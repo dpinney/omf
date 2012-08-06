@@ -18,8 +18,8 @@ $().ready(function(){
   });
 });
 
- var w = 700,
-    h = 500,
+ var w = 1000,
+    h = 600,
     fill = d3.scale.category20();
 
 var vis = d3.select("#chart")
@@ -31,8 +31,8 @@ d3.json("/api/models/1.json", updateView);
 
 function updateView(json) {
   var force = d3.layout.force()
-      .charge(-125)
-      .linkDistance(50)
+      .charge(-12)
+      .linkDistance(10)
       .nodes(json.nodes)
       .links(json.links)
       .size([w, h])
@@ -71,4 +71,4 @@ function updateView(json) {
     
     node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
   });
-});
+}

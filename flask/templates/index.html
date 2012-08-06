@@ -48,58 +48,111 @@
   </div>
 
   <div class="container">
-
-    <!-- Example row of columns -->
-    <div class="row">
+    <div class="row" id="row1">
       <div class="span2">
-        <div class="row">
-          <div class="span2">
-            <div class="btn-group">
-              <a class="btn dropdown-toggle" data-toggle="dropdown" href="static/#">
-                Add new object
-                <span class="caret"></span>
-              </a>
-              <ul id="object-types" class="dropdown-menu">
-                <!-- dropdown menu links -->
-              </ul>
-            </div>
-          </div>
+        <div class="btn-group">
+          <a class="btn dropdown-toggle" data-toggle="dropdown" href="static/#">
+            Add new object
+            <span class="caret"></span>
+          </a>
+          <ul id="object-types" class="dropdown-menu">
+            <!-- populated dynamically -->
+          </ul>
         </div>
-      </div>
+      </div> <!-- column 1 -->
       <div class="span9">
         <h2>Owen Urban Feeder 3</h2>
-        <div id="chart"></div>
-      </div>
+      </div> <!-- column 2 -->
       <div class="span1">
         <div class="btn-group">
           <a class="btn dropdown-toggle" data-toggle="dropdown" href="static/#">
-
             <span class="icon-wrench"></span>
           </a>
           <ul class="dropdown-menu">
-            <!-- dropdown menu links -->
             <a href="Javascript: accept();">Accept</a>
             <a href="Javascript: revert();">Revert</a>
             <a href="Javascript: saveAs();">Save as...</a>
           </ul>
         </div>
+      </div> <!-- column 3 -->
+    </div> <!-- row1 -->
+    <div class="row" id="row2">
+      <div class="span2">
+        <div class="row spacer" id="row2a">
+          <table class="table table-striped table-bordered table-condensed">
+              <thead>
+                <tr>
+                  <th colspan="2">Selected Component</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Type:</td>
+                  <td>Volt Var Controller</td>
+                </tr>
+                <tr>
+                  <td>Substation Link:</td>
+                  <td>SS1</td>
+                </tr>
+                <tr>
+                  <td>Max Voltage Drop:</td>
+                  <td>7%</td>
+                </tr>
+                <tr>
+                  <td>Capacitor Delay (ms):</td>
+                  <td>212</td>
+                </tr>
+                <tr>
+                  <td>Schedule:</td>
+                  <td>CVR1</td>
+                </tr>
+                <tr>
+                  <td colspan="2"><button type="submit" class="btn">Apply Changes</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div> <!-- row2a -->
+          <div class="row spacer" id="row2b">
+            <table class="table table-striped table-bordered table-condensed">
+              <thead>
+                <tr>
+                  <th colspan="2">Disconnected Components</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>House:</td>
+                  <td>House 1</td>
+                </tr>
+                <tr>
+                  <td>Transformer:</td>
+                  <td>Transformer 1</td>
+                </tr>
+                <tr>
+                  <td>Line:</td>
+                  <td>Line 1</td>
+                </tr>
+              </tbody>
+            </table>
+          </div> <!-- row2b -->
+        </div> <!-- column1 -->
+      <div class="span10">
+        <div id="chart"></div>
       </div>
     </div>
+  </div>
+  <hr>
+  <footer>
+    <p>&copy; NRECA 2012</p>
+  </footer>
+</div> <!-- /container -->
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+<script src="static/js/libs/d3.v2.min.js"></script>
+<script>window.jQuery || document.write('<script src="static/js/libs/jquery-1.7.2.min.js"><\/script>')</script>
 
-    <hr>
+<script src="static/js/libs/bootstrap/bootstrap.min.js"></script>
 
-    <footer>
-      <p>&copy; Company 2012</p>
-    </footer>
-
-  </div> <!-- /container -->
-  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-  <script src="static/js/libs/d3.v2.min.js"></script>
-  <script>window.jQuery || document.write('<script src="static/js/libs/jquery-1.7.2.min.js"><\/script>')</script>
-
-  <script src="static/js/libs/bootstrap/bootstrap.min.js"></script>
-
-  <script src="static/js/script.js"></script>
+<script src="static/js/script.js"></script>
 
 </body>
 </html>
