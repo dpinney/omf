@@ -7,6 +7,31 @@ import treeParser
 import networkx as nx
 import matplotlib.pyplot as plot
 
+def outputHTML():
+	import treeGrapher as tg
+	import treeParser as tp
+	parsed = tp.parse('./testglms/IEEE_13_house_vvc_2hrDuration.glm')
+	graph = tg.createGraph(parsed)
+	from networkx_ext import d3_js
+	d3_js.export_d3_js(graph)
+
+def createGraph(glmTree):
+	# Graph it.
+	glmGraph = nx.Graph()
+	nodeNodes = []
+	for x in glmTree:
+		if 'from' in glmTree[x] and 'to' in glmTree[x]:
+			glmGraph.add_edge(glmTree[x]['from'],glmTree[x]['to'])
+			glmGraph.add_node(glmTree[x]['from'], group=1)
+			glmGraph.add_node(glmTree[x]['to'], group=2)
+		if 'parent' in glmTree[x] and 'name' in glmTree[x]:
+			glmGraph.add_edge(glmTree[x]['name'],glmTree[x]['parent'])
+			glmGraph.add_node(glmTree[x]['name'], group=2)
+			glmGraph.add_node(glmTree[x]['parent'], group=1)
+		if 'object' in glmTree[x] and glmTree[x]['object'] == 'node':
+			glmGraph.add_node(glmTree[x]['name'], group=3)
+	return glmGraph
+
 def testGlm(glmTree):
 	# How many nodes do we have?
 	y = 0

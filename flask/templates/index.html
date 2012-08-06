@@ -68,7 +68,7 @@
       </div>
       <div class="span9">
         <h2>Owen Urban Feeder 3</h2>
-
+        <div id="chart"></div>
       </div>
       <div class="span1">
         <div class="btn-group">
@@ -94,30 +94,12 @@
 
   </div> <!-- /container -->
   <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-  <script src="static/js/libs/raphael-min.js"></script>
+  <script src="static/js/libs/d3.v2.min.js"></script>
   <script>window.jQuery || document.write('<script src="static/js/libs/jquery-1.7.2.min.js"><\/script>')</script>
 
   <script src="static/js/libs/bootstrap/bootstrap.min.js"></script>
 
   <script src="static/js/script.js"></script>
-
- <script>
- function addObject(obj_type) {
-  console.log(obj_type)
- }
- $().ready(function(){ 
-  var url = '/api/objects';
-  $.getJSON(url, function(data) {
-    $.each(data, function(key, val) {
-      console.log(key + " " + val)
-      $('#object-types')
-        .append($('<a>', { href : "Javascript: addObject('" + val + "'');" })
-          .text(val)
-        );
-      });
-  });
-});
- </script>
 
 </body>
 </html>

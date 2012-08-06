@@ -21,6 +21,10 @@ if app.config['DEBUG']:
 def root():
     return render_template('index.html')
 
+@app.route('/api/models/<int:model_id>.json')
+def api_model(model_id):
+	return render_template('default_model.json')
+
 @app.route('/api/objects')
 def api_objects():
     all_types = filter(lambda x: x[0] is not '_', dir(models))
