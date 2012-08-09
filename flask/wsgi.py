@@ -24,6 +24,10 @@ if app.config['DEBUG']:
 def root():
     return render_template('index.html')
 
+@app.route('/model/<model_id>')
+def show_model(model_id):
+    return render_template('index.html', model_id=model_id)
+
 @app.route('/api/models/<model_id>/objects/<obj_id>.json')
 def api_object(model_id, obj_id):
     return ""
@@ -41,7 +45,7 @@ def api_model(model_id):
         graph = tg.node_groups(parsed)
         # cache the file for later
         out = file('./files/json/' + model_id + ".json", "w")
-        graph_json = d3_js.d3_json(graph)
+        graph_json = d3_js.d3_json(graph, group="group")
         as_json = json.dumps(graph_json)
         out.write(as_json)
         out.close()

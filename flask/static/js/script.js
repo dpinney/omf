@@ -58,12 +58,10 @@ function nodeout(t, i){
 }
 
 var root;
-
-var split_path = window.location.pathname.split('');
-var model_id = "large";
-if(split_path.length > 1) {
-  console.log(split_path);
+if(!model_id) {
+  var split_path = window.location.pathname.split('');
   model_id = split_path[split_path.length-1];
+  console.log(model_id);
 }
 d3.json("/api/models/" + model_id + ".json", function(json) {
   root = json;
@@ -78,11 +76,15 @@ d3.json("/api/models/" + model_id + ".json", function(json) {
   updateView(root);
 });
 
+var base_grav = 0.09;
+
 function updateView(json) {
 
+  // for every 100 nodes, add a tick of gravity
+  var grav = base_grav + (json.nodes.length / 100) * 0.01;
   var force = d3.layout.force()
-    .charge(-10)
-    .gravity(0.15)
+    .charge(-18)
+    .gravity(grav)
     .linkDistance(13)
     .nodes(json.nodes)
     .links(json.links)
