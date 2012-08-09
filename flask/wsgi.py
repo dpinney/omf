@@ -45,7 +45,7 @@ def api_model(model_id):
         graph = tg.node_groups(parsed)
         # cache the file for later
         out = file('./files/json/' + model_id + ".json", "w")
-        graph_json = d3_js.d3_json(graph, group="group")
+        graph_json = tg.to_d3_json(graph)
         as_json = json.dumps(graph_json)
         out.write(as_json)
         out.close()

@@ -8,20 +8,39 @@ import networkx as nx
 import matplotlib.pyplot as plot
 import treeParser as tp
 
+def to_d3_json(graph):
+	# graph_json = {'nodes':map(lambda x:{'name':x[0],'group':x[1]['group'],(x:y) in x[1]},graph.nodes(data=True))}
+	graph_json = {'nodes':map(lambda x:dict({'name':x[0]},**x[1]),graph.nodes(data=True))}
+	
+	ints_graph = nx.convert_node_labels_to_integers(graph, discard_old_labels=False)
+	graph_edges = ints_graph.edges(data=True)
+	# Build up edge dictionary in JSON format
+	json_edges = list()
+	for j, k, w in graph_edges:
+		e = {'source' : j, 'target' : k}
+		if any(map(lambda k: k=='weight', w.keys())):
+			e['value'] = w['weight']
+		else:
+			e['value'] = 1
+		json_edges.append(e)
+	
+	graph_json['links'] = json_edges
+	return graph_json
+
 def node_groups(glmTree):
 	glmGraph = nx.Graph()
 	nodeNodes = []
 	for x in glmTree:
 		if 'from' in glmTree[x] and 'to' in glmTree[x]:
 			glmGraph.add_edge(glmTree[x]['from'],glmTree[x]['to'])
-			glmGraph.add_node(glmTree[x]['from'], group=1)
+			glmGraph.add_node(glmTree[x]['from'], group=1, _name=glmTree[x]['from'])
 			glmGraph.add_node(glmTree[x]['to'], group=2)
 		if 'parent' in glmTree[x] and 'name' in glmTree[x]:
 			glmGraph.add_edge(glmTree[x]['name'],glmTree[x]['parent'])
-			glmGraph.add_node(glmTree[x]['name'], group=3)
+			glmGraph.add_node(glmTree[x]['name'], group=3, _name=glmTree[x]['name'])
 			glmGraph.add_node(glmTree[x]['parent'], group=4)
 		if 'object' in glmTree[x] and glmTree[x]['object'] == 'node':
-			glmGraph.add_node(glmTree[x]['name'], group=5)
+			glmGraph.add_node(glmTree[x]['name'], group=5, _name=glmTree[x]['name'])
 	return glmGraph
 
 def testGlm(glmTree):
