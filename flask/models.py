@@ -1,9 +1,6 @@
-class Project():
-    pass
-
 class ProjectObject():
-    name = ""
-    project = Project()
+    def __init__(self):
+        self.name = ""
     def __unicode__(self):
         return self.name
 
@@ -11,8 +8,9 @@ class Group(ProjectObject):
     pass
 
 class PowerFlowObject(ProjectObject):
-    phases = ""
-    nominal_voltage = 0.0
+    def __init__(self):
+        self.phases = ""
+        self.nominal_voltage = 0.0
 
 class Node(PowerFlowObject):
     BUS_CHOICES = (
@@ -20,36 +18,41 @@ class Node(PowerFlowObject):
         (u'V', u'PV - constrainted voltage controlled'),
         (u'S', u'Swing - unconstrained voltage controlled'),
     )
-    bustype = ""
-    voltage_A_real = 0.0
-    voltage_A_imaginary = 0.0
-    voltage_B_real = 0.0
-    voltage_B_imaginary = 0.0
-    voltage_C_real = 0.0
-    voltage_C_imaginary = 0.0
+    def __init__(self):
+        self.bustype = ""
+        self.voltage_A_real = 0.0
+        self.voltage_A_imaginary = 0.0
+        self.voltage_B_real = 0.0
+        self.voltage_B_imaginary = 0.0
+        self.voltage_C_real = 0.0
+        self.voltage_C_imaginary = 0.0
 
 class NodeLink(PowerFlowObject):
-    from_node = Node()
-    to_node = Node()
+    def __init__(self):
+        self.from_node = Node()
+        self.to_node = Node()
 
 class ConnectedPowerFlowObject(PowerFlowObject):
-    phases_connected = ""
-    parent = Node()
+    def __init__(self):
+        self.phases_connected = ""
+        self.parent = Node()
     # todo: add logic to ensure that phases_connected is subset of phases
 
 class OverheadLineConductor(PowerFlowObject):
-    geometric_mean_radius = 0.0
-    resistance = 0.0
-    cable_diameter = 0.0
+    def __init__(self):
+        self.geometric_mean_radius = 0.0
+        self.resistance = 0.0
+        self.cable_diameter = 0.0
 
 class UndergroundLineConductor(OverheadLineConductor):
-    neutral_geometric_mean_radius = 0.0
-    neutral_diameter = 0.0
-    neutral_resistance = 0.0
-    neutral_strands = 0
-    insulation_permittivity = 0.0
-    shield_geometric_mean_radius = 0.0
-    sheild_resistance = 0.0
+    def __init__(self):
+        self.neutral_geometric_mean_radius = 0.0
+        self.neutral_diameter = 0.0
+        self.neutral_resistance = 0.0
+        self.neutral_strands = 0
+        self.insulation_permittivity = 0.0
+        self.shield_geometric_mean_radius = 0.0
+        self.sheild_resistance = 0.0
 
 class Capacitor(ConnectedPowerFlowObject):
     CONTROL_CHOICES = (
@@ -71,40 +74,43 @@ class Capacitor(ConnectedPowerFlowObject):
         (u'k', u'kVAr'),
         (u'M', u'MVAr'),
     )
-    control = ""
-    control_level = ""
-    switch_A = ""
-    switch_B = ""
-    switch_C = ""
-    pt_phase = ""
-    voltage_set_high = 0.0
-    voltage_set_low = 0.0
-    capacitor_A_unit = ""
-    capacitor_A_value = 0.0
-    capacitor_B_unit = ""
-    capacitor_B_value = 0.0
-    capacitor_C_unit = ""
-    capacitor_C_value = 0.0
-    time_delay = 0.0
-    dwell_time = 0.0
+    def __init__(self):
+        self.control = ""
+        self.control_level = ""
+        self.switch_A = ""
+        self.switch_B = ""
+        self.switch_C = ""
+        self.pt_phase = ""
+        self.voltage_set_high = 0.0
+        self.voltage_set_low = 0.0
+        self.capacitor_A_unit = ""
+        self.capacitor_A_value = 0.0
+        self.capacitor_B_unit = ""
+        self.capacitor_B_value = 0.0
+        self.capacitor_C_unit = ""
+        self.capacitor_C_value = 0.0
+        self.time_delay = 0.0
+        self.dwell_time = 0.0
 
 class Configuration(ProjectObject):
     pass
 
 class LineSpacing(Configuration):
-    distance_AC = 0.0
-    distance_AB = 0.0
-    distance_BC = 0.0
-    distance_AN = 0.0
-    distance_CN = 0.0
-    distance_BN = 0.0
+    def __init__(self):
+        self.distance_AC = 0.0
+        self.distance_AB = 0.0
+        self.distance_BC = 0.0
+        self.distance_AN = 0.0
+        self.distance_CN = 0.0
+        self.distance_BN = 0.0
 
 class LineConfiguration(Configuration):
-    conductor_A = []
-    conductor_B = []
-    conductor_C = []
-    conductor_N = []
-    spacing = []
+    def __init__(self):
+        self.conductor_A = []
+        self.conductor_B = []
+        self.conductor_C = []
+        self.conductor_N = []
+        self.spacing = []
 
 class TransformerConfiguration(Configuration):
     CONNECT_CHOICES = (
@@ -123,13 +129,14 @@ class TransformerConfiguration(Configuration):
         (u'k', u'kVA'),
         (u'M', u'MVA'),
     )
-    connect_type = ""
-    install_type = ""
-    power_rating_unit = ""
-    power_rating = 0.0
-    primary_voltage = 0.0
-    secondary_voltage = 0.0
-    resistance = 0.0
+    def __init__(self):
+        self.connect_type = ""
+        self.install_type = ""
+        self.power_rating_unit = ""
+        self.power_rating = 0.0
+        self.primary_voltage = 0.0
+        self.secondary_voltage = 0.0
+        self.resistance = 0.0
 
 class RegulatorConfiguration(Configuration):
     CONNECT_CHOICES = (
@@ -150,93 +157,104 @@ class RegulatorConfiguration(Configuration):
         (u'A', u'A'),
         (u'B', u'B'),
     )
-    connect_type = ""
-    band_center = 0.0
-    band_width = 0.0
-    time_delay = 0.0
-    raise_taps = 0
-    lower_taps = 0
-    current_transducer_ratio = 0.0
-    power_transducer_ratio = 0.0
-    compensator_r_setting_A = 0.0
-    compensator_r_setting_B = 0.0
-    compensator_r_setting_C = 0.0
-    compensator_x_setting_A = 0.0
-    compensator_x_setting_B = 0.0
-    compensator_x_setting_C = 0.0
-    ct_phase = ""
-    pt_phase = ""
-    regulation = 0.0
-    control_type = ""
-    type_type = ""
-    tap_pos_A = 0
-    tap_pos_B = 0
-    tap_pos_C = 0
+    def __init__(self):
+        self.connect_type = ""
+        self.band_center = 0.0
+        self.band_width = 0.0
+        self.time_delay = 0.0
+        self.raise_taps = 0
+        self.lower_taps = 0
+        self.current_transducer_ratio = 0.0
+        self.power_transducer_ratio = 0.0
+        self.compensator_r_setting_A = 0.0
+        self.compensator_r_setting_B = 0.0
+        self.compensator_r_setting_C = 0.0
+        self.compensator_x_setting_A = 0.0
+        self.compensator_x_setting_B = 0.0
+        self.compensator_x_setting_C = 0.0
+        self.ct_phase = ""
+        self.pt_phase = ""
+        self.regulation = 0.0
+        self.control_type = ""
+        self.type_type = ""
+        self.tap_pos_A = 0
+        self.tap_pos_B = 0
+        self.tap_pos_C = 0
 
 class Regulator(NodeLink):
-    sense_node = Node()
-    configuration = RegulatorConfiguration()
+    def __init__(self):
+        self.sense_node = Node()
+        self.configuration = RegulatorConfiguration()
 
 class RegulatorVoltVar(ProjectObject):
-    regulator = Regulator()
-    low_load_deadband = 0.0
-    high_load_deadband = 0.0
-    max_voltage_drop = 0.0
-    desired_voltage = 0.0
+    def __init__(self):
+        self.regulator = Regulator()
+        self.low_load_deadband = 0.0
+        self.high_load_deadband = 0.0
+        self.max_voltage_drop = 0.0
+        self.desired_voltage = 0.0
 
 class VoltVarControl(ConnectedPowerFlowObject):  # derived from c++ code, volt_var_control.cpp
     CONTROL_CHOICES = (
         (u'A', u'Active'),
         (u'S', u'Standby'),
     )
-    control_method = ""
-    capacitor_delay = 0.0
-    regulator_delay = 0.0
-    desired_pf = 0.0
-    d_max = 0.0
-    d_min = 0.0
-    substation_link = Regulator()
-    regulator_list = []
-    capacitor_list = []
-    voltage_measurement_PowerFlowObjects = []
+    def __init__(self):
+        self.control_method = ""
+        self.capacitor_delay = 0.0
+        self.regulator_delay = 0.0
+        self.desired_pf = 0.0
+        self.d_max = 0.0
+        self.d_min = 0.0
+        self.substation_link = Regulator()
+        self.regulator_list = []
+        self.capacitor_list = []
+        self.voltage_measurement_PowerFlowObjects = []
 
 class TriplexLineConductor(ProjectObject):
-    resistance = 0.0
-    geometric_mean_radius = 0.0
+    def __init__(self):
+        self.resistance = 0.0
+        self.geometric_mean_radius = 0.0
 
 class LineConfiguration(Configuration):
-    conductor_1 = TriplexLineConductor()
-    conductor_2 = TriplexLineConductor()
-    conductor_N = TriplexLineConductor()
-    line_spacing = LineSpacing()
+    def __init__(self):
+        self.conductor_1 = TriplexLineConductor()
+        self.conductor_2 = TriplexLineConductor()
+        self.conductor_N = TriplexLineConductor()
+        self.line_spacing = LineSpacing()
 
 class TriplexLineConfiguration(LineConfiguration):
-    insulation_thickness = 0.0
-    diameter = 0.0
-    reactance = 0.0
+    def __init__(self):
+        self.insulation_thickness = 0.0
+        self.diameter = 0.0
+        self.reactance = 0.0
 
 class Transformer(NodeLink):
-    configuration = TransformerConfiguration()
-    group = Group()
+    def __init__(self):
+        self.configuration = TransformerConfiguration()
+        self.group = Group()
 
 class TriplexMeter(PowerFlowObject):
-    group = Group()
+    def __init__(self):
+        self.group = Group()
 
 class TriplexLine(NodeLink):
-    length = 0.0
-    configuration = LineConfiguration()
-    group = Group()
+    def __init__(self):
+        self.length = 0.0
+        self.configuration = LineConfiguration()
+        self.group = Group()
 
 class ZipLoad(ProjectObject):
-    base_power = ""
-    schedule_skew = 0.0
-    heatgain_fraction = 0.0
-    power_pf = 0.0
-    current_pf = 0.0
-    impedance_pf = 0.0
-    impedance_fraction = 0.0
-    current_fraction = 0.0
-    power_fraction = 0.0
+    def __init__(self):
+        self.base_power = ""
+        self.schedule_skew = 0.0
+        self.heatgain_fraction = 0.0
+        self.power_pf = 0.0
+        self.current_pf = 0.0
+        self.impedance_pf = 0.0
+        self.impedance_fraction = 0.0
+        self.current_fraction = 0.0
+        self.power_fraction = 0.0
 
 class WaterHeater(ProjectObject):
     UNIT_CHOICES = (
@@ -247,16 +265,17 @@ class WaterHeater(ProjectObject):
         (u'IN', u'Inside'),
         (u'GA', u'Garage'),
     )
-    schedule_skew = 0.0
-    tank_volume = 0.0
-    heating_element_capacity_unit = ""
-    heating_element_capacity = 0.0
-    tank_setpoint = 0.0
-    temperature = 0.0
-    thermostat_deadband = 0.0
-    location = ""
-    tank_UA = 0.0
-    demand = ""
+    def __init__(self):
+        self.schedule_skew = 0.0
+        self.tank_volume = 0.0
+        self.heating_element_capacity_unit = ""
+        self.heating_element_capacity = 0.0
+        self.tank_setpoint = 0.0
+        self.temperature = 0.0
+        self.thermostat_deadband = 0.0
+        self.location = ""
+        self.tank_UA = 0.0
+        self.demand = ""
 
 class House(ProjectObject):
     HEATING_CHOICES = (
@@ -282,23 +301,25 @@ class House(ProjectObject):
         (u'H3', u'Very Good'),
         (u'UK', u'Unknown'),
     )
-    parent = TriplexMeter()
-    floor_area = 0.0
-    schedule_skew = 0.0
-    heating_system_type = ""
-    cooling_system_type = ""
-    cooling_setpoint = ""
-    heating_setpoint = ""
-    thermal_integrity_level = ""
-    air_temperature = 0.0
-    mass_temperature = 0.0
-    cooling_COP = 0.0
-    zip_load = ZipLoad()
-    water_heater = WaterHeater()
+    def __init__(self):
+        self.parent = TriplexMeter()
+        self.floor_area = 0.0
+        self.schedule_skew = 0.0
+        self.heating_system_type = ""
+        self.cooling_system_type = ""
+        self.cooling_setpoint = ""
+        self.heating_setpoint = ""
+        self.thermal_integrity_level = ""
+        self.air_temperature = 0.0
+        self.mass_temperature = 0.0
+        self.cooling_COP = 0.0
+        self.zip_load = ZipLoad()
+        self.water_heater = WaterHeater()
 
 class Recorder(ProjectObject):
-    interval = 0
-    parent = ProjectObject()
-    file_name = ""
-    limit = 0
-    property_list = ""
+    def __init__(self):
+        self.interval = 0
+        self.parent = ProjectObject()
+        self.file_name = ""
+        self.limit = 0
+        self.property_list = ""
