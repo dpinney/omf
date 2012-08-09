@@ -45,6 +45,7 @@ var link_dist = 20;
 var charge = -18;
 var grav = 0;
 var link_weight = 2;
+var _selected_table;
 
 var color = d3.scale.category20();
 
@@ -88,56 +89,40 @@ function onClickCanvas() {
 }
 
 function onNodeclick(d, i) {
-  console.log("onNodeclick");
-  console.log(d);
-  console.log(i);
+  $('#selected tbody')
+    .empty()
   for(var i in d) {
-    console.log(i);
+    if(i[0] === '_') {
+      $('#selected tbody')
+        .append('<tr></tr>')
+        .append('<td>' + i.split('_')[1] + '</td><td>' + d[i] +'</td>');
+
+      console.log(i);
+    }
   }
 }
 
 function onNodeover(d, i) {
-    var x; var y;
-    if (d3.event.pageX != undefined && d3.event.pageY != undefined) {
-        x = d3.event.pageX;
-        y = d3.event.pageY;
-    } else {
-        x = d3.event.clientX + document.body.scrollLeft +
-      document.documentElement.scrollLeft;
-        y = d3.event.clientY + document.body.scrollTop +
-      document.documentElement.scrollTop;
-    }
-    var popover = "<div id='popover' style='position:absolute; top:"
-        + y + "px; left:" + x + "px; border: 2px dark gray; z-index: 1;'><b>"
-        + d.name + "</b><br />"
-        + "</div>";
-    $("body").append(popover);
-
-  // d = d3.select(this);
-  // console.log(d);
-  // console.log(t);
-  // console.log(d.title);
-  // $('#popover')
-  //   .attr("title", t.title)
-  //   .attr("data-content", t.title)
-  //   .popover('show');
-    // .append()
-    // .attr("r", "8")
-    // .style("stroke", "rgb(204,102,51)");
+  
+    // var x; var y;
+    // if (d3.event.pageX != undefined && d3.event.pageY != undefined) {
+    //     x = d3.event.pageX;
+    //     y = d3.event.pageY;
+    // } else {
+    //     x = d3.event.clientX + document.body.scrollLeft +
+    //   document.documentElement.scrollLeft;
+    //     y = d3.event.clientY + document.body.scrollTop +
+    //   document.documentElement.scrollTop;
+    // }
+    // var popover = "<div id='popover' style='position:absolute; top:"
+    //     + y + "px; left:" + x + "px; border: 2px dark gray; z-index: 1;'><b>"
+    //     + d.name + "</b><br />"
+    //     + "</div>";
+    // $("body").append(popover);
 }
 
-    // $('.popover-test').popover()
-
-    // // popover demo
-    // $("a[rel=popover]")
-    //   .popover()
-    //   .click(function(e) {
-    //     e.preventDefault()
-    //   })
-
 function onNodeout(t, i){
-  $("#popover").remove();
-  // $('#popover').popover('hide');
+  // $("#popover").remove();
 }
 
 function onTick() {
@@ -190,19 +175,6 @@ function addNodes(data) {
   node
     .exit()
       .remove();
-
-  // node
-  //   .each(function(d,i){
-  //     console.log(this,$(this));
-  //     $(this).popover({
-  //       'title': 'This is a popover',
-  //       'data-content': 'For the '+i+'th circle'
-  //     })
-  //     .popover("show");
-  //   });
-
-  // node.append("title")
-  //     .text(function(d) { return d.name; });
 }
 
 function addLinks(data) {
