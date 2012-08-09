@@ -18,38 +18,77 @@ $().ready(function(){
   });
 });
 
- var w = 1000,
+var w = 1000,
     h = 600,
     fill = d3.scale.category20();
 
-var vis = d3.select("#chart")
-  .append("svg:svg")
-    .attr("width", w)
-    .attr("height", h);
+var svg = d3.select("#chart")
+  .append("svg")
+  .attr("width", w)
+  .attr("height", h)
+  .on("click", onClickCanvas);
 
-function toggleChildrenVis(node) {
-  if (node.children) {
-    node._children = node.children;
-    node.children = null;
-  } else {
-    node.children = node._children;
-    node._children = null;
+var force;
+var link;
+var node;
+var root;
+
+var sim_iter = 0;
+var max_iter = 0;
+var base_grav = 0.09;
+var link_dist = 13;
+var charge = -18;
+var grav = 0;
+
+var color = d3.scale.category20();
+
+if(!model_id) {
+  var split_path = window.location.pathname.split('');
+  model_id = split_path[split_path.length-1];
+}
+
+d3.json("/api/models/" + model_id + ".json", function(json) {
+  root = json;
+  // for every 100 nodes, add a bit of gravity to keep nodes in the view
+  var grav = base_grav + (json.nodes.length / 100) * 0.01;
+  // run the layout sim based on the number of nodes 
+  max_iter = 75;
+  if(json.nodes.length < 50) {
+    max_iter = 25;
   }
+  if(json.nodes.length > 1000) {
+    max_iter = 125;
+  }
+  force = d3.layout.force()
+    .gravity(grav)
+    .charge(charge)
+    .linkDistance(link_dist)
+    .nodes(json.nodes)
+    .links(json.links)
+    .size([w, h]);
+
+  addLinks(json.links);
+  addNodes(json.nodes);
+
+  force.start();
+
+  force.on("tick", onTick);
+});
+
+
+function onClickCanvas() {
+  point = d3.mouse(this);
+  addNewNode({name:"new",type:"new",group:4,x:point[0],y:point[1],fixed:1});
 }
 
-function click(d) {
-  toggleChildrenVis(d);
-  updateView(root);
-}
-
-function nodeover(t, i) {
+function onNodeover(t, i) {
   d3.select(this)
     .select("circle")
     .attr("r", "8")
     .style("stroke", "rgb(204,102,51)");
 }
 
-function nodeout(t, i){
+function onNodeout(t, i){
   d3.select(this)
     .select("circle")
     .attr("r", "5")
@@ -57,80 +96,77 @@ function nodeout(t, i){
     .remove();
 }
 
-var root;
-if(!model_id) {
-  var split_path = window.location.pathname.split('');
-  model_id = split_path[split_path.length-1];
-  console.log(model_id);
+function onTick() {
+  sim_iter = sim_iter + 1;
+  if(sim_iter % 5 == 0) {
+    newwidth = ~~(100 * sim_iter / max_iter);
+    $("#progress_bar").css("width", newwidth + "%");
+  }
+
+  if(sim_iter >= max_iter) {
+    force.stop();
+    haltNodeMovement();
+    link.attr("x1", function(d) { return d.source.x; })
+        .attr("y1", function(d) { return d.source.y; })
+        .attr("x2", function(d) { return d.target.x; })
+        .attr("y2", function(d) { return d.target.y; });
+
+    node.attr("cx", function(d) { return d.x; })
+        .attr("cy", function(d) { return d.y; });
+
+    // node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+    // show the chart and remove the progress
+    $("#progress").hide();
+    $("#chart").show();
+  }
+
+  // link.attr("x1", function(d) { return d.source.x; })
+  //     .attr("y1", function(d) { return d.source.y; })
+  //     .attr("x2", function(d) { return d.target.x; })
+  //     .attr("y2", function(d) { return d.target.y; });
+
+  // node.attr("cx", function(d) { return d.x; })
+  //     .attr("cy", function(d) { return d.y; });
 }
-d3.json("/api/models/" + model_id + ".json", function(json) {
-  root = json;
-  jQuery(json.nodes).each(function() {
-    element = jQuery(this);
-    element.attr({ x: w/2, y: h/2, px: w/2, py: h/2});
-  });
-  jQuery(json.links).each(function() {
-    element = jQuery(this);
-    element.attr({ x: w/2, y: h/2, px: w/2, py: h/2});
-  });
-  updateView(root);
-});
 
-var base_grav = 0.09;
+function addNewNode(d) {
+  force.nodes().push(d);
+  last_n = force.nodes().length-1;
+  force.links().push({source:last_n,target:last_n-1,value:4});
+  force.stop();
+  addLinks(force.links());
+  addNodes(force.nodes());
+  force.start();
+}
 
-function updateView(json) {
-
-  // for every 100 nodes, add a tick of gravity
-  var grav = base_grav + (json.nodes.length / 100) * 0.01;
-  var force = d3.layout.force()
-    .charge(-18)
-    .gravity(grav)
-    .linkDistance(13)
-    .nodes(json.nodes)
-    .links(json.links)
-    .size([w, h])
-    .start();
-
-  var link = vis.selectAll("line.link")
-    .data(json.links)
-    .enter().append("svg:line")
-    .attr("class", "link")
-    .style("stroke-width", function(d) { return Math.sqrt(d.value); });
-
-  var node = vis.selectAll("g.node")
-    .data(json.nodes)
-    .enter().append("svg:g")
-    .attr("class", "node")
-    .on("mouseover", nodeover)
-    .on("mouseout", nodeout);
-
-  	node.append("svg:circle")
+function addNodes(data) {
+  node = svg.selectAll("circle.node").data(data)
+  node
+    .enter()
+      .append("circle")
+      .attr("class", "node")
+      .attr("cx", function(d) { return w/2; })
+      .attr("cy", function(d) { return h/2; })
       .attr("r", 5)
-      .style("fill", function(d) { return fill(d.group); })
+      .style("fill", function(d) { return color(d.group); })
       .call(force.drag);
+  node
+    .exit()
+      .remove();
 
-  vis.style("opacity", 1e-6)
-    .transition()
-      .duration(1000)
-      .style("opacity", 1);
+  node.append("title")
+      .text(function(d) { return d.name; });
+}
 
-  var i = 0;
-  force.on("tick", function() {
-    i = i + 1;
-    if(i % 5 == 0) {
-      newwidth = ~~(100 * i / 150);
-      $("#progress_bar").css("width", newwidth + "%");
-    }
-    if(i >= 150) {
-      force.stop();
-      link.attr("x1", function(d) { return d.source.x; })
-          .attr("y1", function(d) { return d.source.y; })
-          .attr("x2", function(d) { return d.target.x; })
-          .attr("y2", function(d) { return d.target.y; });
-      node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-      // show the chart and remove the progress
-      $("#progress").hide();
-      $("#chart").show();
-    }
-  });
+function addLinks(data) {
+  link = svg.selectAll("line.link").data(data)
+  link
+    .enter()
+      .append("line")
+      .attr("class", "link")
+      .style("stroke-width", function(d) { return Math.sqrt(d.value); });
+  link
+    .exit()
+      .remove();
 }
