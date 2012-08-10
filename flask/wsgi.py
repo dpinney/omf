@@ -10,7 +10,6 @@ from flask import Flask, Request, Response, render_template, url_for
 import models
 import treeParser as tp
 import treeGrapher as tg
-from networkx_ext import d3_js
 
 application = app = Flask('wsgi')
 if app.config['DEBUG']:
@@ -22,7 +21,7 @@ if app.config['DEBUG']:
 
 @app.route('/')
 def root():
-    return render_template('index.html')
+    return render_template('index.html', model_id='medium')
 
 @app.route('/model/<model_id>')
 def show_model(model_id):

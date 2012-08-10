@@ -27,20 +27,46 @@ def to_d3_json(graph):
 	graph_json['links'] = json_edges
 	return graph_json
 
+node_group_dict = {'unknown':0}
+
+def node_attrs(node_dict, group=None):
+	attr_dict = {}
+	if group:
+		attr_dict['group'] = group;
+	for key in node_dict:
+		if key not in ['group', 'object']:
+			try:
+				attr_dict['_'+key] = node_dict[key]
+			except TypeError:
+				pass
+	if 'object' in node_dict:
+		attr_dict['_type'] = node_dict['object']
+		if node_dict['object'] not in node_group_dict:
+			node_group_dict[node_dict['object']] = len(node_group_dict)
+		attr_dict['group'] = node_group_dict[node_dict['object']]
+	else:
+		attr_dict['group'] = node_group_dict['unknown']
+	return attr_dict
+
 def node_groups(glmTree):
 	glmGraph = nx.Graph()
 	nodeNodes = []
 	for x in glmTree:
 		if 'from' in glmTree[x] and 'to' in glmTree[x]:
 			glmGraph.add_edge(glmTree[x]['from'],glmTree[x]['to'])
-			glmGraph.add_node(glmTree[x]['from'], group=1, _name=glmTree[x]['from'])
-			glmGraph.add_node(glmTree[x]['to'], group=2)
-		if 'parent' in glmTree[x] and 'name' in glmTree[x]:
+			# glmGraph.add_node(glmTree[x]['from'], group=1)
+			# glmGraph.add_node(glmTree[x]['to'], group=2)
+		elif 'parent' in glmTree[x] and 'name' in glmTree[x]:
 			glmGraph.add_edge(glmTree[x]['name'],glmTree[x]['parent'])
-			glmGraph.add_node(glmTree[x]['name'], group=3, _name=glmTree[x]['name'])
-			glmGraph.add_node(glmTree[x]['parent'], group=4)
-		if 'object' in glmTree[x] and glmTree[x]['object'] == 'node':
-			glmGraph.add_node(glmTree[x]['name'], group=5, _name=glmTree[x]['name'])
+			# glmGraph.add_node(glmTree[x]['name'], group=3)
+			# glmGraph.add_node(glmTree[x]['parent'], group=4)
+		if 'object' in glmTree[x] and glmTree[x]['object'] in ['triplex_meter', 'house', 'node', 'meter', 'load']:
+			name = "unset"
+			try:
+				name = glmTree[x]['name']
+			except KeyError:
+				pass
+			glmGraph.add_node(name, node_attrs(glmTree[x]))
 	return glmGraph
 
 def testGlm(glmTree):
