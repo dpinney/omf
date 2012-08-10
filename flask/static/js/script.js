@@ -203,6 +203,11 @@ function addNodes(data) {
       .attr("id", function(d) { return "n" + d.index; })
       .style("fill", function(d) { return color(d.group); })
       .call(force.drag);
+
+  node
+    .append("title")
+    .text(function(d) { return d.name; });
+
   node
     .exit()
       .remove();
