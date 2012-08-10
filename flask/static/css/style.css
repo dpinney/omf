@@ -33,3 +33,9 @@ circle.selected {
   stroke-width: 2px;
   stroke-opacity: 1.0;
 }
+
+circle.highlighted {
+  stroke: #555;
+  stroke-width: 1.5px;
+  stroke-opacity: .8;
+}

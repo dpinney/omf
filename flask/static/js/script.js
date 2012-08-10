@@ -5,7 +5,7 @@
 function addNewHouse() {
   $('#modal_insert').load('/api/modeltemplates/house.html', function() {
     $('#modal').modal();
-    newObj = {x: 20, y: 20, group:7};
+    newObj = {x: w/2, y: h/2, group:0};
     $('#modal_accept')
       .on('click', function() {
         $.each($('#modal_form input'), function(i, v) {
@@ -44,6 +44,7 @@ var w = 1000,
 
 var svg = d3.select("#chart")
   .append("svg")
+  //.on("click", onClickCanvas)
   .attr("width", w)
   .attr("height", h);
 
@@ -101,28 +102,55 @@ function onClickCanvas() {
   addNewNode({name:"new",type:"new",group:0,x:point[0],y:point[1],fixed:1});
 }
 
-function onNodeclick(d, i) {
+function selectNode(d) {
+    // visually mark the node
+  selected = d;
+  // hack: if the 'highlight' comes first, it overshadows the selection
+  classify(d, "highlighted", false); 
+  classify(d, "selected", true);
+
+  // clear the selected table
   $('#selected tbody')
-    .empty()
+    .empty();
+
   for(var i in d) {
+    // 'real' properties are stored with an underscore
     if(i[0] === '_') {
       $('#selected tbody')
         .append('<tr></tr>')
         .append('<td>' + i.split('_')[1] + '</td><td>' + d[i] +'</td>');
-
-      console.log(i);
     }
   }
+  $('selected tbody')
+    .append('<tr><td colspan="2"><button type="submit" class="btn">Edit</button></td></tr>');
+}
+
+function onNodeclick(d, i) {
+  selectNode(d);
 }
 
 function onNodeover(d, i) {
-  svg.select("#n" + d.index).classed("node", false);
-  svg.select("#n" + d.index).classed("selected", true);
-  svg.select("#n" + d.index).classed("node", true);
+  console.log("onNodeover");
+  console.log(d);
+  classify(d, "highlighted", true);
 }
 
-function onNodeout(d, i){
-  svg.select("#n" + d.index).classed("selected", false);
+function onNodeout(d, i) {
+  console.log("onNodeout");
+  console.log(d);
+  classify(d, "highlighted", false);
+}
+
+function classify(d, c, on) {
+  if(on) {
+    // turn off the currently styled one
+    svg.select("." + c).classed(c, false);
+    // then, style the new one
+    svg.select("#n" + d.index).classed(c, true);
+  }
+  else {
+    svg.select("#n" + d.index).classed(c, false);
+  }
 }
 
 function onTick() {
@@ -149,11 +177,13 @@ function onTick() {
 }
 
 function addNewNode(d) {
+  selectNode(d);
   force.nodes().push(d);
-  last_n = force.nodes().length-1;
-  force.links().push({source:last_n,target:last_n-1,value:link_weight});
+  // todo: add links, probably not here
+  //last_n = force.nodes().length-1;
+  //force.links().push({source:last_n,target:last_n-1,value:link_weight});
   force.stop();
-  addLinks(force.links());
+  //addLinks(force.links());
   addNodes(force.nodes());
   force.start();
 }
