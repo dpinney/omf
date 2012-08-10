@@ -5,13 +5,20 @@
 function addNewHouse() {
   $('#modal_insert').load('/api/modeltemplates/house.html', function() {
     $('#modal').modal();
-    newObj = {x: w/2, y: h/2, group:0};
+    // put it in a random posiiton in the top left portion of the view
+    x1 = 10 + w * .2 * Math.random();
+    y1 = 10 + w * .2 * Math.random();
+    newObj = {x: x1, y: y1, group:9, index: force.nodes().length};
     $('#modal_accept')
       .on('click', function() {
         $.each($('#modal_form input'), function(i, v) {
-          newObj['_' + v.id] = v.value;
+          if(v.id === "name") {
+            newObj['name'] = v.value;
+          }
+          else {
+            newObj['_' + v.id] = v.value;
+          }
         });
-        console.log(newObj);
         addNewNode(newObj);
         $('#modal').modal('hide');
         $('#modal').remove();
@@ -39,8 +46,7 @@ $().ready(function(){
 });
 
 var w = 1000,
-    h = 600,
-    fill = d3.scale.category20();
+    h = 600;
 
 var svg = d3.select("#chart")
   .append("svg")
@@ -53,6 +59,7 @@ var link;
 var node;
 var root;
 
+var node_radius = 5;
 var sim_iter = 0;
 var max_iter = 0;
 var base_grav = 0.09;
@@ -62,7 +69,7 @@ var grav = 0;
 var link_weight = 2;
 var _selected_table;
 
-var color = d3.scale.category20();
+var color = d3.scale.category10();
 
 if(!model_id) {
   var split_path = window.location.pathname.split('');
@@ -95,7 +102,6 @@ d3.json("/api/models/" + model_id + ".json", function(json) {
 
   force.on("tick", onTick);
 });
-
 
 function onClickCanvas() {
   point = d3.mouse(this);
@@ -177,21 +183,19 @@ function onTick() {
 }
 
 function addNewNode(d) {
-  selectNode(d);
   force.nodes().push(d);
   // todo: add links, probably not here
   //last_n = force.nodes().length-1;
   //force.links().push({source:last_n,target:last_n-1,value:link_weight});
-  force.stop();
   //addLinks(force.links());
   addNodes(force.nodes());
   force.start();
+  selectNode(d);
 }
 
 function addNodes(data) {
-  node = svg.selectAll("circle.node").data(data)
-  node
-    .enter()
+  data = svg.selectAll("circle.node").data(data)
+  node = data.enter()
       .append("circle")
       .on("mouseover", onNodeover)
       .on("mouseout", onNodeout)
@@ -199,16 +203,15 @@ function addNodes(data) {
       .attr("class", "node")
       .attr("cx", function(d) { return w/2; })
       .attr("cy", function(d) { return h/2; })
-      .attr("r", 6)
+      .attr("r", node_radius)
       .attr("id", function(d) { return "n" + d.index; })
       .style("fill", function(d) { return color(d.group); })
       .call(force.drag);
 
-  node
-    .append("title")
+  node.append("title")
     .text(function(d) { return d.name; });
 
-  node
+  data
     .exit()
       .remove();
 }
