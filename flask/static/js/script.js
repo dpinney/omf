@@ -3,7 +3,9 @@
 */
 
 function addNewHouse() {
-  $('#houseModal').modal();
+  $('#modal_insert').load('/api/modeltemplates/house.html', function() {
+    $('#modal').modal('show');
+  });
 }
 
 function addObject(obj_type) {

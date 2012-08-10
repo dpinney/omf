@@ -23,6 +23,34 @@ if app.config['DEBUG']:
 def root():
     return render_template('index.html', model_id='medium')
 
+templates = {'house': 
+        {'floor_area':0.0
+        ,'schedule_skew':0.0
+        ,'heating_system_type':""
+        ,'cooling_system_type':""
+        ,'cooling_setpoint':""
+        ,'heating_setpoint':""
+        ,'thermal_integrity_level':""
+        ,'air_temperature':0.0
+        ,'mass_temperature':0.0
+        ,'cooling_COP':0.0
+        ,'zip_load':""
+        ,'water_heater':""
+        }
+    }
+
+@app.route('/api/modeltemplates/<template_id>')
+def api_modeltemplate(template_id):
+    if template_id == 'house':
+        template = templates['house']
+        return json.dumps(template)
+    return ""
+
+@app.route("/api/modeltemplates/<type>.html")
+def api_new_obj_html(type):
+    props = templates[type]
+    return render_template('model_modal.html', type=type, props=props)
+
 @app.route('/model/<model_id>')
 def show_model(model_id):
     return render_template('index.html', model_id=model_id)
@@ -55,6 +83,7 @@ def api_model(model_id):
 @app.route('/api/objects')
 def api_objects():
     all_types = filter(lambda x: x[0] is not '_', dir(models))
+    # all_types = ['House', 'Triplex Meter', 'Meter', 'Node', 'Load']
     return json.dumps(all_types)
     # defaults = map(lambda x: getattr(models, x)().__dict__, all_types)
     # print defaults
