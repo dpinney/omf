@@ -73,11 +73,10 @@ d3.json("/api/models/" + model_id + ".json", function(json) {
     .nodes(json.nodes)
     .links(json.links)
     .size([w, h]);
+  force.start();
 
   addLinks(json.links);
   addNodes(json.nodes);
-
-  force.start();
 
   force.on("tick", onTick);
 });
@@ -103,26 +102,13 @@ function onNodeclick(d, i) {
 }
 
 function onNodeover(d, i) {
-  
-    // var x; var y;
-    // if (d3.event.pageX != undefined && d3.event.pageY != undefined) {
-    //     x = d3.event.pageX;
-    //     y = d3.event.pageY;
-    // } else {
-    //     x = d3.event.clientX + document.body.scrollLeft +
-    //   document.documentElement.scrollLeft;
-    //     y = d3.event.clientY + document.body.scrollTop +
-    //   document.documentElement.scrollTop;
-    // }
-    // var popover = "<div id='popover' style='position:absolute; top:"
-    //     + y + "px; left:" + x + "px; border: 2px dark gray; z-index: 1;'><b>"
-    //     + d.name + "</b><br />"
-    //     + "</div>";
-    // $("body").append(popover);
+  svg.select("#n" + d.index).classed("node", false);
+  svg.select("#n" + d.index).classed("selected", true);
+  svg.select("#n" + d.index).classed("node", true);
 }
 
-function onNodeout(t, i){
-  // $("#popover").remove();
+function onNodeout(d, i){
+  svg.select("#n" + d.index).classed("selected", false);
 }
 
 function onTick() {
@@ -170,6 +156,7 @@ function addNodes(data) {
       .attr("cx", function(d) { return w/2; })
       .attr("cy", function(d) { return h/2; })
       .attr("r", 6)
+      .attr("id", function(d) { return "n" + d.index; })
       .style("fill", function(d) { return color(d.group); })
       .call(force.drag);
   node
