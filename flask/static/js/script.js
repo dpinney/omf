@@ -4,6 +4,18 @@
 
 function addNewHouse() {
   $('#modal_insert').load('/api/modeltemplates/house.html', function() {
+    $('#modal').modal();
+    newObj = {x: 20, y: 20, group:7};
+    $('#modal_accept')
+      .on('click', function() {
+        $.each($('#modal_form input'), function(i, v) {
+          newObj['_' + v.id] = v.value;
+        });
+        console.log(newObj);
+        addNewNode(newObj);
+        $('#modal').modal('hide');
+        $('#modal').remove();
+      });
     $('#modal').modal('show');
   });
 }
@@ -86,7 +98,7 @@ d3.json("/api/models/" + model_id + ".json", function(json) {
 
 function onClickCanvas() {
   point = d3.mouse(this);
-  addNewNode({name:"new",type:"new",group:4,x:point[0],y:point[1],fixed:1});
+  addNewNode({name:"new",type:"new",group:0,x:point[0],y:point[1],fixed:1});
 }
 
 function onNodeclick(d, i) {

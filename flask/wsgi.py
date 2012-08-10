@@ -24,7 +24,9 @@ def root():
     return render_template('index.html', model_id='medium')
 
 templates = {'house': 
-        {'floor_area':0.0
+        {
+        'name':"new house"
+        ,'floor_area':0.0
         ,'schedule_skew':0.0
         ,'heating_system_type':""
         ,'cooling_system_type':""
