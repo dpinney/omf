@@ -73,37 +73,37 @@ def terminate():
 
 @app.route('/model/<model_id>')
 def show_model(model_id):
-    return flask.render_template('gridEdit.html', model_id=model_id)
+	return flask.render_template('gridEdit.html', model_id=model_id)
 
 @app.route('/api/models/<model_id>.json')
 def api_model(model_id):
-    #check file system
-    #or, check for GLM file
-    if model_id+'.json' in os.listdir('./files/json'):
-        in_file = file('./files/json/' + model_id + ".json", "r")
-        as_json = in_file.read()
-        return as_json
-    elif model_id+'.glm' in os.listdir('./files/glms'):
-        parsed = tp.parse('./files/glms/' + model_id + ".glm")
-        graph = tg.node_groups(parsed)
-        # cache the file for later
-        out = file('./files/json/' + model_id + ".json", "w")
-        graph_json = tg.to_d3_json(graph)
-        as_json = json.dumps(graph_json)
-        out.write(as_json)
-        out.close()
-        return as_json
-    return ''
+	#check file system or check for GLM file
+	if model_id+'.json' in os.listdir('./json'):
+		in_file = file('./json/' + model_id + ".json", "r")
+		as_json = in_file.read()
+		return as_json
+	elif model_id in os.listdir('./feeders'):
+		parsed = tp.parse('./feeders/' + model_id + "/main.glm")
+		graph = tg.node_groups(parsed)
+		print graph
+		# cache the file for later
+		out = file('./json/' + model_id + ".json", "w")
+		graph_json = tg.to_d3_json(graph)
+		as_json = json.dumps(graph_json)
+		out.write(as_json)
+		out.close()
+		return as_json
+	return ''
 	# return render_template('default_model.json')
 
 @app.route('/api/objects')
 def api_objects():
-    all_types = filter(lambda x: x[0] is not '_', dir(models))
-    # all_types = ['House', 'Triplex Meter', 'Meter', 'Node', 'Load']
-    return json.dumps(all_types)
-    # defaults = map(lambda x: getattr(models, x)().__dict__, all_types)
-    # print defaults
-    # return json.dumps(defaults)
+	all_types = filter(lambda x: x[0] is not '_', dir(models))
+	# all_types = ['House', 'Triplex Meter', 'Meter', 'Node', 'Load']
+	return json.dumps(all_types)
+	# defaults = map(lambda x: getattr(models, x)().__dict__, all_types)
+	# print defaults
+	# return json.dumps(defaults)
 
 
 

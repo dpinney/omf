@@ -93,7 +93,8 @@ td.preRun {color:orange;}
 td.postRun {color:black;}
 
 /*newAnalysis-specific*/
-table#newAnalysisOptions {width:70%; text-align:left; vertical-align:top;}
+table#newAnalysisOptions {width:70%; text-align:left;}
+table#newAnalysisOptions td {vertical-align:top;}
 
 /* viewReports-specific */
 div.graphBlock {width:320px; height:240px; background-color:white; display:inline-block; margin:5px;}

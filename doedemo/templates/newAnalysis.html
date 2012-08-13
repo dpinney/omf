@@ -19,12 +19,12 @@
 			<tr>
 				<td>Feeder</td>
 				<td>
-					<select name='feederName'>
+					<select name='feederName' id='feederName'>
 					{% for feeder in feeders %}
 					<option value='{{ feeder }}'>{{ feeder }}</option>
 					{% endfor %}
 					</select>
-					<button type='button' onclick='javascript:window.location="../model/large"'>Edit Selected Feeder</button>
+					<button type='button' onclick='javascript:feedSel=document.getElementById("feederName");feeder=feedSel[feedSel.selectedIndex].value;window.location="../model/"+feeder'>Edit Selected Feeder</button>
 				</td>
 			</tr>
 			<tr>
