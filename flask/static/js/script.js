@@ -2,8 +2,8 @@
 
 */
 
-function addNewHouse() {
-  $('#modal_insert').load('/api/modeltemplates/house.html', function() {
+function addNewObject(obj_type) {
+  $('#modal_insert').load('/api/modeltemplates/' + obj_type + '.html', function() {
     $('#modal').modal();
     // put it in a random posiiton in the top left portion of the view
     x1 = 10 + w * .2 * Math.random();
@@ -29,7 +29,7 @@ function addNewHouse() {
 
 function addObject(obj_type) {
   if(obj_type === "House") {
-    addNewHouse();
+    addNewObject('house');
   }
 }
 
@@ -108,6 +108,45 @@ function onClickCanvas() {
   addNewNode({name:"new",type:"new",group:0,x:point[0],y:point[1],fixed:1});
 }
 
+function editObject(d_index) {
+  d = root.nodes[d_index];
+  $('#modal_insert').load('/api/modeltemplates/default.html', function() {
+    $('#modal').modal();
+    $('#type_title').replaceWith('<h2>Edit ' + d.name + '</h2>');
+    jQuery.each(d, function(prop, value) {
+      if(prop.charAt(0) === '_') {
+        var label = prop.substring(1, prop.length);
+        $('#modal_form').append(' \
+            <div class="control-group"> \
+              <label class="control-label" for="' + label + '">' + label + '</label> \
+              <div class="controls"> \
+                <input type="text" class="input-xlarge" id=' + label + ' value="' + value + '"></input> \
+              </div> \
+            </div>'
+          );
+        }
+    });
+
+    $('#modal_accept')
+      .on('click', function() {
+        d = root.nodes[d_index];
+        $.each($('#modal_form input'), function(i, v) {
+          if(v.id === "name") {
+            d['name'] = v.value;
+          }
+          else {
+            d['_' + v.id] = v.value;
+          }
+        });
+        //addNodes(force.nodes());
+        selectNode(d);
+        $('#modal').modal('hide');
+        $('#modal').remove();
+      });
+    $('#modal').modal('show');
+  });
+}
+
 function selectNode(d) {
     // visually mark the node
   selected = d;
@@ -119,16 +158,15 @@ function selectNode(d) {
   $('#selected tbody')
     .empty();
 
-  for(var i in d) {
+  for(var prop in d) {
     // 'real' properties are stored with an underscore
-    if(i[0] === '_') {
+    if(prop[0] === '_') {
       $('#selected tbody')
-        .append('<tr></tr>')
-        .append('<td>' + i.split('_')[1] + '</td><td>' + d[i] +'</td>');
+        .append('<tr><td>' + prop.substring(1, prop.length) + '</td><td>' + d[prop] +'</td></tr>');
     }
   }
-  $('selected tbody')
-    .append('<tr><td colspan="2"><button type="submit" class="btn">Edit</button></td></tr>');
+  $('#selected tbody')
+    .append('<tr><td colspan="2"><a class="btn" href="Javascript: editObject(' + d.index + ');" }>Edit</button></td></tr>');
 }
 
 function onNodeclick(d, i) {
@@ -136,14 +174,10 @@ function onNodeclick(d, i) {
 }
 
 function onNodeover(d, i) {
-  console.log("onNodeover");
-  console.log(d);
   classify(d, "highlighted", true);
 }
 
 function onNodeout(d, i) {
-  console.log("onNodeout");
-  console.log(d);
   classify(d, "highlighted", false);
 }
 

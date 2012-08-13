@@ -2,19 +2,21 @@
 <div id="modal" class="modal hide fade">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal">&times;</button>
-    <h3>Add new {type} object</h3>
+    <h3 id="type_title">Add new {type} object</h3>
   </div>
   <div class="modal-body">
     <h4>Properties</h4>
     <form id="modal_form" class="form-horizontal">
-      {% for key in props.keys() %}
-        <div class="control-group">
-          <label class="control-label" for="{{ key }}">{{ key }}</label>
-          <div class="controls">
-            <input type="text" class="input-xlarge" id="{{ key }}" value="{{ props[key] }}"></input>
+      {% if props %}
+        {% for key in props.keys() %}
+          <div class="control-group">
+            <label class="control-label" for="{{ key }}">{{ key }}</label>
+            <div class="controls">
+              <input type="text" class="input-xlarge" id="{{ key }}" value="{{ props[key] }}"></input>
+            </div>
           </div>
-        </div>
-      {% endfor %}
+        {% endfor %}
+      {% endif %}
     </form>
   </div>
   <div class="modal-footer">

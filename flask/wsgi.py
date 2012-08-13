@@ -23,7 +23,8 @@ if app.config['DEBUG']:
 def root():
     return render_template('index.html', model_id='medium')
 
-templates = {'house': 
+templates = {
+    'house': 
         {
         'name':"new house"
         ,'floor_area':0.0
@@ -38,20 +39,26 @@ templates = {'house':
         ,'cooling_COP':0.0
         ,'zip_load':""
         ,'water_heater':""
+        },
+    'default':
+        {
         }
     }
 
 @app.route('/api/modeltemplates/<template_id>')
 def api_modeltemplate(template_id):
-    if template_id == 'house':
+    if template_id.lowercase() == 'house':
         template = templates['house']
         return json.dumps(template)
     return ""
 
 @app.route("/api/modeltemplates/<type>.html")
 def api_new_obj_html(type):
-    props = templates[type]
-    return render_template('model_modal.html', type=type, props=props)
+    if type is 'default':
+        return render_template('model_modal.html', type=None, props=None)
+    else:
+        props = templates[type]
+        return render_template('model_modal.html', type=type, props=props)
 
 @app.route('/model/<model_id>')
 def show_model(model_id):
