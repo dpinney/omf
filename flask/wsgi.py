@@ -11,6 +11,7 @@ import models
 import treeParser as tp
 import treeGrapher as tg
 
+application = app = Flask('wsgi')
 @app.route('/')
 def root():
     return render_template('index.html', model_id='medium')
