@@ -1,0 +1,1 @@
+{'status': 'postRun', 'climate': u'AZ-TUCSON.tmy2', 'name': u'TIMETESTER', 'created': '2012-08-09 12:14:13.638000', 'sourceFeeder': u'Simple Market System', 'runTime': '0:00:06.325000'}

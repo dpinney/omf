@@ -1,0 +1,1 @@
+{'status': 'postRun', 'climate': u'IL-CHICAGO.tmy2', 'name': u'13for10daysInChitown', 'created': '2012-08-11 17:47:47.886000', 'PID': 4980, 'sourceFeeder': u'13 Node Reference Feeder', 'runTime': 4.708}

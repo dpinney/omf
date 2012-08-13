@@ -1,0 +1,41 @@
+
+Core profiler results
+======================
+
+Total objects                 37 objects
+Parallelism                    1 thread
+Total time                   2.0 seconds
+  Core time                  0.9 seconds (43.3%)
+  Model time                 1.1 seconds/thread (56.8%)
+Simulation time              100 days
+Simulation speed             44k object.hours/second
+Syncs completed            80262 passes
+Time steps completed       54869 timesteps
+Convergence efficiency      1.46 passes/timestep
+Memory lock contention      0.0%
+Average timestep            157 seconds/timestep
+Simulation rate         4318200 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+triplex_meter      0.280     24.7%     93.3
+house              0.210     18.5%    105.0
+regulator          0.112      9.9%    112.0
+triplex_line       0.105      9.3%     52.5
+transformer        0.083      7.3%     41.5
+waterheater        0.080      7.0%     40.0
+ZIPload            0.077      6.8%      9.6
+node               0.054      4.8%     27.0
+recorder           0.042      3.7%     10.5
+triplex_node       0.033      2.9%     33.0
+climate            0.027      2.4%     27.0
+stubauction        0.016      1.4%     16.0
+player             0.008      0.7%      8.0
+transformer_conf   0.008      0.7%      2.0
+================ ======== ======== ========
+Total              1.135    100.0%     30.7
+
