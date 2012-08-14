@@ -105,7 +105,42 @@ def api_objects():
 	# print defaults
 	# return json.dumps(defaults)
 
+templates = {
+    'house': 
+        {
+        'name':"new house"
+        ,'floor_area':0.0
+        ,'schedule_skew':0.0
+        ,'heating_system_type':""
+        ,'cooling_system_type':""
+        ,'cooling_setpoint':""
+        ,'heating_setpoint':""
+        ,'thermal_integrity_level':""
+        ,'air_temperature':0.0
+        ,'mass_temperature':0.0
+        ,'cooling_COP':0.0
+        ,'zip_load':""
+        ,'water_heater':""
+        },
+    'default':
+        {
+        }
+    }
 
+@app.route('/api/modeltemplates/<template_id>')
+def api_modeltemplate(template_id):
+    if template_id.lower() == 'house':
+        template = templates['house']
+        return json.dumps(template)
+    return ""
+
+@app.route("/api/modeltemplates/<type>.html")
+def api_new_obj_html(type):
+    if type is 'default':
+        return flask.render_template('modal_edit.html', type=None, props=None)
+    else:
+        props = templates[type]
+        return flask.render_template('modal_edit.html', type=type, props=props)
 
 # This will run on all interface IPs.
 if __name__ == '__main__':

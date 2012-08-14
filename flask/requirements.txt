@@ -1,4 +1,0 @@
-flask==0.8
-networkx==1.7
-numpy==1.6
-matplotlib==1.1
