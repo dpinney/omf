@@ -743,3 +743,75 @@ Success. Analysis deleted.
 127.0.0.1 - - [14/Aug/2012 13:34:47] "GET /static/omf.css HTTP/1.0" 200 -
 127.0.0.1 - - [14/Aug/2012 13:34:47] "GET /static/omf.js HTTP/1.0" 200 -
 127.0.0.1 - - [14/Aug/2012 13:51:20] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:04] "GET / HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omfsource/doeDemo.py", line 25, in root
+    return flask.render_template('home.html', metadatas=metadatas)
+  File "/usr/share/pyshared/flask/templating.py", line 122, in render_template
+    return _render(ctx.app.jinja_env.get_template(template_name),
+  File "/usr/share/pyshared/jinja2/environment.py", line 719, in get_template
+    return self._load_template(name, self.make_globals(globals))
+  File "/usr/share/pyshared/jinja2/environment.py", line 693, in _load_template
+    template = self.loader.load(self, name, globals)
+  File "/usr/share/pyshared/jinja2/loaders.py", line 115, in load
+    source, filename, uptodate = self.get_source(environment, name)
+  File "/usr/share/pyshared/flask/templating.py", line 61, in get_source
+    raise TemplateNotFound(template)
+TemplateNotFound: home.html
+127.0.0.1 - - [14/Aug/2012 14:06:05] "GET /?__debugger__=yes&cmd=resource&f=style.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:05] "GET /?__debugger__=yes&cmd=resource&f=jquery.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:05] "GET /?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:05] "GET /?__debugger__=yes&cmd=resource&f=console.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:05] "GET /?__debugger__=yes&cmd=resource&f=source.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:05] "GET /favicon.ico HTTP/1.0" 404 -
+ * Running on http://0.0.0.0:5001/
+ * Restarting with reloader
+127.0.0.1 - - [14/Aug/2012 14:06:47] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:52] "GET /viewReports/Aaron's%20Analysis HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Voltage_680.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Capacitor_CAP1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Voltage_675.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Voltage_671.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Voltage_652.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Capacitor_CAP2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Voltage_630.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:53] "GET /static/analyses/Aaron's%20Analysis/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:06:56] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:55] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:55] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:57] "GET /viewReports/LongtimeTester HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:57] "GET /static/analyses/LongtimeTester/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:57] "GET /static/analyses/LongtimeTester/Voltage_tm_2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:57] "GET /static/analyses/LongtimeTester/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:57] "GET /static/analyses/LongtimeTester/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:57] "GET /static/analyses/LongtimeTester/Voltage_tm_1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:57] "GET /static/analyses/LongtimeTester/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:57] "GET /static/analyses/LongtimeTester/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:57] "GET /static/analyses/LongtimeTester/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:10:59] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:11:00] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:11:06] "GET /model/Simple%20Market%20System HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:11:08] "GET /api/models/Simple%20Market%20System.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:11:08] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:11:08] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 14:11:17] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:12:02] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:12:02] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 14:12:02] "GET /static/omf.js HTTP/1.0" 200 -
