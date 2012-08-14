@@ -1,0 +1,1 @@
+{'status': 'postRun', 'climate': u'AL-BIRMINGHAM.tmy2', 'name': u'hidef graph', 'created': '2012-08-09 14:13:24.239000', 'sourceFeeder': u'13 Node Reference Feeder', 'runTime': '0:01:47.487000'}

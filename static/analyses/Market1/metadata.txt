@@ -1,0 +1,1 @@
+{'status': 'postRun', 'climate': u'HI-HONOLULU.tmy2', 'name': u'Market1', 'created': '2012-08-14 11:05:34.979919', 'PID': 2998, 'sourceFeeder': u'Simple Market System', 'runTime': 16.410694}

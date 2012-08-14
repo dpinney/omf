@@ -1,0 +1,739 @@
+ * Running on http://0.0.0.0:5001/
+ * Restarting with reloader
+127.0.0.1 - - [13/Aug/2012 15:54:07] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:54:09] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:14] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:16] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:18] "GET /viewReports/newCreationtest HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:18] "GET /static/analyses/newCreationtest/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:18] "GET /static/analyses/newCreationtest/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:18] "GET /static/analyses/newCreationtest/Voltage_tm_2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:18] "GET /static/analyses/newCreationtest/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:18] "GET /static/analyses/newCreationtest/Voltage_tm_1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:18] "GET /static/analyses/newCreationtest/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:18] "GET /static/analyses/newCreationtest/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:18] "GET /static/analyses/newCreationtest/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:20] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:22] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /model/large HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /static/css/bootstrap.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /static/css/bootstrap-responsive.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /static/css/style.css HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /static/js/libs/modernizr-2.5.3-respond-1.1.0.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /static/js/libs/d3.v2.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /static/js/libs/bootstrap/bootstrap.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /static/js/libs/bootstrap/tooltip.js HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /static/js/libs/bootstrap/popover.js HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /static/js/script.js HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /static/img/glyphicons-halflings.png HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /api/models/large.json HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:23] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [13/Aug/2012 15:56:37] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 15:56:38] "GET / HTTP/1.0" 200 -
+ * Detected change in 'doeDemo.py', reloading
+ * Restarting with reloader
+ * Running on http://0.0.0.0:5001/
+ * Restarting with reloader
+127.0.0.1 - - [13/Aug/2012 17:18:08] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:18:10] "GET /viewReports/newCreationtest HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:18:11] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:18:13] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:18:18] "GET /model/Simple%20Market%20System HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:18:19] "GET /api/models/Simple%20Market%20System.json HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 81, in api_model
+    if model_id+'.json' in os.listdir('./json'):
+OSError: [Errno 2] No such file or directory: './json'
+127.0.0.1 - - [13/Aug/2012 17:18:19] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:18:19] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [13/Aug/2012 17:18:29] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:18:29] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 81, in api_model
+    if model_id+'.json' in os.listdir('./json'):
+OSError: [Errno 2] No such file or directory: './json'
+127.0.0.1 - - [13/Aug/2012 17:18:29] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:18:29] "GET /favicon.ico HTTP/1.0" 404 -
+ * Running on http://0.0.0.0:5001/
+ * Restarting with reloader
+127.0.0.1 - - [13/Aug/2012 17:20:33] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:20:35] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:20:37] "GET /model/Simple%20Market%20System HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:20:37] "GET /api/models/Simple%20Market%20System.json HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:20:37] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:20:37] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [13/Aug/2012 17:22:18] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:22:23] "POST /delete/ HTTP/1.0" 302 -
+127.0.0.1 - - [13/Aug/2012 17:22:23] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:28:04] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:28:06] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:28:11] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:28:11] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:28:11] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [13/Aug/2012 17:28:11] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 08:39:29] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:29] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:29] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:35] "GET /viewReports/newCreationtest HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:35] "GET /static/analyses/newCreationtest/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:35] "GET /static/analyses/newCreationtest/Voltage_tm_2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:35] "GET /static/analyses/newCreationtest/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:35] "GET /static/analyses/newCreationtest/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:35] "GET /static/analyses/newCreationtest/Voltage_tm_1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:35] "GET /static/analyses/newCreationtest/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:35] "GET /static/analyses/newCreationtest/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:35] "GET /static/analyses/newCreationtest/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:39:43] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:40] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /static/css/bootstrap.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /static/css/bootstrap-responsive.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /static/css/style.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /static/js/libs/modernizr-2.5.3-respond-1.1.0.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /static/js/libs/d3.v2.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /static/js/libs/bootstrap/bootstrap.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /static/js/libs/bootstrap/tooltip.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /static/js/libs/bootstrap/popover.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /static/js/script.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:43] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:44] "GET /static/img/glyphicons-halflings.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:40:44] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 08:41:11] "GET /api/modeltemplates/house.html HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 09:45:00] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 09:45:03] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 09:45:03] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 09:45:03] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 09:45:05] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /static/css/bootstrap.min.css HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /static/css/bootstrap-responsive.min.css HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /static/css/style.css HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /static/js/libs/modernizr-2.5.3-respond-1.1.0.min.js HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /static/js/libs/d3.v2.min.js HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /static/js/libs/bootstrap/bootstrap.min.js HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /static/js/libs/bootstrap/tooltip.js HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /static/js/libs/bootstrap/popover.js HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /static/js/script.js HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /static/img/glyphicons-halflings.png HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 09:45:06] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 09:45:19] "GET / HTTP/1.0" 200 -
+ * Detected change in 'doeDemo.py', reloading
+Success. Analysis deleted.
+ * Restarting with reloader
+ * Running on http://0.0.0.0:5001/
+ * Restarting with reloader
+127.0.0.1 - - [14/Aug/2012 10:55:25] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:26] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:28] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:30] "GET /viewReports/TIMETESTER HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:31] "GET /static/analyses/TIMETESTER/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:31] "GET /static/analyses/TIMETESTER/Voltage_tm_2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:31] "GET /static/analyses/TIMETESTER/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:31] "GET /static/analyses/TIMETESTER/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:31] "GET /static/analyses/TIMETESTER/Voltage_tm_1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:31] "GET /static/analyses/TIMETESTER/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:31] "GET /static/analyses/TIMETESTER/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:31] "GET /static/analyses/TIMETESTER/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:32] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:37] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:39] "GET /model/Simple%20Market%20System HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:40] "GET /api/models/Simple%20Market%20System.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:40] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:55:40] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 10:57:22] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:57:29] "GET /api/models/medium.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:57:29] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:57:29] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 10:57:39] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:57:47] "GET /api/modeltemplates/house.html HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 115, in api_new_obj_html
+    props = models.templates[template_id]
+KeyError: u'house'
+127.0.0.1 - - [14/Aug/2012 10:58:10] "GET /api/modeltemplates/house.html HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 115, in api_new_obj_html
+    props = models.templates[template_id]
+KeyError: u'house'
+127.0.0.1 - - [14/Aug/2012 10:58:22] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:58:27] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 10:58:34] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:58:39] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 10:58:42] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 10:58:48] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:00:39] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:00:45] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:00:49] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:00:55] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:00:57] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:01:02] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:01:04] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:01:10] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:01:11] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:01:14] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:01:15] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:01:17] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:01:35] "GET /api/models/medium.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:01:35] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:01:35] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:01:41] "GET /api/modeltemplates/house.html HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 115, in api_new_obj_html
+    props = models.templates[template_id]
+KeyError: u'house'
+127.0.0.1 - - [14/Aug/2012 11:01:47] "GET /api/modeltemplates/house.html HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 115, in api_new_obj_html
+    props = models.templates[template_id]
+KeyError: u'house'
+127.0.0.1 - - [14/Aug/2012 11:01:49] "GET /api/modeltemplates/house.html HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 115, in api_new_obj_html
+    props = models.templates[template_id]
+KeyError: u'house'
+127.0.0.1 - - [14/Aug/2012 11:01:50] "GET /api/modeltemplates/house.html HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 115, in api_new_obj_html
+    props = models.templates[template_id]
+KeyError: u'house'
+127.0.0.1 - - [14/Aug/2012 11:03:06] "GET /api/models/medium.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:03:06] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:03:06] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:04:15] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:04:15] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:04:15] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:04:17] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:04:19] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:04:19] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:04:19] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:04:38] "GET /model/Simple%20Market%20System HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:04:39] "GET /api/models/Simple%20Market%20System.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:04:39] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:05:19] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:05:34] "POST /saveAnalysis/ HTTP/1.0" 302 -
+127.0.0.1 - - [14/Aug/2012 11:05:35] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:05:39] "POST /run/ HTTP/1.0" 302 -
+Exception AttributeError: AttributeError("'_DummyThread' object has no attribute '_Thread__block'",) in <module 'threading' from '/usr/lib/python2.7/threading.pyc'> ignored
+127.0.0.1 - - [14/Aug/2012 11:05:39] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:12:31] "GET /api/models/medium.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:12:31] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:12:32] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:13:20] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:15:17] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:15:17] "GET /static/omf.css HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 11:15:17] "GET /static/omf.js HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 11:15:23] "GET /viewReports/Market1 HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:15:23] "GET /static/analyses/Market1/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:15:23] "GET /static/analyses/Market1/Voltage_tm_2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:15:23] "GET /static/analyses/Market1/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:15:23] "GET /static/analyses/Market1/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:15:23] "GET /static/analyses/Market1/Voltage_tm_1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:15:23] "GET /static/analyses/Market1/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:15:23] "GET /static/analyses/Market1/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:15:23] "GET /static/analyses/Market1/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:16:15] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:16:17] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:16:17] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:16:17] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:16:25] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:16:27] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:16:27] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:16:27] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:16:36] "GET /api/modeltemplates/house.html HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 115, in api_new_obj_html
+    props = models.templates[template_id]
+KeyError: u'house'
+127.0.0.1 - - [14/Aug/2012 11:17:56] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:56] "GET /static/css/bootstrap.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:56] "GET /static/css/bootstrap-responsive.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:56] "GET /static/css/style.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:56] "GET /static/js/libs/modernizr-2.5.3-respond-1.1.0.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:56] "GET /static/js/libs/d3.v2.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:56] "GET /static/js/libs/bootstrap/bootstrap.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:56] "GET /static/js/libs/bootstrap/tooltip.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:56] "GET /static/js/libs/bootstrap/popover.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:56] "GET /static/js/script.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:57] "GET /static/img/glyphicons-halflings.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:57] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:17:58] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:18:12] "GET /api/modeltemplates/Node.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:18:32] "GET /api/modeltemplates/Capacitor.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:19:24] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:19:25] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:19:25] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:19:25] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:19:31] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:19:34] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:19:34] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:19:35] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:33] "GET /static/js/script.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:39] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:39] "GET /static/css/bootstrap.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:39] "GET /static/css/bootstrap-responsive.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:39] "GET /static/css/style.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:39] "GET /static/js/libs/modernizr-2.5.3-respond-1.1.0.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:39] "GET /static/js/libs/d3.v2.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:39] "GET /static/js/libs/bootstrap/bootstrap.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:39] "GET /static/js/libs/bootstrap/tooltip.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:39] "GET /static/js/libs/bootstrap/popover.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:39] "GET /static/js/script.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:42] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:42] "GET /static/img/glyphicons-halflings.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:42] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:21:55] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:22:14] "GET /api/modeltemplates/Node.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:31:10] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:31:17] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:31:19] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:31:20] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:31:20] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:31:30] "GET /model/medium HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:31:31] "GET /api/models/medium.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:31:31] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:31:40] "GET /api/modeltemplates/Capacitor.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:33:36] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:33:50] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:11] "GET /model/medium HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:12] "GET /api/models/medium.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:12] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:28] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:33] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:35:36] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:42] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:42] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:44] "GET /model/Simple%20Market%20System HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:45] "GET /api/models/Simple%20Market%20System.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:45] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:35:45] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:35:53] "GET /api/modeltemplates/House.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:36:04] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:37:43] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:37:44] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:37:53] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:37:58] "GET /model/medium HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:37:59] "GET /api/models/medium.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:37:59] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:38:05] "GET /static/favicon.ico HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:38:11] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:38:24] "GET /api/modeltemplates/Capacitor.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:38:37] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:39:13] "POST /saveAnalysis/ HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 65, in saveAnalysis
+    da.create(flask.request.form.to_dict())
+  File "/home/dpinney/omf/doedemo/doeAnalysis.py", line 52, in create
+    os.mkdir('static/analyses/' + analysisName)
+OSError: [Errno 17] File exists: 'static/analyses/'
+127.0.0.1 - - [14/Aug/2012 11:39:13] "GET /saveAnalysis/?__debugger__=yes&cmd=resource&f=style.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:39:13] "GET /saveAnalysis/?__debugger__=yes&cmd=resource&f=jquery.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:39:13] "GET /saveAnalysis/?__debugger__=yes&cmd=resource&f=debugger.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:39:14] "GET /saveAnalysis/?__debugger__=yes&cmd=resource&f=console.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:39:14] "GET /saveAnalysis/?__debugger__=yes&cmd=resource&f=source.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:44] "GET /model/medium HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /static/css/bootstrap.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /static/js/libs/modernizr-2.5.3-respond-1.1.0.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /static/css/bootstrap-responsive.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /static/js/libs/d3.v2.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /static/css/style.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /static/js/libs/bootstrap/tooltip.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /static/js/libs/bootstrap/popover.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /static/js/libs/bootstrap/bootstrap.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /static/js/script.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /static/img/glyphicons-halflings.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:41:45] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:41:54] "GET /api/modeltemplates/Capacitor.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:42:04] "GET /api/modeltemplates/Node.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:42:50] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:43:50] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:45:26] "GET /model/large HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:45:26] "GET /api/models/large.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:45:26] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:45:27] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:46:46] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:46:54] "GET /model/Simple%20Market%20System HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:46:54] "GET /api/models/Simple%20Market%20System.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:46:54] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:46:55] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:46:57] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:46:59] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:47:00] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:47:04] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:47:12] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:47:12] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:47:13] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:47:23] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:47:23] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:47:23] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:47:27] "GET /api/modeltemplates/UndergroundLineConductor.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:47:49] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:48:13] "GET /api/modeltemplates/House.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:48:23] "GET /api/modeltemplates/Capacitor.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:12] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /static/css/bootstrap.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /static/css/bootstrap-responsive.min.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /static/js/libs/modernizr-2.5.3-respond-1.1.0.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /static/js/libs/d3.v2.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /static/js/libs/bootstrap/tooltip.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /static/js/libs/bootstrap/bootstrap.min.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /static/css/style.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /static/js/libs/bootstrap/popover.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /static/js/script.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:24] "GET /static/img/glyphicons-halflings.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:25] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:49:25] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:49:35] "GET /api/modeltemplates/Node.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:10] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:31] "GET /viewReports/CVRinAlaska HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Voltage_680.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Capacitor_CAP1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Voltage_675.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Voltage_671.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Voltage_652.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Capacitor_CAP2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Voltage_630.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:51:32] "GET /static/analyses/CVRinAlaska/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:55:51] "GET /api/modeltemplates/house.html HTTP/1.0" 500 -
+Traceback (most recent call last):
+  File "/usr/share/pyshared/flask/app.py", line 1518, in __call__
+    return self.wsgi_app(environ, start_response)
+  File "/usr/share/pyshared/flask/app.py", line 1506, in wsgi_app
+    response = self.make_response(self.handle_exception(e))
+  File "/usr/share/pyshared/flask/app.py", line 1504, in wsgi_app
+    response = self.full_dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1264, in full_dispatch_request
+    rv = self.handle_user_exception(e)
+  File "/usr/share/pyshared/flask/app.py", line 1262, in full_dispatch_request
+    rv = self.dispatch_request()
+  File "/usr/share/pyshared/flask/app.py", line 1248, in dispatch_request
+    return self.view_functions[rule.endpoint](**req.view_args)
+  File "/home/dpinney/omf/doedemo/doeDemo.py", line 115, in api_new_obj_html
+    props = models.templates[template_id]
+KeyError: u'house'
+127.0.0.1 - - [14/Aug/2012 11:55:51] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 11:55:53] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:49] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:51] "GET /viewReports/simleng HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:51] "GET /static/analyses/simleng/Voltage_680.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:51] "GET /static/analyses/simleng/Capacitor_CAP1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:51] "GET /static/analyses/simleng/Voltage_675.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:51] "GET /static/analyses/simleng/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:51] "GET /static/analyses/simleng/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:51] "GET /static/analyses/simleng/Voltage_671.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:51] "GET /static/analyses/simleng/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:51] "GET /static/analyses/simleng/Voltage_652.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:51] "GET /static/analyses/simleng/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:52] "GET /static/analyses/simleng/Capacitor_CAP2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:52] "GET /static/analyses/simleng/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:52] "GET /static/analyses/simleng/Voltage_630.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:52] "GET /static/analyses/simleng/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:58:55] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:59:55] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:59:55] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 11:59:55] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:00:29] "GET /viewReports/newCreationtest HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:00:42] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:00:43] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:00:44] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:00:44] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:00:56] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:31] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:31] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:31] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:31] "GET /static/favicon.ico HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:48] "GET /viewReports/LongtimeTester HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:48] "GET /static/analyses/LongtimeTester/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:48] "GET /static/analyses/LongtimeTester/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:48] "GET /static/analyses/LongtimeTester/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:48] "GET /static/analyses/LongtimeTester/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:48] "GET /static/analyses/LongtimeTester/Voltage_tm_2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:48] "GET /static/analyses/LongtimeTester/Voltage_tm_1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:48] "GET /static/analyses/LongtimeTester/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:03:48] "GET /static/analyses/LongtimeTester/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:04:03] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:05:47] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:07:47] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:07:47] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:07:47] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:07:53] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:07:55] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:07:56] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 12:07:56] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:06:56] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:07:00] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:07:00] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:07:00] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:07:09] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:07:17] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:07:17] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:07:17] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:08:56] "GET /api/modeltemplates/Capacitor.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:10:23] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:10:26] "GET /static/js/script.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:10:26] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:10:30] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:10:31] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:10:33] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:10:34] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:10:34] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:10:34] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:10:48] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:10:53] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:11:03] "GET /api/modeltemplates/Node.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:11:20] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:12:06] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:12:14] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:12:21] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:12:42] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:04] "GET /viewReports/13for10days HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Voltage_680.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Capacitor_CAP1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Voltage_675.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Voltage_671.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Voltage_652.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Capacitor_CAP2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Voltage_630.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:05] "GET /static/analyses/13for10days/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:06] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:07] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:13] "GET /model/Simple%20Market%20System HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:14] "GET /api/models/Simple%20Market%20System.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:14] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:14] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:13:29] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:13:50] "GET /api/modeltemplates/Node.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:14:03] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:14:17] "GET /api/modeltemplates/UndergroundLineConductor.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:14:27] "GET /model// HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:14:27] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:14:30] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:14:32] "GET /model/ HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:14:32] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:14:42] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:15:15] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:15:16] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:15:16] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:15:36] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:15:44] "GET /api/modeltemplates/default.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:15:57] "GET /api/modeltemplates/House.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:16:54] "GET /model/ HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:16:55] "GET /favicon.ico HTTP/1.0" 404 -
+127.0.0.1 - - [14/Aug/2012 13:17:33] "POST /saveAnalysis/ HTTP/1.0" 302 -
+127.0.0.1 - - [14/Aug/2012 13:17:33] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:17:47] "GET /viewReports/VeryLongRun HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:17:48] "GET /static/analyses/VeryLongRun/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:17:48] "GET /static/analyses/VeryLongRun/Voltage_tm_2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:17:48] "GET /static/analyses/VeryLongRun/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:17:48] "GET /static/analyses/VeryLongRun/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:17:48] "GET /static/analyses/VeryLongRun/Voltage_tm_1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:17:48] "GET /static/analyses/VeryLongRun/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:17:48] "GET /static/analyses/VeryLongRun/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:17:48] "GET /static/analyses/VeryLongRun/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:30] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:36] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:39] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:39] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:40] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:41] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:42] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:43] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:44] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:45] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:18:56] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:03] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:03] "GET /static/omf.css HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 13:19:03] "GET /static/omf.js HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 13:19:03] "GET /static/favicon.ico HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:13] "POST /delete/ HTTP/1.0" 302 -
+127.0.0.1 - - [14/Aug/2012 13:19:13] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:18] "POST /delete/ HTTP/1.0" 302 -
+127.0.0.1 - - [14/Aug/2012 13:19:18] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:26] "POST /delete/ HTTP/1.0" 302 -
+127.0.0.1 - - [14/Aug/2012 13:19:26] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:29] "POST /delete/ HTTP/1.0" 302 -
+127.0.0.1 - - [14/Aug/2012 13:19:30] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:36] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:55] "GET /viewReports/13for10daysInChitown HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Voltage_680.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Capacitor_CAP1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Voltage_675.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Voltage_671.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Voltage_652.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Capacitor_CAP2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Voltage_630.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:19:56] "GET /static/analyses/13for10daysInChitown/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:21:19] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:21:33] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:21:41] "GET /model/13%20Node%20Reference%20Feeder HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:21:41] "GET /api/models/13%20Node%20Reference%20Feeder.json HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:21:41] "GET /api/objects HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:21:51] "GET /api/modeltemplates/House.html HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:22:59] "GET /newAnalysis/ HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:23:01] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:25:12] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:25:19] "POST /run/ HTTP/1.0" 302 -
+Exception AttributeError: AttributeError("'_DummyThread' object has no attribute '_Thread__block'",) in <module 'threading' from '/usr/lib/python2.7/threading.pyc'> ignored
+127.0.0.1 - - [14/Aug/2012 13:25:19] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:05] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:05] "GET /static/omf.css HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 13:26:05] "GET /static/omf.js HTTP/1.0" 304 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /viewReports/Aaron%27s%20Analysis HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Voltage_680.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Capacitor_CAP1.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Voltage_675.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Regulator_Reg1.csv_2.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Regulator_Reg1.csv_0.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Voltage_671.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Regulator_Reg1.csv_4.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Voltage_652.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/main.glm.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Capacitor_CAP2.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Regulator_Reg1.csv_3.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Voltage_630.csv.png HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:26:12] "GET /static/analyses/Aaron%27s%20Analysis/Regulator_Reg1.csv_1.png HTTP/1.0" 200 -
+Success. Analysis created.
+Success. Analysis created.
+Success. Analysis deleted.
+Success. Analysis deleted.
+Success. Analysis deleted.
+Success. Analysis deleted.

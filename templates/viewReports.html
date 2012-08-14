@@ -1,0 +1,21 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset='utf-8'>
+	<link href='../static/omf.css' type='text/css' rel='stylesheet'/>
+	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>	
+</head>
+
+<body>
+	<div id='title'>
+		<div id='logoBox'><a href='/'>▦</a></div>
+		<!--Title:-->Reports on {{ analysisName }}
+	</div>
+	<div class='content'>
+		{% for png in pngs %}
+			<div class='graphBlock'><img width='320' height='240' src='../static/analyses/{{ analysisName }}/{{ png }}'/></div>
+		{% endfor %}    
+	</div>
+	<div class='content'>
+		<pre>{{ profile }}</pre>
+	</div>
+</body>
