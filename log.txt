@@ -737,3 +737,9 @@ Success. Analysis deleted.
 Success. Analysis deleted.
 Success. Analysis deleted.
 Success. Analysis deleted.
+ * Running on http://0.0.0.0:5001/
+ * Restarting with reloader
+127.0.0.1 - - [14/Aug/2012 13:34:47] "GET / HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:34:47] "GET /static/omf.css HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:34:47] "GET /static/omf.js HTTP/1.0" 200 -
+127.0.0.1 - - [14/Aug/2012 13:51:20] "GET / HTTP/1.0" 200 -
