@@ -1,1 +1,0 @@
-{'status': 'postRun', 'climate': 'AK-ANCHORAGE.tmy2', 'name': 'chicken', 'created': '2012-08-12 18:50:18.881000', 'PID': 8748, 'sourceFeeder': '13 Node Reference Feeder', 'runTime': 4.21}

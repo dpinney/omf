@@ -1,43 +1,0 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-Core profiler results
-======================
-
-Total objects               3079 objects
-Parallelism                    1 thread
-Total time                  21.0 seconds
-  Core time                  4.8 seconds (23.0%)
-  Model time                16.2 seconds/thread (77.0%)
-Simulation time                1 days
-Simulation speed            3.5k object.hours/second
-Syncs completed             6643 passes
-Time steps completed        1441 timesteps
-Convergence efficiency      4.61 passes/timestep
-Memory lock contention      0.0%
-Average timestep             60 seconds/timestep
-Simulation rate            4114 x realtime
-
-
-Model profiler results
-======================
-
-Class            Time (s) Time (%) msec/obj
----------------- -------- -------- --------
-triplex_meter      5.377     33.3%      8.3
-house              4.649     28.8%      7.4
-triplex_line       3.181     19.7%      5.1
-waterheater        1.187      7.3%      2.7
-ZIPload            0.613      3.8%      1.0
-volt_var_control   0.468      2.9%    468.0
-recorder           0.369      2.3%     46.1
-transformer        0.110      0.7%      5.2
-node               0.081      0.5%      4.8
-overhead_line      0.048      0.3%      5.3
-capacitor          0.026      0.2%     13.0
-regulator          0.022      0.1%     22.0
-underground_line   0.010      0.1%      5.0
-transformer_conf   0.010      0.1%      0.5
-climate            0.009      0.1%      9.0
-switch             0.008      0.0%      8.0
-================ ======== ======== ========
-Total             16.168    100.0%      5.3
-

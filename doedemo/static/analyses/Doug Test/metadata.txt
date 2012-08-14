@@ -1,1 +1,0 @@
-{'status': 'postRun', 'climate': u'KY-LEXINGTON.tmy2', 'name': u'Doug Test', 'created': '2012-08-13 10:43:09.659000', 'PID': 8832, 'sourceFeeder': u'Simple Market System', 'runTime': 4.771}

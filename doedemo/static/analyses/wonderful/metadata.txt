@@ -1,1 +1,0 @@
-{'status': 'postRun', 'climate': u'FL-KEY_WEST.tmy2', 'name': u'wonderful', 'created': '2012-08-08 16:49:30.221000', 'sourceFeeder': u'13 Node Reference Feeder', 'runTime': '0:00:22.143000'}
