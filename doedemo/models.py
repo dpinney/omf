@@ -1,3 +1,85 @@
+
+templates = {
+    'House': 
+        {
+        'name':"new object"
+        ,'floor_area':0.0
+        ,'schedule_skew':0.0
+        ,'heating_system_type':""
+        ,'cooling_system_type':""
+        ,'cooling_setpoint':""
+        ,'heating_setpoint':""
+        ,'thermal_integrity_level':""
+        ,'air_temperature':0.0
+        ,'mass_temperature':0.0
+        ,'cooling_COP':0.0
+        ,'zip_load':""
+        ,'water_heater':""
+        },
+    'Node': 
+        {
+        'name':"new object"
+        ,'bustype':""
+        ,'voltage_A':0.0
+        ,'voltage_B':0.0
+        ,'voltage_C':0.0
+        ,'phases':""
+        ,'nominal_voltage':0.0
+        },
+    'NodeLink':
+        {
+        'name':"new object"
+        ,'from_node': 0
+        ,'to_node': 0
+        ,'phases':""
+        ,'nominal_voltage':0.0
+        },
+    'OverheadLineConductor':
+        {
+        'name':"new object"
+        ,'geometric_mean_radius':0.0
+        ,'resistance':0.0
+        ,'cable_diameter':0.0
+        },
+    'UndergroundLineConductor':
+        {
+        'name':"new object"
+        ,'geometric_mean_radius':0.0
+        ,'resistance':0.0
+        ,'cable_diameter':0.0
+        ,'neutral_geometric_mean_radius':0.0
+        ,'neutral_diameter':0.0
+        ,'neutral_resistance':0.0
+        ,'neutral_strands':0
+        ,'insulation_permittivity':0.0
+        ,'shield_geometric_mean_radius':0.0
+        ,'sheild_resistance':0.0
+        },
+    'Capacitor':
+        {
+        'name':"new object"
+        ,'control':""
+        ,'control_level':""
+        ,'switch_A':""
+        ,'switch_B':""
+        ,'switch_C':""
+        ,'pt_phase':""
+        ,'voltage_set_high':0.0
+        ,'voltage_set_low':0.0
+        ,'capacitor_A_unit':""
+        ,'capacitor_A_value':0.0
+        ,'capacitor_B_unit':""
+        ,'capacitor_B_value':0.0
+        ,'capacitor_C_unit':""
+        ,'capacitor_C_value':0.0
+        ,'time_delay':0.0
+        ,'dwell_time':0.0
+        },
+    'default':
+        {
+        }
+    }
+
 class ProjectObject():
     def __init__(self):
         self.name = ""

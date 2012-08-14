@@ -63,7 +63,6 @@ def delete():
 @app.route('/saveAnalysis/', methods=['POST'])
 def saveAnalysis():
 	da.create(flask.request.form.to_dict())
-	print flask.request.form.to_dict()
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/terminate/', methods=['POST'])
@@ -85,7 +84,6 @@ def api_model(model_id):
 	elif model_id in os.listdir('./feeders'):
 		parsed = tp.parse('./feeders/' + model_id + "/main.glm")
 		graph = tg.node_groups(parsed)
-		print graph
 		# cache the file for later
 		out = file('./json/' + model_id + ".json", "w")
 		graph_json = tg.to_d3_json(graph)
@@ -98,49 +96,24 @@ def api_model(model_id):
 
 @app.route('/api/objects')
 def api_objects():
-	all_types = filter(lambda x: x[0] is not '_', dir(models))
-	# all_types = ['House', 'Triplex Meter', 'Meter', 'Node', 'Load']
+	all_types = filter(lambda x: x is not "default", models.templates.keys())
 	return json.dumps(all_types)
-	# defaults = map(lambda x: getattr(models, x)().__dict__, all_types)
-	# print defaults
-	# return json.dumps(defaults)
-
-templates = {
-    'house': 
-        {
-        'name':"new house"
-        ,'floor_area':0.0
-        ,'schedule_skew':0.0
-        ,'heating_system_type':""
-        ,'cooling_system_type':""
-        ,'cooling_setpoint':""
-        ,'heating_setpoint':""
-        ,'thermal_integrity_level':""
-        ,'air_temperature':0.0
-        ,'mass_temperature':0.0
-        ,'cooling_COP':0.0
-        ,'zip_load':""
-        ,'water_heater':""
-        },
-    'default':
-        {
-        }
-    }
 
 @app.route('/api/modeltemplates/<template_id>')
 def api_modeltemplate(template_id):
-    if template_id.lower() == 'house':
-        template = templates['house']
-        return json.dumps(template)
-    return ""
+	try:
+		template = models.templates[template_id]
+	except KeyError:
+		template = models.templates['default']
+	return json.dumps(template)
 
-@app.route("/api/modeltemplates/<type>.html")
-def api_new_obj_html(type):
-    if type is 'default':
+@app.route("/api/modeltemplates/<template_id>.html")
+def api_new_obj_html(template_id):
+    if template_id is 'default':
         return flask.render_template('modal_edit.html', type=None, props=None)
     else:
-        props = templates[type]
-        return flask.render_template('modal_edit.html', type=type, props=props)
+        props = models.templates[template_id]
+        return flask.render_template('modal_edit.html', type=template_id, props=props)
 
 # This will run on all interface IPs.
 if __name__ == '__main__':

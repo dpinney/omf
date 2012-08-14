@@ -27,18 +27,12 @@ function addNewObject(obj_type) {
   });
 }
 
-function addObject(obj_type) {
-  if(obj_type === "House") {
-    addNewObject('house');
-  }
-}
-
 $().ready(function(){ 
   var url = '/api/objects';
   $.getJSON(url, function(data) {
     $.each(data, function(key, val) {
       $('#object-types')
-        .append($('<a>', { href : "Javascript: addObject('" + val + "');" })
+        .append($('<a>', { href : "Javascript: addNewObject('" + val + "');" })
           .text(val)
         );
       });
