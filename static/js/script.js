@@ -8,7 +8,7 @@ function addNewObject(obj_type) {
     // put it in a random posiiton in the top left portion of the view
     x1 = 10 + w * .2 * Math.random();
     y1 = 10 + w * .2 * Math.random();
-    newObj = {x: x1, y: y1, group:9, index: force.nodes().length};
+    newObj = {x: x1, y: y1, group:9, index: force.nodes().length, weight:1};
     $('#modal_accept')
       .on('click', function() {
         $.each($('#modal_form input'), function(i, v) {
@@ -44,14 +44,8 @@ var w = 1000,
 
 var svg = d3.select("#chart")
   .append("svg")
-  //.on("click", onClickCanvas)
   .attr("width", w)
   .attr("height", h);
-
-var force;
-var link;
-var node;
-var root;
 
 var node_radius = 5;
 var sim_iter = 0;
@@ -61,9 +55,12 @@ var link_dist = 20;
 var charge = -18;
 var grav = 0;
 var link_weight = 2;
-var _selected_table;
-
 var color = d3.scale.category10();
+
+var force;
+var link;
+var node;
+var root;
 
 if(!model_id) {
   var split_path = window.location.pathname.split('');
@@ -76,31 +73,26 @@ d3.json("/api/models/" + model_id + ".json", function(json) {
   var grav = base_grav + (json.nodes.length / 100) * 0.01;
   // run the layout sim based on the number of nodes 
   max_iter = 75;
-  if(json.nodes.length < 50) {
+  if(root.nodes.length < 50) {
     max_iter = 25;
   }
-  if(json.nodes.length > 1000) {
+  if(root.nodes.length > 1000) {
     max_iter = 125;
   }
   force = d3.layout.force()
     .gravity(grav)
     .charge(charge)
     .linkDistance(link_dist)
-    .nodes(json.nodes)
-    .links(json.links)
+    .nodes(root.nodes)
+    .links(root.links)
     .size([w, h]);
   force.start();
 
-  addLinks(json.links);
-  addNodes(json.nodes);
+  updateLinkView();
+  updateNodeView();
 
   force.on("tick", onTick);
 });
-
-function onClickCanvas() {
-  point = d3.mouse(this);
-  addNewNode({name:"new",type:"new",group:0,x:point[0],y:point[1],fixed:1});
-}
 
 function editObject(d_index) {
   d = root.nodes[d_index];
@@ -132,7 +124,6 @@ function editObject(d_index) {
             d['_' + v.id] = v.value;
           }
         });
-        //addNodes(force.nodes());
         selectNode(d);
         $('#modal').modal('hide');
         $('#modal').remove();
@@ -196,6 +187,12 @@ function onTick() {
 
   if(sim_iter >= max_iter) {
     force.stop();
+    // hack?
+    // fix the node positions so that they don't
+    // move (unless manually moved)
+    $.each(root.nodes, function(i, d) {
+      d.fixed = 1;
+    });
     link.attr("x1", function(d) { return d.source.x; })
         .attr("y1", function(d) { return d.source.y; })
         .attr("x2", function(d) { return d.target.x; })
@@ -203,7 +200,6 @@ function onTick() {
 
     node.attr("cx", function(d) { return d.x; })
         .attr("cy", function(d) { return d.y; });
-
     // show the chart and remove the progress
     $("#progress").hide();
     $("#chart").show();
@@ -211,47 +207,44 @@ function onTick() {
 }
 
 function addNewNode(d) {
-  force.nodes().push(d);
-  // todo: add links, probably not here
-  //last_n = force.nodes().length-1;
-  //force.links().push({source:last_n,target:last_n-1,value:link_weight});
-  //addLinks(force.links());
-  addNodes(force.nodes());
+  if(true) {
+    // hack: force reset
+    svg.selectAll("circle.node").data([]).exit().remove();
+    svg.selectAll("line.link").data([]).exit().remove();
+  }
+  root.nodes.push(d);
+  updateLinkView(true);
+  updateNodeView(true);
   force.start();
   selectNode(d);
 }
 
-function addNodes(data) {
-  data = svg.selectAll("circle.node").data(data)
-  node = data.enter()
-      .append("circle")
-      .on("mouseover", onNodeover)
-      .on("mouseout", onNodeout)
-      .on("click", onNodeclick)
-      .attr("class", "node")
-      .attr("cx", function(d) { return w/2; })
-      .attr("cy", function(d) { return h/2; })
-      .attr("r", node_radius)
-      .attr("id", function(d) { return "n" + d.index; })
-      .style("fill", function(d) { return color(d.group); })
-      .call(force.drag);
+function updateNodeView() {
+  node = svg.selectAll("circle.node")
+    .data(root.nodes)
+      .enter()
+        .append("circle")
+        .on("mouseover", onNodeover)
+        .on("mouseout", onNodeout)
+        .on("click", onNodeclick)
+        .attr("class", "node")
+        .attr("r", node_radius)
+        .attr("id", function(d) { return "n" + d.index; })
+        .style("fill", function(d) { return color(d.group); })
+        .call(force.drag);
 
-  node.append("title")
-    .text(function(d) { return d.name; });
-
-  data
-    .exit()
-      .remove();
+  svg.selectAll("circle.node title")
+    .data(root.nodes)
+    .enter()
+      .append("title")
+      .text(function(d) { return d.name; });
 }
 
-function addLinks(data) {
-  link = svg.selectAll("line.link").data(data)
+function updateLinkView() {
+  link = svg.selectAll("line.link").data(root.links)
   link
     .enter()
       .append("line")
       .attr("class", "link")
       .style("stroke-width", function(d) { return link_weight; });
-  link
-    .exit()
-      .remove();
 }
