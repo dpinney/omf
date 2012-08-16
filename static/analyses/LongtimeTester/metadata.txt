@@ -1,1 +1,1 @@
-{'status': 'postRun', 'climate': u'FL-KEY_WEST.tmy2', 'name': u'LongtimeTester', 'created': '2012-08-09 12:17:21.281000', 'sourceFeeder': u'Simple Market System', 'runTime': '0:00:04.871000'}
+{'status': 'postRun', 'climate': u'FL-KEY_WEST.tmy2', 'name': u'LongtimeTester', 'created': '2012-08-09 12:17:21.281000', 'PID': 7736, 'sourceFeeder': u'Simple Market System', 'runTime': 5.688}

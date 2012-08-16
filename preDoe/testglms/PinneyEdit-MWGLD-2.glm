@@ -1,0 +1,2205 @@
+// $Id: MWGLD.glm 2012-04-13 16:22:55 ychen $
+//*********************************************
+
+#set iteration_limit=50;
+#set profiler=1;
+#set pauseatexit=1;
+#set relax_naming_rules=1;
+#define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0;
+
+clock {
+	 timezone EST+5EDT;
+	 timestamp '2000-01-01 0:00:00';
+}
+
+//*********************************************
+// modules
+module powerflow {
+	solver_method FBS;
+//	solver_method NR;
+//	default_maximum_voltage_error 1e-9;
+};
+
+
+object overhead_line_conductor {
+	name MWGLD-DEFAULT_OH;
+	rating.summer.continuous 480.0;
+	geometric_mean_radius 0.5084 cm;
+	resistance 0.1727 ohm/km;
+}
+
+object overhead_line_conductor {
+	name MWGLD-NONE;
+	rating.summer.continuous 0.0;
+	geometric_mean_radius 0.0 cm;
+	resistance 0.0 ohm/km;
+}
+
+object overhead_line_conductor {
+	name MWGLD-118-8A;
+	rating.summer.continuous 1000.0;
+	geometric_mean_radius 0.010008 cm;
+	resistance 2.181013 ohm/km;
+}
+
+object overhead_line_conductor {
+	name MWGLD-102-#1/0_ACSR;
+	rating.summer.continuous 1000.0;
+	geometric_mean_radius 0.02827 cm;
+	resistance 0.551156 ohm/km;
+}
+
+object overhead_line_conductor {
+	name MWGLD-096-#4/0_ACSR_6/1;
+	rating.summer.continuous 1000.0;
+	geometric_mean_radius 0.0508 cm;
+	resistance 0.27651 ohm/km;
+}
+
+object overhead_line_conductor {
+	name MWGLD-106-#2_ACSR_6/1;
+	rating.summer.continuous 1000.0;
+	geometric_mean_radius 0.010617 cm;
+	resistance 0.876133 ohm/km;
+}
+
+object overhead_line_conductor {
+	name MWGLD-115-2A;
+	rating.summer.continuous 1000.0;
+	geometric_mean_radius 0.01938 cm;
+	resistance 0.548049 ohm/km;
+}
+
+object triplex_line_conductor {
+	name MWGLD-1/0 AA triplex;
+	resistance 0.97;
+	geometric_mean_radius 0.0111;
+}
+
+object triplex_line_configuration {
+	name MWGLD-TLCFG;
+	conductor_1 MWGLD-1/0 AA triplex;
+	conductor_2 MWGLD-1/0 AA triplex;
+	conductor_N MWGLD-1/0 AA triplex;
+	insulation_thickness 0.08;
+	diameter 0.368;
+}
+
+object line_spacing {
+	name MWGLD-CNST-001_BN;
+	distance_BN 4.47 ft; 
+}
+
+object line_spacing {
+	name MWGLD-CNST-004_CN;
+	distance_CN 4.25 ft; 
+}
+
+object line_spacing {
+	name MWGLD-CNST-001_ABCN;
+	distance_AB 4.79 ft; 
+	distance_BC 4.79 ft; 
+	distance_AC 4.79 ft; 
+	distance_AN 4.47 ft; 
+	distance_BN 4.47 ft; 
+	distance_CN 4.47 ft; 
+}
+
+object line_spacing {
+	name MWGLD-CNST-004_ACN;
+	distance_AC 4.79 ft; 
+	distance_AN 4.25 ft; 
+	distance_CN 4.25 ft; 
+}
+
+object line_spacing {
+	name MWGLD-CNST-004_AN;
+	distance_AN 4.25 ft; 
+}
+
+object line_spacing {
+	name MWGLD-CNST-001_BCN;
+	distance_BC 4.79 ft; 
+	distance_BN 4.47 ft; 
+	distance_CN 4.47 ft; 
+}
+
+object line_spacing {
+	name MWGLD-SYSTEMCNSTDEFAULT_AN;
+	distance_AN 4.47 ft; 
+}
+
+object line_spacing {
+	name MWGLD-CNST-001_ABN;
+	distance_AB 4.79 ft; 
+	distance_AN 4.47 ft; 
+	distance_BN 4.47 ft; 
+}
+
+object line_spacing {
+	name MWGLD-CNST-001_AN;
+	distance_AN 4.47 ft; 
+}
+
+object line_spacing {
+	name MWGLD-CNST-001_CN;
+	distance_CN 4.47 ft; 
+}
+
+object line_spacing {
+	name MWGLD-SYSTEMCNSTDEFAULT_ABCN;
+	distance_AB 4.79 ft; 
+	distance_BC 4.79 ft; 
+	distance_AC 4.79 ft; 
+	distance_AN 4.47 ft; 
+	distance_BN 4.47 ft; 
+	distance_CN 4.47 ft; 
+}
+
+object line_spacing {
+	name MWGLD-CNST-001_ACN;
+	distance_AC 4.79 ft; 
+	distance_AN 4.47 ft; 
+	distance_CN 4.47 ft; 
+}
+
+object line_configuration {
+	name MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+	conductor_B MWGLD-118-8A; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-001_BN;
+}
+
+object line_configuration {
+	name MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-004-CN;
+	conductor_C MWGLD-118-8A; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-004_CN;
+}
+
+object line_configuration {
+	name CONFIG2-ABCN;
+	conductor_A MWGLD-102-#1/0_ACSR; 
+	conductor_B MWGLD-102-#1/0_ACSR; 
+	conductor_C MWGLD-102-#1/0_ACSR; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-001_ABCN;
+}
+
+object line_configuration {
+	name CONFIG5-ABCN;
+	conductor_A MWGLD-096-#4/0_ACSR_6/1; 
+	conductor_B MWGLD-096-#4/0_ACSR_6/1; 
+	conductor_C MWGLD-096-#4/0_ACSR_6/1; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-001_ABCN;
+}
+
+object line_configuration {
+	name MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-004-ACN;
+	conductor_A MWGLD-118-8A; 
+	conductor_C MWGLD-118-8A; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-004_ACN;
+}
+
+object line_configuration {
+	name MWGLD-106-#2_ACSR_6/1-NONE-NONE-102-#1/0_ACSR-CNST-004-AN;
+	conductor_A MWGLD-106-#2_ACSR_6/1; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-004_AN;
+}
+
+object line_configuration {
+	name CONFIG4-BCN;
+	conductor_B MWGLD-106-#2_ACSR_6/1; 
+	conductor_C MWGLD-106-#2_ACSR_6/1; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-001_BCN;
+}
+
+object line_configuration {
+	name MWGLD-118-8A-NONE-NONE-115-2A-SYSTEMCNSTDEFAULT-AN;
+	conductor_A MWGLD-118-8A; 
+	conductor_N MWGLD-115-2A; 
+	spacing MWGLD-SYSTEMCNSTDEFAULT_AN;
+}
+
+object line_configuration {
+	name CONFIG1-ABN;
+	conductor_A MWGLD-106-#2_ACSR_6/1; 
+	conductor_B MWGLD-106-#2_ACSR_6/1; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-001_ABN;
+}
+
+object line_configuration {
+	name MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-CNST-004-AN;
+	conductor_A MWGLD-118-8A; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-004_AN;
+}
+
+object line_configuration {
+	name MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-CNST-001-AN;
+	conductor_A MWGLD-118-8A; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-001_AN;
+}
+
+object line_configuration {
+	name MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-001-CN;
+	conductor_C MWGLD-118-8A; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-001_CN;
+}
+
+object line_configuration {
+	name CONFIG3-ABCN;
+	conductor_A MWGLD-106-#2_ACSR_6/1; 
+	conductor_B MWGLD-106-#2_ACSR_6/1; 
+	conductor_C MWGLD-106-#2_ACSR_6/1; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-SYSTEMCNSTDEFAULT_ABCN;
+}
+
+object line_configuration {
+	name MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-001-ACN;
+	conductor_A MWGLD-118-8A; 
+	conductor_C MWGLD-118-8A; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-CNST-001_ACN;
+}
+
+object line_configuration {
+	name MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-SYSTEMCNSTDEFAULT-AN;
+	conductor_A MWGLD-118-8A; 
+	conductor_N MWGLD-102-#1/0_ACSR; 
+	spacing MWGLD-SYSTEMCNSTDEFAULT_AN;
+}
+
+object node {
+	name MWGLD-9200;
+	phases ABCN;
+    bustype SWING;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-8550;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-8551;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-8552;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-8553;
+	phases ACN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-8554;
+	phases ACN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9204;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9205;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9206;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9207;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9208;
+	phases ACN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9209;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9210;
+	phases ACN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9211;
+	phases ACN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9212;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9213;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9214;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9215;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9216;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9217;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9218;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9219;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9220;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9221;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9222;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9223;
+	phases ACN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9224;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9299;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9302;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9315;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9316;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9317;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9318;
+	phases BCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9319;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9320;
+	phases BCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9321;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9325;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9350;
+	phases ABN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9356;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9357;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9358;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9359;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9706;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9707;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9708;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9709;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9710;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-9806;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD297;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD48;
+	phases ACN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD49;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD50;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD51;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD5143;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD5144;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD5145;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD52;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD5411;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD5412;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD5413;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD55;
+	phases ACN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD56;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD57;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD58;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-OCD62;
+	phases ABN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-5578;
+	phases ABN;
+	nominal_voltage 7200.000;
+}
+
+object load {
+	name MWGLD-L_10;
+	parent MWGLD-L_10_M;
+	phases A;
+	nominal_voltage 7200.000;
+	constant_power_A 38522.53+12769.089j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_59;
+	parent MWGLD-L_59_M;
+	phases AC;
+	nominal_voltage 7200.000;
+	constant_power_A 2099.638+695.968j;
+	constant_power_C 5372.367+1780.782j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_52;
+	parent MWGLD-L_52_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 0+0j;
+	constant_power_B 7548.972+2502.263j;
+	constant_power_C 6694.786+2219.125j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_61;
+	parent MWGLD-L_61_M;
+	phases AC;
+	nominal_voltage 7200.000;
+	constant_power_A 60741.207+20133.928j;
+	constant_power_C 66556.328+22061.47j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_18;
+	parent MWGLD-L_18_M;
+	phases A;
+	nominal_voltage 7200.000;
+	constant_power_A 11236.139+3724.451j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_11;
+	parent MWGLD-L_11_M;
+	phases A;
+	nominal_voltage 7200.000;
+	constant_power_A 30595.076+10141.37j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_27;
+	parent MWGLD-L_27_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 11329.253+3755.315j;
+	constant_power_B 1334.678+442.407j;
+	constant_power_C 0+0j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_0;
+	parent MWGLD-L_0_M;
+	phases B;
+	nominal_voltage 7200.000;
+	constant_power_B 41470.573+13746.279j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_1;
+	parent MWGLD-L_1_M;
+	phases B;
+	nominal_voltage 7200.000;
+	constant_power_B 10129.701+3357.699j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_2;
+	parent MWGLD-L_2_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 0+0j;
+	constant_power_B 0+0j;
+	constant_power_C 5025.491+1665.803j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_4;
+	parent MWGLD-L_4_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 0+0j;
+	constant_power_B 0+0j;
+	constant_power_C 3716.703+1231.978j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_5;
+	parent MWGLD-L_5_M;
+	phases C;
+	nominal_voltage 7200.000;
+	constant_power_C 16715.916+5540.836j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_6;
+	parent MWGLD-L_6_M;
+	phases AC;
+	nominal_voltage 7200.000;
+	constant_power_A 0+0j;
+	constant_power_C 22632.589+7502.039j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_7;
+	parent MWGLD-L_7_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 48783.451+21534.351j;
+	constant_power_B 56390.45+24055.847j;
+	constant_power_C 56222.717+24000.25j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_9;
+	parent MWGLD-L_9_M;
+	phases AC;
+	nominal_voltage 7200.000;
+	constant_power_A 5352.962+1774.35j;
+	constant_power_C 5352.962+1774.35j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_62;
+	parent MWGLD-L_62_M;
+	phases C;
+	nominal_voltage 7200.000;
+	constant_power_C 28456.219+9432.402j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_45;
+	parent MWGLD-L_45_M;
+	phases AB;
+	nominal_voltage 7200.000;
+	constant_power_A 20503.555+6796.327j;
+	constant_power_B 20138.721+6675.395j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_12;
+	parent MWGLD-L_12_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 16772.44+5559.572j;
+	constant_power_B 0+0j;
+	constant_power_C 16949.196+5618.161j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_54;
+	parent MWGLD-L_54_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 3980.471+1319.409j;
+	constant_power_B 5572.93+1847.263j;
+	constant_power_C 3980.471+1319.409j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_21;
+	parent MWGLD-L_21_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 11117.994+3685.289j;
+	constant_power_B 0+0j;
+	constant_power_C 5571.573+1846.813j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_37;
+	parent MWGLD-L_37_M;
+	phases C;
+	nominal_voltage 7200.000;
+	constant_power_C 6568.057+2177.118j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_46;
+	parent MWGLD-L_46_M;
+	phases C;
+	nominal_voltage 7200.000;
+	constant_power_C 31001.963+10276.241j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_29;
+	parent MWGLD-L_29_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 8448.206+2800.333j;
+	constant_power_B 576.948+191.241j;
+	constant_power_C 2242.914+743.46j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_55;
+	parent MWGLD-L_55_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 13748.091+4557.089j;
+	constant_power_B 11956.908+3963.364j;
+	constant_power_C 9237.605+3061.995j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_22;
+	parent MWGLD-L_22_M;
+	phases AC;
+	nominal_voltage 7200.000;
+	constant_power_A 19313.162+6401.747j;
+	constant_power_C 13402.032+4442.38j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_38;
+	parent MWGLD-L_38_M;
+	phases A;
+	nominal_voltage 7200.000;
+	constant_power_A 26154.392+8669.414j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_31;
+	parent MWGLD-L_31_M;
+	phases A;
+	nominal_voltage 7200.000;
+	constant_power_A 43827.95+14527.679j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_39;
+	parent MWGLD-L_39_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 5137.054+1702.783j;
+	constant_power_B 0+0j;
+	constant_power_C 8983.997+2977.931j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_32;
+	parent MWGLD-L_32_M;
+	phases BC;
+	nominal_voltage 7200.000;
+	constant_power_B 402.991+133.58j;
+	constant_power_C 0+0j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_48;
+	parent MWGLD-L_48_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 7276.731+2412.023j;
+	constant_power_B 0+0j;
+	constant_power_C 0+0j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_15;
+	parent MWGLD-L_15_M;
+	phases A;
+	nominal_voltage 7200.000;
+	constant_power_A 11310.515+3749.104j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_57;
+	parent MWGLD-L_57_M;
+	phases B;
+	nominal_voltage 7200.000;
+	constant_power_B 18643.883+6179.9j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_24;
+	parent MWGLD-L_24_M;
+	phases A;
+	nominal_voltage 7200.000;
+	constant_power_A 16070.2+5326.8j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_33;
+	parent MWGLD-L_33_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+	constant_power_A 0+0j;
+	constant_power_B 7048.759+2336.457j;
+	constant_power_C 6617.596+2193.539j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_49;
+	parent MWGLD-L_49_M;
+	phases B;
+	nominal_voltage 7200.000;
+	constant_power_B 15429.456+5114.412j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_16;
+	parent MWGLD-L_16_M;
+	phases A;
+	nominal_voltage 7200.000;
+	constant_power_A 2877.224+953.715j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_51;
+	parent MWGLD-L_51_M;
+	phases B;
+	nominal_voltage 7200.000;
+	constant_power_B 15799.508+5237.073j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object load {
+	name MWGLD-L_43;
+	parent MWGLD-L_43_M;
+	phases B;
+	nominal_voltage 7200.000;
+	constant_power_B 26180.304+8678.002j;
+	load_class U;
+	//house_tag Unknown;
+}
+
+object meter {
+	name MWGLD-L_10_M;
+	phases A;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_59_M;
+	phases AC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_52_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_61_M;
+	phases AC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_18_M;
+	phases A;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_11_M;
+	phases A;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_27_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_0_M;
+	phases B;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_1_M;
+	phases B;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_2_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_4_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_5_M;
+	phases C;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_6_M;
+	phases AC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_7_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_9_M;
+	phases AC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_62_M;
+	phases C;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_45_M;
+	phases AB;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_12_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_54_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_21_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_37_M;
+	phases C;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_46_M;
+	phases C;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_29_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_55_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_22_M;
+	phases AC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_38_M;
+	phases A;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_31_M;
+	phases A;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_39_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_32_M;
+	phases BC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_48_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_15_M;
+	phases A;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_57_M;
+	phases B;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_24_M;
+	phases A;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_33_M;
+	phases ABC;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_49_M;
+	phases B;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_16_M;
+	phases A;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_51_M;
+	phases B;
+	nominal_voltage 7200.000;
+}
+
+object meter {
+	name MWGLD-L_43_M;
+	phases B;
+	nominal_voltage 7200.000;
+}
+
+object overhead_line  {
+	name MWGLD-42_OH2;
+	phases A;
+	from MWGLD-9222;
+	to MWGLD-L_10_M;
+	length 7569;
+	configuration MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-CNST-001-AN;
+}
+
+object overhead_line  {
+	name MWGLD-43_OH2;
+	phases AC;
+	from MWGLD-8554;
+	to MWGLD-L_59_M;
+	length 4532.75;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-004-ACN;
+}
+
+object overhead_line  {
+	name MWGLD-45_OH2;
+	phases ABC;
+	from MWGLD-9706;
+	to MWGLD-L_52_M;
+	length 5554.4;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-57_OH2;
+	phases AC;
+	from MWGLD-9223;
+	to MWGLD-L_61_M;
+	length 6608.6;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-001-ACN;
+}
+
+object overhead_line  {
+	name MWGLD-58_OH2;
+	phases A;
+	from MWGLD-9209;
+	to MWGLD-L_18_M;
+	length 7066.2;
+	configuration MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-CNST-004-AN;
+}
+
+object overhead_line  {
+	name MWGLD-60_OH2;
+	phases A;
+	from MWGLD-9316;
+	to MWGLD-L_11_M;
+	length 9857;
+	configuration MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-SYSTEMCNSTDEFAULT-AN;
+}
+
+object overhead_line  {
+	name MWGLD-61_OH2;
+	phases ABC;
+	from MWGLD-9207;
+	to MWGLD-L_27_M;
+	length 5579;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-63_OH2;
+	phases B;
+	from MWGLD-9321;
+	to MWGLD-L_0_M;
+	length 11695;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line  {
+	name MWGLD-64_OH2;
+	phases B;
+	from MWGLD-9319;
+	to MWGLD-L_1_M;
+	length 5219.2;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line  {
+	name MWGLD-65_OH2;
+	phases ABC;
+	from MWGLD-9216;
+	to MWGLD-L_2_M;
+	length 6045;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-4_OH2;
+	phases ABC;
+	from MWGLD-9221;
+	to MWGLD-L_4_M;
+	length 2789;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-5_OH2;
+	phases C;
+	from MWGLD-9220;
+	to MWGLD-L_5_M;
+	length 8629.3;
+	configuration MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-001-CN;
+}
+
+object overhead_line  {
+	name MWGLD-6_OH2;
+	phases AC;
+	from MWGLD-9211;
+	to MWGLD-L_6_M;
+	length 12190.5;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-004-ACN;
+}
+
+object overhead_line  {
+	name MWGLD-7_OH2;
+	phases ABC;
+	from MWGLD-9707;
+	to MWGLD-L_7_M;
+	length 6093.1;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-9_OH2;
+	phases AC;
+	from MWGLD-8553;
+	to MWGLD-L_9_M;
+	length 5095.48;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-004-ACN;
+}
+
+object overhead_line  {
+	name MWGLD-11_OH2;
+	phases C;
+	from MWGLD-9214;
+	to MWGLD-L_62_M;
+	length 10847.1;
+	configuration MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-004-CN;
+}
+
+object overhead_line  {
+	name MWGLD-23_OH2;
+	phases AB;
+	from MWGLD-9350;
+	to MWGLD-L_45_M;
+	length 7532.9;
+	configuration CONFIG1-ABN;
+}
+
+object overhead_line  {
+	name MWGLD-24_OH2;
+	phases ABC;
+	from MWGLD-9317;
+	to MWGLD-L_12_M;
+	length 7812;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-26_OH2;
+	phases ABC;
+	from MWGLD-9357;
+	to MWGLD-L_54_M;
+	length 2045;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-27_OH2;
+	phases ABC;
+	from MWGLD-9358;
+	to MWGLD-L_21_M;
+	length 1487;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-28_OH2;
+	phases C;
+	from MWGLD-9213;
+	to MWGLD-L_37_M;
+	length 4674.2;
+	configuration MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-004-CN;
+}
+
+object overhead_line  {
+	name MWGLD-31_OH2;
+	phases C;
+	from MWGLD-9215;
+	to MWGLD-L_46_M;
+	length 12001.9;
+	configuration MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-004-CN;
+}
+
+object overhead_line  {
+	name MWGLD-13_OH2;
+	phases ABC;
+	from MWGLD-9224;
+	to MWGLD-L_29_M;
+	length 8167.7;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-14_OH2;
+	phases ABC;
+	from MWGLD-9206;
+	to MWGLD-L_55_M;
+	length 8392;
+	configuration CONFIG5-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-15_OH2;
+	phases AC;
+	from MWGLD-9208;
+	to MWGLD-L_22_M;
+	length 8835;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-004-ACN;
+}
+
+object overhead_line  {
+	name MWGLD-16_OH2;
+	phases A;
+	from MWGLD-8552;
+	to MWGLD-L_38_M;
+	length 7128.7;
+	configuration MWGLD-106-#2_ACSR_6/1-NONE-NONE-102-#1/0_ACSR-CNST-004-AN;
+}
+
+object overhead_line  {
+	name MWGLD-18_OH2;
+	phases A;
+	from MWGLD-9217;
+	to MWGLD-L_31_M;
+	length 8369;
+	configuration MWGLD-118-8A-NONE-NONE-115-2A-SYSTEMCNSTDEFAULT-AN;
+}
+
+object overhead_line  {
+	name MWGLD-34_OH2;
+	phases ABC;
+	from MWGLD-9356;
+	to MWGLD-L_39_M;
+	length 6996;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-35_OH2;
+	phases BC;
+	from MWGLD-9318;
+	to MWGLD-L_32_M;
+	length 4886;
+	configuration CONFIG4-BCN;
+}
+
+object overhead_line  {
+	name MWGLD-36_OH2;
+	phases ABC;
+	from MWGLD-9325;
+	to MWGLD-L_48_M;
+	length 3534;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-37_OH2;
+	phases A;
+	from MWGLD-8551;
+	to MWGLD-L_15_M;
+	length 7687;
+	configuration MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-CNST-004-AN;
+}
+
+object overhead_line  {
+	name MWGLD-39_OH2;
+	phases B;
+	from MWGLD-9708;
+	to MWGLD-L_57_M;
+	length 7449;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line  {
+	name MWGLD-40_OH2;
+	phases A;
+	from MWGLD-9359;
+	to MWGLD-L_24_M;
+	length 4100.6;
+	configuration MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-CNST-001-AN;
+}
+
+object overhead_line  {
+	name MWGLD-46_OH2;
+	phases ABC;
+	from MWGLD-9218;
+	to MWGLD-L_33_M;
+	length 1767;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line  {
+	name MWGLD-47_OH2;
+	phases B;
+	from MWGLD-9806;
+	to MWGLD-L_49_M;
+	length 4625;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line  {
+	name MWGLD-48_OH2;
+	phases A;
+	from MWGLD-8550;
+	to MWGLD-L_16_M;
+	length 1545;
+	configuration MWGLD-106-#2_ACSR_6/1-NONE-NONE-102-#1/0_ACSR-CNST-004-AN;
+}
+
+object overhead_line  {
+	name MWGLD-52_OH2;
+	phases B;
+	from MWGLD-9709;
+	to MWGLD-L_51_M;
+	length 5506;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line  {
+	name MWGLD-1_OH2;
+	phases B;
+	from MWGLD-9710;
+	to MWGLD-L_43_M;
+	length 8153;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object node {
+	name MWGLD-20_10_recnode;
+	phases ACN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-21_10_recnode;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-44_10_recnode;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-50_10_recnode;
+	phases ABCN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-56_10_recnode;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-10_14_fusenode;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-12_14_fusenode;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-22_14_fusenode;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-25_14_fusenode;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-29_14_fusenode;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-30_14_fusenode;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-33_14_fusenode;
+	phases ACN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-38_14_fusenode;
+	phases ABN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-41_14_fusenode;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-49_14_fusenode;
+	phases BN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-53_14_fusenode;
+	phases CN;
+	nominal_voltage 7200.000;
+}
+
+object node {
+	name MWGLD-54_14_fusenode;
+	phases AN;
+	nominal_voltage 7200.000;
+}
+
+object overhead_line {
+	name MWGLD-1_OH;
+	phases BN;
+	from MWGLD-OCD5144;
+	to MWGLD-9710;
+	length 8152.980;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line {
+	name MWGLD-11_OH;
+	phases CN;
+	from MWGLD-9212;
+	to MWGLD-9214;
+	length 10847.100;
+	configuration MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-004-CN;
+}
+
+object overhead_line {
+	name MWGLD-13_OH;
+	phases ABCN;
+	from MWGLD-OCD5143;
+	to MWGLD-9224;
+	length 8167.680;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-14_OH;
+	phases ABCN;
+	from MWGLD-9205;
+	to MWGLD-9206;
+	length 8392.000;
+	configuration CONFIG5-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-15_OH;
+	phases ACN;
+	from MWGLD-OCD48;
+	to MWGLD-9208;
+	length 8835.000;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-004-ACN;
+}
+
+object overhead_line {
+	name MWGLD-16_OH;
+	phases AN;
+	from MWGLD-OCD51;
+	to MWGLD-8552;
+	length 7128.660;
+	configuration MWGLD-106-#2_ACSR_6/1-NONE-NONE-102-#1/0_ACSR-CNST-004-AN;
+}
+
+object overhead_line {
+	name MWGLD-17_OH;
+	phases BCN;
+	from MWGLD-9318;
+	to MWGLD-9320;
+	length 1317.000;
+	configuration CONFIG4-BCN;
+}
+
+object overhead_line {
+	name MWGLD-18_OH;
+	phases AN;
+	from MWGLD-OCD297;
+	to MWGLD-9217;
+	length 8369.000;
+	configuration MWGLD-118-8A-NONE-NONE-115-2A-SYSTEMCNSTDEFAULT-AN;
+}
+
+object overhead_line {
+	name MWGLD-19_OH;
+	phases ABCN;
+	from MWGLD-OCD52;
+	to MWGLD-9205;
+	length 5000.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-2_OH;
+	phases ACN;
+	from MWGLD-9208;
+	to MWGLD-9210;
+	length 7004.330;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-004-ACN;
+}
+
+object overhead_line {
+	name MWGLD-23_OH;
+	phases ABN;
+	from MWGLD-5578;
+	to MWGLD-9350;
+	length 7532.860;
+	configuration CONFIG1-ABN;
+}
+
+object overhead_line {
+	name MWGLD-24_OH;
+	phases ABCN;
+	from MWGLD-9315;
+	to MWGLD-9317;
+	length 7812.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-26_OH;
+	phases ABCN;
+	from MWGLD-9216;
+	to MWGLD-9357;
+	length 2045.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-27_OH;
+	phases ABCN;
+	from MWGLD-9299;
+	to MWGLD-9358;
+	length 1487.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-28_OH;
+	phases CN;
+	from MWGLD-OCD50;
+	to MWGLD-9213;
+	length 4674.240;
+	configuration MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-004-CN;
+}
+
+object overhead_line {
+	name MWGLD-3_OH;
+	phases ABCN;
+	from MWGLD-9200;
+	to MWGLD-9204;
+	length 200.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-31_OH;
+	phases CN;
+	from MWGLD-9212;
+	to MWGLD-9215;
+	length 12001.900;
+	configuration MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-004-CN;
+}
+
+object overhead_line {
+	name MWGLD-32_OH;
+	phases ABCN;
+	from MWGLD-9358;
+	to MWGLD-9219;
+	length 1953.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-34_OH;
+	phases ABCN;
+	from MWGLD-9207;
+	to MWGLD-9356;
+	length 6996.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-35_OH;
+	phases BCN;
+	from MWGLD-9317;
+	to MWGLD-9318;
+	length 4885.910;
+	configuration CONFIG4-BCN;
+}
+
+object overhead_line {
+	name MWGLD-36_OH;
+	phases ABCN;
+	from MWGLD-9357;
+	to MWGLD-9325;
+	length 3534.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-37_OH;
+	phases AN;
+	from MWGLD-8552;
+	to MWGLD-8551;
+	length 7686.960;
+	configuration MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-CNST-004-AN;
+}
+
+object overhead_line {
+	name MWGLD-39_OH;
+	phases BN;
+	from MWGLD-OCD5412;
+	to MWGLD-9708;
+	length 7449.430;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line {
+	name MWGLD-4_OH;
+	phases ABCN;
+	from MWGLD-9219;
+	to MWGLD-9221;
+	length 2789.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-40_OH;
+	phases AN;
+	from MWGLD-OCD56;
+	to MWGLD-9359;
+	length 4100.610;
+	configuration MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-CNST-001-AN;
+}
+
+object overhead_line {
+	name MWGLD-42_OH;
+	phases AN;
+	from MWGLD-OCD58;
+	to MWGLD-9222;
+	length 7568.800;
+	configuration MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-CNST-001-AN;
+}
+
+object overhead_line {
+	name MWGLD-43_OH;
+	phases ACN;
+	from MWGLD-8553;
+	to MWGLD-8554;
+	length 4532.750;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-004-ACN;
+}
+
+object overhead_line {
+	name MWGLD-45_OH;
+	phases ABCN;
+	from MWGLD-9224;
+	to MWGLD-9706;
+	length 5554.370;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-46_OH;
+	phases ABCN;
+	from MWGLD-9325;
+	to MWGLD-9218;
+	length 1767.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-47_OH;
+	phases BN;
+	from MWGLD-9710;
+	to MWGLD-9806;
+	length 4624.970;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line {
+	name MWGLD-48_OH;
+	phases AN;
+	from MWGLD-8552;
+	to MWGLD-8550;
+	length 1545.060;
+	configuration MWGLD-106-#2_ACSR_6/1-NONE-NONE-102-#1/0_ACSR-CNST-004-AN;
+}
+
+object overhead_line {
+	name MWGLD-5_OH;
+	phases CN;
+	from MWGLD-OCD57;
+	to MWGLD-9220;
+	length 8629.280;
+	configuration MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-001-CN;
+}
+
+object overhead_line {
+	name MWGLD-52_OH;
+	phases BN;
+	from MWGLD-OCD5413;
+	to MWGLD-9709;
+	length 5506.040;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line {
+	name MWGLD-55_OH;
+	phases ABCN;
+	from MWGLD-9200;
+	to MWGLD-9302;
+	length 500.000;
+	configuration CONFIG3-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-57_OH;
+	phases ACN;
+	from MWGLD-OCD55;
+	to MWGLD-9223;
+	length 6608.590;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-001-ACN;
+}
+
+object overhead_line {
+	name MWGLD-58_OH;
+	phases AN;
+	from MWGLD-9208;
+	to MWGLD-9209;
+	length 7066.160;
+	configuration MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-CNST-004-AN;
+}
+
+object overhead_line {
+	name MWGLD-59_OH;
+	phases CN;
+	from MWGLD-OCD49;
+	to MWGLD-9212;
+	length 3651.350;
+	configuration MWGLD-NONE-NONE-118-8A-102-#1/0_ACSR-CNST-004-CN;
+}
+
+object overhead_line {
+	name MWGLD-6_OH;
+	phases ACN;
+	from MWGLD-9208;
+	to MWGLD-9211;
+	length 12190.500;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-004-ACN;
+}
+
+object overhead_line {
+	name MWGLD-60_OH;
+	phases AN;
+	from MWGLD-5578;
+	to MWGLD-9316;
+	length 9857.000;
+	configuration MWGLD-118-8A-NONE-NONE-102-#1/0_ACSR-SYSTEMCNSTDEFAULT-AN;
+}
+
+object overhead_line {
+	name MWGLD-61_OH;
+	phases ABCN;
+	from MWGLD-9206;
+	to MWGLD-9207;
+	length 5579.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-62_OH;
+	phases ABCN;
+	from MWGLD-OCD5145;
+	to MWGLD-9315;
+	length 5673.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-63_OH;
+	phases BN;
+	from MWGLD-9320;
+	to MWGLD-9321;
+	length 11695.000;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line {
+	name MWGLD-64_OH;
+	phases BN;
+	from MWGLD-OCD5411;
+	to MWGLD-9319;
+	length 5219.220;
+	configuration MWGLD-NONE-118-8A-NONE-102-#1/0_ACSR-CNST-001-BN;
+}
+
+object overhead_line {
+	name MWGLD-65_OH;
+	phases ABCN;
+	from MWGLD-9356;
+	to MWGLD-9216;
+	length 6045.000;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-7_OH;
+	phases ABCN;
+	from MWGLD-9706;
+	to MWGLD-9707;
+	length 6093.140;
+	configuration CONFIG2-ABCN;
+}
+
+object overhead_line {
+	name MWGLD-8_OH;
+	phases ABN;
+	from MWGLD-OCD62;
+	to MWGLD-5578;
+	length 20.000;
+	configuration CONFIG1-ABN;
+}
+
+object overhead_line {
+	name MWGLD-9_OH;
+	phases ACN;
+	from MWGLD-9210;
+	to MWGLD-8553;
+	length 5095.480;
+	configuration MWGLD-118-8A-NONE-118-8A-102-#1/0_ACSR-CNST-004-ACN;
+}
+
+//object capacitor {
+//	name MWGLD-51_17;
+//	parent MWGLD-9299;
+//	phases ABCN;
+//	pt_phase ABCN;
+//	phases_connected ABCN;
+//	control MANUAL;
+//	capacitor_A 50.0 kVAr;
+//	capacitor_B 50.0 kVAr;
+//	capacitor_C 50.0 kVAr;
+//	control_level INDIVIDUAL;
+//	switchA CLOSED;
+//	switchB CLOSED;
+//	switchC CLOSED;
+//	time_delay 2.0;
+//	dwell_time 3.0;
+//	cap_nominal_voltage 0;
+//	nominal_voltage 7200.000;
+//}
+

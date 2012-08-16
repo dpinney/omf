@@ -7,7 +7,6 @@ import matplotlib as m
 m.use('Agg')
 import matplotlib.pyplot as p
 import math
-import Image
 from subprocess import call
 import treeParser
 import networkx as nx
@@ -128,18 +127,18 @@ def buildFromDir(workDir):
 		for x in xrange(5):
 			p.clf()
 			graphRegFile(workDir + '/' + fileName, x + 1)
-			p.savefig(workDir + '/' + fileName + '_' + str(x) + '.png', dpi=40)
+			p.savefig(workDir + '/' + fileName + '_' + str(x) + '.png', dpi=60)
 	for fileName in voltageCsvs:
 		p.clf()
 		graphVoltFile(workDir + '/' + fileName)
-		p.savefig(workDir + '/' + fileName + '.png', dpi=40)
+		p.savefig(workDir + '/' + fileName + '.png', dpi=60)
 	for fileName in capacitorCsvs:
 		p.clf()
 		graphCapFile(workDir + '/' + fileName)
-		p.savefig(workDir + '/' + fileName + '.png', dpi=40)
+		p.savefig(workDir + '/' + fileName + '.png', dpi=60)
 	p.clf()
 	graphGlmFile(workDir + '/' + glm)
-	p.savefig(workDir + '/' + glm + '.png', dpi=40)
+	p.savefig(workDir + '/' + glm + '.png', dpi=60)
 
 def to_d3_json(graph):
 	# graph_json = {'nodes':map(lambda x:{'name':x[0],'group':x[1]['group'],(x:y) in x[1]},graph.nodes(data=True))}

@@ -1,20 +1,20 @@
-                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                      
 Core profiler results
 ======================
 
 Total objects                 37 objects
 Parallelism                    1 thread
-Total time                  10.0 seconds
-  Core time                  3.3 seconds (32.8%)
-  Model time                 6.7 seconds/thread (67.2%)
+Total time                  11.0 seconds
+  Core time                  3.8 seconds (34.2%)
+  Model time                 7.2 seconds/thread (65.8%)
 Simulation time              600 days
-Simulation speed             53k object.hours/second
+Simulation speed             48k object.hours/second
 Syncs completed           479334 passes
 Time steps completed      329159 timesteps
 Convergence efficiency      1.46 passes/timestep
 Memory lock contention      0.0%
 Average timestep            157 seconds/timestep
-Simulation rate         5183640 x realtime
+Simulation rate         4712400 x realtime
 
 
 Model profiler results
@@ -22,20 +22,20 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-triplex_meter      1.582     23.6%    527.3
-house              1.212     18.0%    606.0
-triplex_line       0.618      9.2%    309.0
-regulator          0.572      8.5%    572.0
-transformer        0.564      8.4%    282.0
-ZIPload            0.525      7.8%     65.6
-waterheater        0.421      6.3%    210.5
-node               0.344      5.1%    172.0
-triplex_node       0.272      4.1%    272.0
-recorder           0.223      3.3%     55.8
-climate            0.171      2.5%    171.0
-stubauction        0.116      1.7%    116.0
-transformer_conf   0.049      0.7%     12.3
-player             0.047      0.7%     47.0
+triplex_meter      1.680     23.2%    560.0
+house              1.307     18.1%    653.5
+triplex_line       0.687      9.5%    343.5
+regulator          0.627      8.7%    627.0
+transformer        0.602      8.3%    301.0
+ZIPload            0.519      7.2%     64.9
+waterheater        0.414      5.7%    207.0
+node               0.360      5.0%    180.0
+triplex_node       0.314      4.3%    314.0
+recorder           0.251      3.5%     62.8
+climate            0.188      2.6%    188.0
+stubauction        0.135      1.9%    135.0
+player             0.082      1.1%     82.0
+transformer_conf   0.068      0.9%     17.0
 ================ ======== ======== ========
-Total              6.716    100.0%    181.5
+Total              7.234    100.0%    195.5
 
