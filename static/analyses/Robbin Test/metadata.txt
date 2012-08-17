@@ -1,0 +1,1 @@
+{'status': 'postRun', 'climate': u'AK-ANCHORAGE.tmy2', 'name': u'Robbin Test', 'created': '2012-08-17 10:20:01.137000', 'PID': 9728, 'sourceFeeder': u'13 Node Reference Feeder', 'runTime': 50.659}

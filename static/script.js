@@ -39,8 +39,9 @@ $().ready(function(){
   });
 });
 
-var w = 1000,
-    h = 600;
+// Huge hack to get the height where we put the svg...
+var w = $('body').width(),
+    h = $(window).height() - 55 - 61;
 
 var svg = d3.select("#chart")
   .append("svg")
@@ -70,7 +71,7 @@ if(!model_id) {
 d3.json("/api/models/" + model_id + ".json", function(json) {
   root = json;
   // for every 100 nodes, add a bit of gravity to keep nodes in the view
-  var grav = base_grav + (json.nodes.length / 100) * 0.01;
+  var grav = base_grav + (json.nodes.length / 100) * 0.003;
   // run the layout sim based on the number of nodes 
   max_iter = 75;
   if(root.nodes.length < 50) {

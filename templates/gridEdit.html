@@ -9,80 +9,94 @@
   <link rel='stylesheet' href='../static/omf.css'/>
   <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
   <script src='../static/omf.js'></script>
-  <meta name="viewport" content="width=device-width">
   <link rel="stylesheet" href="/static/css/bootstrap.min.css">
-  <style>
-  </style>
   <link rel="stylesheet" href="/static/css/bootstrap-responsive.min.css">
-  <link rel="stylesheet" href="/static/css/style.css">
   <script src="/static/libs/modernizr-2.5.3-respond-1.1.0.min.js"></script>
+  <style>
+  div#toolbar { 
+    padding: 10px;
+    height: 25px;
+    border-width: 0px 0px 1px 0px;
+    border-color:black;
+    border-style:solid;
+    text-align: center;
+    vertical-align: center;
+    background-color:black; /* for browsers that can't do gradients */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#B0B0B0', endColorstr='#696969 '); /* for IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#B0B0B0), to(#696969)); /* for webkit browsers */
+    background: -moz-linear-gradient(top,  #B0B0B0,  #696969); /* for firefox 3.6+ */ }
+  circle.node {
+    stroke: #fff;
+    stroke-width: 1.5px;}
+  line.link {
+    stroke: #999;
+    stroke-opacity: .6;}
+  .nodetext { 
+    pointer-events: none; font: 10px}
+  .table thead {
+    background-color: black;
+    color: white;}
+  .spacer {
+      margin-top: 10px;}
+  circle.selected {
+    stroke: #000;
+    stroke-width: 2px;
+    stroke-opacity: 1.0;}
+  circle.highlighted {
+    stroke: #555;
+    stroke-width: 1.5px;
+    stroke-opacity: .8;}
+  </style>
 </head>
 
 <body>
   <div id='title'>
     <div id='logoBox'><a href='/'>▦</a></div>
-    <!--Title:-->Grid Editor
+    <!--Title:-->Grid Editor: {{model_id}}
   </div>
-  
-  <div class='content'>
-  <div class="container">
-    <div class="row" id="row1">
-      <div class="span2">
-        <!--TODO: PUT THIS BACK IN WHEN IT WORKS <div class="btn-group">
-          <a class="btn dropdown-toggle" data-toggle="dropdown" href="/static/#">
-            <span class="icon-wrench"></span>
-          </a>
-          <ul class="dropdown-menu">
-            <a href="Javascript: accept();">Accept</a>
-            <a href="Javascript: revert();">Revert</a>
-            <a href="Javascript: saveAs();">Save as...</a>
-          </ul>
-        </div>-->
-        <div class="btn-group">
-          <a class="btn dropdown-toggle" data-toggle="dropdown" href="/static/#">
-            Add new object
-            <span class="caret"></span>
-          </a>
-          <ul id="object-types" class="dropdown-menu">
-            <!-- populated dynamically -->
-          </ul>
-        </div>
-      </div> <!-- column 1 -->
-    </div> <!-- row1 -->
-    <div class="row" id="row2">
-      <div class="span2">
-        <div class="row spacer" id="row2a">
-          <table id="selected" class="table table-striped table-bordered table-condensed">
-            <thead>
-              <tr>
-                <th colspan="2">Selected Component</th>
-              </tr>
-            </thead>
-            <tbody>
-            </tbody>
-          </table>
-        </div> <!-- row2a -->
-        <div class="row spacer" id="row2b">
-        </div> <!-- row2b -->
-      </div> <!-- column1 -->
-      <div class="span10">
-        <div id="progress" class="progress progress-striped active progress-success">
-          <div id="progress_bar" class="bar" style="width: 0%;"></div>
-        </div>
-        <div id="modal_insert"></div>
-        <div style="display: none;" id="chart"></div>
-      </div>
+  <div id='toolbar'>
+    <div class="btn-group" style="display:inline-block;float:left">
+      <a class="btn dropdown-toggle" data-toggle="dropdown" href="/static/#">
+        Add new object <span class="caret"></span>
+      </a>
+      <ul id="object-types" class="dropdown-menu" style="text-align:left">
+        <!-- populated dynamically -->
+      </ul>
+    </div>
+    <div style="display:inline-block;width:300px" id="progress" class="progress progress-striped active progress-success">
+      <div id="progress_bar" class="bar"></div>
+    </div>
+    <!-- <div style="display:inline-block;height:18pt;min-height:18pt;line-height:18pt;">Feeder Name Goes Here</div> -->
+    <div style="display:inline-block;float:right" class="btn-group">
+      <a class="btn dropdown-toggle" data-toggle="dropdown" href="/static/#">
+        Grid <span class="icon-wrench"></span>
+      </a>
+      <ul class="dropdown-menu" style="text-align:left">
+        <a href="Javascript: accept();">Accept</a>
+        <a href="Javascript: revert();">Revert</a>
+        <a href="Javascript: saveAs();">Save as...</a>
+      </ul>
     </div>
   </div>
-</div> <!--Container-->
-
-<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-<script src="/static/libs/d3.v2.min.js"></script>
-<script>window.jQuery || document.write('<script src="/static/libs/jquery-1.7.2.min.js"><\/script>')</script>
-<script src="/static/libs/bootstrap/bootstrap.min.js"></script>
-<script src="/static/libs/bootstrap/tooltip.js"></script>
-<script src="/static/libs/bootstrap/popover.js"></script>
-<script>var model_id = "{{model_id}}";</script>
-<script src="/static/script.js"></script>
+  <table id="selected" class="table table-striped table-bordered table-condensed" style="position:absolute;top:90pt;left:4pt;width:20%;background:white">
+    <thead>
+      <tr>
+        <th colspan="2">Selected Component</th>
+      </tr>
+    </thead>
+    <tbody>
+    </tbody>
+  </table>
+  <div id="modal_insert"></div>
+  <div id="chart" style="padding:0px;margin:0px;border:0px;"></div>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+  <script src="/static/libs/d3.v2.min.js"></script>
+  <script>window.jQuery || document.write('<script src="/static/libs/jquery-1.7.2.min.js"><\/script>')</script>
+  <script src="/static/libs/bootstrap/bootstrap.min.js"></script>
+  <script src="/static/libs/bootstrap/tooltip.js"></script>
+  <script src="/static/libs/bootstrap/popover.js"></script>
+  <script>var model_id = "{{model_id}}";</script>
+  <script src="/static/script.js"></script>
 </body>
 </html>
+

@@ -109,10 +109,17 @@ def api_modeltemplate(template_id):
 @app.route('/api/modeltemplates/<template_id>.html')
 def api_new_obj_html(template_id):
     if template_id is 'default':
-        return flask.render_template('modal_edit.html', type=None, props=None)
+        return flask.render_template('modalEdit.html', type=None, props=None)
     else:
         props = models.templates[template_id]
-        return flask.render_template('modal_edit.html', type=template_id, props=props)
+        return flask.render_template('modalEdit.html', type=template_id, props=props)
+
+@app.route('/saveFeeder/', methods=['POST'])
+def updateGlm():
+	sourceFeeder = flask.request.form['sourceFeeder'] 
+	feederName = flask.request.form['feederName']
+	json = flask.request.form['json']
+	return flask.redirect(flask.url_for('/newAnalysis/'))
 
 # This will run on all interface IPs.
 if __name__ == '__main__':
