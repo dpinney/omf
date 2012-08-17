@@ -5,8 +5,8 @@ Core profiler results
 Total objects                 37 objects
 Parallelism                    1 thread
 Total time                   1.0 seconds
-  Core time                  1.0 seconds (100.0%)
-  Model time                 0.0 seconds/thread (0.0%)
+  Core time                  1.0 seconds (96.8%)
+  Model time                 0.0 seconds/thread (3.2%)
 Simulation time                0 days
 Simulation speed             12 object.hours/second
 Syncs completed               25 passes
@@ -22,6 +22,8 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
+player             0.029     90.6%     29.0
+recorder           0.003      9.4%      0.8
 ================ ======== ======== ========
-Total              0.000    100.0%      0.0
+Total              0.032    100.0%      0.9
 

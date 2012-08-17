@@ -1,1 +1,1 @@
-{'status': 'postRun', 'climate': u'HI-HONOLULU.tmy2', 'name': u'simpleRetest', 'created': '2012-08-08 16:18:54.761000', 'PID': 7928, 'sourceFeeder': u'Simple Market System', 'runTime': 5.271}
+{'status': 'postRun', 'climate': u'HI-HONOLULU.tmy2', 'name': u'simpleRetest', 'created': '2012-08-08 16:18:54.761000', 'PID': 5416, 'sourceFeeder': u'Simple Market System', 'runTime': 6.617}

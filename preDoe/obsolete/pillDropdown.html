@@ -1,0 +1,50 @@
+﻿<head>
+	<style>
+	div.buttonGroup { display: inline-block; position:relative;}
+	button.pill {	padding:4px; 
+				background-color:gray;
+				display:inline-block;
+				border: 1px;
+				border-color:black;
+				border-style:solid;
+				-webkit-border-radius: 5px;
+				-moz-border-radius: 5px;
+				border-radius: 5px;
+			 }
+	ul.menu {	
+				position:absolute;
+				top: 100%;
+				left: 0;
+				z-index: 1000;
+				min-width: 160px;
+				padding: 2px 0px 2px 0px;
+				margin: 1px 0 0;
+				list-style: none;
+				display: none;
+				background-color: white;
+				border: 1px solid #CCC;
+				-webkit-border-radius: 5px;
+				-moz-border-radius: 5px;
+				border-radius: 5px;
+				-webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+				-moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+				box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+				-webkit-background-clip: padding-box;
+			 }
+	ul.menu li {padding:4px;}
+	ul.menu li:hover {background:green;}
+	</style>
+</head>
+<body>
+	<p>A paragraph.</p>
+	<p>Another paragraph.</p>
+	<div class='buttonGroup'>
+		<button class='pill' onclick='javascript:if(this.nextSibling.nextSibling.style.display=="inline-block"){this.nextSibling.nextSibling.style.display="none"}else{this.nextSibling.nextSibling.style.display="inline-block"}'>Test ▾</button>
+		<ul class='menu'>
+			<li>Save</li>
+			<li>Close</li>
+			<li>Quit</li>
+		</ul>
+	</div>
+	<p>Yet another paragraph.</p>
+</body>

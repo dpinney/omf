@@ -92,7 +92,6 @@ def api_model(model_id):
 		out.close()
 		return as_json
 	return ''
-	# return render_template('default_model.json')
 
 @app.route('/api/objects')
 def api_objects():
@@ -107,7 +106,7 @@ def api_modeltemplate(template_id):
 		template = models.templates['default']
 	return json.dumps(template)
 
-@app.route("/api/modeltemplates/<template_id>.html")
+@app.route('/api/modeltemplates/<template_id>.html')
 def api_new_obj_html(template_id):
     if template_id is 'default':
         return flask.render_template('modal_edit.html', type=None, props=None)

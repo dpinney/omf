@@ -1,1 +1,1 @@
-{'status': 'postRun', 'climate': u'CA-SAN_FRANCISCO.tmy2', 'name': u'VeryLongRun', 'created': '2012-08-09 12:18:19.633000', 'sourceFeeder': u'Simple Market System', 'runTime': '0:00:13.434000'}
+{'status': 'postRun', 'climate': u'CA-SAN_FRANCISCO.tmy2', 'name': u'VeryLongRun', 'created': '2012-08-09 12:18:19.633000', 'PID': 7596, 'sourceFeeder': u'Simple Market System', 'runTime': 15.094}
