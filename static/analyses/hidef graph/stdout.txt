@@ -1,43 +1,0 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-Core profiler results
-======================
-
-Total objects               3079 objects
-Parallelism                    1 thread
-Total time                 105.0 seconds
-  Core time                 22.0 seconds (21.0%)
-  Model time                83.0 seconds/thread (79.0%)
-Simulation time                5 days
-Simulation speed            3.5k object.hours/second
-Syncs completed            34750 passes
-Time steps completed        7003 timesteps
-Convergence efficiency      4.96 passes/timestep
-Memory lock contention      0.0%
-Average timestep             62 seconds/timestep
-Simulation rate            4114 x realtime
-
-
-Model profiler results
-======================
-
-Class            Time (s) Time (%) msec/obj
----------------- -------- -------- --------
-triplex_meter     28.048     33.8%     43.3
-house             24.673     29.7%     39.2
-triplex_line      16.391     19.8%     26.1
-waterheater        6.042      7.3%     13.9
-ZIPload            3.174      3.8%      5.0
-volt_var_control   2.717      3.3%   2717.0
-transformer        0.665      0.8%     31.7
-node               0.430      0.5%     25.3
-overhead_line      0.280      0.3%     31.1
-recorder           0.149      0.2%     18.6
-capacitor          0.149      0.2%     74.5
-regulator          0.078      0.1%     78.0
-transformer_conf   0.049      0.1%      2.3
-underground_line   0.048      0.1%     24.0
-climate            0.045      0.1%     45.0
-switch             0.045      0.1%     45.0
-================ ======== ======== ========
-Total             82.983    100.0%     27.0
-

@@ -2,6 +2,8 @@
 TODO: make this so we have consistent colors;
 */
 
+* {margin:0px; padding:0px; border:0px;}
+
 body {
 	font-family:Helvetica,Arial,sans-serif;
 	background:#E6E6E6;
@@ -53,6 +55,12 @@ button {
 
 button:hover {background:#33CC66;}
 
+td, th {padding:3px;}
+
+table {border-spacing:0px;}
+
+/* DROPDOWN BUTTON CODE */
+
 div.buttonGroup { display: inline-block; position:relative; }
 
 button.pill {
@@ -69,11 +77,12 @@ ul.menu {
 	top: 100%;
 	left: 0;
 	z-index: 1000;
-	min-width: 160px;
-	padding: 2px 0px 2px 0px;
+	min-width: 100px;
+	padding: 5px 0px 5px 0px;
 	margin: 1px 0 0;
 	list-style: none;
 	display: none;
+	text-align:left;
 	background-color: white;
 	border: 1px solid #CCC;
 	-webkit-border-radius: 5px;
@@ -84,20 +93,13 @@ ul.menu {
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 	-webkit-background-clip: padding-box; }
 
+ul.menu.right {
+	right: 0;
+	left:auto;
+}
+
 ul.menu li {padding:4px;}
 
 ul.menu li:hover {background:green;}
 
-/*Home-specific*/
-table#homeTable {width:100%; text-align:left;}
-td.running {color:red;}
-td.preRun {color:orange;}
-td.postRun {color:black;}
 
-/*newAnalysis-specific*/
-table#newAnalysisOptions {width:70%; text-align:left; margin-left:auto;}
-table#newAnalysisOptions td {vertical-align:top;}
-
-/* viewReports-specific */
-div.graphBlock {width:31.5%; background-color:white; display:inline-block; padding:5px; margin:0px;}
-div.graphBlock img {width:100%;}

@@ -40,8 +40,9 @@ $().ready(function(){
 });
 
 // Huge hack to get the height where we put the svg...
+
 var w = $('body').width(),
-    h = $(window).height() - 55 - 61;
+    h = $(window).height() - $('body').height() - 4;
 
 var svg = d3.select("#chart")
   .append("svg")

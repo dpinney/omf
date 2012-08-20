@@ -1,5 +1,5 @@
 ﻿<head>
-  <script type='text/javascript' src='../static/libs/d3.v2.min.js'></script>
+  <script type='text/javascript' src='d3.v2.min.js'></script>
   <script type='text/javascript' src='../static/omf.js'></script>
   <link rel='stylesheet' href='../static/omf.css'>
   <style>
@@ -52,7 +52,7 @@
     <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
     <ul class='menu right'>
       <li><a href='#'>Save</a></li>
-      <li><a href='javascript:history.back()'>Cancel</a></li>
+      <li><a href='#'>Cancel</a></li>
     </ul>
   </div>
 </div>
@@ -249,7 +249,7 @@ function zoomToFit() {
   vis.attr('transform', 'translate([0, 0]) scale(1)')
 }
 
-d3.json('/api/models/{{ model_id }}.json', function(json){root=json;draw(json)})
+d3.json('xmedium.json', function(json){root=json;draw(json)})
 
 </script>
 </body>
