@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+import time
+import tempfile
+
 def printNestDicts(nestedDicts, indentLevel=0):
 	def printIndented(string, indentLevel):
 		print ('\t' * indentLevel) + string
@@ -14,6 +17,17 @@ def printNestDicts(nestedDicts, indentLevel=0):
 				printIndented(outString[0:60] + '...', indentLevel)
 			else:
 				printIndented(outString, indentLevel)
+
+def pickleTest(object,useC=False):
+	'''pickleTest(object,useCpickle=False) -> time in seconds it takes to pickle the object.'''
+	if useC:
+		import cPickle as pickle
+	else:
+		import pickle
+	now = time.clock()
+	pickle.dump(object,tempfile.TemporaryFile())
+	end = time.clock()
+	return end-now
 
 def main():
 	'''Tests go here'''

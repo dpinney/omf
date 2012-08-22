@@ -10,7 +10,6 @@ import shutil
 import doeGrapher
 import datetime as dt
 import treeParser as tp
-import treeModifications as tm
 import subprocess
 import copy
 
@@ -56,7 +55,7 @@ def create(formDict):
 			shutil.copyfile('feeders/' + feederName + '/' + fileName, 'static/analyses/' + analysisName + '/' + fileName)
 		# Modify the glm with time variables:
 		tree = tp.parse('static/analyses/' + analysisName + '/main.glm')
-		tm.adjustTime(tree=tree, simLength=simLength, simLengthUnits=simLengthUnits)
+		tp.adjustTime(tree=tree, simLength=simLength, simLengthUnits=simLengthUnits)
 		# write the glm:
 		outString = tp.write(tree)
 		glmFile = open('static/analyses/' + analysisName + '/main.glm','w')

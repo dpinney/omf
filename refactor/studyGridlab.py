@@ -11,11 +11,13 @@ import utility
 
 
 class StudyGridlab:
+	# metadata
 	name = None
 	status = 'preRun'
 	pid = None
 	runTime = None
 	grid = None
+	# not metadata
 	results = None
 	includeFiles = None
 
@@ -54,7 +56,8 @@ class StudyGridlab:
 
 def main():
 	print 'Testing here.'
-	direc = '../feeders/Simple Market System/'
+	direc = '../feeders/13 Node Reference Feeder/'
+	#direc = '../feeders/Simple Market System/'
 	includes = {}
 	for x in os.listdir(direc):
 		if (x.endswith('.glm') and x != 'main.glm') or x.endswith('.tmy2') or x.endswith('.player'):
@@ -68,7 +71,6 @@ def main():
 	test.run()
 	print test.results.recorders.keys()
 	utility.printNestDicts(test.results.recorders)
-	
 
 if __name__ == '__main__':
 	main()
