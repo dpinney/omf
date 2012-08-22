@@ -401,14 +401,13 @@ object ZIPload {
 };
 
 
-
 object recorder {
    parent Market_1;
      property avg24,std24,last.P,current_market.clearing_price;
      limit 14400;
      interval 60;
      file price_statistics.csv;
-     };
+};
 
 object recorder {
      parent Reg1;

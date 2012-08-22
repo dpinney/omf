@@ -96,10 +96,19 @@ def dictToString(inDict):
 		return inDict['omfEmbeddedConfigObject'] + ' {\n' + gatherKeyValues(inDict, 'omfEmbeddedConfigObject') + '};\n'
 
 def write(inTree):
+	'''write(inTreeDict)->stringGlm'''
 	output = ''
 	for key in inTree:
 		output += dictToString(inTree[key]) + '\n'
 	return output
+
+def sortedWrite(inTree):
+	sortedKeys = sorted(inTree.keys(), key=int)
+	output = ''
+	for key in sortedKeys:
+		output += dictToString(inTree[key]) + '\n'
+	return output
+
 
 # Note that we might have to change this up so we're sure the #set statements and modules (etc.) are written first. There might also be problems with parent-child relationships.
 

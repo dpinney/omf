@@ -31,3 +31,7 @@ function dropPill(thisButton, name) {
         thisButton.innerHTML = name + ' ▴'
     }
 }
+
+function gebi(id) {
+  return document.getElementById(id)
+}

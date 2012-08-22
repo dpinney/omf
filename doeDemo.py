@@ -4,10 +4,10 @@ import flask
 import os
 import threading
 import doeAnalysis as da
-import models
 import json
 import treeParser as tp
 import doeGrapher as tg
+import shutil
 
 app = flask.Flask(__name__)
 
@@ -82,44 +82,31 @@ def api_model(model_id):
 		as_json = in_file.read()
 		return as_json
 	elif model_id in os.listdir('./feeders'):
-		parsed = tp.parse('./feeders/' + model_id + "/main.glm")
-		graph = tg.node_groups(parsed)
+		tree = tp.parse('./feeders/' + model_id + "/main.glm")
 		# cache the file for later
 		out = file('./json/' + model_id + ".json", "w")
-		graph_json = tg.to_d3_json(graph)
-		as_json = json.dumps(graph_json)
-		out.write(as_json)
+		jsonTree = json.dumps(tree)
+		out.write(jsonTree)
 		out.close()
-		return as_json
+		return jsonTree
 	return ''
-
-@app.route('/api/objects')
-def api_objects():
-	all_types = filter(lambda x: x is not "default", models.templates.keys())
-	return json.dumps(all_types)
-
-@app.route('/api/modeltemplates/<template_id>')
-def api_modeltemplate(template_id):
-	try:
-		template = models.templates[template_id]
-	except KeyError:
-		template = models.templates['default']
-	return json.dumps(template)
-
-@app.route('/api/modeltemplates/<template_id>.html')
-def api_new_obj_html(template_id):
-    if template_id is 'default':
-        return flask.render_template('modalEdit.html', type=None, props=None)
-    else:
-        props = models.templates[template_id]
-        return flask.render_template('modalEdit.html', type=template_id, props=props)
 
 @app.route('/saveFeeder/', methods=['POST'])
 def updateGlm():
-	sourceFeeder = flask.request.form['sourceFeeder'] 
-	feederName = flask.request.form['feederName']
-	json = flask.request.form['json']
-	return flask.redirect(flask.url_for('/newAnalysis/'))
+	postData = flask.request.form.to_dict()
+	sourceFeeder = str(postData['feederName'])
+	newFeeder = sourceFeeder + '-1'
+	tree = json.loads(postData['tree'])
+	shutil.copytree('./feeders/' + sourceFeeder,'./feeders/' + newFeeder)
+	os.remove('./feeders/' + newFeeder + '/main.glm')
+	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm:
+		newMainGlm.write(tp.sortedWrite(tree))
+	return flask.redirect(flask.url_for('newAnalysis'))
+
+@app.route('/ECHOPOST/', methods=['POST'])
+def ECHOPOST():
+	postData = flask.request.form.to_dict()
+	return str(postData)
 
 # This will run on all interface IPs.
 if __name__ == '__main__':

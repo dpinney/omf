@@ -1,9 +1,3 @@
-#!/usr/bin/env python
-
-import treeParser as tp
-import networkx as nx
-import json
-
 def to_d3_json(inTree):
 	def node_groups(glmTree):
 		#helper function:
@@ -58,9 +52,3 @@ def to_d3_json(inTree):
 	
 	graph_json['links'] = json_edges
 	return graph_json
-
-model_id = 'Simple Market System'
-parsed = tp.parse('./feeders/' + model_id + "/main.glm")
-d3d = to_d3_json(parsed)
-
-print json.dumps(parsed)

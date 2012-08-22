@@ -16,16 +16,23 @@
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#B0B0B0', endColorstr='#696969 '); /* for IE */
     background: -webkit-gradient(linear, left top, left bottom, from(#B0B0B0), to(#696969)); /* for webkit browsers */
     background: -moz-linear-gradient(top,  #B0B0B0,  #696969); /* for firefox 3.6+ */ }
-  circle.node {stroke: #fff;stroke-width: 1.5px;}
-  line.link {stroke: #999;stroke-opacity: .6;}
-  .nodetext {pointer-events: none; font: 10px; }
-  circle.selected {stroke: #000; stroke-width: 2px; stroke-opacity: 1.0; }
-  circle.highlighted {stroke: #555; stroke-width: 1.5px; stroke-opacity: .8; }
   #selected {border:1px solid black; border-bottom:0px;position:absolute;top:90pt;left:4pt;width:20%;}
   #selected th {background:black; color:white;}
   #selected td {padding:5px; border-bottom:1px solid black; background:white; color:black}
   .leftToolbar {float:left;margin-right:5px;}
   .rightToolbar {float:right; margin-left:5px;}
+  input {min-width: 100px}
+  /* Start graph elements. */
+  circle.node {fill:gray; stroke: #fff;stroke-width: 1.5px;}
+  line.link {stroke: #999;stroke-opacity: .6;}
+  .nodetext {pointer-events: none; font: 10px; }
+  circle.selected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; }
+  circle.highlighted {stroke: #555; stroke-width: 1.5px; stroke-opacity: .8; }
+  circle.house {fill:#3366FF;}
+  circle.ZIPload, circle.waterheater {fill:#66CCFF;}
+  circle.triplex_meter {fill:#FF6600;}
+  circle.triplex_node {fill:#660000;}
+  circle.gridNode {fill:#CC0000;}
   </style>
 </head>
 <body>
@@ -45,13 +52,13 @@
   <div class='buttonGroup leftToolbar'>
     <button class='pill' onclick='dropPill(this, "Zoom")'>Zoom ▾</button>
     <ul class='menu'>
-      <li><a href='#' onclick='zoomToFit()'>Zoom to Fit</a></li>
+      <li><a href='javascript:zoomToFit()'>Zoom to Fit</a></li>
     </ul>
   </div>
   <div class='buttonGroup rightToolbar'>
     <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
     <ul class='menu right'>
-      <li><a href='#'>Save</a></li>
+      <li><a href='javascript:saveModel()'>Save</a></li>
       <li><a href='javascript:history.back()'>Cancel</a></li>
     </ul>
   </div>
@@ -65,14 +72,16 @@
   <tbody>
   </tbody>
 </table>
-<div id='modal_insert'></div>
 <div id='chart' style='background:white'></div>
 <script>
+feeder = '{{model_id}}'
+
 var w = document.width,
     // HACK: subtract off the toolbar and titlebar heights.
     h = document.height - 112,
-    root,
-    fill = d3.scale.category20();
+    tree;
+
+var name2nodeIndex = {}
 
 var zoomer = d3.behavior.zoom()
 
@@ -111,9 +120,29 @@ force.on('tick', function() {
 var nodes = force.nodes()
 var links = force.links()
 
-function draw(json) {
-  for (n in json.nodes) nodes.push(json.nodes[n])
-  for (l in json.links) links.push(json.links[l])
+function draw() {
+  // Go through the first time and set up the nodes with indices:
+  for (x in tree) {
+    if (tree[x].name != undefined && tree[x].from == undefined) {
+      nodeName = tree[x].name
+      nodeObject = tree[x].object
+      // Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
+      if (nodeObject == 'node') nodeObject = 'gridNode'
+      nodeIndex = nodes.length
+      nodes.push({name:nodeName,treeIndex:parseInt(x),objectType:nodeObject})
+      name2nodeIndex[nodeName] = nodeIndex
+    }
+  }
+  // Go through a second time and set up the links:
+  for (x in tree) {
+    if (tree[x].name != undefined) {
+      if (tree[x].from != undefined && tree[x].to != undefined) {
+        links.push({source:name2nodeIndex[tree[x].from],target:name2nodeIndex[tree[x].to]})
+      } else if (tree[x].parent != undefined) {
+        links.push({source:name2nodeIndex[tree[x].name],target:name2nodeIndex[tree[x].parent]})
+      }
+    }
+  }
   // This makes a fancy fade-in.
   vis.style('opacity', 1e-6)
     .transition()
@@ -136,12 +165,12 @@ function redraw() {
     .data(nodes)
       .enter()
         .append('svg:circle')
-        .attr('class', 'node')
+        .attr('class', function(d) { return 'node ' + d.objectType })
+        .attr('id', function(d) { return 'n' + d.treeIndex })
         .on('click', onNodeClick)
         .attr('cx', function(d) { return d.x; })
         .attr('cy', function(d) { return d.y; })
         .attr('r', 10)
-        .style('fill', function(d) { return fill(d.group); })
         .call(force.drag);
   // TODO: un-comment this to have text labels on _some_ nodes.
   // node.append('svg:title')
@@ -157,19 +186,30 @@ function zoomRedraw() {
     + ' scale(' + d3.event.scale + ')');
 }
 
+function classify(d, c, on) {
+  svg = d3.select('#chart')
+  if(on) {
+    // turn off the currently styled one
+    svg.select('.' + c).classed(c, false);
+    // then, style the new one
+    svg.select("#n" + d.treeIndex).classed(c, true);
+  }
+  else {
+    svg.select("#n" + d.treeIndex).classed(c, false);
+  }
+}
+
 function onNodeClick(d, i) {
   table = gebi('selected')
-  // TODO: visually identify the selected node.
-
+  // Visually identify the selected node. Note that onNodeClick is a variable that persists as long as the function is in memory.
+  classify(d,'selected',true)
   // clear the selected table
   tableClear(table)
-  for (var prop in d) {
-    // 'real' properties are stored with an underscore
-    if (prop[0] === '_') {
-      row = table.insertRow(-1)
-      row.insertCell(0).innerHTML = prop.substring(1, prop.length)
-      row.insertCell(1).innerHTML = d[prop]
-    }
+  treeData = tree[d.treeIndex]
+  for (prop in treeData) {
+    row = table.insertRow(-1)
+    row.insertCell(0).innerHTML = prop
+    row.insertCell(1).innerHTML = treeData[prop]
   }
   row = table.insertRow(-1)
   cell = row.insertCell(0)
@@ -203,9 +243,9 @@ function editObject(index) {
 
 function saveEdits(index) {
   table = gebi('selected')
-  d = root.nodes[index]
+  d = tree[nodes[index].treeIndex]
   for (i = 1; i < table.rows.length - 1; i++) {
-    name = '_' + table.rows[i].cells[0].innerHTML
+    name = table.rows[i].cells[0].innerHTML
     cell = table.rows[i].cells[1]
     newValue = cell.childNodes[0].value
     // alert(name + ':' + newValue)
@@ -235,13 +275,9 @@ function cancelEditing(index) {
 
 function newObject(objectDict) {
   objectDict.index = nodes.length 
-  objectDict._name = objectDict._type + nodes.length 
+  objectDict.name = objectDict.type + nodes.length 
   nodes.push(objectDict)
   redraw()
-}
-
-function gebi(id) {
-  return document.getElementById(id)
 }
 
 function zoomToFit() {
@@ -249,7 +285,12 @@ function zoomToFit() {
   vis.attr('transform', 'translate([0, 0]) scale(1)')
 }
 
-d3.json('/api/models/{{ model_id }}.json', function(json){root=json;draw(json)})
+function saveModel() {
+  sendDict = {tree:JSON.stringify(tree),feederName:feeder}
+  post_to_url('/saveFeeder/', sendDict)
+}
+
+d3.json('/api/models/{{ model_id }}.json', function(json){tree=json;draw(json)})
 
 </script>
 </body>

@@ -1,0 +1,1 @@
+{'status': 'postRun', 'climate': u'CA-SAN_FRANCISCO.tmy2', 'name': u'Sorted Write Test 2', 'created': '2012-08-22 10:36:11.782000', 'PID': 4216, 'sourceFeeder': u'Simple Market System-1', 'runTime': 4.757}
