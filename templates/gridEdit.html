@@ -1,21 +1,24 @@
 ﻿<head>
-  <script type='text/javascript' src='../static/libs/d3.v2.min.js'></script>
+  <script type='text/javascript' src='../static/d3.v2.min.js'></script>
   <script type='text/javascript' src='../static/omf.js'></script>
   <link rel='stylesheet' href='../static/omf.css'>
   <style>
   * {border:0px;margin:0px;padding:0px;}
   div#toolbar { 
-    padding: 10px;
-    height: 25px;
-    border-width: 0px 0px 1px 0px;
+    padding:10px;
+    height:25px;
+    border-width:0px 0px 1px 0px;
     border-color:black;
     border-style:solid;
-    text-align: center;
-    vertical-align: center;
+    text-align:center;
+    vertical-align:center;
     background-color:black; /* for browsers that can't do gradients */
     filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#B0B0B0', endColorstr='#696969 '); /* for IE */
     background: -webkit-gradient(linear, left top, left bottom, from(#B0B0B0), to(#696969)); /* for webkit browsers */
     background: -moz-linear-gradient(top,  #B0B0B0,  #696969); /* for firefox 3.6+ */ }
+  div#title p {display:inline-block;}
+  input#gridNameEdit {font-size:28pt; line-height: 28pt; text-shadow: 0px 3px 3px #4d4d4d; height: 50px; color:gray; padding:3px; margin-bottom:5px; width:85%;}
+  button.smallButton {height:30px; width:30px; display:inline-block; float:right; padding:2px; margin-left:5px;}
   #selected {border:1px solid black; border-bottom:0px;position:absolute;top:90pt;left:4pt;width:20%;}
   #selected th {background:black; color:white;}
   #selected td {padding:5px; border-bottom:1px solid black; background:white; color:black}
@@ -29,6 +32,7 @@
   circle.selected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; }
   circle.highlighted {stroke: #555; stroke-width: 1.5px; stroke-opacity: .8; }
   circle.house {fill:#3366FF;}
+  circle.load {fill:#3366FF;}
   circle.ZIPload, circle.waterheater {fill:#66CCFF;}
   circle.triplex_meter {fill:#FF6600;}
   circle.triplex_node {fill:#660000;}
@@ -38,15 +42,13 @@
 <body>
 <div id='title'>
   <div id='logoBox'><a href='/'>▦</a></div>
-  <!--Title:-->Grid Editor: {{model_id}}
+  <p>Grid Editor: </p>
+  <p id='gridName'>{{model_id}}</p>
 </div>
 <div id='toolbar'>
   <div class='buttonGroup leftToolbar'>
     <button id='butter' class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
-    <ul class='menu'>
-      <li><a href='javascript:newObject({_type:"node",_phases:"",_nominal_voltage:0})'>Node</a></li>
-      <li><a href='javascript:newObject({_type:"load",_nominal_voltage:0,_phases:"",_constant_power_A:"",_load_class:""})'>Load</a></li>
-      <li><a href='javascript:newObject({_type:"transformer",_phases:"",_nominal_voltage:0})'>Transformer</a></li>
+    <ul id='newObjectMenu' class='menu'>
     </ul>
   </div>
   <div class='buttonGroup leftToolbar'>
@@ -58,7 +60,8 @@
   <div class='buttonGroup rightToolbar'>
     <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
     <ul class='menu right'>
-      <li><a href='javascript:saveModel()'>Save</a></li>
+      <li id='renameMenuItem'><a href='javascript:rename()'>Rename</a></li>
+      <li id='saveMenuItem'><a href='javascript:saveModel()'>Save a Copy</a></li>
       <li><a href='javascript:history.back()'>Cancel</a></li>
     </ul>
   </div>
@@ -76,10 +79,11 @@
 <script>
 feeder = '{{model_id}}'
 
-var w = document.width,
-    // HACK: subtract off the toolbar and titlebar heights.
-    h = document.height - 112,
-    tree;
+var w = document.width
+// HACK: subtract off the toolbar and titlebar heights.
+var h = document.height - 112
+var tree
+var components
 
 var name2nodeIndex = {}
 
@@ -273,10 +277,25 @@ function cancelEditing(index) {
   cell.innerHTML = '<button type="button" onclick="editObject(' + index + ')">Edit</button>'
 }
 
-function newObject(objectDict) {
-  objectDict.index = nodes.length 
-  objectDict.name = objectDict.type + nodes.length 
-  nodes.push(objectDict)
+function newObject(objectName) {
+  component = components[objectName]
+  // Find the next index available in the tree.
+  keys = Object.keys(tree)
+  max = 0
+  for (x in keys) {
+    if (parseInt(x) > max) max = parseInt(x)
+  }
+  treeNewIndex = max + 1
+  // Put the component in the tree.
+  tree[treeNewIndex] = component
+  // Update our name lookup dictionary.
+  name2nodeIndex[component.object] = treeNewIndex
+  // Add to the nodes.
+  newType = component.object
+  // Hack to make sure we color nodes correctly:
+  if (newType == 'node') newType = 'gridNode'
+  newNode = {name:component.name, objectType:newType, treeIndex:treeNewIndex}
+  nodes.push(newNode)
   redraw()
 }
 
@@ -286,11 +305,46 @@ function zoomToFit() {
 }
 
 function saveModel() {
-  sendDict = {tree:JSON.stringify(tree),feederName:feeder}
+  sendDict = {tree:JSON.stringify(tree),feederName:feeder,newName:gebi('gridName').innerHTML}
   post_to_url('/saveFeeder/', sendDict)
 }
 
+function rename() {
+  gebi('renameMenuItem').style.display = 'none'
+  gebi('saveMenuItem').style.display = 'none'
+  gridNameP = gebi('gridName')
+  currentName = gridNameP.innerHTML
+  inputBox = '<input type="text" id="gridNameEdit" name="gridNameEdit" data-old="' + currentName + '" value="' + currentName + '"/>'
+  acceptButton = '<button class="smallButton" id="acceptButton" onclick="acceptRename()">✔</button>'
+  cancelButton = '<button class="smallButton" id="cancelButton" onclick="cancelRename()">✘</button>'
+  gridNameP.innerHTML = inputBox + acceptButton + cancelButton
+}
+
+function cancelRename() {
+  gebi('renameMenuItem').style.display = 'block'
+  gebi('saveMenuItem').style.display = 'block'
+  gridNameP = gebi('gridName')
+  oldName = gebi('gridNameEdit').getAttribute('data-old')
+  gridNameP.innerHTML = oldName
+}
+
+function acceptRename() {
+  gebi('renameMenuItem').style.display = 'block'
+  gebi('saveMenuItem').style.display = 'block'
+  gridNameP = gebi('gridName')
+  newName = gebi('gridNameEdit').value
+  gridNameP.innerHTML = newName
+}
+
+function fillComponentMenu() {
+  newObjectMenu = gebi('newObjectMenu')
+  for (component in components) {
+    newObjectMenu.innerHTML += ('<li><a href="javascript:newObject(\'' + component + '\')">' + component + '</a></li>')
+  }
+}
+
 d3.json('/api/models/{{ model_id }}.json', function(json){tree=json;draw(json)})
+d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
 
 </script>
 </body>

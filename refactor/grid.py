@@ -2,7 +2,6 @@
 
 import networkx as nx
 import matplotlib as m
-m.use('Agg')
 import matplotlib.pyplot as p
 import matplotlib.patheffects as pe
 import re

@@ -91,11 +91,23 @@ def api_model(model_id):
 		return jsonTree
 	return ''
 
+@app.route('/getComponents/')
+def getComponents():
+	compFiles = os.listdir('./components/')
+	components = {}
+	for fileName in compFiles:
+		with open('./components/' + fileName,'r') as compFile:
+			fileContents = compFile.read()
+			components[fileName] = eval(fileContents)
+	print components
+	return json.dumps(components)
+
+
 @app.route('/saveFeeder/', methods=['POST'])
 def updateGlm():
 	postData = flask.request.form.to_dict()
 	sourceFeeder = str(postData['feederName'])
-	newFeeder = sourceFeeder + '-1'
+	newFeeder = str(postData['newName'])	
 	tree = json.loads(postData['tree'])
 	shutil.copytree('./feeders/' + sourceFeeder,'./feeders/' + newFeeder)
 	os.remove('./feeders/' + newFeeder + '/main.glm')

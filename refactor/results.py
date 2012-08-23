@@ -3,7 +3,6 @@
 import os
 import utility
 import matplotlib as m
-m.use('Agg')
 import matplotlib.pyplot as p
 
 class Results:
