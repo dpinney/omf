@@ -1,1 +1,0 @@
-{'status': 'postRun', 'climate': u'CO-BOULDER.tmy2', 'name': u'Feeder Write Test', 'created': '2012-08-22 10:06:38.717000', 'PID': 4452, 'sourceFeeder': u'Simple Market System-1', 'runTime': 0.226}

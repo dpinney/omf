@@ -37,7 +37,11 @@ div.content {
 	border-color:gray;
 	border-style:solid;
 	padding:10px;
-	margin:20px 30px 0px 30px; }
+	width:1000px;
+	margin-left: auto;
+	margin-right: auto;
+	margin-top: 20px;
+	margin-bottom: 30px; }
 
 a {text-decoration:none; color:#33CC66;}
 
@@ -45,13 +49,15 @@ a:visited {color:#339966;}
 
 form {line-height:10pt; padding: 0px; margin: 0px;}
 
-select, input[type='text'], button {width:100%; background:#E6E6E6; padding:4px; border-width:1px; border-color:white; border-style:solid;}
+select, input[type='text'], button {width:100%; background:#E6E6E6; padding:4px; margin:2px; border-width:1px; border-color:white; border-style:solid;}
 
 button {
 	background:#339966;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
-	border-radius: 5px; }
+	border-radius: 5px;
+	border: none;
+	color: white; }
 
 button:hover {background:#33CC66;}
 
@@ -64,13 +70,14 @@ table {border-spacing:0px;}
 div.buttonGroup { display: inline-block; position:relative; }
 
 button.pill {
+	margin: 0px;
 	padding:4px 8px 4px 8px; 
 	background-color:#E0E0E0;
 	display:inline-block;
 	border: 1px;
 	border-color:gray;
 	border-style:solid;
-}
+	color:black; }
 
 ul.menu {
 	position:absolute;

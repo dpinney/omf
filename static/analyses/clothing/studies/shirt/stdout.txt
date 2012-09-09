@@ -1,0 +1,43 @@
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+Core profiler results
+======================
+
+Total objects               3079 objects
+Parallelism                    1 thread
+Total time                  53.0 seconds
+  Core time                 12.7 seconds (24.0%)
+  Model time                40.3 seconds/thread (76.0%)
+Simulation time                2 days
+Simulation speed            2.3k object.hours/second
+Syncs completed            13206 passes
+Time steps completed        2401 timesteps
+Convergence efficiency      5.50 passes/timestep
+Memory lock contention      0.0%
+Average timestep             60 seconds/timestep
+Simulation rate            2717 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+triplex_meter     13.422     33.3%     20.7
+house             12.661     31.4%     20.1
+triplex_line       8.050     20.0%     12.8
+waterheater        2.738      6.8%      6.3
+ZIPload            1.470      3.7%      2.3
+volt_var_control   0.917      2.3%    917.0
+transformer        0.338      0.8%     16.1
+node               0.198      0.5%     11.6
+overhead_line      0.141      0.4%     15.7
+recorder           0.103      0.3%     12.9
+regulator          0.067      0.2%     67.0
+capacitor          0.060      0.1%     30.0
+climate            0.029      0.1%     29.0
+switch             0.027      0.1%     27.0
+underground_line   0.024      0.1%     12.0
+transformer_conf   0.016      0.0%      0.8
+================ ======== ======== ========
+Total             40.261    100.0%     13.1
+

@@ -4,22 +4,169 @@
 	<link href='../static/omf.css' type='text/css' rel='stylesheet'/>
 	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
 	<style>
-		div.graphBlock {width:31.5%; background-color:white; display:inline-block; padding:5px; margin:0px;}
-		div.graphBlock img {width:100%;}
+		pre.stdoutBlock {display:inline-block; width:490px; overflow-x:hidden; padding-left:10px;}
+		div.stdouts {overflow-x:auto;white-space: nowrap; margin-top:0px;}
+		div.tightContent {width:1000px; margin-left:auto; margin-right:auto; margin-top:0px; margin-bottom:20px; border-style: solid; border-color:gray; border-width:1px 0px 1px 0px; }
+		div.tightContent div {margin-top:0px;margin-bottom:0px; border:none;}
+		div.tightContent div + div {margin-top:0px; margin-bottom:0px;}
+		p.reportTitle {	padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt;}
+		div.capChart {height:90px; padding:0px}
+		div.regContainer {position: relative; height:270px; padding:0px;}
+		div.regContainer > div {position: absolute; padding:0px;}
+		div.realPowChart {left:0px; top:0px; width:600px; height:90px;}
+		div.reacPowChart {left:0px; top:90px; width:600px; height:90px;}
+		div.appPowChart {left:0px; top:180px; width:600px; height:90px;}
+		div.tapsChart {right:0px; top:0px; width:400px; height:135px;}
+		div.powFactChart {right:0px; top:135px; width:400px; height:135px;}
+		div.detailsContainer {height:300px; margin-top:0px;}
+		div#mapDiv {float:right; width:500px; height:300px;}
+		table#detailsTable {margin-top:10px;}
+		table#detailsTable th {border-bottom:2px solid gray; text-align:left;}
+		table#detailsTable th, td {padding:5px;}
+		div.voltChart {height:150px; padding:0px}
 	</style>
+	<script type='text/javascript' src='../static/omf.js'></script>
+	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
+	<script>
+		reportsJson = {{ reportsJson|safe }}
+		analysisName = '{{ analysisName }}'
+		google.load('visualization', '1', {packages:['corechart','geochart']})
+		function placeReports() {
+			insert = gebi('reports')
+			for (report in reportsJson) {
+				// if ('powerflow' == reportsJson[report].reportType) {
+				// 	insert.innerHTML += '<div id="powerflowReport" class="content"></div>'
+				// 	powerflowReport = gebi('powerflowReport')
+				// 	pngs = reportsJson[report].pngs
+				// 	for (png in pngs) {					
+				// 		powerflowReport.innerHTML += '<div class="graphblock"><img src="../static/analyses/' + analysisName + '/' + pngs[png] + '"/></div>'
+				// 	}
+				// }
+				if ('studyDetails' == reportsJson[report].reportType) {
+					insert.innerHTML += '<p class="reportTitle">Study Details</p>'
+					insert.innerHTML += '<div id="studyDetails" class="content detailsContainer"></div>'
+					gebi('studyDetails').innerHTML += '<div id="mapDiv"></div>'
+					gebi('studyDetails').innerHTML += '<div id="detailsDiv"></div>'
+					gebi('detailsDiv').innerHTML += '<p>Analysis created ' + reportsJson[report].created + '</p>'
+					gebi('detailsDiv').innerHTML += '<table id="detailsTable"><tr><th>Study</th><th>Source Feeder</th></tr></table>'
+					for (study in reportsJson[report].studies) {
+						newRow = gebi('detailsTable').insertRow(-1)
+						newRow.insertCell(0).innerHTML = reportsJson[report].studies[study][0]
+						newRow.insertCell(1).innerHTML = reportsJson[report].studies[study][1]
+					}
+					details = reportsJson[report]
+				}
+				else if ('runtimeStats' == reportsJson[report].reportType) {
+					insert.innerHTML += '<p class="reportTitle">Model Runtime Statistics</p>'
+					insert.innerHTML += '<div id="runtimeStatsReport" class="content stdouts"></div>'
+					runtimeStatsReport = gebi('runtimeStatsReport')
+					stdouts = reportsJson[report].stdouts
+					for (stdout in stdouts) {					
+						runtimeStatsReport.innerHTML += '<pre class="stdoutBlock">' + stdouts[stdout] + '</pre>'
+					}
+				}
+				else if ('capacitorActivation' == reportsJson[report].reportType) {
+					insert.innerHTML += '<p class="reportTitle">Capacitor Activation</p>'
+					insert.innerHTML += '<div id="capActReport" class="tightContent"></div>'
+					dataTree = reportsJson[report]['dataTree']
+					for (study in dataTree) {					
+						capacitors = dataTree[study]
+						for (cap in capacitors) {
+							gebi('capActReport').innerHTML += '<div id="chartDiv' + study + cap + '" class="content capChart"></div>'
+						}
+					}
+				}
+				else if ('regulatorPowerflow' == reportsJson[report].reportType) {
+					insert.innerHTML += '<p class="reportTitle">Regulator Powerflow</p>'
+					insert.innerHTML += '<div id="regPowReport" class="tightContent"></div>'
+					dataTree = reportsJson[report]['dataTree']
+					for (study in dataTree) {					
+						regulators = dataTree[study]
+						for (reg in regulators) {
+							gebi('regPowReport').innerHTML += '<div id="regContainer' + study + reg + '" class="content regContainer"></div>'
+							regContainer = gebi('regContainer' + study + reg)
+							regContainer.innerHTML += '<div id="chartRealPow' + study + reg + '" class="content realPowChart"></div>'
+							regContainer.innerHTML += '<div id="chartReactPow' + study + reg + '" class="content reacPowChart"></div>'
+							regContainer.innerHTML += '<div id="chartAppPow' + study + reg + '" class="content appPowChart"></div>'
+							regContainer.innerHTML += '<div id="chartTaps' + study + reg + '" class="content tapsChart"></div>'
+							regContainer.innerHTML += '<div id="chartPowFact' + study + reg + '" class="content powFactChart"></div>'
+						}
+					}
+				}
+				else if ('voltageBand' == reportsJson[report].reportType) {
+					insert.innerHTML += '<p class="reportTitle">Triplex Meter Voltages</p>'
+					insert.innerHTML += '<div id="voltageBandReport" class="tightContent"></div>'
+					dataTree = reportsJson[report]['dataTree']
+					for (study in dataTree) {					
+						gebi('voltageBandReport').innerHTML += '<div id="voltChartDiv' + study + '" class="content voltChart"></div>'
+					}
+				}
+			}
+		}
+		function graphAllData() {
+			insert = gebi('reports')
+			for (report in reportsJson) {
+				dataTree = reportsJson[report]['dataTree']
+				if ('capacitorActivation' == reportsJson[report].reportType) {
+					for (study in dataTree) {					
+						capacitors = dataTree[study]
+						for (cap in capacitors) {
+							drawCapChart(capacitors[cap], 'chartDiv' + study + cap, ['gainsboro','silver','gray'])
+						}
+					}
+				}
+				else if ('regulatorPowerflow' == reportsJson[report].reportType) {
+					for (study in dataTree) {					
+						regulators = dataTree[study]
+						for (reg in regulators) {
+							drawRegChart(regulators[reg]['realPower'], 'chartRealPow' + study + reg, ['crimson','red','firebrick'])
+							drawRegChart(regulators[reg]['reactivePower'], 'chartReactPow' + study + reg, ['crimson','red','firebrick'])
+							drawRegChart(regulators[reg]['apparentPower'], 'chartAppPow' + study + reg, ['crimson','red','firebrick'])
+							drawRegChart(regulators[reg]['tapPositions'], 'chartTaps' + study + reg, ['gainsboro','silver','gray'])
+							drawRegChart(regulators[reg]['powerFactor'], 'chartPowFact' + study + reg, ['red'])
+						}
+					}
+				}
+				else if ('studyDetails' == reportsJson[report].reportType) {
+					drawMap(reportsJson[report].climates,'mapDiv')
+				}
+				else if ('voltageBand' == reportsJson[report].reportType) {
+					for (study in dataTree) {					
+						drawVoltChart(dataTree[study],'voltChartDiv' + study)
+					}
+				}
+			}
+		}
+		function drawCapChart(dataArray, divName, colorList) {
+			chartData = google.visualization.arrayToDataTable(dataArray)
+			options = {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:colorList}
+			chart = new google.visualization.AreaChart(gebi(divName))
+			chart.draw(chartData, options)
+		}
+		function drawRegChart(dataArray, divName, colorList) {
+			chartData = google.visualization.arrayToDataTable(dataArray)
+			options = {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:colorList}
+			chart = new google.visualization.LineChart(gebi(divName))
+			chart.draw(chartData, options)
+		}
+		function drawVoltChart(dataArray, divName) {
+			chartData = google.visualization.arrayToDataTable(dataArray)
+			options = {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['gray','blue','gray']}
+			chart = new google.visualization.LineChart(gebi(divName))
+			chart.draw(chartData, options)
+		}
+		function drawMap(dataArray, divName) {
+			chartData = google.visualization.arrayToDataTable(dataArray)
+			options = {region:'US', displayMode:'markers', legend:'none'}
+			chart = new google.visualization.GeoChart(gebi(divName))
+			chart.draw(chartData, options)
+		}
+	</script>
 </head>
-
-<body>
+<body onload='placeReports();graphAllData()'>
 	<div id='title'>
 		<div id='logoBox'><a href='/'>▦</a></div>
 		<!--Title:-->Reports on {{ analysisName }}
 	</div>
-	<div class='content'>
-		{% for png in pngs %}
-			<div class='graphBlock'><img src='../static/analyses/{{ analysisName }}/{{ png }}'/></div>
-		{% endfor %}    
-	</div>
-	<div class='content'>
-		<pre>{{ profile }}</pre>
-	</div>
+	<div id='reports'></div>
 </body>

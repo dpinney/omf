@@ -1,1 +1,0 @@
-{'status': 'preRun', 'climate': u'CO-BOULDER.tmy2', 'name': u'New Ref Feed Test', 'sourceFeeder': u'PNNL Ref Feed RS-12.47-3', 'created': '2012-08-15 13:34:12.255000'}

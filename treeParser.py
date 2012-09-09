@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import datetime
+import copy
 
 def tokenizeGlm(glmFileName):
     import re
@@ -137,9 +138,59 @@ def adjustTime(tree, simLength, simLengthUnits):
 			leaf['interval'] = str(interval)
 			leaf['limit'] = str(simLength)
 
-# Note that we might have to change this up so we're sure the #set statements and modules (etc.) are written first. There might also be problems with parent-child relationships.
+def fullyDeEmbed(glmTree):
+	# TODO: fix problem with deEmbedding sub-objects called by name i.e. config object triplexconfig {blah}.
+	def deEmbedOnce(glmTree):
+		iterTree = copy.deepcopy(glmTree)
+		for x in iterTree:
+			for y in iterTree[x]:
+				if type(iterTree[x][y]) is dict and 'object' in iterTree[x][y]:
+					# set the parent and name attributes:
+					glmTree[x][y]['parent'] = glmTree[x]['name']
+					glmTree[x][y]['name'] = glmTree[x]['name'] + glmTree[x][y]['object'] + str(y)
+					# check for key collision, which should technically be impossible:
+					if y in glmTree.keys(): print 'KEY COLLISION!'
+					# put the embedded object back up in the glmTree:
+					glmTree[y] = glmTree[x][y]
+					# delete the embedded copy:
+					del glmTree[x][y]
+	lenDiff = 1
+	while lenDiff != 0:
+		currLen = len(glmTree)
+		deEmbedOnce(glmTree)
+		lenDiff = len(glmTree) - currLen
+
+def attachRecorders(tree, recorderType, objectToJoin, sample=False):
+	# TODO: if sample is a percentage, only attach to that percentage of nodes chosen at random.
+	# HACK: the biggestKey assumption only works for a flat tree or one that has a flat node for the last item...
+	biggestKey = int(sorted(tree.keys())[-1]) + 1
+	# Types of recorders we can attach:
+	recorders = {	'Regulator':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '1', 'file': 'Regulator_Y.csv', 'property': 'tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag'},
+					'Voltage':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '1', 'file': 'Voltage_Y.csv', 'property': 'voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag'},
+					'Capacitor':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '1', 'file': 'Capacitor_Y.csv', 'property': 'switchA,switchB,switchC'}
+				}
+	# Walk the tree. Don't worry about a recursive walk (yet).
+	staticTree = copy.copy(tree)
+	for key in staticTree:
+		leaf = staticTree[key]
+		if 'object' in leaf and 'name' in leaf:
+			parentObject = leaf['name']
+			if leaf['object'] == objectToJoin:
+				# DEBUGGING MESSAGE: print 'just joined ' + parentObject
+				newLeaf = copy.copy(recorders[recorderType])
+				newLeaf['parent'] = parentObject
+				newLeaf['file'] = recorderType + '_' + parentObject + '.csv'
+				tree[biggestKey] = newLeaf
+				biggestKey += 1
 
 #Some test code follows:
 #tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
 #simpleTokens = tokenizeGlm('testglms/Simple_System.glm')
 #print parseTokenList(simpleTokens)
+
+# recorder attachment test
+# tree = parse('./feeders/Simple Market System/main.glm')
+# attachRecorders(tree, 'reg', 'regulator')
+# attachRecorders(tree, 'volt', 'node')
+# from pprint import pprint
+# pprint(tree)

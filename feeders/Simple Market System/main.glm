@@ -399,36 +399,3 @@ object ZIPload {
       current_pf 0.950000;
       impedance_pf 0.970000;
 };
-
-
-object recorder {
-   parent Market_1;
-     property avg24,std24,last.P,current_market.clearing_price;
-     limit 14400;
-     interval 60;
-     file price_statistics.csv;
-};
-
-object recorder {
-     parent Reg1;
-     file Regulator_Reg1.csv;
-     interval 60;
-     limit 14400;
-     property tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag;
-};
-
-object recorder {
-     parent tm_1;
-     file Voltage_tm_1.csv;
-     interval 60;
-     limit 14400;
-     property voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag;
-};
-
-object recorder {
-     parent tm_2;
-     file Voltage_tm_2.csv;
-     interval 60;
-     limit 14400;
-     property voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag;
-};

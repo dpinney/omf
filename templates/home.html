@@ -3,7 +3,7 @@
 	<meta charset='utf-8'>
 	<link rel='stylesheet' href='../static/omf.css'/>
 	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
-	<script src='../static/omf.js'></script>
+	<script type='text/javascript' src='../static/omf.js'></script>
 	<style>
 		table#homeTable {width:100%; text-align:left;}
 		td.running {color:red;}
@@ -19,20 +19,21 @@
 	</div>
 	<div class='content'>
 		<table id='homeTable'>
-			<tr><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Status</th><th> </th></tr>
+			<tr><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (s)</th><th>Status</th><th> </th></tr>
 			{% for md in metadatas %}
 			<tr>
 				<td>{{ md['name'] }}</td>
 				<td>{{ md['sourceFeeder'] }}</td>
 				<td>{{ md['climate'] }}</td>
+				<td>{{ md['runTime'] }}</td>
 				<td class="{{ md['status'] }}">{{ md['status'] }}</td>
 				<td>
 					<div class='buttonGroup'>
-						<button class='pill' onclick='javascript:if(this.nextSibling.nextSibling.style.display=="inline-block"){this.nextSibling.nextSibling.style.display="none";this.innerHTML="Action ▾"}else{this.nextSibling.nextSibling.style.display="inline-block";this.innerHTML="Action ▴"}'>Action ▾</button>
+						<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
 						<ul class='menu'>
 							{% if md['status'] == 'postRun' %}<li><a href='/viewReports/{{ md["name"] }}'>View Reports</a></li>{% endif %}
 							{% if md['status'] == 'preRun' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/run/",dict)')>Run</a></li>{% endif %}
-							{% if md['status'] == 'postRun' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/reRun/",dict)'>Re-Run</a></li>{% endif %}
+							{% if md['status'] == 'postRun' or md['status'] == 'terminated' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/reRun/",dict)'>Re-Run</a></li>{% endif %}
 							{% if md['status'] != 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/",dict)'>Delete</a></li>{% endif %}
 							{% if md['status'] == 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/",dict)'>Terminate</a></li>
 							{% endif %}

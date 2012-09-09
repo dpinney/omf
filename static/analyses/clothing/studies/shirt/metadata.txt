@@ -1,0 +1,1 @@
+{'climate': u'KY-LEXINGTON.tmy2', 'name': u'shirt', 'sourceFeeder': u'13 Node Reference Feeder'}

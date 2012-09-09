@@ -33,5 +33,33 @@ function dropPill(thisButton, name) {
 }
 
 function gebi(id) {
-  return document.getElementById(id)
+    // This shortens a much-used method name.
+    return document.getElementById(id)
+}
+
+function clone(obj) {
+    // Deep copy of a given obj.
+    if (null == obj || "object" != typeof obj) return obj;
+    var copy = obj.constructor();
+    for (var attr in obj) {
+        if (obj.hasOwnProperty(attr)) copy[attr] = obj[attr];
+    }
+    return copy;
+}
+
+function tableClear(table) {
+  try {
+    while (table.rows.length>0) table.deleteRow(table.rows.length-1)
+  }
+  catch (err) {
+    // Catch: we didn't have any rows.
+  }
+}
+
+function getRadioSetting (className) {
+    // Get which radio button is set for a group with a given className.
+    value='';
+    radios = document.getElementsByClassName(className);
+    for (x in radios) {if (radios[x].checked) value = radios[x].value}
+    return value
 }

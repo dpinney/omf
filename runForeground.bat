@@ -1,1 +1,1 @@
-start python doeDemo.py
+start python omf.py
