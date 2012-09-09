@@ -7,7 +7,6 @@
 import os
 import time
 import shutil
-import grapher
 import datetime as dt
 import treeParser as tp
 import subprocess
@@ -104,11 +103,6 @@ def run(analysisName):
 		proc.wait()
 		stdout.close()
 		stderr.close()
-		# GRAPH IT (KINDA EXPENSIVE!)
-		# try:
-		# 	grapher.buildFromDir(studyDir)
-		# except:
-		# 	print 'Data got messed up somewhere. Try running again.'
 	# Update status to postRun and include running time IF WE DIDN'T TERMINATE.
 	metadata = getMetadata(analysisName)
 	if metadata['status'] != 'terminated':

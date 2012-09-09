@@ -6,7 +6,6 @@ import threading
 import analysis as da
 import json
 import treeParser as tp
-import grapher as tg
 import shutil
 import reports
 
