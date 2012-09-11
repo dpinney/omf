@@ -1,1 +1,0 @@
-{'status': 'postRun', 'climate': u'KY-LEXINGTON.tmy2, CA-SAN_FRANCISCO.tmy2', 'name': u'clothing', 'created': '2012-09-05 16:31:38.239000', 'PID': 6740, 'sourceFeeder': u'13 Node Reference Feeder', 'runTime': 138.308}

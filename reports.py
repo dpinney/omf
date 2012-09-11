@@ -11,22 +11,22 @@ def listAll():
 
 # def powerflow(analysisName):
 # 	pngs = []
-# 	for study in os.listdir('static/analyses/' + analysisName + '/studies/'):
-# 		for fileName in os.listdir('static/analyses/' + analysisName + '/studies/' + study):
+# 	for study in os.listdir('analyses/' + analysisName + '/studies/'):
+# 		for fileName in os.listdir('analyses/' + analysisName + '/studies/' + study):
 # 			if fileName.endswith('.png'): pngs.append('studies/' + study + '/' + fileName)
 # 	return {'reportType':'powerflow', 'pngs':pngs}
 
 def runtimeStats(analysisName):
 	stdouts = []
-	for study in os.listdir('static/analyses/' + analysisName + '/studies/'):
-		with open('static/analyses/' + analysisName + '/studies/' + study + '/stdout.txt', 'r') as stdout:
+	for study in os.listdir('analyses/' + analysisName + '/studies/'):
+		with open('analyses/' + analysisName + '/studies/' + study + '/stdout.txt', 'r') as stdout:
 		# Hack: drop leading \r newlines:
 			stdouts.append(study.upper() + '\n\n' + stdout.read().replace('\r',''))
 	return {'reportType':'runtimeStats', 'stdouts':stdouts}
 
 def capacitorActivation(analysisName):
 	dataTree = {}
-	pathPrefix = './static/analyses/' + analysisName
+	pathPrefix = './analyses/' + analysisName
 	for study in os.listdir(pathPrefix + '/studies/'):
 		dataTree[study] = {}
 		capFileNames = filter(lambda x:x.startswith('Capacitor_') and x.endswith('.csv'), os.listdir(pathPrefix + '/studies/' + study))
@@ -36,7 +36,7 @@ def capacitorActivation(analysisName):
 
 def regulatorPowerflow(analysisName):
 	dataTree = {}
-	pathPrefix = './static/analyses/' + analysisName
+	pathPrefix = './analyses/' + analysisName
 	for study in os.listdir(pathPrefix + '/studies/'):
 		dataTree[study] = {}
 		regFileNames = [x for x in os.listdir(pathPrefix + '/studies/' + study) if x.startswith('Regulator_') and x.endswith('.csv')]
@@ -57,7 +57,7 @@ def regulatorPowerflow(analysisName):
 def studyDetails(analysisName):
 	studies = []
 	climates = [['location','marker']]
-	pathPrefix = './static/analyses/' + analysisName
+	pathPrefix = './analyses/' + analysisName
 	with open(pathPrefix + '/metadata.txt','r') as anaMdFile:
 		created = eval(anaMdFile.read())['created']
 	for study in os.listdir(pathPrefix + '/studies/'):
@@ -69,7 +69,7 @@ def studyDetails(analysisName):
 
 def voltageBand(analysisName):
 	dataTree = {}
-	pathPrefix = './static/analyses/' + analysisName
+	pathPrefix = './analyses/' + analysisName
 	for study in os.listdir(pathPrefix + '/studies/'):
 		dataTree[study] = {}
 		for fileName in os.listdir(pathPrefix + '/studies/' + study):

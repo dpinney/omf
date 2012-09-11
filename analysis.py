@@ -13,16 +13,16 @@ import subprocess
 import copy
 
 def listAll():
-	return os.listdir('static/analyses')
+	return os.listdir('analyses')
 
 def getMetadata(analysisName):
-	mdFile = open('static/analyses/' + analysisName + '/metadata.txt','r')
+	mdFile = open('analyses/' + analysisName + '/metadata.txt','r')
 	mdString = mdFile.readlines()[0]
 	mdFile.close()
 	return eval(mdString)
 
 def putMetadata(analysisName, metadataDict):
-	mdFile = open('static/analyses/' + analysisName + '/metadata.txt','w')
+	mdFile = open('analyses/' + analysisName + '/metadata.txt','w')
 	mdFile.writelines(str(metadataDict))
 	mdFile.close()
 	return 'Sucess. Metadata updated.'
@@ -30,18 +30,18 @@ def putMetadata(analysisName, metadataDict):
 def delete(analysisName):
 	allAnalyses = listAll()
 	if analysisName in allAnalyses:
-		shutil.rmtree('static/analyses/' + analysisName)
+		shutil.rmtree('analyses/' + analysisName)
 		print 'Success. Analysis deleted.'
 	else:
 		print 'Deletion failure. Analysis does not exist.'
 
 def createAnalysis(analysisName, simLength, simLengthUnits, studies, reports):
 	# make the analysis folder structure:
-	os.mkdir('static/analyses/' + analysisName)
-	os.mkdir('static/analyses/' + analysisName + '/studies')	
-	os.mkdir('static/analyses/' + analysisName + '/reports')	
+	os.mkdir('analyses/' + analysisName)
+	os.mkdir('analyses/' + analysisName + '/studies')	
+	os.mkdir('analyses/' + analysisName + '/reports')	
 	for study in studies:
-		studyFolder = 'static/analyses/' + analysisName + '/studies/' + study['studyName']
+		studyFolder = 'analyses/' + analysisName + '/studies/' + study['studyName']
 		# make the study folder:
 		os.mkdir(studyFolder)
 		# copy over the feeder files:
@@ -66,18 +66,18 @@ def createAnalysis(analysisName, simLength, simLengthUnits, studies, reports):
 		with open(studyFolder + '/metadata.txt','w') as mdFile:
 			mdFile.write(str(metadata))
 	for report in reports:
-		with open('static/analyses/' + analysisName + '/reports/' + report['reportType'] + '.txt','w') as mdFile:
+		with open('analyses/' + analysisName + '/reports/' + report['reportType'] + '.txt','w') as mdFile:
 			mdFile.write(str({'reportType':report['reportType']}))
 	# write a file with the current status (preRun, running or postRun), source feeder and climate.
 	def uniqJoin(inList, key):
 		return ', '.join(set([x[key] for x in inList]))
 	metadata = {'name':analysisName, 'status':'preRun', 'sourceFeeder':uniqJoin(studies,'feederName'), 'climate':uniqJoin(studies,'tmy2name'), 'created':str(dt.datetime.now())}
-	with open('static/analyses/' + analysisName + '/metadata.txt','w') as mdFile:
+	with open('analyses/' + analysisName + '/metadata.txt','w') as mdFile:
 		mdFile.write(str(metadata))
 	print 'Success. Analysis created.'
 
 def run(analysisName):
-	studyNames = os.listdir('static/analyses/' + analysisName + '/studies/')
+	studyNames = os.listdir('analyses/' + analysisName + '/studies/')
 	# NOTE! We are running studies serially. We save RAM and lose time.
 	# Update status to running.
 	metadata = getMetadata(analysisName)
@@ -85,7 +85,7 @@ def run(analysisName):
 	putMetadata(analysisName, metadata)
 	startTime = dt.datetime.now()
 	for study in studyNames:
-		studyDir = 'static/analyses/' + analysisName + '/studies/' + study
+		studyDir = 'analyses/' + analysisName + '/studies/' + study
 		# Setup: pull in metadata before each study:
 		metadata = getMetadata(analysisName)
 		# HACK: if we've been terminated, don't run any more studies.
@@ -95,7 +95,7 @@ def run(analysisName):
 		stdout = open(studyDir + '/stdout.txt','w')
 		stderr = open(os.devnull,'w')
 		# TODO: turn standerr back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-		#stderr = open('static/analyses/' + analysisName + '/' + study + '/stderr.txt','w')
+		#stderr = open('analyses/' + analysisName + '/' + study + '/stderr.txt','w')
 		proc = subprocess.Popen(['gridlabd','main.glm'], cwd=studyDir, stdout=stdout, stderr=stderr)
 		# Update PID.
 		metadata['PID'] = proc.pid

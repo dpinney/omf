@@ -2,3 +2,4 @@
 log.txt
 *.sublime-project
 *.sublime-workspace
+analyses/*

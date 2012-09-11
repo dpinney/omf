@@ -35,7 +35,7 @@ def newAnalysis():
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):
 	# Get some variables.
-	reportFiles = os.listdir('static/analyses/' + analysisName + '/reports/')
+	reportFiles = os.listdir('analyses/' + analysisName + '/reports/')
 	reportList = []
 	# Iterate over reports and collect what we need: 
 	for report in reportFiles:

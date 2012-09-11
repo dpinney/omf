@@ -1,1 +1,0 @@
-{'status': 'postRun', 'climate': u'HI-HONOLULU.tmy2', 'name': u'againFaster', 'created': '2012-09-09 13:59:06.906000', 'PID': 9848, 'sourceFeeder': u'13 Node Reference Feeder', 'runTime': 13.907}
