@@ -9,7 +9,6 @@ clock {
 
 #include "light_schedule.glm";
 #include "water_and_setpoint_schedule.glm";
-#define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0;
 #set minimum_timestep=60;
 #set profiler=1;
 #set relax_naming_rules=1;

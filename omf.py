@@ -2,7 +2,7 @@
 
 import flask
 import os
-import threading
+import multiprocessing
 import analysis as da
 import json
 import treeParser as tp
@@ -11,10 +11,10 @@ import reports
 
 app = flask.Flask(__name__)
 
-class backgroundThread(threading.Thread):
+class backgroundProc(multiprocessing.Process):
 	def __init__(self, analysisName):
 		self.analysisName = analysisName
-		threading.Thread.__init__(self)
+		multiprocessing.Process.__init__(self)
 	def run(self):
 		da.run(self.analysisName)
 
@@ -52,8 +52,8 @@ def viewReports(analysisName):
 @app.route('/run/', methods=['POST'])
 @app.route('/reRun/', methods=['POST'])
 def run():
-	runThread = backgroundThread(flask.request.form['analysisName'])
-	runThread.start()
+	runProc = backgroundProc(flask.request.form['analysisName'])
+	runProc.start()
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/delete/', methods=['POST'])
@@ -65,7 +65,7 @@ def delete():
 def saveAnalysis():
 	postData = json.loads(flask.request.form.to_dict()['json'])
 	print postData
-	da.createAnalysis(postData['analysisName'], int(postData['simLength']), postData['simLengthUnits'], postData['studies'], postData['reports'])
+	da.createAnalysis(postData['analysisName'], int(postData['simLength']), postData['simLengthUnits'], postData['simStartDate'], postData['studies'], postData['reports'])
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/terminate/', methods=['POST'])
@@ -115,7 +115,7 @@ def updateGlm():
 	os.remove('./feeders/' + newFeeder + '/main.glm')
 	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm:
 		newMainGlm.write(tp.sortedWrite(tree))
-	return flask.redirect(flask.url_for('newStudy'))
+	return flask.redirect(flask.url_for('newAnalysis'))
 
 # This will run on all interface IPs.
 if __name__ == '__main__':

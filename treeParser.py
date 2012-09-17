@@ -109,10 +109,13 @@ def sortedWrite(inTree):
 	sortedKeys = sorted(inTree.keys(), key=int)
 	output = ''
 	for key in sortedKeys:
-		output += dictToString(inTree[key]) + '\n'
+		try:
+			output += dictToString(inTree[key]) + '\n'
+		except Exception:
+			print inTree[key]
 	return output
 
-def adjustTime(tree, simLength, simLengthUnits):
+def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 	# translate LengthUnits to minutes.
 	if simLengthUnits == 'minutes':
 		lengthInSeconds = simLength * 60
@@ -124,7 +127,7 @@ def adjustTime(tree, simLength, simLengthUnits):
 		lengthInSeconds = 86400 * simLength
 		interval = 86400
 
-	starttime = datetime.datetime(2000,1,1)
+	starttime = datetime.datetime.strptime(simStartDate, '%Y-%m-%d')
 	stoptime = starttime + datetime.timedelta(seconds=lengthInSeconds)
 
 	# alter the clocks and recorders:
@@ -134,7 +137,7 @@ def adjustTime(tree, simLength, simLengthUnits):
 			# Ick, Gridlabd wants time values wrapped in single quotes:
 			leaf['starttime'] = "'" + str(starttime) + "'"
 			leaf['stoptime'] = "'" + str(stoptime) + "'"
-		if 'object' in leaf and leaf['object'] == 'recorder':
+		if 'object' in leaf and (leaf['object'] == 'recorder' or leaf['object'] == 'collector'):
 			leaf['interval'] = str(interval)
 			leaf['limit'] = str(simLength)
 
@@ -154,6 +157,21 @@ def fullyDeEmbed(glmTree):
 					glmTree[y] = glmTree[x][y]
 					# delete the embedded copy:
 					del glmTree[x][y]
+				# TODO: take this if case and roll it into the if case above to save lots of code and make it easier to read.
+				if type(iterTree[x][y]) is dict and 'omfEmbeddedConfigObject' in iterTree[x][y]:
+					configList = iterTree[x][y]['omfEmbeddedConfigObject'].split()
+					# set the name attribute and the parent's reference:
+					glmTree[x][y]['name'] = glmTree[x]['name'] + configList[2] + str(y)
+					glmTree[x][y]['object'] = configList[2]
+					glmTree[x][configList[0]] = glmTree[x][y]['name']
+					# get rid of the omfEmbeddedConfigObject string:
+					del glmTree[x][y]['omfEmbeddedConfigObject']
+					# check for key collision, which should technically be impossible BECAUSE Y AND X ARE DIFFERENT INTEGERS IN [1,...,numberOfDicts]:
+					if y in glmTree.keys(): print 'KEY COLLISION!'
+					# put the embedded object back up in the glmTree:
+					glmTree[y] = glmTree[x][y]
+					# delete the embedded copy:
+					del glmTree[x][y]
 	lenDiff = 1
 	while lenDiff != 0:
 		currLen = len(glmTree)
@@ -167,8 +185,14 @@ def attachRecorders(tree, recorderType, objectToJoin, sample=False):
 	# Types of recorders we can attach:
 	recorders = {	'Regulator':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '1', 'file': 'Regulator_Y.csv', 'property': 'tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag'},
 					'Voltage':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '1', 'file': 'Voltage_Y.csv', 'property': 'voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag'},
-					'Capacitor':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '1', 'file': 'Capacitor_Y.csv', 'property': 'switchA,switchB,switchC'}
+					'Capacitor':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '1', 'file': 'Capacitor_Y.csv', 'property': 'switchA,switchB,switchC'},
+					'CollectorVoltage':{'interval': '1', 'object': 'collector', 'limit': '1', 'file': 'VoltageJiggle.csv', 'group': 'class=triplex_meter', 'property':'min(voltage_12.mag),mean(voltage_12.mag),max(voltage_12.mag),std(voltage_12.mag)'}
 				}
+	# If the recorder doesn't have a parent don't walk the tree:
+	if 'parent' not in recorders[recorderType]:
+		newLeaf = copy.copy(recorders[recorderType])
+		tree[biggestKey] = newLeaf
+		biggestKey += 1
 	# Walk the tree. Don't worry about a recursive walk (yet).
 	staticTree = copy.copy(tree)
 	for key in staticTree:
@@ -176,21 +200,28 @@ def attachRecorders(tree, recorderType, objectToJoin, sample=False):
 		if 'object' in leaf and 'name' in leaf:
 			parentObject = leaf['name']
 			if leaf['object'] == objectToJoin:
-				# DEBUGGING MESSAGE: print 'just joined ' + parentObject
+				# DEBUG: print 'just joined ' + parentObject
 				newLeaf = copy.copy(recorders[recorderType])
 				newLeaf['parent'] = parentObject
 				newLeaf['file'] = recorderType + '_' + parentObject + '.csv'
 				tree[biggestKey] = newLeaf
 				biggestKey += 1
 
-#Some test code follows:
-#tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
-#simpleTokens = tokenizeGlm('testglms/Simple_System.glm')
-#print parseTokenList(simpleTokens)
+##Parser Test
+# tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
+# simpleTokens = tokenizeGlm('testglms/Simple_System.glm')
+# print parseTokenList(simpleTokens)
 
-# recorder attachment test
+##Recorder Attachment Test
 # tree = parse('./feeders/Simple Market System/main.glm')
 # attachRecorders(tree, 'reg', 'regulator')
 # attachRecorders(tree, 'volt', 'node')
 # from pprint import pprint
 # pprint(tree)
+
+## Testing The De-Embedding
+# from pprint import pprint
+# tree = parse('./feeders/13 Node Reference Feeder/main.glm')
+# fullyDeEmbed(tree)
+# #pprint(tree)
+# print sortedWrite(tree)

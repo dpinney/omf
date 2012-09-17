@@ -73,22 +73,10 @@ def voltageBand(analysisName):
 	for study in os.listdir(pathPrefix + '/studies/'):
 		dataTree[study] = {}
 		for fileName in os.listdir(pathPrefix + '/studies/' + study):
-			if fileName.startswith('Voltage_') and fileName.endswith('.csv'):
+			if 'VoltageJiggle.csv' == fileName:
 				fullArray = __csvToArray__(pathPrefix + '/studies/' + study + '/' + fileName)
-				dataTree[study][fileName] = [[row[0], __pyth__(row[1],row[2]),__pyth__(row[3],row[4]),__pyth__(row[5],row[6])] for row in fullArray[1:]]
-				dataTree[study][fileName].insert(0,[fullArray[0][0],'A','B','C'])
-		# INSANE ONE-LINER: join all the voltage data on timestamp.
-		dataTree[study] = zip(*[dataTree[study][key] for key in dataTree[study]])
-		# Then flatten without the head:
-		dataTree[study] = map(__flat1__, dataTree[study][1:])
-		# Then filter:
-		def filterStrings(aList):
-			return [aList[0]] + filter(lambda x:type(x) is not str, aList[1:])
-		dataTree[study] = map(filterStrings, dataTree[study][1:])
-		# Then min/max/avg:
-		dataTree[study] = map(lambda x:[x[0],min(x[1:]),sum(x[1:])/len(x[1:]),max(x[1:])], dataTree[study])
-		# Then put the head back on.
-		dataTree[study].insert(0,['# timestamp','min','avg','max'])
+				dataTree[study] = [[row[0],row[1]/2,row[2]/2,row[3]/2] for row in fullArray[1:]]
+				dataTree[study].insert(0,[fullArray[0][0],fullArray[0][1],fullArray[0][2],fullArray[0][3]])
 	return {'reportType':'voltageBand', 'dataTree':dataTree}
 
 def __csvToArray__(fileName):

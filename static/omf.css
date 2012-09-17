@@ -1,12 +1,8 @@
-/* COLOR CHART 
-TODO: make this so we have consistent colors;
-*/
-
 * {margin:0px; padding:0px; border:0px;}
 
 body {
 	font-family:Helvetica,Arial,sans-serif;
-	background:#E6E6E6;
+	background:gainsboro;
 	padding:0px;
 	margin:0px;
 	min-width:600px; }
@@ -49,7 +45,7 @@ a:visited {color:#339966;}
 
 form {line-height:10pt; padding: 0px; margin: 0px;}
 
-select, input[type='text'], button {width:100%; background:#E6E6E6; padding:4px; margin:2px; border-width:1px; border-color:white; border-style:solid;}
+select, input[type='text'], button {width:100%; background:gainsboro; padding:4px; margin:2px; border-width:1px; border-color:white; border-style:solid;}
 
 button {
 	background:#339966;
@@ -77,6 +73,7 @@ button.pill {
 	border: 1px;
 	border-color:gray;
 	border-style:solid;
+	white-space: nowrap;
 	color:black; }
 
 ul.menu {

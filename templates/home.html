@@ -2,16 +2,23 @@
 	<title>Open Modeling Framework</title>
 	<meta charset='utf-8'>
 	<link rel='stylesheet' href='../static/omf.css'/>
-	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
 	<script type='text/javascript' src='../static/omf.js'></script>
+	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
 	<style>
 		table#homeTable {width:100%; text-align:left;}
 		td.running {color:red;}
 		td.preRun {color:orange;}
 		td.postRun {color:black;}
+		td.terminated {color:purple;}		
 	</style>
+	<script>
+		// CODE FOR AUTOMATICALLY REFRESHING THE HOMEPAGE:
+		// intervalID = window.setInterval(analysisStatusCheck, 5000)
+		// function analysisStatusCheck() {
+		// 	console.log('Checkin the runtimes...')
+		// }
+	</script>
 </head>
-
 <body>
 	<div id='title'>
 		<div id='logoBox'><a href='/'>▦</a></div>

@@ -33,6 +33,7 @@
 			// Get the analysis-level stuff.
 			responseDict.simLength = parseInt(gebi('simLength').value)
 			responseDict.simLengthUnits = getRadioSetting('radio')
+			responseDict.simStartDate = gebi('simStartDate').value
 			responseDict.analysisName = gebi('analysisName').value
 			// Get the study-level stuff.
 			studyList = []
@@ -100,6 +101,9 @@
 			</tr>
 			<tr>
 				<td></td><td><input type='radio' class='radio' name='simLengthUnits' value='minutes'/> Minutes <input type='radio' class='radio' name='simLengthUnits' value='hours'/> Hours <input type='radio' class='radio' name='simLengthUnits' value='days'/> Days </td></tr>
+			<tr>
+				<td>Simulation Start Date (YYYY-MM-DD)</td><td><input type='text' id='simStartDate'/></td>
+			</tr>
 			<tr>
 				<td></td><td><button onclick='javascript:saveAnalysis()'>Save Analysis</button></td>
 			</tr>

@@ -35,7 +35,7 @@ def delete(analysisName):
 	else:
 		print 'Deletion failure. Analysis does not exist.'
 
-def createAnalysis(analysisName, simLength, simLengthUnits, studies, reports):
+def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studies, reports):
 	# make the analysis folder structure:
 	os.mkdir('analyses/' + analysisName)
 	os.mkdir('analyses/' + analysisName + '/studies')	
@@ -52,9 +52,9 @@ def createAnalysis(analysisName, simLength, simLengthUnits, studies, reports):
 		tree = tp.parse(studyFolder + '/main.glm')
 		tp.attachRecorders(tree, 'Regulator', 'regulator')
 		tp.attachRecorders(tree, 'Capacitor', 'capacitor')
-		tp.attachRecorders(tree, 'Voltage', 'triplex_meter')		
+		tp.attachRecorders(tree, 'CollectorVoltage', None)		
 		# Modify the glm with time variables:
-		tp.adjustTime(tree=tree, simLength=simLength, simLengthUnits=simLengthUnits)
+		tp.adjustTime(tree=tree, simLength=simLength, simLengthUnits=simLengthUnits, simStartDate=simStartDate)
 		# write the glm:
 		outString = tp.write(tree)
 		with open(studyFolder + '/main.glm','w') as glmFile:
@@ -94,8 +94,8 @@ def run(analysisName):
 		# RUN GRIDLABD (EXPENSIVE!)
 		stdout = open(studyDir + '/stdout.txt','w')
 		stderr = open(os.devnull,'w')
+		# stderr = open(studyDir + '/stderr.txt','w')
 		# TODO: turn standerr back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-		#stderr = open('analyses/' + analysisName + '/' + study + '/stderr.txt','w')
 		proc = subprocess.Popen(['gridlabd','main.glm'], cwd=studyDir, stdout=stdout, stderr=stderr)
 		# Update PID.
 		metadata['PID'] = proc.pid

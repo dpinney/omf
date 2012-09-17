@@ -9,7 +9,6 @@ clock {
 #include "HVAC_schedule.glm";
 #include "water_schedule.glm";
 #include "appliance_schedule.glm";
-#define stylesheet=gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0;
 #set minimum_timestep=60;
 #set profiler=1;
 #set relax_naming_rules=1;

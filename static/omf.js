@@ -20,6 +20,20 @@ function post_to_url(path, params, method) {
     form.submit()
 }
 
+function ajaxReq(requestType, URL, asynch) {
+    var xmlhttp
+    if (window.XMLHttpRequest) {// code for IE7+, Firefox, Chrome, Opera, Safari
+        xmlhttp=new XMLHttpRequest()
+    }
+    else {// code for IE6, IE5
+        xmlhttp=new ActiveXObject("Microsoft.XMLHTTP")
+    }
+    xmlhttp.open(requestType, URL, asynch)
+    xmlhttp.send()
+    return xmlhttp.responseText
+}
+
+
 function dropPill(thisButton, name) {
     currentStatus = getComputedStyle(thisButton.nextSibling.nextSibling).display
     if (currentStatus == 'inline-block' || currentStatus == 'block') {
