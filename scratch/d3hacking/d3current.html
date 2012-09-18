@@ -1,0 +1,486 @@
+﻿<head>
+  <script type='text/javascript' src='../../static/d3.v2.js'></script>
+  <script type='text/javascript' src='../../static/omf.js'></script>
+  <link rel='stylesheet' href='../../static/omf.css'>
+  <style>
+  * {border:0px;margin:0px;padding:0px;}
+  div#toolbar { 
+    padding:10px;
+    height:25px;
+    border-width:0px 0px 1px 0px;
+    border-color:black;
+    border-style:solid;
+    text-align:center;
+    vertical-align:center;
+    background-color:black; /* for browsers that can't do gradients */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#B0B0B0', endColorstr='#696969 '); /* for IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#B0B0B0), to(#696969)); /* for webkit browsers */
+    background: -moz-linear-gradient(top,  #B0B0B0,  #696969); /* for firefox 3.6+ */ }
+  div#title p {display:inline-block;}
+  input#gridNameEdit {font-size:28pt; line-height: 28pt; text-shadow: 0px 3px 3px #4d4d4d; height: 50px; color:gray; padding:3px; margin-bottom:5px; width:85%;}
+  button.smallButton {height:30px; width:30px; display:inline-block; float:right; padding:2px; margin-left:5px;}
+  button.deleteButton {width:auto; float:right; background-color: #CC0000; color:white;}
+  button.deleteButton:hover {background: #FF0000;}
+  #selected {border:1px solid black; border-bottom:0px;position:absolute;top:90pt;left:4pt;width:20%;}
+  #selHead tr td {background:black; color:white;}
+  #selected td {padding:5px; border-bottom:1px solid black; background:white; color:black}
+  .leftToolbar {float:left;margin-right:5px;}
+  .rightToolbar {float:right; margin-left:5px;}
+  input {min-width: 100px}
+  /* Start graph elements. */
+  .nodetext {pointer-events: none; font: 10px; }
+  circle.node {fill:gray; stroke: #fff;stroke-width: 1.5px;}
+  line.link {stroke: #999;stroke-opacity: .6; stroke-width: 2px;}
+  line.parentChild {stroke-dasharray:3,3;}
+  line.selected {stroke:black; stroke-width: 4px; stroke-opacity: 1.0;}
+  circle.selected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; }
+  circle.multiselected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
+  circle.house {fill:#3366FF;}
+  circle.load {fill:#3366FF;}
+  circle.ZIPload, circle.waterheater {fill:#66CCFF;}
+  circle.triplex_meter {fill:#FF6600;}
+  circle.triplex_node {fill:#FFCC00;}
+  circle.gridNode {fill:#CC0000;}
+  </style>
+</head>
+<body>
+<div id='title'>
+  <div id='logoBox'><a href='/'>▦</a></div>
+  <p>Grid Editor: </p>
+  <p id='gridName'>{{model_id}}</p>
+</div>
+<div id='toolbar'>
+  <div class='buttonGroup leftToolbar'>
+    <button id='butter' class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
+    <ul id='newObjectMenu' class='menu'>
+    </ul>
+  </div>
+  <div class='buttonGroup leftToolbar'>
+    <button class='pill' onclick='dropPill(this, "Zoom")'>Zoom ▾</button>
+    <ul class='menu'>
+      <li><a href='javascript:zoomToFit()'>Zoom to Fit</a></li>
+    </ul>
+  </div>
+  <div class='buttonGroup leftToolbar'>
+    <button class='pill' onclick='dropPill(this, "Layout")'>Layout ▾</button>
+    <ul class='menu'>
+      <li><a href='javascript:pauseResume()'>Pause/Resume</a></li>
+    </ul>
+  </div>
+  <div class='buttonGroup rightToolbar'>
+    <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
+    <ul class='menu right'>
+      <li id='renameMenuItem'><a href='javascript:rename()'>Rename</a></li>
+      <li id='saveMenuItem'><a href='javascript:saveModel()'>Save a Copy</a></li>
+      <li><a href='javascript:history.back()'>Cancel</a></li>
+    </ul>
+  </div>
+</div>
+<table id='selected'>
+  <thead id='selHead'>
+  </thead>
+  <tbody id='selBody'>
+  </tbody>
+  <tfoot id='selFoot'>
+  </tfoot>
+</table>
+<div id='chart' style='background:white'></div>
+<script>
+feeder = '{{model_id}}'
+
+var w = document.width
+// HACK: subtract off the toolbar and titlebar heights.
+var h = document.height - 112
+var tree
+var components
+var zoomer = d3.behavior.zoom()
+
+var vis = d3.select('#chart')
+  .append('svg:svg')
+  .attr('width', w)
+  .attr('height', h)
+  .attr('pointer-events', 'all')
+  .call(zoomer.on('zoom', zoomRedraw))
+  .append('svg:g')
+
+var force = d3.layout.force()
+  .charge(-120)
+  .linkDistance(30)
+  .size([w, h]);
+
+var nodes = force.nodes()
+var links = force.links()
+var hiddenNodes = []
+var hiddenLinks = []
+
+force.on('tick', function() {
+  vis.selectAll('line.link')
+    .attr('x1', function(d) { return d.source.x; })
+    .attr('y1', function(d) { return d.source.y; })
+    .attr('x2', function(d) { return d.target.x; })
+    .attr('y2', function(d) { return d.target.y; });
+  vis.selectAll('circle.node')
+    .attr('cx', function(d) { return d.x; })
+    .attr('cy', function(d) { return d.y; });
+});
+
+function draw() {
+  var name2nodeIndex = {}
+  // Go through the first time and set up the nodes with indices:
+  for (x in tree) {
+    if (tree[x].name != undefined && tree[x].from == undefined) {
+      nodeName = tree[x].name
+      nodeObject = tree[x].object
+      // Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
+      if (nodeObject == 'node') nodeObject = 'gridNode'
+      nodeIndex = nodes.length
+      nodes.push({name:nodeName,treeIndex:parseInt(x),objectType:nodeObject})
+      name2nodeIndex[nodeName] = nodeIndex
+    }
+  }
+  // Go through a second time and set up the links:
+  for (x in tree) {
+    if (tree[x].name != undefined) {
+      if (tree[x].from != undefined && tree[x].to != undefined) {
+        name2nodeIndex[tree[x].name] = links.length
+        links.push({source:name2nodeIndex[tree[x].from],target:name2nodeIndex[tree[x].to],treeIndex:parseInt(x),objectType:'fromTo'})
+      } else if (tree[x].parent != undefined) {
+        links.push({source:name2nodeIndex[tree[x].name],target:name2nodeIndex[tree[x].parent],objectType:'parentChild'})
+      }
+    }
+  }
+  // This makes a fancy fade-in.
+  vis.style('opacity', 1e-6)
+    .transition()
+    .duration(1500)
+    .style('opacity', 1);
+  redraw()
+}
+
+function redraw() {
+  link = vis.selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
+
+  link.enter().append('svg:line')
+    .on('click', onCompClick)
+    .attr('class', function(d) { return 'link ' + d.objectType })
+    .attr('id', function(d) { return 'n' + d.treeIndex })
+    .style('stroke-width', function(d) { return Math.sqrt(d.value); })
+    .attr('x1', function(d) { return d.source.x; })
+    .attr('y1', function(d) { return d.source.y; })
+    .attr('x2', function(d) { return d.target.x; })
+    .attr('y2', function(d) { return d.target.y; });
+
+  link.exit().remove()
+
+  node = vis.selectAll('circle.node').data(nodes, function(d) {return d.treeIndex})
+  
+  node.enter().append('svg:circle')
+    .attr('class', function(d) {return 'node ' + d.objectType})
+    .attr('id', function(d) {return 'n' + d.treeIndex})
+    .on('click', onCompClick)
+    .attr('cx', function(d) {return d.x})
+    .attr('cy', function(d) {return d.y})
+    .attr('r', 10)
+    .call(force.drag);
+
+  // TODO: un-comment this to have text labels on _some_ nodes.
+  // node.append('svg:title')
+  //     .text(function(d) { return d.name; });
+
+  node.exit().remove()
+
+  force.start();
+}
+
+function zoomRedraw() {
+  // Some logging code, if you like:
+  // console.log('here', d3.event.translate, d3.event.scale);
+  vis.attr('transform',
+    'translate(' + d3.event.translate + ')'
+    + ' scale(' + d3.event.scale + ')');
+}
+
+function classify(d, c, on) {
+  svg = d3.select('#chart')
+  if(on) {
+    // turn off the currently styled one
+    svg.select('.' + c).classed(c, false);
+    // then, style the new one
+    svg.select("#n" + d.treeIndex).classed(c, true);
+  }
+  else {
+    svg.select("#n" + d.treeIndex).classed(c, false);
+  }
+}
+
+function onCompClick(d, i) {
+  console.log([d.treeIndex,d.name,d.objectType])
+  // Abort if we try to select a parentChild relationship.
+  if (d.objectType == 'parentChild') return false
+  // Multiselection case:
+  if (d3.event.altKey) {
+    classify(d,'multiselected',true)
+    return false
+  }
+  table = gebi('selected')
+  // Visually identify the selected node.
+  classify(d,'selected',true)
+  // clear the selected table
+  tableClear(table)
+  treeData = tree[d.treeIndex]
+  for (prop in treeData) {
+    // TODO: insert name row?
+    if (prop == 'object') {
+      row = gebi('selHead').insertRow(0)
+    } else if (prop != 'from' && prop != 'to' && prop != 'parent' && prop != 'name') {
+      row = gebi('selBody').insertRow(-1)
+    } else {
+      row = null
+    }
+    try {
+      row.insertCell(0).innerHTML = prop
+      row.insertCell(1).innerHTML = treeData[prop]
+    } catch(err) {
+      //Catch: row was null.
+    }
+  }
+  row = table.insertRow(-1)
+  cell = row.insertCell(0)
+  cell.colSpan = 2
+  cell.innerHTML = '<button type="button" onclick="editObject(' + d.treeIndex + ')">Edit</button>'
+}
+
+function editObject(treeIndex) {
+  table = gebi('selected')
+  //Make all the boxes editable.
+  for (i = 1; i < table.rows.length - 1; i++) {
+    cell = table.rows[i].cells[1]
+    oldContent = cell.innerHTML
+    cell.innerHTML = '<input type="text" name="null" data-old="' + oldContent + '" value="' + oldContent + '"/>'
+  }
+  //Put the save/cancel buttons in there with the right index.
+  table.deleteRow(-1)
+  bottomRow = table.insertRow(-1)
+  bottomRow.insertCell(0).innerHTML = '<button type="button" onclick="saveEdits(' + treeIndex + ')">Save</button>'
+  bottomRow.insertCell(1).innerHTML = '<button type="button" onclick="cancelEditing(' + treeIndex + ')">Cancel</button>'
+  //Put a delete button in.
+  gebi('selHead').rows[0].cells[1].innerHTML += '<button class="deleteButton" onclick="deleteObject(' + treeIndex + ')">Delete</button>'
+}
+
+function saveEdits(treeIndex) {
+  table = gebi('selected')
+  // check for node or link:
+  treeObject = tree[treeIndex]
+  for (i = 1; i < table.rows.length - 1; i++) {
+    name = table.rows[i].cells[0].innerHTML
+    cell = table.rows[i].cells[1]
+    newValue = cell.childNodes[0].value
+    // alert(name + ':' + newValue)
+    treeObject[name] = newValue
+    cell.innerHTML = newValue
+  }
+  table.deleteRow(-1)
+  row = table.insertRow(-1)
+  cell = row.insertCell(0)
+  cell.colSpan = 2
+  cell.innerHTML = '<button type="button" onclick="editObject(' + treeIndex + ')">Edit</button>'
+  delButton = gebi('selHead').rows[0].cells[1].children[0]
+  delButton.parentNode.removeChild(delButton)
+}
+
+function cancelEditing(treeIndex) {
+  table = gebi('selected')
+  for (i = 1; i < table.rows.length - 1; i++) {
+    cell = table.rows[i].cells[1]
+    old = cell.childNodes[0].getAttribute('data-old')
+    cell.innerHTML = old
+  }
+  table.deleteRow(-1)
+  row = table.insertRow(-1)
+  cell = row.insertCell(0)
+  cell.colSpan = 2
+  cell.innerHTML = '<button type="button" onclick="editObject(' + treeIndex + ')">Edit</button>'
+  delButton = gebi('selHead').rows[0].cells[1].children[0]
+  delButton.parentNode.removeChild(delButton)
+}
+
+function deleteObject(treeIndex) {
+  // Figure out whether we have a node or an edge:
+  var isNode = true
+  for (prop in tree[treeIndex]) if (prop == 'from') isNode = false
+  if (isNode) {
+    // Check for connections and abort if we have them.
+    nodeName = tree[treeIndex].name
+    for (indexVar in tree) {
+      if (tree[indexVar].from == nodeName || tree[indexVar].to == nodeName || tree[indexVar].parent == nodeName) {
+        alert('We can only delete nodes that aren\'t connected')
+        return false
+      }
+    }
+    // No connection, so delete the node:
+    var nodeIndex
+    for (x=0;x<nodes.length;x++) {
+      if (nodes[x].treeIndex == treeIndex) nodeIndex = x
+    }
+    nodes.splice(nodeIndex,1)
+    // If we have a parent child situation, delete the link:
+    if (tree[treeIndex].parent != undefined) {
+      var linkIndex
+      for (x=0;x<links.length;x++) {
+        if (links[x].source.name == nodeName) linkIndex = x
+      }
+      links.splice(linkIndex,1)
+    }
+    // Delete tree object:
+    delete tree[treeIndex]
+    // Select nothing:
+    tableClear(gebi('selected'))
+    redraw()
+  } else {
+    // Delete edge:
+    var linkIndex
+    for (x=0;x<links.length;x++) {
+      if (links[x].treeIndex == treeIndex) linkIndex = x
+    }
+    links.splice(linkIndex,1)
+    // Delete tree object:
+    delete tree[treeIndex]
+    // Select nothing:
+    tableClear(gebi('selected'))
+    redraw()
+  }
+}
+
+function newObject(objectName) {
+  component = clone(components[objectName])
+  // Find the next index available in the tree.
+  keys = Object.keys(tree)
+  max = 0
+  for (x in keys) {
+    if (parseInt(x) > max) max = parseInt(x)
+  }
+  treeNewIndex = max + 1
+  // Put the component in the tree with a new name.
+  tree[treeNewIndex] = component
+  tree[treeNewIndex].name = objectName + String(treeNewIndex)
+  // Add to the nodes.
+  newType = component.object
+  // Hack to make sure we color nodes correctly:
+  if (newType == 'node') newType = 'gridNode'
+  newNode = {name:component.name, objectType:newType, treeIndex:treeNewIndex}
+  nodes.push(newNode)
+  redraw()
+}
+
+function newEdge() {
+  // TODO: implement
+  return false
+}
+
+function zoomToFit() {
+  zoomer.translate([0, 0]).scale(1)
+  vis.attr('transform', 'translate([0, 0]) scale(1)')
+}
+
+function saveModel() {
+  sendDict = {tree:JSON.stringify(tree),feederName:feeder,newName:gebi('gridName').innerHTML}
+  post_to_url('/saveFeeder/', sendDict)
+}
+
+function rename() {
+  gebi('renameMenuItem').style.display = 'none'
+  gebi('saveMenuItem').style.display = 'none'
+  gridNameP = gebi('gridName')
+  currentName = gridNameP.innerHTML
+  inputBox = '<input type="text" id="gridNameEdit" name="gridNameEdit" data-old="' + currentName + '" value="' + currentName + '"/>'
+  acceptButton = '<button class="smallButton" id="acceptButton" onclick="acceptRename()">✔</button>'
+  cancelButton = '<button class="smallButton" id="cancelButton" onclick="cancelRename()">✘</button>'
+  gridNameP.innerHTML = inputBox + acceptButton + cancelButton
+}
+
+function cancelRename() {
+  gebi('renameMenuItem').style.display = 'block'
+  gebi('saveMenuItem').style.display = 'block'
+  gridNameP = gebi('gridName')
+  oldName = gebi('gridNameEdit').getAttribute('data-old')
+  gridNameP.innerHTML = oldName
+}
+
+function acceptRename() {
+  gebi('renameMenuItem').style.display = 'block'
+  gebi('saveMenuItem').style.display = 'block'
+  gridNameP = gebi('gridName')
+  newName = gebi('gridNameEdit').value
+  gridNameP.innerHTML = newName
+}
+
+function fillComponentMenu() {
+  newObjectMenu = gebi('newObjectMenu')
+  for (component in components) {
+    newObjectMenu.innerHTML += ('<li><a href="javascript:newObject(\'' + component + '\')">' + component + '</a></li>')
+  }
+}
+
+function pauseResume() {
+  if (pauseResume.state == undefined) pauseResume.state = 'playing'
+  if (pauseResume.state == 'playing') {
+    pauseResume.state = 'paused'
+    console.log(pauseResume.state)
+    for (node in nodes) {
+      nodes[node].fixed = true
+    }
+  } else if (pauseResume.state == 'paused') {
+    pauseResume.state = 'playing'
+    console.log(pauseResume.state)
+    for (node in nodes) {
+      nodes[node].fixed = false
+    }
+    // Apparently we have to tell force to go again:
+    force.resume()
+  }
+}
+
+function isChild(node) {
+  counter = 0;
+  for (linkId in links) {
+    if (node.name == links[linkId].source.name || node.name == links[linkId].target.name) {counter += 1}
+  }
+  if (1 == counter) {return true}
+  else {return false}
+}
+
+function hideLink(link) {
+  hiddenLinks.push(links.splice(links.indexOf(link),1)[0])
+}
+
+function hideNode(node) {
+  // Pop the node of the nodes list and push it onto the hiddenNodes list:
+  hiddenNodes.push(nodes.splice(nodes.indexOf(node),1)[0])
+  // Pop/push any connected edges:
+  toHideEdges = links.filter(function (lin) {return node.name == lin.source.name || node.name == lin.target.name})
+  toHideEdges.map(hideLink)
+}
+
+function hideChildren() {
+  // Find all the children:
+  toHide = nodes.filter(isChild)
+  // Hide them:
+  toHide.map(hideNode)
+  redraw()
+}
+
+function showAllNodes() {
+  while (hiddenLinks.length != 0) {
+    links.push(hiddenLinks.pop())
+  }
+  while (hiddenNodes.length != 0) {
+    nodes.push(hiddenNodes.pop())
+  }
+  redraw()
+}
+
+d3.json('small.json', function(json){tree=json;draw(json)})
+d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
+
+</script>
+</body>
