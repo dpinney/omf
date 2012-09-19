@@ -18,7 +18,7 @@
     background: -moz-linear-gradient(top,  #B0B0B0,  #696969); /* for firefox 3.6+ */ }
   div#title p {display:inline-block;}
   input#gridNameEdit {font-size:28pt; line-height: 28pt; text-shadow: 0px 3px 3px #4d4d4d; height: 50px; color:gray; padding:3px; margin-bottom:5px; width:85%;}
-  button.smallButton {height:30px; width:30px; display:inline-block; float:right; padding:2px; margin-left:5px;}
+  button.smallButton {height:20px; width:20px; display:inline-block; float:right; padding:2px; margin-left:5px;}
   button.deleteButton {width:auto; float:right; background-color: #CC0000; color:white;}
   button.deleteButton:hover {background: #FF0000;}
   #selected {border:1px solid black; border-bottom:0px;position:absolute;top:90pt;left:4pt;width:20%;}
@@ -71,7 +71,7 @@
     <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
     <ul class='menu right'>
       <li id='renameMenuItem'><a href='javascript:rename()'>Rename</a></li>
-      <li id='saveMenuItem'><a href='javascript:saveModel()'>Save a Copy</a></li>
+      <li id='saveMenuItem'><a href='javascript:saveModel()'>Save</a></li>
       <li><a href='javascript:history.back()'>Cancel</a></li>
     </ul>
   </div>
@@ -111,6 +111,8 @@ var force = d3.layout.force()
 
 var nodes = force.nodes()
 var links = force.links()
+var hiddenNodes = []
+var hiddenLinks = []
 
 force.on('tick', function() {
   vis.selectAll('line.link')
@@ -382,7 +384,7 @@ function zoomToFit() {
 }
 
 function saveModel() {
-  sendDict = {tree:JSON.stringify(tree),feederName:feeder,newName:gebi('gridName').innerHTML}
+  sendDict = {tree:JSON.stringify(tree),nodes:JSON.stringify(nodes),links:JSON.stringify(links),feederName:feeder,newName:gebi('gridName').innerHTML}
   post_to_url('/saveFeeder/', sendDict)
 }
 
@@ -437,6 +439,45 @@ function pauseResume() {
     // Apparently we have to tell force to go again:
     force.resume()
   }
+}
+
+function isChild(node) {
+  counter = 0;
+  for (linkId in links) {
+    if (node.name == links[linkId].source.name || node.name == links[linkId].target.name) {counter += 1}
+  }
+  if (1 == counter) {return true}
+  else {return false}
+}
+
+function hideLink(link) {
+  hiddenLinks.push(links.splice(links.indexOf(link),1)[0])
+}
+
+function hideNode(node) {
+  // Pop the node of the nodes list and push it onto the hiddenNodes list:
+  hiddenNodes.push(nodes.splice(nodes.indexOf(node),1)[0])
+  // Pop/push any connected edges:
+  toHideEdges = links.filter(function (lin) {return node.name == lin.source.name || node.name == lin.target.name})
+  toHideEdges.map(hideLink)
+}
+
+function hideChildren() {
+  // Find all the children:
+  toHide = nodes.filter(isChild)
+  // Hide them:
+  toHide.map(hideNode)
+  redraw()
+}
+
+function showAllNodes() {
+  while (hiddenLinks.length != 0) {
+    links.push(hiddenLinks.pop())
+  }
+  while (hiddenNodes.length != 0) {
+    nodes.push(hiddenNodes.pop())
+  }
+  redraw()
 }
 
 d3.json('/api/models/{{ model_id }}.json', function(json){tree=json;draw(json)})

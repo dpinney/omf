@@ -228,19 +228,6 @@ motor_efficiency GOOD;
 heating_system_type HEAT_PUMP;
 };
 
-object ZIPload {
-parent house1;
-name fan1;
-power_fraction 0.013500;
-current_fraction 0.253400;
-base_power fan1*0.106899;
-groupid fan;
-current_pf 0.950000;
-power_pf -1.000000;
-impedance_fraction 0.733200;
-impedance_pf 0.970000;
-};
-
 object house {
 auxiliary_system_type ELECTRIC;
 name house2;

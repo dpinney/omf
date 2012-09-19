@@ -18,6 +18,10 @@ class backgroundProc(multiprocessing.Process):
 	def run(self):
 		da.run(self.analysisName)
 
+####################################################
+# VIEWS
+####################################################
+
 @app.route('/')
 def root():
 	analyses = da.listAll()
@@ -49,6 +53,14 @@ def viewReports(analysisName):
 	reportsJson = json.dumps(reportList)
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportsJson=reportsJson)
 
+@app.route('/model/<model_id>')
+def show_model(model_id):
+	return flask.render_template('gridEdit.html', model_id=model_id)
+
+####################################################
+# API FUNCTIONS
+####################################################
+
 @app.route('/run/', methods=['POST'])
 @app.route('/reRun/', methods=['POST'])
 def run():
@@ -72,10 +84,6 @@ def saveAnalysis():
 def terminate():
 	da.terminate(flask.request.form['analysisName'])
 	return flask.redirect(flask.url_for('root'))
-
-@app.route('/model/<model_id>')
-def show_model(model_id):
-	return flask.render_template('gridEdit.html', model_id=model_id)
 
 @app.route('/api/models/<model_id>.json')
 def api_model(model_id):
@@ -110,11 +118,22 @@ def updateGlm():
 	postData = flask.request.form.to_dict()
 	sourceFeeder = str(postData['feederName'])
 	newFeeder = str(postData['newName'])	
+	allFeeders = os.listdir('./feeders/')
 	tree = json.loads(postData['tree'])
-	shutil.copytree('./feeders/' + sourceFeeder,'./feeders/' + newFeeder)
-	os.remove('./feeders/' + newFeeder + '/main.glm')
-	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm:
+	# Nodes and links are the information about how the feeder is layed out.
+	nodes = postData['nodes']
+	links = postData['links']
+	if newFeeder not in allFeeders:
+		# if we've created a new feeder, copy over the associated files:
+		shutil.copytree('./feeders/' + sourceFeeder,'./feeders/' + newFeeder)
+	else:
+		# else if we've saved an existing feeder we might need to blow away the cached json:
+		if newFeeder + '.json' in os.listdir('./json/'):
+			os.remove('./json/' + newFeeder + '.json')
+	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm, open('./feeders/' + newFeeder + '/nodes.json','w') as newNodes, open('./feeders/' + newFeeder + '/links.json','w') as newLinks:
 		newMainGlm.write(tp.sortedWrite(tree))
+		newNodes.write(nodes)
+		newLinks.write(links)
 	return flask.redirect(flask.url_for('newAnalysis'))
 
 # This will run on all interface IPs.

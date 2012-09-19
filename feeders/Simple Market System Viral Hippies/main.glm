@@ -125,6 +125,15 @@ voltage_A 2401.7771;
 nominal_voltage 2401.7771;
 };
 
+object transformer {
+phases AS;
+from n630;
+name T1;
+to tn_1;
+configuration tconf;
+groupid Distribution_Trans;
+};
+
 object transformer_configuration {
 name tconf;
 primary_voltage 2401.777;
@@ -156,10 +165,25 @@ configuration tconf2;
 groupid Distribution_Trans;
 };
 
+object triplex_node {
+phases AS;
+nominal_voltage 120;
+name tn_1;
+};
+
 object triplex_meter {
 phases BS;
 nominal_voltage 120;
 name tn_2;
+};
+
+object triplex_line {
+phases AS;
+from tn_1;
+name tl_1;
+to tm_1;
+length 100;
+configuration trip_line_config;
 };
 
 object triplex_line {
@@ -181,6 +205,27 @@ object triplex_meter {
 phases BS;
 nominal_voltage 120;
 name tm_2;
+};
+
+object house {
+schedule_skew -810;
+auxiliary_system_type ELECTRIC;
+name house1;
+parent tm_1;
+floor_area 1838;
+cooling_COP 3.2;
+cooling_system_type ELECTRIC;
+aux_heat_temperature_lockout 2.270706e+001;
+heating_setpoint heating1*1;
+motor_model BASIC;
+auxiliary_strategy LOCKOUT;
+air_temperature 70;
+thermal_integrity_level 5;
+heating_COP 3.1;
+cooling_setpoint cooling7*1;
+mass_temperature 70;
+motor_efficiency GOOD;
+heating_system_type HEAT_PUMP;
 };
 
 object house {
@@ -219,19 +264,6 @@ temperature 135;
 
 object ZIPload {
 parent house2;
-name convenienceLoads2;
-power_fraction 0.100000;
-current_fraction 0.100000;
-base_power plug1*2.477490;
-groupid plugload;
-current_pf 0.950000;
-power_pf 0.950000;
-impedance_fraction 0.800000;
-impedance_pf 0.950000;
-};
-
-object ZIPload {
-parent house2;
 name lights2;
 power_fraction 0.003200;
 current_fraction 0.425700;
@@ -241,19 +273,6 @@ current_pf -1.000000;
 power_pf 1.000000;
 impedance_fraction 0.571100;
 impedance_pf 1.000000;
-};
-
-object ZIPload {
-parent house2;
-name television2;
-power_fraction 0.998700;
-current_fraction 0.039600;
-base_power television5*0.200598;
-groupid TV;
-current_pf -0.540000;
-power_pf -1.000000;
-impedance_fraction -0.038300;
-impedance_pf 0.610000;
 };
 
 object ZIPload {
