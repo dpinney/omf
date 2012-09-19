@@ -89,17 +89,23 @@ def terminate():
 def api_model(model_id):
 	#check file system or check for GLM file
 	if model_id+'.json' in os.listdir('./json'):
-		in_file = file('./json/' + model_id + ".json", "r")
+		in_file = file('./json/' + model_id + '.json', 'r')
 		as_json = in_file.read()
 		return as_json
 	elif model_id in os.listdir('./feeders'):
-		tree = tp.parse('./feeders/' + model_id + "/main.glm")
-		# cache the file for later
-		out = file('./json/' + model_id + ".json", "w")
-		jsonTree = json.dumps(tree)
-		out.write(jsonTree)
-		out.close()
-		return jsonTree
+		tree = tp.parse('./feeders/' + model_id + '/main.glm')
+		nodes = []
+		links = []
+		filesAvailable = os.listdir('./feeders/' + model_id)
+		if 'nodes.json' in filesAvailable and 'links.json' in filesAvailable:
+			with open('./feeders/' + model_id + '/nodes.json') as nodesFile, open('./feeders/' + model_id + '/links.json') as linksFile:
+				nodes = json.loads(nodesFile.read())
+				links = json.loads(linksFile.read())
+			# cache the file for later
+			with open('./json/' + model_id + '.json', 'w') as out:
+				out.write(json.dumps({'tree':tree, 'nodes':nodes, 'links':links}))
+		jsonLoad = json.dumps({'tree':tree, 'nodes':nodes, 'links':links})
+		return jsonLoad
 	return ''
 
 @app.route('/getComponents/')

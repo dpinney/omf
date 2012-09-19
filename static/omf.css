@@ -67,6 +67,7 @@ table {border-spacing:0px;}
 div.buttonGroup { display: inline-block; position:relative; }
 
 button.pill {
+	width: auto;
 	margin: 0px;
 	padding:4px 8px 4px 8px; 
 	background-color:#E0E0E0;
@@ -75,7 +76,8 @@ button.pill {
 	border-color:gray;
 	border-style:solid;
 	white-space: nowrap;
-	color:black; }
+	color:black;
+	display:inline-block; }
 
 ul.menu {
 	position:absolute;

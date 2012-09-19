@@ -24,7 +24,7 @@
   #selected {border:1px solid black; border-bottom:0px;position:absolute;top:90pt;left:4pt;width:20%;}
   #selHead tr td {background:black; color:white;}
   #selected td {padding:5px; border-bottom:1px solid black; background:white; color:black}
-  .leftToolbar {float:left;margin-right:5px;}
+  .leftToolbar {float:left; margin-right:5px !important;}
   .rightToolbar {float:right; margin-left:5px;}
   input {min-width: 100px}
   /* Start graph elements. */
@@ -55,18 +55,8 @@
     <ul id='newObjectMenu' class='menu'>
     </ul>
   </div>
-  <div class='buttonGroup leftToolbar'>
-    <button class='pill' onclick='dropPill(this, "Zoom")'>Zoom ▾</button>
-    <ul class='menu'>
-      <li><a href='javascript:zoomToFit()'>Zoom to Fit</a></li>
-    </ul>
-  </div>
-  <div class='buttonGroup leftToolbar'>
-    <button class='pill' onclick='dropPill(this, "Layout")'>Layout ▾</button>
-    <ul class='menu'>
-      <li><a href='javascript:pauseResume()'>Pause/Resume</a></li>
-    </ul>
-  </div>
+  <button class='leftToolbar pill' onclick='javascript:zoomToFit()'>Zoom to Fit</button>
+  <button class='leftToolbar pill' id='playPause' onclick='javascript:pauseResume()'>Layout Pause</button>
   <div class='buttonGroup rightToolbar'>
     <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
     <ul class='menu right'>
@@ -86,6 +76,9 @@
 </table>
 <div id='chart' style='background:white'></div>
 <script>
+
+// GLOBAL VARIABLES:
+
 feeder = '{{model_id}}'
 
 var w = document.width
@@ -114,41 +107,43 @@ var links = force.links()
 var hiddenNodes = []
 var hiddenLinks = []
 
-force.on('tick', function() {
-  vis.selectAll('line.link')
-    .attr('x1', function(d) { return d.source.x; })
-    .attr('y1', function(d) { return d.source.y; })
-    .attr('x2', function(d) { return d.target.x; })
-    .attr('y2', function(d) { return d.target.y; });
-  vis.selectAll('circle.node')
-    .attr('cx', function(d) { return d.x; })
-    .attr('cy', function(d) { return d.y; });
-});
-
 function draw() {
+  // d3.js bookkeeping to set what happens on each time tick in the simulation:
+  force.on('tick', function() {
+    vis.selectAll('line.link')
+      .attr('x1', function(d) { return d.source.x; })
+      .attr('y1', function(d) { return d.source.y; })
+      .attr('x2', function(d) { return d.target.x; })
+      .attr('y2', function(d) { return d.target.y; });
+    vis.selectAll('circle.node')
+      .attr('cx', function(d) { return d.x; })
+      .attr('cy', function(d) { return d.y; });
+  });
   var name2nodeIndex = {}
-  // Go through the first time and set up the nodes with indices:
-  for (x in tree) {
-    if (tree[x].name != undefined && tree[x].from == undefined) {
-      nodeName = tree[x].name
-      nodeObject = tree[x].object
-      // Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
-      if (nodeObject == 'node') nodeObject = 'gridNode'
-      nodeIndex = nodes.length
-      nodes.push({name:nodeName,treeIndex:parseInt(x),objectType:nodeObject})
-      name2nodeIndex[nodeName] = nodeIndex
-    }
-  }
-  // Go through a second time and set up the links:
-  for (x in tree) {
-    if (tree[x].name != undefined) {
-      if (tree[x].from != undefined && tree[x].to != undefined) {
-        name2nodeIndex[tree[x].name] = links.length
-        links.push({source:name2nodeIndex[tree[x].from],target:name2nodeIndex[tree[x].to],treeIndex:parseInt(x),objectType:'fromTo'})
-      } else if (tree[x].parent != undefined) {
-        links.push({source:name2nodeIndex[tree[x].name],target:name2nodeIndex[tree[x].parent],objectType:'parentChild'})
+  if (0 == nodes.length) {
+    // Go through the first time and set up the nodes with indices:
+    for (x in tree) {
+      if (tree[x].name != undefined && tree[x].from == undefined) {
+        nodeName = tree[x].name
+        nodeObject = tree[x].object
+        // Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
+        if (nodeObject == 'node') nodeObject = 'gridNode'
+        nodeIndex = nodes.length
+        nodes.push({name:nodeName,treeIndex:parseInt(x),objectType:nodeObject})
+        name2nodeIndex[nodeName] = nodeIndex
       }
     }
+    // Go through a second time and set up the links:
+    for (x in tree) {
+      if (tree[x].name != undefined) {
+        if (tree[x].from != undefined && tree[x].to != undefined) {
+          name2nodeIndex[tree[x].name] = links.length
+          links.push({source:name2nodeIndex[tree[x].from],target:name2nodeIndex[tree[x].to],treeIndex:parseInt(x),objectType:'fromTo'})
+        } else if (tree[x].parent != undefined) {
+          links.push({source:name2nodeIndex[tree[x].name],target:name2nodeIndex[tree[x].parent],objectType:'parentChild'})
+        }
+      }
+    }    
   }
   // This makes a fancy fade-in.
   vis.style('opacity', 1e-6)
@@ -426,19 +421,19 @@ function pauseResume() {
   if (pauseResume.state == undefined) pauseResume.state = 'playing'
   if (pauseResume.state == 'playing') {
     pauseResume.state = 'paused'
-    console.log(pauseResume.state)
     for (node in nodes) {
       nodes[node].fixed = true
     }
+    gebi('playPause').innerHTML = 'Layout Play'
   } else if (pauseResume.state == 'paused') {
     pauseResume.state = 'playing'
-    console.log(pauseResume.state)
     for (node in nodes) {
       nodes[node].fixed = false
     }
-    // Apparently we have to tell force to go again:
-    force.resume()
+    gebi('playPause').innerHTML = 'Layout Pause'
   }
+  // Apparently we have to tell force to go again:
+  force.resume()
 }
 
 function isChild(node) {
@@ -470,6 +465,11 @@ function hideChildren() {
   redraw()
 }
 
+function findIndex(arr,field,val) {
+  for (i=0;i<arr.length;i++) {if (arr[i][field] == val) {return i}}
+  return -1
+}
+
 function showAllNodes() {
   while (hiddenLinks.length != 0) {
     links.push(hiddenLinks.pop())
@@ -480,8 +480,24 @@ function showAllNodes() {
   redraw()
 }
 
-d3.json('/api/models/{{ model_id }}.json', function(json){tree=json;draw(json)})
 d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
+d3.json('/api/models/{{ model_id }}.json', function (json) {
+  tree = json['tree']
+  // Regenerate the layout from the saved layout:
+  nodepop = json['nodes']
+  while (nodepop.length != 0) {nodes.push(nodepop.pop())}
+  linkpop = json['links']
+  while (linkpop.length != 0) {links.push(linkpop.pop())}  
+  //Gotta go through and make the links connect to their actual source and target objects. BAD DESIGN, D3!
+  for (li=0;li<links.length;li++) {
+    sourceName = links[li].source.name
+    targetName = links[li].target.name
+    console.log(li, sourceName, targetName)
+    links[li].source = nodes[findIndex(nodes,'name',sourceName)]
+    links[li].target = nodes[findIndex(nodes,'name',targetName)]
+  }
+  draw()
+})
 
 </script>
 </body>
