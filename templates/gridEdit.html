@@ -51,12 +51,21 @@
 </div>
 <div id='toolbar'>
   <div class='buttonGroup leftToolbar'>
-    <button id='butter' class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
+    <button class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
     <ul id='newObjectMenu' class='menu'>
     </ul>
   </div>
   <button class='leftToolbar pill' onclick='javascript:zoomToFit()'>Zoom to Fit</button>
   <button class='leftToolbar pill' id='playPause' onclick='javascript:pauseResume()'>Layout Pause</button>
+  <div class='buttonGroup leftToolbar'>
+    <button class='pill' onclick='dropPill(this, "Folding")'>Folding ▾</button>
+    <ul class='menu'>
+      <li><a href='javascript:hideChildren()'>Fold One Level</a></li>
+      <li><a href='javascript:unfoldAtSelected()'>Unfold at Selected</a></li>
+      <li><a href='javascript:unfoldOneLevel()'>Unfold One Level</a></li>
+      <li><a href='javascript:showAllNodes()'>Unfold All</a></li>
+    </ul>
+  </div>
   <div class='buttonGroup rightToolbar'>
     <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
     <ul class='menu right'>
@@ -86,6 +95,7 @@ var w = document.width
 var h = document.height - 112
 var tree
 var components
+var selectedName
 
 var zoomer = d3.behavior.zoom()
 
@@ -210,6 +220,7 @@ function classify(d, c, on) {
 }
 
 function onCompClick(d, i) {
+  selectedName = d.name
   console.log([d.treeIndex,d.name,d.objectType])
   // Abort if we try to select a parentChild relationship.
   if (d.objectType == 'parentChild') return false
@@ -449,6 +460,11 @@ function hideLink(link) {
   hiddenLinks.push(links.splice(links.indexOf(link),1)[0])
 }
 
+function showLink(link) {
+  toInsert = hiddenLinks.splice(hiddenLinks.indexOf(link),1)[0]
+  links.push(toInsert)
+}
+
 function hideNode(node) {
   // Pop the node of the nodes list and push it onto the hiddenNodes list:
   hiddenNodes.push(nodes.splice(nodes.indexOf(node),1)[0])
@@ -456,6 +472,12 @@ function hideNode(node) {
   toHideEdges = links.filter(function (lin) {return node.name == lin.source.name || node.name == lin.target.name})
   toHideEdges.map(hideLink)
 }
+
+function showNode(node) {
+  toInsert = hiddenNodes.splice(hiddenNodes.indexOf(node),1)[0]
+  nodes.push(toInsert)
+}
+
 
 function hideChildren() {
   // Find all the children:
@@ -477,6 +499,42 @@ function showAllNodes() {
   while (hiddenNodes.length != 0) {
     nodes.push(hiddenNodes.pop())
   }
+  redraw()
+}
+
+function unfoldOneLevel() {
+  // Find the hidden links that are connected to visible nodes:
+  function attachedToVizNode(link) {
+    return nodes.some(function(d) {return d.name == link.source.name || d.name == link.target.name})
+  }
+  linksToReveal = hiddenLinks.filter(attachedToVizNode)
+  // Find the nodes that are attached to the revealed links:
+  function attachedToRevealed(node) {
+    return linksToReveal.some(function(d) {return node.name == d.source.name || node.name == d.target.name})
+  }
+  nodesToReveal = hiddenNodes.filter(attachedToRevealed)
+  linksToReveal.map(showLink)
+  nodesToReveal.map(showNode)
+  redraw()
+}
+
+function unfoldAtSelected() {
+  if (nodes.some(function(d) {return d.name == selectedName}) == false) {
+    // We have no selection, or an edge was selected.
+    return false
+  }
+  selNode = nodes.filter(function(d) {return d.name == selectedName})[0]
+  function attachedToSelected(link) {
+    return selNode.name == link.source.name || selNode.name == link.target.name
+  }
+  linksToReveal = hiddenLinks.filter(attachedToSelected)
+  // Find the nodes that are attached to the revealed links:
+  function attachedToRevealed(node) {
+    return linksToReveal.some(function(d) {return node.name == d.source.name || node.name == d.target.name})
+  }
+  nodesToReveal = hiddenNodes.filter(attachedToRevealed)
+  linksToReveal.map(showLink)
+  nodesToReveal.map(showNode)
   redraw()
 }
 
