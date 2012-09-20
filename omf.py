@@ -9,6 +9,7 @@ import treeParser as tp
 import shutil
 import reports
 import time
+from pprint import pprint
 
 app = flask.Flask(__name__)
 
@@ -51,7 +52,7 @@ def viewReports(analysisName):
 		except:
 			# there's no report matching the saved file...
 			pass
-	reportsJson = json.dumps(reportList)
+	reportsJson = json.dumps(reportList, indent=4)
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportsJson=reportsJson)
 
 @app.route('/model/<model_id>')
@@ -104,7 +105,7 @@ def api_model(model_id):
 				with open('./feeders/' + model_id + '/' + fileName) as openFile:
 					outDict[fileName[0:-5]] = json.loads(openFile.read())
 		# cache the file for later
-		jsonLoad = json.dumps(outDict)
+		jsonLoad = json.dumps(outDict, indent=4)
 		with open('./json/' + model_id + '.json', 'w') as out:
 			out.write(jsonLoad)
 		return jsonLoad
@@ -119,7 +120,7 @@ def getComponents():
 			fileContents = compFile.read()
 			components[fileName] = eval(fileContents)
 	print components
-	return json.dumps(components)
+	return json.dumps(components, indent=4)
 
 @app.route('/saveFeeder/', methods=['POST'])
 def updateGlm():
