@@ -1,20 +1,20 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
 Core profiler results
 ======================
 
 Total objects               3075 objects
 Parallelism                    1 thread
-Total time                  29.0 seconds
-  Core time                  6.8 seconds (23.5%)
-  Model time                22.2 seconds/thread (76.5%)
+Total time                  30.0 seconds
+  Core time                  6.9 seconds (22.9%)
+  Model time                23.1 seconds/thread (77.1%)
 Simulation time                2 days
-Simulation speed            4.2k object.hours/second
+Simulation speed            4.1k object.hours/second
 Syncs completed             9461 passes
 Time steps completed        2102 timesteps
 Convergence efficiency      4.50 passes/timestep
 Memory lock contention      0.0%
 Average timestep             69 seconds/timestep
-Simulation rate            4966 x realtime
+Simulation rate            4800 x realtime
 
 
 Model profiler results
@@ -22,23 +22,23 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-triplex_meter      7.476     33.7%     11.5
-house              6.663     30.0%     10.6
-triplex_line       4.228     19.1%      6.7
-waterheater        1.690      7.6%      3.9
-ZIPload            0.808      3.6%      1.3
-volt_var_control   0.760      3.4%    760.0
-transformer        0.161      0.7%      7.7
-collector          0.104      0.5%    104.0
-node               0.102      0.5%      6.0
-overhead_line      0.060      0.3%      6.7
-regulator          0.038      0.2%     38.0
-capacitor          0.030      0.1%     15.0
-recorder           0.024      0.1%      8.0
-underground_line   0.017      0.1%      8.5
-switch             0.013      0.1%     13.0
-climate            0.010      0.0%     10.0
-transformer_conf   0.009      0.0%      0.4
+triplex_meter      7.771     33.6%     12.0
+house              6.974     30.2%     11.1
+triplex_line       4.542     19.6%      7.2
+waterheater        1.701      7.4%      3.9
+ZIPload            0.897      3.9%      1.4
+volt_var_control   0.617      2.7%    617.0
+transformer        0.172      0.7%      8.2
+node               0.122      0.5%      7.2
+collector          0.108      0.5%    108.0
+overhead_line      0.079      0.3%      8.8
+regulator          0.034      0.1%     34.0
+recorder           0.028      0.1%      9.3
+capacitor          0.025      0.1%     12.5
+underground_line   0.016      0.1%      8.0
+transformer_conf   0.015      0.1%      0.7
+switch             0.012      0.1%     12.0
+climate            0.009      0.0%      9.0
 ================ ======== ======== ========
-Total             22.193    100.0%      7.2
+Total             23.122    100.0%      7.5
 

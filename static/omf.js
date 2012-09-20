@@ -77,3 +77,11 @@ function getRadioSetting (className) {
     for (x in radios) {if (radios[x].checked) value = radios[x].value}
     return value
 }
+
+function time(func) {
+    // How long does func take to execute?
+    var start = +new Date()
+    func()
+    var end =  +new Date()
+    return end - start
+}

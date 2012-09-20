@@ -89,13 +89,13 @@
 // GLOBAL VARIABLES:
 
 feeder = '{{model_id}}'
-
 var w = document.width
 // HACK: subtract off the toolbar and titlebar heights.
 var h = document.height - 112
 var tree
 var components
 var selectedName
+var altSelectedName
 
 var zoomer = d3.behavior.zoom()
 
@@ -107,6 +107,9 @@ var vis = d3.select('#chart')
 	.call(zoomer.on('zoom', zoomRedraw))
 	.append('svg:g')
 
+vis.append('svg:g').attr('id','bottomLayer')
+var bottomLayer = d3.select('#bottomLayer')
+
 var force = d3.layout.force()
   .charge(-120)
   .linkDistance(30)
@@ -116,6 +119,8 @@ var nodes = force.nodes()
 var links = force.links()
 var hiddenNodes = []
 var hiddenLinks = []
+
+// FUNCTIONS START HERE:
 
 function draw() {
   // d3.js bookkeeping to set what happens on each time tick in the simulation:
@@ -164,7 +169,7 @@ function draw() {
 }
 
 function redraw() {
-  link = vis.selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
+  link = bottomLayer.selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
 
   link.enter().append('svg:line')
     .on('click', onCompClick)
@@ -220,19 +225,21 @@ function classify(d, c, on) {
 }
 
 function onCompClick(d, i) {
-  selectedName = d.name
-  console.log([d.treeIndex,d.name,d.objectType])
   // Abort if we try to select a parentChild relationship.
   if (d.objectType == 'parentChild') return false
-  // Multiselection case:
+  // Multiselection case handled first:
   if (d3.event.altKey) {
+    altSelectedName = d.name
     classify(d,'multiselected',true)
     return false
   }
-  table = gebi('selected')
+  // Set up the global variables
+  selectedName = d.name
+  console.log([d.treeIndex,d.name,d.objectType])
   // Visually identify the selected node.
   classify(d,'selected',true)
   // clear the selected table
+  table = gebi('selected')
   tableClear(table)
   treeData = tree[d.treeIndex]
   for (prop in treeData) {
@@ -312,7 +319,7 @@ function cancelEditing(treeIndex) {
 }
 
 function deleteObject(treeIndex) {
-  // Figure out whether we have a node or an edge:
+  // Figure out whether we have a node or an link:
   var isNode = true
   for (prop in tree[treeIndex]) if (prop == 'from') isNode = false
   if (isNode) {
@@ -344,7 +351,7 @@ function deleteObject(treeIndex) {
     tableClear(gebi('selected'))
     redraw()
   } else {
-    // Delete edge:
+    // Delete link:
     var linkIndex
     for (x=0;x<links.length;x++) {
       if (links[x].treeIndex == treeIndex) linkIndex = x
@@ -358,39 +365,97 @@ function deleteObject(treeIndex) {
   }
 }
 
-function newObject(objectName) {
-  component = clone(components[objectName])
-  // Find the next index available in the tree.
+function nextTreeKey() {
   keys = Object.keys(tree)
   max = 0
-  for (x in keys) {
-    if (parseInt(x) > max) max = parseInt(x)
-  }
-  treeNewIndex = max + 1
+  for (x in keys) {intKey = parseInt(x); if (intKey > max) max = intKey}
+  return max + 1
+}
+
+function findIndex(arrOfObjects,field,val) {
+  for (i=0;i<arrOfObjects.length;i++) {if (arrOfObjects[i][field] == val) return i}
+  return -1
+}
+
+function newNode(componentName) {
+  // Get the stuff we need.
+  component = clone(components[componentName])
+  treeNewIndex = nextTreeKey()
   // Put the component in the tree with a new name.
   tree[treeNewIndex] = component
-  tree[treeNewIndex].name = objectName + String(treeNewIndex)
+  tree[treeNewIndex].name = componentName + String(treeNewIndex)
   // Add to the nodes.
   newType = component.object
   // Hack to make sure we color nodes correctly:
   if (newType == 'node') newType = 'gridNode'
-  newNode = {name:component.name, objectType:newType, treeIndex:treeNewIndex}
-  nodes.push(newNode)
+  nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex}
+  nodes.push(nodeToAdd)
   redraw()
 }
 
-function newEdge() {
-  // TODO: implement
-  return false
+function newLink(componentName) {
+  // Fail if we have an incorrect selection.
+  function alreadyLinked(nodeName1, nodeName2) {
+    for (linkId in links) {
+      sourceName = links[linkId].source.name
+      targetName = links[linkId].target.name
+      if ((nodeName1 == sourceName && nodeName2 == targetName) || (nodeName1 == targetName && nodeName2 == sourceName)) {return true} }
+    return false }
+  if (undefined == selectedName || undefined == altSelectedName || selectedName == altSelectedName || alreadyLinked(selectedName, altSelectedName)) {
+    alert('I am sorry, but we cannot insert a link there.')
+    return false }
+  // Get the stuff we need.
+  component = clone(components[componentName])
+  treeNewIndex = nextTreeKey()
+  // Make sure component's to and from are set.
+  component['from'] = selectedName
+  component['to'] = altSelectedName
+  // Put the component in the tree with a new name.
+  tree[treeNewIndex] = component
+  tree[treeNewIndex].name = componentName + String(treeNewIndex)
+  // TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
+  // Add to the links.
+  linkToAdd = {source:nodes[findIndex(nodes,'name',selectedName)], target:nodes[findIndex(nodes,'name',altSelectedName)], treeIndex:treeNewIndex, objectType:'fromTo'}
+  links.push(linkToAdd)
+  redraw()
+}
+
+function newChild(componentName) {
+  if (undefined == selectedName || findIndex(nodes,'name',selectedName) == -1) {
+    alert('I am sorry, but we cannot insert a child element there.')
+    return false }
+  // Get the stuff we need.
+  component = clone(components[componentName])
+  treeNewIndex = nextTreeKey()
+  // Make sure component's parent is set.
+  component['parent'] = selectedName
+  // Put the component in the tree with a new name.
+  tree[treeNewIndex] = component
+  newName = componentName + String(treeNewIndex)
+  tree[treeNewIndex].name = newName
+  // TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
+  // Add to the nodes.
+  nodeToAdd = {name:component.name, objectType:component.object, treeIndex:treeNewIndex}
+  nodes.push(nodeToAdd)
+  // Add to the links.
+  linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',selectedName)], objectType:'parentChild'}
+  links.push(linkToAdd)
+  redraw()
 }
 
 function zoomToFit() {
+  // TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
   zoomer.translate([0, 0]).scale(1)
-  vis.attr('transform', 'translate([0, 0]) scale(1)')
-}
+  vis.attr('transform', 'translate([0, 0]) scale(1)') }
 
 function saveModel() {
-  sendDict = {tree:JSON.stringify(tree),nodes:JSON.stringify(nodes),links:JSON.stringify(links),feederName:feeder,newName:gebi('gridName').innerHTML}
+  sendDict = {tree:JSON.stringify(tree),
+              nodes:JSON.stringify(nodes),
+              hiddenNodes:JSON.stringify(hiddenNodes),
+              links:JSON.stringify(links),
+              hiddenLinks:JSON.stringify(hiddenLinks),
+              feederName:feeder,
+              newName:gebi('gridName').innerHTML}
   post_to_url('/saveFeeder/', sendDict)
 }
 
@@ -424,7 +489,10 @@ function acceptRename() {
 function fillComponentMenu() {
   newObjectMenu = gebi('newObjectMenu')
   for (component in components) {
-    newObjectMenu.innerHTML += ('<li><a href="javascript:newObject(\'' + component + '\')">' + component + '</a></li>')
+    if (undefined == components[component]['from'] && undefined == components[component]['parent']) {addingFunctionName = 'newNode'}
+    else if (undefined == components[component]['from']) {addingFunctionName = 'newChild'}
+    else {addingFunctionName = 'newLink'}
+    newObjectMenu.innerHTML += ('<li><a href="javascript:' + addingFunctionName + '(\'' + component + '\')">' + component + '</a></li>')
   }
 }
 
@@ -447,14 +515,8 @@ function pauseResume() {
   force.resume()
 }
 
-function isChild(node) {
-  counter = 0;
-  for (linkId in links) {
-    if (node.name == links[linkId].source.name || node.name == links[linkId].target.name) {counter += 1}
-  }
-  if (1 == counter) {return true}
-  else {return false}
-}
+
+// FUNCTIONS FOR GRAPH FOLDING:
 
 function hideLink(link) {
   hiddenLinks.push(links.splice(links.indexOf(link),1)[0])
@@ -468,9 +530,9 @@ function showLink(link) {
 function hideNode(node) {
   // Pop the node of the nodes list and push it onto the hiddenNodes list:
   hiddenNodes.push(nodes.splice(nodes.indexOf(node),1)[0])
-  // Pop/push any connected edges:
-  toHideEdges = links.filter(function (lin) {return node.name == lin.source.name || node.name == lin.target.name})
-  toHideEdges.map(hideLink)
+  // Pop/push any connected Links:
+  toHideLinks = links.filter(function (lin) {return node.name == lin.source.name || node.name == lin.target.name})
+  toHideLinks.map(hideLink)
 }
 
 function showNode(node) {
@@ -478,18 +540,20 @@ function showNode(node) {
   nodes.push(toInsert)
 }
 
-
 function hideChildren() {
+  function isChild(node) {
+    counter = 0;
+    for (linkId in links) {
+      if (node.name == links[linkId].source.name || node.name == links[linkId].target.name) {counter += 1}
+    }
+    if (1 == counter) {return true}
+    else {return false}
+  }
   // Find all the children:
   toHide = nodes.filter(isChild)
   // Hide them:
   toHide.map(hideNode)
   redraw()
-}
-
-function findIndex(arr,field,val) {
-  for (i=0;i<arr.length;i++) {if (arr[i][field] == val) {return i}}
-  return -1
 }
 
 function showAllNodes() {
@@ -520,7 +584,7 @@ function unfoldOneLevel() {
 
 function unfoldAtSelected() {
   if (nodes.some(function(d) {return d.name == selectedName}) == false) {
-    // We have no selection, or an edge was selected.
+    // We have no selection, or an link was selected.
     return false
   }
   selNode = nodes.filter(function(d) {return d.name == selectedName})[0]
@@ -538,21 +602,36 @@ function unfoldAtSelected() {
   redraw()
 }
 
+// INIT FUNCTION IS THIS
 d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
 d3.json('/api/models/{{ model_id }}.json', function (json) {
   tree = json['tree']
-  // Regenerate the layout from the saved layout:
+  console.log(json)
+  // Regenerate the layout from the saved layout. For some insane reason, just cloning the list doesn't work.
   nodepop = json['nodes']
   while (nodepop.length != 0) {nodes.push(nodepop.pop())}
   linkpop = json['links']
   while (linkpop.length != 0) {links.push(linkpop.pop())}  
-  //Gotta go through and make the links connect to their actual source and target objects. BAD DESIGN, D3!
+  hiddenNodePop = json['hiddenNodes']
+  while (hiddenNodePop.length != 0) {hiddenNodes.push(hiddenNodePop.pop())}
+  hiddenLinkPop = json['hiddenLinks']
+  while (hiddenLinkPop .length != 0) {hiddenLinks.push(hiddenLinkPop.pop())}  
+  //Gotta go through and make the links connect to their actual source and target objects. BAD DESIGN, D3!  
   for (li=0;li<links.length;li++) {
     sourceName = links[li].source.name
     targetName = links[li].target.name
-    console.log(li, sourceName, targetName)
     links[li].source = nodes[findIndex(nodes,'name',sourceName)]
     links[li].target = nodes[findIndex(nodes,'name',targetName)]
+  }
+  for (li2=0;li2<hiddenLinks.length;li2++) {
+    sourceName = hiddenLinks[li2].source.name
+    targetName = hiddenLinks[li2].target.name
+    realSource = nodes[findIndex(nodes,'name',sourceName)]
+    realSourceHidden = hiddenNodes[findIndex(hiddenNodes,'name',sourceName)]
+    realTarget = nodes[findIndex(nodes,'name',targetName)]
+    realTargetHidden = hiddenNodes[findIndex(hiddenNodes,'name',targetName)]
+    if (undefined == realSource) {hiddenLinks[li2].source = realSourceHidden} else {hiddenLinks[li2].source = realSource}
+    if (undefined == realTarget) {hiddenLinks[li2].target = realTargetHidden} else {hiddenLinks[li2].target = realTarget} 
   }
   draw()
 })

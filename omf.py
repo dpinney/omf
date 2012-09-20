@@ -8,6 +8,7 @@ import json
 import treeParser as tp
 import shutil
 import reports
+import time
 
 app = flask.Flask(__name__)
 
@@ -66,6 +67,7 @@ def show_model(model_id):
 def run():
 	runProc = backgroundProc(flask.request.form['analysisName'])
 	runProc.start()
+	time.sleep(1)
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/delete/', methods=['POST'])
@@ -94,17 +96,17 @@ def api_model(model_id):
 		return as_json
 	elif model_id in os.listdir('./feeders'):
 		tree = tp.parse('./feeders/' + model_id + '/main.glm')
-		nodes = []
-		links = []
 		filesAvailable = os.listdir('./feeders/' + model_id)
-		if 'nodes.json' in filesAvailable and 'links.json' in filesAvailable:
-			with open('./feeders/' + model_id + '/nodes.json') as nodesFile, open('./feeders/' + model_id + '/links.json') as linksFile:
-				nodes = json.loads(nodesFile.read())
-				links = json.loads(linksFile.read())
-			# cache the file for later
-			with open('./json/' + model_id + '.json', 'w') as out:
-				out.write(json.dumps({'tree':tree, 'nodes':nodes, 'links':links}))
-		jsonLoad = json.dumps({'tree':tree, 'nodes':nodes, 'links':links})
+		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[]}
+		# grab all the layout nodes, links, etc.
+		for fileName in filesAvailable:
+			if fileName.endswith('.json'):
+				with open('./feeders/' + model_id + '/' + fileName) as openFile:
+					outDict[fileName[0:-5]] = json.loads(openFile.read())
+		# cache the file for later
+		jsonLoad = json.dumps(outDict)
+		with open('./json/' + model_id + '.json', 'w') as out:
+			out.write(jsonLoad)
 		return jsonLoad
 	return ''
 
@@ -128,7 +130,9 @@ def updateGlm():
 	tree = json.loads(postData['tree'])
 	# Nodes and links are the information about how the feeder is layed out.
 	nodes = postData['nodes']
+	hiddenNodes = postData['hiddenNodes']
 	links = postData['links']
+	hiddenLinks = postData['hiddenLinks']
 	if newFeeder not in allFeeders:
 		# if we've created a new feeder, copy over the associated files:
 		shutil.copytree('./feeders/' + sourceFeeder,'./feeders/' + newFeeder)
@@ -136,10 +140,12 @@ def updateGlm():
 		# else if we've saved an existing feeder we might need to blow away the cached json:
 		if newFeeder + '.json' in os.listdir('./json/'):
 			os.remove('./json/' + newFeeder + '.json')
-	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm, open('./feeders/' + newFeeder + '/nodes.json','w') as newNodes, open('./feeders/' + newFeeder + '/links.json','w') as newLinks:
+	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm, open('./feeders/' + newFeeder + '/nodes.json','w') as newNodes, open('./feeders/' + newFeeder + '/links.json','w') as newLinks, open('./feeders/' + newFeeder + '/hiddenNodes.json','w') as newHiddenNodes, open('./feeders/' + newFeeder + '/hiddenLinks.json','w') as newHiddenLinks:
 		newMainGlm.write(tp.sortedWrite(tree))
 		newNodes.write(nodes)
+		newHiddenNodes.write(hiddenNodes)
 		newLinks.write(links)
+		newHiddenLinks.write(hiddenLinks)
 	return flask.redirect(flask.url_for('newAnalysis'))
 
 # This will run on all interface IPs.

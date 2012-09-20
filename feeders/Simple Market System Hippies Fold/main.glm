@@ -264,6 +264,19 @@ temperature 135;
 
 object ZIPload {
 parent house2;
+name convenienceLoads2;
+power_fraction 0.100000;
+current_fraction 0.100000;
+base_power plug1*2.477490;
+groupid plugload;
+current_pf 0.950000;
+power_pf 0.950000;
+impedance_fraction 0.800000;
+impedance_pf 0.950000;
+};
+
+object ZIPload {
+parent house2;
 name lights2;
 power_fraction 0.003200;
 current_fraction 0.425700;
@@ -273,6 +286,19 @@ current_pf -1.000000;
 power_pf 1.000000;
 impedance_fraction 0.571100;
 impedance_pf 1.000000;
+};
+
+object ZIPload {
+parent house2;
+name television2;
+power_fraction 0.998700;
+current_fraction 0.039600;
+base_power television5*0.200598;
+groupid TV;
+current_pf -0.540000;
+power_pf -1.000000;
+impedance_fraction -0.038300;
+impedance_pf 0.610000;
 };
 
 object ZIPload {
