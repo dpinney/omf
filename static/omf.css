@@ -100,11 +100,12 @@ ul.menu {
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 	-webkit-background-clip: padding-box; }
 
-ul.menu.right {
-	right: 0;
-	left:auto;
-}
+ul.menu.right {right: 0; left:auto;}
 
 ul.menu li {padding:4px;}
 
 ul.menu li:hover {background:green;}
+
+ul.menu a {display:block; color:black;}
+
+ul.menu a:hover {display:block; color:white;}

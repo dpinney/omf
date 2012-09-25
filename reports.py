@@ -3,18 +3,12 @@
 import os
 import math
 import itertools
+import re
+import types
 
-def listAll():
+def __listAll__():
 	allAttributes = globals().keys()
-	return [x for x in allAttributes if not x.startswith('_') and x not in ['os', 'math', 'itertools', 'listAll']]
-
-
-# def powerflow(analysisName):
-# 	pngs = []
-# 	for study in os.listdir('analyses/' + analysisName + '/studies/'):
-# 		for fileName in os.listdir('analyses/' + analysisName + '/studies/' + study):
-# 			if fileName.endswith('.png'): pngs.append('studies/' + study + '/' + fileName)
-# 	return {'reportType':'powerflow', 'pngs':pngs}
+	return [x for x in globals().keys() if not x.startswith('_') and type(globals()[x]) is types.FunctionType]
 
 def runtimeStats(analysisName):
 	stdouts = []
@@ -53,6 +47,38 @@ def regulatorPowerflow(analysisName):
 			dataTree[study][cleanReg]['powerFactor'] = [[row[0], math.cos(math.atan((row[5]+row[7]+row[9])/(row[4]+row[6]+row[8])))] for row in fullArray[1:]]
 			dataTree[study][cleanReg]['powerFactor'].insert(0,['# timestamp','Power Factor'])
 	return {'reportType':'regulatorPowerflow', 'dataTree':dataTree}
+
+def feederPowerConsumption(analysisName):
+	powerTimeSeries = []
+	interval = 0
+	energyTotals = [['Study Name','Energy Used']]
+	pathPrefix = './analyses/' + analysisName
+	studies = os.listdir(pathPrefix + '/studies/')
+	with open(pathPrefix + '/studies/' + studies[0] + '/main.glm') as testGlm:
+		glmContent = testGlm.read()
+		intervalText = re.findall('interval\s+(\d+)', glmContent)
+		if [] != intervalText:
+			interval = int(intervalText[0])
+	for study in studies:
+		energyToAdd = [study,0]
+		powerToAdd = []
+		swingFileNames = [x for x in os.listdir(pathPrefix + '/studies/' + study) if x.startswith('SwingKids_') and x.endswith('.csv')]
+		for swingFile in swingFileNames:
+			fullArray = __csvToArray__(pathPrefix + '/studies/' + study + '/' + swingFile)
+			fullArray[0][1] = study
+			fullArray[1:] = [[row[0],row[1]/1000] for row in fullArray[1:]]
+			if [] == powerToAdd:
+				powerToAdd = fullArray
+			else: 
+				for rowNum in xrange(len(fullArray)):
+					powerToAdd[rowNum][1] = powerToAdd[rowNum][1] + fullArray[rowNum][1]
+			energyToAdd[1] += sum([float(interval) * row[1] / 3600.0 for row in fullArray[1:]])
+		energyTotals += [energyToAdd]
+		if [] == powerTimeSeries:
+			powerTimeSeries = powerToAdd
+		else:
+			powerTimeSeries = [powerTimeSeries[rowNum] + [powerToAdd[rowNum][1]] for rowNum in xrange(len(powerTimeSeries))]
+	return {'reportType':'feederPowerConsumption', 'powerTimeSeries':powerTimeSeries, 'energyTotals':energyTotals}
 
 def studyDetails(analysisName):
 	studies = []
@@ -120,3 +146,7 @@ def __flat1__(aList):
 # stuff = voltageBand('clothing')
 # sample = stuff['dataTree']['shirt']
 # print sample
+
+# stuff = feederPowerConsumption('ALLPOWER')
+# from pprint import pprint
+# pprint(stuff)

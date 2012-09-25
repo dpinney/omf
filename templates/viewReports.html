@@ -103,6 +103,12 @@
 
 					}
 				}
+				else if ('feederPowerConsumption' == reportsJson[report].reportType) {
+					insert.innerHTML += '<p class="reportTitle">Feeder Power Consumption</p>'
+					insert.innerHTML += '<div id="feederPowerConsumptionReport" class="tightContent"></div>'
+					gebi('feederPowerConsumptionReport').innerHTML += '<div id="powerTimeSeries"></div><div id="energyBalance"></div>'
+					dataTree = reportsJson[report]['dataTree']
+				}
 			}
 		}
 		function graphAllData() {
@@ -137,6 +143,11 @@
 						drawVoltChart(dataTree[study],'voltChartDiv' + study)
 					}
 				}
+				else if ('feederPowerConsumption' == reportsJson[report].reportType) {
+					drawVoltChart(reportsJson[report]['powerTimeSeries'], 'powerTimeSeries')
+					drawBarChart(reportsJson[report]['energyTotals'], 'energyBalance')
+					
+				}
 			}
 		}
 		function drawCapChart(dataArray, divName, colorList) {
@@ -163,6 +174,13 @@
 			chart = new google.visualization.GeoChart(gebi(divName))
 			chart.draw(chartData, options)
 		}
+		function drawBarChart(dataArray, divName) {
+			chartData = google.visualization.arrayToDataTable(dataArray)
+			options = {isStacked:true, chartArea:{left:60,top:20}, hAxis:{textPosition:'none'}, colors:['gainsboro','silver','gray']}
+			chart = new google.visualization.BarChart(gebi(divName))
+			chart.draw(chartData, options)
+		}
+
 	</script>
 </head>
 <body onload='placeReports();graphAllData()'>

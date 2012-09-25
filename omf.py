@@ -35,7 +35,7 @@ def newAnalysis():
 	# Get lists of various things:
 	tmy2s = os.listdir('tmy2s')
 	feeders = os.listdir('feeders')
-	reportList = reports.listAll()
+	reportList = reports.__listAll__()
 	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportList=reportList)
 
 @app.route('/viewReports/<analysisName>')
@@ -148,6 +148,15 @@ def updateGlm():
 		newLinks.write(links)
 		newHiddenLinks.write(hiddenLinks)
 	return flask.redirect(flask.url_for('newAnalysis'))
+
+@app.route('/runStatus/')
+def runStatus():
+	analyses = os.listdir('./analyses/')
+	outDict = {}
+	for ana in analyses:
+		md = da.getMetadata(ana)
+		outDict[ana] = md['status']
+	return json.dumps(outDict)
 
 # This will run on all interface IPs.
 if __name__ == '__main__':

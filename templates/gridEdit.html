@@ -606,7 +606,6 @@ function unfoldAtSelected() {
 d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
 d3.json('/api/models/{{ model_id }}.json', function (json) {
   tree = json['tree']
-  console.log(json)
   // Regenerate the layout from the saved layout. For some insane reason, just cloning the list doesn't work.
   nodepop = json['nodes']
   while (nodepop.length != 0) {nodes.push(nodepop.pop())}

@@ -50,9 +50,10 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 			shutil.copyfile('feeders/' + study['feederName'] + '/' + fileName, studyFolder + '/' + fileName)
 		# Attach recorders:
 		tree = tp.parse(studyFolder + '/main.glm')
-		tp.attachRecorders(tree, 'Regulator', 'regulator')
-		tp.attachRecorders(tree, 'Capacitor', 'capacitor')
-		tp.attachRecorders(tree, 'CollectorVoltage', None)		
+		tp.attachRecorders(tree, 'Regulator', 'object', 'regulator')
+		tp.attachRecorders(tree, 'Capacitor', 'object', 'capacitor')
+		tp.attachRecorders(tree, 'CollectorVoltage', None, None)
+		tp.groupSwingKids(tree)
 		# Modify the glm with time variables:
 		tp.adjustTime(tree=tree, simLength=simLength, simLengthUnits=simLengthUnits, simStartDate=simStartDate)
 		# write the glm:
@@ -93,10 +94,9 @@ def run(analysisName):
 			return False
 		# RUN GRIDLABD (EXPENSIVE!)
 		stdout = open(studyDir + '/stdout.txt','w')
-		stderr = open(os.devnull,'w')
-		# stderr = open(studyDir + '/stderr.txt','w')
-		# TODO: turn standerr back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-		proc = subprocess.Popen(['gridlabd','main.glm'], cwd=studyDir, stdout=stdout, stderr=stderr)
+		stderr = open(studyDir + '/stderr.txt','w')
+		# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
+		proc = subprocess.Popen(['gridlabd','-w','main.glm'], cwd=studyDir, stdout=stdout, stderr=stderr)
 		# Update PID.
 		metadata['PID'] = proc.pid
 		putMetadata(analysisName, metadata)

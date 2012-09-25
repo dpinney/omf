@@ -1,1 +1,1 @@
-{'status': 'postRun', 'climate': u'CO-BOULDER.tmy2', 'name': u'Flat or Not', 'created': '2012-09-14 13:58:51.702000', 'PID': 5712, 'sourceFeeder': u'13 Node Embedded Reference Feeder, 13 Node Ref Feeder Flat', 'runTime': 65.185}
+{'status': 'postRun', 'climate': u'CO-BOULDER.tmy2', 'name': u'Flat or Not', 'created': '2012-09-14 13:58:51.702000', 'PID': 7172, 'sourceFeeder': u'13 Node Embedded Reference Feeder, 13 Node Ref Feeder Flat', 'runTime': 56.182}

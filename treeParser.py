@@ -178,7 +178,7 @@ def fullyDeEmbed(glmTree):
 		deEmbedOnce(glmTree)
 		lenDiff = len(glmTree) - currLen
 
-def attachRecorders(tree, recorderType, objectToJoin, sample=False):
+def attachRecorders(tree, recorderType, keyToJoin, valueToJoin, sample=False):
 	# TODO: if sample is a percentage, only attach to that percentage of nodes chosen at random.
 	# HACK: the biggestKey assumption only works for a flat tree or one that has a flat node for the last item...
 	biggestKey = int(sorted(tree.keys())[-1]) + 1
@@ -197,15 +197,43 @@ def attachRecorders(tree, recorderType, objectToJoin, sample=False):
 	staticTree = copy.copy(tree)
 	for key in staticTree:
 		leaf = staticTree[key]
-		if 'object' in leaf and 'name' in leaf:
+		if keyToJoin in leaf and 'name' in leaf:
 			parentObject = leaf['name']
-			if leaf['object'] == objectToJoin:
+			if leaf[keyToJoin] == valueToJoin:
 				# DEBUG: print 'just joined ' + parentObject
 				newLeaf = copy.copy(recorders[recorderType])
 				newLeaf['parent'] = parentObject
 				newLeaf['file'] = recorderType + '_' + parentObject + '.csv'
 				tree[biggestKey] = newLeaf
 				biggestKey += 1
+
+def groupSwingKids(tree):
+	staticTree = copy.copy(tree)
+	swingNames = []
+	swingTypes = []
+	# find the swing nodes:
+	for key in staticTree:
+		leaf = staticTree[key]
+		if 'bustype' in leaf and leaf['bustype'] == 'SWING':
+			swingNames += [leaf['name']]
+	# set the groupid on the kids:
+	for key in staticTree:
+		leaf = staticTree[key]
+		if 'from' in leaf and 'to' in leaf:
+			if leaf['from'] in swingNames or leaf['to'] in swingNames:
+				leaf['groupid'] = 'swingKids'
+				swingTypes += [leaf['object']]
+	# attach the collector:
+	biggestKey = int(sorted(tree.keys())[-1]) + 1
+	collector = {'interval': '1', 'object': 'collector', 'limit': '1', 'group': 'X', 'file': 'Y', 'property': 'sum(power_in.mag)'}
+	for obType in swingTypes:
+		insert = copy.copy(collector)
+		insert['group'] = 'class=' + obType + ' AND groupid=swingKids'
+		insert['file'] = 'SwingKids_' + obType + '.csv'
+		tree[biggestKey] = insert
+		biggestKey += 1
+
+
 
 ##Parser Test
 # tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
@@ -214,8 +242,8 @@ def attachRecorders(tree, recorderType, objectToJoin, sample=False):
 
 ##Recorder Attachment Test
 # tree = parse('./feeders/Simple Market System/main.glm')
-# attachRecorders(tree, 'reg', 'regulator')
-# attachRecorders(tree, 'volt', 'node')
+# attachRecorders(tree, 'Regulator', 'object', 'regulator')
+# attachRecorders(tree, 'Voltage', 'object', 'node')
 # from pprint import pprint
 # pprint(tree)
 
@@ -225,3 +253,9 @@ def attachRecorders(tree, recorderType, objectToJoin, sample=False):
 # fullyDeEmbed(tree)
 # #pprint(tree)
 # print sortedWrite(tree)
+
+# groupSwingKids test
+# from pprint import pprint
+# tree = parse('./feeders/13 Node Ref Feeder Flat/main.glm')
+# groupSwingKids(tree)
+# pprint(tree)
