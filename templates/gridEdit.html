@@ -56,7 +56,14 @@
     </ul>
   </div>
   <button class='leftToolbar pill' onclick='javascript:zoomToFit()'>Zoom to Fit</button>
-  <button class='leftToolbar pill' id='playPause' onclick='javascript:pauseResume()'>Layout Pause</button>
+  <div class='buttonGroup leftToolbar'>
+    <button class='pill' onclick='dropPill(this, "Fixing")'>Fixing ▾</button>
+    <ul class='menu'>
+      <li><a href='javascript:fixUnfixAll()' id='fixUnfixAll'>Fix All</a></li>
+      <li><a href='javascript:fixSelected()'>Fix Selected</a></li>
+      <li><a href='javascript:unfixSelected()'>Unfix Selected</a></li>
+    </ul>
+  </div>
   <div class='buttonGroup leftToolbar'>
     <button class='pill' onclick='dropPill(this, "Folding")'>Folding ▾</button>
     <ul class='menu'>
@@ -120,7 +127,7 @@ var links = force.links()
 var hiddenNodes = []
 var hiddenLinks = []
 
-// FUNCTIONS START HERE:
+// FUNCTIONS FOR DRAWING:
 
 function draw() {
   // d3.js bookkeeping to set what happens on each time tick in the simulation:
@@ -496,22 +503,33 @@ function fillComponentMenu() {
   }
 }
 
-function pauseResume() {
-  if (pauseResume.state == undefined) pauseResume.state = 'playing'
-  if (pauseResume.state == 'playing') {
-    pauseResume.state = 'paused'
-    for (node in nodes) {
-      nodes[node].fixed = true
-    }
-    gebi('playPause').innerHTML = 'Layout Play'
-  } else if (pauseResume.state == 'paused') {
-    pauseResume.state = 'playing'
-    for (node in nodes) {
-      nodes[node].fixed = false
-    }
-    gebi('playPause').innerHTML = 'Layout Pause'
+function fixUnfixAll() {
+  if (fixUnfixAll.state == undefined) fixUnfixAll.state = 'playing'
+  if (fixUnfixAll.state == 'playing') {
+    fixUnfixAll.state = 'paused'
+    // Tell the nodes and hidden nodes to pause:
+    for (node in nodes) {nodes[node].fixed = true}
+    for (hNode in hiddenNodes) {hiddenNodes[hNode].fixed = true}
+    gebi('fixUnfixAll').innerHTML = 'Unfix All'
+  } else if (fixUnfixAll.state == 'paused') {
+    fixUnfixAll.state = 'playing'
+    for (node in nodes) {nodes[node].fixed = false}
+    for (hNode in hiddenNodes) {hiddenNodes[hNode].fixed = false}    
+    gebi('fixUnfixAll').innerHTML = 'Fix All'
   }
   // Apparently we have to tell force to go again:
+  force.resume()
+}
+
+function fixSelected() {
+  selNode = getSelectedNode()
+  selNode.fixed = true
+  force.resume()
+}
+
+function unfixSelected() {
+  selNode = getSelectedNode()
+  selNode.fixed = false
   force.resume()
 }
 
@@ -582,12 +600,16 @@ function unfoldOneLevel() {
   redraw()
 }
 
-function unfoldAtSelected() {
+function getSelectedNode() {
   if (nodes.some(function(d) {return d.name == selectedName}) == false) {
-    // We have no selection, or an link was selected.
+    // We have no selection, or a link was selected.
     return false
   }
-  selNode = nodes.filter(function(d) {return d.name == selectedName})[0]
+  return nodes.filter(function(d) {return d.name == selectedName})[0]
+}
+
+function unfoldAtSelected() {
+  selNode = getSelectedNode()
   function attachedToSelected(link) {
     return selNode.name == link.source.name || selNode.name == link.target.name
   }
