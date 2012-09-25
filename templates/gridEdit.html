@@ -41,6 +41,7 @@
   circle.triplex_meter {fill:#FF6600;}
   circle.triplex_node {fill:#FFCC00;}
   circle.gridNode {fill:#CC0000;}
+  circle.swingNode {fill:hotpink;}
   </style>
 </head>
 <body>
@@ -148,8 +149,10 @@ function draw() {
       if (tree[x].name != undefined && tree[x].from == undefined) {
         nodeName = tree[x].name
         nodeObject = tree[x].object
+
         // Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
         if (nodeObject == 'node') nodeObject = 'gridNode'
+        if (undefined != tree[x].bustype && tree[x].bustype == 'SWING') nodeObject += ' swingNode'
         nodeIndex = nodes.length
         nodes.push({name:nodeName,treeIndex:parseInt(x),objectType:nodeObject})
         name2nodeIndex[nodeName] = nodeIndex
@@ -395,6 +398,7 @@ function newNode(componentName) {
   newType = component.object
   // Hack to make sure we color nodes correctly:
   if (newType == 'node') newType = 'gridNode'
+  if (undefined != tree[treeNewIndex].bustype && tree[treeNewIndex].bustype == 'SWING') newType += ' swingNode'
   nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex}
   nodes.push(nodeToAdd)
   redraw()

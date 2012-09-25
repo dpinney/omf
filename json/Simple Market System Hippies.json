@@ -22,61 +22,57 @@
             "argument": "\"appliance_schedule.glm\""
         }, 
         "4": {
-            "omftype": "#define", 
-            "argument": "stylesheet=gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0"
-        }, 
-        "5": {
             "omftype": "#set", 
             "argument": "minimum_timestep=60"
         }, 
-        "6": {
+        "5": {
             "omftype": "#set", 
             "argument": "profiler=1"
         }, 
-        "7": {
+        "6": {
             "omftype": "#set", 
             "argument": "relax_naming_rules=1"
         }, 
-        "8": {
+        "7": {
             "omftype": "module", 
             "argument": "tape"
         }, 
-        "9": {
+        "8": {
             "omftype": "module", 
             "argument": "climate"
         }, 
-        "10": {
+        "9": {
             "module": "residential", 
             "implicit_enduses": "NONE"
         }, 
-        "11": {
+        "10": {
             "solver_method": "FBS", 
             "NR_iteration_limit": "50", 
             "module": "powerflow"
         }, 
-        "12": {
+        "11": {
             "omftype": "module", 
             "argument": "market"
         }, 
-        "13": {
+        "12": {
             "object": "stubauction", 
             "name": "Market_1", 
             "period": "300"
         }, 
-        "14": {
+        "13": {
             "property": "current_market.clearing_price", 
             "object": "player", 
             "file": "Price.player", 
             "parent": "Market_1", 
             "loop": "365"
         }, 
-        "15": {
+        "14": {
             "object": "climate", 
             "name": "\"climate\"", 
             "interpolate": "QUADRATIC", 
             "tmyfile": "\"climate.tmy2\""
         }, 
-        "16": {
+        "15": {
             "Control": "MANUAL", 
             "Type": "A", 
             "raise_taps": "16", 
@@ -94,7 +90,7 @@
             "PT_phase": "ABC", 
             "band_width": "50"
         }, 
-        "17": {
+        "16": {
             "diameter": "0.368", 
             "name": "trip_line_config", 
             "object": "triplex_line_configuration", 
@@ -103,13 +99,13 @@
             "conductor_N": "tlc", 
             "insulation_thickness": "0.08"
         }, 
-        "18": {
+        "17": {
             "geometric_mean_radius": "0.01111", 
             "object": "triplex_line_conductor", 
             "resistance": "0.97", 
             "name": "tlc"
         }, 
-        "19": {
+        "18": {
             "impedance1": "0.012000+0.006800j", 
             "name": "fifteen_fifteen_A", 
             "primary_voltage": "4160.0V", 
@@ -122,7 +118,7 @@
             "impedance": "0.006000+0.013600j", 
             "power_rating": "500"
         }, 
-        "20": {
+        "19": {
             "power_rating": "500", 
             "primary_voltage": "4160", 
             "install_type": "PADMOUNT", 
@@ -133,7 +129,7 @@
             "reactance": "0.02", 
             "name": "transformer_configuration_400"
         }, 
-        "21": {
+        "20": {
             "phases": "ABCN", 
             "name": "n650", 
             "object": "node", 
@@ -143,7 +139,7 @@
             "voltage_A": "2401.7771", 
             "nominal_voltage": "2401.7771"
         }, 
-        "22": {
+        "21": {
             "phases": "ABC", 
             "from": "n650", 
             "name": "Reg1", 
@@ -151,7 +147,7 @@
             "to": "n630", 
             "configuration": "regulator_configuration_6506321"
         }, 
-        "23": {
+        "22": {
             "phases": "ABCN", 
             "name": "n630", 
             "object": "node", 
@@ -160,7 +156,7 @@
             "voltage_A": "2401.7771", 
             "nominal_voltage": "2401.7771"
         }, 
-        "24": {
+        "23": {
             "phases": "AS", 
             "from": "n630", 
             "name": "T1", 
@@ -169,7 +165,7 @@
             "configuration": "tconf", 
             "groupid": "Distribution_Trans"
         }, 
-        "25": {
+        "24": {
             "name": "tconf", 
             "primary_voltage": "2401.777", 
             "install_type": "POLETOP", 
@@ -180,7 +176,7 @@
             "impedance": "0.00033+0.0022j", 
             "powerA_rating": "110 kVA"
         }, 
-        "26": {
+        "25": {
             "name": "tconf2", 
             "primary_voltage": "2401.777", 
             "install_type": "POLETOP", 
@@ -191,7 +187,7 @@
             "impedance": "0.00033+0.0022j", 
             "powerB_rating": "110 kVA"
         }, 
-        "27": {
+        "26": {
             "phases": "BS", 
             "from": "n630", 
             "name": "T2", 
@@ -200,19 +196,19 @@
             "configuration": "tconf2", 
             "groupid": "Distribution_Trans"
         }, 
-        "28": {
+        "27": {
             "phases": "AS", 
             "object": "triplex_node", 
             "nominal_voltage": "120", 
             "name": "tn_1"
         }, 
-        "29": {
+        "28": {
             "phases": "BS", 
             "object": "triplex_meter", 
             "nominal_voltage": "120", 
             "name": "tn_2"
         }, 
-        "30": {
+        "29": {
             "phases": "AS", 
             "from": "tn_1", 
             "name": "tl_1", 
@@ -221,7 +217,7 @@
             "length": "100", 
             "configuration": "trip_line_config"
         }, 
-        "31": {
+        "30": {
             "phases": "BS", 
             "from": "tn_2", 
             "name": "t2", 
@@ -230,19 +226,19 @@
             "length": "100", 
             "configuration": "trip_line_config"
         }, 
-        "32": {
+        "31": {
             "phases": "AS", 
             "object": "triplex_meter", 
             "nominal_voltage": "120", 
             "name": "tm_1"
         }, 
-        "33": {
+        "32": {
             "phases": "BS", 
             "object": "triplex_meter", 
             "nominal_voltage": "120", 
             "name": "tm_2"
         }, 
-        "34": {
+        "33": {
             "schedule_skew": "-810", 
             "auxiliary_system_type": "ELECTRIC", 
             "name": "house1", 
@@ -263,7 +259,7 @@
             "motor_efficiency": "GOOD", 
             "motor_model": "BASIC"
         }, 
-        "35": {
+        "34": {
             "auxiliary_system_type": "ELECTRIC", 
             "name": "house2", 
             "parent": "tm_2", 
@@ -283,7 +279,7 @@
             "motor_efficiency": "GOOD", 
             "motor_model": "BASIC"
         }, 
-        "36": {
+        "35": {
             "schedule_skew": "-810", 
             "demand": "water14*1", 
             "name": "waterheater2", 
@@ -297,7 +293,7 @@
             "tank_UA": "2.4", 
             "temperature": "135"
         }, 
-        "37": {
+        "36": {
             "parent": "house2", 
             "name": "convenienceLoads2", 
             "power_fraction": "0.100000", 
@@ -310,7 +306,7 @@
             "impedance_fraction": "0.800000", 
             "groupid": "plugload"
         }, 
-        "38": {
+        "37": {
             "parent": "house2", 
             "name": "lights2", 
             "power_fraction": "0.003200", 
@@ -323,7 +319,7 @@
             "impedance_fraction": "0.571100", 
             "groupid": "lights"
         }, 
-        "39": {
+        "38": {
             "parent": "house2", 
             "name": "television2", 
             "power_fraction": "0.998700", 
@@ -336,7 +332,7 @@
             "impedance_fraction": "-0.038300", 
             "groupid": "TV"
         }, 
-        "40": {
+        "39": {
             "parent": "house2", 
             "name": "fan2", 
             "power_fraction": "0.013500", 
@@ -349,7 +345,7 @@
             "impedance_fraction": "0.733200", 
             "groupid": "fan"
         }, 
-        "41": {
+        "40": {
             "interval": "60", 
             "parent": "Market_1", 
             "object": "recorder", 
@@ -357,7 +353,7 @@
             "file": "price_statistics.csv", 
             "property": "avg24,std24,last.P,current_market.clearing_price"
         }, 
-        "42": {
+        "41": {
             "interval": "60", 
             "parent": "Reg1", 
             "object": "recorder", 
@@ -365,7 +361,7 @@
             "file": "Regulator_Reg1.csv", 
             "property": "tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag"
         }, 
-        "43": {
+        "42": {
             "interval": "60", 
             "parent": "tm_1", 
             "object": "recorder", 
@@ -373,7 +369,7 @@
             "file": "Voltage_tm_1.csv", 
             "property": "voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag"
         }, 
-        "44": {
+        "43": {
             "interval": "60", 
             "parent": "tm_2", 
             "object": "recorder", 
