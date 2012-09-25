@@ -67,7 +67,12 @@ table {border-spacing:0px;}
 div.buttonGroup { display: inline-block; position:relative; }
 
 button.pill {
-	width: auto;
+	-webkit-touch-callout: none;
+	-webkit-user-select: none;
+	-khtml-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;width: auto;
 	margin: 0px;
 	padding:4px 8px 4px 8px; 
 	background-color:#E0E0E0;
