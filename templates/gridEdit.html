@@ -68,6 +68,10 @@
   <div class='buttonGroup leftToolbar'>
     <button class='pill' onclick='dropPill(this, "Folding")'>Folding ▾</button>
     <ul class='menu'>
+      <div style='width:150px;padding:4px'>
+        <div id='shown' style='padding:0px;margin:0px;display:inline-block;height:10px;width:30%;background-color:gray'></div>
+        <div id='hidden' style='padding:0px;margin:0px;display:inline-block;height:10px;width:60%;background-color:black'></div>
+      </div>
       <li><a href='javascript:hideChildren()'>Fold One Level</a></li>
       <li><a href='javascript:unfoldAtSelected()'>Unfold at Selected</a></li>
       <li><a href='javascript:unfoldOneLevel()'>Unfold One Level</a></li>
