@@ -121,8 +121,8 @@ def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 		lengthInSeconds = simLength * 60
 		interval = 60
 	elif simLengthUnits == 'hours':
-		lengthInSeconds = 1440 * simLength
-		interval = 1440
+		lengthInSeconds = 3600 * simLength
+		interval = 3600
 	elif simLengthUnits == 'days':
 		lengthInSeconds = 86400 * simLength
 		interval = 86400
@@ -137,9 +137,12 @@ def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 			# Ick, Gridlabd wants time values wrapped in single quotes:
 			leaf['starttime'] = "'" + str(starttime) + "'"
 			leaf['stoptime'] = "'" + str(stoptime) + "'"
-		if 'object' in leaf and (leaf['object'] == 'recorder' or leaf['object'] == 'collector'):
+		elif 'object' in leaf and (leaf['object'] == 'recorder' or leaf['object'] == 'collector'):
 			leaf['interval'] = str(interval)
 			leaf['limit'] = str(simLength)
+		elif 'argument' in leaf and leaf['argument'].startswith('minimum_timestep'):
+			leaf['argument'] = 'minimum_timestep=' + str(interval)
+
 
 def fullyDeEmbed(glmTree):
 	# TODO: fix problem with deEmbedding sub-objects called by name i.e. config object triplexconfig {blah}.
@@ -258,4 +261,10 @@ def groupSwingKids(tree):
 # from pprint import pprint
 # tree = parse('./feeders/13 Node Ref Feeder Flat/main.glm')
 # groupSwingKids(tree)
+# pprint(tree)
+
+## Time Adjustment Test
+# tree = parse('./feeders/Simple Market System/main.glm')
+# adjustTime(tree, 100, 'hours', '2000-09-01')
+# from pprint import pprint
 # pprint(tree)

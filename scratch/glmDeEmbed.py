@@ -2,6 +2,7 @@
 
 ''' Try to flatten a glm. '''
 
+sys.path.append('C:/Users/dwp0/Dropbox/OMF/omf')
 import treeParser as tp
 import copy
 
