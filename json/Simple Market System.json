@@ -74,11 +74,10 @@
         }, 
         "15": {
             "Control": "MANUAL", 
-            "Type": "A", 
             "raise_taps": "16", 
             "name": "regulator_configuration_6506321", 
             "band_center": "2401", 
-            "tap_pos_A": "1", 
+            "Type": "A", 
             "tap_pos_B": "1", 
             "object": "regulator_configuration", 
             "time_delay": "30.0", 
@@ -86,6 +85,7 @@
             "regulation": "0.10", 
             "CT_phase": "ABC", 
             "lower_taps": "16", 
+            "tap_pos_A": "1", 
             "tap_pos_C": "1", 
             "PT_phase": "ABC", 
             "band_width": "50"
@@ -102,8 +102,8 @@
         "17": {
             "geometric_mean_radius": "0.01111", 
             "object": "triplex_line_conductor", 
-            "resistance": "0.97", 
-            "name": "tlc"
+            "name": "tlc", 
+            "resistance": "0.97"
         }, 
         "18": {
             "impedance1": "0.012000+0.006800j", 
@@ -239,47 +239,113 @@
             "name": "tm_2"
         }, 
         "33": {
+            "cooling_system_type": "ELECTRIC", 
             "schedule_skew": "-810", 
-            "auxiliary_system_type": "ELECTRIC", 
+            "heating_system_type": "HEAT_PUMP", 
             "name": "house1", 
             "parent": "tm_1", 
             "floor_area": "1838", 
             "cooling_COP": "3.2", 
             "object": "house", 
-            "cooling_system_type": "ELECTRIC", 
+            "auxiliary_strategy": "LOCKOUT", 
             "aux_heat_temperature_lockout": "2.270706e+001", 
             "heating_setpoint": "heating1*1", 
-            "auxiliary_strategy": "LOCKOUT", 
-            "heating_system_type": "HEAT_PUMP", 
+            "cooling_setpoint": "cooling7*1", 
             "air_temperature": "70", 
             "thermal_integrity_level": "5", 
             "heating_COP": "3.1", 
-            "cooling_setpoint": "cooling7*1", 
+            "auxiliary_system_type": "ELECTRIC", 
             "mass_temperature": "70", 
             "motor_efficiency": "GOOD", 
             "motor_model": "BASIC"
         }, 
         "34": {
-            "auxiliary_system_type": "ELECTRIC", 
+            "schedule_skew": "-810", 
+            "demand": "water14*1", 
+            "name": "waterheater1", 
+            "parent": "house1", 
+            "object": "waterheater", 
+            "heating_element_capacity": "4.8 kW", 
+            "thermostat_deadband": "2.9", 
+            "location": "INSIDE", 
+            "tank_volume": "50", 
+            "tank_setpoint": "136.8", 
+            "tank_UA": "2.4", 
+            "temperature": "135"
+        }, 
+        "35": {
+            "parent": "house1", 
+            "name": "convenienceLoads1", 
+            "power_fraction": "0.100000", 
+            "object": "ZIPload", 
+            "current_fraction": "0.100000", 
+            "base_power": "plug1*2.477490", 
+            "impedance_pf": "0.950000", 
+            "current_pf": "0.950000", 
+            "power_pf": "0.950000", 
+            "impedance_fraction": "0.800000", 
+            "groupid": "plugload"
+        }, 
+        "36": {
+            "parent": "house1", 
+            "name": "lights1", 
+            "power_fraction": "0.003200", 
+            "object": "ZIPload", 
+            "current_fraction": "0.425700", 
+            "base_power": "lights1*1.616013", 
+            "impedance_pf": "1.000000", 
+            "current_pf": "-1.000000", 
+            "power_pf": "1.000000", 
+            "impedance_fraction": "0.571100", 
+            "groupid": "lights"
+        }, 
+        "37": {
+            "parent": "house1", 
+            "name": "television1", 
+            "power_fraction": "0.998700", 
+            "object": "ZIPload", 
+            "current_fraction": "0.039600", 
+            "base_power": "television5*0.200598", 
+            "impedance_pf": "0.610000", 
+            "current_pf": "-0.540000", 
+            "power_pf": "-1.000000", 
+            "impedance_fraction": "-0.038300", 
+            "groupid": "TV"
+        }, 
+        "38": {
+            "parent": "house1", 
+            "name": "fan1", 
+            "power_fraction": "0.013500", 
+            "object": "ZIPload", 
+            "current_fraction": "0.253400", 
+            "base_power": "fan1*0.106899", 
+            "impedance_pf": "0.970000", 
+            "current_pf": "0.950000", 
+            "power_pf": "-1.000000", 
+            "impedance_fraction": "0.733200", 
+            "groupid": "fan"
+        }, 
+        "39": {
+            "cooling_system_type": "ELECTRIC", 
+            "heating_system_type": "HEAT_PUMP", 
             "name": "house2", 
             "parent": "tm_2", 
             "floor_area": "1838", 
             "cooling_COP": "3.2", 
             "object": "house", 
-            "cooling_system_type": "ELECTRIC", 
+            "auxiliary_strategy": "LOCKOUT", 
             "aux_heat_temperature_lockout": "2.270706e+001", 
             "heating_setpoint": "heating1*1", 
-            "auxiliary_strategy": "LOCKOUT", 
-            "heating_system_type": "HEAT_PUMP", 
+            "cooling_setpoint": "cooling7*1", 
             "air_temperature": "70", 
             "thermal_integrity_level": "5", 
             "heating_COP": "3.1", 
-            "cooling_setpoint": "cooling7*1", 
+            "auxiliary_system_type": "ELECTRIC", 
             "mass_temperature": "70", 
             "motor_efficiency": "GOOD", 
             "motor_model": "BASIC"
         }, 
-        "35": {
+        "40": {
             "schedule_skew": "-810", 
             "demand": "water14*1", 
             "name": "waterheater2", 
@@ -293,7 +359,7 @@
             "tank_UA": "2.4", 
             "temperature": "135"
         }, 
-        "36": {
+        "41": {
             "parent": "house2", 
             "name": "convenienceLoads2", 
             "power_fraction": "0.100000", 
@@ -306,7 +372,7 @@
             "impedance_fraction": "0.800000", 
             "groupid": "plugload"
         }, 
-        "37": {
+        "42": {
             "parent": "house2", 
             "name": "lights2", 
             "power_fraction": "0.003200", 
@@ -319,7 +385,7 @@
             "impedance_fraction": "0.571100", 
             "groupid": "lights"
         }, 
-        "38": {
+        "43": {
             "parent": "house2", 
             "name": "television2", 
             "power_fraction": "0.998700", 
@@ -332,7 +398,7 @@
             "impedance_fraction": "-0.038300", 
             "groupid": "TV"
         }, 
-        "39": {
+        "44": {
             "parent": "house2", 
             "name": "fan2", 
             "power_fraction": "0.013500", 
@@ -344,38 +410,6 @@
             "power_pf": "-1.000000", 
             "impedance_fraction": "0.733200", 
             "groupid": "fan"
-        }, 
-        "40": {
-            "interval": "60", 
-            "parent": "Market_1", 
-            "object": "recorder", 
-            "limit": "14400", 
-            "file": "price_statistics.csv", 
-            "property": "avg24,std24,last.P,current_market.clearing_price"
-        }, 
-        "41": {
-            "interval": "60", 
-            "parent": "Reg1", 
-            "object": "recorder", 
-            "limit": "14400", 
-            "file": "Regulator_Reg1.csv", 
-            "property": "tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag"
-        }, 
-        "42": {
-            "interval": "60", 
-            "parent": "tm_1", 
-            "object": "recorder", 
-            "limit": "14400", 
-            "file": "Voltage_tm_1.csv", 
-            "property": "voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag"
-        }, 
-        "43": {
-            "interval": "60", 
-            "parent": "tm_2", 
-            "object": "recorder", 
-            "limit": "14400", 
-            "file": "Voltage_tm_2.csv", 
-            "property": "voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag"
         }
     }, 
     "links": []

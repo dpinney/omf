@@ -58,11 +58,11 @@
   </div>
   <button class='leftToolbar pill' onclick='javascript:zoomToFit()'>Zoom to Fit</button>
   <div class='buttonGroup leftToolbar'>
-    <button class='pill' onclick='dropPill(this, "Fixing")'>Fixing ▾</button>
+    <button class='pill' onclick='dropPill(this, "Pinning")'>Pinning ▾</button>
     <ul class='menu'>
-      <li><a href='javascript:fixUnfixAll()' id='fixUnfixAll'>Fix All</a></li>
-      <li><a href='javascript:fixSelected()'>Fix Selected</a></li>
-      <li><a href='javascript:unfixSelected()'>Unfix Selected</a></li>
+      <li><a href='javascript:pinUnpinAll()' id='pinUnpinAll'>Pin All</a></li>
+      <li><a href='javascript:pinSelected()'>Pin Selected</a></li>
+      <li><a href='javascript:unpinSelected()'>Unpin Selected</a></li>
     </ul>
   </div>
   <div class='buttonGroup leftToolbar'>
@@ -511,31 +511,31 @@ function fillComponentMenu() {
   }
 }
 
-function fixUnfixAll() {
-  if (fixUnfixAll.state == undefined) fixUnfixAll.state = 'playing'
-  if (fixUnfixAll.state == 'playing') {
-    fixUnfixAll.state = 'paused'
+function pinUnpinAll() {
+  if (pinUnpinAll.state == undefined) pinUnpinAll.state = 'playing'
+  if (pinUnpinAll.state == 'playing') {
+    pinUnpinAll.state = 'paused'
     // Tell the nodes and hidden nodes to pause:
     for (node in nodes) {nodes[node].fixed = true}
     for (hNode in hiddenNodes) {hiddenNodes[hNode].fixed = true}
-    gebi('fixUnfixAll').innerHTML = 'Unfix All'
-  } else if (fixUnfixAll.state == 'paused') {
-    fixUnfixAll.state = 'playing'
+    gebi('pinUnpinAll').innerHTML = 'Unpin All'
+  } else if (pinUnpinAll.state == 'paused') {
+    pinUnpinAll.state = 'playing'
     for (node in nodes) {nodes[node].fixed = false}
     for (hNode in hiddenNodes) {hiddenNodes[hNode].fixed = false}    
-    gebi('fixUnfixAll').innerHTML = 'Fix All'
+    gebi('pinUnpinAll').innerHTML = 'Pin All'
   }
   // Apparently we have to tell force to go again:
   force.resume()
 }
 
-function fixSelected() {
+function pinSelected() {
   selNode = getSelectedNode()
   selNode.fixed = true
   force.resume()
 }
 
-function unfixSelected() {
+function unpinSelected() {
   selNode = getSelectedNode()
   selNode.fixed = false
   force.resume()
