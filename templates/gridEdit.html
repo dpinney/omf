@@ -68,10 +68,6 @@
   <div class='buttonGroup leftToolbar'>
     <button class='pill' onclick='dropPill(this, "Folding")'>Folding ▾</button>
     <ul class='menu'>
-      <div style='width:150px;padding:4px'>
-        <div id='shown' style='padding:0px;margin:0px;display:inline-block;height:10px;width:30%;background-color:gray'></div>
-        <div id='hidden' style='padding:0px;margin:0px;display:inline-block;height:10px;width:60%;background-color:black'></div>
-      </div>
       <li><a href='javascript:hideChildren()'>Fold One Level</a></li>
       <li><a href='javascript:unfoldAtSelected()'>Unfold at Selected</a></li>
       <li><a href='javascript:unfoldOneLevel()'>Unfold One Level</a></li>
@@ -84,6 +80,42 @@
       <li id='renameMenuItem'><a href='javascript:rename()'>Rename</a></li>
       <li id='saveMenuItem'><a href='javascript:saveModel()'>Save</a></li>
       <li><a href='javascript:history.back()'>Cancel</a></li>
+    </ul>
+  </div>
+  <div class='buttonGroup rightToolbar'>
+    <button class='pill' onclick='dropPill(this, "Layout")'>Layout ▾</button>
+    <ul class='menu right'>
+      <table style='padding:4px;word-wrap:'>
+        <tr>
+          <td>GraphNodes</td>
+          <td id='nodesBox'></td>
+        </tr>
+        <tr>
+          <td colspan=2 style='padding:0px'>
+            <div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
+          </td>
+        <tr>
+        <tr>
+          <td>Gravity</td>
+          <td><input id='gravityBox' type='text'></td>
+        </tr>
+        <tr>
+          <td>Theta</td>
+          <td><input id='thetaBox' type='text'></td>
+        </tr>
+        <tr>
+          <td>Friction</td>
+          <td><input id='frictionBox' type='text'></td>
+        </tr>
+        <tr>
+          <td>Charge</td>
+          <td><input id='chargeBox' type='text'></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td style='padding-top:10px'><button onclick='layoutMenuApply()'>Apply</button></td>
+        </tr>
+      </table>
     </ul>
   </div>
 </div>
@@ -179,6 +211,11 @@ function draw() {
     .transition()
     .duration(1500)
     .style('opacity', 1);
+  // Start the layout.
+  force.start();
+  // Run the layout in the background until performance is acceptable.
+  // preLayout()
+  // Start drawing.
   redraw()
 }
 
@@ -214,7 +251,7 @@ function redraw() {
 
   node.exit().remove()
 
-  force.start();
+  force.resume()
 }
 
 function zoomRedraw() {
@@ -223,6 +260,16 @@ function zoomRedraw() {
   vis.attr('transform',
     'translate(' + d3.event.translate + ')'
     + ' scale(' + d3.event.scale + ')');
+}
+
+function preLayout() {
+  function fiveTicks() {for (i=0; i<5; ++i) force.tick()}
+  fiveTicksTime = 1000
+  // while performance is bad keep rendering in the background:
+  while (fiveTicksTime > 200) {
+    fiveTicksTime = time(fiveTicks)
+    console.log(fiveTicksTime)
+  }
 }
 
 function classify(d, c, on) {
@@ -237,6 +284,8 @@ function classify(d, c, on) {
     svg.select("#n" + d.treeIndex).classed(c, false);
   }
 }
+
+// FUNCTIONS FOR OBJECT SELECTION AND EDITING
 
 function onCompClick(d, i) {
   // Abort if we try to select a parentChild relationship.
@@ -542,6 +591,32 @@ function unpinSelected() {
 }
 
 
+// FUNCTIONS FOR LAYOUT MENU
+
+function layoutMenuInit() {
+  nodeCount = nodes.length + hiddenNodes.length
+  gebi('nodesBox').innerHTML = nodeCount
+  gebi('nodesPercShown').style.width = nodes.length*100/nodeCount + '%'
+  gebi('nodesPercHidden').style.width = hiddenNodes.length*100/nodeCount + '%'
+  gebi('gravityBox').value = force.gravity()
+  gebi('thetaBox').value = force.theta()
+  gebi('frictionBox').value = force.friction()
+  gebi('chargeBox').value = force.charge()
+}
+
+function layoutMenuApply() {
+  force.gravity(gebi('gravityBox').value)
+  force.theta(gebi('thetaBox').value)
+  force.friction(gebi('frictionBox').value)
+  force.charge(gebi('chargeBox').value)
+  force.resume()
+}
+
+function updateHiddenPerc() {
+  gebi('nodesPercShown').style.width = nodes.length*100/nodeCount + '%'
+  gebi('nodesPercHidden').style.width = hiddenNodes.length*100/nodeCount + '%'
+}
+
 // FUNCTIONS FOR GRAPH FOLDING:
 
 function hideLink(link) {
@@ -579,6 +654,7 @@ function hideChildren() {
   toHide = nodes.filter(isChild)
   // Hide them:
   toHide.map(hideNode)
+  updateHiddenPerc()
   redraw()
 }
 
@@ -589,6 +665,7 @@ function showAllNodes() {
   while (hiddenNodes.length != 0) {
     nodes.push(hiddenNodes.pop())
   }
+  updateHiddenPerc()
   redraw()
 }
 
@@ -605,6 +682,7 @@ function unfoldOneLevel() {
   nodesToReveal = hiddenNodes.filter(attachedToRevealed)
   linksToReveal.map(showLink)
   nodesToReveal.map(showNode)
+  updateHiddenPerc()
   redraw()
 }
 
@@ -629,6 +707,7 @@ function unfoldAtSelected() {
   nodesToReveal = hiddenNodes.filter(attachedToRevealed)
   linksToReveal.map(showLink)
   nodesToReveal.map(showNode)
+  updateHiddenPerc()
   redraw()
 }
 
@@ -663,6 +742,7 @@ d3.json('/api/models/{{ model_id }}.json', function (json) {
     if (undefined == realTarget) {hiddenLinks[li2].target = realTargetHidden} else {hiddenLinks[li2].target = realTarget} 
   }
   draw()
+  layoutMenuInit()
 })
 
 </script>
