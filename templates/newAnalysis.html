@@ -29,35 +29,53 @@
 			gebi(x).parentNode.removeChild(gebi(x))
 		}
 		function saveAnalysis() {
-			responseDict = {}
-			// Get the analysis-level stuff.
-			responseDict.simLength = parseInt(gebi('simLength').value)
-			responseDict.simLengthUnits = getRadioSetting('radio')
-			responseDict.simStartDate = gebi('simStartDate').value
-			responseDict.analysisName = gebi('analysisName').value
-			// Get the study-level stuff.
-			studyList = []
-			studyDivs = document.getElementsByClassName('studyOptions')
-			for (i=0; i<studyDivs.length; i++) {
-				study = {}
-				study.studyName = studyDivs[i].querySelector('.studyName').value
-				study.feederName = studyDivs[i].querySelector('.feederName').value
-				study.tmy2name = studyDivs[i].querySelector('.tmy2name').value
-				study.studyType = 'gridLab'
-				studyList.push(study)
+			// First, a helper function to validate input against a regex:
+			try {
+				function check(answer, regEx) {
+					// careful with those ints:
+					toTest = answer + ''
+					// do the test:
+					if (toTest == toTest.match(regEx)) {
+						return answer
+					} else {
+						// this error will abort the analysis creation process:
+						throw 'ValidationError'
+					}
+				}
+				responseDict = {}
+				// Get the analysis-level stuff.
+				responseDict.simLength = check(parseInt(gebi('simLength').value), /[1-9]\d*/)
+				responseDict.simLengthUnits = check(getRadioSetting('radio'), /\w+/)
+				responseDict.simStartDate = check(gebi('simStartDate').value, /\d\d\d\d-[01]\d-[0123]\d/) // Doesn't flag all bogus dates but it's close enough.
+				responseDict.analysisName = check(gebi('analysisName').value, /[\w\s]*/) // Must be a valid filename!
+				// Get the study-level stuff.
+				studyList = []
+				studyDivs = document.getElementsByClassName('studyOptions')
+				for (i=0; i<studyDivs.length; i++) {
+					study = {}
+					study.studyName = check(studyDivs[i].querySelector('.studyName').value, /[\w\s]*/) // Must be a valid filename!
+					study.feederName = studyDivs[i].querySelector('.feederName').value
+					study.tmy2name = studyDivs[i].querySelector('.tmy2name').value
+					study.studyType = 'gridLab'
+					studyList.push(study)
+				}
+				responseDict.studies = studyList
+				// Get the reports.
+				reportList = []
+				reportDivs = document.getElementsByClassName('reportOptions')
+				for (i=0; i<reportDivs.length; i++) {
+					report = {}
+					report.reportType = reportDivs[i].querySelector('.reportName').innerHTML
+					reportList.push(report)
+				}
+				responseDict.reports = reportList
+				// Send the request.
+				post_to_url('/saveAnalysis/', {'json':JSON.stringify(responseDict)})
+			} 
+			catch(err) {
+				alert('Some form values are not correct')
+				return false
 			}
-			responseDict.studies = studyList
-			// Get the reports.
-			reportList = []
-			reportDivs = document.getElementsByClassName('reportOptions')
-			for (i=0; i<reportDivs.length; i++) {
-				report = {}
-				report.reportType = reportDivs[i].querySelector('.reportName').innerHTML
-				reportList.push(report)
-			}
-			responseDict.reports = reportList
-			// Send the request.
-			post_to_url('/saveAnalysis/', {'json':JSON.stringify(responseDict)})
 		}
 		function addReport(reportName) {
 			// Don't let the user add more than one copy of the report:

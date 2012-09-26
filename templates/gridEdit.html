@@ -91,7 +91,7 @@
           <td id='nodesBox'></td>
         </tr>
         <tr>
-          <td colspan=2 style='padding:0px'>
+          <td colspan=2 style='padding:0px 0px 10px 0px'>
             <div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
           </td>
         <tr>
@@ -247,7 +247,7 @@ function redraw() {
 
   // TODO: un-comment this to have text labels on _some_ nodes.
   // node.append('svg:title')
-  //     .text(function(d) { return d.name; });
+  //   .text(function(d) { return d.name; });
 
   node.exit().remove()
 
