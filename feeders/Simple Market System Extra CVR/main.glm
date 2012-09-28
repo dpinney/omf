@@ -227,6 +227,72 @@ motor_efficiency GOOD;
 heating_system_type HEAT_PUMP;
 };
 
+object waterheater {
+schedule_skew -810;
+tank_volume 50;
+name waterheater1;
+parent house1;
+heating_element_capacity 4.8 kW;
+thermostat_deadband 2.9;
+location INSIDE;
+demand water14*1;
+tank_setpoint 136.8;
+tank_UA 2.4;
+temperature 135;
+};
+
+object ZIPload {
+parent house1;
+name convenienceLoads1;
+power_fraction 0.100000;
+current_fraction 0.100000;
+base_power plug1*2.477490;
+groupid plugload;
+current_pf 0.950000;
+power_pf 0.950000;
+impedance_fraction 0.800000;
+impedance_pf 0.950000;
+};
+
+object ZIPload {
+parent house1;
+name lights1;
+power_fraction 0.003200;
+current_fraction 0.425700;
+base_power lights1*1.616013;
+groupid lights;
+current_pf -1.000000;
+power_pf 1.000000;
+impedance_fraction 0.571100;
+impedance_pf 1.000000;
+};
+
+object ZIPload {
+parent house1;
+name television1;
+power_fraction 0.998700;
+current_fraction 0.039600;
+base_power television5*0.200598;
+groupid TV;
+current_pf -0.540000;
+power_pf -1.000000;
+impedance_fraction -0.038300;
+impedance_pf 0.610000;
+};
+
+object ZIPload {
+parent house1;
+name fan1;
+power_fraction 0.013500;
+current_fraction 0.253400;
+base_power fan1*0.106899;
+groupid fan;
+current_pf 0.950000;
+power_pf -1.000000;
+impedance_fraction 0.733200;
+impedance_pf 0.970000;
+};
+
 object house {
 auxiliary_system_type ELECTRIC;
 name house2;
@@ -313,35 +379,204 @@ impedance_fraction 0.733200;
 impedance_pf 0.970000;
 };
 
-object recorder {
-parent Market_1;
-interval 60;
-limit 14400;
-file price_statistics.csv;
-property avg24,std24,last.P,current_market.clearing_price;
-};
-
-object recorder {
-parent Reg1;
-interval 60;
-limit 14400;
-file Regulator_Reg1.csv;
-property tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag;
-};
-
-object recorder {
-parent tm_1;
-interval 60;
-limit 14400;
-file Voltage_tm_1.csv;
-property voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag;
-};
-
-object recorder {
+object house {
+auxiliary_system_type ELECTRIC;
+name house45;
 parent tm_2;
-interval 60;
-limit 14400;
-file Voltage_tm_2.csv;
-property voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag;
+floor_area 1838;
+cooling_COP 3.2;
+cooling_system_type ELECTRIC;
+aux_heat_temperature_lockout 2.270706e+001;
+heating_setpoint heating1*1;
+auxiliary_strategy LOCKOUT;
+heating_system_type HEAT_PUMP;
+air_temperature 70;
+thermal_integrity_level 5;
+heating_COP 3.1;
+cooling_setpoint cooling7*1;
+mass_temperature 70;
+motor_efficiency GOOD;
+motor_model BASIC;
+};
+
+object house {
+auxiliary_system_type ELECTRIC;
+name house46;
+parent tm_2;
+floor_area 1838;
+cooling_COP 3.2;
+cooling_system_type ELECTRIC;
+aux_heat_temperature_lockout 2.270706e+001;
+heating_setpoint heating1*1;
+auxiliary_strategy LOCKOUT;
+heating_system_type HEAT_PUMP;
+air_temperature 70;
+thermal_integrity_level 5;
+heating_COP 3.1;
+cooling_setpoint cooling7*1;
+mass_temperature 70;
+motor_efficiency GOOD;
+motor_model BASIC;
+};
+
+object house {
+auxiliary_system_type ELECTRIC;
+name house47;
+parent tm_2;
+floor_area 1838;
+cooling_COP 3.2;
+cooling_system_type ELECTRIC;
+aux_heat_temperature_lockout 2.270706e+001;
+heating_setpoint heating1*1;
+auxiliary_strategy LOCKOUT;
+heating_system_type HEAT_PUMP;
+air_temperature 70;
+thermal_integrity_level 5;
+heating_COP 3.1;
+cooling_setpoint cooling7*1;
+mass_temperature 70;
+motor_efficiency GOOD;
+motor_model BASIC;
+};
+
+object house {
+auxiliary_system_type ELECTRIC;
+name house48;
+parent tm_2;
+floor_area 1838;
+cooling_COP 3.2;
+cooling_system_type ELECTRIC;
+aux_heat_temperature_lockout 2.270706e+001;
+heating_setpoint heating1*1;
+auxiliary_strategy LOCKOUT;
+heating_system_type HEAT_PUMP;
+air_temperature 70;
+thermal_integrity_level 5;
+heating_COP 3.1;
+cooling_setpoint cooling7*1;
+mass_temperature 70;
+motor_efficiency GOOD;
+motor_model BASIC;
+};
+
+object house {
+auxiliary_system_type ELECTRIC;
+name house49;
+parent tm_1;
+floor_area 1838;
+cooling_COP 3.2;
+cooling_system_type ELECTRIC;
+aux_heat_temperature_lockout 2.270706e+001;
+heating_setpoint heating1*1;
+auxiliary_strategy LOCKOUT;
+heating_system_type HEAT_PUMP;
+air_temperature 70;
+thermal_integrity_level 5;
+heating_COP 3.1;
+cooling_setpoint cooling7*1;
+mass_temperature 70;
+motor_efficiency GOOD;
+motor_model BASIC;
+};
+
+object house {
+auxiliary_system_type ELECTRIC;
+name house50;
+parent tm_1;
+floor_area 1838;
+cooling_COP 3.2;
+cooling_system_type ELECTRIC;
+aux_heat_temperature_lockout 2.270706e+001;
+heating_setpoint heating1*1;
+auxiliary_strategy LOCKOUT;
+heating_system_type HEAT_PUMP;
+air_temperature 70;
+thermal_integrity_level 5;
+heating_COP 3.1;
+cooling_setpoint cooling7*1;
+mass_temperature 70;
+motor_efficiency GOOD;
+motor_model BASIC;
+};
+
+object house {
+auxiliary_system_type ELECTRIC;
+name house51;
+parent tm_1;
+floor_area 1838;
+cooling_COP 3.2;
+cooling_system_type ELECTRIC;
+aux_heat_temperature_lockout 2.270706e+001;
+heating_setpoint heating1*1;
+auxiliary_strategy LOCKOUT;
+heating_system_type HEAT_PUMP;
+air_temperature 70;
+thermal_integrity_level 5;
+heating_COP 3.1;
+cooling_setpoint cooling7*1;
+mass_temperature 70;
+motor_efficiency GOOD;
+motor_model BASIC;
+};
+
+object house {
+auxiliary_system_type ELECTRIC;
+name house52;
+parent tm_1;
+floor_area 1838;
+cooling_COP 3.2;
+cooling_system_type ELECTRIC;
+aux_heat_temperature_lockout 2.270706e+001;
+heating_setpoint heating1*1;
+auxiliary_strategy LOCKOUT;
+heating_system_type HEAT_PUMP;
+air_temperature 70;
+thermal_integrity_level 5;
+heating_COP 3.1;
+cooling_setpoint cooling7*1;
+mass_temperature 70;
+motor_efficiency GOOD;
+motor_model BASIC;
+};
+
+object capacitor {
+control VOLT;
+phases ABCN;
+control_level INDIVIDUAL;
+name capacitor53;
+parent n630;
+capacitor_B 0.10 mVAr;
+capacitor_C 0.10 mVAr;
+phases_connected ABCN;
+capacitor_A 0.10 mVAr;
+time_delay 300.0;
+nominal_voltage 2401.7771;
+voltage_set_low 2340.0;
+switcHC CLOSED;
+switcHB CLOSED;
+switcHA CLOSED;
+pt_phase ABCN;
+dwell_time 0.0;
+voltage_set_high 2350.0;
+};
+
+object volt_var_control {
+substation_link Reg1;
+name volt_var_control54;
+low_load_deadband 30;
+d_max 0.8;
+max_vdrop 50;
+minimum_voltages 1800;
+control_method ACTIVE;
+capacitor_list capacitor53;
+regulator_list Reg1;
+capacitor_delay 60.0;
+d_min 0.1;
+regulator_delay 60.0;
+desired_voltages 2200;
+maximum_voltages 3500;
+desired_pf 0.99;
+high_load_deadband 30;
+voltage_measurements 652;
 };
 
