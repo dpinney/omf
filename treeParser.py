@@ -136,10 +136,13 @@ def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 		if 'clock' in leaf:
 			# Ick, Gridlabd wants time values wrapped in single quotes:
 			leaf['starttime'] = "'" + str(starttime) + "'"
+			# Apparently it needs timestamp=starttime. Gross! Bizarre!
+			leaf['timestamp'] = "'" + str(starttime) + "'"
 			leaf['stoptime'] = "'" + str(stoptime) + "'"
 		elif 'object' in leaf and (leaf['object'] == 'recorder' or leaf['object'] == 'collector'):
 			leaf['interval'] = str(interval)
-			leaf['limit'] = str(simLength)
+			# We're trying limitless for the time being.
+			# leaf['limit'] = str(simLength)
 		elif 'argument' in leaf and leaf['argument'].startswith('minimum_timestep'):
 			leaf['argument'] = 'minimum_timestep=' + str(interval)
 
@@ -186,10 +189,10 @@ def attachRecorders(tree, recorderType, keyToJoin, valueToJoin, sample=False):
 	# HACK: the biggestKey assumption only works for a flat tree or one that has a flat node for the last item...
 	biggestKey = int(sorted(tree.keys())[-1]) + 1
 	# Types of recorders we can attach:
-	recorders = {	'Regulator':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '1', 'file': 'Regulator_Y.csv', 'property': 'tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag'},
-					'Voltage':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '1', 'file': 'Voltage_Y.csv', 'property': 'voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag'},
-					'Capacitor':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '1', 'file': 'Capacitor_Y.csv', 'property': 'switchA,switchB,switchC'},
-					'CollectorVoltage':{'interval': '1', 'object': 'collector', 'limit': '1', 'file': 'VoltageJiggle.csv', 'group': 'class=triplex_meter', 'property':'min(voltage_12.mag),mean(voltage_12.mag),max(voltage_12.mag),std(voltage_12.mag)'}
+	recorders = {	'Regulator':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'Regulator_Y.csv', 'property': 'tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag'},
+					'Voltage':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'Voltage_Y.csv', 'property': 'voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag'},
+					'Capacitor':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'Capacitor_Y.csv', 'property': 'switchA,switchB,switchC'},
+					'CollectorVoltage':{'interval': '1', 'object': 'collector', 'limit': '0', 'file': 'VoltageJiggle.csv', 'group': 'class=triplex_meter', 'property':'min(voltage_12.mag),mean(voltage_12.mag),max(voltage_12.mag),std(voltage_12.mag)'}
 				}
 	# If the recorder doesn't have a parent don't walk the tree:
 	if 'parent' not in recorders[recorderType]:
@@ -228,7 +231,7 @@ def groupSwingKids(tree):
 				swingTypes += [leaf['object']]
 	# attach the collector:
 	biggestKey = int(sorted(tree.keys())[-1]) + 1
-	collector = {'interval': '1', 'object': 'collector', 'limit': '1', 'group': 'X', 'file': 'Y', 'property': 'sum(power_in.mag)'}
+	collector = {'interval': '1', 'object': 'collector', 'limit': '0', 'group': 'X', 'file': 'Y', 'property': 'sum(power_in.mag)'}
 	for obType in swingTypes:
 		insert = copy.copy(collector)
 		insert['group'] = 'class=' + obType + ' AND groupid=swingKids'
