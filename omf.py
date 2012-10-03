@@ -26,9 +26,13 @@ class backgroundProc(multiprocessing.Process):
 
 @app.route('/')
 def root():
+	browser = flask.request.user_agent.browser
 	analyses = da.listAll()
 	metadatas = [da.getMetadata(x) for x in analyses]
-	return flask.render_template('home.html', metadatas=metadatas)
+	if browser == 'msie':
+		return "The OMF currently must be accessed by Chrome, Firefox or Safari."
+	else:
+		return flask.render_template('home.html', metadatas=metadatas)
 
 @app.route('/newAnalysis/')
 def newAnalysis():
