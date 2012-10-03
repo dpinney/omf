@@ -43,6 +43,8 @@
   g.gridNode {fill:#CC0000;}
   g.swingNode {fill:hotpink;}
   g text {fill:black; stroke:black; stroke-width:0px; stroke-opacity: 1; font-size:15; pointer-events: none;}
+  circle.nodeIsPinned {fill:none; stroke:black; stroke-width:2.5px; pointer-events: none;}
+  circle.nodeNotPinned {fill:none; stroke-width:0px; pointer-events: none;}
   </style>
 </head>
 <body>
@@ -61,9 +63,9 @@
   <div class='buttonGroup leftToolbar'>
     <button class='pill' onclick='dropPill(this, "Pinning")'>Pinning ▾</button>
     <ul class='menu'>
-      <li><a href='javascript:pinUnpinAll()' id='pinUnpinAll'>Pin All</a></li>
-      <li><a href='javascript:pinSelected()'>Pin Selected</a></li>
-      <li><a href='javascript:unpinSelected()'>Unpin Selected</a></li>
+      <li><a href='javascript:pinAll()' id='pinUnpinAll'>Pin All</a></li>
+      <li><a href='javascript:unPinAll()'>Unpin All</a></li>
+      <li><a href='javascript:toggleSelectedPin()'>Toggle Selected Pin</a></li>
     </ul>
   </div>
   <div class='buttonGroup leftToolbar'>
@@ -230,29 +232,39 @@ function redraw() {
 
   link.exit().remove()
 
-  node = vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex})
-
-  node.enter().append("g")
+  node = vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).enter()
+    .append("g")
     .call(force.drag)
     .attr('class', function(d) {return 'node ' + d.objectType})
     .attr('id', function(d) {return 'n' + d.treeIndex})
-    .append('svg:circle')
     .on('click', onCompClick)
+
+  // Put the main circle on there.
+  node.append('svg:circle')
     .attr('cx', 0)
     .attr('cy', 0)
     .attr('r', 10)
+
+  // Pinning indicator.
+  node.append('svg:circle')
+    .attr('class', function(d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
+    .attr('id', function(d) {return 'pin' + d.treeIndex})
+    .attr('cx', 0)
+    .attr('cy', 0)
+    .attr('r', 3)
 
   // This gives tooltips=nodeName to every node:
   // node.append('svg:title')
   //   .text(function(d) { return d.name; });
 
-  // Some (ugly) text labels.
+  // Some (loud) text labels.
   // node.append('text')
   //   .attr('dx', 12)
   //   .attr('dy', 4)
   //   .text(function(d) { return d.name });
 
-  node.exit().remove()
+  // Get rid of deleted nodes.
+  vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).exit().remove()
 
   force.start()
 }
@@ -601,37 +613,40 @@ function acceptRename() {
   gridNameP.innerHTML = newName
 }
 
-
 // PINNING FUNCTIONS
 
-function pinUnpinAll() {
-  if (pinUnpinAll.state == undefined) pinUnpinAll.state = 'playing'
-  if (pinUnpinAll.state == 'playing') {
-    pinUnpinAll.state = 'paused'
-    // Tell the nodes and hidden nodes to pause:
-    for (node in nodes) {nodes[node].fixed = true}
-    for (hNode in hiddenNodes) {hiddenNodes[hNode].fixed = true}
-    gebi('pinUnpinAll').innerHTML = 'Unpin All'
-  } else if (pinUnpinAll.state == 'paused') {
-    pinUnpinAll.state = 'playing'
-    for (node in nodes) {nodes[node].fixed = false}
-    for (hNode in hiddenNodes) {hiddenNodes[hNode].fixed = false}    
-    gebi('pinUnpinAll').innerHTML = 'Pin All'
+function pinAll() {
+  for (node in nodes) {
+    gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
+    nodes[node].fixed = true
   }
-  // Apparently we have to tell force to go again:
-  force.resume()
+  for (hNode in hiddenNodes) {
+    gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
+    hiddenNodes[hNode].fixed = true
+  }
 }
 
-function pinSelected() {
-  selNode = getSelectedNode()
-  selNode.fixed = true
-  force.resume()
+function unPinAll() {
+  for (node in nodes) {
+    gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeNotPinned')
+    nodes[node].fixed = false
+  }
+  for (hNode in hiddenNodes) {
+    gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeNotPinned')
+    hiddenNodes[hNode].fixed = false
+  }
 }
 
-function unpinSelected() {
+function toggleSelectedPin() {
   selNode = getSelectedNode()
-  selNode.fixed = false
-  force.resume()
+  pinCircle = gebi('pin' + selNode.treeIndex)
+  if (pinCircle.getAttribute('class') == 'nodeIsPinned') {
+    pinCircle.setAttribute('class','nodeNotPinned')
+    selNode.fixed = false
+  } else {
+    pinCircle.setAttribute('class','nodeIsPinned')
+    selNode.fixed = true
+  }
 }
 
 // LAYOUT MENU FUNCTIONS
