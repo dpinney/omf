@@ -29,19 +29,20 @@
   input {min-width: 100px}
   /* Start graph elements. */
   .nodetext {pointer-events: none; font: 10px; }
-  circle.node {fill:gray; stroke: #fff;stroke-width: 1.5px;}
+  g.node {fill:gray; stroke: #fff;stroke-width: 1.5px;}
   line.link {stroke: #999;stroke-opacity: .6; stroke-width: 2px;}
   line.parentChild {stroke-dasharray:3,3;}
   line.selected {stroke:black; stroke-width: 4px; stroke-opacity: 1.0;}
-  circle.selected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; }
-  circle.multiselected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
-  circle.house {fill:#3366FF;}
-  circle.load {fill:#3366FF;}
-  circle.ZIPload, circle.waterheater {fill:#66CCFF;}
-  circle.triplex_meter {fill:#FF6600;}
-  circle.triplex_node {fill:#FFCC00;}
-  circle.gridNode {fill:#CC0000;}
-  circle.swingNode {fill:hotpink;}
+  g.selected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; }
+  g.multiselected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
+  g.house {fill:#3366FF;}
+  g.load {fill:#3366FF;}
+  g.ZIPload, g.waterheater {fill:#66CCFF;}
+  g.triplex_meter {fill:#FF6600;}
+  g.triplex_node {fill:#FFCC00;}
+  g.gridNode {fill:#CC0000;}
+  g.swingNode {fill:hotpink;}
+  g text {fill:black; stroke:black; stroke-width:0px; stroke-opacity: 1; font-size:15; pointer-events: none;}
   </style>
 </head>
 <body>
@@ -174,9 +175,8 @@ function draw() {
       .attr('y1', function(d) { return d.source.y; })
       .attr('x2', function(d) { return d.target.x; })
       .attr('y2', function(d) { return d.target.y; });
-    vis.selectAll('circle.node')
-      .attr('cx', function(d) { return d.x; })
-      .attr('cy', function(d) { return d.y; });
+    vis.selectAll('.node')
+      .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
   });
   var name2nodeIndex = {}
   if (0 == nodes.length) {
@@ -227,27 +227,30 @@ function redraw() {
     .attr('class', function(d) { return 'link ' + d.objectType })
     .attr('id', function(d) { return 'n' + d.treeIndex })
     .style('stroke-width', function(d) { return Math.sqrt(d.value); })
-    .attr('x1', function(d) { return d.source.x; })
-    .attr('y1', function(d) { return d.source.y; })
-    .attr('x2', function(d) { return d.target.x; })
-    .attr('y2', function(d) { return d.target.y; });
 
   link.exit().remove()
 
-  node = vis.selectAll('circle.node').data(nodes, function(d) {return d.treeIndex})
-  
-  node.enter().append('svg:circle')
+  node = vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex})
+
+  node.enter().append("g")
+    .call(force.drag)
     .attr('class', function(d) {return 'node ' + d.objectType})
     .attr('id', function(d) {return 'n' + d.treeIndex})
+    .append('svg:circle')
     .on('click', onCompClick)
-    .attr('cx', function(d) {return d.x})
-    .attr('cy', function(d) {return d.y})
+    .attr('cx', 0)
+    .attr('cy', 0)
     .attr('r', 10)
-    .call(force.drag);
 
-  // TODO: un-comment this to have text labels on _some_ nodes.
+  // This gives tooltips=nodeName to every node:
   // node.append('svg:title')
   //   .text(function(d) { return d.name; });
+
+  // Some (ugly) text labels.
+  // node.append('text')
+  //   .attr('dx', 12)
+  //   .attr('dy', 4)
+  //   .text(function(d) { return d.name });
 
   node.exit().remove()
 
