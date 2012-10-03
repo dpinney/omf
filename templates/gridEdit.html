@@ -285,8 +285,6 @@ function classify(d, c, on) {
   }
 }
 
-// FUNCTIONS FOR OBJECT SELECTION AND EDITING
-
 function onCompClick(d, i) {
   // Abort if we try to select a parentChild relationship.
   if (d.objectType == 'parentChild') return false
@@ -306,7 +304,6 @@ function onCompClick(d, i) {
   tableClear(table)
   treeData = tree[d.treeIndex]
   for (prop in treeData) {
-    // TODO: insert name row?
     if (prop == 'object') {
       row = gebi('selHead').insertRow(0)
     } else if (prop != 'from' && prop != 'to' && prop != 'parent') {
@@ -327,6 +324,14 @@ function onCompClick(d, i) {
   cell.innerHTML = '<button type="button" onclick="editObject(' + d.treeIndex + ')">Edit</button>'
 }
 
+function zoomToFit() {
+  // TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
+  zoomer.translate([0, 0]).scale(1)
+  vis.attr('transform', 'translate([0, 0]) scale(1)')
+}
+
+// EDITING COMPONENTS FUNCTIONS
+
 function editObject(treeIndex) {
   table = gebi('selected')
   //Make all the boxes editable.
@@ -345,16 +350,50 @@ function editObject(treeIndex) {
 }
 
 function saveEdits(treeIndex) {
+  function isNameAlreadyUsed(testValue) {
+    // Helper function to make sure we don't make non-unique names.
+    for (leaf in tree) {
+      for (attrKey in tree[leaf]) {
+        if (attrKey == 'name' && tree[leaf][attrKey] == testValue) {
+          return true
+        }
+      }
+    }
+    return false
+  }
   table = gebi('selected')
   // check for node or link:
   treeObject = tree[treeIndex]
   for (i = 1; i < table.rows.length - 1; i++) {
-    name = table.rows[i].cells[0].innerHTML
+    key = table.rows[i].cells[0].innerHTML
     cell = table.rows[i].cells[1]
+    oldValue = cell.childNodes[0].getAttribute('data-old')
     newValue = cell.childNodes[0].value
-    // alert(name + ':' + newValue)
-    treeObject[name] = newValue
-    cell.innerHTML = newValue
+    // Names are GUIDS and so are strongly constrained. Make sure we're okay with the name change:
+    if (key=='name') {
+      // 1. If the name is already the name of something else, skip the renaming.
+      if (isNameAlreadyUsed(newValue)) {
+        alert('no way jose!')
+        cell.innerHTML = oldValue
+      }
+      else {
+        treeObject[key] = newValue
+        cell.innerHTML = newValue
+        // 2. If the name is unique, go through EVERY attribute in the tree and replace the old name with the new one.
+        for (leaf in tree) {
+          for (attrKey in tree[leaf]) {
+            if (oldValue == tree[leaf][attrKey]) {console.log(tree[leaf]); tree[leaf][attrKey] = newValue}
+          }
+        }
+        // 3. Go through the nodes and replace the name there too. UGH!
+        nodeIndex = findIndex(nodes, 'name', oldValue)
+        if (nodeIndex != -1) {nodes[nodeIndex]['name'] = newValue}
+      }
+    }
+    else {
+      treeObject[key] = newValue
+      cell.innerHTML = newValue
+    }
   }
   table.deleteRow(-1)
   row = table.insertRow(-1)
@@ -436,8 +475,20 @@ function nextTreeKey() {
 }
 
 function findIndex(arrOfObjects,field,val) {
-  for (i=0;i<arrOfObjects.length;i++) {if (arrOfObjects[i][field] == val) return i}
+  for (findIndexI=0;findIndexI<arrOfObjects.length;findIndexI++) {if (arrOfObjects[findIndexI][field] == val) return findIndexI}
   return -1
+}
+
+// ADDING COMPONENTS FUNCTIONS
+
+function fillComponentMenu() {
+  newObjectMenu = gebi('newObjectMenu')
+  for (component in components) {
+    if (undefined == components[component]['from'] && undefined == components[component]['parent']) {addingFunctionName = 'newNode'}
+    else if (undefined == components[component]['from']) {addingFunctionName = 'newChild'}
+    else {addingFunctionName = 'newLink'}
+    newObjectMenu.innerHTML += ('<li><a href="javascript:' + addingFunctionName + '(\'' + component + '\')">' + component + '</a></li>')
+  }
 }
 
 function newNode(componentName) {
@@ -507,10 +558,7 @@ function newChild(componentName) {
   redraw()
 }
 
-function zoomToFit() {
-  // TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
-  zoomer.translate([0, 0]).scale(1)
-  vis.attr('transform', 'translate([0, 0]) scale(1)') }
+// MODEL SAVING
 
 function saveModel() {
   sendDict = {tree:JSON.stringify(tree),
@@ -550,15 +598,8 @@ function acceptRename() {
   gridNameP.innerHTML = newName
 }
 
-function fillComponentMenu() {
-  newObjectMenu = gebi('newObjectMenu')
-  for (component in components) {
-    if (undefined == components[component]['from'] && undefined == components[component]['parent']) {addingFunctionName = 'newNode'}
-    else if (undefined == components[component]['from']) {addingFunctionName = 'newChild'}
-    else {addingFunctionName = 'newLink'}
-    newObjectMenu.innerHTML += ('<li><a href="javascript:' + addingFunctionName + '(\'' + component + '\')">' + component + '</a></li>')
-  }
-}
+
+// PINNING FUNCTIONS
 
 function pinUnpinAll() {
   if (pinUnpinAll.state == undefined) pinUnpinAll.state = 'playing'
@@ -590,8 +631,7 @@ function unpinSelected() {
   force.resume()
 }
 
-
-// FUNCTIONS FOR LAYOUT MENU
+// LAYOUT MENU FUNCTIONS
 
 function layoutMenuInit() {
   nodeCount = nodes.length + hiddenNodes.length
@@ -712,6 +752,7 @@ function unfoldAtSelected() {
 }
 
 // INIT FUNCTION IS THIS
+
 d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
 d3.json('/api/models/{{ model_id }}.json', function (json) {
   tree = json['tree']
