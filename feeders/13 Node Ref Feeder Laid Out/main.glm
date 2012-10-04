@@ -542,18 +542,18 @@ name CAP1;
 parent 675;
 capacitor_B 0.10 MVAr;
 capacitor_C 0.10 MVAr;
+phases_connected ABCN;
 capacitor_A 0.10 MVAr;
 time_delay 300.0;
 nominal_voltage 2401.7771;
-voltage_set_high 2350.0;
 voltage_set_low 2340.0;
 switchC CLOSED;
 control_level INDIVIDUAL;
 switchA CLOSED;
 switchB CLOSED;
-phases_connected ABCN;
-dwell_time 0.0;
 pt_phase ABCN;
+dwell_time 0.0;
+voltage_set_high 2350.0;
 };
 
 object capacitor {
@@ -563,18 +563,18 @@ name CAP2;
 parent 675;
 capacitor_B 0.05 MVAr;
 capacitor_C 0.05 MVAr;
+phases_connected ABCN;
 capacitor_A 0.05 MVAr;
 time_delay 300.0;
 nominal_voltage 2401.7771;
-voltage_set_high 2300.0;
 voltage_set_low 2150.0;
 switchC CLOSED;
 control_level INDIVIDUAL;
 switchA CLOSED;
 switchB CLOSED;
-phases_connected ABCN;
-dwell_time 0.0;
 pt_phase ABCN;
+dwell_time 0.0;
+voltage_set_high 2300.0;
 };
 
 object triplex_line_configuration {

@@ -112,10 +112,6 @@
           <td><input id='frictionBox' type='text'></td>
         </tr>
         <tr>
-          <td>Charge</td>
-          <td><input id='chargeBox' type='text'></td>
-        </tr>
-        <tr>
           <td></td>
           <td style='padding-top:10px'><button onclick='layoutMenuApply()'>Apply</button></td>
         </tr>
@@ -688,14 +684,12 @@ function layoutMenuInit() {
   gebi('gravityBox').value = force.gravity()
   gebi('thetaBox').value = force.theta()
   gebi('frictionBox').value = force.friction()
-  gebi('chargeBox').value = force.charge()
 }
 
 function layoutMenuApply() {
   force.gravity(gebi('gravityBox').value)
   force.theta(gebi('thetaBox').value)
   force.friction(gebi('frictionBox').value)
-  force.charge(gebi('chargeBox').value)
   force.resume()
 }
 
