@@ -74,7 +74,7 @@
       <li><a href='javascript:foldOneLevel()'>Fold One Level</a></li>
       <li><a href='javascript:unfoldAtSelected()'>Unfold at Selected</a></li>
       <li><a href='javascript:unfoldOneLevel()'>Unfold One Level</a></li>
-      <li><a href='javascript:showAllNodes()'>Unfold All</a></li>
+      <li><a href='javascript:unfoldAll()'>Unfold All</a></li>
     </ul>
   </div>
   <div class='buttonGroup rightToolbar'>
@@ -158,9 +158,10 @@ vis.append('svg:g').attr('id','bottomLayer')
 var bottomLayer = d3.select('#bottomLayer')
 
 var force = d3.layout.force()
-  .charge(-120)
   .linkDistance(30)
-  .size([w, h]);
+  .size([w, h])
+  .charge(function(d){return -120*d.chargeMultiple})
+  // .charge(-120)
 
 var nodes = force.nodes()
 var links = force.links()
@@ -192,7 +193,7 @@ function draw() {
         if (nodeObject == 'node') nodeObject = 'gridNode'
         if (undefined != tree[x].bustype && tree[x].bustype == 'SWING') nodeObject += ' swingNode'
         nodeIndex = nodes.length
-        nodes.push({name:nodeName,treeIndex:parseInt(x),objectType:nodeObject})
+        nodes.push({name:nodeName,treeIndex:parseInt(x),objectType:nodeObject,chargeMultiple:1})
         name2nodeIndex[nodeName] = nodeIndex
       }
     }
@@ -239,12 +240,13 @@ function redraw() {
     .attr('id', function(d) {return 'n' + d.treeIndex})
     .on('click', onCompClick)
 
-  // Put the main circle on there.
+  // Put the main circle on there, sized according to its size.
   node.append('svg:circle')
     .attr('id', function(d) {return 'circ' + d.treeIndex})
+    .attr('class', 'nodeCircle')
     .attr('cx', 0)
     .attr('cy', 0)
-    .attr('r', 10)
+    .attr('r', function(d) {return d.chargeMultiple * 10})
 
   // Pinning indicator.
   node.append('svg:circle')
@@ -266,6 +268,9 @@ function redraw() {
 
   // Get rid of deleted nodes.
   vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).exit().remove()
+
+  // Update sizes
+  vis.selectAll('.nodeCircle').data(nodes, function(d) {return d.treeIndex}).attr('r', function(d) {return d.chargeMultiple * 10})
 
   force.start()
 }
@@ -344,6 +349,17 @@ function zoomToFit() {
   // TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
   zoomer.translate([0, 0]).scale(1)
   vis.attr('transform', 'translate([0, 0]) scale(1)')
+}
+
+// UTILITY FUNCTIONS
+
+
+function getSelectedNode() {
+  if (nodes.some(function(d) {return d.name == selectedName}) == false) {
+    // We have no selection, or a link was selected.
+    return false
+  }
+  return nodes.filter(function(d) {return d.name == selectedName})[0]
 }
 
 // EDITING COMPONENTS FUNCTIONS
@@ -678,26 +694,31 @@ function updateHiddenPerc() {
 
 // FUNCTIONS FOR GRAPH FOLDING:
 
-function hideLink(link) {
-  hiddenLinks.push(links.splice(links.indexOf(link),1)[0])
-}
-
-function showLink(link) {
-  toInsert = hiddenLinks.splice(hiddenLinks.indexOf(link),1)[0]
-  links.push(toInsert)
-}
-
 function hideNode(node) {
+  // helper function to hide links:
+  function hideLink(link) {
+    hiddenLinks.push(links.splice(links.indexOf(link),1)[0])
+  }
   // Pop the node of the nodes list and push it onto the hiddenNodes list:
   hiddenNodes.push(nodes.splice(nodes.indexOf(node),1)[0])
   // Pop/push any connected Links:
   toHideLinks = links.filter(function (lin) {return node.name == lin.source.name || node.name == lin.target.name})
   toHideLinks.map(hideLink)
+  // Make the parents big!
+  linkedNames = toHideLinks.map(function (x) {return x.source.name}).concat(toHideLinks.map(function (y) {return y.target.name}))
+  toGrow = nodes.filter(function(thisNode) {return linkedNames.indexOf(thisNode.name) != -1})
+  toGrow.map(function(d) {d.chargeMultiple = 1.5})
 }
 
 function showNode(node) {
   toInsert = hiddenNodes.splice(hiddenNodes.indexOf(node),1)[0]
+  // Actually reveal.
   nodes.push(toInsert)
+}
+
+function showLink(link) {
+  toInsert = hiddenLinks.splice(hiddenLinks.indexOf(link),1)[0]
+  links.push(toInsert)
 }
 
 function foldOneLevel() {
@@ -717,17 +738,6 @@ function foldOneLevel() {
   redraw()
 }
 
-function showAllNodes() {
-  while (hiddenLinks.length != 0) {
-    links.push(hiddenLinks.pop())
-  }
-  while (hiddenNodes.length != 0) {
-    nodes.push(hiddenNodes.pop())
-  }
-  updateHiddenPerc()
-  redraw()
-}
-
 function unfoldOneLevel() {
   // Find the hidden links that are connected to visible nodes:
   function attachedToVizNode(link) {
@@ -738,6 +748,10 @@ function unfoldOneLevel() {
   function attachedToRevealed(node) {
     return linksToReveal.some(function(d) {return node.name == d.source.name || node.name == d.target.name})
   }
+  // Size the parents of revealed elements correctly.
+  nodesToResize = nodes.filter(attachedToRevealed)
+  nodesToResize.map(function(d) {d.chargeMultiple = 1})
+  // Actually do the revealing.
   nodesToReveal = hiddenNodes.filter(attachedToRevealed)
   linksToReveal.map(showLink)
   nodesToReveal.map(showNode)
@@ -745,12 +759,16 @@ function unfoldOneLevel() {
   redraw()
 }
 
-function getSelectedNode() {
-  if (nodes.some(function(d) {return d.name == selectedName}) == false) {
-    // We have no selection, or a link was selected.
-    return false
+function unfoldAll() {
+  while (hiddenLinks.length != 0) {
+    links.push(hiddenLinks.pop())
   }
-  return nodes.filter(function(d) {return d.name == selectedName})[0]
+  while (hiddenNodes.length != 0) {
+    nodes.push(hiddenNodes.pop())
+  }
+  nodes.map(function(d) {d.chargeMultiple = 1})
+  updateHiddenPerc()
+  redraw()
 }
 
 function unfoldAtSelected() {
@@ -764,6 +782,10 @@ function unfoldAtSelected() {
     return linksToReveal.some(function(d) {return node.name == d.source.name || node.name == d.target.name})
   }
   nodesToReveal = hiddenNodes.filter(attachedToRevealed)
+  // Size the parents of revealed elements correctly.
+  nodesToResize = nodes.filter(attachedToRevealed)
+  nodesToResize.map(function(d) {d.chargeMultiple = 1})
+  // Actually do the revealing.
   linksToReveal.map(showLink)
   nodesToReveal.map(showNode)
   updateHiddenPerc()
