@@ -71,10 +71,11 @@
   <div class='buttonGroup leftToolbar'>
     <button class='pill' onclick='dropPill(this, "Folding")'>Folding ▾</button>
     <ul class='menu'>
-      <li><a href='javascript:foldOneLevel()'>Fold One Level</a></li>
-      <li><a href='javascript:unfoldAtSelected()'>Unfold at Selected</a></li>
-      <li><a href='javascript:unfoldOneLevel()'>Unfold One Level</a></li>
+      <li><a href='javascript:foldOneLevel()'>One Level Fold</a></li>
+      <li><a href='javascript:unfoldOneLevel()'>One Level Unfold</a></li>
       <li><a href='javascript:unfoldAll()'>Unfold All</a></li>
+      <li><a href='javascript:foldAtSelected()'>Fold at Selected</a></li>
+      <li><a href='javascript:unfoldAtSelected()'>Unfold at Selected</a></li>
     </ul>
   </div>
   <div class='buttonGroup rightToolbar'>
@@ -788,6 +789,26 @@ function unfoldAtSelected() {
   // Actually do the revealing.
   linksToReveal.map(showLink)
   nodesToReveal.map(showNode)
+  updateHiddenPerc()
+  redraw()
+}
+
+function foldAtSelected() {
+  selNode = getSelectedNode()
+  function attachedToSelected(link) {
+    return selNode.name == link.source.name || selNode.name == link.target.name
+  }
+  linksToHide = links.filter(attachedToSelected)
+  // Find the nodes that are attached to the revealed links:
+  function attachedToRevealed(node) {
+    return linksToHide.some(function(d) {return node.name == d.source.name || node.name == d.target.name})
+  }
+  attachedNodes = nodes.filter(attachedToRevealed)
+  nodesToHide = attachedNodes.filter(function(node) {return node.weight == 1 && node.name != selNode.name})
+  // Size the parent correctly.
+  if (nodesToHide.length > 0) {selNode.chargeMultiple = 1}
+  // Actually do the hiding.
+  nodesToHide.map(hideNode)
   updateHiddenPerc()
   redraw()
 }
