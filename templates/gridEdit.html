@@ -47,7 +47,7 @@
   circle.nodeNotPinned {fill:none; stroke-width:0px; pointer-events: none;}
   </style>
 </head>
-<body>
+<body onkeypress='hotkeys()'>
 <div id='title'>
   <div id='logoBox'><a href='/'>▦</a></div>
   <p>Grid Editor: </p>
@@ -352,8 +352,7 @@ function zoomToFit() {
   vis.attr('transform', 'translate([0, 0]) scale(1)')
 }
 
-// UTILITY FUNCTIONS
-
+// UTILITY AND MISC FUNCTIONS
 
 function getSelectedNode() {
   if (nodes.some(function(d) {return d.name == selectedName}) == false) {
@@ -361,6 +360,18 @@ function getSelectedNode() {
     return false
   }
   return nodes.filter(function(d) {return d.name == selectedName})[0]
+}
+
+function hotkeys() {
+  // IE8 and earlier
+  if(window.event) {x = event.keyCode}
+  // IE9/Firefox/Chrome/Opera/Safari
+  else if(event.which) {x = event.which}
+  keychar = String.fromCharCode(x);
+  // Dispatch the key:
+  if (keychar == 'p') {toggleSelectedPin()}
+  else if (keychar == 'f') {foldAtSelected()}
+  else if (keychar == 'u') {unfoldAtSelected()}
 }
 
 // EDITING COMPONENTS FUNCTIONS
