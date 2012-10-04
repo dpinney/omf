@@ -508,9 +508,9 @@ function deleteObject(treeIndex) {
 }
 
 function nextTreeKey() {
-  keys = Object.keys(tree)
+  keyList = Object.keys(tree)
   max = 0
-  for (x in keys) {intKey = parseInt(x); if (intKey > max) max = intKey}
+  for (x in keyList) {intKey = parseInt(keyList[x]); if (intKey > max) max = intKey}
   return max + 1
 }
 
@@ -543,7 +543,7 @@ function newNode(componentName) {
   // Hack to make sure we color nodes correctly:
   if (newType == 'node') newType = 'gridNode'
   if (undefined != tree[treeNewIndex].bustype && tree[treeNewIndex].bustype == 'SWING') newType += ' swingNode'
-  nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex}
+  nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1}
   nodes.push(nodeToAdd)
   redraw()
 }
@@ -590,7 +590,7 @@ function newChild(componentName) {
   tree[treeNewIndex].name = newName
   // TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
   // Add to the nodes.
-  nodeToAdd = {name:component.name, objectType:component.object, treeIndex:treeNewIndex}
+  nodeToAdd = {name:component.name, objectType:component.object, treeIndex:treeNewIndex, chargeMultiple:1}
   nodes.push(nodeToAdd)
   // Add to the links.
   linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',selectedName)], objectType:'parentChild'}
@@ -649,6 +649,7 @@ function pinAll() {
     gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
     hiddenNodes[hNode].fixed = true
   }
+  force.start()
 }
 
 function unPinAll() {
@@ -660,6 +661,7 @@ function unPinAll() {
     gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeNotPinned')
     hiddenNodes[hNode].fixed = false
   }
+  force.start()
 }
 
 function toggleSelectedPin() {
@@ -672,6 +674,7 @@ function toggleSelectedPin() {
     pinCircle.setAttribute('class','nodeIsPinned')
     selNode.fixed = true
   }
+  force.start()
 }
 
 // LAYOUT MENU FUNCTIONS
@@ -690,7 +693,7 @@ function layoutMenuApply() {
   force.gravity(gebi('gravityBox').value)
   force.theta(gebi('thetaBox').value)
   force.friction(gebi('frictionBox').value)
-  force.resume()
+  force.start()
 }
 
 function updateHiddenPerc() {

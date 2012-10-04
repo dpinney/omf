@@ -1,0 +1,454 @@
+{
+    "hiddenNodes": [], 
+    "hiddenLinks": [], 
+    "nodes": [
+        {
+            "index": 0, 
+            "fixed": 0, 
+            "name": "Market_1", 
+            "weight": 0, 
+            "px": 633.256895029314, 
+            "py": 535.6748979079522, 
+            "y": 535.6842864743995, 
+            "x": 633.3028971614467, 
+            "treeIndex": 12, 
+            "chargeMultiple": 1, 
+            "objectType": "stubauction"
+        }, 
+        {
+            "index": 1, 
+            "fixed": 0, 
+            "name": "n650", 
+            "weight": 1, 
+            "px": 543.9281477425786, 
+            "py": 491.3699002136885, 
+            "y": 491.34033432021533, 
+            "x": 543.9343573740156, 
+            "treeIndex": 20, 
+            "chargeMultiple": 1, 
+            "objectType": "gridNode swingNode"
+        }, 
+        {
+            "index": 2, 
+            "fixed": 0, 
+            "name": "n630", 
+            "weight": 3, 
+            "px": 517.8340520534703, 
+            "py": 516.3035106165307, 
+            "y": 516.3079889956698, 
+            "x": 517.8093954941123, 
+            "treeIndex": 22, 
+            "chargeMultiple": 1, 
+            "objectType": "gridNode"
+        }, 
+        {
+            "index": 3, 
+            "fixed": 0, 
+            "name": "tn_1", 
+            "weight": 2, 
+            "px": 540.1409854447238, 
+            "py": 543.8448560974023, 
+            "y": 543.8702963905153, 
+            "x": 540.1329505076083, 
+            "treeIndex": 27, 
+            "chargeMultiple": 1, 
+            "objectType": "triplex_node"
+        }, 
+        {
+            "index": 4, 
+            "fixed": 0, 
+            "name": "tn_2", 
+            "weight": 2, 
+            "px": 488.26513091404445, 
+            "py": 496.654356244144, 
+            "y": 496.65284242498484, 
+            "x": 488.21100524572967, 
+            "treeIndex": 28, 
+            "chargeMultiple": 1, 
+            "objectType": "triplex_meter"
+        }, 
+        {
+            "index": 5, 
+            "fixed": 0, 
+            "name": "tm_1", 
+            "weight": 1, 
+            "px": 574.1587152077873, 
+            "py": 552.70061170447, 
+            "y": 552.7118741131466, 
+            "x": 574.1857617039296, 
+            "treeIndex": 31, 
+            "chargeMultiple": 1, 
+            "objectType": "triplex_meter"
+        }, 
+        {
+            "index": 6, 
+            "fixed": 0, 
+            "name": "tm_2", 
+            "weight": 1, 
+            "px": 486.76207086692426, 
+            "py": 461.32085032812313, 
+            "y": 461.2830638303646, 
+            "x": 486.72622063321313, 
+            "treeIndex": 32, 
+            "chargeMultiple": 1, 
+            "objectType": "triplex_meter"
+        }, 
+        {
+            "index": 7, 
+            "fixed": 0, 
+            "treeIndex": 25, 
+            "weight": 0, 
+            "px": 620.2101861830223, 
+            "py": 475.6045637297933, 
+            "y": 475.58014593286384, 
+            "x": 620.2461444418357, 
+            "objectType": "gridNode", 
+            "chargeMultiple": 1, 
+            "name": "node25"
+        }, 
+        {
+            "index": 8, 
+            "fixed": 0, 
+            "treeIndex": 26, 
+            "weight": 0, 
+            "px": 573.2788238578019, 
+            "py": 431.4613785518487, 
+            "y": 431.4069268796145, 
+            "x": 573.2899025207253, 
+            "objectType": "gridNode", 
+            "chargeMultiple": 1, 
+            "name": "node26"
+        }, 
+        {
+            "index": 9, 
+            "treeIndex": 26, 
+            "weight": 0, 
+            "px": 476.57359081339865, 
+            "py": 570.2739895245545, 
+            "y": 570.3249882515802, 
+            "x": 476.55147530037254, 
+            "objectType": "gridNode", 
+            "chargeMultiple": 1, 
+            "name": "node26"
+        }, 
+        {
+            "index": 10, 
+            "treeIndex": 26, 
+            "weight": 0, 
+            "px": 560.9443450400131, 
+            "py": 606.4838495390169, 
+            "y": 606.5250586588029, 
+            "x": 560.9726400093017, 
+            "objectType": "gridNode", 
+            "chargeMultiple": 1, 
+            "name": "node26"
+        }
+    ], 
+    "tree": {
+        "0": {
+            "timezone": "PST+8PDT", 
+            "stoptime": "'2000-01-10 00:00:00'", 
+            "starttime": "'2000-01-01 00:00:00'", 
+            "clock": "clock"
+        }, 
+        "1": {
+            "omftype": "#include", 
+            "argument": "\"HVAC_schedule.glm\""
+        }, 
+        "2": {
+            "omftype": "#include", 
+            "argument": "\"water_schedule.glm\""
+        }, 
+        "3": {
+            "omftype": "#include", 
+            "argument": "\"appliance_schedule.glm\""
+        }, 
+        "4": {
+            "omftype": "#set", 
+            "argument": "minimum_timestep=60"
+        }, 
+        "5": {
+            "omftype": "#set", 
+            "argument": "profiler=1"
+        }, 
+        "6": {
+            "omftype": "#set", 
+            "argument": "relax_naming_rules=1"
+        }, 
+        "7": {
+            "omftype": "module", 
+            "argument": "tape"
+        }, 
+        "8": {
+            "omftype": "module", 
+            "argument": "climate"
+        }, 
+        "9": {
+            "module": "residential", 
+            "implicit_enduses": "NONE"
+        }, 
+        "10": {
+            "solver_method": "FBS", 
+            "NR_iteration_limit": "50", 
+            "module": "powerflow"
+        }, 
+        "11": {
+            "omftype": "module", 
+            "argument": "market"
+        }, 
+        "12": {
+            "object": "stubauction", 
+            "name": "Market_1", 
+            "period": "300"
+        }, 
+        "13": {
+            "property": "current_market.clearing_price", 
+            "object": "player", 
+            "file": "Price.player", 
+            "parent": "Market_1", 
+            "loop": "365"
+        }, 
+        "14": {
+            "phases": "ABCN", 
+            "name": "n650", 
+            "object": "node", 
+            "bustype": "SWING", 
+            "voltage_B": "-1200.8886-2080.000j", 
+            "voltage_C": "-1200.8886+2080.000j", 
+            "voltage_A": "2401.7771", 
+            "nominal_voltage": "2401.7771"
+        }, 
+        "15": {
+            "phases": "ABC", 
+            "from": "n650", 
+            "name": "Reg1", 
+            "object": "regulator", 
+            "to": "n630", 
+            "configuration": "regulator_configuration_6506321"
+        }, 
+        "16": {
+            "phases": "ABCN", 
+            "name": "n630", 
+            "object": "node", 
+            "voltage_B": "-1200.8886-2080.000j", 
+            "voltage_C": "-1200.8886+2080.000j", 
+            "voltage_A": "2401.7771", 
+            "nominal_voltage": "2401.7771"
+        }, 
+        "17": {
+            "phases": "AS", 
+            "from": "n630", 
+            "name": "T1", 
+            "object": "transformer", 
+            "to": "tn_1", 
+            "configuration": "tconf", 
+            "groupid": "Distribution_Trans"
+        }, 
+        "18": {
+            "phases": "ABCN", 
+            "object": "node", 
+            "nominal_voltage": "2401.7771", 
+            "name": "node25"
+        }, 
+        "19": {
+            "phases": "ABCN", 
+            "object": "node", 
+            "nominal_voltage": "2401.7771", 
+            "name": "node26"
+        }, 
+        "20": {
+            "phases": "AS", 
+            "object": "triplex_node", 
+            "nominal_voltage": "120", 
+            "name": "tn_1"
+        }, 
+        "21": {
+            "phases": "BS", 
+            "object": "triplex_meter", 
+            "nominal_voltage": "120", 
+            "name": "tn_2"
+        }, 
+        "22": {
+            "phases": "AS", 
+            "from": "tn_1", 
+            "name": "tl_1", 
+            "object": "triplex_line", 
+            "to": "tm_1", 
+            "length": "100", 
+            "configuration": "trip_line_config"
+        }, 
+        "23": {
+            "phases": "BS", 
+            "from": "tn_2", 
+            "name": "t2", 
+            "object": "triplex_line", 
+            "to": "tm_2", 
+            "length": "100", 
+            "configuration": "trip_line_config"
+        }, 
+        "24": {
+            "phases": "AS", 
+            "object": "triplex_meter", 
+            "nominal_voltage": "120", 
+            "name": "tm_1"
+        }, 
+        "25": {
+            "phases": "BS", 
+            "object": "triplex_meter", 
+            "nominal_voltage": "120", 
+            "name": "tm_2"
+        }
+    }, 
+    "links": [
+        {
+            "source": {
+                "index": 1, 
+                "fixed": 0, 
+                "name": "n650", 
+                "weight": 1, 
+                "px": 543.9281477425786, 
+                "py": 491.3699002136885, 
+                "y": 491.34033432021533, 
+                "x": 543.9343573740156, 
+                "treeIndex": 20, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode swingNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 2, 
+                "fixed": 0, 
+                "name": "n630", 
+                "weight": 3, 
+                "px": 517.8340520534703, 
+                "py": 516.3035106165307, 
+                "y": 516.3079889956698, 
+                "x": 517.8093954941123, 
+                "treeIndex": 22, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "treeIndex": 21
+        }, 
+        {
+            "source": {
+                "index": 2, 
+                "fixed": 0, 
+                "name": "n630", 
+                "weight": 3, 
+                "px": 517.8340520534703, 
+                "py": 516.3035106165307, 
+                "y": 516.3079889956698, 
+                "x": 517.8093954941123, 
+                "treeIndex": 22, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 3, 
+                "fixed": 0, 
+                "name": "tn_1", 
+                "weight": 2, 
+                "px": 540.1409854447238, 
+                "py": 543.8448560974023, 
+                "y": 543.8702963905153, 
+                "x": 540.1329505076083, 
+                "treeIndex": 27, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_node"
+            }, 
+            "treeIndex": 23
+        }, 
+        {
+            "source": {
+                "index": 2, 
+                "fixed": 0, 
+                "name": "n630", 
+                "weight": 3, 
+                "px": 517.8340520534703, 
+                "py": 516.3035106165307, 
+                "y": 516.3079889956698, 
+                "x": 517.8093954941123, 
+                "treeIndex": 22, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 4, 
+                "fixed": 0, 
+                "name": "tn_2", 
+                "weight": 2, 
+                "px": 488.26513091404445, 
+                "py": 496.654356244144, 
+                "y": 496.65284242498484, 
+                "x": 488.21100524572967, 
+                "treeIndex": 28, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "treeIndex": 26
+        }, 
+        {
+            "source": {
+                "index": 3, 
+                "fixed": 0, 
+                "name": "tn_1", 
+                "weight": 2, 
+                "px": 540.1409854447238, 
+                "py": 543.8448560974023, 
+                "y": 543.8702963905153, 
+                "x": 540.1329505076083, 
+                "treeIndex": 27, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_node"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 5, 
+                "fixed": 0, 
+                "name": "tm_1", 
+                "weight": 1, 
+                "px": 574.1587152077873, 
+                "py": 552.70061170447, 
+                "y": 552.7118741131466, 
+                "x": 574.1857617039296, 
+                "treeIndex": 31, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "treeIndex": 29
+        }, 
+        {
+            "source": {
+                "index": 4, 
+                "fixed": 0, 
+                "name": "tn_2", 
+                "weight": 2, 
+                "px": 488.26513091404445, 
+                "py": 496.654356244144, 
+                "y": 496.65284242498484, 
+                "x": 488.21100524572967, 
+                "treeIndex": 28, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 6, 
+                "fixed": 0, 
+                "name": "tm_2", 
+                "weight": 1, 
+                "px": 486.76207086692426, 
+                "py": 461.32085032812313, 
+                "y": 461.2830638303646, 
+                "x": 486.72622063321313, 
+                "treeIndex": 32, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "treeIndex": 30
+        }
+    ]
+}
