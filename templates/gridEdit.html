@@ -71,7 +71,7 @@
   <div class='buttonGroup leftToolbar'>
     <button class='pill' onclick='dropPill(this, "Folding")'>Folding ▾</button>
     <ul class='menu'>
-      <li><a href='javascript:hideChildren()'>Fold One Level</a></li>
+      <li><a href='javascript:foldOneLevel()'>Fold One Level</a></li>
       <li><a href='javascript:unfoldAtSelected()'>Unfold at Selected</a></li>
       <li><a href='javascript:unfoldOneLevel()'>Unfold One Level</a></li>
       <li><a href='javascript:showAllNodes()'>Unfold All</a></li>
@@ -241,6 +241,7 @@ function redraw() {
 
   // Put the main circle on there.
   node.append('svg:circle')
+    .attr('id', function(d) {return 'circ' + d.treeIndex})
     .attr('cx', 0)
     .attr('cy', 0)
     .attr('r', 10)
@@ -699,7 +700,7 @@ function showNode(node) {
   nodes.push(toInsert)
 }
 
-function hideChildren() {
+function foldOneLevel() {
   function isChild(node) {
     counter = 0;
     for (linkId in links) {
@@ -769,7 +770,7 @@ function unfoldAtSelected() {
   redraw()
 }
 
-// INIT FUNCTION IS THIS
+// INIT FUNCTION FOLLOWS:
 
 d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
 d3.json('/api/models/{{ model_id }}.json', function (json) {
