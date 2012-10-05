@@ -141,13 +141,12 @@
 				}
 				else if ('voltageBand' == reportsJson[report].reportType) {
 					for (study in dataTree) {					
-						drawVoltChart(dataTree[study],'voltChartDiv' + study)
+						drawLineChart(dataTree[study],'voltChartDiv' + study, {vAxis:{title:'Volts'}, chartArea:{left:60,top:20,height:'70%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['gray','blue','gray']})
 					}
 				}
 				else if ('feederPowerConsumption' == reportsJson[report].reportType) {
-					drawVoltChart(reportsJson[report]['powerTimeSeries'], 'powerTimeSeries')
-					drawBarChart(reportsJson[report]['energyTotals'], 'energyBalance')
-					
+					drawLineChart(reportsJson[report]['powerTimeSeries'], 'powerTimeSeries', {vAxis:{title:'Power (kW)'}, chartArea:{left:60,top:20,width:'90%',height:'80%'}, hAxis:{title:'Time', textPosition:'none'}, colors:['red','darkred','salmon'], legend:{position:'top'}})
+					drawBarChart(reportsJson[report]['energyTotals'], 'energyBalance', {isStacked:true, chartArea:{left:60,top:20,width:'100%'}, hAxis:{title:'Energy (kWH)', gridlines:{count:15}}, vAxis:{textPosition:'in'}, legend:{position:'none'}, colors:['darkorange']})
 				}
 			}
 		}
@@ -163,9 +162,8 @@
 			chart = new google.visualization.LineChart(gebi(divName))
 			chart.draw(chartData, options)
 		}
-		function drawVoltChart(dataArray, divName) {
+		function drawLineChart(dataArray, divName, options) {
 			chartData = google.visualization.arrayToDataTable(dataArray)
-			options = {chartArea:{left:60,top:20}, hAxis:{textPosition:'none'}, colors:['gray','blue','gray']}
 			chart = new google.visualization.LineChart(gebi(divName))
 			chart.draw(chartData, options)
 		}
@@ -175,9 +173,8 @@
 			chart = new google.visualization.GeoChart(gebi(divName))
 			chart.draw(chartData, options)
 		}
-		function drawBarChart(dataArray, divName) {
+		function drawBarChart(dataArray, divName, options) {
 			chartData = google.visualization.arrayToDataTable(dataArray)
-			options = {isStacked:true, chartArea:{left:60,top:20}, hAxis:{textPosition:'none'}, colors:['gainsboro','silver','gray']}
 			chart = new google.visualization.BarChart(gebi(divName))
 			chart.draw(chartData, options)
 		}
