@@ -10,6 +10,7 @@ starttime '2000-01-01 00:00:00';
 #set minimum_timestep=60;
 #set profiler=1;
 #set relax_naming_rules=1;
+module generators;
 module tape;
 module climate;
 module residential {
@@ -539,10 +540,20 @@ motor_efficiency GOOD;
 motor_model BASIC;
 };
 
+object inverter {
+phases AS;
+name inverter54;
+parent tn_2;
+generator_status ONLINE;
+inverter_type PWM;
+power_factor 1.0;
+generator_mode CONSTANT_PF;
+};
+
 object solar {
 area 2500 sf;
-name solar53;
-parent tn_2;
+name solar55;
+parent inverter54;
 efficiency 0.2;
 generator_status ONLINE;
 generator_mode SUPPLY_DRIVEN;

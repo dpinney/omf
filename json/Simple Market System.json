@@ -35,44 +35,48 @@
         }, 
         "7": {
             "omftype": "module", 
-            "argument": "tape"
+            "argument": "generators"
         }, 
         "8": {
             "omftype": "module", 
-            "argument": "climate"
+            "argument": "tape"
         }, 
         "9": {
+            "omftype": "module", 
+            "argument": "climate"
+        }, 
+        "10": {
             "module": "residential", 
             "implicit_enduses": "NONE"
         }, 
-        "10": {
+        "11": {
             "solver_method": "FBS", 
             "NR_iteration_limit": "50", 
             "module": "powerflow"
         }, 
-        "11": {
+        "12": {
             "omftype": "module", 
             "argument": "market"
         }, 
-        "12": {
+        "13": {
             "object": "stubauction", 
             "name": "Market_1", 
             "period": "300"
         }, 
-        "13": {
+        "14": {
             "property": "current_market.clearing_price", 
             "object": "player", 
             "file": "Price.player", 
             "parent": "Market_1", 
             "loop": "365"
         }, 
-        "14": {
+        "15": {
             "object": "climate", 
             "name": "\"climate\"", 
             "interpolate": "QUADRATIC", 
             "tmyfile": "\"climate.tmy2\""
         }, 
-        "15": {
+        "16": {
             "Control": "MANUAL", 
             "raise_taps": "16", 
             "name": "regulator_configuration_6506321", 
@@ -90,7 +94,7 @@
             "PT_phase": "ABC", 
             "band_width": "50"
         }, 
-        "16": {
+        "17": {
             "diameter": "0.368", 
             "name": "trip_line_config", 
             "object": "triplex_line_configuration", 
@@ -99,13 +103,13 @@
             "conductor_N": "tlc", 
             "insulation_thickness": "0.08"
         }, 
-        "17": {
+        "18": {
             "geometric_mean_radius": "0.01111", 
             "object": "triplex_line_conductor", 
             "name": "tlc", 
             "resistance": "0.97"
         }, 
-        "18": {
+        "19": {
             "impedance1": "0.012000+0.006800j", 
             "name": "fifteen_fifteen_A", 
             "primary_voltage": "4160.0V", 
@@ -118,7 +122,7 @@
             "impedance": "0.006000+0.013600j", 
             "power_rating": "500"
         }, 
-        "19": {
+        "20": {
             "power_rating": "500", 
             "primary_voltage": "4160", 
             "install_type": "PADMOUNT", 
@@ -129,7 +133,7 @@
             "reactance": "0.02", 
             "name": "transformer_configuration_400"
         }, 
-        "20": {
+        "21": {
             "phases": "ABCN", 
             "name": "n650", 
             "object": "node", 
@@ -139,7 +143,7 @@
             "voltage_A": "2401.7771", 
             "nominal_voltage": "2401.7771"
         }, 
-        "21": {
+        "22": {
             "phases": "ABC", 
             "from": "n650", 
             "name": "Reg1", 
@@ -147,7 +151,7 @@
             "to": "n630", 
             "configuration": "regulator_configuration_6506321"
         }, 
-        "22": {
+        "23": {
             "phases": "ABCN", 
             "name": "n630", 
             "object": "node", 
@@ -156,7 +160,7 @@
             "voltage_A": "2401.7771", 
             "nominal_voltage": "2401.7771"
         }, 
-        "23": {
+        "24": {
             "phases": "AS", 
             "from": "n630", 
             "name": "T1", 
@@ -165,7 +169,7 @@
             "configuration": "tconf", 
             "groupid": "Distribution_Trans"
         }, 
-        "24": {
+        "25": {
             "name": "tconf", 
             "primary_voltage": "2401.777", 
             "install_type": "POLETOP", 
@@ -176,7 +180,7 @@
             "impedance": "0.00033+0.0022j", 
             "powerA_rating": "110 kVA"
         }, 
-        "25": {
+        "26": {
             "name": "tconf2", 
             "primary_voltage": "2401.777", 
             "install_type": "POLETOP", 
@@ -187,7 +191,7 @@
             "impedance": "0.00033+0.0022j", 
             "powerB_rating": "110 kVA"
         }, 
-        "26": {
+        "27": {
             "phases": "BS", 
             "from": "n630", 
             "name": "T2", 
@@ -196,19 +200,19 @@
             "configuration": "tconf2", 
             "groupid": "Distribution_Trans"
         }, 
-        "27": {
+        "28": {
             "phases": "AS", 
             "object": "triplex_node", 
             "nominal_voltage": "120", 
             "name": "tn_1"
         }, 
-        "28": {
+        "29": {
             "phases": "BS", 
             "object": "triplex_meter", 
             "nominal_voltage": "120", 
             "name": "tn_2"
         }, 
-        "29": {
+        "30": {
             "phases": "AS", 
             "from": "tn_1", 
             "name": "tl_1", 
@@ -217,7 +221,7 @@
             "length": "100", 
             "configuration": "trip_line_config"
         }, 
-        "30": {
+        "31": {
             "phases": "BS", 
             "from": "tn_2", 
             "name": "t2", 
@@ -226,19 +230,19 @@
             "length": "100", 
             "configuration": "trip_line_config"
         }, 
-        "31": {
+        "32": {
             "phases": "AS", 
             "object": "triplex_meter", 
             "nominal_voltage": "120", 
             "name": "tm_1"
         }, 
-        "32": {
+        "33": {
             "phases": "BS", 
             "object": "triplex_meter", 
             "nominal_voltage": "120", 
             "name": "tm_2"
         }, 
-        "33": {
+        "34": {
             "cooling_system_type": "ELECTRIC", 
             "schedule_skew": "-810", 
             "heating_system_type": "HEAT_PUMP", 
@@ -259,7 +263,7 @@
             "motor_efficiency": "GOOD", 
             "motor_model": "BASIC"
         }, 
-        "34": {
+        "35": {
             "schedule_skew": "-810", 
             "demand": "water14*1", 
             "name": "waterheater1", 
@@ -273,7 +277,7 @@
             "tank_UA": "2.4", 
             "temperature": "135"
         }, 
-        "35": {
+        "36": {
             "parent": "house1", 
             "name": "convenienceLoads1", 
             "power_fraction": "0.100000", 
@@ -286,7 +290,7 @@
             "impedance_fraction": "0.800000", 
             "groupid": "plugload"
         }, 
-        "36": {
+        "37": {
             "parent": "house1", 
             "name": "lights1", 
             "power_fraction": "0.003200", 
@@ -299,7 +303,7 @@
             "impedance_fraction": "0.571100", 
             "groupid": "lights"
         }, 
-        "37": {
+        "38": {
             "parent": "house1", 
             "name": "television1", 
             "power_fraction": "0.998700", 
@@ -312,7 +316,7 @@
             "impedance_fraction": "-0.038300", 
             "groupid": "TV"
         }, 
-        "38": {
+        "39": {
             "parent": "house1", 
             "name": "fan1", 
             "power_fraction": "0.013500", 
@@ -325,7 +329,7 @@
             "impedance_fraction": "0.733200", 
             "groupid": "fan"
         }, 
-        "39": {
+        "40": {
             "cooling_system_type": "ELECTRIC", 
             "heating_system_type": "HEAT_PUMP", 
             "name": "house2", 
@@ -345,7 +349,7 @@
             "motor_efficiency": "GOOD", 
             "motor_model": "BASIC"
         }, 
-        "40": {
+        "41": {
             "schedule_skew": "-810", 
             "demand": "water14*1", 
             "name": "waterheater2", 
@@ -359,7 +363,7 @@
             "tank_UA": "2.4", 
             "temperature": "135"
         }, 
-        "41": {
+        "42": {
             "parent": "house2", 
             "name": "convenienceLoads2", 
             "power_fraction": "0.100000", 
@@ -372,7 +376,7 @@
             "impedance_fraction": "0.800000", 
             "groupid": "plugload"
         }, 
-        "42": {
+        "43": {
             "parent": "house2", 
             "name": "lights2", 
             "power_fraction": "0.003200", 
@@ -385,7 +389,7 @@
             "impedance_fraction": "0.571100", 
             "groupid": "lights"
         }, 
-        "43": {
+        "44": {
             "parent": "house2", 
             "name": "television2", 
             "power_fraction": "0.998700", 
@@ -398,7 +402,7 @@
             "impedance_fraction": "-0.038300", 
             "groupid": "TV"
         }, 
-        "44": {
+        "45": {
             "parent": "house2", 
             "name": "fan2", 
             "power_fraction": "0.013500", 

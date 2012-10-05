@@ -5,6 +5,7 @@ stoptime '2000-01-01 1:00:00';
 };
 
 #set profiler=1;
+module generators;
 module tape;
 module powerflow {
 solver_method NR;

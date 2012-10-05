@@ -47,7 +47,8 @@
 					for (study in reportsJson[report].studies) {
 						newRow = gebi('detailsTable').insertRow(-1)
 						newRow.insertCell(0).innerHTML = reportsJson[report].studies[study][0]
-						newRow.insertCell(1).innerHTML = reportsJson[report].studies[study][1]
+						sourceFeedName = reportsJson[report].studies[study][1]
+						newRow.insertCell(1).innerHTML = '<a href="/model/' + sourceFeedName + '">' + sourceFeedName + '</a>'
 					}
 					details = reportsJson[report]
 				}
@@ -104,7 +105,7 @@
 					}
 				}
 				else if ('feederPowerConsumption' == reportsJson[report].reportType) {
-					insert.innerHTML += '<p class="reportTitle">Feeder Power Consumption</p>'
+					insert.innerHTML += '<p class="reportTitle">Power Consumption From Transmission System</p>'
 					insert.innerHTML += '<div id="feederPowerConsumptionReport" class="tightContent"></div>'
 					gebi('feederPowerConsumptionReport').innerHTML += '<div id="powerTimeSeries"></div><div id="energyBalance"></div>'
 					dataTree = reportsJson[report]['dataTree']

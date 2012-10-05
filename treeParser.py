@@ -231,7 +231,7 @@ def groupSwingKids(tree):
 				swingTypes += [leaf['object']]
 	# attach the collector:
 	biggestKey = int(sorted(tree.keys())[-1]) + 1
-	collector = {'interval': '1', 'object': 'collector', 'limit': '0', 'group': 'X', 'file': 'Y', 'property': 'sum(power_in.mag)'}
+	collector = {'interval': '1', 'object': 'collector', 'limit': '0', 'group': 'X', 'file': 'Y', 'property': 'sum(power_in.real),sum(power_in.imag)'}
 	for obType in swingTypes:
 		insert = copy.copy(collector)
 		insert['group'] = 'class=' + obType + ' AND groupid=swingKids'

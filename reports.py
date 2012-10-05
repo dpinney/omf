@@ -65,8 +65,8 @@ def feederPowerConsumption(analysisName):
 		swingFileNames = [x for x in os.listdir(pathPrefix + '/studies/' + study) if x.startswith('SwingKids_') and x.endswith('.csv')]
 		for swingFile in swingFileNames:
 			fullArray = __csvToArray__(pathPrefix + '/studies/' + study + '/' + swingFile)
-			fullArray[0][1] = study
-			fullArray[1:] = [[row[0],row[1]/1000] for row in fullArray[1:]]
+			fullArray[0] = ['',study]
+			fullArray[1:] = [[row[0],(row[1]+row[2])/1000] for row in fullArray[1:]]
 			if [] == powerToAdd:
 				powerToAdd = fullArray
 			else: 

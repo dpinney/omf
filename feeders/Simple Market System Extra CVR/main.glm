@@ -10,6 +10,7 @@ starttime '2000-01-01 00:00:00';
 #set minimum_timestep=60;
 #set profiler=1;
 #set relax_naming_rules=1;
+module generators;
 module tape;
 module climate;
 module residential {
