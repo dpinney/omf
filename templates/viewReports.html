@@ -31,125 +31,7 @@
 	<script type='text/javascript' src='../static/omf.js'></script>
 	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
 	<script>
-		reportsJson = {{ reportsJson|safe }}
-		analysisName = '{{ analysisName }}'
 		google.load('visualization', '1', {packages:['corechart','geochart']})
-		function placeReports() {
-			insert = gebi('reports')
-			for (report in reportsJson) {
-				if ('studyDetails' == reportsJson[report].reportType) {
-					insert.innerHTML += '<p class="reportTitle">Study Details</p>'
-					insert.innerHTML += '<div id="studyDetails" class="detailsContainer tightContent"></div>'
-					gebi('studyDetails').innerHTML += '<div id="mapDiv"></div>'
-					gebi('studyDetails').innerHTML += '<div id="detailsDiv"></div>'
-					gebi('detailsDiv').innerHTML += '<p>Analysis created ' + reportsJson[report].created + '</p>'
-					gebi('detailsDiv').innerHTML += '<table id="detailsTable"><tr><th>Study</th><th>Source Feeder</th></tr></table>'
-					for (study in reportsJson[report].studies) {
-						newRow = gebi('detailsTable').insertRow(-1)
-						newRow.insertCell(0).innerHTML = reportsJson[report].studies[study][0]
-						sourceFeedName = reportsJson[report].studies[study][1]
-						newRow.insertCell(1).innerHTML = '<a href="/model/' + sourceFeedName + '">' + sourceFeedName + '</a>'
-					}
-					details = reportsJson[report]
-				}
-				else if ('runtimeStats' == reportsJson[report].reportType) {
-					insert.innerHTML += '<p class="reportTitle">Model Runtime Statistics</p>'
-					insert.innerHTML += '<div id="runtimeStatsReport" class="content stdouts"></div>'
-					runtimeStatsReport = gebi('runtimeStatsReport')
-					stdouts = reportsJson[report].stdouts
-					for (stdout in stdouts) {					
-						runtimeStatsReport.innerHTML += '<pre class="stdoutBlock">' + stdouts[stdout] + '</pre>'
-					}
-				}
-				else if ('capacitorActivation' == reportsJson[report].reportType) {
-					insert.innerHTML += '<p class="reportTitle">Capacitor Activation</p>'
-					insert.innerHTML += '<div id="capActReport" class="tightContent"></div>'
-					dataTree = reportsJson[report]['dataTree']
-					for (study in dataTree) {					
-						capacitors = dataTree[study]
-						gebi('capActReport').innerHTML += '<div id="capStudy' + study + '" class="studyContainer"></div>'
-						gebi('capStudy' + study).innerHTML += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
-						for (cap in capacitors) {
-							gebi('capStudy' + study).innerHTML += '<div id="chartDiv' + study + cap + '" class="capChart"></div>'
-						}
-					}
-				}
-				else if ('regulatorPowerflow' == reportsJson[report].reportType) {
-					insert.innerHTML += '<p class="reportTitle">Regulator Powerflow</p>'
-					insert.innerHTML += '<div id="regPowReport" class="tightContent"></div>'
-					dataTree = reportsJson[report]['dataTree']
-					for (study in dataTree) {					
-						regulators = dataTree[study]
-						for (reg in regulators) {
-							gebi('regPowReport').innerHTML += '<div id="regContainer' + study + reg + '" class="regContainer"></div>'
-							regContainer = gebi('regContainer' + study + reg)
-							regContainer.innerHTML += '<div id="chartRealPow' + study + reg + '" class="realPowChart"></div>'
-							regContainer.innerHTML += '<div id="chartReactPow' + study + reg + '" class="reacPowChart"></div>'
-							regContainer.innerHTML += '<div id="chartAppPow' + study + reg + '" class="appPowChart"></div>'
-							regContainer.innerHTML += '<div id="chartTaps' + study + reg + '" class="tapsChart"></div>'
-							regContainer.innerHTML += '<div id="chartPowFact' + study + reg + '" class="powFactChart"></div>'
-							regContainer.innerHTML += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
-
-						}
-					}
-				}
-				else if ('voltageBand' == reportsJson[report].reportType) {
-					insert.innerHTML += '<p class="reportTitle">Triplex Meter Voltages</p>'
-					insert.innerHTML += '<div id="voltageBandReport" class="tightContent"></div>'
-					dataTree = reportsJson[report]['dataTree']
-					for (study in dataTree) {					
-						gebi('voltageBandReport').innerHTML += '<div id="voltStudy' + study + '" class="studyContainer"></div>'
-						gebi('voltStudy' + study).innerHTML += '<div id="voltChartDiv' + study + '" class="voltChart"></div>'
-						gebi('voltStudy' + study).innerHTML += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
-
-					}
-				}
-				else if ('feederPowerConsumption' == reportsJson[report].reportType) {
-					insert.innerHTML += '<p class="reportTitle">Power Consumption From Transmission System</p>'
-					insert.innerHTML += '<div id="feederPowerConsumptionReport" class="tightContent"></div>'
-					gebi('feederPowerConsumptionReport').innerHTML += '<div id="powerTimeSeries"></div><div id="energyBalance"></div>'
-					dataTree = reportsJson[report]['dataTree']
-				}
-			}
-		}
-		function graphAllData() {
-			insert = gebi('reports')
-			for (report in reportsJson) {
-				dataTree = reportsJson[report]['dataTree']
-				if ('capacitorActivation' == reportsJson[report].reportType) {
-					for (study in dataTree) {					
-						capacitors = dataTree[study]
-						for (cap in capacitors) {
-							drawAreaChart(capacitors[cap], 'chartDiv' + study + cap, ['gainsboro','silver','gray'])
-						}
-					}
-				}
-				else if ('regulatorPowerflow' == reportsJson[report].reportType) {
-					for (study in dataTree) {					
-						regulators = dataTree[study]
-						for (reg in regulators) {
-							drawLineChart(regulators[reg]['realPower'], 'chartRealPow' + study + reg, {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['crimson','red','firebrick']})
-							drawLineChart(regulators[reg]['reactivePower'], 'chartReactPow' + study + reg, {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['crimson','red','firebrick']})
-							drawLineChart(regulators[reg]['apparentPower'], 'chartAppPow' + study + reg, {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['crimson','red','firebrick']})
-							drawLineChart(regulators[reg]['tapPositions'], 'chartTaps' + study + reg, {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['gainsboro','silver','gray']})
-							drawLineChart(regulators[reg]['powerFactor'], 'chartPowFact' + study + reg, {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['red']})
-						}
-					}
-				}
-				else if ('studyDetails' == reportsJson[report].reportType) {
-					drawMap(reportsJson[report].climates,'mapDiv')
-				}
-				else if ('voltageBand' == reportsJson[report].reportType) {
-					for (study in dataTree) {					
-						drawLineChart(dataTree[study],'voltChartDiv' + study, {vAxis:{title:'Volts'}, chartArea:{left:60,top:20,height:'70%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['gray','blue','gray']})
-					}
-				}
-				else if ('feederPowerConsumption' == reportsJson[report].reportType) {
-					drawLineChart(reportsJson[report]['powerTimeSeries'], 'powerTimeSeries', {vAxis:{title:'Power (kW)'}, chartArea:{left:60,top:20,width:'90%',height:'80%'}, hAxis:{title:'Time', textPosition:'none'}, colors:['red','darkred','salmon'], legend:{position:'top'}})
-					drawBarChart(reportsJson[report]['energyTotals'], 'energyBalance', {isStacked:true, chartArea:{left:60,top:20,width:'100%'}, hAxis:{title:'Energy (kWH)', gridlines:{count:15}}, vAxis:{textPosition:'in'}, legend:{position:'none'}, colors:['darkorange']})
-				}
-			}
-		}
 		function drawAreaChart(dataArray, divName, colorList) {
 			chartData = google.visualization.arrayToDataTable(dataArray)
 			options = {chartArea:{left:60,top:20}, hAxis:{textPosition:'none'}, colors:colorList}
@@ -172,13 +54,16 @@
 			chart = new google.visualization.BarChart(gebi(divName))
 			chart.draw(chartData, options)
 		}
-
 	</script>
 </head>
-<body onload='placeReports();graphAllData()'>
+<body>
 	<div id='title'>
 		<div id='logoBox'><a href='/'>▦</a></div>
 		<!--Title:-->Reports on {{ analysisName }}
 	</div>
-	<div id='reports'></div>
+	<div id='reports'>
+		{% for report in reportList %}
+			{{ report | safe }}
+		{% endfor %}
+	</div>
 </body>

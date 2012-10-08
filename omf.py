@@ -52,7 +52,7 @@ def viewReports(analysisName):
 		# call the relevant reporting function by name.
 		reportModule = getattr(reports, report.replace('.txt',''))
 		reportList.append(reportModule.outputHtml(analysisName))
-	return flask.render_template('neoViewReports.html', analysisName=analysisName, reportList=reportList)
+	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
 
 @app.route('/model/<model_id>')
 def show_model(model_id):
