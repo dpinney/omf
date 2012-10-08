@@ -7,9 +7,9 @@ import analysis as da
 import json
 import treeParser as tp
 import shutil
-import reports
 import time
 from pprint import pprint
+import reports
 
 app = flask.Flask(__name__)
 
@@ -50,14 +50,9 @@ def viewReports(analysisName):
 	# Iterate over reports and collect what we need: 
 	for report in reportFiles:
 		# call the relevant reporting function by name.
-		try:
-			reportFunc = getattr(reports, report.replace('.txt',''))
-			reportList.append(reportFunc(analysisName))
-		except:
-			# there's no report matching the saved file...
-			pass
-	reportsJson = json.dumps(reportList, indent=4)
-	return flask.render_template('viewReports.html', analysisName=analysisName, reportsJson=reportsJson)
+		reportModule = getattr(reports, report.replace('.txt',''))
+		reportList.append(reportModule.outputHtml(analysisName))
+	return flask.render_template('neoViewReports.html', analysisName=analysisName, reportList=reportList)
 
 @app.route('/model/<model_id>')
 def show_model(model_id):

@@ -120,7 +120,7 @@
 					for (study in dataTree) {					
 						capacitors = dataTree[study]
 						for (cap in capacitors) {
-							drawCapChart(capacitors[cap], 'chartDiv' + study + cap, ['gainsboro','silver','gray'])
+							drawAreaChart(capacitors[cap], 'chartDiv' + study + cap, ['gainsboro','silver','gray'])
 						}
 					}
 				}
@@ -128,11 +128,11 @@
 					for (study in dataTree) {					
 						regulators = dataTree[study]
 						for (reg in regulators) {
-							drawRegChart(regulators[reg]['realPower'], 'chartRealPow' + study + reg, ['crimson','red','firebrick'])
-							drawRegChart(regulators[reg]['reactivePower'], 'chartReactPow' + study + reg, ['crimson','red','firebrick'])
-							drawRegChart(regulators[reg]['apparentPower'], 'chartAppPow' + study + reg, ['crimson','red','firebrick'])
-							drawRegChart(regulators[reg]['tapPositions'], 'chartTaps' + study + reg, ['gainsboro','silver','gray'])
-							drawRegChart(regulators[reg]['powerFactor'], 'chartPowFact' + study + reg, ['red'])
+							drawLineChart(regulators[reg]['realPower'], 'chartRealPow' + study + reg, {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['crimson','red','firebrick']})
+							drawLineChart(regulators[reg]['reactivePower'], 'chartReactPow' + study + reg, {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['crimson','red','firebrick']})
+							drawLineChart(regulators[reg]['apparentPower'], 'chartAppPow' + study + reg, {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['crimson','red','firebrick']})
+							drawLineChart(regulators[reg]['tapPositions'], 'chartTaps' + study + reg, {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['gainsboro','silver','gray']})
+							drawLineChart(regulators[reg]['powerFactor'], 'chartPowFact' + study + reg, {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:['red']})
 						}
 					}
 				}
@@ -150,16 +150,10 @@
 				}
 			}
 		}
-		function drawCapChart(dataArray, divName, colorList) {
+		function drawAreaChart(dataArray, divName, colorList) {
 			chartData = google.visualization.arrayToDataTable(dataArray)
 			options = {chartArea:{left:60,top:20}, hAxis:{textPosition:'none'}, colors:colorList}
 			chart = new google.visualization.AreaChart(gebi(divName))
-			chart.draw(chartData, options)
-		}
-		function drawRegChart(dataArray, divName, colorList) {
-			chartData = google.visualization.arrayToDataTable(dataArray)
-			options = {chartArea:{left:10,top:10}, hAxis:{textPosition:'none'}, colors:colorList}
-			chart = new google.visualization.LineChart(gebi(divName))
 			chart.draw(chartData, options)
 		}
 		function drawLineChart(dataArray, divName, options) {
