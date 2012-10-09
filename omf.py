@@ -3,7 +3,7 @@
 import flask
 import os
 import multiprocessing
-import analysis as da
+import analysis
 import json
 import treeParser as tp
 import shutil
@@ -18,7 +18,7 @@ class backgroundProc(multiprocessing.Process):
 		self.analysisName = analysisName
 		multiprocessing.Process.__init__(self)
 	def run(self):
-		da.run(self.analysisName)
+		analysis.run(self.analysisName)
 
 ####################################################
 # VIEWS
@@ -27,8 +27,9 @@ class backgroundProc(multiprocessing.Process):
 @app.route('/')
 def root():
 	browser = flask.request.user_agent.browser
-	analyses = da.listAll()
-	metadatas = [da.getMetadata(x) for x in analyses]
+	analyses = analysis.listAll()
+	metadatas = [analysis.getMetadata(x) for x in analyses]
+	print metadatas
 	if browser == 'msie':
 		return "The OMF currently must be accessed by Chrome, Firefox or Safari."
 	else:
@@ -72,19 +73,19 @@ def run():
 
 @app.route('/delete/', methods=['POST'])
 def delete():
-	da.delete(flask.request.form['analysisName'])
+	analysis.delete(flask.request.form['analysisName'])
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/saveAnalysis/', methods=['POST'])
 def saveAnalysis():
 	postData = json.loads(flask.request.form.to_dict()['json'])
 	print postData
-	da.createAnalysis(postData['analysisName'], int(postData['simLength']), postData['simLengthUnits'], postData['simStartDate'], postData['studies'], postData['reports'])
+	analysis.createAnalysis(postData['analysisName'], int(postData['simLength']), postData['simLengthUnits'], postData['simStartDate'], postData['studies'], postData['reports'])
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/terminate/', methods=['POST'])
 def terminate():
-	da.terminate(flask.request.form['analysisName'])
+	analysis.terminate(flask.request.form['analysisName'])
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/api/models/<model_id>.json')
@@ -153,7 +154,7 @@ def runStatus():
 	analyses = os.listdir('./analyses/')
 	outDict = {}
 	for ana in analyses:
-		md = da.getMetadata(ana)
+		md = analysis.getMetadata(ana)
 		outDict[ana] = md['status']
 	return json.dumps(outDict)
 
