@@ -4,7 +4,7 @@ import os
 import __util__
 import math
 
-configHtmlTemplate = "<div id='REMOVALID' class='content REPORTNAME'><a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>✖</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>REPORTNAME</td></tr></table></div>"
+configHtmlTemplate = "<div id='REMOVALID' class='content regulatorPowerflow'><a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>✖</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>regulatorPowerflow</td></tr></table></div>"
 
 def outputHtml(analysisName):
 	# Put the title in:

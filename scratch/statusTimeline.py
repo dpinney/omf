@@ -1,32 +1,35 @@
 #!/usr/bin/env python
 
-input = '''2xNEXT NEXT VERSION: DECENT M&V
-*Make a demo video of synthCVR.
-*10 Reporting: Tom's M+V report. What's on it?
+input = '''
+THIS WEEK: DECENT M&V
+*10 Reporting: Tom's M+V report.
+     * Implement a report that does as much of what he has already.
+     * Set up a call to review what I've got, where he'd like to see improvements, and how we monetize.
+* Do a great, monetized CVR run.
+* Publish the CVR and solar results. At least a video.
 
-3xNEXT VERSION
-*03 Gridedit: User-editable names. Check to see we're not clobbering a name; rewire all the necessary froms/tos.
-*03 Gridedit: Text labels. Use shadow css to make them readable and make sure they're on a (new?) highest layer.
-*05 Gridedit: Adding and deleting attributes on feeder objects...
-*10 Gridedit: drag box and/or ctrl+click to multiselect? See this convo.
-*01 Gridedit: hide the skinny black bar when there's no selection. Use a css class.
-*06 Reporting: implement house sample report? What's on it? Heating/lighting/appliance breakdown. Temperature timeseries. Set up via user-added recorders?
-*04 Gridedit: visual indication of nodes with folded children.
-
-4xNEXT VERSION:
+2xNEXT VERSION - Frankly, nice to haves:
+*06 Reporting: comparative grid viz reduced form report. Pie chart percentage comparison of unique nodes. Reduced form(s) of feeders.
+*04 Reporting: ability to view the feeders in an analysis (the embedded ones, not the ones in the feeder store).
+*10 Reporting/Gridedit: interface to display two+ different grids on top of each other, gray out the shared nodes, highlight the nodes unique to each feeder.
+*02 Reporting: use a reasonable number of sig figs.
+*06 Reporting: implement house sample report? What's on it? Heating/lighting/appliance breakdown. Temperature timeseries. Set up via user-added recorders or random sampling?
+*04 Reporting: Break power usage out by systemLosses/
 *05 Analysis: Analysis editing (and duplication). Gonna need /newAnalysis to take a huge host of JSON arguments.
-*05 Gridedit: implement a better zoom-to-fit.
-*08 Gridedit: make the save/restore layout code cleaner and simpler by just saving/restoring node positions, weights and fixed stats.
-*08 Reporting: refactor so a report can be described as [preProc(), postProc()], where postProc returns HTML and graphing instructions. See note reportingSpec.
-*04 Gridedit: think about finding the subgraph along the longest lines...
+*04 Reporting: add density (std-devs) to the jiggle band chart. We can already get stddev from gridlab. We can do a stacked area google chart.
+*02 Analysis: Add a way to run the runtime estimator. Or have a new estimator based on stdout.txts.
+*30 Gridedit: cut/copy/paste.
+*10 Gridedit: drag box and/or ctrl+click to multiselect? See this convo.
+*55 Reporting: reliability studies (CAIDA, SAIDA, etc.).
+*05 Reporting: Doug's solar report.
 *15 Gridedit: we should pull configuration objects off into a separate menu somehow.
-*02 Analysis: Add a way to run the runtime estimator.
 *40 Platform: How's that JSON object store going to work again?
-*15 Gridedit: tree search.
+*08 Refactor: make the save/restore layout code cleaner and simpler by just saving/restoring node positions, weights and fixed stats. Also, integrate json caching with this.
 *10 Analysis: have analyses spawn subprocesses in a process group so we can kill with a single -9 and/or run in parallel.
-*01 Gridedit: enable preLayout() and display an interface while it works.
-*40 Gridedit: Google Maps for grids with lat-lon data. Example with D3 at http://bl.ocks.org/1125458.
-*30 Gridedit: cut/copy/paste'''
+*15 Gridedit: tree search?
+*05 Gridedit: Adding and deleting attributes on feeder objects. Enables advanced GridlabD functionality. Not critical.
+*03 Refactor: folding code needs a review to make it cleaner.
+'''
 
 split = input.splitlines()
 

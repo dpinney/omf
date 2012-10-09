@@ -2,7 +2,7 @@
 
 import os
 
-configHtmlTemplate = "<div id='REMOVALID' class='content REPORTNAME'><a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>✖</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>REPORTNAME</td></tr></table></div>"
+configHtmlTemplate = "<div id='REMOVALID' class='content runtimeStats'><a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>✖</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>runtimeStats</td></tr></table></div>"
 
 def outputHtml(analysisName):
 	# Put the title in:
