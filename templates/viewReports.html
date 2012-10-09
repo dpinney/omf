@@ -54,6 +54,11 @@
 			chart = new google.visualization.BarChart(gebi(divName))
 			chart.draw(chartData, options)
 		}
+		function drawPieChart(dataArray, divName, options) {
+			chartData = google.visualization.arrayToDataTable(dataArray)
+			chart = new google.visualization.PieChart(gebi(divName))
+			chart.draw(chartData, options)
+		}
 	</script>
 </head>
 <body>

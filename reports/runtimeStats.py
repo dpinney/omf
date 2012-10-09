@@ -11,8 +11,8 @@ def outputHtml(analysisName):
 	# Collect pre tag info for each study:
 	for study in os.listdir('analyses/' + analysisName + '/studies/'):
 		with open('analyses/' + analysisName + '/studies/' + study + '/stdout.txt', 'r') as stdout, open('analyses/' + analysisName + '/studies/' + study + '/stderr.txt', 'r') as stderr:
-			stderrText = textwrap.fill(stderr.read(), 62).replace('ERROR','\n\nERROR').replace('WARNING','\n\nWARNING').replace('FATAL','\n\nFATAL')
-			stdoutText = stdout.read()
+			stderrText = textwrap.fill(stderr.read().strip(), 62).replace('ERROR','\n\nERROR').replace('WARNING','\n\nWARNING').replace('FATAL','\n\nFATAL')
+			stdoutText = stdout.read().strip()
 			if 'ERROR' in stderrText or 'WARNING' in stderrText:
 				# Error'd out, so show it:
 				cleanPre = study.upper() + '\n\n' + stderrText
