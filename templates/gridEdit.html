@@ -324,7 +324,7 @@ function onCompClick(d, i) {
   for (prop in treeData) {
     if (prop == 'object') {
       row = gebi('selHead').insertRow(0)
-    } else if (prop != 'from' && prop != 'to' && prop != 'parent') {
+    } else if (prop != 'from' && prop != 'to' && prop != 'parent' && prop != 'file') { // Avoid editing machine-written properties!
       row = gebi('selBody').insertRow(-1)
     } else {
       row = null

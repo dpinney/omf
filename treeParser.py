@@ -143,6 +143,9 @@ def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 			leaf['interval'] = str(interval)
 			# We're trying limitless for the time being.
 			# leaf['limit'] = str(simLength)
+			# Also, set the file since we're already inside this data structure.
+			if leaf['file'] == 'meterRecorder_XXX.csv':
+				leaf['file'] = 'meterRecorder_' + leaf['name'] + '.csv'
 		elif 'argument' in leaf and leaf['argument'].startswith('minimum_timestep'):
 			leaf['argument'] = 'minimum_timestep=' + str(interval)
 
