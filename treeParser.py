@@ -151,7 +151,6 @@ def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 
 
 def fullyDeEmbed(glmTree):
-	# TODO: fix problem with deEmbedding sub-objects called by name i.e. config object triplexconfig {blah}.
 	def deEmbedOnce(glmTree):
 		iterTree = copy.deepcopy(glmTree)
 		for x in iterTree:

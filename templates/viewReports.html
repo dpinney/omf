@@ -28,7 +28,7 @@
 	<script type='text/javascript' src='../static/omf.js'></script>
 	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
 	<script>
-		google.load('visualization', '1', {packages:['corechart','geochart']})
+		google.load('visualization', '1', {packages:['corechart','geochart','table']})
 		function drawAreaChart(dataArray, divName, colorList) {
 			chartData = google.visualization.arrayToDataTable(dataArray)
 			options = {chartArea:{left:60,top:20}, hAxis:{textPosition:'none'}, colors:colorList}
@@ -54,6 +54,11 @@
 		function drawPieChart(dataArray, divName, options) {
 			chartData = google.visualization.arrayToDataTable(dataArray)
 			chart = new google.visualization.PieChart(gebi(divName))
+			chart.draw(chartData, options)
+		}
+		function drawTable(dataArray, divName, options) {
+			chartData = google.visualization.arrayToDataTable(dataArray)
+			chart = new google.visualization.Table(gebi(divName))
 			chart.draw(chartData, options)
 		}
 	</script>

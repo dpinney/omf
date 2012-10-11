@@ -7,7 +7,7 @@ configHtmlTemplate = "<div id='REMOVALID' class='content voltageBand'><a href='j
 
 def outputHtml(analysisName):
 	# Put the title in:
-	outputBuffer = "<p class='reportTitle'>Triplex Meter Voltages</p><div id='voltageBandReport' class='tightContent'>"
+	outputBuffer = '<p class="reportTitle">Triplex Meter Voltages</p><div id="voltageBandReport" class="tightContent" style="position:relative">'
 	# Build up the data:
 	dataTree = {}
 	pathPrefix = './analyses/' + analysisName
