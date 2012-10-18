@@ -72,7 +72,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 	# write a file with the current status (preRun, running or postRun), source feeder and climate.
 	def uniqJoin(inList, key):
 		return ', '.join(set([x[key] for x in inList]))
-	metadata = {'name':analysisName, 'status':'preRun', 'sourceFeeder':uniqJoin(studies,'feederName'), 'climate':uniqJoin(studies,'tmy2name'), 'created':str(dt.datetime.now())}
+	metadata = {'name':analysisName, 'status':'preRun', 'sourceFeeder':uniqJoin(studies,'feederName'), 'climate':uniqJoin(studies,'tmy2name'), 'created':str(dt.datetime.now()), 'simStartDate':str(simStartDate), 'simLength':simLength, 'simLengthUnits':simLengthUnits}
 	with open('analyses/' + analysisName + '/metadata.txt','w') as mdFile:
 		mdFile.write(str(metadata))
 	print 'Success. Analysis created.'

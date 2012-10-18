@@ -8,7 +8,6 @@ import json
 import treeParser as tp
 import shutil
 import time
-from pprint import pprint
 import reports
 
 app = flask.Flask(__name__)
@@ -40,7 +39,6 @@ def newAnalysis():
 	# Get lists of various things:
 	tmy2s = os.listdir('tmy2s')
 	feeders = os.listdir('feeders')
-	reportList = reports.__all__
 	reportTemplates = reports.__templates__
 	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportTemplates=reportTemplates)
 

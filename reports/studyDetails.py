@@ -22,10 +22,14 @@ def outputHtml(analysisName):
 		climates.append([str(metadata['climate']),1])
 		studies.append([metadata['name'], metadata['sourceFeeder']])
 	outputBuffer += '<div id="mapDiv" style="position:absolute;width:500px;height:400px;top:0px;left:500px"><script>drawMap(' + str(climates) + ',"mapDiv")</script></div>'
-	# handle the creation date:
+	# handle the creation date and other time variables:
 	with open(pathPrefix + '/metadata.txt','r') as anaMdFile:
-		created = eval(anaMdFile.read())['created']
-	outputBuffer += '<div id="detailsDiv" style="position:absolute;width:500px;height:250px;left:0px;top:0px;padding:10px";overflow:auto><p>Analysis created ' + created + '</p>'
+		anaMd = eval(anaMdFile.read())
+		created = anaMd['created']
+		simLength = anaMd['simLength']
+		simLengthUnits = anaMd['simLengthUnits']
+		simStartDate = anaMd['simStartDate']
+	outputBuffer += '<div id="detailsDiv" style="position:absolute;width:500px;height:250px;left:0px;top:0px;padding:10px";overflow:auto><p>Analysis created ' + created + '</p><p>Simulated ' + str(simLength) + ' ' + simLengthUnits + ' starting on ' + simStartDate + '</p>'
 	# add the feeder table:
 	outputBuffer += '<table id="detailsTable" style="padding-top:10px"><tr><th>Study</th><th>Source Feeder</th></tr>'
 	for row in studies:

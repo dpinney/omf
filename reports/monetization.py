@@ -3,6 +3,8 @@
 import os
 import re
 import __util__
+from pprint import pprint
+from copy import copy
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 configHtmlTemplate = '''
@@ -43,10 +45,9 @@ def outputHtml(analysisName):
 		glmContent = testGlm.read()
 		intervalText = re.findall('interval\s+(\d+)', glmContent)
 		if [] != intervalText:
-			interval = int(intervalText[0])
+			interval = float(intervalText[0])
 	# Gather data for all the studies.
 	for study in studies:
-		energyToAdd = []
 		powerToAdd = []
 		swingFileNames = [x for x in os.listdir(pathPrefix + '/studies/' + study) if x.startswith('SwingKids_') and x.endswith('.csv')]
 		for swingFile in swingFileNames:
@@ -55,28 +56,29 @@ def outputHtml(analysisName):
 			fullArray[1:] = [[row[0],(row[1]+row[2])/1000] for row in fullArray[1:]]
 			if [] == powerToAdd:
 				powerToAdd = fullArray
-				energyToAdd = fullArray
 			else:
 				for rowNum in xrange(len(fullArray)):
 					powerToAdd[rowNum][1] = powerToAdd[rowNum][1] + fullArray[rowNum][1]
-					energyToAdd[rowNum][1] = energyToAdd[rowNum][1] + fullArray[rowNum][1]
 		if [] == powerTimeSeries:
 			powerTimeSeries = powerToAdd
-			energyTimeSeries = energyToAdd
 		else:
 			powerTimeSeries = [powerTimeSeries[rowNum] + [powerToAdd[rowNum][1]] for rowNum in xrange(len(powerTimeSeries))]
-			energyTimeSeries = [energyTimeSeries[rowNum] + [float(interval) / 3600.0 * energyToAdd[rowNum][1]] for rowNum in xrange(len(energyTimeSeries))]
+	energyTimeSeries = copy(powerTimeSeries)
+	energyTimeSeries[1:] = [[row[0]] + map(lambda x:x*interval/3600.0, row[1:]) for row in energyTimeSeries[1:]]
+	print 'INTERVAL: ' + str(interval)
 	# Add the power time series graph:
 	powerGraphOptions = '{vAxis:{title:"Power (kW)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["red","darkred","salmon"], legend:{position:"top"}}'
-	energyGraphOptions = '{vAxis:{title:"Power (kW)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["orange","darkorange","chocolate"], legend:{position:"top"}}'
-	outputBuffer += '<div id="powerTimeSeries" style="position:absolute;top:0px;left:0px;width:500px;height:200px"><script>drawLineChart(' + str(powerTimeSeries) + ',"powerTimeSeries",' + powerGraphOptions + ')</script></div>'
+	energyGraphOptions = '{vAxis:{title:"Energy (kWh)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["orange","darkorange","chocolate"], legend:{position:"top"}}'
+	outputBuffer += '<div id="monPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:500px;height:200px"><script>drawLineChart(' + str(powerTimeSeries) + ',"monPowerTimeSeries",' + powerGraphOptions + ')</script></div>'
 	# Add the energy graph:
-	outputBuffer += '<div id="energyBalance" style="position:absolute;top:0px;left:500px;width:500px;height:200px"><script>drawLineChart(' + str(energyTimeSeries) + ',"energyBalance",' + energyGraphOptions + ')</script></div>'
+	outputBuffer += '<div id="monEnergyBalance" style="position:absolute;top:0px;left:500px;width:500px;height:200px"><script>drawLineChart(' + str(energyTimeSeries) + ',"monEnergyBalance",' + energyGraphOptions + ')</script></div>'
+	moneyPowerGraphOptions = '{vAxis:{title:"Power (kW)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["red","darkred","salmon"], legend:{position:"top"}}'
+	moneyEnergyGraphOptions = '{vAxis:{title:"Energy Cost ($)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["orange","darkorange","chocolate"], legend:{position:"top"}}'
 	# Monetized power graph:
-	outputBuffer += '<div id="monetizedPowerTimeSeries" style="position:absolute;top:200px;left:0px;width:500px;height:200px"><script>drawLineChart(' + str(powerTimeSeries) + ',"monetizedPowerTimeSeries",' + powerGraphOptions + ')</script></div>'
+	outputBuffer += '<div id="monetizedPowerTimeSeries" style="position:absolute;top:200px;left:0px;width:500px;height:200px"><script>drawLineChart(' + str(powerTimeSeries) + ',"monetizedPowerTimeSeries",' + moneyPowerGraphOptions + ')</script></div>'
 	# Monetized energy graph:
-	monetizedEnergy = [energyTimeSeries[0]] + [[row[0],row[1]*gtEnergyCost] for row in energyTimeSeries[1:]]
-	outputBuffer += '<div id="monetizedEnergyBalance" style="position:absolute;top:200px;left:500px;width:500px;height:200px"><script>drawLineChart(' + str(monetizedEnergy) + ',"monetizedEnergyBalance",' + energyGraphOptions + ')</script></div>'
+	monetizedEnergy = [energyTimeSeries[0]] + [[row[0]] + map(lambda x:x*gtEnergyCost, row[1:]) for row in energyTimeSeries[1:]]
+	outputBuffer += '<div id="monetizedEnergyBalance" style="position:absolute;top:200px;left:500px;width:500px;height:200px"><script>drawLineChart(' + str(monetizedEnergy) + ',"monetizedEnergyBalance",' + moneyEnergyGraphOptions + ')</script></div>'
 	# Other metrics table:
 	outputBuffer += '<div id="additionalMetrics" style="position:absolute;top:410px;left:0px;width:1000px;height:240px">'
 	tableOptions = '{}'

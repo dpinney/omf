@@ -107,7 +107,7 @@
 		<div class='buttonGroup'>
 			<button class='pill' onclick='dropPill(this, "Add Report")'>Add Report ▾</button>
 			<ul class='menu'>
-				{% for rep in reportTemplates %}
+				{% for rep in reportTemplates|sort() %}
 				<li><a href='javascript:addReport("{{rep}}")'>{{ rep }}</a></li>
 				{% endfor %}
 			</ul>
