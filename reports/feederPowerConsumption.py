@@ -4,7 +4,8 @@ import os
 import re
 import __util__
 
-configHtmlTemplate = "<div id='REMOVALID' class='content feederPowerConsumption'><a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>✖</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>feederPowerConsumption</td></tr></table></div>"
+# The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
+configHtmlTemplate = "<div id='REMOVALID' class='content feederPowerConsumption'><a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>feederPowerConsumption</td></tr></table></div>"
 
 def outputHtml(analysisName):
 	# Put the title in:

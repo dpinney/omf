@@ -3,7 +3,8 @@
 import os
 import textwrap
 
-configHtmlTemplate = "<div id='REMOVALID' class='content runtimeStats'><a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>✖</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>runtimeStats</td></tr></table></div>"
+# The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
+configHtmlTemplate = "<div id='REMOVALID' class='content runtimeStats'><a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>runtimeStats</td></tr></table></div>"
 
 def outputHtml(analysisName):
 	# Put the title in:

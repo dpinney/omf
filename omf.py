@@ -41,7 +41,8 @@ def newAnalysis():
 	tmy2s = os.listdir('tmy2s')
 	feeders = os.listdir('feeders')
 	reportList = reports.__all__
-	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportList=reportList)
+	reportTemplates = reports.__templates__
+	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportTemplates=reportTemplates)
 
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):

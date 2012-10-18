@@ -68,7 +68,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 			mdFile.write(str(metadata))
 	for report in reports:
 		with open('analyses/' + analysisName + '/reports/' + report['reportType'] + '.txt','w') as mdFile:
-			mdFile.write(str({'reportType':report['reportType']}))
+			mdFile.write(str(report))
 	# write a file with the current status (preRun, running or postRun), source feeder and climate.
 	def uniqJoin(inList, key):
 		return ', '.join(set([x[key] for x in inList]))
