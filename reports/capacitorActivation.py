@@ -22,7 +22,8 @@ def outputHtml(analysisName):
 			cap = capacitor.replace('.csv','')
 			dataTree[study][cap] = __util__.csvToArray(pathPrefix + '/studies/' + study + '/' + capacitor)
 			outputBuffer += '<div id="chartDiv' + study + cap + '" class="capChart"></div>'
-			outputBuffer += '<script>drawAreaChart(' + str(dataTree[study][cap]) + ',' + '"chartDiv' + study + cap + '",' + '["gainsboro","silver","gray"])</script>'
+			chartOptions = '{chartArea:{left:60,top:15,height:60}, hAxis:{title:"Time",textPosition:"none"}, vAxis:{title:"On/Off", gridlines:{count:2}}, colors:["gainsboro","silver","gray"]}'
+			outputBuffer += '<script>drawAreaChart(' + str(dataTree[study][cap]) + ',' + '"chartDiv' + study + cap + '",' + chartOptions + ')</script>'
 		outputBuffer += '</div>'
 	return outputBuffer + '</div>'
 

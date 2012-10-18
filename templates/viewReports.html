@@ -29,9 +29,8 @@
 	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
 	<script>
 		google.load('visualization', '1', {packages:['corechart','geochart','table']})
-		function drawAreaChart(dataArray, divName, colorList) {
+		function drawAreaChart(dataArray, divName, options) {
 			chartData = google.visualization.arrayToDataTable(dataArray)
-			options = {chartArea:{left:60,top:20}, hAxis:{textPosition:'none'}, colors:colorList}
 			chart = new google.visualization.AreaChart(gebi(divName))
 			chart.draw(chartData, options)
 		}
