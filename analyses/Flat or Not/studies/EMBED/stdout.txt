@@ -1,44 +1,0 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-Core profiler results
-======================
-
-Total objects               3075 objects
-Parallelism                    1 thread
-Total time                  25.0 seconds
-  Core time                  4.7 seconds (18.6%)
-  Model time                20.3 seconds/thread (81.4%)
-Simulation time                2 days
-Simulation speed            4.9k object.hours/second
-Syncs completed             9461 passes
-Time steps completed        2102 timesteps
-Convergence efficiency      4.50 passes/timestep
-Memory lock contention      0.0%
-Average timestep             69 seconds/timestep
-Simulation rate            5760 x realtime
-
-
-Model profiler results
-======================
-
-Class            Time (s) Time (%) msec/obj
----------------- -------- -------- --------
-triplex_meter      7.137     35.1%     11.0
-house              6.295     30.9%     10.0
-triplex_line       4.015     19.7%      6.4
-waterheater        1.549      7.6%      3.6
-ZIPload            0.862      4.2%      1.4
-transformer        0.144      0.7%      6.9
-collector          0.094      0.5%     94.0
-node               0.089      0.4%      5.2
-overhead_line      0.060      0.3%      6.7
-capacitor          0.019      0.1%      9.5
-recorder           0.017      0.1%      5.7
-regulator          0.016      0.1%     16.0
-volt_var_control   0.014      0.1%     14.0
-climate            0.011      0.1%     11.0
-switch             0.011      0.1%     11.0
-underground_line   0.010      0.0%      5.0
-transformer_conf   0.006      0.0%      0.3
-================ ======== ======== ========
-Total             20.349    100.0%      6.6
-

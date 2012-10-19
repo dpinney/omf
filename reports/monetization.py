@@ -63,21 +63,23 @@ def outputHtml(analysisName):
 			powerTimeSeries = powerToAdd
 		else:
 			powerTimeSeries = [powerTimeSeries[rowNum] + [powerToAdd[rowNum][1]] for rowNum in xrange(len(powerTimeSeries))]
+	# Get the energy data from the power data:
 	energyTimeSeries = copy(powerTimeSeries)
 	energyTimeSeries[1:] = [[row[0]] + map(lambda x:x*interval/3600.0, row[1:]) for row in energyTimeSeries[1:]]
-	print 'INTERVAL: ' + str(interval)
-	# Add the power time series graph:
-	powerGraphOptions = '{vAxis:{title:"Power (kW)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["red","darkred","salmon"], legend:{position:"top"}}'
-	energyGraphOptions = '{vAxis:{title:"Energy (kWh)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["orange","darkorange","chocolate"], legend:{position:"top"}}'
-	outputBuffer += '<div id="monPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:500px;height:200px"><script>drawLineChart(' + str(powerTimeSeries) + ',"monPowerTimeSeries",' + powerGraphOptions + ')</script></div>'
-	# Add the energy graph:
-	outputBuffer += '<div id="monEnergyBalance" style="position:absolute;top:0px;left:500px;width:500px;height:200px"><script>drawLineChart(' + str(energyTimeSeries) + ',"monEnergyBalance",' + energyGraphOptions + ')</script></div>'
-	moneyPowerGraphOptions = '{vAxis:{title:"Power (kW)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["red","darkred","salmon"], legend:{position:"top"}}'
-	moneyEnergyGraphOptions = '{vAxis:{title:"Energy Cost ($)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["orange","darkorange","chocolate"], legend:{position:"top"}}'
-	# Monetized power graph:
-	outputBuffer += '<div id="monetizedPowerTimeSeries" style="position:absolute;top:200px;left:0px;width:500px;height:200px"><script>drawLineChart(' + str(powerTimeSeries) + ',"monetizedPowerTimeSeries",' + moneyPowerGraphOptions + ')</script></div>'
-	# Monetized energy graph:
+	# Monetize stuff:
 	monetizedEnergy = [energyTimeSeries[0]] + [[row[0]] + map(lambda x:x*gtEnergyCost, row[1:]) for row in energyTimeSeries[1:]]
+	monetizedPower = [powerTimeSeries[0]] + [[row[0]] + map(lambda x:x*gtEnergyCost, row[1:]) for row in powerTimeSeries[1:]]
+	# Power graph:
+	powerGraphOptions = '{vAxis:{title:"Power (kW)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["red","darkred","salmon"], legend:{position:"top"}}'
+	outputBuffer += '<div id="monPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:500px;height:200px"><script>drawLineChart(' + str(powerTimeSeries) + ',"monPowerTimeSeries",' + powerGraphOptions + ')</script></div>'
+	# Energy graph:
+	energyGraphOptions = '{vAxis:{title:"Energy (kWh)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["orange","darkorange","chocolate"], legend:{position:"top"}}'
+	outputBuffer += '<div id="monEnergyBalance" style="position:absolute;top:0px;left:500px;width:500px;height:200px"><script>drawLineChart(' + str(energyTimeSeries) + ',"monEnergyBalance",' + energyGraphOptions + ')</script></div>'
+	# Money power graph:
+	moneyPowerGraphOptions = '{vAxis:{title:"Power Cost ($)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["red","darkred","salmon"], legend:{position:"top"}}'
+	outputBuffer += '<div id="monetizedPowerTimeSeries" style="position:absolute;top:200px;left:0px;width:500px;height:200px"><script>drawLineChart(' + str(monetizedPower) + ',"monetizedPowerTimeSeries",' + moneyPowerGraphOptions + ')</script></div>'
+	# Money energy graph:
+	moneyEnergyGraphOptions = '{vAxis:{title:"Energy Cost ($)"}, chartArea:{left:60,top:20,width:"90%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["orange","darkorange","chocolate"], legend:{position:"top"}}'
 	outputBuffer += '<div id="monetizedEnergyBalance" style="position:absolute;top:200px;left:500px;width:500px;height:200px"><script>drawLineChart(' + str(monetizedEnergy) + ',"monetizedEnergyBalance",' + moneyEnergyGraphOptions + ')</script></div>'
 	# Other metrics table:
 	outputBuffer += '<div id="additionalMetrics" style="position:absolute;top:410px;left:0px;width:1000px;height:240px">'

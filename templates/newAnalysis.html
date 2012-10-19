@@ -19,12 +19,18 @@
 	</style>
 	<script src='../static/omf.js'></script>
 	<script>
+		None = []
+		existingStudies = {{ existingStudies | safe }}
+		existingReports = {{ existingReports | safe }}
 		reportTemplates = {{ reportTemplates | safe }}
 		var studyReportId = 0
 		studyHTML = "<div id='removalId' class='content'><a href='javascript:removeStudyReport(removalId)' class='removeStudyReport'>✖</a><table class='studyOptions'><tr><td>Study Name</td><td><input type='text' class='studyName'/></td></tr><tr><td>Feeder</td><td><select class='feederName'>{% for feeder in feeders %}<option value='{{ feeder }}'>{{ feeder }}</option>{% endfor %}</select><button onclick='window.location=\"../model/\"+this.parentNode.querySelector(\".feederName\").value'>Edit Selected Feeder</button></td></tr><tr><td>Location</td><td><select class='tmy2name'>{% for tmy2 in tmy2s %}<option value='{{ tmy2 }}'>{{ tmy2 }}</option>{% endfor %}</select></td></tr></table></div>"
 		function addStudy() {
+			usedId = studyReportId
+			oldHtml = gebi('studyList').innerHTML
 			gebi('studyList').innerHTML += studyHTML.replace(/removalId/g,studyReportId)
 			studyReportId += 1
+			return usedId
 		}
 		function removeStudyReport(x) {
 			gebi(x).parentNode.removeChild(gebi(x))
@@ -133,4 +139,20 @@
 			</tr>
 		</table>
 	</div>
+	<script>
+		// INIT Code: set up the existing reports and studies.
+		for (exRep=0;exRep<existingReports.length;exRep++) {
+			addReport(existingReports[exRep].reportType)
+		}
+		for (exStud=0;exStud<existingStudies.length;exStud++) {
+			usedId = addStudy()
+			studyDiv = gebi(usedId)
+			console.log(usedId)
+			console.log(existingStudies[exStud].name)
+			// Setting up study values
+			studyDiv.querySelector('.studyName').value = existingStudies[exStud].name
+			studyDiv.querySelector('.feederName').value = existingStudies[exStud].sourceFeeder
+			studyDiv.querySelector('.tmy2name').value = existingStudies[exStud].climate
+		}
+	</script>
 </body>

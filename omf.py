@@ -9,6 +9,7 @@ import treeParser as tp
 import shutil
 import time
 import reports
+import lib
 
 app = flask.Flask(__name__)
 
@@ -35,12 +36,28 @@ def root():
 		return flask.render_template('home.html', metadatas=metadatas)
 
 @app.route('/newAnalysis/')
-def newAnalysis():
-	# Get lists of various things:
+@app.route('/newAnalysis/<analysisName>')
+def newAnalysis(analysisName=None):
+	# Get some prereq data:
 	tmy2s = os.listdir('tmy2s')
 	feeders = os.listdir('feeders')
 	reportTemplates = reports.__templates__
-	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportTemplates=reportTemplates)
+	analyses = os.listdir('analyses')
+	# If we aren't specifying an existing name, just make a blank analysis:
+	if analysisName is None or analysisName not in analyses:
+		existingStudies = None
+		existingReports = None
+	# If we specified an analysis, get the studies and reports:
+	else:
+		reportPrefix = 'analyses/' + analysisName + '/reports/'
+		reportNames = os.listdir(reportPrefix)
+		reportDicts = map(lambda x:eval(lib.fileSlurp(reportPrefix + x)), reportNames)
+		existingReports = json.dumps(reportDicts)
+		studyPrefix = 'analyses/' + analysisName + '/studies/'
+		studyNames = os.listdir(studyPrefix)
+		studyDicts = map(lambda x:eval(lib.fileSlurp(studyPrefix + x + '/metadata.txt')), studyNames)
+		existingStudies = json.dumps(studyDicts)
+	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports)
 
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):
