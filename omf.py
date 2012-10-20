@@ -48,16 +48,18 @@ def newAnalysis(analysisName=None):
 		existingStudies = None
 		existingReports = None
 	# If we specified an analysis, get the studies and reports:
+	# TODO: Also get the analysis MD.
 	else:
 		reportPrefix = 'analyses/' + analysisName + '/reports/'
 		reportNames = os.listdir(reportPrefix)
-		reportDicts = map(lambda x:eval(lib.fileSlurp(reportPrefix + x)), reportNames)
+		reportDicts = [eval(lib.fileSlurp(reportPrefix + x)) for x in reportNames]
 		existingReports = json.dumps(reportDicts)
 		studyPrefix = 'analyses/' + analysisName + '/studies/'
 		studyNames = os.listdir(studyPrefix)
-		studyDicts = map(lambda x:eval(lib.fileSlurp(studyPrefix + x + '/metadata.txt')), studyNames)
+		studyDicts = [eval(lib.fileSlurp(studyPrefix + x + '/metadata.txt')) for x in studyNames]
 		existingStudies = json.dumps(studyDicts)
-	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports)
+		analysisMd = eval(lib.fileSlurp('analyses/' + analysisName + '/metadata.txt'))
+	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
 
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):

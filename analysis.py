@@ -55,7 +55,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 		tp.attachRecorders(tree, 'CollectorVoltage', None, None)
 		tp.groupSwingKids(tree)
 		# Modify the glm with time variables:
-		tp.adjustTime(tree=tree, simLength=simLength, simLengthUnits=simLengthUnits, simStartDate=simStartDate)
+		tp.adjustTime(tree=tree, simLength=simLength, simLengthUnits=str(simLengthUnits), simStartDate=simStartDate)
 		# write the glm:
 		outString = tp.write(tree)
 		with open(studyFolder + '/main.glm','w') as glmFile:
@@ -63,7 +63,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 		# copy over tmy2 and replace the dummy climate.tmy2.
 		shutil.copyfile('tmy2s/' + study['tmy2name'], studyFolder + '/climate.tmy2')
 		# add the metadata:
-		metadata = {'name':study['studyName'], 'sourceFeeder':study['feederName'], 'climate':study['tmy2name']}
+		metadata = {'name':str(study['studyName']), 'sourceFeeder':str(study['feederName']), 'climate':str(study['tmy2name'])}
 		with open(studyFolder + '/metadata.txt','w') as mdFile:
 			mdFile.write(str(metadata))
 	for report in reports:
@@ -72,7 +72,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 	# write a file with the current status (preRun, running or postRun), source feeder and climate.
 	def uniqJoin(inList, key):
 		return ', '.join(set([x[key] for x in inList]))
-	metadata = {'name':analysisName, 'status':'preRun', 'sourceFeeder':uniqJoin(studies,'feederName'), 'climate':uniqJoin(studies,'tmy2name'), 'created':str(dt.datetime.now()), 'simStartDate':str(simStartDate), 'simLength':simLength, 'simLengthUnits':simLengthUnits}
+	metadata = {'name':str(analysisName), 'status':'preRun', 'sourceFeeder':str(uniqJoin(studies,'feederName')), 'climate':str(uniqJoin(studies,'tmy2name')), 'created':str(dt.datetime.now()), 'simStartDate':str(simStartDate), 'simLength':simLength, 'simLengthUnits':str(simLengthUnits)}
 	with open('analyses/' + analysisName + '/metadata.txt','w') as mdFile:
 		mdFile.write(str(metadata))
 	print 'Success. Analysis created.'

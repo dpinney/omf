@@ -23,6 +23,7 @@
 		existingStudies = {{ existingStudies | safe }}
 		existingReports = {{ existingReports | safe }}
 		reportTemplates = {{ reportTemplates | safe }}
+		analysisMd = {{ analysisMd | safe }}
 		var studyReportId = 0
 		studyHTML = "<div id='removalId' class='content'><a href='javascript:removeStudyReport(removalId)' class='removeStudyReport'>✖</a><table class='studyOptions'><tr><td>Study Name</td><td><input type='text' class='studyName'/></td></tr><tr><td>Feeder</td><td><select class='feederName'>{% for feeder in feeders %}<option value='{{ feeder }}'>{{ feeder }}</option>{% endfor %}</select><button onclick='window.location=\"../model/\"+this.parentNode.querySelector(\".feederName\").value'>Edit Selected Feeder</button></td></tr><tr><td>Location</td><td><select class='tmy2name'>{% for tmy2 in tmy2s %}<option value='{{ tmy2 }}'>{{ tmy2 }}</option>{% endfor %}</select></td></tr></table></div>"
 		function addStudy() {
@@ -130,7 +131,7 @@
 				<td>Simulation Length</td><td><input type='text' id='simLength'/></td>
 			</tr>
 			<tr>
-				<td></td><td><input type='radio' class='radio' name='simLengthUnits' value='minutes'/> Minutes <input type='radio' class='radio' name='simLengthUnits' value='hours'/> Hours <input type='radio' class='radio' name='simLengthUnits' value='days'/> Days </td></tr>
+				<td></td><td><input type='radio' id='minutes' class='radio' name='simLengthUnits' value='minutes'/> Minutes <input type='radio' id='hours' class='radio' name='simLengthUnits' value='hours'/> Hours <input type='radio' id='days' class='radio' name='simLengthUnits' value='days'/> Days </td></tr>
 			<tr>
 				<td>Simulation Start Date <br/> (YYYY-MM-DD)</td><td><input type='text' id='simStartDate'/></td>
 			</tr>
@@ -144,15 +145,22 @@
 		for (exRep=0;exRep<existingReports.length;exRep++) {
 			addReport(existingReports[exRep].reportType)
 		}
+		// HACK: collect div Ids for studies so we can init them later.
+		usedIds = []
 		for (exStud=0;exStud<existingStudies.length;exStud++) {
-			usedId = addStudy()
-			studyDiv = gebi(usedId)
-			console.log(usedId)
-			console.log(existingStudies[exStud].name)
+			usedIds.push(addStudy())
+		}
+		// HACK: init the div data, since we can't init before all the innerHTML has been altered...
+		for (exStud=0;exStud<existingStudies.length;exStud++) {
+			studyDiv = gebi(usedIds.pop())
 			// Setting up study values
 			studyDiv.querySelector('.studyName').value = existingStudies[exStud].name
 			studyDiv.querySelector('.feederName').value = existingStudies[exStud].sourceFeeder
 			studyDiv.querySelector('.tmy2name').value = existingStudies[exStud].climate
 		}
+		// Set up the analysis-level stuff.
+		gebi('simLength').value = analysisMd.simLength
+		gebi(analysisMd.simLengthUnits).checked = true
+		gebi('simStartDate').value = analysisMd.simStartDate
 	</script>
 </body>

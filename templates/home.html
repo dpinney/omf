@@ -44,8 +44,8 @@
 							{% if md['status'] == 'preRun' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/run/",dict)')>Run</a></li>{% endif %}
 							{% if md['status'] == 'postRun' or md['status'] == 'terminated' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/reRun/",dict)'>Re-Run</a></li>{% endif %}
 							{% if md['status'] != 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/",dict)'>Delete</a></li>{% endif %}
-							{% if md['status'] == 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/",dict)'>Terminate</a></li>
-							{% endif %}
+							{% if md['status'] == 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/",dict)'>Terminate</a></li>{% endif %}
+							<li><a href='/newAnalysis/{{ md["name"] }}'>Duplicate</a></li>
 						</ul>
 					</div>
 				</td>
