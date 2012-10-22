@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import math
+import re
 
 def csvToArray(fileName):
 	''' Take a filename to a list of timeseries vectors. Internal method. '''
@@ -10,6 +11,11 @@ def csvToArray(fileName):
 			return 1.0
 		elif x == 'CLOSED':
 			return 0.0
+		elif 'd' in x:
+			embedNums = re.findall('-*\d+',x)
+			floatConv = map(float, embedNums)
+			squares = map(lambda x:x**2, floatConv)
+			return math.sqrt(sum(squares))
 		elif x[0] == '+':
 			return float(x[1:])
 		elif x[0] == '-':

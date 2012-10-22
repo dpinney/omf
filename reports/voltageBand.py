@@ -30,4 +30,4 @@ def outputHtml(analysisName):
 
 def modifyStudy(analysisName):
 	pass
-	#TODO: implement if needed. 		div.voltChart {height:150px; padding:0px}
+	#TODO: implement if needed.
