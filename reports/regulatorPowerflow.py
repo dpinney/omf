@@ -11,6 +11,15 @@ def outputHtml(analysisName):
 	# Put the title in:
 	outputBuffer =  '<p class="reportTitle">Regulator Powerflow</p>'
 	outputBuffer += '<div id="regPowReport" class="tightContent">'
+	outputBuffer += '''<style type="text/css" scoped>
+							div.regContainer {position: relative; height:270px; padding:0px;}
+							div.regContainer > div {position: absolute; padding:0px;}
+							div.realPowChart {left:0px; top:0px; width:600px; height:90px;}
+							div.reacPowChart {left:0px; top:90px; width:600px; height:90px;}
+							div.appPowChart {left:0px; top:180px; width:600px; height:90px;}
+							div.tapsChart {right:0px; top:0px; width:400px; height:135px;}
+							div.powFactChart {right:0px; top:135px; width:400px; height:135px;}
+						</style>'''
 	dataTree = {}
 	pathPrefix = './analyses/' + analysisName
 	for study in os.listdir(pathPrefix + '/studies/'):

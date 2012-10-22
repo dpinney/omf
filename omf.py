@@ -47,8 +47,8 @@ def newAnalysis(analysisName=None):
 	if analysisName is None or analysisName not in analyses:
 		existingStudies = None
 		existingReports = None
-	# If we specified an analysis, get the studies and reports:
-	# TODO: Also get the analysis MD.
+		analysisMd = None
+	# If we specified an analysis, get the studies, reports and analysisMd:
 	else:
 		reportPrefix = 'analyses/' + analysisName + '/reports/'
 		reportNames = os.listdir(reportPrefix)

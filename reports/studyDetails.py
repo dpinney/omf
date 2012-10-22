@@ -11,6 +11,10 @@ def outputHtml(analysisName):
 	# Put the title in:
 	outputBuffer =  '<p class="reportTitle">Study Details</p>'
 	outputBuffer += '<div id="studyDetails" class="detailsContainer tightContent" style="height:400px;padding:10px;position:relative;">'
+	outputBuffer += ''' <style type="text/css" scoped>
+							table#detailsTable th {border-bottom:2px solid gray; text-align:left;}
+							table#detailsTable th, td {padding:5px;}
+						</style>'''
 	# Build up the data:
 	studies = []
 	climates = [['location','marker']]

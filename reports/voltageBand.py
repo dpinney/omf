@@ -21,7 +21,7 @@ def outputHtml(analysisName):
 				dataTree[study].insert(0,[fullArray[0][0],fullArray[0][1],fullArray[0][2],fullArray[0][3]])
 		# Write one study's worth of HTML:
 		outputBuffer += '<div id="voltStudy' + study + '" class="studyContainer">'
-		outputBuffer += '<div id="voltChartDiv' + study + '" class="voltChart"></div>'
+		outputBuffer += '<div id="voltChartDiv' + study + '" class="voltChart" style="height:150px"></div>'
 		outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
 		graphOptions = "{vAxis:{title:'Volts'}, chartArea:{left:60,top:20,height:'70%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['gray','blue','gray']}"
 		outputBuffer += "<script>drawLineChart(" + str(dataTree[study]) + ",'" + 'voltChartDiv' + str(study) + "'," + graphOptions + ")</script>"
@@ -30,4 +30,4 @@ def outputHtml(analysisName):
 
 def modifyStudy(analysisName):
 	pass
-	#TODO: implement if needed.
+	#TODO: implement if needed. 		div.voltChart {height:150px; padding:0px}
