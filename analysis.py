@@ -53,6 +53,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 		tp.attachRecorders(tree, 'Regulator', 'object', 'regulator')
 		tp.attachRecorders(tree, 'Capacitor', 'object', 'capacitor')
 		tp.attachRecorders(tree, 'CollectorVoltage', None, None)
+		tp.attachRecorders(tree, 'Climate', 'object', 'climate')
 		tp.groupSwingKids(tree)
 		# Modify the glm with time variables:
 		tp.adjustTime(tree=tree, simLength=simLength, simLengthUnits=str(simLengthUnits), simStartDate=simStartDate)

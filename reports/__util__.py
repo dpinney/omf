@@ -11,7 +11,8 @@ def csvToArray(fileName):
 			return 1.0
 		elif x == 'CLOSED':
 			return 0.0
-		elif 'd' in x:
+		# Look for strings of the type '+32.0+68.32d':
+		elif re.findall('[+-]\d+.*[+-]\d+.*d',x) != []:
 			embedNums = re.findall('-*\d+',x)
 			floatConv = map(float, embedNums)
 			squares = map(lambda x:x**2, floatConv)

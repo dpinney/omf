@@ -566,7 +566,7 @@ parent tn_2;
 interval 1;
 limit 0;
 file meterRecorder_XXX.csv;
-property measured_power,voltage_12;
+property measured_power,voltage_12.real,voltage_12.imag;
 };
 
 object recorder {
@@ -575,7 +575,7 @@ parent tm_2;
 interval 1;
 limit 0;
 file meterRecorder_XXX.csv;
-property measured_power,voltage_12;
+property measured_power,voltage_12.real,voltage_12.imag;
 };
 
 object recorder {
@@ -584,6 +584,6 @@ parent tm_1;
 interval 1;
 limit 0;
 file meterRecorder_XXX.csv;
-property measured_power,voltage_12;
+property measured_power,voltage_12.real,voltage_12.imag;
 };
 
