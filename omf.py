@@ -75,7 +75,14 @@ def viewReports(analysisName):
 
 @app.route('/model/<model_id>')
 def show_model(model_id):
-	return flask.render_template('gridEdit.html', model_id=model_id)
+	return flask.render_template('gridEdit.html', model_id=model_id, analysisModel=False)
+
+@app.route('/analysisModel/<anaNameDotStudy>')
+def showAnalysisModel(anaNameDotStudy):
+	anaName = anaNameDotStudy.split('.')[0]
+	study = anaNameDotStudy.split('.')[-1]
+	model_id = analysis.getMetadata(anaName + '/studies/' + study)['sourceFeeder']
+	return flask.render_template('gridEdit.html', model_id=model_id, anaName=anaName, study=study)
 
 ####################################################
 # API FUNCTIONS
@@ -128,6 +135,24 @@ def api_model(model_id):
 			out.write(jsonLoad)
 		return jsonLoad
 	return ''
+
+@app.route('/api/analysisModel/<anaName>/<study>')
+def analysisModel(anaName, study):
+	#check file system or check for GLM file
+	if anaName in os.listdir('./analyses/') and study in os.listdir('./analyses/' + anaName + '/studies/'):
+		tree = tp.parse('./analyses/' + anaName + '/studies/' + study + '/main.glm')
+		filesAvailable = os.listdir('./analyses/' + anaName + '/studies/' + study)
+		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[]}
+		# grab all the layout nodes, links, etc.
+		for fileName in filesAvailable:
+			if fileName.endswith('.json'):
+				with open('./analyses/' + anaName + '/studies/' + study + '/' + fileName) as openFile:
+					outDict[fileName[0:-5]] = json.loads(openFile.read())
+		# cache the file for later
+		jsonLoad = json.dumps(outDict, indent=4)
+		return jsonLoad
+	else:
+		return ''
 
 @app.route('/getComponents/')
 def getComponents():

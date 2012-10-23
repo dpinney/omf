@@ -132,6 +132,7 @@
 
 // GLOBAL VARIABLES:
 
+analysisModel = '{{ analysisModel }}'
 feeder = '{{model_id}}'
 var w = document.width
 // HACK: subtract off the toolbar and titlebar heights.
@@ -822,9 +823,11 @@ function foldAtSelected() {
 }
 
 // INIT FUNCTION FOLLOWS:
-
 d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
-d3.json('/api/models/{{ model_id }}.json', function (json) {
+// TODO: switch on analysisModel Here.
+var apiAddress = '/api/models/{{ model_id }}.json'
+if ('{{ study }}' != '') {apiAddress = '/api/analysisModel/{{ anaName }}/{{ study }}'}
+d3.json(apiAddress, function (json) {
   tree = json['tree']
   // Regenerate the layout from the saved layout. For some insane reason, just cloning the list doesn't work.
   nodepop = json['nodes']
