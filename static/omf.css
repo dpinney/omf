@@ -40,23 +40,23 @@ div.content {
 	margin-top: 20px;
 	margin-bottom: 30px; }
 
-a {text-decoration:none; color:#33CC66;}
+a {text-decoration:none; color:mediumseagreen;}
 
-a:visited {color:#339966;}
+a:visited {color:seagreen;}
 
 form {line-height:10pt; padding: 0px; margin: 0px;}
 
 select, input[type='text'], button {width:100%; background:gainsboro; padding:4px; margin:2px; border-width:1px; border-color:white; border-style:solid;}
 
 button {
-	background:#339966;
+	background:seagreen;
 	-webkit-border-radius: 5px;
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	border: none;
 	color: white; }
 
-button:hover {background:#33CC66;}
+button:hover {background:mediumseagreen;}
 
 td, th {padding:3px;}
 

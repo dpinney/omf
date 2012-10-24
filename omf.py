@@ -29,7 +29,7 @@ def root():
 	browser = flask.request.user_agent.browser
 	analyses = analysis.listAll()
 	metadatas = [analysis.getMetadata(x) for x in analyses]
-	print metadatas
+	#DEBUG: print metadatas
 	if browser == 'msie':
 		return "The OMF currently must be accessed by Chrome, Firefox or Safari."
 	else:
@@ -104,7 +104,7 @@ def delete():
 @app.route('/saveAnalysis/', methods=['POST'])
 def saveAnalysis():
 	postData = json.loads(flask.request.form.to_dict()['json'])
-	print postData
+	#DEBUG: print postData
 	analysis.createAnalysis(postData['analysisName'], int(postData['simLength']), postData['simLengthUnits'], postData['simStartDate'], postData['studies'], postData['reports'])
 	return flask.redirect(flask.url_for('root'))
 
@@ -162,7 +162,7 @@ def getComponents():
 		with open('./components/' + fileName,'r') as compFile:
 			fileContents = compFile.read()
 			components[fileName] = eval(fileContents)
-	print components
+	# DEBUG: print components
 	return json.dumps(components, indent=4)
 
 @app.route('/saveFeeder/', methods=['POST'])
