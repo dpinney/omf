@@ -5,6 +5,7 @@ import re
 import __util__
 from pprint import pprint
 from copy import copy
+import math
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 configHtmlTemplate = '''
@@ -60,7 +61,7 @@ def outputHtml(analysisName):
 	# Insert the metrics table framework.
 	outputBuffer += '<div id="additionalMetrics" style="position:absolute;top:410px;left:0px;width:1000px;height:190px;overflow-y:auto;overflow-x:hidden">'
 	outputBuffer += '<div style="width:1000px;height:40px;padding:0px 5px 0px 5px">Co-op Energy Rate ($/kWh) <input id="distrEnergyRate" value="' + str(distrEnergyRate) + '"/> Capacity Rate ($/kW) <input id="distrCapacityRate" value="' + str(distrCapacityRate) + '"/> <button style="width:100px" onclick="recalculateCostBenefit()">Recalculate</button></div>'
-	outputBuffer += '<table style="width:980px"><thead><tr><th>Study</th><th>Baseline</th><th>Capital Cost</th><th>O&amp;M Cost</th><th>Capacity Cost</th><th>Energy Cost</th><th>NPV</th><th>C/B</th></tr></thead><tbody id="additionalMetricsTable">'
+	outputBuffer += '<table style="width:980px"><thead><tr><th>Study</th><th>Baseline</th><th>Capital Cost</th><th>O&amp;M Cost</th><th>Capacity Cost</th><th>Energy Cost</th><th>Delta Cost</th><th>C/B</th></tr></thead><tbody id="additionalMetricsTable">'
 	# Gather data for all the studies. firstStudy indicates our default baseline.
 	firstStudy = True
 	for study in studies:
@@ -69,7 +70,7 @@ def outputHtml(analysisName):
 		for swingFile in swingFileNames:
 			fullArray = __util__.csvToArray(pathPrefix + '/studies/' + study + '/' + swingFile)
 			fullArray[0] = ['', str(study)]
-			fullArray[1:] = [[row[0],(row[1]+row[2])/1000] for row in fullArray[1:]]
+			fullArray[1:] = [[row[0],math.sqrt(row[1]**2+row[2]**2)/1000] for row in fullArray[1:]]
 			if [] == powerToAdd:
 				powerToAdd = fullArray
 			else:
@@ -160,24 +161,14 @@ def modifyStudy(analysisName):
 	#TODO: implement if needed.
 
 def processMonths(inList, listFunc):
-	# Given a month chunk, replace values so they're all equal to the listFunc ones.
-	def peakPower(monthList):
-		colForm = zip(*monthList)
-		header = colForm[0]
-		def replaceWithMax(inList):
-			maximum = listFunc(inList)
-			return map(lambda x:maximum, inList)
-		peaks = [header] + map(replaceWithMax, colForm[1:])
-		return [list(x) for x in zip(*peaks)]
-	# Walk the full inList, split it into months, and process each month chunk.
-	workList = copy(inList)
-	monthYear = workList[0][0][0:7]
-	startRow = 0
-	for rowNum in xrange(len(inList)):
-		if workList[rowNum][0][0:7] == monthYear and rowNum != len(inList)-1:
-			pass
-		else:
-			monthYear = workList[rowNum][0][0:7]
-			workList[startRow:rowNum+1] = peakPower(workList[startRow:rowNum+1])
-			startRow = rowNum
-	return workList
+	# get monthly proc'd months.
+	monthList = set([row[0][0:7] for row in inList])
+	# for each month, this function calculates the listFunc of each column.
+	def funcMon(month):
+		listMatr = [row for row in inList if row[0][0:7]==month]
+		transposedNoHeaders = [list(colRow) for colRow in zip(*listMatr)[1:]]
+		return map(listFunc, transposedNoHeaders)
+	# find the processed version for each month
+	monthVects = {month:funcMon(month) for month in monthList}
+	# return the rewritten matrix.
+	return [[row[0]] + monthVects[row[0][0:7]] for row in inList]
