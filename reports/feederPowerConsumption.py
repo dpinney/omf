@@ -2,6 +2,7 @@
 
 import os
 import re
+import math
 import __util__
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
@@ -28,7 +29,7 @@ def outputHtml(analysisName):
 			# fullArray = __csvToArray__(pathPrefix + '/studies/' + study + '/' + swingFile)
 			fullArray = __util__.csvToArray(pathPrefix + '/studies/' + study + '/' + swingFile)
 			fullArray[0] = ['', str(study)]
-			fullArray[1:] = [[row[0],(row[1]+row[2])/1000] for row in fullArray[1:]]
+			fullArray[1:] = [[row[0],(-1 if row[1]<0 else 1)*math.sqrt(row[1]**2+row[2]**2)/1000] for row in fullArray[1:]]
 			if [] == powerToAdd:
 				powerToAdd = fullArray
 			else: 
