@@ -26,7 +26,7 @@ def outputHtml(analysisName):
 		graphOptions = "{vAxis:{title:'Volts'}, chartArea:{left:60,top:20,height:'70%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['gray','blue','gray']}"
 		outputBuffer += "<script>drawLineChart(" + str(dataTree[study]) + ",'" + 'voltChartDiv' + str(study) + "'," + graphOptions + ")</script>"
 		outputBuffer += '</div>'
-	return outputBuffer
+	return outputBuffer + '</div>'
 
 def modifyStudy(analysisName):
 	pass
