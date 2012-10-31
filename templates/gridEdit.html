@@ -413,9 +413,9 @@ function saveEdits(treeIndex) {
     // Names are GUIDS and so are strongly constrained. Make sure we're okay with the name change:
     if (key=='name') {
       // 1. If the name is already the name of something else, skip the renaming.
-      if (isNameAlreadyUsed(newValue)) {
-        alert('no way jose!')
+      if (isNameAlreadyUsed(newValue) && oldValue != newValue) {
         cell.innerHTML = oldValue
+        alert('Please choose a unique name.')
       }
       else {
         treeObject[key] = newValue
