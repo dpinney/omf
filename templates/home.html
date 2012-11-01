@@ -9,7 +9,9 @@
 		td.running {color:red;}
 		td.preRun {color:orange;}
 		td.postRun {color:black;}
-		td.terminated {color:purple;}		
+		td.terminated {color:purple;}
+		td {border-bottom:1px dashed gray;}
+		tr:last-child td {border-bottom:none;}
 	</style>
 	<script>
 		outerBody = document.body
@@ -28,29 +30,31 @@
 	</div>
 	<div class='content'>
 		<table id='homeTable'>
-			<tr><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (s)</th><th>Status</th><th> </th></tr>
-			{% for md in metadatas %}
-			<tr>
-				<td>{{ md['name'] }}</td>
-				<td>{{ md['sourceFeeder'] }}</td>
-				<td>{{ md['climate'] }}</td>
-				<td>{{ md['runTime'] }}</td>
-				<td class="{{ md['status'] }}">{{ md['status'] }}</td>
-				<td>
-					<div class='buttonGroup'>
-						<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
-						<ul class='menu'>
-							{% if md['status'] == 'postRun' %}<li><a href='/viewReports/{{ md["name"] }}'>View Reports</a></li>{% endif %}
-							{% if md['status'] == 'preRun' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/run/",dict)')>Run</a></li>{% endif %}
-							{% if md['status'] == 'postRun' or md['status'] == 'terminated' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/reRun/",dict)'>Re-Run</a></li>{% endif %}
-							{% if md['status'] != 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/",dict)'>Delete</a></li>{% endif %}
-							{% if md['status'] == 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/",dict)'>Terminate</a></li>{% endif %}
-							<li><a href='/newAnalysis/{{ md["name"] }}'>Duplicate</a></li>
-						</ul>
-					</div>
-				</td>
-			</tr>
-			{% endfor %}
+			<tr><thead><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (s)</th><th>Status</th><th></th></tr></thead>
+			<tbody>
+				{% for md in metadatas %}
+				<tr>
+					<td>{{ md['name'] }}</td>
+					<td>{{ md['sourceFeeder'] }}</td>
+					<td>{{ md['climate'] }}</td>
+					<td>{{ md['runTime'] }}</td>
+					<td class="{{ md['status'] }}">{{ md['status'] }}</td>
+					<td>
+						<div class='buttonGroup'>
+							<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
+							<ul class='menu'>
+								{% if md['status'] == 'postRun' %}<li><a href='/viewReports/{{ md["name"] }}'>View Reports</a></li>{% endif %}
+								{% if md['status'] == 'preRun' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/run/",dict)')>Run</a></li>{% endif %}
+								{% if md['status'] == 'postRun' or md['status'] == 'terminated' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/reRun/",dict)'>Re-Run</a></li>{% endif %}
+								{% if md['status'] != 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/",dict)'>Delete</a></li>{% endif %}
+								{% if md['status'] == 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/",dict)'>Terminate</a></li>{% endif %}
+								<li><a href='/newAnalysis/{{ md["name"] }}'>Duplicate</a></li>
+							</ul>
+						</div>
+					</td>
+				</tr>
+				{% endfor %}
+			</tbody>
 		</table>
 	</div>
 	<div class='content'><a href='/newAnalysis/'>New Analysis</a></div>
