@@ -22,6 +22,7 @@
   button.deleteButton {width:auto; float:right; background-color: #CC0000; color:white;}
   button.deleteButton:hover {background: #FF0000;}
   #selected {border:1px solid black; border-bottom:0px;position:absolute;top:90pt;left:4pt;width:20%;}
+  .noSelection {border:none !important;}
   #selHead tr td {background:black; color:white;}
   #selected td {padding:5px; border-bottom:1px solid black; background:white; color:black}
   .leftToolbar {float:left; margin-right:5px !important;}
@@ -119,7 +120,7 @@
     </ul>
   </div>
 </div>
-<table id='selected'>
+<table id='selected' class='noSelection'>
   <thead id='selHead'>
   </thead>
   <tbody id='selBody'>
@@ -305,6 +306,8 @@ function classify(d, c, on) {
 }
 
 function onCompClick(d, i) {
+  // Start showing the table.
+  gebi('selected').className = ''
   // Abort if we try to select a parentChild relationship.
   if (d.objectType == 'parentChild') return false
   // Multiselection case handled first:

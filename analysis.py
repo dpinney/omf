@@ -108,7 +108,7 @@ def run(analysisName):
 	metadata = getMetadata(analysisName)
 	if metadata['status'] != 'terminated':
 		endTime = dt.datetime.now()
-		metadata['runTime'] = (endTime - startTime).total_seconds()
+		metadata['runTime'] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 		metadata['status'] = 'postRun'
 		putMetadata(analysisName, metadata)
 
