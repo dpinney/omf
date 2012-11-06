@@ -191,11 +191,12 @@ def attachRecorders(tree, recorderType, keyToJoin, valueToJoin, sample=False):
 	# HACK: the biggestKey assumption only works for a flat tree or one that has a flat node for the last item...
 	biggestKey = int(sorted(tree.keys())[-1]) + 1
 	# Types of recorders we can attach:
-	recorders = {	'Regulator':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'Regulator_Y.csv', 'property': 'tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag'},
-					'Voltage':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'Voltage_Y.csv', 'property': 'voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag'},
-					'Capacitor':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'Capacitor_Y.csv', 'property': 'switchA,switchB,switchC'},
-					'CollectorVoltage':{'interval': '1', 'object': 'collector', 'limit': '0', 'file': 'VoltageJiggle.csv', 'group': 'class=triplex_meter', 'property':'min(voltage_12.mag),mean(voltage_12.mag),max(voltage_12.mag),std(voltage_12.mag)'},
-					'Climate':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'climate.csv', 'property': 'temperature, solar_direct, wind_speed, rainfall, snowdepth'},
+	recorders = {	'Regulator':{'interval':'1', 'parent':'X', 'object':'recorder', 'limit':'0', 'file':'Regulator_Y.csv', 'property':'tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag'},
+					'Voltage':{'interval':'1', 'parent':'X', 'object':'recorder', 'limit':'0', 'file':'Voltage_Y.csv', 'property':'voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag'},
+					'Capacitor':{'interval':'1', 'parent':'X', 'object':'recorder', 'limit':'0', 'file':'Capacitor_Y.csv', 'property':'switchA,switchB,switchC'},
+					'Climate':{'interval':'1', 'parent':'X', 'object':'recorder', 'limit':'0', 'file':'climate.csv', 'property':'temperature, solar_direct, wind_speed, rainfall, snowdepth'},
+					'Inverter':{'interval':'1', 'parent':'X', 'object':'recorder', 'limit':'0', 'file':'inverter_Y.csv', 'property':'power_A,power_B,power_C'},
+					'CollectorVoltage':{'interval':'1', 'object':'collector', 'limit':'0', 'file':'VoltageJiggle.csv', 'group':'class=triplex_meter', 'property':'min(voltage_12.mag),mean(voltage_12.mag),max(voltage_12.mag),std(voltage_12.mag)'},
 					'OverheadLosses':{'group':'class=overhead_line', 'interval':'1', 'object':'collector', 'limit':'0', 'file':'OverheadLosses.csv', 'property':'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'},
 					'UndergroundLosses':{'group':'class=underground_line', 'interval':'1', 'object':'collector', 'limit':'0', 'file':'UndergroundLosses.csv', 'property':'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'},
 					'TriplexLosses':{'group':'class=triplex_line', 'interval':'1', 'object':'collector', 'limit':'0', 'file':'TriplexLosses.csv', 'property':'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'},
@@ -203,9 +204,14 @@ def attachRecorders(tree, recorderType, keyToJoin, valueToJoin, sample=False):
 				}
 	# If the recorder doesn't have a parent don't walk the tree:
 	if 'parent' not in recorders[recorderType]:
-		newLeaf = copy.copy(recorders[recorderType])
-		tree[biggestKey] = newLeaf
-		biggestKey += 1
+		# What class of objects are we trying to attach to?
+		objectSet = set([tree[x]['object'] for x in tree.keys() if 'object' in tree[x]])
+		groupClass = recorders[recorderType]['group'][6:]
+		# Only attach if the right objects are there: 
+		if groupClass in objectSet:
+			newLeaf = copy.copy(recorders[recorderType])
+			tree[biggestKey] = newLeaf
+			biggestKey += 1
 	# Walk the tree. Don't worry about a recursive walk (yet).
 	staticTree = copy.copy(tree)
 	for key in staticTree:
@@ -213,7 +219,7 @@ def attachRecorders(tree, recorderType, keyToJoin, valueToJoin, sample=False):
 		if keyToJoin in leaf and 'name' in leaf:
 			parentObject = leaf['name']
 			if leaf[keyToJoin] == valueToJoin:
-				# DEBUG: print 'just joined ' + parentObject
+				# DEBUG:print 'just joined ' + parentObject
 				newLeaf = copy.copy(recorders[recorderType])
 				newLeaf['parent'] = parentObject
 				newLeaf['file'] = recorderType + '_' + parentObject + '.csv'
@@ -238,7 +244,7 @@ def groupSwingKids(tree):
 				swingTypes += [leaf['object']]
 	# attach the collector:
 	biggestKey = int(sorted(tree.keys())[-1]) + 1
-	collector = {'interval': '1', 'object': 'collector', 'limit': '0', 'group': 'X', 'file': 'Y', 'property': 'sum(power_in.real),sum(power_in.imag)'}
+	collector = {'interval':'1', 'object':'collector', 'limit':'0', 'group':'X', 'file':'Y', 'property':'sum(power_in.real),sum(power_in.imag)'}
 	for obType in swingTypes:
 		insert = copy.copy(collector)
 		insert['group'] = 'class=' + obType + ' AND groupid=swingKids'
@@ -247,34 +253,40 @@ def groupSwingKids(tree):
 		biggestKey += 1
 
 
+def main():
+	# Here we do the tests.
+	#Parser Test
+	# tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
+	# simpleTokens = tokenizeGlm('./feeders/13 Node Ref Feeder Flat/main.glm')
+	# print parseTokenList(simpleTokens)
 
-##Parser Test
-# tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
-# simpleTokens = tokenizeGlm('testglms/Simple_System.glm')
-# print parseTokenList(simpleTokens)
+	#Recorder Attachment Test
+	tree = parse('./feeders/Simple Market System/main.glm')
+	attachRecorders(tree, 'Regulator', 'object', 'regulator')
+	attachRecorders(tree, 'Voltage', 'object', 'node')
+	from pprint import pprint
+	pprint([tree[x]['object'] for x in tree.keys() if 'object' in tree[x]])
 
-##Recorder Attachment Test
-# tree = parse('./feeders/Simple Market System/main.glm')
-# attachRecorders(tree, 'Regulator', 'object', 'regulator')
-# attachRecorders(tree, 'Voltage', 'object', 'node')
-# from pprint import pprint
-# pprint(tree)
+	# # Testing The De-Embedding
+	# from pprint import pprint
+	# tree = parse('./feeders/13 Node Reference Feeder/main.glm')
+	# fullyDeEmbed(tree)
+	# #pprint(tree)
+	# print sortedWrite(tree)
 
-## Testing The De-Embedding
-# from pprint import pprint
-# tree = parse('./feeders/13 Node Reference Feeder/main.glm')
-# fullyDeEmbed(tree)
-# #pprint(tree)
-# print sortedWrite(tree)
+	# # groupSwingKids test
+	# from pprint import pprint
+	# tree = parse('./feeders/13 Node Ref Feeder Flat/main.glm')
+	# groupSwingKids(tree)
+	# pprint(tree)
 
-# groupSwingKids test
-# from pprint import pprint
-# tree = parse('./feeders/13 Node Ref Feeder Flat/main.glm')
-# groupSwingKids(tree)
-# pprint(tree)
+	# # Time Adjustment Test
+	# tree = parse('./feeders/Simple Market System/main.glm')
+	# adjustTime(tree, 100, 'hours', '2000-09-01')
+	# from pprint import pprint
+	# pprint(tree)
 
-## Time Adjustment Test
-# tree = parse('./feeders/Simple Market System/main.glm')
-# adjustTime(tree, 100, 'hours', '2000-09-01')
-# from pprint import pprint
-# pprint(tree)
+	pass
+
+if __name__ == '__main__':
+	main()

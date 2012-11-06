@@ -26,7 +26,6 @@ def outputHtml(analysisName):
 		powerToAdd = []
 		swingFileNames = [x for x in os.listdir(pathPrefix + '/studies/' + study) if x.startswith('SwingKids_') and x.endswith('.csv')]
 		for swingFile in swingFileNames:
-			# fullArray = __csvToArray__(pathPrefix + '/studies/' + study + '/' + swingFile)
 			fullArray = __util__.csvToArray(pathPrefix + '/studies/' + study + '/' + swingFile)
 			fullArray[0] = ['', str(study)]
 			fullArray[1:] = [[row[0],(-1 if row[1]<0 else 1)*math.sqrt(row[1]**2+row[2]**2)/1000] for row in fullArray[1:]]
