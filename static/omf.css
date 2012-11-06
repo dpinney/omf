@@ -13,6 +13,7 @@ div#logoBox a, a:visited {color:white;}
 
 div#title {	
 	overflow:hidden;
+	white-space: nowrap;
 	padding: 10px;
 	text-align:center;
 	font-size: 34pt;

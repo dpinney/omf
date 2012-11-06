@@ -194,8 +194,12 @@ def attachRecorders(tree, recorderType, keyToJoin, valueToJoin, sample=False):
 	recorders = {	'Regulator':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'Regulator_Y.csv', 'property': 'tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag'},
 					'Voltage':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'Voltage_Y.csv', 'property': 'voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag'},
 					'Capacitor':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'Capacitor_Y.csv', 'property': 'switchA,switchB,switchC'},
-					'CollectorVoltage':{'interval': '1', 'object': 'collector', 'limit': '0', 'file': 'VoltageJiggle.csv', 'group': 'class=triplex_meter', 'property':'min(voltage_12.mag),mean(voltage_12.mag),max(voltage_12.mag),std(voltage_12.mag)'},					'Climate':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'climate.csv', 'property': 'temperature, solar_direct, wind_speed, rainfall, snowdepth'},
-
+					'CollectorVoltage':{'interval': '1', 'object': 'collector', 'limit': '0', 'file': 'VoltageJiggle.csv', 'group': 'class=triplex_meter', 'property':'min(voltage_12.mag),mean(voltage_12.mag),max(voltage_12.mag),std(voltage_12.mag)'},
+					'Climate':{'interval': '1', 'parent': 'X', 'object': 'recorder', 'limit': '0', 'file': 'climate.csv', 'property': 'temperature, solar_direct, wind_speed, rainfall, snowdepth'},
+					'OverheadLosses':{'group':'class=overhead_line', 'interval':'1', 'object':'collector', 'limit':'0', 'file':'OverheadLosses.csv', 'property':'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'},
+					'UndergroundLosses':{'group':'class=underground_line', 'interval':'1', 'object':'collector', 'limit':'0', 'file':'UndergroundLosses.csv', 'property':'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'},
+					'TriplexLosses':{'group':'class=triplex_line', 'interval':'1', 'object':'collector', 'limit':'0', 'file':'TriplexLosses.csv', 'property':'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'},
+					'TransformerLosses':{'group':'class=transformer', 'interval':'1', 'object':'collector', 'limit':'0', 'file':'TransformerLosses.csv', 'property':'sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)'}
 				}
 	# If the recorder doesn't have a parent don't walk the tree:
 	if 'parent' not in recorders[recorderType]:
