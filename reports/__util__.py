@@ -36,9 +36,15 @@ def csvToArray(fileName):
 	return arrayNoHeaders
 
 def pyth(x,y):
-	''' helper function to compute the third side of the triangle'''
-	return math.sqrt(x**2 + y**2)
+	''' helper function to compute the third side of the triangle--BUT KEEP SIGNS THE SAME FOR DG '''
+	def sign(z):
+		return (-1 if z<0 else 1)
+	fullSign = sign(sign(x)*x*x + sign(y)*y*y)
+	return fullSign*math.sqrt(x*x + y*y)
 
 def flat1(aList):
 	''' Flatten one level. Go from e.g. [[1],[2],[3,4],[[5,6],[7,8]]] to [1,2,3,4,[5,6],[7,8]]'''
 	return list(itertools.chain(*aList))
+
+def vecSum(*args):
+	return map(sum,zip(*args))

@@ -51,6 +51,11 @@
 			chart = new google.visualization.Table(gebi(divName))
 			chart.draw(chartData, options)
 		}
+		function drawComboChart(dataArray, divName, options) {
+			chartData = google.visualization.arrayToDataTable(dataArray)
+			chart = new google.visualization.ComboChart(gebi(divName))
+			chart.draw(chartData, options)
+		}
 	</script>
 </head>
 <body>
