@@ -138,7 +138,7 @@ def outputHtml(analysisName):
 										thisRowCost = capacityCost + enerCost + capCost + omCost
 										NPV = baseCost - thisRowCost
 										daRow.querySelector('.NPV').innerHTML = NPV
-										daRow.querySelector('.costBen').innerHTML = thisRowCost/NPV
+										daRow.querySelector('.costBen').innerHTML = (thisRowCost/NPV).toPrecision(4)
 									}
 								}
 							}
