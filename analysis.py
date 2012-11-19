@@ -85,7 +85,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 
 def run(analysisName):
 	studyNames = os.listdir('analyses/' + analysisName + '/studies/')
-	# NOTE! We are running studies serially. We save RAM and lose time.
+	# NOTE! We are running studies serially. We use lower levels of RAM/CPU, potentially saving time if swapping were to occur.
 	# Update status to running.
 	metadata = getMetadata(analysisName)
 	metadata['status'] = 'running'

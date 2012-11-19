@@ -19,9 +19,11 @@ def outputHtml(analysisName):
 	# Put the title in:
 	outputBuffer = '<p class="reportTitle">Meter Powerflow</p><div id="meterPowerflowReport" class="tightContent" style="position:relative">'
 	# Build up the data:
-	dataTree = {}
 	pathPrefix = './analyses/' + analysisName
-	for study in os.listdir(pathPrefix + '/studies/'):
+	with open(pathPrefix + '/metadata.txt','r') as mdFile:
+		resolution = eval(mdFile.read())['simLengthUnits']
+	studies = os.listdir(pathPrefix + '/studies/')
+	for study in studies:
 		voltMatrix = []
 		powerMatrix = []
 		# Add the data from each recorder in this study:
@@ -32,11 +34,16 @@ def outputHtml(analysisName):
 				if voltMatrix == [] and powerMatrix == []:
 					voltMatrix = [[row[0]] for row in fullArray]
 					powerMatrix = [[row[0]] for row in fullArray]
-				# Now add a timeseries for each blahblahblah
+				# Now add a timeseries for each study:
 				voltMatrix[0] += [str(fileName.replace('.csv','').replace('meterRecorder_',''))]
 				voltMatrix[1:] = [voltMatrix[rowNum+1] + [math.sqrt(fullArray[rowNum+1][2]**2 + fullArray[rowNum+1][3]**2)/2] for rowNum in xrange(len(fullArray)-1)]
 				powerMatrix[0] += [str(fileName.replace('.csv','').replace('meterRecorder_',''))]
 				powerMatrix[1:] = [powerMatrix[rowNum+1] + [fullArray[rowNum+1][1]/1000] for rowNum in xrange(len(fullArray)-1)]
+		# Do day-level aggregation:
+		if 'days' == resolution:
+			# TODO: must do more than just maxes!!
+			voltMatrix = [voltMatrix[0]] + __util__.aggCsv(voltMatrix[1:], max, 'day')
+			powerMatrix  = [powerMatrix[0]] + __util__.aggCsv(powerMatrix[1:], max, 'day')
 		# Write one study's worth of HTML:
 		outputBuffer += '<div id="meterPowerflow' + study + '" class="studyContainer">'
 		outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'

@@ -35,6 +35,29 @@ def csvToArray(fileName):
 	# Drop the timestamp column:
 	return arrayNoHeaders
 
+def aggCsv(csvArray, listFuncOrFuncs, level):
+	''' Take a csv at the hour granularity, and aggregate to the day/month level '''
+	# Different substring depending on what level we aggregate to:
+	if level=='month':
+		endPos = 7
+	elif level=='day':
+		endPos = 10
+	# List of the dates we'll aggregate up to:
+	dateList = list(set([row[0][0:endPos] for row in csvArray]))
+	dateList.sort()
+	# for each date, calculate the listFuncOrFuncs of each column:
+	def aggDateGroup(date):
+		listMatr = [row for row in csvArray if row[0][0:endPos]==date]
+		transposedNoHeaders = [list(colRow) for colRow in zip(*listMatr)[1:]]
+		# If we've got a single listFunc, use that:
+		if hasattr(listFuncOrFuncs, '__call__'):
+			return map(listFuncOrFuncs, transposedNoHeaders)
+		# Or, if we have {1:fun, 2:fun2, etc.} apply one to each column:
+		elif hasattr(listFuncOrFuncs, 'keys'):
+			return [listFuncOrFuncs[rowNum](transposedNoHeaders[rowNum]) for rowNum in xrange(0,len(transposedNoHeaders))]
+	# find the aggregated version for each date item:
+	return [[date] + aggDateGroup(date) for date in dateList]
+
 def pyth(x,y):
 	''' helper function to compute the third side of the triangle--BUT KEEP SIGNS THE SAME FOR DG '''
 	def sign(z):

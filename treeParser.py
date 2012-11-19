@@ -125,7 +125,7 @@ def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 		interval = 3600
 	elif simLengthUnits == 'days':
 		lengthInSeconds = 86400 * simLength
-		interval = 86400
+		interval = 3600
 
 	starttime = datetime.datetime.strptime(simStartDate, '%Y-%m-%d')
 	stoptime = starttime + datetime.timedelta(seconds=lengthInSeconds)

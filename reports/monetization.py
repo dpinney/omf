@@ -54,10 +54,13 @@ def outputHtml(analysisName):
 	opAndMaintCost = float(reportOptions['opAndMaintCost'])
 	# Find the interval size (in seconds):
 	with open(pathPrefix + '/studies/' + studies[0] + '/main.glm') as testGlm:
+		# TODO: clean up this hack. Just convert the metadata units value.
 		glmContent = testGlm.read()
 		intervalText = re.findall('interval\s+(\d+)', glmContent)
 		if [] != intervalText:
 			interval = float(intervalText[0])
+	with open(pathPrefix + '/metadata.txt','r') as mdFile:
+		resolution = eval(mdFile.read())['simLengthUnits']
 	# Insert the metrics table framework.
 	outputBuffer += '<div id="additionalMetrics" style="position:absolute;top:410px;left:0px;width:1000px;height:190px;overflow-y:auto;overflow-x:hidden">'
 	outputBuffer += '<div style="width:1000px;height:40px;padding:0px 5px 0px 5px">Co-op Energy Rate ($/kWh) <input id="distrEnergyRate" value="' + str(distrEnergyRate) + '"/> Capacity Rate ($/kW) <input id="distrCapacityRate" value="' + str(distrCapacityRate) + '"/> <button style="width:100px" onclick="recalculateCostBenefit()">Recalculate</button></div>'
@@ -94,6 +97,11 @@ def outputHtml(analysisName):
 	# Get the energy data from the power data:
 	energyTimeSeries = copy(powerTimeSeries)
 	energyTimeSeries[1:] = [[row[0]] + map(lambda x:x*interval/3600.0, row[1:]) for row in energyTimeSeries[1:]]	
+	# Do day-level aggregation if necessary:
+	if 'days' == resolution:
+		# TODO: must do more than just maxes!!
+		powerTimeSeries = [powerTimeSeries[0]] + __util__.aggCsv(powerTimeSeries[1:], max, 'day')
+		energyTimeSeries  = [energyTimeSeries[0]] + __util__.aggCsv(energyTimeSeries[1:], lambda x:sum(x)/len(x), 'day')
 	# Monetize stuff, then get per-study totals:
 	monetizedPower = [powerTimeSeries[0]] + processMonths(powerTimeSeries[1:], lambda x:max(x)/len(x)*distrCapacityRate)
 	monetizedEnergy = [energyTimeSeries[0]] + processMonths(energyTimeSeries[1:], lambda x:sum(x)/len(x)*distrEnergyRate)

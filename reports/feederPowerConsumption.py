@@ -3,7 +3,7 @@
 import os
 import re
 import math
-import __util__
+import __util__ as util
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 configHtmlTemplate = "<div id='REMOVALID' class='content feederPowerConsumption'><a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>feederPowerConsumption</td></tr></table></div>"
@@ -22,6 +22,9 @@ def outputHtml(analysisName):
 			interval = float(intervalText[0])
 		else:
 			interval = 0.0
+	# Figure out the stated resolution (can be different than interval):
+	with open('./analyses/' + analysisName + '/metadata.txt','r') as mdFile:
+		resolution = eval(mdFile.read())['simLengthUnits']
 	# Collect the power stats:
 	powerTimeSeries = []
 	energyTotals = [['Study Name','Energy Used']]
@@ -29,9 +32,12 @@ def outputHtml(analysisName):
 		powerToAdd = []
 		swingFileNames = [x for x in os.listdir(pathPrefix + study) if x.startswith('SwingKids_') and x.endswith('.csv')]
 		for swingFile in swingFileNames:
-			fullArray = __util__.csvToArray(pathPrefix + study + '/' + swingFile)
-			fullArray[0] = ['', str(study)]
+			fullArray = util.csvToArray(pathPrefix + study + '/' + swingFile)
+			fullArray[0] = ['Timestamp', str(study)]
 			fullArray[1:] = [[row[0],(-1 if row[1]<0 else 1)*math.sqrt(row[1]**2+row[2]**2)/1000] for row in fullArray[1:]]
+			if 'days' == resolution:
+				# Aggregate to the day level and max power:
+				fullArray = [fullArray[0]] + util.aggCsv(fullArray[1:], max, 'day')
 			if [] == powerToAdd:
 				powerToAdd = fullArray
 			else: 
@@ -44,11 +50,11 @@ def outputHtml(analysisName):
 	# Collect the energy stats
 	def totalEnergy(studyName, isRelevantFile, isSinglePhaseNotThree):
 		def sumEnergy(lossOrGenFilePath, isSinglePhaseNotThree):
-			fullData = __util__.csvToArray(lossOrGenFilePath)
+			fullData = util.csvToArray(lossOrGenFilePath)
 			if isSinglePhaseNotThree:
-				apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],__util__.pyth(r[1],r[2])/1000] for r in fullData[1:]]
+				apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],util.pyth(r[1],r[2])/1000] for r in fullData[1:]]
 			else:
-				apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],(__util__.pyth(r[1],r[2])+__util__.pyth(r[3],r[4])+__util__.pyth(r[5],r[6]))/1000] for r in fullData[1:]]
+				apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],(util.pyth(r[1],r[2])+util.pyth(r[3],r[4])+util.pyth(r[5],r[6]))/1000] for r in fullData[1:]]
 			totalEnergyKwh = sum([interval * row[1] / 3600.0 for row in apparentPower[1:]])
 			return totalEnergyKwh
 		studyPrefix = pathPrefix + studyName + '/'
@@ -60,7 +66,7 @@ def outputHtml(analysisName):
 	substation = map(lambda x:totalEnergy(x, lambda y:y.startswith('SwingKids_'), True), studies)
 	energyMatrix = [['#'] + map(str,studies),
 					['DG'] + distGen,
-					['Loads'] + __util__.vecSum(substation, distGen, [x*-1 for x in losses]),
+					['Loads'] + util.vecSum(substation, distGen, [x*-1 for x in losses]),
 					['Losses'] + losses]
 	energyTotals = [list(r) for r in zip(*energyMatrix)]
 	# Add the power time series graph:

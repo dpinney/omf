@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 
 import os
-import __util__
+import __util__ as util
 from pprint import pprint
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
@@ -19,9 +19,17 @@ def outputHtml(analysisName):
 	# Put the title in:
 	outputBuffer = '<p class="reportTitle">Climate</p><div id="climateReport" class="tightContent" style="position:relative">'
 	pathPrefix = './analyses/' + analysisName
+	with open(pathPrefix + '/metadata.txt','r') as mdFile:
+		resolution = eval(mdFile.read())['simLengthUnits']
 	for study in os.listdir(pathPrefix + '/studies/'):
 		climateFiles = [x for x in os.listdir(pathPrefix + '/studies/' + study) if x.startswith('Climate_')]
-		fullArray = __util__.csvToArray(pathPrefix + '/studies/' + study + '/' + climateFiles[0])
+		fullArray = util.csvToArray(pathPrefix + '/studies/' + study + '/' + climateFiles[0])		
+		fullArray[0] = ['Timestamp','Temperature (dF)','D.Insolation (W/m^2)', 'Wind Speed', 'Rainfall (in/h)', 'Snow Depth (in)']
+		if 'days' == resolution:
+			# Aggregate to the day level, maxing climate but averaging insolation, summing rain:
+			funs = {0:max, 1:lambda x:sum(x)/len(x), 2:max, 3:sum, 4:max}
+			fullArray = [fullArray[0]] + util.aggCsv(fullArray[1:], funs, 'day')
+			fullArray[0] = ['Timestamp','Max Temp (dF)','Avg Insol (W/m^2)', 'Max Wind Speed', 'Rainfall (in/h)', 'Max Snow Depth (in)']
 		# Write one study's worth of HTML:
 		outputBuffer += '<div id="climateStudy' + study + '" class="studyContainer">'
 		outputBuffer += '<div id="climateChartDiv' + study + '" style="height:250px"></div>'
@@ -40,7 +48,5 @@ def modifyStudy(analysisName):
 
 source info:
 http://www.gridlabd.org/documents/doxygen/latest_dev/climate_8h-source.html
-
-
 
 '''
