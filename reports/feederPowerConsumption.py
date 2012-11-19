@@ -49,6 +49,7 @@ def outputHtml(analysisName):
 			powerTimeSeries = [powerTimeSeries[rowNum] + [powerToAdd[rowNum][1]] for rowNum in xrange(len(powerTimeSeries))]
 	# Collect the energy stats
 	def totalEnergy(studyName, isRelevantFile, isSinglePhaseNotThree):
+		# Helper function for one file:
 		def sumEnergy(lossOrGenFilePath, isSinglePhaseNotThree):
 			fullData = util.csvToArray(lossOrGenFilePath)
 			if isSinglePhaseNotThree:
@@ -57,6 +58,7 @@ def outputHtml(analysisName):
 				apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],(util.pyth(r[1],r[2])+util.pyth(r[3],r[4])+util.pyth(r[5],r[6]))/1000] for r in fullData[1:]]
 			totalEnergyKwh = sum([interval * row[1] / 3600.0 for row in apparentPower[1:]])
 			return totalEnergyKwh
+		# Sum energy over all files for a given study:
 		studyPrefix = pathPrefix + studyName + '/'
 		lossesFiles = [x for x in os.listdir(studyPrefix) if isRelevantFile(x)]
 		energies = map(lambda x:sumEnergy(studyPrefix + x, isSinglePhaseNotThree), lossesFiles)
@@ -70,10 +72,10 @@ def outputHtml(analysisName):
 					['Losses'] + losses]
 	energyTotals = [list(r) for r in zip(*energyMatrix)]
 	# Add the power time series graph:
-	powerGraphOptions = "{vAxis:{title:'Power (kW)'}, chartArea:{left:60, top:20, width:'90%', height:'80%'}, hAxis:{title:'Time', textPosition:'none'}, colors:['red','darkred','salmon'], legend:{position:'top'}}"
+	powerGraphOptions = "{vAxis:{title:'Power (kW)'}, chartArea:{left:60, top:20, width:'93%', height:'80%'}, hAxis:{title:'Time', textPosition:'none'}, colors:['red','darkred','salmon'], legend:{position:'top'}}"
 	outputBuffer += "<div id='powerTimeSeries'><script>drawLineChart(" + str(powerTimeSeries) + ",'powerTimeSeries'," + powerGraphOptions + ")</script></div>"
 	# Add the energy graph:
-	energyGraphOptions = "{chartArea:{left:60,top:20,width:'90%', height:'80%'}, vAxis:{title:'Energy (kWh)'}, isStacked:true, series:{0:{type:'bars'}, 1:{type:'steppedArea'}, 2:{type:'steppedArea'}},colors:['seagreen','darkorange','orangered'], legend:'none', areaOpacity:0.7, bar:{groupWidth:'30%'}}"
+	energyGraphOptions = "{chartArea:{left:60,top:20,width:'93%', height:'80%'}, vAxis:{title:'Energy (kWh)'}, isStacked:true, series:{0:{type:'bars'}, 1:{type:'steppedArea'}, 2:{type:'steppedArea'}},colors:['seagreen','darkorange','orangered'], legend:'none', areaOpacity:0.7, bar:{groupWidth:'30%'}}"
 	outputBuffer += "<div id='energyBalance'><script>drawComboChart(" + str(energyTotals) + ",'energyBalance'," + energyGraphOptions + ")</script></div>"
 	return outputBuffer + "</div>"
 

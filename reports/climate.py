@@ -48,7 +48,7 @@ def outputHtml(analysisName):
 		outputBuffer += '<div id="climateChartDiv' + study + '" style="height:250px"></div>'
 		if True == title:
 			outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
-		graphOptions = "{chartArea:{left:60,top:20,height:'80%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['dimgray','darkgray','darkgray','gainsboro','gainsboro']}"
+		graphOptions = "{chartArea:{left:60,top:20,height:'80%', width:'93%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['dimgray','darkgray','darkgray','gainsboro','gainsboro'],legend:{position:'top'}}"
 		outputBuffer += "<script>drawLineChart(" + str(fullArray) + ",'" + 'climateChartDiv' + str(study) + "'," + graphOptions + ")</script>"
 		outputBuffer += '</div>'
 	return outputBuffer + '</div>'

@@ -48,11 +48,11 @@ def outputHtml(analysisName):
 		outputBuffer += '<div id="meterPowerflow' + study + '" class="studyContainer">'
 		outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
 		outputBuffer += '<div id="meterPowerChart' + study + '" style="height:150px"></div>'
-		powerGraphOptions = "{vAxis:{title:'Load (kW)'}, chartArea:{left:60,top:20,height:'70%',width:'90%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['red','darkred','salmon'], legend:{position:'top'}}"
+		powerGraphOptions = "{vAxis:{title:'Load (kW)'}, chartArea:{left:60,top:20,height:'70%',width:'93%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['red','darkred','salmon'], legend:{position:'top'}}"
 		outputBuffer += "<script>drawLineChart(" + str(powerMatrix) + ",'" + 'meterPowerChart' + str(study) + "'," + powerGraphOptions + ")</script>"
 		#TODO: throw some voltage on there. 
 		outputBuffer += '<div id="meterVoltChart' + study + '" style="height:150px"></div>'
-		voltGraphOptions = "{vAxis:{title:'Voltage (V)'}, chartArea:{left:60,top:20,height:'70%',width:'90%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['lightblue','blue','darkblue'], legend:{position:'top'}}"
+		voltGraphOptions = "{vAxis:{title:'Voltage (V)'}, chartArea:{left:60,top:20,height:'70%',width:'93%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['lightblue','blue','darkblue'], legend:{position:'top'}}"
 		outputBuffer += "<script>drawLineChart(" + str(voltMatrix) + ",'" + 'meterVoltChart' + str(study) + "'," + voltGraphOptions + ")</script>"
 		outputBuffer += '</div>'
 	return outputBuffer + '</div>'

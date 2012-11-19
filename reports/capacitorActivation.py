@@ -25,7 +25,7 @@ def outputHtml(analysisName):
 				# Aggregate to the day level, averaging to percentage charging:
 				fullArray = [fullArray[0]] + util.aggCsv(fullArray[1:], lambda x:sum(x)/len(x), 'day')
 			outputBuffer += '<div id="chartDiv' + study + cap + '" class="capChart" style="height:90px"></div>'
-			chartOptions = '{chartArea:{left:60,top:15,height:60}, hAxis:{title:"Time",textPosition:"none"}, vAxis:{title:"On/Off", gridlines:{count:2}}, colors:["gainsboro","silver","gray"]}'
+			chartOptions = '{chartArea:{left:60,top:20,height:60,width:"93%",height:"70%"}, hAxis:{title:"Time",textPosition:"none"}, vAxis:{title:"On/Off", gridlines:{count:2}}, colors:["gainsboro","silver","gray"], legend:{position:"top"}}'
 			outputBuffer += '<script>drawAreaChart(' + str(fullArray) + ',' + '"chartDiv' + study + cap + '",' + chartOptions + ')</script>'
 		outputBuffer += '</div>'
 	return outputBuffer + '</div>'
