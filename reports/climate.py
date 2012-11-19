@@ -18,10 +18,23 @@ configHtmlTemplate = '''<div id='REMOVALID' class='content'>
 def outputHtml(analysisName):
 	# Put the title in:
 	outputBuffer = '<p class="reportTitle">Climate</p><div id="climateReport" class="tightContent" style="position:relative">'
+	# Collect study variables:
 	pathPrefix = './analyses/' + analysisName
 	with open(pathPrefix + '/metadata.txt','r') as mdFile:
 		resolution = eval(mdFile.read())['simLengthUnits']
-	for study in os.listdir(pathPrefix + '/studies/'):
+	studies = os.listdir(pathPrefix + '/studies/')
+	# If we have more than one study, just show one climate:
+	def fileSlurp(fileName):
+		with open(fileName,'r') as openFile:
+			return openFile.read()
+	metadatas = map(lambda x:fileSlurp(pathPrefix + '/studies/' + x + '/metadata.txt'), studies)
+	climates = set(map(lambda x:eval(x)['climate'], metadatas))
+	title = True
+	if 1 == len(climates):
+		studies = [studies[0]]
+		title = False
+	# Turn each study into graphics:
+	for study in studies:
 		climateFiles = [x for x in os.listdir(pathPrefix + '/studies/' + study) if x.startswith('Climate_')]
 		fullArray = util.csvToArray(pathPrefix + '/studies/' + study + '/' + climateFiles[0])		
 		fullArray[0] = ['Timestamp','Temperature (dF)','D.Insolation (W/m^2)', 'Wind Speed', 'Rainfall (in/h)', 'Snow Depth (in)']
@@ -33,7 +46,8 @@ def outputHtml(analysisName):
 		# Write one study's worth of HTML:
 		outputBuffer += '<div id="climateStudy' + study + '" class="studyContainer">'
 		outputBuffer += '<div id="climateChartDiv' + study + '" style="height:250px"></div>'
-		outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
+		if True == title:
+			outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
 		graphOptions = "{chartArea:{left:60,top:20,height:'80%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['dimgray','darkgray','darkgray','gainsboro','gainsboro']}"
 		outputBuffer += "<script>drawLineChart(" + str(fullArray) + ",'" + 'climateChartDiv' + str(study) + "'," + graphOptions + ")</script>"
 		outputBuffer += '</div>'
@@ -42,6 +56,15 @@ def outputHtml(analysisName):
 def modifyStudy(analysisName):
 	pass
 	#TODO: implement if needed.
+
+def main():
+	# tests go here.
+	os.chdir('..')
+	outputHtml('SolarTrio')
+
+
+if __name__ == '__main__':
+	main()
 
 
 '''
