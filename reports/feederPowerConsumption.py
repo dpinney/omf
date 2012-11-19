@@ -82,8 +82,10 @@ def modifyStudy(analysisName):
 	#TODO: implement if needed.
 
 def main():
-	# Tests go here.
-	pass
+	# Tests go here!
+	os.chdir('..')
+	os.listdir('.')
+	print outputHtml('Loss Test')
 
 if __name__ == '__main__':
 	main()
