@@ -254,18 +254,17 @@ def groupSwingKids(tree):
 
 
 def main():
-	# Here we do the tests.
+	''' Here we do the tests. '''
 	#Parser Test
 	# tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
 	# simpleTokens = tokenizeGlm('./feeders/13 Node Ref Feeder Flat/main.glm')
 	# print parseTokenList(simpleTokens)
 
 	#Recorder Attachment Test
-	tree = parse('./feeders/Simple Market System/main.glm')
+	tree = parse('./feeders/PNNL Taxonomy Feeder 1/main.glm')
 	attachRecorders(tree, 'Regulator', 'object', 'regulator')
 	attachRecorders(tree, 'Voltage', 'object', 'node')
-	from pprint import pprint
-	pprint([tree[x]['object'] for x in tree.keys() if 'object' in tree[x]])
+	print 'All the objects: ' + str([tree[x]['object'] for x in tree.keys() if 'object' in tree[x]])
 
 	# # Testing The De-Embedding
 	# from pprint import pprint

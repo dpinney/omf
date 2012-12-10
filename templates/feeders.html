@@ -1,0 +1,35 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset='utf-8'>
+	<link rel='stylesheet' href='../static/omf.css'/>
+	<script type='text/javascript' src='../static/omf.js'></script>
+	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
+	<style>
+		table#homeTable {width:100%; text-align:left;}
+		td {border-bottom:1px dashed gray;}
+		tr:last-child td {border-bottom:none;}
+	</style>
+	<script>
+		outerBody = document.body
+	</script>
+</head>
+<body>
+	<div id='title'>
+		<div id='logoBox'><a href='/'>▦</a></div>
+		<!--Title:-->All Feeders
+	</div>
+	<div class='content'>
+		<table id='homeTable'>
+			<tr><thead><th>Name</th><th>Size</th></thead>
+			<tbody>
+				{% for feed in feeders %}
+				<tr>
+					<td>{{ feed['name'] }}</td>
+					<td>{{ feed['size'] }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+	</div>
+	<div class='content'><a href='#'>Import Feeder</a></div>
+</body>

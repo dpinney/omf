@@ -159,7 +159,6 @@ def runtimeEstimate(anaSpec):
 
 def main():
 	delete('chicken')
-	#create(analysisName='chicken',tmy2name='AK-ANCHORAGE.tmy2', feederName='Simple Market System', simLength='24')
 	create({'analysisName':'chicken', 'tmy2name':'AK-ANCHORAGE.tmy2', 'feederName':'13 Node Reference Feeder', 'simLength':'24', 'simLengthUnits':'minutes'})
 	print getMetadata('chicken')
 	run('chicken')
