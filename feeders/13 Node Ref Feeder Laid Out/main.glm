@@ -545,8 +545,8 @@ capacitor_B 0.10 MVAr;
 capacitor_C 0.10 MVAr;
 capacitor_A 0.10 MVAr;
 time_delay 300.0;
-pt_phase ABCN;
 nominal_voltage 2401.7771;
+voltage_set_high 2350.0;
 voltage_set_low 2340.0;
 switchC CLOSED;
 control_level INDIVIDUAL;
@@ -554,7 +554,7 @@ switchA CLOSED;
 switchB CLOSED;
 phases_connected ABCN;
 dwell_time 0.0;
-voltage_set_high 2350.0;
+pt_phase ABCN;
 };
 
 object capacitor {
@@ -566,8 +566,8 @@ capacitor_B 0.05 MVAr;
 capacitor_C 0.05 MVAr;
 capacitor_A 0.05 MVAr;
 time_delay 300.0;
-pt_phase ABCN;
 nominal_voltage 2401.7771;
+voltage_set_high 2300.0;
 voltage_set_low 2150.0;
 switchC CLOSED;
 control_level INDIVIDUAL;
@@ -575,7 +575,7 @@ switchA CLOSED;
 switchB CLOSED;
 phases_connected ABCN;
 dwell_time 0.0;
-voltage_set_high 2300.0;
+pt_phase ABCN;
 };
 
 object triplex_line_configuration {

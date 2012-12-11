@@ -115,30 +115,27 @@ def terminate():
 
 @app.route('/api/models/<model_id>.json')
 def api_model(model_id):
-	#check file system or check for GLM file
-	if model_id+'.json' in os.listdir('./json'):
-		in_file = file('./json/' + model_id + '.json', 'r')
-		as_json = in_file.read()
-		return as_json
+	# check for JSON model:
+	if 'main.json' in os.listdir('./feeders/' + model_id):
+		with open('./feeders/' + model_id + '/main.json') as jsonFile:
+			return jsonFile.read()
 	elif model_id in os.listdir('./feeders'):
+		# Grab data from filesystem:
 		tree = tp.parse('./feeders/' + model_id + '/main.glm')
 		filesAvailable = os.listdir('./feeders/' + model_id)
 		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[]}
-		# grab all the layout nodes, links, etc.
-		for fileName in filesAvailable:
-			if fileName.endswith('.json'):
-				with open('./feeders/' + model_id + '/' + fileName) as openFile:
-					outDict[fileName[0:-5]] = json.loads(openFile.read())
 		# cache the file for later
 		jsonLoad = json.dumps(outDict, indent=4)
-		with open('./json/' + model_id + '.json', 'w') as out:
-			out.write(jsonLoad)
+		with open('./feeders/' + model_id + '/main.json', 'w') as jsonOut:
+			jsonOut.write(jsonLoad)
 		return jsonLoad
-	return ''
+	else:
+		# Failed to find the feeder:
+		return ''
 
 @app.route('/api/analysisModel/<anaName>/<study>')
 def analysisModel(anaName, study):
-	#check file system or check for GLM file
+	#just grab the GLM file:
 	if anaName in os.listdir('./analyses/') and study in os.listdir('./analyses/' + anaName + '/studies/'):
 		tree = tp.parse('./analyses/' + anaName + '/studies/' + study + '/main.glm')
 		filesAvailable = os.listdir('./analyses/' + anaName + '/studies/' + study)
@@ -173,23 +170,18 @@ def updateGlm():
 	allFeeders = os.listdir('./feeders/')
 	tree = json.loads(postData['tree'])
 	# Nodes and links are the information about how the feeder is layed out.
-	nodes = postData['nodes']
-	hiddenNodes = postData['hiddenNodes']
-	links = postData['links']
-	hiddenLinks = postData['hiddenLinks']
+	nodes = json.loads(postData['nodes'])
+	hiddenNodes = json.loads(postData['hiddenNodes'])
+	links = json.loads(postData['links'])
+	hiddenLinks = json.loads(postData['hiddenLinks'])
 	if newFeeder not in allFeeders:
 		# if we've created a new feeder, copy over the associated files:
 		shutil.copytree('./feeders/' + sourceFeeder,'./feeders/' + newFeeder)
-	else:
-		# else if we've saved an existing feeder we might need to blow away the cached json:
-		if newFeeder + '.json' in os.listdir('./json/'):
-			os.remove('./json/' + newFeeder + '.json')
-	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm, open('./feeders/' + newFeeder + '/nodes.json','w') as newNodes, open('./feeders/' + newFeeder + '/links.json','w') as newLinks, open('./feeders/' + newFeeder + '/hiddenNodes.json','w') as newHiddenNodes, open('./feeders/' + newFeeder + '/hiddenLinks.json','w') as newHiddenLinks:
+	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm, open('./feeders/' + newFeeder + '/main.json','w') as jsonCache:
 		newMainGlm.write(tp.sortedWrite(tree))
-		newNodes.write(nodes)
-		newHiddenNodes.write(hiddenNodes)
-		newLinks.write(links)
-		newHiddenLinks.write(hiddenLinks)
+		outDict = {'tree':tree, 'nodes':nodes, 'links':links, 'hiddenNodes':hiddenNodes, 'hiddenLinks':hiddenLinks}
+		jsonLoad = json.dumps(outDict, indent=4)
+		jsonCache.write(jsonLoad)
 	return flask.redirect(flask.url_for('newAnalysis'))
 
 @app.route('/runStatus/')
