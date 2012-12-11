@@ -116,13 +116,12 @@ def terminate():
 @app.route('/api/models/<model_id>.json')
 def api_model(model_id):
 	# check for JSON model:
-	if 'main.json' in os.listdir('./feeders/' + model_id):
+	if model_id in os.listdir('./feeders/') and 'main.json' in os.listdir('./feeders/' + model_id):
 		with open('./feeders/' + model_id + '/main.json') as jsonFile:
 			return jsonFile.read()
-	elif model_id in os.listdir('./feeders'):
+	elif model_id in os.listdir('./feeders/'):
 		# Grab data from filesystem:
 		tree = tp.parse('./feeders/' + model_id + '/main.glm')
-		filesAvailable = os.listdir('./feeders/' + model_id)
 		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[]}
 		# cache the file for later
 		jsonLoad = json.dumps(outDict, indent=4)
@@ -142,11 +141,13 @@ def analysisModel(anaName, study):
 		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[]}
 		# grab all the layout nodes, links, etc.
 		for fileName in filesAvailable:
-			if fileName.endswith('.json'):
+			if fileName.endswith('.json') and fileName != 'main.json':
 				with open('./analyses/' + anaName + '/studies/' + study + '/' + fileName) as openFile:
 					outDict[fileName[0:-5]] = json.loads(openFile.read())
 		# cache the file for later
 		jsonLoad = json.dumps(outDict, indent=4)
+		with open('./analyses/' + anaName + '/studies/' + study + '/main.json', 'w') as jsonCache:
+			jsonCache.write(jsonLoad)
 		return jsonLoad
 	else:
 		return ''
