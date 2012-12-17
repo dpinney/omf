@@ -28,12 +28,13 @@ class backgroundProc(multiprocessing.Process):
 def root():
 	browser = flask.request.user_agent.browser
 	analyses = analysis.listAll()
+	feeders = tp.listAll()
 	metadatas = [analysis.getMetadata(x) for x in analyses]
 	#DEBUG: print metadatas
 	if browser == 'msie':
 		return "The OMF currently must be accessed by Chrome, Firefox or Safari."
 	else:
-		return flask.render_template('home.html', metadatas=metadatas)
+		return flask.render_template('home.html', metadatas=metadatas, feeders=feeders)
 
 @app.route('/newAnalysis/')
 @app.route('/newAnalysis/<analysisName>')
@@ -134,8 +135,12 @@ def api_model(model_id):
 
 @app.route('/api/analysisModel/<anaName>/<study>')
 def analysisModel(anaName, study):
+	#check for a json model:
+	if anaName in os.listdir('./analyses/') and study in os.listdir('./analyses/' + anaName + '/studies/') and 'main.json' in os.listdir('./analyses/' + anaName + '/studies/' + study):
+		with open('./analyses/' + anaName + '/studies/' + study + '/main.json') as jsonFile:
+			return jsonFile.read()
 	#just grab the GLM file:
-	if anaName in os.listdir('./analyses/') and study in os.listdir('./analyses/' + anaName + '/studies/'):
+	elif anaName in os.listdir('./analyses/') and study in os.listdir('./analyses/' + anaName + '/studies/'):
 		tree = tp.parse('./analyses/' + anaName + '/studies/' + study + '/main.glm')
 		filesAvailable = os.listdir('./analyses/' + anaName + '/studies/' + study)
 		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[]}

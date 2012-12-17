@@ -2,23 +2,27 @@
 
 import datetime
 import copy
+import os
+import re
+
+def listAll():
+	return os.listdir('feeders')
 
 def tokenizeGlm(glmFileName):
-    import re
-    file = open(glmFileName)
-    data = file.read()
-    # Get rid of http for stylesheets because we don't need it and it conflicts with comment syntax.
-    data = re.sub(r'http:\/\/', '', data)  
-    # Strip comments.
-    data = re.sub(r'\/\/.*\n', '', data)
-    # TODO: If the .glm creator has been lax with semicolons, add them back.
-    # Also strip non-single whitespace because it's only for humans:
-    data = data.replace('\n','').replace('\r','').replace('\t',' ')
-    # Tokenize around semicolons, braces and whitespace.
-    tokenized = re.split(r'(;|\}|\{|\s)',data)
-    # Get rid of whitespace strings.
-    basicList = filter(lambda x:x!='' and x!=' ', tokenized)
-    return basicList
+	file = open(glmFileName)
+	data = file.read()
+	# Get rid of http for stylesheets because we don't need it and it conflicts with comment syntax.
+	data = re.sub(r'http:\/\/', '', data)  
+	# Strip comments.
+	data = re.sub(r'\/\/.*\n', '', data)
+	# TODO: If the .glm creator has been lax with semicolons, add them back.
+	# Also strip non-single whitespace because it's only for humans:
+	data = data.replace('\n','').replace('\r','').replace('\t',' ')
+	# Tokenize around semicolons, braces and whitespace.
+	tokenized = re.split(r'(;|\}|\{|\s)',data)
+	# Get rid of whitespace strings.
+	basicList = filter(lambda x:x!='' and x!=' ', tokenized)
+	return basicList
 
 def parseTokenList(tokenList):
 	# Tree variables.

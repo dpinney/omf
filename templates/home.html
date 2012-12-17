@@ -5,13 +5,21 @@
 	<script type='text/javascript' src='../static/omf.js'></script>
 	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
 	<style>
-		table#homeTable {width:100%; text-align:left;}
+		div#feeders {display:none;}
+		table#anaTable {width:100%; text-align:left;}
+		div#toolbar {padding:0px; height:40px; line-height:40px;} /*over-riding some toolbar defaults so tabs look good.*/
+		p.tab {width:90px;height:100%;display:inline-block; color:#303030;}
+		p.tabSelected {background:gray; color:white;}
 		td.running {color:red;}
 		td.preRun {color:orange;}
 		td.postRun {color:black;}
 		td.terminated {color:purple;}
 		td {border-bottom:1px dashed gray;}
 		tr:last-child td {border-bottom:none;}
+		table.importOptions {width:70%; text-align:left; margin-left:auto;}
+		table.importOptions tr td:first-child {width:40%;}
+		table.importOptions td {border-bottom: none}
+		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
 	</style>
 	<script>
 		outerBody = document.body
@@ -21,41 +29,99 @@
 		// 	back = ajaxReq('GET', '/runStatus/', false)
 		// 	console.log(back)
 		// }
+
+		function feedersClick() {
+			gebi('analyses').style.display = 'none'
+			gebi('feeders').style.display = 'inline'
+			gebi('analysesTab').className = 'tab'
+			gebi('feedersTab').className = 'tab tabSelected'
+		}
+
+		function analysesClick() {
+			gebi('analyses').style.display = 'inline'
+			gebi('feeders').style.display = 'none'
+			gebi('analysesTab').className = 'tab tabSelected'
+			gebi('feedersTab').className = 'tab'
+		}
+
 	</script>
 </head>
 <body>
 	<div id='title'>
 		<div id='logoBox'><a href='/'>▦</a></div>
-		<!--Title:-->All Analyses
+		<!--Title:-->Open Modeling Framework
 	</div>
-	<div class='content'>
-		<table id='homeTable'>
-			<tr><thead><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr></thead>
-			<tbody>
-				{% for md in metadatas %}
-				<tr>
-					<td>{{ md['name'] }}</td>
-					<td>{{ md['sourceFeeder'] }}</td>
-					<td>{{ md['climate'] }}</td>
-					<td>{{ md['runTime'] }}</td>
-					<td class="{{ md['status'] }}">{{ md['status'] }}</td>
-					<td>
-						<div class='buttonGroup'>
-							<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
-							<ul class='menu'>
-								{% if md['status'] == 'postRun' %}<li><a href='/viewReports/{{ md["name"] }}'>View Reports</a></li>{% endif %}
-								{% if md['status'] == 'preRun' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/run/",dict)')>Run</a></li>{% endif %}
-								{% if md['status'] == 'postRun' or md['status'] == 'terminated' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/reRun/",dict)'>Re-Run</a></li>{% endif %}
-								{% if md['status'] != 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/",dict)'>Delete</a></li>{% endif %}
-								{% if md['status'] == 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/",dict)'>Terminate</a></li>{% endif %}
-								<li><a href='/newAnalysis/{{ md["name"] }}'>Duplicate</a></li>
-							</ul>
-						</div>
-					</td>
-				</tr>
-				{% endfor %}
-			</tbody>
-		</table>
+	<div id='toolbar'>
+		<p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Analyses</p>
+		<p id='feedersTab' class='tab' style='' onclick='feedersClick()'>Feeders</p>
 	</div>
-	<div class='content'><a href='/newAnalysis/'>New Analysis</a></div>
+	<div id='analyses'>
+		<div class='content'>
+			<table id='anaTable'>
+				<tr><thead><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr></thead>
+				<tbody>
+					{% for md in metadatas %}
+					<tr>
+						<td>{{ md['name'] }}</td>
+						<td>{{ md['sourceFeeder'] }}</td>
+						<td>{{ md['climate'] }}</td>
+						<td>{{ md['runTime'] }}</td>
+						<td class="{{ md['status'] }}">{{ md['status'] }}</td>
+						<td>
+							<div class='buttonGroup'>
+								<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
+								<ul class='menu'>
+									{% if md['status'] == 'postRun' %}<li><a href='/viewReports/{{ md["name"] }}'>View Reports</a></li>{% endif %}
+									{% if md['status'] == 'preRun' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/run/",dict)')>Run</a></li>{% endif %}
+									{% if md['status'] == 'postRun' or md['status'] == 'terminated' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/reRun/",dict)'>Re-Run</a></li>{% endif %}
+									{% if md['status'] != 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/",dict)'>Delete</a></li>{% endif %}
+									{% if md['status'] == 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/",dict)'>Terminate</a></li>{% endif %}
+									<li><a href='/newAnalysis/{{ md["name"] }}'>Duplicate</a></li>
+								</ul>
+							</div>
+						</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		<div class='content'><a href='/newAnalysis/'>New Analysis</a></div>
+	</div>
+	<div id='feeders'>
+		<div class='content'>
+			<table id='anaTable'>
+				<tr><thead><th>Feeder Name</th></tr></thead>
+				<tbody>
+					{% for feed in feeders %}
+					<tr>
+						<td>{{ feed }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		<div class='content'>
+			<form action='/milsoftImport' enctype='multipart/form-data' method='post'>
+				<p style='font-weight:bold;float:left'>Milsoft Feeder Import</p>
+				<table class='importOptions'>
+					<tr>
+						<td>Feeder Name</td>
+						<td><input type='text' name='feederName'/></td>
+					</tr>
+					<tr>
+						<td>Feeder Data File (.std)</td>
+						<td><input type='file' name='stdFile'/></td>
+					</tr>
+					<tr>
+						<td>Equipment Database File (.seq)</td>
+						<td><input type='file' name='seqFile'/></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><input type='submit' value='Begin'/></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+	</div>
 </body>
