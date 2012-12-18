@@ -49,8 +49,22 @@ function dropPill(thisButton, name) {
 	document.body.addEventListener('click', clickCloseEvent, true)
 }
 
+function dropPillAndStay(thisButton, name) {
+	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
+	thisButton.innerHTML = name + ' ▴'
+	function clickCloseEvent() {
+		// Close the menu:
+		thisButton.nextSibling.nextSibling.style.display = 'none'
+		thisButton.innerHTML = name + ' ▾'
+		// Remove the event when it's fired once:
+		this.removeEventListener('click', arguments.callee, true)
+	}
+	// Add that function as a listener to take care of closing: 
+	thisButton.addEventListener('click', clickCloseEvent, true)
+}
+
 function gebi(id) {
-	// This shortens a much-used method name.
+	// Shorten a much-used method name:
 	return document.getElementById(id)
 }
 

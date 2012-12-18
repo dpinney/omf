@@ -19,6 +19,7 @@ solver_method FBS;
 NR_iteration_limit 50;
 };
 
+module generators;
 object climate {
 name Climate;
 interpolate QUADRATIC;

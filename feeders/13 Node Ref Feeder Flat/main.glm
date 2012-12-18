@@ -16,6 +16,7 @@ module residential {
 implicit_enduses NONE;
 };
 
+module generators;
 module powerflow {
 solver_method FBS;
 NR_iteration_limit 50;

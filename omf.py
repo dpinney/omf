@@ -10,6 +10,7 @@ import shutil
 import time
 import reports
 import lib
+from werkzeug import secure_filename
 
 app = flask.Flask(__name__)
 
@@ -192,12 +193,21 @@ def updateGlm():
 
 @app.route('/runStatus/')
 def runStatus():
+	''' Gives all analysis MD info. Useful for updating home.html automatically. '''
 	analyses = os.listdir('./analyses/')
 	outDict = {}
 	for ana in analyses:
 		md = analysis.getMetadata(ana)
 		outDict[ana] = md['status']
 	return json.dumps(outDict)
+
+@app.route('/milsoftImport/', methods=['POST'])
+def milsoftImport():
+	postData = flask.request.form.to_dict()
+	allFiles = flask.request.files
+	for f in allFiles:
+		allFiles[f].save('./uploads/' + secure_filename(allFiles[f].filename))
+	return str(postData)
 
 # This will run on all interface IPs.
 if __name__ == '__main__':
