@@ -50,17 +50,15 @@ function dropPill(thisButton, name) {
 }
 
 function dropPillAndStay(thisButton, name) {
-	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-	thisButton.innerHTML = name + ' ▴'
-	function clickCloseEvent() {
-		// Close the menu:
+	if (typeof this.currentState == 'undefined' || this.currentState == 'raised') {
+		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
+		thisButton.innerHTML = name + ' ▴'
+		this.currentState = 'dropped'
+	} else {
 		thisButton.nextSibling.nextSibling.style.display = 'none'
 		thisButton.innerHTML = name + ' ▾'
-		// Remove the event when it's fired once:
-		this.removeEventListener('click', arguments.callee, true)
+		this.currentState = 'raised'
 	}
-	// Add that function as a listener to take care of closing: 
-	thisButton.addEventListener('click', clickCloseEvent, true)
 }
 
 function gebi(id) {
