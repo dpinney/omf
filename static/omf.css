@@ -61,7 +61,14 @@ a:visited {color:seagreen;}
 
 form {line-height:10pt; padding: 0px; margin: 0px;}
 
-select, input[type='text'], button {width:100%; background:gainsboro; padding:4px; margin:2px; border-width:1px; border-color:white; border-style:solid;}
+select, input[type='text'], button {
+	width:100%;
+	background:gainsboro;
+	padding:4px;
+	margin:2px;
+	border-width:1px;
+	border-color:white;
+	border-style:solid; }
 
 button, input[type='submit'] {
 	background:seagreen;
@@ -69,7 +76,8 @@ button, input[type='submit'] {
 	-moz-border-radius: 5px;
 	border-radius: 5px;
 	border: none;
-	color: white; }
+	color: white;
+	cursor:pointer; }
 
 button:hover, input[type='submit']:hover {background:mediumseagreen;}
 
