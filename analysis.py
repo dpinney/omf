@@ -126,7 +126,8 @@ def terminate(analysisName):
 	md['status'] = 'terminated'
 	putMetadata(analysisName, md)
 
-#WARNING: TIME ESTIMATES TAKE ABOUT A MINUTE 
+#WARNING: TIME ESTIMATES TAKE ABOUT A MINUTE
+#BIGGER WARNING: THIS DOESN'T WORK AT THE MOMENT
 def runtimeEstimate(anaSpec):
 	# if we're running less than 2 days then fahgeddaboudit.
 	if anaSpec['simLengthUnits'] == 'minutes' \

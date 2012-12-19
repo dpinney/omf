@@ -121,7 +121,6 @@
 
 // GLOBAL VARIABLES:
 
-analysisModel = '{{ analysisModel }}'
 feeder = '{{ feederName }}'
 var w = document.width
 // HACK: subtract off the toolbar and titlebar heights.
@@ -813,9 +812,9 @@ function foldAtSelected() {
   redraw()
 }
 
-// INIT FUNCTION FOLLOWS:
+// INIT FUNCTIONS FOLLOW:
 d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
-// TODO: switch on analysisModel Here.
+
 var apiAddress = '/feederData/{{ path }}/{{ feederName }}.json'
 d3.json(apiAddress, function (json) {
   tree = json['tree']

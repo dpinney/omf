@@ -25,7 +25,6 @@
 		a#consoleLink {width:20px; height:20px; position:absolute; top:0; right:0; background-color:dimgray; border-bottom-left-radius:5px; color: #303030; text-align:center;}
 	</style>
 	<script>
-		outerBody = document.body
 		// CODE FOR AUTOMATICALLY REFRESHING THE HOMEPAGE:
 		// intervalID = window.setInterval(analysisStatusCheck, 5000)
 		// function analysisStatusCheck() {
@@ -33,7 +32,10 @@
 		// 	console.log(back)
 		// }
 
+		window.onload = function() {if (window.location.hash=='#feeders') {gebi('feedersTab').click()}}
+
 		function feedersClick() {
+			window.location.hash = 'feeders'
 			gebi('analyses').style.display = 'none'
 			gebi('feeders').style.display = 'inline'
 			gebi('analysesTab').className = 'tab'
@@ -41,6 +43,7 @@
 		}
 
 		function analysesClick() {
+			window.location.hash = ''
 			gebi('analyses').style.display = 'inline'
 			gebi('feeders').style.display = 'none'
 			gebi('analysesTab').className = 'tab tabSelected'
