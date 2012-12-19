@@ -38,7 +38,7 @@ def outputHtml(analysisName):
 	outputBuffer += '<table id="detailsTable" style="padding-top:10px"><tr><th>Study</th><th>Source Feeder</th></tr>'
 	for row in studies:
 		sourceFeedName = row[1]
-		outputBuffer += '<tr><td>' + row[0] + '</td><td><a href="/analysisModel/' + analysisName + '.' + row[0] + '">' + sourceFeedName + '</a></td></tr>'
+		outputBuffer += '<tr><td>' + row[0] + '</td><td><a href="/analysisFeeder/' + analysisName + '/' + row[0] + '">' + sourceFeedName + '</a></td></tr>'
 	outputBuffer += '</table></div>'
 	# add the pie chart:
 	# Build up the data:

@@ -1,7 +1,7 @@
 ﻿<head>
-  <script type='text/javascript' src='../static/d3.v2.js'></script>
-  <script type='text/javascript' src='../static/omf.js'></script>
-  <link rel='stylesheet' href='../static/omf.css'>
+  <script type='text/javascript' src='/static/d3.v2.js'></script>
+  <script type='text/javascript' src='/static/omf.js'></script>
+  <link rel='stylesheet' href='/static/omf.css'>
   <style>
   * {border:0px;margin:0px;padding:0px;}
   div#title p {display:inline-block;}
@@ -40,7 +40,7 @@
 <div id='title'>
   <div id='logoBox'><a href='/'>▦</a></div>
   <p>Grid Editor: </p>
-  <p id='gridName'>{{model_id}}</p>
+  <p id='gridName'>{{feederName}}</p>
 </div>
 <div id='toolbar'>
   <div class='buttonGroup leftToolbar'>
@@ -122,7 +122,7 @@
 // GLOBAL VARIABLES:
 
 analysisModel = '{{ analysisModel }}'
-feeder = '{{ model_id }}'
+feeder = '{{ feederName }}'
 var w = document.width
 // HACK: subtract off the toolbar and titlebar heights.
 var h = document.height - 112
@@ -816,8 +816,7 @@ function foldAtSelected() {
 // INIT FUNCTION FOLLOWS:
 d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
 // TODO: switch on analysisModel Here.
-var apiAddress = '/api/models/{{ model_id }}.json'
-if ('{{ study }}' != '') {apiAddress = '/api/analysisModel/{{ anaName }}/{{ study }}'}
+var apiAddress = '/feederData/{{ path }}/{{ feederName }}.json'
 d3.json(apiAddress, function (json) {
   tree = json['tree']
   // Regenerate the layout from the saved layout. For some insane reason, just cloning the list doesn't work.

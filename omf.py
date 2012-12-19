@@ -79,16 +79,14 @@ def viewReports(analysisName):
 		reportList.append(reportModule.outputHtml(analysisName))
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
 
-@app.route('/model/<model_id>')
-def show_model(model_id):
-	return flask.render_template('gridEdit.html', model_id=model_id, analysisModel=False)
+@app.route('/feeder/<feederName>')
+def feeder(feederName):
+	return flask.render_template('gridEdit.html', feederName=feederName, path='feeders')
 
-@app.route('/analysisModel/<anaNameDotStudy>')
-def showAnalysisModel(anaNameDotStudy):
-	anaName = anaNameDotStudy.split('.')[0]
-	study = anaNameDotStudy.split('.')[-1]
-	model_id = analysis.getMetadata(anaName + '/studies/' + study)['sourceFeeder']
-	return flask.render_template('gridEdit.html', model_id=model_id, anaName=anaName, study=study)
+@app.route('/analysisFeeder/<analysis>/<study>')
+def analysisFeeder(analysis, study):
+	return flask.render_template('gridEdit.html', feederName=study, path='analyses/' + analysis + '/studies/')
+
 
 ####################################################
 # API FUNCTIONS
@@ -119,47 +117,24 @@ def terminate():
 	analysis.terminate(flask.request.form['analysisName'])
 	return flask.redirect(flask.url_for('root'))
 
-@app.route('/api/models/<model_id>.json')
-def api_model(model_id):
+@app.route('/feederData/<path:path>/<feederName>.json')
+def api_model(path, feederName):
+	fullPrefix = './' + path + '/'
 	# check for JSON model:
-	if model_id in os.listdir('./feeders/') and 'main.json' in os.listdir('./feeders/' + model_id):
-		with open('./feeders/' + model_id + '/main.json') as jsonFile:
+	if feederName in os.listdir(fullPrefix) and 'main.json' in os.listdir(fullPrefix + feederName):
+		with open(fullPrefix + feederName + '/main.json') as jsonFile:
 			return jsonFile.read()
-	elif model_id in os.listdir('./feeders/'):
+	elif feederName in os.listdir(fullPrefix):
 		# Grab data from filesystem:
-		tree = tp.parse('./feeders/' + model_id + '/main.glm')
+		tree = tp.parse(fullPrefix + feederName + '/main.glm')
 		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[]}
 		# cache the file for later
 		jsonLoad = json.dumps(outDict, indent=4)
-		with open('./feeders/' + model_id + '/main.json', 'w') as jsonOut:
+		with open(fullPrefix + feederName + '/main.json', 'w') as jsonOut:
 			jsonOut.write(jsonLoad)
 		return jsonLoad
 	else:
 		# Failed to find the feeder:
-		return ''
-
-@app.route('/api/analysisModel/<anaName>/<study>')
-def analysisModel(anaName, study):
-	#check for a json model:
-	if anaName in os.listdir('./analyses/') and study in os.listdir('./analyses/' + anaName + '/studies/') and 'main.json' in os.listdir('./analyses/' + anaName + '/studies/' + study):
-		with open('./analyses/' + anaName + '/studies/' + study + '/main.json') as jsonFile:
-			return jsonFile.read()
-	#just grab the GLM file:
-	elif anaName in os.listdir('./analyses/') and study in os.listdir('./analyses/' + anaName + '/studies/'):
-		tree = tp.parse('./analyses/' + anaName + '/studies/' + study + '/main.glm')
-		filesAvailable = os.listdir('./analyses/' + anaName + '/studies/' + study)
-		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[]}
-		# grab all the layout nodes, links, etc.
-		for fileName in filesAvailable:
-			if fileName.endswith('.json') and fileName != 'main.json':
-				with open('./analyses/' + anaName + '/studies/' + study + '/' + fileName) as openFile:
-					outDict[fileName[0:-5]] = json.loads(openFile.read())
-		# cache the file for later
-		jsonLoad = json.dumps(outDict, indent=4)
-		with open('./analyses/' + anaName + '/studies/' + study + '/main.json', 'w') as jsonCache:
-			jsonCache.write(jsonLoad)
-		return jsonLoad
-	else:
 		return ''
 
 @app.route('/getComponents/')
