@@ -90,11 +90,18 @@
 	<div id='feeders'>
 		<div class='content'>
 			<table id='anaTable'>
-				<tr><thead><th>Feeder Name</th></tr></thead>
+				<tr><thead><th>Feeder Name</th><th>Status</th></tr></thead>
 				<tbody>
 					{% for feed in feeders %}
 					<tr>
+						<td><a href='/model/{{ feed }}'>{{ feed }}</a></td>
+						<td>Ready</td>
+					</tr>
+					{% endfor %}
+					{% for feed in conversions %}
+					<tr>
 						<td>{{ feed }}</td>
+						<td class='running'>Processing</td>
 					</tr>
 					{% endfor %}
 				</tbody>

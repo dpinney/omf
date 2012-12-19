@@ -43,7 +43,7 @@
 					// careful with those ints:
 					toTest = answer + ''
 					// do the test:
-					if (toTest == toTest.match(regEx)) {
+					if (toTest == toTest.match(regEx) && toTest.length > 0) {
 						return answer
 					} else {
 						// this error will abort the analysis creation process:

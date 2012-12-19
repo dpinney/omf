@@ -11,15 +11,18 @@ import time
 import reports
 import lib
 from werkzeug import secure_filename
+import milToGridlab
 
 app = flask.Flask(__name__)
 
 class backgroundProc(multiprocessing.Process):
-	def __init__(self, analysisName):
-		self.analysisName = analysisName
+	def __init__(self, backFun, funArgs):
+		self.name = 'omfWorkerProc'
+		self.backFun = backFun
+		self.funArgs = funArgs
 		multiprocessing.Process.__init__(self)
 	def run(self):
-		analysis.run(self.analysisName)
+		self.backFun(*self.funArgs)
 
 ###################################################
 # VIEWS
@@ -30,12 +33,13 @@ def root():
 	browser = flask.request.user_agent.browser
 	analyses = analysis.listAll()
 	feeders = tp.listAll()
+	conversions = tp.listAllConversions()
 	metadatas = [analysis.getMetadata(x) for x in analyses]
 	#DEBUG: print metadatas
 	if browser == 'msie':
 		return "The OMF currently must be accessed by Chrome, Firefox or Safari."
 	else:
-		return flask.render_template('home.html', metadatas=metadatas, feeders=feeders)
+		return flask.render_template('home.html', metadatas=metadatas, feeders=feeders, conversions=conversions)
 
 @app.route('/newAnalysis/')
 @app.route('/newAnalysis/<analysisName>')
@@ -93,7 +97,7 @@ def showAnalysisModel(anaNameDotStudy):
 @app.route('/run/', methods=['POST'])
 @app.route('/reRun/', methods=['POST'])
 def run():
-	runProc = backgroundProc(flask.request.form['analysisName'])
+	runProc = backgroundProc(analysis.run, [flask.request.form['analysisName']])
 	runProc.start()
 	time.sleep(1)
 	return flask.redirect(flask.url_for('root'))
@@ -203,11 +207,19 @@ def runStatus():
 
 @app.route('/milsoftImport/', methods=['POST'])
 def milsoftImport():
-	postData = flask.request.form.to_dict()
+	feederName = str(flask.request.form.to_dict()['feederName'])
+	stdName = ''
+	seqName = ''
 	allFiles = flask.request.files
 	for f in allFiles:
-		allFiles[f].save('./uploads/' + secure_filename(allFiles[f].filename))
-	return str(postData)
+		fName = secure_filename(allFiles[f].filename)
+		if fName.endswith('.std'): stdName = fName
+		elif fName.endswith('.seq'): seqName = fName
+		allFiles[f].save('./uploads/' + fName)
+	runProc = backgroundProc(milToGridlab.omfConvert, [feederName, stdName, seqName])
+	runProc.start()
+	time.sleep(1)
+	return flask.redirect(flask.url_for('root'))
 
 # This will run on all interface IPs.
 if __name__ == '__main__':

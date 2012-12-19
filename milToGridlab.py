@@ -2,15 +2,25 @@
 
 import csv
 import treeParser
+import os
 
 
 ''' IMPORTED FROM WINDMILTOGRIDLAB PROJECT ON 17 DEC 2012 '''
 
+def omfConvert(feederName, stdName, seqName):
+	''' Take in two uploads and a name, create a feeder. '''
+	os.mkdir('./conversions/' + feederName)
+	outGlm = convert('./uploads/' + stdName, './uploads/' + seqName)
+	os.rmdir('./conversions/' + feederName)
+	os.mkdir('./feeders/' + feederName)
+	with open('./feeders/' + feederName + '/main.glm', 'w') as outFile:
+		outFile.write(outGlm)
+	return
 
 def convert(stdPath,seqPath):
-	''' Take in a .std and .seq from Milsoft and spit out a .glm.'''
+	''' Take in a .std and .seq from Milsoft and spit out a .glm. '''
 
-	print 'Beginning Windmil to GLM conversion.'
+	print 'Beginning Windmil to GLM conversion of ' + stdPath + ' and ' + seqPath
 
 	def csvToArray(csvFileName):
 		''' Simple csv data ingester. '''
@@ -397,7 +407,7 @@ def convert(stdPath,seqPath):
 
 def main():
 	''' tests go here '''
-	outGlm = convert('FRIENDSHIP.std','ACEC for NRECA CVR Improved.seq')
+	outGlm = convert('./uploads/FRIENDSHIP.std','./uploads/ACEC_for_NRECA_CVR_Improved.seq')
 	with open('testOut.glm','w') as outFile:
 		outFile.write(outGlm)
 

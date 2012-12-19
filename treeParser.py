@@ -8,6 +8,9 @@ import re
 def listAll():
 	return os.listdir('feeders')
 
+def listAllConversions():
+	return os.listdir('conversions')
+
 def tokenizeGlm(glmFileName):
 	file = open(glmFileName)
 	data = file.read()
