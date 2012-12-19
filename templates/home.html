@@ -7,6 +7,8 @@
 	<style>
 		div#feeders {display:none;}
 		table#anaTable {width:100%; text-align:left;}
+		table#anaTable tr td:last-child {text-align:right;}
+		table#anaTable tr th:last-child {text-align:right;}
 		div#toolbar {padding:0px; height:40px; line-height:40px;} /*over-riding some toolbar defaults so tabs look good.*/
 		p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
 		p.tabSelected {background:gray; color:white;}
@@ -20,6 +22,7 @@
 		table.importOptions tr td:first-child {width:40%;}
 		table.importOptions td {border-bottom: none}
 		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
+		a#consoleLink {width:20px; height:20px; position:absolute; top:0; right:0; background-color:dimgray; border-bottom-left-radius:5px; color: #303030; text-align:center;}
 	</style>
 	<script>
 		outerBody = document.body
@@ -47,6 +50,7 @@
 	</script>
 </head>
 <body>
+	<a id='consoleLink' href='/console'>C</a>
 	<div id='title'>
 		<div id='logoBox'><a href='/'>▦</a></div>
 		<!--Title:-->Open Modeling Framework
