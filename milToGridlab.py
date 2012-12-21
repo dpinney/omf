@@ -158,7 +158,6 @@ def convert(stdPath,seqPath):
 			capacitor = convertGenericObject(capList)
 			capacitor['phases'] = capList[2]+ 'N'
 			#TODO: change these from just default values:
-			capacitor['name'] = 'CAP1'
 			capacitor['pt_phase'] = 'ABCN'
 			capacitor['parent'] = '675;'
 			capacitor['phases_connected'] = 'ABCN'

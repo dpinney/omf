@@ -145,7 +145,6 @@ def getComponents():
 		with open('./components/' + fileName,'r') as compFile:
 			fileContents = compFile.read()
 			components[fileName] = eval(fileContents)
-	# DEBUG: print components
 	return json.dumps(components, indent=4)
 
 @app.route('/saveFeeder/', methods=['POST'])
