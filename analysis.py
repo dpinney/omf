@@ -16,10 +16,13 @@ def listAll():
 	return os.listdir('analyses')
 
 def getMetadata(analysisName):
-	mdFile = open('analyses/' + analysisName + '/metadata.txt','r')
-	mdString = mdFile.readlines()[0]
-	mdFile.close()
-	return eval(mdString)
+	try:
+		with open('analyses/' + analysisName + '/metadata.txt','r') as mdFile:
+			mdString = mdFile.readlines()[0]
+		return eval(mdString)
+	except:
+		# The file didn't exist, i.e. the database is corrupt.
+		return {}
 
 def putMetadata(analysisName, metadataDict):
 	mdFile = open('analyses/' + analysisName + '/metadata.txt','w')
