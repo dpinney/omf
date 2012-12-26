@@ -5,7 +5,7 @@ import __util__ as util
 import math
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
-configHtmlTemplate = "<div id='REMOVALID' class='content regulatorPowerflow'><a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>regulatorPowerflow</td></tr></table></div>"
+configHtmlTemplate = "<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>regulatorPowerflow</td></tr></table>"
 
 def outputHtml(analysisName):
 	# Put the title in:

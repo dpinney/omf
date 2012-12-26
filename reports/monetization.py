@@ -8,33 +8,29 @@ from copy import copy
 import math
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
-configHtmlTemplate = '''
-<div id='REMOVALID' class='content monetization'>
-	<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a>
-	<table class='reportOptions'>
-		<tr>
-			<td>Report Name</td>
-			<td><p class='reportName'>monetization</p></td>
-		</tr>
-		<tr>
-			<td>Distribution Co-op Energy Rate ($/kWh)</td>
-			<td><input type='text' class='distrEnergyRate'></td>
-		</tr>
-		<tr>
-			<td>Distribution Co-op Capacity Rate ($/kW)</td>
-			<td><input type='text' class='distrCapacityRate'></td>
-		</tr>
-		<tr>
-			<td>Equipment and Installation Cost ($)</td>
-			<td><input type='text' class='equipAndInstallCost'></td>
-		</tr>
-		<tr>
-			<td>Operating and Maintenance Cost ($/Month)</td>
-			<td><input type='text' class='opAndMaintCost'></td>
-		</tr>
-	</table>
-</div>
-'''
+configHtmlTemplate = '''<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a>
+						<table class='reportOptions'>
+							<tr>
+								<td>Report Name</td>
+								<td><p class='reportName'>monetization</p></td>
+							</tr>
+							<tr>
+								<td>Distribution Co-op Energy Rate ($/kWh)</td>
+								<td><input type='text' class='distrEnergyRate'></td>
+							</tr>
+							<tr>
+								<td>Distribution Co-op Capacity Rate ($/kW)</td>
+								<td><input type='text' class='distrCapacityRate'></td>
+							</tr>
+							<tr>
+								<td>Equipment and Installation Cost ($)</td>
+								<td><input type='text' class='equipAndInstallCost'></td>
+							</tr>
+							<tr>
+								<td>Operating and Maintenance Cost ($/Month)</td>
+								<td><input type='text' class='opAndMaintCost'></td>
+							</tr>
+						</table>'''
 
 def outputHtml(analysisName):
 	# Start with an output buffer containing the title.

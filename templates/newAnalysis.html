@@ -25,11 +25,14 @@
 		reportTemplates = {{ reportTemplates | safe }}
 		analysisMd = {{ analysisMd | safe }}
 		var studyReportId = 0
-		studyHTML = "<div id='removalId' class='content'><a href='javascript:removeStudyReport(removalId)' class='removeStudyReport'>✖</a><table class='studyOptions'><tr><td>Study Name</td><td><input type='text' class='studyName'/></td></tr><tr><td>Feeder</td><td><select class='feederName'>{% for feeder in feeders %}<option value='{{ feeder }}'>{{ feeder }}</option>{% endfor %}</select><button onclick='window.location=\"../feeder/\"+this.parentNode.querySelector(\".feederName\").value'>Edit Selected Feeder</button></td></tr><tr><td>Location</td><td><select class='tmy2name'>{% for tmy2 in tmy2s %}<option value='{{ tmy2 }}'>{{ tmy2 }}</option>{% endfor %}</select></td></tr></table></div>"
+		studyHTML = "<a href='javascript:removeStudyReport(removalId)' class='removeStudyReport'>✖</a><table class='studyOptions'><tr><td>Study Name</td><td><input type='text' class='studyName'/></td></tr><tr><td>Feeder</td><td><select class='feederName'>{% for feeder in feeders %}<option value='{{ feeder }}'>{{ feeder }}</option>{% endfor %}</select><button onclick='window.location=\"../feeder/\"+this.parentNode.querySelector(\".feederName\").value'>Edit Selected Feeder</button></td></tr><tr><td>Location</td><td><select class='tmy2name'>{% for tmy2 in tmy2s %}<option value='{{ tmy2 }}'>{{ tmy2 }}</option>{% endfor %}</select></td></tr></table>"
 		function addStudy() {
 			usedId = studyReportId
-			oldHtml = gebi('studyList').innerHTML
-			gebi('studyList').innerHTML += studyHTML.replace(/removalId/g,studyReportId)
+			newDiv = document.createElement('div')
+			newDiv.id = studyReportId
+			newDiv.className = 'content'
+			newDiv.innerHTML = studyHTML.replace(/removalId/g,studyReportId)
+			gebi('studyList').appendChild(newDiv)
 			studyReportId += 1
 			return usedId
 		}
@@ -94,7 +97,11 @@
 			// Don't let the user add more than one copy of the report:
 			if (document.getElementsByClassName(reportName).length == 1) {return false}
 			reportStatsHTML = reportTemplates[reportName]
-			gebi('reportList').innerHTML += reportStatsHTML.replace(/REMOVALID/g,studyReportId).replace(/REPORTNAME/g,reportName)
+			newDiv = document.createElement('div')
+			newDiv.id = studyReportId
+			newDiv.className = 'content ' + reportName
+			newDiv.innerHTML = reportStatsHTML.replace(/REMOVALID/g,studyReportId).replace(/REPORTNAME/g,reportName)
+			gebi('reportList').appendChild(newDiv)
 			studyReportId += 1
 		}
 	</script>
