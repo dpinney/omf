@@ -1,0 +1,1 @@
+{'object':'battery','parent':'XXX','name':'YYY','generator_mode':'CONSTANT_PQ','V_Max':'260','I_Max':'100','P_Max':'250000','E_Max':'1000000','base_efficiency':'0.86','parasitic_power_draw':'10 W','power_type':'DC','generator_status':'ONLINE','Energy':'1000000','scheduled_power':'battery_schedule*250000','power_factor':'1.0'}
