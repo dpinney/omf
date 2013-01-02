@@ -55,7 +55,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 		tree = tp.parse(studyFolder + '/main.glm')
 		tp.attachRecorders(tree, 'Regulator', 'object', 'regulator')
 		tp.attachRecorders(tree, 'Capacitor', 'object', 'capacitor')
-		tp.attachRecorders(tree, 'Inverter', 'object', 'inverter')		
+		tp.attachRecorders(tree, 'Inverter', 'object', 'inverter')
 		tp.attachRecorders(tree, 'CollectorVoltage', None, None)
 		tp.attachRecorders(tree, 'Climate', 'object', 'climate')
 		tp.attachRecorders(tree, 'OverheadLosses', None, None)
