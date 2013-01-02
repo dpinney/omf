@@ -402,16 +402,8 @@ def convert(stdPath,seqPath):
 	return outGlm
 
 def main():
-	def convertFile(stdName):
-		stdPath = './asciiExports/' + stdName
-		seqPath = './asciiExports/' + stdName[0:4] + '.seq'
-		outName = stdName[0:-4]
-		outGlm = convert(stdPath, seqPath)
-		with open('./output/' + outName + '.glm','w') as outFile:
-			outFile.write(outGlm)
-
-	allStds = [x for x in os.listdir('asciiExports') if x.endswith('.std')]
-	map(convertFile, allStds)
+	''' tests go here '''
+	outGlm = convert('./uploads/ACEC-FRIENDSHIP.std','./uploads/ACEC.seq')
 
 if __name__ == '__main__':
 	main()
