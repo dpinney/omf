@@ -1,0 +1,1643 @@
+{
+    "hiddenNodes": [], 
+    "hiddenLinks": [], 
+    "nodes": [], 
+    "tree": {
+        "0": {
+            "timezone": "PST+8PDT", 
+            "stoptime": "'2000-01-02 00:00:00'", 
+            "starttime": "'2000-01-01 00:00:00'", 
+            "clock": "clock"
+        }, 
+        "1": {
+            "omftype": "#set", 
+            "argument": "minimum_timestep=60"
+        }, 
+        "2": {
+            "omftype": "#set", 
+            "argument": "profiler=1"
+        }, 
+        "3": {
+            "omftype": "#set", 
+            "argument": "relax_naming_rules=1"
+        }, 
+        "4": {
+            "omftype": "module", 
+            "argument": "generators"
+        }, 
+        "5": {
+            "omftype": "module", 
+            "argument": "tape"
+        }, 
+        "6": {
+            "omftype": "module", 
+            "argument": "climate"
+        }, 
+        "7": {
+            "module": "residential", 
+            "implicit_enduses": "NONE"
+        }, 
+        "8": {
+            "solver_method": "FBS", 
+            "NR_iteration_limit": "50", 
+            "module": "powerflow"
+        }, 
+        "9": {
+            "object": "climate", 
+            "name": "Climate", 
+            "interpolate": "QUADRATIC", 
+            "tmyfile": "climate.tmy2"
+        }, 
+        "10": {
+            "phases": "7N", 
+            "object": "node", 
+            "nominal_voltage": "7200.0", 
+            "name": "REMBRANDT", 
+            "bustype": "SWING"
+        }, 
+        "11": {
+            "phases": "7N", 
+            "from": "REMBRANDT", 
+            "name": "RECL_1161", 
+            "object": "fuse", 
+            "current_limit": "9999.0 A", 
+            "to": "nodePRUG6689RECL_1161"
+        }, 
+        "12": {
+            "phases": "7", 
+            "from": "nodePRUG6689RECL_1161", 
+            "name": "PRUG6689", 
+            "object": "underground_line", 
+            "13": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PRUG6689-LINECONFIG", 
+                "14": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG6689-LINESPACING"
+                }
+            }, 
+            "to": "nodePRUG6690PRUG6689", 
+            "length": "3151.9"
+        }, 
+        "15": {
+            "phases": "7", 
+            "from": "nodePRUG6690PRUG6689", 
+            "name": "PRUG6690", 
+            "object": "underground_line", 
+            "16": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "17": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG6690-LINESPACING"
+                }, 
+                "name": "PRUG6690-LINECONFIG"
+            }, 
+            "to": "nodePRUG6691PRUG6690", 
+            "length": "106.228"
+        }, 
+        "18": {
+            "phases": "7", 
+            "from": "nodePRUG6691PRUG6690", 
+            "name": "PRUG6691", 
+            "object": "underground_line", 
+            "to": "nodePRUG6692PRUG6691", 
+            "length": "210.857", 
+            "19": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "20": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG6691-LINESPACING"
+                }, 
+                "name": "PRUG6691-LINECONFIG"
+            }
+        }, 
+        "21": {
+            "phases": "7", 
+            "from": "nodePRUG6692PRUG6691", 
+            "name": "PRUG6692", 
+            "object": "underground_line", 
+            "to": "nodePRUG6693PRUG6692", 
+            "length": "150.334", 
+            "22": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PRUG6692-LINECONFIG", 
+                "23": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG6692-LINESPACING"
+                }
+            }
+        }, 
+        "24": {
+            "phases": "7", 
+            "from": "nodePRUG6693PRUG6692", 
+            "name": "PRUG6693", 
+            "object": "underground_line", 
+            "to": "nodeSWIT_737-APRUG6693", 
+            "length": "260.294", 
+            "25": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "26": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG6693-LINESPACING"
+                }, 
+                "name": "PRUG6693-LINECONFIG"
+            }
+        }, 
+        "27": {
+            "phases": "7N", 
+            "from": "REMBRANDT", 
+            "name": "RECL_1162", 
+            "object": "fuse", 
+            "current_limit": "9999.0 A", 
+            "to": "nodePRUG3301RECL_1162"
+        }, 
+        "28": {
+            "phases": "7", 
+            "from": "nodePRUG3301RECL_1162", 
+            "name": "PRUG3301", 
+            "object": "underground_line", 
+            "to": "nodePRUG5000PRUG3301", 
+            "length": "794.966", 
+            "29": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PRUG3301-LINECONFIG", 
+                "30": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG3301-LINESPACING"
+                }
+            }
+        }, 
+        "31": {
+            "32": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "33": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG5000-LINESPACING"
+                }, 
+                "name": "PRUG5000-LINECONFIG"
+            }, 
+            "phases": "7", 
+            "from": "nodePRUG5000PRUG3301", 
+            "name": "PRUG5000", 
+            "object": "underground_line", 
+            "to": "nodePRUG3297PRUG5000", 
+            "length": "3172.4"
+        }, 
+        "34": {
+            "phases": "3", 
+            "35": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "36": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG3297-LINESPACING"
+                }, 
+                "name": "PRUG3297-LINECONFIG"
+            }, 
+            "from": "nodePRUG3297PRUG5000", 
+            "name": "PRUG3297", 
+            "object": "underground_line", 
+            "to": "node263-32-311PRUG3297", 
+            "length": "358.287"
+        }, 
+        "37": {
+            "phases": "3N", 
+            "load_class": "R", 
+            "name": "263-32-311", 
+            "parent": "node263-32-311PRUG3297", 
+            "object": "load", 
+            "constant_power_C": "9.44403", 
+            "constant_power_B": "0", 
+            "constant_power_A": "0", 
+            "nominal_voltage": "120"
+        }, 
+        "38": {
+            "phases": "7", 
+            "from": "nodePRUG3297PRUG5000", 
+            "name": "PRUG5001", 
+            "39": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "40": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG5001-LINESPACING"
+                }, 
+                "name": "PRUG5001-LINECONFIG"
+            }, 
+            "object": "underground_line", 
+            "to": "nodePRUG5002PRUG5001", 
+            "length": "426.323"
+        }, 
+        "41": {
+            "phases": "7", 
+            "from": "nodePRUG5002PRUG5001", 
+            "name": "PRUG5002", 
+            "42": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "43": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG5002-LINESPACING"
+                }, 
+                "name": "PRUG5002-LINECONFIG"
+            }, 
+            "object": "underground_line", 
+            "to": "nodePROH16277PRUG5002", 
+            "length": "848.662"
+        }, 
+        "44": {
+            "phases": "1N", 
+            "from": "nodePROH16277PRUG5002", 
+            "name": "PROH16277", 
+            "object": "overhead_line", 
+            "45": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PROH16277-LINECONFIG", 
+                "46": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH16277-LINESPACING"
+                }, 
+                "47": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }, 
+            "to": "nodePROH279PROH16277", 
+            "length": "2143.18"
+        }, 
+        "48": {
+            "phases": "1N", 
+            "from": "nodePROH279PROH16277", 
+            "name": "PROH279", 
+            "to": "node263-31-260PROH279", 
+            "object": "overhead_line", 
+            "49": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "50": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH279-LINESPACING"
+                }, 
+                "51": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH279-LINECONFIG"
+            }, 
+            "length": "1004.64"
+        }, 
+        "52": {
+            "phases": "1N", 
+            "load_class": "R", 
+            "name": "263-31-260", 
+            "parent": "node263-31-260PROH279", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "10.8648", 
+            "nominal_voltage": "120"
+        }, 
+        "53": {
+            "phases": "1N", 
+            "from": "nodePROH279PROH16277", 
+            "name": "PROH16278", 
+            "object": "overhead_line", 
+            "to": "nodePROH16279PROH16278", 
+            "length": "214.966", 
+            "54": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "56": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH16278-LINECONFIG", 
+                "55": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH16278-LINESPACING"
+                }
+            }
+        }, 
+        "57": {
+            "phases": "1", 
+            "from": "nodePROH16279PROH16278", 
+            "name": "PRUG84", 
+            "object": "underground_line", 
+            "to": "node263-30-850PRUG84", 
+            "length": "260.644", 
+            "58": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "59": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG84-LINESPACING"
+                }, 
+                "name": "PRUG84-LINECONFIG"
+            }
+        }, 
+        "60": {
+            "phases": "1N", 
+            "load_class": "R", 
+            "name": "263-30-850", 
+            "parent": "node263-30-850PRUG84", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "4.11609", 
+            "nominal_voltage": "120"
+        }, 
+        "61": {
+            "phases": "7", 
+            "from": "nodePROH16277PRUG5002", 
+            "name": "PRUG5361", 
+            "object": "underground_line", 
+            "to": "nodePROH277PRUG5361", 
+            "length": "3866.74", 
+            "62": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PRUG5361-LINECONFIG", 
+                "63": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG5361-LINESPACING"
+                }
+            }
+        }, 
+        "64": {
+            "65": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "66": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH277-LINESPACING"
+                }, 
+                "67": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH277-LINECONFIG"
+            }, 
+            "phases": "1N", 
+            "from": "nodePROH277PRUG5361", 
+            "name": "PROH277", 
+            "object": "overhead_line", 
+            "to": "node263-30-380PROH277", 
+            "length": "268.474"
+        }, 
+        "68": {
+            "phases": "1N", 
+            "load_class": "R", 
+            "name": "263-30-380", 
+            "parent": "node263-30-380PROH277", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "5.59956", 
+            "nominal_voltage": "120"
+        }, 
+        "69": {
+            "phases": "7", 
+            "from": "nodePROH277PRUG5361", 
+            "name": "PRUG5362", 
+            "70": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PRUG5362-LINECONFIG", 
+                "71": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG5362-LINESPACING"
+                }
+            }, 
+            "object": "underground_line", 
+            "to": "nodeSWIT_361-BPRUG5362", 
+            "length": "947.289"
+        }, 
+        "72": {
+            "phases": "2", 
+            "from": "nodePRUG5002PRUG5001", 
+            "name": "PRUG85", 
+            "73": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "74": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG85-LINESPACING"
+                }, 
+                "name": "PRUG85-LINECONFIG"
+            }, 
+            "object": "underground_line", 
+            "to": "node263-32-310PRUG85", 
+            "length": "305.542"
+        }, 
+        "75": {
+            "phases": "2N", 
+            "load_class": "R", 
+            "name": "263-32-310", 
+            "parent": "node263-32-310PRUG85", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "0", 
+            "nominal_voltage": "120"
+        }, 
+        "76": {
+            "phases": "7", 
+            "from": "nodePRUG5000PRUG3301", 
+            "name": "PRUG3303", 
+            "object": "underground_line", 
+            "77": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PRUG3303-LINECONFIG", 
+                "78": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG3303-LINESPACING"
+                }
+            }, 
+            "to": "nodePROH16622PRUG3303", 
+            "length": "836.732"
+        }, 
+        "79": {
+            "phases": "2N", 
+            "from": "nodePROH16622PRUG3303", 
+            "name": "PROH16622", 
+            "object": "overhead_line", 
+            "80": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "81": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH16622-LINESPACING"
+                }, 
+                "82": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH16622-LINECONFIG"
+            }, 
+            "to": "nodeFUSE_434PROH16622", 
+            "length": "242.872"
+        }, 
+        "83": {
+            "phases": "2N", 
+            "from": "nodeFUSE_434PROH16622", 
+            "name": "FUSE_434", 
+            "object": "fuse", 
+            "current_limit": "9999.0 A", 
+            "to": "nodePROH16623FUSE_434"
+        }, 
+        "84": {
+            "phases": "2N", 
+            "from": "nodePROH16623FUSE_434", 
+            "name": "PROH16623", 
+            "object": "overhead_line", 
+            "to": "nodePROH2887PROH16623", 
+            "length": "254.225", 
+            "85": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PROH16623-LINECONFIG", 
+                "86": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH16623-LINESPACING"
+                }, 
+                "87": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }
+        }, 
+        "88": {
+            "phases": "2N", 
+            "from": "nodePROH2887PROH16623", 
+            "name": "PROH2887", 
+            "object": "overhead_line", 
+            "to": "node283-05-120PROH2887", 
+            "length": "442.266", 
+            "89": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "90": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH2887-LINESPACING"
+                }, 
+                "91": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH2887-LINECONFIG"
+            }
+        }, 
+        "92": {
+            "phases": "2N", 
+            "load_class": "R", 
+            "name": "283-05-120", 
+            "parent": "node283-05-120PROH2887", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0.835755", 
+            "constant_power_A": "0", 
+            "nominal_voltage": "120"
+        }, 
+        "93": {
+            "phases": "2N", 
+            "from": "nodePROH2887PROH16623", 
+            "name": "PROH16624", 
+            "object": "overhead_line", 
+            "to": "nodePROH2886PROH16624", 
+            "length": "3290.55", 
+            "94": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "96": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH16624-LINECONFIG", 
+                "95": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH16624-LINESPACING"
+                }
+            }
+        }, 
+        "97": {
+            "98": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "99": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH2886-LINESPACING"
+                }, 
+                "100": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH2886-LINECONFIG"
+            }, 
+            "from": "nodePROH2886PROH16624", 
+            "name": "PROH2886", 
+            "object": "overhead_line", 
+            "phases": "2N", 
+            "to": "node263-32-860PROH2886", 
+            "length": "661.995"
+        }, 
+        "101": {
+            "phases": "2N", 
+            "load_class": "R", 
+            "name": "263-32-860", 
+            "parent": "node263-32-860PROH2886", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "0", 
+            "nominal_voltage": "120"
+        }, 
+        "102": {
+            "phases": "4N", 
+            "from": "nodePROH16622PRUG3303", 
+            "name": "PROH8542", 
+            "103": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "104": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH8542-LINESPACING"
+                }, 
+                "name": "PROH8542-LINECONFIG", 
+                "105": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }, 
+            "object": "overhead_line", 
+            "to": "nodePROH19454PROH8542", 
+            "length": "81.2263"
+        }, 
+        "106": {
+            "phases": "1N", 
+            "object": "overhead_line", 
+            "from": "nodePROH19454PROH8542", 
+            "name": "PROH19454", 
+            "107": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "108": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH19454-LINESPACING"
+                }, 
+                "name": "PROH19454-LINECONFIG", 
+                "109": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }, 
+            "to": "nodeRECL_844PROH19454", 
+            "length": "171.711"
+        }, 
+        "110": {
+            "phases": "1N", 
+            "from": "nodeRECL_844PROH19454", 
+            "name": "RECL_844", 
+            "object": "fuse", 
+            "current_limit": "9999.0 A", 
+            "to": "nodePROH19455RECL_844"
+        }, 
+        "111": {
+            "phases": "1N", 
+            "from": "nodePROH19455RECL_844", 
+            "name": "PROH19455", 
+            "object": "overhead_line", 
+            "112": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "113": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH19455-LINESPACING"
+                }, 
+                "114": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH19455-LINECONFIG"
+            }, 
+            "to": "nodePROH266PROH19455", 
+            "length": "2702.01"
+        }, 
+        "115": {
+            "phases": "1N", 
+            "from": "nodePROH266PROH19455", 
+            "name": "PROH266", 
+            "object": "overhead_line", 
+            "to": "node283-06-131PROH266", 
+            "length": "260.372", 
+            "116": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "117": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH266-LINESPACING"
+                }, 
+                "118": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH266-LINECONFIG"
+            }
+        }, 
+        "119": {
+            "phases": "1N", 
+            "load_class": "R", 
+            "name": "283-06-131", 
+            "parent": "node283-06-131PROH266", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "0.125363", 
+            "nominal_voltage": "120"
+        }, 
+        "120": {
+            "phases": "1N", 
+            "load_class": "R", 
+            "name": "283-06-130", 
+            "parent": "node283-06-131PROH266", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "3.17378", 
+            "nominal_voltage": "120"
+        }, 
+        "121": {
+            "phases": "1N", 
+            "from": "nodePROH266PROH19455", 
+            "name": "PROH19456", 
+            "object": "overhead_line", 
+            "to": "nodePROH20016PROH19456", 
+            "length": "2354.05", 
+            "122": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "123": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH19456-LINESPACING"
+                }, 
+                "124": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH19456-LINECONFIG"
+            }
+        }, 
+        "125": {
+            "phases": "1N", 
+            "from": "nodePROH20016PROH19456", 
+            "name": "PROH20016", 
+            "object": "overhead_line", 
+            "to": "nodePROH268PROH20016", 
+            "length": "171.315", 
+            "126": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "128": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH20016-LINECONFIG", 
+                "127": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH20016-LINESPACING"
+                }
+            }
+        }, 
+        "129": {
+            "130": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "131": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH268-LINESPACING"
+                }, 
+                "132": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH268-LINECONFIG"
+            }, 
+            "from": "nodePROH268PROH20016", 
+            "name": "PROH268", 
+            "object": "overhead_line", 
+            "phases": "1N", 
+            "to": "node282-01-180PROH268", 
+            "length": "88.6741"
+        }, 
+        "133": {
+            "phases": "1N", 
+            "load_class": "R", 
+            "name": "282-01-180", 
+            "parent": "node282-01-180PROH268", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "0.91933", 
+            "nominal_voltage": "120"
+        }, 
+        "134": {
+            "phases": "1N", 
+            "from": "nodePROH268PROH20016", 
+            "name": "PROH20017", 
+            "135": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "136": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH20017-LINESPACING"
+                }, 
+                "name": "PROH20017-LINECONFIG", 
+                "137": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }, 
+            "object": "overhead_line", 
+            "to": "nodePROH20018PROH20017", 
+            "length": "2039.77"
+        }, 
+        "138": {
+            "phases": "1N", 
+            "139": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "140": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH20018-LINESPACING"
+                }, 
+                "name": "PROH20018-LINECONFIG", 
+                "141": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }, 
+            "from": "nodePROH20018PROH20017", 
+            "name": "PROH20018", 
+            "object": "overhead_line", 
+            "to": "nodePRUG81PROH20018", 
+            "length": "1659.7"
+        }, 
+        "142": {
+            "phases": "1", 
+            "from": "nodePRUG81PROH20018", 
+            "name": "PRUG81", 
+            "object": "underground_line", 
+            "143": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "144": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG81-LINESPACING"
+                }, 
+                "name": "PRUG81-LINECONFIG"
+            }, 
+            "to": "node282-01-680PRUG81", 
+            "length": "784.938"
+        }, 
+        "145": {
+            "phases": "1N", 
+            "load_class": "R", 
+            "name": "282-01-680", 
+            "parent": "node282-01-680PRUG81", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "10.2798", 
+            "nominal_voltage": "120"
+        }, 
+        "146": {
+            "phases": "1N", 
+            "from": "nodePRUG81PROH20018", 
+            "name": "PROH20019", 
+            "object": "overhead_line", 
+            "to": "nodePROH20020PROH20019", 
+            "length": "677.389", 
+            "147": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "148": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH20019-LINESPACING"
+                }, 
+                "name": "PROH20019-LINECONFIG", 
+                "149": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }
+        }, 
+        "150": {
+            "phases": "1N", 
+            "from": "nodePROH20020PROH20019", 
+            "name": "PROH20020", 
+            "object": "overhead_line", 
+            "to": "nodeSWIT_617-APROH20020", 
+            "length": "721.565", 
+            "151": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "152": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH20020-LINESPACING"
+                }, 
+                "name": "PROH20020-LINECONFIG", 
+                "153": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }
+        }, 
+        "154": {
+            "phases": "1N", 
+            "from": "nodePROH20020PROH20019", 
+            "name": "PROH270", 
+            "object": "overhead_line", 
+            "to": "node283-06-720PROH270", 
+            "length": "1628.51", 
+            "155": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "156": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH270-LINESPACING"
+                }, 
+                "name": "PROH270-LINECONFIG", 
+                "157": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }
+        }, 
+        "158": {
+            "phases": "1N", 
+            "load_class": "R", 
+            "name": "283-06-720", 
+            "parent": "node283-06-720PROH270", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "5.68313", 
+            "nominal_voltage": "120"
+        }, 
+        "159": {
+            "160": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "161": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH269-LINESPACING"
+                }, 
+                "162": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH269-LINECONFIG"
+            }, 
+            "phases": "1N", 
+            "from": "nodePROH20018PROH20017", 
+            "name": "PROH269", 
+            "object": "overhead_line", 
+            "to": "node283-06-310PROH269", 
+            "length": "353.428"
+        }, 
+        "163": {
+            "phases": "1N", 
+            "load_class": "R", 
+            "name": "283-06-310", 
+            "parent": "node283-06-310PROH269", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0", 
+            "constant_power_A": "2.70576", 
+            "nominal_voltage": "120"
+        }, 
+        "164": {
+            "phases": "2N", 
+            "from": "nodePROH19454PROH8542", 
+            "165": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PROH16513-LINECONFIG", 
+                "166": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH16513-LINESPACING"
+                }, 
+                "167": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }, 
+            "object": "overhead_line", 
+            "to": "nodeRECL_845PROH16513", 
+            "length": "356.333", 
+            "name": "PROH16513"
+        }, 
+        "168": {
+            "phases": "2N", 
+            "from": "nodeRECL_845PROH16513", 
+            "name": "RECL_845", 
+            "object": "fuse", 
+            "current_limit": "9999.0 A", 
+            "to": "nodePROH16514RECL_845"
+        }, 
+        "169": {
+            "phases": "2N", 
+            "from": "nodePROH16514RECL_845", 
+            "name": "PROH16514", 
+            "170": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "171": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH16514-LINESPACING"
+                }, 
+                "172": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH16514-LINECONFIG"
+            }, 
+            "object": "overhead_line", 
+            "to": "nodePROH16515PROH16514", 
+            "length": "5239"
+        }, 
+        "173": {
+            "phases": "2N", 
+            "from": "nodePROH16515PROH16514", 
+            "name": "PROH16515", 
+            "object": "overhead_line", 
+            "174": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "176": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH16515-LINECONFIG", 
+                "175": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH16515-LINESPACING"
+                }
+            }, 
+            "to": "nodePRUG834PROH16515", 
+            "length": "3573.77"
+        }, 
+        "177": {
+            "phases": "2", 
+            "from": "nodePRUG834PROH16515", 
+            "name": "PRUG834", 
+            "object": "underground_line", 
+            "length": "407.943", 
+            "to": "node283-08-710PRUG834", 
+            "178": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "179": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG834-LINESPACING"
+                }, 
+                "name": "PRUG834-LINECONFIG"
+            }
+        }, 
+        "180": {
+            "phases": "2N", 
+            "load_class": "R", 
+            "name": "283-08-710", 
+            "parent": "node283-08-710PRUG834", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "8.02325", 
+            "constant_power_A": "0", 
+            "nominal_voltage": "120"
+        }, 
+        "181": {
+            "phases": "2N", 
+            "from": "nodePRUG834PROH16515", 
+            "name": "PROH16516", 
+            "object": "overhead_line", 
+            "to": "node283-17-120PROH16516", 
+            "length": "3046.11", 
+            "182": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "184": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH16516-LINECONFIG", 
+                "183": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH16516-LINESPACING"
+                }
+            }
+        }, 
+        "185": {
+            "phases": "2N", 
+            "load_class": "R", 
+            "name": "283-17-120", 
+            "parent": "node283-17-120PROH16516", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0.668604", 
+            "constant_power_A": "0", 
+            "nominal_voltage": "120"
+        }, 
+        "186": {
+            "phases": "2N", 
+            "from": "nodePROH16515PROH16514", 
+            "name": "PROH11498", 
+            "object": "overhead_line", 
+            "to": "nodePROH2878PROH11498", 
+            "length": "732.994", 
+            "187": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "188": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH11498-LINESPACING"
+                }, 
+                "name": "PROH11498-LINECONFIG", 
+                "189": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }
+        }, 
+        "190": {
+            "phases": "2N", 
+            "from": "nodePROH2878PROH11498", 
+            "name": "PROH2878", 
+            "object": "overhead_line", 
+            "to": "node283-08-120PROH2878", 
+            "length": "156.322", 
+            "191": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "192": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH2878-LINESPACING"
+                }, 
+                "name": "PROH2878-LINECONFIG", 
+                "193": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }
+        }, 
+        "194": {
+            "phases": "2N", 
+            "load_class": "R", 
+            "name": "283-08-120", 
+            "parent": "node283-08-120PROH2878", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "2.68695", 
+            "constant_power_A": "0", 
+            "nominal_voltage": "120"
+        }, 
+        "195": {
+            "phases": "2N", 
+            "from": "nodePROH2878PROH11498", 
+            "name": "PROH11499", 
+            "object": "overhead_line", 
+            "to": "nodePROH2877PROH11499", 
+            "length": "1448.01", 
+            "196": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "197": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH11499-LINESPACING"
+                }, 
+                "198": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH11499-LINECONFIG"
+            }
+        }, 
+        "199": {
+            "phases": "2N", 
+            "from": "nodePROH2877PROH11499", 
+            "name": "PROH2877", 
+            "200": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "201": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH2877-LINESPACING"
+                }, 
+                "202": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }, 
+                "name": "PROH2877-LINECONFIG"
+            }, 
+            "object": "overhead_line", 
+            "to": "node283-05-830PROH2877", 
+            "length": "144.164"
+        }, 
+        "203": {
+            "phases": "2N", 
+            "load_class": "R", 
+            "name": "283-05-830", 
+            "parent": "node283-05-830PROH2877", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "0.00208939", 
+            "constant_power_A": "0", 
+            "nominal_voltage": "120"
+        }, 
+        "204": {
+            "phases": "2N", 
+            "from": "nodePROH2877PROH11499", 
+            "name": "PROH11500", 
+            "object": "overhead_line", 
+            "205": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PROH11500-LINECONFIG", 
+                "206": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PROH11500-LINESPACING"
+                }, 
+                "207": {
+                    "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
+                    "resistance": "0", 
+                    "geometric_mean_radius": "0"
+                }
+            }, 
+            "to": "node283-08-170PROH11500", 
+            "length": "810.044"
+        }, 
+        "208": {
+            "phases": "2N", 
+            "load_class": "R", 
+            "name": "283-08-170", 
+            "parent": "node283-08-170PROH11500", 
+            "object": "load", 
+            "constant_power_C": "0", 
+            "constant_power_B": "3.46838", 
+            "constant_power_A": "0", 
+            "nominal_voltage": "120"
+        }, 
+        "209": {
+            "phases": "7N", 
+            "from": "REMBRANDT", 
+            "name": "RECL_1160", 
+            "object": "fuse", 
+            "current_limit": "9999.0 A", 
+            "to": "nodePRUG4190RECL_1160"
+        }, 
+        "210": {
+            "phases": "7", 
+            "from": "nodePRUG4190RECL_1160", 
+            "name": "PRUG4190", 
+            "object": "underground_line", 
+            "to": "nodePRUG4176PRUG4190", 
+            "length": "289.527", 
+            "211": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "212": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG4190-LINESPACING"
+                }, 
+                "name": "PRUG4190-LINECONFIG"
+            }
+        }, 
+        "213": {
+            "phases": "7", 
+            "from": "nodePRUG4176PRUG4190", 
+            "name": "PRUG4176", 
+            "object": "underground_line", 
+            "to": "node263-32-710PRUG4176", 
+            "length": "3185.68", 
+            "214": {
+                "omfEmbeddedConfigObject": "configuration object line_configuration", 
+                "name": "PRUG4176-LINECONFIG", 
+                "215": {
+                    "omfEmbeddedConfigObject": "spacing object line_spacing", 
+                    "name": "PRUG4176-LINESPACING"
+                }
+            }
+        }, 
+        "216": {
+            "phases": "7N", 
+            "load_class": "R", 
+            "name": "263-32-710", 
+            "parent": "node263-32-710PRUG4176", 
+            "object": "load", 
+            "constant_power_C": "1853.7", 
+            "constant_power_B": "1853.7", 
+            "constant_power_A": "1853.7", 
+            "nominal_voltage": "120"
+        }, 
+        "217": {
+            "control": "VOLT", 
+            "phases": "7N", 
+            "capacitor_A": "0.10 MVAr", 
+            "control_level": "INDIVIDUAL", 
+            "name": "NEWCAP-1D1DC669", 
+            "parent": "node263-32-710PRUG4176", 
+            "capacitor_B": "0.10 MVAr", 
+            "capacitor_C": "0.10 MVAr", 
+            "object": "capacitor", 
+            "time_delay": "300.0", 
+            "nominal_voltage": "2401.7771", 
+            "voltage_set_high": "2350.0", 
+            "voltage_set_low": "2340.0", 
+            "switchC": "CLOSED", 
+            "switchB": "CLOSED", 
+            "switchA": "CLOSED", 
+            "phases_connected": "ABCN", 
+            "dwell_time": "0.0", 
+            "pt_phase": "ABCN"
+        }, 
+        "218": {
+            "phases": "7N", 
+            "from": "REMBRANDT", 
+            "name": "RECL_993", 
+            "object": "fuse", 
+            "current_limit": "9999.0 A", 
+            "to": "nodePRUG4180RECL_993"
+        }, 
+        "219": {
+            "phases": "7", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG6689RECL_1161"
+        }, 
+        "220": {
+            "phases": "7", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG6690PRUG6689"
+        }, 
+        "221": {
+            "phases": "7", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG6691PRUG6690"
+        }, 
+        "222": {
+            "phases": "7", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG6692PRUG6691"
+        }, 
+        "223": {
+            "phases": "7", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG6693PRUG6692"
+        }, 
+        "224": {
+            "phases": "7N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodeSWIT_737-APRUG6693"
+        }, 
+        "225": {
+            "phases": "7", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG3301RECL_1162"
+        }, 
+        "226": {
+            "phases": "7", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG5000PRUG3301"
+        }, 
+        "227": {
+            "phases": "37", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG3297PRUG5000"
+        }, 
+        "228": {
+            "phases": "3N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node263-32-311PRUG3297"
+        }, 
+        "229": {
+            "phases": "27", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG5002PRUG5001"
+        }, 
+        "230": {
+            "phases": "17N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH16277PRUG5002"
+        }, 
+        "231": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH279PROH16277"
+        }, 
+        "232": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node263-31-260PROH279"
+        }, 
+        "233": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH16279PROH16278"
+        }, 
+        "234": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node263-30-850PRUG84"
+        }, 
+        "235": {
+            "phases": "17N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH277PRUG5361"
+        }, 
+        "236": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node263-30-380PROH277"
+        }, 
+        "237": {
+            "phases": "7N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodeSWIT_361-BPRUG5362"
+        }, 
+        "238": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node263-32-310PRUG85"
+        }, 
+        "239": {
+            "phases": "24N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH16622PRUG3303"
+        }, 
+        "240": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodeFUSE_434PROH16622"
+        }, 
+        "241": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH16623FUSE_434"
+        }, 
+        "242": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH2887PROH16623"
+        }, 
+        "243": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node283-05-120PROH2887"
+        }, 
+        "244": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH2886PROH16624"
+        }, 
+        "245": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node263-32-860PROH2886"
+        }, 
+        "246": {
+            "phases": "12N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH19454PROH8542"
+        }, 
+        "247": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodeRECL_844PROH19454"
+        }, 
+        "248": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH19455RECL_844"
+        }, 
+        "249": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH266PROH19455"
+        }, 
+        "250": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node283-06-131PROH266"
+        }, 
+        "251": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH20016PROH19456"
+        }, 
+        "252": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH268PROH20016"
+        }, 
+        "253": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node282-01-180PROH268"
+        }, 
+        "254": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH20018PROH20017"
+        }, 
+        "255": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG81PROH20018"
+        }, 
+        "256": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node282-01-680PRUG81"
+        }, 
+        "257": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH20020PROH20019"
+        }, 
+        "258": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodeSWIT_617-APROH20020"
+        }, 
+        "259": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node283-06-720PROH270"
+        }, 
+        "260": {
+            "phases": "1N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node283-06-310PROH269"
+        }, 
+        "261": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodeRECL_845PROH16513"
+        }, 
+        "262": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH16514RECL_845"
+        }, 
+        "263": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH16515PROH16514"
+        }, 
+        "264": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG834PROH16515"
+        }, 
+        "265": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node283-08-710PRUG834"
+        }, 
+        "266": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node283-17-120PROH16516"
+        }, 
+        "267": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH2878PROH11498"
+        }, 
+        "268": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node283-08-120PROH2878"
+        }, 
+        "269": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH2877PROH11499"
+        }, 
+        "270": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node283-05-830PROH2877"
+        }, 
+        "271": {
+            "phases": "2N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node283-08-170PROH11500"
+        }, 
+        "272": {
+            "phases": "7", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG4190RECL_1160"
+        }, 
+        "273": {
+            "phases": "7", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG4176PRUG4190"
+        }, 
+        "274": {
+            "phases": "7N", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "node263-32-710PRUG4176"
+        }, 
+        "275": {
+            "phases": "7", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePRUG4180RECL_993"
+        }
+    }, 
+    "links": []
+}

@@ -193,7 +193,7 @@ def milsoftImport():
 	runProc = backgroundProc(milToGridlab.omfConvert, [feederName, stdName, seqName])
 	runProc.start()
 	time.sleep(1)
-	return flask.redirect(flask.url_for('root'))
+	return flask.redirect(flask.url_for('root') + '#feeders')
 
 # This will run on all interface IPs.
 if __name__ == '__main__':

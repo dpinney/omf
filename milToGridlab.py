@@ -4,6 +4,16 @@ import csv
 import treeParser
 import os
 
+def omfConvert(feederName, stdName, seqName):
+	''' Take in two uploads and a name, create a feeder. '''
+	os.mkdir('./conversions/' + feederName)
+	outGlm = convert('./uploads/' + stdName, './uploads/' + seqName)
+	os.rmdir('./conversions/' + feederName)
+	os.mkdir('./feeders/' + feederName)
+	with open('./feeders/' + feederName + '/main.glm', 'w') as outFile:
+		outFile.write(outGlm)
+	return
+
 def convert(stdPath,seqPath):
 	''' Take in a .std and .seq from Milsoft and spit out a .glm.'''
 
