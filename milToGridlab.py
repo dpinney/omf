@@ -4,23 +4,10 @@ import csv
 import treeParser
 import os
 
-
-''' IMPORTED FROM WINDMILTOGRIDLAB PROJECT ON 17 DEC 2012 '''
-
-def omfConvert(feederName, stdName, seqName):
-	''' Take in two uploads and a name, create a feeder. '''
-	os.mkdir('./conversions/' + feederName)
-	outGlm = convert('./uploads/' + stdName, './uploads/' + seqName)
-	os.rmdir('./conversions/' + feederName)
-	os.mkdir('./feeders/' + feederName)
-	with open('./feeders/' + feederName + '/main.glm', 'w') as outFile:
-		outFile.write(outGlm)
-	return
-
 def convert(stdPath,seqPath):
-	''' Take in a .std and .seq from Milsoft and spit out a .glm. '''
+	''' Take in a .std and .seq from Milsoft and spit out a .glm.'''
 
-	print 'Beginning Windmil to GLM conversion of ' + stdPath + ' and ' + seqPath
+	print 'Beginning Windmil to GLM conversion.'
 
 	def csvToArray(csvFileName):
 		''' Simple csv data ingester. '''
@@ -341,31 +328,31 @@ def convert(stdPath,seqPath):
 		if comp['object'] in parentable and parentType(comp) in nodable:
 			comp['parent'] = parent['name']
 		elif comp['object'] in fromToable and parentType(comp) in nodable:
-			comp['to'] = parent['name']
+			comp['from'] = parent['name']
 		elif comp['object'] in parentable and parentType(comp) in fromToable:
-			if 'from' in parent.keys():
-				comp['parent'] = parent['from']
+			if 'to' in parent.keys():
+				comp['parent'] = parent['to']
 				# Making sure our nodes have the superset of connected phases:
-				interNode = getByName(parent['from'])
+				interNode = getByName(parent['to'])
 				interNode['phases'] = phaseMerge(interNode['phases'],comp['phases'])
 			else:
 				# Gotta insert a node between lines and parentable objects:
 				newNode = {'object':'node', 'phases':comp['phases'], 'name': 'node' + comp['name'] + parent['name'], 'nominal_voltage':'2400'}
 				convertedComponents.append(newNode)
-				parent['from'] = newNode['name']
+				parent['to'] = newNode['name']
 				comp['parent'] = newNode['name']
 		elif comp['object'] in fromToable and parentType(comp) in fromToable:
-			if 'from' in parent.keys():
-				comp['to'] = parent['from']
+			if 'to' in parent.keys():
+				comp['from'] = parent['to']
 				# Making sure our nodes have the superset of connected phases:
-				interNode = getByName(parent['from'])
+				interNode = getByName(parent['to'])
 				interNode['phases'] = phaseMerge(interNode['phases'],comp['phases'])
 			else:
 				# Gotta insert a node between two lines:
 				newNode = {'object':'node', 'phases':comp['phases'], 'name': 'node' + comp['name'] + parent['name'], 'nominal_voltage':'2400'}
 				convertedComponents.append(newNode)
-				parent['from'] = newNode['name']
-				comp['to'] = newNode['name']
+				parent['to'] = newNode['name']
+				comp['from'] = newNode['name']
 		else:
 			# Here we're in an error case (like loads connected to loads), so do nothing:
 			return False
@@ -405,14 +392,19 @@ def convert(stdPath,seqPath):
 	return outGlm
 
 def main():
-	''' tests go here '''
-	outGlm = convert('./uploads/FRIENDSHIP.std','./uploads/ACEC_for_NRECA_CVR_Improved.seq')
-	with open('testOut.glm','w') as outFile:
-		outFile.write(outGlm)
+	def convertFile(stdName):
+		stdPath = './asciiExports/' + stdName
+		seqPath = './asciiExports/' + stdName[0:4] + '.seq'
+		outName = stdName[0:-4]
+		outGlm = convert(stdPath, seqPath)
+		with open('./output/' + outName + '.glm','w') as outFile:
+			outFile.write(outGlm)
+
+	allStds = [x for x in os.listdir('asciiExports') if x.endswith('.std')]
+	map(convertFile, allStds)
 
 if __name__ == '__main__':
 	main()
 
 #TODO: set neutral conductors correctly for all components.
 #TODO: get rid of as many magic numbers as possible.
-
