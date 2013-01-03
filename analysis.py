@@ -13,6 +13,8 @@ import subprocess
 import copy
 
 def listAll():
+	if 'analyses' not in os.listdir('.'):
+		os.mkdir('analyses')
 	return os.listdir('analyses')
 
 def getMetadata(analysisName):
