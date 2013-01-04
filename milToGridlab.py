@@ -53,7 +53,7 @@ def convert(stdPath,seqPath):
 							11 : 'ZIPload',			# Motor (Type 11)
 							12 : 'diesel_dg',		# Generator (Type 12)
 							13 : 'load' }			# Consumer (Type 13)
-
+		
 		allNames = [x[0] for x in components]
 
 		def statsByName(deviceName):

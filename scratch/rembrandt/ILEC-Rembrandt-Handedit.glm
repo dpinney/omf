@@ -1,0 +1,1927 @@
+clock {
+timezone PST+8PDT;
+starttime '2000-01-01 00:00:00';
+stoptime '2000-01-02 00:00:00';
+};
+
+#set minimum_timestep=60;
+#set profiler=1;
+#set relax_naming_rules=1;
+module generators;
+module tape;
+module climate;
+module residential {
+implicit_enduses NONE;
+};
+
+module powerflow {
+solver_method FBS;
+NR_iteration_limit 50;
+};
+
+object climate {
+name Climate;
+interpolate QUADRATIC;
+tmyfile climate.tmy2;
+};
+
+object underground_line_conductor { 
+	 name ug_lc_7240;
+	 outer_diameter 0.980000;
+	 conductor_gmr 0.008830;
+	 conductor_diameter 0.292000;
+	 conductor_resistance 1.540000;
+	 neutral_gmr 0.002080;
+	 neutral_resistance 14.872000;
+	 neutral_diameter 0.064000;
+	 neutral_strands 6.000000;
+	 shield_gmr 0.000000;
+	 shield_resistance 0.000000;
+}
+
+object overhead_line_conductor {
+	resistance 0.185900;
+	name overhead_line_conductor_6010;
+	geometric_mean_radius 0.031300;
+};
+
+object line_spacing {
+	 name spacing_515;
+	 distance_AB 0.500000;
+	 distance_BC 0.500000;
+	 distance_AC 1.000000;
+	 distance_AN 0.000000;
+	 distance_BN 0.000000;
+	 distance_CN 0.000000;
+}
+
+object line_spacing {
+	distance_BC 7.0;
+	name overhead_spacing;
+	distance_CN 5.0;
+	distance_AN 4.272002;
+	distance_AB 2.5;
+	distance_BN 5.656854;
+	distance_AC 4.5;
+};
+
+object line_configuration {
+	 name ohconfig;
+	 conductor_A overhead_line_conductor_6010;
+	 conductor_B overhead_line_conductor_6010;
+	 conductor_C overhead_line_conductor_6010;
+	 conductor_N overhead_line_conductor_6010;
+	 spacing overhead_spacing;
+}
+
+object line_configuration {
+	 name lc_7211;
+	 conductor_A ug_lc_7240;
+	 conductor_B ug_lc_7240;
+	 conductor_C ug_lc_7240;
+	 conductor_N ug_lc_7240;
+	 spacing spacing_515;
+}
+
+
+object node {
+phases ABCN;
+name REMBRANDT;
+bustype SWING;
+nominal_voltage 2400.0;
+};
+
+
+object underground_line {
+configuration lc_7211;
+phases ABC;
+from nodePRUG6689RECL_1161;
+name PRUG6689;
+to nodePRUG6690PRUG6689;
+length 3151.9;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG6690-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG6690-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG6690-PHASEB;
+};
+name PRUG6690-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG6690-PHASEC;
+};
+};
+phases ABC;
+from nodePRUG6690PRUG6689;
+name PRUG6690;
+to nodePRUG6691PRUG6690;
+length 106.228;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG6691-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG6691-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG6691-PHASEB;
+};
+name PRUG6691-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG6691-PHASEC;
+};
+};
+phases ABC;
+from nodePRUG6691PRUG6690;
+name PRUG6691;
+to nodePRUG6692PRUG6691;
+length 210.857;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG6692-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG6692-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG6692-PHASEB;
+};
+name PRUG6692-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG6692-PHASEC;
+};
+};
+phases ABC;
+from nodePRUG6692PRUG6691;
+name PRUG6692;
+to nodePRUG6693PRUG6692;
+length 150.334;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG6693-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG6693-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG6693-PHASEB;
+};
+name PRUG6693-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG6693-PHASEC;
+};
+};
+phases ABC;
+from nodePRUG6693PRUG6692;
+name PRUG6693;
+to nodeSWIT_737-APRUG6693;
+length 260.294;
+};
+
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG3301-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG3301-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG3301-PHASEB;
+};
+name PRUG3301-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG3301-PHASEC;
+};
+};
+phases ABC;
+from nodePRUG3301RECL_1162;
+name PRUG3301;
+to nodePRUG5000PRUG3301;
+length 794.966;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG5000-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG5000-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG5000-PHASEB;
+};
+name PRUG5000-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG5000-PHASEC;
+};
+};
+phases ABC;
+from nodePRUG5000PRUG3301;
+name PRUG5000;
+to nodePRUG3297PRUG5000;
+length 3172.4;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG3297-LINESPACING;
+};
+name PRUG3297-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG3297-PHASEC;
+};
+};
+phases C;
+from nodePRUG3297PRUG5000;
+name PRUG3297;
+to node263-32-311PRUG3297;
+length 358.287;
+};
+
+object load {
+phases CN;
+load_class R;
+name 263-32-311;
+parent node263-32-311PRUG3297;
+constant_power_C 9444+0j;
+constant_power_A 0+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG5001-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG5001-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG5001-PHASEB;
+};
+name PRUG5001-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG5001-PHASEC;
+};
+};
+phases ABC;
+from nodePRUG3297PRUG5000;
+name PRUG5001;
+to nodePRUG5002PRUG5001;
+length 426.323;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG5002-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG5002-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG5002-PHASEB;
+};
+name PRUG5002-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG5002-PHASEC;
+};
+};
+phases ABC;
+from nodePRUG5002PRUG5001;
+name PRUG5002;
+to nodePROH16277PRUG5002;
+length 848.662;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH16277-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH16277-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH16277PRUG5002;
+name PROH16277;
+to nodePROH279PROH16277;
+length 2143.18;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH279-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH279-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH279PROH16277;
+name PROH279;
+to node263-31-260PROH279;
+length 1004.64;
+};
+
+object load {
+phases AN;
+load_class R;
+name 263-31-260;
+parent node263-31-260PROH279;
+constant_power_C 0+0j;
+constant_power_A 10648+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH16278-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH16278-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH279PROH16277;
+name PROH16278;
+to nodePROH16279PROH16278;
+length 214.966;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG84-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG84-PHASEA;
+};
+name PRUG84-LINECONFIG;
+};
+phases A;
+from nodePROH16279PROH16278;
+name PRUG84;
+to node263-30-850PRUG84;
+length 260.644;
+};
+
+object load {
+phases AN;
+load_class R;
+name 263-30-850;
+parent node263-30-850PRUG84;
+constant_power_C 0+0j;
+constant_power_A 4116+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG5361-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG5361-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG5361-PHASEB;
+};
+name PRUG5361-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG5361-PHASEC;
+};
+};
+phases ABC;
+from nodePROH16277PRUG5002;
+name PRUG5361;
+to nodePROH277PRUG5361;
+length 3866.74;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH277-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH277-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH277PRUG5361;
+name PROH277;
+to node263-30-380PROH277;
+length 268.474;
+};
+
+object load {
+phases AN;
+load_class R;
+name 263-30-380;
+parent node263-30-380PROH277;
+constant_power_C 0+0j;
+constant_power_A 5599+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG5362-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG5362-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG5362-PHASEB;
+};
+name PRUG5362-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG5362-PHASEC;
+};
+};
+phases ABC;
+from nodePROH277PRUG5361;
+name PRUG5362;
+to nodeSWIT_361-BPRUG5362;
+length 947.289;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG85-LINESPACING;
+};
+conductor_B object underground_line_conductor {
+name PRUG85-PHASEB;
+};
+name PRUG85-LINECONFIG;
+};
+phases B;
+from nodePRUG5002PRUG5001;
+name PRUG85;
+to node263-32-310PRUG85;
+length 305.542;
+};
+
+object load {
+phases BN;
+load_class R;
+name 263-32-310;
+parent node263-32-310PRUG85;
+constant_power_C 0+0j;
+constant_power_A 0+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG3303-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG3303-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG3303-PHASEB;
+};
+name PRUG3303-LINECONFIG;
+conductor_N object underground_line_conductor {
+name PRUG3303-PHASEC;
+};
+};
+phases ABN;
+from nodePRUG5000PRUG3301;
+name PRUG3303;
+to nodePROH16622PRUG3303;
+length 836.732;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH16622-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH16622-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH16622PRUG3303;
+name PROH16622;
+to nodeFUSE_434PROH16622;
+length 242.872;
+};
+
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH16623-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH16623-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH16623FUSE_434;
+name PROH16623;
+to nodePROH2887PROH16623;
+length 254.225;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH2887-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH2887-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH2887PROH16623;
+name PROH2887;
+to node283-05-120PROH2887;
+length 442.266;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-05-120;
+parent node283-05-120PROH2887;
+constant_power_C 0+0j;
+constant_power_A 0+0j;
+nominal_voltage 2400;
+constant_power_B 835+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH16624-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH16624-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH2887PROH16623;
+name PROH16624;
+to nodePROH2886PROH16624;
+length 3290.55;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH2886-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH2886-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH2886PROH16624;
+name PROH2886;
+to node263-32-860PROH2886;
+length 661.995;
+};
+
+object load {
+phases BN;
+load_class R;
+name 263-32-860;
+parent node263-32-860PROH2886;
+constant_power_C 0+0j;
+constant_power_A 0+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH8542-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH8542-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases ABN;
+from nodePROH16622PRUG3303;
+name PROH8542;
+to nodePROH19454PROH8542;
+length 81.2263;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH19454-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH19454-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH19454PROH8542;
+name PROH19454;
+to nodeRECL_844PROH19454;
+length 171.711;
+};
+
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH19455-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH19455-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH19455RECL_844;
+name PROH19455;
+to nodePROH266PROH19455;
+length 2702.01;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH266-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH266-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH266PROH19455;
+name PROH266;
+to node283-06-131PROH266;
+length 260.372;
+};
+
+object load {
+phases AN;
+load_class R;
+name 283-06-131;
+parent node283-06-131PROH266;
+constant_power_C 0+0j;
+constant_power_A 125+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object load {
+phases AN;
+load_class R;
+name 283-06-130;
+parent node283-06-131PROH266;
+constant_power_C 0+0j;
+constant_power_A 3000+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH19456-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH19456-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH266PROH19455;
+name PROH19456;
+to nodePROH20016PROH19456;
+length 2354.05;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH20016-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH20016-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH20016PROH19456;
+name PROH20016;
+to nodePROH268PROH20016;
+length 171.315;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH268-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH268-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH268PROH20016;
+name PROH268;
+to node282-01-180PROH268;
+length 88.6741;
+};
+
+object load {
+phases AN;
+load_class R;
+name 282-01-180;
+parent node282-01-180PROH268;
+constant_power_C 0+0j;
+constant_power_A 900+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH20017-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH20017-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH268PROH20016;
+name PROH20017;
+to nodePROH20018PROH20017;
+length 2039.77;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH20018-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH20018-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH20018PROH20017;
+name PROH20018;
+to nodePRUG81PROH20018;
+length 1659.7;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG81-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG81-PHASEA;
+};
+name PRUG81-LINECONFIG;
+};
+phases A;
+from nodePRUG81PROH20018;
+name PRUG81;
+to node282-01-680PRUG81;
+length 784.938;
+};
+
+object load {
+phases AN;
+load_class R;
+name 282-01-680;
+parent node282-01-680PRUG81;
+constant_power_C 0+0j;
+constant_power_A 10279+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH20019-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH20019-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePRUG81PROH20018;
+name PROH20019;
+to nodePROH20020PROH20019;
+length 677.389;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH20020-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH20020-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH20020PROH20019;
+name PROH20020;
+to nodeSWIT_617-APROH20020;
+length 721.565;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH270-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH270-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH20020PROH20019;
+name PROH270;
+to node283-06-720PROH270;
+length 1628.51;
+};
+
+object load {
+phases AN;
+load_class R;
+name 283-06-720;
+parent node283-06-720PROH270;
+constant_power_C 0+0j;
+constant_power_A 5683+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH269-LINESPACING;
+};
+conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH269-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases AN;
+from nodePROH20018PROH20017;
+name PROH269;
+to node283-06-310PROH269;
+length 353.428;
+};
+
+object load {
+phases AN;
+load_class R;
+name 283-06-310;
+parent node283-06-310PROH269;
+constant_power_C 0+0j;
+constant_power_A 270+0j;
+nominal_voltage 2400;
+constant_power_B 0+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH16513-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH16513-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH19454PROH8542;
+name PROH16513;
+to nodeRECL_845PROH16513;
+length 356.333;
+};
+
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH16514-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH16514-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH16514RECL_845;
+name PROH16514;
+to nodePROH16515PROH16514;
+length 5239;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH16515-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH16515-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH16515PROH16514;
+name PROH16515;
+to nodePRUG834PROH16515;
+length 3573.77;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG834-LINESPACING;
+};
+conductor_B object underground_line_conductor {
+name PRUG834-PHASEB;
+};
+name PRUG834-LINECONFIG;
+};
+phases B;
+from nodePRUG834PROH16515;
+name PRUG834;
+to node283-08-710PRUG834;
+length 407.943;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-08-710;
+parent node283-08-710PRUG834;
+constant_power_C 0+0j;
+constant_power_A 0+0j;
+nominal_voltage 2400;
+constant_power_B 8023+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH16516-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH16516-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePRUG834PROH16515;
+name PROH16516;
+to node283-17-120PROH16516;
+length 3046.11;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-17-120;
+parent node283-17-120PROH16516;
+constant_power_C 0+0j;
+constant_power_A 0+0j;
+nominal_voltage 2400;
+constant_power_B 668+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH11498-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH11498-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH16515PROH16514;
+name PROH11498;
+to nodePROH2878PROH11498;
+length 732.994;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH2878-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH2878-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH2878PROH11498;
+name PROH2878;
+to node283-08-120PROH2878;
+length 156.322;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-08-120;
+parent node283-08-120PROH2878;
+constant_power_C 0+0j;
+constant_power_A 0+0j;
+nominal_voltage 2400;
+constant_power_B 2686+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH11499-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH11499-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH2878PROH11498;
+name PROH11499;
+to nodePROH2877PROH11499;
+length 1448.01;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH2877-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH2877-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH2877PROH11499;
+name PROH2877;
+to node283-05-830PROH2877;
+length 144.164;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-05-830;
+parent node283-05-830PROH2877;
+constant_power_C 0+0j;
+constant_power_A 0+0j;
+nominal_voltage 2400;
+constant_power_B 20+0j;
+};
+
+object overhead_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PROH11500-LINESPACING;
+};
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+name PROH11500-LINECONFIG;
+conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+};
+phases BN;
+from nodePROH2877PROH11499;
+name PROH11500;
+to node283-08-170PROH11500;
+length 810.044;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-08-170;
+parent node283-08-170PROH11500;
+constant_power_C 0+0j;
+constant_power_A 0+0j;
+nominal_voltage 2400;
+constant_power_B 3463+0j;
+};
+
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG4190-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG4190-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG4190-PHASEB;
+};
+name PRUG4190-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG4190-PHASEC;
+};
+};
+phases ABC;
+from nodePRUG4190RECL_1160;
+name PRUG4190;
+to nodePRUG4176PRUG4190;
+length 289.527;
+};
+
+object underground_line {
+configuration object line_configuration {
+spacing object line_spacing {
+name PRUG4176-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name PRUG4176-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name PRUG4176-PHASEB;
+};
+name PRUG4176-LINECONFIG;
+conductor_C object underground_line_conductor {
+name PRUG4176-PHASEC;
+};
+};
+phases ABC;
+from nodePRUG4176PRUG4190;
+name PRUG4176;
+to node263-32-710PRUG4176;
+length 3185.68;
+};
+
+object load {
+phases ABCN;
+load_class R;
+name 263-32-710;
+parent node263-32-710PRUG4176;
+constant_power_C 1853.7+0j;
+constant_power_A 1853.7+0j;
+nominal_voltage 2400;
+constant_power_B 1853.7+0j;
+};
+
+object capacitor {
+control VOLT;
+phases ABCN;
+capacitor_A 0.10 MVAr;
+name NEWCAP-1D1DC669;
+parent node263-32-710PRUG4176;
+capacitor_C 0.10 MVAr;
+capacitor_B 0.10 MVAr;
+phases_connected ABCN;
+time_delay 300.0;
+nominal_voltage 2400;
+switchB CLOSED;
+voltage_set_low 2340.0;
+switchC CLOSED;
+control_level INDIVIDUAL;
+switchA CLOSED;
+pt_phase ABCN;
+dwell_time 0.0;
+voltage_set_high 2350.0;
+};
+
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG6689RECL_1161;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG6690PRUG6689;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG6691PRUG6690;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG6692PRUG6691;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG6693PRUG6692;
+};
+
+object node {
+phases ABCN;
+nominal_voltage 2400;
+name nodeSWIT_737-APRUG6693;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG3301RECL_1162;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG5000PRUG3301;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG3297PRUG5000;
+};
+
+object node {
+phases CN;
+nominal_voltage 2400;
+name node263-32-311PRUG3297;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG5002PRUG5001;
+};
+
+object node {
+phases ABCN;
+nominal_voltage 2400;
+name nodePROH16277PRUG5002;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH279PROH16277;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node263-31-260PROH279;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH16279PROH16278;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node263-30-850PRUG84;
+};
+
+object node {
+phases ABCN;
+nominal_voltage 2400;
+name nodePROH277PRUG5361;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node263-30-380PROH277;
+};
+
+object node {
+phases ABCN;
+nominal_voltage 2400;
+name nodeSWIT_361-BPRUG5362;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node263-32-310PRUG85;
+};
+
+object node {
+phases ABN;
+nominal_voltage 2400;
+name nodePROH16622PRUG3303;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodeFUSE_434PROH16622;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH16623FUSE_434;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH2887PROH16623;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-05-120PROH2887;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH2886PROH16624;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node263-32-860PROH2886;
+};
+
+object node {
+phases ABN;
+nominal_voltage 2400;
+name nodePROH19454PROH8542;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodeRECL_844PROH19454;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH19455RECL_844;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH266PROH19455;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node283-06-131PROH266;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH20016PROH19456;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH268PROH20016;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node282-01-180PROH268;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH20018PROH20017;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePRUG81PROH20018;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node282-01-680PRUG81;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH20020PROH20019;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodeSWIT_617-APROH20020;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node283-06-720PROH270;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node283-06-310PROH269;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodeRECL_845PROH16513;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH16514RECL_845;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH16515PROH16514;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePRUG834PROH16515;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-08-710PRUG834;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-17-120PROH16516;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH2878PROH11498;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-08-120PROH2878;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH2877PROH11499;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-05-830PROH2877;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-08-170PROH11500;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG4190RECL_1160;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG4176PRUG4190;
+};
+
+object node {
+phases ABCN;
+nominal_voltage 2400;
+name node263-32-710PRUG4176;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG4180RECL_993;
+};
+
+object recorder {
+property temperature, solar_direct, wind_speed, rainfall, snowdepth;
+interval 3600;
+limit 0;
+file Climate_Climate.csv;
+parent Climate;
+};
+
+object voltdump {
+filename output_voltage.csv;
+}
+
+
+object underground_line {
+phases ABCN;
+from REMBRANDT;
+name RECL_1161;
+configuration object line_configuration {
+spacing object line_spacing {
+name 1PRUG6689-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name 1PRUG6689-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name 1PRUG6689-PHASEB;
+};
+conductor_N object underground_line_conductor {
+name 1NPRUG6689-PHASEA;
+};
+name 1PRUG6689-LINECONFIG;
+conductor_C object underground_line_conductor {
+name 1PRUG6689-PHASEC;
+};
+};
+length 10;
+to nodePRUG6689RECL_1161;
+};
+
+object underground_line {
+phases ABCN;
+from REMBRANDT;
+name RECL_1162;
+configuration object line_configuration {
+spacing object line_spacing {
+name 2PRUG6689-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name 2PRUG6689-PHASEA;
+};
+conductor_N object underground_line_conductor {
+name 2NPRUG6689-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name 2PRUG6689-PHASEB;
+};
+name 2PRUG6689-LINECONFIG;
+conductor_C object underground_line_conductor {
+name 2PRUG6689-PHASEC;
+};
+};
+length 10;
+to nodePRUG3301RECL_1162;
+};
+
+object underground_line {
+phases BN;
+from nodeFUSE_434PROH16622;
+name FUSE_434;
+configuration object line_configuration {
+spacing object line_spacing {
+name 3PRUG6689-LINESPACING;
+};
+conductor_B object underground_line_conductor {
+name 3PRUG6689-PHASEB;
+};
+conductor_N object underground_line_conductor {
+name NN3PRUG6689-PHASEB;
+};
+name 3PRUG6689-LINECONFIG;
+};
+length 10;
+to nodePROH16623FUSE_434;
+};
+
+object underground_line {
+phases AN;
+from nodeRECL_844PROH19454;
+name RECL_844;
+configuration object line_configuration {
+spacing object line_spacing {
+name 4PRUG6689-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name 4PRUG6689-PHASEA;
+};
+conductor_N object underground_line_conductor {
+name 11NPRUG6689-PHASEA;
+};
+name 4PRUG6689-LINECONFIG;
+};
+length 10;
+to nodePROH19455RECL_844;
+};
+
+object underground_line {
+phases BN;
+from nodeRECL_845PROH16513;
+name RECL_845;
+configuration object line_configuration {
+spacing object line_spacing {
+name 5PRUG6689-LINESPACING;
+};
+conductor_B object underground_line_conductor {
+name 5PRUG6689-PHASEB;
+};
+conductor_N object underground_line_conductor {
+name 12NPRUG6689-PHASEA;
+};
+name 5PRUG6689-LINECONFIG;
+};
+length 10;
+to nodePROH16514RECL_845;
+};
+
+object underground_line {
+phases ABCN;
+from REMBRANDT;
+name RECL_1160;
+configuration object line_configuration {
+spacing object line_spacing {
+name 6PRUG6689-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name 6PRUG6689-PHASEA;
+};
+conductor_N object underground_line_conductor {
+name 14NPRUG6689-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name 6PRUG6689-PHASEB;
+};
+name 6PRUG6689-LINECONFIG;
+conductor_C object underground_line_conductor {
+name 6PRUG6689-PHASEC;
+};
+};
+length 10;
+to nodePRUG4190RECL_1160;
+};
+
+object underground_line {
+phases ABCN;
+from REMBRANDT;
+name RECL_993;
+configuration object line_configuration {
+spacing object line_spacing {
+name 7PRUG6689-LINESPACING;
+};
+conductor_A object underground_line_conductor {
+name 7PRUG6689-PHASEA;
+};
+conductor_N object underground_line_conductor {
+name 15NPRUG6689-PHASEA;
+};
+conductor_B object underground_line_conductor {
+name 7PRUG6689-PHASEB;
+};
+name 7PRUG6689-LINECONFIG;
+conductor_C object underground_line_conductor {
+name 7PRUG6689-PHASEC;
+};
+};
+length 10;
+to nodePRUG4180RECL_993;
+};
