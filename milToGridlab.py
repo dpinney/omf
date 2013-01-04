@@ -61,6 +61,7 @@ def convert(stdPath,seqPath):
 			for row in hardwareStats:
 				if row[0] == deviceName:
 					return row
+			return None
 
 		def convertGenericObject(objectList):
 			''' this converts attributes that are in every milsoft object regardless of hardware type '''
@@ -181,23 +182,21 @@ def convert(stdPath,seqPath):
 			overhead[1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
 							'name': overhead['name'] + '-LINECONFIG'}
 			overhead[1][2] = {	'omfEmbeddedConfigObject' : 'spacing object line_spacing',
-								'name': overhead['name'] + '-LINESPACING'}
-			if 'A' in overhead['phases']:
-				overhead[1][3] = {	'omfEmbeddedConfigObject':'conductor_A object overhead_line_conductor',
-									'resistance':statsByName(ohLineList[8])[5],
-									'geometric_mean_radius':statsByName(ohLineList[8])[6] }
-			if 'B' in overhead['phases']:
-				overhead[1][4] = {	'omfEmbeddedConfigObject':'conductor_B object overhead_line_conductor',
-									'resistance':statsByName(ohLineList[9])[5],
-									'geometric_mean_radius':statsByName(ohLineList[9])[6] }
-			if 'C' in overhead['phases']:
-				overhead[1][5] = {	'omfEmbeddedConfigObject':'conductor_C object overhead_line_conductor',
-									'resistance':statsByName(ohLineList[10])[5],
-									'geometric_mean_radius':statsByName(ohLineList[10])[6] }
-			if 'N' in overhead['phases']:
-				overhead[1][6] = {	'omfEmbeddedConfigObject':'conductor_N object overhead_line_conductor',
-									'resistance':statsByName(ohLineList[11])[5],
-									'geometric_mean_radius':statsByName(ohLineList[11])[6] }
+								'name': overhead['name'] + '-LINESPACING',
+								'distance_BC': '7.0',
+								'distance_CN': '5.0',
+								'distance_AN': '4.272002',
+								'distance_AB': '2.5',
+								'distance_BN': '5.656854',
+								'distance_AC': '4.5'}
+			eqdbIndex = {'A':8,'B':9,'C':10,'N':11}
+			condIndex = {'A':3,'B':4,'C':5,'N':6}
+			for letter in overhead['phases']:
+				res = statsByName(ohLineList[eqdbIndex[letter]])[5]
+				geoRad = statsByName(ohLineList[eqdbIndex[letter]])[6]
+				overhead[1][condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object overhead_line_conductor',
+													'resistance': ('0.185900' if res is '0' else res),
+													'geometric_mean_radius': ('0.031300' if geoRad is '0' else geoRad)}
 			return overhead
 
 		def convertUgLine(ugLineList):
@@ -208,20 +207,28 @@ def convert(stdPath,seqPath):
 			underground[1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
 								'name': underground['name'] + '-LINECONFIG'}
 			underground[1][2] = {	'omfEmbeddedConfigObject' : 'spacing object line_spacing',
-									'name':underground['name'] + '-LINESPACING'}
+									'name':underground['name'] + '-LINESPACING',
+									'distance_AN': '0.000000',
+									'distance_CN': '0.000000',
+									'distance_BC': '0.500000',
+									'distance_AB': '0.500000',
+									'distance_AC': '1.000000',
+									'distance_BN': '0.000000'}
 			#TODO: actually get conductor values!
-			if 'A' in underground['phases']:
-				underground[1][3] = {	'omfEmbeddedConfigObject':'conductor_A object underground_line_conductor',
-										'name':underground['name'] + '-PHASEA'}
-			if 'B' in underground['phases']:
-				underground[1][4] = {	'omfEmbeddedConfigObject':'conductor_B object underground_line_conductor',
-										'name':underground['name'] + '-PHASEB'}
-			if 'C' in underground['phases']:
-				underground[1][5] = {	'omfEmbeddedConfigObject':'conductor_C object underground_line_conductor',
-										'name':underground['name'] + '-PHASEC'}
-			if 'N' in underground['phases']:
-				underground[1][6] = {	'omfEmbeddedConfigObject':'conductor_N object underground_line_conductor',
-										'name':underground['name'] + '-PHASEN'}
+			condIndex = {'A':3,'B':4,'C':5,'N':6}
+			for letter in underground['phases']:
+				underground[1][condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
+														'name':underground['name'] + '-PHASE' + letter,
+														'conductor_resistance': '1.540000',
+														'shield_resistance': '0.000000',
+														'neutral_gmr': '0.002080',
+														'outer_diameter': '0.980000',
+														'neutral_strands': '6.000000',
+														'neutral_resistance': '14.872000',
+														'neutral_diameter': '0.064000',
+														'conductor_diameter': '0.292000',
+														'shield_gmr': '0.000000',
+														'conductor_gmr': '0.008830'}
 			return underground
 
 		def convertRegulator(regList):
@@ -323,9 +330,13 @@ def convert(stdPath,seqPath):
 			else:
 				pass # print parent
 
-		def phaseMerge(*arg):
-			concated = ''.join(arg)
-			return ''.join(sorted(set(concated)))
+		# print 'is this broken!?'
+		# def phaseMerge(*arg):
+		# 	concated = ''.join(arg)
+		# 	return ''.join(sorted(set(concated)))
+
+		def phaseMerge(x,y):
+			return ''.join(sorted(set.intersection(set(x),set(y))))
 
 		# If we already stripped the GUID, don't process:
 		if 'guid' not in comp.keys():
@@ -403,7 +414,8 @@ def convert(stdPath,seqPath):
 
 def main():
 	''' tests go here '''
-	outGlm = convert('./uploads/ACEC-FRIENDSHIP.std','./uploads/ACEC.seq')
+	outGlm = convert('./uploads/ILEC-Rembrandt.std','./uploads/ILEC.seq')
+	# print outGlm
 
 if __name__ == '__main__':
 	main()

@@ -2,8 +2,9 @@
 
 import os
 import sys
-sys.path.append('/Users/dwp0/Dropbox/OMF/windmilToGridlab')
+sys.path.append(os.path.dirname(os.path.dirname(os.getcwd())))
 import treeParser as tp
+import milToGridlab
 from pprint import pprint
 
 glmTree = tp.parse('ILEC-Rembrandt-Handedit.glm')
@@ -29,3 +30,9 @@ for coord in lineCoords:
 outGlmString = tp.sortedWrite(glmTree)
 with open('ILEC-Rembrandt-SYNTH.glm','w') as synthFile:
 	synthFile.write(outGlmString)
+
+
+# also do a regular conversion
+outGlm = milToGridlab.convert('../../uploads/ILEC-Rembrandt.std','../../uploads/ILEC.seq')
+with open('ILEC-Rembrandt-AUTOSYNTH.glm','w') as synthFile2:
+	synthFile2.write(outGlm)
