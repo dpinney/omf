@@ -24,7 +24,7 @@
 	<testoutputfile>test.txt</testoutputfile>
 	<xml_encoding>8</xml_encoding>
 	<clock>2000-01-01 00:00:00 PST</clock>
-	<starttime>2013-01-04 15:23:28 PST</starttime>
+	<starttime>2013-01-07 10:33:11 PST</starttime>
 	<stoptime>2000-01-02 00:00:00 PST</stoptime>
 	<double_format>%+lg</double_format>
 	<complex_format>%+lg%+lg%c</complex_format>
@@ -209,7 +209,7 @@
 			<inherits_from>powerflow_object</inherits_from>
 			<node>
 				<id>1</id>
-				<rank>12</rank>
+				<rank>17</rank>
 				<out_svc>NEVER</out_svc>
 				<name>REMBRANDT</name>
 				<bustype>SWING</bustype>
@@ -418,7 +418,7 @@
 			</node>
 			<node>
 				<id>295</id>
-				<rank>7</rank>
+				<rank>15</rank>
 				<out_svc>NEVER</out_svc>
 				<parent>RECL_1162</parent>
 				<name>nodePRUG3301RECL_1162</name>
@@ -448,7 +448,7 @@
 			</node>
 			<node>
 				<id>296</id>
-				<rank>5</rank>
+				<rank>13</rank>
 				<out_svc>NEVER</out_svc>
 				<parent>PRUG3301</parent>
 				<name>nodePRUG5000PRUG3301</name>
@@ -478,7 +478,7 @@
 			</node>
 			<node>
 				<id>297</id>
-				<rank>3</rank>
+				<rank>11</rank>
 				<out_svc>NEVER</out_svc>
 				<parent>PRUG5000</parent>
 				<name>nodePRUG3297PRUG5000</name>
@@ -503,7 +503,7 @@
 				<NR_mode>FALSE</NR_mode>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<service_status>IN_SERVICE</service_status>
-				<phases>C</phases>
+				<phases>ABC</phases>
 				<nominal_voltage>+2400 V</nominal_voltage>
 			</node>
 			<node>
@@ -538,7 +538,7 @@
 			</node>
 			<node>
 				<id>299</id>
-				<rank>0</rank>
+				<rank>9</rank>
 				<out_svc>NEVER</out_svc>
 				<parent>PRUG5001</parent>
 				<name>nodePRUG5002PRUG5001</name>
@@ -563,13 +563,14 @@
 				<NR_mode>FALSE</NR_mode>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<service_status>IN_SERVICE</service_status>
-				<phases>B</phases>
+				<phases>ABC</phases>
 				<nominal_voltage>+2400 V</nominal_voltage>
 			</node>
 			<node>
 				<id>300</id>
-				<rank>0</rank>
+				<rank>7</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>PRUG5002</parent>
 				<name>nodePROH16277PRUG5002</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -592,13 +593,14 @@
 				<NR_mode>FALSE</NR_mode>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<service_status>IN_SERVICE</service_status>
-				<phases>A</phases>
+				<phases>ABCN</phases>
 				<nominal_voltage>+2400 V</nominal_voltage>
 			</node>
 			<node>
 				<id>301</id>
-				<rank>0</rank>
+				<rank>5</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>PROH16277</parent>
 				<name>nodePROH279PROH16277</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -628,6 +630,7 @@
 				<id>302</id>
 				<rank>1</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>PROH279</parent>
 				<name>node263-31-260PROH279</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -655,8 +658,9 @@
 			</node>
 			<node>
 				<id>303</id>
-				<rank>0</rank>
+				<rank>3</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>PROH16278</parent>
 				<name>nodePROH16279PROH16278</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -679,13 +683,14 @@
 				<NR_mode>FALSE</NR_mode>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<service_status>IN_SERVICE</service_status>
-				<phases>A</phases>
+				<phases>AN</phases>
 				<nominal_voltage>+2400 V</nominal_voltage>
 			</node>
 			<node>
 				<id>304</id>
 				<rank>1</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>PRUG84</parent>
 				<name>node263-30-850PRUG84</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -713,8 +718,9 @@
 			</node>
 			<node>
 				<id>305</id>
-				<rank>0</rank>
+				<rank>3</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>PRUG5361</parent>
 				<name>nodePROH277PRUG5361</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -737,13 +743,14 @@
 				<NR_mode>FALSE</NR_mode>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<service_status>IN_SERVICE</service_status>
-				<phases>A</phases>
+				<phases>ABCN</phases>
 				<nominal_voltage>+2400 V</nominal_voltage>
 			</node>
 			<node>
 				<id>306</id>
 				<rank>1</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>PROH277</parent>
 				<name>node263-30-380PROH277</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -773,6 +780,7 @@
 				<id>307</id>
 				<rank>0</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>PRUG5362</parent>
 				<name>nodeSWIT_361-BPRUG5362</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -802,6 +810,7 @@
 				<id>308</id>
 				<rank>1</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>PRUG85</parent>
 				<name>node263-32-310PRUG85</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -831,6 +840,7 @@
 				<id>309</id>
 				<rank>0</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>PRUG3303</parent>
 				<name>nodePROH16622PRUG3303</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -853,7 +863,7 @@
 				<NR_mode>FALSE</NR_mode>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<service_status>IN_SERVICE</service_status>
-				<phases>BN</phases>
+				<phases>ABN</phases>
 				<nominal_voltage>+2400 V</nominal_voltage>
 			</node>
 			<node>
@@ -1056,7 +1066,7 @@
 				<NR_mode>FALSE</NR_mode>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<service_status>IN_SERVICE</service_status>
-				<phases>N</phases>
+				<phases>ABN</phases>
 				<nominal_voltage>+2400 V</nominal_voltage>
 			</node>
 			<node>
@@ -1317,7 +1327,7 @@
 				<NR_mode>FALSE</NR_mode>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<service_status>IN_SERVICE</service_status>
-				<phases>A</phases>
+				<phases>AN</phases>
 				<nominal_voltage>+2400 V</nominal_voltage>
 			</node>
 			<node>
@@ -1578,7 +1588,7 @@
 				<NR_mode>FALSE</NR_mode>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<service_status>IN_SERVICE</service_status>
-				<phases>B</phases>
+				<phases>BN</phases>
 				<nominal_voltage>+2400 V</nominal_voltage>
 			</node>
 			<node>
@@ -2006,7 +2016,7 @@
 			</fuse>
 			<fuse>
 				<id>33</id>
-				<rank>8</rank>
+				<rank>16</rank>
 				<out_svc>NEVER</out_svc>
 				<parent>REMBRANDT</parent>
 				<name>RECL_1162</name>
@@ -2882,8 +2892,9 @@
 			<inherits_from>line</inherits_from>
 			<overhead_line>
 				<id>63</id>
-				<rank>0</rank>
+				<rank>6</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>nodePROH16277PRUG5002</parent>
 				<name>PROH16277</name>
 				<configuration>PROH16277-LINECONFIG</configuration>
 				<length>+2143.18 ft</length>
@@ -2918,12 +2929,13 @@
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<phases>AN</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</overhead_line>
 			<overhead_line>
 				<id>68</id>
-				<rank>0</rank>
+				<rank>2</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>nodePROH279PROH16277</parent>
 				<name>PROH279</name>
 				<configuration>PROH279-LINECONFIG</configuration>
 				<length>+1004.64 ft</length>
@@ -2958,12 +2970,13 @@
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<phases>AN</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</overhead_line>
 			<overhead_line>
 				<id>74</id>
-				<rank>0</rank>
+				<rank>4</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>nodePROH279PROH16277</parent>
 				<name>PROH16278</name>
 				<configuration>PROH16278-LINECONFIG</configuration>
 				<length>+214.966 ft</length>
@@ -2998,12 +3011,13 @@
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<phases>AN</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</overhead_line>
 			<overhead_line>
 				<id>90</id>
-				<rank>0</rank>
+				<rank>2</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>nodePROH277PRUG5361</parent>
 				<name>PROH277</name>
 				<configuration>PROH277-LINECONFIG</configuration>
 				<length>+268.474 ft</length>
@@ -3038,7 +3052,7 @@
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<phases>AN</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</overhead_line>
 			<overhead_line>
 				<id>113</id>
@@ -4330,7 +4344,7 @@
 			</underground_line>
 			<underground_line>
 				<id>34</id>
-				<rank>6</rank>
+				<rank>14</rank>
 				<out_svc>NEVER</out_svc>
 				<parent>nodePRUG3301RECL_1162</parent>
 				<name>PRUG3301</name>
@@ -4371,7 +4385,7 @@
 			</underground_line>
 			<underground_line>
 				<id>40</id>
-				<rank>4</rank>
+				<rank>12</rank>
 				<out_svc>NEVER</out_svc>
 				<parent>nodePRUG5000PRUG3301</parent>
 				<name>PRUG5000</name>
@@ -4407,7 +4421,7 @@
 				<fault_current_out_C>+0+0j A</fault_current_out_C>
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
-				<phases>C</phases>
+				<phases>ABC</phases>
 				<nominal_voltage>+2400 V</nominal_voltage>
 			</underground_line>
 			<underground_line>
@@ -4453,7 +4467,7 @@
 			</underground_line>
 			<underground_line>
 				<id>51</id>
-				<rank>1</rank>
+				<rank>10</rank>
 				<out_svc>NEVER</out_svc>
 				<parent>nodePRUG3297PRUG5000</parent>
 				<name>PRUG5001</name>
@@ -4489,13 +4503,14 @@
 				<fault_current_out_C>+0+0j A</fault_current_out_C>
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
-				<phases>A</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<phases>ABC</phases>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</underground_line>
 			<underground_line>
 				<id>57</id>
-				<rank>0</rank>
+				<rank>8</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>nodePRUG5002PRUG5001</parent>
 				<name>PRUG5002</name>
 				<configuration>PRUG5002-LINECONFIG</configuration>
 				<length>+848.662 ft</length>
@@ -4530,12 +4545,13 @@
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<phases>ABC</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</underground_line>
 			<underground_line>
 				<id>79</id>
-				<rank>0</rank>
+				<rank>2</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>nodePROH16279PROH16278</parent>
 				<name>PRUG84</name>
 				<configuration>PRUG84-LINECONFIG</configuration>
 				<length>+260.644 ft</length>
@@ -4570,12 +4586,13 @@
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<phases>A</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</underground_line>
 			<underground_line>
 				<id>84</id>
-				<rank>0</rank>
+				<rank>4</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>nodePROH16277PRUG5002</parent>
 				<name>PRUG5361</name>
 				<configuration>PRUG5361-LINECONFIG</configuration>
 				<length>+3866.74 ft</length>
@@ -4610,12 +4627,13 @@
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<phases>ABC</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</underground_line>
 			<underground_line>
 				<id>96</id>
-				<rank>0</rank>
+				<rank>1</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>nodePROH277PRUG5361</parent>
 				<name>PRUG5362</name>
 				<configuration>PRUG5362-LINECONFIG</configuration>
 				<length>+947.289 ft</length>
@@ -4650,12 +4668,13 @@
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<phases>ABC</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</underground_line>
 			<underground_line>
 				<id>102</id>
-				<rank>0</rank>
+				<rank>2</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>nodePRUG5002PRUG5001</parent>
 				<name>PRUG85</name>
 				<configuration>PRUG85-LINECONFIG</configuration>
 				<length>+305.542 ft</length>
@@ -4690,12 +4709,13 @@
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
 				<phases>B</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</underground_line>
 			<underground_line>
 				<id>107</id>
-				<rank>0</rank>
+				<rank>1</rank>
 				<out_svc>NEVER</out_svc>
+				<parent>nodePRUG5000PRUG3301</parent>
 				<name>PRUG3303</name>
 				<configuration>PRUG3303-LINECONFIG</configuration>
 				<length>+836.732 ft</length>
@@ -4729,8 +4749,8 @@
 				<fault_current_out_C>+0+0j A</fault_current_out_C>
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
-				<phases>ABC</phases>
-				<nominal_voltage>+0 V</nominal_voltage>
+				<phases>ABN</phases>
+				<nominal_voltage>+2400 V</nominal_voltage>
 			</underground_line>
 			<underground_line>
 				<id>191</id>
@@ -7665,8 +7685,8 @@
 				<impedance_fraction_C>+0 pu</impedance_fraction_C>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
-				<maximum_voltage_error>+0 V</maximum_voltage_error>
-				<voltage_A>+0+0d V</voltage_A>
+				<maximum_voltage_error>+0.00012 V</maximum_voltage_error>
+				<voltage_A>+120+0d V</voltage_A>
 				<voltage_B>+0+0d V</voltage_B>
 				<voltage_C>+0+0d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -7751,8 +7771,8 @@
 				<impedance_fraction_C>+0 pu</impedance_fraction_C>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
-				<maximum_voltage_error>+0 V</maximum_voltage_error>
-				<voltage_A>+0+0d V</voltage_A>
+				<maximum_voltage_error>+0.00012 V</maximum_voltage_error>
+				<voltage_A>+120+0d V</voltage_A>
 				<voltage_B>+0+0d V</voltage_B>
 				<voltage_C>+0+0d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -7837,8 +7857,8 @@
 				<impedance_fraction_C>+0 pu</impedance_fraction_C>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
-				<maximum_voltage_error>+0 V</maximum_voltage_error>
-				<voltage_A>+0+0d V</voltage_A>
+				<maximum_voltage_error>+0.00012 V</maximum_voltage_error>
+				<voltage_A>+120+0d V</voltage_A>
 				<voltage_B>+0+0d V</voltage_B>
 				<voltage_C>+0+0d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -7923,7 +7943,7 @@
 				<impedance_fraction_C>+0 pu</impedance_fraction_C>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
-				<maximum_voltage_error>+0 V</maximum_voltage_error>
+				<maximum_voltage_error>+0.00012 V</maximum_voltage_error>
 				<voltage_A>+0+0d V</voltage_A>
 				<voltage_B>+0+0d V</voltage_B>
 				<voltage_C>+0+0d V</voltage_C>

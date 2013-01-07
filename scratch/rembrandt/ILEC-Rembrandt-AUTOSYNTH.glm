@@ -454,7 +454,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases C;
+phases ABC;
 from nodePRUG5000PRUG3301;
 name PRUG5000;
 to nodePRUG3297PRUG5000;
@@ -557,7 +557,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases A;
+phases ABC;
 from nodePRUG3297PRUG5000;
 name PRUG5001;
 to nodePRUG5002PRUG5001;
@@ -1015,7 +1015,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases AB;
 from nodePRUG5000PRUG3301;
 name PRUG3303;
 to nodePROH16622PRUG3303;
@@ -2230,7 +2230,7 @@ name nodePRUG5000PRUG3301;
 };
 
 object node {
-phases C;
+phases ABC;
 nominal_voltage 2400;
 name nodePRUG3297PRUG5000;
 };
@@ -2242,13 +2242,13 @@ name node263-32-311PRUG3297;
 };
 
 object node {
-phases B;
+phases ABC;
 nominal_voltage 2400;
 name nodePRUG5002PRUG5001;
 };
 
 object node {
-phases A;
+phases ABCN;
 nominal_voltage 2400;
 name nodePROH16277PRUG5002;
 };
@@ -2266,7 +2266,7 @@ name node263-31-260PROH279;
 };
 
 object node {
-phases A;
+phases AN;
 nominal_voltage 2400;
 name nodePROH16279PROH16278;
 };
@@ -2278,7 +2278,7 @@ name node263-30-850PRUG84;
 };
 
 object node {
-phases A;
+phases ABCN;
 nominal_voltage 2400;
 name nodePROH277PRUG5361;
 };
@@ -2302,7 +2302,7 @@ name node263-32-310PRUG85;
 };
 
 object node {
-phases BN;
+phases ABN;
 nominal_voltage 2400;
 name nodePROH16622PRUG3303;
 };
@@ -2344,7 +2344,7 @@ name node263-32-860PROH2886;
 };
 
 object node {
-phases N;
+phases ABN;
 nominal_voltage 2400;
 name nodePROH19454PROH8542;
 };
@@ -2398,7 +2398,7 @@ name nodePROH20018PROH20017;
 };
 
 object node {
-phases A;
+phases AN;
 nominal_voltage 2400;
 name nodePRUG81PROH20018;
 };
@@ -2452,7 +2452,7 @@ name nodePROH16515PROH16514;
 };
 
 object node {
-phases B;
+phases BN;
 nominal_voltage 2400;
 name nodePRUG834PROH16515;
 };

@@ -73,18 +73,54 @@
                 "name": "PRUG6689-LINECONFIG", 
                 "14": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG6689-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG6689-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "15": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6689-PHASEA"
                 }, 
                 "16": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6689-PHASEB"
                 }, 
                 "17": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6689-PHASEC"
                 }
             }, 
@@ -103,18 +139,54 @@
                 "name": "PRUG6690-LINECONFIG", 
                 "20": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG6690-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG6690-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "21": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6690-PHASEA"
                 }, 
                 "22": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6690-PHASEB"
                 }, 
                 "23": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6690-PHASEC"
                 }
             }
@@ -131,18 +203,54 @@
                 "name": "PRUG6691-LINECONFIG", 
                 "26": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG6691-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG6691-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "27": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6691-PHASEA"
                 }, 
                 "28": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6691-PHASEB"
                 }, 
                 "29": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6691-PHASEC"
                 }
             }
@@ -158,19 +266,55 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "32": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG6692-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG6692-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "34": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6692-PHASEB"
                 }, 
                 "35": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6692-PHASEC"
                 }, 
                 "name": "PRUG6692-LINECONFIG", 
                 "33": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6692-PHASEA"
                 }
             }
@@ -183,18 +327,54 @@
                 "name": "PRUG6693-LINECONFIG", 
                 "38": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG6693-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG6693-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "39": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6693-PHASEA"
                 }, 
                 "40": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6693-PHASEB"
                 }, 
                 "41": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG6693-PHASEC"
                 }
             }, 
@@ -221,18 +401,54 @@
                 "name": "PRUG3301-LINECONFIG", 
                 "45": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG3301-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG3301-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "46": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG3301-PHASEA"
                 }, 
                 "47": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG3301-PHASEB"
                 }, 
                 "48": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG3301-PHASEC"
                 }
             }, 
@@ -251,18 +467,54 @@
                 "name": "PRUG5000-LINECONFIG", 
                 "51": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG5000-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG5000-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "52": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5000-PHASEA"
                 }, 
                 "53": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5000-PHASEB"
                 }, 
                 "54": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5000-PHASEC"
                 }
             }
@@ -278,10 +530,26 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "57": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG3297-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG3297-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "58": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG3297-PHASEC"
                 }, 
                 "name": "PRUG3297-LINECONFIG"
@@ -309,19 +577,55 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "64": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5001-PHASEB"
                 }, 
                 "name": "PRUG5001-LINECONFIG", 
                 "65": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5001-PHASEC"
                 }, 
                 "62": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG5001-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG5001-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "63": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5001-PHASEA"
                 }
             }
@@ -332,18 +636,54 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "68": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG5002-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG5002-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "69": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5002-PHASEA"
                 }, 
                 "70": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5002-PHASEB"
                 }, 
                 "71": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5002-PHASEC"
                 }, 
                 "name": "PRUG5002-LINECONFIG"
@@ -362,17 +702,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "74": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH16277-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH16277-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "75": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "76": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH16277-LINECONFIG"
             }, 
@@ -389,18 +735,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "80": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH279-LINECONFIG", 
                 "81": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "79": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH279-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH279-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }
             }, 
             "to": "node263-31-260PROH279", 
@@ -428,17 +780,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "87": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "85": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH16278-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH16278-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "86": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH16278-LINECONFIG"
             }
@@ -454,10 +812,26 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "90": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG84-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG84-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "91": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG84-PHASEA"
                 }, 
                 "name": "PRUG84-LINECONFIG"
@@ -485,20 +859,56 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "96": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5361-PHASEA"
                 }, 
                 "98": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5361-PHASEC"
                 }, 
                 "name": "PRUG5361-LINECONFIG", 
                 "97": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5361-PHASEB"
                 }, 
                 "95": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG5361-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG5361-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }
             }
         }, 
@@ -513,17 +923,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "103": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "101": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH277-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH277-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "102": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH277-LINECONFIG"
             }
@@ -548,18 +964,54 @@
                 "name": "PRUG5362-LINECONFIG", 
                 "107": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG5362-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG5362-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "108": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5362-PHASEA"
                 }, 
                 "109": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5362-PHASEB"
                 }, 
                 "110": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG5362-PHASEC"
                 }
             }, 
@@ -576,10 +1028,26 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "113": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG85-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG85-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "114": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG85-PHASEB"
                 }, 
                 "name": "PRUG85-LINECONFIG"
@@ -610,18 +1078,54 @@
                 "name": "PRUG3303-LINECONFIG", 
                 "118": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG3303-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG3303-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "119": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG3303-PHASEA"
                 }, 
                 "120": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG3303-PHASEB"
                 }, 
                 "121": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG3303-PHASEC"
                 }
             }
@@ -637,17 +1141,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "124": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH16622-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH16622-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "125": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "126": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH16622-LINECONFIG"
             }
@@ -665,17 +1175,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "130": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH16623-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH16623-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "131": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "132": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH16623-LINECONFIG"
             }, 
@@ -694,18 +1210,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "136": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH2887-LINECONFIG", 
                 "137": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "135": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH2887-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH2887-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }
             }, 
             "object": "overhead_line", 
@@ -732,17 +1254,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "143": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "141": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH16624-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH16624-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "142": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH16624-LINECONFIG"
             }, 
@@ -759,17 +1287,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "146": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH2886-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH2886-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "147": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "148": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH2886-LINECONFIG"
             }, 
@@ -798,22 +1332,28 @@
                 "name": "PROH8542-LINECONFIG", 
                 "152": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH8542-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH8542-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "153": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "154": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "155": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }
             }
         }, 
@@ -828,18 +1368,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "160": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH19454-LINECONFIG", 
                 "158": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH19454-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH19454-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "159": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }
             }
         }, 
@@ -857,17 +1403,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "164": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH19455-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH19455-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "165": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "166": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH19455-LINECONFIG"
             }, 
@@ -885,17 +1437,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "169": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH266-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH266-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "170": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "171": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH266-LINECONFIG"
             }, 
@@ -934,18 +1492,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "176": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH19456-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH19456-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "178": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH19456-LINECONFIG", 
                 "177": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }
             }, 
             "to": "nodePROH20016PROH19456", 
@@ -962,17 +1526,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "183": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "181": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH20016-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH20016-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "182": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH20016-LINECONFIG"
             }
@@ -988,17 +1558,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "186": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH268-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH268-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "187": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "188": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH268-LINECONFIG"
             }
@@ -1025,18 +1601,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "192": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH20017-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH20017-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "194": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH20017-LINECONFIG", 
                 "193": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }
             }
         }, 
@@ -1051,17 +1633,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "199": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "197": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH20018-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH20018-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "198": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH20018-LINECONFIG"
             }
@@ -1074,10 +1662,26 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "202": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG81-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG81-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "203": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG81-PHASEA"
                 }, 
                 "name": "PRUG81-LINECONFIG"
@@ -1106,18 +1710,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "208": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "209": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH20019-LINECONFIG", 
                 "207": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH20019-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH20019-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }
             }, 
             "to": "nodePROH20020PROH20019", 
@@ -1134,17 +1744,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "212": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH20020-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH20020-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "213": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "214": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH20020-LINECONFIG"
             }
@@ -1160,17 +1776,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "217": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH270-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH270-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "218": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "219": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH270-LINECONFIG"
             }
@@ -1197,18 +1819,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "224": {
                     "omfEmbeddedConfigObject": "conductor_A object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "225": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH269-LINECONFIG", 
                 "223": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH269-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH269-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }
             }
         }, 
@@ -1234,17 +1862,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "231": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "229": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH16513-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH16513-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "230": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH16513-LINECONFIG"
             }
@@ -1265,18 +1899,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "235": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH16514-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH16514-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "236": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH16514-LINECONFIG", 
                 "237": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }
             }, 
             "object": "overhead_line", 
@@ -1292,18 +1932,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "240": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH16515-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH16515-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "242": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH16515-LINECONFIG", 
                 "241": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }
             }, 
             "to": "nodePRUG834PROH16515", 
@@ -1320,10 +1966,26 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "245": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG834-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG834-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "246": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG834-PHASEB"
                 }, 
                 "name": "PRUG834-LINECONFIG"
@@ -1351,17 +2013,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "250": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH16516-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH16516-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "251": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "252": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH16516-LINECONFIG"
             }
@@ -1388,18 +2056,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "256": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH11498-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH11498-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "258": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH11498-LINECONFIG", 
                 "257": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }
             }
         }, 
@@ -1414,17 +2088,23 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "263": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "261": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH2878-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH2878-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "262": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH2878-LINECONFIG"
             }
@@ -1448,18 +2128,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "267": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH11499-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH11499-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "268": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH11499-LINECONFIG", 
                 "269": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }
             }, 
             "object": "overhead_line", 
@@ -1475,18 +2161,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "272": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH2877-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH2877-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "274": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH2877-LINECONFIG", 
                 "273": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }
             }, 
             "to": "node283-05-830PROH2877", 
@@ -1514,18 +2206,24 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "280": {
                     "omfEmbeddedConfigObject": "conductor_N object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }, 
                 "name": "PROH11500-LINECONFIG", 
                 "278": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PROH11500-LINESPACING"
+                    "distance_BC": "7.0", 
+                    "name": "PROH11500-LINESPACING", 
+                    "distance_CN": "5.0", 
+                    "distance_AN": "4.272002", 
+                    "distance_AB": "2.5", 
+                    "distance_AC": "4.5", 
+                    "distance_BN": "5.656854"
                 }, 
                 "279": {
                     "omfEmbeddedConfigObject": "conductor_B object overhead_line_conductor", 
-                    "resistance": "0", 
-                    "geometric_mean_radius": "0"
+                    "resistance": "0.185900", 
+                    "geometric_mean_radius": "0.031300"
                 }
             }
         }, 
@@ -1559,19 +2257,55 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "288": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG4190-PHASEC"
                 }, 
                 "name": "PRUG4190-LINECONFIG", 
                 "285": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG4190-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG4190-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "286": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG4190-PHASEA"
                 }, 
                 "287": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG4190-PHASEB"
                 }
             }
@@ -1581,18 +2315,54 @@
                 "omfEmbeddedConfigObject": "configuration object line_configuration", 
                 "291": {
                     "omfEmbeddedConfigObject": "spacing object line_spacing", 
-                    "name": "PRUG4176-LINESPACING"
+                    "distance_AN": "0.000000", 
+                    "name": "PRUG4176-LINESPACING", 
+                    "distance_CN": "0.000000", 
+                    "distance_BC": "0.500000", 
+                    "distance_AB": "0.500000", 
+                    "distance_BN": "0.000000", 
+                    "distance_AC": "1.000000"
                 }, 
                 "292": {
                     "omfEmbeddedConfigObject": "conductor_A object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG4176-PHASEA"
                 }, 
                 "293": {
                     "omfEmbeddedConfigObject": "conductor_B object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG4176-PHASEB"
                 }, 
                 "294": {
                     "omfEmbeddedConfigObject": "conductor_C object underground_line_conductor", 
+                    "conductor_gmr": "0.008830", 
+                    "conductor_resistance": "1.540000", 
+                    "shield_resistance": "0.000000", 
+                    "neutral_gmr": "0.002080", 
+                    "outer_diameter": "0.980000", 
+                    "neutral_strands": "6.000000", 
+                    "neutral_resistance": "14.872000", 
+                    "neutral_diameter": "0.064000", 
+                    "conductor_diameter": "0.292000", 
+                    "shield_gmr": "0.000000", 
                     "name": "PRUG4176-PHASEC"
                 }, 
                 "name": "PRUG4176-LINECONFIG"

@@ -331,12 +331,12 @@ def convert(stdPath,seqPath):
 				pass # print parent
 
 		# print 'is this broken!?'
-		# def phaseMerge(*arg):
-		# 	concated = ''.join(arg)
-		# 	return ''.join(sorted(set(concated)))
+		def phaseMerge(*arg):
+			concated = ''.join(arg)
+			return ''.join(sorted(set(concated)))
 
-		def phaseMerge(x,y):
-			return ''.join(sorted(set.intersection(set(x),set(y))))
+		# def phaseMerge(x,y):
+		# 	return ''.join(sorted(set.intersection(set(x),set(y))))
 
 		# If we already stripped the GUID, don't process:
 		if 'guid' not in comp.keys():
