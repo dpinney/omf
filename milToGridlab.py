@@ -15,7 +15,7 @@ def omfConvert(feederName, stdName, seqName):
 	return
 
 def convert(stdPath,seqPath):
-	''' Take in a .std and .seq from Milsoft and spit out a .glm.'''
+	''' Take in a .std and .seq from Milsoft and spit out a .glm string.'''
 
 	print 'Beginning Windmil to GLM conversion.'
 
@@ -404,7 +404,7 @@ def convert(stdPath,seqPath):
 						'module powerflow {\nsolver_method FBS;\nNR_iteration_limit 50;\n};\n\n' + \
 						'object climate {\nname Climate;\ninterpolate QUADRATIC;\ntmyfile climate.tmy2;\n};\n\n'
 
-	# TODO: de-embed here?
+	# TODO: de-embed and factor out common configurations here?
 	# treeParser.fullyDeEmbed(glmTree)
 
 	# Throw some headers on that:
