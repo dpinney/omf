@@ -25,69 +25,19 @@ interpolate QUADRATIC;
 tmyfile climate.tmy2;
 };
 
-object underground_line_conductor {
-name ug_lc_7240;
-conductor_resistance 1.540000;
-shield_resistance 0.000000;
-neutral_gmr 0.002080;
-outer_diameter 0.980000;
-neutral_strands 6.000000;
-neutral_resistance 14.872000;
-neutral_diameter 0.064000;
-conductor_diameter 0.292000;
-shield_gmr 0.000000;
-conductor_gmr 0.008830;
-};
-
-object overhead_line_conductor {
-geometric_mean_radius 0.031300;
-resistance 0.185900;
-name overhead_line_conductor_6010;
-};
-
-object line_spacing {
-distance_AN 0.000000;
-name spacing_515;
-distance_CN 0.000000;
-distance_BC 0.500000;
-distance_AB 0.500000;
-distance_AC 1.000000;
-distance_BN 0.000000;
-};
-
-object line_spacing {
-distance_BC 7.0;
-name overhead_spacing;
-distance_CN 5.0;
-distance_AN 4.272002;
-distance_AB 2.5;
-distance_BN 5.656854;
-distance_AC 4.5;
-};
-
-object line_configuration {
-name ohconfig;
-spacing overhead_spacing;
-conductor_N overhead_line_conductor_6010;
-conductor_A overhead_line_conductor_6010;
-conductor_C overhead_line_conductor_6010;
-conductor_B overhead_line_conductor_6010;
-};
-
-object line_configuration {
-name lc_7211;
-spacing spacing_515;
-conductor_N ug_lc_7240;
-conductor_A ug_lc_7240;
-conductor_C ug_lc_7240;
-conductor_B ug_lc_7240;
-};
-
 object node {
 phases ABCN;
-nominal_voltage 2400.0;
+nominal_voltage 7200.0;
 name REMBRANDT;
 bustype SWING;
+};
+
+object fuse {
+phases ABCN;
+from REMBRANDT;
+name RECL_1161;
+current_limit 10000000 A;
+to nodePRUG6689RECL_1161;
 };
 
 object underground_line {
@@ -135,6 +85,14 @@ configuration lc_7211;
 name PRUG6693;
 };
 
+object fuse {
+phases ABCN;
+from REMBRANDT;
+name RECL_1162;
+current_limit 10000000 A;
+to nodePRUG3301RECL_1162;
+};
+
 object underground_line {
 phases ABC;
 from nodePRUG3301RECL_1162;
@@ -148,8 +106,8 @@ object underground_line {
 phases ABC;
 from nodePRUG5000PRUG3301;
 name PRUG5000;
-to nodePRUG3297PRUG5000;
 length 3172.4;
+to nodePRUG3297PRUG5000;
 configuration lc_7211;
 };
 
@@ -167,10 +125,10 @@ phases CN;
 load_class R;
 name 263-32-311;
 parent node263-32-311PRUG3297;
-constant_power_C 9444+0j;
-constant_power_B 0+0j;
-constant_power_A 0+0j;
-nominal_voltage 2400;
+constant_power_C 9.44403;
+constant_power_B 0;
+constant_power_A 0;
+nominal_voltage 120;
 };
 
 object underground_line {
@@ -183,9 +141,9 @@ configuration lc_7211;
 };
 
 object underground_line {
+phases ABC;
 from nodePRUG5002PRUG5001;
 name PRUG5002;
-phases ABC;
 to nodePROH16277PRUG5002;
 length 848.662;
 configuration lc_7211;
@@ -214,10 +172,10 @@ phases AN;
 load_class R;
 name 263-31-260;
 parent node263-31-260PROH279;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 10648+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 10.8648;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -243,10 +201,10 @@ phases AN;
 load_class R;
 name 263-30-850;
 parent node263-30-850PRUG84;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 4116+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 4.11609;
+nominal_voltage 120;
 };
 
 object underground_line {
@@ -272,10 +230,10 @@ phases AN;
 load_class R;
 name 263-30-380;
 parent node263-30-380PROH277;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 5599+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 5.59956;
+nominal_voltage 120;
 };
 
 object underground_line {
@@ -301,10 +259,10 @@ phases BN;
 load_class R;
 name 263-32-310;
 parent node263-32-310PRUG85;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 0+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 0;
+nominal_voltage 120;
 };
 
 object underground_line {
@@ -323,6 +281,14 @@ name PROH16622;
 to nodeFUSE_434PROH16622;
 length 242.872;
 configuration ohconfig;
+};
+
+object fuse {
+phases BN;
+from nodeFUSE_434PROH16622;
+name FUSE_434;
+current_limit 10000000 A;
+to nodePROH16623FUSE_434;
 };
 
 object overhead_line {
@@ -348,10 +314,10 @@ phases BN;
 load_class R;
 name 283-05-120;
 parent node283-05-120PROH2887;
-constant_power_C 0+0j;
-constant_power_B 835+0j;
-constant_power_A 0+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0.835755;
+constant_power_A 0;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -377,10 +343,10 @@ phases BN;
 load_class R;
 name 263-32-860;
 parent node263-32-860PROH2886;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 0+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 0;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -401,6 +367,14 @@ length 171.711;
 configuration ohconfig;
 };
 
+object fuse {
+phases AN;
+from nodeRECL_844PROH19454;
+name RECL_844;
+current_limit 10000000 A;
+to nodePROH19455RECL_844;
+};
+
 object overhead_line {
 phases AN;
 from nodePROH19455RECL_844;
@@ -413,10 +387,10 @@ configuration ohconfig;
 object overhead_line {
 phases AN;
 from nodePROH266PROH19455;
+name PROH266;
 to node283-06-131PROH266;
 length 260.372;
 configuration ohconfig;
-name PROH266;
 };
 
 object load {
@@ -424,10 +398,10 @@ phases AN;
 load_class R;
 name 283-06-131;
 parent node283-06-131PROH266;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 125+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 0.125363;
+nominal_voltage 120;
 };
 
 object load {
@@ -435,10 +409,10 @@ phases AN;
 load_class R;
 name 283-06-130;
 parent node283-06-131PROH266;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 3000+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 3.17378;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -473,10 +447,10 @@ phases AN;
 load_class R;
 name 282-01-180;
 parent node282-01-180PROH268;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 900+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 0.91933;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -511,10 +485,10 @@ phases AN;
 load_class R;
 name 282-01-680;
 parent node282-01-680PRUG81;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 10279+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 10.2798;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -549,10 +523,10 @@ phases AN;
 load_class R;
 name 283-06-720;
 parent node283-06-720PROH270;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 5683+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 5.68313;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -569,10 +543,10 @@ phases AN;
 load_class R;
 name 283-06-310;
 parent node283-06-310PROH269;
-constant_power_C 0+0j;
-constant_power_B 0+0j;
-constant_power_A 270+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0;
+constant_power_A 2.70576;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -582,6 +556,14 @@ name PROH16513;
 to nodeRECL_845PROH16513;
 length 356.333;
 configuration ohconfig;
+};
+
+object fuse {
+phases BN;
+from nodeRECL_845PROH16513;
+name RECL_845;
+current_limit 10000000 A;
+to nodePROH16514RECL_845;
 };
 
 object overhead_line {
@@ -616,10 +598,10 @@ phases BN;
 load_class R;
 name 283-08-710;
 parent node283-08-710PRUG834;
-constant_power_C 0+0j;
-constant_power_B 8023+0j;
-constant_power_A 0+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 8.02325;
+constant_power_A 0;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -636,10 +618,10 @@ phases BN;
 load_class R;
 name 283-17-120;
 parent node283-17-120PROH16516;
-constant_power_C 0+0j;
-constant_power_B 668+0j;
-constant_power_A 0+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0.668604;
+constant_power_A 0;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -665,10 +647,10 @@ phases BN;
 load_class R;
 name 283-08-120;
 parent node283-08-120PROH2878;
-constant_power_C 0+0j;
-constant_power_B 2686+0j;
-constant_power_A 0+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 2.68695;
+constant_power_A 0;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -694,10 +676,10 @@ phases BN;
 load_class R;
 name 283-05-830;
 parent node283-05-830PROH2877;
-constant_power_C 0+0j;
-constant_power_B 20+0j;
-constant_power_A 0+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 0.00208939;
+constant_power_A 0;
+nominal_voltage 120;
 };
 
 object overhead_line {
@@ -714,10 +696,18 @@ phases BN;
 load_class R;
 name 283-08-170;
 parent node283-08-170PROH11500;
-constant_power_C 0+0j;
-constant_power_B 3463+0j;
-constant_power_A 0+0j;
-nominal_voltage 2400;
+constant_power_C 0;
+constant_power_B 3.46838;
+constant_power_A 0;
+nominal_voltage 120;
+};
+
+object fuse {
+phases ABCN;
+from REMBRANDT;
+name RECL_1160;
+current_limit 10000000 A;
+to nodePRUG4190RECL_1160;
 };
 
 object underground_line {
@@ -730,9 +720,9 @@ configuration lc_7211;
 };
 
 object underground_line {
-phases ABC;
 from nodePRUG4176PRUG4190;
 name PRUG4176;
+phases ABC;
 to node263-32-710PRUG4176;
 length 3185.68;
 configuration lc_7211;
@@ -743,10 +733,10 @@ phases ABCN;
 load_class R;
 name 263-32-710;
 parent node263-32-710PRUG4176;
-constant_power_C 1853.7+0j;
-constant_power_B 1853.7+0j;
-constant_power_A 1853.7+0j;
-nominal_voltage 2400;
+constant_power_C 1853.7;
+constant_power_B 1853.7;
+constant_power_A 1853.7;
+nominal_voltage 120;
 };
 
 object capacitor {
@@ -759,7 +749,7 @@ parent node263-32-710PRUG4176;
 capacitor_B 0.10 MVAr;
 capacitor_C 0.10 MVAr;
 time_delay 300.0;
-nominal_voltage 2400;
+nominal_voltage 2401.7771;
 voltage_set_high 2350.0;
 voltage_set_low 2340.0;
 switchC CLOSED;
@@ -768,6 +758,14 @@ switchA CLOSED;
 phases_connected ABCN;
 dwell_time 0.0;
 pt_phase ABCN;
+};
+
+object fuse {
+phases ABCN;
+from REMBRANDT;
+name RECL_993;
+current_limit 10000000 A;
+to nodePRUG4180RECL_993;
 };
 
 object node {
@@ -1122,68 +1120,5 @@ property temperature, solar_direct, wind_speed, rainfall, snowdepth;
 
 object voltdump {
 filename output_voltage.csv;
-};
-
-object underground_line {
-phases ABCN;
-from REMBRANDT;
-name RECL_1161;
-to nodePRUG6689RECL_1161;
-length 10;
-configuration lc_7211;
-};
-
-object underground_line {
-phases ABCN;
-from REMBRANDT;
-name RECL_1162;
-to nodePRUG3301RECL_1162;
-length 10;
-configuration lc_7211;
-};
-
-object underground_line {
-phases BN;
-from nodeFUSE_434PROH16622;
-name FUSE_434;
-to nodePROH16623FUSE_434;
-length 10;
-configuration lc_7211;
-};
-
-object underground_line {
-phases AN;
-from nodeRECL_844PROH19454;
-name RECL_844;
-to nodePROH19455RECL_844;
-length 10;
-configuration lc_7211;
-};
-
-object underground_line {
-phases BN;
-from nodeRECL_845PROH16513;
-name RECL_845;
-to nodePROH16514RECL_845;
-length 10;
-configuration lc_7211;
-};
-
-object underground_line {
-phases ABCN;
-from REMBRANDT;
-name RECL_1160;
-to nodePRUG4190RECL_1160;
-length 10;
-configuration lc_7211;
-};
-
-object underground_line {
-phases ABCN;
-name RECL_993;
-to nodePRUG4180RECL_993;
-length 10;
-from REMBRANDT;
-configuration lc_7211;
 };
 

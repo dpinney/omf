@@ -24,7 +24,7 @@
 	<testoutputfile>test.txt</testoutputfile>
 	<xml_encoding>8</xml_encoding>
 	<clock>2000-01-01 00:00:00 PST</clock>
-	<starttime>2013-01-07 10:33:11 PST</starttime>
+	<starttime>2013-01-08 10:43:20 PST</starttime>
 	<stoptime>2000-01-02 00:00:00 PST</stoptime>
 	<double_format>%+lg</double_format>
 	<complex_format>%+lg%+lg%c</complex_format>
@@ -4749,8 +4749,8 @@
 				<fault_current_out_C>+0+0j A</fault_current_out_C>
 				<flow_direction>UNKNOWN</flow_direction>
 				<mean_repair_time>+0 s</mean_repair_time>
-				<phases>ABN</phases>
-				<nominal_voltage>+2400 V</nominal_voltage>
+				<phases>ABC</phases>
+				<nominal_voltage>+0 V</nominal_voltage>
 			</underground_line>
 			<underground_line>
 				<id>191</id>

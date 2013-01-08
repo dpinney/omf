@@ -1015,7 +1015,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases AB;
+phases ABC;
 from nodePRUG5000PRUG3301;
 name PRUG3303;
 to nodePROH16622PRUG3303;
