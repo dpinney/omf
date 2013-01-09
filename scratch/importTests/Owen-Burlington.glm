@@ -29,7 +29,7 @@ object node {
 phases ABCN;
 name BURLINGTON;
 bustype SWING;
-nominal_voltage 7200.0;
+nominal_voltage 2400.0;
 };
 
 object overhead_line {
@@ -11221,7 +11221,7 @@ resistance 0.303;
 geometric_mean_radius 0.0221;
 };
 };
-phases ABCN;
+phases AN;
 from node1844318326;
 name 18443;
 to node1788818443;
@@ -11441,7 +11441,7 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases ABCN;
+phases AN;
 from nodeT6246217249017361;
 name T62462172490;
 to node62462172377T62462172490;

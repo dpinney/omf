@@ -167,7 +167,7 @@ def updateGlm():
 		outDict = {'tree':tree, 'nodes':nodes, 'links':links, 'hiddenNodes':hiddenNodes, 'hiddenLinks':hiddenLinks}
 		jsonLoad = json.dumps(outDict, indent=4)
 		jsonCache.write(jsonLoad)
-	return flask.redirect(flask.url_for('newAnalysis'))
+	return flask.redirect(flask.url_for('root') + '#feeders')
 
 @app.route('/runStatus/')
 def runStatus():
