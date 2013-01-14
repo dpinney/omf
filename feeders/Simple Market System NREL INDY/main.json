@@ -1,0 +1,1434 @@
+{
+    "hiddenNodes": [], 
+    "hiddenLinks": [], 
+    "nodes": [
+        {
+            "index": 0, 
+            "fixed": 0, 
+            "name": "Market_1", 
+            "weight": 0, 
+            "px": 413.00971154175943, 
+            "py": 524.1119380591335, 
+            "y": 524.1334513783416, 
+            "x": 412.96865576025135, 
+            "treeIndex": 13, 
+            "chargeMultiple": 1, 
+            "objectType": "stubauction"
+        }, 
+        {
+            "index": 1, 
+            "name": "\"climate\"", 
+            "weight": 0, 
+            "px": 428.9692598886734, 
+            "py": 640.1690492742836, 
+            "y": 640.2421334692305, 
+            "x": 428.93385873415207, 
+            "treeIndex": 15, 
+            "chargeMultiple": 1, 
+            "objectType": "climate"
+        }, 
+        {
+            "index": 2, 
+            "name": "regulator_configuration_6506321", 
+            "weight": 0, 
+            "px": 359.12307302221814, 
+            "py": 543.035920289734, 
+            "y": 543.0516931505091, 
+            "x": 359.0510361211443, 
+            "treeIndex": 16, 
+            "chargeMultiple": 1, 
+            "objectType": "regulator_configuration"
+        }, 
+        {
+            "index": 3, 
+            "name": "trip_line_config", 
+            "weight": 0, 
+            "px": 373.8269238836782, 
+            "py": 405.19233453039226, 
+            "y": 405.15161402307683, 
+            "x": 373.7616466514399, 
+            "treeIndex": 17, 
+            "chargeMultiple": 1, 
+            "objectType": "triplex_line_configuration"
+        }, 
+        {
+            "index": 4, 
+            "name": "tlc", 
+            "weight": 0, 
+            "px": 341.77312718864556, 
+            "py": 487.4374542703197, 
+            "y": 487.4226218387233, 
+            "x": 341.6938656673612, 
+            "treeIndex": 18, 
+            "chargeMultiple": 1, 
+            "objectType": "triplex_line_conductor"
+        }, 
+        {
+            "index": 5, 
+            "name": "fifteen_fifteen_A", 
+            "weight": 0, 
+            "px": 385.8114546032663, 
+            "py": 462.7118449195808, 
+            "y": 462.70237579843194, 
+            "x": 385.76575398679216, 
+            "treeIndex": 19, 
+            "chargeMultiple": 1, 
+            "objectType": "transformer_configuration"
+        }, 
+        {
+            "index": 6, 
+            "name": "transformer_configuration_400", 
+            "weight": 0, 
+            "px": 486.5267396984841, 
+            "py": 655.0207912864164, 
+            "y": 655.0991845456832, 
+            "x": 486.5232018288923, 
+            "treeIndex": 20, 
+            "chargeMultiple": 1, 
+            "objectType": "transformer_configuration"
+        }, 
+        {
+            "index": 7, 
+            "name": "n650", 
+            "weight": 1, 
+            "px": 598.9972278480521, 
+            "py": 463.6762222883407, 
+            "y": 463.6594828761734, 
+            "x": 599.042337241468, 
+            "treeIndex": 21, 
+            "chargeMultiple": 1, 
+            "objectType": "gridNode swingNode"
+        }, 
+        {
+            "index": 8, 
+            "name": "n630", 
+            "weight": 3, 
+            "px": 627.7622414494292, 
+            "py": 452.0789383407858, 
+            "y": 452.0475383911779, 
+            "x": 627.8602569537625, 
+            "treeIndex": 23, 
+            "chargeMultiple": 1, 
+            "objectType": "gridNode"
+        }, 
+        {
+            "index": 9, 
+            "name": "tconf", 
+            "weight": 0, 
+            "px": 432.1346637537182, 
+            "py": 582.0024382575801, 
+            "y": 582.0521476991886, 
+            "x": 432.10113594292443, 
+            "treeIndex": 25, 
+            "chargeMultiple": 1, 
+            "objectType": "transformer_configuration"
+        }, 
+        {
+            "index": 10, 
+            "name": "tconf2", 
+            "weight": 0, 
+            "px": 376.7396865027451, 
+            "py": 598.7234994277828, 
+            "y": 598.7698278951126, 
+            "x": 376.6739625646859, 
+            "treeIndex": 26, 
+            "chargeMultiple": 1, 
+            "objectType": "transformer_configuration"
+        }, 
+        {
+            "index": 11, 
+            "name": "tn_1", 
+            "weight": 2, 
+            "px": 614.2494978408369, 
+            "py": 494.4019445360259, 
+            "y": 494.40951581444256, 
+            "x": 614.3272296565923, 
+            "treeIndex": 28, 
+            "chargeMultiple": 1, 
+            "objectType": "triplex_node"
+        }, 
+        {
+            "index": 12, 
+            "name": "tn_2", 
+            "weight": 2, 
+            "px": 592.0964815467875, 
+            "py": 425.14229994685786, 
+            "y": 425.09384149526187, 
+            "x": 592.1547711902787, 
+            "treeIndex": 29, 
+            "chargeMultiple": 1, 
+            "objectType": "triplex_meter"
+        }, 
+        {
+            "index": 13, 
+            "fixed": 0, 
+            "name": "tm_1", 
+            "weight": 3, 
+            "px": 579.443333923758, 
+            "py": 524.9252749078983, 
+            "y": 524.9278292429966, 
+            "x": 579.4793737870405, 
+            "treeIndex": 32, 
+            "chargeMultiple": 1, 
+            "objectType": "triplex_meter"
+        }, 
+        {
+            "index": 14, 
+            "fixed": 0, 
+            "name": "tm_2", 
+            "weight": 3, 
+            "px": 548.8098728042227, 
+            "py": 410.3493655084115, 
+            "y": 410.30635418583495, 
+            "x": 548.8420239112722, 
+            "treeIndex": 33, 
+            "chargeMultiple": 1, 
+            "objectType": "triplex_meter"
+        }, 
+        {
+            "index": 15, 
+            "name": "house1", 
+            "weight": 6, 
+            "px": 577.5612545513516, 
+            "py": 565.1051003556305, 
+            "y": 565.1371348570308, 
+            "x": 577.5961321078637, 
+            "treeIndex": 34, 
+            "chargeMultiple": 1, 
+            "objectType": "house"
+        }, 
+        {
+            "index": 16, 
+            "name": "waterheater1", 
+            "weight": 1, 
+            "px": 607.0652843726215, 
+            "py": 590.2185282129994, 
+            "y": 590.2860419808272, 
+            "x": 607.1459050687234, 
+            "treeIndex": 35, 
+            "chargeMultiple": 1, 
+            "objectType": "waterheater"
+        }, 
+        {
+            "index": 17, 
+            "name": "convenienceLoads1", 
+            "weight": 1, 
+            "px": 579.5162264019901, 
+            "py": 605.0915914614635, 
+            "y": 605.1866830839756, 
+            "x": 579.5572066472663, 
+            "treeIndex": 36, 
+            "chargeMultiple": 1, 
+            "objectType": "ZIPload"
+        }, 
+        {
+            "index": 18, 
+            "name": "lights1", 
+            "weight": 1, 
+            "px": 538.992207320044, 
+            "py": 570.7865521682614, 
+            "y": 570.8278932061803, 
+            "x": 538.9703913000544, 
+            "treeIndex": 37, 
+            "chargeMultiple": 1, 
+            "objectType": "ZIPload"
+        }, 
+        {
+            "index": 19, 
+            "name": "television1", 
+            "weight": 1, 
+            "px": 615.2569374954126, 
+            "py": 558.5014730123484, 
+            "y": 558.5228813050551, 
+            "x": 615.3462493610062, 
+            "treeIndex": 38, 
+            "chargeMultiple": 1, 
+            "objectType": "ZIPload"
+        }, 
+        {
+            "index": 20, 
+            "name": "fan1", 
+            "weight": 1, 
+            "px": 552.3351734588739, 
+            "py": 596.9155901303536, 
+            "y": 597.0002228782845, 
+            "x": 552.3312743133628, 
+            "treeIndex": 39, 
+            "chargeMultiple": 1, 
+            "objectType": "ZIPload"
+        }, 
+        {
+            "index": 21, 
+            "fixed": 0, 
+            "name": "house2", 
+            "weight": 6, 
+            "px": 506.4097938269178, 
+            "py": 408.8248414234509, 
+            "y": 408.7742463649409, 
+            "x": 506.4164112583326, 
+            "treeIndex": 40, 
+            "chargeMultiple": 1, 
+            "objectType": "house"
+        }, 
+        {
+            "index": 22, 
+            "name": "waterheater2", 
+            "weight": 1, 
+            "px": 502.60829042174566, 
+            "py": 446.17768821373636, 
+            "y": 446.1793048547662, 
+            "x": 502.609574263786, 
+            "treeIndex": 41, 
+            "chargeMultiple": 1, 
+            "objectType": "waterheater"
+        }, 
+        {
+            "index": 23, 
+            "name": "convenienceLoads2", 
+            "weight": 1, 
+            "px": 473.75051791993883, 
+            "py": 384.41039877613207, 
+            "y": 384.3223399395046, 
+            "x": 473.7012686621301, 
+            "treeIndex": 42, 
+            "chargeMultiple": 1, 
+            "objectType": "ZIPload"
+        }, 
+        {
+            "index": 24, 
+            "fixed": 0, 
+            "name": "lights2", 
+            "weight": 1, 
+            "px": 465.22200902860936, 
+            "py": 410.2590465076683, 
+            "y": 410.21333011808457, 
+            "x": 465.15856219585015, 
+            "treeIndex": 43, 
+            "chargeMultiple": 1, 
+            "objectType": "ZIPload"
+        }, 
+        {
+            "index": 25, 
+            "name": "television2", 
+            "weight": 1, 
+            "px": 500.70171223746644, 
+            "py": 371.3448595540521, 
+            "y": 371.2433271109057, 
+            "x": 500.69749331635774, 
+            "treeIndex": 44, 
+            "chargeMultiple": 1, 
+            "objectType": "ZIPload"
+        }, 
+        {
+            "index": 26, 
+            "name": "fan2", 
+            "weight": 1, 
+            "px": 475.175262404149, 
+            "py": 435.3931601741528, 
+            "y": 435.3884329841176, 
+            "x": 475.12973533459717, 
+            "treeIndex": 45, 
+            "chargeMultiple": 1, 
+            "objectType": "ZIPload"
+        }, 
+        {
+            "index": 27, 
+            "fixed": 0, 
+            "treeIndex": 46, 
+            "weight": 2, 
+            "px": 537.6226259197741, 
+            "py": 519.5940257776351, 
+            "y": 519.5968757683846, 
+            "x": 537.6163260956652, 
+            "objectType": "inverter", 
+            "chargeMultiple": 1, 
+            "name": "inverter46"
+        }, 
+        {
+            "index": 28, 
+            "fixed": 0, 
+            "treeIndex": 47, 
+            "weight": 1, 
+            "px": 498.0148906206293, 
+            "py": 525.0518025768415, 
+            "y": 525.0684848812359, 
+            "x": 497.97525372187897, 
+            "objectType": "solar", 
+            "chargeMultiple": 1, 
+            "name": "solar47"
+        }, 
+        {
+            "index": 29, 
+            "fixed": 0, 
+            "treeIndex": 48, 
+            "weight": 2, 
+            "px": 567.1019202974013, 
+            "py": 378.34613004853605, 
+            "y": 378.27538893039736, 
+            "x": 567.1518863260696, 
+            "objectType": "inverter", 
+            "chargeMultiple": 1, 
+            "name": "inverter48"
+        }, 
+        {
+            "index": 30, 
+            "fixed": 0, 
+            "treeIndex": 49, 
+            "weight": 1, 
+            "px": 568.2565012822147, 
+            "py": 343.67871820574493, 
+            "y": 343.5841783035223, 
+            "x": 568.2881814596756, 
+            "objectType": "solar", 
+            "chargeMultiple": 1, 
+            "name": "solar49"
+        }
+    ], 
+    "tree": {
+        "42": {
+            "parent": "house2", 
+            "name": "convenienceLoads2", 
+            "power_fraction": "0.100000", 
+            "object": "ZIPload", 
+            "current_fraction": "0.100000", 
+            "base_power": "plug1*2.477490", 
+            "groupid": "plugload", 
+            "current_pf": "0.950000", 
+            "power_pf": "0.950000", 
+            "impedance_fraction": "0.800000", 
+            "impedance_pf": "0.950000"
+        }, 
+        "48": {
+            "phases": "AS", 
+            "object": "inverter", 
+            "name": "inverter48", 
+            "parent": "tm_2", 
+            "generator_status": "ONLINE", 
+            "inverter_type": "PWM", 
+            "power_factor": "1.0", 
+            "generator_mode": "CONSTANT_PF"
+        }, 
+        "43": {
+            "parent": "house2", 
+            "name": "lights2", 
+            "power_fraction": "0.003200", 
+            "object": "ZIPload", 
+            "current_fraction": "0.425700", 
+            "base_power": "lights1*1.616013", 
+            "groupid": "lights", 
+            "current_pf": "-1.000000", 
+            "power_pf": "1.000000", 
+            "impedance_fraction": "0.571100", 
+            "impedance_pf": "1.000000"
+        }, 
+        "49": {
+            "area": "1250 sf", 
+            "name": "solar49", 
+            "parent": "inverter48", 
+            "efficiency": "0.2", 
+            "generator_status": "ONLINE", 
+            "object": "solar", 
+            "generator_mode": "SUPPLY_DRIVEN", 
+            "panel_type": "SINGLE_CRYSTAL_SILICON"
+        }, 
+        "24": {
+            "phases": "AS", 
+            "from": "n630", 
+            "name": "T1", 
+            "object": "transformer", 
+            "to": "tn_1", 
+            "configuration": "tconf", 
+            "groupid": "Distribution_Trans"
+        }, 
+        "25": {
+            "name": "tconf", 
+            "primary_voltage": "2401.777", 
+            "install_type": "POLETOP", 
+            "object": "transformer_configuration", 
+            "secondary_voltage": "120", 
+            "connect_type": "SINGLE_PHASE_CENTER_TAPPED", 
+            "shunt_impedance": "10000+10000j", 
+            "impedance": "0.00033+0.0022j", 
+            "powerA_rating": "110 kVA"
+        }, 
+        "26": {
+            "name": "tconf2", 
+            "primary_voltage": "2401.777", 
+            "install_type": "POLETOP", 
+            "object": "transformer_configuration", 
+            "secondary_voltage": "120", 
+            "connect_type": "SINGLE_PHASE_CENTER_TAPPED", 
+            "shunt_impedance": "10000+10000j", 
+            "impedance": "0.00033+0.0022j", 
+            "powerB_rating": "110 kVA"
+        }, 
+        "27": {
+            "phases": "BS", 
+            "from": "n630", 
+            "name": "T2", 
+            "object": "transformer", 
+            "to": "tn_2", 
+            "configuration": "tconf2", 
+            "groupid": "Distribution_Trans"
+        }, 
+        "20": {
+            "power_rating": "500", 
+            "primary_voltage": "4160", 
+            "install_type": "PADMOUNT", 
+            "object": "transformer_configuration", 
+            "secondary_voltage": "480", 
+            "connect_type": "WYE_WYE", 
+            "resistance": "0.011", 
+            "reactance": "0.02", 
+            "name": "transformer_configuration_400"
+        }, 
+        "21": {
+            "phases": "ABCN", 
+            "name": "n650", 
+            "object": "node", 
+            "bustype": "SWING", 
+            "voltage_B": "-1200.8886-2080.000j", 
+            "voltage_C": "-1200.8886+2080.000j", 
+            "voltage_A": "2401.7771", 
+            "nominal_voltage": "2401.7771"
+        }, 
+        "22": {
+            "phases": "ABC", 
+            "from": "n650", 
+            "name": "Reg1", 
+            "object": "regulator", 
+            "to": "n630", 
+            "configuration": "regulator_configuration_6506321"
+        }, 
+        "23": {
+            "phases": "ABCN", 
+            "name": "n630", 
+            "object": "node", 
+            "voltage_B": "-1200.8886-2080.000j", 
+            "voltage_C": "-1200.8886+2080.000j", 
+            "voltage_A": "2401.7771", 
+            "nominal_voltage": "2401.7771"
+        }, 
+        "46": {
+            "phases": "AS", 
+            "object": "inverter", 
+            "name": "inverter46", 
+            "parent": "tm_1", 
+            "generator_status": "ONLINE", 
+            "inverter_type": "PWM", 
+            "power_factor": "1.0", 
+            "generator_mode": "CONSTANT_PF"
+        }, 
+        "47": {
+            "area": "1250 sf", 
+            "name": "solar47", 
+            "parent": "inverter46", 
+            "efficiency": "0.2", 
+            "generator_status": "ONLINE", 
+            "object": "solar", 
+            "generator_mode": "SUPPLY_DRIVEN", 
+            "panel_type": "SINGLE_CRYSTAL_SILICON"
+        }, 
+        "44": {
+            "parent": "house2", 
+            "name": "television2", 
+            "power_fraction": "0.998700", 
+            "object": "ZIPload", 
+            "current_fraction": "0.039600", 
+            "base_power": "television5*0.200598", 
+            "groupid": "TV", 
+            "current_pf": "-0.540000", 
+            "power_pf": "-1.000000", 
+            "impedance_fraction": "-0.038300", 
+            "impedance_pf": "0.610000"
+        }, 
+        "45": {
+            "parent": "house2", 
+            "name": "fan2", 
+            "power_fraction": "0.013500", 
+            "object": "ZIPload", 
+            "current_fraction": "0.253400", 
+            "base_power": "fan1*0.106899", 
+            "groupid": "fan", 
+            "current_pf": "0.950000", 
+            "power_pf": "-1.000000", 
+            "impedance_fraction": "0.733200", 
+            "impedance_pf": "0.970000"
+        }, 
+        "28": {
+            "phases": "AS", 
+            "object": "triplex_node", 
+            "nominal_voltage": "120", 
+            "name": "tn_1"
+        }, 
+        "29": {
+            "phases": "BS", 
+            "object": "triplex_meter", 
+            "nominal_voltage": "120", 
+            "name": "tn_2"
+        }, 
+        "40": {
+            "auxiliary_system_type": "ELECTRIC", 
+            "name": "house2", 
+            "parent": "tm_2", 
+            "floor_area": "1838", 
+            "cooling_COP": "3.2", 
+            "object": "house", 
+            "cooling_system_type": "ELECTRIC", 
+            "aux_heat_temperature_lockout": "2.270706e+001", 
+            "heating_setpoint": "heating1*1", 
+            "motor_model": "BASIC", 
+            "auxiliary_strategy": "LOCKOUT", 
+            "air_temperature": "70", 
+            "thermal_integrity_level": "5", 
+            "heating_COP": "3.1", 
+            "cooling_setpoint": "cooling7*1", 
+            "mass_temperature": "70", 
+            "motor_efficiency": "GOOD", 
+            "heating_system_type": "HEAT_PUMP"
+        }, 
+        "41": {
+            "schedule_skew": "-810", 
+            "tank_volume": "50", 
+            "name": "waterheater2", 
+            "parent": "house2", 
+            "object": "waterheater", 
+            "heating_element_capacity": "4.8 kW", 
+            "thermostat_deadband": "2.9", 
+            "location": "INSIDE", 
+            "demand": "water14*1", 
+            "tank_setpoint": "136.8", 
+            "tank_UA": "2.4", 
+            "temperature": "135"
+        }, 
+        "1": {
+            "omftype": "#include", 
+            "argument": "\"HVAC_schedule.glm\""
+        }, 
+        "0": {
+            "timezone": "PST+8PDT", 
+            "stoptime": "'2000-01-10 00:00:00'", 
+            "starttime": "'2000-01-01 00:00:00'", 
+            "clock": "clock"
+        }, 
+        "3": {
+            "omftype": "#include", 
+            "argument": "\"appliance_schedule.glm\""
+        }, 
+        "2": {
+            "omftype": "#include", 
+            "argument": "\"water_schedule.glm\""
+        }, 
+        "5": {
+            "omftype": "#set", 
+            "argument": "profiler=1"
+        }, 
+        "4": {
+            "omftype": "#set", 
+            "argument": "minimum_timestep=60"
+        }, 
+        "7": {
+            "omftype": "module", 
+            "argument": "generators"
+        }, 
+        "6": {
+            "omftype": "#set", 
+            "argument": "relax_naming_rules=1"
+        }, 
+        "9": {
+            "omftype": "module", 
+            "argument": "climate"
+        }, 
+        "8": {
+            "omftype": "module", 
+            "argument": "tape"
+        }, 
+        "39": {
+            "parent": "house1", 
+            "name": "fan1", 
+            "power_fraction": "0.013500", 
+            "object": "ZIPload", 
+            "current_fraction": "0.253400", 
+            "base_power": "fan1*0.106899", 
+            "groupid": "fan", 
+            "current_pf": "0.950000", 
+            "power_pf": "-1.000000", 
+            "impedance_fraction": "0.733200", 
+            "impedance_pf": "0.970000"
+        }, 
+        "38": {
+            "parent": "house1", 
+            "name": "television1", 
+            "power_fraction": "0.998700", 
+            "object": "ZIPload", 
+            "current_fraction": "0.039600", 
+            "base_power": "television5*0.200598", 
+            "groupid": "TV", 
+            "current_pf": "-0.540000", 
+            "power_pf": "-1.000000", 
+            "impedance_fraction": "-0.038300", 
+            "impedance_pf": "0.610000"
+        }, 
+        "11": {
+            "solver_method": "FBS", 
+            "NR_iteration_limit": "50", 
+            "module": "powerflow"
+        }, 
+        "10": {
+            "module": "residential", 
+            "implicit_enduses": "NONE"
+        }, 
+        "13": {
+            "object": "stubauction", 
+            "name": "Market_1", 
+            "period": "300"
+        }, 
+        "12": {
+            "omftype": "module", 
+            "argument": "market"
+        }, 
+        "15": {
+            "object": "climate", 
+            "name": "\"climate\"", 
+            "interpolate": "QUADRATIC", 
+            "tmyfile": "\"climate.tmy2\""
+        }, 
+        "14": {
+            "parent": "Market_1", 
+            "property": "current_market.clearing_price", 
+            "file": "Price.player", 
+            "object": "player", 
+            "loop": "365"
+        }, 
+        "17": {
+            "diameter": "0.368", 
+            "name": "trip_line_config", 
+            "object": "triplex_line_configuration", 
+            "conductor_1": "tlc", 
+            "conductor_2": "tlc", 
+            "conductor_N": "tlc", 
+            "insulation_thickness": "0.08"
+        }, 
+        "16": {
+            "Control": "MANUAL", 
+            "raise_taps": "16", 
+            "PT_phase": "ABC", 
+            "name": "regulator_configuration_6506321", 
+            "band_center": "2401", 
+            "tap_pos_A": "1", 
+            "tap_pos_B": "1", 
+            "object": "regulator_configuration", 
+            "time_delay": "30.0", 
+            "connect_type": "1", 
+            "regulation": "0.10", 
+            "CT_phase": "ABC", 
+            "band_width": "50", 
+            "tap_pos_C": "1", 
+            "Type": "A", 
+            "lower_taps": "16"
+        }, 
+        "19": {
+            "object": "transformer_configuration", 
+            "name": "fifteen_fifteen_A", 
+            "primary_voltage": "4160.0V", 
+            "install_type": "POLETOP", 
+            "impedance1": "0.012000+0.006800j", 
+            "secondary_voltage": "120.0V", 
+            "connect_type": "SINGLE_PHASE_CENTER_TAPPED", 
+            "shunt_impedance": "1728000+691200j", 
+            "impedance2": "0.012000+0.006800j", 
+            "impedance": "0.006000+0.013600j", 
+            "power_rating": "500"
+        }, 
+        "18": {
+            "object": "triplex_line_conductor", 
+            "resistance": "0.97", 
+            "name": "tlc", 
+            "geometric_mean_radius": "0.01111"
+        }, 
+        "31": {
+            "phases": "BS", 
+            "from": "tn_2", 
+            "name": "t2", 
+            "object": "triplex_line", 
+            "to": "tm_2", 
+            "length": "100", 
+            "configuration": "trip_line_config"
+        }, 
+        "30": {
+            "phases": "AS", 
+            "from": "tn_1", 
+            "name": "tl_1", 
+            "object": "triplex_line", 
+            "to": "tm_1", 
+            "length": "100", 
+            "configuration": "trip_line_config"
+        }, 
+        "37": {
+            "parent": "house1", 
+            "name": "lights1", 
+            "power_fraction": "0.003200", 
+            "object": "ZIPload", 
+            "current_fraction": "0.425700", 
+            "base_power": "lights1*1.616013", 
+            "groupid": "lights", 
+            "current_pf": "-1.000000", 
+            "power_pf": "1.000000", 
+            "impedance_fraction": "0.571100", 
+            "impedance_pf": "1.000000"
+        }, 
+        "36": {
+            "parent": "house1", 
+            "name": "convenienceLoads1", 
+            "power_fraction": "0.100000", 
+            "object": "ZIPload", 
+            "current_fraction": "0.100000", 
+            "base_power": "plug1*2.477490", 
+            "groupid": "plugload", 
+            "current_pf": "0.950000", 
+            "power_pf": "0.950000", 
+            "impedance_fraction": "0.800000", 
+            "impedance_pf": "0.950000"
+        }, 
+        "35": {
+            "schedule_skew": "-810", 
+            "tank_volume": "50", 
+            "name": "waterheater1", 
+            "parent": "house1", 
+            "object": "waterheater", 
+            "heating_element_capacity": "4.8 kW", 
+            "thermostat_deadband": "2.9", 
+            "location": "INSIDE", 
+            "demand": "water14*1", 
+            "tank_setpoint": "136.8", 
+            "tank_UA": "2.4", 
+            "temperature": "135"
+        }, 
+        "34": {
+            "schedule_skew": "-810", 
+            "auxiliary_system_type": "ELECTRIC", 
+            "name": "house1", 
+            "parent": "tm_1", 
+            "floor_area": "1838", 
+            "cooling_COP": "3.2", 
+            "object": "house", 
+            "cooling_system_type": "ELECTRIC", 
+            "aux_heat_temperature_lockout": "2.270706e+001", 
+            "heating_setpoint": "heating1*1", 
+            "motor_model": "BASIC", 
+            "auxiliary_strategy": "LOCKOUT", 
+            "air_temperature": "70", 
+            "thermal_integrity_level": "5", 
+            "heating_COP": "3.1", 
+            "cooling_setpoint": "cooling7*1", 
+            "mass_temperature": "70", 
+            "motor_efficiency": "GOOD", 
+            "heating_system_type": "HEAT_PUMP"
+        }, 
+        "33": {
+            "phases": "BS", 
+            "object": "triplex_meter", 
+            "nominal_voltage": "120", 
+            "name": "tm_2"
+        }, 
+        "32": {
+            "phases": "AS", 
+            "object": "triplex_meter", 
+            "nominal_voltage": "120", 
+            "name": "tm_1"
+        }
+    }, 
+    "links": [
+        {
+            "source": {
+                "index": 7, 
+                "name": "n650", 
+                "weight": 1, 
+                "px": 598.9972278480521, 
+                "py": 463.6762222883407, 
+                "y": 463.6594828761734, 
+                "x": 599.042337241468, 
+                "treeIndex": 21, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode swingNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 8, 
+                "name": "n630", 
+                "weight": 3, 
+                "px": 627.7622414494292, 
+                "py": 452.0789383407858, 
+                "y": 452.0475383911779, 
+                "x": 627.8602569537625, 
+                "treeIndex": 23, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "treeIndex": 22
+        }, 
+        {
+            "source": {
+                "index": 8, 
+                "name": "n630", 
+                "weight": 3, 
+                "px": 627.7622414494292, 
+                "py": 452.0789383407858, 
+                "y": 452.0475383911779, 
+                "x": 627.8602569537625, 
+                "treeIndex": 23, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 11, 
+                "name": "tn_1", 
+                "weight": 2, 
+                "px": 614.2494978408369, 
+                "py": 494.4019445360259, 
+                "y": 494.40951581444256, 
+                "x": 614.3272296565923, 
+                "treeIndex": 28, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_node"
+            }, 
+            "treeIndex": 24
+        }, 
+        {
+            "source": {
+                "index": 8, 
+                "name": "n630", 
+                "weight": 3, 
+                "px": 627.7622414494292, 
+                "py": 452.0789383407858, 
+                "y": 452.0475383911779, 
+                "x": 627.8602569537625, 
+                "treeIndex": 23, 
+                "chargeMultiple": 1, 
+                "objectType": "gridNode"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 12, 
+                "name": "tn_2", 
+                "weight": 2, 
+                "px": 592.0964815467875, 
+                "py": 425.14229994685786, 
+                "y": 425.09384149526187, 
+                "x": 592.1547711902787, 
+                "treeIndex": 29, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "treeIndex": 27
+        }, 
+        {
+            "source": {
+                "index": 11, 
+                "name": "tn_1", 
+                "weight": 2, 
+                "px": 614.2494978408369, 
+                "py": 494.4019445360259, 
+                "y": 494.40951581444256, 
+                "x": 614.3272296565923, 
+                "treeIndex": 28, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_node"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 13, 
+                "fixed": 0, 
+                "name": "tm_1", 
+                "weight": 3, 
+                "px": 579.443333923758, 
+                "py": 524.9252749078983, 
+                "y": 524.9278292429966, 
+                "x": 579.4793737870405, 
+                "treeIndex": 32, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "treeIndex": 30
+        }, 
+        {
+            "source": {
+                "index": 12, 
+                "name": "tn_2", 
+                "weight": 2, 
+                "px": 592.0964815467875, 
+                "py": 425.14229994685786, 
+                "y": 425.09384149526187, 
+                "x": 592.1547711902787, 
+                "treeIndex": 29, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "objectType": "fromTo", 
+            "target": {
+                "index": 14, 
+                "fixed": 0, 
+                "name": "tm_2", 
+                "weight": 3, 
+                "px": 548.8098728042227, 
+                "py": 410.3493655084115, 
+                "y": 410.30635418583495, 
+                "x": 548.8420239112722, 
+                "treeIndex": 33, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "treeIndex": 31
+        }, 
+        {
+            "source": {
+                "index": 15, 
+                "name": "house1", 
+                "weight": 6, 
+                "px": 577.5612545513516, 
+                "py": 565.1051003556305, 
+                "y": 565.1371348570308, 
+                "x": 577.5961321078637, 
+                "treeIndex": 34, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "target": {
+                "index": 13, 
+                "fixed": 0, 
+                "name": "tm_1", 
+                "weight": 3, 
+                "px": 579.443333923758, 
+                "py": 524.9252749078983, 
+                "y": 524.9278292429966, 
+                "x": 579.4793737870405, 
+                "treeIndex": 32, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 16, 
+                "name": "waterheater1", 
+                "weight": 1, 
+                "px": 607.0652843726215, 
+                "py": 590.2185282129994, 
+                "y": 590.2860419808272, 
+                "x": 607.1459050687234, 
+                "treeIndex": 35, 
+                "chargeMultiple": 1, 
+                "objectType": "waterheater"
+            }, 
+            "target": {
+                "index": 15, 
+                "name": "house1", 
+                "weight": 6, 
+                "px": 577.5612545513516, 
+                "py": 565.1051003556305, 
+                "y": 565.1371348570308, 
+                "x": 577.5961321078637, 
+                "treeIndex": 34, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 17, 
+                "name": "convenienceLoads1", 
+                "weight": 1, 
+                "px": 579.5162264019901, 
+                "py": 605.0915914614635, 
+                "y": 605.1866830839756, 
+                "x": 579.5572066472663, 
+                "treeIndex": 36, 
+                "chargeMultiple": 1, 
+                "objectType": "ZIPload"
+            }, 
+            "target": {
+                "index": 15, 
+                "name": "house1", 
+                "weight": 6, 
+                "px": 577.5612545513516, 
+                "py": 565.1051003556305, 
+                "y": 565.1371348570308, 
+                "x": 577.5961321078637, 
+                "treeIndex": 34, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 18, 
+                "name": "lights1", 
+                "weight": 1, 
+                "px": 538.992207320044, 
+                "py": 570.7865521682614, 
+                "y": 570.8278932061803, 
+                "x": 538.9703913000544, 
+                "treeIndex": 37, 
+                "chargeMultiple": 1, 
+                "objectType": "ZIPload"
+            }, 
+            "target": {
+                "index": 15, 
+                "name": "house1", 
+                "weight": 6, 
+                "px": 577.5612545513516, 
+                "py": 565.1051003556305, 
+                "y": 565.1371348570308, 
+                "x": 577.5961321078637, 
+                "treeIndex": 34, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 19, 
+                "name": "television1", 
+                "weight": 1, 
+                "px": 615.2569374954126, 
+                "py": 558.5014730123484, 
+                "y": 558.5228813050551, 
+                "x": 615.3462493610062, 
+                "treeIndex": 38, 
+                "chargeMultiple": 1, 
+                "objectType": "ZIPload"
+            }, 
+            "target": {
+                "index": 15, 
+                "name": "house1", 
+                "weight": 6, 
+                "px": 577.5612545513516, 
+                "py": 565.1051003556305, 
+                "y": 565.1371348570308, 
+                "x": 577.5961321078637, 
+                "treeIndex": 34, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 20, 
+                "name": "fan1", 
+                "weight": 1, 
+                "px": 552.3351734588739, 
+                "py": 596.9155901303536, 
+                "y": 597.0002228782845, 
+                "x": 552.3312743133628, 
+                "treeIndex": 39, 
+                "chargeMultiple": 1, 
+                "objectType": "ZIPload"
+            }, 
+            "target": {
+                "index": 15, 
+                "name": "house1", 
+                "weight": 6, 
+                "px": 577.5612545513516, 
+                "py": 565.1051003556305, 
+                "y": 565.1371348570308, 
+                "x": 577.5961321078637, 
+                "treeIndex": 34, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 21, 
+                "fixed": 0, 
+                "name": "house2", 
+                "weight": 6, 
+                "px": 506.4097938269178, 
+                "py": 408.8248414234509, 
+                "y": 408.7742463649409, 
+                "x": 506.4164112583326, 
+                "treeIndex": 40, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "target": {
+                "index": 14, 
+                "fixed": 0, 
+                "name": "tm_2", 
+                "weight": 3, 
+                "px": 548.8098728042227, 
+                "py": 410.3493655084115, 
+                "y": 410.30635418583495, 
+                "x": 548.8420239112722, 
+                "treeIndex": 33, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 22, 
+                "name": "waterheater2", 
+                "weight": 1, 
+                "px": 502.60829042174566, 
+                "py": 446.17768821373636, 
+                "y": 446.1793048547662, 
+                "x": 502.609574263786, 
+                "treeIndex": 41, 
+                "chargeMultiple": 1, 
+                "objectType": "waterheater"
+            }, 
+            "target": {
+                "index": 21, 
+                "fixed": 0, 
+                "name": "house2", 
+                "weight": 6, 
+                "px": 506.4097938269178, 
+                "py": 408.8248414234509, 
+                "y": 408.7742463649409, 
+                "x": 506.4164112583326, 
+                "treeIndex": 40, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 23, 
+                "name": "convenienceLoads2", 
+                "weight": 1, 
+                "px": 473.75051791993883, 
+                "py": 384.41039877613207, 
+                "y": 384.3223399395046, 
+                "x": 473.7012686621301, 
+                "treeIndex": 42, 
+                "chargeMultiple": 1, 
+                "objectType": "ZIPload"
+            }, 
+            "target": {
+                "index": 21, 
+                "fixed": 0, 
+                "name": "house2", 
+                "weight": 6, 
+                "px": 506.4097938269178, 
+                "py": 408.8248414234509, 
+                "y": 408.7742463649409, 
+                "x": 506.4164112583326, 
+                "treeIndex": 40, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 24, 
+                "fixed": 0, 
+                "name": "lights2", 
+                "weight": 1, 
+                "px": 465.22200902860936, 
+                "py": 410.2590465076683, 
+                "y": 410.21333011808457, 
+                "x": 465.15856219585015, 
+                "treeIndex": 43, 
+                "chargeMultiple": 1, 
+                "objectType": "ZIPload"
+            }, 
+            "target": {
+                "index": 21, 
+                "fixed": 0, 
+                "name": "house2", 
+                "weight": 6, 
+                "px": 506.4097938269178, 
+                "py": 408.8248414234509, 
+                "y": 408.7742463649409, 
+                "x": 506.4164112583326, 
+                "treeIndex": 40, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 25, 
+                "name": "television2", 
+                "weight": 1, 
+                "px": 500.70171223746644, 
+                "py": 371.3448595540521, 
+                "y": 371.2433271109057, 
+                "x": 500.69749331635774, 
+                "treeIndex": 44, 
+                "chargeMultiple": 1, 
+                "objectType": "ZIPload"
+            }, 
+            "target": {
+                "index": 21, 
+                "fixed": 0, 
+                "name": "house2", 
+                "weight": 6, 
+                "px": 506.4097938269178, 
+                "py": 408.8248414234509, 
+                "y": 408.7742463649409, 
+                "x": 506.4164112583326, 
+                "treeIndex": 40, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 26, 
+                "name": "fan2", 
+                "weight": 1, 
+                "px": 475.175262404149, 
+                "py": 435.3931601741528, 
+                "y": 435.3884329841176, 
+                "x": 475.12973533459717, 
+                "treeIndex": 45, 
+                "chargeMultiple": 1, 
+                "objectType": "ZIPload"
+            }, 
+            "target": {
+                "index": 21, 
+                "fixed": 0, 
+                "name": "house2", 
+                "weight": 6, 
+                "px": 506.4097938269178, 
+                "py": 408.8248414234509, 
+                "y": 408.7742463649409, 
+                "x": 506.4164112583326, 
+                "treeIndex": 40, 
+                "chargeMultiple": 1, 
+                "objectType": "house"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 27, 
+                "fixed": 0, 
+                "treeIndex": 46, 
+                "weight": 2, 
+                "px": 537.6226259197741, 
+                "py": 519.5940257776351, 
+                "y": 519.5968757683846, 
+                "x": 537.6163260956652, 
+                "objectType": "inverter", 
+                "chargeMultiple": 1, 
+                "name": "inverter46"
+            }, 
+            "target": {
+                "index": 13, 
+                "fixed": 0, 
+                "name": "tm_1", 
+                "weight": 3, 
+                "px": 579.443333923758, 
+                "py": 524.9252749078983, 
+                "y": 524.9278292429966, 
+                "x": 579.4793737870405, 
+                "treeIndex": 32, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 28, 
+                "fixed": 0, 
+                "treeIndex": 47, 
+                "weight": 1, 
+                "px": 498.0148906206293, 
+                "py": 525.0518025768415, 
+                "y": 525.0684848812359, 
+                "x": 497.97525372187897, 
+                "objectType": "solar", 
+                "chargeMultiple": 1, 
+                "name": "solar47"
+            }, 
+            "target": {
+                "index": 27, 
+                "fixed": 0, 
+                "treeIndex": 46, 
+                "weight": 2, 
+                "px": 537.6226259197741, 
+                "py": 519.5940257776351, 
+                "y": 519.5968757683846, 
+                "x": 537.6163260956652, 
+                "objectType": "inverter", 
+                "chargeMultiple": 1, 
+                "name": "inverter46"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 29, 
+                "fixed": 0, 
+                "treeIndex": 48, 
+                "weight": 2, 
+                "px": 567.1019202974013, 
+                "py": 378.34613004853605, 
+                "y": 378.27538893039736, 
+                "x": 567.1518863260696, 
+                "objectType": "inverter", 
+                "chargeMultiple": 1, 
+                "name": "inverter48"
+            }, 
+            "target": {
+                "index": 14, 
+                "fixed": 0, 
+                "name": "tm_2", 
+                "weight": 3, 
+                "px": 548.8098728042227, 
+                "py": 410.3493655084115, 
+                "y": 410.30635418583495, 
+                "x": 548.8420239112722, 
+                "treeIndex": 33, 
+                "chargeMultiple": 1, 
+                "objectType": "triplex_meter"
+            }, 
+            "objectType": "parentChild"
+        }, 
+        {
+            "source": {
+                "index": 30, 
+                "fixed": 0, 
+                "treeIndex": 49, 
+                "weight": 1, 
+                "px": 568.2565012822147, 
+                "py": 343.67871820574493, 
+                "y": 343.5841783035223, 
+                "x": 568.2881814596756, 
+                "objectType": "solar", 
+                "chargeMultiple": 1, 
+                "name": "solar49"
+            }, 
+            "target": {
+                "index": 29, 
+                "fixed": 0, 
+                "treeIndex": 48, 
+                "weight": 2, 
+                "px": 567.1019202974013, 
+                "py": 378.34613004853605, 
+                "y": 378.27538893039736, 
+                "x": 567.1518863260696, 
+                "objectType": "inverter", 
+                "chargeMultiple": 1, 
+                "name": "inverter48"
+            }, 
+            "objectType": "parentChild"
+        }
+    ]
+}

@@ -132,9 +132,9 @@ def convert(stdPath,seqPath):
 							}
 			consumer['load_class'] = loadClassMap[int(consList[23])]
 			#TODO: support kVars.
-			consumer['constant_power_A'] = consList[12]
-			consumer['constant_power_B'] = consList[13]
-			consumer['constant_power_C'] = consList[14]
+			consumer['constant_power_A'] = str(float(consList[12])*1000)
+			consumer['constant_power_B'] = str(float(consList[13])*1000)
+			consumer['constant_power_C'] = str(float(consList[14])*1000)
 			consumer['nominal_voltage'] = '120'
 			return consumer
 
