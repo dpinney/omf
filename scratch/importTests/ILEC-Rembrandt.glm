@@ -29,7 +29,7 @@ object node {
 phases ABCN;
 name REMBRANDT;
 bustype SWING;
-nominal_voltage 7200.0;
+nominal_voltage 2400;
 };
 
 object fuse {
@@ -499,10 +499,10 @@ phases CN;
 load_class R;
 name 263-32-311;
 parent node263-32-311PRUG3297;
-constant_power_C 9.44403;
-constant_power_A 0;
+constant_power_C 9444.03;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -684,10 +684,10 @@ phases AN;
 load_class R;
 name 263-31-260;
 parent node263-31-260PROH279;
-constant_power_C 0;
-constant_power_A 10.8648;
+constant_power_C 0.0;
+constant_power_A 10864.8;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -756,10 +756,10 @@ phases AN;
 load_class R;
 name 263-30-850;
 parent node263-30-850PRUG84;
-constant_power_C 0;
-constant_power_A 4.11609;
+constant_power_C 0.0;
+constant_power_A 4116.09;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -854,10 +854,10 @@ phases AN;
 load_class R;
 name 263-30-380;
 parent node263-30-380PROH277;
-constant_power_C 0;
-constant_power_A 5.59956;
+constant_power_C 0.0;
+constant_power_A 5599.56;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -957,10 +957,10 @@ phases BN;
 load_class R;
 name 263-32-310;
 parent node263-32-310PRUG85;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -1119,10 +1119,10 @@ phases BN;
 load_class R;
 name 283-05-120;
 parent node283-05-120PROH2887;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.835755;
+constant_power_B 835.755;
 };
 
 object overhead_line {
@@ -1186,10 +1186,10 @@ phases BN;
 load_class R;
 name 263-32-860;
 parent node263-32-860PROH2886;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1321,10 +1321,10 @@ phases AN;
 load_class R;
 name 283-06-131;
 parent node283-06-131PROH266;
-constant_power_C 0;
-constant_power_A 0.125363;
+constant_power_C 0.0;
+constant_power_A 125.363;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -1332,10 +1332,10 @@ phases AN;
 load_class R;
 name 283-06-130;
 parent node283-06-131PROH266;
-constant_power_C 0;
-constant_power_A 3.17378;
+constant_power_C 0.0;
+constant_power_A 3173.78;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1427,10 +1427,10 @@ phases AN;
 load_class R;
 name 282-01-180;
 parent node282-01-180PROH268;
-constant_power_C 0;
-constant_power_A 0.91933;
+constant_power_C 0.0;
+constant_power_A 919.33;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1527,10 +1527,10 @@ phases AN;
 load_class R;
 name 282-01-680;
 parent node282-01-680PRUG81;
-constant_power_C 0;
-constant_power_A 10.2798;
+constant_power_C 0.0;
+constant_power_A 10279.8;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1622,10 +1622,10 @@ phases AN;
 load_class R;
 name 283-06-720;
 parent node283-06-720PROH270;
-constant_power_C 0;
-constant_power_A 5.68313;
+constant_power_C 0.0;
+constant_power_A 5683.13;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1661,10 +1661,10 @@ phases AN;
 load_class R;
 name 283-06-310;
 parent node283-06-310PROH269;
-constant_power_C 0;
-constant_power_A 2.70576;
+constant_power_C 0.0;
+constant_power_A 2705.76;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1797,10 +1797,10 @@ phases BN;
 load_class R;
 name 283-08-710;
 parent node283-08-710PRUG834;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 8.02325;
+constant_power_B 8023.25;
 };
 
 object overhead_line {
@@ -1836,10 +1836,10 @@ phases BN;
 load_class R;
 name 283-17-120;
 parent node283-17-120PROH16516;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.668604;
+constant_power_B 668.604;
 };
 
 object overhead_line {
@@ -1903,10 +1903,10 @@ phases BN;
 load_class R;
 name 283-08-120;
 parent node283-08-120PROH2878;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.68695;
+constant_power_B 2686.95;
 };
 
 object overhead_line {
@@ -1970,10 +1970,10 @@ phases BN;
 load_class R;
 name 283-05-830;
 parent node283-05-830PROH2877;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.00208939;
+constant_power_B 2.08939;
 };
 
 object overhead_line {
@@ -2009,10 +2009,10 @@ phases BN;
 load_class R;
 name 283-08-170;
 parent node283-08-170PROH11500;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 3.46838;
+constant_power_B 3468.38;
 };
 
 object fuse {
@@ -2146,16 +2146,17 @@ phases ABCN;
 load_class R;
 name 263-32-710;
 parent node263-32-710PRUG4176;
-constant_power_C 1853.7;
-constant_power_A 1853.7;
+constant_power_C 1853700.0;
+constant_power_A 1853700.0;
 nominal_voltage 120;
-constant_power_B 1853.7;
+constant_power_B 1853700.0;
 };
 
 object capacitor {
 control VOLT;
 phases ABCN;
 capacitor_A 0.10 MVAr;
+control_level INDIVIDUAL;
 name NEWCAP-1D1DC669;
 parent node263-32-710PRUG4176;
 capacitor_C 0.10 MVAr;
@@ -2163,10 +2164,9 @@ capacitor_B 0.10 MVAr;
 phases_connected ABCN;
 time_delay 300.0;
 nominal_voltage 2401.7771;
-switchB CLOSED;
 voltage_set_low 2340.0;
 switchC CLOSED;
-control_level INDIVIDUAL;
+switchB CLOSED;
 switchA CLOSED;
 pt_phase ABCN;
 dwell_time 0.0;
@@ -2523,3 +2523,6 @@ nominal_voltage 2400;
 name nodePRUG4180RECL_993;
 };
 
+object voltdump {
+filename ILEC-Rembrandt.VOLTS.csv;
+};

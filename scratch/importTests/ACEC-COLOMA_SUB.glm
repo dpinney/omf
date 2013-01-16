@@ -29,7 +29,7 @@ object node {
 phases ABCN;
 name COLOMA SUB;
 bustype SWING;
-nominal_voltage 7200.0;
+nominal_voltage 2400;
 };
 
 object regulator {
@@ -541,10 +541,10 @@ phases BN;
 load_class R;
 name S1807-24-030;
 parent nodeS1807-24-030T21526;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.32434;
+constant_power_B 2324.34;
 };
 
 object underground_line {
@@ -773,10 +773,10 @@ phases ABCN;
 load_class R;
 name S1808-19-011;
 parent nodeS1808-19-0111808-19-005;
-constant_power_C 0.619876;
-constant_power_A 0.619876;
+constant_power_C 619.876;
+constant_power_A 619.876;
 nominal_voltage 120;
-constant_power_B 0.619876;
+constant_power_B 619.876;
 };
 
 object overhead_line {
@@ -956,10 +956,10 @@ phases ABCN;
 load_class R;
 name S1808-19-005;
 parent nodeS1808-19-005T28934;
-constant_power_C 11.5954;
-constant_power_A 11.5954;
+constant_power_C 11595.4;
+constant_power_A 11595.4;
 nominal_voltage 120;
-constant_power_B 11.5954;
+constant_power_B 11595.4;
 };
 
 object underground_line {
@@ -1044,10 +1044,10 @@ phases ABCN;
 load_class R;
 name S1808-19-008;
 parent nodeS1808-19-008T28933;
-constant_power_C 8.60795;
-constant_power_A 8.60795;
+constant_power_C 8607.95;
+constant_power_A 8607.95;
 nominal_voltage 120;
-constant_power_B 8.60795;
+constant_power_B 8607.95;
 };
 
 object load {
@@ -1055,10 +1055,10 @@ phases ABCN;
 load_class R;
 name S1808-19-009;
 parent nodeS1808-19-008T28933;
-constant_power_C 0.282697;
-constant_power_A 0.282697;
+constant_power_C 282.697;
+constant_power_A 282.697;
 nominal_voltage 120;
-constant_power_B 0.282697;
+constant_power_B 282.697;
 };
 
 object overhead_line {
@@ -1212,10 +1212,10 @@ phases BN;
 load_class R;
 name S1808-19-001;
 parent nodeS1808-19-0011808-19-008;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.03275;
+constant_power_B 2032.75;
 };
 
 object underground_line {
@@ -2005,10 +2005,10 @@ phases CN;
 load_class R;
 name S1808-21-003;
 parent nodeS1808-21-0031808-0151;
-constant_power_C 1.58038;
-constant_power_A 0;
+constant_power_C 1580.38;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -2067,10 +2067,10 @@ phases CN;
 load_class R;
 name S1808-21-001;
 parent nodeS1808-21-0011808-0164;
-constant_power_C 1.58621;
-constant_power_A 0;
+constant_power_C 1586.21;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -2096,10 +2096,10 @@ phases CN;
 load_class R;
 name S1808-29-001;
 parent nodeS1808-29-0011808-29-006;
-constant_power_C 0.00916405;
-constant_power_A 0;
+constant_power_C 9.16405;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -2107,10 +2107,10 @@ phases CN;
 load_class R;
 name S1808-29-004;
 parent nodeS1808-29-0011808-29-006;
-constant_power_C 0.579835;
-constant_power_A 0;
+constant_power_C 579.835;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -2118,10 +2118,10 @@ phases CN;
 load_class R;
 name S1808-29-088;
 parent nodeS1808-29-0011808-29-006;
-constant_power_C 0.989718;
-constant_power_A 0;
+constant_power_C 989.718;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -2221,10 +2221,10 @@ phases CN;
 load_class R;
 name S1808-29-098;
 parent nodeS1808-29-098T5087;
-constant_power_C 0.736457;
-constant_power_A 0;
+constant_power_C 736.457;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2787,10 +2787,10 @@ phases CN;
 load_class R;
 name S1808-29-075;
 parent nodeS1808-29-0751808-0088;
-constant_power_C 0.378225;
-constant_power_A 0;
+constant_power_C 378.225;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -2816,10 +2816,10 @@ phases CN;
 load_class R;
 name S1808-29-073;
 parent nodeS1808-29-0731808-0085;
-constant_power_C 0.685638;
-constant_power_A 0;
+constant_power_C 685.638;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -2845,10 +2845,10 @@ phases CN;
 load_class R;
 name S1808-29-081;
 parent nodeS1808-29-0811808-0125;
-constant_power_C 1.01388;
-constant_power_A 0;
+constant_power_C 1013.88;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2902,10 +2902,10 @@ phases CN;
 load_class R;
 name S1808-29-007;
 parent nodeS1808-29-0071808-29-032;
-constant_power_C 1.13218;
-constant_power_A 0;
+constant_power_C 1132.18;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -3005,10 +3005,10 @@ phases CN;
 load_class R;
 name S1808-29-089;
 parent nodeS1808-29-0891808-0144;
-constant_power_C 1.67119;
-constant_power_A 0;
+constant_power_C 1671.19;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -3034,10 +3034,10 @@ phases CN;
 load_class R;
 name S1808-29-003;
 parent nodeS1808-29-0031808-29-012;
-constant_power_C 0.47903;
-constant_power_A 0;
+constant_power_C 479.03;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -3063,10 +3063,10 @@ phases CN;
 load_class R;
 name S1808-29-006;
 parent nodeS1808-29-0061808-29-002;
-constant_power_C 0.636485;
-constant_power_A 0;
+constant_power_C 636.485;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -3199,10 +3199,10 @@ phases CN;
 load_class R;
 name S1808-29-008;
 parent nodeS1808-29-0081808-29-034;
-constant_power_C 0.53818;
-constant_power_A 0;
+constant_power_C 538.18;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -3294,10 +3294,10 @@ phases CN;
 load_class R;
 name S1808-29-092;
 parent nodeS1808-29-0921808-0150;
-constant_power_C 0.122465;
-constant_power_A 0;
+constant_power_C 122.465;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -3323,10 +3323,10 @@ phases CN;
 load_class R;
 name S1808-20-006;
 parent nodeS1808-20-0061808-20-007;
-constant_power_C 0.774779;
-constant_power_A 0;
+constant_power_C 774.779;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -3418,10 +3418,10 @@ phases CN;
 load_class R;
 name S1808-20-009;
 parent nodeS1808-20-009T4114;
-constant_power_C 1.44542;
-constant_power_A 0;
+constant_power_C 1445.42;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -3447,10 +3447,10 @@ phases CN;
 load_class R;
 name S1808-20-008;
 parent nodeS1808-20-008T4113;
-constant_power_C 0.105803;
-constant_power_A 0;
+constant_power_C 105.803;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -3583,10 +3583,10 @@ phases CN;
 load_class R;
 name S1808-20-004;
 parent nodeS1808-20-004T18630;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -3668,10 +3668,10 @@ phases CN;
 load_class R;
 name S1808-20-007;
 parent nodeS1808-20-0071808-20-011;
-constant_power_C 2.31934;
-constant_power_A 0;
+constant_power_C 2319.34;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -3697,10 +3697,10 @@ phases CN;
 load_class R;
 name S1808-20-002;
 parent nodeS1808-20-0021808-20-002;
-constant_power_C 1.01638;
-constant_power_A 0;
+constant_power_C 1016.38;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -3754,10 +3754,10 @@ phases CN;
 load_class R;
 name S1808-20-001;
 parent nodeS1808-20-0011808-20-008;
-constant_power_C 0.749786;
-constant_power_A 0;
+constant_power_C 749.786;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -3901,10 +3901,10 @@ phases ABCN;
 load_class R;
 name S1808-19-004;
 parent nodeS1808-19-004T29595;
-constant_power_C 3.39572;
-constant_power_A 3.39572;
+constant_power_C 3395.72;
+constant_power_A 3395.72;
 nominal_voltage 120;
-constant_power_B 3.39572;
+constant_power_B 3395.72;
 };
 
 object underground_line {
@@ -3989,10 +3989,10 @@ phases ABCN;
 load_class R;
 name S1808-19-012;
 parent nodeS1808-19-012T29596;
-constant_power_C 6.82986;
-constant_power_A 6.82986;
+constant_power_C 6829.86;
+constant_power_A 6829.86;
 nominal_voltage 120;
-constant_power_B 6.82986;
+constant_power_B 6829.86;
 };
 
 object transformer {
@@ -4018,10 +4018,10 @@ phases ABCN;
 load_class R;
 name S1808-19-010;
 parent nodeS1808-19-0101808-19-002;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -4083,10 +4083,10 @@ phases ABCN;
 load_class R;
 name S1808-19-003;
 parent nodeS1808-19-0031808-19-009;
-constant_power_C 0.976289;
-constant_power_A 0.976289;
+constant_power_C 976.289;
+constant_power_A 976.289;
 nominal_voltage 120;
-constant_power_B 0.976289;
+constant_power_B 976.289;
 };
 
 object load {
@@ -4094,10 +4094,10 @@ phases CN;
 load_class R;
 name S1808-19-006;
 parent nodeS1808-19-0031808-19-009;
-constant_power_C 0.052485;
-constant_power_A 0;
+constant_power_C 52.485;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -4491,10 +4491,10 @@ phases ABCN;
 load_class R;
 name S1808-30-004;
 parent nodeS1808-30-0041808-19-010;
-constant_power_C 7.8464;
-constant_power_A 7.8464;
+constant_power_C 7846.4;
+constant_power_A 7846.4;
 nominal_voltage 120;
-constant_power_B 7.8464;
+constant_power_B 7846.4;
 };
 
 object load {
@@ -4502,10 +4502,10 @@ phases ABCN;
 load_class R;
 name S1808-30-006;
 parent nodeS1808-30-0041808-19-010;
-constant_power_C 6.17702;
-constant_power_A 6.17702;
+constant_power_C 6177.02;
+constant_power_A 6177.02;
 nominal_voltage 120;
-constant_power_B 6.17702;
+constant_power_B 6177.02;
 };
 
 object overhead_line {
@@ -4782,10 +4782,10 @@ phases CN;
 load_class R;
 name S1807-36-005;
 parent nodeS1807-36-0051807-0244;
-constant_power_C 1.77199;
-constant_power_A 0;
+constant_power_C 1771.99;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5394,10 +5394,10 @@ phases CN;
 load_class R;
 name S1807-35-005;
 parent nodeS1807-35-005T12925;
-constant_power_C 1.52956;
-constant_power_A 0;
+constant_power_C 1529.56;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -5621,10 +5621,10 @@ phases CN;
 load_class R;
 name S1807-34-011;
 parent nodeS1807-34-0111807-0292;
-constant_power_C 0.924736;
-constant_power_A 0;
+constant_power_C 924.736;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -5650,10 +5650,10 @@ phases CN;
 load_class R;
 name S1807-35-004;
 parent nodeS1807-35-004T12926;
-constant_power_C 0.867253;
-constant_power_A 0;
+constant_power_C 867.253;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -5768,10 +5768,10 @@ phases CN;
 load_class R;
 name S1807-36-001;
 parent nodeS1807-36-0011807-36-005;
-constant_power_C 0.249929;
-constant_power_A 0;
+constant_power_C 249.929;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -5871,10 +5871,10 @@ phases CN;
 load_class R;
 name S1807-36-010;
 parent nodeS1807-36-0101807-0299;
-constant_power_C 0.206608;
-constant_power_A 0;
+constant_power_C 206.608;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -5900,10 +5900,10 @@ phases CN;
 load_class R;
 name S1807-36-008;
 parent nodeS1807-36-0081807-36-002;
-constant_power_C 0.00749786;
-constant_power_A 0;
+constant_power_C 7.49786;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -6013,10 +6013,10 @@ phases CN;
 load_class R;
 name S1807-25-003;
 parent nodeS1807-25-0031807-25-007;
-constant_power_C 1.38294;
-constant_power_A 0;
+constant_power_C 1382.94;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -6215,10 +6215,10 @@ phases CN;
 load_class R;
 name S1807-25-015;
 parent nodeS1807-25-015T11989;
-constant_power_C 0.107469;
-constant_power_A 0;
+constant_power_C 107.469;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -6244,10 +6244,10 @@ phases CN;
 load_class R;
 name S1807-25-002;
 parent nodeS1807-25-002T11988;
-constant_power_C 0.609826;
-constant_power_A 0;
+constant_power_C 609.826;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -6710,10 +6710,10 @@ phases CN;
 load_class R;
 name S1808-32-005;
 parent nodeS1808-32-005T3285;
-constant_power_C 0.324907;
-constant_power_A 0;
+constant_power_C 324.907;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -6805,10 +6805,10 @@ phases CN;
 load_class R;
 name S1808-32-006;
 parent nodeS1808-32-006T3286;
-constant_power_C 0.120799;
-constant_power_A 0;
+constant_power_C 120.799;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -6867,10 +6867,10 @@ phases CN;
 load_class R;
 name S1808-32-074;
 parent nodeS1808-32-074T3287;
-constant_power_C 0.708131;
-constant_power_A 0;
+constant_power_C 708.131;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -6929,10 +6929,10 @@ phases CN;
 load_class R;
 name S1808-32-076;
 parent nodeS1808-32-076T3288;
-constant_power_C 0.232434;
-constant_power_A 0;
+constant_power_C 232.434;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -7291,10 +7291,10 @@ phases CN;
 load_class R;
 name S1808-32-003;
 parent nodeS1808-32-0031808-32-008;
-constant_power_C 0.0533181;
-constant_power_A 0;
+constant_power_C 53.3181;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -7320,10 +7320,10 @@ phases CN;
 load_class R;
 name S1808-32-008;
 parent nodeS1808-32-0081808-32-005;
-constant_power_C 0.0974722;
-constant_power_A 0;
+constant_power_C 97.4722;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -7349,10 +7349,10 @@ phases CN;
 load_class R;
 name S1808-32-017;
 parent nodeS1808-32-0171808-32-004;
-constant_power_C 0.0249929;
-constant_power_A 0;
+constant_power_C 24.9929;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -7518,10 +7518,10 @@ phases CN;
 load_class R;
 name S1808-32-004;
 parent nodeS1808-32-0041808-32-014;
-constant_power_C 0.354899;
-constant_power_A 0;
+constant_power_C 354.899;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -7985,10 +7985,10 @@ phases CN;
 load_class R;
 name S1808-33-005;
 parent nodeS1808-33-0051808-33-002;
-constant_power_C 0.0333238;
-constant_power_A 0;
+constant_power_C 33.3238;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -8126,10 +8126,10 @@ phases CN;
 load_class R;
 name S1808-33-004;
 parent nodeS1808-33-0041808-33-003;
-constant_power_C 0.900576;
-constant_power_A 0;
+constant_power_C 900.576;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -8346,10 +8346,10 @@ phases CN;
 load_class R;
 name S1808-27-011;
 parent nodeS1808-27-0111808-0166;
-constant_power_C 0.364896;
-constant_power_A 0;
+constant_power_C 364.896;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -8477,10 +8477,10 @@ phases CN;
 load_class R;
 name S1808-34-004;
 parent nodeS1808-34-004T4107;
-constant_power_C 0.832263;
-constant_power_A 0;
+constant_power_C 832.263;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -8702,10 +8702,10 @@ phases CN;
 load_class R;
 name S1808-27-006;
 parent nodeS1808-27-0061808-27-007;
-constant_power_C 0.933067;
-constant_power_A 0;
+constant_power_C 933.067;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -8805,10 +8805,10 @@ phases CN;
 load_class R;
 name S1808-27-009;
 parent nodeS1808-27-0091808-0124;
-constant_power_C 0.650648;
-constant_power_A 0;
+constant_power_C 650.648;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -8834,10 +8834,10 @@ phases CN;
 load_class R;
 name S1808-34-003;
 parent nodeS1808-34-0031808-27-005;
-constant_power_C 0.194111;
-constant_power_A 0;
+constant_power_C 194.111;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -8863,10 +8863,10 @@ phases CN;
 load_class R;
 name S1808-27-010;
 parent nodeS1808-27-0101808-27-004;
-constant_power_C 0.134128;
-constant_power_A 0;
+constant_power_C 134.128;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -8892,10 +8892,10 @@ phases CN;
 load_class R;
 name S1808-27-005;
 parent nodeS1808-27-0051808-27-001;
-constant_power_C 0.768114;
-constant_power_A 0;
+constant_power_C 768.114;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -8903,10 +8903,10 @@ phases CN;
 load_class R;
 name S1808-34-001;
 parent nodeS1808-27-0051808-27-001;
-constant_power_C 0.295749;
-constant_power_A 0;
+constant_power_C 295.749;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -8932,10 +8932,10 @@ phases CN;
 load_class R;
 name S1808-33-008;
 parent nodeS1808-33-0081808-28-007;
-constant_power_C 0.249096;
-constant_power_A 0;
+constant_power_C 249.096;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -8961,10 +8961,10 @@ phases CN;
 load_class R;
 name S1808-28-003;
 parent nodeS1808-28-0031808-28-006;
-constant_power_C 2.88168;
-constant_power_A 0;
+constant_power_C 2881.68;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -9158,10 +9158,10 @@ phases CN;
 load_class R;
 name S1808-33-003;
 parent nodeS1808-33-0031808-33-009;
-constant_power_C 0.172451;
-constant_power_A 0;
+constant_power_C 172.451;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -9169,10 +9169,10 @@ phases CN;
 load_class R;
 name S1808-33-012;
 parent nodeS1808-33-0031808-33-009;
-constant_power_C 0.528183;
-constant_power_A 0;
+constant_power_C 528.183;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -9198,10 +9198,10 @@ phases CN;
 load_class R;
 name S1808-33-009;
 parent nodeS1808-33-0091808-33-010;
-constant_power_C 0.18578;
-constant_power_A 0;
+constant_power_C 185.78;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -9227,10 +9227,10 @@ phases CN;
 load_class R;
 name S1808-33-007;
 parent nodeS1808-33-0071808-33-008;
-constant_power_C 0.0599829;
-constant_power_A 0;
+constant_power_C 59.9829;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -9256,10 +9256,10 @@ phases CN;
 load_class R;
 name S1808-33-010;
 parent nodeS1808-33-0101808-33-007;
-constant_power_C 1.20716;
-constant_power_A 0;
+constant_power_C 1207.16;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9359,10 +9359,10 @@ phases CN;
 load_class R;
 name S1808-33-011;
 parent nodeS1808-33-0111808-0136;
-constant_power_C 1.08219;
-constant_power_A 0;
+constant_power_C 1082.19;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9462,10 +9462,10 @@ phases CN;
 load_class R;
 name S1808-28-004;
 parent nodeS1808-28-004T21024;
-constant_power_C 1.07303;
-constant_power_A 0;
+constant_power_C 1073.03;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -9491,10 +9491,10 @@ phases CN;
 load_class R;
 name S1808-28-001;
 parent nodeS1808-28-0011808-28-001;
-constant_power_C 0.0833096;
-constant_power_A 0;
+constant_power_C 83.3096;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -9520,10 +9520,10 @@ phases CN;
 load_class R;
 name S1808-32-015;
 parent nodeS1808-32-0151808-32-022;
-constant_power_C 0.45737;
-constant_power_A 0;
+constant_power_C 457.37;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9623,10 +9623,10 @@ phases CN;
 load_class R;
 name S1808-29-094;
 parent nodeS1808-29-094T2627;
-constant_power_C 0.0649815;
-constant_power_A 0;
+constant_power_C 64.9815;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -9652,10 +9652,10 @@ phases CN;
 load_class R;
 name S1808-32-070;
 parent nodeS1808-32-0701808-32-021;
-constant_power_C 0.308245;
-constant_power_A 0;
+constant_power_C 308.245;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9821,10 +9821,10 @@ phases CN;
 load_class R;
 name S1808-29-082;
 parent nodeS1808-29-0821808-0133;
-constant_power_C 0.0724793;
-constant_power_A 0;
+constant_power_C 72.4793;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9883,10 +9883,10 @@ phases CN;
 load_class R;
 name S1808-29-086;
 parent nodeS1808-29-086T29059;
-constant_power_C 0.501524;
-constant_power_A 0;
+constant_power_C 501.524;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9945,10 +9945,10 @@ phases CN;
 load_class R;
 name S1808-29-085;
 parent nodeS1808-29-0851808-0137;
-constant_power_C 0.0899743;
-constant_power_A 0;
+constant_power_C 89.9743;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10007,10 +10007,10 @@ phases CN;
 load_class R;
 name S1808-29-093;
 parent nodeS1808-29-0931808-0160;
-constant_power_C 0.420713;
-constant_power_A 0;
+constant_power_C 420.713;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -10036,10 +10036,10 @@ phases CN;
 load_class R;
 name S1808-32-009;
 parent nodeS1808-32-0091808-32-013;
-constant_power_C 0.137461;
-constant_power_A 0;
+constant_power_C 137.461;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -10065,10 +10065,10 @@ phases CN;
 load_class R;
 name S1808-32-011;
 parent nodeS1808-32-0111808-32-012;
-constant_power_C 0.544845;
-constant_power_A 0;
+constant_power_C 544.845;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10201,10 +10201,10 @@ phases CN;
 load_class R;
 name S1808-32-016;
 parent nodeS1808-32-0161808-32-024;
-constant_power_C 1.22715;
-constant_power_A 0;
+constant_power_C 1227.15;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -10212,10 +10212,10 @@ phases CN;
 load_class R;
 name S1808-32-075;
 parent nodeS1808-32-0161808-32-024;
-constant_power_C 0.0574836;
-constant_power_A 0;
+constant_power_C 57.4836;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10274,10 +10274,10 @@ phases CN;
 load_class R;
 name S1808-32-073;
 parent nodeS1808-32-073T14065;
-constant_power_C 0.384057;
-constant_power_A 0;
+constant_power_C 384.057;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10336,10 +10336,10 @@ phases CN;
 load_class R;
 name S1808-32-013;
 parent nodeS1808-32-0131808-0082;
-constant_power_C 0.244097;
-constant_power_A 0;
+constant_power_C 244.097;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10629,10 +10629,10 @@ phases CN;
 load_class R;
 name S1808-29-077;
 parent nodeS1808-29-0771808-0103;
-constant_power_C 1.19799;
-constant_power_A 0;
+constant_power_C 1197.99;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10823,10 +10823,10 @@ phases CN;
 load_class R;
 name S1808-29-100;
 parent nodeS1808-29-100T4170;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -10852,10 +10852,10 @@ phases CN;
 load_class R;
 name S1808-29-096;
 parent nodeS1808-29-096T3902;
-constant_power_C 0.904742;
-constant_power_A 0;
+constant_power_C 904.742;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -10881,10 +10881,10 @@ phases CN;
 load_class R;
 name S1808-29-080;
 parent nodeS1808-29-0801808-0123;
-constant_power_C 0.577335;
-constant_power_A 0;
+constant_power_C 577.335;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -11042,10 +11042,10 @@ phases CN;
 load_class R;
 name S1808-29-099;
 parent nodeS1808-29-099T4037;
-constant_power_C 0.308245;
-constant_power_A 0;
+constant_power_C 308.245;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -11170,10 +11170,10 @@ phases CN;
 load_class R;
 name S1808-29-091;
 parent nodeS1808-29-0911808-0148;
-constant_power_C 0.392388;
-constant_power_A 0;
+constant_power_C 392.388;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -11199,10 +11199,10 @@ phases CN;
 load_class R;
 name S1808-29-097;
 parent nodeS1808-29-097T4002;
-constant_power_C 0.566505;
-constant_power_A 0;
+constant_power_C 566.505;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -11327,10 +11327,10 @@ phases CN;
 load_class R;
 name S1808-29-017;
 parent nodeS1808-29-0171808-0045;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -11356,10 +11356,10 @@ phases CN;
 load_class R;
 name S1808-29-016;
 parent nodeS1808-29-016T14089;
-constant_power_C 0.274922;
-constant_power_A 0;
+constant_power_C 274.922;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -11385,10 +11385,10 @@ phases CN;
 load_class R;
 name S1808-29-015;
 parent nodeS1808-29-015T10909;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -11503,10 +11503,10 @@ phases CN;
 load_class R;
 name S1808-29-068;
 parent nodeS1808-29-0681808-29-026;
-constant_power_C 0.33907;
-constant_power_A 0;
+constant_power_C 339.07;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -11588,10 +11588,10 @@ phases CN;
 load_class R;
 name S1808-29-070;
 parent nodeS1808-29-0701808-29-029;
-constant_power_C 0.675641;
-constant_power_A 0;
+constant_power_C 675.641;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -11617,10 +11617,10 @@ phases CN;
 load_class R;
 name S1808-29-035;
 parent nodeS1808-29-0351808-0046;
-constant_power_C 0.264924;
-constant_power_A 0;
+constant_power_C 264.924;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -11628,10 +11628,10 @@ phases CN;
 load_class R;
 name S1808-29-079;
 parent nodeS1808-29-0351808-0046;
-constant_power_C 0.512354;
-constant_power_A 0;
+constant_power_C 512.354;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -11639,10 +11639,10 @@ phases CN;
 load_class R;
 name S1808-29-084;
 parent nodeS1808-29-0351808-0046;
-constant_power_C 0.0133295;
-constant_power_A 0;
+constant_power_C 13.3295;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -11668,10 +11668,10 @@ phases CN;
 load_class R;
 name S1808-29-087;
 parent nodeS1808-29-0871808-0142;
-constant_power_C 0.463201;
-constant_power_A 0;
+constant_power_C 463.201;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -11697,10 +11697,10 @@ phases CN;
 load_class R;
 name S1808-29-101;
 parent nodeS1808-29-101T11098;
-constant_power_C 1.27464;
-constant_power_A 0;
+constant_power_C 1274.64;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -11726,10 +11726,10 @@ phases CN;
 load_class R;
 name S1808-29-074;
 parent nodeS1808-29-0741808-0084;
-constant_power_C 1.00138;
-constant_power_A 0;
+constant_power_C 1001.38;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -11737,10 +11737,10 @@ phases CN;
 load_class R;
 name S1808-29-076;
 parent nodeS1808-29-0741808-0084;
-constant_power_C 0.196611;
-constant_power_A 0;
+constant_power_C 196.611;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -11766,10 +11766,10 @@ phases CN;
 load_class R;
 name S1808-32-078;
 parent nodeS1808-32-078T4061;
-constant_power_C 1.5154;
-constant_power_A 0;
+constant_power_C 1515.4;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -11861,10 +11861,10 @@ phases CN;
 load_class R;
 name S1808-32-014;
 parent nodeS1808-32-014T4140;
-constant_power_C 1.99693;
-constant_power_A 0;
+constant_power_C 1996.93;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -11923,10 +11923,10 @@ phases CN;
 load_class R;
 name S1808-32-012;
 parent nodeS1808-32-0121808-0080;
-constant_power_C 0.0683138;
-constant_power_A 0;
+constant_power_C 68.3138;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -11934,10 +11934,10 @@ phases CN;
 load_class R;
 name S1808-32-069;
 parent nodeS1808-32-0121808-0080;
-constant_power_C 0.130796;
-constant_power_A 0;
+constant_power_C 130.796;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -12060,10 +12060,10 @@ phases CN;
 load_class R;
 name S1808-32-026;
 parent nodeS1808-32-0261808-32-026;
-constant_power_C 0.747287;
-constant_power_A 0;
+constant_power_C 747.287;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -12155,10 +12155,10 @@ phases CN;
 load_class R;
 name S1808-32-022;
 parent nodeS1808-32-0221808-0074;
-constant_power_C 0.00416548;
-constant_power_A 0;
+constant_power_C 4.16548;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -12217,10 +12217,10 @@ phases CN;
 load_class R;
 name S1808-31-066;
 parent nodeS1808-31-0661808-0072;
-constant_power_C 0.418214;
-constant_power_A 0;
+constant_power_C 418.214;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -12460,10 +12460,10 @@ phases CN;
 load_class R;
 name S1808-30-061;
 parent nodeS1808-30-0611808-30-007;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -12629,10 +12629,10 @@ phases CN;
 load_class R;
 name S1808-30-064;
 parent nodeS1808-30-0641808-30-013;
-constant_power_C 0.471532;
-constant_power_A 0;
+constant_power_C 471.532;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -12658,10 +12658,10 @@ phases CN;
 load_class R;
 name S1808-30-065;
 parent nodeS1808-30-0651808-30-014;
-constant_power_C 0.229934;
-constant_power_A 0;
+constant_power_C 229.934;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -12687,10 +12687,10 @@ phases CN;
 load_class R;
 name S1808-30-060;
 parent nodeS1808-30-0601808-30-008;
-constant_power_C 0.00249929;
-constant_power_A 0;
+constant_power_C 2.49929;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -13338,10 +13338,10 @@ phases AN;
 load_class R;
 name S1707-01-009;
 parent nodeS1707-01-0091707-0181;
-constant_power_C 0;
-constant_power_A 0.878916;
+constant_power_C 0.0;
+constant_power_A 878.916;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -13713,10 +13713,10 @@ phases AN;
 load_class R;
 name S1707-11-003;
 parent nodeS1707-11-0031707-0074;
-constant_power_C 0;
-constant_power_A 0.83976;
+constant_power_C 0.0;
+constant_power_A 839.76;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -13775,10 +13775,10 @@ phases AN;
 load_class R;
 name S1707-02-013;
 parent nodeS1707-02-0131707-0223;
-constant_power_C 0;
-constant_power_A 1.06553;
+constant_power_C 0.0;
+constant_power_A 1065.53;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -13837,10 +13837,10 @@ phases AN;
 load_class R;
 name S1707-12-010;
 parent nodeS1707-12-010T12388;
-constant_power_C 0;
-constant_power_A 19.1135;
+constant_power_C 0.0;
+constant_power_A 19113.5;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -13866,10 +13866,10 @@ phases AN;
 load_class R;
 name S1707-12-009;
 parent nodeS1707-12-0091707-12-016;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -14221,10 +14221,10 @@ phases AN;
 load_class R;
 name S1707-12-003;
 parent nodeS1707-12-0031707-0038;
-constant_power_C 0;
-constant_power_A 0.0299914;
+constant_power_C 0.0;
+constant_power_A 29.9914;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -14586,10 +14586,10 @@ phases AN;
 load_class R;
 name S1707-14-013;
 parent nodeS1707-14-013T7736;
-constant_power_C 0;
-constant_power_A 0.131629;
+constant_power_C 0.0;
+constant_power_A 131.629;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -14615,10 +14615,10 @@ phases AN;
 load_class R;
 name S1707-13-010;
 parent nodeS1707-13-0101707-13-036;
-constant_power_C 0;
-constant_power_A 0.31491;
+constant_power_C 0.0;
+constant_power_A 314.91;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -14677,10 +14677,10 @@ phases AN;
 load_class R;
 name S1707-12-008;
 parent nodeS1707-12-008T4265;
-constant_power_C 0;
-constant_power_A 0.534014;
+constant_power_C 0.0;
+constant_power_A 534.014;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -14874,10 +14874,10 @@ phases AN;
 load_class R;
 name S1707-13-002;
 parent nodeS1707-13-0021707-13-016;
-constant_power_C 0;
-constant_power_A 0.488194;
+constant_power_C 0.0;
+constant_power_A 488.194;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15005,10 +15005,10 @@ phases AN;
 load_class R;
 name S1707-13-013;
 parent nodeS1707-13-0131707-0190;
-constant_power_C 0;
-constant_power_A 0.720628;
+constant_power_C 0.0;
+constant_power_A 720.628;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15332,10 +15332,10 @@ phases AN;
 load_class R;
 name S1707-14-017;
 parent nodeS1707-14-017T12395;
-constant_power_C 0;
-constant_power_A 34.6197;
+constant_power_C 0.0;
+constant_power_A 34619.7;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -15361,10 +15361,10 @@ phases AN;
 load_class R;
 name S1707-13-001;
 parent nodeS1707-13-0011707-13-013;
-constant_power_C 0;
-constant_power_A 0.499857;
+constant_power_C 0.0;
+constant_power_A 499.857;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -15464,10 +15464,10 @@ phases AN;
 load_class R;
 name S1707-13-014;
 parent nodeS1707-13-014T19033;
-constant_power_C 0;
-constant_power_A 19.3094;
+constant_power_C 0.0;
+constant_power_A 19309.4;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -15567,10 +15567,10 @@ phases AN;
 load_class R;
 name S1707-13-017;
 parent nodeS1707-13-0171707-0259;
-constant_power_C 0;
-constant_power_A 0.579001;
+constant_power_C 0.0;
+constant_power_A 579.001;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -15695,10 +15695,10 @@ phases AN;
 load_class R;
 name S1707-13-019;
 parent nodeS1707-13-019T11878;
-constant_power_C 0;
-constant_power_A 0.579835;
+constant_power_C 0.0;
+constant_power_A 579.835;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -15831,10 +15831,10 @@ phases AN;
 load_class R;
 name S1707-13-020;
 parent nodeS1707-13-020T11933;
-constant_power_C 0;
-constant_power_A 0.0949729;
+constant_power_C 0.0;
+constant_power_A 94.9729;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -15860,10 +15860,10 @@ phases AN;
 load_class R;
 name S1707-13-015;
 parent nodeS1707-13-015T11932;
-constant_power_C 0;
-constant_power_A 0.0149957;
+constant_power_C 0.0;
+constant_power_A 14.9957;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -15889,10 +15889,10 @@ phases AN;
 load_class R;
 name S1707-13-008;
 parent nodeS1707-13-0081707-13-007;
-constant_power_C 0;
-constant_power_A 0.126631;
+constant_power_C 0.0;
+constant_power_A 126.631;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -15918,10 +15918,10 @@ phases AN;
 load_class R;
 name S1707-13-011;
 parent nodeS1707-13-0111707-13-006;
-constant_power_C 0;
-constant_power_A 0.453204;
+constant_power_C 0.0;
+constant_power_A 453.204;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15929,10 +15929,10 @@ phases AN;
 load_class R;
 name S1707-13-018;
 parent nodeS1707-13-0111707-13-006;
-constant_power_C 0;
-constant_power_A 0.0191612;
+constant_power_C 0.0;
+constant_power_A 19.1612;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -15958,10 +15958,10 @@ phases AN;
 load_class R;
 name S1707-13-016;
 parent nodeS1707-13-0161707-13-003;
-constant_power_C 0;
-constant_power_A 0.554842;
+constant_power_C 0.0;
+constant_power_A 554.842;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -15987,10 +15987,10 @@ phases AN;
 load_class R;
 name S1707-12-001;
 parent nodeS1707-12-0011707-12-009;
-constant_power_C 0;
-constant_power_A 0.124964;
+constant_power_C 0.0;
+constant_power_A 124.964;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -16016,10 +16016,10 @@ phases AN;
 load_class R;
 name S1707-12-002;
 parent nodeS1707-12-0021707-12-007;
-constant_power_C 0;
-constant_power_A 0.336571;
+constant_power_C 0.0;
+constant_power_A 336.571;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -16119,10 +16119,10 @@ phases AN;
 load_class R;
 name S1707-12-007;
 parent nodeS1707-12-007T4331;
-constant_power_C 0;
-constant_power_A 1.55206;
+constant_power_C 0.0;
+constant_power_A 1552.06;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -16148,10 +16148,10 @@ phases AN;
 load_class R;
 name S1707-12-004;
 parent nodeS1707-12-0041707-12-004;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -16159,10 +16159,10 @@ phases AN;
 load_class R;
 name S1707-12-006;
 parent nodeS1707-12-0041707-12-004;
-constant_power_C 0;
-constant_power_A 0.300748;
+constant_power_C 0.0;
+constant_power_A 300.748;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -16262,10 +16262,10 @@ phases AN;
 load_class R;
 name S1707-12-005;
 parent nodeS1707-12-005T2631;
-constant_power_C 0;
-constant_power_A 0.671475;
+constant_power_C 0.0;
+constant_power_A 671.475;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -16324,10 +16324,10 @@ phases AN;
 load_class R;
 name S1707-01-005;
 parent nodeS1707-01-0051707-01-007;
-constant_power_C 0;
-constant_power_A 2.27102;
+constant_power_C 0.0;
+constant_power_A 2271.02;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -16386,10 +16386,10 @@ phases AN;
 load_class R;
 name S1707-01-012;
 parent nodeS1707-01-0121707-0234;
-constant_power_C 0;
-constant_power_A 0.682305;
+constant_power_C 0.0;
+constant_power_A 682.305;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -16514,10 +16514,10 @@ phases AN;
 load_class R;
 name S1708-06-005;
 parent nodeS1708-06-005T15856;
-constant_power_C 0;
-constant_power_A 0.708964;
+constant_power_C 0.0;
+constant_power_A 708.964;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -16609,10 +16609,10 @@ phases AN;
 load_class R;
 name S1708-06-006;
 parent nodeS1708-06-006T15884;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -16638,10 +16638,10 @@ phases AN;
 load_class R;
 name S1708-06-011;
 parent nodeS1708-06-011T15857;
-constant_power_C 0;
-constant_power_A 0.285752;
+constant_power_C 0.0;
+constant_power_A 285.752;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -16766,10 +16766,10 @@ phases AN;
 load_class R;
 name S1708-06-013;
 parent nodeS1708-06-013T15861;
-constant_power_C 0;
-constant_power_A 0.15079;
+constant_power_C 0.0;
+constant_power_A 150.79;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -16861,10 +16861,10 @@ phases AN;
 load_class R;
 name S1708-06-003;
 parent nodeS1708-06-003T15860;
-constant_power_C 0;
-constant_power_A 0.368228;
+constant_power_C 0.0;
+constant_power_A 368.228;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -16890,10 +16890,10 @@ phases AN;
 load_class R;
 name S1708-06-008;
 parent nodeS1708-06-008T15859;
-constant_power_C 0;
-constant_power_A 0.143292;
+constant_power_C 0.0;
+constant_power_A 143.292;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -16919,10 +16919,10 @@ phases AN;
 load_class R;
 name S1707-01-007;
 parent nodeS1707-01-0071707-01-003;
-constant_power_C 0;
-constant_power_A 0.436542;
+constant_power_C 0.0;
+constant_power_A 436.542;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -16948,10 +16948,10 @@ phases AN;
 load_class R;
 name S1707-01-006;
 parent nodeS1707-01-0061707-01-001;
-constant_power_C 0;
-constant_power_A 0.087475;
+constant_power_C 0.0;
+constant_power_A 87.475;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -17033,10 +17033,10 @@ phases AN;
 load_class R;
 name S1808-31-001;
 parent nodeS1808-31-0011808-31-003;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -17510,10 +17510,10 @@ phases BN;
 load_class R;
 name S1708-05-008;
 parent nodeS1708-05-0081708-05-001;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.2813;
+constant_power_B 1281.3;
 };
 
 object overhead_line {
@@ -17791,10 +17791,10 @@ phases BN;
 load_class R;
 name S1708-05-002;
 parent nodeS1708-05-0021708-05-008;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.01304;
+constant_power_B 1013.04;
 };
 
 object overhead_line {
@@ -17904,10 +17904,10 @@ phases BN;
 load_class R;
 name S1708-04-001;
 parent nodeS1708-04-0011708-04-001;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.26631;
+constant_power_B 1266.31;
 };
 
 object overhead_line {
@@ -18017,10 +18017,10 @@ phases BN;
 load_class R;
 name S1708-05-004;
 parent nodeS1708-05-0041708-05-012;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.404884;
+constant_power_B 404.884;
 };
 
 object underground_line {
@@ -18120,10 +18120,10 @@ phases BN;
 load_class R;
 name S1708-04-003;
 parent nodeS1708-04-003T14400;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.227435;
+constant_power_B 227.435;
 };
 
 object transformer {
@@ -18149,10 +18149,10 @@ phases BN;
 load_class R;
 name S1708-05-009;
 parent nodeS1708-05-0091708-05-009;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.970556;
+constant_power_B 970.556;
 };
 
 object overhead_line {
@@ -18374,10 +18374,10 @@ phases BN;
 load_class R;
 name S1708-08-009;
 parent nodeS1708-08-0091708-0024;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.419047;
+constant_power_B 419.047;
 };
 
 object transformer {
@@ -18403,10 +18403,10 @@ phases BN;
 load_class R;
 name S1708-08-005;
 parent nodeS1708-08-0051708-0023;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.718962;
+constant_power_B 718.962;
 };
 
 object overhead_line {
@@ -18786,10 +18786,10 @@ phases BN;
 load_class R;
 name S1708-08-010;
 parent nodeS1708-08-0101708-0029;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.962225;
+constant_power_B 962.225;
 };
 
 object load {
@@ -18797,10 +18797,10 @@ phases BN;
 load_class R;
 name S1708-08-011;
 parent nodeS1708-08-0101708-0029;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.847258;
+constant_power_B 847.258;
 };
 
 object overhead_line {
@@ -18910,10 +18910,10 @@ phases BN;
 load_class R;
 name S1708-08-001;
 parent nodeS1708-08-0011708-08-013;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.698134;
+constant_power_B 698.134;
 };
 
 object overhead_line {
@@ -19294,10 +19294,10 @@ phases BN;
 load_class R;
 name S1708-16-001;
 parent nodeS1708-16-0011708-16-024;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.789775;
+constant_power_B 789.775;
 };
 
 object underground_line {
@@ -19397,10 +19397,10 @@ phases BN;
 load_class R;
 name S1708-16-024;
 parent nodeS1708-16-0241708-0042;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.49957;
+constant_power_B 1499.57;
 };
 
 object underground_line {
@@ -19492,10 +19492,10 @@ phases BN;
 load_class R;
 name S1708-16-012;
 parent nodeS1708-16-012T5390;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.796439;
+constant_power_B 796.439;
 };
 
 object underground_line {
@@ -19969,10 +19969,10 @@ phases BN;
 load_class R;
 name S1708-09-033;
 parent nodeS1708-09-033T4063;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.286585;
+constant_power_B 286.585;
 };
 
 object transformer {
@@ -19998,10 +19998,10 @@ phases BN;
 load_class R;
 name S1708-09-005;
 parent nodeS1708-09-0051708-09-008;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0158288;
+constant_power_B 15.8288;
 };
 
 object underground_line {
@@ -20101,10 +20101,10 @@ phases BN;
 load_class R;
 name S1708-09-029;
 parent nodeS1708-09-0291708-0022;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.649815;
+constant_power_B 649.815;
 };
 
 object overhead_line {
@@ -20242,10 +20242,10 @@ phases BN;
 load_class R;
 name S1708-09-002;
 parent nodeS1708-09-0021708-09-012;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.305746;
+constant_power_B 305.746;
 };
 
 object overhead_line {
@@ -20434,10 +20434,10 @@ phases BN;
 load_class R;
 name S1708-10-006;
 parent nodeS1708-10-0061708-10-002;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.13967;
+constant_power_B 1139.67;
 };
 
 object transformer {
@@ -20463,10 +20463,10 @@ phases BN;
 load_class R;
 name S1708-10-009;
 parent nodeS1708-10-009T12268;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.247429;
+constant_power_B 247.429;
 };
 
 object overhead_line {
@@ -20711,10 +20711,10 @@ phases BN;
 load_class R;
 name S1708-15-007;
 parent nodeS1708-15-0071708-0034;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.39294;
+constant_power_B 1392.94;
 };
 
 object overhead_line {
@@ -20768,10 +20768,10 @@ phases BN;
 load_class R;
 name S1708-15-001;
 parent nodeS1708-15-0011708-15-003;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.60871;
+constant_power_B 1608.71;
 };
 
 object transformer {
@@ -20797,10 +20797,10 @@ phases BN;
 load_class R;
 name S1708-15-003;
 parent nodeS1708-15-0031708-15-001;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.19133;
+constant_power_B 1191.33;
 };
 
 object transformer {
@@ -20826,10 +20826,10 @@ phases BN;
 load_class R;
 name S1708-09-020;
 parent nodeS1708-09-0201708-10-004;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.152457;
+constant_power_B 152.457;
 };
 
 object load {
@@ -20837,10 +20837,10 @@ phases BN;
 load_class R;
 name S1708-10-002;
 parent nodeS1708-09-0201708-10-004;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0774779;
+constant_power_B 77.4779;
 };
 
 object load {
@@ -20848,10 +20848,10 @@ phases BN;
 load_class R;
 name S1708-15-004;
 parent nodeS1708-09-0201708-10-004;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.354066;
+constant_power_B 354.066;
 };
 
 object transformer {
@@ -20877,10 +20877,10 @@ phases BN;
 load_class R;
 name S1708-09-030;
 parent nodeS1708-09-0301708-10-003;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.00749786;
+constant_power_B 7.49786;
 };
 
 object overhead_line {
@@ -21102,10 +21102,10 @@ phases BN;
 load_class R;
 name S1708-10-007;
 parent nodeS1708-10-007T5162;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.25464;
+constant_power_B 1254.64;
 };
 
 object transformer {
@@ -21131,10 +21131,10 @@ phases BN;
 load_class R;
 name S1708-10-003;
 parent nodeS1708-10-003T5161;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.48958;
+constant_power_B 1489.58;
 };
 
 object underground_line {
@@ -21193,10 +21193,10 @@ phases BN;
 load_class R;
 name S1708-10-008;
 parent nodeS1708-10-008T3999;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.808936;
+constant_power_B 808.936;
 };
 
 object overhead_line {
@@ -21306,10 +21306,10 @@ phases BN;
 load_class R;
 name S1708-09-007;
 parent nodeS1708-09-0071708-09-017;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.352399;
+constant_power_B 352.399;
 };
 
 object load {
@@ -21317,10 +21317,10 @@ phases BN;
 load_class R;
 name S1708-09-012;
 parent nodeS1708-09-0071708-09-017;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.141626;
+constant_power_B 141.626;
 };
 
 object load {
@@ -21328,10 +21328,10 @@ phases BN;
 load_class R;
 name S1708-09-019;
 parent nodeS1708-09-0071708-09-017;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.366562;
+constant_power_B 366.562;
 };
 
 object load {
@@ -21339,10 +21339,10 @@ phases BN;
 load_class R;
 name S1708-09-023;
 parent nodeS1708-09-0071708-09-017;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.214939;
+constant_power_B 214.939;
 };
 
 object overhead_line {
@@ -21508,10 +21508,10 @@ phases BN;
 load_class R;
 name S1708-09-008;
 parent nodeS1708-09-0081708-09-026;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0791441;
+constant_power_B 79.1441;
 };
 
 object load {
@@ -21519,10 +21519,10 @@ phases BN;
 load_class R;
 name S1708-09-032;
 parent nodeS1708-09-0081708-09-026;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0591498;
+constant_power_B 59.1498;
 };
 
 object load {
@@ -21530,10 +21530,10 @@ phases BN;
 load_class R;
 name S1708-16-007;
 parent nodeS1708-09-0081708-09-026;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.179949;
+constant_power_B 179.949;
 };
 
 object transformer {
@@ -21559,10 +21559,10 @@ phases BN;
 load_class R;
 name S1708-09-011;
 parent nodeS1708-09-0111708-09-023;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.497358;
+constant_power_B 497.358;
 };
 
 object load {
@@ -21570,10 +21570,10 @@ phases BN;
 load_class R;
 name S1708-09-022;
 parent nodeS1708-09-0111708-09-023;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.39572;
+constant_power_B 395.72;
 };
 
 object load {
@@ -21581,10 +21581,10 @@ phases BN;
 load_class R;
 name S1708-09-031;
 parent nodeS1708-09-0111708-09-023;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0399886;
+constant_power_B 39.9886;
 };
 
 object transformer {
@@ -21610,10 +21610,10 @@ phases BN;
 load_class R;
 name S1708-09-003;
 parent nodeS1708-09-0031708-09-025;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.367395;
+constant_power_B 367.395;
 };
 
 object load {
@@ -21621,10 +21621,10 @@ phases BN;
 load_class R;
 name S1708-09-004;
 parent nodeS1708-09-0031708-09-025;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.462368;
+constant_power_B 462.368;
 };
 
 object transformer {
@@ -21650,10 +21650,10 @@ phases BN;
 load_class R;
 name S1708-09-006;
 parent nodeS1708-09-0061708-09-022;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0158288;
+constant_power_B 15.8288;
 };
 
 object load {
@@ -21661,10 +21661,10 @@ phases BN;
 load_class R;
 name S1708-09-009;
 parent nodeS1708-09-0061708-09-022;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -21690,10 +21690,10 @@ phases BN;
 load_class R;
 name S1708-09-010;
 parent nodeS1708-09-0101708-09-015;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.53818;
+constant_power_B 538.18;
 };
 
 object transformer {
@@ -21719,10 +21719,10 @@ phases BN;
 load_class R;
 name S1708-09-028;
 parent nodeS1708-09-0281708-09-009;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.85309;
+constant_power_B 853.09;
 };
 
 object transformer {
@@ -21748,10 +21748,10 @@ phases BN;
 load_class R;
 name S1708-09-013;
 parent nodeS1708-09-0131708-09-004;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.471532;
+constant_power_B 471.532;
 };
 
 object load {
@@ -21759,10 +21759,10 @@ phases BN;
 load_class R;
 name S1708-09-014;
 parent nodeS1708-09-0131708-09-004;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.214106;
+constant_power_B 214.106;
 };
 
 object load {
@@ -21770,10 +21770,10 @@ phases BN;
 load_class R;
 name S1708-09-018;
 parent nodeS1708-09-0131708-09-004;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.00666477;
+constant_power_B 6.66477;
 };
 
 object load {
@@ -21781,10 +21781,10 @@ phases BN;
 load_class R;
 name S1708-09-026;
 parent nodeS1708-09-0131708-09-004;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.489027;
+constant_power_B 489.027;
 };
 
 object transformer {
@@ -21810,10 +21810,10 @@ phases BN;
 load_class R;
 name S1708-09-021;
 parent nodeS1708-09-0211708-09-003;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.283253;
+constant_power_B 283.253;
 };
 
 object transformer {
@@ -21839,10 +21839,10 @@ phases BN;
 load_class R;
 name S1708-09-015;
 parent nodeS1708-09-0151708-09-002;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.656479;
+constant_power_B 656.479;
 };
 
 object load {
@@ -21850,10 +21850,10 @@ phases BN;
 load_class R;
 name S1708-09-016;
 parent nodeS1708-09-0151708-09-002;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.400719;
+constant_power_B 400.719;
 };
 
 object load {
@@ -21861,10 +21861,10 @@ phases BN;
 load_class R;
 name S1708-09-025;
 parent nodeS1708-09-0151708-09-002;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.100805;
+constant_power_B 100.805;
 };
 
 object load {
@@ -21872,10 +21872,10 @@ phases BN;
 load_class R;
 name S1708-09-027;
 parent nodeS1708-09-0151708-09-002;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.193278;
+constant_power_B 193.278;
 };
 
 object transformer {
@@ -21901,10 +21901,10 @@ phases BN;
 load_class R;
 name S1708-16-004;
 parent nodeS1708-16-0041708-09-001;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0616491;
+constant_power_B 61.6491;
 };
 
 object load {
@@ -21912,10 +21912,10 @@ phases BN;
 load_class R;
 name S1708-16-011;
 parent nodeS1708-16-0041708-09-001;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.14801;
+constant_power_B 1148.01;
 };
 
 object transformer {
@@ -21941,10 +21941,10 @@ phases BN;
 load_class R;
 name S1708-16-002;
 parent nodeS1708-16-0021708-16-007;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.462368;
+constant_power_B 462.368;
 };
 
 object load {
@@ -21952,10 +21952,10 @@ phases BN;
 load_class R;
 name S1708-16-005;
 parent nodeS1708-16-0021708-16-007;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.628987;
+constant_power_B 628.987;
 };
 
 object transformer {
@@ -21981,10 +21981,10 @@ phases BN;
 load_class R;
 name S1708-16-021;
 parent nodeS1708-16-0211708-16-009;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.01804;
+constant_power_B 1018.04;
 };
 
 object overhead_line {
@@ -22234,10 +22234,10 @@ phases BN;
 load_class R;
 name S1708-16-025;
 parent nodeS1708-16-0251708-0043;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.11885;
+constant_power_B 1118.85;
 };
 
 object transformer {
@@ -22263,10 +22263,10 @@ phases BN;
 load_class R;
 name S1708-16-016;
 parent nodeS1708-16-0161708-0045;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -22274,10 +22274,10 @@ phases BN;
 load_class R;
 name S1708-16-026;
 parent nodeS1708-16-0161708-0045;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0483195;
+constant_power_B 48.3195;
 };
 
 object transformer {
@@ -22303,10 +22303,10 @@ phases BN;
 load_class R;
 name S1708-16-015;
 parent nodeS1708-16-0151708-0046;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.968057;
+constant_power_B 968.057;
 };
 
 object overhead_line {
@@ -22462,10 +22462,10 @@ phases BN;
 load_class R;
 name S1708-16-008;
 parent nodeS1708-16-008T28838;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.618157;
+constant_power_B 618.157;
 };
 
 object transformer {
@@ -22491,10 +22491,10 @@ phases BN;
 load_class R;
 name S1708-16-013;
 parent nodeS1708-16-0131708-16-016;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.486528;
+constant_power_B 486.528;
 };
 
 object transformer {
@@ -22520,10 +22520,10 @@ phases BN;
 load_class R;
 name S1708-16-020;
 parent nodeS1708-16-0201708-16-012;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.247429;
+constant_power_B 247.429;
 };
 
 object transformer {
@@ -22549,10 +22549,10 @@ phases BN;
 load_class R;
 name S1708-16-018;
 parent nodeS1708-16-0181708-16-011;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.31962;
+constant_power_B 1319.62;
 };
 
 object overhead_line {
@@ -22662,10 +22662,10 @@ phases BN;
 load_class R;
 name S1708-17-006;
 parent nodeS1708-17-0061708-17-020;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.953895;
+constant_power_B 953.895;
 };
 
 object overhead_line {
@@ -22859,10 +22859,10 @@ phases BN;
 load_class R;
 name S1708-17-011;
 parent nodeS1708-17-0111708-0036;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.282419;
+constant_power_B 282.419;
 };
 
 object underground_line {
@@ -22921,10 +22921,10 @@ phases BN;
 load_class R;
 name S1708-17-012;
 parent nodeS1708-17-0121708-0037;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.158288;
+constant_power_B 158.288;
 };
 
 object transformer {
@@ -22950,10 +22950,10 @@ phases BN;
 load_class R;
 name S1708-17-016;
 parent nodeS1708-17-016T19039;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.648148;
+constant_power_B 648.148;
 };
 
 object transformer {
@@ -22979,10 +22979,10 @@ phases BN;
 load_class R;
 name S1708-17-005;
 parent nodeS1708-17-0051708-17-016;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.13468;
+constant_power_B 1134.68;
 };
 
 object load {
@@ -22990,10 +22990,10 @@ phases BN;
 load_class R;
 name S1708-17-010;
 parent nodeS1708-17-0051708-17-016;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.143292;
+constant_power_B 143.292;
 };
 
 object transformer {
@@ -23019,10 +23019,10 @@ phases BN;
 load_class R;
 name S1708-08-007;
 parent nodeS1708-08-0071708-08-005;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.346568;
+constant_power_B 346.568;
 };
 
 object transformer {
@@ -23048,10 +23048,10 @@ phases BN;
 load_class R;
 name S1708-08-004;
 parent nodeS1708-08-0041708-08-001;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.329073;
+constant_power_B 329.073;
 };
 
 object transformer {
@@ -23077,10 +23077,10 @@ phases BN;
 load_class R;
 name S1708-05-001;
 parent nodeS1708-05-0011708-05-014;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.514853;
+constant_power_B 514.853;
 };
 
 object underground_line {
@@ -23279,10 +23279,10 @@ phases BN;
 load_class R;
 name S1708-05-012;
 parent nodeS1708-05-012T21005;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.291583;
+constant_power_B 291.583;
 };
 
 object underground_line {
@@ -23341,10 +23341,10 @@ phases BN;
 load_class R;
 name S1708-05-013;
 parent nodeS1708-05-013T29051;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.44126;
+constant_power_B 1441.26;
 };
 
 object underground_line {
@@ -23403,10 +23403,10 @@ phases BN;
 load_class R;
 name S1708-05-014;
 parent nodeS1708-05-014T28295;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.474865;
+constant_power_B 474.865;
 };
 
 object transformer {
@@ -23432,10 +23432,10 @@ phases BN;
 load_class R;
 name S1708-05-006;
 parent nodeS1708-05-006T21003;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0308245;
+constant_power_B 30.8245;
 };
 
 object underground_line {
@@ -23535,10 +23535,10 @@ phases BN;
 load_class R;
 name S1708-05-005;
 parent nodeS1708-05-005T7814;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -23638,10 +23638,10 @@ phases BN;
 load_class R;
 name S1708-05-007;
 parent nodeS1708-05-0071708-05-018;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.078311;
+constant_power_B 78.311;
 };
 
 object overhead_line {
@@ -23942,10 +23942,10 @@ phases BN;
 load_class R;
 name S1708-06-018;
 parent nodeS1708-06-018T2590;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.149124;
+constant_power_B 149.124;
 };
 
 object underground_line {
@@ -24070,10 +24070,10 @@ phases BN;
 load_class R;
 name S1708-07-001;
 parent nodeS1708-07-001T11961;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.204108;
+constant_power_B 204.108;
 };
 
 object underground_line {
@@ -24173,10 +24173,10 @@ phases BN;
 load_class R;
 name S1708-06-016;
 parent nodeS1708-06-0161708-0039;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0416548;
+constant_power_B 41.6548;
 };
 
 object underground_line {
@@ -24276,10 +24276,10 @@ phases BN;
 load_class R;
 name S1708-05-011;
 parent nodeS1708-05-011T4307;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.526516;
+constant_power_B 526.516;
 };
 
 object underground_line {
@@ -24379,10 +24379,10 @@ phases BN;
 load_class R;
 name S1708-06-017;
 parent nodeS1708-06-0171708-0040;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.533181;
+constant_power_B 533.181;
 };
 
 object transformer {
@@ -24408,10 +24408,10 @@ phases BN;
 load_class R;
 name S1708-06-001;
 parent nodeS1708-06-0011708-06-005;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.393221;
+constant_power_B 393.221;
 };
 
 object transformer {
@@ -24437,10 +24437,10 @@ phases BN;
 load_class R;
 name S1708-06-020;
 parent nodeS1708-06-0201708-06-044;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.110802;
+constant_power_B 110.802;
 };
 
 object transformer {
@@ -24466,10 +24466,10 @@ phases BN;
 load_class R;
 name S1708-06-004;
 parent nodeS1708-06-0041708-06-004;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0408217;
+constant_power_B 40.8217;
 };
 
 object transformer {
@@ -24495,10 +24495,10 @@ phases BN;
 load_class R;
 name S1708-06-012;
 parent nodeS1708-06-0121708-06-002;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.1805;
+constant_power_B 1180.5;
 };
 
 object transformer {
@@ -24524,10 +24524,10 @@ phases BN;
 load_class R;
 name S1708-06-007;
 parent nodeS1708-06-0071708-06-001;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.06998;
+constant_power_B 69.98;
 };
 
 object load {
@@ -24535,10 +24535,10 @@ phases BN;
 load_class R;
 name S1708-06-009;
 parent nodeS1708-06-0071708-06-001;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0624822;
+constant_power_B 62.4822;
 };
 
 object underground_line {
@@ -24630,10 +24630,10 @@ phases BN;
 load_class R;
 name S1708-06-010;
 parent nodeS1708-06-010T7835;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -24659,10 +24659,10 @@ phases BN;
 load_class R;
 name S1708-06-014;
 parent nodeS1708-06-0141708-06-014;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.19216;
+constant_power_B 1192.16;
 };
 
 object underground_line {
@@ -24721,10 +24721,10 @@ phases BN;
 load_class R;
 name S1708-06-019;
 parent nodeS1708-06-019T11814;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0333238;
+constant_power_B 33.3238;
 };
 
 object underground_line {
@@ -24783,10 +24783,10 @@ phases BN;
 load_class R;
 name S1808-31-068;
 parent nodeS1808-31-068T11894;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.865586;
+constant_power_B 865.586;
 };
 
 object underground_line {
@@ -25845,10 +25845,10 @@ phases BN;
 load_class R;
 name S1707-02-006;
 parent nodeS1707-02-006T7674;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.820599;
+constant_power_B 820.599;
 };
 
 object underground_line {
@@ -25940,10 +25940,10 @@ phases BN;
 load_class R;
 name S1707-02-007;
 parent nodeS1707-02-0071707-0079;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0408217;
+constant_power_B 40.8217;
 };
 
 object underground_line {
@@ -26068,10 +26068,10 @@ phases BN;
 load_class R;
 name S1707-02-005;
 parent nodeS1707-02-0051707-0231;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.77228;
+constant_power_B 772.28;
 };
 
 object underground_line {
@@ -26322,10 +26322,10 @@ phases CN;
 load_class R;
 name S1707-03-012;
 parent nodeS1707-03-012T10259;
-constant_power_C 0.480696;
-constant_power_A 0;
+constant_power_C 480.696;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -26384,10 +26384,10 @@ phases CN;
 load_class R;
 name S1707-03-017;
 parent nodeS1707-03-017T28684;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -26531,10 +26531,10 @@ phases ABCN;
 load_class R;
 name S1707-03-016;
 parent nodeS1707-03-016T18015;
-constant_power_C 5.42901;
-constant_power_A 5.42901;
+constant_power_C 5429.01;
+constant_power_A 5429.01;
 nominal_voltage 120;
-constant_power_B 5.42901;
+constant_power_B 5429.01;
 };
 
 object transformer {
@@ -26560,10 +26560,10 @@ phases ABCN;
 load_class R;
 name S1707-03-004;
 parent nodeS1707-03-004T10257;
-constant_power_C 5.58651;
-constant_power_A 5.58651;
+constant_power_C 5586.51;
+constant_power_A 5586.51;
 nominal_voltage 120;
-constant_power_B 5.58651;
+constant_power_B 5586.51;
 };
 
 object underground_line {
@@ -26622,10 +26622,10 @@ phases CN;
 load_class R;
 name S1707-03-002;
 parent nodeS1707-03-002T10261;
-constant_power_C 0.434876;
-constant_power_A 0;
+constant_power_C 434.876;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -26769,10 +26769,10 @@ phases ABCN;
 load_class R;
 name S1707-03-015;
 parent nodeS1707-03-015T10263;
-constant_power_C 2.66811;
-constant_power_A 2.66811;
+constant_power_C 2668.11;
+constant_power_A 2668.11;
 nominal_voltage 120;
-constant_power_B 2.66811;
+constant_power_B 2668.11;
 };
 
 object underground_line {
@@ -26864,10 +26864,10 @@ phases BN;
 load_class R;
 name S1707-03-001;
 parent nodeS1707-03-001T5274;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.41043;
+constant_power_B 1410.43;
 };
 
 object underground_line {
@@ -26985,10 +26985,10 @@ phases CN;
 load_class R;
 name S1707-10-004;
 parent nodeS1707-10-004T10266;
-constant_power_C 1.60704;
-constant_power_A 0;
+constant_power_C 1607.04;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -27047,10 +27047,10 @@ phases BN;
 load_class R;
 name S1707-10-003;
 parent nodeS1707-10-003T10268;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -27135,10 +27135,10 @@ phases ABCN;
 load_class R;
 name S1707-10-006;
 parent nodeS1707-10-006T10267;
-constant_power_C 3.45188;
-constant_power_A 3.45188;
+constant_power_C 3451.88;
+constant_power_A 3451.88;
 nominal_voltage 120;
-constant_power_B 3.45188;
+constant_power_B 3451.88;
 };
 
 object underground_line {
@@ -27400,10 +27400,10 @@ phases ABCN;
 load_class R;
 name S1707-10-009;
 parent nodeS1707-10-009T10274;
-constant_power_C 7.25371;
-constant_power_A 7.25371;
+constant_power_C 7253.71;
+constant_power_A 7253.71;
 nominal_voltage 120;
-constant_power_B 7.25371;
+constant_power_B 7253.71;
 };
 
 object underground_line {
@@ -27547,10 +27547,10 @@ phases ABCN;
 load_class R;
 name S1707-09-014;
 parent nodeS1707-09-014T12199;
-constant_power_C 2.66991;
-constant_power_A 2.66991;
+constant_power_C 2669.91;
+constant_power_A 2669.91;
 nominal_voltage 120;
-constant_power_B 2.66991;
+constant_power_B 2669.91;
 };
 
 object underground_line {
@@ -27642,10 +27642,10 @@ phases CN;
 load_class R;
 name S1707-09-015;
 parent nodeS1707-09-015T14052;
-constant_power_C 0.725626;
-constant_power_A 0;
+constant_power_C 725.626;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -27730,10 +27730,10 @@ phases ABCN;
 load_class R;
 name S1707-10-007;
 parent nodeS1707-10-007T10272;
-constant_power_C 4.73401;
-constant_power_A 4.73401;
+constant_power_C 4734.01;
+constant_power_A 4734.01;
 nominal_voltage 120;
-constant_power_B 4.73401;
+constant_power_B 4734.01;
 };
 
 object underground_line {
@@ -27818,10 +27818,10 @@ phases ABCN;
 load_class R;
 name S1707-10-027;
 parent nodeS1707-10-027T10270;
-constant_power_C 2.31966;
-constant_power_A 2.31966;
+constant_power_C 2319.66;
+constant_power_A 2319.66;
 nominal_voltage 120;
-constant_power_B 2.31966;
+constant_power_B 2319.66;
 };
 
 object underground_line {
@@ -27939,10 +27939,10 @@ phases AN;
 load_class R;
 name S1707-10-030;
 parent nodeS1707-10-030T10276;
-constant_power_C 0;
-constant_power_A 1.56539;
+constant_power_C 0.0;
+constant_power_A 1565.39;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -28027,10 +28027,10 @@ phases ABCN;
 load_class R;
 name S1707-10-001;
 parent nodeS1707-10-001T10277;
-constant_power_C 6.17902;
-constant_power_A 6.17902;
+constant_power_C 6179.02;
+constant_power_A 6179.02;
 nominal_voltage 120;
-constant_power_B 6.17902;
+constant_power_B 6179.02;
 };
 
 object underground_line {
@@ -28122,10 +28122,10 @@ phases CN;
 load_class R;
 name S1707-10-023;
 parent nodeS1707-10-023T10279;
-constant_power_C 1.18716;
-constant_power_A 0;
+constant_power_C 1187.16;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -28243,10 +28243,10 @@ phases CN;
 load_class R;
 name S1707-10-011;
 parent nodeS1707-10-011T10281;
-constant_power_C 1.32712;
-constant_power_A 0;
+constant_power_C 1327.12;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -28390,10 +28390,10 @@ phases ABCN;
 load_class R;
 name S1707-15-010;
 parent nodeS1707-15-010T10285;
-constant_power_C 0.122187;
-constant_power_A 0.122187;
+constant_power_C 122.187;
+constant_power_A 122.187;
 nominal_voltage 120;
-constant_power_B 0.122187;
+constant_power_B 122.187;
 };
 
 object load {
@@ -28401,10 +28401,10 @@ phases ABCN;
 load_class R;
 name S1707-15-011;
 parent nodeS1707-15-010T10285;
-constant_power_C 0.0999715;
-constant_power_A 0.0999715;
+constant_power_C 99.9715;
+constant_power_A 99.9715;
 nominal_voltage 120;
-constant_power_B 0.0999715;
+constant_power_B 99.9715;
 };
 
 object underground_line {
@@ -28589,10 +28589,10 @@ phases AN;
 load_class R;
 name S1707-10-025;
 parent nodeS1707-10-025T18079;
-constant_power_C 0;
-constant_power_A 2.46596;
+constant_power_C 0.0;
+constant_power_A 2465.96;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -28795,10 +28795,10 @@ phases ABCN;
 load_class R;
 name S1707-14-009;
 parent nodeS1707-14-0091707-0091;
-constant_power_C 3.30254;
-constant_power_A 3.30254;
+constant_power_C 3302.54;
+constant_power_A 3302.54;
 nominal_voltage 120;
-constant_power_B 3.30254;
+constant_power_B 3302.54;
 };
 
 object transformer {
@@ -28824,10 +28824,10 @@ phases AN;
 load_class R;
 name S1707-14-011;
 parent nodeS1707-14-0111707-0088;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -28912,10 +28912,10 @@ phases ABCN;
 load_class R;
 name S1707-11-011;
 parent nodeS1707-11-011T14424;
-constant_power_C 5.93969;
-constant_power_A 5.93969;
+constant_power_C 5939.69;
+constant_power_A 5939.69;
 nominal_voltage 120;
-constant_power_B 5.93969;
+constant_power_B 5939.69;
 };
 
 object underground_line {
@@ -29033,10 +29033,10 @@ phases AN;
 load_class R;
 name S1707-15-004;
 parent nodeS1707-15-004T10286;
-constant_power_C 0;
-constant_power_A 0.422379;
+constant_power_C 0.0;
+constant_power_A 422.379;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -29187,10 +29187,10 @@ phases CN;
 load_class R;
 name S1707-10-031;
 parent nodeS1707-10-031T2552;
-constant_power_C 2.17771;
-constant_power_A 0;
+constant_power_C 2177.71;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -29460,10 +29460,10 @@ phases ABCN;
 load_class R;
 name S1707-15-008;
 parent nodeS1707-15-0081707-0018;
-constant_power_C 1.56357;
-constant_power_A 1.56357;
+constant_power_C 1563.57;
+constant_power_A 1563.57;
 nominal_voltage 120;
-constant_power_B 1.56357;
+constant_power_B 1563.57;
 };
 
 object underground_line {
@@ -29666,10 +29666,10 @@ phases ABCN;
 load_class R;
 name S1707-15-012;
 parent nodeS1707-15-0121707-0055;
-constant_power_C 8.78436;
-constant_power_A 8.78436;
+constant_power_C 8784.36;
+constant_power_A 8784.36;
 nominal_voltage 120;
-constant_power_B 8.78436;
+constant_power_B 8784.36;
 };
 
 object transformer {
@@ -29695,10 +29695,10 @@ phases ABCN;
 load_class R;
 name S1707-15-009;
 parent nodeS1707-15-0091707-0021;
-constant_power_C 5.76007;
-constant_power_A 5.76007;
+constant_power_C 5760.07;
+constant_power_A 5760.07;
 nominal_voltage 120;
-constant_power_B 5.76007;
+constant_power_B 5760.07;
 };
 
 object underground_line {
@@ -29783,10 +29783,10 @@ phases ABCN;
 load_class R;
 name S1707-15-007;
 parent nodeS1707-15-0071707-0014;
-constant_power_C 1.24809;
-constant_power_A 1.24809;
+constant_power_C 1248.09;
+constant_power_A 1248.09;
 nominal_voltage 120;
-constant_power_B 1.24809;
+constant_power_B 1248.09;
 };
 
 object underground_line {
@@ -29878,10 +29878,10 @@ phases AN;
 load_class R;
 name S1707-10-024;
 parent nodeS1707-10-024T11874;
-constant_power_C 0;
-constant_power_A 0.326574;
+constant_power_C 0.0;
+constant_power_A 326.574;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -29889,10 +29889,10 @@ phases AN;
 load_class R;
 name S1707-10-032;
 parent nodeS1707-10-024T11874;
-constant_power_C 0;
-constant_power_A 3.494;
+constant_power_C 0.0;
+constant_power_A 3494.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -29918,10 +29918,10 @@ phases AN;
 load_class R;
 name S1707-10-033;
 parent nodeS1707-10-033T4388;
-constant_power_C 0;
-constant_power_A 2.26269;
+constant_power_C 0.0;
+constant_power_A 2262.69;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -30039,10 +30039,10 @@ phases CN;
 load_class R;
 name S1707-10-005;
 parent nodeS1707-10-005T10292;
-constant_power_C 0.31491;
-constant_power_A 0;
+constant_power_C 314.91;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -30208,10 +30208,10 @@ phases BN;
 load_class R;
 name S1707-10-026;
 parent nodeS1707-10-026T10297;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.784776;
+constant_power_B 784.776;
 };
 
 object transformer {
@@ -30237,10 +30237,10 @@ phases BN;
 load_class R;
 name S1707-09-005;
 parent nodeS1707-09-005T10295;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.747287;
+constant_power_B 747.287;
 };
 
 object underground_line {
@@ -30299,10 +30299,10 @@ phases AN;
 load_class R;
 name S1707-09-012;
 parent nodeS1707-09-012T10293;
-constant_power_C 0;
-constant_power_A 0.509855;
+constant_power_C 0.0;
+constant_power_A 509.855;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -30460,10 +30460,10 @@ phases BN;
 load_class R;
 name S1707-16-010;
 parent nodeS1707-16-010T14062;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0674808;
+constant_power_B 67.4808;
 };
 
 object transformer {
@@ -30489,10 +30489,10 @@ phases BN;
 load_class R;
 name S1707-16-008;
 parent nodeS1707-16-008T10294;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.668976;
+constant_power_B 668.976;
 };
 
 object underground_line {
@@ -30702,10 +30702,10 @@ phases CN;
 load_class R;
 name S1707-16-009;
 parent nodeS1707-16-009T7300;
-constant_power_C 1.08719;
-constant_power_A 0;
+constant_power_C 1087.19;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -30731,10 +30731,10 @@ phases CN;
 load_class R;
 name S1707-16-003;
 parent nodeS1707-16-003T10300;
-constant_power_C 0.826431;
-constant_power_A 0;
+constant_power_C 826.431;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -30900,10 +30900,10 @@ phases BN;
 load_class R;
 name S1707-09-009;
 parent nodeS1707-09-009T10302;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.486528;
+constant_power_B 486.528;
 };
 
 object underground_line {
@@ -31028,10 +31028,10 @@ phases BN;
 load_class R;
 name S1707-09-008;
 parent nodeS1707-09-008T15710;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.324907;
+constant_power_B 324.907;
 };
 
 object underground_line {
@@ -31156,10 +31156,10 @@ phases BN;
 load_class R;
 name S1707-09-013;
 parent nodeS1707-09-013T2700;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.15634;
+constant_power_B 1156.34;
 };
 
 object underground_line {
@@ -31350,10 +31350,10 @@ phases BN;
 load_class R;
 name S1707-04-009;
 parent nodeS1707-04-009T15718;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.393221;
+constant_power_B 393.221;
 };
 
 object transformer {
@@ -31379,10 +31379,10 @@ phases BN;
 load_class R;
 name S1707-04-005;
 parent nodeS1707-04-005T15716;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0883081;
+constant_power_B 88.3081;
 };
 
 object underground_line {
@@ -31441,10 +31441,10 @@ phases BN;
 load_class R;
 name S1707-04-010;
 parent nodeS1707-04-010T15715;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.01692;
+constant_power_B 2016.92;
 };
 
 object underground_line {
@@ -31569,10 +31569,10 @@ phases BN;
 load_class R;
 name S1707-04-007;
 parent nodeS1707-04-007T15721;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.587332;
+constant_power_B 587.332;
 };
 
 object transformer {
@@ -31598,10 +31598,10 @@ phases BN;
 load_class R;
 name S1707-04-008;
 parent nodeS1707-04-008T15719;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.157455;
+constant_power_B 157.455;
 };
 
 object underground_line {
@@ -31660,10 +31660,10 @@ phases BN;
 load_class R;
 name S1707-09-016;
 parent nodeS1707-09-016T12255;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.82336;
+constant_power_B 2823.36;
 };
 
 object underground_line {
@@ -31821,10 +31821,10 @@ phases BN;
 load_class R;
 name S1707-09-010;
 parent nodeS1707-09-010T10306;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.00166619;
+constant_power_B 1.66619;
 };
 
 object transformer {
@@ -31850,10 +31850,10 @@ phases BN;
 load_class R;
 name S1707-09-007;
 parent nodeS1707-09-007T10305;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.17217;
+constant_power_B 1172.17;
 };
 
 object transformer {
@@ -31879,10 +31879,10 @@ phases BN;
 load_class R;
 name S1707-09-011;
 parent nodeS1707-09-011T10303;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.319909;
+constant_power_B 319.909;
 };
 
 object underground_line {
@@ -32000,10 +32000,10 @@ phases CN;
 load_class R;
 name S1707-16-004;
 parent nodeS1707-16-004T10308;
-constant_power_C 0.961392;
-constant_power_A 0;
+constant_power_C 961.392;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -32399,10 +32399,10 @@ phases ABCN;
 load_class R;
 name S1707-02-015;
 parent nodeS1707-02-015T14420;
-constant_power_C 5.74842;
-constant_power_A 5.74842;
+constant_power_C 5748.42;
+constant_power_A 5748.42;
 nominal_voltage 120;
-constant_power_B 5.74842;
+constant_power_B 5748.42;
 };
 
 object underground_line {
@@ -32601,10 +32601,10 @@ phases BN;
 load_class R;
 name S1707-03-014;
 parent nodeS1707-03-0141707-0180;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.34128;
+constant_power_B 1341.28;
 };
 
 object transformer {
@@ -32630,10 +32630,10 @@ phases BN;
 load_class R;
 name S1707-03-011;
 parent nodeS1707-03-0111707-0179;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.000833096;
+constant_power_B 0.833096;
 };
 
 object transformer {
@@ -32659,10 +32659,10 @@ phases BN;
 load_class R;
 name S1707-03-007;
 parent nodeS1707-03-0071707-0177;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.179116;
+constant_power_B 179.116;
 };
 
 object underground_line {
@@ -32721,10 +32721,10 @@ phases CN;
 load_class R;
 name S1707-02-010;
 parent nodeS1707-02-010T28711;
-constant_power_C 0.133295;
-constant_power_A 0;
+constant_power_C 133.295;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -32956,10 +32956,10 @@ phases BN;
 load_class R;
 name S1707-03-010;
 parent nodeS1707-03-010T28731;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.54623;
+constant_power_B 1546.23;
 };
 
 object underground_line {
@@ -33092,10 +33092,10 @@ phases BN;
 load_class R;
 name S1807-34-009;
 parent nodeS1807-34-009T28732;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.17495;
+constant_power_B 174.95;
 };
 
 object underground_line {
@@ -33261,10 +33261,10 @@ phases BN;
 load_class R;
 name S1707-03-013;
 parent nodeS1707-03-013T28733;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.379892;
+constant_power_B 379.892;
 };
 
 object underground_line {
@@ -33389,10 +33389,10 @@ phases BN;
 load_class R;
 name S1807-34-010;
 parent nodeS1807-34-010T28725;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.127464;
+constant_power_B 127.464;
 };
 
 object underground_line {
@@ -33609,10 +33609,10 @@ phases BN;
 load_class R;
 name S1707-04-011;
 parent nodeS1707-04-0111707-04-001;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.14467;
+constant_power_B 1144.67;
 };
 
 object underground_line {
@@ -33671,10 +33671,10 @@ phases BN;
 load_class R;
 name S1707-04-003;
 parent nodeS1707-04-003T12961;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.279087;
+constant_power_B 279.087;
 };
 
 object underground_line {
@@ -33881,10 +33881,10 @@ phases BN;
 load_class R;
 name S1807-33-001;
 parent nodeS1807-33-0011807-33-004;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.361564;
+constant_power_B 361.564;
 };
 
 object overhead_line {
@@ -33994,10 +33994,10 @@ phases BN;
 load_class R;
 name S1807-33-003;
 parent nodeS1807-33-0031807-33-007;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.72034;
+constant_power_B 1720.34;
 };
 
 object underground_line {
@@ -34089,10 +34089,10 @@ phases BN;
 load_class R;
 name S1807-33-007;
 parent nodeS1807-33-0071807-33-009;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.00499857;
+constant_power_B 4.99857;
 };
 
 object underground_line {
@@ -34184,10 +34184,10 @@ phases BN;
 load_class R;
 name S1807-33-005;
 parent nodeS1807-33-0051807-33-011;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.44209;
+constant_power_B 1442.09;
 };
 
 object underground_line {
@@ -34345,10 +34345,10 @@ phases BN;
 load_class R;
 name S1807-33-010;
 parent nodeS1807-33-0101807-0020;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.189946;
+constant_power_B 189.946;
 };
 
 object underground_line {
@@ -34407,10 +34407,10 @@ phases BN;
 load_class R;
 name S1807-33-006;
 parent nodeS1807-33-006T25124;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.826431;
+constant_power_B 826.431;
 };
 
 object load {
@@ -34418,10 +34418,10 @@ phases BN;
 load_class R;
 name S1807-33-009;
 parent nodeS1807-33-006T25124;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.103304;
+constant_power_B 103.304;
 };
 
 object transformer {
@@ -34447,10 +34447,10 @@ phases BN;
 load_class R;
 name S1807-33-008;
 parent nodeS1807-33-0081807-33-012;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.749786;
+constant_power_B 749.786;
 };
 
 object transformer {
@@ -34476,10 +34476,10 @@ phases BN;
 load_class R;
 name S1807-33-004;
 parent nodeS1807-33-0041807-33-005;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.462368;
+constant_power_B 462.368;
 };
 
 object underground_line {
@@ -34678,10 +34678,10 @@ phases BN;
 load_class R;
 name S1707-04-012;
 parent nodeS1707-04-0121707-04-002;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.825598;
+constant_power_B 825.598;
 };
 
 object underground_line {
@@ -34740,10 +34740,10 @@ phases BN;
 load_class R;
 name S1707-04-001;
 parent nodeS1707-04-0011707-0205;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.638984;
+constant_power_B 638.984;
 };
 
 object underground_line {
@@ -34835,10 +34835,10 @@ phases BN;
 load_class R;
 name S1807-34-013;
 parent nodeS1807-34-013T29080;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0599829;
+constant_power_B 59.9829;
 };
 
 object transformer {
@@ -34864,10 +34864,10 @@ phases BN;
 load_class R;
 name S1807-34-003;
 parent nodeS1807-34-003T28723;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.778944;
+constant_power_B 778.944;
 };
 
 object underground_line {
@@ -34926,10 +34926,10 @@ phases BN;
 load_class R;
 name S1807-34-002;
 parent nodeS1807-34-002T28720;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.707298;
+constant_power_B 707.298;
 };
 
 object underground_line {
@@ -34988,10 +34988,10 @@ phases BN;
 load_class R;
 name S1807-34-001;
 parent nodeS1807-34-001T28716;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.543178;
+constant_power_B 543.178;
 };
 
 object underground_line {
@@ -35190,10 +35190,10 @@ phases BN;
 load_class R;
 name S1807-34-012;
 parent nodeS1807-34-0121807-0303;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0816434;
+constant_power_B 81.6434;
 };
 
 object underground_line {
@@ -35285,10 +35285,10 @@ phases BN;
 load_class R;
 name S1807-34-008;
 parent nodeS1807-34-0081807-34-003;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.138294;
+constant_power_B 138.294;
 };
 
 object underground_line {
@@ -35413,10 +35413,10 @@ phases BN;
 load_class R;
 name S1807-35-002;
 parent nodeS1807-35-0021807-0009;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.41988;
+constant_power_B 419.88;
 };
 
 object underground_line {
@@ -35475,10 +35475,10 @@ phases BN;
 load_class R;
 name S1807-35-008;
 parent nodeS1807-35-0081807-0306;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.162454;
+constant_power_B 162.454;
 };
 
 object underground_line {
@@ -35537,10 +35537,10 @@ phases AN;
 load_class R;
 name S1707-02-002;
 parent nodeS1707-02-0021707-0152;
-constant_power_C 0;
-constant_power_A 1.19966;
+constant_power_C 0.0;
+constant_power_A 1199.66;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -35625,10 +35625,10 @@ phases ABCN;
 load_class R;
 name S1807-35-009;
 parent nodeS1807-35-0091807-0316;
-constant_power_C 9.43914;
-constant_power_A 9.43914;
+constant_power_C 9439.14;
+constant_power_A 9439.14;
 nominal_voltage 120;
-constant_power_B 9.43914;
+constant_power_B 9439.14;
 };
 
 object transformer {
@@ -35654,10 +35654,10 @@ phases BN;
 load_class R;
 name S1807-35-001;
 parent nodeS1807-35-001T18012;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.09802;
+constant_power_B 1098.02;
 };
 
 object underground_line {
@@ -35809,10 +35809,10 @@ phases ABCN;
 load_class R;
 name S1707-02-014;
 parent nodeS1707-02-014T18014;
-constant_power_C 17.2256;
-constant_power_A 17.2256;
+constant_power_C 17225.6;
+constant_power_A 17225.6;
 nominal_voltage 120;
-constant_power_B 17.2256;
+constant_power_B 17225.6;
 };
 
 object underground_line {
@@ -36103,10 +36103,10 @@ phases BN;
 load_class R;
 name S1707-02-011;
 parent nodeS1707-02-0111707-02-001;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.864753;
+constant_power_B 864.753;
 };
 
 object underground_line {
@@ -36165,10 +36165,10 @@ phases BN;
 load_class R;
 name S1707-02-004;
 parent nodeS1707-02-0041707-0164;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.818933;
+constant_power_B 818.933;
 };
 
 object transformer {
@@ -36194,10 +36194,10 @@ phases BN;
 load_class R;
 name S1707-02-003;
 parent nodeS1707-02-0031707-0162;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.171618;
+constant_power_B 171.618;
 };
 
 object underground_line {
@@ -36349,10 +36349,10 @@ phases ABCN;
 load_class R;
 name S1707-01-013;
 parent nodeS1707-01-0131707-01-016;
-constant_power_C 7.18704;
-constant_power_A 7.18704;
+constant_power_C 7187.04;
+constant_power_A 7187.04;
 nominal_voltage 120;
-constant_power_B 7.18704;
+constant_power_B 7187.04;
 };
 
 object underground_line {
@@ -36437,10 +36437,10 @@ phases ABCN;
 load_class R;
 name S1807-36-009;
 parent nodeS1807-36-0091807-0274;
-constant_power_C 5.70305;
-constant_power_A 5.70305;
+constant_power_C 5703.05;
+constant_power_A 5703.05;
 nominal_voltage 120;
-constant_power_B 5.70305;
+constant_power_B 5703.05;
 };
 
 object underground_line {
@@ -36525,10 +36525,10 @@ phases ABCN;
 load_class R;
 name S1807-36-003;
 parent nodeS1807-36-003T29581;
-constant_power_C 15.3573;
-constant_power_A 15.3573;
+constant_power_C 15357.3;
+constant_power_A 15357.3;
 nominal_voltage 120;
-constant_power_B 15.3573;
+constant_power_B 15357.3;
 };
 
 object underground_line {
@@ -36587,10 +36587,10 @@ phases CN;
 load_class R;
 name S1707-01-011;
 parent nodeS1707-01-0111807-0226;
-constant_power_C 0.567338;
-constant_power_A 0;
+constant_power_C 567.338;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -36675,10 +36675,10 @@ phases ABCN;
 load_class R;
 name S1808-31-067;
 parent nodeS1808-31-0671808-0100;
-constant_power_C 11.6125;
-constant_power_A 11.6125;
+constant_power_C 11612.5;
+constant_power_A 11612.5;
 nominal_voltage 120;
-constant_power_B 11.6125;
+constant_power_B 11612.5;
 };
 
 object transformer {
@@ -36704,10 +36704,10 @@ phases ABCN;
 load_class R;
 name S1807-36-006;
 parent nodeS1807-36-0061807-36-006;
-constant_power_C 11.5689;
-constant_power_A 11.5689;
+constant_power_C 11568.9;
+constant_power_A 11568.9;
 nominal_voltage 120;
-constant_power_B 11.5689;
+constant_power_B 11568.9;
 };
 
 object transformer {
@@ -36733,10 +36733,10 @@ phases ABCN;
 load_class R;
 name S1807-25-011;
 parent nodeS1807-25-0111807-25-003;
-constant_power_C 8.84518;
-constant_power_A 8.84518;
+constant_power_C 8845.18;
+constant_power_A 8845.18;
 nominal_voltage 120;
-constant_power_B 8.84518;
+constant_power_B 8845.18;
 };
 
 object load {
@@ -36744,10 +36744,10 @@ phases ABCN;
 load_class R;
 name S1807-25-012;
 parent nodeS1807-25-0111807-25-003;
-constant_power_C 8.84518;
-constant_power_A 8.84518;
+constant_power_C 8845.18;
+constant_power_A 8845.18;
 nominal_voltage 120;
-constant_power_B 8.84518;
+constant_power_B 8845.18;
 };
 
 object underground_line {
@@ -36899,10 +36899,10 @@ phases ABCN;
 load_class R;
 name S1807-25-013;
 parent nodeS1807-25-0131807--T325;
-constant_power_C 4.29115;
-constant_power_A 4.29115;
+constant_power_C 4291.15;
+constant_power_A 4291.15;
 nominal_voltage 120;
-constant_power_B 4.29115;
+constant_power_B 4291.15;
 };
 
 object underground_line {
@@ -37113,10 +37113,10 @@ phases ABCN;
 load_class R;
 name S1807-24-041;
 parent nodeS1807-24-041T29032;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.138294;
+constant_power_B 138.294;
 };
 
 object transformer {
@@ -37142,10 +37142,10 @@ phases ABCN;
 load_class R;
 name S1807-24-034;
 parent nodeS1807-24-034T29031;
-constant_power_C 0.919848;
-constant_power_A 0.919848;
+constant_power_C 919.848;
+constant_power_A 919.848;
 nominal_voltage 120;
-constant_power_B 0.919848;
+constant_power_B 919.848;
 };
 
 object node {
@@ -44210,3 +44210,6 @@ nominal_voltage 2400;
 name nodeS1807-24-034T29031;
 };
 
+object voltdump {
+filename ACEC-COLOMA_SUB.VOLTS.csv;
+};

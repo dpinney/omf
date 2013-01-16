@@ -148,7 +148,7 @@ def convert(stdPath,seqPath):
 		def convertSource(sourceList):
 			source = convertGenericObject(sourceList)
 			source['phases'] = sourceList[2]+ 'N'
-			source['nominal_voltage'] = str(float(sourceList[14])*1000)
+			source['nominal_voltage'] = '2400'
 			source['bustype'] = 'SWING'
 			return source
 
@@ -156,21 +156,24 @@ def convert(stdPath,seqPath):
 			capacitor = convertGenericObject(capList)
 			capacitor['phases'] = capList[2]+ 'N'
 			#TODO: change these from just default values:
-			capacitor['pt_phase'] = 'ABCN'
+			capacitor['pt_phase'] = capacitor['phases']
 			capacitor['parent'] = '675;'
-			capacitor['phases_connected'] = 'ABCN'
+			capacitor['phases_connected'] = capacitor['phases']
 			capacitor['control'] = 'VOLT'
 			capacitor['voltage_set_high'] = '2350.0'
 			capacitor['voltage_set_low'] = '2340.0'
-			capacitor['capacitor_A'] = '0.10 MVAr'
-			capacitor['capacitor_B'] = '0.10 MVAr'
-			capacitor['capacitor_C'] = '0.10 MVAr'
+			if 'A' in capacitor['phases']:
+				capacitor['capacitor_A'] = '0.10 MVAr'
+				capacitor['switchA'] = 'CLOSED'
+			if 'B' in capacitor['phases']:
+				capacitor['capacitor_B'] = '0.10 MVAr'
+				capacitor['switchB'] = 'CLOSED'
+			if 'C' in capacitor['phases']:
+				capacitor['capacitor_C'] = '0.10 MVAr'
+				capacitor['switchC'] = 'CLOSED'
 			capacitor['control_level'] = 'INDIVIDUAL'
 			capacitor['time_delay'] = '300.0'
 			capacitor['dwell_time'] = '0.0'
-			capacitor['switchA'] = 'CLOSED'
-			capacitor['switchB'] = 'CLOSED'
-			capacitor['switchC'] = 'CLOSED'
 			capacitor['nominal_voltage'] = '2401.7771'
 			return capacitor
 
@@ -330,13 +333,9 @@ def convert(stdPath,seqPath):
 			else:
 				pass # print parent
 
-		# print 'is this broken!?'
 		def phaseMerge(*arg):
 			concated = ''.join(arg)
 			return ''.join(sorted(set(concated)))
-
-		# def phaseMerge(x,y):
-		# 	return ''.join(sorted(set.intersection(set(x),set(y))))
 
 		# If we already stripped the GUID, don't process:
 		if 'guid' not in comp.keys():
@@ -377,7 +376,7 @@ def convert(stdPath,seqPath):
 		else:
 			# Here we're in an error case (like loads connected to loads), so do nothing:
 			return False
-		return True
+		return True		
 
 	# Fix the connectivity:
 	for comp in convertedComponents:
@@ -397,6 +396,32 @@ def convert(stdPath,seqPath):
 	for key in glmTree:
 		if 'guid' in glmTree[key]: del glmTree[key]['guid']
 		if 'parentGuid' in glmTree[key]: del glmTree[key]['parentGuid']
+
+	def fixLinkPhases(comp):
+		def getByName(name):
+			candidates = [glmTree[x] for x in glmTree if 'name' in glmTree[x] and glmTree[x]['name'] == name]
+			if len(candidates) == 0:
+				return {}
+			else:
+				return candidates[0]
+
+		def phaseMin(x,y):
+			return ''.join(set(x).intersection(set(y)))
+
+		if comp['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse']:
+			fromPhases = getByName(comp['from'])['phases']
+			toPhases = getByName(comp['to'])['phases']
+			comp['phases'] = phaseMin(fromPhases, toPhases)
+			return True
+		else:
+			return False
+
+	#TODO: enable fix link phase information:
+	# for key in glmTree:
+	# 	fixLinkPhases(glmTree[key])
+
+	#TODO: fix secondary system here.
+
 
 	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
 						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\nmodule climate;\n' + \

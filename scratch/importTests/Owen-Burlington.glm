@@ -29,7 +29,7 @@ object node {
 phases ABCN;
 name BURLINGTON;
 bustype SWING;
-nominal_voltage 2400.0;
+nominal_voltage 2400;
 };
 
 object overhead_line {
@@ -603,10 +603,10 @@ phases BN;
 load_class R;
 name 62463027798;
 parent node62463027798T62463027880;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.698961;
+constant_power_B 698.961;
 };
 
 object overhead_line {
@@ -804,10 +804,10 @@ phases AN;
 load_class R;
 name 62463024800;
 parent node62463024800T62463023775;
-constant_power_C 0;
-constant_power_A 6.07365;
+constant_power_C 0.0;
+constant_power_A 6073.65;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -815,10 +815,10 @@ phases AN;
 load_class R;
 name 62463023758;
 parent node62463024800T62463023775;
-constant_power_C 0;
-constant_power_A 0.880641;
+constant_power_C 0.0;
+constant_power_A 880.641;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -880,10 +880,10 @@ phases BN;
 load_class R;
 name 62463022720;
 parent node62463022720T62463022676;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 4.54703;
+constant_power_B 4547.03;
 };
 
 object overhead_line {
@@ -945,10 +945,10 @@ phases CN;
 load_class R;
 name 62463021692;
 parent node62463021692T62463021663;
-constant_power_C 0.0731765;
-constant_power_A 0;
+constant_power_C 73.1765;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1010,10 +1010,10 @@ phases BN;
 load_class R;
 name 62463020586;
 parent node62463020586T62463020670;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 4.16349;
+constant_power_B 4163.49;
 };
 
 object overhead_line {
@@ -1111,10 +1111,10 @@ phases AN;
 load_class R;
 name 62463019437;
 parent node62463019437T62463019414;
-constant_power_C 0;
-constant_power_A 5.57655;
+constant_power_C 0.0;
+constant_power_A 5576.55;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1204,10 +1204,10 @@ phases CN;
 load_class R;
 name 62463019498;
 parent node62463019498T62463019467;
-constant_power_C 1.51904;
-constant_power_A 0;
+constant_power_C 1519.04;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1353,10 +1353,10 @@ phases CN;
 load_class R;
 name 62463022298;
 parent node62463022298T62463022289;
-constant_power_C 1.6553;
-constant_power_A 0;
+constant_power_C 1655.3;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1438,10 +1438,10 @@ phases CN;
 load_class R;
 name 62463025237;
 parent node62463025237T62463024257;
-constant_power_C 10.1337;
-constant_power_A 0;
+constant_power_C 10133.7;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1531,10 +1531,10 @@ phases AN;
 load_class R;
 name 62463018503;
 parent node62463018503T62463017479;
-constant_power_C 0;
-constant_power_A 6.3386;
+constant_power_C 0.0;
+constant_power_A 6338.6;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1588,10 +1588,10 @@ phases AN;
 load_class R;
 name 62463017349;
 parent node62463017349T62463017451;
-constant_power_C 0;
-constant_power_A 0.0605598;
+constant_power_C 0.0;
+constant_power_A 60.5598;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -1599,10 +1599,10 @@ phases AN;
 load_class R;
 name 62463017481;
 parent node62463017349T62463017451;
-constant_power_C 0;
-constant_power_A 3.48976;
+constant_power_C 0.0;
+constant_power_A 3489.76;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1656,10 +1656,10 @@ phases AN;
 load_class R;
 name 62463016405;
 parent node62463016405T62463015557;
-constant_power_C 0;
-constant_power_A 4.20638;
+constant_power_C 0.0;
+constant_power_A 4206.38;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -1667,10 +1667,10 @@ phases AN;
 load_class R;
 name 62463014593;
 parent node62463016405T62463015557;
-constant_power_C 0;
-constant_power_A 5.09964;
+constant_power_C 0.0;
+constant_power_A 5099.64;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1724,10 +1724,10 @@ phases AN;
 load_class R;
 name 62463013691;
 parent node62463013691T62463013576;
-constant_power_C 0;
-constant_power_A 0.156446;
+constant_power_C 0.0;
+constant_power_A 156.446;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1781,10 +1781,10 @@ phases AN;
 load_class R;
 name 62463012543;
 parent node62463012543T62463012540;
-constant_power_C 0;
-constant_power_A 7.22428;
+constant_power_C 0.0;
+constant_power_A 7224.28;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1866,10 +1866,10 @@ phases AN;
 load_class R;
 name 62463014628;
 parent node62463014628T62463014734;
-constant_power_C 0;
-constant_power_A 1.36007;
+constant_power_C 0.0;
+constant_power_A 1360.07;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -1877,10 +1877,10 @@ phases AN;
 load_class R;
 name 62463014757;
 parent node62463014628T62463014734;
-constant_power_C 0;
-constant_power_A 4.81198;
+constant_power_C 0.0;
+constant_power_A 4811.98;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1934,10 +1934,10 @@ phases AN;
 load_class R;
 name 62463013707;
 parent node62463013707T62463013737;
-constant_power_C 0;
-constant_power_A 3.67901;
+constant_power_C 0.0;
+constant_power_A 3679.01;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -1991,10 +1991,10 @@ phases AN;
 load_class R;
 name 62463016900;
 parent node62463016900T62463016837;
-constant_power_C 0;
-constant_power_A 6.36635;
+constant_power_C 0.0;
+constant_power_A 6366.35;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2048,10 +2048,10 @@ phases AN;
 load_class R;
 name 62474195011;
 parent node62474195011T62474196023;
-constant_power_C 0;
-constant_power_A 4.97095;
+constant_power_C 0.0;
+constant_power_A 4970.95;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -2059,10 +2059,10 @@ phases AN;
 load_class R;
 name 62463016996;
 parent node62474195011T62474196023;
-constant_power_C 0;
-constant_power_A 7.02242;
+constant_power_C 0.0;
+constant_power_A 7022.42;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2116,10 +2116,10 @@ phases AN;
 load_class R;
 name 62474195151;
 parent node62474195151T62474196103;
-constant_power_C 0;
-constant_power_A 5.79356;
+constant_power_C 0.0;
+constant_power_A 5793.56;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2173,10 +2173,10 @@ phases AN;
 load_class R;
 name 62474195268;
 parent node62474195268T62474196213;
-constant_power_C 0;
-constant_power_A 5.56393;
+constant_power_C 0.0;
+constant_power_A 5563.93;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -2184,10 +2184,10 @@ phases AN;
 load_class R;
 name 62474195267;
 parent node62474195268T62474196213;
-constant_power_C 0;
-constant_power_A 0.116073;
+constant_power_C 0.0;
+constant_power_A 116.073;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2241,10 +2241,10 @@ phases AN;
 load_class R;
 name 62474196319;
 parent node62474196319T62474196353;
-constant_power_C 0;
-constant_power_A 1.63512;
+constant_power_C 0.0;
+constant_power_A 1635.12;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -2252,10 +2252,10 @@ phases AN;
 load_class R;
 name 62474197334;
 parent node62474196319T62474196353;
-constant_power_C 0;
-constant_power_A 9.00323;
+constant_power_C 0.0;
+constant_power_A 9003.23;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2309,10 +2309,10 @@ phases AN;
 load_class R;
 name 62474197221;
 parent node62474197221T62474197215;
-constant_power_C 0;
-constant_power_A 3.88592;
+constant_power_C 0.0;
+constant_power_A 3885.92;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2366,10 +2366,10 @@ phases AN;
 load_class R;
 name 62474196191;
 parent node62474196191T62474197105;
-constant_power_C 0;
-constant_power_A 4.27956;
+constant_power_C 0.0;
+constant_power_A 4279.56;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2423,10 +2423,10 @@ phases AN;
 load_class R;
 name 62463016539;
 parent node62463016539T62463016634;
-constant_power_C 0;
-constant_power_A 6.54803;
+constant_power_C 0.0;
+constant_power_A 6548.03;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2488,10 +2488,10 @@ phases BN;
 load_class R;
 name 62463018228;
 parent node62463018228T62463018249;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.20363;
+constant_power_B 1203.63;
 };
 
 object overhead_line {
@@ -2581,10 +2581,10 @@ phases CN;
 load_class R;
 name 62463019285;
 parent node62463019285T62463019253;
-constant_power_C 4.53442;
-constant_power_A 0;
+constant_power_C 4534.42;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2638,10 +2638,10 @@ phases CN;
 load_class R;
 name 62463021167;
 parent node62463021167T62463021200;
-constant_power_C 3.75723;
-constant_power_A 0;
+constant_power_C 3757.23;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2739,10 +2739,10 @@ phases BN;
 load_class R;
 name 62463017062;
 parent node62463017062T62463017045;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.3366;
+constant_power_B 2336.6;
 };
 
 object overhead_line {
@@ -2832,10 +2832,10 @@ phases AN;
 load_class R;
 name 62463016038;
 parent node62463016038T62463016077;
-constant_power_C 0;
-constant_power_A 2.39716;
+constant_power_C 0.0;
+constant_power_A 2397.16;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2917,10 +2917,10 @@ phases AN;
 load_class R;
 name 62463074975;
 parent node62463074975T62463014050;
-constant_power_C 0;
-constant_power_A 3.57051;
+constant_power_C 0.0;
+constant_power_A 3570.51;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -2974,10 +2974,10 @@ phases AN;
 load_class R;
 name 62463016251;
 parent node62463016251T62463016201;
-constant_power_C 0;
-constant_power_A 2.66968;
+constant_power_C 0.0;
+constant_power_A 2669.68;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -2985,10 +2985,10 @@ phases AN;
 load_class R;
 name 62463015244;
 parent node62463016251T62463016201;
-constant_power_C 0;
-constant_power_A 4.69086;
+constant_power_C 0.0;
+constant_power_A 4690.86;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -3176,10 +3176,10 @@ phases ABCN;
 load_class R;
 name 62463078953;
 parent node62463078953T62463078922;
-constant_power_C 3.07258;
-constant_power_A 3.07258;
+constant_power_C 3072.58;
+constant_power_A 3072.58;
 nominal_voltage 120;
-constant_power_B 3.07258;
+constant_power_B 3072.58;
 };
 
 object overhead_line {
@@ -3241,10 +3241,10 @@ phases BN;
 load_class R;
 name 62463076992;
 parent node62463076992T62463076899;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.38959;
+constant_power_B 2389.59;
 };
 
 object load {
@@ -3252,10 +3252,10 @@ phases BN;
 load_class R;
 name 62463076991;
 parent node62463076992T62463076899;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.961387;
+constant_power_B 961.387;
 };
 
 object load {
@@ -3263,10 +3263,10 @@ phases BN;
 load_class R;
 name 62463076869;
 parent node62463076992T62463076899;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 5.06179;
+constant_power_B 5061.79;
 };
 
 object overhead_line {
@@ -3420,10 +3420,10 @@ phases AN;
 load_class R;
 name 62463074798;
 parent node62463074798T62463074775;
-constant_power_C 0;
-constant_power_A 4.83469;
+constant_power_C 0.0;
+constant_power_A 4834.69;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -3431,10 +3431,10 @@ phases AN;
 load_class R;
 name 62463074872;
 parent node62463074798T62463074775;
-constant_power_C 0;
-constant_power_A 0.141306;
+constant_power_C 0.0;
+constant_power_A 141.306;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -3632,10 +3632,10 @@ phases CN;
 load_class R;
 name 62463074197;
 parent node62463074197T62463074165;
-constant_power_C 2.69744;
-constant_power_A 0;
+constant_power_C 2697.44;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -3689,10 +3689,10 @@ phases CN;
 load_class R;
 name 62463073088;
 parent node62463073088T62463074161;
-constant_power_C 2.17258;
-constant_power_A 0;
+constant_power_C 2172.58;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -3700,10 +3700,10 @@ phases CN;
 load_class R;
 name 62463074161;
 parent node62463073088T62463074161;
-constant_power_C 0.787278;
-constant_power_A 0;
+constant_power_C 787.278;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -3897,10 +3897,10 @@ phases CN;
 load_class R;
 name 62463079175;
 parent node62463079175T62463079127;
-constant_power_C 2.91444;
-constant_power_A 0;
+constant_power_C 2914.44;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -3954,10 +3954,10 @@ phases CN;
 load_class R;
 name 62463139865;
 parent node62463139865T62463139950;
-constant_power_C 2.54099;
-constant_power_A 0;
+constant_power_C 2540.99;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -4011,10 +4011,10 @@ phases CN;
 load_class R;
 name 62463075194;
 parent node62463075194T62463075133;
-constant_power_C 4.56722;
-constant_power_A 0;
+constant_power_C 4567.22;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -4076,10 +4076,10 @@ phases BN;
 load_class R;
 name 62463133906;
 parent node62463133906T62463072031;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 5.29142;
+constant_power_B 5291.42;
 };
 
 object overhead_line {
@@ -4265,10 +4265,10 @@ phases AN;
 load_class R;
 name 62463130850;
 parent node62463130850T62463130794;
-constant_power_C 0;
-constant_power_A 4.71862;
+constant_power_C 0.0;
+constant_power_A 4718.62;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -4474,10 +4474,10 @@ phases BN;
 load_class R;
 name 62463129089;
 parent node62463129089T62463129146;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.782231;
+constant_power_B 782.231;
 };
 
 object load {
@@ -4485,10 +4485,10 @@ phases BN;
 load_class R;
 name 62463129140;
 parent node62463129089T62463129146;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0908397;
+constant_power_B 90.8397;
 };
 
 object load {
@@ -4496,10 +4496,10 @@ phases BN;
 load_class R;
 name 62463129029;
 parent node62463129089T62463129146;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -4625,10 +4625,10 @@ phases AN;
 load_class R;
 name 62463132202;
 parent node62463132202T62463131250;
-constant_power_C 0;
-constant_power_A 3.78751;
+constant_power_C 0.0;
+constant_power_A 3787.51;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -4794,10 +4794,10 @@ phases AN;
 load_class R;
 name 62463133761;
 parent node62463133761T62463133761;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -4879,10 +4879,10 @@ phases AN;
 load_class R;
 name 62463134548;
 parent node62463134548T62463134578;
-constant_power_C 0;
-constant_power_A 2.83622;
+constant_power_C 0.0;
+constant_power_A 2836.22;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -4890,10 +4890,10 @@ phases AN;
 load_class R;
 name 62463135417;
 parent node62463134548T62463134578;
-constant_power_C 0;
-constant_power_A 0.0353266;
+constant_power_C 0.0;
+constant_power_A 35.3266;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5008,10 +5008,10 @@ phases AN;
 load_class R;
 name 62463132895;
 parent node62463132895T62463133818;
-constant_power_C 0;
-constant_power_A 5.18796;
+constant_power_C 0.0;
+constant_power_A 5187.96;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5065,10 +5065,10 @@ phases AN;
 load_class R;
 name 62463132482;
 parent node62463132482T62463132499;
-constant_power_C 0;
-constant_power_A 5.81879;
+constant_power_C 0.0;
+constant_power_A 5818.79;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5130,10 +5130,10 @@ phases AN;
 load_class R;
 name 62463133009;
 parent node62463133009T62463132037;
-constant_power_C 0;
-constant_power_A 2.64445;
+constant_power_C 0.0;
+constant_power_A 2644.45;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5287,10 +5287,10 @@ phases AN;
 load_class R;
 name 62463188749;
 parent node62463188749T62463188832;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -5298,10 +5298,10 @@ phases AN;
 load_class R;
 name 62463188841;
 parent node62463188749T62463188832;
-constant_power_C 0;
-constant_power_A 3.36864;
+constant_power_C 0.0;
+constant_power_A 3368.64;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5355,10 +5355,10 @@ phases AN;
 load_class R;
 name 62463190800;
 parent node62463190800T62463189781;
-constant_power_C 0;
-constant_power_A 2.62426;
+constant_power_C 0.0;
+constant_power_A 2624.26;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5412,10 +5412,10 @@ phases AN;
 load_class R;
 name 62463190694;
 parent node62463190694T62463190598;
-constant_power_C 0;
-constant_power_A 0.0807464;
+constant_power_C 0.0;
+constant_power_A 80.7464;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5497,10 +5497,10 @@ phases AN;
 load_class R;
 name 62463193561;
 parent node62463193561T62463193504;
-constant_power_C 0;
-constant_power_A 8.12006;
+constant_power_C 0.0;
+constant_power_A 8120.06;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5554,10 +5554,10 @@ phases AN;
 load_class R;
 name 62463188901;
 parent node62463188901T62463187888;
-constant_power_C 0;
-constant_power_A 6.57074;
+constant_power_C 0.0;
+constant_power_A 6570.74;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5639,10 +5639,10 @@ phases AN;
 load_class R;
 name 62463186718;
 parent node62463186718T62463186742;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -5650,10 +5650,10 @@ phases AN;
 load_class R;
 name 62463186767;
 parent node62463186718T62463186742;
-constant_power_C 0;
-constant_power_A 1.69063;
+constant_power_C 0.0;
+constant_power_A 1690.63;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5763,10 +5763,10 @@ phases AN;
 load_class R;
 name 62463186398;
 parent node62463186398T62463185453;
-constant_power_C 0;
-constant_power_A 1.14307;
+constant_power_C 0.0;
+constant_power_A 1143.07;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -5774,10 +5774,10 @@ phases AN;
 load_class R;
 name 62463186406;
 parent node62463186398T62463185453;
-constant_power_C 0;
-constant_power_A 5.04918;
+constant_power_C 0.0;
+constant_power_A 5049.18;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5831,10 +5831,10 @@ phases AN;
 load_class R;
 name 62463185287;
 parent node62463185287T62463186324;
-constant_power_C 0;
-constant_power_A 6.71962;
+constant_power_C 0.0;
+constant_power_A 6719.62;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -5888,10 +5888,10 @@ phases AN;
 load_class R;
 name 62463186691;
 parent node62463186691T62463186577;
-constant_power_C 0;
-constant_power_A 4.54451;
+constant_power_C 0.0;
+constant_power_A 4544.51;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -6029,10 +6029,10 @@ phases AN;
 load_class R;
 name 62463189387;
 parent node62463189387T62463189482;
-constant_power_C 0;
-constant_power_A 2.96491;
+constant_power_C 0.0;
+constant_power_A 2964.91;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -6086,10 +6086,10 @@ phases AN;
 load_class R;
 name 62463128092;
 parent node62463128092T62463188978;
-constant_power_C 0;
-constant_power_A 4.74133;
+constant_power_C 0.0;
+constant_power_A 4741.33;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -6243,10 +6243,10 @@ phases AN;
 load_class R;
 name 62463124065;
 parent node62463124065T62463124087;
-constant_power_C 0;
-constant_power_A 1.70577;
+constant_power_C 0.0;
+constant_power_A 1705.77;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -6344,10 +6344,10 @@ phases BN;
 load_class R;
 name 62463123162;
 parent node62463123162T62463123126;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.49633;
+constant_power_B 1496.33;
 };
 
 object load {
@@ -6355,10 +6355,10 @@ phases BN;
 load_class R;
 name 62463123039;
 parent node62463123162T62463123126;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.58641;
+constant_power_B 2586.41;
 };
 
 object overhead_line {
@@ -6420,10 +6420,10 @@ phases CN;
 load_class R;
 name 62463121169;
 parent node62463121169T62463121197;
-constant_power_C 3.5049;
-constant_power_A 0;
+constant_power_C 3504.9;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -6549,10 +6549,10 @@ phases AN;
 load_class R;
 name 62462178343;
 parent node62462178343T62462178321;
-constant_power_C 0;
-constant_power_A 6.34364;
+constant_power_C 0.0;
+constant_power_A 6343.64;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -6642,10 +6642,10 @@ phases CN;
 load_class R;
 name 62462238928;
 parent node62462238928T62462237996;
-constant_power_C 3.11126;
-constant_power_A 0;
+constant_power_C 3111.26;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -6653,10 +6653,10 @@ phases CN;
 load_class R;
 name 62462238910;
 parent node62462238928T62462237996;
-constant_power_C 0.507189;
-constant_power_A 0;
+constant_power_C 507.189;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -6710,10 +6710,10 @@ phases CN;
 load_class R;
 name 62462237962;
 parent node62462237962T62462237964;
-constant_power_C 0.0454199;
-constant_power_A 0;
+constant_power_C 45.4199;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -6767,10 +6767,10 @@ phases CN;
 load_class R;
 name 62462236984;
 parent node62462236984T62462236981;
-constant_power_C 3.05322;
-constant_power_A 0;
+constant_power_C 3053.22;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -7601,10 +7601,10 @@ phases AN;
 load_class R;
 name 62463000348;
 parent node62463000348T62463000400;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -7612,10 +7612,10 @@ phases AN;
 load_class R;
 name 62462059368;
 parent node62463000348T62463000400;
-constant_power_C 0;
-constant_power_A 2.32651;
+constant_power_C 0.0;
+constant_power_A 2326.51;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -7674,10 +7674,10 @@ phases AN;
 load_class R;
 name 62462059542;
 parent node62462059542T62463000511;
-constant_power_C 0;
-constant_power_A 6.47233;
+constant_power_C 0.0;
+constant_power_A 6472.33;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -7736,10 +7736,10 @@ phases AN;
 load_class R;
 name 62462059675;
 parent node62462059675T62463000610;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -7747,10 +7747,10 @@ phases AN;
 load_class R;
 name 62462059694;
 parent node62462059675T62463000610;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -7758,10 +7758,10 @@ phases AN;
 load_class R;
 name 62462059538;
 parent node62462059675T62463000610;
-constant_power_C 0;
-constant_power_A 2.09436;
+constant_power_C 0.0;
+constant_power_A 2094.36;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -7820,10 +7820,10 @@ phases AN;
 load_class R;
 name 62463001627;
 parent node62463001627T62463000688;
-constant_power_C 0;
-constant_power_A 1.01438;
+constant_power_C 0.0;
+constant_power_A 1014.38;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -7882,10 +7882,10 @@ phases AN;
 load_class R;
 name 62462059793;
 parent node62462059793T62462059787;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -7970,10 +7970,10 @@ phases BN;
 load_class R;
 name 62462059308;
 parent node62462059308T62462058491;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.44839;
+constant_power_B 1448.39;
 };
 
 object underground_line {
@@ -8536,10 +8536,10 @@ phases BN;
 load_class R;
 name 62474182051;
 parent node62474182051T62463002948;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.34165;
+constant_power_B 2341.65;
 };
 
 object load {
@@ -8547,10 +8547,10 @@ phases BN;
 load_class R;
 name 62474182023;
 parent node62474182051T62463002948;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.02371;
+constant_power_B 2023.71;
 };
 
 object load {
@@ -8558,10 +8558,10 @@ phases BN;
 load_class R;
 name 62474182070;
 parent node62474182051T62463002948;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.921014;
+constant_power_B 921.014;
 };
 
 object underground_line {
@@ -8646,10 +8646,10 @@ phases CN;
 load_class R;
 name 62474181058;
 parent node62474181058T62474181036;
-constant_power_C 2.71005;
-constant_power_A 0;
+constant_power_C 2710.05;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -8657,10 +8657,10 @@ phases CN;
 load_class R;
 name 62474181087;
 parent node62474181058T62474181036;
-constant_power_C 1.7638;
-constant_power_A 0;
+constant_power_C 1763.8;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -8668,10 +8668,10 @@ phases CN;
 load_class R;
 name 62474181049;
 parent node62474181058T62474181036;
-constant_power_C 3.54527;
-constant_power_A 0;
+constant_power_C 3545.27;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -8763,10 +8763,10 @@ phases CN;
 load_class R;
 name 62463000855;
 parent node62463000855T62463000829;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -8858,10 +8858,10 @@ phases CN;
 load_class R;
 name 62463001804;
 parent node62463001804T62463001814;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -8869,10 +8869,10 @@ phases CN;
 load_class R;
 name 62463001887;
 parent node62463001804T62463001814;
-constant_power_C 1.94296;
-constant_power_A 0;
+constant_power_C 1942.96;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -8880,10 +8880,10 @@ phases CN;
 load_class R;
 name 62463000882;
 parent node62463001804T62463001814;
-constant_power_C 3.00528;
-constant_power_A 0;
+constant_power_C 3005.28;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -8891,10 +8891,10 @@ phases CN;
 load_class R;
 name 62463001801;
 parent node62463001804T62463001814;
-constant_power_C 2.3694;
-constant_power_A 0;
+constant_power_C 2369.4;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -8953,10 +8953,10 @@ phases CN;
 load_class R;
 name 62463001766;
 parent node62463001766T62463001769;
-constant_power_C 1.76885;
-constant_power_A 0;
+constant_power_C 1768.85;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -8964,10 +8964,10 @@ phases CN;
 load_class R;
 name 62463001747;
 parent node62463001766T62463001769;
-constant_power_C 1.83698;
-constant_power_A 0;
+constant_power_C 1836.98;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9052,10 +9052,10 @@ phases AN;
 load_class R;
 name 62473239194;
 parent node62473239194T62474180122;
-constant_power_C 0;
-constant_power_A 2.31137;
+constant_power_C 0.0;
+constant_power_A 2311.37;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -9063,10 +9063,10 @@ phases AN;
 load_class R;
 name 62474180125;
 parent node62473239194T62474180122;
-constant_power_C 0;
-constant_power_A 7.44886;
+constant_power_C 0.0;
+constant_power_A 7448.86;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9210,10 +9210,10 @@ phases BN;
 load_class R;
 name 62473238040;
 parent node62473238040T62473238073;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -9221,10 +9221,10 @@ phases BN;
 load_class R;
 name 62473238011;
 parent node62473238040T62473238073;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 3.13902;
+constant_power_B 3139.02;
 };
 
 object underground_line {
@@ -9283,10 +9283,10 @@ phases BN;
 load_class R;
 name 62473238221;
 parent node62473238221T62473238126;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9378,10 +9378,10 @@ phases BN;
 load_class R;
 name 62473238255;
 parent node62473238255T62473238283;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 3.89097;
+constant_power_B 3890.97;
 };
 
 object underground_line {
@@ -9466,10 +9466,10 @@ phases AN;
 load_class R;
 name 62462058915;
 parent node62462058915T62462058961;
-constant_power_C 0;
-constant_power_A 1.81175;
+constant_power_C 0.0;
+constant_power_A 1811.75;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9613,10 +9613,10 @@ phases BN;
 load_class R;
 name 62462058744;
 parent node62462058744T62462058764;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -9624,10 +9624,10 @@ phases BN;
 load_class R;
 name 62462058715;
 parent node62462058744T62462058764;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.97829;
+constant_power_B 1978.29;
 };
 
 object underground_line {
@@ -9712,10 +9712,10 @@ phases AN;
 load_class R;
 name 62462057655;
 parent node62462057655T62462057695;
-constant_power_C 0;
-constant_power_A 2.59146;
+constant_power_C 0.0;
+constant_power_A 2591.46;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9800,10 +9800,10 @@ phases CN;
 load_class R;
 name 62462058558;
 parent node62462058558T62462057585;
-constant_power_C 3.29042;
-constant_power_A 0;
+constant_power_C 3290.42;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -9811,10 +9811,10 @@ phases CN;
 load_class R;
 name 62462058536;
 parent node62462058558T62462057585;
-constant_power_C 2.37445;
-constant_power_A 0;
+constant_power_C 2374.45;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -9899,10 +9899,10 @@ phases BN;
 load_class R;
 name 62462057439;
 parent node62462057439T62462057478;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.958864;
+constant_power_B 958.864;
 };
 
 object load {
@@ -9910,10 +9910,10 @@ phases BN;
 load_class R;
 name 62462057437;
 parent node62462057439T62462057478;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.87231;
+constant_power_B 1872.31;
 };
 
 object transformer {
@@ -9939,10 +9939,10 @@ phases CN;
 load_class R;
 name 62462057863;
 parent node62462057863T62462058873;
-constant_power_C 1.98838;
-constant_power_A 0;
+constant_power_C 1988.38;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -9968,10 +9968,10 @@ phases CN;
 load_class R;
 name 62473239131;
 parent node62473239131T62473239069;
-constant_power_C 4.28208;
-constant_power_A 0;
+constant_power_C 4282.08;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -9997,10 +9997,10 @@ phases AN;
 load_class R;
 name 62463002869;
 parent node62463002869T62463003904;
-constant_power_C 0;
-constant_power_A 1.17839;
+constant_power_C 0.0;
+constant_power_A 1178.39;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -10008,10 +10008,10 @@ phases AN;
 load_class R;
 name 62463002888;
 parent node62463002869T62463003904;
-constant_power_C 0;
-constant_power_A 7.40092;
+constant_power_C 0.0;
+constant_power_A 7400.92;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -10019,10 +10019,10 @@ phases AN;
 load_class R;
 name 62463003936;
 parent node62463002869T62463003904;
-constant_power_C 0;
-constant_power_A 2.71258;
+constant_power_C 0.0;
+constant_power_A 2712.58;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10544,10 +10544,10 @@ phases AN;
 load_class R;
 name 62474182499;
 parent node62474182499T62474182459;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -10555,10 +10555,10 @@ phases AN;
 load_class R;
 name 62474182422;
 parent node62474182499T62474182459;
-constant_power_C 0;
-constant_power_A 1.81175;
+constant_power_C 0.0;
+constant_power_A 1811.75;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -10566,10 +10566,10 @@ phases AN;
 load_class R;
 name 62474182452;
 parent node62474182499T62474182459;
-constant_power_C 0;
-constant_power_A 2.0338;
+constant_power_C 0.0;
+constant_power_A 2033.8;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10628,10 +10628,10 @@ phases AN;
 load_class R;
 name 62474181469;
 parent node62474181469T62474181497;
-constant_power_C 0;
-constant_power_A 2.24071;
+constant_power_C 0.0;
+constant_power_A 2240.71;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10690,10 +10690,10 @@ phases AN;
 load_class R;
 name 62474181379;
 parent node62474181379T62474181443;
-constant_power_C 0;
-constant_power_A 3.10621;
+constant_power_C 0.0;
+constant_power_A 3106.21;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -10701,10 +10701,10 @@ phases AN;
 load_class R;
 name 62474181480;
 parent node62474181379T62474181443;
-constant_power_C 0;
-constant_power_A 2.09688;
+constant_power_C 0.0;
+constant_power_A 2096.88;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -10712,10 +10712,10 @@ phases AN;
 load_class R;
 name 62474181436;
 parent node62474181379T62474181443;
-constant_power_C 0;
-constant_power_A 3.2021;
+constant_power_C 0.0;
+constant_power_A 3202.1;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -10723,10 +10723,10 @@ phases AN;
 load_class R;
 name 62474181415;
 parent node62474181379T62474181443;
-constant_power_C 0;
-constant_power_A 2.74538;
+constant_power_C 0.0;
+constant_power_A 2745.38;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10785,10 +10785,10 @@ phases AN;
 load_class R;
 name 62474181335;
 parent node62474181335T62474180389;
-constant_power_C 0;
-constant_power_A 2.65202;
+constant_power_C 0.0;
+constant_power_A 2652.02;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -10796,10 +10796,10 @@ phases AN;
 load_class R;
 name 62474180472;
 parent node62474181335T62474180389;
-constant_power_C 0;
-constant_power_A 2.50566;
+constant_power_C 0.0;
+constant_power_A 2505.66;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -10807,10 +10807,10 @@ phases AN;
 load_class R;
 name 62474181313;
 parent node62474181335T62474180389;
-constant_power_C 0;
-constant_power_A 2.10193;
+constant_power_C 0.0;
+constant_power_A 2101.93;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -10869,10 +10869,10 @@ phases AN;
 load_class R;
 name 62474180317;
 parent node62474180317T62474180356;
-constant_power_C 0;
-constant_power_A 2.41987;
+constant_power_C 0.0;
+constant_power_A 2419.87;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -10970,10 +10970,10 @@ phases BN;
 load_class R;
 name 62474181623;
 parent node62474181623T62474181695;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 6.40925;
+constant_power_B 6409.25;
 };
 
 object overhead_line {
@@ -11221,7 +11221,7 @@ resistance 0.303;
 geometric_mean_radius 0.0221;
 };
 };
-phases AN;
+phases ABCN;
 from node1844318326;
 name 18443;
 to node1788818443;
@@ -11315,10 +11315,10 @@ phases AN;
 load_class R;
 name 62474182629;
 parent node62474182629T62474182678;
-constant_power_C 0;
-constant_power_A 2.38959;
+constant_power_C 0.0;
+constant_power_A 2389.59;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -11441,7 +11441,7 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases ABCN;
 from nodeT6246217249017361;
 name T62462172490;
 to node62462172377T62462172490;
@@ -11452,10 +11452,10 @@ phases AN;
 load_class R;
 name 62462172377;
 parent node62462172377T62462172490;
-constant_power_C 0;
-constant_power_A 5.02786;
+constant_power_C 0.0;
+constant_power_A 5027.86;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -11517,10 +11517,10 @@ phases BN;
 load_class R;
 name 62462172359;
 parent node62462172359T62462172379;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 4.7817;
+constant_power_B 4781.7;
 };
 
 object overhead_line {
@@ -11934,10 +11934,10 @@ phases AN;
 load_class R;
 name 62462169230;
 parent node62462169230T62462169245;
-constant_power_C 0;
-constant_power_A 6.15439;
+constant_power_C 0.0;
+constant_power_A 6154.39;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -11999,10 +11999,10 @@ phases CN;
 load_class R;
 name 62462168493;
 parent node62462168493T62462169442;
-constant_power_C 4.7489;
-constant_power_A 0;
+constant_power_C 4748.9;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -12172,10 +12172,10 @@ phases BN;
 load_class R;
 name 62462163909;
 parent node62462163909T62462162948;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -12183,10 +12183,10 @@ phases BN;
 load_class R;
 name 62462102070;
 parent node62462163909T62462162948;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -12544,10 +12544,10 @@ phases ABCN;
 load_class R;
 name 62462091125;
 parent node62462091125T62462091135;
-constant_power_C 32.759;
-constant_power_A 32.759;
+constant_power_C 32759.0;
+constant_power_A 32759.0;
 nominal_voltage 120;
-constant_power_B 32.759;
+constant_power_B 32759.0;
 };
 
 object overhead_line {
@@ -13112,10 +13112,10 @@ phases BN;
 load_class R;
 name 62462101209;
 parent node62462101209T62462101267;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 4.976;
+constant_power_B 4976.0;
 };
 
 object overhead_line {
@@ -13169,10 +13169,10 @@ phases BN;
 load_class R;
 name 62462100205;
 parent node62462100205T62462100224;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 6.65906;
+constant_power_B 6659.06;
 };
 
 object overhead_line {
@@ -13226,10 +13226,10 @@ phases BN;
 load_class R;
 name 62462100389;
 parent node62462100389T62462101338;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 6.25028;
+constant_power_B 6250.28;
 };
 
 object overhead_line {
@@ -13357,10 +13357,10 @@ phases BN;
 load_class R;
 name 62462166430;
 parent node62462166430T62462166454;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 5.3444;
+constant_power_B 5344.4;
 };
 
 object overhead_line {
@@ -13450,10 +13450,10 @@ phases CN;
 load_class R;
 name 62462169487;
 parent node62462169487T62462169469;
-constant_power_C 4.26442;
-constant_power_A 0;
+constant_power_C 4264.42;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -13461,10 +13461,10 @@ phases CN;
 load_class R;
 name 62462169591;
 parent node62462169487T62462169469;
-constant_power_C 0.15897;
-constant_power_A 0;
+constant_power_C 158.97;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -13546,10 +13546,10 @@ phases CN;
 load_class R;
 name 62462170679;
 parent node62462170679T62462170743;
-constant_power_C 4.38554;
-constant_power_A 0;
+constant_power_C 4385.54;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -13677,10 +13677,10 @@ phases CN;
 load_class R;
 name 62462110050;
 parent node62462110050T62462110060;
-constant_power_C 3.41658;
-constant_power_A 0;
+constant_power_C 3416.58;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -13688,10 +13688,10 @@ phases CN;
 load_class R;
 name 62462110074;
 parent node62462110050T62462110060;
-constant_power_C 5.44534;
-constant_power_A 0;
+constant_power_C 5445.34;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -13745,10 +13745,10 @@ phases CN;
 load_class R;
 name 62462168810;
 parent node62462168810T62462168870;
-constant_power_C 3.57808;
-constant_power_A 0;
+constant_power_C 3578.08;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -13756,16 +13756,17 @@ phases CN;
 load_class R;
 name 62462168853;
 parent node62462168810T62462168870;
-constant_power_C 0.0277566;
-constant_power_A 0;
+constant_power_C 27.7566;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object capacitor {
 control VOLT;
 phases ABCN;
 capacitor_A 0.10 MVAr;
+control_level INDIVIDUAL;
 name CAP134;
 parent node7055970558;
 capacitor_C 0.10 MVAr;
@@ -13773,10 +13774,9 @@ capacitor_B 0.10 MVAr;
 phases_connected ABCN;
 time_delay 300.0;
 nominal_voltage 2401.7771;
-switchB CLOSED;
 voltage_set_low 2340.0;
 switchC CLOSED;
-control_level INDIVIDUAL;
+switchB CLOSED;
 switchA CLOSED;
 pt_phase ABCN;
 dwell_time 0.0;
@@ -13950,10 +13950,10 @@ phases ABCN;
 load_class R;
 name 62462173273;
 parent node62462173273T62462173272;
-constant_power_C 14.8043;
-constant_power_A 14.8043;
+constant_power_C 14804.3;
+constant_power_A 14804.3;
 nominal_voltage 120;
-constant_power_B 14.8043;
+constant_power_B 14804.3;
 };
 
 object overhead_line {
@@ -14478,10 +14478,10 @@ phases CN;
 load_class R;
 name 62462223811;
 parent node62462223811T62462223734;
-constant_power_C 0.103456;
-constant_power_A 0;
+constant_power_C 103.456;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -14535,10 +14535,10 @@ phases CN;
 load_class R;
 name 62462221747;
 parent node62462221747T62462222618;
-constant_power_C 0.116073;
-constant_power_A 0;
+constant_power_C 116.073;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -14628,10 +14628,10 @@ phases CN;
 load_class R;
 name 62462222990;
 parent node62462222990T62462222900;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14639,10 +14639,10 @@ phases CN;
 load_class R;
 name 62462222906;
 parent node62462222990T62462222900;
-constant_power_C 0.111026;
-constant_power_A 0;
+constant_power_C 111.026;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14650,10 +14650,10 @@ phases CN;
 load_class R;
 name 62462222928;
 parent node62462222990T62462222900;
-constant_power_C 0.234669;
-constant_power_A 0;
+constant_power_C 234.669;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14661,10 +14661,10 @@ phases CN;
 load_class R;
 name 62462222940;
 parent node62462222990T62462222900;
-constant_power_C 1.37017;
-constant_power_A 0;
+constant_power_C 1370.17;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14672,10 +14672,10 @@ phases CN;
 load_class R;
 name 62462221940;
 parent node62462222990T62462222900;
-constant_power_C 0.11355;
-constant_power_A 0;
+constant_power_C 113.55;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14683,10 +14683,10 @@ phases CN;
 load_class R;
 name 62462222991;
 parent node62462222990T62462222900;
-constant_power_C 0.227099;
-constant_power_A 0;
+constant_power_C 227.099;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14694,10 +14694,10 @@ phases CN;
 load_class R;
 name 62462222898;
 parent node62462222990T62462222900;
-constant_power_C 0.0706531;
-constant_power_A 0;
+constant_power_C 70.6531;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -14779,10 +14779,10 @@ phases CN;
 load_class R;
 name 62462161131;
 parent node62462161131T62462161089;
-constant_power_C 0.0479432;
-constant_power_A 0;
+constant_power_C 47.9432;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14790,10 +14790,10 @@ phases CN;
 load_class R;
 name 62462161064;
 parent node62462161131T62462161089;
-constant_power_C 0.0883164;
-constant_power_A 0;
+constant_power_C 88.3164;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14801,10 +14801,10 @@ phases CN;
 load_class R;
 name 62462161074;
 parent node62462161131T62462161089;
-constant_power_C 0.0782231;
-constant_power_A 0;
+constant_power_C 78.2231;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14812,10 +14812,10 @@ phases CN;
 load_class R;
 name 62462161015;
 parent node62462161131T62462161089;
-constant_power_C 0.0479432;
-constant_power_A 0;
+constant_power_C 47.9432;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14823,10 +14823,10 @@ phases CN;
 load_class R;
 name 62462161141;
 parent node62462161131T62462161089;
-constant_power_C 0.0958864;
-constant_power_A 0;
+constant_power_C 95.8864;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -14852,10 +14852,10 @@ phases CN;
 load_class R;
 name 62462221928;
 parent node62462221928T62462221998;
-constant_power_C 0.0580365;
-constant_power_A 0;
+constant_power_C 58.0365;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -14909,10 +14909,10 @@ phases CN;
 load_class R;
 name 62462219692;
 parent node62462219692T62462220516;
-constant_power_C 3.97929;
-constant_power_A 0;
+constant_power_C 3979.29;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14920,10 +14920,10 @@ phases CN;
 load_class R;
 name 62462219587;
 parent node62462219692T62462220516;
-constant_power_C 7.46905;
-constant_power_A 0;
+constant_power_C 7469.05;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14931,10 +14931,10 @@ phases CN;
 load_class R;
 name 62462219593;
 parent node62462219692T62462220516;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -14942,10 +14942,10 @@ phases CN;
 load_class R;
 name 62462220524;
 parent node62462219692T62462220516;
-constant_power_C 0.01514;
-constant_power_A 0;
+constant_power_C 15.14;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15055,10 +15055,10 @@ phases CN;
 load_class R;
 name 62462219940;
 parent node62462219940T62462219856;
-constant_power_C 0.00504665;
-constant_power_A 0;
+constant_power_C 5.04665;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15066,10 +15066,10 @@ phases CN;
 load_class R;
 name 62462219723;
 parent node62462219940T62462219856;
-constant_power_C 0.0605598;
-constant_power_A 0;
+constant_power_C 60.5598;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15077,10 +15077,10 @@ phases CN;
 load_class R;
 name 62462217843;
 parent node62462219940T62462219856;
-constant_power_C 0.244763;
-constant_power_A 0;
+constant_power_C 244.763;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15088,10 +15088,10 @@ phases CN;
 load_class R;
 name 62462158002;
 parent node62462219940T62462219856;
-constant_power_C 0.0731765;
-constant_power_A 0;
+constant_power_C 73.1765;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15099,10 +15099,10 @@ phases CN;
 load_class R;
 name 62462157070;
 parent node62462219940T62462219856;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15212,10 +15212,10 @@ phases CN;
 load_class R;
 name 62462157141;
 parent node62462157141T62462156117;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15223,10 +15223,10 @@ phases CN;
 load_class R;
 name 62462155030;
 parent node62462157141T62462156117;
-constant_power_C 0.100933;
-constant_power_A 0;
+constant_power_C 100.933;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15234,10 +15234,10 @@ phases CN;
 load_class R;
 name 62462154072;
 parent node62462157141T62462156117;
-constant_power_C 0.13626;
-constant_power_A 0;
+constant_power_C 136.26;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15245,10 +15245,10 @@ phases CN;
 load_class R;
 name 62462156170;
 parent node62462157141T62462156117;
-constant_power_C 0.196819;
-constant_power_A 0;
+constant_power_C 196.819;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15256,10 +15256,10 @@ phases CN;
 load_class R;
 name 62462156240;
 parent node62462157141T62462156117;
-constant_power_C 0.100933;
-constant_power_A 0;
+constant_power_C 100.933;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15267,10 +15267,10 @@ phases CN;
 load_class R;
 name 62462154130;
 parent node62462157141T62462156117;
-constant_power_C 0.0328032;
-constant_power_A 0;
+constant_power_C 32.8032;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15278,10 +15278,10 @@ phases CN;
 load_class R;
 name 62462153231;
 parent node62462157141T62462156117;
-constant_power_C 1.52914;
-constant_power_A 0;
+constant_power_C 1529.14;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15289,10 +15289,10 @@ phases CN;
 load_class R;
 name 62462215977;
 parent node62462157141T62462156117;
-constant_power_C 0.0403732;
-constant_power_A 0;
+constant_power_C 40.3732;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15374,10 +15374,10 @@ phases CN;
 load_class R;
 name 62462225969;
 parent node62462225969T62462166024;
-constant_power_C 5.44029;
-constant_power_A 0;
+constant_power_C 5440.29;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15487,10 +15487,10 @@ phases CN;
 load_class R;
 name 62462174083;
 parent node62462174083T62462174081;
-constant_power_C 1.14307;
-constant_power_A 0;
+constant_power_C 1143.07;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15498,10 +15498,10 @@ phases CN;
 load_class R;
 name 62462175009;
 parent node62462174083T62462174081;
-constant_power_C 2.40725;
-constant_power_A 0;
+constant_power_C 2407.25;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15555,10 +15555,10 @@ phases CN;
 load_class R;
 name 62462234942;
 parent node62462234942T62462233960;
-constant_power_C 2.49809;
-constant_power_A 0;
+constant_power_C 2498.09;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15566,10 +15566,10 @@ phases CN;
 load_class R;
 name 62462234833;
 parent node62462234942T62462233960;
-constant_power_C 1.38026;
-constant_power_A 0;
+constant_power_C 1380.26;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15623,10 +15623,10 @@ phases CN;
 load_class R;
 name 62462232961;
 parent node62462232961T62462233819;
-constant_power_C 0.905874;
-constant_power_A 0;
+constant_power_C 905.874;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15764,10 +15764,10 @@ phases CN;
 load_class R;
 name 62462231679;
 parent node62462231679T62462231679;
-constant_power_C 0.116073;
-constant_power_A 0;
+constant_power_C 116.073;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -15775,10 +15775,10 @@ phases CN;
 load_class R;
 name 62462231782;
 parent node62462231679T62462231679;
-constant_power_C 2.09688;
-constant_power_A 0;
+constant_power_C 2096.88;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15832,10 +15832,10 @@ phases CN;
 load_class R;
 name 62462231529;
 parent node62462231529T62462231545;
-constant_power_C 5.85412;
-constant_power_A 0;
+constant_power_C 5854.12;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -15973,10 +15973,10 @@ phases CN;
 load_class R;
 name 62462229732;
 parent node62462229732T62462229741;
-constant_power_C 3.21976;
-constant_power_A 0;
+constant_power_C 3219.76;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16058,10 +16058,10 @@ phases CN;
 load_class R;
 name 62462229510;
 parent node62462229510T62462229436;
-constant_power_C 1.6225;
-constant_power_A 0;
+constant_power_C 1622.5;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16115,10 +16115,10 @@ phases CN;
 load_class R;
 name 62462229319;
 parent node62462229319T62462228465;
-constant_power_C 5.66234;
-constant_power_A 0;
+constant_power_C 5662.34;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16172,10 +16172,10 @@ phases CN;
 load_class R;
 name 62462226475;
 parent node62462226475T62462227457;
-constant_power_C 4.9003;
-constant_power_A 0;
+constant_power_C 4900.3;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16229,10 +16229,10 @@ phases CN;
 load_class R;
 name 62462226602;
 parent node62462226602T62462226538;
-constant_power_C 7.85764;
-constant_power_A 0;
+constant_power_C 7857.64;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16314,10 +16314,10 @@ phases CN;
 load_class R;
 name 62462225428;
 parent node62462225428T62462224580;
-constant_power_C 8.61211;
-constant_power_A 0;
+constant_power_C 8612.11;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16371,10 +16371,10 @@ phases CN;
 load_class R;
 name 62462227630;
 parent node62462227630T62462227535;
-constant_power_C 6.90634;
-constant_power_A 0;
+constant_power_C 6906.34;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16428,10 +16428,10 @@ phases CN;
 load_class R;
 name 62462231414;
 parent node62462231414T62462230473;
-constant_power_C 5.31917;
-constant_power_A 0;
+constant_power_C 5319.17;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16485,10 +16485,10 @@ phases CN;
 load_class R;
 name 62462232691;
 parent node62462232691T62462232564;
-constant_power_C 2.46781;
-constant_power_A 0;
+constant_power_C 2467.81;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16570,10 +16570,10 @@ phases CN;
 load_class R;
 name 62462235664;
 parent node62462235664T62462235631;
-constant_power_C 8.1024;
-constant_power_A 0;
+constant_power_C 8102.4;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16663,10 +16663,10 @@ phases AN;
 load_class R;
 name 62462239978;
 parent node62462239978T62463120010;
-constant_power_C 0;
-constant_power_A 2.65706;
+constant_power_C 0.0;
+constant_power_A 2657.06;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16820,10 +16820,10 @@ phases AN;
 load_class R;
 name 62463072245;
 parent node62463072245T62463072330;
-constant_power_C 0;
-constant_power_A 3.28789;
+constant_power_C 0.0;
+constant_power_A 3287.89;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -16913,10 +16913,10 @@ phases CN;
 load_class R;
 name 62463075332;
 parent node62463075332T62463075357;
-constant_power_C 4.59245;
-constant_power_A 0;
+constant_power_C 4592.45;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -17006,10 +17006,10 @@ phases CN;
 load_class R;
 name 62463019058;
 parent node62463019058T62463019150;
-constant_power_C 10.6989;
-constant_power_A 0;
+constant_power_C 10698.9;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -17017,10 +17017,10 @@ phases CN;
 load_class R;
 name 62463019173;
 parent node62463019058T62463019150;
-constant_power_C 2.4552;
-constant_power_A 0;
+constant_power_C 2455.2;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -17138,10 +17138,10 @@ phases BN;
 load_class R;
 name 62463020936;
 parent node62463020936T62463020868;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object transformer {
@@ -17167,10 +17167,10 @@ phases BN;
 load_class R;
 name 62463019768;
 parent node62463019768T62463020860;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.244763;
+constant_power_B 244.763;
 };
 
 object load {
@@ -17178,10 +17178,10 @@ phases BN;
 load_class R;
 name 62463020699;
 parent node62463019768T62463020860;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.81679;
+constant_power_B 1816.79;
 };
 
 object load {
@@ -17189,10 +17189,10 @@ phases BN;
 load_class R;
 name 62463021707;
 parent node62463019768T62463020860;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.181679;
+constant_power_B 181.679;
 };
 
 object overhead_line {
@@ -17274,10 +17274,10 @@ phases BN;
 load_class R;
 name 62463018993;
 parent node62463018993T62463018961;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.67801;
+constant_power_B 1678.01;
 };
 
 object overhead_line {
@@ -17367,10 +17367,10 @@ phases CN;
 load_class R;
 name 62463021455;
 parent node62463021455T62463021550;
-constant_power_C 2.91697;
-constant_power_A 0;
+constant_power_C 2916.97;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -17378,10 +17378,10 @@ phases CN;
 load_class R;
 name 62463021581;
 parent node62463021455T62463021550;
-constant_power_C 3.87835;
-constant_power_A 0;
+constant_power_C 3878.35;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -17389,10 +17389,10 @@ phases CN;
 load_class R;
 name 62463022467;
 parent node62463021455T62463021550;
-constant_power_C 2.62426;
-constant_power_A 0;
+constant_power_C 2624.26;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -17454,10 +17454,10 @@ phases BN;
 load_class R;
 name 62463024844;
 parent node62463024844T62463025910;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0.0176633;
+constant_power_B 17.6633;
 };
 
 object overhead_line {
@@ -17645,10 +17645,10 @@ phases BN;
 load_class R;
 name 62474204023;
 parent node62474204023T62474203073;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 3.82032;
+constant_power_B 3820.32;
 };
 
 object load {
@@ -17656,10 +17656,10 @@ phases BN;
 load_class R;
 name 62474204038;
 parent node62474204023T62474203073;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 3.20715;
+constant_power_B 3207.15;
 };
 
 object load {
@@ -17667,10 +17667,10 @@ phases BN;
 load_class R;
 name 62474203084;
 parent node62474204023T62474203073;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.82613;
+constant_power_B 2826.13;
 };
 
 object underground_line {
@@ -17729,10 +17729,10 @@ phases BN;
 load_class R;
 name 62474202046;
 parent node62474202046T62463022999;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.001;
+constant_power_B 2001.0;
 };
 
 object load {
@@ -17740,10 +17740,10 @@ phases BN;
 load_class R;
 name 62463023927;
 parent node62474202046T62463022999;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.55437;
+constant_power_B 1554.37;
 };
 
 object load {
@@ -17751,10 +17751,10 @@ phases BN;
 load_class R;
 name 62463022995;
 parent node62474202046T62463022999;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.7479;
+constant_power_B 2747.9;
 };
 
 object underground_line {
@@ -17813,10 +17813,10 @@ phases BN;
 load_class R;
 name 62474201080;
 parent node62474201080T62463022938;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 3.87331;
+constant_power_B 3873.31;
 };
 
 object load {
@@ -17824,10 +17824,10 @@ phases BN;
 load_class R;
 name 62463022936;
 parent node62474201080T62463022938;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.2011;
+constant_power_B 1201.1;
 };
 
 object underground_line {
@@ -17912,10 +17912,10 @@ phases CN;
 load_class R;
 name 62474202147;
 parent node62474202147T62474202166;
-constant_power_C 3.27023;
-constant_power_A 0;
+constant_power_C 3270.23;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -17923,10 +17923,10 @@ phases CN;
 load_class R;
 name 62474202144;
 parent node62474202147T62474202166;
-constant_power_C 2.19025;
-constant_power_A 0;
+constant_power_C 2190.25;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -18011,10 +18011,10 @@ phases BN;
 load_class R;
 name 62474202258;
 parent node62474202258T62474202360;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 5.86584;
+constant_power_B 5865.84;
 };
 
 object underground_line {
@@ -18099,10 +18099,10 @@ phases AN;
 load_class R;
 name 62474202354;
 parent node62474202354T62474202362;
-constant_power_C 0;
-constant_power_A 2.24324;
+constant_power_C 0.0;
+constant_power_A 2243.24;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -18305,10 +18305,10 @@ phases AN;
 load_class R;
 name 62474202454;
 parent node62474202454T62474202471;
-constant_power_C 0;
-constant_power_A 2.87155;
+constant_power_C 0.0;
+constant_power_A 2871.55;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -18316,10 +18316,10 @@ phases AN;
 load_class R;
 name 62474202349;
 parent node62474202454T62474202471;
-constant_power_C 0;
-constant_power_A 1.6225;
+constant_power_C 0.0;
+constant_power_A 1622.5;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -18404,10 +18404,10 @@ phases AN;
 load_class R;
 name 62474202555;
 parent node62474202555T62474202581;
-constant_power_C 0;
-constant_power_A 3.01285;
+constant_power_C 0.0;
+constant_power_A 3012.85;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -18415,10 +18415,10 @@ phases AN;
 load_class R;
 name 62474202540;
 parent node62474202555T62474202581;
-constant_power_C 0;
-constant_power_A 5.62197;
+constant_power_C 0.0;
+constant_power_A 5621.97;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -18562,10 +18562,10 @@ phases BN;
 load_class R;
 name 62474202650;
 parent node62474202650T62474202681;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.42744;
+constant_power_B 2427.44;
 };
 
 object load {
@@ -18573,10 +18573,10 @@ phases BN;
 load_class R;
 name 62474202663;
 parent node62474202650T62474202681;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.46024;
+constant_power_B 2460.24;
 };
 
 object load {
@@ -18584,10 +18584,10 @@ phases BN;
 load_class R;
 name 62474202671;
 parent node62474202650T62474202681;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.65026;
+constant_power_B 1650.26;
 };
 
 object underground_line {
@@ -18672,10 +18672,10 @@ phases CN;
 load_class R;
 name 62474202679;
 parent node62474202679T62474202791;
-constant_power_C 3.91873;
-constant_power_A 0;
+constant_power_C 3918.73;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -18806,10 +18806,10 @@ phases BN;
 load_class R;
 name 62474204748;
 parent node62474204748T62474204749;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -18817,10 +18817,10 @@ phases BN;
 load_class R;
 name 62474204762;
 parent node62474204748T62474204749;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 4.65301;
+constant_power_B 4653.01;
 };
 
 object load {
@@ -18828,10 +18828,10 @@ phases BN;
 load_class R;
 name 62474204880;
 parent node62474204748T62474204749;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.65783;
+constant_power_B 1657.83;
 };
 
 object load {
@@ -18839,10 +18839,10 @@ phases BN;
 load_class R;
 name 62474204795;
 parent node62474204748T62474204749;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 3.75976;
+constant_power_B 3759.76;
 };
 
 object underground_line {
@@ -18914,10 +18914,10 @@ phases CN;
 load_class R;
 name 62474204990;
 parent node62474204990T62474204859;
-constant_power_C 2.42492;
-constant_power_A 0;
+constant_power_C 2424.92;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -18925,10 +18925,10 @@ phases CN;
 load_class R;
 name 62474205807;
 parent node62474204990T62474204859;
-constant_power_C 7.36307;
-constant_power_A 0;
+constant_power_C 7363.07;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -19000,10 +19000,10 @@ phases BN;
 load_class R;
 name 62474144036;
 parent node62474144036T62474204979;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 4.5647;
+constant_power_B 4564.7;
 };
 
 object load {
@@ -19011,10 +19011,10 @@ phases BN;
 load_class R;
 name 62474145010;
 parent node62474144036T62474204979;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 4.15087;
+constant_power_B 4150.87;
 };
 
 object underground_line {
@@ -19073,10 +19073,10 @@ phases BN;
 load_class R;
 name 62474203981;
 parent node62474203981T62474203987;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 7.19653;
+constant_power_B 7196.53;
 };
 
 object load {
@@ -19084,10 +19084,10 @@ phases BN;
 load_class R;
 name 62474143090;
 parent node62474203981T62474203987;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 6.80289;
+constant_power_B 6802.89;
 };
 
 object load {
@@ -19095,10 +19095,10 @@ phases BN;
 load_class R;
 name 62474203952;
 parent node62474203981T62474203987;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 7.32522;
+constant_power_B 7325.22;
 };
 
 object load {
@@ -19106,10 +19106,10 @@ phases BN;
 load_class R;
 name 62474143060;
 parent node62474203981T62474203987;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 2.35679;
+constant_power_B 2356.79;
 };
 
 object underground_line {
@@ -19168,10 +19168,10 @@ phases BN;
 load_class R;
 name 62474202953;
 parent node62474202953T62474202989;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 3.78751;
+constant_power_B 3787.51;
 };
 
 object load {
@@ -19179,10 +19179,10 @@ phases BN;
 load_class R;
 name 62474142082;
 parent node62474202953T62474202989;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 1.11026;
+constant_power_B 1110.26;
 };
 
 object load {
@@ -19190,10 +19190,10 @@ phases BN;
 load_class R;
 name 62474142051;
 parent node62474202953T62474202989;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 4.48395;
+constant_power_B 4483.95;
 };
 
 object load {
@@ -19201,10 +19201,10 @@ phases BN;
 load_class R;
 name 62474202972;
 parent node62474202953T62474202989;
-constant_power_C 0;
-constant_power_A 0;
+constant_power_C 0.0;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 4.61769;
+constant_power_B 4617.69;
 };
 
 object transformer {
@@ -19230,10 +19230,10 @@ phases AN;
 load_class R;
 name 62474203871;
 parent node62474203871T62474203769;
-constant_power_C 0;
-constant_power_A 3.22986;
+constant_power_C 0.0;
+constant_power_A 3229.86;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19241,10 +19241,10 @@ phases AN;
 load_class R;
 name 62474203750;
 parent node62474203871T62474203769;
-constant_power_C 0;
-constant_power_A 3.82032;
+constant_power_C 0.0;
+constant_power_A 3820.32;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19252,10 +19252,10 @@ phases AN;
 load_class R;
 name 62474203842;
 parent node62474203871T62474203769;
-constant_power_C 0;
-constant_power_A 5.47309;
+constant_power_C 0.0;
+constant_power_A 5473.09;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19263,10 +19263,10 @@ phases AN;
 load_class R;
 name 62474203781;
 parent node62474203871T62474203769;
-constant_power_C 0;
-constant_power_A 5.85916;
+constant_power_C 0.0;
+constant_power_A 5859.16;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -19325,10 +19325,10 @@ phases AN;
 load_class R;
 name 62474203572;
 parent node62474203572T62474203566;
-constant_power_C 0;
-constant_power_A 1.91773;
+constant_power_C 0.0;
+constant_power_A 1917.73;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19336,10 +19336,10 @@ phases AN;
 load_class R;
 name 62474203652;
 parent node62474203572T62474203566;
-constant_power_C 0;
-constant_power_A 2.40978;
+constant_power_C 0.0;
+constant_power_A 2409.78;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19347,10 +19347,10 @@ phases AN;
 load_class R;
 name 62474203552;
 parent node62474203572T62474203566;
-constant_power_C 0;
-constant_power_A 5.45795;
+constant_power_C 0.0;
+constant_power_A 5457.95;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19358,10 +19358,10 @@ phases AN;
 load_class R;
 name 62474203681;
 parent node62474203572T62474203566;
-constant_power_C 0;
-constant_power_A 3.10621;
+constant_power_C 0.0;
+constant_power_A 3106.21;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -19420,10 +19420,10 @@ phases AN;
 load_class R;
 name 62474204552;
 parent node62474204552T62474204575;
-constant_power_C 0;
-constant_power_A 2.22053;
+constant_power_C 0.0;
+constant_power_A 2220.53;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19431,10 +19431,10 @@ phases AN;
 load_class R;
 name 62474204585;
 parent node62474204552T62474204575;
-constant_power_C 0;
-constant_power_A 4.4032;
+constant_power_C 0.0;
+constant_power_A 4403.2;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19442,10 +19442,10 @@ phases AN;
 load_class R;
 name 62474204662;
 parent node62474204552T62474204575;
-constant_power_C 0;
-constant_power_A 6.45972;
+constant_power_C 0.0;
+constant_power_A 6459.72;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19453,10 +19453,10 @@ phases AN;
 load_class R;
 name 62474205503;
 parent node62474204552T62474204575;
-constant_power_C 0;
-constant_power_A 2.54856;
+constant_power_C 0.0;
+constant_power_A 2548.56;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -19515,10 +19515,10 @@ phases AN;
 load_class R;
 name 62474206532;
 parent node62474206532T62474206505;
-constant_power_C 0;
-constant_power_A 2.05146;
+constant_power_C 0.0;
+constant_power_A 2051.46;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19526,10 +19526,10 @@ phases AN;
 load_class R;
 name 62474206502;
 parent node62474206532T62474206505;
-constant_power_C 0;
-constant_power_A 6.75494;
+constant_power_C 0.0;
+constant_power_A 6754.94;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -19588,10 +19588,10 @@ phases AN;
 load_class R;
 name 62474205692;
 parent node62474205692T62474206624;
-constant_power_C 0;
-constant_power_A 2.58136;
+constant_power_C 0.0;
+constant_power_A 2581.36;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -19650,10 +19650,10 @@ phases AN;
 load_class R;
 name 62474206706;
 parent node62474206706T62474206724;
-constant_power_C 0;
-constant_power_A 2.38202;
+constant_power_C 0.0;
+constant_power_A 2382.02;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19661,10 +19661,10 @@ phases AN;
 load_class R;
 name 62474205793;
 parent node62474206706T62474206724;
-constant_power_C 0;
-constant_power_A 2.91192;
+constant_power_C 0.0;
+constant_power_A 2911.92;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -19723,10 +19723,10 @@ phases AN;
 load_class R;
 name 62474205893;
 parent node62474205893T62474206824;
-constant_power_C 0;
-constant_power_A 4.17358;
+constant_power_C 0.0;
+constant_power_A 4173.58;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19734,10 +19734,10 @@ phases AN;
 load_class R;
 name 62474206806;
 parent node62474205893T62474206824;
-constant_power_C 0;
-constant_power_A 2.72772;
+constant_power_C 0.0;
+constant_power_A 2727.72;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -19796,10 +19796,10 @@ phases AN;
 load_class R;
 name 62474146040;
 parent node62474146040T62474206947;
-constant_power_C 0;
-constant_power_A 3.70172;
+constant_power_C 0.0;
+constant_power_A 3701.72;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19807,10 +19807,10 @@ phases AN;
 load_class R;
 name 62474206918;
 parent node62474146040T62474206947;
-constant_power_C 0;
-constant_power_A 3.82789;
+constant_power_C 0.0;
+constant_power_A 3827.89;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19818,10 +19818,10 @@ phases AN;
 load_class R;
 name 62474206903;
 parent node62474146040T62474206947;
-constant_power_C 0;
-constant_power_A 2.0767;
+constant_power_C 0.0;
+constant_power_A 2076.7;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -19880,10 +19880,10 @@ phases AN;
 load_class R;
 name 62474207930;
 parent node62474207930T62474207936;
-constant_power_C 0;
-constant_power_A 6.65653;
+constant_power_C 0.0;
+constant_power_A 6656.53;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19891,10 +19891,10 @@ phases AN;
 load_class R;
 name 62474206990;
 parent node62474207930T62474207936;
-constant_power_C 0;
-constant_power_A 2.14987;
+constant_power_C 0.0;
+constant_power_A 2149.87;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19902,10 +19902,10 @@ phases AN;
 load_class R;
 name 62474147020;
 parent node62474207930T62474207936;
-constant_power_C 0;
-constant_power_A 2.82108;
+constant_power_C 0.0;
+constant_power_A 2821.08;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19913,10 +19913,10 @@ phases AN;
 load_class R;
 name 62474207949;
 parent node62474207930T62474207936;
-constant_power_C 0;
-constant_power_A 3.21724;
+constant_power_C 0.0;
+constant_power_A 3217.24;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -19975,10 +19975,10 @@ phases AN;
 load_class R;
 name 62474208819;
 parent node62474208819T62474208904;
-constant_power_C 0;
-constant_power_A 4.58488;
+constant_power_C 0.0;
+constant_power_A 4584.88;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -19986,10 +19986,10 @@ phases AN;
 load_class R;
 name 62474148010;
 parent node62474208819T62474208904;
-constant_power_C 0;
-constant_power_A 1.90763;
+constant_power_C 0.0;
+constant_power_A 1907.63;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -20048,10 +20048,10 @@ phases AN;
 load_class R;
 name 62474206893;
 parent node62474206893T62474207830;
-constant_power_C 0;
-constant_power_A 7.14354;
+constant_power_C 0.0;
+constant_power_A 7143.54;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20059,10 +20059,10 @@ phases AN;
 load_class R;
 name 62474207708;
 parent node62474206893T62474207830;
-constant_power_C 0;
-constant_power_A 2.97752;
+constant_power_C 0.0;
+constant_power_A 2977.52;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20070,10 +20070,10 @@ phases AN;
 load_class R;
 name 62474207880;
 parent node62474206893T62474207830;
-constant_power_C 0;
-constant_power_A 6.72971;
+constant_power_C 0.0;
+constant_power_A 6729.71;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -20132,10 +20132,10 @@ phases AN;
 load_class R;
 name 62474207559;
 parent node62474207559T62474207612;
-constant_power_C 0;
-constant_power_A 2.79332;
+constant_power_C 0.0;
+constant_power_A 2793.32;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20143,10 +20143,10 @@ phases AN;
 load_class R;
 name 62474206588;
 parent node62474207559T62474207612;
-constant_power_C 0;
-constant_power_A 1.42568;
+constant_power_C 0.0;
+constant_power_A 1425.68;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20154,10 +20154,10 @@ phases AN;
 load_class R;
 name 62474207700;
 parent node62474207559T62474207612;
-constant_power_C 0;
-constant_power_A 4.70348;
+constant_power_C 0.0;
+constant_power_A 4703.48;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20165,10 +20165,10 @@ phases AN;
 load_class R;
 name 62474207684;
 parent node62474207559T62474207612;
-constant_power_C 0;
-constant_power_A 2.22053;
+constant_power_C 0.0;
+constant_power_A 2220.53;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20176,10 +20176,10 @@ phases AN;
 load_class R;
 name 62474207629;
 parent node62474207559T62474207612;
-constant_power_C 0;
-constant_power_A 8.10492;
+constant_power_C 0.0;
+constant_power_A 8104.92;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -20238,10 +20238,10 @@ phases AN;
 load_class R;
 name 62474207489;
 parent node62474207489T62474207437;
-constant_power_C 0;
-constant_power_A 2.80342;
+constant_power_C 0.0;
+constant_power_A 2803.42;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -20333,10 +20333,10 @@ phases CN;
 load_class R;
 name 62474203443;
 parent node62474203443T62474203356;
-constant_power_C 4.99619;
-constant_power_A 0;
+constant_power_C 4996.19;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20344,10 +20344,10 @@ phases CN;
 load_class R;
 name 62474203373;
 parent node62474203443T62474203356;
-constant_power_C 3.55032;
-constant_power_A 0;
+constant_power_C 3550.32;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20355,10 +20355,10 @@ phases CN;
 load_class R;
 name 62474203472;
 parent node62474203443T62474203356;
-constant_power_C 5.64468;
-constant_power_A 0;
+constant_power_C 5644.68;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20366,10 +20366,10 @@ phases CN;
 load_class R;
 name 62474203343;
 parent node62474203443T62474203356;
-constant_power_C 2.91444;
-constant_power_A 0;
+constant_power_C 2914.44;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object underground_line {
@@ -20428,10 +20428,10 @@ phases CN;
 load_class R;
 name 62474204371;
 parent node62474204371T62474204354;
-constant_power_C 3.45191;
-constant_power_A 0;
+constant_power_C 3451.91;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20439,10 +20439,10 @@ phases CN;
 load_class R;
 name 62474204432;
 parent node62474204371T62474204354;
-constant_power_C 4.43348;
-constant_power_A 0;
+constant_power_C 4433.48;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20450,10 +20450,10 @@ phases CN;
 load_class R;
 name 62474205305;
 parent node62474204371T62474204354;
-constant_power_C 5.73047;
-constant_power_A 0;
+constant_power_C 5730.47;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20461,10 +20461,10 @@ phases CN;
 load_class R;
 name 62474204471;
 parent node62474204371T62474204354;
-constant_power_C 3.74462;
-constant_power_A 0;
+constant_power_C 3744.62;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20472,10 +20472,10 @@ phases CN;
 load_class R;
 name 62474204342;
 parent node62474204371T62474204354;
-constant_power_C 2.95734;
-constant_power_A 0;
+constant_power_C 2957.34;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -20529,10 +20529,10 @@ phases AN;
 load_class R;
 name 62474205151;
 parent node62474205151T62474205022;
-constant_power_C 0;
-constant_power_A 8.22352;
+constant_power_C 0.0;
+constant_power_A 8223.52;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20540,10 +20540,10 @@ phases AN;
 load_class R;
 name 62474205022;
 parent node62474205151T62474205022;
-constant_power_C 0;
-constant_power_A 0.974004;
+constant_power_C 0.0;
+constant_power_A 974.004;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -20633,10 +20633,10 @@ phases AN;
 load_class R;
 name 62463026977;
 parent node62463026977T62463026955;
-constant_power_C 0;
-constant_power_A 0.837744;
+constant_power_C 0.0;
+constant_power_A 837.744;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20644,10 +20644,10 @@ phases AN;
 load_class R;
 name 62463026926;
 parent node62463026977T62463026955;
-constant_power_C 0;
-constant_power_A 6.58336;
+constant_power_C 0.0;
+constant_power_A 6583.36;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -20737,10 +20737,10 @@ phases AN;
 load_class R;
 name 62463027895;
 parent node62463027895T62463028953;
-constant_power_C 0;
-constant_power_A 7.03503;
+constant_power_C 0.0;
+constant_power_A 7035.03;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -20794,10 +20794,10 @@ phases AN;
 load_class R;
 name 62474207056;
 parent node62474207056T62474207085;
-constant_power_C 0;
-constant_power_A 3.08603;
+constant_power_C 0.0;
+constant_power_A 3086.03;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -20851,10 +20851,10 @@ phases AN;
 load_class R;
 name 62474208243;
 parent node62474208243T62474208138;
-constant_power_C 0;
-constant_power_A 3.20967;
+constant_power_C 0.0;
+constant_power_A 3209.67;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -20862,10 +20862,10 @@ phases AN;
 load_class R;
 name 62474208163;
 parent node62474208243T62474208138;
-constant_power_C 0;
-constant_power_A 1.57708;
+constant_power_C 0.0;
+constant_power_A 1577.08;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -21021,10 +21021,10 @@ phases AN;
 load_class R;
 name 62474207119;
 parent node62474207119T62474207223;
-constant_power_C 0;
-constant_power_A 2.84884;
+constant_power_C 0.0;
+constant_power_A 2848.84;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -21032,10 +21032,10 @@ phases AN;
 load_class R;
 name 62474207263;
 parent node62474207119T62474207223;
-constant_power_C 0;
-constant_power_A 5.43777;
+constant_power_C 0.0;
+constant_power_A 5437.77;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -21097,10 +21097,10 @@ phases CN;
 load_class R;
 name 62474211060;
 parent node62474211060T62463031930;
-constant_power_C 0.936154;
-constant_power_A 0;
+constant_power_C 936.154;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -21108,10 +21108,10 @@ phases CN;
 load_class R;
 name 62463031934;
 parent node62474211060T62463031930;
-constant_power_C 1.2869;
-constant_power_A 0;
+constant_power_C 1286.9;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -21245,10 +21245,10 @@ phases AN;
 load_class R;
 name 62474215045;
 parent node62474215045T62474214083;
-constant_power_C 0;
-constant_power_A 0.239716;
+constant_power_C 0.0;
+constant_power_A 239.716;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -21458,10 +21458,10 @@ phases AN;
 load_class R;
 name 62474213353;
 parent node62474213353T62474213347;
-constant_power_C 0;
-constant_power_A 6.58336;
+constant_power_C 0.0;
+constant_power_A 6583.36;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -21515,10 +21515,10 @@ phases AN;
 load_class R;
 name 62463030909;
 parent node62463030909T62474210056;
-constant_power_C 0;
-constant_power_A 3.6235;
+constant_power_C 0.0;
+constant_power_A 3623.5;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -21526,10 +21526,10 @@ phases AN;
 load_class R;
 name 62474210171;
 parent node62463030909T62474210056;
-constant_power_C 0;
-constant_power_A 3.55032;
+constant_power_C 0.0;
+constant_power_A 3550.32;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -21611,10 +21611,10 @@ phases AN;
 load_class R;
 name 62474212215;
 parent node62474212215T62474212237;
-constant_power_C 0;
-constant_power_A 0.345696;
+constant_power_C 0.0;
+constant_power_A 345.696;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -21668,10 +21668,10 @@ phases AN;
 load_class R;
 name 62474212387;
 parent node62474212387T62474212358;
-constant_power_C 0;
-constant_power_A 2.36183;
+constant_power_C 0.0;
+constant_power_A 2361.83;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -21753,10 +21753,10 @@ phases AN;
 load_class R;
 name 62474211335;
 parent node62474211335T62474211356;
-constant_power_C 0;
-constant_power_A 1.2768;
+constant_power_C 0.0;
+constant_power_A 1276.8;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -21866,10 +21866,10 @@ phases AN;
 load_class R;
 name 62474209432;
 parent node62474209432T62474209464;
-constant_power_C 0;
-constant_power_A 3.0078;
+constant_power_C 0.0;
+constant_power_A 3007.8;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -21951,10 +21951,10 @@ phases AN;
 load_class R;
 name 62474211556;
 parent node62474211556T62474211583;
-constant_power_C 0;
-constant_power_A 1.95305;
+constant_power_C 0.0;
+constant_power_A 1953.05;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -21962,10 +21962,10 @@ phases AN;
 load_class R;
 name 62474211641;
 parent node62474211556T62474211583;
-constant_power_C 0;
-constant_power_A 2.80846;
+constant_power_C 0.0;
+constant_power_A 2808.46;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -22019,10 +22019,10 @@ phases CN;
 load_class R;
 name 62463032835;
 parent node62463032835T62463032849;
-constant_power_C 4.84226;
-constant_power_A 0;
+constant_power_C 4842.26;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object load {
@@ -22030,10 +22030,10 @@ phases CN;
 load_class R;
 name 62463032970;
 parent node62463032835T62463032849;
-constant_power_C 6.33607;
-constant_power_A 0;
+constant_power_C 6336.07;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -22123,10 +22123,10 @@ phases CN;
 load_class R;
 name 62463028720;
 parent node62463028720T62463028740;
-constant_power_C 1.26166;
-constant_power_A 0;
+constant_power_C 1261.66;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object overhead_line {
@@ -22236,10 +22236,10 @@ phases CN;
 load_class R;
 name 62463028401;
 parent node62463028401T62463028430;
-constant_power_C 2.2937;
-constant_power_A 0;
+constant_power_C 2293.7;
+constant_power_A 0.0;
 nominal_voltage 120;
-constant_power_B 0;
+constant_power_B 0.0;
 };
 
 object switch {
@@ -26310,3 +26310,6 @@ nominal_voltage 2400;
 name node62463028401T62463028430;
 };
 
+object voltdump {
+filename Owen-Burlington.VOLTS.csv;
+};

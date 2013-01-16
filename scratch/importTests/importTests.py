@@ -7,6 +7,7 @@ import treeParser as tp
 import milToGridlab
 from pprint import pprint
 import traceback
+import subprocess
 
 filesToTest = [	['ACEC-COLOMA_SUB','ACEC.seq'],
 				['ACEC-Friendship','ACEC.seq'],
@@ -17,14 +18,20 @@ filesToTest = [	['ACEC-COLOMA_SUB','ACEC.seq'],
 
 def testFile(stdName, seqName):
 	try:
-		outGlm = milToGridlab.convert('../../uploads/' + stdName + '.std','../../uploads/' + seqName)
+		outGlmString = milToGridlab.convert('../../uploads/' + stdName + '.std','../../uploads/' + seqName)
+		outGlmString += 'object voltdump {\nfilename ' + stdName + '.VOLTS.csv;\n};'
 		with open(stdName + '.glm','w') as outFile:
-			outFile.write(outGlm)
+			outFile.write(outGlmString)
 		print stdName + ' converted.'
+		proc = subprocess.Popen(['gridlabd','-w', stdName + '.glm'], cwd='.')
+		proc.wait()
 	except:
 		print 'Conversion error! With ' + stdName
 		traceback.print_exc(file=sys.stdout)
 
-# Test all files:
+# Clear and then test all files:
+for fileName in os.listdir('.'):
+	if fileName.endswith('.csv') or fileName.endswith('.glm'):
+		os.remove(fileName)
 for pair in filesToTest:
-	testFile(pair[0],pair[1])
+	testFile(pair[0], pair[1])

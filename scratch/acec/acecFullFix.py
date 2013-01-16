@@ -19,7 +19,7 @@ from pprint import pprint
 
 glm = tp.parse('ACEC-Friendship-AUTOSYNTH.glm')
 
-def fullFix(glm):
+def secondarySystemFix(glm):
 	allLoadKeys = [x for x in glm if 'object' in glm[x] and glm[x]['object']=='load']
 
 	print 'Number of loads (some group on one transformer):'
@@ -74,7 +74,7 @@ def fullFix(glm):
 		configKey = [x for x in glm[key] if type(x) is int].pop()
 		glm[key][configKey]['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
 
-fullFix(glm)
+secondarySystemFix(glm)
 
 # print out
 with open('ACEC-Friendship-Full.glm','w') as outFile:
