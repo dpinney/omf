@@ -33,7 +33,7 @@ nominal_voltage 2400;
 };
 
 object fuse {
-phases ABCN;
+phases ACB;
 from REMBRANDT;
 name RECL_1161;
 current_limit 9999.0 A;
@@ -78,6 +78,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG6689-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG6689-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -92,7 +105,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG6689RECL_1161;
 name PRUG6689;
 to nodePRUG6690PRUG6689;
@@ -137,6 +150,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG6690-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG6690-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -151,7 +177,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG6690PRUG6689;
 name PRUG6690;
 to nodePRUG6691PRUG6690;
@@ -196,6 +222,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG6691-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG6691-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -210,7 +249,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG6691PRUG6690;
 name PRUG6691;
 to nodePRUG6692PRUG6691;
@@ -255,6 +294,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG6692-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG6692-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -269,7 +321,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG6692PRUG6691;
 name PRUG6692;
 to nodePRUG6693PRUG6692;
@@ -314,6 +366,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG6693-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG6693-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -328,7 +393,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG6693PRUG6692;
 name PRUG6693;
 to nodeSWIT_737-APRUG6693;
@@ -336,7 +401,7 @@ length 260.294;
 };
 
 object fuse {
-phases ABCN;
+phases ACB;
 from REMBRANDT;
 name RECL_1162;
 current_limit 9999.0 A;
@@ -381,6 +446,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG3301-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG3301-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -395,7 +473,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG3301RECL_1162;
 name PRUG3301;
 to nodePRUG5000PRUG3301;
@@ -440,6 +518,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG5000-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG5000-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -454,7 +545,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG5000PRUG3301;
 name PRUG5000;
 to nodePRUG3297PRUG5000;
@@ -472,7 +563,46 @@ distance_BC 0.500000;
 distance_AB 0.500000;
 distance_AC 1.000000;
 };
+conductor_A object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG3297-PHASEA;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
+conductor_B object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG3297-PHASEB;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 name PRUG3297-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG3297-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -500,9 +630,9 @@ load_class R;
 name 263-32-311;
 parent node263-32-311PRUG3297;
 constant_power_C 9444.03;
-constant_power_A 0.0;
+constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object underground_line {
@@ -543,6 +673,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG5001-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG5001-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -557,7 +700,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG3297PRUG5000;
 name PRUG5001;
 to nodePRUG5002PRUG5001;
@@ -602,6 +745,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG5002-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG5002-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -616,7 +772,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG5002PRUG5001;
 name PRUG5002;
 to nodePROH16277PRUG5002;
@@ -635,11 +791,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH16277-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -663,11 +827,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH279-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -684,10 +856,10 @@ phases AN;
 load_class R;
 name 263-31-260;
 parent node263-31-260PROH279;
-constant_power_C 0.0;
+constant_power_C 100;
 constant_power_A 10864.8;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object overhead_line {
@@ -702,11 +874,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH16278-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -742,9 +922,48 @@ neutral_resistance 14.872000;
 neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
-name PRUG84-LINECONFIG;
+conductor_B object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG84-PHASEB;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
 };
-phases A;
+name PRUG84-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG84-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
+conductor_C object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG84-PHASEC;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
+};
+phases AN;
 from nodePROH16279PROH16278;
 name PRUG84;
 to node263-30-850PRUG84;
@@ -756,10 +975,10 @@ phases AN;
 load_class R;
 name 263-30-850;
 parent node263-30-850PRUG84;
-constant_power_C 0.0;
+constant_power_C 100;
 constant_power_A 4116.09;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object underground_line {
@@ -800,6 +1019,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG5361-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG5361-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -814,7 +1046,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACBN;
 from nodePROH16277PRUG5002;
 name PRUG5361;
 to nodePROH277PRUG5361;
@@ -833,11 +1065,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH277-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -854,10 +1094,10 @@ phases AN;
 load_class R;
 name 263-30-380;
 parent node263-30-380PROH277;
-constant_power_C 0.0;
+constant_power_C 100;
 constant_power_A 5599.56;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object underground_line {
@@ -898,6 +1138,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG5362-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG5362-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -912,7 +1165,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACBN;
 from nodePROH277PRUG5361;
 name PRUG5362;
 to nodeSWIT_361-BPRUG5362;
@@ -930,6 +1183,19 @@ distance_BC 0.500000;
 distance_AB 0.500000;
 distance_AC 1.000000;
 };
+conductor_A object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG85-PHASEA;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_B object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -944,6 +1210,32 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG85-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG85-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
+conductor_C object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG85-PHASEC;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 };
 phases B;
 from nodePRUG5002PRUG5001;
@@ -957,10 +1249,10 @@ phases BN;
 load_class R;
 name 263-32-310;
 parent node263-32-310PRUG85;
-constant_power_C 0.0;
-constant_power_A 0.0;
+constant_power_C 100;
+constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object underground_line {
@@ -1001,6 +1293,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG3303-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG3303-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -1015,7 +1320,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases AB;
 from nodePRUG5000PRUG3301;
 name PRUG3303;
 to nodePROH16622PRUG3303;
@@ -1033,12 +1338,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH16622-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1069,12 +1382,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH16623-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1097,12 +1418,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH2887-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1119,8 +1448,8 @@ phases BN;
 load_class R;
 name 283-05-120;
 parent node283-05-120PROH2887;
-constant_power_C 0.0;
-constant_power_A 0.0;
+constant_power_C 100;
+constant_power_A 100;
 nominal_voltage 120;
 constant_power_B 835.755;
 };
@@ -1136,12 +1465,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH16624-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1164,12 +1501,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH2886-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1186,10 +1531,10 @@ phases BN;
 load_class R;
 name 263-32-860;
 parent node263-32-860PROH2886;
-constant_power_C 0.0;
-constant_power_A 0.0;
+constant_power_C 100;
+constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object overhead_line {
@@ -1204,15 +1549,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
-resistance 0.185900;
-geometric_mean_radius 0.031300;
+resistance 0;
+geometric_mean_radius 0;
 };
 conductor_B object overhead_line_conductor {
-resistance 0.185900;
-geometric_mean_radius 0.031300;
+resistance 0;
+geometric_mean_radius 0;
 };
 name PROH8542-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1236,11 +1585,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH19454-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1272,11 +1629,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH19455-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1300,11 +1665,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH266-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1321,10 +1694,10 @@ phases AN;
 load_class R;
 name 283-06-131;
 parent node283-06-131PROH266;
-constant_power_C 0.0;
+constant_power_C 100;
 constant_power_A 125.363;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object load {
@@ -1332,10 +1705,10 @@ phases AN;
 load_class R;
 name 283-06-130;
 parent node283-06-131PROH266;
-constant_power_C 0.0;
+constant_power_C 100;
 constant_power_A 3173.78;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object overhead_line {
@@ -1350,11 +1723,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH19456-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1378,11 +1759,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH20016-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1406,11 +1795,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH268-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1427,10 +1824,10 @@ phases AN;
 load_class R;
 name 282-01-180;
 parent node282-01-180PROH268;
-constant_power_C 0.0;
+constant_power_C 100;
 constant_power_A 919.33;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object overhead_line {
@@ -1445,11 +1842,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH20017-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1473,11 +1878,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH20018-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1513,9 +1926,48 @@ neutral_resistance 14.872000;
 neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
-name PRUG81-LINECONFIG;
+conductor_B object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG81-PHASEB;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
 };
-phases A;
+name PRUG81-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG81-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
+conductor_C object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG81-PHASEC;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
+};
+phases AN;
 from nodePRUG81PROH20018;
 name PRUG81;
 to node282-01-680PRUG81;
@@ -1527,10 +1979,10 @@ phases AN;
 load_class R;
 name 282-01-680;
 parent node282-01-680PRUG81;
-constant_power_C 0.0;
+constant_power_C 100;
 constant_power_A 10279.8;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object overhead_line {
@@ -1545,11 +1997,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH20019-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1573,11 +2033,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH20020-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1601,11 +2069,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH270-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1622,10 +2098,10 @@ phases AN;
 load_class R;
 name 283-06-720;
 parent node283-06-720PROH270;
-constant_power_C 0.0;
+constant_power_C 100;
 constant_power_A 5683.13;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object overhead_line {
@@ -1640,11 +2116,19 @@ distance_AB 2.5;
 distance_BN 5.656854;
 };
 conductor_A object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_B object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
 name PROH269-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1661,10 +2145,10 @@ phases AN;
 load_class R;
 name 283-06-310;
 parent node283-06-310PROH269;
-constant_power_C 0.0;
+constant_power_C 100;
 constant_power_A 2705.76;
 nominal_voltage 120;
-constant_power_B 0.0;
+constant_power_B 100;
 };
 
 object overhead_line {
@@ -1678,12 +2162,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH16513-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1714,12 +2206,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH16514-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1742,12 +2242,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH16515-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1770,6 +2278,19 @@ distance_BC 0.500000;
 distance_AB 0.500000;
 distance_AC 1.000000;
 };
+conductor_A object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG834-PHASEA;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_B object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -1784,8 +2305,34 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG834-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG834-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
 };
-phases B;
+conductor_C object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG834-PHASEC;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
+};
+phases BN;
 from nodePRUG834PROH16515;
 name PRUG834;
 to node283-08-710PRUG834;
@@ -1797,8 +2344,8 @@ phases BN;
 load_class R;
 name 283-08-710;
 parent node283-08-710PRUG834;
-constant_power_C 0.0;
-constant_power_A 0.0;
+constant_power_C 100;
+constant_power_A 100;
 nominal_voltage 120;
 constant_power_B 8023.25;
 };
@@ -1814,12 +2361,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH16516-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1836,8 +2391,8 @@ phases BN;
 load_class R;
 name 283-17-120;
 parent node283-17-120PROH16516;
-constant_power_C 0.0;
-constant_power_A 0.0;
+constant_power_C 100;
+constant_power_A 100;
 nominal_voltage 120;
 constant_power_B 668.604;
 };
@@ -1853,12 +2408,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH11498-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1881,12 +2444,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH2878-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1903,8 +2474,8 @@ phases BN;
 load_class R;
 name 283-08-120;
 parent node283-08-120PROH2878;
-constant_power_C 0.0;
-constant_power_A 0.0;
+constant_power_C 100;
+constant_power_A 100;
 nominal_voltage 120;
 constant_power_B 2686.95;
 };
@@ -1920,12 +2491,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH11499-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1948,12 +2527,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH2877-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -1970,10 +2557,10 @@ phases BN;
 load_class R;
 name 283-05-830;
 parent node283-05-830PROH2877;
-constant_power_C 0.0;
-constant_power_A 0.0;
+constant_power_C 100;
+constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2.08939;
+constant_power_B 100;
 };
 
 object overhead_line {
@@ -1987,12 +2574,20 @@ distance_AN 4.272002;
 distance_AB 2.5;
 distance_BN 5.656854;
 };
-conductor_B object overhead_line_conductor {
+conductor_A object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
+conductor_B object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
 name PROH11500-LINECONFIG;
 conductor_N object overhead_line_conductor {
+resistance 0;
+geometric_mean_radius 0;
+};
+conductor_C object overhead_line_conductor {
 resistance 0.185900;
 geometric_mean_radius 0.031300;
 };
@@ -2009,14 +2604,14 @@ phases BN;
 load_class R;
 name 283-08-170;
 parent node283-08-170PROH11500;
-constant_power_C 0.0;
-constant_power_A 0.0;
+constant_power_C 100;
+constant_power_A 100;
 nominal_voltage 120;
 constant_power_B 3468.38;
 };
 
 object fuse {
-phases ABCN;
+phases ACB;
 from REMBRANDT;
 name RECL_1160;
 current_limit 9999.0 A;
@@ -2061,6 +2656,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG4190-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG4190-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -2075,7 +2683,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG4190RECL_1160;
 name PRUG4190;
 to nodePRUG4176PRUG4190;
@@ -2120,6 +2728,19 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 name PRUG4176-LINECONFIG;
+conductor_N object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG4176-PHASEN;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
 conductor_C object underground_line_conductor {
 conductor_gmr 0.008830;
 conductor_resistance 1.540000;
@@ -2134,7 +2755,7 @@ neutral_diameter 0.064000;
 shield_gmr 0.000000;
 };
 };
-phases ABC;
+phases ACB;
 from nodePRUG4176PRUG4190;
 name PRUG4176;
 to node263-32-710PRUG4176;
@@ -2174,7 +2795,7 @@ voltage_set_high 2350.0;
 };
 
 object fuse {
-phases ABCN;
+phases ACB;
 from REMBRANDT;
 name RECL_993;
 current_limit 9999.0 A;

@@ -132,9 +132,9 @@ def convert(stdPath,seqPath):
 							}
 			consumer['load_class'] = loadClassMap[int(consList[23])]
 			#TODO: support kVars.
-			consumer['constant_power_A'] = str(float(consList[12])*1000)
-			consumer['constant_power_B'] = str(float(consList[13])*1000)
-			consumer['constant_power_C'] = str(float(consList[14])*1000)
+			consumer['constant_power_A'] = ('100' if float(consList[12])*1000<100 else str(float(consList[12])*1000))
+			consumer['constant_power_B'] = ('100' if float(consList[13])*1000<100 else str(float(consList[13])*1000))
+			consumer['constant_power_C'] = ('100' if float(consList[14])*1000<100 else str(float(consList[14])*1000))
 			consumer['nominal_voltage'] = '120'
 			return consumer
 
@@ -181,7 +181,7 @@ def convert(stdPath,seqPath):
 			overhead = convertGenericObject(ohLineList)
 			# TODO: be smarter about multiple neutrals.
 			overhead['phases'] = ohLineList[2] + ('N' if ohLineList[33]=='1' else '')
-			overhead['length'] = ohLineList[12]
+			overhead['length'] = ('10' if float(ohLineList[12])<10 else ohLineList[12])
 			overhead[1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
 							'name': overhead['name'] + '-LINECONFIG'}
 			overhead[1][2] = {	'omfEmbeddedConfigObject' : 'spacing object line_spacing',
@@ -194,19 +194,26 @@ def convert(stdPath,seqPath):
 								'distance_AC': '4.5'}
 			eqdbIndex = {'A':8,'B':9,'C':10,'N':11}
 			condIndex = {'A':3,'B':4,'C':5,'N':6}
-			for letter in overhead['phases']:
-				res = statsByName(ohLineList[eqdbIndex[letter]])[5]
-				geoRad = statsByName(ohLineList[eqdbIndex[letter]])[6]
+			#TODO: make this in overhead['phases'], or don't, not like I care.
+			for letter in 'ABCN':
+				lineIndex = eqdbIndex[letter]
+				hardware = statsByName(ohLineList[lineIndex])
+				if hardware is None:
+					res = '0.185900'
+					geoRad = '0.031300'
+				else:
+					res = hardware[5]
+					geoRad = hardware[6]
 				overhead[1][condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object overhead_line_conductor',
-													'resistance': ('0.185900' if res is '0' else res),
-													'geometric_mean_radius': ('0.031300' if geoRad is '0' else geoRad)}
+													'resistance': res,
+													'geometric_mean_radius': geoRad}
 			return overhead
 
 		def convertUgLine(ugLineList):
 			underground = convertGenericObject(ugLineList)
 			# TODO: be smarter about multiple neutrals.
 			underground['phases'] = ugLineList[2] + ('N' if ugLineList[33]=='1' else '')
-			underground['length'] = ugLineList[12]
+			underground['length'] = ('10' if float(ugLineList[12])<10 else ugLineList[12])
 			underground[1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
 								'name': underground['name'] + '-LINECONFIG'}
 			underground[1][2] = {	'omfEmbeddedConfigObject' : 'spacing object line_spacing',
@@ -219,7 +226,8 @@ def convert(stdPath,seqPath):
 									'distance_BN': '0.000000'}
 			#TODO: actually get conductor values!
 			condIndex = {'A':3,'B':4,'C':5,'N':6}
-			for letter in underground['phases']:
+			#TODO: make this in underground['phases'], or don't, not like I care.
+			for letter in 'ABCN':
 				underground[1][condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
 														'name':underground['name'] + '-PHASE' + letter,
 														'conductor_resistance': '1.540000',
@@ -386,9 +394,10 @@ def convert(stdPath,seqPath):
 	glmTree = {convertedComponents.index(x):x for x in convertedComponents}
 
 	#TODO: REMOVE THIS DISASTER HERE AND FIGURE OUT WHY SOME LINKS ARE MALFORMED
-	print 'Components removed because they have connectivity on only one side:'
+	print 'Components removed because they have totally busted connectivity:'
 	for key in glmTree.keys():
-		if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
+		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
+		if glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
 			print glmTree[key]
 			del glmTree[key]
 
@@ -416,12 +425,55 @@ def convert(stdPath,seqPath):
 		else:
 			return False
 
-	#TODO: enable fix link phase information:
-	# for key in glmTree:
-	# 	fixLinkPhases(glmTree[key])
+	for key in glmTree:
+		fixLinkPhases(glmTree[key])
 
+	def secondarySystemFix(glm):
+		allLoadKeys = [x for x in glm if 'object' in glm[x] and glm[x]['object']=='load']
+		allNamesNodesOnLoads = list(set([glm[key]['parent'] for key in allLoadKeys]))
+		allNodesOnLoadsKeys = [x for x in glm if 'name' in glm[x] and glm[x]['name'] in allNamesNodesOnLoads]
+		allTransKeys = [x for x in glm if 'object' in glm[x] and glm[x]['object'] == 'transformer']
+
+		# Fix da nodes.
+		# {'phases': 'BN', 'object': 'node', 'nominal_voltage': '2400', 'name': 'nodeS1806-32-065T14102'}
+		# object triplex_meter { phases BS; nominal_voltage 120; };
+		for nodeKey in allNodesOnLoadsKeys:
+			newDict = {}
+			newDict['object'] = 'triplex_meter'
+			newDict['name'] = glm[nodeKey]['name']
+			newDict['phases'] = sorted(glm[nodeKey]['phases'])[0] + 'S'
+			newDict['nominal_voltage'] = '120'
+			glm[nodeKey] = newDict
+
+		# Fix da loads.
+		#{'phases': 'BN', 'object': 'load', 'name': 'S1806-32-065', 'parent': 'nodeS1806-32-065T14102', 'load_class': 'R', 'constant_power_C': '0', 'constant_power_B': '1.06969', 'constant_power_A': '0', 'nominal_voltage': '120'}
+		for loadKey in allLoadKeys:
+			newDict = {}
+			newDict['object'] = 'triplex_node'
+			newDict['name'] = glm[loadKey]['name']
+			newDict['phases'] = sorted(glm[loadKey]['phases'])[0] + 'S'
+			a = glm[loadKey]['constant_power_A']
+			b = glm[loadKey]['constant_power_B']
+			c = glm[loadKey]['constant_power_C']
+			powList = [x for x in [a,b,c] if x!='0' and x!='0.0']
+			newDict['power_12'] = ('0' if len(powList)==0 else powList.pop())
+			newDict['parent'] = glm[loadKey]['parent']
+			newDict['nominal_voltage'] = '120'
+			glm[loadKey] = newDict
+
+
+		# Gotta fix the transformer phases too...
+		for key in allTransKeys:
+			fromName = glm[key]['from']
+			toName = glm[key]['to']
+			fromToPhases = [glm[x]['phases'] for x in glm if 'name' in glm[x] and glm[x]['name'] in [fromName, toName]]
+			glm[key]['phases'] = set('ABC').intersection(*map(set, fromToPhases)).pop() + 'S'
+			configKey = [x for x in glm[key] if type(x) is int].pop()
+			glm[key][configKey]['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
+
+	# Fixing the secondary (triplex) system.
 	#TODO: fix secondary system here.
-
+	# secondarySystemFix(glmTree)
 
 	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
 						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\nmodule climate;\n' + \
