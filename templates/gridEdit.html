@@ -104,6 +104,10 @@
           <td><input id='frictionBox' type='text'></td>
         </tr>
         <tr>
+          <td>Link Strength</td>
+          <td><input id='linkStrengthBox' type='text'></td>
+        </tr>
+        <tr>
           <td></td>
           <td style='padding-top:10px'><button onclick='layoutMenuApply()'>Apply</button></td>
         </tr>
@@ -682,12 +686,14 @@ function layoutMenuInit() {
   gebi('gravityBox').value = force.gravity()
   gebi('thetaBox').value = force.theta()
   gebi('frictionBox').value = force.friction()
+  gebi('linkStrengthBox').value = 1
 }
 
 function layoutMenuApply() {
   force.gravity(gebi('gravityBox').value)
   force.theta(gebi('thetaBox').value)
   force.friction(gebi('frictionBox').value)
+  force.linkStrength(gebi('linkStrengthBox').value)
   force.start()
 }
 

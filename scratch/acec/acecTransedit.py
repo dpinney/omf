@@ -1,5 +1,12 @@
 #!/usr/bin/env python
 
+'''
+
+Goes through the ACEC Friendship feeder and figures out where all the loads and transformers are.
+We're looking for end-of-line transformers that are connected in non-EOL locations.
+
+'''
+
 import os
 import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.getcwd())))
