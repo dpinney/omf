@@ -34,6 +34,9 @@ def convert(stdPath,seqPath):
 	hardwareStats = csvToArray(seqPath)[1:]
 	# We dropped the first rows which are metadata (n.b. there are no headers)
 
+	# The number of allowable sub objects:
+	subObCount = 100
+
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
 
@@ -178,13 +181,14 @@ def convert(stdPath,seqPath):
 			return capacitor
 
 		def convertOhLine(ohLineList):
+			myIndex = components.index(objectList)*subObCount
 			overhead = convertGenericObject(ohLineList)
 			# TODO: be smarter about multiple neutrals.
 			overhead['phases'] = ohLineList[2] + ('N' if ohLineList[33]=='1' else '')
 			overhead['length'] = ('10' if float(ohLineList[12])<10 else ohLineList[12])
-			overhead[1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
+			overhead[myIndex+1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
 							'name': overhead['name'] + '-LINECONFIG'}
-			overhead[1][2] = {	'omfEmbeddedConfigObject' : 'spacing object line_spacing',
+			overhead[myIndex+1][myIndex+2] = {	'omfEmbeddedConfigObject' : 'spacing object line_spacing',
 								'name': overhead['name'] + '-LINESPACING',
 								'distance_BC': '7.0',
 								'distance_CN': '5.0',
@@ -194,7 +198,6 @@ def convert(stdPath,seqPath):
 								'distance_AC': '4.5'}
 			eqdbIndex = {'A':8,'B':9,'C':10,'N':11}
 			condIndex = {'A':3,'B':4,'C':5,'N':6}
-			#TODO: make this in overhead['phases'], or don't, not like I care.
 			for letter in 'ABCN':
 				lineIndex = eqdbIndex[letter]
 				hardware = statsByName(ohLineList[lineIndex])
@@ -204,19 +207,20 @@ def convert(stdPath,seqPath):
 				else:
 					res = hardware[5]
 					geoRad = hardware[6]
-				overhead[1][condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object overhead_line_conductor',
-													'resistance': res,
-													'geometric_mean_radius': geoRad}
+				overhead[myIndex+1][myIndex+condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object overhead_line_conductor',
+															'resistance': res,
+															'geometric_mean_radius': geoRad}
 			return overhead
 
 		def convertUgLine(ugLineList):
+			myIndex = components.index(objectList)*subObCount
 			underground = convertGenericObject(ugLineList)
 			# TODO: be smarter about multiple neutrals.
 			underground['phases'] = ugLineList[2] + ('N' if ugLineList[33]=='1' else '')
 			underground['length'] = ('10' if float(ugLineList[12])<10 else ugLineList[12])
-			underground[1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
+			underground[myIndex+1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
 								'name': underground['name'] + '-LINECONFIG'}
-			underground[1][2] = {	'omfEmbeddedConfigObject' : 'spacing object line_spacing',
+			underground[myIndex+1][myIndex+2] = {	'omfEmbeddedConfigObject' : 'spacing object line_spacing',
 									'name':underground['name'] + '-LINESPACING',
 									'distance_AN': '0.000000',
 									'distance_CN': '0.000000',
@@ -226,70 +230,71 @@ def convert(stdPath,seqPath):
 									'distance_BN': '0.000000'}
 			#TODO: actually get conductor values!
 			condIndex = {'A':3,'B':4,'C':5,'N':6}
-			#TODO: make this in underground['phases'], or don't, not like I care.
 			for letter in 'ABCN':
-				underground[1][condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
-														'name':underground['name'] + '-PHASE' + letter,
-														'conductor_resistance': '1.540000',
-														'shield_resistance': '0.000000',
-														'neutral_gmr': '0.002080',
-														'outer_diameter': '0.980000',
-														'neutral_strands': '6.000000',
-														'neutral_resistance': '14.872000',
-														'neutral_diameter': '0.064000',
-														'conductor_diameter': '0.292000',
-														'shield_gmr': '0.000000',
-														'conductor_gmr': '0.008830'}
+				underground[myIndex+1][myIndex+condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
+																		'name':underground['name'] + '-PHASE' + letter,
+																		'conductor_resistance': '1.540000',
+																		'shield_resistance': '0.000000',
+																		'neutral_gmr': '0.002080',
+																		'outer_diameter': '0.980000',
+																		'neutral_strands': '6.000000',
+																		'neutral_resistance': '14.872000',
+																		'neutral_diameter': '0.064000',
+																		'conductor_diameter': '0.292000',
+																		'shield_gmr': '0.000000',
+																		'conductor_gmr': '0.008830'}
 			return underground
 
 		def convertRegulator(regList):
+			myIndex = components.index(objectList)*subObCount
 			regulator = convertGenericObject(regList)
 			regulator['phases'] = regList[2]
 			#TODO: figure out whether I'll run into trouble if the following integer isn't unique:
-			regulator[1] = {}
-			regulator[1]['name'] = regulator['name'] + '-CONFIG'
-			regulator[1]['omfEmbeddedConfigObject'] = 'configuration object regulator_configuration'
+			regulator[myIndex+1] = {}
+			regulator[myIndex+1]['name'] = regulator['name'] + '-CONFIG'
+			regulator[myIndex+1]['omfEmbeddedConfigObject'] = 'configuration object regulator_configuration'
 			#TODO: change these from just default values:
-			regulator[1]['connect_type'] = '1'
-			regulator[1]['band_center'] = '2401'
-			regulator[1]['band_width'] = '50'
-			regulator[1]['time_delay'] = '30.0'
-			regulator[1]['raise_taps'] = '16'
-			regulator[1]['lower_taps'] = '16'
-			regulator[1]['CT_phase'] = 'ABC'
-			regulator[1]['PT_phase'] = 'ABC'
-			regulator[1]['regulation'] = '0.10'
-			regulator[1]['Control'] = 'MANUAL'
-			regulator[1]['Type'] = 'A'
-			regulator[1]['tap_pos_A'] = '1'
-			regulator[1]['tap_pos_B'] = '1'
-			regulator[1]['tap_pos_C'] = '1'
+			regulator[myIndex+1]['connect_type'] = '1'
+			regulator[myIndex+1]['band_center'] = '2401'
+			regulator[myIndex+1]['band_width'] = '50'
+			regulator[myIndex+1]['time_delay'] = '30.0'
+			regulator[myIndex+1]['raise_taps'] = '16'
+			regulator[myIndex+1]['lower_taps'] = '16'
+			regulator[myIndex+1]['CT_phase'] = 'ABC'
+			regulator[myIndex+1]['PT_phase'] = 'ABC'
+			regulator[myIndex+1]['regulation'] = '0.10'
+			regulator[myIndex+1]['Control'] = 'MANUAL'
+			regulator[myIndex+1]['Type'] = 'A'
+			regulator[myIndex+1]['tap_pos_A'] = '1'
+			regulator[myIndex+1]['tap_pos_B'] = '1'
+			regulator[myIndex+1]['tap_pos_C'] = '1'
 			return regulator
 
 		def convertTransformer(transList):
+			myIndex = components.index(objectList)*subObCount
 			transformer = convertGenericObject(transList)
 			transformer['phases'] = transList[2]+ 'N'
 			# transformer['nominal_voltage'] = '2400'
-			transformer[1] = {}
-			transformer[1]['name'] = transformer['name'] + '-CONFIG'
-			transformer[1]['omfEmbeddedConfigObject'] = 'configuration object transformer_configuration'
-			transformer[1]['primary_voltage'] = str(float(transList[10])*1000)
-			transformer[1]['secondary_voltage'] = str(float(transList[13])*1000)
+			transformer[myIndex+1] = {}
+			transformer[myIndex+1]['name'] = transformer['name'] + '-CONFIG'
+			transformer[myIndex+1]['omfEmbeddedConfigObject'] = 'configuration object transformer_configuration'
+			transformer[myIndex+1]['primary_voltage'] = str(float(transList[10])*1000)
+			transformer[myIndex+1]['secondary_voltage'] = str(float(transList[13])*1000)
 			#NOTE: seems to be what PNNL uses everywhere:
-			transformer[1]['shunt_impedance'] = '10000+10000j'
+			transformer[myIndex+1]['shunt_impedance'] = '10000+10000j'
 			# NOTE: Windmil doesn't export any information on install type, but Gridlab only puts it in there for info reasons.
 			# transformer[1]['install_type'] = 'POLETOP'
 			transPhases = transList[2]
 			if 1 == len(transPhases):
-				transformer[1]['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
+				transformer[myIndex+1]['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
 			else:
 				#TODO: support other types of windings (D-D, D-Y, etc.)
-				transformer[1]['connect_type'] = 'WYE_WYE'
+				transformer[myIndex+1]['connect_type'] = 'WYE_WYE'
 			#TODO: change these from just default values:
-			transformer[1]['powerA_rating'] = '50 kVA'
-			transformer[1]['powerB_rating'] = '50 kVA'
-			transformer[1]['powerC_rating'] = '50 kVA'
-			transformer[1]['impedance'] = '0.00033+0.0022j'
+			transformer[myIndex+1]['powerA_rating'] = '50 kVA'
+			transformer[myIndex+1]['powerB_rating'] = '50 kVA'
+			transformer[myIndex+1]['powerC_rating'] = '50 kVA'
+			transformer[myIndex+1]['impedance'] = '0.00033+0.0022j'
 			#TODO: and change these, which were added to make the transformer work on multiple phases: 
 			return transformer
 
@@ -391,7 +396,7 @@ def convert(stdPath,seqPath):
 		fixCompConnectivity(comp)
 
 	# Go to a dictionary format so we have a valid glmTree:
-	glmTree = {convertedComponents.index(x):x for x in convertedComponents}
+	glmTree = {convertedComponents.index(x)*subObCount:x for x in convertedComponents}
 
 	#TODO: REMOVE THIS DISASTER HERE AND FIGURE OUT WHY SOME LINKS ARE MALFORMED
 	print 'Components removed because they have totally busted connectivity:'
@@ -494,17 +499,103 @@ def convert(stdPath,seqPath):
 			glm[key][configKey]['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
 
 	# Fixing the secondary (triplex) system.
-	#TODO: fix secondary system here.
 	secondarySystemFix(glmTree)
+
+	def dedupGlm(compName, glmRef):
+		'''
+		Assume compName is transformer_configuration
+		1. pull out a list of all transformer_configuration dicts.
+		2. process to make redundant ones into tuples
+		3. go through the list backwards and collapse chains of references. or fold carefully until we can't fold any more.
+		4. actually replace the names on other objects and then delete the tuples.
+		'''
+		def isSameMinusName(x,y):
+			newX = {val:x[val] for val in x if val != 'name'}
+			newY = {val:y[val] for val in y if val != 'name'}
+			return newX==newY
+		def dupToTup(inList):
+			# Go through a list of components, and given two identicals (up to name) in a row, replace the first one with (name1, name2).
+			for i in xrange(0,len(inList)-1):
+				if isSameMinusName(inList[i], inList[i+1]):
+					inList[i] = (inList[i]['name'], inList[i+1]['name'])
+				else:
+					pass
+		def dechain(tupleList):
+			# Go backwards through a list of tuples and change e.g. (1,2),(2,3),(3,4) into (1,4),(2,4),(3,4).
+			for i in xrange(len(tupleList)-1,0,-1):
+				if tupleList[i][0] == tupleList[i-1][1]:
+					tupleList[i-1] = (tupleList[i-1][0], tupleList[i][1])
+				else:
+					pass
+
+		# sort the components, ignoring their names:
+		compList = sorted([glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object']==compName], key=lambda x:{val:x[val] for val in x if val != 'name'})
+
+		dupToTup(compList)
+
+		nameMaps = [x for x in compList if type(x) is tuple]
+		realConfigs = [x for x in compList if type(x) is dict]
+
+		dechain(nameMaps)
+
+		#Debug: print the amount of collapse:
+		# print 'WORKING ON ' + compName
+		# print 'Mappings:'
+		# print len(nameMaps)
+		# print 'Real configs:'
+		# print len(realConfigs)
+		# print 'Total:'
+		# print len(nameMaps) + len(realConfigs)
+
+		nameDictMap = {x[0]:x[1] for x in nameMaps}
+
+		# Killing duplicate objects
+		iterKeys = glmRef.keys()
+		for x in iterKeys:
+			if 'name' in glmRef[x] and glmRef[x]['name'] in nameDictMap.keys():
+				del glmRef[x]
+
+		# Rewiring all objects
+		iterKeys = glmRef.keys()
+		if compName == 'transformer_configuration': 
+			transformers = [glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object'] == 'transformer']
+			for tranny in transformers:
+				if tranny['configuration'] in nameDictMap.keys(): tranny['configuration'] = nameDictMap[tranny['configuration']]
+		elif compName == 'regulator_configuration': 
+			regulators = [glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object'] == 'regulator']
+			for reggy in regulators:
+				if reggy['configuration'] in nameDictMap.keys(): reggy['configuration'] = nameDictMap[reggy['configuration']]
+		elif compName == 'line_spacing': 
+			lineConfigs = [glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object'] == 'line_configuration']
+			for config in lineConfigs:
+				if config['spacing'] in nameDictMap.keys(): config['spacing'] = nameDictMap[config['spacing']]
+		elif compName == 'overhead_line_conductor' or compName == 'underground_line_conductor': 
+			lineConfigs = [glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object'] == 'line_configuration']
+			for config in lineConfigs:
+				if config['conductor_A'] in nameDictMap.keys(): config['conductor_A'] = nameDictMap[config['conductor_A']]
+				if config['conductor_B'] in nameDictMap.keys(): config['conductor_B'] = nameDictMap[config['conductor_B']]
+				if config['conductor_C'] in nameDictMap.keys(): config['conductor_C'] = nameDictMap[config['conductor_C']]
+				if config['conductor_N'] in nameDictMap.keys(): config['conductor_N'] = nameDictMap[config['conductor_N']]
+		elif compName == 'line_configuration': 
+			lines = [glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object'] in ['overhead_line','underground_line']]
+			for line in lines:
+				if line['configuration'] in nameDictMap.keys(): line['configuration'] = nameDictMap[line['configuration']]
+
+	# Fully disembed and remove duplicate configuration objects:
+	treeParser.fullyDeEmbed(glmTree)
+	dedupGlm('transformer_configuration', glmTree)
+	dedupGlm('regulator_configuration', glmTree)
+	dedupGlm('line_spacing', glmTree)
+	dedupGlm('overhead_line_conductor', glmTree)
+	dedupGlm('underground_line_conductor', glmTree)
+	# NOTE: This last dedup has to come last, because it relies on doing conductors and spacings first!
+	dedupGlm('line_configuration', glmTree)
 
 	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
 						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\nmodule climate;\n' + \
 						'module residential {\nimplicit_enduses NONE;\n};\n\n' + \
 						'module powerflow {\nsolver_method FBS;\nNR_iteration_limit 50;\n};\n\n' + \
 						'object climate {\nname Climate;\ninterpolate QUADRATIC;\ntmyfile climate.tmy2;\n};\n\n'
-
-	# TODO: de-embed and factor out common configurations here?
-	# treeParser.fullyDeEmbed(glmTree)
 
 	# Throw some headers on that:
 	outGlm = genericHeaders + treeParser.sortedWrite(glmTree)

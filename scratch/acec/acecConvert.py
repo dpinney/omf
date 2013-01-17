@@ -13,5 +13,5 @@ from pprint import pprint
 
 outGlm = milToGridlab.convert('../../uploads/ACEC-Friendship.std','../../uploads/ACEC.seq')
 outGlm += 'object voltdump {\nfilename output_voltage.csv;\n};'
-with open('ACEC-Friendship-AUTOSYNTH.glm','w') as outFile:
+with open('ACEC-Friendship-NEOSYNTH.glm','w') as outFile:
 	outFile.write(outGlm)
