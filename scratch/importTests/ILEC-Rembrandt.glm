@@ -29,7 +29,7 @@ object node {
 phases ABCN;
 name REMBRANDT;
 bustype SWING;
-nominal_voltage 2400;
+nominal_voltage 7200.0;
 };
 
 object fuse {

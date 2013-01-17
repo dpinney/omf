@@ -29,7 +29,7 @@ object node {
 phases ABCN;
 name BURLINGTON;
 bustype SWING;
-nominal_voltage 2400;
+nominal_voltage 7200.0;
 };
 
 object overhead_line {
@@ -592,21 +592,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246302788020367;
 name T62463027880;
 to node62463027798T62463027880;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463027798;
 parent node62463027798T62463027880;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 698.961;
 };
 
 object overhead_line {
@@ -809,32 +806,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246302377520130;
 name T62463023775;
 to node62463024800T62463023775;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463024800;
 parent node62463024800T62463023775;
-constant_power_C 100;
-constant_power_A 6073.65;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463023758;
 parent node62463024800T62463023775;
-constant_power_C 100;
-constant_power_A 880.641;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -885,21 +876,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246302267620050;
 name T62463022676;
 to node62463022720T62463022676;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463022720;
 parent node62463022720T62463022676;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 4547.03;
 };
 
 object overhead_line {
@@ -950,21 +938,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246302166319663;
 name T62463021663;
 to node62463021692T62463021663;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62463021692;
 parent node62463021692T62463021663;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -1015,21 +1000,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246302067019935;
 name T62463020670;
 to node62463020586T62463020670;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463020586;
 parent node62463020586T62463020670;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 4163.49;
 };
 
 object overhead_line {
@@ -1116,21 +1098,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301941419852;
 name T62463019414;
 to node62463019437T62463019414;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463019437;
 parent node62463019437T62463019414;
-constant_power_C 100;
-constant_power_A 5576.55;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -1225,21 +1204,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246301946719851;
 name T62463019467;
 to node62463019498T62463019467;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1519.04;
 name 62463019498;
 parent node62463019498T62463019467;
-constant_power_C 1519.04;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -1406,21 +1382,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246302228919964;
 name T62463022289;
 to node62463022298T62463022289;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1655.3;
 name 62463022298;
 parent node62463022298T62463022289;
-constant_power_C 1655.3;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -1507,21 +1480,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246302425720132;
 name T62463024257;
 to node62463025237T62463024257;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 10133.7;
 name 62463025237;
 parent node62463025237T62463024257;
-constant_power_C 10133.7;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -1616,21 +1586,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301747919770;
 name T62463017479;
 to node62463018503T62463017479;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463018503;
 parent node62463018503T62463017479;
-constant_power_C 100;
-constant_power_A 6338.6;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -1681,32 +1648,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301745119750;
 name T62463017451;
 to node62463017349T62463017451;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463017349;
 parent node62463017349T62463017451;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463017481;
 parent node62463017349T62463017451;
-constant_power_C 100;
-constant_power_A 3489.76;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -1757,32 +1718,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301555719583;
 name T62463015557;
 to node62463016405T62463015557;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463016405;
 parent node62463016405T62463015557;
-constant_power_C 100;
-constant_power_A 4206.38;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463014593;
 parent node62463016405T62463015557;
-constant_power_C 100;
-constant_power_A 5099.64;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -1833,21 +1788,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301357619342;
 name T62463013576;
 to node62463013691T62463013576;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463013691;
 parent node62463013691T62463013576;
-constant_power_C 100;
-constant_power_A 156.446;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -1898,21 +1850,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301254019399;
 name T62463012540;
 to node62463012543T62463012540;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463012543;
 parent node62463012543T62463012540;
-constant_power_C 100;
-constant_power_A 7224.28;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -1999,32 +1948,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301473419483;
 name T62463014734;
 to node62463014628T62463014734;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463014628;
 parent node62463014628T62463014734;
-constant_power_C 100;
-constant_power_A 1360.07;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463014757;
 parent node62463014628T62463014734;
-constant_power_C 100;
-constant_power_A 4811.98;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2075,21 +2018,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301373719474;
 name T62463013737;
 to node62463013707T62463013737;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463013707;
 parent node62463013707T62463013737;
-constant_power_C 100;
-constant_power_A 3679.01;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2140,21 +2080,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301683718573;
 name T62463016837;
 to node62463016900T62463016837;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463016900;
 parent node62463016900T62463016837;
-constant_power_C 100;
-constant_power_A 6366.35;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2205,32 +2142,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247419602319688;
 name T62474196023;
 to node62474195011T62474196023;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474195011;
 parent node62474195011T62474196023;
-constant_power_C 100;
-constant_power_A 4970.95;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463016996;
 parent node62474195011T62474196023;
-constant_power_C 100;
-constant_power_A 7022.42;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2281,21 +2212,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247419610319558;
 name T62474196103;
 to node62474195151T62474196103;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474195151;
 parent node62474195151T62474196103;
-constant_power_C 100;
-constant_power_A 5793.56;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2346,32 +2274,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247419621319560;
 name T62474196213;
 to node62474195268T62474196213;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474195268;
 parent node62474195268T62474196213;
-constant_power_C 100;
-constant_power_A 5563.93;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474195267;
 parent node62474195268T62474196213;
-constant_power_C 100;
-constant_power_A 116.073;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2422,32 +2344,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247419635319683;
 name T62474196353;
 to node62474196319T62474196353;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474196319;
 parent node62474196319T62474196353;
-constant_power_C 100;
-constant_power_A 1635.12;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474197334;
 parent node62474196319T62474196353;
-constant_power_C 100;
-constant_power_A 9003.23;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2498,21 +2414,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247419721519682;
 name T62474197215;
 to node62474197221T62474197215;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474197221;
 parent node62474197221T62474197215;
-constant_power_C 100;
-constant_power_A 3885.92;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2563,21 +2476,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247419710519559;
 name T62474197105;
 to node62474196191T62474197105;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474196191;
 parent node62474196191T62474197105;
-constant_power_C 100;
-constant_power_A 4279.56;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2628,21 +2538,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301663418572;
 name T62463016634;
 to node62463016539T62463016634;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463016539;
 parent node62463016539T62463016634;
-constant_power_C 100;
-constant_power_A 6548.03;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2693,21 +2600,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246301824919815;
 name T62463018249;
 to node62463018228T62463018249;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463018228;
 parent node62463018228T62463018249;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1203.63;
 };
 
 object overhead_line {
@@ -2802,21 +2706,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246301925319563;
 name T62463019253;
 to node62463019285T62463019253;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4534.42;
 name 62463019285;
 parent node62463019285T62463019253;
-constant_power_C 4534.42;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2867,21 +2768,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246302120019237;
 name T62463021200;
 to node62463021167T62463021200;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3757.23;
 name 62463021167;
 parent node62463021167T62463021200;
-constant_power_C 3757.23;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -2968,21 +2866,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246301704519748;
 name T62463017045;
 to node62463017062T62463017045;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463017062;
 parent node62463017062T62463017045;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2336.6;
 };
 
 object overhead_line {
@@ -3077,21 +2972,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301607719714;
 name T62463016077;
 to node62463016038T62463016077;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463016038;
 parent node62463016038T62463016077;
-constant_power_C 100;
-constant_power_A 2397.16;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -3178,21 +3070,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301405019507;
 name T62463014050;
 to node62463074975T62463014050;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463074975;
 parent node62463074975T62463014050;
-constant_power_C 100;
-constant_power_A 3570.51;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -3243,32 +3132,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246301620119561;
 name T62463016201;
 to node62463016251T62463016201;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463016251;
 parent node62463016251T62463016201;
-constant_power_C 100;
-constant_power_A 2669.68;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463015244;
 parent node62463016251T62463016201;
-constant_power_C 100;
-constant_power_A 4690.86;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -3465,27 +3348,24 @@ powerC_rating 50 kVA;
 name T62463078922-CONFIG;
 shunt_impedance 10000+10000j;
 secondary_voltage 120.0;
-connect_type WYE_WYE;
+connect_type SINGLE_PHASE_CENTER_TAPPED;
 impedance 0.00033+0.0022j;
 primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases ACBN;
+phases AS;
 from nodeT6246307892258021;
 name T62463078922;
 to node62463078953T62463078922;
 };
 
-object load {
-phases ABCN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 3072.58;
 name 62463078953;
 parent node62463078953T62463078922;
-constant_power_C 3072.58;
-constant_power_A 3072.58;
 nominal_voltage 120;
-constant_power_B 3072.58;
 };
 
 object overhead_line {
@@ -3536,43 +3416,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246307689919589;
 name T62463076899;
 to node62463076992T62463076899;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463076992;
 parent node62463076992T62463076899;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2389.59;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463076991;
 parent node62463076992T62463076899;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 961.387;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463076869;
 parent node62463076992T62463076899;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 5061.79;
 };
 
 object overhead_line {
@@ -3739,32 +3610,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246307477519519;
 name T62463074775;
 to node62463074798T62463074775;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463074798;
 parent node62463074798T62463074775;
-constant_power_C 100;
-constant_power_A 4834.69;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463074872;
 parent node62463074798T62463074775;
-constant_power_C 100;
-constant_power_A 141.306;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -3967,21 +3832,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246307416519353;
 name T62463074165;
 to node62463074197T62463074165;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2697.44;
 name 62463074197;
 parent node62463074197T62463074165;
-constant_power_C 2697.44;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -4032,32 +3894,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246307416119512;
 name T62463074161;
 to node62463073088T62463074161;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2172.58;
 name 62463073088;
 parent node62463073088T62463074161;
-constant_power_C 2172.58;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 787.278;
 name 62463074161;
 parent node62463073088T62463074161;
-constant_power_C 787.278;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -4288,21 +4144,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246307912719573;
 name T62463079127;
 to node62463079175T62463079127;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2914.44;
 name 62463079175;
 parent node62463079175T62463079127;
-constant_power_C 2914.44;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -4353,21 +4206,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246313995019792;
 name T62463139950;
 to node62463139865T62463139950;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2540.99;
 name 62463139865;
 parent node62463139865T62463139950;
-constant_power_C 2540.99;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -4418,21 +4268,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246307513319198;
 name T62463075133;
 to node62463075194T62463075133;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4567.22;
 name 62463075194;
 parent node62463075194T62463075133;
-constant_power_C 4567.22;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -4483,21 +4330,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246307203119384;
 name T62463072031;
 to node62463133906T62463072031;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463133906;
 parent node62463133906T62463072031;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 5291.42;
 };
 
 object overhead_line {
@@ -4672,21 +4516,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246313079419089;
 name T62463130794;
 to node62463130850T62463130794;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463130850;
 parent node62463130850T62463130794;
-constant_power_C 100;
-constant_power_A 4718.62;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -4881,43 +4722,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246312914618752;
 name T62463129146;
 to node62463129089T62463129146;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463129089;
 parent node62463129089T62463129146;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 782.231;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463129140;
 parent node62463129089T62463129146;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463129029;
 parent node62463129089T62463129146;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -5048,21 +4880,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246313125019103;
 name T62463131250;
 to node62463132202T62463131250;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463132202;
 parent node62463132202T62463131250;
-constant_power_C 100;
-constant_power_A 3787.51;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -5257,21 +5086,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246313376119386;
 name T62463133761;
 to node62463133761T62463133761;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463133761;
 parent node62463133761T62463133761;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -5358,32 +5184,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246313457819521;
 name T62463134578;
 to node62463134548T62463134578;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463134548;
 parent node62463134548T62463134578;
-constant_power_C 100;
-constant_power_A 2836.22;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463135417;
 parent node62463134548T62463134578;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -5542,21 +5362,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246313381819387;
 name T62463133818;
 to node62463132895T62463133818;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463132895;
 parent node62463132895T62463133818;
-constant_power_C 100;
-constant_power_A 5187.96;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -5607,21 +5424,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246313249919328;
 name T62463132499;
 to node62463132482T62463132499;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463132482;
 parent node62463132482T62463132499;
-constant_power_C 100;
-constant_power_A 5818.79;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -5672,21 +5486,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246313203719094;
 name T62463132037;
 to node62463133009T62463132037;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463133009;
 parent node62463133009T62463132037;
-constant_power_C 100;
-constant_power_A 2644.45;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -5853,32 +5664,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246318883218949;
 name T62463188832;
 to node62463188749T62463188832;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463188749;
 parent node62463188749T62463188832;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463188841;
 parent node62463188749T62463188832;
-constant_power_C 100;
-constant_power_A 3368.64;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -5929,21 +5734,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246318978118948;
 name T62463189781;
 to node62463190800T62463189781;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463190800;
 parent node62463190800T62463189781;
-constant_power_C 100;
-constant_power_A 2624.26;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -5994,21 +5796,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246319059819136;
 name T62463190598;
 to node62463190694T62463190598;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463190694;
 parent node62463190694T62463190598;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -6095,21 +5894,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246319350418558;
 name T62463193504;
 to node62463193561T62463193504;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463193561;
 parent node62463193561T62463193504;
-constant_power_C 100;
-constant_power_A 8120.06;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -6160,21 +5956,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246318788818907;
 name T62463187888;
 to node62463188901T62463187888;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463188901;
 parent node62463188901T62463187888;
-constant_power_C 100;
-constant_power_A 6570.74;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -6261,32 +6054,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246318674218359;
 name T62463186742;
 to node62463186718T62463186742;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463186718;
 parent node62463186718T62463186742;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463186767;
 parent node62463186718T62463186742;
-constant_power_C 100;
-constant_power_A 1690.63;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -6409,32 +6196,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246318545318695;
 name T62463185453;
 to node62463186398T62463185453;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463186398;
 parent node62463186398T62463185453;
-constant_power_C 100;
-constant_power_A 1143.07;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463186406;
 parent node62463186398T62463185453;
-constant_power_C 100;
-constant_power_A 5049.18;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -6485,21 +6266,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246318632418790;
 name T62463186324;
 to node62463185287T62463186324;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463185287;
 parent node62463185287T62463186324;
-constant_power_C 100;
-constant_power_A 6719.62;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -6550,21 +6328,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246318657718329;
 name T62463186577;
 to node62463186691T62463186577;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463186691;
 parent node62463186691T62463186577;
-constant_power_C 100;
-constant_power_A 4544.51;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -6723,21 +6498,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246318948219027;
 name T62463189482;
 to node62463189387T62463189482;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463189387;
 parent node62463189387T62463189482;
-constant_power_C 100;
-constant_power_A 2964.91;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -6788,21 +6560,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246318897818991;
 name T62463188978;
 to node62463128092T62463188978;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463128092;
 parent node62463128092T62463188978;
-constant_power_C 100;
-constant_power_A 4741.33;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -6969,21 +6738,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246312408718674;
 name T62463124087;
 to node62463124065T62463124087;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463124065;
 parent node62463124065T62463124087;
-constant_power_C 100;
-constant_power_A 1705.77;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -7070,32 +6836,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246312312617886;
 name T62463123126;
 to node62463123162T62463123126;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463123162;
 parent node62463123162T62463123126;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1496.33;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463123039;
 parent node62463123162T62463123126;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2586.41;
 };
 
 object overhead_line {
@@ -7146,21 +6906,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246312119717815;
 name T62463121197;
 to node62463121169T62463121197;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3504.9;
 name 62463121169;
 parent node62463121169T62463121197;
-constant_power_C 3504.9;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -7283,21 +7040,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246217832118025;
 name T62462178321;
 to node62462178343T62462178321;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462178343;
 parent node62462178343T62462178321;
-constant_power_C 100;
-constant_power_A 6343.64;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -7392,32 +7146,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246223799617654;
 name T62462237996;
 to node62462238928T62462237996;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3111.26;
 name 62462238928;
 parent node62462238928T62462237996;
-constant_power_C 3111.26;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 507.189;
 name 62462238910;
 parent node62462238928T62462237996;
-constant_power_C 507.189;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -7468,21 +7216,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246223796417998;
 name T62462237964;
 to node62462237962T62462237964;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462237962;
 parent node62462237962T62462237964;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -7533,21 +7278,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246223698117773;
 name T62462236981;
 to node62462236984T62462236981;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3053.22;
 name 62462236984;
 parent node62462236984T62462236981;
-constant_power_C 3053.22;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -8406,32 +8148,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246300040057837;
 name T62463000400;
 to node62463000348T62463000400;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463000348;
 parent node62463000348T62463000400;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462059368;
 parent node62463000348T62463000400;
-constant_power_C 100;
-constant_power_A 2326.51;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -8518,21 +8254,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246300051157838;
 name T62463000511;
 to node62462059542T62463000511;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462059542;
 parent node62462059542T62463000511;
-constant_power_C 100;
-constant_power_A 6472.33;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -8619,43 +8352,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246300061057836;
 name T62463000610;
 to node62462059675T62463000610;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462059675;
 parent node62462059675T62463000610;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462059694;
 parent node62462059675T62463000610;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462059538;
 parent node62462059675T62463000610;
-constant_power_C 100;
-constant_power_A 2094.36;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -8742,21 +8466,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246300068857843;
 name T62463000688;
 to node62463001627T62463000688;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463001627;
 parent node62463001627T62463000688;
-constant_power_C 100;
-constant_power_A 1014.38;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -8843,21 +8564,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246205978757835;
 name T62462059787;
 to node62462059793T62462059787;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462059793;
 parent node62462059793T62462059787;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -8944,21 +8662,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246205849157833;
 name T62462058491;
 to node62462059308T62462058491;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462059308;
 parent node62462059308T62462058491;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1448.39;
 };
 
 object underground_line {
@@ -9653,43 +9368,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246300294857880;
 name T62463002948;
 to node62474182051T62463002948;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474182051;
 parent node62474182051T62463002948;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2341.65;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474182023;
 parent node62474182051T62463002948;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2023.71;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474182070;
 parent node62474182051T62463002948;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 921.014;
 };
 
 object underground_line {
@@ -9776,43 +9482,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6247418103657857;
 name T62474181036;
 to node62474181058T62474181036;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2710.05;
 name 62474181058;
 parent node62474181058T62474181036;
-constant_power_C 2710.05;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1763.8;
 name 62474181087;
 parent node62474181058T62474181036;
-constant_power_C 1763.8;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3545.27;
 name 62474181049;
 parent node62474181058T62474181036;
-constant_power_C 3545.27;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -9971,21 +9668,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246300082957844;
 name T62463000829;
 to node62463000855T62463000829;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62463000855;
 parent node62463000855T62463000829;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -10144,54 +9838,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246300181472108;
 name T62463001814;
 to node62463001804T62463001814;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62463001804;
 parent node62463001804T62463001814;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1942.96;
 name 62463001887;
 parent node62463001804T62463001814;
-constant_power_C 1942.96;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3005.28;
 name 62463000882;
 parent node62463001804T62463001814;
-constant_power_C 3005.28;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2369.4;
 name 62463001801;
 parent node62463001804T62463001814;
-constant_power_C 2369.4;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -10278,32 +9960,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246300176957821;
 name T62463001769;
 to node62463001766T62463001769;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1768.85;
 name 62463001766;
 parent node62463001766T62463001769;
-constant_power_C 1768.85;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1836.98;
 name 62463001747;
 parent node62463001766T62463001769;
-constant_power_C 1836.98;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -10390,32 +10066,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247418012257845;
 name T62474180122;
 to node62473239194T62474180122;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62473239194;
 parent node62473239194T62474180122;
-constant_power_C 100;
-constant_power_A 2311.37;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474180125;
 parent node62473239194T62474180122;
-constant_power_C 100;
-constant_power_A 7448.86;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -10574,32 +10244,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247323807357806;
 name T62473238073;
 to node62473238040T62473238073;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62473238040;
 parent node62473238040T62473238073;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62473238011;
 parent node62473238040T62473238073;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 3139.02;
 };
 
 object underground_line {
@@ -10686,21 +10350,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247323812657824;
 name T62473238126;
 to node62473238221T62473238126;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62473238221;
 parent node62473238221T62473238126;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -10859,21 +10520,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247323828372522;
 name T62473238283;
 to node62473238255T62473238283;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62473238255;
 parent node62473238255T62473238283;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 3890.97;
 };
 
 object underground_line {
@@ -10960,21 +10618,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246205896157827;
 name T62462058961;
 to node62462058915T62462058961;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462058915;
 parent node62462058915T62462058961;
-constant_power_C 100;
-constant_power_A 1811.75;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -11133,32 +10788,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246205876457829;
 name T62462058764;
 to node62462058744T62462058764;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462058744;
 parent node62462058744T62462058764;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462058715;
 parent node62462058744T62462058764;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1978.29;
 };
 
 object underground_line {
@@ -11245,21 +10894,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246205769557803;
 name T62462057695;
 to node62462057655T62462057695;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462057655;
 parent node62462057655T62462057695;
-constant_power_C 100;
-constant_power_A 2591.46;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -11346,32 +10992,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246205758557801;
 name T62462057585;
 to node62462058558T62462057585;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3290.42;
 name 62462058558;
 parent node62462058558T62462057585;
-constant_power_C 3290.42;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2374.45;
 name 62462058536;
 parent node62462058558T62462057585;
-constant_power_C 2374.45;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -11458,32 +11098,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246205747857800;
 name T62462057478;
 to node62462057439T62462057478;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462057439;
 parent node62462057439T62462057478;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 958.864;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462057437;
 parent node62462057439T62462057478;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1872.31;
 };
 
 object transformer {
@@ -11498,21 +11132,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from node5782957830;
 name T62462058873;
 to node62462057863T62462058873;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1988.38;
 name 62462057863;
 parent node62462057863T62462058873;
-constant_power_C 1988.38;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object transformer {
@@ -11527,21 +11158,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from node5780657825;
 name T62473239069;
 to node62473239131T62473239069;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4282.08;
 name 62473239131;
 parent node62473239131T62473239069;
-constant_power_C 4282.08;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object transformer {
@@ -11556,43 +11184,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from node5788057819;
 name T62463003904;
 to node62463002869T62463003904;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463002869;
 parent node62463002869T62463003904;
-constant_power_C 100;
-constant_power_A 1178.39;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463002888;
 parent node62463002869T62463003904;
-constant_power_C 100;
-constant_power_A 7400.92;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463003936;
 parent node62463002869T62463003904;
-constant_power_C 100;
-constant_power_A 2712.58;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -12259,43 +11878,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247418245957866;
 name T62474182459;
 to node62474182499T62474182459;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474182499;
 parent node62474182499T62474182459;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474182422;
 parent node62474182499T62474182459;
-constant_power_C 100;
-constant_power_A 1811.75;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474182452;
 parent node62474182499T62474182459;
-constant_power_C 100;
-constant_power_A 2033.8;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -12382,21 +11992,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247418149757865;
 name T62474181497;
 to node62474181469T62474181497;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474181469;
 parent node62474181469T62474181497;
-constant_power_C 100;
-constant_power_A 2240.71;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -12483,54 +12090,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247418144357858;
 name T62474181443;
 to node62474181379T62474181443;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474181379;
 parent node62474181379T62474181443;
-constant_power_C 100;
-constant_power_A 3106.21;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474181480;
 parent node62474181379T62474181443;
-constant_power_C 100;
-constant_power_A 2096.88;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474181436;
 parent node62474181379T62474181443;
-constant_power_C 100;
-constant_power_A 3202.1;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474181415;
 parent node62474181379T62474181443;
-constant_power_C 100;
-constant_power_A 2745.38;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -12617,43 +12212,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247418038957852;
 name T62474180389;
 to node62474181335T62474180389;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474181335;
 parent node62474181335T62474180389;
-constant_power_C 100;
-constant_power_A 2652.02;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474180472;
 parent node62474181335T62474180389;
-constant_power_C 100;
-constant_power_A 2505.66;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474181313;
 parent node62474181335T62474180389;
-constant_power_C 100;
-constant_power_A 2101.93;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -12740,21 +12326,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247418035657847;
 name T62474180356;
 to node62474180317T62474180356;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474180317;
 parent node62474180317T62474180356;
-constant_power_C 100;
-constant_power_A 2419.87;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -12841,21 +12424,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247418169517811;
 name T62474181695;
 to node62474181623T62474181695;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474181623;
 parent node62474181623T62474181695;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 6409.25;
 };
 
 object overhead_line {
@@ -13202,21 +12782,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247418267818410;
 name T62474182678;
 to node62474182629T62474182678;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474182629;
 parent node62474182629T62474182678;
-constant_power_C 100;
-constant_power_A 2389.59;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -13333,27 +12910,24 @@ powerC_rating 50 kVA;
 name T62462172490-CONFIG;
 shunt_impedance 10000+10000j;
 secondary_voltage 120.0;
-connect_type WYE_WYE;
+connect_type SINGLE_PHASE_CENTER_TAPPED;
 impedance 0.00033+0.0022j;
 primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246217249017361;
 name T62462172490;
 to node62462172377T62462172490;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462172377;
 parent node62462172377T62462172490;
-constant_power_C 100;
-constant_power_A 5027.86;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -13404,21 +12978,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246217237917230;
 name T62462172379;
 to node62462172359T62462172379;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462172359;
 parent node62462172359T62462172379;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 4781.7;
 };
 
 object overhead_line {
@@ -13845,21 +13416,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246216924517038;
 name T62462169245;
 to node62462169230T62462169245;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462169230;
 parent node62462169230T62462169245;
-constant_power_C 100;
-constant_power_A 6154.39;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -13910,21 +13478,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246216944216489;
 name T62462169442;
 to node62462168493T62462169442;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4748.9;
 name 62462168493;
 parent node62462168493T62462169442;
-constant_power_C 4748.9;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -14083,32 +13648,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246216294816246;
 name T62462162948;
 to node62462163909T62462162948;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462163909;
 parent node62462163909T62462162948;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462102070;
 parent node62462163909T62462162948;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -14449,27 +14008,24 @@ powerC_rating 50 kVA;
 name T62462091135-CONFIG;
 shunt_impedance 10000+10000j;
 secondary_voltage 120.0;
-connect_type WYE_WYE;
+connect_type SINGLE_PHASE_CENTER_TAPPED;
 impedance 0.00033+0.0022j;
 primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases ACBN;
+phases AS;
 from nodeT6246209113515042;
 name T62462091135;
 to node62462091125T62462091135;
 };
 
-object load {
-phases ABCN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 32759.0;
 name 62462091125;
 parent node62462091125T62462091135;
-constant_power_C 32759.0;
-constant_power_A 32759.0;
 nominal_voltage 120;
-constant_power_B 32759.0;
 };
 
 object overhead_line {
@@ -15092,21 +14648,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246210126716194;
 name T62462101267;
 to node62462101209T62462101267;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462101209;
 parent node62462101209T62462101267;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 4976.0;
 };
 
 object overhead_line {
@@ -15157,21 +14710,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246210022416109;
 name T62462100224;
 to node62462100205T62462100224;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462100205;
 parent node62462100205T62462100224;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 6659.06;
 };
 
 object overhead_line {
@@ -15222,21 +14772,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246210133815631;
 name T62462101338;
 to node62462100389T62462101338;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462100389;
 parent node62462100389T62462101338;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 6250.28;
 };
 
 object overhead_line {
@@ -15439,21 +14986,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246216645457765;
 name T62462166454;
 to node62462166430T62462166454;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62462166430;
 parent node62462166430T62462166454;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 5344.4;
 };
 
 object overhead_line {
@@ -15548,32 +15092,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246216946917035;
 name T62462169469;
 to node62462169487T62462169469;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4264.42;
 name 62462169487;
 parent node62462169487T62462169469;
-constant_power_C 4264.42;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 158.97;
 name 62462169591;
 parent node62462169487T62462169469;
-constant_power_C 158.97;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -15660,21 +15198,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246217074317023;
 name T62462170743;
 to node62462170679T62462170743;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4385.54;
 name 62462170679;
 parent node62462170679T62462170743;
-constant_power_C 4385.54;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -15877,32 +15412,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246211006057781;
 name T62462110060;
 to node62462110050T62462110060;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3416.58;
 name 62462110050;
 parent node62462110050T62462110060;
-constant_power_C 3416.58;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 5445.34;
 name 62462110074;
 parent node62462110050T62462110060;
-constant_power_C 5445.34;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -15953,32 +15482,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246216887016738;
 name T62462168870;
 to node62462168810T62462168870;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3578.08;
 name 62462168810;
 parent node62462168810T62462168870;
-constant_power_C 3578.08;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462168853;
 parent node62462168810T62462168870;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object capacitor {
@@ -16152,27 +15675,24 @@ powerC_rating 50 kVA;
 name T62462173272-CONFIG;
 shunt_impedance 10000+10000j;
 secondary_voltage 120.0;
-connect_type WYE_WYE;
+connect_type SINGLE_PHASE_CENTER_TAPPED;
 impedance 0.00033+0.0022j;
 primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases ACBN;
+phases AS;
 from nodeT6246217327217422;
 name T62462173272;
 to node62462173273T62462173272;
 };
 
-object load {
-phases ABCN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 14804.3;
 name 62462173273;
 parent node62462173273T62462173272;
-constant_power_C 14804.3;
-constant_power_A 14804.3;
 nominal_voltage 120;
-constant_power_B 14804.3;
 };
 
 object overhead_line {
@@ -16795,21 +16315,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222373416390;
 name T62462223734;
 to node62462223811T62462223734;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 103.456;
 name 62462223811;
 parent node62462223811T62462223734;
-constant_power_C 103.456;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -16860,21 +16377,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222261814901;
 name T62462222618;
 to node62462221747T62462222618;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 116.073;
 name 62462221747;
 parent node62462221747T62462222618;
-constant_power_C 116.073;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -16969,87 +16483,66 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222290016223;
 name T62462222900;
 to node62462222990T62462222900;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462222990;
 parent node62462222990T62462222900;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 111.026;
 name 62462222906;
 parent node62462222990T62462222900;
-constant_power_C 111.026;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 234.669;
 name 62462222928;
 parent node62462222990T62462222900;
-constant_power_C 234.669;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1370.17;
 name 62462222940;
 parent node62462222990T62462222900;
-constant_power_C 1370.17;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 113.55;
 name 62462221940;
 parent node62462222990T62462222900;
-constant_power_C 113.55;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 227.099;
 name 62462222991;
 parent node62462222990T62462222900;
-constant_power_C 227.099;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462222898;
 parent node62462222990T62462222900;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -17136,65 +16629,50 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246216108916204;
 name T62462161089;
 to node62462161131T62462161089;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462161131;
 parent node62462161131T62462161089;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462161064;
 parent node62462161131T62462161089;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462161074;
 parent node62462161131T62462161089;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462161015;
 parent node62462161131T62462161089;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462161141;
 parent node62462161131T62462161089;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object transformer {
@@ -17209,21 +16687,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from node1620416213;
 name T62462221998;
 to node62462221928T62462221998;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462221928;
 parent node62462221928T62462221998;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -17274,54 +16749,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222051616100;
 name T62462220516;
 to node62462219692T62462220516;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3979.29;
 name 62462219692;
 parent node62462219692T62462220516;
-constant_power_C 3979.29;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 7469.05;
 name 62462219587;
 parent node62462219692T62462220516;
-constant_power_C 7469.05;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462219593;
 parent node62462219692T62462220516;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462220524;
 parent node62462219692T62462220516;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -17444,65 +16907,50 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246221985615141;
 name T62462219856;
 to node62462219940T62462219856;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462219940;
 parent node62462219940T62462219856;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462219723;
 parent node62462219940T62462219856;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 244.763;
 name 62462217843;
 parent node62462219940T62462219856;
-constant_power_C 244.763;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462158002;
 parent node62462219940T62462219856;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462157070;
 parent node62462219940T62462219856;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -17625,98 +17073,74 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246215611715674;
 name T62462156117;
 to node62462157141T62462156117;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462157141;
 parent node62462157141T62462156117;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100.933;
 name 62462155030;
 parent node62462157141T62462156117;
-constant_power_C 100.933;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 136.26;
 name 62462154072;
 parent node62462157141T62462156117;
-constant_power_C 136.26;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 196.819;
 name 62462156170;
 parent node62462157141T62462156117;
-constant_power_C 196.819;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100.933;
 name 62462156240;
 parent node62462157141T62462156117;
-constant_power_C 100.933;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462154130;
 parent node62462157141T62462156117;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1529.14;
 name 62462153231;
 parent node62462157141T62462156117;
-constant_power_C 1529.14;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 100;
 name 62462215977;
 parent node62462157141T62462156117;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -17803,21 +17227,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246216602416774;
 name T62462166024;
 to node62462225969T62462166024;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 5440.29;
 name 62462225969;
 parent node62462225969T62462166024;
-constant_power_C 5440.29;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -17940,32 +17361,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246217408117450;
 name T62462174081;
 to node62462174083T62462174081;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1143.07;
 name 62462174083;
 parent node62462174083T62462174081;
-constant_power_C 1143.07;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2407.25;
 name 62462175009;
 parent node62462174083T62462174081;
-constant_power_C 2407.25;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18016,32 +17431,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246223396017093;
 name T62462233960;
 to node62462234942T62462233960;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2498.09;
 name 62462234942;
 parent node62462234942T62462233960;
-constant_power_C 2498.09;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1380.26;
 name 62462234833;
 parent node62462234942T62462233960;
-constant_power_C 1380.26;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18092,21 +17501,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246223381917380;
 name T62462233819;
 to node62462232961T62462233819;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 905.874;
 name 62462232961;
 parent node62462232961T62462233819;
-constant_power_C 905.874;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18265,32 +17671,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246223167917290;
 name T62462231679;
 to node62462231679T62462231679;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 116.073;
 name 62462231679;
 parent node62462231679T62462231679;
-constant_power_C 116.073;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2096.88;
 name 62462231782;
 parent node62462231679T62462231679;
-constant_power_C 2096.88;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18341,21 +17741,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246223154517268;
 name T62462231545;
 to node62462231529T62462231545;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 5854.12;
 name 62462231529;
 parent node62462231529T62462231545;
-constant_power_C 5854.12;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18514,21 +17911,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222974116092;
 name T62462229741;
 to node62462229732T62462229741;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3219.76;
 name 62462229732;
 parent node62462229732T62462229741;
-constant_power_C 3219.76;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18615,21 +18009,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222943616477;
 name T62462229436;
 to node62462229510T62462229436;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1622.5;
 name 62462229510;
 parent node62462229510T62462229436;
-constant_power_C 1622.5;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18680,21 +18071,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222846516733;
 name T62462228465;
 to node62462229319T62462228465;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 5662.34;
 name 62462229319;
 parent node62462229319T62462228465;
-constant_power_C 5662.34;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18745,21 +18133,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222745716882;
 name T62462227457;
 to node62462226475T62462227457;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4900.3;
 name 62462226475;
 parent node62462226475T62462227457;
-constant_power_C 4900.3;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18810,21 +18195,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222653816797;
 name T62462226538;
 to node62462226602T62462226538;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 7857.64;
 name 62462226602;
 parent node62462226602T62462226538;
-constant_power_C 7857.64;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18911,21 +18293,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222458016622;
 name T62462224580;
 to node62462225428T62462224580;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 8612.11;
 name 62462225428;
 parent node62462225428T62462224580;
-constant_power_C 8612.11;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -18976,21 +18355,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246222753516865;
 name T62462227535;
 to node62462227630T62462227535;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 6906.34;
 name 62462227630;
 parent node62462227630T62462227535;
-constant_power_C 6906.34;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -19041,21 +18417,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246223047317252;
 name T62462230473;
 to node62462231414T62462230473;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 5319.17;
 name 62462231414;
 parent node62462231414T62462230473;
-constant_power_C 5319.17;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -19106,21 +18479,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246223256417176;
 name T62462232564;
 to node62462232691T62462232564;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2467.81;
 name 62462232691;
 parent node62462232691T62462232564;
-constant_power_C 2467.81;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -19207,21 +18577,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246223563117082;
 name T62462235631;
 to node62462235664T62462235631;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 8102.4;
 name 62462235664;
 parent node62462235664T62462235631;
-constant_power_C 8102.4;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -19316,21 +18683,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246312001018203;
 name T62463120010;
 to node62462239978T62463120010;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62462239978;
 parent node62462239978T62463120010;
-constant_power_C 100;
-constant_power_A 2657.06;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -19505,21 +18869,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246307233019396;
 name T62463072330;
 to node62463072245T62463072330;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463072245;
 parent node62463072245T62463072330;
-constant_power_C 100;
-constant_power_A 3287.89;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -19614,21 +18975,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246307535719502;
 name T62463075357;
 to node62463075332T62463075357;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4592.45;
 name 62463075332;
 parent node62463075332T62463075357;
-constant_power_C 4592.45;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -19723,32 +19081,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246301915019776;
 name T62463019150;
 to node62463019058T62463019150;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 10698.9;
 name 62463019058;
 parent node62463019058T62463019150;
-constant_power_C 10698.9;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2455.2;
 name 62463019173;
 parent node62463019058T62463019150;
-constant_power_C 2455.2;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -19879,21 +19231,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246302086819930;
 name T62463020868;
 to node62463020936T62463020868;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463020936;
 parent node62463020936T62463020868;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object transformer {
@@ -19908,43 +19257,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from node1993019599;
 name T62463020860;
 to node62463019768T62463020860;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463019768;
 parent node62463019768T62463020860;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 244.763;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463020699;
 parent node62463019768T62463020860;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1816.79;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463021707;
 parent node62463019768T62463020860;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 181.679;
 };
 
 object overhead_line {
@@ -20031,21 +19371,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246301896119574;
 name T62463018961;
 to node62463018993T62463018961;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463018993;
 parent node62463018993T62463018961;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1678.01;
 };
 
 object overhead_line {
@@ -20140,43 +19477,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246302155019652;
 name T62463021550;
 to node62463021455T62463021550;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2916.97;
 name 62463021455;
 parent node62463021455T62463021550;
-constant_power_C 2916.97;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3878.35;
 name 62463021581;
 parent node62463021455T62463021550;
-constant_power_C 3878.35;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2624.26;
 name 62463022467;
 parent node62463021455T62463021550;
-constant_power_C 2624.26;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -20227,21 +19555,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246302591020208;
 name T62463025910;
 to node62463024844T62463025910;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463024844;
 parent node62463024844T62463025910;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -20444,43 +19769,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247420307358181;
 name T62474203073;
 to node62474204023T62474203073;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474204023;
 parent node62474204023T62474203073;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 3820.32;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474204038;
 parent node62474204023T62474203073;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 3207.15;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474203084;
 parent node62474204023T62474203073;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2826.13;
 };
 
 object underground_line {
@@ -20567,43 +19883,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246302299958149;
 name T62463022999;
 to node62474202046T62463022999;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474202046;
 parent node62474202046T62463022999;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2001.0;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463023927;
 parent node62474202046T62463022999;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1554.37;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463022995;
 parent node62474202046T62463022999;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2747.9;
 };
 
 object underground_line {
@@ -20690,32 +19997,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6246302293858119;
 name T62463022938;
 to node62474201080T62463022938;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474201080;
 parent node62474201080T62463022938;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 3873.31;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62463022936;
 parent node62474201080T62463022938;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1201.1;
 };
 
 object underground_line {
@@ -20802,32 +20103,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6247420216658136;
 name T62474202166;
 to node62474202147T62474202166;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3270.23;
 name 62474202147;
 parent node62474202147T62474202166;
-constant_power_C 3270.23;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2190.25;
 name 62474202144;
 parent node62474202147T62474202166;
-constant_power_C 2190.25;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -20914,21 +20209,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247420236058131;
 name T62474202360;
 to node62474202258T62474202360;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474202258;
 parent node62474202258T62474202360;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 5865.84;
 };
 
 object underground_line {
@@ -21015,21 +20307,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420236258134;
 name T62474202362;
 to node62474202354T62474202362;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474202354;
 parent node62474202354T62474202362;
-constant_power_C 100;
-constant_power_A 2243.24;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -21260,32 +20549,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420247158139;
 name T62474202471;
 to node62474202454T62474202471;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474202454;
 parent node62474202454T62474202471;
-constant_power_C 100;
-constant_power_A 2871.55;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474202349;
 parent node62474202454T62474202471;
-constant_power_C 100;
-constant_power_A 1622.5;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -21372,32 +20655,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420258158140;
 name T62474202581;
 to node62474202555T62474202581;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474202555;
 parent node62474202555T62474202581;
-constant_power_C 100;
-constant_power_A 3012.85;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474202540;
 parent node62474202555T62474202581;
-constant_power_C 100;
-constant_power_A 5621.97;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -21556,43 +20833,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247420268158145;
 name T62474202681;
 to node62474202650T62474202681;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474202650;
 parent node62474202650T62474202681;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2427.44;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474202663;
 parent node62474202650T62474202681;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2460.24;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474202671;
 parent node62474202650T62474202681;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1650.26;
 };
 
 object underground_line {
@@ -21679,21 +20947,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6247420279158146;
 name T62474202791;
 to node62474202679T62474202791;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3918.73;
 name 62474202679;
 parent node62474202679T62474202791;
-constant_power_C 3918.73;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -21852,54 +21117,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247420474958176;
 name T62474204749;
 to node62474204748T62474204749;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474204748;
 parent node62474204748T62474204749;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474204762;
 parent node62474204748T62474204749;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 4653.01;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474204880;
 parent node62474204748T62474204749;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1657.83;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474204795;
 parent node62474204748T62474204749;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 3759.76;
 };
 
 object underground_line {
@@ -21986,32 +21239,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6247420485957977;
 name T62474204859;
 to node62474204990T62474204859;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2424.92;
 name 62474204990;
 parent node62474204990T62474204859;
-constant_power_C 2424.92;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 7363.07;
 name 62474205807;
 parent node62474204990T62474204859;
-constant_power_C 7363.07;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -22098,32 +21345,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247420497957981;
 name T62474204979;
 to node62474144036T62474204979;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474144036;
 parent node62474144036T62474204979;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 4564.7;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474145010;
 parent node62474144036T62474204979;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 4150.87;
 };
 
 object underground_line {
@@ -22210,54 +21451,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247420398758183;
 name T62474203987;
 to node62474203981T62474203987;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474203981;
 parent node62474203981T62474203987;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 7196.53;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474143090;
 parent node62474203981T62474203987;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 6802.89;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474203952;
 parent node62474203981T62474203987;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 7325.22;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474143060;
 parent node62474203981T62474203987;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 2356.79;
 };
 
 object underground_line {
@@ -22344,54 +21573,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases BN;
+phases BS;
 from nodeT6247420298958142;
 name T62474202989;
 to node62474202953T62474202989;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474202953;
 parent node62474202953T62474202989;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 3787.51;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474142082;
 parent node62474202953T62474202989;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 1110.26;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474142051;
 parent node62474202953T62474202989;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 4483.95;
 };
 
-object load {
-phases BN;
-load_class R;
+object triplex_node {
+phases BS;
+power_12 100;
 name 62474202972;
 parent node62474202953T62474202989;
-constant_power_C 100;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 4617.69;
 };
 
 object transformer {
@@ -22406,54 +21623,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from node5817658150;
 name T62474203769;
 to node62474203871T62474203769;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474203871;
 parent node62474203871T62474203769;
-constant_power_C 100;
-constant_power_A 3229.86;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474203750;
 parent node62474203871T62474203769;
-constant_power_C 100;
-constant_power_A 3820.32;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474203842;
 parent node62474203871T62474203769;
-constant_power_C 100;
-constant_power_A 5473.09;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474203781;
 parent node62474203871T62474203769;
-constant_power_C 100;
-constant_power_A 5859.16;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -22540,54 +21745,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420356658144;
 name T62474203566;
 to node62474203572T62474203566;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474203572;
 parent node62474203572T62474203566;
-constant_power_C 100;
-constant_power_A 1917.73;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474203652;
 parent node62474203572T62474203566;
-constant_power_C 100;
-constant_power_A 2409.78;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474203552;
 parent node62474203572T62474203566;
-constant_power_C 100;
-constant_power_A 5457.95;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474203681;
 parent node62474203572T62474203566;
-constant_power_C 100;
-constant_power_A 3106.21;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -22674,54 +21867,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420457558177;
 name T62474204575;
 to node62474204552T62474204575;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474204552;
 parent node62474204552T62474204575;
-constant_power_C 100;
-constant_power_A 2220.53;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474204585;
 parent node62474204552T62474204575;
-constant_power_C 100;
-constant_power_A 4403.2;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474204662;
 parent node62474204552T62474204575;
-constant_power_C 100;
-constant_power_A 6459.72;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474205503;
 parent node62474204552T62474204575;
-constant_power_C 100;
-constant_power_A 2548.56;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -22808,32 +21989,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420650557921;
 name T62474206505;
 to node62474206532T62474206505;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474206532;
 parent node62474206532T62474206505;
-constant_power_C 100;
-constant_power_A 2051.46;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474206502;
 parent node62474206532T62474206505;
-constant_power_C 100;
-constant_power_A 6754.94;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -22920,21 +22095,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420662458233;
 name T62474206624;
 to node62474205692T62474206624;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474205692;
 parent node62474205692T62474206624;
-constant_power_C 100;
-constant_power_A 2581.36;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -23021,32 +22193,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420672458241;
 name T62474206724;
 to node62474206706T62474206724;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474206706;
 parent node62474206706T62474206724;
-constant_power_C 100;
-constant_power_A 2382.02;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474205793;
 parent node62474206706T62474206724;
-constant_power_C 100;
-constant_power_A 2911.92;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -23133,32 +22299,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420682458243;
 name T62474206824;
 to node62474205893T62474206824;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474205893;
 parent node62474205893T62474206824;
-constant_power_C 100;
-constant_power_A 4173.58;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474206806;
 parent node62474205893T62474206824;
-constant_power_C 100;
-constant_power_A 2727.72;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -23245,43 +22405,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420694757997;
 name T62474206947;
 to node62474146040T62474206947;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474146040;
 parent node62474146040T62474206947;
-constant_power_C 100;
-constant_power_A 3701.72;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474206918;
 parent node62474146040T62474206947;
-constant_power_C 100;
-constant_power_A 3827.89;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474206903;
 parent node62474146040T62474206947;
-constant_power_C 100;
-constant_power_A 2076.7;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -23368,54 +22519,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420793657911;
 name T62474207936;
 to node62474207930T62474207936;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207930;
 parent node62474207930T62474207936;
-constant_power_C 100;
-constant_power_A 6656.53;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474206990;
 parent node62474207930T62474207936;
-constant_power_C 100;
-constant_power_A 2149.87;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474147020;
 parent node62474207930T62474207936;
-constant_power_C 100;
-constant_power_A 2821.08;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207949;
 parent node62474207930T62474207936;
-constant_power_C 100;
-constant_power_A 3217.24;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -23502,32 +22641,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420890458263;
 name T62474208904;
 to node62474208819T62474208904;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474208819;
 parent node62474208819T62474208904;
-constant_power_C 100;
-constant_power_A 4584.88;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474148010;
 parent node62474208819T62474208904;
-constant_power_C 100;
-constant_power_A 1907.63;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -23614,43 +22747,34 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420783058242;
 name T62474207830;
 to node62474206893T62474207830;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474206893;
 parent node62474206893T62474207830;
-constant_power_C 100;
-constant_power_A 7143.54;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207708;
 parent node62474206893T62474207830;
-constant_power_C 100;
-constant_power_A 2977.52;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207880;
 parent node62474206893T62474207830;
-constant_power_C 100;
-constant_power_A 6729.71;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -23737,65 +22861,50 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420761258240;
 name T62474207612;
 to node62474207559T62474207612;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207559;
 parent node62474207559T62474207612;
-constant_power_C 100;
-constant_power_A 2793.32;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474206588;
 parent node62474207559T62474207612;
-constant_power_C 100;
-constant_power_A 1425.68;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207700;
 parent node62474207559T62474207612;
-constant_power_C 100;
-constant_power_A 4703.48;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207684;
 parent node62474207559T62474207612;
-constant_power_C 100;
-constant_power_A 2220.53;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207629;
 parent node62474207559T62474207612;
-constant_power_C 100;
-constant_power_A 8104.92;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -23882,21 +22991,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420743758260;
 name T62474207437;
 to node62474207489T62474207437;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207489;
 parent node62474207489T62474207437;
-constant_power_C 100;
-constant_power_A 2803.42;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -24055,54 +23161,42 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6247420335658143;
 name T62474203356;
 to node62474203443T62474203356;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4996.19;
 name 62474203443;
 parent node62474203443T62474203356;
-constant_power_C 4996.19;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3550.32;
 name 62474203373;
 parent node62474203443T62474203356;
-constant_power_C 3550.32;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 5644.68;
 name 62474203472;
 parent node62474203443T62474203356;
-constant_power_C 5644.68;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2914.44;
 name 62474203343;
 parent node62474203443T62474203356;
-constant_power_C 2914.44;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object underground_line {
@@ -24189,65 +23283,50 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6247420435458172;
 name T62474204354;
 to node62474204371T62474204354;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3451.91;
 name 62474204371;
 parent node62474204371T62474204354;
-constant_power_C 3451.91;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4433.48;
 name 62474204432;
 parent node62474204371T62474204354;
-constant_power_C 4433.48;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 5730.47;
 name 62474205305;
 parent node62474204371T62474204354;
-constant_power_C 5730.47;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 3744.62;
 name 62474204471;
 parent node62474204371T62474204354;
-constant_power_C 3744.62;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2957.34;
 name 62474204342;
 parent node62474204371T62474204354;
-constant_power_C 2957.34;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -24298,32 +23377,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420502220172;
 name T62474205022;
 to node62474205151T62474205022;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474205151;
 parent node62474205151T62474205022;
-constant_power_C 100;
-constant_power_A 8223.52;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474205022;
 parent node62474205151T62474205022;
-constant_power_C 100;
-constant_power_A 974.004;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -24418,32 +23491,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246302695520288;
 name T62463026955;
 to node62463026977T62463026955;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463026977;
 parent node62463026977T62463026955;
-constant_power_C 100;
-constant_power_A 837.744;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463026926;
 parent node62463026977T62463026955;
-constant_power_C 100;
-constant_power_A 6583.36;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -24530,21 +23597,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6246302895320509;
 name T62463028953;
 to node62463027895T62463028953;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463027895;
 parent node62463027895T62463028953;
-constant_power_C 100;
-constant_power_A 7035.03;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -24595,21 +23659,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420708520423;
 name T62474207085;
 to node62474207056T62474207085;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207056;
 parent node62474207056T62474207085;
-constant_power_C 100;
-constant_power_A 3086.03;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -24660,32 +23721,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420813820424;
 name T62474208138;
 to node62474208243T62474208138;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474208243;
 parent node62474208243T62474208138;
-constant_power_C 100;
-constant_power_A 3209.67;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474208163;
 parent node62474208243T62474208138;
-constant_power_C 100;
-constant_power_A 1577.08;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -24924,32 +23979,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420722358261;
 name T62474207223;
 to node62474207119T62474207223;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207119;
 parent node62474207119T62474207223;
-constant_power_C 100;
-constant_power_A 2848.84;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474207263;
 parent node62474207119T62474207223;
-constant_power_C 100;
-constant_power_A 5437.77;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -25000,32 +24049,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246303193020531;
 name T62463031930;
 to node62474211060T62463031930;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 936.154;
 name 62474211060;
 parent node62474211060T62463031930;
-constant_power_C 936.154;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1286.9;
 name 62463031934;
 parent node62474211060T62463031930;
-constant_power_C 1286.9;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -25148,21 +24191,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247421408320788;
 name T62474214083;
 to node62474215045T62474214083;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474215045;
 parent node62474215045T62474214083;
-constant_power_C 100;
-constant_power_A 239.716;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -25409,21 +24449,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247421334720400;
 name T62474213347;
 to node62474213353T62474213347;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474213353;
 parent node62474213353T62474213347;
-constant_power_C 100;
-constant_power_A 6583.36;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -25474,32 +24511,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247421005620599;
 name T62474210056;
 to node62463030909T62474210056;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62463030909;
 parent node62463030909T62474210056;
-constant_power_C 100;
-constant_power_A 3623.5;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474210171;
 parent node62463030909T62474210056;
-constant_power_C 100;
-constant_power_A 3550.32;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -25586,21 +24617,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247421223720865;
 name T62474212237;
 to node62474212215T62474212237;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474212215;
 parent node62474212215T62474212237;
-constant_power_C 100;
-constant_power_A 345.696;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -25651,21 +24679,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247421235820660;
 name T62474212358;
 to node62474212387T62474212358;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474212387;
 parent node62474212387T62474212358;
-constant_power_C 100;
-constant_power_A 2361.83;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -25752,21 +24777,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247421135620750;
 name T62474211356;
 to node62474211335T62474211356;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474211335;
 parent node62474211335T62474211356;
-constant_power_C 100;
-constant_power_A 1276.8;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -25889,21 +24911,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247420946420553;
 name T62474209464;
 to node62474209432T62474209464;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474209432;
 parent node62474209432T62474209464;
-constant_power_C 100;
-constant_power_A 3007.8;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -25990,32 +25009,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases AN;
+phases AS;
 from nodeT6247421158320770;
 name T62474211583;
 to node62474211556T62474211583;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474211556;
 parent node62474211556T62474211583;
-constant_power_C 100;
-constant_power_A 1953.05;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases AN;
-load_class R;
+object triplex_node {
+phases AS;
+power_12 100;
 name 62474211641;
 parent node62474211556T62474211583;
-constant_power_C 100;
-constant_power_A 2808.46;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -26066,32 +25079,26 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246303284920665;
 name T62463032849;
 to node62463032835T62463032849;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 4842.26;
 name 62463032835;
 parent node62463032835T62463032849;
-constant_power_C 4842.26;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 6336.07;
 name 62463032970;
 parent node62463032835T62463032849;
-constant_power_C 6336.07;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -26186,21 +25193,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246302874020500;
 name T62463028740;
 to node62463028720T62463028740;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 1261.66;
 name 62463028720;
 parent node62463028720T62463028740;
-constant_power_C 1261.66;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object overhead_line {
@@ -26323,21 +25327,18 @@ primary_voltage 7200.0;
 powerB_rating 50 kVA;
 powerA_rating 50 kVA;
 };
-phases CN;
+phases CS;
 from nodeT6246302843020478;
 name T62463028430;
 to node62463028401T62463028430;
 };
 
-object load {
-phases CN;
-load_class R;
+object triplex_node {
+phases CS;
+power_12 2293.7;
 name 62463028401;
 parent node62463028401T62463028430;
-constant_power_C 2293.7;
-constant_power_A 100;
 nominal_voltage 120;
-constant_power_B 100;
 };
 
 object node {
@@ -26436,9 +25437,9 @@ nominal_voltage 2400;
 name nodeT6246302788020367;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463027798T62463027880;
 };
 
@@ -26478,9 +25479,9 @@ nominal_voltage 2400;
 name nodeT6246302377520130;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463024800T62463023775;
 };
 
@@ -26490,9 +25491,9 @@ nominal_voltage 2400;
 name nodeT6246302267620050;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463022720T62463022676;
 };
 
@@ -26502,9 +25503,9 @@ nominal_voltage 2400;
 name nodeT6246302166319663;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463021692T62463021663;
 };
 
@@ -26514,9 +25515,9 @@ nominal_voltage 2400;
 name nodeT6246302067019935;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463020586T62463020670;
 };
 
@@ -26532,9 +25533,9 @@ nominal_voltage 2400;
 name nodeT6246301941419852;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463019437T62463019414;
 };
 
@@ -26556,9 +25557,9 @@ nominal_voltage 2400;
 name nodeT6246301946719851;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463019498T62463019467;
 };
 
@@ -26592,9 +25593,9 @@ nominal_voltage 2400;
 name nodeT6246302228919964;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463022298T62463022289;
 };
 
@@ -26610,9 +25611,9 @@ nominal_voltage 2400;
 name nodeT6246302425720132;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463025237T62463024257;
 };
 
@@ -26634,9 +25635,9 @@ nominal_voltage 2400;
 name nodeT6246301747919770;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463018503T62463017479;
 };
 
@@ -26646,9 +25647,9 @@ nominal_voltage 2400;
 name nodeT6246301745119750;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463017349T62463017451;
 };
 
@@ -26658,9 +25659,9 @@ nominal_voltage 2400;
 name nodeT6246301555719583;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463016405T62463015557;
 };
 
@@ -26670,9 +25671,9 @@ nominal_voltage 2400;
 name nodeT6246301357619342;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463013691T62463013576;
 };
 
@@ -26682,9 +25683,9 @@ nominal_voltage 2400;
 name nodeT6246301254019399;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463012543T62463012540;
 };
 
@@ -26700,9 +25701,9 @@ nominal_voltage 2400;
 name nodeT6246301473419483;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463014628T62463014734;
 };
 
@@ -26712,9 +25713,9 @@ nominal_voltage 2400;
 name nodeT6246301373719474;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463013707T62463013737;
 };
 
@@ -26724,9 +25725,9 @@ nominal_voltage 2400;
 name nodeT6246301683718573;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463016900T62463016837;
 };
 
@@ -26736,9 +25737,9 @@ nominal_voltage 2400;
 name nodeT6247419602319688;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474195011T62474196023;
 };
 
@@ -26748,9 +25749,9 @@ nominal_voltage 2400;
 name nodeT6247419610319558;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474195151T62474196103;
 };
 
@@ -26760,9 +25761,9 @@ nominal_voltage 2400;
 name nodeT6247419621319560;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474195268T62474196213;
 };
 
@@ -26772,9 +25773,9 @@ nominal_voltage 2400;
 name nodeT6247419635319683;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474196319T62474196353;
 };
 
@@ -26784,9 +25785,9 @@ nominal_voltage 2400;
 name nodeT6247419721519682;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474197221T62474197215;
 };
 
@@ -26796,9 +25797,9 @@ nominal_voltage 2400;
 name nodeT6247419710519559;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474196191T62474197105;
 };
 
@@ -26808,9 +25809,9 @@ nominal_voltage 2400;
 name nodeT6246301663418572;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463016539T62463016634;
 };
 
@@ -26820,9 +25821,9 @@ nominal_voltage 2400;
 name nodeT6246301824919815;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463018228T62463018249;
 };
 
@@ -26844,9 +25845,9 @@ nominal_voltage 2400;
 name nodeT6246301925319563;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463019285T62463019253;
 };
 
@@ -26856,9 +25857,9 @@ nominal_voltage 2400;
 name nodeT6246302120019237;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463021167T62463021200;
 };
 
@@ -26874,9 +25875,9 @@ nominal_voltage 2400;
 name nodeT6246301704519748;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463017062T62463017045;
 };
 
@@ -26898,9 +25899,9 @@ nominal_voltage 2400;
 name nodeT6246301607719714;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463016038T62463016077;
 };
 
@@ -26916,9 +25917,9 @@ nominal_voltage 2400;
 name nodeT6246301405019507;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463074975T62463014050;
 };
 
@@ -26928,9 +25929,9 @@ nominal_voltage 2400;
 name nodeT6246301620119561;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463016251T62463016201;
 };
 
@@ -26958,9 +25959,9 @@ nominal_voltage 2400;
 name nodeT6246307892258021;
 };
 
-object node {
-phases ABCN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463078953T62463078922;
 };
 
@@ -26970,9 +25971,9 @@ nominal_voltage 2400;
 name nodeT6246307689919589;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463076992T62463076899;
 };
 
@@ -27006,9 +26007,9 @@ nominal_voltage 2400;
 name nodeT6246307477519519;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463074798T62463074775;
 };
 
@@ -27048,9 +26049,9 @@ nominal_voltage 2400;
 name nodeT6246307416519353;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463074197T62463074165;
 };
 
@@ -27060,9 +26061,9 @@ nominal_voltage 2400;
 name nodeT6246307416119512;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463073088T62463074161;
 };
 
@@ -27102,9 +26103,9 @@ nominal_voltage 2400;
 name nodeT6246307912719573;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463079175T62463079127;
 };
 
@@ -27114,9 +26115,9 @@ nominal_voltage 2400;
 name nodeT6246313995019792;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463139865T62463139950;
 };
 
@@ -27126,9 +26127,9 @@ nominal_voltage 2400;
 name nodeT6246307513319198;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463075194T62463075133;
 };
 
@@ -27138,9 +26139,9 @@ nominal_voltage 2400;
 name nodeT6246307203119384;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463133906T62463072031;
 };
 
@@ -27180,9 +26181,9 @@ nominal_voltage 2400;
 name nodeT6246313079419089;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463130850T62463130794;
 };
 
@@ -27216,9 +26217,9 @@ nominal_voltage 2400;
 name nodeT6246312914618752;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463129089T62463129146;
 };
 
@@ -27246,9 +26247,9 @@ nominal_voltage 2400;
 name nodeT6246313125019103;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463132202T62463131250;
 };
 
@@ -27282,9 +26283,9 @@ nominal_voltage 2400;
 name nodeT6246313376119386;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463133761T62463133761;
 };
 
@@ -27300,9 +26301,9 @@ nominal_voltage 2400;
 name nodeT6246313457819521;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463134548T62463134578;
 };
 
@@ -27324,9 +26325,9 @@ nominal_voltage 2400;
 name nodeT6246313381819387;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463132895T62463133818;
 };
 
@@ -27336,9 +26337,9 @@ nominal_voltage 2400;
 name nodeT6246313249919328;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463132482T62463132499;
 };
 
@@ -27348,9 +26349,9 @@ nominal_voltage 2400;
 name nodeT6246313203719094;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463133009T62463132037;
 };
 
@@ -27384,9 +26385,9 @@ nominal_voltage 2400;
 name nodeT6246318883218949;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463188749T62463188832;
 };
 
@@ -27396,9 +26397,9 @@ nominal_voltage 2400;
 name nodeT6246318978118948;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463190800T62463189781;
 };
 
@@ -27408,9 +26409,9 @@ nominal_voltage 2400;
 name nodeT6246319059819136;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463190694T62463190598;
 };
 
@@ -27426,9 +26427,9 @@ nominal_voltage 2400;
 name nodeT6246319350418558;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463193561T62463193504;
 };
 
@@ -27438,9 +26439,9 @@ nominal_voltage 2400;
 name nodeT6246318788818907;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463188901T62463187888;
 };
 
@@ -27456,9 +26457,9 @@ nominal_voltage 2400;
 name nodeT6246318674218359;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463186718T62463186742;
 };
 
@@ -27480,9 +26481,9 @@ nominal_voltage 2400;
 name nodeT6246318545318695;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463186398T62463185453;
 };
 
@@ -27492,9 +26493,9 @@ nominal_voltage 2400;
 name nodeT6246318632418790;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463185287T62463186324;
 };
 
@@ -27504,9 +26505,9 @@ nominal_voltage 2400;
 name nodeT6246318657718329;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463186691T62463186577;
 };
 
@@ -27534,9 +26535,9 @@ nominal_voltage 2400;
 name nodeT6246318948219027;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463189387T62463189482;
 };
 
@@ -27546,9 +26547,9 @@ nominal_voltage 2400;
 name nodeT6246318897818991;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463128092T62463188978;
 };
 
@@ -27582,9 +26583,9 @@ nominal_voltage 2400;
 name nodeT6246312408718674;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463124065T62463124087;
 };
 
@@ -27600,9 +26601,9 @@ nominal_voltage 2400;
 name nodeT6246312312617886;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463123162T62463123126;
 };
 
@@ -27612,9 +26613,9 @@ nominal_voltage 2400;
 name nodeT6246312119717815;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463121169T62463121197;
 };
 
@@ -27636,9 +26637,9 @@ nominal_voltage 2400;
 name nodeT6246217832118025;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462178343T62462178321;
 };
 
@@ -27660,9 +26661,9 @@ nominal_voltage 2400;
 name nodeT6246223799617654;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462238928T62462237996;
 };
 
@@ -27672,9 +26673,9 @@ nominal_voltage 2400;
 name nodeT6246223796417998;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462237962T62462237964;
 };
 
@@ -27684,9 +26685,9 @@ nominal_voltage 2400;
 name nodeT6246223698117773;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462236984T62462236981;
 };
 
@@ -27822,9 +26823,9 @@ nominal_voltage 2400;
 name nodeT6246300040057837;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463000348T62463000400;
 };
 
@@ -27834,9 +26835,9 @@ nominal_voltage 2400;
 name nodeT6246300051157838;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462059542T62463000511;
 };
 
@@ -27846,9 +26847,9 @@ nominal_voltage 2400;
 name nodeT6246300061057836;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462059675T62463000610;
 };
 
@@ -27858,9 +26859,9 @@ nominal_voltage 2400;
 name nodeT6246300068857843;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463001627T62463000688;
 };
 
@@ -27870,9 +26871,9 @@ nominal_voltage 2400;
 name nodeT6246205978757835;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462059793T62462059787;
 };
 
@@ -27882,9 +26883,9 @@ nominal_voltage 2400;
 name nodeT6246205849157833;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62462059308T62462058491;
 };
 
@@ -27966,9 +26967,9 @@ nominal_voltage 2400;
 name nodeT6246300294857880;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474182051T62463002948;
 };
 
@@ -27978,9 +26979,9 @@ nominal_voltage 2400;
 name nodeT6247418103657857;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62474181058T62474181036;
 };
 
@@ -27996,9 +26997,9 @@ nominal_voltage 2400;
 name nodeT6246300082957844;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463000855T62463000829;
 };
 
@@ -28014,9 +27015,9 @@ nominal_voltage 2400;
 name nodeT6246300181472108;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463001804T62463001814;
 };
 
@@ -28026,9 +27027,9 @@ nominal_voltage 2400;
 name nodeT6246300176957821;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463001766T62463001769;
 };
 
@@ -28038,9 +27039,9 @@ nominal_voltage 2400;
 name nodeT6247418012257845;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62473239194T62474180122;
 };
 
@@ -28056,9 +27057,9 @@ nominal_voltage 2400;
 name nodeT6247323807357806;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62473238040T62473238073;
 };
 
@@ -28068,9 +27069,9 @@ nominal_voltage 2400;
 name nodeT6247323812657824;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62473238221T62473238126;
 };
 
@@ -28086,9 +27087,9 @@ nominal_voltage 2400;
 name nodeT6247323828372522;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62473238255T62473238283;
 };
 
@@ -28098,9 +27099,9 @@ nominal_voltage 2400;
 name nodeT6246205896157827;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462058915T62462058961;
 };
 
@@ -28116,9 +27117,9 @@ nominal_voltage 2400;
 name nodeT6246205876457829;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62462058744T62462058764;
 };
 
@@ -28128,9 +27129,9 @@ nominal_voltage 2400;
 name nodeT6246205769557803;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462057655T62462057695;
 };
 
@@ -28140,9 +27141,9 @@ nominal_voltage 2400;
 name nodeT6246205758557801;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462058558T62462057585;
 };
 
@@ -28152,27 +27153,27 @@ nominal_voltage 2400;
 name nodeT6246205747857800;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62462057439T62462057478;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462057863T62462058873;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62473239131T62473239069;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463002869T62463003904;
 };
 
@@ -28260,9 +27261,9 @@ nominal_voltage 2400;
 name nodeT6247418245957866;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474182499T62474182459;
 };
 
@@ -28272,9 +27273,9 @@ nominal_voltage 2400;
 name nodeT6247418149757865;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474181469T62474181497;
 };
 
@@ -28284,9 +27285,9 @@ nominal_voltage 2400;
 name nodeT6247418144357858;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474181379T62474181443;
 };
 
@@ -28296,9 +27297,9 @@ nominal_voltage 2400;
 name nodeT6247418038957852;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474181335T62474180389;
 };
 
@@ -28308,9 +27309,9 @@ nominal_voltage 2400;
 name nodeT6247418035657847;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474180317T62474180356;
 };
 
@@ -28326,9 +27327,9 @@ nominal_voltage 2400;
 name nodeT6247418169517811;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474181623T62474181695;
 };
 
@@ -28392,9 +27393,9 @@ nominal_voltage 2400;
 name nodeT6247418267818410;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474182629T62474182678;
 };
 
@@ -28416,9 +27417,9 @@ nominal_voltage 2400;
 name nodeT6246217249017361;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462172377T62462172490;
 };
 
@@ -28428,9 +27429,9 @@ nominal_voltage 2400;
 name nodeT6246217237917230;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62462172359T62462172379;
 };
 
@@ -28512,9 +27513,9 @@ nominal_voltage 2400;
 name nodeT6246216924517038;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462169230T62462169245;
 };
 
@@ -28524,9 +27525,9 @@ nominal_voltage 2400;
 name nodeT6246216944216489;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462168493T62462169442;
 };
 
@@ -28554,9 +27555,9 @@ nominal_voltage 2400;
 name nodeT6246216294816246;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62462163909T62462162948;
 };
 
@@ -28620,9 +27621,9 @@ nominal_voltage 2400;
 name nodeT6246209113515042;
 };
 
-object node {
-phases ABCN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462091125T62462091135;
 };
 
@@ -28740,9 +27741,9 @@ nominal_voltage 2400;
 name nodeT6246210126716194;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62462101209T62462101267;
 };
 
@@ -28752,9 +27753,9 @@ nominal_voltage 2400;
 name nodeT6246210022416109;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62462100205T62462100224;
 };
 
@@ -28764,9 +27765,9 @@ nominal_voltage 2400;
 name nodeT6246210133815631;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62462100389T62462101338;
 };
 
@@ -28794,9 +27795,9 @@ nominal_voltage 2400;
 name nodeT6246216645457765;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62462166430T62462166454;
 };
 
@@ -28818,9 +27819,9 @@ nominal_voltage 2400;
 name nodeT6246216946917035;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462169487T62462169469;
 };
 
@@ -28836,9 +27837,9 @@ nominal_voltage 2400;
 name nodeT6246217074317023;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462170679T62462170743;
 };
 
@@ -28866,9 +27867,9 @@ nominal_voltage 2400;
 name nodeT6246211006057781;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462110050T62462110060;
 };
 
@@ -28878,9 +27879,9 @@ nominal_voltage 2400;
 name nodeT6246216887016738;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462168810T62462168870;
 };
 
@@ -28908,9 +27909,9 @@ nominal_voltage 2400;
 name nodeT6246217327217422;
 };
 
-object node {
-phases ABCN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462173273T62462173272;
 };
 
@@ -29028,9 +28029,9 @@ nominal_voltage 2400;
 name nodeT6246222373416390;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462223811T62462223734;
 };
 
@@ -29040,9 +28041,9 @@ nominal_voltage 2400;
 name nodeT6246222261814901;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462221747T62462222618;
 };
 
@@ -29064,9 +28065,9 @@ nominal_voltage 2400;
 name nodeT6246222290016223;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462222990T62462222900;
 };
 
@@ -29082,15 +28083,15 @@ nominal_voltage 2400;
 name nodeT6246216108916204;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462161131T62462161089;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462221928T62462221998;
 };
 
@@ -29100,9 +28101,9 @@ nominal_voltage 2400;
 name nodeT6246222051616100;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462219692T62462220516;
 };
 
@@ -29124,9 +28125,9 @@ nominal_voltage 2400;
 name nodeT6246221985615141;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462219940T62462219856;
 };
 
@@ -29148,9 +28149,9 @@ nominal_voltage 2400;
 name nodeT6246215611715674;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462157141T62462156117;
 };
 
@@ -29166,9 +28167,9 @@ nominal_voltage 2400;
 name nodeT6246216602416774;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462225969T62462166024;
 };
 
@@ -29190,9 +28191,9 @@ nominal_voltage 2400;
 name nodeT6246217408117450;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462174083T62462174081;
 };
 
@@ -29202,9 +28203,9 @@ nominal_voltage 2400;
 name nodeT6246223396017093;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462234942T62462233960;
 };
 
@@ -29214,9 +28215,9 @@ nominal_voltage 2400;
 name nodeT6246223381917380;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462232961T62462233819;
 };
 
@@ -29244,9 +28245,9 @@ nominal_voltage 2400;
 name nodeT6246223167917290;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462231679T62462231679;
 };
 
@@ -29256,9 +28257,9 @@ nominal_voltage 2400;
 name nodeT6246223154517268;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462231529T62462231545;
 };
 
@@ -29286,9 +28287,9 @@ nominal_voltage 2400;
 name nodeT6246222974116092;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462229732T62462229741;
 };
 
@@ -29304,9 +28305,9 @@ nominal_voltage 2400;
 name nodeT6246222943616477;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462229510T62462229436;
 };
 
@@ -29316,9 +28317,9 @@ nominal_voltage 2400;
 name nodeT6246222846516733;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462229319T62462228465;
 };
 
@@ -29328,9 +28329,9 @@ nominal_voltage 2400;
 name nodeT6246222745716882;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462226475T62462227457;
 };
 
@@ -29340,9 +28341,9 @@ nominal_voltage 2400;
 name nodeT6246222653816797;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462226602T62462226538;
 };
 
@@ -29358,9 +28359,9 @@ nominal_voltage 2400;
 name nodeT6246222458016622;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462225428T62462224580;
 };
 
@@ -29370,9 +28371,9 @@ nominal_voltage 2400;
 name nodeT6246222753516865;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462227630T62462227535;
 };
 
@@ -29382,9 +28383,9 @@ nominal_voltage 2400;
 name nodeT6246223047317252;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462231414T62462230473;
 };
 
@@ -29394,9 +28395,9 @@ nominal_voltage 2400;
 name nodeT6246223256417176;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462232691T62462232564;
 };
 
@@ -29412,9 +28413,9 @@ nominal_voltage 2400;
 name nodeT6246223563117082;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62462235664T62462235631;
 };
 
@@ -29436,9 +28437,9 @@ nominal_voltage 2400;
 name nodeT6246312001018203;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62462239978T62463120010;
 };
 
@@ -29478,9 +28479,9 @@ nominal_voltage 2400;
 name nodeT6246307233019396;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463072245T62463072330;
 };
 
@@ -29502,9 +28503,9 @@ nominal_voltage 2400;
 name nodeT6246307535719502;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463075332T62463075357;
 };
 
@@ -29526,9 +28527,9 @@ nominal_voltage 2400;
 name nodeT6246301915019776;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463019058T62463019150;
 };
 
@@ -29556,15 +28557,15 @@ nominal_voltage 2400;
 name nodeT6246302086819930;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463020936T62463020868;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463019768T62463020860;
 };
 
@@ -29580,9 +28581,9 @@ nominal_voltage 2400;
 name nodeT6246301896119574;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463018993T62463018961;
 };
 
@@ -29604,9 +28605,9 @@ nominal_voltage 2400;
 name nodeT6246302155019652;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463021455T62463021550;
 };
 
@@ -29616,9 +28617,9 @@ nominal_voltage 2400;
 name nodeT6246302591020208;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62463024844T62463025910;
 };
 
@@ -29646,9 +28647,9 @@ nominal_voltage 2400;
 name nodeT6247420307358181;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474204023T62474203073;
 };
 
@@ -29658,9 +28659,9 @@ nominal_voltage 2400;
 name nodeT6246302299958149;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474202046T62463022999;
 };
 
@@ -29670,9 +28671,9 @@ nominal_voltage 2400;
 name nodeT6246302293858119;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474201080T62463022938;
 };
 
@@ -29682,9 +28683,9 @@ nominal_voltage 2400;
 name nodeT6247420216658136;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62474202147T62474202166;
 };
 
@@ -29694,9 +28695,9 @@ nominal_voltage 2400;
 name nodeT6247420236058131;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474202258T62474202360;
 };
 
@@ -29706,9 +28707,9 @@ nominal_voltage 2400;
 name nodeT6247420236258134;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474202354T62474202362;
 };
 
@@ -29730,9 +28731,9 @@ nominal_voltage 2400;
 name nodeT6247420247158139;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474202454T62474202471;
 };
 
@@ -29742,9 +28743,9 @@ nominal_voltage 2400;
 name nodeT6247420258158140;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474202555T62474202581;
 };
 
@@ -29760,9 +28761,9 @@ nominal_voltage 2400;
 name nodeT6247420268158145;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474202650T62474202681;
 };
 
@@ -29772,9 +28773,9 @@ nominal_voltage 2400;
 name nodeT6247420279158146;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62474202679T62474202791;
 };
 
@@ -29790,9 +28791,9 @@ nominal_voltage 2400;
 name nodeT6247420474958176;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474204748T62474204749;
 };
 
@@ -29802,9 +28803,9 @@ nominal_voltage 2400;
 name nodeT6247420485957977;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62474204990T62474204859;
 };
 
@@ -29814,9 +28815,9 @@ nominal_voltage 2400;
 name nodeT6247420497957981;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474144036T62474204979;
 };
 
@@ -29826,9 +28827,9 @@ nominal_voltage 2400;
 name nodeT6247420398758183;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474203981T62474203987;
 };
 
@@ -29838,15 +28839,15 @@ nominal_voltage 2400;
 name nodeT6247420298958142;
 };
 
-object node {
-phases BN;
-nominal_voltage 2400;
+object triplex_meter {
+phases BS;
+nominal_voltage 120;
 name node62474202953T62474202989;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474203871T62474203769;
 };
 
@@ -29856,9 +28857,9 @@ nominal_voltage 2400;
 name nodeT6247420356658144;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474203572T62474203566;
 };
 
@@ -29868,9 +28869,9 @@ nominal_voltage 2400;
 name nodeT6247420457558177;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474204552T62474204575;
 };
 
@@ -29880,9 +28881,9 @@ nominal_voltage 2400;
 name nodeT6247420650557921;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474206532T62474206505;
 };
 
@@ -29892,9 +28893,9 @@ nominal_voltage 2400;
 name nodeT6247420662458233;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474205692T62474206624;
 };
 
@@ -29904,9 +28905,9 @@ nominal_voltage 2400;
 name nodeT6247420672458241;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474206706T62474206724;
 };
 
@@ -29916,9 +28917,9 @@ nominal_voltage 2400;
 name nodeT6247420682458243;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474205893T62474206824;
 };
 
@@ -29928,9 +28929,9 @@ nominal_voltage 2400;
 name nodeT6247420694757997;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474146040T62474206947;
 };
 
@@ -29940,9 +28941,9 @@ nominal_voltage 2400;
 name nodeT6247420793657911;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474207930T62474207936;
 };
 
@@ -29952,9 +28953,9 @@ nominal_voltage 2400;
 name nodeT6247420890458263;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474208819T62474208904;
 };
 
@@ -29964,9 +28965,9 @@ nominal_voltage 2400;
 name nodeT6247420783058242;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474206893T62474207830;
 };
 
@@ -29976,9 +28977,9 @@ nominal_voltage 2400;
 name nodeT6247420761258240;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474207559T62474207612;
 };
 
@@ -29988,9 +28989,9 @@ nominal_voltage 2400;
 name nodeT6247420743758260;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474207489T62474207437;
 };
 
@@ -30006,9 +29007,9 @@ nominal_voltage 2400;
 name nodeT6247420335658143;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62474203443T62474203356;
 };
 
@@ -30018,9 +29019,9 @@ nominal_voltage 2400;
 name nodeT6247420435458172;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62474204371T62474204354;
 };
 
@@ -30030,9 +29031,9 @@ nominal_voltage 2400;
 name nodeT6247420502220172;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474205151T62474205022;
 };
 
@@ -30054,9 +29055,9 @@ nominal_voltage 2400;
 name nodeT6246302695520288;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463026977T62463026955;
 };
 
@@ -30072,9 +29073,9 @@ nominal_voltage 2400;
 name nodeT6246302895320509;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463027895T62463028953;
 };
 
@@ -30084,9 +29085,9 @@ nominal_voltage 2400;
 name nodeT6247420708520423;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474207056T62474207085;
 };
 
@@ -30096,9 +29097,9 @@ nominal_voltage 2400;
 name nodeT6247420813820424;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474208243T62474208138;
 };
 
@@ -30132,9 +29133,9 @@ nominal_voltage 2400;
 name nodeT6247420722358261;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474207119T62474207223;
 };
 
@@ -30144,9 +29145,9 @@ nominal_voltage 2400;
 name nodeT6246303193020531;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62474211060T62463031930;
 };
 
@@ -30168,9 +29169,9 @@ nominal_voltage 2400;
 name nodeT6247421408320788;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474215045T62474214083;
 };
 
@@ -30222,9 +29223,9 @@ nominal_voltage 2400;
 name nodeT6247421334720400;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474213353T62474213347;
 };
 
@@ -30234,9 +29235,9 @@ nominal_voltage 2400;
 name nodeT6247421005620599;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62463030909T62474210056;
 };
 
@@ -30252,9 +29253,9 @@ nominal_voltage 2400;
 name nodeT6247421223720865;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474212215T62474212237;
 };
 
@@ -30264,9 +29265,9 @@ nominal_voltage 2400;
 name nodeT6247421235820660;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474212387T62474212358;
 };
 
@@ -30282,9 +29283,9 @@ nominal_voltage 2400;
 name nodeT6247421135620750;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474211335T62474211356;
 };
 
@@ -30306,9 +29307,9 @@ nominal_voltage 2400;
 name nodeT6247420946420553;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474209432T62474209464;
 };
 
@@ -30324,9 +29325,9 @@ nominal_voltage 2400;
 name nodeT6247421158320770;
 };
 
-object node {
-phases AN;
-nominal_voltage 2400;
+object triplex_meter {
+phases AS;
+nominal_voltage 120;
 name node62474211556T62474211583;
 };
 
@@ -30336,9 +29337,9 @@ nominal_voltage 2400;
 name nodeT6246303284920665;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463032835T62463032849;
 };
 
@@ -30360,9 +29361,9 @@ nominal_voltage 2400;
 name nodeT6246302874020500;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463028720T62463028740;
 };
 
@@ -30384,9 +29385,9 @@ nominal_voltage 2400;
 name nodeT6246302843020478;
 };
 
-object node {
-phases CN;
-nominal_voltage 2400;
+object triplex_meter {
+phases CS;
+nominal_voltage 120;
 name node62463028401T62463028430;
 };
 

@@ -36,10 +36,44 @@ def secondarySystemFix(glm):
 	print 'Example load:'
 	print glm[allLoadKeys[1]]
 
+
+	all2ndTransKeys = []
+	all2ndLoadKeys = []
+	all2ndNodeKeys = []
+	def nameToKey(name):
+		hits = [x for x in glm if 'name' in glm[x] and glm[x]['name'] == name]
+		if len(hits) == 0:
+			return []
+		else:
+			return hits
+
+	for key in glm:
+		if 'object' in glm[key] and glm[key]['object'] == 'transformer':
+			fromName = glm[key]['from']
+			toName = glm[key]['to']
+			if fromName in allNamesNodesOnLoads:
+				all2ndTransKeys.append(key)
+				all2ndNodeKeys.extend(nameToKey(fromName))
+				all2ndLoadKeys.extend([x for x in glm if 'parent' in glm[x] and 'object' in glm[x] and glm[x]['object'] == 'load' and glm[x]['parent'] == fromName])				
+			elif toName in allNamesNodesOnLoads:
+				all2ndTransKeys.append(key)
+				all2ndNodeKeys.extend(nameToKey(toName))
+				all2ndLoadKeys.extend([x for x in glm if 'parent' in glm[x] and 'object' in glm[x] and glm[x]['object'] == 'load' and glm[x]['parent'] == toName])
+			else:
+				# this ain't no poletop transformer
+				pass
+
+	allTransKeys = [x for x in glm if 'object' in glm[x] and glm[x]['object'] == 'transformer']
+
+	print 'All transformers:'
+	print len(allTransKeys)
+	print 'All secondary system transformers:'
+	print len(all2ndTransKeys)
+
 	# Fix da nodes.
 	# {'phases': 'BN', 'object': 'node', 'nominal_voltage': '2400', 'name': 'nodeS1806-32-065T14102'}
 	# object triplex_meter { phases BS; nominal_voltage 120; };
-	for nodeKey in allNodesOnLoadsKeys:
+	for nodeKey in all2ndNodeKeys:
 		newDict = {}
 		newDict['object'] = 'triplex_meter'
 		newDict['name'] = glm[nodeKey]['name']
@@ -49,7 +83,7 @@ def secondarySystemFix(glm):
 
 	# Fix da loads.
 	#{'phases': 'BN', 'object': 'load', 'name': 'S1806-32-065', 'parent': 'nodeS1806-32-065T14102', 'load_class': 'R', 'constant_power_C': '0', 'constant_power_B': '1.06969', 'constant_power_A': '0', 'nominal_voltage': '120'}
-	for loadKey in allLoadKeys:
+	for loadKey in all2ndLoadKeys:
 		newDict = {}
 		newDict['object'] = 'triplex_node'
 		newDict['name'] = glm[loadKey]['name']
@@ -63,10 +97,8 @@ def secondarySystemFix(glm):
 		newDict['nominal_voltage'] = '120'
 		glm[loadKey] = newDict
 
-
 	# Gotta fix the transformer phases too...
-	allTransKeys = [x for x in glm if 'object' in glm[x] and glm[x]['object'] == 'transformer']
-	for key in allTransKeys:
+	for key in all2ndTransKeys:
 		fromName = glm[key]['from']
 		toName = glm[key]['to']
 		fromToPhases = [glm[x]['phases'] for x in glm if 'name' in glm[x] and glm[x]['name'] in [fromName, toName]]
