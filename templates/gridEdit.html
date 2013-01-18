@@ -289,18 +289,11 @@ function preLayout() {
 }
 
 function onCompClick(d, i) {
-  function classify(d, c, on) {
-    // stupid helper function.
+  function classify(d, c) {
     svg = d3.select('#chart')
-    if(on) {
-      // turn off the currently styled one
-      svg.select('.' + c).classed(c, false);
-      // then, style the new one
-      svg.select("#n" + d.treeIndex).classed(c, true);
-    }
-    else {
-      svg.select("#n" + d.treeIndex).classed(c, false);
-    }
+    // turn off the old styled one, then style the new one
+    svg.select('.' + c).classed(c, false);
+    svg.select("#n" + d.treeIndex).classed(c, true);
   }
   // Start showing the table.
   gebi('selected').className = ''
@@ -309,14 +302,14 @@ function onCompClick(d, i) {
   // Multiselection case handled first:
   if (d3.event.altKey) {
     altSelectedName = d.name
-    classify(d,'multiselected',true)
+    classify(d,'multiselected')
     return false
   }
   // Set up the global variables
   selectedName = d.name
-  // console.log([d.treeIndex,d.name,d.objectType])
+  console.log([d.treeIndex,d.name,d.objectType])
   // Visually identify the selected node.
-  classify(d,'selected',true)
+  classify(d,'selected')
   // clear the selected table
   table = gebi('selected')
   tableClear(table)
@@ -371,8 +364,9 @@ function getSelectedNode() {
   if (nodes.some(function(d) {return d.name == selectedName}) == false) {
     // We have no selection, or a link was selected.
     return false
+  } else {
+    return nodes.filter(function(d) {return d.name == selectedName})[0]    
   }
-  return nodes.filter(function(d) {return d.name == selectedName})[0]
 }
 
 function hotkeys() {
@@ -525,9 +519,10 @@ function nextTreeKey() {
   return max + 1
 }
 
-function findIndex(arrOfObjects,field,val) {
-  for (findIndexI=0;findIndexI<arrOfObjects.length;findIndexI++) {if (arrOfObjects[findIndexI][field] == val) return findIndexI}
-  return -1
+function findIndex(inOb,field,val) {
+  for (key in inOb) {if (inOb[key][field]==val) {return key}}
+  // if we can't find an index:
+  return ''
 }
 
 // ADDING COMPONENTS FUNCTIONS
