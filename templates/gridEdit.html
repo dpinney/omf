@@ -525,6 +525,12 @@ function findIndex(inOb,field,val) {
   return ''
 }
 
+function findIndices(inOb,field,val) {
+  results = []
+  for (key in inOb) {if (inOb[key][field]==val) results.push(key)}
+  return results
+}
+
 // ADDING COMPONENTS FUNCTIONS
 
 function fillComponentMenu() {
@@ -587,12 +593,16 @@ function newChild(componentName) {
     return false }
   // Get the stuff we need.
   component = clone(components[componentName])
+  newChildAtLocation(component, getSelectedNode()['treeIndex'])
+}
+
+function newChildAtLocation(component,treeIndex) {
   treeNewIndex = nextTreeKey()
   // Make sure component's parent is set.
-  component['parent'] = selectedName
+  component['parent'] = tree[treeIndex]['name']
   // Put the component in the tree with a new name.
   tree[treeNewIndex] = component
-  newName = componentName + String(treeNewIndex)
+  newName = component['object'] + String(treeNewIndex)
   tree[treeNewIndex].name = newName
   // TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
   // Add to the nodes.
