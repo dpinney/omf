@@ -300,7 +300,7 @@ function onCompClick(d, i) {
   // Abort if we try to select a parentChild relationship.
   if (d.objectType == 'parentChild') return false
   // Multiselection case handled first:
-  if (d3.event.altKey) {
+  if (d3.event != null && d3.event.altKey) {
     altSelectedName = d.name
     classify(d,'multiselected')
     return false
@@ -346,6 +346,20 @@ function clearSelection() {
   }
   tableClear(gebi('selected'))
   gebi('selected').className = 'noSelection'
+}
+
+function selectViaTreeIndex(treeIndex) {
+  if (tree[treeIndex].hasOwnProperty('from')) {
+    // That particular tree item is a link:
+    linkI = findIndex(links,'treeIndex',treeIndex)
+    onCompClick(links[linkI],linkI)
+  } else if (tree[treeIndex].hasOwnProperty('object') && tree[treeIndex]['object'] != 'player'){
+    // Or it's a node:
+    nodeI = findIndex(nodes,'treeIndex',treeIndex)
+    onCompClick(nodes[nodeI],nodeI)
+  } else {
+    // Degenerate case: object without visual representation.
+  }
 }
 
 function zoomReset() {
