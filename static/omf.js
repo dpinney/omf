@@ -52,7 +52,7 @@ function dropPill(thisButton, name) {
 function dropPillAndStay(thisButton, name) {
 	if (typeof this.currentState == 'undefined' || this.currentState == 'raised') {
 		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-		thisButton.innerHTML = name + ' ▴'
+		thisButton.innerHTML = name + ' &times;'
 		this.currentState = 'dropped'
 	} else {
 		thisButton.nextSibling.nextSibling.style.display = 'none'

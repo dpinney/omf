@@ -70,6 +70,25 @@
       <li><a href='javascript:unfoldAtSelected()'>Unfold at Selected (u)</a></li>
     </ul>
   </div>
+  <div class='buttonGroup leftToolbar'>
+    <button class='pill' onclick='dropPillAndStay(this, "Find")'>Find ▾</button>
+    <ul class='menu'>
+      <table style='padding:4px;word-wrap:break-word'>
+        <tr>
+          <td>Term</td>
+          <td><input id='searchTerm' type='text'></td>
+        </tr>
+        <tr>
+          <td></td>
+          <td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
+        </tr>
+        <tr>
+          <td style='padding-top:10px'><button onclick='findPrevious()'>Previous</button></td>
+          <td style='padding-top:10px'><button onclick='findNext()'>Next</button></td>
+        </tr>
+      </table>
+    </ul>
+  </div>
   <div class='buttonGroup rightToolbar'>
     <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
     <ul class='menu right'>
@@ -288,6 +307,14 @@ function preLayout() {
   }
 }
 
+function zoomReset() {
+  // TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
+  zoomer.translate([0, 0]).scale(1)
+  vis.attr('transform', 'translate([0, 0]) scale(1)')
+}
+
+// SELECT AND SEARCH FUNCTIONS
+
 function onCompClick(d, i) {
   function classify(d, c) {
     svg = d3.select('#chart')
@@ -362,17 +389,9 @@ function selectViaTreeIndex(treeIndex) {
   }
 }
 
-function zoomReset() {
-  // TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
-  zoomer.translate([0, 0]).scale(1)
-  vis.attr('transform', 'translate([0, 0]) scale(1)')
-}
-
 function onSvgBlankCanvasClick() {
   if (window.event.toElement.tagName == 'svg') {clearSelection()}
 }
-
-// UTILITY AND MISC FUNCTIONS
 
 function getSelectedNode() {
   if (nodes.some(function(d) {return d.name == selectedName}) == false) {
@@ -393,6 +412,50 @@ function hotkeys() {
   if (keychar == 'p') {toggleSelectedPin()}
   else if (keychar == 'f') {foldAtSelected()}
   else if (keychar == 'u') {unfoldAtSelected()}
+}
+
+function findElementsViaString(inString) {
+  results = []
+  for (key in tree) {
+    subIndex = JSON.stringify(tree[key]).indexOf(inString)
+    if (subIndex != -1 && tree[key].hasOwnProperty('object') && tree[key]['object'] != 'player') {
+      results.push(key)
+    }
+  }
+  return results
+}
+
+// Public variable to hold the current search state. Todo: put in a closure.
+var searchCursor
+var oldSearchTerm
+
+function findNext() {
+  term = gebi('searchTerm').value
+  if (oldSearchTerm != term) {
+    oldSearchTerm = term
+    searchCursor = undefined
+  }
+  hits = findElementsViaString(term)
+  gebi('searchHitCount').innerHTML = hits.length + ' Hits'
+  if (hits.length == 0) {return false}
+  if (searchCursor==undefined) {
+    selectViaTreeIndex(hits[0])
+    searchCursor = 0
+  } else {
+    searchCursor++
+    if (searchCursor == hits.length) {searchCursor = 0}
+    if (searchCursor == -1) {searchCursor = hits.length-2}
+    selectViaTreeIndex(hits[searchCursor])
+  }
+}
+
+function findPrevious() {
+  if (searchCursor == undefined) {
+    findNext()
+  } else {
+    searchCursor -= 2
+    findNext()
+  }
 }
 
 // EDITING AND REMOVING COMPONENTS FUNCTIONS
