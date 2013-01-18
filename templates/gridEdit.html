@@ -272,7 +272,6 @@ function redraw() {
 }
 
 function zoomRedraw() {
-  // Some logging code, if you like:
   // console.log('here', d3.event.translate, d3.event.scale);
   vis.attr('transform',
     'translate(' + d3.event.translate + ')'
@@ -289,20 +288,20 @@ function preLayout() {
   }
 }
 
-function classify(d, c, on) {
-  svg = d3.select('#chart')
-  if(on) {
-    // turn off the currently styled one
-    svg.select('.' + c).classed(c, false);
-    // then, style the new one
-    svg.select("#n" + d.treeIndex).classed(c, true);
-  }
-  else {
-    svg.select("#n" + d.treeIndex).classed(c, false);
-  }
-}
-
 function onCompClick(d, i) {
+  function classify(d, c, on) {
+    // stupid helper function.
+    svg = d3.select('#chart')
+    if(on) {
+      // turn off the currently styled one
+      svg.select('.' + c).classed(c, false);
+      // then, style the new one
+      svg.select("#n" + d.treeIndex).classed(c, true);
+    }
+    else {
+      svg.select("#n" + d.treeIndex).classed(c, false);
+    }
+  }
   // Start showing the table.
   gebi('selected').className = ''
   // Abort if we try to select a parentChild relationship.
@@ -315,7 +314,7 @@ function onCompClick(d, i) {
   }
   // Set up the global variables
   selectedName = d.name
-  console.log([d.treeIndex,d.name,d.objectType])
+  // console.log([d.treeIndex,d.name,d.objectType])
   // Visually identify the selected node.
   classify(d,'selected',true)
   // clear the selected table
@@ -346,8 +345,12 @@ function onCompClick(d, i) {
 function clearSelection() {
   selectedName = ''
   altSelectedName = ''
-  svg.select('.selected').classed('selected',false)  
-  svg.select('.multiselected').classed('multiselected',false)  
+  try {
+    svg.select('.selected').classed('selected',false)
+    svg.select('.multiselected').classed('multiselected',false)    
+  } catch(err) {
+    // ignore the error we get because we use svg before we define it--it'll be generated very fast after page load.
+  }
   tableClear(gebi('selected'))
   gebi('selected').className = 'noSelection'
 }
@@ -384,7 +387,7 @@ function hotkeys() {
   else if (keychar == 'u') {unfoldAtSelected()}
 }
 
-// EDITING COMPONENTS FUNCTIONS
+// EDITING AND REMOVING COMPONENTS FUNCTIONS
 
 function editObject(treeIndex) {
   table = gebi('selected')
@@ -501,12 +504,6 @@ function deleteObject(treeIndex) {
       }
       links.splice(linkIndex,1)
     }
-    // Delete tree object:
-    delete tree[treeIndex]
-    // Select nothing:
-    tableClear(gebi('selected'))
-    gebi('selected').className = 'noSelection'
-    redraw()
   } else {
     // Delete link:
     var linkIndex
@@ -514,13 +511,11 @@ function deleteObject(treeIndex) {
       if (links[x].treeIndex == treeIndex) linkIndex = x
     }
     links.splice(linkIndex,1)
-    // Delete tree object:
-    delete tree[treeIndex]
-    // Select nothing:
-    tableClear(gebi('selected'))
-    gebi('selected').className = 'noSelection'
-    redraw()
   }
+  // Delete tree object:
+  delete tree[treeIndex]
+  clearSelection()
+  redraw()  
 }
 
 function nextTreeKey() {
