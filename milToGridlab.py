@@ -3,6 +3,7 @@
 import csv
 import treeParser
 import os
+import shutil
 
 def omfConvert(feederName, stdName, seqName):
 	''' Take in two uploads and a name, create a feeder. '''
@@ -12,6 +13,7 @@ def omfConvert(feederName, stdName, seqName):
 	os.mkdir('./feeders/' + feederName)
 	with open('./feeders/' + feederName + '/main.glm', 'w') as outFile:
 		outFile.write(outGlm)
+	shutil.copyfile('./schedules.glm','./feeders/' + feederName + '/schedules.glm')
 	return
 
 def convert(stdPath,seqPath):
@@ -592,6 +594,7 @@ def convert(stdPath,seqPath):
 	dedupGlm('line_configuration', glmTree)
 
 	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
+						'#include schedules.glm;\n' + \
 						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\nmodule climate;\n' + \
 						'module residential {\nimplicit_enduses NONE;\n};\n\n' + \
 						'module powerflow {\nsolver_method FBS;\nNR_iteration_limit 50;\n};\n\n' + \
@@ -606,6 +609,7 @@ def main():
 	''' tests go here '''
 	outGlm = convert('./uploads/ILEC-Rembrandt.std','./uploads/ILEC.seq')
 	# print outGlm
+	# omfConvert('testMagic','ILEC-Rembrandt.std','ILEC.seq')
 
 if __name__ == '__main__':
 	main()
