@@ -15,7 +15,7 @@ implicit_enduses NONE;
 };
 
 module powerflow {
-solver_method FBS;
+solver_method NR;
 NR_iteration_limit 50;
 };
 

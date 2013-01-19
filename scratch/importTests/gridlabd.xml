@@ -24,7 +24,7 @@
 	<testoutputfile>test.txt</testoutputfile>
 	<xml_encoding>8</xml_encoding>
 	<clock>2000-01-01 00:00:00 PST</clock>
-	<starttime>2013-01-17 15:40:30 PST</starttime>
+	<starttime>2013-01-19 10:46:54 PST</starttime>
 	<stoptime>2000-01-02 00:00:00 PST</stoptime>
 	<double_format>%+lg</double_format>
 	<complex_format>%+lg%+lg%c</complex_format>
@@ -209,7 +209,7 @@
 			<inherits_from>powerflow_object</inherits_from>
 			<node>
 				<id>1</id>
-				<rank>2</rank>
+				<rank>7</rank>
 				<out_svc>NEVER</out_svc>
 				<name>BURLINGTON</name>
 				<bustype>SWING</bustype>
@@ -240,7 +240,6 @@
 				<id>1029</id>
 				<rank>0</rank>
 				<out_svc>NEVER</out_svc>
-				<parent>21003</parent>
 				<name>node2101121003</name>
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
@@ -16276,9 +16275,8 @@
 			<inherits_from>line</inherits_from>
 			<overhead_line>
 				<id>2</id>
-				<rank>1</rank>
+				<rank>2</rank>
 				<out_svc>NEVER</out_svc>
-				<parent>BURLINGTON</parent>
 				<name>21003</name>
 				<configuration>20531line_configuration98301</configuration>
 				<length>+20.6237 ft</length>
