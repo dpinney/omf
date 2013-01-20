@@ -602,12 +602,6 @@ function findIndex(inOb,field,val) {
   return ''
 }
 
-function findIndices(inOb,field,val) {
-  results = []
-  for (key in inOb) {if (inOb[key][field]==val) results.push(key)}
-  return results
-}
-
 // ADDING COMPONENTS FUNCTIONS
 
 function fillComponentMenu() {
@@ -686,9 +680,22 @@ function newChildAtLocation(component,treeIndex) {
   nodeToAdd = {name:component.name, objectType:component.object, treeIndex:treeNewIndex, chargeMultiple:1}
   nodes.push(nodeToAdd)
   // Add to the links.
-  linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',selectedName)], objectType:'parentChild'}
+  linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',tree[treeIndex]['name'])], objectType:'parentChild'}
   links.push(linkToAdd)
   redraw()
+}
+
+function staticLoadsToHouses() {
+  // show hourglass
+  for (index in tree) {
+    if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
+      parentIndex = findIndex(tree, 'name', tree[index]['parent'])
+      deleteObject(index)
+      newHouse = randomHouse()
+      newChildAtLocation(newHouse, parentIndex)
+    }
+  }
+  // hide hourglass
 }
 
 function randomHouse() {
@@ -705,6 +712,7 @@ function randomHouse() {
   function randomChoice(inList) {return inList[Math.floor(Math.random() * inList.length)]}
   function randomInt(min,max) {return Math.floor(Math.random()*(max - min + 1) + min)}
   newHouse = {}
+  newHouse['object'] = 'house'
   newHouse['air_temperature'] = '70'
   newHouse['cooling_COP'] = randomInt(25,40)/10.0 + ''
   newHouse['cooling_setpoint'] = 'cooling' + randomInt(1,8) + '*1'
@@ -722,7 +730,7 @@ function randomHouse() {
   skew = 1200*randomGaussian()
   skew = skew.toPrecision(3) * 1.0 + ''
   newHouse['schedule_skew'] = skew
-  newHouse['thermal_integrity_level'] = randomChoice([1,2,2,2,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6])
+  newHouse['thermal_integrity_level'] = randomChoice([1,2,2,2,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6]) + ''
   treeNewIndex = nextTreeKey()
   newHouse['name'] = 'synhouse' + treeNewIndex
   return newHouse
