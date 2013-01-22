@@ -314,14 +314,29 @@ function preLayout() {
   }
 }
 
+function zoom(x,y,s) {
+  zoomer.translate([x,y]).scale(s);
+  vis.transition().duration(1000).attr('transform','translate(' + x + ',' + y + ') scale(' + s + ')')
+}
+
 function zoomReset() {
   // TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
   zoom(0,0,1)
 }
 
-function zoom(x,y,s) {
-  zoomer.translate([x,y]).scale(s);
-  vis.transition().duration(1000).attr('transform','translate(' + x + ',' + y + ') scale(' + s + ')')
+function zoomToSelection() {
+  domTargets = document.getElementsByClassName('selected')
+  if (domTargets.length != 1) {return false}
+  if (domTargets[0].nodeName == 'line') {
+    x = getSelectedLink()['source']['x']
+    y = getSelectedLink()['source']['y']
+  }
+  else {
+    x = getSelectedNode()['x']
+    y = getSelectedNode()['y']
+  }
+  // Zooming to a node's coordinates puts the node in the upper-left corner of the svg, and the fudge factor was worked out from that.
+  zoom(-1*x+graphSvg.clientWidth/2, -1*y+graphSvg.clientHeight/2, 1)
 }
 
 // SELECT AND SEARCH FUNCTIONS
@@ -413,6 +428,17 @@ function getSelectedNode() {
   }
 }
 
+function getSelectedLink() {
+  try {
+    hits = document.getElementsByClassName('selected')
+    linkIndex = findIndex(links, 'treeIndex', hits[0]['id'].substr(1))
+    return links[linkIndex]
+  } catch(err) {
+    // We had no selection, or the selection wasn't in the links.
+    return undefined
+  }
+}
+
 function hotkeys() {
   // IE8 and earlier
   if(window.event) {x = event.keyCode}
@@ -458,8 +484,7 @@ function findNext() {
     if (searchCursor == -1) {searchCursor = hits.length-2}
     selectViaTreeIndex(hits[searchCursor])
   }
-  //TODO:zoom to the appropriate spot.
-  // target = document.getElementsByClassName('selected')[0]
+  zoomToSelection()
 }
 
 function findPrevious() {
