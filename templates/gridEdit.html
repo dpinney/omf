@@ -25,7 +25,7 @@
   line.link {stroke: #999;stroke-opacity: .6; stroke-width: 6px;}
   line.parentChild {stroke-dasharray:3,3;}
   line.selected {stroke:black; stroke-width: 8px; stroke-opacity: 1.0;}
-  g.selected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; }
+  g.selected {stroke:black; stroke-width: 4px; stroke-opacity: 1.0; }
   g.multiselected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
   g.house {fill:#3366FF;}
   g.load {fill:#3366FF;}
@@ -316,8 +316,12 @@ function preLayout() {
 
 function zoomReset() {
   // TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
-  zoomer.translate([0, 0]).scale(1)
-  vis.attr('transform', 'translate([0, 0]) scale(1)')
+  zoom(0,0,1)
+}
+
+function zoom(x,y,s) {
+  zoomer.translate([x,y]).scale(s);
+  vis.transition().duration(1000).attr('transform','translate(' + x + ',' + y + ') scale(' + s + ')')
 }
 
 // SELECT AND SEARCH FUNCTIONS
@@ -445,7 +449,7 @@ function findNext() {
   hits = findElementsViaString(term)
   gebi('searchHitCount').innerHTML = hits.length + ' Hits'
   if (hits.length == 0) {return false}
-  if (searchCursor==undefined) {
+  if (searchCursor == undefined) {
     selectViaTreeIndex(hits[0])
     searchCursor = 0
   } else {
@@ -454,6 +458,8 @@ function findNext() {
     if (searchCursor == -1) {searchCursor = hits.length-2}
     selectViaTreeIndex(hits[searchCursor])
   }
+  //TODO:zoom to the appropriate spot.
+  // target = document.getElementsByClassName('selected')[0]
 }
 
 function findPrevious() {
