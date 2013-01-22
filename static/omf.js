@@ -42,10 +42,10 @@ function dropPill(thisButton, name) {
 		thisButton.innerHTML = name + ' ▾'
 		// Remove the event when it's fired once:
 		this.removeEventListener('click', arguments.callee, true)
-		// Chill with the propagation, man. Tends not to work...
-		// event.stopPropagation()
+		// If we're hitting the current button, stop propagation so we don't re-open it again instantly.
+		if (window.event.toElement==thisButton) {event.stopPropagation()}
 	}
-	// Add that function as a listener to take care of closing: 
+	// Add that function as a listener to take care of closing:
 	document.body.addEventListener('click', clickCloseEvent, true)
 }
 
