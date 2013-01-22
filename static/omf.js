@@ -100,3 +100,26 @@ function time(func) {
 	var end =  +new Date()
 	return end - start
 }
+
+function showProgressDialog(dialogMessage) {
+	// Make the elements.
+	background = document.createElement('div')
+	background.id = 'progressBackground'
+	progContent = document.createElement('div')
+	progContent.id = 'progressContent'
+	spinner = document.createElement('img')
+	spinner.src = '/static/spinner.gif'
+	progressText = document.createElement('h2')
+	progressText.id = 'progressText'
+	progressText.textContent = dialogMessage
+	// Insert the elements.
+	document.body.appendChild(background)
+	document.body.appendChild(progContent)
+	progContent.appendChild(spinner)
+	progContent.appendChild(progressText)
+}
+
+function removeProgressDialog() {
+	document.body.removeChild(gebi('progressBackground'))
+	document.body.removeChild(gebi('progressContent'))
+}

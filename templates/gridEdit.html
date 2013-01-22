@@ -2,6 +2,7 @@
   <script type='text/javascript' src='/static/d3.v2.js'></script>
   <script type='text/javascript' src='/static/omf.js'></script>
   <link rel='stylesheet' href='/static/omf.css'>
+  <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
   <style>
   * {border:0px;margin:0px;padding:0px;}
   body {overflow-y:hidden;}
@@ -49,6 +50,12 @@
   <div class='buttonGroup leftToolbar'>
     <button class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
     <ul id='newObjectMenu' class='menu'>
+    </ul>
+  </div>
+  <div class='buttonGroup leftToolbar'>
+    <button class='pill' onclick='dropPill(this, "Edit")'>Edit ▾</button>
+    <ul class='menu'>
+      <li><a href='javascript:staticLoadsToHouses()' id='staticToHouses'>Static Loads to Houses</a></li>
     </ul>
   </div>
   <button class='leftToolbar pill' onclick='javascript:zoomReset()'>Zoom Reset</button>
@@ -665,6 +672,7 @@ function newChild(componentName) {
   // Get the stuff we need.
   component = clone(components[componentName])
   newChildAtLocation(component, getSelectedNode()['treeIndex'])
+  redraw()
 }
 
 function newChildAtLocation(component,treeIndex) {
@@ -682,58 +690,62 @@ function newChildAtLocation(component,treeIndex) {
   // Add to the links.
   linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',tree[treeIndex]['name'])], objectType:'parentChild'}
   links.push(linkToAdd)
-  redraw()
 }
 
 function staticLoadsToHouses() {
-  // show hourglass
-  for (index in tree) {
-    if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
-      parentIndex = findIndex(tree, 'name', tree[index]['parent'])
-      deleteObject(index)
-      newHouse = randomHouse()
-      newChildAtLocation(newHouse, parentIndex)
+  function randomHouse() {
+    function randomGaussian() {
+      // Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
+      do {
+        x1 = 2 * Math.random() - 1
+        x2 = 2 * Math.random() - 1
+        rad = x1 * x1 + x2 * x2
+      } while (rad >= 1 || rad == 0)   
+      c = Math.sqrt(-2 * Math.log(rad) / rad);
+      return x1 * c
     }
+    function randomChoice(inList) {return inList[Math.floor(Math.random() * inList.length)]}
+    function randomInt(min,max) {return Math.floor(Math.random()*(max - min + 1) + min)}
+    newHouse = {}
+    newHouse['object'] = 'house'
+    newHouse['air_temperature'] = '70'
+    newHouse['cooling_COP'] = randomInt(25,40)/10.0 + ''
+    newHouse['cooling_setpoint'] = 'cooling' + randomInt(1,8) + '*1'
+    newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
+    // House sizing distribution from http://www.census.gov/housing/ahs/
+    // between 1100 and 3000. Probably needs a normal distribution.
+    area = 1800 + 500*randomGaussian()
+    if (area < 500) {area = 500}
+    area = area.toPrecision(2) * 1.0 + ''
+    newHouse['floor_area'] = area
+    newHouse['heating_COP'] = randomInt(20,35)/10.0 + ''
+    newHouse['heating_setpoint'] = 'heating' + randomInt(1,8) + '*1'
+    newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
+    newHouse['mass_temperature'] = '70'
+    skew = 1200*randomGaussian()
+    skew = skew.toPrecision(3) * 1.0 + ''
+    newHouse['schedule_skew'] = skew
+    newHouse['thermal_integrity_level'] = randomChoice([1,2,2,2,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6]) + ''
+    treeNewIndex = nextTreeKey()
+    newHouse['name'] = 'synhouse' + treeNewIndex
+    return newHouse
   }
-  // hide hourglass
-}
-
-function randomHouse() {
-  function randomGaussian() {
-    // Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
-    do {
-      x1 = 2 * Math.random() - 1
-      x2 = 2 * Math.random() - 1
-      rad = x1 * x1 + x2 * x2
-    } while (rad >= 1 || rad == 0)   
-    c = Math.sqrt(-2 * Math.log(rad) / rad);
-    return x1 * c
+  function replaceAllHouses() {
+    for (index in tree) {
+      if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
+        // console.log(tree[index])
+        parentIndex = findIndex(tree, 'name', tree[index]['parent'])
+        deleteObject(index)
+        newHouse = randomHouse()
+        newChildAtLocation(newHouse, parentIndex)
+      }
+    }
+    redraw()
+    removeProgressDialog()
   }
-  function randomChoice(inList) {return inList[Math.floor(Math.random() * inList.length)]}
-  function randomInt(min,max) {return Math.floor(Math.random()*(max - min + 1) + min)}
-  newHouse = {}
-  newHouse['object'] = 'house'
-  newHouse['air_temperature'] = '70'
-  newHouse['cooling_COP'] = randomInt(25,40)/10.0 + ''
-  newHouse['cooling_setpoint'] = 'cooling' + randomInt(1,8) + '*1'
-  newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
-  // House sizing distribution from http://www.census.gov/housing/ahs/
-  // between 1100 and 3000. Probably needs a normal distribution.
-  area = 1800 + 500*randomGaussian()
-  if (area < 500) {area = 500}
-  area = area.toPrecision(2) * 1.0 + ''
-  newHouse['floor_area'] = area
-  newHouse['heating_COP'] = randomInt(20,35)/10.0 + ''
-  newHouse['heating_setpoint'] = 'heating' + randomInt(1,8) + '*1'
-  newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
-  newHouse['mass_temperature'] = '70'
-  skew = 1200*randomGaussian()
-  skew = skew.toPrecision(3) * 1.0 + ''
-  newHouse['schedule_skew'] = skew
-  newHouse['thermal_integrity_level'] = randomChoice([1,2,2,2,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6]) + ''
-  treeNewIndex = nextTreeKey()
-  newHouse['name'] = 'synhouse' + treeNewIndex
-  return newHouse
+  showProgressDialog('Please wait. Houses are being generated.')
+  // HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
+  setTimeout(replaceAllHouses, 500);
 }
 
 // MODEL SAVING
