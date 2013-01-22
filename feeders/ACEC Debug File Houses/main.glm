@@ -43,8 +43,8 @@ configuration REG27regulator_configuration101;
 
 object regulator_configuration {
 Control MANUAL;
+Type A;
 raise_taps 16;
-PT_phase ABC;
 name REG27regulator_configuration101;
 band_center 2401;
 tap_pos_A 1;
@@ -53,10 +53,10 @@ time_delay 30.0;
 connect_type 1;
 regulation 0.10;
 CT_phase ABC;
-band_width 50;
-tap_pos_C 1;
-Type A;
 lower_taps 16;
+tap_pos_C 1;
+PT_phase ABC;
+band_width 50;
 };
 
 object underground_line {
@@ -929,9 +929,9 @@ conductor_B 978202line_configuration14001overhead_line_conductor14003;
 };
 
 object overhead_line_conductor {
-geometric_mean_radius 0.0304;
 resistance 0.216;
 name 978202line_configuration14001overhead_line_conductor14003;
+geometric_mean_radius 0.0304;
 };
 
 object overhead_line {
@@ -8724,9 +8724,9 @@ conductor_B 985054line_configuration196601overhead_line_conductor196605;
 };
 
 object overhead_line_conductor {
-geometric_mean_radius 0.00814;
 resistance 0.592;
 name 926524line_configuration135701overhead_line_conductor135705;
+geometric_mean_radius 0.00814;
 };
 
 object transformer {
@@ -10233,15 +10233,15 @@ conductor_B 985293line_configuration163601overhead_line_conductor163605;
 };
 
 object overhead_line_conductor {
-geometric_mean_radius 0.0255;
 resistance 0.306;
 name 985293line_configuration163601overhead_line_conductor163605;
+geometric_mean_radius 0.0255;
 };
 
 object overhead_line_conductor {
-geometric_mean_radius 0.00446;
 resistance 1.12;
 name 985293line_configuration163601overhead_line_conductor163606;
+geometric_mean_radius 0.00446;
 };
 
 object overhead_line {
@@ -11836,9 +11836,9 @@ conductor_B 949217line_configuration196501overhead_line_conductor196506;
 };
 
 object overhead_line_conductor {
-geometric_mean_radius 0.00373;
 resistance 3.86;
 name 949217line_configuration196501overhead_line_conductor196506;
+geometric_mean_radius 0.00373;
 };
 
 object overhead_line {
@@ -11870,15 +11870,15 @@ distance_BN 5.656854;
 };
 
 object overhead_line_conductor {
-geometric_mean_radius 0.031300;
 resistance 0.185900;
 name 985054line_configuration196601overhead_line_conductor196605;
+geometric_mean_radius 0.031300;
 };
 
 object overhead_line_conductor {
-geometric_mean_radius 0.00437;
 resistance 2.57;
 name 985054line_configuration196601overhead_line_conductor196606;
+geometric_mean_radius 0.00437;
 };
 
 object overhead_line {
@@ -12421,22 +12421,22 @@ configuration 985293line_configuration163601;
 object capacitor {
 control VOLT;
 phases ABCN;
-capacitor_A 0.10 MVAr;
 name CAP25;
 parent nodeCAP25985309;
 capacitor_B 0.10 MVAr;
 capacitor_C 0.10 MVAr;
-phases_connected ABCN;
+capacitor_A 0.10 MVAr;
 time_delay 300.0;
 nominal_voltage 2401.7771;
+voltage_set_high 2350.0;
 voltage_set_low 2340.0;
 switchC CLOSED;
 control_level INDIVIDUAL;
 switchA CLOSED;
 switchB CLOSED;
-pt_phase ABCN;
+phases_connected ABCN;
 dwell_time 0.0;
-voltage_set_high 2350.0;
+pt_phase ABCN;
 };
 
 object overhead_line {
@@ -22999,9 +22999,9 @@ conductor_B 985054line_configuration196601overhead_line_conductor196605;
 };
 
 object overhead_line_conductor {
-geometric_mean_radius 0.00418;
 resistance 1.69;
 name 979060line_configuration383501overhead_line_conductor383506;
+geometric_mean_radius 0.00418;
 };
 
 object overhead_line {
@@ -23690,9 +23690,9 @@ configuration 904509line_configuration393101;
 };
 
 object overhead_line_conductor {
-geometric_mean_radius 0.00504;
 resistance 1.65;
 name 948792line_configuration392801overhead_line_conductor392804;
+geometric_mean_radius 0.00504;
 };
 
 object underground_line {
