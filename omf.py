@@ -127,7 +127,7 @@ def api_model(path, feederName):
 	elif feederName in os.listdir(fullPrefix):
 		# Grab data from filesystem:
 		tree = tp.parse(fullPrefix + feederName + '/main.glm')
-		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[]}
+		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[], 'layoutVars':{'gravity':'0.1','theta':'0.8','friction':'0.9','linkStrength':'1'}}
 		# cache the file for later
 		jsonLoad = json.dumps(outDict, indent=4)
 		with open(fullPrefix + feederName + '/main.json', 'w') as jsonOut:
@@ -159,12 +159,13 @@ def updateGlm():
 	hiddenNodes = json.loads(postData['hiddenNodes'])
 	links = json.loads(postData['links'])
 	hiddenLinks = json.loads(postData['hiddenLinks'])
+	layoutVars = json.loads(postData['layoutVars'])
 	if newFeeder not in allFeeders:
 		# if we've created a new feeder, copy over the associated files:
 		shutil.copytree('./feeders/' + sourceFeeder,'./feeders/' + newFeeder)
 	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm, open('./feeders/' + newFeeder + '/main.json','w') as jsonCache:
 		newMainGlm.write(tp.sortedWrite(tree))
-		outDict = {'tree':tree, 'nodes':nodes, 'links':links, 'hiddenNodes':hiddenNodes, 'hiddenLinks':hiddenLinks}
+		outDict = {'tree':tree, 'nodes':nodes, 'links':links, 'hiddenNodes':hiddenNodes, 'hiddenLinks':hiddenLinks, 'layoutVars':layoutVars}
 		jsonLoad = json.dumps(outDict, indent=4)
 		jsonCache.write(jsonLoad)
 	return flask.redirect(flask.url_for('root') + '#feeders')

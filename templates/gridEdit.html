@@ -756,6 +756,7 @@ function saveModel() {
               hiddenNodes:JSON.stringify(hiddenNodes),
               links:JSON.stringify(links),
               hiddenLinks:JSON.stringify(hiddenLinks),
+              layoutVars:JSON.stringify({'gravity':force.gravity(),'theta':force.theta(),'friction':force.friction(),'linkStrength':force.linkStrength()()}),
               feederName:feeder,
               newName:gebi('gridName').innerHTML}
   post_to_url('/saveFeeder/', sendDict)
@@ -837,7 +838,8 @@ function layoutMenuInit() {
   gebi('gravityBox').value = force.gravity()
   gebi('thetaBox').value = force.theta()
   gebi('frictionBox').value = force.friction()
-  gebi('linkStrengthBox').value = 1
+  //D3 is crazy, linkStrength is a functor but none of the other variables are. WTF?
+  gebi('linkStrengthBox').value = force.linkStrength()()
 }
 
 function layoutMenuApply() {
@@ -1005,6 +1007,14 @@ d3.json(apiAddress, function (json) {
     if (undefined == realSource) {hiddenLinks[li2].source = realSourceHidden} else {hiddenLinks[li2].source = realSource}
     if (undefined == realTarget) {hiddenLinks[li2].target = realTargetHidden} else {hiddenLinks[li2].target = realTarget} 
   }
+  // Regenerate the layout variables:
+  if (undefined != json['layoutVars']) {
+    force.gravity(json['layoutVars']['gravity'])
+    force.theta(json['layoutVars']['theta'])
+    force.friction(json['layoutVars']['friction'])
+    force.linkStrength(json['layoutVars']['linkStrength'])
+  }
+  // And go at it:
   draw()
   layoutMenuInit()
 })
