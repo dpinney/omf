@@ -26,7 +26,7 @@
   line.parentChild {stroke-dasharray:3,3;}
   line.selected {stroke:black; stroke-width: 8px; stroke-opacity: 1.0;}
   g.selected {stroke:black; stroke-width: 4px; stroke-opacity: 1.0; }
-  g.multiselected {stroke:black; stroke-width: 2px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
+  g.multiselected {stroke:black; stroke-width: 4px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
   g.house {fill:#3366FF;}
   g.load {fill:#3366FF;}
   g.ZIPload, g.waterheater {fill:#66CCFF;}
@@ -161,8 +161,6 @@ var w = 1000
 var h = 1000
 var tree
 var components
-var selectedName
-var altSelectedName
 
 var zoomer = d3.behavior.zoom()
 
@@ -354,12 +352,9 @@ function onCompClick(d, i) {
   if (d.objectType == 'parentChild') return false
   // Multiselection case handled first:
   if (d3.event != null && d3.event.altKey) {
-    altSelectedName = d.name
     classify(d,'multiselected')
     return false
   }
-  // Set up the global variables
-  selectedName = d.name
   console.log([d.treeIndex,d.name,d.objectType])
   // Visually identify the selected node.
   classify(d,'selected')
@@ -389,8 +384,6 @@ function onCompClick(d, i) {
 }
 
 function clearSelection() {
-  selectedName = ''
-  altSelectedName = ''
   try {
     svg.select('.selected').classed('selected',false)
     svg.select('.multiselected').classed('multiselected',false)    
@@ -420,11 +413,24 @@ function onSvgBlankCanvasClick() {
 }
 
 function getSelectedNode() {
-  if (nodes.some(function(d) {return d.name == selectedName}) == false) {
-    // We have no selection, or a link was selected.
-    return false
-  } else {
-    return nodes.filter(function(d) {return d.name == selectedName})[0]    
+  try {
+    hits = document.getElementsByClassName('selected')
+    nodeIndex = findIndex(nodes, 'treeIndex', hits[0]['id'].substr(1))
+    return nodes[nodeIndex]
+  } catch(err) {
+    // We had no selection, or the selection wasn't in the links.
+    return undefined
+  }
+}
+
+function getAltSelectedNode() {
+  try {
+    hits = document.getElementsByClassName('multiselected')
+    nodeIndex = findIndex(nodes, 'treeIndex', hits[0]['id'].substr(1))
+    return nodes[nodeIndex]
+  } catch(err) {
+    // We had no selection, or the selection wasn't in the links.
+    return undefined
   }
 }
 
@@ -646,7 +652,7 @@ function fillComponentMenu() {
   newObjectMenu = gebi('newObjectMenu')
   for (component in components) {
     if (undefined == components[component]['from'] && undefined == components[component]['parent']) {addingFunctionName = 'newNode'}
-    else if (undefined == components[component]['from']) {addingFunctionName = 'newChild'}
+    else if (undefined == components[component]['from']) {addingFunctionName = 'newChildAtSelected'}
     else {addingFunctionName = 'newLink'}
     newObjectMenu.innerHTML += ('<li><a href="javascript:' + addingFunctionName + '(\'' + component + '\')">' + component + '</a></li>')
   }
@@ -675,11 +681,22 @@ function newLink(componentName) {
     for (linkId in links) {
       sourceName = links[linkId].source.name
       targetName = links[linkId].target.name
-      if ((nodeName1 == sourceName && nodeName2 == targetName) || (nodeName1 == targetName && nodeName2 == sourceName)) {return true} }
-    return false }
+      if ((nodeName1 == sourceName && nodeName2 == targetName) || (nodeName1 == targetName && nodeName2 == sourceName)) {return true}
+    }
+    return false
+  }
+  try {
+    selectedName = getSelectedNode()['name']
+    altSelectedName = getAltSelectedNode()['name']
+  } catch(err) {
+    // Key error!
+    selectedName = undefined
+    altSelectedName = undefined
+  }
   if (undefined == selectedName || undefined == altSelectedName || selectedName == altSelectedName || alreadyLinked(selectedName, altSelectedName)) {
     alert('I am sorry, but we cannot insert a link there.')
-    return false }
+    return false
+  }
   // Get the stuff we need.
   component = clone(components[componentName])
   treeNewIndex = nextTreeKey()
@@ -696,10 +713,11 @@ function newLink(componentName) {
   redraw()
 }
 
-function newChild(componentName) {
-  if (undefined == selectedName || findIndex(nodes,'name',selectedName) == -1) {
+function newChildAtSelected(componentName) {
+  if (undefined == getSelectedNode()) {
     alert('I am sorry, but we cannot insert a child element there.')
-    return false }
+    return false
+  }
   // Get the stuff we need.
   component = clone(components[componentName])
   newChildAtLocation(component, getSelectedNode()['treeIndex'])
