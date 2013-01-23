@@ -165,17 +165,16 @@ var components
 var zoomer = d3.behavior.zoom()
 
 var vis = d3.select('#chart')
-	.append('svg:svg')
+  .append('svg:svg')
   .attr('id','graphSvg')
   .on('click', onSvgBlankCanvasClick)
   .attr('viewBox', '0 0 ' + w + ' ' + h )
   .attr('preserveAspectRatio', 'xMinYMin')
-	.attr('pointer-events', 'all')
-	.call(zoomer.on('zoom', zoomRedraw))
-	.append('svg:g')
+  .attr('pointer-events', 'all')
+  .call(zoomer.on('zoom', zoomRedraw))
+  .append('svg:g')
 
-vis.append('svg:g').attr('id','bottomLayer')
-var bottomLayer = d3.select('#bottomLayer')
+vis.append('svg:g').attr('id','linkLayer')
 
 var force = d3.layout.force()
   .linkDistance(30)
@@ -243,7 +242,7 @@ function draw() {
 }
 
 function redraw() {
-  link = bottomLayer.selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
+  link = d3.select('#linkLayer').selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
 
   link.enter().append('svg:line')
     .on('click', onCompClick)
@@ -335,6 +334,20 @@ function zoomToSelection() {
   }
   // Zooming to a node's coordinates puts the node in the upper-left corner of the svg, and the fudge factor was worked out from that.
   zoom(-1*x+graphSvg.clientWidth/2, -1*y+graphSvg.clientHeight/2, 1)
+}
+
+function getCenterCoordinates() {
+  try {
+    x = zoomer.translate()[0]
+    y = zoomer.translate()[1]
+    s = 1/zoomer.scale()
+    xMod = graphSvg.clientWidth/2
+    yMod = graphSvg.clientHeight/2
+    return [s*(xMod-x), s*(yMod-y)]
+  } catch(err) {
+    // Probably haven't transformed yet.
+    return [0,0]
+  }
 }
 
 // SELECT AND SEARCH FUNCTIONS
@@ -670,7 +683,8 @@ function newNode(componentName) {
   // Hack to make sure we color nodes correctly:
   if (newType == 'node') newType = 'gridNode'
   if (undefined != tree[treeNewIndex].bustype && tree[treeNewIndex].bustype == 'SWING') newType += ' swingNode'
-  nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1}
+  coords = getCenterCoordinates()
+  nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1, fixed:true, x:coords[0], y:coords[1], px:coords[0], py:coords[1]}
   nodes.push(nodeToAdd)
   redraw()
 }
