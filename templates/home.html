@@ -9,7 +9,7 @@
 		table#anaTable {width:100%; text-align:left;}
 		table#anaTable tr td:last-child {text-align:right;}
 		table#anaTable tr th:last-child {text-align:right;}
-		div#toolbar {padding:0px; height:40px; line-height:40px;} /*over-riding some toolbar defaults so tabs look good.*/
+		div#toolbar {padding: 0px; height:40px; line-height:40px;} /*over-riding some toolbar defaults so tabs look good.*/
 		p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
 		p.tabSelected {background:gray; color:white;}
 		td.running {color:red;}
@@ -77,7 +77,7 @@
 						<td>
 							<div class='buttonGroup'>
 								<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
-								<ul class='menu'>
+								<ul class='menu right'>
 									{% if md['status'] == 'postRun' %}<li><a href='/viewReports/{{ md["name"] }}'>View Reports</a></li>{% endif %}
 									{% if md['status'] == 'preRun' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/run/",dict)')>Run</a></li>{% endif %}
 									{% if md['status'] == 'postRun' or md['status'] == 'terminated' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/reRun/",dict)'>Re-Run</a></li>{% endif %}

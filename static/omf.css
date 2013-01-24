@@ -14,13 +14,15 @@ div#logoBox a, a:visited {color:white;}
 div#title {	
 	overflow:hidden;
 	white-space: nowrap;
-	padding: 10px;
+	padding-top: 10px;
+	padding-bottom: 10px;
 	text-align:center;
 	font-size: 34pt;
 	line-height: 34pt;
 	text-shadow: 0px 3px 3px gray;
 	color:white;
 	height: 45px;
+	width: 100%;
 	border-width: 0px 0px 1px 0px;
 	border-color:black;
 	border-style:solid;
@@ -30,8 +32,10 @@ div#title {
 	background: -moz-linear-gradient(top,  #404040,  #101010); /* for firefox 3.6+ */ }
 
 div#toolbar {
-    padding:10px;
     height:25px;
+    width: 100%;
+    padding-bottom: 10px;
+    padding-top: 10px;
     border-width:0px 0px 1px 0px;
     border-color:black;
     border-style:solid;
@@ -46,10 +50,12 @@ div#toolbar {
 div.content {
 	background: white;
 	border-width: 1px 0px 1px 0px;
-	border-color:gray;
-	border-style:solid;
-	padding:10px;
-	width:1000px;
+	border-color: gray;
+	border-style: solid;
+	padding: 10px;
+	max-width:1000px;
+	min-width: 640px;
+	width: 95%;
 	margin-left: auto;
 	margin-right: auto;
 	margin-top: 20px;
