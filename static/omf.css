@@ -7,7 +7,7 @@ body {
 	margin:0px;
 	min-width:600px; }
 
-div#logoBox {float:left;}
+div#logoBox {float:left; margin-left: 5px;}
 
 div#logoBox a, a:visited {color:white;}
 
