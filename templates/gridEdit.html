@@ -40,7 +40,6 @@
   g text {fill:black; stroke:black; stroke-width:0px; stroke-opacity: 1; font-size:15; pointer-events: none;}
   circle.nodeIsPinned {fill:none; stroke:black; stroke-width:2.5px; pointer-events: none;}
   circle.nodeNotPinned {fill:none; stroke-width:0px; pointer-events: none;}
-  div#chart {width: 100%; height: 100%;}
   </style>
 </head>
 <body onkeypress='hotkeys()'>
@@ -156,7 +155,6 @@
 </div>
 <script>
 
-// <div id='chart' style='background:white'></div>
 // GLOBAL VARIABLES:
 
 feeder = '{{ feederName }}'
@@ -357,7 +355,7 @@ function getCenterCoordinates() {
 
 function onCompClick(d, i) {
   function classify(d, c) {
-    svg = d3.select('#chart')
+    svg = d3.select('#graphSvg')
     // turn off the old styled one, then style the new one
     svg.select('.' + c).classed(c, false);
     svg.select("#n" + d.treeIndex).classed(c, true);
