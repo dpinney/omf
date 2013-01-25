@@ -3,6 +3,11 @@
 import os
 import __util__ as util
 from pprint import pprint
+import sys
+from os.path import dirname
+# go two layers up and add that to this file's temp path
+sys.path.append(dirname(dirname(os.getcwd())))
+import lib
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 configHtmlTemplate = '''<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a>
@@ -16,26 +21,23 @@ configHtmlTemplate = '''<a href='javascript:removeStudyReport(REMOVALID)' class=
 
 def outputHtml(analysisName):
 	# Put the title in:
-	outputBuffer = '<p class="reportTitle">Climate</p><div id="climateReport" class="tightContent" style="position:relative">'
+	outputBuffer = '<p class="reportTitle">Climate</p>\n<div id="climateReport" class="tightContent" style="position:relative">\n'
 	# Collect study variables:
 	pathPrefix = './analyses/' + analysisName
-	with open(pathPrefix + '/metadata.txt','r') as mdFile:
-		resolution = eval(mdFile.read())['simLengthUnits']
+	resolution = eval(lib.fileSlurp(pathPrefix + '/metadata.txt'))['simLengthUnits']
 	studies = os.listdir(pathPrefix + '/studies/')
-	# If we have more than one study, just show one climate:
-	def fileSlurp(fileName):
-		with open(fileName,'r') as openFile:
-			return openFile.read()
-	metadatas = map(lambda x:fileSlurp(pathPrefix + '/studies/' + x + '/metadata.txt'), studies)
+	metadatas = map(lambda x:lib.fileSlurp(pathPrefix + '/studies/' + x + '/metadata.txt'), studies)
 	climates = set(map(lambda x:eval(x)['climate'], metadatas))
-	title = True
+	# If we have more than one study, just show one climate:
 	if 1 == len(climates):
 		studies = [studies[0]]
 		title = False
+	else:
+		title = True
 	# Turn each study into graphics:
 	for study in studies:
 		climateFiles = [x for x in os.listdir(pathPrefix + '/studies/' + study) if x.startswith('Climate_')]
-		fullArray = util.csvToArray(pathPrefix + '/studies/' + study + '/' + climateFiles[0])		
+		fullArray = util.csvToArray(pathPrefix + '/studies/' + study + '/' + climateFiles[0])
 		fullArray[0] = ['Timestamp','Temperature (dF)','D.Insolation (W/m^2)', 'Wind Speed', 'Rainfall (in/h)', 'Snow Depth (in)']
 		if 'days' == resolution:
 			# Aggregate to the day level, maxing climate but averaging insolation, summing rain:
@@ -43,14 +45,18 @@ def outputHtml(analysisName):
 			fullArray = [fullArray[0]] + util.aggCsv(fullArray[1:], funs, 'day')
 			fullArray[0] = ['Timestamp','Max Temp (dF)','Avg Insol (W/m^2)', 'Max Wind Speed', 'Rainfall (in/h)', 'Max Snow Depth (in)']
 		# Write one study's worth of HTML:
-		outputBuffer += '<div id="climateStudy' + study + '" class="studyContainer">'
-		outputBuffer += '<div id="climateChartDiv' + study + '" style="height:250px"></div>'
+		outputBuffer += '<div id="climateStudy' + study + '" class="studyContainer">\n'
+		outputBuffer += '<div id="climateChartDiv' + study + '" style="height:250px"></div>\n'
 		if True == title:
-			outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
-		graphOptions = "{chartArea:{left:60,top:20,height:'80%', width:'93%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['dimgray','darkgray','darkgray','gainsboro','gainsboro'],legend:{position:'top'}}"
-		outputBuffer += "<script>drawLineChart(" + str(fullArray) + ",'" + 'climateChartDiv' + str(study) + "'," + graphOptions + ")</script>"
-		outputBuffer += '</div>'
-	return outputBuffer + '</div>'
+			outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>\n'
+		outputBuffer += '<script>\n'
+		outputBuffer += 'graphOptions = {chartArea:{left:60,top:20,height:"80%", width:"93%"}, hAxis:{textPosition:"none", title:"Time"}, colors:["dimgray","darkgray","darkgray","gainsboro","gainsboro"],legend:{position:"top"}};\n'
+		outputBuffer += 'climateData = ' + str(fullArray) + ';\n'
+		outputBuffer += 'divName = "climateChartDiv' + str(study) + '";\n'
+		outputBuffer += 'drawLineChart(climateData,divName,graphOptions);\n'
+		outputBuffer += '</script>\n'
+		outputBuffer += '</div>\n'
+	return outputBuffer + '</div>\n'
 
 def modifyStudy(analysisName):
 	pass
@@ -60,7 +66,6 @@ def main():
 	# tests go here.
 	os.chdir('..')
 	outputHtml('SolarTrio')
-
 
 if __name__ == '__main__':
 	main()
