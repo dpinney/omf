@@ -8,6 +8,7 @@ from os.path import dirname
 # go two layers up and add that to this file's temp path
 sys.path.append(dirname(dirname(os.getcwd())))
 import lib
+import json
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 configHtmlTemplate = '''<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a>
@@ -44,16 +45,30 @@ def outputHtml(analysisName):
 			funs = {0:max, 1:lambda x:sum(x)/len(x), 2:max, 3:sum, 4:max}
 			fullArray = [fullArray[0]] + util.aggCsv(fullArray[1:], funs, 'day')
 			fullArray[0] = ['Timestamp','Max Temp (dF)','Avg Insol (W/m^2)', 'Max Wind Speed', 'Rainfall (in/h)', 'Max Snow Depth (in)']
+		# Setting up the graph options:
+		graphParameters = {
+			'chart':{'renderTo':'container', 'type':'line', 'marginRight':20, 'marginBottom':20},
+			'title':{'text':None},
+			'yAxis':{'title':{'text':None},'plotLines':[{'value':0, 'width':1, 'color':'#808080'}]},
+			'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':0, 'borderWidth':0},
+			'credits':{'enabled':False},
+			'xAxis':{'categories':[],'labels':{'enabled':False}},
+			'series':[]
+		}
+		graphParameters['chart']['renderTo'] = 'climateChartDiv' + str(study)
+		graphParameters['xAxis']['categories'] = [x[0] for x in fullArray[1:]]
+		graphParameters['series'].append({'name':fullArray[0][1],'data':[x[1] for x in fullArray[1:]],'color':'dimgray'})
+		graphParameters['series'].append({'name':fullArray[0][2],'data':[x[2] for x in fullArray[1:]],'color':'darkgray'})
+		graphParameters['series'].append({'name':fullArray[0][3],'data':[x[3] for x in fullArray[1:]],'color':'darkgray'})
+		graphParameters['series'].append({'name':fullArray[0][4],'data':[x[4] for x in fullArray[1:]],'color':'gainsboro'})
+		graphParameters['series'].append({'name':fullArray[0][5],'data':[x[5] for x in fullArray[1:]],'color':'gainsboro'})
 		# Write one study's worth of HTML:
 		outputBuffer += '<div id="climateStudy' + study + '" class="studyContainer">\n'
 		outputBuffer += '<div id="climateChartDiv' + study + '" style="height:250px"></div>\n'
 		if True == title:
 			outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>\n'
 		outputBuffer += '<script>\n'
-		outputBuffer += 'graphOptions = {chartArea:{left:60,top:20,height:"80%", width:"93%"}, hAxis:{textPosition:"none", title:"Time"}, colors:["dimgray","darkgray","darkgray","gainsboro","gainsboro"],legend:{position:"top"}};\n'
-		outputBuffer += 'climateData = ' + str(fullArray) + ';\n'
-		outputBuffer += 'divName = "climateChartDiv' + str(study) + '";\n'
-		outputBuffer += 'drawLineChart(climateData,divName,graphOptions);\n'
+		outputBuffer += 'new Highcharts.Chart(' + json.dumps(graphParameters) + ');\n'
 		outputBuffer += '</script>\n'
 		outputBuffer += '</div>\n'
 	return outputBuffer + '</div>\n'

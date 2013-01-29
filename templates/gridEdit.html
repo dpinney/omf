@@ -181,7 +181,6 @@ var force = d3.layout.force()
   .linkDistance(30)
   .size([w, h])
   .charge(function(d){return -120*d.chargeMultiple})
-  // .charge(-120)
 
 var nodes = force.nodes()
 var links = force.links()
