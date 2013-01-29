@@ -47,21 +47,22 @@ def outputHtml(analysisName):
 			fullArray[0] = ['Timestamp','Max Temp (dF)','Avg Insol (W/m^2)', 'Max Wind Speed', 'Rainfall (in/h)', 'Max Snow Depth (in)']
 		# Setting up the graph options:
 		graphParameters = {
-			'chart':{'renderTo':'container', 'type':'line', 'marginRight':20, 'marginBottom':20},
+			'chart':{'renderTo':'', 'type':'line', 'marginRight':20, 'marginBottom':20},
 			'title':{'text':None},
 			'yAxis':{'title':{'text':None},'plotLines':[{'value':0, 'width':1, 'color':'#808080'}]},
 			'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':0, 'borderWidth':0},
 			'credits':{'enabled':False},
 			'xAxis':{'categories':[],'labels':{'enabled':False}},
+			'plotOptions':{'line':{'shadow':False}},
 			'series':[]
 		}
 		graphParameters['chart']['renderTo'] = 'climateChartDiv' + str(study)
 		graphParameters['xAxis']['categories'] = [x[0] for x in fullArray[1:]]
-		graphParameters['series'].append({'name':fullArray[0][1],'data':[x[1] for x in fullArray[1:]],'color':'dimgray'})
-		graphParameters['series'].append({'name':fullArray[0][2],'data':[x[2] for x in fullArray[1:]],'color':'darkgray'})
-		graphParameters['series'].append({'name':fullArray[0][3],'data':[x[3] for x in fullArray[1:]],'color':'darkgray'})
-		graphParameters['series'].append({'name':fullArray[0][4],'data':[x[4] for x in fullArray[1:]],'color':'gainsboro'})
-		graphParameters['series'].append({'name':fullArray[0][5],'data':[x[5] for x in fullArray[1:]],'color':'gainsboro'})
+		graphParameters['series'].append({'name':fullArray[0][1],'data':[x[1] for x in fullArray[1:]],'marker':{'enabled':False},'color':'dimgray'})
+		graphParameters['series'].append({'name':fullArray[0][2],'data':[x[2] for x in fullArray[1:]],'marker':{'enabled':False},'color':'darkgray'})
+		graphParameters['series'].append({'name':fullArray[0][3],'data':[x[3] for x in fullArray[1:]],'marker':{'enabled':False},'color':'darkgray'})
+		graphParameters['series'].append({'name':fullArray[0][4],'data':[x[4] for x in fullArray[1:]],'marker':{'enabled':False},'color':'gainsboro'})
+		graphParameters['series'].append({'name':fullArray[0][5],'data':[x[5] for x in fullArray[1:]],'marker':{'enabled':False},'color':'gainsboro'})
 		# Write one study's worth of HTML:
 		outputBuffer += '<div id="climateStudy' + study + '" class="studyContainer">\n'
 		outputBuffer += '<div id="climateChartDiv' + study + '" style="height:250px"></div>\n'
