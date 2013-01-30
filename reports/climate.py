@@ -47,12 +47,12 @@ def outputHtml(analysisName):
 			fullArray[0] = ['Timestamp','Max Temp (dF)','Avg Insol (W/m^2)', 'Max Wind Speed', 'Rainfall (in/h)', 'Max Snow Depth (in)']
 		# Setting up the graph options:
 		graphParameters = {
-			'chart':{'renderTo':'', 'type':'line', 'marginRight':20, 'marginBottom':20},
+			'chart':{'renderTo':'', 'type':'line', 'marginRight':20, 'marginBottom':20, 'zoomType':'x'},
 			'title':{'text':None},
 			'yAxis':{'title':{'text':None},'plotLines':[{'value':0, 'width':1, 'color':'#808080'}]},
 			'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':0, 'borderWidth':0},
 			'credits':{'enabled':False},
-			'xAxis':{'categories':[],'labels':{'enabled':False}},
+			'xAxis':{'categories':[],'labels':{'enabled':False},'maxZoom':20},
 			'plotOptions':{'line':{'shadow':False}},
 			'series':[]
 		}
