@@ -4,6 +4,7 @@ import os
 import re
 import math
 import __util__ as util
+import json
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 configHtmlTemplate = "<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>feederPowerConsumption</td></tr></table>"
@@ -72,11 +73,36 @@ def outputHtml(analysisName):
 					['Losses'] + losses]
 	energyTotals = [list(r) for r in zip(*energyMatrix)]
 	# Add the power time series graph:
-	powerGraphOptions = "{vAxis:{title:'Power (kW)'}, chartArea:{left:60, top:20, width:'93%', height:'80%'}, hAxis:{title:'Time', textPosition:'none'}, colors:['red','darkred','salmon'], legend:{position:'top'}}"
-	outputBuffer += "<div id='powerTimeSeries'><script>drawLineChart(" + str(powerTimeSeries) + ",'powerTimeSeries'," + powerGraphOptions + ")</script></div>"
+	powGraphParams = {
+		'chart':{'renderTo':'powerTimeSeries', 'type':'line', 'marginRight':20, 'marginBottom':20, 'height':250, 'zoomType':'x'},
+		'title':{'text':None},
+		'yAxis':{'title':{'text':'Power (kW)', 'style':{'color':'gray'}},'plotLines':[{'value':0, 'width':1, 'color':'gray'}]},
+		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
+		'credits':{'enabled':False},
+		'xAxis':{'categories':[],'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
+		'plotOptions':{'line':{'shadow':False}},
+		'series':[]
+	}
+	powGraphParams['xAxis']['categories'] = [x[0] for x in powerTimeSeries[1:]]
+	colorMap = {0:'salmon',1:'red',2:'darkred'}
+	for x in range(1,len(powerTimeSeries[0])):
+		powGraphParams['series'].append({'name':powerTimeSeries[0][x],'data':[y[x] for y in powerTimeSeries[1:]],'marker':{'enabled':False},'color':colorMap[x%3]})
+	outputBuffer += '<div id="powerTimeSeries"><script>new Highcharts.Chart(' + json.dumps(powGraphParams) + ')</script></div>\n'
 	# Add the energy graph:
-	energyGraphOptions = "{chartArea:{left:60,top:20,width:'93%', height:'80%'}, vAxis:{title:'Energy (kWh)'}, isStacked:true, series:{0:{type:'bars'}, 1:{type:'steppedArea'}, 2:{type:'steppedArea'}},colors:['seagreen','darkorange','orangered'], legend:'none', areaOpacity:0.7, bar:{groupWidth:'30%'}}"
-	outputBuffer += "<div id='energyBalance'><script>drawComboChart(" + str(energyTotals) + ",'energyBalance'," + energyGraphOptions + ")</script></div>"
+	energyGraphParams = {
+		'chart':{'renderTo':'energyBalance', 'marginRight':20, 'marginBottom':20, 'height':250},
+		'title':{'text':None},
+		'yAxis':{'title':{'text':'Energy (kWh)', 'style':{'color':'gray'}},'plotLines':[{'value':0, 'width':1, 'color':'gray'}]},
+		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
+		'credits':{'enabled':False},
+		'xAxis':{'categories':[x[0] for x in energyTotals[1:]],'tickColor':'gray','lineColor':'gray'},
+		'plotOptions':{'spline':{'shadow':False, 'lineWidth':0,'marker':{'radius':8}}, 'column':{'stacking':'normal','shadow':False}},
+		'series':[	{'type':'column','name':energyTotals[0][3],'data':[x[3] for x in energyTotals[1:]], 'color':'orangered'},
+					{'type':'column','name':energyTotals[0][2],'data':[x[2] for x in energyTotals[1:]], 'color':'darkorange'},
+					{'type':'spline','name':energyTotals[0][1],'data':[x[1] for x in energyTotals[1:]], 'color':'seagreen'}
+				]
+	}
+	outputBuffer += '<div id="energyBalance"><script>new Highcharts.Chart(' + json.dumps(energyGraphParams) + ')</script></div>\n'
 	return outputBuffer + "</div>"
 
 def modifyStudy(analysisName):
