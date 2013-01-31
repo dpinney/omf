@@ -158,7 +158,7 @@ def outputHtml(analysisName):
 	# Money energy graph:
 	moneyEnergyGraphOptions = '{vAxis:{title:"Energy Cost ($)"}, chartArea:{left:60,top:20,width:"85%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["orange","darkorange","chocolate"], legend:{position:"top"}}'
 	outputBuffer += '<div id="monetizedEnergyBalance" style="position:absolute;top:200px;left:500px;width:500px;height:200px"><script>drawLineChart(' + str(monetizedEnergy) + ',"monetizedEnergyBalance",' + moneyEnergyGraphOptions + ')</script></div>'
-	return outputBuffer + '</div>'
+	return outputBuffer + '</div>\n\n'
 
 def modifyStudy(analysisName):
 	pass

@@ -35,7 +35,7 @@ def outputHtml(analysisName):
 			'yAxis':{'title':{'text':None},'plotLines':[{'value':0, 'width':1, 'color':'gray'}]},
 			'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
 			'credits':{'enabled':False},
-			'xAxis':{'categories':[],'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
+			'xAxis':{'categories':[],'minTickInterval':len(fullArray)/100,'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
 			'plotOptions':{'line':{'shadow':False}},
 			'series':[]
 		}
@@ -45,12 +45,12 @@ def outputHtml(analysisName):
 		graphParameters['series'].append({'name':voltMatrix[0][2],'data':[x[2] for x in voltMatrix[1:]],'marker':{'enabled':False},'color':'blue'})
 		graphParameters['series'].append({'name':voltMatrix[0][3],'data':[x[3] for x in voltMatrix[1:]],'marker':{'enabled':False},'color':'gray'})
 		# Write one study's worth of HTML:
-		outputBuffer += '<div id="voltStudy' + study + '" class="studyContainer">'
-		outputBuffer += '<div id="voltChartDiv' + study + '" class="voltChart" style="height:150px"></div>'
-		outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
+		outputBuffer += '<div id="voltStudy' + study + '" class="studyContainer">\n'
+		outputBuffer += '<div id="voltChartDiv' + study + '" class="voltChart" style="height:150px"></div>\n'
+		outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>\n'
 		outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script>\n'
 		outputBuffer += '</div>'
-	return outputBuffer + '</div>'
+	return outputBuffer + '</div>\n\n'
 
 def modifyStudy(analysisName):
 	pass

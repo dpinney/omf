@@ -3,6 +3,7 @@
 import os
 import __util__
 import math
+import json
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 configHtmlTemplate = '''<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a>
@@ -42,18 +43,35 @@ def outputHtml(analysisName):
 			# TODO: must do more than just maxes!!
 			voltMatrix = [voltMatrix[0]] + __util__.aggCsv(voltMatrix[1:], max, 'day')
 			powerMatrix  = [powerMatrix[0]] + __util__.aggCsv(powerMatrix[1:], max, 'day')
-		# Write one study's worth of HTML:
+		# Study container and title:
 		outputBuffer += '<div id="meterPowerflow' + study + '" class="studyContainer">'
 		outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
-		outputBuffer += '<div id="meterPowerChart' + study + '" style="height:150px"></div>'
-		powerGraphOptions = "{vAxis:{title:'Load (kW)'}, chartArea:{left:60,top:20,height:'70%',width:'93%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['red','darkred','salmon'], legend:{position:'top'}}"
-		outputBuffer += "<script>drawLineChart(" + str(powerMatrix) + ",'" + 'meterPowerChart' + str(study) + "'," + powerGraphOptions + ")</script>"
-		#TODO: throw some voltage on there. 
-		outputBuffer += '<div id="meterVoltChart' + study + '" style="height:150px"></div>'
-		voltGraphOptions = "{vAxis:{title:'Voltage (V)'}, chartArea:{left:60,top:20,height:'70%',width:'93%'}, hAxis:{textPosition:'none', title:'Time'}, colors:['lightblue','blue','darkblue'], legend:{position:'top'}}"
-		outputBuffer += "<script>drawLineChart(" + str(voltMatrix) + ",'" + 'meterVoltChart' + str(study) + "'," + voltGraphOptions + ")</script>"
+		# Power graph:
+		graphParameters = {
+			'chart':{'renderTo':'', 'type':'line', 'marginRight':20, 'marginBottom':20, 'height':150, 'zoomType':'x'},
+			'title':{'text':None},
+			'yAxis':{'title':{'text':'Load (kW)', 'style':{'color':'gray'}},'plotLines':[{'value':0, 'width':1, 'color':'gray'}]},
+			'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
+			'credits':{'enabled':False},
+			'xAxis':{'categories':[x[0] for x in powerMatrix[1:]],'minTickInterval':len(powerMatrix)/100,'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
+			'plotOptions':{'line':{'shadow':False}},
+			'series':[]
+		}
+		graphParameters['chart']['renderTo'] = 'meterPowerChart' + study
+		colorMap = {0:'salmon',1:'red',2:'darkred',3:'crimson',4:'firebrick',5:'indianred'}
+		for x in range(1,len(powerMatrix[0])):
+			graphParameters['series'].append({'name':powerMatrix[0][x],'data':[y[x] for y in powerMatrix[1:]],'marker':{'enabled':False},'color':colorMap[x%5]})
+		outputBuffer += '<div id="meterPowerChart' + study + '"><script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script></div>'
+		# Voltage graph:
+		graphParameters['chart']['renderTo'] = 'meterVoltChart' + study
+		graphParameters['yAxis']['title']['text'] = 'Voltage (V)'
+		colorMap2 = {0:'lightblue',1:'blue',2:'darkblue',3:'cornflowerblue',4:'cyan'}
+		graphParameters['series'] = []
+		for x in range(1,len(voltMatrix[0])):
+			graphParameters['series'].append({'name':voltMatrix[0][x],'data':[y[x] for y in voltMatrix[1:]],'marker':{'enabled':False},'color':colorMap2[x%4]})
+		outputBuffer += '<div id="meterVoltChart' + study + '"><script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script></div>'
 		outputBuffer += '</div>'
-	return outputBuffer + '</div>'
+	return outputBuffer + '</div>\n\n'
 
 def modifyStudy(analysisName):
 	pass

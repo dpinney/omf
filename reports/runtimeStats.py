@@ -21,7 +21,7 @@ def outputHtml(analysisName):
 				# No errors, so get stdout:
 				cleanPre = study.upper() + '\n\n' + stdoutText
 			outputBuffer += "<pre class='stdoutBlock'>" + cleanPre + "</pre>"
-	return outputBuffer + "</div>"
+	return outputBuffer + '</div>\n\n'
 
 def modifyStudy(analysisName):
 	pass

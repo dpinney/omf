@@ -22,7 +22,8 @@ configHtmlTemplate = '''<a href='javascript:removeStudyReport(REMOVALID)' class=
 
 def outputHtml(analysisName):
 	# Put the title in:
-	outputBuffer = '<p class="reportTitle">Climate</p>\n<div id="climateReport" class="tightContent" style="position:relative">\n'
+	outputBuffer = '<p class="reportTitle">Climate</p>\n'
+	outputBuffer += '<div id="climateReport" class="tightContent" style="position:relative">\n'
 	# Collect study variables:
 	pathPrefix = './analyses/' + analysisName
 	resolution = eval(lib.fileSlurp(pathPrefix + '/metadata.txt'))['simLengthUnits']
@@ -52,7 +53,7 @@ def outputHtml(analysisName):
 			'yAxis':{'title':{'text':None},'plotLines':[{'value':0, 'width':1, 'color':'gray'}]},
 			'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
 			'credits':{'enabled':False},
-			'xAxis':{'categories':[],'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
+			'xAxis':{'categories':[],'minTickInterval':len(fullArray)/100,'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
 			'plotOptions':{'line':{'shadow':False}},
 			'series':[]
 		}
@@ -66,11 +67,9 @@ def outputHtml(analysisName):
 		outputBuffer += '<div id="climateChartDiv' + study + '" style="height:250px"></div>\n'
 		if True == title:
 			outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>\n'
-		outputBuffer += '<script>\n'
-		outputBuffer += 'new Highcharts.Chart(' + json.dumps(graphParameters) + ');\n'
-		outputBuffer += '</script>\n'
+		outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script>\n'
 		outputBuffer += '</div>\n'
-	return outputBuffer + '</div>\n'
+	return outputBuffer + '</div>\n\n'
 
 def modifyStudy(analysisName):
 	pass

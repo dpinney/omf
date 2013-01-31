@@ -57,7 +57,7 @@ def outputHtml(analysisName):
 	pieChartData = [['Study','Components']] + [[study, uniqueNameCounts[study]] for study in uniqueNameCounts]
 	graphOptions = '{title:"Grid Components", colors:["gainsboro","silver","gray"], titleTextStyle:{fontSize:14},chartArea:{left:10}}'
 	outputBuffer += '<div id="comparisonPieChart" style="position:absolute;width:500px;height:150px;left:0px;top:250px"><script>drawPieChart(' + str(pieChartData) + ',"comparisonPieChart",' + graphOptions + ')</script></div>'
-	return outputBuffer + '</div>'
+	return outputBuffer + '</div>\n\n'
 
 def modifyStudy(analysisName):
 	pass

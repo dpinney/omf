@@ -32,7 +32,7 @@ def outputHtml(analysisName):
 				'yAxis':{'title':{'text':None}, 'labels':{'enabled':False}},
 				'legend':{'enabled':False},
 				'credits':{'enabled':False},
-				'xAxis':{'categories':[x[0] for x in fullArray[1:]],'tickColor':'gray','lineColor':'gray','labels':{'enabled':False},'maxZoom':20},
+				'xAxis':{'categories':[x[0] for x in fullArray[1:]],'minTickInterval':len(fullArray)/100,'tickColor':'gray','lineColor':'gray','labels':{'enabled':False},'maxZoom':20},
 				'plotOptions':{'area':{'shadow':False,'stacking':'normal','marker':{'enabled':False},'fillOpacity':1,}},
 				'series':[	{'type':'area','name':'PhaseA','data':[x[1] for x in fullArray[1:]],'color':'gainsboro'},
 							{'type':'area','name':'PhaseB','data':[x[2] for x in fullArray[1:]],'color':'darkgray'},
@@ -41,7 +41,7 @@ def outputHtml(analysisName):
 			}
 			outputBuffer += '<div id="chartDiv' + study + cap + '" class="capChart" style="height:90px"><script>new Highcharts.Chart(' + json.dumps(graphParams) + ')</script></div>\n'
 		outputBuffer += '</div>'
-	return outputBuffer + '</div>'
+	return outputBuffer + '</div>\n\n'
 
 def modifyStudy(analysisName):
 	pass
