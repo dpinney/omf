@@ -21,12 +21,7 @@
 	<script type="text/javascript" src='/static/jquery-1.8.3.min.js'></script>
 	<script src='/static/highcharts.min.js'></script>	
 	<script>
-		google.load('visualization', '1', {packages:['corechart','geochart','table']})
-		function drawLineChart(dataArray, divName, options) {
-			chartData = google.visualization.arrayToDataTable(dataArray)
-			chart = new google.visualization.LineChart(gebi(divName))
-			chart.draw(chartData, options)
-		}
+		google.load('visualization', '1', {packages:['corechart','geochart']})
 		function drawMap(dataArray, divName) {
 			chartData = google.visualization.arrayToDataTable(dataArray)
 			options = {region:'US', displayMode:'markers', legend:'none'}
