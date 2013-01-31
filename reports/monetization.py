@@ -6,6 +6,7 @@ import __util__
 from pprint import pprint
 from copy import copy
 import math
+import json
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 configHtmlTemplate = '''<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a>
@@ -150,14 +151,39 @@ def outputHtml(analysisName):
 						</script> '''
 	outputBuffer += '</div>'
 	# Power graph:
-	powerGraphOptions = '{vAxis:{title:"Power (kW)"}, chartArea:{left:60,top:20,width:"93%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["red","darkred","salmon"], legend:{position:"top"}}'
-	outputBuffer += '<div id="monPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:1000px;height:200px"><script>drawLineChart(' + str(powerTimeSeries) + ',"monPowerTimeSeries",' + powerGraphOptions + ')</script></div>'
+	graphParameters = {
+		'chart':{'renderTo':'monPowerTimeSeries', 'type':'line', 'marginRight':20, 'marginBottom':20, 'height':200, 'width':1000, 'zoomType':'x'},
+		'title':{'text':None},
+		'yAxis':{'title':{'text':'Power (kW)', 'style':{'color':'gray'}},'plotLines':[{'value':0, 'width':1, 'color':'gray'}]},
+		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
+		'credits':{'enabled':False},
+		'xAxis':{'categories':[],'minTickInterval':len(fullArray)/100,'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
+		'plotOptions':{'line':{'shadow':False}},
+		'series':[]
+	}
+	graphParameters['xAxis']['categories'] = [x[0] for x in powerTimeSeries[1:]]
+	colorMap = {0:'salmon',1:'red',2:'darkred',3:'crimson',4:'firebrick',5:'indianred'}
+	for x in range(1,len(powerTimeSeries[0])):
+		graphParameters['series'].append({'name':powerTimeSeries[0][x],'data':[y[x] for y in powerTimeSeries[1:]],'marker':{'enabled':False},'color':colorMap[x%6]})
+	outputBuffer += '<div id="monPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:1000px;height:200px"></div>\n'
+	outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script>\n'
 	# Money power graph:
-	moneyPowerGraphOptions = '{vAxis:{title:"Capacity Cost ($)"}, chartArea:{left:60,top:20,width:"85%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["red","darkred","salmon"], legend:{position:"top"}}'
-	outputBuffer += '<div id="monetizedPowerTimeSeries" style="position:absolute;top:200px;left:0px;width:500px;height:200px"><script>drawLineChart(' + str(monetizedPower) + ',"monetizedPowerTimeSeries",' + moneyPowerGraphOptions + ')</script></div>'
+	graphParameters['series'] = []
+	graphParameters['chart']['height'] = 200
+	graphParameters['chart']['width'] = 500
+	graphParameters['chart']['renderTo'] = 'monetizedPowerTimeSeries'
+	for x in range(1,len(monetizedPower[0])):
+		graphParameters['series'].append({'name':monetizedPower[0][x],'data':[y[x] for y in monetizedPower[1:]],'marker':{'enabled':False},'color':colorMap[x%6]})
+	outputBuffer += '<div id="monetizedPowerTimeSeries" style="position:absolute;top:200px;left:0px;width:500px;height:200px"></div>'
+	outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script>\n'
 	# Money energy graph:
-	moneyEnergyGraphOptions = '{vAxis:{title:"Energy Cost ($)"}, chartArea:{left:60,top:20,width:"85%",height:"80%"}, hAxis:{title:"Time", textPosition:"none"}, colors:["orange","darkorange","chocolate"], legend:{position:"top"}}'
-	outputBuffer += '<div id="monetizedEnergyBalance" style="position:absolute;top:200px;left:500px;width:500px;height:200px"><script>drawLineChart(' + str(monetizedEnergy) + ',"monetizedEnergyBalance",' + moneyEnergyGraphOptions + ')</script></div>'
+	graphParameters['series'] = []
+	graphParameters['chart']['renderTo'] = 'monetizedEnergyBalance'
+	colorMap = {0:'goldenrod', 1:'orange', 2:'darkorange', 3:'gold', 4:'chocolate'}
+	for x in range(1,len(monetizedEnergy[0])):
+		graphParameters['series'].append({'name':monetizedEnergy[0][x],'data':[y[x] for y in monetizedEnergy[1:]],'marker':{'enabled':False},'color':colorMap[x%5]})
+	outputBuffer += '<div id="monetizedEnergyBalance" style="position:absolute;top:200px;left:500px;width:500px;height:200px"></div>'
+	outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script>\n'
 	return outputBuffer + '</div>\n\n'
 
 def modifyStudy(analysisName):

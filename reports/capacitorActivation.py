@@ -29,7 +29,7 @@ def outputHtml(analysisName):
 			graphParams = {
 				'chart':{'renderTo':'chartDiv' + study + cap, 'marginRight':20, 'marginBottom':10, 'marginTop':0, 'zoomType':'x', 'height':90},
 				'title':{'text':None},
-				'yAxis':{'title':{'text':None}, 'labels':{'enabled':False}},
+				'yAxis':{'title':{'text':None}, 'labels':{'enabled':False}, 'gridLineWidth':0},
 				'legend':{'enabled':False},
 				'credits':{'enabled':False},
 				'xAxis':{'categories':[x[0] for x in fullArray[1:]],'minTickInterval':len(fullArray)/100,'tickColor':'gray','lineColor':'gray','labels':{'enabled':False},'maxZoom':20},
