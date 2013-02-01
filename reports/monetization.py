@@ -3,7 +3,6 @@
 import os
 import re
 import __util__
-from pprint import pprint
 from copy import copy
 import math
 import json
@@ -49,15 +48,11 @@ def outputHtml(analysisName):
 	distrCapacityRate = float(reportOptions['distrCapacityRate'])
 	equipAndInstallCost = float(reportOptions['equipAndInstallCost'])
 	opAndMaintCost = float(reportOptions['opAndMaintCost'])
-	# Find the interval size (in seconds):
-	with open(pathPrefix + '/studies/' + studies[0] + '/main.glm') as testGlm:
-		# TODO: clean up this hack. Just convert the metadata units value.
-		glmContent = testGlm.read()
-		intervalText = re.findall('interval\s+(\d+)', glmContent)
-		if [] != intervalText:
-			interval = float(intervalText[0])
+	# Find the resolution and interval size (in seconds):
 	with open(pathPrefix + '/metadata.txt','r') as mdFile:
 		resolution = eval(mdFile.read())['simLengthUnits']
+		intervalMap = {'minutes':60,'hours':3600,'days':86400}
+		interval = intervalMap[resolution]
 	# Insert the metrics table framework.
 	outputBuffer += '<div id="additionalMetrics" style="position:absolute;top:410px;left:0px;width:1000px;height:190px;overflow-y:auto;overflow-x:hidden">'
 	outputBuffer += '<div style="width:1000px;height:40px;padding:0px 5px 0px 5px">Co-op Energy Rate ($/kWh) <input id="distrEnergyRate" value="' + str(distrEnergyRate) + '"/> Capacity Rate ($/kW) <input id="distrCapacityRate" value="' + str(distrCapacityRate) + '"/> <button style="width:100px" onclick="recalculateCostBenefit()">Recalculate</button></div>'
