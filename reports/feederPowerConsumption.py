@@ -73,17 +73,11 @@ def outputHtml(analysisName):
 					['Losses'] + losses]
 	energyTotals = [list(r) for r in zip(*energyMatrix)]
 	# Add the power time series graph:
-	powGraphParams = {
-		'chart':{'renderTo':'powerTimeSeries', 'type':'line', 'marginRight':20, 'marginBottom':20, 'height':250, 'zoomType':'x'},
-		'title':{'text':None},
-		'yAxis':{'title':{'text':'Power (kW)', 'style':{'color':'gray'}}},
-		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
-		'credits':{'enabled':False},
-		'xAxis':{'categories':[],'minTickInterval':len(fullArray)/100,'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
-		'plotOptions':{'line':{'shadow':False}},
-		'series':[]
-	}
-	powGraphParams['xAxis']['categories'] = [x[0] for x in powerTimeSeries[1:]]
+	powGraphParams = util.defaultGraphObject(resolution, powerTimeSeries[1][0])
+	powGraphParams['chart']['renderTo'] = 'powerTimeSeries'
+	powGraphParams['chart']['type'] = 'line'
+	powGraphParams['chart']['height'] = 250	
+	powGraphParams['yAxis']['title']['text'] = 'Power (kW)'
 	colorMap = {0:'salmon',1:'red',2:'darkred'}
 	for x in range(1,len(powerTimeSeries[0])):
 		powGraphParams['series'].append({'name':powerTimeSeries[0][x],'data':[y[x] for y in powerTimeSeries[1:]],'marker':{'enabled':False},'color':colorMap[x%3]})

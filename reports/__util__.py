@@ -89,7 +89,7 @@ def defaultGraphObject(resolution, startTimeStamp):
 	graphParameters = {
 		'chart':{'renderTo':'', 'marginRight':20, 'marginBottom':20, 'zoomType':'x'},
 		'title':{'text':None},
-		'yAxis':{'title':{'text':None}},
+		'yAxis':{'title':{'text':None, 'style':{'color':'gray'}}},
 		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
 		'credits':{'enabled':False},
 		'xAxis':{'type':'datetime','maxZoom':maxZoom, 'tickColor':'gray','lineColor':'gray'},

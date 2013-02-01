@@ -40,8 +40,7 @@ def outputHtml(analysisName):
 		sourceFeedName = row[1]
 		outputBuffer += '<tr><td>' + row[0] + '</td><td><a href="/analysisFeeder/' + analysisName + '/' + row[0] + '">' + sourceFeedName + '</a></td></tr>'
 	outputBuffer += '</table></div>'
-	# add the pie chart:
-	# Build up the data:
+	# Build up the pie chart:
 	dataTree = {}
 	pathPrefix = './analyses/' + analysisName + '/studies/'
 	for study in os.listdir('./analyses/' + analysisName + '/studies/'):

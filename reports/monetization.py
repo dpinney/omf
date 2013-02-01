@@ -2,7 +2,7 @@
 
 import os
 import re
-import __util__
+import __util__ as util
 from copy import copy
 import math
 import json
@@ -63,7 +63,7 @@ def outputHtml(analysisName):
 		powerToAdd = []
 		swingFileNames = [x for x in os.listdir(pathPrefix + '/studies/' + study) if x.startswith('SwingKids_') and x.endswith('.csv')]
 		for swingFile in swingFileNames:
-			fullArray = __util__.csvToArray(pathPrefix + '/studies/' + study + '/' + swingFile)
+			fullArray = util.csvToArray(pathPrefix + '/studies/' + study + '/' + swingFile)
 			fullArray[0] = ['', str(study)]
 			fullArray[1:] = [[row[0],(-1 if row[1]<0 else 1)*math.sqrt(row[1]**2+row[2]**2)/1000] for row in fullArray[1:]]
 			if [] == powerToAdd:
@@ -92,8 +92,8 @@ def outputHtml(analysisName):
 	# Do day-level aggregation if necessary:
 	if 'days' == resolution:
 		# TODO: must do more than just maxes!!
-		powerTimeSeries = [powerTimeSeries[0]] + __util__.aggCsv(powerTimeSeries[1:], max, 'day')
-		energyTimeSeries  = [energyTimeSeries[0]] + __util__.aggCsv(energyTimeSeries[1:], lambda x:sum(x)/len(x), 'day')
+		powerTimeSeries = [powerTimeSeries[0]] + util.aggCsv(powerTimeSeries[1:], max, 'day')
+		energyTimeSeries  = [energyTimeSeries[0]] + util.aggCsv(energyTimeSeries[1:], lambda x:sum(x)/len(x), 'day')
 	# Monetize stuff, then get per-study totals:
 	monetizedPower = [powerTimeSeries[0]] + processMonths(powerTimeSeries[1:], lambda x:max(x)/len(x)*distrCapacityRate)
 	monetizedEnergy = [energyTimeSeries[0]] + processMonths(energyTimeSeries[1:], lambda x:sum(x)/len(x)*distrEnergyRate)
@@ -146,39 +146,39 @@ def outputHtml(analysisName):
 						</script> '''
 	outputBuffer += '</div>'
 	# Power graph:
-	graphParameters = {
-		'chart':{'renderTo':'monPowerTimeSeries', 'type':'line', 'marginRight':20, 'marginBottom':20, 'height':200, 'width':1000, 'zoomType':'x'},
-		'title':{'text':None},
-		'yAxis':{'title':{'text':'Power (kW)', 'style':{'color':'gray'}}},
-		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
-		'credits':{'enabled':False},
-		'xAxis':{'categories':[],'minTickInterval':len(fullArray)/100,'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
-		'plotOptions':{'line':{'shadow':False}},
-		'series':[]
-	}
-	graphParameters['xAxis']['categories'] = [x[0] for x in powerTimeSeries[1:]]
+	powGraphParams = util.defaultGraphObject(resolution, powerTimeSeries[1][0])
+	powGraphParams['chart']['renderTo'] = 'monPowerTimeSeries'
+	powGraphParams['chart']['type'] = 'line'
+	powGraphParams['chart']['height'] = 200	
+	powGraphParams['yAxis']['title']['text'] = 'Power (kW)'
 	colorMap = {0:'salmon',1:'red',2:'darkred',3:'crimson',4:'firebrick',5:'indianred'}
 	for x in range(1,len(powerTimeSeries[0])):
-		graphParameters['series'].append({'name':powerTimeSeries[0][x],'data':[y[x] for y in powerTimeSeries[1:]],'marker':{'enabled':False},'color':colorMap[x%6]})
+		powGraphParams['series'].append({'name':powerTimeSeries[0][x],'data':[y[x] for y in powerTimeSeries[1:]],'marker':{'enabled':False},'color':colorMap[x%6]})
 	outputBuffer += '<div id="monPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:1000px;height:200px"></div>\n'
-	outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script>\n'
+	outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(powGraphParams) + ')</script>\n'
 	# Money power graph:
-	graphParameters['series'] = []
-	graphParameters['chart']['height'] = 200
-	graphParameters['chart']['width'] = 500
-	graphParameters['chart']['renderTo'] = 'monetizedPowerTimeSeries'
+	monPowGraphParams = util.defaultGraphObject(resolution, monetizedPower[1][0])
+	monPowGraphParams['chart']['height'] = 200
+	monPowGraphParams['chart']['width'] = 500
+	monPowGraphParams['chart']['renderTo'] = 'monetizedPowerTimeSeries'
+	monPowGraphParams['chart']['type'] = 'line'
+	monPowGraphParams['yAxis']['title']['text'] = 'Capacity Cost ($)'
 	for x in range(1,len(monetizedPower[0])):
-		graphParameters['series'].append({'name':monetizedPower[0][x],'data':[y[x] for y in monetizedPower[1:]],'marker':{'enabled':False},'color':colorMap[x%6]})
+		monPowGraphParams['series'].append({'name':monetizedPower[0][x],'data':[y[x] for y in monetizedPower[1:]],'marker':{'enabled':False},'color':colorMap[x%6]})
 	outputBuffer += '<div id="monetizedPowerTimeSeries" style="position:absolute;top:200px;left:0px;width:500px;height:200px"></div>'
-	outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script>\n'
+	outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(monPowGraphParams) + ')</script>\n'
 	# Money energy graph:
-	graphParameters['series'] = []
-	graphParameters['chart']['renderTo'] = 'monetizedEnergyBalance'
+	monEnergyGraphParams = util.defaultGraphObject(resolution, monetizedEnergy[1][0])
+	monEnergyGraphParams['chart']['height'] = 200
+	monEnergyGraphParams['chart']['width'] = 500
+	monEnergyGraphParams['chart']['renderTo'] = 'monetizedEnergyBalance'
+	monEnergyGraphParams['chart']['type'] = 'line'
+	monEnergyGraphParams['yAxis']['title']['text'] = 'Energy Cost ($)'
 	colorMap = {0:'goldenrod', 1:'orange', 2:'darkorange', 3:'gold', 4:'chocolate'}
 	for x in range(1,len(monetizedEnergy[0])):
-		graphParameters['series'].append({'name':monetizedEnergy[0][x],'data':[y[x] for y in monetizedEnergy[1:]],'marker':{'enabled':False},'color':colorMap[x%5]})
+		monEnergyGraphParams['series'].append({'name':monetizedEnergy[0][x],'data':[y[x] for y in monetizedEnergy[1:]],'marker':{'enabled':False},'color':colorMap[x%5]})
 	outputBuffer += '<div id="monetizedEnergyBalance" style="position:absolute;top:200px;left:500px;width:500px;height:200px"></div>'
-	outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script>\n'
+	outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(monEnergyGraphParams) + ')</script>\n'
 	return outputBuffer + '</div>\n\n'
 
 def modifyStudy(analysisName):
