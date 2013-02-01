@@ -1,7 +1,7 @@
 ﻿#!/usr/bin/env python
 
 import os
-import __util__
+import __util__ as util
 import math
 import json
 
@@ -19,8 +19,7 @@ def outputHtml(analysisName):
 	outputBuffer = '<p class="reportTitle">Meter Powerflow</p><div id="meterPowerflowReport" class="tightContent" style="position:relative">'
 	# Build up the data:
 	pathPrefix = './analyses/' + analysisName
-	with open(pathPrefix + '/metadata.txt','r') as mdFile:
-		resolution = eval(mdFile.read())['simLengthUnits']
+	resolution = eval(util.fileSlurp(pathPrefix + '/metadata.txt'))['simLengthUnits']
 	studies = os.listdir(pathPrefix + '/studies/')
 	for study in studies:
 		voltMatrix = []
@@ -28,7 +27,7 @@ def outputHtml(analysisName):
 		# Add the data from each recorder in this study:
 		for fileName in os.listdir(pathPrefix + '/studies/' + study):
 			if fileName.startswith('meterRecorder') and fileName.endswith('.csv'):
-				fullArray = __util__.csvToArray(pathPrefix + '/studies/' + study + '/' + fileName)
+				fullArray = util.csvToArray(pathPrefix + '/studies/' + study + '/' + fileName)
 				# If we haven't added a time series yet, put the datestamp stuff on there:
 				if voltMatrix == [] and powerMatrix == []:
 					voltMatrix = [[row[0]] for row in fullArray]
@@ -41,23 +40,16 @@ def outputHtml(analysisName):
 		# Do day-level aggregation:
 		if 'days' == resolution:
 			# TODO: must do more than just maxes!!
-			voltMatrix = [voltMatrix[0]] + __util__.aggCsv(voltMatrix[1:], max, 'day')
-			powerMatrix  = [powerMatrix[0]] + __util__.aggCsv(powerMatrix[1:], max, 'day')
+			voltMatrix = [voltMatrix[0]] + util.aggCsv(voltMatrix[1:], max, 'day')
+			powerMatrix  = [powerMatrix[0]] + util.aggCsv(powerMatrix[1:], max, 'day')
 		# Study container and title:
 		outputBuffer += '<div id="meterPowerflow' + study + '" class="studyContainer">'
 		outputBuffer += '<div class="studyTitleBox"><p class="studyTitle">' + study + '</p></div>'
 		# Power graph:
-		graphParameters = {
-			'chart':{'renderTo':'', 'type':'line', 'marginRight':20, 'marginBottom':20, 'height':150, 'zoomType':'x'},
-			'title':{'text':None},
-			'yAxis':{'title':{'text':'Load (kW)', 'style':{'color':'gray'}}},
-			'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
-			'credits':{'enabled':False},
-			'xAxis':{'categories':[x[0] for x in powerMatrix[1:]],'minTickInterval':len(powerMatrix)/100,'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
-			'plotOptions':{'line':{'shadow':False}},
-			'series':[]
-		}
+		graphParameters = util.defaultGraphObject(resolution, powerMatrix[1][0])	
+		graphParameters['chart']['height'] = 150
 		graphParameters['chart']['renderTo'] = 'meterPowerChart' + study
+		graphParameters['yAxis']['title']['text'] = 'Load (kW)'
 		colorMap = {0:'salmon',1:'red',2:'darkred',3:'crimson',4:'firebrick',5:'indianred'}
 		for x in range(1,len(powerMatrix[0])):
 			graphParameters['series'].append({'name':powerMatrix[0][x],'data':[y[x] for y in powerMatrix[1:]],'marker':{'enabled':False},'color':colorMap[x%6]})
