@@ -76,7 +76,7 @@ def outputHtml(analysisName):
 	powGraphParams = {
 		'chart':{'renderTo':'powerTimeSeries', 'type':'line', 'marginRight':20, 'marginBottom':20, 'height':250, 'zoomType':'x'},
 		'title':{'text':None},
-		'yAxis':{'title':{'text':'Power (kW)', 'style':{'color':'gray'}},'plotLines':[{'value':0, 'width':1, 'color':'gray'}]},
+		'yAxis':{'title':{'text':'Power (kW)', 'style':{'color':'gray'}}},
 		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
 		'credits':{'enabled':False},
 		'xAxis':{'categories':[],'minTickInterval':len(fullArray)/100,'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},
@@ -92,7 +92,7 @@ def outputHtml(analysisName):
 	energyGraphParams = {
 		'chart':{'renderTo':'energyBalance', 'marginRight':20, 'marginBottom':20, 'height':250},
 		'title':{'text':None},
-		'yAxis':{'title':{'text':'Energy (kWh)', 'style':{'color':'gray'}},'plotLines':[{'value':0, 'width':1, 'color':'gray'}]},
+		'yAxis':{'title':{'text':'Energy (kWh)', 'style':{'color':'gray'}}},
 		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
 		'credits':{'enabled':False},
 		'xAxis':{'categories':[x[0] for x in energyTotals[1:]],'tickColor':'gray','lineColor':'gray'},

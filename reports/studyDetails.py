@@ -62,5 +62,3 @@ def outputHtml(analysisName):
 def modifyStudy(analysisName):
 	pass
 	#TODO: implement if needed.
-
-

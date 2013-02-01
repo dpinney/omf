@@ -2,6 +2,8 @@
 
 import math
 import re
+from time import mktime
+from datetime import datetime
 
 def csvToArray(fileName):
 	''' Take a filename to a list of timeseries vectors. Internal method. '''
@@ -71,3 +73,31 @@ def flat1(aList):
 
 def vecSum(*args):
 	return map(sum,zip(*args))
+
+def defaultGraphObject(resolution, startTimeStamp):
+	timeMap = {'minutes':1,'hours':60,'days':1440}
+	pointInterval = timeMap[resolution]*60*1000
+	maxZoom = pointInterval*30
+	def getPointStart(dateTimeStamp):
+		if dateTimeStamp[-1].isdigit():
+			stampOb = datetime.strptime(dateTimeStamp,'%Y-%m-%d')
+		else:
+			# Handle those dang arbitrary timezones.
+			stampOb = datetime.strptime(dateTimeStamp.rsplit(' ',1)[0],'%Y-%m-%d %H:%M:%S')
+		return int(mktime(stampOb.timetuple()))*1000
+	pointStart = getPointStart(startTimeStamp)
+	graphParameters = {
+		'chart':{'renderTo':'', 'marginRight':20, 'marginBottom':20, 'zoomType':'x'},
+		'title':{'text':None},
+		'yAxis':{'title':{'text':None}},
+		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
+		'credits':{'enabled':False},
+		'xAxis':{'type':'datetime','maxZoom':maxZoom, 'tickColor':'gray','lineColor':'gray'},
+		'plotOptions':{'series':{'shadow':False, 'pointInterval':pointInterval, 'pointStart':pointStart}},
+		'series':[]
+	}
+	return graphParameters
+
+def fileSlurp(fileName):
+	with open(fileName,'r') as openFile:
+		return openFile.read()

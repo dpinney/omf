@@ -154,7 +154,7 @@ def outputHtml(analysisName):
 	graphParameters = {
 		'chart':{'renderTo':'monPowerTimeSeries', 'type':'line', 'marginRight':20, 'marginBottom':20, 'height':200, 'width':1000, 'zoomType':'x'},
 		'title':{'text':None},
-		'yAxis':{'title':{'text':'Power (kW)', 'style':{'color':'gray'}},'plotLines':[{'value':0, 'width':1, 'color':'gray'}]},
+		'yAxis':{'title':{'text':'Power (kW)', 'style':{'color':'gray'}}},
 		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
 		'credits':{'enabled':False},
 		'xAxis':{'categories':[],'minTickInterval':len(fullArray)/100,'labels':{'enabled':False},'maxZoom':20,'tickColor':'gray','lineColor':'gray'},

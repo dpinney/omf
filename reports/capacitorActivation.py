@@ -13,8 +13,7 @@ def outputHtml(analysisName):
 	outputBuffer += '<div id="capActReport" class="tightContent">'
 	# Build up the data:
 	pathPrefix = './analyses/' + analysisName
-	with open(pathPrefix + '/metadata.txt','r') as mdFile:
-		resolution = eval(mdFile.read())['simLengthUnits']
+	resolution = eval(util.fileSlurp(pathPrefix + '/metadata.txt'))['simLengthUnits']
 	for study in os.listdir(pathPrefix + '/studies/'):
 		capFileNames = filter(lambda x:x.startswith('Capacitor_') and x.endswith('.csv'), os.listdir(pathPrefix + '/studies/' + study))
 		outputBuffer += '<div id="capStudy' + study + '" class="studyContainer">'
@@ -26,19 +25,16 @@ def outputHtml(analysisName):
 				# Aggregate to the day level, averaging to percentage charging:
 				fullArray = [fullArray[0]] + util.aggCsv(fullArray[1:], lambda x:sum(x)/len(x), 'day')
 			# Draw the graphs:
-			graphParams = {
-				'chart':{'renderTo':'chartDiv' + study + cap, 'marginRight':20, 'marginBottom':10, 'marginTop':0, 'zoomType':'x', 'height':90},
-				'title':{'text':None},
-				'yAxis':{'title':{'text':None}, 'labels':{'enabled':False}, 'gridLineWidth':0},
-				'legend':{'enabled':False},
-				'credits':{'enabled':False},
-				'xAxis':{'categories':[x[0] for x in fullArray[1:]],'minTickInterval':len(fullArray)/100,'tickColor':'gray','lineColor':'gray','labels':{'enabled':False},'maxZoom':20},
-				'plotOptions':{'area':{'shadow':False,'stacking':'normal','marker':{'enabled':False},'fillOpacity':1,}},
-				'series':[	{'type':'area','name':'PhaseA','data':[x[1] for x in fullArray[1:]],'color':'gainsboro'},
-							{'type':'area','name':'PhaseB','data':[x[2] for x in fullArray[1:]],'color':'darkgray'},
-							{'type':'area','name':'PhaseC','data':[x[3] for x in fullArray[1:]],'color':'gray'}
-						]
-			}
+			graphParams = util.defaultGraphObject(resolution, fullArray[1][0])
+			graphParams['chart']['renderTo'] = 'chartDiv' + study + cap
+			graphParams['chart']['height'] = 90
+			graphParams['chart']['type'] = 'area'
+			graphParams['legend']['enabled'] = False
+			graphParams['plotOptions']['area'] = {'stacking':'normal','marker':{'enabled':False},'fillOpacity':1}
+			graphParams['series'] = [	{'type':'area','name':'PhaseA','data':[x[1] for x in fullArray[1:]],'color':'gainsboro'},
+										{'type':'area','name':'PhaseB','data':[x[2] for x in fullArray[1:]],'color':'darkgray'},
+										{'type':'area','name':'PhaseC','data':[x[3] for x in fullArray[1:]],'color':'gray'}
+									]
 			outputBuffer += '<div id="chartDiv' + study + cap + '" class="capChart" style="height:90px"><script>new Highcharts.Chart(' + json.dumps(graphParams) + ')</script></div>\n'
 		outputBuffer += '</div>'
 	return outputBuffer + '</div>\n\n'
