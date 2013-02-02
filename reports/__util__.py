@@ -2,6 +2,7 @@
 
 import math
 import re
+import os
 from time import mktime
 from datetime import datetime
 
@@ -37,6 +38,28 @@ def csvToArray(fileName):
 	# Drop the timestamp column:
 	return arrayNoHeaders
 
+def groupBy(inL, func):
+	''' Take a list and func, and group items in place comparing with func. '''
+	if inL == [] or len(inL) == 1: return inL
+	newL = [[inL[0]]]
+	for item in inL[1:]:
+		if func(item, newL[-1][0]):
+			newL[-1].append(item)
+		else:
+			newL.append([item])
+	return newL
+
+def aggSeries(timeStamps, timeSeries, func, level):
+	# Different substring depending on what level we aggregate to:
+	if level=='month':
+		endPos = 7
+	elif level=='day':
+		endPos = 10
+	combo = zip(timeStamps, timeSeries)
+	groupedCombo = groupBy(combo, lambda x1,x2: x1[0][0:endPos]==x2[0][0:endPos])
+	groupedRaw = [[pair[1] for pair in group] for group in groupedCombo]
+	return map(func, groupedRaw)
+
 def aggCsv(csvArray, listFuncOrFuncs, level):
 	''' Take a csv at the hour granularity, and aggregate to the day/month level '''
 	# Different substring depending on what level we aggregate to:
@@ -59,6 +82,21 @@ def aggCsv(csvArray, listFuncOrFuncs, level):
 			return [listFuncOrFuncs[rowNum](transposedNoHeaders[rowNum]) for rowNum in xrange(0,len(transposedNoHeaders))]
 	# find the aggregated version for each date item:
 	return [[date] + aggDateGroup(date) for date in dateList]
+
+def anaDataTree(analysisPath, fileNameTest):
+	''' Take a study and put all its data into a nested object {studyName:{fileName:{metricName:[...]}}} '''
+	def seriesTranspose(theArray):
+		return {i[0]:list(i)[1:] for i in zip(*theArray)}
+	studyNames = os.listdir(analysisPath + '/studies/')
+	data = {}
+	for study in studyNames:
+		data[study] = {}
+		csvFiles = os.listdir(analysisPath + '/studies/' + study)
+		for cName in csvFiles:
+			if fileNameTest(cName) and cName.endswith('.csv'):
+				arr = csvToArray(analysisPath + '/studies/' + study + '/' + cName)
+				data[study][cName] = seriesTranspose(arr)
+	return data
 
 def pyth(x,y):
 	''' helper function to compute the third side of the triangle--BUT KEEP SIGNS THE SAME FOR DG '''
@@ -93,7 +131,7 @@ def defaultGraphObject(resolution, startTimeStamp):
 		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
 		'credits':{'enabled':False},
 		'xAxis':{'type':'datetime','maxZoom':maxZoom, 'tickColor':'gray','lineColor':'gray'},
-		'plotOptions':{'series':{'shadow':False, 'pointInterval':pointInterval, 'pointStart':pointStart}},
+		'plotOptions':{'line':{'marker':{'enabled':False}}, 'series':{'shadow':False, 'pointInterval':pointInterval, 'pointStart':pointStart}},
 		'series':[]
 	}
 	return graphParameters

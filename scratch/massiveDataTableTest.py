@@ -4,6 +4,7 @@ import time
 import os
 import csv
 from pprint import pformat
+from pprint import pprint
 import re
 
 analysisPath = '../analyses/zSolar Trio/'
@@ -52,13 +53,26 @@ def anaSuck(analysisPath):
 		for cName in csvFiles:
 			if cName.endswith('.csv'):
 				arr = csvToArray(analysisPath + '/studies/' + study + '/' + cName)
-				data[study][cName] = transpose(arr)
+				data[study][cName] = seriesTranspose(arr)
 				# with open(analysisPath + '/studies/' + study + '/' + cName, 'rb') as csvFile:
 				# 	reader = csv.reader(csvFile)
 				# 	data[study][cName] = list(reader)
 	return data
 
-x = anaSuck(analysisPath)
+def anaSubSuck(analysisPath, fileNameTest):
+	''' Take a study and put all its data into a nested object {studyName:{fileName:{metricName:[...]}}} '''
+	studyNames = os.listdir(analysisPath + '/studies/')
+	data = {}
+	for study in studyNames:
+		data[study] = {}
+		csvFiles = os.listdir(analysisPath + '/studies/' + study)
+		for cName in csvFiles:
+			if fileNameTest(cName) and cName.endswith('.csv'):
+				arr = csvToArray(analysisPath + '/studies/' + study + '/' + cName)
+				data[study][cName] = seriesTranspose(arr)
+	return data
 
-with open('./massiveTableOut.txt','wb') as f:
-	f.write(pformat(x))
+x = anaSuck(analysisPath)
+y = anaSubSuck(analysisPath, lambda z:z.startswith('Climate_'))
+
+pprint(y, depth=3)
