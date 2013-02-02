@@ -14,7 +14,6 @@ with open('./reports/monetizationConfig.html','r') as configFile:
 
 def outputHtml(analysisName):
 	# Get all the data from the run:
-	interval = 0
 	pathPrefix = 'analyses/' + analysisName
 	studies = os.listdir(pathPrefix + '/studies/')
 	# Get the report input:
