@@ -45,7 +45,11 @@ def outputHtml(analysisName):
 	for study in newData:
 		newData[study]['totEnergy'] = [x*interval/3600.0 for x in newData[study]['totAppPower']]
 	# Make the study list:
-	studyList = [{'name':study, 'firstStudy':study==newData.keys()[0], 'equipAndInstallCost':equipAndInstallCost, 'opAndMaintCost':opAndMaintCost} for study in newData]
+	studyList = [{	'name':study,
+					'firstStudy':study==newData.keys()[0],
+					'equipAndInstallCost':(0 if study==newData.keys()[0] else equipAndInstallCost),
+					'opAndMaintCost':(0 if study==newData.keys()[0] else opAndMaintCost)
+				} for study in newData]
 	# Do day-level aggregation if necessary:
 	if 'days' == resolution:
 		for study in newData:
@@ -55,8 +59,8 @@ def outputHtml(analysisName):
 	for study in newData:
 		newData[study]['monPower'] = util.flat1(util.aggSeries(newData[study]['time'], newData[study]['totAppPower'], lambda x:[max(x)/len(x)*distrCapacityRate]*len(x), 'month'))
 		newData[study]['monEnergy'] = util.flat1(util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:[sum(x)/len(x)*distrEnergyRate]*len(x), 'month'))
-	energyTotals = {study:sum(newData[study]['monPower'])/distrCapacityRate for study in newData}
-	capTotals = {study:sum(newData[study]['monEnergy'])/distrEnergyRate for study in newData}
+	capTotals = {study:sum(newData[study]['monPower'])/distrCapacityRate for study in newData}
+	energyTotals = {study:sum(newData[study]['monEnergy'])/distrEnergyRate for study in newData}
 	# Start time for all graphs:
 	startTime = newData[newData.keys()[0]]['time'][0]
 	# Money power graph:
