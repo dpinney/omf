@@ -1,15 +1,12 @@
 <p class="reportTitle">Cost Benefit Analysis</p>
-<div id="monetizationReport" class="tightContent" style="position:relative;height:600px">
-	<div id="monPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:1000px;height:200px">
-		<script>monPowGraph = new Highcharts.Chart({{ powGraphParams }})</script>
-	</div>
-	<div id="monetizedPowerTimeSeries" style="position:absolute;top:200px;left:0px;width:500px;height:200px">
+<div id="monetizationReport" class="tightContent" style="position:relative;height:400px">
+	<div id="monetizedPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:500px;height:200px">
 		<script>monCapCostGraph = new Highcharts.Chart({{ monPowGraphParams }})</script>
 	</div>
-	<div id="monetizedEnergyBalance" style="position:absolute;top:200px;left:500px;width:500px;height:200px">
+	<div id="monetizedEnergyBalance" style="position:absolute;top:0px;left:500px;width:500px;height:200px">
 		<script>monEnergyCostGraph = new Highcharts.Chart({{ monEnergyGraphParams }})</script>
 	</div>
-	<div id="additionalMetrics" style="position:absolute;top:410px;left:0px;width:1000px;height:190px;overflow-y:auto;overflow-x:hidden">
+	<div id="additionalMetrics" style="position:absolute;top:210px;left:10px;width:1000px;height:190px;overflow-y:auto;overflow-x:hidden">
 		<div style="width:1000px;height:40px;padding:0px 5px 0px 5px">
 				Co-op Energy Rate ($/kWh) <input id="distrEnergyRate" value="{{distrEnergyRate}}"/> Capacity Rate ($/kW) <input id="distrCapacityRate" value="{{distrCapacityRate}}"/><button style="width:100px" onclick="recalculateCostBenefit()">Recalculate</button>
 		</div>
@@ -54,7 +51,6 @@
 						daRow.querySelector('.costBen').innerHTML = 'N/A'
 						capCost = parseFloat(daRow.querySelector('.capCost').value)
 						omCost = parseFloat(daRow.querySelector('.omCost').value)
-						// console.log(capacityCost, enerCost, capCost, omCost, baseCost)
 						baseCost = capCost + omCost + enerCost + capacityCost
 					}
 				}
@@ -66,7 +62,6 @@
 						enerCost = parseFloat(daRow.querySelector('.enerCost').innerHTML)
 						capCost = parseFloat(daRow.querySelector('.capCost').value)
 						omCost = parseFloat(daRow.querySelector('.omCost').value)
-						// console.log(capacityCost, enerCost, capCost, omCost, baseCost)
 						thisRowCost = capacityCost + enerCost + capCost + omCost
 						NPV = baseCost - thisRowCost
 						daRow.querySelector('.NPV').innerHTML = NPV

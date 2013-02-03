@@ -26,7 +26,7 @@ def outputHtml(analysisName):
 	# Find the resolution and interval size (in seconds):
 	with open(pathPrefix + '/metadata.txt','r') as mdFile:
 		resolution = eval(mdFile.read())['simLengthUnits']
-		intervalMap = {'minutes':60,'hours':3600,'days':86400}
+		intervalMap = {'minutes':60, 'hours':3600, 'days':86400}
 		interval = intervalMap[resolution]
 	# Gather data for all the studies.
 	data = util.anaDataTree('./analyses/' + analysisName, lambda x:x.startswith('SwingKids_'))
@@ -53,23 +53,12 @@ def outputHtml(analysisName):
 			newData[study]['totEnergy'] = util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:sum(x)/len(x), 'day')
 	# Monetize stuff, then get per-study totals:
 	for study in newData:
-		# newData[study]['monPower'] = util.aggSeries(newData[study]['time'], newData[study]['totAppPower'], lambda x:max(x)*len(x)*distrCapacityRate, 'month')
-		# newData[study]['monEnergy'] = util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:sum(x)*distrEnergyRate, 'month')
 		newData[study]['monPower'] = util.flat1(util.aggSeries(newData[study]['time'], newData[study]['totAppPower'], lambda x:[max(x)/len(x)*distrCapacityRate]*len(x), 'month'))
-		newData[study]['monEnergy'] = util.flat1(util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:[sum(x)/len(x)*distrCapacityRate]*len(x), 'month'))
-	energyTotals = {study:sum(newData[study]['monPower']) for study in newData}
-	capTotals = {study:sum(newData[study]['monEnergy']) for study in newData}
+		newData[study]['monEnergy'] = util.flat1(util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:[sum(x)/len(x)*distrEnergyRate]*len(x), 'month'))
+	energyTotals = {study:sum(newData[study]['monPower'])/distrCapacityRate for study in newData}
+	capTotals = {study:sum(newData[study]['monEnergy'])/distrEnergyRate for study in newData}
 	# Start time for all graphs:
 	startTime = newData[newData.keys()[0]]['time'][0]
-	# Power graph:
-	powGraphParams = util.defaultGraphObject(resolution, startTime)
-	powGraphParams['chart']['renderTo'] = 'monPowerTimeSeries'
-	powGraphParams['chart']['type'] = 'line'
-	powGraphParams['chart']['height'] = 200
-	powGraphParams['yAxis']['title']['text'] = 'Power (kW)'
-	colorMap = {0:'salmon',1:'red',2:'darkred',3:'crimson',4:'firebrick',5:'indianred'}
-	for study in newData:
-		powGraphParams['series'].append({'name':study,'data':newData[study]['totAppPower'],'color':colorMap[newData.keys().index(study)%6]})
 	# Money power graph:
 	monPowGraphParams = util.defaultGraphObject(resolution, startTime)
 	monPowGraphParams['chart']['height'] = 200
@@ -77,6 +66,7 @@ def outputHtml(analysisName):
 	monPowGraphParams['chart']['renderTo'] = 'monetizedPowerTimeSeries'
 	monPowGraphParams['chart']['type'] = 'line'
 	monPowGraphParams['yAxis']['title']['text'] = 'Capacity Cost ($)'
+	colorMap = {0:'salmon',1:'red',2:'darkred',3:'crimson',4:'firebrick',5:'indianred'}
 	for study in newData:
 		monPowGraphParams['series'].append({'name':study,'data':newData[study]['monPower'],'color':colorMap[newData.keys().index(study)%6]})
 	# Money energy graph:
@@ -93,9 +83,8 @@ def outputHtml(analysisName):
 	with open('./reports/monetizationOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
 	# Write the results.
-	return template.render(powGraphParams=json.dumps(powGraphParams), monPowGraphParams=json.dumps(monPowGraphParams), 
-							monEnergyGraphParams=json.dumps(monEnergyGraphParams), distrEnergyRate=distrEnergyRate,
-							distrCapacityRate=distrCapacityRate, studyList=studyList,
+	return template.render(monPowGraphParams=json.dumps(monPowGraphParams), monEnergyGraphParams=json.dumps(monEnergyGraphParams),
+							distrEnergyRate=distrEnergyRate, distrCapacityRate=distrCapacityRate, studyList=studyList,
 							energyTotals=json.dumps(energyTotals), capTotals=json.dumps(capTotals))
 
 def modifyStudy(analysisName):
