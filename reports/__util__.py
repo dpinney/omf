@@ -5,6 +5,7 @@ import re
 import os
 from time import mktime
 from datetime import datetime
+import itertools
 
 def csvToArray(fileName):
 	''' Take a filename to a list of timeseries vectors. Internal method. '''
@@ -40,7 +41,8 @@ def csvToArray(fileName):
 
 def groupBy(inL, func):
 	''' Take a list and func, and group items in place comparing with func. '''
-	if inL == [] or len(inL) == 1: return inL
+	if inL == []: return inL
+	if len(inL) == 1: return [inL]
 	newL = [[inL[0]]]
 	for item in inL[1:]:
 		if func(item, newL[-1][0]):
@@ -56,7 +58,9 @@ def aggSeries(timeStamps, timeSeries, func, level):
 	elif level=='day':
 		endPos = 10
 	combo = zip(timeStamps, timeSeries)
+	# Group by level:
 	groupedCombo = groupBy(combo, lambda x1,x2: x1[0][0:endPos]==x2[0][0:endPos])
+	# Get rid of the timestamps:
 	groupedRaw = [[pair[1] for pair in group] for group in groupedCombo]
 	return map(func, groupedRaw)
 

@@ -53,11 +53,13 @@ def outputHtml(analysisName):
 			newData[study]['totEnergy'] = util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:sum(x)/len(x), 'day')
 	# Monetize stuff, then get per-study totals:
 	for study in newData:
-		newData[study]['monPower'] = util.aggSeries(newData[study]['time'], newData[study]['totAppPower'], lambda x:max(x)*len(x)*distrCapacityRate, 'month')
-		newData[study]['monEnergy'] = util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:sum(x)*distrEnergyRate, 'month')
+		# newData[study]['monPower'] = util.aggSeries(newData[study]['time'], newData[study]['totAppPower'], lambda x:max(x)*len(x)*distrCapacityRate, 'month')
+		# newData[study]['monEnergy'] = util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:sum(x)*distrEnergyRate, 'month')
+		newData[study]['monPower'] = util.flat1(util.aggSeries(newData[study]['time'], newData[study]['totAppPower'], lambda x:[max(x)/len(x)*distrCapacityRate]*len(x), 'month'))
+		newData[study]['monEnergy'] = util.flat1(util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:[sum(x)/len(x)*distrCapacityRate]*len(x), 'month'))
 	energyTotals = {study:sum(newData[study]['monPower']) for study in newData}
 	capTotals = {study:sum(newData[study]['monEnergy']) for study in newData}
-	# Time scale for all graphs:
+	# Start time for all graphs:
 	startTime = newData[newData.keys()[0]]['time'][0]
 	# Power graph:
 	powGraphParams = util.defaultGraphObject(resolution, startTime)
