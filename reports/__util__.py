@@ -40,7 +40,7 @@ def csvToArray(fileName):
 	return arrayNoHeaders
 
 def groupBy(inL, func):
-	''' Take a list and func, and group items in place comparing with func. '''
+	''' Take a list and func, and group items in place comparing with func. Make sure the func is an equivalence relation, or your brain will hurt. '''
 	if inL == []: return inL
 	if len(inL) == 1: return [inL]
 	newL = [[inL[0]]]
@@ -53,10 +53,8 @@ def groupBy(inL, func):
 
 def aggSeries(timeStamps, timeSeries, func, level):
 	# Different substring depending on what level we aggregate to:
-	if level=='month':
-		endPos = 7
-	elif level=='day':
-		endPos = 10
+	if level=='month': endPos = 7
+	elif level=='day': endPos = 10
 	combo = zip(timeStamps, timeSeries)
 	# Group by level:
 	groupedCombo = groupBy(combo, lambda x1,x2: x1[0][0:endPos]==x2[0][0:endPos])

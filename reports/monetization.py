@@ -30,66 +30,78 @@ def outputHtml(analysisName):
 		interval = intervalMap[resolution]
 	# Gather data for all the studies.
 	data = util.anaDataTree('./analyses/' + analysisName, lambda x:x.startswith('SwingKids_'))
-	newData = {study:{} for study in data}
+	fullData = {study:{} for study in data}
 	for study in data:
 		for swingFile in data[study]:
 			rPow = data[study][swingFile]['sum(power_in.real)']
 			iPow = data[study][swingFile]['sum(power_in.real)']
 			appPow = map(lambda x:util.pyth(x[0],x[1])/1000, zip(rPow,iPow))
 			if 	'totAppPower' in data[study]:
-				newData[study]['totAppPower'] = util.vecSum(data[study]['totAppPower'], appPow)
+				fullData[study]['totAppPower'] = util.vecSum(data[study]['totAppPower'], appPow)
 			else:
-				newData[study]['totAppPower'] = appPow
-				newData[study]['time'] = data[study][swingFile]['# property.. timestamp']
+				fullData[study]['totAppPower'] = appPow
+				fullData[study]['time'] = data[study][swingFile]['# property.. timestamp']
+		fullData[study]['yearPercentage'] = interval*len(fullData[study]['totAppPower'])/(365*24*60*60.0)
 	# Calculate energy from power:
-	for study in newData:
-		newData[study]['totEnergy'] = [x*interval/3600.0 for x in newData[study]['totAppPower']]
+	for study in fullData:
+		fullData[study]['totEnergy'] = [x*interval/3600.0 for x in fullData[study]['totAppPower']]
 	# Make the study list:
 	studyList = [{	'name':study,
-					'firstStudy':study==newData.keys()[0],
-					'equipAndInstallCost':(0 if study==newData.keys()[0] else equipAndInstallCost),
-					'opAndMaintCost':(0 if study==newData.keys()[0] else opAndMaintCost)
-				} for study in newData]
+					'firstStudy':study==fullData.keys()[0],
+					'equipAndInstallCost':(0 if study==fullData.keys()[0] else equipAndInstallCost),
+					'opAndMaintCost':(0 if study==fullData.keys()[0] else opAndMaintCost)
+				} for study in fullData]
 	# Do day-level aggregation if necessary:
 	if 'days' == resolution:
-		for study in newData:
-			newData[study]['totAppPower'] = util.aggSeries(newData[study]['time'], newData[study]['totAppPower'], max, 'day')
-			newData[study]['totEnergy'] = util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:sum(x)/len(x), 'day')
+		for study in fullData:
+			fullData[study]['totAppPower'] = util.aggSeries(fullData[study]['time'], fullData[study]['totAppPower'], max, 'day')
+			fullData[study]['totEnergy'] = util.aggSeries(fullData[study]['time'], fullData[study]['totEnergy'], lambda x:sum(x)/len(x), 'day')
 	# Monetize stuff, then get per-study totals:
-	for study in newData:
-		newData[study]['monPower'] = util.flat1(util.aggSeries(newData[study]['time'], newData[study]['totAppPower'], lambda x:[max(x)/len(x)*distrCapacityRate]*len(x), 'month'))
-		newData[study]['monEnergy'] = util.flat1(util.aggSeries(newData[study]['time'], newData[study]['totEnergy'], lambda x:[sum(x)/len(x)*distrEnergyRate]*len(x), 'month'))
-	capTotals = {study:sum(newData[study]['monPower'])/distrCapacityRate for study in newData}
-	energyTotals = {study:sum(newData[study]['monEnergy'])/distrEnergyRate for study in newData}
+	for study in fullData:
+		fullData[study]['monthlyPower'] = util.flat1(util.aggSeries(fullData[study]['time'], fullData[study]['totAppPower'], lambda x:[max(x)/len(x)]*len(x), 'month'))
+		fullData[study]['capTotal'] = sum(fullData[study]['monthlyPower'])
+		fullData[study]['monthlyEnergy'] = util.flat1(util.aggSeries(fullData[study]['time'], fullData[study]['totEnergy'], lambda x:[sum(x)/len(x)]*len(x), 'month'))
+		fullData[study]['energyTotal'] = sum(fullData[study]['monthlyEnergy'])
+	capTotals = {study:sum(fullData[study]['monthlyPower']) for study in fullData}
+	energyTotals = {study:sum(fullData[study]['monthlyEnergy']) for study in fullData}
 	# Start time for all graphs:
-	startTime = newData[newData.keys()[0]]['time'][0]
+	startTime = fullData[fullData.keys()[0]]['time'][0]
 	# Money power graph:
-	monPowGraphParams = util.defaultGraphObject(resolution, startTime)
-	monPowGraphParams['chart']['height'] = 200
-	monPowGraphParams['chart']['width'] = 500
-	monPowGraphParams['chart']['renderTo'] = 'monetizedPowerTimeSeries'
-	monPowGraphParams['chart']['type'] = 'line'
-	monPowGraphParams['yAxis']['title']['text'] = 'Capacity Cost ($)'
+	monPowParams = util.defaultGraphObject(resolution, startTime)
+	monPowParams['chart']['height'] = 200
+	monPowParams['chart']['width'] = 500
+	monPowParams['chart']['renderTo'] = 'monetizedPowerTimeSeries'
+	monPowParams['chart']['type'] = 'line'
+	monPowParams['yAxis']['title']['text'] = 'Capacity Cost ($)'
 	colorMap = {0:'salmon',1:'red',2:'darkred',3:'crimson',4:'firebrick',5:'indianred'}
-	for study in newData:
-		monPowGraphParams['series'].append({'name':study,'data':newData[study]['monPower'],'color':colorMap[newData.keys().index(study)%6]})
+	for study in fullData:
+		monPowParams['series'].append({'name':study,'data':[],'color':colorMap[fullData.keys().index(study)%6]})
 	# Money energy graph:
-	monEnergyGraphParams = util.defaultGraphObject(resolution, startTime)
-	monEnergyGraphParams['chart']['height'] = 200
-	monEnergyGraphParams['chart']['width'] = 500
-	monEnergyGraphParams['chart']['renderTo'] = 'monetizedEnergyBalance'
-	monEnergyGraphParams['chart']['type'] = 'line'
-	monEnergyGraphParams['yAxis']['title']['text'] = 'Energy Cost ($)'
+	monEnergyParams = util.defaultGraphObject(resolution, startTime)
+	monEnergyParams['chart']['height'] = 200
+	monEnergyParams['chart']['width'] = 500
+	monEnergyParams['chart']['renderTo'] = 'monetizedEnergyBalance'
+	monEnergyParams['chart']['type'] = 'line'
+	monEnergyParams['yAxis']['title']['text'] = 'Energy Cost ($)'
 	colorMap = {0:'goldenrod', 1:'orange', 2:'darkorange', 3:'gold', 4:'chocolate'}
-	for study in newData:
-		monEnergyGraphParams['series'].append({'name':study,'data':newData[study]['monPower'],'color':colorMap[newData.keys().index(study)%5]})
+	for study in fullData:
+		monEnergyParams['series'].append({'name':study,'data':[],'color':colorMap[fullData.keys().index(study)%5]})
+	# Cost growth graph:
+	costGrowthParams = util.defaultGraphObject(resolution, startTime)
+	costGrowthParams['chart']['height'] = 200
+	costGrowthParams['chart']['width'] = 1000
+	costGrowthParams['chart']['renderTo'] = 'costGrowthContainer'
+	costGrowthParams['chart']['type'] = 'line'
+	costGrowthParams['yAxis']['title']['text'] = 'Cumulative Cost ($)'
+	colorMapGray = {0:'gainsboro',1:'silver',2:'gray'}
+	for study in fullData:
+		costGrowthParams['series'].append({'name':study,'data':[],'color':colorMapGray[fullData.keys().index(study)%3]})
 	# Get the template in.
 	with open('./reports/monetizationOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
 	# Write the results.
-	return template.render(monPowGraphParams=json.dumps(monPowGraphParams), monEnergyGraphParams=json.dumps(monEnergyGraphParams),
-							distrEnergyRate=distrEnergyRate, distrCapacityRate=distrCapacityRate, studyList=studyList,
-							energyTotals=json.dumps(energyTotals), capTotals=json.dumps(capTotals))
+	return template.render(monPowParams=json.dumps(monPowParams), monEnergyParams=json.dumps(monEnergyParams), costGrowthParams=json.dumps(costGrowthParams),
+							distrEnergyRate=distrEnergyRate, distrCapacityRate=distrCapacityRate, studyList=studyList, fullData=json.dumps(fullData))
 
 def modifyStudy(analysisName):
 	pass
