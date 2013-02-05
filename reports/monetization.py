@@ -93,6 +93,10 @@ def outputHtml(analysisName):
 	costGrowthParams['chart']['renderTo'] = 'costGrowthContainer'
 	costGrowthParams['chart']['type'] = 'line'
 	costGrowthParams['yAxis']['title']['text'] = 'Cumulative Cost ($)'
+	costGrowthParams['xAxis']['title'] = {'text':'Years After Install'}
+	costGrowthParams['xAxis']['type'] = 'linear'
+	costGrowthParams['plotOptions']['series'] = {'shadow':False}	
+	del costGrowthParams['xAxis']['maxZoom']
 	colorMapGray = {0:'gainsboro',1:'silver',2:'gray'}
 	for study in fullData:
 		costGrowthParams['series'].append({'name':study,'data':[],'color':colorMapGray[fullData.keys().index(study)%3]})
