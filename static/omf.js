@@ -123,3 +123,7 @@ function removeProgressDialog() {
 	document.body.removeChild(gebi('progressBackground'))
 	document.body.removeChild(gebi('progressContent'))
 }
+
+function round(number,precision) {
+	return parseFloat(number.toPrecision(precision))
+}

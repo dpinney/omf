@@ -37,10 +37,6 @@
 		<script>
 			fullData = {{ fullData }}
 
-			function round(number,precision) {
-				return parseFloat(number.toPrecision(precision))
-			}
-
 			function recalculateCostBenefit() {
 				baseCost = 0
 				energyRate = parseFloat(gebi('distrEnergyRate').value)
