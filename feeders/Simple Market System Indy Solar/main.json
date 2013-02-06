@@ -50,7 +50,7 @@
             "implicit_enduses": "NONE"
         }, 
         "11": {
-            "solver_method": "FBS", 
+            "solver_method": "NR", 
             "NR_iteration_limit": "50", 
             "module": "powerflow"
         }, 

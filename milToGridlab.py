@@ -597,7 +597,7 @@ def convert(stdPath,seqPath):
 						'#include "schedules.glm";\n' + \
 						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\nmodule climate;\n' + \
 						'module residential {\nimplicit_enduses NONE;\n};\n\n' + \
-						'module powerflow {\nsolver_method FBS;\nNR_iteration_limit 50;\n};\n\n' + \
+						'module powerflow {\nsolver_method NR;\nNR_iteration_limit 50;\n};\n\n' + \
 						'object climate {\nname Climate;\ninterpolate QUADRATIC;\ntmyfile climate.tmy2;\n};\n\n'
 
 	# Throw some headers on that:

@@ -24,7 +24,7 @@
 	<testoutputfile>test.txt</testoutputfile>
 	<xml_encoding>8</xml_encoding>
 	<clock>2000-01-01 00:00:00 PST</clock>
-	<starttime>2013-01-19 10:46:54 PST</starttime>
+	<starttime>2013-02-06 13:12:44 PST</starttime>
 	<stoptime>2000-01-02 00:00:00 PST</stoptime>
 	<double_format>%+lg</double_format>
 	<complex_format>%+lg%+lg%c</complex_format>
@@ -41,7 +41,7 @@
 	<include>"C:\Program Files\GridLAB-D"</include>
 	<trace>""</trace>
 	<gdb_window>0</gdb_window>
-	<tmp>C:\Users\gxw2\AppData\Roaming\temp\gridlabd</tmp>
+	<tmp>C:\Users\dwp0\AppData\Roaming\temp\gridlabd</tmp>
 	<force_compile>0</force_compile>
 	<nolocks>0</nolocks>
 	<skipsafe>0</skipsafe>

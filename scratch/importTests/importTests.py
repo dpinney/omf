@@ -31,7 +31,7 @@ def testFile(stdName, seqName):
 
 # Clear and then test all files:
 for fileName in os.listdir('.'):
-	if fileName.endswith('.csv') or fileName.endswith('.glm'):
+	if fileName.endswith('.csv') or (fileName.endswith('.glm') and not fileName.startswith('schedules.')):
 		os.remove(fileName)
 for pair in filesToTest:
 	testFile(pair[0], pair[1])

@@ -641,7 +641,7 @@
             "impedance_pf": "0.610000"
         }, 
         "11": {
-            "solver_method": "FBS", 
+            "solver_method": "NR", 
             "NR_iteration_limit": "50", 
             "module": "powerflow"
         }, 
