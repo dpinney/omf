@@ -205,6 +205,7 @@ function draw() {
     // Go through the first time and set up the nodes with indices:
     for (x in tree) {
       if (tree[x].name != undefined && tree[x].from == undefined) {
+        //TODO: Think about allowing access to other objects here.
         nodeName = tree[x].name
         nodeObject = tree[x].object
 
