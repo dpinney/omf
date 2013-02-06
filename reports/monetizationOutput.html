@@ -17,7 +17,7 @@
 		</div>
 		<table style="width:980px;padding-bottom:10px">
 			<thead>
-				<tr><th>Study</th><th>Baseline</th><th>Capital Cost</th><th>O&amp;M Cost</th><th>Capacity Cost</th><th>Energy Cost</th><th>Delta Cost</th><th>C/B</th></tr>
+				<tr><th>Study</th><th>Baseline</th><th>Capital Cost</th><th>O&amp;M Cost</th><th>Cap. Cost</th><th>En. Cost</th><th>Y1 Save</th><th>Annual Save</th><th>Payback (Y)</th></tr>
 			</thead>
 			<tbody id="additionalMetricsTable">
 				{%- for study in studyList -%}
@@ -27,14 +27,19 @@
 					<td><input class="omCost" value="{{ study.opAndMaintCost}}"/></td>
 					<td class="capacityCost">calcMe</td>
 					<td class="enerCost">calcMe</td>
-					<td class="NPV">calcMe</td>
-					<td class="costBen">calcMe</td>
+					<td class="y1save">calcMe</td>
+					<td class="annualSave">calcMe</td>					
+					<td class="payback">calcMe</td>
 				</tr>
 				{%- endfor -%}
 			</tbody>
 		</table>
 		<script>
 			fullData = {{ fullData }}
+
+			function round(number,precision) {
+				return parseFloat(number.toPrecision(precision))
+			}
 
 			function recalculateCostBenefit() {
 				baseCost = 0
@@ -47,21 +52,20 @@
 					daRow = tableRows[rowNum]
 					studyName = daRow.querySelector('.studyName').innerHTML
 					isBaseline = daRow.querySelector('.baseline').checked
-					capacityCost = parseFloat((capRate * fullData[studyName]['capTotal']).toPrecision(4))
+					capacityCost = round(capRate * fullData[studyName]['capTotal'],4)
 					daRow.querySelector('.capacityCost').innerHTML = capacityCost
-					enerCost = parseFloat((energyRate * fullData[studyName]['energyTotal']).toPrecision(4))
+					enerCost = round(energyRate * fullData[studyName]['energyTotal'],4)
 					daRow.querySelector('.enerCost').innerHTML = enerCost
 					if (isBaseline) {
-						daRow.querySelector('.NPV').innerHTML = '0'
-						daRow.querySelector('.costBen').innerHTML = 'N/A'
+						daRow.querySelector('.y1save').innerHTML = '0'
+						daRow.querySelector('.annualSave').innerHTML = '0'
+						daRow.querySelector('.payback').innerHTML = '0'
 						capCost = parseFloat(daRow.querySelector('.capCost').value)
 						omCost = parseFloat(daRow.querySelector('.omCost').value)
 						baseCost = capCost + omCost + enerCost + capacityCost
-						initialCost = capCost + (omCost + enerCost + capacityCost)/fullData[studyName]['yearPercentage']
-						annualCost = (omCost + enerCost + capacityCost)/fullData[studyName]['yearPercentage']
+						annualBaseCost = (omCost + enerCost + capacityCost)/fullData[studyName]['yearPercentage']
 						costSeries = []
-						for (i=0;i<15;i++) {costSeries.push(initialCost+i*annualCost)}
-						console.log(costSeries)
+						for (i=0;i<30;i++) {costSeries.push(0)}
 						for (i=0;i<costGrowth.series.length;i++) {
 							if (costGrowth['series'][i].name==studyName) {costGrowth['series'][i].setData(costSeries)}
 						}
@@ -77,14 +81,15 @@
 						capCost = parseFloat(daRow.querySelector('.capCost').value)
 						omCost = parseFloat(daRow.querySelector('.omCost').value)
 						thisRowCost = capacityCost + enerCost + capCost + omCost
-						NPV = baseCost - thisRowCost
-						daRow.querySelector('.NPV').innerHTML = NPV
-						daRow.querySelector('.costBen').innerHTML = (thisRowCost/NPV).toPrecision(4)
+						y1save = baseCost - thisRowCost
+						daRow.querySelector('.y1save').innerHTML = y1save
 						initialCost = capCost + (omCost + enerCost + capacityCost)/fullData[studyName]['yearPercentage']
 						annualCost = (omCost + enerCost + capacityCost)/fullData[studyName]['yearPercentage']
+						annualSave = (annualBaseCost-annualCost)
+						daRow.querySelector('.annualSave').innerHTML = round(annualSave,4)
+						daRow.querySelector('.payback').innerHTML = round(Math.abs(y1save/annualSave),2)
 						costSeries = []
-						for (i=0;i<15;i++) {costSeries.push(initialCost+i*annualCost)}
-						console.log(costSeries)
+						for (i=0;i<30;i++) {costSeries.push(annualBaseCost-initialCost+i*(annualBaseCost-annualCost))}
 						for (i=0;i<costGrowth.series.length;i++) {
 							if (costGrowth['series'][i].name==studyName) {costGrowth['series'][i].setData(costSeries)}
 						}
@@ -104,4 +109,4 @@
 			recalculateCostBenefit()
 		</script>
 	</div>
-</div>
+</div

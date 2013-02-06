@@ -92,14 +92,17 @@ def outputHtml(analysisName):
 	costGrowthParams['chart']['width'] = 1000
 	costGrowthParams['chart']['renderTo'] = 'costGrowthContainer'
 	costGrowthParams['chart']['type'] = 'line'
-	costGrowthParams['yAxis']['title']['text'] = 'Cumulative Cost ($)'
+	costGrowthParams['yAxis']['title']['text'] = 'Cumulative Savings ($)'
 	costGrowthParams['xAxis']['title'] = {'text':'Years After Install'}
 	costGrowthParams['xAxis']['type'] = 'linear'
+	costGrowthParams['xAxis']['maxZoom'] = 1
 	costGrowthParams['plotOptions']['series'] = {'shadow':False}	
+	costGrowthParams['xAxis']['plotLines'] = []
 	del costGrowthParams['xAxis']['maxZoom']
-	colorMapGray = {0:'gainsboro',1:'silver',2:'gray'}
+	colorMapGray = {0:'dimgray',1:'darkgray',2:'gainsboro',3:'silver'}
 	for study in fullData:
 		costGrowthParams['series'].append({'name':study,'data':[],'color':colorMapGray[fullData.keys().index(study)%3]})
+		costGrowthParams['xAxis']['plotLines'] = [{'color':'silver','width':1,'value':interval*len(fullData[study]['totAppPower'])/(365*24*60*60.0)}]
 	# Get the template in.
 	with open('./reports/monetizationOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
