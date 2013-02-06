@@ -17,11 +17,11 @@ configHtmlTemplate = '''<a href='javascript:removeStudyReport(REMOVALID)' class=
 def outputHtml(analysisName):
 	# Put the title in:
 	outputBuffer = '<p class="reportTitle">Full Output Data</p>\n'
-	outputBuffer += '<div id="repot" class="tightContent">\n'
+	outputBuffer += '<div id="rawData" class="tightContent">\n'
 	# Collect study variables:
 	data = util.anaDataTree('./analyses/' + analysisName, lambda x:True)
 	outputBuffer += '<script>allOutputData = ' + json.dumps(data) + '</script>\n'
-	outputBuffer += '<a >Look at JSON variable allOutputData in the console.</a>'
+	outputBuffer += '<p style="padding:10px">Look at JSON variable "allOutputData" in the console.</p>'
 	return outputBuffer + '</div>\n\n'
 
 def modifyStudy(analysisName):
