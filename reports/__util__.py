@@ -141,3 +141,13 @@ def defaultGraphObject(resolution, startTimeStamp):
 def fileSlurp(fileName):
 	with open(fileName,'r') as openFile:
 		return openFile.read()
+
+def roundSig(x, sig=3):
+	def roundPosSig(y):
+		return round(y, sig-int(math.floor(math.log10(y)))-1)
+	if x == 0: return 0
+	elif x < 0: return -1*roundPosSig(-1*x)
+	else: return roundPosSig(x)
+
+def roundSeries(ser):
+	return map(lambda x:roundSig(x,4), ser)

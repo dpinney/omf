@@ -30,9 +30,9 @@ def outputHtml(analysisName):
 		graphParameters = util.defaultGraphObject(resolution, voltMatrix[1][0])
 		graphParameters['chart']['type'] = 'line'
 		graphParameters['chart']['renderTo'] = 'voltChartDiv' + str(study)
-		graphParameters['series'].append({'name':voltMatrix[0][1],'data':[x[1] for x in voltMatrix[1:]],'marker':{'enabled':False},'color':'gray'})
-		graphParameters['series'].append({'name':voltMatrix[0][2],'data':[x[2] for x in voltMatrix[1:]],'marker':{'enabled':False},'color':'blue'})
-		graphParameters['series'].append({'name':voltMatrix[0][3],'data':[x[3] for x in voltMatrix[1:]],'marker':{'enabled':False},'color':'gray'})
+		graphParameters['series'].append({'name':voltMatrix[0][1],'data':util.roundSeries([x[1] for x in voltMatrix[1:]]),'marker':{'enabled':False},'color':'gray'})
+		graphParameters['series'].append({'name':voltMatrix[0][2],'data':util.roundSeries([x[2] for x in voltMatrix[1:]]),'marker':{'enabled':False},'color':'blue'})
+		graphParameters['series'].append({'name':voltMatrix[0][3],'data':util.roundSeries([x[3] for x in voltMatrix[1:]]),'marker':{'enabled':False},'color':'gray'})
 		# Write one study's worth of HTML:
 		outputBuffer += '<div id="voltStudy' + study + '" class="studyContainer">\n'
 		outputBuffer += '<div id="voltChartDiv' + study + '" class="voltChart" style="height:150px"></div>\n'

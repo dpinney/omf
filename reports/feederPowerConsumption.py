@@ -80,7 +80,7 @@ def outputHtml(analysisName):
 	powGraphParams['yAxis']['title']['text'] = 'Power (kW)'
 	colorMap = {0:'salmon',1:'red',2:'darkred'}
 	for x in range(1,len(powerTimeSeries[0])):
-		powGraphParams['series'].append({'name':powerTimeSeries[0][x],'data':[y[x] for y in powerTimeSeries[1:]],'marker':{'enabled':False},'color':colorMap[x%3]})
+		powGraphParams['series'].append({'name':powerTimeSeries[0][x],'data':util.roundSeries([y[x] for y in powerTimeSeries[1:]]),'marker':{'enabled':False},'color':colorMap[x%3]})
 	outputBuffer += '<div id="powerTimeSeries"><script>new Highcharts.Chart(' + json.dumps(powGraphParams) + ')</script></div>\n'
 	# Add the energy graph:
 	energyGraphParams = {
@@ -91,9 +91,9 @@ def outputHtml(analysisName):
 		'credits':{'enabled':False},
 		'xAxis':{'categories':[x[0] for x in energyTotals[1:]],'tickColor':'gray','lineColor':'gray'},
 		'plotOptions':{'spline':{'shadow':False, 'lineWidth':0,'marker':{'radius':8}}, 'column':{'stacking':'normal','shadow':False}},
-		'series':[	{'type':'column','name':energyTotals[0][3],'data':[x[3] for x in energyTotals[1:]], 'color':'orangered'},
-					{'type':'column','name':energyTotals[0][2],'data':[x[2] for x in energyTotals[1:]], 'color':'darkorange'},
-					{'type':'spline','name':energyTotals[0][1],'data':[x[1] for x in energyTotals[1:]], 'color':'seagreen'}
+		'series':[	{'type':'column','name':energyTotals[0][3],'data':util.roundSeries([x[3] for x in energyTotals[1:]]), 'color':'orangered'},
+					{'type':'column','name':energyTotals[0][2],'data':util.roundSeries([x[2] for x in energyTotals[1:]]), 'color':'darkorange'},
+					{'type':'spline','name':energyTotals[0][1],'data':util.roundSeries([x[1] for x in energyTotals[1:]]), 'color':'seagreen'}
 				]
 	}
 	outputBuffer += '<div id="energyBalance"><script>new Highcharts.Chart(' + json.dumps(energyGraphParams) + ')</script></div>\n'

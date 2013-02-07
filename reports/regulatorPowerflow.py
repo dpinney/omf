@@ -47,7 +47,7 @@ def outputHtml(analysisName):
 			appPowerParams['chart']['renderTo'] = 'regApparentChart' + study + regulator
 			colorMap = {0:'crimson',1:'red',2:'firebrick'}
 			for x in range(1,len(apparentPower[0])):
-				appPowerParams['series'].append({'name':apparentPower[0][x],'data':[y[x] for y in apparentPower[1:]],'marker':{'enabled':False},'color':colorMap[x%3]})
+				appPowerParams['series'].append({'name':apparentPower[0][x],'data':util.roundSeries([y[x] for y in apparentPower[1:]]),'marker':{'enabled':False},'color':colorMap[x%3]})
 			outputBuffer += '<div id="regApparentChart' + study + regulator + '"></div>\n'
 			outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(appPowerParams) + ')</script>\n'
 			# Do power factor chart:
@@ -55,7 +55,7 @@ def outputHtml(analysisName):
 			powerFactorParams['chart']['height'] = 150
 			powerFactorParams['chart']['renderTo'] = 'regPowFactChart' + study + regulator
 			powerFactorParams['yAxis']['title']['text'] = 'Power Factor (%)'
-			powerFactorParams['series'] = [{'name':powerFactor[0][1],'data':[y[1] for y in powerFactor[1:]],'marker':{'enabled':False},'color':'red'}]
+			powerFactorParams['series'] = [{'name':powerFactor[0][1],'data':util.roundSeries([y[1] for y in powerFactor[1:]]),'marker':{'enabled':False},'color':'red'}]
 			outputBuffer += '<div id="regPowFactChart' + study + regulator + '"></div>\n'
 			outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(powerFactorParams) + ')</script>\n'
 			# Do regulator tap position chart:
@@ -65,7 +65,7 @@ def outputHtml(analysisName):
 			tapPosParams['yAxis']['title']['text'] = 'Tap Multiplier'
 			colorMapGray = {0:'gainsboro',1:'silver',2:'gray'}
 			for x in range(1,len(tapPositions[0])):
-				tapPosParams['series'].append({'name':tapPositions[0][x],'data':[y[x] for y in tapPositions[1:]],'marker':{'enabled':False},'color':colorMapGray[x%3]})
+				tapPosParams['series'].append({'name':tapPositions[0][x],'data':util.roundSeries([y[x] for y in tapPositions[1:]]),'marker':{'enabled':False},'color':colorMapGray[x%3]})
 			outputBuffer += '<div id="regTapsChart' + study + regulator + '"></div>\n'
 			outputBuffer += '<script>new Highcharts.Chart(' + json.dumps(tapPosParams) + ')</script>\n'
 		# Close the study div:

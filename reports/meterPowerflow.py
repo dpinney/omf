@@ -52,7 +52,7 @@ def outputHtml(analysisName):
 		graphParameters['yAxis']['title']['text'] = 'Load (kW)'
 		colorMap = {0:'salmon',1:'red',2:'darkred',3:'crimson',4:'firebrick',5:'indianred'}
 		for x in range(1,len(powerMatrix[0])):
-			graphParameters['series'].append({'name':powerMatrix[0][x],'data':[y[x] for y in powerMatrix[1:]],'marker':{'enabled':False},'color':colorMap[x%6]})
+			graphParameters['series'].append({'name':powerMatrix[0][x],'data':util.roundSeries([y[x] for y in powerMatrix[1:]]),'marker':{'enabled':False},'color':colorMap[x%6]})
 		outputBuffer += '<div id="meterPowerChart' + study + '"><script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script></div>'
 		# Voltage graph:
 		graphParameters['chart']['renderTo'] = 'meterVoltChart' + study
@@ -60,7 +60,7 @@ def outputHtml(analysisName):
 		colorMap2 = {0:'lightblue',1:'blue',2:'darkblue',3:'cornflowerblue',4:'cyan'}
 		graphParameters['series'] = []
 		for x in range(1,len(voltMatrix[0])):
-			graphParameters['series'].append({'name':voltMatrix[0][x],'data':[y[x] for y in voltMatrix[1:]],'marker':{'enabled':False},'color':colorMap2[x%5]})
+			graphParameters['series'].append({'name':voltMatrix[0][x],'data':util.roundSeries([y[x] for y in voltMatrix[1:]]),'marker':{'enabled':False},'color':colorMap2[x%5]})
 		outputBuffer += '<div id="meterVoltChart' + study + '"><script>new Highcharts.Chart(' + json.dumps(graphParameters) + ')</script></div>'
 		outputBuffer += '</div>'
 	return outputBuffer + '</div>\n\n'

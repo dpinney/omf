@@ -85,7 +85,7 @@
 						daRow.querySelector('.annualSave').innerHTML = round(annualSave,4)
 						daRow.querySelector('.payback').innerHTML = round(Math.abs(y1save/annualSave),2)
 						costSeries = []
-						for (i=0;i<30;i++) {costSeries.push(annualBaseCost-initialCost+i*(annualBaseCost-annualCost))}
+						for (i=0;i<30;i++) {costSeries.push(round(annualBaseCost-initialCost+i*(annualBaseCost-annualCost),4))}
 						for (i=0;i<costGrowth.series.length;i++) {
 							if (costGrowth['series'][i].name==studyName) {costGrowth['series'][i].setData(costSeries)}
 						}
@@ -94,12 +94,12 @@
 				// Updating the capacity cost graph:
 				for (i=0;i<monCapCostGraph.series.length;i++) {
 					seriesName = monCapCostGraph['series'][i]['name']
-					monCapCostGraph['series'][i].setData(fullData[seriesName]['monthlyPower'].map(function(x){return x*capRate}))
+					monCapCostGraph['series'][i].setData(fullData[seriesName]['monthlyPower'].map(function(x){return round(x*capRate,4)}))
 				}
 				// Updating the energy cost graph:
 				for (i=0;i<monEnergyCostGraph.series.length;i++) {
 					seriesName = monEnergyCostGraph['series'][i]['name']
-					monEnergyCostGraph['series'][i].setData(fullData[seriesName]['monthlyEnergy'].map(function(x){return x*energyRate}))
+					monEnergyCostGraph['series'][i].setData(fullData[seriesName]['monthlyEnergy'].map(function(x){return round(x*energyRate,4)}))
 				}
 			}
 			recalculateCostBenefit()

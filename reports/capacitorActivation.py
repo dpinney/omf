@@ -31,9 +31,9 @@ def outputHtml(analysisName):
 			graphParams['chart']['type'] = 'area'
 			graphParams['legend']['enabled'] = False
 			graphParams['plotOptions']['area'] = {'stacking':'normal','marker':{'enabled':False},'fillOpacity':1}
-			graphParams['series'] = [	{'type':'area','name':'PhaseA','data':[x[1] for x in fullArray[1:]],'color':'gainsboro'},
-										{'type':'area','name':'PhaseB','data':[x[2] for x in fullArray[1:]],'color':'darkgray'},
-										{'type':'area','name':'PhaseC','data':[x[3] for x in fullArray[1:]],'color':'gray'}
+			graphParams['series'] = [	{'type':'area','name':'PhaseA','data':util.roundSeries([x[1] for x in fullArray[1:]]),'color':'gainsboro'},
+										{'type':'area','name':'PhaseB','data':util.roundSeries([x[2] for x in fullArray[1:]]),'color':'darkgray'},
+										{'type':'area','name':'PhaseC','data':util.roundSeries([x[3] for x in fullArray[1:]]),'color':'gray'}
 									]
 			outputBuffer += '<div id="chartDiv' + study + cap + '" class="capChart" style="height:90px"><script>new Highcharts.Chart(' + json.dumps(graphParams) + ')</script></div>\n'
 		outputBuffer += '</div>'

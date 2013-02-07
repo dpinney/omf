@@ -46,7 +46,7 @@ def outputHtml(analysisName):
 		graphParameters['chart']['type'] = 'line'
 		colorMap = {1:'dimgray',2:'darkgray',3:'darkgray',4:'gainsboro',5:'gainsboro'}
 		for x in [1,2,3,4,5]:
-			graphParameters['series'].append({'name':fullArray[0][x],'data':[y[x] for y in fullArray[1:]],'marker':{'enabled':False},'color':colorMap[x]})
+			graphParameters['series'].append({'name':fullArray[0][x],'data':util.roundSeries([float(y[x]) for y in fullArray[1:]]),'marker':{'enabled':False},'color':colorMap[x]})
 		# Write one study's worth of HTML:
 		outputBuffer += '<div id="climateStudy' + study + '" class="studyContainer">\n'
 		outputBuffer += '<div id="climateChartDiv' + study + '" style="height:250px"></div>\n'
