@@ -204,7 +204,7 @@ function draw() {
   if (0 == nodes.length) {
     // Go through the first time and set up the nodes with indices:
     for (x in tree) {
-      if (tree[x].name != undefined && tree[x].from == undefined) {
+      if ((tree[x].name != undefined || tree[x].module != undefined) && tree[x].from == undefined) {
         //TODO: Think about allowing access to other objects here.
         nodeName = tree[x].name
         nodeObject = tree[x].object
@@ -377,7 +377,7 @@ function onCompClick(d, i) {
   tableClear(table)
   treeData = tree[d.treeIndex]
   for (prop in treeData) {
-    if (prop == 'object') {
+    if (prop == 'object' || prop == 'module') {
       row = gebi('selHead').insertRow(0)
     } else if (prop != 'from' && prop != 'to' && prop != 'parent' && prop != 'file') { // Avoid editing machine-written properties!
       row = gebi('selBody').insertRow(-1)
