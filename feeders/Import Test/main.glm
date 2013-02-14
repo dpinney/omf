@@ -1,0 +1,1195 @@
+clock {
+timezone PST+8PDT;
+stoptime '2000-01-02 00:00:00';
+starttime '2000-01-01 00:00:00';
+};
+
+#include "schedules.glm";
+#set minimum_timestep=60;
+#set profiler=1;
+#set relax_naming_rules=1;
+module generators;
+module tape;
+module climate;
+module residential {
+implicit_enduses NONE;
+};
+
+module powerflow {
+solver_method NR;
+NR_iteration_limit 50;
+};
+
+object climate {
+name Climate;
+interpolate QUADRATIC;
+tmyfile climate.tmy2;
+};
+
+object node {
+phases ABCN;
+name REMBRANDT;
+bustype SWING;
+nominal_voltage 7200.0;
+};
+
+object fuse {
+phases ACB;
+from REMBRANDT;
+name RECL_1161;
+current_limit 9999.0 A;
+to nodePRUG6689RECL_1161;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG6689RECL_1161;
+name PRUG6689;
+to nodePRUG6690PRUG6689;
+length 3151.9;
+configuration PRUG84line_configuration2001;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG6690PRUG6689;
+name PRUG6690;
+to nodePRUG6691PRUG6690;
+length 106.228;
+configuration PRUG84line_configuration2001;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG6691PRUG6690;
+name PRUG6691;
+to nodePRUG6692PRUG6691;
+length 210.857;
+configuration PRUG84line_configuration2001;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG6692PRUG6691;
+name PRUG6692;
+to nodePRUG6693PRUG6692;
+length 150.334;
+configuration PRUG84line_configuration2001;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG6693PRUG6692;
+name PRUG6693;
+to nodeSWIT_737-APRUG6693;
+length 260.294;
+configuration PRUG84line_configuration2001;
+};
+
+object fuse {
+phases ACB;
+from REMBRANDT;
+name RECL_1162;
+current_limit 9999.0 A;
+to nodePRUG3301RECL_1162;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG3301RECL_1162;
+name PRUG3301;
+to nodePRUG5000PRUG3301;
+length 794.966;
+configuration PRUG84line_configuration2001;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG5000PRUG3301;
+name PRUG5000;
+to nodePRUG3297PRUG5000;
+length 3172.4;
+configuration PRUG84line_configuration2001;
+};
+
+object underground_line {
+phases C;
+from nodePRUG3297PRUG5000;
+name PRUG3297;
+to node263-32-311PRUG3297;
+length 358.287;
+configuration PRUG84line_configuration2001;
+};
+
+object load {
+phases CN;
+load_class R;
+name 263-32-311;
+parent node263-32-311PRUG3297;
+constant_power_C 9444.03;
+constant_power_A 100;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG3297PRUG5000;
+name PRUG5001;
+to nodePRUG5002PRUG5001;
+length 426.323;
+configuration PRUG84line_configuration2001;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG5002PRUG5001;
+name PRUG5002;
+to nodePROH16277PRUG5002;
+length 848.662;
+configuration PRUG84line_configuration2001;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH16277PRUG5002;
+name PROH16277;
+to nodePROH279PROH16277;
+length 2143.18;
+configuration PROH19454line_configuration3901;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH279PROH16277;
+name PROH279;
+to node263-31-260PROH279;
+length 1004.64;
+configuration PROH19454line_configuration3901;
+};
+
+object load {
+phases AN;
+load_class R;
+name 263-31-260;
+parent node263-31-260PROH279;
+constant_power_C 100;
+constant_power_A 10864.8;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH279PROH16277;
+name PROH16278;
+to nodePROH16279PROH16278;
+length 214.966;
+configuration PROH19454line_configuration3901;
+};
+
+object underground_line {
+phases AN;
+from nodePROH16279PROH16278;
+name PRUG84;
+to node263-30-850PRUG84;
+length 260.644;
+configuration PRUG84line_configuration2001;
+};
+
+object line_configuration {
+name PRUG84line_configuration2001;
+spacing PRUG84line_configuration2001line_spacing2002;
+conductor_N PRUG84line_configuration2001underground_line_conductor2006;
+conductor_A PRUG84line_configuration2001underground_line_conductor2006;
+conductor_C PRUG84line_configuration2001underground_line_conductor2006;
+conductor_B PRUG84line_configuration2001underground_line_conductor2006;
+};
+
+object line_spacing {
+distance_AN 0.000000;
+name PRUG84line_configuration2001line_spacing2002;
+distance_CN 0.000000;
+distance_BN 0.000000;
+distance_BC 0.500000;
+distance_AB 0.500000;
+distance_AC 1.000000;
+};
+
+object underground_line_conductor {
+conductor_gmr 0.008830;
+conductor_resistance 1.540000;
+shield_resistance 0.000000;
+neutral_gmr 0.002080;
+neutral_strands 6.000000;
+conductor_diameter 0.292000;
+name PRUG84line_configuration2001underground_line_conductor2006;
+outer_diameter 0.980000;
+neutral_resistance 14.872000;
+neutral_diameter 0.064000;
+shield_gmr 0.000000;
+};
+
+object load {
+phases AN;
+load_class R;
+name 263-30-850;
+parent node263-30-850PRUG84;
+constant_power_C 100;
+constant_power_A 4116.09;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object underground_line {
+phases ACBN;
+from nodePROH16277PRUG5002;
+name PRUG5361;
+to nodePROH277PRUG5361;
+length 3866.74;
+configuration PRUG84line_configuration2001;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH277PRUG5361;
+name PROH277;
+to node263-30-380PROH277;
+length 268.474;
+configuration PROH19454line_configuration3901;
+};
+
+object load {
+phases AN;
+load_class R;
+name 263-30-380;
+parent node263-30-380PROH277;
+constant_power_C 100;
+constant_power_A 5599.56;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object underground_line {
+phases ACBN;
+from nodePROH277PRUG5361;
+name PRUG5362;
+to nodeSWIT_361-BPRUG5362;
+length 947.289;
+configuration PRUG84line_configuration2001;
+};
+
+object underground_line {
+phases B;
+from nodePRUG5002PRUG5001;
+name PRUG85;
+to node263-32-310PRUG85;
+length 305.542;
+configuration PRUG84line_configuration2001;
+};
+
+object load {
+phases BN;
+load_class R;
+name 263-32-310;
+parent node263-32-310PRUG85;
+constant_power_C 100;
+constant_power_A 100;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object underground_line {
+phases AB;
+from nodePRUG5000PRUG3301;
+name PRUG3303;
+to nodePROH16622PRUG3303;
+length 836.732;
+configuration PRUG84line_configuration2001;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH16622PRUG3303;
+name PROH16622;
+to nodeFUSE_434PROH16622;
+length 242.872;
+configuration PROH16513line_configuration6001;
+};
+
+object fuse {
+phases BN;
+from nodeFUSE_434PROH16622;
+name FUSE_434;
+current_limit 9999.0 A;
+to nodePROH16623FUSE_434;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH16623FUSE_434;
+name PROH16623;
+to nodePROH2887PROH16623;
+length 254.225;
+configuration PROH16513line_configuration6001;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH2887PROH16623;
+name PROH2887;
+to node283-05-120PROH2887;
+length 442.266;
+configuration PROH16513line_configuration6001;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-05-120;
+parent node283-05-120PROH2887;
+constant_power_C 100;
+constant_power_A 100;
+nominal_voltage 120;
+constant_power_B 835.755;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH2887PROH16623;
+name PROH16624;
+to nodePROH2886PROH16624;
+length 3290.55;
+configuration PROH16513line_configuration6001;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH2886PROH16624;
+name PROH2886;
+to node263-32-860PROH2886;
+length 661.995;
+configuration PROH16513line_configuration6001;
+};
+
+object load {
+phases BN;
+load_class R;
+name 263-32-860;
+parent node263-32-860PROH2886;
+constant_power_C 100;
+constant_power_A 100;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object overhead_line {
+phases ABN;
+from nodePROH16622PRUG3303;
+name PROH8542;
+to nodePROH19454PROH8542;
+length 81.2263;
+configuration PROH8542line_configuration3801;
+};
+
+object line_configuration {
+name PROH8542line_configuration3801;
+conductor_A PROH16513line_configuration6001overhead_line_conductor6006;
+spacing PROH16513line_configuration6001line_spacing6002;
+conductor_N PROH16513line_configuration6001overhead_line_conductor6006;
+conductor_C PROH268line_configuration4701overhead_line_conductor4704;
+conductor_B PROH16513line_configuration6001overhead_line_conductor6006;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH19454PROH8542;
+name PROH19454;
+to nodeRECL_844PROH19454;
+length 171.711;
+configuration PROH19454line_configuration3901;
+};
+
+object line_configuration {
+name PROH19454line_configuration3901;
+spacing PROH16513line_configuration6001line_spacing6002;
+conductor_N PROH16513line_configuration6001overhead_line_conductor6006;
+conductor_C PROH268line_configuration4701overhead_line_conductor4704;
+conductor_B PROH268line_configuration4701overhead_line_conductor4704;
+conductor_A PROH16513line_configuration6001overhead_line_conductor6006;
+};
+
+object fuse {
+phases AN;
+from nodeRECL_844PROH19454;
+name RECL_844;
+current_limit 9999.0 A;
+to nodePROH19455RECL_844;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH19455RECL_844;
+name PROH19455;
+to nodePROH266PROH19455;
+length 2702.01;
+configuration PROH19454line_configuration3901;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH266PROH19455;
+name PROH266;
+to node283-06-131PROH266;
+length 260.372;
+configuration PROH19454line_configuration3901;
+};
+
+object load {
+phases AN;
+load_class R;
+name 283-06-131;
+parent node283-06-131PROH266;
+constant_power_C 100;
+constant_power_A 125.363;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object load {
+phases AN;
+load_class R;
+name 283-06-130;
+parent node283-06-131PROH266;
+constant_power_C 100;
+constant_power_A 3173.78;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH266PROH19455;
+name PROH19456;
+to nodePROH20016PROH19456;
+length 2354.05;
+configuration PROH19454line_configuration3901;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH20016PROH19456;
+name PROH20016;
+to nodePROH268PROH20016;
+length 171.315;
+configuration PROH19454line_configuration3901;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH268PROH20016;
+name PROH268;
+to node282-01-180PROH268;
+length 88.6741;
+configuration PROH19454line_configuration3901;
+};
+
+object overhead_line_conductor {
+resistance 0.185900;
+name PROH268line_configuration4701overhead_line_conductor4704;
+geometric_mean_radius 0.031300;
+};
+
+object load {
+phases AN;
+load_class R;
+name 282-01-180;
+parent node282-01-180PROH268;
+constant_power_C 100;
+constant_power_A 919.33;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH268PROH20016;
+name PROH20017;
+to nodePROH20018PROH20017;
+length 2039.77;
+configuration PROH19454line_configuration3901;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH20018PROH20017;
+name PROH20018;
+to nodePRUG81PROH20018;
+length 1659.7;
+configuration PROH19454line_configuration3901;
+};
+
+object underground_line {
+phases AN;
+from nodePRUG81PROH20018;
+name PRUG81;
+to node282-01-680PRUG81;
+length 784.938;
+configuration PRUG84line_configuration2001;
+};
+
+object load {
+phases AN;
+load_class R;
+name 282-01-680;
+parent node282-01-680PRUG81;
+constant_power_C 100;
+constant_power_A 10279.8;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object overhead_line {
+phases AN;
+from nodePRUG81PROH20018;
+name PROH20019;
+to nodePROH20020PROH20019;
+length 677.389;
+configuration PROH19454line_configuration3901;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH20020PROH20019;
+name PROH20020;
+to nodeSWIT_617-APROH20020;
+length 721.565;
+configuration PROH19454line_configuration3901;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH20020PROH20019;
+name PROH270;
+to node283-06-720PROH270;
+length 1628.51;
+configuration PROH19454line_configuration3901;
+};
+
+object load {
+phases AN;
+load_class R;
+name 283-06-720;
+parent node283-06-720PROH270;
+constant_power_C 100;
+constant_power_A 5683.13;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object overhead_line {
+phases AN;
+from nodePROH20018PROH20017;
+name PROH269;
+to node283-06-310PROH269;
+length 353.428;
+configuration PROH19454line_configuration3901;
+};
+
+object load {
+phases AN;
+load_class R;
+name 283-06-310;
+parent node283-06-310PROH269;
+constant_power_C 100;
+constant_power_A 2705.76;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH19454PROH8542;
+name PROH16513;
+to nodeRECL_845PROH16513;
+length 356.333;
+configuration PROH16513line_configuration6001;
+};
+
+object line_configuration {
+name PROH16513line_configuration6001;
+spacing PROH16513line_configuration6001line_spacing6002;
+conductor_N PROH16513line_configuration6001overhead_line_conductor6006;
+conductor_A PROH268line_configuration4701overhead_line_conductor4704;
+conductor_C PROH268line_configuration4701overhead_line_conductor4704;
+conductor_B PROH16513line_configuration6001overhead_line_conductor6006;
+};
+
+object line_spacing {
+distance_BC 7.0;
+name PROH16513line_configuration6001line_spacing6002;
+distance_CN 5.0;
+distance_AC 4.5;
+distance_AN 4.272002;
+distance_AB 2.5;
+distance_BN 5.656854;
+};
+
+object overhead_line_conductor {
+resistance 0;
+name PROH16513line_configuration6001overhead_line_conductor6006;
+geometric_mean_radius 0;
+};
+
+object fuse {
+phases BN;
+from nodeRECL_845PROH16513;
+name RECL_845;
+current_limit 9999.0 A;
+to nodePROH16514RECL_845;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH16514RECL_845;
+name PROH16514;
+to nodePROH16515PROH16514;
+length 5239;
+configuration PROH16513line_configuration6001;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH16515PROH16514;
+name PROH16515;
+to nodePRUG834PROH16515;
+length 3573.77;
+configuration PROH16513line_configuration6001;
+};
+
+object underground_line {
+phases BN;
+from nodePRUG834PROH16515;
+name PRUG834;
+to node283-08-710PRUG834;
+length 407.943;
+configuration PRUG84line_configuration2001;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-08-710;
+parent node283-08-710PRUG834;
+constant_power_C 100;
+constant_power_A 100;
+nominal_voltage 120;
+constant_power_B 8023.25;
+};
+
+object overhead_line {
+phases BN;
+from nodePRUG834PROH16515;
+name PROH16516;
+to node283-17-120PROH16516;
+length 3046.11;
+configuration PROH16513line_configuration6001;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-17-120;
+parent node283-17-120PROH16516;
+constant_power_C 100;
+constant_power_A 100;
+nominal_voltage 120;
+constant_power_B 668.604;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH16515PROH16514;
+name PROH11498;
+to nodePROH2878PROH11498;
+length 732.994;
+configuration PROH16513line_configuration6001;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH2878PROH11498;
+name PROH2878;
+to node283-08-120PROH2878;
+length 156.322;
+configuration PROH16513line_configuration6001;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-08-120;
+parent node283-08-120PROH2878;
+constant_power_C 100;
+constant_power_A 100;
+nominal_voltage 120;
+constant_power_B 2686.95;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH2878PROH11498;
+name PROH11499;
+to nodePROH2877PROH11499;
+length 1448.01;
+configuration PROH16513line_configuration6001;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH2877PROH11499;
+name PROH2877;
+to node283-05-830PROH2877;
+length 144.164;
+configuration PROH16513line_configuration6001;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-05-830;
+parent node283-05-830PROH2877;
+constant_power_C 100;
+constant_power_A 100;
+nominal_voltage 120;
+constant_power_B 100;
+};
+
+object overhead_line {
+phases BN;
+from nodePROH2877PROH11499;
+name PROH11500;
+to node283-08-170PROH11500;
+length 810.044;
+configuration PROH16513line_configuration6001;
+};
+
+object load {
+phases BN;
+load_class R;
+name 283-08-170;
+parent node283-08-170PROH11500;
+constant_power_C 100;
+constant_power_A 100;
+nominal_voltage 120;
+constant_power_B 3468.38;
+};
+
+object fuse {
+phases ACB;
+from REMBRANDT;
+name RECL_1160;
+current_limit 9999.0 A;
+to nodePRUG4190RECL_1160;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG4190RECL_1160;
+name PRUG4190;
+to nodePRUG4176PRUG4190;
+length 289.527;
+configuration PRUG84line_configuration2001;
+};
+
+object underground_line {
+phases ACB;
+from nodePRUG4176PRUG4190;
+name PRUG4176;
+to node263-32-710PRUG4176;
+length 3185.68;
+configuration PRUG84line_configuration2001;
+};
+
+object load {
+phases ABCN;
+load_class R;
+name 263-32-710;
+parent node263-32-710PRUG4176;
+constant_power_C 1853700.0;
+constant_power_A 1853700.0;
+nominal_voltage 120;
+constant_power_B 1853700.0;
+};
+
+object capacitor {
+control VOLT;
+phases ABCN;
+capacitor_A 0.10 MVAr;
+control_level INDIVIDUAL;
+name NEWCAP-1D1DC669;
+parent node263-32-710PRUG4176;
+capacitor_C 0.10 MVAr;
+capacitor_B 0.10 MVAr;
+phases_connected ABCN;
+time_delay 300.0;
+nominal_voltage 2401.7771;
+voltage_set_low 2340.0;
+switchC CLOSED;
+switchB CLOSED;
+switchA CLOSED;
+pt_phase ABCN;
+dwell_time 0.0;
+voltage_set_high 2350.0;
+};
+
+object fuse {
+phases ACB;
+from REMBRANDT;
+name RECL_993;
+current_limit 9999.0 A;
+to nodePRUG4180RECL_993;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG6689RECL_1161;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG6690PRUG6689;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG6691PRUG6690;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG6692PRUG6691;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG6693PRUG6692;
+};
+
+object node {
+phases ABCN;
+nominal_voltage 2400;
+name nodeSWIT_737-APRUG6693;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG3301RECL_1162;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG5000PRUG3301;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG3297PRUG5000;
+};
+
+object node {
+phases CN;
+nominal_voltage 2400;
+name node263-32-311PRUG3297;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG5002PRUG5001;
+};
+
+object node {
+phases ABCN;
+nominal_voltage 2400;
+name nodePROH16277PRUG5002;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH279PROH16277;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node263-31-260PROH279;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH16279PROH16278;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node263-30-850PRUG84;
+};
+
+object node {
+phases ABCN;
+nominal_voltage 2400;
+name nodePROH277PRUG5361;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node263-30-380PROH277;
+};
+
+object node {
+phases ABCN;
+nominal_voltage 2400;
+name nodeSWIT_361-BPRUG5362;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node263-32-310PRUG85;
+};
+
+object node {
+phases ABN;
+nominal_voltage 2400;
+name nodePROH16622PRUG3303;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodeFUSE_434PROH16622;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH16623FUSE_434;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH2887PROH16623;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-05-120PROH2887;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH2886PROH16624;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node263-32-860PROH2886;
+};
+
+object node {
+phases ABN;
+nominal_voltage 2400;
+name nodePROH19454PROH8542;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodeRECL_844PROH19454;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH19455RECL_844;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH266PROH19455;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node283-06-131PROH266;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH20016PROH19456;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH268PROH20016;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node282-01-180PROH268;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH20018PROH20017;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePRUG81PROH20018;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node282-01-680PRUG81;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodePROH20020PROH20019;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name nodeSWIT_617-APROH20020;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node283-06-720PROH270;
+};
+
+object node {
+phases AN;
+nominal_voltage 2400;
+name node283-06-310PROH269;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodeRECL_845PROH16513;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH16514RECL_845;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH16515PROH16514;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePRUG834PROH16515;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-08-710PRUG834;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-17-120PROH16516;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH2878PROH11498;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-08-120PROH2878;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name nodePROH2877PROH11499;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-05-830PROH2877;
+};
+
+object node {
+phases BN;
+nominal_voltage 2400;
+name node283-08-170PROH11500;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG4190RECL_1160;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG4176PRUG4190;
+};
+
+object node {
+phases ABCN;
+nominal_voltage 2400;
+name node263-32-710PRUG4176;
+};
+
+object node {
+phases ABC;
+nominal_voltage 2400;
+name nodePRUG4180RECL_993;
+};
+
