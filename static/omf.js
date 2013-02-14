@@ -127,3 +127,23 @@ function removeProgressDialog() {
 function round(number,precision) {
 	return parseFloat(number.toPrecision(precision))
 }
+
+function randomGaussian() {
+  // Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
+  do {
+    x1 = 2 * Math.random() - 1
+    x2 = 2 * Math.random() - 1
+    rad = x1 * x1 + x2 * x2
+  } while (rad >= 1 || rad == 0)   
+  c = Math.sqrt(-2 * Math.log(rad) / rad);
+  return x1 * c
+}
+
+function randomChoice(inList) {
+	return inList[Math.floor(Math.random() * inList.length)]
+}
+
+function randomInt(min,max) {
+	return Math.floor(Math.random()*(max - min + 1) + min)
+}
+
