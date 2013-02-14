@@ -9,12 +9,12 @@ from pprint import pprint
 import traceback
 import subprocess
 
-filesToTest = [	['ACEC-COLOMA_SUB','ACEC.seq'],
-				['ACEC-Friendship','ACEC.seq'],
-				['ILEC-Gilmore_City_Sub','ILEC.seq'],
-				['ILEC-Rembrandt','ILEC.seq'],
-				['Owen-Bromley','Owen.seq'],
-				['Owen-Burlington','Owen.seq']]
+filesToTest = [	['ABEC-COLUMBIA','ABEC.seq'],
+				['ABEC-FRANK','ABEC.seq'],
+				['INEC-GRAHAM','INEC.seq'],
+				['INEC-RENOIR','INEC.seq'],
+				['Olin-Barre','Olin.seq'],
+				['Olin-Brown','Olin.seq']]
 
 def testFile(stdName, seqName):
 	try:

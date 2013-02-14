@@ -68,6 +68,13 @@ def parseTokenList(tokenList):
 			if len(fullToken) > 1:
 				currentLeafAdd(fullToken[0],listToString(fullToken))
 			guidStack.pop()
+		elif fullToken[0] == 'schedule':
+			# Special code for those ugly schedule objects:
+			if fullToken[0] == 'schedule':
+				while fullToken[-1] not in ['}']:
+					fullToken.append(tokenList.pop(0))
+				tree[guid] = {'object':'schedule','name':fullToken[1], 'cron':' '.join(fullToken[3:-2])}
+				guid += 1
 		elif fullToken[-1] == '{':
 			currentLeafAdd(guid,{})
 			guidStack.append(guid)
@@ -104,6 +111,8 @@ def dictToString(inDict):
 		return 'module ' + inDict['module'] + ' {\n' + gatherKeyValues(inDict, 'module') + '};\n'
 	elif 'clock' in inDict:
 		return 'clock {\n' + gatherKeyValues(inDict, 'clock') + '};\n'
+	elif 'object' in inDict and inDict['object'] == 'schedule':
+		return 'schedule ' + inDict['name'] + ' {\n' + inDict['cron'] + '\n};\n'
 	elif 'object' in inDict:
 		return 'object ' + inDict['object'] + ' {\n' + gatherKeyValues(inDict, 'object') + '};\n'
 	elif 'omfEmbeddedConfigObject' in inDict:

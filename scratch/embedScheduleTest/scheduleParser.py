@@ -9,3 +9,6 @@ from pprint import pformat
 tree=tp.parse('main.glm')
 with open('out.txt','w') as outFile:
 	outFile.write(pformat(tree))
+
+with open('out.glm','w') as outGlm:
+	outGlm.write(tp.sortedWrite(tree))
