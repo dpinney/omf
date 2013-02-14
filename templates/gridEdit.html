@@ -782,6 +782,27 @@ function staticLoadsToHouses() {
     newHouse['name'] = 'synhouse' + treeNewIndex
     return newHouse
   }
+  function randomLights() {
+    newLights = {}
+    newLights['object'] = 'ZIPload'
+    newLights['power_fraction'] = '0.400000'
+    newLights['current_fraction'] = '0.300000'
+    newLights['impedance_pf'] = '1.000'
+    newLights['current_pf'] = '1.000'
+    newLights['power_pf'] = '1.000'
+    newLights['impedance_fraction'] = '0.300000'
+    newLights['heatgain_fraction'] = '0.9'
+    power = 1.2 + randomGaussian()
+    if (power < 0) {power = -1*power}
+    power = power.toPrecision(3) * 1.0 + ''
+    newLights['base_power'] = 'LIGHTS*' + 1.33
+    skew = 2000*randomGaussian()
+    skew = skew.toPrecision(3) * 1.0 + ''
+    newLights['schedule_skew'] = skew
+    treeNewIndex = nextTreeKey()
+    newLights['name'] = 'synLights' + treeNewIndex
+    return newLights
+  }
   function replaceAllHouses() {
     for (index in tree) {
       if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
@@ -789,7 +810,10 @@ function staticLoadsToHouses() {
         parentIndex = findIndex(tree, 'name', tree[index]['parent'])
         deleteObject(index)
         newHouse = randomHouse()
+        newLights = randomLights()
         newChildAtLocation(newHouse, parentIndex)
+        houseIndex = findIndex(tree, 'name', newHouse['name'])
+        newChildAtLocation(newLights, houseIndex)
       }
     }
     redraw()
