@@ -803,6 +803,29 @@ function staticLoadsToHouses() {
     newLights['name'] = 'synLights' + treeNewIndex
     return newLights
   }
+  function randomWaterHeater() {
+    newHeater = {}
+    if (randomChoice([1,2,3]) == 3) {return false}
+    // Static properties.
+    newHeater['object'] = 'waterheater'
+    newHeater['temperature'] = '135'
+    newHeater['tank_volume'] = '50'
+    newHeater['location'] = 'INSIDE'
+    // Uniformly distributed properties.
+    newHeater['heating_element_capacity'] = randomInt(37,53)/10.0 + ''
+    newHeater['thermostat_deadband'] = randomInt(20,60)/10.0 + ''
+    newHeater['demand'] = 'water' + randomInt(1,20) + '*1'
+    newHeater['tank_UA'] = randomInt(20,40)/10.0 + ''
+    // Gaussian properties.
+    skew = 2000*randomGaussian()
+    skew = skew.toPrecision(3) * 1.0 + ''
+    newHeater['schedule_skew'] = skew
+    newHeater['tank_setpoint'] = (randomGaussian()*2+130).toPrecision(3) + ''
+    // between 1100 and 3000. Probably needs a normal distribution.
+    treeNewIndex = nextTreeKey()
+    newHeater['name'] = 'synwaterheater' + treeNewIndex
+    return newHeater
+  }
   function replaceAllHouses() {
     for (index in tree) {
       if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
@@ -811,9 +834,11 @@ function staticLoadsToHouses() {
         deleteObject(index)
         newHouse = randomHouse()
         newLights = randomLights()
+        newHeater = randomWaterHeater()
         newChildAtLocation(newHouse, parentIndex)
         houseIndex = findIndex(tree, 'name', newHouse['name'])
         newChildAtLocation(newLights, houseIndex)
+        if (newHeater!=false) {newChildAtLocation(newHeater, houseIndex)}
       }
     }
     redraw()
