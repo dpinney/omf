@@ -3783,18 +3783,18 @@ name CAP134;
 parent node7055970558;
 capacitor_B 0.10 MVAr;
 capacitor_C 0.10 MVAr;
+phases_connected ABCN;
 capacitor_A 0.10 MVAr;
 time_delay 300.0;
 nominal_voltage 2401.7771;
-voltage_set_high 2350.0;
 voltage_set_low 2340.0;
 switchC CLOSED;
 control_level INDIVIDUAL;
 switchA CLOSED;
 switchB CLOSED;
-phases_connected ABCN;
-dwell_time 0.0;
 pt_phase ABCN;
+dwell_time 0.0;
+voltage_set_high 2350.0;
 };
 
 object overhead_line {
@@ -23061,5 +23061,29 @@ tank_volume 50;
 tank_setpoint 128;
 tank_UA 3.8;
 name waterheater2592;
+};
+
+object meter {
+phases ABCN;
+nominal_voltage 2400.0;
+name meter2593;
+parent node2101121003;
+};
+
+object battery {
+power_factor 1.0;
+E_Max 1000000;
+parent meter2593;
+base_efficiency 0.86;
+generator_status ONLINE;
+Energy 1000000;
+power_type DC;
+V_Max 8000;
+generator_mode CONSTANT_PQ;
+scheduled_power battery_schedule*250000;
+parasitic_power_draw 190 W;
+I_Max 250;
+P_Max 250000;
+name battery2594;
 };
 
