@@ -56,7 +56,12 @@ def outputHtml(analysisName):
 			if isSinglePhaseNotThree:
 				apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],util.pyth(r[1],r[2])/1000] for r in fullData[1:]]
 			else:
-				apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],(util.pyth(r[1],r[2])+util.pyth(r[3],r[4])+util.pyth(r[5],r[6]))/1000] for r in fullData[1:]]
+				print lossOrGenFilePath
+				if lossOrGenFilePath.find('/Windmill_') != -1:
+					apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],-1*(util.pyth(r[1],r[2])*util.pyth(r[7],r[8])+util.pyth(r[3],r[4])*util.pyth(r[9],r[10])+util.pyth(r[5],r[6])*util.pyth(r[11],r[12]))/1000] for r in fullData[1:]]
+					# raise Exception
+				else:
+					apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],(util.pyth(r[1],r[2])+util.pyth(r[3],r[4])+util.pyth(r[5],r[6]))/1000] for r in fullData[1:]]					
 			totalEnergyKwh = sum([interval * row[1] / 3600.0 for row in apparentPower[1:]])
 			return totalEnergyKwh
 		# Sum energy over all files for a given study:
@@ -65,7 +70,7 @@ def outputHtml(analysisName):
 		energies = map(lambda x:sumEnergy(studyPrefix + x, isSinglePhaseNotThree), lossesFiles)
 		return sum(energies)
 	losses = map(lambda x:totalEnergy(x, lambda y:y in ['TriplexLosses.csv','OverheadLosses.csv','UndergroundLosses.csv','TransformerLosses.csv'], False), studies)
-	distGen = map(lambda x:totalEnergy(x, lambda y:y.startswith('Inverter_'), False), studies)
+	distGen = map(lambda x:totalEnergy(x, lambda y:y.startswith('Inverter_') or y.startswith('Windmill_'), False), studies)
 	substation = map(lambda x:totalEnergy(x, lambda y:y.startswith('SwingKids_'), True), studies)
 	energyMatrix = [['#'] + map(str,studies),
 					['DG'] + distGen,

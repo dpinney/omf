@@ -58,6 +58,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 		tp.attachRecorders(tree, 'Regulator', 'object', 'regulator')
 		tp.attachRecorders(tree, 'Capacitor', 'object', 'capacitor')
 		tp.attachRecorders(tree, 'Inverter', 'object', 'inverter')
+		tp.attachRecorders(tree, 'Windmill', 'object', 'windturb_dg')
 		tp.attachRecorders(tree, 'CollectorVoltage', None, None)
 		tp.attachRecorders(tree, 'Climate', 'object', 'climate')
 		tp.attachRecorders(tree, 'OverheadLosses', None, None)

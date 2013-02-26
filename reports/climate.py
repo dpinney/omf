@@ -44,6 +44,7 @@ def outputHtml(analysisName):
 		graphParameters = util.defaultGraphObject(resolution, fullArray[1][0])
 		graphParameters['chart']['renderTo'] = 'climateChartDiv' + str(study)
 		graphParameters['chart']['type'] = 'line'
+		graphParameters['yAxis'] = {'title':{'text':'Climate Units', 'style':{'color':'gray'}}}
 		colorMap = {1:'dimgray',2:'darkgray',3:'darkgray',4:'gainsboro',5:'gainsboro'}
 		for x in [1,2,3,4,5]:
 			graphParameters['series'].append({'name':fullArray[0][x],'data':util.roundSeries([float(y[x]) for y in fullArray[1:]]),'marker':{'enabled':False},'color':colorMap[x]})
