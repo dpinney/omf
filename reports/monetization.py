@@ -87,27 +87,27 @@ def outputHtml(analysisName):
 	for study in fullData:
 		monEnergyParams['series'].append({'name':study,'data':[],'color':colorMap[fullData.keys().index(study)%5]})
 	# Cost growth graph:
-	costGrowthParams = util.defaultGraphObject(resolution, startTime)
-	costGrowthParams['chart']['height'] = 200
-	costGrowthParams['chart']['width'] = 1000
-	costGrowthParams['chart']['renderTo'] = 'costGrowthContainer'
-	costGrowthParams['chart']['type'] = 'line'
-	costGrowthParams['yAxis']['title']['text'] = 'Cumulative Savings ($)'
-	costGrowthParams['xAxis']['title'] = {'text':'Years After Install'}
-	costGrowthParams['xAxis']['type'] = 'linear'
-	costGrowthParams['xAxis']['maxZoom'] = 1
-	costGrowthParams['plotOptions']['series'] = {'shadow':False}	
-	costGrowthParams['xAxis']['plotLines'] = []
-	del costGrowthParams['xAxis']['maxZoom']
+	savingsGrowthParams = util.defaultGraphObject(resolution, startTime)
+	savingsGrowthParams['chart']['height'] = 200
+	savingsGrowthParams['chart']['width'] = 1000
+	savingsGrowthParams['chart']['renderTo'] = 'costGrowthContainer'
+	savingsGrowthParams['chart']['type'] = 'line'
+	savingsGrowthParams['yAxis']['title']['text'] = 'Cumulative Savings ($)'
+	savingsGrowthParams['xAxis']['title'] = {'text':'Years After Install'}
+	savingsGrowthParams['xAxis']['type'] = 'linear'
+	savingsGrowthParams['xAxis']['maxZoom'] = 1
+	savingsGrowthParams['plotOptions']['series'] = {'shadow':False}	
+	savingsGrowthParams['xAxis']['plotLines'] = []
+	del savingsGrowthParams['xAxis']['maxZoom']
 	colorMapGray = {0:'dimgray',1:'darkgray',2:'gainsboro',3:'silver'}
 	for study in fullData:
-		costGrowthParams['series'].append({'name':study,'data':[],'color':colorMapGray[fullData.keys().index(study)%3]})
-		costGrowthParams['xAxis']['plotLines'] = [{'color':'silver','width':1,'value':interval*len(fullData[study]['totAppPower'])/(365*24*60*60.0)}]
+		savingsGrowthParams['series'].append({'name':study,'data':[],'color':colorMapGray[fullData.keys().index(study)%3]})
+		savingsGrowthParams['xAxis']['plotLines'] = [{'color':'silver','width':1,'value':interval*len(fullData[study]['totAppPower'])/(365*24*60*60.0)}]
 	# Get the template in.
 	with open('./reports/monetizationOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
 	# Write the results.
-	return template.render(monPowParams=json.dumps(monPowParams), monEnergyParams=json.dumps(monEnergyParams), costGrowthParams=json.dumps(costGrowthParams),
+	return template.render(monPowParams=json.dumps(monPowParams), monEnergyParams=json.dumps(monEnergyParams), savingsGrowthParams=json.dumps(savingsGrowthParams),
 							distrEnergyRate=distrEnergyRate, distrCapacityRate=distrCapacityRate, studyList=studyList, fullData=json.dumps(fullData))
 
 def modifyStudy(analysisName):

@@ -9,7 +9,7 @@
 		</div>
 	</div>
 	<div id="costGrowthContainer" class="studyContainer" style="height:200px">
-		<script>costGrowth = new Highcharts.Chart({{ costGrowthParams }})</script>
+		<script>costGrowth = new Highcharts.Chart({{ savingsGrowthParams }})</script>
 	</div>
 	<div id="additionalMetrics" class="studyContainer">
 		<div style="width:1000px;padding:5px 5px 5px 5px">
@@ -70,6 +70,7 @@
 				// Table update things that aren't the baseline:
 				for (rowNum=0;rowNum<totalRows;rowNum++) {
 					daRow = tableRows[rowNum]
+					studyName = daRow.querySelector('.studyName').innerHTML
 					isBaseline = daRow.querySelector('.baseline').checked
 					if (!isBaseline) {
 						capacityCost = parseFloat(daRow.querySelector('.capacityCost').innerHTML)
@@ -87,7 +88,9 @@
 						costSeries = []
 						for (i=0;i<30;i++) {costSeries.push(round(annualBaseCost-initialCost+i*(annualBaseCost-annualCost),4))}
 						for (i=0;i<costGrowth.series.length;i++) {
-							if (costGrowth['series'][i].name==studyName) {costGrowth['series'][i].setData(costSeries)}
+							if (costGrowth['series'][i].name==studyName) {
+								costGrowth['series'][i].setData(costSeries)
+							}
 						}
 					}
 				}
