@@ -105,8 +105,10 @@ function showProgressDialog(dialogMessage) {
 	// Make the elements.
 	background = document.createElement('div')
 	background.id = 'progressBackground'
+	background.style.zIndex = '9998'
 	progContent = document.createElement('div')
 	progContent.id = 'progressContent'
+	progContent.style.zIndex = '9999'
 	spinner = document.createElement('img')
 	spinner.src = '/static/spinner.gif'
 	progressText = document.createElement('h2')

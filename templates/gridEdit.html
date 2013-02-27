@@ -51,16 +51,27 @@
 <div id='toolbar'>
   <div class='buttonGroup leftToolbar'>
     <button class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
-    <ul id='newObjectMenu' class='menu'>
-    </ul>
+    <ul id='newObjectMenu' class='menu'></ul>
   </div>
   <div class='buttonGroup leftToolbar'>
-    <button class='pill' onclick='dropPill(this, "Edit")'>Edit ▾</button>
+    <button class='pill' onclick='dropPillAndStay(this, "Edit")'>Edit ▾</button>
     <ul class='menu'>
-      <li><a href='javascript:staticLoadsToHouses()' id='staticToHouses'>Static Loads to Houses</a></li>
+      <table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
+        <tr>
+          <td>Zoom Reset</td>
+          <td><button onclick='javascript:zoomReset()'>Go</button></td>
+        </tr>
+        <tr>
+          <td>Static Loads to Houses</td>
+          <td><button onclick='javascript:staticLoadsToHouses()'>Go</button></td>
+        </tr>
+        <tr>
+          <td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
+          <td><button onclick='javascript:solarAdding()'>Go</button></td>
+        </tr>
+      </table>
     </ul>
   </div>
-  <button class='leftToolbar pill' onclick='javascript:zoomReset()'>Zoom Reset</button>
   <div class='buttonGroup leftToolbar'>
     <button class='pill' onclick='dropPill(this, "Pinning")'>Pinning ▾</button>
     <ul class='menu'>
@@ -847,6 +858,53 @@ function staticLoadsToHouses() {
   showProgressDialog('Please wait. Houses are being generated.')
   // HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
   setTimeout(replaceAllHouses, 500);
+}
+
+function solarAdding() {
+  solarPerc = gebi('solarAddingPercentage').value/100.0
+  function makeNewInverter(phases) {
+    newInverter = {}
+    newInverter['object'] = 'inverter'
+    newInverter['phases'] = phases
+    newInverter['generator_status'] = 'ONLINE'
+    newInverter['inverter_type'] = 'PWM'
+    newInverter['generator_mode'] = 'CONSTANT_PF'
+    treeNewIndex = nextTreeKey()
+    newInverter['name'] = 'synInverter' + treeNewIndex
+    return newInverter
+  }
+  function newRandomPanels() {
+    newPanels = {}
+    newPanels['object'] = 'solar'
+    newPanels['generator_mode'] = 'SUPPLY_DRIVEN'
+    newPanels['generator_status'] = 'ONLINE'
+    newPanels['panel_type'] = 'SINGLE_CRYSTAL_SILICON'
+    newPanels['efficiency'] = '0.1' + randomInt(2,9)
+    newPanels['area'] = randomInt(8,18) + '00 sf'
+    treeNewIndex = nextTreeKey()
+    newInverter['name'] = 'synSolar' + treeNewIndex
+    return newPanels
+  }
+  function walkAndAddSolar() {
+    for (index in tree) {
+      if (tree[index].hasOwnProperty('object') && tree[index]['object']=='house') {
+        if (Math.random() < solarPerc) {
+          meterIndex = findIndex(tree, 'name', tree[index]['parent'])
+          newInverter = makeNewInverter(tree[index]['phases'])
+          newPanels = newRandomPanels()
+          newChildAtLocation(newInverter, meterIndex)
+          inverterIndex = findIndex(tree, 'name', newInverter['name'])
+          newChildAtLocation(newPanels, inverterIndex)
+        }
+      }
+    }
+    redraw()
+    removeProgressDialog()
+  }
+  showProgressDialog('Please wait. Solar is being generated.')
+  // HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
+  setTimeout(walkAndAddSolar, 500);
+
 }
 
 // MODEL SAVING
