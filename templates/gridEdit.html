@@ -879,8 +879,8 @@ function solarAdding() {
     newPanels['generator_mode'] = 'SUPPLY_DRIVEN'
     newPanels['generator_status'] = 'ONLINE'
     newPanels['panel_type'] = 'SINGLE_CRYSTAL_SILICON'
-    newPanels['efficiency'] = '0.1' + randomInt(2,9)
-    newPanels['area'] = randomInt(8,18) + '00 sf'
+    newPanels['efficiency'] = '0.1' + randomInt(0,5)
+    newPanels['area'] = randomInt(2,8) + '00 sf'
     treeNewIndex = nextTreeKey()
     newInverter['name'] = 'synSolar' + treeNewIndex
     return newPanels
