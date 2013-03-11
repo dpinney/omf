@@ -2,7 +2,8 @@
 # encoding: utf-8
 
 # This is a library to manage analysis objects.
-# Note that it doesn't care about performance and will happily lock up any thread its methods are called in. So spawn some worker threads to do this stuff.
+# Note that it doesn't care about performance and will happily lock up any thread its methods are called in.
+# So spawn some worker threads to do this stuff.
 
 import os
 import time
@@ -43,8 +44,8 @@ def delete(analysisName):
 def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studies, reports):
 	# make the analysis folder structure:
 	os.mkdir('analyses/' + analysisName)
-	os.mkdir('analyses/' + analysisName + '/studies')	
-	os.mkdir('analyses/' + analysisName + '/reports')	
+	os.mkdir('analyses/' + analysisName + '/studies')
+	os.mkdir('analyses/' + analysisName + '/reports')
 	for study in studies:
 		studyFolder = 'analyses/' + analysisName + '/studies/' + study['studyName']
 		# make the study folder:
