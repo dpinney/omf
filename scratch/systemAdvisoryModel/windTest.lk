@@ -1,0 +1,26 @@
+clear();
+
+var('file_name', 'WY Southern-Flat Lands.srw');
+var('ctl_mode', 2);
+var('cutin', 4);
+var('hub_ht', 50);
+var('lossc', 0);
+var('lossp', 0);
+var('pc_wind', [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39]);
+var('pc_power', [0,0,0,0,0.08,0.02,0.35,0.6,1,1.6,2,2.25,2.35,2.4,2.4,2.37,2.3,2.09,2,2,2,2,2,1.98,1.95,1.8,0,0,0,0,0,0,0,0,0,0,0,0,0,0]);
+var('rotor_di', 3.7);
+var('shear', 0.14);
+var('turbul', 0.1);
+var('wt_x', [0]);
+var('wt_y', [0]);
+var('wake_model', 0);
+var('model_choice', 0);
+var('weibullK', 2);
+var('max_cp', 0.45);
+var('resource_class', 0.45);
+var('hub_efficiency', [1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1]);
+
+
+run('windpower');
+
+outln("after poa=" + var('farmpwr'));

@@ -8,8 +8,11 @@ ssc.data_set_number(dat, "derate", 0.77)
 ssc.data_set_number(dat, "track_mode", 0)
 ssc.data_set_number(dat, "azimuth", 180)
 ssc.data_set_number(dat, "tilt_eq_lat", 1)
+
 # run PV system simulation
 mod = ssc.module_create("pvwattsv1")
+
+# process results
 if ssc.module_exec(mod, dat) == 0:
 	print "PVWatts V1 simulation error"
 	idx = 1
