@@ -1,5 +1,8 @@
 from sscapi import PySSC
 
+
+''' This does not work because of API failures as of 3/22/2013 '''
+
 ssc = PySSC()
 data = ssc.data_create()
 

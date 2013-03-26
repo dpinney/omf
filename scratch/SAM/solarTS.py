@@ -397,7 +397,7 @@ print 'num_inverters: ' + str(num_inverters)
 ssc = PySSC()
 dat = ssc.data_create()
 
-ssc.data_set_string(dat, 'weather_file', 'C:/Users/dwp0/Dropbox/OMF/omf/scratch/systemAdvisoryModel/examples/abilene.tm2')
+ssc.data_set_string(dat, 'weather_file', 'C:/Users/dwp0/Dropbox/OMF/omf/scratch/SAM/daggett.tm2')
 
 ssc.data_set_number(dat, 'ac_derate', ac_derate)
 ssc.data_set_number(dat, 'modules_per_string', num_series)
