@@ -12,6 +12,7 @@ import datetime as dt
 import feeder
 import subprocess
 import copy
+import studies
 
 def listAll():
 	if 'analyses' not in os.listdir('.'):

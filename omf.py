@@ -46,7 +46,7 @@ def root():
 @app.route('/newAnalysis/<analysisName>')
 def newAnalysis(analysisName=None):
 	# Get some prereq data:
-	tmy2s = os.listdir('tmy2s')
+	tmy2s = feeder.listAllWeather()
 	feeders = feeder.listAll()
 	reportTemplates = reports.__templates__
 	analyses = analysis.listAll()
@@ -140,7 +140,7 @@ def api_model(path, feederName):
 
 @app.route('/getComponents/')
 def getComponents():
-	compFiles = os.listdir('./components/')
+	compFiles = feeder.listAllComponents()
 	components = {}
 	for fileName in compFiles:
 		with open('./components/' + fileName,'r') as compFile:

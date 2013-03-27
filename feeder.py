@@ -15,6 +15,16 @@ def listAllConversions():
 		os.mkdir('conversions')
 	return os.listdir('conversions')
 
+def listAllComponents():
+	if 'components' not in os.listdir('.'):
+		os.mkdir('components')
+	return os.listdir('components')
+
+def listAllWeather():
+	if 'tmy2s' not in os.listdir('.'):
+		os.mkdir('tmy2s')
+	return os.listdir('tmy2s')
+
 def tokenizeGlm(glmFileName):
 	file = open(glmFileName)
 	data = file.read()
