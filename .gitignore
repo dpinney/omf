@@ -3,5 +3,3 @@ log.txt
 *.sublime-project
 *.sublime-workspace
 analyses/*
-!analyses/zCVR Boulder/*
-!analyses/zSolar Trio/*
