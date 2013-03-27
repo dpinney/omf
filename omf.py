@@ -70,14 +70,7 @@ def newAnalysis(analysisName=None):
 
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):
-	# Get some variables.
-	reportFiles = os.listdir('analyses/' + analysisName + '/reports/')
-	reportList = []
-	# Iterate over reports and collect what we need: 
-	for report in reportFiles:
-		# call the relevant reporting function by name.
-		reportModule = getattr(reports, report.replace('.txt',''))
-		reportList.append(reportModule.outputHtml(analysisName))
+	reportList = analysis.generateReportHtml(analysisName)
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
 
 @app.route('/feeder/<feederName>')

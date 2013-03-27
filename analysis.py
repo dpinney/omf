@@ -13,6 +13,7 @@ import feeder
 import subprocess
 import copy
 import studies
+import reports
 
 def listAll():
 	if 'analyses' not in os.listdir('.'):
@@ -133,6 +134,17 @@ def terminate(analysisName):
 		print 'We could not kill PID ' + str(md['PID']) + '. It may already have completed normally.'
 	md['status'] = 'terminated'
 	putMetadata(analysisName, md)
+
+def generateReportHtml(analysisName):
+	# Get some variables.
+	reportFiles = os.listdir('analyses/' + analysisName + '/reports/')
+	reportList = []
+	# Iterate over reports and collect what we need: 
+	for report in reportFiles:
+		# call the relevant reporting function by name.
+		reportModule = getattr(reports, report.replace('.txt',''))
+		reportList.append(reportModule.outputHtml(analysisName))
+	return reportList
 
 #WARNING: TIME ESTIMATES TAKE ABOUT A MINUTE
 #BIGGER WARNING: THIS DOESN'T WORK AT THE MOMENT
