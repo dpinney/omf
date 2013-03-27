@@ -9,7 +9,7 @@ import os
 import time
 import shutil
 import datetime as dt
-import treeParser as tp
+import feeder
 import subprocess
 import copy
 
@@ -55,22 +55,22 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 		for fileName in feederFiles:
 			shutil.copyfile('feeders/' + study['feederName'] + '/' + fileName, studyFolder + '/' + fileName)
 		# Attach recorders:
-		tree = tp.parse(studyFolder + '/main.glm')
-		tp.attachRecorders(tree, 'Regulator', 'object', 'regulator')
-		tp.attachRecorders(tree, 'Capacitor', 'object', 'capacitor')
-		tp.attachRecorders(tree, 'Inverter', 'object', 'inverter')
-		tp.attachRecorders(tree, 'Windmill', 'object', 'windturb_dg')
-		tp.attachRecorders(tree, 'CollectorVoltage', None, None)
-		tp.attachRecorders(tree, 'Climate', 'object', 'climate')
-		tp.attachRecorders(tree, 'OverheadLosses', None, None)
-		tp.attachRecorders(tree, 'UndergroundLosses', None, None)
-		tp.attachRecorders(tree, 'TriplexLosses', None, None)
-		tp.attachRecorders(tree, 'TransformerLosses', None, None)
-		tp.groupSwingKids(tree)
+		tree = feeder.parse(studyFolder + '/main.glm')
+		feeder.attachRecorders(tree, 'Regulator', 'object', 'regulator')
+		feeder.attachRecorders(tree, 'Capacitor', 'object', 'capacitor')
+		feeder.attachRecorders(tree, 'Inverter', 'object', 'inverter')
+		feeder.attachRecorders(tree, 'Windmill', 'object', 'windturb_dg')
+		feeder.attachRecorders(tree, 'CollectorVoltage', None, None)
+		feeder.attachRecorders(tree, 'Climate', 'object', 'climate')
+		feeder.attachRecorders(tree, 'OverheadLosses', None, None)
+		feeder.attachRecorders(tree, 'UndergroundLosses', None, None)
+		feeder.attachRecorders(tree, 'TriplexLosses', None, None)
+		feeder.attachRecorders(tree, 'TransformerLosses', None, None)
+		feeder.groupSwingKids(tree)
 		# Modify the glm with time variables:
-		tp.adjustTime(tree=tree, simLength=simLength, simLengthUnits=str(simLengthUnits), simStartDate=simStartDate)
+		feeder.adjustTime(tree=tree, simLength=simLength, simLengthUnits=str(simLengthUnits), simStartDate=simStartDate)
 		# write the glm:
-		outString = tp.write(tree)
+		outString = feeder.write(tree)
 		with open(studyFolder + '/main.glm','w') as glmFile:
 			glmFile.write(outString)
 		# copy over tmy2 and replace the dummy climate.tmy2.

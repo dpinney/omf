@@ -5,7 +5,7 @@ import os
 import multiprocessing
 import analysis
 import json
-import treeParser as tp
+import feeder
 import shutil
 import time
 import reports
@@ -32,8 +32,8 @@ class backgroundProc(multiprocessing.Process):
 def root():
 	browser = flask.request.user_agent.browser
 	analyses = analysis.listAll()
-	feeders = tp.listAll()
-	conversions = tp.listAllConversions()
+	feeders = feeder.listAll()
+	conversions = feeder.listAllConversions()
 	metadatas = [analysis.getMetadata(x) for x in analyses]
 	#DEBUG: print metadatas
 	if browser == 'msie':
@@ -80,7 +80,7 @@ def viewReports(analysisName):
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
 
 @app.route('/feeder/<feederName>')
-def feeder(feederName):
+def feederGet(feederName):
 	return flask.render_template('gridEdit.html', feederName=feederName, path='feeders')
 
 @app.route('/analysisFeeder/<analysis>/<study>')
@@ -126,7 +126,7 @@ def api_model(path, feederName):
 			return jsonFile.read()
 	elif feederName in os.listdir(fullPrefix):
 		# Grab data from filesystem:
-		tree = tp.parse(fullPrefix + feederName + '/main.glm')
+		tree = feeder.parse(fullPrefix + feederName + '/main.glm')
 		outDict = {'tree':tree, 'nodes':[], 'links':[], 'hiddenNodes':[], 'hiddenLinks':[], 'layoutVars':{'gravity':'0.1','theta':'0.8','friction':'0.9','linkStrength':'1'}}
 		# cache the file for later
 		jsonLoad = json.dumps(outDict, indent=4)
@@ -164,7 +164,7 @@ def updateGlm():
 		# if we've created a new feeder, copy over the associated files:
 		shutil.copytree('./feeders/' + sourceFeeder,'./feeders/' + newFeeder)
 	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm, open('./feeders/' + newFeeder + '/main.json','w') as jsonCache:
-		newMainGlm.write(tp.sortedWrite(tree))
+		newMainGlm.write(feeder.sortedWrite(tree))
 		outDict = {'tree':tree, 'nodes':nodes, 'links':links, 'hiddenNodes':hiddenNodes, 'hiddenLinks':hiddenLinks, 'layoutVars':layoutVars}
 		jsonLoad = json.dumps(outDict, indent=4)
 		jsonCache.write(jsonLoad)

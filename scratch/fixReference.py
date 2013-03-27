@@ -4,7 +4,7 @@
 
 import sys
 sys.path.append('C:/Users/dwp0/Dropbox/OMF/omf')
-import treeParser as tp
+import feeder as tp
 from pprint import pprint
 import re
 

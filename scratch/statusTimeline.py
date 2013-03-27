@@ -9,7 +9,7 @@ input1 = '''
 *10 Platform: support for collectors on wind.
 *10 Monetization to Tom Lovas's spec. Awaiting Tom/George input. Set deadline to March.
 *40 Platform: JSON object store for all data objects.
-*10 Platform: do an audit of all the libraries we have, clean up the interfaces (e.g. treeParser shouldn't read files for itself, its write methods should be renamed toString, etc.).
+*10 Platform: do an audit of all the libraries we have, clean up the interfaces (e.g. feeder shouldn't read files for itself, its write methods should be renamed toString, etc.).
 *40 Platform: server provisioning.
 '''
 

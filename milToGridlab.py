@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import csv
-import treeParser
+import feeder
 import os
 import shutil
 
@@ -584,7 +584,7 @@ def convert(stdPath,seqPath):
 				if line['configuration'] in nameDictMap.keys(): line['configuration'] = nameDictMap[line['configuration']]
 
 	# Fully disembed and remove duplicate configuration objects:
-	treeParser.fullyDeEmbed(glmTree)
+	feeder.fullyDeEmbed(glmTree)
 	dedupGlm('transformer_configuration', glmTree)
 	dedupGlm('regulator_configuration', glmTree)
 	dedupGlm('line_spacing', glmTree)
@@ -601,7 +601,7 @@ def convert(stdPath,seqPath):
 						'object climate {\nname Climate;\ninterpolate QUADRATIC;\ntmyfile climate.tmy2;\n};\n\n'
 
 	# Throw some headers on that:
-	outGlm = genericHeaders + treeParser.sortedWrite(glmTree)
+	outGlm = genericHeaders + feeder.sortedWrite(glmTree)
 
 	return outGlm
 

@@ -14,7 +14,7 @@ import sys
 from os.path import dirname
 # go two layers up and add that to this file's temp path
 sys.path.append(dirname(dirname(os.getcwd())))
-import treeParser as tp
+import feeder as tp
 from pprint import pprint
 
 glm = tp.parse('ACEC-Friendship-AUTOSYNTH.glm')

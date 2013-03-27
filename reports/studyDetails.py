@@ -2,7 +2,7 @@
 
 import os
 import __util__
-import treeParser as tp
+import feeder
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 configHtmlTemplate = "<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>studyDetails</td></tr></table>"
@@ -44,7 +44,7 @@ def outputHtml(analysisName):
 	dataTree = {}
 	pathPrefix = './analyses/' + analysisName + '/studies/'
 	for study in os.listdir('./analyses/' + analysisName + '/studies/'):
-		glmTree = tp.parse(pathPrefix + study + '/main.glm')
+		glmTree = feeder.parse(pathPrefix + study + '/main.glm')
 		names = [glmTree[x]['name'] for x in glmTree if 'name' in glmTree[x]]
 		dataTree[str(study)] = set(names)
 	# Partition the names into common names and those unique to each feeder:
