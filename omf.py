@@ -9,6 +9,7 @@ import feeder
 import shutil
 import time
 import reports
+import studies
 import lib
 from werkzeug import secure_filename
 import milToGridlab

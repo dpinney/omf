@@ -3,10 +3,7 @@
 import os
 
 # Grab all our submodules and include them whenever we include this package:
-fileNames = os.listdir('reports')
-reportNames = filter(lambda x:not x.startswith('__') and x.endswith('.py'), fileNames)
-cleanReports = map(lambda x:x.replace('.py',''), reportNames)
-__all__ = cleanReports
+__all__ = [x.replace('.py','') for x in os.listdir('reports') if not x.startswith('__') and x.endswith('.py')]
 
 # Neat little import of all the sub-modules in the __all__ variable:
 map(lambda x:__import__('reports.' + x), __all__)
