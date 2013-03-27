@@ -46,9 +46,9 @@ def root():
 def newAnalysis(analysisName=None):
 	# Get some prereq data:
 	tmy2s = os.listdir('tmy2s')
-	feeders = os.listdir('feeders')
+	feeders = feeder.listAll()
 	reportTemplates = reports.__templates__
-	analyses = os.listdir('analyses')
+	analyses = analysis.listAll()
 	# If we aren't specifying an existing name, just make a blank analysis:
 	if analysisName is None or analysisName not in analyses:
 		existingStudies = None
@@ -152,7 +152,7 @@ def updateGlm():
 	postData = flask.request.form.to_dict()
 	sourceFeeder = str(postData['feederName'])
 	newFeeder = str(postData['newName'])	
-	allFeeders = os.listdir('./feeders/')
+	allFeeders = feeder.listAll()
 	tree = json.loads(postData['tree'])
 	# Nodes and links are the information about how the feeder is layed out.
 	nodes = json.loads(postData['nodes'])
@@ -173,7 +173,7 @@ def updateGlm():
 @app.route('/runStatus/')
 def runStatus():
 	''' Gives all analysis MD info. Useful for updating home.html automatically. '''
-	analyses = os.listdir('./analyses/')
+	analyses = analysis.listAll()
 	outDict = {}
 	for ana in analyses:
 		md = analysis.getMetadata(ana)
