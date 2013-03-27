@@ -26,8 +26,8 @@ def listAllWeather():
 	return os.listdir('tmy2s')
 
 def tokenizeGlm(glmFileName):
-	file = open(glmFileName)
-	data = file.read()
+	glmFile = open(glmFileName)
+	data = glmFile.read()
 	# Get rid of http for stylesheets because we don't need it and it conflicts with comment syntax.
 	data = re.sub(r'http:\/\/', '', data)  
 	# Strip comments.

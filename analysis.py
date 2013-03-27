@@ -24,7 +24,9 @@ def getMetadata(analysisName):
 	try:
 		with open('analyses/' + analysisName + '/metadata.txt','r') as mdFile:
 			mdString = mdFile.readlines()[0]
-		return eval(mdString)
+		md = eval(mdString)
+		md['name'] = analysisName
+		return md
 	except:
 		# The file didn't exist, i.e. the database is corrupt.
 		return {}
@@ -89,7 +91,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studie
 	# write a file with the current status (preRun, running or postRun), source feeder and climate.
 	def uniqJoin(inList, key):
 		return ', '.join(set([x[key] for x in inList]))
-	metadata = {'name':str(analysisName), 'status':'preRun', 'sourceFeeder':str(uniqJoin(studies,'feederName')), 'climate':str(uniqJoin(studies,'tmy2name')), 'created':str(dt.datetime.now()), 'simStartDate':str(simStartDate), 'simLength':simLength, 'simLengthUnits':str(simLengthUnits)}
+	metadata = {'status':'preRun', 'sourceFeeder':str(uniqJoin(studies,'feederName')), 'climate':str(uniqJoin(studies,'tmy2name')), 'created':str(dt.datetime.now()), 'simStartDate':str(simStartDate), 'simLength':simLength, 'simLengthUnits':str(simLengthUnits)}
 	with open('analyses/' + analysisName + '/metadata.txt','w') as mdFile:
 		mdFile.write(str(metadata))
 	print 'Success. Analysis created.'

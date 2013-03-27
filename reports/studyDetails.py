@@ -23,6 +23,7 @@ def outputHtml(analysisName):
 	for study in os.listdir(pathPrefix + '/studies/'):
 		with open(pathPrefix + '/studies/' + study + '/metadata.txt', 'r') as mdFile:
 			metadata = eval(mdFile.read())
+			metadata['name'] = study
 		climates.append([str(metadata['climate']),1])
 		studies.append([metadata['name'], metadata['sourceFeeder']])
 	outputBuffer += '<div id="mapDiv" style="position:absolute;width:500px;height:400px;top:0px;left:500px"><script>drawMap(' + str(climates) + ',"mapDiv")</script></div>'
