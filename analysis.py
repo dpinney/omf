@@ -37,6 +37,7 @@ def putMetadata(analysisName, metadataDict):
 			mdFile.writelines(str(metadataDict))
 		return True
 	except:
+		# The file didn't exist, i.e. the database is corrupt.
 		return False
 
 def delete(analysisName):
@@ -47,51 +48,21 @@ def delete(analysisName):
 	else:
 		print 'Deletion failure. Analysis does not exist.'
 
-def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studies, reports):
+def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studyList, reports):
 	# make the analysis folder structure:
 	os.mkdir('analyses/' + analysisName)
 	os.mkdir('analyses/' + analysisName + '/studies')
 	os.mkdir('analyses/' + analysisName + '/reports')
-	for study in studies:
-		studyFolder = 'analyses/' + analysisName + '/studies/' + study['studyName']
-		# make the study folder:
-		os.mkdir(studyFolder)
-		# copy over the feeder files:
-		feederFiles = os.listdir('feeders/' + study['feederName'])
-		for fileName in feederFiles:
-			shutil.copyfile('feeders/' + study['feederName'] + '/' + fileName, studyFolder + '/' + fileName)
-		# Attach recorders:
-		tree = feeder.parse(studyFolder + '/main.glm')
-		feeder.attachRecorders(tree, 'Regulator', 'object', 'regulator')
-		feeder.attachRecorders(tree, 'Capacitor', 'object', 'capacitor')
-		feeder.attachRecorders(tree, 'Inverter', 'object', 'inverter')
-		feeder.attachRecorders(tree, 'Windmill', 'object', 'windturb_dg')
-		feeder.attachRecorders(tree, 'CollectorVoltage', None, None)
-		feeder.attachRecorders(tree, 'Climate', 'object', 'climate')
-		feeder.attachRecorders(tree, 'OverheadLosses', None, None)
-		feeder.attachRecorders(tree, 'UndergroundLosses', None, None)
-		feeder.attachRecorders(tree, 'TriplexLosses', None, None)
-		feeder.attachRecorders(tree, 'TransformerLosses', None, None)
-		feeder.groupSwingKids(tree)
-		# Modify the glm with time variables:
-		feeder.adjustTime(tree=tree, simLength=simLength, simLengthUnits=str(simLengthUnits), simStartDate=simStartDate)
-		# write the glm:
-		outString = feeder.write(tree)
-		with open(studyFolder + '/main.glm','w') as glmFile:
-			glmFile.write(outString)
-		# copy over tmy2 and replace the dummy climate.tmy2.
-		shutil.copyfile('tmy2s/' + study['tmy2name'], studyFolder + '/climate.tmy2')
-		# add the metadata:
-		metadata = {'name':str(study['studyName']), 'sourceFeeder':str(study['feederName']), 'climate':str(study['tmy2name'])}
-		with open(studyFolder + '/metadata.txt','w') as mdFile:
-			mdFile.write(str(metadata))
+	for studyConf in studyList:
+		studyModule = getattr(studies, studyConf['studyType'])
+		studyModule.create(analysisName, simLength, simLengthUnits, simStartDate, studyConf)
 	for report in reports:
 		with open('analyses/' + analysisName + '/reports/' + report['reportType'] + '.txt','w') as mdFile:
 			mdFile.write(str(report))
 	# write a file with the current status (preRun, running or postRun), source feeder and climate.
 	def uniqJoin(inList, key):
 		return ', '.join(set([x[key] for x in inList]))
-	metadata = {'status':'preRun', 'sourceFeeder':str(uniqJoin(studies,'feederName')), 'climate':str(uniqJoin(studies,'tmy2name')), 'created':str(dt.datetime.now()), 'simStartDate':str(simStartDate), 'simLength':simLength, 'simLengthUnits':str(simLengthUnits)}
+	metadata = {'status':'preRun', 'sourceFeeder':str(uniqJoin(studyList,'feederName')), 'climate':str(uniqJoin(studyList,'tmy2name')), 'created':str(dt.datetime.now()), 'simStartDate':str(simStartDate), 'simLength':simLength, 'simLengthUnits':str(simLengthUnits)}
 	putMetadata(analysisName, metadata)
 	print 'Success. Analysis created.'
 
