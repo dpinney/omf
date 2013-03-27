@@ -168,11 +168,8 @@ def updateGlm():
 def runStatus():
 	''' Gives all analysis MD info. Useful for updating home.html automatically. '''
 	analyses = analysis.listAll()
-	outDict = {}
-	for ana in analyses:
-		md = analysis.getMetadata(ana)
-		outDict[ana] = md['status']
-	return json.dumps(outDict)
+	statuses = {ana:analysis.getMetadata(ana)['status'] for ana in analysis.listAll()}
+	return json.dumps(statuses)
 
 @app.route('/milsoftImport/', methods=['POST'])
 def milsoftImport():

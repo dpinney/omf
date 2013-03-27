@@ -30,10 +30,12 @@ def getMetadata(analysisName):
 		return {}
 
 def putMetadata(analysisName, metadataDict):
-	mdFile = open('analyses/' + analysisName + '/metadata.txt','w')
-	mdFile.writelines(str(metadataDict))
-	mdFile.close()
-	return 'Sucess. Metadata updated.'
+	try:
+		with open('analyses/' + analysisName + '/metadata.txt','w') as mdFile:
+			mdFile.writelines(str(metadataDict))
+		return True
+	except:
+		return False
 
 def delete(analysisName):
 	allAnalyses = listAll()
