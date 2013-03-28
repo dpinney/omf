@@ -22,7 +22,7 @@ def listAll():
 
 def getMetadata(analysisName):
 	try:
-		with open('analyses/' + analysisName + '/metadata.txt','r') as mdFile:
+		with open('analyses/' + analysisName + '/metadata.json','r') as mdFile:
 			md = json.load(mdFile)
 			md['name'] = str(analysisName)
 			return md
@@ -32,7 +32,7 @@ def getMetadata(analysisName):
 
 def putMetadata(analysisName, metadataDict):
 	try:
-		with open('analyses/' + analysisName + '/metadata.txt','w') as mdFile:
+		with open('analyses/' + analysisName + '/metadata.json','w') as mdFile:
 			json.dump(metadataDict, mdFile)
 		return True
 	except:
@@ -47,7 +47,7 @@ def delete(analysisName):
 	else:
 		print 'Deletion failure. Analysis does not exist.'
 
-def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studyList, reportList):
+def create(analysisName, simLength, simLengthUnits, simStartDate, studyList, reportList):
 	# make the analysis folder structure:
 	os.mkdir('analyses/' + analysisName)
 	os.mkdir('analyses/' + analysisName + '/studies')
@@ -76,8 +76,7 @@ def run(analysisName):
 	for studyName in studyNames:
 		# If we've been terminated, don't run any more studies.
 		if md['status'] == 'terminated': return False
-		# TODO: get studyType from study MD.
-		with open('analyses/' + analysisName + '/studies/' + studyName + '/metadata.txt') as studyMd:
+		with open('analyses/' + analysisName + '/studies/' + studyName + '/metadata.json') as studyMd:
 			studyType = json.load(studyMd)['studyType']
 		studyModule = getattr(studies, studyType)
 		studyModule.run(analysisName, studyName)

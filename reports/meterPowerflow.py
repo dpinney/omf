@@ -19,7 +19,7 @@ def outputHtml(analysisName):
 	outputBuffer = '<p class="reportTitle">Meter Powerflow</p><div id="meterPowerflowReport" class="tightContent" style="position:relative">'
 	# Build up the data:
 	pathPrefix = './analyses/' + analysisName
-	resolution = eval(util.fileSlurp(pathPrefix + '/metadata.txt'))['simLengthUnits']
+	resolution = eval(util.fileSlurp(pathPrefix + '/metadata.json'))['simLengthUnits']
 	studies = os.listdir(pathPrefix + '/studies/')
 	for study in studies:
 		voltMatrix = []

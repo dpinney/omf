@@ -20,9 +20,9 @@ def outputHtml(analysisName):
 	outputBuffer += '<div id="climateReport" class="tightContent" style="position:relative">\n'
 	# Collect study variables:
 	pathPrefix = './analyses/' + analysisName
-	resolution = eval(util.fileSlurp(pathPrefix + '/metadata.txt'))['simLengthUnits']
+	resolution = eval(util.fileSlurp(pathPrefix + '/metadata.json'))['simLengthUnits']
 	studies = os.listdir(pathPrefix + '/studies/')
-	metadatas = map(lambda x:util.fileSlurp(pathPrefix + '/studies/' + x + '/metadata.txt'), studies)
+	metadatas = map(lambda x:util.fileSlurp(pathPrefix + '/studies/' + x + '/metadata.json'), studies)
 	climates = set(map(lambda x:eval(x)['climate'], metadatas))
 	# If we have more than one study, just show one climate:
 	if 1 == len(climates):

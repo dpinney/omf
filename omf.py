@@ -13,6 +13,7 @@ import studies
 import lib
 from werkzeug import secure_filename
 import milToGridlab
+import otherObjects
 
 app = flask.Flask(__name__)
 
@@ -34,7 +35,7 @@ def root():
 	browser = flask.request.user_agent.browser
 	analyses = analysis.listAll()
 	feeders = feeder.listAll()
-	conversions = feeder.listAllConversions()
+	conversions = otherObjects.listAllConversions()
 	metadatas = [analysis.getMetadata(x) for x in analyses]
 	#DEBUG: print metadatas
 	if browser == 'msie':
@@ -46,7 +47,7 @@ def root():
 @app.route('/newAnalysis/<analysisName>')
 def newAnalysis(analysisName=None):
 	# Get some prereq data:
-	tmy2s = feeder.listAllWeather()
+	tmy2s = otherObjects.listAllWeather()
 	feeders = feeder.listAll()
 	reportTemplates = reports.__templates__
 	analyses = analysis.listAll()
@@ -63,7 +64,7 @@ def newAnalysis(analysisName=None):
 		existingReports = json.dumps(reportDicts)
 		studyPrefix = 'analyses/' + analysisName + '/studies/'
 		studyNames = os.listdir(studyPrefix)
-		studyDicts = [json.loads(lib.fileSlurp(studyPrefix + x + '/metadata.txt')) for x in studyNames]
+		studyDicts = [json.loads(lib.fileSlurp(studyPrefix + x + '/metadata.json')) for x in studyNames]
 		existingStudies = json.dumps(studyDicts)
 		analysisMd = analysis.getMetadata(analysisName)
 	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=json.dumps(analysisMd))
@@ -103,7 +104,7 @@ def delete():
 def saveAnalysis():
 	postData = json.loads(flask.request.form.to_dict()['json'])
 	#DEBUG: print postData
-	analysis.createAnalysis(postData['analysisName'], int(postData['simLength']), postData['simLengthUnits'], postData['simStartDate'], postData['studies'], postData['reports'])
+	analysis.create(postData['analysisName'], int(postData['simLength']), postData['simLengthUnits'], postData['simStartDate'], postData['studies'], postData['reports'])
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/terminate/', methods=['POST'])
@@ -133,12 +134,7 @@ def api_model(path, feederName):
 
 @app.route('/getComponents/')
 def getComponents():
-	compFiles = feeder.listAllComponents()
-	components = {}
-	for fileName in compFiles:
-		with open('./components/' + fileName,'r') as compFile:
-			fileContents = compFile.read()
-			components[fileName] = eval(fileContents)
+	components = otherObjects.getAllComponents()
 	return json.dumps(components, indent=4)
 
 @app.route('/saveFeeder/', methods=['POST'])

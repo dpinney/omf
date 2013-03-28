@@ -10,21 +10,6 @@ def listAll():
 		os.mkdir('feeders')
 	return os.listdir('feeders')
 
-def listAllConversions():
-	if 'conversions' not in os.listdir('.'):
-		os.mkdir('conversions')
-	return os.listdir('conversions')
-
-def listAllComponents():
-	if 'components' not in os.listdir('.'):
-		os.mkdir('components')
-	return os.listdir('components')
-
-def listAllWeather():
-	if 'tmy2s' not in os.listdir('.'):
-		os.mkdir('tmy2s')
-	return os.listdir('tmy2s')
-
 def tokenizeGlm(glmFileName):
 	glmFile = open(glmFileName)
 	data = glmFile.read()

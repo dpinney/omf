@@ -12,7 +12,7 @@ def outputHtml(analysisName):
 	outputBuffer = '<p class="reportTitle">Triplex Meter Voltages</p><div id="voltageBandReport" class="tightContent" style="position:relative">'
 	# Build up the data:
 	pathPrefix = './analyses/' + analysisName
-	resolution = eval(util.fileSlurp(pathPrefix + '/metadata.txt'))['simLengthUnits']
+	resolution = eval(util.fileSlurp(pathPrefix + '/metadata.json'))['simLengthUnits']
 	for study in os.listdir(pathPrefix + '/studies/'):
 		voltMatrix = []
 		for fileName in os.listdir(pathPrefix + '/studies/' + study):

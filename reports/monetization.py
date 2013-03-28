@@ -24,7 +24,7 @@ def outputHtml(analysisName):
 	equipAndInstallCost = float(reportOptions['equipAndInstallCost'])
 	opAndMaintCost = float(reportOptions['opAndMaintCost'])
 	# Find the resolution and interval size (in seconds):
-	with open(pathPrefix + '/metadata.txt','r') as mdFile:
+	with open(pathPrefix + '/metadata.json','r') as mdFile:
 		resolution = eval(mdFile.read())['simLengthUnits']
 		intervalMap = {'minutes':60, 'hours':3600, 'days':86400}
 		interval = intervalMap[resolution]

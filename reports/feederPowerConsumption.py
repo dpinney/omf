@@ -24,7 +24,7 @@ def outputHtml(analysisName):
 		else:
 			interval = 0.0
 	# Figure out the stated resolution (can be different than interval):
-	with open('./analyses/' + analysisName + '/metadata.txt','r') as mdFile:
+	with open('./analyses/' + analysisName + '/metadata.json','r') as mdFile:
 		resolution = eval(mdFile.read())['simLengthUnits']
 	# Collect the power stats:
 	powerTimeSeries = []
