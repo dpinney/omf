@@ -63,10 +63,10 @@ def newAnalysis(analysisName=None):
 		existingReports = json.dumps(reportDicts)
 		studyPrefix = 'analyses/' + analysisName + '/studies/'
 		studyNames = os.listdir(studyPrefix)
-		studyDicts = [eval(lib.fileSlurp(studyPrefix + x + '/metadata.txt')) for x in studyNames]
+		studyDicts = [json.loads(lib.fileSlurp(studyPrefix + x + '/metadata.txt')) for x in studyNames]
 		existingStudies = json.dumps(studyDicts)
-		analysisMd = eval(lib.fileSlurp('analyses/' + analysisName + '/metadata.txt'))
-	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
+		analysisMd = analysis.getMetadata(analysisName)
+	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=json.dumps(analysisMd))
 
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):
