@@ -25,7 +25,7 @@
 		reportTemplates = {{ reportTemplates | safe }}
 		analysisMd = {{ analysisMd | safe }}
 		var studyReportId = 0
-		studyHTML = "<a href='javascript:removeStudyReport(removalId)' class='removeStudyReport'>✖</a><table class='studyOptions'><tr><td>Study Name</td><td><input type='text' class='studyName'/></td></tr><tr><td>Feeder</td><td><select class='feederName'>{% for feeder in feeders %}<option value='{{ feeder }}'>{{ feeder }}</option>{% endfor %}</select><button onclick='window.location=\"../feeder/\"+this.parentNode.querySelector(\".feederName\").value'>Edit Selected Feeder</button></td></tr><tr><td>Location</td><td><select class='tmy2name'>{% for tmy2 in tmy2s %}<option value='{{ tmy2 }}'>{{ tmy2 }}</option>{% endfor %}</select></td></tr></table>"
+		studyHTML = "<a href='javascript:removeStudyReport(removalId)' class='removeStudyReport'>&#10006;</a><table class='studyOptions'><tr><td>Study Name</td><td><input type='text' class='studyName'/></td></tr><tr><td>Feeder</td><td><select class='feederName'>{% for feeder in feeders %}<option value='{{ feeder }}'>{{ feeder }}</option>{% endfor %}</select><button onclick='window.location=\"../feeder/\"+this.parentNode.querySelector(\".feederName\").value'>Edit Selected Feeder</button></td></tr><tr><td>Location</td><td><select class='tmy2name'>{% for tmy2 in tmy2s %}<option value='{{ tmy2 }}'>{{ tmy2 }}</option>{% endfor %}</select></td></tr></table>"
 		function addStudy() {
 			usedId = studyReportId
 			newDiv = document.createElement('div')
