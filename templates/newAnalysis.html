@@ -151,7 +151,6 @@
 		for (exRep=0;exRep<existingReports.length;exRep++) {
 			addReport(existingReports[exRep].reportType)
 		}
-		// HACK: collect div Ids for studies so we can init them later.
 		for (exStud=0;exStud<existingStudies.length;exStud++) {
 			newDiv = addStudy(existingStudies[exStud].studyType)
 			newDiv.querySelector('.studyName').value = existingStudies[exStud].name
