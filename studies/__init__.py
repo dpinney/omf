@@ -9,4 +9,4 @@ __all__ = [x.replace('.py','') for x in os.listdir('studies') if not x.startswit
 map(lambda x:__import__('studies.' + x), __all__)
 
 # Store all the HTML input templates for the studies:
-# __templates__ = {reportName:globals()[reportName].configHtmlTemplate for reportName in __all__}
+__templates__ = {studyName:globals()[studyName].configHtmlTemplate for studyName in __all__}

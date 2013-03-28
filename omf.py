@@ -50,6 +50,7 @@ def newAnalysis(analysisName=None):
 	tmy2s = otherObjects.listAllWeather()
 	feeders = feeder.listAll()
 	reportTemplates = reports.__templates__
+	studyTemplates = studies.__templates__
 	analyses = analysis.listAll()
 	# If we aren't specifying an existing name, just make a blank analysis:
 	if analysisName is None or analysisName not in analyses:
@@ -67,7 +68,7 @@ def newAnalysis(analysisName=None):
 		studyDicts = [json.loads(lib.fileSlurp(studyPrefix + x + '/metadata.json')) for x in studyNames]
 		existingStudies = json.dumps(studyDicts)
 		analysisMd = analysis.getMetadata(analysisName)
-	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=json.dumps(analysisMd))
+	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, studyTemplate=studyTemplates, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=json.dumps(analysisMd))
 
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):

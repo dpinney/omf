@@ -6,6 +6,8 @@ import shutil
 import subprocess
 import json
 
+configHtmlTemplate = "<p>nada</p>"
+
 def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 	studyPath = 'analyses/' + analysisName + '/studies/' + studyConfig['studyName']
 	# make the study folder:

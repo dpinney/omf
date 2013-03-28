@@ -1,6 +1,6 @@
 ﻿#!/usr/bin/env python
 
-import os
+configHtmlTemplate = "<p>nada</p>"
 
 def create(analysisName, studyName):
 	pass
