@@ -1,6 +1,6 @@
 ﻿#!/usr/bin/env python
 
-configHtmlTemplate = "<p>nada</p>"
+with open('./studies/nrelsam.html','r') as configFile: configHtmlTemplate = configFile.read()
 
 def create(analysisName, studyName):
 	pass

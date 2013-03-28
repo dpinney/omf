@@ -20,24 +20,32 @@
 	<script src='../static/omf.js'></script>
 	<script>
 		None = []
+		// First, pull in the JSON data.
 		existingStudies = {{ existingStudies | safe }}
 		existingReports = {{ existingReports | safe }}
+		studyTemplates = {{ studyTemplates | safe }}
 		reportTemplates = {{ reportTemplates | safe }}
 		analysisMd = {{ analysisMd | safe }}
-		var studyReportId = 0
-		studyHTML = "<a href='javascript:removeStudyReport(removalId)' class='removeStudyReport'>&#10006;</a><table class='studyOptions'><tr><td>Study Name</td><td><input type='text' class='studyName'/></td></tr><tr><td>Feeder</td><td><select class='feederName'>{% for feeder in feeders %}<option value='{{ feeder }}'>{{ feeder }}</option>{% endfor %}</select><button onclick='window.location=\"../feeder/\"+this.parentNode.querySelector(\".feederName\").value'>Edit Selected Feeder</button></td></tr><tr><td>Location</td><td><select class='tmy2name'>{% for tmy2 in tmy2s %}<option value='{{ tmy2 }}'>{{ tmy2 }}</option>{% endfor %}</select></td></tr></table>"
-		function addStudy() {
-			usedId = studyReportId
+		function addStudy(studyType) {
+			studyPrefix = "<a onclick='javascript:removeStudyReport(this)' class='removeStudyReport'>&#10006;</a>"
+			studyHtml = studyPrefix + studyTemplates[studyType]
 			newDiv = document.createElement('div')
-			newDiv.id = studyReportId
 			newDiv.className = 'content'
-			newDiv.innerHTML = studyHTML.replace(/removalId/g,studyReportId)
+			newDiv.innerHTML = studyHtml
 			gebi('studyList').appendChild(newDiv)
-			studyReportId += 1
-			return usedId
+			return newDiv
 		}
-		function removeStudyReport(x) {
-			gebi(x).parentNode.removeChild(gebi(x))
+		function addReport(reportName) {
+			// Don't let the user add more than one copy of the report:
+			if (document.getElementsByClassName(reportName).length == 1) {return false}
+			reportStatsHTML = reportTemplates[reportName]
+			newDiv = document.createElement('div')
+			newDiv.className = 'content ' + reportName
+			newDiv.innerHTML = reportStatsHTML
+			gebi('reportList').appendChild(newDiv)
+		}
+		function removeStudyReport(aClicked) {
+			aClicked.parentNode.parentNode.removeChild(aClicked.parentNode)
 		}
 		function saveAnalysis() {
 			// First, a helper function to validate input against a regex:
@@ -67,7 +75,7 @@
 					study.studyName = check(studyDivs[i].querySelector('.studyName').value, /[\w\s]*/) // Must be a valid filename!
 					study.feederName = studyDivs[i].querySelector('.feederName').value
 					study.tmy2name = studyDivs[i].querySelector('.tmy2name').value
-					study.studyType = 'gridlabd'
+					study.studyType = studyDivs[i].querySelector('.studyType').innerHTML
 					studyList.push(study)
 				}
 				responseDict.studies = studyList
@@ -89,20 +97,9 @@
 				post_to_url('/saveAnalysis/', {'json':JSON.stringify(responseDict)})
 			} 
 			catch(err) {
-				alert('Some form values are not correct')
+				alert('Some form values are not correct.')
 				return false
 			}
-		}
-		function addReport(reportName) {
-			// Don't let the user add more than one copy of the report:
-			if (document.getElementsByClassName(reportName).length == 1) {return false}
-			reportStatsHTML = reportTemplates[reportName]
-			newDiv = document.createElement('div')
-			newDiv.id = studyReportId
-			newDiv.className = 'content ' + reportName
-			newDiv.innerHTML = reportStatsHTML.replace(/REMOVALID/g,studyReportId).replace(/REPORTNAME/g,reportName)
-			gebi('reportList').appendChild(newDiv)
-			studyReportId += 1
 		}
 	</script>
 </head>
@@ -115,8 +112,9 @@
 		<div class='buttonGroup'>
 			<button class='pill' onclick='dropPill(this, "Add Study")'>Add Study ▾</button>
 			<ul class='menu'>
-				<li><a href='javascript:addStudy()'>Gridlab</a></li>
-				<li><a href='javascript:addStudy()'>NREL SAM</a></li>
+				{% for stud in studyTemplates|sort() %}
+				<li><a href='javascript:addStudy("{{stud}}")'>{{stud}}</a></li>
+				{% endfor %}
 			</ul>
 		</div>
 		<div class='buttonGroup'>
@@ -154,17 +152,11 @@
 			addReport(existingReports[exRep].reportType)
 		}
 		// HACK: collect div Ids for studies so we can init them later.
-		usedIds = []
 		for (exStud=0;exStud<existingStudies.length;exStud++) {
-			usedIds.push(addStudy())
-		}
-		// HACK: init the div data, since we can't init before all the innerHTML has been altered...
-		for (exStud=0;exStud<existingStudies.length;exStud++) {
-			studyDiv = gebi(usedIds.pop())
-			// Setting up study values
-			studyDiv.querySelector('.studyName').value = existingStudies[exStud].name
-			studyDiv.querySelector('.feederName').value = existingStudies[exStud].sourceFeeder
-			studyDiv.querySelector('.tmy2name').value = existingStudies[exStud].climate
+			newDiv = addStudy(existingStudies[exStud].studyType)
+			newDiv.querySelector('.studyName').value = existingStudies[exStud].name
+			newDiv.querySelector('.feederName').value = existingStudies[exStud].sourceFeeder
+			newDiv.querySelector('.tmy2name').value = existingStudies[exStud].climate
 		}
 		// Set up the analysis-level stuff.
 		gebi('simLength').value = analysisMd.simLength

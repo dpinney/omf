@@ -39,7 +39,7 @@ def root():
 	metadatas = [analysis.getMetadata(x) for x in analyses]
 	#DEBUG: print metadatas
 	if browser == 'msie':
-		return "The OMF currently must be accessed by Chrome, Firefox or Safari."
+		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
 	else:
 		return flask.render_template('home.html', metadatas=metadatas, feeders=feeders, conversions=conversions)
 
@@ -51,6 +51,8 @@ def newAnalysis(analysisName=None):
 	feeders = feeder.listAll()
 	reportTemplates = reports.__templates__
 	studyTemplates = studies.__templates__
+	for study in studyTemplates:
+		studyTemplates[study] = str(flask.render_template_string(studyTemplates[study], tmy2s=tmy2s, feeders=feeders))
 	analyses = analysis.listAll()
 	# If we aren't specifying an existing name, just make a blank analysis:
 	if analysisName is None or analysisName not in analyses:
@@ -67,8 +69,8 @@ def newAnalysis(analysisName=None):
 		studyNames = os.listdir(studyPrefix)
 		studyDicts = [json.loads(lib.fileSlurp(studyPrefix + x + '/metadata.json')) for x in studyNames]
 		existingStudies = json.dumps(studyDicts)
-		analysisMd = analysis.getMetadata(analysisName)
-	return flask.render_template('newAnalysis.html', tmy2s=tmy2s, feeders=feeders, studyTemplate=studyTemplates, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=json.dumps(analysisMd))
+		analysisMd = json.dumps(analysis.getMetadata(analysisName))
+	return flask.render_template('newAnalysis.html', studyTemplates=studyTemplates, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
 
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):

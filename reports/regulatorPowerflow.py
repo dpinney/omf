@@ -6,8 +6,7 @@ import math
 import json
 from copy import copy
 
-# The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
-configHtmlTemplate = "<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>&#10006;</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>regulatorPowerflow</td></tr></table>"
+configHtmlTemplate = "<a onclick='javascript:removeStudyReport(this)' class='removeStudyReport'>&#10006;</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>regulatorPowerflow</td></tr></table>"
 
 def outputHtml(analysisName):
 	# Put the title in:

@@ -8,7 +8,6 @@ import math
 import json
 from jinja2 import Template
 
-# The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 with open('./reports/monetizationConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read()
 

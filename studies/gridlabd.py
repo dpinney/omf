@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import json
 
-configHtmlTemplate = "<p>nada</p>"
+with open('./studies/gridlabd.html','r') as configFile: configHtmlTemplate = configFile.read()
 
 def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 	studyPath = 'analyses/' + analysisName + '/studies/' + studyConfig['studyName']
