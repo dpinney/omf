@@ -3,6 +3,8 @@
 import os
 import feeder
 import shutil
+import subprocess
+import json
 
 def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 	studyPath = 'analyses/' + analysisName + '/studies/' + studyConfig['studyName']
@@ -33,10 +35,27 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 	# copy over tmy2 and replace the dummy climate.tmy2.
 	shutil.copyfile('tmy2s/' + studyConfig['tmy2name'], studyPath + '/climate.tmy2')
 	# add the metadata:
-	metadata = {'sourceFeeder':str(studyConfig['feederName']), 'climate':str(studyConfig['tmy2name'])}
+	metadata = {'sourceFeeder':str(studyConfig['feederName']), 'climate':str(studyConfig['tmy2name']), 'studyType':str(studyConfig['studyType'])}
 	with open(studyPath + '/metadata.txt','w') as mdFile:
 		mdFile.write(str(metadata))
 	return
 
+# WARNING! Run does not care about performance and will happily run for a long, long time. Spawn a thread or process for this nonsense.
 def run(analysisName, studyName):
-	pass
+	studyDir = 'analyses/' + analysisName + '/studies/' + studyName
+	# RUN GRIDLABD (EXPENSIVE!)
+	with open(studyDir + '/stdout.txt','w') as stdout, open(studyDir + '/stderr.txt','w') as stderr:
+		# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
+		proc = subprocess.Popen(['gridlabd','-w','main.glm'], cwd=studyDir, stdout=stdout, stderr=stderr)
+		# Put PID.
+		with open(studyDir + '/PID.txt','w') as pidFile:
+			pidFile.write(str(proc.pid))
+		proc.wait()
+		# Remove PID to indicate completion.
+		try: 
+			os.remove(studyDir + '/PID.txt')
+		except:
+			# Terminated, return false so analysis knows to not run any more studies.
+			return False
+	# Study run succesfully, indicate in return.
+	return True

@@ -12,6 +12,7 @@ import datetime as dt
 import feeder
 import subprocess
 import copy
+import json
 import studies
 import reports
 
@@ -70,44 +71,44 @@ def run(analysisName):
 	studyNames = os.listdir('analyses/' + analysisName + '/studies/')
 	# NOTE! We are running studies serially. We use lower levels of RAM/CPU, potentially saving time if swapping were to occur.
 	# Update status to running.
-	metadata = getMetadata(analysisName)
-	metadata['status'] = 'running'
-	putMetadata(analysisName, metadata)
+	md = getMetadata(analysisName)
+	md['status'] = 'running'
+	putMetadata(analysisName, md)
 	startTime = dt.datetime.now()
-	for study in studyNames:
-		studyDir = 'analyses/' + analysisName + '/studies/' + study
-		# Setup: pull in metadata before each study:
-		metadata = getMetadata(analysisName)
-		# HACK: if we've been terminated, don't run any more studies.
-		if metadata['status'] == 'terminated':
-			return False
-		# RUN GRIDLABD (EXPENSIVE!)
-		stdout = open(studyDir + '/stdout.txt','w')
-		stderr = open(studyDir + '/stderr.txt','w')
-		# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-		proc = subprocess.Popen(['gridlabd','-w','main.glm'], cwd=studyDir, stdout=stdout, stderr=stderr)
-		# Update PID.
-		metadata['PID'] = proc.pid
-		putMetadata(analysisName, metadata)
-		proc.wait()
-		stdout.close()
-		stderr.close()
+	for studyName in studyNames:
+		# If we've been terminated, don't run any more studies.
+		if md['status'] == 'terminated': return False
+		# TODO: get studyType from study MD.
+		with open('analyses/' + analysisName + '/studies/' + studyName + '/metadata.txt') as studyMd:
+			studyType = json.load(studyMd)['studyType']
+		studyModule = getattr(studies, studyType)
+		studyModule.run(analysisName, studyName)
 	# Update status to postRun and include running time IF WE DIDN'T TERMINATE.
-	metadata = getMetadata(analysisName)
-	if metadata['status'] != 'terminated':
+	md = getMetadata(analysisName)
+	if md['status'] != 'terminated':
 		endTime = dt.datetime.now()
-		metadata['runTime'] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
-		metadata['status'] = 'postRun'
-		putMetadata(analysisName, metadata)
+		md['runTime'] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+		md['status'] = 'postRun'
+		putMetadata(analysisName, md)
 
 def terminate(analysisName):
-	md = getMetadata(analysisName)
+	# Get all the pids.
+	pids = []
+	studiesDir = 'analyses/' + analysisName + '/studies/'
+	for studyName in os.listdir(studiesDir):
+		studyFiles = os.listdir(studiesDir + studyName)
+		if 'PID.txt' in studyFiles:
+			with open(studiesDir + studyName + '/PID.txt','r') as pidFile: pids.append(int(pidFile.read()))
+			os.remove(studiesDir + studyName + '/PID.txt')
 	try:
-		os.kill(int(md['PID']), 15)
+		for pid in pids: os.kill(pid, 15)
 	except:
-		print 'We could not kill PID ' + str(md['PID']) + '. It may already have completed normally.'
+		print 'We could not kill some PIDs. They may have already completed normally.'
+	# Update that analysis status.
+	md = getMetadata(analysisName)
 	md['status'] = 'terminated'
 	putMetadata(analysisName, md)
+	return
 
 def generateReportHtml(analysisName):
 	# Get some variables.
