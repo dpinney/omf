@@ -6,7 +6,6 @@
 # So spawn some worker threads to do this stuff.
 
 import os
-import time
 import shutil
 import datetime as dt
 import feeder
@@ -24,18 +23,17 @@ def listAll():
 def getMetadata(analysisName):
 	try:
 		with open('analyses/' + analysisName + '/metadata.txt','r') as mdFile:
-			mdString = mdFile.readlines()[0]
-		md = eval(mdString)
-		md['name'] = analysisName
-		return md
+			md = json.load(mdFile)
+			md['name'] = str(analysisName)
+			return md
 	except:
 		# The file didn't exist, i.e. the database is corrupt.
-		return {}
+		return {'name':str(analysisName)}
 
 def putMetadata(analysisName, metadataDict):
 	try:
 		with open('analyses/' + analysisName + '/metadata.txt','w') as mdFile:
-			mdFile.writelines(str(metadataDict))
+			json.dump(metadataDict, mdFile)
 		return True
 	except:
 		# The file didn't exist, i.e. the database is corrupt.
@@ -49,7 +47,7 @@ def delete(analysisName):
 	else:
 		print 'Deletion failure. Analysis does not exist.'
 
-def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studyList, reports):
+def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studyList, reportList):
 	# make the analysis folder structure:
 	os.mkdir('analyses/' + analysisName)
 	os.mkdir('analyses/' + analysisName + '/studies')
@@ -57,7 +55,7 @@ def createAnalysis(analysisName, simLength, simLengthUnits, simStartDate, studyL
 	for studyConf in studyList:
 		studyModule = getattr(studies, studyConf['studyType'])
 		studyModule.create(analysisName, simLength, simLengthUnits, simStartDate, studyConf)
-	for report in reports:
+	for report in reportList:
 		with open('analyses/' + analysisName + '/reports/' + report['reportType'] + '.txt','w') as mdFile:
 			mdFile.write(str(report))
 	# write a file with the current status (preRun, running or postRun), source feeder and climate.

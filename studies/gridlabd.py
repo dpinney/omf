@@ -37,7 +37,7 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 	# add the metadata:
 	metadata = {'sourceFeeder':str(studyConfig['feederName']), 'climate':str(studyConfig['tmy2name']), 'studyType':str(studyConfig['studyType'])}
 	with open(studyPath + '/metadata.txt','w') as mdFile:
-		mdFile.write(str(metadata))
+		json.dump(metadata, mdFile)
 	return
 
 # WARNING! Run does not care about performance and will happily run for a long, long time. Spawn a thread or process for this nonsense.
