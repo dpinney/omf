@@ -36,7 +36,7 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 	shutil.copyfile('tmy2s/' + studyConfig['tmy2name'], studyPath + '/climate.tmy2')
 	# add the metadata:
 	metadata = {'sourceFeeder':str(studyConfig['feederName']), 'climate':str(studyConfig['tmy2name']), 'studyType':str(studyConfig['studyType'])}
-	with open(studyPath + '/metadata.txt','w') as mdFile:
+	with open(studyPath + '/metadata.json','w') as mdFile:
 		json.dump(metadata, mdFile)
 	return
 

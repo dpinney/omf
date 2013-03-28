@@ -60,7 +60,7 @@ def newAnalysis(analysisName=None):
 	else:
 		reportPrefix = 'analyses/' + analysisName + '/reports/'
 		reportNames = os.listdir(reportPrefix)
-		reportDicts = [eval(lib.fileSlurp(reportPrefix + x)) for x in reportNames]
+		reportDicts = [json.loads(lib.fileSlurp(reportPrefix + x)) for x in reportNames]
 		existingReports = json.dumps(reportDicts)
 		studyPrefix = 'analyses/' + analysisName + '/studies/'
 		studyNames = os.listdir(studyPrefix)

@@ -13,7 +13,7 @@ def outputHtml(analysisName):
 	outputBuffer += '<div id="capActReport" class="tightContent">'
 	# Build up the data:
 	pathPrefix = './analyses/' + analysisName
-	resolution = eval(util.fileSlurp(pathPrefix + '/metadata.json'))['simLengthUnits']
+	resolution = json.loads(util.fileSlurp(pathPrefix + '/metadata.json'))['simLengthUnits']
 	for study in os.listdir(pathPrefix + '/studies/'):
 		capFileNames = filter(lambda x:x.startswith('Capacitor_') and x.endswith('.csv'), os.listdir(pathPrefix + '/studies/' + study))
 		outputBuffer += '<div id="capStudy' + study + '" class="studyContainer">'

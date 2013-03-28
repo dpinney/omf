@@ -17,15 +17,15 @@ def outputHtml(analysisName):
 	pathPrefix = 'analyses/' + analysisName
 	studies = os.listdir(pathPrefix + '/studies/')
 	# Get the report input:
-	with open (pathPrefix + '/reports/monetization.txt') as reportFile:
-		reportOptions = eval(reportFile.read())
+	with open (pathPrefix + '/reports/monetization.json') as reportFile:
+		reportOptions = json.load(reportFile)
 	distrEnergyRate = float(reportOptions['distrEnergyRate'])
 	distrCapacityRate = float(reportOptions['distrCapacityRate'])
 	equipAndInstallCost = float(reportOptions['equipAndInstallCost'])
 	opAndMaintCost = float(reportOptions['opAndMaintCost'])
 	# Find the resolution and interval size (in seconds):
 	with open(pathPrefix + '/metadata.json','r') as mdFile:
-		resolution = eval(mdFile.read())['simLengthUnits']
+		resolution = json.loads(mdFile.read())['simLengthUnits']
 		intervalMap = {'minutes':60, 'hours':3600, 'days':86400}
 		interval = intervalMap[resolution]
 	# Gather data for all the studies.

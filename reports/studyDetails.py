@@ -3,6 +3,7 @@
 import os
 import __util__
 import feeder
+import json
 
 # The config template, when inserted, will have the string REMOVALID replaced with a unique GUID.
 configHtmlTemplate = "<a href='javascript:removeStudyReport(REMOVALID)' class='removeStudyReport'>x</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>studyDetails</td></tr></table>"
@@ -22,14 +23,14 @@ def outputHtml(analysisName):
 	# put the map and table in:
 	for study in os.listdir(pathPrefix + '/studies/'):
 		with open(pathPrefix + '/studies/' + study + '/metadata.json', 'r') as mdFile:
-			metadata = eval(mdFile.read())
+			metadata = json.load(mdFile)
 			metadata['name'] = study
 		climates.append([str(metadata['climate']),1])
 		studies.append([metadata['name'], metadata['sourceFeeder']])
 	outputBuffer += '<div id="mapDiv" style="position:absolute;width:500px;height:400px;top:0px;left:500px"><script>drawMap(' + str(climates) + ',"mapDiv")</script></div>'
 	# handle the creation date and other time variables:
 	with open(pathPrefix + '/metadata.json','r') as anaMdFile:
-		anaMd = eval(anaMdFile.read())
+		anaMd = json.loads(anaMdFile.read())
 		created = anaMd['created']
 		simLength = anaMd['simLength']
 		simLengthUnits = anaMd['simLengthUnits']

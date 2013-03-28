@@ -56,7 +56,7 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyList, rep
 		studyModule = getattr(studies, studyConf['studyType'])
 		studyModule.create(analysisName, simLength, simLengthUnits, simStartDate, studyConf)
 	for report in reportList:
-		with open('analyses/' + analysisName + '/reports/' + report['reportType'] + '.txt','w') as mdFile:
+		with open('analyses/' + analysisName + '/reports/' + report['reportType'] + '.json','w') as mdFile:
 			mdFile.write(str(report))
 	# write a file with the current status (preRun, running or postRun), source feeder and climate.
 	def uniqJoin(inList, key):
@@ -114,7 +114,7 @@ def generateReportHtml(analysisName):
 	# Iterate over reports and collect what we need: 
 	for report in reportFiles:
 		# call the relevant reporting function by name.
-		reportModule = getattr(reports, report.replace('.txt',''))
+		reportModule = getattr(reports, report.replace('.json',''))
 		reportList.append(reportModule.outputHtml(analysisName))
 	return reportList
 

@@ -15,7 +15,7 @@ def outputHtml(analysisName):
 	outputBuffer += '<div id="regPowReport" class="tightContent">\n'
 	pathPrefix = './analyses/' + analysisName
 	with open(pathPrefix + '/metadata.json','r') as mdFile:
-		resolution = eval(mdFile.read())['simLengthUnits']
+		resolution = json.loads(mdFile.read())['simLengthUnits']
 	for study in os.listdir(pathPrefix + '/studies/'):
 		regFileNames = [x for x in os.listdir(pathPrefix + '/studies/' + study) if x.startswith('Regulator_') and x.endswith('.csv')]
 		outputBuffer += '<div id="regulatorStudy' + study + '" class="studyContainer">\n'
