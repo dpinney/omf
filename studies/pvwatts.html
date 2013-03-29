@@ -1,0 +1,37 @@
+<table class='studyOptions'>
+	<tr>
+		<td>Study Type</td>
+		<td class='studyType'>pvwatts</td>
+	</tr>
+	<tr>
+		<td>Study Name</td>
+		<td><input type='text' class='studyName'/></td>
+	</tr>
+	<tr>
+		<td>Location</td>
+		<td><select class='tmy2name'>{% for tmy2 in tmy2s %}<option value='{{ tmy2 }}'>{{ tmy2 }}</option>{% endfor %}</select></td>
+	</tr>
+	<tr>
+		<td>System Size (kWh)</td>
+		<td><input type='text' class='systemSize'/></td>
+	</tr>
+	<tr>
+		<td>Derate (%)</td>
+		<td><input type='text' class='derate'/></td>
+	</tr>
+	<tr>
+		<td>Tracking Mode</td>
+		<td>
+			<select class='trackingMode'/>
+				<option value='0'>Fixed</option>
+				<option value='1'>1 Axis</option>
+				<option value='2'>2 Axis</option>
+				<option value='3'>Azimuth Axis</option>
+			</select>
+		</td>
+	</tr>
+	<tr>
+		<td>Azimuth (degrees)</td>
+		<td><input type='text' class='azimuth'/></td>
+	</tr>
+</table>
