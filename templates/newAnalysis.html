@@ -72,10 +72,12 @@
 				studyDivs = document.getElementsByClassName('studyOptions')
 				for (i=0; i<studyDivs.length; i++) {
 					study = {}
-					study.studyName = check(studyDivs[i].querySelector('.studyName').value, /[\w\s]*/) // Must be a valid filename!
-					study.feederName = studyDivs[i].querySelector('.feederName').value
-					study.tmy2name = studyDivs[i].querySelector('.tmy2name').value
-					study.studyType = studyDivs[i].querySelector('.studyType').innerHTML
+					allInputs = studyDivs[i].querySelectorAll('input,select')
+					for (j=0; j<allInputs.length;j++) {
+						thisInput = allInputs[j]
+						if (thisInput.className == 'studyName') {check(thisInput.value, /[\w\s]*/)}// Must be a valid filename!} 
+						study[thisInput.className] = thisInput.value
+					}
 					studyList.push(study)
 				}
 				responseDict.studies = studyList

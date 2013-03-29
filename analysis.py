@@ -60,8 +60,15 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyList, rep
 			mdFile.write(str(report))
 	# write a file with the current status (preRun, running or postRun), source feeder and climate.
 	def uniqJoin(inList, key):
-		return ', '.join(set([x[key] for x in inList]))
-	metadata = {'status':'preRun', 'sourceFeeder':str(uniqJoin(studyList,'feederName')), 'climate':str(uniqJoin(studyList,'tmy2name')), 'created':str(dt.datetime.now()), 'simStartDate':str(simStartDate), 'simLength':simLength, 'simLengthUnits':str(simLengthUnits)}
+		theSet = set([x[key] for x in inList if key in x])
+		return ', '.join(theSet)
+	metadata = {'status':'preRun',
+				'sourceFeeder':uniqJoin(studyList,'feederName'),
+				'climate':uniqJoin(studyList,'tmy2name'),
+				'created':str(dt.datetime.now()),
+				'simStartDate':simStartDate,
+				'simLength':simLength,
+				'simLengthUnits':simLengthUnits }
 	putMetadata(analysisName, metadata)
 	print 'Success. Analysis created.'
 
