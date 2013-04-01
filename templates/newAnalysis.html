@@ -13,9 +13,11 @@
 		button {width:auto; padding:4px 6px 4px; float:right;}
 		.buttonGroup {float:none;}
 		a#addReport {float:right;}
-		a.removeStudyReport {float:left;}
+		a.removeStudyReport {float:left; cursor:pointer; user-select:none}
 		select.feederName {width:70%;}
 		input.radio {margin-left:10px;}
+		.advancedOption {display:none;}
+		.discloser {display:inline-block; cursor:pointer; user-select:none}
 	</style>
 	<script src='../static/omf.js'></script>
 	<script>
@@ -102,6 +104,20 @@
 				alert('Some form values are not correct.')
 				return false
 			}
+		}
+		// Little function here to get discloser triangles:
+		function toggleAdvanced(clickedObject) {
+			siblings = clickedObject.parentNode.parentNode.parentNode.querySelectorAll('.advancedOption')
+			for (i=0;i<siblings.length;i++) {
+				visible = (getComputedStyle(siblings[i])['display'] == 'none')
+				if (visible) {
+					siblings[i].style.display='table-row'
+				} else {
+					siblings[i].style.display='none'
+				}
+			}
+			if (visible) {code = 9660} else {code = 9654}
+			clickedObject.textContent = String.fromCharCode(code) + ' Advanced Options'
 		}
 	</script>
 </head>

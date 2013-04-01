@@ -37,17 +37,17 @@ def run(analysisName, studyName):
 	ssc.data_set_number(dat, "track_mode", float(inputs['trackingMode']))
 	ssc.data_set_number(dat, "azimuth", float(inputs['azimuth']))
 	# default inputs exposed
-	ssc.data_set_number(dat, 'rotlim', 45.0)
-	ssc.data_set_number(dat, 't_noct', 45.0)
-	ssc.data_set_number(dat, 't_ref', 25.0)
-	ssc.data_set_number(dat, 'gamma', -0.5)
-	ssc.data_set_number(dat, 'inv_eff', 0.92)
-	ssc.data_set_number(dat, 'fd', 1.0)
-	ssc.data_set_number(dat, 'i_ref', 1000)
-	ssc.data_set_number(dat, 'poa_cutin', 0)
-	ssc.data_set_number(dat, 'w_stow', 0)
-	ssc.data_set_number(dat, "tilt_eq_lat", 1)
+	ssc.data_set_number(dat, 'rotlim', float(inputs['rotlim']))
+	ssc.data_set_number(dat, 't_noct', float(inputs['t_noct']))
+	ssc.data_set_number(dat, 't_ref', float(inputs['t_ref']))
+	ssc.data_set_number(dat, 'gamma', float(inputs['gamma']))
+	ssc.data_set_number(dat, 'inv_eff', float(inputs['inv_eff']))
+	ssc.data_set_number(dat, 'fd', float(inputs['fd']))
+	ssc.data_set_number(dat, 'i_ref', float(inputs['i_ref']))
+	ssc.data_set_number(dat, 'poa_cutin', float(inputs['poa_cutin']))
+	ssc.data_set_number(dat, 'w_stow', float(inputs['w_stow']))
 	# complicated optional inputs
+	ssc.data_set_number(dat, 'tilt_eq_lat', 1)
 	# ssc.data_set_array(dat, 'shading_hourly', ...) 	Hourly beam shading factors
 	# ssc.data_set_matrix(dat, 'shading_mxh', ...) 		Month x Hour beam shading factors
 	# ssc.data_set_matrix(dat, 'shading_azal', ...) 	Azimuth x altitude beam shading factors

@@ -34,4 +34,44 @@
 		<td>Azimuth (degrees)</td>
 		<td><input type='text' class='azimuth'/></td>
 	</tr>
+	<tr>
+		<td></td>
+		<td style='text-align:right'><p class='discloser' onclick='javascript:toggleAdvanced(this)'>&#9654; Advanced Inputs</p></td>
+	</tr>
+	<tr class='advancedOption'>
+		<td>Tracker rotation limit (deg)</td>
+		<td><input type='text' class='rotlim' value='45.0'/></td>
+	</tr>
+	<tr class='advancedOption'>
+		<td>Nominal operating cell temperature (C)</td>
+		<td><input type='text' class='t_noct' value='45.0'/></td>
+	</tr>
+	<tr class='advancedOption'>
+		<td>Reference cell temperature (C)</td>
+		<td><input type='text' class='t_ref' value='25.0'/></td>
+	</tr>
+	<tr class='advancedOption'>
+		<td>Max power temperature coefficient (%/C)</td>
+		<td><input type='text' class='gamma' value='-0.5'/></td>
+	</tr>
+	<tr class='advancedOption'>
+		<td>Inverter efficiency at rated power (frac)</td>
+		<td><input type='text' class='inv_eff' value='0.92'/></td>
+	</tr>
+	<tr class='advancedOption'>
+		<td>Diffuse fraction (0..1)</td>
+		<td><input type='text' class='fd' value='1.0'/></td>
+	</tr>
+	<tr class='advancedOption'>
+		<td>Rating condition irradiance (W/m2)</td>
+		<td><input type='text' class='i_ref' value='1000'/></td>
+	</tr>
+	<tr class='advancedOption'>
+		<td>Min reqd irradiance for operation (W/m2)</td>
+		<td><input type='text' class='poa_cutin' value='0'/></td>
+	</tr>
+	<tr class='advancedOption'>
+		<td>Wind stow speed	(m/s)</td>
+		<td><input type='text' class='w_stow' value='0'/></td>
+	</tr>
 </table>
