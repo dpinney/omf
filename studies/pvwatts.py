@@ -81,3 +81,5 @@ def run(analysisName, studyName):
 	# Write some results.
 	with open(studyPath + '/output.json','w') as outFile:
 		json.dump(outData, outFile, indent=4)
+
+	return
