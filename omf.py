@@ -159,8 +159,7 @@ def updateGlm():
 	with open('./feeders/' + newFeeder + '/main.glm','w') as newMainGlm, open('./feeders/' + newFeeder + '/main.json','w') as jsonCache:
 		newMainGlm.write(feeder.sortedWrite(tree))
 		outDict = {'tree':tree, 'nodes':nodes, 'links':links, 'hiddenNodes':hiddenNodes, 'hiddenLinks':hiddenLinks, 'layoutVars':layoutVars}
-		jsonLoad = json.dumps(outDict, indent=4)
-		jsonCache.write(jsonLoad)
+		json.dump(outDict, jsonCache, indent=4)
 	return flask.redirect(flask.url_for('root') + '#feeders')
 
 @app.route('/runStatus/')
