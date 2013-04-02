@@ -57,7 +57,7 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyList, rep
 		studyModule.create(analysisName, simLength, simLengthUnits, simStartDate, studyConf)
 	for report in reportList:
 		with open('analyses/' + analysisName + '/reports/' + report['reportType'] + '.json','w') as mdFile:
-			mdFile.write(str(report))
+			json.dump(report, mdFile)
 	# write a file with the current status (preRun, running or postRun), source feeder and climate.
 	def uniqJoin(inList, key):
 		theSet = set([x[key] for x in inList if key in x])

@@ -15,7 +15,7 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 	shutil.copyfile('tmy2s/' + studyConfig['tmy2name'], studyPath + '/climate.tmy2')
 	# write all the other variables:
 	with open(studyPath + '/samInput.json','w') as samInputFile:
-		json.dump(studyConfig, samInputFile)
+		json.dump(studyConfig, samInputFile, indent=4)
 	# add the metadata:
 	md = {'climate':str(studyConfig['tmy2name']), 'studyType':str(studyConfig['studyType'])}
 	with open(studyPath + '/metadata.json','w') as mdFile:
@@ -48,12 +48,12 @@ def run(analysisName, studyName):
 	ssc.data_set_number(dat, 'w_stow', float(inputs['w_stow']))
 	# complicated optional inputs
 	ssc.data_set_number(dat, 'tilt_eq_lat', 1)
-	# ssc.data_set_array(dat, 'shading_hourly', ...) 	Hourly beam shading factors
-	# ssc.data_set_matrix(dat, 'shading_mxh', ...) 		Month x Hour beam shading factors
-	# ssc.data_set_matrix(dat, 'shading_azal', ...) 	Azimuth x altitude beam shading factors
-	# ssc.data_set_number(dat, 'shading_diff', ...) 	Diffuse shading factor
-	# ssc.data_set_number(dat, 'enable_user_poa', ...)	Enable user-defined POA irradiance input = 0 or 1
-	# ssc.data_set_array(dat, 'user_poa', ...) 			User-defined POA irradiance in W/m2
+	# ssc.data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
+	# ssc.data_set_matrix(dat, 'shading_mxh', ...) 		# Month x Hour beam shading factors
+	# ssc.data_set_matrix(dat, 'shading_azal', ...) 	# Azimuth x altitude beam shading factors
+	# ssc.data_set_number(dat, 'shading_diff', ...) 	# Diffuse shading factor
+	# ssc.data_set_number(dat, 'enable_user_poa', ...)	# Enable user-defined POA irradiance input = 0 or 1
+	# ssc.data_set_array(dat, 'user_poa', ...) 			# User-defined POA irradiance in W/m2
 	# ssc.data_set_number(dat, "tilt", 999)
 
 	# run PV system simulation
@@ -81,5 +81,3 @@ def run(analysisName, studyName):
 	# Write some results.
 	with open(studyPath + '/output.json','w') as outFile:
 		json.dump(outData, outFile, indent=4)
-
-	return
