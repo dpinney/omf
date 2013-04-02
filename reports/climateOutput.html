@@ -1,0 +1,12 @@
+<p class="reportTitle">Climate</p>
+<div id="climateReport" class="tightContent">
+	{%- for study in studyList -%}
+	<div id="climateStudy{{studyName}}" class="studyContainer">
+		<div id="climateChartDiv' + study + '" style="height:250px"></div>
+		{%- if True=title??? -%}
+		<div class="studyTitleBox"><p class="studyTitle">{{studyName}}</p></div>
+		{%- endif -%}		
+		<script>new Highcharts.Chart({{graphParameters}})</script>
+	</div>
+	{%- endfor -%}
+</div>

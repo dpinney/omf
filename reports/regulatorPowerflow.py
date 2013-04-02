@@ -6,7 +6,8 @@ import math
 import json
 from copy import copy
 
-configHtmlTemplate = "<a onclick='javascript:removeStudyReport(this)' class='removeStudyReport'>&#10006;</a><table class='reportOptions'><tr><td>Report Name</td><td class='reportName'>regulatorPowerflow</td></tr></table>"
+with open('./reports/defaultConfig.html','r') as configFile:
+	configHtmlTemplate = configFile.read().replace('{{reportName}}','regulatorPowerflow')
 
 def outputHtml(analysisName):
 	# Put the title in:

@@ -4,14 +4,8 @@ import os
 import __util__ as util
 import json
 
-configHtmlTemplate = '''<a onclick='javascript:removeStudyReport(this)' class='removeStudyReport'>&#10006;</a>
-						<table class='reportOptions'>
-							<tr>
-								<td>Report Name</td>
-								<td class='reportName'>rawData</td>
-							</tr>
-						</table>
-						'''
+with open('./reports/defaultConfig.html','r') as configFile:
+	configHtmlTemplate = configFile.read().replace('{{reportName}}','rawData')
 
 def outputHtml(analysisName):
 	# Put the title in:
