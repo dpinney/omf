@@ -49,3 +49,20 @@ def anaDataTree(studyPath, fileNameTest):
 			arr = csvToArray(studyPath + '/' + cName)
 			data[cName] = seriesTranspose(arr)
 	return data
+
+def pyth(x,y):
+	''' helper function to compute the third side of the triangle--BUT KEEP SIGNS THE SAME FOR DG '''
+	def sign(z):
+		return (-1 if z<0 else 1)
+	fullSign = sign(sign(x)*x*x + sign(y)*y*y)
+	return fullSign*math.sqrt(x*x + y*y)
+
+def vecPyth(vx,vy):
+	rows = zip(vx,vy)
+	return map(lambda x:pyth(*x), rows)
+
+def threePhasePowFac(ra,rb,rc,ia,ib,ic):
+	rows = zip(ra,rb,rc,ia,ib,ic)
+	def pfRow(row):
+		return math.cos(math.atan((row[0]+row[1]+row[2])/(row[3]+row[4]+row[5])))
+	return map(pfRow, rows)

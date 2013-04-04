@@ -102,13 +102,46 @@ def generateReferenceOutput(studyPath):
 		cleanOut['allMeterVoltages']['StdDev'] = rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']
 		cleanOut['allMeterVoltages']['Max'] = rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']
 	# Capacitor Activation
-	pass
-	# Meter Poweflow
-	pass
-	# Regulator Powerflow
-	pass
+	for key in rawOut:
+		if key.startswith('Capacitor_') and key.endswith('.csv'):
+			if 'Capacitors' not in cleanOut:
+				cleanOut['Capacitors'] = {}
+			capName = key[10:-4]
+			cleanOut['Capacitors'][capName] = {}
+			for switchKey in rawOut[key]:
+				if switchKey != '# timestamp':
+					cleanOut['Capacitors'][capName][switchKey] = rawOut[key][switchKey]
 	# Study Details
-	pass
+	glmTree = feeder.parse(studyPath + '/main.glm')
+	names = [glmTree[x]['name'] for x in glmTree if 'name' in glmTree[x]]
+	cleanOut['componentNames'] = list(set(names))
+	# Regulator Powerflow
+	for key in rawOut:
+		if key.startswith('Regulator_') and key.endswith('.csv'):
+			if 'Regulators' not in cleanOut: cleanOut['Regulators'] = {}
+			regName = key[10:-4]
+			cleanOut['Regulators'][regName] = {}
+			cleanOut['Regulators'][regName]['Tap A Position'] = rawOut[key]['tap_A']
+			cleanOut['Regulators'][regName]['Tap B Position'] = rawOut[key]['tap_B']
+			cleanOut['Regulators'][regName]['Tap C Position'] = rawOut[key]['tap_C']
+			realA = rawOut[key]['power_in_A.real']
+			realB = rawOut[key]['power_in_B.real']
+			realC = rawOut[key]['power_in_C.real']
+			imagA = rawOut[key]['power_in_A.imag']
+			imagB = rawOut[key]['power_in_B.imag']
+			imagC = rawOut[key]['power_in_C.imag']
+			cleanOut['Regulators'][regName]['Power Factor'] = util.threePhasePowFac(realA,realB,realC,imagA,imagB,imagC)
+			cleanOut['Regulators'][regName]['Tap A App Power'] = util.vecPyth(realA,imagA)
+			cleanOut['Regulators'][regName]['Tap B App Power'] = util.vecPyth(realB,imagB)
+			cleanOut['Regulators'][regName]['Tap C App Power'] = util.vecPyth(realC,imagC)
+	# Meter Powerflow
+	for key in rawOut:
+		if key.startswith('meterRecorder_') and key.endswith('.csv'):
+			if 'Meters' not in cleanOut: cleanOut['Meters'] = {}
+			meterName = key[14:-4]
+			cleanOut['Meters'][meterName] = {}
+			cleanOut['Meters'][meterName]['Voltage (V)'] = util.vecPyth(rawOut[key]['voltage_12.real'],rawOut[key]['voltage_12.imag'])
+			cleanOut['Meters'][meterName]['Load (kW)'] = rawOut[key]['measured_power']
 	# Power Consumption
 	pass
 	# Writing clean output.
