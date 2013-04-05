@@ -53,8 +53,8 @@ def anaDataTree(studyPath, fileNameTest):
 def aggSeries(timeStamps, timeSeries, func, level):
 	''' Aggregate a list + timeStamps up to the required time level. '''
 	# Different substring depending on what level we aggregate to:
-	if level=='month': endPos = 7
-	elif level=='day': endPos = 10
+	if level=='months': endPos = 7
+	elif level=='days': endPos = 10
 	combo = zip(timeStamps, timeSeries)
 	def groupBy(inL, func):
 		''' Take a list and func, and group items in place comparing with func. Make sure the func is an equivalence relation, or your brain will hurt. '''
