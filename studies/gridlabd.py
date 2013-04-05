@@ -90,21 +90,23 @@ def generateReferenceOutput(analysisName, studyPath):
 			return util.aggSeries(stamps, series, func, level)
 		else:
 			return series
+	def avg(x):
+		return sum(x)/len(x)
 	# Climate
 	if 'Climate_climate.csv' in rawOut:
 		cleanOut['climate'] = {}
-		cleanOut['climate']['Rain Fall (in/h)'] = rawOut['Climate_climate.csv']['rainfall'] #AGGME!
-		cleanOut['climate']['Wind Speed (m/s)'] = rawOut['Climate_climate.csv']['wind_speed'] #AGGME!
-		cleanOut['climate']['Temperature (F)'] = rawOut['Climate_climate.csv']['temperature'] #AGGME!
-		cleanOut['climate']['Snow Depth (in)'] = rawOut['Climate_climate.csv']['snowdepth'] #AGGME!
-		cleanOut['climate']['Direct Insolation (W/m^2)'] = rawOut['Climate_climate.csv']['solar_direct'] #AGGME!
+		cleanOut['climate']['Rain Fall (in/h)'] = agg(rawOut['Climate_climate.csv']['rainfall'], sum)
+		cleanOut['climate']['Wind Speed (m/s)'] = agg(rawOut['Climate_climate.csv']['wind_speed'], avg)
+		cleanOut['climate']['Temperature (F)'] = agg(rawOut['Climate_climate.csv']['temperature'], max)
+		cleanOut['climate']['Snow Depth (in)'] = agg(rawOut['Climate_climate.csv']['snowdepth'], max)
+		cleanOut['climate']['Direct Insolation (W/m^2)'] = agg(rawOut['Climate_climate.csv']['solar_direct'], sum)
 	# Voltage Band
 	if 'VoltageJiggle.csv' in rawOut:
 		cleanOut['allMeterVoltages'] = {}
-		cleanOut['allMeterVoltages']['Min'] = rawOut['VoltageJiggle.csv']['min(voltage_12.mag)'] #AGGME!
-		cleanOut['allMeterVoltages']['Mean'] = rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)'] #AGGME!
-		cleanOut['allMeterVoltages']['StdDev'] = rawOut['VoltageJiggle.csv']['std(voltage_12.mag)'] #AGGME!
-		cleanOut['allMeterVoltages']['Max'] = rawOut['VoltageJiggle.csv']['max(voltage_12.mag)'] #AGGME!
+		cleanOut['allMeterVoltages']['Min'] = agg(rawOut['VoltageJiggle.csv']['min(voltage_12.mag)'], min)
+		cleanOut['allMeterVoltages']['Mean'] = agg(rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)'], avg)
+		cleanOut['allMeterVoltages']['StdDev'] = agg(rawOut['VoltageJiggle.csv']['std(voltage_12.mag)'], avg)
+		cleanOut['allMeterVoltages']['Max'] = agg(rawOut['VoltageJiggle.csv']['max(voltage_12.mag)'], max)
 	# Capacitor Activation
 	for key in rawOut:
 		if key.startswith('Capacitor_') and key.endswith('.csv'):
@@ -114,7 +116,7 @@ def generateReferenceOutput(analysisName, studyPath):
 			cleanOut['Capacitors'][capName] = {}
 			for switchKey in rawOut[key]:
 				if switchKey != '# timestamp':
-					cleanOut['Capacitors'][capName][switchKey] = rawOut[key][switchKey] #AGGME!
+					cleanOut['Capacitors'][capName][switchKey] = agg(arawOut[key][switchKey], avg)
 	# Study Details
 	glmTree = feeder.parse(studyPath + '/main.glm')
 	names = [glmTree[x]['name'] for x in glmTree if 'name' in glmTree[x]]
@@ -125,36 +127,36 @@ def generateReferenceOutput(analysisName, studyPath):
 			if 'Regulators' not in cleanOut: cleanOut['Regulators'] = {}
 			regName = key[10:-4]
 			cleanOut['Regulators'][regName] = {}
-			cleanOut['Regulators'][regName]['Tap A Position'] = rawOut[key]['tap_A'] #AGGME!
-			cleanOut['Regulators'][regName]['Tap B Position'] = rawOut[key]['tap_B'] #AGGME!
-			cleanOut['Regulators'][regName]['Tap C Position'] = rawOut[key]['tap_C'] #AGGME!
+			cleanOut['Regulators'][regName]['Tap A Position'] = agg(rawOut[key]['tap_A'], avg)
+			cleanOut['Regulators'][regName]['Tap B Position'] = agg(rawOut[key]['tap_B'], avg)
+			cleanOut['Regulators'][regName]['Tap C Position'] = agg(rawOut[key]['tap_C'], avg)
 			realA = rawOut[key]['power_in_A.real']
 			realB = rawOut[key]['power_in_B.real']
 			realC = rawOut[key]['power_in_C.real']
 			imagA = rawOut[key]['power_in_A.imag']
 			imagB = rawOut[key]['power_in_B.imag']
 			imagC = rawOut[key]['power_in_C.imag']
-			cleanOut['Regulators'][regName]['Power Factor'] = util.threePhasePowFac(realA,realB,realC,imagA,imagB,imagC) #AGGME!
-			cleanOut['Regulators'][regName]['Tap A App Power'] = util.vecPyth(realA,imagA) #AGGME!
-			cleanOut['Regulators'][regName]['Tap B App Power'] = util.vecPyth(realB,imagB) #AGGME!
-			cleanOut['Regulators'][regName]['Tap C App Power'] = util.vecPyth(realC,imagC) #AGGME!
+			cleanOut['Regulators'][regName]['Power Factor'] = agg(util.threePhasePowFac(realA,realB,realC,imagA,imagB,imagC), avg)
+			cleanOut['Regulators'][regName]['Tap A App Power'] = agg(util.vecPyth(realA,imagA), avg)
+			cleanOut['Regulators'][regName]['Tap B App Power'] = agg(util.vecPyth(realB,imagB), avg)
+			cleanOut['Regulators'][regName]['Tap C App Power'] = agg(util.vecPyth(realC,imagC), avg)
 	# Meter Powerflow
 	for key in rawOut:
 		if key.startswith('meterRecorder_') and key.endswith('.csv'):
 			if 'Meters' not in cleanOut: cleanOut['Meters'] = {}
 			meterName = key[14:-4]
 			cleanOut['Meters'][meterName] = {}
-			cleanOut['Meters'][meterName]['Voltage (V)'] = util.vecPyth(rawOut[key]['voltage_12.real'],rawOut[key]['voltage_12.imag']) #AGGME!
-			cleanOut['Meters'][meterName]['Load (kW)'] = rawOut[key]['measured_power'] #AGGME!
+			cleanOut['Meters'][meterName]['Voltage (V)'] = agg(util.vecPyth(rawOut[key]['voltage_12.real'],rawOut[key]['voltage_12.imag']), avg)
+			cleanOut['Meters'][meterName]['Load (kW)'] = agg(rawOut[key]['measured_power'], avg)
 	# Power Consumption
 	cleanOut['Consumption'] = {}
 	for key in rawOut:
 		if key.startswith('SwingKids_') and key.endswith('.csv'):
-			oneSwingPower = util.vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)'])
+			oneSwingPower = agg(util.vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), avg)
 			if 'Power' not in cleanOut['Consumption']:
 				cleanOut['Consumption']['Power'] = oneSwingPower
 			else:
-				cleanOut['Consumption']['Power'] = util.vecSum(oneSwingPower,cleanOut['Consumption']['Power']) #AGGME!
+				cleanOut['Consumption']['Power'] = util.vecSum(oneSwingPower,cleanOut['Consumption']['Power'])
 		elif key.startswith('Inverter_') and key.endswith('.csv'): 	
 			realA = rawOut[key]['power_A.real']
 			realB = rawOut[key]['power_B.real']
@@ -162,11 +164,11 @@ def generateReferenceOutput(analysisName, studyPath):
 			imagA = rawOut[key]['power_A.imag']
 			imagB = rawOut[key]['power_B.imag']
 			imagC = rawOut[key]['power_C.imag']
-			oneDgPower = util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC))
+			oneDgPower = agg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), avg)
 			if 'DG' not in cleanOut['Consumption']:
 				cleanOut['Consumption']['DG'] = oneDgPower
 			else:
-				cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG']) #AGGME!
+				cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG'])
 		elif key.startswith('Windmill_') and key.endswith('.csv'):
 			vrA = rawOut[key]['voltage_A.real']
 			vrB = rawOut[key]['voltage_B.real']
@@ -183,11 +185,11 @@ def generateReferenceOutput(analysisName, studyPath):
 			powerA = util.vecProd(util.vecPyth(vrA,viA),util.vecPyth(crA,ciA))
 			powerB = util.vecProd(util.vecPyth(vrB,viB),util.vecPyth(crB,ciB))
 			powerC = util.vecProd(util.vecPyth(vrC,viC),util.vecPyth(crC,ciC))
-			oneDgPower = util.vecSum(powerA,powerB,powerC)
+			oneDgPower = agg(util.vecSum(powerA,powerB,powerC), avg)
 			if 'DG' not in cleanOut['Consumption']:
 				cleanOut['Consumption']['DG'] = oneDgPower
 			else:
-				cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG']) #AGGME!
+				cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG'])
 		elif key in ['OverheadLosses.csv', 'UndergroundLosses.csv', 'TriplexLosses.csv', 'TransformerLosses.csv']:
 			realA = rawOut[key]['sum(power_losses_A.real)']
 			imagA = rawOut[key]['sum(power_losses_A.imag)']
@@ -195,7 +197,7 @@ def generateReferenceOutput(analysisName, studyPath):
 			imagB = rawOut[key]['sum(power_losses_B.imag)']
 			realC = rawOut[key]['sum(power_losses_C.real)']
 			imagC = rawOut[key]['sum(power_losses_C.imag)']
-			oneLoss = util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC))
+			oneLoss = agg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), avg)
 			if 'Losses' not in cleanOut['Consumption']:
 				cleanOut['Consumption']['Losses'] = oneLoss
 			else:
