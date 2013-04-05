@@ -66,3 +66,12 @@ def threePhasePowFac(ra,rb,rc,ia,ib,ic):
 	def pfRow(row):
 		return math.cos(math.atan((row[0]+row[1]+row[2])/(row[3]+row[4]+row[5])))
 	return map(pfRow, rows)
+
+def vecSum(*args):
+	return map(sum,zip(*args))
+
+def prod(inList):
+	return reduce(lambda x,y:x*y, inList, 1)
+
+def vecProd(*args):
+	return map(prod, zip(*args))

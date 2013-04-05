@@ -66,12 +66,10 @@ def run(analysisName, studyName):
 	return True
 
 def generateReferenceOutput(studyPath):
-	# Pull in the raw output:
-	rawOut = util.anaDataTree(studyPath, lambda x:True) # Lambda function gets everything.
-	# Writing raw output.
-	with open(studyPath + '/output.json','w') as outFile:
-		json.dump(rawOut, outFile, indent=4)
-	# Cleaning up.
+	# Setting up:
+	rawOut = util.anaDataTree(studyPath, lambda x:True) # Lambda x:true means get every csv .
+	# with open(studyPath + '/output.json','w') as outFile:
+	# 	json.dump(rawOut, outFile, indent=4)
 	cleanOut = {}
 	# Std Err and Std Out
 	with open(studyPath + '/stderr.txt','r') as stderrFile:
@@ -143,7 +141,59 @@ def generateReferenceOutput(studyPath):
 			cleanOut['Meters'][meterName]['Voltage (V)'] = util.vecPyth(rawOut[key]['voltage_12.real'],rawOut[key]['voltage_12.imag'])
 			cleanOut['Meters'][meterName]['Load (kW)'] = rawOut[key]['measured_power']
 	# Power Consumption
-	pass
+	cleanOut['Consumption'] = {}
+	for key in rawOut:
+		if key.startswith('SwingKids_') and key.endswith('.csv'):
+			oneSwingPower = util.vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)'])
+			if 'Power' not in cleanOut['Consumption']:
+				cleanOut['Consumption']['Power'] = oneSwingPower
+			else:
+				cleanOut['Consumption']['Power'] = util.vecSum(oneSwingPower,cleanOut['Consumption']['Power'])
+		elif key.startswith('Inverter_') and key.endswith('.csv'): 	
+			realA = rawOut[key]['power_A.real']
+			realB = rawOut[key]['power_B.real']
+			realC = rawOut[key]['power_C.real']
+			imagA = rawOut[key]['power_A.imag']
+			imagB = rawOut[key]['power_B.imag']
+			imagC = rawOut[key]['power_C.imag']
+			oneDgPower = util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC))
+			if 'DG' not in cleanOut['Consumption']:
+				cleanOut['Consumption']['DG'] = oneDgPower
+			else:
+				cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG'])
+		elif key.startswith('Windmill_') and key.endswith('.csv'):
+			vrA = rawOut[key]['voltage_A.real']
+			vrB = rawOut[key]['voltage_B.real']
+			vrC = rawOut[key]['voltage_C.real']
+			viA = rawOut[key]['voltage_A.imag']
+			viB = rawOut[key]['voltage_B.imag']
+			viC = rawOut[key]['voltage_C.imag']
+			crB = rawOut[key]['current_B.real']
+			crA = rawOut[key]['current_A.real']
+			crC = rawOut[key]['current_C.real']
+			ciA = rawOut[key]['current_A.imag']
+			ciB = rawOut[key]['current_B.imag']
+			ciC = rawOut[key]['current_C.imag']
+			powerA = util.vecProd(util.vecPyth(vrA,viA),util.vecPyth(crA,ciA))
+			powerB = util.vecProd(util.vecPyth(vrB,viB),util.vecPyth(crB,ciB))
+			powerC = util.vecProd(util.vecPyth(vrC,viC),util.vecPyth(crC,ciC))
+			oneDgPower = util.vecSum(powerA,powerB,powerC)
+			if 'DG' not in cleanOut['Consumption']:
+				cleanOut['Consumption']['DG'] = oneDgPower
+			else:
+				cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG'])
+		elif key in ['OverheadLosses.csv', 'UndergroundLosses.csv', 'TriplexLosses.csv', 'TransformerLosses.csv']:
+			realA = rawOut[key]['sum(power_losses_A.real)']
+			imagA = rawOut[key]['sum(power_losses_A.imag)']
+			realB = rawOut[key]['sum(power_losses_B.real)']
+			imagB = rawOut[key]['sum(power_losses_B.imag)']
+			realC = rawOut[key]['sum(power_losses_C.real)']
+			imagC = rawOut[key]['sum(power_losses_C.imag)']
+			oneLoss = util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC))
+			if 'Losses' not in cleanOut['Consumption']:
+				cleanOut['Consumption']['Losses'] = oneLoss
+			else:
+				cleanOut['Consumption']['Losses'] = util.vecSum(oneLoss,cleanOut['Consumption']['Losses'])
 	# Writing clean output.
 	with open(studyPath + '/cleanOutput.json','w') as cleanFile:
 		json.dump(cleanOut, cleanFile, indent=4)
