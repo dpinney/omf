@@ -116,7 +116,7 @@ def generateReferenceOutput(analysisName, studyPath):
 			cleanOut['Capacitors'][capName] = {}
 			for switchKey in rawOut[key]:
 				if switchKey != '# timestamp':
-					cleanOut['Capacitors'][capName][switchKey] = agg(arawOut[key][switchKey], avg)
+					cleanOut['Capacitors'][capName][switchKey] = agg(rawOut[key][switchKey], avg)
 	# Study Details
 	glmTree = feeder.parse(studyPath + '/main.glm')
 	names = [glmTree[x]['name'] for x in glmTree if 'name' in glmTree[x]]
