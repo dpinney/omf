@@ -201,7 +201,12 @@ def generateReferenceOutput(analysisName, studyPath):
 			if 'Losses' not in cleanOut['Consumption']:
 				cleanOut['Consumption']['Losses'] = oneLoss
 			else:
-				cleanOut['Consumption']['Losses'] = util.vecSum(oneLoss,cleanOut['Consumption']['Losses']) #AGGME!
+				cleanOut['Consumption']['Losses'] = util.vecSum(oneLoss,cleanOut['Consumption']['Losses'])
+	# Aggregate up the timestamps:
+	if level=='days':
+		cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
+	elif level=='months':
+		cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
 	# Writing clean output.
 	with open(studyPath + '/cleanOutput.json','w') as cleanFile:
 		json.dump(cleanOut, cleanFile, indent=4)
