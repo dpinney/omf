@@ -28,9 +28,9 @@ def outputHtml(analysisName):
 			graphParameters['chart']['renderTo'] = 'climateChartDiv' + str(study)
 			graphParameters['chart']['type'] = 'line'
 			graphParameters['yAxis'] = {'title':{'text':'Climate Units', 'style':{'color':'gray'}}}
-			# TODO: colorMap = {1:'dimgray',2:'darkgray',3:'darkgray',4:'gainsboro',5:'gainsboro'}
 			for varName in cleanOut['climate']:
-				graphParameters['series'].append({'name':varName,'data':cleanOut['climate'][varName],'marker':{'enabled':False},'color':'gray'})
+				colorChoice = util.rainbow(cleanOut['climate'], varName, ['dimgray','darkgray','darkgray','gainsboro','gainsboro'])
+				graphParameters['series'].append({'name':varName,'data':cleanOut['climate'][varName],'marker':{'enabled':False},'color':colorChoice})
 			studyDict['graphParameters'] = json.dumps(graphParameters)
 			studyList.append(studyDict)
 	# Get the template in.

@@ -159,3 +159,8 @@ def getResolution(analysisName):
 	with open('analyses/' + analysisName + '/metadata.json') as mdFile:
 		md = json.load(mdFile)
 	return md['simLengthUnits']
+
+def rainbow(dic, key, colorList):
+	pos = dic.keys().index(key)
+	modPos = pos % len(colorList)
+	return colorList[modPos]
