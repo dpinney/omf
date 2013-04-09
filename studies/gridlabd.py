@@ -93,13 +93,14 @@ def generateReferenceOutput(analysisName, studyPath):
 	def avg(x):
 		return sum(x)/len(x)
 	# Climate
-	if 'Climate_climate.csv' in rawOut:
-		cleanOut['climate'] = {}
-		cleanOut['climate']['Rain Fall (in/h)'] = agg(rawOut['Climate_climate.csv']['rainfall'], sum)
-		cleanOut['climate']['Wind Speed (m/s)'] = agg(rawOut['Climate_climate.csv']['wind_speed'], avg)
-		cleanOut['climate']['Temperature (F)'] = agg(rawOut['Climate_climate.csv']['temperature'], max)
-		cleanOut['climate']['Snow Depth (in)'] = agg(rawOut['Climate_climate.csv']['snowdepth'], max)
-		cleanOut['climate']['Direct Insolation (W/m^2)'] = agg(rawOut['Climate_climate.csv']['solar_direct'], sum)
+	for key in rawOut:
+		if key.startswith('Climate_') and key.endswith('.csv') in rawOut:
+			cleanOut['climate'] = {}
+			cleanOut['climate']['Rain Fall (in/h)'] = agg(rawOut['Climate_climate.csv']['rainfall'], sum)
+			cleanOut['climate']['Wind Speed (m/s)'] = agg(rawOut['Climate_climate.csv']['wind_speed'], avg)
+			cleanOut['climate']['Temperature (F)'] = agg(rawOut['Climate_climate.csv']['temperature'], max)
+			cleanOut['climate']['Snow Depth (in)'] = agg(rawOut['Climate_climate.csv']['snowdepth'], max)
+			cleanOut['climate']['Direct Insolation (W/m^2)'] = agg(rawOut['Climate_climate.csv']['solar_direct'], sum)
 	# Voltage Band
 	if 'VoltageJiggle.csv' in rawOut:
 		cleanOut['allMeterVoltages'] = {}
