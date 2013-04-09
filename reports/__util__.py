@@ -6,6 +6,7 @@ import os
 from time import mktime
 from datetime import datetime
 import itertools
+import json
 
 def csvToArray(fileName):
 	''' Take a filename to a list of timeseries vectors. Internal method. '''
@@ -153,3 +154,8 @@ def roundSig(x, sig=3):
 
 def roundSeries(ser):
 	return map(lambda x:roundSig(x,4), ser)
+
+def getResolution(analysisName):
+	with open('analyses/' + analysisName + '/metadata.json') as mdFile:
+		md = json.load(mdFile)
+	return md['simLengthUnits']

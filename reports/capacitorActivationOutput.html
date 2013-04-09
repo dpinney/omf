@@ -1,0 +1,12 @@
+<p class="reportTitle">Capacitor Activation</p>
+<div id="capActReport" class="tightContent">
+	{%- for study in studyList -%}
+	<div id="capStudy{{study.studyName}}" class="studyContainer">
+		<div class="studyTitleBox"><p class="studyTitle">{{study.studyName}}</p></div>
+		{%- for cap in study.capList -%}
+			<div id="chartDiv{{study.studyName}}{{cap.capName}}"></div>
+			<script>new Highcharts.Chart({{cap.graphParams | safe}})</script>
+		{%- endfor -%}
+	</div>
+	{%- endfor -%}
+</div>

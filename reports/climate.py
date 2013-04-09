@@ -9,7 +9,6 @@ with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','climate')
 
 def outputHtml(analysisName):
-	# Put the title in:
 	# Collect study variables:
 	pathPrefix = './analyses/' + analysisName
 	resolution = json.loads(util.fileSlurp(pathPrefix + '/metadata.json'))['simLengthUnits']

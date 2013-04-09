@@ -120,7 +120,7 @@ def generateReferenceOutput(analysisName, studyPath):
 	# Study Details
 	glmTree = feeder.parse(studyPath + '/main.glm')
 	names = [glmTree[x]['name'] for x in glmTree if 'name' in glmTree[x]]
-	cleanOut['componentNames'] = list(set(names)) #AGGME!
+	cleanOut['componentNames'] = list(set(names))
 	# Regulator Powerflow
 	for key in rawOut:
 		if key.startswith('Regulator_') and key.endswith('.csv'):
