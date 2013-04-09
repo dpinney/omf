@@ -141,6 +141,10 @@ def defaultGraphObject(resolution, startTimeStamp):
 	}
 	return graphParameters
 
+def totalEnergy(series, res):
+	resMap = {'minutes':1.0/60.0,'hours':1,'days':24}
+	return sum(series)*resMap[res]
+
 def fileSlurp(fileName):
 	with open(fileName,'r') as openFile:
 		return openFile.read()
@@ -159,6 +163,11 @@ def getResolution(analysisName):
 	with open('analyses/' + analysisName + '/metadata.json') as mdFile:
 		md = json.load(mdFile)
 	return md['simLengthUnits']
+
+def getStartDate(analysisName):
+	with open('analyses/' + analysisName + '/metadata.json') as mdFile:
+		md = json.load(mdFile)
+	return md['simStartDate']
 
 def rainbow(dic, key, colorList):
 	pos = dic.keys().index(key)

@@ -28,11 +28,3 @@ def main():
 
 if __name__ == '__main__':
 	main()
-
-
-'''
-
-source info:
-http://www.gridlabd.org/documents/doxygen/latest_dev/climate_8h-source.html
-
-'''

@@ -33,7 +33,7 @@ def outputHtml(analysisName):
 				powerMatrix[1:] = [powerMatrix[rowNum+1] + [fullArray[rowNum+1][1]/1000] for rowNum in xrange(len(fullArray)-1)]
 		# Do day-level aggregation:
 		if 'days' == resolution:
-			# TODO: must do more than just maxes!!
+			# TODO: must do more than just maxes!
 			voltMatrix = [voltMatrix[0]] + util.aggCsv(voltMatrix[1:], max, 'day')
 			powerMatrix  = [powerMatrix[0]] + util.aggCsv(powerMatrix[1:], max, 'day')
 		# Study container and title:

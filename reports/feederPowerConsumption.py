@@ -5,6 +5,7 @@ import re
 import math
 import __util__ as util
 import json
+from jinja2 import Template
 
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','feederPowerConsumption')
@@ -15,94 +16,49 @@ def outputHtml(analysisName):
 	# Variables for the whole analysis:
 	pathPrefix = 'analyses/' + analysisName + '/studies/'
 	studies = os.listdir(pathPrefix)
-	# Figure out what the time interval was:
-	with open(pathPrefix + studies[0] + '/main.glm') as testGlm:
-		glmContent = testGlm.read()
-		intervalText = re.findall('interval\s+(\d+)', glmContent)
-		if [] != intervalText:
-			interval = float(intervalText[0])
-		else:
-			interval = 0.0
-	# Figure out the stated resolution (can be different than interval):
-	with open('./analyses/' + analysisName + '/metadata.json','r') as mdFile:
-		resolution = json.loads(mdFile.read())['simLengthUnits']
-	# Collect the power stats:
-	powerTimeSeries = []
-	energyTotals = [['Study Name','Energy Used']]
+	resolution = util.getResolution(analysisName)
+	allData = {}
 	for study in studies:
-		powerToAdd = []
-		swingFileNames = [x for x in os.listdir(pathPrefix + study) if x.startswith('SwingKids_') and x.endswith('.csv')]
-		for swingFile in swingFileNames:
-			fullArray = util.csvToArray(pathPrefix + study + '/' + swingFile)
-			fullArray[0] = ['Timestamp', str(study)]
-			fullArray[1:] = [[row[0],(-1 if row[1]<0 else 1)*math.sqrt(row[1]**2+row[2]**2)/1000] for row in fullArray[1:]]
-			if 'days' == resolution:
-				# Aggregate to the day level and max power:
-				fullArray = [fullArray[0]] + util.aggCsv(fullArray[1:], max, 'day')
-			if [] == powerToAdd:
-				powerToAdd = fullArray
-			else: 
-				for rowNum in xrange(len(fullArray)):
-					powerToAdd[rowNum][1] = powerToAdd[rowNum][1] + fullArray[rowNum][1]
-		if [] == powerTimeSeries:
-			powerTimeSeries = powerToAdd
-		else:
-			powerTimeSeries = [powerTimeSeries[rowNum] + [powerToAdd[rowNum][1]] for rowNum in xrange(len(powerTimeSeries))]
-	# Collect the energy stats
-	def totalEnergy(studyName, isRelevantFile, isSinglePhaseNotThree):
-		# Helper function for one file:
-		def sumEnergy(lossOrGenFilePath, isSinglePhaseNotThree):
-			fullData = util.csvToArray(lossOrGenFilePath)
-			if isSinglePhaseNotThree:
-				apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],util.pyth(r[1],r[2])/1000] for r in fullData[1:]]
-			else:
-				print lossOrGenFilePath
-				if lossOrGenFilePath.find('/Windmill_') != -1:
-					apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],-1*(util.pyth(r[1],r[2])*util.pyth(r[7],r[8])+util.pyth(r[3],r[4])*util.pyth(r[9],r[10])+util.pyth(r[5],r[6])*util.pyth(r[11],r[12]))/1000] for r in fullData[1:]]
-					# raise Exception
-				else:
-					apparentPower = [['Datetime','AppPower(kW)']] + [[r[0],(util.pyth(r[1],r[2])+util.pyth(r[3],r[4])+util.pyth(r[5],r[6]))/1000] for r in fullData[1:]]					
-			totalEnergyKwh = sum([interval * row[1] / 3600.0 for row in apparentPower[1:]])
-			return totalEnergyKwh
-		# Sum energy over all files for a given study:
-		studyPrefix = pathPrefix + studyName + '/'
-		lossesFiles = [x for x in os.listdir(studyPrefix) if isRelevantFile(x)]
-		energies = map(lambda x:sumEnergy(studyPrefix + x, isSinglePhaseNotThree), lossesFiles)
-		return sum(energies)
-	losses = map(lambda x:totalEnergy(x, lambda y:y in ['TriplexLosses.csv','OverheadLosses.csv','UndergroundLosses.csv','TransformerLosses.csv'], False), studies)
-	distGen = map(lambda x:totalEnergy(x, lambda y:y.startswith('Inverter_') or y.startswith('Windmill_'), False), studies)
-	substation = map(lambda x:totalEnergy(x, lambda y:y.startswith('SwingKids_'), True), studies)
-	energyMatrix = [['#'] + map(str,studies),
-					['DG'] + distGen,
-					['Loads'] + util.vecSum(substation, distGen, [x*-1 for x in losses]),
-					['Losses'] + losses]
-	energyTotals = [list(r) for r in zip(*energyMatrix)]
+		allData[study] = {}
+		with open(pathPrefix + study + '/cleanOutput.json') as outFile:
+			studyJson = json.load(outFile)
+			allData[study]['Power'] = studyJson['Consumption']['Power']
+			allData[study]['totalEnergy'] = util.totalEnergy(allData[study]['Power'], resolution)
+			allData[study]['Losses'] = util.totalEnergy(studyJson['Consumption']['Losses'], resolution)
+			allData[study]['Loads'] = allData[study]['totalEnergy'] - allData[study]['Losses']
+			if 'DG' in studyJson['Consumption']:
+				allData[study]['DG'] = util.totalEnergy(studyJson['Consumption']['DG'], resolution)
+				allData[study]['Loads'] = allData[study]['Loads'] + allData[study]['DG']
 	# Add the power time series graph:
-	powGraphParams = util.defaultGraphObject(resolution, powerTimeSeries[1][0])
+	powGraphParams = util.defaultGraphObject(resolution, util.getStartDate(analysisName))
 	powGraphParams['chart']['renderTo'] = 'powerTimeSeries'
 	powGraphParams['chart']['type'] = 'line'
 	powGraphParams['chart']['height'] = 250	
-	powGraphParams['yAxis']['title']['text'] = 'Power (kW)'
+	powGraphParams['yAxis']['title']['text'] = 'Power (W)'
 	colorMap = {0:'salmon',1:'red',2:'darkred'}
-	for x in range(1,len(powerTimeSeries[0])):
-		powGraphParams['series'].append({'name':powerTimeSeries[0][x],'data':util.roundSeries([y[x] for y in powerTimeSeries[1:]]),'marker':{'enabled':False},'color':colorMap[x%3]})
-	outputBuffer += '<div id="powerTimeSeries"><script>new Highcharts.Chart(' + json.dumps(powGraphParams) + ')</script></div>\n'
+	for study in allData:
+		color = util.rainbow(allData,study,['salmon','red','darkred'])
+		powGraphParams['series'].append({'name':study,'data':allData[study]['Power'],'marker':{'enabled':False},'color':color})
 	# Add the energy graph:
 	energyGraphParams = {
 		'chart':{'renderTo':'energyBalance', 'marginRight':20, 'marginBottom':20, 'height':250},
 		'title':{'text':None},
-		'yAxis':{'title':{'text':'Energy (kWh)', 'style':{'color':'gray'}}},
+		'yAxis':{'title':{'text':'Energy (Wh)', 'style':{'color':'gray'}}},
 		'legend':{'layout':'horizontal', 'align':'top', 'verticalAlign':'top', 'x':50, 'y':-10, 'borderWidth':0},
 		'credits':{'enabled':False},
-		'xAxis':{'categories':[x[0] for x in energyTotals[1:]],'tickColor':'gray','lineColor':'gray'},
+		'xAxis':{'categories':[study for study in allData],'tickColor':'gray','lineColor':'gray'},
 		'plotOptions':{'spline':{'shadow':False, 'lineWidth':0,'marker':{'radius':8}}, 'column':{'stacking':'normal','shadow':False}},
-		'series':[	{'type':'column','name':energyTotals[0][3],'data':util.roundSeries([x[3] for x in energyTotals[1:]]), 'color':'orangered'},
-					{'type':'column','name':energyTotals[0][2],'data':util.roundSeries([x[2] for x in energyTotals[1:]]), 'color':'darkorange'},
-					{'type':'spline','name':energyTotals[0][1],'data':util.roundSeries([x[1] for x in energyTotals[1:]]), 'color':'seagreen'}
+		'series':[	{'type':'column','name':'Losses','data':[allData[study]['Losses'] for study in allData], 'color':'orangered'},
+					{'type':'column','name':'Loads','data':[allData[study]['Loads'] for study in allData], 'color':'darkorange'},
+					{'type':'spline','name':'DG','data':[allData[study]['DG'] for study in allData if 'DG' in allData[study]], 'color':'seagreen'}
 				]
 	}
-	outputBuffer += '<div id="energyBalance"><script>new Highcharts.Chart(' + json.dumps(energyGraphParams) + ')</script></div>\n'
-	return outputBuffer + '</div>\n\n'
+	# Get the template in.
+	with open('./reports/feederPowerConsumptionOutput.html','r') as tempFile:
+		template = Template(tempFile.read())
+	# Write the results.
+	return template.render(powGraphParams=json.dumps(powGraphParams), energyGraphParams=json.dumps(energyGraphParams))
+
 
 def modifyStudy(analysisName):
 	pass
