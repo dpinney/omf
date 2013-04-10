@@ -2,15 +2,16 @@
 <div id="regPowReport" class="tightContent">
 {%- for study in studyList -%}
 	<div id="regulatorStudy{{study.studyName}}" class="studyContainer">
-		<div class="studyTitleBox"><p class="studyTitle">{{study.studyName</p></div>
-		{%- for reg in study.regulators -%}
-		<div id="regCharts' + study + regulator + '">
-			<div id="regApparentChart{{study.studyName}}{{regulator.regName}}"></div>
-			<script>new Highcharts.Chart({{appPowerParams}})</script>
-			<div id="regPowFactChart{{study.studyName}}{{regulator.regName}}"></div>
-			<script>new Highcharts.Chart({{powerFactorParams}})</script>
-			<div id="regTapsChart{{study.studyName}}{{regulator.regName}}"></div>
-			<script>new Highcharts.Chart({{tapPosParams}})</script>
+		<div class="studyTitleBox"><p class="studyTitle">{{study.studyName}}</p></div>
+		{%- for reg in study.regs -%}
+		<div id="regCharts{{study.studyName}}{{reg.regName}}">
+			<div id="regApparentChart{{study.studyName}}{{reg.regName}}"></div>
+			<script>new Highcharts.Chart({{reg.appPowerParams | safe}})</script>
+			<div id="regPowFactChart{{study.studyName}}{{reg.regName}}"></div>
+			<script>new Highcharts.Chart({{reg.powerFactorParams | safe}})</script>
+			<div id="regTapsChart{{study.studyName}}{{reg.regName}}"></div>
+			<script>new Highcharts.Chart({{reg.tapPosParams | safe}})</script>
+		{%- endfor -%}
 		</div>
 	</div>
 {%- endfor -%}
