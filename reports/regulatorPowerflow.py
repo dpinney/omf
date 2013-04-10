@@ -4,7 +4,6 @@ import os
 import __util__ as util
 import math
 import json
-from copy import copy
 
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','regulatorPowerflow')
