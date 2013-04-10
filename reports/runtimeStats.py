@@ -2,26 +2,33 @@
 
 import os
 import textwrap
+import json
+from jinja2 import Template
 
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','runtimeStats')
 
 def outputHtml(analysisName):
-	# Put the title in:
-	outputBuffer = "<p class='reportTitle'>Model Runtime Statistics</p><div id='runtimeStatsReport' class='content stdouts'>"
 	# Collect pre tag info for each study:
-	for study in os.listdir('analyses/' + analysisName + '/studies/'):
-		with open('analyses/' + analysisName + '/studies/' + study + '/stdout.txt', 'r') as stdout, open('analyses/' + analysisName + '/studies/' + study + '/stderr.txt', 'r') as stderr:
-			stderrText = textwrap.fill(stderr.read().strip(), 62).replace('ERROR','\n\nERROR').replace('WARNING','\n\nWARNING').replace('FATAL','\n\nFATAL')
-			stdoutText = stdout.read().strip()
-			if 'ERROR' in stderrText or 'WARNING' in stderrText:
-				# Error'd out, so show it:
-				cleanPre = study.upper() + '\n\n' + stderrText
-			else:
-				# No errors, so get stdout:
-				cleanPre = study.upper() + '\n\n' + stdoutText
-			outputBuffer += "<pre class='stdoutBlock'>" + cleanPre + "</pre>"
-	return outputBuffer + '</div>\n\n'
+	pathPrefix = 'analyses/' + analysisName + '/studies/'
+	stdList = []
+	for study in os.listdir(pathPrefix):
+		with open(pathPrefix + study + '/cleanOutput.json','r') as outFile:
+			cleanOut = json.load(outFile)
+		stderrText = cleanOut['stderr']
+		stdoutText = cleanOut['stdout']
+		if 'ERROR' in stderrText or 'WARNING' in stderrText:
+			# Error'd out, so show it:
+			cleanPre = study.upper() + '\n\n' + stderrText
+		else:
+			# No errors, so get stdout:
+			cleanPre = study.upper() + '\n\n' + stdoutText
+		stdList.append(cleanPre)
+	# Get the template in.
+	with open('./reports/runtimeStatsOutput.html','r') as tempFile:
+		template = Template(tempFile.read())
+	# Write the results.
+	return template.render(stdList=stdList)
 
 def modifyStudy(analysisName):
 	pass
