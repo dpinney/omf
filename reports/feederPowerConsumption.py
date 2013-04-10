@@ -27,7 +27,7 @@ def outputHtml(analysisName):
 			allData[study]['Losses'] = util.totalEnergy(studyJson['Consumption']['Losses'], resolution)
 			allData[study]['Loads'] = allData[study]['totalEnergy'] - allData[study]['Losses']
 			if 'DG' in studyJson['Consumption']:
-				allData[study]['DG'] = util.totalEnergy(studyJson['Consumption']['DG'], resolution)
+				allData[study]['DG'] = -1.0*util.totalEnergy(studyJson['Consumption']['DG'], resolution)
 				allData[study]['Loads'] = allData[study]['Loads'] + allData[study]['DG']
 	# Add the power time series graph:
 	powGraphParams = util.defaultGraphObject(resolution, util.getStartDate(analysisName))
