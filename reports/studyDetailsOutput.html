@@ -9,7 +9,7 @@
 		<table id="detailsTable" style="padding-top:10px">
 			<tr><th>Study</th><th>Source Feeder</th></tr>
 			{%- for study in studyList -%}
-				<tr><td>{{study.studyName}}</td><td><a href="/analysisFeeder/{{ana.name}}/{{study.sourceFeederName}}">{{study.sourceFeederName}}</a></td></tr>
+				<tr><td>{{study.studyName}}</td><td><a href="/analysisFeeder/{{ana.name}}/{{study.studyName}}">{{study.sourceFeederName}}</a></td></tr>
 			{%- endfor -%}
 		</table></div>
 <!-- 	<div id="comparisonPieChart" style="position:absolute;width:500px;height:150px;left:0px;top:250px"><script>drawPieChart({{pie.chartData}},"comparisonPieChart",{{pie.chartOptions}})</script></div>
