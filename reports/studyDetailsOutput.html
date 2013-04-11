@@ -1,0 +1,16 @@
+<p class="reportTitle">Study Details</p>
+<div id="studyDetails" class="detailsContainer tightContent" style="height:400px;padding:10px;position:relative;">
+	<style type="text/css" scoped>
+		table#detailsTable th {border-bottom:2px solid gray; text-align:left;}
+		table#detailsTable th, td {padding:5px;}
+	</style>
+<!-- 	<div id="mapDiv" style="position:absolute;width:500px;height:400px;top:0px;left:500px"><script>drawMap({{climates}},"mapDiv")</script></div>
+ -->	<div id="detailsDiv" style="position:absolute;width:500px;height:250px;left:0px;top:0px;padding:10px;overflow:auto"><p>Analysis created {{ana.created}}</p><p>Simulated {{ana.simLength}} {{ana.simLengthUnits}} starting on {{ana.simStartDate}}</p>
+		<table id="detailsTable" style="padding-top:10px">
+			<tr><th>Study</th><th>Source Feeder</th></tr>
+			{%- for study in studyList -%}
+				<tr><td>{{study.studyName}}</td><td><a href="/analysisFeeder/{{ana.name}}/{{study.sourceFeederName}}">{{study.sourceFeederName}}</a></td></tr>
+			{%- endfor -%}
+		</table></div>
+<!-- 	<div id="comparisonPieChart" style="position:absolute;width:500px;height:150px;left:0px;top:250px"><script>drawPieChart({{pie.chartData}},"comparisonPieChart",{{pie.chartOptions}})</script></div>
+ --></div>
