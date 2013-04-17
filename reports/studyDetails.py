@@ -39,7 +39,7 @@ def outputHtml(analysisName):
 			out = json.load(outFile)
 			# newStudy['componentNames'] = out['componentNames']
 		studyList.append(newStudy)
-	climates = [[key, climates[key]] for key in climates]
+	climates = [['Climate','Studies']] + [[key.replace('.tmy2',''), climates[key]] for key in climates]
 	# Partition the names into common names and those unique to each feeder:
 	pie = {}
 	# commonNames = reduce(lambda x,y:x.intersection(y), dataTree.values())
@@ -53,10 +53,6 @@ def outputHtml(analysisName):
 	# Get the template in.
 	with open('./reports/studyDetailsOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
-	print ana
-	print studyList
-	print climates
-	print pie
 	# Write the results.
 	return template.render(studyList=studyList, ana=ana, climates=json.dumps(climates), pie=json.dumps(pie))
 
