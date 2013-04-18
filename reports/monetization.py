@@ -12,7 +12,7 @@ with open('./reports/monetizationConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read()
 
 def outputHtml(analysisName):
-	# Get all the data from the run:
+	# Set general run data:
 	pathPrefix = 'analyses/' + analysisName
 	studies = os.listdir(pathPrefix + '/studies/')
 	resolution = util.getResolution(analysisName)
@@ -27,12 +27,14 @@ def outputHtml(analysisName):
 		inputData['opAndMaintCost'] = float(reportOptions['opAndMaintCost'])
 	# Pull in the power data:
 	studyDict = {}
+	timeStamps = []
 	for study in studies:
 		studyDict[study] = {}
 		with open(pathPrefix + '/studies/' + study + '/cleanOutput.json') as outFile:
 			studyJson = json.load(outFile)
+			if studies[0] == study:
+				timeStamps = studyJson['timeStamps']
 			studyDict[study]['Power'] = studyJson['Consumption']['Power']
-	# Monetize stuff, then get per-study totals:
 	# Money power graph:
 	monPowParams = util.defaultGraphObject(resolution, startTime)
 	monPowParams['chart']['height'] = 200
@@ -73,7 +75,7 @@ def outputHtml(analysisName):
 		template = Template(tempFile.read())
 	# Write the results.
 	return template.render(monPowParams=json.dumps(monPowParams), monEnergyParams=json.dumps(monEnergyParams), savingsGrowthParams=json.dumps(savingsGrowthParams),
-							inputData=json.dumps(inputData), studyDict=json.dumps(studyDict))
+							inputData=json.dumps(inputData), studyDict=json.dumps(studyDict), timeStamps = json.dumps(timeStamps))
 
 def modifyStudy(analysisName):
 	pass

@@ -25,7 +25,8 @@
 		<script>
 			studyDict = {{ studyDict | safe }}
 			inputData = {{ inputData | safe }}
-
+			timeStamps = {{ timeStamps | safe }}
+			
 			// Put the input data in.
 			gebi('distrEnergyRate').value = inputData.distrEnergyRate
 			gebi('distrCapacityRate').value = inputData.distrCapacityRate
@@ -60,10 +61,9 @@
 			function recalculateCostBenefit() {
 				energyRate = parseFloat(gebi('distrEnergyRate').value)
 				capRate = parseFloat(gebi('distrCapacityRate').value)
+				// Update everything not depending on baseline diff.
 				for (study in studyDict) {
 					if (undefined != study) {
-						// update the table:
-
 						// Update the capacity graph. TODO: fix values.					
 						capStudyIndex = indexFind(monCapCostGraph['series'], function (x) {return x.name == study})
 						monthlyPower = studyDict[study]['Power'].map(function(x){return round(x*capRate,4)})
@@ -72,6 +72,13 @@
 						enStudyIndex = indexFind(monEnergyCostGraph['series'], function (x) {return x.name == study})
 						monthlyEnergy = studyDict[study]['Power'].map(function(x){return round(x*energyRate,4)})
 						monEnergyCostGraph['series'][enStudyIndex].setData(monthlyEnergy)
+						// update the table:
+
+					}
+				}
+				// Update baseline diff.
+				for (study in studyDict) {
+					if (undefined != study) {
 						// update the costBen graph. TODO: values.
 						costGrowthIndex = indexFind(costGrowth['series'], function (x) {return x.name == study})
 						costSeries = []

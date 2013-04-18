@@ -12,7 +12,10 @@ def outputHtml(analysisName):
 	outputBuffer = '<p class="reportTitle">Full Output Data</p>\n'
 	outputBuffer += '<div id="rawData" class="tightContent">\n'
 	# Collect study variables:
-	data = util.anaDataTree('./analyses/' + analysisName, lambda x:True)
+	data = {}
+	for study in os.listdir('./analyses/' + analysisName + '/studies/'):
+		with open('./analyses/' + analysisName + '/studies/' + study + '/cleanOutput.json','r') as outFile:
+			data[study] = json.load(outFile)
 	outputBuffer += '<script>allOutputData = ' + json.dumps(data) + '</script>\n'
 	outputBuffer += '<p style="padding:10px">Look at JSON variable "allOutputData" in the console.</p>'
 	return outputBuffer + '</div>\n\n'
