@@ -11,8 +11,6 @@ with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','feederPowerConsumption')
 
 def outputHtml(analysisName):
-	# Put the title in:
-	outputBuffer = "<p class='reportTitle'>Power Consumption From Transmission System</p><div id='feederPowerConsumptionReport' class='tightContent'>"
 	# Variables for the whole analysis:
 	pathPrefix = 'analyses/' + analysisName + '/studies/'
 	studies = os.listdir(pathPrefix)

@@ -13,31 +13,75 @@
 	</div>
 	<div id="additionalMetrics" class="studyContainer">
 		<div style="width:1000px;padding:5px 5px 5px 5px">
-				Co-op Energy Rate ($/kWh) <input id="distrEnergyRate" value="{{distrEnergyRate}}"/> Capacity Rate ($/kW) <input id="distrCapacityRate" value="{{distrCapacityRate}}"/><button style="width:100px" onclick="recalculateCostBenefit()">Recalculate</button>
+				Co-op Energy Rate ($/kWh) <input id="distrEnergyRate" value=""/> Capacity Rate ($/kW) <input id="distrCapacityRate" value=""/><button style="width:100px" onclick="recalculateCostBenefit()">Recalculate</button>
 		</div>
 		<table style="width:980px;padding-bottom:10px">
 			<thead>
 				<tr><th>Study</th><th>Baseline</th><th>Capital Cost</th><th>O&amp;M Cost</th><th>Cap. Cost</th><th>En. Cost</th><th>Y1 Save</th><th>Annual Save</th><th>Payback (Y)</th></tr>
 			</thead>
 			<tbody id="additionalMetricsTable">
-				{%- for study in studyList -%}
-				<tr><td class="studyName">{{ study.name }}</td>
-					<td><input type="radio" name="baseline" class="baseline" {% if study.firstStudy %}checked{% endif %}/></td>
-					<td><input class="capCost" value="{{ study.equipAndInstallCost}}"/></td>
-					<td><input class="omCost" value="{{ study.opAndMaintCost}}"/></td>
-					<td class="capacityCost">calcMe</td>
-					<td class="enerCost">calcMe</td>
-					<td class="y1save">calcMe</td>
-					<td class="annualSave">calcMe</td>					
-					<td class="payback">calcMe</td>
-				</tr>
-				{%- endfor -%}
 			</tbody>
 		</table>
 		<script>
-			fullData = {{ fullData }}
+			studyDict = {{ studyDict | safe }}
+			inputData = {{ inputData | safe }}
+
+			// Put the input data in.
+			gebi('distrEnergyRate').value = inputData.distrEnergyRate
+			gebi('distrCapacityRate').value = inputData.distrCapacityRate
+
+			// Init the table.
+			firstTime = true
+			for (study in studyDict) {
+				if (undefined != study) {
+				// Add table row:
+				table = gebi('additionalMetricsTable')
+				newRow = table.insertRow()
+				if (firstTime) {checked = 'checked'; cap = '0'; om = '0'; firstTime = false} else {checked = ''; cap = inputData['equipAndInstallCost']; om = inputData['opAndMaintCost']}
+				newRow.innerHTML = '<td class="studyName">' + study + '</td>' +
+				'<td><input type="radio" name="baseline" class="baseline" ' + checked + '/></td>' +
+				'<td><input class="capCost" value="' + cap + '"/></td>' +
+				'<td><input class="omCost" value="' + om + '"/></td>' +
+				'<td class="capacityCost">calcMe</td>' +
+				'<td class="enerCost">calcMe</td>' +
+				'<td class="y1save">calcMe</td>' +
+				'<td class="annualSave">calcMe</td>' +
+				'<td class="payback">calcMe</td>'
+				}
+			}
+
+			function indexFind(arr, fun) {
+				for (i=0;i<arr.length;i++) {
+					if (fun(arr[i])) {return i}
+				}
+				return -1
+			}
 
 			function recalculateCostBenefit() {
+				energyRate = parseFloat(gebi('distrEnergyRate').value)
+				capRate = parseFloat(gebi('distrCapacityRate').value)
+				for (study in studyDict) {
+					if (undefined != study) {
+						// update the table:
+
+						// Update the capacity graph. TODO: fix values.					
+						capStudyIndex = indexFind(monCapCostGraph['series'], function (x) {return x.name == study})
+						monthlyPower = studyDict[study]['Power'].map(function(x){return round(x*capRate,4)})
+						monCapCostGraph['series'][capStudyIndex].setData(monthlyPower)
+						// Update the energy graph. TODO: fix values.
+						enStudyIndex = indexFind(monEnergyCostGraph['series'], function (x) {return x.name == study})
+						monthlyEnergy = studyDict[study]['Power'].map(function(x){return round(x*energyRate,4)})
+						monEnergyCostGraph['series'][enStudyIndex].setData(monthlyEnergy)
+						// update the costBen graph. TODO: values.
+						costGrowthIndex = indexFind(costGrowth['series'], function (x) {return x.name == study})
+						costSeries = []
+						for (i=0;i<30;i++) {costSeries.push(randomInt(1,10))}
+						costGrowth['series'][costGrowthIndex].setData(costSeries)
+					}
+				}
+			}
+
+			function OLDRecalculateCostBenefit() {
 				baseCost = 0
 				energyRate = parseFloat(gebi('distrEnergyRate').value)
 				capRate = parseFloat(gebi('distrCapacityRate').value)
@@ -48,9 +92,9 @@
 					daRow = tableRows[rowNum]
 					studyName = daRow.querySelector('.studyName').innerHTML
 					isBaseline = daRow.querySelector('.baseline').checked
-					capacityCost = round(capRate * fullData[studyName]['capTotal'],4)
+					capacityCost = round(capRate * studyDict[studyName]['capTotal'],4)
 					daRow.querySelector('.capacityCost').innerHTML = capacityCost
-					enerCost = round(energyRate * fullData[studyName]['energyTotal'],4)
+					enerCost = round(energyRate * studyDict[studyName]['energyTotal'],4)
 					daRow.querySelector('.enerCost').innerHTML = enerCost
 					if (isBaseline) {
 						daRow.querySelector('.y1save').innerHTML = '0'
@@ -59,7 +103,7 @@
 						capCost = parseFloat(daRow.querySelector('.capCost').value)
 						omCost = parseFloat(daRow.querySelector('.omCost').value)
 						baseCost = capCost + omCost + enerCost + capacityCost
-						annualBaseCost = (omCost + enerCost + capacityCost)/fullData[studyName]['yearPercentage']
+						annualBaseCost = (omCost + enerCost + capacityCost)/studyDict[studyName]['yearPercentage']
 						costSeries = []
 						for (i=0;i<30;i++) {costSeries.push(0)}
 						for (i=0;i<costGrowth.series.length;i++) {
@@ -80,8 +124,8 @@
 						thisRowCost = capacityCost + enerCost + capCost + omCost
 						y1save = baseCost - thisRowCost
 						daRow.querySelector('.y1save').innerHTML = y1save
-						initialCost = capCost + (omCost + enerCost + capacityCost)/fullData[studyName]['yearPercentage']
-						annualCost = (omCost + enerCost + capacityCost)/fullData[studyName]['yearPercentage']
+						initialCost = capCost + (omCost + enerCost + capacityCost)/studyDict[studyName]['yearPercentage']
+						annualCost = (omCost + enerCost + capacityCost)/studyDict[studyName]['yearPercentage']
 						annualSave = (annualBaseCost-annualCost)
 						daRow.querySelector('.annualSave').innerHTML = round(annualSave,4)
 						daRow.querySelector('.payback').innerHTML = round(Math.abs(y1save/annualSave),2)
@@ -93,16 +137,6 @@
 							}
 						}
 					}
-				}
-				// Updating the capacity cost graph:
-				for (i=0;i<monCapCostGraph.series.length;i++) {
-					seriesName = monCapCostGraph['series'][i]['name']
-					monCapCostGraph['series'][i].setData(fullData[seriesName]['monthlyPower'].map(function(x){return round(x*capRate,4)}))
-				}
-				// Updating the energy cost graph:
-				for (i=0;i<monEnergyCostGraph.series.length;i++) {
-					seriesName = monEnergyCostGraph['series'][i]['name']
-					monEnergyCostGraph['series'][i].setData(fullData[seriesName]['monthlyEnergy'].map(function(x){return round(x*energyRate,4)}))
 				}
 			}
 			recalculateCostBenefit()
