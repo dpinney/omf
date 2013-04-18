@@ -13,5 +13,5 @@
 				<tr><td>{{study.studyName}}</td><td><a href="/analysisFeeder/{{ana.name}}/{{study.studyName}}">{{study.sourceFeederName}}</a></td></tr>
 			{%- endfor -%}
 		</table></div>
-<!-- 	<div id="comparisonPieChart" style="position:absolute;width:500px;height:150px;left:0px;top:250px"><script>drawPieChart({{pie.chartData}},"comparisonPieChart",{{pie.chartOptions}})</script></div>
- --></div>
+	<div id="comparisonPieChart" style="position:absolute;width:500px;height:150px;left:0px;top:250px"><script>drawPieChart({{pieChartData}},"comparisonPieChart",{title:"Grid Components", colors:["gainsboro","silver","gray"], titleTextStyle:{fontSize:14},chartArea:{left:10}})</script></div>
+</div>
