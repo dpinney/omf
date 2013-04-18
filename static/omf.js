@@ -149,3 +149,61 @@ function randomInt(min,max) {
 	return Math.floor(Math.random()*(max - min + 1) + min)
 }
 
+function zip(arrays) {
+	// Take in two arrays as [A,B], return [[a1,b1],[a2,b2,],...]
+	return arrays[0].map(function(_,i){
+		return arrays.map(function(array){return array[i]})
+	})
+}
+
+function partition(inL, eqRel) {
+	// Group inL as compared by eqRel. Make sure the eqRel is an equivalence relation, or your brain will hurt.
+	if (inL.length == 0) {return inL}
+	if (inL.length == 1) {return [inL]}
+	accum = []
+	work = [inL[0]]
+	for (i=1;i<inL.length;i++) {
+		if (eqRel(inL[i], work[0])) {
+			work.push(inL[i])
+		}
+		else {
+			accum.push(work)
+			work = [inL[i]]
+		}
+	}
+	accum.push(work)
+	return accum
+}
+
+function flatten1(matrix) {
+	// Take [A1,A2,...An] and return an in-order list of the items in each Ai.
+	accum = []
+	for (i=0;i<matrix.length;i++) {
+		if (typeof matrix[i] == 'object') {
+			for (j=0;j<matrix[i].length;j++) {
+				accum.push(matrix[i][j])
+			}
+		} else {
+			accum.push(matrix[i])
+		}
+	}
+	return accum
+}
+
+function arrMax(arr) {
+	// Get max of an array.
+	return Math.max.apply(null,arr)
+}
+
+function arrSum(arr) {
+	// Sum an array.
+	return arr.reduce(function(x,y){return x+y})
+}
+
+function indexFind(arr, fun) {
+	// Given an array of objects, return the first one where fun(arr[i]) is true.
+	for (i=0;i<arr.length;i++) {
+		if (fun(arr[i])) {return i}
+	}
+	return -1
+}

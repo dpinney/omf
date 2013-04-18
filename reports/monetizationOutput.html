@@ -26,7 +26,7 @@
 			studyDict = {{ studyDict | safe }}
 			inputData = {{ inputData | safe }}
 			timeStamps = {{ timeStamps | safe }}
-			
+
 			// Put the input data in.
 			gebi('distrEnergyRate').value = inputData.distrEnergyRate
 			gebi('distrCapacityRate').value = inputData.distrCapacityRate
@@ -38,24 +38,28 @@
 				// Add table row:
 				table = gebi('additionalMetricsTable')
 				newRow = table.insertRow()
+				newRow.id = 'row' + study
 				if (firstTime) {checked = 'checked'; cap = '0'; om = '0'; firstTime = false} else {checked = ''; cap = inputData['equipAndInstallCost']; om = inputData['opAndMaintCost']}
 				newRow.innerHTML = '<td class="studyName">' + study + '</td>' +
 				'<td><input type="radio" name="baseline" class="baseline" ' + checked + '/></td>' +
 				'<td><input class="capCost" value="' + cap + '"/></td>' +
 				'<td><input class="omCost" value="' + om + '"/></td>' +
 				'<td class="capacityCost">calcMe</td>' +
-				'<td class="enerCost">calcMe</td>' +
+				'<td class="energyCost">calcMe</td>' +
 				'<td class="y1save">calcMe</td>' +
 				'<td class="annualSave">calcMe</td>' +
 				'<td class="payback">calcMe</td>'
 				}
 			}
 
-			function indexFind(arr, fun) {
-				for (i=0;i<arr.length;i++) {
-					if (fun(arr[i])) {return i}
-				}
-				return -1
+			function monthAgg(stamps, power, func) {
+				// Aggregate a month's worth of power.
+				combo = zip([stamps,power])
+				grouped = partition(combo, function(x,y){return x[0].substring(5,7)==y[0].substring(5,7)})
+				function dropStamp(pairArr) {return pairArr.map(function(x){return x[1]})}
+				noStamps = grouped.map(dropStamp)
+				applied = noStamps.map(func)
+				return flatten1(applied)
 			}
 
 			function recalculateCostBenefit() {
@@ -64,85 +68,37 @@
 				// Update everything not depending on baseline diff.
 				for (study in studyDict) {
 					if (undefined != study) {
-						// Update the capacity graph. TODO: fix values.					
+						// Update the capacity graph.
 						capStudyIndex = indexFind(monCapCostGraph['series'], function (x) {return x.name == study})
-						monthlyPower = studyDict[study]['Power'].map(function(x){return round(x*capRate,4)})
+						function maxAvg(arr) {max=arrMax(arr); len=arr.length; return arr.map(function(x){return max/len})}
+						powerAgged = monthAgg(timeStamps, studyDict[study]['Power'], maxAvg)
+						monthlyPower = powerAgged.map(function(x){return round(x*capRate/1000,4)})
 						monCapCostGraph['series'][capStudyIndex].setData(monthlyPower)
-						// Update the energy graph. TODO: fix values.
+						// Update the energy graph.
 						enStudyIndex = indexFind(monEnergyCostGraph['series'], function (x) {return x.name == study})
-						monthlyEnergy = studyDict[study]['Power'].map(function(x){return round(x*energyRate,4)})
+						function avg(arr) {total=arrSum(arr); len=arr.length; return arr.map(function(x){return total/len})}
+						energyAgged = monthAgg(timeStamps, studyDict[study]['Power'], avg)
+						monthlyEnergy = energyAgged.map(function(x){return round(x*energyRate/1000,4)})
 						monEnergyCostGraph['series'][enStudyIndex].setData(monthlyEnergy)
 						// update the table:
-
+						thisRow = gebi('row' + study)
+						thisRow.querySelector('.capacityCost').innerHTML = round(arrSum(monthlyPower),4)
+						thisRow.querySelector('.energyCost').innerHTML = round(arrSum(monthlyEnergy),4)
 					}
 				}
-				// Update baseline diff.
+				// Update things that depend on the baseline diff.
 				for (study in studyDict) {
 					if (undefined != study) {
+						// Update the table:
+						thisRow = gebi('row' + study)
+						thisRow.querySelector('.y1save').innerHTML = 999
+						thisRow.querySelector('.annualSave').innerHTML = 999
+						thisRow.querySelector('.payback').innerHTML = 999
 						// update the costBen graph. TODO: values.
 						costGrowthIndex = indexFind(costGrowth['series'], function (x) {return x.name == study})
 						costSeries = []
 						for (i=0;i<30;i++) {costSeries.push(randomInt(1,10))}
 						costGrowth['series'][costGrowthIndex].setData(costSeries)
-					}
-				}
-			}
-
-			function OLDRecalculateCostBenefit() {
-				baseCost = 0
-				energyRate = parseFloat(gebi('distrEnergyRate').value)
-				capRate = parseFloat(gebi('distrCapacityRate').value)
-				tableRows = gebi('additionalMetricsTable').childNodes
-				totalRows = tableRows.length
-				// Table update baseline:
-				for (rowNum=0;rowNum<totalRows;rowNum++) {
-					daRow = tableRows[rowNum]
-					studyName = daRow.querySelector('.studyName').innerHTML
-					isBaseline = daRow.querySelector('.baseline').checked
-					capacityCost = round(capRate * studyDict[studyName]['capTotal'],4)
-					daRow.querySelector('.capacityCost').innerHTML = capacityCost
-					enerCost = round(energyRate * studyDict[studyName]['energyTotal'],4)
-					daRow.querySelector('.enerCost').innerHTML = enerCost
-					if (isBaseline) {
-						daRow.querySelector('.y1save').innerHTML = '0'
-						daRow.querySelector('.annualSave').innerHTML = '0'
-						daRow.querySelector('.payback').innerHTML = '0'
-						capCost = parseFloat(daRow.querySelector('.capCost').value)
-						omCost = parseFloat(daRow.querySelector('.omCost').value)
-						baseCost = capCost + omCost + enerCost + capacityCost
-						annualBaseCost = (omCost + enerCost + capacityCost)/studyDict[studyName]['yearPercentage']
-						costSeries = []
-						for (i=0;i<30;i++) {costSeries.push(0)}
-						for (i=0;i<costGrowth.series.length;i++) {
-							if (costGrowth['series'][i].name==studyName) {costGrowth['series'][i].setData(costSeries)}
-						}
-					}
-				}
-				// Table update things that aren't the baseline:
-				for (rowNum=0;rowNum<totalRows;rowNum++) {
-					daRow = tableRows[rowNum]
-					studyName = daRow.querySelector('.studyName').innerHTML
-					isBaseline = daRow.querySelector('.baseline').checked
-					if (!isBaseline) {
-						capacityCost = parseFloat(daRow.querySelector('.capacityCost').innerHTML)
-						enerCost = parseFloat(daRow.querySelector('.enerCost').innerHTML)
-						capCost = parseFloat(daRow.querySelector('.capCost').value)
-						omCost = parseFloat(daRow.querySelector('.omCost').value)
-						thisRowCost = capacityCost + enerCost + capCost + omCost
-						y1save = baseCost - thisRowCost
-						daRow.querySelector('.y1save').innerHTML = y1save
-						initialCost = capCost + (omCost + enerCost + capacityCost)/studyDict[studyName]['yearPercentage']
-						annualCost = (omCost + enerCost + capacityCost)/studyDict[studyName]['yearPercentage']
-						annualSave = (annualBaseCost-annualCost)
-						daRow.querySelector('.annualSave').innerHTML = round(annualSave,4)
-						daRow.querySelector('.payback').innerHTML = round(Math.abs(y1save/annualSave),2)
-						costSeries = []
-						for (i=0;i<30;i++) {costSeries.push(round(annualBaseCost-initialCost+i*(annualBaseCost-annualCost),4))}
-						for (i=0;i<costGrowth.series.length;i++) {
-							if (costGrowth['series'][i].name==studyName) {
-								costGrowth['series'][i].setData(costSeries)
-							}
-						}
 					}
 				}
 			}
