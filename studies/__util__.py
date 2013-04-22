@@ -98,3 +98,14 @@ def threePhasePowFac(ra,rb,rc,ia,ib,ic):
 	def pfRow(row):
 		return math.cos(math.atan((row[0]+row[1]+row[2])/(row[3]+row[4]+row[5])))
 	return map(pfRow, rows)
+
+def roundSig(x, sig=3):
+	def roundPosSig(y):
+		return round(y, sig-int(math.floor(math.log10(y)))-1)
+	if x == 0: return 0
+	elif x < 0: return -1*roundPosSig(-1*x)
+	else: return roundPosSig(x)
+
+def roundSeries(ser):
+	return map(lambda x:roundSig(x,4), ser)
+
