@@ -86,18 +86,29 @@
 						thisRow.querySelector('.energyCost').innerHTML = round(arrSum(monthlyEnergy),4)
 					}
 				}
+				// Calculate baseline.
+				baseRow = gebi('additionalMetricsTable').querySelector('[checked]').parentElement.parentElement
+				baseAnnual = parseFloat(baseRow.querySelector('.omCost').value) + parseFloat(baseRow.querySelector('.capacityCost').innerHTML)/inputData['yearPercentage'] + parseFloat(baseRow.querySelector('.energyCost').innerHTML)/inputData['yearPercentage']
+				baseCost = baseAnnual + parseFloat(baseRow.querySelector('.capCost').value)
+				baseRow.querySelector('.y1save').innerHTML = '0'
+				baseRow.querySelector('.annualSave').innerHTML = '0'
+				baseRow.querySelector('.payback').innerHTML = '0'
 				// Update things that depend on the baseline diff.
 				for (study in studyDict) {
 					if (undefined != study) {
 						// Update the table:
 						thisRow = gebi('row' + study)
-						thisRow.querySelector('.y1save').innerHTML = 999
-						thisRow.querySelector('.annualSave').innerHTML = 999
-						thisRow.querySelector('.payback').innerHTML = 999
+						annualCost = parseFloat(thisRow.querySelector('.omCost').value) + parseFloat(thisRow.querySelector('.capacityCost').innerHTML)/inputData['yearPercentage'] + parseFloat(thisRow.querySelector('.energyCost').innerHTML)/inputData['yearPercentage']
+						y1cost = annualCost + parseFloat(thisRow.querySelector('.capCost').value)
+						y1save = baseCost - y1cost
+						thisRow.querySelector('.y1save').innerHTML = round(y1save,4)
+						annualSave = baseAnnual - annualCost
+						thisRow.querySelector('.annualSave').innerHTML = round(annualSave,4)
+						thisRow.querySelector('.payback').innerHTML = round(Math.abs(y1save/annualSave),2)
 						// update the costBen graph. TODO: values.
 						costGrowthIndex = indexFind(costGrowth['series'], function (x) {return x.name == study})
 						costSeries = []
-						for (i=0;i<30;i++) {costSeries.push(randomInt(1,10))}
+						for (i=0;i<30;i++) {costSeries.push(round(baseCost-y1cost+i*(baseAnnual-annualCost),4))}
 						costGrowth['series'][costGrowthIndex].setData(costSeries)
 					}
 				}

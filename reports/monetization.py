@@ -35,6 +35,9 @@ def outputHtml(analysisName):
 			if studies[0] == study:
 				timeStamps = studyJson['timeStamps']
 			studyDict[study]['Power'] = studyJson['Consumption']['Power']
+	# What percentage of a year did we simulate?
+	intervalMap = {'minutes':60, 'hours':3600, 'days':86400}
+	inputData['yearPercentage'] = intervalMap[resolution]*len(timeStamps)/(365*24*60*60.0)
 	# Money power graph:
 	monPowParams = util.defaultGraphObject(resolution, startTime)
 	monPowParams['chart']['height'] = 200
@@ -62,14 +65,12 @@ def outputHtml(analysisName):
 	savingsGrowthParams['chart']['renderTo'] = 'costGrowthContainer'
 	savingsGrowthParams['chart']['type'] = 'line'
 	savingsGrowthParams['yAxis']['title']['text'] = 'Cumulative Savings ($)'
-	savingsGrowthParams['xAxis']['title'] = {'text':'Years After Install'}
-	savingsGrowthParams['xAxis']['type'] = 'linear'
-	savingsGrowthParams['xAxis']['plotLines'] = []
-	del savingsGrowthParams['xAxis']['maxZoom']
+	savingsGrowthParams['xAxis'] = 	{'type':'linear', 'tickColor':'gray', 'lineColor':'gray', 'title':{'text':'Years After Install'}}
+	savingsGrowthParams['plotOptions']['series'] = {'shadow':False}
 	for study in studyDict:
 		color = util.rainbow(studyDict,study,['dimgray','darkgray','gainsboro','silver'])
 		savingsGrowthParams['series'].append({'name':study,'data':[],'color':color})
-		# savingsGrowthParams['xAxis']['plotLines'] = [{'color':'silver','width':1,'value':interval*len(studyDict[study]['totAppPower'])/(365*24*60*60.0)}]
+		savingsGrowthParams['xAxis']['plotLines'] = [{'color':'silver','width':1,'value':inputData['yearPercentage']}]
 	# Get the template in.
 	with open('./reports/monetizationOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
