@@ -9,7 +9,7 @@
 	</tr>
 	<tr>
 		<td>Feeder</td>
-		<td><select class='feederName'>{% for feeder in feeders %}<option value='{{ feeder }}'>{{ feeder }}</option>{% endfor %}</select><button onclick='window.location=\"../feeder/\"+this.parentNode.querySelector(\".feederName\").value'>Edit Selected Feeder</button></td>
+		<td><select class='feederName'>{% for feeder in feeders %}<option value='{{ feeder }}'>{{ feeder }}</option>{% endfor %}</select><button onclick="window.location='../feeder/'+this.parentNode.querySelector('.feederName').value">Edit Selected Feeder</button></td>
 	</tr>
 	<tr>
 		<td>Location</td>
