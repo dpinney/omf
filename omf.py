@@ -107,7 +107,6 @@ def delete():
 @app.route('/saveAnalysis/', methods=['POST'])
 def saveAnalysis():
 	postData = json.loads(flask.request.form.to_dict()['json'])
-	#DEBUG: print postData
 	analysis.create(postData['analysisName'], int(postData['simLength']), postData['simLengthUnits'], postData['simStartDate'], postData['studies'], postData['reports'])
 	return flask.redirect(flask.url_for('root'))
 
