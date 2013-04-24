@@ -68,19 +68,28 @@ def run(analysisName, studyName):
 	else:
 		startDateTime = md['simStartDate'] + ' 00:00:00 PDT'
 
-	def aggData(key):
+	def aggData(key, aggFun):
 		u = md['simStartDate']
 		dt = datetime(int(u[0:4]),int(u[5:7]),int(u[8:10]))
 		v = dt.isocalendar()
 		initHour = int(8760*(v[1]+v[2]/7)/52.0)
 		fullData = ssc.ssc_data_get_array(dat, key)
+		if md['simLengthUnits'] == 'days':
+			multiplier = 24
+		else:
+			multiplier = 1
+		hourData = [fullData[(initHour+i)%8760] for i in xrange(md['simLength']*multiplier)]
 		if md['simLengthUnits'] == 'minutes':
 			pass
 		elif md['simLengthUnits'] == 'hours':
-			return [fullData[(initHour+i)%8760] for i in xrange(md['simLength'])]
+			return hourData
 		elif md['simLengthUnits'] == 'days':
-			pass
+			split = [hourData[x:x+24] for x in xrange(md['simLength'])]
+			return map(aggFun, split)
 
+	def avg(x):
+		return sum(x)/len(x)
+	
 	# Extract data.
 	# Timestamps.
 	outData = {}
@@ -93,17 +102,16 @@ def run(analysisName, studyName):
 	outData['elev'] = ssc.ssc_data_get_number(dat, 'elev')
 	# Weather
 	outData['climate'] = {}
-	outData['climate']['irrad'] = aggData('dn')
-	outData['climate']['diffIrrad'] = aggData('df')
-	outData['climate']['temp'] = aggData('tamb')
-	outData['climate']['cellTemp'] = aggData('tcell')
-	outData['climate']['wind'] = aggData('wspd')
+	outData['climate']['irrad'] = aggData('dn', avg)
+	outData['climate']['diffIrrad'] = aggData('df', avg)
+	outData['climate']['temp'] = aggData('tamb', avg)
+	outData['climate']['cellTemp'] = aggData('tcell', avg)
+	outData['climate']['wind'] = aggData('wspd', avg)
 	# Power generation.
 	outData['Consumption'] = {}
-	outData['Consumption']['Power'] = [-1*x for x in aggData('ac')]
-	outData['Consumption']['Losses'] = [0 for x in aggData('ac')]
-	outData['Consumption']['DG'] = aggData('ac')
-	# outData['acOut'] = ssc.ssc_data_get_array(dat, 'ac')
+	outData['Consumption']['Power'] = [-1*x for x in aggData('ac', avg)]
+	outData['Consumption']['Losses'] = [0 for x in aggData('ac', avg)]
+	outData['Consumption']['DG'] = aggData('ac', avg)
 	# Stdout/stderr.
 	outData['stdout'] = 'Success'
 	outData['stderr'] = ''
