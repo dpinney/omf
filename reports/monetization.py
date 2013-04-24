@@ -21,10 +21,13 @@ def outputHtml(analysisName):
 	inputData = {}
 	with open (pathPrefix + '/reports/monetization.json') as reportFile:
 		reportOptions = json.load(reportFile)
-		inputData['distrEnergyRate'] = float(reportOptions['distrEnergyRate'])
-		inputData['distrCapacityRate'] = float(reportOptions['distrCapacityRate'])
-		inputData['equipAndInstallCost'] = float(reportOptions['equipAndInstallCost'])
-		inputData['opAndMaintCost'] = float(reportOptions['opAndMaintCost'])
+		def safeFloat(x):
+			if x=='': return 0
+			else: return float(x)
+		inputData['distrEnergyRate'] = safeFloat(reportOptions['distrEnergyRate'])
+		inputData['distrCapacityRate'] = safeFloat(reportOptions['distrCapacityRate'])
+		inputData['equipAndInstallCost'] = safeFloat(reportOptions['equipAndInstallCost'])
+		inputData['opAndMaintCost'] = safeFloat(reportOptions['opAndMaintCost'])
 	# Pull in the power data:
 	studyDict = {}
 	timeStamps = []
