@@ -14,11 +14,11 @@ def outputHtml(analysisName):
 	resolution = util.getResolution(analysisName)
 	studyList = []
 	for study in os.listdir(pathPrefix + '/studies/'):
-		newStudy = {'studyName':study}
 		with open(pathPrefix + '/studies/' + study + '/cleanOutput.json','r') as outFile:
 			cleanOut = json.load(outFile)
 		# Set up the graph.
 		if 'allMeterVoltages' in cleanOut:
+			newStudy = {'studyName':study}
 			graphParameters = util.defaultGraphObject(resolution, util.getStartDate(analysisName))
 			graphParameters['chart']['type'] = 'line'
 			graphParameters['chart']['renderTo'] = 'voltChartDiv' + study
@@ -26,7 +26,7 @@ def outputHtml(analysisName):
 			graphParameters['series'].append({'name':'Mean','data':cleanOut['allMeterVoltages']['Mean'],'marker':{'enabled':False},'color':'blue'})
 			graphParameters['series'].append({'name':'Max','data':cleanOut['allMeterVoltages']['Max'],'marker':{'enabled':False},'color':'gray'})
 			newStudy['graphParams'] = json.dumps(graphParameters)
-		studyList.append(newStudy)
+			studyList.append(newStudy)
 	# Get the template in.
 	with open('./reports/voltageBandOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
