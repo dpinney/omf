@@ -18,9 +18,11 @@ def run(analysisName, studyName):
 		print "Platform not supported ", sys.platform
 	# Path to glm etc.:
 	studyPath = 'analyses/' + analysisName + '/studies/' + studyName
+	
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 	with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr:
 		# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
+		# TODO: actually hook up platform-specific binary instead of the site package.
 		proc = subprocess.Popen(['gridlabd','-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr)
 		# Put PID.
 		with open(studyPath + '/PID.txt','w') as pidFile:
