@@ -7,6 +7,7 @@ import subprocess
 import json
 import __util__ as util
 import analysis
+import solvers
 
 with open('./studies/gridlabd.html','r') as configFile: configHtmlTemplate = configFile.read()
 
@@ -46,28 +47,10 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 
 # WARNING! Run does not care about performance and will happily run for a long, long time. Spawn a thread or process for this nonsense.
 def run(analysisName, studyName):
+	# Execute the solver.
 	studyPath = 'analyses/' + analysisName + '/studies/' + studyName
-	# RUN GRIDLABD (EXPENSIVE!)
-	with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr:
-		# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-		proc = subprocess.Popen(['gridlabd','-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr)
-		# Put PID.
-		with open(studyPath + '/PID.txt','w') as pidFile:
-			pidFile.write(str(proc.pid))
-		proc.wait()
-		# Remove PID to indicate completion.
-		try: 
-			os.remove(studyPath + '/PID.txt')
-		except:
-			# Terminated, return false so analysis knows to not run any more studies.
-			return False
-	# Study run succesfully, do post-proc.
-	generateReferenceOutput(analysisName, studyPath)
-	# Return true to indicate success.
-	return True
-
-def generateReferenceOutput(analysisName, studyPath):
-	# Setting up:
+	solvers.gridlabd.run(analysisName, studyName)
+	# Process the output.
 	rawOut = util.anaDataTree(studyPath, lambda x:True) # Lambda x:true means get every csv.
 	cleanOut = {}
 	# Std Err and Std Out
