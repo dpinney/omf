@@ -1,0 +1,44 @@
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+Core profiler results
+=====================
+
+Total objects               2779 objects
+Parallelism                    1 thread
+Total time                 184.0 seconds
+  Core time                 10.1 seconds (5.5%)
+  Model time               173.9 seconds/thread (94.5%)
+Simulation time               10 days
+Simulation speed             3.6k object.hours/second
+Syncs completed             6146 passes
+Time steps completed        1536 timesteps
+Convergence efficiency      4.00 passes/timestep
+Memory lock contention       0.0%
+Average timestep             563 seconds/timestep
+Simulation rate             4696 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+node             154.518     88.8%    319.3
+house              5.727      3.3%     17.2
+overhead_line      2.748      1.6%      8.2
+triplex_meter      2.062      1.2%     10.7
+recorder           2.045      1.2%     11.6
+collector          1.347      0.8%    269.4
+transformer        1.135      0.7%      5.9
+waterheater        1.066      0.6%      5.0
+inverter           0.805      0.5%      4.6
+underground_line   0.765      0.4%      8.2
+ZIPload            0.671      0.4%      2.0
+solar              0.448      0.3%      2.6
+fuse               0.411      0.2%      9.3
+switch             0.120      0.1%     10.0
+capacitor          0.035      0.0%     35.0
+climate            0.021      0.0%     21.0
+transformer_conf   0.001      0.0%      1.0
+================ ======== ======== ========
+Total            173.925    100.0%     62.6
+

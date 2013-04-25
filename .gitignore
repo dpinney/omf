@@ -3,3 +3,5 @@ log.txt
 *.sublime-project
 *.sublime-workspace
 analyses/*
+# But include a few example analyses:
+!analyses/z*
