@@ -22,7 +22,7 @@ def run(analysisName, studyName):
 		# Implement me, maybe.
 		pass
 	elif sys.platform == 'linux2':
-		binary = solverRoot + "/linx64/gridlabd"
+		binary = solverRoot + "/linx64/gridlabd.bin"
 		enviro['GRIDLABD'] = solverRoot + "/linx64"
 		enviro['GLPATH'] = solverRoot + "/linx64"
 	else:
@@ -34,7 +34,6 @@ def run(analysisName, studyName):
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 	with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr:
 		# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-		# TODO: actually hook up platform-specific binary instead of the site package.
 		proc = subprocess.Popen([binary,'-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr, env=enviro)
 		# Put PID.
 		with open(studyPath + '/PID.txt','w') as pidFile:
