@@ -5,15 +5,15 @@ Core profiler results
 Total objects                 45 objects
 Parallelism                    1 thread
 Total time                   1.0 seconds
-  Core time                  0.9 seconds (91.1%)
-  Model time                 0.1 seconds/thread (8.9%)
+  Core time                  0.9 seconds (86.2%)
+  Model time                 0.1 seconds/thread (13.8%)
 Simulation time                4 days
 Simulation speed             4.3k object.hours/second
-Syncs completed              258 passes
-Time steps completed          97 timesteps
-Convergence efficiency      2.66 passes/timestep
+Syncs completed             3197 passes
+Time steps completed        1554 timesteps
+Convergence efficiency      2.06 passes/timestep
 Memory lock contention       0.0%
-Average timestep            3563 seconds/timestep
+Average timestep             222 seconds/timestep
 Simulation rate           345600 x realtime
 
 
@@ -22,17 +22,19 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-player             0.027     30.3%     27.0
-recorder           0.026     29.2%      6.5
-collector          0.021     23.6%      5.3
-triplex_meter      0.005      5.6%      1.7
-house              0.002      2.2%      1.0
-ZIPload            0.002      2.2%      0.3
-transformer        0.002      2.2%      1.0
-inverter           0.001      1.1%      0.5
-node               0.001      1.1%      0.5
-regulator          0.001      1.1%      1.0
-stubauction        0.001      1.1%      1.0
+collector          0.035     25.4%      8.8
+recorder           0.032     23.2%      8.0
+player             0.020     14.5%     20.0
+house              0.012      8.7%      6.0
+triplex_meter      0.011      8.0%      3.7
+regulator          0.007      5.1%      7.0
+ZIPload            0.005      3.6%      0.6
+triplex_node       0.005      3.6%      5.0
+transformer        0.004      2.9%      2.0
+node               0.002      1.4%      1.0
+triplex_line       0.002      1.4%      1.0
+stubauction        0.002      1.4%      2.0
+inverter           0.001      0.7%      0.5
 ================ ======== ======== ========
-Total              0.089    100.0%      2.0
+Total              0.138    100.0%      3.1
 

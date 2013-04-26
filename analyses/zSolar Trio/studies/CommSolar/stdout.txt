@@ -1,20 +1,20 @@
-
+
 Core profiler results
 =====================
 
 Total objects                 42 objects
 Parallelism                    1 thread
-Total time                   1.0 seconds
-  Core time                  0.9 seconds (92.5%)
-  Model time                 0.1 seconds/thread (7.5%)
+Total time                   2.0 seconds
+  Core time                  1.9 seconds (93.0%)
+  Model time                 0.1 seconds/thread (7.1%)
 Simulation time                4 days
-Simulation speed             4.0k object.hours/second
-Syncs completed              220 passes
-Time steps completed          97 timesteps
-Convergence efficiency      2.27 passes/timestep
+Simulation speed             2.0k object.hours/second
+Syncs completed             2801 passes
+Time steps completed        1554 timesteps
+Convergence efficiency      1.80 passes/timestep
 Memory lock contention       0.0%
-Average timestep            3563 seconds/timestep
-Simulation rate           345600 x realtime
+Average timestep             222 seconds/timestep
+Simulation rate           172800 x realtime
 
 
 Model profiler results
@@ -22,15 +22,20 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-collector          0.026     34.7%      6.5
-player             0.025     33.3%     25.0
-recorder           0.017     22.7%      5.7
-triplex_meter      0.002      2.7%      0.7
-inverter           0.001      1.3%      1.0
-house              0.001      1.3%      0.5
-ZIPload            0.001      1.3%      0.1
-transformer        0.001      1.3%      0.5
-regulator          0.001      1.3%      1.0
+player             0.046     32.6%     46.0
+recorder           0.026     18.4%      8.7
+collector          0.026     18.4%      6.5
+triplex_meter      0.012      8.5%      4.0
+triplex_line       0.007      5.0%      3.5
+house              0.005      3.5%      2.5
+ZIPload            0.004      2.8%      0.5
+waterheater        0.003      2.1%      1.5
+node               0.003      2.1%      1.5
+transformer        0.003      2.1%      1.5
+climate            0.002      1.4%      2.0
+regulator          0.002      1.4%      2.0
+solar              0.001      0.7%      1.0
+triplex_node       0.001      0.7%      1.0
 ================ ======== ======== ========
-Total              0.075    100.0%      1.8
+Total              0.141    100.0%      3.4
 

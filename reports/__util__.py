@@ -28,6 +28,7 @@ def defaultGraphObject(resolution, startTimeStamp):
 		'credits':{'enabled':False},
 		'xAxis':{'type':'datetime','maxZoom':maxZoom, 'tickColor':'gray','lineColor':'gray'},
 		'plotOptions':{'line':{'marker':{'enabled':False}}, 'series':{'shadow':False, 'pointInterval':pointInterval, 'pointStart':pointStart}},
+		'tooltip':{'valueDecimals':1},
 		'series':[]
 	}
 	return graphParameters

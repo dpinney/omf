@@ -49,6 +49,7 @@ def outputHtml(analysisName):
 		'credits':{'enabled':False},
 		'xAxis':{'categories':[study for study in allData],'tickColor':'gray','lineColor':'gray'},
 		'plotOptions':{'spline':{'shadow':False, 'lineWidth':0,'marker':{'radius':8}}, 'column':{'stacking':'normal','shadow':False}},
+		'tooltip':{'valueDecimals':1},
 		'series':[	{'type':'column','name':'Losses','data':[allData[study]['Losses'] for study in allData], 'color':'orangered'},
 					{'type':'column','name':'Loads','data':[allData[study]['Loads'] for study in allData], 'color':'darkorange'},
 					{'type':'spline','name':'DG','data':[allData[study]['DG'] for study in allData if 'DG' in allData[study]], 'color':'seagreen'}

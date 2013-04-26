@@ -5,15 +5,15 @@ Core profiler results
 Total objects                 39 objects
 Parallelism                    1 thread
 Total time                   1.0 seconds
-  Core time                  0.9 seconds (93.2%)
-  Model time                 0.1 seconds/thread (6.8%)
+  Core time                  0.9 seconds (88.4%)
+  Model time                 0.1 seconds/thread (11.6%)
 Simulation time                4 days
 Simulation speed             3.7k object.hours/second
-Syncs completed              220 passes
-Time steps completed          97 timesteps
-Convergence efficiency      2.27 passes/timestep
+Syncs completed             2182 passes
+Time steps completed        1554 timesteps
+Convergence efficiency      1.40 passes/timestep
 Memory lock contention       0.0%
-Average timestep            3563 seconds/timestep
+Average timestep             222 seconds/timestep
 Simulation rate           345600 x realtime
 
 
@@ -22,14 +22,19 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-collector          0.029     42.6%      7.3
-player             0.024     35.3%     24.0
-recorder           0.009     13.2%      4.5
-transformer        0.002      2.9%      1.0
-ZIPload            0.001      1.5%      0.1
-node               0.001      1.5%      0.5
-triplex_meter      0.001      1.5%      0.3
-stubauction        0.001      1.5%      1.0
+collector          0.037     31.9%      9.3
+player             0.021     18.1%     21.0
+recorder           0.018     15.5%      9.0
+triplex_meter      0.009      7.8%      3.0
+house              0.008      6.9%      4.0
+transformer        0.007      6.0%      3.5
+node               0.005      4.3%      2.5
+waterheater        0.003      2.6%      1.5
+regulator          0.003      2.6%      3.0
+triplex_line       0.002      1.7%      1.0
+climate            0.001      0.9%      1.0
+ZIPload            0.001      0.9%      0.1
+stubauction        0.001      0.9%      1.0
 ================ ======== ======== ========
-Total              0.068    100.0%      1.7
+Total              0.116    100.0%      3.0
 
