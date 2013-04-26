@@ -22,7 +22,7 @@ def run(analysisName, studyName):
 		# Implement me, maybe.
 		pass
 	elif sys.platform == 'linux2':
-		binary = solverRoot + "/linx64/gridlabd"
+		binary = solverRoot + "/linx64/gridlabd.bin"
 		enviro['GRIDLABD'] = solverRoot + "/linx64"
 		enviro['GLPATH'] = solverRoot + "/linx64"
 	else:
