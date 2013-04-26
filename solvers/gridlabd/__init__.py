@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, struct, subprocess, os
+import sys, struct, subprocess, os, platform
 
 def run(analysisName, studyName):
 	# Choose our platform:
@@ -10,7 +10,7 @@ def run(analysisName, studyName):
 	enviro = os.environ
 	# print solverRoot
 	if sys.platform == 'win32' or sys.platform == 'cygwin':
-		if 8*struct.calcsize("P") == 64:
+		if platform.machine().endswith('64'):
 			binary = solverRoot + "\\win64\\gridlabd.exe"
 			enviro['GRIDLABD'] = solverRoot + "\\win64"
 			enviro['GLPATH'] = solverRoot + "\\win64\\"
