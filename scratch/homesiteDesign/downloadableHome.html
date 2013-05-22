@@ -1,27 +1,64 @@
-<head>
+﻿<head>
 	<title>Open Modeling Framework</title>
 	<meta charset='utf-8'>
 	<style type="text/css">
 		* {margin:5px; font-size:16pt;}
 		div.section {margin:0 auto; width:1024px}
-		a.menuEntry {display:inline-block;}
-		a.menuEntry /*deleteMe!*/ {display:inline-block; outline-width:1px; outline-color:red; outline-style:solid}
-		div.section /*deleteMe!*/ {height:100px; outline-width:1px; outline-color:red; outline-style:solid}
+		div#menuBar {text-align:center; margin-bottom:30px;}
+		a.menuEntry {display:inline-block; font-size:24pt; background:dimgray; color:white; margin:0px; padding:5px}
+		div#carouselViewer {height:512;width:1024;border:2px solid dimgray; position:relative; border-radius:25px}
+		img#carouselPic {position:absolute; bottom:0px; left:20px; height:480px; width:750px}
+		p#picBlurb {position:absolute; right:0px; bottom:60px; width:200px; height:200px}
+		div#carouselSelector {position:absolute; right:0px; bottom:10px; width:200px}
+		div.researchColumn {display:inline-block; width:480; vertical-align:top}
+		h1 {text-align:center; font-size:24pt; font-weight:bold; margin:20px}
+		h2 {text-align:center; font-size:16pt}
+		p {font-size:12pt}
+		a.menuEntry /*deleteMe!*/ {outline-width:1px; outline-color:red; outline-style:solid}
+		div.section /*deleteMe!*/ {outline-width:1px; outline-color:red; outline-style:solid}
 	</style>
 </head>
 <body>
-	<div id='menuBar' class='section' style='text-align:center'>
-		<a class='menuEntry' id='aboutEntry' href=''>About</a>
-		<a class='menuEntry' id='downloadEntry' href=''>Download</a>
-		<a class='menuEntry' id='discussionEntry' href='https://groups.google.com/forum/?fromgroups#!forum/open-modeling-framework'>Dicsussion</a>
-		<a class='menuEntry' id='developerEntry' href='https://github.com/dpinney/omf'>Development</a>
+	<div id='menuBar' class='section'>
+		<a class='menuEntry' id='aboutEntry' href=''>◬ About</a>
+		<a class='menuEntry' id='downloadEntry' href=''>↯ Download</a>
+		<a class='menuEntry' id='discussionEntry' href='https://groups.google.com/forum/?fromgroups#!forum/open-modeling-framework'>✉ Dicsussion</a>
+		<a class='menuEntry' id='developerEntry' href='https://github.com/dpinney/omf'>∯ Development</a>
 	</div>
 	<div id='titleBlurb' class='section' style='text-align:center'>
 		<p style='font-size:36pt'>Open Modeling Framework</p>
 		<p style='font-size:16pt;color:dimgray'>Software for powerflow, cost benefit analysis and grid model execution.</p>
 	</div>
-	<div id='carouselViewer' class='section'></div>
-	<div id='bigDownloadAction' class='section'></div>
-	<div id='researchWords' class='section'></div>
-	<div id='sponsors' class='section'></div>
+	<div id='carouselViewer' class='section'>
+		<img src='gridEdit.jpg' alt='Picture of the grid editor.' id='carouselPic'>
+		<p id='picBlurb'>The OMF offers a rich set of tools for importing (from Milsoft, GridlabD) and editing digital representations of electrical distribution systems.</p>
+		<div id='carouselSelector'>1/2/3/4</div>
+	</div>
+	<div id='bigDownloadAction' class='section'>
+		<div id='downloadButton'>Current version is XXXYXYZ. Download here.</div>
+	</div>
+	<div id='researchWords' class='section'>
+		<h1>Our Research Approach</h1>
+		<div class='researchColumn'>
+			<h2>Framework, Not a Model</h2>
+			<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi metus elit, adipiscing sit amet posuere ornare, molestie vel nisl. Ut porttitor, erat in dapibus auctor, risus ligula facilisis erat, nec tristique nisi elit nec lectus. Aenean placerat ligula ornare. Proin non dolor at dui varius tincidunt. Sed adipiscing diam id neque viverra pellentesque. Praesent et fermentum nibh. Praesent gravida aliquam lacus, non vehicula nisl interdum non.</p>
+			<h2>Powerflow by Gridlab-D</h2>
+			<p>Phasellus ac arcu fermentum justo aliquam commodo. Integer rutrum tincidunt scelerisque. Donec cursus sagittis hendrerit. Donec quis leo magna. Praesent molestie nisl neque, pulvinar ultricies sapien. Nam dui nibh, vulputate ac dolor. Proin sit amet est ipsum. Duis porta, ante hendrerit feugiat mollis, lectus orci fringilla mauris, at laoreet ipsum arcu eu metus. Cras volutpat euismod massa eget venenatis. Nunc vestibulum dolor lacus, lacinia fermentum ligula. Nulla rhoncus faucibus elit, sed rutrum urna facilisis a. Nam vel nisi odio.</p>
+			<h2>Model Reduction</h2>
+			<p>Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Aenean vel ligula ut orci pretium euismod ullamcorper ac orci. In laoreet posuere tortor vitae tincidunt. Proin mattis odio a nunc vulputate aliquam. Quisque ornare odio et mauris dapibus mollis. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nulla lectus quam, ornare vel posuere ac, vehicula quis ante.</p>
+			<p>Vestibulum sollicitudin sapien nunc. Vestibulum porta magna eu enim tincidunt tincidunt id at tellus. Aliquam erat volutpat.</p>
+		</div>
+		<div class='researchColumn'>
+			<h2>(Un-)Parallel(-ed) Execution</h2>
+			<p>Pellentesque at magna ut diam luctus imperdiet. Nulla placerat magna ac massa ullamcorper dignissim. Cras gravida vestibulum elit in dapibus. Nullam sagittis ultrices magna, in mollis velit semper ac. Praesent congue fermentum metus et dapibus. Mauris nisi leo, commodo eu pharetra id, consequat non eros. Morbi vel accumsan augue. Cras ullamcorper egestas lectus id auctor. Sed lobortis, mi ac ultrices porttitor, lacus leo molestie odio, ut sodales lacus diam in odio. Etiam fringilla vulputate risus eget congue. Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer commodo felis et dui tempus eu tempor mauris facilisis. Quisque aliquet porttitor sapien mattis lobortis. Pellentesque at neque massa., nec facilisis leo lacus nec risus. Integer pellentesque augue imperdiet leo ultrices vel bibendum eros facilisis. Fusce euismod dui sed velit accumsan semper. Nulla sit amet elit vel mauris aliquam sodales quis consequat orci. Duis eu eros ipsum.</p>
+			<h2>Monetizing Grid Investments</h2>
+			<p>Suspendisse eu consectetur metus. Curabitur augue tortor, convallis vitae egestas ac, posuere eget augue. Maecenas fermentum, nisl sagittis rutrum tempus, erat orci pretium odio, vitae sagittis orci nibh eu sem. Integer mollis, diam ut mollis fringilla, nunc lorem dapibus elit, quis ornare velit leo quis diam. Aliquam erat volutpat. Etiam in lacus in arcu ornare sagittis. Lorem ipsum dolor sit amet. Fusce tempor enim a velit pretium vehicula bibendum nulla interdum. Integer ullamcorper euismod hendrerit. Integer a lacus quis nisi molestie tincidunt. Mauris auctor vestibulum felis at consectetur. Morbi ultrices, nibh a vehicula interdum, sapien velit molestie erat, ac auctor neque lacus at elit. Sed accumsan sollicitudin quam, a aliquam lacus vehicula eget. Praesent sed sapien in massa pretium dapibus. Integer risus odio, tempus nec mattis sit amet, elementum eu tellus. Morbi dignissim tristique mi, vitae varius leo vehicula in.</p>
+		</div>
+	</div>
+	<div id='sponsors' class='section' style='text-align:center'>
+		<img src='crn.png' alt='Cooperative Research Network (CRN) Logo'>
+		<img src='nreca.gif' alt='National Rural Electrical Cooperative Association (NRECA) Logo'>
+		<img src='doe.jpeg' alt='US Department of Energy Logo'>
+		<img src='pnnl.jpeg' alt='Pacific Northwest National Lab (PNNL) Logo'>
+	</div>
 </body>
