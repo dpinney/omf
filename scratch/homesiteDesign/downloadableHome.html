@@ -1,16 +1,27 @@
 <head>
 	<title>Open Modeling Framework</title>
 	<meta charset='utf-8'>
-	<link rel='stylesheet' href='../static/omf.css'/>
-	<script type='text/javascript' src='../static/omf.js'></script>
-	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
-	</script>
+	<style type="text/css">
+		* {margin:5px; font-size:16pt;}
+		div.section {margin:0 auto; width:1024px}
+		a.menuEntry {display:inline-block;}
+		a.menuEntry /*deleteMe!*/ {display:inline-block; outline-width:1px; outline-color:red; outline-style:solid}
+		div.section /*deleteMe!*/ {height:100px; outline-width:1px; outline-color:red; outline-style:solid}
+	</style>
 </head>
 <body>
-	<div id='menuBar'></div>
-	<div id='titleBlurb'></div>
-	<div id='carouselViewer'></div>
-	<div id='bigDownloadAction'></div>
-	<div id='researchWords'></div>
-	<div id='sponsors'></div>
+	<div id='menuBar' class='section' style='text-align:center'>
+		<a class='menuEntry' id='aboutEntry' href=''>About</a>
+		<a class='menuEntry' id='downloadEntry' href=''>Download</a>
+		<a class='menuEntry' id='discussionEntry' href='https://groups.google.com/forum/?fromgroups#!forum/open-modeling-framework'>Dicsussion</a>
+		<a class='menuEntry' id='developerEntry' href='https://github.com/dpinney/omf'>Development</a>
+	</div>
+	<div id='titleBlurb' class='section' style='text-align:center'>
+		<p style='font-size:36pt'>Open Modeling Framework</p>
+		<p style='font-size:16pt;color:dimgray'>Software for powerflow, cost benefit analysis and grid model execution.</p>
+	</div>
+	<div id='carouselViewer' class='section'></div>
+	<div id='bigDownloadAction' class='section'></div>
+	<div id='researchWords' class='section'></div>
+	<div id='sponsors' class='section'></div>
 </body>
