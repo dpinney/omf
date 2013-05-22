@@ -3,34 +3,33 @@
 	<meta charset='utf-8'>
 	<style type="text/css">
 		* {margin:5px; font-size:16pt;}
-		div.section {margin:0 auto; width:1024px}
+		* /*delete me!*/ {/*outline-width:1px; outline-color:red; outline-style:solid*/}
+		div.section {margin:0 auto; width:1024px; margin-bottom:40px;}
 		div#menuBar {text-align:center; margin-bottom:30px;}
-		a.menuEntry {display:inline-block; font-size:24pt; background:dimgray; color:white; margin:0px; padding:5px}
-		div#carouselViewer {height:512;width:1024;border:2px solid dimgray; position:relative; border-radius:25px}
-		img#carouselPic {position:absolute; bottom:0px; left:20px; height:480px; width:750px}
-		p#picBlurb {position:absolute; right:0px; bottom:60px; width:200px; height:200px}
+		a.menuEntry {display:inline-block; font-size:20pt; background:dimgray; color:white; margin:0px; padding:7px 25px 7px 25px; text-decoration:none}
+		a.menuEntry:first-child {border-top-left-radius: 10px; border-bottom-left-radius: 10px}
+		a.menuEntry:last-child {border-top-right-radius: 10px; border-bottom-right-radius: 10px}
+		a.menuEntry:hover {color:lightgreen}
+		div#carouselViewer {height:512;width:1024;border:2px solid dimgray; position:relative; border-radius:20px; margin-bottom:5px}
+		img#carouselPic {position:absolute; bottom:0px; left:20px; height:480px; width:750px; margin:0px;}
+		p#picBlurb {position:absolute; right:20px; bottom:60px; width:200px; height:200px}
 		div#carouselSelector {position:absolute; right:0px; bottom:10px; width:200px}
 		div.researchColumn {display:inline-block; width:480; vertical-align:top}
 		h1 {text-align:center; font-size:24pt; font-weight:bold; margin:20px}
 		h2 {text-align:center; font-size:16pt}
 		p {font-size:12pt}
-		a.menuEntry /*deleteMe!*/ {outline-width:1px; outline-color:red; outline-style:solid}
-		div.section /*deleteMe!*/ {outline-width:1px; outline-color:red; outline-style:solid}
 	</style>
 </head>
 <body>
 	<div id='menuBar' class='section'>
-		<a class='menuEntry' id='aboutEntry' href=''>◬ About</a>
-		<a class='menuEntry' id='downloadEntry' href=''>↯ Download</a>
-		<a class='menuEntry' id='discussionEntry' href='https://groups.google.com/forum/?fromgroups#!forum/open-modeling-framework'>✉ Dicsussion</a>
-		<a class='menuEntry' id='developerEntry' href='https://github.com/dpinney/omf'>∯ Development</a>
+		<a class='menuEntry' id='aboutEntry' href=''>◬ About</a><a class='menuEntry' id='downloadEntry' href=''>↯ Download</a><a class='menuEntry' id='discussionEntry' href='https://groups.google.com/forum/?fromgroups#!forum/open-modeling-framework'>✉ Dicsussion</a><a class='menuEntry' id='developerEntry' href='https://github.com/dpinney/omf'>∯ Development</a>
 	</div>
 	<div id='titleBlurb' class='section' style='text-align:center'>
 		<p style='font-size:36pt'>Open Modeling Framework</p>
 		<p style='font-size:16pt;color:dimgray'>Software for powerflow, cost benefit analysis and grid model execution.</p>
 	</div>
 	<div id='carouselViewer' class='section'>
-		<img src='gridEdit.jpg' alt='Picture of the grid editor.' id='carouselPic'>
+		<img src='carousel1.png' alt='Picture of the grid editor.' id='carouselPic'>
 		<p id='picBlurb'>The OMF offers a rich set of tools for importing (from Milsoft, GridlabD) and editing digital representations of electrical distribution systems.</p>
 		<div id='carouselSelector'>1/2/3/4</div>
 	</div>
