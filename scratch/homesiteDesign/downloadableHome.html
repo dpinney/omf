@@ -10,8 +10,12 @@
 		a.menuEntry:first-child {border-top-left-radius: 10px; border-bottom-left-radius: 10px}
 		a.menuEntry:last-child {border-top-right-radius: 10px; border-bottom-right-radius: 10px}
 		a.menuEntry:hover {color:lightgreen}
-		div#carouselViewer {height:512;width:1024;border:2px solid dimgray; position:relative; border-radius:20px; margin-bottom:5px}
+		div#carouselViewer {height:512;width:1024;border:2px solid dimgray; position:relative; border-radius:20px}
 		img#carouselPic {position:absolute; bottom:0px; left:20px; height:480px; width:750px; margin:0px;}
+		a.carouselButton {display:inline-block; background:gainsboro; font-size:12pt; color:black; margin:0px; padding:3px 15px 3px 15px; text-decoration:none}
+		a.carouselButton:first-child {border-top-left-radius: 10px; border-bottom-left-radius: 10px}
+		a.carouselButton:last-child {border-top-right-radius: 10px; border-bottom-right-radius: 10px}
+		a.carouselButton:hover {color:lightgreen}
 		p#picBlurb {position:absolute; right:20px; bottom:60px; width:200px; height:200px}
 		div#carouselSelector {position:absolute; right:0px; bottom:10px; width:200px}
 		div.researchColumn {display:inline-block; width:480; vertical-align:top}
@@ -31,10 +35,8 @@
 	<div id='carouselViewer' class='section'>
 		<img src='carousel1.png' alt='Picture of the grid editor.' id='carouselPic'>
 		<p id='picBlurb'>The OMF offers a rich set of tools for importing (from Milsoft, GridlabD) and editing digital representations of electrical distribution systems.</p>
-		<div id='carouselSelector'>1/2/3/4</div>
-	</div>
-	<div id='bigDownloadAction' class='section'>
-		<div id='downloadButton'>Current version is XXXYXYZ. Download here.</div>
+		<div id='carouselSelector'>
+			<a class='carouselButton'>1</a><a class='carouselButton'>2</a><a class='carouselButton'>3</a><a class='carouselButton'>4</a></div>
 	</div>
 	<div id='researchWords' class='section'>
 		<h1>Our Research Approach</h1>
@@ -55,9 +57,9 @@
 		</div>
 	</div>
 	<div id='sponsors' class='section' style='text-align:center'>
-		<img src='crn.png' alt='Cooperative Research Network (CRN) Logo'>
-		<img src='nreca.gif' alt='National Rural Electrical Cooperative Association (NRECA) Logo'>
-		<img src='doe.jpeg' alt='US Department of Energy Logo'>
-		<img src='pnnl.jpeg' alt='Pacific Northwest National Lab (PNNL) Logo'>
+		<a href='http://www.nreca.coop/programs/CRN/Pages/default.aspx'><img src='crn.png' alt='Cooperative Research Network (CRN) Logo'></a>
+		<a href='http://www.nreca.coop/Pages/default.aspx'><img src='nreca.gif' alt='National Rural Electrical Cooperative Association (NRECA) Logo'></a>
+		<a href='http://www.doe.gov/'><img src='doe.jpeg' alt='US Department of Energy Logo'></a>
+		<a href='http://www.pnnl.gov/'><img src='pnnl.png' alt='Pacific Northwest National Lab (PNNL) Logo'></a>
 	</div>
 </body>
