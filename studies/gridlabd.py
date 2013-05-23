@@ -65,8 +65,10 @@ def run(analysisName, studyName):
 			break
 		elif '# property.. timestamp' in rawOut[key]:
 			cleanOut['timeStamps'] = rawOut[key]['# property.. timestamp']
+		else:
+			cleanOut['timeStamps'] = []
 	# Day/Month Aggregation Setup:
-	stamps = cleanOut['timeStamps']
+	stamps = cleanOut.get('timeStamps',[])
 	level = analysis.getMetadata(analysisName)['simLengthUnits']
 	def agg(series, func):
 		if level in ['days','months']:
