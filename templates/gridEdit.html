@@ -626,14 +626,13 @@
 	$("#selected").append($("<tr>")
 			      .attr("class", "new_attr_row")
 			      .append($("<td>")
-				      .append($("<span>")
+				      .append($("<button>")
 					      .html("X")
 					      .click(function(e){
 						  $(this).parent().parent().remove()
 					      })
-					      .css("background-color", "red")
-					      .css("display", "inline"))
-			      // .append($("<td>")
+					      .addClass("deleteButton"))
+
 				      
 				      .append($("<input>")
 					      .css("display", "inline")
