@@ -52,8 +52,10 @@ def newAnalysis(analysisName=None):
 	reportTemplates = reports.__templates__
 	studyTemplates = studies.__templates__
 	studyRendered = {}
+
 	for study in studyTemplates:
 		studyRendered[study] = str(flask.render_template_string(studyTemplates[study], tmy2s=tmy2s, feeders=feeders))
+
 	analyses = analysis.listAll()
 	# If we aren't specifying an existing name, just make a blank analysis:
 	if analysisName is None or analysisName not in analyses:
@@ -62,6 +64,7 @@ def newAnalysis(analysisName=None):
 		analysisMd = None
 	# If we specified an analysis, get the studies, reports and analysisMd:
 	else:
+
 		reportPrefix = 'analyses/' + analysisName + '/reports/'
 		reportNames = os.listdir(reportPrefix)
 		reportDicts = [json.loads(lib.fileSlurp(reportPrefix + x)) for x in reportNames]
@@ -69,12 +72,15 @@ def newAnalysis(analysisName=None):
 		studyPrefix = 'analyses/' + analysisName + '/studies/'
 		studyNames = os.listdir(studyPrefix)
 		studyDicts = [json.loads(lib.fileSlurp(studyPrefix + x + '/metadata.json')) for x in studyNames]
+
 		existingStudies = json.dumps(studyDicts)
 		analysisMd = json.dumps(analysis.getMetadata(analysisName))
 	return flask.render_template('newAnalysis.html', studyTemplates=studyRendered, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
 
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):
+	if not analysis.is_name_of_analysis(analysisName):
+		return flask.redirect(flask.url_for('root'))
 	reportList = analysis.generateReportHtml(analysisName)
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
 
@@ -90,6 +96,10 @@ def analysisFeeder(analysis, study):
 ####################################################
 # API FUNCTIONS
 ####################################################
+
+@app.route('/uniqueName/<name>')
+def uniqueName(name):
+	return json.dumps(not analysis.is_name_of_analysis(name))
 
 @app.route('/run/', methods=['POST'])
 @app.route('/reRun/', methods=['POST'])

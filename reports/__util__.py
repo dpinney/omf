@@ -13,12 +13,16 @@ def defaultGraphObject(resolution, startTimeStamp):
 	pointInterval = timeMap[resolution]*60*1000
 	maxZoom = pointInterval*30
 	def getPointStart(dateTimeStamp):
+		print dateTimeStamp
 		if dateTimeStamp[-1].isdigit():
 			stampOb = datetime.strptime(dateTimeStamp,'%Y-%m-%d')
 		else:
 			# Handle those dang arbitrary timezones.
 			stampOb = datetime.strptime(dateTimeStamp.rsplit(' ',1)[0],'%Y-%m-%d %H:%M:%S')
-		return int(mktime(stampOb.timetuple()))*1000
+		try:
+			return int(mktime(stampOb.timetuple()))*1000
+		except OverflowError:
+			return 0
 	pointStart = getPointStart(startTimeStamp)
 	graphParameters = {
 		'chart':{'renderTo':'', 'marginRight':20, 'marginBottom':20, 'zoomType':'x'},

@@ -98,7 +98,13 @@
 				}
 				responseDict.reports = chosenReports
 				// Send the request.
-				post_to_url('/saveAnalysis/', {'json':JSON.stringify(responseDict)})
+			        if(JSON.parse(ajaxReq("GET", "/uniqueName/"+gebi("analysisName").value)))
+				    post_to_url('/saveAnalysis/', {'json':JSON.stringify(responseDict)})
+			        else{
+				    alert("Please choose a unique Analysis Name");
+				    gebi("analysisName").style.border = "1px solid red";
+				    gebi("analysisName").focus();
+				}
 			} 
 			catch(err) {
 				alert('Some form values are not correct.')

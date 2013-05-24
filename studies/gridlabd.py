@@ -81,11 +81,11 @@ def run(analysisName, studyName):
 	for key in rawOut:
 		if key.startswith('Climate_') and key.endswith('.csv'):
 			cleanOut['climate'] = {}
-			cleanOut['climate']['Rain Fall (in/h)'] = agg(rawOut[key]['rainfall'], sum)
-			cleanOut['climate']['Wind Speed (m/s)'] = agg(rawOut[key]['wind_speed'], avg)
-			cleanOut['climate']['Temperature (F)'] = agg(rawOut[key]['temperature'], max)
-			cleanOut['climate']['Snow Depth (in)'] = agg(rawOut[key]['snowdepth'], max)
-			cleanOut['climate']['Direct Insolation (W/m^2)'] = agg(rawOut[key]['solar_direct'], sum)
+			cleanOut['climate']['Rain Fall (in/h)'] = agg(rawOut[key].get('rainfall'), sum)
+			cleanOut['climate']['Wind Speed (m/s)'] = agg(rawOut[key].get('wind_speed'), avg)
+			cleanOut['climate']['Temperature (F)'] = agg(rawOut[key].get('temperature'), max)
+			cleanOut['climate']['Snow Depth (in)'] = agg(rawOut[key].get('snowdepth'), max)
+			cleanOut['climate']['Direct Insolation (W/m^2)'] = agg(rawOut[key].get('solar_direct'), sum)
 	# Voltage Band
 	if 'VoltageJiggle.csv' in rawOut:
 		cleanOut['allMeterVoltages'] = {}

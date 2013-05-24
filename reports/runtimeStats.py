@@ -15,8 +15,8 @@ def outputHtml(analysisName):
 	for study in os.listdir(pathPrefix):
 		with open(pathPrefix + study + '/cleanOutput.json','r') as outFile:
 			cleanOut = json.load(outFile)
-		stderrText = cleanOut['stderr']
-		stdoutText = cleanOut['stdout']
+		stderrText = cleanOut.get('stderr', '')
+		stdoutText = cleanOut.get('stdout', '')
 		if 'ERROR' in stderrText or 'WARNING' in stderrText:
 			# Error'd out, so show it:
 			cleanPre = study.upper() + '\n\n' + stderrText

@@ -16,12 +16,14 @@ def outputHtml(analysisName):
 	for study in os.listdir(pathPrefix):
 		with open(pathPrefix + study + '/cleanOutput.json') as outFile:
 			cleanOut = json.load(outFile)
+			print "This works fine"
+			print pathPrefix
 		if 'Capacitors' in cleanOut:
 			newStudy = {'studyName':study, 'capList':[]}
 			for cap in cleanOut['Capacitors']:
 				newCap = {'capName':cap}
 				# Draw the graphs:
-				graphParams = util.defaultGraphObject(resolution, cleanOut['timeStamps'][0])
+				graphParams = util.defaultGraphObject(resolution, cleanOut['timeStamps'][0] if cleanOut['timeStamps'] else "0001-01-01")
 				graphParams['chart']['renderTo'] = 'chartDiv' + study + cap
 				graphParams['chart']['height'] = 90
 				graphParams['chart']['type'] = 'area'

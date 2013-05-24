@@ -30,7 +30,7 @@ def outputHtml(analysisName):
 		with open(pathPrefix + '/studies/' + study + '/metadata.json', 'r') as mdFile:
 			md = json.load(mdFile)
 			# Study metadata:
-			newStudy['sourceFeederName'] = md['sourceFeeder']
+			newStudy['sourceFeederName'] = md.get('sourceFeeder','')
 			# Climate data:
 			if md['climate'] in climates:
 				climates[md['climate']] += 1
@@ -38,8 +38,8 @@ def outputHtml(analysisName):
 				climates[md['climate']] = 1
 		with open(pathPrefix + '/studies/' + study + '/cleanOutput.json','r') as outFile:
 			out = json.load(outFile)
-			newStudy['componentNames'] = set(out['componentNames'])
-			allComponents.update(out['componentNames'])
+			newStudy['componentNames'] = set(out.get('componentNames', []))
+			allComponents.update(out.get('componentNames', []))
 		studyList.append(newStudy)
 	climates = [['Climate','Studies']] + [[key.replace('.tmy2',''), climates[key]] for key in climates]
 	# Partition the names into common names and those unique to each feeder:
