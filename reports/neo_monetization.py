@@ -8,33 +8,40 @@ import math
 import json
 from jinja2 import Template
 
-with open('./reports/monetizationConfig.html','r') as configFile:
+with open('./reports/neo_monetizationConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read()
 
 def outputHtml(analysisName):
 	# Set general run data:
-	pathPrefix = 'analyses/' + analysisName
-	studies = os.listdir(pathPrefix + '/studies/')
+	pathPrefix = 'analyses/' + analysisName # analysis is the name of the entire report
+	studies = os.listdir(pathPrefix + '/studies/') # get all the studies.... so not just the monetization ones???
 	resolution = util.getResolution(analysisName)
 	startTime = util.getStartDate(analysisName)
 	# Get the report input:
 	inputData = {}
 	with open (pathPrefix + '/reports/monetization.json') as reportFile:
 		reportOptions = json.load(reportFile)
-		inputData['distrEnergyRate'] = float(reportOptions['distrEnergyRate'])
-		inputData['distrCapacityRate'] = float(reportOptions['distrCapacityRate'])
-		inputData['equipAndInstallCost'] = float(reportOptions['equipAndInstallCost'])
-		inputData['opAndMaintCost'] = float(reportOptions['opAndMaintCost'])
+		def safeFloat(x):
+			if x=='': return 0
+			else:
+				try:
+					return float(x)
+				except ValueError:
+					return 0
+		inputData['distrEnergyRate'] = safeFloat(reportOptions['distrEnergyRate'])
+		inputData['distrCapacityRate'] = safeFloat(reportOptions['distrCapacityRate'])
+		inputData['equipAndInstallCost'] = safeFloat(reportOptions['equipAndInstallCost'])
+		inputData['opAndMaintCost'] = safeFloat(reportOptions['opAndMaintCost'])
 	# Pull in the power data:
 	studyDict = {}
 	timeStamps = []
 	for study in studies:
 		studyDict[study] = {}
 		with open(pathPrefix + '/studies/' + study + '/cleanOutput.json') as outFile:
-			studyJson = json.load(outFile)
-			if studies[0] == study:
-				timeStamps = studyJson['timeStamps']
-			studyDict[study]['Power'] = studyJson['Consumption']['Power']
+			studyJson = json.load(outFile) # outFile is a file containing a json blob
+			if studies[0] == study: # if we're not dealing with the first study
+				timeStamps = studyJson.get('timeStamps', [])
+			studyDict[study]['Power'] = studyJson.get('Consumption', {}).get('Power')
 	# What percentage of a year did we simulate?
 	intervalMap = {'minutes':60, 'hours':3600, 'days':86400}
 	inputData['yearPercentage'] = intervalMap[resolution]*len(timeStamps)/(365*24*60*60.0)
@@ -72,7 +79,7 @@ def outputHtml(analysisName):
 		savingsGrowthParams['series'].append({'name':study,'data':[],'color':color})
 		savingsGrowthParams['xAxis']['plotLines'] = [{'color':'silver','width':1,'value':inputData['yearPercentage']}]
 	# Get the template in.
-	with open('./reports/monetizationOutput.html','r') as tempFile:
+	with open('./reports/neo_monetizationOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
 	# Write the results.
 	return template.render(monPowParams=json.dumps(monPowParams), monEnergyParams=json.dumps(monEnergyParams), savingsGrowthParams=json.dumps(savingsGrowthParams),

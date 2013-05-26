@@ -1,0 +1,369 @@
+<p class="reportTitle">Cost Benefit Analysis</p>
+<div id="monetizationReport" class="tightContent">
+  <div class="studyContainer" style="position:relative;height:200px">
+    <div id="monetizedPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:500px;height:200px">
+      <script>monCapCostGraph = new Highcharts.Chart({{ monPowParams }})</script>
+    </div>
+    <div id="monetizedEnergyBalance" style="position:absolute;top:0px;left:500px;width:500px;height:200px">
+      <script>monEnergyCostGraph = new Highcharts.Chart({{ monEnergyParams }})</script>
+    </div>
+  </div>
+  <div id="costGrowthContainer" class="studyContainer" style="height:200px">
+    <script>costGrowth = new Highcharts.Chart({{ savingsGrowthParams }})</script>
+  </div>
+  <div id="additionalMetrics" class="studyContainer">
+    <div style="width:1000px;padding:5px 5px 5px 5px">
+      Co-op Energy Rate ($/kWh) <input id="distrEnergyRate" value=""/> Capacity Rate ($/kW) <input id="distrCapacityRate" value=""/><button style="width:100px" onclick="recalculateCostBenefit()">Recalculate</button>
+    </div>
+    <table style="width:980px;padding-bottom:10px">
+      <thead>
+	<tr><th>Study</th><th>Baseline</th><th>Capital Cost</th><th>O&amp;M Cost</th><th>Cap. Cost</th><th>En. Cost</th><th>Y1 Save</th><th>Annual Save</th><th>Payback (Y)</th></tr>
+      </thead>
+      <tbody id="additionalMetricsTable">
+      </tbody>
+    </table>
+
+    <div  class="brand_new_tables">
+      <!-- <h1 class="study_name_header">Study Name</h1> -->
+      <table  class="pv_table" border="1">
+	<tr>
+	  <th colspan="11" class="study_name_header"></th>
+	</tr>
+	<tr>
+	  <th class="collapseRates" rowspan="2">Collapse Rates</th>
+	  <th class="advancedRates" colspan="10">Advanced Rates</th>
+	</tr>
+	
+	<tr>
+	  <th colspan="7">Wholesale</th>
+	  <th colspan="3">Retail</th>
+	</tr>
+
+	<tr>
+	  <th class="year_th">Yearly Rates</th><th class="season_th">Season</th><th>Start Date</th><th>Energy off peak rate ($/kWh)</th><th>Peak rate ($/kWh)</th><th>Peak period start (Hour/24, local)</th><th>Peak period end (Hour/24, local)</th><th>Demand (MW)</th><th>Expected annual rate increase (%)</th><th>Energy Off Peak rate ($/kWh)</th><th>Peak rate ($/kWh)</th><th>Expected Annual Increase (%)</th>
+	</tr>
+	
+	<tbody class="seasons">
+	  <tr class="SpringRow">
+	    <th>Spring</th>
+	  </tr>
+	  <tr class="SummerRow">
+	    <th>Summer</th>
+	  </tr>
+	  <tr class="FallRow">
+	    <th>Fall</th>
+	  </tr>
+	  <tr class="WinterRow">
+	    <th>Winter</th>
+	  </tr>
+	</tbody>
+	<tbody class="years">
+	  <tr class="YearRow">
+	    <th></th>
+	  </tr>
+	</tbody>
+      </table>
+      <div class="FinExContainer">
+	<table class="Expenses">
+	  <tr>
+	    <th colspan="8">Expenses</th>
+	  </tr>
+	  <tr>
+	    <th colspan="5">Recurring (annual) expenses</th>
+	    <th colspan="3">Non-recurring expenses</th>
+	  </tr>
+	  <tr>
+	    <th>Item <button class="addItem">Add Item</button></th>
+	    <th>Amount</th>
+	    <th>Start date</th>
+	    <th>End date</th>
+	    <th>Expected annual rate increase</th>
+	    <th>Item</th>
+	    <th>Amount</th>
+	    <th>Date Incurred</th>
+	  </tr>
+	  <!-- <tr class="OMRow"> -->
+	  <!--   <th>O&M</th> -->
+	  <!-- </tr> -->
+	  <!-- <tr class="ReplacementRow"> -->
+	  <!--   <th>Replacement</th> -->
+	  <!-- </tr> -->
+	  <!-- <tr class="LeaseRow"> -->
+	  <!--   <th>Lease</th> -->
+	  <!-- </tr> -->
+	  <!-- <tr class="TaxesRow"> -->
+	  <!--   <th>Taxes</th> -->
+	  <!-- </tr> -->
+	  <tr class="NewExpenseRow">
+	    <th><button class="removeItem">Remove Item</button><input type="text" placeholder="Item Name" class="ItemName"/></th>
+	  </tr>
+	</table>
+
+	<table class="FinancialParameters">
+	  <tr>
+	    <th colspan="2">Financial Parameters</th>
+	  </tr>
+	  <tr class="InterestRow">
+	    <th>Interest Rate (%)</th>
+	  </tr>
+	  <tr class="InflationRow">
+	    <th>Inflation (%)</th>
+	  </tr>
+	  <tr class="DiscountRow">
+	    <th>Discount Rate (%)</th>
+	  </tr>
+	</table>
+	
+      </div>
+      <table class="last_table">
+	<tr>
+	  <th class="blank_th"></th>
+	  <th>NPV</th>
+	  <th>IRR</th>
+	  <th>SPP (years)</th>
+	</tr>
+	<tbody class="yellowTbody">
+	  <tr class="20YearRow">
+	    <th >20 Year</th>
+	  </tr>
+	  <tr class="30YearRow">
+	    <th >30 Year</th>
+	  </tr>
+	</tbody>
+      </table>
+	  
+      
+    </div>
+    
+    <div id="pv_tables">
+    </div>
+    <style type="text/css">
+    .brand_new_tables{display:none;}
+    .study_name_header{background-color:#2b4f81;
+		  color:white;
+		  border:1px solid black;}
+    .collapseRates{background-color:rgb(0,176,0);
+		  color:white;
+		  border:2px solid black;}
+
+    td{
+	width:85px;
+	}
+    th{
+	text-align:center;
+	border:1px solid black;
+	margin:0px;
+	padding:0px;
+	}
+    .NewExpenseRow{
+	display:none;
+    }
+    .removeItem{
+	background-color:#dd0000;
+    }
+    #pv_tables > div > table, #pv_tables > div > div > table{
+	border-collapse:collapse;
+	border:1px solid black;
+	margin:5px;
+	}
+    
+    .FinExContainer{
+	position:relative;
+	}
+    .Expenses{width:75%;
+	     }
+    .FinancialParameters{
+	position:absolute;
+	top:0px;
+	right:0px;}
+    .blank_th{
+	background-color:black;
+	}
+    tr.20YearRow{
+	background-color:yellow;
+	}
+    .year_th{
+	display:none;
+	}
+    .years{
+	display:none;
+	}
+    .year_th{
+	background-color:black;
+	}
+    .YearRow > th{
+	background-color:black;
+	}
+    </style>
+    <script type="text/javascript">
+      function pv_table_ui(){
+	  $(".collapseRates").css("cursor", "pointer");
+	  $(document).on("click", ".collapseRates", function(event){
+	      if($(this).html() == "Collapse Rates")
+		  $(this).html("Expand Rates");
+	      else
+		  $(this).html("Collapse Rates");
+	      $(this).parent().parent().siblings(".seasons, .years").toggle();
+	      $(this).parent().siblings().children(".year_th, .season_th").toggle();
+
+	  }).on("click", ".addItem", function(event){
+	      var new_row = $("<tr>").html($(".NewExpenseRow").html());
+	      $(this).parent().parent().parent().append($(new_row));
+	  }).on("click", ".removeItem", function(event){
+	      $(this).parent().parent().remove();
+	  });
+      }
+      function fill_inputs(){
+	  var tables = [
+	      {"row_names":
+	       ["Summer",
+		"Spring",
+		"Winter",
+		"Fall",
+		"Year"],
+	       "cols":10},
+	      {"row_names":
+	       ["OM",
+		"Replacement",
+		"Lease",
+		"Taxes",
+		"NewExpense"],
+	       "cols":7},
+	      {"row_names":
+	       ["Interest",
+		"Inflation",
+		"Discount"],
+	       "cols":1},
+	      {"row_names":
+	       ["20Year", "30Year"],
+	       "cols":3}
+
+	  ];
+	  for (k=0; k<tables.length; k++){
+	      for (i=0; i<tables[k].cols; i++){
+		  for(j=0; j<tables[k].row_names.length; j++){
+		      $("."+tables[k].row_names[j]+"Row").append($("<td>")
+								 .append($("<input>")
+									 .attr("type", "text")
+									 .css("margin", "0px")
+									 .css("background-color", "white")
+									 .css("border-bottom", "1px dotted black")
+									 .css("padding", "0px")));
+		  }
+	      }
+	      
+	  }
+      }
+
+      function add_pv_table(study){
+	  var new_table = $("<div>").html($(".brand_new_tables").html());
+	  new_table.children().children().children().children(".study_name_header").html(study).css("text-align", "center");
+	  $("#pv_tables").append(new_table);
+
+	  var item_defaults = ["O&M", "Replacement", "Lease", "Taxes"];
+	  var i;
+	  for(i=0; i<item_defaults.length; i++){
+	      var new_row = $("<tr>").html($(".NewExpenseRow").html()).addClass("NewExpenseRow").show();
+	      $(new_row).children().children(".ItemName").attr("value", item_defaults[i]);
+	      $(new_table).children(".FinExContainer").children(".Expenses").append($(new_row));
+	  }
+
+      }
+      
+      studyDict = {{ studyDict | safe }}
+      inputData = {{ inputData | safe }}
+      timeStamps = {{ timeStamps | safe }}
+
+      // Put the input data in.
+      gebi('distrEnergyRate').value = inputData.distrEnergyRate
+      gebi('distrCapacityRate').value = inputData.distrCapacityRate
+      // fill_inputs();
+      // Init the table.
+      firstTime = true
+      for (study in studyDict) {
+	  if (undefined != study) {
+	      // Add table row:
+	      table = gebi('additionalMetricsTable')
+	      newRow = table.insertRow()
+	      newRow.id = 'row' + study
+	      if (firstTime) {checked = 'checked'; cap = '0'; om = '0'; firstTime = false} else {checked = ''; cap = inputData['equipAndInstallCost']; om = inputData['opAndMaintCost']}
+	      newRow.innerHTML = '<td class="studyName">' + study + '</td>' +
+		  '<td><input type="radio" name="baseline" class="baseline" ' + checked + '/></td>' +
+		  '<td><input class="capCost" value="' + cap + '"/></td>' +
+		  '<td><input class="omCost" value="' + om + '"/></td>' +
+		  '<td class="capacityCost">calcMe</td>' +
+		  '<td class="energyCost">calcMe</td>' +
+		  '<td class="y1save">calcMe</td>' +
+		  '<td class="annualSave">calcMe</td>' +
+		  '<td class="payback">calcMe</td>'
+	  }
+	  add_pv_table(study);
+      }
+      fill_inputs();
+      pv_table_ui();
+      $(".20YearRow>td, .20YearRow>td>input, .30YearRow>td, .30YearRow>td>input").css("background-color", "yellow");
+      function monthAgg(stamps, power, func) {
+	  //  Aggregate a month's worth of power.
+	  combo = zip([stamps,power])
+	  grouped = partition(combo, function(x,y){return x[0].substring(5,7)==y[0].substring(5,7)})
+	  function dropStamp(pairArr) {return pairArr.map(function(x){return x[1]})}
+	  noStamps = grouped.map(dropStamp)
+	  applied = noStamps.map(func)
+	  return flatten1(applied)
+      }
+
+      function recalculateCostBenefit() {
+	  energyRate = parseFloat(gebi('distrEnergyRate').value)
+	  capRate = parseFloat(gebi('distrCapacityRate').value)
+	  // Update everything not depending on baseline diff.
+	  for (study in studyDict) { 
+	      if (undefined != study) {
+		  // Update the capacity graph.
+		  capStudyIndex = indexFind(monCapCostGraph['series'], function (x) {return x.name == study})
+		  function maxAvg(arr) {max=arrMax(arr); len=arr.length; return arr.map(function(x){return max/len})}
+		  powerAgged = monthAgg(timeStamps, studyDict[study]['Power'], maxAvg)
+		  monthlyPower = powerAgged.map(function(x){return round(x*capRate/1000,4)})
+		  monCapCostGraph['series'][capStudyIndex].setData(monthlyPower)
+		  // Update the energy graph.
+		  enStudyIndex = indexFind(monEnergyCostGraph['series'], function (x) {return x.name == study})
+		  function avg(arr) {total=arrSum(arr); len=arr.length; return arr.map(function(x){return total/len})}
+		  energyAgged = monthAgg(timeStamps, studyDict[study]['Power'], avg)
+		  monthlyEnergy = energyAgged.map(function(x){return round(x*energyRate/1000,4)})
+		  monEnergyCostGraph['series'][enStudyIndex].setData(monthlyEnergy)
+		  // update the table:
+		  thisRow = gebi('row' + study)
+		  thisRow.querySelector('.capacityCost').innerHTML = round(arrSum(monthlyPower),4)
+		  thisRow.querySelector('.energyCost').innerHTML = round(arrSum(monthlyEnergy),4)
+	      }
+	  }
+	  // Calculate baseline.
+	  baseRow = gebi('additionalMetricsTable').querySelector('[checked]').parentElement.parentElement
+	  baseAnnual = parseFloat(baseRow.querySelector('.omCost').value) + parseFloat(baseRow.querySelector('.capacityCost').innerHTML)/inputData['yearPercentage'] + parseFloat(baseRow.querySelector('.energyCost').innerHTML)/inputData['yearPercentage']
+	  baseCost = baseAnnual + parseFloat(baseRow.querySelector('.capCost').value)
+	  baseRow.querySelector('.y1save').innerHTML = '0'
+	  baseRow.querySelector('.annualSave').innerHTML = '0'
+	  baseRow.querySelector('.payback').innerHTML = '0'
+	  // Update things that depend on the baseline diff.
+	  for (study in studyDict) {
+	      if (undefined != study) {
+		  // Update the table:
+		  thisRow = gebi('row' + study)
+		  annualCost = parseFloat(thisRow.querySelector('.omCost').value) + parseFloat(thisRow.querySelector('.capacityCost').innerHTML)/inputData['yearPercentage'] + parseFloat(thisRow.querySelector('.energyCost').innerHTML)/inputData['yearPercentage']
+		  y1cost = annualCost + parseFloat(thisRow.querySelector('.capCost').value)
+		  y1save = baseCost - y1cost
+		  thisRow.querySelector('.y1save').innerHTML = round(y1save,4)
+		  annualSave = baseAnnual - annualCost
+		  thisRow.querySelector('.annualSave').innerHTML = round(annualSave,4)
+		  thisRow.querySelector('.payback').innerHTML = round(Math.abs(y1save/annualSave),2)
+		  // update the costBen graph. TODO: values.
+		  costGrowthIndex = indexFind(costGrowth['series'], function (x) {return x.name == study})
+		  costSeries = []
+		  for (i=0;i<30;i++) {costSeries.push(round(baseCost-y1cost+i*(baseAnnual-annualCost),4))}
+		  costGrowth['series'][costGrowthIndex].setData(costSeries)
+	      }
+	  }
+      }
+      recalculateCostBenefit()
+    </script>
+  </div>
+</div>
