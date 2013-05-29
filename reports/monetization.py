@@ -21,17 +21,10 @@ def outputHtml(analysisName):
 	inputData = {}
 	with open (pathPrefix + '/reports/monetization.json') as reportFile:
 		reportOptions = json.load(reportFile)
-		def safeFloat(x):
-			if x=='': return 0
-			else:
-				try:
-					return float(x)
-				except ValueError:
-					return 0
-		inputData['distrEnergyRate'] = safeFloat(reportOptions['distrEnergyRate'])
-		inputData['distrCapacityRate'] = safeFloat(reportOptions['distrCapacityRate'])
-		inputData['equipAndInstallCost'] = safeFloat(reportOptions['equipAndInstallCost'])
-		inputData['opAndMaintCost'] = safeFloat(reportOptions['opAndMaintCost'])
+		inputData['distrEnergyRate'] = float(reportOptions['distrEnergyRate'])
+		inputData['distrCapacityRate'] = float(reportOptions['distrCapacityRate'])
+		inputData['equipAndInstallCost'] = float(reportOptions['equipAndInstallCost'])
+		inputData['opAndMaintCost'] = float(reportOptions['opAndMaintCost'])
 	# Pull in the power data:
 	studyDict = {}
 	timeStamps = []
@@ -40,8 +33,8 @@ def outputHtml(analysisName):
 		with open(pathPrefix + '/studies/' + study + '/cleanOutput.json') as outFile:
 			studyJson = json.load(outFile)
 			if studies[0] == study:
-				timeStamps = studyJson.get('timeStamps', [])
-			studyDict[study]['Power'] = studyJson.get('Consumption', {}).get('Power')
+				timeStamps = studyJson['timeStamps']
+			studyDict[study]['Power'] = studyJson['Consumption']['Power']
 	# What percentage of a year did we simulate?
 	intervalMap = {'minutes':60, 'hours':3600, 'days':86400}
 	inputData['yearPercentage'] = intervalMap[resolution]*len(timeStamps)/(365*24*60*60.0)
