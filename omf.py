@@ -14,6 +14,8 @@ import lib
 from werkzeug import secure_filename
 import milToGridlab
 import otherObjects
+import threading, thread
+import logging_system
 
 app = flask.Flask(__name__)
 
@@ -25,6 +27,15 @@ class backgroundProc(multiprocessing.Process):
 		multiprocessing.Process.__init__(self)
 	def run(self):
 		self.backFun(*self.funArgs)
+
+class background_thread(threading.Thread):
+    def __init__(self, backFun, funArgs):
+        threading.Thread.__init__(self)
+        self.backFun = backFun
+        self.funArgs = funArgs
+         
+    def run(self):
+        self.backFun(*self.funArgs)
 
 ###################################################
 # VIEWS
@@ -197,4 +208,6 @@ def milsoftImport():
 
 # This will run on all interface IPs.
 if __name__ == '__main__':
-	app.run(host='0.0.0.0', debug='False', port=5001)
+	thread_logging = background_thread(logging_system.logging_system(app).logging_run, (app,))
+	thread_logging.start()
+	app.run(host='0.0.0.0', debug=False, port=5001)
