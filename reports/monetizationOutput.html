@@ -137,17 +137,11 @@
 		  border:2px solid black;}
 
     td{
-
-	/* margin:0px; */
-	/* padding:0px; */
 	width:85px;
 	}
     th{
-	/* padding:-3px; */
-	/* margin:-3px; */
 	text-align:center;
 	border:1px solid black;
-	/* width:85px; */
 	margin:0px;
 	padding:0px;
 	}
@@ -189,9 +183,6 @@
       function pv_table_ui(){
 	  $(".collapseRates").css("cursor", "pointer");
 	  $(document).on("click", ".collapseRates", function(event){
-	      // $(".seasons").toggle();
-	      // console.log($(this).parent().siblings());
-
 	      if($(this).html() == "Collapse Rates")
 		  $(this).html("Expand Rates");
 	      else
