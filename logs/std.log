@@ -1,0 +1,36 @@
+2013-05-29 09:18:42,821 - INFO - werkzeug: 	<open file '<stdout>', mode 'w' at 0x0000000001E860C0>
+2013-05-29 09:18:42,821 - ERROR - werkzeug: 	<open file '<stderr>', mode 'w' at 0x0000000001E86150>
+2013-05-29 09:18:42,832 - INFO - werkzeug: 	 * Running on http://0.0.0.0:5001/
+2013-05-29 09:19:07,451 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 09:19:07] "GET / HTTP/1.1" 200 -
+2013-05-29 09:21:28,392 - INFO - werkzeug: 	<open file '<stdout>', mode 'w' at 0x0000000001DD60C0>
+2013-05-29 09:21:28,392 - ERROR - werkzeug: 	<open file '<stderr>', mode 'w' at 0x0000000001DD6150>
+2013-05-29 09:21:28,404 - INFO - werkzeug: 	 * Running on http://0.0.0.0:5001/
+2013-05-29 09:21:33,867 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 09:21:33] "GET / HTTP/1.1" 200 -
+2013-05-29 09:25:51,367 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 09:25:51] "GET /feeder/13%20Node%20Embedded%20DO%20NOT%20SAVE HTTP/1.1" 200 -
+2013-05-29 09:25:51,559 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 09:25:51] "GET /static/d3.v2.js HTTP/1.1" 304 -
+2013-05-29 09:25:51,739 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 09:25:51] "GET /static/jquery-1.8.3.min.js HTTP/1.1" 304 -
+2013-05-29 09:25:51,900 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 09:25:51] "GET /getComponents/ HTTP/1.1" 200 -
+2013-05-29 09:25:52,092 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 09:25:52] "GET /feederData/feeders/13%20Node%20Embedded%20DO%20NOT%20SAVE.json HTTP/1.1" 200 -
+2013-05-29 09:25:55,239 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 09:25:55] "GET / HTTP/1.1" 200 -
+2013-05-29 09:26:03,002 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 09:26:03] "GET /viewReports/zSolar%20Distributed%20VariablePen HTTP/1.1" 200 -
+2013-05-29 09:26:03,371 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 09:26:03] "GET /static/highcharts.min.js HTTP/1.1" 304 -
+2013-05-29 10:14:30,035 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 10:14:30] "GET / HTTP/1.1" 200 -
+2013-05-29 10:14:32,065 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 10:14:32] "GET /viewReports/zSolar%20Distributed%20VariablePen HTTP/1.1" 200 -
+2013-05-29 12:43:18,487 - INFO - werkzeug: 	<open file '<stdout>', mode 'w' at 0x0000000001F860C0>
+2013-05-29 12:43:18,487 - ERROR - werkzeug: 	<open file '<stderr>', mode 'w' at 0x0000000001F86150>
+2013-05-29 12:43:18,500 - INFO - werkzeug: 	 * Running on http://0.0.0.0:5001/
+2013-05-29 12:49:23,336 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 12:49:23] "GET / HTTP/1.1" 200 -
+2013-05-29 12:49:25,500 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 12:49:25] "GET /viewReports/zSolar%20Distributed%20VariablePen HTTP/1.1" 200 -
+2013-05-29 12:58:29,680 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 12:58:29] "GET / HTTP/1.1" 200 -
+2013-05-29 13:31:01,164 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 13:31:01] "GET / HTTP/1.1" 200 -
+2013-05-29 13:38:41,423 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 13:38:41] "GET / HTTP/1.1" 200 -
+2013-05-29 13:38:44,279 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 13:38:44] "GET /viewReports/zSolar%20Trio HTTP/1.1" 200 -
+2013-05-29 14:26:08,529 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 14:26:08] "GET / HTTP/1.1" 200 -
+2013-05-29 14:26:17,325 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 14:26:17] "GET /viewReports/zSolar%20Distributed%20VariablePen HTTP/1.1" 200 -
+2013-05-29 16:38:46,553 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 16:38:46] "GET / HTTP/1.1" 200 -
+2013-05-29 16:38:59,334 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 16:38:59] "GET /viewReports/zSolar%20Trio HTTP/1.1" 200 -
+2013-05-29 16:46:21,647 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 16:46:21] "GET /viewReports/zSolar%20Distributed%20VariablePen HTTP/1.1" 200 -
+2013-05-29 16:46:26,926 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 16:46:26] "GET /favicon.ico HTTP/1.1" 404 -
+2013-05-29 16:48:17,351 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 16:48:17] "GET / HTTP/1.1" 200 -
+2013-05-29 16:48:21,237 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 16:48:21] "GET /viewReports/zSolar%20Trio HTTP/1.1" 200 -
+2013-05-29 16:48:24,529 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 16:48:24] "GET /favicon.ico HTTP/1.1" 404 -
