@@ -34,3 +34,12 @@
 2013-05-29 16:48:17,351 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 16:48:17] "GET / HTTP/1.1" 200 -
 2013-05-29 16:48:21,237 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 16:48:21] "GET /viewReports/zSolar%20Trio HTTP/1.1" 200 -
 2013-05-29 16:48:24,529 - INFO - werkzeug: 	127.0.0.1 - - [29/May/2013 16:48:24] "GET /favicon.ico HTTP/1.1" 404 -
+2013-05-29 18:07:49,019 - INFO - werkzeug: 	<open file '<stdout>', mode 'w' at 0x0000000001DD60C0>
+2013-05-29 18:07:49,019 - ERROR - werkzeug: 	<open file '<stderr>', mode 'w' at 0x0000000001DD6150>
+2013-05-29 18:07:49,269 - INFO - werkzeug: 	 * Running on http://0.0.0.0:5001/
+2013-05-29 18:07:49,329 - INFO - werkzeug: 	 * Restarting with reloader
+2013-05-29 18:07:49,848 - INFO - werkzeug: 	<open file '<stdout>', mode 'w' at 0x0000000001D760C0>
+2013-05-29 18:07:49,848 - ERROR - werkzeug: 	<open file '<stderr>', mode 'w' at 0x0000000001D76150>
+2013-05-29 18:09:27,721 - INFO - werkzeug: 	<open file '<stdout>', mode 'w' at 0x0000000001D760C0>
+2013-05-29 18:09:27,723 - ERROR - werkzeug: 	<open file '<stderr>', mode 'w' at 0x0000000001D76150>
+2013-05-29 18:09:27,740 - INFO - werkzeug: 	 * Running on http://0.0.0.0:5001/
