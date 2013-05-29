@@ -21,7 +21,7 @@ def outputHtml(analysisName):
 			for cap in cleanOut['Capacitors']:
 				newCap = {'capName':cap}
 				# Draw the graphs:
-				graphParams = util.defaultGraphObject(resolution, cleanOut['timeStamps'][0])
+				graphParams = util.defaultGraphObject(resolution, cleanOut['timeStamps'][0] if cleanOut['timeStamps'] else "0001-01-01")
 				graphParams['chart']['renderTo'] = 'chartDiv' + study + cap
 				graphParams['chart']['height'] = 90
 				graphParams['chart']['type'] = 'area'

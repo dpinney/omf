@@ -1,7 +1,7 @@
 ﻿<head>
   <script type='text/javascript' src='/static/d3.v2.js'></script>
   <script type='text/javascript' src='/static/omf.js'></script>
-  <script type="text/javascript" src="/static/jquery-1.8.3.min.js"></script>
+  <script type="text/javascript" src="/static/jquery-1.10.0.js"></script>
   <link rel='stylesheet' href='/static/omf.css' />
   <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}' />
   <style type="text/css">
@@ -621,8 +621,6 @@
 	}
 	var table = gebi('selected');
 	table.deleteRow(-1);
-	// var attr_row = table.insertRow(-1);
-
 	$("#selected").append($("<tr>")
 			      .attr("class", "new_attr_row")
 			      .append($("<td>")
@@ -631,8 +629,9 @@
 					      .click(function(e){
 						  $(this).parent().parent().remove()
 					      })
-					      .addClass("deleteButton"))
-
+					      .addClass("deleteButton")
+					      .css("float", "left"))
+				      
 				      
 				      .append($("<input>")
 					      .css("display", "inline")
@@ -646,11 +645,9 @@
 					      .attr("type", "text")
 					      .attr("class", "new_attr_value")
 					      .attr("placeholder", "New Attribute's value"))));
-
-	
 	bump_buttons_down(table, treeIndex);
 	$("#focus_me").focus();
-	// $("#selected").parent().css("width", "75%");
+
 	
     }
 

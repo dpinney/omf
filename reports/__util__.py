@@ -18,7 +18,10 @@ def defaultGraphObject(resolution, startTimeStamp):
 		else:
 			# Handle those dang arbitrary timezones.
 			stampOb = datetime.strptime(dateTimeStamp.rsplit(' ',1)[0],'%Y-%m-%d %H:%M:%S')
-		return int(mktime(stampOb.timetuple()))*1000
+		try:
+			return int(mktime(stampOb.timetuple()))*1000
+		except OverflowError:
+			return 0
 	pointStart = getPointStart(startTimeStamp)
 	graphParameters = {
 		'chart':{'renderTo':'', 'marginRight':20, 'marginBottom':20, 'zoomType':'x'},

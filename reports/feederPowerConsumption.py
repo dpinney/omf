@@ -20,11 +20,11 @@ def outputHtml(analysisName):
 		allData[study] = {}
 		with open(pathPrefix + study + '/cleanOutput.json') as outFile:
 			studyJson = json.load(outFile)
-			allData[study]['Power'] = studyJson['Consumption']['Power']
+			allData[study]['Power'] = studyJson.get('Consumption', {}).get('Power', [])
 			allData[study]['totalEnergy'] = util.totalEnergy(allData[study]['Power'], resolution)
-			allData[study]['Losses'] = util.totalEnergy(studyJson['Consumption']['Losses'], resolution)
+			allData[study]['Losses'] = util.totalEnergy(studyJson.get('Consumption', {}).get('Losses', []), resolution)
 			allData[study]['Loads'] = allData[study]['totalEnergy'] - allData[study]['Losses']
-			if 'DG' in studyJson['Consumption']:
+			if 'DG' in studyJson.get('Consumption', {}):
 				allData[study]['DG'] = util.totalEnergy(studyJson['Consumption']['DG'], resolution)
 				allData[study]['Loads'] = allData[study]['totalEnergy'] - allData[study]['Losses'] + allData[study]['DG']
 			else:

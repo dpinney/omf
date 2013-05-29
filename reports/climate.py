@@ -24,7 +24,7 @@ def outputHtml(analysisName):
 		if 'climate' in cleanOut:
 			studyDict = {'studyName':study}
 			# Setting up the graph options:
-			graphParameters = util.defaultGraphObject(resolution, cleanOut['timeStamps'][0])
+			graphParameters = util.defaultGraphObject(resolution, cleanOut['timeStamps'][0] if cleanOut['timeStamps'] else "0001-01-01")
 			graphParameters['chart']['renderTo'] = 'climateChartDiv' + str(study)
 			graphParameters['chart']['type'] = 'line'
 			graphParameters['yAxis'] = {'title':{'text':'Climate Units', 'style':{'color':'gray'}}}
@@ -38,7 +38,7 @@ def outputHtml(analysisName):
 		template = Template(tempFile.read())
 	# If we've only got one real climate, hide the dups.
 	if climates < 2:
-		studyList = [studyList[0]]
+		studyList = [studyList[0]] if studyList else ''
 		title = False
 	# Write the results.
 	return template.render(studyList=studyList, title=title)

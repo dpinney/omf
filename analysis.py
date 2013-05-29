@@ -20,6 +20,10 @@ def listAll():
 		os.mkdir('analyses')
 	return os.listdir('analyses')
 
+
+def is_name_of_analysis(name):
+	return name in [getMetadata(x)['name'] for x in listAll()]
+
 def getMetadata(analysisName):
 	try:
 		with open('analyses/' + analysisName + '/metadata.json','r') as mdFile:
@@ -86,10 +90,20 @@ def run(analysisName):
 		with open('analyses/' + analysisName + '/studies/' + studyName + '/metadata.json') as studyMd:
 			studyType = json.load(studyMd)['studyType']
 		studyModule = getattr(studies, studyType)
-		studyModule.run(analysisName, studyName)
+		try:
+			studyModule.run(analysisName, studyName)
+		except Exception, e:
+			md = getMetadata(analysisName)
+			print "Got an error, but everything should be alright"
+			print e
+			md['status'] = 'ERROR'
+			putMetadata(analysisName, md)
+			with open('analyses/' + analysisName + '/studies/' + studyName + '/cleanOutput.json', 'w') as cleanOutput:
+				cleanOutput.write('{}')
+			# return
 	# Update status to postRun and include running time IF WE DIDN'T TERMINATE.
 	md = getMetadata(analysisName)
-	if md['status'] != 'terminated':
+	if md['status'] != 'terminated' and md['status'] != 'ERROR':
 		endTime = dt.datetime.now()
 		md['runTime'] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 		md['status'] = 'postRun'
