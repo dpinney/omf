@@ -25,6 +25,8 @@ def run(analysisName, studyName):
 		binary = solverRoot + "/linx64/gridlabd.bin"
 		enviro['GRIDLABD'] = solverRoot + "/linx64"
 		enviro['GLPATH'] = solverRoot + "/linx64"
+		# Uncomment the following line if we ever get all the linux libraries bundled. Hard!
+		# enviro['LD_LIBRARY_PATH'] = enviro['LD_LIBRARY_PATH'] + ':' + solverRoot + "/linx64"
 	else:
 		print "Platform not supported ", sys.platform
 		return False

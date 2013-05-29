@@ -13,7 +13,6 @@ def defaultGraphObject(resolution, startTimeStamp):
 	pointInterval = timeMap[resolution]*60*1000
 	maxZoom = pointInterval*30
 	def getPointStart(dateTimeStamp):
-		print dateTimeStamp
 		if dateTimeStamp[-1].isdigit():
 			stampOb = datetime.strptime(dateTimeStamp,'%Y-%m-%d')
 		else:

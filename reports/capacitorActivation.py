@@ -16,8 +16,6 @@ def outputHtml(analysisName):
 	for study in os.listdir(pathPrefix):
 		with open(pathPrefix + study + '/cleanOutput.json') as outFile:
 			cleanOut = json.load(outFile)
-			print "This works fine"
-			print pathPrefix
 		if 'Capacitors' in cleanOut:
 			newStudy = {'studyName':study, 'capList':[]}
 			for cap in cleanOut['Capacitors']:

@@ -12,12 +12,20 @@
 		input, button, label {margin-bottom:10px; font-size:16pt; padding:5px}
 		input[type='text'], input[type='password'] {width:300px}
 		label#remember {margin-left:75px; color:gray}
+		div#subLinks {display:inline-block;position:absolute;bottom:-60px;left:0px;line-height:50px}
+		a.menuEntry {display:inline-block; font-size:20pt; color:black; margin:0px; padding:7px 25px 7px 25px; text-decoration:none}
+
 	</style>
 </head>
 <body>
 	<div id='pusherRobot'></div>
 	<div id='container'>
-		<div class='subContainer' id='advertisingFrame'>Advertising </div>
+		<div class='subContainer' id='advertisingFrame'>Advertising
+			<div id='subLinks'>
+				<a class='menuEntry' id='discussionEntry' href='https://groups.google.com/forum/?fromgroups#!forum/open-modeling-framework'>✉ Discussion</a>
+				<a class='menuEntry' id='developerEntry' href='https://github.com/dpinney/omf'>∯ Development</a>
+			</div>
+		</div>
 		<div class='subContainer' id='login'>
 			<p id='loginTitle'>◬ Open Modeling Framework</p>
 			<form id='loginForm' method='POST' action='login'>
