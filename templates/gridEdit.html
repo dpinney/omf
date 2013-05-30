@@ -1134,8 +1134,7 @@
 	gebi('gravityBox').value = force.gravity()
 	gebi('thetaBox').value = force.theta()
 	gebi('frictionBox').value = force.friction()
-	//D3 is crazy, linkStrength is a functor but none of the other variables are. WTF?
-	gebi('linkStrengthBox').value = force.linkStrength()()
+	gebi('linkStrengthBox').value = force.linkStrength()
     }
 
     function layoutMenuApply() {
