@@ -94,8 +94,7 @@ def run(analysisName):
 			studyModule.run(analysisName, studyName)
 		except Exception, e:
 			md = getMetadata(analysisName)
-			print "Got an error, but everything should be alright"
-			print e
+			print "Got an error, but everything should be alright. Error:", e
 			md['status'] = 'ERROR'
 			putMetadata(analysisName, md)
 			with open('analyses/' + analysisName + '/studies/' + studyName + '/cleanOutput.json', 'w') as cleanOutput:
