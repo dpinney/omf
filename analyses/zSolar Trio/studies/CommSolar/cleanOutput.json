@@ -787,7 +787,7 @@
             2048.8996404743693
         ]
     }, 
-    "stdout": "Core profiler results\n=====================\n\nTotal objects                 42 objects\nParallelism                    1 thread\nTotal time                   2.0 seconds\n  Core time                  1.9 seconds (93.0%)\n  Model time                 0.1 seconds/thread (7.1%)\nSimulation time                4 days\nSimulation speed             2.0k object.hours/second\nSyncs completed             2801 passes\nTime steps completed        1554 timesteps\nConvergence efficiency      1.80 passes/timestep\nMemory lock contention       0.0%\nAverage timestep             222 seconds/timestep\nSimulation rate           172800 x realtime\n\n\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\nplayer             0.046     32.6%     46.0\nrecorder           0.026     18.4%      8.7\ncollector          0.026     18.4%      6.5\ntriplex_meter      0.012      8.5%      4.0\ntriplex_line       0.007      5.0%      3.5\nhouse              0.005      3.5%      2.5\nZIPload            0.004      2.8%      0.5\nwaterheater        0.003      2.1%      1.5\nnode               0.003      2.1%      1.5\ntransformer        0.003      2.1%      1.5\nclimate            0.002      1.4%      2.0\nregulator          0.002      1.4%      2.0\nsolar              0.001      0.7%      1.0\ntriplex_node       0.001      0.7%      1.0\n================ ======== ======== ========\nTotal              0.141    100.0%      3.4", 
+    "stdout": "Core profiler results\n=====================\n\nTotal objects                 42 objects\nParallelism                    1 thread\nTotal time                   1.0 seconds\n  Core time                  0.9 seconds (87.6%)\n  Model time                 0.1 seconds/thread (12.4%)\nSimulation time                4 days\nSimulation speed             4.0k object.hours/second\nSyncs completed             2801 passes\nTime steps completed        1554 timesteps\nConvergence efficiency      1.80 passes/timestep\nMemory lock contention       0.0%\nAverage timestep             222 seconds/timestep\nSimulation rate           345600 x realtime\n\n\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\nplayer             0.045     36.3%     45.0\ncollector          0.020     16.1%      5.0\nrecorder           0.014     11.3%      4.7\ntriplex_meter      0.012      9.7%      4.0\nhouse              0.006      4.8%      3.0\nwaterheater        0.005      4.0%      2.5\nnode               0.005      4.0%      2.5\nregulator          0.004      3.2%      4.0\ntriplex_node       0.003      2.4%      3.0\nsolar              0.002      1.6%      2.0\nclimate            0.002      1.6%      2.0\nZIPload            0.002      1.6%      0.3\ntransformer        0.002      1.6%      1.0\ntriplex_line       0.002      1.6%      1.0\n================ ======== ======== ========\nTotal              0.124    100.0%      3.0", 
     "allMeterVoltages": {
         "Max": [
             241.495, 
@@ -1908,7 +1908,7 @@
             ]
         }
     }, 
-    "stderr": "Processing 2012-06-07 03:22:00 PDT...", 
+    "stderr": "", 
     "timeStamps": [
         "2012-06-06 00:00:00 PDT", 
         "2012-06-06 01:00:00 PDT", 
