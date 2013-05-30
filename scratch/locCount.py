@@ -11,7 +11,7 @@ import os
 
 def cleanList(inList):
 	goodSuffixes = ['py','js','htm','html']
-	libraries = ['d3.v2.js','highcharts.src.js','jquery-1.10.0.js']
+	libraries = ['d3.v3.js','highcharts.src.js','jquery-1.10.0.js']
 	return [x for x in inList if (x.split('.')[-1] in goodSuffixes and x not in libraries)]
 
 def lineCount(fileName):
