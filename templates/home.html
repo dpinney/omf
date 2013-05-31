@@ -49,12 +49,16 @@
 	    data:{analysisName:analysisName}
 
 	}).done(function(data){
-	    $("#"+analysisName).html($(data).html());
+	    console.log("sent the request!");
+	    console.log(data);
+	    $("#"+analysisName.replace(/ /g, '_')).html($(data).html());
 	    startPolling({"name":analysisName});
 	    return false;
 	});
 	return false;
     }
+
+
 
     function startPolling(md){
 	var i = setInterval(function(){
@@ -63,7 +67,7 @@
 		data:{name:md.name}
 	    }).done(function(data){
 		if (data != "waiting"){
-		    $("#"+md.name).html($(data).html());
+		    $("#"+md.name.replace(/ /g, '_')).html($(data).html());
 		    clearInterval(i);
 		}
 	    });
