@@ -106,4 +106,4 @@ if __name__ == '__main__':
 	print 'What was that MD?', test.getMetadata('feeder', 'testFeeder')
 	print 'List something.', test.listAll('feeder')
 	# Cleanup:
-	# shutil.rmtree('./testFileStore/')
+	shutil.rmtree('./testFileStore/')
