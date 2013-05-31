@@ -1,7 +1,6 @@
 {
+    "links": [], 
     "hiddenNodes": [], 
-    "hiddenLinks": [], 
-    "nodes": [], 
     "tree": {
         "0": {
             "timezone": "PST+8PDT", 
@@ -11,72 +10,48 @@
         }, 
         "1": {
             "omftype": "#include", 
-            "argument": "\"HVAC_schedule.glm\""
+            "argument": "\"schedules.glm\""
         }, 
         "2": {
-            "omftype": "#include", 
-            "argument": "\"water_schedule.glm\""
-        }, 
-        "3": {
-            "omftype": "#include", 
-            "argument": "\"appliance_schedule.glm\""
-        }, 
-        "4": {
             "omftype": "#set", 
             "argument": "minimum_timestep=60"
         }, 
-        "5": {
+        "3": {
             "omftype": "#set", 
             "argument": "profiler=1"
         }, 
-        "6": {
+        "4": {
             "omftype": "#set", 
             "argument": "relax_naming_rules=1"
         }, 
-        "7": {
+        "5": {
             "omftype": "module", 
             "argument": "generators"
         }, 
-        "8": {
+        "6": {
             "omftype": "module", 
             "argument": "tape"
         }, 
-        "9": {
+        "7": {
             "omftype": "module", 
             "argument": "climate"
         }, 
-        "10": {
+        "8": {
             "module": "residential", 
             "implicit_enduses": "NONE"
         }, 
-        "11": {
+        "9": {
             "solver_method": "NR", 
             "NR_iteration_limit": "50", 
             "module": "powerflow"
         }, 
-        "12": {
-            "omftype": "module", 
-            "argument": "market"
-        }, 
-        "13": {
-            "object": "stubauction", 
-            "name": "Market_1", 
-            "period": "300"
-        }, 
-        "14": {
-            "property": "current_market.clearing_price", 
-            "object": "player", 
-            "file": "Price.player", 
-            "parent": "Market_1", 
-            "loop": "365"
-        }, 
-        "15": {
+        "10": {
             "object": "climate", 
             "name": "\"climate\"", 
             "interpolate": "QUADRATIC", 
             "tmyfile": "\"climate.tmy2\""
         }, 
-        "16": {
+        "11": {
             "Control": "MANUAL", 
             "Type": "A", 
             "raise_taps": "16", 
@@ -94,7 +69,7 @@
             "PT_phase": "ABC", 
             "band_width": "50"
         }, 
-        "17": {
+        "12": {
             "diameter": "0.368", 
             "name": "trip_line_config", 
             "object": "triplex_line_configuration", 
@@ -103,13 +78,13 @@
             "conductor_N": "tlc", 
             "insulation_thickness": "0.08"
         }, 
-        "18": {
+        "13": {
             "geometric_mean_radius": "0.01111", 
             "object": "triplex_line_conductor", 
             "resistance": "0.97", 
             "name": "tlc"
         }, 
-        "19": {
+        "14": {
             "impedance1": "0.012000+0.006800j", 
             "name": "fifteen_fifteen_A", 
             "primary_voltage": "4160.0V", 
@@ -122,7 +97,7 @@
             "impedance": "0.006000+0.013600j", 
             "power_rating": "500"
         }, 
-        "20": {
+        "15": {
             "power_rating": "500", 
             "primary_voltage": "4160", 
             "install_type": "PADMOUNT", 
@@ -133,7 +108,7 @@
             "reactance": "0.02", 
             "name": "transformer_configuration_400"
         }, 
-        "21": {
+        "16": {
             "phases": "ABCN", 
             "name": "n650", 
             "object": "node", 
@@ -143,7 +118,7 @@
             "voltage_A": "2401.7771", 
             "nominal_voltage": "2401.7771"
         }, 
-        "22": {
+        "17": {
             "phases": "ABC", 
             "from": "n650", 
             "name": "Reg1", 
@@ -151,7 +126,7 @@
             "to": "n630", 
             "configuration": "regulator_configuration_6506321"
         }, 
-        "23": {
+        "18": {
             "phases": "ABCN", 
             "name": "n630", 
             "object": "node", 
@@ -160,7 +135,7 @@
             "voltage_A": "2401.7771", 
             "nominal_voltage": "2401.7771"
         }, 
-        "24": {
+        "19": {
             "phases": "AS", 
             "from": "n630", 
             "name": "T1", 
@@ -169,7 +144,7 @@
             "configuration": "tconf", 
             "groupid": "Distribution_Trans"
         }, 
-        "25": {
+        "20": {
             "name": "tconf", 
             "primary_voltage": "2401.777", 
             "install_type": "POLETOP", 
@@ -180,7 +155,7 @@
             "impedance": "0.00033+0.0022j", 
             "powerA_rating": "110 kVA"
         }, 
-        "26": {
+        "21": {
             "name": "tconf2", 
             "primary_voltage": "2401.777", 
             "install_type": "POLETOP", 
@@ -191,7 +166,7 @@
             "impedance": "0.00033+0.0022j", 
             "powerB_rating": "110 kVA"
         }, 
-        "27": {
+        "22": {
             "phases": "BS", 
             "from": "n630", 
             "name": "T2", 
@@ -200,19 +175,19 @@
             "configuration": "tconf2", 
             "groupid": "Distribution_Trans"
         }, 
-        "28": {
+        "23": {
             "phases": "AS", 
             "object": "triplex_node", 
             "nominal_voltage": "120", 
             "name": "tn_1"
         }, 
-        "29": {
+        "24": {
             "phases": "BS", 
             "object": "triplex_meter", 
             "nominal_voltage": "120", 
             "name": "tn_2"
         }, 
-        "30": {
+        "25": {
             "phases": "AS", 
             "from": "tn_1", 
             "name": "tl_1", 
@@ -221,7 +196,7 @@
             "length": "100", 
             "configuration": "trip_line_config"
         }, 
-        "31": {
+        "26": {
             "phases": "BS", 
             "from": "tn_2", 
             "name": "t2", 
@@ -230,19 +205,19 @@
             "length": "100", 
             "configuration": "trip_line_config"
         }, 
-        "32": {
+        "27": {
             "phases": "AS", 
             "object": "triplex_meter", 
             "nominal_voltage": "120", 
             "name": "tm_1"
         }, 
-        "33": {
+        "28": {
             "phases": "BS", 
             "object": "triplex_meter", 
             "nominal_voltage": "120", 
             "name": "tm_2"
         }, 
-        "34": {
+        "29": {
             "schedule_skew": "-810", 
             "auxiliary_system_type": "ELECTRIC", 
             "name": "house1", 
@@ -263,7 +238,7 @@
             "motor_efficiency": "GOOD", 
             "motor_model": "BASIC"
         }, 
-        "35": {
+        "30": {
             "schedule_skew": "-810", 
             "demand": "water14*1", 
             "name": "waterheater1", 
@@ -277,7 +252,7 @@
             "tank_UA": "2.4", 
             "temperature": "135"
         }, 
-        "36": {
+        "31": {
             "parent": "house1", 
             "name": "convenienceLoads1", 
             "power_fraction": "0.100000", 
@@ -290,7 +265,7 @@
             "impedance_fraction": "0.800000", 
             "groupid": "plugload"
         }, 
-        "37": {
+        "32": {
             "parent": "house1", 
             "name": "lights1", 
             "power_fraction": "0.003200", 
@@ -303,7 +278,7 @@
             "impedance_fraction": "0.571100", 
             "groupid": "lights"
         }, 
-        "38": {
+        "33": {
             "parent": "house1", 
             "name": "television1", 
             "power_fraction": "0.998700", 
@@ -316,7 +291,7 @@
             "impedance_fraction": "-0.038300", 
             "groupid": "TV"
         }, 
-        "39": {
+        "34": {
             "parent": "house1", 
             "name": "fan1", 
             "power_fraction": "0.013500", 
@@ -329,7 +304,7 @@
             "impedance_fraction": "0.733200", 
             "groupid": "fan"
         }, 
-        "40": {
+        "35": {
             "auxiliary_system_type": "ELECTRIC", 
             "name": "house2", 
             "parent": "tm_2", 
@@ -349,7 +324,7 @@
             "motor_efficiency": "GOOD", 
             "motor_model": "BASIC"
         }, 
-        "41": {
+        "36": {
             "schedule_skew": "-810", 
             "demand": "water14*1", 
             "name": "waterheater2", 
@@ -363,7 +338,7 @@
             "tank_UA": "2.4", 
             "temperature": "135"
         }, 
-        "42": {
+        "37": {
             "parent": "house2", 
             "name": "convenienceLoads2", 
             "power_fraction": "0.100000", 
@@ -376,7 +351,7 @@
             "impedance_fraction": "0.800000", 
             "groupid": "plugload"
         }, 
-        "43": {
+        "38": {
             "parent": "house2", 
             "name": "lights2", 
             "power_fraction": "0.003200", 
@@ -389,7 +364,7 @@
             "impedance_fraction": "0.571100", 
             "groupid": "lights"
         }, 
-        "44": {
+        "39": {
             "parent": "house2", 
             "name": "television2", 
             "power_fraction": "0.998700", 
@@ -402,7 +377,7 @@
             "impedance_fraction": "-0.038300", 
             "groupid": "TV"
         }, 
-        "45": {
+        "40": {
             "parent": "house2", 
             "name": "fan2", 
             "power_fraction": "0.013500", 
@@ -415,7 +390,7 @@
             "impedance_fraction": "0.733200", 
             "groupid": "fan"
         }, 
-        "46": {
+        "41": {
             "phases": "AS", 
             "power_factor": "1.0", 
             "name": "inverter46", 
@@ -425,7 +400,7 @@
             "object": "inverter", 
             "generator_mode": "CONSTANT_PF"
         }, 
-        "47": {
+        "42": {
             "generator_mode": "SUPPLY_DRIVEN", 
             "name": "solar47", 
             "parent": "inverter46", 
@@ -435,7 +410,7 @@
             "efficiency": "0.2", 
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
-        "48": {
+        "43": {
             "phases": "AS", 
             "power_factor": "1.0", 
             "name": "inverter48", 
@@ -445,7 +420,7 @@
             "object": "inverter", 
             "generator_mode": "CONSTANT_PF"
         }, 
-        "49": {
+        "44": {
             "generator_mode": "SUPPLY_DRIVEN", 
             "name": "solar49", 
             "parent": "inverter48", 
@@ -456,5 +431,12 @@
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }
     }, 
-    "links": []
+    "nodes": [], 
+    "hiddenLinks": [], 
+    "layoutVars": {
+        "theta": "0.8", 
+        "gravity": "0.1", 
+        "friction": "0.9", 
+        "linkStrength": "1"
+    }
 }

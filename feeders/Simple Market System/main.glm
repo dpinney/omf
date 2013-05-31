@@ -6,9 +6,7 @@ clock {
      stoptime '2000-01-10 00:00:00';
 };
 
-#include "HVAC_schedule.glm";
-#include "water_schedule.glm";
-#include "appliance_schedule.glm";
+#include "schedules.glm";
 #set minimum_timestep=60;
 #set profiler=1;
 #set relax_naming_rules=1;
@@ -23,20 +21,6 @@ module residential {
 module powerflow {
      solver_method NR;
      NR_iteration_limit 50;
-};
-
-module market;
-
-object stubauction {
-     name Market_1;
-     period 300;
-};
-
-object player {
-      parent Market_1;
-      file Price.player;
-      loop 365;
-      property current_market.clearing_price;
 };
 
 object climate {
