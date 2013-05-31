@@ -11,8 +11,8 @@ def listAll():
 	return os.listdir('feeders')
 
 def tokenizeGlm(glmFileName):
-	glmFile = open(glmFileName)
-	data = glmFile.read()
+	with open(glmFileName,'r') as glmFile:
+		data = glmFile.read()
 	# Get rid of http for stylesheets because we don't need it and it conflicts with comment syntax.
 	data = re.sub(r'http:\/\/', '', data)  
 	# Strip comments.
