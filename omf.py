@@ -15,7 +15,7 @@ from werkzeug import secure_filename
 import milToGridlab
 import otherObjects
 import threading, thread
-import logging_system
+# import logging_system
 
 app = flask.Flask(__name__)
 
@@ -213,6 +213,6 @@ def milsoftImport():
 
 # This will run on all interface IPs.
 if __name__ == '__main__':
-	thread_logging = background_thread(logging_system.logging_system(app).logging_run, (app,))
-	thread_logging.start()
-	app.run(host='0.0.0.0', debug=False, port=5001)
+	# thread_logging = background_thread(logging_system.logging_system(app).logging_run, (app,))
+	# thread_logging.start()
+	app.run(host='0.0.0.0', debug=True, port=5001)
