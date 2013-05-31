@@ -98,11 +98,11 @@ def viewReports(analysisName):
 
 @app.route('/feeder/<feederName>')
 def feederGet(feederName):
-	return flask.render_template('gridEdit.html', feederName=feederName, path='feeders')
+	return flask.render_template('gridEdit.html', feederName=feederName, path='feeders/')
 
 @app.route('/analysisFeeder/<analysis>/<study>')
 def analysisFeeder(analysis, study):
-	return flask.render_template('gridEdit.html', feederName=study, path='analyses/' + analysis + '/studies')
+	return flask.render_template('gridEdit.html', feederName=study, path='analyses/' + analysis + '/studies/' + study)
 
 
 ####################################################
@@ -140,9 +140,11 @@ def terminate():
 
 @app.route('/feederData/<path:path>/<feederName>.json')
 def feederData(path, feederName):
-	#Todo: fix case where we're pulling the feeder from an analysis.
-	fullPrefix = './' + path + '/'
-	with open(fullPrefix + feederName + '.json') as jsonFile:
+	if path.startswith('feeders/'):
+		fileName = './' + path + '/' + feederName + '.json'
+	else:
+		fileName = './' + path + '/main.json'
+	with open(fileName) as jsonFile:
 		return jsonFile.read()
 
 @app.route('/getComponents/')

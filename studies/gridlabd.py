@@ -17,7 +17,7 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 	os.mkdir(studyPath)
 	# copy over the feeder file:
 	feederPath = 'feeders/' + studyConfig['feederName'] + '.json'
-	shutil.copyfile(feederPath, studyPath + '/' + studyConfig['feederName'] + '.json')
+	shutil.copyfile(feederPath, studyPath + '/main.json')
 	# Attach recorders:
 	with open(feederPath,'r') as feederFile:
 		thisFeeder = json.load(feederFile)
