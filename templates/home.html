@@ -1,141 +1,175 @@
 <head>
-	<title>Open Modeling Framework</title>
-	<meta charset='utf-8'>
-	<link rel='stylesheet' href='/static/omf.css'/>
-	<script type='text/javascript' src='/static/omf.js'></script>
-	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
-	<style>
-		div#feeders {display:none;}
-		table#anaTable {width:100%; text-align:left;}
-		table#anaTable tr td:last-child {text-align:right;}
-		table#anaTable tr th:last-child {text-align:right;}
-		div#toolbar {padding: 0px; height:40px; line-height:40px;} /*over-riding some toolbar defaults so tabs look good.*/
-		p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
-		p.tabSelected {background:gray; color:white;}
-		td.running {color:red;}
-		td.preRun {color:orange;}
-		td.postRun {color:black;}
-		td.terminated {color:purple;}
-		td {border-bottom:1px dashed gray;}
-		tr:last-child td {border-bottom:none;}
-		table.importOptions {width:70%; text-align:left; margin-left:auto;}
-		table.importOptions tr td:first-child {width:40%;}
-		table.importOptions td {border-bottom: none}
-		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
-		a#consoleLink {width:20px; height:20px; position:absolute; top:0; right:0; background-color:dimgray; border-bottom-left-radius:5px; color: #303030; text-align:center;}
-	</style>
-	<script>
-		// CODE FOR AUTOMATICALLY REFRESHING THE HOMEPAGE:
-		// intervalID = window.setInterval(analysisStatusCheck, 5000)
-		// function analysisStatusCheck() {
-		// 	back = ajaxReq('GET', '/runStatus/', false)
-		// 	console.log(back)
-		// }
+  <title>Open Modeling Framework</title>
+  <meta charset='utf-8'>
+  <link rel='stylesheet' href='/static/omf.css'/>
+  <script type='text/javascript' src='/static/omf.js'></script>
+  <script type='text/javascript' src='/static/jquery-1.10.0.js'></script>
+  <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
+  <style>
+    div#feeders {display:none;}
+    table#anaTable {width:100%; text-align:left;}
+    table#anaTable tr td:last-child {text-align:right;}
+    table#anaTable tr th:last-child {text-align:right;}
+    div#toolbar {padding: 0px; height:40px; line-height:40px;} /*over-riding some toolbar defaults so tabs look good.*/
+    p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
+    p.tabSelected {background:gray; color:white;}
+    td.running {color:red;}
+    td.preRun {color:orange;}
+    td.postRun {color:black;}
+    td.terminated {color:purple;}
+    td {border-bottom:1px dashed gray;}
+    tr:last-child td {border-bottom:none;}
+    table.importOptions {width:70%; text-align:left; margin-left:auto;}
+    table.importOptions tr td:first-child {width:40%;}
+    table.importOptions td {border-bottom: none}
+    input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
+    a#consoleLink {width:20px; height:20px; position:absolute; top:0; right:0; background-color:dimgray; border-bottom-left-radius:5px; color: #303030; text-align:center;}
+  </style>
+  <script>
+   
 
-		window.onload = function() {if (window.location.hash=='#feeders') {gebi('feedersTab').click()}}
+    $(function(){
+	$(document).on("click", ".run, .reRun", function(e){
+	    e.preventDefault();
+	    return false;
+	});
+	var metadatas = pull_html_data();
+	var i;
+	for(i=0; i<metadatas.length; i++){
+	    startPolling(metadatas[i]);
+	}
+    });
 
-		function feedersClick() {
-			window.location.hash = 'feeders'
-			gebi('analyses').style.display = 'none'
-			gebi('feeders').style.display = 'inline'
-			gebi('analysesTab').className = 'tab'
-			gebi('feedersTab').className = 'tab tabSelected'
+    function run_analysis(url, analysisName){
+	console.log(url);
+	console.log(analysisName);
+	$.ajax({
+	    type:"post",
+	    url:url,
+	    data:{analysisName:analysisName}
+
+	}).done(function(data){
+	    $("#"+analysisName).html($(data).html());
+	    startPolling({"name":analysisName});
+	    return false;
+	});
+	return false;
+    }
+
+    function startPolling(md){
+	var i = setInterval(function(){
+	    $.ajax({
+		url:"/runStatus",
+		data:{name:md.name}
+	    }).done(function(data){
+		if (data != "waiting"){
+		    $("#"+md.name).html($(data).html());
+		    clearInterval(i);
 		}
+	    });
+	}, 5000);
+    }
 
-		function analysesClick() {
-			window.location.hash = ''
-			gebi('analyses').style.display = 'inline'
-			gebi('feeders').style.display = 'none'
-			gebi('analysesTab').className = 'tab tabSelected'
-			gebi('feedersTab').className = 'tab'
-		}
+    function pull_html_data(){
+	var metadatas = [];
+	for(i=0; i<$(".analysis").length; i++){
+	    var attr_names = ["name", "sourceFeeder", "climate", "runTime", "status"];
+	    var md={};
+	    for(j=0; j<attr_names.length; j++){
+		md[attr_names[j]] = $($(".analysis")[i]).children("."+attr_names[j]).html();
+	    }
+	    if (md.status == "running"){
+		console.log(md);
+		metadatas.push(md);
+	    }
+	}
+	return metadatas;
+    }
+    window.onload = function() {if (window.location.hash=='#feeders') {gebi('feedersTab').click()}}
 
-	</script>
+    function feedersClick() {
+	window.location.hash = 'feeders'
+	gebi('analyses').style.display = 'none'
+	gebi('feeders').style.display = 'inline'
+	gebi('analysesTab').className = 'tab'
+	gebi('feedersTab').className = 'tab tabSelected'
+    }
+
+    function analysesClick() {
+	window.location.hash = ''
+	gebi('analyses').style.display = 'inline'
+	gebi('feeders').style.display = 'none'
+	gebi('analysesTab').className = 'tab tabSelected'
+	gebi('feedersTab').className = 'tab'
+    }
+
+  </script>
 </head>
 <body>
-	<a id='consoleLink' href='/console'>C</a>
-	<div id='title'>
-		<div id='logoBox'><a href='/'>▦</a></div>
-		<!--Title:-->Open Modeling Framework
-	</div>
-	<div id='toolbar'>
-		<p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Analyses</p>
-		<p id='feedersTab' class='tab' style='' onclick='feedersClick()'>Feeders</p>
-	</div>
-	<div id='analyses'>
-		<div class='content'>
-			<table id='anaTable'>
-				<tr><thead><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr></thead>
-				<tbody>
-					{% for md in metadatas %}
-					<tr>
-						<td>{{ md['name'] }}</td>
-						<td>{{ md['sourceFeeder'] }}</td>
-						<td>{{ md['climate'] }}</td>
-						<td>{{ md['runTime'] }}</td>
-						<td class="{{ md['status'] }}">{{ md['status'] }}</td>
-						<td>
-							<div class='buttonGroup'>
-								<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
-								<ul class='menu right'>
-									{% if md['status'] == 'postRun' or md['status'] == 'ERROR' %}<li><a href='/viewReports/{{ md["name"] }}'>View Reports</a></li>{% endif %}
-									{% if md['status'] == 'preRun' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/run/",dict)')>Run</a></li>{% endif %}
-									{% if md['status'] == 'postRun' or md['status'] == 'terminated' or md['status'] == 'ERROR' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/reRun/",dict)'>Re-Run</a></li>{% endif %}
-									{% if md['status'] != 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/",dict)'>Delete</a></li>{% endif %}
-									{% if md['status'] == 'running' %}<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/",dict)'>Terminate</a></li>{% endif %}
-									<li><a href='/newAnalysis/{{ md["name"] }}'>Duplicate</a></li>
-								</ul>
-							</div>
-						</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-		<div class='content'><a href='/newAnalysis/'>New Analysis</a></div>
-	</div>
-	<div id='feeders'>
-		<div class='content'>
-			<table id='anaTable'>
-				<tr><thead><th>Feeder Name</th><th>Status</th></tr></thead>
-				<tbody>
-					{% for feed in feeders %}
-					<tr>
-						<td><a href='/feeder/{{ feed }}'>{{ feed }}</a></td>
-						<td>Ready</td>
-					</tr>
-					{% endfor %}
-					{% for feed in conversions %}
-					<tr>
-						<td>{{ feed }}</td>
-						<td class='running'>Processing</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-		<div class='content'>
-			<form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
-				<p style='font-weight:bold;float:left'>Milsoft Feeder Import</p>
-				<table class='importOptions'>
-					<tr>
-						<td>Feeder Name</td>
-						<td><input type='text' name='feederName'/></td>
-					</tr>
-					<tr>
-						<td>Feeder Data File (.std)</td>
-						<td><input type='file' name='stdFile'/></td>
-					</tr>
-					<tr>
-						<td>Equipment Database File (.seq)</td>
-						<td><input type='file' name='seqFile'/></td>
-					</tr>
-					<tr>
-						<td></td>
-						<td><input type='submit' value='Begin Import'/></td>
-					</tr>
-				</table>
-			</form>
-		</div>
-	</div>
+  <a id='consoleLink' href='/console'>C</a>
+  <div id='title'>
+    <div id='logoBox'><a href='/'>▦</a></div>
+    <!--Title:-->Open Modeling Framework
+  </div>
+  <div id='toolbar'>
+    <p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Analyses</p>
+    <p id='feedersTab' class='tab' style='' onclick='feedersClick()'>Feeders</p>
+  </div>
+  <div id='analyses'>
+    <div class='content'>
+      <table id='anaTable'>
+	<tr><thead><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr></thead>
+<tbody>
+  {% for md in metadatas %}
+  {% include 'metadata.html' %}
+  {% endfor %}
+</tbody>
+</table>
+</div>
+<div class='content'><a href='/newAnalysis/'>New Analysis</a></div>
+</div>
+<div id='feeders'>
+  <div class='content'>
+    <table id='anaTable'>
+      <tr><thead><th>Feeder Name</th><th>Status</th></tr></thead>
+<tbody>
+  {% for feed in feeders %}
+  <tr>
+    <td><a href='/feeder/{{ feed }}'>{{ feed }}</a></td>
+    <td>Ready</td>
+  </tr>
+  {% endfor %}
+  {% for feed in conversions %}
+  <tr>
+    <td>{{ feed }}</td>
+    <td class='running'>Processing</td>
+  </tr>
+  {% endfor %}
+</tbody>
+</table>
+</div>
+<div class='content'>
+  <form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
+    <p style='font-weight:bold;float:left'>Milsoft Feeder Import</p>
+    <table class='importOptions'>
+      <tr>
+	<td>Feeder Name</td>
+	<td><input type='text' name='feederName'/></td>
+      </tr>
+      <tr>
+	<td>Feeder Data File (.std)</td>
+	<td><input type='file' name='stdFile'/></td>
+      </tr>
+      <tr>
+	<td>Equipment Database File (.seq)</td>
+	<td><input type='file' name='seqFile'/></td>
+      </tr>
+      <tr>
+	<td></td>
+	<td><input type='submit' value='Begin Import'/></td>
+      </tr>
+    </table>
+  </form>
+</div>
+</div>
 </body>

@@ -15,7 +15,7 @@ from werkzeug import secure_filename
 import milToGridlab
 import otherObjects
 import threading, thread
-# import logging_system
+import logging_system
 
 app = flask.Flask(__name__)
 
@@ -52,6 +52,7 @@ def root():
 	if browser == 'msie':
 		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
 	else:
+		
 		return flask.render_template('home.html', metadatas=metadatas, feeders=feeders, conversions=conversions)
 
 @app.route('/newAnalysis/')
@@ -115,10 +116,11 @@ def uniqueName(name):
 @app.route('/run/', methods=['POST'])
 @app.route('/reRun/', methods=['POST'])
 def run():
-	runProc = backgroundProc(analysis.run, [flask.request.form['analysisName']])
+	runProc = backgroundProc(analysis.run, [flask.request.form.get('analysisName')])
 	runProc.start()
-	time.sleep(1)
-	return flask.redirect(flask.url_for('root'))
+	md = analysis.getMetadata(flask.request.form.get('analysisName'))
+	md['status'] = 'running'
+	return flask.render_template('metadata.html', md=md)
 
 @app.route('/delete/', methods=['POST'])
 def delete():
@@ -183,12 +185,15 @@ def updateGlm():
 		json.dump(outDict, jsonCache, indent=4)
 	return flask.redirect(flask.url_for('root') + '#feeders')
 
-@app.route('/runStatus/')
+@app.route('/runStatus')
 def runStatus():
-	''' Gives all analysis MD info. Useful for updating home.html automatically. '''
-	analyses = analysis.listAll()
-	statuses = {ana:analysis.getMetadata(ana)['status'] for ana in analysis.listAll()}
-	return json.dumps(statuses)
+	name = flask.request.args.get('name')
+	md = analysis.getMetadata(name)
+	if md['status'] != 'running':
+		return flask.render_template('metadata.html', md=md)
+	else:
+		return flask.Response("waiting", content_type="text/plain")
+	
 
 @app.route('/milsoftImport/', methods=['POST'])
 def milsoftImport():
@@ -208,6 +213,6 @@ def milsoftImport():
 
 # This will run on all interface IPs.
 if __name__ == '__main__':
-	# thread_logging = background_thread(logging_system.logging_system(app).logging_run, (app,))
-	# thread_logging.start()
+	thread_logging = background_thread(logging_system.logging_system(app).logging_run, (app,))
+	thread_logging.start()
 	app.run(host='0.0.0.0', debug=False, port=5001)
