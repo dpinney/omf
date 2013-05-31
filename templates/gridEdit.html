@@ -267,7 +267,7 @@
 
 	node = vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).enter()
 	    .append("g")
-	    //.call(force.drag)
+	    .call(force.drag)
 	    .attr('class', function(d) {return 'node ' + d.objectType})
 	    .attr('id', function(d) {return 'n' + d.treeIndex})
 	    .on('click', onCompClick)
