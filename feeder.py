@@ -8,7 +8,7 @@ import re
 def listAll():
 	if 'feeders' not in os.listdir('.'):
 		os.mkdir('feeders')
-	return os.listdir('feeders')
+	return [x[0:-5] for x in os.listdir('feeders')]
 
 def tokenizeGlm(glmFileName):
 	with open(glmFileName,'r') as glmFile:

@@ -15,12 +15,13 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 	studyPath = 'analyses/' + analysisName + '/studies/' + studyConfig['studyName']
 	# make the study folder:
 	os.mkdir(studyPath)
-	# copy over the feeder files:
-	feederPath = 'feeders/' + studyConfig['feederName']
-	for fileName in  os.listdir(feederPath):
-		shutil.copyfile(feederPath + '/' + fileName, studyPath + '/' + fileName)
+	# copy over the feeder file:
+	feederPath = 'feeders/' + studyConfig['feederName'] + '.json'
+	shutil.copyfile(feederPath, studyPath + '/' + studyConfig['feederName'] + '.json')
 	# Attach recorders:
-	tree = feeder.parse(studyPath + '/main.glm')
+	with open(feederPath,'r') as feederFile:
+		thisFeeder = json.load(feederFile)
+	tree = thisFeeder['tree']
 	feeder.attachRecorders(tree, 'Regulator', 'object', 'regulator')
 	feeder.attachRecorders(tree, 'Capacitor', 'object', 'capacitor')
 	feeder.attachRecorders(tree, 'Inverter', 'object', 'inverter')
@@ -36,8 +37,12 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 	feeder.adjustTime(tree=tree, simLength=simLength, simLengthUnits=str(simLengthUnits), simStartDate=simStartDate)
 	# write the glm:
 	with open(studyPath + '/main.glm','w') as glmFile:
-		glmFile.write(feeder.write(tree))
-	# copy over tmy2 and replace the dummy climate.tmy2.
+		glmFile.write(feeder.sortedWrite(tree))
+	# write the attachments:
+	for fileName in thisFeeder['attachments']:
+		with open(studyPath + '/' + fileName,'w') as attachFile:
+			attachFile.write(thisFeeder['attachments'][fileName])
+	# copy over tmy2:
 	shutil.copyfile('tmy2s/' + studyConfig['tmy2name'], studyPath + '/climate.tmy2')
 	# add the metadata:
 	metadata = {'sourceFeeder':str(studyConfig['feederName']), 'climate':str(studyConfig['tmy2name']), 'studyType':str(studyConfig['studyType'])}
