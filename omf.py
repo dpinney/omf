@@ -215,4 +215,4 @@ def milsoftImport():
 if __name__ == '__main__':
 	# thread_logging = background_thread(logging_system.logging_system(app).logging_run, (app,))
 	# thread_logging.start()
-	app.run(host='0.0.0.0', debug=True, port=5001)
+	app.run(host='0.0.0.0', debug=False, port=5001)
