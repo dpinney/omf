@@ -204,7 +204,7 @@ def fullyDeEmbed(glmTree):
 def attachRecorders(tree, recorderType, keyToJoin, valueToJoin, sample=False):
 	# TODO: if sample is a percentage, only attach to that percentage of nodes chosen at random.
 	# HACK: the biggestKey assumption only works for a flat tree or one that has a flat node for the last item...
-	biggestKey = int(sorted(tree.keys())[-1]) + 1
+	biggestKey = sorted([int(key) for key in tree.keys()])[-1] + 1
 	# Types of recorders we can attach:
 	recorders = {	'Regulator':{'interval':'1', 'parent':'X', 'object':'recorder', 'limit':'0', 'file':'Regulator_Y.csv', 'property':'tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag'},
 					'Voltage':{'interval':'1', 'parent':'X', 'object':'recorder', 'limit':'0', 'file':'Voltage_Y.csv', 'property':'voltage_1.real,voltage_1.imag,voltage_2.real,voltage_2.imag,voltage_12.real,voltage_12.imag'},
@@ -259,7 +259,7 @@ def groupSwingKids(tree):
 				leaf['groupid'] = 'swingKids'
 				swingTypes += [leaf['object']]
 	# attach the collector:
-	biggestKey = int(sorted(tree.keys())[-1]) + 1
+	biggestKey = sorted([int(key) for key in tree.keys()])[-1] + 1
 	collector = {'interval':'1', 'object':'collector', 'limit':'0', 'group':'X', 'file':'Y', 'property':'sum(power_in.real),sum(power_in.imag)'}
 	for obType in swingTypes:
 		insert = copy.copy(collector)

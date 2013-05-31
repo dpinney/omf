@@ -102,7 +102,7 @@ def feederGet(feederName):
 
 @app.route('/analysisFeeder/<analysis>/<study>')
 def analysisFeeder(analysis, study):
-	return flask.render_template('gridEdit.html', feederName=study, path='analyses/' + analysis + '/studies/')
+	return flask.render_template('gridEdit.html', feederName=study, path='analyses/' + analysis + '/studies')
 
 
 ####################################################
