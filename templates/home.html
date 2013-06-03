@@ -51,7 +51,7 @@
 	}).done(function(data){
 	    console.log("sent the request!");
 	    console.log(data);
-	    $("#"+analysisName.replace(/_/g, '__').replace(/[^A-z 0-9_]/g, '_')).html($(data).html());
+	    $("#"+analysisName.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
 	    startPolling({"name":analysisName});
 	    return false;
 	});
