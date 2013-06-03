@@ -4,17 +4,22 @@ import csv
 import feeder
 import os
 import shutil
+import json
 
 def omfConvert(feederName, stdName, seqName):
-	''' Take in two uploads and a name, create a feeder. '''
+	''' Take in two uploads and a name, create a feeder. VERY PROCESSOR INTENSIVE -- RUN IN A SUBPROCESS '''
 	os.mkdir('./conversions/' + feederName)
-	outGlm = convert('./uploads/' + stdName, './uploads/' + seqName)
+	glmTree = convert('./uploads/' + stdName, './uploads/' + seqName)
 	os.rmdir('./conversions/' + feederName)
-	os.mkdir('./feeders/' + feederName)
-	with open('./feeders/' + feederName + '/main.glm', 'w') as outFile:
-		outFile.write(outGlm)
-	shutil.copyfile('./schedules.glm','./feeders/' + feederName + '/schedules.glm')
-	return
+	# os.mkdir('./feeders/' + feederName)
+	# with open('./feeders/' + feederName + '/main.glm', 'w') as outFile:
+	# 	outFile.write(glmTree)
+	# shutil.copyfile('./schedules.glm','./feeders/' + feederName + '/schedules.glm')
+	with open('./schedules.glm','r') as schedFile:
+		attachments = {'schedules.glm':schedFile.read()}
+	with open('./feeders/' + feederName + '.json', 'w') as outFile:
+		json.dump({'attachments':attachments,'tree':glmTree,'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.1','friction':'0.9','linkStrength':'1'}},outFile,indent=4)
+	return True
 
 def convert(stdPath,seqPath):
 	''' Take in a .std and .seq from Milsoft and spit out a .glm string.'''
@@ -397,8 +402,8 @@ def convert(stdPath,seqPath):
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
 
-	# Go to a dictionary format so we have a valid glmTree:
-	glmTree = {convertedComponents.index(x)*subObCount:x for x in convertedComponents}
+	# Go to a dictionary format so we have a valid glmTree, leave 10 indices for headers:
+	glmTree = {10+convertedComponents.index(x)*subObCount:x for x in convertedComponents}
 
 	#TODO: REMOVE THIS DISASTER HERE AND FIGURE OUT WHY SOME LINKS ARE MALFORMED
 	print 'Components removed because they have totally busted connectivity:'
@@ -592,18 +597,16 @@ def convert(stdPath,seqPath):
 	dedupGlm('underground_line_conductor', glmTree)
 	# NOTE: This last dedup has to come last, because it relies on doing conductors and spacings first!
 	dedupGlm('line_configuration', glmTree)
-
-	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
-						'#include "schedules.glm";\n' + \
-						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\nmodule climate;\n' + \
-						'module residential {\nimplicit_enduses NONE;\n};\n\n' + \
-						'module powerflow {\nsolver_method NR;\nNR_iteration_limit 50;\n};\n\n' + \
-						'object climate {\nname Climate;\ninterpolate QUADRATIC;\ntmyfile climate.tmy2;\n};\n\n'
-
 	# Throw some headers on that:
-	outGlm = genericHeaders + feeder.sortedWrite(glmTree)
-
-	return outGlm
+	genericHeaders = [	{"timezone":"PST+8PDT","stoptime":"'2000-01-0200:00:00'","starttime":"'2000-01-0100:00:00'","clock":"clock"},
+						{"omftype":"#include","argument":"\"schedules.glm\""},
+						{"omftype":"#set","argument":"minimum_timestep=60"},
+						{"module":"residential","implicit_enduses":"NONE"},
+						{"solver_method":"NR","NR_iteration_limit":"50","module":"powerflow"},
+						{"object":"climate","name":"Climate","interpolate":"QUADRATIC","tmyfile":"climate.tmy2"}]
+	for headId in xrange(len(genericHeaders)):
+		glmTree[headId] = genericHeaders[headId]
+	return glmTree
 
 def main():
 	''' tests go here '''
