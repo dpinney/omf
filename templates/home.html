@@ -51,7 +51,7 @@
 	}).done(function(data){
 	    console.log("sent the request!");
 	    console.log(data);
-	    $("#"+analysisName.replace(/ /g, '_')).html($(data).html());
+	    $("#"+analysisName.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
 	    startPolling({"name":analysisName});
 	    return false;
 	});
@@ -67,7 +67,7 @@
 		data:{name:md.name}
 	    }).done(function(data){
 		if (data != "waiting"){
-		    $("#"+md.name.replace(/ /g, '_')).html($(data).html());
+		    $("#"+md.name.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
 		    clearInterval(i);
 		}
 	    });
