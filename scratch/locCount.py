@@ -5,6 +5,7 @@
 Count the number of lines of code in this project. Ignores the data stores and libraries, etc.
 I was at 2.5 kLOC as of 2012-10-24.
 At 12kLOC as of 2013-01-24. Wow!
+At 48kLOC as of 2013-06-04.
 '''
 
 import os
