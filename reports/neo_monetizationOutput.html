@@ -23,121 +23,142 @@
       </tbody>
     </table>
 
-    <div  class="brand_new_tables">
-      <!-- <h1 class="study_name_header">Study Name</h1> -->
-      <table  class="pv_table" border="1">
-	<tr>
-	  <th colspan="11" class="study_name_header"></th>
-	</tr>
-	<tr>
-	  <th class="collapseRates" rowspan="2">Collapse Rates</th>
-	  <th class="advancedRates" colspan="10">Advanced Rates</th>
-	</tr>
-	
-	<tr>
-	  <th colspan="7">Wholesale</th>
-	  <th colspan="3">Retail</th>
-	</tr>
-
-	<tr>
-	  <th class="year_th">Yearly Rates</th><th class="season_th">Season</th><th>Start Date</th><th>Energy off peak rate ($/kWh)</th><th>Peak rate ($/kWh)</th><th>Peak period start (Hour/24, local)</th><th>Peak period end (Hour/24, local)</th><th>Demand (MW)</th><th>Expected annual rate increase (%)</th><th>Energy Off Peak rate ($/kWh)</th><th>Peak rate ($/kWh)</th><th>Expected Annual Increase (%)</th>
-	</tr>
-	
-	<tbody class="seasons">
-	  <tr class="SpringRow">
-	    <th>Spring</th>
+    <div class="bnt2">
+      <h1>Study Name</h1>
+      <table class="WholesaleRates">
+	<thead class="title">
+	  <tr>
+	    <th colspan="8">Wholesale Rates</th>
 	  </tr>
-	  <tr class="SummerRow">
-	    <th>Summer</th>
+	</thead>
+	<thead>
+	  <tr class="headings">
+	    <th class="Season">Season</th>
+	    <th class="StartDate">Start Date</th>
+	    <th class="offPeak">Off peak rate</th>
+	    <th class="peakRate">Peak rate</th>
+	    <th class="ppstart">Peak period start</th>
+	    <th  class="ppend">Peak period end</th>
+	    <th class="demand">Demand</th>
+	    <th class="expectedIncrease">Expected Annual Increase</th>
 	  </tr>
-	  <tr class="FallRow">
-	    <th>Fall</th>
-	  </tr>
-	  <tr class="WinterRow">
-	    <th>Winter</th>
-	  </tr>
-	</tbody>
-	<tbody class="years">
-	  <tr class="YearRow">
-	    <th></th>
-	  </tr>
+	</thead>
+	<tbody>
 	</tbody>
       </table>
-      <div class="FinExContainer">
-	<table class="Expenses">
-	  <tr>
-	    <th colspan="8">Expenses</th>
-	  </tr>
-	  <tr>
-	    <th colspan="5">Recurring (annual) expenses</th>
-	    <th colspan="3">Non-recurring expenses</th>
-	  </tr>
-	  <tr>
-	    <th>Item <button class="addItem">Add Item</button></th>
-	    <th>Amount</th>
-	    <th>Start date</th>
-	    <th>End date</th>
-	    <th>Expected annual rate increase</th>
-	    <th>Item</th>
-	    <th>Amount</th>
-	    <th>Date Incurred</th>
-	  </tr>
-	  <!-- <tr class="OMRow"> -->
-	  <!--   <th>O&M</th> -->
-	  <!-- </tr> -->
-	  <!-- <tr class="ReplacementRow"> -->
-	  <!--   <th>Replacement</th> -->
-	  <!-- </tr> -->
-	  <!-- <tr class="LeaseRow"> -->
-	  <!--   <th>Lease</th> -->
-	  <!-- </tr> -->
-	  <!-- <tr class="TaxesRow"> -->
-	  <!--   <th>Taxes</th> -->
-	  <!-- </tr> -->
-	  <tr class="NewExpenseRow">
-	    <th><button class="removeItem">Remove Item</button><input type="text" placeholder="Item Name" class="ItemName"/></th>
-	  </tr>
-	</table>
-
-	<table class="FinancialParameters">
-	  <tr>
-	    <th colspan="2">Financial Parameters</th>
-	  </tr>
-	  <tr class="InterestRow">
-	    <th>Interest Rate (%)</th>
-	  </tr>
-	  <tr class="InflationRow">
-	    <th>Inflation (%)</th>
-	  </tr>
-	  <tr class="DiscountRow">
-	    <th>Discount Rate (%)</th>
-	  </tr>
-	</table>
-	
-      </div>
-      <table class="last_table">
-	<tr>
-	  <th class="blank_th"></th>
-	  <th>NPV</th>
-	  <th>IRR</th>
-	  <th>SPP (years)</th>
-	</tr>
-	<tbody class="yellowTbody">
-	  <tr class="20YearRow">
-	    <th >20 Year</th>
-	  </tr>
-	  <tr class="30YearRow">
-	    <th >30 Year</th>
-	  </tr>
-	</tbody>
-      </table>
-	  
       
+      <table class="RetailRates">
+	<thead class="title">
+	  <tr>
+	    <th colspan="4">Retail Rates</th>
+	  </tr>
+	</thead>
+	<thead>
+	  <tr class="headings">
+	    <th class="Season">Season</th>
+	    <th class="offPeak">Off peak rate</th>
+	    <th class="peakRate">Peak rate</th>
+	    <th class="expectedIncrease">Expected Increase</th>
+	  </tr>
+	</thead>
+	<tbody>
+	</tbody>
+      </table>
+
+      <table class="RecurringExpenses">
+	<thead class="title">
+	  <tr>
+
+	    <th colspan="5">Recurring Expenses <button class="rec_exp_but">Add Item</button></th>
+	  </tr>
+	</thead>
+	<thead>
+	  <tr class="headings">
+	    <th class="Item">Item</th>
+	    <th class="Amount">Amount</th>
+	    <th class="StartDate">Start Date</th>
+	    <th class="EndDate">End date</th>
+	    <th class="expectedIncrease">Expected Increase</th>
+	  </tr>
+	</thead>
+	<tbody>
+	</tbody>
+      </table>
+
+      <table class="NonRecurringExpenses">
+	<thead class="title">
+	  <tr>
+	    <th colspan="3">Non recurring expenses <button class="nr_exp_but">Add Item</button></th>
+	  </tr>
+	</thead>
+	<thead>
+	  <tr class="headings">
+	    <th class="Item">Item</th>
+	    <th class="Amount">Amount</th>
+	    <th class="DateIncurred">Date Incurred</th>
+	  </tr>
+	</thead>
+	<tbody>
+	</tbody>
+      </table>
+
+      <table class="FinParams">
+	<thead class="title">
+	  <tr>
+	    <th colspan="3">Financial Parameters</th>
+	  </tr>
+	</thead>
+	<thead>
+	  <tr class="headings">
+	    <th class="InterestRate">Interest Rate</th>
+	    <th class="Inflation">Inflation</th>
+	    <th class="DiscountRate">Discount Rate</th>
+	  </tr>
+	</thead>
+	<tbody>
+	  <tr>
+	    <td>
+	      <input type="text" name="InterestRate"/>
+	    </td>
+	    <td>
+	      <input type="text" name="Inflation"/>
+	    </td>
+	    <td>
+	      <input type="text" name="DiscountRate"/>
+	    </td>
+	</tbody>
+      </table>
     </div>
-    
     <div id="pv_tables">
     </div>
     <style type="text/css">
+    .bnt2{
+	display:none;
+	}
+    .nr_exp_but, .rec_exp_but{
+	width:75px;
+	}
+    #pv_tables table{
+	margin:5px;
+	padding:5px;
+    }
+    #pv_tables th, #pv_tables td{
+	padding:2px;
+    }
+    #pv_tables td.true{
+	height:30px;
+	width:160px;
+	position:relative;
+    }
+    #pv_tables h1{
+	text-align:center;
+    }
+    input[disabled]{
+	color:black;
+	background-color:white;
+	font-weight:bold;
+	border:1px solid black
+    }
     .brand_new_tables{display:none;}
     .study_name_header{background-color:#2b4f81;
 		  color:white;
@@ -146,10 +167,15 @@
 		  color:white;
 		  border:2px solid black;}
 
-    td{
-	width:85px;
-	}
-    th{
+    /* #pv_tables td{ */
+    /* 	width:85px; */
+    /* 	vertical-align:bottom; */
+    /* 	position:relative; */
+    /* } */
+    /* #pv_tables td.true{ */
+	
+    /* } */
+    #pv_tables th{
 	text-align:center;
 	border:1px solid black;
 	margin:0px;
@@ -160,6 +186,25 @@
     }
     .removeItem{
 	background-color:#dd0000;
+	height:25px;
+	width:60px;
+    }
+    #pv_tables input{
+	background-color:white;
+	border-bottom:1px dotted black;
+	margin:0px;
+	padding:0px;
+	}
+    #pv_tables input[name=Item]{
+	position:absolute;
+	right:0;
+	bottom:6px;
+	width:100px;
+    }
+    #pv_tables td button{
+	position:absolute;
+	left:0;
+	top:0;
     }
     #pv_tables > div > table, #pv_tables > div > div > table{
 	border-collapse:collapse;
@@ -196,88 +241,93 @@
 	}
     </style>
     <script type="text/javascript">
-      function pv_table_ui(){
-	  $(".collapseRates").css("cursor", "pointer");
-	  $(document).on("click", ".collapseRates", function(event){
-	      if($(this).html() == "Collapse Rates")
-		  $(this).html("Expand Rates");
-	      else
-		  $(this).html("Collapse Rates");
-	      $(this).parent().parent().siblings(".seasons, .years").toggle();
-	      $(this).parent().siblings().children(".year_th, .season_th").toggle();
+      function Study(study_name){
+	  this.study_name=study_name;
+	  this.id_name = "bnt2"+this.study_name;
+	  this.WholesaleRates = [];
+	  this.RetailRates = [];
+	  this.RecurringExpenses = [];
+	  this.NonRecurringExpenses = [];
+	  this.InterestRate=undefined;
+	  this.Inflation=undefined;
+	  this.DiscountRate=undefined;
+	  this.create_tables();
+      }
 
-	  }).on("click", ".addItem", function(event){
-	      var new_row = $("<tr>").html($(".NewExpenseRow").html());
-	      $(this).parent().parent().parent().append($(new_row));
-	  }).on("click", ".removeItem", function(event){
-	      $(this).parent().parent().remove();
+      Study.prototype.create_tables = function(){
+	  var new_tables = $("<div>")
+	      .html($(".bnt2").html())
+	      .attr("id", this.id_name);
+	  $(new_tables).children("h1").html(this.study_name);
+	  $("#pv_tables").append($(new_tables));
+	  var self = this;
+	  $("#"+this.id_name+" .rec_exp_but").click(function(e){
+	      self.addRow("RecurringExpenses", true);
+	  });
+	  $("#"+this.id_name+" .nr_exp_but").click(function(e){
+	      self.addRow("NonRecurringExpenses", true);
+	  });
+	  ["Year", "Winter", "Summer", "Spring", "Fall"].forEach(function(season, i){
+	      ["WholesaleRates", "RetailRates"].forEach(function(table_name){
+		  self.addRow(table_name);
+		  $($("#"+self.id_name+" ."+table_name+" input[name=Season]")[i]).val(season).attr("disabled", "disabled");
+		  self[table_name][i].Season = season;
+	      });
+	  });
+	  ["O&M", "Replacement", "Lease", "Taxes"].forEach(function(item, i){
+	      self.addRow("RecurringExpenses", true);
+	      $($("#"+self.id_name+" .RecurringExpenses input[name=Item]")[i]).val(item);
+	      self.RecurringExpenses[i].Item = item;
+	  });
+	  $("#"+this.id_name+" .FinParams input").keyup(function(e){
+	      var at = $(this).attr("name");
+	      self[at] = $(this).val();
 	  });
       }
-      function fill_inputs(){
-	  var tables = [
-	      {"row_names":
-	       ["Summer",
-		"Spring",
-		"Winter",
-		"Fall",
-		"Year"],
-	       "cols":10},
-	      {"row_names":
-	       ["OM",
-		"Replacement",
-		"Lease",
-		"Taxes",
-		"NewExpense"],
-	       "cols":7},
-	      {"row_names":
-	       ["Interest",
-		"Inflation",
-		"Discount"],
-	       "cols":1},
-	      {"row_names":
-	       ["20Year", "30Year"],
-	       "cols":3}
 
-	  ];
-	  for (k=0; k<tables.length; k++){
-	      for (i=0; i<tables[k].cols; i++){
-		  for(j=0; j<tables[k].row_names.length; j++){
-		      $("."+tables[k].row_names[j]+"Row").append($("<td>")
-								 .append($("<input>")
-									 .attr("type", "text")
-									 .css("margin", "0px")
-									 .css("background-color", "white")
-									 .css("border-bottom", "1px dotted black")
-									 .css("padding", "0px")));
-		  }
-	      }
-	      
-	  }
-      }
-
-      function add_pv_table(study){
-	  var new_table = $("<div>").html($(".brand_new_tables").html());
-	  new_table.children().children().children().children(".study_name_header").html(study).css("text-align", "center");
-	  $("#pv_tables").append(new_table);
-
-	  var item_defaults = ["O&M", "Replacement", "Lease", "Taxes"];
+      Study.prototype.addRow = function(table_name, removable){
+	  var self = this;
+	  var table = $("#"+this.id_name+" ."+table_name);
+	  var ths = $("#"+this.id_name+" ."+table_name+" thead:not(.title) th");
 	  var i;
-	  for(i=0; i<item_defaults.length; i++){
-	      var new_row = $("<tr>").html($(".NewExpenseRow").html()).addClass("NewExpenseRow").show();
-	      $(new_row).children().children(".ItemName").attr("value", item_defaults[i]);
-	      $(new_table).children(".FinExContainer").children(".Expenses").append($(new_row));
+	  var attrs = [];
+	  for(i=0; i<ths.length; i++){
+	      attrs.push($(ths[i]).attr("class"));
 	  }
-
+	  var new_row = $("<tr>");
+	  var new_obj = {};
+	  attrs.forEach(function(att){
+	      $(new_row).append($("<td>")
+				.attr("class", removable)
+				.append($("<input>")
+					.keyup(function(e){
+					    new_obj[att] = $(this).val();
+					})
+	      				.attr("type", "text")
+	      				.attr("name", att)));
+	      new_obj[att] = undefined;
+	  });
+	  if(removable){
+	      $($(new_row).children("td")[0]).append($("<button>").click(function(event){
+		  $(new_row).remove();
+		  self[table_name]=self[table_name].filter(function(e){
+		      return (e!=new_obj);
+		  });
+	      }).html("Remove").attr("class", "removeItem"));
+	  }
+	  $(table).append($(new_row));
+	  this[table_name].push(new_obj);
       }
       
       studyDict = {{ studyDict | safe }}
       inputData = {{ inputData | safe }}
       timeStamps = {{ timeStamps | safe }}
 
+      study_data = {};
+      
       // Put the input data in.
       gebi('distrEnergyRate').value = inputData.distrEnergyRate
       gebi('distrCapacityRate').value = inputData.distrCapacityRate
-      // fill_inputs();
       // Init the table.
       firstTime = true
       for (study in studyDict) {
@@ -297,11 +347,9 @@
 		  '<td class="annualSave">calcMe</td>' +
 		  '<td class="payback">calcMe</td>'
 	  }
-	  add_pv_table(study);
+	  study_data[study] = new Study(study);
       }
-      fill_inputs();
-      pv_table_ui();
-      $(".20YearRow>td, .20YearRow>td>input, .30YearRow>td, .30YearRow>td>input").css("background-color", "yellow");
+
       function monthAgg(stamps, power, func) {
 	  //  Aggregate a month's worth of power.
 	  combo = zip([stamps,power])
