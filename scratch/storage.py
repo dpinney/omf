@@ -1,5 +1,8 @@
 #!/usr/bin/env python
 
+
+''' First attempt at a storage abstraction layer. '''
+
 import os
 import traceback
 import json

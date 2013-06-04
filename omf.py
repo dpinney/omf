@@ -52,7 +52,6 @@ def root():
 	if browser == 'msie':
 		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
 	else:
-		
 		return flask.render_template('home.html', metadatas=metadatas, feeders=feeders, conversions=conversions)
 
 @app.route('/newAnalysis/')
@@ -76,7 +75,6 @@ def newAnalysis(analysisName=None):
 		analysisMd = None
 	# If we specified an analysis, get the studies, reports and analysisMd:
 	else:
-
 		reportPrefix = 'analyses/' + analysisName + '/reports/'
 		reportNames = os.listdir(reportPrefix)
 		reportDicts = [json.loads(lib.fileSlurp(reportPrefix + x)) for x in reportNames]
