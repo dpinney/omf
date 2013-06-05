@@ -1,20 +1,20 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
 Core profiler results
 =====================
 
 Total objects               2259 objects
 Parallelism                    1 thread
-Total time                  58.0 seconds
-  Core time                  3.1 seconds (5.3%)
-  Model time                54.9 seconds/thread (94.7%)
+Total time                  57.0 seconds
+  Core time                  3.2 seconds (5.6%)
+  Model time                53.8 seconds/thread (94.4%)
 Simulation time                6 days
-Simulation speed             5.8k object.hours/second
+Simulation speed             5.9k object.hours/second
 Syncs completed             3790 passes
 Time steps completed         947 timesteps
 Convergence efficiency      4.00 passes/timestep
 Memory lock contention       0.0%
 Average timestep             563 seconds/timestep
-Simulation rate             9186 x realtime
+Simulation rate             9347 x realtime
 
 
 Model profiler results
@@ -22,22 +22,23 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-node              50.073     91.2%    103.5
-house              1.555      2.8%      4.7
-overhead_line      0.877      1.6%      2.6
-triplex_meter      0.620      1.1%      3.2
-collector          0.488      0.9%     97.6
-waterheater        0.354      0.6%      1.7
-transformer        0.348      0.6%      1.8
-underground_line   0.244      0.4%      2.6
-ZIPload            0.187      0.3%      0.6
-fuse               0.103      0.2%      2.3
-switch             0.029      0.1%      2.4
-capacitor          0.014      0.0%     14.0
+node              49.259     91.6%    101.8
+house              1.430      2.7%      4.3
+overhead_line      0.773      1.4%      2.3
+triplex_meter      0.577      1.1%      3.0
+collector          0.466      0.9%     93.2
+waterheater        0.335      0.6%      1.6
+transformer        0.327      0.6%      1.7
+underground_line   0.226      0.4%      2.4
+ZIPload            0.192      0.4%      0.6
+fuse               0.125      0.2%      2.8
+switch             0.026      0.0%      2.2
+battery            0.013      0.0%     13.0
 recorder           0.012      0.0%      6.0
-battery            0.009      0.0%      9.0
-climate            0.008      0.0%      8.0
-meter              0.006      0.0%      6.0
+capacitor          0.011      0.0%     11.0
+climate            0.006      0.0%      6.0
+meter              0.005      0.0%      5.0
+transformer_conf   0.001      0.0%      1.0
 ================ ======== ======== ========
-Total             54.927    100.0%     24.3
+Total             53.784    100.0%     23.8
 

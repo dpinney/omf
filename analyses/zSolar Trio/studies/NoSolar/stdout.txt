@@ -5,8 +5,8 @@ Core profiler results
 Total objects                 39 objects
 Parallelism                    1 thread
 Total time                   1.0 seconds
-  Core time                  0.9 seconds (92.5%)
-  Model time                 0.1 seconds/thread (7.5%)
+  Core time                  0.9 seconds (92.0%)
+  Model time                 0.1 seconds/thread (8.0%)
 Simulation time                4 days
 Simulation speed             3.7k object.hours/second
 Syncs completed             2182 passes
@@ -22,19 +22,19 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-collector          0.021     28.0%      5.3
-player             0.018     24.0%     18.0
-recorder           0.011     14.7%      5.5
-house              0.005      6.7%      2.5
-triplex_meter      0.004      5.3%      1.3
-triplex_line       0.004      5.3%      2.0
-transformer        0.003      4.0%      1.5
-regulator          0.003      4.0%      3.0
-ZIPload            0.002      2.7%      0.3
+player             0.018     22.5%     18.0
+recorder           0.014     17.5%      7.0
+collector          0.014     17.5%      3.5
+triplex_meter      0.009     11.3%      3.0
+house              0.005      6.3%      2.5
+regulator          0.005      6.3%      5.0
+triplex_line       0.004      5.0%      2.0
+ZIPload            0.003      3.8%      0.4
+transformer        0.003      3.8%      1.5
+node               0.002      2.5%      1.0
 climate            0.001      1.3%      1.0
-waterheater        0.001      1.3%      0.5
-node               0.001      1.3%      0.5
 triplex_node       0.001      1.3%      1.0
+stubauction        0.001      1.3%      1.0
 ================ ======== ======== ========
-Total              0.075    100.0%      1.9
+Total              0.080    100.0%      2.1
 

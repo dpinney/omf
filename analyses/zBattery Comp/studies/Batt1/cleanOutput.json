@@ -786,12 +786,12 @@
             13205.537222234489, 
             14320.530284323253, 
             5456.856765306408, 
-            7481.79497823655, 
+            7481.7949782610485, 
             5838.16960414826, 
             4351.71881812299, 
             4721.711567160942, 
             5494.374430916583, 
-            10383.726386587754, 
+            10383.726386587823, 
             16604.667191909186, 
             15722.294008500226, 
             14983.313142140194, 
@@ -837,7 +837,7 @@
             7783.8514482241035, 
             6388.023123481252, 
             5250.223321038609, 
-            5052.952259229695, 
+            5052.952259228963, 
             6363.28404343359, 
             12705.675896082954, 
             34378.63085612367, 
@@ -869,7 +869,7 @@
             14694.118131766338, 
             10866.54669240365, 
             8692.257302421842, 
-            6506.746897790086, 
+            6506.747348724815, 
             7126.039182465849, 
             6257.387171196816, 
             4888.365793725019, 
@@ -1022,7 +1022,7 @@
             358248.685000368, 
             394631.9996861442, 
             456101.61555644416, 
-            455288.15512865264, 
+            455288.15504441183, 
             456870.51765181305, 
             439004.02409495064, 
             318946.7006018805, 
@@ -1053,7 +1053,7 @@
             453248.28338981053
         ]
     }, 
-    "stdout": "Core profiler results\n=====================\n\nTotal objects               2259 objects\nParallelism                    1 thread\nTotal time                  58.0 seconds\n  Core time                  2.9 seconds (4.9%)\n  Model time                55.1 seconds/thread (95.1%)\nSimulation time                6 days\nSimulation speed             5.8k object.hours/second\nSyncs completed             3790 passes\nTime steps completed         947 timesteps\nConvergence efficiency      4.00 passes/timestep\nMemory lock contention       0.0%\nAverage timestep             563 seconds/timestep\nSimulation rate             9186 x realtime\n\n\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\nnode              50.222     91.1%    103.8\nhouse              1.632      3.0%      4.9\noverhead_line      0.861      1.6%      2.6\ntriplex_meter      0.608      1.1%      3.2\ncollector          0.484      0.9%     96.8\nwaterheater        0.359      0.7%      1.7\ntransformer        0.332      0.6%      1.7\nunderground_line   0.206      0.4%      2.2\nZIPload            0.204      0.4%      0.6\nfuse               0.141      0.3%      3.2\nswitch             0.036      0.1%      3.0\nrecorder           0.015      0.0%      7.5\nbattery            0.012      0.0%     12.0\ncapacitor          0.011      0.0%     11.0\nmeter              0.010      0.0%     10.0\nclimate            0.007      0.0%      7.0\n================ ======== ======== ========\nTotal             55.140    100.0%     24.4", 
+    "stdout": "Core profiler results\n=====================\n\nTotal objects               2259 objects\nParallelism                    1 thread\nTotal time                  57.0 seconds\n  Core time                  2.8 seconds (5.0%)\n  Model time                54.2 seconds/thread (95.0%)\nSimulation time                6 days\nSimulation speed             5.9k object.hours/second\nSyncs completed             3790 passes\nTime steps completed         947 timesteps\nConvergence efficiency      4.00 passes/timestep\nMemory lock contention       0.0%\nAverage timestep             563 seconds/timestep\nSimulation rate             9347 x realtime\n\n\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\nnode              49.430     91.3%    102.1\nhouse              1.535      2.8%      4.6\noverhead_line      0.823      1.5%      2.5\ntriplex_meter      0.635      1.2%      3.3\ncollector          0.481      0.9%     96.2\ntransformer        0.314      0.6%      1.6\nwaterheater        0.312      0.6%      1.5\nunderground_line   0.244      0.5%      2.6\nZIPload            0.185      0.3%      0.6\nfuse               0.118      0.2%      2.7\nswitch             0.042      0.1%      3.5\nrecorder           0.012      0.0%      6.0\nmeter              0.011      0.0%     11.0\ncapacitor          0.008      0.0%      8.0\nbattery            0.006      0.0%      6.0\nclimate            0.006      0.0%      6.0\ntransformer_conf   0.001      0.0%      1.0\n================ ======== ======== ========\nTotal             54.163    100.0%     24.0", 
     "Capacitors": {
         "CAP134": {
             "switchC": [
@@ -4364,7 +4364,7 @@
         "node62474202953T62474202989", 
         "house2055"
     ], 
-    "stderr": "Processing 2012-06-06 03:20:00 PDT...\rProcessing 2012-06-06 05:29:00 PDT...\rProcessing 2012-06-06 07:10:00 PDT...\rProcessing 2012-06-06 09:15:00 PDT...\rProcessing 2012-06-06 12:30:00 PDT...\rProcessing 2012-06-06 14:43:00 PDT...\rProcessing 2012-06-06 16:10:00 PDT...\rProcessing 2012-06-06 17:30:00 PDT...\rProcessing 2012-06-06 20:00:00 PDT...\rProcessing 2012-06-07 00:00:00 PDT...\rProcessing 2012-06-07 03:40:00 PDT...\rProcessing 2012-06-07 05:29:00 PDT...\rProcessing 2012-06-07 07:20:00 PDT...\rProcessing 2012-06-07 09:30:00 PDT...\rProcessing 2012-06-07 13:50:00 PDT...\rProcessing 2012-06-07 15:10:00 PDT...\rProcessing 2012-06-07 16:30:00 PDT...\rProcessing 2012-06-07 19:00:00 PDT...\rProcessing 2012-06-07 22:35:00 PDT...\rProcessing 2012-06-08 03:00:00 PDT...\rProcessing 2012-06-08 05:00:00 PDT...\rProcessing 2012-06-08 07:00:00 PDT...\rProcessing 2012-06-08 09:00:00 PDT...\rProcessing 2012-06-08 11:55:00 PDT...\rProcessing 2012-06-08 14:40:00 PDT...\rProcessing 2012-06-08 16:10:00 PDT...\rProcessing 2012-06-08 18:20:00 PDT...\rProcessing 2012-06-08 22:00:00 PDT...\rProcessing 2012-06-09 02:30:00 PDT...\rProcessing 2012-06-09 04:50:00 PDT...\rProcessing 2012-06-09 06:20:00 PDT...\rProcessing 2012-06-09 08:20:00 PDT...\rProcessing 2012-06-09 11:30:00 PDT...\rProcessing 2012-06-09 14:30:00 PDT...\rProcessing 2012-06-09 16:15:00 PDT...\rProcessing 2012-06-09 18:10:00 PDT...\rProcessing 2012-06-09 21:13:00 PDT...\rProcessing 2012-06-10 01:50:00 PDT...\rProcessing 2012-06-10 04:30:00 PDT...\rProcessing 2012-06-10 06:10:00 PDT...\rProcessing 2012-06-10 08:10:00 PDT...\rProcessing 2012-06-10 11:30:00 PDT...\rProcessing 2012-06-10 14:25:00 PDT...\rProcessing 2012-06-10 16:14:00 PDT...\rProcessing 2012-06-10 18:20:00 PDT...\rProcessing 2012-06-10 21:30:00 PDT...\rProcessing 2012-06-11 02:00:00 PDT...\rProcessing 2012-06-11 04:21:00 PDT...\rProcessing 2012-06-11 06:20:00 PDT...\rProcessing 2012-06-11 08:30:00 PDT...\rProcessing 2012-06-11 11:14:00 PDT...\rProcessing 2012-06-11 14:40:00 PDT...\rProcessing 2012-06-11 16:10:00 PDT...\rProcessing 2012-06-11 18:20:00 PDT...\rProcessing 2012-06-11 21:45:00 PDT...\rProcessing 2012-06-12 02:00:00 PDT...", 
+    "stderr": "Processing 2012-06-06 03:00:00 PDT...\rProcessing 2012-06-06 05:10:00 PDT...\rProcessing 2012-06-06 07:00:00 PDT...\rProcessing 2012-06-06 09:15:00 PDT...\rProcessing 2012-06-06 12:30:00 PDT...\rProcessing 2012-06-06 14:43:00 PDT...\rProcessing 2012-06-06 16:10:00 PDT...\rProcessing 2012-06-06 17:20:00 PDT...\rProcessing 2012-06-06 19:40:00 PDT...\rProcessing 2012-06-06 23:15:00 PDT...\rProcessing 2012-06-07 03:30:00 PDT...\rProcessing 2012-06-07 05:29:00 PDT...\rProcessing 2012-06-07 07:20:00 PDT...\rProcessing 2012-06-07 09:20:00 PDT...\rProcessing 2012-06-07 13:30:00 PDT...\rProcessing 2012-06-07 15:00:00 PDT...\rProcessing 2012-06-07 16:25:00 PDT...\rProcessing 2012-06-07 18:40:00 PDT...\rProcessing 2012-06-07 22:25:00 PDT...\rProcessing 2012-06-08 02:40:00 PDT...\rProcessing 2012-06-08 04:50:00 PDT...\rProcessing 2012-06-08 06:50:00 PDT...\rProcessing 2012-06-08 09:10:00 PDT...\rProcessing 2012-06-08 12:30:00 PDT...\rProcessing 2012-06-08 14:50:00 PDT...\rProcessing 2012-06-08 16:15:00 PDT...\rProcessing 2012-06-08 18:20:00 PDT...\rProcessing 2012-06-08 22:15:00 PDT...\rProcessing 2012-06-09 02:50:00 PDT...\rProcessing 2012-06-09 05:10:00 PDT...\rProcessing 2012-06-09 06:40:00 PDT...\rProcessing 2012-06-09 09:00:00 PDT...\rProcessing 2012-06-09 12:00:00 PDT...\rProcessing 2012-06-09 14:50:00 PDT...\rProcessing 2012-06-09 16:40:00 PDT...\rProcessing 2012-06-09 19:10:00 PDT...\rProcessing 2012-06-09 22:45:00 PDT...\rProcessing 2012-06-10 03:10:00 PDT...\rProcessing 2012-06-10 05:21:00 PDT...\rProcessing 2012-06-10 07:10:00 PDT...\rProcessing 2012-06-10 09:30:00 PDT...\rProcessing 2012-06-10 13:50:00 PDT...\rProcessing 2012-06-10 15:30:00 PDT...\rProcessing 2012-06-10 17:37:00 PDT...\rProcessing 2012-06-10 19:45:00 PDT...\rProcessing 2012-06-11 00:00:00 PDT...\rProcessing 2012-06-11 03:30:00 PDT...\rProcessing 2012-06-11 05:30:00 PDT...\rProcessing 2012-06-11 07:40:00 PDT...\rProcessing 2012-06-11 09:45:00 PDT...\rProcessing 2012-06-11 14:20:00 PDT...\rProcessing 2012-06-11 15:32:00 PDT...\rProcessing 2012-06-11 17:30:00 PDT...\rProcessing 2012-06-11 20:15:00 PDT...\rProcessing 2012-06-12 01:00:00 PDT...\rProcessing 2012-06-12 03:45:00 PDT...", 
     "timeStamps": [
         "2012-06-06 00:00:00 PDT", 
         "2012-06-06 01:00:00 PDT", 

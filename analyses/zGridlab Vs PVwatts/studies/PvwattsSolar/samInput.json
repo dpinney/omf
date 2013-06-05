@@ -1,0 +1,18 @@
+{
+    "gamma": "-0.5", 
+    "w_stow": "0", 
+    "rotlim": "45.0", 
+    "trackingMode": "2", 
+    "derate": ".94", 
+    "poa_cutin": "0", 
+    "i_ref": "1000", 
+    "studyName": "PvwattsSolar", 
+    "fd": "1.0", 
+    "t_noct": "45.0", 
+    "inv_eff": "0.92", 
+    "azimuth": "180", 
+    "systemSize": "10", 
+    "tmy2name": "NY-ITHACA.tmy2", 
+    "studyType": "pvwatts", 
+    "t_ref": "25.0"
+}
