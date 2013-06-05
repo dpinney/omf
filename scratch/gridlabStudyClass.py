@@ -94,7 +94,7 @@ class GridlabStudy:
 					if switchKey != '# timestamp':
 						cleanOut['Capacitors'][capName][switchKey] = agg(rawOut[key][switchKey], avg)
 		# Study Details
-		glmTree = feeder.parse(studyPath + '/main.glm')
+		glmTree = rawOut['glmTree']
 		names = [glmTree[x]['name'] for x in glmTree if 'name' in glmTree[x]]
 		cleanOut['componentNames'] = list(set(names))
 		# Regulator Powerflow

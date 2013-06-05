@@ -52,14 +52,11 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 
 # WARNING! Run does not care about performance and will happily run for a long, long time. Spawn a thread or process for this nonsense.
 def run(analysisName, studyName):
-	studyPath = 'analyses/' + analysisName + '/studies/' + studyName
 	rawOut = solvers.gridlabd.run(analysisName, studyName)
 	cleanOut = {}
 	# Std Err and Std Out
-	with open(studyPath + '/stderr.txt','r') as stderrFile:
-		cleanOut['stderr'] = stderrFile.read().strip()
-	with open(studyPath + '/stdout.txt','r') as stdoutFile:
-		cleanOut['stdout'] = stdoutFile.read().strip()
+	cleanOut['stderr'] = rawOut['stderr']
+	cleanOut['stdout'] = rawOut['stdout']
 	# Time Stamps
 	for key in rawOut:
 		if '# timestamp' in rawOut[key]:
@@ -106,7 +103,7 @@ def run(analysisName, studyName):
 				if switchKey != '# timestamp':
 					cleanOut['Capacitors'][capName][switchKey] = agg(rawOut[key][switchKey], avg)
 	# Study Details
-	glmTree = feeder.parse(studyPath + '/main.glm')
+	glmTree = rawOut['glmTree']
 	names = [glmTree[x]['name'] for x in glmTree if 'name' in glmTree[x]]
 	cleanOut['componentNames'] = list(set(names))
 	# Regulator Powerflow
@@ -196,5 +193,5 @@ def run(analysisName, studyName):
 	elif level=='months':
 		cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
 	# Writing clean output.
-	with open(studyPath + '/cleanOutput.json','w') as cleanFile:
+	with open('analyses/' + analysisName + '/studies/' + studyName + '/cleanOutput.json','w') as cleanFile:
 		json.dump(cleanOut, cleanFile, indent=4)

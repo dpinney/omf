@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, struct, subprocess, os, platform, re
+import sys, struct, subprocess, os, platform, re, feeder
 
 def run(analysisName, studyName):
 	# Choose our platform:
@@ -48,7 +48,13 @@ def run(analysisName, studyName):
 			# Terminated, return false so analysis knows to not run any more studies.
 			return False
 	# Return raw JSON output.
-	return anaDataTree(studyPath, lambda x:True)
+	rawOut = anaDataTree(studyPath, lambda x:True)
+	with open(studyPath + '/stderr.txt','r') as stderrFile:
+		rawOut['stderr'] = stderrFile.read().strip()
+	with open(studyPath + '/stdout.txt','r') as stdoutFile:
+		rawOut['stdout'] = stdoutFile.read().strip()
+	rawOut['glmTree'] = feeder.parse(studyPath + '/main.glm')
+	return rawOut
 
 def csvToArray(fileName):
 	''' Take a filename to a list of timeseries vectors. Internal method. '''
