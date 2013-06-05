@@ -52,11 +52,8 @@ def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
 
 # WARNING! Run does not care about performance and will happily run for a long, long time. Spawn a thread or process for this nonsense.
 def run(analysisName, studyName):
-	# Execute the solver.
-	solvers.gridlabd.run(analysisName, studyName)
-	# Process the output.
 	studyPath = 'analyses/' + analysisName + '/studies/' + studyName
-	rawOut = util.anaDataTree(studyPath, lambda x:True) # Lambda x:true means get every csv.
+	rawOut = solvers.gridlabd.run(analysisName, studyName)
 	cleanOut = {}
 	# Std Err and Std Out
 	with open(studyPath + '/stderr.txt','r') as stderrFile:
