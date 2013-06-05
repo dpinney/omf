@@ -84,13 +84,12 @@ def newAnalysis(analysisName=None):
 		existingStudies = json.dumps(studyDicts)
 	return flask.render_template('newAnalysis.html', studyTemplates=studyRendered, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
 
+#COMPLETED!!!
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):
 	if not store.exists('Analysis', analysisName):
 		return flask.redirect(flask.url_for('root'))
-	analysis = store.get('Analysis', analysisName)
-	reportList = analysis.generateReportHtml()
-	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
+	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=analysis.Analysis(analysisName, store.getMetadata('Analysis',analysisName), store.get('Analysis',analysisName)).generateReportHtml())
 
 #COMPLETED!!!
 @app.route('/feeder/<feederName>')

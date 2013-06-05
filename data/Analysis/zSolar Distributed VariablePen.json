@@ -1,1 +1,1 @@
-{"reports": ["climate.json", "feederPowerConsumption.json", "runtimeStats.json", "studyDetails.json", "voltageBand.json"], "studyNames": ["05Sol", "20Sol", "50Sol", "90Sol", "NoSol"]}
+{"reports": [{"reportType":"climate"}, {"reportType":"feederPowerConsumption"}, {"reportType":"runtimeStats"}, {"reportType":"studyDetails"}, {"reportType":"voltageBand"}], "studyNames": ["05Sol", "20Sol", "50Sol", "90Sol", "NoSol"]}

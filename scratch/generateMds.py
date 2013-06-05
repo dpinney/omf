@@ -38,36 +38,36 @@ os.chdir('../data/')
 # for ana in anas:
 # 	os.remove(ana + '/metadata.json')
 
-anaStudies = [x for x in os.listdir('Study') if not x.endswith('.json')]
+# anaStudies = [x for x in os.listdir('Study') if not x.endswith('.json')]
 
-for ana in anaStudies:
-	studies = [x for x in os.listdir('Study/' + ana + '/studies')]
-	outputs = [os.path.isfile('Study/' + ana + '/studies/' + x + '/cleanOutput.json') for x in studies]
-	inputs = [os.path.isfile('Study/' + ana + '/studies/' + x + '/cleanOutput.json') for x in studies]
-	print ana, studies, outputs, inputs
-	if False in outputs or False in inputs: print 'WE ARE MISSING SOME DATA!'
-	for study in studies:
-		studyDir = 'Study/' + ana + '/studies/' + study
-		try:
-			with open(studyDir + '/main.json','r') as feederFile:
-				rawInput = json.load(feederFile)
-		except:
-			rawInput = {'nodes':[],'hiddenNodes':[],'links':[],'hiddenLinks':[],'layoutVars':{'theta':'0.8','gravity':'0.1','friction':'0.9','linkStrength':'2'}}
-		with open(studyDir + '/cleanOutput.json','r') as mdFile:
-			outputJson = json.load(mdFile)
-		try:
-			glmTree = feeder.parse(studyDir + '/main.glm')
-		except:
-			pass
-		attachments = {fileName:slurp(studyDir + '/' + fileName) for fileName in os.listdir(studyDir) if fileName != 'main.glm' and not fileName.endswith('json')}
-		rawInput['attachments'] = attachments
-		rawInput['tree'] = glmTree
-		# with open('Study/' + ana + '/studies/' + study + '/metadata.json','r') as mdFile:
-		# 	mdJson = mdFile.read()
-		# print os.path.isfile('Study/' + ana + '/studies/' + study + '/cleanOutput.json')
-		# with open('Study/' + ana + '---' + study + '.md.json','w') as studyMdFile:
-		# 	studyMdFile.write(mdJson)
-		# 	os.remove('Study/' + ana + '/studies/' + study + '/metadata.json')
-		output = {'inputJson':rawInput,'outputJson':outputJson}
-		with open('Study/' + ana + '---' + study + '.json','w') as studyFile:
-			json.dump(output, studyFile, indent=4)
+# for ana in anaStudies:
+# 	studies = [x for x in os.listdir('Study/' + ana + '/studies')]
+# 	outputs = [os.path.isfile('Study/' + ana + '/studies/' + x + '/cleanOutput.json') for x in studies]
+# 	inputs = [os.path.isfile('Study/' + ana + '/studies/' + x + '/cleanOutput.json') for x in studies]
+# 	print ana, studies, outputs, inputs
+# 	if False in outputs or False in inputs: print 'WE ARE MISSING SOME DATA!'
+# 	for study in studies:
+# 		studyDir = 'Study/' + ana + '/studies/' + study
+# 		try:
+# 			with open(studyDir + '/main.json','r') as feederFile:
+# 				rawInput = json.load(feederFile)
+# 		except:
+# 			rawInput = {'nodes':[],'hiddenNodes':[],'links':[],'hiddenLinks':[],'layoutVars':{'theta':'0.8','gravity':'0.1','friction':'0.9','linkStrength':'2'}}
+# 		with open(studyDir + '/cleanOutput.json','r') as mdFile:
+# 			outputJson = json.load(mdFile)
+# 		try:
+# 			glmTree = feeder.parse(studyDir + '/main.glm')
+# 		except:
+# 			pass
+# 		attachments = {fileName:slurp(studyDir + '/' + fileName) for fileName in os.listdir(studyDir) if fileName != 'main.glm' and not fileName.endswith('json')}
+# 		rawInput['attachments'] = attachments
+# 		rawInput['tree'] = glmTree
+# 		# with open('Study/' + ana + '/studies/' + study + '/metadata.json','r') as mdFile:
+# 		# 	mdJson = mdFile.read()
+# 		# print os.path.isfile('Study/' + ana + '/studies/' + study + '/cleanOutput.json')
+# 		# with open('Study/' + ana + '---' + study + '.md.json','w') as studyMdFile:
+# 		# 	studyMdFile.write(mdJson)
+# 		# 	os.remove('Study/' + ana + '/studies/' + study + '/metadata.json')
+# 		output = {'inputJson':rawInput,'outputJson':outputJson}
+# 		with open('Study/' + ana + '---' + study + '.json','w') as studyFile:
+# 			json.dump(output, studyFile, indent=4)

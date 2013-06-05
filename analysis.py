@@ -14,23 +14,27 @@ import copy
 import json
 import studies
 import reports
+import storage
+
+store = storage.Filestore('data')
 
 class Analysis:
 	# Metadata attributes
-	status = None
-	sourceFeeder = None
-	climate = None
-	created = None
-	simStartDate = None
-	simLength = None
-	simLengthUnits = None
+	name = ''
+	status = ''
+	sourceFeeder = ''
+	climate = ''
+	created = ''
+	simStartDate = ''
+	simLength = ''
+	simLengthUnits = 0
 	# Data attributes
 	reports = []
 	studyNames = []
 	# Internal attributes
 	studies = []
 
-	def __init__(self, jsonMdDict, jsonDict, studies=None):
+	def __init__(self, name, jsonMdDict, jsonDict):
 		self.reports = jsonDict['reports']
 		self.studyNames = jsonDict['studyNames']
 		self.status = jsonMdDict['status']
@@ -40,25 +44,26 @@ class Analysis:
 		self.simStartDate = jsonMdDict['simStartDate']
 		self.simLength = jsonMdDict['simLength']
 		self.simLengthUnits = jsonMdDict['simLengthUnits']
-		
+		self.name = name
+		self.studies = [studies.gridlabd.GridlabStudy(studyName, store.getMetadata('Study', self.name + '---' + studyName), store.get('Study', self.name + '---' + studyName)) for studyName in self.studyNames]
 
-	def generateReportHtml(analysisName):
+	def generateReportHtml(self):
 		# Iterate over reports and collect what we need: 
-		for report in reports:
+		reportList = []
+		for report in self.reports:
 			# call the relevant reporting function by name.
-			reportModule = getattr(reports, report.replace('.json',''))
-			reportList.append(reportModule.outputHtml(analysisName))
+			reportModule = getattr(reports, report['reportType'])
+			reportList.append(reportModule.outputHtml(self, report))
 		return reportList
 
-	def run(analysisName):
-		studyNames = os.listdir('analyses/' + analysisName + '/studies/')
+	def run(self):
 		# NOTE! We are running studies serially. We use lower levels of RAM/CPU, potentially saving time if swapping were to occur.
 		# Update status to running.
 		md = getMetadata(analysisName)
 		md['status'] = 'running'
 		putMetadata(analysisName, md)
 		startTime = dt.datetime.now()
-		for studyName in studyNames:
+		for studyName in self.studies:
 			# If we've been terminated, don't run any more studies.
 			if md['status'] == 'terminated': return False
 			with open('analyses/' + analysisName + '/studies/' + studyName + '/metadata.json') as studyMd:
@@ -82,7 +87,7 @@ class Analysis:
 			md['status'] = 'postRun'
 			putMetadata(analysisName, md)
 
-	def terminate(analysisName):
+	def terminate(self):
 		# Get all the pids.
 		pids = []
 		studiesDir = 'analyses/' + analysisName + '/studies/'
@@ -101,5 +106,11 @@ class Analysis:
 		putMetadata(analysisName, md)
 		return
 
+	def toJson(self):
+		pass
+
+	def mdToJson(self):
+		pass
+
 if __name__ == '__main__':
-	main()
+	pass

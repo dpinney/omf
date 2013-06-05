@@ -1,1 +1,1 @@
-{"reports": ["climate.json", "feederPowerConsumption.json", "runtimeStats.json", "studyDetails.json"], "studyNames": ["NoWind", "Wind"]}
+{"reports": [{"reportType":"climate"}, {"reportType":"feederPowerConsumption"}, {"reportType":"runtimeStats"}, {"reportType":"studyDetails"}], "studyNames": ["NoWind", "Wind"]}

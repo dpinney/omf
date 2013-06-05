@@ -1,1 +1,1 @@
-{"climate": "CA-BRAWLEY.tmy2", "studyType": "gridlabd", "sourceFeeder": "DEC Red Base"}
+{"climate": "CA-BRAWLEY.tmy2", "simStartDate": "2012-06-03", "simLengthUnits": "minutes", "sourceFeeder": "DEC Red Base", "simLength": 1440, "studyType": "gridlabd"}

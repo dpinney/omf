@@ -11,30 +11,24 @@ from jinja2 import Template
 with open('./reports/monetizationConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read()
 
-def outputHtml(analysisName):
+def outputHtml(analysisObject, reportConfig):
 	# Set general run data:
-	pathPrefix = 'analyses/' + analysisName
-	studies = os.listdir(pathPrefix + '/studies/')
-	resolution = util.getResolution(analysisName)
-	startTime = util.getStartDate(analysisName)
+	resolution = analysisObject.simLengthUnits
+	startTime = analysisObject.simStartDate
 	# Get the report input:
 	inputData = {}
-	with open (pathPrefix + '/reports/monetization.json') as reportFile:
-		reportOptions = json.load(reportFile)
-		inputData['distrEnergyRate'] = float(reportOptions['distrEnergyRate'])
-		inputData['distrCapacityRate'] = float(reportOptions['distrCapacityRate'])
-		inputData['equipAndInstallCost'] = float(reportOptions['equipAndInstallCost'])
-		inputData['opAndMaintCost'] = float(reportOptions['opAndMaintCost'])
+	inputData['distrEnergyRate'] = float(reportConfig['distrEnergyRate'])
+	inputData['distrCapacityRate'] = float(reportConfig['distrCapacityRate'])
+	inputData['equipAndInstallCost'] = float(reportConfig['equipAndInstallCost'])
+	inputData['opAndMaintCost'] = float(reportConfig['opAndMaintCost'])
 	# Pull in the power data:
 	studyDict = {}
 	timeStamps = []
-	for study in studies:
-		studyDict[study] = {}
-		with open(pathPrefix + '/studies/' + study + '/cleanOutput.json') as outFile:
-			studyJson = json.load(outFile)
-			if studies[0] == study:
-				timeStamps = studyJson['timeStamps']
-			studyDict[study]['Power'] = studyJson['Consumption']['Power']
+	for study in analysisObject.studies:
+		studyDict[study.name] = {}
+		studyJson = study.outputJson
+		timeStamps = studyJson['timeStamps']
+		studyDict[study.name]['Power'] = studyJson['Consumption']['Power']
 	# What percentage of a year did we simulate?
 	intervalMap = {'minutes':60, 'hours':3600, 'days':86400}
 	inputData['yearPercentage'] = intervalMap[resolution]*len(timeStamps)/(365*24*60*60.0)
@@ -77,7 +71,3 @@ def outputHtml(analysisName):
 	# Write the results.
 	return template.render(monPowParams=json.dumps(monPowParams), monEnergyParams=json.dumps(monEnergyParams), savingsGrowthParams=json.dumps(savingsGrowthParams),
 							inputData=json.dumps(inputData), studyDict=json.dumps(studyDict), timeStamps = json.dumps(timeStamps))
-
-def modifyStudy(analysisName):
-	pass
-	#TODO: implement if needed.

@@ -1,1 +1,1 @@
-{"reports": ["capacitorActivation.json", "feederPowerConsumption.json", "monetization.json", "rawData.json"], "studyNames": ["CVR", "NoCVR"]}
+{"reports": [{"reportType":"capacitorActivation"}, {"reportType":"feederPowerConsumption"}, {"opAndMaintCost": "1000", "distrCapacityRate": "15", "equipAndInstallCost": "30000", "distrEnergyRate": "0", "reportType": "monetization"}, {"reportType":"rawData"}], "studyNames": ["CVR", "NoCVR"]}

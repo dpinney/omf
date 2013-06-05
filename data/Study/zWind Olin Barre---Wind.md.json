@@ -1,1 +1,1 @@
-{"climate": "KY-LEXINGTON.tmy2", "studyType": "gridlabd", "sourceFeeder": "Olin Barre Housed Wind"}
+{"climate": "KY-LEXINGTON.tmy2", "simStartDate": "2012-04-03", "simLengthUnits": "hours", "sourceFeeder": "Olin Barre Housed Wind", "simLength": 360, "studyType": "gridlabd"}

@@ -1,1 +1,1 @@
-{"climate": "WA-EPHRATA.tmy2", "studyType": "gridlabd", "sourceFeeder": "Olin Barre Housed Battery"}
+{"climate": "WA-EPHRATA.tmy2", "simStartDate": "2012-06-06", "simLengthUnits": "hours", "sourceFeeder": "Olin Barre Housed Battery", "simLength": 148, "studyType": "gridlabd"}

@@ -1,1 +1,1 @@
-{"reports": ["climate.json", "feederPowerConsumption.json", "monetization.json", "runtimeStats.json", "studyDetails.json", "voltageBand.json"], "studyNames": ["Batt", "NoBatt"]}
+{"reports": [{"reportType":"climate"}, {"reportType":"feederPowerConsumption"}, {"opAndMaintCost": "1000", "distrCapacityRate": "18", "equipAndInstallCost": "300000", "distrEnergyRate": "0.07", "reportType": "monetization"}, {"reportType":"runtimeStats"}, {"reportType":"studyDetails"}, {"reportType":"voltageBand"}], "studyNames": ["Batt", "NoBatt"]}

@@ -8,21 +8,19 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','capacitorActivation')
 
-def outputHtml(analysisName):
+def outputHtml(analysisObject, reportConfig):
 	# Build up the data:
-	pathPrefix = './analyses/' + analysisName + '/studies/'
+	resolution = analysisObject.simLengthUnits
 	studyList = []
-	resolution = util.getResolution(analysisName)
-	for study in os.listdir(pathPrefix):
-		with open(pathPrefix + study + '/cleanOutput.json') as outFile:
-			cleanOut = json.load(outFile)
+	for study in analysisObject.studies:
+		cleanOut = study.outputJson
 		if 'Capacitors' in cleanOut:
-			newStudy = {'studyName':study, 'capList':[]}
+			newStudy = {'studyName':study.name, 'capList':[]}
 			for cap in cleanOut['Capacitors']:
 				newCap = {'capName':cap}
 				# Draw the graphs:
 				graphParams = util.defaultGraphObject(resolution, cleanOut['timeStamps'][0] if cleanOut['timeStamps'] else "0001-01-01")
-				graphParams['chart']['renderTo'] = 'chartDiv' + study + cap
+				graphParams['chart']['renderTo'] = 'chartDiv' + study.name + cap
 				graphParams['chart']['height'] = 90
 				graphParams['chart']['type'] = 'area'
 				graphParams['legend']['enabled'] = False
@@ -39,7 +37,3 @@ def outputHtml(analysisName):
 		template = Template(tempFile.read())
 	# Write the results.
 	return template.render(studyList=studyList)
-
-def modifyStudy(analysisName):
-	pass
-	#TODO: implement if needed.
