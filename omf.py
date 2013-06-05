@@ -13,11 +13,13 @@ import studies
 import lib
 from werkzeug import secure_filename
 import milToGridlab
-import otherObjects
 import threading, thread
 # import logging_system
+import storage
 
 app = flask.Flask(__name__)
+
+store = storage.Filestore('data')
 
 class backgroundProc(multiprocessing.Process):
 	def __init__(self, backFun, funArgs):
@@ -41,14 +43,13 @@ class background_thread(threading.Thread):
 # VIEWS
 ###################################################
 
+#COMPLETED!!!
 @app.route('/')
 def root():
 	browser = flask.request.user_agent.browser
-	analyses = analysis.listAll()
-	feeders = feeder.listAll()
-	conversions = otherObjects.listAllConversions()
-	metadatas = [analysis.getMetadata(x) for x in analyses]
-	#DEBUG: print metadatas
+	metadatas = [store.getMetadata('Analysis', x) for x in store.listAll('Analysis')]
+	feeders = store.listAll('Feeder')
+	conversions = store.listAll('Conversion')
 	if browser == 'msie':
 		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
 	else:
@@ -58,16 +59,14 @@ def root():
 @app.route('/newAnalysis/<analysisName>')
 def newAnalysis(analysisName=None):
 	# Get some prereq data:
-	tmy2s = otherObjects.listAllWeather()
-	feeders = feeder.listAll()
+	tmy2s = store.listAll('Weather')
+	feeders = store.listAll('Feeder')
+	analyses = store.listAll('Analysis')
 	reportTemplates = reports.__templates__
 	studyTemplates = studies.__templates__
 	studyRendered = {}
-
 	for study in studyTemplates:
 		studyRendered[study] = str(flask.render_template_string(studyTemplates[study], tmy2s=tmy2s, feeders=feeders))
-
-	analyses = analysis.listAll()
 	# If we aren't specifying an existing name, just make a blank analysis:
 	if analysisName is None or analysisName not in analyses:
 		existingStudies = None
@@ -75,37 +74,39 @@ def newAnalysis(analysisName=None):
 		analysisMd = None
 	# If we specified an analysis, get the studies, reports and analysisMd:
 	else:
-		reportPrefix = 'analyses/' + analysisName + '/reports/'
-		reportNames = os.listdir(reportPrefix)
+		# TODO: implement this.
+		analysisMd = store.getMetadata('Analysis', analysisName)
+		analysis = store.get('Analysis', analysisName)
 		reportDicts = [json.loads(lib.fileSlurp(reportPrefix + x)) for x in reportNames]
 		existingReports = json.dumps(reportDicts)
-		studyPrefix = 'analyses/' + analysisName + '/studies/'
 		studyNames = os.listdir(studyPrefix)
 		studyDicts = [json.loads(lib.fileSlurp(studyPrefix + x + '/metadata.json')) for x in studyNames]
-
 		existingStudies = json.dumps(studyDicts)
-		analysisMd = json.dumps(analysis.getMetadata(analysisName))
 	return flask.render_template('newAnalysis.html', studyTemplates=studyRendered, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
 
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):
-	if not analysis.is_name_of_analysis(analysisName):
+	if not store.exists('Analysis', analysisName):
 		return flask.redirect(flask.url_for('root'))
-	reportList = analysis.generateReportHtml(analysisName)
+	analysis = store.get('Analysis', analysisName)
+	reportList = analysis.generateReportHtml()
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
 
+#COMPLETED!!!
 @app.route('/feeder/<feederName>')
 def feederGet(feederName):
-	return flask.render_template('gridEdit.html', feederName=feederName, path='feeders/')
+	return flask.render_template('gridEdit.html', feederName=feederName, anaFeeder=False)
 
+#COMPLETED!!!
 @app.route('/analysisFeeder/<analysis>/<study>')
 def analysisFeeder(analysis, study):
-	return flask.render_template('gridEdit.html', feederName=study, path='analyses/' + analysis + '/studies/' + study)
+	return flask.render_template('gridEdit.html', feederName=analysis+'---'+study, anaFeeder=True)
 
 
 ####################################################
 # API FUNCTIONS
 ####################################################
+
 
 @app.route('/uniqueName/<name>')
 def uniqueName(name):
@@ -136,31 +137,34 @@ def terminate():
 	analysis.terminate(flask.request.form['analysisName'])
 	return flask.redirect(flask.url_for('root'))
 
-@app.route('/feederData/<path:path>/<feederName>.json')
-def feederData(path, feederName):
-	if path.startswith('feeders/'):
-		fileName = './' + path + '/' + feederName + '.json'
+#COMPLETED!!!
+@app.route('/feederData/<anaFeeder>/<feederName>.json')
+def feederData(anaFeeder, feederName):
+	if anaFeeder == 'True':
+		data = store.get('Study',feederName)['inputJson']
+		del data['attachments']
+		return json.dumps(data)
 	else:
-		fileName = './' + path + '/main.json'
-	with open(fileName) as jsonFile:
-		return jsonFile.read()
+		return json.dumps(store.get('Feeder', feederName))
 
+#COMPLETED!!!
 @app.route('/getComponents/')
 def getComponents():
-	components = otherObjects.getAllComponents()
+	components = {name:store.get('Component', name) for name in store.listAll('Component')}
 	return json.dumps(components, indent=4)
 
+#COMPLETED!!!
 @app.route('/saveFeeder/', methods=['POST'])
 def saveFeeder():
 	postObject = flask.request.form.to_dict()
-	with open('./feeders/' + str(postObject['name']) + '.json','wb') as newJsonFile:
-		newJsonFile.write(postObject['feederObjectJson'])
+	store.put('Feeder', str(postObject['name']), jsonDict=json.loads(postObject['feederObjectJson']), mdDict=None)
 	return flask.redirect(flask.url_for('root') + '#feeders')
 
+#COMPLETED!!!
 @app.route('/runStatus')
 def runStatus():
 	name = flask.request.args.get('name')
-	md = analysis.getMetadata(name)
+	md = store.getMetadata('Analysis', name)
 	if md['status'] != 'running':
 		return flask.render_template('metadata.html', md=md)
 	else:

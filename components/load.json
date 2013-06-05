@@ -1,1 +1,0 @@
-{"object":"load", "name":"load", "parent":"NULL", "phases":"ABCN", "voltage_A":"7200+0.0j", "voltage_B":"-3600-6235j", "voltage_C":"-3600+6235j", "constant_power_A":"69300+43000j", "constant_power_B":"69300+43000j", "constant_power_C":"69300+43000j", "nominal_voltage":"7200", "load_class":"R"}

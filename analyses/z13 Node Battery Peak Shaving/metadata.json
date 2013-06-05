@@ -1,1 +1,0 @@
-{"status": "postRun", "climate": "CA-BRAWLEY.tmy2", "name": "z13 Node Battery Peak Shaving", "simStartDate": "2012-06-01", "simLengthUnits": "hours", "created": "2013-02-25 15:24:28.323000", "PID": 8448, "sourceFeeder": "13 Node Ref Feeder Laid Out ZERO CVR, Battery 13 Node Centralized", "simLength": 240, "runTime": "0:21:17"}

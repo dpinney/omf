@@ -1274,7 +1274,7 @@
 	// INIT FUNCTIONS FOLLOW:
 	d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
 
-	var apiAddress = '/feederData/{{ path }}/{{ feederName }}.json'
+	var apiAddress = '/feederData/{{ anaFeeder }}/{{ feederName }}.json'
 	d3.json(apiAddress, function (json) {
 	tree = json['tree']
 	attachments = json['attachments']

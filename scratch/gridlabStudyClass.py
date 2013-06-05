@@ -1,8 +1,13 @@
 #!/usr/bin/env python
 
+import os, sys, json
+os.chdir('..')
+sys.path.append(os.path.abspath('.'))
 import feeder
+import solvers
 
-with open('./studies/gridlabd.html','r') as configFile: configHtmlTemplate = configFile.read()
+#TODO: uncomment this thing in production.
+# with open('./studies/gridlabd.html','r') as configFile: configHtmlTemplate = configFile.read()
 
 class GridlabStudy:
 	# Metadata attributes
@@ -188,10 +193,22 @@ class GridlabStudy:
 
 	def toDict(self):
 		# Return json-compatible dictionary representation.
-		return {'inputJson':inputJson,'outputJson':outputJson}
+		return {'inputJson':self.inputJson,'outputJson':self.outputJson}
 
 	def mdToDict(self):
-		return {'studyType':'gridlabd', 'simLength':simLength, 'simLengthUnits':simLengthUnits, 'simStartDate':simStartDate, 'feederName':feederName}
+		return {'studyType':'gridlabd', 'simLength':self.simLength, 'simLengthUnits':self.simLengthUnits, 'simStartDate':self.simStartDate, 'feederName':self.feederName}
 
-def main():
-	pass
+if __name__ == '__main__':
+	import json
+	# Create a new study.
+	mdDict = {'simLength':10,'simLengthUnits':'days','simStartDate':'2012-09-01'}
+	with open('feeders/INEC Renoir.json','r') as jsonFile:
+		jsonDict = {'inputJson':json.load(jsonFile),'outputJson':{}}
+	testStudy = GridlabStudy(mdDict, jsonDict, new=True)
+	print testStudy, dir(testStudy)
+	# Run Study
+	# testStudy.run()
+	# Persist new study to disk.
+	with open('./scratch/study.json','w') as studyOut, open('./scratch/study.md.json','w') as studyMd:
+		json.dump(testStudy.toDict(), studyOut, indent=4)
+		json.dump(testStudy.mdToDict(), studyMd, indent=4)

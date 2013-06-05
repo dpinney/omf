@@ -1,0 +1,1 @@
+{"status": "postRun", "climate": "CO-CARBONDALE.tmy2", "name": "zCVR ACEC 3M", "simStartDate": "2012-06-01", "simLengthUnits": "hours", "created": "2013-02-05 12:23:14.324000", "PID": 5432, "sourceFeeder": "ACEC Houses NR, ACEC Houses NR CVR", "simLength": 2016, "runTime": "0:16:30"}

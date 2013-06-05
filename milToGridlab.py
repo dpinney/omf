@@ -608,14 +608,9 @@ def convert(stdPath,seqPath):
 		glmTree[headId] = genericHeaders[headId]
 	return glmTree
 
-def main():
-	''' tests go here '''
-	outGlm = convert('./uploads/ILEC-Rembrandt.std','./uploads/ILEC.seq')
-	# print outGlm
-	# omfConvert('testMagic','ILEC-Rembrandt.std','ILEC.seq')
-
 if __name__ == '__main__':
-	main()
+	# outGlm = convert('./uploads/ILEC-Rembrandt.std','./uploads/ILEC.seq')
+	pass
 
 #TODO: set neutral conductors correctly for all components.
 #TODO: get rid of as many magic numbers as possible.
