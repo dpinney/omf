@@ -1,10 +1,6 @@
 #!/usr/bin/env python
 # encoding: utf-8
 
-# This is a library to manage analysis objects.
-# Note that it doesn't care about performance and will happily lock up any thread its methods are called in.
-# So spawn some worker threads to do this stuff.
-
 import os
 import shutil
 import datetime as dt
@@ -28,6 +24,7 @@ class Analysis:
 	simStartDate = ''
 	simLength = ''
 	simLengthUnits = 0
+	runTime = ''
 	# Data attributes
 	reports = []
 	studyNames = []
@@ -35,17 +32,19 @@ class Analysis:
 	studies = []
 
 	def __init__(self, name, jsonMdDict, jsonDict):
-		self.reports = jsonDict['reports']
-		self.studyNames = jsonDict['studyNames']
-		self.status = jsonMdDict['status']
-		self.sourceFeeder = jsonMdDict['sourceFeeder']
-		self.climate = jsonMdDict['climate']
-		self.created = jsonMdDict['created']
-		self.simStartDate = jsonMdDict['simStartDate']
-		self.simLength = jsonMdDict['simLength']
-		self.simLengthUnits = jsonMdDict['simLengthUnits']
+		self.status = jsonMdDict.get('status','')
+		self.sourceFeeder = jsonMdDict.get('sourceFeeder','')
+		self.climate = jsonMdDict.get('climate','')
+		self.created = jsonMdDict.get('created','')
+		self.simStartDate = jsonMdDict.get('simStartDate','')
+		self.simLength = jsonMdDict.get('simLength',0)
+		self.simLengthUnits = jsonMdDict.get('simLengthUnits','')
+		self.runTime = jsonMdDict.get('runTime','')
+		self.reports = jsonDict.get('reports', [])
+		self.studyNames = jsonDict.get('studyNames', [])
 		self.name = name
-		self.studies = [studies.gridlabd.GridlabStudy(studyName, store.getMetadata('Study', self.name + '---' + studyName), store.get('Study', self.name + '---' + studyName)) for studyName in self.studyNames]
+		# TODO: Support study types that aren't Gridlab!!!
+		self.studies = [studies.gridlabd.GridlabStudy(studyName, self.name, store.getMetadata('Study', self.name + '---' + studyName), store.get('Study', self.name + '---' + studyName)) for studyName in self.studyNames]
 
 	def generateReportHtml(self):
 		# Iterate over reports and collect what we need: 
@@ -58,34 +57,17 @@ class Analysis:
 
 	def run(self):
 		# NOTE! We are running studies serially. We use lower levels of RAM/CPU, potentially saving time if swapping were to occur.
-		# Update status to running.
-		md = getMetadata(analysisName)
-		md['status'] = 'running'
-		putMetadata(analysisName, md)
+		self.status = 'running'
 		startTime = dt.datetime.now()
-		for studyName in self.studies:
-			# If we've been terminated, don't run any more studies.
-			if md['status'] == 'terminated': return False
-			with open('analyses/' + analysisName + '/studies/' + studyName + '/metadata.json') as studyMd:
-				studyType = json.load(studyMd)['studyType']
-			studyModule = getattr(studies, studyType)
+		for study in self.studies:
 			try:
-				studyModule.run(analysisName, studyName)
-			except Exception, e:
-				md = getMetadata(analysisName)
-				print "Got an error, but everything should be alright. Error:", e
-				md['status'] = 'ERROR'
-				putMetadata(analysisName, md)
-				with open('analyses/' + analysisName + '/studies/' + studyName + '/cleanOutput.json', 'w') as cleanOutput:
-					cleanOutput.write('{}')
-				# return
-		# Update status to postRun and include running time IF WE DIDN'T TERMINATE.
-		md = getMetadata(analysisName)
-		if md['status'] != 'terminated' and md['status'] != 'ERROR':
+				study.run()
+			except Exception:
+				self.status = 'ERROR'
+		if self.status not in ['terminated','ERROR']:
 			endTime = dt.datetime.now()
-			md['runTime'] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
-			md['status'] = 'postRun'
-			putMetadata(analysisName, md)
+			self.runTime = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+			self.status = 'postRun'
 
 	def terminate(self):
 		# Get all the pids.
@@ -107,10 +89,10 @@ class Analysis:
 		return
 
 	def toJson(self):
-		pass
+		return {'reports':self.reports, 'studyNames':self.studyNames}
 
 	def mdToJson(self):
-		pass
+		return {'name':self.name, 'status':self.status, 'sourceFeeder':self.sourceFeeder, 'climate':self.climate, 'created':self.created, 'simStartDate':self.simStartDate, 'simLength':self.simLength, 'simLengthUnits':self.simLengthUnits, 'runTime':self.runTime}
 
 if __name__ == '__main__':
 	pass

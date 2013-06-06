@@ -89,7 +89,8 @@ def newAnalysis(analysisName=None):
 def viewReports(analysisName):
 	if not store.exists('Analysis', analysisName):
 		return flask.redirect(flask.url_for('root'))
-	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=analysis.Analysis(analysisName, store.getMetadata('Analysis',analysisName), store.get('Analysis',analysisName)).generateReportHtml())
+	reportList = analysis.Analysis(analysisName, store.getMetadata('Analysis',analysisName), store.get('Analysis',analysisName)).generateReportHtml()
+	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
 
 #COMPLETED!!!
 @app.route('/feeder/<feederName>')
@@ -106,19 +107,30 @@ def analysisFeeder(analysis, study):
 # API FUNCTIONS
 ####################################################
 
-
+#COMPLETED!!!
 @app.route('/uniqueName/<name>')
 def uniqueName(name):
-	return json.dumps(not analysis.is_name_of_analysis(name))
+	return json.dumps(name not in store.listAll('Analysis'))
 
+#COMPLETED!!!
 @app.route('/run/', methods=['POST'])
 @app.route('/reRun/', methods=['POST'])
 def run():
-	runProc = backgroundProc(analysis.run, [flask.request.form.get('analysisName')])
+	anaName = flask.request.form.get('analysisName')
+	anaInstance = analysis.Analysis(anaName, store.getMetadata('Analysis', anaName), store.get('Analysis', anaName))
+	anaInstance.status = 'running'
+	store.put('Analysis', anaInstance.name, mdDict=anaInstance.mdToJson())
+	runProc = backgroundProc(analysisRun, [anaInstance, store])
 	runProc.start()
-	md = analysis.getMetadata(flask.request.form.get('analysisName'))
-	md['status'] = 'running'
-	return flask.render_template('metadata.html', md=md)
+	return flask.render_template('metadata.html', md=anaInstance.mdToJson())
+
+#COMPLETED!!!
+# Helper function to run an analyses in a new process.
+def analysisRun(anaInstance, store):
+	anaInstance.run()
+	store.put('Analysis', anaInstance.name, mdDict=anaInstance.mdToJson(), jsonDict=anaInstance.toJson())
+	for study in anaInstance.studies:
+		store.put('Study', study.analysisName + '---' + study.name, mdDict=study.mdToDict(), jsonDict=study.toDict())
 
 @app.route('/delete/', methods=['POST'])
 def delete():
@@ -189,4 +201,4 @@ def milsoftImport():
 if __name__ == '__main__':
 	# thread_logging = background_thread(logging_system.logging_system(app).logging_run, (app,))
 	# thread_logging.start()
-	app.run(host='0.0.0.0', debug=True, port=5001)
+	app.run(host='0.0.0.0', debug=True, port=5001, threaded=True)

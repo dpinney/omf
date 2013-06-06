@@ -1,5 +1,11 @@
 ﻿#!/usr/bin/env python
 
+if __name__ == '__main__':
+	# Setup for tests.
+	import os, sys
+	os.chdir('./..')
+	sys.path.append(os.getcwd())
+
 import os
 import feeder
 import shutil
@@ -18,20 +24,22 @@ class GridlabStudy:
 	simStartDate = ''
 	sourceFeeder = ''
 	climate = ''
+	analysisName = ''
 	name = ''
 	# Data attributes
 	inputJson = {}
 	outputJson = {}
 
-	def __init__(self, name, jsonMdDict, jsonDict, new=False):
+	def __init__(self, name, analysisName, jsonMdDict, jsonDict, new=False):
+		self.analysisName = analysisName
 		self.name = name
-		self.simLength = jsonMdDict['simLength']
-		self.simLengthUnits = jsonMdDict['simLengthUnits']
-		self.simStartDate = jsonMdDict['simStartDate']
-		self.climate = jsonMdDict['climate']
-		self.sourceFeeder = jsonMdDict['sourceFeeder']
-		self.inputJson = jsonDict['inputJson']
-		self.outputJson = jsonDict['outputJson']
+		self.simLength = jsonMdDict.get('simLength',0)
+		self.simLengthUnits = jsonMdDict.get('simLengthUnits','')
+		self.simStartDate = jsonMdDict.get('simStartDate','')
+		self.climate = jsonMdDict.get('climate','')
+		self.sourceFeeder = jsonMdDict.get('sourceFeeder','')
+		self.inputJson = jsonDict.get('inputJson', {})
+		self.outputJson = jsonDict.get('outputJson', {})
 		# If we're creating a new one:
 		if new == True:
 			# Attach recorders:
@@ -53,11 +61,11 @@ class GridlabStudy:
 	# WARNING! Run does not care about performance and will happily run for a long, long time. Spawn a thread or process for this nonsense.
 	def run(self):
 		# Execute the solver, the process output.
-		rawOut = solvers.gridlabd.run(self.inputJson)
+		rawOut = solvers.gridlabd.run(self)
 		cleanOut = {}
 		# Std Err and Std Out
 		cleanOut['stderr'] = rawOut['stderr']
-		cleanOut['stdout'] = rawout['stdout']
+		cleanOut['stdout'] = rawOut['stdout']
 		# Time Stamps
 		for key in rawOut:
 			if '# timestamp' in rawOut[key]:
@@ -201,19 +209,14 @@ class GridlabStudy:
 		return {'inputJson':self.inputJson,'outputJson':self.outputJson}
 
 	def mdToDict(self):
-		return {'studyType':'gridlabd', 'simLength':self.simLength, 'simLengthUnits':self.simLengthUnits, 'simStartDate':self.simStartDate, 'feederName':self.feederName}
+		return {'studyType':'gridlabd', 'simLength':self.simLength, 'simLengthUnits':self.simLengthUnits, 'simStartDate':self.simStartDate, 'sourceFeeder':self.sourceFeeder}
 
 if __name__ == '__main__':
-	import json
-	# Create a new study.
-	mdDict = {'simLength':10,'simLengthUnits':'days','simStartDate':'2012-09-01'}
-	with open('feeders/INEC Renoir.json','r') as jsonFile:
-		jsonDict = {'inputJson':json.load(jsonFile),'outputJson':{}}
-	testStudy = GridlabStudy(mdDict, jsonDict, new=True)
-	print testStudy, dir(testStudy)
-	# Run Study
-	# testStudy.run()
-	# Persist new study to disk.
-	with open('./scratch/study.json','w') as studyOut, open('./scratch/study.md.json','w') as studyMd:
-		json.dump(testStudy.toDict(), studyOut, indent=4)
-		json.dump(testStudy.mdToDict(), studyMd, indent=4)
+	import storage
+	store = storage.Filestore('data')
+	# Pull in a study.
+	testStudy = GridlabStudy('IndySolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---IndySolar'), store.get('Study','zSolar Trio---IndySolar'))
+	print testStudy.name, dir(testStudy)
+	# Run the study.
+	testStudy.run()
+	print testStudy.outputJson.keys()

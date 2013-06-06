@@ -1,1 +1,24 @@
-{"reports": [{"reportType":"climate"}, {"reportType":"feederPowerConsumption"}, {"reportType":"runtimeStats"}, {"reportType":"studyDetails"}, {"reportType":"voltageBand"}], "studyNames": ["CommSolar", "IndySolar", "NoSolar"]}
+{
+    "reports": [
+        {
+            "reportType": "climate"
+        }, 
+        {
+            "reportType": "feederPowerConsumption"
+        }, 
+        {
+            "reportType": "runtimeStats"
+        }, 
+        {
+            "reportType": "studyDetails"
+        }, 
+        {
+            "reportType": "voltageBand"
+        }
+    ], 
+    "studyNames": [
+        "CommSolar", 
+        "IndySolar", 
+        "NoSolar"
+    ]
+}
