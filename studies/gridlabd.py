@@ -8,9 +8,6 @@ if __name__ == '__main__':
 
 import os
 import feeder
-import shutil
-import subprocess
-import json
 import __util__ as util
 import solvers
 
@@ -62,6 +59,7 @@ class GridlabStudy:
 	def run(self):
 		# Execute the solver, the process output.
 		rawOut = solvers.gridlabd.run(self)
+		if rawOut == False: return False
 		cleanOut = {}
 		# Std Err and Std Out
 		cleanOut['stderr'] = rawOut['stderr']
@@ -203,13 +201,14 @@ class GridlabStudy:
 			cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
 		# Put the results into the self variable:
 		self.outputJson = cleanOut
+		return True
 
 	def toDict(self):
 		# Return json-compatible dictionary representation.
 		return {'inputJson':self.inputJson,'outputJson':self.outputJson}
 
 	def mdToDict(self):
-		return {'studyType':'gridlabd', 'simLength':self.simLength, 'simLengthUnits':self.simLengthUnits, 'simStartDate':self.simStartDate, 'sourceFeeder':self.sourceFeeder}
+		return {'studyType':'gridlabd', 'simLength':self.simLength, 'simLengthUnits':self.simLengthUnits, 'simStartDate':self.simStartDate, 'sourceFeeder':self.sourceFeeder, 'climate':self.climate}
 
 if __name__ == '__main__':
 	import storage

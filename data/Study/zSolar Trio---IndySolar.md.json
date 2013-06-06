@@ -1,7 +1,8 @@
 {
+    "climate": "CO-CARBONDALE", 
+    "simStartDate": "2012-06-06", 
     "simLengthUnits": "hours", 
-    "simLength": 96, 
     "sourceFeeder": "Simple Market System Indy Solar", 
-    "studyType": "gridlabd", 
-    "simStartDate": "2012-06-06"
+    "simLength": 96, 
+    "studyType": "gridlabd"
 }

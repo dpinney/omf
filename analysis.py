@@ -61,32 +61,17 @@ class Analysis:
 		startTime = dt.datetime.now()
 		for study in self.studies:
 			try:
-				study.run()
-			except Exception:
+				exitStatus = study.run()
+				if exitStatus == False:
+					self.status = 'terminated'
+					self.runTime = 'NA'
+					return
+			except:
 				self.status = 'ERROR'
 		if self.status not in ['terminated','ERROR']:
 			endTime = dt.datetime.now()
 			self.runTime = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 			self.status = 'postRun'
-
-	def terminate(self):
-		# Get all the pids.
-		pids = []
-		studiesDir = 'analyses/' + analysisName + '/studies/'
-		for studyName in os.listdir(studiesDir):
-			studyFiles = os.listdir(studiesDir + studyName)
-			if 'PID.txt' in studyFiles:
-				with open(studiesDir + studyName + '/PID.txt','r') as pidFile: pids.append(int(pidFile.read()))
-				os.remove(studiesDir + studyName + '/PID.txt')
-		try:
-			for pid in pids: os.kill(pid, 15)
-		except:
-			print 'We could not kill some PIDs. They may have already completed normally.'
-		# Update that analysis status.
-		md = getMetadata(analysisName)
-		md['status'] = 'terminated'
-		putMetadata(analysisName, md)
-		return
 
 	def toJson(self):
 		return {'reports':self.reports, 'studyNames':self.studyNames}

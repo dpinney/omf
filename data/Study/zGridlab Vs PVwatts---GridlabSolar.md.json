@@ -1,1 +1,1 @@
-{"climate": "NY-ITHACA.tmy2", "simStartDate": "2012-04-01", "simLengthUnits": "hours", "sourceFeeder": "Simple Market System Indy Solar", "simLength": 240, "studyType": "gridlabd"}
+{"climate": "NY-ITHACA", "simStartDate": "2012-04-01", "simLengthUnits": "hours", "sourceFeeder": "Simple Market System Indy Solar", "simLength": 240, "studyType": "gridlabd"}

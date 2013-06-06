@@ -788,7 +788,7 @@
                 2048.8996404743693
             ]
         }, 
-        "stdout": "Core profiler results\n=====================\n\nTotal objects                 42 objects\nParallelism                    1 thread\nTotal time                   1.0 seconds\n  Core time                  0.9 seconds (88.2%)\n  Model time                 0.1 seconds/thread (11.8%)\nSimulation time                4 days\nSimulation speed             4.0k object.hours/second\nSyncs completed             2801 passes\nTime steps completed        1554 timesteps\nConvergence efficiency      1.80 passes/timestep\nMemory lock contention       0.0%\nAverage timestep             222 seconds/timestep\nSimulation rate           345600 x realtime\n\n\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\ncollector          0.033     28.0%      8.3\nplayer             0.024     20.3%     24.0\nrecorder           0.022     18.6%      7.3\nhouse              0.011      9.3%      5.5\ntriplex_meter      0.009      7.6%      3.0\ntriplex_line       0.006      5.1%      3.0\nZIPload            0.005      4.2%      0.6\nregulator          0.003      2.5%      3.0\ntransformer_conf   0.002      1.7%      0.5\ninverter           0.001      0.8%      1.0\nclimate            0.001      0.8%      1.0\ntransformer        0.001      0.8%      0.5\n================ ======== ======== ========\nTotal              0.118    100.0%      2.8", 
+        "stdout": "Core profiler results\n=====================\n\nTotal objects                 42 objects\nParallelism                    1 thread\nTotal time                   2.0 seconds\n  Core time                  1.8 seconds (92.2%)\n  Model time                 0.2 seconds/thread (7.9%)\nSimulation time                4 days\nSimulation speed             2.0k object.hours/second\nSyncs completed             2801 passes\nTime steps completed        1554 timesteps\nConvergence efficiency      1.80 passes/timestep\nMemory lock contention       0.0%\nAverage timestep             222 seconds/timestep\nSimulation rate           172800 x realtime\n\n\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\ncollector          0.053     33.8%     13.3\nrecorder           0.039     24.8%     13.0\nplayer             0.027     17.2%     27.0\ntriplex_meter      0.016     10.2%      5.3\nhouse              0.007      4.5%      3.5\ntriplex_line       0.004      2.5%      2.0\ntransformer        0.003      1.9%      1.5\ntriplex_node       0.002      1.3%      2.0\nsolar              0.001      0.6%      1.0\nwaterheater        0.001      0.6%      0.5\nZIPload            0.001      0.6%      0.1\nnode               0.001      0.6%      0.5\ntransformer_conf   0.001      0.6%      0.3\nregulator          0.001      0.6%      1.0\n================ ======== ======== ========\nTotal              0.157    100.0%      3.7", 
         "allMeterVoltages": {
             "Max": [
                 241.495, 
@@ -2137,21 +2137,23 @@
                 "voltage_A": "2401.7771", 
                 "nominal_voltage": "2401.7771"
             }, 
-            "48": {
-                "interval": "3600", 
-                "parent": "Reg1", 
-                "object": "recorder", 
-                "limit": "0", 
-                "file": "Regulator_Reg1.csv", 
-                "property": "tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag"
+            "22": {
+                "phases": "ABC", 
+                "from": "n650", 
+                "name": "Reg1", 
+                "object": "regulator", 
+                "to": "n630", 
+                "configuration": "regulator_configuration_6506321", 
+                "groupid": "swingKids"
             }, 
-            "49": {
-                "interval": "3600", 
-                "parent": "inverter46", 
-                "object": "recorder", 
-                "limit": "0", 
-                "file": "Inverter_inverter46.csv", 
-                "property": "power_A.real,power_A.imag,power_B.real,power_B.imag,power_C.real,power_C.imag"
+            "23": {
+                "phases": "ABCN", 
+                "name": "n630", 
+                "object": "node", 
+                "voltage_B": "-1200.8886-2080.000j", 
+                "voltage_C": "-1200.8886+2080.000j", 
+                "voltage_A": "2401.7771", 
+                "nominal_voltage": "2401.7771"
             }, 
             "46": {
                 "phases": "AS", 
@@ -2302,6 +2304,12 @@
                 "omftype": "module", 
                 "argument": "tape"
             }, 
+            "18": {
+                "object": "triplex_line_conductor", 
+                "resistance": "0.97", 
+                "name": "tlc", 
+                "geometric_mean_radius": "0.01111"
+            }, 
             "13": {
                 "object": "stubauction", 
                 "name": "Market_1", 
@@ -2316,13 +2324,6 @@
                 "object": "triplex_meter", 
                 "nominal_voltage": "120", 
                 "name": "tm_1"
-            }, 
-            "14": {
-                "loop": "365", 
-                "property": "current_market.clearing_price", 
-                "parent": "Market_1", 
-                "file": "Price.player", 
-                "object": "player"
             }, 
             "11": {
                 "solver_method": "FBS", 
@@ -2365,14 +2366,12 @@
                 "interpolate": "QUADRATIC", 
                 "tmyfile": "\"climate.tmy2\""
             }, 
-            "22": {
-                "phases": "ABC", 
-                "from": "n650", 
-                "name": "Reg1", 
-                "object": "regulator", 
-                "to": "n630", 
-                "configuration": "regulator_configuration_6506321", 
-                "groupid": "swingKids"
+            "14": {
+                "property": "current_market.clearing_price", 
+                "object": "player", 
+                "parent": "Market_1", 
+                "file": "Price.player", 
+                "loop": "365"
             }, 
             "17": {
                 "diameter": "0.368", 
@@ -2431,14 +2430,13 @@
                 "length": "100", 
                 "configuration": "trip_line_config"
             }, 
-            "23": {
-                "phases": "ABCN", 
-                "name": "n630", 
-                "object": "node", 
-                "voltage_B": "-1200.8886-2080.000j", 
-                "voltage_C": "-1200.8886+2080.000j", 
-                "voltage_A": "2401.7771", 
-                "nominal_voltage": "2401.7771"
+            "49": {
+                "interval": "3600", 
+                "parent": "inverter46", 
+                "object": "recorder", 
+                "limit": "0", 
+                "file": "Inverter_inverter46.csv", 
+                "property": "power_A.real,power_A.imag,power_B.real,power_B.imag,power_C.real,power_C.imag"
             }, 
             "51": {
                 "interval": "3600", 
@@ -2496,11 +2494,13 @@
                 "impedance_fraction": "0.571100", 
                 "impedance_pf": "1.000000"
             }, 
-            "18": {
-                "object": "triplex_line_conductor", 
-                "resistance": "0.97", 
-                "name": "tlc", 
-                "geometric_mean_radius": "0.01111"
+            "48": {
+                "interval": "3600", 
+                "parent": "Reg1", 
+                "object": "recorder", 
+                "limit": "0", 
+                "file": "Regulator_Reg1.csv", 
+                "property": "tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag"
             }, 
             "50": {
                 "interval": "3600", 

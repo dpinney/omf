@@ -1,1 +1,1 @@
-{"climate": "AZ-GLOBE.tmy2", "simStartDate": "2012-06-01", "simLengthUnits": "hours", "sourceFeeder": "Olin Barre Housed", "simLength": 240, "studyType": "gridlabd"}
+{"climate": "AZ-GLOBE", "simStartDate": "2012-06-01", "simLengthUnits": "hours", "sourceFeeder": "Olin Barre Housed", "simLength": 240, "studyType": "gridlabd"}

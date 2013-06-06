@@ -1,7 +1,7 @@
 {
     "status": "postRun", 
     "climate": "CO-CARBONDALE.tmy2", 
-    "runTime": "0:00:14", 
+    "runTime": "0:00:15", 
     "simLength": 96, 
     "name": "zSolar Trio", 
     "created": "2012-11-16 10:32:02.015000", 

@@ -26,6 +26,7 @@ class backgroundProc(multiprocessing.Process):
 		self.name = 'omfWorkerProc'
 		self.backFun = backFun
 		self.funArgs = funArgs
+		self.myPid = os.getpid()
 		multiprocessing.Process.__init__(self)
 	def run(self):
 		self.backFun(*self.funArgs)
@@ -43,7 +44,6 @@ class background_thread(threading.Thread):
 # VIEWS
 ###################################################
 
-#COMPLETED!!!
 @app.route('/')
 def root():
 	browser = flask.request.user_agent.browser
@@ -74,17 +74,12 @@ def newAnalysis(analysisName=None):
 		analysisMd = None
 	# If we specified an analysis, get the studies, reports and analysisMd:
 	else:
-		# TODO: implement this.
-		analysisMd = store.getMetadata('Analysis', analysisName)
-		analysis = store.get('Analysis', analysisName)
-		reportDicts = [json.loads(lib.fileSlurp(reportPrefix + x)) for x in reportNames]
-		existingReports = json.dumps(reportDicts)
-		studyNames = os.listdir(studyPrefix)
-		studyDicts = [json.loads(lib.fileSlurp(studyPrefix + x + '/metadata.json')) for x in studyNames]
-		existingStudies = json.dumps(studyDicts)
+		analysisMd = json.dumps(store.getMetadata('Analysis', analysisName))
+		analysisData = store.get('Analysis', analysisName)
+		existingReports = json.dumps(analysisData['reports'])
+		existingStudies = json.dumps([store.getMetadata('Study', analysisName + '---' + studyName) for studyName in analysisData['studyNames']])
 	return flask.render_template('newAnalysis.html', studyTemplates=studyRendered, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
 
-#COMPLETED!!!
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):
 	if not store.exists('Analysis', analysisName):
@@ -92,12 +87,10 @@ def viewReports(analysisName):
 	reportList = analysis.Analysis(analysisName, store.getMetadata('Analysis',analysisName), store.get('Analysis',analysisName)).generateReportHtml()
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
 
-#COMPLETED!!!
 @app.route('/feeder/<feederName>')
 def feederGet(feederName):
 	return flask.render_template('gridEdit.html', feederName=feederName, anaFeeder=False)
 
-#COMPLETED!!!
 @app.route('/analysisFeeder/<analysis>/<study>')
 def analysisFeeder(analysis, study):
 	return flask.render_template('gridEdit.html', feederName=analysis+'---'+study, anaFeeder=True)
@@ -107,26 +100,25 @@ def analysisFeeder(analysis, study):
 # API FUNCTIONS
 ####################################################
 
-#COMPLETED!!!
 @app.route('/uniqueName/<name>')
 def uniqueName(name):
 	return json.dumps(name not in store.listAll('Analysis'))
 
-#COMPLETED!!!
 @app.route('/run/', methods=['POST'])
 @app.route('/reRun/', methods=['POST'])
 def run():
 	anaName = flask.request.form.get('analysisName')
+	anaMd = store.getMetadata('Analysis', anaName)
+	anaMd['status'] = 'running'
+	store.put('Analysis', anaName, mdDict=anaMd)
+	runProc = backgroundProc(analysisRun, [anaName, store])
+	runProc.start()
+	return flask.render_template('metadata.html', md=anaMd)
+
+# Helper function to run an analyses in a new process.
+def analysisRun(anaName, store):
 	anaInstance = analysis.Analysis(anaName, store.getMetadata('Analysis', anaName), store.get('Analysis', anaName))
 	anaInstance.status = 'running'
-	store.put('Analysis', anaInstance.name, mdDict=anaInstance.mdToJson())
-	runProc = backgroundProc(analysisRun, [anaInstance, store])
-	runProc.start()
-	return flask.render_template('metadata.html', md=anaInstance.mdToJson())
-
-#COMPLETED!!!
-# Helper function to run an analyses in a new process.
-def analysisRun(anaInstance, store):
 	anaInstance.run()
 	store.put('Analysis', anaInstance.name, mdDict=anaInstance.mdToJson(), jsonDict=anaInstance.toJson())
 	for study in anaInstance.studies:
@@ -134,9 +126,16 @@ def analysisRun(anaInstance, store):
 
 @app.route('/delete/', methods=['POST'])
 def delete():
-	analysis.delete(flask.request.form['analysisName'])
+	anaName = flask.request.form['analysisName']
+	# Delete studies.
+	childStudies = [x for x in store.listAll('Study') if x.startswith(anaName + '---')]
+	for study in childStudies:
+		store.delete('Study', study)
+	# Delete analysis.
+	store.delete('Analysis', anaName)
 	return flask.redirect(flask.url_for('root'))
 
+#TODO:fixME!
 @app.route('/saveAnalysis/', methods=['POST'])
 def saveAnalysis():
 	postData = json.loads(flask.request.form.to_dict()['json'])
@@ -145,10 +144,16 @@ def saveAnalysis():
 
 @app.route('/terminate/', methods=['POST'])
 def terminate():
-	analysis.terminate(flask.request.form['analysisName'])
+	anaName = flask.request.form['analysisName']
+	for runDir in os.listdir('running'):
+		if runDir.startswith(anaName + '---'):
+			try:
+				with open('running/' + runDir + '/PID.txt','r') as pidFile:
+					os.kill(int(pidFile.read()), 15)
+			except:
+				pass
 	return flask.redirect(flask.url_for('root'))
 
-#COMPLETED!!!
 @app.route('/feederData/<anaFeeder>/<feederName>.json')
 def feederData(anaFeeder, feederName):
 	if anaFeeder == 'True':
@@ -158,20 +163,17 @@ def feederData(anaFeeder, feederName):
 	else:
 		return json.dumps(store.get('Feeder', feederName))
 
-#COMPLETED!!!
 @app.route('/getComponents/')
 def getComponents():
 	components = {name:store.get('Component', name) for name in store.listAll('Component')}
 	return json.dumps(components, indent=4)
 
-#COMPLETED!!!
 @app.route('/saveFeeder/', methods=['POST'])
 def saveFeeder():
 	postObject = flask.request.form.to_dict()
 	store.put('Feeder', str(postObject['name']), jsonDict=json.loads(postObject['feederObjectJson']), mdDict=None)
 	return flask.redirect(flask.url_for('root') + '#feeders')
 
-#COMPLETED!!!
 @app.route('/runStatus')
 def runStatus():
 	name = flask.request.args.get('name')

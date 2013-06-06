@@ -1,1 +1,7 @@
-{"climate": "WA-EPHRATA.tmy2", "simStartDate": "2012-06-06", "simLengthUnits": "hours", "sourceFeeder": "Olin Barre Housed", "simLength": 148, "studyType": "gridlabd"}
+{
+    "simLengthUnits": "hours", 
+    "simLength": 148, 
+    "sourceFeeder": "Olin Barre Housed", 
+    "studyType": "gridlabd", 
+    "simStartDate": "2012-06-06"
+}

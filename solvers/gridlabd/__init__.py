@@ -52,12 +52,11 @@ def run(studyObject):
 		# Put PID.
 		with open(studyPath + '/PID.txt','w') as pidFile:
 			pidFile.write(str(proc.pid))
-		proc.wait()
-		# Remove PID to indicate completion.
-		try: 
-			os.remove(studyPath + '/PID.txt')
-		except:
-			# Terminated, return false so analysis knows to not run any more studies.
+		returnCode = proc.wait()
+		print '!!!!!!', returnCode
+		if returnCode != 0:
+			# Stop running studies, set status=terminated.
+			shutil.rmtree(studyPath)
 			return False
 	# Build raw JSON output.
 	rawOut = anaDataTree(studyPath, lambda x:True)
