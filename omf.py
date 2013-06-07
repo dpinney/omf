@@ -225,10 +225,19 @@ def milsoftImport():
 		if fName.endswith('.std'): stdName = fName
 		elif fName.endswith('.seq'): seqName = fName
 		allFiles[f].save('./uploads/' + fName)
-	runProc = backgroundProc(milToGridlab.omfConvert, [feederName, stdName, seqName])
+	runProc = backgroundProc(milImportAndConvert, [store, feederName, stdName, seqName])
 	runProc.start()
 	time.sleep(1)
 	return flask.redirect(flask.url_for('root') + '#feeders')
+
+def milImportAndConvert(store, feederName, stdName, seqName):
+	store.put('Conversion', feederName, {'data':'none'})
+	newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5'}}
+	newFeeder['tree'] = milToGridlab.convert('./uploads/' + stdName, './uploads/' + seqName)
+	with open('./schedules.glm','r') as schedFile:
+		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	store.put('Feeder', feederName, newFeeder)
+	store.delete('Conversion', feederName)
 
 # This will run on all interface IPs.
 if __name__ == '__main__':
