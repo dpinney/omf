@@ -2,7 +2,7 @@
 
 # How big is a pickled analysis?
 
-import os, sys
+import os, sys, json
 os.chdir('..')
 sys.path.append(os.getcwd())
 
@@ -43,25 +43,59 @@ def test1():
 
 # test1()
 
-# How much slower is it to read a bunch of studies than a single analysis?
 
 import timeit
 setup = '''
-import json, os
+import os, json
 def fullAnalysis():
 	with open('data/Analysis/zBattery Comp.md.json','r') as anaFile:
-		print json.load(anaFile)
+		json.load(anaFile)
 
 def byStudy():
 	studnames = [x for x in os.listdir('data/Study/') if x.startswith('zBattery') and x.endswith('.md.json')]
 	for stud in studnames:
 		with open('data/Study/' + stud, 'r') as studFile:
-			print json.load(studFile)
+			json.load(studFile)
+
+def loadAll():
+	with open('data/Study/zCVR ACEC 3M---CVR.json','r') as openFile:
+		json.load(openFile)
+
+def loadMd():
+	with open('data/Study/zCVR ACEC 3M---CVR.md.json','r') as openFile:
+		json.load(openFile)
+
+def loadNormal():
+	with open('scratch/monolithicjsontest.json','r') as openFile:
+		json.load(openFile)
+
+def loadSelected():
+	with open('scratch/monolithicjsontest.json','r') as openFile:
+		test = openFile.read()
+		test.split(',')
 '''
 
-a = timeit.timeit('fullAnalysis()', setup=setup, number=20)
-b = timeit.timeit('byStudy()', setup=setup, number=20)
+
+
+# How much slower is it to read a bunch of studies than a single analysis?
+# Ten times slower.
+
+a = timeit.timeit('fullAnalysis()', setup=setup, number=200)
+b = timeit.timeit('byStudy()', setup=setup, number=200)
 print '#####FULL ANALYSIS', a
 print '#####BY STUDY', b
 
-# Five times slower.
+# How long does it take to read a md file versus a plain file?
+# Over 100 times slower!
+
+c = timeit.timeit('loadMd()', setup=setup, number=20)
+d = timeit.timeit('loadAll()', setup=setup, number=20)
+print '#####LOAD MD', c
+print '#####LOAD FULL', d
+
+# Hey, what about a custom json deserialization?
+
+c = timeit.timeit('loadNormal()', setup=setup, number=20)
+d = timeit.timeit('loadSelected()', setup=setup, number=20)
+print '#####NORMAL', c
+print '#####REDUCED', d

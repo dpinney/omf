@@ -50,8 +50,9 @@ def run(studyObject):
 		with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr, open(studyPath + '/PID.txt','w') as pidFile:
 			# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
 			proc = subprocess.Popen([binary,'-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr, env=enviro)
+			print '!!!!!!!!!!!!!', proc.pid
 			pidFile.write(str(proc.pid))
-			returnCode = proc.wait()
+		returnCode = proc.wait()
 		if returnCode != 0:
 			# Stop running studies, set status=terminated.
 			shutil.rmtree(studyPath)
