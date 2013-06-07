@@ -45,10 +45,15 @@ class Filestore:
 			traceback.print_exc()
 			return False
 
-	def get(self, objectType, objectName):
+	def get(self, objectType, objectName, raw=False):
 		try:
-			with open(os.path.join(self.storagePath, objectType, objectName) + '.json', 'r') as objectFile:
-				return json.load(objectFile)
+			# This hack is in here to deal with tmy2s. Eventually we'll make a serializable weather object.
+			if raw == True:
+				with open(os.path.join(self.storagePath, objectType, objectName), 'r') as objectFile:
+					return objectFile.read()
+			else:
+				with open(os.path.join(self.storagePath, objectType, objectName) + '.json', 'r') as objectFile:
+					return json.load(objectFile)
 		except:
 			traceback.print_exc()
 			return ''

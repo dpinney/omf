@@ -6,7 +6,7 @@ if __name__ == '__main__':
 	os.chdir('./../..')
 	sys.path.append(os.getcwd())
 
-import sys, struct, subprocess, os, platform, re, feeder, datetime, shutil
+import sys, struct, subprocess, os, platform, re, feeder, datetime, shutil, traceback
 
 def run(studyObject):
 	# Choose our platform:
@@ -34,40 +34,41 @@ def run(studyObject):
 	else:
 		print "Platform not supported ", sys.platform
 		return False
-	# Create a running directory and fill it.
-	studyPath = 'running/' + studyObject.analysisName + '---' + studyObject.name + '___' + str(datetime.datetime.now()).replace(':','_') + '/'
-	os.makedirs(studyPath)
-	# Write attachments and glm.
-	attachments = studyObject.inputJson['attachments']
-	for attach in attachments:
-		with open (studyPath + attach,'w') as attachFile:
-			attachFile.write(attachments[attach])
-	glmString = feeder.sortedWrite(studyObject.inputJson['tree'])
-	with open(studyPath + 'main.glm','w') as glmFile:
-		glmFile.write(glmString)
-	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-	with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr:
-		# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-		proc = subprocess.Popen([binary,'-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr, env=enviro)
-		# Put PID.
-		with open(studyPath + '/PID.txt','w') as pidFile:
+	try:
+		# Create a running directory and fill it.
+		studyPath = 'running/' + studyObject.analysisName + '---' + studyObject.name + '___' + str(datetime.datetime.now()).replace(':','_') + '/'
+		os.makedirs(studyPath)
+		# Write attachments and glm.
+		attachments = studyObject.inputJson['attachments']
+		for attach in attachments:
+			with open (studyPath + attach,'w') as attachFile:
+				attachFile.write(attachments[attach])
+		glmString = feeder.sortedWrite(studyObject.inputJson['tree'])
+		with open(studyPath + 'main.glm','w') as glmFile:
+			glmFile.write(glmString)
+		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
+		with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr, open(studyPath + '/PID.txt','w') as pidFile:
+			# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
+			proc = subprocess.Popen([binary,'-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr, env=enviro)
 			pidFile.write(str(proc.pid))
-		returnCode = proc.wait()
-		print '!!!!!!', returnCode
+			returnCode = proc.wait()
 		if returnCode != 0:
 			# Stop running studies, set status=terminated.
 			shutil.rmtree(studyPath)
 			return False
-	# Build raw JSON output.
-	rawOut = anaDataTree(studyPath, lambda x:True)
-	with open(studyPath + '/stderr.txt','r') as stderrFile:
-		rawOut['stderr'] = stderrFile.read().strip()
-	with open(studyPath + '/stdout.txt','r') as stdoutFile:
-		rawOut['stdout'] = stdoutFile.read().strip()
-	rawOut['glmTree'] = feeder.parse(studyPath + '/main.glm')
-	# Delete the folder and return.
-	shutil.rmtree(studyPath)
-	return rawOut
+		# Build raw JSON output.
+		rawOut = anaDataTree(studyPath, lambda x:True)
+		with open(studyPath + '/stderr.txt','r') as stderrFile:
+			rawOut['stderr'] = stderrFile.read().strip()
+		with open(studyPath + '/stdout.txt','r') as stdoutFile:
+			rawOut['stdout'] = stdoutFile.read().strip()
+		rawOut['glmTree'] = feeder.parse(studyPath + '/main.glm')
+		# Delete the folder and return.
+		shutil.rmtree(studyPath)
+		return rawOut
+	except:
+		traceback.print_exc()
+		return False
 
 def csvToArray(fileName):
 	''' Take a filename to a list of timeseries vectors. Internal method. '''

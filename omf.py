@@ -16,6 +16,7 @@ import milToGridlab
 import threading, thread
 # import logging_system
 import storage
+import datetime
 
 app = flask.Flask(__name__)
 
@@ -77,6 +78,7 @@ def newAnalysis(analysisName=None):
 		analysisMd = json.dumps(store.getMetadata('Analysis', analysisName))
 		analysisData = store.get('Analysis', analysisName)
 		existingReports = json.dumps(analysisData['reports'])
+		#TODO: remove analysis name from study names. Dang DB keys.
 		existingStudies = json.dumps([store.getMetadata('Study', analysisName + '---' + studyName) for studyName in analysisData['studyNames']])
 	return flask.render_template('newAnalysis.html', studyTemplates=studyRendered, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
 
@@ -135,11 +137,40 @@ def delete():
 	store.delete('Analysis', anaName)
 	return flask.redirect(flask.url_for('root'))
 
-#TODO:fixME!
 @app.route('/saveAnalysis/', methods=['POST'])
 def saveAnalysis():
-	postData = json.loads(flask.request.form.to_dict()['json'])
-	analysis.create(postData['analysisName'], int(postData['simLength']), postData['simLengthUnits'], postData['simStartDate'], postData['studies'], postData['reports'])
+	pData = json.loads(flask.request.form.to_dict()['json'])
+	#TODO: unique string join.
+	def uniqJoin(stringList):
+		return ', '.join(set(stringList))
+	anaMetadata = {	'status':'preRun',
+					'sourceFeeder':uniqJoin([stud['feederName'] for stud in pData['studies']]),
+					'climate':uniqJoin([stud['tmy2name'] for stud in pData['studies']]),
+					'created':str(datetime.datetime.now()),
+					'simStartDate':pData['simStartDate'],
+					'simLength':pData['simLength'],
+					'simLengthUnits':pData['simLengthUnits'],
+					'runTime':'' }
+	anaData = {	'reports':pData['reports'],
+				'studyNames':[stud['studyName'] for stud in pData['studies']] }
+	store.put('Analysis', pData['analysisName'], mdDict=anaMetadata, jsonDict=anaData)
+	for study in pData['studies']:
+		if study['studyType'] == 'gridlabd':
+			studyMd = {	'studyType':'gridlabd',
+						'simLength':pData['simLength'],
+						'simLengthUnits':pData['simLengthUnits'],
+						'simStartDate':pData['simStartDate'],
+						'sourceFeeder':study['feederName'],
+						'climate':study['tmy2name'],
+						'analysisName':pData['analysisName'] }
+			studyFeeder = store.get('Feeder', study['feederName'])
+			studyFeeder['attachments']['climate.tmy2'] = store.get('Weather', study['tmy2name']+'.tmy2', raw=True)
+			studyData = {'inputJson':studyFeeder,'outputJson':{}}
+			studyObj = studies.gridlabd.GridlabStudy(study['studyName'], pData['analysisName'], studyMd, studyData, new=True)
+			store.put('Study', pData['analysisName'] + '---' + study['studyName'], mdDict=studyObj.mdToDict(), jsonDict=studyObj.toDict())
+		elif study['studyType'] == 'XXX':
+			#TODO: implement me.
+			pass
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/terminate/', methods=['POST'])

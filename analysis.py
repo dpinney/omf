@@ -22,8 +22,8 @@ class Analysis:
 	climate = ''
 	created = ''
 	simStartDate = ''
-	simLength = ''
-	simLengthUnits = 0
+	simLength = 0
+	simLengthUnits = ''
 	runTime = ''
 	# Data attributes
 	reports = []
@@ -60,14 +60,11 @@ class Analysis:
 		self.status = 'running'
 		startTime = dt.datetime.now()
 		for study in self.studies:
-			try:
-				exitStatus = study.run()
-				if exitStatus == False:
-					self.status = 'terminated'
-					self.runTime = 'NA'
-					return
-			except:
-				self.status = 'ERROR'
+			exitStatus = study.run()
+			if exitStatus == False:
+				self.status = 'terminated'
+				self.runTime = ''
+				return
 		if self.status not in ['terminated','ERROR']:
 			endTime = dt.datetime.now()
 			self.runTime = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
