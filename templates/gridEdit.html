@@ -2,6 +2,7 @@
   <script type='text/javascript' src='/static/d3.v3.js'></script>
   <script type='text/javascript' src='/static/omf.js'></script>
   <script type="text/javascript" src="/static/jquery-1.10.0.js"></script>
+
   <link rel='stylesheet' href='/static/omf.css' />
   <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}' />
   <style type="text/css">
@@ -41,6 +42,9 @@
 	g text {fill:black; stroke:black; stroke-width:0px; stroke-opacity: 1; font-size:15; pointer-events: none;}
 	circle.nodeIsPinned {fill:none; stroke:black; stroke-width:2.5px; pointer-events: none;}
 	circle.nodeNotPinned {fill:none; stroke-width:0px; pointer-events: none;}
+	.node:not(:hover) .nodetext { display: none; }
+	.axis path,.axis line { fill: none; stroke: black;	shape-rendering: crispEdges; }
+	.axis text { font-family: sans-serif; font-size: 11px; }
   </style>
 </head>
 <body onkeypress='hotkeys()'>
@@ -210,35 +214,72 @@
 		.attr('x2', function(d) { return d.target.x; })
 		.attr('y2', function(d) { return d.target.y; });
 		vis.selectAll('.node')
+		.attr("fixed", function(d){ return d.fixed =true }) // fixed a node
 		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 	});
 	var name2nodeIndex = {}
-	if (0 == nodes.length) {
+	if (nodes.length == 0) {
 		// Go through the first time and set up the nodes with indices:
 		for (x in tree) {
-		if ((tree[x].name != undefined || tree[x].module != undefined) && tree[x].from == undefined) {
-			//TODO: Think about allowing access to other objects here.
-			nodeName = tree[x].name
-			nodeObject = tree[x].object
-
-			// Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
-			if (nodeObject == 'node') nodeObject = 'gridNode'
-			if (undefined != tree[x].bustype && tree[x].bustype == 'SWING') nodeObject += ' swingNode'
-			nodeIndex = nodes.length
-			nodes.push({name:nodeName,treeIndex:parseInt(x),objectType:nodeObject,chargeMultiple:1})
-			name2nodeIndex[nodeName] = nodeIndex
-		}
-		}
-		// Go through a second time and set up the links:
-		for (x in tree) {
-		if (tree[x].name != undefined) {
-			if (tree[x].from != undefined && tree[x].to != undefined) {
-			name2nodeIndex[tree[x].name] = links.length
-			links.push({source:name2nodeIndex[tree[x].from],target:name2nodeIndex[tree[x].to],treeIndex:parseInt(x),objectType:'fromTo'})
-			} else if (tree[x].parent != undefined) {
-			links.push({source:name2nodeIndex[tree[x].name],target:name2nodeIndex[tree[x].parent],objectType:'parentChild'})
+			if ((tree[x].name != undefined || tree[x].module != undefined) && tree[x].from == undefined) {
+				//TODO: Think about allowing access to other objects here.
+				nodeName = tree[x].name
+				nodeObject = tree[x].object
+				x_pixel = tree[x].latitude
+				y_pixel = tree[x].longitude
+				if (nodeObject == 'triplex_meter'){
+					for (i in tree){
+						if (tree[i].to == tree[x].name){
+							x_pixel = tree[i].latitude + Math.random() * 20 - 10
+							y_pixel = tree[i].longitude + Math.random() * 20 - 10
+						}
+					}
+				}
+				// Generate triplex_node position, but in this case, it will remain random, since all the parent node are not assigned the position
+				if (nodeObject == 'triplex_node'){
+					for (i in tree){
+						if (tree[i].name == tree[x].parent){
+							x_pixel =  tree[i].latitude + Math.random() * 20-5 
+							y_pixel =  tree[i].longitude + Math.random() * 10-5
+						}
+					}
+				}
+				// Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
+				if (nodeObject == 'node') 
+					nodeObject = 'gridNode'
+				if (undefined != tree[x].bustype && tree[x].bustype == 'SWING') 
+					nodeObject += ' swingNode'
+				nodeIndex = nodes.length
+				nodes.push({
+					name : nodeName,
+					treeIndex : parseInt(x),
+					objectType : nodeObject,
+					chargeMultiple : 1,
+					x : x_pixel,
+					y : y_pixel })
+				name2nodeIndex[nodeName] = nodeIndex
 			}
 		}
+
+
+		// Go through a second time and set up the links:
+		for (x in tree) {
+			if (tree[x].name != undefined) {
+				if (tree[x].from != undefined && tree[x].to != undefined) {
+					name2nodeIndex[tree[x].name] = links.length
+					links.push({
+						// TODO: only need to insert index of node
+						source:name2nodeIndex[tree[x].from],
+						target:name2nodeIndex[tree[x].to],
+						treeIndex:parseInt(x),
+						objectType:'fromTo' })
+				} else if (tree[x].parent != undefined) {
+					links.push({
+						source:name2nodeIndex[tree[x].name],
+						target:name2nodeIndex[tree[x].parent],
+						objectType:'parentChild'})
+				}
+			}
 		}    
 	}
 	// This makes a fancy fade-in.
@@ -254,6 +295,7 @@
 	redraw()
 	}
 
+	// TODO: fix a bug when add a new node, redraw the size of the node
 	function redraw() {
 	link = d3.select('#linkLayer').selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
 
@@ -272,6 +314,12 @@
 		.attr('id', function(d) {return 'n' + d.treeIndex})
 		.on('click', onCompClick)
 
+	node.append("svg:text")
+	        .attr("class", "nodetext")
+	        .attr("dx", 12)
+	        .attr("dy", ".35em")
+	        .text(function(d) { return d.objectType });
+	        
 	// Put the main circle on there, sized according to its size.
 	node.append('svg:circle')
 		.attr('id', function(d) {return 'circ' + d.treeIndex})
@@ -307,11 +355,46 @@
 	force.start()
 	}
 
+	function drawScaleRuler(){
+		var domain_size = 20
+		var padding = 20
+		var size =  100
+		
+		var xScale = d3.scale.linear().domain([ 0, size * shrinkSize ]).range([ 0, size ]);
+
+		//Define X axis
+		var xAxis = d3.svg.axis().scale(xScale).orient("top").ticks(3);
+
+		//Create SVG element
+		var svg = vis.append('svg:g').attr('width', 300).attr('height', 100);
+		//Create X axis
+		svg.append("g")
+			.attr("class", "axis")
+			.attr('x', 300)
+			.attr('y', 800)
+			.attr("transform", "translate("+ (300) +"," + (800) + ")")
+			.call(xAxis);
+	} // end of function drawScaleRuler()
+
 	function zoomRedraw() {
-	// console.log('here', d3.event.translate, d3.event.scale);
-	vis.attr('transform',
-		 'translate(' + d3.event.translate + ')'
-		 + ' scale(' + d3.event.scale + ')');
+		// console.log('here', d3.event.translate, d3.event.scale);
+		vis.attr(
+					'transform',
+					'translate(' + d3.event.translate + ')' + ' scale('
+							+ d3.event.scale + ')').selectAll('.node').style(
+					"stroke-width", 1 / d3.event.scale).selectAll(
+					'circle.nodeIsPinned').style('stroke-width',
+					2.5 / d3.event.scale)
+		vis.selectAll('.nodeCircle').data(nodes, function(d){return d.treeIndex})
+			.attr('r', function(d){return d.chargeMultiple * 10/d3.event.scale});
+		vis.selectAll('nodeIsPinned').data(nodes, function(d){return d.treeIndex})
+			.attr('r', function(d){return 3/d3.event.scale});
+		vis.selectAll('line.link').style("stroke-width", 6/ d3.event.scale)
+		vis.selectAll('nodetext').attr('dx', 12/d3.event.scale).attr('offsetLeft', 0)
+		vis.selectAll('text').style('font-size', 30/d3.event.scale)
+		vis.selectAll('.axis').style('font-size', 11/d3.event.scale)
+		// vis.selectAll('.axis').ticks(3/d3.event.scale)
+		// return d3.event.scale
 	}
 
 	function preLayout() {

@@ -2,6 +2,7 @@
 
 import csv
 import feeder
+import random
 
 def convert(stdPath,seqPath):
 	''' Take in a .std and .seq from Milsoft and spit out a glmTree.'''
@@ -25,6 +26,24 @@ def convert(stdPath,seqPath):
 
 	# The number of allowable sub objects:
 	subObCount = 100
+
+	def convertToPixel(stdPath):
+		x_list = []
+		y_list = []
+		x_pixel_range = 1200
+		y_pixel_range = 800
+		with open(stdPath, 'r') as file_handler:
+			file_handler.readline()
+			for line in file_handler:
+				token_list = line.split(',')
+				x_list.append(float(token_list[5]))
+				y_list.append(float(token_list[6]))
+		# according to convert function  f(x) = a * x + b
+		x_a = x_pixel_range / (max(x_list) - min(x_list))
+		x_b = -x_a * min(x_list)
+		y_a = y_pixel_range / (max(y_list) - min(y_list))
+		y_b = -y_a * min(y_list)
+		return x_a, x_b, y_a, y_b
 
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
@@ -61,6 +80,12 @@ def convert(stdPath,seqPath):
 			# Need to replace invalid characters in names:
 			newOb['name'] = objectList[0].replace('.','x')
 			newOb['object'] = gridlabFields[int(objectList[1])]
+			# Coordinate position, except overheadLine and undergoundLine
+			# if objectList[1] != '1' and objectList[1] != '3': 
+			[x_a,x_b,y_a,y_b] = convertToPixel(stdPath)
+			# convert to the relative pixel position f(x) = a * x + b
+			newOb['latitude'] = x_a * float(objectList[5]) + x_b
+			newOb['longitude'] = y_a * float(objectList[6]) + y_b
 			# Some non-Gridlab elements:
 			newOb['guid'] = objectList[49].replace('{','').replace('}','')
 			newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
@@ -359,7 +384,13 @@ def convert(stdPath,seqPath):
 				interNode['phases'] = phaseMerge(interNode['phases'],comp['phases'])
 			else:
 				# Gotta insert a node between lines and parentable objects:
-				newNode = {'object':'node', 'phases':comp['phases'], 'name': 'node' + comp['name'] + parent['name'], 'nominal_voltage':'2400'}
+				newNode = {\
+					'object':'node', \
+					'phases':comp['phases'],\
+					'name': 'node' + comp['name'] + parent['name'], \
+					'nominal_voltage':'2400', \
+					'latitude': comp['latitude'],\
+					'longitude': comp['longitude']}
 				convertedComponents.append(newNode)
 				parent['to'] = newNode['name']
 				comp['parent'] = newNode['name']
@@ -371,7 +402,12 @@ def convert(stdPath,seqPath):
 				interNode['phases'] = phaseMerge(interNode['phases'],comp['phases'])
 			else:
 				# Gotta insert a node between two lines:
-				newNode = {'object':'node', 'phases':comp['phases'], 'name': 'node' + comp['name'] + parent['name'], 'nominal_voltage':'2400'}
+				newNode = {'object':'node', \
+							'phases':comp['phases'], \
+							'name': 'node' + comp['name'] + parent['name'], \
+							'nominal_voltage':'2400',\
+							'latitude': comp['latitude'],\
+					'longitude': comp['longitude']}
 				convertedComponents.append(newNode)
 				parent['to'] = newNode['name']
 				comp['from'] = newNode['name']
