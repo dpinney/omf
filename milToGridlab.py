@@ -2,26 +2,9 @@
 
 import csv
 import feeder
-import os
-import shutil
-import json
-import storage
-
-
-def omfConvert(feederName, stdName, seqName):
-	store = storage.Filestore('data')
-	store.put('Conversion', feederName, {'data':'none'})
-	#TODO: have a conversion.
-	newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.1','friction':'0.9','linkStrength':'1'}}
-	newFeeder['tree'] = convert('./uploads/' + stdName, './uploads/' + seqName)
-	with open('./schedules.glm','r') as schedFile:
-		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
-	store.put('Feeder', feederName, newFeeder)
-	store.delete('Conversion', feederName)
-	return True
 
 def convert(stdPath,seqPath):
-	''' Take in a .std and .seq from Milsoft and spit out a .glm string.'''
+	''' Take in a .std and .seq from Milsoft and spit out a glmTree.'''
 
 	print 'Beginning Windmil to GLM conversion.'
 
