@@ -10,28 +10,24 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','feederPowerConsumption')
 
-def outputHtml(analysisName):
+def outputHtml(analysisObject, reportConfig):
 	# Variables for the whole analysis:
-	pathPrefix = 'analyses/' + analysisName + '/studies/'
-	studies = os.listdir(pathPrefix)
-	resolution = util.getResolution(analysisName)
 	allData = {}
-	for study in studies:
+	for studyObject in analysisObject.studies:
+		study = studyObject.name
 		allData[study] = {}
-		with open(pathPrefix + study + '/cleanOutput.json') as outFile:
-			studyJson = json.load(outFile)
-			allData[study]['Power'] = studyJson.get('Consumption', {}).get('Power', [])
-			allData[study]['totalEnergy'] = util.totalEnergy(allData[study]['Power'], resolution)
-			allData[study]['Losses'] = util.totalEnergy(studyJson.get('Consumption', {}).get('Losses', []), resolution)
-			allData[study]['Loads'] = allData[study]['totalEnergy'] - allData[study]['Losses']
-			if 'DG' in studyJson.get('Consumption', {}):
-				allData[study]['DG'] = util.totalEnergy(studyJson['Consumption']['DG'], resolution)
-				allData[study]['Loads'] = allData[study]['totalEnergy'] - allData[study]['Losses'] + allData[study]['DG']
-			else:
-				allData[study]['DG'] = 0
-
+		studyJson = studyObject.outputJson
+		allData[study]['Power'] = studyJson.get('Consumption', {}).get('Power', [])
+		allData[study]['totalEnergy'] = util.totalEnergy(allData[study]['Power'], analysisObject.simLengthUnits)
+		allData[study]['Losses'] = util.totalEnergy(studyJson.get('Consumption', {}).get('Losses', []), analysisObject.simLengthUnits)
+		allData[study]['Loads'] = allData[study]['totalEnergy'] - allData[study]['Losses']
+		if 'DG' in studyJson.get('Consumption', {}):
+			allData[study]['DG'] = util.totalEnergy(studyJson['Consumption']['DG'], analysisObject.simLengthUnits)
+			allData[study]['Loads'] = allData[study]['totalEnergy'] - allData[study]['Losses'] + allData[study]['DG']
+		else:
+			allData[study]['DG'] = 0
 	# Add the power time series graph:
-	powGraphParams = util.defaultGraphObject(resolution, util.getStartDate(analysisName))
+	powGraphParams = util.defaultGraphObject(analysisObject.simLengthUnits, analysisObject.simStartDate)
 	powGraphParams['chart']['renderTo'] = 'powerTimeSeries'
 	powGraphParams['chart']['type'] = 'line'
 	powGraphParams['chart']['height'] = 250	
@@ -61,16 +57,8 @@ def outputHtml(analysisName):
 	# Write the results.
 	return template.render(powGraphParams=json.dumps(powGraphParams), energyGraphParams=json.dumps(energyGraphParams))
 
-
-def modifyStudy(analysisName):
-	pass
-	#TODO: implement if needed.
-
-def main():
+if __name__ == '__main__':
 	# Tests go here!
 	os.chdir('..')
 	os.listdir('.')
 	print outputHtml('Loss Test')
-
-if __name__ == '__main__':
-	main()

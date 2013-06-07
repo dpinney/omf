@@ -1,0 +1,1 @@
+{"reports": [{"reportType":"climate"}, {"reportType":"feederPowerConsumption"}, {"opAndMaintCost": "1000", "distrCapacityRate": "16", "equipAndInstallCost": "30000", "distrEnergyRate": "0.07", "reportType": "monetization"}, {"reportType":"runtimeStats"}, {"reportType":"studyDetails"}, {"reportType":"voltageBand"}], "studyNames": ["Baseline", "Battery", "CVR", "DG"]}

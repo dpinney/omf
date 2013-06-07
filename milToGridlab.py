@@ -5,20 +5,19 @@ import feeder
 import os
 import shutil
 import json
+import storage
+
 
 def omfConvert(feederName, stdName, seqName):
-	''' Take in two uploads and a name, create a feeder. VERY PROCESSOR INTENSIVE -- RUN IN A SUBPROCESS '''
-	os.mkdir('./conversions/' + feederName)
-	glmTree = convert('./uploads/' + stdName, './uploads/' + seqName)
-	os.rmdir('./conversions/' + feederName)
-	# os.mkdir('./feeders/' + feederName)
-	# with open('./feeders/' + feederName + '/main.glm', 'w') as outFile:
-	# 	outFile.write(glmTree)
-	# shutil.copyfile('./schedules.glm','./feeders/' + feederName + '/schedules.glm')
+	store = storage.Filestore('data')
+	store.put('Conversion', feederName, {'data':'none'})
+	#TODO: have a conversion.
+	newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.1','friction':'0.9','linkStrength':'1'}}
+	newFeeder['tree'] = convert('./uploads/' + stdName, './uploads/' + seqName)
 	with open('./schedules.glm','r') as schedFile:
-		attachments = {'schedules.glm':schedFile.read()}
-	with open('./feeders/' + feederName + '.json', 'w') as outFile:
-		json.dump({'attachments':attachments,'tree':glmTree,'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.1','friction':'0.9','linkStrength':'1'}},outFile,indent=4)
+		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	store.put('Feeder', feederName, newFeeder)
+	store.delete('Conversion', feederName)
 	return True
 
 def convert(stdPath,seqPath):
@@ -608,14 +607,9 @@ def convert(stdPath,seqPath):
 		glmTree[headId] = genericHeaders[headId]
 	return glmTree
 
-def main():
-	''' tests go here '''
-	outGlm = convert('./uploads/ILEC-Rembrandt.std','./uploads/ILEC.seq')
-	# print outGlm
-	# omfConvert('testMagic','ILEC-Rembrandt.std','ILEC.seq')
-
 if __name__ == '__main__':
-	main()
+	# outGlm = convert('./uploads/ILEC-Rembrandt.std','./uploads/ILEC.seq')
+	pass
 
 #TODO: set neutral conductors correctly for all components.
 #TODO: get rid of as many magic numbers as possible.

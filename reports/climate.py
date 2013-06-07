@@ -8,19 +8,20 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','climate')
 
-def outputHtml(analysisName):
+
+'''
+source info:
+http://www.gridlabd.org/documents/doxygen/latest_dev/climate_8h-source.html
+'''
+
+def outputHtml(analysisObject, reportConfig):
 	# Collect study variables:
-	pathPrefix = './analyses/' + analysisName + '/studies/'
-	studies = os.listdir(pathPrefix)
-	with open('./analyses/' + analysisName + '/metadata.json') as mdFile:
-		md = json.load(mdFile)
-		resolution = md['simLengthUnits']
-		climates = md['climate'].count('.tmy2')
+	resolution = analysisObject.simLengthUnits
+	climates = analysisObject.climate.count('.tmy2')
 	studyList = []
 	title = True
-	for study in studies:
-		with open(pathPrefix + study + '/cleanOutput.json') as outFile:
-			cleanOut = json.load(outFile)
+	for study in analysisObject.studies:
+		cleanOut = study.outputJson
 		if 'climate' in cleanOut:
 			studyDict = {'studyName':study}
 			# Setting up the graph options:
@@ -43,23 +44,7 @@ def outputHtml(analysisName):
 	# Write the results.
 	return template.render(studyList=studyList, title=title)
 
-
-def modifyStudy(analysisName):
-	pass
-	#TODO: implement if needed.
-
-def main():
+if __name__ == '__main__':
 	# tests go here.
 	os.chdir('..')
 	outputHtml('SolarTrio')
-
-if __name__ == '__main__':
-	main()
-
-
-'''
-
-source info:
-http://www.gridlabd.org/documents/doxygen/latest_dev/climate_8h-source.html
-
-'''

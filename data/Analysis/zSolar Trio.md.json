@@ -1,0 +1,11 @@
+{
+    "status": "postRun", 
+    "climate": "CO-CARBONDALE.tmy2", 
+    "runTime": "0:00:15", 
+    "simLength": 96, 
+    "name": "zSolar Trio", 
+    "created": "2012-11-16 10:32:02.015000", 
+    "simLengthUnits": "hours", 
+    "simStartDate": "2012-06-06", 
+    "sourceFeeder": "Simple Market System Indy Solar, Simple Market System, Simple Market System Comm Solar"
+}

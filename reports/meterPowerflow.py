@@ -9,21 +9,19 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','meterPowerflow')
 
-def outputHtml(analysisName):
+def outputHtml(analysisObject, reportConfig):
 	# Build up the data:
-	pathPrefix = './analyses/' + analysisName + '/studies/'
-	resolution = util.getResolution(analysisName)
-	startDate = util.getStartDate(analysisName)
+	resolution = analysisObject.simLengthUnits
+	startDate = analysisObject.simStartDate
 	studyList = []
-	for study in os.listdir(pathPrefix):
-		with open(pathPrefix + study + '/cleanOutput.json') as outFile:
-			cleanOut = json.load(outFile)
+	for study in analysisObject.studies:
+		cleanOut = study.outputJson
 		if 'Meters' in cleanOut:
-			newStudy = {'studyName':study}
+			newStudy = {'studyName':study.name}
 			# Power graph:
 			newStudy['powerParameters'] = util.defaultGraphObject(resolution, startDate)	
 			newStudy['powerParameters']['chart']['height'] = 150
-			newStudy['powerParameters']['chart']['renderTo'] = 'meterPowerChart' + study
+			newStudy['powerParameters']['chart']['renderTo'] = 'meterPowerChart' + study.name
 			newStudy['powerParameters']['yAxis']['title']['text'] = 'Load (kW)'
 			newStudy['powerParameters']['series'] = [{	'name':meter,
 														'data':cleanOut['Meters'][meter]['Load (kW)'],
@@ -33,7 +31,7 @@ def outputHtml(analysisName):
 			# Voltage graph:
 			newStudy['voltParameters'] = util.defaultGraphObject(resolution, startDate)	
 			newStudy['voltParameters']['chart']['height'] = 150
-			newStudy['voltParameters']['chart']['renderTo'] = 'meterVoltChart' + study
+			newStudy['voltParameters']['chart']['renderTo'] = 'meterVoltChart' + study.name
 			newStudy['voltParameters']['yAxis']['title']['text'] = 'Voltage (V)'
 			newStudy['voltParameters']['series'] = [{	'name':meter,
 														'data':cleanOut['Meters'][meter]['Voltage (V)'],
@@ -46,8 +44,3 @@ def outputHtml(analysisName):
 		template = Template(tempFile.read())
 	# Write the results.
 	return template.render(studyList=studyList)
-
-
-def modifyStudy(analysisName):
-	pass
-	#TODO: implement if needed.
