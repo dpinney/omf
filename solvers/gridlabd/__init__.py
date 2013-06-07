@@ -1,14 +1,18 @@
 #!/usr/bin/env python
 
-import sys, struct, subprocess, os, platform, re, feeder
+if __name__ == '__main__':
+	# Setup for tests.
+	import os, sys
+	os.chdir('./../..')
+	sys.path.append(os.getcwd())
 
-def run(analysisName, studyName):
+import sys, struct, subprocess, os, platform, re, feeder, datetime, shutil, traceback
+
+def run(studyObject):
 	# Choose our platform:
 	thisFile = os.path.realpath(__file__)
 	solverRoot = os.path.split(thisFile)[0]
-	# Get current environment variables:
 	enviro = os.environ
-	# print solverRoot
 	if sys.platform == 'win32' or sys.platform == 'cygwin':
 		if platform.machine().endswith('64'):
 			binary = solverRoot + "\\win64\\gridlabd.exe"
@@ -30,31 +34,41 @@ def run(analysisName, studyName):
 	else:
 		print "Platform not supported ", sys.platform
 		return False
-	# Path to glm etc.:
-	studyPath = 'analyses/' + analysisName + '/studies/' + studyName
-	
-	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-	with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr:
-		# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-		proc = subprocess.Popen([binary,'-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr, env=enviro)
-		# Put PID.
-		with open(studyPath + '/PID.txt','w') as pidFile:
+	try:
+		# Create a running directory and fill it.
+		studyPath = 'running/' + studyObject.analysisName + '---' + studyObject.name + '___' + str(datetime.datetime.now()).replace(':','_') + '/'
+		os.makedirs(studyPath)
+		# Write attachments and glm.
+		attachments = studyObject.inputJson['attachments']
+		for attach in attachments:
+			with open (studyPath + attach,'w') as attachFile:
+				attachFile.write(attachments[attach])
+		glmString = feeder.sortedWrite(studyObject.inputJson['tree'])
+		with open(studyPath + 'main.glm','w') as glmFile:
+			glmFile.write(glmString)
+		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
+		with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr, open(studyPath + '/PID.txt','w') as pidFile:
+			# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
+			proc = subprocess.Popen([binary,'-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr, env=enviro)
 			pidFile.write(str(proc.pid))
-		proc.wait()
-		# Remove PID to indicate completion.
-		try: 
-			os.remove(studyPath + '/PID.txt')
-		except:
-			# Terminated, return false so analysis knows to not run any more studies.
+			returnCode = proc.wait()
+		if returnCode != 0:
+			# Stop running studies, set status=terminated.
+			shutil.rmtree(studyPath)
 			return False
-	# Return raw JSON output.
-	rawOut = anaDataTree(studyPath, lambda x:True)
-	with open(studyPath + '/stderr.txt','r') as stderrFile:
-		rawOut['stderr'] = stderrFile.read().strip()
-	with open(studyPath + '/stdout.txt','r') as stdoutFile:
-		rawOut['stdout'] = stdoutFile.read().strip()
-	rawOut['glmTree'] = feeder.parse(studyPath + '/main.glm')
-	return rawOut
+		# Build raw JSON output.
+		rawOut = anaDataTree(studyPath, lambda x:True)
+		with open(studyPath + '/stderr.txt','r') as stderrFile:
+			rawOut['stderr'] = stderrFile.read().strip()
+		with open(studyPath + '/stdout.txt','r') as stdoutFile:
+			rawOut['stdout'] = stdoutFile.read().strip()
+		rawOut['glmTree'] = feeder.parse(studyPath + '/main.glm')
+		# Delete the folder and return.
+		shutil.rmtree(studyPath)
+		return rawOut
+	except:
+		traceback.print_exc()
+		return False
 
 def csvToArray(fileName):
 	''' Take a filename to a list of timeseries vectors. Internal method. '''
@@ -103,8 +117,9 @@ def anaDataTree(studyPath, fileNameTest):
 	return data
 
 if __name__ == '__main__':
-	# os.chdir('../..')
-	# run('zSolar Trio','NoSolar')
-	# with open('analyses/zSolar Trio/studies/NoSolar/stdout.txt') as stdout:
-	# 	print stdout.read()
-	pass
+	import storage, studies
+	store = storage.Filestore('data')
+	testStudy = studies.gridlabd.GridlabStudy('NoSolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---NoSolar'), store.get('Study','zSolar Trio---NoSolar'))
+	print testStudy.name, dir(testStudy)
+	rawOut = run(testStudy)
+	print rawOut.keys()

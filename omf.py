@@ -13,17 +13,21 @@ import studies
 import lib
 from werkzeug import secure_filename
 import milToGridlab
-import otherObjects
 import threading, thread
 # import logging_system
+import storage
+import datetime
 
 app = flask.Flask(__name__)
+
+store = storage.Filestore('data')
 
 class backgroundProc(multiprocessing.Process):
 	def __init__(self, backFun, funArgs):
 		self.name = 'omfWorkerProc'
 		self.backFun = backFun
 		self.funArgs = funArgs
+		self.myPid = os.getpid()
 		multiprocessing.Process.__init__(self)
 	def run(self):
 		self.backFun(*self.funArgs)
@@ -44,11 +48,9 @@ class background_thread(threading.Thread):
 @app.route('/')
 def root():
 	browser = flask.request.user_agent.browser
-	analyses = analysis.listAll()
-	feeders = feeder.listAll()
-	conversions = otherObjects.listAllConversions()
-	metadatas = [analysis.getMetadata(x) for x in analyses]
-	#DEBUG: print metadatas
+	metadatas = [store.getMetadata('Analysis', x) for x in store.listAll('Analysis')]
+	feeders = store.listAll('Feeder')
+	conversions = store.listAll('Conversion')
 	if browser == 'msie':
 		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
 	else:
@@ -58,16 +60,14 @@ def root():
 @app.route('/newAnalysis/<analysisName>')
 def newAnalysis(analysisName=None):
 	# Get some prereq data:
-	tmy2s = otherObjects.listAllWeather()
-	feeders = feeder.listAll()
+	tmy2s = store.listAll('Weather')
+	feeders = store.listAll('Feeder')
+	analyses = store.listAll('Analysis')
 	reportTemplates = reports.__templates__
 	studyTemplates = studies.__templates__
 	studyRendered = {}
-
 	for study in studyTemplates:
 		studyRendered[study] = str(flask.render_template_string(studyTemplates[study], tmy2s=tmy2s, feeders=feeders))
-
-	analyses = analysis.listAll()
 	# If we aren't specifying an existing name, just make a blank analysis:
 	if analysisName is None or analysisName not in analyses:
 		existingStudies = None
@@ -75,32 +75,27 @@ def newAnalysis(analysisName=None):
 		analysisMd = None
 	# If we specified an analysis, get the studies, reports and analysisMd:
 	else:
-		reportPrefix = 'analyses/' + analysisName + '/reports/'
-		reportNames = os.listdir(reportPrefix)
-		reportDicts = [json.loads(lib.fileSlurp(reportPrefix + x)) for x in reportNames]
-		existingReports = json.dumps(reportDicts)
-		studyPrefix = 'analyses/' + analysisName + '/studies/'
-		studyNames = os.listdir(studyPrefix)
-		studyDicts = [json.loads(lib.fileSlurp(studyPrefix + x + '/metadata.json')) for x in studyNames]
-
-		existingStudies = json.dumps(studyDicts)
-		analysisMd = json.dumps(analysis.getMetadata(analysisName))
+		analysisMd = json.dumps(store.getMetadata('Analysis', analysisName))
+		analysisData = store.get('Analysis', analysisName)
+		existingReports = json.dumps(analysisData['reports'])
+		#TODO: remove analysis name from study names. Dang DB keys.
+		existingStudies = json.dumps([store.getMetadata('Study', analysisName + '---' + studyName) for studyName in analysisData['studyNames']])
 	return flask.render_template('newAnalysis.html', studyTemplates=studyRendered, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
 
 @app.route('/viewReports/<analysisName>')
 def viewReports(analysisName):
-	if not analysis.is_name_of_analysis(analysisName):
+	if not store.exists('Analysis', analysisName):
 		return flask.redirect(flask.url_for('root'))
-	reportList = analysis.generateReportHtml(analysisName)
+	reportList = analysis.Analysis(analysisName, store.getMetadata('Analysis',analysisName), store.get('Analysis',analysisName)).generateReportHtml()
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
 
 @app.route('/feeder/<feederName>')
 def feederGet(feederName):
-	return flask.render_template('gridEdit.html', feederName=feederName, path='feeders/')
+	return flask.render_template('gridEdit.html', feederName=feederName, anaFeeder=False)
 
 @app.route('/analysisFeeder/<analysis>/<study>')
 def analysisFeeder(analysis, study):
-	return flask.render_template('gridEdit.html', feederName=study, path='analyses/' + analysis + '/studies/' + study)
+	return flask.render_template('gridEdit.html', feederName=analysis+'---'+study, anaFeeder=True)
 
 
 ####################################################
@@ -109,58 +104,111 @@ def analysisFeeder(analysis, study):
 
 @app.route('/uniqueName/<name>')
 def uniqueName(name):
-	return json.dumps(not analysis.is_name_of_analysis(name))
+	return json.dumps(name not in store.listAll('Analysis'))
 
 @app.route('/run/', methods=['POST'])
 @app.route('/reRun/', methods=['POST'])
 def run():
-	runProc = backgroundProc(analysis.run, [flask.request.form.get('analysisName')])
+	anaName = flask.request.form.get('analysisName')
+	anaMd = store.getMetadata('Analysis', anaName)
+	anaMd['status'] = 'running'
+	store.put('Analysis', anaName, mdDict=anaMd)
+	runProc = backgroundProc(analysisRun, [anaName, store])
 	runProc.start()
-	md = analysis.getMetadata(flask.request.form.get('analysisName'))
-	md['status'] = 'running'
-	return flask.render_template('metadata.html', md=md)
+	return flask.render_template('metadata.html', md=anaMd)
+
+# Helper function to run an analyses in a new process.
+def analysisRun(anaName, store):
+	anaInstance = analysis.Analysis(anaName, store.getMetadata('Analysis', anaName), store.get('Analysis', anaName))
+	anaInstance.status = 'running'
+	anaInstance.run()
+	store.put('Analysis', anaInstance.name, mdDict=anaInstance.mdToJson(), jsonDict=anaInstance.toJson())
+	for study in anaInstance.studies:
+		store.put('Study', study.analysisName + '---' + study.name, mdDict=study.mdToDict(), jsonDict=study.toDict())
 
 @app.route('/delete/', methods=['POST'])
 def delete():
-	analysis.delete(flask.request.form['analysisName'])
+	anaName = flask.request.form['analysisName']
+	# Delete studies.
+	childStudies = [x for x in store.listAll('Study') if x.startswith(anaName + '---')]
+	for study in childStudies:
+		store.delete('Study', study)
+	# Delete analysis.
+	store.delete('Analysis', anaName)
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/saveAnalysis/', methods=['POST'])
 def saveAnalysis():
-	postData = json.loads(flask.request.form.to_dict()['json'])
-	analysis.create(postData['analysisName'], int(postData['simLength']), postData['simLengthUnits'], postData['simStartDate'], postData['studies'], postData['reports'])
+	pData = json.loads(flask.request.form.to_dict()['json'])
+	#TODO: unique string join.
+	def uniqJoin(stringList):
+		return ', '.join(set(stringList))
+	anaMetadata = {	'status':'preRun',
+					'sourceFeeder':uniqJoin([stud['feederName'] for stud in pData['studies']]),
+					'climate':uniqJoin([stud['tmy2name'] for stud in pData['studies']]),
+					'created':str(datetime.datetime.now()),
+					'simStartDate':pData['simStartDate'],
+					'simLength':pData['simLength'],
+					'simLengthUnits':pData['simLengthUnits'],
+					'runTime':'' }
+	anaData = {	'reports':pData['reports'],
+				'studyNames':[stud['studyName'] for stud in pData['studies']] }
+	store.put('Analysis', pData['analysisName'], mdDict=anaMetadata, jsonDict=anaData)
+	for study in pData['studies']:
+		if study['studyType'] == 'gridlabd':
+			studyMd = {	'studyType':'gridlabd',
+						'simLength':pData['simLength'],
+						'simLengthUnits':pData['simLengthUnits'],
+						'simStartDate':pData['simStartDate'],
+						'sourceFeeder':study['feederName'],
+						'climate':study['tmy2name'],
+						'analysisName':pData['analysisName'] }
+			studyFeeder = store.get('Feeder', study['feederName'])
+			studyFeeder['attachments']['climate.tmy2'] = store.get('Weather', study['tmy2name']+'.tmy2', raw=True)
+			studyData = {'inputJson':studyFeeder,'outputJson':{}}
+			studyObj = studies.gridlabd.GridlabStudy(study['studyName'], pData['analysisName'], studyMd, studyData, new=True)
+			store.put('Study', pData['analysisName'] + '---' + study['studyName'], mdDict=studyObj.mdToDict(), jsonDict=studyObj.toDict())
+		elif study['studyType'] == 'XXX':
+			#TODO: implement me.
+			pass
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/terminate/', methods=['POST'])
 def terminate():
-	analysis.terminate(flask.request.form['analysisName'])
+	anaName = flask.request.form['analysisName']
+	for runDir in os.listdir('running'):
+		if runDir.startswith(anaName + '---'):
+			try:
+				with open('running/' + runDir + '/PID.txt','r') as pidFile:
+					os.kill(int(pidFile.read()), 15)
+			except:
+				pass
 	return flask.redirect(flask.url_for('root'))
 
-@app.route('/feederData/<path:path>/<feederName>.json')
-def feederData(path, feederName):
-	if path.startswith('feeders/'):
-		fileName = './' + path + '/' + feederName + '.json'
+@app.route('/feederData/<anaFeeder>/<feederName>.json')
+def feederData(anaFeeder, feederName):
+	if anaFeeder == 'True':
+		data = store.get('Study',feederName)['inputJson']
+		del data['attachments']
+		return json.dumps(data)
 	else:
-		fileName = './' + path + '/main.json'
-	with open(fileName) as jsonFile:
-		return jsonFile.read()
+		return json.dumps(store.get('Feeder', feederName))
 
 @app.route('/getComponents/')
 def getComponents():
-	components = otherObjects.getAllComponents()
+	components = {name:store.get('Component', name) for name in store.listAll('Component')}
 	return json.dumps(components, indent=4)
 
 @app.route('/saveFeeder/', methods=['POST'])
 def saveFeeder():
 	postObject = flask.request.form.to_dict()
-	with open('./feeders/' + str(postObject['name']) + '.json','wb') as newJsonFile:
-		newJsonFile.write(postObject['feederObjectJson'])
+	store.put('Feeder', str(postObject['name']), jsonDict=json.loads(postObject['feederObjectJson']), mdDict=None)
 	return flask.redirect(flask.url_for('root') + '#feeders')
 
 @app.route('/runStatus')
 def runStatus():
 	name = flask.request.args.get('name')
-	md = analysis.getMetadata(name)
+	md = store.getMetadata('Analysis', name)
 	if md['status'] != 'running':
 		return flask.render_template('metadata.html', md=md)
 	else:
@@ -186,4 +234,4 @@ def milsoftImport():
 if __name__ == '__main__':
 	# thread_logging = background_thread(logging_system.logging_system(app).logging_run, (app,))
 	# thread_logging.start()
-	app.run(host='0.0.0.0', debug=True, port=5001)
+	app.run(host='0.0.0.0', debug=True, port=5001, threaded=True)

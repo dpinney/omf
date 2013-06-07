@@ -9,37 +9,30 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','studyDetails')
 
-def outputHtml(analysisName):
-	# General variables:
-	pathPrefix = './analyses/' + analysisName
+def outputHtml(analysisObject, reportConfig):
 	# Gather analysis variables:
-	with open(pathPrefix + '/metadata.json','r') as anaMdFile:
-		anaMd = json.load(anaMdFile)
-		ana = {}
-		ana['name'] = analysisName
-		ana['created'] = anaMd['created']
-		ana['simLength'] = anaMd['simLength']
-		ana['simLengthUnits'] = anaMd['simLengthUnits']
-		ana['simStartDate'] = anaMd['simStartDate']
+	ana = {}
+	ana['name'] = analysisObject.name
+	ana['created'] = analysisObject.created
+	ana['simLength'] = analysisObject.simLength
+	ana['simLengthUnits'] = analysisObject.simLengthUnits
+	ana['simStartDate'] = analysisObject.simStartDate
 	# Gather study data:
 	climates = {}
 	studyList = []
 	allComponents = set()
-	for study in os.listdir(pathPrefix + '/studies/'):
-		newStudy = {'studyName':study}
-		with open(pathPrefix + '/studies/' + study + '/metadata.json', 'r') as mdFile:
-			md = json.load(mdFile)
-			# Study metadata:
-			newStudy['sourceFeederName'] = md.get('sourceFeeder','')
-			# Climate data:
-			if md['climate'] in climates:
-				climates[md['climate']] += 1
-			else:
-				climates[md['climate']] = 1
-		with open(pathPrefix + '/studies/' + study + '/cleanOutput.json','r') as outFile:
-			out = json.load(outFile)
-			newStudy['componentNames'] = set(out.get('componentNames', []))
-			allComponents.update(out.get('componentNames', []))
+	for study in analysisObject.studies:
+		newStudy = {'studyName':study.name}
+		# Study metadata:
+		newStudy['sourceFeederName'] = study.sourceFeeder
+		# Climate data:
+		if study.climate in climates:
+			climates[study.climate] += 1
+		else:
+			climates[study.climate] = 1
+		out = study.outputJson
+		newStudy['componentNames'] = set(out.get('componentNames', []))
+		allComponents.update(out.get('componentNames', []))
 		studyList.append(newStudy)
 	climates = [['Climate','Studies']] + [[key.replace('.tmy2',''), climates[key]] for key in climates]
 	# Partition the names into common names and those unique to each feeder:
@@ -51,9 +44,3 @@ def outputHtml(analysisName):
 		template = Template(tempFile.read())
 	# Write the results.
 	return template.render(studyList=studyList, ana=ana, climates=json.dumps(climates), pieChartData=json.dumps(pieChartData))
-
-
-
-def modifyStudy(analysisName):
-	pass
-	#TODO: implement if needed.

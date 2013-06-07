@@ -1,0 +1,1 @@
+{"reports": [{"reportType":"climate"}, {"reportType":"feederPowerConsumption"}, {"reportType":"runtimeStats"}, {"reportType":"studyDetails"}, {"reportType":"voltageBand"}], "studyNames": ["05Sol", "20Sol", "50Sol", "90Sol", "NoSol"]}

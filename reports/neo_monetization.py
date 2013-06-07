@@ -11,12 +11,10 @@ from jinja2 import Template
 with open('./reports/neo_monetizationConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read()
 
-def outputHtml(analysisName):
+def outputHtml(analysisObject, reportConfig):
 	# Set general run data:
-	pathPrefix = 'analyses/' + analysisName # analysis is the name of the entire report
-	studies = os.listdir(pathPrefix + '/studies/') # get all the studies.... so not just the monetization ones???
-	resolution = util.getResolution(analysisName)
-	startTime = util.getStartDate(analysisName)
+	resolution = analysisObject.simLengthUnits
+	startTime = analysisObject.simStartDate
 	# Get the report input:
 	inputData = {}
 	with open (pathPrefix + '/reports/monetization.json') as reportFile:
@@ -35,11 +33,11 @@ def outputHtml(analysisName):
 	# Pull in the power data:
 	studyDict = {}
 	timeStamps = []
-	for study in studies:
+	for study in analysisObject.studies:
 		studyDict[study] = {}
 		with open(pathPrefix + '/studies/' + study + '/cleanOutput.json') as outFile:
 			studyJson = json.load(outFile) # outFile is a file containing a json blob
-			if studies[0] == study: # if we're not dealing with the first study
+			if analysisObject.studies[0] == study: # if we're not dealing with the first study
 				timeStamps = studyJson.get('timeStamps', [])
 			studyDict[study]['Power'] = studyJson.get('Consumption', {}).get('Power')
 	# What percentage of a year did we simulate?
@@ -84,7 +82,3 @@ def outputHtml(analysisName):
 	# Write the results.
 	return template.render(monPowParams=json.dumps(monPowParams), monEnergyParams=json.dumps(monEnergyParams), savingsGrowthParams=json.dumps(savingsGrowthParams),
 							inputData=json.dumps(inputData), studyDict=json.dumps(studyDict), timeStamps = json.dumps(timeStamps))
-
-def modifyStudy(analysisName):
-	pass
-	#TODO: implement if needed.

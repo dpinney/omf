@@ -8,20 +8,17 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','voltageBand')
 
-def outputHtml(analysisName):
+def outputHtml(analysisObject, reportConfig):
 	# Build up the data:
-	pathPrefix = './analyses/' + analysisName
-	resolution = util.getResolution(analysisName)
 	studyList = []
-	for study in os.listdir(pathPrefix + '/studies/'):
-		with open(pathPrefix + '/studies/' + study + '/cleanOutput.json','r') as outFile:
-			cleanOut = json.load(outFile)
+	for study in analysisObject.studies:
+		cleanOut = study.outputJson
 		# Set up the graph.
 		if 'allMeterVoltages' in cleanOut:
-			newStudy = {'studyName':study}
-			graphParameters = util.defaultGraphObject(resolution, util.getStartDate(analysisName))
+			newStudy = {'studyName':study.name}
+			graphParameters = util.defaultGraphObject(analysisObject.simLengthUnits, analysisObject.simStartDate)
 			graphParameters['chart']['type'] = 'line'
-			graphParameters['chart']['renderTo'] = 'voltChartDiv' + study
+			graphParameters['chart']['renderTo'] = 'voltChartDiv' + study.name
 			graphParameters['series'].append({'name':'Min','data':cleanOut['allMeterVoltages']['Min'],'marker':{'enabled':False},'color':'gray'})
 			graphParameters['series'].append({'name':'Mean','data':cleanOut['allMeterVoltages']['Mean'],'marker':{'enabled':False},'color':'blue'})
 			graphParameters['series'].append({'name':'Max','data':cleanOut['allMeterVoltages']['Max'],'marker':{'enabled':False},'color':'gray'})
@@ -32,7 +29,3 @@ def outputHtml(analysisName):
 		template = Template(tempFile.read())
 	# Write the results.
 	return template.render(studyList=studyList)
-
-def modifyStudy(analysisName):
-	pass
-	#TODO: implement if needed.
