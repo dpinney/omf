@@ -11,6 +11,7 @@
 	/*hacks to get D3 responsive sizing*/
 	div#title {position: absolute; top:0;}
 	div#toolbar {position: absolute; top:65px;}
+	div#scaleRuler{position: absolute; bottom: 30px; right:30px;}
 	/*other styles*/  
 	input#gridNameEdit {font-size:28pt; line-height: 28pt; text-shadow: 0px 3px 3px #4d4d4d; height: 50px; color:gray; padding:3px; margin-bottom:5px; width:85%;}
 	button.smallButton {height:20px; width:20px; display:inline-block; float:right; padding:2px; margin-left:5px;}
@@ -169,6 +170,11 @@
 	  </tfoot>
 	</table>
 	  </div>
+	  <div id='scaleRuler'>
+	  	ScaleRuler goes here.
+	  	<br>
+	  	|___|___|___|
+	  </div>
 	  <script type="text/javascript">
 
 	  // GLOBAL VARIABLES:
@@ -206,93 +212,116 @@
 	// FUNCTIONS FOR DRAWING:
 
 	function draw() {
-	// d3.js bookkeeping to set what happens on each time tick in the simulation:
-	force.on('tick', function() {
-		vis.selectAll('line.link')
-		.attr('x1', function(d) { return d.source.x; })
-		.attr('y1', function(d) { return d.source.y; })
-		.attr('x2', function(d) { return d.target.x; })
-		.attr('y2', function(d) { return d.target.y; });
-		vis.selectAll('.node')
-		.attr("fixed", function(d){ return d.fixed =true }) // fixed a node
-		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-	});
-	var name2nodeIndex = {}
-	if (nodes.length == 0) {
-		// Go through the first time and set up the nodes with indices:
-		for (x in tree) {
-			if ((tree[x].name != undefined || tree[x].module != undefined) && tree[x].from == undefined) {
-				//TODO: Think about allowing access to other objects here.
-				nodeName = tree[x].name
-				nodeObject = tree[x].object
-				x_pixel = tree[x].latitude
-				y_pixel = tree[x].longitude
-				if (nodeObject == 'triplex_meter'){
-					for (i in tree){
-						if (tree[i].to == tree[x].name){
-							x_pixel = tree[i].latitude + Math.random() * 20 - 10
-							y_pixel = tree[i].longitude + Math.random() * 20 - 10
-						}
+		// d3.js bookkeeping to set what happens on each time tick in the simulation:
+		force.on('tick', function() {
+			vis.selectAll('line.link')
+			.attr('x1', function(d) { return d.source.x; })
+			.attr('y1', function(d) { return d.source.y; })
+			.attr('x2', function(d) { return d.target.x; })
+			.attr('y2', function(d) { return d.target.y; });
+			vis.selectAll('.node')
+			.attr("fixed", function(d){return d.fixed }) // fixed a node
+			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+		});
+		var name2nodeIndex = {}
+		if (nodes.length == 0) {
+			// Go through the first time and set up the nodes with indices:
+			for (x in tree) {
+				if ((tree[x].name != undefined || tree[x].module != undefined) && tree[x].from == undefined) {
+					//TODO: Think about allowing access to other objects here.
+					nodeName = tree[x].name
+					nodeObject = tree[x].object
+					if (tree[x].latitude != undefined && tree[x].longitude != undefined){
+						x_pixel = tree[x].latitude
+						y_pixel = tree[x].longitude
+						isfixed = true
+					}else{
+						x_pixel = tree[x].latitude
+						y_pixel = tree[x].longitude
+						isfixed = false
+						
 					}
+
+					// if (nodeObject == 'triplex_meter'){
+					// 	for (i in tree){
+					// 		if (tree[i].to == tree[x].name){
+					// 			if (tree[i].latitude != undefined && tree[i].latitude != undefined){
+					// 			x_pixel = tree[i].latitude + Math.random() * 20 - 10
+					// 			y_pixel = tree[i].longitude + Math.random() * 20 - 10
+					// 			isfixed = true
+					// 		}else
+					// 			isfixed = false
+					// 		}
+					// 	}
+					// }
+
+					// Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
+					if (nodeObject == 'node') 
+						nodeObject = 'gridNode'
+					if (undefined != tree[x].bustype && tree[x].bustype == 'SWING') 
+						nodeObject += ' swingNode'
+					nodeIndex = nodes.length
+					nodes.push({
+						name : nodeName,
+						treeIndex : parseInt(x),
+						objectType : nodeObject,
+						chargeMultiple : 1,
+						x : x_pixel,
+						y : y_pixel,
+						fixed : isfixed })
+					name2nodeIndex[nodeName] = nodeIndex
 				}
-				// Generate triplex_node position, but in this case, it will remain random, since all the parent node are not assigned the position
-				if (nodeObject == 'triplex_node'){
-					for (i in tree){
-						if (tree[i].name == tree[x].parent){
-							x_pixel =  tree[i].latitude + Math.random() * 20-5 
-							y_pixel =  tree[i].longitude + Math.random() * 10-5
-						}
-					}
-				}
-				// Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
-				if (nodeObject == 'node') 
-					nodeObject = 'gridNode'
-				if (undefined != tree[x].bustype && tree[x].bustype == 'SWING') 
-					nodeObject += ' swingNode'
-				nodeIndex = nodes.length
-				nodes.push({
-					name : nodeName,
-					treeIndex : parseInt(x),
-					objectType : nodeObject,
-					chargeMultiple : 1,
-					x : x_pixel,
-					y : y_pixel })
-				name2nodeIndex[nodeName] = nodeIndex
 			}
+			// // TODO: any other way to update the position of triplex_node, to reduce the cost
+			// for (i in tree){
+			// 	if (tree[i].object == "triplex_node"){
+			// 		for (j in nodes){
+			// 			if( nodes[j].name == tree[i].parent){
+			// 				for (k in nodes){
+			// 					if (nodes[k].name == tree[i].name){
+			// 						nodes[k].x = nodes[j].x + Math.random() * 10-5
+			// 						nodes[k].y = nodes[j].y + Math.random() * 10-5
+			// 						console.log('nodes[i].name')
+			// 						nodes[k].fixed = true  
+			// 					}
+			// 				}
+			// 			}
+			// 		}
+			// 	}
+			// }
+			
+
+			// Go through a second time and set up the links:
+			for (x in tree) {
+				if (tree[x].name != undefined) {
+					if (tree[x].from != undefined && tree[x].to != undefined) {
+						name2nodeIndex[tree[x].name] = links.length
+						links.push({
+							// TODO: only need to insert index of node
+							source:name2nodeIndex[tree[x].from],
+							target:name2nodeIndex[tree[x].to],
+							treeIndex:parseInt(x),
+							objectType:'fromTo' })
+					} else if (tree[x].parent != undefined) {
+						links.push({
+							source:name2nodeIndex[tree[x].name],
+							target:name2nodeIndex[tree[x].parent],
+							objectType:'parentChild'})
+					}
+				}
+			}    
 		}
-
-
-		// Go through a second time and set up the links:
-		for (x in tree) {
-			if (tree[x].name != undefined) {
-				if (tree[x].from != undefined && tree[x].to != undefined) {
-					name2nodeIndex[tree[x].name] = links.length
-					links.push({
-						// TODO: only need to insert index of node
-						source:name2nodeIndex[tree[x].from],
-						target:name2nodeIndex[tree[x].to],
-						treeIndex:parseInt(x),
-						objectType:'fromTo' })
-				} else if (tree[x].parent != undefined) {
-					links.push({
-						source:name2nodeIndex[tree[x].name],
-						target:name2nodeIndex[tree[x].parent],
-						objectType:'parentChild'})
-				}
-			}
-		}    
-	}
-	// This makes a fancy fade-in.
-	vis.style('opacity', 1e-6)
-		.transition()
-		.duration(1500)
-		.style('opacity', 1);
-	// Start the layout.
-	force.start();
-	// Run the layout in the background until performance is acceptable.
-	// preLayout()
-	// Start drawing.
-	redraw()
+		// This makes a fancy fade-in.
+		vis.style('opacity', 1e-6)
+			.transition()
+			.duration(1500)
+			.style('opacity', 1);
+		// Start the layout.
+		force.start();
+		// Run the layout in the background until performance is acceptable.
+		// preLayout()
+		// Start drawing.
+		redraw()
 	}
 
 	// TODO: fix a bug when add a new node, redraw the size of the node
@@ -316,8 +345,8 @@
 
 	node.append("svg:text")
 	        .attr("class", "nodetext")
-	        .attr("dx", 12)
-	        .attr("dy", ".35em")
+	        // .attr("dx", 12) //omit some 
+	        // .attr("dy", ".35em")
 	        .text(function(d) { return d.objectType });
 	        
 	// Put the main circle on there, sized according to its size.
@@ -330,7 +359,7 @@
 
 	// Pinning indicator.
 	node.append('svg:circle')
-		.attr('class', function(d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
+		// .attr('class', function(d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
 		.attr('id', function(d) {return 'pin' + d.treeIndex})
 		.attr('cx', 0)
 		.attr('cy', 0)
@@ -356,24 +385,7 @@
 	}
 
 	function drawScaleRuler(){
-		var domain_size = 20
-		var padding = 20
-		var size =  100
-		
-		var xScale = d3.scale.linear().domain([ 0, size * shrinkSize ]).range([ 0, size ]);
-
-		//Define X axis
-		var xAxis = d3.svg.axis().scale(xScale).orient("top").ticks(3);
-
-		//Create SVG element
-		var svg = vis.append('svg:g').attr('width', 300).attr('height', 100);
-		//Create X axis
-		svg.append("g")
-			.attr("class", "axis")
-			.attr('x', 300)
-			.attr('y', 800)
-			.attr("transform", "translate("+ (300) +"," + (800) + ")")
-			.call(xAxis);
+		// $("#scaleRuler").text(function(){return d3.event.scale + "scale"})
 	} // end of function drawScaleRuler()
 
 	function zoomRedraw() {
@@ -387,10 +399,15 @@
 					2.5 / d3.event.scale)
 		vis.selectAll('.nodeCircle').data(nodes, function(d){return d.treeIndex})
 			.attr('r', function(d){return d.chargeMultiple * 10/d3.event.scale});
+		vis.selectAll('circle').attr('r', function(d){return 10/d3.event.scale})
 		vis.selectAll('nodeIsPinned').data(nodes, function(d){return d.treeIndex})
 			.attr('r', function(d){return 3/d3.event.scale});
-		vis.selectAll('line.link').style("stroke-width", 6/ d3.event.scale)
-		vis.selectAll('nodetext').attr('dx', 12/d3.event.scale).attr('offsetLeft', 0)
+		// vis.selectAll('nodeNotPinned').data(nodes, function(d){return d.treeIndex})
+		// 	.attr('r', function(d){return 3/d3.event.scale});
+		// vis.selectAll('g.selected').data(nodes, function(d){return d.treeIndex})
+		// 	.attr('r', function(d){return 4/d3.event.scale})
+		vis.selectAll('line.link').style("stroke-width", 6/d3.event.scale);
+		vis.selectAll('nodetext').style('font-size', 12/d3.event.scale)
 		vis.selectAll('text').style('font-size', 30/d3.event.scale)
 		vis.selectAll('.axis').style('font-size', 11/d3.event.scale)
 		// vis.selectAll('.axis').ticks(3/d3.event.scale)
@@ -1172,40 +1189,40 @@
 	// PINNING FUNCTIONS
 
 	function pinAll() {
-	for (node in nodes) {
-		gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
-		nodes[node].fixed = true
-	}
-	for (hNode in hiddenNodes) {
-		gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
-		hiddenNodes[hNode].fixed = true
-	}
-	force.start()
+		for (node in nodes) {
+			gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
+			nodes[node].fixed = true
+		}
+		for (hNode in hiddenNodes) {
+			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
+			hiddenNodes[hNode].fixed = true
+		}
+		force.start()
 	}
 
 	function unPinAll() {
-	for (node in nodes) {
-		gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeNotPinned')
-		nodes[node].fixed = false
-	}
-	for (hNode in hiddenNodes) {
-		gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeNotPinned')
-		hiddenNodes[hNode].fixed = false
-	}
-	force.start()
+		for (node in nodes) {
+			gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeNotPinned')
+			nodes[node].fixed = false
+		}
+		for (hNode in hiddenNodes) {
+			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeNotPinned')
+			hiddenNodes[hNode].fixed = false
+		}
+		force.start()
 	}
 
 	function toggleSelectedPin() {
-	selNode = getSelectedNode()
-	pinCircle = gebi('pin' + selNode.treeIndex)
-	if (pinCircle.getAttribute('class') == 'nodeIsPinned') {
-		pinCircle.setAttribute('class','nodeNotPinned')
-		selNode.fixed = false
-	} else {
-		pinCircle.setAttribute('class','nodeIsPinned')
-		selNode.fixed = true
-	}
-	force.start()
+		selNode = getSelectedNode()
+		pinCircle = gebi('pin' + selNode.treeIndex)
+		if (pinCircle.getAttribute('class') == 'nodeIsPinned') {
+			pinCircle.setAttribute('class','nodeNotPinned')
+			selNode.fixed = false
+		} else {
+			pinCircle.setAttribute('class','nodeIsPinned')
+			selNode.fixed = true
+		}
+		force.start()
 	}
 
 	// LAYOUT MENU FUNCTIONS
@@ -1396,6 +1413,7 @@
 	}
 	// And go at it:
 	draw()
+	drawScaleRuler()
 	layoutMenuInit()
 	})
 

@@ -86,6 +86,9 @@ def convert(stdPath,seqPath):
 			# convert to the relative pixel position f(x) = a * x + b
 			newOb['latitude'] = x_a * float(objectList[5]) + x_b
 			newOb['longitude'] = y_a * float(objectList[6]) + y_b
+
+			
+
 			# Some non-Gridlab elements:
 			newOb['guid'] = objectList[49].replace('{','').replace('}','')
 			newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
@@ -428,7 +431,7 @@ def convert(stdPath,seqPath):
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
 		if glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
-			print glmTree[key]
+			# print glmTree[key]
 			del glmTree[key]
 
 	#Strip guids:
@@ -624,6 +627,19 @@ def convert(stdPath,seqPath):
 						{"object":"climate","name":"Climate","interpolate":"QUADRATIC","tmyfile":"climate.tmy2"}]
 	for headId in xrange(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
+	
+	# to generate position for triplex_meter and triplex_node
+	for i in glmTree:
+		if glmTree[i].has_key('object') and glmTree[i]['object'] == 'triplex_meter':
+			for j in glmTree:
+				if glmTree[j].has_key('to') and glmTree[j]['to'] == glmTree[i]['name']:
+					glmTree[i]['latitude'] = glmTree[j]['latitude'] + random.uniform(-20,20)
+					glmTree[i]['longitude'] = glmTree[j]['longitude'] + random.uniform(-20,20)
+					for k in glmTree:
+						if glmTree[k].has_key('parent') and glmTree[k]['parent'] == glmTree[i]['name']:
+							glmTree[k]['latitude'] = glmTree[i]['latitude'] + random.uniform(-10,10)
+							glmTree[k]['longitude'] = glmTree[i]['longitude'] + random.uniform(-10,10)
+
 	return glmTree
 
 if __name__ == '__main__':
