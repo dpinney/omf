@@ -166,7 +166,7 @@ def saveAnalysis():
 			studyFeeder = store.get('Feeder', study['feederName'])
 			studyFeeder['attachments']['climate.tmy2'] = store.get('Weather', study['tmy2name']+'.tmy2', raw=True)
 			studyData = {'inputJson':studyFeeder,'outputJson':{}}
-			studyObj = studies.gridlabd.GridlabStudy(study['studyName'], pData['analysisName'], studyMd, studyData, new=True)
+			studyObj = studies.gridlabd.Gridlabd(study['studyName'], pData['analysisName'], studyMd, studyData, new=True)
 			store.put('Study', pData['analysisName'] + '---' + study['studyName'], mdDict=studyObj.mdToDict(), jsonDict=studyObj.toDict())
 		elif study['studyType'] == 'XXX':
 			#TODO: implement me.

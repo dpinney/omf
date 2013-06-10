@@ -119,7 +119,7 @@ def anaDataTree(studyPath, fileNameTest):
 if __name__ == '__main__':
 	import storage, studies
 	store = storage.Filestore('data')
-	testStudy = studies.gridlabd.GridlabStudy('NoSolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---NoSolar'), store.get('Study','zSolar Trio---NoSolar'))
+	testStudy = studies.gridlabd.Gridlabd('NoSolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---NoSolar'), store.get('Study','zSolar Trio---NoSolar'))
 	print testStudy.name, dir(testStudy)
 	rawOut = run(testStudy)
 	print rawOut.keys()

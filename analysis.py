@@ -15,22 +15,6 @@ import storage
 store = storage.Filestore('data')
 
 class Analysis:
-	# Metadata attributes
-	name = ''
-	status = ''
-	sourceFeeder = ''
-	climate = ''
-	created = ''
-	simStartDate = ''
-	simLength = 0
-	simLengthUnits = ''
-	runTime = ''
-	# Data attributes
-	reports = []
-	studyNames = []
-	# Internal attributes
-	studies = []
-
 	def __init__(self, name, jsonMdDict, jsonDict):
 		self.status = jsonMdDict.get('status','')
 		self.sourceFeeder = jsonMdDict.get('sourceFeeder','')
@@ -44,7 +28,7 @@ class Analysis:
 		self.studyNames = jsonDict.get('studyNames', [])
 		self.name = name
 		# TODO: Support study types that aren't Gridlab!!!
-		self.studies = [studies.gridlabd.GridlabStudy(studyName, self.name, store.getMetadata('Study', self.name + '---' + studyName), store.get('Study', self.name + '---' + studyName)) for studyName in self.studyNames]
+		self.studies = [studies.gridlabd.Gridlabd(studyName, self.name, store.getMetadata('Study', self.name + '---' + studyName), store.get('Study', self.name + '---' + studyName)) for studyName in self.studyNames]
 
 	def generateReportHtml(self):
 		# Iterate over reports and collect what we need: 
