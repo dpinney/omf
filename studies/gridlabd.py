@@ -13,20 +13,7 @@ import solvers
 
 with open('./studies/gridlabd.html','r') as configFile: configHtmlTemplate = configFile.read()
 
-class GridlabStudy:
-	# Metadata attributes
-	studyType = 'gridlabd'
-	simLength = 0
-	simLengthUnits = ''
-	simStartDate = ''
-	sourceFeeder = ''
-	climate = ''
-	analysisName = ''
-	name = ''
-	# Data attributes
-	inputJson = {}
-	outputJson = {}
-
+class Gridlabd:
 	def __init__(self, name, analysisName, jsonMdDict, jsonDict, new=False):
 		self.analysisName = analysisName
 		self.name = name
@@ -214,7 +201,7 @@ if __name__ == '__main__':
 	import storage
 	store = storage.Filestore('data')
 	# Pull in a study.
-	testStudy = GridlabStudy('IndySolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---IndySolar'), store.get('Study','zSolar Trio---IndySolar'))
+	testStudy = Gridlabd('IndySolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---IndySolar'), store.get('Study','zSolar Trio---IndySolar'))
 	print testStudy.name, dir(testStudy)
 	# Run the study.
 	testStudy.run()

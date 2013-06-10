@@ -51,7 +51,7 @@ def run(studyObject):
 			# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
 			proc = subprocess.Popen([binary,'-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr, env=enviro)
 			pidFile.write(str(proc.pid))
-			returnCode = proc.wait()
+		returnCode = proc.wait()
 		if returnCode != 0:
 			# Stop running studies, set status=terminated.
 			shutil.rmtree(studyPath)
@@ -119,7 +119,7 @@ def anaDataTree(studyPath, fileNameTest):
 if __name__ == '__main__':
 	import storage, studies
 	store = storage.Filestore('data')
-	testStudy = studies.gridlabd.GridlabStudy('NoSolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---NoSolar'), store.get('Study','zSolar Trio---NoSolar'))
+	testStudy = studies.gridlabd.Gridlabd('NoSolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---NoSolar'), store.get('Study','zSolar Trio---NoSolar'))
 	print testStudy.name, dir(testStudy)
 	rawOut = run(testStudy)
 	print rawOut.keys()

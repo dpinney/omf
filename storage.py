@@ -8,8 +8,6 @@ import traceback
 import json
 
 class Filestore:
-	storagePath = None
-
 	def __init__(self, inStoragePath):
 		if not os.path.exists(inStoragePath):
 			# We're using an existing store:
