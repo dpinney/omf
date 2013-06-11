@@ -1,1 +1,0 @@
-{"status": "postRun", "climate": "NY-ITHACA.tmy2", "name": "zGridlab Vs PVwatts", "simStartDate": "2012-04-01", "simLengthUnits": "hours", "created": "2013-04-26 15:19:52.675000", "sourceFeeder": "Simple Market System Indy Solar", "simLength": 240, "runTime": "0:00:06"}

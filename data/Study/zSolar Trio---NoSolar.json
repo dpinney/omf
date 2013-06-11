@@ -1,4 +1,5 @@
 {
+    "climate": "CO-CARBONDALE", 
     "outputJson": {
         "climate": {
             "Rain Fall (in/h)": [
@@ -690,7 +691,7 @@
                 2048.8996404743693
             ]
         }, 
-        "stdout": "Core profiler results\n=====================\n\nTotal objects                 39 objects\nParallelism                    1 thread\nTotal time                   2.0 seconds\n  Core time                  1.9 seconds (95.9%)\n  Model time                 0.1 seconds/thread (4.1%)\nSimulation time                4 days\nSimulation speed             1.9k object.hours/second\nSyncs completed             2182 passes\nTime steps completed        1554 timesteps\nConvergence efficiency      1.40 passes/timestep\nMemory lock contention       0.0%\nAverage timestep             222 seconds/timestep\nSimulation rate           172800 x realtime\n\n\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\nplayer             0.022     26.8%     22.0\ncollector          0.018     22.0%      4.5\nrecorder           0.012     14.6%      6.0\ntriplex_meter      0.009     11.0%      3.0\nhouse              0.004      4.9%      2.0\nZIPload            0.003      3.7%      0.4\ntriplex_node       0.003      3.7%      3.0\ntriplex_line       0.003      3.7%      1.5\nwaterheater        0.002      2.4%      1.0\nnode               0.002      2.4%      1.0\ntransformer        0.002      2.4%      1.0\nregulator          0.002      2.4%      2.0\n================ ======== ======== ========\nTotal              0.082    100.0%      2.1", 
+        "stdout": "Core profiler results\n=====================\n\nTotal objects                 39 objects\nParallelism                    1 thread\nTotal time                   2.0 seconds\n  Core time                  1.9 seconds (93.4%)\n  Model time                 0.1 seconds/thread (6.6%)\nSimulation time                4 days\nSimulation speed             1.9k object.hours/second\nSyncs completed             2182 passes\nTime steps completed        1554 timesteps\nConvergence efficiency      1.40 passes/timestep\nMemory lock contention       0.0%\nAverage timestep             222 seconds/timestep\nSimulation rate           172800 x realtime\n\n\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\ncollector          0.047     35.6%     11.8\nrecorder           0.028     21.2%     14.0\nplayer             0.026     19.7%     26.0\ntriplex_meter      0.011      8.3%      3.7\nhouse              0.004      3.0%      2.0\ntransformer        0.004      3.0%      2.0\ntriplex_line       0.004      3.0%      2.0\nwaterheater        0.002      1.5%      1.0\nregulator          0.002      1.5%      2.0\ntriplex_node       0.002      1.5%      2.0\nnode               0.001      0.8%      0.5\ntransformer_conf   0.001      0.8%      0.3\n================ ======== ======== ========\nTotal              0.132    100.0%      3.4", 
         "allMeterVoltages": {
             "Max": [
                 241.495, 
@@ -1809,7 +1810,7 @@
                 ]
             }
         }, 
-        "stderr": "Processing 2012-06-08 21:00:00 PDT...", 
+        "stderr": "", 
         "timeStamps": [
             "2012-06-06 00:00:00 PDT", 
             "2012-06-06 01:00:00 PDT", 
@@ -1909,6 +1910,11 @@
             "2012-06-09 23:00:00 PDT"
         ]
     }, 
+    "name": "NoSolar", 
+    "simStartDate": "2012-06-06", 
+    "simLengthUnits": "hours", 
+    "sourceFeeder": "Simple Market System", 
+    "simLength": 96, 
     "inputJson": {
         "attachments": {
             "Price.player": "2000-08-01 00:00:00,0.065139609\n+1h,0.063279907\n+1h,0.047926635\n+1h,0.054980748\n+1h,0.054144897\n+1h,0.052692165\n+1h,0.025675894\n+1h,0.048756545\n+1h,0.060731834\n+1h,0.067444366\n+1h,0.077139106\n+1h,0.085129386\n+1h,0.084471806\n+1h,0.093280668\n+1h,0.097517265\n+1h,0.090978092\n+1h,0.099465131\n+1h,0.103445608\n+1h,0.118779549\n+1h,0.122554232\n+1h,0.121734869\n+1h,0.110559158\n+1h,0.092833806\n+1h,0.081005661\n", 
@@ -1920,47 +1926,26 @@
         "links": [], 
         "hiddenNodes": [], 
         "tree": {
-            "42": {
-                "parent": "house2", 
-                "name": "convenienceLoads2", 
-                "power_fraction": "0.100000", 
-                "object": "ZIPload", 
-                "current_fraction": "0.100000", 
-                "base_power": "plug1*2.477490", 
-                "impedance_pf": "0.950000", 
-                "current_pf": "0.950000", 
-                "power_pf": "0.950000", 
-                "impedance_fraction": "0.800000", 
-                "groupid": "plugload"
+            "30": {
+                "phases": "AS", 
+                "from": "tn_1", 
+                "name": "tl_1", 
+                "object": "triplex_line", 
+                "to": "tm_1", 
+                "length": "100", 
+                "configuration": "trip_line_config"
             }, 
-            "48": {
-                "object": "recorder", 
-                "parent": "\"climate\"", 
-                "interval": "3600", 
-                "limit": "0", 
-                "file": "Climate_\"climate\".csv", 
-                "property": "temperature,solar_direct,wind_speed,rainfall,snowdepth"
+            "28": {
+                "phases": "AS", 
+                "object": "triplex_node", 
+                "nominal_voltage": "120", 
+                "name": "tn_1"
             }, 
-            "43": {
-                "parent": "house2", 
-                "name": "lights2", 
-                "power_fraction": "0.003200", 
-                "object": "ZIPload", 
-                "current_fraction": "0.425700", 
-                "base_power": "lights1*1.616013", 
-                "impedance_pf": "1.000000", 
-                "current_pf": "-1.000000", 
-                "power_pf": "1.000000", 
-                "impedance_fraction": "0.571100", 
-                "groupid": "lights"
-            }, 
-            "49": {
-                "object": "collector", 
-                "group": "class=triplex_line", 
-                "interval": "3600", 
-                "limit": "0", 
-                "file": "TriplexLosses.csv", 
-                "property": "sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)"
+            "29": {
+                "phases": "BS", 
+                "object": "triplex_meter", 
+                "nominal_voltage": "120", 
+                "name": "tn_2"
             }, 
             "24": {
                 "phases": "AS", 
@@ -2042,17 +2027,17 @@
                 "nominal_voltage": "2401.7771"
             }, 
             "46": {
-                "object": "recorder", 
-                "parent": "Reg1", 
                 "interval": "3600", 
+                "parent": "Reg1", 
+                "object": "recorder", 
                 "limit": "0", 
                 "file": "Regulator_Reg1.csv", 
                 "property": "tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag"
             }, 
             "47": {
-                "object": "collector", 
-                "group": "class=triplex_meter", 
                 "interval": "3600", 
+                "group": "class=triplex_meter", 
+                "object": "collector", 
                 "limit": "0", 
                 "file": "VoltageJiggle.csv", 
                 "property": "min(voltage_12.mag),mean(voltage_12.mag),max(voltage_12.mag),std(voltage_12.mag)"
@@ -2064,11 +2049,11 @@
                 "object": "ZIPload", 
                 "current_fraction": "0.039600", 
                 "base_power": "television5*0.200598", 
-                "impedance_pf": "0.610000", 
+                "groupid": "TV", 
                 "current_pf": "-0.540000", 
                 "power_pf": "-1.000000", 
                 "impedance_fraction": "-0.038300", 
-                "groupid": "TV"
+                "impedance_pf": "0.610000"
             }, 
             "45": {
                 "parent": "house2", 
@@ -2077,23 +2062,37 @@
                 "object": "ZIPload", 
                 "current_fraction": "0.253400", 
                 "base_power": "fan1*0.106899", 
-                "impedance_pf": "0.970000", 
+                "groupid": "fan", 
                 "current_pf": "0.950000", 
                 "power_pf": "-1.000000", 
                 "impedance_fraction": "0.733200", 
-                "groupid": "fan"
+                "impedance_pf": "0.970000"
             }, 
-            "28": {
-                "phases": "AS", 
-                "object": "triplex_node", 
-                "nominal_voltage": "120", 
-                "name": "tn_1"
+            "42": {
+                "parent": "house2", 
+                "name": "convenienceLoads2", 
+                "power_fraction": "0.100000", 
+                "object": "ZIPload", 
+                "current_fraction": "0.100000", 
+                "base_power": "plug1*2.477490", 
+                "groupid": "plugload", 
+                "current_pf": "0.950000", 
+                "power_pf": "0.950000", 
+                "impedance_fraction": "0.800000", 
+                "impedance_pf": "0.950000"
             }, 
-            "29": {
-                "phases": "BS", 
-                "object": "triplex_meter", 
-                "nominal_voltage": "120", 
-                "name": "tn_2"
+            "43": {
+                "parent": "house2", 
+                "name": "lights2", 
+                "power_fraction": "0.003200", 
+                "object": "ZIPload", 
+                "current_fraction": "0.425700", 
+                "base_power": "lights1*1.616013", 
+                "groupid": "lights", 
+                "current_pf": "-1.000000", 
+                "power_pf": "1.000000", 
+                "impedance_fraction": "0.571100", 
+                "impedance_pf": "1.000000"
             }, 
             "40": {
                 "auxiliary_system_type": "ELECTRIC", 
@@ -2105,26 +2104,26 @@
                 "cooling_system_type": "ELECTRIC", 
                 "aux_heat_temperature_lockout": "2.270706e+001", 
                 "heating_setpoint": "heating1*1", 
+                "motor_model": "BASIC", 
                 "auxiliary_strategy": "LOCKOUT", 
-                "heating_system_type": "HEAT_PUMP", 
                 "air_temperature": "70", 
                 "thermal_integrity_level": "5", 
                 "heating_COP": "3.1", 
                 "cooling_setpoint": "cooling7*1", 
                 "mass_temperature": "70", 
                 "motor_efficiency": "GOOD", 
-                "motor_model": "BASIC"
+                "heating_system_type": "HEAT_PUMP"
             }, 
             "41": {
                 "schedule_skew": "-810", 
-                "demand": "water14*1", 
+                "tank_volume": "50", 
                 "name": "waterheater2", 
                 "parent": "house2", 
                 "object": "waterheater", 
                 "heating_element_capacity": "4.8 kW", 
                 "thermostat_deadband": "2.9", 
                 "location": "INSIDE", 
-                "tank_volume": "50", 
+                "demand": "water14*1", 
                 "tank_setpoint": "136.8", 
                 "tank_UA": "2.4", 
                 "temperature": "135"
@@ -2136,9 +2135,9 @@
             "0": {
                 "timezone": "PST+8PDT", 
                 "stoptime": "'2012-06-10 00:00:00'", 
-                "clock": "clock", 
+                "timestamp": "'2012-06-06 00:00:00'", 
                 "starttime": "'2012-06-06 00:00:00'", 
-                "timestamp": "'2012-06-06 00:00:00'"
+                "clock": "clock"
             }, 
             "3": {
                 "omftype": "#include", 
@@ -2172,31 +2171,21 @@
                 "omftype": "module", 
                 "argument": "tape"
             }, 
-            "39": {
-                "parent": "house1", 
-                "name": "fan1", 
-                "power_fraction": "0.013500", 
-                "object": "ZIPload", 
-                "current_fraction": "0.253400", 
-                "base_power": "fan1*0.106899", 
-                "impedance_pf": "0.970000", 
-                "current_pf": "0.950000", 
-                "power_pf": "-1.000000", 
-                "impedance_fraction": "0.733200", 
-                "groupid": "fan"
+            "13": {
+                "object": "stubauction", 
+                "name": "Market_1", 
+                "period": "300"
             }, 
-            "38": {
-                "parent": "house1", 
-                "name": "television1", 
-                "power_fraction": "0.998700", 
-                "object": "ZIPload", 
-                "current_fraction": "0.039600", 
-                "base_power": "television5*0.200598", 
-                "impedance_pf": "0.610000", 
-                "current_pf": "-0.540000", 
-                "power_pf": "-1.000000", 
-                "impedance_fraction": "-0.038300", 
-                "groupid": "TV"
+            "12": {
+                "omftype": "module", 
+                "argument": "market"
+            }, 
+            "14": {
+                "object": "player", 
+                "property": "current_market.clearing_price", 
+                "parent": "Market_1", 
+                "file": "Price.player", 
+                "loop": "365"
             }, 
             "11": {
                 "solver_method": "FBS", 
@@ -2207,14 +2196,31 @@
                 "module": "residential", 
                 "implicit_enduses": "NONE"
             }, 
-            "13": {
-                "object": "stubauction", 
-                "name": "Market_1", 
-                "period": "300"
+            "39": {
+                "parent": "house1", 
+                "name": "fan1", 
+                "power_fraction": "0.013500", 
+                "object": "ZIPload", 
+                "current_fraction": "0.253400", 
+                "base_power": "fan1*0.106899", 
+                "groupid": "fan", 
+                "current_pf": "0.950000", 
+                "power_pf": "-1.000000", 
+                "impedance_fraction": "0.733200", 
+                "impedance_pf": "0.970000"
             }, 
-            "12": {
-                "omftype": "module", 
-                "argument": "market"
+            "38": {
+                "parent": "house1", 
+                "name": "television1", 
+                "power_fraction": "0.998700", 
+                "object": "ZIPload", 
+                "current_fraction": "0.039600", 
+                "base_power": "television5*0.200598", 
+                "groupid": "TV", 
+                "current_pf": "-0.540000", 
+                "power_pf": "-1.000000", 
+                "impedance_fraction": "-0.038300", 
+                "impedance_pf": "0.610000"
             }, 
             "15": {
                 "object": "climate", 
@@ -2222,12 +2228,13 @@
                 "interpolate": "QUADRATIC", 
                 "tmyfile": "\"climate.tmy2\""
             }, 
-            "14": {
-                "file": "Price.player", 
-                "property": "current_market.clearing_price", 
-                "parent": "Market_1", 
-                "object": "player", 
-                "loop": "365"
+            "48": {
+                "interval": "3600", 
+                "parent": "\"climate\"", 
+                "object": "recorder", 
+                "limit": "0", 
+                "file": "Climate_\"climate\".csv", 
+                "property": "temperature,solar_direct,wind_speed,rainfall,snowdepth"
             }, 
             "17": {
                 "diameter": "0.368", 
@@ -2240,8 +2247,8 @@
             }, 
             "16": {
                 "Control": "MANUAL", 
-                "Type": "A", 
                 "raise_taps": "16", 
+                "PT_phase": "ABC", 
                 "name": "regulator_configuration_6506321", 
                 "band_center": "2401", 
                 "tap_pos_A": "1", 
@@ -2251,17 +2258,17 @@
                 "connect_type": "1", 
                 "regulation": "0.10", 
                 "CT_phase": "ABC", 
-                "lower_taps": "16", 
+                "band_width": "50", 
                 "tap_pos_C": "1", 
-                "PT_phase": "ABC", 
-                "band_width": "50"
+                "Type": "A", 
+                "lower_taps": "16"
             }, 
             "19": {
-                "object": "transformer_configuration", 
+                "impedance1": "0.012000+0.006800j", 
                 "name": "fifteen_fifteen_A", 
                 "primary_voltage": "4160.0V", 
                 "install_type": "POLETOP", 
-                "impedance1": "0.012000+0.006800j", 
+                "object": "transformer_configuration", 
                 "secondary_voltage": "120.0V", 
                 "connect_type": "SINGLE_PHASE_CENTER_TAPPED", 
                 "shunt_impedance": "1728000+691200j", 
@@ -2270,10 +2277,10 @@
                 "power_rating": "500"
             }, 
             "18": {
-                "geometric_mean_radius": "0.01111", 
                 "object": "triplex_line_conductor", 
                 "resistance": "0.97", 
-                "name": "tlc"
+                "name": "tlc", 
+                "geometric_mean_radius": "0.01111"
             }, 
             "31": {
                 "phases": "BS", 
@@ -2284,19 +2291,18 @@
                 "length": "100", 
                 "configuration": "trip_line_config"
             }, 
-            "30": {
-                "phases": "AS", 
-                "from": "tn_1", 
-                "name": "tl_1", 
-                "object": "triplex_line", 
-                "to": "tm_1", 
-                "length": "100", 
-                "configuration": "trip_line_config"
+            "49": {
+                "interval": "3600", 
+                "group": "class=triplex_line", 
+                "object": "collector", 
+                "limit": "0", 
+                "file": "TriplexLosses.csv", 
+                "property": "sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)"
             }, 
             "51": {
-                "object": "collector", 
-                "group": "class=regulator AND groupid=swingKids", 
                 "interval": "3600", 
+                "group": "class=regulator AND groupid=swingKids", 
+                "object": "collector", 
                 "limit": "0", 
                 "file": "SwingKids_regulator.csv", 
                 "property": "sum(power_in.real),sum(power_in.imag)"
@@ -2308,22 +2314,22 @@
                 "object": "ZIPload", 
                 "current_fraction": "0.100000", 
                 "base_power": "plug1*2.477490", 
-                "impedance_pf": "0.950000", 
+                "groupid": "plugload", 
                 "current_pf": "0.950000", 
                 "power_pf": "0.950000", 
                 "impedance_fraction": "0.800000", 
-                "groupid": "plugload"
+                "impedance_pf": "0.950000"
             }, 
             "35": {
                 "schedule_skew": "-810", 
-                "demand": "water14*1", 
+                "tank_volume": "50", 
                 "name": "waterheater1", 
                 "parent": "house1", 
                 "object": "waterheater", 
                 "heating_element_capacity": "4.8 kW", 
                 "thermostat_deadband": "2.9", 
                 "location": "INSIDE", 
-                "tank_volume": "50", 
+                "demand": "water14*1", 
                 "tank_setpoint": "136.8", 
                 "tank_UA": "2.4", 
                 "temperature": "135"
@@ -2339,15 +2345,15 @@
                 "cooling_system_type": "ELECTRIC", 
                 "aux_heat_temperature_lockout": "2.270706e+001", 
                 "heating_setpoint": "heating1*1", 
+                "motor_model": "BASIC", 
                 "auxiliary_strategy": "LOCKOUT", 
-                "heating_system_type": "HEAT_PUMP", 
                 "air_temperature": "70", 
                 "thermal_integrity_level": "5", 
                 "heating_COP": "3.1", 
                 "cooling_setpoint": "cooling7*1", 
                 "mass_temperature": "70", 
                 "motor_efficiency": "GOOD", 
-                "motor_model": "BASIC"
+                "heating_system_type": "HEAT_PUMP"
             }, 
             "33": {
                 "phases": "BS", 
@@ -2362,11 +2368,11 @@
                 "object": "ZIPload", 
                 "current_fraction": "0.425700", 
                 "base_power": "lights1*1.616013", 
-                "impedance_pf": "1.000000", 
+                "groupid": "lights", 
                 "current_pf": "-1.000000", 
                 "power_pf": "1.000000", 
                 "impedance_fraction": "0.571100", 
-                "groupid": "lights"
+                "impedance_pf": "1.000000"
             }, 
             "32": {
                 "phases": "AS", 
@@ -2375,9 +2381,9 @@
                 "name": "tm_1"
             }, 
             "50": {
-                "object": "collector", 
-                "group": "class=transformer", 
                 "interval": "3600", 
+                "group": "class=transformer", 
+                "object": "collector", 
                 "limit": "0", 
                 "file": "TransformerLosses.csv", 
                 "property": "sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)"
@@ -2391,5 +2397,7 @@
             "friction": "0.9", 
             "linkStrength": "1"
         }
-    }
+    }, 
+    "studyType": "gridlabd", 
+    "analysisName": "zSolar Trio"
 }

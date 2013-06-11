@@ -14,16 +14,17 @@ import solvers
 with open('./studies/gridlabd.html','r') as configFile: configHtmlTemplate = configFile.read()
 
 class Gridlabd:
-	def __init__(self, jsonMdDict, jsonDict, new=False):
-		self.analysisName = jsonMdDict.get('analysisName','')
-		self.name = jsonMdDict.get('name','')
-		self.simLength = jsonMdDict.get('simLength',0)
-		self.simLengthUnits = jsonMdDict.get('simLengthUnits','')
-		self.simStartDate = jsonMdDict.get('simStartDate','')
-		self.climate = jsonMdDict.get('climate','')
-		self.sourceFeeder = jsonMdDict.get('sourceFeeder','')
+	def __init__(self, jsonDict, new=False):
+		self.analysisName = jsonDict.get('analysisName','')
+		self.name = jsonDict.get('name','')
+		self.simLength = jsonDict.get('simLength',0)
+		self.simLengthUnits = jsonDict.get('simLengthUnits','')
+		self.simStartDate = jsonDict.get('simStartDate','')
+		self.climate = jsonDict.get('climate','')
+		self.sourceFeeder = jsonDict.get('sourceFeeder','')
 		self.inputJson = jsonDict.get('inputJson', {})
 		self.outputJson = jsonDict.get('outputJson', {})
+		self.studyType = jsonDict.get('studyType', '')
 		# If we're creating a new one:
 		if new == True:
 			# Attach recorders:
@@ -190,12 +191,6 @@ class Gridlabd:
 		self.outputJson = cleanOut
 		return True
 
-	def toDict(self):
-		# Return json-compatible dictionary representation.
-		return {'inputJson':self.inputJson,'outputJson':self.outputJson}
-
-	def mdToDict(self):
-		return {'studyType':'gridlabd', 'simLength':self.simLength, 'simLengthUnits':self.simLengthUnits, 'simStartDate':self.simStartDate, 'sourceFeeder':self.sourceFeeder, 'climate':self.climate}
 
 if __name__ == '__main__':
 	import storage

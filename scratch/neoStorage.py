@@ -93,5 +93,7 @@ if __name__ == '__main__':
 	print 'What was that MD?', test.get('feeder', 'testFeeder', justMd=True)
 	print 'List something.', test.listAll('feeder')
 	print 'Full feeder get back', test.get('feeder','testFeeder')
+	print 'How about just data?', test.put('feed', 'newFeed', {"component1":{"test":1},"component2":{"bullseye":5}})
+	print 'And back:', test.get('feed','newFeed')
 	# Cleanup:
 	shutil.rmtree('./testFileStore/')

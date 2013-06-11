@@ -1,1 +1,0 @@
-{"status": "postRun", "climate": "CA-BRAWLEY.tmy2", "name": "zMultiTech DEC Red Peak", "simStartDate": "2012-06-03", "simLengthUnits": "minutes", "created": "2013-03-06 13:20:53.665000", "PID": 45536, "sourceFeeder": "DEC Red Base, DEC Red CVR, DEC Red DG, DEC Red Battery", "simLength": 1440, "runTime": "0:28:20"}

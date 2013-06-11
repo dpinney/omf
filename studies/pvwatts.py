@@ -9,15 +9,15 @@ from datetime import datetime
 with open('./studies/pvwatts.html','r') as configFile: configHtmlTemplate = configFile.read()
 
 class Pvwatts:
-	def __init__(self, jsonMdDict, jsonDict):
+	def __init__(self, jsonDict):
 		pass
-		self.analysisName = analysisName
-		self.name = name
-		self.simLength = jsonMdDict.get('simLength',0)
-		self.simLengthUnits = jsonMdDict.get('simLengthUnits','')
-		self.simStartDate = jsonMdDict.get('simStartDate','')
-		self.climate = jsonMdDict.get('climate','')
-		self.sourceFeeder = jsonMdDict.get('sourceFeeder','')
+		self.analysisName = jsonDict.get('analysisName','')
+		self.name = jsonDict.get('name','')
+		self.simLength = jsonDict.get('simLength',0)
+		self.simLengthUnits = jsonDict.get('simLengthUnits','')
+		self.simStartDate = jsonDict.get('simStartDate','')
+		self.climate = jsonDict.get('climate','')
+		self.sourceFeeder = jsonDict.get('sourceFeeder','')
 		self.inputJson = jsonDict.get('inputJson', {})
 		self.outputJson = jsonDict.get('outputJson', {})
 

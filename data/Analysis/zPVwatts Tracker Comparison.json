@@ -1,1 +1,42 @@
-{"reports": [{"reportType":"climate"}, {"reportType":"feederPowerConsumption"}, {"reportType":"meterPowerflow"}, {"opAndMaintCost": "500", "distrCapacityRate": "12", "equipAndInstallCost": "3000", "distrEnergyRate": "0.05", "reportType": "monetization"}, {"reportType":"rawData"}, {"reportType":"runtimeStats"}, {"reportType":"studyDetails"}], "studyNames": ["1Axis", "2Axis", "Fixed"]}
+{
+    "status": "postRun", 
+    "climate": "CO-CARBONDALE.tmy2", 
+    "simStartDate": "2012-06-03", 
+    "simLengthUnits": "hours", 
+    "created": "2013-04-24 17:54:34.171000", 
+    "sourceFeeder": "", 
+    "simLength": 240, 
+    "reports": [
+        {
+            "reportType": "climate"
+        }, 
+        {
+            "reportType": "feederPowerConsumption"
+        }, 
+        {
+            "reportType": "meterPowerflow"
+        }, 
+        {
+            "opAndMaintCost": "500", 
+            "distrCapacityRate": "12", 
+            "distrEnergyRate": "0.05", 
+            "equipAndInstallCost": "3000", 
+            "reportType": "monetization"
+        }, 
+        {
+            "reportType": "rawData"
+        }, 
+        {
+            "reportType": "runtimeStats"
+        }, 
+        {
+            "reportType": "studyDetails"
+        }
+    ], 
+    "studyNames": [
+        "1Axis", 
+        "2Axis", 
+        "Fixed"
+    ], 
+    "runTime": "0:00:00"
+}

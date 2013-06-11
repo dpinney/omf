@@ -1,1 +1,35 @@
-{"reports": [{"reportType":"climate"}, {"reportType":"feederPowerConsumption"}, {"reportType":"runtimeStats"}, {"reportType":"studyDetails"}, {"reportType":"voltageBand"}], "studyNames": ["05Sol", "20Sol", "50Sol", "90Sol", "NoSol"]}
+{
+    "status": "postRun", 
+    "climate": "AZ-GLOBE.tmy2", 
+    "simStartDate": "2012-06-01", 
+    "simLengthUnits": "hours", 
+    "created": "2013-02-27 17:39:24.272000", 
+    "PID": 7396, 
+    "sourceFeeder": "Olin Barre Housed, Olin Barre Housed 90Perc Solar, Olin Barre Housed 05Perc Solar, Olin Barre Housed 50Perc Solar, Olin Barre Housed 20Perc Solar", 
+    "simLength": 240, 
+    "reports": [
+        {
+            "reportType": "climate"
+        }, 
+        {
+            "reportType": "feederPowerConsumption"
+        }, 
+        {
+            "reportType": "runtimeStats"
+        }, 
+        {
+            "reportType": "studyDetails"
+        }, 
+        {
+            "reportType": "voltageBand"
+        }
+    ], 
+    "studyNames": [
+        "05Sol", 
+        "20Sol", 
+        "50Sol", 
+        "90Sol", 
+        "NoSol"
+    ], 
+    "runTime": "0:16:42"
+}
