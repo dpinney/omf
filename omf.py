@@ -114,7 +114,6 @@ def run():
 
 # Helper function that runs an analyses in a new process.
 def analysisRun(anaObject, store):
-	#TODO: support non-Gridlab studies.
 	def studyInstance(studyName):
 		studyData = store.get('Study', anaObject.name + '---' + studyName)
 		studyData.update({'name':studyName,'analysisName':anaObject.name})
