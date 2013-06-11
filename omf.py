@@ -135,7 +135,6 @@ def delete():
 @app.route('/saveAnalysis/', methods=['POST'])
 def saveAnalysis():
 	pData = json.loads(flask.request.form.to_dict()['json'])
-	#TODO: unique string join.
 	def uniqJoin(stringList):
 		return ', '.join(set(stringList))
 	analysisData = {'status':'preRun',
