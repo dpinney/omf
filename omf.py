@@ -116,13 +116,13 @@ def run():
 
 # Helper function that runs an analyses in a new process.
 def analysisRun(anaName, store):
-	anaInstance = analysis.Analysis(store.getMetadata('Analysis', anaName), store.get('Analysis', anaName))
-	anaInstance.status = 'running'
+	thisAnalysis = analysis.Analysis(store.getMetadata('Analysis', anaName), store.get('Analysis', anaName))
+	thisAnalysis.status = 'running'
 	#TODO: support non-Gridlab studies.
-	studyList = [studies.gridlabd.Gridlabd(studyName, anaInstance.name, store.getMetadata('Study', anaInstance.name + '---' + studyName), store.get('Study', anaInstance.name + '---' + studyName)) for studyName in anaInstance.studyNames]
-	anaInstance.run(studyList)
-	store.put('Analysis', anaInstance.name, mdDict=anaInstance.mdToJson(), jsonDict=anaInstance.toJson())
-	for study in anaInstance.studies:
+	studyList = [studies.gridlabd.Gridlabd(dict(store.getMetadata('Study', thisAnalysis.name + '---' + studyName).items() + {'name':studyName,'analysisName':thisAnalysis.name}.items()), store.get('Study', thisAnalysis.name + '---' + studyName)) for studyName in thisAnalysis.studyNames]
+	thisAnalysis.run(studyList)
+	store.put('Analysis', thisAnalysis.name, mdDict=thisAnalysis.mdToJson(), jsonDict=thisAnalysis.toJson())
+	for study in thisAnalysis.studies:
 		store.put('Study', study.analysisName + '---' + study.name, mdDict=study.mdToDict(), jsonDict=study.toDict())
 
 @app.route('/delete/', methods=['POST'])
@@ -165,7 +165,7 @@ def saveAnalysis():
 			studyFeeder = store.get('Feeder', study['feederName'])
 			studyFeeder['attachments']['climate.tmy2'] = store.get('Weather', study['tmy2name']+'.tmy2', raw=True)
 			studyData = {'inputJson':studyFeeder,'outputJson':{}}
-			studyObj = studies.gridlabd.Gridlabd(study['studyName'], pData['analysisName'], studyMd, studyData, new=True)
+			studyObj = studies.gridlabd.Gridlabd(studyMd, studyData, new=True)
 			store.put('Study', pData['analysisName'] + '---' + study['studyName'], mdDict=studyObj.mdToDict(), jsonDict=studyObj.toDict())
 		elif study['studyType'] == 'XXX':
 			#TODO: implement me.

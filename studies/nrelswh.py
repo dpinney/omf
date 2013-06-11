@@ -8,7 +8,7 @@ import solvers
 with open('./studies/nrelswh.html','r') as configFile: configHtmlTemplate = configFile.read()
 
 class Nrelswh:
-	def __init__(self, name, analysisName, jsonMdDict, jsonDict):
+	def __init__(self, jsonMdDict, jsonDict):
 		pass
 		self.analysisName = analysisName
 		self.name = name

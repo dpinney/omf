@@ -16,9 +16,9 @@ class Analysis:
 		self.simLength = jsonMdDict.get('simLength',0)
 		self.simLengthUnits = jsonMdDict.get('simLengthUnits','')
 		self.runTime = jsonMdDict.get('runTime','')
+		self.name = jsonMdDict.get('name','')
 		self.reports = jsonDict.get('reports', [])
 		self.studyNames = jsonDict.get('studyNames', [])
-		self.name = jsonMdDict.get('name','')
 
 	def generateReportHtml(self, studyList):
 		# Iterate over reports and collect what we need: 
@@ -45,10 +45,10 @@ class Analysis:
 			self.status = 'postRun'
 
 	def toJson(self):
-		return {'reports':self.reports, 'studyNames':self.studyNames}
+		return {key:self.__dict__[key] for key in self.__dict__ if type(self.__dict__[key]) is dict or type(self.__dict__[key]) is list}
 
 	def mdToJson(self):
-		return {'name':self.name, 'status':self.status, 'sourceFeeder':self.sourceFeeder, 'climate':self.climate, 'created':self.created, 'simStartDate':self.simStartDate, 'simLength':self.simLength, 'simLengthUnits':self.simLengthUnits, 'runTime':self.runTime}
+		return {key:self.__dict__[key] for key in self.__dict__ if type(self.__dict__[key]) is not dict and type(self.__dict__[key]) is not list}
 
 if __name__ == '__main__':
 	pass

@@ -9,7 +9,7 @@ from datetime import datetime
 with open('./studies/pvwatts.html','r') as configFile: configHtmlTemplate = configFile.read()
 
 class Pvwatts:
-	def __init__(self, name, analysisName, jsonMdDict, jsonDict):
+	def __init__(self, jsonMdDict, jsonDict):
 		pass
 		self.analysisName = analysisName
 		self.name = name

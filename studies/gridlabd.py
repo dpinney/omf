@@ -14,9 +14,9 @@ import solvers
 with open('./studies/gridlabd.html','r') as configFile: configHtmlTemplate = configFile.read()
 
 class Gridlabd:
-	def __init__(self, name, analysisName, jsonMdDict, jsonDict, new=False):
-		self.analysisName = analysisName
-		self.name = name
+	def __init__(self, jsonMdDict, jsonDict, new=False):
+		self.analysisName = jsonMdDict.get('analysisName','')
+		self.name = jsonMdDict.get('name','')
 		self.simLength = jsonMdDict.get('simLength',0)
 		self.simLengthUnits = jsonMdDict.get('simLengthUnits','')
 		self.simStartDate = jsonMdDict.get('simStartDate','')
