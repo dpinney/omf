@@ -10,10 +10,10 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','feederPowerConsumption')
 
-def outputHtml(analysisObject, reportConfig):
+def outputHtml(analysisObject, studyList):
 	# Variables for the whole analysis:
 	allData = {}
-	for studyObject in analysisObject.studies:
+	for studyObject in studyList:
 		study = studyObject.name
 		allData[study] = {}
 		studyJson = studyObject.outputJson

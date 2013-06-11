@@ -9,7 +9,7 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','studyDetails')
 
-def outputHtml(analysisObject, reportConfig):
+def outputHtml(analysisObject, studyList):
 	# Gather analysis variables:
 	ana = {}
 	ana['name'] = analysisObject.name
@@ -19,9 +19,9 @@ def outputHtml(analysisObject, reportConfig):
 	ana['simStartDate'] = analysisObject.simStartDate
 	# Gather study data:
 	climates = {}
-	studyList = []
+	outputList = []
 	allComponents = set()
-	for study in analysisObject.studies:
+	for study in studyList:
 		newStudy = {'studyName':study.name}
 		# Study metadata:
 		newStudy['sourceFeederName'] = study.sourceFeeder
@@ -33,14 +33,14 @@ def outputHtml(analysisObject, reportConfig):
 		out = study.outputJson
 		newStudy['componentNames'] = set(out.get('componentNames', []))
 		allComponents.update(out.get('componentNames', []))
-		studyList.append(newStudy)
+		outputList.append(newStudy)
 	climates = [['Climate','Studies']] + [[key.replace('.tmy2',''), climates[key]] for key in climates]
 	# Partition the names into common names and those unique to each feeder:
-	uniqueNameCounts = {x['studyName']:len(allComponents.difference(x['componentNames'])) for x in studyList}
+	uniqueNameCounts = {x['studyName']:len(allComponents.difference(x['componentNames'])) for x in outputList}
 	uniqueNameCounts['Common to All'] = len(allComponents)
 	pieChartData = [['Study','Components']] + [[x, uniqueNameCounts[x]] for x in uniqueNameCounts]
 	# Get the template in.
 	with open('./reports/studyDetailsOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
 	# Write the results.
-	return template.render(studyList=studyList, ana=ana, climates=json.dumps(climates), pieChartData=json.dumps(pieChartData))
+	return template.render(outputList=outputList, ana=ana, climates=json.dumps(climates), pieChartData=json.dumps(pieChartData))

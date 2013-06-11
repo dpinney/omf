@@ -1,6 +1,6 @@
 <p class="reportTitle">Regulator Powerflow</p>
 <div id="regPowReport" class="tightContent">
-{%- for study in studyList -%}
+{%- for study in outputList -%}
 	<div id="regulatorStudy{{study.studyName}}" class="studyContainer">
 		<div class="studyTitleBox"><p class="studyTitle">{{study.studyName}}</p></div>
 		{%- for reg in study.regs -%}

@@ -86,7 +86,10 @@ def newAnalysis(analysisName=None):
 def viewReports(analysisName):
 	if not store.exists('Analysis', analysisName):
 		return flask.redirect(flask.url_for('root'))
-	reportList = analysis.Analysis(analysisName, store.getMetadata('Analysis',analysisName), store.get('Analysis',analysisName)).generateReportHtml()
+	thisAnalysis = analysis.Analysis(store.getMetadata('Analysis',analysisName), store.get('Analysis',analysisName))
+	#TODO: support non-Gridlab studies.
+	studyList = [studies.gridlabd.Gridlabd(studyName, thisAnalysis.name, store.getMetadata('Study', thisAnalysis.name + '---' + studyName), store.get('Study', thisAnalysis.name + '---' + studyName)) for studyName in thisAnalysis.studyNames]
+	reportList = thisAnalysis.generateReportHtml(studyList)
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
 
 @app.route('/feeder/<feederName>')
@@ -119,9 +122,11 @@ def run():
 
 # Helper function to run an analyses in a new process.
 def analysisRun(anaName, store):
-	anaInstance = analysis.Analysis(anaName, store.getMetadata('Analysis', anaName), store.get('Analysis', anaName))
+	anaInstance = analysis.Analysis(store.getMetadata('Analysis', anaName), store.get('Analysis', anaName))
 	anaInstance.status = 'running'
-	anaInstance.run()
+	#TODO: support non-Gridlab studies.
+	studyList = [studies.gridlabd.Gridlabd(studyName, anaInstance.name, store.getMetadata('Study', anaInstance.name + '---' + studyName), store.get('Study', anaInstance.name + '---' + studyName)) for studyName in anaInstance.studyNames]
+	anaInstance.run(studyList)
 	store.put('Analysis', anaInstance.name, mdDict=anaInstance.mdToJson(), jsonDict=anaInstance.toJson())
 	for study in anaInstance.studies:
 		store.put('Study', study.analysisName + '---' + study.name, mdDict=study.mdToDict(), jsonDict=study.toDict())

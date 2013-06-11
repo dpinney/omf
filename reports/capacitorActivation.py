@@ -8,11 +8,11 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','capacitorActivation')
 
-def outputHtml(analysisObject, reportConfig):
+def outputHtml(analysisObject, studyList):
 	# Build up the data:
 	resolution = analysisObject.simLengthUnits
-	studyList = []
-	for study in analysisObject.studies:
+	outputList = []
+	for study in studyList:
 		cleanOut = study.outputJson
 		if 'Capacitors' in cleanOut:
 			newStudy = {'studyName':study.name, 'capList':[]}
@@ -31,9 +31,9 @@ def outputHtml(analysisObject, reportConfig):
 										]
 				newCap['graphParams'] = json.dumps(graphParams)
 				newStudy['capList'].append(newCap)
-			studyList.append(newStudy)
+			outputList.append(newStudy)
 	# Get the template inserted.
 	with open('./reports/capacitorActivationOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
 	# Write the results.
-	return template.render(studyList=studyList)
+	return template.render(outputList=outputList)

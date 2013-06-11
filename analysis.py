@@ -10,12 +10,9 @@ import copy
 import json
 import studies
 import reports
-import storage
-
-store = storage.Filestore('data')
 
 class Analysis:
-	def __init__(self, name, jsonMdDict, jsonDict):
+	def __init__(self, jsonMdDict, jsonDict):
 		self.status = jsonMdDict.get('status','')
 		self.sourceFeeder = jsonMdDict.get('sourceFeeder','')
 		self.climate = jsonMdDict.get('climate','')
@@ -26,24 +23,22 @@ class Analysis:
 		self.runTime = jsonMdDict.get('runTime','')
 		self.reports = jsonDict.get('reports', [])
 		self.studyNames = jsonDict.get('studyNames', [])
-		self.name = name
-		# TODO: Support study types that aren't Gridlab!!!
-		self.studies = [studies.gridlabd.Gridlabd(studyName, self.name, store.getMetadata('Study', self.name + '---' + studyName), store.get('Study', self.name + '---' + studyName)) for studyName in self.studyNames]
+		self.name = jsonMdDict.get('name','')
 
-	def generateReportHtml(self):
+	def generateReportHtml(self, studyList):
 		# Iterate over reports and collect what we need: 
 		reportList = []
 		for report in self.reports:
 			# call the relevant reporting function by name.
 			reportModule = getattr(reports, report['reportType'])
-			reportList.append(reportModule.outputHtml(self, report))
+			reportList.append(reportModule.outputHtml(self, studyList))
 		return reportList
 
-	def run(self):
+	def run(self, studyList):
 		# NOTE! We are running studies serially. We use lower levels of RAM/CPU, potentially saving time if swapping were to occur.
 		self.status = 'running'
 		startTime = dt.datetime.now()
-		for study in self.studies:
+		for study in studyList:
 			exitStatus = study.run()
 			if exitStatus == False:
 				self.status = 'terminated'

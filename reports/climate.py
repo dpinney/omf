@@ -14,13 +14,13 @@ source info:
 http://www.gridlabd.org/documents/doxygen/latest_dev/climate_8h-source.html
 '''
 
-def outputHtml(analysisObject, reportConfig):
+def outputHtml(analysisObject, studyList):
 	# Collect study variables:
 	resolution = analysisObject.simLengthUnits
 	climates = analysisObject.climate.count('.tmy2')
-	studyList = []
+	outputList = []
 	title = True
-	for study in analysisObject.studies:
+	for study in studyList:
 		cleanOut = study.outputJson
 		if 'climate' in cleanOut:
 			studyDict = {'studyName':study}
@@ -33,16 +33,16 @@ def outputHtml(analysisObject, reportConfig):
 				colorChoice = util.rainbow(cleanOut['climate'], varName, ['dimgray','darkgray','darkgray','gainsboro','gainsboro'])
 				graphParameters['series'].append({'name':varName,'data':cleanOut['climate'][varName],'marker':{'enabled':False},'color':colorChoice})
 			studyDict['graphParameters'] = json.dumps(graphParameters)
-			studyList.append(studyDict)
+			outputList.append(studyDict)
 	# Get the template in.
 	with open('./reports/climateOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
 	# If we've only got one real climate, hide the dups.
 	if climates < 2:
-		studyList = [studyList[0]] if studyList else ''
+		outputList = [outputList[0]] if outputList else ''
 		title = False
 	# Write the results.
-	return template.render(studyList=studyList, title=title)
+	return template.render(outputList=outputList, title=title)
 
 if __name__ == '__main__':
 	# tests go here.

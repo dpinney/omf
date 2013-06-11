@@ -9,12 +9,12 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','meterPowerflow')
 
-def outputHtml(analysisObject, reportConfig):
+def outputHtml(analysisObject, studyList):
 	# Build up the data:
 	resolution = analysisObject.simLengthUnits
 	startDate = analysisObject.simStartDate
-	studyList = []
-	for study in analysisObject.studies:
+	outputList = []
+	for study in studyList:
 		cleanOut = study.outputJson
 		if 'Meters' in cleanOut:
 			newStudy = {'studyName':study.name}
@@ -38,9 +38,9 @@ def outputHtml(analysisObject, reportConfig):
 														'color':util.rainbow(cleanOut['Meters'],meter,['lightblue','blue','darkblue','cornflowerblue','cyan'])}
 													for meter in cleanOut['Meters']]
 			newStudy['voltParameters'] = json.dumps(newStudy['voltParameters'])
-			studyList.append(newStudy)
+			outputList.append(newStudy)
 	# Get the template in.
 	with open('./reports/meterPowerflowOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
 	# Write the results.
-	return template.render(studyList=studyList)
+	return template.render(outputList=outputList)

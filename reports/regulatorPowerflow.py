@@ -9,12 +9,12 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','regulatorPowerflow')
 
-def outputHtml(analysisObject, reportConfig):
+def outputHtml(analysisObject, studyList):
 	# Put the title in:
 	resolution = analysisObject.simLengthUnits
 	startDate = analysisObject.simStartDate
-	studyList = []
-	for study in analysisObject.studies:
+	outputList = []
+	for study in studyList:
 		regFileNames = [x for x in os.listdir(pathPrefix + study) if x.startswith('Regulator_') and x.endswith('.csv')]
 		cleanOut = study.outputJson
 		if 'Regulators' in cleanOut:
@@ -51,9 +51,9 @@ def outputHtml(analysisObject, reportConfig):
 													for tap in cleanOut['Regulators'][reg] if tap.endswith('Position')]
 				newReg['tapPosParams'] = json.dumps(tapPosParams)
 				newStudy['regs'].append(newReg)
-			studyList.append(newStudy)
+			outputList.append(newStudy)
 	# Get the template in.
 	with open('./reports/regulatorPowerflowOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
 	# Write the results.
-	return template.render(studyList=studyList)
+	return template.render(outputList=outputList)

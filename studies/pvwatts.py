@@ -8,20 +8,35 @@ from datetime import datetime
 
 with open('./studies/pvwatts.html','r') as configFile: configHtmlTemplate = configFile.read()
 
-def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
-	studyPath = 'analyses/' + analysisName + '/studies/' + studyConfig['studyName']
-	# make the study folder:
-	os.mkdir(studyPath)
-	# copy over tmy2 and replace the dummy climate.tmy2.
-	shutil.copyfile('tmy2s/' + studyConfig['tmy2name'], studyPath + '/climate.tmy2')
-	# write all the other variables:
-	with open(studyPath + '/samInput.json','w') as samInputFile:
-		json.dump(studyConfig, samInputFile, indent=4)
-	# add the metadata:
-	md = {'climate':str(studyConfig['tmy2name']), 'studyType':str(studyConfig['studyType']), 'sourceFeeder':'N/A'}
-	with open(studyPath + '/metadata.json','w') as mdFile:
-		json.dump(md, mdFile)
-	return
+class Pvwatts:
+	def __init__(self, name, analysisName, jsonMdDict, jsonDict):
+		pass
+		self.analysisName = analysisName
+		self.name = name
+		self.simLength = jsonMdDict.get('simLength',0)
+		self.simLengthUnits = jsonMdDict.get('simLengthUnits','')
+		self.simStartDate = jsonMdDict.get('simStartDate','')
+		self.climate = jsonMdDict.get('climate','')
+		self.sourceFeeder = jsonMdDict.get('sourceFeeder','')
+		self.inputJson = jsonDict.get('inputJson', {})
+		self.outputJson = jsonDict.get('outputJson', {})
+
+
+
+	def create(analysisName, simLength, simLengthUnits, simStartDate, studyConfig):
+		studyPath = 'analyses/' + analysisName + '/studies/' + studyConfig['studyName']
+		# make the study folder:
+		os.mkdir(studyPath)
+		# copy over tmy2 and replace the dummy climate.tmy2.
+		shutil.copyfile('tmy2s/' + studyConfig['tmy2name'], studyPath + '/climate.tmy2')
+		# write all the other variables:
+		with open(studyPath + '/samInput.json','w') as samInputFile:
+			json.dump(studyConfig, samInputFile, indent=4)
+		# add the metadata:
+		md = {'climate':str(studyConfig['tmy2name']), 'studyType':str(studyConfig['studyType']), 'sourceFeeder':'N/A'}
+		with open(studyPath + '/metadata.json','w') as mdFile:
+			json.dump(md, mdFile)
+		return
 
 def run(analysisName, studyName):
 	studyPath = 'analyses/' + analysisName + '/studies/' + studyName

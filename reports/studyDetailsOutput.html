@@ -9,7 +9,7 @@
 	<div id="detailsDiv" style="position:absolute;width:500px;height:250px;left:0px;top:0px;padding:10px;overflow:auto"><p>Analysis created {{ana.created}}</p><p>Simulated {{ana.simLength}} {{ana.simLengthUnits}} starting on {{ana.simStartDate}}</p>
 		<table id="detailsTable" style="padding-top:10px">
 			<tr><th>Study</th><th>Source Feeder</th></tr>
-			{%- for study in studyList -%}
+			{%- for study in outputList -%}
 				<tr><td>{{study.studyName}}</td><td><a href="/analysisFeeder/{{ana.name}}/{{study.studyName}}">{{study.sourceFeederName}}</a></td></tr>
 			{%- endfor -%}
 		</table></div>

@@ -11,20 +11,24 @@ from jinja2 import Template
 with open('./reports/monetizationConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read()
 
-def outputHtml(analysisObject, reportConfig):
+def outputHtml(analysisObject, studyList):
 	# Set general run data:
 	resolution = analysisObject.simLengthUnits
 	startTime = analysisObject.simStartDate
 	# Get the report input:
 	inputData = {}
-	inputData['distrEnergyRate'] = float(reportConfig['distrEnergyRate'])
-	inputData['distrCapacityRate'] = float(reportConfig['distrCapacityRate'])
-	inputData['equipAndInstallCost'] = float(reportConfig['equipAndInstallCost'])
-	inputData['opAndMaintCost'] = float(reportConfig['opAndMaintCost'])
+	try:
+		reportConfig = [rep for rep in analysisObject.reports if rep.get('reportType','') == 'monetization'][0]
+	except:
+		reportConfig = {}
+	inputData['distrEnergyRate'] = float(reportConfig.get('distrEnergyRate',0))
+	inputData['distrCapacityRate'] = float(reportConfig.get('distrCapacityRate',0))
+	inputData['equipAndInstallCost'] = float(reportConfig.get('equipAndInstallCost',0))
+	inputData['opAndMaintCost'] = float(reportConfig.get('opAndMaintCost',0))
 	# Pull in the power data:
 	studyDict = {}
 	timeStamps = []
-	for study in analysisObject.studies:
+	for study in studyList:
 		studyDict[study.name] = {}
 		studyJson = study.outputJson
 		timeStamps = studyJson['timeStamps']

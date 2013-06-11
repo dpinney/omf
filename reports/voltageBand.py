@@ -8,10 +8,10 @@ from jinja2 import Template
 with open('./reports/defaultConfig.html','r') as configFile:
 	configHtmlTemplate = configFile.read().replace('{{reportName}}','voltageBand')
 
-def outputHtml(analysisObject, reportConfig):
+def outputHtml(analysisObject, studyList):
 	# Build up the data:
-	studyList = []
-	for study in analysisObject.studies:
+	outputList = []
+	for study in studyList:
 		cleanOut = study.outputJson
 		# Set up the graph.
 		if 'allMeterVoltages' in cleanOut:
@@ -23,9 +23,9 @@ def outputHtml(analysisObject, reportConfig):
 			graphParameters['series'].append({'name':'Mean','data':cleanOut['allMeterVoltages']['Mean'],'marker':{'enabled':False},'color':'blue'})
 			graphParameters['series'].append({'name':'Max','data':cleanOut['allMeterVoltages']['Max'],'marker':{'enabled':False},'color':'gray'})
 			newStudy['graphParams'] = json.dumps(graphParameters)
-			studyList.append(newStudy)
+			outputList.append(newStudy)
 	# Get the template in.
 	with open('./reports/voltageBandOutput.html','r') as tempFile:
 		template = Template(tempFile.read())
 	# Write the results.
-	return template.render(studyList=studyList)
+	return template.render(outputList=outputList)

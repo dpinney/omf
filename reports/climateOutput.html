@@ -1,6 +1,6 @@
 <p class="reportTitle">Climate</p>
 <div id="climateReport" class="tightContent">
-	{%- for study in studyList -%}
+	{%- for study in outputList -%}
 	<div id="climateStudy{{study.studyName}}" class="studyContainer">
 		<div id="climateChartDiv{{study.studyName}}" style="height:250px"></div>
 		{%- if title -%}
