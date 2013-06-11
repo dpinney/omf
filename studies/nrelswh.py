@@ -22,10 +22,9 @@ class Nrelswh:
 		self.studyType = 'nrelswh'
 	
 	def run(self):
-		studyPath = 'analyses/' + analysisName + '/studies/' + studyName
+		studyPath = 'running/' + self.analysisName + '---' + self.name + '___' + str(datetime.now()).replace(':','_') + '/'
 		# gather input.
-		with open(studyPath + '/samInput.json','r') as inputFile:
-			inputs = json.load(inputFile)
+		inputs = self.inputJson
 		# setup data structures.
 		ssc = solvers.nrelsam.SSCAPI()
 		dat = ssc.ssc_data_create()
@@ -66,15 +65,12 @@ class Nrelswh:
 		setNumber("iam")				#Incidence angle modifier				?
 		setNumber("max_iter")			#Max iterations allowed					? ?=100	MIN=0,MAX=1000,INTEGER
 		setNumber("ftol_iter")			#Iteration tolerance					? ?=0.01 POSITIVE
-
 		# run solar water heating system simulation
 		mod = ssc.ssc_module_create("swh")
 		ssc.ssc_module_exec(mod, dat)
-
 		# extract results 
 		varNames = ['beam','diffuse','T_dry','Q_deliv','Q_useful', 'T_hot', 'T_cold', 'draw']
 		rezzies = {var:ssc.ssc_data_get_array(dat, var) for var in varNames}
-
 		# Write some results.
-		with open(studyPath + '/output.json','w') as outFile:
-			json.dump(rezzies, outFile, indent=4)
+		shutil.rmtree(studyPath)
+		self.outputJson = outData
