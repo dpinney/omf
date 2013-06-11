@@ -1,7 +1,7 @@
 #!/bin/python
 
 # third party modules
-import flask, werkzeug, os, multiprocessing, json, time, threading, datetime
+import flask, werkzeug, os, multiprocessing, json, time, threading, datetime, copy
 # our modules
 import analysis, feeder, reports, studies, milToGridlab, storage
 # import logging_system
@@ -115,7 +115,13 @@ def run():
 # Helper function that runs an analyses in a new process.
 def analysisRun(anaObject, store):
 	#TODO: support non-Gridlab studies.
-	studyList = [studies.gridlabd.Gridlabd(dict(store.get('Study', anaObject.name + '---' + studyName).items() + {'name':studyName,'analysisName':anaObject.name}.items())) for studyName in anaObject.studyNames]
+	def studyInstance(studyName):
+		studyData = store.get('Study', anaObject.name + '---' + studyName)
+		studyData.update({'name':studyName,'analysisName':anaObject.name})
+		moduleRef = getattr(studies, studyData['studyType'])
+		classRef = getattr(moduleRef, studyData['studyType'].capitalize())
+		return classRef(studyData)
+	studyList = [studyInstance(studyName) for studyName in anaObject.studyNames]
 	anaObject.run(studyList)
 	store.put('Analysis', anaObject.name, anaObject.__dict__)
 	for study in studyList:
@@ -138,34 +144,36 @@ def saveAnalysis():
 	def uniqJoin(stringList):
 		return ', '.join(set(stringList))
 	analysisData = {'status':'preRun',
-					'sourceFeeder':uniqJoin([stud['feederName'] for stud in pData['studies']]),
-					'climate':uniqJoin([stud['tmy2name'] for stud in pData['studies']]),
-					'created':str(datetime.datetime.now()),
-					'simStartDate':pData['simStartDate'],
-					'simLength':pData['simLength'],
-					'simLengthUnits':pData['simLengthUnits'],
-					'runTime':'',
-					'reports':pData['reports'],
-					'studyNames':[stud['studyName'] for stud in pData['studies']] }
+					'sourceFeeder': uniqJoin([stud.get('feederName','') for stud in pData['studies']]),
+					'climate': uniqJoin([stud.get('tmy2name','') for stud in pData['studies']]),
+					'created': str(datetime.datetime.now()),
+					'simStartDate': pData['simStartDate'],
+					'simLength': pData['simLength'],
+					'simLengthUnits': pData['simLengthUnits'],
+					'runTime': '',
+					'reports': pData['reports'],
+					'studyNames': [stud['studyName'] for stud in pData['studies']] }
 	store.put('Analysis', pData['analysisName'], analysisData)
 	for study in pData['studies']:
-		if study['studyType'] == 'gridlabd':
-			studyData = {	'studyType':'gridlabd',
-							'simLength':pData['simLength'],
-							'simLengthUnits':pData['simLengthUnits'],
-							'simStartDate':pData['simStartDate'],
-							'sourceFeeder':study['feederName'],
-							'climate':study['tmy2name'],
-							'analysisName':pData['analysisName'] }
+		studyData = {	'simLength': pData.get('simLength',0),
+						'simLengthUnits': pData.get('simLengthUnits',''),
+						'simStartDate': pData.get('simStartDate',''),
+						'sourceFeeder': study.get('feederName',''),
+						'analysisName': pData.get('analysisName',''),
+						'climate': study.pop('tmy2name',''),
+						'studyType': study.pop('studyType',''),
+						'outputJson': {}}
+		if studyData['studyType'] == 'gridlabd':
 			studyFeeder = store.get('Feeder', study['feederName'])
-			studyFeeder['attachments']['climate.tmy2'] = store.get('Weather', study['tmy2name'])['tmy2']
+			studyFeeder['attachments']['climate.tmy2'] = store.get('Weather', studyData['climate'])['tmy2']
 			studyData['inputJson'] = studyFeeder
-			studyData['outputJson'] = {}
-			studyObj = studies.gridlabd.Gridlabd(studyData, new=True)
-			store.put('Study', pData['analysisName'] + '---' + study['studyName'], studyObj.__dict__)
-		elif study['studyType'] == 'XXX':
-			#TODO: implement me.
-			pass
+		elif studyData['studyType'] in ['nrelswh','pvwatts']:
+			study['attachments'] = {'climate.tmy2': store.get('Weather', studyData['climate'])['tmy2']}
+			studyData['inputJson'] = study
+		moduleRef = getattr(studies, studyData['studyType'])
+		classRef =  getattr(moduleRef, studyData['studyType'].capitalize())
+		studyObj = classRef(studyData, new=True)
+		store.put('Study', pData['analysisName'] + '---' + study['studyName'], studyObj.__dict__)
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/terminate/', methods=['POST'])

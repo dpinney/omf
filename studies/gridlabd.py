@@ -24,7 +24,7 @@ class Gridlabd:
 		self.sourceFeeder = jsonDict.get('sourceFeeder','')
 		self.inputJson = jsonDict.get('inputJson', {})
 		self.outputJson = jsonDict.get('outputJson', {})
-		self.studyType = jsonDict.get('studyType', '')
+		self.studyType = 'gridlabd'
 		# If we're creating a new one:
 		if new == True:
 			# Attach recorders:

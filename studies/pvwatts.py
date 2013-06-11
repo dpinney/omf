@@ -9,7 +9,7 @@ from datetime import datetime
 with open('./studies/pvwatts.html','r') as configFile: configHtmlTemplate = configFile.read()
 
 class Pvwatts:
-	def __init__(self, jsonDict):
+	def __init__(self, jsonDict, new=False):
 		pass
 		self.analysisName = jsonDict.get('analysisName','')
 		self.name = jsonDict.get('name','')
@@ -20,33 +20,37 @@ class Pvwatts:
 		self.sourceFeeder = jsonDict.get('sourceFeeder','')
 		self.inputJson = jsonDict.get('inputJson', {})
 		self.outputJson = jsonDict.get('outputJson', {})
+		self.studyType = 'pvwatts'
 
 	#TODO: fix run.
 	def run(self):
-		studyPath = 'analyses/' + analysisName + '/studies/' + studyName
-		# gather input and metadata.
-		with open(studyPath + '/samInput.json','r') as inputFile, open('analyses/' + analysisName + '/metadata.json','r') as mdFile:
-			inputs = json.load(inputFile)
-			md = json.load(mdFile)
+		# Create a running directory and fill it.
+		studyPath = 'running/' + self.analysisName + '---' + self.name + '___' + str(datetime.now()).replace(':','_') + '/'
+		os.makedirs(studyPath)
+		# Write attachments and glm.
+		attachments = self.inputJson['attachments']
+		for attach in attachments:
+			with open (studyPath + attach,'w') as attachFile:
+				attachFile.write(attachments[attach])
 		# setup data structures
 		ssc = solvers.nrelsam.SSCAPI()
 		dat = ssc.ssc_data_create()
 		# required inputs
 		ssc.ssc_data_set_string(dat, "file_name", studyPath + "/climate.tmy2")
-		ssc.ssc_data_set_number(dat, "system_size", float(inputs['systemSize']))
-		ssc.ssc_data_set_number(dat, "derate", float(inputs['derate']))
-		ssc.ssc_data_set_number(dat, "track_mode", float(inputs['trackingMode']))
-		ssc.ssc_data_set_number(dat, "azimuth", float(inputs['azimuth']))
+		ssc.ssc_data_set_number(dat, "system_size", float(self.inputJson['systemSize']))
+		ssc.ssc_data_set_number(dat, "derate", float(self.inputJson['derate']))
+		ssc.ssc_data_set_number(dat, "track_mode", float(self.inputJson['trackingMode']))
+		ssc.ssc_data_set_number(dat, "azimuth", float(self.inputJson['azimuth']))
 		# default inputs exposed
-		ssc.ssc_data_set_number(dat, 'rotlim', float(inputs['rotlim']))
-		ssc.ssc_data_set_number(dat, 't_noct', float(inputs['t_noct']))
-		ssc.ssc_data_set_number(dat, 't_ref', float(inputs['t_ref']))
-		ssc.ssc_data_set_number(dat, 'gamma', float(inputs['gamma']))
-		ssc.ssc_data_set_number(dat, 'inv_eff', float(inputs['inv_eff']))
-		ssc.ssc_data_set_number(dat, 'fd', float(inputs['fd']))
-		ssc.ssc_data_set_number(dat, 'i_ref', float(inputs['i_ref']))
-		ssc.ssc_data_set_number(dat, 'poa_cutin', float(inputs['poa_cutin']))
-		ssc.ssc_data_set_number(dat, 'w_stow', float(inputs['w_stow']))
+		ssc.ssc_data_set_number(dat, 'rotlim', float(self.inputJson['rotlim']))
+		ssc.ssc_data_set_number(dat, 't_noct', float(self.inputJson['t_noct']))
+		ssc.ssc_data_set_number(dat, 't_ref', float(self.inputJson['t_ref']))
+		ssc.ssc_data_set_number(dat, 'gamma', float(self.inputJson['gamma']))
+		ssc.ssc_data_set_number(dat, 'inv_eff', float(self.inputJson['inv_eff']))
+		ssc.ssc_data_set_number(dat, 'fd', float(self.inputJson['fd']))
+		ssc.ssc_data_set_number(dat, 'i_ref', float(self.inputJson['i_ref']))
+		ssc.ssc_data_set_number(dat, 'poa_cutin', float(self.inputJson['poa_cutin']))
+		ssc.ssc_data_set_number(dat, 'w_stow', float(self.inputJson['w_stow']))
 		# complicated optional inputs
 		ssc.ssc_data_set_number(dat, 'tilt_eq_lat', 1)
 		# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
@@ -62,28 +66,28 @@ class Pvwatts:
 		ssc.ssc_module_exec(mod, dat)
 
 		# MD calc.
-		if md['simLengthUnits'] == 'days':
-			startDateTime = md['simStartDate']
+		if self.simLengthUnits == 'days':
+			startDateTime = self.simStartDate
 		else:
-			startDateTime = md['simStartDate'] + ' 00:00:00 PDT'
+			startDateTime = self.simStartDate + ' 00:00:00 PDT'
 
 		def aggData(key, aggFun):
-			u = md['simStartDate']
+			u = self.simStartDate
 			dt = datetime(int(u[0:4]),int(u[5:7]),int(u[8:10]))
 			v = dt.isocalendar()
 			initHour = int(8760*(v[1]+v[2]/7)/52.0)
 			fullData = ssc.ssc_data_get_array(dat, key)
-			if md['simLengthUnits'] == 'days':
+			if self.simLengthUnits == 'days':
 				multiplier = 24
 			else:
 				multiplier = 1
-			hourData = [fullData[(initHour+i)%8760] for i in xrange(md['simLength']*multiplier)]
-			if md['simLengthUnits'] == 'minutes':
+			hourData = [fullData[(initHour+i)%8760] for i in xrange(self.simLength*multiplier)]
+			if self.simLengthUnits == 'minutes':
 				pass
-			elif md['simLengthUnits'] == 'hours':
+			elif self.simLengthUnits == 'hours':
 				return hourData
-			elif md['simLengthUnits'] == 'days':
-				split = [hourData[x:x+24] for x in xrange(md['simLength'])]
+			elif self.simLengthUnits == 'days':
+				split = [hourData[x:x+24] for x in xrange(self.simLength)]
 				return map(aggFun, split)
 
 		def avg(x):
@@ -92,7 +96,7 @@ class Pvwatts:
 		# Extract data.
 		# Timestamps.
 		outData = {}
-		outData['timeStamps'] = [startDateTime for x in range(md['simLength'])]
+		outData['timeStamps'] = [startDateTime for x in range(self.simLength)]
 		# Geodata.
 		outData['city'] = ssc.ssc_data_get_string(dat, 'city')
 		outData['state'] = ssc.ssc_data_get_string(dat, 'state')
@@ -116,7 +120,5 @@ class Pvwatts:
 		outData['stderr'] = ''
 		# componentNames.
 		outData['componentNames'] = []
-
-		# Write some results.
-		with open(studyPath + '/cleanOutput.json','w') as outFile:
-			json.dump(outData, outFile, indent=4)
+		shutil.rmtree(studyPath)
+		self.outputJson = outData
