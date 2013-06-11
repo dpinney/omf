@@ -4,11 +4,6 @@
 import os
 import shutil
 import datetime as dt
-import feeder
-import subprocess
-import copy
-import json
-import studies
 import reports
 
 class Analysis:
