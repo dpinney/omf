@@ -1,22 +1,10 @@
 #!/bin/python
 
-import flask
-import os
-import multiprocessing
-import analysis
-import json
-import feeder
-import shutil
-import time
-import reports
-import studies
-import lib
-from werkzeug import secure_filename
-import milToGridlab
-import threading, thread
+# third party modules
+import flask, werkzeug, os, multiprocessing, json, time, threading, datetime
+# our modules
+import analysis, feeder, reports, studies, milToGridlab, storage
 # import logging_system
-import storage
-import datetime
 
 app = flask.Flask(__name__)
 
@@ -232,7 +220,7 @@ def milsoftImport():
 	seqName = ''
 	allFiles = flask.request.files
 	for f in allFiles:
-		fName = secure_filename(allFiles[f].filename)
+		fName = werkzeug.secure_filename(allFiles[f].filename)
 		if fName.endswith('.std'): stdName = fName
 		elif fName.endswith('.seq'): seqName = fName
 		allFiles[f].save('./uploads/' + fName)
