@@ -19,7 +19,6 @@ class Nrelswh:
 		self.sourceFeeder = jsonMdDict.get('sourceFeeder','')
 		self.inputJson = jsonDict.get('inputJson', {})
 		self.outputJson = jsonDict.get('outputJson', {})
-
 	
 	def run(self):
 		studyPath = 'analyses/' + analysisName + '/studies/' + studyName

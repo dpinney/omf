@@ -78,10 +78,11 @@ def viewReports(analysisName):
 	studyList = []
 	for studyName in thisAnalysis.studyNames:
 		studyMdJson = store.getMetadata('Study', thisAnalysis.name + '---' + studyName)
+		studyMdJson.update({'name':studyName, 'analysisName':thisAnalysis.name})
 		studyData = store.get('Study', thisAnalysis.name + '---' + studyName)
 		moduleRef = getattr(studies, studyMdJson.get('studyType',''))
 		classRef =  getattr(moduleRef, studyMdJson.get('studyType','').capitalize())
-		studyInstance = classRef(studyName, thisAnalysis.name, studyMdJson, studyData)
+		studyInstance = classRef(studyMdJson, studyData)
 		studyList.append(studyInstance)
 	reportList = thisAnalysis.generateReportHtml(studyList)
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
@@ -122,7 +123,7 @@ def analysisRun(anaName, store):
 	studyList = [studies.gridlabd.Gridlabd(dict(store.getMetadata('Study', thisAnalysis.name + '---' + studyName).items() + {'name':studyName,'analysisName':thisAnalysis.name}.items()), store.get('Study', thisAnalysis.name + '---' + studyName)) for studyName in thisAnalysis.studyNames]
 	thisAnalysis.run(studyList)
 	store.put('Analysis', thisAnalysis.name, mdDict=thisAnalysis.mdToJson(), jsonDict=thisAnalysis.toJson())
-	for study in thisAnalysis.studies:
+	for study in studyList:
 		store.put('Study', study.analysisName + '---' + study.name, mdDict=study.mdToDict(), jsonDict=study.toDict())
 
 @app.route('/delete/', methods=['POST'])
