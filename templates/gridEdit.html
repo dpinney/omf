@@ -977,25 +977,40 @@
 
 	function newChildAtLocation(component,treeIndex) {
 		treeNewIndex = nextTreeKey()
+		newName = component['object'] + String(treeNewIndex)
+		
 		// Make sure component's parent is set.
 		component['parent'] = tree[treeIndex]['name']
-		component['latitude'] = tree[treeIndex].latitude + Math.random() * 10 - 5
-		component['longitude'] = tree[treeIndex].longitude + Math.random() * 10 -5
-		console.log(tree[treeIndex].latitude)
-		// Put the component in the tree with a new name.
-		tree[treeNewIndex] = component
-		newName = component['object'] + String(treeNewIndex)
-		tree[treeNewIndex].name = newName
+		// decide which attribute should be put into node and tree
+		if (tree[treeIndex].latitude != undefined && tree[treeIndex].longitude != undefined){
+			component['latitude'] = tree[treeIndex].latitude + Math.random() * 10 - 5
+			component['longitude'] = tree[treeIndex].longitude + Math.random() * 10 -5
+			// Put the component in the tree with a new name.
+			tree[treeNewIndex] = component
+			tree[treeNewIndex].name = newName
+			// Add to the nodes.
+			nodeToAdd = {name:component.name, 
+				objectType:component.object, 
+				treeIndex:treeNewIndex, 
+				chargeMultiple:1, 
+				x: component['latitude'],
+				y: component['longitude'],
+				fixed : true}
+			nodes.push(nodeToAdd)
+		}else{
+			tree[treeNewIndex] = component
+			tree[treeNewIndex].name = newName
+			nodeToAdd = {name:component.name, 
+				objectType:component.object, 
+				treeIndex:treeNewIndex, 
+				chargeMultiple:1,
+				fixed: false}
+			nodes.push(nodeToAdd)
+		}
+		
+		
 		// TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
-		// Add to the nodes.
-		nodeToAdd = {name:component.name, 
-			objectType:component.object, 
-			treeIndex:treeNewIndex, 
-			chargeMultiple:1, 
-			x: component['latitude'],
-			y: component['longitude'],
-			fixed : true}
-		nodes.push(nodeToAdd)
+		
 		// Add to the links.
 		linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',tree[treeIndex]['name'])], objectType:'parentChild'}
 		links.push(linkToAdd)
@@ -1105,49 +1120,49 @@
 	}
 
 	function solarAdding() {
-	solarPerc = gebi('solarAddingPercentage').value/100.0
-	function makeNewInverter(phases) {
-		newInverter = {}
-		newInverter['object'] = 'inverter'
-		newInverter['phases'] = phases
-		newInverter['generator_status'] = 'ONLINE'
-		newInverter['inverter_type'] = 'PWM'
-		newInverter['generator_mode'] = 'CONSTANT_PF'
-		treeNewIndex = nextTreeKey()
-		newInverter['name'] = 'synInverter' + treeNewIndex
-		return newInverter
-	}
-	function newRandomPanels() {
-		newPanels = {}
-		newPanels['object'] = 'solar'
-		newPanels['generator_mode'] = 'SUPPLY_DRIVEN'
-		newPanels['generator_status'] = 'ONLINE'
-		newPanels['panel_type'] = 'SINGLE_CRYSTAL_SILICON'
-		newPanels['efficiency'] = '0.1' + randomInt(0,5)
-		newPanels['area'] = randomInt(2,8) + '00 sf'
-		treeNewIndex = nextTreeKey()
-		newInverter['name'] = 'synSolar' + treeNewIndex
-		return newPanels
-	}
-	function walkAndAddSolar() {
-		for (index in tree) {
-		if (tree[index].hasOwnProperty('object') && tree[index]['object']=='house') {
-			if (Math.random() < solarPerc) {
-			meterIndex = findIndex(tree, 'name', tree[index]['parent'])
-			newInverter = makeNewInverter(tree[index]['phases'])
-			newPanels = newRandomPanels()
-			newChildAtLocation(newInverter, meterIndex)
-			inverterIndex = findIndex(tree, 'name', newInverter['name'])
-			newChildAtLocation(newPanels, inverterIndex)
+		solarPerc = gebi('solarAddingPercentage').value/100.0
+		function makeNewInverter(phases) {
+			newInverter = {}
+			newInverter['object'] = 'inverter'
+			newInverter['phases'] = phases
+			newInverter['generator_status'] = 'ONLINE'
+			newInverter['inverter_type'] = 'PWM'
+			newInverter['generator_mode'] = 'CONSTANT_PF'
+			treeNewIndex = nextTreeKey()
+			newInverter['name'] = 'synInverter' + treeNewIndex
+			return newInverter
+		}
+		function newRandomPanels() {
+			newPanels = {}
+			newPanels['object'] = 'solar'
+			newPanels['generator_mode'] = 'SUPPLY_DRIVEN'
+			newPanels['generator_status'] = 'ONLINE'
+			newPanels['panel_type'] = 'SINGLE_CRYSTAL_SILICON'
+			newPanels['efficiency'] = '0.1' + randomInt(0,5)
+			newPanels['area'] = randomInt(2,8) + '00 sf'
+			treeNewIndex = nextTreeKey()
+			newInverter['name'] = 'synSolar' + treeNewIndex
+			return newPanels
+		}
+		function walkAndAddSolar() {
+			for (index in tree) {
+				if (tree[index].hasOwnProperty('object') && tree[index]['object']=='house') {
+					if (Math.random() < solarPerc) {
+					meterIndex = findIndex(tree, 'name', tree[index]['parent'])
+					newInverter = makeNewInverter(tree[index]['phases'])
+					newPanels = newRandomPanels()
+					newChildAtLocation(newInverter, meterIndex)
+					inverterIndex = findIndex(tree, 'name', newInverter['name'])
+					newChildAtLocation(newPanels, inverterIndex)
+					}
+				}
 			}
+			redraw()
+			removeProgressDialog()
 		}
-		}
-		redraw()
-		removeProgressDialog()
-	}
-	showProgressDialog('Please wait. Solar is being generated.')
-	// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-	setTimeout(walkAndAddSolar, 500);
+		showProgressDialog('Please wait. Solar is being generated.')
+		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
+		setTimeout(walkAndAddSolar, 500);
 
 	}
 
