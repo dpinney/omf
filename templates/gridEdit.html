@@ -171,9 +171,6 @@
 	</table>
 	  </div>
 	  <div id='scaleRuler'>
-	  	ScaleRuler goes here.
-	  	<br>
-	  	|___|___|___|
 	  </div>
 	  <script type="text/javascript">
 
@@ -239,21 +236,7 @@
 						x_pixel = tree[x].latitude
 						y_pixel = tree[x].longitude
 						isfixed = false
-						
 					}
-
-					// if (nodeObject == 'triplex_meter'){
-					// 	for (i in tree){
-					// 		if (tree[i].to == tree[x].name){
-					// 			if (tree[i].latitude != undefined && tree[i].latitude != undefined){
-					// 			x_pixel = tree[i].latitude + Math.random() * 20 - 10
-					// 			y_pixel = tree[i].longitude + Math.random() * 20 - 10
-					// 			isfixed = true
-					// 		}else
-					// 			isfixed = false
-					// 		}
-					// 	}
-					// }
 
 					// Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
 					if (nodeObject == 'node') 
@@ -272,24 +255,6 @@
 					name2nodeIndex[nodeName] = nodeIndex
 				}
 			}
-			// // TODO: any other way to update the position of triplex_node, to reduce the cost
-			// for (i in tree){
-			// 	if (tree[i].object == "triplex_node"){
-			// 		for (j in nodes){
-			// 			if( nodes[j].name == tree[i].parent){
-			// 				for (k in nodes){
-			// 					if (nodes[k].name == tree[i].name){
-			// 						nodes[k].x = nodes[j].x + Math.random() * 10-5
-			// 						nodes[k].y = nodes[j].y + Math.random() * 10-5
-			// 						console.log('nodes[i].name')
-			// 						nodes[k].fixed = true  
-			// 					}
-			// 				}
-			// 			}
-			// 		}
-			// 	}
-			// }
-			
 
 			// Go through a second time and set up the links:
 			for (x in tree) {
@@ -385,7 +350,26 @@
 	}
 
 	function drawScaleRuler(){
-		// $("#scaleRuler").text(function(){return d3.event.scale + "scale"})
+		var domain_size = 20
+		var padding = 20
+		var size =  100
+		var shrinkSize = 10
+		var xScale = d3.scale.linear().domain([ 0, size * shrinkSize ]).range([ 0, size ]);
+
+		//Define X axis
+		var xAxis = d3.svg.axis().scale(xScale).orient("top").ticks(3);
+		d3.selectAll('div#scaleRuler')
+			.append('svg')
+			.attr('width', '200px')
+			.attr('height', '100px')
+			.append('g')
+			
+			.attr('x', "100px")
+			.attr('y', "100px")
+			.attr("transform", "translate("+ (50) +"," + (50) + ")")
+			.attr('class', 'axis')
+			.call(xAxis)
+
 	} // end of function drawScaleRuler()
 
 	function zoomRedraw() {
@@ -402,16 +386,12 @@
 		vis.selectAll('circle').attr('r', function(d){return 10/d3.event.scale})
 		vis.selectAll('nodeIsPinned').data(nodes, function(d){return d.treeIndex})
 			.attr('r', function(d){return 3/d3.event.scale});
-		// vis.selectAll('nodeNotPinned').data(nodes, function(d){return d.treeIndex})
-		// 	.attr('r', function(d){return 3/d3.event.scale});
-		// vis.selectAll('g.selected').data(nodes, function(d){return d.treeIndex})
-		// 	.attr('r', function(d){return 4/d3.event.scale})
 		vis.selectAll('line.link').style("stroke-width", 6/d3.event.scale);
 		vis.selectAll('nodetext').style('font-size', 12/d3.event.scale)
 		vis.selectAll('text').style('font-size', 30/d3.event.scale)
 		vis.selectAll('.axis').style('font-size', 11/d3.event.scale)
-		// vis.selectAll('.axis').ticks(3/d3.event.scale)
-		// return d3.event.scale
+		// d3.selectAll('body').selectAll('div').selectAll('svg').selectAll('g').selectAll('g.tick.major').data(data, function(d){ return data/d3.event.scale})
+		// d3.selectAll('body').selectAll('div').selectAll('svg').selectAll('g').selectAll('g').data(2)/d3.event.scale
 	}
 
 	function preLayout() {
@@ -896,16 +876,24 @@
 	}
 
 	function nextTreeKey() {
-	keyList = Object.keys(tree)
-	max = 0
-	for (x in keyList) {intKey = parseInt(keyList[x]); if (intKey > max) max = intKey}
-	return max + 1
+		keyList = Object.keys(tree)
+		max = 0
+		for (x in keyList) {
+			intKey = parseInt(keyList[x]); 
+			if (intKey > max) 
+				max = intKey
+		}
+		return max + 1
 	}
 
 	function findIndex(inOb,field,val) {
-	for (key in inOb) {if (inOb[key][field]==val) {return key}}
-	// if we can't find an index:
-	return ''
+		for (key in inOb) {
+			if (inOb[key][field]==val) {
+				return key
+			}
+		}
+		// if we can't find an index:
+		return ''
 	}
 
 	// ADDING COMPONENTS FUNCTIONS
@@ -988,113 +976,132 @@
 	}
 
 	function newChildAtLocation(component,treeIndex) {
-	treeNewIndex = nextTreeKey()
-	// Make sure component's parent is set.
-	component['parent'] = tree[treeIndex]['name']
-	// Put the component in the tree with a new name.
-	tree[treeNewIndex] = component
-	newName = component['object'] + String(treeNewIndex)
-	tree[treeNewIndex].name = newName
-	// TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
-	// Add to the nodes.
-	nodeToAdd = {name:component.name, objectType:component.object, treeIndex:treeNewIndex, chargeMultiple:1}
-	nodes.push(nodeToAdd)
-	// Add to the links.
-	linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',tree[treeIndex]['name'])], objectType:'parentChild'}
-	links.push(linkToAdd)
+		treeNewIndex = nextTreeKey()
+		// Make sure component's parent is set.
+		component['parent'] = tree[treeIndex]['name']
+		component['latitude'] = tree[treeIndex].latitude + Math.random() * 10 - 5
+		component['longitude'] = tree[treeIndex].longitude + Math.random() * 10 -5
+		console.log(tree[treeIndex].latitude)
+		// Put the component in the tree with a new name.
+		tree[treeNewIndex] = component
+		newName = component['object'] + String(treeNewIndex)
+		tree[treeNewIndex].name = newName
+		// TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
+		// Add to the nodes.
+		nodeToAdd = {name:component.name, 
+			objectType:component.object, 
+			treeIndex:treeNewIndex, 
+			chargeMultiple:1, 
+			x: component['latitude'],
+			y: component['longitude'],
+			fixed : true}
+		nodes.push(nodeToAdd)
+		// Add to the links.
+		linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',tree[treeIndex]['name'])], objectType:'parentChild'}
+		links.push(linkToAdd)
 	}
 
 	function staticLoadsToHouses() {
-	function randomHouse() {
-		newHouse = {}
-		newHouse['object'] = 'house'
-		newHouse['air_temperature'] = '70'
-		newHouse['cooling_COP'] = randomInt(25,40)/10.0 + ''
-		newHouse['cooling_setpoint'] = 'cooling' + randomInt(1,8) + '*1'
-		newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
-		// House sizing distribution from http://www.census.gov/housing/ahs/
-		// between 1100 and 3000. Probably needs a normal distribution.
-		area = 1800 + 500*randomGaussian()
-		if (area < 500) {area = 500}
-		area = area.toPrecision(2) * 1.0 + ''
-		newHouse['floor_area'] = area
-		newHouse['heating_COP'] = randomInt(20,35)/10.0 + ''
-		newHouse['heating_setpoint'] = 'heating' + randomInt(1,8) + '*1'
-		newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
-		newHouse['mass_temperature'] = '70'
-		skew = 1200*randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newHouse['schedule_skew'] = skew
-		newHouse['thermal_integrity_level'] = randomChoice([1,2,2,2,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6]) + ''
-		treeNewIndex = nextTreeKey()
-		newHouse['name'] = 'synhouse' + treeNewIndex
-		return newHouse
-	}
-	function randomLights() {
-		newLights = {}
-		newLights['object'] = 'ZIPload'
-		newLights['power_fraction'] = '0.400000'
-		newLights['current_fraction'] = '0.300000'
-		newLights['impedance_pf'] = '1.000'
-		newLights['current_pf'] = '1.000'
-		newLights['power_pf'] = '1.000'
-		newLights['impedance_fraction'] = '0.300000'
-		newLights['heatgain_fraction'] = '0.9'
-		power = 1.2 + randomGaussian()
-		if (power < 0) {power = -1*power}
-		power = power.toPrecision(3) * 1.0 + ''
-		newLights['base_power'] = 'LIGHTS*' + 1.33
-		skew = 2000*randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newLights['schedule_skew'] = skew
-		treeNewIndex = nextTreeKey()
-		newLights['name'] = 'synLights' + treeNewIndex
-		return newLights
-	}
-	function randomWaterHeater() {
-		newHeater = {}
-		if (randomChoice([1,2,3]) == 3) {return false}
-		// Static properties.
-		newHeater['object'] = 'waterheater'
-		newHeater['temperature'] = '135'
-		newHeater['tank_volume'] = '50'
-		newHeater['location'] = 'INSIDE'
-		// Uniformly distributed properties.
-		newHeater['heating_element_capacity'] = randomInt(37,53)/10.0 + ''
-		newHeater['thermostat_deadband'] = randomInt(20,60)/10.0 + ''
-		newHeater['demand'] = 'water' + randomInt(1,20) + '*1'
-		newHeater['tank_UA'] = randomInt(20,40)/10.0 + ''
-		// Gaussian properties.
-		skew = 2000*randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newHeater['schedule_skew'] = skew
-		newHeater['tank_setpoint'] = (randomGaussian()*2+130).toPrecision(3) + ''
-		// between 1100 and 3000. Probably needs a normal distribution.
-		treeNewIndex = nextTreeKey()
-		newHeater['name'] = 'synwaterheater' + treeNewIndex
-		return newHeater
-	}
-	function replaceAllHouses() {
-		for (index in tree) {
-		if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
-			// console.log(tree[index])
-			parentIndex = findIndex(tree, 'name', tree[index]['parent'])
-			deleteObject(index)
-			newHouse = randomHouse()
-			newLights = randomLights()
-			newHeater = randomWaterHeater()
-			newChildAtLocation(newHouse, parentIndex)
-			houseIndex = findIndex(tree, 'name', newHouse['name'])
-			newChildAtLocation(newLights, houseIndex)
-			if (newHeater!=false) {newChildAtLocation(newHeater, houseIndex)}
+		function randomHouse() {
+			newHouse = {}
+			newHouse['object'] = 'house'
+			newHouse['air_temperature'] = '70'
+			newHouse['cooling_COP'] = randomInt(25,40)/10.0 + ''
+			newHouse['cooling_setpoint'] = 'cooling' + randomInt(1,8) + '*1'
+			newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
+			// House sizing distribution from http://www.census.gov/housing/ahs/
+			// between 1100 and 3000. Probably needs a normal distribution.
+			area = 1800 + 500*randomGaussian()
+			if (area < 500) {area = 500}
+			area = area.toPrecision(2) * 1.0 + ''
+			newHouse['floor_area'] = area
+			newHouse['heating_COP'] = randomInt(20,35)/10.0 + ''
+			newHouse['heating_setpoint'] = 'heating' + randomInt(1,8) + '*1'
+			newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
+			newHouse['mass_temperature'] = '70'
+			// console.log(tree[parentIndex])
+			// newHouse['latitude'] = tree[parentIndex]['latitude'] + Math.random()*20 -10
+			// newHouse['longitude'] = tree[parentIndex]['longitude'] + Math.random()*20 -10
+			skew = 1200*randomGaussian()
+			skew = skew.toPrecision(3) * 1.0 + ''
+			newHouse['schedule_skew'] = skew
+			newHouse['thermal_integrity_level'] = randomChoice([1,2,2,2,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6]) + ''
+			treeNewIndex = nextTreeKey()
+			newHouse['name'] = 'synhouse' + treeNewIndex
+
+			return newHouse
 		}
+		function randomLights() {
+			newLights = {}
+			newLights['object'] = 'ZIPload'
+			newLights['power_fraction'] = '0.400000'
+			newLights['current_fraction'] = '0.300000'
+			newLights['impedance_pf'] = '1.000'
+			newLights['current_pf'] = '1.000'
+			newLights['power_pf'] = '1.000'
+			newLights['impedance_fraction'] = '0.300000'
+			newLights['heatgain_fraction'] = '0.9'
+			power = 1.2 + randomGaussian()
+			if (power < 0) {power = -1*power}
+			power = power.toPrecision(3) * 1.0 + ''
+			newLights['base_power'] = 'LIGHTS*' + 1.33
+			skew = 2000*randomGaussian()
+			skew = skew.toPrecision(3) * 1.0 + ''
+			newLights['schedule_skew'] = skew
+			treeNewIndex = nextTreeKey()
+			newLights['name'] = 'synLights' + treeNewIndex
+			return newLights
 		}
-		redraw()
-		removeProgressDialog()
-	}
-	showProgressDialog('Please wait. Houses are being generated.')
-	// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-	setTimeout(replaceAllHouses, 500);
+		function randomWaterHeater() {
+			newHeater = {}
+			if (randomChoice([1,2,3]) == 3) {return false}
+			// Static properties.
+			newHeater['object'] = 'waterheater'
+			newHeater['temperature'] = '135'
+			newHeater['tank_volume'] = '50'
+			newHeater['location'] = 'INSIDE'
+			// Uniformly distributed properties.
+			newHeater['heating_element_capacity'] = randomInt(37,53)/10.0 + ''
+			newHeater['thermostat_deadband'] = randomInt(20,60)/10.0 + ''
+			newHeater['demand'] = 'water' + randomInt(1,20) + '*1'
+			newHeater['tank_UA'] = randomInt(20,40)/10.0 + ''
+			// Gaussian properties.
+			skew = 2000*randomGaussian()
+			skew = skew.toPrecision(3) * 1.0 + ''
+			newHeater['schedule_skew'] = skew
+			newHeater['tank_setpoint'] = (randomGaussian()*2+130).toPrecision(3) + ''
+			// between 1100 and 3000. Probably needs a normal distribution.
+			treeNewIndex = nextTreeKey()
+			newHeater['name'] = 'synwaterheater' + treeNewIndex
+			return newHeater
+		}
+		function replaceAllHouses() {
+			for (index in tree) {
+				if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
+					//get the parent index in tree, actually it is triplex_meter index
+					parentIndex = findIndex(tree, 'name', tree[index]['parent'])
+					// delete the triplex_node
+					deleteObject(index)
+					// create a new node which parent is 
+					newHouse = randomHouse()
+					newLights = randomLights()
+					newHeater = randomWaterHeater()
+					newChildAtLocation(newHouse, parentIndex)
+					houseIndex = findIndex(tree, 'name', newHouse['name'])
+					newChildAtLocation(newLights, houseIndex)
+
+					if (newHeater!=false) {newChildAtLocation(newHeater, houseIndex)}
+				}
+				// if (tree[index].hasOwnProperty('object') && tree[index]['object'] == 'house')
+				// 	console.log(tree[index])
+				
+			}
+			redraw()
+			removeProgressDialog()
+		}
+		showProgressDialog('Please wait. Houses are being generated.')
+		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
+		setTimeout(replaceAllHouses, 500);
 	}
 
 	function solarAdding() {
@@ -1413,7 +1420,7 @@
 	}
 	// And go at it:
 	draw()
-	drawScaleRuler()
+	// drawScaleRuler()
 	layoutMenuInit()
 	})
 
