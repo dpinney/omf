@@ -344,6 +344,7 @@
 		force.start()
 	}
 
+	// TODO: add a scale ruler to the graph, dynamic to show the scale of in real geography, but when it unpinned, it make no sense.
 	function drawScaleRuler(){
 		var domain_size = 20
 		var padding = 20
@@ -919,7 +920,9 @@
 	if (newType == 'node') newType = 'gridNode'
 	if (undefined != tree[treeNewIndex].bustype && tree[treeNewIndex].bustype == 'SWING') newType += ' swingNode'
 	coords = getCenterCoordinates()
-	nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1, fixed:true, x:coords[0], y:coords[1], px:coords[0], py:coords[1]}
+	if (d3.selectAll('.node.gridNode').attr('fixed')=='true') isfixed = true
+		else isfixed = false
+	nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1, fixed: isfixed, x:coords[0], y:coords[1], px:coords[0], py:coords[1]}
 	nodes.push(nodeToAdd)
 	redraw()
 	}
@@ -988,20 +991,18 @@
 			tree[treeNewIndex].name = newName
 			// Add to the nodes.
 			// TODO: when the previour graph is pinned, it should set fixed as false rather than true
-			// for(x in nodes){
-			// 	if (nodes[x].treeIndex == treeIndex && nodes[x].fixed == true){
-			// 		isfixed = true
-			// 	}else{
-			// 		isfixed = false
-			// 	}
-			// }
+			if (d3.selectAll('.node.gridNode').attr('fixed')=='true'){
+				isfixed = true
+			}else{
+				isfixed = false
+			}
 			nodeToAdd = {name:component.name, 
 					objectType:component.object, 
 					treeIndex:treeNewIndex, 
 					chargeMultiple:1, 
 					x: component['latitude'],
 					y: component['longitude'],
-					fixed : true}
+					fixed : isfixed}
 			nodes.push(nodeToAdd)
 		}else{
 			tree[treeNewIndex] = component
@@ -1119,7 +1120,7 @@
 		}
 		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
 		showProgressDialog('Please wait. Houses are being generated.')		
-		setTimeout(replaceAllHouses, 10000);
+		setTimeout(replaceAllHouses, 1000);
 		
 
 	}
