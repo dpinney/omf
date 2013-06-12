@@ -99,7 +99,7 @@
 	<div class='buttonGroup leftToolbar'>
 	  <button class='pill' onclick='dropPillAndStay(this, "Find")'>Find ▾</button>
 	  <ul class='menu'>
-	<table style='padding:4px;word-wrap:break-word'>
+	  <table style='padding:4px;word-wrap:break-word'>
 		  <tr>
 			<td>Term</td>
 			<td><input id='searchTerm' type='text'></td>
@@ -112,7 +112,7 @@
 			<td style='padding-top:10px'><button onclick='findPrevious()'>Previous</button></td>
 			<td style='padding-top:10px'><button onclick='findNext()'>Next</button></td>
 		  </tr>
-	</table>
+	  </table>
 	  </ul>
 	</div>
 	<div class='buttonGroup rightToolbar'>
@@ -262,7 +262,6 @@
 					if (tree[x].from != undefined && tree[x].to != undefined) {
 						name2nodeIndex[tree[x].name] = links.length
 						links.push({
-							// TODO: only need to insert index of node
 							source:name2nodeIndex[tree[x].from],
 							target:name2nodeIndex[tree[x].to],
 							treeIndex:parseInt(x),
@@ -289,64 +288,60 @@
 		redraw()
 	}
 
-	// TODO: fix a bug when add a new node, redraw the size of the node
+
 	function redraw() {
-	link = d3.select('#linkLayer').selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
+		link = d3.select('#linkLayer').selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
+		// fix the dynamic drawing according to current scale level
+		var scale = zoomer.scale()
+		
+		link.enter().append('svg:line')
+			.on('click', onCompClick)
+			.attr('class', function(d) { return 'link ' + d.objectType })
+			.attr('id', function(d) { return 'n' + d.treeIndex })
+			.style('stroke-width', function(d) { return Math.sqrt(d.value)/scale; })
 
-	link.enter().append('svg:line')
-		.on('click', onCompClick)
-		.attr('class', function(d) { return 'link ' + d.objectType })
-		.attr('id', function(d) { return 'n' + d.treeIndex })
-		.style('stroke-width', function(d) { return Math.sqrt(d.value); })
+		// .style('stroke-dasharray', function(d){return 3/scale, 3/scale})
 
-	link.exit().remove()
+		link.exit().remove()
 
-	node = vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).enter()
-		.append("g")
-		.call(force.drag)
-		.attr('class', function(d) {return 'node ' + d.objectType})
-		.attr('id', function(d) {return 'n' + d.treeIndex})
-		.on('click', onCompClick)
+		
+		node = vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).enter()
+			.append("g")
+			.call(force.drag)
+			.attr('class', function(d) {return 'node ' + d.objectType})
+			.attr('id', function(d) {return 'n' + d.treeIndex})
+			.on('click', onCompClick)
 
-	node.append("svg:text")
-	        .attr("class", "nodetext")
-	        // .attr("dx", 12) //omit some 
-	        // .attr("dy", ".35em")
-	        .text(function(d) { return d.objectType });
-	        
-	// Put the main circle on there, sized according to its size.
-	node.append('svg:circle')
-		.attr('id', function(d) {return 'circ' + d.treeIndex})
-		.attr('class', 'nodeCircle')
-		.attr('cx', 0)
-		.attr('cy', 0)
-		.attr('r', function(d) {return d.chargeMultiple * 10})
+		node.append("svg:text")
+		        .attr("class", "nodetext")
+		        .text(function(d) { return d.objectType })
+		        // .style('font-size', 15/scale + 'px');
+		// Put the main circle on there, sized according to its size.
+		node.append('svg:circle')
+			.attr('id', function(d) {return 'circ' + d.treeIndex})
+			.attr('class', 'nodeCircle')
+			.attr('cx', 0)
+			.attr('cy', 0)
+			.attr('r', function(d) {return d.chargeMultiple * 10/scale })
+			// .style('stroke-width', 1/scale)
+		
+		
+		// TODO: Pinning indicator.
+		node.append('svg:circle')
+			.attr('class', function(d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
+			.attr('id', function(d) {return 'pin' + d.treeIndex})
+			.attr('cx', 0)
+			.attr('cy', 0)
+			.attr('r', 3/scale)
+			.style('stroke-width', 2.5/scale)
+		// Get rid of deleted nodes.
+		vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).exit().remove()
 
-	// Pinning indicator.
-	node.append('svg:circle')
-		// .attr('class', function(d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
-		.attr('id', function(d) {return 'pin' + d.treeIndex})
-		.attr('cx', 0)
-		.attr('cy', 0)
-		.attr('r', 3)
-
-	// This gives tooltips=nodeName to every node:
-	// node.append('svg:title')
-	//   .text(function(d) { return d.name; });
-
-	// Some (loud) text labels.
-	// node.append('text')
-	//   .attr('dx', 12)
-	//   .attr('dy', 4)
-	//   .text(function(d) { return d.name });
-
-	// Get rid of deleted nodes.
-	vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).exit().remove()
-
-	// Update sizes
-	vis.selectAll('.nodeCircle').data(nodes, function(d) {return d.treeIndex}).attr('r', function(d) {return d.chargeMultiple * 10})
-
-	force.start()
+		// Update sizes
+		vis.selectAll('.nodeCircle').data(nodes, function(d) {return d.treeIndex}).attr('r', function(d) {return d.chargeMultiple * 10/scale })
+			.style('stroke-width', 1.5/scale)
+		setByScale()
+		force.start()
 	}
 
 	function drawScaleRuler(){
@@ -373,25 +368,28 @@
 	} // end of function drawScaleRuler()
 
 	function zoomRedraw() {
-		// console.log('here', d3.event.translate, d3.event.scale);
-		vis.attr(
-					'transform',
-					'translate(' + d3.event.translate + ')' + ' scale('
-							+ d3.event.scale + ')').selectAll('.node').style(
-					"stroke-width", 1 / d3.event.scale).selectAll(
-					'circle.nodeIsPinned').style('stroke-width',
-					2.5 / d3.event.scale)
-		vis.selectAll('.nodeCircle').data(nodes, function(d){return d.treeIndex})
-			.attr('r', function(d){return d.chargeMultiple * 10/d3.event.scale});
-		vis.selectAll('circle').attr('r', function(d){return 10/d3.event.scale})
-		vis.selectAll('nodeIsPinned').data(nodes, function(d){return d.treeIndex})
-			.attr('r', function(d){return 3/d3.event.scale});
-		vis.selectAll('line.link').style("stroke-width", 6/d3.event.scale);
-		vis.selectAll('nodetext').style('font-size', 12/d3.event.scale)
-		vis.selectAll('text').style('font-size', 30/d3.event.scale)
-		vis.selectAll('.axis').style('font-size', 11/d3.event.scale)
-		// d3.selectAll('body').selectAll('div').selectAll('svg').selectAll('g').selectAll('g.tick.major').data(data, function(d){ return data/d3.event.scale})
-		// d3.selectAll('body').selectAll('div').selectAll('svg').selectAll('g').selectAll('g').data(2)/d3.event.scale
+		vis.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
+		setByScale()
+	}
+
+	// reset graph svg size when zooming or redraw
+	function setByScale(){
+		var scale = zoomer.scale()
+		d3.selectAll('.node').style("stroke-width", 1 / scale)
+		d3.selectAll('circle.nodeIsPinned').style('stroke-width', 2.5 / scale)
+		d3.selectAll('.nodeCircle').data(nodes, function(d){return d.treeIndex})
+			.attr('r', function(d){return d.chargeMultiple * 10/scale})
+			.style('stroke-width', 1.5/scale);
+		// vis.selectAll('circle').attr('r', function(d){return 10/scale})
+		d3.selectAll('.link').style("stroke-width", 6/scale);
+		// d3.selectAll('text').style('font-size', 30/scale)
+		d3.selectAll('.parentChild').style('stroke-width', 4/scale)
+		d3.selectAll('node.selected').style('stroke-width', 8/scale);
+		d3.selectAll('.nodetext').style('font-size', 30/scale);
+		d3.selectAll('circle.nodeIsPinned').style('stroke-width', 2.5/scale)
+									.attr('r', 3/scale);
+		d3.selectAll('circle.nodeNotPinned').style('stroke-width', 0/scale)
+									.attr('r',3/scale);
 	}
 
 	function preLayout() {
@@ -410,23 +408,23 @@
 	}
 
 	function zoomReset() {
-	// TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
-	zoom(0,0,1)
+		// TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
+		zoom(0,0,1)
 	}
 
 	function zoomToSelection() {
-	domTargets = document.getElementsByClassName('selected')
-	if (domTargets.length != 1) {return false}
-	if (domTargets[0].nodeName == 'line') {
-		x = getSelectedLink()['source']['x']
-		y = getSelectedLink()['source']['y']
-	}
-	else {
-		x = getSelectedNode()['x']
-		y = getSelectedNode()['y']
-	}
-	// Zooming to a node's coordinates puts the node in the upper-left corner of the svg, and the fudge factor was worked out from that.
-	zoom(-1*x+graphSvg.clientWidth/2, -1*y+graphSvg.clientHeight/2, 1)
+		domTargets = document.getElementsByClassName('selected')
+		if (domTargets.length != 1) {return false}
+		if (domTargets[0].nodeName == 'line') {
+			x = getSelectedLink()['source']['x']
+			y = getSelectedLink()['source']['y']
+		}
+		else {
+			x = getSelectedNode()['x']
+			y = getSelectedNode()['y']
+		}
+		// Zooming to a node's coordinates puts the node in the upper-left corner of the svg, and the fudge factor was worked out from that.
+		zoom(-1*x+graphSvg.clientWidth/2, -1*y+graphSvg.clientHeight/2, 1)
 	}
 
 	function getCenterCoordinates() {
@@ -927,41 +925,41 @@
 	}
 
 	function newLink(componentName) {
-	// Fail if we have an incorrect selection.
-	function alreadyLinked(nodeName1, nodeName2) {
-		for (linkId in links) {
-		sourceName = links[linkId].source.name
-		targetName = links[linkId].target.name
-		if ((nodeName1 == sourceName && nodeName2 == targetName) || (nodeName1 == targetName && nodeName2 == sourceName)) {return true}
+		// Fail if we have an incorrect selection.
+		function alreadyLinked(nodeName1, nodeName2) {
+			for (linkId in links) {
+			sourceName = links[linkId].source.name
+			targetName = links[linkId].target.name
+			if ((nodeName1 == sourceName && nodeName2 == targetName) || (nodeName1 == targetName && nodeName2 == sourceName)) {return true}
+			}
+			return false
 		}
-		return false
-	}
-	try {
-		selectedName = getSelectedNode()['name']
-		altSelectedName = getAltSelectedNode()['name']
-	} catch(err) {
-		// Key error!
-		selectedName = undefined
-		altSelectedName = undefined
-	}
-	if (undefined == selectedName || undefined == altSelectedName || selectedName == altSelectedName || alreadyLinked(selectedName, altSelectedName)) {
-		alert('I am sorry, but we cannot insert a link there.')
-		return false
-	}
-	// Get the stuff we need.
-	component = clone(components[componentName])
-	treeNewIndex = nextTreeKey()
-	// Make sure component's to and from are set.
-	component['from'] = selectedName
-	component['to'] = altSelectedName
-	// Put the component in the tree with a new name.
-	tree[treeNewIndex] = component
-	tree[treeNewIndex].name = componentName + String(treeNewIndex)
-	// TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
-	// Add to the links.
-	linkToAdd = {source:nodes[findIndex(nodes,'name',selectedName)], target:nodes[findIndex(nodes,'name',altSelectedName)], treeIndex:treeNewIndex, objectType:'fromTo'}
-	links.push(linkToAdd)
-	redraw()
+		try {
+			selectedName = getSelectedNode()['name']
+			altSelectedName = getAltSelectedNode()['name']
+		} catch(err) {
+			// Key error!
+			selectedName = undefined
+			altSelectedName = undefined
+		}
+		if (undefined == selectedName || undefined == altSelectedName || selectedName == altSelectedName || alreadyLinked(selectedName, altSelectedName)) {
+			alert('I am sorry, but we cannot insert a link there.')
+			return false
+		}
+		// Get the stuff we need.
+		component = clone(components[componentName])
+		treeNewIndex = nextTreeKey()
+		// Make sure component's to and from are set.
+		component['from'] = selectedName
+		component['to'] = altSelectedName
+		// Put the component in the tree with a new name.
+		tree[treeNewIndex] = component
+		tree[treeNewIndex].name = componentName + String(treeNewIndex)
+		// TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
+		// Add to the links.
+		linkToAdd = {source:nodes[findIndex(nodes,'name',selectedName)], target:nodes[findIndex(nodes,'name',altSelectedName)], treeIndex:treeNewIndex, objectType:'fromTo'}
+		links.push(linkToAdd)
+		redraw()
 	}
 
 	function newChildAtSelected(componentName) {
@@ -989,13 +987,21 @@
 			tree[treeNewIndex] = component
 			tree[treeNewIndex].name = newName
 			// Add to the nodes.
+			// TODO: when the previour graph is pinned, it should set fixed as false rather than true
+			// for(x in nodes){
+			// 	if (nodes[x].treeIndex == treeIndex && nodes[x].fixed == true){
+			// 		isfixed = true
+			// 	}else{
+			// 		isfixed = false
+			// 	}
+			// }
 			nodeToAdd = {name:component.name, 
-				objectType:component.object, 
-				treeIndex:treeNewIndex, 
-				chargeMultiple:1, 
-				x: component['latitude'],
-				y: component['longitude'],
-				fixed : true}
+					objectType:component.object, 
+					treeIndex:treeNewIndex, 
+					chargeMultiple:1, 
+					x: component['latitude'],
+					y: component['longitude'],
+					fixed : true}
 			nodes.push(nodeToAdd)
 		}else{
 			tree[treeNewIndex] = component
@@ -1034,9 +1040,6 @@
 			newHouse['heating_setpoint'] = 'heating' + randomInt(1,8) + '*1'
 			newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
 			newHouse['mass_temperature'] = '70'
-			// console.log(tree[parentIndex])
-			// newHouse['latitude'] = tree[parentIndex]['latitude'] + Math.random()*20 -10
-			// newHouse['longitude'] = tree[parentIndex]['longitude'] + Math.random()*20 -10
 			skew = 1200*randomGaussian()
 			skew = skew.toPrecision(3) * 1.0 + ''
 			newHouse['schedule_skew'] = skew
@@ -1114,9 +1117,11 @@
 			redraw()
 			removeProgressDialog()
 		}
-		showProgressDialog('Please wait. Houses are being generated.')
 		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-		setTimeout(replaceAllHouses, 500);
+		showProgressDialog('Please wait. Houses are being generated.')		
+		setTimeout(replaceAllHouses, 10000);
+		
+
 	}
 
 	function solarAdding() {
@@ -1144,6 +1149,7 @@
 			newInverter['name'] = 'synSolar' + treeNewIndex
 			return newPanels
 		}
+		// TODO: need to remove previour solar nodes, if we do it twice.
 		function walkAndAddSolar() {
 			for (index in tree) {
 				if (tree[index].hasOwnProperty('object') && tree[index]['object']=='house') {
@@ -1162,7 +1168,7 @@
 		}
 		showProgressDialog('Please wait. Solar is being generated.')
 		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-		setTimeout(walkAndAddSolar, 500);
+		setTimeout(walkAndAddSolar, 1000);
 
 	}
 
@@ -1219,7 +1225,8 @@
 			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
 			hiddenNodes[hNode].fixed = true
 		}
-		force.start()
+		redraw()
+		// force.start()
 	}
 
 	function unPinAll() {
@@ -1231,7 +1238,8 @@
 			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeNotPinned')
 			hiddenNodes[hNode].fixed = false
 		}
-		force.start()
+		redraw()
+		// force.start()
 	}
 
 	function toggleSelectedPin() {
