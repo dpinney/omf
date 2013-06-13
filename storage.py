@@ -62,9 +62,27 @@ class Filestore:
 	def exists(self, objectType, objectName):
 		return os.path.isfile(os.path.join(self.storagePath,objectType,objectName + '.json'))
 
-class DatabaseStore:
-	# TODO: implement me.
-	pass
+class S3store:
+	def __init__(self, connectionString):
+		pass
+
+	def __createSchema__(self):
+		pass
+
+	def put(self, objectType, objectName, putDict):
+		pass
+
+	def get(self, objectType, objectName):
+		pass
+
+	def delete(self, objectType, objectName):
+		pass
+
+	def listAll(self, objectType):
+		pass
+
+	def exists(self, objectType, objectName):
+		pass
 
 if __name__ == '__main__':
 	# Tests go here.
