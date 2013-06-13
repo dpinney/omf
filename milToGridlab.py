@@ -633,13 +633,19 @@ def convert(stdPath,seqPath):
 		if glmTree[i].has_key('object') and glmTree[i]['object'] == 'triplex_meter':
 			for j in glmTree:
 				if glmTree[j].has_key('to') and glmTree[j]['to'] == glmTree[i]['name']:
-					glmTree[i]['latitude'] = glmTree[j]['latitude'] + random.uniform(-20,20)
-					glmTree[i]['longitude'] = glmTree[j]['longitude'] + random.uniform(-20,20)
+					glmTree[i]['latitude'] = glmTree[j]['latitude'] + random.uniform(-5,5)
+					glmTree[i]['longitude'] = glmTree[j]['longitude'] + random.uniform(-5,5)
 					for k in glmTree:
 						if glmTree[k].has_key('parent') and glmTree[k]['parent'] == glmTree[i]['name']:
-							glmTree[k]['latitude'] = glmTree[i]['latitude'] + random.uniform(-10,10)
-							glmTree[k]['longitude'] = glmTree[i]['longitude'] + random.uniform(-10,10)
-
+							glmTree[k]['latitude'] = glmTree[i]['latitude'] + random.uniform(-2,2)
+							glmTree[k]['longitude'] = glmTree[i]['longitude'] + random.uniform(-2,2)
+	# to generate position for load
+	for i in glmTree:
+		if glmTree[i].has_key('object') and glmTree[i]['object'] == 'load':
+			for k in glmTree:
+				if glmTree[k].has_key('name') and glmTree[i].has_key('parent') and glmTree[i]['parent'] == glmTree[k]['name']:
+					glmTree[i]['latitude'] = glmTree[k]['latitude'] + random.uniform(-2,2)
+					glmTree[i]['longitude'] = glmTree[k]['longitude'] + random.uniform(-2,2)
 	return glmTree
 
 if __name__ == '__main__':
