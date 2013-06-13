@@ -405,10 +405,12 @@
 
 	function zoom(x,y,s) {
 	zoomer.translate([x,y]).scale(s);
+	// zoomer.translate
 	vis.transition().duration(1000).attr('transform','translate(' + x + ',' + y + ') scale(' + s + ')')
 	}
 
 	function zoomReset() {
+		var scale = zoomer.scale()
 		// TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
 		zoom(0,0,1)
 	}
@@ -424,8 +426,11 @@
 			x = getSelectedNode()['x']
 			y = getSelectedNode()['y']
 		}
+		// var scale = zoomer.scale()
 		// Zooming to a node's coordinates puts the node in the upper-left corner of the svg, and the fudge factor was worked out from that.
+		// TODO: need to dynamic draw graph when find next
 		zoom(-1*x+graphSvg.clientWidth/2, -1*y+graphSvg.clientHeight/2, 1)
+		// redraw()
 	}
 
 	function getCenterCoordinates() {
@@ -908,23 +913,28 @@
 	}
 
 	function newNode(componentName) {
-	// Get the stuff we need.
-	component = clone(components[componentName])
-	treeNewIndex = nextTreeKey()
-	// Put the component in the tree with a new name.
-	tree[treeNewIndex] = component
-	tree[treeNewIndex].name = componentName + String(treeNewIndex)
-	// Add to the nodes.
-	newType = component.object
-	// Hack to make sure we color nodes correctly:
-	if (newType == 'node') newType = 'gridNode'
-	if (undefined != tree[treeNewIndex].bustype && tree[treeNewIndex].bustype == 'SWING') newType += ' swingNode'
-	coords = getCenterCoordinates()
-	if (d3.selectAll('.node.gridNode').attr('fixed')=='true') isfixed = true
-		else isfixed = false
-	nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1, fixed: isfixed, x:coords[0], y:coords[1], px:coords[0], py:coords[1]}
-	nodes.push(nodeToAdd)
-	redraw()
+
+		// Get the stuff we need.
+		component = clone(components[componentName])
+		treeNewIndex = nextTreeKey()
+		// Put the component in the tree with a new name.
+		tree[treeNewIndex] = component
+		tree[treeNewIndex].name = componentName + String(treeNewIndex)
+		// Add to the nodes.
+		newType = component.object
+		// Hack to make sure we color nodes correctly:
+		if (newType == 'node') newType = 'gridNode'
+		if (undefined != tree[treeNewIndex].bustype && tree[treeNewIndex].bustype == 'SWING') newType += ' swingNode'
+		coords = getCenterCoordinates()
+		if (d3.selectAll('.node.gridNode').attr('fixed')=='true') {
+			isfixed = true
+		}
+		else {
+			isfixed = false
+		}
+		nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1, fixed: isfixed, x:coords[0], y:coords[1], px:coords[0], py:coords[1]}
+		nodes.push(nodeToAdd)
+		redraw()
 	}
 
 	function newLink(componentName) {
@@ -994,6 +1004,7 @@
 			if (d3.selectAll('.node.gridNode').attr('fixed')=='true'){
 				isfixed = true
 			}else{
+				
 				isfixed = false
 			}
 			nodeToAdd = {name:component.name, 
@@ -1005,18 +1016,21 @@
 					fixed : isfixed}
 			nodes.push(nodeToAdd)
 		}else{
+			if (d3.selectAll('.node.gridNode').attr('fixed')=='true'){
+				isfixed = true
+			}else{
+				
+				isfixed = false
+			}
 			tree[treeNewIndex] = component
 			tree[treeNewIndex].name = newName
 			nodeToAdd = {name:component.name, 
 				objectType:component.object, 
 				treeIndex:treeNewIndex, 
 				chargeMultiple:1,
-				fixed: false}
+				fixed: isfixed}
 			nodes.push(nodeToAdd)
 		}
-		
-		
-		// TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
 		
 		// Add to the links.
 		linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',tree[treeIndex]['name'])], objectType:'parentChild'}
@@ -1047,7 +1061,6 @@
 			newHouse['thermal_integrity_level'] = randomChoice([1,2,2,2,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6]) + ''
 			treeNewIndex = nextTreeKey()
 			newHouse['name'] = 'synhouse' + treeNewIndex
-
 			return newHouse
 		}
 		function randomLights() {
@@ -1111,9 +1124,6 @@
 
 					if (newHeater!=false) {newChildAtLocation(newHeater, houseIndex)}
 				}
-				// if (tree[index].hasOwnProperty('object') && tree[index]['object'] == 'house')
-				// 	console.log(tree[index])
-				
 			}
 			redraw()
 			removeProgressDialog()
@@ -1150,8 +1160,20 @@
 			newInverter['name'] = 'synSolar' + treeNewIndex
 			return newPanels
 		}
-		// TODO: need to remove previour solar nodes, if we do it twice.
+
+		// TODO: 
+		function removeSolar(){
+			// remove node from nodes, and remove accoiated link from link
+			for (x in nodes){
+				if (nodes[x].objectType == 'inverter'|| nodes[x].objectType == 'solar'){
+
+				}
+
+			}
+		}
+		// TODO: need to remove previour solar nodes, if we do it twice?
 		function walkAndAddSolar() {
+			// removeSolar()
 			for (index in tree) {
 				if (tree[index].hasOwnProperty('object') && tree[index]['object']=='house') {
 					if (Math.random() < solarPerc) {
