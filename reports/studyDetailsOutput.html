@@ -1,17 +1,146 @@
 <p class="reportTitle">Study Details</p>
-<div id="studyDetails" class="detailsContainer tightContent" style="height:400px;padding:10px;position:relative;">
+
+<div id="studyDetails" class="detailsContainer tightContent" style="padding:10px;position:relative;">
 	<style type="text/css" scoped>
 		table#detailsTable th {border-bottom:2px solid gray; text-align:left;}
-		table#detailsTable th, td {padding:5px;}
+		table#detailsTable th, td {
+		    text-align:left;
+		    border:1px solid black;
+		    padding:5px;
+		}
+		#comparisonPieChart{
+		    width:400px;
+		}
+		.HighlightCircle{
+		    fill: rgb(16, 150, 24);
+		}
+
+		#states{
+		    fill: #aaa;
+		    stroke: #fff;
+		    stroke-width: 1.5px;
+		}
+		.cont{
+		    position:absolute;
+		    top:-75;
+		    left:-100;
+		}
+		#mapHere{
+		    position:relative;
+		}
 	</style>
 	<script>daClimates={{climates | safe}}</script>
-	<div id="mapDiv" style="position:absolute;width:500px;height:400px;top:0px;left:500px"><script>drawMap({{climates | safe}},"mapDiv")</script></div>
-	<div id="detailsDiv" style="position:absolute;width:500px;height:250px;left:0px;top:0px;padding:10px;overflow:auto"><p>Analysis created {{ana.created}}</p><p>Simulated {{ana.simLength}} {{ana.simLengthUnits}} starting on {{ana.simStartDate}}</p>
-		<table id="detailsTable" style="padding-top:10px">
-			<tr><th>Study</th><th>Source Feeder</th></tr>
-			{%- for study in outputList -%}
-				<tr><td>{{study.studyName}}</td><td><a href="/analysisFeeder/{{ana.name}}/{{study.studyName}}">{{study.sourceFeederName}}</a></td></tr>
-			{%- endfor -%}
-		</table></div>
-	<div id="comparisonPieChart" style="position:absolute;width:500px;height:150px;left:0px;top:250px"><script>drawPieChart({{pieChartData}},"comparisonPieChart",{title:"Grid Components", colors:["gainsboro","silver","gray"], titleTextStyle:{fontSize:14},chartArea:{left:10}})</script></div>
+	<table id="detailsTable">
+	  <tr>
+	    <th>Analysis Creation Date</th>
+	    <td>{{ ana.created }}</td>
+	  </tr>
+	  <tr>
+	    <th>Simulation Length</th>
+	    <td>{{ ana.simLength }} {{ ana.simLengthUnits }}</td>
+	  </tr>
+	  <tr>
+	    <th>Studies</th>
+	    <td>
+	      {%- for study in studyList -%}
+	      <span>{{ study.studyName }} - <a href="/analysisFeeder/{{ana.name}}/{{study.studyName}}">{{study.sourceFeederName}}</a></span><br />
+	      {%- endfor -%}
+	    </td>
+	  </tr>
+	  <tr>
+	    <th>Grid Components</th>
+	    <td>
+	      <div id="comparisonPieChart">
+	      </div>
+	    </td>
+	  </tr>
+	  <tr>
+	    <th>Simulation Location</th>
+	    <td>
+	      <div id="mapHere">
+	      </div>
+	    </td>
+	  </tr>
+	</table>
 </div>
+
+<script src="/static/d3.v3.js"></script>
+<script type="text/javascript">
+	$(function(){
+	    $("#comparisonPieChart").highcharts({
+		credits:{
+		    enabled:false
+		},
+		chart: {
+		    type: 'pie'
+		},
+		title: {
+		    text: 'Grid Components'
+		},
+		series: [{
+		    data: {{ pieChartData }}.splice(1)
+		}]
+	    });
+	});
+
+var width = 800, height=600;
+
+$("#mapHere")
+	.css("width", width-100)
+	.css("height", height-75);
+
+var sf = 0.7;
+var projection = d3.geo.albers()
+	.scale(sf*1000);
+
+
+var path = d3.geo.path()
+	.projection(projection)
+	.pointRadius(2);
+
+var svg = d3.select("#mapHere").append("svg")
+	.attr("width", width)
+	.attr("height", height)
+	.attr("class", "cont");
+
+var g = svg.append("g")
+	.attr("id", "states");
+
+
+var ak_transform = "translate("+250*sf+","+sf*800+")";
+var hi_transform = "translate("+sf*480+","+sf*0+")";
+
+d3.json("/static/readme.json", function(json){
+    g.selectAll("path")
+	    .data(json.features)
+	    .enter().append("path")
+	    .attr("d", path)
+	    .attr("transform", function(d){
+		if(d.properties.name == "Alaska")
+		    return ak_transform;
+		else if(d.properties.name == "Hawaii")
+		    return hi_transform;
+		return "translate(0, 0)";
+	    })
+
+})
+
+d3.json("/static/even_newer.json", function(new_us_places){
+    daClimates.splice(1).forEach(function(climate){
+	var ST_NAME = climate[0].split("-");
+	var ST = ST_NAME[0], NAME = ST_NAME[1];
+	var my_coords = projection(new_us_places[ST][NAME]);
+	svg.append("circle")
+		.attr("cx", my_coords[0])
+		.attr("cy", my_coords[1])
+		.attr("r", 5)
+		.attr("class", "HighlightCircle")
+		.attr("transform", function(){
+		    if (ST == "AK") return ak_transform;
+		    else if (ST == "HI") return hi_transform;
+		    return "translate(0, 0)";
+		})
+    })
+})
+
+</script>
