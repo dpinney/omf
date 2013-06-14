@@ -17,23 +17,9 @@
 		td,th {text-align: right}
 	</style>
 	<script type='text/javascript' src='/static/omf.js'></script>
-	<script type='text/javascript' src='https://www.google.com/jsapi'></script>
-	<script type="text/javascript" src='/static/jquery-1.10.0.js'></script>
+	<script type="text/javascript" src='/static/jquery-1.9.1.min.js'></script>
 	<script src='/static/highcharts.src.js'></script>	
-	<script>
-		google.load('visualization', '1', {packages:['corechart','geochart']})
-		function drawMap(dataArray, divName) {
-			chartData = google.visualization.arrayToDataTable(dataArray)
-			options = {region:'US', displayMode:'markers', legend:'none'}
-			chart = new google.visualization.GeoChart(gebi(divName))
-			chart.draw(chartData, options)
-		}
-		function drawPieChart(dataArray, divName, options) {
-			chartData = google.visualization.arrayToDataTable(dataArray)
-			chart = new google.visualization.PieChart(gebi(divName))
-			chart.draw(chartData, options)
-		}
-	</script>
+
 </head>
 <body>
 	<div id='title'>
