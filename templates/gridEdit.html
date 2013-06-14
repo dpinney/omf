@@ -153,6 +153,10 @@
 		<td><input id='linkStrengthBox' type='text'></td>
 			  </tr>
 			  <tr>
+		<td>Charge</td>
+		<td><input id='chargeBox' type='text'></td>
+			  </tr>
+			  <tr>
 		<td></td>
 		<td style='padding-top:10px'><button onclick='layoutMenuApply()'>Apply</button></td>
 			  </tr>
@@ -190,10 +194,10 @@
 	  var LINE_PARENTCHILD_STROKE_WIDTH = 3/5
 	  var LINE_SELECTED_STROKE_WIDTH = 3/5
 	  var NODE_SELECTED_STROKE_WIDTH = 3/5
-	  var NODE_CIRCLE_RADIUS = 4/5
+	  var NODE_CIRCLE_RADIUS = 3/5
 	  var PINNED_NODE_STROKE_SIZE = 1/5
 	  var PINNED_NODE_CIRCLE_RADIUS = 1.5/5
-	  var UNPINNED_NODE_CIRCLE_RADIUS = 4/5
+	  var UNPINNED_NODE_CIRCLE_RADIUS = 3/5
 	  var TEXT_FONT_SIZE = '30px'
 
 	  var vis = d3.select('body')
@@ -211,7 +215,7 @@
 	var force = d3.layout.force()
 	.linkDistance(30)
 	.size([w, h])
-	.charge(function(d){return -120*d.chargeMultiple})
+	// .charge(function(d){return -120*d.chargeMultiple})
 
 	var nodes = force.nodes()
 	var links = force.links()
@@ -310,9 +314,8 @@
 			.on('click', onCompClick)
 			.attr('class', function(d) { return 'link ' + d.objectType })
 			.attr('id', function(d) { return 'n' + d.treeIndex })
-			// .style('stroke-width', function(d) { return Math.sqrt(d.value); })
+			// TODO: set stroke-width according the load of links
 			.style('stroke-width', LINE_LINK_STROKE_WIDTH);
-		// .style('stroke-dasharray', function(d){return 3/scale, 3/scale})
 
 		link.exit().remove()
 
@@ -326,9 +329,13 @@
 
 		node.append("svg:text")
 		        .attr("class", "nodetext")
-		        .text(function(d) { return d.objectType })
-		        // .style('font-size', TEXT_FONT_SIZE/scale + 'px');
+		        
+
 		d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/scale)
+				.text(function(d) { 
+		        	if (d.chargeMultiple != 1){
+		        		return d.objectType + ' has hidden children'}
+		    		else {return d.objectType}})
 		// Put the main circle on there, sized according to its size.
 		node.append('svg:circle')
 			.attr('id', function(d) {return 'circ' + d.treeIndex})
@@ -395,8 +402,6 @@
 			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/d3.event.scale);
 		}
 		d3.selectAll('.nodetext').style('font-size', 30/d3.event.scale);
-		// force.friction(0.8/d3.event.scale)
-		// var scale = zoomer.scale()
 		// if (scale >1){
 		// 	setByScale()
 		// }
@@ -1045,10 +1050,9 @@
 					fixed : isfixed}
 			nodes.push(nodeToAdd)
 		}else{
-			if (d3.selectAll('.node.gridNode').attr('fixed')=='true'){
+			if (d3.selectAll('.node.gridNode').attr('fixed')=='true' && tree[treeIndex].latitude != undefined){
 				isfixed = true
 			}else{
-				
 				isfixed = false
 			}
 			tree[treeNewIndex] = component
@@ -1276,6 +1280,8 @@
 			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
 			hiddenNodes[hNode].fixed = true
 		}
+
+		
 		redraw()
 		// force.start()
 	}
@@ -1317,6 +1323,7 @@
 	gebi('thetaBox').value = force.theta()
 	gebi('frictionBox').value = force.friction()
 	gebi('linkStrengthBox').value = force.linkStrength()
+	gebi('chargeBox').value = force.charge()
 	}
 
 	function layoutMenuApply() {
@@ -1324,6 +1331,7 @@
 	force.theta(gebi('thetaBox').value)
 	force.friction(gebi('frictionBox').value)
 	force.linkStrength(gebi('linkStrengthBox').value)
+	force.charge(gebi('chargeBox').value)
 	force.start()
 	}
 
