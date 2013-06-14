@@ -2,6 +2,7 @@
 
 
 import os, traceback, json, boto
+from boto.s3.connection import S3Connection
 
 class Filestore:
 	def __init__(self, inStoragePath):
@@ -61,16 +62,16 @@ class Filestore:
 		return os.path.isfile(os.path.join(self.storagePath,objectType,objectName + '.json'))
 
 class S3store:
-	def __init__(self):
-		self.conn = S3Connection('AKIAIFNNIT7VXOXVFPIQ', 'stNtF2dlPiuSigHNcs95JKw06aEkOAyoktnWqXq+')
-		bucket = conn.get_bucket('ohdwptestthisbucket')
+	def __init__(self, publicKey, privateKey, bucketName):
+		self.conn = S3Connection(publicKey, privateKey)
+		self.bucket = self.conn.get_bucket(bucketName)
 
 	def put(self, objectType, objectName, putDict):
 		try:
 			if self.exists(objectType, objectName):
-				thisKey = bucket.get_key(objectType + '/' + objectName + '.json')
+				thisKey = self.bucket.get_key(objectType + '/' + objectName + '.json')
 			else:
-				thisKey = bucket.new_key(objectType + '/' + objectName + '.json')
+				thisKey = self.bucket.new_key(objectType + '/' + objectName + '.json')
 			thisKey.set_contents_from_string(json.dumps(putDict, indent=4))
 			return True
 		except:
@@ -79,7 +80,7 @@ class S3store:
 
 	def get(self, objectType, objectName):
 		try:
-			thisOb = json.loads(bucket.get_key(objectType + '/' + objectName + '.json').get_contents_as_string())
+			thisOb = json.loads(self.bucket.get_key(objectType + '/' + objectName + '.json').get_contents_as_string())
 			return thisOb
 		except:
 			traceback.print_exc()
@@ -110,6 +111,7 @@ class S3store:
 if __name__ == '__main__':
 	# Filstore tests with cleanup.
 	import shutil
+	print '---TESTING FILESTORE---'
 	test = Filestore('./testFileStore/')
 	print 'Feeder ACEC in the store?', test.exists('Feeder', 'ACEC')
 	print 'Can we store a simple int?', test.put('int', 'testInt', {'value':34})
@@ -120,4 +122,12 @@ if __name__ == '__main__':
 	print 'Full feeder get back', test.get('feeder','testFeeder')
 	shutil.rmtree('./testFileStore/')
 	# S3store tests with cleanup.
-	pass
+	print '---TESTING S3STORE---'
+	s3 = S3store('AKIAIFNNIT7VXOXVFPIQ', 'stNtF2dlPiuSigHNcs95JKw06aEkOAyoktnWqXq+', 'ohdwptestthisbucket')
+	print 'Feeder ACEC in the store?', s3.exists('Feeder', 'ACEC')
+	print 'Can we store a simple int?', s3.put('int', 'testInt', {'value':34})
+	print 'Get it back', s3.get('int', 'testInt')
+	print 'Now put something with an MD.', s3.put('feeder', 'testFeeder', {"component1":{"test":1},"component2":{"bullseye":5}, "norman":"powder"})
+	print 'What was that MD?', s3.get('feeder', 'testFeeder')
+	print 'List something.', s3.listAll('feeder')
+	print 'Full feeder get back', s3.get('feeder','testFeeder')

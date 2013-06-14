@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import boto, json, traceback
-
+import boto, json, traceback, os
 from boto.s3.connection import S3Connection
-from boto.s3.key import Key
 
 # We're running as dwpTestUser
 conn = S3Connection('AKIAIFNNIT7VXOXVFPIQ', 'stNtF2dlPiuSigHNcs95JKw06aEkOAyoktnWqXq+')
@@ -39,3 +37,16 @@ print 'testkey1 Contents:', bucket.get_key('testkey1').get_contents_as_string()
 # Delete that key
 bucket.delete_key('testkey1')
 
+# Function to move all file data to S3:
+def stockFromFilestore():
+	neoCon = S3Connection('AKIAISPAZIA6NBEX5J3A','YEAHRIGHT')
+	store = neoCon.get_bucket('crnomf')
+	root = '../data/'
+	for folderName in os.listdir(root):
+		for fileName in os.listdir(root + folderName):
+			with open(root + folderName + '/' + fileName, 'r') as jsonFile:
+				rawData = jsonFile.read()
+			store.new_key(folderName + '/' + fileName).set_contents_from_string(rawData)
+			print 'Completed', root + folderName + '/' + fileName
+
+# stockFromFilestore()
