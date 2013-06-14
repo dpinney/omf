@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
 
-import os
-import traceback
-import json
+import os, trackeback, json, boto
 
 class Filestore:
 	def __init__(self, inStoragePath):
@@ -39,7 +37,7 @@ class Filestore:
 				return dataDict
 		except:
 			traceback.print_exc()
-			return ''
+			return {}
 
 	def delete(self, objectType, objectName):
 		basePath = os.path.join(self.storagePath, objectType, objectName)
@@ -63,26 +61,51 @@ class Filestore:
 		return os.path.isfile(os.path.join(self.storagePath,objectType,objectName + '.json'))
 
 class S3store:
-	def __init__(self, connectionString):
-		pass
-
-	def __createSchema__(self):
-		pass
+	def __init__(self):
+		self.conn = S3Connection('AKIAIFNNIT7VXOXVFPIQ', 'stNtF2dlPiuSigHNcs95JKw06aEkOAyoktnWqXq+')
+		bucket = conn.get_bucket('ohdwptestthisbucket')
 
 	def put(self, objectType, objectName, putDict):
-		pass
+		try:
+			if self.exists(objectType, objectName):
+				thisKey = bucket.get_key(objectType + '/' + objectName + '.json')
+			else:
+				thisKey = bucket.new_key(objectType + '/' + objectName + '.json')
+			thisKey.set_contents_from_string(json.dumps(putDict, indent=4))
+			return True
+		except:
+			traceback.print_exc()
+			return False
 
 	def get(self, objectType, objectName):
-		pass
+		try:
+			thisOb = json.loads(bucket.get_key(objectType + '/' + objectName + '.json').get_contents_as_string())
+			return thisOb
+		except:
+			traceback.print_exc()
+			return {}
 
 	def delete(self, objectType, objectName):
-		pass
+		try:
+			self.bucket.delete_key(objectType + '/' + objectName + '.json')
+			return True
+		except:
+			traceback.print_exc()
+			return False
 
 	def listAll(self, objectType):
-		pass
+		try:
+			keyList = self.bucket.list(prefix=objectType+'/',delimiter='/')
+			return [key.name[0:-5] for key in keyList if key.name.endswith('.json')]
+		except:
+			traceback.print_exc()
+			return []
 
 	def exists(self, objectType, objectName):
-		pass
+		try:
+			return self.bucket.get_key(objectType + '/' + objectName + '.json') is not None
+		else:
+			return None
 
 if __name__ == '__main__':
 	# Tests go here.
