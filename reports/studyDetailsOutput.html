@@ -130,7 +130,7 @@ var g = svg.append("g")
 var ak_transform = "translate("+-30*sf+","+sf*480+")"; // scale(0.75) rotate(-30)";
 var hi_transform = "translate("+sf*500+","+sf*250+")"; //
 
-d3.json("/static/readme.json", function(json){
+d3.json("/static/state_boundaries.json", function(json){
     g.selectAll("path")
 	    .data(json.features)
 	    .enter().append("path")
@@ -145,7 +145,7 @@ d3.json("/static/readme.json", function(json){
 
 })
 
-d3.json("/static/even_newer.json", function(new_us_places){
+d3.json("/static/city_locations.json", function(new_us_places){
     daClimates.splice(1).forEach(function(climate){
 	var ST_NAME = climate[0].split("-");
 	var ST = ST_NAME[0], NAME = ST_NAME[1];
