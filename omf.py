@@ -78,6 +78,8 @@ def viewReports(analysisName):
 	studyList = []
 	for studyName in thisAnalysis.studyNames:
 		studyData = store.get('Study', thisAnalysis.name + '---' + studyName)
+		studyData['name'] = studyName
+		studyData['analysisName'] = thisAnalysis.name
 		moduleRef = getattr(studies, studyData['studyType'])
 		classRef =  getattr(moduleRef, studyData['studyType'].capitalize())
 		studyList.append(classRef(studyData))
