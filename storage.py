@@ -81,6 +81,7 @@ class S3store:
 	def get(self, objectType, objectName):
 		try:
 			thisOb = json.loads(self.bucket.get_key(objectType + '/' + objectName + '.json').get_contents_as_string())
+			thisOb['name'] = objectName
 			return thisOb
 		except:
 			traceback.print_exc()
@@ -97,7 +98,7 @@ class S3store:
 	def listAll(self, objectType):
 		try:
 			keyList = self.bucket.list(prefix=objectType+'/',delimiter='/')
-			return [key.name[0:-5] for key in keyList if key.name.endswith('.json')]
+			return [key.name[len(objectType)+1:-5] for key in keyList if key.name.endswith('.json')]
 		except:
 			traceback.print_exc()
 			return []

@@ -9,6 +9,7 @@ import analysis, feeder, reports, studies, milToGridlab, storage
 app = flask.Flask(__name__)
 
 store = storage.Filestore('data')
+# store = storage.S3store('AKIAISPAZIA6NBEX5J3A', 'YEAHRIGHT', 'crnomf')
 
 class backgroundProc(multiprocessing.Process):
 	def __init__(self, backFun, funArgs):
