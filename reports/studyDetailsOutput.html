@@ -28,8 +28,8 @@
 		}
 		.cont{
 		    position:absolute;
-		    top:-170;
-		    left:-180;
+		    top:-20;
+		    left:-100;
 		}
 		#mapHere{
 		    position:relative;
@@ -101,9 +101,13 @@
 		    }
 		}
 	    });
+
+	    // $(document).on("click", "#detailsTable a", function(e){
+	    // 	window.location = $(this).attr("href");
+	    // });
 	});
 
-var width = 800, height=600;
+var width = 500, height=250;
 
 $("#mapHere")
 	.css("width", width-300)
@@ -112,7 +116,9 @@ $("#mapHere")
 var sf = 0.4;
 var projection = d3.geo.albers()
 	.scale(sf*1000)
+	.center([25,15])
 
+	
 var path = d3.geo.path()
 	.projection(projection)
 	.pointRadius(2);
