@@ -2,19 +2,25 @@
 
 <div id="studyDetails" class="detailsContainer tightContent" style="padding:10px;position:relative;">
 	<style type="text/css" scoped>
-		table#detailsTable th {border-bottom:2px solid gray; text-align:left;}
 		table#detailsTable th, td {
-		    text-align:left;
-		    border:1px solid black;
+		    /* text-align:left; */
+		    text-align: center;
+		    /* border:1px solid black; */
 		    padding:5px;
+		    vertical-align:top;
 		}
-		#comparisonPieChart{
-		    width:400px;
+		#stnames{
+		    text-align:left;
 		}
+		/* #comparisonPieChart{ */
+		/*     min-width:400px; */
+		/*     min-height:200px; */
+		/*     /\* margin: -10; *\/ */
+		/*     /\* vertical-align:top; *\/ */
+		/* } */
 		.HighlightCircle{
 		    fill: rgb(16, 150, 24);
 		}
-
 		#states{
 		    fill: #aaa;
 		    stroke: #fff;
@@ -22,40 +28,49 @@
 		}
 		.cont{
 		    position:absolute;
-		    top:-75;
-		    left:-100;
+		    top:-170;
+		    left:-180;
 		}
 		#mapHere{
 		    position:relative;
+		}
+		#studies{
+		    text-align: center;
 		}
 	</style>
 	<script>daClimates={{climates | safe}}</script>
 	<table id="detailsTable">
 	  <tr>
-	    <th>Analysis Creation Date</th>
+	    <th class="hozHead">Analysis Creation Date</th>
+	    <th id="studies">Studies</th>
+	  </tr>
+	  <tr>
 	    <td>{{ ana.created }}</td>
-	  </tr>
-	  <tr>
-	    <th>Simulation Length</th>
-	    <td>{{ ana.simLength }} {{ ana.simLengthUnits }}</td>
-	  </tr>
-	  <tr>
-	    <th>Studies</th>
-	    <td>
-	      {%- for study in studyList -%}
-	      <span>{{ study.studyName }} - <a href="/analysisFeeder/{{ana.name}}/{{study.studyName}}">{{study.sourceFeederName}}</a></span><br />
-	      {%- endfor -%}
-	    </td>
-	  </tr>
-	  <tr>
-	    <th>Grid Components</th>
-	    <td>
-	      <div id="comparisonPieChart">
+	    <td rowspan="3">
+	      <div id="stnames">
+		{%- for study in outputList -%}
+		<span>{{ study.studyName }} - <a href="/analysisFeeder/{{ana.name}}/{{study.studyName}}">{{study.sourceFeederName}}</a></span><br />
+		{%- endfor -%}
 	      </div>
 	    </td>
 	  </tr>
 	  <tr>
-	    <th>Simulation Location</th>
+	    <th class="hozHead">Simulation Length</th>
+	  </tr>
+	  <tr>
+	    <td class="hozHead">{{ ana.simLength }} {{ ana.simLengthUnits }}</td>
+	  </tr>
+	  <tr>
+	    <th>Grid Components</th>
+	    <th id="SL">Simulation Location</th>
+	  </tr>
+	  <tr>
+	    <td id="GC" rowspan="2">
+	      <div id="comparisonPieChart" style="min-width: 400px; height: 200px; margin: 0 auto">
+	      </div>
+	    </td>
+	  </tr>
+	  <tr>
 	    <td>
 	      <div id="mapHere">
 	      </div>
@@ -71,28 +86,32 @@
 		credits:{
 		    enabled:false
 		},
-		chart: {
-		    type: 'pie'
-		},
 		title: {
-		    text: 'Grid Components'
+		    text: ''
 		},
 		series: [{
-		    data: {{ pieChartData }}.splice(1)
-		}]
+		    type: "pie",
+		    data: {{ pieChartData }}.splice(1),
+		}],
+		plotOptions: {
+		    pie: {
+			dataLabels: {
+			    enabled: false,
+			}
+		    }
+		}
 	    });
 	});
 
 var width = 800, height=600;
 
 $("#mapHere")
-	.css("width", width-100)
-	.css("height", height-75);
+	.css("width", width-300)
+	.css("height", height-400);
 
-var sf = 0.7;
+var sf = 0.4;
 var projection = d3.geo.albers()
-	.scale(sf*1000);
-
+	.scale(sf*1000)
 
 var path = d3.geo.path()
 	.projection(projection)
@@ -107,8 +126,9 @@ var g = svg.append("g")
 	.attr("id", "states");
 
 
-var ak_transform = "translate("+250*sf+","+sf*800+")";
-var hi_transform = "translate("+sf*480+","+sf*0+")";
+
+var ak_transform = "translate("+-30*sf+","+sf*480+")"; // scale(0.75) rotate(-30)";
+var hi_transform = "translate("+sf*500+","+sf*250+")"; //
 
 d3.json("/static/readme.json", function(json){
     g.selectAll("path")
@@ -120,7 +140,7 @@ d3.json("/static/readme.json", function(json){
 		    return ak_transform;
 		else if(d.properties.name == "Hawaii")
 		    return hi_transform;
-		return "translate(0, 0)";
+		// return "translate(0, 0)";
 	    })
 
 })
@@ -138,8 +158,12 @@ d3.json("/static/even_newer.json", function(new_us_places){
 		.attr("transform", function(){
 		    if (ST == "AK") return ak_transform;
 		    else if (ST == "HI") return hi_transform;
-		    return "translate(0, 0)";
+		    // return "translate(0, 0)";
 		})
+		// .scale(function(){
+		//     if (ST == "AK") return 100;
+		//     return 1000;
+		// })
     })
 })
 
