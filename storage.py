@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 
-import os, trackeback, json, boto
+import os, traceback, json, boto
 
 class Filestore:
 	def __init__(self, inStoragePath):
@@ -104,11 +104,11 @@ class S3store:
 	def exists(self, objectType, objectName):
 		try:
 			return self.bucket.get_key(objectType + '/' + objectName + '.json') is not None
-		else:
+		except:
 			return None
 
 if __name__ == '__main__':
-	# Tests go here.
+	# Filstore tests with cleanup.
 	import shutil
 	test = Filestore('./testFileStore/')
 	print 'Feeder ACEC in the store?', test.exists('Feeder', 'ACEC')
@@ -118,5 +118,6 @@ if __name__ == '__main__':
 	print 'What was that MD?', test.get('feeder', 'testFeeder')
 	print 'List something.', test.listAll('feeder')
 	print 'Full feeder get back', test.get('feeder','testFeeder')
-	# Cleanup:
 	shutil.rmtree('./testFileStore/')
+	# S3store tests with cleanup.
+	pass
