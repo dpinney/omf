@@ -7,8 +7,12 @@ import analysis, feeder, reports, studies, milToGridlab, storage
 
 app = flask.Flask(__name__)
 
-store = storage.Filestore('data')
-# store = storage.S3store('AKIAISPAZIA6NBEX5J3A', 'YEAHRIGHT', 'crnomf')
+USER_PASS='YEAHRIGHT' # DO NOT EDIT THIS LINE! DEPLOYMENT SCRIPTS RELY ON IT!
+
+if USER_PASS == 'YEAHRIGHT':
+	store = storage.Filestore('data')
+else:
+	store = storage.S3store('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnomf')
 
 class backgroundProc(multiprocessing.Process):
 	def __init__(self, backFun, funArgs):
