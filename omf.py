@@ -3,7 +3,7 @@
 # third party modules
 import flask, werkzeug, os, multiprocessing, json, time, datetime, copy
 # our modules
-import analysis, feeder, reports, studies, milToGridlab, storage
+import analysis, feeder, reports, studies, milToGridlab, storage, work
 
 app = flask.Flask(__name__)
 
