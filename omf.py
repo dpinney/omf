@@ -1,10 +1,9 @@
 #!/bin/python
 
 # third party modules
-import flask, werkzeug, os, multiprocessing, json, time, threading, datetime, copy
+import flask, werkzeug, os, multiprocessing, json, time, datetime, copy
 # our modules
 import analysis, feeder, reports, studies, milToGridlab, storage
-# import logging_system
 
 app = flask.Flask(__name__)
 
@@ -20,15 +19,6 @@ class backgroundProc(multiprocessing.Process):
 		multiprocessing.Process.__init__(self)
 	def run(self):
 		self.backFun(*self.funArgs)
-
-class background_thread(threading.Thread):
-    def __init__(self, backFun, funArgs):
-        threading.Thread.__init__(self)
-        self.backFun = backFun
-        self.funArgs = funArgs
-         
-    def run(self):
-        self.backFun(*self.funArgs)
 
 ###################################################
 # VIEWS
@@ -245,8 +235,6 @@ def milImportAndConvert(store, feederName, stdName, seqName):
 	store.put('Feeder', feederName, newFeeder)
 	store.delete('Conversion', feederName)
 
-# This will run on all interface IPs.
 if __name__ == '__main__':
-	# thread_logging = background_thread(logging_system.logging_system(app).logging_run, (app,))
-	# thread_logging.start()
+	# Run a debug server all interface IPs.
 	app.run(host='0.0.0.0', debug=True, port=5001, threaded=True)
