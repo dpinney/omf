@@ -107,21 +107,33 @@ class ClusterQueue:
 		return status
 
 def monitorClusterQueue():
-	#TODO: what all do we have to import to run this stuff?
-	conn = SQSConnection(USERKEY, PASSKEY)
+	import omf
+	conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', omf.USER_PASS)
 	jobQueue = conn.get_queue('crnOmfJobQueue')
 	terminateQueue = conn.get_queue('crnOmfTerminateQueue')
 	runningJobs = 0
+	def popJob(queueName):
+		mList = queueName.get_messages(1)
+		if len(mList) == 1:
+			anaName = mList[0].get_body()
+			queueName.delete_message(mList[0])
+			return anaName
+		else:
+			return False
 	def endlessLoop():
 		if runningJobs < JOB_LIMIT:
-			mList = jobQueue.get_messages(1)
-			if len(mList) == 1:
-				anaName = mList[0].get_body()
-				# Get analysis stuff from storage, run it here.
+			anaName = popJob(jobQueue)
+			if anaName != False:
+				runningJobs += 1
+				# TODO: Get analysis stuff from storage, run it here.
+				pass
 		if runningJobs > 0:
-			# Get the termination going here.
-			pass
-		Timer(2, repeating).start()
+			anaName = popJob(terminateQueue)
+			if anaName != False:
+				# TODO: Try to terminate. 
+				if TERMINATION_SUCCESS: runningJobs -= 1
+		# Check again in 1 second:
+		Timer(1, repeating).start()
 	endlessLoop()
 
 if __name__ == '__main__':

@@ -1,7 +1,6 @@
 # Update this version to the latest in the source tree.
 if [ $# -eq 0 ]; then
-	then
-		echo "Usage: cloudDeploy.sh <S3DatabaseKey>"
+	echo "Usage: cloudDeploy.sh <S3DatabaseKey>"
 fi
 echo "** Resetting to head and pulling the latest source from git."
 git reset --hard
