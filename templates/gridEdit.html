@@ -1,7 +1,9 @@
 ﻿<head>
   <script type='text/javascript' src='/static/d3.v3.js'></script>
   <script type='text/javascript' src='/static/omf.js'></script>
+<<<<<<< HEAD
   <script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
+>>>>>>> feederLayoutCoordinates
   <link rel='stylesheet' href='/static/omf.css' />
   <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}' />
   <style type="text/css">
@@ -10,6 +12,7 @@
 	/*hacks to get D3 responsive sizing*/
 	div#title {position: absolute; top:0;}
 	div#toolbar {position: absolute; top:65px;}
+	div#scaleRuler{position: absolute; bottom: 30px; right:30px;}
 	/*other styles*/  
 	input#gridNameEdit {font-size:28pt; line-height: 28pt; text-shadow: 0px 3px 3px #4d4d4d; height: 50px; color:gray; padding:3px; margin-bottom:5px; width:85%;}
 	button.smallButton {height:20px; width:20px; display:inline-block; float:right; padding:2px; margin-left:5px;}
@@ -26,9 +29,9 @@
 	/* Start graph elements. */
 	.nodetext {pointer-events: none; font: 10px; }
 	g.node {fill:gray; stroke: #fff;stroke-width: 1.5px;}
-	line.link {stroke: #999;stroke-opacity: 0.6; stroke-width: 6px;}
-	line.parentChild {stroke-dasharray:3,3;}
-	line.selected {stroke:black; stroke-width: 8px; stroke-opacity: 1.0;}
+	line.link {stroke: black;stroke-opacity: 1; stroke-width: 6px;}
+	line.parentChild {stroke-dasharray:1,1;}
+	line.selected {stroke:blue; stroke-width: 8px; stroke-opacity: 1.0;}
 	g.selected {stroke:black; stroke-width: 4px; stroke-opacity: 1.0; }
 	g.multiselected {stroke:black; stroke-width: 4px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
 	g.house {fill:#3366FF;}
@@ -41,6 +44,9 @@
 	g text {fill:black; stroke:black; stroke-width:0px; stroke-opacity: 1; font-size:15; pointer-events: none;}
 	circle.nodeIsPinned {fill:none; stroke:black; stroke-width:2.5px; pointer-events: none;}
 	circle.nodeNotPinned {fill:none; stroke-width:0px; pointer-events: none;}
+	.node:not(:hover) .nodetext { display: none; }
+	.axis path,.axis line { fill: none; stroke: black;	shape-rendering: crispEdges; }
+	.axis text { font-family: sans-serif; font-size: 11px; }
   </style>
 </head>
 <body onkeypress='hotkeys()'>
@@ -94,7 +100,7 @@
 	<div class='buttonGroup leftToolbar'>
 	  <button class='pill' onclick='dropPillAndStay(this, "Find")'>Find ▾</button>
 	  <ul class='menu'>
-	<table style='padding:4px;word-wrap:break-word'>
+	  <table style='padding:4px;word-wrap:break-word'>
 		  <tr>
 			<td>Term</td>
 			<td><input id='searchTerm' type='text'></td>
@@ -107,7 +113,7 @@
 			<td style='padding-top:10px'><button onclick='findPrevious()'>Previous</button></td>
 			<td style='padding-top:10px'><button onclick='findNext()'>Next</button></td>
 		  </tr>
-	</table>
+	  </table>
 	  </ul>
 	</div>
 	<div class='buttonGroup rightToolbar'>
@@ -148,6 +154,10 @@
 		<td><input id='linkStrengthBox' type='text'></td>
 			  </tr>
 			  <tr>
+		<td>Charge</td>
+		<td><input id='chargeBox' type='text'></td>
+			  </tr>
+			  <tr>
 		<td></td>
 		<td style='padding-top:10px'><button onclick='layoutMenuApply()'>Apply</button></td>
 			  </tr>
@@ -165,6 +175,8 @@
 	  </tfoot>
 	</table>
 	  </div>
+	  <div id='scaleRuler'>
+	  </div>
 	  <script type="text/javascript">
 
 	  // GLOBAL VARIABLES:
@@ -176,6 +188,18 @@
 	  var components
 
 	  var zoomer = d3.behavior.zoom()
+
+	  // Graph size global variable
+	  var NODE_STROKE_WIDTH = 0.08 
+	  var LINE_LINK_STROKE_WIDTH = 3 /5
+	  var LINE_PARENTCHILD_STROKE_WIDTH = 3/5
+	  var LINE_SELECTED_STROKE_WIDTH = 3/5
+	  var NODE_SELECTED_STROKE_WIDTH = 3/5
+	  var NODE_CIRCLE_RADIUS = 3/5
+	  var PINNED_NODE_STROKE_SIZE = 1/5
+	  var PINNED_NODE_CIRCLE_RADIUS = 1.5/5
+	  var UNPINNED_NODE_CIRCLE_RADIUS = 3/5
+	  var TEXT_FONT_SIZE = '30px'
 
 	  var vis = d3.select('body')
 	.append('svg:svg')
@@ -192,7 +216,7 @@
 	var force = d3.layout.force()
 	.linkDistance(30)
 	.size([w, h])
-	.charge(function(d){return -120*d.chargeMultiple})
+	// .charge(function(d){return -120*d.chargeMultiple})
 
 	var nodes = force.nodes()
 	var links = force.links()
@@ -202,116 +226,206 @@
 	// FUNCTIONS FOR DRAWING:
 
 	function draw() {
-	// d3.js bookkeeping to set what happens on each time tick in the simulation:
-	force.on('tick', function() {
-		vis.selectAll('line.link')
-		.attr('x1', function(d) { return d.source.x; })
-		.attr('y1', function(d) { return d.source.y; })
-		.attr('x2', function(d) { return d.target.x; })
-		.attr('y2', function(d) { return d.target.y; });
-		vis.selectAll('.node')
-		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-	});
-	var name2nodeIndex = {}
-	if (0 == nodes.length) {
-		// Go through the first time and set up the nodes with indices:
-		for (x in tree) {
-		if ((tree[x].name != undefined || tree[x].module != undefined) && tree[x].from == undefined) {
-			//TODO: Think about allowing access to other objects here.
-			nodeName = tree[x].name
-			nodeObject = tree[x].object
+		// d3.js bookkeeping to set what happens on each time tick in the simulation:
+		force.on('tick', function() {
+			vis.selectAll('line.link')
+			.attr('x1', function(d) { return d.source.x; })
+			.attr('y1', function(d) { return d.source.y; })
+			.attr('x2', function(d) { return d.target.x; })
+			.attr('y2', function(d) { return d.target.y; });
+			vis.selectAll('.node')
+			.attr("fixed", function(d){return d.fixed }) // fixed a node
+			.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+		});
+		var name2nodeIndex = {}
+		if (nodes.length == 0) {
+			// Go through the first time and set up the nodes with indices:
+			for (x in tree) {
+				if ((tree[x].name != undefined || tree[x].module != undefined) && tree[x].from == undefined) {
+					//TODO: Think about allowing access to other objects here.
+					nodeName = tree[x].name
+					nodeObject = tree[x].object
+					if (tree[x].latitude != undefined && tree[x].longitude != undefined){
+						x_pixel = tree[x].latitude
+						y_pixel = tree[x].longitude
+						isfixed = true
+					}else{
+						x_pixel = tree[x].latitude
+						y_pixel = tree[x].longitude
+						isfixed = false
+					}
 
-			// Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
-			if (nodeObject == 'node') nodeObject = 'gridNode'
-			if (undefined != tree[x].bustype && tree[x].bustype == 'SWING') nodeObject += ' swingNode'
-			nodeIndex = nodes.length
-			nodes.push({name:nodeName,treeIndex:parseInt(x),objectType:nodeObject,chargeMultiple:1})
-			name2nodeIndex[nodeName] = nodeIndex
-		}
-		}
-		// Go through a second time and set up the links:
-		for (x in tree) {
-		if (tree[x].name != undefined) {
-			if (tree[x].from != undefined && tree[x].to != undefined) {
-			name2nodeIndex[tree[x].name] = links.length
-			links.push({source:name2nodeIndex[tree[x].from],target:name2nodeIndex[tree[x].to],treeIndex:parseInt(x),objectType:'fromTo'})
-			} else if (tree[x].parent != undefined) {
-			links.push({source:name2nodeIndex[tree[x].name],target:name2nodeIndex[tree[x].parent],objectType:'parentChild'})
+					// Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
+					if (nodeObject == 'node') 
+						nodeObject = 'gridNode'
+					if (undefined != tree[x].bustype && tree[x].bustype == 'SWING') 
+						nodeObject += ' swingNode'
+					nodeIndex = nodes.length
+					nodes.push({
+						name : nodeName,
+						treeIndex : parseInt(x),
+						objectType : nodeObject,
+						chargeMultiple : 1,
+						x : x_pixel,
+						y : y_pixel,
+						fixed : isfixed })
+					name2nodeIndex[nodeName] = nodeIndex
+				}
 			}
+
+			// Go through a second time and set up the links:
+			for (x in tree) {
+				if (tree[x].name != undefined) {
+					if (tree[x].from != undefined && tree[x].to != undefined) {
+						name2nodeIndex[tree[x].name] = links.length
+						links.push({
+							source:name2nodeIndex[tree[x].from],
+							target:name2nodeIndex[tree[x].to],
+							treeIndex:parseInt(x),
+							objectType:'fromTo' })
+					} else if (tree[x].parent != undefined) {
+						links.push({
+							source:name2nodeIndex[tree[x].name],
+							target:name2nodeIndex[tree[x].parent],
+							objectType:'parentChild'})
+					}
+				}
+			}    
 		}
-		}    
+		// This makes a fancy fade-in.
+		vis.style('opacity', 1e-6)
+			.transition()
+			.duration(1500)
+			.style('opacity', 1);
+		// Start the layout.
+		force.start();
+		// Run the layout in the background until performance is acceptable.
+		// preLayout()
+		// Start drawing.
+		redraw()
 	}
-	// This makes a fancy fade-in.
-	vis.style('opacity', 1e-6)
-		.transition()
-		.duration(1500)
-		.style('opacity', 1);
-	// Start the layout.
-	force.start();
-	// Run the layout in the background until performance is acceptable.
-	// preLayout()
-	// Start drawing.
-	redraw()
-	}
+
 
 	function redraw() {
-	link = d3.select('#linkLayer').selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
+		link = d3.select('#linkLayer').selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
+		// fix the dynamic drawing according to current scale level
+		var scale = zoomer.scale()
+		
+		link.enter().append('svg:line')
+			.on('click', onCompClick)
+			.attr('class', function(d) { return 'link ' + d.objectType })
+			.attr('id', function(d) { return 'n' + d.treeIndex })
+			// TODO: set stroke-width according the load of links
+			.style('stroke-width', LINE_LINK_STROKE_WIDTH);
 
-	link.enter().append('svg:line')
-		.on('click', onCompClick)
-		.attr('class', function(d) { return 'link ' + d.objectType })
-		.attr('id', function(d) { return 'n' + d.treeIndex })
-		.style('stroke-width', function(d) { return Math.sqrt(d.value); })
+		link.exit().remove()
 
-	link.exit().remove()
+		
+		node = vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).enter()
+			.append("g")
+			.call(force.drag)
+			.attr('class', function(d) {return 'node ' + d.objectType})
+			.attr('id', function(d) {return 'n' + d.treeIndex})
+			.on('click', onCompClick)
 
-	node = vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).enter()
-		.append("g")
-		.call(force.drag)
-		.attr('class', function(d) {return 'node ' + d.objectType})
-		.attr('id', function(d) {return 'n' + d.treeIndex})
-		.on('click', onCompClick)
+		node.append("svg:text")
+		        .attr("class", "nodetext")
+		        
 
-	// Put the main circle on there, sized according to its size.
-	node.append('svg:circle')
-		.attr('id', function(d) {return 'circ' + d.treeIndex})
-		.attr('class', 'nodeCircle')
-		.attr('cx', 0)
-		.attr('cy', 0)
-		.attr('r', function(d) {return d.chargeMultiple * 10})
+		d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/scale)
+				.text(function(d) { 
+		        	if (d.chargeMultiple != 1){
+		        		return d.objectType + ' has hidden children'}
+		    		else {return d.objectType}})
+		// Put the main circle on there, sized according to its size.
+		node.append('svg:circle')
+			.attr('id', function(d) {return 'circ' + d.treeIndex})
+			.attr('class', 'nodeCircle')
+			.attr('cx', 0)
+			.attr('cy', 0)
+			.attr('r', function(d) {return d.chargeMultiple * NODE_CIRCLE_RADIUS })
+			// .style('stroke-width', 1/scale)
+		
+		
+		// TODO: Pinning indicator.
+		node.append('svg:circle')
+			.attr('class', function(d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
+			.attr('id', function(d) {return 'pin' + d.treeIndex})
+			.attr('cx', 0)
+			.attr('cy', 0)
+			.attr('r', PINNED_NODE_CIRCLE_RADIUS)
+			.style('stroke-width', NODE_STROKE_WIDTH)
+		// Get rid of deleted nodes.
+		vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).exit().remove()
 
-	// Pinning indicator.
-	node.append('svg:circle')
-		.attr('class', function(d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
-		.attr('id', function(d) {return 'pin' + d.treeIndex})
-		.attr('cx', 0)
-		.attr('cy', 0)
-		.attr('r', 3)
+		// Update sizes
+		vis.selectAll('.nodeCircle').data(nodes, function(d) {return d.treeIndex}).attr('r', function(d) {return d.chargeMultiple * NODE_CIRCLE_RADIUS })
+			.style('stroke-width', NODE_STROKE_WIDTH)
+		// Test for force
+		// force.gravity(0.5)
+		// force.theta(0.1)
+		// force.friction(0.5)
+		// force.charge(0.1)
+		// force.linkStrength(1)
 
-	// This gives tooltips=nodeName to every node:
-	// node.append('svg:title')
-	//   .text(function(d) { return d.name; });
-
-	// Some (loud) text labels.
-	// node.append('text')
-	//   .attr('dx', 12)
-	//   .attr('dy', 4)
-	//   .text(function(d) { return d.name });
-
-	// Get rid of deleted nodes.
-	vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).exit().remove()
-
-	// Update sizes
-	vis.selectAll('.nodeCircle').data(nodes, function(d) {return d.treeIndex}).attr('r', function(d) {return d.chargeMultiple * 10})
-
-	force.start()
+		// setByScale()
+		force.start()
 	}
 
+	// TODO: add a scale ruler to the graph, dynamic to show the scale of in real geography, but when it unpinned, it make no sense.
+	function drawScaleRuler(){
+		var domain_size = 20
+		var padding = 20
+		var size =  100
+		var shrinkSize = 10
+		var xScale = d3.scale.linear().domain([ 0, size * shrinkSize ]).range([ 0, size ]);
+
+		//Define X axis
+		var xAxis = d3.svg.axis().scale(xScale).orient("top").ticks(3);
+		d3.selectAll('div#scaleRuler')
+			.append('svg')
+			.attr('width', '200px')
+			.attr('height', '100px')
+			.append('g')
+			
+			.attr('x', "100px")
+			.attr('y', "100px")
+			.attr("transform", "translate("+ (50) +"," + (50) + ")")
+			.attr('class', 'axis')
+			.call(xAxis)
+
+	} // end of function drawScaleRuler()
+
 	function zoomRedraw() {
-	// console.log('here', d3.event.translate, d3.event.scale);
-	vis.attr('transform',
-		 'translate(' + d3.event.translate + ')'
-		 + ' scale(' + d3.event.scale + ')');
+		vis.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
+
+		if (d3.event.scale<1){
+			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/d3.event.scale);
+		}
+		d3.selectAll('.nodetext').style('font-size', 30/d3.event.scale);
+		// if (scale >1){
+		// 	setByScale()
+		// }
+	}
+
+	// reset graph svg size when zooming or redraw
+	function setByScale(){
+		var scale = zoomer.scale()
+		d3.selectAll('.node').style("stroke-width", NODE_STROKE_WIDTH / scale)
+		d3.selectAll('circle.nodeIsPinned').style('stroke-width', PINNED_NODE_STROKE_SIZE / scale)
+		d3.selectAll('.nodeCircle').data(nodes, function(d){return d.treeIndex})
+			.attr('r', function(d){return d.chargeMultiple * PINNED_NODE_CIRCLE_RADIUS/scale})
+			.style('stroke-width', NODE_STROKE_WIDTH/scale);
+		// vis.selectAll('circle').attr('r', function(d){return 10/scale})
+		d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/scale);
+		// d3.selectAll('text').style('font-size', 30/scale)
+		d3.selectAll('.parentChild').style('stroke-width', LINE_PARENTCHILD_STROKE_WIDTH/scale)
+		d3.selectAll('node.selected').style('stroke-width', NODE_SELECTED_STROKE_WIDTH/scale);
+		d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/scale);
+		d3.selectAll('circle.nodeIsPinned').style('stroke-width', NODE_STROKE_WIDTH/scale)
+									.attr('r', PINNED_NODE_CIRCLE_RADIUS/scale);
+		d3.selectAll('circle.nodeNotPinned').style('stroke-width', 0/scale)
+									.attr('r',UNPINNED_NODE_CIRCLE_RADIUS/scale);
 	}
 
 	function preLayout() {
@@ -326,27 +440,32 @@
 
 	function zoom(x,y,s) {
 	zoomer.translate([x,y]).scale(s);
+	// zoomer.translate
 	vis.transition().duration(1000).attr('transform','translate(' + x + ',' + y + ') scale(' + s + ')')
 	}
 
 	function zoomReset() {
-	// TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
-	zoom(0,0,1)
+		var scale = zoomer.scale()
+		// TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
+		zoom(0,0,1)
 	}
 
 	function zoomToSelection() {
-	domTargets = document.getElementsByClassName('selected')
-	if (domTargets.length != 1) {return false}
-	if (domTargets[0].nodeName == 'line') {
-		x = getSelectedLink()['source']['x']
-		y = getSelectedLink()['source']['y']
-	}
-	else {
-		x = getSelectedNode()['x']
-		y = getSelectedNode()['y']
-	}
-	// Zooming to a node's coordinates puts the node in the upper-left corner of the svg, and the fudge factor was worked out from that.
-	zoom(-1*x+graphSvg.clientWidth/2, -1*y+graphSvg.clientHeight/2, 1)
+		domTargets = document.getElementsByClassName('selected')
+		if (domTargets.length != 1) {return false}
+		if (domTargets[0].nodeName == 'line') {
+			x = getSelectedLink()['source']['x']
+			y = getSelectedLink()['source']['y']
+		}
+		else {
+			x = getSelectedNode()['x']
+			y = getSelectedNode()['y']
+		}
+		// var scale = zoomer.scale()
+		// Zooming to a node's coordinates puts the node in the upper-left corner of the svg, and the fudge factor was worked out from that.
+		// TODO: need to dynamic draw graph when find next
+		zoom(-1*x+graphSvg.clientWidth/2, -1*y+graphSvg.clientHeight/2, 1)
+		// redraw()
 	}
 
 	function getCenterCoordinates() {
@@ -796,16 +915,24 @@
 	}
 
 	function nextTreeKey() {
-	keyList = Object.keys(tree)
-	max = 0
-	for (x in keyList) {intKey = parseInt(keyList[x]); if (intKey > max) max = intKey}
-	return max + 1
+		keyList = Object.keys(tree)
+		max = 0
+		for (x in keyList) {
+			intKey = parseInt(keyList[x]); 
+			if (intKey > max) 
+				max = intKey
+		}
+		return max + 1
 	}
 
 	function findIndex(inOb,field,val) {
-	for (key in inOb) {if (inOb[key][field]==val) {return key}}
-	// if we can't find an index:
-	return ''
+		for (key in inOb) {
+			if (inOb[key][field]==val) {
+				return key
+			}
+		}
+		// if we can't find an index:
+		return ''
 	}
 
 	// ADDING COMPONENTS FUNCTIONS
@@ -821,59 +948,66 @@
 	}
 
 	function newNode(componentName) {
-	// Get the stuff we need.
-	component = clone(components[componentName])
-	treeNewIndex = nextTreeKey()
-	// Put the component in the tree with a new name.
-	tree[treeNewIndex] = component
-	tree[treeNewIndex].name = componentName + String(treeNewIndex)
-	// Add to the nodes.
-	newType = component.object
-	// Hack to make sure we color nodes correctly:
-	if (newType == 'node') newType = 'gridNode'
-	if (undefined != tree[treeNewIndex].bustype && tree[treeNewIndex].bustype == 'SWING') newType += ' swingNode'
-	coords = getCenterCoordinates()
-	nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1, fixed:true, x:coords[0], y:coords[1], px:coords[0], py:coords[1]}
-	nodes.push(nodeToAdd)
-	redraw()
+
+		// Get the stuff we need.
+		component = clone(components[componentName])
+		treeNewIndex = nextTreeKey()
+		// Put the component in the tree with a new name.
+		tree[treeNewIndex] = component
+		tree[treeNewIndex].name = componentName + String(treeNewIndex)
+		// Add to the nodes.
+		newType = component.object
+		// Hack to make sure we color nodes correctly:
+		if (newType == 'node') newType = 'gridNode'
+		if (undefined != tree[treeNewIndex].bustype && tree[treeNewIndex].bustype == 'SWING') newType += ' swingNode'
+		coords = getCenterCoordinates()
+		if (d3.selectAll('.node.gridNode').attr('fixed')=='true') {
+			isfixed = true
+		}
+		else {
+			isfixed = false
+		}
+		nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1, fixed: isfixed, x:coords[0], y:coords[1], px:coords[0], py:coords[1]}
+		nodes.push(nodeToAdd)
+		redraw()
 	}
 
 	function newLink(componentName) {
-	// Fail if we have an incorrect selection.
-	function alreadyLinked(nodeName1, nodeName2) {
-		for (linkId in links) {
-		sourceName = links[linkId].source.name
-		targetName = links[linkId].target.name
-		if ((nodeName1 == sourceName && nodeName2 == targetName) || (nodeName1 == targetName && nodeName2 == sourceName)) {return true}
+		// Fail if we have an incorrect selection.
+		function alreadyLinked(nodeName1, nodeName2) {
+			for (linkId in links) {
+			sourceName = links[linkId].source.name
+			targetName = links[linkId].target.name
+			if ((nodeName1 == sourceName && nodeName2 == targetName) || (nodeName1 == targetName && nodeName2 == sourceName)) {return true}
+			}
+			return false
 		}
-		return false
-	}
-	try {
-		selectedName = getSelectedNode()['name']
-		altSelectedName = getAltSelectedNode()['name']
-	} catch(err) {
-		// Key error!
-		selectedName = undefined
-		altSelectedName = undefined
-	}
-	if (undefined == selectedName || undefined == altSelectedName || selectedName == altSelectedName || alreadyLinked(selectedName, altSelectedName)) {
-		alert('I am sorry, but we cannot insert a link there.')
-		return false
-	}
-	// Get the stuff we need.
-	component = clone(components[componentName])
-	treeNewIndex = nextTreeKey()
-	// Make sure component's to and from are set.
-	component['from'] = selectedName
-	component['to'] = altSelectedName
-	// Put the component in the tree with a new name.
-	tree[treeNewIndex] = component
-	tree[treeNewIndex].name = componentName + String(treeNewIndex)
-	// TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
-	// Add to the links.
-	linkToAdd = {source:nodes[findIndex(nodes,'name',selectedName)], target:nodes[findIndex(nodes,'name',altSelectedName)], treeIndex:treeNewIndex, objectType:'fromTo'}
-	links.push(linkToAdd)
-	redraw()
+		try {
+			selectedName = getSelectedNode()['name']
+			altSelectedName = getAltSelectedNode()['name']
+		} catch(err) {
+			// Key error!
+			selectedName = undefined
+			altSelectedName = undefined
+		}
+		if (undefined == selectedName || undefined == altSelectedName || selectedName == altSelectedName || alreadyLinked(selectedName, altSelectedName)) {
+			alert('I am sorry, but we cannot insert a link there.')
+			return false
+		}
+		// Get the stuff we need.
+		component = clone(components[componentName])
+		treeNewIndex = nextTreeKey()
+		// Make sure component's to and from are set.
+		component['from'] = selectedName
+		component['to'] = altSelectedName
+		// Put the component in the tree with a new name.
+		tree[treeNewIndex] = component
+		tree[treeNewIndex].name = componentName + String(treeNewIndex)
+		// TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
+		// Add to the links.
+		linkToAdd = {source:nodes[findIndex(nodes,'name',selectedName)], target:nodes[findIndex(nodes,'name',altSelectedName)], treeIndex:treeNewIndex, objectType:'fromTo'}
+		links.push(linkToAdd)
+		redraw()
 	}
 
 	function newChildAtSelected(componentName) {
@@ -888,159 +1022,209 @@
 	}
 
 	function newChildAtLocation(component,treeIndex) {
-	treeNewIndex = nextTreeKey()
-	// Make sure component's parent is set.
-	component['parent'] = tree[treeIndex]['name']
-	// Put the component in the tree with a new name.
-	tree[treeNewIndex] = component
-	newName = component['object'] + String(treeNewIndex)
-	tree[treeNewIndex].name = newName
-	// TODO: make absolutely sure we're not clobbering a name. We should just come up with a unique naming convention.
-	// Add to the nodes.
-	nodeToAdd = {name:component.name, objectType:component.object, treeIndex:treeNewIndex, chargeMultiple:1}
-	nodes.push(nodeToAdd)
-	// Add to the links.
-	linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',tree[treeIndex]['name'])], objectType:'parentChild'}
-	links.push(linkToAdd)
+		treeNewIndex = nextTreeKey()
+		newName = component['object'] + String(treeNewIndex)
+		
+		// Make sure component's parent is set.
+		component['parent'] = tree[treeIndex]['name']
+		// decide which attribute should be put into node and tree
+		if (tree[treeIndex].latitude != undefined && tree[treeIndex].longitude != undefined){
+			component['latitude'] = tree[treeIndex].latitude + Math.random() * 4 - 2
+			component['longitude'] = tree[treeIndex].longitude + Math.random() * 4 - 2
+			// Put the component in the tree with a new name.
+			tree[treeNewIndex] = component
+			tree[treeNewIndex].name = newName
+			// Add to the nodes.
+			// TODO: when the previour graph is pinned, it should set fixed as false rather than true
+			if (d3.selectAll('.node.gridNode').attr('fixed')=='true'){
+				isfixed = true
+			}else{
+				
+				isfixed = false
+			}
+			nodeToAdd = {name:component.name, 
+					objectType:component.object, 
+					treeIndex:treeNewIndex, 
+					chargeMultiple:1, 
+					x: component['latitude'],
+					y: component['longitude'],
+					fixed : isfixed}
+			nodes.push(nodeToAdd)
+		}else{
+			if (d3.selectAll('.node.gridNode').attr('fixed')=='true' && tree[treeIndex].latitude != undefined){
+				isfixed = true
+			}else{
+				isfixed = false
+			}
+			tree[treeNewIndex] = component
+			tree[treeNewIndex].name = newName
+			nodeToAdd = {name:component.name, 
+				objectType:component.object, 
+				treeIndex:treeNewIndex, 
+				chargeMultiple:1,
+				fixed: isfixed}
+			nodes.push(nodeToAdd)
+		}
+		
+		// Add to the links.
+		linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',tree[treeIndex]['name'])], objectType:'parentChild'}
+		links.push(linkToAdd)
 	}
 
 	function staticLoadsToHouses() {
-	function randomHouse() {
-		newHouse = {}
-		newHouse['object'] = 'house'
-		newHouse['air_temperature'] = '70'
-		newHouse['cooling_COP'] = randomInt(25,40)/10.0 + ''
-		newHouse['cooling_setpoint'] = 'cooling' + randomInt(1,8) + '*1'
-		newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
-		// House sizing distribution from http://www.census.gov/housing/ahs/
-		// between 1100 and 3000. Probably needs a normal distribution.
-		area = 1800 + 500*randomGaussian()
-		if (area < 500) {area = 500}
-		area = area.toPrecision(2) * 1.0 + ''
-		newHouse['floor_area'] = area
-		newHouse['heating_COP'] = randomInt(20,35)/10.0 + ''
-		newHouse['heating_setpoint'] = 'heating' + randomInt(1,8) + '*1'
-		newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
-		newHouse['mass_temperature'] = '70'
-		skew = 1200*randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newHouse['schedule_skew'] = skew
-		newHouse['thermal_integrity_level'] = randomChoice([1,2,2,2,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6]) + ''
-		treeNewIndex = nextTreeKey()
-		newHouse['name'] = 'synhouse' + treeNewIndex
-		return newHouse
-	}
-	function randomLights() {
-		newLights = {}
-		newLights['object'] = 'ZIPload'
-		newLights['power_fraction'] = '0.400000'
-		newLights['current_fraction'] = '0.300000'
-		newLights['impedance_pf'] = '1.000'
-		newLights['current_pf'] = '1.000'
-		newLights['power_pf'] = '1.000'
-		newLights['impedance_fraction'] = '0.300000'
-		newLights['heatgain_fraction'] = '0.9'
-		power = 1.2 + randomGaussian()
-		if (power < 0) {power = -1*power}
-		power = power.toPrecision(3) * 1.0 + ''
-		newLights['base_power'] = 'LIGHTS*' + 1.33
-		skew = 2000*randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newLights['schedule_skew'] = skew
-		treeNewIndex = nextTreeKey()
-		newLights['name'] = 'synLights' + treeNewIndex
-		return newLights
-	}
-	function randomWaterHeater() {
-		newHeater = {}
-		if (randomChoice([1,2,3]) == 3) {return false}
-		// Static properties.
-		newHeater['object'] = 'waterheater'
-		newHeater['temperature'] = '135'
-		newHeater['tank_volume'] = '50'
-		newHeater['location'] = 'INSIDE'
-		// Uniformly distributed properties.
-		newHeater['heating_element_capacity'] = randomInt(37,53)/10.0 + ''
-		newHeater['thermostat_deadband'] = randomInt(20,60)/10.0 + ''
-		newHeater['demand'] = 'water' + randomInt(1,20) + '*1'
-		newHeater['tank_UA'] = randomInt(20,40)/10.0 + ''
-		// Gaussian properties.
-		skew = 2000*randomGaussian()
-		skew = skew.toPrecision(3) * 1.0 + ''
-		newHeater['schedule_skew'] = skew
-		newHeater['tank_setpoint'] = (randomGaussian()*2+130).toPrecision(3) + ''
-		// between 1100 and 3000. Probably needs a normal distribution.
-		treeNewIndex = nextTreeKey()
-		newHeater['name'] = 'synwaterheater' + treeNewIndex
-		return newHeater
-	}
-	function replaceAllHouses() {
-		for (index in tree) {
-		if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
-			// console.log(tree[index])
-			parentIndex = findIndex(tree, 'name', tree[index]['parent'])
-			deleteObject(index)
-			newHouse = randomHouse()
-			newLights = randomLights()
-			newHeater = randomWaterHeater()
-			newChildAtLocation(newHouse, parentIndex)
-			houseIndex = findIndex(tree, 'name', newHouse['name'])
-			newChildAtLocation(newLights, houseIndex)
-			if (newHeater!=false) {newChildAtLocation(newHeater, houseIndex)}
+		function randomHouse() {
+			newHouse = {}
+			newHouse['object'] = 'house'
+			newHouse['air_temperature'] = '70'
+			newHouse['cooling_COP'] = randomInt(25,40)/10.0 + ''
+			newHouse['cooling_setpoint'] = 'cooling' + randomInt(1,8) + '*1'
+			newHouse['cooling_system_type'] = randomChoice(['ELECTRIC', 'HEAT_PUMP', 'NONE'])
+			// House sizing distribution from http://www.census.gov/housing/ahs/
+			// between 1100 and 3000. Probably needs a normal distribution.
+			area = 1800 + 500*randomGaussian()
+			if (area < 500) {area = 500}
+			area = area.toPrecision(2) * 1.0 + ''
+			newHouse['floor_area'] = area
+			newHouse['heating_COP'] = randomInt(20,35)/10.0 + ''
+			newHouse['heating_setpoint'] = 'heating' + randomInt(1,8) + '*1'
+			newHouse['heating_system_type'] = randomChoice(['RESISTANCE', 'HEAT_PUMP', 'GAS'])
+			newHouse['mass_temperature'] = '70'
+			skew = 1200*randomGaussian()
+			skew = skew.toPrecision(3) * 1.0 + ''
+			newHouse['schedule_skew'] = skew
+			newHouse['thermal_integrity_level'] = randomChoice([1,2,2,2,3,3,3,4,4,4,4,4,4,5,5,5,5,5,5,5,6,6,6]) + ''
+			treeNewIndex = nextTreeKey()
+			newHouse['name'] = 'synhouse' + treeNewIndex
+			return newHouse
 		}
+		function randomLights() {
+			newLights = {}
+			newLights['object'] = 'ZIPload'
+			newLights['power_fraction'] = '0.400000'
+			newLights['current_fraction'] = '0.300000'
+			newLights['impedance_pf'] = '1.000'
+			newLights['current_pf'] = '1.000'
+			newLights['power_pf'] = '1.000'
+			newLights['impedance_fraction'] = '0.300000'
+			newLights['heatgain_fraction'] = '0.9'
+			power = 1.2 + randomGaussian()
+			if (power < 0) {power = -1*power}
+			power = power.toPrecision(3) * 1.0 + ''
+			newLights['base_power'] = 'LIGHTS*' + 1.33
+			skew = 2000*randomGaussian()
+			skew = skew.toPrecision(3) * 1.0 + ''
+			newLights['schedule_skew'] = skew
+			treeNewIndex = nextTreeKey()
+			newLights['name'] = 'synLights' + treeNewIndex
+			return newLights
 		}
-		redraw()
-		removeProgressDialog()
-	}
-	showProgressDialog('Please wait. Houses are being generated.')
-	// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-	setTimeout(replaceAllHouses, 500);
+		function randomWaterHeater() {
+			newHeater = {}
+			if (randomChoice([1,2,3]) == 3) {return false}
+			// Static properties.
+			newHeater['object'] = 'waterheater'
+			newHeater['temperature'] = '135'
+			newHeater['tank_volume'] = '50'
+			newHeater['location'] = 'INSIDE'
+			// Uniformly distributed properties.
+			newHeater['heating_element_capacity'] = randomInt(37,53)/10.0 + ''
+			newHeater['thermostat_deadband'] = randomInt(20,60)/10.0 + ''
+			newHeater['demand'] = 'water' + randomInt(1,20) + '*1'
+			newHeater['tank_UA'] = randomInt(20,40)/10.0 + ''
+			// Gaussian properties.
+			skew = 2000*randomGaussian()
+			skew = skew.toPrecision(3) * 1.0 + ''
+			newHeater['schedule_skew'] = skew
+			newHeater['tank_setpoint'] = (randomGaussian()*2+130).toPrecision(3) + ''
+			// between 1100 and 3000. Probably needs a normal distribution.
+			treeNewIndex = nextTreeKey()
+			newHeater['name'] = 'synwaterheater' + treeNewIndex
+			return newHeater
+		}
+		function replaceAllHouses() {
+			for (index in tree) {
+				if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
+					//get the parent index in tree, actually it is triplex_meter index
+					parentIndex = findIndex(tree, 'name', tree[index]['parent'])
+					// delete the triplex_node
+					deleteObject(index)
+					// create a new node which parent is 
+					newHouse = randomHouse()
+					newLights = randomLights()
+					newHeater = randomWaterHeater()
+					newChildAtLocation(newHouse, parentIndex)
+					houseIndex = findIndex(tree, 'name', newHouse['name'])
+					newChildAtLocation(newLights, houseIndex)
+
+					if (newHeater!=false) {newChildAtLocation(newHeater, houseIndex)}
+				}
+			}
+			redraw()
+			removeProgressDialog()
+		}
+		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
+		showProgressDialog('Please wait. Houses are being generated.')		
+		setTimeout(replaceAllHouses, 1000);
+		
+
 	}
 
 	function solarAdding() {
-	solarPerc = gebi('solarAddingPercentage').value/100.0
-	function makeNewInverter(phases) {
-		newInverter = {}
-		newInverter['object'] = 'inverter'
-		newInverter['phases'] = phases
-		newInverter['generator_status'] = 'ONLINE'
-		newInverter['inverter_type'] = 'PWM'
-		newInverter['generator_mode'] = 'CONSTANT_PF'
-		treeNewIndex = nextTreeKey()
-		newInverter['name'] = 'synInverter' + treeNewIndex
-		return newInverter
-	}
-	function newRandomPanels() {
-		newPanels = {}
-		newPanels['object'] = 'solar'
-		newPanels['generator_mode'] = 'SUPPLY_DRIVEN'
-		newPanels['generator_status'] = 'ONLINE'
-		newPanels['panel_type'] = 'SINGLE_CRYSTAL_SILICON'
-		newPanels['efficiency'] = '0.1' + randomInt(0,5)
-		newPanels['area'] = randomInt(2,8) + '00 sf'
-		treeNewIndex = nextTreeKey()
-		newInverter['name'] = 'synSolar' + treeNewIndex
-		return newPanels
-	}
-	function walkAndAddSolar() {
-		for (index in tree) {
-		if (tree[index].hasOwnProperty('object') && tree[index]['object']=='house') {
-			if (Math.random() < solarPerc) {
-			meterIndex = findIndex(tree, 'name', tree[index]['parent'])
-			newInverter = makeNewInverter(tree[index]['phases'])
-			newPanels = newRandomPanels()
-			newChildAtLocation(newInverter, meterIndex)
-			inverterIndex = findIndex(tree, 'name', newInverter['name'])
-			newChildAtLocation(newPanels, inverterIndex)
+		solarPerc = gebi('solarAddingPercentage').value/100.0
+		function makeNewInverter(phases) {
+			newInverter = {}
+			newInverter['object'] = 'inverter'
+			newInverter['phases'] = phases
+			newInverter['generator_status'] = 'ONLINE'
+			newInverter['inverter_type'] = 'PWM'
+			newInverter['generator_mode'] = 'CONSTANT_PF'
+			treeNewIndex = nextTreeKey()
+			newInverter['name'] = 'synInverter' + treeNewIndex
+			return newInverter
+		}
+		function newRandomPanels() {
+			newPanels = {}
+			newPanels['object'] = 'solar'
+			newPanels['generator_mode'] = 'SUPPLY_DRIVEN'
+			newPanels['generator_status'] = 'ONLINE'
+			newPanels['panel_type'] = 'SINGLE_CRYSTAL_SILICON'
+			newPanels['efficiency'] = '0.1' + randomInt(0,5)
+			newPanels['area'] = randomInt(2,8) + '00 sf'
+			treeNewIndex = nextTreeKey()
+			newInverter['name'] = 'synSolar' + treeNewIndex
+			return newPanels
+		}
+
+		// TODO: 
+		function removeSolar(){
+			// remove node from nodes, and remove accoiated link from link
+			for (x in nodes){
+				if (nodes[x].objectType == 'inverter'|| nodes[x].objectType == 'solar'){
+
+				}
+
 			}
 		}
+		function walkAndAddSolar() {
+			// removeSolar()
+			for (index in tree) {
+				if (tree[index].hasOwnProperty('object') && tree[index]['object']=='house') {
+					if (Math.random() < solarPerc) {
+					meterIndex = findIndex(tree, 'name', tree[index]['parent'])
+					newInverter = makeNewInverter(tree[index]['phases'])
+					newPanels = newRandomPanels()
+					newChildAtLocation(newInverter, meterIndex)
+					inverterIndex = findIndex(tree, 'name', newInverter['name'])
+					newChildAtLocation(newPanels, inverterIndex)
+					}
+				}
+			}
+			redraw()
+			removeProgressDialog()
 		}
-		redraw()
-		removeProgressDialog()
-	}
-	showProgressDialog('Please wait. Solar is being generated.')
-	// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-	setTimeout(walkAndAddSolar, 500);
+		showProgressDialog('Please wait. Solar is being generated.')
+		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
+		setTimeout(walkAndAddSolar, 1000);
 
 	}
 
@@ -1089,40 +1273,44 @@
 	// PINNING FUNCTIONS
 
 	function pinAll() {
-	for (node in nodes) {
-		gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
-		nodes[node].fixed = true
-	}
-	for (hNode in hiddenNodes) {
-		gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
-		hiddenNodes[hNode].fixed = true
-	}
-	force.start()
+		for (node in nodes) {
+			gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
+			nodes[node].fixed = true
+		}
+		for (hNode in hiddenNodes) {
+			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
+			hiddenNodes[hNode].fixed = true
+		}
+
+		
+		redraw()
+		// force.start()
 	}
 
 	function unPinAll() {
-	for (node in nodes) {
-		gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeNotPinned')
-		nodes[node].fixed = false
-	}
-	for (hNode in hiddenNodes) {
-		gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeNotPinned')
-		hiddenNodes[hNode].fixed = false
-	}
-	force.start()
+		for (node in nodes) {
+			gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeNotPinned')
+			nodes[node].fixed = false
+		}
+		for (hNode in hiddenNodes) {
+			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeNotPinned')
+			hiddenNodes[hNode].fixed = false
+		}
+		redraw()
+		// force.start()
 	}
 
 	function toggleSelectedPin() {
-	selNode = getSelectedNode()
-	pinCircle = gebi('pin' + selNode.treeIndex)
-	if (pinCircle.getAttribute('class') == 'nodeIsPinned') {
-		pinCircle.setAttribute('class','nodeNotPinned')
-		selNode.fixed = false
-	} else {
-		pinCircle.setAttribute('class','nodeIsPinned')
-		selNode.fixed = true
-	}
-	force.start()
+		selNode = getSelectedNode()
+		pinCircle = gebi('pin' + selNode.treeIndex)
+		if (pinCircle.getAttribute('class') == 'nodeIsPinned') {
+			pinCircle.setAttribute('class','nodeNotPinned')
+			selNode.fixed = false
+		} else {
+			pinCircle.setAttribute('class','nodeIsPinned')
+			selNode.fixed = true
+		}
+		force.start()
 	}
 
 	// LAYOUT MENU FUNCTIONS
@@ -1136,6 +1324,7 @@
 	gebi('thetaBox').value = force.theta()
 	gebi('frictionBox').value = force.friction()
 	gebi('linkStrengthBox').value = force.linkStrength()
+	gebi('chargeBox').value = force.charge()
 	}
 
 	function layoutMenuApply() {
@@ -1143,6 +1332,7 @@
 	force.theta(gebi('thetaBox').value)
 	force.friction(gebi('frictionBox').value)
 	force.linkStrength(gebi('linkStrengthBox').value)
+	force.charge(gebi('chargeBox').value)
 	force.start()
 	}
 
@@ -1313,6 +1503,7 @@
 	}
 	// And go at it:
 	draw()
+	// drawScaleRuler()
 	layoutMenuInit()
 	})
 
