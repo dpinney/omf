@@ -25,14 +25,14 @@ def writeToSQS():
 	from boto.sqs.connection import SQSConnection
 	import time
 	conn = SQSConnection('AKIAIFNNIT7VXOXVFPIQ', 'stNtF2dlPiuSigHNcs95JKw06aEkOAyoktnWqXq+')
-	q = conn.get_queue('crnOmfJobQueue')
+	q = conn.get_queue('dwpTestQueue')
 	m = q.new_message('Test Message ' + str(time.time()))
 	q.write(m)
 
 def pingSQS():
 	from boto.sqs.connection import SQSConnection
 	conn = SQSConnection('AKIAIFNNIT7VXOXVFPIQ', 'stNtF2dlPiuSigHNcs95JKw06aEkOAyoktnWqXq+')
-	q = conn.get_queue('crnOmfJobQueue')
+	q = conn.get_queue('dwpTestQueue')
 	print 'OMF message count:', q.count()
 
 def endlessPinging():
