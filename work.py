@@ -130,7 +130,6 @@ def monitorClusterQueue():
 				thisAnalysis = omf.analysis.Analysis(omf.store.get('Analysis', anaName))
 				daemonWorker.run(thisAnalysis, omf.store)
 		if daemonWorker.runningJobCount.value() > 0:
-			# TODO: can't just pop a job here!
 			anaName = popJob(terminateQueue)
 			if anaName != False:
 				print 'Terminating', anaName
