@@ -77,13 +77,13 @@ class ClusterWorker:
 		self.terminateQueue = self.conn.get_queue(terminateQueueName)
 	def run(self, analysisObject, store):
 		m = Message()
-		m.set_body(analysisName)
+		m.set_body(analysisObject.name)
 		status = self.workQueue.write(m)
 		return status
-	def terminate(self, analysisObject, store):
+	def terminate(self, anaName):
 		m = Message()
-		m.set_body(analysisName)
-		status = self.terminateQueue(m)
+		m.set_body(anaName)
+		status = self.terminateQueue.write(m)
 		return status
 
 def monitorClusterQueue():
