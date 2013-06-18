@@ -7,7 +7,7 @@ import analysis, feeder, reports, studies, milToGridlab, storage, work
 
 app = flask.Flask(__name__)
 
-USER_PASS='YEAHRIGHT' # DO NOT EDIT THIS LINE! DEPLOYMENT SCRIPTS RELY ON IT!
+USER_PASS="YEAHRIGHT" # DO NOT EDIT THIS LINE! DEPLOYMENT SCRIPTS RELY ON IT!
 
 if USER_PASS == 'YEAHRIGHT':
 	store = storage.Filestore('data')
