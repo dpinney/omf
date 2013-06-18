@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 
 '''
 One queue, stores tuples (analysisName, requestType). Or maybe have two queues, whatever.
@@ -24,7 +25,8 @@ We need to handle two cases:
 2. S3 cluster case. Have a cluterQueue class, and also have a daemon.
 
 '''
-
+import os
+import studies
 import multiprocessing
 from threading import Timer
 from boto.sqs.connection import SQSConnection
@@ -42,26 +44,39 @@ class backgroundProc(multiprocessing.Process):
 	def run(self):
 		self.backFun(*self.funArgs)
 
-class LocalQueue:
+class LocalWorker:
 	def __init__(self):
 		pass
-	def executeAnalysis(self, jobOb):
-		pass
-	def terminateAnalysis(self, jobOb):
+	def run(self, analysisObject, store):
+		runProc = backgroundProc(self.runInBackground, [analysisObject, store])
+		runProc.start()
+	def runInBackground(self, anaObject, store):
+		def studyInstance(studyName):
+			studyData = store.get('Study', anaObject.name + '---' + studyName)
+			studyData.update({'name':studyName,'analysisName':anaObject.name})
+			moduleRef = getattr(studies, studyData['studyType'])
+			classRef = getattr(moduleRef, studyData['studyType'].capitalize())
+			return classRef(studyData)
+		studyList = [studyInstance(studyName) for studyName in anaObject.studyNames]
+		anaObject.run(studyList)
+		store.put('Analysis', anaObject.name, anaObject.__dict__)
+		for study in studyList:
+			store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
+	def terminate(self, analysisObject, store):
 		pass
 
-class ClusterQueue:
+class ClusterWorker:
 	def __init__(self, userKey, passKey, workQueueName, terminateQueueName):
 		self.runningJobs = 0
 		self.conn = SQSConnection(userKey, passKey)
 		self.workQueue = self.conn.get_queue(workQueueName)
 		self.terminateQueue = self.conn.get_queue(terminateQueueName)
-	def queueWork(self, analysisName):
+	def run(self, analysisObject, store):
 		m = Message()
 		m.set_body(analysisName)
 		status = self.workQueue.write(m)
 		return status
-	def queueTerminate(self, analysisName):
+	def terminate(self, analysisObject, store):
 		m = Message()
 		m.set_body(analysisName)
 		status = self.terminateQueue(m)

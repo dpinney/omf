@@ -11,8 +11,10 @@ USER_PASS='YEAHRIGHT' # DO NOT EDIT THIS LINE! DEPLOYMENT SCRIPTS RELY ON IT!
 
 if USER_PASS == 'YEAHRIGHT':
 	store = storage.Filestore('data')
+	worker = work.LocalWorker()
 else:
 	store = storage.S3store('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnomf')
+	worker = work.ClusterWorker('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnOmfJobQueue', 'crnOmfTerminateQueue')
 
 class backgroundProc(multiprocessing.Process):
 	def __init__(self, backFun, funArgs):
@@ -105,23 +107,9 @@ def run():
 	thisAnalysis = analysis.Analysis(store.get('Analysis', anaName))
 	thisAnalysis.status = 'running'
 	store.put('Analysis', anaName, thisAnalysis.__dict__)
-	runProc = backgroundProc(analysisRun, [thisAnalysis, store])
-	runProc.start()
+	worker.run(thisAnalysis, store)
+	print "GOT HERE", thisAnalysis, store
 	return flask.render_template('metadata.html', md=thisAnalysis.__dict__)
-
-# Helper function that runs an analyses in a new process.
-def analysisRun(anaObject, store):
-	def studyInstance(studyName):
-		studyData = store.get('Study', anaObject.name + '---' + studyName)
-		studyData.update({'name':studyName,'analysisName':anaObject.name})
-		moduleRef = getattr(studies, studyData['studyType'])
-		classRef = getattr(moduleRef, studyData['studyType'].capitalize())
-		return classRef(studyData)
-	studyList = [studyInstance(studyName) for studyName in anaObject.studyNames]
-	anaObject.run(studyList)
-	store.put('Analysis', anaObject.name, anaObject.__dict__)
-	for study in studyList:
-		store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
 
 @app.route('/delete/', methods=['POST'])
 def delete():
@@ -230,6 +218,7 @@ def milsoftImport():
 	time.sleep(1)
 	return flask.redirect(flask.url_for('root') + '#feeders')
 
+# Helper function for importing.
 def milImportAndConvert(store, feederName, stdName, seqName):
 	store.put('Conversion', feederName, {'data':'none'})
 	newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5'}}
