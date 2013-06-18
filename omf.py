@@ -108,7 +108,6 @@ def run():
 	thisAnalysis.status = 'running'
 	store.put('Analysis', anaName, thisAnalysis.__dict__)
 	worker.run(thisAnalysis, store)
-	print "GOT HERE", thisAnalysis, store
 	return flask.render_template('metadata.html', md=thisAnalysis.__dict__)
 
 @app.route('/delete/', methods=['POST'])

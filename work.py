@@ -25,9 +25,8 @@ We need to handle two cases:
 2. S3 cluster case. Have a cluterQueue class, and also have a daemon.
 
 '''
-import os
+import os, multiprocessing
 import studies
-import multiprocessing
 from threading import Timer
 from boto.sqs.connection import SQSConnection
 from boto.sqs.message import Message
