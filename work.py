@@ -25,32 +25,48 @@ We need to handle two cases:
 2. S3 cluster case. Have a cluterQueue class, and also have a daemon.
 '''
 
-import os, multiprocessing
+import os
+from multiprocessing import Process, Value, Lock
 import studies
 from threading import Timer
 from boto.sqs.connection import SQSConnection
 from boto.sqs.message import Message
 
-JOB_LIMIT=1
+JOB_LIMIT = 1
 
-class backgroundProc(multiprocessing.Process):
+class backgroundProc(Process):
 	def __init__(self, backFun, funArgs):
 		self.name = 'omfWorkerProc'
 		self.backFun = backFun
 		self.funArgs = funArgs
 		self.myPid = os.getpid()
-		multiprocessing.Process.__init__(self)
+		Process.__init__(self)
 	def run(self):
 		self.backFun(*self.funArgs)
 
+class MultiCounter(object):
+    def __init__(self, initval=0):
+        self.val = Value('i', initval)
+        self.lock = Lock()
+    def increment(self):
+        with self.lock:
+            self.val.value += 1
+    def decrement(self):
+    	with self.lock:
+    		self.val.value -= 1
+    def value(self):
+        with self.lock:
+            return self.val.value
+
 class LocalWorker:
 	def __init__(self):
-		pass
+		self.runningJobCount = MultiCounter(0)
 	def run(self, analysisObject, store):
 		runProc = backgroundProc(self.runInBackground, [analysisObject, store])
 		runProc.start()
 	def runInBackground(self, anaObject, store):
 		# Setup.
+		self.runningJobCount.increment()
 		def studyInstance(studyName):
 			studyData = store.get('Study', anaObject.name + '---' + studyName)
 			studyData.update({'name':studyName,'analysisName':anaObject.name})
@@ -64,6 +80,7 @@ class LocalWorker:
 		store.put('Analysis', anaObject.name, anaObject.__dict__)
 		for study in studyList:
 			store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
+		self.runningJobCount.decrement()
 	def terminate(self, anaName):
 		for runDir in os.listdir('running'):
 			if runDir.startswith(anaName + '---'):
@@ -92,7 +109,6 @@ class ClusterWorker:
 def monitorClusterQueue():
 	print 'Entering Daemon Mode.'
 	import omf
-	runningJobs = 0
 	conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', omf.USER_PASS)
 	jobQueue = conn.get_queue('crnOmfJobQueue')
 	terminateQueue = conn.get_queue('crnOmfTerminateQueue')
@@ -106,17 +122,19 @@ def monitorClusterQueue():
 		else:
 			return False
 	def endlessLoop():
-		if runningJobs < JOB_LIMIT:
+		# print 'Currently running', daemonWorker.runningJobCount.value(), 'jobs.'
+		if daemonWorker.runningJobCount.value() < JOB_LIMIT:
 			anaName = popJob(jobQueue)
 			if anaName != False:
-				runningJobs += 1
-				# TODO: Get analysis stuff from storage, run it here.
-				pass
-		if runningJobs > 0:
+				print 'Running', anaName
+				thisAnalysis = omf.analysis.Analysis(omf.store.get('Analysis', anaName))
+				daemonWorker.run(thisAnalysis, omf.store)
+		if daemonWorker.runningJobCount.value() > 0:
+			# TODO: can't just pop a job here!
 			anaName = popJob(terminateQueue)
 			if anaName != False:
-				# TODO: Try to terminate. 
-				if TERMINATION_SUCCESS: runningJobs -= 1
+				print 'Terminating', anaName
+				daemonWorker.terminate(anaName)
 		# Check again in 1 second:
 		Timer(1, endlessLoop).start()
 	endlessLoop()
