@@ -7,14 +7,17 @@ import analysis, feeder, reports, studies, milToGridlab, storage, work
 
 app = flask.Flask(__name__)
 
-USER_PASS="YEAHRIGHT" # DO NOT EDIT THIS LINE! DEPLOYMENT SCRIPTS RELY ON IT!
-
-if USER_PASS == 'YEAHRIGHT':
-	store = storage.Filestore('data')
-	worker = work.LocalWorker()
-else:
+try:
+	with open('S3KEY.txt','r') as keyFile:
+		USER_PASS = keyFile.read()
 	store = storage.S3store('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnomf')
 	worker = work.ClusterWorker('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnOmfJobQueue', 'crnOmfTerminateQueue')
+	print 'Running on S3 cluster.'
+except:
+	USER_PASS = 'YEAHRIGHT'
+	store = storage.Filestore('data')
+	worker = work.LocalWorker()
+	print 'Running on local file system.'
 
 class backgroundProc(multiprocessing.Process):
 	def __init__(self, backFun, funArgs):

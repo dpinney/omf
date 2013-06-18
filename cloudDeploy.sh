@@ -7,10 +7,7 @@ echo "** Resetting to head and pulling the latest source from git."
 git reset --hard
 git pull
 echo "** Updating database key."
-sedHead='s/USER_PASS="YEAHRIGHT"/USER_PASS="'
-sedTail='"/g'
-sedArg=$sedHead$1$sedTail
-sed -i $sedArg omf.py
+cat $1 > S3KEY.txt
 echo "** Setting permissions."
 chown -R omfwsgi *
 chgrp -R omfwsgi *

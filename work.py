@@ -89,15 +89,15 @@ class ClusterWorker:
 def monitorClusterQueue():
 	print 'Entering Daemon Mode.'
 	import omf
+	runningJobs = 0
 	conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', omf.USER_PASS)
 	jobQueue = conn.get_queue('crnOmfJobQueue')
 	terminateQueue = conn.get_queue('crnOmfTerminateQueue')
-	runningJobs = 0
-	def popJob(queueName):
-		mList = queueName.get_messages(1)
+	def popJob(queueObject):
+		mList = queueObject.get_messages(1)
 		if len(mList) == 1:
 			anaName = mList[0].get_body()
-			queueName.delete_message(mList[0])
+			queueObject.delete_message(mList[0])
 			return anaName
 		else:
 			return False
@@ -114,7 +114,7 @@ def monitorClusterQueue():
 				# TODO: Try to terminate. 
 				if TERMINATION_SUCCESS: runningJobs -= 1
 		# Check again in 1 second:
-		Timer(1, repeating).start()
+		Timer(1, endlessLoop).start()
 	endlessLoop()
 
 if __name__ == '__main__':

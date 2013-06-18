@@ -6,3 +6,4 @@ analyses/*
 logs/*.log
 # But include a few example analyses:
 !analyses/z*
+S3KEY.txt
