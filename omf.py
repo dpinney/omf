@@ -163,13 +163,7 @@ def saveAnalysis():
 @app.route('/terminate/', methods=['POST'])
 def terminate():
 	anaName = flask.request.form['analysisName']
-	for runDir in os.listdir('running'):
-		if runDir.startswith(anaName + '---'):
-			try:
-				with open('running/' + runDir + '/PID.txt','r') as pidFile:
-					os.kill(int(pidFile.read()), 15)
-			except:
-				pass
+	worker.terminate(anaName)
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/feederData/<anaFeeder>/<feederName>.json')

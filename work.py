@@ -62,8 +62,14 @@ class LocalWorker:
 		store.put('Analysis', anaObject.name, anaObject.__dict__)
 		for study in studyList:
 			store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
-	def terminate(self, analysisObject, store):
-		pass
+	def terminate(self, anaName):
+		for runDir in os.listdir('running'):
+			if runDir.startswith(anaName + '---'):
+				try:
+					with open('running/' + runDir + '/PID.txt','r') as pidFile:
+						os.kill(int(pidFile.read()), 15)
+				except:
+					pass
 
 class ClusterWorker:
 	def __init__(self, userKey, passKey, workQueueName, terminateQueueName):
