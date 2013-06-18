@@ -72,7 +72,6 @@ class LocalWorker:
 
 class ClusterWorker:
 	def __init__(self, userKey, passKey, workQueueName, terminateQueueName):
-		self.runningJobs = 0
 		self.conn = SQSConnection(userKey, passKey)
 		self.workQueue = self.conn.get_queue(workQueueName)
 		self.terminateQueue = self.conn.get_queue(terminateQueueName)
@@ -88,6 +87,7 @@ class ClusterWorker:
 		return status
 
 def monitorClusterQueue():
+	print 'Entering Daemon Mode.'
 	import omf
 	conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', omf.USER_PASS)
 	jobQueue = conn.get_queue('crnOmfJobQueue')
