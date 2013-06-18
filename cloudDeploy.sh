@@ -7,7 +7,7 @@ echo "** Resetting to head and pulling the latest source from git."
 git reset --hard
 git pull
 echo "** Updating database key."
-echo "$1" > S3KEY.txt
+echo -n "$1" > S3KEY.txt
 echo "** Setting permissions."
 chown -R omfwsgi *
 chgrp -R omfwsgi *
