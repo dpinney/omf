@@ -23,8 +23,8 @@ Queue limits?
 We need to handle two cases:
 1. Filesystem case. Just have a dumb fileQueue class that has no limits, etc.?
 2. S3 cluster case. Have a cluterQueue class, and also have a daemon.
-
 '''
+
 import os, multiprocessing
 import studies
 from threading import Timer
@@ -45,11 +45,12 @@ class backgroundProc(multiprocessing.Process):
 
 class LocalWorker:
 	def __init__(self):
-		pass
+		self.runDict = {}
 	def run(self, analysisObject, store):
 		runProc = backgroundProc(self.runInBackground, [analysisObject, store])
 		runProc.start()
 	def runInBackground(self, anaObject, store):
+		# Setup.
 		def studyInstance(studyName):
 			studyData = store.get('Study', anaObject.name + '---' + studyName)
 			studyData.update({'name':studyName,'analysisName':anaObject.name})
@@ -57,10 +58,20 @@ class LocalWorker:
 			classRef = getattr(moduleRef, studyData['studyType'].capitalize())
 			return classRef(studyData)
 		studyList = [studyInstance(studyName) for studyName in anaObject.studyNames]
-		anaObject.run(studyList)
+		# Run.
+		self.runDict[anaObject.name] = backgroundProc(anaObject.run, [studyList])
+		self.runDict[anaObject.name].start()
+		self.runDict[anaObject.name].join()
+		# Storing result.
+		if self.runDict[anaObject.name].exitcode == 0:
+			anaObject.status = 'postRun'
+			for study in studyList:
+				store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
+		if self.runDict[anaObject.name].exitcode != 0:
+			anaObject.status = 'terminated'
+		del self.runDict[anaObject.name]
 		store.put('Analysis', anaObject.name, anaObject.__dict__)
-		for study in studyList:
-			store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
+
 	def terminate(self, anaName):
 		for runDir in os.listdir('running'):
 			if runDir.startswith(anaName + '---'):
@@ -93,6 +104,7 @@ def monitorClusterQueue():
 	conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', omf.USER_PASS)
 	jobQueue = conn.get_queue('crnOmfJobQueue')
 	terminateQueue = conn.get_queue('crnOmfTerminateQueue')
+	daemonWorker = LocalWorker()
 	def popJob(queueObject):
 		mList = queueObject.get_messages(1)
 		if len(mList) == 1:

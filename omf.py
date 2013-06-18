@@ -106,10 +106,12 @@ def uniqueName(name):
 @app.route('/run/', methods=['POST'])
 @app.route('/reRun/', methods=['POST'])
 def run():
+	# Get the analysis, and set it running on the data store.
 	anaName = flask.request.form.get('analysisName')
 	thisAnalysis = analysis.Analysis(store.get('Analysis', anaName))
 	thisAnalysis.status = 'running'
 	store.put('Analysis', anaName, thisAnalysis.__dict__)
+	# Run in background and immediately return.
 	worker.run(thisAnalysis, store)
 	return flask.render_template('metadata.html', md=thisAnalysis.__dict__)
 
