@@ -45,7 +45,7 @@ class backgroundProc(multiprocessing.Process):
 
 class LocalWorker:
 	def __init__(self):
-		self.runDict = {}
+		pass
 	def run(self, analysisObject, store):
 		runProc = backgroundProc(self.runInBackground, [analysisObject, store])
 		runProc.start()
@@ -59,19 +59,11 @@ class LocalWorker:
 			return classRef(studyData)
 		studyList = [studyInstance(studyName) for studyName in anaObject.studyNames]
 		# Run.
-		self.runDict[anaObject.name] = backgroundProc(anaObject.run, [studyList])
-		self.runDict[anaObject.name].start()
-		self.runDict[anaObject.name].join()
+		anaObject.run(studyList)
 		# Storing result.
-		if self.runDict[anaObject.name].exitcode == 0:
-			anaObject.status = 'postRun'
-			for study in studyList:
-				store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
-		if self.runDict[anaObject.name].exitcode != 0:
-			anaObject.status = 'terminated'
-		del self.runDict[anaObject.name]
 		store.put('Analysis', anaObject.name, anaObject.__dict__)
-
+		for study in studyList:
+			store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
 	def terminate(self, anaName):
 		for runDir in os.listdir('running'):
 			if runDir.startswith(anaName + '---'):
