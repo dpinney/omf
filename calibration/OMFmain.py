@@ -73,13 +73,17 @@ def OMFmain(milsoft, feeder_info, scada, case_flag, feeder_config, calibration_c
 			final_dict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(outGLM,case_flag,calibration_config,feeder_config)
 		#AddTapeObjects
 		filename = 'test_feeder'
-		AddTapeObjects.add_recorders(final_dict,None,last_key,None,1,0,filename,None,0,0)
-		#TODO: Turn final_dict into a .glm and return it to the user. 
-		glmstring = feeder.sortedWrite(final_dict)
+		if final_dict is not None:
+			AddTapeObjects.add_recorders(final_dict,None,last_key,None,1,0,filename,None,0,0)
 		
-		file = open(directory+'\\'+filename+'.glm', 'w')
-		file.write(glmstring)
-		file.close()
+			#TODO: Turn final_dict into a .glm and return it to the user. 
+			glmstring = feeder.sortedWrite(final_dict)
+		
+			file = open(directory+'\\'+filename+'.glm', 'w')
+			file.write(glmstring)
+			file.close()
+		else:
+			pass
 		
 def main():
 	# test run with pre-made dictionary simuating output from milToGridlab.py. All other parameters are None. Note that SCADA input just needs to be not None for this test-- the values are imput directily into processSCADA.py rather than actually being taken from a file right now.
@@ -128,7 +132,7 @@ def main():
 						  'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
 						  'install_type' : 'PADMOUNT',
 						  'primary_voltage' : '2400',
-						  'secondary_voltage' : '124',
+						  'secondary_voltage' : '120',
 						  'power_rating' : '500',
 						  'powerA_rating' : '500',
 						  'impedance' : '0.015+0.0675j'}
@@ -138,7 +142,7 @@ def main():
 						  'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
 						  'install_type' : 'PADMOUNT',
 						  'primary_voltage' : '2400',
-						  'secondary_voltage' : '124',
+						  'secondary_voltage' : '120',
 						  'power_rating' : '500',
 						  'powerB_rating' : '500',
 						  'impedance' : '0.015+0.0675j'}
@@ -148,7 +152,7 @@ def main():
 						  'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
 						  'install_type' : 'PADMOUNT',
 						  'primary_voltage' : '2400',
-						  'secondary_voltage' : '124',
+						  'secondary_voltage' : '120',
 						  'power_rating' : '666.7',
 						  'powerC_rating' : '666.7',
 						  'impedance' : '0.015+0.0675j'}

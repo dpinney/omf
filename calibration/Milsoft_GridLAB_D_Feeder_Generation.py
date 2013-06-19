@@ -661,7 +661,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 					if 'power_1' in glmCaseDict[x]:
 						del glmCaseDict[x]['power_1']
 
-					if total_house_number == 0 and load > 0: # Residential street light
+					if number_of_houses == 0 and load > 0.0: # Residential street light
 						glmCaseDict[x]['power_12_real'] = 'street_lighting*{.4f}'.format(c_num.real*tech_data['light_scalar_res'])
 						glmCaseDict[x]['power_12_reac'] = 'street_lighting*{.4f}'.format(c_num.imag*tech_data['light_scalar_res'])
 

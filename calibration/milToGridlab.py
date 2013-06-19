@@ -4,6 +4,7 @@ import csv
 import feeder
 import os
 import shutil
+import math
 
 def omfConvert(feederName, stdName, seqName):
 	''' Take in two uploads and a name, create a feeder. '''
@@ -87,12 +88,14 @@ def convert(stdPath,seqPath):
 		# -----------------------------------------------
 
 		def convertSwitch(switchList):
+			#print('Converting switch')
 			switch = convertGenericObject(switchList)
 			switch['status'] = ('OPEN' if switchList[9]=='O' else 'CLOSED')
 			switch['phases'] = switchList[2] + 'N'
 			return switch
 
 		def convertOvercurrentDevice(ocDeviceList):
+			#print('Converting fuse')
 			fuse = convertGenericObject(ocDeviceList)
 			fuse['phases'] = ocDeviceList[2] + 'N'
 			#TODO: set fuse current_limit correctly.
@@ -100,6 +103,7 @@ def convert(stdPath,seqPath):
 			return fuse
 
 		def convertGenerator(genList):
+			#print('Converting generator')
 			generator = convertGenericObject(genList)
 			generator['Gen_mode'] = 'CONSTANTP'
 			generator['Gen_status'] = ('OFFLINE' if genList[26]=='1' else 'ONLINE')
@@ -107,6 +111,7 @@ def convert(stdPath,seqPath):
 			return generator
 
 		def convertMotor(motorList):
+			#print('Converting motor')
 			motor = convertGenericObject(motorList)
 			motor['Gen_mode'] = 'CONSTANTP'
 			# Convert horsepower to kW:
@@ -121,6 +126,7 @@ def convert(stdPath,seqPath):
 			return motor
 
 		def convertConsumer(consList):
+			#print('Converting load')
 			consumer = convertGenericObject(consList)
 			consumer['phases'] = consList[2] + 'N'
 			loadClassMap = {	0 : 'R',
@@ -137,13 +143,14 @@ def convert(stdPath,seqPath):
 							}
 			consumer['load_class'] = loadClassMap[int(consList[23])]
 			#TODO: support kVars.
-			consumer['constant_power_A'] = ('100' if float(consList[12])*1000<100 else str(float(consList[12])*1000))
-			consumer['constant_power_B'] = ('100' if float(consList[13])*1000<100 else str(float(consList[13])*1000))
-			consumer['constant_power_C'] = ('100' if float(consList[14])*1000<100 else str(float(consList[14])*1000))
+			consumer['constant_power_A'] = str(float(consList[12])*1000) + ('+' if float(consList[15]) >= 0.0 else '-') + str(abs(float(consList[15])*1000)) + 'j'
+			consumer['constant_power_B'] = str(float(consList[13])*1000) + ('+' if float(consList[16]) >= 0.0 else '-') + str(abs(float(consList[16])*1000)) + 'j'
+			consumer['constant_power_C'] = str(float(consList[14])*1000) + ('+' if float(consList[17]) >= 0.0 else '-') + str(abs(float(consList[17])*1000)) + 'j'
 			consumer['nominal_voltage'] = '120'
 			return consumer
 
 		def convertNode(nodeList):
+			#print('Converting node')
 			node = convertGenericObject(nodeList)
 			node['phases'] = nodeList[2] + 'N'
 			#TODO: can we get nominal voltage from the windmil file?
@@ -151,6 +158,7 @@ def convert(stdPath,seqPath):
 			return node
 
 		def convertSource(sourceList):
+			#print('Converting swing node')
 			source = convertGenericObject(sourceList)
 			source['phases'] = sourceList[2]+ 'N'
 			source['nominal_voltage'] = str(float(sourceList[14])*1000)
@@ -158,6 +166,7 @@ def convert(stdPath,seqPath):
 			return source
 
 		def convertCapacitor(capList):
+			#print('Converting capacitor')
 			capacitor = convertGenericObject(capList)
 			capacitor['phases'] = capList[2]+ 'N'
 			#TODO: change these from just default values:
@@ -183,6 +192,7 @@ def convert(stdPath,seqPath):
 			return capacitor
 
 		def convertOhLine(ohLineList):
+			#print('Converting overhead line')
 			myIndex = components.index(objectList)*subObCount
 			overhead = convertGenericObject(ohLineList)
 			# TODO: be smarter about multiple neutrals.
@@ -191,21 +201,68 @@ def convert(stdPath,seqPath):
 			overhead[myIndex+1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
 							'name': overhead['name'] + '-LINECONFIG'}
 			overhead[myIndex+1][myIndex+2] = {	'omfEmbeddedConfigObject' : 'spacing object line_spacing',
-								'name': overhead['name'] + '-LINESPACING',
-								'distance_BC': '7.0',
-								'distance_CN': '5.0',
-								'distance_AN': '4.272002',
-								'distance_AB': '2.5',
-								'distance_BN': '5.656854',
-								'distance_AC': '4.5'}
+								'name': overhead['name'] + '-LINESPACING'}
+			#Grab line spacing distances
+			# Find name of construction code
+			if ohLineList[13] == 'NONE':
+				construction_description = 'SystemCnstDefault'
+			else:
+				construction_description = ohLineList[13]
+			
+			# Find the construction code in hardwareStats
+			construction_stats = statsByName(construction_description)
+			if construction_stats is None:
+				#Couldn't find construction object. Using defalut phase distances. Distances are from IEEE 4 Node
+				Dab = 2.5
+				Dac = 7.0
+				Dan = 5.656854
+				Dbc = 4.5
+				Dbn = 4.272002
+				Dcn = 5.0
+			else:
+				# Find the distances in feet between each conductor
+				Dab = math.sqrt(((float(construction_stats[19]) - float(construction_stats[20]))*(float(construction_stats[19]) - float(construction_stats[20]))) + ((float(construction_stats[23]) - float(construction_stats[24]))*(float(construction_stats[23]) - float(construction_stats[24]))))/12
+				Dac = math.sqrt(((float(construction_stats[19]) - float(construction_stats[21]))*(float(construction_stats[19]) - float(construction_stats[21]))) + ((float(construction_stats[23]) - float(construction_stats[25]))*(float(construction_stats[23]) - float(construction_stats[25]))))/12
+				Dan = math.sqrt(((float(construction_stats[19]) - float(construction_stats[22]))*(float(construction_stats[19]) - float(construction_stats[22]))) + ((float(construction_stats[23]) - float(construction_stats[26]))*(float(construction_stats[23]) - float(construction_stats[26]))))/12
+				Dbc = math.sqrt(((float(construction_stats[20]) - float(construction_stats[21]))*(float(construction_stats[20]) - float(construction_stats[21]))) + ((float(construction_stats[24]) - float(construction_stats[25]))*(float(construction_stats[24]) - float(construction_stats[25]))))/12
+				Dbn = math.sqrt(((float(construction_stats[20]) - float(construction_stats[22]))*(float(construction_stats[20]) - float(construction_stats[22]))) + ((float(construction_stats[24]) - float(construction_stats[26]))*(float(construction_stats[24]) - float(construction_stats[26]))))/12
+				Dcn = math.sqrt(((float(construction_stats[21]) - float(construction_stats[22]))*(float(construction_stats[21]) - float(construction_stats[22]))) + ((float(construction_stats[25]) - float(construction_stats[26]))*(float(construction_stats[25]) - float(construction_stats[26]))))/12
+			# Add distances to dictionary when appropriate
+			if 'A' in overhead['phases'] and 'B' in overhead['phases']:
+				overhead[myIndex+1][myIndex+2]['distance_AB'] = '{:0.6f}'.format(Dab)
+			else:
+				overhead[myIndex+1][myIndex+2]['distance_AB'] = '{:0.6f}'.format(0.0)
+			if 'A' in overhead['phases'] and 'C' in overhead['phases']:
+				overhead[myIndex+1][myIndex+2]['distance_AC'] = '{:0.6f}'.format(Dac)
+			else:
+				overhead[myIndex+1][myIndex+2]['distance_AC'] = '{:0.6f}'.format(0.0)
+			if 'A' in overhead['phases'] and 'N' in overhead['phases']:
+				overhead[myIndex+1][myIndex+2]['distance_AN'] = '{:0.6f}'.format(Dan)
+			else:
+				overhead[myIndex+1][myIndex+2]['distance_AN'] = '{:0.6f}'.format(0.0)
+			if 'B' in overhead['phases'] and 'C' in overhead['phases']:
+				overhead[myIndex+1][myIndex+2]['distance_BC'] = '{:0.6f}'.format(Dbc)
+			else:
+				overhead[myIndex+1][myIndex+2]['distance_BC'] = '{:0.6f}'.format(0.0)
+			if 'B' in overhead['phases'] and 'N' in overhead['phases']:
+				overhead[myIndex+1][myIndex+2]['distance_BN'] = '{:0.6f}'.format(Dbn)
+			else:
+				overhead[myIndex+1][myIndex+2]['distance_BN'] = '{:0.6f}'.format(0.0)
+			if 'C' in overhead['phases'] and 'N' in overhead['phases']:
+				overhead[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(Dcn)
+			else:
+				overhead[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(0.0)
+			
+			
+				
 			eqdbIndex = {'A':8,'B':9,'C':10,'N':11}
 			condIndex = {'A':3,'B':4,'C':5,'N':6}
-			for letter in 'ABCN':
+			for letter in overhead['phases']:
 				lineIndex = eqdbIndex[letter]
 				hardware = statsByName(ohLineList[lineIndex])
 				if hardware is None:
-					res = '0.185900'
-					geoRad = '0.031300'
+					res = '0.306'
+					geoRad = '0.0244'
 				else:
 					res = hardware[5]
 					geoRad = hardware[6]
@@ -215,6 +272,7 @@ def convert(stdPath,seqPath):
 			return overhead
 
 		def convertUgLine(ugLineList):
+			#print('Converting underground line')
 			myIndex = components.index(objectList)*subObCount
 			underground = convertGenericObject(ugLineList)
 			# TODO: be smarter about multiple neutrals.
@@ -230,24 +288,100 @@ def convert(stdPath,seqPath):
 									'distance_AB': '0.500000',
 									'distance_AC': '1.000000',
 									'distance_BN': '0.000000'}
+			#Grab line spacing distances
+			# Find name of construction code
+			if ugLineList[13] == 'NONE':
+				construction_description = 'SystemCnstDefault'
+			else:
+				construction_description = ugLineList[13]
+			
+			# Find the construction code in hardwareStats
+			construction_stats = statsByName(construction_description)
+			if construction_stats is None:
+				#Couldn't find construction object. Using defalut phase distances. Distances are from IEEE 4 Node
+				Dab = 2.5
+				Dac = 7.0
+				Dan = 5.656854
+				Dbc = 4.5
+				Dbn = 4.272002
+				Dcn = 5.0
+			else:
+				# Find the distances in feet between each conductor
+				Dab = math.sqrt(((float(construction_stats[19]) - float(construction_stats[20]))*(float(construction_stats[19]) - float(construction_stats[20]))) + ((float(construction_stats[23]) - float(construction_stats[24]))*(float(construction_stats[23]) - float(construction_stats[24]))))/12
+				Dac = math.sqrt(((float(construction_stats[19]) - float(construction_stats[21]))*(float(construction_stats[19]) - float(construction_stats[21]))) + ((float(construction_stats[23]) - float(construction_stats[25]))*(float(construction_stats[23]) - float(construction_stats[25]))))/12
+				Dan = math.sqrt(((float(construction_stats[19]) - float(construction_stats[22]))*(float(construction_stats[19]) - float(construction_stats[22]))) + ((float(construction_stats[23]) - float(construction_stats[26]))*(float(construction_stats[23]) - float(construction_stats[26]))))/12
+				Dbc = math.sqrt(((float(construction_stats[20]) - float(construction_stats[21]))*(float(construction_stats[20]) - float(construction_stats[21]))) + ((float(construction_stats[24]) - float(construction_stats[25]))*(float(construction_stats[24]) - float(construction_stats[25]))))/12
+				Dbn = math.sqrt(((float(construction_stats[20]) - float(construction_stats[22]))*(float(construction_stats[20]) - float(construction_stats[22]))) + ((float(construction_stats[24]) - float(construction_stats[26]))*(float(construction_stats[24]) - float(construction_stats[26]))))/12
+				Dcn = math.sqrt(((float(construction_stats[21]) - float(construction_stats[22]))*(float(construction_stats[21]) - float(construction_stats[22]))) + ((float(construction_stats[25]) - float(construction_stats[26]))*(float(construction_stats[25]) - float(construction_stats[26]))))/12
+			# Add distances to dictionary when appropriate
+			if 'A' in underground['phases'] and 'B' in underground['phases']:
+				underground[myIndex+1][myIndex+2]['distance_AB'] = '{:0.6f}'.format(Dab)
+			else:
+				underground[myIndex+1][myIndex+2]['distance_AB'] = '{:0.1f}'.format(0.0)
+			if 'A' in underground['phases'] and 'C' in underground['phases']:
+				underground[myIndex+1][myIndex+2]['distance_AC'] = '{:0.6f}'.format(Dac)
+			else:
+				underground[myIndex+1][myIndex+2]['distance_AC'] = '{:0.1f}'.format(0.0)
+			if 'A' in underground['phases'] and 'N' in underground['phases']:
+				underground[myIndex+1][myIndex+2]['distance_AN'] = '{:0.6f}'.format(Dan)
+			else:
+				underground[myIndex+1][myIndex+2]['distance_AN'] = '{:0.1f}'.format(0.0)
+			if 'B' in underground['phases'] and 'C' in underground['phases']:
+				underground[myIndex+1][myIndex+2]['distance_BC'] = '{:0.6f}'.format(Dbc)
+			else:
+				underground[myIndex+1][myIndex+2]['distance_BC'] = '{:0.1f}'.format(0.0)
+			if 'B' in underground['phases'] and 'N' in underground['phases']:
+				underground[myIndex+1][myIndex+2]['distance_BN'] = '{:0.6f}'.format(Dbn)
+			else:
+				underground[myIndex+1][myIndex+2]['distance_BN'] = '{:0.1f}'.format(0.0)
+			if 'C' in underground['phases'] and 'N' in underground['phases']:
+				underground[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(Dcn)
+			else:
+				underground[myIndex+1][myIndex+2]['distance_CN'] = '{:0.1f}'.format(0.0)
 			#TODO: actually get conductor values!
+			eqdbIndex = {'A':8,'B':9,'C':10,'N':11}
 			condIndex = {'A':3,'B':4,'C':5,'N':6}
-			for letter in 'ABCN':
-				underground[myIndex+1][myIndex+condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
-																		'name':underground['name'] + '-PHASE' + letter,
-																		'conductor_resistance': '1.540000',
-																		'shield_resistance': '0.000000',
-																		'neutral_gmr': '0.002080',
-																		'outer_diameter': '0.980000',
-																		'neutral_strands': '6.000000',
-																		'neutral_resistance': '14.872000',
-																		'neutral_diameter': '0.064000',
-																		'conductor_diameter': '0.292000',
-																		'shield_gmr': '0.000000',
-																		'conductor_gmr': '0.008830'}
+			for letter in underground['phases']:
+				lineIndex = eqdbIndex[letter]
+				hardware = statsByName(ugLineList[lineIndex])
+				if hardware is None:
+					# Concentric Neutral 15 kV 2000 circular mil stranded AA
+					conductor_resistance = '1.541000'
+					conductor_diameter = 0.292
+					conductor_gmr = '0.008830'
+					neutral_resistance = '14.872200'
+					neutral_diameter = 0.0641
+					neutral_gmr = '0.002080'
+					neutral_strands = '6'
+					outer_diameter = 0.98
+					insulation_relative_permitivity = '1'
+				else:
+					conductor_resistance = hardware[4]
+					conductor_diameter = float(hardware[18])*12
+					conductor_gmr = hardware[5]
+					neutral_resistance = hardware[6]
+					neutral_diameter = (float(hardware[9]) - float(hardware[12]))*12
+					neutral_gmr = hardware[16]
+					neutral_strands = hardware[7]
+					outer_diameter = float(hardware[9])*12
+					insulation_relative_permitivity = hardware[11]
+					
+				underground[myIndex+1][myIndex+condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object overhead_line_conductor',
+															'conductor_resistance' : conductor_resistance,
+															'shield_resistance' : '0.000000',
+															'neutral_gmr' : neutral_gmr,
+															'outer_diameter' : '{:0.6f}'.format(outer_diameter),
+															'neutral_strands' : neutral_strands,
+															'neutral_resistance' : neutral_resistance,
+															'neutral_diameter' : '{:0.6f}'.format(neutral_diameter),
+															'conductor_diameter' : '{:0.6f}'.format(conductor_diameter),
+															'shield_gmr' : '0.000000',
+															'conductor_gmr' : conductor_gmr,
+															'insulation_relative_permitivitty' : insulation_relative_permitivity}
 			return underground
 
 		def convertRegulator(regList):
+			#print('Converting regulator')
 			myIndex = components.index(objectList)*subObCount
 			regulator = convertGenericObject(regList)
 			regulator['phases'] = regList[2]
@@ -273,6 +407,7 @@ def convert(stdPath,seqPath):
 			return regulator
 
 		def convertTransformer(transList):
+			#print('Converting transformer')
 			myIndex = components.index(objectList)*subObCount
 			transformer = convertGenericObject(transList)
 			transformer['phases'] = transList[2]+ 'N'
@@ -318,6 +453,7 @@ def convert(stdPath,seqPath):
 
 	# Convert to a list of dicts:
 	convertedComponents = [obConvert(x) for x in components]
+	print('Finished converting components')
 
 	def fixCompConnectivity(comp):
 		''' Rejigger the connectivity attributes to work with Gridlab '''
@@ -399,13 +535,14 @@ def convert(stdPath,seqPath):
 
 	# Go to a dictionary format so we have a valid glmTree:
 	glmTree = {convertedComponents.index(x)*subObCount:x for x in convertedComponents}
+	print('Finished fixing connectivity')
 
 	#TODO: REMOVE THIS DISASTER HERE AND FIGURE OUT WHY SOME LINKS ARE MALFORMED
 	print 'Components removed because they have totally busted connectivity:'
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
 		if glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
-			print glmTree[key]
+			print [glmTree[key]['name'], glmTree[key]['object']]
 			del glmTree[key]
 
 	#Strip guids:
@@ -594,20 +731,23 @@ def convert(stdPath,seqPath):
 	dedupGlm('line_configuration', glmTree)
 
 	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
-						'#include "schedules.glm";\n' + \
 						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\nmodule climate;\n' + \
 						'module residential {\nimplicit_enduses NONE;\n};\n\n' + \
 						'module powerflow {\nsolver_method NR;\nNR_iteration_limit 50;\n};\n\n' + \
 						'object climate {\nname Climate;\ninterpolate QUADRATIC;\ntmyfile climate.tmy2;\n};\n\n'
 
 	# Throw some headers on that:
-	#outGlm = genericHeaders + feeder.sortedWrite(glmTree)
+	outGlm = genericHeaders + feeder.sortedWrite(glmTree)
 
-	return glmTree
+	return outGlm
 
 def main():
 	''' tests go here '''
-	StaticGlmDict = convert('./uploads/ILEC-Rembrandt.std','./uploads/ILEC.seq')
+	StaticGlmDict = convert('C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC-FRIENDSHIP.std','C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC.seq')
+	print('Success')
+	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_Static_Model.glm','w')
+	file.write(StaticGlmDict)
+	file.close()
 	# print outGlm
 	# omfConvert('testMagic','ILEC-Rembrandt.std','ILEC.seq')
 

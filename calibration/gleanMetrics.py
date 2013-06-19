@@ -50,10 +50,10 @@ def getValues(glm_filenames,days):
 		cursor.execute(sql)
 		result = cursor.fetchone()
 		if result[0] is None or result[0] == 0:
-			print ("Missing simulation output for "+i)
+			print ("	Missing simulation output for "+i)
 			continue
 		elif result[0] < 288:
-			print ("Missing simulation output for "+i+". "+str(result[0])+"/288 five-minute intervals made it into the database.")
+			print ("	Missing simulation output for "+i+". "+str(result[0])+"/288 five-minute intervals made it into the database.")
 			continue
 		
 		# Get annual .glm ID by stripping the date from the filename. 
@@ -65,7 +65,7 @@ def getValues(glm_filenames,days):
 			if m is not None:
 				glm_ID = m.group()
 			else:
-				print ("Can't recognize file name: "+str(i)+". Going to ignore it.")
+				print ("	Can't recognize file name: "+str(i)+". Going to ignore it.")
 				continue
 		
 		# # Check that there are three days for each of these glms
@@ -164,6 +164,7 @@ def funcRawMetsDict (glms,scada,days):
 		raw_metrics[j].append(calcDiffs(measurements[j][0],scada[0]));
 		raw_metrics[j].append(calcDiffs(measurements[j][1],scada[1]));
 		raw_metrics[j].append(calcDiffs(measurements[j][2],scada[2]));
+	#print (raw_metrics)
 	return raw_metrics
 	
 def main():

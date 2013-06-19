@@ -20,13 +20,17 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 	- dir(string)-- directory in which to store created .glm files
 	'''
 	# create populated dictionary
+	if calib_file is not None:
+		print ('Populating feeder using calibration file ' + calib_file+'.')
+	else:
+		print ('Populating feeder using default calibrations.')
 	glmDict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(baseGLM,case_flag,calib_file,feeder_config) 
 	
 	fnames =  []
 	for i in clock.keys():
-		print ("Making .glm for "+i)
 		# define start and end
-		starttime = clock[i][0]
+		#starttime = clock[i][0]
+		starttime = i
 		rec_starttime = i
 		stoptime = clock[i][1]
 		
@@ -78,7 +82,7 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 		file = open(dir+'\\'+filename, 'w')
 		file.write(glmstring)
 		file.close()
-		print ("File "+filename+ " written to "+dir+ ". Ready to be run in GLD.")
+		print ("\t"+filename+ " is ready.")
 		fnames.append(filename)
 	return fnames
 

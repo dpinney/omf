@@ -3,12 +3,54 @@ Created on Jun 7, 2013
 
 @author: fish334
 '''
-def add_recorders(recorder_dict,use_flags,last_key,tech_data,use_mysql,use_tape,FeederID,swing_node,total_houses,total_com):
+import TechnologyParameters.py
+
+def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID,last_key = 0):
     # Check is last_key is already in glm dictionary
     if last_key in recorder_dict.keys():
         while last_key in recorder_dict.keys():
             last_key += 1
+
+    use_flags = {}
+    tech_data,use_flags = TechnologyParameters.TechnologyParametersFunc(use_flags, case_flag)
     
+    have_resp_ZIPs = 0        
+    swing_node = None
+    climate_name = None
+    have_unresp_ZIPs = 0
+    have_waterheater = 0
+    have_lights = 0
+    have_plugs = 0
+    have_gas_waterheater = 0
+    have_occupancy = 0
+    
+    for x in recorder_dict.keys():
+        if 'object' in recorder_dict[x].keys():
+            if recorder_dict[x]['object'] == 'transformer' and recorder_dict[x]['name'] == 'substation_transformer':
+                swing_node = recorder_dict[x]['to']
+        
+            if recorder_dict[x]['object'] == 'climate':
+                climate_name = recorder_dict[x]['name']
+            
+            if recorder_dict[x]['object'] == 'ZIPload':
+                if 'groupid' in recorder_dict[x].keys():
+                    if recorder_dict[x]['groupid'] == 'Responsive_load':
+                        have_resp_ZIPs = 1
+                    elif recorder_dict[x]['groupid'] == 'Unresponsive_load':
+                        have_unresp_ZIPs = 1
+                    elif recorder_dict[x]['groupid'] == 'Lights':
+                        have_lights = 1
+                    elif recorder_dict[x]['groupid'] == 'Plugs':
+                        have_plugs = 1
+                    elif recorder_dict[x]['groupid'] == 'Gas_waterheater':
+                        have_gas_waterheater = 1
+                    elif recorder_dict[x]['groupid'] == 'Occupancy':
+                        have_occupancy = 1
+            
+            if recorder_dict[x]['object'] == 'waterheater':
+                have_waterheater = 1
+            
+                
     # Determine whether we are using mySQL or tape
     if use_mysql == 1:
         recorder_dict[last_key] = {'module' : 'mysql'}
@@ -33,22 +75,18 @@ def add_recorders(recorder_dict,use_flags,last_key,tech_data,use_mysql,use_tape,
                                    'limit' : '{:d}'.format(tech_data['meas_limit']),
                                    'property' : 'power_out_A.real,power_out_A.imag,power_out_B.real,power_out_B.imag,power_out_C.real,power_out_C.imag,power_out.real,power_out.imag,power_losses_A.real,power_losses_A.imag,power_losses_B.real,power_losses_B.imag,power_losses_C.real,power_losses_C.imag'}
         last_key += 1
-        
+            
         # Measure Feeder Source Output
-        recorder_dict[last_key] = {'object' : 'tape.recorder',
-                                   'parent' : '{:s}'.format(swing_node),
-                                   'file' : '{:s}_swing.csv'.format(FeederID),
-                                   'interval' : '{:d}'.format(tech_data['meas_interval']),
-                                   'limit' : '{:d}'.format(tech_data['meas_limit']),
-                                   'property' : 'measured_current_A.real,measured_current_A.imag,measured_current_B.real,measured_current_B.imag,measured_current_C.real,measured_current_C.imag,measured_voltage_A.real,measured_voltage_A.imag,measured_voltage_B.real,measured_voltage_B.imag,measured_voltage_C.real,measured_voltage_C.imag,measured_real_power,measured_reactive_power'}
-        last_key += 1
+        if swing_node != None:
+            recorder_dict[last_key] = {'object' : 'tape.recorder',
+                                       'parent' : '{:s}'.format(swing_node),
+                                       'file' : '{:s}_swing.csv'.format(FeederID),
+                                       'interval' : '{:d}'.format(tech_data['meas_interval']),
+                                       'limit' : '{:d}'.format(tech_data['meas_limit']),
+                                       'property' : 'measured_current_A.real,measured_current_A.imag,measured_current_B.real,measured_current_B.imag,measured_current_C.real,measured_current_C.imag,measured_voltage_A.real,measured_voltage_A.imag,measured_voltage_B.real,measured_voltage_B.imag,measured_voltage_C.real,measured_voltage_C.imag,measured_real_power,measured_reactive_power'}
+            last_key += 1
         
         # Measure outside temperature
-        climate_name = None
-        for x in recorder_dict.keys():
-            if 'object' in recorder_dict[x].keys() and recorder_dict[x]['object'] == 'climate':
-                climate_name = recorder_dict[x]['name']
-                
         if climate_name != None:
             recorder_dict[last_key] = {'object' : 'tape.recorder',
                                        'parent' : '{:s}'.format(climate_name),
@@ -59,7 +97,7 @@ def add_recorders(recorder_dict,use_flags,last_key,tech_data,use_mysql,use_tape,
             last_key += 1
         
         # Measure residential data
-        if use_flags['use_homes'] == 1 and total_houses > 0:
+        if have_resp_ZIPs == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
                                        'group' : '"class=ZIPload AND groupid=Responsive_load"',
                                        'file' : '{:s}_Res_responisve_load.csv'.format(FeederID),
@@ -67,7 +105,8 @@ def add_recorders(recorder_dict,use_flags,last_key,tech_data,use_mysql,use_tape,
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
             last_key += 1
-            
+        
+        if have_unresp_ZIPs == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
                                        'group' : '"class=ZIPload AND groupid=Unresponsive_load"',
                                        'file' : '{:s}_Res_unresponisve_load.csv'.format(FeederID),
@@ -75,7 +114,8 @@ def add_recorders(recorder_dict,use_flags,last_key,tech_data,use_mysql,use_tape,
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
             last_key += 1
-            
+        
+        if have_waterheater == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
                                        'group' : '"class=waterheater"',
                                        'file' : '{:s}_waterheater.csv'.format(FeederID),
@@ -84,7 +124,7 @@ def add_recorders(recorder_dict,use_flags,last_key,tech_data,use_mysql,use_tape,
                                        'property' : 'sum(base_power)'}
             last_key += 1
             
-        if use_flags['use_commercial'] == 1 and total_com > 0:
+        if have_lights == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
                                        'group' : '"class=ZIPload AND groupid=Lights"',
                                        'file' : '{:s}_lights.csv'.format(FeederID),
@@ -92,7 +132,8 @@ def add_recorders(recorder_dict,use_flags,last_key,tech_data,use_mysql,use_tape,
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
             last_key += 1
-            
+        
+        if have_plugs == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
                                        'group' : '"class=ZIPload AND groupid=Plugs"',
                                        'file' : '{:s}_plugs.csv'.format(FeederID),
@@ -100,7 +141,8 @@ def add_recorders(recorder_dict,use_flags,last_key,tech_data,use_mysql,use_tape,
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
             last_key += 1
-            
+        
+        if have_gas_waterheater == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
                                        'group' : '"class=ZIPload AND groupid=Gas_waterheater"',
                                        'file' : '{:s}_gas_waterheater.csv'.format(FeederID),
@@ -108,7 +150,8 @@ def add_recorders(recorder_dict,use_flags,last_key,tech_data,use_mysql,use_tape,
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
             last_key += 1
-            
+        
+        if have_occupancy == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
                                        'group' : '"class=ZIPload AND groupid=Occupancy"',
                                        'file' : '{:s}_occupancy.csv'.format(FeederID),

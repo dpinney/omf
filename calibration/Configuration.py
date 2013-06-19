@@ -515,7 +515,7 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 		
 		#TODO: this is actually in TechnologyParameters Right now...
 		# widen schedule skew
-		data["schedule_skew_std"] = 2700
+		data["residential_skew_std"] = 2700
 		
 		# window wall ratio
 		data["window_wall_ratio"] = 0.05
@@ -546,11 +546,11 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 
 		data["residential_skew_shift"] = config.res_skew_shift
 
-		decrease_gas = config.res_skew_shift
+		decrease_gas = config.decrease_gas
 
 		#TODO: this is actually in TechnologyParameters Right now...
 		# widen schedule skew
-		data["schedule_skew_std"] = config.sched_skew_std
+		data["residential_skew_std"] = config.sched_skew_std
 
 		# window wall ratio
 		data["window_wall_ratio"] = config.window_wall_ratio
@@ -596,7 +596,7 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 	perc_pump = list(map(lambda x, y: x + (1-decrease_gas)*y,perc_pump,perc_gas))
 	perc_gas = list(map(lambda x:x*decrease_gas,perc_gas))
 	
-	print("classification is = "+str(classID))
+	#print("classification is = "+str(classID))
 
 	#Variables referenced by Feeder_Generator.m
 	if classification != None :
@@ -645,6 +645,6 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 def main():
 	#tests here
 	config_data = ConfigurationFunc(None,4)
-	print(config_data['cooling_setpoint'][0])
+	#print(config_data['cooling_setpoint'][0])
 if __name__ ==  '__main__':
 	main()

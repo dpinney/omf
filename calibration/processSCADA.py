@@ -8,9 +8,9 @@ def getValues(input):
 
 	# From the SCADA available, choose three days representing summer, winter, and spring (shoulder).
 	# Ideally, summer and winter days are seasonal peak days.
-	summer_day = '2013-06-29'
-	winter_day = '2013-01-04'
-	shoulder_day = '2013-04-14'
+	summer_day = '2012-06-29'
+	winter_day = '2012-01-04'
+	shoulder_day = '2012-04-14'
 	
 	# summer day measurements
 	# su_peak_value = 14748.45  # kW

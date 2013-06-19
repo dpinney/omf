@@ -640,7 +640,7 @@ def TechnologyParametersFunc(use_flags, TechToTest):
 
 	# Skews
 	#data["residential_skew_std"] = 2700; #45 min
-	data["residential_skew_std"] = 3600;
+	#data["residential_skew_std"] = 3600; # taking this from Configuration.py instead
 	data["residential_skew_max"] = 8100; # 2hr 15min
 	data["commercial_skew_std"] = 1800; #These are in 30 minute blocks
 	data["commercial_skew_max"] = 5400;

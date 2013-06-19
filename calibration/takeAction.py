@@ -7,29 +7,28 @@ def loadLevel (a, avg_house, avg_comm, base_load_scalar, avg_diff):
 	options = [None] * 6
 	for i in range(6):
 		options[i] = [base_load_scalar, avg_house, avg_comm]
-	change = 0.05 + (abs(avg_diff) - (abs(avg_diff) % 0.05))
+	change = 0.10 + (abs(avg_diff) - (abs(avg_diff) % 0.10))
+	change_base_load = 0.05;
 	if a < 0:
 		a0 = "To lower load overall, we can ";
 		a1 = "increase";
 		a2 = "decrease";
+		change_base_load = -change_base_load
 	else:
 		a0 = "To increase load overall, we can ";
 		a1 = "decrease";
 		a2 = "increase";
 		change = -change
 	print (a0 + a1 + " average house VA and/or average commercial VA, and/or "+ a2 + " residential base load scalar.");
-	if base_load_scalar >= 0:
-		options[0][0] = base_load_scalar - (base_load_scalar * change) # change base load scalar only
-	else:
-		options[0][0] = base_load_scalar + (base_load_scalar * change)
-	options[1][1] = avg_house + (avg_house * change) # change avg house only
-	options[2][2] = avg_comm + (avg_comm * change) # change avg comm only
-	options[3][1] = avg_house + (avg_house * change) # change avg res and avg comm equally
-	options[3][2] = avg_comm + (avg_comm * change)
-	options[4][1] = avg_house + (avg_house * 1.5 * change) # change avg res more than avg comm
-	options[4][2] = avg_comm + (avg_comm * 0.5 * change)
-	options[5][2] = avg_comm + (avg_comm * 1.5 * change) # change avg com more than avg res
-	options[5][1] = avg_house + (avg_house * 0.5 * change)
+	options[0][0] = round(base_load_scalar + change_base_load,2) # change base load scalar only
+	options[1][1] = int(avg_house + (avg_house * change)) # change avg house only
+	options[2][2] = int(avg_comm + (avg_comm * change)) # change avg comm only
+	options[3][1] = int(avg_house + (avg_house * change)) # change avg res and avg comm equally
+	options[3][2] = int(avg_comm + (avg_comm * change))
+	options[4][1] = int(avg_house + (avg_house * 1.5 * change)) # change avg res more than avg comm
+	options[4][2] = int(avg_comm + (avg_comm * 0.5 * change))
+	options[5][2] = int(avg_comm + (avg_comm * 1.5 * change)) # change avg com more than avg res
+	options[5][1] = int(avg_house + (avg_house * 0.5 * change))
 	
 	# constrain the values within our set limits
 	for i in range(6):
@@ -67,13 +66,13 @@ def winterLoad (a, decrease_gas, add_heat_degree):
 		a2 = "more";
 		ch = 1
 	print (a0 + a1 + " gas heating penetration, and/or add " + a2 + " degrees to the heating set points.");
-	options[0][0] = decrease_gas + (ch * 0.05)   # change gas heat only
-	options[1][0] = decrease_gas + (ch * 0.10)   # change gas heat double
+	options[0][0] = round(decrease_gas + (ch * 0.05),2)   # change gas heat only
+	options[1][0] = round(decrease_gas + (ch * 0.10),2)   # change gas heat double
 	options[2][1] = add_heat_degree + (ch * 0.5) # change heat set only
 	options[3][1] = add_heat_degree + (ch * 1)   # change heat set double
-	options[4][0] = decrease_gas + (ch * 0.05)
+	options[4][0] = round(decrease_gas + (ch * 0.05),2)
 	options[4][1] = add_heat_degree + (ch * 0.5) # change gas and heat
-	options[5][0] = decrease_gas + (ch * 0.10)
+	options[5][0] = round(decrease_gas + (ch * 0.10),2)
 	options[5][1] = add_heat_degree + (ch * 1)   # change gas and heat double
 	# constrain the values within our set limits
 	for i in range(6):
@@ -168,8 +167,8 @@ def peakLevel (a, cool_offset, heat_offset, cop_high, cop_low, sched_skew_std):
 	
 	cool_offset_new = cool_offset + ch * 0.5
 	heat_offset_new = heat_offset + ch * 0.5
-	cop_high_new = cop_high - ch * 0.05
-	cop_low_new = cop_low - ch * 0.05
+	cop_high_new = round(cop_high - ch * 0.05,2)
+	cop_low_new = round(cop_low - ch * 0.05,2)
 	sched_skew_std_new = sched_skew_std - ch * 900
 	
 	# Changing COP values together and offsets together for now.	
@@ -214,8 +213,8 @@ def winterPeaksummerOK (a, cop_high, cop_low, decrease_gas, add_heat_degree ):
 		a1 = "decrease" # COP values
 		ch = 1
 	print (a0 + a1 + " COP values.")
-	cop_high_new = cop_high - ch * 0.05
-	cop_low_new = cop_low - ch * 0.05
+	cop_high_new = round(cop_high - ch * 0.05,2)
+	cop_low_new = round(cop_low - ch * 0.05,2)
 	if not limits.COPvalsLIM(cop_high_new,cop_low_new):  # Will need modification if changing COP high and COP low independently.
 		if a < 0:
 			cop_high_new, cop_low_new = limits.COPlim_high, limits.COPlim_high
@@ -242,10 +241,10 @@ def summerPeakwinterOK (a, cop_high, cop_low, window_wall_ratio ):
 		ch = 1
 	print (a0 + a1 + " COP values, " + a2 + " window wall ratio.")
 	
-	cop_high_new = cop_high - ch * 0.05
-	cop_high_dub = cop_high - ch * 0.10
-	cop_low_new = cop_low - ch * 0.05
-	cop_low_dub = cop_low - ch * 0.10
+	cop_high_new = round(cop_high - ch * 0.05,2)
+	cop_high_dub = round(cop_high - ch * 0.10,2)
+	cop_low_new = round(cop_low - ch * 0.05,2)
+	cop_low_dub = round(cop_low - ch * 0.10,2)
 	window_wall_ratio_new = round(window_wall_ratio + ch * 0.05, 2)
 	window_wall_ratio_dub = round(window_wall_ratio + ch * 0.10, 2)
 	
