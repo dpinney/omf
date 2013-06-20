@@ -20,16 +20,6 @@ except:
 	worker = work.LocalWorker()
 	print 'Running on local file system.'
 
-class backgroundProc(multiprocessing.Process):
-	def __init__(self, backFun, funArgs):
-		self.name = 'omfWorkerProc'
-		self.backFun = backFun
-		self.funArgs = funArgs
-		self.myPid = os.getpid()
-		multiprocessing.Process.__init__(self)
-	def run(self):
-		self.backFun(*self.funArgs)
-
 ###################################################
 # VIEWS
 ###################################################
@@ -211,7 +201,7 @@ def milsoftImport():
 		if fName.endswith('.std'): stdName = fName
 		elif fName.endswith('.seq'): seqName = fName
 		allFiles[f].save('./uploads/' + fName)
-	runProc = backgroundProc(milImportAndConvert, [store, feederName, stdName, seqName])
+	runProc = multiprocessing.Process(target=milImportAndConvert, args=[store, feederName, stdName, seqName])
 	runProc.start()
 	time.sleep(1)
 	return flask.redirect(flask.url_for('root') + '#feeders')
