@@ -27,7 +27,7 @@ We need to handle two cases:
 
 import os
 from multiprocessing import Process, Value, Lock
-import studies
+import studies, analysis
 from threading import Timer
 from boto.sqs.connection import SQSConnection
 from boto.sqs.message import Message
@@ -91,10 +91,12 @@ class LocalWorker:
 					pass
 
 class ClusterWorker:
-	def __init__(self, userKey, passKey, workQueueName, terminateQueueName):
+	def __init__(self, userKey, passKey, workQueueName, terminateQueueName, store):
 		self.conn = SQSConnection(userKey, passKey)
 		self.workQueue = self.conn.get_queue(workQueueName)
 		self.terminateQueue = self.conn.get_queue(terminateQueueName)
+		# Start polling for jobs on launch:
+		self.__monitorClusterQueue__(passKey, store)
 	def run(self, analysisObject, store):
 		m = Message()
 		m.set_body(analysisObject.name)
@@ -105,39 +107,33 @@ class ClusterWorker:
 		m.set_body(anaName)
 		status = self.terminateQueue.write(m)
 		return status
-
-def monitorClusterQueue():
-	print 'Entering Daemon Mode.'
-	import omf
-	conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', omf.USER_PASS)
-	jobQueue = conn.get_queue('crnOmfJobQueue')
-	terminateQueue = conn.get_queue('crnOmfTerminateQueue')
-	daemonWorker = LocalWorker()
-	def popJob(queueObject):
-		mList = queueObject.get_messages(1)
-		if len(mList) == 1:
-			anaName = mList[0].get_body()
-			queueObject.delete_message(mList[0])
-			return anaName
-		else:
-			return False
-	def endlessLoop():
-		# print 'Currently running', daemonWorker.runningJobCount.value(), 'jobs.'
-		if daemonWorker.runningJobCount.value() < JOB_LIMIT:
-			anaName = popJob(jobQueue)
-			if anaName != False:
-				print 'Running', anaName
-				thisAnalysis = omf.analysis.Analysis(omf.store.get('Analysis', anaName))
-				daemonWorker.run(thisAnalysis, omf.store)
-		if daemonWorker.runningJobCount.value() > 0:
-			anaName = popJob(terminateQueue)
-			if anaName != False:
-				print 'Terminating', anaName
-				daemonWorker.terminate(anaName)
-		# Check again in 1 second:
-		Timer(1, endlessLoop).start()
-	endlessLoop()
-
-if __name__ == '__main__':
-	# If we're running this module directly, go into daemon mode:
-	monitorClusterQueue()
+	def __monitorClusterQueue__(self, passKey, store):
+		print 'Entering Daemon Mode.'
+		conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', passKey)
+		jobQueue = conn.get_queue('crnOmfJobQueue')
+		terminateQueue = conn.get_queue('crnOmfTerminateQueue')
+		daemonWorker = LocalWorker()
+		def popJob(queueObject):
+			mList = queueObject.get_messages(1)
+			if len(mList) == 1:
+				anaName = mList[0].get_body()
+				queueObject.delete_message(mList[0])
+				return anaName
+			else:
+				return False
+		def endlessLoop():
+			# print 'Currently running', daemonWorker.runningJobCount.value(), 'jobs.'
+			if daemonWorker.runningJobCount.value() < JOB_LIMIT:
+				anaName = popJob(jobQueue)
+				if anaName != False:
+					print 'Running', anaName
+					thisAnalysis = analysis.Analysis(store.get('Analysis', anaName))
+					daemonWorker.run(thisAnalysis, store)
+			if daemonWorker.runningJobCount.value() > 0:
+				anaName = popJob(terminateQueue)
+				if anaName != False:
+					print 'Terminating', anaName
+					daemonWorker.terminate(anaName)
+			# Check again in 1 second:
+			Timer(1, endlessLoop).start()
+		endlessLoop()

@@ -52,7 +52,7 @@ def run(studyObject):
 			proc = subprocess.Popen([binary,'-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr, env=enviro)
 			pidFile.write(str(proc.pid))
 		returnCode = proc.wait()
-		if returnCode != 0:
+		if returnCode == 15:
 			# Stop running studies, set status=terminated.
 			shutil.rmtree(studyPath)
 			return False

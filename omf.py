@@ -1,7 +1,7 @@
 #!/bin/python
 
 # third party modules
-import flask, werkzeug, os, multiprocessing, json, time, datetime, copy
+import flask, werkzeug, os, multiprocessing, json, time, datetime, copy, traceback
 # our modules
 import analysis, feeder, reports, studies, milToGridlab, storage, work
 
@@ -11,9 +11,10 @@ try:
 	with open('S3KEY.txt','r') as keyFile:
 		USER_PASS = keyFile.read()
 	store = storage.S3store('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnomf')
-	worker = work.ClusterWorker('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnOmfJobQueue', 'crnOmfTerminateQueue')
+	worker = work.ClusterWorker('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnOmfJobQueue', 'crnOmfTerminateQueue', store)
 	print 'Running on S3 cluster.'
 except:
+	traceback.print_exc()
 	USER_PASS = 'YEAHRIGHT'
 	store = storage.Filestore('data')
 	worker = work.LocalWorker()
