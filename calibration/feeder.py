@@ -129,7 +129,7 @@ def dictToString(inDict):
 	elif 'class' in inDict:
 		prop = ''
 		if 'variable_types' in inDict and 'variable_names' in inDict and len(inDict['variable_types'])==len(inDict['variable_names']):
-			for x in range(len(inDict['variable_types'])):
+			for x in xrange(len(inDict['variable_types'])):
 				prop += '\t' + inDict['variable_types'][x] + ' ' + inDict['variable_names'][x] + '\n'
 			return 'class' + inDict['class'] + '{\n' + prop + '};\n'
 		else:

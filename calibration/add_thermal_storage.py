@@ -14,7 +14,7 @@ def add_ts(scalar, ts_array, ts_dict, use_flags, config_data, tech_data, key):
     ts_count = total_number * scalar
     # put the numbers in the hat
     #random_index = []
-    random_index = random.sample(list(range(total_number)), ts_count)
+    random_index = random.sample(list(xrange(total_number)), ts_count)
     
     # attach TS units to the dictionary
     for x in random_index:
@@ -88,13 +88,13 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
             for i in ts_office_array:
                 no_ts_office += i.length()
             office_penetration = []
-            for i in range(0, no_ts_office.length):
+            for i in xrange(0, no_ts_office.length):
                 office_penetration[i] = random.random();
             office_count = 0
             
-            for jj in range(0, no_ts_office_length):
+            for jj in xrange(0, no_ts_office_length):
                 if ts_office_array[jj].length() > 0:
-                    for jjj in range(0, ts_office_array[jj].length()):
+                    for jjj in xrange(0, ts_office_array[jj].length()):
                         #if (isfield(taxonomy_data,'thermal_override')):
                         if config_data.has_key("thermal_override"):
                             thermal_storage_penetration_level = config_data["thermal_override"]/100;
@@ -102,8 +102,8 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
                             thermal_storage_penetration_level = config_data["ts_penetration"]/100;
                         
                         if (office_penetration(office_count) <= thermal_storage_penetration_level):
-                            for jjjj in range(0, ts_office_array[jj][jjj].length()):
-                                for jjjjj in range(0, ts_office_array[jj][jjj][jjjj].length()):
+                            for jjjj in xrange(0, ts_office_array[jj][jjj].length()):
+                                for jjjjj in xrange(0, ts_office_array[jj][jjj][jjjj].length()):
                                     #if (~isempty(ts_office_array[jj][jjj][jjjj][jjjjj])):
                                     if ts_office_array[jj][jjj][jjjj][jjjjj].length() > 0:
                                         parent = ts_office_array[jj][jjj][jjjj][jjjjj];
@@ -131,12 +131,12 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
                 no_ts_bigbox += i.length()
             #bigbox_penetration = rand(no_ts_bigbox,1);
             bigbox_penetration = []
-            for i in range(0, no_ts_bigbox):
+            for i in xrange(0, no_ts_bigbox):
                 bigbox_penetration[i] = random.random() 
             #bigbox_count=1;
             bigbox_count = 0 # 
     
-            for jj in range(0, no_ts_bigbox_length):
+            for jj in xrange(0, no_ts_bigbox_length):
                 if ts_bigbox_array[jj].length() > 0:
                     if "thermal_override" in config_data:
                         thermal_storage_penetration_level=config_data["thermal_override"]/100;
@@ -144,9 +144,9 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
                         thermal_storage_penetration_level = config_data["ts_penetration"]/100;
                     
                     if (bigbox_penetration[bigbox_count] <= thermal_storage_penetration_level):
-                        for jjj in range(0, ts_bigbox_array[jj].length()):
-                            for jjjj in range(0, ts_bigbox_array[jj][jjj].length()):
-                                for jjjjj in range(0, ts_bigbox_array[jj][jjj][jjjj].length()):
+                        for jjj in xrange(0, ts_bigbox_array[jj].length()):
+                            for jjjj in xrange(0, ts_bigbox_array[jj][jjj].length()):
+                                for jjjjj in xrange(0, ts_bigbox_array[jj][jjj][jjjj].length()):
                                     if ts_bigbox_array[jj][jjj][jjjj][jjjjj].length() > 0:
                                         parent = ts_bigbox_array[jj][jjj][jjjj][jjjjj];
                                         TS_Tech_Dict[last_object_key] = {"object" : "thermal_storage",
@@ -171,12 +171,12 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
             for i in ts_stripmall_array:
                 no_ts_stripmall += i.length()
             stripmall_penetration = []
-            for i in range(0, no_ts_stripmall):
+            for i in xrange(0, no_ts_stripmall):
                 stripmall_penetration[i] = random.random();
             #stripmall_count = 1
             stripmall_count = 0 # index
             
-            for jj in range(0, no_ts_stripmall_length):
+            for jj in xrange(0, no_ts_stripmall_length):
                 if ts_stripmall_array[jj].length() > 0:
                     if 'thermal_override' in config_data:
                         thermal_storage_penetration_level = config_data["thermal_override"]/100;
@@ -184,8 +184,8 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
                         thermal_storage_penetration_level = config_data["ts_penetration"]/100;
 
                     if (stripmall_penetration[stripmall_count] <= thermal_storage_penetration_level):
-                        for jjj in range(0, ts_stripmall_array[jj].length()):
-                            for jjjj in range(0, ts_stripmall_array[jj][jjj].length()):
+                        for jjj in xrange(0, ts_stripmall_array[jj].length()):
+                            for jjjj in xrange(0, ts_stripmall_array[jj][jjj].length()):
                                 if ts_stripmall_array[jj][jjj][jjjj].length() > 0:
                                     parent = ts_stripmall_array[jj][jjj][jjjj];
                                     TS_Tech_Dict[last_object_key] = {"object" : "thermal_storage",
@@ -209,13 +209,13 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
             for i in ts_residential_array:
                 no_ts_residential += i.length()
             residential_penetration = []
-            for i in range(0, ts_residential_array):
+            for i in xrange(0, ts_residential_array):
                 residential_penetration[i] = random.random();
             residential_count = 0 # index
             
-            for jj in range(0, no_ts_residential_length.length()):
+            for jj in xrange(0, no_ts_residential_length.length()):
                 if ts_residential_array[jj].length() > 0:
-                    for jjj in range(0, ts_residential_array[jj].length()):
+                    for jjj in xrange(0, ts_residential_array[jj].length()):
                         if ts_residential_array[jj][jjj].length() > 0:
                             if "thermal_override" in config_data:
                                 thermal_storage_penetration_level = config_data["thermal_override"]/100;

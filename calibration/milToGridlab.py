@@ -91,13 +91,13 @@ def convert(stdPath,seqPath):
 			#print('Converting switch')
 			switch = convertGenericObject(switchList)
 			switch['status'] = ('OPEN' if switchList[9]=='O' else 'CLOSED')
-			switch['phases'] = switchList[2] + 'N'
+			switch['phases'] = switchList[2]
 			return switch
 
 		def convertOvercurrentDevice(ocDeviceList):
 			#print('Converting fuse')
 			fuse = convertGenericObject(ocDeviceList)
-			fuse['phases'] = ocDeviceList[2] + 'N'
+			fuse['phases'] = ocDeviceList[2]
 			#TODO: set fuse current_limit correctly.
 			fuse['current_limit'] = '9999.0 A'
 			return fuse
@@ -128,7 +128,7 @@ def convert(stdPath,seqPath):
 		def convertConsumer(consList):
 			#print('Converting load')
 			consumer = convertGenericObject(consList)
-			consumer['phases'] = consList[2] + 'N'
+			consumer['phases'] = consList[2]
 			loadClassMap = {	0 : 'R',
 								1 : 'C',
 								2 : 'C',
@@ -152,7 +152,7 @@ def convert(stdPath,seqPath):
 		def convertNode(nodeList):
 			#print('Converting node')
 			node = convertGenericObject(nodeList)
-			node['phases'] = nodeList[2] + 'N'
+			node['phases'] = nodeList[2]
 			#TODO: can we get nominal voltage from the windmil file?
 			node['nominal_voltage'] = '2400'
 			return node
@@ -160,7 +160,7 @@ def convert(stdPath,seqPath):
 		def convertSource(sourceList):
 			#print('Converting swing node')
 			source = convertGenericObject(sourceList)
-			source['phases'] = sourceList[2]+ 'N'
+			source['phases'] = sourceList[2]
 			source['nominal_voltage'] = str(float(sourceList[14])*1000)
 			source['bustype'] = 'SWING'
 			return source
@@ -168,7 +168,7 @@ def convert(stdPath,seqPath):
 		def convertCapacitor(capList):
 			#print('Converting capacitor')
 			capacitor = convertGenericObject(capList)
-			capacitor['phases'] = capList[2]+ 'N'
+			capacitor['phases'] = capList[2]
 			#TODO: change these from just default values:
 			capacitor['pt_phase'] = capacitor['phases']
 			capacitor['parent'] = '675;'
@@ -227,48 +227,83 @@ def convert(stdPath,seqPath):
 				Dbc = math.sqrt(((float(construction_stats[20]) - float(construction_stats[21]))*(float(construction_stats[20]) - float(construction_stats[21]))) + ((float(construction_stats[24]) - float(construction_stats[25]))*(float(construction_stats[24]) - float(construction_stats[25]))))/12
 				Dbn = math.sqrt(((float(construction_stats[20]) - float(construction_stats[22]))*(float(construction_stats[20]) - float(construction_stats[22]))) + ((float(construction_stats[24]) - float(construction_stats[26]))*(float(construction_stats[24]) - float(construction_stats[26]))))/12
 				Dcn = math.sqrt(((float(construction_stats[21]) - float(construction_stats[22]))*(float(construction_stats[21]) - float(construction_stats[22]))) + ((float(construction_stats[25]) - float(construction_stats[26]))*(float(construction_stats[25]) - float(construction_stats[26]))))/12
+			
 			# Add distances to dictionary when appropriate
 			if 'A' in overhead['phases'] and 'B' in overhead['phases']:
-				overhead[myIndex+1][myIndex+2]['distance_AB'] = '{:0.6f}'.format(Dab)
+				if Dab > 0:
+					overhead[myIndex+1][myIndex+2]['distance_AB'] = '{:0.6f}'.format(Dab)
+				else:
+					overhead[myIndex+1][myIndex+2]['distance_AB'] = '{:0.6f}'.format(2.5)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_AB'] = '{:0.6f}'.format(0.0)
+				
 			if 'A' in overhead['phases'] and 'C' in overhead['phases']:
-				overhead[myIndex+1][myIndex+2]['distance_AC'] = '{:0.6f}'.format(Dac)
+				if Dac > 0:
+					overhead[myIndex+1][myIndex+2]['distance_AC'] = '{:0.6f}'.format(Dac)
+				else:
+					overhead[myIndex+1][myIndex+2]['distance_AC'] = '{:0.6f}'.format(7.0)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_AC'] = '{:0.6f}'.format(0.0)
+				
 			if 'A' in overhead['phases'] and 'N' in overhead['phases']:
-				overhead[myIndex+1][myIndex+2]['distance_AN'] = '{:0.6f}'.format(Dan)
+				if Dan > 0:
+					overhead[myIndex+1][myIndex+2]['distance_AN'] = '{:0.6f}'.format(Dan)
+				else:
+					overhead[myIndex+1][myIndex+2]['distance_AN'] = '{:0.6f}'.format(5.656854)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_AN'] = '{:0.6f}'.format(0.0)
+				
 			if 'B' in overhead['phases'] and 'C' in overhead['phases']:
-				overhead[myIndex+1][myIndex+2]['distance_BC'] = '{:0.6f}'.format(Dbc)
+				if Dbc > 0:
+					overhead[myIndex+1][myIndex+2]['distance_BC'] = '{:0.6f}'.format(Dbc)
+				else:
+					overhead[myIndex+1][myIndex+2]['distance_BC'] = '{:0.6f}'.format(4.5)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_BC'] = '{:0.6f}'.format(0.0)
+				
 			if 'B' in overhead['phases'] and 'N' in overhead['phases']:
-				overhead[myIndex+1][myIndex+2]['distance_BN'] = '{:0.6f}'.format(Dbn)
+				if Dbn > 0:
+					overhead[myIndex+1][myIndex+2]['distance_BN'] = '{:0.6f}'.format(Dbn)
+				else:
+					overhead[myIndex+1][myIndex+2]['distance_BN'] = '{:0.6f}'.format(4.272002)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_BN'] = '{:0.6f}'.format(0.0)
+				
 			if 'C' in overhead['phases'] and 'N' in overhead['phases']:
-				overhead[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(Dcn)
+				if Dcn > 0:
+					overhead[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(Dcn)
+				else:
+					overhead[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(5.0)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(0.0)
-			
-			
-				
+					
 			eqdbIndex = {'A':8,'B':9,'C':10,'N':11}
 			condIndex = {'A':3,'B':4,'C':5,'N':6}
+			
 			for letter in overhead['phases']:
 				lineIndex = eqdbIndex[letter]
 				hardware = statsByName(ohLineList[lineIndex])
 				if hardware is None:
 					res = '0.306'
 					geoRad = '0.0244'
+					diameter = '0.721'
 				else:
 					res = hardware[5]
+					if res == '0':
+						res = '0.306'
+						
 					geoRad = hardware[6]
+					if geoRad == '0':
+						geoRad = '0.0244'
+						
+					diameter = hardware[8]
+					if diameter == '0':
+						diameter = '0.721'
+						
 				overhead[myIndex+1][myIndex+condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object overhead_line_conductor',
 															'resistance': res,
-															'geometric_mean_radius': geoRad}
+															'geometric_mean_radius': geoRad,
+															'diameter' : diameter}
 			return overhead
 
 		def convertUgLine(ugLineList):
@@ -281,13 +316,7 @@ def convert(stdPath,seqPath):
 			underground[myIndex+1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
 								'name': underground['name'] + '-LINECONFIG'}
 			underground[myIndex+1][myIndex+2] = {	'omfEmbeddedConfigObject' : 'spacing object line_spacing',
-									'name':underground['name'] + '-LINESPACING',
-									'distance_AN': '0.000000',
-									'distance_CN': '0.000000',
-									'distance_BC': '0.500000',
-									'distance_AB': '0.500000',
-									'distance_AC': '1.000000',
-									'distance_BN': '0.000000'}
+									'name':underground['name'] + '-LINESPACING'}
 			#Grab line spacing distances
 			# Find name of construction code
 			if ugLineList[13] == 'NONE':
@@ -357,16 +386,42 @@ def convert(stdPath,seqPath):
 					insulation_relative_permitivity = '1'
 				else:
 					conductor_resistance = hardware[4]
+					if conductor_resistance == '0':
+						conductor_resistance = '1.541000'
+						
 					conductor_diameter = float(hardware[18])*12
+					if conductor_diameter == 0.0:
+						conductor_diameter = 0.292
+						
 					conductor_gmr = hardware[5]
+					if conductor_gmr == '0':
+						conductor_gmr = '0.008830'
+						
 					neutral_resistance = hardware[6]
+					if neutral_resistance == '0':
+						neutral_resistance = '14.087220'
+	
 					neutral_diameter = (float(hardware[9]) - float(hardware[12]))*12
+					if neutral_diameter == 0.0:
+						neutral_diameter = 0.0641
+						
 					neutral_gmr = hardware[16]
+					if neutral_gmr == '0':
+						neutral_gmr = '0.002080'
+						
 					neutral_strands = hardware[7]
+					if neutral_strands == '0':
+						neutral_strands = '6'
+						
 					outer_diameter = float(hardware[9])*12
+					if outer_diameter == 0.0:
+						outer_diameter = 0.98
+						
 					insulation_relative_permitivity = hardware[11]
+					if insulation_relative_permitivity == '0':
+						insulation_relative_permitivity = '1'
 					
-				underground[myIndex+1][myIndex+condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object overhead_line_conductor',
+				underground[myIndex+1][myIndex+condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
 															'conductor_resistance' : conductor_resistance,
 															'shield_resistance' : '0.000000',
 															'neutral_gmr' : neutral_gmr,
@@ -410,7 +465,7 @@ def convert(stdPath,seqPath):
 			#print('Converting transformer')
 			myIndex = components.index(objectList)*subObCount
 			transformer = convertGenericObject(transList)
-			transformer['phases'] = transList[2]+ 'N'
+			transformer['phases'] = transList[2]
 			# transformer['nominal_voltage'] = '2400'
 			transformer[myIndex+1] = {}
 			transformer[myIndex+1]['name'] = transformer['name'] + '-CONFIG'
@@ -711,10 +766,14 @@ def convert(stdPath,seqPath):
 		elif compName == 'overhead_line_conductor' or compName == 'underground_line_conductor': 
 			lineConfigs = [glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object'] == 'line_configuration']
 			for config in lineConfigs:
-				if config['conductor_A'] in nameDictMap.keys(): config['conductor_A'] = nameDictMap[config['conductor_A']]
-				if config['conductor_B'] in nameDictMap.keys(): config['conductor_B'] = nameDictMap[config['conductor_B']]
-				if config['conductor_C'] in nameDictMap.keys(): config['conductor_C'] = nameDictMap[config['conductor_C']]
-				if config['conductor_N'] in nameDictMap.keys(): config['conductor_N'] = nameDictMap[config['conductor_N']]
+				if 'conductor_A' in config.keys():
+					if config['conductor_A'] in nameDictMap.keys(): config['conductor_A'] = nameDictMap[config['conductor_A']]
+				if 'conductor_B' in config.keys():
+					if config['conductor_B'] in nameDictMap.keys(): config['conductor_B'] = nameDictMap[config['conductor_B']]
+				if 'conductor_C' in config.keys():
+					if config['conductor_C'] in nameDictMap.keys(): config['conductor_C'] = nameDictMap[config['conductor_C']]
+				if 'conductor_N' in config.keys():
+					if config['conductor_N'] in nameDictMap.keys(): config['conductor_N'] = nameDictMap[config['conductor_N']]
 		elif compName == 'line_configuration': 
 			lines = [glmRef[x] for x in glmRef if 'object' in glmRef[x] and glmRef[x]['object'] in ['overhead_line','underground_line']]
 			for line in lines:
@@ -730,23 +789,22 @@ def convert(stdPath,seqPath):
 	# NOTE: This last dedup has to come last, because it relies on doing conductors and spacings first!
 	dedupGlm('line_configuration', glmTree)
 
+	return glmTree
+
+def main():
+	''' tests go here '''
+	StaticGlmDict = convert('C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC-FRIENDSHIP.std','C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC.seq')
+	
 	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
 						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\nmodule climate;\n' + \
 						'module residential {\nimplicit_enduses NONE;\n};\n\n' + \
 						'module powerflow {\nsolver_method NR;\nNR_iteration_limit 50;\n};\n\n' + \
 						'object climate {\nname Climate;\ninterpolate QUADRATIC;\ntmyfile climate.tmy2;\n};\n\n'
-
-	# Throw some headers on that:
-	outGlm = genericHeaders + feeder.sortedWrite(glmTree)
-
-	return outGlm
-
-def main():
-	''' tests go here '''
-	StaticGlmDict = convert('C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC-FRIENDSHIP.std','C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC.seq')
+						
+	outGlm = genericHeaders + feeder.sortedWrite(StaticGlmDict)					
 	print('Success')
 	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_Static_Model.glm','w')
-	file.write(StaticGlmDict)
+	file.write(outGlm)
 	file.close()
 	# print outGlm
 	# omfConvert('testMagic','ILEC-Rembrandt.std','ILEC.seq')

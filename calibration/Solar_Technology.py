@@ -54,20 +54,20 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
         #Determine total number of PV we must add to office
         if penetration_office > 0:    # solar_office_array = list(number of office meters attached to com loads,list(office meter names attached to loads),list(phases of office meters attached to loads))
             total_office_pv_units = math.ceil((config_data['emissions_peak'] * penetration_office) / tech_data['solar_averagepower_office'])
-            total_office_number = solar_office_array[0]
+            total_office_number = int(solar_office_array[0])
             
             # Create a randomized list of numbers 0 to total_office_number
             random_index = []
-            random_index = random.sample(list(range(total_office_number)),total_office_number);
+            random_index = random.sample(list(xrange(total_office_number)),total_office_number);
             
             # Determine how many units to attach to each office building
-            pv_units_per_office = math.ceil(total_office_pv_units / total_office_number)
+            pv_units_per_office = int(math.ceil(total_office_pv_units / total_office_number))
             
             # Attach PV units to dictionary
             pv_unit = 0
             floor_area = round(solar_rating / (92.902 * 0.20))
             
-            for x in range(0,total_office_number):
+            for x in xrange(total_office_number):
                 parent = solar_office_array[1][random_index[x]]
                 phases = solar_office_array[2][random_index[x]]
                 pv_unit = pv_unit + pv_units_per_office
@@ -76,7 +76,7 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
                     if pv_units_per_office > (total_office_number - pv_unit - 1):
                         pv_units_per_office = total_office_number - pv_unit - 1
                         
-                    for y in range(0,pv_units_per_office):
+                    for y in xrange(0,pv_units_per_office):
                         # Write the PV meter
                         last_key += 1
                         PV_Tech_Dict[last_key] = {'object' : 'meter',
@@ -112,20 +112,20 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
         # Determine total number of PV we must add to bigbox commercial
         if penetration_bigbox > 0:    # solar_bigbox_array = list(number of bigbox meters attached to com loads,list(bigbox meter names attached to loads),list(phases of bigbox meters attached to loads))
             total_bigbox_pv_units = math.ceil((config_data['emissions_peak'] * penetration_bigbox) / tech_data['solar_averagepower_bigbox'])
-            total_bigbox_number = solar_bigbox_array[0]
+            total_bigbox_number = int(solar_bigbox_array[0])
             
             # Create a randomized list of numbers 0 to total_bigbox_number
             random_index = []
-            random_index = random.sample(list(range(total_bigbox_number)),total_office_number);
+            random_index = random.sample(list(xrange(total_bigbox_number)),total_office_number);
             
             # Determine how many units to attach to each bigbox building
-            pv_units_per_bigbox = math.ceil(total_bigbox_pv_units / total_bigbox_number)
+            pv_units_per_bigbox = int(math.ceil(total_bigbox_pv_units / total_bigbox_number))
             
             # Attach PV units to dictionary
             pv_unit = 0
             floor_area = round(solar_rating / (92.902 * 0.20))
             
-            for x in range(0,total_bigbox_number):
+            for x in xrange(total_bigbox_number):
                 parent = solar_bigbox_array[1][random_index[x]]
                 phases = solar_bigbox_array[2][random_index[x]]
                 pv_unit = pv_unit + pv_units_per_bigbox
@@ -134,7 +134,7 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
                     if pv_units_per_bigbox > (total_bigbox_number - pv_unit - 1):
                         pv_units_per_bigbox = total_bigbox_number - pv_unit - 1
                         
-                    for y in range(0,pv_units_per_bigbox):
+                    for y in xrange(pv_units_per_bigbox):
                         # Write the PV meter
                         last_key += 1
                         PV_Tech_Dict[last_key] = {'object' : 'meter',
@@ -170,20 +170,20 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
         # Determine total number of PV we must add to stripmall commercial
         if penetration_stripmall > 0:    # solar_stripmall_array = list(number of stripmall meters attached to com loads,list(stripmall meter names attached to loads),list(phases of stripmall meters attached to loads))
             total_stripmall_pv_units = math.ceil((config_data['emissions_peak'] * penetration_stripmall) / tech_data['solar_averagepower_stripmall'])
-            total_stripmall_number = solar_stripmall_array[0]
+            total_stripmall_number = int(solar_stripmall_array[0])
             
             # Create a randomized list of numbers 0 to total_stripmall_number
             random_index = []
-            random_index = random.sample(list(range(total_stripmall_number)),total_office_number);
+            random_index = random.sample(list(xrange(total_stripmall_number)),total_office_number);
             
             # Determine how many units to attach to each stripmall building
-            pv_units_per_stripmall = math.ceil(total_stripmall_pv_units / total_stripmall_number)
+            pv_units_per_stripmall = int(math.ceil(total_stripmall_pv_units / total_stripmall_number))
             
             # Attach PV units to dictionary
             pv_unit = 0
             floor_area = round(solar_rating / (92.902 * 0.20))
             
-            for x in range(0,total_stripmall_number):
+            for x in xrange(total_stripmall_number):
                 parent = solar_stripmall_array[1][random_index[x]]
                 phases = solar_stripmall_array[2][random_index[x]]
                 pv_unit = pv_unit + pv_units_per_stripmall
@@ -192,7 +192,7 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
                     if pv_units_per_stripmall > (total_stripmall_number - pv_unit - 1):
                         pv_units_per_stripmall = total_stripmall_number - pv_unit - 1
                         
-                    for y in range(0,pv_units_per_stripmall):
+                    for y in xrange(pv_units_per_stripmall):
                         # Write the PV meter
                         last_key += 1
                         PV_Tech_Dict[last_key] = {'object' : 'triplex_meter',
@@ -240,20 +240,20 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
         # Determine total number of PV we must add to residential houses
         if residential_penetration > 0:    # solar_residential_array = list(number of residential triplex_meters attached to com loads,list(residential triplex_meter names attached to loads),list(phases of residential triplex_meters attached to loads))
             total_residential_pv_units = math.ceil((config_data['emissions_peak'] * residential_penetration) / tech_data['solar_averagepower_residential'])
-            total_residential_number = solar_residential_array[0]
+            total_residential_number = int(solar_residential_array[0])
             
             # Create a randomized list of numbers 0 to total_residential_number
             random_index = []
-            random_index = random.sample(list(range(total_residential_number)),total_office_number);
+            random_index = random.sample(list(xrange(total_residential_number)),total_office_number);
             
             # Determine how many units to attach to each residential house
-            pv_units_per_residential = math.ceil(total_residential_pv_units / total_residential_number)
+            pv_units_per_residential = int(math.ceil(total_residential_pv_units / total_residential_number))
             
             # Attach PV units to dictionary
             pv_unit = 0
             floor_area = round(solar_rating / (92.902 * 0.20))
             
-            for x in range(0,total_residential_number):
+            for x in xrange(total_residential_number):
                 parent = solar_residential_array[1][random_index[x]]
                 phases = solar_residential_array[2][random_index[x]]
                 pv_unit = pv_unit + pv_units_per_residential
@@ -262,7 +262,7 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
                     if pv_units_per_residential > (total_residential_number - pv_unit - 1):
                         pv_units_per_residential = total_residential_number - pv_unit - 1
                         
-                    for y in range(0,pv_units_per_residential):
+                    for y in xrange(pv_units_per_residential):
                         # Write the PV meter
                         last_key += 1
                         PV_Tech_Dict[last_key] = {'object' : 'triplex_meter',
