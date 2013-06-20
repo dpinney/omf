@@ -51,8 +51,10 @@ class MultiCounter(object):
 class LocalWorker:
 	def __init__(self):
 		self.runningJobCount = MultiCounter(0)
+		self.jobRecorder = []
 	def run(self, analysisObject, store):
-		runProc = Process(target=self.runInBackground, args=[analysisObject, store])
+		runProc = Process(name=analysisObject.name, target=self.runInBackground, args=[analysisObject, store])
+		self.jobRecorder.append(runProc)
 		runProc.start()
 	def runInBackground(self, anaObject, store):
 		# Setup.
@@ -79,6 +81,9 @@ class LocalWorker:
 						os.kill(int(pidFile.read()), 15)
 				except:
 					pass
+	def status(self):
+		return [[row.name,row.pid,row.is_alive()] for row in self.jobRecorder]
+
 
 class ClusterWorker:
 	def __init__(self, userKey, passKey, workQueueName, terminateQueueName, store):
@@ -86,6 +91,8 @@ class ClusterWorker:
 		self.workQueue = self.conn.get_queue(workQueueName)
 		self.terminateQueue = self.conn.get_queue(terminateQueueName)
 		# Start polling for jobs on launch:
+		# pollerProc = Process(name='pollerProc',target=self.__monitorClusterQueue__, args=[passKey, store])
+		# pollerProc.start()
 		self.__monitorClusterQueue__(passKey, store)
 	def run(self, analysisObject, store):
 		m = Message()
@@ -112,7 +119,7 @@ class ClusterWorker:
 			else:
 				return False
 		def endlessLoop():
-			# print 'Currently running', daemonWorker.runningJobCount.value(), 'jobs.'
+			print daemonWorker.status()
 			if daemonWorker.runningJobCount.value() < JOB_LIMIT:
 				anaName = popJob(jobQueue)
 				if anaName != False:
@@ -127,3 +134,5 @@ class ClusterWorker:
 			# Check again in 1 second:
 			Timer(1, endlessLoop).start()
 		endlessLoop()
+	def status(self):
+		return []

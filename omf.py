@@ -95,7 +95,6 @@ def feederGet(feederName):
 def analysisFeeder(analysis, study):
 	return flask.render_template('gridEdit.html', feederName=analysis+'---'+study, anaFeeder=True)
 
-
 ####################################################
 # API FUNCTIONS
 ####################################################
