@@ -34,16 +34,6 @@ from boto.sqs.message import Message
 
 JOB_LIMIT = 1
 
-class backgroundProc(Process):
-	def __init__(self, backFun, funArgs):
-		self.name = 'omfWorkerProc'
-		self.backFun = backFun
-		self.funArgs = funArgs
-		self.myPid = os.getpid()
-		Process.__init__(self)
-	def run(self):
-		self.backFun(*self.funArgs)
-
 class MultiCounter(object):
     def __init__(self, initval=0):
         self.val = Value('i', initval)
@@ -62,7 +52,7 @@ class LocalWorker:
 	def __init__(self):
 		self.runningJobCount = MultiCounter(0)
 	def run(self, analysisObject, store):
-		runProc = backgroundProc(self.runInBackground, [analysisObject, store])
+		runProc = Process(target=self.runInBackground, args=[analysisObject, store])
 		runProc.start()
 	def runInBackground(self, anaObject, store):
 		# Setup.
