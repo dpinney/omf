@@ -1,69 +1,80 @@
 
 
 try:
-    from passlib.hash import pbkdf2_sha512
+	from passlib.hash import pbkdf2_sha512
 except ImportError, e:
-    print "install passlib - 'pip install passlib'"
-    raise Exception, e
+	print "install passlib - 'pip install passlib'"
+	raise Exception, e
 
 import os
 import json
 
 class UserManager:
-    def __init__(self, store):
-        self.store = store
-        
-    def create_user(self, username, password, confirm_password):
-        # For now, just creating user in file store
-        if self.store.exists("User", username):
-            return
-        if username and  password == confirm_password:
-            u_dict = {"username":username,
-                      "password_digest":pbkdf2_sha512.encrypt(password),
-                      "analyses":[],
-                      "studies":[],
-                      "feeders":[]
-                      }
-            self.store.put("User", username, u_dict)
-            return User(self.store, u_dict)
-            
-    def authenticate(self, username, password):
-        user = self.store.get("User", username)
-        if user and pbkdf2_sha512.verify(password,
-                                         user["password_digest"]):
-            return User(store, **user)
+	def __init__(self, store):
+		self.store = store
+		
+	def create_user(self, username, password, confirm_password):
+		# For now, just creating user in file store
+		if self.store.exists("User", username):
+			return
+		if username and  password == confirm_password:
+			u_dict = {"username":username,
+					  "password_digest":pbkdf2_sha512.encrypt(password),
+					  "analyses":[],
+					  "studies":[],
+					  "feeders":[],
+					  }
+			self.store.put("User", username, u_dict)
+			return User(self.store, **u_dict)
+			
+	def authenticate(self, username, password):
+		print "We at least got to this point"
+		user = self.store.get("User", username)
+		if user and pbkdf2_sha512.verify(password,
+										 user["password_digest"]):
+			return User(self.store, **user)
 
-    def get(self, username):
-        return User(self.store, self.store.get("User", username))
-        
+	def get(self, username):
+		return User(self.store, **self.store.get("User", username))
+		
 class User:
-    def __init__(self, store, **kwargs):
-        self.store = store
-        map((lambda k, v: setattr(self, k, v)),
-            kwargs.keys(),
-            kwargs.values())
+	def __init__(self, store, **kwargs):
+		print "User initialized, which means succesful login!!!!"
+		self.store = store
+		map((lambda k, v: setattr(self, k, v)),
+			kwargs.keys(),
+			kwargs.values())
+		self.prepend = "" if self.username == "admin" else self.username+"_"
 
-    def is_authenticated(self):
-        return True
+	def is_authenticated(self):
+		return True
 
-    def is_active(self):
-        return True
+	def is_active(self):
+		return True
 
-    def is_anonymous(self):
-        return False
+	def is_anonymous(self):
+		return False
 
-    def get_id(self):
-        return self.username
+	def get_id(self):
+		return self.username
 
-    def list_all(self, objectType):
-        return [e for e in self.store.listAll(objectType)
-                if e[:len(self.username)+1] == self.username+"_"]
+	def listAll(self, objectType):
+		return [e[len(self.prepend):] for e in self.store.listAll(objectType)
+				if e[:len(self.prepend)] == self.prepend]
 
-    def get(self, objectType, objectName):
-        return self.store.get(objectType, self.username+"_"+objectName)
+	def get(self, objectType, objectName, crop_name=True):
+		gdict = self.store.get(objectType, self.prepend+objectName)
+		if gdict and crop_name:
+			gdict["name"] = gdict["name"][len(self.prepend):]
+		return gdict
 
-    def exists(self, objectType, objectName):
-        return self.store.exists(objectType, self.username+"_"+objectName)
+	def exists(self, objectType, objectName):
+		return self.store.exists(objectType, self.prepend+objectName)
 
-    def delete(self, objectType, objectName):
-        return self.store.delete(objectType, self.username+"_"+objectName)
+	def delete(self, objectType, objectName):
+		return self.store.delete(objectType, self.prepend+objectName)
+	
+	def put(self, objectType, objectName, putDict):
+		return self.store.put(objectType, self.prepend+objectName, putDict)
+
+	
