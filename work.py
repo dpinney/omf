@@ -119,7 +119,7 @@ class ClusterWorker:
 			else:
 				return False
 		def endlessLoop():
-			print daemonWorker.status()
+			# print daemonWorker.status()
 			if daemonWorker.runningJobCount.value() < JOB_LIMIT:
 				anaName = popJob(jobQueue)
 				if anaName != False:
