@@ -4,8 +4,8 @@ import Config_Parameter_Limits as limits
 # Returns a list of lists, each is a set of calibration parameter values to try. 
 
 def loadLevel (a, avg_house, avg_comm, base_load_scalar, avg_diff):
-	options = [None] * 6
-	for i in range(6):
+	options = [None] * 7
+	for i in range(7):
 		options[i] = [base_load_scalar, avg_house, avg_comm]
 	change = 0.10 + (abs(avg_diff) - (abs(avg_diff) % 0.10))
 	change_base_load = 0.05;
@@ -29,6 +29,7 @@ def loadLevel (a, avg_house, avg_comm, base_load_scalar, avg_diff):
 	options[4][2] = int(avg_comm + (avg_comm * 0.5 * change))
 	options[5][2] = int(avg_comm + (avg_comm * 1.5 * change)) # change avg com more than avg res
 	options[5][1] = int(avg_house + (avg_house * 0.5 * change))
+	options[6][0] = round(base_load_scalar + (change_base_load * 2),2) # change base load double
 	
 	# constrain the values within our set limits
 	for i in range(6):

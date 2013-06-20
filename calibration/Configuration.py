@@ -3,6 +3,7 @@ Created on Apr 2, 2013
 
 @author: D3P988
 '''
+import re
 
 # start big ugly .m copy/paste - about 3329 lines
 
@@ -524,39 +525,87 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 		data["addtl_heat_degrees"] = 1
 		
 	else:
-		import importlib
-		import re
-		m = re.compile( '\.py$' )
-		config = importlib.import_module(m.sub('',config_file))
+		# import importlib
+		# import re
+		# m = re.compile( '\.py$' )
+		# config = importlib.import_module(m.sub('',config_file))
+		def num(s):
+			try:
+				return int(s)
+			except ValueError:
+				return float(s)
 		
-		# get dictionary values from Configuration_X.py library
-		data["avg_house"] = config.avg_house
+		couplets={}
+		# open calibration file
+		calib = open(config_file, 'r')
+		# separate into lines
+		lines = (calib.read()).split('\n')
+		for l in lines:
+			# ignore comment lines
+			if re.match(r'^#',l) is None:
+				# split at first comma
+				f = l.split(',',1)
+				if f[0] == 'all':
+					couplets[f[0]]=f[1].split(',')
+				else:
+					# insert variable name and value into dictionary
+					couplets[f[0]]=num(f[1])
 
-		data["avg_commercial"] = config.avg_comm
+		# get dictionary values from calibration file
+		# data["avg_house"] = config.avg_house
 
-		data["base_load_scalar"] = config.base_load_scalar
+		# data["avg_commercial"] = config.avg_comm
 
-		allsame_c = config.cooling_offset
+		# data["base_load_scalar"] = config.base_load_scalar
 
-		allsame_h = config.heating_offset
+		# allsame_c = config.cooling_offset
 
-		COP_high = config.COP_high_scalar
+		# allsame_h = config.heating_offset
 
-		COP_low = config.COP_low_scalar
+		# COP_high = config.COP_high_scalar
 
-		data["residential_skew_shift"] = config.res_skew_shift
+		# COP_low = config.COP_low_scalar
 
-		decrease_gas = config.decrease_gas
+		# data["residential_skew_shift"] = config.res_skew_shift
 
-		#TODO: this is actually in TechnologyParameters Right now...
+		# decrease_gas = config.decrease_gas
+
+		# #TODO: this is actually in TechnologyParameters Right now...
+		# # widen schedule skew
+		# data["residential_skew_std"] = config.sched_skew_std
+
+		# # window wall ratio
+		# data["window_wall_ratio"] = config.window_wall_ratio
+
+		# # additional set point degrees
+		# data["addtl_heat_degrees"] = config.addtl_heat_degrees
+		
+		data["avg_house"] = couplets['avg_house']
+
+		data["avg_commercial"] = couplets['avg_comm']
+
+		data["base_load_scalar"] = couplets['base_load_scalar'] + 1
+
+		allsame_c = couplets['cooling_offset']
+
+		allsame_h = couplets['heating_offset']
+
+		COP_high = couplets['COP_high_scalar'] + 1
+
+		COP_low = couplets['COP_low_scalar'] + 1
+
+		data["residential_skew_shift"] = couplets['res_skew_shift']
+
+		decrease_gas = couplets['decrease_gas']
+
 		# widen schedule skew
-		data["residential_skew_std"] = config.sched_skew_std
+		data["residential_skew_std"] = couplets['sched_skew_std']
 
 		# window wall ratio
-		data["window_wall_ratio"] = config.window_wall_ratio
+		data["window_wall_ratio"] = couplets['window_wall_ratio']
 
 		# additional set point degrees
-		data["addtl_heat_degrees"] = config.addtl_heat_degrees
+		data["addtl_heat_degrees"] = couplets['addtl_heat_degrees']
 		
 	# Apply calibration scalars
 	for x in cooling_setpoint:

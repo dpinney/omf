@@ -22,9 +22,11 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 	# create populated dictionary
 	if calib_file is not None:
 		print ('Populating feeder using calibration file ' + calib_file+'.')
+		calib_fullpath = dir+'\\'+calib_file
 	else:
 		print ('Populating feeder using default calibrations.')
-	glmDict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(baseGLM,case_flag,calib_file,feeder_config) 
+		calib_fullpath = None
+	glmDict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(baseGLM,case_flag,calib_fullpath,feeder_config) 
 	
 	fnames =  []
 	for i in clock.keys():
@@ -73,7 +75,7 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 		if calib_file is None:
 			id = 'DefaultCalibration'
 		else:
-			m = re.compile( '\.py$' )
+			m = re.compile( '\.txt$' )
 			id = m.sub('',calib_file)
 			
 		date = re.sub('\s.*$','',rec_starttime)
