@@ -469,7 +469,7 @@ def TechnologyParametersFunc(use_flags, TechToTest):
 		# period, 
 		# mean, 
 		# stdev, 
-		# max slider setting (range: 0.001 - 1; NOTE: do not use zero;
+		# max slider setting (xrange: 0.001 - 1; NOTE: do not use zero;
 		# name of the price player/schedule)
 		# percent penetration,
 		if (use_flags["use_market"] == 1):
@@ -636,7 +636,7 @@ def TechnologyParametersFunc(use_flags, TechToTest):
 	#meas = datenum(data["end_date"]) - datenum(data["start_date"]); #days between start and end
 	meas = 10000
 	meas2 = meas*24*60*60;  #seconds between start and end dates
-	data["meas_limit"] = 20*math.ceil(meas2/data["meas_interval"]);
+	data["meas_limit"] = int(20*math.ceil(meas2/data["meas_interval"]));
 
 	# Skews
 	#data["residential_skew_std"] = 2700; #45 min

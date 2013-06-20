@@ -20,7 +20,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 		fl_area = []
 		
 		random.seed(3)	
-		print('iterating over residential_dict')
+		#print('iterating over residential_dict')
 		# Begin attaching houses to designated triplex_meters		
 		for x in residential_dict:
 			if residential_dict[x]['number_of_houses'] > 0:
@@ -40,16 +40,16 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 				heat_sp = []
 				sfh = list(map(lambda a,b:a*b,config_data['SFH'],thermal_integrity)) # Number of single-family homes in each subclass
 				
-				#range(thermal_integrity.length)
-				for y in range(len(thermal_integrity)):
+				#xrange(thermal_integrity.length)
+				for y in xrange(len(thermal_integrity)):
 					cool_sp.append([])
 					heat_sp.append([])
-					for z in range(len(config_data['cooling_setpoint'])):
+					for z in xrange(len(config_data['cooling_setpoint'])):
 						cool_sp[y].append(math.ceil(config_data['cooling_setpoint'][z][0] * thermal_integrity[y]))
 						heat_sp[y].append(math.ceil(config_data['heating_setpoint'][z][0] * thermal_integrity[y]))
-				print('iterating over number of houses')
+				#print('iterating over number of houses')
 				# Start adding house dictionaries
-				for y in range(no_houses):
+				for y in xrange(no_houses):
 					ResTechDict[last_object_key] = {'object' : 'triplex_meter',
 													'phases' : '{:s}'.format(phase),
 													'name' : 'tpm{:d}_{:s}'.format(y,parent),
@@ -69,7 +69,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 						ResTechDict[last_object_key]['monthly_fee'] = '{:s}'.format(tech_data['monthly_fee'])
 						ResTechDict[last_object_key]['bill_day'] = '1'
 					last_object_key += 1
-					print('finished triplex_meter')
+					#print('finished triplex_meter')
 					# Create an array of parents for the residential thermal storage
 					if use_flags['use_ts'] != 0:
 						ts_residential_array[0] += 1
@@ -88,7 +88,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 													'groupid' : 'Residential'}
 					
 					# Calculate the  residential schedule skew value
-					skew_value = tech_data['residential_skew_std']*random.normalvariate(0,1)
+					skew_value = config_data['residential_skew_std']*random.normalvariate(0,1)
 					
 					if skew_value < -1*tech_data['residential_skew_max']:
 						skew_value = -1*tech_data['residential_skew_max']
@@ -99,7 +99,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					skew_value = skew_value + config_data['residential_skew_shift']
 					
 					# Calculate the waterheater schedule skew
-					wh_skew_value = 3*tech_data['residential_skew_std']*random.normalvariate(0,1)
+					wh_skew_value = 3*config_data['residential_skew_std']*random.normalvariate(0,1)
 					
 					if wh_skew_value < -6*tech_data['residential_skew_max']:
 						wh_skew_value = -6*tech_data['residential_skew_max']
@@ -107,7 +107,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 						wh_skew_value = 6*tech_data['residential_skew_max']
 					
 					# Scale this skew up to weeks
-					pp_skew_value = 128*tech_data['residential_skew_std']*random.normalvariate(0,1)
+					pp_skew_value = 128*config_data['residential_skew_std']*random.normalvariate(0,1)
 					
 					if pp_skew_value < -128*tech_data['residential_skew_max']:
 						pp_skew_value = -128*tech_data['residential_skew_max']
@@ -120,19 +120,19 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					# and set the thermal integrity of said building
 					size_a = len(thermal_integrity)
 					
-					for z in range(len(thermal_integrity)):
+					for z in xrange(len(thermal_integrity)):
 						if type(thermal_integrity[z]) == type([]):# Checks to see if contents of thermal_integrity are lists
 							size_b = len(thermal_integrity[z])
 						else:
 							size_b = 1
 					
-					therm_int = math.ceil(size_a * size_b * random.random())
+					therm_int = int(math.ceil(size_a * size_b * random.random()))
 					
 					row_ti = therm_int % size_a
 					col_ti = therm_int % size_b
 					
 					while thermal_integrity[row_ti] < 1:
-						therm_int = math.ceil(size_a * size_b * random.random())
+						therm_int = int(math.ceil(size_a * size_b * random.random()))
 						row_ti = therm_int % size_a
 						col_ti = therm_int % size_b
 						
@@ -269,8 +269,8 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					ResTechDict[last_object_key]['hvac_breaker_rating'] = '1000'
 					
 					# Choose a cooling and heating schedule
-					cooling_set = math.ceil(config_data['no_cool_sch'] * random.random())
-					heating_set = math.ceil(config_data['no_heat_sch'] * random.random())
+					cooling_set = int(math.ceil(config_data['no_cool_sch'] * random.random()))
+					heating_set = int(math.ceil(config_data['no_heat_sch'] * random.random()))
 					
 					# Choose a cooling bin
 					coolsp = config_data['cooling_setpoint']
@@ -314,6 +314,8 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					cool_night_diff = coolsp[cool_bin][1] * 2 * diff_rand;
 					heat_night_diff = heatsp[heat_bin][1] * 2 * diff_rand;
 					
+					heat_night += config_data['addtl_heat_degrees']
+					
 					if use_flags['use_market'] == 0 or use_flags['use_market'] == 3:
 						ResTechDict[last_object_key]['cooling_setpoint'] = 'cooling{:d}*{:.2f}+{:.2f}'.format(cooling_set,cool_night_diff,cool_night)
 						ResTechDict[last_object_key]['heating_setpoint'] = 'heating{:d}*{:.2f}+{:.2f}'.format(heating_set,heat_night_diff,heat_night)
@@ -344,7 +346,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 						ResTechDict[last_object_key]['heating_setpoint'] = 'heating{:d}*{:.2f}+{:.2f}'.format(heating_set,heat_night_diff/new_rand,heat_night)
 
 					last_object_key += 1
-					print('finished house')
+					#print('finished house')
 					# Put in passive controller for DLC use_flags.use_market = 3 line 2224
 					if use_flags['use_market'] == 3:
 						ResTechDict[last_object_key] = {'object' : 'passive_controller',
@@ -373,7 +375,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 							# pull in the slider response level
 							slider = slider_random[y*len(residential_dict) + x]
 	
-							# set the pre-cool / pre-heat range to really small
+							# set the pre-cool / pre-heat xrange to really small
 							# to get rid of it.
 							s_tstat = 2
 							hrh = -5 + 5*(1-slider)
@@ -534,7 +536,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 													'current_fraction' : '{:f}'.format(tech_data['ifrac']),
 													'power_fraction' : '{:f}'.format(tech_data['pfrac'])}
 					last_object_key += 1
-					print('finished responsive zipload')
+					#print('finished responsive zipload')
 					if use_flags['use_market'] == 1 or use_flags['use_market'] == 2:
 						ResTechDict[last_object_key] = {'object' : 'passive_controller',
 														'parent' : 'house{:d}_resp_{:s}'.format(y,parent),
@@ -588,7 +590,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 													'current_fraction' : '{:f}'.format(tech_data['ifrac']),
 													'power_fraction' : '{:f}'.format(tech_data['pfrac'])}
 					last_object_key += 1
-					print('finished unresponsive zipload')
+					#print('finished unresponsive zipload')
 					# Add pool pumps only on single-family homes
 					if pool_pump_perc < (2*config_data['perc_poolpumps']) and no_pool_pumps >= 1 and row_ti == 0:
 						ResTechDict[last_object_key] = {'object' : 'ZIPload',
@@ -653,7 +655,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 							last_object_key += 1
 						
 						no_pool_pumps -= 1
-					print('finished pool pump zipload')	
+					#print('finished pool pump zipload')	
 					# Add Water heater objects
 					heat_element = 3.0 + (0.5 * random.randint(1,5))
 					tank_set = 120 + (16 * random.random())
@@ -733,7 +735,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 															'second_tier_price' : '{:f}'.format(config_data['CPP_prices'][2]),
 															'state_property' : 'override'}
 							last_object_key += 1
-				print('finished water heater')
-			print('finished iterating over number of houses')
-		print('finished iterating over residential dict')
+				#print('finished water heater')
+			#print('finished iterating over number of houses')
+		#print('finished iterating over residential dict')
 	return (ResTechDict, solar_residential_array, ts_residential_array, last_object_key)

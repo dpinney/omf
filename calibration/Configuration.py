@@ -25,7 +25,7 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 		
 	# TODO: this should be user specified
 	data["directory"] = 'C:\\Users\\d3y051\\Documents\\NRECA feeder calibration 2-2013\\Calibration\\repository\\Feeder_Test\\schedules'
-	dir = 'C:\\\\Users\\\\d3y051\\\\Documents\\\\NRECA_feeder_calibration_2-2013\\\\Calibration\\\\repository\\\\Feeder_Test\\\\schedules\\\\'
+	dir = 'C:\\\\Projects\\\\NRECEA\\\\OMF\\\\omf_calibration_27\\\\src\\\\feeder_calibration_scripts\\\\omf\\\\calibration\\\\schedules\\\\'
 	#default case
 	if file_to_extract == None:
 		
@@ -142,7 +142,7 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 		# - thermal_properties[i][j] = [ R-ceil,R-wall,R-floor,window layers,window glass, glazing treatment, window frame, R-door, Air infiltrationS ]
 		# - for i = subclassficaiton, j = classification
 		thermal_properties = [None] * 6 
-		for i in range(6):
+		for i in xrange(6):
 			thermal_properties[i] = [None] * 9  
 			# Now we have a list of 6 lists of "None"
 
@@ -612,14 +612,14 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 		if x is None:
 			pass
 		else:
-			for j in range(len(x)):
+			for j in xrange(len(x)):
 				x[j].insert(1,allsame_c)
 				
 	for x in heating_setpoint:
 		if x is None:
 			pass
 		else:
-			for j in range(len(x)):
+			for j in xrange(len(x)):
 				x[j].insert(1,allsame_h)
 				
 	cop_high_new = []
@@ -632,11 +632,11 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 	for x in cop_low:
 		cop_low_new.append([round(COP_low*y,2) for y in x])
 		
-	for i in range(len(thermal_properties)):
+	for i in xrange(len(thermal_properties)):
 		if thermal_properties[i] is None:
 			pass
 		else:
-			for j in range(len(thermal_properties[i])):
+			for j in xrange(len(thermal_properties[i])):
 				if thermal_properties[i][j] is None:
 					pass
 				else:
@@ -650,11 +650,11 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 	#Variables referenced by Feeder_Generator.m
 	if classification != None :
 		data["thermal_percentages"] = [None]*len(thermal_percentages)
-		for x in range(len(thermal_percentages)):
+		for x in xrange(len(thermal_percentages)):
 			data["thermal_percentages"][x] = thermal_percentages[x][classID]
 
 		data["thermal_properties"] = [None]*len(thermal_properties)
-		for x in range(len(thermal_properties)):
+		for x in xrange(len(thermal_properties)):
 			data["thermal_properties"][x] = thermal_properties[x][classID]
 
 		data["cooling_setpoint"] = cooling_setpoint[classID]; 
@@ -668,17 +668,17 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 		data["wh_size"] = wh_size[classID];
 		
 		data["over_sizing_factor"] = [None]*len(over_sizing_factor)
-		for x in range(len(over_sizing_factor)):
+		for x in xrange(len(over_sizing_factor)):
 			data["over_sizing_factor"][x] = over_sizing_factor[x][classID];
 			
 		data["AC_type"] = [None]*len(AC_type)
-		for x in range(len(AC_type)):
+		for x in xrange(len(AC_type)):
 			data["AC_type"][x] = AC_type[x][classID];
 			
 		data["dispatch_order"] = dispatch_order[classID];
 
 		data["SFH"] = [None]*len(SFH)
-		for x in range(len(SFH)):
+		for x in xrange(len(SFH)):
 			data["SFH"][x] = SFH[x][classID];
 
 

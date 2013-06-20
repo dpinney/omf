@@ -36,7 +36,8 @@ def OMFmain(milsoft, feeder_info, scada, case_flag, feeder_config, calibration_c
 				pass  # We'll use defaults.
 			else:
 				# use whatever feeder_info is to write a new feeder_config file that will populate Configuration.py appropriatly.
-				feeder_config = writeFeederConfig(feeder_info)  #TODO: This function is in the future. 
+				#feeder_config = writeFeederConfig(feeder_info)  #TODO: This function is in the future. 
+				pass
 		else:
 			pass
 			# We should check that this file is a valid feeder_config file for use inside Configuration.py. This is important if it's coming from the user incase they made change to the file that aren't compatible with our format. 

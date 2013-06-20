@@ -6,13 +6,12 @@ import ResidentialLoads
 import CommercialLoads
 import math
 import random
-import copy
 import Configuration
 import TechnologyParameters
 import Solar_Technology
 import feeder
 import AddTapeObjects
-
+import copy
 
 def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 	#glmDict is a dictionary containing all the objects in WindMIL model represented as equivalent GridLAB-D objects
@@ -45,13 +44,13 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 
 	if case_flag > 13:
 		case_flag = 13
-	print("Calling configuration.py\n")
+	#print("Calling configuration.py\n")
 	# Get information about each feeder from Configuration() and  TechnologyParameters()
 	config_data = Configuration.ConfigurationFunc(configuration_file,None,None)
 
 	#set up default flags
 	use_flags = {}
-	print("Calling TechnologyParameters.py\n")
+	#print("Calling TechnologyParameters.py\n")
 	tech_data,use_flags = TechnologyParameters.TechnologyParametersFunc(use_flags,case_flag)
 
 	# TODO: figure out how to use a user specified tmy file.
@@ -217,7 +216,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 							 'name' : 'trans_config_to_feeder',
 							 'connect_type' : 'WYE_WYE',
 							 'install_type' : 'PADMOUNT',
-							 'primary_voltage' : '25000',
+							 'primary_voltage' : '{:d}'.format(config_data['nom_volt']),
 							 'secondary_voltage' : '{:s}'.format(nom_volt),
 							 'power_rating' : '{:.1f} MVA'.format(config_data['feeder_rating']),
 							 'impedance' : '0.00033+0.0022j'}
@@ -247,7 +246,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 		if num_caps > 0:
 			glmCaseDict[last_key]['capacitor_list'] = '"'
 
-			for x in range(num_caps):
+			for x in xrange(num_caps):
 				if x < (num_caps - 1):
 					glmCaseDict[last_key]['capacitor_list'] = glmCaseDict[last_key]['capacitor_list'] + '{:s},'.format(config_data['capacitor_outage'][x][0])
 				else:
@@ -258,7 +257,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 		num_eol = len(config_data['EOL_points'])
 		glmCaseDict[last_key]['voltage_measurements'] = '"'
 
-		for x in range(num_eol):
+		for x in xrange(num_eol):
 			if x < (num_eol - 1):
 				glmCaseDict[last_key]['voltage_measurements'] = glmCaseDict[last_key]['voltage_measurements'] + '{:s},{:d},'.format(config_data['EOL_points'][x][0],config_data['EOL_points'][x][2])
 			else:
@@ -269,7 +268,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 	glmCaseDict[last_key] = {'object' : 'meter',
 							 'name' : 'network_node',
 							 'bustype' : 'SWING',
-							 'nominal_voltage' : '25000',
+							 'nominal_voltage' : '{:d}'.format(config_data['nom_volt']),
 							 'phases' : 'ABCN'}
 	# Add transmission voltage players
 	parent_key = last_key
@@ -312,6 +311,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 		if 'bustype' in glmCaseDict[last_key] and glmCaseDict[last_key]['bustype'] == 'SWING':
 			swing_node = glmCaseDict[last_key]['name']
 			del glmCaseDict[last_key]['bustype']
+			glmCaseDict[last_key]['object'] = 'meter'
 		last_key += 1
 
 
@@ -325,7 +325,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 			elif glmCaseDict[x]['object'] == 'overhead_line' or glmCaseDict[x]['object'] == 'underground_line':
 				glmCaseDict[x]['groupid'] = 'Distribution_Line'
 	
-	print('finished copying base glm\n')
+	#print('finished copying base glm\n')
 
 	# Create dictionary that houses the number of commercial 'load' objects where commercial house objects will be tacked on.
 	total_commercial_number = 0 # Variable that stores the total amount of houses that need to be added.
@@ -388,15 +388,15 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 					load_C += commercial_dict[commercial_key]['nom_volt']*(abs(c_num))
 
 				if load_A >= tech_data['load_cutoff']:
-					commercial_dict[commercial_key]['number_of_houses'][0] = math.ceil(load_A/config_data['avg_commercial'])
+					commercial_dict[commercial_key]['number_of_houses'][0] = int(math.ceil(load_A/config_data['avg_commercial']))
 					total_commercial_number += commercial_dict[commercial_key]['number_of_houses'][0]
 
 				if load_B >= tech_data['load_cutoff']:
-					commercial_dict[commercial_key]['number_of_houses'][1] = math.ceil(load_B/config_data['avg_commercial'])
+					commercial_dict[commercial_key]['number_of_houses'][1] = int(math.ceil(load_B/config_data['avg_commercial']))
 					total_commercial_number += commercial_dict[commercial_key]['number_of_houses'][1]
 
 				if load_C >= tech_data['load_cutoff']:
-					commercial_dict[commercial_key]['number_of_houses'][2] = math.ceil(load_C/config_data['avg_commercial'])
+					commercial_dict[commercial_key]['number_of_houses'][2] = int(math.ceil(load_C/config_data['avg_commercial']))
 					total_commercial_number += commercial_dict[commercial_key]['number_of_houses'][2]
 
 				commercial_dict[commercial_key]['load'][0] = load_A
@@ -525,7 +525,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 
 				commercial_key += 1
 				
-	print('finished collecting commercial load objects\n')
+	#print('finished collecting commercial load objects\n')
 
 	# Create dictionary that houses the number of residential 'load' objects where residential house objects will be tacked on.
 	total_house_number = 0
@@ -555,7 +555,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 						c_num = complex(glmCaseDict[x]['power_12'])
 						load += abs(c_num)
 
-					residential_dict[residential_key]['number_of_houses'] = round(load/config_data['avg_house'])
+					residential_dict[residential_key]['number_of_houses'] = int(round(load/config_data['avg_house']))
 					total_house_number += residential_dict[residential_key]['number_of_houses']
 					# Determine whether we rounded down of up to help determine the square footage (neg. number => small homes)
 					residential_dict[residential_key]['large_vs_small'] = load/config_data['avg_house'] - residential_dict[residential_key]['number_of_houses']
@@ -661,13 +661,13 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 					if 'power_1' in glmCaseDict[x]:
 						del glmCaseDict[x]['power_1']
 
-					if number_of_houses == 0 and load > 0.0: # Residential street light
+					if total_house_number == 0 and load > 0: # Residential street light
 						glmCaseDict[x]['power_12_real'] = 'street_lighting*{.4f}'.format(c_num.real*tech_data['light_scalar_res'])
 						glmCaseDict[x]['power_12_reac'] = 'street_lighting*{.4f}'.format(c_num.imag*tech_data['light_scalar_res'])
 
 					residential_key += 1
 					
-	print('finished collecting residential load objects\n')
+	#print('finished collecting residential load objects\n')
 
 	# Calculate some random numbers needed for TOU/CPP and DLC technologies
 	if use_flags['use_market'] != 0:
@@ -687,7 +687,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 			# Make a large array so we don't run out
 			if len(residential_dict) > 0:
 				aa = len(residential_dict)*total_house_number
-				for x in range(aa):
+				for x in xrange(aa):
 					market_penetration_random.append(random.random())
 					dlc_rand.append(random.random()) # Used for dlc randomization
 
@@ -710,13 +710,13 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 				multiplier = 3.6
 				xval = []
 				elasticity_random = []
-				for x in range(aa):
+				for x in xrange(aa):
 					xval.append(random.random())
 					elasticity_random.append(multiplier * math.exp(-1 / (2 * pow(sigma,2))) * pow((math.log(xval[x]) - mu),2) / (xval[x] * sigma * math.sqrt(2 * math.pi)))
 
 			if len(commercial_dict) > 0:
 				aa = len(commercial_dict)*15*100
-				for x in range(aa):
+				for x in xrange(aa):
 					# Limit slider randomization to Olypen style
 					comm_slider_random.append(random.normalvariate(0.45,0.2))
 					if comm_slider_random[x] > tech_data['market_info'][4]:
@@ -750,13 +750,13 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 
 	# Tack on residential loads
 	if use_flags['use_homes'] != 0:
-		print('calling ResidentialLoads.py\n')
+		#print('calling ResidentialLoads.py\n')
 		glmCaseDict, solar_residential_array, ts_residential_array, last_key = ResidentialLoads.append_residential(glmCaseDict, use_flags, tech_data, residential_dict, last_key, CPP_flag_name, market_penetration_random, dlc_rand, pool_pump_recovery_random, slider_random, xval, elasticity_random, configuration_file)
 	# End addition of residential loads ########################################################################################################################
 
 	# TODO: Call Commercial Function
 	if use_flags['use_commercial'] != 0:
-		print('calling CommercialLoads.py\n')
+		#print('calling CommercialLoads.py\n')
 		glmCaseDict, solar_office_array, solar_bigbox_array, solar_stripmall_array, ts_office_array, ts_bigbox_array, ts_stripmall_array, last_key = CommercialLoads.append_commercial(glmCaseDict, use_flags, tech_data, last_key, commercial_dict, comm_slider_random, dlc_c_rand, dlc_c_rand2, configuration_file)
 			
 	# Append Solar: Call append_solar(feeder_dict, use_flags, config_file, solar_bigbox_array, solar_office_array, solar_stripmall_array, solar_residential_array, last_key)
@@ -764,9 +764,9 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 		glmCaseDict = Solar_Technology.Append_Solar(glmCaseDict, use_flags, configuration_file, solar_bigbox_array, solar_office_array, solar_stripmall_array, solar_residential_array, last_key)
 		
 	# Append recorders
-	#glmCaseDict, last_key = AddTapeObjects.addrecorders(glmCaseDict,use_flags,last_key,tech_data,0,0,FeederID,swing_node,total_house_number,total_commercial_number)
+	glmCaseDict, last_key = AddTapeObjects.add_recorders(glmCaseDict,case_flag,0,1,'four_node_basecase_test', last_key)
 
-	return glmCaseDict, last_key
+	return (glmCaseDict, last_key)
 
 def main():
 	#tests here
@@ -936,9 +936,9 @@ def main():
 						  'nominal_voltage' : '120'}
 
 
-	baseGLM = GLD_Feeder(glm_object_dict,0)
+	baseGLM, last_key = GLD_Feeder(glm_object_dict,0)
 	glm_string = feeder.sortedWrite(baseGLM)
-	file = open('C:\\Projects\\NRECEA\\OMF\\OMF_Support\\PyDev\\src\\root\\four_node_basecase_test.glm','w')
+	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\four_node_basecase_test.glm','w')
 	file.write(glm_string)
 	file.close()
 	print('success!')
