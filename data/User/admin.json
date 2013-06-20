@@ -1,0 +1,7 @@
+{
+"username":"admin",
+"password_digest":"$pbkdf2-sha512$12000$1nrvvbd2LgUAYOyd01qL8Q$NvTP3ARbPFUFTnzbrJFE/6FcwfKQT7h7lRP1J3yrSJy9Xx3TouBihHjnxFWAXVZYGdMW02vCLAczEXWIgCMFvw",
+"analyses":[],
+"studies":[],
+"feeders":[]
+}

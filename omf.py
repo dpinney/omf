@@ -1,11 +1,12 @@
 #!/bin/python
 
 # third party modules
-import flask, werkzeug, os, multiprocessing, json, time, datetime, copy
+import flask, werkzeug, os, multiprocessing, json, time, datetime, copy, flask_login
 # our modules
-import analysis, feeder, reports, studies, milToGridlab, storage, work
+import analysis, feeder, reports, studies, milToGridlab, storage, work, User
 
 app = flask.Flask(__name__)
+
 
 try:
 	with open('S3KEY.txt','r') as keyFile:
@@ -18,6 +19,17 @@ except:
 	store = storage.Filestore('data')
 	worker = work.LocalWorker()
 	print 'Running on local file system.'
+	
+	
+login_manager = flask_login.LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
+app.secret_key = "Here is a secret key"
+user_manager = User.UserManager(store)
+
+@login_manager.user_loader
+def load_user(username):
+	return user_manager.get(username)
 
 class backgroundProc(multiprocessing.Process):
 	def __init__(self, backFun, funArgs):
@@ -32,6 +44,29 @@ class backgroundProc(multiprocessing.Process):
 ###################################################
 # VIEWS
 ###################################################
+
+@app.route("/login", methods = ["GET", "POST"])
+def login():
+	username, password = map(flask.request.form.get, ["username",
+							  "password"])
+	if username and password:
+		user = user_manager.authenticate(username, password)
+		if user:
+			flask_login.login_user(user)
+			return flask.redirect("/")
+	return flask.render_template("login.html")
+
+@app.route("/register", methods = ["POST"])
+def register():
+	user = user_manager.create_user(*map(flask.request.form.get,
+					     ["username",
+					      "password",
+					      "confirm_password"]))
+	if user:
+		flask_login.login_user(user)
+	return flask.redirect("/")
+	
+	
 
 @app.route('/')
 def root():
