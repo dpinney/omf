@@ -24,6 +24,10 @@ except:
 # VIEWS
 ###################################################
 
+@app.route('/readCount')
+def readCount():
+	return str(globals()) + str(counter.value())
+
 @app.route('/')
 def root():
 	browser = flask.request.user_agent.browser
