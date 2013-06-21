@@ -1,7 +1,7 @@
 ﻿<head>
   <script type='text/javascript' src='/static/d3.v3.js'></script>
   <script type='text/javascript' src='/static/omf.js'></script>
-  <script type="text/javascript" src="/static/jquery-1.10.0.js"></script>
+  <script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
 
   <link rel='stylesheet' href='/static/omf.css' />
   <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}' />
@@ -29,12 +29,12 @@
 	input {min-width: 100px}
 	/* Start graph elements. */
 	.nodetext {pointer-events: none; font: 10px; }
-	g.node {fill:gray; stroke: #fff;stroke-width: 1.5px;}
+	g.node {fill:gray; stroke: #fff;}
 	line.link {stroke: black;stroke-opacity: 1; stroke-width: 6px;}
 	line.parentChild {stroke-dasharray:1,1;}
-	line.selected {stroke:blue; stroke-width: 8px; stroke-opacity: 1.0;}
-	g.selected {stroke:black; stroke-width: 4px; stroke-opacity: 1.0; }
-	g.multiselected {stroke:black; stroke-width: 4px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
+	line.selected {stroke:aqua; stroke-width: 8px; stroke-opacity: 1.0;}
+	g.selected {stroke:aqua; stroke-width: 2px; stroke-opacity: 1.0; }
+	g.multiselected {stroke:aqua; stroke-width: 4px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
 	g.house {fill:#3366FF;}
 	g.load {fill:#3366FF;}
 	g.ZIPload, g.waterheater {fill:#66CCFF;}
@@ -43,7 +43,7 @@
 	g.gridNode {fill:#CC0000;}
 	g.swingNode {fill:hotpink;}
 	g text {fill:black; stroke:black; stroke-width:0px; stroke-opacity: 1; font-size:15; pointer-events: none;}
-	circle.nodeIsPinned {fill:none; stroke:black; stroke-width:2.5px; pointer-events: none;}
+	circle.nodeIsPinned {fill:none; stroke:black;  pointer-events: none;}
 	circle.nodeNotPinned {fill:none;  pointer-events: none;}
 	.node:not(:hover) .nodetext { display: none; }
 	.axis path,.axis line { fill: none; stroke: black;	shape-rendering: crispEdges; }
@@ -190,14 +190,14 @@
 	var zoomer = d3.behavior.zoom()
 
 	// Graph size global variable
-	var NODE_STROKE_WIDTH = 0.08 
+	var NODE_STROKE_WIDTH = 0.4 
 	var LINE_LINK_STROKE_WIDTH = 3 /5
 	var LINE_PARENTCHILD_STROKE_WIDTH = 3/5
 	var LINE_SELECTED_STROKE_WIDTH = 3/5
-	var NODE_SELECTED_STROKE_WIDTH = 1
+	var NODE_SELECTED_STROKE_WIDTH = 4/5
 	var NODE_CIRCLE_RADIUS = 3/5
 	var PINNED_NODE_STROKE_SIZE = 1/5
-	var PINNED_NODE_CIRCLE_RADIUS = 1.5/5
+	var PINNED_NODE_CIRCLE_RADIUS = 0.5/5
 	var UNPINNED_NODE_CIRCLE_RADIUS = 3/5
 	var TEXT_FONT_SIZE = '30px'
 	var vis = d3.select('body')
@@ -361,7 +361,7 @@
 			.on('click', onCompClick)
 
 		node.append("svg:text")
-		        .attr("class", "nodetext")
+		        .attr("class", "nodetext");
 		        
 
 		d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/scale)
@@ -376,26 +376,41 @@
 			.attr('cx', 0)
 			.attr('cy', 0)
 			.attr('r', function(d) {return d.chargeMultiple * NODE_CIRCLE_RADIUS })
+			.style('stroke-width', NODE_STROKE_WIDTH-0.2);
 			// .style('stroke-width', 1/scale)
 		
 		
 		// TODO: Pinning indicator.
 		node.append('svg:circle')
 			.attr('class', function(d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
+			
+		node.selectAll('.nodeIsPinned')
 			.attr('id', function(d) {return 'pin' + d.treeIndex})
-			.attr('cx', 0)
-			.attr('cy', 0)
-			.attr('r', PINNED_NODE_CIRCLE_RADIUS)
-			.style('stroke-width', NODE_STROKE_WIDTH)
+			// .attr('cx', 0)
+			// .attr('cy', 0)
+			// .attr('r', PINNED_NODE_CIRCLE_RADIUS)
+			// .style('stroke-width', NODE_STROKE_WIDTH)
+		node.selectAll('.nodeNotPinned')
+			.attr('id', function(d) {return 'pin' + d.treeIndex})
+
 		// Get rid of deleted nodes.
 		vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).exit().remove()
 
 		// Update sizes
-		vis.selectAll('.nodeCircle').data(nodes, function(d) {return d.treeIndex}).attr('r', function(d) {return d.chargeMultiple * NODE_CIRCLE_RADIUS })
-			.style('stroke-width', NODE_STROKE_WIDTH)
-		
-		scaleRedraw()
+		// vis.selectAll('.nodeCircle').data(nodes, function(d) {return d.treeIndex})
+		// 	// .attr('r', function(d) {return d.chargeMultiple * NODE_CIRCLE_RADIUS })
+		// 	.style('stroke-width', NODE_SELECTED_STROKE_WIDTH)
 
+		d3.selectAll('.nodeIsPinned')
+						.attr('cx', 0)
+						.attr('cy', 0)
+						.attr('r', PINNED_NODE_CIRCLE_RADIUS)
+						.style('stroke-width', PINNED_NODE_STROKE_SIZE);
+		d3.selectAll('.nodeNotPinned').attr('r', null)
+
+		d3.selectAll('.node.selected').style('stroke-width', NODE_SELECTED_STROKE_WIDTH)
+			
+		scaleRedraw()
 		force.start()
 	}
 
@@ -404,13 +419,8 @@
 
 		if (d3.event.scale<1){
 			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/d3.event.scale);
-
 		}
 		d3.selectAll('.nodetext').style('font-size', 30/d3.event.scale);
-		// scaleRedraw()
-		
-		// console.log('Running here')
-
 		scaleRedraw()	
 	}
 
@@ -490,6 +500,7 @@
 		showScale();
 	}
 
+	// Unused function
 	function setByScale(){
 		var scale = zoomer.scale()
 		d3.selectAll('.node').style("stroke-width", NODE_STROKE_WIDTH / scale)
