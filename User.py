@@ -17,7 +17,7 @@ class UserManager:
 		# For now, just creating user in file store
 		if self.store.exists("User", username):
 			return
-		if username and  password == confirm_password:
+		if username and  password == confirm_password and username not in ["admin","public"]:
 			u_dict = {"username":username,
 					  "password_digest":pbkdf2_sha512.encrypt(password),
 					  "analyses":[],
@@ -28,7 +28,6 @@ class UserManager:
 			return User(self.store, **u_dict)
 			
 	def authenticate(self, username, password):
-		print "We at least got to this point"
 		user = self.store.get("User", username)
 		if user and pbkdf2_sha512.verify(password,
 										 user["password_digest"]):
@@ -39,7 +38,6 @@ class UserManager:
 		
 class User:
 	def __init__(self, store, **kwargs):
-		print "User initialized, which means succesful login!!!!"
 		self.store = store
 		map((lambda k, v: setattr(self, k, v)),
 			kwargs.keys(),
@@ -77,4 +75,10 @@ class User:
 	def put(self, objectType, objectName, putDict):
 		return self.store.put(objectType, self.prepend+objectName, putDict)
 
-	
+	def make_public(self, objectType, objectName):
+		dataDict = self.store.get(objectType, self.prepend+objectName)
+		if dataDict:
+			self.store.put(objectType, "public_"+objectName, dataDict)
+		
+		
+			

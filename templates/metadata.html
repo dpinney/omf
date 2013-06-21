@@ -1,4 +1,5 @@
 <tr class="analysis" id="{{ md['name'].replace('_', '__').replace(' ', '_') }}">
+  <span class="public" style="display:none;">{% if "true" in value["url"] %}true{% else %}false{% endif %}</span>
   <td class="name">{{ md['name'] }}</td>
   <td class="sourceFeeder">{{ md['sourceFeeder'] }}</td>
   <td class="climate">{{ md['climate'] }}</td>
@@ -11,25 +12,28 @@
       <ul class='menu right'>
 
 	{% if md['status'] == 'postRun' or md['status'] == 'ERROR' %}
-	<li><a href='/viewReports/{{ md["name"] }}'>View Reports</a></li>
+	<li><a href='/viewReports/{{ md["name"] }}{{ value["url"] }}'>View Reports</a></li>
 	{% endif %}
 
 	{% if md['status'] == 'preRun' %}
-	<li><a class="run" href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";run_analysis("/run/", "{{ md['name'] }}")'>Run</a></li>
+	<li><a class="run" href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";run_analysis("/run/{{ value['url'] }}", "{{ md['name'] }}")'>Run</a></li>
 	{% endif %}
 
 	{% if md['status'] == 'postRun' or md['status'] == 'terminated' or md['status'] == 'ERROR' %}
-	<li><a class="reRun" href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";run_analysis("/reRun/","{{ md['name'] }}")'>Re-Run</a></li>
+	<li><a class="reRun" href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";run_analysis("/reRun/{{ value['url'] }}","{{ md['name'] }}")'>Re-Run</a></li>
 	{% endif %}
 
 	{% if md['status'] != 'running' %}
-	<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/",dict)'>Delete</a></li>
+	<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/{{ value['url'] }}",dict)'>Delete</a></li>
 	{% endif %}
 
 	{% if md['status'] == 'running' %}
-	<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/",dict)'>Terminate</a></li>
+	<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/{{ value['url'] }}",dict)'>Terminate</a></li>
 	{% endif %}
-	<li><a href='/newAnalysis/{{ md["name"] }}'>Duplicate</a></li>
+	<li><a href='/newAnalysis/{{ md["name"] }}{{ value["url"] }}'>Duplicate</a></li>
+	{% if "false" in value["url"] %}
+	<li><a href="/makePublic/Analysis/{{ md['name'] }}">Make Public</a></li>
+	{% endif %}
       </ul>
     </div>
   </td>

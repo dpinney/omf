@@ -1238,7 +1238,7 @@
 					attachments:attachments
 					}
 	payload = {'name':gebi('gridName').innerHTML, 'feederObjectJson':JSON.stringify(feederObject, null, '    ')}
-	post_to_url('/saveFeeder/', payload)
+	post_to_url('/saveFeeder/{% if public %}True{% else %}False{% endif %}', payload)
 	}
 
 	function rename() {
@@ -1461,8 +1461,7 @@
 
 	// INIT FUNCTIONS FOLLOW:
 	d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
-
-	var apiAddress = '/feederData/{{ anaFeeder }}/{{ feederName }}.json'
+	var apiAddress = '/feederData/{{ anaFeeder }}/{{ feederName }}.json' + "?public={% if public %}true{% else %}false{% endif %}";
 	d3.json(apiAddress, function (json) {
 	tree = json['tree']
 	attachments = json['attachments']

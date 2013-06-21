@@ -83,15 +83,39 @@ def register():
 @flask_login.login_required
 def root():
 	browser = flask.request.user_agent.browser
-	metadatas = [flask_login.current_user.get('Analysis', x) for x in flask_login.current_user.listAll('Analysis')]
-	feeders = flask_login.current_user.listAll('Feeder')
-	conversions = flask_login.current_user.listAll('Conversion')
-	
+	def get_data(u):
+		return ([u.get("Analysis", x) for x in u.listAll("Analysis")],
+				u.listAll("Feeder"),
+				u.listAll("Conversion"))
+	d = {}
+	for pn, pf, url in [("Private", flask_login.current_user, "false"), ("Public", user_manager.get("public"), "true")]:
+		d[pn] = {"url":"?public="+url}
+		map((lambda k, v: d[pn].__setitem__(k, v)), ["metadatas", "feeders", "conversions"], get_data(pf))
 	if browser == 'msie':
 		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
 	else:
-		return flask.render_template('home.html', metadatas=metadatas, feeders=feeders, conversions=conversions)
+		return flask.render_template('home.html', d=d)
+									 # metadatas=metadatas,
+									 # feeders=feeders,
+									 # conversions=conversions,
+									 # public_md=public_md,
+									 # public_feeders=public_feeders,
+									 # public_conversions=public_conversions)
 
+@app.route("/makePublic/<objectType>/<objectName>")
+@flask_login.login_required
+def makePublic(objectType, objectName):
+	if not user_manager.get("public").get(objectType, objectName):
+		flask_login.current_user.make_public(objectType, objectName)
+	if objectType == "Analysis":
+		for study in [s for s in flask_login.current_user.listAll("Study")
+					  if s[:s.find("---")] == objectName]:
+			flask_login.current_user.make_public("Study", study)
+	return flask.redirect(flask.url_for("root"))
+	
+		
+
+	
 @app.route('/newAnalysis/')
 @app.route('/newAnalysis/<analysisName>')
 @flask_login.login_required
@@ -122,29 +146,38 @@ def newAnalysis(analysisName=None):
 @app.route('/viewReports/<analysisName>')
 @flask_login.login_required
 def viewReports(analysisName):
-	if not flask_login.current_user.exists('Analysis', analysisName):
+	user, is_public = (user_manager.get("public"), True) if flask.request.args.get("public") == "true" else (flask_login.current_user, False)
+	if not user.exists('Analysis', analysisName):
 		return flask.redirect(flask.url_for('root'))
-	thisAnalysis = analysis.Analysis(flask_login.current_user.get('Analysis',analysisName))
+	thisAnalysis = analysis.Analysis(user.get('Analysis',analysisName))
 	studyList = []
 	for studyName in thisAnalysis.studyNames:
-		studyData = flask_login.current_user.get('Study', thisAnalysis.name + '---' + studyName)
+		studyData = user.get('Study', thisAnalysis.name + '---' + studyName)
 		studyData['name'] = studyName
 		studyData['analysisName'] = thisAnalysis.name
 		moduleRef = getattr(studies, studyData['studyType'])
 		classRef =  getattr(moduleRef, studyData['studyType'].capitalize())
 		studyList.append(classRef(studyData))
 	reportList = thisAnalysis.generateReportHtml(studyList)
-	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList)
+	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList, public = is_public)
 
 @app.route('/feeder/<feederName>')
 @flask_login.login_required
 def feederGet(feederName):
-	return flask.render_template('gridEdit.html', feederName=feederName, anaFeeder=False)
+	return flask.render_template('gridEdit.html',
+								 feederName=feederName,
+								 anaFeeder=False,
+								 public = flask.request.args.get("public") == "true")
+								 
 
 @app.route('/analysisFeeder/<analysis>/<study>')
 @flask_login.login_required
 def analysisFeeder(analysis, study):
-	return flask.render_template('gridEdit.html', feederName=analysis+'---'+study, anaFeeder=True)
+	# , public = user_manager.get("public").exists("Analysis", analysis))
+	return flask.render_template('gridEdit.html',
+								 feederName=analysis+'---'+study,
+								 anaFeeder=True,
+								 public=flask.request.args.get("public"))
 
 
 ####################################################
@@ -161,10 +194,11 @@ def uniqueName(name):
 @flask_login.login_required
 def run():
 	# Get the analysis, and set it running on the data store.
+	user = user_manager.get("public") if flask.request.args.get("public") == "true" else flask_login.current_user
 	anaName = flask.request.form.get('analysisName')
-	thisAnalysis = analysis.Analysis(flask_login.current_user.get('Analysis', anaName, False))
+	thisAnalysis = analysis.Analysis(user.get('Analysis', anaName, False))
 	thisAnalysis.status = 'running'
-	flask_login.current_user.put('Analysis', anaName, thisAnalysis.__dict__)
+	user.put('Analysis', anaName, thisAnalysis.__dict__)
 	# Run in background and immediately return.
 	worker.run(thisAnalysis, store)
 	return flask.render_template('metadata.html', md=dict(thisAnalysis.__dict__.items() + {"name":anaName}.items()))
@@ -172,13 +206,14 @@ def run():
 @app.route('/delete/', methods=['POST'])
 @flask_login.login_required
 def delete():
+	user = user_manager.get("public") if flask.request.args.get("public") == "true" else flask_login.current_user	
 	anaName = flask.request.form['analysisName']
 	# Delete studies.
-	childStudies = [x for x in flask_login.current_user.listAll('Study') if x.startswith(anaName + '---')]
+	childStudies = [x for x in user.listAll('Study') if x.startswith(user.prepend+anaName + '---')]
 	for study in childStudies:
-		flask_login.current_user.delete('Study', study)
+		user.delete('Study', study)
 	# Delete analysis.
-	flask_login.current_user.delete('Analysis', anaName)
+	user.delete('Analysis', anaName)
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/saveAnalysis/', methods=['POST'])
@@ -221,32 +256,35 @@ def saveAnalysis():
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/terminate/', methods=['POST'])
+@flask_login.login_required
 def terminate():
+	user = user_manager.get("public") if flask.request.args.get("public") == "true" else flask_login.current_user
 	anaName = flask.request.form['analysisName']
-	worker.terminate(anaName)
+	worker.terminate(user.prepend+anaName)
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/feederData/<anaFeeder>/<feederName>.json')
 @flask_login.login_required
 def feederData(anaFeeder, feederName):
+	user = user_manager.get("public") if flask.request.args.get("public") == "true" else flask_login.current_user
 	if anaFeeder == 'True':
 		#TODO: fix this.
-		data = flask_login.current_user.get('Study', feederName)['inputJson']
+		data = user.get('Study', feederName)['inputJson']
 		del data['attachments']
 		return json.dumps(data)
 	else:
-		return json.dumps(flask_login.current_user.get('Feeder', feederName))
+		return json.dumps(user.get('Feeder', feederName))
 
 @app.route('/getComponents/')
 def getComponents():
 	components = {name:store.get('Component', name) for name in store.listAll('Component')}
 	return json.dumps(components, indent=4)
 
-@app.route('/saveFeeder/', methods=['POST'])
+@app.route('/saveFeeder/<public>', methods=['POST'])
 @flask_login.login_required
-def saveFeeder():
+def saveFeeder(public):
 	postObject = flask.request.form.to_dict()
-	flask_login.current_user.put('Feeder', str(postObject['name']), json.loads(postObject['feederObjectJson']))
+	(user_manager.get("public") if public else flask_login.current_user).put('Feeder', str(postObject['name']), json.loads(postObject['feederObjectJson']))
 	return flask.redirect(flask.url_for('root') + '#feeders')
 
 @app.route('/runStatus')
