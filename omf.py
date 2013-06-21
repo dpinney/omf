@@ -25,6 +25,11 @@ except:
 # VIEWS
 ###################################################
 
+@app.route('/fuck')
+def fuck():
+	raise Exception
+	return 'HEAVY FUCK'
+
 @app.route('/')
 def root():
 	browser = flask.request.user_agent.browser
@@ -219,4 +224,4 @@ def milImportAndConvert(store, feederName, stdName, seqName):
 
 if __name__ == '__main__':
 	# Run a debug server all interface IPs.
-	app.run(host='0.0.0.0', debug=True, port=5001, threaded=True)
+	app.run(host='0.0.0.0', port=5001, threaded=True)
