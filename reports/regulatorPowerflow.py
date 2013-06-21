@@ -15,7 +15,7 @@ def outputHtml(analysisObject, studyList):
 	startDate = analysisObject.simStartDate
 	outputList = []
 	for study in studyList:
-		regFileNames = [x for x in os.listdir(pathPrefix + study) if x.startswith('Regulator_') and x.endswith('.csv')]
+		# regFileNames = [x for x in os.listdir(pathPrefix + study) if x.startswith('Regulator_') and x.endswith('.csv')]
 		cleanOut = study.outputJson
 		if 'Regulators' in cleanOut:
 			newStudy = {'studyName':study, 'regs':[]}
