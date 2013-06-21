@@ -25,11 +25,6 @@ except:
 # VIEWS
 ###################################################
 
-@app.route('/fuck')
-def fuck():
-	raise Exception
-	return 'HEAVY FUCK'
-
 @app.route('/')
 def root():
 	browser = flask.request.user_agent.browser
@@ -94,6 +89,10 @@ def analysisFeeder(analysis, study):
 ####################################################
 # API FUNCTIONS
 ####################################################
+
+@app.route('/workerStatus')
+def workerStatus():
+	return json.dumps(worker.status())
 
 @app.route('/uniqueName/<name>')
 def uniqueName(name):

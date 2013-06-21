@@ -54,9 +54,9 @@ class LocalWorker:
 		self.runningJobCount = MultiCounter(0)
 		self.jobRecorder = {}
 	def run(self, analysisObject, store):
-		runProc = Process(name=analysisObject.name, target=self.runInBackground, args=[analysisObject, store])
-		self.jobRecorder[time.time] = runProc
-		runProc.start()
+		runThread = Thread(name=analysisObject.name, target=self.runInBackground, args=[analysisObject, store])
+		self.jobRecorder[time.time()] = runThread
+		runThread.start()
 	def runInBackground(self, anaObject, store):
 		# Setup.
 		self.runningJobCount.increment()
@@ -75,22 +75,18 @@ class LocalWorker:
 			store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
 		self.runningJobCount.decrement()
 	def terminate(self, anaName):
-		for runDir in os.listdir('running'):
-			if runDir.startswith(anaName + '---'):
-				try:
-					with open('running/' + runDir + '/PID.txt','r') as pidFile:
-						os.kill(int(pidFile.read()), 15)
-				except:
-					pass
+		#TODO: implement this fliff.
+		pass
 	def status(self):
-		return [[self.jobRecorder[key].name,self.jobRecorder[key].pid,self.jobRecorder[key].is_alive()] for key in self.jobRecorder]
+		return [[key,self.jobRecorder[key].name,self.jobRecorder[key].is_alive()] for key in self.jobRecorder]
 
 class ClusterWorker:
 	def __init__(self, userKey, passKey, workQueueName, terminateQueueName, store):
 		self.conn = SQSConnection(userKey, passKey)
 		self.workQueue = self.conn.get_queue(workQueueName)
 		self.terminateQueue = self.conn.get_queue(terminateQueueName)
-		self.daemonThread = Thread(target=self.__monitorClusterQueue__,args=(passKey, store))
+		self.daemonWorker = LocalWorker()
+		self.daemonThread = Thread(target=self.__monitorClusterQueue__,args=(passKey, store, self.daemonWorker))
 		self.daemonThread.start()
 	def run(self, analysisObject, store):
 		m = Message()
@@ -102,12 +98,11 @@ class ClusterWorker:
 		m.set_body(anaName)
 		status = self.terminateQueue.write(m)
 		return status
-	def __monitorClusterQueue__(self, passKey, store):
+	def __monitorClusterQueue__(self, passKey, store, daemonWorker):
 		print 'Entering Daemon Mode.'
 		conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', passKey)
 		jobQueue = conn.get_queue('crnOmfJobQueue')
 		terminateQueue = conn.get_queue('crnOmfTerminateQueue')
-		daemonWorker = LocalWorker()
 		def popJob(queueObject):
 			mList = queueObject.get_messages(1)
 			if len(mList) == 1:
@@ -117,7 +112,6 @@ class ClusterWorker:
 			else:
 				return False
 		def endlessLoop():
-			print daemonWorker.status()
 			if daemonWorker.runningJobCount.value() < JOB_LIMIT:
 				anaName = popJob(jobQueue)
 				if anaName != False:
@@ -133,4 +127,4 @@ class ClusterWorker:
 			Timer(1, endlessLoop).start()
 		endlessLoop()
 	def status(self):
-		return []
+		return self.daemonWorker.status()
