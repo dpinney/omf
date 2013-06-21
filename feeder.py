@@ -92,7 +92,8 @@ def dictToString(inDict):
 				# TODO (cosmetic): know our depth, and indent the output so it's more human readable.
 				otherKeyValues += dictToString(inDict[key])
 			elif key != keyToAvoid:
-				otherKeyValues += (key + ' ' + inDict[key] + ';\n')
+				if key != 'latitude' and key != 'longitude':
+					otherKeyValues += (str(key) + ' ' + str(inDict[key]) + ';\n')
 		return otherKeyValues
 	# Handle the different types of dictionaries that are leafs of the tree root:
 	if 'omftype' in inDict:
@@ -118,11 +119,11 @@ def write(inTree):
 def sortedWrite(inTree):
 	sortedKeys = sorted(inTree.keys(), key=int)
 	output = ''
-	for key in sortedKeys:
-		try:
+	try:
+		for key in sortedKeys:
 			output += dictToString(inTree[key]) + '\n'
-		except Exception:
-			print inTree[key]
+	except ValueError:
+		raise Exception
 	return output
 
 def adjustTime(tree, simLength, simLengthUnits, simStartDate):

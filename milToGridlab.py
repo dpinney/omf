@@ -8,6 +8,18 @@ def convert(stdPath,seqPath):
 	''' Take in a .std and .seq from Milsoft and spit out a glmTree.'''
 
 	print 'Beginning Windmil to GLM conversion.'
+	
+	# TODO: optimize the performance.
+	def getNominalVoltage(stdPath):
+		with open (stdPath,'r') as stdFile:
+			stdFile.readline()
+			for line in stdFile:
+				token_list = line.split(',')
+				if token_list[1] == '9':
+					# print token_list[0], token_list[14]
+					return str(float(token_list[14])*1000)
+
+	nominal_voltage = getNominalVoltage(stdPath)
 
 	def csvToArray(csvFileName):
 		''' Simple csv data ingester. '''
@@ -44,6 +56,8 @@ def convert(stdPath,seqPath):
 		y_a = y_pixel_range / (max(y_list) - min(y_list))
 		y_b = -y_a * min(y_list)
 		return x_a, x_b, y_a, y_b
+
+	[x_scale, x_b, y_scale, y_b] = convertToPixel(stdPath)
 
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
@@ -85,10 +99,7 @@ def convert(stdPath,seqPath):
 			[x_a,x_b,y_a,y_b] = convertToPixel(stdPath)
 			# convert to the relative pixel position f(x) = a * x + b
 			newOb['latitude'] = x_a * float(objectList[5]) + x_b
-			newOb['longitude'] = y_a * float(objectList[6]) + y_b
-
-			
-
+			newOb['longitude'] = 800 - (y_a * float(objectList[6]) + y_b)
 			# Some non-Gridlab elements:
 			newOb['guid'] = objectList[49].replace('{','').replace('}','')
 			newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
@@ -161,8 +172,7 @@ def convert(stdPath,seqPath):
 		def convertNode(nodeList):
 			node = convertGenericObject(nodeList)
 			node['phases'] = nodeList[2] + 'N'
-			#TODO: can we get nominal voltage from the windmil file?
-			node['nominal_voltage'] = '2400'
+			node['nominal_voltage'] = nominal_voltage
 			return node
 
 		def convertSource(sourceList):
@@ -391,7 +401,7 @@ def convert(stdPath,seqPath):
 					'object':'node', \
 					'phases':comp['phases'],\
 					'name': 'node' + comp['name'] + parent['name'], \
-					'nominal_voltage':'2400', \
+					'nominal_voltage':nominal_voltage, \
 					'latitude': comp['latitude'],\
 					'longitude': comp['longitude']}
 				convertedComponents.append(newNode)
@@ -408,7 +418,7 @@ def convert(stdPath,seqPath):
 				newNode = {'object':'node', \
 							'phases':comp['phases'], \
 							'name': 'node' + comp['name'] + parent['name'], \
-							'nominal_voltage':'2400',\
+							'nominal_voltage':nominal_voltage,\
 							'latitude': comp['latitude'],\
 					'longitude': comp['longitude']}
 				convertedComponents.append(newNode)
@@ -423,8 +433,8 @@ def convert(stdPath,seqPath):
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
 
-	# Go to a dictionary format so we have a valid glmTree, leave 10 indices for headers:
-	glmTree = {10+convertedComponents.index(x)*subObCount:x for x in convertedComponents}
+	# Go to a dictionary format so we have a valid glmTree, leave 20 indices for headers:
+	glmTree = {20 + convertedComponents.index(x)*subObCount:x for x in convertedComponents}
 
 	#TODO: REMOVE THIS DISASTER HERE AND FIGURE OUT WHY SOME LINKS ARE MALFORMED
 	print 'Components removed because they have totally busted connectivity:'
@@ -622,6 +632,11 @@ def convert(stdPath,seqPath):
 	genericHeaders = [	{"timezone":"PST+8PDT","stoptime":"'2000-01-0200:00:00'","starttime":"'2000-01-0100:00:00'","clock":"clock"},
 						{"omftype":"#include","argument":"\"schedules.glm\""},
 						{"omftype":"#set","argument":"minimum_timestep=60"},
+						{"omftype":"#set","argument":"profiler=1"},
+						{"omftype":"#set","argument":"relax_naming_rules=1"},
+						{"omftype":"module","argument":"generators"},
+						{"omftype":"module","argument":"tape"},
+						{"omftype":"module","argument":"climate"},
 						{"module":"residential","implicit_enduses":"NONE"},
 						{"solver_method":"NR","NR_iteration_limit":"50","module":"powerflow"},
 						{"object":"climate","name":"Climate","interpolate":"QUADRATIC","tmyfile":"climate.tmy2"}]
@@ -646,7 +661,7 @@ def convert(stdPath,seqPath):
 				if glmTree[k].has_key('name') and glmTree[i].has_key('parent') and glmTree[i]['parent'] == glmTree[k]['name']:
 					glmTree[i]['latitude'] = glmTree[k]['latitude'] + random.uniform(-2,2)
 					glmTree[i]['longitude'] = glmTree[k]['longitude'] + random.uniform(-2,2)
-	return glmTree
+	return glmTree, x_scale, y_scale
 
 if __name__ == '__main__':
 	# outGlm = convert('./uploads/ILEC-Rembrandt.std','./uploads/ILEC.seq')
