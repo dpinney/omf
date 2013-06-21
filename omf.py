@@ -20,6 +20,7 @@ except:
 	worker = work.LocalWorker()
 	print 'Running on local file system.'
 
+
 ###################################################
 # VIEWS
 ###################################################

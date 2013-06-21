@@ -25,8 +25,9 @@ We need to handle two cases:
 2. S3 cluster case. Have a cluterQueue class, and also have a daemon.
 '''
 
-import os, tempfile, psutil
+import os, tempfile, psutil, time
 from multiprocessing import Process, Value, Lock
+from threading import Thread
 import studies, analysis
 from threading import Timer
 from boto.sqs.connection import SQSConnection
@@ -51,10 +52,10 @@ class MultiCounter(object):
 class LocalWorker:
 	def __init__(self):
 		self.runningJobCount = MultiCounter(0)
-		self.jobRecorder = []
+		self.jobRecorder = {}
 	def run(self, analysisObject, store):
 		runProc = Process(name=analysisObject.name, target=self.runInBackground, args=[analysisObject, store])
-		self.jobRecorder.append(runProc)
+		self.jobRecorder[time.time] = runProc
 		runProc.start()
 	def runInBackground(self, anaObject, store):
 		# Setup.
@@ -82,45 +83,15 @@ class LocalWorker:
 				except:
 					pass
 	def status(self):
-		return [[row.name,row.pid,row.is_alive()] for row in self.jobRecorder]
-
+		return [[self.jobRecorder[key].name,self.jobRecorder[key].pid,self.jobRecorder[key].is_alive()] for key in self.jobRecorder]
 
 class ClusterWorker:
 	def __init__(self, userKey, passKey, workQueueName, terminateQueueName, store):
 		self.conn = SQSConnection(userKey, passKey)
 		self.workQueue = self.conn.get_queue(workQueueName)
 		self.terminateQueue = self.conn.get_queue(terminateQueueName)
-		# Start polling for jobs on launch:
-		tempPath = os.path.join(tempfile.gettempdir(),'omfWorker.pid')
-		def touchOpen(filename, *args, **kwargs):
-			# Open the file in R/W and create if it doesn't exist. *Don't* pass O_TRUNC
-			fd = os.open(filename, os.O_RDWR | os.O_CREAT)
-			# Encapsulate the low-level file descriptor in a python file object
-			return os.fdopen(fd, *args, **kwargs)
-		try:
-			if not os.path.isfile(tempPath):
-				with touchOpen(tempPath, 'w') as newLock:
-					pollerProc = Process(name='pollerProc',target=self.__monitorClusterQueue__, args=[passKey, store])
-					pollerProc.start()
-					newLock.write(str(pollerProc.pid))
-			else:
-				with open(tempPath, 'r+b') as pidFile:
-					fileContents = pidFile.read()
-					try:
-						pid = int(fileContents)
-					except:
-						pid = -999
-					if not psutil.pid_exists(pid):
-						pollerProc = Process(name='pollerProc',target=self.__monitorClusterQueue__, args=[passKey, store])
-						pollerProc.start()
-						pidFile.seek(0)
-						pidFile.write(str(pollerProc.pid))
-		except:
-			# Debug code. Will spit garbage on the regular:
-			import traceback
-			traceback.print_exc()
-			# Something else probably had the write lock, so give up in this thread:
-			pass
+		self.daemonThread = Thread(target=self.__monitorClusterQueue__,args=(passKey, store))
+		self.daemonThread.start()
 	def run(self, analysisObject, store):
 		m = Message()
 		m.set_body(analysisObject.name)
@@ -146,7 +117,6 @@ class ClusterWorker:
 			else:
 				return False
 		def endlessLoop():
-			print os.getpid()
 			print daemonWorker.status()
 			if daemonWorker.runningJobCount.value() < JOB_LIMIT:
 				anaName = popJob(jobQueue)
