@@ -220,7 +220,9 @@ def milsoftImport():
 def milImportAndConvert(store, feederName, stdName, seqName):
 	store.put('Conversion', feederName, {'data':'none'})
 	newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5'}}
-	newFeeder['tree'] = milToGridlab.convert('./uploads/' + stdName, './uploads/' + seqName)
+	[newFeeder['tree'], xScale, yScale] = milToGridlab.convert('./uploads/' + stdName, './uploads/' + seqName)
+	newFeeder['layoutVars']['xScale'] = xScale
+	newFeeder['layoutVars']['yScale'] = yScale
 	with open('./schedules.glm','r') as schedFile:
 		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
 	store.put('Feeder', feederName, newFeeder)
