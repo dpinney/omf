@@ -485,8 +485,6 @@
 	}
 
 	function scaleRedraw(){
-		
-
 		curScale = zoomer.scale()
 		// x-scale renewed
 		x = d3.scale.linear().domain([ options.xmin, options.xmax/curScale]).nice().range([ 0, width ]).nice();
@@ -499,7 +497,6 @@
 			}else
 				return;
 		}
-		// TODO: When unpinned all nodes, remove the scale grid.
 		showScale();
 	}
 
@@ -707,7 +704,7 @@
 		for (key in tree) {
 			subIndex = JSON.stringify(tree[key]).indexOf(inString)
 			if (subIndex != -1 && tree[key]['object'] != 'player' && tree[key].hasOwnProperty('object') ) {
-			results.push(key)
+				results.push(key)
 			}
 		}
 		return results
@@ -724,7 +721,7 @@
 			searchCursor = undefined
 		}
 		hits = findElementsViaString(term)
-		// TODO: when the target node is hide, show dialog
+		// TODO: What if it is hidden(folded).
 		gebi('searchHitCount').innerHTML = hits.length + ' Hits'
 		if (hits.length == 0) {return false}
 		if (searchCursor == undefined) {
@@ -1356,11 +1353,13 @@
 	// PINNING FUNCTIONS
 	function pinAll() {
 		for (node in nodes) {
-			gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
+			d3.select('pin' + nodes[node].treeIndex).attr('class','nodeIsPinned')
+			// gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
 			nodes[node].fixed = true
 		}
 		for (hNode in hiddenNodes) {
-			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
+			d3.select('pin'+ hiddenNodes[hNode].treeIndex).attr('class','nodeIsPinned')
+			// gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
 			hiddenNodes[hNode].fixed = true
 		}
 		redraw()
@@ -1369,15 +1368,16 @@
 
 	function unPinAll() {
 		for (node in nodes) {
-			gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeNotPinned')
+			d3.select('pin' + nodes[node].treeIndex).attr('class','nodeNotPinned')
 			nodes[node].fixed = false
 		}
 		for (hNode in hiddenNodes) {
-			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeNotPinned')
+			d3.select('pin'+ hiddenNodes[hNode].treeIndex).attr('class','nodeNotPinned')
 			hiddenNodes[hNode].fixed = false
 		}
 		redraw()
-		// force.start()
+		// Remove the scale grid, which is meaningless.
+		d3.select('#scaleRuler').remove()
 	}
 
 	function toggleSelectedPin() {
@@ -1590,7 +1590,6 @@
 		}
 		// And go at it:
 		draw()
-
 		layoutMenuInit()
 	})
 
