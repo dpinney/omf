@@ -79,7 +79,6 @@ class LocalWorker:
 		importThread = Thread(target=self.milImportBackground, args=[store, feederName, stdName, seqName])
 		importThread.start()
 	def milImportBackground(self, store, feederName, stdName, seqName):
-		store.put('Conversion', feederName, {'data':'none'})
 		newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5'}}
 		[newFeeder['tree'], xScale, yScale] = milToGridlab.convert('./uploads/' + stdName, './uploads/' + seqName)
 		newFeeder['layoutVars']['xScale'] = xScale
@@ -125,6 +124,9 @@ class ClusterWorker:
 		m.set_body(anaName)
 		status = self.terminateQueue.write(m)
 		return status
+	def milImport():
+		#TODO: implement me.
+		pass
 	def __monitorClusterQueue__(self, passKey, store, daemonWorker):
 		print 'Entering Daemon Mode.'
 		conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', passKey)

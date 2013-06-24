@@ -203,9 +203,12 @@ def runStatus():
 @app.route('/milsoftImport/', methods=['POST'])
 def milsoftImport():
 	feederName = str(flask.request.form.to_dict()['feederName'])
+	store.put('Conversion', feederName, {'data':'none'})
 	stdName = ''
 	seqName = ''
 	allFiles = flask.request.files
+	# stdString = allFiles['stdFile'].stream.read()
+	# seqString = allFiles['seqFile'].stream.read()
 	for f in allFiles:
 		fName = werkzeug.secure_filename(allFiles[f].filename)
 		if fName.endswith('.std'): stdName = fName
@@ -217,4 +220,4 @@ def milsoftImport():
 
 if __name__ == '__main__':
 	# Run a debug server all interface IPs.
-	app.run(host='0.0.0.0', port=5001, threaded=True)
+	app.run(host='0.0.0.0', port=5001, threaded=True, debug=True, use_reloader=False)
