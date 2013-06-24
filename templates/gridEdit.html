@@ -51,6 +51,7 @@
   </style>
 </head>
 <body onkeypress='hotkeys()'>
+<!-- <body > -->
   <div id='title'>
 	<div id='logoBox'><a href='/'>▦</a></div>
 	<p>Grid Editor: </p>
@@ -178,7 +179,7 @@
 	  </div>
 	<div id='scaleRuler' class='chart' >
   	</div>
-	  
+
 <script type="text/javascript">
 
 	// GLOBAL VARIABLES:
@@ -420,7 +421,6 @@
 		if (d3.event.scale<1){
 			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/d3.event.scale);
 		}
-		d3.selectAll('.nodetext').style('font-size', 30/d3.event.scale);
 		scaleRedraw()	
 	}
 
@@ -498,7 +498,7 @@
 				return;
 		}
 		showScale();
-		d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/curScale)
+		d3.selectAll('.nodetext').style('font-size', 30/curScale)
 				.text(function(d) { 
 		        	if (d.chargeMultiple != 1){
 		        		return d.objectType + ' has hidden children'}
@@ -607,6 +607,7 @@
 		classify(d,'selected')
 		// clear the selected table
 		table = gebi('selected')
+		// table.setAttribute('keypress', hotkeys())
 		tableClear(table)
 		treeData = tree[d.treeIndex]
 		for (prop in treeData) {
@@ -692,17 +693,20 @@
 		}
 	}
 
+	// TODO: disable hotkey when edit in the input text field.
 	function hotkeys() {
 		// IE8 and earlier
 		if(window.event) {x = event.keyCode}
 		// IE9/Firefox/Chrome/Opera/Safari
 		else if(event.which) {x = event.which}
 		keychar = String.fromCharCode(x);
-		// Dispatch the key:
-		if (keychar == 'p') {toggleSelectedPin()}
-		else if (keychar == 'f') {foldAtSelected()}
-		else if (keychar == 'u') {unfoldAtSelected()}
-	}
+		if(event.target.type != 'text'){
+			// Dispatch the key:
+			if (keychar == 'p') {toggleSelectedPin()}
+			else if (keychar == 'f') {foldAtSelected()}
+			else if (keychar == 'u') {unfoldAtSelected()}
+		}
+	}	
 
 	function findElementsViaString(inString) {
 		results = []
@@ -1388,6 +1392,7 @@
 	function toggleSelectedPin() {
 		selNode = getSelectedNode()
 		pinCircle = gebi('pin' + selNode.treeIndex)
+		// pinCircle = d3.select('pin' + selNode.treeIndex)
 		if (pinCircle.getAttribute('class') == 'nodeIsPinned') {
 			pinCircle.setAttribute('class','nodeNotPinned')
 			selNode.fixed = false
