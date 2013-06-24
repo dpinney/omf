@@ -498,6 +498,11 @@
 				return;
 		}
 		showScale();
+		d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/curScale)
+				.text(function(d) { 
+		        	if (d.chargeMultiple != 1){
+		        		return d.objectType + ' has hidden children'}
+		    		else {return d.objectType}})
 	}
 
 	// Unused function
