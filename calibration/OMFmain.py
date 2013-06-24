@@ -1,5 +1,5 @@
 # About the inputs:
-#import milToGridlab  
+import milToGridlab  
 import Milsoft_GridLAB_D_Feeder_Generation
 import calibrateFeeder
 import processSCADA #TODO: write this function
@@ -20,7 +20,7 @@ def createFeederDirectory(feederID):
 	# create folder with all the fixin's for this model to be populated and/or calibrated and ran in GLD
 	# TODO: directory needs to include subdirectory 'winners' for storing the best .glms from each calibration round
 	# TODO: anything with suffix 'glm' might be deleted during calibration since we cleanup unecessary file between rounds. Put schedules, other .glms, etc into a subdirectory if we don't want them deleted. 
-	directory = 'C:\\Users\\d3y051\\Documents\\NRECA_feeder_calibration_2-2013\\Calibration\\repository\\Feeder_Test'
+	directory = 'C:\\Users\\d3y051\\Documents\\NRECA_feeder_calibration_2-2013\\Calibration\\repository_two\\Feeder_Test'
 	return directory
 	
 def OMFmain(milsoft, feeder_info, scada, case_flag, feeder_config, calibration_config, user_flag_to_calibrate=1):
@@ -71,7 +71,7 @@ def OMFmain(milsoft, feeder_info, scada, case_flag, feeder_config, calibration_c
 		else:
 			# Populate the feeder. 
 			print ("Either the user selected not to calibrate this feeder, the SCADA was not input, or this feeder has already been calibrated.")
-			final_dict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(outGLM,case_flag,calibration_config,feeder_config)
+			final_dict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(outGLM,case_flag,directory,calibration_config,feeder_config)
 		#AddTapeObjects
 		filename = 'test_feeder'
 		if final_dict is not None:
@@ -254,6 +254,7 @@ def main():
 						  'nominal_voltage' : '120'}
 
 	milsoft = glm_object_dict
+	milsoft = milToGridlab.convert('ACEC-FRIENDSHIP.std','ACEC.seq')
 	feeder_info = None # place holder for future feeder information input from the user. 
 	scada = 'make_believe_scada_file.xlsx' # place holder for file with scada that will be processed for certain values. 
 	case_flag = 0 # base case, do not put None

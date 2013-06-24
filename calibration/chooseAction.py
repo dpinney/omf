@@ -78,9 +78,9 @@ def chooseAction(difs):
 				return i, actionDict[i][0];
 
 def main():
-	#action, desc = chooseAction(mets);
+	action, desc = chooseAction(mets);
 	print (__doc__)
-	#print ("From the test metrics, we've chosen to " +desc);
+	print ("From the test metrics, we've chosen to " +desc);
 
 if __name__ ==  '__main__':
 	main();

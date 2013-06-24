@@ -5,7 +5,7 @@ import subprocess
 def create_batch_file(glm_folder,batch_name):
 	batch_file = open('{:s}'.format(batch_name),'w')
 	batch_file.write('gridlabd.exe -T 0 --job\n')
-	batch_file.write('pause\n')
+	#batch_file.write('pause\n')
 	batch_file.close()
 	return None
 

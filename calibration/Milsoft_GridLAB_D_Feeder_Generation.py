@@ -2,6 +2,7 @@
 #Note: This assumes that dictionary being passed in already contains split-phase center-tapped transformers with spot loads ( triplex_nodes ) on the secondary side.
 #Note: All triplex_node dictionaries must contain a load classification key which tells what type of houses are located at this spot load.
 #Note: All swing node objects must have a Dictionary key
+from __future__ import division
 import ResidentialLoads
 import CommercialLoads
 import math
@@ -13,7 +14,8 @@ import feeder
 import AddTapeObjects
 import copy
 
-def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
+
+def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=None):
 	#glmDict is a dictionary containing all the objects in WindMIL model represented as equivalent GridLAB-D objects
 
 	#case_flag is an integer indicating which technology case to tack on to the GridLAB-D model
@@ -46,7 +48,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 		case_flag = 13
 	#print("Calling configuration.py\n")
 	# Get information about each feeder from Configuration() and  TechnologyParameters()
-	config_data = Configuration.ConfigurationFunc(configuration_file,None,None)
+	config_data = Configuration.ConfigurationFunc(wdir,configuration_file,None,None)
 
 	#set up default flags
 	use_flags = {}
@@ -759,20 +761,21 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 	# Tack on residential loads
 	if use_flags['use_homes'] != 0:
 		#print('calling ResidentialLoads.py\n')
-		glmCaseDict, solar_residential_array, ts_residential_array, last_key = ResidentialLoads.append_residential(glmCaseDict, use_flags, tech_data, residential_dict, last_key, CPP_flag_name, market_penetration_random, dlc_rand, pool_pump_recovery_random, slider_random, xval, elasticity_random, configuration_file)
+		glmCaseDict, solar_residential_array, ts_residential_array, last_key = ResidentialLoads.append_residential(glmCaseDict, use_flags, tech_data, residential_dict, last_key, CPP_flag_name, market_penetration_random, dlc_rand, pool_pump_recovery_random, slider_random, xval, elasticity_random, wdir,configuration_file)
 	# End addition of residential loads ########################################################################################################################
 
 	# TODO: Call Commercial Function
 	if use_flags['use_commercial'] != 0:
 		#print('calling CommercialLoads.py\n')
-		glmCaseDict, solar_office_array, solar_bigbox_array, solar_stripmall_array, ts_office_array, ts_bigbox_array, ts_stripmall_array, last_key = CommercialLoads.append_commercial(glmCaseDict, use_flags, tech_data, last_key, commercial_dict, comm_slider_random, dlc_c_rand, dlc_c_rand2, configuration_file)
+		glmCaseDict, solar_office_array, solar_bigbox_array, solar_stripmall_array, ts_office_array, ts_bigbox_array, ts_stripmall_array, last_key = CommercialLoads.append_commercial(glmCaseDict, use_flags, tech_data, last_key, commercial_dict, comm_slider_random, dlc_c_rand, dlc_c_rand2, wdir, configuration_file)
 			
 	# Append Solar: Call append_solar(feeder_dict, use_flags, config_file, solar_bigbox_array, solar_office_array, solar_stripmall_array, solar_residential_array, last_key)
 	if use_flags['use_solar'] != 0 or use_flags['use_solar_res'] != 0 or use_flags['use_solar_com'] != 0:
 		glmCaseDict = Solar_Technology.Append_Solar(glmCaseDict, use_flags, configuration_file, solar_bigbox_array, solar_office_array, solar_stripmall_array, solar_residential_array, last_key)
 		
 	# Append recorders
-	#glmCaseDict, last_key = AddTapeObjects.add_recorders(glmCaseDict,case_flag,0,1,'four_node_basecase_test1', last_key)
+	#glmCaseDict, last_key = AddTapeObjects.add_recorders(glmCaseDict,case_flag,0,1,'four_node_basecase_test', last_key)
+
 
 	return (glmCaseDict, last_key)
 

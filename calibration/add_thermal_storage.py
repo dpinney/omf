@@ -1,5 +1,5 @@
 import random
-
+from __future__ import division
 def add_ts(scalar, ts_array, ts_dict, use_flags, config_data, tech_data, key):
     # if there are no objects to attach thermal storage to, continue
     if ts_array is None or ts_array.empty():

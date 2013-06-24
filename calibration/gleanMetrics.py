@@ -1,5 +1,7 @@
 # After the .glms all run, of those that ran succesfully we want the five comparison metrics to plug into the WSM. 
-import pymysql
+#import pymysql
+from __future__ import division
+import MySQLdb
 import re
 
 # MySQL connection parameters
@@ -39,7 +41,7 @@ def getValues(glm_filenames,days):
 	measurements = {}
 	orig_len = len(glm_filenames)
 	# open database connection
-	dbh = pymysql.connect(user=u,passwd=p,db=schema)
+	dbh = MySQLdb.connect(user=u,passwd=p,db=schema)
 	cursor = dbh.cursor()
 
 	for i in glm_filenames:
@@ -81,7 +83,7 @@ def getValues(glm_filenames,days):
 			
 		# Determine what season this .glm was for.
 		season = None
-		for j in range(len(days)):
+		for j in xrange(len(days)):
 			if re.match(r'^.*'+days[j]+'.*$',i) is not None:
 				season = j
 		if season is None:
@@ -125,11 +127,13 @@ def getValues(glm_filenames,days):
 					topop.append(j)
 	if len(topop) != 0:
 		for i in topop:
-			print ("Ignoring "+i+" due to missing simulation output.")
-			measurements.pop(i)
+			if i in measurements.keys():
+				print ("Ignoring "+i+" due to missing simulation output.")
+				measurements.pop(i)
 					
 	#print ("Final measurments: "+str(measurements))
 	dbh.close()
+	print (str(len(measurements))+" of "+ str(orig_len/3)+ " calibrated models successfully ran")
 	return measurements
 	
 
@@ -137,7 +141,7 @@ def calcDiffs (glm_vals, scada):
 	'''Calculate percent differences for [peak val, peak time, total energy, minimum val, minimum time] from recorder output from simulation of given glm on given day.'''
 
 	diffs = [];
-	for i in range(len(glm_vals)):
+	for i in xrange(len(glm_vals)):
 		if i == 1 or i == 4:
 			j = round((glm_vals[i] - scada[i])/24,4);
 		else:

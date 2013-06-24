@@ -1,10 +1,11 @@
 #Python Extraction and Calibration Version of MATLAB Scripts
 # add_residential_loads.py appends residential houses and residential TOU/CPP technology object dictionaries to the desired feeder technology case dictionary
+from __future__ import division
 import math
 import random
 import Configuration
 
-def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last_object_key, CPP_flag_name, market_penetration_random, dlc_rand, pool_pump_recovery_random, slider_random, xval, elasticity_random, configuration_file=None):
+def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last_object_key, CPP_flag_name, market_penetration_random, dlc_rand, pool_pump_recovery_random, slider_random, xval, elasticity_random, wdir,configuration_file=None):
 	#ResTechDict is a dictionary containing all the objects in WindMIL model represented as equivalent GridLAB-D objects that this function will append residential load object to.
 	solar_residential_array = [0,[None],[None]]
 	ts_residential_array = [0,[None]]
@@ -36,7 +37,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 				lg_vs_sm = residential_dict[x]['large_vs_small']
 				classID = residential_dict[x]['load_classification']
 				
-				config_data = Configuration.ConfigurationFunc(configuration_file,None,classID) # recall Configuration() with this load's classification
+				config_data = Configuration.ConfigurationFunc(wdir,configuration_file,None,classID) # recall Configuration() with this load's classification
 				# Find out how many houses in any sub-classifications
 				thermal_integrity = list(map(lambda a:math.ceil(a*no_houses),config_data['thermal_percentages']))
 				no_pool_pumps = math.fsum(config_data['SFH'])*no_houses # Total Single-Family Homes (only allow pool-pumps on SFH)
