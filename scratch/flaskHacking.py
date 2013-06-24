@@ -2,9 +2,7 @@
 Making flask do stuff.
 '''
 
-import multiprocessing
-
-
+import multiprocessing, time
 from flask import Flask, request, make_response
 
 app = Flask(__name__)
@@ -16,9 +14,13 @@ print 'garbage!'
 
 def testThing():
 	print 'okeydoke'
-	import time
 	time.sleep(100)
 	print 'FUCK'
+
+print 'GlobalCheck:', globals()
+print 'Test already up?', 'test' in globals()
+
+time.sleep(2)
 
 test = Thread(target=testThing)
 test.start()
@@ -35,4 +37,4 @@ def cookie():
 	return resp
 
 if __name__ == '__main__':
-	app.run()
+	app.run(debug=True)

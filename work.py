@@ -75,10 +75,23 @@ class LocalWorker:
 			store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
 		self.runningJobCount.decrement()
 	def terminate(self, anaName):
-		#TODO: implement this fliff.
-		pass
-	def status(self):
-		return [[key,self.jobRecorder[key].name,self.jobRecorder[key].is_alive()] for key in self.jobRecorder]
+		def killingInTheName(anaName):
+			try: 
+				for runDir in os.listdir('running'):
+					if runDir.startswith(anaName + '---'):
+						with open('running/' + runDir + '/PID.txt','r') as pidFile:
+							os.kill(int(pidFile.read()), 15)
+							print 'Terminated', anaName
+							return True
+			except:
+				print 'Missed attempt to terminate', anaName
+				return False
+		# Try to kill three times.
+		for attempt in range(3):
+			if killingInTheName(anaName): break
+			time.sleep(1)
+		def status(self):
+			return [[key,self.jobRecorder[key].name,self.jobRecorder[key].is_alive()] for key in self.jobRecorder]
 
 class ClusterWorker:
 	def __init__(self, userKey, passKey, workQueueName, terminateQueueName, store):
@@ -121,7 +134,7 @@ class ClusterWorker:
 			if daemonWorker.runningJobCount.value() > 0:
 				anaName = popJob(terminateQueue)
 				if anaName != False:
-					print 'Daemon terminating', anaName
+					print 'Daemon attempting to terminate', anaName
 					daemonWorker.terminate(anaName)
 			# Check again in 1 second:
 			Timer(1, endlessLoop).start()
