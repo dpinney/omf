@@ -499,6 +499,7 @@
 			}else
 				return;
 		}
+		// TODO: When unpinned all nodes, remove the scale grid.
 		showScale();
 	}
 
@@ -723,6 +724,7 @@
 			searchCursor = undefined
 		}
 		hits = findElementsViaString(term)
+		// TODO: when the target node is hide, show dialog
 		gebi('searchHitCount').innerHTML = hits.length + ' Hits'
 		if (hits.length == 0) {return false}
 		if (searchCursor == undefined) {
@@ -1225,16 +1227,27 @@
 					newChildAtLocation(newHouse, parentIndex)
 					houseIndex = findIndex(tree, 'name', newHouse['name'])
 					newChildAtLocation(newLights, houseIndex)
-
 					if (newHeater!=false) {newChildAtLocation(newHeater, houseIndex)}
 				}
 			}
 			redraw()
 			removeProgressDialog()
 		}
-		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-		showProgressDialog('Please wait. Houses are being generated.')		
-		setTimeout(replaceAllHouses, 1000);
+
+		function noTriplexNode(){
+			for (x in hiddenNodes){
+				if (hiddenNodes[x].objectType != undefined && hiddenNodes[x].objectType == 'triplex_node')
+					return true
+			}
+			return false
+		}
+		if (noTriplexNode()){
+			alert('TRIPLEX NODES have been hidden by the layout, please unfold them first.')
+		} else {
+			showProgressDialog('Please wait. House is being generated.')
+			// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
+			setTimeout(replaceAllHouses, 1000);	
+		}
 	}
 
 	function solarAdding() {
@@ -1279,9 +1292,24 @@
 			redraw()
 			removeProgressDialog()
 		}
-		showProgressDialog('Please wait. Solar is being generated.')
-		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-		setTimeout(walkAndAddSolar, 1000);
+		
+		
+		function noTriplexNode(){
+			for (x in hiddenNodes){
+				if (hiddenNodes[x].objectType != undefined && hiddenNodes[x].objectType == 'house')
+					return true
+			}
+			return false
+		}
+
+		if (noTriplexNode){
+			alert('Houses have been hidden in the layout, please unfold it first.')
+		} else {
+			showProgressDialog('Please wait. Solar is being generated.')
+			// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
+			setTimeout(walkAndAddSolar, 1000);	
+		}
+		
 	}
 
 	// MODEL SAVING
