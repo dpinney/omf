@@ -26,10 +26,9 @@ We need to handle two cases:
 '''
 
 import os, tempfile, psutil, time
-from multiprocessing import Process, Value, Lock
-from threading import Thread
+from multiprocessing import Value, Lock
+from threading import Thread, Timer
 import studies, analysis
-from threading import Timer
 from boto.sqs.connection import SQSConnection
 from boto.sqs.message import Message
 
@@ -89,9 +88,9 @@ class LocalWorker:
 		# Try to kill three times.
 		for attempt in range(3):
 			if killingInTheName(anaName): break
-			time.sleep(1)
-		def status(self):
-			return [[key,self.jobRecorder[key].name,self.jobRecorder[key].is_alive()] for key in self.jobRecorder]
+			time.sleep(2)
+	def status(self):
+		return [[key,self.jobRecorder[key].name,self.jobRecorder[key].is_alive()] for key in self.jobRecorder]
 
 class ClusterWorker:
 	def __init__(self, userKey, passKey, workQueueName, terminateQueueName, store):
@@ -124,6 +123,12 @@ class ClusterWorker:
 				return anaName
 			else:
 				return False
+		def peakJob(queueObject):
+			mList = queueObject.get_messages(1)
+			if len(mList) == 1:
+				return mList[0]
+			else:
+				return False
 		def endlessLoop():
 			if daemonWorker.runningJobCount.value() < JOB_LIMIT:
 				anaName = popJob(jobQueue)
@@ -132,10 +137,14 @@ class ClusterWorker:
 					thisAnalysis = analysis.Analysis(store.get('Analysis', anaName))
 					daemonWorker.run(thisAnalysis, store)
 			if daemonWorker.runningJobCount.value() > 0:
-				anaName = popJob(terminateQueue)
-				if anaName != False:
-					print 'Daemon attempting to terminate', anaName
-					daemonWorker.terminate(anaName)
+				termMessage = peakJob(terminateQueue)
+				if termMessage != False:				
+					runningAnas = [stat[1] for stat in daemonWorker.status() if stat[2]==True]
+					anaName = termMessage.get_body()
+					if anaName in runningAnas:
+						print 'Daemon attempting to terminate', anaName
+						daemonWorker.terminate(anaName)
+						terminateQueue.delete_message(termMessage)
 			# Check again in 1 second:
 			Timer(1, endlessLoop).start()
 		endlessLoop()
