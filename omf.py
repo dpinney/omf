@@ -161,7 +161,12 @@ def saveAnalysis():
 
 @app.route('/terminate/', methods=['POST'])
 def terminate():
-	anaName = flask.request.form['analysisName']
+	# Get the analysis, and set it terminated on the data store.
+	anaName = flask.request.form.get('analysisName')
+	thisAnalysis = analysis.Analysis(store.get('Analysis', anaName))
+	thisAnalysis.status = 'terminated'
+	store.put('Analysis', anaName, thisAnalysis.__dict__)
+	# Now actually do the termination:
 	worker.terminate(anaName)
 	return flask.redirect(flask.url_for('root'))
 
