@@ -28,7 +28,7 @@ We need to handle two cases:
 import os, tempfile, psutil, time
 from multiprocessing import Value, Lock
 from threading import Thread, Timer
-import studies, analysis
+import studies, analysis, milToGridlab
 from boto.sqs.connection import SQSConnection
 from boto.sqs.message import Message
 
@@ -73,6 +73,21 @@ class LocalWorker:
 		for study in studyList:
 			store.put('Study', study.analysisName + '---' + study.name, study.__dict__)
 		self.runningJobCount.decrement()
+	def milImport(self, store, feederName, stdName, seqName):
+		# Setup.
+		self.runningJobCount.increment()
+		importThread = Thread(target=self.milImportBackground, args=[store, feederName, stdName, seqName])
+		importThread.start()
+	def milImportBackground(self, store, feederName, stdName, seqName):
+		store.put('Conversion', feederName, {'data':'none'})
+		newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5'}}
+		[newFeeder['tree'], xScale, yScale] = milToGridlab.convert('./uploads/' + stdName, './uploads/' + seqName)
+		newFeeder['layoutVars']['xScale'] = xScale
+		newFeeder['layoutVars']['yScale'] = yScale
+		with open('./schedules.glm','r') as schedFile:
+			newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+		store.put('Feeder', feederName, newFeeder)
+		store.delete('Conversion', feederName)
 	def terminate(self, anaName):
 		def killingInTheName(anaName):
 			try: 

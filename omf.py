@@ -1,9 +1,9 @@
 #!/bin/python
 
 # third party modules
-import flask, werkzeug, os, multiprocessing, json, time, datetime, copy, traceback
+import flask, werkzeug, os, json, time, datetime, copy, traceback
 # our modules
-import analysis, feeder, reports, studies, milToGridlab, storage, work
+import analysis, feeder, reports, studies, storage, work
 
 app = flask.Flask(__name__)
 
@@ -211,22 +211,9 @@ def milsoftImport():
 		if fName.endswith('.std'): stdName = fName
 		elif fName.endswith('.seq'): seqName = fName
 		allFiles[f].save('./uploads/' + fName)
-	runProc = multiprocessing.Process(target=milImportAndConvert, args=[store, feederName, stdName, seqName])
-	runProc.start()
+	worker.milImport(store, feederName, stdName, seqName)
 	time.sleep(1)
 	return flask.redirect(flask.url_for('root') + '#feeders')
-
-# Helper function for importing.
-def milImportAndConvert(store, feederName, stdName, seqName):
-	store.put('Conversion', feederName, {'data':'none'})
-	newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5'}}
-	[newFeeder['tree'], xScale, yScale] = milToGridlab.convert('./uploads/' + stdName, './uploads/' + seqName)
-	newFeeder['layoutVars']['xScale'] = xScale
-	newFeeder['layoutVars']['yScale'] = yScale
-	with open('./schedules.glm','r') as schedFile:
-		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
-	store.put('Feeder', feederName, newFeeder)
-	store.delete('Conversion', feederName)
 
 if __name__ == '__main__':
 	# Run a debug server all interface IPs.
