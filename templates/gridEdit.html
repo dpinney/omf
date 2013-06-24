@@ -123,7 +123,7 @@
 	  <ul class='menu right'>
 	<li id='renameMenuItem'><a href='javascript:rename()'>Rename</a></li>
 	<li id='saveMenuItem'><a href='javascript:saveModel()'>Save</a></li>
-	<li><a href='javascript:history.back()'>Cancel</a></li>
+	<li><a href='javascript:history.back()'>Leave →</a></li>
 	  </ul>
 	</div>
 	<div class='buttonGroup rightToolbar'>
@@ -564,6 +564,7 @@
 			x = getSelectedNode()['x']
 			y = getSelectedNode()['y']
 		}
+		console.log(x)
 		var scale = 15 
 		var xNew = -x*scale+graphSvg.clientWidth/2
 		var yNew = -y*scale+graphSvg.clientHeight/2
@@ -731,18 +732,24 @@
 		}
 		hits = findElementsViaString(term)
 		// TODO: What if it is hidden(folded).
+
 		gebi('searchHitCount').innerHTML = hits.length + ' Hits'
-		if (hits.length == 0) {return false}
-		if (searchCursor == undefined) {
-			selectViaTreeIndex(hits[0])
-			searchCursor = 0
-		} else {
-			searchCursor++
-			if (searchCursor == hits.length) {searchCursor = 0}
-			if (searchCursor == -1) {searchCursor = hits.length-2}
-			selectViaTreeIndex(hits[searchCursor])
+		try {
+			if (hits.length == 0) {return false}
+			if (searchCursor == undefined) {
+				selectViaTreeIndex(hits[0])
+				searchCursor = 0
+			} else {
+				searchCursor++
+				if (searchCursor == hits.length) {searchCursor = 0}
+				if (searchCursor == -1) {searchCursor = hits.length-2}
+				selectViaTreeIndex(hits[searchCursor])
+			}
+			zoomToSelection()
 		}
-		zoomToSelection()
+		catch(err){
+			alert('Objects have been hidden in the layout, please unfold them first.\n' + err.message)
+		}
 	}
 
 	function findPrevious() {
