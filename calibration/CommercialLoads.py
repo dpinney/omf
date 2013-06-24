@@ -3,6 +3,7 @@ Created on Apr 9, 2013
 
 @author: D3P988
 '''
+from __future__ import division
 import Configuration
 import random
 import math
@@ -11,7 +12,7 @@ import math
 # @param last_object_key: the last ID used to key objects in glmCaseDict ... not an actual index! 
 # @param PV_loads: initialized at line 1484 in Feeder_Generator_updated.m
 # @param spot_check: initialized at line 1110 in Feeder_Generator_updated.m
-def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commercial_dict, comm_slider_random, dlc_c_rand, dlc_c_rand2, use_config_file=None):
+def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commercial_dict, comm_slider_random, dlc_c_rand, dlc_c_rand2, wdir,use_config_file=None):
 	# real inits
 	solar_office_array = [0,[None],[None]]
 	solar_bigbox_array = [0,[None],[None]]
@@ -172,7 +173,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 			classID = commercial_dict[iii]['load_classification'] # Get load classification
 			# Recall Configuration.m with this load's classification
 			# @todo figure out what to do with this!
-			config_data = Configuration.ConfigurationFunc(None,use_config_file,classID) 
+			config_data = Configuration.ConfigurationFunc(wdir,use_config_file,None,classID) 
 			# Determine how many houses and of what building type the classification designates
 			com_buildings_classified = [config_data["com_buildings"][0][classID] * total_comm_houses,config_data["com_buildings"][1][classID] * total_comm_houses,config_data["com_buildings"][2][classID] * total_comm_houses] # cID-1 for index fixing
 

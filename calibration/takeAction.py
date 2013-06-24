@@ -1,3 +1,4 @@
+from __future__ import division
 import Config_Parameter_Limits as limits
 
 # Main function takeAction(action,vals,diffs) takes action code, list of previously used calibration parameter values, and list of calculated differences for four main metrics. 
@@ -5,34 +6,43 @@ import Config_Parameter_Limits as limits
 
 def loadLevel (a, avg_house, avg_comm, base_load_scalar, avg_diff):
 	options = [None] * 7
-	for i in range(7):
+	for i in xrange(7):
 		options[i] = [base_load_scalar, avg_house, avg_comm]
-	change = 0.10 + (abs(avg_diff) - (abs(avg_diff) % 0.10))
+	#change = 0.10 + (abs(avg_diff) - (abs(avg_diff) % 0.10))
+	change_r = 500
+	change_c = 2000
 	change_base_load = 0.05;
 	if a < 0:
 		a0 = "To lower load overall, we can ";
 		a1 = "increase";
 		a2 = "decrease";
 		change_base_load = -change_base_load
+		ch = 1
 	else:
 		a0 = "To increase load overall, we can ";
 		a1 = "decrease";
 		a2 = "increase";
-		change = -change
+		#change = -change
+		ch = -1
 	print (a0 + a1 + " average house VA and/or average commercial VA, and/or "+ a2 + " residential base load scalar.");
 	options[0][0] = round(base_load_scalar + change_base_load,2) # change base load scalar only
-	options[1][1] = int(avg_house + (avg_house * change)) # change avg house only
-	options[2][2] = int(avg_comm + (avg_comm * change)) # change avg comm only
-	options[3][1] = int(avg_house + (avg_house * change)) # change avg res and avg comm equally
-	options[3][2] = int(avg_comm + (avg_comm * change))
-	options[4][1] = int(avg_house + (avg_house * 1.5 * change)) # change avg res more than avg comm
-	options[4][2] = int(avg_comm + (avg_comm * 0.5 * change))
-	options[5][2] = int(avg_comm + (avg_comm * 1.5 * change)) # change avg com more than avg res
-	options[5][1] = int(avg_house + (avg_house * 0.5 * change))
+	# options[1][1] = int(avg_house + (avg_house * change)) # change avg house only
+	# options[2][2] = int(avg_comm + (avg_comm * change)) # change avg comm only
+	# options[3][1] = int(avg_house + (avg_house * change)) # change avg res and avg comm equally
+	# options[3][2] = int(avg_comm + (avg_comm * change))
+	# options[4][1] = int(avg_house + (avg_house * 1.5 * change)) # change avg res more than avg comm
+	# options[4][2] = int(avg_comm + (avg_comm * 0.5 * change))
+	# options[5][2] = int(avg_comm + (avg_comm * 1.5 * change)) # change avg com more than avg res
+	# options[5][1] = int(avg_house + (avg_house * 0.5 * change))
 	options[6][0] = round(base_load_scalar + (change_base_load * 2),2) # change base load double
-	
+	options[1][1] = int(avg_house + ch * change_r) # change avg house only
+	options[2][2] = int(avg_comm + ch * change_c) # change avg comm only
+	options[3][1] = int(avg_house + ch * change_r) # change avg res and avg comm
+	options[3][2] = int(avg_comm + ch * change_c)
+	options[4][1] = int(avg_house + (2 * ch * change_r)) # change avg res double
+	options[5][2] = int(avg_comm + (2 * ch *change_c)) # change avg com double
 	# constrain the values within our set limits
-	for i in range(6):
+	for i in xrange(7):
 		if not limits.resBaseLoadLIM(options[i][0]):
 			if a < 0:
 				options[i][0] = limits.base_scale_low
@@ -54,7 +64,7 @@ def loadLevel (a, avg_house, avg_comm, base_load_scalar, avg_diff):
 
 def winterLoad (a, decrease_gas, add_heat_degree):
 	options = [None] * 6
-	for i in range(6):
+	for i in xrange(6):
 		options[i] = [decrease_gas, add_heat_degree]
 	if a < 0:
 		a0 = "To lower winter load only, we can ";
@@ -76,7 +86,7 @@ def winterLoad (a, decrease_gas, add_heat_degree):
 	options[5][0] = round(decrease_gas + (ch * 0.10),2)
 	options[5][1] = add_heat_degree + (ch * 1)   # change gas and heat double
 	# constrain the values within our set limits
-	for i in range(6):
+	for i in xrange(6):
 		if not limits.gasHeatPercLIM(options[i][0]):
 			if a < 0:
 				options[i][0] = limits.less_gas_low
@@ -126,7 +136,7 @@ def winterPeak (a, decrease_gas, sched_skew_std, add_heat_degree):
 
 def summerPeak (a, window_wall_ratio):
 	options = [None] * 2
-	for i in range(2):
+	for i in xrange(2):
 		options[i] = [window_wall_ratio]
 	if a < 0:
 		a0 = "To lower summer peak, we can "
@@ -139,7 +149,7 @@ def summerPeak (a, window_wall_ratio):
 	print (a0 + a1 + " window wall ratio.");
 	options[0][0] = round(window_wall_ratio + ch * 0.05, 2)
 	options[1][0] = round(window_wall_ratio + ch * 0.10, 2)
-	for i in range(2):
+	for i in xrange(2):
 		if not limits.windowWallRatioLIM(options[i][0]):
 			if a < 0:
 				options[i][0] = limits.window_wall_low;
@@ -150,7 +160,7 @@ def summerPeak (a, window_wall_ratio):
 	
 def peakLevel (a, cool_offset, heat_offset, cop_high, cop_low, sched_skew_std):
 	options = [None] * 7
-	for i in range(7):
+	for i in xrange(7):
 		options[i] = [cool_offset, heat_offset, cop_high, cop_low, sched_skew_std]
 	if a < 0:
 		a0 = "To lower peaks, we can "
@@ -181,7 +191,7 @@ def peakLevel (a, cool_offset, heat_offset, cop_high, cop_low, sched_skew_std):
 	options[5][2:5] = cop_high_new, cop_low_new, sched_skew_std_new  # change COP scaling and schedule skew std
 	options[6] = [cool_offset_new, heat_offset_new, cop_high_new, cop_low_new, sched_skew_std_new]  # change COP scaling, offsets, and schedule skew std
 	
-	for i in range(7):
+	for i in xrange(7):
 		if not limits.OffsetsLIM(options[i][1],options[i][0]):  # Will need modification if changing offsets independently.
 			if a < 0:
 				options[i][0],options[i][1] = -limits.offset_band, -limits.offset_band
@@ -228,7 +238,7 @@ def winterPeaksummerOK (a, cop_high, cop_low, decrease_gas, add_heat_degree ):
 		
 def summerPeakwinterOK (a, cop_high, cop_low, window_wall_ratio ):
 	options = [None] * 6
-	for i in range(6):
+	for i in xrange(6):
 		options[i] = [cop_high, cop_low, window_wall_ratio]
 	if a < 0:
 		a0 = "To lower summer peak (lowering winter is OK too), we can "
@@ -255,7 +265,7 @@ def summerPeakwinterOK (a, cop_high, cop_low, window_wall_ratio ):
 	options[3] = [cop_high_dub, cop_low_dub, window_wall_ratio_dub]  # change COP high and low and window wall ratio double
 	options[4][2] = window_wall_ratio_new  # change window wall ratio
 	options[5][2] = window_wall_ratio_dub  # change window wall ratio double
-	for i in range(6):
+	for i in xrange(6):
 		if not limits.COPvalsLIM(options[i][0],options[i][1]):  # Will need modification if changing COP high and COP low independently.
 			if a < 0:
 				options[i][0], options[i][1] = limits.COPlim_high, limits.COPlim_high
@@ -283,12 +293,12 @@ def peaksOpposite (a, decrease_gas, window_wall_ratio, add_heat_degree):
 
 def resSchedSkew(seconds):
 	options = [None] * 7
-	for i in range(7):
+	for i in xrange(7):
 		options[i] = [seconds]
 	test = [-3600, -1800, -900, 0, 900, 1800, 3600]
-	for j in range(len(options)):
+	for j in xrange(len(options)):
 		options[j][0] += test[j]
-	for i in range(7):
+	for i in xrange(7):
 		if not limits.resSchedSkewLIM(options[i][0]):
 			if options[i][0] < seconds:
 				options[i][0] = - limits.schedskewband
@@ -318,44 +328,45 @@ def takeAction(action,vals,diffs):
 	calibrations = []
 	if i == 1:
 		options = loadLevel(action, a, b, c, avg_diff)
-		for n in range(len(options)):
+		for n in xrange(len(options)):
 			calibrations.append([options[n][1], options[n][2], options[n][0], d, e, f, g, h, j, k, l, m])
 	elif i == 2:
 		options = winterLoad(action, j, m)
-		for n in range(len(options)):
+		for n in xrange(len(options)):
 			calibrations.append([a, b, c, d, e, f, g, h, options[n][0], k, l, options[n][1]])
 	elif i == 3:
 		options = winterPeak(action, j, k, m)
-		for n in range(len(options)):
+		for n in xrange(len(options)):
 			calibrations.append([a, b, c, d, e, f, g, h, options[n][0], options[n][2], l, options[n][1]])
 	elif i == 4:
 		options = winterPeaksummerOK(action, f, g, j, m)
-		for n in range(len(options)):
+		for n in xrange(len(options)):
 			calibrations.append([a, b, c, d, e, options[n][2], options[n][3], h, options[n][0], k, l, options[n][1]])
 	elif i == 5:
 		options = summerPeak(action, l)
-		for n in range(len(options)):
+		for n in xrange(len(options)):
 			calibrations.append([a, b, c, d, e, f, g, h, j, k, options[n][0], m])
 	elif i == 6:
 		options = summerPeakwinterOK(action, f, g, l)
-		for n in range(len(options)):
+		for n in xrange(len(options)):
 			calibrations.append([a, b, c, d, e, options[n][0], options[n][1], h, j, k, options[n][2], m])
 	elif i == 7:
 		options = peakLevel(action, d, e, f, g, k)
-		for n in range(len(options)):
+		for n in xrange(len(options)):
 			calibrations.append([a, b, c, options[n][0], options[n][1], options[n][2], options[n][3], h, j, options[n][4], l, m])
 	elif i == 8:
 		options = peaksOpposite(action, j, l, m)
-		for n in range(len(options)):
+		for n in xrange(len(options)):
 			calibrations.append([a, b, c, d, e, f, g, h, options[n][0], k, options[n][2], options[n][1]])
 	elif i == 9:
 		options = resSchedSkew(h)
-		for n in range(len(options)):
+		for n in xrange(len(options)):
 			calibrations.append([a, b, c, d, e, f, g, options[n][0], j, k, l, m])
 	else:
 		print ("Action ID doesn't match any defined!");
 	#print (options)
-	#print (calibrations)
+	for x in calibrations:
+		print (str(x)+"\n")
 	return calibrations
 
 def main():

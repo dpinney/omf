@@ -14,6 +14,7 @@ Example:
 A is 'extremely' more important than B implies A vs. B = 9, and therfore B vs. A = 1/9.
 
 '''
+from __future__ import division
  
 # Pairwise Comparisons
 PvPt = 3;

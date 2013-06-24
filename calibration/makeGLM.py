@@ -1,5 +1,5 @@
 '''Writes the necessary .glm files for a calibration round. Define recording interval and MySQL schema name here.'''
-
+from __future__ import division
 import datetime 
 import re
 import math
@@ -8,6 +8,7 @@ import Milsoft_GridLAB_D_Feeder_Generation
 
 interval = 300  # seconds
 schema = 'CalibrationDB'
+
 
 def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 	'''Create populated dict and write it to .glm file
@@ -26,7 +27,7 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 	else:
 		print ('Populating feeder using default calibrations.')
 		calib_fullpath = None
-	glmDict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(baseGLM,case_flag,calib_fullpath,feeder_config) 
+	glmDict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(baseGLM,case_flag,dir,calib_fullpath,feeder_config) 
 	
 	fnames =  []
 	for i in clock.keys():
@@ -40,7 +41,7 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 		j = datetime.datetime.strptime(rec_starttime,'%Y-%m-%d %H:%M:%S')
 		k = datetime.datetime.strptime(stoptime,'%Y-%m-%d %H:%M:%S')
 		diff = (k - j).total_seconds()
-		limit = math.ceil(diff / interval)
+		limit = int(math.ceil(diff / interval))
 		
 		populated_dict = glmDict
 		
@@ -68,6 +69,7 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 									'property' : 'measured_real_power,measured_real_energy',
 									'interval' : '{:d}'.format(interval),
 									'limit' : '{:d}'.format(limit),
+									#'start': "'{:s}'".format(rec_starttime),
 									'connection': schema,
 									'mode': 'a'}
 		

@@ -8,7 +8,7 @@ import re
 # start big ugly .m copy/paste - about 3329 lines
 
 #function [data] = Configuration(file_to_extract, classification)
-def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
+def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=None):
 	data = {}
 	# This file contains data particular to each feeder, and regionalization data for each load classification being used. This data may be different for each feeder. 
 	if file_to_extract == None:
@@ -23,9 +23,11 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 	else:
 		classID = classification
 		
-	# TODO: this should be user specified
-	data["directory"] = 'C:\\Users\\d3y051\\Documents\\NRECA feeder calibration 2-2013\\Calibration\\repository\\Feeder_Test\\schedules'
-	dir = 'C:\\\\Projects\\\\NRECEA\\\\OMF\\\\omf_calibration_27\\\\src\\\\feeder_calibration_scripts\\\\omf\\\\calibration\\\\schedules\\\\'
+	working_directory = re.sub('\\\\','\\\\\\\\',wdir)
+	#data["directory"] = 'C:\\\\Users\\\\d3y051\\\\Documents\\\\NRECA_feeder_calibration 2-2013\\\\Calibration\\\\repository_two\\\\Feeder_Test\\\\schedules'
+	#dir = 'C:\\\\Users\\\\d3y051\\\\Documents\\\\NRECA_feeder_calibration_2-2013\\\\Calibration\\\\repository_two\\\\Feeder_Test\\\\schedules\\\\'
+	dir = working_directory+'\\\\schedules'
+	data["directory"] = dir
 	#default case
 	if file_to_extract == None:
 		
@@ -525,10 +527,6 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 		data["addtl_heat_degrees"] = 1
 		
 	else:
-		# import importlib
-		# import re
-		# m = re.compile( '\.py$' )
-		# config = importlib.import_module(m.sub('',config_file))
 		def num(s):
 			try:
 				return int(s)
@@ -550,35 +548,6 @@ def ConfigurationFunc(config_file, file_to_extract=None, classification=None):
 				else:
 					# insert variable name and value into dictionary
 					couplets[f[0]]=num(f[1])
-
-		# get dictionary values from calibration file
-		# data["avg_house"] = config.avg_house
-
-		# data["avg_commercial"] = config.avg_comm
-
-		# data["base_load_scalar"] = config.base_load_scalar
-
-		# allsame_c = config.cooling_offset
-
-		# allsame_h = config.heating_offset
-
-		# COP_high = config.COP_high_scalar
-
-		# COP_low = config.COP_low_scalar
-
-		# data["residential_skew_shift"] = config.res_skew_shift
-
-		# decrease_gas = config.decrease_gas
-
-		# #TODO: this is actually in TechnologyParameters Right now...
-		# # widen schedule skew
-		# data["residential_skew_std"] = config.sched_skew_std
-
-		# # window wall ratio
-		# data["window_wall_ratio"] = config.window_wall_ratio
-
-		# # additional set point degrees
-		# data["addtl_heat_degrees"] = config.addtl_heat_degrees
 		
 		data["avg_house"] = couplets['avg_house']
 
