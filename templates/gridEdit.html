@@ -32,9 +32,9 @@
 	g.node {fill:gray; stroke: #fff;}
 	line.link {stroke: black;stroke-opacity: 1; stroke-width: 6px;}
 	line.parentChild {stroke-dasharray:1,1;}
-	line.selected {stroke:aqua; stroke-width: 8px; stroke-opacity: 1.0;}
-	g.selected {stroke:aqua; stroke-width: 2px; stroke-opacity: 1.0; }
-	g.multiselected {stroke:aqua; stroke-width: 4px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
+	line.selected {stroke:lime; stroke-width: 8px; stroke-opacity: 1.0;}
+	g.selected {stroke:lime; stroke-width: 2px; stroke-opacity: 1.0; }
+	g.multiselected {stroke:lime; stroke-width: 4px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
 	g.house {fill:#3366FF;}
 	g.load {fill:#3366FF;}
 	g.ZIPload, g.waterheater {fill:#66CCFF;}
@@ -415,8 +415,8 @@
 	}
 
 	function zoomRedraw() {
+		// console.log(d3.event.scale, d3.event.translate)
 		vis.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
-
 		if (d3.event.scale<1){
 			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/d3.event.scale);
 		}
@@ -485,6 +485,8 @@
 	}
 
 	function scaleRedraw(){
+		
+
 		curScale = zoomer.scale()
 		// x-scale renewed
 		x = d3.scale.linear().domain([ options.xmin, options.xmax/curScale]).nice().range([ 0, width ]).nice();
@@ -531,9 +533,14 @@
 	}
 
 	function zoom(x,y,s) {
-		zoomer.translate([x,y]).scale(s);
+		// zoomer.translate([x,y]).scale(s);
 		// zoomer.translate
 		vis.transition().duration(1000).attr('transform','translate(' + x + ',' + y + ') scale(' + s + ')')
+		// Set the behavior scale and translate to the current condition.
+		zoomer.scale(s)
+		zoomer.translate([x, y])
+		// Set the scale grid to the current size.
+		scaleRedraw()
 	}
 
 	function zoomReset() {
@@ -543,6 +550,7 @@
 	}
 
 	function zoomToSelection() {
+
 		domTargets = document.getElementsByClassName('selected')
 		if (domTargets.length != 1) {return false}
 		if (domTargets[0].nodeName == 'line') {
@@ -553,11 +561,11 @@
 			x = getSelectedNode()['x']
 			y = getSelectedNode()['y']
 		}
-		// var scale = zoomer.scale()
-		// Zooming to a node's coordinates puts the node in the upper-left corner of the svg, and the fudge factor was worked out from that.
-		// TODO: need to dynamic draw graph when find next
-		zoom(-1*x+graphSvg.clientWidth/2, -1*y+graphSvg.clientHeight/2, 1)
-		// redraw()
+		var scale = 15 
+		var xNew = -x*scale+graphSvg.clientWidth/2
+		var yNew = -y*scale+graphSvg.clientHeight/2
+		// Zooming to a node's coordinates
+		zoom(xNew, yNew, scale)
 	}
 
 	function getCenterCoordinates() {
