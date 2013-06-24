@@ -336,11 +336,15 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 		for x in glmCaseDict:
 			if 'object' in glmCaseDict[x] and glmCaseDict[x]['object'] == 'load':
 				commercial_dict[commercial_key] = {'name' : glmCaseDict[x]['name'],
+												   'parent' : 'None',
 												   'load_classification' : 'None',
 												   'load' : [0,0,0],
 												   'number_of_houses' : [0,0,0], #[phase A, phase B, phase C]
 												   'nom_volt' : glmCaseDict[x]['nominal_voltage'],
 												   'phases' : glmCaseDict[x]['phases']}
+				
+				if 'parent' in glmCaseDict[x]:
+					commercial_dict[commercial_key]['parent'] = glmCaseDict[x]['parent']
 
 				if 'load_class' in glmCaseDict[x]:
 					commercial_dict[commercial_key]['load_classification'] = glmCaseDict[x]['load_class']
@@ -536,10 +540,14 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 			if 'object' in glmCaseDict[x] and glmCaseDict[x]['object'] == 'triplex_node':
 				if 'power_1' in glmCaseDict[x] or 'power_12' in glmCaseDict[x]:
 					residential_dict[residential_key] = {'name' : glmCaseDict[x]['name'],
+														 'parent' : 'None',
 														 'load_classification' : 'None',
 														 'number_of_houses' : 0,
 														 'large_vs_small' : 0.0,
 														 'phases' : glmCaseDict[x]['phases']}
+					
+					if 'parent' in glmCaseDict[x]:
+						residential_dict[residential_key]['parent'] = glmCaseDict[x]['parent']
 
 					if 'load_class' in glmCaseDict[x]:
 						residential_dict[residential_key]['load_classification'] = glmCaseDict[x]['load_class']
@@ -662,8 +670,8 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 						del glmCaseDict[x]['power_1']
 
 					if total_house_number == 0 and load > 0: # Residential street light
-						glmCaseDict[x]['power_12_real'] = 'street_lighting*{.4f}'.format(c_num.real*tech_data['light_scalar_res'])
-						glmCaseDict[x]['power_12_reac'] = 'street_lighting*{.4f}'.format(c_num.imag*tech_data['light_scalar_res'])
+						glmCaseDict[x]['power_12_real'] = 'street_lighting*{:.4f}'.format(c_num.real*tech_data['light_scalar_res'])
+						glmCaseDict[x]['power_12_reac'] = 'street_lighting*{:.4f}'.format(c_num.imag*tech_data['light_scalar_res'])
 
 					residential_key += 1
 					
@@ -764,7 +772,7 @@ def GLD_Feeder(glmDict,case_flag,configuration_file=None,file_to_extract=None):
 		glmCaseDict = Solar_Technology.Append_Solar(glmCaseDict, use_flags, configuration_file, solar_bigbox_array, solar_office_array, solar_stripmall_array, solar_residential_array, last_key)
 		
 	# Append recorders
-	glmCaseDict, last_key = AddTapeObjects.add_recorders(glmCaseDict,case_flag,0,1,'four_node_basecase_test', last_key)
+	#glmCaseDict, last_key = AddTapeObjects.add_recorders(glmCaseDict,case_flag,0,1,'four_node_basecase_test1', last_key)
 
 	return (glmCaseDict, last_key)
 
@@ -938,7 +946,7 @@ def main():
 
 	baseGLM, last_key = GLD_Feeder(glm_object_dict,0)
 	glm_string = feeder.sortedWrite(baseGLM)
-	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\four_node_basecase_test.glm','w')
+	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\four_node_basecase_test1.glm','w')
 	file.write(glm_string)
 	file.close()
 	print('success!')

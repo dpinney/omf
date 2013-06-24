@@ -164,7 +164,12 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 				raise Exception('The phases in commercial buildings did not add up right.')
 
 			# name of original load object
-			my_name = commercial_dict[iii]['name']
+			if commercial_dict[iii]['parent'] != 'None':
+				my_name = commercial_dict[iii]['parent'] + '_' + commercial_dict[iii]['name']
+				my_parent = commercial_dict[iii]['parent']
+			else:
+				my_name = commercial_dict[iii]['name']
+				my_parent = commercial_dict[iii]['name']
 
 			nom_volt = int(commercial_dict[iii]['nom_volt'])
 
@@ -245,7 +250,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 					int_gains = 3.24; #W/sf
 
 					glmCaseDict[last_object_key] = {"object" : "overhead_line",
-													"from" : "{:s}".format(my_name),
+													"from" : "{:s}".format(my_parent),
 													"to" : "{:s}_office_meter{:.0f}".format(my_name,jjj),
 													"phases" : "{:s}".format(commercial_dict[iii]['phases']),
 													"length" : "50ft",
@@ -633,7 +638,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 					int_gains = 3.6; #W/sf
 
 					glmCaseDict[last_object_key] = {"object" : "overhead_line",
-													"from" : "{:s}".format(my_name),
+													"from" : "{:s}".format(my_parent),
 													"to" : "{:s}_bigbox_meter{:.0f}".format(my_name,jjj),
 													"phases" : "{:s}".format(commercial_dict[iii]["phases"]),
 													"length" : "50ft",
@@ -973,7 +978,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 					last_object_key += 1;
 
 				glmCaseDict[last_object_key] = {"object" : "overhead_line",
-												"from" : "{:s}".format(my_name),
+												"from" : "{:s}".format(my_parent),
 												"to" : "{:s}_strip_node".format(my_name),
 												"phases" : "{:s}".format(commercial_dict[iii]["phases"]),
 												"length" : "50ft",

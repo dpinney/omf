@@ -24,7 +24,13 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 		# Begin attaching houses to designated triplex_meters		
 		for x in residential_dict:
 			if residential_dict[x]['number_of_houses'] > 0:
-				parent = residential_dict[x]['name']
+				if residential_dict[x]['parent'] != 'None':
+					my_name = residential_dict[x]['parent'] + '_' + residential_dict[x]['name']
+					my_parent = residential_dict[x]['parent']
+				else:
+					my_name = residential_dict[x]['name']
+					my_parent = residential_dict[x]['name']
+					
 				no_houses = residential_dict[x]['number_of_houses']
 				phase = residential_dict[x]['phases']
 				lg_vs_sm = residential_dict[x]['large_vs_small']
@@ -52,8 +58,8 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 				for y in xrange(no_houses):
 					ResTechDict[last_object_key] = {'object' : 'triplex_meter',
 													'phases' : '{:s}'.format(phase),
-													'name' : 'tpm{:d}_{:s}'.format(y,parent),
-													'parent' : '{:s}'.format(parent),
+													'name' : 'tpm{:d}_{:s}'.format(y,my_name),
+													'parent' : '{:s}'.format(my_parent),
 													'groupid' : 'Residential_Meter',
 													'meter_power_consumption' : '{:s}'.format(tech_data['res_meter_cons']),
 													'nominal_voltage' : '120'}
@@ -73,18 +79,18 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					# Create an array of parents for the residential thermal storage
 					if use_flags['use_ts'] != 0:
 						ts_residential_array[0] += 1
-						ts_residential_array[1].append('house{:s}_{:s}'.format(y,parent))
+						ts_residential_array[1].append('house{:s}_{:s}'.format(y,my_name))
 						
 					# Create an array of parents for the residential solar
 					if use_flags['use_solar'] != 0 or use_flags['use_solar_res'] != 0:
 						solar_residential_array[0] += 1
-						solar_residential_array[1].append('tpm{:d}_{:s}'.format(y,parent))
+						solar_residential_array[1].append('tpm{:d}_{:s}'.format(y,my_name))
 						solar_residential_array[2].append('{:s}'.format(phase))
 						
 					# Create the house dictionary
 					ResTechDict[last_object_key] = {'object' : 'house',
-													'name' : 'house{:d}_{:s}'.format(y,parent),
-													'parent' : 'tpm{:d}_{:s}'.format(y,parent),
+													'name' : 'house{:d}_{:s}'.format(y,my_name),
+													'parent' : 'tpm{:d}_{:s}'.format(y,my_name),
 													'groupid' : 'Residential'}
 					
 					# Calculate the  residential schedule skew value
@@ -351,7 +357,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					if use_flags['use_market'] == 3:
 						ResTechDict[last_object_key] = {'object' : 'passive_controller',
 														'control_mode' : 'DIRECT_LOAD_CONTROL',
-														'parent' : 'house' + str(y) + '_' + parent,
+														'parent' : 'house' + str(y) + '_' + my_name,
 														'dlc_mode' : 'CYCLING',
 														'period' : '0',
 														'state_property' : 'override',
@@ -390,7 +396,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 							
 							if ht == 'HP': # Control both therm setpoints
 								ResTechDict[last_object_key] = {'object' : 'controller',
-																'parent' : 'house{:s}_{:s}'.format(y,parent),
+																'parent' : 'house{:s}_{:s}'.format(y,my_name),
 																'schedule_skew' : '{:.0f}'.format(skew_value),
 																'market' : '{:s}'.format(tech_data['market_info'][0]),
 																'bid_mode' : 'OFF',
@@ -422,7 +428,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 							elif ht == 'ELEC': # Control the heat, but check to see if we have AC
 								if ct == 'ELEC': # get to control just like a heat pump
 									ResTechDict[last_object_key] = {'object' : 'controller',
-																	'parent' : 'house{:s}_{:s}'.format(y,parent),
+																	'parent' : 'house{:s}_{:s}'.format(y,my_name),
 																	'schedule_skew' : '{:.0f}'.format(skew_value),
 																	'market' : '{:s}'.format(tech_data['market_info'][0]),
 																	'bid_mode' : 'OFF',
@@ -453,7 +459,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 									last_object_key += 1
 								else: # control only the heat
 									ResTechDict[last_object_key] = {'object' : 'controller',
-																	'parent' : 'house{:s}_{:s}'.format(y,parent),
+																	'parent' : 'house{:s}_{:s}'.format(y,my_name),
 																	'schedule_skew' : '{:.0f}'.format(skew_value),
 																	'market' : '{:s}'.format(tech_data['market_info'][0]),
 																	'bid_mode' : 'OFF',
@@ -476,7 +482,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 									last_object_key += 1
 							elif ct == 'ELEC': # Gas heat, cut control the AC
 								ResTechDict[last_object_key] = {'object' : 'controller',
-																'parent' : 'house{:s}_{:s}'.format(y,parent),
+																'parent' : 'house{:s}_{:s}'.format(y,my_name),
 																'schedule_skew' : '{:.0f}'.format(skew_value),
 																'market' : '{:s}'.format(tech_data['market_info'][0]),
 																'bid_mode' : 'OFF',
@@ -522,8 +528,8 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					# Add responsive ZIPload
 					
 					ResTechDict[last_object_key] = {'object' : 'ZIPload',
-													'name' : 'house{:d}_resp_{:s}'.format(y,parent),
-													'parent' : 'house{:d}_{:s}'.format(y,parent),
+													'name' : 'house{:d}_resp_{:s}'.format(y,my_name),
+													'parent' : 'house{:d}_{:s}'.format(y,my_name),
 													'comment' : '// Responsive load',
 													'groupid' : 'Responsive_load',
 													'schedule_skew' : '{:.0f}'.format(skew_value),
@@ -539,7 +545,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					#print('finished responsive zipload')
 					if use_flags['use_market'] == 1 or use_flags['use_market'] == 2:
 						ResTechDict[last_object_key] = {'object' : 'passive_controller',
-														'parent' : 'house{:d}_resp_{:s}'.format(y,parent),
+														'parent' : 'house{:d}_resp_{:s}'.format(y,my_name),
 														'period' : '{:.0f}'.format(tech_data['market_info'][1]),
 														'control_mode' : 'ELASTICITY_MODEL',
 														'two_tier_cpp' : '{:s}'.format(tech_data['two_tier_cpp']),
@@ -576,8 +582,8 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					
 					# Add unresponsive ZIPload object
 					ResTechDict[last_object_key] = {'object' : 'ZIPload',
-													'name' : 'house{:d}_unresp_{:s}'.format(y,parent),
-													'parent' : 'house{:d}_{:s}'.format(y,parent),
+													'name' : 'house{:d}_unresp_{:s}'.format(y,my_name),
+													'parent' : 'house{:d}_{:s}'.format(y,my_name),
 													'comment' : '// Unresponsive load',
 													'groupid' : 'Unresponsive_load',
 													'schedule_skew' : '{:.0f}'.format(skew_value),
@@ -594,8 +600,8 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					# Add pool pumps only on single-family homes
 					if pool_pump_perc < (2*config_data['perc_poolpumps']) and no_pool_pumps >= 1 and row_ti == 0:
 						ResTechDict[last_object_key] = {'object' : 'ZIPload',
-														'name' : 'house{:d}_ppump_{:s}'.format(y,parent),
-														'parent' : 'house{:s}_{:s}'.format(y,parent),
+														'name' : 'house{:d}_ppump_{:s}'.format(y,my_name),
+														'parent' : 'house{:s}_{:s}'.format(y,my_name),
 														'comment' : '// Pool Pump',
 														'groupid' : 'Pool_Pump',
 														'schedule_skew' : '{:.0f}'.format(pp_skew_value),
@@ -619,7 +625,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 						# Add passive_controllers to the pool pump ZIPloads
 						if (use_flags['use_market'] == 1 or use_flags['use_market'] == 2) and tech_data['use_tech'] == 1: # TOU
 							ResTechDict[last_object_key] = {'object' : 'passive_controller',
-															'parent' : 'house{:d}_ppump_{:s}'.format(y,parent),
+															'parent' : 'house{:d}_ppump_{:s}'.format(y,my_name),
 															'period' : '{:.0f}'.format(tech_data['market_info'][1]),
 															'control_mode' : 'DUTYCYCLE',
 															'pool_pump_model' : 'TRUE',
@@ -644,7 +650,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 							last_object_key += 1
 							
 							ResTechDict[last_object_key] = {'object' : 'passive_controller',
-															'parent' : 'house{:d}_ppump_{:s}'.format(y,parent),
+															'parent' : 'house{:d}_ppump_{:s}'.format(y,my_name),
 															'period' : '0',
 															'control_mode' : 'DIRECT_LOAD_CONTROL',
 															'dlc_mode' : 'OFF',
@@ -669,8 +675,8 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					if heat_type > (1 - config_data['wh_electric']) and tech_data['use_wh'] == 1:
 						last_object_key += 1
 						ResTechDict[last_object_key] = {'object' : 'waterheater',
-														'name' : 'house{:d}_wh_{:s}'.format(y,parent),
-														'parent' : 'house{:d}_{:s}'.format(y,parent),
+														'name' : 'house{:d}_wh_{:s}'.format(y,my_name),
+														'parent' : 'house{:d}_{:s}'.format(y,my_name),
 														'schedule_skew' : '{:.0f}'.format(wh_skew_value),
 														'heating_element_capacity' : '{:.1f} kW'.format(heat_element),
 														'tank_setpoint' : '{:.1f}'.format(tank_set),
@@ -707,7 +713,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 						# Add passive controllers to the waterheaters
 						if use_flags['use_market'] == 1 or use_flags['use_market'] == 2:
 							ResTechDict[last_object_key] = {'object' : 'passive_controller',
-															'parent' : 'house{:d}_wh_{:s}'.format(y,parent),
+															'parent' : 'house{:d}_wh_{:s}'.format(y,my_name),
 															'period' : '{:.0f}'.format(tech_data['market_info'][1]),
 															'control_mode' : 'PROBABILITY_OFF',
 															'distribution_type' : 'NORMAL',
@@ -723,7 +729,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 							c_on = 180 + (120 * dlc_rand[y*len(residential_dict) + x])
 							c_off = 1080 + (720 * xval[y*len(residential_dict) + x])
 							ResTechDict[last_object_key] = {'object' : 'passive_controller',
-															'parent' : 'house{:d}_wh_{:s}'.format(y,parent),
+															'parent' : 'house{:d}_wh_{:s}'.format(y,my_name),
 															'period' : '0',
 															'control_mode' : 'DIRECT_LOAD_CONTROL',
 															'dlc_mode' : 'CYCLING',

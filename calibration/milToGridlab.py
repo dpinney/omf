@@ -806,6 +806,15 @@ def main():
 	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_Static_Model.glm','w')
 	file.write(outGlm)
 	file.close()
+	
+	print('Finished converting base glm')
+	import Milsoft_GridLAB_D_Feeder_Generation
+	baseGLM, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(StaticGlmDict,0)
+	glm_string = feeder.sortedWrite(baseGLM)			
+	print('Success')
+	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_basecase_Model.glm','w')
+	file.write(glm_string)
+	file.close()
 	# print outGlm
 	# omfConvert('testMagic','ILEC-Rembrandt.std','ILEC.seq')
 
