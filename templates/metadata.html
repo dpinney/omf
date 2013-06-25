@@ -1,5 +1,6 @@
-<tr class="analysis" id="{{ md['name'].replace('_', '__').replace(' ', '_') }}">
-  <span class="public" style="display:none;">{% if "true" in value["url"] %}true{% else %}false{% endif %}</span>
+<tr class="analysis {{ md['name'].replace('_', '__').replace(' ', '_') }}">
+  <td class="public" style="display:none;">{% if "true" in value["url"] %}true{% else %}false{% endif %}</td>
+  <td style="display:none"><a name="{{ md['name'] }}"></a></td>
   <td class="name">{{ md['name'] }}</td>
   <td class="sourceFeeder">{{ md['sourceFeeder'] }}</td>
   <td class="climate">{{ md['climate'] }}</td>
@@ -15,24 +16,24 @@
 	<li><a href='/viewReports/{{ md["name"] }}{{ value["url"] }}'>View Reports</a></li>
 	{% endif %}
 
-	{% if md['status'] == 'preRun' %}
+	{% if md['status'] == 'preRun' and "false" in value["url"] %}
 	<li><a class="run" href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";run_analysis("/run/{{ value['url'] }}", "{{ md['name'] }}")'>Run</a></li>
 	{% endif %}
 
-	{% if md['status'] == 'postRun' or md['status'] == 'terminated' or md['status'] == 'ERROR' %}
+	{% if "false" in value["url"] and (md['status'] == 'postRun' or md['status'] == 'terminated' or md['status'] == 'ERROR') %}
 	<li><a class="reRun" href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";run_analysis("/reRun/{{ value['url'] }}","{{ md['name'] }}")'>Re-Run</a></li>
 	{% endif %}
 
-	{% if md['status'] != 'running' %}
+	{% if "false" in value["url"] and  md['status'] != 'running' %}
 	<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/{{ value['url'] }}",dict)'>Delete</a></li>
 	{% endif %}
 
-	{% if md['status'] == 'running' %}
+	{% if "false" in value["url"] and md['status'] == 'running' %}
 	<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/{{ value['url'] }}",dict)'>Terminate</a></li>
 	{% endif %}
 	<li><a href='/newAnalysis/{{ md["name"] }}{{ value["url"] }}'>Duplicate</a></li>
 	{% if "false" in value["url"] %}
-	<li><a href="/makePublic/Analysis/{{ md['name'] }}">Make Public</a></li>
+	<li><a class="makePublic" objectType="Analysis" objectName="{{ md['name'] }}" href="/makePublic/Analysis/{{ md['name'] }}">Publish</a></li>
 	{% endif %}
       </ul>
     </div>

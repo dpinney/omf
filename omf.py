@@ -1,7 +1,8 @@
 #!/bin/python
 
 # third party modules
-import flask, werkzeug, os, multiprocessing, json, time, datetime, copy, flask_login
+import flask, werkzeug, os, multiprocessing, json, time, datetime, copy, flask_login, boto.ses, hashlib, time, random
+from datetime import datetime, timedelta
 # our modules
 import analysis, feeder, reports, studies, milToGridlab, storage, work, User
 
@@ -47,7 +48,7 @@ class backgroundProc(multiprocessing.Process):
 
 @app.route("/login_page")
 def login_page():
-	return flask.render_template("login.html")
+	return flask.render_template("clusterLogin.html")
 
 @app.route("/logout")
 def logout():
@@ -56,52 +57,89 @@ def logout():
 
 @app.route("/login", methods = ["POST"])
 def login():
-	print "We should print something ehre"
-	username, password = map(flask.request.form.get, ["username",
-							  "password"])
+	username, password, remember = map(flask.request.form.get, ["username",
+																"password",
+																"remember"])
 	if username and password:
 		user = user_manager.authenticate(username, password)
 		if user:
-			flask_login.login_user(user)
+			flask_login.login_user(user, remember = remember == "on")
 	return flask.redirect("/")
-	
-	# return flask.render_template("login.html")
 
-@app.route("/register", methods = ["POST"])
-def register():
-	user = user_manager.create_user(*map(flask.request.form.get,
-					     ["username",
-					      "password",
-					      "confirm_password"]))
-	if user:
-		flask_login.login_user(user)
-	return flask.redirect("/")
-	
-	
+@app.route("/new_user", methods=["POST"])
+@flask_login.login_required
+def new_user():
+	if flask_login.curren_user.username != "admin":
+		return "You are not allowed to access this page"
+	email = flask.request.form.get("email")
+	if user_manager.get(email):
+		return "Already Exists"
+	c = boto.ses.connect_to_region("us-east-1",
+								   aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
+								   aws_secret_access_key="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")
+	reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
+	u = {}
+	u["reg_key"] = reg_key
+	u["timestamp"] = datetime.strftime(datetime.now(), format="%c")
+	u["registered"] = False
+	store.put("User", email[:email.find("@")], u)
+	c.send_email("mh6445a@student.american.edu",
+				 "OMF Registration Link",
+				 "To register your account for the OMF click this link: http://localhost:5001/register/"+email[:email.find("@")]+"/"+reg_key+"\nThis link will expire in 24 hours",
+				 [email])
+	return "Success"
 
-@app.route('/')
+@app.route("/register/<email>/<reg_key>", methods=["GET", "POST"])
+def register(email, reg_key):
+	u = store.get("User", email)
+	if u and reg_key == u["reg_key"] and timedelta(1) < datetime.now() - datetime.strptime(u["timestamp"], "%c"):
+		password, confirm_password = map(flask.request.form.get, ["password", "confirm_password"])
+		if password and confirm_password:
+			pass
+		else:
+			return flask.render_template("register.html")
+	else:
+		return "Either you have not been verified to register or your registration link has expired."
+
+@app.route("/myaccount")
+def myaccount():
+	return flask.render_template("myaccount.html",
+								 user=flask_login.current_user)
+
+@app.route("/changepwd", methods=["POST"])
+def changepwd():
+	old_pwd, new_pwd, conf_pwd = map(flask.request.form.get, ["old_pwd", "new_pwd", "conf_pwd"])
+	if user_manager.authenticate(flask_login.current_user.username, old_pwd):
+		if new_pwd == conf_pwd:
+			flask_login.current_user.changepwd(new_pwd)
+			return "Success"
+		else:
+			return "not_match"
+	else:
+		return "not_auth"
+			
+@app.route("/")
 @flask_login.login_required
 def root():
-	browser = flask.request.user_agent.browser
-	def get_data(u):
-		return ([u.get("Analysis", x) for x in u.listAll("Analysis")],
-				u.listAll("Feeder"),
-				u.listAll("Conversion"))
 	d = {}
-	for pn, pf, url in [("Private", flask_login.current_user, "false"), ("Public", user_manager.get("public"), "true")]:
-		d[pn] = {"url":"?public="+url}
-		map((lambda k, v: d[pn].__setitem__(k, v)), ["metadatas", "feeders", "conversions"], get_data(pf))
-	if browser == 'msie':
+	for header, user, url in [["Private", flask_login.current_user, "?public=false"],
+							  ["Public", user_manager.get("public"), "?public=true"]]:
+		d[header] = {"metadatas":[user.get("Analysis", x) for x in user.listAll("Analysis")],
+					 "feeders":user.listAll("Feeder"),
+					 "conversions":user.listAll("Conversion"),
+					 "url":url,
+					}
+	if flask.request.user_agent.browser == 'msie':
 		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
 	else:
 		return flask.render_template('home.html', d=d)
-									 # metadatas=metadatas,
-									 # feeders=feeders,
-									 # conversions=conversions,
-									 # public_md=public_md,
-									 # public_feeders=public_feeders,
-									 # public_conversions=public_conversions)
 
+@app.route("/publicObject/<objectType>/<objectName>")
+def publicObject(objectType, objectName):
+	if user_manager.get("public").get(objectType, objectName):
+		return "Nope"
+	return "Yep"
+	
 @app.route("/makePublic/<objectType>/<objectName>")
 @flask_login.login_required
 def makePublic(objectType, objectName):
@@ -112,9 +150,6 @@ def makePublic(objectType, objectName):
 					  if s[:s.find("---")] == objectName]:
 			flask_login.current_user.make_public("Study", study)
 	return flask.redirect(flask.url_for("root"))
-	
-		
-
 	
 @app.route('/newAnalysis/')
 @app.route('/newAnalysis/<analysisName>')
@@ -201,7 +236,10 @@ def run():
 	user.put('Analysis', anaName, thisAnalysis.__dict__)
 	# Run in background and immediately return.
 	worker.run(thisAnalysis, store)
-	return flask.render_template('metadata.html', md=dict(thisAnalysis.__dict__.items() + {"name":anaName}.items()))
+	# print dict(thisAnalysis.__dict__.items() + {"name":anaName}.items())
+	return flask.render_template('metadata.html',
+								 md=dict(thisAnalysis.__dict__.items() + {"name":anaName}.items()),
+								 value = {"url":"?public="+("true" if user.username == "public" else "false")})
 
 @app.route('/delete/', methods=['POST'])
 @flask_login.login_required
@@ -215,6 +253,11 @@ def delete():
 	# Delete analysis.
 	user.delete('Analysis', anaName)
 	return flask.redirect(flask.url_for('root'))
+
+@app.route("/deleteFeeder/<feedername>")
+def deleteGrid(feedername):
+	flask_login.current_user.delete("Feeder", feedername)
+	return flask.redirect("/#feeders")
 
 @app.route('/saveAnalysis/', methods=['POST'])
 @flask_login.login_required
@@ -284,16 +327,31 @@ def getComponents():
 @flask_login.login_required
 def saveFeeder(public):
 	postObject = flask.request.form.to_dict()
-	(user_manager.get("public") if public else flask_login.current_user).put('Feeder', str(postObject['name']), json.loads(postObject['feederObjectJson']))
+	(user_manager.get("public") if public == "True" else flask_login.current_user).put('Feeder', str(postObject['name']), json.loads(postObject['feederObjectJson']))
 	return flask.redirect(flask.url_for('root') + '#feeders')
+
+@app.route("/feederName/<new_name>")
+@flask_login.login_required
+def feederName(new_name):
+	if flask_login.current_user.get("Feeder", new_name):
+		return "Nope"
+	return "Yep"
 
 @app.route('/runStatus')
 @flask_login.login_required
 def runStatus():
 	name = flask.request.args.get('name')
-	md = flask_login.current_user.get('Analysis', name)
+	is_public = flask.request.args.get("is_public") == "true"
+	if is_public:
+		user = user_manager.get("public")
+	else:
+		user = flask_login.current_user
+	md = user.get("Analysis", name)
+	# md = flask_login.current_user.get('Analysis', name)
+	# md = (user_manager.get("public") if flask.request.args.get("is_public") == "true" else flask_login.current_user).get("Analysis", name)
+	# print md
 	if md['status'] != 'running':
-		return flask.render_template('metadata.html', md=md)
+		return flask.render_template('metadata.html', md=md, value={"url":"?public="+("true" if is_public else "false")})
 	else:
 		return flask.Response("waiting", content_type="text/plain")
 

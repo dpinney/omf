@@ -20,9 +20,6 @@ class UserManager:
 		if username and  password == confirm_password and username not in ["admin","public"]:
 			u_dict = {"username":username,
 					  "password_digest":pbkdf2_sha512.encrypt(password),
-					  "analyses":[],
-					  "studies":[],
-					  "feeders":[],
 					  }
 			self.store.put("User", username, u_dict)
 			return User(self.store, **u_dict)
@@ -44,6 +41,11 @@ class User:
 			kwargs.values())
 		self.prepend = "" if self.username == "admin" else self.username+"_"
 
+	def changepwd(self, new_pwd):
+		self.password_digest = pbkdf2_sha512.encrypt(new_pwd)
+		self.store.put("User", self.username, {"username":self.username,
+											   "password_digest":self.password_digest})
+	
 	def is_authenticated(self):
 		return True
 

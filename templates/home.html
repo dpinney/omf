@@ -28,12 +28,31 @@
 
   </style>
   <script>
-   
-
     $(function(){
 	$(document).on("click", ".run, .reRun", function(e){
 	    e.preventDefault();
 	    return false;
+	}).on("click", ".makePublic", function(e){
+	    var objectName = $(this).attr("objectName");
+	    var objectType = $(this).attr("objectType");
+	    
+	    console.log(objectName+" "+objectType);
+	    $.ajax({
+		url:"publicObject/"+objectType+"/"+objectName,
+		async:false
+	    }).done(function(data){
+		if (data == "Nope"){
+		    alert("There is already a public "+objectType+" with that name!");
+		    e.preventDefault();
+		    return false;
+		}
+		if(!confirm("When a feeder or analysis is published, all users can view it and it cannot be altered or un-published.  Do you want to continue?")){
+		e.preventDefault();
+		return false;
+		}
+		    
+	    })
+		
 	});
 	var metadatas = pull_html_data();
 	var i;
@@ -53,29 +72,30 @@
 	}).done(function(data){
 	    console.log("sent the request!");
 	    console.log(data);
-	    $("#"+analysisName.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
-	    startPolling({"name":analysisName});
+	    var p = url.indexOf("true") > -1 ? ".Public" : ".Private";
+	    $(p+" ."+analysisName.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
+	    startPolling({"name":analysisName, "public":""+(url.indexOf("true") > -1)});
 	    return false;
 	});
 	return false;
     }
 
-
-
     function startPolling(md){
-	var i = setInterval(function(){
-	    $.ajax({
-		url:"/runStatus",
-		data:{name:md.name,
-		      is_public:// todo
-		     }
-	    }).done(function(data){
-		if (data != "waiting"){
-		    $("#"+md.name.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
-		    clearInterval(i);
-		}
-	    });
-	}, 5000);
+	// console.log(md)
+    	var i = setInterval(function(){
+    	    $.ajax({
+    		url:"/runStatus",
+    		data:{name:md.name,
+    		      is_public:md["public"]
+    		     }
+    	    }).done(function(data){
+    		if (data != "waiting"){
+		    var p = md["public"] == "true" ? ".Public" : ".Private";
+    		    $(p+" ."+md.name.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
+    		    clearInterval(i);
+    		}
+    	    });
+    	}, 5000);
     }
 
     function pull_html_data(){
@@ -111,22 +131,27 @@
 	gebi('feedersTab').className = 'tab'
     }
 
+    function makePublic(name){
+	
+    }
+
   </script>
 </head>
 <body>
   <a id='consoleLink' href='/console'>C</a>
   <div id='title'>
     <div id='logoBox'><a href='/'>▦</a></div>
-    <a href="logout">Log Out</a>
     <!--Title:-->Open Modeling Framework
   </div>
   <div id='toolbar'>
+
     <p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Analyses</p>
     <p id='feedersTab' class='tab' style='' onclick='feedersClick()'>Feeders</p>
   </div>
   <div id='analyses'>
     <div class='content'>
       {% for key, value in d.items() %}
+      <div class="{{ key }}">
     <h2>{{ key }} Analyses</h2>
       <table id='anaTable'>
 	<tr><thead><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr></thead>
@@ -136,6 +161,7 @@
   {% endfor %}
 </tbody>
 </table>
+</div>
 {% endfor %}
 </div>
 <div class='content'><a href='/newAnalysis/'>New Analysis</a></div>
@@ -143,49 +169,70 @@
 
 <div id='feeders'>
   <div class='content'>
-    {% for key, value in d.items() %}
-    <h2>{{ key }} Feeders</h2>
     <table id='anaTable'>
-      <tr><thead><th>Feeder Name</th><th>Status</th></tr></thead>
-<tbody>
-  {% for feed in value["feeders"] %}
-  <tr>
-    <td><a href='/feeder/{{ feed }}{{ value["url"] }}'>{{ feed }}</a></td>
-    <td>Ready</td>
-  </tr>
-  {% endfor %}
-  {% for feed in value["conversions"] %}
-  <tr>
-    <td>{{ feed }}</td>
-    <td class='running'>Processing</td>
-  </tr>
-  {% endfor %}
-</tbody>
-</table>
-{% endfor %}
-</div>
-<div class='content'>
-  <form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
-    <p style='font-weight:bold;float:left'>Milsoft Feeder Import</p>
-    <table class='importOptions'>
-      <tr>
-	<td>Feeder Name</td>
-	<td><input type='text' name='feederName'/></td>
-      </tr>
-      <tr>
-	<td>Feeder Data File (.std)</td>
-	<td><input type='file' name='stdFile'/></td>
-      </tr>
-      <tr>
-	<td>Equipment Database File (.seq)</td>
-	<td><input type='file' name='seqFile'/></td>
-      </tr>
-      <tr>
-	<td></td>
-	<td><input type='submit' value='Begin Import'/></td>
-      </tr>
+      {% for key, value in d.items() %}
+      <tbody class="{{ key }}">
+	<tr>
+	    <th style="text-align:center" colspan="3">{{ key }} Feeders</th>
+	</tr>
+	<tr>
+	    <th>Feeder Name</th>
+	    <th>Status</th>
+	    <th></th>
+	</tr>
+	  {% for feed in value["feeders"] %}
+	  <tr class="{{ feed.replace('_', '__').replace(' ', '_') }}">
+	    <td><a name="{{ feed }}" href='/feeder/{{ feed }}{{ value["url"] }}'>{{ feed }}</a></td>
+	    <td>Ready</td>
+	    <td>
+	      {% if "false" in value["url"] %}
+	      <div class="buttonGroup">
+		<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
+		<ul class='menu right'>
+		  <li><a href="/deleteFeeder/{{ feed }}">Delete</a></li>
+		  <li><a class="makePublic" objectType="Feeder" objectName="{{ feed }}" href="/makePublic/Feeder/{{ feed }}">Publish</a></li>
+		</ul>
+	      </div>
+	      {% else %}
+	    </td>
+	    {% endif %}
+	  </tr>
+	  {% endfor %}
+	  {% for feed in value["conversions"] %}
+	  <tr>
+	    <td>{{ feed }}</td>
+	    <td class='running'>Processing</td>
+	    <td></td>
+	  </tr>
+	  {% endfor %}
+      </tbody>
+      {% endfor %}
     </table>
-  </form>
+  </div>
+  <div class='content'>
+    <form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
+      <p style='font-weight:bold;float:left'>Milsoft Feeder Import</p>
+      <table class='importOptions'>
+	<tr>
+	  <td>Feeder Name</td>
+	  <td><input type='text' name='feederName'/></td>
+	</tr>
+	<tr>
+	  <td>Feeder Data File (.std)</td>
+	  <td><input type='file' name='stdFile'/></td>
+	</tr>
+	<tr>
+	  <td>Equipment Database File (.seq)</td>
+	  <td><input type='file' name='seqFile'/></td>
+	</tr>
+	<tr>
+	  <td></td>
+	  <td><input type='submit' value='Begin Import'/></td>
+	</tr>
+      </table>
+    </form>
+  </div>
 </div>
-</div>
+<a href="logout">Log Out</a><br />
+<a href="myaccount">My Account</a>
 </body>
