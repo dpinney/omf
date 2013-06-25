@@ -353,7 +353,6 @@
 
 		link.exit().remove()
 
-		
 		node = vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).enter()
 			.append("g")
 			.call(force.drag)
@@ -364,7 +363,6 @@
 		node.append("svg:text")
 		        .attr("class", "nodetext");
 		        
-
 		d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/scale)
 				.text(function(d) { 
 		        	if (d.chargeMultiple != 1){
@@ -379,28 +377,17 @@
 			.attr('r', function(d) {return d.chargeMultiple * NODE_CIRCLE_RADIUS })
 			.style('stroke-width', NODE_STROKE_WIDTH-0.2);
 			// .style('stroke-width', 1/scale)
-		
-		
-		// TODO: Pinning indicator.
+
 		node.append('svg:circle')
 			.attr('class', function(d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
 			
 		node.selectAll('.nodeIsPinned')
 			.attr('id', function(d) {return 'pin' + d.treeIndex})
-			// .attr('cx', 0)
-			// .attr('cy', 0)
-			// .attr('r', PINNED_NODE_CIRCLE_RADIUS)
-			// .style('stroke-width', NODE_STROKE_WIDTH)
 		node.selectAll('.nodeNotPinned')
 			.attr('id', function(d) {return 'pin' + d.treeIndex})
 
 		// Get rid of deleted nodes.
 		vis.selectAll('.node').data(nodes, function(d) {return d.treeIndex}).exit().remove()
-
-		// Update sizes
-		// vis.selectAll('.nodeCircle').data(nodes, function(d) {return d.treeIndex})
-		// 	// .attr('r', function(d) {return d.chargeMultiple * NODE_CIRCLE_RADIUS })
-		// 	.style('stroke-width', NODE_SELECTED_STROKE_WIDTH)
 
 		d3.selectAll('.nodeIsPinned')
 						.attr('cx', 0)
@@ -408,9 +395,13 @@
 						.attr('r', PINNED_NODE_CIRCLE_RADIUS)
 						.style('stroke-width', PINNED_NODE_STROKE_SIZE);
 		d3.selectAll('.nodeNotPinned').attr('r', null)
-
 		d3.selectAll('.node.selected').style('stroke-width', NODE_SELECTED_STROKE_WIDTH)
-			
+
+		// Updata sizes
+		vis.selectAll('.nodeCircle').data(nodes, function(d){return d.treeIndex})
+			.attr('r', function(d){
+				console.log(d.chargeMultiple)
+				return d.chargeMultiple * NODE_CIRCLE_RADIUS})
 		scaleRedraw()
 		force.start()
 	}
@@ -492,7 +483,7 @@
 		y = d3.scale.linear().domain([ options.ymin, options.ymax/curScale]).nice().range([ 0, height ]).nice();
 		function showScale(){
 			var index = Math.round(Math.random()*nodes.length)
-			if (nodes[index].fixed == true && !isNaN(options.xmax)){
+			if (nodes[index].fixed !=undefined && nodes[index].fixed == true && !isNaN(options.xmax)){
 				drawScaleGrid()();
 			}else
 				return;
@@ -1369,13 +1360,13 @@
 	// PINNING FUNCTIONS
 	function pinAll() {
 		for (node in nodes) {
-			d3.select('pin' + nodes[node].treeIndex).attr('class','nodeIsPinned')
-			// gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
+			// d3.select('pin' + nodes[node].treeIndex).attr('class','nodeIsPinned')
+			gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
 			nodes[node].fixed = true
 		}
 		for (hNode in hiddenNodes) {
-			d3.select('pin'+ hiddenNodes[hNode].treeIndex).attr('class','nodeIsPinned')
-			// gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
+			// d3.select('pin'+ hiddenNodes[hNode].treeIndex).attr('class','nodeIsPinned')
+			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
 			hiddenNodes[hNode].fixed = true
 		}
 		redraw()
@@ -1384,11 +1375,13 @@
 
 	function unPinAll() {
 		for (node in nodes) {
-			d3.select('pin' + nodes[node].treeIndex).attr('class','nodeNotPinned')
+			gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeNotPinned')
+			// d3.select('pin' + nodes[node].treeIndex).attr('class','nodeNotPinned')
 			nodes[node].fixed = false
 		}
 		for (hNode in hiddenNodes) {
-			d3.select('pin'+ hiddenNodes[hNode].treeIndex).attr('class','nodeNotPinned')
+			// d3.select('pin'+ hiddenNodes[hNode].treeIndex).attr('class','nodeNotPinned')
+			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeNotPinned')
 			hiddenNodes[hNode].fixed = false
 		}
 		redraw()
@@ -1501,6 +1494,7 @@
 		nodesToReveal.map(showNode)
 		updateHiddenPerc()
 		redraw()
+		d3.selectAll('.node').attr('stroke-width', function(d){return d.chargeMultiple* NODE_STROKE_WIDTH})
 	}
 
 	function unfoldAll() {
@@ -1512,6 +1506,7 @@
 		}
 		nodes.map(function(d) {d.chargeMultiple = 1})
 		updateHiddenPerc()
+
 		redraw()
 	}
 
