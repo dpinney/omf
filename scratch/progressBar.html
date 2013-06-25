@@ -1,0 +1,29 @@
+<!-- A progress bar in pure HTML and JavaScript -->
+
+<head>
+	<style type="text/css">
+		div.progressBar {
+		background-color: black;
+		width:400px;
+		border-radius: 13px; /* (height of inner div) / 2 + padding */
+		padding: 3px; }
+
+		div.progColor {
+		background-color: orange;
+		width: 90%; /* Adjust with JavaScript */
+		height: 20px;
+		border-radius: 10px; }
+	</style>
+	<script type="text/javascript">
+		function change() {
+			document.getElementById('prog1').style.width = document.getElementById('valueBox').value
+		}
+
+	</script>
+</head>
+
+<body>
+	<div class="progressBar"><div id="prog1" class="progColor"></div></div>
+	<br>
+	<input id="valueBox" type="text" value="90%"/><button onclick="javascript:change()">Change</button>
+</body>
