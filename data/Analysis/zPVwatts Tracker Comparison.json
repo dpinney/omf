@@ -1,6 +1,7 @@
 {
     "status": "postRun", 
     "climate": "CO-CARBONDALE.tmy2", 
+    "name": "zPVwatts Tracker Comparison", 
     "simStartDate": "2012-06-03", 
     "simLengthUnits": "hours", 
     "created": "2013-04-24 17:54:34.171000", 

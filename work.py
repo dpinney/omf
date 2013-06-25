@@ -162,7 +162,6 @@ class ClusterWorker:
 				feederName = popJob(importQueue)
 				if feederName != False:
 					print 'Daemon importing', feederName
-					#TODO: make this run.
 					convo = store.get('Conversion', feederName)
 					daemonWorker.milImport(store, feederName, convo['stdString'], convo['seqString'])
 			if daemonWorker.runningJobCount.value() > 0:
