@@ -53,7 +53,7 @@ def run(studyObject):
 			pidFile.write(str(proc.pid))
 		returnCode = proc.wait()
 		if returnCode == 15:
-			# Stop running studies, set status=terminated.
+			# Stop running studies because we were terminated.
 			shutil.rmtree(studyPath)
 			return False
 		# Build raw JSON output.
