@@ -8,4 +8,4 @@ data/Analysis/*
 data/Study/*
 # But include a few example analyses:
 !analyses/z*
-S3KEY.txt
+S3KEY.*

@@ -1,63 +1,52 @@
 #!/usr/bin/env python
 
-import csv
-import feeder
-import random
+import csv, feeder, random
+from StringIO import StringIO
 
-def convert(stdPath,seqPath):
+def convert(stdString, seqString):
 	''' Take in a .std and .seq from Milsoft and spit out a glmTree.'''
 
 	print 'Beginning Windmil to GLM conversion.'
 	
-	# TODO: optimize the performance.
-	def getNominalVoltage(stdPath):
-		with open (stdPath,'r') as stdFile:
-			stdFile.readline()
-			for line in stdFile:
-				token_list = line.split(',')
-				if token_list[1] == '9':
-					# print token_list[0], token_list[14]
-					return str(float(token_list[14])*1000)
-
-	nominal_voltage = getNominalVoltage(stdPath)
-
-	def csvToArray(csvFileName):
+	def csvToArray(csvString):
 		''' Simple csv data ingester. '''
-		with open(csvFileName,'r') as csvFile:
-			csvReader = csv.reader(csvFile)
-			outArray = []
-			for row in csvReader:
-				outArray += [row]
-			return outArray
+		csvReader = csv.reader(StringIO(csvString))
+		outArray = []
+		for row in csvReader:
+			outArray += [row]
+		return outArray
 
 	# Get all components from the .std:
-	components = csvToArray(stdPath)[1:]
+	components = csvToArray(stdString)[1:]
 	# Get all hardware stats from the .seq:
-	hardwareStats = csvToArray(seqPath)[1:]
+	hardwareStats = csvToArray(seqString)[1:]
 	# We dropped the first rows which are metadata (n.b. there are no headers)
+
+	# Get nominal voltage:
+	nominal_voltage = 2400
+	for ob in components:
+		if ob[1] == 9: nominal_voltage = str(float(ob[14])*1000)
+
+	print nominal_voltage
 
 	# The number of allowable sub objects:
 	subObCount = 100
 
-	def convertToPixel(stdPath):
+	def convertToPixel():
 		x_list = []
 		y_list = []
 		x_pixel_range = 1200
 		y_pixel_range = 800
-		with open(stdPath, 'r') as file_handler:
-			file_handler.readline()
-			for line in file_handler:
-				token_list = line.split(',')
-				x_list.append(float(token_list[5]))
-				y_list.append(float(token_list[6]))
+		for component in components:
+			x_list.append(float(component[5]))
+			y_list.append(float(component[6]))
 		# according to convert function  f(x) = a * x + b
 		x_a = x_pixel_range / (max(x_list) - min(x_list))
 		x_b = -x_a * min(x_list)
 		y_a = y_pixel_range / (max(y_list) - min(y_list))
 		y_b = -y_a * min(y_list)
 		return x_a, x_b, y_a, y_b
-
-	[x_scale, x_b, y_scale, y_b] = convertToPixel(stdPath)
+	[x_scale, x_b, y_scale, y_b] = convertToPixel()
 
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
@@ -96,10 +85,9 @@ def convert(stdPath,seqPath):
 			newOb['object'] = gridlabFields[int(objectList[1])]
 			# Coordinate position, except overheadLine and undergoundLine
 			# if objectList[1] != '1' and objectList[1] != '3': 
-			[x_a,x_b,y_a,y_b] = convertToPixel(stdPath)
 			# convert to the relative pixel position f(x) = a * x + b
-			newOb['latitude'] = x_a * float(objectList[5]) + x_b
-			newOb['longitude'] = 800 - (y_a * float(objectList[6]) + y_b)
+			newOb['latitude'] = x_scale * float(objectList[5]) + x_b
+			newOb['longitude'] = 800 - (y_scale * float(objectList[6]) + y_b)
 			# Some non-Gridlab elements:
 			newOb['guid'] = objectList[49].replace('{','').replace('}','')
 			newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
@@ -204,7 +192,7 @@ def convert(stdPath,seqPath):
 			capacitor['control_level'] = 'INDIVIDUAL'
 			capacitor['time_delay'] = '300.0'
 			capacitor['dwell_time'] = '0.0'
-			capacitor['nominal_voltage'] = '2401.7771'
+			capacitor['nominal_voltage'] = nominal_voltage
 			return capacitor
 
 		def convertOhLine(ohLineList):
@@ -664,7 +652,10 @@ def convert(stdPath,seqPath):
 	return glmTree, x_scale, y_scale
 
 if __name__ == '__main__':
-	# outGlm = convert('./uploads/ILEC-Rembrandt.std','./uploads/ILEC.seq')
+	with open('./uploads/INEC-RENOIR.std','r') as stdFile, open('./uploads/INEC.seq','r') as seqFile:
+		outGlm = convert(stdFile.read(),seqFile.read())
+	from pprint import pprint
+	pprint(outGlm)
 	pass
 
 #TODO: set neutral conductors correctly for all components.

@@ -20,7 +20,6 @@ except:
 	worker = work.LocalWorker()
 	print 'Running on local file system.'
 
-
 ###################################################
 # VIEWS
 ###################################################
@@ -204,18 +203,9 @@ def runStatus():
 def milsoftImport():
 	feederName = str(flask.request.form.to_dict()['feederName'])
 	store.put('Conversion', feederName, {'data':'none'})
-	stdName = ''
-	seqName = ''
-	allFiles = flask.request.files
-	# stdString = allFiles['stdFile'].stream.read()
-	# seqString = allFiles['seqFile'].stream.read()
-	for f in allFiles:
-		fName = werkzeug.secure_filename(allFiles[f].filename)
-		if fName.endswith('.std'): stdName = fName
-		elif fName.endswith('.seq'): seqName = fName
-		allFiles[f].save('./uploads/' + fName)
-	worker.milImport(store, feederName, stdName, seqName)
-	time.sleep(1)
+	stdString = flask.request.files['stdFile'].stream.read()
+	seqString = flask.request.files['seqFile'].stream.read()
+	worker.milImport(store, feederName, stdString, seqString)
 	return flask.redirect(flask.url_for('root') + '#feeders')
 
 if __name__ == '__main__':
