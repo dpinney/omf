@@ -78,6 +78,7 @@ class LocalWorker:
 		self.runningJobCount.increment()
 		importThread = Thread(target=self.milImportBackground, args=[store, feederName, stdString, seqString])
 		importThread.start()
+		self.runningJobCount.decrement()
 	def milImportBackground(self, store, feederName, stdString, seqString):
 		newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5'}}
 		[newFeeder['tree'], xScale, yScale] = milToGridlab.convert(stdString, seqString)
