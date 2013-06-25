@@ -11,7 +11,6 @@
 	/*hacks to get D3 responsive sizing*/
 	div#title {position: absolute; top:0;}
 	div#toolbar {position: absolute; top:65px;}
-	div#canvas {position: relative;}
 	div#scaleRuler{position: absolute;z-index: -2; top:120px;}
 	/*div#svgGraph{position: absolute;width:100%;height: 100%;}*/
 	/*other styles*/  
@@ -71,6 +70,10 @@
 			<td><button onclick='javascript:zoomReset()'>Go</button></td>
 		  </tr>
 		  <tr>
+		  	<td>Remove Scale Grid</td>
+		  	<td><button onclick='javascript:removeScaleGrid()'>Go</button></td>
+		  </tr>
+		  <tr>
 			<td>Static Loads to Houses</td>
 			<td><button onclick='javascript:staticLoadsToHouses()'>Go</button></td>
 		  </tr>
@@ -78,6 +81,7 @@
 			<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
 			<td><button onclick='javascript:solarAdding()'>Go</button></td>
 		  </tr>
+		  
 	</table>
 	  </ul>
 	</div>
@@ -177,7 +181,7 @@
 	  </tfoot>
 	</table>
 	  </div>
-	<div id='scaleRuler' class='chart' >
+	<div id='scaleRuler'>
   	</div>
 
 <script type="text/javascript">
@@ -201,7 +205,13 @@
 	var PINNED_NODE_CIRCLE_RADIUS = 0.5/5
 	var UNPINNED_NODE_CIRCLE_RADIUS = 3/5
 	var TEXT_FONT_SIZE = '30px'
-	var vis = d3.select('body')
+
+	// SCALE DRAW GLOBAL LAYOUT
+	var xScale = 1, yScale = 1;
+	width = window.innerWidth
+	height = window.innerHeight;
+
+	var body = d3.select('body')
 			.append('svg:svg')
 			.attr('id','graphSvg')
 			.on('click', onSvgBlankCanvasClick)
@@ -211,51 +221,26 @@
 			// .attr('width', window.innerWidth)
 			// .attr('height', window.innerHeight)
 			.call(zoomer.on('zoom', zoomRedraw))
-			.append('svg:g')
+	// add scalegrid to the lower layer
+	var vis2 = body.append("svg:g")
+			.attr('id', 'scaleGrid')
+			.attr('viewBox', '0 0 ' + width+' '+ height)
+			.attr("transform", "translate(" + 10 + "," + 120 + ")")
+			.attr("preserveAspectRatio", "xMinYMin meet")
+	// add powergrid to the upper layer
+	var vis = body.append('svg:g')
+			.attr('id', 'powerGrid')
 
 	vis.append('svg:g').attr('id','linkLayer')
 	var force = d3.layout.force()
 		.linkDistance(30)
 		.size([w, h])
-	// .charge(function(d){return -120*d.chargeMultiple})
-
-	// SCALE DRAW GLOBAL LAYOUT
-	var xScale = 1, yScale = 1;
-	width = window.innerWidth;
-	height = window.innerHeight-40;
-	padding = {
-		"top" : 150,
-		"right" : 20,
-		"bottom" : 20,
-		"left" : 20
-	};
-
-	vis2 = d3.select('#scaleRuler')
-			.append("svg").attr("width", width)
-			.attr("height", height)
-			.append("g")
-			.attr("transform", "translate(" + 10 + "," + 0 + ")");
-
-	plot = vis2.append("rect")
-			.attr("width", width)
-			.attr("height", height)
-			.style("fill", "#FFFFFF")
-			.attr("pointer-events", "all")
-
-	vis2.append("svg")
-		.attr("top", 0)
-		.attr("left", 0)
-		.attr("width", width)
-		.attr("height",	height)
-		.attr("viewBox", "0 0 " + width + " " + height)
 
 	// D3 FORCE GLOBAL VARIABLES.
 	var nodes = force.nodes()
 	var links = force.links()
 	var hiddenNodes = []
 	var hiddenLinks = []
-
-
 
 	// FUNCTIONS FOR DRAWING:
 	function draw() {
@@ -399,9 +384,9 @@
 
 		// Updata sizes
 		vis.selectAll('.nodeCircle').data(nodes, function(d){return d.treeIndex})
-			.attr('r', function(d){
-				console.log(d.chargeMultiple)
-				return d.chargeMultiple * NODE_CIRCLE_RADIUS})
+			.attr('r', function(d){ return d.chargeMultiple * NODE_CIRCLE_RADIUS})
+		
+		// Show scalegrid. 
 		scaleRedraw()
 		force.start()
 	}
@@ -412,7 +397,13 @@
 		if (d3.event.scale<1){
 			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/d3.event.scale);
 		}
-		scaleRedraw()	
+		// vis2.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
+		scaleRedraw()
+		d3.selectAll('.nodetext').style('font-size', 30/d3.event.scale)
+				.text(function(d) { 
+		        	if (d.chargeMultiple != 1){
+		        		return d.objectType + ' has hidden children'}
+		    		else {return d.objectType}})	
 	}
 
 	function drawScaleGrid() {
@@ -421,12 +412,13 @@
 			var tx = function(d) { return "translate(" + self.x(d) + ",0)";}, 
 				ty = function(d) { return "translate(0," + self.y(d) + ")";}, 
 				stroke = "#ddd"
-				fx = self.x.tickFormat(10),
-				fy = self.y.tickFormat(10);
+				var tick_size = 12
+				fx = self.x.tickFormat(tick_size),
+				fy = self.y.tickFormat(tick_size);
 				
 			// Regenerate x-ticks…
 			var gx = self.vis2.selectAll("g.x")
-						.data(self.x.ticks(10), String)
+						.data(self.x.ticks(tick_size), String)
 						.attr("transform", tx);
 
 			gx.select("text").text(fx);
@@ -438,19 +430,20 @@
 			gxe.append("line")
 						.attr("stroke", stroke)
 						.attr("y1", 0)
-						.attr("y2", self.height-120);
+						.attr("y2", 3000);
 
 			gxe.append("text")
-						.attr("class", "axis")
-						.attr("y", self.height-120)
-						.attr("dy", "1em")
+						.attr('margin-left', '20px')
+						.attr("class", "axisX")
+						.attr("y", 0)
+						.attr("dy", "1.8em")
 						.attr("text-anchor", "middle")
 						.text(fx);
 			gx.exit().remove();
 
 			// Regenerate y-ticks…
 			var gy = self.vis2.selectAll("g.y")
-						.data(self.y.ticks(10), String)
+						.data(self.y.ticks(tick_size), String)
 						.attr("transform", ty);
 
 			gy.select("text").text(fy);
@@ -461,13 +454,12 @@
 
 			gye.append("line")
 						.attr("stroke", stroke)
-						// .style('stroke-width', '1px')
 						.attr("x1", 0)
-						.attr("x2", self.width);
+						.attr("x2", 3000); // enouth long 
 
 			gye.append("text")
-						.attr("class", "axis")
-						.attr("x", self.width-20)
+						.attr("class", "axisY")
+						.attr("x", 35)
 						.attr("dy", "1em")
 						.attr("text-anchor", "end")
 						.text(fy);
@@ -477,11 +469,13 @@
 
 	function scaleRedraw(){
 		curScale = zoomer.scale()
+
 		// x-scale renewed
 		x = d3.scale.linear().domain([ options.xmin, options.xmax/curScale]).nice().range([ 0, width ]).nice();
 		// y-scale renewed
 		y = d3.scale.linear().domain([ options.ymin, options.ymax/curScale]).nice().range([ 0, height ]).nice();
 		function showScale(){
+			//TODO: To be precise, it should read all the nodes.
 			var index = Math.round(Math.random()*nodes.length)
 			if (nodes[index].fixed !=undefined && nodes[index].fixed == true && !isNaN(options.xmax)){
 				drawScaleGrid()();
@@ -489,11 +483,15 @@
 				return;
 		}
 		showScale();
-		d3.selectAll('.nodetext').style('font-size', 30/curScale)
-				.text(function(d) { 
-		        	if (d.chargeMultiple != 1){
-		        		return d.objectType + ' has hidden children'}
-		    		else {return d.objectType}})
+		
+	}
+
+	function removeScaleGrid(){
+		try{
+			d3.select('#scaleGrid').remove()
+		}catch(err){
+			alert('Scale grid already been removed.\n'+err.message)
+		}
 	}
 
 	// Unused function
@@ -1115,7 +1113,6 @@
 			if (d3.selectAll('.node.gridNode').attr('fixed')=='true'){
 				isfixed = true
 			}else{
-				
 				isfixed = false
 			}
 			nodeToAdd = {name:component.name, 
