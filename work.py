@@ -107,10 +107,11 @@ class LocalWorker:
 		return [[key,self.jobRecorder[key].name,self.jobRecorder[key].is_alive()] for key in self.jobRecorder]
 
 class ClusterWorker:
-	def __init__(self, userKey, passKey, workQueueName, terminateQueueName, store):
+	def __init__(self, userKey, passKey, workQueueName, terminateQueueName, importQueueName, store):
 		self.conn = SQSConnection(userKey, passKey)
 		self.workQueue = self.conn.get_queue(workQueueName)
 		self.terminateQueue = self.conn.get_queue(terminateQueueName)
+		self.importQueue = self.conn.get_queue(importQueueName)
 		self.daemonWorker = LocalWorker()
 		self.daemonThread = Thread(target=self.__monitorClusterQueue__,args=(passKey, store, self.daemonWorker))
 		self.daemonThread.start()
@@ -124,13 +125,17 @@ class ClusterWorker:
 		m.set_body(anaName)
 		status = self.terminateQueue.write(m)
 		return status
-	def milImport():
-		#TODO: implement me.
-		pass
+	def milImport(self, store, feederName, stdString, seqString):
+		store.put('Conversion',feederName,{'stdString':stdString,'seqString':seqString})
+		m = Message()
+		m.set_body(feederName)
+		status = self.importQueue.write(m)
+		return status
 	def __monitorClusterQueue__(self, passKey, store, daemonWorker):
 		print 'Entering Daemon Mode.'
 		conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', passKey)
 		jobQueue = conn.get_queue('crnOmfJobQueue')
+		importQueue = conn.get_queue('crnOmfImportQueue')
 		terminateQueue = conn.get_queue('crnOmfTerminateQueue')
 		def popJob(queueObject):
 			mList = queueObject.get_messages(1)
@@ -153,6 +158,13 @@ class ClusterWorker:
 					print 'Daemon running', anaName
 					thisAnalysis = analysis.Analysis(store.get('Analysis', anaName))
 					daemonWorker.run(thisAnalysis, store)
+			if daemonWorker.runningJobCount.value() < JOB_LIMIT:
+				feederName = popJob(importQueue)
+				if feederName != False:
+					print 'Daemon importing', feederName
+					#TODO: make this run.
+					convo = store.get('Conversion', feederName)
+					daemonWorker.milImport(store, feederName, convo['stdString'], convo['seqString'])
 			if daemonWorker.runningJobCount.value() > 0:
 				termMessage = peakJob(terminateQueue)
 				if termMessage != False:				

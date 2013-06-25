@@ -11,7 +11,7 @@ try:
 	with open('S3KEY.txt','r') as keyFile:
 		USER_PASS = keyFile.read()
 	store = storage.S3store('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnomf')
-	worker = work.ClusterWorker('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnOmfJobQueue', 'crnOmfTerminateQueue', store)
+	worker = work.ClusterWorker('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnOmfJobQueue', 'crnOmfTerminateQueue', 'crnOmfImportQueue', store)
 	print 'Running on S3 cluster.'
 except:
 	traceback.print_exc()
