@@ -55,8 +55,8 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	#print("Calling TechnologyParameters.py\n")
 	tech_data,use_flags = TechnologyParameters.TechnologyParametersFunc(use_flags,case_flag)
 
-	# TODO: figure out how to use a user specified tmy file.
-	tmy = 'schedules\\\\SCADA_weather_NC_gld_shifted.csv'
+	#tmy = 'schedules\\\\SCADA_weather_ISW_gld.csv'
+	tmy = config_data['weather']
 
 	#find name of swingbus of static model dictionary
 	hit = 0

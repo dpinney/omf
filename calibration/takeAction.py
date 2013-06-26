@@ -365,8 +365,9 @@ def takeAction(action,vals,diffs):
 	else:
 		print ("Action ID doesn't match any defined!");
 	#print (options)
+	print ("Calibrations to test:")
 	for x in calibrations:
-		print (str(x)+"\n")
+		print (str(x))
 	return calibrations
 
 def main():

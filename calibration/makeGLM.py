@@ -32,8 +32,8 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 	fnames =  []
 	for i in clock.keys():
 		# define start and end
-		#starttime = clock[i][0]
-		starttime = i
+		starttime = clock[i][0]
+		#starttime = i
 		rec_starttime = i
 		stoptime = clock[i][1]
 		
@@ -69,7 +69,7 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 									'property' : 'measured_real_power,measured_real_energy',
 									'interval' : '{:d}'.format(interval),
 									'limit' : '{:d}'.format(limit),
-									#'start': "'{:s}'".format(rec_starttime),
+									'start': "'{:s}'".format(rec_starttime),
 									'connection': schema,
 									'mode': 'a'}
 		
