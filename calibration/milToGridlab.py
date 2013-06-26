@@ -21,7 +21,7 @@ def convert(stdPath,seqPath):
 	''' Take in a .std and .seq from Milsoft and spit out a .glm string.'''
 
 	print ('Beginning Windmil to GLM conversion.')
-
+	nominal_voltage = '7200'
 	def csvToArray(csvFileName):
 		''' Simple csv data ingester. '''
 		with open(csvFileName,'r') as csvFile:
@@ -154,7 +154,7 @@ def convert(stdPath,seqPath):
 			node = convertGenericObject(nodeList)
 			node['phases'] = nodeList[2]
 			#TODO: can we get nominal voltage from the windmil file?
-			node['nominal_voltage'] = '2400'
+			node['nominal_voltage'] = nominal_voltage
 			return node
 
 		def convertSource(sourceList):
@@ -162,6 +162,7 @@ def convert(stdPath,seqPath):
 			source = convertGenericObject(sourceList)
 			source['phases'] = sourceList[2]
 			source['nominal_voltage'] = str(float(sourceList[14])*1000)
+			nominal_voltage = str(float(sourceList[14])*1000)
 			source['bustype'] = 'SWING'
 			return source
 
@@ -472,8 +473,36 @@ def convert(stdPath,seqPath):
 			transformer[myIndex+1]['omfEmbeddedConfigObject'] = 'configuration object transformer_configuration'
 			transformer[myIndex+1]['primary_voltage'] = str(float(transList[10])*1000)
 			transformer[myIndex+1]['secondary_voltage'] = str(float(transList[13])*1000)
-			#NOTE: seems to be what PNNL uses everywhere:
-			transformer[myIndex+1]['shunt_impedance'] = '10000+10000j'
+			# Grab transformer phase hardware
+			if 'A' in transformer['phases']:
+				trans_config = statsByName(transList[24])
+				no_load_loss = trans_config[20]
+				percent_z = trans_config[4]
+				x_r_ratio = trans_config[7]
+			elif 'B' in transformer['phases']:
+				trans_config = statsByName(transList[25])
+				no_load_loss = trans_config[21]
+				percent_z = trans_config[5]
+				x_r_ratio = trans_config[8]
+			else:
+				trans_config = statsByName(transList[26])
+				no_load_loss = trans_config[22]
+				percent_z = trans_config[6]
+				x_r_ratio = trans_config[9]
+			
+			# Set the shunt impedance
+			if float(no_load_loss) > 0.0:
+				r_shunt = float(transList[10])*float(transList[10])*1000/float(no_load_loss)
+				x_shunt = r_shunt*float(x_r_ratio)
+				transformer[myIndex+1]['shunt_impedance'] = str(r_shunt) + '+' + str(x_shunt) + 'j'
+			
+			# Set series impedance
+			if float(percent_z) > 0.0:
+				r_series = float(percent_z)*0.01
+				x_series = r_series*float(x_r_ratio)
+				transformer[myIndex+1]['impedance'] = str(r_series) + '+' + str(x_series) + 'j'
+			else:
+				transformer[myIndex+1]['impedance'] = '0.00033+0.0022j'
 			# NOTE: Windmil doesn't export any information on install type, but Gridlab only puts it in there for info reasons.
 			# transformer[1]['install_type'] = 'POLETOP'
 			transPhases = transList[2]
@@ -483,10 +512,15 @@ def convert(stdPath,seqPath):
 				#TODO: support other types of windings (D-D, D-Y, etc.)
 				transformer[myIndex+1]['connect_type'] = 'WYE_WYE'
 			#TODO: change these from just default values:
-			transformer[myIndex+1]['powerA_rating'] = '50 kVA'
-			transformer[myIndex+1]['powerB_rating'] = '50 kVA'
-			transformer[myIndex+1]['powerC_rating'] = '50 kVA'
-			transformer[myIndex+1]['impedance'] = '0.00033+0.0022j'
+			transformer[myIndex+1]['power_rating'] = str(float(transList[19]) + float(transList[20]) + float(transList[21]))
+			if float(transList[19]) > 0:
+				transformer[myIndex+1]['powerA_rating'] = transList[19]
+				
+			if float(transList[20]) > 0:
+				transformer[myIndex+1]['powerB_rating'] = transList[20]
+				
+			if float(transList[21]) > 0:
+				transformer[myIndex+1]['powerC_rating'] = transList[21]
 			#TODO: and change these, which were added to make the transformer work on multiple phases: 
 			return transformer
 
@@ -563,7 +597,7 @@ def convert(stdPath,seqPath):
 				interNode['phases'] = phaseMerge(interNode['phases'],comp['phases'])
 			else:
 				# Gotta insert a node between lines and parentable objects:
-				newNode = {'object':'node', 'phases':comp['phases'], 'name': 'node' + comp['name'] + parent['name'], 'nominal_voltage':'2400'}
+				newNode = {'object':'node', 'phases':comp['phases'], 'name': 'node' + comp['name'] + parent['name'], 'nominal_voltage':nominal_voltage}
 				convertedComponents.append(newNode)
 				parent['to'] = newNode['name']
 				comp['parent'] = newNode['name']
@@ -575,7 +609,7 @@ def convert(stdPath,seqPath):
 				interNode['phases'] = phaseMerge(interNode['phases'],comp['phases'])
 			else:
 				# Gotta insert a node between two lines:
-				newNode = {'object':'node', 'phases':comp['phases'], 'name': 'node' + comp['name'] + parent['name'], 'nominal_voltage':'2400'}
+				newNode = {'object':'node', 'phases':comp['phases'], 'name': 'node' + comp['name'] + parent['name'], 'nominal_voltage':nominal_voltage}
 				convertedComponents.append(newNode)
 				parent['to'] = newNode['name']
 				comp['from'] = newNode['name']
@@ -628,7 +662,11 @@ def convert(stdPath,seqPath):
 		fixLinkPhases(glmTree[key])
 
 	def secondarySystemFix(glm):
-		allLoadKeys = [x for x in glm if 'object' in glm[x] and 'parent' in glm[x] and glm[x]['object']=='load']
+		def unused_key(dic, key_multiplier):
+			free_key = (int(max(dic.keys())/key_multiplier) + 1)*key_multiplier
+			return free_key 
+		
+		allLoadKeys = [x for x in glm if 'object' in glm[x] and 'parent' in glm[x] and glm[x]['object']=='load' and 'load_class' in glm[x] and glm[x]['load_class'] == 'R']
 		allNamesNodesOnLoads = list(set([glm[key]['parent'] for key in allLoadKeys]))
 		all2ndTransKeys = []
 		all2ndLoadKeys = []
@@ -642,13 +680,13 @@ def convert(stdPath,seqPath):
 
 		for key in glm:
 			if 'object' in glm[key] and glm[key]['object'] == 'transformer':
-				fromName = glm[key]['from']
+				#fromName = glm[key]['from']
 				toName = glm[key]['to']
-				if fromName in allNamesNodesOnLoads:
-					all2ndTransKeys.append(key)
-					all2ndNodeKeys.extend(nameToKey(fromName))
-					all2ndLoadKeys.extend([x for x in glm if 'parent' in glm[x] and 'object' in glm[x] and glm[x]['object'] == 'load' and glm[x]['parent'] == fromName])				
-				elif toName in allNamesNodesOnLoads:
+				#if fromName in allNamesNodesOnLoads:
+				#	all2ndTransKeys.append(key)
+				#	all2ndNodeKeys.extend(nameToKey(fromName))
+				#	all2ndLoadKeys.extend([x for x in glm if 'parent' in glm[x] and 'object' in glm[x] and glm[x]['object'] == 'load' and glm[x]['parent'] == fromName])				
+				if toName in allNamesNodesOnLoads:
 					all2ndTransKeys.append(key)
 					all2ndNodeKeys.extend(nameToKey(toName))
 					all2ndLoadKeys.extend([x for x in glm if 'parent' in glm[x] and 'object' in glm[x] and glm[x]['object'] == 'load' and glm[x]['parent'] == toName])
@@ -660,37 +698,77 @@ def convert(stdPath,seqPath):
 		# {'phases': 'BN', 'object': 'node', 'nominal_voltage': '2400', 'name': 'nodeS1806-32-065T14102'}
 		# object triplex_meter { phases BS; nominal_voltage 120; };
 		for nodeKey in all2ndNodeKeys:
-			newDict = {}
-			newDict['object'] = 'triplex_meter'
-			newDict['name'] = glm[nodeKey]['name']
-			newDict['phases'] = sorted(glm[nodeKey]['phases'])[0] + 'S'
-			newDict['nominal_voltage'] = '120'
-			glm[nodeKey] = newDict
+			phases = set(glm[nodeKey]['phases'])
+			#if the node has multiple phases we need to split it out to multiple triplex_meters
+			for y in phases:
+				if y != 'N' and y != 'D':
+					new_key = unused_key(glm,subObCount)
+					glm[new_key] = {'object' : 'triplex_meter',
+									'name' : glm[nodeKey]['name'] + '_' + y,
+									'phases' : y + 'S',
+									'nominal_voltage' : '120'}
+					
 
 		# Fix da loads.
 		#{'phases': 'BN', 'object': 'load', 'name': 'S1806-32-065', 'parent': 'nodeS1806-32-065T14102', 'load_class': 'R', 'constant_power_C': '0', 'constant_power_B': '1.06969', 'constant_power_A': '0', 'nominal_voltage': '120'}
 		for loadKey in all2ndLoadKeys:
-			newDict = {}
-			newDict['object'] = 'triplex_node'
-			newDict['name'] = glm[loadKey]['name']
-			newDict['phases'] = sorted(glm[loadKey]['phases'])[0] + 'S'
-			a = glm[loadKey]['constant_power_A']
-			b = glm[loadKey]['constant_power_B']
-			c = glm[loadKey]['constant_power_C']
-			powList = [x for x in [a,b,c] if x!='0' and x!='0.0']
-			newDict['power_12'] = ('0' if len(powList)==0 else powList.pop())
-			newDict['parent'] = glm[loadKey]['parent']
-			newDict['nominal_voltage'] = '120'
-			glm[loadKey] = newDict
+			phases = set(glm[loadKey]['phases'])
+			for y in phases:
+				if y != 'N' and y != 'D':
+					new_key = unused_key(glm,subObCount)
+					glm[new_key] = {'object' : 'triplex_node',
+									'name' : glm[loadKey]['name'] + '_' + y,
+									'phases' : y + 'S',
+									'parent' : glm[loadKey]['parent'] + '_' + y,
+									'nominal_voltage' : '120'}
+					
+					if y == 'A':
+						glm[new_key]['power_12'] = glm[loadKey]['constant_power_A']
+					elif y == 'B':
+						glm[new_key]['power_12'] = glm[loadKey]['constant_power_B']
+					elif y == 'C':
+						glm[new_key]['power_12'] = glm[loadKey]['constant_power_C']
 
 		# Gotta fix the transformer phases too...
 		for key in all2ndTransKeys:
-			fromName = glm[key]['from']
-			toName = glm[key]['to']
-			fromToPhases = [glm[x]['phases'] for x in glm if 'name' in glm[x] and glm[x]['name'] in [fromName, toName]]
-			glm[key]['phases'] = set('ABC').intersection(*map(set, fromToPhases)).pop() + 'S'
-			configKey = [x for x in glm[key] if type(x) is int].pop()
-			glm[key][configKey]['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
+			phases = set(glm[key]['phases'])
+			for y in phases:
+				if y != 'N' and y != 'D':
+					new_key = unused_key(glm,subObCount)
+					glm[new_key] = {'object' : 'transformer',
+									'name' : glm[key]['name'] + '_' + y,
+									'phases' : y + 'S',
+									'from' : glm[key]['from'],
+									'to' : glm[key]['to'] + '_' + y}
+					for z in glm[key]:
+						if type(z) is int:#
+							glm[new_key][new_key+1] = {'omfEmbeddedConfigObject' : 'configuration object transformer_configuration',
+													   'name' : glm[new_key]['name'] + '-CONFIG',
+													   'primary_voltage' : glm[key][z]['primary_voltage'],
+													   'secondary_voltage' : '120.0',
+													   'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
+													   'impedance' : glm[key][z]['impedance']}
+							
+							if 'shunt_impedance' in glm[key][z]:
+								glm[new_key][new_key+1]['shunt_impedance'] = glm[key][z]['shunt_impedance']
+							
+							if y == 'A':
+								glm[new_key][new_key+1]['power_rating'] = glm[key][z]['powerA_rating']
+								glm[new_key][new_key+1]['powerA_rating'] = glm[key][z]['powerA_rating']
+							elif y == 'B':
+								glm[new_key][new_key+1]['power_rating'] = glm[key][z]['powerB_rating']
+								glm[new_key][new_key+1]['powerB_rating'] = glm[key][z]['powerB_rating']
+							elif y == 'C':
+								glm[new_key][new_key+1]['power_rating'] = glm[key][z]['powerC_rating']
+								glm[new_key][new_key+1]['powerC_rating'] = glm[key][z]['powerC_rating']
+		
+		# Delete original transformers, nodes and loads that the split phase objects are representing						
+		for key in all2ndTransKeys:
+			del glm[key]
+		for key in all2ndLoadKeys:
+			del glm[key]
+		for key in all2ndNodeKeys:
+			del glm[key]
 
 	# Fixing the secondary (triplex) system.
 	secondarySystemFix(glmTree)
@@ -793,28 +871,28 @@ def convert(stdPath,seqPath):
 
 def main():
 	''' tests go here '''
-	StaticGlmDict = convert('C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC-FRIENDSHIP.std','C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC.seq')
+	wdir = 'C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration'
+	StaticGlmDict = convert('C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC_FRIENDSHIP.std','C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC.seq')
 	
 	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
-						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\nmodule climate;\n' + \
+						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\n' + \
 						'module residential {\nimplicit_enduses NONE;\n};\n\n' + \
-						'module powerflow {\nsolver_method NR;\nNR_iteration_limit 50;\n};\n\n' + \
-						'object climate {\nname Climate;\ninterpolate QUADRATIC;\ntmyfile climate.tmy2;\n};\n\n'
+						'module powerflow {\nsolver_method NR;\nNR_iteration_limit 50;\n};\n\n'
 						
 	outGlm = genericHeaders + feeder.sortedWrite(StaticGlmDict)					
 	print('Success')
-	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_Static_Model.glm','w')
-	file.write(outGlm)
-	file.close()
+	f = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_STATIC_MODEL.glm','w')
+	f.write(outGlm)
+	f.close()
 	
 	print('Finished converting base glm')
 	import Milsoft_GridLAB_D_Feeder_Generation
-	baseGLM, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(StaticGlmDict,0)
+	baseGLM, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(StaticGlmDict,0,wdir)
 	glm_string = feeder.sortedWrite(baseGLM)			
 	print('Success')
-	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_basecase_Model.glm','w')
-	file.write(glm_string)
-	file.close()
+	f = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_basecase_Model.glm','w')
+	f.write(glm_string)
+	f.close()
 	# print outGlm
 	# omfConvert('testMagic','ILEC-Rembrandt.std','ILEC.seq')
 

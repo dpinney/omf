@@ -26,7 +26,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 	working_directory = re.sub('\\\\','\\\\\\\\',wdir)
 	#data["directory"] = 'C:\\\\Users\\\\d3y051\\\\Documents\\\\NRECA_feeder_calibration 2-2013\\\\Calibration\\\\repository_two\\\\Feeder_Test\\\\schedules'
 	#dir = 'C:\\\\Users\\\\d3y051\\\\Documents\\\\NRECA_feeder_calibration_2-2013\\\\Calibration\\\\repository_two\\\\Feeder_Test\\\\schedules\\\\'
-	dir = working_directory+'\\\\schedules'
+	dir = working_directory+'\\\\schedules\\\\'
 	data["directory"] = dir
 	#default case
 	if file_to_extract == None:
