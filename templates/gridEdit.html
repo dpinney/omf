@@ -160,6 +160,10 @@
 		<td><input id='linkStrengthBox' type='text'></td>
 			  </tr>
 			  <tr>
+		<td>Link Distance</td>
+		<td><input id='linkDistanceBox' type='text'></td>
+			  </tr>
+			  <tr>
 		<td>Charge</td>
 		<td><input id='chargeBox' type='text'></td>
 			  </tr>
@@ -1416,6 +1420,7 @@
 		gebi('thetaBox').value = force.theta()
 		gebi('frictionBox').value = force.friction()
 		gebi('linkStrengthBox').value = force.linkStrength()
+		gebi('linkDistanceBox').value = force.linkDistance()
 		gebi('chargeBox').value = force.charge()
 	}
 
@@ -1424,6 +1429,7 @@
 		force.theta(gebi('thetaBox').value)
 		force.friction(gebi('frictionBox').value)
 		force.linkStrength(gebi('linkStrengthBox').value)
+		force.linkDistance(gebi('linkDistanceBox').value)
 		force.charge(gebi('chargeBox').value)
 		force.start()
 	}
