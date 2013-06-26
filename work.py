@@ -117,11 +117,21 @@ class ClusterWorker:
 		self.daemonThread = Thread(target=self.__monitorClusterQueue__,args=(passKey, store, self.daemonWorker))
 		self.daemonThread.start()
 	def run(self, analysisObject, store):
+		#TODO: make sure the queue isn't full, i.e. has fewer than 10 messages!
 		m = Message()
 		m.set_body(analysisObject.name)
 		status = self.workQueue.write(m)
 		return status
 	def terminate(self, anaName):
+		# Check for non-running queued messages:
+		jobList = self.workQueue.get_messages(num_messages=10)
+		for jobMess in jobList:
+			bod = jobMess.get_body()
+			if bod == anaName:
+				self.workQueue.delete_message(jobMess)
+				print 'Removing from job queue analysis', anaName
+				return True
+		# Else write the terminate message:
 		m = Message()
 		m.set_body(anaName)
 		status = self.terminateQueue.write(m)
