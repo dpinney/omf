@@ -1315,16 +1315,22 @@
 
 	// MODEL SAVING
 	function saveModel() {
-		feederObject = {tree:tree,
-						nodes:nodes,
-						hiddenNodes:hiddenNodes,
-						links:links,
-						hiddenLinks:hiddenLinks,
-						layoutVars:{'gravity':force.gravity(),'theta':force.theta(),'friction':force.friction(),'linkStrength':force.linkStrength()},
-						attachments:attachments
-						}
-		payload = {'name':gebi('gridName').innerHTML, 'feederObjectJson':JSON.stringify(feederObject, null, '    ')}
-		post_to_url('/saveFeeder/', payload)
+		nameTry = gebi('gridName').innerHTML
+		if (nameTry != nameTry.match(/[\w\s]+/)) {
+			alert('Please give this feeder a name that contains only alphanumeric characters and spaces.')
+			return false
+		} else {
+			feederObject = {tree:tree,
+							nodes:nodes,
+							hiddenNodes:hiddenNodes,
+							links:links,
+							hiddenLinks:hiddenLinks,
+							layoutVars:{'gravity':force.gravity(),'theta':force.theta(),'friction':force.friction(),'linkStrength':force.linkStrength()},
+							attachments:attachments
+							}
+			payload = {'name':gebi('gridName').innerHTML, 'feederObjectJson':JSON.stringify(feederObject, null, '    ')}
+			post_to_url('/saveFeeder/', payload)			
+		}
 	}
 
 	function rename() {
