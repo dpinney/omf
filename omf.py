@@ -44,9 +44,7 @@ def newAnalysis(analysisName=None):
 	analyses = store.listAll('Analysis')
 	reportTemplates = reports.__templates__
 	studyTemplates = studies.__templates__
-	studyRendered = {}
-	for study in studyTemplates:
-		studyRendered[study] = str(flask.render_template_string(studyTemplates[study], tmy2s=tmy2s, feeders=feeders))
+	studyRendered = {study:str(flask.render_template_string(studyTemplates[study], tmy2s=tmy2s, feeders=feeders)) for study in studyTemplates}
 	# If we aren't specifying an existing name, just make a blank analysis:
 	if analysisName is None or analysisName not in analyses:
 		existingStudies = None
