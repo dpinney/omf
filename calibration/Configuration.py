@@ -35,7 +35,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		# - Weather File (May be .tmy2 or .csv)
 		# - Region Identifier (1:West Coast (temperate), 2:North Central/Northeast (cold/cold), 3:Southwest (hot/arid), 4:Southeast/Central (hot/cold), 5:Southeast Coastal (hot/humid), 6: Hawaii (sub-tropical))
 		# - Timezone
-		data["weather"] = 'NC-Charlotte.tmy2'
+		data["weather"] = 'schedules\\\\SCADA_weather_ISW_gld.csv'
 		data["region"] = 4
 		data["timezone"] = 'PST+8PDT'
 		
@@ -47,9 +47,9 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		data["feeder_rating"] = 1.15*14.0
 		data["nom_volt"] = 14400
 		data["nom_volt2"] = 14400 #was set to 480 for taxonomy feeders
-		vA=dir+'f2407_VA.player'
-		vB=dir+'f2407_VB.player'
-		vC=dir+'f2407_VC.player'
+		vA='schedules\\\\VA.player'
+		vB='schedules\\\\VB.player'
+		vC='schedules\\\\VC.player'
 		data["voltage_players"] = ['"{:s}"'.format(vA),'"{:s}"'.format(vB),'"{:s}"'.format(vC)]
 		
 		# Voltage Regulation
@@ -565,7 +565,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 
 		data["residential_skew_shift"] = couplets['res_skew_shift']
 
-		decrease_gas = couplets['decrease_gas']
+		decrease_gas = 1 - couplets['decrease_gas']
 
 		# widen schedule skew
 		data["residential_skew_std"] = couplets['sched_skew_std']
