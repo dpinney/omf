@@ -1593,12 +1593,19 @@
 			if (undefined == realSource) {hiddenLinks[li2].source = realSourceHidden} else {hiddenLinks[li2].source = realSource}
 			if (undefined == realTarget) {hiddenLinks[li2].target = realTargetHidden} else {hiddenLinks[li2].target = realTarget} 
 		}
+
 		// Regenerate the layout variables:
+		// TODO: make this whole layout variables code much less hackish. We get/set like 5 different ways and times in this file.
 		if (undefined != json['layoutVars']) {
-			force.gravity(json['layoutVars']['gravity'])
-			force.theta(json['layoutVars']['theta'])
-			force.friction(json['layoutVars']['friction'])
-			force.linkStrength(json['layoutVars']['linkStrength'])
+			function safeSet(value) {
+				if (json['layoutVars'].hasOwnProperty(value)) {force[value](json['layoutVars'][value])}
+			}
+			safeSet('gravity')
+			safeSet('theta')
+			safeSet('friction')
+			safeSet('linkStrength')
+			safeSet('linkDistance')
+			safeSet('charge')
 			xScale = json['layoutVars']['xScale']
 			yScale = json['layoutVars']['yScale']
 		}
