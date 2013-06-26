@@ -57,8 +57,14 @@ def newAnalysis(analysisName=None):
 		thisAnalysis = store.get('Analysis', analysisName)
 		analysisMd = json.dumps({key:thisAnalysis[key] for key in thisAnalysis if type(thisAnalysis[key]) is not list})
 		existingReports = json.dumps(thisAnalysis['reports'])
-		#TODO: remove analysis name from study names. Dang DB keys.
-		existingStudies = json.dumps([store.get('Study', analysisName + '---' + studyName) for studyName in thisAnalysis['studyNames']])
+		studyList = []
+		for studyName in thisAnalysis['studyNames']:
+			studyJson = store.get('Study', analysisName + '---' + studyName)
+			studyJson.update({'name':studyName})
+			studyJson.pop('inputJson','')
+			studyJson.pop('outputJson','')
+			studyList.append(studyJson)
+		existingStudies = json.dumps(studyList)
 	return flask.render_template('newAnalysis.html', studyTemplates=studyRendered, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
 
 @app.route('/viewReports/<analysisName>')
