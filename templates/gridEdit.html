@@ -124,9 +124,14 @@
 	<div class='buttonGroup rightToolbar'>
 	  <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
 	  <ul class='menu right'>
-	<li id='renameMenuItem'><a href='javascript:rename()'>Rename</a></li>
-	<li id='saveMenuItem'><a href='javascript:saveModel()'>Save</a></li>
-	<li><a href='javascript:history.back()'>Leave →</a></li>
+	    {% if public %}
+	    <li><a href="#" onclick="saveas()">Save As Private Feeder </a></li>
+	    {% endif %}
+	    {% if is_admin or not public %}
+		<li id='renameMenuItem'><a href='javascript:rename()'>Rename</a></li>
+		<li id='saveMenuItem'><a href='javascript:saveModel()'>Save</a></li>
+		<li><a href='javascript:history.back()'>Leave →</a></li>
+		{% endif %}
 	  </ul>
 	</div>
 	<div class='buttonGroup rightToolbar'>
@@ -1317,34 +1322,50 @@
 	}
 
 	// MODEL SAVING
-	function saveModel() {
-		nameTry = gebi('gridName').innerHTML
-		if (nameTry != nameTry.match(/[\w\s]+/)) {
-			alert('Please give this feeder a name that contains only alphanumeric characters and spaces.')
-			return false
-		} else {
-			feederObject = {tree:tree,
-							nodes:nodes,
-							hiddenNodes:hiddenNodes,
-							links:links,
-							hiddenLinks:hiddenLinks,
-							layoutVars:{'gravity':force.gravity(),'theta':force.theta(),'friction':force.friction(),'linkStrength':force.linkStrength(),'charge':force.charge(),'linkDistance':force.linkDistance()},
-							attachments:attachments
-							}
-			payload = {'name':gebi('gridName').innerHTML, 'feederObjectJson':JSON.stringify(feederObject, null, '    ')}
-			post_to_url('/saveFeeder/', payload)			
-		}
+	function saveModel(new_name) {
+	    feederObject = {tree:tree,
+			    nodes:nodes,
+			    hiddenNodes:hiddenNodes,
+			    links:links,
+			    hiddenLinks:hiddenLinks,
+			    layoutVars:{'gravity':force.gravity(),'theta':force.theta(),'friction':force.friction(),'linkStrength':force.linkStrength(),'charge':force.charge(),'linkDistance':force.linkDistance()},
+			    attachments:attachments
+			   }
+	    var name = new_name ? new_name : gebi("gridName").innerHTML
+	    payload = {'name':name, 'feederObjectJson':JSON.stringify(feederObject, null, '    ')}
+	    if (!new_name)
+		post_to_url('/saveFeeder/{% if public %}True{% else %}False{% endif %}', payload)
+	    else{
+		post_to_url("/saveFeeder/False", payload);
+	    }
 	}
 
 	function rename() {
-		gebi('renameMenuItem').style.display = 'none'
-		gebi('saveMenuItem').style.display = 'none'
-		gridNameP = gebi('gridName')
-		currentName = gridNameP.innerHTML
-		inputBox = '<input type="text" id="gridNameEdit" name="gridNameEdit" data-old="' + currentName + '" value="' + currentName + '"/>'
-		acceptButton = '<button class="smallButton" id="acceptButton" onclick="acceptRename()">✔</button>'
-		cancelButton = '<button class="smallButton" id="cancelButton" onclick="cancelRename()">✘</button>'
-		gridNameP.innerHTML = inputBox + acceptButton + cancelButton
+	    gebi('renameMenuItem').style.display = 'none'
+	    gebi('saveMenuItem').style.display = 'none'
+	    gridNameP = gebi('gridName')
+	    currentName = gridNameP.innerHTML
+	    inputBox = '<input type="text" id="gridNameEdit" name="gridNameEdit" data-old="' + currentName + '" value="' + currentName + '"/>'
+	    acceptButton = '<button class="smallButton" id="acceptButton" onclick="acceptRename()">✔</button>'
+	    cancelButton = '<button class="smallButton" id="cancelButton" onclick="cancelRename()">✘</button>'
+	    gridNameP.innerHTML = inputBox + acceptButton + cancelButton
+	}
+
+        function saveas(){
+	    var new_name = prompt("Save as", $("#gridName").html());
+	    if (new_name){
+		$.ajax({
+		    url:"/feederName/"+new_name
+		}).done(function(data){
+		    if (data == "Nope"){
+			alert("You already have a feeder named "+new_name);
+			saveas();
+		    }else{
+			saveModel(new_name);
+		    }
+		    
+		})
+	    }
 	}
 
 	function cancelRename() {
@@ -1356,11 +1377,11 @@
 	}
 
 	function acceptRename() {
-		gebi('renameMenuItem').style.display = 'block'
-		gebi('saveMenuItem').style.display = 'block'
-		gridNameP = gebi('gridName')
-		newName = gebi('gridNameEdit').value
-		gridNameP.innerHTML = newName
+	    gebi('renameMenuItem').style.display = 'block'
+	    gebi('saveMenuItem').style.display = 'block'
+	    gridNameP = gebi('gridName')
+	    newName = gebi('gridNameEdit').value
+	    gridNameP.innerHTML = newName
 	}
 
 	// PINNING FUNCTIONS
@@ -1561,8 +1582,7 @@
 
 	// INIT FUNCTIONS FOLLOW:
 	d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
-
-	var apiAddress = '/feederData/{{ anaFeeder }}/{{ feederName }}.json'
+	var apiAddress = '/feederData/{{ anaFeeder }}/{{ feederName }}.json' + "?public={% if public %}true{% else %}false{% endif %}";
 	d3.json(apiAddress, function (json) {
 		tree = json['tree']
 		attachments = json['attachments']

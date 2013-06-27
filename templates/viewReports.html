@@ -19,7 +19,14 @@
 	<script type='text/javascript' src='/static/omf.js'></script>
 	<script type="text/javascript" src='/static/jquery-1.9.1.js'></script>
 	<script src='/static/highcharts.src.js'></script>	
-
+	<script>
+	$(function(){
+	    $("a").each(function(){
+		var self = this;
+		$(this).attr("href", $(self).attr("href")+"?public={% if public %}true{% else %}false{% endif %}");
+	    })
+	})
+	</script>
 </head>
 <body>
 	<div id='title'>
