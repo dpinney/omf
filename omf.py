@@ -67,6 +67,21 @@ def login():
 			flask_login.login_user(user, remember = remember == "on")
 	return flask.redirect("/")
 
+@app.route("/deleteUser", methods=["POST"])
+@flask_login.login_required
+def deleteUser():
+	if flask_login.current_user.username != "admin":
+		return "You are not authorized to delete users"
+	csrf = flask.request.form.get("csrf")
+	if csrf != user_manager.get("admin").csrf:
+		return "Nice try, hacker"
+	user = user_manager.get(flask.request.form.get("username"))
+	for objectType in ["Analysis", "Feeder", "Study"]:
+		for objectName in user.listAll(objectType):
+			user.delete(objectType, objectName)
+	store.delete("User", user.username)
+	return "Success"
+
 @app.route("/new_user", methods=["POST"])
 @flask_login.login_required
 def new_user():
@@ -75,11 +90,14 @@ def new_user():
 	email = flask.request.form.get("email")
 	if store.get("User", email):
 		return "Already Exists"
+	return send_link(email)
+
+def send_link(email, u={}):
 	c = boto.ses.connect_to_region("us-east-1",
 								   aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
 								   aws_secret_access_key="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")
 	reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
-	u = {}
+	# u = {}
 	u["reg_key"] = reg_key
 	u["timestamp"] = datetime.datetime.strftime(datetime.datetime.now(), format="%c")
 	u["registered"] = False
@@ -91,6 +109,15 @@ def new_user():
 				 [email])
 	return "Success"
 
+@app.route("/forgotpwd", methods=["POST"])
+def forgotpwd():
+	user = user_manager.get(flask.request.form.get("email"))
+	if user:
+		return send_link(user.username, store.get("User", user.username))
+		
+		
+	
+	
 @app.route("/register/<email>/<reg_key>", methods=["GET", "POST"])
 def register(email, reg_key):
 	if flask_login.current_user.is_authenticated():
@@ -98,9 +125,8 @@ def register(email, reg_key):
 	user = store.get("User", email)
 	if not all([user,
 				reg_key == user.get("reg_key"),
-				datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user["timestamp"], "%c"),
-				not user["registered"]]):
-		return "This page either expired, or you are not supposed to access it.  Heck, it might not even exist"
+				datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user["timestamp"], "%c")]):
+		return "This page either expired, or you are not supposed to access it.  It might not even exist"
 	if flask.request.method == "GET":
 		return flask.render_template("register.html", email=email)
 	password, confirm_password = map(flask.request.form.get, ["password", "confirm_password"])
@@ -108,7 +134,9 @@ def register(email, reg_key):
 		user["username"] = email
 		store.put("User", email, user)
 		user = user_manager.get(email)
+		# user = user_manager.authenticate(user["username"], password)
 		user.changepwd(password)
+		user = user_manager.authenticate(user.username, password)
 		flask_login.login_user(user)
 	return flask.redirect("/")
 	
@@ -123,7 +151,7 @@ def adminControls():
 	for username in store.listAll("User"):
 		if username not in ["public", "admin"] and store.get("User", username).get("username"):
 			users.append(user_manager.get(username))
-	return flask.render_template("adminControls.html", users = users)
+	return flask.render_template("adminControls.html", users = users, csrf = flask_login.current_user.csrf)
 	
 @app.route("/myaccount")
 def myaccount():
@@ -131,6 +159,7 @@ def myaccount():
 								 user=flask_login.current_user)
 
 @app.route("/changepwd", methods=["POST"])
+@flask_login.login_required
 def changepwd():
 	old_pwd, new_pwd, conf_pwd = map(flask.request.form.get, ["old_pwd", "new_pwd", "conf_pwd"])
 	if user_manager.authenticate(flask_login.current_user.username, old_pwd):
@@ -176,22 +205,36 @@ def makePublic(objectType, objectName):
 					  if s[:s.find("---")] == objectName]:
 			flask_login.current_user.make_public("Study", study)
 	return flask.redirect(flask.url_for("root"))
-	
+
 @app.route('/newAnalysis/')
 @app.route('/newAnalysis/<analysisName>')
 @flask_login.login_required
 def newAnalysis(analysisName=None):
 	# Get some prereq data:
 	tmy2s = store.listAll('Weather')
-	# feeders = flask_login.current_user.listAll('Feeder')
-	# analyses = flask_login.current_user.listAll('Analysis')
-	feeders = store.listAll("Feeder")
-	analyses = store.listAll("Analysis")
+	if flask.request.args.get("public") == "true":
+		is_public = True
+		user = user_manager.get("public")
+	else:
+		is_public = False
+		user = flask_login.current_user
+	public_feeders = user_manager.get("public").listAll("Feeder")
+	private_feeders = [f for f in flask_login.current_user.listAll("Feeder") if f[:f.find("_")] != "public"]
+	# if flask_login.current_user.username == "admin":
+	# 	private_feeders
+	# else:
+	# 	private_feeders = flask_login.current_user.listAll("Feeder")
+	feeders = {"Private":private_feeders, "Public":public_feeders}
+	# feeders = user.listAll('Feeder')
+	analyses = user.listAll('Analysis')
+	# feeders = store.listAll("Feeder")
+	# analyses = store.listAll("Analysis")
 	reportTemplates = reports.__templates__
 	studyTemplates = studies.__templates__
 	studyRendered = {}
+	is_admin = flask_login.current_user.username == "admin"
 	for study in studyTemplates:
-		studyRendered[study] = str(flask.render_template_string(studyTemplates[study], tmy2s=tmy2s, feeders=feeders))
+		studyRendered[study] = str(flask.render_template_string(studyTemplates[study], tmy2s=tmy2s, feeders=feeders, is_admin=is_admin))
 	# If we aren't specifying an existing name, just make a blank analysis:
 	if analysisName is None or analysisName not in analyses:
 		existingStudies = None
@@ -199,12 +242,20 @@ def newAnalysis(analysisName=None):
 		analysisMd = None
 	# If we specified an analysis, get the studies, reports and analysisMd:
 	else:
-		thisAnalysis = flask_login.current_user.get('Analysis', analysisName)
+		thisAnalysis = user.get('Analysis', analysisName)
 		analysisMd = json.dumps({key:thisAnalysis[key] for key in thisAnalysis if type(thisAnalysis[key]) is not list})
 		existingReports = json.dumps(thisAnalysis['reports'])
 		#TODO: remove analysis name from study names. Dang DB keys.
-		existingStudies = json.dumps([flask_login.current_user.get('Study', analysisName + '---' + studyName) for studyName in thisAnalysis['studyNames']])
-	return flask.render_template('newAnalysis.html', studyTemplates=studyRendered, reportTemplates=reportTemplates, existingStudies=existingStudies, existingReports=existingReports, analysisMd=analysisMd)
+		existingStudies = json.dumps([user.get('Study', analysisName + '---' + studyName) for studyName in thisAnalysis['studyNames']])
+	return flask.render_template('newAnalysis.html',
+								 studyTemplates=studyRendered,
+								 reportTemplates=reportTemplates,
+								 existingStudies=existingStudies,
+								 existingReports=existingReports,
+								 analysisMd=analysisMd,
+								 is_public=is_public,
+								 is_admin = is_admin
+		)
 
 @app.route('/viewReports/<analysisName>')
 @flask_login.login_required
@@ -294,14 +345,19 @@ def deleteGrid(feedername):
 		flask_login.current_user.delete("Feeder", feedername)
 	return flask.redirect("/#feeders")
 
+
 @app.route('/saveAnalysis/', methods=['POST'])
 @flask_login.login_required
 def saveAnalysis():
 	pData = json.loads(flask.request.form.to_dict()['json'])
+	if pData["is_public"] == "True":
+		user = user_manager.get("public")
+	else:
+		user = flask_login.current_user
 	def uniqJoin(stringList):
 		return ', '.join(set(stringList))
 	analysisData = {'status':'preRun',
-					'sourceFeeder': uniqJoin([stud.get('feederName','') for stud in pData['studies']]),
+					'sourceFeeder': uniqJoin([stud.get('feederName','').split("?")[0] for stud in pData['studies']]),
 					'climate': uniqJoin([stud.get('tmy2name','') for stud in pData['studies']]),
 					'created': str(datetime.datetime.now()),
 					'simStartDate': pData['simStartDate'],
@@ -315,16 +371,21 @@ def saveAnalysis():
 	else:
 		flask_login.current_user.put('Analysis', pData['analysisName'], analysisData)
 	for study in pData['studies']:
+		fname, pub = study["feederName"].split("?")
 		studyData = {	'simLength': pData.get('simLength',0),
 						'simLengthUnits': pData.get('simLengthUnits',''),
 						'simStartDate': pData.get('simStartDate',''),
-						'sourceFeeder': study.get('feederName',''),
+						'sourceFeeder': fname, #study.get('feederName',''),
 						'analysisName': pData.get('analysisName',''),
 						'climate': study.pop('tmy2name',''),
 						'studyType': study.pop('studyType',''),
 						'outputJson': {}}
 		if studyData['studyType'] == 'gridlabd':
-			studyFeeder = flask_login.current_user.get('Feeder', study['feederName'])
+
+			if "true" in pub:
+				studyFeeder = user_manager.get("public").get("Feeder",fname)
+			else:
+				studyFeeder = flask_login.current_user.get('Feeder', fname)
 			studyFeeder['attachments']['climate.tmy2'] = store.get('Weather', studyData['climate'])['tmy2']
 			studyData['inputJson'] = studyFeeder
 		elif studyData['studyType'] in ['nrelswh','pvwatts']:

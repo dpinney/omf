@@ -1,0 +1,83 @@
+
+<style>
+.error{
+    color: red;
+    display:none;
+}
+.success{
+    color:green;
+    display:none;
+}
+.owner{
+    font-weight:bold;
+}
+</style>
+<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
+<script>
+
+$(function(){
+    $(".new_user").submit(function(e){
+	$(".error, .success").hide()
+	$.ajax({
+	    url:"new_user",
+	    data:{
+		email:$("input[name=email]").val()
+	    },
+	    method:"post"
+	}).done(function(data){
+	    if (data == "Already Exists"){
+		$("#alreadyExists").fadeIn();
+		$("input[name=email]").select()
+	    }else if(data == "Success")
+		alert("Email sent!")
+	    else
+		document.write(data);
+	})
+	e.preventDefault();
+	return false;
+    })
+
+    $(".deleteButton").click(function(e){
+	var username = $(this).attr("name");
+	var self = this;
+	if (confirm("Are you sure you want to delete this user and all associated data?")){
+	    $.ajax({
+		url:"deleteUser",
+		data:{
+		    username:username,
+		    csrf: "{{ csrf }}"
+		},
+		method:"post"
+	    }).done(function(data){
+		if (data == "Success"){
+		    $(self).parent().remove();
+		    alert("User succesfully deleted!");
+		    
+		}else{
+		    alert("Something has gone wrong!")
+		}
+	    })
+	}
+    })
+})
+</script>
+
+<h1>Admin Controls</h1>
+<h2>Users</h2>
+<h3>Create New User!</h3>
+<form class="new_user">
+  <input type="text" name="email" placeholder="User's Email Address"/>
+  <span id="alreadyExists" class="error">A user with that email already exists!</span>
+  <br />
+  <input type="submit" value="Submit">
+</form>
+
+<ul>
+{% for u in users %}
+<li><span class="username">{{ u.username }}</span><button name="{{ u.username }}"  class="deleteButton">Delete</button></li>
+{% endfor %}
+</ul>
+
+
+
+<a href="/">Home</a>

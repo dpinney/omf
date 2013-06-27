@@ -8,6 +8,9 @@ except ImportError, e:
 
 import os
 import json
+import hashlib
+import random
+import time
 
 class UserManager:
 	def __init__(self, store):
@@ -28,6 +31,8 @@ class UserManager:
 		user = self.store.get("User", username)
 		if user and pbkdf2_sha512.verify(password,
 										 user["password_digest"]):
+			user["csrf"] = hashlib.md5(str(random.random())+str(time.time())).hexdigest()
+			self.store.put("User", username, user)
 			return User(self.store, **user)
 
 	def get(self, username):
