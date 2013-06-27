@@ -490,41 +490,41 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 	if config_file==None:
 		# set dictionary values (for default case)
 		# Determines how many houses to populate (bigger avg_house = less houses)
-		data["avg_house"] = 5700
+		data["avg_house"] = 15000
 		
 		# Determines sizing of commercial loads (bigger avg_commercial = less houses)
 		data["avg_commercial"] = 35000
 		
 		# Scale the responsive and unresponsive loads (percentage)
-		data["base_load_scalar"] = 1.30
+		data["base_load_scalar"] = 1
 		
 		# heating offset
-		allsame_c = 3.5
+		allsame_c = 1
 		
 		# cooling offset
-		allsame_h = 3.5
+		allsame_h = 1
 		
 		# COP high scalar
-		COP_high = 1.75
+		COP_high = 1
 		
 		# COP low scalar
-		COP_low = 1.75
+		COP_low = 1
 		
 		#variable to shift the residential schedule skew (seconds)
-		data["residential_skew_shift"] = 900 
+		data["residential_skew_shift"] = 0
 		
 		# decrease gas heating percentage
-		decrease_gas = 0.50
+		decrease_gas = 1
 		
 		#TODO: this is actually in TechnologyParameters Right now...
 		# widen schedule skew
 		data["residential_skew_std"] = 2700
 		
 		# window wall ratio
-		data["window_wall_ratio"] = 0.05
+		data["window_wall_ratio"] = 0.15
 		
 		# additional set point degrees
-		data["addtl_heat_degrees"] = 1
+		data["addtl_heat_degrees"] = 0
 		
 	else:
 		def num(s):

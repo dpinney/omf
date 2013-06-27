@@ -9,8 +9,8 @@ def loadLevel (a, avg_house, avg_comm, base_load_scalar, avg_diff):
 	for i in xrange(7):
 		options[i] = [base_load_scalar, avg_house, avg_comm]
 	#change = 0.10 + (abs(avg_diff) - (abs(avg_diff) % 0.10))
-	change_r = 500
-	change_c = 2000
+	change_r = 1000
+	change_c = 4000
 	change_base_load = 0.05;
 	if a < 0:
 		a0 = "To lower load overall, we can ";

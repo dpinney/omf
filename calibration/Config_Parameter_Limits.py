@@ -1,8 +1,8 @@
 '''The limits imposed on the calibration parameters.'''
 
 # limits for Average House (VA)
-res_high = 8000
-res_low = 4000
+res_high = 15000
+res_low = 3000
 
 # limits for Average Commercial (VA)
 com_high = 35000

@@ -7,7 +7,7 @@ import datetime
 import os
 import glob
 import re
-import run_gridlabd_batch_file
+import gld_job_handler
 import importlib
 import Milsoft_GridLAB_D_Feeder_Generation
 import makeGLM
@@ -130,7 +130,7 @@ def getCalibVals (glm,dir):
 				else:
 					pass
 	else:
-		calibration_values = [5700,35000,.30,3.5,3.5,.75,.75,3600,.50,2700,.15,1] #TODO: These should be defaults. 
+		calibration_values = [15000,35000,0,1,1,0,0,0,0,2700,.15,0] #CHECK: These should be the defaults. 
 	return calibration_values
 	
 def writeLIB (id, calib_id, params, dir):
@@ -170,7 +170,8 @@ def cleanUP(dir,savethis=None):
 		if not os.path.exists(dir+'\\losers'):
 			os.mkdir(dir+'\\losers')
 		for glm in glms:
-			os.rename(glm,dir+"\\losers\\"+os.path.basename(glm))
+			new = dir+"\\losers\\"+os.path.basename(glm)
+			os.rename(glm,new)
 		print (str(len(glms))+" files moved to 'losers'.")
 	else:
 		for glm in glms:
@@ -400,7 +401,7 @@ def calibrateLoop(glm_name, main_mets, scada, days, eval, counter, baseGLM, case
 		print ("\tTrying action "+str(action)+" ("+desc+")")
 		if abs(action) == 0:
 			print ("\tWe're all out of calibration options...")
-			cleanUP()
+			cleanUP(dir)
 			return glm_name
 
 	# Once every few rounds, make sure we check some schedule skew options
@@ -435,8 +436,11 @@ def calibrateLoop(glm_name, main_mets, scada, days, eval, counter, baseGLM, case
 		
 	# Run all the .glms by executing the batch file.
 	print ('Begining simulations in GridLab-D.')
-	run_gridlabd_batch_file.run_batch_file(dir,batch_file)
-	
+	if os.name == 'nt':
+		gld_job_handler.run_batch_file(dir,batch_file)
+	else:
+		gld_job_handler.run_shell_script(dir)
+		
 	# Get comparison metrics between simulation outputs and SCADA.
 	raw_metrics = gleanMetrics.funcRawMetsDict(glms_ran, scada, days)
 	
@@ -448,7 +452,7 @@ def calibrateLoop(glm_name, main_mets, scada, days, eval, counter, baseGLM, case
 			action_failed_count[action] = 1
 		calib_record[counter] = ["*all runs failed",calib_record[counter-1][1],action,2]
 		log.write(calib_record[counter][0]+"\t"+str(calib_record[counter][1])+"\t"+str(calib_record[counter][2])+"\t\t"+str(calib_record[counter][3])+"\t"+"N/A"+"\t"+"N/A"+"\n")
-		cleanUP()
+		cleanUP(dir)
 		return calibrateLoop(glm_name, main_mets, scada, days, 2, counter, baseGLM, case_flag, feeder_config, dir, batch_file)
 	else:
 		# Choose the glm with the best WSM score.
@@ -481,7 +485,7 @@ def calibrateLoop(glm_name, main_mets, scada, days, eval, counter, baseGLM, case
 		if wsm_eval == 1: 
 			print ("This WSM score has been deemed acceptable.")
 			movetoWinners(glm_best,dir)
-			cleanUP()
+			cleanUP(dir)
 			return glm_best
 		else:
 			if wsm_eval == 2:
@@ -518,8 +522,12 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 	'''
 	
 	# Name and create batch file.
-	batch_file = dir + '\\calibration_batch_file.bat'
-	run_gridlabd_batch_file.create_batch_file(dir,batch_file)
+	if os.name=='nt':
+		batch_file = dir + '\\calibration_batch_file.bat'
+		gld_job_handler.create_batch_file(dir,batch_file)
+	else:
+		batch_file = ''
+		gld_job_handler.create_shell_script(dir)
 	
 	# Do initial run. 
 	print ('Beginning initial run for calibration.')
@@ -529,7 +537,11 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 	#glms_init = ['DefaultCalibration_2013-04-14.glm','DefaultCalibration_2013-01-04.glm','DefaultCalibration_2013-06-29.glm']
 	# Run those .glms by executing a batch file. 
 	print ('Begining simulations in GridLab-D.')
-	run_gridlabd_batch_file.run_batch_file(dir,batch_file)
+	
+	if os.name=='nt':
+		gld_job_handler.run_batch_file(dir,batch_file)
+	else:
+		gld_job_handler.run_shell_script(dir)
 	
 	# Get comparison metrics from simulation outputs
 	print ('Beginning comparison of intitial simulation output with SCADA.')
@@ -538,7 +550,7 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 	if len(raw_metrics) == 0:
 		# if we can't even get the initial .glm to run... how will we continue? We need to carefully pick our defaults, for one thing.
 		print ('At least one of the .glms in '+str(glms_init)+' failed to run in GridLab-D. Please evaluate what the error is before trying to calibrate again.')
-		return
+		return None, None, None
 		
 	# Find .glm with the best WSM score (at this point there is only one...)
 	glm, wsm_score = chooseBest(raw_metrics)
@@ -571,7 +583,7 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 			last_count = max(calib_record.keys())
 			print ("Interuppted at calibration loop number "+str(last_count)+" where the best .glm was "+calib_record[last_count][0]+" with WSM score of "+str(calib_record[last_count][1])+".")
 			final_glm_file = calib_record[last_count][0]
-			cleanUP()
+			cleanUP(dir)
 			#print (str(action_count))
 			#print (str(calib_record))
 	
