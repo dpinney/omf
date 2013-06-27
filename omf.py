@@ -12,12 +12,14 @@ try:
 		USER_PASS = keyFile.read()
 	store = storage.S3store('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnomf')
 	worker = work.ClusterWorker('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnOmfJobQueue', 'crnOmfTerminateQueue', 'crnOmfImportQueue', store)
+	URL = 'www.omf.coop'
 	print 'Running on S3 cluster.'
 except:
 	traceback.print_exc()
 	USER_PASS = 'YEAHRIGHT'
 	store = storage.Filestore('data')
 	worker = work.LocalWorker()
+	URL = 'localhost:5001'
 	print 'Running on local file system.'
 	
 	
@@ -93,9 +95,9 @@ def send_link(email, u={}):
 	u["registered"] = False
 	u["email"] = email
 	store.put("User", email, u)
-	c.send_email("mh6445a@student.american.edu",
+	c.send_email("david.pinney@nreca.coop",
 				 "OMF Registration Link",
-				 "To register your account for the OMF click this link: http://localhost:5001/register/"+email+"/"+reg_key+"\nThis link will expire in 24 hours",
+				 "To register your account for the OMF click this link: http://"+URL+"/register/"+email+"/"+reg_key+"\nThis link will expire in 24 hours",
 				 [email])
 	return "Success"
 
@@ -314,7 +316,6 @@ def run():
 	user.put('Analysis', anaName, thisAnalysis.__dict__)
 	# Run in background and immediately return.
 	worker.run(thisAnalysis, store)
-	# print dict(thisAnalysis.__dict__.items() + {"name":anaName}.items())
 	return flask.render_template('metadata.html',
 								 md=dict(thisAnalysis.__dict__.items() + {"name":anaName}.items()),
 								 value = {"url":"?public="+("true" if user.username == "public" else "false")})
