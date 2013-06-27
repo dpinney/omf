@@ -45,7 +45,10 @@ class User:
 		self.password_digest = pbkdf2_sha512.encrypt(new_pwd)
 		self.store.put("User", self.username, {"username":self.username,
 											   "password_digest":self.password_digest})
-	
+
+	def is_admin(self):
+		return self.username == "admin"
+
 	def is_authenticated(self):
 		return True
 
@@ -79,6 +82,8 @@ class User:
 
 	def make_public(self, objectType, objectName):
 		dataDict = self.store.get(objectType, self.prepend+objectName)
+		if self.username == "admin":
+			objectName = objectName[objectName.find("_")+1:]
 		if dataDict:
 			self.store.put(objectType, "public_"+objectName, dataDict)
 		

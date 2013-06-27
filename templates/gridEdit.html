@@ -118,8 +118,9 @@
 	  <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
 	  <ul class='menu right'>
 	    {% if public %}
-	    <li><a href="#" onclick="saveas()">Save As </a></li>
-	    {% else %}
+	    <li><a href="#" onclick="saveas()">Save As Private Feeder </a></li>
+	    {% endif %}
+	    {% if is_admin or not public %}
 	<li id='renameMenuItem'><a href='javascript:rename()'>Rename</a></li>
 	<li id='saveMenuItem'><a href='javascript:saveModel()'>Save</a></li>
 	<li><a href='javascript:history.back()'>Cancel</a></li>

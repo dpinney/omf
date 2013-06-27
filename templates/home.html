@@ -25,7 +25,9 @@
     table.importOptions td {border-bottom: none}
     input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
     a#consoleLink {width:20px; height:20px; position:absolute; top:0; right:0; background-color:dimgray; border-bottom-left-radius:5px; color: #303030; text-align:center;}
-
+    .owner{
+	font-weight:bold;
+    }
   </style>
   <script>
     $(function(){
@@ -144,26 +146,30 @@
     <!--Title:-->Open Modeling Framework
   </div>
   <div id='toolbar'>
-
+    
     <p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Analyses</p>
     <p id='feedersTab' class='tab' style='' onclick='feedersClick()'>Feeders</p>
   </div>
   <div id='analyses'>
     <div class='content'>
-      {% for key, value in d.items() %}
-      <div class="{{ key }}">
-    <h2>{{ key }} Analyses</h2>
       <table id='anaTable'>
-	<tr><thead><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr></thead>
-<tbody>
-  {% for md in value["metadatas"] %}
-  {% include 'metadata.html' %}
-  {% endfor %}
-</tbody>
-</table>
-</div>
-{% endfor %}
-</div>
+	{% for key, value in d.items() %}
+	<tbody class="{{ key }}">
+	  <tr>
+	    <th style="text-align:center" colspan="6">{{ key }} Analyses</th>
+	  </tr>
+	  <tr><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr>
+	  {% for md in value["metadatas"] %}
+	  {% if (md["name"].strip() == "" or (key == "Private" and md["name"].startswith("public_"))) and is_admin %}
+	  {% else %}
+	  {% include 'metadata.html' %}
+	  {% endif %}
+	  {% endfor %}
+	</tbody>
+	{% endfor %}
+      </table>
+    </div>
+
 <div class='content'><a href='/newAnalysis/'>New Analysis</a></div>
 </div>
 
@@ -181,22 +187,37 @@
 	    <th></th>
 	</tr>
 	  {% for feed in value["feeders"] %}
+	{% if (is_admin and (key == "Private" and feed[:feed.find("_")] != "public")) or key == "Public" or not is_admin %}
 	  <tr class="{{ feed.replace('_', '__').replace(' ', '_') }}">
-	    <td><a name="{{ feed }}" href='/feeder/{{ feed }}{{ value["url"] }}'>{{ feed }}</a></td>
+	    <td>
+	      <a name="{{ feed }}" href='/feeder/{{ feed }}{{ value["url"] }}'>
+		{% if is_admin and key == "Private" %}
+
+		<span class="owner">{{ feed[:feed.find("_")] }}: </span>
+		<span class="feederName">{{ feed[feed.find("_")+1:] }}</span>
+		
+		{% else %}
+		{{ feed }}
+		{% endif %}
+	      </a>
+	    </td>
 	    <td>Ready</td>
 	    <td>
-	      {% if "false" in value["url"] %}
+	      {% if "false" in value["url"] or is_admin %}
 	      <div class="buttonGroup">
 		<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
 		<ul class='menu right'>
 		  <li><a href="/deleteFeeder/{{ feed }}">Delete</a></li>
+		  {% if "false" in value["url"] %}
 		  <li><a class="makePublic" objectType="Feeder" objectName="{{ feed }}" href="/makePublic/Feeder/{{ feed }}">Publish</a></li>
+		  {% endif %}
 		</ul>
 	      </div>
 	      {% else %}
 	    </td>
 	    {% endif %}
 	  </tr>
+	  {% endif %}
 	  {% endfor %}
 	  {% for feed in value["conversions"] %}
 	  <tr>
@@ -234,5 +255,8 @@
   </div>
 </div>
 <a href="logout">Log Out</a><br />
-<a href="myaccount">My Account</a>
+<a href="myaccount">My Account</a><br>
+{% if is_admin %}
+<a href="adminControls">Admin Controls</a>
+{% endif %}
 </body>
