@@ -2,7 +2,6 @@
   <script type='text/javascript' src='/static/d3.v3.js'></script>
   <script type='text/javascript' src='/static/omf.js'></script>
   <script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
-
   <link rel='stylesheet' href='/static/omf.css' />
   <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}' />
   <style type="text/css">
@@ -27,13 +26,13 @@
 	.rightToolbar {float:right; margin-right:5px;}
 	input {min-width: 100px}
 	/* Start graph elements. */
-	.nodetext {pointer-events: none; font: 10px; }
-	g.node {fill:gray; stroke: #fff;}
-	line.link {stroke: black;stroke-opacity: 1; stroke-width: 6px;}
+	.nodetext {pointer-events:none; font:10px; }
+	g.node {fill:gray; stroke:#fff;}
+	line.link {stroke:black; stroke-opacity:1; stroke-width:6px;}
 	line.parentChild {stroke-dasharray:1,1;}
-	line.selected {stroke:lime; stroke-width: 8px; stroke-opacity: 1.0;}
-	g.selected {stroke:lime; stroke-width: 2px; stroke-opacity: 1.0; }
-	g.multiselected {stroke:lime; stroke-width: 4px; stroke-opacity: 1.0; stroke-dasharray:2,2;}
+	line.selected {stroke:lime; stroke-width:8px; stroke-opacity:1.0;}
+	g.selected {stroke:lime; stroke-width:2px; stroke-opacity:1.0; }
+	g.multiselected {stroke:lime; stroke-width:4px; stroke-opacity:1.0; stroke-dasharray:1,1;}
 	g.house {fill:#3366FF;}
 	g.load {fill:#3366FF;}
 	g.ZIPload, g.waterheater {fill:#66CCFF;}
@@ -41,12 +40,12 @@
 	g.triplex_node {fill:#FFCC00;}
 	g.gridNode {fill:#CC0000;}
 	g.swingNode {fill:hotpink;}
-	g text {fill:black; stroke:black; stroke-width:0px; stroke-opacity: 1; font-size:15; pointer-events: none;}
-	circle.nodeIsPinned {fill:none; stroke:black;  pointer-events: none;}
-	circle.nodeNotPinned {fill:none;  pointer-events: none;}
-	.node:not(:hover) .nodetext { display: none; }
-	.axis path,.axis line { fill: none; stroke: black;	shape-rendering: crispEdges; }
-	.axis text { font-family: sans-serif; font-size: 11px; }
+	g text {fill:black; stroke:black; stroke-width:0px; stroke-opacity:1; font-size:15; pointer-events:none;}
+	circle.nodeIsPinned {fill:none; stroke:black; pointer-events:none;}
+	circle.nodeNotPinned {fill:none; pointer-events:none;}
+	.node:not(:hover) .nodetext { display:none; }
+	.axis path,.axis line { fill:none; stroke:black; shape-rendering:crispEdges; }
+	.axis text { font-family:sans-serif; font-size:11px; }
   </style>
 </head>
 <body onkeypress='hotkeys()'>
