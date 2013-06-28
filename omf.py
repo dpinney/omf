@@ -80,9 +80,10 @@ def new_user():
 	email = flask.request.form.get("email")
 	if store.get("User", email):
 		return "Already Exists"
-	return send_link(email)
+	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\nreg_link"
+	return send_link(email, message)
 
-def send_link(email, u={}):
+def send_link(email, message, u={}):
 	c = boto.ses.connect_to_region("us-east-1",
 								   aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
 								   aws_secret_access_key="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")
@@ -95,15 +96,19 @@ def send_link(email, u={}):
 	store.put("User", email, u)
 	c.send_email("mh6445a@student.american.edu",
 				 "OMF Registration Link",
-				 "To register your account for the OMF click this link: http://localhost:5001/register/"+email+"/"+reg_key+"\nThis link will expire in 24 hours",
+				 message.replace("reg_link", "http://localhost:5001/"+email+"/"+reg_key)
 				 [email])
 	return "Success"
 
 @app.route("/forgotpwd", methods=["POST"])
 def forgotpwd():
+	if not store.get("User", flask.request.form.get("email")):
+		return "Error"
 	user = user_manager.get(flask.request.form.get("email"))
 	if user:
-		return send_link(user.username, store.get("User", user.username))
+		return send_link(user.username,
+						 "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\nreg_link",
+						 store.get("User", user.username))
 		
 		
 	

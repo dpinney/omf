@@ -41,10 +41,10 @@
 			  <input type="text" name="email" placeholder="Email" />
 			  <input type="submit" value="Send">
 			</form>
-			<p class="Success">Email successfully sent!  The reset link will expire in 24 hours</p>
-			<p class="Error">That email is not associated with any account</p>
-			<a href="#" id="cancel">Cancel</a>
-			</div>
+	<a href="#" id="cancel">Cancel</a>
+	</div>
+	<p class="Error">That email is not associated with any account</p>
+	<p class="Success">Email successfully sent!  The reset link will expire in 24 hours</p>
 		</div>
 	</div>
 </body>
@@ -69,11 +69,15 @@ $(function(){
     $("input[name=username]").focus();
     $("#forgotpwd").click(function(e){
 	$(this).hide();
+	$(".Success, .Error").hide();
 	$(".fdiv").fadeIn();
+	$("input[name=email]").focus();
     });
     $("#cancel").click(function(e){
 	$(".fdiv").fadeOut();
 	$("#forgotpwd").fadeIn();
+	$("input[name=email]").val("");
+	$("input[name=username]").focus();
     })
     $(".forgot_pwd").submit(function(e){
 	$.ajax({
@@ -81,14 +85,19 @@ $(function(){
 	    data:{
 		email:$("input[name=email]").val()
 	    },
-	    method:"post"
+	    method:"post",
+	    async:false
 	}).done(function(data){
 	    $(".fdiv").fadeOut()
-	    if (data=="Success"){
-		$(".Success").fadeIn();
-	    }else{
-		$(".Error").fadeIn();
-	    }
+	    setTimeout(function(){
+		if (data == "Success")
+		    $(".Success").fadeIn();
+		else
+		    $(".Error, #forgotpwd").fadeIn();
+	    }, 500)
+	    e.preventDefault();
+	    return false;
+	    
 	})
     })
     
