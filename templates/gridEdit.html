@@ -477,21 +477,11 @@
 
 	function scaleRedraw(){
 		curScale = zoomer.scale()
-
 		// x-scale renewed
 		x = d3.scale.linear().domain([ options.xmin, options.xmax/curScale]).nice().range([ 0, width ]).nice();
 		// y-scale renewed
 		y = d3.scale.linear().domain([ options.ymin, options.ymax/curScale]).nice().range([ 0, height ]).nice();
-		function showScale(){
-			//TODO: To be precise, it should read all the nodes.
-			var index = Math.round(Math.random()*nodes.length)
-			if (nodes[index].fixed !=undefined && nodes[index].fixed == true && !isNaN(options.xmax)){
-				drawScaleGrid()();
-			}else
-				return;
-		}
-		showScale();
-		
+		drawScaleGrid()();
 	}
 
 	function removeScaleGrid(){
