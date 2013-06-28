@@ -129,8 +129,9 @@ def getCalibVals (glm,dir):
 					break
 				else:
 					pass
+		calib.close()
 	else:
-		calibration_values = [15000,35000,0,1,1,0,0,0,0,2700,.15,0] #CHECK: These should be the defaults. 
+		calibration_values = [15000,35000,0,2,2,0,0,0,0,2700,.15,0] #CHECK: These should be the defaults. 
 	return calibration_values
 	
 def writeLIB (id, calib_id, params, dir):
@@ -442,7 +443,7 @@ def calibrateLoop(glm_name, main_mets, scada, days, eval, counter, baseGLM, case
 		gld_job_handler.run_shell_script(dir)
 		
 	# Get comparison metrics between simulation outputs and SCADA.
-	raw_metrics = gleanMetrics.funcRawMetsDict(glms_ran, scada, days)
+	raw_metrics = gleanMetrics.funcRawMetsDict(dir, glms_ran, scada, days)
 	
 	if len(raw_metrics) == 0:
 		print ("It appears that none of the .glms in the last round ran successfully. Let's try a different action.")
@@ -545,7 +546,7 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 	
 	# Get comparison metrics from simulation outputs
 	print ('Beginning comparison of intitial simulation output with SCADA.')
-	raw_metrics = gleanMetrics.funcRawMetsDict(glms_init, SCADA, days)
+	raw_metrics = gleanMetrics.funcRawMetsDict(dir, glms_init, SCADA, days)
 	
 	if len(raw_metrics) == 0:
 		# if we can't even get the initial .glm to run... how will we continue? We need to carefully pick our defaults, for one thing.

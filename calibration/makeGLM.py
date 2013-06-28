@@ -45,43 +45,55 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 		
 		populated_dict = glmDict
 		
-		# get into clock object and change start and stop
-		# glmCaseDict[last_key] = {'clock' : '',
-							 # 'timezone' : '{:s}'.format(config_data['timezone']),
-							 # 'starttime' : "'{:s}'".format(tech_data['start_date']),
-							 # 'stoptime' : "'{:s}'".format(tech_data['end_date'])}
-							 
+		# name the file
+		if calib_file is None:
+			id = 'DefaultCalibration'
+		else:
+			m = re.compile( '\.txt$' )
+			id = m.sub('',calib_file)
+		date = re.sub('\s.*$','',rec_starttime)
+		filename = id + '_' + date + '.glm'
+		
+		# get into clock object and change start and stop time
 		for i in populated_dict.keys():
 			if 'clock' in populated_dict[i].keys():
 				populated_dict[i]['starttime'] = "'{:s}'".format(starttime)
 				populated_dict[i]['stoptime'] = "'{:s}'".format(stoptime)
 		
 		lkey = last_key
-		populated_dict[lkey] = { 'module' : 'mysql' }
-		lkey += 1
-		populated_dict[lkey] = {'object' : 'database',
-									'name' : '{:s}'.format(schema),
-									'schema' : '{:s}'.format(schema) }
-		lkey += 1
-		populated_dict[lkey] = {'object' : 'mysql.recorder',
-									'table' : 'network_node_recorder',
+		
+		# USE ONLY ONE OF THE FOLLOWING BLOCKS OF CODE FOR RECORDING SIMULATION OUTPUT.
+		###############################################################################
+		# # TO USE MYSQL FOR RECORDER OUTPUT, USE THIS:
+		# populated_dict[lkey] = { 'module' : 'mysql' }
+		# lkey += 1
+		# populated_dict[lkey] = {'object' : 'database',
+									# 'name' : '{:s}'.format(schema),
+									# 'schema' : '{:s}'.format(schema) }
+		# lkey += 1
+		# populated_dict[lkey] = {'object' : 'mysql.recorder',
+									# 'table' : 'network_node_recorder',
+									# 'parent' : 'network_node',
+									# 'property' : 'measured_real_power,measured_real_energy',
+									# 'interval' : '{:d}'.format(interval),
+									# 'limit' : '{:d}'.format(limit),
+									# 'start': "'{:s}'".format(rec_starttime),
+									# 'connection': schema,
+									# 'mode': 'a'}
+									
+		# # TO USE *.CSV FILES FOR RECORDER OUTPUT, USE THIS:
+		populated_dict[lkey] = {'object' : 'tape.recorder',
+									#'file' : id + '_' + date + '_network_node_recorder.csv',
+									'file' : 'csv_output/{:s}_{:s}_network_node_recorder.csv'.format(id,date),
 									'parent' : 'network_node',
 									'property' : 'measured_real_power,measured_real_energy',
 									'interval' : '{:d}'.format(interval),
 									'limit' : '{:d}'.format(limit),
-									'start': "'{:s}'".format(rec_starttime),
-									'connection': schema,
-									'mode': 'a'}
+									'in': "'{:s}'".format(rec_starttime) }
+		##############################################################################
 		
 		# turn into a .glm and save it in the given directory
-		if calib_file is None:
-			id = 'DefaultCalibration'
-		else:
-			m = re.compile( '\.txt$' )
-			id = m.sub('',calib_file)
-			
-		date = re.sub('\s.*$','',rec_starttime)
-		filename = id + '_' + date + '.glm'
+		
 		glmstring = feeder.sortedWrite(populated_dict)
 		file = open(dir+'\\'+filename, 'w')
 		file.write(glmstring)

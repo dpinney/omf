@@ -21,8 +21,9 @@ def createFeederDirectory(feederID):
 	# create folder with all the fixin's for this model to be populated and/or calibrated and ran in GLD
 	# TODO: directory needs to include subdirectory 'winners' for storing the best .glms from each calibration round
 	# TODO: anything with suffix 'glm' might be deleted during calibration since we cleanup unecessary file between rounds. Put schedules, other .glms, etc into a subdirectory if we don't want them deleted. 
-	#directory = 'C:\\Users\\d3y051\\Documents\\NRECA_feeder_calibration_2-2013\\Calibration\\repository_two\\Feeder_Test'
-	directory = 'C:\\Users\\d3y051\\Desktop\\calibration\\calibration\\Feeder_Test'
+	# TODO: If using .csv files for recorder output (as opposed to mysql), add subdirectory 'csv_output' ( or go into makeGLM.py and change the file path -- that's where it's defined. Also would have to change it in gleanMetrics.py where each file is opened.)
+	directory = 'C:\\Users\\d3y051\\Documents\\NRECA_feeder_calibration_2-2013\\Calibration\\github\\omf\\calibration\\Feeder_Test'
+	#directory = 'C:\\Users\\d3y051\\Desktop\\calibration\\calibration\\Feeder_Test'
 	return directory
 	
 def OMFmain(milsoft, feeder_info, scada, case_flag, feeder_config, calibration_config, model_name='Feeder', user_flag_to_calibrate=1):
@@ -273,8 +274,8 @@ def main():
 						  'power_12' : '593750.000+195156.187j',
 						  'nominal_voltage' : '120'}
 
-	#milsoft = glm_object_dict
-	milsoft = milToGridlab.convert('ACEC-FRIENDSHIP.std','ACEC.seq')
+	milsoft = glm_object_dict
+	#milsoft = milToGridlab.convert('ACEC-FRIENDSHIP.std','ACEC.seq')
 	
 	model_name = 'testing_model_FRIENDSHIP'
 	feeder_info = None # place holder for future feeder information input from the user. 

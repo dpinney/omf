@@ -226,12 +226,6 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 
 		# Percentage One Story Homes by Classification
 		data["one_story"] = [0.6295, 0.5357, 0.6295, 0.5357, 1.0000, 0.9073, 0, 0, 0]
-
-		# Cooling/Heating Nighttime Average Differences by Classification
-		# - TODO: these are not good default values.
-		c_nad = [3.5, 3.5, 3.5, 3.5, 3.5, 3.5]
-		
-		h_nad = [3.5, 3.5, 3.5, 3.5, 3.5, 3.5]
 		
 		# Cooling Setpoint Bins by Classification
 		# [nighttime percentage, high bin value, low bin value]
@@ -383,8 +377,8 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		AC_type = [[0.90, 1.00, 0.90, 1.00, 0.88, 0.87, 0, 0, 0],
                    [0.10, 0.00, 0.10, 0.00, 0.12, 0.13, 0, 0, 0]]
 		
-		over_sizing_factor = [[ 0.2, 0.2, 0.3, 0.3, 0.3, 0.3, 0, 0, 0],
-                              [-0.2,-0.2,-0.3,-0.3,-0.3,-0.3, 0, 0, 0]]
+		over_sizing_factor = [[ 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                              [ 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 		
 		# Percent Pool Pumps by Classification
 		perc_pool_pumps = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -499,10 +493,10 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		data["base_load_scalar"] = 1
 		
 		# heating offset
-		allsame_c = 1
+		allsame_c = 2
 		
 		# cooling offset
-		allsame_h = 1
+		allsame_h = 2
 		
 		# COP high scalar
 		COP_high = 1
@@ -548,7 +542,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 				else:
 					# insert variable name and value into dictionary
 					couplets[f[0]]=num(f[1])
-		
+		calib.close()
 		data["avg_house"] = couplets['avg_house']
 
 		data["avg_commercial"] = couplets['avg_comm']
