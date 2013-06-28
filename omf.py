@@ -348,7 +348,7 @@ def delete():
 	user = user_manager.get("public") if flask.request.args.get("public") == "true" else flask_login.current_user	
 	anaName = flask.request.form['analysisName']
 	# Delete studies.
-	childStudies = [x for x in user.listAll('Study') if x.startswith(user.prepend+anaName + '---')]
+	childStudies = [x for x in user.listAll('Study') if x.startswith(anaName + '---')]
 	for study in childStudies:
 		user.delete('Study', study)
 	# Delete analysis.
@@ -462,7 +462,8 @@ def saveFeeder(public):
 		else:
 			return "You are not authorized to modify public feeders"
 	else:
-		store.put("Feeder", flask_login.current_user.username+"_"+str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
+		# store.put("Feeder", flask_login.current_user.username+"_"+str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
+		flask_login.current_user.put("Feeder", str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
 	return flask.redirect(flask.url_for('root') + '#feeders')
 
 @app.route("/feederName/<new_name>")
@@ -494,6 +495,8 @@ def runStatus():
 @flask_login.login_required
 def milsoftImport():
 	feederName = str(flask.request.form.to_dict()['feederName'])
+	if flask_login.current_user.username == "admin":
+		feederName = "admin_" + feederName 
 	current_user = user_manager.get(flask_login.current_user.get_id())		
 	current_user.put('Conversion', feederName, {'data':'none'})
 	stdString = flask.request.files['stdFile'].stream.read()

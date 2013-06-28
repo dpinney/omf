@@ -241,7 +241,11 @@
 	  {% endfor %}
 	  {% for feed in value["conversions"] %}
 	  <tr>
+	    {% if is_admin %}
+	    <td><strong>{{ feed.split("_")[0] }}: </strong>{{ "_".join(feed.split("_")[1:]) }}</td>
+	    {% else %}
 	    <td>{{ feed }}</td>
+	    {% endif %}
 	    <td class='running'>Processing</td>
 	    <td></td>
 	  </tr>

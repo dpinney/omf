@@ -42,7 +42,7 @@ class User:
 		map((lambda k, v: setattr(self, k, v)),
 			kwargs.keys(),
 			kwargs.values())
-		self.prepend = self.username+"_"
+		self.prepend = "" if self.username == "admin" else self.username+"_"
 
 	def changepwd(self, new_pwd):
 		self.password_digest = pbkdf2_sha512.encrypt(new_pwd)
