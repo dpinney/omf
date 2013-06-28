@@ -1,7 +1,7 @@
 #!/bin/python
 
 # third party modules
-import flask, werkzeug, json, time, datetime, copy, flask_login, boto.ses, hashlib, random, traceback
+import flask, werkzeug, json, time, datetime, copy, flask_login, boto.ses, hashlib, random, traceback, hashlib, time, random
 # our modules
 import analysis, feeder, reports, studies, storage, work, User
 
@@ -21,13 +21,30 @@ except:
 	worker = work.LocalWorker()
 	URL = 'localhost:5001'
 	print 'Running on local file system.'
-	
+
+def some_random_string():
+	return hashlib.md5(str(random.random())+str(time.time())).hexdigest()
 	
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login_page'
-app.secret_key = "Here is a secret key"
+app.secret_key = some_random_string()
 user_manager = User.UserManager(store)
+
+@app.before_request
+def csrf_protect():
+    if flask.request.method == "POST":
+        token = flask.session.pop('_csrf_token', None)
+        if not token or token != flask.request.form.get('_csrf_token'):
+            flask.abort(403)
+
+def generate_csrf_token():
+    if '_csrf_token' not in flask.session:
+        flask.session['_csrf_token'] = some_random_string()
+    return flask.session['_csrf_token']
+
+app.jinja_env.globals['csrf_token'] = generate_csrf_token 
+
 
 @login_manager.user_loader
 def load_user(username):
@@ -64,9 +81,6 @@ def login():
 def deleteUser():
 	if flask_login.current_user.username != "admin":
 		return "You are not authorized to delete users"
-	csrf = flask.request.form.get("csrf")
-	if csrf != user_manager.get("admin").csrf:
-		return "Nice try, hacker"
 	user = user_manager.get(flask.request.form.get("username"))
 	for objectType in ["Analysis", "Feeder", "Study"]:
 		for objectName in user.listAll(objectType):
@@ -98,8 +112,8 @@ def send_link(email, message, u={}):
 	store.put("User", email, u)
 	c.send_email("david.pinney@nreca.coop",
 				 "OMF Registration Link",
-				 "To register your account for the OMF click this link: http://"+URL+"/register/"+email+"/"+reg_key+"\nThis link will expire in 24 hours",
-				 [email])
+				 message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
+			 [email])
 	return "Success"
 
 @app.route("/forgotpwd", methods=["POST"])
@@ -151,6 +165,7 @@ def adminControls():
 	return flask.render_template("adminControls.html", users = users, csrf = flask_login.current_user.csrf)
 	
 @app.route("/myaccount")
+@flask_login.login_required
 def myaccount():
 	return flask.render_template("myaccount.html",
 								 user=flask_login.current_user)
@@ -182,7 +197,9 @@ def root():
 	if flask.request.user_agent.browser == 'msie':
 		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
 	else:
-		return flask.render_template('home.html', d=d, is_admin = flask_login.current_user.username == "admin")
+		return flask.render_template('home.html',
+									 d=d,
+									 is_admin = flask_login.current_user.username == "admin")
 
 @app.route("/publicObject/<objectType>/<objectName>")
 def publicObject(objectType, objectName):
@@ -192,7 +209,7 @@ def publicObject(objectType, objectName):
 		return "Nope"
 	return "Yep"
 	
-@app.route("/makePublic/<objectType>/<objectName>")
+@app.route("/makePublic/<objectType>/<objectName>", methods=["POST"])
 @flask_login.login_required
 def makePublic(objectType, objectName):
 	if not user_manager.get("public").get(objectType, objectName):
@@ -338,8 +355,12 @@ def delete():
 	user.delete('Analysis', anaName)
 	return flask.redirect(flask.url_for('root'))
 
-@app.route("/deleteFeeder/<feedername>")
-def deleteGrid(feedername):
+@app.route("/deleteFeeder/", methods=["POST"])
+@flask_login.login_required
+def deleteGrid():
+	feedername, csrf = map(flask.request.form.get, ["feedername", "csrf"])
+	if csrf != flask_login.current_user.csrf:
+		return "Someone just attempted a CSRF attack."
 	if flask_login.current_user.username == "admin":
 		if feedername.count("_") > 0:
 			store.delete("Feeder", feedername)

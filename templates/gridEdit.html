@@ -1322,7 +1322,10 @@
 			    attachments:attachments
 			   }
 	    var name = new_name ? new_name : gebi("gridName").innerHTML
-	    payload = {'name':name, 'feederObjectJson':JSON.stringify(feederObject, null, '    ')}
+	    payload = {'name':name,
+		       'feederObjectJson':JSON.stringify(feederObject, null, '    '),
+		       "_csrf_token":"{{ csrf_token() }}"
+		      }
 	    if (!new_name)
 		post_to_url('/saveFeeder/{% if public %}True{% else %}False{% endif %}', payload)
 	    else{

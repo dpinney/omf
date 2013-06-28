@@ -1,5 +1,4 @@
 
-
 try:
 	from passlib.hash import pbkdf2_sha512
 except ImportError, e:
@@ -31,7 +30,6 @@ class UserManager:
 		user = self.store.get("User", username)
 		if user and pbkdf2_sha512.verify(password,
 										 user["password_digest"]):
-			user["csrf"] = hashlib.md5(str(random.random())+str(time.time())).hexdigest()
 			self.store.put("User", username, user)
 			return User(self.store, **user)
 

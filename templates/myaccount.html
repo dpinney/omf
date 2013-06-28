@@ -13,7 +13,8 @@ $(function(){
 	    data:{
 		old_pwd:$("input[name=old_pwd]").val(),
 		new_pwd:$("input[name=new_pwd]").val(),
-		conf_pwd:$("input[name=conf_pwd]").val()
+		conf_pwd:$("input[name=conf_pwd]").val(),
+		_csrf_token:"{{ csrf_token() }}"
 	    },
 	    async:false
 	}).done(function(data){

@@ -103,7 +103,8 @@
 				// Send the request.
 					if (JSON.parse(ajaxReq("GET", "/uniqueName/"+gebi("analysisName").value))){
 					    responseDict["is_public"] = '{{ is_public }}';
-						post_to_url('/saveAnalysis/', {'json':JSON.stringify(responseDict)})
+						post_to_url('/saveAnalysis/', {'json':JSON.stringify(responseDict),
+									      "_csrf_token":"{{ csrf_token() }}"})
 					}else {
 						alert("Please choose a unique Analysis Name");
 						gebi("analysisName").style.border = "1px solid red";

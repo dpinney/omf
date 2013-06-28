@@ -35,19 +35,19 @@
 	{% endif %}
 
 	{% if md['status'] == 'preRun' and "false" in value["url"] %}
-	<li><a class="run" href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";run_analysis("/run/{{ value['url'] }}", "{{ md['name'] }}")'>Run</a></li>
+	<li><a class="run" href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="{{ md['name'] }}";run_analysis("/run/{{ value['url'] }}", "{{ md['name'] }}")'>Run</a></li>
 	{% endif %}
 
 	{% if "false" in value["url"] and (md['status'] == 'postRun' or md['status'] == 'terminated' or md['status'] == 'ERROR') %}
-	<li><a class="reRun" href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";run_analysis("/reRun/{{ value['url'] }}","{{ md['name'] }}")'>Re-Run</a></li>
+	<li><a class="reRun" href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="{{ md['name'] }}";run_analysis("/reRun/{{ value['url'] }}","{{ md['name'] }}")'>Re-Run</a></li>
 	{% endif %}
 
 	{% if "false" in value["url"] and  md['status'] != 'running' %}
-	<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/{{ value['url'] }}",dict)'>Delete</a></li>
+	<li><a href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/{{ value['url'] }}",dict)'>Delete</a></li>
 	{% endif %}
 
 	{% if "false" in value["url"] and md['status'] == 'running' %}
-	<li><a href='#' onclick='var dict={};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/{{ value['url'] }}",dict)'>Terminate</a></li>
+	<li><a href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/{{ value['url'] }}",dict)'>Terminate</a></li>
 	{% endif %}
 	<li><a href='/newAnalysis/{{ md["name"] }}{{ value["url"] }}'>Duplicate</a></li>
 	{% if "false" in value["url"] %}

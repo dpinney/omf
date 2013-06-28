@@ -37,7 +37,7 @@
 	}).on("click", ".makePublic", function(e){
 	    var objectName = $(this).attr("objectName");
 	    var objectType = $(this).attr("objectType");
-	    
+	    var url = $(this).attr;
 	    console.log(objectName+" "+objectType);
 	    $.ajax({
 		url:"publicObject/"+objectType+"/"+objectName,
@@ -48,11 +48,28 @@
 		    e.preventDefault();
 		    return false;
 		}
-		if(!confirm("When a feeder or analysis is published, all users can view it and it cannot be altered or un-published.  Do you want to continue?")){
+		if(confirm("When a feeder or analysis is published, all users can view it and it cannot be altered or un-published.  Do you want to continue?")){
+		    $.ajax({
+			url:"/makePublic/"+objectType+"/"+objectName,
+			data:{
+			    _csrf_token:"{{ csrf_token() }}"
+			},
+			method:"post"
+		    })
+		}
 		e.preventDefault();
 		return false;
-		}
 		    
+	    }).on("click", ".deleteFeeder", function(e){
+		var self = this;
+		$.ajax({
+		    url:"deleteFeeder",
+		    data:{
+			feedername:$(self).attr("name"),
+			_csrf_token:"{{ csrf_token() }}"
+		    },
+		    method:"post"
+		})
 	    })
 		
 	});
@@ -69,7 +86,9 @@
 	$.ajax({
 	    type:"post",
 	    url:url,
-	    data:{analysisName:analysisName}
+	    data:{analysisName:analysisName,
+		  "_csrf_token":"{{ csrf_token() }}"
+		 }
 
 	}).done(function(data){
 	    console.log("sent the request!");
@@ -207,7 +226,8 @@
 	      <div class="buttonGroup">
 		<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
 		<ul class='menu right'>
-		  <li><a href="/deleteFeeder/{{ feed }}">Delete</a></li>
+		  <!-- <li><a href="/deleteFeeder/{{ feed }}">Delete</a></li> -->
+		  <li><a href="#" name="{{ feed }}" class="deleteFeeder">Delete</a></li>
 		  {% if "false" in value["url"] %}
 		  <li><a class="makePublic" objectType="Feeder" objectName="{{ feed }}" href="/makePublic/Feeder/{{ feed }}">Publish</a></li>
 		  {% endif %}
@@ -232,6 +252,7 @@
   </div>
   <div class='content'>
     <form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
+      <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
       <p style='font-weight:bold;float:left'>Milsoft Feeder Import</p>
       <table class='importOptions'>
 	<tr>
