@@ -35,7 +35,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		# - Weather File (May be .tmy2 or .csv)
 		# - Region Identifier (1:West Coast (temperate), 2:North Central/Northeast (cold/cold), 3:Southwest (hot/arid), 4:Southeast/Central (hot/cold), 5:Southeast Coastal (hot/humid), 6: Hawaii (sub-tropical))
 		# - Timezone
-		data["weather"] = 'NC-Charlotte.tmy2'
+		data["weather"] = 'schedules\\\\SCADA_weather_ISW_gld.csv'
 		data["region"] = 4
 		data["timezone"] = 'PST+8PDT'
 		
@@ -47,9 +47,9 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		data["feeder_rating"] = 1.15*14.0
 		data["nom_volt"] = 14400
 		data["nom_volt2"] = 14400 #was set to 480 for taxonomy feeders
-		vA=dir+'f2407_VA.player'
-		vB=dir+'f2407_VB.player'
-		vC=dir+'f2407_VC.player'
+		vA='schedules\\\\VA.player'
+		vB='schedules\\\\VB.player'
+		vC='schedules\\\\VC.player'
 		data["voltage_players"] = ['"{:s}"'.format(vA),'"{:s}"'.format(vB),'"{:s}"'.format(vC)]
 		
 		# Voltage Regulation
@@ -226,12 +226,6 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 
 		# Percentage One Story Homes by Classification
 		data["one_story"] = [0.6295, 0.5357, 0.6295, 0.5357, 1.0000, 0.9073, 0, 0, 0]
-
-		# Cooling/Heating Nighttime Average Differences by Classification
-		# - TODO: these are not good default values.
-		c_nad = [3.5, 3.5, 3.5, 3.5, 3.5, 3.5]
-		
-		h_nad = [3.5, 3.5, 3.5, 3.5, 3.5, 3.5]
 		
 		# Cooling Setpoint Bins by Classification
 		# [nighttime percentage, high bin value, low bin value]
@@ -383,8 +377,8 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		AC_type = [[0.90, 1.00, 0.90, 1.00, 0.88, 0.87, 0, 0, 0],
                    [0.10, 0.00, 0.10, 0.00, 0.12, 0.13, 0, 0, 0]]
 		
-		over_sizing_factor = [[ 0.2, 0.2, 0.3, 0.3, 0.3, 0.3, 0, 0, 0],
-                              [-0.2,-0.2,-0.3,-0.3,-0.3,-0.3, 0, 0, 0]]
+		over_sizing_factor = [[ 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                              [ 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 		
 		# Percent Pool Pumps by Classification
 		perc_pool_pumps = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -490,41 +484,41 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 	if config_file==None:
 		# set dictionary values (for default case)
 		# Determines how many houses to populate (bigger avg_house = less houses)
-		data["avg_house"] = 5700
+		data["avg_house"] = 15000
 		
 		# Determines sizing of commercial loads (bigger avg_commercial = less houses)
 		data["avg_commercial"] = 35000
 		
 		# Scale the responsive and unresponsive loads (percentage)
-		data["base_load_scalar"] = 1.30
+		data["base_load_scalar"] = 1
 		
 		# heating offset
-		allsame_c = 3.5
+		allsame_c = 2
 		
 		# cooling offset
-		allsame_h = 3.5
+		allsame_h = 2
 		
 		# COP high scalar
-		COP_high = 1.75
+		COP_high = 1
 		
 		# COP low scalar
-		COP_low = 1.75
+		COP_low = 1
 		
 		#variable to shift the residential schedule skew (seconds)
-		data["residential_skew_shift"] = 900 
+		data["residential_skew_shift"] = 0
 		
 		# decrease gas heating percentage
-		decrease_gas = 0.50
+		decrease_gas = 1
 		
 		#TODO: this is actually in TechnologyParameters Right now...
 		# widen schedule skew
 		data["residential_skew_std"] = 2700
 		
 		# window wall ratio
-		data["window_wall_ratio"] = 0.05
+		data["window_wall_ratio"] = 0.15
 		
 		# additional set point degrees
-		data["addtl_heat_degrees"] = 1
+		data["addtl_heat_degrees"] = 0
 		
 	else:
 		def num(s):
@@ -548,7 +542,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 				else:
 					# insert variable name and value into dictionary
 					couplets[f[0]]=num(f[1])
-		
+		calib.close()
 		data["avg_house"] = couplets['avg_house']
 
 		data["avg_commercial"] = couplets['avg_comm']
@@ -565,7 +559,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 
 		data["residential_skew_shift"] = couplets['res_skew_shift']
 
-		decrease_gas = couplets['decrease_gas']
+		decrease_gas = 1 - couplets['decrease_gas']
 
 		# widen schedule skew
 		data["residential_skew_std"] = couplets['sched_skew_std']
