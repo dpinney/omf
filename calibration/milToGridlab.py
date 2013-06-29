@@ -21,7 +21,7 @@ def convert(stdPath,seqPath):
 	''' Take in a .std and .seq from Milsoft and spit out a .glm string.'''
 
 	print ('Beginning Windmil to GLM conversion.')
-	nominal_voltage = '7200'
+	nominal_voltage = '2400'
 	def csvToArray(csvFileName):
 		''' Simple csv data ingester. '''
 		with open(csvFileName,'r') as csvFile:
@@ -162,7 +162,6 @@ def convert(stdPath,seqPath):
 			source = convertGenericObject(sourceList)
 			source['phases'] = sourceList[2]
 			source['nominal_voltage'] = str(float(sourceList[14])*1000)
-			nominal_voltage = str(float(sourceList[14])*1000)
 			source['bustype'] = 'SWING'
 			return source
 
@@ -441,21 +440,104 @@ def convert(stdPath,seqPath):
 			myIndex = components.index(objectList)*subObCount
 			regulator = convertGenericObject(regList)
 			regulator['phases'] = regList[2]
+			# Grab regulator configuration parameters
+			reg_hardware = statsByName(regList[11])
+			if reg_hardware is not None:
+				band_width = reg_hardware[7]
+				if float(reg_hardware) > 0.0:
+					raise_taps = str(math.ceil(float(reg_hardware[4])/float(reg_hardware[6])))
+					lower_taps = str(math.ceil(float(reg_hardware[5])/float(reg_hardware[6])))
+				else:
+					raise_taps = '16'
+					lower_taps = '16'
+				if float(raise_taps) == 0.0 and float(reg_hardware[4]) > 0.0:
+					raise_taps = '16'
+				if float(lower_taps) == 0.0 and float(reg_hardware[5]) > 0.0:
+					lower_taps = '16'
+				
+				if float(reg_hardware[4]) > 0.0:
+					regulation = float(reg_hardware[4])
+				elif float(reg_hardware[5]) > 0.0:
+					regulation = float(reg_hardware[5])
+				else:
+					regulation = '0.1'
+			else:
+				band_width = '0.02'
+				raise_taps = '16'
+				raise_taps = '16'
+				regulation = '0.1'
+					
+			if regList[9] == '0': # Each phase is controlled independently
+				band_center = regList[14]
+				control_level = 'INDIVIDUAL'
+			if regList[9] == '1': # Bank with A as control phase
+				band_center = regList[14]
+				control_level = 'BANK'
+				CT_Phase = 'A'
+				PT_Phase = 'A'
+			if regList[9] == '2': # Bank with B as control phase
+				band_center = regList[15]
+				control_level = 'BANK'
+				CT_Phase = 'B'
+				PT_Phase = 'B'
+			if regList[9] == '3': # Bank with C as control phase
+				band_center = regList[16]
+				control_level = 'BANK'
+				CT_Phase = 'C'
+				PT_Phase = 'C'
+			
+			if float(band_center) == 0.0:
+				band_center = '1'
+			
+			ldc_r_A = regList[17]
+			ldc_r_B = regList[18]
+			ldc_r_C = regList[19]
+			ldc_x_A = regList[20]
+			ldc_x_B = regList[21]
+			ldc_x_C = regList[22]
+			
+			if float(ldc_r_A) > 0.0 or float(ldc_r_B) > 0.0 or float(ldc_r_C) > 0.0 or float(ldc_x_A) > 0.0 or float(ldc_x_B) > 0.0 or float(ldc_x_C) > 0.0:
+				control = 'LINE_DROP_COMP'
+				ctr = '700'
+				ptr = '20'
+			else:
+				control = 'OUTPUT_VOLTAGE'
+				ctr = None
+				ptr = None
+			
+			
 			#TODO: figure out whether I'll run into trouble if the following integer isn't unique:
 			regulator[myIndex+1] = {}
 			regulator[myIndex+1]['name'] = regulator['name'] + '-CONFIG'
 			regulator[myIndex+1]['omfEmbeddedConfigObject'] = 'configuration object regulator_configuration'
 			#TODO: change these from just default values:
-			regulator[myIndex+1]['connect_type'] = '1'
-			regulator[myIndex+1]['band_center'] = '2401'
-			regulator[myIndex+1]['band_width'] = '50'
+			regulator[myIndex+1]['connect_type'] = 'WYE_WYE'
+			regulator[myIndex+1]['band_center'] = band_center
+			regulator[myIndex+1]['band_width'] = band_width
 			regulator[myIndex+1]['time_delay'] = '30.0'
-			regulator[myIndex+1]['raise_taps'] = '16'
-			regulator[myIndex+1]['lower_taps'] = '16'
-			regulator[myIndex+1]['CT_phase'] = 'ABC'
-			regulator[myIndex+1]['PT_phase'] = 'ABC'
-			regulator[myIndex+1]['regulation'] = '0.10'
-			regulator[myIndex+1]['Control'] = 'MANUAL'
+			regulator[myIndex+1]['raise_taps'] = raise_taps
+			regulator[myIndex+1]['lower_taps'] = lower_taps
+			regulator[myIndex+1]['CT_phase'] = regulator['phases']
+			regulator[myIndex+1]['PT_phase'] = regulator['phases']
+			regulator[myIndex+1]['regulation'] = regulation
+			if ctr is not None:
+				regulator[myIndex+1]['current_transducer_ratio'] = ctr
+			if ptr is not None:
+				regulator[myIndex+1]['power_transducer_ration'] = ptr
+			if float(ldc_r_A) != 0.0:
+				regulator[myIndex+1]['compensator_r_setting_A'] = ldc_r_A
+			if float(ldc_x_A) != 0.0:
+				regulator[myIndex+1]['compensator_x_setting_A'] = ldc_x_A
+			if float(ldc_r_B) != 0.0:
+				regulator[myIndex+1]['compensator_r_setting_B'] = ldc_r_B
+			if float(ldc_x_B) != 0.0:
+				regulator[myIndex+1]['compensator_x_setting_B'] = ldc_x_B
+			if float(ldc_r_C) != 0.0:
+				regulator[myIndex+1]['compensator_r_setting_C'] = ldc_r_C
+			if float(ldc_x_C) != 0.0:
+				regulator[myIndex+1]['compensator_x_setting_C'] = ldc_x_C
+			regulator[myIndex+1]['Control'] = control
+			regulator[myIndex+1]['control_level'] = control_level
 			regulator[myIndex+1]['Type'] = 'A'
 			regulator[myIndex+1]['tap_pos_A'] = '1'
 			regulator[myIndex+1]['tap_pos_B'] = '1'
@@ -660,7 +742,60 @@ def convert(stdPath,seqPath):
 
 	for key in glmTree:
 		fixLinkPhases(glmTree[key])
-
+		
+	# Fix nominal voltage
+	def fix_nominal_voltage(glm_dict, volt_dict):
+		for x in glm_dict:
+			if 'parent' in glm_dict[x].keys() and glm_dict[x]['parent'] in volt_dict.keys() and glm_dict[x]['name'] not in volt_dict.keys():
+				glm_dict[x]['nominal_voltage'] = volt_dict[glm_dict[x]['parent']]
+				volt_dict[glm_dict[x]['name']] = glm_dict[x]['nominal_voltage']
+			elif 'from' in glm_dict[x].keys() and glm_dict[x]['from'] in volt_dict.keys() and glm_dict[x]['name'] not in volt_dict.keys(): 
+				if glm_dict[x]['object'] == 'transformer':
+					for y in glm_dict[x]:
+						if type(y) is int:
+							nv = glm_dict[x][y]['secondary_voltage']
+							
+					glm_dict[x]['nominal_voltage'] = nv
+				else:
+					glm_dict[x]['nominal_voltage'] = volt_dict[glm_dict[x]['from']]
+					
+				volt_dict[glm_dict[x]['name']] = glm_dict[x]['nominal_voltage']
+				for y in glm_dict:
+					if 'name' in glm_dict[y] and glm_dict[y]['name'] == glm_dict[x]['to']:
+						glm_dict[y]['nominal_voltage'] = glm_dict[x]['nominal_voltage']
+						volt_dict[glm_dict[y]['name']] = glm_dict[y]['nominal_voltage'] 
+				
+					
+	parent_voltage = {}
+	current_parents = len(parent_voltage)
+	previous_parents = 0
+	
+	for obj in glmTree:
+		if 'bustype' in glmTree[obj] and glmTree[obj]['bustype'] == 'SWING':
+			parent_voltage[glmTree[obj]['name']] = glmTree[obj]['nominal_voltage']
+			current_parents = len(parent_voltage)
+			
+	while current_parents > previous_parents:
+		fix_nominal_voltage(glmTree, parent_voltage)
+		previous_parents = current_parents
+		current_parents = len(parent_voltage)
+		
+	# Convert all per unit values in regulators to volts that should be in volts
+	pu_keys = ['band_center', 'band_width', 'compensator_r_setting_A', 'compensator_r_setting_B', 'compensator_r_setting_C', 'compensator_x_setting_A', 'compensator_x_setting_B', 'compensator_x_setting_C']
+	for x in glmTree.keys():
+		if 'object' in glmTree[x].keys() and glmTree[x]['object'] == 'regulator':
+			for y in glmTree[x].keys():
+				if type(y) is int:
+					for z in pu_keys:
+						if z in glmTree[x][y].keys():
+							glmTree[x][y][z] = str(float(glmTree[x][y][z])*float(glmTree[x]['nominal_voltage']))
+	
+	# Delete nominal_voltage from link objects
+	del_nom_volt_list = ['overhead_line', 'capacitor', 'underground_line', 'regulator', 'transformer', 'switch', 'fuse', 'ZIPload', 'diesel_dg']
+	for x in glmTree:
+		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in del_nom_volt_list and 'nominal_voltage' in glmTree[x].keys():
+			del glmTree[x]['nominal_voltage']
+		
 	def secondarySystemFix(glm):
 		def unused_key(dic, key_multiplier):
 			free_key = (int(max(dic.keys())/key_multiplier) + 1)*key_multiplier
@@ -872,7 +1007,7 @@ def convert(stdPath,seqPath):
 def main():
 	''' tests go here '''
 	wdir = 'C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration'
-	StaticGlmDict = convert('C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC_FRIENDSHIP.std','C:\\Projects\\NRECEA\\OMF\\OMF Feeder Calibration and Automation\\ACEC.seq')
+	StaticGlmDict = convert('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\Uncalibrated Windmil Feeder Models\\ACEC for NRECA Existing.std','C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\Uncalibrated Windmil Feeder Models\\ACEC for NRECA Existing.seq')
 	
 	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
 						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\n' + \
@@ -885,14 +1020,14 @@ def main():
 	f.write(outGlm)
 	f.close()
 	
-	print('Finished converting base glm')
-	import Milsoft_GridLAB_D_Feeder_Generation
-	baseGLM, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(StaticGlmDict,0,wdir)
-	glm_string = feeder.sortedWrite(baseGLM)			
-	print('Success')
-	f = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_basecase_Model.glm','w')
-	f.write(glm_string)
-	f.close()
+	#print('Finished converting base glm')
+	#import Milsoft_GridLAB_D_Feeder_Generation
+	#baseGLM, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(StaticGlmDict,0,wdir)
+	#glm_string = feeder.sortedWrite(baseGLM)			
+	#print('Success')
+	#f = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_basecase_Model.glm','w')
+	#f.write(glm_string)
+	#f.close()
 	# print outGlm
 	# omfConvert('testMagic','ILEC-Rembrandt.std','ILEC.seq')
 
