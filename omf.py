@@ -23,6 +23,7 @@ except:
 	print 'Running on local file system.'
 
 def some_random_string():
+	# Random string for signing/encrypting cookies.
 	return hashlib.md5(str(random.random())+str(time.time())).hexdigest()
 	
 login_manager = flask_login.LoginManager()
@@ -379,6 +380,7 @@ def saveAnalysis():
 		user = user_manager.get("public")
 	else:
 		user = flask_login.current_user
+	adminPrefix = ("admin_" if flask_login.current_user.username == "admin" else "")
 	def uniqJoin(stringList):
 		return ', '.join(set(stringList))
 	analysisData = {'status':'preRun',
@@ -391,10 +393,7 @@ def saveAnalysis():
 					'runTime': '',
 					'reports': pData['reports'],
 					'studyNames': [stud['studyName'] for stud in pData['studies']] }
-	if flask_login.current_user.username == "admin":
-		store.put("Analysis", "admin_"+pData["analysisName"], analysisData)
-	else:
-		flask_login.current_user.put('Analysis', pData['analysisName'], analysisData)
+	flask_login.current_user.put('Analysis', adminPrefix+pData['analysisName'], analysisData)
 	for study in pData['studies']:
 		fname, pub = study["feederName"].split("?")
 		studyData = {	'simLength': pData.get('simLength',0),
@@ -406,7 +405,6 @@ def saveAnalysis():
 						'studyType': study.pop('studyType',''),
 						'outputJson': {}}
 		if studyData['studyType'] == 'gridlabd':
-
 			if "true" in pub:
 				studyFeeder = user_manager.get("public").get("Feeder",fname)
 			else:
@@ -419,7 +417,7 @@ def saveAnalysis():
 		moduleRef = getattr(studies, studyData['studyType'])
 		classRef =  getattr(moduleRef, studyData['studyType'].capitalize())
 		studyObj = classRef(studyData, new=True)
-		flask_login.current_user.put('Study', pData['analysisName'] + '---' + study['studyName'], studyObj.__dict__)
+		flask_login.current_user.put('Study', adminPrefix+pData['analysisName'] + '---' + study['studyName'], studyObj.__dict__)
 	return flask.redirect(flask.url_for('root'))
 
 @app.route('/terminate/', methods=['POST'])
