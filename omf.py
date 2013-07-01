@@ -66,8 +66,6 @@ def logout():
 	flask_login.logout_user()
 	return flask.redirect("/")
 
-
-
 @app.route("/login", methods = ["POST"])
 def login():
 	username, password, remember = map(flask.request.form.get, ["username",
