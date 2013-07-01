@@ -10,7 +10,6 @@
 	/*hacks to get D3 responsive sizing*/
 	div#title {position: absolute; top:0;}
 	div#toolbar {position: absolute; top:65px;}
-	div#scaleRuler{position: absolute;z-index: -2; top:120px;}
 	/*div#svgGraph{position: absolute;width:100%;height: 100%;}*/
 	/*other styles*/  
 	input#gridNameEdit {font-size:28pt; line-height: 28pt; text-shadow: 0px 3px 3px #4d4d4d; height: 50px; color:gray; padding:3px; margin-bottom:5px; width:85%;}
@@ -69,8 +68,8 @@
 			<td><button onclick='javascript:zoomReset()'>Go</button></td>
 		  </tr>
 		  <tr>
-		  	<td>Remove Scale Grid</td>
-		  	<td><button onclick='javascript:removeScaleGrid()'>Go</button></td>
+		  	<td>Toggle Scale Grid</td>
+		  	<td><button onclick='javascript:toggleScaleGrid()'>Go</button></td>
 		  </tr>
 		  <tr>
 			<td>Static Loads to Houses</td>
@@ -189,9 +188,6 @@
 	  </tfoot>
 	</table>
 	  </div>
-	<div id='scaleRuler'>
-  	</div>
-
 <script type="text/javascript">
 
 	// GLOBAL VARIABLES:
@@ -484,11 +480,12 @@
 		drawScaleGrid()();
 	}
 
-	function removeScaleGrid(){
-		try{
-			d3.select('#scaleGrid').remove()
-		}catch(err){
-			alert('Scale grid already been removed.\n'+err.message)
+	function toggleScaleGrid(){
+		grid = d3.select('#scaleGrid')
+		if (grid.style('display') == 'none') {
+			grid.style('display','inline-block')
+		} else {
+			grid.style('display','none')
 		}
 	}
 
@@ -1405,39 +1402,31 @@
 	// PINNING FUNCTIONS
 	function pinAll() {
 		for (node in nodes) {
-			// d3.select('pin' + nodes[node].treeIndex).attr('class','nodeIsPinned')
 			gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
 			nodes[node].fixed = true
 		}
 		for (hNode in hiddenNodes) {
-			// d3.select('pin'+ hiddenNodes[hNode].treeIndex).attr('class','nodeIsPinned')
 			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeIsPinned')
 			hiddenNodes[hNode].fixed = true
 		}
 		redraw()
-		// force.start()
 	}
 
 	function unPinAll() {
 		for (node in nodes) {
 			gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeNotPinned')
-			// d3.select('pin' + nodes[node].treeIndex).attr('class','nodeNotPinned')
 			nodes[node].fixed = false
 		}
 		for (hNode in hiddenNodes) {
-			// d3.select('pin'+ hiddenNodes[hNode].treeIndex).attr('class','nodeNotPinned')
 			gebi('pin' + hiddenNodes[hNode].treeIndex).setAttribute('class','nodeNotPinned')
 			hiddenNodes[hNode].fixed = false
 		}
 		redraw()
-		// Remove the scale grid, which is meaningless.
-		d3.select('#scaleRuler').remove()
 	}
 
 	function toggleSelectedPin() {
 		selNode = getSelectedNode()
 		pinCircle = gebi('pin' + selNode.treeIndex)
-		// pinCircle = d3.select('pin' + selNode.treeIndex)
 		if (pinCircle.getAttribute('class') == 'nodeIsPinned') {
 			pinCircle.setAttribute('class','nodeNotPinned')
 			selNode.fixed = false
@@ -1445,7 +1434,7 @@
 			pinCircle.setAttribute('class','nodeIsPinned')
 			selNode.fixed = true
 		}
-		force.start()
+		redraw()
 	}
 
 	// LAYOUT MENU FUNCTIONS
