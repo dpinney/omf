@@ -21,7 +21,8 @@ $(function(){
 	$.ajax({
 	    url:"new_user",
 	    data:{
-		email:$("input[name=email]").val()
+		email:$("input[name=email]").val(),
+		_csrf_token:"{{ csrf_token() }}"
 	    },
 	    method:"post"
 	}).done(function(data){

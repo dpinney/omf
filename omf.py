@@ -66,6 +66,8 @@ def logout():
 	flask_login.logout_user()
 	return flask.redirect("/")
 
+
+
 @app.route("/login", methods = ["POST"])
 def login():
 	username, password, remember = map(flask.request.form.get, ["username",
@@ -111,10 +113,11 @@ def send_link(email, message, u={}):
 	u["registered"] = False
 	u["email"] = email
 	store.put("User", email, u)
-	c.send_email("david.pinney@nreca.coop",
-				 "OMF Registration Link",
-				 message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
-			 [email])
+	outDict = c.send_email("david.pinney@nreca.coop",
+						   "OMF Registration Link",
+						   message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
+						   [email])
+	# json.dump(outDict, )
 	return "Success"
 
 @app.route("/forgotpwd", methods=["POST"])
@@ -135,9 +138,10 @@ def register(email, reg_key):
 	if flask_login.current_user.is_authenticated():
 		return flask.redirect("/")
 	user = store.get("User", email)
-	if not all([user,
-				reg_key == user.get("reg_key"),
-				datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user["timestamp"], "%c")]):
+	if not (user and
+			reg_key == user.get("reg_key") and
+			user.get("timestamp") and
+			datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user.get("timestamp"), "%c")):
 		return "This page either expired, or you are not supposed to access it.  It might not even exist"
 	if flask.request.method == "GET":
 		return flask.render_template("register.html", email=email)
