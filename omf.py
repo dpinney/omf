@@ -479,7 +479,10 @@ def runStatus():
 	# md = (user_manager.get("public") if flask.request.args.get("is_public") == "true" else flask_login.current_user).get("Analysis", name)
 	# print md
 	if md['status'] != 'running':
-		return flask.render_template('metadata.html', md=md, value={"url":"?public="+("true" if is_public else "false")})
+		return flask.render_template('metadata.html',
+									 md=md,
+									 is_admin = flask_login.current_user.username == "admin",
+									 value={"url":"?public="+("true" if is_public else "false")})
 	else:
 		return flask.Response("waiting", content_type="text/plain")
 

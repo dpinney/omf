@@ -30,28 +30,36 @@
       <button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
       <ul class='menu right'>
 
-	{% if md['status'] == 'postRun' or md['status'] == 'ERROR' %}
+	
+	{% if md["status"] in ["postRun", "ERROR"] %}
 	<li><a href='/viewReports/{{ md["name"] }}{{ value["url"] }}'>View Reports</a></li>
 	{% endif %}
 
-	{% if md['status'] == 'preRun' and "false" in value["url"] %}
+	<li><a href='/newAnalysis/{{ md["name"] }}{{ value["url"] }}'>Duplicate</a></li>
+
+
+	{% if "false" in value["url"] or is_admin %}
+	
+	{% if md['status'] == 'preRun' %}
 	<li><a class="run" href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="{{ md['name'] }}";run_analysis("/run/{{ value['url'] }}", "{{ md['name'] }}")'>Run</a></li>
 	{% endif %}
 
-	{% if "false" in value["url"] and (md['status'] == 'postRun' or md['status'] == 'terminated' or md['status'] == 'ERROR') %}
+	{% if md["status"] in ["postRun", "terminated", "ERROR"] %}
 	<li><a class="reRun" href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="{{ md['name'] }}";run_analysis("/reRun/{{ value['url'] }}","{{ md['name'] }}")'>Re-Run</a></li>
 	{% endif %}
 
-	{% if "false" in value["url"] and  md['status'] != 'running' %}
+	{% if md['status'] != 'running' %}
 	<li><a href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="{{ md['name'] }}";post_to_url("/delete/{{ value['url'] }}",dict)'>Delete</a></li>
 	{% endif %}
 
-	{% if "false" in value["url"] and md['status'] == 'running' %}
+	{% if md['status'] == 'running' %}
 	<li><a href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="{{ md['name'] }}";post_to_url("/terminate/{{ value['url'] }}",dict)'>Terminate</a></li>
 	{% endif %}
-	<li><a href='/newAnalysis/{{ md["name"] }}{{ value["url"] }}'>Duplicate</a></li>
+	
 	{% if "false" in value["url"] %}
 	<li><a class="makePublic" objectType="Analysis" objectName="{{ md['name'] }}" href="/makePublic/Analysis/{{ md['name'] }}">Publish</a></li>
+	{% endif %}
+
 	{% endif %}
       </ul>
     </div>
