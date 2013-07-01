@@ -11,7 +11,7 @@ try:
 	with open('S3KEY.txt','r') as keyFile:
 		USER_PASS = keyFile.read()
 	with open('COOKIEKEY.txt','r') as cookieKeyFile:
-		COOKIE_KEY = keyFile.read()
+		COOKIE_KEY = cookieKeyFile.read()
 	store = storage.S3store('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnomf')
 	worker = work.ClusterWorker('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnOmfJobQueue', 'crnOmfTerminateQueue', 'crnOmfImportQueue', store)
 	URL = 'www.omf.coop'
