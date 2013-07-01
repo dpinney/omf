@@ -389,16 +389,17 @@ def saveAnalysis():
 					'studyNames': [stud['studyName'] for stud in pData['studies']] }
 	flask_login.current_user.put('Analysis', adminPrefix+pData['analysisName'], analysisData)
 	for study in pData['studies']:
-		fname, pub = study["feederName"].split("?")
 		studyData = {	'simLength': pData.get('simLength',0),
 						'simLengthUnits': pData.get('simLengthUnits',''),
 						'simStartDate': pData.get('simStartDate',''),
-						'sourceFeeder': fname, #study.get('feederName',''),
+						'sourceFeeder': 'N/A',
 						'analysisName': pData.get('analysisName',''),
 						'climate': study.pop('tmy2name',''),
 						'studyType': study.pop('studyType',''),
 						'outputJson': {}}
 		if studyData['studyType'] == 'gridlabd':
+			fname, pub = study["feederName"].split("?")
+			studyData['sourceFeeder'] = fname
 			if "true" in pub:
 				studyFeeder = user_manager.get("public").get("Feeder",fname)
 			else:
