@@ -105,7 +105,6 @@ def send_link(email, message, u={}):
 								   aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
 								   aws_secret_access_key="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")
 	reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
-	# u = {}
 	u["reg_key"] = reg_key
 	u["timestamp"] = datetime.datetime.strftime(datetime.datetime.now(), format="%c")
 	u["registered"] = False
@@ -115,7 +114,6 @@ def send_link(email, message, u={}):
 						   "OMF Registration Link",
 						   message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
 						   [email])
-	# json.dump(outDict, )
 	return "Success"
 
 @app.route("/forgotpwd", methods=["POST"])
