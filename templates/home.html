@@ -60,18 +60,8 @@
 		e.preventDefault();
 		return false;
 		    
-	    }).on("click", ".deleteFeeder", function(e){
-		var self = this;
-		$.ajax({
-		    url:"deleteFeeder",
-		    data:{
-			feedername:$(self).attr("name"),
-			_csrf_token:"{{ csrf_token() }}"
-		    },
-		    method:"post"
-		})
 	    })
-		
+
 	});
 	var metadatas = pull_html_data();
 	var i;
@@ -156,6 +146,10 @@
 	
     }
 
+    function delete_feeder(feederName) {
+		post_to_url('deleteFeeder/', {'feedername':feederName, '_csrf_token':'{{ csrf_token() }}'})
+	}
+
   </script>
 </head>
 <body>
@@ -226,11 +220,10 @@
 	      <div class="buttonGroup">
 		<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
 		<ul class='menu right'>
-		  <!-- <li><a href="/deleteFeeder/{{ feed }}">Delete</a></li> -->
-		  <li><a href="#" name="{{ feed }}" class="deleteFeeder">Delete</a></li>
-		  {% if "false" in value["url"] %}
-		  <li><a class="makePublic" objectType="Feeder" objectName="{{ feed }}" href="/makePublic/Feeder/{{ feed }}">Publish</a></li>
-		  {% endif %}
+			<li><a href="javascript:delete_feeder('{% if key == "Public" %}public_{% endif %}{{ feed }}')">Delete</a></li>
+			{% if "false" in value["url"] %}
+				<li><a class="makePublic" objectType="Feeder" objectName="{{ feed }}" href="/makePublic/Feeder/{{ feed }}">Publish</a></li>
+			{% endif %}
 		</ul>
 	      </div>
 	      {% else %}
