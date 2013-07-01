@@ -364,15 +364,12 @@ def delete():
 @flask_login.login_required
 def deleteGrid():
 	feedername, csrf = map(flask.request.form.get, ["feedername", "csrf"])
-	if csrf != flask_login.current_user.csrf:
-		return "Someone just attempted a CSRF attack."
+	print 'THIS FEEDER:', feedername
 	if flask_login.current_user.username == "admin":
-		if feedername.count("_") > 0:
-			store.delete("Feeder", feedername)
-		else:
-			store.delete("Feeder", "public_"+feedername)
+		store.delete("Feeder", feedername)
 	else:
-		flask_login.current_user.delete("Feeder", feedername)
+		feedNoUser = feedername[feedername.find('_')+1:-1]
+		flask_login.current_user.delete("Feeder", feedNoUser)
 	return flask.redirect("/#feeders")
 
 
@@ -380,10 +377,7 @@ def deleteGrid():
 @flask_login.login_required
 def saveAnalysis():
 	pData = json.loads(flask.request.form.to_dict()['json'])
-	if pData["is_public"] == "True":
-		user = user_manager.get("public")
-	else:
-		user = flask_login.current_user
+	user = (user_manager.get("public") if pData["is_public"] == "True" else flask_login.current_user)
 	adminPrefix = ("admin_" if flask_login.current_user.username == "admin" else "")
 	def uniqJoin(stringList):
 		return ', '.join(set(stringList))
@@ -399,16 +393,17 @@ def saveAnalysis():
 					'studyNames': [stud['studyName'] for stud in pData['studies']] }
 	flask_login.current_user.put('Analysis', adminPrefix+pData['analysisName'], analysisData)
 	for study in pData['studies']:
-		fname, pub = study["feederName"].split("?")
 		studyData = {	'simLength': pData.get('simLength',0),
 						'simLengthUnits': pData.get('simLengthUnits',''),
 						'simStartDate': pData.get('simStartDate',''),
-						'sourceFeeder': fname, #study.get('feederName',''),
+						'sourceFeeder': 'N/A',
 						'analysisName': pData.get('analysisName',''),
 						'climate': study.pop('tmy2name',''),
 						'studyType': study.pop('studyType',''),
 						'outputJson': {}}
 		if studyData['studyType'] == 'gridlabd':
+			fname, pub = study["feederName"].split("?")
+			studyData['sourceFeeder'] = fname
 			if "true" in pub:
 				studyFeeder = user_manager.get("public").get("Feeder",fname)
 			else:

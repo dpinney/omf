@@ -7,5 +7,5 @@ logs/*.log
 data/Analysis/*
 data/Study/*
 # But include a few example analyses:
-!analyses/z*
+!analyses/public_z*
 S3KEY.*
