@@ -31,8 +31,8 @@ def outputHtml(analysisObject, studyList):
 	for study in studyList:
 		studyDict[study.name] = {}
 		studyJson = study.outputJson
-		timeStamps = studyJson['timeStamps']
-		studyDict[study.name]['Power'] = studyJson['Consumption']['Power']
+		timeStamps = studyJson.get('timeStamps',[])
+		studyDict[study.name]['Power'] = studyJson.get('Consumption',{}).get('Power',[])
 	# What percentage of a year did we simulate?
 	intervalMap = {'minutes':60, 'hours':3600, 'days':86400}
 	inputData['yearPercentage'] = intervalMap[resolution]*len(timeStamps)/(365*24*60*60.0)
