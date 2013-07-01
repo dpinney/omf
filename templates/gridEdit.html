@@ -753,6 +753,14 @@
 		table = gebi('selected')
 		//Make all the boxes editable.
 		for (i = 1; i < table.rows.length - 1; i++) {
+		    span = $("<span>").html($(table.rows[i].cells[0]).html()).css("float", "right");
+		    button = $("<button>").attr("class", "deleteButton").html("X").css("float", "left").click(function(e){
+			$(this).parent().parent().remove();
+		    })
+		        $(table.rows[i].cells[0]).html("").append(button).append(span);
+
+
+		        // $(table.rows[i].cells[0]).prepend($("<button>").html("X").attr("class", "deleteButton"));
 			cell = table.rows[i].cells[1]
 			oldContent = cell.innerHTML
 			cell.innerHTML = '<input type="text" name="null" data-old="' + oldContent + '" value="' + oldContent + '"/>'
@@ -854,75 +862,92 @@
 				   ,
 				   [blank_inputs, new_at, new_at])){
 				   
-			alert("Don't leave stuff blank pal!");
+			alert("Don't leave stuff blank!");
 			return;
 		}
 			
 			
-		function isNameAlreadyUsed(testValue) {
-			// Helper function to make sure we don't make non-unique names.
-			for (leaf in tree) {
-			for (attrKey in tree[leaf]) {
-				if (attrKey == 'name' && tree[leaf][attrKey] == testValue) {
-				return true
-				}
+	    function isNameAlreadyUsed(testValue) {
+		// Helper function to make sure we don't make non-unique names.
+		for (leaf in tree) {
+		    for (attrKey in tree[leaf]) {
+			if (attrKey == 'name' && tree[leaf][attrKey] == testValue) {
+			    return true
 			}
-			}
-			return false
+		    }
 		}
-		table = gebi('selected')
-		// check for node or link:
-		treeObject = tree[treeIndex]
-		for (i = 1; i < table.rows.length - 1; i++) {
-			var k = table.rows[i].cells[0];
-			// key = k.firstElementChild && k.firstElementChild.nextElementSibling.nodeName == "INPUT" ? k.firstElementChild.value : k.innerHTML;
-			key = $(k).children("input").length > 0 ? $(k).children("input").val() : k.innerHTML;
-			console.log(key);
-			console.log(k.nodeName);
-			cell = table.rows[i].cells[1]
-			oldValue = cell.childNodes[0].getAttribute('data-old')
-			// if we are adding a completely new attribute, there would be no oldValue
-			newValue = cell.childNodes[0].value
-			// Names are GUIDS and so are strongly constrained. Make sure we're okay with the name change:
-			if (key=='name') {
-			// 1. If the name is already the name of something else, skip the renaming.
-			if (isNameAlreadyUsed(newValue) && oldValue != newValue) {
-				cell.innerHTML = oldValue
-				alert('Please choose a unique name.')
-			}
-			else {
-				treeObject[key] = newValue
-				cell.innerHTML = newValue
-				// 2. If the name is unique, go through EVERY attribute in the tree and replace the old name with the new one.
-				for (leaf in tree) {
-				for (attrKey in tree[leaf]) {
-					if (oldValue == tree[leaf][attrKey]) {console.log(tree[leaf]); tree[leaf][attrKey] = newValue}
-				}
-				}
-				// 3. Go through the nodes and replace the name there too. UGH!
-				nodeIndex = findIndex(nodes, 'name', oldValue)
-				if (nodeIndex != "") {nodes[nodeIndex]['name'] = newValue}
-			}
-			}
-			else {
+		return false
+	    }
+	    table = gebi('selected')
+	    // check for node or link:
+	    treeObject = tree[treeIndex]
+	    var undeleted_attributes = ["object"];
+	    for (i = 1; i < table.rows.length - 1; i++) {
+		var k = table.rows[i].cells[0];
+		// key = k.firstElementChild && k.firstElementChild.nextElementSibling.nodeName == "INPUT" ? k.firstElementChild.value : k.innerHTML;
+		key = $(k).children("input").length > 0 ? $(k).children("input").val() : $(k).children("span").html();
+		undeleted_attributes.push(key)
+		// undeleted_attributes[key] = true;
+		console.log(key);
+		console.log(k.nodeName);
+		cell = table.rows[i].cells[1]
+		oldValue = cell.childNodes[0].getAttribute('data-old')
+		// if we are adding a completely new attribute, there would be no oldValue
+		newValue = cell.childNodes[0].value
+		// Names are GUIDS and so are strongly constrained. Make sure we're okay with the name change:
+		if (key=='name') {
+		    // 1. If the name is already the name of something else, skip the renaming.
+		    if (isNameAlreadyUsed(newValue) && oldValue != newValue) {
+			cell.innerHTML = oldValue
+			alert('Please choose a unique name.')
+		    }
+		    else {
 			treeObject[key] = newValue
 			cell.innerHTML = newValue
-			k.innerHTML = key;
+			k.innerHTML = key
+			// 2. If the name is unique, go through EVERY attribute in the tree and replace the old name with the new one.
+			
+			for (leaf in tree) {
+			    for (attrKey in tree[leaf]) {
+				if (oldValue == tree[leaf][attrKey]) {console.log(tree[leaf]); tree[leaf][attrKey] = newValue}
+			    }
 			}
+			// 3. Go through the nodes and replace the name there too. UGH!
+			nodeIndex = findIndex(nodes, 'name', oldValue)
+			if (nodeIndex != "") {nodes[nodeIndex]['name'] = newValue}
+		    }
 		}
-		table.deleteRow(-1)
-		row = table.insertRow(-1)
-		cell = row.insertCell(0)
-		cell.colSpan = 2
-		cell.innerHTML = '<button type="button" onclick="editObject(' + treeIndex + ')">Edit</button>'
-		remove_del_buttons();
-		// delButton = gebi('selHead').rows[0].cells[1].children[0]
-		// delButton.parentNode.removeChild(delButton)
+		else {
+		    treeObject[key] = newValue
+		    cell.innerHTML = newValue
+		    k.innerHTML = key;
+		}
+	    }
+	    var all_attrs = {};
+	    for (attr in treeObject){
+		all_attrs[attr] = true;
+	    }
+	    for (i=0; i<undeleted_attributes.length; i++){
+		delete all_attrs[undeleted_attributes[i]];
+	    }
+	    for (a in all_attrs){
+		delete treeObject[a];
+	    }
+	    table.deleteRow(-1)
+	    row = table.insertRow(-1)
+	    cell = row.insertCell(0)
+	    cell.colSpan = 2
+	    cell.innerHTML = '<button type="button" onclick="editObject(' + treeIndex + ')">Edit</button>'
+	    remove_del_buttons();
+	    // delButton = gebi('selHead').rows[0].cells[1].children[0]
+	    // delButton.parentNode.removeChild(delButton)
 	}
 
 	function cancelEditing(treeIndex) {
 		table = gebi('selected')
 		for (i = 1; i < table.rows.length - 1; i++) {
+		        c0 = $(table.rows[i].cells[0])
+		        c0.html(c0.children("span").html())
 			cell = table.rows[i].cells[1]
 			old = cell.childNodes[0].getAttribute('data-old')
 			cell.innerHTML = old
