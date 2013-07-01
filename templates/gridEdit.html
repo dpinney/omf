@@ -757,6 +757,7 @@
 		    button = $("<button>").attr("class", "deleteButton").html("X").css("float", "left").click(function(e){
 			$(this).parent().parent().remove();
 		    })
+		    if ($(table.rows[i].cells[0]).html() != "name")
 		        $(table.rows[i].cells[0]).html("").append(button).append(span);
 
 
@@ -881,7 +882,7 @@
 	    table = gebi('selected')
 	    // check for node or link:
 	    treeObject = tree[treeIndex]
-	    var undeleted_attributes = ["object"];
+	    var undeleted_attributes = ["object", "name"];
 	    for (i = 1; i < table.rows.length - 1; i++) {
 		var k = table.rows[i].cells[0];
 		// key = k.firstElementChild && k.firstElementChild.nextElementSibling.nodeName == "INPUT" ? k.firstElementChild.value : k.innerHTML;
