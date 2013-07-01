@@ -10,6 +10,8 @@ app = flask.Flask(__name__)
 try:
 	with open('S3KEY.txt','r') as keyFile:
 		USER_PASS = keyFile.read()
+	with open('COOKIEKEY.txt','r') as cookieKeyFile:
+		COOKIE_KEY = keyFile.read()
 	store = storage.S3store('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnomf')
 	worker = work.ClusterWorker('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnOmfJobQueue', 'crnOmfTerminateQueue', 'crnOmfImportQueue', store)
 	URL = 'www.omf.coop'
@@ -23,8 +25,11 @@ except:
 	print 'Running on local file system.'
 
 def some_random_string():
-	# Random string for signing/encrypting cookies.
-	return hashlib.md5(str(random.random())+str(time.time())).hexdigest()
+	if 'COOKIE_KEY' in globals():
+		return COOKIE_KEY
+	else:
+		# Random string for signing/encrypting cookies.
+		return hashlib.md5(str(random.random())+str(time.time())).hexdigest()
 	
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
