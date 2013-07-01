@@ -460,7 +460,8 @@ def saveFeeder(public):
 			return "You are not authorized to modify public feeders"
 	else:
 		# store.put("Feeder", flask_login.current_user.username+"_"+str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
-		flask_login.current_user.put("Feeder", str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
+		adminPrefix = "admin_" if flask_login.current_user.username == "admin" else ""
+		flask_login.current_user.put("Feeder", adminPrefix+str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
 	return flask.redirect(flask.url_for('root') + '#feeders')
 
 @app.route("/feederName/<new_name>")
