@@ -753,12 +753,15 @@
 		table = gebi('selected')
 		//Make all the boxes editable.
 		for (i = 1; i < table.rows.length - 1; i++) {
-		    span = $("<span>").html($(table.rows[i].cells[0]).html()).css("float", "right");
+		    var c0 = $(table.rows[i].cells[0]);
+		    span = $("<span>").html(c0.html()).css("float", "right");
 		    button = $("<button>").attr("class", "deleteButton").html("X").css("float", "left").click(function(e){
 			$(this).parent().parent().remove();
 		    })
-		    if ($(table.rows[i].cells[0]).html() != "name")
-		        $(table.rows[i].cells[0]).html("").append(button).append(span);
+
+	            c0.html("").append(span);
+		    if (c0.children("span").html() != "name")
+		        c0.append(button);
 
 
 		        // $(table.rows[i].cells[0]).prepend($("<button>").html("X").attr("class", "deleteButton"));
