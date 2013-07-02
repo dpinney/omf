@@ -302,6 +302,7 @@ def viewReports(analysisName):
 def feederGet(feederName):
 	return flask.render_template('gridEdit.html',
 								 feederName=feederName,
+								 ref = flask.request.referrer,
 								 is_admin = flask_login.current_user.username == "admin",
 								 anaFeeder=False,
 								 public = flask.request.args.get("public") == "true")
@@ -466,7 +467,8 @@ def saveFeeder(public):
 				store.put("Feeder", "admin_"+str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
 		else:
 			flask_login.current_user.put("Feeder", str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
-	return flask.redirect(flask.url_for('root') + '#feeders')
+	# return flask.redirect(flask.url_for('root') + '#feeders')
+	return flask.redirect(flask.request.form.get("ref", flask.url_for("root")+"#feeders"))
 
 @app.route("/feederName/<new_name>")
 @flask_login.login_required

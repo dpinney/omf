@@ -1350,7 +1350,8 @@
 	    var name = new_name ? new_name : gebi("gridName").innerHTML
 	    payload = {'name':name,
 		       'feederObjectJson':JSON.stringify(feederObject, null, '    '),
-		       "_csrf_token":"{{ csrf_token() }}"
+		       "_csrf_token":"{{ csrf_token() }}",
+		       ref: "{{ ref }}"
 		      }
 	    if (!new_name)
 		post_to_url('/saveFeeder/{% if public %}True{% else %}False{% endif %}', payload)

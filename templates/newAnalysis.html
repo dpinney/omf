@@ -24,11 +24,12 @@
 	<script>
 		None = []
 		// First, pull in the JSON data.
-		existingStudies = {{ existingStudies | safe }}
-		existingReports = {{ existingReports | safe }}
-		studyTemplates = {{ studyTemplates | safe }}
-		reportTemplates = {{ reportTemplates | safe }}
-		analysisMd = {{ analysisMd | safe }}
+		    existingStudies = {{ existingStudies | safe }}
+		    existingReports = {{ existingReports | safe }}
+		    studyTemplates = {{ studyTemplates | safe }}
+		    reportTemplates = {{ reportTemplates | safe }}
+		    analysisMd = {{ analysisMd | safe }}
+
 		function addStudy(studyType) {
 			studyPrefix = "<a onclick='javascript:removeStudyReport(this)' class='removeStudyReport'>&#10006;</a>"
 			studyHtml = studyPrefix + studyTemplates[studyType]
@@ -50,6 +51,51 @@
 		function removeStudyReport(aClicked) {
 			aClicked.parentNode.parentNode.removeChild(aClicked.parentNode)
 		}
+
+
+
+
+                function getResponseDict(check){
+		    responseDict = {}
+		    // Get the analysis-level stuff.
+		    responseDict.simLength = check ? check(parseInt(gebi('simLength').value), /[1-9]\d*/) : $("#simLength").val()
+		    responseDict.simLengthUnits = check ? check(getRadioSetting('radio'), /\w+/) : getRadioSetting("radio")
+		    responseDict.simStartDate = check ? check(gebi('simStartDate').value, /\d\d\d\d-[01]\d-[0123]\d/) : $("#simStartDate").val() // Doesn't flag all bogus dates but it's close enough.
+		    responseDict.analysisName = check ? check(gebi('analysisName').value, /[\w\s]*/) : $("#analysisName").val() // Must be a valid filename!
+		    // Get the study-level stuff.
+		    studyList = []
+		    studyDivs = document.getElementsByClassName('studyOptions')
+		    for (i=0; i<studyDivs.length; i++) {
+			study = {}
+			allInputs = studyDivs[i].querySelectorAll('input,select')
+			for (j=0; j<allInputs.length;j++) {
+			    thisInput = allInputs[j]
+			    if (thisInput.className == 'studyName') {
+				if (check)
+				    check(thisInput.value, /[\w\s]*/)
+			    }// Must be a valid filename!}
+			    
+			    study[thisInput.className] = thisInput.value
+			}
+			studyList.push(study)
+		    }
+		    responseDict.studies = studyList
+		    // Get the reports.
+		    chosenReports = []
+		    reportDivs = document.getElementsByClassName('reportOptions')
+		    for (i=0; i<reportDivs.length; i++) {
+			report = {}
+			report.reportType = reportDivs[i].querySelector('.reportName').innerHTML
+			inputFields = reportDivs[i].querySelectorAll('input')
+			for (j=0; j<inputFields.length; j++) {
+			    inputBox = inputFields[j]
+			    report[inputBox.className] = inputBox.value
+			}
+			chosenReports.push(report)
+		    }
+		    responseDict.reports = chosenReports
+		    return responseDict;
+		}
 		function saveAnalysis() {
 			// First, a helper function to validate input against a regex:
 			try {
@@ -63,54 +109,19 @@
 						// this error will abort the analysis creation process:
 						throw 'ValidationError'
 					}
+				    
 				}
-				responseDict = {}
-				// Get the analysis-level stuff.
-				responseDict.simLength = check(parseInt(gebi('simLength').value), /[1-9]\d*/)
-				responseDict.simLengthUnits = check(getRadioSetting('radio'), /\w+/)
-				responseDict.simStartDate = check(gebi('simStartDate').value, /\d\d\d\d-[01]\d-[0123]\d/) // Doesn't flag all bogus dates but it's close enough.
-				responseDict.analysisName = check(gebi('analysisName').value, /[\w\s]*/) // Must be a valid filename!
-				// Get the study-level stuff.
-				studyList = []
-				studyDivs = document.getElementsByClassName('studyOptions')
-				for (i=0; i<studyDivs.length; i++) {
-					study = {}
-					allInputs = studyDivs[i].querySelectorAll('input,select')
-					for (j=0; j<allInputs.length;j++) {
-						thisInput = allInputs[j]
-						if (thisInput.className == 'studyName') {
-						    check(thisInput.value, /[\w\s]*/)
-						}// Must be a valid filename!}
-					    
-						study[thisInput.className] = thisInput.value
-					}
-					studyList.push(study)
-				}
-				responseDict.studies = studyList
-				// Get the reports.
-				chosenReports = []
-				reportDivs = document.getElementsByClassName('reportOptions')
-				for (i=0; i<reportDivs.length; i++) {
-					report = {}
-					report.reportType = reportDivs[i].querySelector('.reportName').innerHTML
-					inputFields = reportDivs[i].querySelectorAll('input')
-					for (j=0; j<inputFields.length; j++) {
-						inputBox = inputFields[j]
-						report[inputBox.className] = inputBox.value
-					}
-					chosenReports.push(report)
-				}
-				responseDict.reports = chosenReports
-				// Send the request.
-					if (JSON.parse(ajaxReq("GET", "/uniqueName/"+gebi("analysisName").value))){
-					    responseDict["is_public"] = '{{ is_public }}';
-						post_to_url('/saveAnalysis/', {'json':JSON.stringify(responseDict),
-									      "_csrf_token":"{{ csrf_token() }}"})
-					}else {
-						alert("Please choose a unique Analysis Name");
-						gebi("analysisName").style.border = "1px solid red";
-						gebi("analysisName").focus();
-				}
+			    responseDict = getResponseDict(check);
+			    // Send the request.
+			    if (JSON.parse(ajaxReq("GET", "/uniqueName/"+gebi("analysisName").value))){
+				responseDict["is_public"] = '{{ is_public }}';
+				post_to_url('/saveAnalysis/', {'json':JSON.stringify(responseDict),
+							       "_csrf_token":"{{ csrf_token() }}"})
+			    }else {
+				alert("Please choose a unique Analysis Name");
+				gebi("analysisName").style.border = "1px solid red";
+				gebi("analysisName").focus();
+			    }
 			} 
 			catch(err) {
 				alert('Some form values are not correct.')
@@ -179,23 +190,61 @@
 	</div>
 	<script>
 	// INIT Code: set up the existing reports and studies.
-	for (exRep=0;exRep<existingReports.length;exRep++) {
+	function init(){
+	    for (exRep=0;exRep<existingReports.length;exRep++) {
 		addReport(existingReports[exRep].reportType)
+	    }
+	    for (exStud=0;exStud<existingStudies.length;exStud++) {
+		newDiv = addStudy(existingStudies[exStud].studyType) // studyType
+		newDiv.querySelector('.studyName').value = existingStudies[exStud].name // studyName
+	        fname = existingStudies[exStud].sourceFeeder // SourceFeeder
+		if(fname.indexOf("_") > -1)
+	            newDiv.querySelector('.feederName').value = fname+"?public=false"
+		else
+		    newDiv.querySelector(".feederName").value = fname+"?public=true"
+		newDiv.querySelector('.tmy2name').value = existingStudies[exStud].climate // climate
+	    }
+	    // Set up the analysis-level stuff.
+	    gebi('simLength').value = analysisMd.simLength
+	    gebi(analysisMd.simLengthUnits).checked = true
+	    gebi('simStartDate').value = analysisMd.simStartDate
 	}
-	for (exStud=0;exStud<existingStudies.length;exStud++) {
-		newDiv = addStudy(existingStudies[exStud].studyType)
-		newDiv.querySelector('.studyName').value = existingStudies[exStud].name
-	        fname = existingStudies[exStud].sourceFeeder
-	    if(fname.indexOf("_") > -1)
-	        newDiv.querySelector('.feederName').value = fname+"?public=false"
-	    else
-		newDiv.querySelector(".feederName").value = fname+"?public=true"
-	    //existingStudies[exStud].sourceFeeder
-		newDiv.querySelector('.tmy2name').value = existingStudies[exStud].climate
+
+        function fromResponseDict(rd){
+	    fillInReports(rd.reports);
+	    fillInStudies(rd.studies);
+	    $("#simLength").val(rd.simLength);
+	    $("input[type=radio][value="+rd.simLengthUnits+"]")[0].checked = true;
+	    $("#simStartDate").val(rd.simStartDate);
+	    $("#analysisName").val(rd.analysisName);
 	}
-	// Set up the analysis-level stuff.
-	gebi('simLength').value = analysisMd.simLength
-	gebi(analysisMd.simLengthUnits).checked = true
-	gebi('simStartDate').value = analysisMd.simStartDate
+
+
+        function fillInStudies(studyArray){
+	    for(i=0; i<studyArray.length; i++){
+		newDiv = addStudy(studyArray[i].studyType);
+		newDiv.querySelector(".studyName").value = studyArray[i].studyName;
+		newDiv.querySelector(".feederName").value = studyArray[i].feederName;
+		newDiv.querySelector(".tmy2name").value = studyArray[i].tmy2name;
+	    }
+	}
+        
+        function fillInReports(reportArray){
+	    for(i=0; i<reportArray.length; i++){
+		addReport(reportArray[i].reportType);
+		for (field in reportArray[i]){
+		    if (field != "reportType"){
+			$("."+field).val(reportArray[i][field])
+		    }
+		}
+	    }
+	}
+        if (localStorage.rd)
+	    fromResponseDict(JSON.parse(localStorage.rd))
+        else
+	    init();
+        interval = setInterval(function(){
+	    localStorage.rd = JSON.stringify(getResponseDict())
+	}, 250);
 	</script>
 </body>
