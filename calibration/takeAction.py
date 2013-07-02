@@ -4,7 +4,7 @@ import Config_Parameter_Limits as limits
 # Main function takeAction(action,vals,diffs) takes action code, list of previously used calibration parameter values, and list of calculated differences for four main metrics. 
 # Returns a list of lists, each is a set of calibration parameter values to try. 
 
-def loadLevel (a, avg_house, avg_comm, base_load_scalar, avg_diff):
+def loadLevel (a, a_count, avg_house, avg_comm, base_load_scalar, avg_diff):
 	options = [None] * 7
 	for i in xrange(7):
 		options[i] = [base_load_scalar, avg_house, avg_comm]
@@ -15,7 +15,8 @@ def loadLevel (a, avg_house, avg_comm, base_load_scalar, avg_diff):
 		scalar = 2
 	else:
 		scalar = 1
-		
+	if a_count > 1 and scalar > 1:
+		scalar -= 1
 	change_r = 1000 * scalar
 	change_c = 4000 
 	change_base_load = 0.05;
@@ -315,10 +316,11 @@ def resSchedSkew(seconds):
 	return final
 	
 
-def takeAction(action,vals,diffs):
+def takeAction(action,action_count,vals,diffs):
 	'''Calculate changes to certain calibration parameters based on the action code supplied (from chooseAction.py)
 	
 	- action (int)-- Action code from chooseAction.py. Determines which calibration parameters to alter.
+	- action_count (int) -- How many times this action has been attempted. 
 	- vals (list)-- List of previously used calibration parameters. (Order is important.)
 	- diffs (list)-- Calculated differences for the four main metrics [pv_s,te_s,pv_w,te_w]. 
 	
@@ -334,7 +336,7 @@ def takeAction(action,vals,diffs):
 	i = abs(action);
 	calibrations = []
 	if i == 1:
-		options = loadLevel(action, a, b, c, avg_diff)
+		options = loadLevel(action, action_count, a, b, c, avg_diff)
 		for n in xrange(len(options)):
 			calibrations.append([options[n][1], options[n][2], options[n][0], d, e, f, g, h, j, k, l, m])
 	elif i == 2:

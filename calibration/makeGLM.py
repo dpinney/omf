@@ -6,23 +6,30 @@ import math
 import feeder
 import Milsoft_GridLAB_D_Feeder_Generation
 
-interval = 300  # seconds
+# recording interval (seconds)
+interval = 300  
+
+# flag whether we're using mysql for recorder output or not ( implies using .csv files instead )
+# Make sure this flag is the same in gleanMetrics.py or there'll be problems. 
+use_mysql = 0 # 0 => .csv files; 1 => mysql database
+
+# MySQL schema name
 schema = 'CalibrationDB'
 
 
 def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 	'''Create populated dict and write it to .glm file
 	
-	- clock (dictionary) links the three seasonal dates with start and stop times (start simulation full 24 hour before day we're recording)
+	- clock (dictionary) links the three seasonal dates with start and stop timestamps (start simulation full 24 hour before day we're recording)
 	- calib_file (string) -- filename of one of the calibration files generated during a calibration round 
 	- baseGLM (dictionary) -- orignal base dictionary for use in Milsoft_GridLAB_D_Feeder_Generation.py
 	- case_flag (int) -- flag technologies to test
 	- feeder_config (string TODO: this is future work, leave as 'None')-- feeder configuration file (weather, sizing, etc)
 	- dir(string)-- directory in which to store created .glm files
 	'''
-	# create populated dictionary
+	# Create populated dictionary.
 	if calib_file is not None:
-		print ('Populating feeder using calibration file ' + calib_file+'.')
+		print ('Populating feeder using calibration file '+calib_file+'.')
 		calib_fullpath = dir+'\\'+calib_file
 	else:
 		print ('Populating feeder using default calibrations.')
@@ -31,13 +38,14 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 	
 	fnames =  []
 	for i in clock.keys():
-		# define start and end
+		# Simulation start
 		starttime = clock[i][0]
-		#starttime = i
+		# Recording start
 		rec_starttime = i
+		# Simulation and Recording stop
 		stoptime = clock[i][1]
 		
-		# calculate limit
+		# Calculate limit.
 		j = datetime.datetime.strptime(rec_starttime,'%Y-%m-%d %H:%M:%S')
 		k = datetime.datetime.strptime(stoptime,'%Y-%m-%d %H:%M:%S')
 		diff = (k - j).total_seconds()
@@ -45,7 +53,7 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 		
 		populated_dict = glmDict
 		
-		# name the file
+		# Name the file.
 		if calib_file is None:
 			id = 'DefaultCalibration'
 		else:
@@ -54,7 +62,7 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 		date = re.sub('\s.*$','',rec_starttime)
 		filename = id + '_' + date + '.glm'
 		
-		# get into clock object and change start and stop time
+		# Get into clock object and set start and stop timestamp.
 		for i in populated_dict.keys():
 			if 'clock' in populated_dict[i].keys():
 				populated_dict[i]['starttime'] = "'{:s}'".format(starttime)
@@ -62,43 +70,40 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 		
 		lkey = last_key
 		
-		# USE ONLY ONE OF THE FOLLOWING BLOCKS OF CODE FOR RECORDING SIMULATION OUTPUT.
-		###############################################################################
-		# # TO USE MYSQL FOR RECORDER OUTPUT, USE THIS:
-		# populated_dict[lkey] = { 'module' : 'mysql' }
-		# lkey += 1
-		# populated_dict[lkey] = {'object' : 'database',
-									# 'name' : '{:s}'.format(schema),
-									# 'schema' : '{:s}'.format(schema) }
-		# lkey += 1
-		# populated_dict[lkey] = {'object' : 'mysql.recorder',
-									# 'table' : 'network_node_recorder',
-									# 'parent' : 'network_node',
-									# 'property' : 'measured_real_power,measured_real_energy',
-									# 'interval' : '{:d}'.format(interval),
-									# 'limit' : '{:d}'.format(limit),
-									# 'start': "'{:s}'".format(rec_starttime),
-									# 'connection': schema,
-									# 'mode': 'a'}
-									
-		# # TO USE *.CSV FILES FOR RECORDER OUTPUT, USE THIS:
-		populated_dict[lkey] = {'object' : 'tape.recorder',
-									#'file' : id + '_' + date + '_network_node_recorder.csv',
-									'file' : 'csv_output/{:s}_{:s}_network_node_recorder.csv'.format(id,date),
-									'parent' : 'network_node',
-									'property' : 'measured_real_power,measured_real_energy',
-									'interval' : '{:d}'.format(interval),
-									'limit' : '{:d}'.format(limit),
-									'in': "'{:s}'".format(rec_starttime) }
-		##############################################################################
-		
-		# turn into a .glm and save it in the given directory
-		
+		if use_mysql == 1:
+			# Add GridLAB-D objects for recording into MySQL database.
+			populated_dict[lkey] = { 'module' : 'mysql' }
+			lkey += 1
+			populated_dict[lkey] = {'object' : 'database',
+										'name' : '{:s}'.format(schema),
+										'schema' : '{:s}'.format(schema) }
+			lkey += 1
+			populated_dict[lkey] = {'object' : 'mysql.recorder',
+										'table' : 'network_node_recorder',
+										'parent' : 'network_node',
+										'property' : 'measured_real_power,measured_real_energy',
+										'interval' : '{:d}'.format(interval),
+										'limit' : '{:d}'.format(limit),
+										'start': "'{:s}'".format(rec_starttime),
+										'connection': schema,
+										'mode': 'a'}
+		else:
+			# Add GridLAB-D object for recording into *.csv files.
+			populated_dict[lkey] = {'object' : 'tape.recorder',
+										'file' : 'csv_output/{:s}_{:s}_network_node_recorder.csv'.format(id,date),
+										'parent' : 'network_node',
+										'property' : 'measured_real_power,measured_real_energy',
+										'interval' : '{:d}'.format(interval),
+										'limit' : '{:d}'.format(limit),
+										'in': "'{:s}'".format(rec_starttime) }
+										
+		# Turn dictionary into a *.glm string and print it to a file in the given directory.
 		glmstring = feeder.sortedWrite(populated_dict)
 		file = open(dir+'\\'+filename, 'w')
 		file.write(glmstring)
 		file.close()
 		print ("\t"+filename+ " is ready.")
+		
 		fnames.append(filename)
 	return fnames
 

@@ -418,7 +418,7 @@ def calibrateLoop(glm_name, main_mets, scada, days, eval, counter, baseGLM, case
 	print ("\tFINAL DECISION: We're going to use Action ID "+str(action)+" ( "+desc+" ). \n\tThis action will have been tried " + str(action_count[action]) + " times.")
 	
 	# Take the decided upon action and produce a list of lists with difference calibration parameters to try
-	calibrations = takeAction.takeAction(action,getCalibVals(glm_name,dir),main_mets)
+	calibrations = takeAction.takeAction(action,action_count[action],getCalibVals(glm_name,dir),main_mets)
 	print ("That's " + str(len(calibrations)) + " calibrations to test.")
 	
 	# For each list of calibration values in list calibrations, make a .py file.
