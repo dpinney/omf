@@ -1,14 +1,6 @@
 <tr class="analysis {{ md['name'].replace('_', '__').replace(' ', '_') }}">
   <td class="public" style="display:none;">{% if "true" in value["url"] %}true{% else %}false{% endif %}</td>
   <td style="display:none"><a name="{{ md['name'] }}"></a></td>
-  <!-- <td class="name"> -->
-  <!--   {% if key == "Private" and is_admin %} -->
-    <!-- <span class="owner">{{ md['name'][:md['name'].find("_")] }}: </span> -->
-    <!-- <span  class="analysisName">{{ md["name"][md["name"].find("_")+1:]}}</span> -->
-  <!--   {% else %} -->
-  <!--   {{ md["name"] }} -->
-  <!--   {% endif %} -->
-  <!-- </td> -->
   <td class="name"
       {% if key == "Private" and is_admin %}
       style="display:none"
@@ -16,8 +8,8 @@
       >{{ md["name"] }}</td>
   {% if key == "Private" and is_admin %}
   <td>
-    <span class="owner">{{ md['name'][:md['name'].find("_")] }}: </span>
-    <span  class="analysisName">{{ md["name"][md["name"].find("_")+1:]}}</span>
+    <span class="owner">{{ md["name"].split("_")[0] }}: </span>
+    <span class="analysisName">{{ "_".join(md["name"].split("_")[1:]) }}</span>
   </td>
   {% endif %}
   <td class="sourceFeeder">{{ md['sourceFeeder'] }}</td>

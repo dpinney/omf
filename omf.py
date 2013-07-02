@@ -337,7 +337,7 @@ def uniqueName(name):
 @flask_login.login_required
 def run():
 	# Get the analysis, and set it running on the data store.
-	user = user_manager.get("public") if flask.request.args.get("public") == "true" else flask_login.current_user
+	user, key = (user_manager.get("public"), "Public") if flask.request.args.get("public") == "true" else (flask_login.current_user, "Private")
 	anaName = flask.request.form.get('analysisName')
 	thisAnalysis = analysis.Analysis(user.get('Analysis', anaName, False))
 	thisAnalysis.status = 'running'
@@ -346,6 +346,8 @@ def run():
 	worker.run(thisAnalysis, store)
 	return flask.render_template('metadata.html',
 								 md=dict(thisAnalysis.__dict__.items() + {"name":anaName}.items()),
+								 key=key,
+								 is_admin = flask_login.current_user.username == "admin",
 								 value = {"url":"?public="+("true" if user.username == "public" else "false")})
 
 @app.route('/delete/', methods=['POST'])
