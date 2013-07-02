@@ -602,7 +602,7 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					if pool_pump_perc < (2*config_data['perc_poolpumps']) and no_pool_pumps >= 1 and row_ti == 0:
 						ResTechDict[last_object_key] = {'object' : 'ZIPload',
 														'name' : 'house{:d}_ppump_{:s}'.format(y,my_name),
-														'parent' : 'house{:s}_{:s}'.format(y,my_name),
+														'parent' : 'house{:d}_{:s}'.format(y,my_name),
 														'comment' : '// Pool Pump',
 														'groupid' : 'Pool_Pump',
 														'schedule_skew' : '{:.0f}'.format(pp_skew_value),

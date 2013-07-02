@@ -8,7 +8,7 @@ import re
 # start big ugly .m copy/paste - about 3329 lines
 
 #function [data] = Configuration(file_to_extract, classification)
-def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=None):
+def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=None):
 	data = {}
 	# This file contains data particular to each feeder, and regionalization data for each load classification being used. This data may be different for each feeder. 
 	if file_to_extract == None:
@@ -16,7 +16,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 	else:
 		file_extracted = file_to_extract
 
-	data["intro"] = 'Populated feeder '+ file_extracted +'for DUKE'
+	data["intro"] = 'Populated feeder '+ file_extracted +'.'
 	
 	if classification == None:
 		classID = None
@@ -24,21 +24,41 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		classID = classification
 		
 	working_directory = re.sub('\\\\','\\\\\\\\',wdir)
-	#data["directory"] = 'C:\\\\Users\\\\d3y051\\\\Documents\\\\NRECA_feeder_calibration 2-2013\\\\Calibration\\\\repository_two\\\\Feeder_Test\\\\schedules'
-	#dir = 'C:\\\\Users\\\\d3y051\\\\Documents\\\\NRECA_feeder_calibration_2-2013\\\\Calibration\\\\repository_two\\\\Feeder_Test\\\\schedules\\\\'
 	dir = working_directory+'\\\\schedules\\\\'
 	data["directory"] = dir
-	#default case
+	
+	default_weather_by_region = { 	1:	['CA-San_francisco.tmy2', 	'PST+8PDT'],
+									2:	['IL-Chicago.tmy2', 		'CST+6CDT'],
+									3:	['AZ-Phoenix.tmy2', 		'MST+7MDT'],
+									4:	['TN-Nashville.tmy2', 		'CST+6CDT'],
+									5:	['FL-Miami.tmy2', 			'EST+5EDT'],
+									6:	['HI-Honolulu.tmy2', 		'HST10'] }
+
 	if file_to_extract == None:
+		# Use default values.
 		
 		# Region Properties
 		# - Weather File (May be .tmy2 or .csv)
 		# - Region Identifier (1:West Coast (temperate), 2:North Central/Northeast (cold/cold), 3:Southwest (hot/arid), 4:Southeast/Central (hot/cold), 5:Southeast Coastal (hot/humid), 6: Hawaii (sub-tropical))
 		# - Timezone
-		data["weather"] = 'schedules\\\\SCADA_weather_ISW_gld.csv'
-		data["region"] = 4
-		data["timezone"] = 'PST+8PDT'
 		
+		# TODO: These variables should be filled in automatically, probably from 'make weather file' script. Within that function we should get the appropriate timestamp and region ID too. 
+		data["weather"] = 'schedules\\\\SCADA_weather_ISW_gld.csv'
+		data["timezone"] = 'PST+8PDT'
+		region = 4
+		
+		if not region or region not in xrange(1,7):
+			print ("No region ID found. Using region 1 (West Coast, Temperate) to fill in default house configurations.")
+			region = 1
+		data["region"] = region
+		
+		if "weather" not in data.keys() or not data["weather"]:
+			print ("Using default weather file for climate region "+str(region))
+			data["weather"] = 'schedules\\\\'+default_weather_by_region[region][0]
+			data["timezone"] = default_weather_by_region[region][1]
+		elif "timezone" not in data.keys() or not data["timezone"]:
+			data["timezone"] = default_weather_by_region[region][1]
+
 		# Feeder Properties
 		# - Substation Rating in MVA (Additional 15% gives rated kW & pf = 0.87)
 		# - Nominal Voltage of Feeder Trunk
@@ -93,7 +113,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		data["indust_scalar_com_i"]=0;
 		data["indust_scalar_com"]=0+0j
 
-		# Thermal Percentages
+		# Thermal Percentages by Region
 		# - The "columns" represent load classifications. The "rows" represent the breakdown within that classification of building age. 
 		#   1:<1940     2:1980-89   3:<1940     4:1980-89   5:<1960     6:<1960     7:<2010 8:<2010 9:<2010
 		#   1:1940-49   2:>1990     3:1940-49   4:>1990     5:1960-89   6:1960-89   7:-     8:-     9:-
@@ -101,13 +121,125 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		#   1:1960-69   2:-         3:1960-69   4:-         5:-         6:-         7:-     8:-     9:-
 		#   1:1970-79   2:-         3:1970-79   4:-         5:-         6:-         7:-     8:-     9:-
 		#   1:-         2:-         3:-   		4:-         5:-         6:-         7:-     8:-     9:-
-		thermal_percentages = [[0.1470, 0.3297, 0.1470, 0.3297, 0.0000, 0.1198, 1, 1, 1],   #1
-							   [0.0942, 0.6702, 0.0942, 0.6702, 0.5958, 0.6027, 0, 0, 0], 	#2
-							   [0.2253, 0.0000, 0.2253, 0.0000, 0.4041, 0.2773, 0, 0, 0], 	#3
-							   [0.2311, 0.0000, 0.2311, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
-							   [0.3022, 0.0000, 0.3022, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
-							   [0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
-
+		
+		# Using values from the old regionalization.m script. 
+		# Retooled the old thermal percentages values into this new "matrix" form for classifications.
+		if region == 1:
+			thermal_percentages = [	[0.1652, 0.4935, 0.1652, 0.4935, 0.0000, 0.1940, 1, 1, 1],  #1
+									[0.1486, 0.5064, 0.1486, 0.5064, 0.7535, 0.6664, 0, 0, 0], 	#2
+									[0.2238, 0.0000, 0.2238, 0.0000, 0.2462, 0.1395, 0, 0, 0], 	#3
+									[0.1780, 0.0000, 0.1780, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+									[0.2841, 0.0000, 0.2841, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			data["floor_area"] = [2209, 2209, 2209, 2209, 1054, 820, 0, 0, 0]
+			data["one_story"] = [0.6887] * 9
+			perc_gas = [0.7051] * 9 
+			perc_pump = [0.0321] * 9
+			perc_AC = [0.4348] * 9 
+			wh_electric = [0.7455] * 9
+			wh_size = [[0.0000,0.3333,0.6667]] * 9
+			AC_type = [	[1, 1, 1, 1, 1, 1, 0, 0, 0], # central
+						[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			over_sizing_factor = [	[ 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0, 0, 0], # central
+									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			perc_pool_pumps= [0.0904] * 9
+		elif region == 2:
+			thermal_percentages = [	[0.2873, 0.3268, 0.2873, 0.3268, 0.0000, 0.2878, 1, 1, 1],  #1
+									[0.1281, 0.6731, 0.1281, 0.6731, 0.6480, 0.5308, 0, 0, 0], 	#2
+									[0.2354, 0.0000, 0.2354, 0.0000, 0.3519, 0.1813, 0, 0, 0], 	#3
+									[0.1772, 0.0000, 0.1772, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+									[0.1717, 0.0000, 0.1717, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			data["floor_area"] = [2951] * 9
+			data["one_story"] = [0.5210] * 9
+			perc_gas = [0.8927] * 9
+			perc_pump = [0.0177] * 9
+			perc_AC = [0.7528] * 9 
+			wh_electric = [0.7485] * 9
+			wh_size = [[0.1459,0.5836,0.2706]] * 9
+			AC_type = [	[1, 1, 1, 1, 1, 1, 0, 0, 0], # central
+						[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			over_sizing_factor = [	[ 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0, 0, 0], # central
+									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			perc_pool_pumps= [0.0591] * 9
+		elif region == 3:
+			thermal_percentages = [	[0.1240, 0.3529, 0.1240, 0.3529, 0.0000, 0.1079, 1, 1, 1],  #1
+									[0.0697, 0.6470, 0.0697, 0.6470, 0.6343, 0.6316, 0, 0, 0], 	#2
+									[0.2445, 0.0000, 0.2445, 0.0000, 0.3656, 0.2604, 0, 0, 0], 	#3
+									[0.2334, 0.0000, 0.2334, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+									[0.3281, 0.0000, 0.3281, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			data["floor_area"] = [2370] * 9
+			data["one_story"] = [0.7745] * 9
+			perc_gas = [0.6723] * 9
+			perc_pump = [0.0559] * 9
+			perc_AC = [0.5259] * 9
+			wh_electric = [0.6520] * 9
+			wh_size = [[0.2072,0.5135,0.2793]] * 9
+			AC_type = [	[1, 1, 1, 1, 1, 1, 0, 0, 0], # central
+						[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			over_sizing_factor = [	[ 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0, 0, 0], # central
+									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			perc_pool_pumps= [0.0818] * 9
+		elif region == 4:
+			thermal_percentages = [	[0.1470, 0.3297, 0.1470, 0.3297, 0.0000, 0.1198, 1, 1, 1],  #1
+									[0.0942, 0.6702, 0.0942, 0.6702, 0.5958, 0.6027, 0, 0, 0], 	#2
+									[0.2253, 0.0000, 0.2253, 0.0000, 0.4041, 0.2773, 0, 0, 0], 	#3
+									[0.2311, 0.0000, 0.2311, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+									[0.3022, 0.0000, 0.3022, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			data["floor_area"] = [2655] * 9
+			data["one_story"] = [0.7043] * 9
+			perc_gas = [0.4425] * 9
+			perc_pump = [0.1983] * 9
+			perc_AC = [0.9673] * 9
+			wh_electric = [0.3572] * 9
+			wh_size = [[0.2259,0.5267,0.2475]] * 9
+			AC_type = [	[1, 1, 1, 1, 1, 1, 0, 0, 0], # central
+						[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			over_sizing_factor = [	[ 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0, 0, 0], # central
+									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			perc_pool_pumps= [0.0657] * 9
+		elif region == 5:
+			thermal_percentages = [	[0.1470, 0.3297, 0.1470, 0.3297, 0.0000, 0.1198, 1, 1, 1],  #1
+									[0.0942, 0.6702, 0.0942, 0.6702, 0.5958, 0.6027, 0, 0, 0], 	#2
+									[0.2253, 0.0000, 0.2253, 0.0000, 0.4041, 0.2773, 0, 0, 0], 	#3
+									[0.2311, 0.0000, 0.2311, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+									[0.3022, 0.0000, 0.3022, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			data["floor_area"] = [2655] * 9
+			data["one_story"] = [0.7043] * 9
+			perc_gas = [0.4425] * 9
+			perc_pump = [0.1983] * 9
+			perc_AC = [0.9673] * 9
+			wh_electric = [0.3572] * 9
+			wh_size = [[0.2259,0.5267,0.2475]] * 9
+			AC_type = [	[1, 1, 1, 1, 1, 1, 0, 0, 0], # central
+						[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			over_sizing_factor = [	[ 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0, 0, 0], # central
+									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			perc_pool_pumps= [0.0657] * 9
+		elif region == 6:
+			thermal_percentages = [	[0.2184, 0.3545, 0.2184, 0.3545, 0.0289, 0.2919, 1, 1, 1],  #1
+									[0.0818, 0.6454, 0.0818, 0.6454, 0.6057, 0.5169, 0, 0, 0], 	#2
+									[0.2390, 0.0000, 0.2390, 0.0000, 0.3652, 0.1911, 0, 0, 0], 	#3
+									[0.2049, 0.0000, 0.2049, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+									[0.2556, 0.0000, 0.2556, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			data["floor_area"] = [2655] * 9
+			data["one_story"] = [0.7043] * 9
+			perc_gas = [0.4425] * 9
+			perc_pump = [0.1983] * 9
+			perc_AC = [0.9673] * 9
+			wh_electric = [0.3572] * 9
+			wh_size = [[0.2259,0.5267,0.2475]] * 9
+			AC_type = [	[1, 1, 1, 1, 1, 1, 0, 0, 0], # central
+						[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			over_sizing_factor = [	[ 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0, 0, 0], # central
+									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+			perc_pool_pumps= [0.0657] * 9
+			
+			
 		# Single-Family Homes
 		# - Designate the percentage of SFH in each classification
 		SFH = [[1, 1, 1, 1, 0, 0, 0, 0, 0], # Res1-Res4 are 100% SFH.
@@ -119,8 +251,8 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 
 		# Commercial Buildings
 		# - Designate what type of commercial building each classification represents.
-		com_buildings = [[0, 0, 0, 0, 0, 0, 0, 0, 1],  # office buildings   
-                         [0, 0, 0, 0, 0, 0, 0, 1, 0],  # big box              
+		com_buildings = [[0, 0, 0, 0, 0, 0, 0, 0, 1],  # office buildings 
+                         [0, 0, 0, 0, 0, 0, 0, 1, 0],  # big box 
                          [0, 0, 0, 0, 0, 0, 1, 0, 0]]  # strip mall
 
 		# COP High/Low Values
@@ -148,7 +280,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 			thermal_properties[i] = [None] * 9  
 			# Now we have a list of 6 lists of "None"
 
-		# For each non-zero entry for a classification ("column") in thermal_percentages, fill in thermal properties (except for commercial classifications). 
+		# For each non-zero entry for a classification ("column") in thermal_percentages, fill in thermal properties. 
 		# Res 1 (sfh pre-1980, <2000sf)
 		thermal_properties[0][0] = [16, 10, 10, 1, 1, 1, 1, 3, 0.75]  # <1940
 		thermal_properties[1][0] = [19, 11, 12, 2, 1, 1, 1, 3, 0.75]  # 1940-49
@@ -222,10 +354,10 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		thermal_properties[5][8] = [0, 0, 0, 0, 0, 0, 0, 0, 0]  # n/a
 		
 		# Floor Area by Classification
-		data["floor_area"] = [1200, 1200, 2400, 2400, 1710, 820, 0, 0, 0]
+		#data["floor_area"] = [1200, 1200, 2400, 2400, 1710, 820, 0, 0, 0]
 
 		# Percentage One Story Homes by Classification
-		data["one_story"] = [0.6295, 0.5357, 0.6295, 0.5357, 1.0000, 0.9073, 0, 0, 0]
+		#data["one_story"] = [0.6295, 0.5357, 0.6295, 0.5357, 1.0000, 0.9073, 0, 0, 0]
 		
 		# Cooling Setpoint Bins by Classification
 		# [nighttime percentage, high bin value, low bin value]
@@ -362,9 +494,9 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		
 		# Heating
 		# - Percentage breakdown of heating system type by classification.
-		perc_gas     = [0.52, 0.36, 0.52, 0.36, 0.16, 0.33, 0, 0, 0] 
+		#perc_gas     = [0.52, 0.36, 0.52, 0.36, 0.16, 0.33, 0, 0, 0] 
 		
-		perc_pump    = [0.37, 0.57, 0.37, 0.57, 0.34, 0.53, 0, 0, 0]
+		#perc_pump    = [0.37, 0.57, 0.37, 0.57, 0.34, 0.53, 0, 0, 0]
 		
 		perc_res = list(map(lambda x, y:1-x-y, perc_pump, perc_gas))
 		
@@ -372,31 +504,31 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		# - Percentage AC
 		# - Breakdown AC unit types([central AC; window/wall units])
 		# - Oversizing factor of AC units by load classification and unit type (central/window wall)
-		perc_AC = [0.94, 1.00, 0.94, 1.00, 0.94, 0.93, 0, 0, 0] 
+		#perc_AC = [0.94, 1.00, 0.94, 1.00, 0.94, 0.93, 0, 0, 0] 
 		
-		AC_type = [[0.90, 1.00, 0.90, 1.00, 0.88, 0.87, 0, 0, 0],
-                   [0.10, 0.00, 0.10, 0.00, 0.12, 0.13, 0, 0, 0]]
+		# AC_type = [[0.90, 1.00, 0.90, 1.00, 0.88, 0.87, 0, 0, 0],
+                   # [0.10, 0.00, 0.10, 0.00, 0.12, 0.13, 0, 0, 0]]
 		
-		over_sizing_factor = [[ 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                              [ 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+		# over_sizing_factor = [[ 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                              # [ 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 		
 		# Percent Pool Pumps by Classification
-		perc_pool_pumps = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+		#perc_pool_pumps = [0, 0, 0, 0, 0, 0, 0, 0, 0]
 		
 		# Waterheater
 		# - Percentage electric water heaters by classificaition
 		# - Waterheater sizing breakdown  [<30, 31-49, >50] by classification
-		wh_electric = [0.67, 0.49, 0.67, 0.49, 0.73, 0.96, 0, 0, 0]
+		#wh_electric = [0.67, 0.49, 0.67, 0.49, 0.73, 0.96, 0, 0, 0]
 		
-		wh_size = [[0.2259,0.5267, 0.2475],  #Res1
-                   [0.2259, 0.5267, 0.2475], #Res2
-                   [0.2259, 0.5267, 0.2475], #Res3
-                   [0.2259, 0.5267, 0.2475], #Res4
-                   [0.2259, 0.5267, 0.2475], #Res5
-                   [0.2259, 0.5267, 0.2475], #Res6
-                   [0, 0, 0],                #Com1
-                   [0, 0, 0],                #Com2
-                   [0, 0, 0]]                #Com3
+		# wh_size = [[0.2259,0.5267, 0.2475],  #Res1
+                   # [0.2259, 0.5267, 0.2475], #Res2
+                   # [0.2259, 0.5267, 0.2475], #Res3
+                   # [0.2259, 0.5267, 0.2475], #Res4
+                   # [0.2259, 0.5267, 0.2475], #Res5
+                   # [0.2259, 0.5267, 0.2475], #Res6
+                   # [0, 0, 0],                #Com1
+                   # [0, 0, 0],                #Com2
+                   # [0, 0, 0]]                #Com3
 		
 		# Additional Solar Modules
 		# - penetration (%)
