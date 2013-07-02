@@ -444,7 +444,7 @@ def convert(stdPath,seqPath):
 			reg_hardware = statsByName(regList[11])
 			if reg_hardware is not None:
 				band_width = reg_hardware[7]
-				if float(reg_hardware) > 0.0:
+				if float(reg_hardware[6]) > 0.0:
 					raise_taps = str(math.ceil(float(reg_hardware[4])/float(reg_hardware[6])))
 					lower_taps = str(math.ceil(float(reg_hardware[5])/float(reg_hardware[6])))
 				else:
@@ -456,9 +456,9 @@ def convert(stdPath,seqPath):
 					lower_taps = '16'
 				
 				if float(reg_hardware[4]) > 0.0:
-					regulation = float(reg_hardware[4])
+					regulation = reg_hardware[4]
 				elif float(reg_hardware[5]) > 0.0:
-					regulation = float(reg_hardware[5])
+					regulation = reg_hardware[5]
 				else:
 					regulation = '0.1'
 			else:
@@ -520,28 +520,44 @@ def convert(stdPath,seqPath):
 			regulator[myIndex+1]['CT_phase'] = regulator['phases']
 			regulator[myIndex+1]['PT_phase'] = regulator['phases']
 			regulator[myIndex+1]['regulation'] = regulation
+			
 			if ctr is not None:
 				regulator[myIndex+1]['current_transducer_ratio'] = ctr
+				
 			if ptr is not None:
-				regulator[myIndex+1]['power_transducer_ration'] = ptr
-			if float(ldc_r_A) != 0.0:
+				regulator[myIndex+1]['power_transducer_ratio'] = ptr
+				
+			if float(ldc_r_A) != 0.0 and 'A' in regulator['phases']:
 				regulator[myIndex+1]['compensator_r_setting_A'] = ldc_r_A
-			if float(ldc_x_A) != 0.0:
+				
+			if float(ldc_x_A) != 0.0 and 'A' in regulator['phases']:
 				regulator[myIndex+1]['compensator_x_setting_A'] = ldc_x_A
-			if float(ldc_r_B) != 0.0:
+				
+			if float(ldc_r_B) != 0.0 and 'B' in regulator['phases']:
 				regulator[myIndex+1]['compensator_r_setting_B'] = ldc_r_B
-			if float(ldc_x_B) != 0.0:
+				
+			if float(ldc_x_B) != 0.0 and 'B' in regulator['phases']:
 				regulator[myIndex+1]['compensator_x_setting_B'] = ldc_x_B
-			if float(ldc_r_C) != 0.0:
+				
+			if float(ldc_r_C) != 0.0 and 'C' in regulator['phases']:
 				regulator[myIndex+1]['compensator_r_setting_C'] = ldc_r_C
-			if float(ldc_x_C) != 0.0:
+				
+			if float(ldc_x_C) != 0.0 and 'C' in regulator['phases']:
 				regulator[myIndex+1]['compensator_x_setting_C'] = ldc_x_C
+				
 			regulator[myIndex+1]['Control'] = control
 			regulator[myIndex+1]['control_level'] = control_level
 			regulator[myIndex+1]['Type'] = 'A'
-			regulator[myIndex+1]['tap_pos_A'] = '1'
-			regulator[myIndex+1]['tap_pos_B'] = '1'
-			regulator[myIndex+1]['tap_pos_C'] = '1'
+			
+			if 'A' in regulator['phases']:
+				regulator[myIndex+1]['tap_pos_A'] = '1'
+				
+			if 'B' in regulator['phases']:
+				regulator[myIndex+1]['tap_pos_B'] = '1'
+				
+			if 'C' in regulator['phases']:
+				regulator[myIndex+1]['tap_pos_C'] = '1'
+				
 			return regulator
 
 		def convertTransformer(transList):
@@ -736,6 +752,16 @@ def convert(stdPath,seqPath):
 			fromPhases = getByName(comp['from'])['phases']
 			toPhases = getByName(comp['to'])['phases']
 			comp['phases'] = phaseMin(fromPhases, toPhases)
+			if 'N' in comp['phases'] and (comp['object'] == 'overhead_line' or comp['object'] == 'underground_line'):
+				key = 0
+				for y in comp.keys():
+					if type(y) is int:
+						key = y+5
+						if key in comp[y].keys():# line_configuration has a neutral conductor
+							pass
+						else:
+							comp['phases'] = comp['phases'].replace('N','')
+						
 			return True
 		else:
 			return False
@@ -1007,7 +1033,7 @@ def convert(stdPath,seqPath):
 def main():
 	''' tests go here '''
 	wdir = 'C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration'
-	StaticGlmDict = convert('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\Uncalibrated Windmil Feeder Models\\ACEC for NRECA Existing.std','C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\Uncalibrated Windmil Feeder Models\\ACEC for NRECA Existing.seq')
+	StaticGlmDict = convert('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\Uncalibrated Windmil Feeder Models\\ACEC-COLOMA.std','C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\Uncalibrated Windmil Feeder Models\\ACEC.seq')
 	
 	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
 						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\n' + \
@@ -1016,7 +1042,7 @@ def main():
 						
 	outGlm = genericHeaders + feeder.sortedWrite(StaticGlmDict)					
 	print('Success')
-	f = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_STATIC_MODEL.glm','w')
+	f = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_COLOMA_STATIC_MODEL.glm','w')
 	f.write(outGlm)
 	f.close()
 	

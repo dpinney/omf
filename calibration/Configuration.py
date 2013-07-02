@@ -47,6 +47,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		data["feeder_rating"] = 1.15*14.0
 		data["nom_volt"] = 14400
 		data["nom_volt2"] = 14400 #was set to 480 for taxonomy feeders
+		data["load_shape_norm"] = None
 		vA='schedules\\\\VA.player'
 		vB='schedules\\\\VB.player'
 		vC='schedules\\\\VC.player'
@@ -62,7 +63,7 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		data["voltage_regulation"] = [14400, 12420, 15180, 60, 60]     
 		data["regulators"] = []
 		data["capacitor_outtage"] = []
-		data["emissions_peak"] = 13910; # Peak in kVa base .85 pf of 29 (For emissions)
+		data["emissions_peak"] = 13910 # Peak in kVa base .85 pf of 29 (For emissions)
 		
 		# Time of Use (TOU)
 		data["TOU_prices"] = [0.07590551, 0.15181102]
@@ -89,8 +90,8 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		data["loadshape_r"]='' # player file
 		data["loadshape_i"]='' # player file
 		data["loadshape"]=0+0j
-		data["indust_scalar_com_r"]=0;
-		data["indust_scalar_com_i"]=0;
+		data["indust_scalar_com_r"]=0
+		data["indust_scalar_com_i"]=0
 		data["indust_scalar_com"]=0+0j
 
 		# Thermal Percentages
@@ -520,6 +521,23 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		# additional set point degrees
 		data["addtl_heat_degrees"] = 0
 		
+		if 'feeder_load_shape_norm' in data.keys() and data['feeder_load_shape_norm'] is not None:
+			# commercial zip fractions for loadshapes
+			data["c_z_pf"] = 0.97
+			data["c_i_pf"] = 0.97
+			data["c_p_pf"] = 0.97
+			data["c_zfrac"] = 0.2
+			data["c_ifrac"] = 0.4
+			data["c_pfrac"] = 1 - data["c_zfrac"] - data["c_ifrac"]
+			
+			# residential zip fractions for loadshapes
+			data["r_z_pf"] = 0.97
+			data["r_i_pf"] = 0.97
+			data["r_p_pf"] = 0.97
+			data["r_zfrac"] = 0.2
+			data["r_ifrac"] = 0.4
+			data["r_pfrac"] = 1 - data["r_zfrac"] - data["r_ifrac"]
+		
 	else:
 		def num(s):
 			try:
@@ -569,6 +587,23 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 
 		# additional set point degrees
 		data["addtl_heat_degrees"] = couplets['addtl_heat_degrees']
+		
+		if 'feeder_load_shape_norm' in data.keys() and data['feeder_load_shape_norm'] is not None:
+			# commercial zip fractions for loadshapes
+			data["c_z_pf"] = couplets["c_z_pf"]
+			data["c_i_pf"] = couplets["c_i_pf"]
+			data["c_p_pf"] = couplets["c_p_pf"]
+			data["c_zfrac"] = couplets["c_zfrac"]
+			data["c_ifrac"] = couplets["c_ifrac"]
+			data["c_pfrac"] = 1 - data["c_zfrac"] - data["c_ifrac"]
+			
+			# residential zip fractions for loadshapes
+			data["r_z_pf"] = couplets["r_z_pf"]
+			data["r_i_pf"] = couplets["r_i_pf"]
+			data["r_p_pf"] = couplets["r_p_pf"]
+			data["r_zfrac"] = couplets["r_zfrac"]
+			data["r_ifrac"] = couplets["r_ifrac"]
+			data["r_pfrac"] = 1 - data["r_zfrac"] - data["r_ifrac"]
 		
 	# Apply calibration scalars
 	for x in cooling_setpoint:
@@ -620,38 +655,38 @@ def ConfigurationFunc(wdir,config_file, file_to_extract=None, classification=Non
 		for x in xrange(len(thermal_properties)):
 			data["thermal_properties"][x] = thermal_properties[x][classID]
 
-		data["cooling_setpoint"] = cooling_setpoint[classID]; 
-		data["heating_setpoint"] = heating_setpoint[classID];
-		data["perc_gas"] = perc_gas[classID];
-		data["perc_pump"] = perc_pump[classID];
-		data["perc_res"] = perc_res[classID];
-		data["perc_AC"] = perc_AC[classID];
-		data["perc_poolpumps"] = perc_pool_pumps[classID];
-		data["wh_electric"] = wh_electric[classID];
-		data["wh_size"] = wh_size[classID];
+		data["cooling_setpoint"] = cooling_setpoint[classID] 
+		data["heating_setpoint"] = heating_setpoint[classID]
+		data["perc_gas"] = perc_gas[classID]
+		data["perc_pump"] = perc_pump[classID]
+		data["perc_res"] = perc_res[classID]
+		data["perc_AC"] = perc_AC[classID]
+		data["perc_poolpumps"] = perc_pool_pumps[classID]
+		data["wh_electric"] = wh_electric[classID]
+		data["wh_size"] = wh_size[classID]
 		
 		data["over_sizing_factor"] = [None]*len(over_sizing_factor)
 		for x in xrange(len(over_sizing_factor)):
-			data["over_sizing_factor"][x] = over_sizing_factor[x][classID];
+			data["over_sizing_factor"][x] = over_sizing_factor[x][classID]
 			
 		data["AC_type"] = [None]*len(AC_type)
 		for x in xrange(len(AC_type)):
-			data["AC_type"][x] = AC_type[x][classID];
+			data["AC_type"][x] = AC_type[x][classID]
 			
-		data["dispatch_order"] = dispatch_order[classID];
+		data["dispatch_order"] = dispatch_order[classID]
 
 		data["SFH"] = [None]*len(SFH)
 		for x in xrange(len(SFH)):
-			data["SFH"][x] = SFH[x][classID];
+			data["SFH"][x] = SFH[x][classID]
 
 
-	data["sol_inv_properties"] = sol_inv_properties;
-	data["sol_module_properties"] = sol_module_properties;
-	data["com_buildings"] = com_buildings;
-	data["no_cool_sch"] = 8;
-	data["no_heat_sch"] = 6;
-	data["no_water_sch"] = 6;
-	data["ts_penetration"] = 10; #0-100, percent of buildings utilizing thermal storage - for all regions
+	data["sol_inv_properties"] = sol_inv_properties
+	data["sol_module_properties"] = sol_module_properties
+	data["com_buildings"] = com_buildings
+	data["no_cool_sch"] = 8
+	data["no_heat_sch"] = 6
+	data["no_water_sch"] = 6
+	data["ts_penetration"] = 10 #0-100, percent of buildings utilizing thermal storage - for all regions
 	return data
 
 def main():

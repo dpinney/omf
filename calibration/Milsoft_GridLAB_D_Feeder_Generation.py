@@ -12,6 +12,7 @@ import TechnologyParameters
 import Solar_Technology
 import feeder
 import AddTapeObjects
+import AddLoadShapes
 import copy
 
 
@@ -20,6 +21,7 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 
 	#case_flag is an integer indicating which technology case to tack on to the GridLAB-D model
 	#	case_flag : technology
+	#  -1 : Loadshape Case
 	#	0 : Base Case
 	#	1 : CVR
 	#	2 : Automation
@@ -41,7 +43,7 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 
 	random.seed(1)
 	# Check to make sure we have a valid case flag
-	if case_flag < 0:
+	if case_flag < -1:
 		case_flag = 0
 
 	if case_flag > 13:
@@ -141,6 +143,14 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 							 'variable_types' : ['double'],
 							 'variable_name' : ['value']}
 	last_key += 1
+	
+	if 'feeder_load_shape_norm' in config_data.keys() and config_data['feeder_load_shape_norm'] is not None:
+		glmCaseDict[last_key] = {'object' : 'player',
+								 'name' : 'norm_feeder_loadshape',
+								 'property' : 'value',
+								 'file' : '{:s}'.format(config_data['feeder_load_shape_norm']),
+								 'loop' : '14600 // Will loop file for 40 years assuming the file has data for a 24 hour period'}
+		last_key += 1
 
 	# Include the objects for the TOU case flags
 	if use_flags['use_market'] != 0:
@@ -545,6 +555,7 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 														 'parent' : 'None',
 														 'load_classification' : 'None',
 														 'number_of_houses' : 0,
+														 'load' : 0,
 														 'large_vs_small' : 0.0,
 														 'phases' : glmCaseDict[x]['phases']}
 					
@@ -564,7 +575,8 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 					if 'power_12' in glmCaseDict[x]:
 						c_num = complex(glmCaseDict[x]['power_12'])
 						load += abs(c_num)
-
+					
+					residential_dict[residential_key]['load'] = load	
 					residential_dict[residential_key]['number_of_houses'] = int(round(load/config_data['avg_house']))
 					total_house_number += residential_dict[residential_key]['number_of_houses']
 					# Determine whether we rounded down of up to help determine the square footage (neg. number => small homes)
@@ -671,7 +683,7 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 					if 'power_1' in glmCaseDict[x]:
 						del glmCaseDict[x]['power_1']
 
-					if total_house_number == 0 and load > 0: # Residential street light
+					if total_house_number == 0 and load > 0 and use_flags['use_normalized_loadshapes'] == 0: # Residential street light
 						glmCaseDict[x]['power_12_real'] = 'street_lighting*{:.4f}'.format(c_num.real*tech_data['light_scalar_res'])
 						glmCaseDict[x]['power_12_reac'] = 'street_lighting*{:.4f}'.format(c_num.imag*tech_data['light_scalar_res'])
 
@@ -761,13 +773,19 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	# Tack on residential loads
 	if use_flags['use_homes'] != 0:
 		#print('calling ResidentialLoads.py\n')
-		glmCaseDict, solar_residential_array, ts_residential_array, last_key = ResidentialLoads.append_residential(glmCaseDict, use_flags, tech_data, residential_dict, last_key, CPP_flag_name, market_penetration_random, dlc_rand, pool_pump_recovery_random, slider_random, xval, elasticity_random, wdir,configuration_file)
+		if use_flags['use_normalized_loadshapes'] == 1:
+			glmCaseDict, last_key = AddLoadShapes.add_normalized_residential_ziploads(glmCaseDict, residential_dict, config_data, last_key)
+		else:
+			glmCaseDict, solar_residential_array, ts_residential_array, last_key = ResidentialLoads.append_residential(glmCaseDict, use_flags, tech_data, residential_dict, last_key, CPP_flag_name, market_penetration_random, dlc_rand, pool_pump_recovery_random, slider_random, xval, elasticity_random, wdir,configuration_file)
 	# End addition of residential loads ########################################################################################################################
 
 	# TODO: Call Commercial Function
 	if use_flags['use_commercial'] != 0:
 		#print('calling CommercialLoads.py\n')
-		glmCaseDict, solar_office_array, solar_bigbox_array, solar_stripmall_array, ts_office_array, ts_bigbox_array, ts_stripmall_array, last_key = CommercialLoads.append_commercial(glmCaseDict, use_flags, tech_data, last_key, commercial_dict, comm_slider_random, dlc_c_rand, dlc_c_rand2, wdir, configuration_file)
+		if use_flags['use_normalized_loadshapes'] == 1:
+			glmCaseDict, last_key = AddLoadShapes.add_normalized_commercial_ziploads(glmCaseDict, commercial_dict, config_data, last_key)
+		else:
+			glmCaseDict, solar_office_array, solar_bigbox_array, solar_stripmall_array, ts_office_array, ts_bigbox_array, ts_stripmall_array, last_key = CommercialLoads.append_commercial(glmCaseDict, use_flags, tech_data, last_key, commercial_dict, comm_slider_random, dlc_c_rand, dlc_c_rand2, wdir, configuration_file)
 			
 	# Append Solar: Call append_solar(feeder_dict, use_flags, config_file, solar_bigbox_array, solar_office_array, solar_stripmall_array, solar_residential_array, last_key)
 	if use_flags['use_solar'] != 0 or use_flags['use_solar_res'] != 0 or use_flags['use_solar_com'] != 0:

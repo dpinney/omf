@@ -31,7 +31,8 @@ def TechnologyParametersFunc(use_flags, TechToTest):
 	data["use_tech"] = 0;
 
 	# initialize use_flags
-	use_flags = {'use_homes' : 0,
+	use_flags = {'use_normalized_loadshapes' : 0,
+				 'use_homes' : 0,
 				 'use_commercial' : 0,
 				 'use_billing' : 0,
 				 'use_capacitor_outtages' : 0,
@@ -46,6 +47,27 @@ def TechnologyParametersFunc(use_flags, TechToTest):
 				 'use_phev' : 0,
 				 'use_da' : 0,
 				 'use_wind' : 0}
+	
+	# quick case. Use load shapes instead of house objects.
+	if TechToTest == -1:
+		use_flags["use_normalized_loadshapes"] = 1
+		use_flags["use_homes"] = 1
+		use_flags["use_commercial"] = 1
+		# These will include recorders/collectors/dumps
+		data["measure_losses"] = 1;    
+		data["collect_setpoints"] = 1;    
+		data["measure_loads"] = 1;
+
+		#Prints stats at bottom of GLM
+		data["include_stats"] = 1
+
+		# Adds in meter consumption
+		data["meter_consumption"] = 1
+
+		#Set to '1' only for testing
+		data["dump_voltage"] = 0; 
+		data["measure_market"] = 0
+		data["get_IEEE_stats"] = 0
 
 	# base case
 	if TechToTest == 0:
