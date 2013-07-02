@@ -39,6 +39,8 @@ user_manager = User.UserManager(store)
 
 @app.before_request
 def csrf_protect():
+    if flask.request.user_agent.browser == 'msie':
+		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
     if flask.request.method == "POST":
         token = flask.session.pop('_csrf_token', None)
         if not token or token != flask.request.form.get('_csrf_token'):
@@ -200,12 +202,7 @@ def root():
 					 "conversions":user.listAll("Conversion"),
 					 "url":url,
 					}
-	if flask.request.user_agent.browser == 'msie':
-		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
-	else:
-		return flask.render_template('home.html',
-									 d=d,
-									 is_admin = flask_login.current_user.username == "admin")
+	return flask.render_template('home.html', d=d, is_admin = flask_login.current_user.username == "admin")
 
 @app.route("/publicObject/<objectType>/<objectName>")
 def publicObject(objectType, objectName):

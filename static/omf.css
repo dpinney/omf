@@ -137,13 +137,13 @@ ul.menu {
 
 ul.menu.right {right: 0; left:auto;}
 
-ul.menu li {padding:4px;}
+ul.menu li {padding:0px;}
 
 ul.menu li:hover {background:green;}
 
 ul.menu li:hover a {color:white;}
 
-ul.menu a {display:block; color:black;}
+ul.menu a {display:block; color:black; padding:4px;}
 
 ul.menu a:hover {color:white;}
 
