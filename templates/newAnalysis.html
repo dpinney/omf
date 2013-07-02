@@ -3,6 +3,7 @@
 	<meta charset='utf-8'>
 	<link type='text/css' rel='stylesheet' href='/static/omf.css' />
 	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
+	<script src="/static/jquery-1.9.1.js"></script>
 	<style>
 		table.studyOptions, table.analysisOptions, table.reportOptions {width:70%; text-align:left; margin-left:auto;}
 		table tr td:first-child {width:25%;}
@@ -184,7 +185,12 @@
 	for (exStud=0;exStud<existingStudies.length;exStud++) {
 		newDiv = addStudy(existingStudies[exStud].studyType)
 		newDiv.querySelector('.studyName').value = existingStudies[exStud].name
-		newDiv.querySelector('.feederName').value = existingStudies[exStud].sourceFeeder
+	        fname = existingStudies[exStud].sourceFeeder
+	    if(fname.indexOf("_") > -1)
+	        newDiv.querySelector('.feederName').value = fname+"?public=false"
+	    else
+		newDiv.querySelector(".feederName").value = fname+"?public=true"
+	    //existingStudies[exStud].sourceFeeder
 		newDiv.querySelector('.tmy2name').value = existingStudies[exStud].climate
 	}
 	// Set up the analysis-level stuff.
