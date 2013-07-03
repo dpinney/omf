@@ -409,6 +409,8 @@ def saveAnalysis():
 		elif studyData['studyType'] in ['nrelswh','pvwatts']:
 			study['attachments'] = {'climate.tmy2': store.get('Weather', studyData['climate'])['tmy2']}
 			studyData['inputJson'] = study
+		elif studyData['studyType'] == 'scada':
+			studyData['inputJson'] = study
 		moduleRef = getattr(studies, studyData['studyType'])
 		classRef =  getattr(moduleRef, studyData['studyType'].capitalize())
 		studyObj = classRef(studyData, new=True)
