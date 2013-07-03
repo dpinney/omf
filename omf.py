@@ -132,9 +132,6 @@ def forgotpwd():
 		return send_link(user.username,
 						 "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\nreg_link",
 						 store.get("User", user.username))
-		
-		
-	
 	
 @app.route("/register/<email>/<reg_key>", methods=["GET", "POST"])
 def register(email, reg_key):
@@ -158,8 +155,6 @@ def register(email, reg_key):
 		user = user_manager.authenticate(user.username, password)
 		flask_login.login_user(user)
 	return flask.redirect("/")
-	
-			
 	
 @app.route("/adminControls")
 @flask_login.login_required
