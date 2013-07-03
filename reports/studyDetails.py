@@ -36,8 +36,9 @@ def outputHtml(analysisObject, studyList):
 		outputList.append(newStudy)
 	climates = [['Climate','Studies']] + [[key.replace('.tmy2',''), climates[key]] for key in climates]
 	# Partition the names into common names and those unique to each feeder:
-	uniqueNameCounts = {x['studyName']:len(allComponents.difference(x['componentNames'])) for x in outputList}
-	uniqueNameCounts['Common to All'] = len(allComponents)
+	# Debug here: change allComponents.difference to allComponents.intersection
+	uniqueNameCounts = {x['studyName']:len(allComponents.intersection(x['componentNames'])) for x in outputList}
+	# uniqueNameCounts['Common to All'] = len(allComponents)
 	pieChartData = [['Study','Components']] + [[x, uniqueNameCounts[x]] for x in uniqueNameCounts]
 	# Get the template in.
 	with open('./reports/studyDetailsOutput.html','r') as tempFile:

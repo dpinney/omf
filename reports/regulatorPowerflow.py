@@ -15,7 +15,6 @@ def outputHtml(analysisObject, studyList):
 	startDate = analysisObject.simStartDate
 	outputList = []
 	for study in studyList:
-		# regFileNames = [x for x in os.listdir(pathPrefix + study) if x.startswith('Regulator_') and x.endswith('.csv')]
 		cleanOut = study.outputJson
 		if 'Regulators' in cleanOut:
 			newStudy = {'studyName':study, 'regs':[]}
@@ -25,7 +24,7 @@ def outputHtml(analysisObject, studyList):
 				appPowerParams = util.defaultGraphObject(resolution, startDate)
 				appPowerParams['chart']['height'] = 150
 				appPowerParams['yAxis']['title']['text'] = 'App. Power (kW)'			
-				appPowerParams['chart']['renderTo'] = 'regApparentChart' + study + reg
+				appPowerParams['chart']['renderTo'] = 'regApparentChart' + study.name + reg
 				appPowerParams['series'] = [{	'name':tap.replace(' App Power',''),
 														'data':cleanOut['Regulators'][reg][tap],
 														'color':util.rainbow(cleanOut['Regulators'][reg],tap,['crimson','red','firebrick'])}
@@ -34,7 +33,7 @@ def outputHtml(analysisObject, studyList):
 				# Do power factor chart:
 				powerFactorParams = util.defaultGraphObject(resolution, startDate)
 				powerFactorParams['chart']['height'] = 150
-				powerFactorParams['chart']['renderTo'] = 'regPowFactChart' + study + reg
+				powerFactorParams['chart']['renderTo'] = 'regPowFactChart' + study.name + reg
 				powerFactorParams['yAxis']['title']['text'] = 'Power Factor (%)'
 				powerFactorParams['series'] = [{	'name':'Total',
 															'data':cleanOut['Regulators'][reg]['Power Factor'],
@@ -43,7 +42,7 @@ def outputHtml(analysisObject, studyList):
 				# Do regulator tap position chart:
 				tapPosParams = util.defaultGraphObject(resolution, startDate)
 				tapPosParams['chart']['height'] = 150
-				tapPosParams['chart']['renderTo'] = 'regTapsChart' + study + reg
+				tapPosParams['chart']['renderTo'] = 'regTapsChart' + study.name + reg
 				tapPosParams['yAxis']['title']['text'] = 'Tap Multiplier'
 				tapPosParams['series'] = [{	'name':tap.replace(' Position',''),
 														'data':cleanOut['Regulators'][reg][tap],

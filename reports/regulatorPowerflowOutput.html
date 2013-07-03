@@ -11,8 +11,8 @@
 			<script>new Highcharts.Chart({{reg.powerFactorParams | safe}})</script>
 			<div id="regTapsChart{{study.studyName}}{{reg.regName}}"></div>
 			<script>new Highcharts.Chart({{reg.tapPosParams | safe}})</script>
-		{%- endfor -%}
 		</div>
+		{%- endfor -%}
 	</div>
 {%- endfor -%}
 </div>
