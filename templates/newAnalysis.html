@@ -52,8 +52,16 @@
 			aClicked.parentNode.parentNode.removeChild(aClicked.parentNode)
 		}
 
-
-
+		// read file to a hidden input field
+		function handle_files(files) {
+			reader = new FileReader();
+			reader.readAsText(files[0]);
+			reader.onload = loaded;
+			function loaded(evt){
+				evt.target.result;
+				document.getElementsByClassName('hiddenScadaFile').value = reader.result;
+			}
+		}
 
 		function getResponseDict(check){
 			responseDict = {}
@@ -76,6 +84,10 @@
 				}// Must be a valid filename!}
 				
 				study[thisInput.className] = thisInput.value
+			}
+			// Add scada data to list
+			if (document.getElementsByClassName('hiddenScadaFile').value !=undefined){
+				study['hiddenScadaFile']=document.getElementsByClassName('hiddenScadaFile').value
 			}
 			studyList.push(study)
 		}
