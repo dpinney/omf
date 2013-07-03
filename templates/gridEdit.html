@@ -222,13 +222,11 @@
 			.attr('viewBox', '0 0 ' + w + ' ' + h  )
 			.attr('preserveAspectRatio', 'xMinYMin')
 			.attr('pointer-events', 'all')
-			// .attr('width', window.innerWidth)
-			// .attr('height', window.innerHeight)
 			.call(zoomer.on('zoom', zoomRedraw))
 	// add scalegrid to the lower layer
 	var vis2 = body.append("svg:g")
 			.attr('id', 'scaleGrid')
-			// .attr('viewBox', '0 0 ' + width+' '+ height)
+			.attr('viewBox', '0 0 ' + width+' '+ height)
 			.attr("transform", "translate(" + 10 + "," + 120 + ")")
 			.attr("preserveAspectRatio", "xMinYMin meet")
 	// add powergrid to the upper layer
