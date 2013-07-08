@@ -5,13 +5,14 @@
 		table#detailsTable th, td {
 		    /* text-align:left; */
 		    text-align: center;
-		    border:1px solid black;
+		    /* // border:1px solid black; */
 		    padding:5px;
 		    vertical-align:top;
 		}
 		#stnames{
 		    text-align:left;
 		}
+		
 		/* #comparisonPieChart{ */
 		/*     min-width:400px; */
 		/*     min-height:200px; */
@@ -27,12 +28,15 @@
 		    stroke-width: 1.5px;
 		}
 		.cont{
-		    position:absolute;
-		    top:-20;
-		    left:-100;
+		    /* position:absolute; */
+		    /* top:-20; */
+		    /* left:-100; */
 		}
 		#mapHere{
-		    position:relative;
+		    /* position:relative; */
+		    /* left:50%; */
+		    height:100%;
+		    width:100%;
 		}
 		#studies{
 		    text-align: center;
@@ -48,7 +52,7 @@
     
     <tr>
       <td>{{ ana.created }}</td>
-      <td rowspan="6">
+      <td rowspan="7" style="width:100%">
 	<div id="mapHere">
 	</div>
       </td>
@@ -67,7 +71,7 @@
     </tr>
     
     <tr>
-      <td id="GC" rowspan="2">
+      <td id="GC">
 	<div id="comparisonPieChart" style="min-width: 400px; height: 200px; margin: 0 auto">
 	</div>
       </td>
@@ -118,16 +122,17 @@
 	    // });
 	});
 
-var width = 500, height=250;
+var width = $("#mapHere").width(), height=450;
 
-$("#mapHere")
-	.css("width", width-300)
-	.css("height", height-400);
+// var width = 1000, height = 1000;
+// $("#mapHere")
+// 	.css("width", width-300)
+// 	.css("height", height-400);
 
-var sf = 0.4;
+var sf = 0.7;
 var projection = d3.geo.albers()
 	.scale(sf*1000)
-	.center([25,15])
+	.center([17,40]);
 
 	
 var path = d3.geo.path()
@@ -144,8 +149,8 @@ var g = svg.append("g")
 
 
 
-var ak_transform = "translate("+-30*sf+","+sf*480+") scale(0.75)"; // scale(0.75) rotate(-30)";
-var hi_transform = "translate("+sf*500+","+sf*250+") scale(1.25)"; //
+var ak_transform = "translate("+300*sf+","+sf*175+") scale(0.5)"; // scale(0.75) rotate(-30)";
+var hi_transform = "translate("+sf*1950+","+sf*-950+") scale(2.75)"; //
 
 d3.json("/static/state_boundaries.json", function(json){
     g.selectAll("path")
@@ -167,10 +172,15 @@ d3.json("/static/city_locations.json", function(new_us_places){
 	var ST_NAME = climate[0].split("-");
 	var ST = ST_NAME[0], NAME = ST_NAME[1];
 	var my_coords = projection(new_us_places[ST][NAME]);
+	var r = 5;
 	svg.append("circle")
 		.attr("cx", my_coords[0])
 		.attr("cy", my_coords[1])
-		.attr("r", 5)
+		.attr("r", function(){
+		    if (ST == "AK") return r * 1/0.5;
+		    else if (ST == "HI") return r* 1/2.75;
+		    return r;
+		})
 		.attr("class", "HighlightCircle")
 		.attr("transform", function(){
 		    if (ST == "AK") return ak_transform;
