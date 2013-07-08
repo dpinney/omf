@@ -1,11 +1,11 @@
 <p class="reportTitle">Study Details</p>
 
 <div id="studyDetails" class="detailsContainer tightContent" style="padding:10px;position:relative;">
-	<style type="text/css" scoped>
+  <style type="text/css" scoped>
 		table#detailsTable th, td {
 		    /* text-align:left; */
 		    text-align: center;
-		    /* border:1px solid black; */
+		    border:1px solid black;
 		    padding:5px;
 		    vertical-align:top;
 		}
@@ -37,46 +37,57 @@
 		#studies{
 		    text-align: center;
 		}
-	</style>
-	<script>daClimates={{climates | safe}}</script>
-	<table id="detailsTable">
-	  <tr>
-	    <th class="hozHead">Analysis Creation Date</th>
-	    <th id="studies">Studies</th>
-	  </tr>
-	  <tr>
-	    <td>{{ ana.created }}</td>
-	    <td rowspan="3">
-	      <div id="stnames">
-		{%- for study in outputList -%}
-		<span>{{ study.studyName }} - <a href="/analysisFeeder/{{ana.name}}/{{study.studyName}}">{{study.sourceFeederName}}</a></span><br />
-		{%- endfor -%}
-	      </div>
-	    </td>
-	  </tr>
-	  <tr>
-	    <th class="hozHead">Simulation Length</th>
-	  </tr>
-	  <tr>
-	    <td class="hozHead">{{ ana.simLength }} {{ ana.simLengthUnits }}</td>
-	  </tr>
-	  <tr>
-	    <th>Grid Components</th>
-	    <th id="SL">Simulation Location</th>
-	  </tr>
-	  <tr>
-	    <td id="GC" rowspan="2">
-	      <div id="comparisonPieChart" style="min-width: 400px; height: 200px; margin: 0 auto">
-	      </div>
-	    </td>
-	  </tr>
-	  <tr>
-	    <td>
-	      <div id="mapHere">
-	      </div>
-	    </td>
-	  </tr>
-	</table>
+  </style>
+  <script>daClimates={{climates | safe}}</script>
+  <table id="detailsTable">
+    
+    <tr>
+      <th class="hozHead">Analysis Creation Date</th>
+      <th id="SL">Simulation Location</th>
+    </tr>
+    
+    <tr>
+      <td>{{ ana.created }}</td>
+      <td rowspan="6">
+	<div id="mapHere">
+	</div>
+      </td>
+    </tr>
+    
+    <tr>
+      <th class="hozHead">Simulation Length</th>
+    </tr>
+    
+    <tr>
+      <td class="hozHead">{{ ana.simLength }} {{ ana.simLengthUnits }}</td>
+    </tr>
+    
+    <tr>
+      <th>Grid Components</th>
+    </tr>
+    
+    <tr>
+      <td id="GC" rowspan="2">
+	<div id="comparisonPieChart" style="min-width: 400px; height: 200px; margin: 0 auto">
+	</div>
+      </td>
+    </tr>
+    
+    <tr>
+      <th id="studies">Studies</th>
+    </tr>
+    
+    <tr>
+      <td>
+	<div id="stnames">
+	  {%- for study in outputList -%}
+	  <span>{{ study.studyName }} - <a href="/analysisFeeder/{{ana.name}}/{{study.studyName}}">{{study.sourceFeederName}}</a></span><br />
+	  {%- endfor -%}
+	</div>
+      </td>
+    </tr>
+    
+  </table>
 </div>
 
 <script src="/static/d3.v3.js"></script>
@@ -133,8 +144,8 @@ var g = svg.append("g")
 
 
 
-var ak_transform = "translate("+-30*sf+","+sf*480+")"; // scale(0.75) rotate(-30)";
-var hi_transform = "translate("+sf*500+","+sf*250+")"; //
+var ak_transform = "translate("+-30*sf+","+sf*480+") scale(0.75)"; // scale(0.75) rotate(-30)";
+var hi_transform = "translate("+sf*500+","+sf*250+") scale(1.25)"; //
 
 d3.json("/static/state_boundaries.json", function(json){
     g.selectAll("path")
