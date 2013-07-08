@@ -5,7 +5,7 @@
 		div#container {clear:both; position:relative; margin:0 auto; padding:0; width:1024px; height:500px}
 		div#pusherRobot {float:left; height:50%; margin-bottom:-250px;}
 		div.subContainer {margin:0; display:inline-block; width:50%;height:100%; text-align: center}
-		div#advertisingFrame {float:left; border-radius: 25px; color:white; text-align:center; line-height: 500px; background-image:url('{{ url_for("static", filename="gridAbstract.png") }}'); background-size:500px;}
+		div#advertisingFrame {float:left; border-radius: 25px; color:white; text-align:center; line-height: 500px; background-image:url('/static/gridAbstract.png'); background-size:500px;}
 		div#login {float:right}
 		p#loginTitle {font-size:24pt; width:100%; text-align:center; padding-top:85px;}
 		form#loginForm {font-size:16pt}
@@ -17,7 +17,7 @@
 		a.menuEntry:hover {color:black;}
 		a {text-decoration:none;}
 	</style>
-	<link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
+	<link rel='shortcut icon' href='/static/favicon.ico'>
 </head>
 <body>
   <div id='pusherRobot'></div>

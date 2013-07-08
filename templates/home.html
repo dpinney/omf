@@ -4,7 +4,7 @@
   <link rel='stylesheet' href='/static/omf.css'/>
   <script type='text/javascript' src='/static/omf.js'></script>
   <script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
-  <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}'>
+  <link rel='shortcut icon' href='/static/favicon.ico'>
   <style>
     div#feeders {display:none;}
     h2{text-align:center;}
@@ -259,11 +259,11 @@
 	</tr>
 	<tr>
 	  <td>Feeder Data File (.std)</td>
-	  <td><input type='file' name='stdFile'/></td>
+	  <td><input type='file' name='stdFile' accept = '.std'/></td>
 	</tr>
 	<tr>
 	  <td>Equipment Database File (.seq)</td>
-	  <td><input type='file' name='seqFile'/></td>
+	  <td><input type='file' name='seqFile' accept = '.seq'/></td>
 	</tr>
 	<tr>
 	  <td></td>

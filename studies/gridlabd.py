@@ -10,7 +10,6 @@ import os
 import feeder
 import __util__ as util
 import solvers
-
 with open('./studies/gridlabd.html','r') as configFile: configHtmlTemplate = configFile.read()
 
 class Gridlabd:
@@ -187,6 +186,7 @@ class Gridlabd:
 			cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
 		elif level=='months':
 			cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
+		
 		# Put the results into the self variable:
 		self.outputJson = cleanOut
 		return True

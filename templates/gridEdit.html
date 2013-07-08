@@ -3,7 +3,7 @@
   <script type='text/javascript' src='/static/omf.js'></script>
   <script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
   <link rel='stylesheet' href='/static/omf.css' />
-  <link rel='shortcut icon' href='{{ url_for("static", filename="favicon.ico") }}' />
+  <link rel='shortcut icon' href='/static/favicon.ico' />
   <style type="text/css">
 	body {overflow:hidden; height:100%; background:white;}
 	div#title p {display:inline-block;}
@@ -212,8 +212,8 @@
 
 	// SCALE DRAW GLOBAL LAYOUT
 	var xScale = 1, yScale = 1;
-	width = window.innerWidth
-	height = window.innerHeight;
+	width = window.screen.availWidth;
+	height = window.screen.availHeight;
 
 	var body = d3.select('body')
 			.append('svg:svg')
@@ -222,8 +222,6 @@
 			.attr('viewBox', '0 0 ' + w + ' ' + h  )
 			.attr('preserveAspectRatio', 'xMinYMin')
 			.attr('pointer-events', 'all')
-			// .attr('width', window.innerWidth)
-			// .attr('height', window.innerHeight)
 			.call(zoomer.on('zoom', zoomRedraw))
 	// add scalegrid to the lower layer
 	var vis2 = body.append("svg:g")

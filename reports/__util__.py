@@ -38,7 +38,14 @@ def defaultGraphObject(resolution, startTimeStamp):
 
 def totalEnergy(series, res):
 	resMap = {'minutes':1.0/60.0,'hours':1,'days':24}
-	return sum(series)*resMap[res]
+	sumSeries = 0
+	for data in series:
+		if data == None:
+			continue
+		else:
+			sumSeries += data
+	# return sum(series)*resMap[res]
+	return sumSeries*resMap[res]
 
 def fileSlurp(fileName):
 	with open(fileName,'r') as openFile:

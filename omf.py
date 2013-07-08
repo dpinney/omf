@@ -132,9 +132,6 @@ def forgotpwd():
 		return send_link(user.username,
 						 "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\nreg_link",
 						 store.get("User", user.username))
-		
-		
-	
 	
 @app.route("/register/<email>/<reg_key>", methods=["GET", "POST"])
 def register(email, reg_key):
@@ -158,8 +155,6 @@ def register(email, reg_key):
 		user = user_manager.authenticate(user.username, password)
 		flask_login.login_user(user)
 	return flask.redirect("/")
-	
-			
 	
 @app.route("/adminControls")
 @flask_login.login_required
@@ -413,6 +408,8 @@ def saveAnalysis():
 			studyData['inputJson'] = studyFeeder
 		elif studyData['studyType'] in ['nrelswh','pvwatts']:
 			study['attachments'] = {'climate.tmy2': store.get('Weather', studyData['climate'])['tmy2']}
+			studyData['inputJson'] = study
+		elif studyData['studyType'] == 'scada':
 			studyData['inputJson'] = study
 		moduleRef = getattr(studies, studyData['studyType'])
 		classRef =  getattr(moduleRef, studyData['studyType'].capitalize())
