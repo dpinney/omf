@@ -1,6 +1,7 @@
 <!-- A progress bar in pure HTML and JavaScript -->
 
 <head>
+	<script type='text/javascript' src='../static/omf.js'></script>
 	<style type="text/css">
 		div.progressBar {
 		background-color: black;
@@ -19,16 +20,64 @@
 		var interval;
 		var index = 0;
 		var size = 1000;
+		var subsize = 500;
+
+		function showProgressDialog(dialogMessage) {
+			// Make the elements.
+			background = document.createElement('div')
+			background.id = 'progressBackground'
+			background.style.zIndex = '9998'
+			progContent = document.createElement('div')
+			progContent.id = 'progressContent'
+			progContent.style.zIndex = '9999'
+			spinner = document.createElement('img')
+			spinner.src = '../static/spinner.gif'
+			progressText = document.createElement('h2')
+			progressText.id = 'progressText'
+			progressText.textContent = dialogMessage
+			// Insert the elements.
+			document.body.appendChild(background)
+			document.body.appendChild(progContent)
+			progContent.appendChild(spinner)
+			progContent.appendChild(progressText)
+		}
+
+		function removeProgressDialog() {
+			document.body.removeChild(gebi('progressBackground'))
+			document.body.removeChild(gebi('progressContent'))
+		}
+
 		function start() {
-			interval = setInterval(change, 100);
+			interval = setInterval(function(){showProgressBar()}, 100);
+			init = setInterval(function(){document.body.removeChild(gebi('progressContent'))}, 100)
+		}
+
+		function showProgressBar(){
+			if (index <= 500){
+				console.log(index)
+				showProgressDialog()
+				index++
+				// document.getElementById('prog1').style.width = index / size * 100 + '%'
+			}else{
+				removeProgressDialog()
+				clearInterval(interval)
+			}
 		}
 		function change() {
-			index ++;
+			// index ++;
 			if (index <= size){
-				document.getElementById('prog1').style.width = index / size * 100 + '%'
+				index++
+				// init = setInterval(function(){
+				// 	showProressBar()
+				// },1)
 			}else{
-				clearInterval(interval);
+				clearInterval(init)
 			}
+		}
+		function init(){
+			
+			start()
+			// change()
 		}
 
 	</script>
@@ -37,5 +86,5 @@
 <body>
 	<div class="progressBar"><div id="prog1" class="progColor" style='width:0%'></div></div>
 	<br>
-	<button onclick="javascript:start()">Change</button>
+	<button onclick="javascript:init()">Change</button>
 </body>
