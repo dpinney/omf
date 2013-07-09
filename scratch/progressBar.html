@@ -11,20 +11,31 @@
 		div.progColor {
 		transition: width 2s;
 		background-color: orange;
-		width: 90%; /* Adjust with JavaScript */
+		width: 10%; /* Adjust with JavaScript */
 		height: 20px;
 		border-radius: 10px; }
 	</style>
 	<script type="text/javascript">
+		var interval;
+		var index = 0;
+		var size = 1000;
+		function start() {
+			interval = setInterval(change, 100);
+		}
 		function change() {
-			document.getElementById('prog1').style.width = document.getElementById('valueBox').value
+			index ++;
+			if (index <= size){
+				document.getElementById('prog1').style.width = index / size * 100 + '%'
+			}else{
+				clearInterval(interval);
+			}
 		}
 
 	</script>
 </head>
 
 <body>
-	<div class="progressBar"><div id="prog1" class="progColor"></div></div>
+	<div class="progressBar"><div id="prog1" class="progColor" style='width:0%'></div></div>
 	<br>
-	<input id="valueBox" type="text" value="90%"/><button onclick="javascript:change()">Change</button>
+	<button onclick="javascript:start()">Change</button>
 </body>
