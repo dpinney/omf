@@ -49,17 +49,17 @@
 
 		function start() {
 			interval = setInterval(function(){showProgressBar()}, 100);
-			init = setInterval(function(){document.body.removeChild(gebi('progressContent'))}, 100)
+			showProgressDialog()
+			// init = setInterval(function(){document.body.removeChild(gebi('progressContent'))}, 100)
 		}
 
 		function showProgressBar(){
-			if (index <= 500){
+			if (index <= size){
 				console.log(index)
-				showProgressDialog()
 				index++
-				// document.getElementById('prog1').style.width = index / size * 100 + '%'
+				document.getElementById('progColor').style.width = index / size * 100 + '%'
 			}else{
-				removeProgressDialog()
+				removeProgressDialog('Running')
 				clearInterval(interval)
 			}
 		}
@@ -84,7 +84,7 @@
 </head>
 
 <body>
-	<div class="progressBar"><div id="prog1" class="progColor" style='width:0%'></div></div>
+	<div class="progressBar" id='progBar'><div id="progColor" class="progColor" style='width:0%'></div></div>
 	<br>
 	<button onclick="javascript:init()">Change</button>
 </body>
