@@ -141,15 +141,16 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	# Add the class player dictionary to glmCaseDict
 	glmCaseDict[last_key] = {'class' : 'player',
 							 'variable_types' : ['double'],
-							 'variable_name' : ['value']}
+							 'variable_names' : ['value']}
 	last_key += 1
 	
-	if 'feeder_load_shape_norm' in config_data.keys() and config_data['feeder_load_shape_norm'] is not None:
+	if use_flags['use_normalized_loadshapes'] == 1:
 		glmCaseDict[last_key] = {'object' : 'player',
 								 'name' : 'norm_feeder_loadshape',
 								 'property' : 'value',
-								 'file' : '{:s}'.format(config_data['feeder_load_shape_norm']),
-								 'loop' : '14600 // Will loop file for 40 years assuming the file has data for a 24 hour period'}
+								 'file' : '{:s}'.format(config_data['load_shape_norm']),
+								 'loop' : '14600',
+								 'comment' : '// Will loop file for 40 years assuming the file has data for a 24 hour period'}
 		last_key += 1
 
 	# Include the objects for the TOU case flags
@@ -496,7 +497,7 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 						if random_class_number <= 50:
 							commercial_dict[commercial_key]['load_classification'] = 7
 						elif random_class_number > 50:
-							commercial_key[commercial_key]['load_classification'] = 8
+							commercial_dict[commercial_key]['load_classification'] = 8
 					else:
 						if sum(commercial_dict[commercial_key]['number_of_houses']) >= 15:
 							commercial_dict[commercial_key]['load_classification'] = 8
@@ -830,46 +831,16 @@ def main():
 	glm_object_dict[4] = {'object' : 'transformer_configuration',
 						  'name' : 'tc_400',
 						  'connect_type' : '1',
-						  'power_rating' : '1666.7',
-						  'powerA_rating' : '666.7',
-						  'powerB_rating' : '500',
-						  'powerC_rating' : '500',
-						  'primary_voltage' : '12470',
-						  'secondary_voltage' : '4160',
+						  'power_rating' : '7000',
+						  'powerA_rating' : '875',
+						  'powerB_rating' : '1750',
+						  'powerC_rating' : '4375',
+						  'primary_voltage' : '7200',
+						  'secondary_voltage' : '2400',
 						  'resistance' : '0.01',
 						  'reactance' : '0.06'}
 
-	glm_object_dict[5] = {'object' : 'transformer_configuration',
-						  'name' : 'SPCT_config_A_500k',
-						  'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
-						  'install_type' : 'PADMOUNT',
-						  'primary_voltage' : '2400',
-						  'secondary_voltage' : '124',
-						  'power_rating' : '500',
-						  'powerA_rating' : '500',
-						  'impedance' : '0.015+0.0675j'}
-
-	glm_object_dict[6] = {'object' : 'transformer_configuration',
-						  'name' : 'SPCT_config_B_500k',
-						  'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
-						  'install_type' : 'PADMOUNT',
-						  'primary_voltage' : '2400',
-						  'secondary_voltage' : '124',
-						  'power_rating' : '500',
-						  'powerB_rating' : '500',
-						  'impedance' : '0.015+0.0675j'}
-
-	glm_object_dict[7] = {'object' : 'transformer_configuration',
-						  'name' : 'SPCT_config_C_667k',
-						  'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
-						  'install_type' : 'PADMOUNT',
-						  'primary_voltage' : '2400',
-						  'secondary_voltage' : '124',
-						  'power_rating' : '666.7',
-						  'powerC_rating' : '666.7',
-						  'impedance' : '0.015+0.0675j'}
-
-	glm_object_dict[8] = {'object' : 'node',
+	glm_object_dict[5] = {'object' : 'node',
 						  'name' : 'node1',
 						  'phases' : 'ABCN',
                           'bustype' : 'SWING',
@@ -878,7 +849,7 @@ def main():
 						  'voltage_C' : '-3599.779+6235.000j',
 						  'nominal_voltage' : '7200'}
 
-	glm_object_dict[9] = {'object' : 'overhead_line',
+	glm_object_dict[6] = {'object' : 'overhead_line',
 						  'name' : 'oh_12',
 						  'phases' : 'ABCN',
 						  'from' : 'node1',
@@ -886,7 +857,7 @@ def main():
 						  'length' : '2000',
 						  'configuration' : 'lc_300'}
 
-	glm_object_dict[10] = {'object' : 'node',
+	glm_object_dict[7] = {'object' : 'node',
 						  'name' : 'node2',
 						  'phases' : 'ABCN',
 						  'voltage_A' : '+7199.558+0.000j',
@@ -894,14 +865,14 @@ def main():
 						  'voltage_C' : '-3599.779+6235.000j',
 						  'nominal_voltage' : '7200'}
 
-	glm_object_dict[11] = {'object' : 'transformer',
+	glm_object_dict[8] = {'object' : 'transformer',
 						  'name' : 't_23',
 						  'phases' : 'ABCN',
 						  'from' : 'node2',
 						  'to' : 'node3',
 						  'configuration' : 'tc_400'}
 
-	glm_object_dict[12] = {'object' : 'node',
+	glm_object_dict[9] = {'object' : 'node',
 						  'name' : 'node3',
 						  'phases' : 'ABCN',
 						  'voltage_A' : '+2401.777+0.000j',
@@ -909,7 +880,7 @@ def main():
 						  'voltage_C' : '-1200.889+2080.000j',
 						  'nominal_voltage' : '2400'}
 
-	glm_object_dict[13] = {'object' : 'overhead_line',
+	glm_object_dict[10] = {'object' : 'overhead_line',
 						  'name' : 'oh_34',
 						  'phases' : 'ABCN',
 						  'from' : 'node3',
@@ -917,7 +888,7 @@ def main():
 						  'length' : '2500',
 						  'configuration' : 'lc_300'}
 
-	glm_object_dict[14] = {'object' : 'node',
+	glm_object_dict[11] = {'object' : 'node',
 						  'name' : 'node4',
 						  'phases' : 'ABCN',
 						  'voltage_A' : '+2401.777+0.000j',
@@ -925,49 +896,34 @@ def main():
 						  'voltage_C' : '-1200.889+2080.000j',
 						  'nominal_voltage' : '2400'}
 
-	glm_object_dict[15] = {'object' : 'transformer',
-						  'name' : 'SPCT_A_n4-tn4',
-						  'phases' : 'AS',
-						  'from' : 'node4',
-						  'to' : 'tn4A',
-						  'configuration' : 'SPCT_config_A_500k'}
+	glm_object_dict[12] = {'object' : 'load',
+						  'parent' : 'node4',
+						  'name' : 'l4A',
+						  'phases' : 'AN',
+						  'constant_power_A' : '785369.750+258138.553j',
+						  'load_class' : 'C',
+						  'nominal_voltage' : '2400'}
 
-	glm_object_dict[16] = {'object' : 'transformer',
-						  'name' : 'SPCT_B_n4-tn4',
-						  'phases' : 'BS',
-						  'from' : 'node4',
-						  'to' : 'tn4B',
-						  'configuration' : 'SPCT_config_B_500k'}
+	glm_object_dict[13] = {'object' : 'load',
+						  'parent' : 'node4',
+						  'name' : 'l4B',
+						  'phases' : 'BN',
+						  'constant_power_B' : '1570739.500+516277.107j',
+						  'load_class' : 'C',
+						  'nominal_voltage' : '2400'}
 
-	glm_object_dict[17] = {'object' : 'transformer',
-						  'name' : 'SPCT_C_n4-tn4',
-						  'phases' : 'CS',
-						  'from' : 'node4',
-						  'to' : 'tn4C',
-						  'configuration' : 'SPCT_config_C_667k'}
-
-	glm_object_dict[18] = {'object' : 'triplex_node',
-						  'name' : 'tn4A',
-						  'phases' : 'AS',
-						  'power_12' : '318750.000+197544.508j',
-						  'nominal_voltage' : '120'}
-
-	glm_object_dict[19] = {'object' : 'triplex_node',
-						  'name' : 'tn4B',
-						  'phases' : 'BS',
-						  'power_12' : '450000.000+217945.947j',
-						  'nominal_voltage' : '120'}
-
-	glm_object_dict[20] = {'object' : 'triplex_node',
-						  'name' : 'tn4C',
-						  'phases' : 'CS',
-						  'power_12' : '593750.000+195156.187j',
-						  'nominal_voltage' : '120'}
+	glm_object_dict[14] = {'object' : 'load',
+						  'parent' : 'node4',
+						  'name' : 'l4C',
+						  'phases' : 'CN',
+						  'constant_power_C' : '3926848.750+1290692.768j',
+						  'load_class' : 'C',
+						  'nominal_voltage' : '2400'}
 
 
-	baseGLM, last_key = GLD_Feeder(glm_object_dict,0)
+	baseGLM, last_key = GLD_Feeder(glm_object_dict,-1,'C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration')
 	glm_string = feeder.sortedWrite(baseGLM)
-	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\four_node_basecase_test1.glm','w')
+	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\four_node_loadshapes_test1.glm','w')
 	file.write(glm_string)
 	file.close()
 	print('success!')

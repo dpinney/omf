@@ -67,7 +67,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		data["feeder_rating"] = 1.15*14.0
 		data["nom_volt"] = 14400
 		data["nom_volt2"] = 14400 #was set to 480 for taxonomy feeders
-		data["load_shape_norm"] = None
+		data["load_shape_norm"] = dir + 'load_shape_player.player'
 		vA='schedules\\\\VA.player'
 		vB='schedules\\\\VB.player'
 		vC='schedules\\\\VC.player'
@@ -623,7 +623,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		data["avg_commercial"] = 35000
 		
 		# Scale the responsive and unresponsive loads (percentage)
-		data["base_load_scalar"] = 1
+		data["base_load_scalar"] = 1.0
 		
 		# heating offset
 		allsame_c = 2
@@ -653,7 +653,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		# additional set point degrees
 		data["addtl_heat_degrees"] = 0
 		
-		if 'feeder_load_shape_norm' in data.keys() and data['feeder_load_shape_norm'] is not None:
+		if 'load_shape_norm' in data.keys() and data['load_shape_norm'] is not None:
 			# commercial zip fractions for loadshapes
 			data["c_z_pf"] = 0.97
 			data["c_i_pf"] = 0.97
@@ -720,7 +720,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		# additional set point degrees
 		data["addtl_heat_degrees"] = couplets['addtl_heat_degrees']
 		
-		if 'feeder_load_shape_norm' in data.keys() and data['feeder_load_shape_norm'] is not None:
+		if 'load_shape_norm' in data.keys() and data['load_shape_norm'] is not None:
 			# commercial zip fractions for loadshapes
 			data["c_z_pf"] = couplets["c_z_pf"]
 			data["c_i_pf"] = couplets["c_i_pf"]
