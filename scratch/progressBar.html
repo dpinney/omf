@@ -19,8 +19,7 @@
 	<script type="text/javascript">
 		var interval;
 		var index = 0;
-		var size = 1000;
-		var subsize = 500;
+		var size = 100;
 
 		function showProgressDialog(dialogMessage) {
 			// Make the elements.
@@ -49,7 +48,7 @@
 
 		function start() {
 			interval = setInterval(function(){showProgressBar()}, 100);
-			showProgressDialog()
+			showProgressDialog('Loading...')
 			// init = setInterval(function(){document.body.removeChild(gebi('progressContent'))}, 100)
 		}
 
@@ -59,7 +58,7 @@
 				index++
 				document.getElementById('progColor').style.width = index / size * 100 + '%'
 			}else{
-				removeProgressDialog('Running')
+				removeProgressDialog()
 				clearInterval(interval)
 			}
 		}

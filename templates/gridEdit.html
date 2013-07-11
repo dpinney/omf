@@ -535,7 +535,6 @@
 	}
 
 	function zoomToSelection() {
-
 		domTargets = document.getElementsByClassName('selected')
 		if (domTargets.length != 1) {return false}
 		if (domTargets[0].nodeName == 'line') {
@@ -635,6 +634,8 @@
 			nodeI = findIndex(nodes,'treeIndex',treeIndex)
 			onCompClick(nodes[nodeI],nodeI)
 		} else {
+			nodeI = findIndex(nodes,'treeIndex',treeIndex)
+			onCompClick(nodes[nodeI],nodeI)
 			// Degenerate case: object without visual representation.
 		}
 	}
@@ -697,6 +698,10 @@
 			subIndex = JSON.stringify(tree[key]).indexOf(inString)
 			if (subIndex != -1 && tree[key]['object'] != 'player' && tree[key].hasOwnProperty('object') ) {
 				results.push(key)
+			}
+			// Add module or its properties to search area
+			if (tree[key]['module']==inString || tree[key][inString]!=undefined){
+				results.push(key)	
 			}
 		}
 		return results
