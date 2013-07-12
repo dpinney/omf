@@ -128,10 +128,10 @@ def dictToString(inDict):
 		return '#set ' + inDict['#set'] + '\n'
 	elif 'class' in inDict:
 		prop = ''
-		if 'variable_types' in inDict and 'variable_names' in inDict and len(inDict['variable_types'])==len(inDict['variable_names']):
+		if 'variable_types' in inDict.keys() and 'variable_names' in inDict.keys() and len(inDict['variable_types'])==len(inDict['variable_names']):
 			for x in xrange(len(inDict['variable_types'])):
-				prop += '\t' + inDict['variable_types'][x] + ' ' + inDict['variable_names'][x] + '\n'
-			return 'class' + inDict['class'] + '{\n' + prop + '};\n'
+				prop += '\t' + inDict['variable_types'][x] + ' ' + inDict['variable_names'][x] + ';\n'
+			return 'class ' + inDict['class'] + '{\n' + prop + '};\n'
 		else:
 			return '\n'
 

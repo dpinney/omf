@@ -67,7 +67,8 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		data["feeder_rating"] = 1.15*14.0
 		data["nom_volt"] = 14400
 		data["nom_volt2"] = 14400 #was set to 480 for taxonomy feeders
-		data["load_shape_norm"] = dir + "NHEC_small_commercial_normalized_load_shape.player"
+		#data["load_shape_norm"] = dir + "NHEC_small_commercial_normalized_load_shape.player"
+		data["load_shape_norm"] = dir + 'load_shape_player.player'
 		vA='schedules\\\\VA.player'
 		vB='schedules\\\\VB.player'
 		vC='schedules\\\\VC.player'
@@ -623,7 +624,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		data["avg_commercial"] = 35000
 		
 		# Scale the responsive and unresponsive loads (percentage)
-		data["base_load_scalar"] = 1
+		data["base_load_scalar"] = 1.0
 		
 		# heating offset
 		allsame_c = 2
