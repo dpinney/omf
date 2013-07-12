@@ -22,8 +22,8 @@ def createFeederDirectory(feederID):
 	# TODO: directory needs to include subdirectory 'winners' for storing the best .glms from each calibration round
 	# TODO: anything with suffix 'glm' might be deleted during calibration since we cleanup unecessary file between rounds. Put schedules, other .glms, etc into a subdirectory if we don't want them deleted. 
 	# TODO: If using .csv files for recorder output (as opposed to mysql), add subdirectory 'csv_output' ( or go into makeGLM.py and change the file path -- that's where it's defined. Also would have to change it in gleanMetrics.py where each file is opened.)
-	directory = 'C:\\Users\\d3y051\\Documents\\NRECA_feeder_calibration_2-2013\\Calibration\\github\\omf\\calibration\\Feeder_Test'
-	#directory = 'C:\\Users\\d3y051\\Desktop\\calibration\\calibration\\Feeder_Test'
+	#directory = 'C:\\Users\\d3y051\\Documents\\NRECA_feeder_calibration_2-2013\\Calibration\\github\\omf\\calibration\\Feeder_Test'
+	directory = 'C:\\Users\\d3y051\\Desktop\\calibration\\calibration\\Feeder_Test'
 	return directory
 	
 def OMFmain(milsoft, feeder_info, scada, case_flag, feeder_config, calibration_config, model_name='Feeder', user_flag_to_calibrate=1):
@@ -235,52 +235,75 @@ def main():
 						  'voltage_C' : '-1200.889+2080.000j',
 						  'nominal_voltage' : '2400'}
 
-	glm_object_dict[15] = {'object' : 'transformer',
-						  'name' : 'SPCT_A_n4-tn4',
-						  'phases' : 'AS',
-						  'from' : 'node4',
-						  'to' : 'tn4A',
-						  'configuration' : 'SPCT_config_A_500k'}
+	# glm_object_dict[15] = {'object' : 'transformer',
+						  # 'name' : 'SPCT_A_n4-tn4',
+						  # 'phases' : 'AS',
+						  # 'from' : 'node4',
+						  # 'to' : 'tn4A',
+						  # 'configuration' : 'SPCT_config_A_500k'}
 
-	glm_object_dict[16] = {'object' : 'transformer',
-						  'name' : 'SPCT_B_n4-tn4',
-						  'phases' : 'BS',
-						  'from' : 'node4',
-						  'to' : 'tn4B',
-						  'configuration' : 'SPCT_config_B_500k'}
+	# glm_object_dict[16] = {'object' : 'transformer',
+						  # 'name' : 'SPCT_B_n4-tn4',
+						  # 'phases' : 'BS',
+						  # 'from' : 'node4',
+						  # 'to' : 'tn4B',
+						  # 'configuration' : 'SPCT_config_B_500k'}
 
-	glm_object_dict[17] = {'object' : 'transformer',
-						  'name' : 'SPCT_C_n4-tn4',
-						  'phases' : 'CS',
-						  'from' : 'node4',
-						  'to' : 'tn4C',
-						  'configuration' : 'SPCT_config_C_667k'}
+	# glm_object_dict[17] = {'object' : 'transformer',
+						  # 'name' : 'SPCT_C_n4-tn4',
+						  # 'phases' : 'CS',
+						  # 'from' : 'node4',
+						  # 'to' : 'tn4C',
+						  # 'configuration' : 'SPCT_config_C_667k'}
+	# glm_object_dict[18] = {'object' : 'triplex_node',
+						  # 'name' : 'tn4A',
+						  # 'phases' : 'AS',
+						  # 'power_12' : '318750.000+197544.508j',
+						  # 'nominal_voltage' : '120'}
 
-	glm_object_dict[18] = {'object' : 'triplex_node',
+	# glm_object_dict[19] = {'object' : 'triplex_node',
+						  # 'name' : 'tn4B',
+						  # 'phases' : 'BS',
+						  # 'power_12' : '450000.000+217945.947j',
+						  # 'nominal_voltage' : '120'}
+
+	# glm_object_dict[20] = {'object' : 'triplex_node',
+						  # 'name' : 'tn4C',
+						  # 'phases' : 'CS',
+						  # 'power_12' : '593750.000+195156.187j',
+						  # 'nominal_voltage' : '120'}
+						  
+	glm_object_dict[18] = {'object' : 'load',
+						  'parent' : 'node4',
 						  'name' : 'tn4A',
-						  'phases' : 'AS',
-						  'power_12' : '318750.000+197544.508j',
+						  'phases' : 'AN',
+						  'load_class' : '7',
+						  'constant_power_A' : '318750.000+197544.508j',
 						  'nominal_voltage' : '120'}
 
-	glm_object_dict[19] = {'object' : 'triplex_node',
+	glm_object_dict[19] = {'object' : 'load',
+						  'parent' : 'node4',
 						  'name' : 'tn4B',
-						  'phases' : 'BS',
-						  'power_12' : '450000.000+217945.947j',
+						  'phases' : 'BN',
+						  'load_class' : '8',
+						  'constant_power_B' : '450000.000+217945.947j',
 						  'nominal_voltage' : '120'}
 
-	glm_object_dict[20] = {'object' : 'triplex_node',
+	glm_object_dict[20] = {'object' : 'load',
+						  'parent' : 'node4',
 						  'name' : 'tn4C',
-						  'phases' : 'CS',
-						  'power_12' : '593750.000+195156.187j',
+						  'phases' : 'CN',
+						  'load_class' : '8',
+						  'constant_power_C' : '593750.000+195156.187j',
 						  'nominal_voltage' : '120'}
 
 	milsoft = glm_object_dict
 	#milsoft = milToGridlab.convert('ACEC-FRIENDSHIP.std','ACEC.seq')
 	
-	model_name = 'testing_model_FRIENDSHIP'
+	model_name = 'testing_model_fournode'
 	feeder_info = None # place holder for future feeder information input from the user. 
 	scada = 'make_believe_scada_file.xlsx' # place holder for file with scada that will be processed for certain values. 
-	case_flag = 0 # base case, do not put None
+	case_flag = -1 # base case, do not put None
 	feeder_config = None # only used in the case that the user already has a feeder configuration .py file that works (i.e. they've calibrated feeder  or at least part of it)
 	calibration_config = None # same as for feeder_config
 	

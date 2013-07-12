@@ -211,6 +211,7 @@ def funcRawMetsDict (dir, glms,scada,days):
 	return raw_metrics
 	
 def main():
+	pass
 	# pretend these are returned from a function gleaning val's from recorder output stored somewhere 
 	# [peak val, peak time, total energy, minimum val, minimum time] for summer = 0, winter = 1, shoulder = 2
 	# test_metrics = {	'2407': [[15010.97, 18.0, 253289.49, 6229.59, 4.25], [11754.59, 7.08, 2061549.63, 6228.17, 22.58], [8496.49, 17.09, 165030.59, 5197.83, 2.91]], # first entry are measurements from 2407

@@ -33,7 +33,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 									4:	['TN-Nashville.tmy2', 		'CST+6CDT'],
 									5:	['FL-Miami.tmy2', 			'EST+5EDT'],
 									6:	['HI-Honolulu.tmy2', 		'HST10'] }
-
+		
 	if file_to_extract == None:
 		# Use default values.
 		
@@ -67,7 +67,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		data["feeder_rating"] = 1.15*14.0
 		data["nom_volt"] = 14400
 		data["nom_volt2"] = 14400 #was set to 480 for taxonomy feeders
-		data["load_shape_norm"] = None
+		data["load_shape_norm"] = dir + "NHEC_small_commercial_normalized_load_shape.player"
 		vA='schedules\\\\VA.player'
 		vB='schedules\\\\VB.player'
 		vC='schedules\\\\VC.player'
@@ -643,7 +643,6 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		# decrease gas heating percentage
 		decrease_gas = 1
 		
-		#TODO: this is actually in TechnologyParameters Right now...
 		# widen schedule skew
 		data["residential_skew_std"] = 2700
 		
@@ -653,7 +652,10 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		# additional set point degrees
 		data["addtl_heat_degrees"] = 0
 		
-		if 'feeder_load_shape_norm' in data.keys() and data['feeder_load_shape_norm'] is not None:
+		# normalized load shape scalar
+		data["normalized_loadshape_scalar"] = 1
+		
+		if 'load_shape_norm' in data.keys() and data['load_shape_norm'] is not None:
 			# commercial zip fractions for loadshapes
 			data["c_z_pf"] = 0.97
 			data["c_i_pf"] = 0.97
@@ -720,21 +722,36 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		# additional set point degrees
 		data["addtl_heat_degrees"] = couplets['addtl_heat_degrees']
 		
-		if 'feeder_load_shape_norm' in data.keys() and data['feeder_load_shape_norm'] is not None:
+		if "load_shape_scalar" in couplets.keys():
+			data["normalized_loadshape_scalar"] = couplets['load_shape_scalar']
+		else:
+			data["normalized_loadshape_scalar"] = 1
+			
+		if 'load_shape_norm' in data.keys() and data['load_shape_norm'] is not None:
 			# commercial zip fractions for loadshapes
-			data["c_z_pf"] = couplets["c_z_pf"]
-			data["c_i_pf"] = couplets["c_i_pf"]
-			data["c_p_pf"] = couplets["c_p_pf"]
-			data["c_zfrac"] = couplets["c_zfrac"]
-			data["c_ifrac"] = couplets["c_ifrac"]
+			data["c_z_pf"] = 0.97
+			data["c_i_pf"] = 0.97
+			data["c_p_pf"] = 0.97
+			data["c_zfrac"] = 0.2
+			data["c_ifrac"] = 0.4
+			# data["c_z_pf"] = couplets["c_z_pf"]
+			# data["c_i_pf"] = couplets["c_i_pf"]
+			# data["c_p_pf"] = couplets["c_p_pf"]
+			# data["c_zfrac"] = couplets["c_zfrac"]
+			# data["c_ifrac"] = couplets["c_ifrac"]
 			data["c_pfrac"] = 1 - data["c_zfrac"] - data["c_ifrac"]
 			
 			# residential zip fractions for loadshapes
-			data["r_z_pf"] = couplets["r_z_pf"]
-			data["r_i_pf"] = couplets["r_i_pf"]
-			data["r_p_pf"] = couplets["r_p_pf"]
-			data["r_zfrac"] = couplets["r_zfrac"]
-			data["r_ifrac"] = couplets["r_ifrac"]
+			data["r_z_pf"] = 0.97
+			data["r_i_pf"] = 0.97
+			data["r_p_pf"] = 0.97
+			data["r_zfrac"] = 0.2
+			data["r_ifrac"] = 0.4
+			# data["r_z_pf"] = couplets["r_z_pf"]
+			# data["r_i_pf"] = couplets["r_i_pf"]
+			# data["r_p_pf"] = couplets["r_p_pf"]
+			# data["r_zfrac"] = couplets["r_zfrac"]
+			# data["r_ifrac"] = couplets["r_ifrac"]
 			data["r_pfrac"] = 1 - data["r_zfrac"] - data["r_ifrac"]
 		
 	# Apply calibration scalars

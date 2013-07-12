@@ -9,7 +9,7 @@ def add_normalized_residential_ziploads(loadshape_dict, residenntial_dict, confi
         tpload_parent = residenntial_dict[x]['parent']
         tpphases = residenntial_dict[x]['phases']
         tpnom_volt = '120.0'
-        bp = residenntial_dict[x]['load']*config_data['base_load_scalar']
+        bp = residenntial_dict[x]['load']*config_data['normalized_loadshape_scalar']
 
         
         loadshape_dict[last_key] = {'object' : 'triplex_load',
@@ -38,9 +38,9 @@ def add_normalized_commercial_ziploads(loadshape_dict, commercial_dict, config_d
         load_parent = commercial_dict[x]['parent']
         phases = commercial_dict[x]['phases']
         nom_volt = commercial_dict[x]['nom_volt']
-        bp_A = commercial_dict[x]['load'][0]*config_data['base_load_scalar']
-        bp_B = commercial_dict[x]['load'][1]*config_data['base_load_scalar']
-        bp_C = commercial_dict[x]['load'][2]*config_data['base_load_scalar']
+        bp_A = commercial_dict[x]['load'][0]*config_data['normalized_loadshape_scalar']
+        bp_B = commercial_dict[x]['load'][1]*config_data['normalized_loadshape_scalar']
+        bp_C = commercial_dict[x]['load'][2]*config_data['normalized_loadshape_scalar']
         
         loadshape_dict[last_key] = {'object' : 'load',
                             'name' : '{:s}_loadshape'.format(load_name),

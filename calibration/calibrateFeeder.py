@@ -33,6 +33,9 @@ action_failed_count = {}
 # The number of times an action may produce a unhelpful result before we begin bypassing it. Once a brand new action is attempted, fail counts are wiped and the action may be tried again. 
 fail_lim = 1
 
+# The default parameters. NOTE: These should match the defaults within Configuration.py.
+default_params = [15000,35000,0,2,2,0,0,0,0,2700,.15,0]
+
 log = open('calibration_log.txt','a')
 log.write('ID\t\t\tWSM\t\tActionID\tWSMeval\tCalibration Values\t\t\t\t\t\tMain Metrics\n')
 
@@ -131,17 +134,17 @@ def getCalibVals (glm,dir):
 					pass
 		calib.close()
 	else:
-		calibration_values = [15000,35000,0,2,2,0,0,0,0,2700,.15,0] #CHECK: These should be the defaults. 
+		calibration_values = default_params 
 	return calibration_values
 	
-def writeLIB (id, calib_id, params, dir):
+def writeLIB (id, calib_id, params, dir, load_shape_scalar=None):
 	'''Write a file containing calibration values.
 	
 	id (int)-- ID of calibration file within this loop
 	calib_id (int)-- ID of calibration loop within calibrateFeeder function
 	params (list)-- list of calibration values for populating .glm
 	dir (string)-- the directory in which these files should be written
-	
+	load_shape_scalar (float)-- if using case flag = -1 (load shape rather than houses)
 	'''
 	[a,b,c,d,e,f,g,h,i,j,k,l] = list(map(lambda x:str(x),params))
 	filename = 'Calib_ID'+str(calib_id)+'_Config_ID'+str(id)+'.txt' 
@@ -161,6 +164,8 @@ def writeLIB (id, calib_id, params, dir):
 	file.write("# widen schedule skew\nsched_skew_std,"+j+"\n")
 	file.write("# window wall ratio\nwindow_wall_ratio,"+k+"\n")
 	file.write("# additional set point degrees\naddtl_heat_degrees,"+l)
+	if load_shape_scalar is not None:
+		file.write("\n# normalized load shape scalar\nload_shape_scalar,"+str(load_shape_scalar))
 	file.close()
 	return filename
 
@@ -533,9 +538,22 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 	# Do initial run. 
 	print ('Beginning initial run for calibration.')
 	
-	# Make .glm's for each day. 
-	glms_init = makeGLM.makeGLM(clockDates(days), calibration_config, baseGLM, case_flag, feeder_config, dir)
+	glms_init = []
+	
+	if case_flag == -1:
+		c = 0;
+		calibration_config_files = []
+		for val in [0.05, 0.10, 0.25, 0.50, 1]:
+			print("Begin writing calibration files...")
+			calibration_config_files.append(writeLIB (c, 0, default_params, dir, val))
+			c += 1
+		for i in calibration_config_files:
+			glms_init.extend(makeGLM.makeGLM(clockDates(days), i, baseGLM, case_flag, feeder_config,dir))
+	else:
+		# Make .glm's for each day. 
+		glms_init = makeGLM.makeGLM(clockDates(days), calibration_config, baseGLM, case_flag, feeder_config, dir)
 	#glms_init = ['DefaultCalibration_2013-04-14.glm','DefaultCalibration_2013-01-04.glm','DefaultCalibration_2013-06-29.glm']
+	
 	# Run those .glms by executing a batch file. 
 	print ('Begining simulations in GridLab-D.')
 	
@@ -555,7 +573,7 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 		
 	# Find .glm with the best WSM score (at this point there is only one...)
 	glm, wsm_score = chooseBest(raw_metrics)
-	print ('The initial WSM score is ' + str(wsm_score) + '.')
+	print ('The WSM score is ' + str(wsm_score) + '.')
 	
 	# Print warnings for outliers in the comparison metrics. 
 	warnOutliers(raw_metrics[glm],0)
@@ -573,20 +591,23 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 	# Since this .glm technically won its round, we'll move it to winners subdirectory. 
 	movetoWinners(glm,dir)
 	
-	if wsm_score <= wsm_acceptable:
-		print ("Hooray! We're done.")
-		return None, glm # to OMFmain.py
+	if case_flag == -1: # populated with normalized load shape rather than houses
+		final_glm_file = glm
 	else:
-		# Go into loop
-		try:
-			final_glm_file = calibrateLoop(glm, main_mets, SCADA, days, 0, 0, baseGLM, case_flag, feeder_config,dir,batch_file)
-		except KeyboardInterrupt:
-			last_count = max(calib_record.keys())
-			print ("Interuppted at calibration loop number "+str(last_count)+" where the best .glm was "+calib_record[last_count][0]+" with WSM score of "+str(calib_record[last_count][1])+".")
-			final_glm_file = calib_record[last_count][0]
-			cleanUP(dir)
-			#print (str(action_count))
-			#print (str(calib_record))
+		if wsm_score <= wsm_acceptable:
+			print ("Hooray! We're done.")
+			return None, glm # to OMFmain.py
+		else:
+			# Go into loop
+			try:
+				final_glm_file = calibrateLoop(glm, main_mets, SCADA, days, 0, 0, baseGLM, case_flag, feeder_config,dir,batch_file)
+			except KeyboardInterrupt:
+				last_count = max(calib_record.keys())
+				print ("Interuppted at calibration loop number "+str(last_count)+" where the best .glm was "+calib_record[last_count][0]+" with WSM score of "+str(calib_record[last_count][1])+".")
+				final_glm_file = calib_record[last_count][0]
+				cleanUP(dir)
+				#print (str(action_count))
+				#print (str(calib_record))
 	
 	log.close()
 	
