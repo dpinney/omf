@@ -730,12 +730,8 @@ function zoomRedraw(){
 		results = []
 		for (key in tree) {
 			subIndex = JSON.stringify(tree[key]).indexOf(inString)
-			if (subIndex != -1 && tree[key]['object'] != 'player' && tree[key].hasOwnProperty('object') ) {
+			if (subIndex != -1 && tree[key]['object'] != 'player' && (tree[key].hasOwnProperty('object')||tree[key].hasOwnProperty('module'))) {
 				results.push(key)
-			}
-			// Add module or its properties to search area
-			if (tree[key]['module']==inString || tree[key][inString]!=undefined){
-				results.push(key)	
 			}
 		}
 		return results
