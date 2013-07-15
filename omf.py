@@ -51,12 +51,15 @@ def generate_csrf_token():
         flask.session['_csrf_token'] = some_random_string()
     return flask.session['_csrf_token']
 
-app.jinja_env.globals['csrf_token'] = generate_csrf_token 
-
+app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
 @login_manager.user_loader
 def load_user(username):
 	return user_manager.get(username)
+
+@app.route('/robots.txt')
+def static_from_root():
+    return flask.send_from_directory(app.static_folder, flask.request.path[1:])
 
 ###################################################
 # VIEWS
