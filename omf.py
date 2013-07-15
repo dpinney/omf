@@ -216,7 +216,7 @@ def makePublic(objectType, objectName):
 		for study in [s for s in flask_login.current_user.listAll("Study")
 					  if s[:s.find("---")] == objectName]:
 			flask_login.current_user.make_public("Study", study)
-	return flask.redirect(flask.url_for("root"))
+	return flask.redirect('/')
 
 @app.route('/newAnalysis/')
 @app.route('/newAnalysis/<analysisName>')
@@ -279,7 +279,7 @@ def newAnalysis(analysisName=None):
 def viewReports(analysisName):
 	user, is_public = (user_manager.get("public"), True) if flask.request.args.get("public") == "true" else (flask_login.current_user, False)
 	if not user.exists('Analysis', analysisName):
-		return flask.redirect(flask.url_for('root'))
+		return flask.redirect('/')
 	thisAnalysis = analysis.Analysis(user.get('Analysis',analysisName))
 	studyList = []
 	for studyName in thisAnalysis.studyNames:
@@ -354,7 +354,7 @@ def delete():
 		user.delete('Study', study)
 	# Delete analysis.
 	user.delete('Analysis', anaName)
-	return flask.redirect(flask.url_for('root'))
+	return flask.redirect('/')
 
 @app.route("/deleteFeeder/", methods=["POST"])
 @flask_login.login_required
@@ -415,7 +415,7 @@ def saveAnalysis():
 		classRef =  getattr(moduleRef, studyData['studyType'].capitalize())
 		studyObj = classRef(studyData, new=True)
 		flask_login.current_user.put('Study', adminPrefix+pData['analysisName'] + '---' + study['studyName'], studyObj.__dict__)
-	return flask.redirect(flask.url_for('root'))
+	return flask.redirect('/')
 
 @app.route('/terminate/', methods=['POST'])
 @flask_login.login_required
@@ -428,7 +428,7 @@ def terminate():
 	user.put('Analysis', anaName, thisAnalysis.__dict__)
 	# Now actually do the termination:
 	worker.terminate(user.prepend+anaName)
-	return flask.redirect(flask.url_for('root'))
+	return flask.redirect('/')
 
 @app.route('/feederData/<anaFeeder>/<feederName>.json')
 @flask_login.login_required
@@ -464,8 +464,7 @@ def saveFeeder(public):
 				store.put("Feeder", "admin_"+str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
 		else:
 			flask_login.current_user.put("Feeder", str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
-	# return flask.redirect(flask.url_for('root') + '#feeders')
-	return flask.redirect(flask.request.form.get("ref", flask.url_for("root")+"#feeders"))
+	return flask.redirect(flask.request.form.get("ref", "/#feeders"))
 
 @app.route("/feederName/<new_name>")
 @flask_login.login_required
@@ -506,7 +505,7 @@ def milsoftImport():
 	stdString = flask.request.files['stdFile'].stream.read()
 	seqString = flask.request.files['seqFile'].stream.read()
 	worker.milImport(store, current_user.prepend+feederName, stdString, seqString)
-	return flask.redirect(flask.url_for('root') + '#feeders')
+	return flask.redirect('/#feeders')
 
 if __name__ == '__main__':
 	# Run a debug server all interface IPs.
