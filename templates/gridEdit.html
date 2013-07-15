@@ -393,9 +393,42 @@
 		force.start()
 	}
 
-	function zoomRedraw() {
+
+var event_translate = [0,0];
+var event_scale = 1;
+
+var current_scale = 1;
+var current_translate = [0,0];
+
+function man_zoom(scale, translate){
+    current_scale = scale, current_translate = translate;
+    setvis();
+}
+
+function setvis(){
+    vis.attr('transform', 'translate(' + current_translate + ')' + ' scale('+ current_scale + ')')
+    if (current_scale<1){
+	d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/current_scale);
+    }
+    // vis2.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
+    scaleRedraw()
+    d3.selectAll('.nodetext').style('font-size', 30/current_scale)
+	.text(function(d) { 
+	    if (d.chargeMultiple != 1){
+		return d.objectType + ' has hidden children'}
+	    else {return d.objectType}})	    
+}
+
+function zoomRedraw(){
+    current_scale = current_scale * d3.event.scale / event_scale;
+    var diff = [d3.event.translate[0] - event_translate[0], d3.event.translate[1] - event_translate[1]];
+    current_translate = [diff[0]+current_translate[0], diff[1]+current_translate[1]];
+    event_scale = d3.event.scale, event_translate = d3.event.translate.slice(0);
+    setvis();
+}
+	function zoomRedraw2() {
 		// console.log(d3.event.scale, d3.event.translate)
-		vis.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
+	    vis.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
 		if (d3.event.scale<1){
 			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/d3.event.scale);
 		}
@@ -470,7 +503,8 @@
 	}
 
 	function scaleRedraw(){
-		curScale = zoomer.scale()
+		// curScale = zoomer.scale()
+	    curScale = current_scale;
 		// x-scale renewed
 		x = d3.scale.linear().domain([ options.xmin, options.xmax/curScale]).nice().range([ 0, width ]).nice();
 		// y-scale renewed
