@@ -25,7 +25,7 @@ We need to handle two cases:
 2. S3 cluster case. Have a cluterQueue class, and also have a daemon.
 '''
 
-import os, tempfile, psutil, time
+import os, tempfile, time
 from multiprocessing import Value, Lock
 from threading import Thread, Timer
 import studies, analysis, milToGridlab
