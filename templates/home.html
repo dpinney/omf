@@ -84,9 +84,9 @@
 
 	}).done(function(data){
 	    console.log("sent the request!");
-	    console.log(data);
 	    var p = url.indexOf("true") > -1 ? ".Public" : ".Private";
-	    $(p+" ."+analysisName.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
+	    var my_tr = $.makeArray($(p+" tr")).filter(function(tr){return $(tr).attr("class") == "analysis "+analysisName.replace(/_/g, '__').replace(/ /g, '_')})[0];
+	    $(my_tr).html($("<div>").html(data)[0].getElementsByTagName("tr")[0].innerHTML);
 	    startPolling({"name":analysisName, "public":""+(url.indexOf("true") > -1)});
 	    return false;
 	});
@@ -111,7 +111,7 @@
     	}, 5000);
     }
 
-    function pull_html_data(){
+    function pull_html_data(){ 
 	var metadatas = [];
 	for(i=0; i<$(".analysis").length; i++){
 	    var attr_names = ["name", "sourceFeeder", "climate", "runTime", "status", "public"];
