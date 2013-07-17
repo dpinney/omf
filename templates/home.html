@@ -85,12 +85,16 @@
 	}).done(function(data){
 	    console.log("sent the request!");
 	    var p = url.indexOf("true") > -1 ? ".Public" : ".Private";
-	    var my_tr = $.makeArray($(p+" tr")).filter(function(tr){return $(tr).attr("class") == "analysis "+analysisName.replace(/_/g, '__').replace(/ /g, '_')})[0];
-	    $(my_tr).html($("<div>").html(data)[0].getElementsByTagName("tr")[0].innerHTML);
+	    replace_row(p, analysisName)
 	    startPolling({"name":analysisName, "public":""+(url.indexOf("true") > -1)});
 	    return false;
 	});
 	return false;
+    }
+
+    function replace_row(p, analysisName){
+	var my_tr = $.makeArray($(p+" tr")).filter(function(tr){return $(tr).attr("class") == "analysis "+analysisName.replace(/_/g, '__').replace(/ /g, '_')})[0];
+	$(my_tr).html($("<div>").html(data)[0].getElementsByTagName("tr")[0].innerHTML);
     }
 
     function startPolling(md){
@@ -104,7 +108,8 @@
     	    }).done(function(data){
     		if (data != "waiting"){
 		    var p = md["public"] == "true" ? ".Public" : ".Private";
-    		    $(p+" ."+md.name.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
+    		    // $(p+" ."+md.name.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
+		    repalce_row(p, md.name)
     		    clearInterval(i);
     		}
     	    });
