@@ -1358,7 +1358,7 @@ function get_window_size(){
 		if (noTriplexNode()){
 			alert('TRIPLEX NODES have been hidden by the layout, please unfold them first.')
 		} else {
-			showProgressDialog('Please wait. House is being generated.')
+			showProgressDialog('Please wait. Houses are being generated.')
 			// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
 			setTimeout(replaceAllHouses, 1000);	
 		}
