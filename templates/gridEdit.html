@@ -25,7 +25,7 @@
 	.rightToolbar {float:right; margin-right:5px;}
 	input {min-width: 100px}
 	/* Start graph elements. */
-	.nodetext {pointer-events:none; font:10px; }
+	.nodetext {pointer-events:none; font:10px;}
 	g.node {fill:gray; stroke:#fff;}
 	line.link {stroke:black; stroke-opacity:1; stroke-width:6px;}
 	line.parentChild {stroke-dasharray:1,1;}
@@ -43,7 +43,7 @@
 	circle.nodeIsPinned {fill:none; stroke:black; pointer-events:none;}
 	circle.nodeNotPinned {fill:none; pointer-events:none;}
 	.node:not(:hover) .nodetext { display:none; }
-	.axis path,.axis line { fill:none; stroke:black; shape-rendering:crispEdges; }
+	.axis path,.axis line { fill:none; stroke:black; shape-rendering:crispEdges}
 	.axis text { font-family:sans-serif; font-size:11px; }
   </style>
 </head>
@@ -328,14 +328,11 @@
 
 	function redraw() {
 		link = d3.select('#linkLayer').selectAll('line.link').data(links, function(d) {return d.source.treeIndex + '-' + d.target.treeIndex})
-		// fix the dynamic drawing according to current scale level
-		var scale = zoomer.scale()
 		
 		link.enter().append('svg:line')
 			.on('click', onCompClick)
 			.attr('class', function(d) { return 'link ' + d.objectType })
 			.attr('id', function(d) { return 'n' + d.treeIndex })
-			// TODO: set stroke-width according the load of links
 			.style('stroke-width', LINE_LINK_STROKE_WIDTH);
 
 		link.exit().remove()
@@ -350,7 +347,7 @@
 		node.append("svg:text")
 		        .attr("class", "nodetext");
 		        
-		d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/scale)
+		d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE)
 				.text(function(d) { 
 		        	if (d.chargeMultiple != 1){
 		        		return d.objectType + ' has hidden children'}
@@ -363,7 +360,6 @@
 			.attr('cy', 0)
 			.attr('r', function(d) {return d.chargeMultiple * NODE_CIRCLE_RADIUS })
 			.style('stroke-width', NODE_STROKE_WIDTH-0.2);
-			// .style('stroke-width', 1/scale)
 
 		node.append('svg:circle')
 			.attr('class', function(d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
@@ -519,26 +515,6 @@ function zoomRedraw(){
 		} else {
 			grid.style('display','none')
 		}
-	}
-
-	// Unused function
-	function setByScale(){
-		var scale = zoomer.scale()
-		d3.selectAll('.node').style("stroke-width", NODE_STROKE_WIDTH / scale)
-		d3.selectAll('circle.nodeIsPinned').style('stroke-width', PINNED_NODE_STROKE_SIZE / scale)
-		d3.selectAll('.nodeCircle').data(nodes, function(d){return d.treeIndex})
-			.attr('r', function(d){return d.chargeMultiple * PINNED_NODE_CIRCLE_RADIUS/scale})
-			.style('stroke-width', NODE_STROKE_WIDTH/scale);
-		// vis.selectAll('circle').attr('r', function(d){return 10/scale})
-		d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/scale);
-		// d3.selectAll('text').style('font-size', 30/scale)
-		d3.selectAll('.parentChild').style('stroke-width', LINE_PARENTCHILD_STROKE_WIDTH/scale)
-		d3.selectAll('node.selected').style('stroke-width', NODE_SELECTED_STROKE_WIDTH/scale);
-		d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/scale);
-		d3.selectAll('circle.nodeIsPinned').style('stroke-width', NODE_STROKE_WIDTH/scale)
-									.attr('r', PINNED_NODE_CIRCLE_RADIUS/scale);
-		d3.selectAll('circle.nodeNotPinned').style('stroke-width', 0/scale)
-									.attr('r',UNPINNED_NODE_CIRCLE_RADIUS/scale);
 	}
 
 	function preLayout() {
