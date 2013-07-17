@@ -126,6 +126,34 @@ function removeProgressDialog() {
 	document.body.removeChild(gebi('progressContent'))
 }
 
+function showProgressBar(dialogMessage) {
+	// Make the elements.
+	background = document.createElement('div')
+	background.id = 'progressBackground'
+	background.style.zIndex = '9998'
+	progContent = document.createElement('div')
+	progContent.id = 'progressContent'
+	progContent.style.zIndex = '9999'
+	progBar = document.createElement('div')
+	progBar.id = 'progBar' 
+	progColor = document.createElement('div')
+	progColor.id = 'progColor'
+	progressText = document.createElement('h2')
+	progressText.id = 'progressText'
+	progressText.textContent = dialogMessage
+	// Insert the elements.
+	document.body.appendChild(background)
+	document.body.appendChild(progContent)
+	progBar.appendChild(progColor)
+	progContent.appendChild(progBar)
+	progContent.appendChild(progressText)
+}
+
+function removeProgressBar() {
+	document.body.removeChild(gebi('progressBackground'))
+	document.body.removeChild(gebi('progressContent'))
+}
+
 function round(number,precision) {
 	return parseFloat(number.toPrecision(precision))
 }
