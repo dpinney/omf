@@ -161,10 +161,19 @@
 </head>
 <body>
   <a id='consoleLink' href='/console'>C</a>
+  
   <div id='title'>
     <div id='logoBox'><a href='/'>▦</a></div>
     <!--Title:-->Open Modeling Framework
+
   </div>
+      <div id="account_links">
+<div>      <a href="logout">Log Out</a></div>
+      <div><a href="myaccount">My Account</a></div>
+      {% if is_admin %}
+      <div><a href="adminControls">Admin Controls</a></div>
+      {% endif %}
+      </div>
   <div id='toolbar'>
     
     <p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Analyses</p>
@@ -279,9 +288,5 @@
     </form>
   </div>
 </div>
-<a href="logout">Log Out</a><br />
-<a href="myaccount">My Account</a><br>
-{% if is_admin %}
-<a href="adminControls">Admin Controls</a>
-{% endif %}
+
 </body>
