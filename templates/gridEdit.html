@@ -323,7 +323,22 @@
 		// Run the layout in the background until performance is acceptable.
 		// preLayout()
 		// Start drawing.
+		// Feeder loading
+		setTimeout(function(){
+			showProgressDialog('Feeder is loading...')
+		},100)
 
+		var interval = setInterval(function(){
+			console.log(force.alpha())
+			if(force.alpha() < 0.02){
+				removeProgressDialog()
+				clearInterval(interval)
+			}
+			else if (nodes[parseInt(Math.random()*nodes.length)].fixed){
+				removeProgressDialog()
+				clearInterval(interval)
+			}
+		}, 1500)
 		redraw()
 	}
 
