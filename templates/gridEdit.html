@@ -362,7 +362,10 @@
 			.attr('cx', 0)
 			.attr('cy', 0)
 			.attr('r', function(d) {return d.chargeMultiple * NODE_CIRCLE_RADIUS })
+		    // .attr("r", 100)
 			.style('stroke-width', NODE_STROKE_WIDTH-0.2);
+		    // .style("stroke-width", 100)
+		    // .attr("fill", "red")
 			// .style('stroke-width', 1/scale)
 
 		node.append('svg:circle')
@@ -393,42 +396,9 @@
 		force.start()
 	}
 
-
-var event_translate = [0,0];
-var event_scale = 1;
-
-var current_scale = 1;
-var current_translate = [0,0];
-
-function man_zoom(scale, translate){
-    current_scale = scale, current_translate = translate;
-    setvis();
-}
-
-function setvis(){
-    vis.attr('transform', 'translate(' + current_translate + ')' + ' scale('+ current_scale + ')')
-    if (current_scale<1){
-	d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/current_scale);
-    }
-    // vis2.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
-    scaleRedraw()
-    d3.selectAll('.nodetext').style('font-size', 30/current_scale)
-	.text(function(d) { 
-	    if (d.chargeMultiple != 1){
-		return d.objectType + ' has hidden children'}
-	    else {return d.objectType}})	    
-}
-
-function zoomRedraw(){
-    current_scale = current_scale * d3.event.scale / event_scale;
-    var diff = [d3.event.translate[0] - event_translate[0], d3.event.translate[1] - event_translate[1]];
-    current_translate = [diff[0]+current_translate[0], diff[1]+current_translate[1]];
-    event_scale = d3.event.scale, event_translate = d3.event.translate.slice(0);
-    setvis();
-}
-	function zoomRedraw2() {
+	function zoomRedraw() {
 		// console.log(d3.event.scale, d3.event.translate)
-	    vis.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
+		vis.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
 		if (d3.event.scale<1){
 			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/d3.event.scale);
 		}
@@ -503,8 +473,7 @@ function zoomRedraw(){
 	}
 
 	function scaleRedraw(){
-		// curScale = zoomer.scale()
-	    curScale = current_scale;
+		curScale = zoomer.scale()
 		// x-scale renewed
 		x = d3.scale.linear().domain([ options.xmin, options.xmax/curScale]).nice().range([ 0, width ]).nice();
 		// y-scale renewed
@@ -567,6 +536,101 @@ function zoomRedraw(){
 		// TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
 		zoom(0,0,1)
 	}
+
+function find_largest_y(){
+    var l = -9000;
+    var n;
+    var coords_regex = /translate\((-{0,1}\d+.\d+),(-{0,1}\d+.\d+)\)/;
+    for (i=0; i<$(".node").length; i++){
+	var y = $($(".node")[i]).attr("transform").match(coords_regex).slice(1).map(parseFloat)[1];
+	if (y > l){
+	    l = y;
+	    n = $(".node")[i]
+	} 
+	
+    }
+    return n;
+}
+
+function fe(coord_func, comp_func){
+    var l;
+    var n;
+    var coords_regex = /translate\((-{0,1}\d+.\d+),(-{0,1}\d+.\d+)\)/;
+    for (i=0; i<$(".node").length; i++){
+	var y = coord_func($($(".node")[i]).attr("transform").match(coords_regex).slice(1).map(parseFloat))
+	// if (y > l){
+	if(!l || comp_func(y,l)){
+	    l = y;
+	    n = $(".node")[i]
+	} 
+	
+    }
+    return n;
+}
+
+function getx(e){
+    return e[0]
+}
+function gety(e){
+    return e[1]
+}
+function high_light_extremes(){
+    var a = [fe(gety, gt), fe(gety, lt), fe(getx, gt), fe(getx, lt)];
+    console.log(a)
+    for(i=0; i<a.length; i++){
+	// console.log($($(a[i]).children("circle")[0]));
+	// $($(a[i]).children("circle")[0]).attr("r", 10).attr("fill", "green")
+	get_and_hl(a[i]);
+    }
+
+    return a;
+}
+
+function get_and_hl(a){
+    highlight_node($($(a).children("circle")[0]))
+}
+
+function highlight_node(n){
+    n.attr("r", 10).attr("fill", "green");
+}
+
+function fly(attr_func, comp_func){
+    var largest;
+    var my_n;
+    for (i=0; i<nodes.length;i++){
+	if (!largest || comp_func(attr_func(nodes[i]), largest)){
+	    largest = attr_func(nodes[i])
+	    my_n = nodes[i]
+	}
+    }
+    return my_n;
+}
+
+function draw_axes(){
+    var a = [["cx", "cy"], ["cy", "cx"]];
+    var x,y;
+    for (y=0; y<a.length; y++){
+	for(x=-2000; x<2000; x++){
+	    d3.select("#powerGrid").append("circle").attr(a[y][0], x).attr(a[y][1], 0).attr("r", 5).attr("fill", "black").attr("transform", $("#powerGrid").attr("transform"))
+	}
+    }
+}
+
+var rets_x = function(n){return n.x;};
+var rets_y = function(n){return n.y;};
+var lt = function (a,b){return a<b;};
+var gt = function(a,b){return a>b;};
+function get_bounds(){
+    low_x = fly(rets_x, lt).x;
+    high_x = fly(rets_x, gt).x;
+    low_y = fly(rets_y, lt).y;
+    high_y = fly(rets_y, gt).y;
+    return [[low_x, low_y], [high_x, high_y]];
+}
+
+function get_window_size(){
+    return [$(window).height() - $("#title").outerHeight() + $("#toolbar").outerHeight(), $(window).width()]
+}
 
 	function zoomToSelection() {
 		domTargets = document.getElementsByClassName('selected')
