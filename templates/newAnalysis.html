@@ -160,14 +160,13 @@
 		<div id='title'>
 			<div id='logoBox'><a href='/'>▦</a></div>
 			<!--Title:-->Analysis Creation
-
 		</div>
 		<div class='content'>
 			<div class='buttonGroup'>
 				<button class='pill' onclick='dropPill(this, "Add Study")'>Add Study ▾</button>
 				<ul class='menu'>
 					{% for stud in studyTemplates|sort() %}
-					<li><a href='javascript:addStudy("{{stud}}")'>{{stud}}</a></li>
+					<li><a onclick='javascript:addStudy("{{stud}}")'>{{stud}}</a></li>
 					{% endfor %}
 				</ul>
 			</div>
@@ -175,7 +174,7 @@
 				<button class='pill' onclick='dropPill(this, "Add Report")'>Add Report ▾</button>
 				<ul class='menu'>
 					{% for rep in reportTemplates|sort() %}
-					<li><a href='javascript:addReport("{{rep}}")'>{{ rep }}</a></li>
+					<li><a onclick='javascript:addReport("{{rep}}")'>{{ rep }}</a></li>
 					{% endfor %}
 				</ul>
 			</div>
