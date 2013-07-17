@@ -42,7 +42,7 @@ def csrf_protect():
     if flask.request.user_agent.browser == 'msie':
 		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
     if flask.request.method == "POST":
-        token = flask.session.pop('_csrf_token', None)
+        token = flask.session.get('_csrf_token', None)
         if not token or token != flask.request.form.get('_csrf_token'):
             flask.abort(403)
 
@@ -482,8 +482,10 @@ def runStatus():
 	name = flask.request.args.get('name')
 	is_public = flask.request.args.get("is_public") == "true"
 	if is_public:
+		key = "Public"
 		user = user_manager.get("public")
 	else:
+		key="Private"
 		user = flask_login.current_user
 	md = user.get("Analysis", name)
 	# md = flask_login.current_user.get('Analysis', name)
@@ -492,6 +494,7 @@ def runStatus():
 	if md['status'] != 'running':
 		return flask.render_template('metadata.html',
 									 md=md,
+									 key=key,
 									 is_admin = flask_login.current_user.username == "admin",
 									 value={"url":"?public="+("true" if is_public else "false")})
 	else:

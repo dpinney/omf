@@ -84,13 +84,17 @@
 
 	}).done(function(data){
 	    console.log("sent the request!");
-	    console.log(data);
 	    var p = url.indexOf("true") > -1 ? ".Public" : ".Private";
-	    $(p+" ."+analysisName.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
+	    replace_row(p, analysisName)
 	    startPolling({"name":analysisName, "public":""+(url.indexOf("true") > -1)});
 	    return false;
 	});
 	return false;
+    }
+
+    function replace_row(p, analysisName){
+	var my_tr = $.makeArray($(p+" tr")).filter(function(tr){return $(tr).attr("class") == "analysis "+analysisName.replace(/_/g, '__').replace(/ /g, '_')})[0];
+	$(my_tr).html($("<div>").html(data)[0].getElementsByTagName("tr")[0].innerHTML);
     }
 
     function startPolling(md){
@@ -104,14 +108,15 @@
     	    }).done(function(data){
     		if (data != "waiting"){
 		    var p = md["public"] == "true" ? ".Public" : ".Private";
-    		    $(p+" ."+md.name.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
+    		    // $(p+" ."+md.name.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
+		    repalce_row(p, md.name)
     		    clearInterval(i);
     		}
     	    });
     	}, 5000);
     }
 
-    function pull_html_data(){
+    function pull_html_data(){ 
 	var metadatas = [];
 	for(i=0; i<$(".analysis").length; i++){
 	    var attr_names = ["name", "sourceFeeder", "climate", "runTime", "status", "public"];
@@ -156,9 +161,18 @@
 </head>
 <body>
   <a id='consoleLink' href='/console'>C</a>
+  
   <div id='title'>
     <div id='logoBox'><a href='/'>▦</a></div>
     <!--Title:-->Open Modeling Framework
+
+  </div>
+  <div id="account_links">
+    <div><a href="logout">Log Out</a></div>
+    <div><a href="myaccount">My Account</a></div>
+    {% if is_admin %}
+    <div><a href="adminControls">Admin Controls</a></div>
+    {% endif %}
   </div>
   <div id='toolbar'>
     
@@ -274,9 +288,5 @@
     </form>
   </div>
 </div>
-<a href="logout">Log Out</a><br />
-<a href="myaccount">My Account</a><br>
-{% if is_admin %}
-<a href="adminControls">Admin Controls</a>
-{% endif %}
+
 </body>
