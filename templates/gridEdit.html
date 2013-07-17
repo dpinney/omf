@@ -521,8 +521,6 @@
 	}
 
 	function zoom(x,y,s) {
-		// zoomer.translate([x,y]).scale(s);
-		// zoomer.translate
 		vis.transition().duration(1000).attr('transform','translate(' + x + ',' + y + ') scale(' + s + ')')
 		// Set the behavior scale and translate to the current condition.
 		zoomer.scale(s)
@@ -794,12 +792,8 @@ function get_window_size(){
 		results = []
 		for (key in tree) {
 			subIndex = JSON.stringify(tree[key]).indexOf(inString)
-			if (subIndex != -1 && tree[key]['object'] != 'player' && tree[key].hasOwnProperty('object') ) {
+			if (subIndex != -1 && tree[key]['object'] != 'player' && (tree[key].hasOwnProperty('object')||tree[key].hasOwnProperty('module'))) {
 				results.push(key)
-			}
-			// Add module or its properties to search area
-			if (tree[key]['module']==inString || tree[key][inString]!=undefined){
-				results.push(key)	
 			}
 		}
 		return results
@@ -1160,13 +1154,7 @@ function get_window_size(){
 		if (newType == 'node') newType = 'gridNode'
 		if (undefined != tree[treeNewIndex].bustype && tree[treeNewIndex].bustype == 'SWING') newType += ' swingNode'
 		coords = getCenterCoordinates()
-		if (d3.selectAll('.node.gridNode').attr('fixed')=='true') {
-			isfixed = true
-		}
-		else {
-			isfixed = false
-		}
-		nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1, fixed: isfixed, x:coords[0], y:coords[1], px:coords[0], py:coords[1]}
+		nodeToAdd = {name:component.name, objectType:newType, treeIndex:treeNewIndex, chargeMultiple:1, fixed: true, x:coords[0], y:coords[1], px:coords[0], py:coords[1]}
 		nodes.push(nodeToAdd)
 		redraw()
 	}
