@@ -52,6 +52,7 @@
   <div id='title'>
 	<div id='logoBox'><a href='/'>▦</a></div>
 	<p>Grid Editor: </p>
+	
 	<p id='gridName'>{{feederName}}</p>
   </div>
   <div id='toolbar'>
@@ -1454,6 +1455,12 @@ function get_window_size(){
 	    gebi('saveMenuItem').style.display = 'none'
 	    gridNameP = gebi('gridName')
 	    currentName = gridNameP.innerHTML
+	    {% if is_admin and not public %}
+	    var i = currentName.indexOf("_");
+	    var p = $("#title p")[0];
+	    $(p).html($(p).html()+currentName.substr(0,i))
+	    currentName = currentName.substr(i+1);
+	    {% endif %}
 	    inputBox = '<input type="text" id="gridNameEdit" name="gridNameEdit" data-old="' + currentName + '" value="' + currentName + '"/>'
 	    acceptButton = '<button class="smallButton" id="acceptButton" onclick="acceptRename()">✔</button>'
 	    cancelButton = '<button class="smallButton" id="cancelButton" onclick="cancelRename()">✘</button>'
