@@ -47,7 +47,7 @@
 	.axis text { font-family:sans-serif; font-size:11px; }
   </style>
 </head>
-<body onkeypress='hotkeys()'>
+<body onkeypress='hotkeys()' onload="showProgressDialog('Feeder page is loading...')">
 <!-- <body > -->
   <div id='title'>
 	<div id='logoBox'><a href='/'>▦</a></div>
@@ -320,14 +320,11 @@
 			.style('opacity', 1);
 		// Start the layout.
 		force.start();
+		
 		// Run the layout in the background until performance is acceptable.
 		// preLayout()
-		// Start drawing.
+		
 		// Feeder loading
-		setTimeout(function(){
-			showProgressDialog('Feeder is loading...')
-		},10)
-
 		var interval = setInterval(function(){
 			console.log(force.alpha())
 			if(force.alpha() < 0.02){
@@ -339,6 +336,8 @@
 				clearInterval(interval)
 			}
 		}, 1500)
+
+		// Start drawing.
 		redraw()
 	}
 
