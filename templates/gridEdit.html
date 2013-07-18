@@ -326,7 +326,7 @@
 		// Feeder loading
 		setTimeout(function(){
 			showProgressDialog('Feeder is loading...')
-		},100)
+		},10)
 
 		var interval = setInterval(function(){
 			console.log(force.alpha())
@@ -1398,7 +1398,7 @@ function get_window_size(){
 		}
 		
 		
-		function noTriplexNode(){
+		function noHouse(){
 			for (x in hiddenNodes){
 				if (hiddenNodes[x].objectType != undefined && hiddenNodes[x].objectType == 'house')
 					return true
@@ -1406,7 +1406,7 @@ function get_window_size(){
 			return false
 		}
 
-		if (noTriplexNode){
+		if (noHouse()){
 			alert('Houses have been hidden in the layout, please unfold it first.')
 		} else {
 			showProgressDialog('Please wait. Solar is being generated.')
