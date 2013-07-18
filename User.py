@@ -1,10 +1,4 @@
-
-try:
-	from passlib.hash import pbkdf2_sha512
-except ImportError, e:
-	print "install passlib - 'pip install passlib'"
-	raise Exception, e
-
+from passlib.hash import pbkdf2_sha512
 import os
 import json
 import hashlib

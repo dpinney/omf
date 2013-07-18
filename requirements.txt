@@ -1,0 +1,5 @@
+flask==0.9
+boto==2.9.5
+psutil==0.7
+passlib==1.6.1
+flask_login==0.2.4
