@@ -1316,27 +1316,47 @@ function get_window_size(){
 			newHeater['name'] = 'synwaterheater' + treeNewIndex
 			return newHeater
 		}
+		i = 0
+		percentage = 0
+		in_use= false;
+		// TODO: An fast way --> d3.selectAll('.triplex_node')[0].length
+		tkeys = Object.keys(tree)
 		function replaceAllHouses() {
-			for (index in tree) {
-				if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
-					//get the parent index in tree, actually it is triplex_meter index
-					parentIndex = findIndex(tree, 'name', tree[index]['parent'])
-					// delete the triplex_node
-					deleteObject(index)
-					// create a new node which parent is 
-					newHouse = randomHouse()
-					newLights = randomLights()
-					newHeater = randomWaterHeater()
-					newChildAtLocation(newHouse, parentIndex)
-					houseIndex = findIndex(tree, 'name', newHouse['name'])
-					newChildAtLocation(newLights, houseIndex)
-					if (newHeater!=false) {newChildAtLocation(newHeater, houseIndex)}
+			progressBarUpdate(percentage)
+			if (i<tkeys.length && !in_use && percentage != 100) {
+				in_use = true
+				var limit = i+100
+				for(; i<tkeys.length && i < limit; i++){
+					index = tkeys[i]
+					if (tree[index].hasOwnProperty('object') && tree[index].hasOwnProperty('parent') && tree[index]['object']=='triplex_node') {
+						//get the parent index in tree, actually it is triplex_meter index
+						parentIndex = findIndex(tree, 'name', tree[index]['parent'])
+						// delete the triplex_node
+						deleteObject(index)
+						// create a new node which parent is 
+						newHouse = randomHouse()
+						newLights = randomLights()
+						newHeater = randomWaterHeater()
+						newChildAtLocation(newHouse, parentIndex)
+						houseIndex = findIndex(tree, 'name', newHouse['name'])
+						newChildAtLocation(newLights, houseIndex)
+						if (newHeater!=false) {newChildAtLocation(newHeater, houseIndex)}
+					}
+					percentage = Math.round(i/tkeys.length * 100).toFixed(2) 
 				}
+				in_use =false
 			}
-			redraw()
-			removeProgressDialog()
+			else{
+				redraw()
+				removeProgressBar()
+				in_use=false;
+				clearInterval(inter)
+			}
 		}
-
+		function progressBarUpdate(percentage) {
+			if (document.getElementById('progBar') != undefined)
+				document.getElementById('progColor').style.width = percentage + '%'
+		}
 		function noTriplexNode(){
 			for (x in hiddenNodes){
 				if (hiddenNodes[x].objectType != undefined && hiddenNodes[x].objectType == 'triplex_node')
@@ -1347,9 +1367,9 @@ function get_window_size(){
 		if (noTriplexNode()){
 			alert('TRIPLEX NODES have been hidden by the layout, please unfold them first.')
 		} else {
-			showProgressDialog('Please wait. Houses are being generated.')
-			// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-			setTimeout(replaceAllHouses, 1000);	
+			showProgressBar('Please wait. Houses are being generated.')
+			// set interval function to run replaceAllHouses every 10 ms, if it is running, will put one request in the queue.
+			inter = setInterval(replaceAllHouses, 10)
 		}
 	}
 
@@ -1378,25 +1398,46 @@ function get_window_size(){
 			newInverter['name'] = 'synSolar' + treeNewIndex
 			return newPanels
 		}
-
+		i = 0;
+		percentage = 0;
+		in_use = false;
+		tkeys = Object.keys(tree)
 		function walkAndAddSolar() {
-			for (index in tree) {
-				if (tree[index].hasOwnProperty('object') && tree[index]['object']=='house') {
-					if (Math.random() < solarPerc) {
-					meterIndex = findIndex(tree, 'name', tree[index]['parent'])
-					newInverter = makeNewInverter(tree[index]['phases'])
-					newPanels = newRandomPanels()
-					newChildAtLocation(newInverter, meterIndex)
-					inverterIndex = findIndex(tree, 'name', newInverter['name'])
-					newChildAtLocation(newPanels, inverterIndex)
+			progressBarUpdate(percentage)
+			// for (index in tree) {
+			if (i<tkeys.length && !in_use && percentage != 100){
+				in_use = true
+				var limit = i + 100
+				for (;i<tkeys.length && i < limit; i++){
+					index = tkeys[i]
+					if (tree[index].hasOwnProperty('object') && tree[index]['object']=='house') {
+						if (Math.random() < solarPerc) {
+						meterIndex = findIndex(tree, 'name', tree[index]['parent'])
+						newInverter = makeNewInverter(tree[index]['phases'])
+						newPanels = newRandomPanels()
+						newChildAtLocation(newInverter, meterIndex)
+						inverterIndex = findIndex(tree, 'name', newInverter['name'])
+						newChildAtLocation(newPanels, inverterIndex)
+						redraw()  // fix overlap nodes
+						}
 					}
 				}
+				percentage = Math.round(i/tkeys.length * 100).toFixed(2)
+				in_use = false
 			}
-			redraw()
-			removeProgressDialog()
+			else{
+				redraw()
+				removeProgressBar()
+				is_use = false
+				clearInterval(inter2)
+			}
 		}
-		
-		
+
+		function progressBarUpdate(percentage) {
+			if (document.getElementById('progBar') != undefined)
+				document.getElementById('progColor').style.width = percentage + '%'
+		}
+
 		function noHouse(){
 			for (x in hiddenNodes){
 				if (hiddenNodes[x].objectType != undefined && hiddenNodes[x].objectType == 'house')
@@ -1408,9 +1449,10 @@ function get_window_size(){
 		if (noHouse()){
 			alert('Houses have been hidden in the layout, please unfold it first.')
 		} else {
-			showProgressDialog('Please wait. Solar is being generated.')
+			showProgressBar('Please wait. Solar is being generated.')
 			// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-			setTimeout(walkAndAddSolar, 1000);	
+			// setTimeout(walkAndAddSolar, 1000);	
+			inter2 = setInterval(walkAndAddSolar, 10)
 		}
 		
 	}
