@@ -29,6 +29,12 @@
 		stroke-opacity: .8;
 	}
 
+	.markerText {
+		stroke: black;
+		stroke-width: 1px;
+		font: 8px sans-serif;
+	}
+
 	</style>
 </head>
 <body>
@@ -97,7 +103,7 @@ svg.append("svg:defs").selectAll("marker")
 .attr("id", String)
 .attr("viewBox", "0 0 15 15")
 .attr("refX", -40)
-.attr("refY", 0)
+.attr("refY", 1)
 .attr("markerUnits","strokeWidth")
 .attr("markerWidth", 3)
 .attr("markerHeight", 3)
@@ -108,7 +114,15 @@ svg.append("svg:defs").selectAll("marker")
 .append("svg:circle")
 .attr("r", 5)
 .attr("cx", 6)
-.attr("cy", 6);
+.attr("cy", 6)
+
+svg.selectAll("marker")
+.append("svg:text")
+.attr("class","markerText")
+.attr("x",3)
+.attr("y",10)
+.text("T")
+
 
 var path = svg.append("svg:g").selectAll("path")
 .data(force.links())
