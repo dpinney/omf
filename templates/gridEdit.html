@@ -523,100 +523,82 @@
 		// TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
 		zoom(0,0,1)
 	}
-
-function find_largest_y(){
-    var l = -9000;
-    var n;
-    var coords_regex = /translate\((-{0,1}\d+.\d+),(-{0,1}\d+.\d+)\)/;
-    for (i=0; i<$(".node").length; i++){
-	var y = $($(".node")[i]).attr("transform").match(coords_regex).slice(1).map(parseFloat)[1];
-	if (y > l){
-	    l = y;
-	    n = $(".node")[i]
-	} 
-	
-    }
-    return n;
-}
-
-function fe(coord_func, comp_func){
-    var l;
-    var n;
-    var coords_regex = /translate\((-{0,1}\d+.\d+),(-{0,1}\d+.\d+)\)/;
-    for (i=0; i<$(".node").length; i++){
-	var y = coord_func($($(".node")[i]).attr("transform").match(coords_regex).slice(1).map(parseFloat))
-	// if (y > l){
-	if(!l || comp_func(y,l)){
-	    l = y;
-	    n = $(".node")[i]
-	} 
-	
-    }
-    return n;
-}
-
-function getx(e){
-    return e[0]
-}
-function gety(e){
-    return e[1]
-}
-function high_light_extremes(){
-    var a = [fe(gety, gt), fe(gety, lt), fe(getx, gt), fe(getx, lt)];
-    console.log(a)
-    for(i=0; i<a.length; i++){
-	// console.log($($(a[i]).children("circle")[0]));
-	// $($(a[i]).children("circle")[0]).attr("r", 10).attr("fill", "green")
-	get_and_hl(a[i]);
-    }
-
-    return a;
-}
-
-function get_and_hl(a){
-    highlight_node($($(a).children("circle")[0]))
-}
-
-function highlight_node(n){
-    n.attr("r", 10).attr("fill", "green");
-}
-
-function fly(attr_func, comp_func){
-    var largest;
-    var my_n;
-    for (i=0; i<nodes.length;i++){
-	if (!largest || comp_func(attr_func(nodes[i]), largest)){
-	    largest = attr_func(nodes[i])
-	    my_n = nodes[i]
+function zoomToFit(){
+    function fly(attr_func, comp_func){
+	var largest;
+	var my_n;
+	for (i=0; i<nodes.length;i++){
+	    if (!largest || comp_func(attr_func(nodes[i]), largest)){
+		largest = attr_func(nodes[i])
+		my_n = nodes[i]
+	    }
 	}
+	return my_n;
     }
-    return my_n;
-}
-
-function draw_axes(){
-    var a = [["cx", "cy"], ["cy", "cx"]];
-    var x,y;
-    for (y=0; y<a.length; y++){
-	for(x=-2000; x<2000; x++){
-	    d3.select("#powerGrid").append("circle").attr(a[y][0], x).attr(a[y][1], 0).attr("r", 5).attr("fill", "black").attr("transform", $("#powerGrid").attr("transform"))
-	}
+    
+    function actual_scale(){
+	return $(window).height()/1000
     }
-}
 
-var rets_x = function(n){return n.x;};
-var rets_y = function(n){return n.y;};
-var lt = function (a,b){return a<b;};
-var gt = function(a,b){return a>b;};
-function get_bounds(){
-    low_x = fly(rets_x, lt).x;
-    high_x = fly(rets_x, gt).x;
-    low_y = fly(rets_y, lt).y;
-    high_y = fly(rets_y, gt).y;
-    return [[low_x, low_y], [high_x, high_y]];
-}
+    function the_center(bounds, i){
+	return ((bounds[0][i] + bounds[1][i])/2)
+    }
 
-function get_window_size(){
-    return [$(window).height() - $("#title").outerHeight() + $("#toolbar").outerHeight(), $(window).width()]
+    function xcenter(){
+	return the_center(get_bounds(), 0) * zoomer.scale()
+    }
+
+    function ycenter(){
+	return the_center(get_bounds(), 1) * zoomer.scale()
+    }
+
+    function window_hoz_center(){
+	return ($(window).width()/2)/actual_scale()
+    }
+
+    function window_vert_center(){
+	var extra = $("#title").outerHeight() + $("#toolbar").outerHeight()
+	var win_height = $(window).height() - extra
+	return (win_height/2 + extra)/actual_scale();
+    }
+
+    function center_feeder(){
+	var trans_amt_x = window_hoz_center() - xcenter();
+	var trans_amt_y = window_vert_center() - ycenter();
+	zoom(trans_amt_x, trans_amt_y, zoomer.scale())
+    }
+    var rets_x = function(n){return n.x;};
+    var rets_y = function(n){return n.y;};
+    var lt = function (a,b){return a<b;};
+    var gt = function(a,b){return a>b;};
+
+    function get_bounds(){
+	low_x = fly(rets_x, lt).x;
+	high_x = fly(rets_x, gt).x;
+	low_y = fly(rets_y, lt).y;
+	high_y = fly(rets_y, gt).y;
+	return [[low_x, low_y], [high_x, high_y]];
+    }
+
+    function win_h(){
+	var extra = $("#title").outerHeight() + $("#toolbar").outerHeight()
+	var win_h = $(window).height() - extra
+	return win_h/actual_scale()
+    }
+
+    function get_width(bounds, i){
+	return bounds[1][i] - bounds[0][i];
+    }
+
+    function xwidth(){
+	return get_width(get_bounds(), 0)
+    }
+
+    function ywidth(){
+	return get_width(get_bounds(), 1)
+    }
+    zoom(0,0, win_h()/ywidth())
+    center_feeder()
 }
 
 	function zoomToSelection() {
