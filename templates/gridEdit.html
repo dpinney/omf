@@ -560,6 +560,7 @@
 		zoom(0,0,1)
 	}
 function zoomToFit(){
+    // If this function zooms out, the lines may become much lighter, and if this function is used to zoom in, the lines may become much thicker.  Probably a Chrome bug.  The display goes back to normal after using the mouse wheel to zoom.
     function fly(attr_func, comp_func){
 	var largest;
 	var my_n;
