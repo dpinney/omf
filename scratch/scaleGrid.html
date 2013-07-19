@@ -1,170 +1,77 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-<title>Scale Ruler</title>
-<script type="text/javascript"
-	src="http://d3js.org/d3.v3.js"></script>
-<style type="text/css">
-body {
-	font: 10px sans-serif;
+<style>
+svg {
+	font: 20px sans-serif;
+	/*   shape-rendering: crispEdges; */
 }
 
-.axis {
-	font-size: 1.5em;
+rect {
+	fill: #fff;
 }
 
-.line {
+.axis path,.axis line {
 	fill: none;
-	stroke: steelblue;
-	stroke-width: 2px;
+	stroke: #ddd;
 }
-
 </style>
 </head>
 <body>
-	<!-- <div id="chart1" class="chart" type='width:100%, height:100%'>
-	</div> -->
+	<script src="http://d3js.org/d3.v3.min.js"></script>
 	<script type="text/javascript">
-		scaleRuler = function(elemid, options) {
-			var self = this;
-			// this.chart = document.getElementById(elemid);
-			this.chart = document.body
-			this.cx = this.chart.clientWidth;
-			this.cy = this.chart.clientHeight;
-			this.options = options || {};
-			this.options.xmax = options.xmax || 30;
-			this.options.xmin = options.xmin || 0;
-			this.options.ymax = options.ymax || 10;
-			this.options.ymin = options.ymin || 0;
-			this.width = window.innerWidth - 40;
-			this.height = window.innerHeight - 40;
-			
-			this.padding = {
-				"top" : 100,
-				"right" : 20,
-				"bottom" : 20,
-				"left" : 20
-			};
+	
+		/* 	Clarification:
+		 	1. add svg component, containing two parts, one for scale grid, one for power grid.
+		 	2. add g component of scale grid to svg --> only transform translate, not scale. Using d3.svg.axis() to generate dynamic grid lines.
+		 	3. add g component of power grid to svg --> transform both position and scale by translate and scale
+		 	4. add a zoom function to body, one for changing x-y axis, another for changing power grid.
+		 	Example: http://bl.ocks.org/mbostock/3892919
+		*/
+		var margin = {
+			top : 20,
+			right : 20,
+			bottom : 30,
+			left : 40};
+		var width = window.screen.availWidth - 40 - margin.left - margin.right; 
+		var height = window.screen.availHeight - 40 - margin.top - margin.bottom;
 
-			// x-scale
-			this.x = d3.scale.linear().domain([ this.options.xmin, this.options.xmax]).range([ 0, this.width ]);
+		var x = d3.scale.linear().domain([-width / 2, width / 2]).range([0, width]);
 
-			// drag x-axis logic
-			this.downx = Math.NaN;
+		var y = d3.scale.linear().domain([-height / 2, height / 2]).range([height, 0]);
 
-			// y-scale (inverted domain)
-			this.y = d3.scale.linear().domain([ this.options.ymin, this.options.ymax]).nice().range([ 0, this.height ]).nice();
+		var xAxis = d3.svg.axis().scale(x).orient("bottom").tickSize(-height);
 
-			// drag y-axis logic
-			this.downy = Math.NaN;
+		var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5).tickSize(-width);
 
-
-			var xrange = (this.options.xmax - this.options.xmin), 
-				yrange = (this.options.ymax - this.options.ymin);
-
-			this.vis2 = d3.select(this.chart)
-						.append("svg").attr("width", this.width)
-						.attr("height", this.height)
-						.append("g")
-						.attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
-
-			this.plot = this.vis2.append("rect")
-								.attr("width", this.width)
-								.attr("height", this.height)
-								.style("fill", "#FFFFFF")
-								.attr("pointer-events", "all")
-
-			this.vis2.append("svg")
-					.attr("top", 0)
-					.attr("left", 0)
-					.attr("width", this.width)
-					.attr("height",	this.height)
-					.attr("viewBox", "0 0 " + this.width + " " + this.height)
-
-
-			this.redraw()();
-		};
-
-
-		scaleRuler.prototype.update = function() {
-			var self = this;
-			if (d3.event && d3.event.keyCode) {
-				d3.event.preventDefault();
-				d3.event.stopPropagation();
-			}
-		}
-
-		scaleRuler.prototype.redraw = function() {
-			var self = this;
-			return function() {
-				var tx = function(d) { return "translate(" + self.x(d) + ",0)";}, 
-					ty = function(d) { return "translate(0," + self.y(d) + ")";}, 
-					stroke = "#ccc"
-					fx = self.x.tickFormat(10),
-					fy = self.y.tickFormat(10);
-					
-				// Regenerate x-ticks…
-				var gx = self.vis2.selectAll("g.x")
-							.data(self.x.ticks(10), String)
-							.attr("transform", tx);
-
-				gx.select("text").text(fx);
-
-				var gxe = gx.enter().insert("g", "a")
-							.attr("class", "x")
-							.attr("transform", tx);
-
-				gxe.append("line")
-							.attr("stroke", stroke)
-							.attr("y1", 0)
-							.attr("y2", self.height);
-
-				gxe.append("text")
-							.attr("class", "axis")
-							.attr("y", self.height-self.padding.top)
-							.attr("dy", "0em")
-							.attr("text-anchor", "middle")
-							.text(fx);
-				gx.exit().remove();
-
-				// Regenerate y-ticks…
-				var gy = self.vis2.selectAll("g.y")
-							.data(self.y.ticks(10), String)
-							.attr("transform", ty);
-
-				gy.select("text").text(fy);
-
-				var gye = gy.enter().insert("g", "a")
-							.attr("class", "y")
-							.attr("transform", ty);
-
-				gye.append("line")
-							.attr("stroke", stroke)
-							.attr("x1", 0)
-							.attr("x2", self.width);
-
-				gye.append("text")
-							.attr("class", "axis")
-							.attr("x", self.width- self.padding.left)
-							.attr("dy", "0em")
-							.attr("text-anchor", "end")
-							.text(fy);
-				gy.exit().remove();
-				
-// 				console.log(d3.behavior.zoom().x(self.x).y(self.y).on("zoom", self.redraw()))
-				self.plot.call(d3.behavior.zoom().x(self.x).y(self.y).on("zoom", self.redraw()));
-// 				self.plot.call(d3.behavior.zoom().on("zoom", self.redraw()));
-				self.update();
-			};
-		};
+		// 1
+		var svg = d3.select("body").append("svg").attr("width", width + margin.left + margin.right).attr("height",
+				height + margin.top + margin.bottom).append("g").attr("transform",
+				"translate(" + margin.left + "," + margin.top + ")");
 		
-		graph = new scaleRuler("chart1", {
-			"xmax" : window.innerWidth-40,
-			"xmin" : 0,
-			"ymax" : window.innerHeight-40,
-			"ymin" : 0,
-		});
+		svg.append("rect").attr("width", width).attr("height", height);
+
+		// 2
+		svg.append("g").attr("class", "x axis").attr("transform", "translate(0," + height + ")").call(xAxis);
+
+		svg.append("g").attr("class", "y axis").call(yAxis);
+		
+		// 3
+		scale = d3.select('svg').append('g')
+		scale.append('circle').attr('r', 10).attr('cx', 100).attr('cy', 300)
+		
+		var zoom = d3.behavior.zoom().x(x).y(y).on("zoom", zoomed);
+		
+		// 4
+		d3.select('body').call(zoom)
+		function zoomed() {
+			svg.select(".x.axis").call(xAxis);
+			svg.select(".y.axis").call(yAxis);
+
+			d3.select('circle')
+					.attr('transform', 'translate(' + d3.event.translate + ') scale(' + d3.event.scale + ')')
+		}
 	</script>
 </body>
 </html>
+
