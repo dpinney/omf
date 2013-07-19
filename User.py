@@ -21,7 +21,11 @@ class UserManager:
 			return User(self.store, **u_dict)
 			
 	def authenticate(self, username, password):
-		user = self.store.get("User", username)
+		user = None
+		for u in self.store.listAll("User"):
+			if u.lower() == username.lower():
+				user = self.store.get("User", u)
+				break
 		if user and pbkdf2_sha512.verify(password,
 										 user["password_digest"]):
 			self.store.put("User", username, user)
