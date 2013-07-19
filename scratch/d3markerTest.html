@@ -121,7 +121,7 @@ svg.selectAll("marker")
 .attr("class","markerText")
 .attr("x",4)
 .attr("y",8)
-.text("T")
+.text(function(d) {console.log(d); return d[0].toUpperCase()})
 
 
 var path = svg.append("svg:g").selectAll("path")
