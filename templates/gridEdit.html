@@ -359,7 +359,6 @@
 		
 		// Feeder loading
 		var interval = setInterval(function(){
-			console.log(force.alpha())
 			if(force.alpha() < 0.02){
 				removeProgressDialog()
 				clearInterval(interval)
@@ -372,6 +371,7 @@
 
 		// Start drawing.
 		redraw()
+		scaleRedraw()
 	}
 
 	function redraw() {
@@ -385,7 +385,7 @@
 			.style('stroke-width', LINE_LINK_STROKE_WIDTH)
 			.attr('marker-start',
 				function(d) {
-					console.log(d);
+					// console.log(d);
 					treeData = tree[d.treeIndex]
 					if (d.objectType=='fromTo') {
 						if (treeData.object == "transformer") {return "url(#transformerMarker)"};
@@ -444,7 +444,6 @@
 			.attr('r', function(d){ return d.chargeMultiple * NODE_CIRCLE_RADIUS})
 		
 		// Show scalegrid. 
-		scaleRedraw()
 		force.start()
 	}
 
@@ -467,7 +466,6 @@
 	}
 
 	function scaleRedraw(){
-		curScale = zoomer.scale()
 		// x-scale renewed
 		x = d3.scale.linear().domain([ options.xmin, options.xmax]).range([ 0, width  ]);
 		// y-scale renewed
@@ -475,10 +473,10 @@
 
 		xAxis = d3.svg.axis().scale(x).orient("bottom").tickSize(-height);
 		yAxis = d3.svg.axis().scale(y).orient("right").ticks(8).tickSize(width);
-
-		vis2.append('g').attr('class', 'x axis').attr("transform", "translate(0," + height + ")").call(xAxis);
-		vis2.append("g").attr("class", "y axis").call(yAxis);
-
+		if (d3.select(".x.axis") != undefined){
+			vis2.append('g').attr('class', 'x axis').attr("transform", "translate(0," + height + ")").call(xAxis);
+			vis2.append("g").attr("class", "y axis").call(yAxis);
+		}
 		d3.selectAll(".x.axis").select()
 		body.call(zoomer.x(x).y(y).on('zoom', zoomRedraw))
 	}
