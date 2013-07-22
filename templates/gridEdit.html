@@ -473,10 +473,8 @@
 
 		xAxis = d3.svg.axis().scale(x).orient("bottom").tickSize(-height);
 		yAxis = d3.svg.axis().scale(y).orient("right").ticks(8).tickSize(width);
-		if (d3.select(".x.axis") != undefined){
-			vis2.append('g').attr('class', 'x axis').attr("transform", "translate(0," + height + ")").call(xAxis);
-			vis2.append("g").attr("class", "y axis").call(yAxis);
-		}
+		vis2.append('g').attr('class', 'x axis').attr("transform", "translate(0," + height + ")").call(xAxis);
+		vis2.append("g").attr("class", "y axis").call(yAxis);
 		d3.selectAll(".x.axis").select()
 		body.call(zoomer.x(x).y(y).on('zoom', zoomRedraw))
 	}
