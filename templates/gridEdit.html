@@ -238,6 +238,9 @@
 		// TODO: optimize the translate position
 		.attr('transform', 'translate(' + 0 + ',' + 0 + ')')
 		// .attr('preserveAspectRatio', 'xMinYMin meet')
+	// for onSvgBlankCanvasClick function
+	vis2.append('rect').attr('width', width).attr('height', height);	
+	
 	// add powergrid to the upper layer
 	var vis = body.append('svg:g')
 		.attr('id', 'powerGrid')
@@ -503,6 +506,8 @@
 		// Set the behavior scale and translate to the current condition.
 		zoomer.scale(s)
 		zoomer.translate([x, y])
+		// reset link width
+		d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/s);
 		// Set the scale grid to the current size.
 		// scaleRedraw()
 	}
@@ -511,8 +516,6 @@
 		var scale = zoomer.scale()
 		// TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
 		zoom(0,0,1)
-		// reset link width
-		d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH);
 		// reset scale grid
 		vis2.select(".x.axis").call(xAxis)
 		vis2.select(".y.axis").call(yAxis)
