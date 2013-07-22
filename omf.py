@@ -39,8 +39,8 @@ user_manager = User.UserManager(store)
 
 @app.before_request
 def csrf_protect():
-    if flask.request.user_agent.browser == 'msie':
-		return 'The OMF currently must be accessed by Chrome, Firefox or Safari.'
+    if flask.request.user_agent.browser == 'msie' or flask.request.user_agent.browser == 'firefox':
+		return 'The OMF currently must be accessed by Chrome or Safari.'
     if flask.request.method == "POST":
         token = flask.session.get('_csrf_token', None)
         if not token or token != flask.request.form.get('_csrf_token'):

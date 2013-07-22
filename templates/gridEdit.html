@@ -43,7 +43,7 @@
 	circle.nodeIsPinned {fill:none; stroke:black; pointer-events:none;}
 	circle.nodeNotPinned {fill:none; pointer-events:none;}
 	.node:not(:hover) .nodetext { display:none; }
-	.axis path,.axis line { fill:none; stroke:#ddd; stroke-width:2px; shape-rendering:crispEdges}
+	.axis path,.axis line { fill:none; stroke:#ddd; stroke-width:1px; shape-rendering:crispEdges}
 	.axis text { font-family:sans-serif; font-size:11px; text-anchor:middle; }
 	text.markerText {fill:gray; font-size:6}
 	rect {fill:#fff;}
@@ -215,8 +215,11 @@
 
 	// SCALE DRAW GLOBAL LAYOUT VARIABLES
 	var xScale = 1, yScale = 1;
-	var width = window.screen.availWidth-45;
-	var height = window.screen.availHeight-100;
+	// var width = window.screen.availWidth-45;
+	// var height = window.screen.availHeight-60;
+
+	var width = document.body.clientWidth-45
+	var height = document.body.clientHeight -20
 
 	// CREATE LAYOUT
 	var body = d3.select('body')
