@@ -215,19 +215,22 @@
 
 	// SCALE DRAW GLOBAL LAYOUT VARIABLES
 	var xScale = 1, yScale = 1;
-	// var width = window.screen.availWidth-45;
-	// var height = window.screen.availHeight-60;
-
-	var width = document.body.clientWidth-45
-	var height = document.body.clientHeight -20
+	var width = window.screen.availWidth-45;
+	var height = window.screen.availHeight-100;
+	// TODO: for the size of the scale grid, may not suitable for specific window size
+	// 		check: document.body.clientWidth || document.body.offsetWidth || document.body.scrollWidth || document.body.scrollTop 
+	//   			|| window.screenTop || window.screen.width || window.screen.availWidth 
+	// var width = document.body.scrollWidth-45
+	// var height = document.body.scrollHeight -20
 
 	// CREATE LAYOUT
 	var body = d3.select('body')
 		.append('svg:svg')
 		.attr('id','graphSvg')
 		.on('click', onSvgBlankCanvasClick)
+		// TODO: for more info: http://www.w3.org/TR/SVG/coords.html#ViewBoxAttribute
 		// .attr('viewBox', '0 0 ' + w + ' ' + h  )
-		// .attr('preserveAspectRatio', 'xMinYMin')
+		// .attr('preserveAspectRatio', 'xMidYMid')
 		// .attr('pointer-events', 'all')
 		// .call(zoomer.on('zoom', zoomRedraw))
 
@@ -237,7 +240,7 @@
 		// .attr('viewBox', '0 0 ' + width+' '+ height)
 		// TODO: optimize the translate position
 		.attr('transform', 'translate(' + 0 + ',' + 0 + ')')
-		// .attr('preserveAspectRatio', 'xMinYMin meet')
+		// .attr('preserveAspectRatio', 'xMidYMid slice')
 	// for onSvgBlankCanvasClick function
 	vis2.append('rect').attr('width', width).attr('height', height);	
 	
@@ -507,7 +510,9 @@
 		zoomer.scale(s)
 		zoomer.translate([x, y])
 		// reset link width
-		d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/s);
+		if (s < 1){
+			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/s);
+		}
 		// Set the scale grid to the current size.
 		// scaleRedraw()
 	}
