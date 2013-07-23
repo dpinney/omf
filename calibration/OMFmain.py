@@ -6,6 +6,7 @@ import processSCADA #TODO: write this function
 import feeder
 import AddTapeObjects
 import re
+import os
 #import writeFeederConfig #TODO: future work (after June 1 deadline)
 
 # MilSoft model ( milsoft = [stdPath, seqPath])
@@ -23,8 +24,12 @@ def createFeederDirectory(feederID):
 	# TODO: anything with suffix 'glm' might be deleted during calibration since we cleanup unecessary file between rounds. Put schedules, other .glms, etc into a subdirectory if we don't want them deleted. 
 	# TODO: If using .csv files for recorder output (as opposed to mysql), add subdirectory 'csv_output' ( or go into makeGLM.py and change the file path -- that's where it's defined. Also would have to change it in gleanMetrics.py where each file is opened.)
 	#directory = 'C:\\Users\\d3y051\\Documents\\NRECA_feeder_calibration_2-2013\\Calibration\\github\\omf\\calibration\\Feeder_Test'
-	directory = 'C:\\Users\\d3y051\\Desktop\\calibration\\calibration\\Feeder_Test'
-	return directory
+	#directory = 'C:\\Users\\d3y051\\Desktop\\calibration\\calibration\\Feeder_Test'
+	currentDirectory = os.getcwd()
+	workingDirectory = os.path.join(currentDirectory,'workingDir')
+	if not os.path.isdir(workingDirectory):
+		os.mkdir('workingDir')
+	return workingDirectory
 	
 def OMFmain(milsoft, feeder_info, scada, case_flag, feeder_config, calibration_config, model_name='Feeder', user_flag_to_calibrate=1):
 
