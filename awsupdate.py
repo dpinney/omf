@@ -13,9 +13,7 @@ def c2e():
 	access, secret = get_key_and_secret()
 	host_list = []
 	for region in boto.ec2.regions():
-		connection = boto.ec2.connect_to_region(region.name,
-												aws_access_key_id=access,
-												aws_secret_access_key=secret)
+		connection = boto.ec2.connect_to_region(region.name,aws_access_key_id=access,aws_secret_access_key=secret)
 		conn_instances = connection.get_all_instances()
 		if conn_instances:
 			for i in conn_instances:
