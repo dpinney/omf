@@ -3,14 +3,14 @@
 <head>
 	<script type='text/javascript' src='../static/omf.js'></script>
 	<style type="text/css">
-		div.progressBar {
+		div.progressBar, div.progressBar2 {
 		background-color: black;
 		width:400px;
 		border-radius: 13px; /* (height of inner div) / 2 + padding */
 		padding: 3px; }
 
-		div.progColor {
-		transition: width 2s;
+		div.progColor,div.progColor2  {
+		/*transition: width 2s;*/
 		background-color: orange;
 		width: 10%; /* Adjust with JavaScript */
 		height: 20px;
@@ -18,7 +18,7 @@
 	</style>
 	<script type="text/javascript">
 		var interval;
-		var index = 0;
+		var index = 0, index2 = 0;
 		var size = 100;
 
 		function showProgressDialog(dialogMessage) {
@@ -47,19 +47,32 @@
 		}
 
 		function start() {
-			interval = setInterval(function(){showProgressBar()}, 100);
+			interval = setInterval(function(){showProgressBar()}, 10);
 			showProgressDialog('Loading...')
-			// init = setInterval(function(){document.body.removeChild(gebi('progressContent'))}, 100)
+			window.requestAnimationFrame(showProgressBar2)
 		}
 
 		function showProgressBar(){
 			if (index <= size){
 				console.log(index)
-				index++
 				document.getElementById('progColor').style.width = index / size * 100 + '%'
+				index++
+				// window.requestAnimationFrame(showProgressBar)
 			}else{
 				removeProgressDialog()
 				clearInterval(interval)
+			}
+		}
+
+		function showProgressBar2(){
+			if (index2 < size){
+				console.log(index2)
+				index2++
+				document.getElementById('progColor2').style.width = index2 / size * 100 + '%'
+				window.requestAnimationFrame(showProgressBar2)
+				
+			}else{
+				removeProgressDialog()
 			}
 		}
 		function change() {
@@ -83,7 +96,9 @@
 </head>
 
 <body>
-	<div class="progressBar" id='progBar'><div id="progColor" class="progColor" style='width:0%'></div></div>
+	<div class="progressBar" id='progBar'><div id="progColor" class="progColor" style='width:0%'></div> </div> setInterval
+	<br>
+	<div class="progressBar2" id='progBar'><div id="progColor2" class="progColor2" style='width:0%'></div></div> requestAnimationFrame
 	<br>
 	<button onclick="javascript:init()">Change</button>
 </body>

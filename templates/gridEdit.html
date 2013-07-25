@@ -43,7 +43,7 @@
 	circle.nodeIsPinned {fill:none; stroke:black; pointer-events:none;}
 	circle.nodeNotPinned {fill:none; pointer-events:none;}
 	.node:not(:hover) .nodetext { display:none; }
-	.axis path,.axis line { fill:none; stroke:#ddd; stroke-width:2px; shape-rendering:crispEdges}
+	.axis path,.axis line { fill:none; stroke:#ddd; stroke-width:1px; shape-rendering:crispEdges}
 	.axis text { font-family:sans-serif; font-size:11px; text-anchor:middle; }
 	text.markerText {fill:gray; font-size:6}
 	rect {fill:#fff;}
@@ -217,14 +217,20 @@
 	var xScale = 1, yScale = 1;
 	var width = window.screen.availWidth-45;
 	var height = window.screen.availHeight-100;
+	// TODO: for the size of the scale grid, may not suitable for specific window size
+	// 		check: document.body.clientWidth || document.body.offsetWidth || document.body.scrollWidth || document.body.scrollTop 
+	//   			|| window.screenTop || window.screen.width || window.screen.availWidth 
+	// var width = document.body.scrollWidth-45
+	// var height = document.body.scrollHeight -20
 
 	// CREATE LAYOUT
 	var body = d3.select('body')
 		.append('svg:svg')
 		.attr('id','graphSvg')
 		.on('click', onSvgBlankCanvasClick)
+		// TODO: for more info: http://www.w3.org/TR/SVG/coords.html#ViewBoxAttribute
 		// .attr('viewBox', '0 0 ' + w + ' ' + h  )
-		// .attr('preserveAspectRatio', 'xMinYMin')
+		// .attr('preserveAspectRatio', 'xMidYMid')
 		// .attr('pointer-events', 'all')
 		// .call(zoomer.on('zoom', zoomRedraw))
 
@@ -234,7 +240,10 @@
 		// .attr('viewBox', '0 0 ' + width+' '+ height)
 		// TODO: optimize the translate position
 		.attr('transform', 'translate(' + 0 + ',' + 0 + ')')
-		// .attr('preserveAspectRatio', 'xMinYMin meet')
+		// .attr('preserveAspectRatio', 'xMidYMid slice')
+	// for onSvgBlankCanvasClick function
+	vis2.append('rect').attr('width', width).attr('height', height);	
+	
 	// add powergrid to the upper layer
 	var vis = body.append('svg:g')
 		.attr('id', 'powerGrid')
@@ -356,7 +365,6 @@
 		
 		// Feeder loading
 		var interval = setInterval(function(){
-			console.log(force.alpha())
 			if(force.alpha() < 0.02){
 				removeProgressDialog()
 				clearInterval(interval)
@@ -369,6 +377,7 @@
 
 		// Start drawing.
 		redraw()
+		scaleRedraw()
 	}
 
 	function redraw() {
@@ -382,7 +391,7 @@
 			.style('stroke-width', LINE_LINK_STROKE_WIDTH)
 			.attr('marker-start',
 				function(d) {
-					console.log(d);
+					// console.log(d);
 					treeData = tree[d.treeIndex]
 					if (d.objectType=='fromTo') {
 						if (treeData.object == "transformer") {return "url(#transformerMarker)"};
@@ -441,7 +450,6 @@
 			.attr('r', function(d){ return d.chargeMultiple * NODE_CIRCLE_RADIUS})
 		
 		// Show scalegrid. 
-		scaleRedraw()
 		force.start()
 	}
 
@@ -464,7 +472,6 @@
 	}
 
 	function scaleRedraw(){
-		curScale = zoomer.scale()
 		// x-scale renewed
 		x = d3.scale.linear().domain([ options.xmin, options.xmax]).range([ 0, width  ]);
 		// y-scale renewed
@@ -472,10 +479,8 @@
 
 		xAxis = d3.svg.axis().scale(x).orient("bottom").tickSize(-height);
 		yAxis = d3.svg.axis().scale(y).orient("right").ticks(8).tickSize(width);
-
 		vis2.append('g').attr('class', 'x axis').attr("transform", "translate(0," + height + ")").call(xAxis);
 		vis2.append("g").attr("class", "y axis").call(yAxis);
-
 		d3.selectAll(".x.axis").select()
 		body.call(zoomer.x(x).y(y).on('zoom', zoomRedraw))
 	}
@@ -504,6 +509,10 @@
 		// Set the behavior scale and translate to the current condition.
 		zoomer.scale(s)
 		zoomer.translate([x, y])
+		// reset link width
+		if (s < 1){
+			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/s);
+		}
 		// Set the scale grid to the current size.
 		// scaleRedraw()
 	}
@@ -512,8 +521,6 @@
 		var scale = zoomer.scale()
 		// TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
 		zoom(0,0,1)
-		// reset link width
-		d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH);
 		// reset scale grid
 		vis2.select(".x.axis").call(xAxis)
 		vis2.select(".y.axis").call(yAxis)
