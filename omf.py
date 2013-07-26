@@ -188,19 +188,38 @@ def changepwd():
 			return "not_match"
 	else:
 		return "not_auth"
-			
+
+FEEDERS_PER_PAGE = 10
+	
 @app.route("/")
 @flask_login.login_required
 def root():
 	d = {}
+	# feeders_per_page = 10
 	for header, user, url in [["Private", flask_login.current_user, "?public=false"],
 							  ["Public", user_manager.get("public"), "?public=true"]]:
 		d[header] = {"metadatas":[user.get("Analysis", x) for x in user.listAll("Analysis")],
-					 "feeders":user.listAll("Feeder"),
+					 "feeders":user.listAll("Feeder")[:FEEDERS_PER_PAGE],
+					 "amount_of_feeder_pages":len(user.listAll("Feeder"))/FEEDERS_PER_PAGE,
 					 "conversions":user.listAll("Conversion"),
 					 "url":url,
 					}
 	return flask.render_template('home.html', d=d, is_admin = flask_login.current_user.username == "admin")
+
+@app.route("/retrieveFeeders/<feeder_type>/<page>")
+@flask_login.login_required
+def retrieveFeeders(feeder_type, page):
+	user = user_manager.get("public") if feeder_type == "Public" else flask_login.current_user
+	url = "?public=true" if feeder_type == "Public" else "?public=false"
+	page = int(page)
+	feeders = user.listAll("Feeder")[FEEDERS_PER_PAGE*(page-1):FEEDERS_PER_PAGE*page]
+	value = {"feeders":feeders, url:url}
+	# return flask.Response(json.dumps(feeders), content_type="application/json")
+	return flask.render_template("feeder.html",
+								 key=feeder_type,
+								 is_admin = flask_login.current_user.username == "admin",
+								 conversions = user.listAll("Conversion"),
+								 value=value)
 
 @app.route("/publicObject/<objectType>/<objectName>")
 def publicObject(objectType, objectName):

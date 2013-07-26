@@ -5,8 +5,13 @@
   <link rel='stylesheet' href='/static/omf.css'/>
   <script type='text/javascript' src='/static/omf.js'></script>
   <script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
+  <script type='text/javascript' src='/static/pagination.js'></script>
   <link rel='shortcut icon' href='/static/favicon.ico'>
   <style>
+  #spinner{
+      display:none;
+      position:absolute;
+  }
     div#feeders {display:none;}
     h2{text-align:center;}
     table#anaTable {width:100%; text-align:left;}
@@ -218,60 +223,30 @@
   <div class='content'>
     <table id='anaTable'>
       {% for key, value in d.items() %}
-      <tbody class="{{ key }}">
+      <thead>
 	<tr>
-	    <th style="text-align:center" colspan="3">{{ key }} Feeders</th>
+	  <th style="text-align:center" colspan="3">{{ key }} Feeders</th>
 	</tr>
 	<tr>
-	    <th>Feeder Name</th>
-	    <th>Status</th>
-	    <th></th>
+	  <th>Feeder Name</th>
+	  <th>Status</th>
+	  <th></th>
 	</tr>
-	  {% for feed in value["feeders"] %}
-	{% if (is_admin and (key == "Private" and feed[:feed.find("_")] != "public")) or key == "Public" or not is_admin %}
-	  <tr class="{{ feed.replace('_', '__').replace(' ', '_') }}">
-	    <td>
-	      <a name="{{ feed }}" href='/feeder/{{ feed }}{{ value["url"] }}'>
-		{% if is_admin and key == "Private" %}
+	</thead>
+      <tbody class="{{ key }}Feeders">
 
-		<span class="owner">{{ feed[:feed.find("_")] }}: </span>
-		<span class="feederName">{{ feed[feed.find("_")+1:] }}</span>
-		
-		{% else %}
-		{{ feed }}
-		{% endif %}
-	      </a>
-	    </td>
-	    <td>Ready</td>
-	    <td>
-	      {% if "false" in value["url"] or is_admin %}
-	      <div class="buttonGroup">
-		<button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
-		<ul class='menu right'>
-			<li><a href="javascript:delete_feeder('{% if key == "Public" %}public_{% endif %}{{ feed }}')">Delete</a></li>
-			{% if "false" in value["url"] %}
-				<li><a class="makePublic" objectType="Feeder" objectName="{{ feed }}" href="/makePublic/Feeder/{{ feed }}">Publish</a></li>
-			{% endif %}
-		</ul>
-	      </div>
-	      {% else %}
-	    </td>
-	    {% endif %}
-	  </tr>
-	  {% endif %}
-	  {% endfor %}
-	  {% for feed in value["conversions"] %}
-	  <tr>
-	    {% if is_admin %}
-	    <td><strong>{{ feed.split("_")[0] }}: </strong>{{ "_".join(feed.split("_")[1:]) }}</td>
-	    {% else %}
-	    <td>{{ feed }}</td>
-	    {% endif %}
-	    <td class='running'>Processing</td>
-	    <td></td>
-	  </tr>
-	  {% endfor %}
+	{% include "feeder.html" %}
       </tbody>
+      <tr>
+	<td style="text-align:center;" colspan="3" id="{{ key }}feederpages">
+	  <!-- <a class="feeder_page" href="#">1</a> | -->
+	  {% for i in range(1, value["amount_of_feeder_pages"]+ 1) %}
+	  <a type="{{ key }}" class="feeder_page" href="#">{{ i }}</a>{% if i != value["amount_of_feeder_pages"] %} | {% endif %}
+	  {% endfor %}
+	  
+	  
+	</td>
+      </tr>
       {% endfor %}
     </table>
   </div>
@@ -300,5 +275,5 @@
     </form>
   </div>
 </div>
-
+<img src="/static/spinner.gif" id="spinner" />
 </body>
