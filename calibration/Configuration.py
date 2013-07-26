@@ -67,7 +67,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		data["feeder_rating"] = 1.15*14.0
 		data["nom_volt"] = 14400
 		data["nom_volt2"] = 14400 #was set to 480 for taxonomy feeders
-		#data["load_shape_norm"] = dir + "NHEC_small_commercial_normalized_load_shape.player"
+		#data["load_shape_norm"] = dir + "FRIENDSHIP_2012_normalized_loadshape.player"
 		data["load_shape_norm"] = dir + 'load_shape_player.player'
 		vA='schedules\\\\VA.player'
 		vB='schedules\\\\VB.player'
@@ -669,8 +669,10 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 			data["r_z_pf"] = 0.97
 			data["r_i_pf"] = 0.97
 			data["r_p_pf"] = 0.97
-			data["r_zfrac"] = 0.2
-			data["r_ifrac"] = 0.4
+			#data["r_zfrac"] = 0.2
+			#data["r_ifrac"] = 0.4
+			data["r_zfrac"] = 0.0
+			data["r_ifrac"] = 0.0
 			data["r_pfrac"] = 1 - data["r_zfrac"] - data["r_ifrac"]
 		
 	else:
@@ -746,8 +748,10 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 			data["r_z_pf"] = 0.97
 			data["r_i_pf"] = 0.97
 			data["r_p_pf"] = 0.97
-			data["r_zfrac"] = 0.2
-			data["r_ifrac"] = 0.4
+			#data["r_zfrac"] = 0.2
+			#data["r_ifrac"] = 0.4
+			data["r_zfrac"] = 0.0
+			data["r_ifrac"] = 0.0
 			# data["r_z_pf"] = couplets["r_z_pf"]
 			# data["r_i_pf"] = couplets["r_i_pf"]
 			# data["r_p_pf"] = couplets["r_p_pf"]

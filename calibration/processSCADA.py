@@ -15,8 +15,8 @@ def getValues(input):
 	winter_day = '2012-01-19'
 	shoulder_day = '2012-04-10'
 	
-	# for four-node test:
-	# summer day measurements
+	# # for four-node test:
+	# # summer day measurements
 	# su_peak_value = 2250  # kW
 	# su_total_energy = 38746.05433 # kWh
 	# su_peak_time = 17.92  # hour
@@ -37,42 +37,42 @@ def getValues(input):
 	
 	# for FRIENDSHIP 2012:
 	# summer day measurements
-	# su_peak_value = 5931.36  # kW
-	# su_total_energy = 107380.8 # kWh
-	# su_peak_time = 17  # hour
-	# su_minimum_value = 2988  # kW
-	# su_minimum_time = 6  # hour
-	# # winter day measurements
-	# wi_peak_value = 3646.08  # kW
-	# wi_total_energy = 75604.32  # kWh
-	# wi_peak_time = 21  # hour
-	# wi_minimum_value = 2469.60  # kW
-	# wi_minimum_time = 1  # hour
-	# # spring day measurements
-	# sh_peak_value = 2518.56  # kW
-	# sh_total_energy = 52316.64  #kWh
-	# sh_peak_time = 21  # hour
-	# sh_minimum_value = 1738.08  # kW
-	# sh_minimum_time = 2  # hour
-	
-	# for Coloma 2012
-	su_peak_value = 6704.10  # kW
-	su_total_energy = 138359.88 # kWh
-	su_peak_time = 22  # hour
-	su_minimum_value = 4763.88  # kW
-	su_minimum_time = 15  # hour
+	su_peak_value = 5931.36  # kW
+	su_total_energy = 107380.8 # kWh
+	su_peak_time = 17  # hour
+	su_minimum_value = 2988  # kW
+	su_minimum_time = 6  # hour
 	# winter day measurements
-	wi_peak_value = 1217.70  # kW
-	wi_total_energy = 26265.60  # kWh
-	wi_peak_time = 18  # hour
-	wi_minimum_value = 937.98 # kW
-	wi_minimum_time = 2  # hour
+	wi_peak_value = 3646.08  # kW
+	wi_total_energy = 75604.32  # kWh
+	wi_peak_time = 21  # hour
+	wi_minimum_value = 2469.60  # kW
+	wi_minimum_time = 1  # hour
 	# spring day measurements
-	sh_peak_value = 1164.24  # kW
-	sh_total_energy = 21380.76  #kWh
-	sh_peak_time = 14  # hour
-	sh_minimum_value = 600.48  # kW
+	sh_peak_value = 2518.56  # kW
+	sh_total_energy = 52316.64  #kWh
+	sh_peak_time = 21  # hour
+	sh_minimum_value = 1738.08  # kW
 	sh_minimum_time = 2  # hour
+	
+	# # for Coloma 2012
+	# su_peak_value = 6704.10  # kW
+	# su_total_energy = 138359.88 # kWh
+	# su_peak_time = 22  # hour
+	# su_minimum_value = 4763.88  # kW
+	# su_minimum_time = 15  # hour
+	# # winter day measurements
+	# wi_peak_value = 1217.70  # kW
+	# wi_total_energy = 26265.60  # kWh
+	# wi_peak_time = 18  # hour
+	# wi_minimum_value = 937.98 # kW
+	# wi_minimum_time = 2  # hour
+	# # spring day measurements
+	# sh_peak_value = 1164.24  # kW
+	# sh_total_energy = 21380.76  #kWh
+	# sh_peak_time = 14  # hour
+	# sh_minimum_value = 600.48  # kW
+	# sh_minimum_time = 2  # hour
 	
 	# It is important that values are returned in the correct order.
 	return [summer_day, winter_day, shoulder_day], [ [su_peak_value, su_peak_time, su_total_energy, su_minimum_value, su_minimum_time],[wi_peak_value, wi_peak_time, wi_total_energy, wi_minimum_value, wi_minimum_time], [sh_peak_value, sh_peak_time, sh_total_energy, sh_minimum_value, sh_minimum_time] ]

@@ -328,9 +328,9 @@ def takeAction(action,action_count,vals,diffs):
 	# a : avg house,			b : avg comm,			c : base load scalar,
 	# d : cooling offset,		e : heating offset,		f : cop high,
 	# g : cop low,				h : sched skew,			j : decrease gas,
-	# k : schedule skew std,	l : window wall ratio,	m : additional heating degrees
+	# k : schedule skew std,	l : window wall ratio,	m : additional heating degrees	o: load shape scalar (if used)
 	
-	[a,b,c,d,e,f,g,h,j,k,l,m] = vals
+	[a,b,c,d,e,f,g,h,j,k,l,m] = vals[0:12]
 	[pv_s,te_s,pv_w,te_w] = diffs 
 	avg_diff = sum(diffs)/4
 	i = abs(action);

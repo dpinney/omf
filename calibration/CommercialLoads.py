@@ -141,9 +141,12 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 
 		#initializations for the commercial "house" list
 
-		print('iterating over commercial_dict')
+		#print('iterating over commercial_dict')
 		for iii in commercial_dict:
 			total_comm_houses = commercial_dict[iii]['number_of_houses'][0] + commercial_dict[iii]['number_of_houses'][0] + commercial_dict[iii]['number_of_houses'][0]
+			
+			my_phases = 'ABC'
+			
 			# read through the phases and do some bit-wise math
 			has_phase_A = 0;
 			has_phase_B = 0;
@@ -160,7 +163,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 				ph += 'C'
 
 			no_of_phases = has_phase_A + has_phase_B + has_phase_C;
-
+			
 			if (no_of_phases == 0):
 				raise Exception('The phases in commercial buildings did not add up right.')
 
@@ -202,7 +205,6 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 				no_of_offices = int(round(total_comm_houses / 15))
 				if (no_of_offices == 0):
 					no_of_offices = 1
-
 				glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
 												"name" : "CTTF_config_A_{:s}".format(my_name),
 												"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
@@ -235,7 +237,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 												"secondary_voltage" : "{:.3f}".format(120),
 												"powerC_rating" : "50 kVA"}
 				last_object_key += 1
-				print('iterating over number of offices')
+				#print('iterating over number of offices')
 				for jjj in xrange(no_of_offices):
 					floor_area_choose = 40000 * (0.5 * random.random() + 0.5); #up to -50# #config_data.floor_area
 					ceiling_height = 13;
@@ -308,29 +310,29 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 														"nominal_voltage" : "120"}
 						last_object_key += 1;
 
-						# split total number of zones as close to evenly as possible between phases #jlh
-						zones_per_phase = [0, 0, 0];
-						if (no_of_phases == 3):
-							zones_per_phase = [5, 5, 5];
-						elif (no_of_phases == 2):
-							# lazy mode for 'take the two that exist and give me an array[2]
-							#temp = find([has_phase_A, has_phase_B, has_phase_C]);
-							temp = [0, 0]
-							if has_phase_A is 0:
-								temp[0] = 1
+					# split total number of zones as close to evenly as possible between phases #jlh
+					zones_per_phase = [0, 0, 0];
+					if (no_of_phases == 3):
+						zones_per_phase = [5, 5, 5];
+					elif (no_of_phases == 2):
+						# lazy mode for 'take the two that exist and give me an array[2]
+						#temp = find([has_phase_A, has_phase_B, has_phase_C]);
+						temp = [0, 0]
+						if has_phase_A == 0:
+							temp[0] = 1
+							temp[1] = 2
+						else:
+							temp[0] = 0
+							if has_phase_B == 0:
 								temp[1] = 2
 							else:
-								temp[0] = 0
-								if has_phase_B is 0:
-									temp[1] = 2
-								else:
-									temp[1] = 1
-							zones_per_phase[temp[0]] = round(7+random.random());
-							zones_per_phase[temp[1]] = 15 - zones_per_phase[temp[1]];
-						elif (no_of_phases == 1):
-							zones_per_phase = [has_phase_A*15, has_phase_B*15, has_phase_C*15]
-
-					for flrind in xrange(1,4): #for each of three floors (5 zones each) #jlh
+								temp[1] = 1
+						zones_per_phase[temp[0]] = round(7+random.random());
+						zones_per_phase[temp[1]] = 15 - zones_per_phase[temp[0]];
+					elif (no_of_phases == 1):
+						zones_per_phase = [has_phase_A*15, has_phase_B*15, has_phase_C*15]
+					
+					for flrind in xrange(1,4): # for each of three floors (5 zones each) #jlh
 						# skew each office zone identically per floor
 						sk = round(2*random.normalvariate(0,1))
 						skew_value = tech_data["commercial_skew_std"] * sk
@@ -347,7 +349,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 								phind = 1
 							elif (zones_per_phase[2]>0):
 								phind = 2
-
+							
 							zones_per_phase[phind] -= 1
 
 							total_depth = math.sqrt(floor_area_choose / (3 * 1.5));
@@ -392,8 +394,8 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							os_rand = config_data["over_sizing_factor"][0] * (.8 + 0.4*random.random());
 							COP_A = tech_data["cooling_COP"] * (0.8 + 0.4*random.random());
 							glmCaseDict[last_object_key] = {"object" : "house",
-															"name" :  "office{:s}_{:s}{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,ph[phind],jjj,zoneind,flrind), #added floor ID #jlh
-															"parent" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+															"name" :  "office{:s}_{:s}{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
+															"parent" : "{:s}_tm_{:s}_{:.0f}".format(my_name,my_phases[phind],jjj),
 															"groupid" : "Commercial",
 															"schedule_skew" : "{:.0f}".format(skew_value),
 															"floor_area" : "{:.0f}".format(floor_area),
@@ -497,7 +499,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							# Lights
 							adj_lights = (0.9 + 0.1*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW
 							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "lights_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name, ph[phind], jjj, zoneind, flrind), #added floor ID #jlh
+															"name" : "lights_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name, my_phases[phind], jjj, zoneind, flrind), #added floor ID #jlh
 															"parent" : parent_house["name"],
 															"groupid" : "Lights",
 															"schedule_skew" : "{:.0f}".format(skew_value),
@@ -514,7 +516,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							# Plugs
 							adj_plugs = (0.9 + 0.2*random.random()) * floor_area / 1000; # randomize 20# then convert W/sf -> kW
 							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "plugs_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,ph[phind],jjj,zoneind,flrind), #added floor ID #jlh
+															"name" : "plugs_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
 															"parent" : parent_house["name"],
 															"groupid" : "Plugs",
 															"schedule_skew" : "{:.0f}".format(skew_value),
@@ -531,7 +533,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							# Gas Waterheater
 							adj_gas = (0.9 + 0.2*random.random()) * floor_area / 1000; # randomize 20# then convert W/sf -> kW
 							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "wh_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,ph[phind],jjj,zoneind,flrind), #added floor ID #jlh
+															"name" : "wh_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
 															"parent" : parent_house["name"],
 															"groupid" : "Gas_waterheater",
 															"schedule_skew" : "{:.0f}".format(skew_value),
@@ -546,7 +548,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							# Exterior Lighting
 							adj_ext = (0.9 + 0.1*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW
 							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "ext_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,ph[phind],jjj,zoneind,flrind), #added floor ID #jlh
+															"name" : "ext_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
 															"parent" : parent_house["name"],
 															"groupid" : "Exterior_lighting",
 															"schedule_skew" : "{:.0f}".format(skew_value), 
@@ -563,7 +565,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							# Occupancy
 							adj_occ = (0.9 + 0.1*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW 
 							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "occ_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,ph[phind],jjj,zoneind,flrind), #added floor ID #jlh
+															"name" : "occ_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
 															"parent" : parent_house["name"],
 															"groupid" : "Occupancy",
 															"schedule_skew" : "{:.0f}".format(skew_value),
@@ -580,7 +582,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 						#end # office zones (1-5)        
 					#end  #office floors (1-3)
 				#end # total offices needed
-				print('finished iterating over number of offices')
+				#print('finished iterating over number of offices')
 			# Big box - has at least 2 phases and enough load for 6 zones
 			#            *or* load is classified to be big boxes
 			elif (classID == 7): #jlh
@@ -623,7 +625,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 													"secondary_voltage" : "{:.3f}".format(120),
 													"powerC_rating" : "50 kVA"}
 					last_object_key += 1;
-				print('iterating over number of big boxes')
+				#print('iterating over number of big boxes')
 				for jjj in xrange(no_of_bigboxes):
 					floor_area_choose = 20000 * (0.5 + 1 * random.random()); #+/- 50#
 					ceiling_height = 14;
@@ -706,7 +708,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 														"nominal_voltage" : "120"}
 						last_object_key += 1;
 
-						zones_per_phase = 6 / no_of_phases;
+						zones_per_phase = int(6 / no_of_phases);
 						for zoneind in xrange(zones_per_phase):
 							total_index = total_index + 1;
 							thermal_mass_per_floor_area = 3.9 * (0.8 + 0.4 * random.random()); #+/- 20#
@@ -933,7 +935,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 						#end #zone index
 					#end #phase index    
 				#end #number of big boxes
-				print('finished iterating over number of big boxes')
+				#print('finished iterating over number of big boxes')
 			# Strip mall
 			elif (classID == 6): #jlh
 				no_of_strip = total_comm_houses;
@@ -1000,7 +1002,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 				if use_flags["use_ts"] != 0:
 					ts_bigbox_array[0] += 1
 					homes_stored = 0
-				print('iterating over number of stripmalls')		
+				#print('iterating over number of stripmalls')		
 				for phind in xrange(no_of_phases):
 					floor_area_choose = 2400 * (0.7 + 0.6 * random.random()); #+/- 30#
 					ceiling_height = 12;
@@ -1291,12 +1293,12 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 					#end #number of strip zones
 				#end #phase index
 			#end #commercial selection
-				print('finished iterating over number of stripmalls')
+				#print('finished iterating over number of stripmalls')
 			# add the "street light" loads
 			# parent them to the METER as opposed to the node, so we don't
 			# have any "grandchildren"
 			elif total_comm_houses == 0 and sum(commercial_dict[iii]['load']) > 0:
-				print('writing street_light')
+				#print('writing street_light')
 				glmCaseDict[last_object_key] = {"object" : "load",
 												"parent" : "{:s}".format(my_name),
 												"name" : "str_light_{:s}{:s}".format(ph,commercial_dict[iii]['name']),
