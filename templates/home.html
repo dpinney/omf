@@ -10,7 +10,13 @@
   <style>
   #spinner{
       display:none;
-      position:absolute;
+      /* position:absolute; */
+      position:fixed;
+  }
+  .current_page{
+      pointer-events:none;
+      cursor:default;
+      color:black;
   }
     div#feeders {display:none;}
     h2{text-align:center;}
@@ -83,12 +89,19 @@
 	    })
 
 	});
+
+	run_statuses();
+    });
+
+    var all_intervals = {};
+
+    function run_statuses(){
 	var metadatas = pull_html_data();
 	var i;
 	for(i=0; i<metadatas.length; i++){
 	    startPolling(metadatas[i]);
 	}
-    });
+    }
 
     function run_analysis(url, analysisName){
 	console.log(url);
@@ -103,14 +116,14 @@
 	}).done(function(data){
 	    console.log("sent the request!");
 	    var p = url.indexOf("true") > -1 ? ".Public" : ".Private";
-	    replace_row(p, analysisName)
+	    replace_row(p, analysisName, data)
 	    startPolling({"name":analysisName, "public":""+(url.indexOf("true") > -1)});
 	    return false;
 	});
 	return false;
     }
 
-    function replace_row(p, analysisName){
+    function replace_row(p, analysisName, data){
 	var my_tr = $.makeArray($(p+" tr")).filter(function(tr){return $(tr).attr("class") == "analysis "+analysisName.replace(/_/g, '__').replace(/ /g, '_')})[0];
 	$(my_tr).html($("<div>").html(data)[0].getElementsByTagName("tr")[0].innerHTML);
     }
@@ -126,12 +139,12 @@
     	    }).done(function(data){
     		if (data != "waiting"){
 		    var p = md["public"] == "true" ? ".Public" : ".Private";
-    		    // $(p+" ."+md.name.replace(/_/g, '__').replace(/ /g, '_')).html($(data).html());
 		    repalce_row(p, md.name)
     		    clearInterval(i);
     		}
     	    });
     	}, 5000);
+	all_intervals[Object.keys(all_intervals).length] = i;
     }
 
     function pull_html_data(){ 
@@ -200,19 +213,24 @@
     <div class='content'>
       <table id='anaTable'>
 	{% for key, value in d.items() %}
-	<tbody class="{{ key }}">
+	<thead>
 	  <tr>
 	    <th style="text-align:center" colspan="6">{{ key }} Analyses</th>
 	  </tr>
 	  <tr><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr>
-	  {% for md in value["metadatas"] %}
-	  {% if (md["name"].strip() == "" or (key == "Private" and md["name"].startswith("public_"))) and is_admin %}
-	  {% else %}
-	  {% include 'metadata.html' %}
-	  {% endif %}
-	  {% endfor %}
+	</thead>
+	<tbody class="{{ key }} {{ key }}Analyses">
+	  {% include 'metadata_loop.html' %}
+	</tbody>
+	<tr>
+	  <td style="text-align:center;" colspan="6" id="{{ key }}analysispages">
+	    {% for i in range(1, value["amount_of_analysis_pages"] + 1) %}
+	    <a type="{{key}}" class="analysis_page" href="#">{{ i }}</a>{% if i != value["amount_of_analysis_pages"] %} | {% endif %}
+	    {% endfor %}
+	  </td>
 	</tbody>
 	{% endfor %}
+
       </table>
     </div>
 

@@ -1,54 +1,38 @@
 $(function(){
-    $(".feeder_page").click(function(e){
+    $.makeArray($(".feeder_page, .analysis_page")).map(function(f){
+	if ($(f).html() == "1")
+	    $(f).replaceWith($("<span>").html("1"))
+    })
+    $(document).on("click", ".feeder_page, .analysis_page", function(e){
 	var type = $(this).attr("type");
 	var page = $(this).html();
-	show_spinner(type);
-	// alert("You wanna see page "+page+" of "+type+" feeders");
+	var link_selector = $(this).attr("class") == "feeder_page" ? "Feeders" : "Analyses";
+	var pid = $(this).parent().attr("id")
+	var the_class = $(this).attr("class")
+	var self = this;
+	for (interval in all_intervals){
+	    clearInterval(all_intervals[interval]);
+	}
+	all_intervals = {};
+	show_spinner();
 	$.ajax({
-	    url:"/retrieveFeeders/"+type+"/"+page,
-	    type:"get"
+	    url:"/retrievePage/"+link_selector+"/"+type+"/"+page
 	}).done(function(data){
-	    // console.log(data);
 	    $("#spinner").hide();
-	    $("tbody."+type+"Feeders").html(data);
+	    $("tbody."+type+link_selector).html(data);
+	    $.makeArray($("#"+pid).children("span")).map(function(s){
+		$(s).replaceWith($("<a>").attr("href", "#").attr("type", type).attr("class", the_class).html($(s).html()))
+	    })
+	    $(self).replaceWith($("<span>").html(page))
+	    run_statuses();
 	})
 	e.preventDefault();
 	return false;
     })
 })
 
-var pal;
-
-function show_spinner(type){
-    // I tried to be clever with the window sizes and element sizes but
-    // it didn't work like I expected it to.
-    var left = ($(window).width() - $("#spinner").width()) / 2;
-    $("#spinner").show().css("left", left);
-    function headers (type){
-	return ($($("tbody."+type+"Feeders").children()[0]).outerHeight() +
-		$($("tbody."+type+"Feeders").children()[1]).outerHeight())
-    }
-    var top = ($("#title").outerHeight() +
-	       $("#toolbar").outerHeight() -
-	       $("#spinner").outerHeight() +
-	       headers("Public"));
-    function extra (x, type){
-	return ($($("tbody."+type+"Feeders").children()[2]).outerHeight() *
-		$("tbody."+type+"Feeders").children().length/x);
-    }
-    if (type == "Public"){
-	top += extra(2, "Public");
-    }else{
-	top += (extra(1, "Public") +
-		$("#Publicfeederpages").outerHeight() +
-		headers("Private") + extra(2, "Private") - 60)
-    }
-    $("#spinner").css("top", top);
-}
-
-function ss(){
-    show_spinner("Public");
-    $(window).resize(function(){
-	show_spinner("Public");
-    })
+function show_spinner(){
+    var top = (window.innerHeight - $("#spinner").height())/2;
+    var left = (window.innerWidth - $("#spinner").width())/2;
+    $("#spinner").show().css("top", top).css("left", left);
 }

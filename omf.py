@@ -189,37 +189,50 @@ def changepwd():
 	else:
 		return "not_auth"
 
-FEEDERS_PER_PAGE = 10
-	
+FEEDERS_PER_PAGE = 10.
+ANALYSES_PER_PAGE = 10.
 @app.route("/")
 @flask_login.login_required
 def root():
 	d = {}
-	# feeders_per_page = 10
+	my_ciel = lambda x: (int(x) + 1) if int(x) < x else int(x)
+	is_admin = flask_login.current_user.username == "admin"
 	for header, user, url in [["Private", flask_login.current_user, "?public=false"],
 							  ["Public", user_manager.get("public"), "?public=true"]]:
-		d[header] = {"metadatas":[user.get("Analysis", x) for x in user.listAll("Analysis")],
-					 "feeders":user.listAll("Feeder")[:FEEDERS_PER_PAGE],
-					 "amount_of_feeder_pages":len(user.listAll("Feeder"))/FEEDERS_PER_PAGE,
+		metadatas = [user.get("Analysis", x) for x in user.listAll("Analysis")]
+		feeders = user.listAll("Feeder")
+		not_public_or_blank = lambda x: not (x.startswith("public_") or x.strip() == "")
+		if is_admin and header == "Private":
+			metadatas = filter(lambda x: not_public_or_blank(x["name"]), metadatas)
+			feeders = filter(not_public_or_blank, feeders)
+		d[header] = {"metadatas":metadatas[:int(ANALYSES_PER_PAGE)],
+					 "amount_of_analysis_pages":my_ciel(len(metadatas)/ANALYSES_PER_PAGE),
+					 "feeders":feeders[:int(FEEDERS_PER_PAGE)],
+					 "amount_of_feeder_pages":my_ciel(len(feeders)/FEEDERS_PER_PAGE),
 					 "conversions":user.listAll("Conversion"),
 					 "url":url,
 					}
-	return flask.render_template('home.html', d=d, is_admin = flask_login.current_user.username == "admin")
+	return flask.render_template('home.html', d=d, is_admin = is_admin)
 
-@app.route("/retrieveFeeders/<feeder_type>/<page>")
+@app.route("/retrievePage/<objectType>/<permission>/<page_number>")
 @flask_login.login_required
-def retrieveFeeders(feeder_type, page):
-	user = user_manager.get("public") if feeder_type == "Public" else flask_login.current_user
-	url = "?public=true" if feeder_type == "Public" else "?public=false"
-	page = int(page)
-	feeders = user.listAll("Feeder")[FEEDERS_PER_PAGE*(page-1):FEEDERS_PER_PAGE*page]
-	value = {"feeders":feeders, url:url}
-	# return flask.Response(json.dumps(feeders), content_type="application/json")
-	return flask.render_template("feeder.html",
-								 key=feeder_type,
+def retrievePage(objectType, permission, page_number):
+	page_number = int(page_number)
+	url, user = ("?public=true", user_manager.get("public")) if permission == "Public" else ("?public=false", flask_login.current_user)
+	if objectType == "Feeders":
+		template, s, l, inc = ["feeder.html", "feeders", user.listAll("Feeder"), int(FEEDERS_PER_PAGE)]
+	else:
+		template, s, l, inc = ["metadata_loop.html",
+							   "metadatas",
+							   [user.get("Analysis", x) for x in user.listAll("Analysis")],
+							   int(ANALYSES_PER_PAGE)]
+	value = {s:l[inc*(page_number-1):inc*page_number], "url":url}
+	return flask.render_template(template,
+								 key=permission,
 								 is_admin = flask_login.current_user.username == "admin",
-								 conversions = user.listAll("Conversion"),
-								 value=value)
+								 conversions=user.listAll("Conversion"),
+								 value = value)
+		
 
 @app.route("/publicObject/<objectType>/<objectName>")
 def publicObject(objectType, objectName):
