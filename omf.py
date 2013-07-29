@@ -106,7 +106,7 @@ def new_user():
 		return flask.redirect("/")
 	email = flask.request.form.get("email")
 	u = store.get("User", email)
-	if u and not u.get("registered", True): # so if the registered key is not there, assume they have registered
+	if u and u.get("registered", True): # so if the registered key is not there, assume they have registered
 		return "Already Exists"
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\nreg_link"
 	return send_link(email, message)
@@ -145,7 +145,7 @@ def register(email, reg_key):
 	if not (user and
 			reg_key == user.get("reg_key") and
 			user.get("timestamp") and
-			datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user.get("timestamp"), "%c")):
+			datetime.timedelta(seconds=120) > datetime.datetime.now() - datetime.datetime.strptime(user.get("timestamp"), "%c")):
 		return "This page either expired, or you are not supposed to access it.  It might not even exist"
 	if flask.request.method == "GET":
 		return flask.render_template("register.html", email=email)
