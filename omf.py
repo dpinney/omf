@@ -105,7 +105,8 @@ def new_user():
 	if flask_login.current_user.username != "admin":
 		return flask.redirect("/")
 	email = flask.request.form.get("email")
-	if store.get("User", email):
+	u = store.get("User", email)
+	if u and not u.get("registered"):
 		return "Already Exists"
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\nreg_link"
 	return send_link(email, message)
