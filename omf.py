@@ -145,7 +145,7 @@ def register(email, reg_key):
 	if not (user and
 			reg_key == user.get("reg_key") and
 			user.get("timestamp") and
-			datetime.timedelta(seconds=120) > datetime.datetime.now() - datetime.datetime.strptime(user.get("timestamp"), "%c")):
+			datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user.get("timestamp"), "%c")):
 		return "This page either expired, or you are not supposed to access it.  It might not even exist"
 	if flask.request.method == "GET":
 		return flask.render_template("register.html", email=email)
