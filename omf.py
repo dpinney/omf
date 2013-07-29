@@ -106,7 +106,7 @@ def new_user():
 		return flask.redirect("/")
 	email = flask.request.form.get("email")
 	u = store.get("User", email)
-	if u and not u.get("registered"):
+	if u and not u.get("registered", True): # so if the registered key is not there, assume they have registered
 		return "Already Exists"
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\nreg_link"
 	return send_link(email, message)
