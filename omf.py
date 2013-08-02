@@ -169,7 +169,7 @@ def adminControls():
 	for username in store.listAll("User"):
 		if username not in ["public", "admin"] and store.get("User", username).get("username"):
 			users.append(user_manager.get(username))
-	return flask.render_template("adminControls.html", users = users, csrf = flask_login.current_user.csrf)
+	return flask.render_template("adminControls.html", users = users)
 	
 @app.route("/myaccount")
 @flask_login.login_required
