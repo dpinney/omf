@@ -1,6 +1,7 @@
 d3.geo.tiler = function() {
 	var tiler = {},
 			points = [],
+			// TODO: this mercator is not covered in d3.v3.js, it's in d3.geo
 			projection = d3.geo.mercator().scale(1).translate([.5, .5]),
 			location = Object, // identity function
 			zoom = 8,
@@ -64,6 +65,8 @@ d3.geo.tiler = function() {
 		// Project the points to normalized coordinates in [0, 1].
 		if (!root) {
 			root = build(points.map(function(d, i) {
+				// TODO: Debug here. The projection function is in d3.geo.js function mercator(coordinates)
+				// coordinates should indicate latitude and longitude as an array.
 				var point = projection(location.call(tiler, d, i));
 				point.data = d,point;
 				return point;

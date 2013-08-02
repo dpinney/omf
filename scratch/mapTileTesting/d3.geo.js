@@ -119,6 +119,8 @@ d3.geo.mercator = function() {
       translate = [480, 250];
 
   function mercator(coordinates) {
+    // TODO: Need to get understand
+    coordinates = coordinates.coordinates
     var x = (coordinates[0]) / 360,
         y = (-180 / Math.PI * Math.log(Math.tan(Math.PI / 4 + coordinates[1] * Math.PI / 360))) / 360;
     return [
