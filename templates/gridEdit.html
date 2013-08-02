@@ -15,18 +15,20 @@
 	/*other styles*/  
 	input#gridNameEdit {font-size:28pt; line-height: 28pt; text-shadow: 0px 3px 3px #4d4d4d; height: 50px; color:gray; padding:3px; margin-bottom:5px; width:85%;}
 	button.smallButton {height:20px; width:20px; display:inline-block; float:right; padding:2px; margin-left:5px;}
+	/* Edit object table style */
 	button.deleteButton {width:100%; float:right; background-color: #CC0000; color:white;}
 	button.deleteButton:hover {background: #FF0000;}
-	/* #selectedScroller {max-height:60%; width:350px; overflow-y: auto;} */
 	
-	#selected {border:1px solid black;
-		   border-bottom:0px;
-		   min-width:350px;
-		   position:absolute;
-		   top:90pt;
-		   left:4pt;}
+	#selected {
+	    min-width:350px;
+	    position:absolute;
+	    top:90pt;
+	    left:4pt;
+	}
 
 	#selected table{
+	    border:1px solid black;
+	    border-bottom: 0px;
 	    display:none;
 	    width:100%
 	}
@@ -39,20 +41,30 @@
 	    display:none;
 	}
 	
-	.noSelection {border:none !important;}
-	#selHead tr td {background:black; color:white;}
-	#selBody{
-	    word-break:break-all;
-	    max-height:100%;
-	    max-width:100%;
-	    overflow-y:scroll;
+	#selHead tr td {
+	    background:black;
+	    color:white;
 	}
 	
-	#selected td {padding:5px;
-		      border-bottom:1px solid black;}
+	#selBody{
+	    
+	    max-height:100%;
+	    max-width:100%;
+	    overflow-y:auto;
+	}
+	
+	#selected #selBody td {
+	    padding:5px;
+	    border-bottom:1px solid black;
+	}
 	
 	#selected button{
 	    width:100%;
+	}
+
+	#selBody td{
+	    word-break:break-all;
+	    max-width: 100px;
 	}
 	
 	#selBody td, #daButtons td{
@@ -63,6 +75,7 @@
 	.leftToolbar {float:left; margin-left:5px !important;}
 	.rightToolbar {float:right; margin-right:5px;}
 	input {min-width: 100px;}
+	
 	/* Start graph elements. */
 	.nodetext {pointer-events:none;font-size: 10}
 	g.node {fill:gray; stroke:#fff;}

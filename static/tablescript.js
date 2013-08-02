@@ -2,6 +2,7 @@ function fit_table(){
     var raw_height = $("#selBody").height()+$("#daButtons").height()+$("#selHead").height();
     var win_height = window.innerHeight * 0.6;
     $("#selected").css("height", win_height > raw_height ? raw_height : win_height)
+    // $("#selected").css("border", "1px solid black");
 }
 
 $(window).resize(fit_table);
@@ -28,8 +29,6 @@ function selectNode(){
     fit_table();
 }
 
-
-
 function deselect(){
     $("#objmod, #value, #body").html("")
     $("#selected").css("height", "auto");
@@ -39,23 +38,41 @@ function deselect(){
     $("#selected").hide();
 }
 
-function validate_blanks(selector){
-    var blanks = false;
+function validation(selector, testfunc, error_msg){
+    var invalid = false;
     $.makeArray($(selector)).forEach(function(e){
-	if ($(e).val().trim() == ""){
+	if (testfunc(e)){
 	    $(e).css("border", "1px solid red");
-	    if(!blanks)
+	    if(!invalid)
 		$(e).focus();
-	    blanks = true;
+	    invalid = true;
 	}
     })
-    if (blanks){
-	alert("Fill in the highlighted fields before you proceed");
+    if (invalid){
+	alert(error_msg);
     }
-    return blanks;
+    return invalid;
+}
+
+function validate_blanks(selector){
+    return validation(selector, function(e){
+	return $(e).val().trim() == "";
+    })
+}
+
+function validate_name(selector){
+    return validation(selector, function(e){
+	var m = $(e).val().match(/[A-z0-9_]+/);
+	return m == null || m  != $(e).val();
+    }, "Invalid field values.  Letters, numbers, underscores, no spaces.")
 }
 
 $(function(){
+    var delete_prop_button = $("<button>")
+	    .addClass("deleteButton")
+	    .addClass("deleteProperty")
+	    .html("╳")
+    
     $("#selected").hide();
     $("#editButton").click(function(e){
 	$("#editButtonRow").hide();
@@ -72,10 +89,7 @@ $(function(){
 					.attr("type", "text")))
 		if (prop != "name")
 		    tr.prepend($("<td>")
-			       .append($("<button>")
-				       .addClass("deleteButton")
-				       .addClass("deleteProperty")
-				       .html("X")))
+			       .append(delete_prop_button.clone()))
 		else
 		    tr.prepend($("<td>"))
 		$("#body").append(tr);
@@ -90,7 +104,9 @@ $(function(){
 	selectNode();
     })
     $("#saveObject").click(function(e){
-	if(validate_blanks("#body input"))
+	if (validate_blanks("#body input"))
+	    return;
+	if(validate_name(".newPropertyName"))
 	    return;
 	function isNameAlreadyUsed(testValue) {
 	    // Helper function to make sure we don't make non-unique names.
@@ -158,21 +174,21 @@ $(function(){
     $("#addAttribute").click(function(e){
 	if (validate_blanks(".newPropertyName, .newPropertyValue"))
 	    return;
+	var new_name = $("<input>")
+		.addClass("newPropertyName")
+		.attr("type", "text");
+	
 	$("#body").append($("<tr>")
 			  .append($("<td>")
-				  .append($("<button>")
-					  .addClass("deleteButton")
-					  .addClass("deleteProperty")
-					  .html("X")))
+				  .append(delete_prop_button.clone()))
 			  .append($("<td>")
-				  .append($("<input>")
-					  .addClass("newPropertyName")
-					  .attr("type", "text")))
+				  .append(new_name))
 			  .append($("<td>")
 				  .append($("<input>")
 					  .addClass("newPropertyValue")
 					  .attr("type", "text"))));
 	fit_table();
+	new_name.focus();
     })
     $("#deleteObject").click(function(e){
 	deleteObject(ti);
