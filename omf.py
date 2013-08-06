@@ -92,11 +92,17 @@ def login():
 def deleteUser():
 	if flask_login.current_user.username != "admin":
 		return "You are not authorized to delete users"
-	user = user_manager.get(flask.request.form.get("username"))
-	for objectType in ["Analysis", "Feeder", "Study"]:
-		for objectName in user.listAll(objectType):
-			user.delete(objectType, objectName)
-	store.delete("User", user.username)
+
+	username = flask.request.form.get("username")
+	user_dict = store.get("User", username)
+	
+	if user_dict.get("password_digest"):
+		user = user_manager.get(flask.request.form.get("username"))
+
+		for objectType in ["Analysis", "Feeder", "Study"]:
+			for objectName in user.listAll(objectType):
+				user.delete(objectType, objectName)
+	store.delete("User", username)
 	return "Success"
 
 @app.route("/new_user", methods=["POST"])
@@ -106,7 +112,8 @@ def new_user():
 		return flask.redirect("/")
 	email = flask.request.form.get("email")
 	u = store.get("User", email)
-	if u and u.get("registered", True): # so if the registered key is not there, assume they have registered
+	# if u and u.get("registered", True) and not flask.request.form.get("resend"): # so if the registered key is not there, assume they have registered
+	if u and (u.get("password_digest") or not u.get("password_digest") and not flask.request.form.get("resend")):
 		return "Already Exists"
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\nreg_link"
 	return send_link(email, message)
@@ -166,9 +173,25 @@ def adminControls():
 	if flask_login.current_user.username != "admin":
 		return flask.redirect("/")
 	users = []
+	# for username in store.listAll("User"):
+	# 	if username not in ["public", "admin"] and store.get("User", username).get("username"):
+	# 		users.append(user_manager.get(username))
 	for username in store.listAll("User"):
-		if username not in ["public", "admin"] and store.get("User", username).get("username"):
-			users.append(user_manager.get(username))
+		if username != "admin" and username != "public":
+			u = {"username":username}
+			user_dict = store.get("User", username)
+			try:
+				if user_dict.get("password_digest"):
+					u["status"] = u["status_class"] = "Registered"
+				elif datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user_dict["timestamp"], "%c"):
+					u["status"] = "Email sent"
+					u["status_class"] = "emailSent"
+				else:
+					u["status"] = "Email expired"
+					u["status_class"] = "emailExpired"
+			except KeyError:
+				return flask.Response(str(user_dict)+"\n"+username, content_type="text/plain")
+			users.append(u)
 	return flask.render_template("adminControls.html", users = users)
 	
 @app.route("/myaccount")
