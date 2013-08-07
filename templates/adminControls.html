@@ -82,7 +82,8 @@ $(function(){
     })
 
     $(document).on("click", ".resendEmail", function(e){
-	var username = $(this).attr("name")
+	var username = $(this).attr("name");
+	var self = this;
 	$.ajax({
 	    url:"/new_user",
 	    data:{
@@ -93,6 +94,7 @@ $(function(){
 	    method:"post"
 	}).done(function(data){
 	    alert(data);
+	    $(self).parent().parent().children(".emailExpired").html("Email sent").attr("class", "emailSent")
 	})
     })
 
