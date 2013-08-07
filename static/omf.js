@@ -122,8 +122,10 @@ function showProgressDialog(dialogMessage) {
 }
 
 function removeProgressDialog() {
-	document.body.removeChild(gebi('progressBackground'))
-	document.body.removeChild(gebi('progressContent'))
+	if (gebi('progressBackground')!=null)
+		document.body.removeChild(gebi('progressBackground'))
+	if (gebi('progressContent')!=null)
+		document.body.removeChild(gebi('progressContent'))
 }
 
 function showProgressBar(dialogMessage) {
@@ -150,8 +152,10 @@ function showProgressBar(dialogMessage) {
 }
 
 function removeProgressBar() {
-	document.body.removeChild(gebi('progressBackground'))
-	document.body.removeChild(gebi('progressContent'))
+	if (gebi('progressBackground')!=null)
+		document.body.removeChild(gebi('progressBackground'))
+	if (gebi('progressContent')!=null)
+		document.body.removeChild(gebi('progressContent'))
 }
 
 function round(number,precision) {
