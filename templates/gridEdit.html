@@ -80,7 +80,7 @@
 	.nodetext {pointer-events:none;font-size: 10}
 	g.node {fill:gray; stroke:#fff;}
 	line.link {stroke:black; stroke-opacity:1; stroke-width:6px;}
-	line.parentChild {stroke-dasharray:1,1;}
+	line.parentChild {stroke-dasharray:0.4,0.4;}
 	line.selected {stroke:lime; stroke-width:8px; stroke-opacity:1.0;}
 	g.selected {stroke:lime; stroke-width:2px; stroke-opacity:1.0; }
 	g.multiselected {stroke:lime; stroke-width:4px; stroke-opacity:1.0; stroke-dasharray:1,1;}
@@ -522,14 +522,16 @@
 		force.start()
 	}
 
+	var previourLevel = 1
+	var dynamicShow = false
 	function zoomRedraw() {
 		// console.log(d3.event.scale, d3.event.translate)
 		vis.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
 		if (d3.event.scale<1){
 			d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/d3.event.scale);
 		}
-		// vis2.attr('transform', 'translate(' + d3.event.translate + ')' + ' scale('+ d3.event.scale + ')')
-		// scaleRedraw()
+		if (dynamicShow)
+			dynamicFoldAndUnfold()
 		// change scale grid
 		vis2.select(".x.axis").call(xAxis)
 		vis2.select(".y.axis").call(yAxis)
@@ -538,6 +540,22 @@
 		        	if (d.chargeMultiple != 1){
 		        		return d.objectType + ' has hidden children'}
 		    		else {return d.objectType}})	
+		previourLevel = d3.event.scale;
+
+		function dynamicFoldAndUnfold() {
+			if (previourLevel > d3.event.scale){
+				foldOneLevel();
+			}else if (previourLevel < d3.event.scale) {
+				unfoldOneLevel();
+			}
+		}
+	}
+
+	function changeDynamicShow() {
+		if (!dynamicShow)
+			dynamicShow = true
+		else 
+			dynamicShow = false
 	}
 
 	function scaleRedraw(){
@@ -1436,12 +1454,11 @@ function zoomToFit(){
 
 	function foldOneLevel() {
 		function isChild(node) {
-			counter = 0;
-			for (linkId in links) {
-			if (node.name == links[linkId].source.name || node.name == links[linkId].target.name) {counter += 1}
-			}
-			if (1 == counter) {return true}
-			else {return false}
+			// We can apply the property of node in D3: weight, indicate number of links associated with it.
+			if (node.weight == 1)
+				return true
+			else
+				return false
 		}
 		// Find all the children:
 		toHide = nodes.filter(isChild)
@@ -1527,6 +1544,70 @@ function zoomToFit(){
 		redraw()
 	}
 
+	// Fold 2nd System
+	function foldSecSys() {
+		// filter out all links in secondary system, put them into hiddenLinks
+		secLinks = links.filter(function (link) {
+			if (link.objectType == 'parentChild') {
+				hiddenLinks.push(link)
+				nodes[link.target.index].chargeMultiple = 1.5
+				return true;
+			} else if (link.target.objectType == 'triplex_meter' && link.source.objectType == 'gridNode') {
+				hiddenLinks.push(link)
+				nodes[link.source.index].chargeMultiple = 1.5
+				return true;
+			} else if (link.target.objectType == 'triplex_meter' && link.source.objectType == 'triplex_meter') {
+				hiddenLinks.push(link)
+				nodes[link.source.index].chargeMultiple = 1.5
+				return true
+			} else if (link.target.objectType == 'triplex_meter' && link.source.objectType == 'triplex_node') {
+				hiddenLinks.push(link)
+				nodes[link.source.index].chargeMultiple = 1.5
+				return true
+			} else if (link.target.objectType == 'triplex_node' && link.source.objectType == 'gridNode') {
+				hiddenLinks.push(link)
+				nodes[link.target.index].chargeMultiple = 1.5
+				return true
+			}
+			else return false;
+		})
+
+		// remove secLinks from links and its nodes from nodes 
+		// TODO: bugs with handling secLinks
+		for (var i=links.length -1; i>=0; i--) {
+			if (links[i].objectType == 'parentChild') {
+				links.splice(i, 1)
+			} else if (links[i].target.objectType == 'triplex_meter' && links[i].source.objectType == 'gridNode') {
+				links.splice(i, 1)
+			} else if (links[i].target.objectType == 'triplex_meter' && links[i].source.objectType == 'triplex_meter') {
+				links.splice(i, 1)
+			} else if (links[i].target.objectType == 'triplex_meter' && links[i].source.objectType == 'triplex_node') {
+				links.splice(i, 1)
+			} else if (links[i].target.objectType == 'triplex_node' && links[i].source.objectType == 'gridNode') {
+				links.splice(i, 1)
+			}
+		}
+
+		// put nodes into hiddenNodes
+		secLinks.filter(function (link){
+			if (!hiddenNodes.some(function (d){return (d.index == link.target.index)})){
+				hiddenNodes.push(link.target);
+			}
+				
+			if (!hiddenNodes.some(function (d){return (d.index == link.source.index)}))
+				if (link.source.objectType!= 'gridNode')
+					hiddenNodes.push(link.source);
+		})
+
+		// remove nodes in secondary system
+		// TODO: bugs with handling hiddenNodes
+		for (var i = nodes.length - 1; i>=0; i--){
+			if (nodes[i].objectType == 'triplex_meter' || nodes[i].objectType == 'triplex_node' || nodes[i].objectType == 'ZIPload' || nodes[i].objectType == 'waterheater' || nodes[i].objectType == 'inverter' || nodes[i].objectType == 'solar' || nodes[i].objectType == 'house' || nodes.objectType == 'capacitor')
+				nodes.splice(nodes[i].index, 1)
+		}
+		redraw()
+	}
+			
 	// INIT FUNCTIONS FOLLOW:
 	d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
 	var apiAddress = '/feederData/{{ anaFeeder }}/{{ feederName }}.json' + "?public={% if public %}true{% else %}false{% endif %}";
