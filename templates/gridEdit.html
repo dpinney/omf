@@ -1221,7 +1221,6 @@ function zoomToFit(){
 				triNodeName = 'triNode' + newNode.name
 				triNodeParents = newNode.name
 				triNodePower = Math.max(parseFloat(tree[tkeys[i]].constant_power_A),parseFloat(tree[tkeys[i]].constant_power_B),parseFloat(tree[tkeys[i]].constant_power_C))
-				console.log(triNodePower)
 				triNodePhases = tree[tkeys[i]].phases
 				triNodeVol = tree[tkeys[i]].nominal_voltage
 				triNode = {'name':triNodeName, 'phases':triNodePhases, 'power_12': triNodePower, 'object': 'triplex_node', 'nominal_voltage': triNodeVol}
