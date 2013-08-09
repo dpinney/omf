@@ -1,0 +1,110 @@
+﻿<head>
+	<title>Open Modeling Framework</title>
+	<meta charset='utf-8'>
+	<style type='text/css'>
+		div#container {clear:both; position:relative; margin:0 auto; padding:0; width:1024px; height:500px}
+		div#pusherRobot {float:left; height:50%; margin-bottom:-250px;}
+		div.subContainer {margin:0; display:inline-block; width:50%;height:100%; text-align: center}
+		div#advertisingFrame {float:left; border-radius: 25px; color:white; text-align:center; line-height: 500px; background-image:url('/static/gridAbstract.png'); background-size:500px;}
+		div#login {float:right}
+		p#loginTitle {font-size:24pt; width:100%; text-align:center; padding-top:85px;}
+		form#loginForm {font-size:16pt}
+		input, button, label {margin-bottom:10px; font-size:16pt; padding:5px}
+		input[type='text'], input[type='password'] {width:300px}
+		label#remember {margin-left:75px; color:gray}
+		div#subLinks {display:inline-block;position:absolute;bottom:-60px;left:-30px;line-height:50px}
+		a.menuEntry {display:inline-block; font-size:18pt; color:gray; margin:0px; padding:7px 10px 7px 10px; text-decoration:none;}
+		a.menuEntry:hover {color:black;}
+		a {text-decoration:none;}
+	</style>
+	<link rel='shortcut icon' href='/static/favicon.ico'>
+</head>
+<body>
+  <div id='pusherRobot'></div>
+  <div id='container'>
+    <div class='subContainer' id='advertisingFrame'>
+      <div id='subLinks'>
+		<a class='menuEntry' id='docsEntry' href='https://github.com/dpinney/omf/wiki'>✑ Documentation</a>
+		<a class='menuEntry' id='discussionEntry' href='https://groups.google.com/forum/?fromgroups#!forum/open-modeling-framework'>✉ Discussion</a>
+		<a class='menuEntry' id='developerEntry' href='https://github.com/dpinney/omf'>∯ Development</a>
+      </div>
+    </div>
+    <div class='subContainer' id='login'>
+      <p id='loginTitle'>Open Modeling Framework</p>
+      <form id='loginForm' method='POST' action='login'>
+	<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+	<input type='text' placeholder='Username' name='username'><br/>
+	<input type='password' placeholder='Password' name='password'><br/>
+	<button type='submit'>Login</button>
+	<label id='remember'>Remember Me <input name="remember" type='checkbox'></label>
+      </form>
+      <a href="#" id="forgotpwd">Forgot Password?</a>
+      <div class="fdiv">
+	<p>Enter your email and a password reset link will be sent to you.</p>
+	<form class="forgot_pwd">
+	  <input type="text" name="email" placeholder="Email" />
+	  <input type="submit" value="Send">
+	</form>
+	<a href="#" id="cancel">Cancel</a>
+      </div>
+      <p class="Error">That email is not associated with any account</p>
+      <p class="Success">Email successfully sent!  The reset link will expire in 24 hours</p>
+    </div>
+  </div>
+</body>
+<style>
+.Success{
+    color:green;
+    display:none;
+}
+.Error{
+    color:red;
+    display:none;
+}
+.fdiv{
+    display:none;
+}
+  
+</style>
+<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
+<script>
+
+$(function(){
+    $("input[name=username]").focus();
+    $("#forgotpwd").click(function(e){
+	$(this).hide();
+	$(".Success, .Error").hide();
+	$(".fdiv").fadeIn();
+	$("input[name=email]").focus();
+    });
+    $("#cancel").click(function(e){
+	$(".fdiv").fadeOut();
+	$("#forgotpwd").fadeIn();
+	$("input[name=email]").val("");
+	$("input[name=username]").focus();
+    })
+    $(".forgot_pwd").submit(function(e){
+	$.ajax({
+	    url:"/forgotpwd",
+	    data:{
+		email:$("input[name=email]").val(),
+		_csrf_token:"{{ csrf_token() }}"
+	    },
+	    method:"post",
+	    async:false
+	}).done(function(data){
+	    $(".fdiv").fadeOut()
+	    setTimeout(function(){
+		if (data == "Success")
+		    $(".Success").fadeIn();
+		else
+		    $(".Error, #forgotpwd").fadeIn();
+	    }, 500)
+	    e.preventDefault();
+	    return false;
+	    
+	})
+    })
+    
+})
+</script>

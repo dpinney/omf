@@ -1,0 +1,261 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset='utf-8'>
+	<link type='text/css' rel='stylesheet' href='/static/omf.css' />
+	<link rel='shortcut icon' href='/static/favicon.ico'>
+	<script src="/static/jquery-1.9.1.js"></script>
+	<style>
+	table.studyOptions, table.analysisOptions, table.reportOptions {width:70%; text-align:left; margin-left:auto;}
+	table tr td:first-child {width:25%;}
+	#studyList > div {margin-bottom:0px;}
+	#studyList > div + div {margin-top:0px; margin-bottom:0px; border-top:none;} 
+	#reportList > div {margin-bottom:0px;}
+	#reportList > div + div {margin-top:0px; margin-bottom:0px; border-top:none;} 
+	button {width:auto; padding:4px 6px 4px; float:right;}
+	.buttonGroup {float:none;}
+	a#addReport {float:right;}
+	a.removeStudyReport {float:left; cursor:pointer; user-select:none}
+	select.feederName {width:70%;}
+	input.radio {margin-left:10px;}
+	.advancedOption {display:none;}
+	.discloser {display:inline-block; cursor:pointer; user-select:none}
+	</style>
+	<script src='../static/omf.js'></script>
+	<script>
+	None = []
+		// First, pull in the JSON data.
+		existingStudies = {{ existingStudies | safe }}
+		existingReports = {{ existingReports | safe }}
+		studyTemplates = {{ studyTemplates | safe }}
+		reportTemplates = {{ reportTemplates | safe }}
+		analysisMd = {{ analysisMd | safe }}
+
+		function addStudy(studyType) {
+			studyPrefix = "<a onclick='javascript:removeStudyReport(this)' class='removeStudyReport'>&#10006;</a>"
+			studyHtml = studyPrefix + studyTemplates[studyType]
+			newDiv = document.createElement('div')
+			newDiv.className = 'content'
+			newDiv.innerHTML = studyHtml
+			gebi('studyList').appendChild(newDiv)
+			return newDiv
+		}
+		function addReport(reportName) {
+			// Don't let the user add more than one copy of the report:
+			if (document.getElementsByClassName(reportName).length == 1) {return false}
+				reportStatsHTML = reportTemplates[reportName]
+			newDiv = document.createElement('div')
+			newDiv.className = 'content ' + reportName
+			newDiv.innerHTML = reportStatsHTML
+			gebi('reportList').appendChild(newDiv)
+		}
+		function removeStudyReport(aClicked) {
+			aClicked.parentNode.parentNode.removeChild(aClicked.parentNode)
+		}
+
+		// read file to a hidden input field
+		function handle_files(files) {
+			reader = new FileReader();
+			reader.readAsText(files[0]);
+			reader.onload = loaded;
+			function loaded(evt){
+				evt.target.result;
+				document.getElementsByClassName('hiddenScadaFile').value = reader.result;
+			}
+		}
+
+		function getResponseDict(check){
+			responseDict = {}
+			// Get the analysis-level stuff.
+			responseDict.simLength = check ? check(parseInt(gebi('simLength').value), /[1-9]\d*/) : $("#simLength").val()
+			responseDict.simLengthUnits = check ? check(getRadioSetting('radio'), /\w+/) : getRadioSetting("radio")
+			responseDict.simStartDate = check ? check(gebi('simStartDate').value, /\d\d\d\d-[01]\d-[0123]\d/) : $("#simStartDate").val() // Doesn't flag all bogus dates but it's close enough.
+			responseDict.analysisName = check ? check(gebi('analysisName').value, /[\w\s]*/) : $("#analysisName").val() // Must be a valid filename!
+			// Get the study-level stuff.
+			studyList = []
+			studyDivs = document.getElementsByClassName('studyOptions')
+			for (i=0; i<studyDivs.length; i++) {
+				study = {}
+				allInputs = studyDivs[i].querySelectorAll('input,select')
+				for (j=0; j<allInputs.length;j++) {
+					thisInput = allInputs[j]
+					if (thisInput.className == 'studyName') {
+						if (check)
+							check(thisInput.value, /[\w\s]*/)
+				}// Must be a valid filename!}
+				
+				study[thisInput.className] = thisInput.value
+			}
+			// Add scada data to list
+			if (document.getElementsByClassName('hiddenScadaFile').value !=undefined){
+				study['hiddenScadaFile']=document.getElementsByClassName('hiddenScadaFile').value
+			}
+			studyList.push(study)
+		}
+		responseDict.studies = studyList
+			// Get the reports.
+			chosenReports = []
+			reportDivs = document.getElementsByClassName('reportOptions')
+			for (i=0; i<reportDivs.length; i++) {
+				report = {}
+				report.reportType = reportDivs[i].querySelector('.reportName').innerHTML
+				inputFields = reportDivs[i].querySelectorAll('input')
+				for (j=0; j<inputFields.length; j++) {
+					inputBox = inputFields[j]
+					report[inputBox.className] = inputBox.value
+				}
+				chosenReports.push(report)
+			}
+			responseDict.reports = chosenReports
+			return responseDict;
+		}
+		function saveAnalysis() {
+			// First, a helper function to validate input against a regex:
+			try {
+				function check(answer, regEx) {
+					// careful with those ints:
+					toTest = answer + ''
+					// do the test:
+					if (toTest == toTest.match(regEx) && toTest.length > 0) {
+						return answer
+					} else {
+						// this error will abort the analysis creation process:
+						throw 'ValidationError'
+					}
+					
+				}
+				responseDict = getResponseDict(check);
+				// Send the request.
+				if (JSON.parse(ajaxReq("GET", "/uniqueName/"+gebi("analysisName").value))){
+					responseDict["is_public"] = '{{ is_public }}';
+					post_to_url('/saveAnalysis/', {'json':JSON.stringify(responseDict),
+						"_csrf_token":"{{ csrf_token() }}"})
+				}else {
+					alert("Please choose a unique Analysis Name");
+					gebi("analysisName").style.border = "1px solid red";
+					gebi("analysisName").focus();
+				}
+			} 
+			catch(err) {
+				alert('Some form values are not correct.')
+				return false
+			}
+		}
+		// Little function here to get discloser triangles:
+		function toggleAdvanced(clickedObject) {
+			siblings = clickedObject.parentNode.parentNode.parentNode.querySelectorAll('.advancedOption')
+			for (i=0;i<siblings.length;i++) {
+				visible = (getComputedStyle(siblings[i])['display'] == 'none')
+				if (visible) {
+					siblings[i].style.display='table-row'
+				} else {
+					siblings[i].style.display='none'
+				}
+			}
+			if (visible) {code = 9660} else {code = 9654}
+				clickedObject.textContent = String.fromCharCode(code) + ' Advanced Options'
+		}
+		</script>
+	</head>
+	<body>
+		<div id='title'>
+			<div id='logoBox'><a href='/'>▦</a></div>
+			<!--Title:-->Analysis Creation
+		</div>
+		<div class='content'>
+			<div class='buttonGroup'>
+				<button class='pill' onclick='dropPill(this, "Add Study")'>Add Study ▾</button>
+				<ul class='menu'>
+					{% for stud in studyTemplates|sort() %}
+					<li><a onclick='javascript:addStudy("{{stud}}")'>{{stud}}</a></li>
+					{% endfor %}
+				</ul>
+			</div>
+			<div class='buttonGroup'>
+				<button class='pill' onclick='dropPill(this, "Add Report")'>Add Report ▾</button>
+				<ul class='menu'>
+					{% for rep in reportTemplates|sort() %}
+					<li><a onclick='javascript:addReport("{{rep}}")'>{{ rep }}</a></li>
+					{% endfor %}
+				</ul>
+			</div>
+		</div>
+		<div id='studyList'></div>
+		<div id='reportList'></div>
+		<div class='content'>
+			<table class='analysisOptions'>
+				<tr>
+					<td>Analysis Name</td><td><input type='text' id='analysisName'/></td>
+				</tr>
+				<tr>
+					<td>Simulation Length</td><td><input type='text' id='simLength'/></td>
+				</tr>
+				<tr>
+					<td></td><td><input type='radio' id='minutes' class='radio' name='simLengthUnits' value='minutes'/> Minutes <input type='radio' id='hours' class='radio' name='simLengthUnits' value='hours'/> Hours <input type='radio' id='days' class='radio' name='simLengthUnits' value='days'/> Days </td></tr>
+					<tr>
+						<td>Simulation Start Date <br/> (YYYY-MM-DD)</td><td><input type='text' id='simStartDate'/></td>
+					</tr>
+					<tr>
+						<td></td><td><button onclick='javascript:saveAnalysis()'>Save Analysis</button></td>
+					</tr>
+				</table>
+			</div>
+			<script>
+	// INIT Code: set up the existing reports and studies.
+	function init(){
+		for (exRep=0;exRep<existingReports.length;exRep++) {
+			addReport(existingReports[exRep].reportType)
+		}
+		for (exStud=0;exStud<existingStudies.length;exStud++) {
+		newDiv = addStudy(existingStudies[exStud].studyType) // studyType
+		newDiv.querySelector('.studyName').value = existingStudies[exStud].name // studyName
+			fname = existingStudies[exStud].sourceFeeder // SourceFeeder
+			if(fname.indexOf("_") > -1)
+				newDiv.querySelector('.feederName').value = fname+"?public=false"
+			else
+				newDiv.querySelector(".feederName").value = fname+"?public=true"
+		newDiv.querySelector('.tmy2name').value = existingStudies[exStud].climate // climate
+	}
+		// Set up the analysis-level stuff.
+		gebi('simLength').value = analysisMd.simLength
+		gebi(analysisMd.simLengthUnits).checked = true
+		gebi('simStartDate').value = analysisMd.simStartDate
+	}
+
+	function fromResponseDict(rd){
+		fillInReports(rd.reports);
+		fillInStudies(rd.studies);
+		$("#simLength").val(rd.simLength);
+		$("input[type=radio][value="+rd.simLengthUnits+"]")[0].checked = true;
+		$("#simStartDate").val(rd.simStartDate);
+		$("#analysisName").val(rd.analysisName);
+	}
+
+
+	function fillInStudies(studyArray){
+		for(i=0; i<studyArray.length; i++){
+			newDiv = addStudy(studyArray[i].studyType);
+			newDiv.querySelector(".studyName").value = studyArray[i].studyName;
+			newDiv.querySelector(".feederName").value = studyArray[i].feederName;
+			newDiv.querySelector(".tmy2name").value = studyArray[i].tmy2name;
+		}
+	}
+	
+	function fillInReports(reportArray){
+		for(i=0; i<reportArray.length; i++){
+			addReport(reportArray[i].reportType);
+			for (field in reportArray[i]){
+				if (field != "reportType"){
+					$("."+field).val(reportArray[i][field])
+				}
+			}
+		}
+	}
+	if (localStorage.rd)
+		fromResponseDict(JSON.parse(localStorage.rd))
+	else
+		init();
+	interval = setInterval(function(){
+		localStorage.rd = JSON.stringify(getResponseDict())
+	}, 250);
+	</script>
+</body>
