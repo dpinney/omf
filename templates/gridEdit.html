@@ -1071,6 +1071,7 @@ function zoomToFit(){
 		// Add to the links.
 		linkToAdd = {source:nodes[findIndex(nodes,'name',newName)], target:nodes[findIndex(nodes,'name',tree[treeIndex]['name'])], objectType:'parentChild'}
 		links.push(linkToAdd)
+		return nodeToAdd
 	}
 
 	function staticLoadsToHouses() {
@@ -1146,7 +1147,7 @@ function zoomToFit(){
 		i = 0
 		percentage = 0
 		in_use= false;
-		// TODO: An fast way --> d3.selectAll('.triplex_node')[0].length
+		// TODO: for secondary system has 'load', replace it with triplex_meter and triplex_node
 		tkeys = Object.keys(tree)
 		function replaceAllHouses() {
 			progressBarUpdate(percentage)
@@ -1197,6 +1198,37 @@ function zoomToFit(){
 			showProgressBar('Please wait. Houses are being generated.')
 			// set interval function to run replaceAllHouses every 10 ms, if it is running, will put one request in the queue.
 			inter = setInterval(replaceAllHouses, 10)
+		}
+	}
+
+	function replaceLoadWithTriplex () {
+		var tkeys = Object.keys(tree)
+		var count = tkeys.length
+		// TODO: performance issue here, same with staticLoadsToHouses()
+		for (var i = count - 1; i >= 0; i--) {
+			if (tree[tkeys[i]].object != undefined && tree[tkeys[i]].object == 'load') {
+				// Add triplex_meter
+				parentIndex = findIndex(tree, 'name', tree[tkeys[i]]['parent'])
+				triName = 'tri' + tree[tkeys[i]].name
+				triPhases = tree[tkeys[i]].phases
+				triObject = 'triplex_meter'
+				triVol = tree[tkeys[i]].nominal_voltage 	
+				triMeter = {'name': triName, 'phases': triPhases, 'object': triObject, 'nominal_voltage': triVol}
+				newNode = newChildAtLocation(triMeter, parentIndex)
+
+				// Add triplex_node
+				parentIndex = findIndex(tree, 'name', newNode.name)
+				triNodeName = 'triNode' + newNode.name
+				triNodeParents = newNode.name
+				triNodePower = Math.max(parseFloat(tree[tkeys[i]].constant_power_A),parseFloat(tree[tkeys[i]].constant_power_B),parseFloat(tree[tkeys[i]].constant_power_C))
+				triNodePhases = tree[tkeys[i]].phases
+				triNodeVol = tree[tkeys[i]].nominal_voltage
+				triNode = {'name':triNodeName, 'phases':triNodePhases, 'power_12': triNodePower, 'object': 'triplex_node', 'nominal_voltage': triNodeVol}
+				newChildAtLocation(triNode, parentIndex)
+				
+				// delete load object
+				deleteObject(tkeys[i])
+			}
 		}
 	}
 
