@@ -276,13 +276,13 @@ def main():
 						  # 'load_class' : 'C',
 						  # 'nominal_voltage' : '2400'}
 
-	milsoft = four_node_commercial.glm_object_dict
-	#milsoft = milToGridlab.convert('ACEC-FRIENDSHIP.std','ACEC.seq')
+	#milsoft = four_node_commercial.glm_object_dict
+	milsoft = milToGridlab.convert('IEEE 13.std','IEEE 13.seq')
 	
-	model_name = 'testing_model_fournode'
+	model_name = 'testing_model_IEEE13'
 	feeder_info = None # place holder for future feeder information input from the user. 
 	scada = 'make_believe_scada_file.xlsx' # place holder for file with scada that will be processed for certain values. 
-	case_flag = 0 # base case, do not put None
+	case_flag = -1 # base case, do not put None
 	feeder_config = None # only used in the case that the user already has a feeder configuration .py file that works (i.e. they've calibrated feeder  or at least part of it)
 	calibration_config = None # same as for feeder_config
 	

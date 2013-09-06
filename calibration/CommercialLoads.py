@@ -175,7 +175,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 				my_name = commercial_dict[iii]['name']
 				my_parent = commercial_dict[iii]['name']
 
-			nom_volt = int(commercial_dict[iii]['nom_volt'])
+			nom_volt = int(float(commercial_dict[iii]['nom_volt']))
 
 			# Grab the load classification
 			classID = commercial_dict[iii]['load_classification'] # Get load classification

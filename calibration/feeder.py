@@ -195,26 +195,47 @@ def fullyDeEmbed(glmTree):
 				if type(iterTree[x][y]) is dict and 'object' in iterTree[x][y]:
 					# set the parent and name attributes:
 					glmTree[x][y]['parent'] = glmTree[x]['name']
-					glmTree[x][y]['name'] = glmTree[x]['name'] + glmTree[x][y]['object'] + str(y)
+					if 'name' in glmTree[x][y]:
+						pass
+					else:
+						glmTree[x][y]['name'] = glmTree[x]['name'] + glmTree[x][y]['object'] + str(y)
+						
 					# check for key collision, which should technically be impossible:
-					if y in glmTree.keys(): print('KEY COLLISION!')
-					# put the embedded object back up in the glmTree:
-					glmTree[y] = glmTree[x][y]
+					if y in glmTree.keys():
+						print('KEY COLLISION!')
+						z = y
+						while z in glmTree.keys():
+							z += 1
+						# put the embedded object back up in the glmTree:
+						glmTree[z] = glmTree[x][y]
+					else:
+						# put the embedded object back up in the glmTree:
+						glmTree[y] = glmTree[x][y]
 					# delete the embedded copy:
 					del glmTree[x][y]
 				# TODO: take this if case and roll it into the if case above to save lots of code and make it easier to read.
 				if type(iterTree[x][y]) is dict and 'omfEmbeddedConfigObject' in iterTree[x][y]:
 					configList = iterTree[x][y]['omfEmbeddedConfigObject'].split()
 					# set the name attribute and the parent's reference:
-					glmTree[x][y]['name'] = glmTree[x]['name'] + configList[2] + str(y)
+					if 'name' in glmTree[x][y]:
+						pass
+					else:
+						glmTree[x][y]['name'] = glmTree[x]['name'] + configList[2] + str(y)
 					glmTree[x][y]['object'] = configList[2]
 					glmTree[x][configList[0]] = glmTree[x][y]['name']
 					# get rid of the omfEmbeddedConfigObject string:
 					del glmTree[x][y]['omfEmbeddedConfigObject']
 					# check for key collision, which should technically be impossible BECAUSE Y AND X ARE DIFFERENT INTEGERS IN [1,...,numberOfDicts]:
-					if y in glmTree.keys(): print('KEY COLLISION!')
-					# put the embedded object back up in the glmTree:
-					glmTree[y] = glmTree[x][y]
+					if y in glmTree.keys():
+						print('KEY COLLISION!')
+						z = y
+						while z in glmTree.keys():
+							z += 1
+						# put the embedded object back up in the glmTree:
+						glmTree[z] = glmTree[x][y]
+					else:
+						# put the embedded object back up in the glmTree:
+						glmTree[y] = glmTree[x][y]
 					# delete the embedded copy:
 					del glmTree[x][y]
 	lenDiff = 1
