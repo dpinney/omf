@@ -412,10 +412,10 @@
             "name": "OHx13line_configuration401", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx13line_configuration401overhead_line_conductor404", 
-            "conductor_A": "OHx13line_configuration401overhead_line_conductor404", 
-            "conductor_C": "OHx13line_configuration401overhead_line_conductor404", 
-            "conductor_B": "OHx13line_configuration401overhead_line_conductor404"
+            "conductor_N": "OHx13line_configuration401ohlc404", 
+            "conductor_A": "OHx13line_configuration401ohlc404", 
+            "conductor_C": "OHx13line_configuration401ohlc404", 
+            "conductor_B": "OHx13line_configuration401ohlc404"
         }, 
         "393620": {
             "phases": "2N", 
@@ -894,10 +894,10 @@
             "name": "OHSx973line_configuration132001", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_B": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx220109line_configuration305801overhead_line_conductor305804"
+            "conductor_N": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_B": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx220109line_configuration305801ohlc305804"
         }, 
         "525220": {
             "phases": "5N", 
@@ -2178,7 +2178,7 @@
         "404": {
             "object": "overhead_line_conductor", 
             "resistance": "0.216", 
-            "name": "OHx13line_configuration401overhead_line_conductor404", 
+            "name": "OHx13line_configuration401ohlc404", 
             "geometric_mean_radius": "0.029"
         }, 
         "526720": {
@@ -4040,10 +4040,10 @@
             "name": "OHx207418line_configuration266701", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_A": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_A": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "659920": {
             "phases": "6", 
@@ -8686,10 +8686,10 @@
             "object": "line_configuration", 
             "name": "OHSx317633-S18024line_configuration272201", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_A": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_C": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_A": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_C": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "665420": {
             "phases": "6N", 
@@ -11130,10 +11130,10 @@
             "name": "OHx5575line_configuration13101", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_A": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_C": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_B": "OHSx16064line_configuration239001overhead_line_conductor239004"
+            "conductor_N": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_A": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_C": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_B": "OHSx16064line_configuration239001ohlc239004"
         }, 
         "406320": {
             "phases": "2N", 
@@ -12140,10 +12140,10 @@
             "name": "OHx220632line_configuration407501", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx221245line_configuration524001overhead_line_conductor524006"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx221245line_configuration524001ohlc524006"
         }, 
         "800720": {
             "phases": "2N", 
@@ -12569,10 +12569,10 @@
             "name": "OHx1509line_configuration14801", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_A": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_C": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_B": "OHx220109line_configuration305801overhead_line_conductor305804"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_A": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_C": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_B": "OHx220109line_configuration305801ohlc305804"
         }, 
         "408020": {
             "phases": "6", 
@@ -14576,12 +14576,12 @@
         }, 
         "541401": {
             "name": "OHx221279line_configuration541401", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_C": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_C": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "934620": {
             "phases": "6", 
@@ -21723,10 +21723,10 @@
             "name": "OHSx69870line_configuration25301", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_B": "OHSx176419line_configuration348801overhead_line_conductor348804"
+            "conductor_N": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_B": "OHSx176419line_configuration348801ohlc348804"
         }, 
         "418520": {
             "phases": "6", 
@@ -22202,10 +22202,10 @@
             "name": "OHSx16050line_configuration156901", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_A": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHSx33670line_configuration632001overhead_line_conductor632004"
+            "conductor_N": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_A": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHSx33670line_configuration632001ohlc632004"
         }, 
         "550120": {
             "phases": "5", 
@@ -22287,10 +22287,10 @@
             "name": "OHx10443line_configuration332001", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_B": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_B": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "550220": {
             "phases": "5N", 
@@ -25214,10 +25214,10 @@
             "name": "OHSx244257line_configuration553601", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_B": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_A": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_B": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_A": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "946820": {
             "phases": "6N", 
@@ -27655,10 +27655,10 @@
             "name": "OHSx46465line_configuration556301", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_A": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_C": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_B": "OHSx237217line_configuration129101overhead_line_conductor129106"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_A": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_C": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_B": "OHSx237217line_configuration129101ohlc129106"
         }, 
         "949520": {
             "phases": "6N", 
@@ -29960,12 +29960,12 @@
         }, 
         "559001": {
             "name": "OHx221579line_configuration559001", 
-            "conductor_A": "OHx221170line_configuration524201overhead_line_conductor524206", 
+            "conductor_A": "OHx221170line_configuration524201ohlc524206", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_C": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_B": "OHx221170line_configuration524201overhead_line_conductor524206"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_C": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_B": "OHx221170line_configuration524201ohlc524206"
         }, 
         "34720": {
             "phases": "6N", 
@@ -30648,10 +30648,10 @@
             "name": "OHSx154028line_configuration428701", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "821920": {
             "phases": "2N", 
@@ -33169,10 +33169,10 @@
             "name": "OHx221346line_configuration300701", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_C": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_B": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_A": "OHSx16064line_configuration239001overhead_line_conductor239004"
+            "conductor_N": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_C": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_B": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_A": "OHSx16064line_configuration239001ohlc239004"
         }, 
         "693920": {
             "phases": "3N", 
@@ -36335,10 +36335,10 @@
             "name": "OHx12588line_configuration435701", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_A": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_A": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "435720": {
             "phases": "1N", 
@@ -40535,10 +40535,10 @@
             "name": "OHx256442line_configuration178701", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_A": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_C": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_B": "OHSx16064line_configuration239001overhead_line_conductor239004"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_A": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_C": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_B": "OHSx16064line_configuration239001ohlc239004"
         }, 
         "571920": {
             "phases": "3N", 
@@ -41281,10 +41281,10 @@
             "name": "OHSx66358line_configuration48501", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_A": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_C": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_A": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_C": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "441720": {
             "phases": "1N", 
@@ -50189,10 +50189,10 @@
             "name": "OHx17214line_configuration452001", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_A": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_A": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "845220": {
             "phases": "1N", 
@@ -61829,10 +61829,10 @@
             "name": "OHx8854line_configuration334701", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHSx33670line_configuration632001overhead_line_conductor632004"
+            "conductor_N": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHSx33670line_configuration632001ohlc632004"
         }, 
         "727920": {
             "phases": "2N", 
@@ -62167,10 +62167,10 @@
             "object": "line_configuration", 
             "name": "OHSx338785line_configuration73001", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_A": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_C": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_A": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_C": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "466220": {
             "phases": "1N", 
@@ -62461,12 +62461,12 @@
         }, 
         "73401": {
             "name": "OHSx152106line_configuration73401", 
-            "conductor_A": "OHSx16064line_configuration239001overhead_line_conductor239004", 
+            "conductor_A": "OHSx16064line_configuration239001ohlc239004", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_C": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_C": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "466620": {
             "phases": "1N", 
@@ -62766,10 +62766,10 @@
             "object": "line_configuration", 
             "name": "OHx570351line_configuration73801", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "467020": {
             "status": "CLOSED", 
@@ -64466,10 +64466,10 @@
             "object": "line_configuration", 
             "name": "OHSx4187line_configuration76201", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_A": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_C": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_A": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_C": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "469420": {
             "phases": "4", 
@@ -65583,10 +65583,10 @@
             "name": "OHSx384585line_configuration77601", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_A": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_C": "OHx207439-S2790line_configuration257501overhead_line_conductor257504"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_A": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_C": "OHx207439-S2790line_configuration257501ohlc257504"
         }, 
         "470820": {
             "phases": "1", 
@@ -67000,10 +67000,10 @@
             "name": "OHSx364098line_configuration341601", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_B": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_A": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_C": "OHSx237217line_configuration129101overhead_line_conductor129106"
+            "conductor_N": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_B": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_A": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_C": "OHSx237217line_configuration129101ohlc129106"
         }, 
         "734820": {
             "phases": "6N", 
@@ -68838,12 +68838,12 @@
         }, 
         "475001": {
             "name": "OHSx173542line_configuration475001", 
-            "conductor_A": "OHSx16064line_configuration239001overhead_line_conductor239004", 
+            "conductor_A": "OHSx16064line_configuration239001ohlc239004", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHSx16064line_configuration239001overhead_line_conductor239004"
+            "conductor_N": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHSx16064line_configuration239001ohlc239004"
         }, 
         "868220": {
             "phases": "7N", 
@@ -68929,10 +68929,10 @@
             "name": "OHSx260257line_configuration475101", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_A": "OHx221170line_configuration524201overhead_line_conductor524206"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_A": "OHx221170line_configuration524201ohlc524206"
         }, 
         "868320": {
             "phases": "7N", 
@@ -69386,12 +69386,12 @@
         }, 
         "344601": {
             "name": "OHx571959line_configuration344601", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx220109line_configuration305801overhead_line_conductor305804"
+            "conductor_N": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx220109line_configuration305801ohlc305804"
         }, 
         "737820": {
             "phases": "4", 
@@ -70590,10 +70590,10 @@
             "name": "OHx16057line_configuration608301", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "1001520": {
             "phases": "14N", 
@@ -72434,10 +72434,10 @@
             "name": "OHSx263777line_configuration610701", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_A": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_C": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_A": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_C": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "1003920": {
             "phases": "1N", 
@@ -73939,10 +73939,10 @@
             "name": "OHx18152line_configuration88301", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "481520": {
             "phases": "6", 
@@ -74513,10 +74513,10 @@
             "name": "OHx9061line_configuration613301", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "1006520": {
             "phases": "1N", 
@@ -76318,10 +76318,10 @@
             "name": "OHSx51618line_configuration91301", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_A": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_C": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_A": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_C": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "484520": {
             "phases": "1N", 
@@ -78464,10 +78464,10 @@
             "name": "OHx209652-S18415line_configuration94001", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx571303line_configuration542101overhead_line_conductor542105", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx571303line_configuration542101ohlc542105", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "487220": {
             "phases": "1N", 
@@ -79163,10 +79163,10 @@
             "name": "OHSx34289line_configuration619201", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_B": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_A": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_B": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_A": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "1012420": {
             "phases": "4N", 
@@ -79472,10 +79472,10 @@
             "name": "OHx31004line_configuration488501", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_A": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_A": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "881720": {
             "phases": "2N", 
@@ -80875,12 +80875,12 @@
         }, 
         "621401": {
             "name": "OHx13731line_configuration621401", 
-            "conductor_A": "OHSx237217line_configuration129101overhead_line_conductor129106", 
+            "conductor_A": "OHSx237217line_configuration129101ohlc129106", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "1014620": {
             "phases": "1N", 
@@ -81181,10 +81181,10 @@
             "name": "OHSx100581line_configuration97501", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_C": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_A": "OHSx237217line_configuration129101overhead_line_conductor129106"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_C": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_A": "OHSx237217line_configuration129101ohlc129106"
         }, 
         "490720": {
             "phases": "4N", 
@@ -81429,10 +81429,10 @@
             "object": "line_configuration", 
             "name": "OHSx25650line_configuration97801", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_A": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_C": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_A": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_C": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "1015320": {
             "phases": "4N", 
@@ -82839,10 +82839,10 @@
             "name": "OHSx30131line_configuration623901", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_A": "OHSx237217line_configuration129101overhead_line_conductor129106"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_A": "OHSx237217line_configuration129101ohlc129106"
         }, 
         "1017120": {
             "phases": "4", 
@@ -84907,10 +84907,10 @@
             "name": "OHSx342657line_configuration102401", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_A": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_C": "OHSx237217line_configuration129101overhead_line_conductor129106"
+            "conductor_N": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_A": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_C": "OHSx237217line_configuration129101ohlc129106"
         }, 
         "495620": {
             "phases": "4N", 
@@ -85694,10 +85694,10 @@
             "object": "line_configuration", 
             "name": "OHx10016line_configuration103401", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "496620": {
             "phases": "4", 
@@ -85844,10 +85844,10 @@
             "name": "OHx17414line_configuration496801", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_A": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_A": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "890020": {
             "phases": "6N", 
@@ -88336,7 +88336,7 @@
         "542105": {
             "object": "overhead_line_conductor", 
             "resistance": "1.503", 
-            "name": "OHx571303line_configuration542101overhead_line_conductor542105", 
+            "name": "OHx571303line_configuration542101ohlc542105", 
             "geometric_mean_radius": "0.00663"
         }, 
         "500120": {
@@ -88944,10 +88944,10 @@
             "name": "OHSx33670line_configuration632001", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_B": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_A": "OHSx33670line_configuration632001overhead_line_conductor632004", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_B": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_A": "OHSx33670line_configuration632001ohlc632004", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "1025220": {
             "phases": "4N", 
@@ -93364,10 +93364,10 @@
             "name": "OHSx67617line_configuration375901", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_C": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_B": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_C": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_B": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "769120": {
             "phases": "5N", 
@@ -94107,12 +94107,12 @@
         }, 
         "150201": {
             "name": "OHx254819line_configuration150201", 
-            "conductor_A": "OHx220109line_configuration305801overhead_line_conductor305804", 
+            "conductor_A": "OHx220109line_configuration305801ohlc305804", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "376920": {
             "phases": "2N", 
@@ -95188,10 +95188,10 @@
             "object": "line_configuration", 
             "name": "OHSx107940line_configuration116201", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_B": "OHSx237217line_configuration129101overhead_line_conductor129106"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_B": "OHSx237217line_configuration129101ohlc129106"
         }, 
         "509420": {
             "phases": "1", 
@@ -96636,10 +96636,10 @@
             "name": "OHx4700line_configuration325501", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_C": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_B": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_A": "OHx207439-S2790line_configuration257501overhead_line_conductor257504"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_C": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_B": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_A": "OHx207439-S2790line_configuration257501ohlc257504"
         }, 
         "511220": {
             "status": "CLOSED", 
@@ -98145,10 +98145,10 @@
             "name": "OHSx162351line_configuration513101", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_A": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHSx237217line_configuration129101overhead_line_conductor129106"
+            "conductor_N": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_A": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHSx237217line_configuration129101ohlc129106"
         }, 
         "906320": {
             "phases": "2N", 
@@ -98397,10 +98397,10 @@
             "object": "line_configuration", 
             "name": "OHSx16052line_configuration120201", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_B": "OHx221170line_configuration524201overhead_line_conductor524206"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_B": "OHx221170line_configuration524201ohlc524206"
         }, 
         "513420": {
             "phases": "4", 
@@ -98697,10 +98697,10 @@
             "object": "line_configuration", 
             "name": "OHx571320line_configuration513801", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_A": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_A": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "907020": {
             "phases": "2N", 
@@ -99009,10 +99009,10 @@
             "object": "line_configuration", 
             "name": "OHSx61543line_configuration121001", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_B": "OHSx237217line_configuration129101overhead_line_conductor129106"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_B": "OHSx237217line_configuration129101ohlc129106"
         }, 
         "514220": {
             "phases": "4", 
@@ -99257,10 +99257,10 @@
             "name": "OHSx77537line_configuration514501", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_A": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHSx16064line_configuration239001overhead_line_conductor239004"
+            "conductor_N": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_A": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHSx16064line_configuration239001ohlc239004"
         }, 
         "907720": {
             "phases": "2N", 
@@ -99806,7 +99806,7 @@
         "632004": {
             "object": "overhead_line_conductor", 
             "resistance": "2.44", 
-            "name": "OHSx33670line_configuration632001overhead_line_conductor632004", 
+            "name": "OHSx33670line_configuration632001ohlc632004", 
             "geometric_mean_radius": "0.00479"
         }, 
         "1039520": {
@@ -99940,10 +99940,10 @@
             "name": "OHSx244274line_configuration384301", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHSx16064line_configuration239001overhead_line_conductor239004", 
-            "conductor_B": "OHSx16064line_configuration239001overhead_line_conductor239004"
+            "conductor_N": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHSx16064line_configuration239001ohlc239004", 
+            "conductor_B": "OHSx16064line_configuration239001ohlc239004"
         }, 
         "777520": {
             "phases": "2N", 
@@ -100635,10 +100635,10 @@
             "name": "OHx263122line_configuration516301", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx263122line_configuration516301overhead_line_conductor516306", 
-            "conductor_A": "OHx263122line_configuration516301overhead_line_conductor516306", 
-            "conductor_C": "OHx263122line_configuration516301overhead_line_conductor516306", 
-            "conductor_B": "OHx263122line_configuration516301overhead_line_conductor516306"
+            "conductor_N": "OHx263122line_configuration516301ohlc516306", 
+            "conductor_A": "OHx263122line_configuration516301ohlc516306", 
+            "conductor_C": "OHx263122line_configuration516301ohlc516306", 
+            "conductor_B": "OHx263122line_configuration516301ohlc516306"
         }, 
         "909520": {
             "phases": "2N", 
@@ -100651,7 +100651,7 @@
         "516306": {
             "object": "overhead_line_conductor", 
             "resistance": "0.723", 
-            "name": "OHx263122line_configuration516301overhead_line_conductor516306", 
+            "name": "OHx263122line_configuration516301ohlc516306", 
             "geometric_mean_radius": "0.006"
         }, 
         "516320": {
@@ -100709,10 +100709,10 @@
             "name": "OHx220566line_configuration385301", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx221245line_configuration524001overhead_line_conductor524006"
+            "conductor_N": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx221245line_configuration524001ohlc524006"
         }, 
         "778520": {
             "phases": "6N", 
@@ -100844,7 +100844,7 @@
         "239004": {
             "object": "overhead_line_conductor", 
             "resistance": "0.592", 
-            "name": "OHSx16064line_configuration239001overhead_line_conductor239004", 
+            "name": "OHSx16064line_configuration239001ohlc239004", 
             "geometric_mean_radius": "0.00814"
         }, 
         "1040820": {
@@ -100908,12 +100908,12 @@
         }, 
         "516601": {
             "name": "OHx221339line_configuration516601", 
-            "conductor_A": "OHx220109line_configuration305801overhead_line_conductor305804", 
+            "conductor_A": "OHx220109line_configuration305801ohlc305804", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_C": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_B": "OHx220109line_configuration305801overhead_line_conductor305804"
+            "conductor_N": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_C": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_B": "OHx220109line_configuration305801ohlc305804"
         }, 
         "909820": {
             "phases": "2N", 
@@ -101098,10 +101098,10 @@
             "name": "OHSx95line_configuration123601", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_B": "OHx220109line_configuration305801overhead_line_conductor305804"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_B": "OHx220109line_configuration305801ohlc305804"
         }, 
         "516820": {
             "phases": "3N", 
@@ -103544,10 +103544,10 @@
             "name": "OHSx176419line_configuration348801", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_B": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_A": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_B": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_A": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "651020": {
             "phases": "1N", 
@@ -103560,7 +103560,7 @@
         "348804": {
             "object": "overhead_line_conductor", 
             "resistance": "1", 
-            "name": "OHSx176419line_configuration348801overhead_line_conductor348804", 
+            "name": "OHSx176419line_configuration348801ohlc348804", 
             "geometric_mean_radius": "1"
         }, 
         "257820": {
@@ -104296,10 +104296,10 @@
             "name": "OHx207439line_configuration258801", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx207439-S2790line_configuration257501overhead_line_conductor257504"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx207439-S2790line_configuration257501ohlc257504"
         }, 
         "652020": {
             "phases": "3N", 
@@ -104599,10 +104599,10 @@
             "name": "OHSx318290line_configuration259201", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_B": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx207439-S2790line_configuration257501overhead_line_conductor257504"
+            "conductor_N": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_B": "OHx207439-S2790line_configuration257501ohlc257504", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx207439-S2790line_configuration257501ohlc257504"
         }, 
         "652420": {
             "phases": "5", 
@@ -105342,15 +105342,15 @@
             "name": "OHSx237217line_configuration129101", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHSx237217line_configuration129101overhead_line_conductor129106", 
-            "conductor_B": "OHSx237217line_configuration129101overhead_line_conductor129106"
+            "conductor_N": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHSx237217line_configuration129101ohlc129106", 
+            "conductor_B": "OHSx237217line_configuration129101ohlc129106"
         }, 
         "129106": {
             "object": "overhead_line_conductor", 
             "resistance": "0.034792", 
-            "name": "OHSx237217line_configuration129101overhead_line_conductor129106", 
+            "name": "OHSx237217line_configuration129101ohlc129106", 
             "geometric_mean_radius": "0.00446"
         }, 
         "1046620": {
@@ -105798,10 +105798,10 @@
             "name": "OHx7056line_configuration129701", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx220109line_configuration305801overhead_line_conductor305804"
+            "conductor_N": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx220109line_configuration305801ohlc305804"
         }, 
         "522920": {
             "phases": "3N", 
@@ -105919,10 +105919,10 @@
             "name": "OHx16881line_configuration392001", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx220109line_configuration305801overhead_line_conductor305804", 
-            "conductor_B": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx220109line_configuration305801ohlc305804", 
+            "conductor_B": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "785220": {
             "phases": "26N", 
@@ -106309,12 +106309,12 @@
         }, 
         "349401": {
             "name": "OHx8262line_configuration349401", 
-            "conductor_A": "OHx220109line_configuration305801overhead_line_conductor305804", 
+            "conductor_A": "OHx220109line_configuration305801ohlc305804", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHSx176419line_configuration348801overhead_line_conductor348804", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHSx176419line_configuration348801ohlc348804", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "654620": {
             "phases": "17N", 
@@ -106606,10 +106606,10 @@
             "name": "OHx7959line_configuration130701", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_B": "OHx221170line_configuration524201overhead_line_conductor524206"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_B": "OHx221170line_configuration524201ohlc524206"
         }, 
         "523920": {
             "phases": "3N", 
@@ -106682,10 +106682,10 @@
             "name": "OHx221245line_configuration524001", 
             "object": "line_configuration", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221245line_configuration524001overhead_line_conductor524006", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx221245line_configuration524001overhead_line_conductor524006"
+            "conductor_N": "OHx221245line_configuration524001ohlc524006", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx221245line_configuration524001ohlc524006"
         }, 
         "917220": {
             "phases": "2", 
@@ -106698,7 +106698,7 @@
         "524006": {
             "object": "overhead_line_conductor", 
             "resistance": "3.87", 
-            "name": "OHx221245line_configuration524001overhead_line_conductor524006", 
+            "name": "OHx221245line_configuration524001ohlc524006", 
             "geometric_mean_radius": "0.00394"
         }, 
         "130801": {
@@ -106793,7 +106793,7 @@
         "305804": {
             "object": "overhead_line_conductor", 
             "resistance": "1.12", 
-            "name": "OHx220109line_configuration305801overhead_line_conductor305804", 
+            "name": "OHx220109line_configuration305801ohlc305804", 
             "geometric_mean_radius": "0.00446"
         }, 
         "524120": {
@@ -106870,10 +106870,10 @@
             "object": "line_configuration", 
             "name": "OHx221170line_configuration524201", 
             "spacing": "OHx221170line_configuration524201line_spacing524202", 
-            "conductor_N": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_A": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
-            "conductor_C": "OHx221170line_configuration524201overhead_line_conductor524206", 
-            "conductor_B": "OHx254812-S18640line_configuration152901overhead_line_conductor152904"
+            "conductor_N": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_A": "OHx254812-S18640line_configuration152901ohlc152904", 
+            "conductor_C": "OHx221170line_configuration524201ohlc524206", 
+            "conductor_B": "OHx254812-S18640line_configuration152901ohlc152904"
         }, 
         "524202": {
             "distance_BC": "7.0", 
@@ -106896,19 +106896,19 @@
         "524206": {
             "object": "overhead_line_conductor", 
             "resistance": "2.57", 
-            "name": "OHx221170line_configuration524201overhead_line_conductor524206", 
+            "name": "OHx221170line_configuration524201ohlc524206", 
             "geometric_mean_radius": "0.00437"
         }, 
         "152904": {
             "object": "overhead_line_conductor", 
             "resistance": "0.185900", 
-            "name": "OHx254812-S18640line_configuration152901overhead_line_conductor152904", 
+            "name": "OHx254812-S18640line_configuration152901ohlc152904", 
             "geometric_mean_radius": "0.031300"
         }, 
         "257504": {
             "object": "overhead_line_conductor", 
             "resistance": "0.895", 
-            "name": "OHx207439-S2790line_configuration257501overhead_line_conductor257504", 
+            "name": "OHx207439-S2790line_configuration257501ohlc257504", 
             "geometric_mean_radius": "0.0051"
         }, 
         "524220": {
@@ -106947,10 +106947,10 @@
             "name": "UGSx54540line_configuration262101", 
             "object": "line_configuration", 
             "spacing": "UGSx54540line_configuration262101line_spacing262102", 
-            "conductor_N": "UGx432029line_configuration196601underground_line_conductor196604", 
-            "conductor_A": "UGx432029line_configuration196601underground_line_conductor196604", 
-            "conductor_C": "UGx432029line_configuration196601underground_line_conductor196604", 
-            "conductor_B": "UGx432029line_configuration196601underground_line_conductor196604"
+            "conductor_N": "UGx432029line_configuration196601uglc196604", 
+            "conductor_A": "UGx432029line_configuration196601uglc196604", 
+            "conductor_C": "UGx432029line_configuration196601uglc196604", 
+            "conductor_B": "UGx432029line_configuration196601uglc196604"
         }, 
         "262102": {
             "distance_AN": "0.000000", 
@@ -106989,7 +106989,7 @@
             "neutral_gmr": "0.002080", 
             "neutral_strands": "6.000000", 
             "conductor_diameter": "0.292000", 
-            "name": "UGx432029line_configuration196601underground_line_conductor196604", 
+            "name": "UGx432029line_configuration196601uglc196604", 
             "outer_diameter": "0.980000", 
             "neutral_resistance": "14.872000", 
             "neutral_diameter": "0.064000", 

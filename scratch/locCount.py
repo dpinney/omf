@@ -14,10 +14,10 @@ def cleanList(inList):
 	return [x for x in inList if (x.split('.')[-1] in goodSuffixes and x not in libraries)]
 
 def lineCount(fileName):
-	with open(fileName) as openFile:
-		for x, y in enumerate(openFile):
-			pass
-	return x + 1
+    lines = 0
+    for line in open(fileName):
+        lines += 1
+    return lines
 
 def fileNameAndLineCount(fileName):
 	return [fileName, lineCount(fileName)]
