@@ -72,7 +72,7 @@ def run(studyObject):
 
 def csvToArray(fileName):
 	''' Take a Gridlab-export csv filename, return a list of timeseries vectors. Internal method. 
-		testStringsThatPass = ['+954.877', '+2.18351e+006', '+7244.99+1.20333e-005d', '+7244.99+120d', '+3.76184','1','']
+		testStringsThatPass = ['+954.877', '+2.18351e+006', '+7244.99+1.20333e-005d', '+7244.99+120d', '+3.76184','1','+7200+0d','']
 	'''
 	def strClean(x):
 		# Helper function that translates csv values to reasonable floats (or header values to strings):
@@ -84,14 +84,14 @@ def csvToArray(fileName):
 		elif x == '-1.#IND':
 			return 0.0
 		if x.endswith('d'):
-			matches = re.findall('([+-]?\d+\.?\d*e?[+-]?\d+)[+-](\d+\.?\d*e?[+-]?\d+)d',x)
+			matches = re.findall('^([+-]?\d+\.?\d*e?[+-]?\d+)[+-](\d+\.?\d*e?[+-]?\d*)d$',x)
 			if len(matches)==0:
 				return 0.0
 			else:
 				floatConv = map(float, matches[0])
 				squares = map(lambda x:x**2, floatConv)
 				return math.sqrt(sum(squares))
-		elif re.findall('([+-]?\d+\.?\d*e?[+-]?\d*)',x) != []:
+		elif re.findall('^([+-]?\d+\.?\d*e?[+-]?\d*)$',x) != []:
 			matches = re.findall('([+-]?\d+\.?\d*e?[+-]?\d*)',x)
 			if len(matches)==0:
 				return 0.0
