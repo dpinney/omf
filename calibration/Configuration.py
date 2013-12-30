@@ -43,7 +43,8 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		# - Timezone
 		
 		# TODO: These variables should be filled in automatically, probably from 'make weather file' script. Within that function we should get the appropriate timestamp and region ID too. 
-		data["weather"] = 'schedules\\\\SCADA_weather_ISW_gld.csv'
+		#data["weather"] = 'schedules\\\\SCADA_weather_ISW_gld.csv'
+		data["weather"] = 'schedules\\\\SCADA_weather_NC_gld_shifted.csv'
 		data["timezone"] = 'PST+8PDT'
 		region = 4
 		

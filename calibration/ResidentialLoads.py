@@ -182,7 +182,8 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					
 					ceiling_height = 8 + height_rand
 					ResTechDict[last_object_key]['ceiling_height'] = '{:.0f}'.format(ceiling_height)
-					ResTechDict[last_object_key]['comment'] = '//Load Classification -> {:s} {:.0f}'.format(config_data['load_classifications'][classID],row_ti + 1)
+					#ResTechDict[last_object_key]['comment'] = '//Load Classification -> {:s} {:.0f}'.format(config_data['load_classifications'][classID],row_ti + 1)
+					ResTechDict[last_object_key]['comment'] = '//Load Classification -> {:s}'.format(config_data['load_classifications'][classID])
 					
 					rroof = thermal_temp[0] * (0.8 + (0.4 * random.random()))
 					ResTechDict[last_object_key]['Rroof'] = '{:.2f}'.format(rroof)

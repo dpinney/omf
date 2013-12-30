@@ -937,10 +937,9 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 				#end #number of big boxes
 				#print('finished iterating over number of big boxes')
 			# Strip mall
-			elif (classID == 6): #jlh
+			elif (classID == 6 and total_comm_houses > 0): # unlike for big boxes and offices, if total house number = 0, just don't populate anything.
 				no_of_strip = total_comm_houses;
 				strip_per_phase = int(math.ceil(no_of_strip / no_of_phases))
-
 				if (has_phase_A == 1):
 					glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
 													"name" : "CTTF_config_A_{:s}".format(my_name),
@@ -1300,7 +1299,7 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 			elif total_comm_houses == 0 and sum(commercial_dict[iii]['load']) > 0:
 				#print('writing street_light')
 				glmCaseDict[last_object_key] = {"object" : "load",
-												"parent" : "{:s}".format(my_name),
+												"parent" : "{:s}".format(my_parent),
 												"name" : "str_light_{:s}{:s}".format(ph,commercial_dict[iii]['name']),
 												"nominal_voltage" : "{:.2f}".format(nom_volt),
 												"phases" : "{:s}".format(ph)

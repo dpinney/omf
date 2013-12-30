@@ -4,6 +4,7 @@ import datetime
 import copy
 import os
 import re
+import warnings
 from functools import reduce
 
 
@@ -99,10 +100,16 @@ def dictToString(inDict):
 				# TODO (cosmetic): know our depth, and indent the output so it's more human readable.
 				otherKeyValues += dictToString(inDict[key])
 			elif key != keyToAvoid:
-				if key != 'comment':
-					otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
-				else:
+				if key == 'comment':
 					otherKeyValues += (inDict[key] + '\n')
+				elif key == 'name' or key == 'parent':
+					if len(inDict[key]) <= 62:
+						otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
+					else:
+						warnings.warn("{:s} argument is longer that 64 characters. Truncating.".format(key), RuntimeWarning)
+						otherKeyValues += ('\t' + key + ' ' + inDict[key][0:62] + '; // truncated from {:s}\n'.format(inDict[key]))
+				else:
+					otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
 		return otherKeyValues
 	# Handle the different types of dictionaries that are leafs of the tree root:
 	if 'omftype' in inDict:
@@ -146,10 +153,10 @@ def sortedWrite(inTree):
 	sortedKeys = sorted(inTree.keys(), key=int)
 	output = ''
 	for key in sortedKeys:
-		try:
-			output += dictToString(inTree[key]) + '\n'
-		except Exception:
-			print(inTree[key])
+		#try:
+		output += dictToString(inTree[key]) + '\n'
+		#except Exception:
+		#	print(inTree[key])
 	return output
 
 def adjustTime(tree, simLength, simLengthUnits, simStartDate):
