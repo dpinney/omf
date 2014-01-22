@@ -1,9 +1,7 @@
 #!/usr/bin/env python
 
-import datetime
-import copy
-import os
-import re
+import datetime, copy, os, re, networkx as nx
+from matplotlib import pyplot as plt
 
 def tokenizeGlm(glmFileName):
 	with open(glmFileName,'r') as glmFile:
@@ -264,19 +262,80 @@ def groupSwingKids(tree):
 		tree[biggestKey] = insert
 		biggestKey += 1
 
+# Processing functions.
+def treeToNxGraph(inTree):
+    ''' Convert feeder tree to networkx graph. '''
+    outGraph = nx.Graph()
+    for key in inTree:
+        item = inTree[key]
+        if 'name' in item.keys():
+            if 'parent' in item.keys():
+                outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild'})
+                outGraph.node[item['name']]['type']=item['object']
+                outGraph.node[item['name']]['pos']=(float(item['latitude']),float(item['longitude']))
+            elif 'from' in item.keys():
+                outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object']})
+            elif item['name'] in outGraph:
+                # Edge already led to node's addition, so just set the attributes:
+                outGraph.node[item['name']]['type']=item['object']
+            else:
+                outGraph.add_node(item['name'],attr_dict={'type':item['object']})
+            if 'latitude' in item.keys() and 'longitude' in item.keys():
+                outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
+    return outGraph
+
+def latLonNxGraph(inGraph):
+    ''' Draw an networkx graph representing a feeder. '''
+    # Function to color by node/edge type.
+    def obToCol(obStr):
+        obToColor = {'node':'gray',
+            'house':'#3366FF',
+            'load':'#3366FF',
+            'ZIPload':'#66CCFF',
+            'waterheater':'#66CCFF',
+            'triplex_meter':'#FF6600',
+            'triplex_node':'#FFCC00',
+            'gridNode':'#CC0000',
+            'swingNode':'hotpink',
+            'parentChild':'green',
+            'underground_line':'red'}
+        return obToColor.get(obStr,'black')
+    # Draw!
+    plt.figure(figsize=(10,10))
+    nx.draw(inGraph,
+            pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph},
+            node_color=[obToCol(inGraph.node[n]['type']) for n in inGraph],
+            edge_color=[obToCol(inGraph.edge[e[0]][e[1]]['type']) for e in inGraph.edges()],
+            with_labels=False,
+            node_size=20)
+    plt.show()
+
+def neatNxGraph(inG):
+    ''' Layout via Graphviz neato and draw a feeder. '''
+    # We have to remove all edge/node attributes of else graphviz gets confused:
+    cleanG = nx.Graph(inG.edges())
+    nx.draw(cleanG,nx.graphviz_layout(cleanG,prog='neato'),with_labels=False,node_size=10)
 
 def main():
 	''' Here we do the tests. '''
-	#Parser Test
+
+	# # Graph Test
+	# import json
+	# with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
+	# 	tree = json.load(inJ)['tree']
+	# nxG = treeToNxGraph(tree)
+	# latLonNxGraph(nxG)
+
+	# # Parser Test
 	# tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
 	# simpleTokens = tokenizeGlm('./feeders/13 Node Ref Feeder Flat/main.glm')
 	# print parseTokenList(simpleTokens)
 
-	#Recorder Attachment Test
-	tree = parse('./feeders/PNNL Taxonomy Feeder 1/main.glm')
-	attachRecorders(tree, 'Regulator', 'object', 'regulator')
-	attachRecorders(tree, 'Voltage', 'object', 'node')
-	print 'All the objects: ' + str([tree[x]['object'] for x in tree.keys() if 'object' in tree[x]])
+	# # Recorder Attachment Test
+	# tree = parse('./feeders/PNNL Taxonomy Feeder 1/main.glm')
+	# attachRecorders(tree, 'Regulator', 'object', 'regulator')
+	# attachRecorders(tree, 'Voltage', 'object', 'node')
+	# print 'All the objects: ' + str([tree[x]['object'] for x in tree.keys() if 'object' in tree[x]])
 
 	# # Testing The De-Embedding
 	# from pprint import pprint
@@ -296,7 +355,7 @@ def main():
 	# adjustTime(tree, 100, 'hours', '2000-09-01')
 	# from pprint import pprint
 	# pprint(tree)
-
+	
 	pass
 
 if __name__ == '__main__':
