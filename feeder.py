@@ -353,11 +353,11 @@ def main():
 	''' Here we do the tests. '''
 
 	# # Graph Test
-	import json
-	with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
-		tree = json.load(inJ)['tree']
-	nxG = treeToNxGraph(tree)
-	latLonNxGraph(nxG)
+	# import json
+	# with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
+	# 	tree = json.load(inJ)['tree']
+	# nxG = treeToNxGraph(tree)
+	# latLonNxGraph(nxG)
 
 	# # Parser Test
 	# tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
