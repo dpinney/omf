@@ -262,7 +262,10 @@ def groupSwingKids(tree):
 		tree[biggestKey] = insert
 		biggestKey += 1
 
-# Processing functions.
+def phaseCount(phaseString):
+    ''' Return number of phases not including neutrals. '''
+    return sum([phaseString.lower().count(x) for x in ['a','b','c']])
+
 def treeToNxGraph(inTree):
     ''' Convert feeder tree to networkx graph. '''
     outGraph = nx.Graph()
@@ -270,11 +273,12 @@ def treeToNxGraph(inTree):
         item = inTree[key]
         if 'name' in item.keys():
             if 'parent' in item.keys():
-                outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild'})
+                outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
                 outGraph.node[item['name']]['type']=item['object']
                 outGraph.node[item['name']]['pos']=(float(item['latitude']),float(item['longitude']))
             elif 'from' in item.keys():
-                outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object']})
+                myPhase = phaseCount(item.get('phases','AN'))
+                outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase})
             elif item['name'] in outGraph:
                 # Edge already led to node's addition, so just set the attributes:
                 outGraph.node[item['name']]['type']=item['object']
@@ -284,47 +288,76 @@ def treeToNxGraph(inTree):
                 outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
     return outGraph
 
-def latLonNxGraph(inGraph):
-    ''' Draw an networkx graph representing a feeder. '''
-    # Function to color by node/edge type.
-    def obToCol(obStr):
-        obToColor = {'node':'gray',
-            'house':'#3366FF',
-            'load':'#3366FF',
-            'ZIPload':'#66CCFF',
-            'waterheater':'#66CCFF',
-            'triplex_meter':'#FF6600',
-            'triplex_node':'#FFCC00',
-            'gridNode':'#CC0000',
-            'swingNode':'hotpink',
-            'parentChild':'green',
-            'underground_line':'red'}
-        return obToColor.get(obStr,'black')
-    # Draw!
-    plt.figure(figsize=(10,10))
-    nx.draw(inGraph,
-            pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph},
-            node_color=[obToCol(inGraph.node[n]['type']) for n in inGraph],
-            edge_color=[obToCol(inGraph.edge[e[0]][e[1]]['type']) for e in inGraph.edges()],
-            with_labels=False,
-            node_size=20)
-    plt.show()
+def obToCol(obStr):
+    ''' Function to color by node/edge type. '''
+    obToColor = {'node':'gray',
+        'house':'#3366FF',
+        'load':'#3366FF',
+        'ZIPload':'#66CCFF',
+        'waterheater':'#66CCFF',
+        'triplex_meter':'#FF6600',
+        'triplex_node':'#FFCC00',
+        'gridNode':'#CC0000',
+        'swingNode':'hotpink',
+        'parentChild':'gray',
+        'underground_line':'black'}
+    return obToColor.get(obStr,'black')
 
-def neatNxGraph(inG):
-    ''' Layout via Graphviz neato and draw a feeder. '''
-    # We have to remove all edge/node attributes of else graphviz gets confused:
-    cleanG = nx.Graph(inG.edges())
-    nx.draw(cleanG,nx.graphviz_layout(cleanG,prog='neato'),with_labels=False,node_size=10)
+def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
+    ''' Draw an networkx graph representing a feeder. '''
+    plt.figure(figsize=(15,15))
+    plt.axis('off')
+    plt.tight_layout()
+    # Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
+    if neatoLayout:
+        # HACK: work on a new graph without attributes because graphViz tries to read attrs.
+        pos = nx.graphviz_layout(nx.Graph(inGraph.edges()),prog='neato')
+    else:
+        pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
+    # Draw all the edges.
+    for e in inGraph.edges():
+        eType = inGraph.edge[e[0]][e[1]]['type']
+        ePhases = inGraph.edge[e[0]][e[1]]['phases']
+        standArgs = {'edgelist':[e],
+                     'edge_color':obToCol(eType),
+                     'width':2,
+                     'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
+        if ePhases==3:
+            standArgs.update({'width':5})
+            nx.draw_networkx_edges(inGraph,pos,**standArgs)
+            standArgs.update({'width':3,'edge_color':'white'})
+            nx.draw_networkx_edges(inGraph,pos,**standArgs)
+            standArgs.update({'width':1,'edge_color':obToCol(eType)})
+            nx.draw_networkx_edges(inGraph,pos,**standArgs)
+        if ePhases==2:
+            standArgs.update({'width':3})
+            nx.draw_networkx_edges(inGraph,pos,**standArgs)
+            standArgs.update({'width':1,'edge_color':'white'})
+            nx.draw_networkx_edges(inGraph,pos,**standArgs)
+        else:
+            nx.draw_networkx_edges(inGraph,pos,**standArgs)
+    # Draw nodes and optional labels.
+    nx.draw_networkx_nodes(inGraph,pos,
+                           nodelist=pos.keys(),
+                           node_color=[obToCol(inGraph.node[n]['type']) for n in inGraph],
+                           linewidths=0,
+                           node_size=40)
+    if labels:
+        nx.draw_networkx_labels(inGraph,pos,
+                                font_color='black',
+                                font_weight='bold',
+                                font_size=0.25)
+    plt.show()
 
 def main():
 	''' Here we do the tests. '''
 
 	# # Graph Test
-	# import json
-	# with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
-	# 	tree = json.load(inJ)['tree']
-	# nxG = treeToNxGraph(tree)
-	# latLonNxGraph(nxG)
+	import json
+	with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
+		tree = json.load(inJ)['tree']
+	nxG = treeToNxGraph(tree)
+	latLonNxGraph(nxG)
 
 	# # Parser Test
 	# tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
