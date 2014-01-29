@@ -1,4 +1,4 @@
-# Update this version to the latest in the source tree.
+# Update this OMF install to the latest from the source tree.
 if [ $# -lt 2 ]; then
 	echo "Usage: cloudDeploy.sh <S3DatabaseKey> <randomStringForSigningCookies>"
 	exit

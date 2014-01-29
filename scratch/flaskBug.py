@@ -1,3 +1,5 @@
+''' Bug: this Flask code starts multiple web server processes. '''
+
 import time
 from multiprocessing import Process
 from flask import Flask
