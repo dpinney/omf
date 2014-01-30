@@ -25,28 +25,7 @@ def convert(stdString, seqString):
 	for ob in components:
 		if ob[1] == 9: nominal_voltage = str(float(ob[14])*1000)
 
-	print nominal_voltage
-
-	# convert numbers in phases filed to alphabets
-	def convertPhases():
-		for ob in components:
-			if ob[2] == '1':
-				ob[2] = 'A'
-			elif ob[2] == '2':
-				ob[2] = 'B'
-			elif ob[2] == '3':
-				ob[2] = 'C'
-			elif ob[2] == '4':
-				ob[2] = 'AB'
-			elif ob[2] == '5':
-				ob[2] = 'AC'
-			elif ob[2] == '6':
-				ob[2] = 'BC'
-			elif ob[2] == '7':
-				ob[2] = 'ABC'
-			else:
-				# by default
-				ob[2] = ob[2]
+	print 'Nominal feeder voltage', nominal_voltage
 
 	# The number of allowable sub objects:
 	subObCount = 100
@@ -347,8 +326,13 @@ def convert(stdString, seqString):
 							13 : convertConsumer }
 		# Apply fun:
 		return objectToFun[int(objectList[1])](objectList)
-	# Convert Phases to alphabets type
-	convertPhases()
+
+	# If we got numbered phases, convert them to letters.
+	for ob in components:
+		phaseNumToLetter = {'1':'A','2':'B','3':'C','4':'AB','5':'AC','6':'BC','7':'ABC'}
+		# replace numbers, leave letters alone.
+		ob[2] = phaseNumToLetter.get(ob[2],ob[2])
+
 	# Convert to a list of dicts:
 	convertedComponents = [obConvert(x) for x in components]
 

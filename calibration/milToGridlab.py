@@ -1,43 +1,33 @@
-#!/usr/bin/env python
-
-import csv
-import feeder
-import os
-import shutil
-import math
-import cmath
-import copy
-
-def omfConvert(feederName, stdName, seqName):
-	''' Take in two uploads and a name, create a feeder. '''
-	os.mkdir('./conversions/' + feederName)
-	outGlm = convert('./uploads/' + stdName, './uploads/' + seqName)
-	os.rmdir('./conversions/' + feederName)
-	os.mkdir('./feeders/' + feederName)
-	with open('./feeders/' + feederName + '/main.glm', 'w') as outFile:
-		outFile.write(outGlm)
-	shutil.copyfile('./schedules.glm','./feeders/' + feederName + '/schedules.glm')
-	return
+import sys
+sys.path.append('..')
+import feeder, csv, random, math, copy
+from StringIO import StringIO
 
 def convert(stdPath,seqPath):
 	''' Take in a .std and .seq from Milsoft and spit out a .glm string.'''
 
-	print ('Beginning Windmil to GLM conversion.')
-	nominal_voltage = '2400'
-	def csvToArray(csvFileName):
+	print 'Beginning Windmil to GLM conversion.'
+
+	def csvToArray(csvString):
 		''' Simple csv data ingester. '''
-		with open(csvFileName,'r') as csvFile:
-			csvReader = csv.reader(csvFile)
-			outArray = []
-			for row in csvReader:
-				outArray += [row]
-			return outArray
+		csvReader = csv.reader(StringIO(csvString))
+		outArray = []
+		for row in csvReader:
+			outArray += [row]
+		return outArray
 
 	# Get all components from the .std:
 	components = csvToArray(stdPath)[1:]
 	# Get all hardware stats from the .seq:
 	hardwareStats = csvToArray(seqPath)[1:]
 	# We dropped the first rows which are metadata (n.b. there are no headers)
+
+	# Get nominal voltage:
+	nominal_voltage = 2400
+	for ob in components:
+		if ob[1] == 9: nominal_voltage = str(float(ob[14])*1000)
+
+	print 'Nominal feeder voltage', nominal_voltage
 
 	# The number of allowable sub objects:
 	subObCount = 100
@@ -264,7 +254,9 @@ def convert(stdPath,seqPath):
 			if load_mix is None or load_mix[5] == 'W':#Wye connected line
 				overhead['phases'] = ohLineList[2] + ('N' if ohLineList[33]=='1' else '')
 			else: #Delta connected line
-				overhead['phases'] = ohLineList[2] + ('D' if len(ohLineList[2]) >= 2 else '')
+				# Delta connections are breaking things.
+				# overhead['phases'] = ohLineList[2] + ('D' if len(ohLineList[2]) >= 2 else '')
+				overhead['phases'] = ohLineList[2]
 				
 			overhead['length'] = ('10' if float(ohLineList[12])<10 else ohLineList[12])
 			overhead[myIndex+1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
@@ -394,7 +386,9 @@ def convert(stdPath,seqPath):
 			if load_mix is None or load_mix[5] == 'W':#Wye connected line
 				underground['phases'] = ugLineList[2] + ('N' if ugLineList[33]=='1' else '')
 			else: #Delta connected line
-				underground['phases'] = ugLineList[2] + ('D' if len(ugLineList[2]) >= 2 else '')
+				# Delta loads are breaking things.
+				# underground['phases'] = ugLineList[2] + ('D' if len(ugLineList[2]) >= 2 else '')
+				underground['phases'] = ugLineList[2]
 			underground['length'] = ('10' if float(ugLineList[12])<10 else ugLineList[12])
 			underground[myIndex+1] = {	'omfEmbeddedConfigObject':'configuration object line_configuration',
 								'name': underground['name'] + '-LINECONFIG'}
@@ -739,6 +733,12 @@ def convert(stdPath,seqPath):
 							13 : convertConsumer }
 		# Apply fun:
 		return objectToFun[int(objectList[1])](objectList)
+
+	# If we got numbered phases, convert them to letters.
+	for ob in components:
+		phaseNumToLetter = {'1':'A','2':'B','3':'C','4':'AB','5':'AC','6':'BC','7':'ABC'}
+		# replace numbers, leave letters alone.
+		ob[2] = phaseNumToLetter.get(ob[2],ob[2])
 
 	# Convert to a list of dicts:
 	convertedComponents = [obConvert(x) for x in components]
@@ -1236,38 +1236,26 @@ def convert(stdPath,seqPath):
 	dedupGlm('underground_line_conductor', glmTree)
 	# NOTE: This last dedup has to come last, because it relies on doing conductors and spacings first!
 	dedupGlm('line_configuration', glmTree)
+	# Throw some headers on that:
+	genericHeaders = [	{"timezone":"PST+8PDT","stoptime":"'2000-01-02 00:00:00'","starttime":"'2000-01-01 00:00:00'","clock":"clock"},
+						{"omftype":"#include","argument":"\"schedules.glm\""},
+						{"omftype":"#set","argument":"minimum_timestep=60"},
+						{"omftype":"#set","argument":"profiler=1"},
+						{"omftype":"#set","argument":"relax_naming_rules=1"},
+						{"omftype":"module","argument":"generators"},
+						{"omftype":"module","argument":"tape"},
+						{"omftype":"module","argument":"climate"},
+						{"module":"residential","implicit_enduses":"NONE"},
+						{"solver_method":"NR","NR_iteration_limit":"50","module":"powerflow"},
+						{"object":"climate","name":"Climate","interpolate":"QUADRATIC","tmyfile":"climate.tmy2"}]
+	for headId in xrange(len(genericHeaders)):
+		glmTree[headId] = genericHeaders[headId]
 
 	return glmTree
 
-def main():
-	''' tests go here '''
-	wdir = 'C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration'
-	StaticGlmDict = convert('C:\\Projects\\NRECEA\\OMF\\IEEE_WindMil_Models\\IEEE_13_Node\\IEEE 13.std','C:\\Projects\\NRECEA\\OMF\\IEEE_WindMil_Models\\IEEE_13_Node\\IEEE 13.seq')
-	
-	genericHeaders =	'clock {\ntimezone PST+8PDT;\nstoptime \'2000-01-02 00:00:00\';\nstarttime \'2000-01-01 00:00:00\';\n};\n\n' + \
-						'#set minimum_timestep=60;\n#set profiler=1;\n#set relax_naming_rules=1;\nmodule generators;\nmodule tape;\n' + \
-						'module residential {\nimplicit_enduses NONE;\n};\n\n' + \
-						'module powerflow {\nsolver_method NR;\nNR_iteration_limit 50;\n};\n\n'
-						
-	outGlm = genericHeaders + feeder.sortedWrite(StaticGlmDict)					
-	print('Success')
-	f = open('C:\\Projects\\NRECEA\\OMF\\IEEE_WindMil_Models\\IEEE_13_Node\\IEEE_13_STATIC.glm','w')
-	f.write(outGlm)
-	f.close()
-	
-	#print('Finished converting base glm')
-	#import Milsoft_GridLAB_D_Feeder_Generation
-	#baseGLM, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(StaticGlmDict,0,wdir)
-	#glm_string = feeder.sortedWrite(baseGLM)			
-	#print('Success')
-	#f = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\ACEC_FRIENDSHIP_basecase_Model.glm','w')
-	#f.write(glm_string)
-	#f.close()
-	# print outGlm
-	# omfConvert('testMagic','ILEC-Rembrandt.std','ILEC.seq')
-
 if __name__ == '__main__':
-	main()
-
-#TODO: set neutral conductors correctly for all components.
-#TODO: get rid of as many magic numbers as possible.
+	with open('../uploads/INEC-RENOIR.std','r') as stdFile, open('../uploads/INEC.seq','r') as seqFile:
+		outGlm = convert(stdFile.read(),seqFile.read())
+	from pprint import pprint
+	print 'And here is the GLM:'
+	pprint(outGlm)
