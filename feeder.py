@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import datetime, copy, os, re, networkx as nx
+import datetime, copy, os, re, warnings, networkx as nx
 from matplotlib import pyplot as plt
 
 def tokenizeGlm(glmFileName):
@@ -90,8 +90,16 @@ def dictToString(inDict):
 				# TODO (cosmetic): know our depth, and indent the output so it's more human readable.
 				otherKeyValues += dictToString(inDict[key])
 			elif key != keyToAvoid:
-				if key != 'latitude' and key != 'longitude':
-					otherKeyValues += (str(key) + ' ' + str(inDict[key]) + ';\n')
+				if key == 'comment':
+					otherKeyValues += (inDict[key] + '\n')
+				elif key == 'name' or key == 'parent':
+					if len(inDict[key]) <= 62:
+						otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
+					else:
+						warnings.warn("{:s} argument is longer that 64 characters. Truncating.".format(key), RuntimeWarning)
+						otherKeyValues += ('\t' + key + ' ' + inDict[key][0:62] + '; // truncated from {:s}\n'.format(inDict[key]))
+				else:
+					otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
 		return otherKeyValues
 	# Handle the different types of dictionaries that are leafs of the tree root:
 	if 'omftype' in inDict:
@@ -99,13 +107,30 @@ def dictToString(inDict):
 	elif 'module' in inDict:
 		return 'module ' + inDict['module'] + ' {\n' + gatherKeyValues(inDict, 'module') + '};\n'
 	elif 'clock' in inDict:
-		return 'clock {\n' + gatherKeyValues(inDict, 'clock') + '};\n'
+		#return 'clock {\n' + gatherKeyValues(inDict, 'clock') + '};\n'
+		# THis object has known property order issues writing it out explicitly
+		clock_string = 'clock {\n' + '\ttimezone ' + inDict['timezone'] + ';\n' + '\tstarttime ' + inDict['starttime'] + ';\n' + '\tstoptime ' + inDict['stoptime'] + ';\n};\n'
+		return clock_string
 	elif 'object' in inDict and inDict['object'] == 'schedule':
 		return 'schedule ' + inDict['name'] + ' {\n' + inDict['cron'] + '\n};\n'
 	elif 'object' in inDict:
 		return 'object ' + inDict['object'] + ' {\n' + gatherKeyValues(inDict, 'object') + '};\n'
 	elif 'omfEmbeddedConfigObject' in inDict:
 		return inDict['omfEmbeddedConfigObject'] + ' {\n' + gatherKeyValues(inDict, 'omfEmbeddedConfigObject') + '};\n'
+	elif '#include' in inDict:
+		return '#include ' + '"' + inDict['#include'] + '"' + '\n'
+	elif '#define' in inDict:
+		return '#define ' + inDict['#define'] + '\n'
+	elif '#set' in inDict:
+		return '#set ' + inDict['#set'] + '\n'
+	elif 'class' in inDict:
+		prop = ''
+		if 'variable_types' in inDict.keys() and 'variable_names' in inDict.keys() and len(inDict['variable_types'])==len(inDict['variable_names']):
+			for x in xrange(len(inDict['variable_types'])):
+				prop += '\t' + inDict['variable_types'][x] + ' ' + inDict['variable_names'][x] + ';\n'
+			return 'class ' + inDict['class'] + '{\n' + prop + '};\n'
+		else:
+			return '\n'
 
 def write(inTree):
 	'''write(inTreeDict)->stringGlm'''
@@ -158,7 +183,6 @@ def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 		elif 'argument' in leaf and leaf['argument'].startswith('minimum_timestep'):
 			leaf['argument'] = 'minimum_timestep=' + str(interval)
 
-
 def fullyDeEmbed(glmTree):
 	def deEmbedOnce(glmTree):
 		iterTree = copy.deepcopy(glmTree)
@@ -167,26 +191,47 @@ def fullyDeEmbed(glmTree):
 				if type(iterTree[x][y]) is dict and 'object' in iterTree[x][y]:
 					# set the parent and name attributes:
 					glmTree[x][y]['parent'] = glmTree[x]['name']
-					glmTree[x][y]['name'] = glmTree[x]['name'] + glmTree[x][y]['object'] + str(y)
+					if 'name' in glmTree[x][y]:
+						pass
+					else:
+						glmTree[x][y]['name'] = glmTree[x]['name'] + glmTree[x][y]['object'] + str(y)
+						
 					# check for key collision, which should technically be impossible:
-					if y in glmTree.keys(): print 'KEY COLLISION!'
-					# put the embedded object back up in the glmTree:
-					glmTree[y] = glmTree[x][y]
+					if y in glmTree.keys():
+						print('KEY COLLISION!')
+						z = y
+						while z in glmTree.keys():
+							z += 1
+						# put the embedded object back up in the glmTree:
+						glmTree[z] = glmTree[x][y]
+					else:
+						# put the embedded object back up in the glmTree:
+						glmTree[y] = glmTree[x][y]
 					# delete the embedded copy:
 					del glmTree[x][y]
 				# TODO: take this if case and roll it into the if case above to save lots of code and make it easier to read.
 				if type(iterTree[x][y]) is dict and 'omfEmbeddedConfigObject' in iterTree[x][y]:
 					configList = iterTree[x][y]['omfEmbeddedConfigObject'].split()
 					# set the name attribute and the parent's reference:
-					glmTree[x][y]['name'] = glmTree[x]['name'] + configList[2] + str(y)
+					if 'name' in glmTree[x][y]:
+						pass
+					else:
+						glmTree[x][y]['name'] = glmTree[x]['name'] + configList[2] + str(y)
 					glmTree[x][y]['object'] = configList[2]
 					glmTree[x][configList[0]] = glmTree[x][y]['name']
 					# get rid of the omfEmbeddedConfigObject string:
 					del glmTree[x][y]['omfEmbeddedConfigObject']
 					# check for key collision, which should technically be impossible BECAUSE Y AND X ARE DIFFERENT INTEGERS IN [1,...,numberOfDicts]:
-					if y in glmTree.keys(): print 'KEY COLLISION!'
-					# put the embedded object back up in the glmTree:
-					glmTree[y] = glmTree[x][y]
+					if y in glmTree.keys():
+						print('KEY COLLISION!')
+						z = y
+						while z in glmTree.keys():
+							z += 1
+						# put the embedded object back up in the glmTree:
+						glmTree[z] = glmTree[x][y]
+					else:
+						# put the embedded object back up in the glmTree:
+						glmTree[y] = glmTree[x][y]
 					# delete the embedded copy:
 					del glmTree[x][y]
 	lenDiff = 1
@@ -365,7 +410,8 @@ def main():
 	# print parseTokenList(simpleTokens)
 
 	# # Recorder Attachment Test
-	# tree = parse('./feeders/PNNL Taxonomy Feeder 1/main.glm')
+	# with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
+	# 	tree = json.load(inJ)['tree']
 	# attachRecorders(tree, 'Regulator', 'object', 'regulator')
 	# attachRecorders(tree, 'Voltage', 'object', 'node')
 	# print 'All the objects: ' + str([tree[x]['object'] for x in tree.keys() if 'object' in tree[x]])
@@ -388,7 +434,6 @@ def main():
 	# adjustTime(tree, 100, 'hours', '2000-09-01')
 	# from pprint import pprint
 	# pprint(tree)
-	
 	pass
 
 if __name__ == '__main__':
