@@ -1,0 +1,134 @@
+<table class='studyOptions'>
+	<tr>
+		<td>Study Type</td>
+		<td><input type='text' class='studyType' disabled value='nrelswh'/></td>
+	</tr>
+	<tr>
+		<td>Study Name</td>
+		<td><input type='text' class='studyName'/></td>
+	</tr>
+	<tr>
+		<td>Location</td>
+		<td><select class='tmy2name'>{% for tmy2 in tmy2s %}<option value='{{ tmy2 }}'>{{ tmy2 }}</option>{% endfor %}</select></td>
+	</tr>
+	<tr>
+		<td>Hot Water Draw (kg/hr LENGTH=8760)</td>
+		<td><input type='text' class='scaled_draw'/></td>
+	</tr>
+	<tr>
+		<td>Max Iterations Allowed (? ?=100	MIN=0,MAX=1000,INTEGER)</td>
+		<td><input type='text' class='max_iter'/></td>
+	</tr>
+	<tr>
+		<td>Iteration Tolerance (? ?=0.01 POSITIVE)</td>
+		<td><input type='text' class='ftol_iter'/></td>
+	</tr>
+	<tr>
+		<td>Collector Tilt (deg  MIN=0,MAX=90)</td>
+		<td><input type='text' class='tilt'/></td>
+	</tr>
+	<tr>
+		<td>Collector Azimuth (deg 90=E,180=S MIN=0,MAX=360)</td>
+		<td><input type='text' class='azimuth'/></td>
+	</tr>
+	<tr>
+		<td>Ground Reflectance Factor (0..1 FACTOR)</td>
+		<td><input type='text' class='albedo'/></td>
+	</tr>
+	<tr>
+		<td>Irradiance Input Mode (0/1 Beam+Diff,Global+Beam ?=0 INTEGER,MIN=0,MAX=1)</td>
+		<td><input type='text' class='irrad_mode'/></td>
+	</tr>
+	<tr>
+		<td>Tilted Surface Irradiance Model (0/1/2 Isotropic,HDKR,Perez ?=2 INTEGER,MIN=0,MAX=2)</td>
+		<td><input type='text' class='sky_model'/></td>
+	</tr>
+	<tr>
+		<td>Total System Mass Flow Rate (kg/s POSITIVE)</td>
+		<td><input type='text' class='mdot'/></td>
+	</tr>
+	<tr>
+		<td>Number Of Collectors (Unitless POSITIVE,INTEGER)</td>
+		<td><input type='text' class='ncoll'/></td>
+	</tr>
+	<tr>
+		<td>Working Fluid In System (Water,Glycol (INTEGER,MIN=0,MAX=1))</td>
+		<td><input type='text' class='fluid'/></td>
+	</tr>
+	<tr>
+		<td>Single Collector Area (m2 POSITIVE)</td>
+		<td><input type='text' class='area_coll'/></td>
+	</tr>
+	<tr>
+		<td>Frta (?)</td>
+		<td><input type='text' class='FRta'/></td>
+	</tr>
+	<tr>
+		<td>Frul (?)</td>
+		<td><input type='text' class='FRUL'/></td>
+	</tr>
+	<tr>
+		<td>Incidence Angle Modifier (?)</td>
+		<td><input type='text' class='iam'/></td>
+	</tr>
+	<tr>
+		<td>Fluid Used In Collector Test (Water,Glycol (INTEGER,MIN=0,MAX=1))</td>
+		<td><input type='text' class='test_fluid'/></td>
+	</tr>
+	<tr>
+		<td>Flow Rate Used In Collector Test (kg/s POSITIVE)</td>
+		<td><input type='text' class='test_flow'/></td>
+	</tr>
+	<tr>
+		<td>Length Of Piping In System (m POSITIVE)</td>
+		<td><input type='text' class='pipe_length'/></td>
+	</tr>
+	<tr>
+		<td>Pipe Diameter (m POSITIVE)</td>
+		<td><input type='text' class='pipe_diam'/></td>
+	</tr>
+	<tr>
+		<td>Pipe Insulation Conductivity (W/m2.C POSITIVE)</td>
+		<td><input type='text' class='pipe_k'/></td>
+	</tr>
+	<tr>
+		<td>Pipe Insulation Thickness (m POSITIVE)</td>
+		<td><input type='text' class='pipe_insul'/></td>
+	</tr>
+	<tr>
+		<td>Solar Tank Height To Diameter Ratio (Unitless POSITIVE)</td>
+		<td><input type='text' class='tank_h2d_ratio'/></td>
+	</tr>
+	<tr>
+		<td>Solar Tank Heat Loss Coefficient (W/m2K POSITIVE)</td>
+		<td><input type='text' class='U_tank'/></td>
+	</tr>
+	<tr>
+		<td>Solar Tank Volume (m3 POSITIVE)</td>
+		<td><input type='text' class='V_tank'/></td>
+	</tr>
+	<tr>
+		<td>Heat Exchanger Effectiveness (0..1 POSITIVE)</td>
+		<td><input type='text' class='hx_eff'/></td>
+	</tr>
+	<tr>
+		<td>Ambient Temperature In Mech Room (C POSITIVE)</td>
+		<td><input type='text' class='T_room'/></td>
+	</tr>
+	<tr>
+		<td>Max Temperature In Storage Tank (C POSITIVE)</td>
+		<td><input type='text' class='T_tank_max'/></td>
+	</tr>
+	<tr>
+		<td>Set Temperature (C POSITIVE)</td>
+		<td><input type='text' class='T_set'/></td>
+	</tr>
+	<tr>
+		<td>Pump Power (W POSITIVE)</td>
+		<td><input type='text' class='pump_power'/></td>
+	</tr>
+	<tr>
+		<td>Pumping Efficiency (%)</td>
+		<td><input type='text' class='pump_eff'/></td>
+	</tr>
+</table>

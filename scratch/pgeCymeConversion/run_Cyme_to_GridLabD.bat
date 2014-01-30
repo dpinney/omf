@@ -1,0 +1,2 @@
+C:\strawberry\perl\bin\perl Cyme_to_GridLabD.pl "C:\Users\dwp0\Dropbox\OMF\PGE Cyme Conversion\PasoRobles1108.mdb" "C:\Users\dwp0\Dropbox\OMF\PGE Cyme Conversion\PasoRobles1108IdenticalCopy.mdb" convertedCyme
+pause

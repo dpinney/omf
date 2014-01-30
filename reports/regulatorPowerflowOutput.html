@@ -1,0 +1,18 @@
+<p class="reportTitle">Regulator Powerflow</p>
+<div id="regPowReport" class="tightContent">
+{%- for study in outputList -%}
+	<div id="regulatorStudy{{study.studyName}}" class="studyContainer">
+		<div class="studyTitleBox"><p class="studyTitle">{{study.studyName}}</p></div>
+		{%- for reg in study.regs -%}
+		<div id="regCharts{{study.studyName}}{{reg.regName}}">
+			<div id="regApparentChart{{study.studyName}}{{reg.regName}}"></div>
+			<script>new Highcharts.Chart({{reg.appPowerParams | safe}})</script>
+			<div id="regPowFactChart{{study.studyName}}{{reg.regName}}"></div>
+			<script>new Highcharts.Chart({{reg.powerFactorParams | safe}})</script>
+			<div id="regTapsChart{{study.studyName}}{{reg.regName}}"></div>
+			<script>new Highcharts.Chart({{reg.tapPosParams | safe}})</script>
+		</div>
+		{%- endfor -%}
+	</div>
+{%- endfor -%}
+</div>

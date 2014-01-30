@@ -1,0 +1,49 @@
+button.deleteButton {width:auto;
+		     background-color: #CC0000;
+		     color:white;}
+
+#selBody .deleteButton{
+    float:right;    
+}
+
+button.deleteButton:hover {background: #FF0000;}
+
+#selectedScroller {
+		   max-height:200px;
+		   width:340px;
+		   overflow-y: auto;
+		  }
+
+#selected {border:1px solid black;
+	   border-bottom:0px;
+	   width:340px;
+	   position:absolute;
+	   top:90pt;
+	   left:4pt;
+	   }
+
+
+#selHead tr td {background:black;
+		color:white;}
+#selBody{
+    overflow:scroll;
+    word-break:break-all;
+}
+
+#selected td {padding:5px;
+	      border-bottom:1px solid black;
+	      background:white;
+	      color:black;}
+
+input {min-width: 100px;}
+
+
+
+#selBody, #selHead{
+    width:100%;
+}
+
+#selBody{
+    max-height:40%;
+    overflow-y:auto;
+}

@@ -1,0 +1,33 @@
+<table class='studyOptions'>
+	<tr>
+		<td>Study Type</td>
+		<td><input type='text' class='studyType' disabled value='gridlabd'/></td>
+	</tr>
+	<tr>
+		<td>Study Name</td>
+		<td><input type='text' class='studyName'/></td>
+	</tr>
+	<tr>
+		<td>Feeder</td>
+		<td>
+		  <select class='feederName'>
+		    {% for (feedertype, furl) in [["Public", "true"], ["Private", "false"]] %}
+		    <option disabled><strong>{{ feedertype }} Feeders</strong></option>
+		    {% for feeder in feeders[feedertype] %}
+		    <option value='{{ feeder }}?public={{ furl }}'>
+		      {% if is_admin and feedertype == "Private" %}
+		      <strong>{{ feeder[:feeder.find("_")] }}: </strong> {{ feeder[feeder.find("_")+1:] }}
+		      {% else %}
+		      {{ feeder }}
+		      {% endif %}
+		    </option>
+		    {% endfor %}
+		    {% endfor %}
+		  </select>
+		  <button onclick="window.location='../feeder/'+this.parentNode.querySelector('.feederName').value">Edit Selected Feeder</button></td>
+	</tr>
+	<tr>
+		<td>Location</td>
+		<td><select class='tmy2name'>{% for tmy2 in tmy2s %}<option value='{{ tmy2 }}'>{{ tmy2 }}</option>{% endfor %}</select></td>
+	</tr>
+</table>

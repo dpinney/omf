@@ -1,0 +1,10 @@
+<p class="reportTitle">Triplex Meter Voltages</p>
+<div id="voltageBandReport" class="tightContent">
+{%- for study in outputList -%}
+	<div id="voltStudy{{study.studyName}}" class="studyContainer">
+		<div id="voltChartDiv{{study.studyName}}" class="voltChart" style="height:150px"></div>
+		<div class="studyTitleBox"><p class="studyTitle">{{study.studyName}}</p></div>
+		<script>new Highcharts.Chart({{study.graphParams | safe}})</script>
+	</div>
+{%- endfor -%}
+</div>

@@ -1,0 +1,8 @@
+<h1>Create a password to login to the OMF</h1>
+<p>{{ email }}</p>
+<form action="" method="post">
+  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+  <input type="password" name="password" placeholder="Password"><br>
+  <input type="password" name="confirm_password" placeholder="Confirm Password"><br>
+  <input type="submit" value="Submit">
+</form>

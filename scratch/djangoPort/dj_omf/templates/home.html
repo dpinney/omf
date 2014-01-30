@@ -1,0 +1,378 @@
+<head>
+  <title>Open Modeling Framework</title>
+  <meta charset='utf-8'>
+  <meta name='Description' content='The Open Modeling Framework for smart grid cost-benefit analysis.'>
+  <link rel='stylesheet' href='{{ STATIC_URL }}omf.css'/>
+  <script type='text/javascript' src='{{ STATIC_URL }}omf.js'></script>
+  <script type='text/javascript' src='{{ STATIC_URL }}jquery-1.9.1.js'></script>
+  <script type='text/javascript' src='{{ STATIC_URL}}pagination.js'></script>
+  <link rel='shortcut icon' href='{{ STATIC_URL }}favicon.ico'>
+  <style>
+  #spinner{
+      display:none;
+      /* position:absolute; */
+      position:fixed;
+  }
+  .current_page{
+      pointer-events:none;
+      cursor:default;
+      color:black;
+  }
+    div#feeders {display:none;}
+    h2{text-align:center;}
+    table#anaTable {width:100%; text-align:left;}
+    table#anaTable tr td:last-child {text-align:right;}
+    table#anaTable tr th:last-child {text-align:right;}
+    div#toolbar {padding: 0px;
+		 height:40px;
+		 line-height:40px;
+		 position:fixed;
+		 top:65px;
+		 z-index:1;
+		} /*over-riding some toolbar defaults so tabs look good.*/
+    div#title{
+	position:fixed;
+	top:0;
+	z-index:1;
+    }
+    p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
+    p.tabSelected {background:gray; color:white;}
+    td.running {color:red;}
+    td.preRun {color:orange;}
+    td.postRun {color:black;}
+    td.terminated {color:purple;}
+    td {border-bottom:1px dashed gray;}
+    tr:last-child td {border-bottom:none;}
+    table.importOptions {width:70%; text-align:left; margin-left:auto;}
+    table.importOptions tr td:first-child {width:40%;}
+    table.importOptions td {border-bottom: none}
+    input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
+	/*a#consoleLink {width:20px; height:20px; position:absolute; top:0; right:0; background-color:dimgray; border-bottom-left-radius:5px; color: #303030; text-align:center;}*/   
+	.owner{font-weight:bold}
+#placeholder{
+    height:90px;
+	}
+
+  </style>
+  <script>
+    $(function(){
+	localStorage.clear();
+	$(document).on("click", ".run, .reRun", function(e){
+	    e.preventDefault();
+	    return false;
+	}).on("click", ".makePublic", function(e){
+	    var objectName = $(this).attr("objectName");
+	    var objectType = $(this).attr("objectType");
+	    var url = $(this).attr;
+	    console.log(objectName+" "+objectType);
+	    $.ajax({
+		url:"publicObject/"+objectType+"/"+objectName,
+		async:false
+	    }).done(function(data){
+		if (data == "Nope"){
+		    alert("There is already a public "+objectType+" with that name!");
+		    e.preventDefault();
+		    return false;
+		}
+		if(confirm("When a feeder or analysis is published, all users can view it and it cannot be altered or un-published.  Do you want to continue?")){
+		    $.ajax({
+			url:"/makePublic/"+objectType+"/"+objectName,
+			data:{
+			    csrfmiddlewaretoken:"{{ csrf_token }}"
+			},
+			method:"post"
+		    })
+		}
+		e.preventDefault();
+		return false;
+		    
+	    })
+
+	});
+
+	run_statuses();
+    });
+
+    var all_intervals = {};
+
+    function run_statuses(){
+	var metadatas = pull_html_data();
+	var i;
+	for(i=0; i<metadatas.length; i++){
+	    startPolling(metadatas[i]);
+	}
+    }
+
+    function run_analysis(url, analysisName){
+	console.log(url);
+	console.log(analysisName);
+	$.ajax({
+	    type:"post",
+	    url:url,
+	    data:{analysisName:analysisName,
+		  "csrfmiddlewaretoken":"{{ csrf_token }}"
+		 }
+
+	}).done(function(data){
+	    console.log("sent the request!");
+	    var p = url.indexOf("true") > -1 ? ".Public" : ".Private";
+	    replace_row(p, analysisName, data)
+	    startPolling({"name":analysisName, "public":""+(url.indexOf("true") > -1)});
+	    return false;
+	});
+	return false;
+    }
+
+    function replace_row(p, analysisName, data){
+	var my_tr = $.makeArray($(p+" tr")).filter(function(tr){return $(tr).attr("class") == "analysis "+analysisName.replace(/_/g, '__').replace(/ /g, '_')})[0];
+	$(my_tr).html($("<div>").html(data)[0].getElementsByTagName("tr")[0].innerHTML);
+    }
+
+    function startPolling(md){
+	// console.log(md)
+    	var i = setInterval(function(){
+    	    $.ajax({
+    		url:"/runStatus",
+    		data:{name:md.name,
+    		      is_public:md["public"]
+    		     }
+    	    }).done(function(data){
+    		if (data != "waiting"){
+		    var p = md["public"] == "true" ? ".Public" : ".Private";
+		    repalce_row(p, md.name)
+    		    clearInterval(i);
+    		}
+    	    });
+    	}, 5000);
+	all_intervals[Object.keys(all_intervals).length] = i;
+    }
+
+    function pull_html_data(){ 
+	var metadatas = [];
+	for(i=0; i<$(".analysis").length; i++){
+	    var attr_names = ["name", "sourceFeeder", "climate", "runTime", "status", "public"];
+	    var md={};
+	    for(j=0; j<attr_names.length; j++){
+		md[attr_names[j]] = $($(".analysis")[i]).children("."+attr_names[j]).html();
+	    }
+	    if (md.status == "running"){
+		console.log(md);
+		metadatas.push(md);
+	    }
+	}
+	return metadatas;
+    }
+    window.onload = function() {if (window.location.hash=='#feeders') {gebi('feedersTab').click()}}
+
+    function feedersClick() {
+	window.location.hash = 'feeders'
+	gebi('analyses').style.display = 'none'
+	gebi('feeders').style.display = 'inline'
+	gebi('analysesTab').className = 'tab'
+	gebi('feedersTab').className = 'tab tabSelected'
+    }
+
+    function analysesClick() {
+	window.location.hash = ''
+	gebi('analyses').style.display = 'inline'
+	gebi('feeders').style.display = 'none'
+	gebi('analysesTab').className = 'tab tabSelected'
+	gebi('feedersTab').className = 'tab'
+    }
+
+    function makePublic(name){
+	
+    }
+
+    function delete_feeder(feederName) {
+		post_to_url('deleteFeeder/', {'feedername':feederName, 'csrfmiddlewaretoken':'{{ csrf_token }}'})
+	}
+
+  </script>
+</head>
+<body>
+  <div id='title'>
+    <div id='logoBox'><a href='/'>▦</a></div>
+    <!--Title:-->Open Modeling Framework
+
+  </div>
+  <div id="account_links">
+    <div><a href="logout">Log Out</a></div>
+    <div><a href="myaccount">My Account</a></div>
+    <div><a href="adminControls">Admin Controls</a></div>
+    
+  </div>
+  <div id='toolbar'>
+    
+    <p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Analyses</p>
+    <p id='feedersTab' class='tab' style='' onclick='feedersClick()'>Feeders</p>
+  </div>
+  <div id="placeholder"></div>
+  <div id='analyses'>
+    <div class='content'>
+      <table id='anaTable'>
+	<th style="text-align:center" colspan="7">{{ key }} Analyses</th>
+	<tr>
+	  <th>Analysis</th>
+	  <th>Feeder</th>
+	  <th>Climate</th>
+	  <th>Runtime (H:M:S)</th>
+	  <th>Status</th>
+	  <th>Owner</th>
+	  <th></th>
+	</tr>
+	{% for md in metadatas %}
+	<tr class="analysis {{ md.name }}">
+	  <td>
+	    {{ md.name }}
+	  </td>
+	  <td class="sourceFeeder">
+	    {% for feeder in md.sourceFeeder.all %}
+	    {{ feeder.name }},
+	    {% endfor %}
+	  </td>
+	  <td class="climate">
+	    {{ md.climate }}
+	  </td>
+	  <td class="runTime">
+	    {{ md.runTime }}
+	  </td>
+	  <td class="status">
+	    {{ md.status }}
+	  </td>
+	  <td>
+	    {{ md.owner }}
+	  </td>
+	  <td>
+	    <div class='buttonGroup'>
+	      <button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
+	      <ul class='menu right'>
+		
+	{% if md.status == "postRun" or md.status == "ERROR" %}
+	<li><a href='/viewReports/{{ md.owner }}/{{ md.name }}'>View Reports</a></li>
+	{% endif %}
+
+	<li><a href='/newAnalysis/{{ md.name }}'>Duplicate</a></li>
+	
+	{% if md.status == 'preRun' %}
+	<li><a class="run" href='#' onclick='var dict={csrfmiddlewaretoken:"{{ csrf_token }}"};dict.analysisName="{{ md.name }}";run_analysis("/run/", "{{ md.name }}")'>Run</a></li>
+	{% endif %}
+
+	{% if md.status == "postRun" or md.status ==  "terminated" or md.status == "ERROR" %}
+	<li><a class="reRun" href='#' onclick='var dict={csrfmiddlewaretoken:"{{ csrf_token }}"};dict.analysisName="{{ md.name }}";run_analysis("/reRun/","{{ md.name }}")'>Re-Run</a></li>
+	{% endif %}
+
+	{% if md.status != 'running' %}
+	<li><a href='#' onclick='var dict={csrfmiddlewaretoken:"{{ csrf_token }}"};dict.analysisName="{{ md.name }}";post_to_url("/delete/",dict)'>Delete</a></li>
+	{% endif %}
+
+	{% if md.status == 'running' %}
+	<li><a href='#' onclick='var dict={csrfmiddlewaretoken:"{{ csrf_token }}"};dict.analysisName="{{ md.name }}";post_to_url("/terminate/",dict)'>Terminate</a></li>
+	{% endif %}
+	
+	<li><a class="makePublic" objectType="Analysis" objectName="{{ md.name }}" href="/makePublic/Analysis/{{ md.name }}">Publish</a></li>
+
+      </ul>
+    </div>
+	  </td>
+	  </td>
+	</tr>
+	{% endfor %}
+	{% comment %}
+	{% for key, value in d.items() %}
+	<thead>
+	  <tr>
+	    <th style="text-align:center" colspan="6">{{ key }} Analyses</th>
+	  </tr>
+	  <tr><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr>
+	</thead>
+	<tbody class="{{ key }} {{ key }}Analyses">
+	  {% include 'metadata_loop.html' %}
+	</tbody>
+	<tr>
+	  <td style="text-align:center;" colspan="6" id="{{ key }}analysispages">
+	    {% for i in range(1, value["amount_of_analysis_pages"] + 1) %}
+	    <a type="{{key}}" class="analysis_page" href="#">{{ i }}</a>{% if i != value["amount_of_analysis_pages"] %} | {% endif %}
+	    {% endfor %}
+	  </td>
+	</tbody>
+	{% endfor %}
+{% endcomment %}
+      </table>
+    </div>
+
+<div class='content'><a href='/newAnalysis/'>New Analysis</a></div>
+</div>
+
+<div id='feeders'>
+  <div class='content'>
+    <table id='anaTable'>
+      <thead>
+	<tr>
+	  <th style="text-align:center" colspan="3">Feeders</th>
+	</tr>
+	<tr>
+	  <th>Feeder Name</th>
+	  <th>Status</th>
+	  <th>Owner</th>
+	</tr>
+	</thead>
+      {% for f in feeders %}
+      <tr>
+	<td>
+	  <a href="{% url 'omf_dj_app.views.feeder' f.owner.username f.name %}">{{ f.name }}</a>
+	</td>
+	<td>
+	  {{ f.status }}
+	</td>
+	<td>
+	  {{ f.owner }}
+	</td>
+      </tr>
+      {% endfor %}
+      {% comment %}
+      <tbody class="{{ key }}Feeders">
+
+	{% include "feeder.html" %}
+      </tbody>
+      <tr>
+	<td style="text-align:center;" colspan="3" id="{{ key }}feederpages">
+	  <!-- <a class="feeder_page" href="#">1</a> | -->
+	  {% for i in range(1, value["amount_of_feeder_pages"]+ 1) %}
+	  <a type="{{ key }}" class="feeder_page" href="#">{{ i }}</a>{% if i != value["amount_of_feeder_pages"] %} | {% endif %}
+	  {% endfor %}
+	  
+	  
+	</td>
+      </tr>
+      {% endfor %}
+      {% endcomment %}
+    </table>
+  </div>
+  <div class='content'>
+    <form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
+      {% csrf_token %}
+      <p style='font-weight:bold;float:left'>Milsoft Feeder Import</p>
+      <table class='importOptions'>
+	<tr>
+	  <td>Feeder Name</td>
+	  <td><input type='text' name='feederName'/></td>
+	</tr>
+	<tr>
+	  <td>Feeder Data File (.std)</td>
+	  <td><input type='file' name='stdFile' accept = '.std'/></td>
+	</tr>
+	<tr>
+	  <td>Equipment Database File (.seq)</td>
+	  <td><input type='file' name='seqFile' accept = '.seq'/></td>
+	</tr>
+	<tr>
+	  <td></td>
+	  <td><input type='submit' value='Begin Import'/></td>
+	</tr>
+      </table>
+    </form>
+  </div>
+</div>
+<img src="/static/spinner.gif" id="spinner" />
+</body>

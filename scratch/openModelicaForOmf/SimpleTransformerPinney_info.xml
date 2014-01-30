@@ -1,0 +1,3410 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="application/xml" href="simcodedump.xsl"?>
+<simcodedump model="SimpleTransformerPinney">
+<variables>
+  <variable name="basicTransformer._i2" comment="Current flowing from pos. to neg. pin of the right port">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="228" lineEnd="228" colStart="5" colEnd="76"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._i2" comment="Current flowing from pos. to neg. pin of the right port">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="228" lineEnd="228" colStart="5" colEnd="76"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._i1" comment="Current flowing from pos. to neg. pin of the left port">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="227" lineEnd="227" colStart="5" colEnd="75"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._i1" comment="Current flowing from pos. to neg. pin of the left port">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="227" lineEnd="227" colStart="5" colEnd="75"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="der(basicTransformer._i2)" comment="Current flowing from pos. to neg. pin of the right port">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="228" lineEnd="228" colStart="5" colEnd="76"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._der(basicTransformer._i2)" comment="Current flowing from pos. to neg. pin of the right port">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="228" lineEnd="228" colStart="5" colEnd="76"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="der(basicTransformer._i1)" comment="Current flowing from pos. to neg. pin of the left port">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="227" lineEnd="227" colStart="5" colEnd="75"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._der(basicTransformer._i1)" comment="Current flowing from pos. to neg. pin of the left port">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="227" lineEnd="227" colStart="5" colEnd="75"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="resistor12._LossPower" comment="Loss power leaving component via HeatPort">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="311" lineEnd="312" colStart="5" colEnd="50"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Power</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._LossPower" comment="Loss power leaving component via HeatPort">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="311" lineEnd="312" colStart="5" colEnd="50"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Power</type>
+    </source>
+  </variable>
+  <variable name="resistor12._v" comment="Voltage drop between the two pins (= p.v - n.v)">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="173" lineEnd="173" colStart="5" colEnd="67"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._v" comment="Voltage drop between the two pins (= p.v - n.v)">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="173" lineEnd="173" colStart="5" colEnd="67"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="load1._LossPower" comment="Loss power leaving component via HeatPort">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="311" lineEnd="312" colStart="5" colEnd="50"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Power</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._LossPower" comment="Loss power leaving component via HeatPort">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="311" lineEnd="312" colStart="5" colEnd="50"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Power</type>
+    </source>
+  </variable>
+  <variable name="load1._v" comment="Voltage drop between the two pins (= p.v - n.v)">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="173" lineEnd="173" colStart="5" colEnd="67"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._v" comment="Voltage drop between the two pins (= p.v - n.v)">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="173" lineEnd="173" colStart="5" colEnd="67"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="resistor11._LossPower" comment="Loss power leaving component via HeatPort">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="311" lineEnd="312" colStart="5" colEnd="50"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Power</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._LossPower" comment="Loss power leaving component via HeatPort">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="311" lineEnd="312" colStart="5" colEnd="50"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Power</type>
+    </source>
+  </variable>
+  <variable name="resistor11._v" comment="Voltage drop between the two pins (= p.v - n.v)">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="173" lineEnd="173" colStart="5" colEnd="67"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._v" comment="Voltage drop between the two pins (= p.v - n.v)">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="173" lineEnd="173" colStart="5" colEnd="67"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._v" comment="Voltage drop between the two pins (= p.v - n.v)">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="173" lineEnd="173" colStart="5" colEnd="67"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._v" comment="Voltage drop between the two pins (= p.v - n.v)">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="173" lineEnd="173" colStart="5" colEnd="67"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._dv" comment="">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="484" lineEnd="484" colStart="5" colEnd="12"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Real</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._dv" comment="">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="484" lineEnd="484" colStart="5" colEnd="12"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Real</type>
+    </source>
+  </variable>
+  <variable name="i2B" comment="Secondary current, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="20" lineEnd="20" colStart="3" colEnd="92"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._i2B" comment="Secondary current, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="20" lineEnd="20" colStart="3" colEnd="92"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="v2B" comment="Secondary voltage, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="19" lineEnd="19" colStart="3" colEnd="94"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._v2B" comment="Secondary voltage, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="19" lineEnd="19" colStart="3" colEnd="94"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="i1B" comment="Primary current, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="18" lineEnd="18" colStart="3" colEnd="90"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._i1B" comment="Primary current, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="18" lineEnd="18" colStart="3" colEnd="90"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="v1B" comment="Primary voltage, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="17" lineEnd="17" colStart="3" colEnd="92"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._v1B" comment="Primary voltage, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="17" lineEnd="17" colStart="3" colEnd="92"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="ground12._p._i" comment="Current flowing into the pin">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="13" lineEnd="18" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._ground12._p._i" comment="Current flowing into the pin">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="13" lineEnd="18" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="ground11._p._i" comment="Current flowing into the pin">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="13" lineEnd="18" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._ground11._p._i" comment="Current flowing into the pin">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="13" lineEnd="18" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="load1._R_actual" comment="Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._R_actual" comment="Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="resistor12._R_actual" comment="Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._R_actual" comment="Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="resistor11._R_actual" comment="Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._R_actual" comment="Actual resistance = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="ground12._p._v" comment="Potential at the pin">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="7" lineEnd="12" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._ground12._p._v" comment="Potential at the pin">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="7" lineEnd="12" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="ground11._p._v" comment="Potential at the pin">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="7" lineEnd="12" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._ground11._p._v" comment="Potential at the pin">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="7" lineEnd="12" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="i2B" comment="Secondary current, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="20" lineEnd="20" colStart="3" colEnd="92"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._i2B" comment="Secondary current, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="20" lineEnd="20" colStart="3" colEnd="92"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="v2B" comment="Secondary voltage, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="19" lineEnd="19" colStart="3" colEnd="94"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._v2B" comment="Secondary voltage, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="19" lineEnd="19" colStart="3" colEnd="94"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="i1B" comment="Primary current, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="18" lineEnd="18" colStart="3" colEnd="90"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._i1B" comment="Primary current, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="18" lineEnd="18" colStart="3" colEnd="90"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="v1B" comment="Primary voltage, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="17" lineEnd="17" colStart="3" colEnd="92"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._v1B" comment="Primary voltage, basic transformer">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="17" lineEnd="17" colStart="3" colEnd="92"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._n1._v" comment="Potential at the pin">
+    <alias>ground11._p._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._n1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._n1._v" comment="Potential at the pin">
+    <alias>ground11._p._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._n1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._n._v" comment="Potential at the pin">
+    <alias>ground11._p._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._n._v" comment="Potential at the pin">
+    <alias>ground11._p._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="resistor11._n._v" comment="Potential at the pin">
+    <alias>v1B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._n._v" comment="Potential at the pin">
+    <alias>v1B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._p1._v" comment="Potential at the pin">
+    <alias>v1B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._p1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._p1._v" comment="Potential at the pin">
+    <alias>v1B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._p1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._p._v" comment="Potential at the pin">
+    <alias>sineVoltage1._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._p._v" comment="Potential at the pin">
+    <alias>sineVoltage1._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="resistor12._p._v" comment="Potential at the pin">
+    <alias>v2B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._p._v" comment="Potential at the pin">
+    <alias>v2B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._p2._v" comment="Potential at the pin">
+    <alias>v2B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._p2</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._p2._v" comment="Potential at the pin">
+    <alias>v2B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._p2</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="resistor12._n._v" comment="Potential at the pin">
+    <alias>load1._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._n._v" comment="Potential at the pin">
+    <alias>load1._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._n2._v" comment="Potential at the pin">
+    <alias>ground12._p._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._n2</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._n2._v" comment="Potential at the pin">
+    <alias>ground12._p._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._n2</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="load1._n._v" comment="Potential at the pin">
+    <alias>ground12._p._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>load1._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._n._v" comment="Potential at the pin">
+    <alias>ground12._p._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="87" lineEnd="92" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>load1._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._p2._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._p2</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._p2._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._p2</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="resistor12._p._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._p._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="resistor12._i" comment="Current flowing from pin p to pin n">
+     <alias negated="true">basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="174" lineEnd="174" colStart="5" colEnd="55"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._i" comment="Current flowing from pin p to pin n">
+     <alias negated="true">basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="174" lineEnd="174" colStart="5" colEnd="55"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="resistor12._n._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._n._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="load1._p._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>load1._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._p._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>load1._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="load1._i" comment="Current flowing from pin p to pin n">
+     <alias negated="true">basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="174" lineEnd="174" colStart="5" colEnd="55"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._i" comment="Current flowing from pin p to pin n">
+     <alias negated="true">basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="174" lineEnd="174" colStart="5" colEnd="55"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="load1._n._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>load1._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._n._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>load1._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._n2._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._n2</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._n2._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i2</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._n2</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._p1._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._p1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._p1._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._p1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="resistor11._n._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._n._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="resistor11._p._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._p._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._p._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._p._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="53" lineEnd="58" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._i" comment="Current flowing from pin p to pin n">
+     <alias negated="true">basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="174" lineEnd="174" colStart="5" colEnd="55"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._i" comment="Current flowing from pin p to pin n">
+     <alias negated="true">basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="174" lineEnd="174" colStart="5" colEnd="55"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._n._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._n._i" comment="Current flowing into the pin">
+    <alias>basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._n</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="resistor11._i" comment="Current flowing from pin p to pin n">
+    <alias>basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="174" lineEnd="174" colStart="5" colEnd="55"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._i" comment="Current flowing from pin p to pin n">
+    <alias>basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="174" lineEnd="174" colStart="5" colEnd="55"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._n1._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._n1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._n1._i" comment="Current flowing into the pin">
+     <alias negated="true">basicTransformer._i1</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="93" lineEnd="98" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer._n1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.Electrical.Analog.Interfaces.NegativePin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </variable>
+  <variable name="load1._T_heatPort" comment="Temperature of HeatPort">
+    <alias>load1._T</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="313" lineEnd="313" colStart="5" colEnd="70"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._T_heatPort" comment="Temperature of HeatPort">
+    <alias>load1._T</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="313" lineEnd="313" colStart="5" colEnd="70"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="resistor12._T_heatPort" comment="Temperature of HeatPort">
+    <alias>resistor12._T</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="313" lineEnd="313" colStart="5" colEnd="70"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._T_heatPort" comment="Temperature of HeatPort">
+    <alias>resistor12._T</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="313" lineEnd="313" colStart="5" colEnd="70"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._signalSource._y" comment="Connector of Real output signal">
+    <alias>sineVoltage1._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Interfaces.mo" lineStart="276" lineEnd="277" colStart="5" colEnd="68"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.Blocks.Interfaces.RealOutput</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._signalSource._y" comment="Connector of Real output signal">
+    <alias>sineVoltage1._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Interfaces.mo" lineStart="276" lineEnd="277" colStart="5" colEnd="68"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.Blocks.Interfaces.RealOutput</type>
+    </source>
+  </variable>
+  <variable name="resistor11._T_heatPort" comment="Temperature of HeatPort">
+    <alias>resistor11._T</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="313" lineEnd="313" colStart="5" colEnd="70"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._T_heatPort" comment="Temperature of HeatPort">
+    <alias>resistor11._T</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="313" lineEnd="313" colStart="5" colEnd="70"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="resistor11._p._v" comment="Potential at the pin">
+    <alias>sineVoltage1._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._p._v" comment="Potential at the pin">
+    <alias>sineVoltage1._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="load1._p._v" comment="Potential at the pin">
+    <alias>load1._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>load1._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._p._v" comment="Potential at the pin">
+    <alias>load1._v</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="47" lineEnd="52" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>load1._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.Electrical.Analog.Interfaces.PositivePin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._v1" comment="Voltage drop over the left port">
+    <alias>v1B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="225" lineEnd="225" colStart="5" colEnd="52"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._v1" comment="Voltage drop over the left port">
+    <alias>v1B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="225" lineEnd="225" colStart="5" colEnd="52"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._v2" comment="Voltage drop over the right port">
+    <alias>v2B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="226" lineEnd="226" colStart="5" colEnd="53"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._v2" comment="Voltage drop over the right port">
+    <alias>v2B</alias>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="226" lineEnd="226" colStart="5" colEnd="53"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="Vdc" comment="DC offset of voltage source">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="3" lineEnd="3" colStart="3" colEnd="77"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._Vdc" comment="DC offset of voltage source">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="3" lineEnd="3" colStart="3" colEnd="77"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="Vpeak" comment="Peak voltage of voltage source">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="4" lineEnd="4" colStart="3" colEnd="82"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._Vpeak" comment="Peak voltage of voltage source">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="4" lineEnd="4" colStart="3" colEnd="82"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="f" comment="Frequency of voltage source">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="5" lineEnd="5" colStart="3" colEnd="76"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Frequency</type>
+    </source>
+  </variable>
+  <variable name="$PRE._f" comment="Frequency of voltage source">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="5" lineEnd="5" colStart="3" colEnd="76"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Frequency</type>
+    </source>
+  </variable>
+  <variable name="phi0" comment="Phase of voltage source">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="6" lineEnd="6" colStart="3" colEnd="75"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </variable>
+  <variable name="$PRE._phi0" comment="Phase of voltage source">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="6" lineEnd="6" colStart="3" colEnd="75"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </variable>
+  <variable name="n" comment="Turns ratio primary:secondary voltage">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="7" lineEnd="7" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Real</type>
+    </source>
+  </variable>
+  <variable name="$PRE._n" comment="Turns ratio primary:secondary voltage">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="7" lineEnd="7" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Real</type>
+    </source>
+  </variable>
+  <variable name="R1" comment="Primary resistance w.r.t. primary side">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="8" lineEnd="8" colStart="3" colEnd="91"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._R1" comment="Primary resistance w.r.t. primary side">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="8" lineEnd="8" colStart="3" colEnd="91"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="L1sigma" comment="Primary leakage inductance w.r.t. primary side">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="9" lineEnd="9" colStart="3" colEnd="119"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._L1sigma" comment="Primary leakage inductance w.r.t. primary side">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="9" lineEnd="9" colStart="3" colEnd="119"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="Lm1" comment="Magnetizing inductance w.r.t. primary side">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="10" lineEnd="10" colStart="3" colEnd="111"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._Lm1" comment="Magnetizing inductance w.r.t. primary side">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="10" lineEnd="10" colStart="3" colEnd="111"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="L2sigma" comment="Secondary leakage inductance w.r.t. secondary side">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="11" lineEnd="11" colStart="3" colEnd="131"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._L2sigma" comment="Secondary leakage inductance w.r.t. secondary side">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="11" lineEnd="11" colStart="3" colEnd="131"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="R2" comment="Secondary resistance w.r.t. secondary side">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="12" lineEnd="12" colStart="3" colEnd="103"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._R2" comment="Secondary resistance w.r.t. secondary side">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="12" lineEnd="12" colStart="3" colEnd="103"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="RL" comment="Load resistance">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="13" lineEnd="13" colStart="3" colEnd="73"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._RL" comment="Load resistance">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="13" lineEnd="13" colStart="3" colEnd="73"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="L1" comment="Primary no-load inductance">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="14" lineEnd="14" colStart="3" colEnd="96"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._L1" comment="Primary no-load inductance">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="14" lineEnd="14" colStart="3" colEnd="96"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="L2" comment="Secondary no-load inductance">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="15" lineEnd="15" colStart="3" colEnd="98"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._L2" comment="Secondary no-load inductance">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="15" lineEnd="15" colStart="3" colEnd="98"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="M" comment="Mutual inductance">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="16" lineEnd="16" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._M" comment="Mutual inductance">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="16" lineEnd="16" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._L1" comment="Primary inductance">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="481" lineEnd="481" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._L1" comment="Primary inductance">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="481" lineEnd="481" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._L2" comment="Secondary inductance">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="482" lineEnd="482" colStart="5" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._L2" comment="Secondary inductance">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="482" lineEnd="482" colStart="5" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="basicTransformer._M" comment="Coupling inductance">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="483" lineEnd="483" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._basicTransformer._M" comment="Coupling inductance">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="483" lineEnd="483" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>basicTransformer</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Transformer</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._offset" comment="Voltage offset">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="425" lineEnd="425" colStart="5" colEnd="51"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._offset" comment="Voltage offset">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="425" lineEnd="425" colStart="5" colEnd="51"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._startTime" comment="Time offset">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="426" lineEnd="426" colStart="5" colEnd="48"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Time</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._startTime" comment="Time offset">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="426" lineEnd="426" colStart="5" colEnd="48"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Time</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._V" comment="Amplitude of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="359" lineEnd="359" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._V" comment="Amplitude of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="359" lineEnd="359" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._phase" comment="Phase of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="360" lineEnd="360" colStart="5" colEnd="52"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._phase" comment="Phase of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="360" lineEnd="360" colStart="5" colEnd="52"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._freqHz" comment="Frequency of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="361" lineEnd="361" colStart="5" colEnd="68"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Frequency</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._freqHz" comment="Frequency of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="361" lineEnd="361" colStart="5" colEnd="68"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Frequency</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._signalSource._amplitude" comment="Amplitude of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="560" lineEnd="560" colStart="5" colEnd="56"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Real</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._signalSource._amplitude" comment="Amplitude of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="560" lineEnd="560" colStart="5" colEnd="56"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Real</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._signalSource._freqHz" comment="Frequency of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="561" lineEnd="561" colStart="5" colEnd="73"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Frequency</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._signalSource._freqHz" comment="Frequency of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="561" lineEnd="561" colStart="5" colEnd="73"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Frequency</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._signalSource._phase" comment="Phase of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="562" lineEnd="562" colStart="5" colEnd="57"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._signalSource._phase" comment="Phase of sine wave">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="562" lineEnd="562" colStart="5" colEnd="57"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._signalSource._offset" comment="Offset of output signal">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="563" lineEnd="563" colStart="5" colEnd="54"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Real</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._signalSource._offset" comment="Offset of output signal">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="563" lineEnd="563" colStart="5" colEnd="54"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Real</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._signalSource._startTime" comment="Output = offset for time &lt; startTime">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="564" lineEnd="564" colStart="5" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Time</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._signalSource._startTime" comment="Output = offset for time &lt; startTime">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="564" lineEnd="564" colStart="5" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Time</type>
+    </source>
+  </variable>
+  <variable name="resistor11._R" comment="Resistance at temperature T_ref">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._R" comment="Resistance at temperature T_ref">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="resistor11._T_ref" comment="Reference temperature">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="64" lineEnd="64" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._T_ref" comment="Reference temperature">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="64" lineEnd="64" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="resistor11._alpha" comment="Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="65" lineEnd="66" colStart="3" colEnd="93"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.LinearTemperatureCoefficient</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._alpha" comment="Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="65" lineEnd="66" colStart="3" colEnd="93"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.LinearTemperatureCoefficient</type>
+    </source>
+  </variable>
+  <variable name="resistor11._T" comment="Fixed device temperature if useHeatPort = false">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._T" comment="Fixed device temperature if useHeatPort = false">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="load1._R" comment="Resistance at temperature T_ref">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._R" comment="Resistance at temperature T_ref">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="load1._T_ref" comment="Reference temperature">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="64" lineEnd="64" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._T_ref" comment="Reference temperature">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="64" lineEnd="64" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="load1._alpha" comment="Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="65" lineEnd="66" colStart="3" colEnd="93"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.LinearTemperatureCoefficient</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._alpha" comment="Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="65" lineEnd="66" colStart="3" colEnd="93"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.LinearTemperatureCoefficient</type>
+    </source>
+  </variable>
+  <variable name="load1._T" comment="Fixed device temperature if useHeatPort = false">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._T" comment="Fixed device temperature if useHeatPort = false">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="resistor12._R" comment="Resistance at temperature T_ref">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._R" comment="Resistance at temperature T_ref">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </variable>
+  <variable name="resistor12._T_ref" comment="Reference temperature">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="64" lineEnd="64" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._T_ref" comment="Reference temperature">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="64" lineEnd="64" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="resistor12._alpha" comment="Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="65" lineEnd="66" colStart="3" colEnd="93"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.LinearTemperatureCoefficient</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._alpha" comment="Temperature coefficient of resistance (R_actual = R*(1 + alpha*(T_heatPort - T_ref))">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="65" lineEnd="66" colStart="3" colEnd="93"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.LinearTemperatureCoefficient</type>
+    </source>
+  </variable>
+  <variable name="resistor12._T" comment="Fixed device temperature if useHeatPort = false">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._T" comment="Fixed device temperature if useHeatPort = false">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </variable>
+  <variable name="resistor11._useHeatPort" comment="=true, if HeatPort is enabled">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="304" lineEnd="305" colStart="5" colEnd="71"/>
+      <part-of>within Boolean;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Boolean</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor11._useHeatPort" comment="=true, if HeatPort is enabled">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="304" lineEnd="305" colStart="5" colEnd="71"/>
+      <part-of>within Boolean;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Boolean</type>
+    </source>
+  </variable>
+  <variable name="load1._useHeatPort" comment="=true, if HeatPort is enabled">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="304" lineEnd="305" colStart="5" colEnd="71"/>
+      <part-of>within Boolean;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Boolean</type>
+    </source>
+  </variable>
+  <variable name="$PRE._load1._useHeatPort" comment="=true, if HeatPort is enabled">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="304" lineEnd="305" colStart="5" colEnd="71"/>
+      <part-of>within Boolean;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Boolean</type>
+    </source>
+  </variable>
+  <variable name="resistor12._useHeatPort" comment="=true, if HeatPort is enabled">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="304" lineEnd="305" colStart="5" colEnd="71"/>
+      <part-of>within Boolean;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Boolean</type>
+    </source>
+  </variable>
+  <variable name="$PRE._resistor12._useHeatPort" comment="=true, if HeatPort is enabled">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="304" lineEnd="305" colStart="5" colEnd="71"/>
+      <part-of>within Boolean;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Boolean</type>
+    </source>
+  </variable>
+  <variable name="pi" comment="">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="2" lineEnd="2" colStart="3" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </variable>
+  <variable name="$PRE._pi" comment="">
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="2" lineEnd="2" colStart="3" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </variable>
+  <variable name="sineVoltage1._signalSource._pi" comment="">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="567" lineEnd="567" colStart="5" colEnd="43"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Real</type>
+    </source>
+  </variable>
+  <variable name="$PRE._sineVoltage1._signalSource._pi" comment="">
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="567" lineEnd="567" colStart="5" colEnd="43"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Real</type>
+    </source>
+  </variable>
+</variables>
+<equations>
+  <equation index="1">
+    <assign>
+      <lhs>resistor12._T</lhs>
+      <rhs>resistor12.T_ref</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="2">
+    <assign>
+      <lhs>load1._T</lhs>
+      <rhs>load1.T_ref</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="3">
+    <assign>
+      <lhs>resistor11._T</lhs>
+      <rhs>resistor11.T_ref</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="4">
+    <assign>
+      <lhs>resistor11._R</lhs>
+      <rhs>R1</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="5">
+    <assign>
+      <lhs>sineVoltage1._signalSource._startTime</lhs>
+      <rhs>sineVoltage1.startTime</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="564" lineEnd="564" colStart="5" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Time</type>
+    </source>
+  </equation>
+  <equation index="6">
+    <assign>
+      <lhs>sineVoltage1._freqHz</lhs>
+      <rhs>f</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="361" lineEnd="361" colStart="5" colEnd="68"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Frequency</type>
+    </source>
+  </equation>
+  <equation index="7">
+    <assign>
+      <lhs>sineVoltage1._signalSource._freqHz</lhs>
+      <rhs>sineVoltage1.freqHz</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="561" lineEnd="561" colStart="5" colEnd="73"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Frequency</type>
+    </source>
+  </equation>
+  <equation index="8">
+    <assign>
+      <lhs>sineVoltage1._phase</lhs>
+      <rhs>phi0</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="360" lineEnd="360" colStart="5" colEnd="52"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </equation>
+  <equation index="9">
+    <assign>
+      <lhs>sineVoltage1._signalSource._phase</lhs>
+      <rhs>sineVoltage1.phase</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="562" lineEnd="562" colStart="5" colEnd="57"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </equation>
+  <equation index="10">
+    <assign>
+      <lhs>sineVoltage1._V</lhs>
+      <rhs>Vpeak</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="359" lineEnd="359" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </equation>
+  <equation index="11">
+    <assign>
+      <lhs>sineVoltage1._signalSource._amplitude</lhs>
+      <rhs>sineVoltage1.V</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="560" lineEnd="560" colStart="5" colEnd="56"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Real</type>
+    </source>
+  </equation>
+  <equation index="12">
+    <assign>
+      <lhs>sineVoltage1._offset</lhs>
+      <rhs>Vdc</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="425" lineEnd="425" colStart="5" colEnd="51"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </equation>
+  <equation index="13">
+    <assign>
+      <lhs>sineVoltage1._signalSource._offset</lhs>
+      <rhs>sineVoltage1.offset</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="563" lineEnd="563" colStart="5" colEnd="54"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Real</type>
+    </source>
+  </equation>
+  <equation index="14">
+    <assign>
+      <lhs>RL</lhs>
+      <rhs>n ^ -2.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="13" lineEnd="13" colStart="3" colEnd="73"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="15">
+    <assign>
+      <lhs>load1._R</lhs>
+      <rhs>RL</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="16">
+    <assign>
+      <lhs>R2</lhs>
+      <rhs>DIVISION(0.01, n ^ 2.0, #SHARED_LITERAL_2(String)#)</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="12" lineEnd="12" colStart="3" colEnd="103"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="17">
+    <assign>
+      <lhs>resistor12._R</lhs>
+      <rhs>R2</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="18">
+    <assign>
+      <lhs>resistor11._R_actual</lhs>
+      <rhs>resistor11.R * (1.0 + resistor11.alpha * (resistor11.T - resistor11.T_ref))</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="19">
+    <assign>
+      <lhs>resistor12._R_actual</lhs>
+      <rhs>resistor12.R * (1.0 + resistor12.alpha * (resistor12.T - resistor12.T_ref))</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="20">
+    <assign>
+      <lhs>load1._R_actual</lhs>
+      <rhs>load1.R * (1.0 + load1.alpha * (load1.T - load1.T_ref))</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="21">
+    <assign>
+      <lhs>sineVoltage1._v</lhs>
+      <rhs>sineVoltage1.signalSource.offset + (if time &lt; sineVoltage1.signalSource.startTime then 0.0 else sineVoltage1.signalSource.amplitude * sin(6.283185307179586 * sineVoltage1.signalSource.freqHz * (time - sineVoltage1.signalSource.startTime) + sineVoltage1.signalSource.phase))</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="570" lineEnd="571" colStart="5" colEnd="46"/>
+      <part-of>within Modelica.Blocks.Sources.Sine;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+    </source>
+  </equation>
+  <equation index="22">
+    <assign>
+      <lhs>basicTransformer._i2</lhs>
+      <rhs>0.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="30" lineEnd="30" colStart="3" colEnd="26"/>
+      <part-of>within SimpleTransformerPinney;</part-of>
+    </source>
+  </equation>
+  <equation index="23">
+    <assign>
+      <lhs>resistor12._v</lhs>
+      <rhs>(-resistor12.R_actual) * basicTransformer.i2</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="76" lineEnd="76" colStart="3" colEnd="17"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor12</instance>
+    </source>
+  </equation>
+  <equation index="24">
+    <assign>
+      <lhs>resistor12._LossPower</lhs>
+      <rhs>(-resistor12.v) * basicTransformer.i2</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="77" lineEnd="77" colStart="3" colEnd="18"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor12</instance>
+    </source>
+  </equation>
+  <equation index="25">
+    <assign>
+      <lhs>load1._v</lhs>
+      <rhs>(-load1.R_actual) * basicTransformer.i2</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="76" lineEnd="76" colStart="3" colEnd="17"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>load1</instance>
+    </source>
+  </equation>
+  <equation index="26">
+    <assign>
+      <lhs>v2B</lhs>
+      <rhs>resistor12.v + load1.v</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="181" lineEnd="181" colStart="5" colEnd="18"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor12</instance>
+    </source>
+  </equation>
+  <equation index="27">
+    <assign>
+      <lhs>load1._LossPower</lhs>
+      <rhs>(-load1.v) * basicTransformer.i2</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="77" lineEnd="77" colStart="3" colEnd="18"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>load1</instance>
+    </source>
+  </equation>
+  <equation index="28">
+    <assign>
+      <lhs>i2B</lhs>
+      <rhs>-basicTransformer.i2</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="20" lineEnd="20" colStart="3" colEnd="92"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </equation>
+  <equation index="29">
+    <assign>
+      <lhs>basicTransformer._i1</lhs>
+      <rhs>0.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="29" lineEnd="29" colStart="3" colEnd="26"/>
+      <part-of>within SimpleTransformerPinney;</part-of>
+    </source>
+  </equation>
+  <equation index="30">
+    <assign>
+      <lhs>resistor11._v</lhs>
+      <rhs>resistor11.R_actual * basicTransformer.i1</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="76" lineEnd="76" colStart="3" colEnd="17"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor11</instance>
+    </source>
+  </equation>
+  <equation index="31">
+    <assign>
+      <lhs>v1B</lhs>
+      <rhs>sineVoltage1.v - resistor11.v</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="181" lineEnd="181" colStart="5" colEnd="18"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor11</instance>
+    </source>
+  </equation>
+  <equation index="32">
+    <assign>
+      <lhs>basicTransformer._dv</lhs>
+      <rhs>v1B - v2B</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="495" lineEnd="495" colStart="5" colEnd="17"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Transformer;</part-of>
+      <instance>basicTransformer</instance>
+    </source>
+  </equation>
+  <equation index="33">
+    <linear>
+      <var name="der(basicTransformer._i2)" />
+      <var name="der(basicTransformer._i1)" />
+      <row>
+        <cell>-basicTransformer.dv</cell>
+        <cell>-v1B</cell>
+      </row>
+      <matrix>
+        <cell row="0" col="0">
+          <residual>-0.03958979209410897</residual>
+          <source>
+            <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="494" lineEnd="494" colStart="5" colEnd="45"/>
+            <part-of>within Modelica.Electrical.Analog.Basic.Transformer;</part-of>
+            <instance>basicTransformer</instance>
+          </source>
+        </cell><cell row="0" col="1">
+          <residual>-0.08037324626140714</residual>
+          <source>
+            <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="494" lineEnd="494" colStart="5" colEnd="45"/>
+            <part-of>within Modelica.Electrical.Analog.Basic.Transformer;</part-of>
+            <instance>basicTransformer</instance>
+          </source>
+        </cell><cell row="1" col="0">
+          <residual>-0.07957747154594767</residual>
+          <source>
+            <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="486" lineEnd="486" colStart="5" colEnd="32"/>
+            <part-of>within Modelica.Electrical.Analog.Basic.Transformer;</part-of>
+            <instance>basicTransformer</instance>
+          </source>
+        </cell><cell row="1" col="1">
+          <residual>-0.15995071780735481</residual>
+          <source>
+            <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="486" lineEnd="486" colStart="5" colEnd="32"/>
+            <part-of>within Modelica.Electrical.Analog.Basic.Transformer;</part-of>
+            <instance>basicTransformer</instance>
+          </source>
+        </cell>
+      </matrix>
+    </linear>
+  </equation>
+  <equation index="34">
+    <assign>
+      <lhs>resistor11._LossPower</lhs>
+      <rhs>resistor11.v * basicTransformer.i1</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="77" lineEnd="77" colStart="3" colEnd="18"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor11</instance>
+    </source>
+  </equation>
+  <equation index="35">
+    <assign>
+      <lhs>i1B</lhs>
+      <rhs>basicTransformer.i1</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="18" lineEnd="18" colStart="3" colEnd="90"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </equation>
+  <equation index="36">
+    <assign>
+      <lhs>L2sigma</lhs>
+      <rhs>DIVISION(0.05, n ^ 2.0 * f * 6.283185307179586, #SHARED_LITERAL_3(String)#)</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="11" lineEnd="11" colStart="3" colEnd="131"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </equation>
+  <equation index="37">
+    <assign>
+      <lhs>Lm1</lhs>
+      <rhs>DIVISION(10.0, f * 6.283185307179586, #SHARED_LITERAL_4(String)#)</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="10" lineEnd="10" colStart="3" colEnd="111"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </equation>
+  <equation index="38">
+    <assign>
+      <lhs>L1sigma</lhs>
+      <rhs>DIVISION(0.05, f * 6.283185307179586, #SHARED_LITERAL_5(String)#)</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="9" lineEnd="9" colStart="3" colEnd="119"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </equation>
+  <equation index="39">
+    <assign>
+      <lhs>ground12._p._i</lhs>
+      <rhs>0.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="13" lineEnd="18" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </equation>
+  <equation index="40">
+    <assign>
+      <lhs>ground11._p._i</lhs>
+      <rhs>0.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="13" lineEnd="18" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </equation>
+  <equation index="41">
+    <assign>
+      <lhs>ground12._p._v</lhs>
+      <rhs>0.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="7" lineEnd="12" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </equation>
+  <equation index="42">
+    <assign>
+      <lhs>ground11._p._v</lhs>
+      <rhs>0.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="7" lineEnd="12" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </equation>
+  <equation index="43">
+    <residual>basicTransformer.i2</residual>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="30" lineEnd="30" colStart="3" colEnd="26"/>
+      <part-of>within SimpleTransformerPinney;</part-of>
+    </source>
+  </equation>
+  <equation index="44">
+    <residual>basicTransformer.i1</residual>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="29" lineEnd="29" colStart="3" colEnd="26"/>
+      <part-of>within SimpleTransformerPinney;</part-of>
+    </source>
+  </equation>
+  <equation index="45">
+    <assign>
+      <lhs>resistor11._v</lhs>
+      <rhs>resistor11.R_actual * basicTransformer.i1</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="76" lineEnd="76" colStart="3" colEnd="17"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor11</instance>
+    </source>
+  </equation>
+  <equation index="46">
+    <assign>
+      <lhs>resistor11._LossPower</lhs>
+      <rhs>resistor11.v * basicTransformer.i1</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="77" lineEnd="77" colStart="3" colEnd="18"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor11</instance>
+    </source>
+  </equation>
+  <equation index="47">
+    <assign>
+      <lhs>sineVoltage1._v</lhs>
+      <rhs>sineVoltage1.signalSource.offset + (if time &lt; sineVoltage1.signalSource.startTime then 0.0 else sineVoltage1.signalSource.amplitude * sin(6.283185307179586 * sineVoltage1.signalSource.freqHz * (time - sineVoltage1.signalSource.startTime) + sineVoltage1.signalSource.phase))</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="570" lineEnd="571" colStart="5" colEnd="46"/>
+      <part-of>within Modelica.Blocks.Sources.Sine;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+    </source>
+  </equation>
+  <equation index="48">
+    <assign>
+      <lhs>v1B</lhs>
+      <rhs>sineVoltage1.v - resistor11.v</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="181" lineEnd="181" colStart="5" colEnd="18"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor11</instance>
+    </source>
+  </equation>
+  <equation index="49">
+    <assign>
+      <lhs>resistor12._v</lhs>
+      <rhs>(-resistor12.R_actual) * basicTransformer.i2</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="76" lineEnd="76" colStart="3" colEnd="17"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor12</instance>
+    </source>
+  </equation>
+  <equation index="50">
+    <assign>
+      <lhs>resistor12._LossPower</lhs>
+      <rhs>(-resistor12.v) * basicTransformer.i2</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="77" lineEnd="77" colStart="3" colEnd="18"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor12</instance>
+    </source>
+  </equation>
+  <equation index="51">
+    <assign>
+      <lhs>load1._v</lhs>
+      <rhs>(-load1.R_actual) * basicTransformer.i2</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="76" lineEnd="76" colStart="3" colEnd="17"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>load1</instance>
+    </source>
+  </equation>
+  <equation index="52">
+    <assign>
+      <lhs>load1._LossPower</lhs>
+      <rhs>(-load1.v) * basicTransformer.i2</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="77" lineEnd="77" colStart="3" colEnd="18"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>load1</instance>
+    </source>
+  </equation>
+  <equation index="53">
+    <assign>
+      <lhs>v2B</lhs>
+      <rhs>resistor12.v + load1.v</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="181" lineEnd="181" colStart="5" colEnd="18"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor12</instance>
+    </source>
+  </equation>
+  <equation index="54">
+    <assign>
+      <lhs>basicTransformer._dv</lhs>
+      <rhs>v1B - v2B</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="495" lineEnd="495" colStart="5" colEnd="17"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Transformer;</part-of>
+      <instance>basicTransformer</instance>
+    </source>
+  </equation>
+  <equation index="55">
+    <linear>
+      <var name="der(basicTransformer._i2)" />
+      <var name="der(basicTransformer._i1)" />
+      <row>
+        <cell>-basicTransformer.dv</cell>
+        <cell>-v1B</cell>
+      </row>
+      <matrix>
+        <cell row="0" col="0">
+          <residual>-0.03958979209410897</residual>
+          <source>
+            <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="494" lineEnd="494" colStart="5" colEnd="45"/>
+            <part-of>within Modelica.Electrical.Analog.Basic.Transformer;</part-of>
+            <instance>basicTransformer</instance>
+          </source>
+        </cell><cell row="0" col="1">
+          <residual>-0.08037324626140714</residual>
+          <source>
+            <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="494" lineEnd="494" colStart="5" colEnd="45"/>
+            <part-of>within Modelica.Electrical.Analog.Basic.Transformer;</part-of>
+            <instance>basicTransformer</instance>
+          </source>
+        </cell><cell row="1" col="0">
+          <residual>-0.07957747154594767</residual>
+          <source>
+            <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="486" lineEnd="486" colStart="5" colEnd="32"/>
+            <part-of>within Modelica.Electrical.Analog.Basic.Transformer;</part-of>
+            <instance>basicTransformer</instance>
+          </source>
+        </cell><cell row="1" col="1">
+          <residual>-0.15995071780735481</residual>
+          <source>
+            <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="486" lineEnd="486" colStart="5" colEnd="32"/>
+            <part-of>within Modelica.Electrical.Analog.Basic.Transformer;</part-of>
+            <instance>basicTransformer</instance>
+          </source>
+        </cell>
+      </matrix>
+    </linear>
+  </equation>
+  <equation index="56">
+    <assign>
+      <lhs>i2B</lhs>
+      <rhs>-basicTransformer.i2</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="20" lineEnd="20" colStart="3" colEnd="92"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </equation>
+  <equation index="57">
+    <assign>
+      <lhs>i1B</lhs>
+      <rhs>basicTransformer.i1</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="18" lineEnd="18" colStart="3" colEnd="90"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </equation>
+  <equation index="58">
+    <assign>
+      <lhs>ground12._p._i</lhs>
+      <rhs>0.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="13" lineEnd="18" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </equation>
+  <equation index="59">
+    <assign>
+      <lhs>ground11._p._i</lhs>
+      <rhs>0.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="13" lineEnd="18" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Current</type>
+    </source>
+  </equation>
+  <equation index="60">
+    <assign>
+      <lhs>ground12._p._v</lhs>
+      <rhs>0.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="7" lineEnd="12" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground12._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </equation>
+  <equation index="61">
+    <assign>
+      <lhs>ground11._p._v</lhs>
+      <rhs>0.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="7" lineEnd="12" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>ground11._p</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Ground</type>
+      <type>Modelica.Electrical.Analog.Interfaces.Pin</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </equation>
+  <equation index="62">
+    <assign>
+      <lhs>L1sigma</lhs>
+      <rhs>DIVISION(0.05, f * 6.283185307179586, #SHARED_LITERAL_5(String)#)</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="9" lineEnd="9" colStart="3" colEnd="119"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </equation>
+  <equation index="63">
+    <assign>
+      <lhs>Lm1</lhs>
+      <rhs>DIVISION(10.0, f * 6.283185307179586, #SHARED_LITERAL_4(String)#)</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="10" lineEnd="10" colStart="3" colEnd="111"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </equation>
+  <equation index="64">
+    <assign>
+      <lhs>L2sigma</lhs>
+      <rhs>DIVISION(0.05, n ^ 2.0 * f * 6.283185307179586, #SHARED_LITERAL_3(String)#)</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="11" lineEnd="11" colStart="3" colEnd="131"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Inductance</type>
+    </source>
+  </equation>
+  <equation index="65">
+    <assign>
+      <lhs>R2</lhs>
+      <rhs>DIVISION(0.01, n ^ 2.0, #SHARED_LITERAL_2(String)#)</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="12" lineEnd="12" colStart="3" colEnd="103"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="66">
+    <assign>
+      <lhs>RL</lhs>
+      <rhs>n ^ -2.0</rhs>
+    </assign>
+    <source>
+      <info file="C:\Users\dwp0\Dropbox\OMF\openModelicaForOmf\transformer.mo" lineStart="13" lineEnd="13" colStart="3" colEnd="73"/>
+      <part-of>within Real;</part-of>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="67">
+    <assign>
+      <lhs>sineVoltage1._offset</lhs>
+      <rhs>Vdc</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="425" lineEnd="425" colStart="5" colEnd="51"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </equation>
+  <equation index="68">
+    <assign>
+      <lhs>sineVoltage1._V</lhs>
+      <rhs>Vpeak</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="359" lineEnd="359" colStart="5" colEnd="61"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Voltage</type>
+    </source>
+  </equation>
+  <equation index="69">
+    <assign>
+      <lhs>sineVoltage1._phase</lhs>
+      <rhs>phi0</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="360" lineEnd="360" colStart="5" colEnd="52"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </equation>
+  <equation index="70">
+    <assign>
+      <lhs>sineVoltage1._freqHz</lhs>
+      <rhs>f</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Sources.mo" lineStart="361" lineEnd="361" colStart="5" colEnd="68"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.SIunits.Frequency</type>
+    </source>
+  </equation>
+  <equation index="71">
+    <assign>
+      <lhs>sineVoltage1._signalSource._amplitude</lhs>
+      <rhs>sineVoltage1.V</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="560" lineEnd="560" colStart="5" colEnd="56"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Real</type>
+    </source>
+  </equation>
+  <equation index="72">
+    <assign>
+      <lhs>sineVoltage1._signalSource._freqHz</lhs>
+      <rhs>sineVoltage1.freqHz</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="561" lineEnd="561" colStart="5" colEnd="73"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Frequency</type>
+    </source>
+  </equation>
+  <equation index="73">
+    <assign>
+      <lhs>sineVoltage1._signalSource._phase</lhs>
+      <rhs>sineVoltage1.phase</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="562" lineEnd="562" colStart="5" colEnd="57"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Angle</type>
+    </source>
+  </equation>
+  <equation index="74">
+    <assign>
+      <lhs>sineVoltage1._signalSource._offset</lhs>
+      <rhs>sineVoltage1.offset</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="563" lineEnd="563" colStart="5" colEnd="54"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Real</type>
+    </source>
+  </equation>
+  <equation index="75">
+    <assign>
+      <lhs>sineVoltage1._signalSource._startTime</lhs>
+      <rhs>sineVoltage1.startTime</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Blocks\Sources.mo" lineStart="564" lineEnd="564" colStart="5" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>sineVoltage1._signalSource</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Sources.SineVoltage</type>
+      <type>Modelica.Blocks.Sources.Sine</type>
+      <type>Modelica.SIunits.Time</type>
+    </source>
+  </equation>
+  <equation index="76">
+    <assign>
+      <lhs>resistor11._R</lhs>
+      <rhs>R1</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="77">
+    <assign>
+      <lhs>resistor11._T</lhs>
+      <rhs>resistor11.T_ref</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="78">
+    <assign>
+      <lhs>resistor11._R_actual</lhs>
+      <rhs>resistor11.R * (1.0 + resistor11.alpha * (resistor11.T - resistor11.T_ref))</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="79">
+    <assign>
+      <lhs>load1._R</lhs>
+      <rhs>RL</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="80">
+    <assign>
+      <lhs>load1._T</lhs>
+      <rhs>load1.T_ref</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="81">
+    <assign>
+      <lhs>load1._R_actual</lhs>
+      <rhs>load1.R * (1.0 + load1.alpha * (load1.T - load1.T_ref))</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="82">
+    <assign>
+      <lhs>resistor12._R</lhs>
+      <rhs>R2</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="62" lineEnd="63" colStart="3" colEnd="40"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="83">
+    <assign>
+      <lhs>resistor12._T</lhs>
+      <rhs>resistor12.T_ref</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="84">
+    <assign>
+      <lhs>resistor12._R_actual</lhs>
+      <rhs>resistor12.R * (1.0 + resistor12.alpha * (resistor12.T - resistor12.T_ref))</rhs>
+    </assign>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="70" lineEnd="71" colStart="3" colEnd="63"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Resistance</type>
+    </source>
+  </equation>
+  <equation index="85">
+    <statement>
+        assert(resistor12.T &gt;= 0.0, &quot;Variable resistor12.T out of [min, max] interval: resistor12.T &gt;= 0.0 has value: &quot; + String(resistor12.T, &quot;g&quot;));
+    </statement>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="86">
+    <statement>
+        assert(resistor12.T_ref &gt;= 0.0, &quot;Variable resistor12.T_ref out of [min, max] interval: resistor12.T_ref &gt;= 0.0 has value: &quot; + String(resistor12.T_ref, &quot;g&quot;));
+    </statement>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="64" lineEnd="64" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor12</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="87">
+    <statement>
+        assert(load1.T &gt;= 0.0, &quot;Variable load1.T out of [min, max] interval: load1.T &gt;= 0.0 has value: &quot; + String(load1.T, &quot;g&quot;));
+    </statement>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="88">
+    <statement>
+        assert(load1.T_ref &gt;= 0.0, &quot;Variable load1.T_ref out of [min, max] interval: load1.T_ref &gt;= 0.0 has value: &quot; + String(load1.T_ref, &quot;g&quot;));
+    </statement>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="64" lineEnd="64" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>load1</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="89">
+    <statement>
+        assert(resistor11.T &gt;= 0.0, &quot;Variable resistor11.T out of [min, max] interval: resistor11.T &gt;= 0.0 has value: &quot; + String(resistor11.T, &quot;g&quot;));
+    </statement>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Interfaces.mo" lineStart="306" lineEnd="307" colStart="5" colEnd="99"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="90">
+    <statement>
+        assert(resistor11.T_ref &gt;= 0.0, &quot;Variable resistor11.T_ref out of [min, max] interval: resistor11.T_ref &gt;= 0.0 has value: &quot; + String(resistor11.T_ref, &quot;g&quot;));
+    </statement>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="64" lineEnd="64" colStart="3" colEnd="78"/>
+      <part-of>within Real;</part-of>
+      <instance>resistor11</instance>
+      <type>SimpleTransformerPinney</type>
+      <type>Modelica.Electrical.Analog.Basic.Resistor</type>
+      <type>Modelica.SIunits.Temperature</type>
+    </source>
+  </equation>
+  <equation index="91">
+    <statement>
+        assert(1.0 + load1.alpha * (load1.T - load1.T_ref) &gt;= 0.000000000000001, &quot;Temperature outside scope of model!&quot;);
+    </statement>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="74" lineEnd="74" colStart="3" colEnd="108"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>load1</instance>
+    </source>
+  </equation>
+  <equation index="92">
+    <statement>
+        assert(1.0 + resistor12.alpha * (resistor12.T - resistor12.T_ref) &gt;= 0.000000000000001, &quot;Temperature outside scope of model!&quot;);
+    </statement>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="74" lineEnd="74" colStart="3" colEnd="108"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor12</instance>
+    </source>
+  </equation>
+  <equation index="93">
+    <statement>
+        assert(1.0 + resistor11.alpha * (resistor11.T - resistor11.T_ref) &gt;= 0.000000000000001, &quot;Temperature outside scope of model!&quot;);
+    </statement>
+    <source>
+      <info file="C:\OpenModelica1.9.0\lib\omlibrary\Modelica 3.2.1\Electrical\Analog\Basic.mo" lineStart="74" lineEnd="74" colStart="3" colEnd="108"/>
+      <part-of>within Modelica.Electrical.Analog.Basic.Resistor;</part-of>
+      <instance>resistor11</instance>
+    </source>
+  </equation>
+</equations>
+<literals>
+  <exp>&quot;'p&quot;</exp>
+  <exp>&quot;'p/s&quot;</exp>
+  <exp>&quot;0.01 / n ^ 2.0 because n ^ 2.0 == 0: File: C:\\Users\\dwp0\\Dropbox\\OMF\\openModelicaForOmf\\transformer.mo Line: 12&quot;</exp>
+  <exp>&quot;0.05 / (n ^ 2.0 * (f * 6.283185307179586)) because n ^ 2.0 * (f * 6.283185307179586) == 0: File: C:\\Users\\dwp0\\Dropbox\\OMF\\openModelicaForOmf\\transformer.mo Line: 11&quot;</exp>
+  <exp>&quot;10.0 / (f * 6.283185307179586) because f * 6.283185307179586 == 0: File: C:\\Users\\dwp0\\Dropbox\\OMF\\openModelicaForOmf\\transformer.mo Line: 10&quot;</exp>
+  <exp>&quot;0.05 / (f * 6.283185307179586) because f * 6.283185307179586 == 0: File: C:\\Users\\dwp0\\Dropbox\\OMF\\openModelicaForOmf\\transformer.mo Line: 9&quot;</exp>
+</literals>
+<functions>
+</functions>
+</simcodedump>

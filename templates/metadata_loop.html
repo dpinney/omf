@@ -1,0 +1,7 @@
+{% for md in value["metadatas"] %}
+{% if (md["name"].strip() == "" or (key == "Private" and md["name"].startswith("public_"))) and is_admin %}
+{% else %}
+{% include "metadata.html" %}
+{% endif %}
+{% endfor %}
+

@@ -1,0 +1,11 @@
+*.pyc
+log.txt
+*.sublime-project
+*.sublime-workspace
+analyses/*
+logs/*.log
+data/Analysis/*
+data/Study/*
+# But include a few example analyses:
+!analyses/public_z*
+S3KEY.*
