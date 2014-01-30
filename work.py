@@ -1,6 +1,6 @@
-#!/usr/bin/env python
-
 '''
+Work executes python functions. It can use the local machine or the omf.coop cluster.
+
 One queue, stores tuples (analysisName, requestType). Or maybe have two queues, whatever.
 
 Adding jobs.
@@ -18,7 +18,6 @@ Canceling jobs.
 	Kill the PID.
 
 Queue limits?
-
 
 We need to handle two cases:
 1. Filesystem case. Just have a dumb fileQueue class that has no limits, etc.?

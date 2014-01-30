@@ -1,3 +1,5 @@
+''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
+
 import feeder, csv, random, math, copy
 from StringIO import StringIO
 
@@ -1281,6 +1283,7 @@ def convert(stdPath,seqPath):
 	for headId in xrange(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
 
+	# TODO: speed up this gross, gross, gross hack.
 	try:
 		# Generat lat/lon for triplex_meter and triplex_node
 		for i in glmTree:
