@@ -3,7 +3,7 @@
 # third party modules
 import flask, werkzeug, json, time, datetime, copy, flask_login, boto.ses, hashlib, random, traceback, hashlib, time, random
 # our modules
-import analysis, feeder, reports, studies, storage, work, User
+import analysis, feeder, reports, studies, storage, work, user
 
 app = flask.Flask(__name__)
 
@@ -35,7 +35,7 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login_page'
 app.secret_key = some_random_string()
-user_manager = User.UserManager(store)
+user_manager = user.UserManager(store)
 
 @app.before_request
 def csrf_protect():

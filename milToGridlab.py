@@ -1,6 +1,4 @@
-#!/usr/bin/env python
-
-import csv, feeder, random
+import csv, feeder, random, math, copy
 from StringIO import StringIO
 
 def convert(stdString, seqString):
@@ -677,8 +675,5 @@ if __name__ == '__main__':
 	with open('./uploads/INEC-RENOIR.std','r') as stdFile, open('./uploads/INEC.seq','r') as seqFile:
 		outGlm = convert(stdFile.read(),seqFile.read())
 	from pprint import pprint
+	print 'And here is the GLM:'
 	pprint(outGlm)
-	pass
-
-#TODO: set neutral conductors correctly for all components.
-#TODO: get rid of as many magic numbers as possible.

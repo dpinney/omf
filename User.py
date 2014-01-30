@@ -1,9 +1,7 @@
+''' Classes to manage omf.coop user creation/deletion/authentication. '''
+
 from passlib.hash import pbkdf2_sha512
-import os
-import json
-import hashlib
-import random
-import time
+import os, json, hashlib, random, time
 
 class UserManager:
 	def __init__(self, store):
