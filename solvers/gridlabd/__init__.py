@@ -70,6 +70,43 @@ def run(studyObject):
 		traceback.print_exc()
 		return False
 
+def runInFilesystem(feederTree, attachments=[], keepFiles=False):
+	''' Execute gridlab in the local filesystem. Return a nice dictionary of results. '''
+	try:
+		# Create a running directory and fill it.
+		studyPath = 'running/' + str(datetime.datetime.now()).replace(':','_') + '/'
+		os.makedirs(studyPath)
+		# Write attachments and glm.
+		for attach in attachments:
+			with open (studyPath + attach,'w') as attachFile:
+				attachFile.write(attachments[attach])
+		glmString = feeder.sortedWrite(feederTree)
+		with open(studyPath + 'main.glm','w') as glmFile:
+			glmFile.write(glmString)
+		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
+		with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr, open(studyPath + '/PID.txt','w') as pidFile:
+			# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
+			proc = subprocess.Popen(['gridlabd','-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr)
+			pidFile.write(str(proc.pid))
+		returnCode = proc.wait()
+		# Build raw JSON output.
+		rawOut = anaDataTree(studyPath, lambda x:True)
+		with open(studyPath + '/stderr.txt','r') as stderrFile:
+			rawOut['stderr'] = stderrFile.read().strip()
+		with open(studyPath + '/stdout.txt','r') as stdoutFile:
+			rawOut['stdout'] = stdoutFile.read().strip()
+		# Delete the folder and return.
+		if not keepFiles:
+			# HACK: if we don't sleep 1 second, windows intermittantly fails to delete things and an exception is thrown.
+			# Probably cus dropbox is monkeying around in these folders on my dev machine. Disabled for now since it works when dropbox is off.
+			# time.sleep(1)
+			shutil.rmtree(studyPath)
+		return rawOut
+	except:
+		traceback.print_exc()
+		return {}
+
+
 def csvToArray(fileName):
 	''' Take a Gridlab-export csv filename, return a list of timeseries vectors. Internal method. 
 		testStringsThatPass = ['+954.877', '+2.18351e+006', '+7244.99+1.20333e-005d', '+7244.99+120d', '+3.76184','1','+7200+0d','']
