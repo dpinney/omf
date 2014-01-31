@@ -3368,4 +3368,3 @@ testVolt.glm(16114): '283.236421603' is not a valid longitude
 testVolt.glm(16116): '1085.16172296' is not a valid latitude
 testVolt.glm(16122): '282.551515948' is not a valid longitude
 testVolt.glm(16124): '1083.61741973' is not a valid latitude
-Processing 2012-06-01 00:00:00 EST...
