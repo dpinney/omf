@@ -140,6 +140,7 @@ def write(inTree):
 	return output
 
 def sortedWrite(inTree):
+	'''write(inTreeDict)->stringGlm, with all tree objects ordered by their key. '''
 	sortedKeys = sorted(inTree.keys(), key=int)
 	output = ''
 	try:
@@ -148,6 +149,14 @@ def sortedWrite(inTree):
 	except ValueError:
 		raise Exception
 	return output
+
+def findIndex(inTree, testFun):
+	''' Find the key (misnamed index) for a given test function in a tree. '''
+	for k in inTree:
+		if testFun(inTree[k]):
+			return k
+		else:
+			return False
 
 def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 	# translate LengthUnits to minutes.
@@ -394,7 +403,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
                                 font_size=0.25)
     plt.show()
 
-def main():
+if __name__ == '__main__':
 	''' Here we do the tests. '''
 
 	# # Graph Test
@@ -435,6 +444,3 @@ def main():
 	# from pprint import pprint
 	# pprint(tree)
 	pass
-
-if __name__ == '__main__':
-	main()
