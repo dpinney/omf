@@ -6,7 +6,7 @@ if __name__ == '__main__':
 	os.chdir('./../..')
 	sys.path.append(os.getcwd())
 
-import sys, struct, subprocess, os, platform, re, feeder, datetime, shutil, traceback
+import sys, struct, subprocess, os, platform, re, feeder, datetime, shutil, traceback, math
 
 def run(studyObject):
 	# Choose our platform:
