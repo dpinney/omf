@@ -1,12 +1,12 @@
 # About the inputs:
-import milToGridlab  
+import sys, re, os
+sys.path.append('..')
+import milToGridlab
 import Milsoft_GridLAB_D_Feeder_Generation
 import calibrateFeeder
-import processSCADA #TODO: write this function
+import processSCADA #TODO: write this module
 import feeder
 import AddTapeObjects
-import re
-import os
 #import writeFeederConfig #TODO: future work (after June 1 deadline)
 import four_node_commercial # feeder dictionary just for testing
 import four_node_residential # feeder dictionary just for testing
@@ -287,5 +287,6 @@ def main():
 	calibration_config = None # same as for feeder_config
 	
 	OMFmain(milsoft, feeder_info, scada, case_flag, feeder_config, calibration_config, model_name, 1) 
+
 if __name__ ==  '__main__':
-	main();
+	main()
