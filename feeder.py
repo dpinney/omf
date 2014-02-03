@@ -150,14 +150,6 @@ def sortedWrite(inTree):
 		raise Exception
 	return output
 
-def findIndex(inTree, testFun):
-	''' Find the key (misnamed index) for a given test function in a tree. '''
-	for k in inTree:
-		if testFun(inTree[k]):
-			return k
-		else:
-			return False
-
 def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 	# translate LengthUnits to minutes.
 	if simLengthUnits == 'minutes':
@@ -406,12 +398,12 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 if __name__ == '__main__':
 	''' Here we do the tests. '''
 
-	# Graph Test
-	import json
-	with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
-		tree = json.load(inJ)['tree']
-	nxG = treeToNxGraph(tree)
-	latLonNxGraph(nxG)
+	# # Graph Test
+	# import json
+	# with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
+	# 	tree = json.load(inJ)['tree']
+	# nxG = treeToNxGraph(tree)
+	# latLonNxGraph(nxG)
 
 	# # Parser Test
 	# tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
