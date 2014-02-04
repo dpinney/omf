@@ -321,7 +321,7 @@ def treeToNxGraph(inTree):
             if 'parent' in item.keys():
                 outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
                 outGraph.node[item['name']]['type']=item['object']
-                outGraph.node[item['name']]['pos']=(float(item['latitude']),float(item['longitude']))
+                outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
             elif 'from' in item.keys():
                 myPhase = phaseCount(item.get('phases','AN'))
                 outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase})
@@ -334,7 +334,7 @@ def treeToNxGraph(inTree):
                 outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
     return outGraph
 
-def obToCol(obStr):
+def _obToCol(obStr):
     ''' Function to color by node/edge type. '''
     obToColor = {'node':'gray',
         'house':'#3366FF',
@@ -350,7 +350,7 @@ def obToCol(obStr):
     return obToColor.get(obStr,'black')
 
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
-    ''' Draw an networkx graph representing a feeder. '''
+    ''' Draw a networkx graph representing a feeder. '''
     plt.figure(figsize=(15,15))
     plt.axis('off')
     plt.tight_layout()
@@ -365,7 +365,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
         eType = inGraph.edge[e[0]][e[1]]['type']
         ePhases = inGraph.edge[e[0]][e[1]]['phases']
         standArgs = {'edgelist':[e],
-                     'edge_color':obToCol(eType),
+                     'edge_color':_obToCol(eType),
                      'width':2,
                      'style':{'parentChild':'dotted','underground_line':'dashed'}.get(eType,'solid') }
         if ePhases==3:
@@ -373,7 +373,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
             nx.draw_networkx_edges(inGraph,pos,**standArgs)
             standArgs.update({'width':3,'edge_color':'white'})
             nx.draw_networkx_edges(inGraph,pos,**standArgs)
-            standArgs.update({'width':1,'edge_color':obToCol(eType)})
+            standArgs.update({'width':1,'edge_color':_obToCol(eType)})
             nx.draw_networkx_edges(inGraph,pos,**standArgs)
         if ePhases==2:
             standArgs.update({'width':3})
@@ -385,7 +385,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
     # Draw nodes and optional labels.
     nx.draw_networkx_nodes(inGraph,pos,
                            nodelist=pos.keys(),
-                           node_color=[obToCol(inGraph.node[n]['type']) for n in inGraph],
+                           node_color=[_obToCol(inGraph.node[n]['type']) for n in inGraph],
                            linewidths=0,
                            node_size=40)
     if labels:
@@ -393,7 +393,6 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
                                 font_color='black',
                                 font_weight='bold',
                                 font_size=0.25)
-    plt.show()
 
 if __name__ == '__main__':
 	''' Here we do the tests. '''
@@ -403,7 +402,8 @@ if __name__ == '__main__':
 	# with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
 	# 	tree = json.load(inJ)['tree']
 	# nxG = treeToNxGraph(tree)
-	# latLonNxGraph(nxG)
+	# x = latLonNxGraph(nxG)
+	# plt.show()
 
 	# # Parser Test
 	# tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
