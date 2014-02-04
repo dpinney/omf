@@ -34,8 +34,8 @@ def convert(stdPath,seqPath):
 
 	# Helper for lat/lon conversion.
 	def convertToPixel():
-		x_list = []
-		y_list = []
+		x_list = [1,2]
+		y_list = [1,2]
 		x_pixel_range = 1200
 		y_pixel_range = 800
 		for component in components:
@@ -87,8 +87,8 @@ def convert(stdPath,seqPath):
 			newOb['object'] = gridlabFields[int(objectList[1])]
 			# Convert lat-lon if we have them.
 			# convert to the relative pixel position f(x) = a * x + b
-			newOb['latitude'] = x_scale * float(objectList[5]) + x_b
-			newOb['longitude'] = 800 - (y_scale * float(objectList[6]) + y_b)
+			newOb['latitude'] = str(x_scale * float(objectList[5]) + x_b)
+			newOb['longitude'] = str(800 - (y_scale * float(objectList[6]) + y_b))
 			# Some non-Gridlab elements:
 			newOb['guid'] = objectList[49].replace('{','').replace('}','')
 			newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
