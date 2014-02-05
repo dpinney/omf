@@ -76,6 +76,10 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False):
 		# Create a running directory and fill it.
 		studyPath = 'running/' + str(datetime.datetime.now()).replace(':','_') + '/'
 		os.makedirs(studyPath)
+		# Need to zero out lat/lon data because it frequently breaks Gridlab.
+		for key in feederTree:
+			if 'latitude' in feederTree[key]: feederTree[key]['latitude'] = '0'
+			if 'longitude' in feederTree[key]: feederTree[key]['longitude'] = '0'
 		# Write attachments and glm.
 		for attach in attachments:
 			with open (studyPath + attach,'w') as attachFile:
