@@ -3,7 +3,7 @@
 import sys
 sys.path.append('../..')
 sys.path.append('../../solvers/')
-import milToGridlab as m2g, feeder, os, gridlabd
+import milToGridlab as m2g, feeder, os, gridlabd, json
 from pprint import pprint as pp
 from matplotlib import pyplot as plt
 
@@ -29,8 +29,9 @@ for stdPath, seqPath in testFiles:
 			print 'FAILED DRAWING', stdPath
 		try:
 			# Run powerflow on the GLM.
-			gridlabd.runInFilesystem(outGlm, keepFiles=False)
-			pass
+			output = gridlabd.runInFilesystem(outGlm, keepFiles=False)
+			with open(stdPath.replace('.std','.json'),'w') as outFile:
+				json.dump(output, outFile, indent=4)
 		except:
 			print 'POWERFLOW FAILED', stdPath
 	except:
