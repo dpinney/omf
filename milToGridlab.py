@@ -34,18 +34,21 @@ def convert(stdPath,seqPath):
 
 	# Helper for lat/lon conversion.
 	def convertToPixel():
-		x_list = [1,2]
-		y_list = [1,2]
+		x_list = []
+		y_list = []
 		x_pixel_range = 1200
 		y_pixel_range = 800
 		for component in components:
 			x_list.append(float(component[5]))
 			y_list.append(float(component[6]))
 		# according to convert function  f(x) = a * x + b
-		x_a = x_pixel_range / (max(x_list) - min(x_list))
-		x_b = -x_a * min(x_list)
-		y_a = y_pixel_range / (max(y_list) - min(y_list))
-		y_b = -y_a * min(y_list)
+		try:
+			x_a = x_pixel_range / (max(x_list) - min(x_list))
+			x_b = -x_a * min(x_list)
+			y_a = y_pixel_range / (max(y_list) - min(y_list))
+			y_b = -y_a * min(y_list)
+		except:
+			x_a,x_b,y_a,y_b = (0,0,0,0)
 		return x_a, x_b, y_a, y_b
 	[x_scale, x_b, y_scale, y_b] = convertToPixel()
 
@@ -1270,16 +1273,13 @@ def convert(stdPath,seqPath):
 	dedupGlm('line_configuration', glmTree)
 	# Throw some headers on that:
 	genericHeaders = [	{"timezone":"PST+8PDT","stoptime":"'2000-01-01 00:00:00'","starttime":"'2000-01-01 00:00:00'","clock":"clock"},
-						{"omftype":"#include","argument":"\"schedules.glm\""},
 						{"omftype":"#set","argument":"minimum_timestep=60"},
 						{"omftype":"#set","argument":"profiler=1"},
 						{"omftype":"#set","argument":"relax_naming_rules=1"},
 						{"omftype":"module","argument":"generators"},
 						{"omftype":"module","argument":"tape"},
-						{"omftype":"module","argument":"climate"},
 						{"module":"residential","implicit_enduses":"NONE"},
-						{"solver_method":"NR","NR_iteration_limit":"50","module":"powerflow"},
-						{"object":"climate","name":"Climate","interpolate":"QUADRATIC","tmyfile":"climate.tmy2"}]
+						{"solver_method":"NR","NR_iteration_limit":"50","module":"powerflow"}]
 	for headId in xrange(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
 

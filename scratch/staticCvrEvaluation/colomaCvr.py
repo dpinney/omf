@@ -137,7 +137,7 @@ for key in tree:
         confIndex = key
 baselineTap = 3 # GLOBAL VARIABLE FOR DEFAULT TAP POSITION
 tree[confIndex] = { # manual regulation 
-	'name':'REG27-CONFIG',
+	'name':'REG27-CONFIG', #TODO: DO NOT HARD CODE THIS VALUE
 	'object':'regulator_configuration',
 	'connect_type':'1',
 	'raise_taps':'10',

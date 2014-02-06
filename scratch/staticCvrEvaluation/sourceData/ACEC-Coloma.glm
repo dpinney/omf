@@ -1,7 +1,7 @@
 clock {
 	timezone PST+8PDT;
 	starttime '2000-01-01 00:00:00';
-	stoptime '2000-01-02 00:00:00';
+	stoptime '2000-01-01 00:00:00';
 };
 
 #include "schedules.glm";
@@ -26,14 +26,13 @@ object climate {
 	tmyfile climate.tmy2;
 };
 
-object regulator {
-	phases ACB;
-	from COLOMA SUB;
-	name Coloma Bus Regs;
-	longitude 0.0;
-	to nodeCOLOMA4Coloma Bus Regs;
-	latitude 1189.21325596;
-	configuration Coloma Bus Regs-CONFIG;
+object node {
+	phases ABCN;
+	name COLOMA SUB;
+	bustype SWING;
+	longitude 0.366168846059;
+	nominal_voltage 7200.0;
+	latitude 1188.78454546;
 };
 
 object regulator_configuration {
@@ -55,6 +54,16 @@ object regulator_configuration {
 	control_level INDIVIDUAL;
 	PT_phase ABC;
 	band_width 2.000004;
+};
+
+object regulator {
+	phases ACB;
+	from COLOMA SUB;
+	name Coloma Bus Regs;
+	longitude 0.0;
+	to nodeCOLOMA4Coloma Bus Regs;
+	latitude 1189.21325596;
+	configuration Coloma Bus Regs-CONFIG;
 };
 
 object fuse {
@@ -755,17 +764,6 @@ object overhead_line {
 	configuration 949086-LINECONFIG;
 };
 
-object overhead_line {
-	phases CN;
-	from node949086900842;
-	name 949086;
-	longitude 8.77213843796;
-	to node824761949086;
-	length 315;
-	latitude 1192.07550366;
-	configuration 949086-LINECONFIG;
-};
-
 object line_configuration {
 	name 949086-LINECONFIG;
 	spacing 825694-LINESPACING;
@@ -782,6 +780,17 @@ object overhead_line_conductor {
 
 object overhead_line {
 	phases CN;
+	from node949086900842;
+	name 949086;
+	longitude 8.77213843796;
+	to node824761949086;
+	length 315;
+	latitude 1192.07550366;
+	configuration 949086-LINECONFIG;
+};
+
+object overhead_line {
+	phases CN;
 	from node824761949086;
 	name 824761;
 	longitude 9.07428550265;
@@ -789,6 +798,13 @@ object overhead_line {
 	length 325;
 	latitude 1192.07663282;
 	configuration 914176-LINECONFIG;
+};
+
+object line_configuration {
+	name 914176-LINECONFIG;
+	spacing 825694-LINESPACING;
+	conductor_N 824894_conductor_N;
+	conductor_C 824894_conductor_C;
 };
 
 object overhead_line {
@@ -800,13 +816,6 @@ object overhead_line {
 	length 300;
 	latitude 1192.07889116;
 	configuration 914176-LINECONFIG;
-};
-
-object line_configuration {
-	name 914176-LINECONFIG;
-	spacing 825694-LINESPACING;
-	conductor_N 824894_conductor_N;
-	conductor_C 824894_conductor_C;
 };
 
 object underground_line {
@@ -1069,6 +1078,13 @@ object overhead_line {
 	configuration 825694-LINECONFIG;
 };
 
+object line_configuration {
+	name 824825-LINECONFIG;
+	spacing 825694-LINESPACING;
+	conductor_N 913826_conductor_N;
+	conductor_C 913826_conductor_N;
+};
+
 object overhead_line {
 	phases C;
 	from node824717920601;
@@ -1078,13 +1094,6 @@ object overhead_line {
 	length 338;
 	latitude 1191.3963095;
 	configuration 824825-LINECONFIG;
-};
-
-object line_configuration {
-	name 824825-LINECONFIG;
-	spacing 825694-LINESPACING;
-	conductor_N 913826_conductor_N;
-	conductor_C 913826_conductor_N;
 };
 
 object underground_line {
@@ -1120,6 +1129,15 @@ object underground_line {
 	configuration 825456-LINECONFIG;
 };
 
+object line_configuration {
+	name 824830-LINECONFIG;
+	spacing 824894-LINESPACING;
+	conductor_N 825694_conductor_N;
+	conductor_A 825694_conductor_N;
+	conductor_C 825694_conductor_N;
+	conductor_B 825694_conductor_N;
+};
+
 object overhead_line {
 	phases ACB;
 	from node824701824700;
@@ -1129,15 +1147,6 @@ object overhead_line {
 	length 204;
 	latitude 1188.95109764;
 	configuration 824830-LINECONFIG;
-};
-
-object line_configuration {
-	name 824830-LINECONFIG;
-	spacing 824894-LINESPACING;
-	conductor_N 825694_conductor_N;
-	conductor_A 825694_conductor_N;
-	conductor_C 825694_conductor_N;
-	conductor_B 825694_conductor_N;
 };
 
 object underground_line {
@@ -2330,17 +2339,6 @@ object fuse {
 	latitude 1196.21277276;
 };
 
-object underground_line {
-	phases C;
-	from node825688FCMA4-F011x1;
-	name 825688;
-	longitude 12.0654331467;
-	to node1808-33-002825688;
-	length 354;
-	latitude 1196.17268732;
-	configuration 825688-LINECONFIG;
-};
-
 object line_configuration {
 	name 825688-LINECONFIG;
 	spacing 825117-LINESPACING;
@@ -2362,6 +2360,17 @@ object underground_line_conductor {
 	shield_gmr 0.000000;
 };
 
+object underground_line {
+	phases C;
+	from node825688FCMA4-F011x1;
+	name 825688;
+	longitude 12.0654331467;
+	to node1808-33-002825688;
+	length 354;
+	latitude 1196.17268732;
+	configuration 825688-LINECONFIG;
+};
+
 object overhead_line {
 	phases CN;
 	from node825687914182;
@@ -2370,17 +2379,6 @@ object overhead_line {
 	to node825692825690;
 	length 312;
 	latitude 1196.39682704;
-	configuration 825692-LINECONFIG;
-};
-
-object overhead_line {
-	phases CN;
-	from node825692825690;
-	name 825692;
-	to node825693825692;
-	longitude 11.6311644264;
-	length 345;
-	latitude 1196.5916084;
 	configuration 825692-LINECONFIG;
 };
 
@@ -2400,23 +2398,23 @@ object overhead_line_conductor {
 
 object overhead_line {
 	phases CN;
+	from node825692825690;
+	name 825692;
+	to node825693825692;
+	longitude 11.6311644264;
+	length 345;
+	latitude 1196.5916084;
+	configuration 825692-LINECONFIG;
+};
+
+object overhead_line {
+	phases CN;
 	from node825693825692;
 	name 825693;
 	longitude 12.0686820398;
 	to node825694825693;
 	length 469;
 	latitude 1196.72597932;
-	configuration 825694-LINECONFIG;
-};
-
-object overhead_line {
-	phases C;
-	from node825694825693;
-	name 825694;
-	longitude 12.1509873334;
-	to node1808-33-003825694;
-	length 140;
-	latitude 1196.64976052;
 	configuration 825694-LINECONFIG;
 };
 
@@ -2442,6 +2440,17 @@ object overhead_line_conductor {
 	name 825694_conductor_N;
 	geometric_mean_radius 0.00437;
 	resistance 2.57;
+};
+
+object overhead_line {
+	phases C;
+	from node825694825693;
+	name 825694;
+	longitude 12.1509873334;
+	to node1808-33-003825694;
+	length 140;
+	latitude 1196.64976052;
+	configuration 825694-LINECONFIG;
 };
 
 object overhead_line {
@@ -3567,17 +3576,6 @@ object overhead_line {
 	configuration 824894-LINECONFIG;
 };
 
-object overhead_line {
-	phases ACB;
-	from node824894824892;
-	name 824894;
-	longitude 13.170056824;
-	to node824899824894;
-	length 421;
-	latitude 1188.81164548;
-	configuration 824894-LINECONFIG;
-};
-
 object line_configuration {
 	name 824894-LINECONFIG;
 	spacing 824894-LINESPACING;
@@ -3611,6 +3609,17 @@ object overhead_line_conductor {
 	resistance 1.12;
 };
 
+object overhead_line {
+	phases ACB;
+	from node824894824892;
+	name 824894;
+	longitude 13.170056824;
+	to node824899824894;
+	length 421;
+	latitude 1188.81164548;
+	configuration 824894-LINECONFIG;
+};
+
 object underground_line {
 	phases ACB;
 	from node824899824894;
@@ -3633,6 +3642,14 @@ object underground_line {
 	configuration 824901-LINECONFIG;
 };
 
+object line_configuration {
+	name 824901-LINECONFIG;
+	conductor_A 825244-LINECONFIGunderground_line_conductor62003;
+	spacing 923991-LINESPACING;
+	conductor_C 825244-LINECONFIGunderground_line_conductor62003;
+	conductor_B 825244-LINECONFIGunderground_line_conductor62003;
+};
+
 object underground_line {
 	phases ACB;
 	from node824901824900;
@@ -3642,24 +3659,6 @@ object underground_line {
 	length 1053;
 	latitude 1188.81164548;
 	configuration 824901-LINECONFIG;
-};
-
-object line_configuration {
-	name 824901-LINECONFIG;
-	conductor_A 825244-LINECONFIGunderground_line_conductor62003;
-	spacing 923991-LINESPACING;
-	conductor_C 825244-LINECONFIGunderground_line_conductor62003;
-	conductor_B 825244-LINECONFIGunderground_line_conductor62003;
-};
-
-object regulator {
-	phases A;
-	from nodeREG14824901;
-	name REG14;
-	longitude 17.2810922759;
-	to node825184REG14;
-	latitude 1188.81912366;
-	configuration REG14-CONFIG;
 };
 
 object regulator_configuration {
@@ -3681,6 +3680,16 @@ object regulator_configuration {
 	compensator_r_setting_A 19.40004;
 	PT_phase A;
 	band_width 2.000004;
+};
+
+object regulator {
+	phases A;
+	from nodeREG14824901;
+	name REG14;
+	longitude 17.2810922759;
+	to node825184REG14;
+	latitude 1188.81912366;
+	configuration REG14-CONFIG;
 };
 
 object underground_line {
@@ -3814,6 +3823,12 @@ object underground_line {
 	configuration 955227-LINECONFIG;
 };
 
+object line_configuration {
+	name 825215-LINECONFIG;
+	spacing 825117-LINESPACING;
+	conductor_A 825688-LINECONFIGunderground_line_conductor32005;
+};
+
 object underground_line {
 	phases A;
 	from node825215825212;
@@ -3823,12 +3838,6 @@ object underground_line {
 	length 1779;
 	latitude 1187.4109134;
 	configuration 825215-LINECONFIG;
-};
-
-object line_configuration {
-	name 825215-LINECONFIG;
-	spacing 825117-LINESPACING;
-	conductor_A 825688-LINECONFIGunderground_line_conductor32005;
 };
 
 object overhead_line {
@@ -4159,6 +4168,13 @@ object overhead_line {
 	configuration 825240-LINECONFIG;
 };
 
+object line_configuration {
+	name 825240-LINECONFIG;
+	spacing 913826-LINESPACING;
+	conductor_N 825694_conductor_N;
+	conductor_A 825694_conductor_N;
+};
+
 object overhead_line {
 	phases AN;
 	from node825240825239;
@@ -4168,13 +4184,6 @@ object overhead_line {
 	length 295;
 	latitude 1187.47132385;
 	configuration 825240-LINECONFIG;
-};
-
-object line_configuration {
-	name 825240-LINECONFIG;
-	spacing 913826-LINESPACING;
-	conductor_N 825694_conductor_N;
-	conductor_A 825694_conductor_N;
 };
 
 object underground_line {
@@ -4220,17 +4229,6 @@ object underground_line {
 	configuration 825244-LINECONFIG;
 };
 
-object underground_line {
-	phases A;
-	from node825244919704;
-	name 825244;
-	to nodeT7736825244;
-	longitude 30.0643013014;
-	length 910;
-	latitude 1185.79959162;
-	configuration 825244-LINECONFIG;
-};
-
 object line_configuration {
 	name 825244-LINECONFIG;
 	spacing 825117-LINESPACING;
@@ -4250,6 +4248,17 @@ object underground_line_conductor {
 	neutral_resistance 1.61568;
 	neutral_diameter 0.127999;
 	shield_gmr 0.000000;
+};
+
+object underground_line {
+	phases A;
+	from node825244919704;
+	name 825244;
+	to nodeT7736825244;
+	longitude 30.0643013014;
+	length 910;
+	latitude 1185.79959162;
+	configuration 825244-LINECONFIG;
 };
 
 object underground_line {
@@ -4449,17 +4458,6 @@ object overhead_line {
 	configuration 913826-LINECONFIG;
 };
 
-object overhead_line {
-	phases A;
-	from node913826913784;
-	name 913826;
-	longitude 33.3781723335;
-	to node7651x2-B913826;
-	length 454;
-	latitude 1184.54508671;
-	configuration 913826-LINECONFIG;
-};
-
 object line_configuration {
 	name 913826-LINECONFIG;
 	spacing 913826-LINESPACING;
@@ -4484,6 +4482,17 @@ object overhead_line_conductor {
 	resistance 3.86;
 };
 
+object overhead_line {
+	phases A;
+	from node913826913784;
+	name 913826;
+	longitude 33.3781723335;
+	to node7651x2-B913826;
+	length 454;
+	latitude 1184.54508671;
+	configuration 913826-LINECONFIG;
+};
+
 object underground_line {
 	phases A;
 	from node955225913783;
@@ -4505,6 +4514,12 @@ object fuse {
 	latitude 1185.34002051;
 };
 
+object line_configuration {
+	name 955227-LINECONFIG;
+	spacing 825117-LINESPACING;
+	conductor_A 825116-LINECONFIGunderground_line_conductor98204;
+};
+
 object underground_line {
 	phases A;
 	from node955227F12396x1;
@@ -4514,12 +4529,6 @@ object underground_line {
 	length 1280;
 	latitude 1185.3405851;
 	configuration 955227-LINECONFIG;
-};
-
-object line_configuration {
-	name 955227-LINECONFIG;
-	spacing 825117-LINESPACING;
-	conductor_A 923998-LINECONFIGunderground_line_conductor131004;
 };
 
 object underground_line {
@@ -6329,17 +6338,6 @@ object overhead_line {
 	configuration 825114-LINECONFIG;
 };
 
-object overhead_line {
-	phases BN;
-	from node825114825113;
-	name 825114;
-	longitude 30.0848776248;
-	to node825115825114;
-	length 31;
-	latitude 1196.28503947;
-	configuration 825114-LINECONFIG;
-};
-
 object line_configuration {
 	name 825114-LINECONFIG;
 	spacing 825114-LINESPACING;
@@ -6355,6 +6353,17 @@ object line_spacing {
 	distance_AB 0.000000;
 	distance_AC 0.000000;
 	distance_BN 4.000000;
+};
+
+object overhead_line {
+	phases BN;
+	from node825114825113;
+	name 825114;
+	longitude 30.0848776248;
+	to node825115825114;
+	length 31;
+	latitude 1196.28503947;
+	configuration 825114-LINECONFIG;
 };
 
 object underground_line {
@@ -6378,6 +6387,21 @@ object fuse {
 	latitude 1196.29350823;
 };
 
+object underground_line_conductor {
+	conductor_gmr 0.01177;
+	conductor_resistance 1.1088;
+	shield_resistance 0.000000;
+	neutral_gmr 0.0317574;
+	neutral_strands 19;
+	conductor_diameter 0.373000;
+	name 825116-LINECONFIGunderground_line_conductor98204;
+	insulation_relative_permitivitty 2.4;
+	outer_diameter 0.983000;
+	neutral_resistance 2.96208;
+	neutral_diameter 0.128000;
+	shield_gmr 0.000000;
+};
+
 object underground_line {
 	phases B;
 	from node825116F7305x1;
@@ -6389,21 +6413,10 @@ object underground_line {
 	configuration 825117-LINECONFIG;
 };
 
-object underground_line {
-	phases B;
-	from node825117825116;
-	name 825117;
-	longitude 30.4877403778;
-	to node825119825117;
-	length 574;
-	latitude 1196.63564593;
-	configuration 825117-LINECONFIG;
-};
-
 object line_configuration {
 	name 825117-LINECONFIG;
 	spacing 825117-LINESPACING;
-	conductor_B 923998-LINECONFIGunderground_line_conductor131004;
+	conductor_B 825116-LINECONFIGunderground_line_conductor98204;
 };
 
 object line_spacing {
@@ -6414,6 +6427,17 @@ object line_spacing {
 	distance_AB 0.0;
 	distance_AC 0.0;
 	distance_BN 0.0;
+};
+
+object underground_line {
+	phases B;
+	from node825117825116;
+	name 825117;
+	longitude 30.4877403778;
+	to node825119825117;
+	length 574;
+	latitude 1196.63564593;
+	configuration 825117-LINECONFIG;
 };
 
 object underground_line {
@@ -7931,6 +7955,14 @@ object underground_line {
 	configuration 825456-LINECONFIG;
 };
 
+object line_configuration {
+	name 825456-LINECONFIG;
+	spacing 923991-LINESPACING;
+	conductor_A 825116-LINECONFIGunderground_line_conductor98204;
+	conductor_C 825116-LINECONFIGunderground_line_conductor98204;
+	conductor_B 825116-LINECONFIGunderground_line_conductor98204;
+};
+
 object underground_line {
 	phases ACB;
 	from node825456825455;
@@ -7943,11 +7975,11 @@ object underground_line {
 };
 
 object line_configuration {
-	name 825456-LINECONFIG;
+	name 825458-LINECONFIG;
 	spacing 923991-LINESPACING;
-	conductor_A 923998-LINECONFIGunderground_line_conductor131004;
-	conductor_C 923998-LINECONFIGunderground_line_conductor131004;
-	conductor_B 923998-LINECONFIGunderground_line_conductor131004;
+	conductor_A 825688-LINECONFIGunderground_line_conductor32005;
+	conductor_C 825688-LINECONFIGunderground_line_conductor32005;
+	conductor_B 825688-LINECONFIGunderground_line_conductor32005;
 };
 
 object underground_line {
@@ -7959,14 +7991,6 @@ object underground_line {
 	length 184;
 	latitude 1180.33837381;
 	configuration 825458-LINECONFIG;
-};
-
-object line_configuration {
-	name 825458-LINECONFIG;
-	spacing 923991-LINESPACING;
-	conductor_A 825688-LINECONFIGunderground_line_conductor32005;
-	conductor_C 825688-LINECONFIGunderground_line_conductor32005;
-	conductor_B 825688-LINECONFIGunderground_line_conductor32005;
 };
 
 object underground_line {
@@ -8133,23 +8157,12 @@ object underground_line {
 	configuration 923991-LINECONFIG;
 };
 
-object underground_line {
-	phases ACB;
-	from node923991923989;
-	name 923991;
-	to node923993923991;
-	longitude 29.0625592411;
-	length 1300;
-	latitude 1178.60623112;
-	configuration 923991-LINECONFIG;
-};
-
 object line_configuration {
 	name 923991-LINECONFIG;
 	spacing 923991-LINESPACING;
-	conductor_A 923991-LINECONFIGunderground_line_conductor130003;
-	conductor_C 923991-LINECONFIGunderground_line_conductor130003;
-	conductor_B 923991-LINECONFIGunderground_line_conductor130003;
+	conductor_A 923991-LINECONFIGunderground_line_conductor130005;
+	conductor_C 923991-LINECONFIGunderground_line_conductor130005;
+	conductor_B 923991-LINECONFIGunderground_line_conductor130005;
 };
 
 object line_spacing {
@@ -8169,12 +8182,23 @@ object underground_line_conductor {
 	neutral_gmr 0.0317574;
 	neutral_strands 19;
 	conductor_diameter 0.520000;
-	name 923991-LINECONFIGunderground_line_conductor130003;
+	name 923991-LINECONFIGunderground_line_conductor130005;
 	insulation_relative_permitivitty 2.4;
 	outer_diameter 1.138000;
 	neutral_resistance 1.61568;
 	neutral_diameter 0.127999;
 	shield_gmr 0.000000;
+};
+
+object underground_line {
+	phases ACB;
+	from node923991923989;
+	name 923991;
+	to node923993923991;
+	longitude 29.0625592411;
+	length 1300;
+	latitude 1178.60623112;
+	configuration 923991-LINECONFIG;
 };
 
 object underground_line {
@@ -8188,6 +8212,12 @@ object underground_line {
 	configuration 925975-LINECONFIG;
 };
 
+object line_configuration {
+	name 925975-LINECONFIG;
+	spacing 825117-LINESPACING;
+	conductor_C 825116-LINECONFIGunderground_line_conductor98204;
+};
+
 object underground_line {
 	phases C;
 	from node925975923993;
@@ -8197,12 +8227,6 @@ object underground_line {
 	length 220;
 	latitude 1178.47863521;
 	configuration 925975-LINECONFIG;
-};
-
-object line_configuration {
-	name 925975-LINECONFIG;
-	spacing 825117-LINESPACING;
-	conductor_C 923998-LINECONFIGunderground_line_conductor131004;
 };
 
 object underground_line {
@@ -8246,21 +8270,6 @@ object underground_line {
 	length 1296;
 	latitude 1178.58759986;
 	configuration 825117-LINECONFIG;
-};
-
-object underground_line_conductor {
-	conductor_gmr 0.01177;
-	conductor_resistance 1.1088;
-	shield_resistance 0.000000;
-	neutral_gmr 0.0317574;
-	neutral_strands 19;
-	conductor_diameter 0.373000;
-	name 923998-LINECONFIGunderground_line_conductor131004;
-	insulation_relative_permitivitty 2.4;
-	outer_diameter 0.983000;
-	neutral_resistance 2.96208;
-	neutral_diameter 0.128000;
-	shield_gmr 0.000000;
 };
 
 object underground_line {
@@ -8505,6 +8514,12 @@ object underground_line {
 	configuration 923991-LINECONFIG;
 };
 
+object line_configuration {
+	name 924010-LINECONFIG;
+	spacing 825117-LINESPACING;
+	conductor_C 923991-LINECONFIGunderground_line_conductor130005;
+};
+
 object underground_line {
 	phases C;
 	from node924010924009;
@@ -8514,12 +8529,6 @@ object underground_line {
 	length 87;
 	latitude 1177.99930368;
 	configuration 924010-LINECONFIG;
-};
-
-object line_configuration {
-	name 924010-LINECONFIG;
-	spacing 825117-LINESPACING;
-	conductor_C 923991-LINECONFIGunderground_line_conductor130003;
 };
 
 object underground_line {
@@ -9075,6 +9084,13 @@ object overhead_line {
 	configuration 825563-LINECONFIG;
 };
 
+object line_configuration {
+	name 825563-LINECONFIG;
+	spacing 825114-LINESPACING;
+	conductor_N 913826_conductor_N;
+	conductor_B 913826_conductor_N;
+};
+
 object overhead_line {
 	phases B;
 	from node825563825562;
@@ -9084,13 +9100,6 @@ object overhead_line {
 	length 536;
 	latitude 1178.07495789;
 	configuration 825563-LINECONFIG;
-};
-
-object line_configuration {
-	name 825563-LINECONFIG;
-	spacing 825114-LINESPACING;
-	conductor_N 913826_conductor_N;
-	conductor_B 913826_conductor_N;
 };
 
 object underground_line {
@@ -9421,6 +9430,12 @@ object underground_line {
 	configuration 825599-LINECONFIG;
 };
 
+object line_configuration {
+	name 825599-LINECONFIG;
+	spacing 825117-LINESPACING;
+	conductor_B 825688-LINECONFIGunderground_line_conductor32005;
+};
+
 object underground_line {
 	phases B;
 	from node825599825598;
@@ -9430,12 +9445,6 @@ object underground_line {
 	length 573;
 	latitude 1183.00659622;
 	configuration 825599-LINECONFIG;
-};
-
-object line_configuration {
-	name 825599-LINECONFIG;
-	spacing 825117-LINESPACING;
-	conductor_B 825688-LINECONFIGunderground_line_conductor32005;
 };
 
 object underground_line {
@@ -16627,6 +16636,42 @@ object node {
 object triplex_meter {
 	phases AS;
 	nominal_voltage 120;
+	name nodeS1808-19-0031808-19-009_A;
+};
+
+object triplex_meter {
+	phases CS;
+	nominal_voltage 120;
+	name nodeS1808-19-0031808-19-009_C;
+};
+
+object triplex_meter {
+	phases BS;
+	nominal_voltage 120;
+	name nodeS1808-19-0031808-19-009_B;
+};
+
+object triplex_meter {
+	phases CS;
+	nominal_voltage 120;
+	name nodeS1808-33-0041808-33-003_C;
+};
+
+object triplex_meter {
+	phases BS;
+	nominal_voltage 120;
+	name nodeS1707-04-0011707-0205_B;
+};
+
+object triplex_meter {
+	phases BS;
+	nominal_voltage 120;
+	name nodeS1708-15-0031708-15-001_B;
+};
+
+object triplex_meter {
+	phases AS;
+	nominal_voltage 120;
 	name nodeS1707-10-025T18079_A;
 };
 
@@ -18928,40 +18973,60 @@ object triplex_meter {
 	name nodeS1708-08-0011708-08-013_B;
 };
 
-object triplex_meter {
+object triplex_node {
 	phases AS;
+	power_12 976.289+656.099j;
+	name S1808-19-003_A;
+	parent nodeS1808-19-0031808-19-009_A;
 	nominal_voltage 120;
-	name nodeS1808-19-0031808-19-009_A;
 };
 
-object triplex_meter {
+object triplex_node {
 	phases CS;
+	power_12 976.289+656.099j;
+	name S1808-19-003_C;
+	parent nodeS1808-19-0031808-19-009_C;
 	nominal_voltage 120;
-	name nodeS1808-19-0031808-19-009_C;
 };
 
-object triplex_meter {
+object triplex_node {
 	phases BS;
+	power_12 976.289+656.099j;
+	name S1808-19-003_B;
+	parent nodeS1808-19-0031808-19-009_B;
 	nominal_voltage 120;
-	name nodeS1808-19-0031808-19-009_B;
 };
 
-object triplex_meter {
+object triplex_node {
 	phases CS;
+	power_12 52.485+20.7679j;
+	name S1808-19-006_C;
+	parent nodeS1808-19-0031808-19-009_C;
 	nominal_voltage 120;
-	name nodeS1808-33-0041808-33-003_C;
 };
 
-object triplex_meter {
-	phases BS;
+object triplex_node {
+	phases CS;
+	power_12 900.576+356.351j;
+	name S1808-33-004_C;
+	parent nodeS1808-33-0041808-33-003_C;
 	nominal_voltage 120;
-	name nodeS1707-04-0011707-0205_B;
 };
 
-object triplex_meter {
+object triplex_node {
 	phases BS;
+	power_12 638.984+252.841j;
+	name S1707-04-001_B;
+	parent nodeS1707-04-0011707-0205_B;
 	nominal_voltage 120;
-	name nodeS1708-15-0031708-15-001_B;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 1191.33+471.399j;
+	name S1708-15-003_B;
+	parent nodeS1708-15-0031708-15-001_B;
+	nominal_voltage 120;
 };
 
 object triplex_node {
@@ -22359,30 +22424,6 @@ object triplex_node {
 object triplex_node {
 	phases AS;
 	power_12 8845.18+4792.29j;
-	name S1807-25-012_A;
-	parent nodeS1807-25-0111807-25-003_A;
-	nominal_voltage 120;
-};
-
-object triplex_node {
-	phases CS;
-	power_12 8845.18+4792.29j;
-	name S1807-25-012_C;
-	parent nodeS1807-25-0111807-25-003_C;
-	nominal_voltage 120;
-};
-
-object triplex_node {
-	phases BS;
-	power_12 8845.18+4792.29j;
-	name S1807-25-012_B;
-	parent nodeS1807-25-0111807-25-003_B;
-	nominal_voltage 120;
-};
-
-object triplex_node {
-	phases AS;
-	power_12 8845.18+4792.29j;
 	name S1807-25-011_A;
 	parent nodeS1807-25-0111807-25-003_A;
 	nominal_voltage 120;
@@ -22406,6 +22447,30 @@ object triplex_node {
 
 object triplex_node {
 	phases AS;
+	power_12 8845.18+4792.29j;
+	name S1807-25-012_A;
+	parent nodeS1807-25-0111807-25-003_A;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases CS;
+	power_12 8845.18+4792.29j;
+	name S1807-25-012_C;
+	parent nodeS1807-25-0111807-25-003_C;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases BS;
+	power_12 8845.18+4792.29j;
+	name S1807-25-012_B;
+	parent nodeS1807-25-0111807-25-003_B;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
 	power_12 34619.7+18154.6j;
 	name S1707-14-017_A;
 	parent nodeS1707-14-017T12395_A;
@@ -22420,60 +22485,82 @@ object triplex_node {
 	nominal_voltage 120;
 };
 
-object triplex_node {
+object transformer {
 	phases AS;
-	power_12 976.289+656.099j;
-	name S1808-19-003_A;
-	parent nodeS1808-19-0031808-19-009_A;
-	nominal_voltage 120;
+	from node1808-19-009824830;
+	name 1808-19-009_A;
+	to nodeS1808-19-0031808-19-009_A;
+	configuration 1808-19-009_A-CONFIG;
 };
 
-object triplex_node {
+object transformer_configuration {
+	name 1808-19-009_A-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00459908027591+0.0225354933519j;
+	powerA_rating 75;
+	power_rating 75;
+};
+
+object transformer {
 	phases CS;
-	power_12 976.289+656.099j;
-	name S1808-19-003_C;
-	parent nodeS1808-19-0031808-19-009_C;
-	nominal_voltage 120;
+	from node1808-19-009824830;
+	name 1808-19-009_C;
+	to nodeS1808-19-0031808-19-009_C;
+	configuration 1808-19-009_C-CONFIG;
 };
 
-object triplex_node {
+object transformer_configuration {
+	powerC_rating 75;
+	name 1808-19-009_C-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00459908027591+0.0225354933519j;
+	power_rating 75;
+};
+
+object transformer {
 	phases BS;
-	power_12 976.289+656.099j;
-	name S1808-19-003_B;
-	parent nodeS1808-19-0031808-19-009_B;
-	nominal_voltage 120;
+	from node1808-19-009824830;
+	name 1808-19-009_B;
+	to nodeS1808-19-0031808-19-009_B;
+	configuration 1808-19-009_B-CONFIG;
 };
 
-object triplex_node {
+object transformer_configuration {
+	name 1808-19-009_B-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00459908027591+0.0225354933519j;
+	powerB_rating 75;
+	power_rating 75;
+};
+
+object transformer {
 	phases CS;
-	power_12 52.485+20.7679j;
-	name S1808-19-006_C;
-	parent nodeS1808-19-0031808-19-009_C;
-	nominal_voltage 120;
+	from node1808-33-003825694;
+	name 1808-33-003_C;
+	to nodeS1808-33-0041808-33-003_C;
+	configuration T7300_C-CONFIG;
 };
 
-object triplex_node {
-	phases CS;
-	power_12 900.576+356.351j;
-	name S1808-33-004_C;
-	parent nodeS1808-33-0041808-33-003_C;
-	nominal_voltage 120;
-};
-
-object triplex_node {
+object transformer {
 	phases BS;
-	power_12 638.984+252.841j;
-	name S1707-04-001_B;
-	parent nodeS1707-04-0011707-0205_B;
-	nominal_voltage 120;
+	from node1707-0205825590;
+	name 1707-0205_B;
+	to nodeS1707-04-0011707-0205_B;
+	configuration 1707-0079_B-CONFIG;
 };
 
-object triplex_node {
+object transformer {
 	phases BS;
-	power_12 1191.33+471.399j;
-	name S1708-15-003_B;
-	parent nodeS1708-15-0031708-15-001_B;
-	nominal_voltage 120;
+	from node825008825007;
+	name 1708-15-001_B;
+	to nodeS1708-15-0031708-15-001_B;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22481,7 +22568,17 @@ object transformer {
 	from nodeT18079825341;
 	name T18079_A;
 	to nodeS1707-10-025T18079_A;
-	configuration T19033_A-CONFIG;
+	configuration T18079_A-CONFIG;
+};
+
+object transformer_configuration {
+	name T18079_A-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00399920023992+0.0195960811756j;
+	powerA_rating 75;
+	power_rating 75;
 };
 
 object transformer {
@@ -22489,7 +22586,7 @@ object transformer {
 	from node1808-29-029824786;
 	name 1808-29-029_C;
 	to nodeS1808-29-0701808-29-029_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -22515,7 +22612,7 @@ object transformer {
 	from nodeT10302929726;
 	name T10302_B;
 	to nodeS1707-09-009T10302_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22541,7 +22638,7 @@ object transformer {
 	from node825007825005;
 	name 1708-10-004_B;
 	to nodeS1708-09-0201708-10-004_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -22549,7 +22646,7 @@ object transformer {
 	from node1708-0043825119;
 	name 1708-0043_B;
 	to nodeS1708-16-0251708-0043_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22557,7 +22654,7 @@ object transformer {
 	from node1808-0133825738;
 	name 1808-0133_C;
 	to nodeS1808-29-0821808-0133_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -22565,7 +22662,17 @@ object transformer {
 	from node899901899882;
 	name 1808-0046_C;
 	to nodeS1808-29-0351808-0046_C;
-	configuration 1808-0142_C-CONFIG;
+	configuration 1808-0046_C-CONFIG;
+};
+
+object transformer_configuration {
+	powerC_rating 25;
+	name 1808-0046_C-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00033+0.0022j;
+	power_rating 25;
 };
 
 object transformer {
@@ -22573,7 +22680,7 @@ object transformer {
 	from nodeT11989950220;
 	name T11989_C;
 	to nodeS1807-25-015T11989_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -22581,7 +22688,7 @@ object transformer {
 	from nodeT28731825596;
 	name T28731_B;
 	to nodeS1707-03-010T28731_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22589,7 +22696,7 @@ object transformer {
 	from nodeT29080981158;
 	name T29080_B;
 	to nodeS1807-34-013T29080_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22597,7 +22704,7 @@ object transformer {
 	from node825119825117;
 	name 1708-0045_B;
 	to nodeS1708-16-0161708-0045_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -22605,7 +22712,7 @@ object transformer {
 	from nodeT2590933215;
 	name T2590_B;
 	to nodeS1708-06-018T2590_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22621,7 +22728,17 @@ object transformer {
 	from node1807--T325825794;
 	name 1807--T325_C;
 	to nodeS1807-25-0131807--T325_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
+};
+
+object transformer_configuration {
+	powerC_rating 75;
+	name 1807--T325_C-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00639872038387+0.031353729881j;
+	power_rating 75;
 };
 
 object transformer {
@@ -22629,7 +22746,17 @@ object transformer {
 	from node1807--T325825794;
 	name 1807--T325_B;
 	to nodeS1807-25-0131807--T325_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
+};
+
+object transformer_configuration {
+	name 1807--T325_B-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00639872038387+0.031353729881j;
+	powerB_rating 75;
+	power_rating 75;
 };
 
 object transformer {
@@ -22691,7 +22818,17 @@ object transformer {
 	from node950220824890;
 	name T11988_C;
 	to nodeS1807-25-002T11988_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
+};
+
+object transformer_configuration {
+	powerC_rating 10;
+	name T11988_C-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00033+0.0022j;
+	power_rating 10;
 };
 
 object transformer {
@@ -22699,7 +22836,7 @@ object transformer {
 	from nodeT29059825740;
 	name T29059_C;
 	to nodeS1808-29-086T29059_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -22707,17 +22844,7 @@ object transformer {
 	from node981158974694;
 	name T28723_B;
 	to nodeS1807-34-003T28723_B;
-	configuration T28723_B-CONFIG;
-};
-
-object transformer_configuration {
-	name T28723_B-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00033+0.0022j;
-	powerB_rating 15;
-	power_rating 15;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22725,17 +22852,7 @@ object transformer {
 	from nodeT19033956635;
 	name T19033_A;
 	to nodeS1707-13-014T19033_A;
-	configuration T19033_A-CONFIG;
-};
-
-object transformer_configuration {
-	name T19033_A-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00399920023992+0.0195960811756j;
-	powerA_rating 75;
-	power_rating 75;
+	configuration T18079_A-CONFIG;
 };
 
 object transformer {
@@ -22743,7 +22860,7 @@ object transformer {
 	from node825005825003;
 	name 1708-10-003_B;
 	to nodeS1708-09-0301708-10-003_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -22751,7 +22868,7 @@ object transformer {
 	from nodeT10259825491;
 	name T10259_C;
 	to nodeS1707-03-012T10259_C;
-	configuration 1808-0142_C-CONFIG;
+	configuration 1808-0046_C-CONFIG;
 };
 
 object transformer {
@@ -22759,7 +22876,7 @@ object transformer {
 	from nodeT15710929730;
 	name T15710_B;
 	to nodeS1707-09-008T15710_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -22767,17 +22884,7 @@ object transformer {
 	from node899882899881;
 	name 1808-0142_C;
 	to nodeS1808-29-0871808-0142_C;
-	configuration 1808-0142_C-CONFIG;
-};
-
-object transformer_configuration {
-	powerC_rating 25;
-	name 1808-0142_C-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00033+0.0022j;
-	power_rating 25;
+	configuration 1808-0046_C-CONFIG;
 };
 
 object transformer {
@@ -22785,7 +22892,7 @@ object transformer {
 	from node825117825116;
 	name 1708-0046_B;
 	to nodeS1708-16-0151708-0046_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22801,7 +22908,7 @@ object transformer {
 	from node1808-0137825742;
 	name 1808-0137_C;
 	to nodeS1808-29-0851808-0137_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -22809,7 +22916,7 @@ object transformer {
 	from nodeT28720974697;
 	name T28720_B;
 	to nodeS1807-34-002T28720_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22817,7 +22924,7 @@ object transformer {
 	from nodeT11961933218;
 	name T11961_B;
 	to nodeS1708-07-001T11961_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22825,7 +22932,7 @@ object transformer {
 	from nodeT28684970368;
 	name T28684_C;
 	to nodeS1707-03-017T28684_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -22833,7 +22940,7 @@ object transformer {
 	from node825704825703;
 	name 1808-0166_C;
 	to nodeS1808-27-0111808-0166_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -22841,7 +22948,7 @@ object transformer {
 	from nodeT28732825538;
 	name T28732_B;
 	to nodeS1807-34-009T28732_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -22849,7 +22956,7 @@ object transformer {
 	from node933796899864;
 	name T11098_C;
 	to nodeS1808-29-101T11098_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -22865,7 +22972,7 @@ object transformer {
 	from nodeT14424928282;
 	name T14424_C;
 	to nodeS1707-11-011T14424_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -22873,7 +22980,7 @@ object transformer {
 	from nodeT14424928282;
 	name T14424_B;
 	to nodeS1707-11-011T14424_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -22913,7 +23020,7 @@ object transformer {
 	from nodeT2700929734;
 	name T2700_B;
 	to nodeS1707-09-013T2700_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22921,7 +23028,7 @@ object transformer {
 	from node1808-0160916883;
 	name 1808-0160_C;
 	to nodeS1808-29-0931808-0160_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -22929,7 +23036,7 @@ object transformer {
 	from nodeT28716974690;
 	name T28716_B;
 	to nodeS1807-34-001T28716_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -22937,7 +23044,7 @@ object transformer {
 	from node899864899863;
 	name 1808-0084_C;
 	to nodeS1808-29-0741808-0084_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -22945,7 +23052,7 @@ object transformer {
 	from node1707-0074825223;
 	name 1707-0074_A;
 	to nodeS1707-11-0031707-0074_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -23027,7 +23134,7 @@ object transformer {
 	from nodeT18015928145;
 	name T18015_C;
 	to nodeS1707-03-016T18015_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -23035,7 +23142,7 @@ object transformer {
 	from nodeT18015928145;
 	name T18015_B;
 	to nodeS1707-03-016T18015_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -23051,7 +23158,7 @@ object transformer {
 	from nodeT28838975303;
 	name T28838_B;
 	to nodeS1708-16-008T28838_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23059,7 +23166,7 @@ object transformer {
 	from node1708-0039825172;
 	name 1708-0039_B;
 	to nodeS1708-06-0161708-0039_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23067,7 +23174,7 @@ object transformer {
 	from node899863899862;
 	name T4061_C;
 	to nodeS1808-32-078T4061_C;
-	configuration 1808-0142_C-CONFIG;
+	configuration 1808-0046_C-CONFIG;
 };
 
 object transformer {
@@ -23083,7 +23190,7 @@ object transformer {
 	from nodeT5162907740;
 	name T5162_B;
 	to nodeS1708-10-007T5162_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23099,7 +23206,7 @@ object transformer {
 	from node928145923930;
 	name T10257_C;
 	to nodeS1707-03-004T10257_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -23107,7 +23214,7 @@ object transformer {
 	from node928145923930;
 	name T10257_B;
 	to nodeS1707-03-004T10257_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -23115,7 +23222,7 @@ object transformer {
 	from nodeT10286923970;
 	name T10286_A;
 	to nodeS1707-15-004T10286_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -23123,7 +23230,7 @@ object transformer {
 	from nodeT4107912863;
 	name T4107_C;
 	to nodeS1808-34-004T4107_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -23131,7 +23238,7 @@ object transformer {
 	from node825666825664;
 	name 1808-32-012_C;
 	to nodeS1808-32-0111808-32-012_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -23147,7 +23254,7 @@ object transformer {
 	from node1708-16-024825138;
 	name 1708-16-024_B;
 	to nodeS1708-16-0011708-16-024_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23155,7 +23262,7 @@ object transformer {
 	from node975302825125;
 	name 1708-16-016_B;
 	to nodeS1708-16-0131708-16-016_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23163,7 +23270,7 @@ object transformer {
 	from nodeT28733981975;
 	name T28733_B;
 	to nodeS1707-03-013T28733_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23171,7 +23278,7 @@ object transformer {
 	from node907740919955;
 	name T5161_B;
 	to nodeS1708-10-003T5161_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23179,7 +23286,7 @@ object transformer {
 	from node1808-0088824802;
 	name 1808-0088_C;
 	to nodeS1808-29-0751808-0088_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23187,7 +23294,7 @@ object transformer {
 	from nodeT12388955235;
 	name T12388_A;
 	to nodeS1707-12-010T12388_A;
-	configuration T19033_A-CONFIG;
+	configuration T18079_A-CONFIG;
 };
 
 object transformer {
@@ -23195,7 +23302,7 @@ object transformer {
 	from node825114825113;
 	name 1708-16-012_B;
 	to nodeS1708-16-0201708-16-012_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23203,7 +23310,7 @@ object transformer {
 	from nodeT10261923937;
 	name T10261_C;
 	to nodeS1707-03-002T10261_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -23211,7 +23318,7 @@ object transformer {
 	from nodeT15718929744;
 	name T15718_B;
 	to nodeS1707-04-009T15718_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23219,7 +23326,7 @@ object transformer {
 	from nodeT4140914746;
 	name T4140_C;
 	to nodeS1808-32-014T4140_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -23227,7 +23334,7 @@ object transformer {
 	from nodeT4307906989;
 	name T4307_B;
 	to nodeS1708-05-011T4307_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23235,7 +23342,7 @@ object transformer {
 	from node824802824800;
 	name 1808-0085_C;
 	to nodeS1808-29-0731808-0085_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23243,7 +23350,7 @@ object transformer {
 	from node1807-0303825525;
 	name 1807-0303_B;
 	to nodeS1807-34-0121807-0303_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23275,7 +23382,7 @@ object transformer {
 	from node825113825112;
 	name 1708-16-011_B;
 	to nodeS1708-16-0181708-16-011_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23283,17 +23390,7 @@ object transformer {
 	from node1808-19-005824705;
 	name 1808-19-005_A;
 	to nodeS1808-19-0111808-19-005_A;
-	configuration 1808-19-005_A-CONFIG;
-};
-
-object transformer_configuration {
-	name 1808-19-005_A-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00459908027591+0.0225354933519j;
-	powerA_rating 75;
-	power_rating 75;
+	configuration 1808-19-009_A-CONFIG;
 };
 
 object transformer {
@@ -23301,17 +23398,7 @@ object transformer {
 	from node1808-19-005824705;
 	name 1808-19-005_C;
 	to nodeS1808-19-0111808-19-005_C;
-	configuration 1808-19-005_C-CONFIG;
-};
-
-object transformer_configuration {
-	powerC_rating 75;
-	name 1808-19-005_C-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00459908027591+0.0225354933519j;
-	power_rating 75;
+	configuration 1808-19-009_C-CONFIG;
 };
 
 object transformer {
@@ -23319,17 +23406,7 @@ object transformer {
 	from node1808-19-005824705;
 	name 1808-19-005_B;
 	to nodeS1808-19-0111808-19-005_B;
-	configuration 1808-19-005_B-CONFIG;
-};
-
-object transformer_configuration {
-	name 1808-19-005_B-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00459908027591+0.0225354933519j;
-	powerB_rating 75;
-	power_rating 75;
+	configuration 1808-19-009_B-CONFIG;
 };
 
 object transformer {
@@ -23337,7 +23414,7 @@ object transformer {
 	from nodeT2552910116;
 	name T2552_C;
 	to nodeS1707-10-031T2552_C;
-	configuration 1808-0142_C-CONFIG;
+	configuration 1808-0046_C-CONFIG;
 };
 
 object transformer {
@@ -23345,7 +23422,7 @@ object transformer {
 	from node929743929741;
 	name T15716_B;
 	to nodeS1707-04-005T15716_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23361,7 +23438,7 @@ object transformer {
 	from node824800824799;
 	name 1808-0125_C;
 	to nodeS1808-29-0811808-0125_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23369,7 +23446,7 @@ object transformer {
 	from nodeT3285825639;
 	name T3285_C;
 	to nodeS1808-32-005T3285_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23377,7 +23454,7 @@ object transformer {
 	from nodeT28725825593;
 	name T28725_B;
 	to nodeS1807-34-010T28725_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23385,7 +23462,7 @@ object transformer {
 	from node1808-32-024929700;
 	name 1808-32-024_C;
 	to nodeS1808-32-0161808-32-024_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23393,7 +23470,7 @@ object transformer {
 	from node1808-0080825759;
 	name 1808-0080_C;
 	to nodeS1808-32-0121808-0080_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23417,7 +23494,7 @@ object transformer {
 	from nodeT10263825298;
 	name T10263_C;
 	to nodeS1707-03-015T10263_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -23425,7 +23502,7 @@ object transformer {
 	from nodeT10263825298;
 	name T10263_B;
 	to nodeS1707-03-015T10263_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -23433,7 +23510,7 @@ object transformer {
 	from node1807-0244824850;
 	name 1807-0244_C;
 	to nodeS1807-36-0051807-0244_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -23441,7 +23518,7 @@ object transformer {
 	from nodeT15715929747;
 	name T15715_B;
 	to nodeS1707-04-010T15715_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23465,7 +23542,7 @@ object transformer {
 	from node1708-0040825175;
 	name 1708-0040_B;
 	to nodeS1708-06-0171708-0040_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23473,7 +23550,7 @@ object transformer {
 	from node1808-29-032824805;
 	name 1808-29-032_C;
 	to nodeS1808-29-0071808-29-032_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -23481,7 +23558,7 @@ object transformer {
 	from nodeT5390920248;
 	name T5390_B;
 	to nodeS1708-16-012T5390_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23489,7 +23566,7 @@ object transformer {
 	from node1708-17-020825145;
 	name 1708-17-020_B;
 	to nodeS1708-17-0061708-17-020_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23521,7 +23598,7 @@ object transformer {
 	from nodeT3286825641;
 	name T3286_C;
 	to nodeS1808-32-006T3286_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23529,7 +23606,7 @@ object transformer {
 	from node825713825711;
 	name 1808-27-007_C;
 	to nodeS1808-27-0061808-27-007_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23537,7 +23614,7 @@ object transformer {
 	from nodeT14065929701;
 	name T14065_C;
 	to nodeS1808-32-073T14065_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -23553,7 +23630,7 @@ object transformer {
 	from node1708-09-017825033;
 	name 1708-09-017_B;
 	to nodeS1708-09-0071708-09-017_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23561,7 +23638,7 @@ object transformer {
 	from node824914980820;
 	name 1708-06-005_B;
 	to nodeS1708-06-0011708-06-005_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23569,7 +23646,7 @@ object transformer {
 	from nodeT5274915123;
 	name T5274_B;
 	to nodeS1707-03-001T5274_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23663,7 +23740,7 @@ object transformer {
 	from node980820824910;
 	name 1708-06-044_B;
 	to nodeS1708-06-0201708-06-044_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23671,7 +23748,7 @@ object transformer {
 	from nodeT3287825644;
 	name T3287_C;
 	to nodeS1808-32-074T3287_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23679,7 +23756,7 @@ object transformer {
 	from nodeT15721929751;
 	name T15721_B;
 	to nodeS1707-04-007T15721_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23687,7 +23764,7 @@ object transformer {
 	from node1807-0009825599;
 	name 1807-0009_B;
 	to nodeS1807-35-0021807-0009_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23695,7 +23772,7 @@ object transformer {
 	from node1808-32-026825765;
 	name 1808-32-026_C;
 	to nodeS1808-32-0261808-32-026_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23703,7 +23780,7 @@ object transformer {
 	from node1808-0144824810;
 	name 1808-0144_C;
 	to nodeS1808-29-0891808-0144_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23711,7 +23788,7 @@ object transformer {
 	from node1808-0082825749;
 	name 1808-0082_C;
 	to nodeS1808-32-0131808-0082_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23737,7 +23814,7 @@ object transformer {
 	from nodeT10266923943;
 	name T10266_C;
 	to nodeS1707-10-004T10266_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -23745,7 +23822,7 @@ object transformer {
 	from node929750929749;
 	name T15719_B;
 	to nodeS1707-04-008T15719_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23753,7 +23830,7 @@ object transformer {
 	from node1808-0124825716;
 	name 1808-0124_C;
 	to nodeS1808-27-0091808-0124_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23761,7 +23838,7 @@ object transformer {
 	from node1707-04-001825553;
 	name 1707-04-001_B;
 	to nodeS1707-04-0111707-04-001_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23777,7 +23854,7 @@ object transformer {
 	from node1708-05-008824927;
 	name 1708-05-008_B;
 	to nodeS1708-05-0021708-05-008_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23785,7 +23862,7 @@ object transformer {
 	from nodeT3288902742;
 	name T3288_C;
 	to nodeS1808-32-076T3288_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23793,7 +23870,7 @@ object transformer {
 	from node1807-0306825601;
 	name 1807-0306_B;
 	to nodeS1807-35-0081807-0306_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23801,7 +23878,7 @@ object transformer {
 	from node824909824908;
 	name 1708-06-002_B;
 	to nodeS1708-06-0121708-06-002_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23809,7 +23886,7 @@ object transformer {
 	from node824750824748;
 	name 1808-29-012_C;
 	to nodeS1808-29-0031808-29-012_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23825,7 +23902,7 @@ object transformer {
 	from node1707-0055825456;
 	name 1707-0055_C;
 	to nodeS1707-15-0121707-0055_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -23833,7 +23910,7 @@ object transformer {
 	from node1707-0055825456;
 	name 1707-0055_B;
 	to nodeS1707-15-0121707-0055_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -23841,7 +23918,7 @@ object transformer {
 	from node825710825709;
 	name 1808-27-005_C;
 	to nodeS1808-34-0031808-27-005_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23857,7 +23934,7 @@ object transformer {
 	from nodeT10268923946;
 	name T10268_B;
 	to nodeS1707-10-003T10268_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23865,7 +23942,7 @@ object transformer {
 	from nodeT12255930194;
 	name T12255_B;
 	to nodeS1707-09-016T12255_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23873,7 +23950,7 @@ object transformer {
 	from nodeT12961974674;
 	name T12961_B;
 	to nodeS1707-04-003T12961_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23881,7 +23958,7 @@ object transformer {
 	from node1808-0074825769;
 	name 1808-0074_C;
 	to nodeS1808-32-0221808-0074_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23889,7 +23966,7 @@ object transformer {
 	from node1707-0038825266;
 	name 1707-0038_A;
 	to nodeS1707-12-0031707-0038_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -23897,7 +23974,7 @@ object transformer {
 	from node1708-0036825150;
 	name 1708-0036_B;
 	to nodeS1708-17-0111708-0036_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -23905,7 +23982,7 @@ object transformer {
 	from node1808-19-008824713;
 	name 1808-19-008_B;
 	to nodeS1808-19-0011808-19-008_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -23921,7 +23998,7 @@ object transformer {
 	from node824729824728;
 	name 1808-29-002_C;
 	to nodeS1808-29-0061808-29-002_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -23983,7 +24060,7 @@ object transformer {
 	from node825709825707;
 	name 1808-27-004_C;
 	to nodeS1808-27-0101808-27-004_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24017,7 +24094,7 @@ object transformer {
 	from node1708-04-001824931;
 	name 1708-04-001_B;
 	to nodeS1708-04-0011708-04-001_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24025,7 +24102,7 @@ object transformer {
 	from node1708-09-026825048;
 	name 1708-09-026_B;
 	to nodeS1708-09-0081708-09-026_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24041,7 +24118,7 @@ object transformer {
 	from nodeT10267923950;
 	name T10267_C;
 	to nodeS1707-10-006T10267_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -24049,7 +24126,7 @@ object transformer {
 	from nodeT10267923950;
 	name T10267_B;
 	to nodeS1707-10-006T10267_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -24057,7 +24134,7 @@ object transformer {
 	from node825701825698;
 	name 1808-27-001_C;
 	to nodeS1808-27-0051808-27-001_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24065,7 +24142,7 @@ object transformer {
 	from node1808-0072825771;
 	name 1808-0072_C;
 	to nodeS1808-31-0661808-0072_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24073,7 +24150,7 @@ object transformer {
 	from node1708-0037825152;
 	name 1708-0037_B;
 	to nodeS1708-17-0121708-0037_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24143,7 +24220,7 @@ object transformer {
 	from node1807-0316825607;
 	name 1807-0316_C;
 	to nodeS1807-35-0091807-0316_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -24151,7 +24228,7 @@ object transformer {
 	from node1807-0316825607;
 	name 1807-0316_B;
 	to nodeS1807-35-0091807-0316_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -24167,7 +24244,7 @@ object transformer {
 	from nodeT7835825181;
 	name T7835_B;
 	to nodeS1708-06-010T7835_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24175,7 +24252,7 @@ object transformer {
 	from nodeT10306924005;
 	name T10306_B;
 	to nodeS1707-09-010T10306_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24183,7 +24260,7 @@ object transformer {
 	from node825698825696;
 	name 1808-28-007_C;
 	to nodeS1808-33-0081808-28-007_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24191,7 +24268,7 @@ object transformer {
 	from node1808-0103824783;
 	name 1808-0103_C;
 	to nodeS1808-29-0771808-0103_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24199,7 +24276,7 @@ object transformer {
 	from node825285825283;
 	name T18012_B;
 	to nodeS1807-35-001T18012_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24207,7 +24284,7 @@ object transformer {
 	from nodeT4331825269;
 	name T4331_A;
 	to nodeS1707-12-007T4331_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -24215,7 +24292,7 @@ object transformer {
 	from node825048825047;
 	name 1708-09-023_B;
 	to nodeS1708-09-0111708-09-023_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24231,7 +24308,7 @@ object transformer {
 	from node1708-05-012824935;
 	name 1708-05-012_B;
 	to nodeS1708-05-0041708-05-012_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24239,7 +24316,7 @@ object transformer {
 	from node824971824970;
 	name 1708-17-016_B;
 	to nodeS1708-17-0051708-17-016_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24247,7 +24324,7 @@ object transformer {
 	from node825181825180;
 	name 1708-06-014_B;
 	to nodeS1708-06-0141708-06-014_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24273,7 +24350,7 @@ object transformer {
 	from node924005924004;
 	name T10305_B;
 	to nodeS1707-09-007T10305_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24281,7 +24358,7 @@ object transformer {
 	from node825693825692;
 	name 1808-28-006_C;
 	to nodeS1808-28-0031808-28-006_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24351,7 +24428,7 @@ object transformer {
 	from node1807-33-004825557;
 	name 1807-33-004_B;
 	to nodeS1807-33-0011807-33-004_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24359,7 +24436,7 @@ object transformer {
 	from nodeT4063914887;
 	name T4063_B;
 	to nodeS1708-09-033T4063_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24367,7 +24444,7 @@ object transformer {
 	from node825047825046;
 	name 1708-09-025_B;
 	to nodeS1708-09-0031708-09-025_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24375,7 +24452,7 @@ object transformer {
 	from node824959824958;
 	name 1708-08-005_B;
 	to nodeS1708-08-0071708-08-005_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24383,7 +24460,7 @@ object transformer {
 	from nodeT11814919020;
 	name T11814_B;
 	to nodeS1708-06-019T11814_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24391,7 +24468,7 @@ object transformer {
 	from node1808-0150824820;
 	name 1808-0150_C;
 	to nodeS1808-29-0921808-0150_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24407,7 +24484,7 @@ object transformer {
 	from node924001923999;
 	name T10303_B;
 	to nodeS1707-09-011T10303_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24423,7 +24500,7 @@ object transformer {
 	from nodeT18014927915;
 	name T18014_C;
 	to nodeS1707-02-014T18014_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -24431,7 +24508,7 @@ object transformer {
 	from nodeT18014927915;
 	name T18014_B;
 	to nodeS1707-02-014T18014_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -24439,7 +24516,7 @@ object transformer {
 	from node914884824987;
 	name 1708-09-008_B;
 	to nodeS1708-09-0051708-09-008_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24465,7 +24542,7 @@ object transformer {
 	from nodeT14400824938;
 	name T14400_B;
 	to nodeS1708-04-003T14400_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24473,7 +24550,7 @@ object transformer {
 	from node824956824954;
 	name 1708-08-001_B;
 	to nodeS1708-08-0041708-08-001_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24489,7 +24566,7 @@ object transformer {
 	from nodeT12199928120;
 	name T12199_C;
 	to nodeS1707-09-014T12199_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -24497,7 +24574,7 @@ object transformer {
 	from nodeT12199928120;
 	name T12199_B;
 	to nodeS1707-09-014T12199_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -24505,7 +24582,7 @@ object transformer {
 	from nodeT12925922976;
 	name T12925_C;
 	to nodeS1807-35-005T12925_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24513,7 +24590,7 @@ object transformer {
 	from nodeT4170923318;
 	name T4170_C;
 	to nodeS1808-29-100T4170_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24521,7 +24598,7 @@ object transformer {
 	from nodeT11894924869;
 	name T11894_B;
 	to nodeS1808-31-068T11894_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24537,7 +24614,7 @@ object transformer {
 	from node1807-33-007825563;
 	name 1807-33-007_B;
 	to nodeS1807-33-0031807-33-007_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24545,7 +24622,7 @@ object transformer {
 	from nodeT7736825244;
 	name T7736_A;
 	to nodeS1707-14-013T7736_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -24561,7 +24638,7 @@ object transformer {
 	from node824930824929;
 	name 1708-05-009_B;
 	to nodeS1708-05-0091708-05-009_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24569,7 +24646,7 @@ object transformer {
 	from node825045825041;
 	name 1708-09-022_B;
 	to nodeS1708-09-0061708-09-022_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24577,7 +24654,7 @@ object transformer {
 	from node824942824941;
 	name 1708-05-014_B;
 	to nodeS1708-05-0011708-05-014_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24585,7 +24662,7 @@ object transformer {
 	from nodeT10292923978;
 	name T10292_C;
 	to nodeS1707-10-005T10292_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24601,7 +24678,7 @@ object transformer {
 	from nodeT10308924010;
 	name T10308_C;
 	to nodeS1707-16-004T10308_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24609,7 +24686,7 @@ object transformer {
 	from node923318910323;
 	name T3902_C;
 	to nodeS1808-29-096T3902_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24617,7 +24694,7 @@ object transformer {
 	from node1808-30-007825783;
 	name 1808-30-007_C;
 	to nodeS1808-30-0611808-30-007_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24625,7 +24702,7 @@ object transformer {
 	from node1808-33-009825728;
 	name 1808-33-009_C;
 	to nodeS1808-33-0031808-33-009_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24633,7 +24710,7 @@ object transformer {
 	from node825244919704;
 	name 1707-13-036_A;
 	to nodeS1707-13-0101707-13-036_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -24641,7 +24718,7 @@ object transformer {
 	from node1708-0022824990;
 	name 1708-0022_B;
 	to nodeS1708-09-0291708-0022_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24649,7 +24726,7 @@ object transformer {
 	from nodeT14052928768;
 	name T14052_C;
 	to nodeS1707-09-015T14052_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24657,7 +24734,7 @@ object transformer {
 	from node825654825652;
 	name 1808-32-004_C;
 	to nodeS1808-32-0171808-32-004_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24665,7 +24742,7 @@ object transformer {
 	from node910323824769;
 	name 1808-0123_C;
 	to nodeS1808-29-0801808-0123_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24691,7 +24768,7 @@ object transformer {
 	from node825032825031;
 	name 1708-09-015_B;
 	to nodeS1708-09-0101708-09-015_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -24699,7 +24776,7 @@ object transformer {
 	from nodeT4114911238;
 	name T4114_C;
 	to nodeS1808-20-009T4114_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24707,7 +24784,7 @@ object transformer {
 	from node1807-33-009825567;
 	name 1807-33-009_B;
 	to nodeS1807-33-0071807-33-009_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24715,7 +24792,7 @@ object transformer {
 	from node825728825727;
 	name 1808-33-010_C;
 	to nodeS1808-33-0091808-33-010_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24731,7 +24808,7 @@ object transformer {
 	from node824994824993;
 	name 1708-09-009_B;
 	to nodeS1708-09-0281708-09-009_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24739,7 +24816,7 @@ object transformer {
 	from node911238911237;
 	name T4113_C;
 	to nodeS1808-20-008T4113_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24755,7 +24832,7 @@ object transformer {
 	from nodeT10272825316;
 	name T10272_C;
 	to nodeS1707-10-007T10272_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -24763,7 +24840,7 @@ object transformer {
 	from nodeT10272825316;
 	name T10272_B;
 	to nodeS1707-10-007T10272_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -24771,7 +24848,7 @@ object transformer {
 	from node1707-0234825273;
 	name 1707-0234_A;
 	to nodeS1707-01-0121707-0234_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -24797,7 +24874,7 @@ object transformer {
 	from node1707-02-001825614;
 	name 1707-02-001_B;
 	to nodeS1707-02-0111707-02-001_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24813,7 +24890,7 @@ object transformer {
 	from node1807-0292922983;
 	name 1807-0292_C;
 	to nodeS1807-34-0111807-0292_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24821,7 +24898,7 @@ object transformer {
 	from nodeT10297825472;
 	name T10297_B;
 	to nodeS1707-10-026T10297_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24829,7 +24906,7 @@ object transformer {
 	from node1807-33-011825570;
 	name 1807-33-011_B;
 	to nodeS1807-33-0051807-33-011_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24837,7 +24914,7 @@ object transformer {
 	from node1808-30-013825792;
 	name 1808-30-013_C;
 	to nodeS1808-30-0641808-30-013_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24845,7 +24922,7 @@ object transformer {
 	from node1708-09-012824995;
 	name 1708-09-012_B;
 	to nodeS1708-09-0021708-09-012_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24915,7 +24992,7 @@ object transformer {
 	from node825724825723;
 	name 1808-33-007_C;
 	to nodeS1808-33-0101808-33-007_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24923,7 +25000,7 @@ object transformer {
 	from nodeT4037911157;
 	name T4037_C;
 	to nodeS1808-29-099T4037_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24931,7 +25008,7 @@ object transformer {
 	from node1708-0024824946;
 	name 1708-0024_B;
 	to nodeS1708-08-0091708-0024_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24939,7 +25016,7 @@ object transformer {
 	from node922983824871;
 	name T12926_C;
 	to nodeS1807-35-004T12926_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24947,7 +25024,7 @@ object transformer {
 	from node923982825471;
 	name T10295_B;
 	to nodeS1707-09-005T10295_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24955,7 +25032,7 @@ object transformer {
 	from node1808-32-014825667;
 	name 1808-32-014_C;
 	to nodeS1808-32-0041808-32-014_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -24963,7 +25040,7 @@ object transformer {
 	from node1707-0164825616;
 	name 1707-0164_B;
 	to nodeS1707-02-0041707-0164_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24971,7 +25048,7 @@ object transformer {
 	from node825792825791;
 	name 1808-30-014_C;
 	to nodeS1808-30-0651808-30-014_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -24987,7 +25064,7 @@ object transformer {
 	from node824946824945;
 	name 1708-0023_B;
 	to nodeS1708-08-0051708-0023_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -24995,7 +25072,7 @@ object transformer {
 	from nodeT29051980337;
 	name T29051_B;
 	to nodeS1708-05-013T29051_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -25003,7 +25080,7 @@ object transformer {
 	from nodeT18630900921;
 	name T18630_C;
 	to nodeS1808-20-004T18630_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25011,7 +25088,7 @@ object transformer {
 	from node825613825610;
 	name 1707-0162_B;
 	to nodeS1707-02-0031707-0162_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25037,7 +25114,7 @@ object transformer {
 	from node824983824982;
 	name 1708-09-003_B;
 	to nodeS1708-09-0211708-09-003_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -25045,7 +25122,7 @@ object transformer {
 	from nodeT10276825485;
 	name T10276_A;
 	to nodeS1707-10-030T10276_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -25053,7 +25130,7 @@ object transformer {
 	from nodeT10293923984;
 	name T10293_A;
 	to nodeS1707-09-012T10293_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -25069,7 +25146,7 @@ object transformer {
 	from nodeT14420928081;
 	name T14420_C;
 	to nodeS1707-02-015T14420_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -25077,7 +25154,7 @@ object transformer {
 	from nodeT14420928081;
 	name T14420_B;
 	to nodeS1707-02-015T14420_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -25093,7 +25170,7 @@ object transformer {
 	from node1808-0136825733;
 	name 1808-0136_C;
 	to nodeS1808-33-0111808-0136_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25101,7 +25178,7 @@ object transformer {
 	from node824982824978;
 	name 1708-09-002_B;
 	to nodeS1708-09-0151708-09-002_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25109,7 +25186,7 @@ object transformer {
 	from nodeT28295980862;
 	name T28295_B;
 	to nodeS1708-05-014T28295_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -25117,7 +25194,7 @@ object transformer {
 	from node825577825575;
 	name 1807-0020_B;
 	to nodeS1807-33-0101807-0020_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25125,7 +25202,7 @@ object transformer {
 	from node824796911159;
 	name 1808-0148_C;
 	to nodeS1808-29-0911808-0148_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25133,7 +25210,7 @@ object transformer {
 	from nodeT15884937676;
 	name T15884_A;
 	to nodeS1708-06-006T15884_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -25149,7 +25226,7 @@ object transformer {
 	from nodeT10277923956;
 	name T10277_C;
 	to nodeS1707-10-001T10277_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -25157,7 +25234,7 @@ object transformer {
 	from nodeT10277923956;
 	name T10277_B;
 	to nodeS1707-10-001T10277_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -25165,7 +25242,7 @@ object transformer {
 	from node1708-10-002931436;
 	name 1708-10-002_B;
 	to nodeS1708-10-0061708-10-002_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25173,7 +25250,7 @@ object transformer {
 	from node954396982180;
 	name T21003_B;
 	to nodeS1708-05-006T21003_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25181,7 +25258,7 @@ object transformer {
 	from node1808-0151824743;
 	name 1808-0151_C;
 	to nodeS1808-21-0031808-0151_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25189,7 +25266,7 @@ object transformer {
 	from node1808-20-011910308;
 	name 1808-20-011_C;
 	to nodeS1808-20-0071808-20-011_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25197,7 +25274,7 @@ object transformer {
 	from node1807-36-005824878;
 	name 1807-36-005_C;
 	to nodeS1807-36-0011807-36-005_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25205,7 +25282,7 @@ object transformer {
 	from node911160930243;
 	name T4002_C;
 	to nodeS1808-29-097T4002_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25221,7 +25298,7 @@ object transformer {
 	from node1707-01-016949865;
 	name 1707-01-016_C;
 	to nodeS1707-01-0131707-01-016_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -25229,7 +25306,7 @@ object transformer {
 	from node1707-01-016949865;
 	name 1707-01-016_B;
 	to nodeS1707-01-0131707-01-016_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -25237,7 +25314,7 @@ object transformer {
 	from node937676937675;
 	name T15857_A;
 	to nodeS1708-06-011T15857_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -25245,7 +25322,7 @@ object transformer {
 	from nodeT25124825578;
 	name T25124_B;
 	to nodeS1807-33-006T25124_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25253,7 +25330,7 @@ object transformer {
 	from node931436825001;
 	name T12268_B;
 	to nodeS1708-10-009T12268_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -25261,7 +25338,7 @@ object transformer {
 	from node824720824718;
 	name 1808-20-002_C;
 	to nodeS1808-20-0021808-20-002_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25269,7 +25346,7 @@ object transformer {
 	from nodeT14062929440;
 	name T14062_B;
 	to nodeS1707-16-010T14062_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25277,7 +25354,7 @@ object transformer {
 	from nodeT21024957978;
 	name T21024_C;
 	to nodeS1808-28-004T21024_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25285,7 +25362,7 @@ object transformer {
 	from node1707-0190825256;
 	name 1707-0190_A;
 	to nodeS1707-13-0131707-0190_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -25301,7 +25378,7 @@ object transformer {
 	from node1808-0164824745;
 	name 1808-0164_C;
 	to nodeS1808-21-0011808-0164_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25309,7 +25386,7 @@ object transformer {
 	from nodeT10279923959;
 	name T10279_C;
 	to nodeS1707-10-023T10279_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25325,7 +25402,7 @@ object transformer {
 	from node1807-0274825619;
 	name 1807-0274_C;
 	to nodeS1807-36-0091807-0274_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -25333,7 +25410,7 @@ object transformer {
 	from node1807-0274825619;
 	name 1807-0274_B;
 	to nodeS1807-36-0091807-0274_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -25341,7 +25418,7 @@ object transformer {
 	from node929439825474;
 	name T10294_B;
 	to nodeS1707-16-008T10294_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25349,7 +25426,7 @@ object transformer {
 	from node1707-0180825516;
 	name 1707-0180_B;
 	to nodeS1707-03-0141707-0180_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25357,7 +25434,7 @@ object transformer {
 	from node825684825682;
 	name 1808-28-001_C;
 	to nodeS1808-28-0011808-28-001_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25365,7 +25442,7 @@ object transformer {
 	from node825574825572;
 	name 1807-33-012_B;
 	to nodeS1807-33-0081807-33-012_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25373,7 +25450,7 @@ object transformer {
 	from nodeT7814825163;
 	name T7814_B;
 	to nodeS1708-05-005T7814_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25381,7 +25458,7 @@ object transformer {
 	from node824738824734;
 	name 1808-29-006_C;
 	to nodeS1808-29-0011808-29-006_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25389,7 +25466,7 @@ object transformer {
 	from node1808-20-008824825;
 	name 1808-20-008_C;
 	to nodeS1808-20-0011808-20-008_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25397,7 +25474,7 @@ object transformer {
 	from node1807-0299824881;
 	name 1807-0299_C;
 	to nodeS1807-36-0101807-0299_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25405,7 +25482,7 @@ object transformer {
 	from node1808-0045945215;
 	name 1808-0045_C;
 	to nodeS1808-29-0171808-0045_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25413,7 +25490,7 @@ object transformer {
 	from nodeT15861937600;
 	name T15861_A;
 	to nodeS1708-06-013T15861_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -25421,7 +25498,7 @@ object transformer {
 	from node824977825106;
 	name 1708-16-007_B;
 	to nodeS1708-16-0021708-16-007_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25447,7 +25524,7 @@ object transformer {
 	from node825516825514;
 	name 1707-0179_B;
 	to nodeS1707-03-0111707-0179_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25473,7 +25550,7 @@ object transformer {
 	from node825562825560;
 	name 1807-33-005_B;
 	to nodeS1807-33-0041807-33-005_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25489,7 +25566,7 @@ object transformer {
 	from nodeT29581825621;
 	name T29581_C;
 	to nodeS1807-36-003T29581_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -25497,7 +25574,7 @@ object transformer {
 	from nodeT29581825621;
 	name T29581_B;
 	to nodeS1807-36-003T29581_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -25505,7 +25582,7 @@ object transformer {
 	from nodeT10281923962;
 	name T10281_C;
 	to nodeS1707-10-011T10281_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25513,7 +25590,7 @@ object transformer {
 	from node824857824855;
 	name 1807-36-002_C;
 	to nodeS1807-36-0081807-36-002_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25521,7 +25598,7 @@ object transformer {
 	from node945215824792;
 	name T14089_C;
 	to nodeS1808-29-016T14089_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25537,7 +25614,7 @@ object transformer {
 	from nodeT29595974368;
 	name T29595_C;
 	to nodeS1808-19-004T29595_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -25545,7 +25622,7 @@ object transformer {
 	from nodeT29595974368;
 	name T29595_B;
 	to nodeS1808-19-004T29595_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -25553,7 +25630,7 @@ object transformer {
 	from node825512825510;
 	name 1707-0177_B;
 	to nodeS1707-03-0071707-0177_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25561,7 +25638,7 @@ object transformer {
 	from node824792930244;
 	name T10909_C;
 	to nodeS1808-29-015T10909_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25569,7 +25646,7 @@ object transformer {
 	from node1807-0226825625;
 	name 1807-0226_C;
 	to nodeS1707-01-0111807-0226_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25577,7 +25654,17 @@ object transformer {
 	from nodeT15860937757;
 	name T15860_A;
 	to nodeS1708-06-003T15860_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
+};
+
+object transformer_configuration {
+	name T15860_A-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00319936019194+0.0156768649405j;
+	powerA_rating 10;
+	power_rating 10;
 };
 
 object transformer {
@@ -25585,7 +25672,7 @@ object transformer {
 	from node825107825108;
 	name 1708-16-009_B;
 	to nodeS1708-16-0211708-16-009_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25593,7 +25680,7 @@ object transformer {
 	from node1708-05-018825167;
 	name 1708-05-018_B;
 	to nodeS1708-05-0071708-05-018_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25601,7 +25688,17 @@ object transformer {
 	from node1707-0079825502;
 	name 1707-0079_B;
 	to nodeS1707-02-0071707-0079_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
+};
+
+object transformer_configuration {
+	name 1707-0079_B-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00033+0.0022j;
+	powerB_rating 10;
+	power_rating 10;
 };
 
 object transformer {
@@ -25609,7 +25706,17 @@ object transformer {
 	from nodeT7300925975;
 	name T7300_C;
 	to nodeS1707-16-009T7300_C;
-	configuration T5087_C-CONFIG;
+	configuration T7300_C-CONFIG;
+};
+
+object transformer_configuration {
+	powerC_rating 15;
+	name T7300_C-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00033+0.0022j;
+	power_rating 15;
 };
 
 object transformer {
@@ -25617,7 +25724,17 @@ object transformer {
 	from node1708-0029824963;
 	name 1708-0029_B;
 	to nodeS1708-08-0101708-0029_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
+};
+
+object transformer_configuration {
+	name 1708-0029_B-CONFIG;
+	primary_voltage 7200.0;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00033+0.0022j;
+	powerB_rating 15;
+	power_rating 15;
 };
 
 object transformer {
@@ -25643,17 +25760,7 @@ object transformer {
 	from nodeT10285923966;
 	name T10285_C;
 	to nodeS1707-15-010T10285_C;
-	configuration T10285_C-CONFIG;
-};
-
-object transformer_configuration {
-	powerC_rating 75;
-	name T10285_C-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00639872038387+0.031353729881j;
-	power_rating 75;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -25661,17 +25768,7 @@ object transformer {
 	from nodeT10285923966;
 	name T10285_B;
 	to nodeS1707-15-010T10285_B;
-	configuration T10285_B-CONFIG;
-};
-
-object transformer_configuration {
-	name T10285_B-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00639872038387+0.031353729881j;
-	powerB_rating 75;
-	power_rating 75;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -25679,7 +25776,7 @@ object transformer {
 	from node1808-33-002825688;
 	name 1808-33-002_C;
 	to nodeS1808-33-0051808-33-002_C;
-	configuration 1808-0142_C-CONFIG;
+	configuration 1808-0046_C-CONFIG;
 };
 
 object transformer {
@@ -25687,17 +25784,7 @@ object transformer {
 	from nodeT2627910320;
 	name T2627_C;
 	to nodeS1808-29-094T2627_C;
-	configuration T2627_C-CONFIG;
-};
-
-object transformer_configuration {
-	powerC_rating 10;
-	name T2627_C-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00033+0.0022j;
-	power_rating 10;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25705,17 +25792,7 @@ object transformer {
 	from node937757937755;
 	name T15859_A;
 	to nodeS1708-06-008T15859_A;
-	configuration T15859_A-CONFIG;
-};
-
-object transformer_configuration {
-	name T15859_A-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00319936019194+0.0156768649405j;
-	powerA_rating 10;
-	power_rating 10;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -25723,17 +25800,7 @@ object transformer {
 	from node1708-0034825011;
 	name 1708-0034_B;
 	to nodeS1708-15-0071708-0034_B;
-	configuration 1708-0034_B-CONFIG;
-};
-
-object transformer_configuration {
-	name 1708-0034_B-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00033+0.0022j;
-	powerB_rating 10;
-	power_rating 10;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25741,17 +25808,7 @@ object transformer {
 	from nodeT5087905284;
 	name T5087_C;
 	to nodeS1808-29-098T5087_C;
-	configuration T5087_C-CONFIG;
-};
-
-object transformer_configuration {
-	powerC_rating 15;
-	name T5087_C-CONFIG;
-	primary_voltage 7200.0;
-	secondary_voltage 120.0;
-	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.00033+0.0022j;
-	power_rating 15;
+	configuration T7300_C-CONFIG;
 };
 
 object transformer {
@@ -25767,7 +25824,7 @@ object transformer {
 	from nodeT29596974371;
 	name T29596_C;
 	to nodeS1808-19-012T29596_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -25775,7 +25832,7 @@ object transformer {
 	from nodeT29596974371;
 	name T29596_B;
 	to nodeS1808-19-012T29596_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -25783,7 +25840,7 @@ object transformer {
 	from node925975923993;
 	name T10300_C;
 	to nodeS1707-16-003T10300_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25791,7 +25848,7 @@ object transformer {
 	from nodeT28711825603;
 	name T28711_C;
 	to nodeS1707-02-010T28711_C;
-	configuration 1808-0142_C-CONFIG;
+	configuration 1808-0046_C-CONFIG;
 };
 
 object transformer {
@@ -25807,7 +25864,7 @@ object transformer {
 	from node1808-0100825627;
 	name 1808-0100_C;
 	to nodeS1808-31-0671808-0100_C;
-	configuration T10285_C-CONFIG;
+	configuration 1807--T325_C-CONFIG;
 };
 
 object transformer {
@@ -25815,7 +25872,7 @@ object transformer {
 	from node1808-0100825627;
 	name 1808-0100_B;
 	to nodeS1808-31-0671808-0100_B;
-	configuration T10285_B-CONFIG;
+	configuration 1807--T325_B-CONFIG;
 };
 
 object transformer {
@@ -25823,7 +25880,7 @@ object transformer {
 	from node1807-25-007824885;
 	name 1807-25-007_C;
 	to nodeS1807-25-0031807-25-007_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25831,7 +25888,7 @@ object transformer {
 	from node825678825676;
 	name 1808-32-021_C;
 	to nodeS1808-32-0701808-32-021_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25901,7 +25958,7 @@ object transformer {
 	from node1707-04-002825588;
 	name 1707-04-002_B;
 	to nodeS1707-04-0121707-04-002_B;
-	configuration 1708-0034_B-CONFIG;
+	configuration 1707-0079_B-CONFIG;
 };
 
 object transformer {
@@ -25909,7 +25966,7 @@ object transformer {
 	from node1808-29-026824765;
 	name 1808-29-026_C;
 	to nodeS1808-29-0681808-29-026_C;
-	configuration T2627_C-CONFIG;
+	configuration T11988_C-CONFIG;
 };
 
 object transformer {
@@ -25917,7 +25974,7 @@ object transformer {
 	from node824894824892;
 	name 1807-36-006_A;
 	to nodeS1807-36-0061807-36-006_A;
-	configuration 1808-19-005_A-CONFIG;
+	configuration 1808-19-009_A-CONFIG;
 };
 
 object transformer {
@@ -25925,7 +25982,7 @@ object transformer {
 	from node824894824892;
 	name 1807-36-006_C;
 	to nodeS1807-36-0061807-36-006_C;
-	configuration 1808-19-005_C-CONFIG;
+	configuration 1808-19-009_C-CONFIG;
 };
 
 object transformer {
@@ -25933,7 +25990,7 @@ object transformer {
 	from node824894824892;
 	name 1807-36-006_B;
 	to nodeS1807-36-0061807-36-006_B;
-	configuration 1808-19-005_B-CONFIG;
+	configuration 1808-19-009_B-CONFIG;
 };
 
 object transformer {
@@ -25941,7 +25998,7 @@ object transformer {
 	from node1707-0181825210;
 	name 1707-0181_A;
 	to nodeS1707-01-0091707-0181_A;
-	configuration T15859_A-CONFIG;
+	configuration T15860_A-CONFIG;
 };
 
 object transformer {
@@ -25957,7 +26014,7 @@ object transformer {
 	from node1708-15-003825015;
 	name 1708-15-003_B;
 	to nodeS1708-15-0011708-15-003_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -25965,7 +26022,7 @@ object transformer {
 	from node1707-0231825507;
 	name 1707-0231_B;
 	to nodeS1707-02-0051707-0231_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
 object transformer {
@@ -26045,54 +26102,6 @@ object transformer {
 	from node1708-08-013824968;
 	name 1708-08-013_B;
 	to nodeS1708-08-0011708-08-013_B;
-	configuration T28723_B-CONFIG;
-};
-
-object transformer {
-	phases AS;
-	from node1808-19-009824830;
-	name 1808-19-009_A;
-	to nodeS1808-19-0031808-19-009_A;
-	configuration 1808-19-005_A-CONFIG;
-};
-
-object transformer {
-	phases CS;
-	from node1808-19-009824830;
-	name 1808-19-009_C;
-	to nodeS1808-19-0031808-19-009_C;
-	configuration 1808-19-005_C-CONFIG;
-};
-
-object transformer {
-	phases BS;
-	from node1808-19-009824830;
-	name 1808-19-009_B;
-	to nodeS1808-19-0031808-19-009_B;
-	configuration 1808-19-005_B-CONFIG;
-};
-
-object transformer {
-	phases CS;
-	from node1808-33-003825694;
-	name 1808-33-003_C;
-	to nodeS1808-33-0041808-33-003_C;
-	configuration T5087_C-CONFIG;
-};
-
-object transformer {
-	phases BS;
-	from node1707-0205825590;
-	name 1707-0205_B;
-	to nodeS1707-04-0011707-0205_B;
-	configuration 1708-0034_B-CONFIG;
-};
-
-object transformer {
-	phases BS;
-	from node825008825007;
-	name 1708-15-001_B;
-	to nodeS1708-15-0031708-15-001_B;
-	configuration T28723_B-CONFIG;
+	configuration 1708-0029_B-CONFIG;
 };
 
