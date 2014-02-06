@@ -1269,7 +1269,7 @@ def convert(stdPath,seqPath):
 	# NOTE: This last dedup has to come last, because it relies on doing conductors and spacings first!
 	dedupGlm('line_configuration', glmTree)
 	# Throw some headers on that:
-	genericHeaders = [	{"timezone":"PST+8PDT","stoptime":"'2000-01-02 00:00:00'","starttime":"'2000-01-01 00:00:00'","clock":"clock"},
+	genericHeaders = [	{"timezone":"PST+8PDT","stoptime":"'2000-01-01 00:00:00'","starttime":"'2000-01-01 00:00:00'","clock":"clock"},
 						{"omftype":"#include","argument":"\"schedules.glm\""},
 						{"omftype":"#set","argument":"minimum_timestep=60"},
 						{"omftype":"#set","argument":"profiler=1"},
