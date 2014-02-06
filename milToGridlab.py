@@ -856,8 +856,8 @@ def convert(stdPath,seqPath):
 	for comp in convertedComponents:
 		fixCompConnectivity(comp)
 
-	# Go to a dictionary format so we have a valid glmTree:
-	glmTree = {convertedComponents.index(x)*subObCount:x for x in convertedComponents}
+	# Go to a dictionary format so we have a valid glmTree. Start at 1 so we have room for headers:
+	glmTree = {(1+convertedComponents.index(x))*subObCount:x for x in convertedComponents}
 	print('Finished fixing connectivity')
 
 	#TODO: REMOVE THIS DISASTER HERE AND FIGURE OUT WHY SOME LINKS ARE MALFORMED

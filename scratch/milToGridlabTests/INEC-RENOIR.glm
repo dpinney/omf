@@ -1,0 +1,1455 @@
+clock {
+	timezone PST+8PDT;
+	starttime '2000-01-01 00:00:00';
+	stoptime '2000-01-02 00:00:00';
+};
+
+#include "schedules.glm";
+#set minimum_timestep=60;
+#set profiler=1;
+#set relax_naming_rules=1;
+module generators;
+module tape;
+module climate;
+module residential {
+	implicit_enduses NONE;
+};
+
+module powerflow {
+	solver_method NR;
+	NR_iteration_limit 50;
+};
+
+object climate {
+	name Climate;
+	interpolate QUADRATIC;
+	tmyfile climate.tmy2;
+};
+
+object node {
+	phases ABCN;
+	name REMBRANDT;
+	bustype SWING;
+	longitude 14.3360247448;
+	nominal_voltage 7200.0;
+	latitude 1197.99041991;
+};
+
+object fuse {
+	phases ACB;
+	from REMBRANDT;
+	name RECL_1161;
+	current_limit 9999.0 A;
+	longitude 14.6243862192;
+	to nodePRUG6689RECL_1161;
+	latitude 1197.69202326;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG6689RECL_1161;
+	name PRUG6689;
+	longitude 12.262001686;
+	to nodePRUG6690PRUG6689;
+	length 3151.9;
+	latitude 1198.11097271;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG6690PRUG6689;
+	name PRUG6690;
+	longitude 12.4329005513;
+	to nodePRUG6691PRUG6690;
+	length 106.228;
+	latitude 1198.10544057;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG6691PRUG6690;
+	name PRUG6691;
+	to nodePRUG6692PRUG6691;
+	longitude 12.4215655872;
+	length 210.857;
+	latitude 1198.26691116;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object line_configuration {
+	spacing PRUG6692-LINESPACING;
+	name PRUG6692-LINECONFIG;
+};
+
+object line_spacing {
+	distance_AN 0.0;
+	name PRUG6692-LINESPACING;
+	distance_CN 0.0;
+	distance_BC 3.961621;
+	distance_AB 3.961621;
+	distance_AC 7.333333;
+	distance_BN 0.0;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG6692PRUG6691;
+	name PRUG6692;
+	longitude 12.5688229568;
+	to nodePRUG6693PRUG6692;
+	length 150.334;
+	latitude 1198.35841064;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG6693PRUG6692;
+	name PRUG6693;
+	longitude 12.5461692231;
+	to nodeSWIT_737-APRUG6693;
+	length 260.294;
+	latitude 1198.15926154;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object fuse {
+	phases ACB;
+	from REMBRANDT;
+	name RECL_1162;
+	current_limit 9999.0 A;
+	longitude 14.9338145325;
+	to nodePRUG3301RECL_1162;
+	latitude 1197.70635756;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG3301RECL_1162;
+	name PRUG3301;
+	longitude 14.9279527375;
+	to nodePRUG5000PRUG3301;
+	length 794.966;
+	latitude 1197.09725354;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG5000PRUG3301;
+	name PRUG5000;
+	longitude 9.81262940356;
+	to nodePRUG3297PRUG5000;
+	length 3172.4;
+	latitude 1197.12094399;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object underground_line {
+	phases C;
+	from nodePRUG3297PRUG5000;
+	name PRUG3297;
+	longitude 9.62616925098;
+	to node263-32-311PRUG3297;
+	length 358.287;
+	latitude 1197.31991613;
+	configuration PRUG81-LINECONFIG;
+};
+
+object load {
+	phases C;
+	load_class R;
+	name 263-32-311;
+	parent node263-32-311PRUG3297;
+	longitude 9.62616925098;
+	constant_power_C 9444.03+3210.73j;
+	constant_power_A 0.0+0.0j;
+	latitude 1197.31991613;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG3297PRUG5000;
+	name PRUG5001;
+	longitude 9.125973502;
+	to nodePRUG5002PRUG5001;
+	length 426.323;
+	latitude 1197.10519396;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG5002PRUG5001;
+	name PRUG5002;
+	longitude 7.75748715473;
+	to nodePROH16277PRUG5002;
+	length 848.662;
+	latitude 1197.1050093;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH16277PRUG5002;
+	name PROH16277;
+	longitude 7.71447906377;
+	to nodePROH279PROH16277;
+	length 2143.18;
+	latitude 1195.46301214;
+	configuration PROH20016-LINECONFIG;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH279PROH16277;
+	name PROH279;
+	longitude 9.33439109623;
+	to node263-31-260PROH279;
+	length 1004.64;
+	latitude 1195.45511019;
+	configuration PROH20016-LINECONFIG;
+};
+
+object load {
+	phases A;
+	load_class R;
+	name 263-31-260;
+	parent node263-31-260PROH279;
+	longitude 9.33439109623;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 10864.8+3693.76j;
+	latitude 1195.45511019;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH279PROH16277;
+	name PROH16278;
+	longitude 7.6920358352;
+	to nodePROH16279PROH16278;
+	length 214.966;
+	latitude 1195.29864854;
+	configuration PROH20016-LINECONFIG;
+};
+
+object underground_line {
+	phases A;
+	from nodePROH16279PROH16278;
+	name PRUG84;
+	to node263-30-850PRUG84;
+	longitude 7.27204304869;
+	length 260.644;
+	latitude 1195.29109283;
+	configuration PRUG81-LINECONFIG;
+};
+
+object load {
+	phases A;
+	load_class R;
+	name 263-30-850;
+	parent node263-30-850PRUG84;
+	longitude 7.27204304869;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 4116.09+1399.37j;
+	latitude 1195.29109283;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePROH16277PRUG5002;
+	name PRUG5361;
+	longitude 1.52751588589;
+	to nodePROH277PRUG5361;
+	length 3866.74;
+	latitude 1197.22628535;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH277PRUG5361;
+	name PROH277;
+	longitude 1.58054732324;
+	to node263-30-380PROH277;
+	length 268.474;
+	latitude 1197.02212732;
+	configuration PROH20016-LINECONFIG;
+};
+
+object load {
+	phases A;
+	load_class R;
+	name 263-30-380;
+	parent node263-30-380PROH277;
+	longitude 1.58054732324;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 5599.56+1903.71j;
+	latitude 1197.02212732;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePROH277PRUG5361;
+	name PRUG5362;
+	longitude 0.0;
+	to nodeSWIT_361-BPRUG5362;
+	length 947.289;
+	latitude 1197.2287475;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object underground_line {
+	phases B;
+	from nodePRUG5002PRUG5001;
+	name PRUG85;
+	longitude 9.17494054411;
+	to node263-32-310PRUG85;
+	length 305.542;
+	latitude 1197.3381437;
+	configuration PRUG81-LINECONFIG;
+};
+
+object load {
+	phases B;
+	load_class R;
+	name 263-32-310;
+	parent node263-32-310PRUG85;
+	longitude 9.17494054411;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 0.0+0.0j;
+	latitude 1197.3381437;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object underground_line {
+	phases AB;
+	from nodePRUG5000PRUG3301;
+	name PRUG3303;
+	longitude 16.2770886824;
+	to nodePROH16622PRUG3303;
+	length 836.732;
+	latitude 1197.0889438;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH16622PRUG3303;
+	name PROH16622;
+	longitude 16.2701095834;
+	to nodeFUSE_434PROH16622;
+	length 242.872;
+	latitude 1197.27500506;
+	configuration PROH11499-LINECONFIG;
+};
+
+object fuse {
+	phases B;
+	from nodeFUSE_434PROH16622;
+	name FUSE_434;
+	current_limit 9999.0 A;
+	longitude 15.0397013085;
+	to nodePROH16623FUSE_434;
+	latitude 1199.10347367;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH16623FUSE_434;
+	name PROH16623;
+	longitude 16.2951922388;
+	to nodePROH2887PROH16623;
+	length 254.225;
+	latitude 1197.46942991;
+	configuration PROH11499-LINECONFIG;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH2887PROH16623;
+	name PROH2887;
+	longitude 17.0083557609;
+	to node283-05-120PROH2887;
+	length 442.266;
+	latitude 1197.46965305;
+	configuration PROH11499-LINECONFIG;
+};
+
+object load {
+	phases B;
+	load_class R;
+	name 283-05-120;
+	parent node283-05-120PROH2887;
+	longitude 17.0083557609;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 0.0+0.0j;
+	latitude 1197.46965305;
+	nominal_voltage 7200.0;
+	constant_power_B 835.755+284.135j;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH2887PROH16623;
+	name PROH16624;
+	longitude 16.3930615528;
+	to nodePROH2886PROH16624;
+	length 3290.55;
+	latitude 1199.99025144;
+	configuration PROH11499-LINECONFIG;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH2886PROH16624;
+	name PROH2886;
+	to node263-32-860PROH2886;
+	longitude 15.325777574;
+	length 661.995;
+	latitude 1200.0;
+	configuration PROH11499-LINECONFIG;
+};
+
+object load {
+	phases B;
+	load_class R;
+	name 263-32-860;
+	parent node263-32-860PROH2886;
+	longitude 15.325777574;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 0.0+0.0j;
+	latitude 1200.0;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object line_configuration {
+	name PROH8542-LINECONFIG;
+	spacing PROH8542-LINESPACING;
+	conductor_A PROH20016_conductor_A;
+	conductor_B PROH20016_conductor_A;
+};
+
+object line_spacing {
+	distance_AN 0.000000;
+	name PROH8542-LINESPACING;
+	distance_CN 0.000000;
+	distance_BC 0.000000;
+	distance_AB 3.961621;
+	distance_AC 0.000000;
+	distance_BN 0.000000;
+};
+
+object overhead_line {
+	phases AB;
+	from nodePROH16622PRUG3303;
+	name PROH8542;
+	longitude 16.2895571418;
+	to nodePROH19454PROH8542;
+	length 81.2263;
+	latitude 1197.02699006;
+	configuration PROH8542-LINECONFIG;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH19454PROH8542;
+	name PROH19454;
+	longitude 16.2874844634;
+	to nodeRECL_844PROH19454;
+	length 171.711;
+	latitude 1196.89542685;
+	configuration PROH20016-LINECONFIG;
+};
+
+object fuse {
+	phases A;
+	from nodeRECL_844PROH19454;
+	name RECL_844;
+	current_limit 9999.0 A;
+	longitude 13.5774343302;
+	to nodePROH19455RECL_844;
+	latitude 1195.51789154;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH19455RECL_844;
+	name PROH19455;
+	longitude 16.2214825884;
+	to nodePROH266PROH19455;
+	length 2702.01;
+	latitude 1194.82536262;
+	configuration PROH20016-LINECONFIG;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH266PROH19455;
+	name PROH266;
+	longitude 16.64132964;
+	to node283-06-131PROH266;
+	length 260.372;
+	latitude 1194.82670141;
+	configuration PROH20016-LINECONFIG;
+};
+
+object load {
+	phases A;
+	load_class R;
+	name 283-06-131;
+	parent node283-06-131PROH266;
+	longitude 16.695947972;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 125.363+42.6203j;
+	latitude 1194.92692612;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object load {
+	phases A;
+	load_class R;
+	name 283-06-130;
+	parent node283-06-131PROH266;
+	longitude 16.8365177141;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 3173.78+1079.0j;
+	latitude 1194.81345199;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH266PROH19455;
+	name PROH19456;
+	longitude 16.1658441101;
+	to nodePROH20016PROH19456;
+	length 2354.05;
+	latitude 1193.0218641;
+	configuration PROH20016-LINECONFIG;
+};
+
+object line_configuration {
+	name PROH20016-LINECONFIG;
+	spacing PROH20016-LINESPACING;
+	conductor_A PROH20016_conductor_A;
+};
+
+object line_spacing {
+	distance_AN 0.000000;
+	name PROH20016-LINESPACING;
+	distance_CN 0.000000;
+	distance_BC 0.000000;
+	distance_AB 0.000000;
+	distance_AC 0.000000;
+	distance_BN 0.000000;
+};
+
+object overhead_line_conductor {
+	diameter 0.721;
+	name PROH20016_conductor_A;
+	geometric_mean_radius 0.0244;
+	resistance 0.306;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH20016PROH19456;
+	name PROH20016;
+	longitude 16.4417857023;
+	to nodePROH268PROH20016;
+	length 171.315;
+	latitude 1193.02806563;
+	configuration PROH20016-LINECONFIG;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH268PROH20016;
+	name PROH268;
+	longitude 16.4404255073;
+	to node282-01-180PROH268;
+	length 88.6741;
+	latitude 1192.9601258;
+	configuration PROH20016-LINECONFIG;
+};
+
+object load {
+	phases A;
+	load_class R;
+	name 282-01-180;
+	parent node282-01-180PROH268;
+	longitude 16.4404255073;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 919.33+312.549j;
+	latitude 1192.9601258;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH268PROH20016;
+	name PROH20017;
+	longitude 19.7306415827;
+	to nodePROH20018PROH20017;
+	length 2039.77;
+	latitude 1193.00626795;
+	configuration PROH20016-LINECONFIG;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH20018PROH20017;
+	name PROH20018;
+	longitude 22.406470244;
+	to nodePRUG81PROH20018;
+	length 1659.7;
+	latitude 1192.98224664;
+	configuration PROH20016-LINECONFIG;
+};
+
+object line_configuration {
+	spacing PRUG81-LINESPACING;
+	name PRUG81-LINECONFIG;
+};
+
+object line_spacing {
+	distance_AN 0.0;
+	name PRUG81-LINESPACING;
+	distance_CN 0.0;
+	distance_BC 0.0;
+	distance_AB 0.0;
+	distance_AC 0.0;
+	distance_BN 0.0;
+};
+
+object underground_line {
+	phases A;
+	from nodePRUG81PROH20018;
+	name PRUG81;
+	longitude 22.4386453475;
+	to node282-01-680PRUG81;
+	length 784.938;
+	latitude 1192.38101379;
+	configuration PRUG81-LINECONFIG;
+};
+
+object load {
+	phases A;
+	load_class R;
+	name 282-01-680;
+	parent node282-01-680PRUG81;
+	longitude 22.4386453475;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 10279.8+3494.86j;
+	latitude 1192.38101379;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object overhead_line {
+	phases A;
+	from nodePRUG81PROH20018;
+	name PROH20019;
+	longitude 23.4987073363;
+	to nodePROH20020PROH20019;
+	length 677.389;
+	latitude 1192.97645291;
+	configuration PROH20016-LINECONFIG;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH20020PROH20019;
+	name PROH20020;
+	longitude 24.6614964793;
+	to nodeSWIT_617-APROH20020;
+	length 721.565;
+	latitude 1192.95659416;
+	configuration PROH20016-LINECONFIG;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH20020PROH20019;
+	name PROH270;
+	longitude 23.6425318309;
+	to node283-06-720PROH270;
+	length 1628.51;
+	latitude 1194.21798979;
+	configuration PROH20016-LINECONFIG;
+};
+
+object load {
+	phases A;
+	load_class R;
+	name 283-06-720;
+	parent node283-06-720PROH270;
+	longitude 23.6425318309;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 5683.13+1932.12j;
+	latitude 1194.21798979;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object overhead_line {
+	phases A;
+	from nodePROH20018PROH20017;
+	name PROH269;
+	longitude 19.728228854;
+	to node283-06-310PROH269;
+	length 353.428;
+	latitude 1193.27706549;
+	configuration PROH20016-LINECONFIG;
+};
+
+object load {
+	phases A;
+	load_class R;
+	name 283-06-310;
+	parent node283-06-310PROH269;
+	longitude 19.728228854;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 2705.76+919.887j;
+	latitude 1193.27706549;
+	nominal_voltage 7200.0;
+	constant_power_B 0.0+0.0j;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH19454PROH8542;
+	name PROH16513;
+	to nodeRECL_845PROH16513;
+	longitude 16.8639969037;
+	length 356.333;
+	latitude 1197.03333778;
+	configuration PROH11499-LINECONFIG;
+};
+
+object fuse {
+	phases B;
+	from nodeRECL_845PROH16513;
+	name RECL_845;
+	current_limit 9999.0 A;
+	longitude 19.5718994649;
+	to nodePROH16514RECL_845;
+	latitude 1195.64371054;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH16514RECL_845;
+	name PROH16514;
+	longitude 25.2263501013;
+	to nodePROH16515PROH16514;
+	length 5239;
+	latitude 1197.03186818;
+	configuration PROH11499-LINECONFIG;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH16515PROH16514;
+	name PROH16515;
+	longitude 30.9888836627;
+	to nodePRUG834PROH16515;
+	length 3573.77;
+	latitude 1197.00670814;
+	configuration PROH11499-LINECONFIG;
+};
+
+object underground_line {
+	phases B;
+	from nodePRUG834PROH16515;
+	name PRUG834;
+	longitude 31.0137396184;
+	to node283-08-710PRUG834;
+	length 407.943;
+	latitude 1197.31905438;
+	configuration PRUG81-LINECONFIG;
+};
+
+object load {
+	phases B;
+	load_class R;
+	name 283-08-710;
+	parent node283-08-710PRUG834;
+	longitude 31.0137396184;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 0.0+0.0j;
+	latitude 1197.31905438;
+	nominal_voltage 7200.0;
+	constant_power_B 8023.25+2727.7j;
+};
+
+object overhead_line {
+	phases B;
+	from nodePRUG834PROH16515;
+	name PROH16516;
+	longitude 34.3269980552;
+	to node283-17-120PROH16516;
+	length 3046.11;
+	latitude 1197.7318023;
+	configuration PROH11499-LINECONFIG;
+};
+
+object load {
+	phases B;
+	load_class R;
+	name 283-17-120;
+	parent node283-17-120PROH16516;
+	longitude 34.3269980552;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 0.0+0.0j;
+	latitude 1197.7318023;
+	nominal_voltage 7200.0;
+	constant_power_B 668.604+227.308j;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH16515PROH16514;
+	name PROH11498;
+	to nodePROH2878PROH11498;
+	longitude 25.2433039678;
+	length 732.994;
+	latitude 1197.59343741;
+	configuration PROH11499-LINECONFIG;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH2878PROH11498;
+	name PROH2878;
+	longitude 25.4953773662;
+	to node283-08-120PROH2878;
+	length 156.322;
+	latitude 1197.59356821;
+	configuration PROH11499-LINECONFIG;
+};
+
+object load {
+	phases B;
+	load_class R;
+	name 283-08-120;
+	parent node283-08-120PROH2878;
+	longitude 25.4953773662;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 0.0+0.0j;
+	latitude 1197.59356821;
+	nominal_voltage 7200.0;
+	constant_power_B 2686.95+913.494j;
+};
+
+object line_configuration {
+	name PROH11499-LINECONFIG;
+	spacing PROH20016-LINESPACING;
+	conductor_B PROH20016_conductor_A;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH2878PROH11498;
+	name PROH11499;
+	longitude 25.269698241;
+	to nodePROH2877PROH11499;
+	length 1448.01;
+	latitude 1198.70284171;
+	configuration PROH11499-LINECONFIG;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH2877PROH11499;
+	name PROH2877;
+	longitude 25.1017788512;
+	to node283-05-830PROH2877;
+	length 144.164;
+	latitude 1198.77922978;
+	configuration PROH11499-LINECONFIG;
+};
+
+object load {
+	phases B;
+	load_class R;
+	name 283-05-830;
+	parent node283-05-830PROH2877;
+	longitude 25.1017788512;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 0.0+0.0j;
+	latitude 1198.77922978;
+	nominal_voltage 7200.0;
+	constant_power_B 2.08939+0.710338j;
+};
+
+object overhead_line {
+	phases B;
+	from nodePROH2877PROH11499;
+	name PROH11500;
+	longitude 25.6141192055;
+	to node283-08-170PROH11500;
+	length 810.044;
+	latitude 1199.1737809;
+	configuration PROH11499-LINECONFIG;
+};
+
+object load {
+	phases B;
+	load_class R;
+	name 283-08-170;
+	parent node283-08-170PROH11500;
+	longitude 25.6141192055;
+	constant_power_C 0.0+0.0j;
+	constant_power_A 0.0+0.0j;
+	latitude 1199.1737809;
+	nominal_voltage 7200.0;
+	constant_power_B 3468.38+1179.16j;
+};
+
+object fuse {
+	phases ACB;
+	from REMBRANDT;
+	name RECL_1160;
+	current_limit 9999.0 A;
+	longitude 14.3855099582;
+	to nodePRUG4190RECL_1160;
+	latitude 1197.67087189;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG4190RECL_1160;
+	name PRUG4190;
+	longitude 14.3575125974;
+	to nodePRUG4176PRUG4190;
+	length 289.527;
+	latitude 1197.44943268;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object underground_line {
+	phases ACB;
+	from nodePRUG4176PRUG4190;
+	name PRUG4176;
+	longitude 13.4267177725;
+	to node263-32-710PRUG4176;
+	length 3185.68;
+	latitude 1198.51345656;
+	configuration PRUG6692-LINECONFIG;
+};
+
+object load {
+	phases ABC;
+	load_class R;
+	name 263-32-710;
+	parent node263-32-710PRUG4176;
+	longitude 13.2492608216;
+	constant_power_C 1853700.0+630212.0j;
+	constant_power_A 1853700.0+630212.0j;
+	latitude 1198.38714849;
+	nominal_voltage 7200.0;
+	constant_power_B 1853700.0+630212.0j;
+};
+
+object capacitor {
+	control MANUAL;
+	phases ABCN;
+	capacitor_A 350000.0;
+	control_level BANK;
+	name NEWCAP-1D1DC669;
+	parent node263-32-710PRUG4176;
+	capacitor_B 350000.0;
+	phases_connected ABCN;
+	longitude 13.4267177725;
+	switchC CLOSED;
+	nominal_voltage 7200.0;
+	capacitor_C 350000.0;
+	latitude 1198.51345656;
+	switchB CLOSED;
+	switchA CLOSED;
+	pt_phase A;
+};
+
+object fuse {
+	phases ACB;
+	from REMBRANDT;
+	name RECL_993;
+	current_limit 9999.0 A;
+	longitude 14.0558082523;
+	to nodePRUG4180RECL_993;
+	latitude 1197.6972784;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG6689RECL_1161;
+	longitude 12.262001686;
+	nominal_voltage 7200.0;
+	latitude 1198.11097271;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG6690PRUG6689;
+	longitude 12.4329005513;
+	nominal_voltage 7200.0;
+	latitude 1198.10544057;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG6691PRUG6690;
+	longitude 12.4215655872;
+	nominal_voltage 7200.0;
+	latitude 1198.26691116;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG6692PRUG6691;
+	longitude 12.5688229568;
+	nominal_voltage 7200.0;
+	latitude 1198.35841064;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG6693PRUG6692;
+	longitude 12.5461692231;
+	nominal_voltage 7200.0;
+	latitude 1198.15926154;
+};
+
+object node {
+	phases ABC;
+	name nodeSWIT_737-APRUG6693;
+	longitude 12.5461692231;
+	nominal_voltage 7200.0;
+	latitude 1198.15926154;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG3301RECL_1162;
+	longitude 14.9279527375;
+	nominal_voltage 7200.0;
+	latitude 1197.09725354;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG5000PRUG3301;
+	longitude 9.81262940356;
+	nominal_voltage 7200.0;
+	latitude 1197.12094399;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG3297PRUG5000;
+	longitude 9.62616925098;
+	nominal_voltage 7200.0;
+	latitude 1197.31991613;
+};
+
+object node {
+	phases C;
+	name node263-32-311PRUG3297;
+	longitude 9.62616925098;
+	nominal_voltage 7200.0;
+	latitude 1197.31991613;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG5002PRUG5001;
+	longitude 7.75748715473;
+	nominal_voltage 7200.0;
+	latitude 1197.1050093;
+};
+
+object node {
+	phases ABC;
+	name nodePROH16277PRUG5002;
+	longitude 7.71447906377;
+	nominal_voltage 7200.0;
+	latitude 1195.46301214;
+};
+
+object node {
+	phases A;
+	name nodePROH279PROH16277;
+	longitude 9.33439109623;
+	nominal_voltage 7200.0;
+	latitude 1195.45511019;
+};
+
+object node {
+	phases A;
+	name node263-31-260PROH279;
+	longitude 9.33439109623;
+	nominal_voltage 7200.0;
+	latitude 1195.45511019;
+};
+
+object node {
+	phases A;
+	name nodePROH16279PROH16278;
+	longitude 7.67778616729;
+	nominal_voltage 7200.0;
+	latitude 1195.07508573;
+};
+
+object node {
+	phases A;
+	name node263-30-850PRUG84;
+	longitude 7.27204304869;
+	nominal_voltage 7200.0;
+	latitude 1195.29109283;
+};
+
+object node {
+	phases ABC;
+	name nodePROH277PRUG5361;
+	longitude 1.58054732324;
+	nominal_voltage 7200.0;
+	latitude 1197.02212732;
+};
+
+object node {
+	phases A;
+	name node263-30-380PROH277;
+	longitude 1.58054732324;
+	nominal_voltage 7200.0;
+	latitude 1197.02212732;
+};
+
+object node {
+	phases ABC;
+	name nodeSWIT_361-BPRUG5362;
+	longitude 0.0;
+	nominal_voltage 7200.0;
+	latitude 1197.2287475;
+};
+
+object node {
+	phases B;
+	name node263-32-310PRUG85;
+	longitude 9.17494054411;
+	nominal_voltage 7200.0;
+	latitude 1197.3381437;
+};
+
+object node {
+	phases AB;
+	name nodePROH16622PRUG3303;
+	longitude 16.2701095834;
+	nominal_voltage 7200.0;
+	latitude 1197.27500506;
+};
+
+object node {
+	phases B;
+	name nodeFUSE_434PROH16622;
+	longitude 15.0397013085;
+	nominal_voltage 7200.0;
+	latitude 1199.10347367;
+};
+
+object node {
+	phases B;
+	name nodePROH16623FUSE_434;
+	longitude 16.2951922388;
+	nominal_voltage 7200.0;
+	latitude 1197.46942991;
+};
+
+object node {
+	phases B;
+	name nodePROH2887PROH16623;
+	longitude 17.0083557609;
+	nominal_voltage 7200.0;
+	latitude 1197.46965305;
+};
+
+object node {
+	phases B;
+	name node283-05-120PROH2887;
+	longitude 17.0083557609;
+	nominal_voltage 7200.0;
+	latitude 1197.46965305;
+};
+
+object node {
+	phases B;
+	name nodePROH2886PROH16624;
+	longitude 15.325777574;
+	nominal_voltage 7200.0;
+	latitude 1200.0;
+};
+
+object node {
+	phases B;
+	name node263-32-860PROH2886;
+	longitude 15.325777574;
+	nominal_voltage 7200.0;
+	latitude 1200.0;
+};
+
+object node {
+	phases AB;
+	name nodePROH19454PROH8542;
+	longitude 16.2874844634;
+	nominal_voltage 7200.0;
+	latitude 1196.89542685;
+};
+
+object node {
+	phases A;
+	name nodeRECL_844PROH19454;
+	longitude 13.5774343302;
+	nominal_voltage 7200.0;
+	latitude 1195.51789154;
+};
+
+object node {
+	phases A;
+	name nodePROH19455RECL_844;
+	longitude 16.2214825884;
+	nominal_voltage 7200.0;
+	latitude 1194.82536262;
+};
+
+object node {
+	phases A;
+	name nodePROH266PROH19455;
+	longitude 16.64132964;
+	nominal_voltage 7200.0;
+	latitude 1194.82670141;
+};
+
+object node {
+	phases A;
+	name node283-06-131PROH266;
+	longitude 16.695947972;
+	nominal_voltage 7200.0;
+	latitude 1194.92692612;
+};
+
+object node {
+	phases A;
+	name nodePROH20016PROH19456;
+	longitude 16.4417857023;
+	nominal_voltage 7200.0;
+	latitude 1193.02806563;
+};
+
+object node {
+	phases A;
+	name nodePROH268PROH20016;
+	longitude 16.4404255073;
+	nominal_voltage 7200.0;
+	latitude 1192.9601258;
+};
+
+object node {
+	phases A;
+	name node282-01-180PROH268;
+	longitude 16.4404255073;
+	nominal_voltage 7200.0;
+	latitude 1192.9601258;
+};
+
+object node {
+	phases A;
+	name nodePROH20018PROH20017;
+	longitude 22.406470244;
+	nominal_voltage 7200.0;
+	latitude 1192.98224664;
+};
+
+object node {
+	phases A;
+	name nodePRUG81PROH20018;
+	longitude 22.4386453475;
+	nominal_voltage 7200.0;
+	latitude 1192.38101379;
+};
+
+object node {
+	phases A;
+	name node282-01-680PRUG81;
+	longitude 22.4386453475;
+	nominal_voltage 7200.0;
+	latitude 1192.38101379;
+};
+
+object node {
+	phases A;
+	name nodePROH20020PROH20019;
+	longitude 24.6614964793;
+	nominal_voltage 7200.0;
+	latitude 1192.95659416;
+};
+
+object node {
+	phases A;
+	name nodeSWIT_617-APROH20020;
+	longitude 24.6614964793;
+	nominal_voltage 7200.0;
+	latitude 1192.95659416;
+};
+
+object node {
+	phases A;
+	name node283-06-720PROH270;
+	longitude 23.6425318309;
+	nominal_voltage 7200.0;
+	latitude 1194.21798979;
+};
+
+object node {
+	phases A;
+	name node283-06-310PROH269;
+	longitude 19.728228854;
+	nominal_voltage 7200.0;
+	latitude 1193.27706549;
+};
+
+object node {
+	phases B;
+	name nodeRECL_845PROH16513;
+	longitude 19.5718994649;
+	nominal_voltage 7200.0;
+	latitude 1195.64371054;
+};
+
+object node {
+	phases B;
+	name nodePROH16514RECL_845;
+	longitude 25.2263501013;
+	nominal_voltage 7200.0;
+	latitude 1197.03186818;
+};
+
+object node {
+	phases B;
+	name nodePROH16515PROH16514;
+	longitude 30.9888836627;
+	nominal_voltage 7200.0;
+	latitude 1197.00670814;
+};
+
+object node {
+	phases B;
+	name nodePRUG834PROH16515;
+	longitude 31.0137396184;
+	nominal_voltage 7200.0;
+	latitude 1197.31905438;
+};
+
+object node {
+	phases B;
+	name node283-08-710PRUG834;
+	longitude 31.0137396184;
+	nominal_voltage 7200.0;
+	latitude 1197.31905438;
+};
+
+object node {
+	phases B;
+	name node283-17-120PROH16516;
+	longitude 34.3269980552;
+	nominal_voltage 7200.0;
+	latitude 1197.7318023;
+};
+
+object node {
+	phases B;
+	name nodePROH2878PROH11498;
+	longitude 25.4953773662;
+	nominal_voltage 7200.0;
+	latitude 1197.59356821;
+};
+
+object node {
+	phases B;
+	name node283-08-120PROH2878;
+	longitude 25.4953773662;
+	nominal_voltage 7200.0;
+	latitude 1197.59356821;
+};
+
+object node {
+	phases B;
+	name nodePROH2877PROH11499;
+	longitude 25.1017788512;
+	nominal_voltage 7200.0;
+	latitude 1198.77922978;
+};
+
+object node {
+	phases B;
+	name node283-05-830PROH2877;
+	longitude 25.1017788512;
+	nominal_voltage 7200.0;
+	latitude 1198.77922978;
+};
+
+object node {
+	phases B;
+	name node283-08-170PROH11500;
+	longitude 25.6141192055;
+	nominal_voltage 7200.0;
+	latitude 1199.1737809;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG4190RECL_1160;
+	longitude 14.3575125974;
+	nominal_voltage 7200.0;
+	latitude 1197.44943268;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG4176PRUG4190;
+	longitude 13.4267177725;
+	nominal_voltage 7200.0;
+	latitude 1198.51345656;
+};
+
+object node {
+	phases ABCN;
+	name node263-32-710PRUG4176;
+	longitude 13.2492608216;
+	nominal_voltage 7200.0;
+	latitude 1198.38714849;
+};
+
+object node {
+	phases ABC;
+	name nodePRUG4180RECL_993;
+	longitude 12.5688229568;
+	nominal_voltage 7200.0;
+	latitude 1198.0031692;
+};
+
