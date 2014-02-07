@@ -165,7 +165,7 @@
 			<td><input id='searchTerm' type='text'></td>
 		  </tr>
 		  <tr>
-			<td></td>
+			<td><button onclick='backButton()'>Back</button></td>
 			<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
 		  </tr>
 		  <tr>
@@ -738,7 +738,7 @@ function zoomToFit(){
 		// Abort if we try to select a parentChild relationship.
 		if (d.objectType == 'parentChild') return false;
 		// Multiselection case handled first:
-		if (d3.event != null && d3.event.altKey) {
+		if (d3.event && d3.event.altKey) {
 			classify(d,'multiselected')
 			return false
 		}
@@ -747,7 +747,7 @@ function zoomToFit(){
 		classify(d,'selected')
 		// clear the selected table
 		table = gebi('selected')
-		table.setAttribute('keypress', hotkeys())
+		table.setAttribute('keypress', "hotkeys()")
 		tableClear(table)
 		treeData = tree[d.treeIndex]
 	        ti = d.treeIndex;
@@ -843,11 +843,31 @@ function zoomToFit(){
 		return results
 	}
 
+
+	var prevObjName
+	function backButton(){
+		if (!prevObjName){
+			console.log("There is no previous object")
+			return
+		}
+		$("#searchTerm").val("\"name\":\""+prevObjName+"\"")
+		findNext()
+
+	}
+
+
 	// Public variable to hold the current search state. Todo: put in a closure.
 	var searchCursor
 	var oldSearchTerm
 
 	function findNext() {
+		if ($(".selected").length && treeData.object.indexOf("configuration") < 0){ 
+			// We don't want to store configuration objects in the history, right?
+			prevObjName = treeData.name
+		}else{
+			prevObjName = undefined
+		}
+
 		term = gebi('searchTerm').value
 		if (oldSearchTerm != term) {
 			oldSearchTerm = term
