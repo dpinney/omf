@@ -2,7 +2,7 @@
 
 # ### Section 0: Imports
 
-import os, csv, math, re, sys
+import os, csv, math, re, sys, shutil
 sys.path.append('../..')
 sys.path.append('../../solvers/')
 import feeder, milToGridlab, gridlabd
@@ -137,7 +137,7 @@ for key in tree:
         confIndex = key
 baselineTap = 3 # GLOBAL VARIABLE FOR DEFAULT TAP POSITION
 tree[confIndex] = { # manual regulation 
-	'name':'REG27-CONFIG', #TODO: DO NOT HARD CODE THIS VALUE
+	'name':'REG14-CONFIG', #TODO: DO NOT HARD CODE THIS VALUE
 	'object':'regulator_configuration',
 	'connect_type':'1',
 	'raise_taps':'10',
@@ -262,7 +262,7 @@ for doingCvr in [False, True]:
             tree[confIndex]['tap_pos_B'] = str(newTapPos)
             tree[confIndex]['tap_pos_C'] = str(newTapPos)
         # Run the model through gridlab and put outputs in the table.
-        output = gridlabd.runInFilesystem(tree, keepFiles=True)
+        output = gridlabd.runInFilesystem(tree, keepFiles=False)
         p = output['Zregulator.csv']['power_in.real'][0]
         q = output['Zregulator.csv']['power_in.imag'][0]
         s = math.sqrt(p**2+q**2)
@@ -285,6 +285,7 @@ for doingCvr in [False, True]:
                 output['ZsubstationBottom.csv']['voltage_C'][0] )/3/60,
             'lowVoltage':output['ZvoltageJiggle.csv']['min(voltage_12.mag)'][0]/2,
             'highVoltage':output['ZvoltageJiggle.csv']['max(voltage_12.mag)'][0]/2 })
+
 
 # For a given load level, find two points to interpolate on.
 def getInterpPoints(t):
@@ -340,7 +341,7 @@ for row in monthData:
 
 # Pretty output
 def plotTable(inData):
-	fig = plt.figure()
+	fig = plt.figure(figsize=(20,10))
 	plt.axis('off')
 	plt.tight_layout()
 	plt.table(cellText=[row[1:] for row in inData[1:]], 
