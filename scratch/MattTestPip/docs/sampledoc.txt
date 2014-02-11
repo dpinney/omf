@@ -1,0 +1,1 @@
+This is a sample doc for my module that contains functions for finding fibonaccis and primes.  I am doing this to understand how to package Python modules and make them pip-installable.
