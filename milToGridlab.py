@@ -1307,10 +1307,13 @@ def convert(stdPath,seqPath):
 		pass
 	return glmTree, x_scale, y_scale
 
-if __name__ == '__main__':
+def _tests():
 	from pprint import pprint
 	for stdPath, seqPath in [('INEC-RENOIR.std','INEC.seq'),('Olin-Barre.std','Olin.seq'), ('ABEC-Frank.std','ABEC.seq')]:
 		with open('./uploads/' + stdPath,'r') as stdFile, open('./uploads/' + seqPath,'r') as seqFile:
 			outGlm = convert(stdFile.read(),seqFile.read())
 		print 'And here is the GLM:'
 		pprint(outGlm)
+
+if __name__ == '__main__':
+	_tests()
