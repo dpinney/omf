@@ -590,9 +590,10 @@ def convert(stdPath,seqPath):
 				else:
 					ctr = '700'
 			else:
+				ctr = '700'
 				band_width = '2'
 				raise_taps = '16'
-				raise_taps = '16'
+				lower_taps = '16'
 				regulation = '0.1'
 					
 			if regList[9] == '0': # Each phase is controlled independently
