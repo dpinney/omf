@@ -3,7 +3,7 @@ from distutils.core import setup
 
 setup(
 	name='MattTestPip',
-	version='0.1.0',
+	version='0.1.1',
 	author='Matt Havard',
 	author_email='Matthew.Havard@nreca.coop',
 	packages=['matttestpip', 'matttestpip.test'],
