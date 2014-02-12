@@ -162,10 +162,24 @@ def anaDataTree(studyPath, fileNameTest):
 			data[cName] = seriesTranspose(arr)
 	return data
 
+def _tests():
+	# On the Python side, this test runs fine, but it gets fatal errors in gridlab because it is looking for a file called "climate.tmy2"
+	import json
+	# import storage, studies
+	# store = storage.Filestore('data')
+	# testStudy = studies.gridlabd.Gridlabd('NoSolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---NoSolar'), store.get('Study','zSolar Trio---NoSolar'))
+	with open("data\\Feeder\\public_Olin Barre.json") as feederFile:
+		feederJson = json.load(feederFile)
+	print "tree:", feederJson["tree"]
+	print "attachments:", feederJson["attachments"]
+	testStudy = runInFilesystem(feederJson["tree"], feederJson["attachments"])
+	# print testStudy.name, 
+	print dir(testStudy)
+	# rawOut = run(testStudy)
+	# print rawOut.keys()
+	print "testStudy.keys():", testStudy.keys()
+	print "testStudy['stdout']:", testStudy['stdout']
+	print "testStudy['stderr']:", testStudy['stderr']
+
 if __name__ == '__main__':
-	import storage, studies
-	store = storage.Filestore('data')
-	testStudy = studies.gridlabd.Gridlabd('NoSolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---NoSolar'), store.get('Study','zSolar Trio---NoSolar'))
-	print testStudy.name, dir(testStudy)
-	rawOut = run(testStudy)
-	print rawOut.keys()
+	_tests()

@@ -311,7 +311,9 @@ class Scada:
 	def getKeys(self):
 		return self.scada_dict.keys()
 
-if __name__ == '__main__':
+def _tests():
+	# This test is broken.  Where is the variable/function scada coming from?
+	# The arguments passed to scada do not match the parameters of the Scada class's __init__ method
 	"""
 		test code
 	"""
@@ -324,3 +326,6 @@ if __name__ == '__main__':
 	#     file.write(str(s.run()))
 	print s.run()
 #     s.run()
+
+if __name__ == '__main__':
+	_tests()
