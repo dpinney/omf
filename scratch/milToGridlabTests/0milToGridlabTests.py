@@ -3,7 +3,7 @@
 import sys
 sys.path.append('../..')
 sys.path.append('../../solvers/')
-import milToGridlab as m2g, feeder, os, gridlabd, json
+import milToGridlab as m2g, feeder, os, gridlabd, json, traceback
 from pprint import pprint as pp
 from matplotlib import pyplot as plt
 
@@ -36,5 +36,6 @@ for stdPath, seqPath in testFiles:
 			print 'POWERFLOW FAILED', stdPath
 	except:
 		print 'FAILED CONVERTING', stdPath
+		traceback.print_exc()
 
 print os.listdir('.')
