@@ -394,45 +394,45 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 								font_weight='bold',
 								font_size=0.25)
 
+def _tests():
+	# Graph Test
+	import json
+	with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
+		tree = json.load(inJ)['tree']
+	nxG = treeToNxGraph(tree)
+	x = latLonNxGraph(nxG)
+	plt.show()
+
+	# Parser Test
+	tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
+	simpleTokens = tokenizeGlm('./feeders/13 Node Ref Feeder Flat/main.glm')
+	print parseTokenList(simpleTokens)
+
+	# Recorder Attachment Test
+	with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
+		tree = json.load(inJ)['tree']
+	attachRecorders(tree, 'Regulator', 'object', 'regulator')
+	attachRecorders(tree, 'Voltage', 'object', 'node')
+	print 'All the objects: ' + str([tree[x]['object'] for x in tree.keys() if 'object' in tree[x]])
+
+	# Testing The De-Embedding
+	from pprint import pprint
+	tree = parse('./feeders/13 Node Reference Feeder/main.glm')
+	fullyDeEmbed(tree)
+	#pprint(tree)
+	print sortedWrite(tree)
+
+	# groupSwingKids test
+	from pprint import pprint
+	tree = parse('./feeders/13 Node Ref Feeder Flat/main.glm')
+	groupSwingKids(tree)
+	pprint(tree)
+
+	# Time Adjustment Test
+	tree = parse('./feeders/Simple Market System/main.glm')
+	adjustTime(tree, 100, 'hours', '2000-09-01')
+	from pprint import pprint
+	pprint(tree)
+
 if __name__ == '__main__':
-	''' Here we do the tests. '''
-
-	# # Graph Test
-	# import json
-	# with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
-	# 	tree = json.load(inJ)['tree']
-	# nxG = treeToNxGraph(tree)
-	# x = latLonNxGraph(nxG)
-	# plt.show()
-
-	# # Parser Test
-	# tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
-	# simpleTokens = tokenizeGlm('./feeders/13 Node Ref Feeder Flat/main.glm')
-	# print parseTokenList(simpleTokens)
-
-	# # Recorder Attachment Test
-	# with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
-	# 	tree = json.load(inJ)['tree']
-	# attachRecorders(tree, 'Regulator', 'object', 'regulator')
-	# attachRecorders(tree, 'Voltage', 'object', 'node')
-	# print 'All the objects: ' + str([tree[x]['object'] for x in tree.keys() if 'object' in tree[x]])
-
-	# # Testing The De-Embedding
-	# from pprint import pprint
-	# tree = parse('./feeders/13 Node Reference Feeder/main.glm')
-	# fullyDeEmbed(tree)
-	# #pprint(tree)
-	# print sortedWrite(tree)
-
-	# # groupSwingKids test
-	# from pprint import pprint
-	# tree = parse('./feeders/13 Node Ref Feeder Flat/main.glm')
-	# groupSwingKids(tree)
-	# pprint(tree)
-
-	# # Time Adjustment Test
-	# tree = parse('./feeders/Simple Market System/main.glm')
-	# adjustTime(tree, 100, 'hours', '2000-09-01')
-	# from pprint import pprint
-	# pprint(tree)
-	pass
+	_tests()
