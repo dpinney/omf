@@ -1284,28 +1284,24 @@ def convert(stdPath,seqPath):
 	for headId in xrange(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
 
-	# TODO: speed up this gross, gross, gross hack.
-	try:
-		# Generat lat/lon for triplex_meter and triplex_node
-		for i in glmTree:
-			if glmTree[i].has_key('object') and glmTree[i]['object'] == 'triplex_meter':
-				for j in glmTree:
-					if glmTree[j].has_key('to') and glmTree[j]['to'] == glmTree[i]['name']:
-						glmTree[i]['latitude'] = glmTree[j]['latitude'] + random.uniform(-5,5)
-						glmTree[i]['longitude'] = glmTree[j]['longitude'] + random.uniform(-5,5)
-						for k in glmTree:
-							if glmTree[k].has_key('parent') and glmTree[k]['parent'] == glmTree[i]['name']:
-								glmTree[k]['latitude'] = glmTree[i]['latitude'] + random.uniform(-2,2)
-								glmTree[k]['longitude'] = glmTree[i]['longitude'] + random.uniform(-2,2)
-		# Generat lat/lon for load
-		for i in glmTree:
-			if glmTree[i].has_key('object') and glmTree[i]['object'] == 'load':
-				for k in glmTree:
-					if glmTree[k].has_key('name') and glmTree[i].has_key('parent') and glmTree[i]['parent'] == glmTree[k]['name']:
-						glmTree[i]['latitude'] = glmTree[k]['latitude'] + random.uniform(-2,2)
-						glmTree[i]['longitude'] = glmTree[k]['longitude'] + random.uniform(-2,2)
-	except:
-		pass
+	# Go through and put lat/lons on meters and loads.
+	nameToIndex = {glmTree[key].get('name',''):key for key in glmTree}
+	for key in glmTree:
+		thisOb = glmTree[key]
+		if thisOb.get('object','') == 'transformer':
+			fromOb = glmTree.get(nameToIndex.get(thisOb.get('from',''),0),{})
+			toOb = glmTree.get(nameToIndex.get(thisOb.get('to',''),0),{})
+			if toOb.get('object','') == 'triplex_meter' and 'latitude' in fromOb and 'longitude' in fromOb:
+				toOb['latitude'] = str(float(fromOb['latitude']) + random.uniform(-10,10))
+				toOb['longitude'] = str(float(fromOb['longitude']) + random.uniform(-10,10))
+	for key in glmTree:
+		thisOb = glmTree[key]
+		if thisOb.get('object','') in ['triplex_node','load']:
+			parentOb = glmTree.get(nameToIndex.get(thisOb.get('parent',''),0),{})
+			if 'latitude' in parentOb and 'longitude' in parentOb:
+				thisOb['latitude'] = str(float(parentOb['latitude']) + random.uniform(-5,5))
+				thisOb['longitude'] = str(float(parentOb['longitude']) + random.uniform(-5,5))
+
 	return glmTree, x_scale, y_scale
 
 def _tests():

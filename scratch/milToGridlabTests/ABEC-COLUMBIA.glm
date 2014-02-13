@@ -16627,2342 +16627,3122 @@ object node {
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1808-19-0031808-19-009_A;
+	longitude 40.5256990448;
+	nominal_voltage 120;
+	latitude 617.725794992;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-19-0031808-19-009_C;
+	longitude 43.2305218504;
+	nominal_voltage 120;
+	latitude 613.050986556;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-19-0031808-19-009_B;
+	longitude 39.1107050567;
+	nominal_voltage 120;
+	latitude 616.944853596;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-33-0041808-33-003_C;
+	longitude 275.987669837;
+	nominal_voltage 120;
+	latitude 1029.60754108;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-04-0011707-0205_B;
+	longitude 403.832696145;
+	nominal_voltage 120;
+	latitude 143.709180863;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-15-0031708-15-001_B;
+	longitude 676.453514287;
+	nominal_voltage 120;
+	latitude 1078.28604546;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-10-025T18079_A;
+	longitude 659.549145161;
+	nominal_voltage 120;
+	latitude 234.801026533;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0701808-29-029_C;
+	longitude 227.085290019;
+	nominal_voltage 120;
+	latitude 765.991684429;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-0011707-13-013_A;
+	longitude 763.598072017;
+	nominal_voltage 120;
+	latitude 436.846196431;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-09-009T10302_B;
+	longitude 635.962873938;
+	nominal_voltage 120;
+	latitude 77.6058436218;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1808-31-0011808-31-003_A;
+	longitude 366.590940748;
+	nominal_voltage 120;
+	latitude 643.967378719;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0201708-10-004_B;
+	longitude 673.013840506;
+	nominal_voltage 120;
+	latitude 1059.84760818;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0251708-0043_B;
+	longitude 709.033920449;
+	nominal_voltage 120;
+	latitude 1040.63377824;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0821808-0133_C;
+	longitude 253.536316271;
+	nominal_voltage 120;
+	latitude 840.738126772;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0351808-0046_C;
+	longitude 231.962051877;
+	nominal_voltage 120;
+	latitude 793.505026112;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-25-015T11989_C;
+	longitude 155.741379032;
+	nominal_voltage 120;
+	latitude 548.12367104;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-03-010T28731_B;
+	longitude 403.295608629;
+	nominal_voltage 120;
+	latitude 210.781258122;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-34-013T29080_B;
+	longitude 379.01651512;
+	nominal_voltage 120;
+	latitude 188.104778284;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0161708-0045_B;
+	longitude 721.344608737;
+	nominal_voltage 120;
+	latitude 1046.46826239;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-018T2590_B;
+	longitude 543.084748228;
+	nominal_voltage 120;
+	latitude 688.879136802;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1807-25-0131807--T325_A;
+	longitude 148.251436258;
+	nominal_voltage 120;
+	latitude 581.896650003;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-25-0131807--T325_C;
+	longitude 164.587757296;
+	nominal_voltage 120;
+	latitude 577.792082435;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-25-0131807--T325_B;
+	longitude 157.067781711;
+	nominal_voltage 120;
+	latitude 564.092059753;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-14-0091707-0091_A;
+	longitude 711.728135878;
+	nominal_voltage 120;
+	latitude 351.637710628;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-14-0091707-0091_C;
+	longitude 707.738775646;
+	nominal_voltage 120;
+	latitude 340.630284391;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-14-0091707-0091_B;
+	longitude 709.824846616;
+	nominal_voltage 120;
+	latitude 357.330372518;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-25-002T11988_C;
+	longitude 157.132250629;
+	nominal_voltage 120;
+	latitude 547.598080783;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-086T29059_C;
+	longitude 243.647747023;
+	nominal_voltage 120;
+	latitude 862.612567291;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-34-003T28723_B;
+	longitude 387.49353238;
+	nominal_voltage 120;
+	latitude 188.427556215;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-014T19033_A;
+	longitude 773.120579599;
+	nominal_voltage 120;
+	latitude 505.534138767;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0301708-10-003_B;
+	longitude 663.065507994;
+	nominal_voltage 120;
+	latitude 1063.91064974;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-03-012T10259_C;
+	longitude 512.451027117;
+	nominal_voltage 120;
+	latitude 199.903407967;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-09-008T15710_B;
+	longitude 605.596651736;
+	nominal_voltage 120;
+	latitude 58.2743312745;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0871808-0142_C;
+	longitude 243.588573913;
+	nominal_voltage 120;
+	latitude 805.635645884;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0151708-0046_B;
+	longitude 698.551519162;
+	nominal_voltage 120;
+	latitude 1030.27780759;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-14-0111707-0088_A;
+	longitude 708.443111749;
+	nominal_voltage 120;
+	latitude 351.587978542;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0851808-0137_C;
+	longitude 254.446221474;
+	nominal_voltage 120;
+	latitude 863.758991023;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-34-002T28720_B;
+	longitude 396.046541836;
+	nominal_voltage 120;
+	latitude 194.349486026;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-07-001T11961_B;
+	longitude 560.258953243;
+	nominal_voltage 120;
+	latitude 652.263933985;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-03-017T28684_C;
+	longitude 507.110646534;
+	nominal_voltage 120;
+	latitude 253.492337222;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-27-0111808-0166_C;
+	longitude 241.07863207;
+	nominal_voltage 120;
+	latitude 1077.28849427;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-34-009T28732_B;
+	longitude 372.08448666;
+	nominal_voltage 120;
+	latitude 194.69327959;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-101T11098_C;
+	longitude 240.77006668;
+	nominal_voltage 120;
+	latitude 803.968065328;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-11-011T14424_A;
+	longitude 635.916128309;
+	nominal_voltage 120;
+	latitude 344.710600973;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-11-011T14424_C;
+	longitude 640.781322117;
+	nominal_voltage 120;
+	latitude 360.427354512;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-11-011T14424_B;
+	longitude 632.831603813;
+	nominal_voltage 120;
+	latitude 359.643652818;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1807-24-041T29032_A;
+	longitude 39.3303687238;
+	nominal_voltage 120;
+	latitude 596.000707374;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-24-041T29032_C;
+	longitude 44.3837715926;
+	nominal_voltage 120;
+	latitude 589.432762787;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-24-041T29032_B;
+	longitude 48.4362379765;
+	nominal_voltage 120;
+	latitude 597.780556149;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-0171707-0259_A;
+	longitude 754.358684434;
+	nominal_voltage 120;
+	latitude 537.348437868;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-09-013T2700_B;
+	longitude 548.539334459;
+	nominal_voltage 120;
+	latitude 36.3738239086;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0931808-0160_C;
+	longitude 266.01090335;
+	nominal_voltage 120;
+	latitude 872.416048474;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-34-001T28716_B;
+	longitude 405.078491494;
+	nominal_voltage 120;
+	latitude 203.022734736;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0741808-0084_C;
+	longitude 254.624604643;
+	nominal_voltage 120;
+	latitude 795.343824948;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-11-0031707-0074_A;
+	longitude 552.290567131;
+	nominal_voltage 120;
+	latitude 408.802586922;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1808-30-0041808-19-010_A;
+	longitude 144.641965502;
+	nominal_voltage 120;
+	latitude 669.913766924;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-30-0041808-19-010_C;
+	longitude 139.78884233;
+	nominal_voltage 120;
+	latitude 676.451719439;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-30-0041808-19-010_B;
+	longitude 144.737130333;
+	nominal_voltage 120;
+	latitude 677.25976687;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1807-24-034T29031_A;
+	longitude 49.4779000196;
+	nominal_voltage 120;
+	latitude 598.208694417;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-24-034T29031_C;
+	longitude 40.798645205;
+	nominal_voltage 120;
+	latitude 600.291240191;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-24-034T29031_B;
+	longitude 50.3449464623;
+	nominal_voltage 120;
+	latitude 594.599508813;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-24-030T21526_B;
+	longitude 24.0352607869;
+	nominal_voltage 120;
+	latitude 608.73743266;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-03-016T18015_A;
+	longitude 477.853098189;
+	nominal_voltage 120;
+	latitude 165.156007029;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-03-016T18015_C;
+	longitude 475.003331927;
+	nominal_voltage 120;
+	latitude 175.055195609;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-03-016T18015_B;
+	longitude 478.885988511;
+	nominal_voltage 120;
+	latitude 177.348756076;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0091808-32-013_C;
+	longitude 282.911959682;
+	nominal_voltage 120;
+	latitude 855.531908972;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-008T28838_B;
+	longitude 686.233815763;
+	nominal_voltage 120;
+	latitude 1014.21690569;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-0161708-0039_B;
+	longitude 501.168109181;
+	nominal_voltage 120;
+	latitude 696.84717288;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-078T4061_C;
+	longitude 267.596084699;
+	nominal_voltage 120;
+	latitude 789.514114147;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-02-0131707-0223_A;
+	longitude 528.503405664;
+	nominal_voltage 120;
+	latitude 465.254378504;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-10-007T5162_B;
+	longitude 608.328254648;
+	nominal_voltage 120;
+	latitude 1127.96214661;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-03-004T10257_A;
+	longitude 480.816278008;
+	nominal_voltage 120;
+	latitude 168.565122331;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-03-004T10257_C;
+	longitude 467.328067444;
+	nominal_voltage 120;
+	latitude 169.155290352;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-03-004T10257_B;
+	longitude 470.335500293;
+	nominal_voltage 120;
+	latitude 178.927658344;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-15-004T10286_A;
+	longitude 669.45422385;
+	nominal_voltage 120;
+	latitude 218.341133215;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-34-004T4107_C;
+	longitude 266.450830121;
+	nominal_voltage 120;
+	latitude 1082.342891;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0111808-32-012_C;
+	longitude 280.635471968;
+	nominal_voltage 120;
+	latitude 843.284859025;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-019T11878_A;
+	longitude 745.615059221;
+	nominal_voltage 120;
+	latitude 581.413821805;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0011708-16-024_B;
+	longitude 738.597792684;
+	nominal_voltage 120;
+	latitude 916.297900658;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0131708-16-016_B;
+	longitude 691.635437852;
+	nominal_voltage 120;
+	latitude 1023.02050887;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-03-013T28733_B;
+	longitude 423.690792453;
+	nominal_voltage 120;
+	latitude 175.925924875;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-10-003T5161_B;
+	longitude 612.901688342;
+	nominal_voltage 120;
+	latitude 1141.15930449;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0751808-0088_C;
+	longitude 211.160202265;
+	nominal_voltage 120;
+	latitude 818.944827833;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-12-010T12388_A;
+	longitude 539.414613996;
+	nominal_voltage 120;
+	latitude 473.195661555;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0201708-16-012_B;
+	longitude 698.33364878;
+	nominal_voltage 120;
+	latitude 1004.99519603;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-03-002T10261_C;
+	longitude 515.334280395;
+	nominal_voltage 120;
+	latitude 272.544387291;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-04-009T15718_B;
+	longitude 498.73120905;
+	nominal_voltage 120;
+	latitude 139.555352144;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-014T4140_C;
+	longitude 303.021128435;
+	nominal_voltage 120;
+	latitude 806.144620868;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-011T4307_B;
+	longitude 458.431114013;
+	nominal_voltage 120;
+	latitude 735.02356467;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0731808-0085_C;
+	longitude 209.073468052;
+	nominal_voltage 120;
+	latitude 819.928611715;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-34-0121807-0303_B;
+	longitude 322.99026538;
+	nominal_voltage 120;
+	latitude 245.710110844;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-12-0091707-12-016_A;
+	longitude 541.558480471;
+	nominal_voltage 120;
+	latitude 497.852884454;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-0081708-05-001_B;
+	longitude 485.413510044;
+	nominal_voltage 120;
+	latitude 752.086757874;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-10-008T3999_B;
+	longitude 640.071206272;
+	nominal_voltage 120;
+	latitude 1113.53508603;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0181708-16-011_B;
+	longitude 689.744087885;
+	nominal_voltage 120;
+	latitude 1013.42574969;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1808-19-0111808-19-005_A;
+	longitude 47.9335813975;
+	nominal_voltage 120;
+	latitude 638.030049842;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-19-0111808-19-005_C;
+	longitude 42.2745997677;
+	nominal_voltage 120;
+	latitude 639.56870508;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-19-0111808-19-005_B;
+	longitude 41.8981648695;
+	nominal_voltage 120;
+	latitude 652.621780328;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-10-031T2552_C;
+	longitude 663.000735087;
+	nominal_voltage 120;
+	latitude 190.716670321;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-04-005T15716_B;
+	longitude 499.712072455;
+	nominal_voltage 120;
+	latitude 122.075967231;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0241708-0042_B;
+	longitude 767.652324562;
+	nominal_voltage 120;
+	latitude 908.531816605;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0811808-0125_C;
+	longitude 211.423133433;
+	nominal_voltage 120;
+	latitude 800.313881319;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-005T3285_C;
+	longitude 295.275069053;
+	nominal_voltage 120;
+	latitude 768.171798015;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-34-010T28725_B;
+	longitude 397.869988529;
+	nominal_voltage 120;
+	latitude 154.951911188;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0161808-32-024_C;
+	longitude 268.458810449;
+	nominal_voltage 120;
+	latitude 827.804866378;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0121808-0080_C;
+	longitude 285.469569849;
+	nominal_voltage 120;
+	latitude 797.243870598;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-020T11933_A;
+	longitude 725.829524301;
+	nominal_voltage 120;
+	latitude 579.503151705;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-03-015T10263_A;
+	longitude 519.585719447;
+	nominal_voltage 120;
+	latitude 278.31116627;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-03-015T10263_C;
+	longitude 535.808925723;
+	nominal_voltage 120;
+	latitude 294.009595458;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-03-015T10263_B;
+	longitude 536.905885725;
+	nominal_voltage 120;
+	latitude 276.513878537;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-36-0051807-0244_C;
+	longitude 317.752670954;
+	nominal_voltage 120;
+	latitude 510.402269463;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-04-010T15715_B;
+	longitude 506.653834735;
+	nominal_voltage 120;
+	latitude 69.4926993012;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-34-0081807-34-003_B;
+	longitude 321.177128611;
+	nominal_voltage 120;
+	latitude 157.566452637;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-015T11932_A;
+	longitude 733.860444301;
+	nominal_voltage 120;
+	latitude 564.726781909;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-0171708-0040_B;
+	longitude 457.850678567;
+	nominal_voltage 120;
+	latitude 721.383584172;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0071808-29-032_C;
+	longitude 203.31348145;
+	nominal_voltage 120;
+	latitude 827.711146446;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-012T5390_B;
+	longitude 717.805437688;
+	nominal_voltage 120;
+	latitude 985.902070735;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-17-0061708-17-020_B;
+	longitude 770.269038583;
+	nominal_voltage 120;
+	latitude 861.265814137;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1808-19-005T28934_A;
+	longitude 16.1182781255;
+	nominal_voltage 120;
+	latitude 697.62168169;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-19-005T28934_C;
+	longitude 18.2970472949;
+	nominal_voltage 120;
+	latitude 694.273984762;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-19-005T28934_B;
+	longitude 14.8890343685;
+	nominal_voltage 120;
+	latitude 697.491421115;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-006T3286_C;
+	longitude 325.91818511;
+	nominal_voltage 120;
+	latitude 756.455102547;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-27-0061808-27-007_C;
+	longitude 257.920340433;
+	nominal_voltage 120;
+	latitude 1184.27030631;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-073T14065_C;
+	longitude 271.940804666;
+	nominal_voltage 120;
+	latitude 827.831586808;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-0081707-13-007_A;
+	longitude 726.113951545;
+	nominal_voltage 120;
+	latitude 539.021091325;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0071708-09-017_B;
+	longitude 639.783717991;
+	nominal_voltage 120;
+	latitude 1019.35887436;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-0011708-06-005_B;
+	longitude 456.021946886;
+	nominal_voltage 120;
+	latitude 720.595985425;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-03-001T5274_B;
+	longitude 542.377496006;
+	nominal_voltage 120;
+	latitude 263.92074617;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-15-0081707-0018_A;
+	longitude 732.523313164;
+	nominal_voltage 120;
+	latitude 165.367907855;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-15-0081707-0018_C;
+	longitude 722.00417329;
+	nominal_voltage 120;
+	latitude 167.068496127;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-15-0081707-0018_B;
+	longitude 728.238632647;
+	nominal_voltage 120;
+	latitude 182.383535104;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-0111707-13-006_A;
+	longitude 707.706181422;
+	nominal_voltage 120;
+	latitude 544.241845755;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1808-19-008T28933_A;
+	longitude 33.2847545707;
+	nominal_voltage 120;
+	latitude 691.525853084;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-19-008T28933_C;
+	longitude 40.6771898653;
+	nominal_voltage 120;
+	latitude 703.582184282;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-19-008T28933_B;
+	longitude 29.4507006851;
+	nominal_voltage 120;
+	latitude 701.051984194;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-0201708-06-044_B;
+	longitude 440.028612081;
+	nominal_voltage 120;
+	latitude 711.138865694;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-074T3287_C;
+	longitude 329.218748787;
+	nominal_voltage 120;
+	latitude 762.226419091;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-04-007T15721_B;
+	longitude 480.775139231;
+	nominal_voltage 120;
+	latitude 87.4317423635;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-35-0021807-0009_B;
+	longitude 365.099645389;
+	nominal_voltage 120;
+	latitude 307.512799401;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0261808-32-026_C;
+	longitude 270.965384988;
+	nominal_voltage 120;
+	latitude 759.901975349;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0891808-0144_C;
+	longitude 188.265878327;
+	nominal_voltage 120;
+	latitude 820.325691812;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0131808-0082_C;
+	longitude 273.837131743;
+	nominal_voltage 120;
+	latitude 810.147532406;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-0041708-06-004_B;
+	longitude 433.371773746;
+	nominal_voltage 120;
+	latitude 703.728175515;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-10-004T10266_C;
+	longitude 558.883174998;
+	nominal_voltage 120;
+	latitude 242.93984999;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-04-008T15719_B;
+	longitude 473.603568998;
+	nominal_voltage 120;
+	latitude 73.8445481281;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-27-0091808-0124_C;
+	longitude 254.619218091;
+	nominal_voltage 120;
+	latitude 1162.9569651;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-04-0111707-04-001_B;
+	longitude 439.070339022;
+	nominal_voltage 120;
+	latitude 64.702790026;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-0161707-13-003_A;
+	longitude 667.897458528;
+	nominal_voltage 120;
+	latitude 536.675687051;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-0021708-05-008_B;
+	longitude 487.267409623;
+	nominal_voltage 120;
+	latitude 851.272512745;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-076T3288_C;
+	longitude 348.12330414;
+	nominal_voltage 120;
+	latitude 773.374568103;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-35-0081807-0306_B;
+	longitude 384.490336064;
+	nominal_voltage 120;
+	latitude 306.226054202;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-0121708-06-002_B;
+	longitude 424.50035824;
+	nominal_voltage 120;
+	latitude 687.378992851;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0031808-29-012_C;
+	longitude 194.646141848;
+	nominal_voltage 120;
+	latitude 839.323040278;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-15-0121707-0055_A;
+	longitude 786.977995996;
+	nominal_voltage 120;
+	latitude 223.398516425;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-15-0121707-0055_C;
+	longitude 778.928882679;
+	nominal_voltage 120;
+	latitude 217.217623524;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-15-0121707-0055_B;
+	longitude 784.39528705;
+	nominal_voltage 120;
+	latitude 212.651138381;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-34-0031808-27-005_C;
+	longitude 266.709285833;
+	nominal_voltage 120;
+	latitude 1169.8778795;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-12-0011707-12-009_A;
+	longitude 669.764889988;
+	nominal_voltage 120;
+	latitude 543.415688183;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-10-003T10268_B;
+	longitude 560.681153421;
+	nominal_voltage 120;
+	latitude 235.862681736;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-09-016T12255_B;
+	longitude 629.104363853;
+	nominal_voltage 120;
+	latitude 89.1213864743;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-04-003T12961_B;
+	longitude 399.858925583;
+	nominal_voltage 120;
+	latitude 35.4091451018;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0221808-0074_C;
+	longitude 276.783875974;
+	nominal_voltage 120;
+	latitude 747.953316938;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-12-0031707-0038_A;
+	longitude 624.684790262;
+	nominal_voltage 120;
+	latitude 539.475829312;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-17-0111708-0036_B;
+	longitude 739.459879935;
+	nominal_voltage 120;
+	latitude 806.247362226;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-19-0011808-19-008_B;
+	longitude 27.6884376446;
+	nominal_voltage 120;
+	latitude 725.389559504;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-0071708-06-001_B;
+	longitude 421.722293601;
+	nominal_voltage 120;
+	latitude 670.820310827;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0061808-29-002_C;
+	longitude 186.382527627;
+	nominal_voltage 120;
+	latitude 856.180295762;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-15-0091707-0021_A;
+	longitude 743.787144852;
+	nominal_voltage 120;
+	latitude 221.105708429;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-15-0091707-0021_C;
+	longitude 736.668817306;
+	nominal_voltage 120;
+	latitude 221.841356344;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-15-0091707-0021_B;
+	longitude 744.473809619;
+	nominal_voltage 120;
+	latitude 221.053428201;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-27-0101808-27-004_C;
+	longitude 269.516208008;
+	nominal_voltage 120;
+	latitude 1115.89250162;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-02-0021707-0152_A;
+	longitude 400.435134454;
+	nominal_voltage 120;
+	latitude 317.486472402;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-12-0021707-12-007_A;
+	longitude 588.963845601;
+	nominal_voltage 120;
+	latitude 556.872156102;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-04-0011708-04-001_B;
+	longitude 498.044560377;
+	nominal_voltage 120;
+	latitude 911.411458536;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0081708-09-026_B;
+	longitude 657.687059601;
+	nominal_voltage 120;
+	latitude 1045.69033838;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-10-006T10267_A;
+	longitude 559.320355196;
+	nominal_voltage 120;
+	latitude 242.241559353;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-10-006T10267_C;
+	longitude 560.965598525;
+	nominal_voltage 120;
+	latitude 252.447624471;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-10-006T10267_B;
+	longitude 559.76453883;
+	nominal_voltage 120;
+	latitude 254.794820401;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-27-0051808-27-001_C;
+	longitude 259.099245183;
+	nominal_voltage 120;
+	latitude 1092.40681273;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-31-0661808-0072_C;
+	longitude 274.459606247;
+	nominal_voltage 120;
+	latitude 730.286157662;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-17-0121708-0037_B;
+	longitude 742.940983227;
+	nominal_voltage 120;
+	latitude 810.043599917;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-15-0071707-0014_A;
+	longitude 683.66991547;
+	nominal_voltage 120;
+	latitude 166.344968044;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-15-0071707-0014_C;
+	longitude 684.627924043;
+	nominal_voltage 120;
+	latitude 164.029099031;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-15-0071707-0014_B;
+	longitude 683.080447917;
+	nominal_voltage 120;
+	latitude 178.215698585;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1807-35-0091807-0316_A;
+	longitude 405.94328327;
+	nominal_voltage 120;
+	latitude 374.590074345;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-35-0091807-0316_C;
+	longitude 393.026234449;
+	nominal_voltage 120;
+	latitude 381.078818856;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-35-0091807-0316_B;
+	longitude 407.647733665;
+	nominal_voltage 120;
+	latitude 383.029705876;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-17-016T19039_B;
+	longitude 743.95359967;
+	nominal_voltage 120;
+	latitude 808.169274801;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-010T7835_B;
+	longitude 405.550689959;
+	nominal_voltage 120;
+	latitude 682.833967141;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-09-010T10306_B;
+	longitude 642.674610999;
+	nominal_voltage 120;
+	latitude 63.0714634341;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-33-0081808-28-007_C;
+	longitude 262.534212257;
+	nominal_voltage 120;
+	latitude 1054.95316733;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0771808-0103_C;
+	longitude 225.284520963;
+	nominal_voltage 120;
+	latitude 793.136503287;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-35-001T18012_B;
+	longitude 394.247123903;
+	nominal_voltage 120;
+	latitude 373.551526878;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-12-007T4331_A;
+	longitude 582.176426201;
+	nominal_voltage 120;
+	latitude 535.106742082;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0111708-09-023_B;
+	longitude 674.770370633;
+	nominal_voltage 120;
+	latitude 1045.18832834;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0081808-29-034_C;
+	longitude 143.715560641;
+	nominal_voltage 120;
+	latitude 865.371076312;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-0041708-05-012_B;
+	longitude 410.583861076;
+	nominal_voltage 120;
+	latitude 895.038119523;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-17-0051708-17-016_B;
+	longitude 722.837778041;
+	nominal_voltage 120;
+	latitude 856.443300462;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-0141708-06-014_B;
+	longitude 400.903798307;
+	nominal_voltage 120;
+	latitude 673.977739003;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-10-024T11874_A;
+	longitude 672.015058362;
+	nominal_voltage 120;
+	latitude 159.012378141;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-09-007T10305_B;
+	longitude 641.618381546;
+	nominal_voltage 120;
+	latitude 54.5458115492;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-28-0031808-28-006_C;
+	longitude 281.825443343;
+	nominal_voltage 120;
+	latitude 1018.45146528;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-12-0041707-12-004_A;
+	longitude 577.758146173;
+	nominal_voltage 120;
+	latitude 539.502299128;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-10-009T10274_A;
+	longitude 566.747953522;
+	nominal_voltage 120;
+	latitude 181.449612829;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-10-009T10274_C;
+	longitude 580.89116624;
+	nominal_voltage 120;
+	latitude 200.259099887;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-10-009T10274_B;
+	longitude 571.192517374;
+	nominal_voltage 120;
+	latitude 184.747724465;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-33-0011807-33-004_B;
+	longitude 364.187336895;
+	nominal_voltage 120;
+	latitude 40.6905743325;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-033T4063_B;
+	longitude 588.867058416;
+	nominal_voltage 120;
+	latitude 1002.18002058;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0031708-09-025_B;
+	longitude 661.682726819;
+	nominal_voltage 120;
+	latitude 1031.50910473;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-08-0071708-08-005_B;
+	longitude 610.320381045;
+	nominal_voltage 120;
+	latitude 834.6631178;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-06-019T11814_B;
+	longitude 394.950015484;
+	nominal_voltage 120;
+	latitude 660.143336753;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0921808-0150_C;
+	longitude 153.187446899;
+	nominal_voltage 120;
+	latitude 843.023096387;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-10-033T4388_A;
+	longitude 661.112537184;
+	nominal_voltage 120;
+	latitude 162.879517573;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-09-011T10303_B;
+	longitude 659.642213304;
+	nominal_voltage 120;
+	latitude 53.5911827112;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-02-014T18014_A;
+	longitude 444.313417781;
+	nominal_voltage 120;
+	latitude 402.035140024;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-02-014T18014_C;
+	longitude 441.159253045;
+	nominal_voltage 120;
+	latitude 400.40268214;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-02-014T18014_B;
+	longitude 431.708554438;
+	nominal_voltage 120;
+	latitude 399.10838815;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0051708-09-008_B;
+	longitude 599.338433064;
+	nominal_voltage 120;
+	latitude 984.089954347;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0031808-32-008_C;
+	longitude 322.574697662;
+	nominal_voltage 120;
+	latitude 798.081141166;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-04-003T14400_B;
+	longitude 480.712340022;
+	nominal_voltage 120;
+	latitude 916.238875186;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-08-0041708-08-001_B;
+	longitude 574.802479984;
+	nominal_voltage 120;
+	latitude 829.182706264;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-09-014T12199_A;
+	longitude 576.306856483;
+	nominal_voltage 120;
+	latitude 111.871907518;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-09-014T12199_C;
+	longitude 567.226933593;
+	nominal_voltage 120;
+	latitude 117.061642309;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-09-014T12199_B;
+	longitude 565.535322917;
+	nominal_voltage 120;
+	latitude 117.030472881;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-35-005T12925_C;
+	longitude 339.684891199;
+	nominal_voltage 120;
+	latitude 379.483218645;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-100T4170_C;
+	longitude 257.338075933;
+	nominal_voltage 120;
+	latitude 783.175093673;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-31-068T11894_B;
+	longitude 376.157130758;
+	nominal_voltage 120;
+	latitude 659.666828;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-20-0061808-20-007_C;
+	longitude 154.591753968;
+	nominal_voltage 120;
+	latitude 842.663531381;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-33-0031807-33-007_B;
+	longitude 334.175038824;
+	nominal_voltage 120;
+	latitude 47.7402092587;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-14-013T7736_A;
+	longitude 697.519282393;
+	nominal_voltage 120;
+	latitude 452.014765823;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-12-005T2631_A;
+	longitude 545.928592551;
+	nominal_voltage 120;
+	latitude 562.648186237;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-0091708-05-009_B;
+	longitude 495.005742661;
+	nominal_voltage 120;
+	latitude 888.523962724;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0061708-09-022_B;
+	longitude 649.157436993;
+	nominal_voltage 120;
+	latitude 1041.87454074;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-0011708-05-014_B;
+	longitude 531.554693074;
+	nominal_voltage 120;
+	latitude 847.173880796;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-10-005T10292_C;
+	longitude 666.261669359;
+	nominal_voltage 120;
+	latitude 166.53877478;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0081808-32-005_C;
+	longitude 296.38337631;
+	nominal_voltage 120;
+	latitude 819.693271247;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-16-004T10308_C;
+	longitude 677.546020904;
+	nominal_voltage 120;
+	latitude 48.6707065934;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-096T3902_C;
+	longitude 259.66071738;
+	nominal_voltage 120;
+	latitude 780.496775003;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-30-0611808-30-007_C;
+	longitude 246.09051395;
+	nominal_voltage 120;
+	latitude 704.122334259;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-33-0031808-33-009_C;
+	longitude 339.532872476;
+	nominal_voltage 120;
+	latitude 989.781055026;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-0101707-13-036_A;
+	longitude 684.436748817;
+	nominal_voltage 120;
+	latitude 449.668203322;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0291708-0022_B;
+	longitude 602.973816755;
+	nominal_voltage 120;
+	latitude 1012.55831723;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-09-015T14052_C;
+	longitude 573.753786258;
+	nominal_voltage 120;
+	latitude 147.026628292;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0171808-32-004_C;
+	longitude 301.114784005;
+	nominal_voltage 120;
+	latitude 812.837428063;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0801808-0123_C;
+	longitude 251.995087916;
+	nominal_voltage 120;
+	latitude 779.943827215;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-01-0051707-01-007_A;
+	longitude 508.578058566;
+	nominal_voltage 120;
+	latitude 576.913640648;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0101708-09-015_B;
+	longitude 649.570916663;
+	nominal_voltage 120;
+	latitude 1030.42622056;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-20-009T4114_C;
+	longitude 129.397576966;
+	nominal_voltage 120;
+	latitude 852.844509703;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-33-0071807-33-009_B;
+	longitude 324.579034329;
+	nominal_voltage 120;
+	latitude 116.555763978;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-33-0091808-33-010_C;
+	longitude 323.120361644;
+	nominal_voltage 120;
+	latitude 989.105380003;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-12-008T4265_A;
+	longitude 672.820484427;
+	nominal_voltage 120;
+	latitude 491.918831449;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0281708-09-009_B;
+	longitude 640.026664973;
+	nominal_voltage 120;
+	latitude 1017.55349792;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-20-008T4113_C;
+	longitude 134.785528633;
+	nominal_voltage 120;
+	latitude 866.792796498;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-10-007T10272_A;
+	longitude 605.052463578;
+	nominal_voltage 120;
+	latitude 190.79227929;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-10-007T10272_C;
+	longitude 601.352831385;
+	nominal_voltage 120;
+	latitude 183.224862483;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-10-007T10272_B;
+	longitude 593.432491155;
+	nominal_voltage 120;
+	latitude 195.004090908;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-01-0121707-0234_A;
+	longitude 499.126031067;
+	nominal_voltage 120;
+	latitude 539.472618051;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-33-0071808-33-008_C;
+	longitude 323.866890279;
+	nominal_voltage 120;
+	latitude 988.317890826;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-02-0111707-02-001_B;
+	longitude 447.204814149;
+	nominal_voltage 120;
+	latitude 445.48610343;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0131708-09-004_B;
+	longitude 647.976066791;
+	nominal_voltage 120;
+	latitude 988.519548599;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-34-0111807-0292_C;
+	longitude 295.089805788;
+	nominal_voltage 120;
+	latitude 303.646665007;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-10-026T10297_B;
+	longitude 630.196635173;
+	nominal_voltage 120;
+	latitude 162.727945127;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-33-0051807-33-011_B;
+	longitude 296.051289032;
+	nominal_voltage 120;
+	latitude 48.4249735579;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-30-0641808-30-013_C;
+	longitude 251.182576713;
+	nominal_voltage 120;
+	latitude 722.47528239;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0021708-09-012_B;
+	longitude 638.0243812;
+	nominal_voltage 120;
+	latitude 1014.45337;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-012T21005_B;
+	longitude 446.08084708;
+	nominal_voltage 120;
+	latitude 846.668997626;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-10-027T10270_A;
+	longitude 600.105063589;
+	nominal_voltage 120;
+	latitude 228.158098065;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-10-027T10270_C;
+	longitude 595.006279369;
+	nominal_voltage 120;
+	latitude 231.343394192;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-10-027T10270_B;
+	longitude 596.062912927;
+	nominal_voltage 120;
+	latitude 244.698817511;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-33-0101808-33-007_C;
+	longitude 331.431928469;
+	nominal_voltage 120;
+	latitude 980.59430221;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-099T4037_C;
+	longitude 198.511590618;
+	nominal_voltage 120;
+	latitude 748.469928072;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-08-0091708-0024_B;
+	longitude 546.987812246;
+	nominal_voltage 120;
+	latitude 890.295706498;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-35-004T12926_C;
+	longitude 299.335475252;
+	nominal_voltage 120;
+	latitude 303.210679369;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-09-005T10295_B;
+	longitude 635.710518738;
+	nominal_voltage 120;
+	latitude 159.373222856;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0041808-32-014_C;
+	longitude 272.681688388;
+	nominal_voltage 120;
+	latitude 850.192194757;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-02-0041707-0164_B;
+	longitude 446.308582667;
+	nominal_voltage 120;
+	latitude 429.000192498;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-30-0651808-30-014_C;
+	longitude 247.537841142;
+	nominal_voltage 120;
+	latitude 723.230929857;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1708-06-005T15856_A;
+	longitude 498.143396642;
+	nominal_voltage 120;
+	latitude 641.920068958;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-08-0051708-0023_B;
+	longitude 557.366147978;
+	nominal_voltage 120;
+	latitude 884.502073528;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-013T29051_B;
+	longitude 443.684783785;
+	nominal_voltage 120;
+	latitude 803.684686535;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-20-004T18630_C;
+	longitude 115.822537959;
+	nominal_voltage 120;
+	latitude 796.42530253;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-02-0031707-0162_B;
+	longitude 440.125970485;
+	nominal_voltage 120;
+	latitude 420.280321131;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-30-0601808-30-008_C;
+	longitude 245.251197518;
+	nominal_voltage 120;
+	latitude 711.047956244;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0211708-09-003_B;
+	longitude 652.324591822;
+	nominal_voltage 120;
+	latitude 986.405510305;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-10-030T10276_A;
+	longitude 647.828179651;
+	nominal_voltage 120;
+	latitude 217.034851015;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-09-012T10293_A;
+	longitude 663.982298257;
+	nominal_voltage 120;
+	latitude 149.37424352;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-02-015T14420_A;
+	longitude 484.470930741;
+	nominal_voltage 120;
+	latitude 332.854994688;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-02-015T14420_C;
+	longitude 494.854529418;
+	nominal_voltage 120;
+	latitude 323.592281243;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-02-015T14420_B;
+	longitude 498.46524861;
+	nominal_voltage 120;
+	latitude 322.778179384;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-0021707-13-016_A;
+	longitude 757.621562232;
+	nominal_voltage 120;
+	latitude 561.079673434;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-33-0111808-0136_C;
+	longitude 279.679578362;
+	nominal_voltage 120;
+	latitude 983.552002477;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-09-0151708-09-002_B;
+	longitude 647.857697931;
+	nominal_voltage 120;
+	latitude 991.786360804;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-014T28295_B;
+	longitude 478.328664928;
+	nominal_voltage 120;
+	latitude 832.394413499;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-33-0101807-0020_B;
+	longitude 238.776872635;
+	nominal_voltage 120;
+	latitude 70.9615914342;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0911808-0148_C;
+	longitude 202.320137421;
+	nominal_voltage 120;
+	latitude 767.537579767;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1708-06-006T15884_A;
+	longitude 521.586879227;
+	nominal_voltage 120;
+	latitude 631.482534002;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-10-001T10277_A;
+	longitude 645.667342562;
+	nominal_voltage 120;
+	latitude 271.891576712;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-10-001T10277_C;
+	longitude 641.190773649;
+	nominal_voltage 120;
+	latitude 259.893301646;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-10-001T10277_B;
+	longitude 633.392267235;
+	nominal_voltage 120;
+	latitude 275.652578432;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-10-0061708-10-002_B;
+	longitude 612.547279061;
+	nominal_voltage 120;
+	latitude 1050.89176482;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-006T21003_B;
+	longitude 460.403379122;
+	nominal_voltage 120;
+	latitude 831.053402727;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-21-0031808-0151_C;
+	longitude 126.559142823;
+	nominal_voltage 120;
+	latitude 945.406042395;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-20-0071808-20-011_C;
+	longitude 79.9944967338;
+	nominal_voltage 120;
+	latitude 863.557514219;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-36-0011807-36-005_C;
+	longitude 338.262057681;
+	nominal_voltage 120;
+	latitude 471.447297079;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-097T4002_C;
+	longitude 209.590344199;
+	nominal_voltage 120;
+	latitude 745.341325917;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-01-0131707-01-016_A;
+	longitude 446.607680577;
+	nominal_voltage 120;
+	latitude 502.332237358;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-01-0131707-01-016_C;
+	longitude 450.056605655;
+	nominal_voltage 120;
+	latitude 513.412656691;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-01-0131707-01-016_B;
+	longitude 443.971167393;
+	nominal_voltage 120;
+	latitude 507.0681012;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1708-06-011T15857_A;
+	longitude 526.114930418;
+	nominal_voltage 120;
+	latitude 626.615992651;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-33-006T25124_B;
+	longitude 303.353281471;
+	nominal_voltage 120;
+	latitude 74.3914282842;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-10-009T12268_B;
+	longitude 622.954746723;
+	nominal_voltage 120;
+	latitude 1054.56346085;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-20-0021808-20-002_C;
+	longitude 54.0464482093;
+	nominal_voltage 120;
+	latitude 827.456950401;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-16-010T14062_B;
+	longitude 730.500105269;
+	nominal_voltage 120;
+	latitude 146.490120383;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-28-004T21024_C;
+	longitude 269.318602479;
+	nominal_voltage 120;
+	latitude 965.447689585;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-13-0131707-0190_A;
+	longitude 754.215684918;
+	nominal_voltage 120;
+	latitude 531.404625155;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0041708-09-001_B;
+	longitude 665.82570731;
+	nominal_voltage 120;
+	latitude 990.064828448;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-21-0011808-0164_C;
+	longitude 120.007991332;
+	nominal_voltage 120;
+	latitude 913.409980242;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-10-023T10279_C;
+	longitude 646.938896731;
+	nominal_voltage 120;
+	latitude 213.051915461;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1807-36-0091807-0274_A;
+	longitude 365.846882119;
+	nominal_voltage 120;
+	latitude 527.182158363;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-36-0091807-0274_C;
+	longitude 378.300870891;
+	nominal_voltage 120;
+	latitude 518.138625751;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-36-0091807-0274_B;
+	longitude 369.261475468;
+	nominal_voltage 120;
+	latitude 523.450670278;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-16-008T10294_B;
+	longitude 693.993990267;
+	nominal_voltage 120;
+	latitude 152.831999081;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-03-0141707-0180_B;
+	longitude 415.102666777;
+	nominal_voltage 120;
+	latitude 302.88964231;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-28-0011808-28-001_C;
+	longitude 274.835978704;
+	nominal_voltage 120;
+	latitude 972.999179413;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-33-0081807-33-012_B;
+	longitude 302.647022934;
+	nominal_voltage 120;
+	latitude 62.7047233159;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-005T7814_B;
+	longitude 500.84872373;
+	nominal_voltage 120;
+	latitude 814.995793096;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0011808-29-006_C;
+	longitude 167.125637894;
+	nominal_voltage 120;
+	latitude 899.564288022;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-20-0011808-20-008_C;
+	longitude 53.7239474404;
+	nominal_voltage 120;
+	latitude 742.578692194;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-36-0101807-0299_C;
+	longitude 317.746362825;
+	nominal_voltage 120;
+	latitude 465.15502834;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0171808-0045_C;
+	longitude 241.865115381;
+	nominal_voltage 120;
+	latitude 734.024298658;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1708-06-013T15861_A;
+	longitude 461.061630355;
+	nominal_voltage 120;
+	latitude 635.061481627;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0021708-16-007_B;
+	longitude 677.183163967;
+	nominal_voltage 120;
+	latitude 987.247850934;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-02-006T7674_B;
+	longitude 522.294241905;
+	nominal_voltage 120;
+	latitude 338.268822212;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-03-0111707-0179_B;
+	longitude 428.012361858;
+	nominal_voltage 120;
+	latitude 298.844273572;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0151808-32-022_C;
+	longitude 275.229328006;
+	nominal_voltage 120;
+	latitude 895.171782924;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-33-0041807-33-005_B;
+	longitude 345.334536451;
+	nominal_voltage 120;
+	latitude 62.2446218399;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1807-36-003T29581_A;
+	longitude 393.90758614;
+	nominal_voltage 120;
+	latitude 579.695773388;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-36-003T29581_C;
+	longitude 381.38714463;
+	nominal_voltage 120;
+	latitude 584.688345377;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-36-003T29581_B;
+	longitude 391.387257222;
+	nominal_voltage 120;
+	latitude 577.156876804;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-10-011T10281_C;
+	longitude 673.39863836;
+	nominal_voltage 120;
+	latitude 224.167949686;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-36-0081807-36-002_C;
+	longitude 272.07158286;
+	nominal_voltage 120;
+	latitude 470.49351795;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-016T14089_C;
+	longitude 238.092882092;
+	nominal_voltage 120;
+	latitude 746.924626218;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1808-19-004T29595_A;
+	longitude 1.57705835477;
+	nominal_voltage 120;
+	latitude 693.726451062;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-19-004T29595_C;
+	longitude 17.4221209585;
+	nominal_voltage 120;
+	latitude 691.683075506;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-19-004T29595_B;
+	longitude 6.16576194855;
+	nominal_voltage 120;
+	latitude 701.162179117;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-03-0071707-0177_B;
+	longitude 429.154299176;
+	nominal_voltage 120;
+	latitude 308.321173436;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-015T10909_C;
+	longitude 241.122707777;
+	nominal_voltage 120;
+	latitude 744.284237685;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-01-0111807-0226_C;
+	longitude 392.177198223;
+	nominal_voltage 120;
+	latitude 605.164734907;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1708-06-003T15860_A;
+	longitude 447.857456571;
+	nominal_voltage 120;
+	latitude 659.198082267;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-16-0211708-16-009_B;
+	longitude 676.896071342;
+	nominal_voltage 120;
+	latitude 984.765677924;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-05-0071708-05-018_B;
+	longitude 496.466811152;
+	nominal_voltage 120;
+	latitude 795.318510255;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-02-0071707-0079_B;
+	longitude 513.588529014;
+	nominal_voltage 120;
+	latitude 364.565521163;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-16-009T7300_C;
+	longitude 664.746946566;
+	nominal_voltage 120;
+	latitude 63.0942237463;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-08-0101708-0029_B;
+	longitude 635.296987022;
+	nominal_voltage 120;
+	latitude 833.0056793;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-15-010T10285_A;
+	longitude 684.093839835;
+	nominal_voltage 120;
+	latitude 241.564304927;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-15-010T10285_C;
+	longitude 680.300633964;
+	nominal_voltage 120;
+	latitude 248.167827165;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-15-010T10285_B;
+	longitude 681.471931346;
+	nominal_voltage 120;
+	latitude 247.80315865;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-33-0051808-33-002_C;
+	longitude 274.197886755;
+	nominal_voltage 120;
+	latitude 1007.67116162;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-094T2627_C;
+	longitude 272.286661272;
+	nominal_voltage 120;
+	latitude 887.907807165;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1708-06-008T15859_A;
+	longitude 455.414651247;
+	nominal_voltage 120;
+	latitude 651.633081138;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-15-0071708-0034_B;
+	longitude 682.837994468;
+	nominal_voltage 120;
+	latitude 1049.14758249;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-098T5087_C;
+	longitude 187.634082874;
+	nominal_voltage 120;
+	latitude 855.577424469;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1808-19-012T29596_A;
+	longitude -0.732928408646;
+	nominal_voltage 120;
+	latitude 735.891791304;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-19-012T29596_C;
+	longitude 11.5953622305;
+	nominal_voltage 120;
+	latitude 742.234164613;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-19-012T29596_B;
+	longitude 6.01929731757;
+	nominal_voltage 120;
+	latitude 741.784576259;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-16-003T10300_C;
+	longitude 680.046980838;
+	nominal_voltage 120;
+	latitude 69.3172528517;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1707-02-010T28711_C;
+	longitude 410.996463384;
+	nominal_voltage 120;
+	latitude 305.066120444;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1808-31-0671808-0100_A;
+	longitude 290.246496215;
+	nominal_voltage 120;
+	latitude 659.920526227;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-31-0671808-0100_C;
+	longitude 301.230873651;
+	nominal_voltage 120;
+	latitude 656.602189356;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-31-0671808-0100_B;
+	longitude 295.052259727;
+	nominal_voltage 120;
+	latitude 646.337140563;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-25-0031807-25-007_C;
+	longitude 227.14445803;
+	nominal_voltage 120;
+	latitude 536.070206113;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-32-0701808-32-021_C;
+	longitude 269.424448148;
+	nominal_voltage 120;
+	latitude 887.143663019;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-01-0071707-01-003_A;
+	longitude 460.545755174;
+	nominal_voltage 120;
+	latitude 621.74697501;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1808-19-0101808-19-002_A;
+	longitude 32.0592532678;
+	nominal_voltage 120;
+	latitude 653.024646903;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-19-0101808-19-002_C;
+	longitude 32.0260571349;
+	nominal_voltage 120;
+	latitude 648.318210398;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1808-19-0101808-19-002_B;
+	longitude 43.383069049;
+	nominal_voltage 120;
+	latitude 646.960439305;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-04-0121707-04-002_B;
+	longitude 457.859975744;
+	nominal_voltage 120;
+	latitude 147.746930699;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1808-29-0681808-29-026_C;
+	longitude 214.594504207;
+	nominal_voltage 120;
+	latitude 789.469199432;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1807-36-0061807-36-006_A;
+	longitude 309.894718195;
+	nominal_voltage 120;
+	latitude 608.164528642;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-36-0061807-36-006_C;
+	longitude 307.212635182;
+	nominal_voltage 120;
+	latitude 606.570867273;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-36-0061807-36-006_B;
+	longitude 309.530649374;
+	nominal_voltage 120;
+	latitude 610.137777717;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-01-0091707-0181_A;
+	longitude 463.974934252;
+	nominal_voltage 120;
+	latitude 573.452135468;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-01-0061707-01-001_A;
+	longitude 447.241035336;
+	nominal_voltage 120;
+	latitude 615.8497892;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-15-0011708-15-003_B;
+	longitude 676.4599872;
+	nominal_voltage 120;
+	latitude 1077.30712329;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1707-02-0051707-0231_B;
+	longitude 508.906692058;
+	nominal_voltage 120;
+	latitude 351.536145342;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1807-25-0111807-25-003_A;
+	longitude 270.480528124;
+	nominal_voltage 120;
+	latitude 610.92372863;
 };
 
 object triplex_meter {
 	phases CS;
-	nominal_voltage 120;
 	name nodeS1807-25-0111807-25-003_C;
+	longitude 255.708192898;
+	nominal_voltage 120;
+	latitude 612.125089064;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1807-25-0111807-25-003_B;
+	longitude 258.340624382;
+	nominal_voltage 120;
+	latitude 613.518130918;
 };
 
 object triplex_meter {
 	phases AS;
-	nominal_voltage 120;
 	name nodeS1707-14-017T12395_A;
+	longitude 805.396143457;
+	nominal_voltage 120;
+	latitude 426.182609384;
 };
 
 object triplex_meter {
 	phases BS;
-	nominal_voltage 120;
 	name nodeS1708-08-0011708-08-013_B;
+	longitude 672.444094533;
+	nominal_voltage 120;
+	latitude 842.625528493;
 };
 
 object triplex_node {
@@ -18970,7 +19750,9 @@ object triplex_node {
 	power_12 976.289+656.099j;
 	name S1808-19-003_A;
 	parent nodeS1808-19-0031808-19-009_A;
+	longitude 44.1733462057;
 	nominal_voltage 120;
+	latitude 618.486931067;
 };
 
 object triplex_node {
@@ -18978,7 +19760,9 @@ object triplex_node {
 	power_12 976.289+656.099j;
 	name S1808-19-003_C;
 	parent nodeS1808-19-0031808-19-009_C;
+	longitude 46.785814082;
 	nominal_voltage 120;
+	latitude 615.966789474;
 };
 
 object triplex_node {
@@ -18986,7 +19770,9 @@ object triplex_node {
 	power_12 976.289+656.099j;
 	name S1808-19-003_B;
 	parent nodeS1808-19-0031808-19-009_B;
+	longitude 40.69197459;
 	nominal_voltage 120;
+	latitude 615.51436417;
 };
 
 object triplex_node {
@@ -18994,7 +19780,9 @@ object triplex_node {
 	power_12 52.485+20.7679j;
 	name S1808-19-006_C;
 	parent nodeS1808-19-0031808-19-009_C;
+	longitude 42.2853479447;
 	nominal_voltage 120;
+	latitude 610.982557001;
 };
 
 object triplex_node {
@@ -19002,7 +19790,9 @@ object triplex_node {
 	power_12 900.576+356.351j;
 	name S1808-33-004_C;
 	parent nodeS1808-33-0041808-33-003_C;
+	longitude 274.745795823;
 	nominal_voltage 120;
+	latitude 1029.77547961;
 };
 
 object triplex_node {
@@ -19010,7 +19800,9 @@ object triplex_node {
 	power_12 638.984+252.841j;
 	name S1707-04-001_B;
 	parent nodeS1707-04-0011707-0205_B;
+	longitude 407.468252312;
 	nominal_voltage 120;
+	latitude 148.153120808;
 };
 
 object triplex_node {
@@ -19018,7 +19810,9 @@ object triplex_node {
 	power_12 1191.33+471.399j;
 	name S1708-15-003_B;
 	parent nodeS1708-15-0031708-15-001_B;
+	longitude 672.088844165;
 	nominal_voltage 120;
+	latitude 1073.82345135;
 };
 
 object triplex_node {
@@ -19026,7 +19820,9 @@ object triplex_node {
 	power_12 2465.96+975.762j;
 	name S1707-10-025_A;
 	parent nodeS1707-10-025T18079_A;
+	longitude 661.296560826;
 	nominal_voltage 120;
+	latitude 238.059767157;
 };
 
 object triplex_node {
@@ -19034,7 +19830,9 @@ object triplex_node {
 	power_12 675.641+267.346j;
 	name S1808-29-070_C;
 	parent nodeS1808-29-0701808-29-029_C;
+	longitude 223.495480514;
 	nominal_voltage 120;
+	latitude 765.128727296;
 };
 
 object triplex_node {
@@ -19042,7 +19840,9 @@ object triplex_node {
 	power_12 499.857+197.79j;
 	name S1707-13-001_A;
 	parent nodeS1707-13-0011707-13-013_A;
+	longitude 758.968285409;
 	nominal_voltage 120;
+	latitude 436.351525339;
 };
 
 object triplex_node {
@@ -19050,7 +19850,9 @@ object triplex_node {
 	power_12 486.528+192.515j;
 	name S1707-09-009_B;
 	parent nodeS1707-09-009T10302_B;
+	longitude 632.49296896;
 	nominal_voltage 120;
+	latitude 76.5899679355;
 };
 
 object triplex_node {
@@ -19058,7 +19860,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1808-31-001_A;
 	parent nodeS1808-31-0011808-31-003_A;
+	longitude 369.093003446;
 	nominal_voltage 120;
+	latitude 639.768317572;
 };
 
 object triplex_node {
@@ -19066,7 +19870,9 @@ object triplex_node {
 	power_12 152.457+60.3258j;
 	name S1708-09-020_B;
 	parent nodeS1708-09-0201708-10-004_B;
+	longitude 670.161612303;
 	nominal_voltage 120;
+	latitude 1062.25425595;
 };
 
 object triplex_node {
@@ -19074,7 +19880,9 @@ object triplex_node {
 	power_12 77.4779+30.6574j;
 	name S1708-10-002_B;
 	parent nodeS1708-09-0201708-10-004_B;
+	longitude 671.472533806;
 	nominal_voltage 120;
+	latitude 1063.15728658;
 };
 
 object triplex_node {
@@ -19082,7 +19890,9 @@ object triplex_node {
 	power_12 354.066+140.101j;
 	name S1708-15-004_B;
 	parent nodeS1708-09-0201708-10-004_B;
+	longitude 673.004775207;
 	nominal_voltage 120;
+	latitude 1055.36656312;
 };
 
 object triplex_node {
@@ -19090,7 +19900,9 @@ object triplex_node {
 	power_12 1118.85+442.719j;
 	name S1708-16-025_B;
 	parent nodeS1708-16-0251708-0043_B;
+	longitude 711.010884943;
 	nominal_voltage 120;
+	latitude 1039.68489761;
 };
 
 object triplex_node {
@@ -19098,7 +19910,9 @@ object triplex_node {
 	power_12 72.4793+28.6795j;
 	name S1808-29-082_C;
 	parent nodeS1808-29-0821808-0133_C;
+	longitude 252.292490576;
 	nominal_voltage 120;
+	latitude 837.105971481;
 };
 
 object triplex_node {
@@ -19106,7 +19920,9 @@ object triplex_node {
 	power_12 264.924+104.829j;
 	name S1808-29-035_C;
 	parent nodeS1808-29-0351808-0046_C;
+	longitude 227.354613511;
 	nominal_voltage 120;
+	latitude 796.411937516;
 };
 
 object triplex_node {
@@ -19114,7 +19930,9 @@ object triplex_node {
 	power_12 512.354+202.734j;
 	name S1808-29-079_C;
 	parent nodeS1808-29-0351808-0046_C;
+	longitude 229.433929381;
 	nominal_voltage 120;
+	latitude 797.506084925;
 };
 
 object triplex_node {
@@ -19122,7 +19940,9 @@ object triplex_node {
 	power_12 13.3295+5.27439j;
 	name S1808-29-084_C;
 	parent nodeS1808-29-0351808-0046_C;
+	longitude 232.957868362;
 	nominal_voltage 120;
+	latitude 789.391539661;
 };
 
 object triplex_node {
@@ -19130,7 +19950,9 @@ object triplex_node {
 	power_12 107.469+42.5248j;
 	name S1807-25-015_C;
 	parent nodeS1807-25-015T11989_C;
+	longitude 159.429297119;
 	nominal_voltage 120;
+	latitude 547.432054723;
 };
 
 object triplex_node {
@@ -19138,7 +19960,9 @@ object triplex_node {
 	power_12 1546.23+611.829j;
 	name S1707-03-010_B;
 	parent nodeS1707-03-010T28731_B;
+	longitude 402.261606253;
 	nominal_voltage 120;
+	latitude 214.605324572;
 };
 
 object triplex_node {
@@ -19146,7 +19970,9 @@ object triplex_node {
 	power_12 59.9829+23.7348j;
 	name S1807-34-013_B;
 	parent nodeS1807-34-013T29080_B;
+	longitude 380.526219848;
 	nominal_voltage 120;
+	latitude 190.568988561;
 };
 
 object triplex_node {
@@ -19154,7 +19980,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1708-16-016_B;
 	parent nodeS1708-16-0161708-0045_B;
+	longitude 722.708387422;
 	nominal_voltage 120;
+	latitude 1050.1794671;
 };
 
 object triplex_node {
@@ -19162,7 +19990,9 @@ object triplex_node {
 	power_12 48.3195+19.1197j;
 	name S1708-16-026_B;
 	parent nodeS1708-16-0161708-0045_B;
+	longitude 721.429479442;
 	nominal_voltage 120;
+	latitude 1050.7889115;
 };
 
 object triplex_node {
@@ -19170,7 +20000,9 @@ object triplex_node {
 	power_12 149.124+59.0072j;
 	name S1708-06-018_B;
 	parent nodeS1708-06-018T2590_B;
+	longitude 543.099358147;
 	nominal_voltage 120;
+	latitude 684.729321139;
 };
 
 object triplex_node {
@@ -19178,7 +20010,9 @@ object triplex_node {
 	power_12 4291.15+3002.58j;
 	name S1807-25-013_A;
 	parent nodeS1807-25-0131807--T325_A;
+	longitude 148.102186041;
 	nominal_voltage 120;
+	latitude 585.481095904;
 };
 
 object triplex_node {
@@ -19186,7 +20020,9 @@ object triplex_node {
 	power_12 4291.15+3002.58j;
 	name S1807-25-013_C;
 	parent nodeS1807-25-0131807--T325_C;
+	longitude 164.887427884;
 	nominal_voltage 120;
+	latitude 582.09285707;
 };
 
 object triplex_node {
@@ -19194,7 +20030,9 @@ object triplex_node {
 	power_12 4291.15+3002.58j;
 	name S1807-25-013_B;
 	parent nodeS1807-25-0131807--T325_B;
+	longitude 152.516135294;
 	nominal_voltage 120;
+	latitude 566.556027355;
 };
 
 object triplex_node {
@@ -19202,7 +20040,9 @@ object triplex_node {
 	power_12 3302.54+2356.8j;
 	name S1707-14-009_A;
 	parent nodeS1707-14-0091707-0091_A;
+	longitude 716.593446511;
 	nominal_voltage 120;
+	latitude 352.469621557;
 };
 
 object triplex_node {
@@ -19210,7 +20050,9 @@ object triplex_node {
 	power_12 3302.54+2356.8j;
 	name S1707-14-009_C;
 	parent nodeS1707-14-0091707-0091_C;
+	longitude 710.793966647;
 	nominal_voltage 120;
+	latitude 335.775028784;
 };
 
 object triplex_node {
@@ -19218,7 +20060,9 @@ object triplex_node {
 	power_12 3302.54+2356.8j;
 	name S1707-14-009_B;
 	parent nodeS1707-14-0091707-0091_B;
+	longitude 705.997558479;
 	nominal_voltage 120;
+	latitude 353.028644169;
 };
 
 object triplex_node {
@@ -19226,7 +20070,9 @@ object triplex_node {
 	power_12 609.826+241.303j;
 	name S1807-25-002_C;
 	parent nodeS1807-25-002T11988_C;
+	longitude 159.624436239;
 	nominal_voltage 120;
+	latitude 546.700810893;
 };
 
 object triplex_node {
@@ -19234,7 +20080,9 @@ object triplex_node {
 	power_12 501.524+198.449j;
 	name S1808-29-086_C;
 	parent nodeS1808-29-086T29059_C;
+	longitude 243.681386815;
 	nominal_voltage 120;
+	latitude 857.878741869;
 };
 
 object triplex_node {
@@ -19242,7 +20090,9 @@ object triplex_node {
 	power_12 778.944+308.222j;
 	name S1807-34-003_B;
 	parent nodeS1807-34-003T28723_B;
+	longitude 385.577707125;
 	nominal_voltage 120;
+	latitude 184.962256135;
 };
 
 object triplex_node {
@@ -19250,7 +20100,9 @@ object triplex_node {
 	power_12 19309.4+11521.3j;
 	name S1707-13-014_A;
 	parent nodeS1707-13-014T19033_A;
+	longitude 776.161473685;
 	nominal_voltage 120;
+	latitude 507.267528841;
 };
 
 object triplex_node {
@@ -19258,7 +20110,9 @@ object triplex_node {
 	power_12 7.49786+2.96684j;
 	name S1708-09-030_B;
 	parent nodeS1708-09-0301708-10-003_B;
+	longitude 664.319031483;
 	nominal_voltage 120;
+	latitude 1065.10150619;
 };
 
 object triplex_node {
@@ -19266,7 +20120,9 @@ object triplex_node {
 	power_12 480.696+190.208j;
 	name S1707-03-012_C;
 	parent nodeS1707-03-012T10259_C;
+	longitude 512.487557417;
 	nominal_voltage 120;
+	latitude 198.828810193;
 };
 
 object triplex_node {
@@ -19274,7 +20130,9 @@ object triplex_node {
 	power_12 324.907+128.563j;
 	name S1707-09-008_B;
 	parent nodeS1707-09-008T15710_B;
+	longitude 610.421019336;
 	nominal_voltage 120;
+	latitude 62.0482191592;
 };
 
 object triplex_node {
@@ -19282,7 +20140,9 @@ object triplex_node {
 	power_12 463.201+183.285j;
 	name S1808-29-087_C;
 	parent nodeS1808-29-0871808-0142_C;
+	longitude 242.21796509;
 	nominal_voltage 120;
+	latitude 808.063675028;
 };
 
 object triplex_node {
@@ -19290,7 +20150,9 @@ object triplex_node {
 	power_12 968.057+383.053j;
 	name S1708-16-015_B;
 	parent nodeS1708-16-0151708-0046_B;
+	longitude 701.399089822;
 	nominal_voltage 120;
+	latitude 1025.34368571;
 };
 
 object triplex_node {
@@ -19298,7 +20160,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1707-14-011_A;
 	parent nodeS1707-14-0111707-0088_A;
+	longitude 707.77844403;
 	nominal_voltage 120;
+	latitude 356.345994988;
 };
 
 object triplex_node {
@@ -19306,7 +20170,9 @@ object triplex_node {
 	power_12 89.9743+35.6021j;
 	name S1808-29-085_C;
 	parent nodeS1808-29-0851808-0137_C;
+	longitude 258.670390025;
 	nominal_voltage 120;
+	latitude 860.619708175;
 };
 
 object triplex_node {
@@ -19314,7 +20180,9 @@ object triplex_node {
 	power_12 707.298+279.872j;
 	name S1807-34-002_B;
 	parent nodeS1807-34-002T28720_B;
+	longitude 400.053340207;
 	nominal_voltage 120;
+	latitude 193.109012974;
 };
 
 object triplex_node {
@@ -19322,7 +20190,9 @@ object triplex_node {
 	power_12 204.108+80.7641j;
 	name S1708-07-001_B;
 	parent nodeS1708-07-001T11961_B;
+	longitude 563.265957907;
 	nominal_voltage 120;
+	latitude 649.346902114;
 };
 
 object triplex_node {
@@ -19330,7 +20200,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1707-03-017_C;
 	parent nodeS1707-03-017T28684_C;
+	longitude 511.17603066;
 	nominal_voltage 120;
+	latitude 254.573012571;
 };
 
 object triplex_node {
@@ -19338,7 +20210,9 @@ object triplex_node {
 	power_12 364.896+144.386j;
 	name S1808-27-011_C;
 	parent nodeS1808-27-0111808-0166_C;
+	longitude 243.529525612;
 	nominal_voltage 120;
+	latitude 1078.43524221;
 };
 
 object triplex_node {
@@ -19346,7 +20220,9 @@ object triplex_node {
 	power_12 174.95+69.2264j;
 	name S1807-34-009_B;
 	parent nodeS1807-34-009T28732_B;
+	longitude 368.007416706;
 	nominal_voltage 120;
+	latitude 196.238922208;
 };
 
 object triplex_node {
@@ -19354,7 +20230,9 @@ object triplex_node {
 	power_12 1274.64+504.364j;
 	name S1808-29-101_C;
 	parent nodeS1808-29-101T11098_C;
+	longitude 237.139437887;
 	nominal_voltage 120;
+	latitude 807.719273892;
 };
 
 object triplex_node {
@@ -19362,7 +20240,9 @@ object triplex_node {
 	power_12 5939.69+3684.46j;
 	name S1707-11-011_A;
 	parent nodeS1707-11-011T14424_A;
+	longitude 639.351660105;
 	nominal_voltage 120;
+	latitude 349.343314416;
 };
 
 object triplex_node {
@@ -19370,7 +20250,9 @@ object triplex_node {
 	power_12 5939.69+3684.46j;
 	name S1707-11-011_C;
 	parent nodeS1707-11-011T14424_C;
+	longitude 637.044322914;
 	nominal_voltage 120;
+	latitude 357.594918092;
 };
 
 object triplex_node {
@@ -19378,7 +20260,9 @@ object triplex_node {
 	power_12 5939.69+3684.46j;
 	name S1707-11-011_B;
 	parent nodeS1707-11-011T14424_B;
+	longitude 635.668212186;
 	nominal_voltage 120;
+	latitude 364.351173786;
 };
 
 object triplex_node {
@@ -19386,7 +20270,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1807-24-041_A;
 	parent nodeS1807-24-041T29032_A;
+	longitude 41.7317260544;
 	nominal_voltage 120;
+	latitude 593.823953175;
 };
 
 object triplex_node {
@@ -19394,7 +20280,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1807-24-041_C;
 	parent nodeS1807-24-041T29032_C;
+	longitude 41.6111980787;
 	nominal_voltage 120;
+	latitude 588.608832356;
 };
 
 object triplex_node {
@@ -19402,7 +20290,9 @@ object triplex_node {
 	power_12 138.294+54.7218j;
 	name S1807-24-041_B;
 	parent nodeS1807-24-041T29032_B;
+	longitude 49.4139490936;
 	nominal_voltage 120;
+	latitude 594.949163978;
 };
 
 object triplex_node {
@@ -19410,7 +20300,9 @@ object triplex_node {
 	power_12 579.001+229.106j;
 	name S1707-13-017_A;
 	parent nodeS1707-13-0171707-0259_A;
+	longitude 754.411203436;
 	nominal_voltage 120;
+	latitude 535.568663443;
 };
 
 object triplex_node {
@@ -19418,7 +20310,9 @@ object triplex_node {
 	power_12 1156.34+457.553j;
 	name S1707-09-013_B;
 	parent nodeS1707-09-013T2700_B;
+	longitude 552.205330598;
 	nominal_voltage 120;
+	latitude 38.3145725717;
 };
 
 object triplex_node {
@@ -19426,7 +20320,9 @@ object triplex_node {
 	power_12 420.713+166.473j;
 	name S1808-29-093_C;
 	parent nodeS1808-29-0931808-0160_C;
+	longitude 265.222059655;
 	nominal_voltage 120;
+	latitude 874.01699559;
 };
 
 object triplex_node {
@@ -19434,7 +20330,9 @@ object triplex_node {
 	power_12 543.178+214.931j;
 	name S1807-34-001_B;
 	parent nodeS1807-34-001T28716_B;
+	longitude 406.810604208;
 	nominal_voltage 120;
+	latitude 206.684006378;
 };
 
 object triplex_node {
@@ -19442,7 +20340,9 @@ object triplex_node {
 	power_12 1001.38+396.239j;
 	name S1808-29-074_C;
 	parent nodeS1808-29-0741808-0084_C;
+	longitude 249.87873997;
 	nominal_voltage 120;
+	latitude 796.459931376;
 };
 
 object triplex_node {
@@ -19450,7 +20350,9 @@ object triplex_node {
 	power_12 196.611+77.7972j;
 	name S1808-29-076_C;
 	parent nodeS1808-29-0741808-0084_C;
+	longitude 258.097271698;
 	nominal_voltage 120;
+	latitude 791.580965109;
 };
 
 object triplex_node {
@@ -19458,7 +20360,9 @@ object triplex_node {
 	power_12 839.76+332.287j;
 	name S1707-11-003_A;
 	parent nodeS1707-11-0031707-0074_A;
+	longitude 547.344236723;
 	nominal_voltage 120;
+	latitude 409.559636138;
 };
 
 object triplex_node {
@@ -19466,7 +20370,9 @@ object triplex_node {
 	power_12 7846.4+4508.66j;
 	name S1808-30-004_A;
 	parent nodeS1808-30-0041808-19-010_A;
+	longitude 146.261597855;
 	nominal_voltage 120;
+	latitude 671.46340052;
 };
 
 object triplex_node {
@@ -19474,7 +20380,9 @@ object triplex_node {
 	power_12 7846.4+4508.66j;
 	name S1808-30-004_C;
 	parent nodeS1808-30-0041808-19-010_C;
+	longitude 136.249216215;
 	nominal_voltage 120;
+	latitude 675.632417231;
 };
 
 object triplex_node {
@@ -19482,7 +20390,9 @@ object triplex_node {
 	power_12 7846.4+4508.66j;
 	name S1808-30-004_B;
 	parent nodeS1808-30-0041808-19-010_B;
+	longitude 147.502211136;
 	nominal_voltage 120;
+	latitude 681.481068065;
 };
 
 object triplex_node {
@@ -19490,7 +20400,9 @@ object triplex_node {
 	power_12 6177.02+3665.74j;
 	name S1808-30-006_A;
 	parent nodeS1808-30-0041808-19-010_A;
+	longitude 144.584633656;
 	nominal_voltage 120;
+	latitude 670.054105447;
 };
 
 object triplex_node {
@@ -19498,7 +20410,9 @@ object triplex_node {
 	power_12 6177.02+3665.74j;
 	name S1808-30-006_C;
 	parent nodeS1808-30-0041808-19-010_C;
+	longitude 135.237912224;
 	nominal_voltage 120;
+	latitude 673.380953057;
 };
 
 object triplex_node {
@@ -19506,7 +20420,9 @@ object triplex_node {
 	power_12 6177.02+3665.74j;
 	name S1808-30-006_B;
 	parent nodeS1808-30-0041808-19-010_B;
+	longitude 142.43122601;
 	nominal_voltage 120;
+	latitude 681.104187263;
 };
 
 object triplex_node {
@@ -19514,7 +20430,9 @@ object triplex_node {
 	power_12 919.848+605.455j;
 	name S1807-24-034_A;
 	parent nodeS1807-24-034T29031_A;
+	longitude 44.7624663061;
 	nominal_voltage 120;
+	latitude 596.297224362;
 };
 
 object triplex_node {
@@ -19522,7 +20440,9 @@ object triplex_node {
 	power_12 919.848+605.455j;
 	name S1807-24-034_C;
 	parent nodeS1807-24-034T29031_C;
+	longitude 37.4194839998;
 	nominal_voltage 120;
+	latitude 598.456845895;
 };
 
 object triplex_node {
@@ -19530,7 +20450,9 @@ object triplex_node {
 	power_12 919.848+605.455j;
 	name S1807-24-034_B;
 	parent nodeS1807-24-034T29031_B;
+	longitude 52.5797596481;
 	nominal_voltage 120;
+	latitude 598.371342528;
 };
 
 object triplex_node {
@@ -19538,7 +20460,9 @@ object triplex_node {
 	power_12 2324.34+919.722j;
 	name S1807-24-030_B;
 	parent nodeS1807-24-030T21526_B;
+	longitude 22.7948309456;
 	nominal_voltage 120;
+	latitude 605.289830937;
 };
 
 object triplex_node {
@@ -19546,7 +20470,9 @@ object triplex_node {
 	power_12 5429.01+3622.69j;
 	name S1707-03-016_A;
 	parent nodeS1707-03-016T18015_A;
+	longitude 475.413035869;
 	nominal_voltage 120;
+	latitude 160.165975075;
 };
 
 object triplex_node {
@@ -19554,7 +20480,9 @@ object triplex_node {
 	power_12 5429.01+3622.69j;
 	name S1707-03-016_C;
 	parent nodeS1707-03-016T18015_C;
+	longitude 472.528478495;
 	nominal_voltage 120;
+	latitude 177.102190595;
 };
 
 object triplex_node {
@@ -19562,7 +20490,9 @@ object triplex_node {
 	power_12 5429.01+3622.69j;
 	name S1707-03-016_B;
 	parent nodeS1707-03-016T18015_B;
+	longitude 475.555318128;
 	nominal_voltage 120;
+	latitude 172.994552033;
 };
 
 object triplex_node {
@@ -19570,7 +20500,9 @@ object triplex_node {
 	power_12 137.461+54.3921j;
 	name S1808-32-009_C;
 	parent nodeS1808-32-0091808-32-013_C;
+	longitude 281.653272418;
 	nominal_voltage 120;
+	latitude 860.399526548;
 };
 
 object triplex_node {
@@ -19578,7 +20510,9 @@ object triplex_node {
 	power_12 618.157+244.6j;
 	name S1708-16-008_B;
 	parent nodeS1708-16-008T28838_B;
+	longitude 690.648398012;
 	nominal_voltage 120;
+	latitude 1011.29104614;
 };
 
 object triplex_node {
@@ -19586,7 +20520,9 @@ object triplex_node {
 	power_12 41.6548+16.4825j;
 	name S1708-06-016_B;
 	parent nodeS1708-06-0161708-0039_B;
+	longitude 505.081654635;
 	nominal_voltage 120;
+	latitude 695.988779448;
 };
 
 object triplex_node {
@@ -19594,7 +20530,9 @@ object triplex_node {
 	power_12 1515.4+599.632j;
 	name S1808-32-078_C;
 	parent nodeS1808-32-078T4061_C;
+	longitude 266.903271309;
 	nominal_voltage 120;
+	latitude 792.378875612;
 };
 
 object triplex_node {
@@ -19602,7 +20540,9 @@ object triplex_node {
 	power_12 1065.53+421.622j;
 	name S1707-02-013_A;
 	parent nodeS1707-02-0131707-0223_A;
+	longitude 527.433246223;
 	nominal_voltage 120;
+	latitude 463.859771379;
 };
 
 object triplex_node {
@@ -19610,7 +20550,9 @@ object triplex_node {
 	power_12 1254.64+496.452j;
 	name S1708-10-007_B;
 	parent nodeS1708-10-007T5162_B;
+	longitude 611.813051479;
 	nominal_voltage 120;
+	latitude 1127.93157647;
 };
 
 object triplex_node {
@@ -19618,7 +20560,9 @@ object triplex_node {
 	power_12 5586.51+3410.85j;
 	name S1707-03-004_A;
 	parent nodeS1707-03-004T10257_A;
+	longitude 479.629550701;
 	nominal_voltage 120;
+	latitude 167.576258046;
 };
 
 object triplex_node {
@@ -19626,7 +20570,9 @@ object triplex_node {
 	power_12 5586.51+3410.85j;
 	name S1707-03-004_C;
 	parent nodeS1707-03-004T10257_C;
+	longitude 465.985548303;
 	nominal_voltage 120;
+	latitude 173.710767162;
 };
 
 object triplex_node {
@@ -19634,7 +20580,9 @@ object triplex_node {
 	power_12 5586.51+3410.85j;
 	name S1707-03-004_B;
 	parent nodeS1707-03-004T10257_B;
+	longitude 466.698743429;
 	nominal_voltage 120;
+	latitude 176.514895578;
 };
 
 object triplex_node {
@@ -19642,7 +20590,9 @@ object triplex_node {
 	power_12 422.379+167.132j;
 	name S1707-15-004_A;
 	parent nodeS1707-15-004T10286_A;
+	longitude 666.333832048;
 	nominal_voltage 120;
+	latitude 219.216274212;
 };
 
 object triplex_node {
@@ -19650,7 +20600,9 @@ object triplex_node {
 	power_12 832.263+329.32j;
 	name S1808-34-004_C;
 	parent nodeS1808-34-004T4107_C;
+	longitude 265.639118284;
 	nominal_voltage 120;
+	latitude 1087.28027955;
 };
 
 object triplex_node {
@@ -19658,7 +20610,9 @@ object triplex_node {
 	power_12 544.845+215.591j;
 	name S1808-32-011_C;
 	parent nodeS1808-32-0111808-32-012_C;
+	longitude 283.046896525;
 	nominal_voltage 120;
+	latitude 839.20044849;
 };
 
 object triplex_node {
@@ -19666,7 +20620,9 @@ object triplex_node {
 	power_12 579.835+229.436j;
 	name S1707-13-019_A;
 	parent nodeS1707-13-019T11878_A;
+	longitude 748.277434889;
 	nominal_voltage 120;
+	latitude 579.922050935;
 };
 
 object triplex_node {
@@ -19674,7 +20630,9 @@ object triplex_node {
 	power_12 789.775+312.508j;
 	name S1708-16-001_B;
 	parent nodeS1708-16-0011708-16-024_B;
+	longitude 738.796491265;
 	nominal_voltage 120;
+	latitude 911.626147367;
 };
 
 object triplex_node {
@@ -19682,7 +20640,9 @@ object triplex_node {
 	power_12 486.528+192.515j;
 	name S1708-16-013_B;
 	parent nodeS1708-16-0131708-16-016_B;
+	longitude 693.737988396;
 	nominal_voltage 120;
+	latitude 1023.73082095;
 };
 
 object triplex_node {
@@ -19690,7 +20650,9 @@ object triplex_node {
 	power_12 379.892+150.32j;
 	name S1707-03-013_B;
 	parent nodeS1707-03-013T28733_B;
+	longitude 420.07985902;
 	nominal_voltage 120;
+	latitude 174.705046876;
 };
 
 object triplex_node {
@@ -19698,7 +20660,9 @@ object triplex_node {
 	power_12 1489.58+589.413j;
 	name S1708-10-003_B;
 	parent nodeS1708-10-003T5161_B;
+	longitude 615.440737524;
 	nominal_voltage 120;
+	latitude 1140.34478419;
 };
 
 object triplex_node {
@@ -19706,7 +20670,9 @@ object triplex_node {
 	power_12 378.225+149.661j;
 	name S1808-29-075_C;
 	parent nodeS1808-29-0751808-0088_C;
+	longitude 209.958872441;
 	nominal_voltage 120;
+	latitude 816.478914803;
 };
 
 object triplex_node {
@@ -19714,7 +20680,9 @@ object triplex_node {
 	power_12 19113.5+11770.4j;
 	name S1707-12-010_A;
 	parent nodeS1707-12-010T12388_A;
+	longitude 536.576667621;
 	nominal_voltage 120;
+	latitude 473.035663119;
 };
 
 object triplex_node {
@@ -19722,7 +20690,9 @@ object triplex_node {
 	power_12 247.429+97.9059j;
 	name S1708-16-020_B;
 	parent nodeS1708-16-0201708-16-012_B;
+	longitude 702.576449866;
 	nominal_voltage 120;
+	latitude 1006.09289937;
 };
 
 object triplex_node {
@@ -19730,7 +20700,9 @@ object triplex_node {
 	power_12 434.876+172.077j;
 	name S1707-03-002_C;
 	parent nodeS1707-03-002T10261_C;
+	longitude 519.532926759;
 	nominal_voltage 120;
+	latitude 275.624887739;
 };
 
 object triplex_node {
@@ -19738,7 +20710,9 @@ object triplex_node {
 	power_12 393.221+155.594j;
 	name S1707-04-009_B;
 	parent nodeS1707-04-009T15718_B;
+	longitude 501.249166609;
 	nominal_voltage 120;
+	latitude 137.332037282;
 };
 
 object triplex_node {
@@ -19746,7 +20720,9 @@ object triplex_node {
 	power_12 1996.93+790.17j;
 	name S1808-32-014_C;
 	parent nodeS1808-32-014T4140_C;
+	longitude 301.710984498;
 	nominal_voltage 120;
+	latitude 804.887183975;
 };
 
 object triplex_node {
@@ -19754,7 +20730,9 @@ object triplex_node {
 	power_12 526.516+208.338j;
 	name S1708-05-011_B;
 	parent nodeS1708-05-011T4307_B;
+	longitude 454.604866577;
 	nominal_voltage 120;
+	latitude 739.565498394;
 };
 
 object triplex_node {
@@ -19762,7 +20740,9 @@ object triplex_node {
 	power_12 685.638+271.301j;
 	name S1808-29-073_C;
 	parent nodeS1808-29-0731808-0085_C;
+	longitude 206.346237624;
 	nominal_voltage 120;
+	latitude 819.023073697;
 };
 
 object triplex_node {
@@ -19770,7 +20750,9 @@ object triplex_node {
 	power_12 81.6434+32.3056j;
 	name S1807-34-012_B;
 	parent nodeS1807-34-0121807-0303_B;
+	longitude 318.61826558;
 	nominal_voltage 120;
+	latitude 242.295385278;
 };
 
 object triplex_node {
@@ -19778,7 +20760,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1707-12-009_A;
 	parent nodeS1707-12-0091707-12-016_A;
+	longitude 541.297461025;
 	nominal_voltage 120;
+	latitude 498.394831927;
 };
 
 object triplex_node {
@@ -19786,7 +20770,9 @@ object triplex_node {
 	power_12 1281.3+507.001j;
 	name S1708-05-008_B;
 	parent nodeS1708-05-0081708-05-001_B;
+	longitude 482.000628291;
 	nominal_voltage 120;
+	latitude 754.344015861;
 };
 
 object triplex_node {
@@ -19794,7 +20780,9 @@ object triplex_node {
 	power_12 808.936+320.09j;
 	name S1708-10-008_B;
 	parent nodeS1708-10-008T3999_B;
+	longitude 643.636129306;
 	nominal_voltage 120;
+	latitude 1109.13939308;
 };
 
 object triplex_node {
@@ -19802,7 +20790,9 @@ object triplex_node {
 	power_12 1319.62+522.165j;
 	name S1708-16-018_B;
 	parent nodeS1708-16-0181708-16-011_B;
+	longitude 686.203667861;
 	nominal_voltage 120;
+	latitude 1015.77967175;
 };
 
 object triplex_node {
@@ -19810,7 +20800,9 @@ object triplex_node {
 	power_12 619.876+361.856j;
 	name S1808-19-011_A;
 	parent nodeS1808-19-0111808-19-005_A;
+	longitude 46.3537942747;
 	nominal_voltage 120;
+	latitude 635.867959333;
 };
 
 object triplex_node {
@@ -19818,7 +20810,9 @@ object triplex_node {
 	power_12 619.876+361.856j;
 	name S1808-19-011_C;
 	parent nodeS1808-19-0111808-19-005_C;
+	longitude 46.6806178005;
 	nominal_voltage 120;
+	latitude 636.788140273;
 };
 
 object triplex_node {
@@ -19826,7 +20820,9 @@ object triplex_node {
 	power_12 619.876+361.856j;
 	name S1808-19-011_B;
 	parent nodeS1808-19-0111808-19-005_B;
+	longitude 46.7254882589;
 	nominal_voltage 120;
+	latitude 651.504346279;
 };
 
 object triplex_node {
@@ -19834,7 +20830,9 @@ object triplex_node {
 	power_12 2177.71+861.704j;
 	name S1707-10-031_C;
 	parent nodeS1707-10-031T2552_C;
+	longitude 664.138673403;
 	nominal_voltage 120;
+	latitude 187.813467661;
 };
 
 object triplex_node {
@@ -19842,7 +20840,9 @@ object triplex_node {
 	power_12 88.3081+34.9428j;
 	name S1707-04-005_B;
 	parent nodeS1707-04-005T15716_B;
+	longitude 501.892001476;
 	nominal_voltage 120;
+	latitude 119.821073494;
 };
 
 object triplex_node {
@@ -19850,7 +20850,9 @@ object triplex_node {
 	power_12 1499.57+593.369j;
 	name S1708-16-024_B;
 	parent nodeS1708-16-0241708-0042_B;
+	longitude 771.569265471;
 	nominal_voltage 120;
+	latitude 905.919238643;
 };
 
 object triplex_node {
@@ -19858,7 +20860,9 @@ object triplex_node {
 	power_12 1013.88+401.183j;
 	name S1808-29-081_C;
 	parent nodeS1808-29-0811808-0125_C;
+	longitude 210.462872242;
 	nominal_voltage 120;
+	latitude 803.820889872;
 };
 
 object triplex_node {
@@ -19866,7 +20870,9 @@ object triplex_node {
 	power_12 324.907+128.563j;
 	name S1808-32-005_C;
 	parent nodeS1808-32-005T3285_C;
+	longitude 295.024615922;
 	nominal_voltage 120;
+	latitude 770.405328215;
 };
 
 object triplex_node {
@@ -19874,7 +20880,9 @@ object triplex_node {
 	power_12 127.464+50.4364j;
 	name S1807-34-010_B;
 	parent nodeS1807-34-010T28725_B;
+	longitude 395.978568834;
 	nominal_voltage 120;
+	latitude 152.838044169;
 };
 
 object triplex_node {
@@ -19882,7 +20890,9 @@ object triplex_node {
 	power_12 1227.15+485.574j;
 	name S1808-32-016_C;
 	parent nodeS1808-32-0161808-32-024_C;
+	longitude 264.593558122;
 	nominal_voltage 120;
+	latitude 830.47581649;
 };
 
 object triplex_node {
@@ -19890,7 +20900,9 @@ object triplex_node {
 	power_12 57.4836+22.7458j;
 	name S1808-32-075_C;
 	parent nodeS1808-32-0161808-32-024_C;
+	longitude 268.475923442;
 	nominal_voltage 120;
+	latitude 825.362442383;
 };
 
 object triplex_node {
@@ -19898,7 +20910,9 @@ object triplex_node {
 	power_12 68.3138+27.0312j;
 	name S1808-32-012_C;
 	parent nodeS1808-32-0121808-0080_C;
+	longitude 286.98963624;
 	nominal_voltage 120;
+	latitude 795.56473958;
 };
 
 object triplex_node {
@@ -19906,7 +20920,9 @@ object triplex_node {
 	power_12 130.796+51.755j;
 	name S1808-32-069_C;
 	parent nodeS1808-32-0121808-0080_C;
+	longitude 285.938407554;
 	nominal_voltage 120;
+	latitude 797.534792001;
 };
 
 object triplex_node {
@@ -19914,7 +20930,9 @@ object triplex_node {
 	power_12 94.9729+37.58j;
 	name S1707-13-020_A;
 	parent nodeS1707-13-020T11933_A;
+	longitude 724.314763947;
 	nominal_voltage 120;
+	latitude 575.806606481;
 };
 
 object triplex_node {
@@ -19922,7 +20940,9 @@ object triplex_node {
 	power_12 2668.11+1983.57j;
 	name S1707-03-015_A;
 	parent nodeS1707-03-015T10263_A;
+	longitude 523.750919747;
 	nominal_voltage 120;
+	latitude 281.416159394;
 };
 
 object triplex_node {
@@ -19930,7 +20950,9 @@ object triplex_node {
 	power_12 2668.11+1983.57j;
 	name S1707-03-015_C;
 	parent nodeS1707-03-015T10263_C;
+	longitude 532.925137199;
 	nominal_voltage 120;
+	latitude 290.96206469;
 };
 
 object triplex_node {
@@ -19938,7 +20960,9 @@ object triplex_node {
 	power_12 2668.11+1983.57j;
 	name S1707-03-015_B;
 	parent nodeS1707-03-015T10263_B;
+	longitude 533.268861226;
 	nominal_voltage 120;
+	latitude 276.521226037;
 };
 
 object triplex_node {
@@ -19946,7 +20970,9 @@ object triplex_node {
 	power_12 1771.99+701.164j;
 	name S1807-36-005_C;
 	parent nodeS1807-36-0051807-0244_C;
+	longitude 316.681218688;
 	nominal_voltage 120;
+	latitude 506.427396659;
 };
 
 object triplex_node {
@@ -19954,7 +20980,9 @@ object triplex_node {
 	power_12 2016.92+798.081j;
 	name S1707-04-010_B;
 	parent nodeS1707-04-010T15715_B;
+	longitude 502.653472845;
 	nominal_voltage 120;
+	latitude 74.0880705472;
 };
 
 object triplex_node {
@@ -19962,7 +20990,9 @@ object triplex_node {
 	power_12 138.294+54.7218j;
 	name S1807-34-008_B;
 	parent nodeS1807-34-0081807-34-003_B;
+	longitude 320.585728744;
 	nominal_voltage 120;
+	latitude 160.82748239;
 };
 
 object triplex_node {
@@ -19970,7 +21000,9 @@ object triplex_node {
 	power_12 14.9957+5.93369j;
 	name S1707-13-015_A;
 	parent nodeS1707-13-015T11932_A;
+	longitude 728.877908557;
 	nominal_voltage 120;
+	latitude 566.323882639;
 };
 
 object triplex_node {
@@ -19978,7 +21010,9 @@ object triplex_node {
 	power_12 533.181+210.976j;
 	name S1708-06-017_B;
 	parent nodeS1708-06-0171708-0040_B;
+	longitude 459.637316416;
 	nominal_voltage 120;
+	latitude 717.325572185;
 };
 
 object triplex_node {
@@ -19986,7 +21020,9 @@ object triplex_node {
 	power_12 1132.18+447.994j;
 	name S1808-29-007_C;
 	parent nodeS1808-29-0071808-29-032_C;
+	longitude 205.512732908;
 	nominal_voltage 120;
+	latitude 827.846303434;
 };
 
 object triplex_node {
@@ -19994,7 +21030,9 @@ object triplex_node {
 	power_12 796.439+315.145j;
 	name S1708-16-012_B;
 	parent nodeS1708-16-012T5390_B;
+	longitude 714.098319955;
 	nominal_voltage 120;
+	latitude 986.390008278;
 };
 
 object triplex_node {
@@ -20002,7 +21040,9 @@ object triplex_node {
 	power_12 953.895+377.449j;
 	name S1708-17-006_B;
 	parent nodeS1708-17-0061708-17-020_B;
+	longitude 767.773018885;
 	nominal_voltage 120;
+	latitude 864.283968376;
 };
 
 object triplex_node {
@@ -20010,7 +21050,9 @@ object triplex_node {
 	power_12 11595.4+6336.21j;
 	name S1808-19-005_A;
 	parent nodeS1808-19-005T28934_A;
+	longitude 15.5590134708;
 	nominal_voltage 120;
+	latitude 696.16395691;
 };
 
 object triplex_node {
@@ -20018,7 +21060,9 @@ object triplex_node {
 	power_12 11595.4+6336.21j;
 	name S1808-19-005_C;
 	parent nodeS1808-19-005T28934_C;
+	longitude 16.0228667712;
 	nominal_voltage 120;
+	latitude 689.350851343;
 };
 
 object triplex_node {
@@ -20026,7 +21070,9 @@ object triplex_node {
 	power_12 11595.4+6336.21j;
 	name S1808-19-005_B;
 	parent nodeS1808-19-005T28934_B;
+	longitude 14.3583687512;
 	nominal_voltage 120;
+	latitude 696.188369927;
 };
 
 object triplex_node {
@@ -20034,7 +21080,9 @@ object triplex_node {
 	power_12 120.799+47.7992j;
 	name S1808-32-006_C;
 	parent nodeS1808-32-006T3286_C;
+	longitude 329.589293646;
 	nominal_voltage 120;
+	latitude 752.161059547;
 };
 
 object triplex_node {
@@ -20042,7 +21090,9 @@ object triplex_node {
 	power_12 933.067+369.207j;
 	name S1808-27-006_C;
 	parent nodeS1808-27-0061808-27-007_C;
+	longitude 262.422890482;
 	nominal_voltage 120;
+	latitude 1179.63016838;
 };
 
 object triplex_node {
@@ -20050,7 +21100,9 @@ object triplex_node {
 	power_12 384.057+151.968j;
 	name S1808-32-073_C;
 	parent nodeS1808-32-073T14065_C;
+	longitude 271.18539353;
 	nominal_voltage 120;
+	latitude 827.346261631;
 };
 
 object triplex_node {
@@ -20058,7 +21110,9 @@ object triplex_node {
 	power_12 126.631+50.1067j;
 	name S1707-13-008_A;
 	parent nodeS1707-13-0081707-13-007_A;
+	longitude 724.983387917;
 	nominal_voltage 120;
+	latitude 541.380619651;
 };
 
 object triplex_node {
@@ -20066,7 +21120,9 @@ object triplex_node {
 	power_12 352.399+139.442j;
 	name S1708-09-007_B;
 	parent nodeS1708-09-0071708-09-017_B;
+	longitude 636.905166356;
 	nominal_voltage 120;
+	latitude 1024.11722352;
 };
 
 object triplex_node {
@@ -20074,7 +21130,9 @@ object triplex_node {
 	power_12 141.626+56.0404j;
 	name S1708-09-012_B;
 	parent nodeS1708-09-0071708-09-017_B;
+	longitude 644.057454005;
 	nominal_voltage 120;
+	latitude 1019.42602456;
 };
 
 object triplex_node {
@@ -20082,7 +21140,9 @@ object triplex_node {
 	power_12 366.562+145.046j;
 	name S1708-09-019_B;
 	parent nodeS1708-09-0071708-09-017_B;
+	longitude 636.889749042;
 	nominal_voltage 120;
+	latitude 1017.07422604;
 };
 
 object triplex_node {
@@ -20090,7 +21150,9 @@ object triplex_node {
 	power_12 214.939+85.0495j;
 	name S1708-09-023_B;
 	parent nodeS1708-09-0071708-09-017_B;
+	longitude 635.587140746;
 	nominal_voltage 120;
+	latitude 1023.02741385;
 };
 
 object triplex_node {
@@ -20098,7 +21160,9 @@ object triplex_node {
 	power_12 393.221+155.594j;
 	name S1708-06-001_B;
 	parent nodeS1708-06-0011708-06-005_B;
+	longitude 460.329354522;
 	nominal_voltage 120;
+	latitude 716.592374506;
 };
 
 object triplex_node {
@@ -20106,7 +21170,9 @@ object triplex_node {
 	power_12 1410.43+558.096j;
 	name S1707-03-001_B;
 	parent nodeS1707-03-001T5274_B;
+	longitude 544.113593389;
 	nominal_voltage 120;
+	latitude 267.503934291;
 };
 
 object triplex_node {
@@ -20114,7 +21180,9 @@ object triplex_node {
 	power_12 1563.57+1149.11j;
 	name S1707-15-008_A;
 	parent nodeS1707-15-0081707-0018_A;
+	longitude 736.511332768;
 	nominal_voltage 120;
+	latitude 169.905399231;
 };
 
 object triplex_node {
@@ -20122,7 +21190,9 @@ object triplex_node {
 	power_12 1563.57+1149.11j;
 	name S1707-15-008_C;
 	parent nodeS1707-15-0081707-0018_C;
+	longitude 719.840270189;
 	nominal_voltage 120;
+	latitude 166.828106819;
 };
 
 object triplex_node {
@@ -20130,7 +21200,9 @@ object triplex_node {
 	power_12 1563.57+1149.11j;
 	name S1707-15-008_B;
 	parent nodeS1707-15-0081707-0018_B;
+	longitude 730.7670923;
 	nominal_voltage 120;
+	latitude 178.315068835;
 };
 
 object triplex_node {
@@ -20138,7 +21210,9 @@ object triplex_node {
 	power_12 453.204+179.329j;
 	name S1707-13-011_A;
 	parent nodeS1707-13-0111707-13-006_A;
+	longitude 706.335501044;
 	nominal_voltage 120;
+	latitude 548.239792592;
 };
 
 object triplex_node {
@@ -20146,7 +21220,9 @@ object triplex_node {
 	power_12 19.1612+7.58194j;
 	name S1707-13-018_A;
 	parent nodeS1707-13-0111707-13-006_A;
+	longitude 708.355941867;
 	nominal_voltage 120;
+	latitude 544.341333284;
 };
 
 object triplex_node {
@@ -20154,7 +21230,9 @@ object triplex_node {
 	power_12 8607.95+4772.94j;
 	name S1808-19-008_A;
 	parent nodeS1808-19-008T28933_A;
+	longitude 31.5917124356;
 	nominal_voltage 120;
+	latitude 686.790697593;
 };
 
 object triplex_node {
@@ -20162,7 +21240,9 @@ object triplex_node {
 	power_12 8607.95+4772.94j;
 	name S1808-19-008_C;
 	parent nodeS1808-19-008T28933_C;
+	longitude 42.6514287491;
 	nominal_voltage 120;
+	latitude 706.812356627;
 };
 
 object triplex_node {
@@ -20170,7 +21250,9 @@ object triplex_node {
 	power_12 8607.95+4772.94j;
 	name S1808-19-008_B;
 	parent nodeS1808-19-008T28933_B;
+	longitude 29.9965319275;
 	nominal_voltage 120;
+	latitude 696.337022629;
 };
 
 object triplex_node {
@@ -20178,7 +21260,9 @@ object triplex_node {
 	power_12 282.697+111.861j;
 	name S1808-19-009_A;
 	parent nodeS1808-19-008T28933_A;
+	longitude 33.2569967306;
 	nominal_voltage 120;
+	latitude 687.304343694;
 };
 
 object triplex_node {
@@ -20186,7 +21270,9 @@ object triplex_node {
 	power_12 282.697+111.861j;
 	name S1808-19-009_C;
 	parent nodeS1808-19-008T28933_C;
+	longitude 43.5381199032;
 	nominal_voltage 120;
+	latitude 703.485581876;
 };
 
 object triplex_node {
@@ -20194,7 +21280,9 @@ object triplex_node {
 	power_12 282.697+111.861j;
 	name S1808-19-009_B;
 	parent nodeS1808-19-008T28933_B;
+	longitude 31.8347518558;
 	nominal_voltage 120;
+	latitude 698.601614407;
 };
 
 object triplex_node {
@@ -20202,7 +21290,9 @@ object triplex_node {
 	power_12 110.802+43.8434j;
 	name S1708-06-020_B;
 	parent nodeS1708-06-0201708-06-044_B;
+	longitude 444.171188644;
 	nominal_voltage 120;
+	latitude 715.511952237;
 };
 
 object triplex_node {
@@ -20210,7 +21300,9 @@ object triplex_node {
 	power_12 708.131+280.202j;
 	name S1808-32-074_C;
 	parent nodeS1808-32-074T3287_C;
+	longitude 333.981041995;
 	nominal_voltage 120;
+	latitude 763.040594343;
 };
 
 object triplex_node {
@@ -20218,7 +21310,9 @@ object triplex_node {
 	power_12 587.332+232.403j;
 	name S1707-04-007_B;
 	parent nodeS1707-04-007T15721_B;
+	longitude 479.647580865;
 	nominal_voltage 120;
+	latitude 84.097654266;
 };
 
 object triplex_node {
@@ -20226,7 +21320,9 @@ object triplex_node {
 	power_12 419.88+166.143j;
 	name S1807-35-002_B;
 	parent nodeS1807-35-0021807-0009_B;
+	longitude 368.010725892;
 	nominal_voltage 120;
+	latitude 303.807377775;
 };
 
 object triplex_node {
@@ -20234,7 +21330,9 @@ object triplex_node {
 	power_12 747.287+295.695j;
 	name S1808-32-026_C;
 	parent nodeS1808-32-0261808-32-026_C;
+	longitude 269.679421365;
 	nominal_voltage 120;
+	latitude 757.343373952;
 };
 
 object triplex_node {
@@ -20242,7 +21340,9 @@ object triplex_node {
 	power_12 1671.19+661.277j;
 	name S1808-29-089_C;
 	parent nodeS1808-29-0891808-0144_C;
+	longitude 186.267600305;
 	nominal_voltage 120;
+	latitude 825.254666188;
 };
 
 object triplex_node {
@@ -20250,7 +21350,9 @@ object triplex_node {
 	power_12 244.097+96.5873j;
 	name S1808-32-013_C;
 	parent nodeS1808-32-0131808-0082_C;
+	longitude 278.004917824;
 	nominal_voltage 120;
+	latitude 814.215444674;
 };
 
 object triplex_node {
@@ -20258,7 +21360,9 @@ object triplex_node {
 	power_12 40.8217+16.1528j;
 	name S1708-06-004_B;
 	parent nodeS1708-06-0041708-06-004_B;
+	longitude 432.958759835;
 	nominal_voltage 120;
+	latitude 700.274721139;
 };
 
 object triplex_node {
@@ -20266,7 +21370,9 @@ object triplex_node {
 	power_12 1607.04+635.894j;
 	name S1707-10-004_C;
 	parent nodeS1707-10-004T10266_C;
+	longitude 554.724656931;
 	nominal_voltage 120;
+	latitude 246.818996972;
 };
 
 object triplex_node {
@@ -20274,7 +21380,9 @@ object triplex_node {
 	power_12 157.455+62.3037j;
 	name S1707-04-008_B;
 	parent nodeS1707-04-008T15719_B;
+	longitude 476.116547204;
 	nominal_voltage 120;
+	latitude 76.5281118558;
 };
 
 object triplex_node {
@@ -20282,7 +21390,9 @@ object triplex_node {
 	power_12 650.648+257.456j;
 	name S1808-27-009_C;
 	parent nodeS1808-27-0091808-0124_C;
+	longitude 257.085606804;
 	nominal_voltage 120;
+	latitude 1162.90621636;
 };
 
 object triplex_node {
@@ -20290,7 +21400,9 @@ object triplex_node {
 	power_12 1144.67+452.938j;
 	name S1707-04-011_B;
 	parent nodeS1707-04-0111707-04-001_B;
+	longitude 434.76035793;
 	nominal_voltage 120;
+	latitude 69.2921317344;
 };
 
 object triplex_node {
@@ -20298,7 +21410,9 @@ object triplex_node {
 	power_12 554.842+219.546j;
 	name S1707-13-016_A;
 	parent nodeS1707-13-0161707-13-003_A;
+	longitude 666.830848022;
 	nominal_voltage 120;
+	latitude 538.357278102;
 };
 
 object triplex_node {
@@ -20306,7 +21420,9 @@ object triplex_node {
 	power_12 1013.04+400.854j;
 	name S1708-05-002_B;
 	parent nodeS1708-05-0021708-05-008_B;
+	longitude 484.680579716;
 	nominal_voltage 120;
+	latitude 848.676809669;
 };
 
 object triplex_node {
@@ -20314,7 +21430,9 @@ object triplex_node {
 	power_12 232.434+91.9722j;
 	name S1808-32-076_C;
 	parent nodeS1808-32-076T3288_C;
+	longitude 351.932060191;
 	nominal_voltage 120;
+	latitude 768.780101887;
 };
 
 object triplex_node {
@@ -20322,7 +21440,9 @@ object triplex_node {
 	power_12 162.454+64.2816j;
 	name S1807-35-008_B;
 	parent nodeS1807-35-0081807-0306_B;
+	longitude 379.640460159;
 	nominal_voltage 120;
+	latitude 302.06638216;
 };
 
 object triplex_node {
@@ -20330,7 +21450,9 @@ object triplex_node {
 	power_12 1180.5+467.113j;
 	name S1708-06-012_B;
 	parent nodeS1708-06-0121708-06-002_B;
+	longitude 420.729231378;
 	nominal_voltage 120;
+	latitude 685.351982982;
 };
 
 object triplex_node {
@@ -20338,7 +21460,9 @@ object triplex_node {
 	power_12 479.03+189.548j;
 	name S1808-29-003_C;
 	parent nodeS1808-29-0031808-29-012_C;
+	longitude 191.849851528;
 	nominal_voltage 120;
+	latitude 836.508493626;
 };
 
 object triplex_node {
@@ -20346,7 +21470,9 @@ object triplex_node {
 	power_12 8784.36+4887.72j;
 	name S1707-15-012_A;
 	parent nodeS1707-15-0121707-0055_A;
+	longitude 782.048024587;
 	nominal_voltage 120;
+	latitude 219.353134935;
 };
 
 object triplex_node {
@@ -20354,7 +21480,9 @@ object triplex_node {
 	power_12 8784.36+4887.72j;
 	name S1707-15-012_C;
 	parent nodeS1707-15-0121707-0055_C;
+	longitude 778.169901812;
 	nominal_voltage 120;
+	latitude 216.379539703;
 };
 
 object triplex_node {
@@ -20362,7 +21490,9 @@ object triplex_node {
 	power_12 8784.36+4887.72j;
 	name S1707-15-012_B;
 	parent nodeS1707-15-0121707-0055_B;
+	longitude 786.694760764;
 	nominal_voltage 120;
+	latitude 214.74810158;
 };
 
 object triplex_node {
@@ -20370,7 +21500,9 @@ object triplex_node {
 	power_12 194.111+76.8083j;
 	name S1808-34-003_C;
 	parent nodeS1808-34-0031808-27-005_C;
+	longitude 267.966872587;
 	nominal_voltage 120;
+	latitude 1168.87289913;
 };
 
 object triplex_node {
@@ -20378,7 +21510,9 @@ object triplex_node {
 	power_12 124.964+49.4474j;
 	name S1707-12-001_A;
 	parent nodeS1707-12-0011707-12-009_A;
+	longitude 670.938129067;
 	nominal_voltage 120;
+	latitude 548.342533374;
 };
 
 object triplex_node {
@@ -20386,7 +21520,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1707-10-003_B;
 	parent nodeS1707-10-003T10268_B;
+	longitude 564.069309245;
 	nominal_voltage 120;
+	latitude 240.195351896;
 };
 
 object triplex_node {
@@ -20394,7 +21530,9 @@ object triplex_node {
 	power_12 2823.36+1117.18j;
 	name S1707-09-016_B;
 	parent nodeS1707-09-016T12255_B;
+	longitude 629.612022563;
 	nominal_voltage 120;
+	latitude 84.8834002724;
 };
 
 object triplex_node {
@@ -20402,7 +21540,9 @@ object triplex_node {
 	power_12 279.087+110.433j;
 	name S1707-04-003_B;
 	parent nodeS1707-04-003T12961_B;
+	longitude 394.887598796;
 	nominal_voltage 120;
+	latitude 35.3065087832;
 };
 
 object triplex_node {
@@ -20410,7 +21550,9 @@ object triplex_node {
 	power_12 4.16548+1.64825j;
 	name S1808-32-022_C;
 	parent nodeS1808-32-0221808-0074_C;
+	longitude 279.836789581;
 	nominal_voltage 120;
+	latitude 749.573660724;
 };
 
 object triplex_node {
@@ -20418,7 +21560,9 @@ object triplex_node {
 	power_12 29.9914+11.8674j;
 	name S1707-12-003_A;
 	parent nodeS1707-12-0031707-0038_A;
+	longitude 624.237017415;
 	nominal_voltage 120;
+	latitude 537.496683764;
 };
 
 object triplex_node {
@@ -20426,7 +21570,9 @@ object triplex_node {
 	power_12 282.419+111.751j;
 	name S1708-17-011_B;
 	parent nodeS1708-17-0111708-0036_B;
+	longitude 734.542275256;
 	nominal_voltage 120;
+	latitude 810.511827657;
 };
 
 object triplex_node {
@@ -20434,7 +21580,9 @@ object triplex_node {
 	power_12 2032.75+804.345j;
 	name S1808-19-001_B;
 	parent nodeS1808-19-0011808-19-008_B;
+	longitude 23.9264064508;
 	nominal_voltage 120;
+	latitude 721.213813468;
 };
 
 object triplex_node {
@@ -20442,7 +21590,9 @@ object triplex_node {
 	power_12 69.98+27.6906j;
 	name S1708-06-007_B;
 	parent nodeS1708-06-0071708-06-001_B;
+	longitude 419.548514375;
 	nominal_voltage 120;
+	latitude 675.113324585;
 };
 
 object triplex_node {
@@ -20450,7 +21600,9 @@ object triplex_node {
 	power_12 62.4822+24.7237j;
 	name S1708-06-009_B;
 	parent nodeS1708-06-0071708-06-001_B;
+	longitude 419.02023421;
 	nominal_voltage 120;
+	latitude 675.653433919;
 };
 
 object triplex_node {
@@ -20458,7 +21610,9 @@ object triplex_node {
 	power_12 636.485+251.852j;
 	name S1808-29-006_C;
 	parent nodeS1808-29-0061808-29-002_C;
+	longitude 188.452088489;
 	nominal_voltage 120;
+	latitude 855.67603888;
 };
 
 object triplex_node {
@@ -20466,7 +21620,9 @@ object triplex_node {
 	power_12 5760.07+4072.81j;
 	name S1707-15-009_A;
 	parent nodeS1707-15-0091707-0021_A;
+	longitude 747.805637703;
 	nominal_voltage 120;
+	latitude 224.110898405;
 };
 
 object triplex_node {
@@ -20474,7 +21630,9 @@ object triplex_node {
 	power_12 5760.07+4072.81j;
 	name S1707-15-009_C;
 	parent nodeS1707-15-0091707-0021_C;
+	longitude 740.39976828;
 	nominal_voltage 120;
+	latitude 222.228029591;
 };
 
 object triplex_node {
@@ -20482,7 +21640,9 @@ object triplex_node {
 	power_12 5760.07+4072.81j;
 	name S1707-15-009_B;
 	parent nodeS1707-15-0091707-0021_B;
+	longitude 743.740255676;
 	nominal_voltage 120;
+	latitude 218.543544753;
 };
 
 object triplex_node {
@@ -20490,7 +21650,9 @@ object triplex_node {
 	power_12 134.128+53.0736j;
 	name S1808-27-010_C;
 	parent nodeS1808-27-0101808-27-004_C;
+	longitude 266.186293767;
 	nominal_voltage 120;
+	latitude 1114.91196464;
 };
 
 object triplex_node {
@@ -20498,7 +21660,9 @@ object triplex_node {
 	power_12 1199.66+474.695j;
 	name S1707-02-002_A;
 	parent nodeS1707-02-0021707-0152_A;
+	longitude 395.67978731;
 	nominal_voltage 120;
+	latitude 320.631635764;
 };
 
 object triplex_node {
@@ -20506,7 +21670,9 @@ object triplex_node {
 	power_12 336.571+133.178j;
 	name S1707-12-002_A;
 	parent nodeS1707-12-0021707-12-007_A;
+	longitude 586.718519219;
 	nominal_voltage 120;
+	latitude 558.455309881;
 };
 
 object triplex_node {
@@ -20514,7 +21680,9 @@ object triplex_node {
 	power_12 1266.31+501.067j;
 	name S1708-04-001_B;
 	parent nodeS1708-04-0011708-04-001_B;
+	longitude 497.697004569;
 	nominal_voltage 120;
+	latitude 908.813342714;
 };
 
 object triplex_node {
@@ -20522,7 +21690,9 @@ object triplex_node {
 	power_12 79.1441+31.3167j;
 	name S1708-09-008_B;
 	parent nodeS1708-09-0081708-09-026_B;
+	longitude 655.040484061;
 	nominal_voltage 120;
+	latitude 1048.41459832;
 };
 
 object triplex_node {
@@ -20530,7 +21700,9 @@ object triplex_node {
 	power_12 59.1498+23.4051j;
 	name S1708-09-032_B;
 	parent nodeS1708-09-0081708-09-026_B;
+	longitude 657.864632421;
 	nominal_voltage 120;
+	latitude 1047.06438179;
 };
 
 object triplex_node {
@@ -20538,7 +21710,9 @@ object triplex_node {
 	power_12 179.949+71.2043j;
 	name S1708-16-007_B;
 	parent nodeS1708-09-0081708-09-026_B;
+	longitude 661.03045032;
 	nominal_voltage 120;
+	latitude 1043.4380168;
 };
 
 object triplex_node {
@@ -20546,7 +21720,9 @@ object triplex_node {
 	power_12 3451.88+2290.99j;
 	name S1707-10-006_A;
 	parent nodeS1707-10-006T10267_A;
+	longitude 561.358474322;
 	nominal_voltage 120;
+	latitude 242.484646707;
 };
 
 object triplex_node {
@@ -20554,7 +21730,9 @@ object triplex_node {
 	power_12 3451.88+2290.99j;
 	name S1707-10-006_C;
 	parent nodeS1707-10-006T10267_C;
+	longitude 563.131451587;
 	nominal_voltage 120;
+	latitude 250.80939553;
 };
 
 object triplex_node {
@@ -20562,7 +21740,9 @@ object triplex_node {
 	power_12 3451.88+2290.99j;
 	name S1707-10-006_B;
 	parent nodeS1707-10-006T10267_B;
+	longitude 555.858198283;
 	nominal_voltage 120;
+	latitude 253.334204513;
 };
 
 object triplex_node {
@@ -20570,7 +21750,9 @@ object triplex_node {
 	power_12 768.114+303.937j;
 	name S1808-27-005_C;
 	parent nodeS1808-27-0051808-27-001_C;
+	longitude 255.806291158;
 	nominal_voltage 120;
+	latitude 1091.43856533;
 };
 
 object triplex_node {
@@ -20578,7 +21760,9 @@ object triplex_node {
 	power_12 295.749+117.026j;
 	name S1808-34-001_C;
 	parent nodeS1808-27-0051808-27-001_C;
+	longitude 257.563487982;
 	nominal_voltage 120;
+	latitude 1096.75517407;
 };
 
 object triplex_node {
@@ -20586,7 +21770,9 @@ object triplex_node {
 	power_12 418.214+165.484j;
 	name S1808-31-066_C;
 	parent nodeS1808-31-0661808-0072_C;
+	longitude 270.014425201;
 	nominal_voltage 120;
+	latitude 728.181072084;
 };
 
 object triplex_node {
@@ -20594,7 +21780,9 @@ object triplex_node {
 	power_12 158.288+62.6334j;
 	name S1708-17-012_B;
 	parent nodeS1708-17-0121708-0037_B;
+	longitude 738.312347956;
 	nominal_voltage 120;
+	latitude 814.309530113;
 };
 
 object triplex_node {
@@ -20602,7 +21790,9 @@ object triplex_node {
 	power_12 1248.09+980.562j;
 	name S1707-15-007_A;
 	parent nodeS1707-15-0071707-0014_A;
+	longitude 681.676864917;
 	nominal_voltage 120;
+	latitude 165.989846126;
 };
 
 object triplex_node {
@@ -20610,7 +21800,9 @@ object triplex_node {
 	power_12 1248.09+980.562j;
 	name S1707-15-007_C;
 	parent nodeS1707-15-0071707-0014_C;
+	longitude 685.290173418;
 	nominal_voltage 120;
+	latitude 159.435147183;
 };
 
 object triplex_node {
@@ -20618,7 +21810,9 @@ object triplex_node {
 	power_12 1248.09+980.562j;
 	name S1707-15-007_B;
 	parent nodeS1707-15-0071707-0014_B;
+	longitude 682.907041123;
 	nominal_voltage 120;
+	latitude 179.939514021;
 };
 
 object triplex_node {
@@ -20626,7 +21820,9 @@ object triplex_node {
 	power_12 9439.14+4820.39j;
 	name S1807-35-009_A;
 	parent nodeS1807-35-0091807-0316_A;
+	longitude 408.030813027;
 	nominal_voltage 120;
+	latitude 375.564677293;
 };
 
 object triplex_node {
@@ -20634,7 +21830,9 @@ object triplex_node {
 	power_12 9439.14+4820.39j;
 	name S1807-35-009_C;
 	parent nodeS1807-35-0091807-0316_C;
+	longitude 391.358481362;
 	nominal_voltage 120;
+	latitude 381.922910439;
 };
 
 object triplex_node {
@@ -20642,7 +21840,9 @@ object triplex_node {
 	power_12 9439.14+4820.39j;
 	name S1807-35-009_B;
 	parent nodeS1807-35-0091807-0316_B;
+	longitude 412.102692993;
 	nominal_voltage 120;
+	latitude 381.366309809;
 };
 
 object triplex_node {
@@ -20650,7 +21850,9 @@ object triplex_node {
 	power_12 648.148+256.467j;
 	name S1708-17-016_B;
 	parent nodeS1708-17-016T19039_B;
+	longitude 747.032941639;
 	nominal_voltage 120;
+	latitude 813.02581341;
 };
 
 object triplex_node {
@@ -20658,7 +21860,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1708-06-010_B;
 	parent nodeS1708-06-010T7835_B;
+	longitude 400.619147064;
 	nominal_voltage 120;
+	latitude 677.947559056;
 };
 
 object triplex_node {
@@ -20666,7 +21870,9 @@ object triplex_node {
 	power_12 1.66619+0.659299j;
 	name S1707-09-010_B;
 	parent nodeS1707-09-010T10306_B;
+	longitude 641.179333938;
 	nominal_voltage 120;
+	latitude 62.0613253005;
 };
 
 object triplex_node {
@@ -20674,7 +21880,9 @@ object triplex_node {
 	power_12 249.096+98.5652j;
 	name S1808-33-008_C;
 	parent nodeS1808-33-0081808-28-007_C;
+	longitude 261.147471772;
 	nominal_voltage 120;
+	latitude 1059.27491034;
 };
 
 object triplex_node {
@@ -20682,7 +21890,9 @@ object triplex_node {
 	power_12 1197.99+474.036j;
 	name S1808-29-077_C;
 	parent nodeS1808-29-0771808-0103_C;
+	longitude 226.836839103;
 	nominal_voltage 120;
+	latitude 796.429926187;
 };
 
 object triplex_node {
@@ -20690,7 +21900,9 @@ object triplex_node {
 	power_12 1098.02+434.478j;
 	name S1807-35-001_B;
 	parent nodeS1807-35-001T18012_B;
+	longitude 394.573073457;
 	nominal_voltage 120;
+	latitude 372.639234103;
 };
 
 object triplex_node {
@@ -20698,7 +21910,9 @@ object triplex_node {
 	power_12 1552.06+614.137j;
 	name S1707-12-007_A;
 	parent nodeS1707-12-007T4331_A;
+	longitude 579.229063362;
 	nominal_voltage 120;
+	latitude 536.536335823;
 };
 
 object triplex_node {
@@ -20706,7 +21920,9 @@ object triplex_node {
 	power_12 497.358+196.801j;
 	name S1708-09-011_B;
 	parent nodeS1708-09-0111708-09-023_B;
+	longitude 676.984021225;
 	nominal_voltage 120;
+	latitude 1048.20430064;
 };
 
 object triplex_node {
@@ -20714,7 +21930,9 @@ object triplex_node {
 	power_12 395.72+156.583j;
 	name S1708-09-022_B;
 	parent nodeS1708-09-0111708-09-023_B;
+	longitude 670.861600942;
 	nominal_voltage 120;
+	latitude 1045.17503925;
 };
 
 object triplex_node {
@@ -20722,7 +21940,9 @@ object triplex_node {
 	power_12 39.9886+15.8232j;
 	name S1708-09-031_B;
 	parent nodeS1708-09-0111708-09-023_B;
+	longitude 675.788109033;
 	nominal_voltage 120;
+	latitude 1040.82273054;
 };
 
 object triplex_node {
@@ -20730,7 +21950,9 @@ object triplex_node {
 	power_12 538.18+212.954j;
 	name S1808-29-008_C;
 	parent nodeS1808-29-0081808-29-034_C;
+	longitude 147.767844216;
 	nominal_voltage 120;
+	latitude 867.371043949;
 };
 
 object triplex_node {
@@ -20738,7 +21960,9 @@ object triplex_node {
 	power_12 404.884+160.21j;
 	name S1708-05-004_B;
 	parent nodeS1708-05-0041708-05-012_B;
+	longitude 408.76560965;
 	nominal_voltage 120;
+	latitude 892.930149311;
 };
 
 object triplex_node {
@@ -20746,7 +21970,9 @@ object triplex_node {
 	power_12 1134.68+448.982j;
 	name S1708-17-005_B;
 	parent nodeS1708-17-0051708-17-016_B;
+	longitude 721.482947116;
 	nominal_voltage 120;
+	latitude 856.658235731;
 };
 
 object triplex_node {
@@ -20754,7 +21980,9 @@ object triplex_node {
 	power_12 143.292+56.6997j;
 	name S1708-17-010_B;
 	parent nodeS1708-17-0051708-17-016_B;
+	longitude 718.359827198;
 	nominal_voltage 120;
+	latitude 858.669130363;
 };
 
 object triplex_node {
@@ -20762,7 +21990,9 @@ object triplex_node {
 	power_12 1192.16+471.728j;
 	name S1708-06-014_B;
 	parent nodeS1708-06-0141708-06-014_B;
+	longitude 397.341362879;
 	nominal_voltage 120;
+	latitude 676.008074076;
 };
 
 object triplex_node {
@@ -20770,7 +22000,9 @@ object triplex_node {
 	power_12 326.574+129.223j;
 	name S1707-10-024_A;
 	parent nodeS1707-10-024T11874_A;
+	longitude 671.13362722;
 	nominal_voltage 120;
+	latitude 160.417166268;
 };
 
 object triplex_node {
@@ -20778,7 +22010,9 @@ object triplex_node {
 	power_12 3494.0+1382.55j;
 	name S1707-10-032_A;
 	parent nodeS1707-10-024T11874_A;
+	longitude 677.012476951;
 	nominal_voltage 120;
+	latitude 161.975785587;
 };
 
 object triplex_node {
@@ -20786,7 +22020,9 @@ object triplex_node {
 	power_12 1172.17+463.817j;
 	name S1707-09-007_B;
 	parent nodeS1707-09-007T10305_B;
+	longitude 645.693422718;
 	nominal_voltage 120;
+	latitude 51.382643612;
 };
 
 object triplex_node {
@@ -20794,7 +22030,9 @@ object triplex_node {
 	power_12 2881.68+1140.26j;
 	name S1808-28-003_C;
 	parent nodeS1808-28-0031808-28-006_C;
+	longitude 285.583829873;
 	nominal_voltage 120;
+	latitude 1020.8969165;
 };
 
 object triplex_node {
@@ -20802,7 +22040,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1707-12-004_A;
 	parent nodeS1707-12-0041707-12-004_A;
+	longitude 572.963699264;
 	nominal_voltage 120;
+	latitude 543.872067581;
 };
 
 object triplex_node {
@@ -20810,7 +22050,9 @@ object triplex_node {
 	power_12 300.748+119.003j;
 	name S1707-12-006_A;
 	parent nodeS1707-12-0041707-12-004_A;
+	longitude 577.185289649;
 	nominal_voltage 120;
+	latitude 536.246423481;
 };
 
 object triplex_node {
@@ -20818,7 +22060,9 @@ object triplex_node {
 	power_12 7253.71+4582.44j;
 	name S1707-10-009_A;
 	parent nodeS1707-10-009T10274_A;
+	longitude 564.932586166;
 	nominal_voltage 120;
+	latitude 184.627625233;
 };
 
 object triplex_node {
@@ -20826,7 +22070,9 @@ object triplex_node {
 	power_12 7253.71+4582.44j;
 	name S1707-10-009_C;
 	parent nodeS1707-10-009T10274_C;
+	longitude 576.290073554;
 	nominal_voltage 120;
+	latitude 198.378177087;
 };
 
 object triplex_node {
@@ -20834,7 +22080,9 @@ object triplex_node {
 	power_12 7253.71+4582.44j;
 	name S1707-10-009_B;
 	parent nodeS1707-10-009T10274_B;
+	longitude 567.071450506;
 	nominal_voltage 120;
+	latitude 186.600859553;
 };
 
 object triplex_node {
@@ -20842,7 +22090,9 @@ object triplex_node {
 	power_12 361.564+143.068j;
 	name S1807-33-001_B;
 	parent nodeS1807-33-0011807-33-004_B;
+	longitude 367.690424962;
 	nominal_voltage 120;
+	latitude 37.2357820696;
 };
 
 object triplex_node {
@@ -20850,7 +22100,9 @@ object triplex_node {
 	power_12 286.585+113.399j;
 	name S1708-09-033_B;
 	parent nodeS1708-09-033T4063_B;
+	longitude 587.330156129;
 	nominal_voltage 120;
+	latitude 1006.97424699;
 };
 
 object triplex_node {
@@ -20858,7 +22110,9 @@ object triplex_node {
 	power_12 367.395+145.375j;
 	name S1708-09-003_B;
 	parent nodeS1708-09-0031708-09-025_B;
+	longitude 663.824814812;
 	nominal_voltage 120;
+	latitude 1031.82786422;
 };
 
 object triplex_node {
@@ -20866,7 +22120,9 @@ object triplex_node {
 	power_12 462.368+182.955j;
 	name S1708-09-004_B;
 	parent nodeS1708-09-0031708-09-025_B;
+	longitude 664.509049684;
 	nominal_voltage 120;
+	latitude 1033.82970421;
 };
 
 object triplex_node {
@@ -20874,7 +22130,9 @@ object triplex_node {
 	power_12 346.568+137.134j;
 	name S1708-08-007_B;
 	parent nodeS1708-08-0071708-08-005_B;
+	longitude 608.138276988;
 	nominal_voltage 120;
+	latitude 836.483298887;
 };
 
 object triplex_node {
@@ -20882,7 +22140,9 @@ object triplex_node {
 	power_12 33.3238+13.186j;
 	name S1708-06-019_B;
 	parent nodeS1708-06-019T11814_B;
+	longitude 398.730670693;
 	nominal_voltage 120;
+	latitude 662.036022804;
 };
 
 object triplex_node {
@@ -20890,7 +22150,9 @@ object triplex_node {
 	power_12 122.465+48.4585j;
 	name S1808-29-092_C;
 	parent nodeS1808-29-0921808-0150_C;
+	longitude 151.673187145;
 	nominal_voltage 120;
+	latitude 839.397121824;
 };
 
 object triplex_node {
@@ -20898,7 +22160,9 @@ object triplex_node {
 	power_12 2262.69+895.328j;
 	name S1707-10-033_A;
 	parent nodeS1707-10-033T4388_A;
+	longitude 657.564791019;
 	nominal_voltage 120;
+	latitude 158.740000383;
 };
 
 object triplex_node {
@@ -20906,7 +22170,9 @@ object triplex_node {
 	power_12 319.909+126.585j;
 	name S1707-09-011_B;
 	parent nodeS1707-09-011T10303_B;
+	longitude 661.79360328;
 	nominal_voltage 120;
+	latitude 52.508254312;
 };
 
 object triplex_node {
@@ -20914,7 +22180,9 @@ object triplex_node {
 	power_12 17225.6+8606.08j;
 	name S1707-02-014_A;
 	parent nodeS1707-02-014T18014_A;
+	longitude 445.574146734;
 	nominal_voltage 120;
+	latitude 404.592956318;
 };
 
 object triplex_node {
@@ -20922,7 +22190,9 @@ object triplex_node {
 	power_12 17225.6+8606.08j;
 	name S1707-02-014_C;
 	parent nodeS1707-02-014T18014_C;
+	longitude 438.977713791;
 	nominal_voltage 120;
+	latitude 395.872116335;
 };
 
 object triplex_node {
@@ -20930,7 +22200,9 @@ object triplex_node {
 	power_12 17225.6+8606.08j;
 	name S1707-02-014_B;
 	parent nodeS1707-02-014T18014_B;
+	longitude 431.897162432;
 	nominal_voltage 120;
+	latitude 403.641118773;
 };
 
 object triplex_node {
@@ -20938,7 +22210,9 @@ object triplex_node {
 	power_12 15.8288+6.26334j;
 	name S1708-09-005_B;
 	parent nodeS1708-09-0051708-09-008_B;
+	longitude 597.795898975;
 	nominal_voltage 120;
+	latitude 987.775505691;
 };
 
 object triplex_node {
@@ -20946,7 +22220,9 @@ object triplex_node {
 	power_12 53.3181+21.0976j;
 	name S1808-32-003_C;
 	parent nodeS1808-32-0031808-32-008_C;
+	longitude 325.853341864;
 	nominal_voltage 120;
+	latitude 796.764749853;
 };
 
 object triplex_node {
@@ -20954,7 +22230,9 @@ object triplex_node {
 	power_12 227.435+89.9943j;
 	name S1708-04-003_B;
 	parent nodeS1708-04-003T14400_B;
+	longitude 477.583540062;
 	nominal_voltage 120;
+	latitude 919.673475561;
 };
 
 object triplex_node {
@@ -20962,7 +22240,9 @@ object triplex_node {
 	power_12 329.073+130.212j;
 	name S1708-08-004_B;
 	parent nodeS1708-08-0041708-08-001_B;
+	longitude 575.084510712;
 	nominal_voltage 120;
+	latitude 831.545275938;
 };
 
 object triplex_node {
@@ -20970,7 +22250,9 @@ object triplex_node {
 	power_12 2669.91+2286.13j;
 	name S1707-09-014_A;
 	parent nodeS1707-09-014T12199_A;
+	longitude 580.556908555;
 	nominal_voltage 120;
+	latitude 112.960975519;
 };
 
 object triplex_node {
@@ -20978,7 +22260,9 @@ object triplex_node {
 	power_12 2669.91+2286.13j;
 	name S1707-09-014_C;
 	parent nodeS1707-09-014T12199_C;
+	longitude 566.650589114;
 	nominal_voltage 120;
+	latitude 118.656029582;
 };
 
 object triplex_node {
@@ -20986,7 +22270,9 @@ object triplex_node {
 	power_12 2669.91+2286.13j;
 	name S1707-09-014_B;
 	parent nodeS1707-09-014T12199_B;
+	longitude 560.921591146;
 	nominal_voltage 120;
+	latitude 121.83834417;
 };
 
 object triplex_node {
@@ -20994,7 +22280,9 @@ object triplex_node {
 	power_12 1529.56+605.236j;
 	name S1807-35-005_C;
 	parent nodeS1807-35-005T12925_C;
+	longitude 342.383006807;
 	nominal_voltage 120;
+	latitude 374.911559639;
 };
 
 object triplex_node {
@@ -21002,7 +22290,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1808-29-100_C;
 	parent nodeS1808-29-100T4170_C;
+	longitude 256.533926123;
 	nominal_voltage 120;
+	latitude 781.437479963;
 };
 
 object triplex_node {
@@ -21010,7 +22300,9 @@ object triplex_node {
 	power_12 865.586+342.506j;
 	name S1808-31-068_B;
 	parent nodeS1808-31-068T11894_B;
+	longitude 377.841606879;
 	nominal_voltage 120;
+	latitude 658.153143187;
 };
 
 object triplex_node {
@@ -21018,7 +22310,9 @@ object triplex_node {
 	power_12 774.779+306.574j;
 	name S1808-20-006_C;
 	parent nodeS1808-20-0061808-20-007_C;
+	longitude 156.700264227;
 	nominal_voltage 120;
+	latitude 845.299511015;
 };
 
 object triplex_node {
@@ -21026,7 +22320,9 @@ object triplex_node {
 	power_12 1720.34+680.726j;
 	name S1807-33-003_B;
 	parent nodeS1807-33-0031807-33-007_B;
+	longitude 329.19444577;
 	nominal_voltage 120;
+	latitude 44.5091001996;
 };
 
 object triplex_node {
@@ -21034,7 +22330,9 @@ object triplex_node {
 	power_12 131.629+52.0846j;
 	name S1707-14-013_A;
 	parent nodeS1707-14-013T7736_A;
+	longitude 696.600406901;
 	nominal_voltage 120;
+	latitude 447.451024669;
 };
 
 object triplex_node {
@@ -21042,7 +22340,9 @@ object triplex_node {
 	power_12 671.475+265.697j;
 	name S1707-12-005_A;
 	parent nodeS1707-12-005T2631_A;
+	longitude 549.828856533;
 	nominal_voltage 120;
+	latitude 562.980130327;
 };
 
 object triplex_node {
@@ -21050,7 +22350,9 @@ object triplex_node {
 	power_12 970.556+384.042j;
 	name S1708-05-009_B;
 	parent nodeS1708-05-0091708-05-009_B;
+	longitude 498.647633334;
 	nominal_voltage 120;
+	latitude 888.14964846;
 };
 
 object triplex_node {
@@ -21058,7 +22360,9 @@ object triplex_node {
 	power_12 15.8288+6.26334j;
 	name S1708-09-006_B;
 	parent nodeS1708-09-0061708-09-022_B;
+	longitude 651.246376518;
 	nominal_voltage 120;
+	latitude 1042.43857592;
 };
 
 object triplex_node {
@@ -21066,7 +22370,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1708-09-009_B;
 	parent nodeS1708-09-0061708-09-022_B;
+	longitude 646.325726409;
 	nominal_voltage 120;
+	latitude 1037.41269915;
 };
 
 object triplex_node {
@@ -21074,7 +22380,9 @@ object triplex_node {
 	power_12 514.853+203.723j;
 	name S1708-05-001_B;
 	parent nodeS1708-05-0011708-05-014_B;
+	longitude 529.918553087;
 	nominal_voltage 120;
+	latitude 847.50883697;
 };
 
 object triplex_node {
@@ -21082,7 +22390,9 @@ object triplex_node {
 	power_12 314.91+124.607j;
 	name S1707-10-005_C;
 	parent nodeS1707-10-005T10292_C;
+	longitude 662.946823342;
 	nominal_voltage 120;
+	latitude 166.973259688;
 };
 
 object triplex_node {
@@ -21090,7 +22400,9 @@ object triplex_node {
 	power_12 97.4722+38.569j;
 	name S1808-32-008_C;
 	parent nodeS1808-32-0081808-32-005_C;
+	longitude 295.54891747;
 	nominal_voltage 120;
+	latitude 823.709197816;
 };
 
 object triplex_node {
@@ -21098,7 +22410,9 @@ object triplex_node {
 	power_12 961.392+380.415j;
 	name S1707-16-004_C;
 	parent nodeS1707-16-004T10308_C;
+	longitude 679.126007566;
 	nominal_voltage 120;
+	latitude 51.6056397114;
 };
 
 object triplex_node {
@@ -21106,7 +22420,9 @@ object triplex_node {
 	power_12 904.742+357.999j;
 	name S1808-29-096_C;
 	parent nodeS1808-29-096T3902_C;
+	longitude 261.534228863;
 	nominal_voltage 120;
+	latitude 780.408125726;
 };
 
 object triplex_node {
@@ -21114,7 +22430,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1808-30-061_C;
 	parent nodeS1808-30-0611808-30-007_C;
+	longitude 247.213830701;
 	nominal_voltage 120;
+	latitude 705.200174796;
 };
 
 object triplex_node {
@@ -21122,7 +22440,9 @@ object triplex_node {
 	power_12 172.451+68.2374j;
 	name S1808-33-003_C;
 	parent nodeS1808-33-0031808-33-009_C;
+	longitude 343.791085693;
 	nominal_voltage 120;
+	latitude 993.106648056;
 };
 
 object triplex_node {
@@ -21130,7 +22450,9 @@ object triplex_node {
 	power_12 528.183+208.998j;
 	name S1808-33-012_C;
 	parent nodeS1808-33-0031808-33-009_C;
+	longitude 339.332458396;
 	nominal_voltage 120;
+	latitude 987.518328184;
 };
 
 object triplex_node {
@@ -21138,7 +22460,9 @@ object triplex_node {
 	power_12 314.91+124.607j;
 	name S1707-13-010_A;
 	parent nodeS1707-13-0101707-13-036_A;
+	longitude 682.255122529;
 	nominal_voltage 120;
+	latitude 449.504770851;
 };
 
 object triplex_node {
@@ -21146,7 +22470,9 @@ object triplex_node {
 	power_12 649.815+257.127j;
 	name S1708-09-029_B;
 	parent nodeS1708-09-0291708-0022_B;
+	longitude 603.795605834;
 	nominal_voltage 120;
+	latitude 1012.40079707;
 };
 
 object triplex_node {
@@ -21154,7 +22480,9 @@ object triplex_node {
 	power_12 725.626+287.125j;
 	name S1707-09-015_C;
 	parent nodeS1707-09-015T14052_C;
+	longitude 572.745213435;
 	nominal_voltage 120;
+	latitude 143.943105929;
 };
 
 object triplex_node {
@@ -21162,7 +22490,9 @@ object triplex_node {
 	power_12 24.9929+9.88948j;
 	name S1808-32-017_C;
 	parent nodeS1808-32-0171808-32-004_C;
+	longitude 300.960739512;
 	nominal_voltage 120;
+	latitude 813.114802806;
 };
 
 object triplex_node {
@@ -21170,7 +22500,9 @@ object triplex_node {
 	power_12 577.335+228.447j;
 	name S1808-29-080_C;
 	parent nodeS1808-29-0801808-0123_C;
+	longitude 248.731741349;
 	nominal_voltage 120;
+	latitude 782.598133883;
 };
 
 object triplex_node {
@@ -21178,7 +22510,9 @@ object triplex_node {
 	power_12 2271.02+898.624j;
 	name S1707-01-005_A;
 	parent nodeS1707-01-0051707-01-007_A;
+	longitude 512.632639203;
 	nominal_voltage 120;
+	latitude 581.671115281;
 };
 
 object triplex_node {
@@ -21186,7 +22520,9 @@ object triplex_node {
 	power_12 538.18+212.954j;
 	name S1708-09-010_B;
 	parent nodeS1708-09-0101708-09-015_B;
+	longitude 650.209564772;
 	nominal_voltage 120;
+	latitude 1032.66492036;
 };
 
 object triplex_node {
@@ -21194,7 +22530,9 @@ object triplex_node {
 	power_12 1445.42+571.942j;
 	name S1808-20-009_C;
 	parent nodeS1808-20-009T4114_C;
+	longitude 129.789748718;
 	nominal_voltage 120;
+	latitude 851.384244198;
 };
 
 object triplex_node {
@@ -21202,7 +22540,9 @@ object triplex_node {
 	power_12 4.99857+1.9779j;
 	name S1807-33-007_B;
 	parent nodeS1807-33-0071807-33-009_B;
+	longitude 328.091738647;
 	nominal_voltage 120;
+	latitude 120.934042261;
 };
 
 object triplex_node {
@@ -21210,7 +22550,9 @@ object triplex_node {
 	power_12 185.78+73.5118j;
 	name S1808-33-009_C;
 	parent nodeS1808-33-0091808-33-010_C;
+	longitude 319.747101152;
 	nominal_voltage 120;
+	latitude 994.015178047;
 };
 
 object triplex_node {
@@ -21218,7 +22560,9 @@ object triplex_node {
 	power_12 534.014+211.305j;
 	name S1707-12-008_A;
 	parent nodeS1707-12-008T4265_A;
+	longitude 672.736107409;
 	nominal_voltage 120;
+	latitude 493.828724374;
 };
 
 object triplex_node {
@@ -21226,7 +22570,9 @@ object triplex_node {
 	power_12 853.09+337.561j;
 	name S1708-09-028_B;
 	parent nodeS1708-09-0281708-09-009_B;
+	longitude 637.703964361;
 	nominal_voltage 120;
+	latitude 1015.01625886;
 };
 
 object triplex_node {
@@ -21234,7 +22580,9 @@ object triplex_node {
 	power_12 105.803+41.8655j;
 	name S1808-20-008_C;
 	parent nodeS1808-20-008T4113_C;
+	longitude 130.10463878;
 	nominal_voltage 120;
+	latitude 867.218989931;
 };
 
 object triplex_node {
@@ -21242,7 +22590,9 @@ object triplex_node {
 	power_12 4734.01+3398.89j;
 	name S1707-10-007_A;
 	parent nodeS1707-10-007T10272_A;
+	longitude 605.600436933;
 	nominal_voltage 120;
+	latitude 186.800867814;
 };
 
 object triplex_node {
@@ -21250,7 +22600,9 @@ object triplex_node {
 	power_12 4734.01+3398.89j;
 	name S1707-10-007_C;
 	parent nodeS1707-10-007T10272_C;
+	longitude 603.897195378;
 	nominal_voltage 120;
+	latitude 181.867391892;
 };
 
 object triplex_node {
@@ -21258,7 +22610,9 @@ object triplex_node {
 	power_12 4734.01+3398.89j;
 	name S1707-10-007_B;
 	parent nodeS1707-10-007T10272_B;
+	longitude 597.760901326;
 	nominal_voltage 120;
+	latitude 192.405399092;
 };
 
 object triplex_node {
@@ -21266,7 +22620,9 @@ object triplex_node {
 	power_12 682.305+269.983j;
 	name S1707-01-012_A;
 	parent nodeS1707-01-0121707-0234_A;
+	longitude 495.465196584;
 	nominal_voltage 120;
+	latitude 536.697946005;
 };
 
 object triplex_node {
@@ -21274,7 +22630,9 @@ object triplex_node {
 	power_12 59.9829+23.7348j;
 	name S1808-33-007_C;
 	parent nodeS1808-33-0071808-33-008_C;
+	longitude 320.96431819;
 	nominal_voltage 120;
+	latitude 990.48376376;
 };
 
 object triplex_node {
@@ -21282,7 +22640,9 @@ object triplex_node {
 	power_12 864.753+342.176j;
 	name S1707-02-011_B;
 	parent nodeS1707-02-0111707-02-001_B;
+	longitude 447.687932213;
 	nominal_voltage 120;
+	latitude 442.722426193;
 };
 
 object triplex_node {
@@ -21290,7 +22650,9 @@ object triplex_node {
 	power_12 471.532+186.582j;
 	name S1708-09-013_B;
 	parent nodeS1708-09-0131708-09-004_B;
+	longitude 649.722150678;
 	nominal_voltage 120;
+	latitude 985.410630349;
 };
 
 object triplex_node {
@@ -21298,7 +22660,9 @@ object triplex_node {
 	power_12 214.106+84.7199j;
 	name S1708-09-014_B;
 	parent nodeS1708-09-0131708-09-004_B;
+	longitude 649.053147766;
 	nominal_voltage 120;
+	latitude 991.093117171;
 };
 
 object triplex_node {
@@ -21306,7 +22670,9 @@ object triplex_node {
 	power_12 6.66477+2.6372j;
 	name S1708-09-018_B;
 	parent nodeS1708-09-0131708-09-004_B;
+	longitude 645.818873599;
 	nominal_voltage 120;
+	latitude 989.724078718;
 };
 
 object triplex_node {
@@ -21314,7 +22680,9 @@ object triplex_node {
 	power_12 489.027+193.504j;
 	name S1708-09-026_B;
 	parent nodeS1708-09-0131708-09-004_B;
+	longitude 648.413328296;
 	nominal_voltage 120;
+	latitude 991.990516392;
 };
 
 object triplex_node {
@@ -21322,7 +22690,9 @@ object triplex_node {
 	power_12 924.736+365.911j;
 	name S1807-34-011_C;
 	parent nodeS1807-34-0111807-0292_C;
+	longitude 296.796875045;
 	nominal_voltage 120;
+	latitude 301.282177638;
 };
 
 object triplex_node {
@@ -21330,7 +22700,9 @@ object triplex_node {
 	power_12 784.776+310.53j;
 	name S1707-10-026_B;
 	parent nodeS1707-10-026T10297_B;
+	longitude 632.503415213;
 	nominal_voltage 120;
+	latitude 165.584198563;
 };
 
 object triplex_node {
@@ -21338,7 +22710,9 @@ object triplex_node {
 	power_12 1442.09+570.623j;
 	name S1807-33-005_B;
 	parent nodeS1807-33-0051807-33-011_B;
+	longitude 298.280136134;
 	nominal_voltage 120;
+	latitude 52.9124679236;
 };
 
 object triplex_node {
@@ -21346,7 +22720,9 @@ object triplex_node {
 	power_12 471.532+186.582j;
 	name S1808-30-064_C;
 	parent nodeS1808-30-0641808-30-013_C;
+	longitude 251.381171848;
 	nominal_voltage 120;
+	latitude 718.704738334;
 };
 
 object triplex_node {
@@ -21354,7 +22730,9 @@ object triplex_node {
 	power_12 305.746+120.981j;
 	name S1708-09-002_B;
 	parent nodeS1708-09-0021708-09-012_B;
+	longitude 634.006777206;
 	nominal_voltage 120;
+	latitude 1013.97611461;
 };
 
 object triplex_node {
@@ -21362,7 +22740,9 @@ object triplex_node {
 	power_12 291.583+115.377j;
 	name S1708-05-012_B;
 	parent nodeS1708-05-012T21005_B;
+	longitude 443.882309591;
 	nominal_voltage 120;
+	latitude 848.550852735;
 };
 
 object triplex_node {
@@ -21370,7 +22750,9 @@ object triplex_node {
 	power_12 2319.66+1617.32j;
 	name S1707-10-027_A;
 	parent nodeS1707-10-027T10270_A;
+	longitude 604.046968399;
 	nominal_voltage 120;
+	latitude 232.134423165;
 };
 
 object triplex_node {
@@ -21378,7 +22760,9 @@ object triplex_node {
 	power_12 2319.66+1617.32j;
 	name S1707-10-027_C;
 	parent nodeS1707-10-027T10270_C;
+	longitude 594.099690838;
 	nominal_voltage 120;
+	latitude 231.170979149;
 };
 
 object triplex_node {
@@ -21386,7 +22770,9 @@ object triplex_node {
 	power_12 2319.66+1617.32j;
 	name S1707-10-027_B;
 	parent nodeS1707-10-027T10270_B;
+	longitude 593.631629543;
 	nominal_voltage 120;
+	latitude 247.369791452;
 };
 
 object triplex_node {
@@ -21394,7 +22780,9 @@ object triplex_node {
 	power_12 1207.16+477.662j;
 	name S1808-33-010_C;
 	parent nodeS1808-33-0101808-33-007_C;
+	longitude 327.180150595;
 	nominal_voltage 120;
+	latitude 981.619607847;
 };
 
 object triplex_node {
@@ -21402,7 +22790,9 @@ object triplex_node {
 	power_12 308.245+121.97j;
 	name S1808-29-099_C;
 	parent nodeS1808-29-099T4037_C;
+	longitude 199.195292007;
 	nominal_voltage 120;
+	latitude 752.049992423;
 };
 
 object triplex_node {
@@ -21410,7 +22800,9 @@ object triplex_node {
 	power_12 419.047+165.814j;
 	name S1708-08-009_B;
 	parent nodeS1708-08-0091708-0024_B;
+	longitude 547.089952314;
 	nominal_voltage 120;
+	latitude 890.590915477;
 };
 
 object triplex_node {
@@ -21418,7 +22810,9 @@ object triplex_node {
 	power_12 867.253+343.165j;
 	name S1807-35-004_C;
 	parent nodeS1807-35-004T12926_C;
+	longitude 303.029399382;
 	nominal_voltage 120;
+	latitude 302.912542438;
 };
 
 object triplex_node {
@@ -21426,7 +22820,9 @@ object triplex_node {
 	power_12 747.287+295.695j;
 	name S1707-09-005_B;
 	parent nodeS1707-09-005T10295_B;
+	longitude 631.73876954;
 	nominal_voltage 120;
+	latitude 154.774386721;
 };
 
 object triplex_node {
@@ -21434,7 +22830,9 @@ object triplex_node {
 	power_12 354.899+140.431j;
 	name S1808-32-004_C;
 	parent nodeS1808-32-0041808-32-014_C;
+	longitude 273.139560997;
 	nominal_voltage 120;
+	latitude 848.035522742;
 };
 
 object triplex_node {
@@ -21442,7 +22840,9 @@ object triplex_node {
 	power_12 818.933+324.045j;
 	name S1707-02-004_B;
 	parent nodeS1707-02-0041707-0164_B;
+	longitude 441.597195136;
 	nominal_voltage 120;
+	latitude 433.947363248;
 };
 
 object triplex_node {
@@ -21450,7 +22850,9 @@ object triplex_node {
 	power_12 229.934+90.9832j;
 	name S1808-30-065_C;
 	parent nodeS1808-30-0651808-30-014_C;
+	longitude 243.931860261;
 	nominal_voltage 120;
+	latitude 725.150802078;
 };
 
 object triplex_node {
@@ -21458,7 +22860,9 @@ object triplex_node {
 	power_12 708.964+280.532j;
 	name S1708-06-005_A;
 	parent nodeS1708-06-005T15856_A;
+	longitude 494.323114186;
 	nominal_voltage 120;
+	latitude 645.024310687;
 };
 
 object triplex_node {
@@ -21466,7 +22870,9 @@ object triplex_node {
 	power_12 718.962+284.487j;
 	name S1708-08-005_B;
 	parent nodeS1708-08-0051708-0023_B;
+	longitude 555.191724665;
 	nominal_voltage 120;
+	latitude 889.112541306;
 };
 
 object triplex_node {
@@ -21474,7 +22880,9 @@ object triplex_node {
 	power_12 1441.26+570.293j;
 	name S1708-05-013_B;
 	parent nodeS1708-05-013T29051_B;
+	longitude 443.246658751;
 	nominal_voltage 120;
+	latitude 799.362515947;
 };
 
 object triplex_node {
@@ -21482,7 +22890,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1808-20-004_C;
 	parent nodeS1808-20-004T18630_C;
+	longitude 111.536605614;
 	nominal_voltage 120;
+	latitude 798.170134153;
 };
 
 object triplex_node {
@@ -21490,7 +22900,9 @@ object triplex_node {
 	power_12 171.618+67.9078j;
 	name S1707-02-003_B;
 	parent nodeS1707-02-0031707-0162_B;
+	longitude 440.620316572;
 	nominal_voltage 120;
+	latitude 422.406438463;
 };
 
 object triplex_node {
@@ -21498,7 +22910,9 @@ object triplex_node {
 	power_12 2.49929+0.988948j;
 	name S1808-30-060_C;
 	parent nodeS1808-30-0601808-30-008_C;
+	longitude 242.75208463;
 	nominal_voltage 120;
+	latitude 711.308340448;
 };
 
 object triplex_node {
@@ -21506,7 +22920,9 @@ object triplex_node {
 	power_12 283.253+112.081j;
 	name S1708-09-021_B;
 	parent nodeS1708-09-0211708-09-003_B;
+	longitude 651.007157645;
 	nominal_voltage 120;
+	latitude 987.641360386;
 };
 
 object triplex_node {
@@ -21514,7 +22930,9 @@ object triplex_node {
 	power_12 1565.39+619.411j;
 	name S1707-10-030_A;
 	parent nodeS1707-10-030T10276_A;
+	longitude 643.417996677;
 	nominal_voltage 120;
+	latitude 213.679639238;
 };
 
 object triplex_node {
@@ -21522,7 +22940,9 @@ object triplex_node {
 	power_12 509.855+201.745j;
 	name S1707-09-012_A;
 	parent nodeS1707-09-012T10293_A;
+	longitude 663.626997284;
 	nominal_voltage 120;
+	latitude 149.459804986;
 };
 
 object triplex_node {
@@ -21530,7 +22950,9 @@ object triplex_node {
 	power_12 5748.42+3138.3j;
 	name S1707-02-015_A;
 	parent nodeS1707-02-015T14420_A;
+	longitude 484.683228927;
 	nominal_voltage 120;
+	latitude 333.40116596;
 };
 
 object triplex_node {
@@ -21538,7 +22960,9 @@ object triplex_node {
 	power_12 5748.42+3138.3j;
 	name S1707-02-015_C;
 	parent nodeS1707-02-015T14420_C;
+	longitude 499.07643586;
 	nominal_voltage 120;
+	latitude 319.928697631;
 };
 
 object triplex_node {
@@ -21546,7 +22970,9 @@ object triplex_node {
 	power_12 5748.42+3138.3j;
 	name S1707-02-015_B;
 	parent nodeS1707-02-015T14420_B;
+	longitude 501.65524479;
 	nominal_voltage 120;
+	latitude 326.089781709;
 };
 
 object triplex_node {
@@ -21554,7 +22980,9 @@ object triplex_node {
 	power_12 488.194+193.175j;
 	name S1707-13-002_A;
 	parent nodeS1707-13-0021707-13-016_A;
+	longitude 758.059682435;
 	nominal_voltage 120;
+	latitude 559.807198134;
 };
 
 object triplex_node {
@@ -21562,7 +22990,9 @@ object triplex_node {
 	power_12 1082.19+428.215j;
 	name S1808-33-011_C;
 	parent nodeS1808-33-0111808-0136_C;
+	longitude 283.09515285;
 	nominal_voltage 120;
+	latitude 982.155970122;
 };
 
 object triplex_node {
@@ -21570,7 +23000,9 @@ object triplex_node {
 	power_12 656.479+259.764j;
 	name S1708-09-015_B;
 	parent nodeS1708-09-0151708-09-002_B;
+	longitude 642.953695345;
 	nominal_voltage 120;
+	latitude 990.193586492;
 };
 
 object triplex_node {
@@ -21578,7 +23010,9 @@ object triplex_node {
 	power_12 400.719+158.561j;
 	name S1708-09-016_B;
 	parent nodeS1708-09-0151708-09-002_B;
+	longitude 646.230670689;
 	nominal_voltage 120;
+	latitude 987.625031137;
 };
 
 object triplex_node {
@@ -21586,7 +23020,9 @@ object triplex_node {
 	power_12 100.805+39.8876j;
 	name S1708-09-025_B;
 	parent nodeS1708-09-0151708-09-002_B;
+	longitude 648.048158477;
 	nominal_voltage 120;
+	latitude 989.571319522;
 };
 
 object triplex_node {
@@ -21594,7 +23030,9 @@ object triplex_node {
 	power_12 193.278+76.4787j;
 	name S1708-09-027_B;
 	parent nodeS1708-09-0151708-09-002_B;
+	longitude 646.201569276;
 	nominal_voltage 120;
+	latitude 994.382282704;
 };
 
 object triplex_node {
@@ -21602,7 +23040,9 @@ object triplex_node {
 	power_12 474.865+187.9j;
 	name S1708-05-014_B;
 	parent nodeS1708-05-014T28295_B;
+	longitude 477.80644098;
 	nominal_voltage 120;
+	latitude 837.339331014;
 };
 
 object triplex_node {
@@ -21610,7 +23050,9 @@ object triplex_node {
 	power_12 189.946+75.1601j;
 	name S1807-33-010_B;
 	parent nodeS1807-33-0101807-0020_B;
+	longitude 242.600017717;
 	nominal_voltage 120;
+	latitude 75.0059341496;
 };
 
 object triplex_node {
@@ -21618,7 +23060,9 @@ object triplex_node {
 	power_12 392.388+155.265j;
 	name S1808-29-091_C;
 	parent nodeS1808-29-0911808-0148_C;
+	longitude 198.408286277;
 	nominal_voltage 120;
+	latitude 766.531580293;
 };
 
 object triplex_node {
@@ -21626,7 +23070,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1708-06-006_A;
 	parent nodeS1708-06-006T15884_A;
+	longitude 522.862367579;
 	nominal_voltage 120;
+	latitude 627.340143368;
 };
 
 object triplex_node {
@@ -21634,7 +23080,9 @@ object triplex_node {
 	power_12 6179.02+3681.32j;
 	name S1707-10-001_A;
 	parent nodeS1707-10-001T10277_A;
+	longitude 642.951974496;
 	nominal_voltage 120;
+	latitude 275.842616501;
 };
 
 object triplex_node {
@@ -21642,7 +23090,9 @@ object triplex_node {
 	power_12 6179.02+3681.32j;
 	name S1707-10-001_C;
 	parent nodeS1707-10-001T10277_C;
+	longitude 640.380800802;
 	nominal_voltage 120;
+	latitude 263.996911384;
 };
 
 object triplex_node {
@@ -21650,7 +23100,9 @@ object triplex_node {
 	power_12 6179.02+3681.32j;
 	name S1707-10-001_B;
 	parent nodeS1707-10-001T10277_B;
+	longitude 633.747906277;
 	nominal_voltage 120;
+	latitude 277.361384532;
 };
 
 object triplex_node {
@@ -21658,7 +23110,9 @@ object triplex_node {
 	power_12 1139.67+450.96j;
 	name S1708-10-006_B;
 	parent nodeS1708-10-0061708-10-002_B;
+	longitude 609.57019153;
 	nominal_voltage 120;
+	latitude 1050.79095887;
 };
 
 object triplex_node {
@@ -21666,7 +23120,9 @@ object triplex_node {
 	power_12 30.8245+12.197j;
 	name S1708-05-006_B;
 	parent nodeS1708-05-006T21003_B;
+	longitude 462.160257029;
 	nominal_voltage 120;
+	latitude 828.8025447;
 };
 
 object triplex_node {
@@ -21674,7 +23130,9 @@ object triplex_node {
 	power_12 1580.38+625.345j;
 	name S1808-21-003_C;
 	parent nodeS1808-21-0031808-0151_C;
+	longitude 128.822862177;
 	nominal_voltage 120;
+	latitude 948.661099422;
 };
 
 object triplex_node {
@@ -21682,7 +23140,9 @@ object triplex_node {
 	power_12 2319.34+917.744j;
 	name S1808-20-007_C;
 	parent nodeS1808-20-0071808-20-011_C;
+	longitude 82.1837499421;
 	nominal_voltage 120;
+	latitude 863.645915194;
 };
 
 object triplex_node {
@@ -21690,7 +23150,9 @@ object triplex_node {
 	power_12 249.929+98.8948j;
 	name S1807-36-001_C;
 	parent nodeS1807-36-0011807-36-005_C;
+	longitude 337.079483123;
 	nominal_voltage 120;
+	latitude 469.065961396;
 };
 
 object triplex_node {
@@ -21698,7 +23160,9 @@ object triplex_node {
 	power_12 566.505+224.162j;
 	name S1808-29-097_C;
 	parent nodeS1808-29-097T4002_C;
+	longitude 207.373492401;
 	nominal_voltage 120;
+	latitude 743.522842967;
 };
 
 object triplex_node {
@@ -21706,7 +23170,9 @@ object triplex_node {
 	power_12 7187.04+4249.42j;
 	name S1707-01-013_A;
 	parent nodeS1707-01-0131707-01-016_A;
+	longitude 441.813385689;
 	nominal_voltage 120;
+	latitude 504.797428635;
 };
 
 object triplex_node {
@@ -21714,7 +23180,9 @@ object triplex_node {
 	power_12 7187.04+4249.42j;
 	name S1707-01-013_C;
 	parent nodeS1707-01-0131707-01-016_C;
+	longitude 447.305323985;
 	nominal_voltage 120;
+	latitude 508.876791668;
 };
 
 object triplex_node {
@@ -21722,7 +23190,9 @@ object triplex_node {
 	power_12 7187.04+4249.42j;
 	name S1707-01-013_B;
 	parent nodeS1707-01-0131707-01-016_B;
+	longitude 440.216541586;
 	nominal_voltage 120;
+	latitude 502.069479167;
 };
 
 object triplex_node {
@@ -21730,7 +23200,9 @@ object triplex_node {
 	power_12 285.752+113.07j;
 	name S1708-06-011_A;
 	parent nodeS1708-06-011T15857_A;
+	longitude 524.617228125;
 	nominal_voltage 120;
+	latitude 624.333391232;
 };
 
 object triplex_node {
@@ -21738,7 +23210,9 @@ object triplex_node {
 	power_12 826.431+327.012j;
 	name S1807-33-006_B;
 	parent nodeS1807-33-006T25124_B;
+	longitude 298.891740064;
 	nominal_voltage 120;
+	latitude 72.6350973121;
 };
 
 object triplex_node {
@@ -21746,7 +23220,9 @@ object triplex_node {
 	power_12 103.304+40.8765j;
 	name S1807-33-009_B;
 	parent nodeS1807-33-006T25124_B;
+	longitude 305.219045265;
 	nominal_voltage 120;
+	latitude 78.7762249189;
 };
 
 object triplex_node {
@@ -21754,7 +23230,9 @@ object triplex_node {
 	power_12 247.429+97.9059j;
 	name S1708-10-009_B;
 	parent nodeS1708-10-009T12268_B;
+	longitude 626.83655282;
 	nominal_voltage 120;
+	latitude 1052.28082982;
 };
 
 object triplex_node {
@@ -21762,7 +23240,9 @@ object triplex_node {
 	power_12 1016.38+402.172j;
 	name S1808-20-002_C;
 	parent nodeS1808-20-0021808-20-002_C;
+	longitude 58.2815116195;
 	nominal_voltage 120;
+	latitude 830.588401864;
 };
 
 object triplex_node {
@@ -21770,7 +23250,9 @@ object triplex_node {
 	power_12 67.4808+26.7016j;
 	name S1707-16-010_B;
 	parent nodeS1707-16-010T14062_B;
+	longitude 726.46040391;
 	nominal_voltage 120;
+	latitude 147.069268604;
 };
 
 object triplex_node {
@@ -21778,7 +23260,9 @@ object triplex_node {
 	power_12 1073.03+424.588j;
 	name S1808-28-004_C;
 	parent nodeS1808-28-004T21024_C;
+	longitude 268.427900896;
 	nominal_voltage 120;
+	latitude 961.384948803;
 };
 
 object triplex_node {
@@ -21786,7 +23270,9 @@ object triplex_node {
 	power_12 720.628+285.147j;
 	name S1707-13-013_A;
 	parent nodeS1707-13-0131707-0190_A;
+	longitude 756.701721509;
 	nominal_voltage 120;
+	latitude 528.166429478;
 };
 
 object triplex_node {
@@ -21794,7 +23280,9 @@ object triplex_node {
 	power_12 61.6491+24.3941j;
 	name S1708-16-004_B;
 	parent nodeS1708-16-0041708-09-001_B;
+	longitude 663.945033757;
 	nominal_voltage 120;
+	latitude 992.257254225;
 };
 
 object triplex_node {
@@ -21802,7 +23290,9 @@ object triplex_node {
 	power_12 1148.01+454.257j;
 	name S1708-16-011_B;
 	parent nodeS1708-16-0041708-09-001_B;
+	longitude 662.792317561;
 	nominal_voltage 120;
+	latitude 988.455331779;
 };
 
 object triplex_node {
@@ -21810,7 +23300,9 @@ object triplex_node {
 	power_12 1586.21+627.652j;
 	name S1808-21-001_C;
 	parent nodeS1808-21-0011808-0164_C;
+	longitude 124.849318819;
 	nominal_voltage 120;
+	latitude 912.386495468;
 };
 
 object triplex_node {
@@ -21818,7 +23310,9 @@ object triplex_node {
 	power_12 1187.16+469.75j;
 	name S1707-10-023_C;
 	parent nodeS1707-10-023T10279_C;
+	longitude 651.71387072;
 	nominal_voltage 120;
+	latitude 216.727722953;
 };
 
 object triplex_node {
@@ -21826,7 +23320,9 @@ object triplex_node {
 	power_12 5703.05+3737.16j;
 	name S1807-36-009_A;
 	parent nodeS1807-36-0091807-0274_A;
+	longitude 369.294004569;
 	nominal_voltage 120;
+	latitude 531.234562711;
 };
 
 object triplex_node {
@@ -21834,7 +23330,9 @@ object triplex_node {
 	power_12 5703.05+3737.16j;
 	name S1807-36-009_C;
 	parent nodeS1807-36-0091807-0274_C;
+	longitude 383.031317635;
 	nominal_voltage 120;
+	latitude 520.974339993;
 };
 
 object triplex_node {
@@ -21842,7 +23340,9 @@ object triplex_node {
 	power_12 5703.05+3737.16j;
 	name S1807-36-009_B;
 	parent nodeS1807-36-0091807-0274_B;
+	longitude 373.53387372;
 	nominal_voltage 120;
+	latitude 521.670836012;
 };
 
 object triplex_node {
@@ -21850,7 +23350,9 @@ object triplex_node {
 	power_12 668.976+264.708j;
 	name S1707-16-008_B;
 	parent nodeS1707-16-008T10294_B;
+	longitude 692.190681437;
 	nominal_voltage 120;
+	latitude 151.640747801;
 };
 
 object triplex_node {
@@ -21858,7 +23360,9 @@ object triplex_node {
 	power_12 1341.28+530.735j;
 	name S1707-03-014_B;
 	parent nodeS1707-03-0141707-0180_B;
+	longitude 414.401861385;
 	nominal_voltage 120;
+	latitude 298.670912207;
 };
 
 object triplex_node {
@@ -21866,7 +23370,9 @@ object triplex_node {
 	power_12 83.3096+32.9649j;
 	name S1808-28-001_C;
 	parent nodeS1808-28-0011808-28-001_C;
+	longitude 279.53170554;
 	nominal_voltage 120;
+	latitude 974.787295602;
 };
 
 object triplex_node {
@@ -21874,7 +23380,9 @@ object triplex_node {
 	power_12 749.786+296.684j;
 	name S1807-33-008_B;
 	parent nodeS1807-33-0081807-33-012_B;
+	longitude 304.572844959;
 	nominal_voltage 120;
+	latitude 59.6208386783;
 };
 
 object triplex_node {
@@ -21882,7 +23390,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1708-05-005_B;
 	parent nodeS1708-05-005T7814_B;
+	longitude 498.077693525;
 	nominal_voltage 120;
+	latitude 814.557581157;
 };
 
 object triplex_node {
@@ -21890,7 +23400,9 @@ object triplex_node {
 	power_12 9.16405+3.62614j;
 	name S1808-29-001_C;
 	parent nodeS1808-29-0011808-29-006_C;
+	longitude 163.118823418;
 	nominal_voltage 120;
+	latitude 901.134765394;
 };
 
 object triplex_node {
@@ -21898,7 +23410,9 @@ object triplex_node {
 	power_12 579.835+229.436j;
 	name S1808-29-004_C;
 	parent nodeS1808-29-0011808-29-006_C;
+	longitude 167.619949955;
 	nominal_voltage 120;
+	latitude 902.419394158;
 };
 
 object triplex_node {
@@ -21906,7 +23420,9 @@ object triplex_node {
 	power_12 989.718+391.623j;
 	name S1808-29-088_C;
 	parent nodeS1808-29-0011808-29-006_C;
+	longitude 169.136573704;
 	nominal_voltage 120;
+	latitude 901.792036642;
 };
 
 object triplex_node {
@@ -21914,7 +23430,9 @@ object triplex_node {
 	power_12 749.786+296.684j;
 	name S1808-20-001_C;
 	parent nodeS1808-20-0011808-20-008_C;
+	longitude 49.3814901686;
 	nominal_voltage 120;
+	latitude 745.448182877;
 };
 
 object triplex_node {
@@ -21922,7 +23440,9 @@ object triplex_node {
 	power_12 206.608+81.753j;
 	name S1807-36-010_C;
 	parent nodeS1807-36-0101807-0299_C;
+	longitude 317.229121579;
 	nominal_voltage 120;
+	latitude 465.205650267;
 };
 
 object triplex_node {
@@ -21930,7 +23450,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1808-29-017_C;
 	parent nodeS1808-29-0171808-0045_C;
+	longitude 245.05510305;
 	nominal_voltage 120;
+	latitude 735.406540301;
 };
 
 object triplex_node {
@@ -21938,7 +23460,9 @@ object triplex_node {
 	power_12 150.79+59.6665j;
 	name S1708-06-013_A;
 	parent nodeS1708-06-013T15861_A;
+	longitude 462.136725913;
 	nominal_voltage 120;
+	latitude 638.04058371;
 };
 
 object triplex_node {
@@ -21946,7 +23470,9 @@ object triplex_node {
 	power_12 462.368+182.955j;
 	name S1708-16-002_B;
 	parent nodeS1708-16-0021708-16-007_B;
+	longitude 678.428304109;
 	nominal_voltage 120;
+	latitude 990.379178985;
 };
 
 object triplex_node {
@@ -21954,7 +23480,9 @@ object triplex_node {
 	power_12 628.987+248.885j;
 	name S1708-16-005_B;
 	parent nodeS1708-16-0021708-16-007_B;
+	longitude 673.924436092;
 	nominal_voltage 120;
+	latitude 986.231922407;
 };
 
 object triplex_node {
@@ -21962,7 +23490,9 @@ object triplex_node {
 	power_12 820.599+324.705j;
 	name S1707-02-006_B;
 	parent nodeS1707-02-006T7674_B;
+	longitude 520.268693189;
 	nominal_voltage 120;
+	latitude 333.377029696;
 };
 
 object triplex_node {
@@ -21970,7 +23500,9 @@ object triplex_node {
 	power_12 0.833096+0.329649j;
 	name S1707-03-011_B;
 	parent nodeS1707-03-0111707-0179_B;
+	longitude 424.737665923;
 	nominal_voltage 120;
+	latitude 300.941170678;
 };
 
 object triplex_node {
@@ -21978,7 +23510,9 @@ object triplex_node {
 	power_12 457.37+180.978j;
 	name S1808-32-015_C;
 	parent nodeS1808-32-0151808-32-022_C;
+	longitude 273.036424528;
 	nominal_voltage 120;
+	latitude 893.673079895;
 };
 
 object triplex_node {
@@ -21986,7 +23520,9 @@ object triplex_node {
 	power_12 462.368+182.955j;
 	name S1807-33-004_B;
 	parent nodeS1807-33-0041807-33-005_B;
+	longitude 344.254958577;
 	nominal_voltage 120;
+	latitude 65.3931907712;
 };
 
 object triplex_node {
@@ -21994,7 +23530,9 @@ object triplex_node {
 	power_12 15357.3+7703.8j;
 	name S1807-36-003_A;
 	parent nodeS1807-36-003T29581_A;
+	longitude 395.865539425;
 	nominal_voltage 120;
+	latitude 577.018568695;
 };
 
 object triplex_node {
@@ -22002,7 +23540,9 @@ object triplex_node {
 	power_12 15357.3+7703.8j;
 	name S1807-36-003_C;
 	parent nodeS1807-36-003T29581_C;
+	longitude 379.431997932;
 	nominal_voltage 120;
+	latitude 582.317597269;
 };
 
 object triplex_node {
@@ -22010,7 +23550,9 @@ object triplex_node {
 	power_12 15357.3+7703.8j;
 	name S1807-36-003_B;
 	parent nodeS1807-36-003T29581_B;
+	longitude 394.116893649;
 	nominal_voltage 120;
+	latitude 577.267716689;
 };
 
 object triplex_node {
@@ -22018,7 +23560,9 @@ object triplex_node {
 	power_12 1327.12+525.131j;
 	name S1707-10-011_C;
 	parent nodeS1707-10-011T10281_C;
+	longitude 675.926362664;
 	nominal_voltage 120;
+	latitude 221.124493212;
 };
 
 object triplex_node {
@@ -22026,7 +23570,9 @@ object triplex_node {
 	power_12 7.49786+2.96684j;
 	name S1807-36-008_C;
 	parent nodeS1807-36-0081807-36-002_C;
+	longitude 273.0951955;
 	nominal_voltage 120;
+	latitude 466.160361407;
 };
 
 object triplex_node {
@@ -22034,7 +23580,9 @@ object triplex_node {
 	power_12 274.922+108.784j;
 	name S1808-29-016_C;
 	parent nodeS1808-29-016T14089_C;
+	longitude 241.801113248;
 	nominal_voltage 120;
+	latitude 744.629876838;
 };
 
 object triplex_node {
@@ -22042,7 +23590,9 @@ object triplex_node {
 	power_12 3395.72+2353.7j;
 	name S1808-19-004_A;
 	parent nodeS1808-19-004T29595_A;
+	longitude 0.947896545657;
 	nominal_voltage 120;
+	latitude 691.944057408;
 };
 
 object triplex_node {
@@ -22050,7 +23600,9 @@ object triplex_node {
 	power_12 3395.72+2353.7j;
 	name S1808-19-004_C;
 	parent nodeS1808-19-004T29595_C;
+	longitude 21.9123512258;
 	nominal_voltage 120;
+	latitude 695.982887569;
 };
 
 object triplex_node {
@@ -22058,7 +23610,9 @@ object triplex_node {
 	power_12 3395.72+2353.7j;
 	name S1808-19-004_B;
 	parent nodeS1808-19-004T29595_B;
+	longitude 6.11918529983;
 	nominal_voltage 120;
+	latitude 697.445115698;
 };
 
 object triplex_node {
@@ -22066,7 +23620,9 @@ object triplex_node {
 	power_12 179.116+70.8746j;
 	name S1707-03-007_B;
 	parent nodeS1707-03-0071707-0177_B;
+	longitude 427.058314103;
 	nominal_voltage 120;
+	latitude 306.197983099;
 };
 
 object triplex_node {
@@ -22074,7 +23630,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1808-29-015_C;
 	parent nodeS1808-29-015T10909_C;
+	longitude 237.451900519;
 	nominal_voltage 120;
+	latitude 745.767692592;
 };
 
 object triplex_node {
@@ -22082,7 +23640,9 @@ object triplex_node {
 	power_12 567.338+224.491j;
 	name S1707-01-011_C;
 	parent nodeS1707-01-0111807-0226_C;
+	longitude 389.323114992;
 	nominal_voltage 120;
+	latitude 606.560304382;
 };
 
 object triplex_node {
@@ -22090,7 +23650,9 @@ object triplex_node {
 	power_12 368.228+145.705j;
 	name S1708-06-003_A;
 	parent nodeS1708-06-003T15860_A;
+	longitude 446.171857633;
 	nominal_voltage 120;
+	latitude 663.920513959;
 };
 
 object triplex_node {
@@ -22098,7 +23660,9 @@ object triplex_node {
 	power_12 1018.04+402.832j;
 	name S1708-16-021_B;
 	parent nodeS1708-16-0211708-16-009_B;
+	longitude 673.358655188;
 	nominal_voltage 120;
+	latitude 980.450097375;
 };
 
 object triplex_node {
@@ -22106,7 +23670,9 @@ object triplex_node {
 	power_12 78.311+30.987j;
 	name S1708-05-007_B;
 	parent nodeS1708-05-0071708-05-018_B;
+	longitude 500.824730483;
 	nominal_voltage 120;
+	latitude 799.699314715;
 };
 
 object triplex_node {
@@ -22114,7 +23680,9 @@ object triplex_node {
 	power_12 40.8217+16.1528j;
 	name S1707-02-007_B;
 	parent nodeS1707-02-0071707-0079_B;
+	longitude 508.91688283;
 	nominal_voltage 120;
+	latitude 367.979886394;
 };
 
 object triplex_node {
@@ -22122,7 +23690,9 @@ object triplex_node {
 	power_12 1087.19+430.192j;
 	name S1707-16-009_C;
 	parent nodeS1707-16-009T7300_C;
+	longitude 663.458434761;
 	nominal_voltage 120;
+	latitude 63.6185102009;
 };
 
 object triplex_node {
@@ -22130,7 +23700,9 @@ object triplex_node {
 	power_12 962.225+380.745j;
 	name S1708-08-010_B;
 	parent nodeS1708-08-0101708-0029_B;
+	longitude 637.56503261;
 	nominal_voltage 120;
+	latitude 833.873076289;
 };
 
 object triplex_node {
@@ -22138,7 +23710,9 @@ object triplex_node {
 	power_12 847.258+335.253j;
 	name S1708-08-011_B;
 	parent nodeS1708-08-0101708-0029_B;
+	longitude 637.525020729;
 	nominal_voltage 120;
+	latitude 831.893751695;
 };
 
 object triplex_node {
@@ -22146,7 +23720,9 @@ object triplex_node {
 	power_12 122.187+48.3486j;
 	name S1707-15-010_A;
 	parent nodeS1707-15-010T10285_A;
+	longitude 688.591430841;
 	nominal_voltage 120;
+	latitude 241.318933857;
 };
 
 object triplex_node {
@@ -22154,7 +23730,9 @@ object triplex_node {
 	power_12 122.187+48.3486j;
 	name S1707-15-010_C;
 	parent nodeS1707-15-010T10285_C;
+	longitude 682.170692606;
 	nominal_voltage 120;
+	latitude 244.213043363;
 };
 
 object triplex_node {
@@ -22162,7 +23740,9 @@ object triplex_node {
 	power_12 122.187+48.3486j;
 	name S1707-15-010_B;
 	parent nodeS1707-15-010T10285_B;
+	longitude 685.501256774;
 	nominal_voltage 120;
+	latitude 251.336899804;
 };
 
 object triplex_node {
@@ -22170,7 +23750,9 @@ object triplex_node {
 	power_12 99.9715+39.5579j;
 	name S1707-15-011_A;
 	parent nodeS1707-15-010T10285_A;
+	longitude 685.001383299;
 	nominal_voltage 120;
+	latitude 237.817201674;
 };
 
 object triplex_node {
@@ -22178,7 +23760,9 @@ object triplex_node {
 	power_12 99.9715+39.5579j;
 	name S1707-15-011_C;
 	parent nodeS1707-15-010T10285_C;
+	longitude 676.668014032;
 	nominal_voltage 120;
+	latitude 246.792959861;
 };
 
 object triplex_node {
@@ -22186,7 +23770,9 @@ object triplex_node {
 	power_12 99.9715+39.5579j;
 	name S1707-15-011_B;
 	parent nodeS1707-15-010T10285_B;
+	longitude 676.554623434;
 	nominal_voltage 120;
+	latitude 248.351380742;
 };
 
 object triplex_node {
@@ -22194,7 +23780,9 @@ object triplex_node {
 	power_12 33.3238+13.186j;
 	name S1808-33-005_C;
 	parent nodeS1808-33-0051808-33-002_C;
+	longitude 272.085532903;
 	nominal_voltage 120;
+	latitude 1012.57190557;
 };
 
 object triplex_node {
@@ -22202,7 +23790,9 @@ object triplex_node {
 	power_12 64.9815+25.7127j;
 	name S1808-29-094_C;
 	parent nodeS1808-29-094T2627_C;
+	longitude 267.549992102;
 	nominal_voltage 120;
+	latitude 892.011371819;
 };
 
 object triplex_node {
@@ -22210,7 +23800,9 @@ object triplex_node {
 	power_12 143.292+56.6997j;
 	name S1708-06-008_A;
 	parent nodeS1708-06-008T15859_A;
+	longitude 453.410525001;
 	nominal_voltage 120;
+	latitude 652.297604857;
 };
 
 object triplex_node {
@@ -22218,7 +23810,9 @@ object triplex_node {
 	power_12 1392.94+551.174j;
 	name S1708-15-007_B;
 	parent nodeS1708-15-0071708-0034_B;
+	longitude 680.425687825;
 	nominal_voltage 120;
+	latitude 1053.55811149;
 };
 
 object triplex_node {
@@ -22226,7 +23820,9 @@ object triplex_node {
 	power_12 736.457+291.41j;
 	name S1808-29-098_C;
 	parent nodeS1808-29-098T5087_C;
+	longitude 184.96745949;
 	nominal_voltage 120;
+	latitude 855.486750815;
 };
 
 object triplex_node {
@@ -22234,7 +23830,9 @@ object triplex_node {
 	power_12 6829.86+3744.21j;
 	name S1808-19-012_A;
 	parent nodeS1808-19-012T29596_A;
+	longitude -5.22259595162;
 	nominal_voltage 120;
+	latitude 737.435780592;
 };
 
 object triplex_node {
@@ -22242,7 +23840,9 @@ object triplex_node {
 	power_12 6829.86+3744.21j;
 	name S1808-19-012_C;
 	parent nodeS1808-19-012T29596_C;
+	longitude 13.7236468557;
 	nominal_voltage 120;
+	latitude 737.263034269;
 };
 
 object triplex_node {
@@ -22250,7 +23850,9 @@ object triplex_node {
 	power_12 6829.86+3744.21j;
 	name S1808-19-012_B;
 	parent nodeS1808-19-012T29596_B;
+	longitude 5.86733884503;
 	nominal_voltage 120;
+	latitude 738.622547155;
 };
 
 object triplex_node {
@@ -22258,7 +23860,9 @@ object triplex_node {
 	power_12 826.431+327.012j;
 	name S1707-16-003_C;
 	parent nodeS1707-16-003T10300_C;
+	longitude 681.73753117;
 	nominal_voltage 120;
+	latitude 66.380584226;
 };
 
 object triplex_node {
@@ -22266,7 +23870,9 @@ object triplex_node {
 	power_12 133.295+52.7439j;
 	name S1707-02-010_C;
 	parent nodeS1707-02-010T28711_C;
+	longitude 415.709334579;
 	nominal_voltage 120;
+	latitude 307.799535078;
 };
 
 object triplex_node {
@@ -22274,7 +23880,9 @@ object triplex_node {
 	power_12 11612.5+6075.47j;
 	name S1808-31-067_A;
 	parent nodeS1808-31-0671808-0100_A;
+	longitude 288.341051578;
 	nominal_voltage 120;
+	latitude 662.987651331;
 };
 
 object triplex_node {
@@ -22282,7 +23890,9 @@ object triplex_node {
 	power_12 11612.5+6075.47j;
 	name S1808-31-067_C;
 	parent nodeS1808-31-0671808-0100_C;
+	longitude 305.709270471;
 	nominal_voltage 120;
+	latitude 654.964364513;
 };
 
 object triplex_node {
@@ -22290,7 +23900,9 @@ object triplex_node {
 	power_12 11612.5+6075.47j;
 	name S1808-31-067_B;
 	parent nodeS1808-31-0671808-0100_B;
+	longitude 290.099012141;
 	nominal_voltage 120;
+	latitude 644.146605398;
 };
 
 object triplex_node {
@@ -22298,7 +23910,9 @@ object triplex_node {
 	power_12 1382.94+547.218j;
 	name S1807-25-003_C;
 	parent nodeS1807-25-0031807-25-007_C;
+	longitude 226.42813915;
 	nominal_voltage 120;
+	latitude 539.171599485;
 };
 
 object triplex_node {
@@ -22306,7 +23920,9 @@ object triplex_node {
 	power_12 308.245+121.97j;
 	name S1808-32-070_C;
 	parent nodeS1808-32-0701808-32-021_C;
+	longitude 266.226848017;
 	nominal_voltage 120;
+	latitude 884.944371402;
 };
 
 object triplex_node {
@@ -22314,7 +23930,9 @@ object triplex_node {
 	power_12 436.542+172.736j;
 	name S1707-01-007_A;
 	parent nodeS1707-01-0071707-01-003_A;
+	longitude 459.205527026;
 	nominal_voltage 120;
+	latitude 619.720554824;
 };
 
 object triplex_node {
@@ -22322,7 +23940,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1808-19-010_A;
 	parent nodeS1808-19-0101808-19-002_A;
+	longitude 28.9968541319;
 	nominal_voltage 120;
+	latitude 656.282157737;
 };
 
 object triplex_node {
@@ -22330,7 +23950,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1808-19-010_C;
 	parent nodeS1808-19-0101808-19-002_C;
+	longitude 35.8690166829;
 	nominal_voltage 120;
+	latitude 653.122180297;
 };
 
 object triplex_node {
@@ -22338,7 +23960,9 @@ object triplex_node {
 	power_12 0.0+0.0j;
 	name S1808-19-010_B;
 	parent nodeS1808-19-0101808-19-002_B;
+	longitude 38.9182627752;
 	nominal_voltage 120;
+	latitude 649.798386431;
 };
 
 object triplex_node {
@@ -22346,7 +23970,9 @@ object triplex_node {
 	power_12 825.598+326.683j;
 	name S1707-04-012_B;
 	parent nodeS1707-04-0121707-04-002_B;
+	longitude 460.565487432;
 	nominal_voltage 120;
+	latitude 145.004527679;
 };
 
 object triplex_node {
@@ -22354,7 +23980,9 @@ object triplex_node {
 	power_12 339.07+134.167j;
 	name S1808-29-068_C;
 	parent nodeS1808-29-0681808-29-026_C;
+	longitude 213.362550369;
 	nominal_voltage 120;
+	latitude 794.143332962;
 };
 
 object triplex_node {
@@ -22362,7 +23990,9 @@ object triplex_node {
 	power_12 11568.9+6086.56j;
 	name S1807-36-006_A;
 	parent nodeS1807-36-0061807-36-006_A;
+	longitude 313.282356104;
 	nominal_voltage 120;
+	latitude 609.048662601;
 };
 
 object triplex_node {
@@ -22370,7 +24000,9 @@ object triplex_node {
 	power_12 11568.9+6086.56j;
 	name S1807-36-006_C;
 	parent nodeS1807-36-0061807-36-006_C;
+	longitude 307.306602763;
 	nominal_voltage 120;
+	latitude 603.043566783;
 };
 
 object triplex_node {
@@ -22378,7 +24010,9 @@ object triplex_node {
 	power_12 11568.9+6086.56j;
 	name S1807-36-006_B;
 	parent nodeS1807-36-0061807-36-006_B;
+	longitude 310.722883083;
 	nominal_voltage 120;
+	latitude 610.914792483;
 };
 
 object triplex_node {
@@ -22386,7 +24020,9 @@ object triplex_node {
 	power_12 878.916+347.78j;
 	name S1707-01-009_A;
 	parent nodeS1707-01-0091707-0181_A;
+	longitude 461.682166511;
 	nominal_voltage 120;
+	latitude 572.788015179;
 };
 
 object triplex_node {
@@ -22394,7 +24030,9 @@ object triplex_node {
 	power_12 87.475+34.6132j;
 	name S1707-01-006_A;
 	parent nodeS1707-01-0061707-01-001_A;
+	longitude 444.583272093;
 	nominal_voltage 120;
+	latitude 613.995010602;
 };
 
 object triplex_node {
@@ -22402,7 +24040,9 @@ object triplex_node {
 	power_12 1608.71+636.553j;
 	name S1708-15-001_B;
 	parent nodeS1708-15-0011708-15-003_B;
+	longitude 674.17598206;
 	nominal_voltage 120;
+	latitude 1080.79563595;
 };
 
 object triplex_node {
@@ -22410,7 +24050,9 @@ object triplex_node {
 	power_12 772.28+305.585j;
 	name S1707-02-005_B;
 	parent nodeS1707-02-0051707-0231_B;
+	longitude 504.299885834;
 	nominal_voltage 120;
+	latitude 352.701309515;
 };
 
 object triplex_node {
@@ -22418,7 +24060,9 @@ object triplex_node {
 	power_12 8845.18+4792.29j;
 	name S1807-25-011_A;
 	parent nodeS1807-25-0111807-25-003_A;
+	longitude 267.109169041;
 	nominal_voltage 120;
+	latitude 609.483760853;
 };
 
 object triplex_node {
@@ -22426,7 +24070,9 @@ object triplex_node {
 	power_12 8845.18+4792.29j;
 	name S1807-25-011_C;
 	parent nodeS1807-25-0111807-25-003_C;
+	longitude 257.922747468;
 	nominal_voltage 120;
+	latitude 613.261341032;
 };
 
 object triplex_node {
@@ -22434,7 +24080,9 @@ object triplex_node {
 	power_12 8845.18+4792.29j;
 	name S1807-25-011_B;
 	parent nodeS1807-25-0111807-25-003_B;
+	longitude 263.106072514;
 	nominal_voltage 120;
+	latitude 616.019448374;
 };
 
 object triplex_node {
@@ -22442,7 +24090,9 @@ object triplex_node {
 	power_12 8845.18+4792.29j;
 	name S1807-25-012_A;
 	parent nodeS1807-25-0111807-25-003_A;
+	longitude 265.816797718;
 	nominal_voltage 120;
+	latitude 612.826275717;
 };
 
 object triplex_node {
@@ -22450,7 +24100,9 @@ object triplex_node {
 	power_12 8845.18+4792.29j;
 	name S1807-25-012_C;
 	parent nodeS1807-25-0111807-25-003_C;
+	longitude 257.255658257;
 	nominal_voltage 120;
+	latitude 610.19766324;
 };
 
 object triplex_node {
@@ -22458,7 +24110,9 @@ object triplex_node {
 	power_12 8845.18+4792.29j;
 	name S1807-25-012_B;
 	parent nodeS1807-25-0111807-25-003_B;
+	longitude 262.20374926;
 	nominal_voltage 120;
+	latitude 610.449215884;
 };
 
 object triplex_node {
@@ -22466,7 +24120,9 @@ object triplex_node {
 	power_12 34619.7+18154.6j;
 	name S1707-14-017_A;
 	parent nodeS1707-14-017T12395_A;
+	longitude 804.959759686;
 	nominal_voltage 120;
+	latitude 430.572872811;
 };
 
 object triplex_node {
@@ -22474,7 +24130,9 @@ object triplex_node {
 	power_12 698.134+276.246j;
 	name S1708-08-001_B;
 	parent nodeS1708-08-0011708-08-013_B;
+	longitude 667.791279151;
 	nominal_voltage 120;
+	latitude 838.641517471;
 };
 
 object transformer {
