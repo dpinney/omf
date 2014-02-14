@@ -109,7 +109,7 @@ class S3store:
 		except:
 			return None
 
-if __name__ == '__main__':
+def _tests():
 	# Filstore tests with cleanup.
 	import shutil
 	print '---TESTING FILESTORE---'
@@ -132,3 +132,7 @@ if __name__ == '__main__':
 	print 'What was that MD?', s3.get('feeder', 'testFeeder')
 	print 'List something.', s3.listAll('feeder')
 	print 'Full feeder get back', s3.get('feeder','testFeeder')
+
+
+if __name__ == '__main__':
+	_tests()
