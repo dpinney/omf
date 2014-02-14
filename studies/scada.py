@@ -328,4 +328,8 @@ def _tests():
 #     s.run()
 
 if __name__ == '__main__':
-	_tests()
+	try:
+		_tests()
+	except Exception, e:
+		print "The Scada test is broken"
+		print e
