@@ -110,56 +110,59 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False):
 		traceback.print_exc()
 		return {}
 
+def _strClean(x):
+	# Helper function that translates csv values to reasonable floats (or header values to strings):
+	if x == 'OPEN':
+		return 1.0
+	elif x == 'CLOSED':
+		return 0.0
+	# Look for strings of the type '+32.0+68.32d':
+	elif x == '-1.#IND':
+		return 0.0
+	if x.endswith('d'):
+		matches = re.findall('^([+-]?\d+\.?\d*e?[+-]?\d+)[+-](\d+\.?\d*e?[+-]?\d*)d$',x)
+		if len(matches)==0:
+			return 0.0
+		else:
+			floatConv = map(float, matches[0])
+			squares = map(lambda x:x**2, floatConv)
+			return math.sqrt(sum(squares))
+	elif re.findall('^([+-]?\d+\.?\d*e?[+-]?\d*)$',x) != []:
+		matches = re.findall('([+-]?\d+\.?\d*e?[+-]?\d*)',x)
+		if len(matches)==0:
+			return 0.0
+		else:
+			return float(matches[0])
+	else:
+		return x
 
 def csvToArray(fileName):
 	''' Take a Gridlab-export csv filename, return a list of timeseries vectors. Internal method. 
 		testStringsThatPass = ['+954.877', '+2.18351e+006', '+7244.99+1.20333e-005d', '+7244.99+120d', '+3.76184','1','+7200+0d','']
 	'''
-	def strClean(x):
-		# Helper function that translates csv values to reasonable floats (or header values to strings):
-		if x == 'OPEN':
-			return 1.0
-		elif x == 'CLOSED':
-			return 0.0
-		# Look for strings of the type '+32.0+68.32d':
-		elif x == '-1.#IND':
-			return 0.0
-		if x.endswith('d'):
-			matches = re.findall('^([+-]?\d+\.?\d*e?[+-]?\d+)[+-](\d+\.?\d*e?[+-]?\d*)d$',x)
-			if len(matches)==0:
-				return 0.0
-			else:
-				floatConv = map(float, matches[0])
-				squares = map(lambda x:x**2, floatConv)
-				return math.sqrt(sum(squares))
-		elif re.findall('^([+-]?\d+\.?\d*e?[+-]?\d*)$',x) != []:
-			matches = re.findall('([+-]?\d+\.?\d*e?[+-]?\d*)',x)
-			if len(matches)==0:
-				return 0.0
-			else:
-				return float(matches[0])
-		else:
-			return x
+
 	with open(fileName) as openfile:
 		data = openfile.read()
 	lines = data.splitlines()
 	array = map(lambda x:x.split(','), lines)
-	cleanArray = [map(strClean, x) for x in array]
+	cleanArray = [map(_strClean, x) for x in array]
 	# Magic number 8 is the number of header rows in each csv.
 	arrayNoHeaders = cleanArray[8:]
 	# Drop the timestamp column:
 	return arrayNoHeaders
 
+def _seriesTranspose(theArray):
+	return {i[0]:list(i)[1:] for i in zip(*theArray)}
+
 def anaDataTree(studyPath, fileNameTest):
 	''' Take a study and put all its data into a nested object {fileName:{metricName:[...]}} '''
-	def seriesTranspose(theArray):
-		return {i[0]:list(i)[1:] for i in zip(*theArray)}
+
 	data = {}
 	csvFiles = os.listdir(studyPath)
 	for cName in csvFiles:
 		if fileNameTest(cName) and cName.endswith('.csv'):
 			arr = csvToArray(studyPath + '/' + cName)
-			data[cName] = seriesTranspose(arr)
+			data[cName] = _seriesTranspose(arr)
 	return data
 
 def _tests():
