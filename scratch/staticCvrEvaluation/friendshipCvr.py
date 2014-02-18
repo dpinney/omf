@@ -12,14 +12,9 @@ from matplotlib import pyplot as plt
 
 
 ''' Basic operations that somehow didn't make it into the standard library. '''
-def avg(inList):
-	''' Average a list. '''
-	return sum(inList)/len(inList)
-
 def roundSig(x, sig=3):
     ''' Round a float to a given number of sig figs. '''
     return round(x, sig-int(math.floor(math.log10(x)))-1)
-
 
 # This conversion of the friendship feeder takes, a couple minutes, so only do it if necessary.
 def convertForCvr(stdPath, seqPath, outFilePath):
@@ -48,7 +43,7 @@ monthToOrd = {'January':1, 'February':2, 'March':3, 'April':4, 'May':5, 'June':6
     'September':9, 'October':10, 'November':11, 'December':12 }
 
 # MonthName -> Season mapping:
-monthToSeas = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
+monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
                'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
                'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
 
@@ -69,9 +64,10 @@ def mapOnPower(monthName, inFun):
 	return inFun([float(row['power']) for row in monthData])
 
 # All monthly SCADA data:
+avg = lambda x:sum(x)/len(x)
 monthData = [{'monthId':monthToOrd[m],
               'monthName':m,
-              'season':monthToSeas[m],
+              'season':monthToSeason[m],
               'histPeak':roundSig(mapOnPower(m,max)*1000),
               'histAverage':roundSig(mapOnPower(m,avg)*1000)} for m in sorted(monthToOrd, key=monthToOrd.get)]
 # Print it compactly along with PMR sanity test:
@@ -373,4 +369,5 @@ plt.bar(ticks,d3,color='blue',yerr=d2)
 plt.xticks([t+0.5 for t in ticks],indices)
 plt.ylabel('Utility Savings ($)')
 
+# Show all the results.
 plt.show()
