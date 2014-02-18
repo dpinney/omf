@@ -1,4 +1,5 @@
-''' Import all the Windmil feeders we have, run them through Gridlab, then volt-graph the results.'''
+''' THESE HAVE BEEN INTEGRATED INTO /omf/milToGridlab.py. 
+Import all the Windmil feeders we have, run them through Gridlab, then volt-graph the results.'''
 
 import sys
 sys.path.append('../..')
