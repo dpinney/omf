@@ -55,16 +55,19 @@ class LocalWorker:
 		runThread = Thread(name=analysisObject.name, target=self.runInBackground, args=[analysisObject, store])
 		self.jobRecorder[time.time()] = runThread
 		runThread.start()
+
+	def _studyInstance(self, studyName, anaObject):
+		studyData = store.get('Study', anaObject.name + '---' + studyName)
+		studyData.update({'name':studyName,'analysisName':anaObject.name})
+		moduleRef = getattr(studies, studyData['studyType'])
+		classRef = getattr(moduleRef, studyData['studyType'].capitalize())
+		return classRef(studyData)
+
 	def runInBackground(self, anaObject, store):
 		# Setup.
 		self.runningJobCount.increment()
-		def studyInstance(studyName):
-			studyData = store.get('Study', anaObject.name + '---' + studyName)
-			studyData.update({'name':studyName,'analysisName':anaObject.name})
-			moduleRef = getattr(studies, studyData['studyType'])
-			classRef = getattr(moduleRef, studyData['studyType'].capitalize())
-			return classRef(studyData)
-		studyList = [studyInstance(studyName) for studyName in anaObject.studyNames]
+
+		studyList = [self._studyInstance(studyName, anaObject) for studyName in anaObject.studyNames]
 		# Run.
 		anaObject.run(studyList)
 		# Storing result.
@@ -87,21 +90,23 @@ class LocalWorker:
 			newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
 		store.put('Feeder', feederName, newFeeder)
 		store.delete('Conversion', feederName)
+
+	def _killingInTheName(self, anaName):
+		try: 
+			for runDir in os.listdir('running'):
+				if runDir.startswith(anaName + '---'):
+					with open('running/' + runDir + '/PID.txt','r') as pidFile:
+						os.kill(int(pidFile.read()), 15)
+						print 'Terminated', anaName
+						return True
+		except:
+			print 'Missed attempt to terminate', anaName
+			return False
+
 	def terminate(self, anaName):
-		def killingInTheName(anaName):
-			try: 
-				for runDir in os.listdir('running'):
-					if runDir.startswith(anaName + '---'):
-						with open('running/' + runDir + '/PID.txt','r') as pidFile:
-							os.kill(int(pidFile.read()), 15)
-							print 'Terminated', anaName
-							return True
-			except:
-				print 'Missed attempt to terminate', anaName
-				return False
 		# Try to kill three times.
 		for attempt in range(3):
-			if killingInTheName(anaName): break
+			if self._killingInTheName(anaName): break
 			time.sleep(2)
 	def status(self):
 		return [[key,self.jobRecorder[key].name,self.jobRecorder[key].is_alive()] for key in self.jobRecorder]
@@ -141,50 +146,57 @@ class ClusterWorker:
 		m.set_body(feederName)
 		status = self.importQueue.write(m)
 		return status
+
+	def _popJob(self, queueObject):
+		mList = queueObject.get_messages(1)
+		if len(mList) == 1:
+			anaName = mList[0].get_body()
+			queueObject.delete_message(mList[0])
+			return anaName
+		else:
+			return False		
+
+	def _peakJob(self, queueObject):
+		mList = queueObject.get_messages(1)
+		if len(mList) == 1:
+			return mList[0]
+		else:
+			return False
+
+	def _endlessLoop(self, daemonWorker, jobQueue, importQueue, terminateQueue):
+		if daemonWorker.runningJobCount.value() < JOB_LIMIT:
+			anaName = self._popJob(jobQueue)
+			if anaName != False:
+				print 'Daemon running', anaName
+				thisAnalysis = analysis.Analysis(store.get('Analysis', anaName))
+				daemonWorker.run(thisAnalysis, store)
+		if daemonWorker.runningJobCount.value() < JOB_LIMIT:
+			feederName = self._popJob(importQueue)
+			if feederName != False:
+				print 'Daemon importing', feederName
+				convo = store.get('Conversion', feederName)
+				daemonWorker.milImport(store, feederName, convo['stdString'], convo['seqString'])
+		if daemonWorker.runningJobCount.value() > 0:
+			termMessage = self._peakJob(terminateQueue)
+			if termMessage != False:				
+				runningAnas = [stat[1] for stat in daemonWorker.status() if stat[2]==True]
+				anaName = termMessage.get_body()
+				if anaName in runningAnas:
+					print 'Daemon attempting to terminate', anaName
+					daemonWorker.terminate(anaName)
+					terminateQueue.delete_message(termMessage)
+		# Check again in 1 second:
+		Timer(1, endlessLoop).start()			
+
 	def __monitorClusterQueue__(self, passKey, store, daemonWorker):
 		print 'Entering Daemon Mode.'
 		conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', passKey)
 		jobQueue = conn.get_queue('crnOmfJobQueue')
 		importQueue = conn.get_queue('crnOmfImportQueue')
 		terminateQueue = conn.get_queue('crnOmfTerminateQueue')
-		def popJob(queueObject):
-			mList = queueObject.get_messages(1)
-			if len(mList) == 1:
-				anaName = mList[0].get_body()
-				queueObject.delete_message(mList[0])
-				return anaName
-			else:
-				return False
-		def peakJob(queueObject):
-			mList = queueObject.get_messages(1)
-			if len(mList) == 1:
-				return mList[0]
-			else:
-				return False
-		def endlessLoop():
-			if daemonWorker.runningJobCount.value() < JOB_LIMIT:
-				anaName = popJob(jobQueue)
-				if anaName != False:
-					print 'Daemon running', anaName
-					thisAnalysis = analysis.Analysis(store.get('Analysis', anaName))
-					daemonWorker.run(thisAnalysis, store)
-			if daemonWorker.runningJobCount.value() < JOB_LIMIT:
-				feederName = popJob(importQueue)
-				if feederName != False:
-					print 'Daemon importing', feederName
-					convo = store.get('Conversion', feederName)
-					daemonWorker.milImport(store, feederName, convo['stdString'], convo['seqString'])
-			if daemonWorker.runningJobCount.value() > 0:
-				termMessage = peakJob(terminateQueue)
-				if termMessage != False:				
-					runningAnas = [stat[1] for stat in daemonWorker.status() if stat[2]==True]
-					anaName = termMessage.get_body()
-					if anaName in runningAnas:
-						print 'Daemon attempting to terminate', anaName
-						daemonWorker.terminate(anaName)
-						terminateQueue.delete_message(termMessage)
-			# Check again in 1 second:
-			Timer(1, endlessLoop).start()
-		endlessLoop()
+
+		# Putting this in a separate function might be unnecessary
+		self._endlessLoop(daemonWorker, jobQueue, importQueue, terminateQueue)
+
 	def status(self):
 		return self.daemonWorker.status()
