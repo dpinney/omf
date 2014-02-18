@@ -70,8 +70,7 @@ class Gridlabd:
 		stamps = cleanOut.get('timeStamps',[])
 		level = self.simLengthUnits
 
-		def avg(x):
-			return sum(x)/len(x)
+		avg = lambda x: sum(x)/len(x)
 		# Climate
 		for key in rawOut:
 			if key.startswith('Climate_') and key.endswith('.csv'):
