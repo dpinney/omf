@@ -43,12 +43,12 @@ def _tests():
 
 # Debug function to count up the meters and such and figure out whether we're lat/lon coding them correctly.
 def latCount(name):
-	nameCount, latCount = (0,0)
+	nameCount, myLatCount = (0,0)
 	for key in outGlm:
 		if outGlm[key].get('object','')==name:
 			nameCount += 1
 			if 'latitude' in outGlm[key]:
-				latCount += 1
+				myLatCount += 1
 	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
 if __name__ == "__main__":
