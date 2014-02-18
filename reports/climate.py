@@ -44,7 +44,9 @@ def outputHtml(analysisObject, studyList):
 	# Write the results.
 	return template.render(outputList=outputList, title=title)
 
-if __name__ == '__main__':
+def _tests():
 	# tests go here.
-	os.chdir('..')
-	outputHtml('SolarTrio')
+	pass
+
+if __name__ == "__main__":
+	_tests()

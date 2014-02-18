@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import datetime, copy, os, re, warnings, networkx as nx
+import datetime, copy, os, re, warnings, networkx as nx, json
 from matplotlib import pyplot as plt
 
 def tokenizeGlm(glmFileName):
@@ -394,45 +394,53 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 								font_weight='bold',
 								font_size=0.25)
 
-def _tests():
-	# Graph Test
-	import json
-	with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
-		tree = json.load(inJ)['tree']
-	nxG = treeToNxGraph(tree)
-	x = latLonNxGraph(nxG)
-	plt.show()
+def _testImportTree(feederName):
+	with open('data/Feeder/'+feederName+'.json','r') as inJ:
+		return json.load(inJ)['tree']
 
+def _tests():
 	# Parser Test
 	tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';','object','ZIPload','{','inductance','bigind',';','power','newpower','}','size','234sqft','}']
-	simpleTokens = tokenizeGlm('./feeders/13 Node Ref Feeder Flat/main.glm')
-	print parseTokenList(simpleTokens)
+	obType = type(parseTokenList(tokens))
+	print 'Parsed tokens into object of type:', obType
+	assert obType is dict
 
 	# Recorder Attachment Test
-	with open('data/Feeder/public_Olin Barre Geo.json','r') as inJ:
-		tree = json.load(inJ)['tree']
+	tree = _testImportTree('public_Olin Barre Geo')
 	attachRecorders(tree, 'Regulator', 'object', 'regulator')
 	attachRecorders(tree, 'Voltage', 'object', 'node')
-	print 'All the objects: ' + str([tree[x]['object'] for x in tree.keys() if 'object' in tree[x]])
+	print 'All the objects after recorder attach: ', set([ob.get('object','') for ob in tree.values()])
 
 	# Testing The De-Embedding
-	from pprint import pprint
-	tree = parse('./feeders/13 Node Reference Feeder/main.glm')
+	tree = _testImportTree('public_13 Node Embedded DO NOT SAVE')
 	fullyDeEmbed(tree)
-	#pprint(tree)
-	print sortedWrite(tree)
+	embeddedDicts = 0
+	for ob in tree.values():
+		for subOb in ob.values():
+			if type(subOb) == 'dict':
+				embeddedDicts += 1
+	print 'Number of objects still embedded:', embeddedDicts
+	assert embeddedDicts == 0, 'Some objects failed to disembed.'
 
 	# groupSwingKids test
-	from pprint import pprint
-	tree = parse('./feeders/13 Node Ref Feeder Flat/main.glm')
+	tree = _testImportTree('public_13 Node Ref Feeder Flat')
 	groupSwingKids(tree)
-	pprint(tree)
+	for ob in tree.values():
+		if ob.get('object','') == 'collector':
+			print 'Swing collector:', ob
 
 	# Time Adjustment Test
-	tree = parse('./feeders/Simple Market System/main.glm')
+	test = _testImportTree('public_Simple Market System')
 	adjustTime(tree, 100, 'hours', '2000-09-01')
-	from pprint import pprint
-	pprint(tree)
+	for ob in tree.values():
+		if ob.get('object','') in ['recorder','collector']:
+			print 'Time-adjusted collector:', ob 
+
+	# Graph Test
+	tree = _testImportTree('public_Olin Barre Geo')
+	nxG = treeToNxGraph(tree)
+	x = latLonNxGraph(nxG)
+	# plt.show()
 
 if __name__ == '__main__':
 	_tests()

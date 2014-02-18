@@ -191,13 +191,18 @@ class Gridlabd:
 		self.outputJson = cleanOut
 		return True
 
-
-if __name__ == '__main__':
+def _tests():
 	import storage
+	import json
 	store = storage.Filestore('data')
 	# Pull in a study.
-	testStudy = Gridlabd('IndySolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---IndySolar'), store.get('Study','zSolar Trio---IndySolar'))
+	# testStudy = Gridlabd('IndySolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---IndySolar'), store.get('Study','zSolar Trio---IndySolar'))
+	testStudy = Gridlabd(json.load(open("data/Study/public_zSolar Trio---IndySolar.json")))
+
 	print testStudy.name, dir(testStudy)
 	# Run the study.
 	testStudy.run()
 	print testStudy.outputJson.keys()
+
+if __name__ == '__main__':
+	_tests()

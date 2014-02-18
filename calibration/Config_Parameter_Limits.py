@@ -110,8 +110,8 @@ def addHeatDegreesLIM (x):
 		return 1
 	else:
 		return 0
-		
-if __name__ ==  '__main__':
+
+def _tests():
 	print(__doc__)
 	print("Average House (VA) in ["+str(res_low)+","+str(res_high)+"].")
 	print("Average Commercial (VA) in ["+str(com_low)+","+str(com_high)+"].")
@@ -123,3 +123,6 @@ if __name__ ==  '__main__':
 	print("Heating and Cooling set point offsets in ["+str(-offset_band)+","+str(offset_band)+"].")
 	print("Window wall ratio in ["+str(window_wall_low)+","+str(window_wall_high)+"].")
 	print("Residential schedule skew (seconds) in ["+str(-schedskewband)+","+str(schedskewband)+"].")
+		
+if __name__ ==  '__main__':
+	_tests()

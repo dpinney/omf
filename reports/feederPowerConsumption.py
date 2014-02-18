@@ -57,8 +57,11 @@ def outputHtml(analysisObject, studyList):
 	# Write the results.
 	return template.render(powGraphParams=json.dumps(powGraphParams), energyGraphParams=json.dumps(energyGraphParams))
 
-if __name__ == '__main__':
+def _tests():
 	# Tests go here!
 	os.chdir('..')
 	os.listdir('.')
 	print outputHtml('Loss Test')
+
+if __name__ == '__main__':
+	_tests()
