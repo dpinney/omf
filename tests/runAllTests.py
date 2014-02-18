@@ -20,7 +20,7 @@ IGNORE_DIRS = [
 # milToGridlab.py, for example, usually does not fail, but running its tests
 # takes a long time.
 IGNORE_FILES = [
-    "milToGridlab.py", 
+    # "milToGridlab.py", 
 ]
 
 def runAllTests(startingdir):
