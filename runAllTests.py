@@ -13,14 +13,14 @@ IGNORE_DIRS = [
     "tests",
     "uploads",
     "venv",
+    "scratch"
     ]
 
 # Useful for debugging this script (runAllTests.py) specifically.
 # milToGridlab.py, for example, usually does not fail, but running its tests
 # takes a long time.
 IGNORE_FILES = [
-    # "milToGridlab.py", 
-
+    #"milToGridlab.py", 
     # runAllTests.py will try to run itself in an infinite loop
     # because the file contains the string "def _tests():"
     "runAllTests.py",
