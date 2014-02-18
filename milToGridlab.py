@@ -1304,13 +1304,62 @@ def convert(stdPath,seqPath):
 
 	return glmTree, x_scale, y_scale
 
-def _tests():
-	from pprint import pprint
-	for stdPath, seqPath in [('INEC-RENOIR.std','INEC.seq'),('Olin-Barre.std','Olin.seq'), ('ABEC-Frank.std','ABEC.seq')]:
-		with open('./uploads/' + stdPath,'r') as stdFile, open('./uploads/' + seqPath,'r') as seqFile:
-			outGlm = convert(stdFile.read(),seqFile.read())
-		print 'And here is the GLM:'
-		pprint(outGlm)
 
-if __name__ == '__main__':
+def _latCount(name):
+	''' Debug function to count up the meters and such and figure out whether we're lat/lon coding them correctly. '''
+	nameCount, myLatCount = (0,0)
+	for key in outGlm:
+		if outGlm[key].get('object','')==name:
+			nameCount += 1
+			if 'latitude' in outGlm[key]:
+				myLatCount += 1
+	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
+
+def _tests(keepFiles=False):
+	''' Test convert every windmil feeder we have (in uploads). Retun number of exceptions we hit. '''
+	import os, json, traceback, shutil
+	from solvers import gridlabd
+	from matplotlib import pyplot as plt
+	openPrefix = './uploads/'
+	outPrefix = './running/milToGridlabTests/'
+	os.mkdir(outPrefix)
+	exceptionCount = 0
+	testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
+		('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
+		('ABEC-Frank.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq')]
+	for stdPath, seqPath in testFiles:
+		try:
+			# Convert the std+seq.
+			with open(openPrefix + stdPath,'r') as stdFile, open(openPrefix + seqPath,'r') as seqFile:
+				outGlm,x,y = convert(stdFile.read(),seqFile.read())
+			with open(outPrefix + stdPath.replace('.std','.glm'),'w') as outFile:
+				outFile.write(feeder.sortedWrite(outGlm))
+			print 'WROTE GLM FOR', stdPath
+			try:
+				# Draw the GLM.
+				myGraph = feeder.treeToNxGraph(outGlm)
+				feeder.latLonNxGraph(myGraph, neatoLayout=False)
+				plt.savefig(outPrefix + stdPath.replace('.std','.png'))
+				print 'DREW GLM OF', stdPath
+			except:
+				exceptionCount += 1
+				print 'FAILED DRAWING', stdPath
+			try:
+				# Run powerflow on the GLM.
+				output = gridlabd.runInFilesystem(outGlm, keepFiles=False)
+				with open(outPrefix + stdPath.replace('.std','.json'),'w') as outFile:
+					json.dump(output, outFile, indent=4)
+				print 'RAN GRIDLAB ON', stdPath					
+			except:
+				exceptionCount += 1
+				print 'POWERFLOW FAILED', stdPath
+		except:
+			print 'FAILED CONVERTING', stdPath
+			exceptionCount += 1
+			traceback.print_exc()
+	if not keepFiles:
+		shutil.rmtree(outPrefix)
+	return exceptionCount
+
+if __name__ == "__main__":
 	_tests()
