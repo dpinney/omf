@@ -19,24 +19,28 @@ def tokenizeGlm(glmFileName):
 	basicList = filter(lambda x:x!='' and x!=' ', tokenized)
 	return basicList
 
+def _currentLeafAdd(key, value, tree, guidStack):
+	current = tree
+	for x in guidStack:
+		current = current[x]
+	current[key] = value
+
+def _listToString(listIn):
+	if len(listIn) == 0:
+		return ''
+	else:
+		return reduce(lambda x,y:str(x)+' '+str(y),listIn[1:-1])
+
 def parseTokenList(tokenList):
 	# Tree variables.
 	tree = {}
 	guid = 0
 	guidStack = []
 	# Helper function to add to the current leaf we're visiting.
-	def currentLeafAdd(key, value):
-		current = tree
-		for x in guidStack:
-			current = current[x]
-		current[key] = value
+
 	# Helper function to turn a list of strings into one string with some decent formatting.
 	# TODO: formatting could be nicer, i.e. remove the extra spaces this function puts in.
-	def listToString(listIn):
-		if len(listIn) == 0:
-			return ''
-		else:
-			return reduce(lambda x,y:str(x)+' '+str(y),listIn[1:-1])
+
 	# Pop off a full token, put it on the tree, rinse, repeat.
 	while tokenList != []:
 		# Pop, then keep going until we have a full token (i.e. 'object house', not just 'object')
@@ -47,14 +51,14 @@ def parseTokenList(tokenList):
 		if fullToken[-1] == ';':
 			# Special case when we have zero-attribute items (like #include, #set, module).
 			if guidStack == [] and fullToken != [';']:
-				tree[guid] = {'omftype':fullToken[0],'argument':listToString(fullToken)}
+				tree[guid] = {'omftype':fullToken[0],'argument':_listToString(fullToken)}
 				guid += 1
 			# We process if it isn't the empty token (';')
 			elif len(fullToken) > 1:
-				currentLeafAdd(fullToken[0],listToString(fullToken))
+				_currentLeafAdd(fullToken[0],_listToString(fullToken), tree, guidStack)
 		elif fullToken[-1] == '}':
 			if len(fullToken) > 1:
-				currentLeafAdd(fullToken[0],listToString(fullToken))
+				_currentLeafAdd(fullToken[0],_listToString(fullToken), tree, guidStack)
 			guidStack.pop()
 		elif fullToken[0] == 'schedule':
 			# Special code for those ugly schedule objects:
@@ -64,48 +68,50 @@ def parseTokenList(tokenList):
 				tree[guid] = {'object':'schedule','name':fullToken[1], 'cron':' '.join(fullToken[3:-2])}
 				guid += 1
 		elif fullToken[-1] == '{':
-			currentLeafAdd(guid,{})
+			_currentLeafAdd(guid,{}, tree, guidStack)
 			guidStack.append(guid)
 			guid += 1
 			# Wrapping this currentLeafAdd is defensive coding so we don't crash on malformed glms.
 			if len(fullToken) > 1:
 				# Do we have a clock/object or else an embedded configuration object?
 				if len(fullToken) < 4:
-					currentLeafAdd(fullToken[0],fullToken[-2])
+					_currentLeafAdd(fullToken[0],fullToken[-2], tree, guidStack)
 				else:
-					currentLeafAdd('omfEmbeddedConfigObject', fullToken[0] + ' ' + listToString(fullToken))
+					_currentLeafAdd('omfEmbeddedConfigObject', fullToken[0] + ' ' + _listToString(fullToken), tree, guidStack)
 	return tree
 
 def parse(glmFileName):
 	tokens = tokenizeGlm(glmFileName)
 	return parseTokenList(tokens)
 
+def _gatherKeyValues(inDict, keyToAvoid):
+	otherKeyValues = ''
+	for key in inDict:
+		if type(key) is int:
+			# WARNING: RECURSION HERE
+			# TODO (cosmetic): know our depth, and indent the output so it's more human readable.
+			otherKeyValues += dictToString(inDict[key])
+		elif key != keyToAvoid:
+			if key == 'comment':
+				otherKeyValues += (inDict[key] + '\n')
+			elif key == 'name' or key == 'parent':
+				if len(inDict[key]) <= 62:
+					otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
+				else:
+					warnings.warn("{:s} argument is longer that 64 characters. Truncating.".format(key), RuntimeWarning)
+					otherKeyValues += ('\t' + key + ' ' + inDict[key][0:62] + '; // truncated from {:s}\n'.format(inDict[key]))
+			else:
+				otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
+	return otherKeyValues
+
 def dictToString(inDict):
 	# Helper function: given a single dict, concatenate it into a string.
-	def gatherKeyValues(inDict, keyToAvoid):
-		otherKeyValues = ''
-		for key in inDict:
-			if type(key) is int:
-				# WARNING: RECURSION HERE
-				# TODO (cosmetic): know our depth, and indent the output so it's more human readable.
-				otherKeyValues += dictToString(inDict[key])
-			elif key != keyToAvoid:
-				if key == 'comment':
-					otherKeyValues += (inDict[key] + '\n')
-				elif key == 'name' or key == 'parent':
-					if len(inDict[key]) <= 62:
-						otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
-					else:
-						warnings.warn("{:s} argument is longer that 64 characters. Truncating.".format(key), RuntimeWarning)
-						otherKeyValues += ('\t' + key + ' ' + inDict[key][0:62] + '; // truncated from {:s}\n'.format(inDict[key]))
-				else:
-					otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
-		return otherKeyValues
+
 	# Handle the different types of dictionaries that are leafs of the tree root:
 	if 'omftype' in inDict:
 		return inDict['omftype'] + ' ' + inDict['argument'] + ';'
 	elif 'module' in inDict:
-		return 'module ' + inDict['module'] + ' {\n' + gatherKeyValues(inDict, 'module') + '};\n'
+		return 'module ' + inDict['module'] + ' {\n' + _gatherKeyValues(inDict, 'module') + '};\n'
 	elif 'clock' in inDict:
 		#return 'clock {\n' + gatherKeyValues(inDict, 'clock') + '};\n'
 		# THis object has known property order issues writing it out explicitly
@@ -114,9 +120,9 @@ def dictToString(inDict):
 	elif 'object' in inDict and inDict['object'] == 'schedule':
 		return 'schedule ' + inDict['name'] + ' {\n' + inDict['cron'] + '\n};\n'
 	elif 'object' in inDict:
-		return 'object ' + inDict['object'] + ' {\n' + gatherKeyValues(inDict, 'object') + '};\n'
+		return 'object ' + inDict['object'] + ' {\n' + _gatherKeyValues(inDict, 'object') + '};\n'
 	elif 'omfEmbeddedConfigObject' in inDict:
-		return inDict['omfEmbeddedConfigObject'] + ' {\n' + gatherKeyValues(inDict, 'omfEmbeddedConfigObject') + '};\n'
+		return inDict['omfEmbeddedConfigObject'] + ' {\n' + _gatherKeyValues(inDict, 'omfEmbeddedConfigObject') + '};\n'
 	elif '#include' in inDict:
 		return '#include ' + '"' + inDict['#include'] + '"' + '\n'
 	elif '#define' in inDict:
@@ -184,61 +190,62 @@ def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 		elif 'argument' in leaf and leaf['argument'].startswith('minimum_timestep'):
 			leaf['argument'] = 'minimum_timestep=' + str(interval)
 
+def _deEmbedOnce(glmTree):
+	iterTree = copy.deepcopy(glmTree)
+	for x in iterTree:
+		for y in iterTree[x]:
+			if type(iterTree[x][y]) is dict and 'object' in iterTree[x][y]:
+				# set the parent and name attributes:
+				glmTree[x][y]['parent'] = glmTree[x]['name']
+				if 'name' in glmTree[x][y]:
+					pass
+				else:
+					glmTree[x][y]['name'] = glmTree[x]['name'] + glmTree[x][y]['object'] + str(y)
+					
+				# check for key collision, which should technically be impossible:
+				if y in glmTree.keys():
+					print('KEY COLLISION!')
+					z = y
+					while z in glmTree.keys():
+						z += 1
+					# put the embedded object back up in the glmTree:
+					glmTree[z] = glmTree[x][y]
+				else:
+					# put the embedded object back up in the glmTree:
+					glmTree[y] = glmTree[x][y]
+				# delete the embedded copy:
+				del glmTree[x][y]
+			# TODO: take this if case and roll it into the if case above to save lots of code and make it easier to read.
+			if type(iterTree[x][y]) is dict and 'omfEmbeddedConfigObject' in iterTree[x][y]:
+				configList = iterTree[x][y]['omfEmbeddedConfigObject'].split()
+				# set the name attribute and the parent's reference:
+				if 'name' in glmTree[x][y]:
+					pass
+				else:
+					glmTree[x][y]['name'] = glmTree[x]['name'] + configList[2] + str(y)
+				glmTree[x][y]['object'] = configList[2]
+				glmTree[x][configList[0]] = glmTree[x][y]['name']
+				# get rid of the omfEmbeddedConfigObject string:
+				del glmTree[x][y]['omfEmbeddedConfigObject']
+				# check for key collision, which should technically be impossible BECAUSE Y AND X ARE DIFFERENT INTEGERS IN [1,...,numberOfDicts]:
+				if y in glmTree.keys():
+					print('KEY COLLISION!')
+					z = y
+					while z in glmTree.keys():
+						z += 1
+					# put the embedded object back up in the glmTree:
+					glmTree[z] = glmTree[x][y]
+				else:
+					# put the embedded object back up in the glmTree:
+					glmTree[y] = glmTree[x][y]
+				# delete the embedded copy:
+				del glmTree[x][y]
+
 def fullyDeEmbed(glmTree):
-	def deEmbedOnce(glmTree):
-		iterTree = copy.deepcopy(glmTree)
-		for x in iterTree:
-			for y in iterTree[x]:
-				if type(iterTree[x][y]) is dict and 'object' in iterTree[x][y]:
-					# set the parent and name attributes:
-					glmTree[x][y]['parent'] = glmTree[x]['name']
-					if 'name' in glmTree[x][y]:
-						pass
-					else:
-						glmTree[x][y]['name'] = glmTree[x]['name'] + glmTree[x][y]['object'] + str(y)
-						
-					# check for key collision, which should technically be impossible:
-					if y in glmTree.keys():
-						print('KEY COLLISION!')
-						z = y
-						while z in glmTree.keys():
-							z += 1
-						# put the embedded object back up in the glmTree:
-						glmTree[z] = glmTree[x][y]
-					else:
-						# put the embedded object back up in the glmTree:
-						glmTree[y] = glmTree[x][y]
-					# delete the embedded copy:
-					del glmTree[x][y]
-				# TODO: take this if case and roll it into the if case above to save lots of code and make it easier to read.
-				if type(iterTree[x][y]) is dict and 'omfEmbeddedConfigObject' in iterTree[x][y]:
-					configList = iterTree[x][y]['omfEmbeddedConfigObject'].split()
-					# set the name attribute and the parent's reference:
-					if 'name' in glmTree[x][y]:
-						pass
-					else:
-						glmTree[x][y]['name'] = glmTree[x]['name'] + configList[2] + str(y)
-					glmTree[x][y]['object'] = configList[2]
-					glmTree[x][configList[0]] = glmTree[x][y]['name']
-					# get rid of the omfEmbeddedConfigObject string:
-					del glmTree[x][y]['omfEmbeddedConfigObject']
-					# check for key collision, which should technically be impossible BECAUSE Y AND X ARE DIFFERENT INTEGERS IN [1,...,numberOfDicts]:
-					if y in glmTree.keys():
-						print('KEY COLLISION!')
-						z = y
-						while z in glmTree.keys():
-							z += 1
-						# put the embedded object back up in the glmTree:
-						glmTree[z] = glmTree[x][y]
-					else:
-						# put the embedded object back up in the glmTree:
-						glmTree[y] = glmTree[x][y]
-					# delete the embedded copy:
-					del glmTree[x][y]
 	lenDiff = 1
 	while lenDiff != 0:
 		currLen = len(glmTree)
-		deEmbedOnce(glmTree)
+		_deEmbedOnce(glmTree)
 		lenDiff = len(glmTree) - currLen
 
 def attachRecorders(tree, recorderType, keyToJoin, valueToJoin, sample=False):
