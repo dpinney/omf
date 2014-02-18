@@ -43,6 +43,12 @@ class Gridlabd:
 			feeder.adjustTime(tree=tree, simLength=self.simLength, simLengthUnits=str(self.simLengthUnits), simStartDate=self.simStartDate)
 
 	# WARNING! Run does not care about performance and will happily run for a long, long time. Spawn a thread or process for this nonsense.
+	def _agg(self, series, func, level):
+		if level in ['days','months']:
+			return util.aggSeries(stamps, series, func, level)
+		else:
+			return series	
+
 	def run(self):
 		# Execute the solver, the process output.
 		rawOut = solvers.gridlabd.run(self)
@@ -63,29 +69,25 @@ class Gridlabd:
 		# Day/Month Aggregation Setup:
 		stamps = cleanOut.get('timeStamps',[])
 		level = self.simLengthUnits
-		def agg(series, func):
-			if level in ['days','months']:
-				return util.aggSeries(stamps, series, func, level)
-			else:
-				return series
+
 		def avg(x):
 			return sum(x)/len(x)
 		# Climate
 		for key in rawOut:
 			if key.startswith('Climate_') and key.endswith('.csv'):
 				cleanOut['climate'] = {}
-				cleanOut['climate']['Rain Fall (in/h)'] = agg(rawOut[key].get('rainfall'), sum)
-				cleanOut['climate']['Wind Speed (m/s)'] = agg(rawOut[key].get('wind_speed'), avg)
-				cleanOut['climate']['Temperature (F)'] = agg(rawOut[key].get('temperature'), max)
-				cleanOut['climate']['Snow Depth (in)'] = agg(rawOut[key].get('snowdepth'), max)
-				cleanOut['climate']['Direct Insolation (W/m^2)'] = agg(rawOut[key].get('solar_direct'), sum)
+				cleanOut['climate']['Rain Fall (in/h)'] = self._agg(rawOut[key].get('rainfall'), sum, level)
+				cleanOut['climate']['Wind Speed (m/s)'] = self._agg(rawOut[key].get('wind_speed'), avg, level)
+				cleanOut['climate']['Temperature (F)'] = self._agg(rawOut[key].get('temperature'), max, level)
+				cleanOut['climate']['Snow Depth (in)'] = self._agg(rawOut[key].get('snowdepth'), max, level)
+				cleanOut['climate']['Direct Insolation (W/m^2)'] = self._agg(rawOut[key].get('solar_direct'), sum, level)
 		# Voltage Band
 		if 'VoltageJiggle.csv' in rawOut:
 			cleanOut['allMeterVoltages'] = {}
-			cleanOut['allMeterVoltages']['Min'] = agg(rawOut['VoltageJiggle.csv']['min(voltage_12.mag)'], min)
-			cleanOut['allMeterVoltages']['Mean'] = agg(rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)'], avg)
-			cleanOut['allMeterVoltages']['StdDev'] = agg(rawOut['VoltageJiggle.csv']['std(voltage_12.mag)'], avg)
-			cleanOut['allMeterVoltages']['Max'] = agg(rawOut['VoltageJiggle.csv']['max(voltage_12.mag)'], max)
+			cleanOut['allMeterVoltages']['Min'] = self._agg(rawOut['VoltageJiggle.csv']['min(voltage_12.mag)'], min, level)
+			cleanOut['allMeterVoltages']['Mean'] = self._agg(rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)'], avg, level)
+			cleanOut['allMeterVoltages']['StdDev'] = self._agg(rawOut['VoltageJiggle.csv']['std(voltage_12.mag)'], avg, level)
+			cleanOut['allMeterVoltages']['Max'] = self._agg(rawOut['VoltageJiggle.csv']['max(voltage_12.mag)'], max, level)
 		# Capacitor Activation
 		for key in rawOut:
 			if key.startswith('Capacitor_') and key.endswith('.csv'):
@@ -95,7 +97,7 @@ class Gridlabd:
 				cleanOut['Capacitors'][capName] = {}
 				for switchKey in rawOut[key]:
 					if switchKey != '# timestamp':
-						cleanOut['Capacitors'][capName][switchKey] = agg(rawOut[key][switchKey], avg)
+						cleanOut['Capacitors'][capName][switchKey] = self._agg(rawOut[key][switchKey], avg, level)
 		# Study Details
 		glmTree = rawOut['glmTree']
 		names = [glmTree[x]['name'] for x in glmTree if 'name' in glmTree[x]]
@@ -106,32 +108,32 @@ class Gridlabd:
 				if 'Regulators' not in cleanOut: cleanOut['Regulators'] = {}
 				regName = key[10:-4]
 				cleanOut['Regulators'][regName] = {}
-				cleanOut['Regulators'][regName]['Tap A Position'] = agg(rawOut[key]['tap_A'], avg)
-				cleanOut['Regulators'][regName]['Tap B Position'] = agg(rawOut[key]['tap_B'], avg)
-				cleanOut['Regulators'][regName]['Tap C Position'] = agg(rawOut[key]['tap_C'], avg)
+				cleanOut['Regulators'][regName]['Tap A Position'] = self._agg(rawOut[key]['tap_A'], avg, level)
+				cleanOut['Regulators'][regName]['Tap B Position'] = self._agg(rawOut[key]['tap_B'], avg, level)
+				cleanOut['Regulators'][regName]['Tap C Position'] = self._agg(rawOut[key]['tap_C'], avg, level)
 				realA = rawOut[key]['power_in_A.real']
 				realB = rawOut[key]['power_in_B.real']
 				realC = rawOut[key]['power_in_C.real']
 				imagA = rawOut[key]['power_in_A.imag']
 				imagB = rawOut[key]['power_in_B.imag']
 				imagC = rawOut[key]['power_in_C.imag']
-				cleanOut['Regulators'][regName]['Power Factor'] = agg(util.threePhasePowFac(realA,realB,realC,imagA,imagB,imagC), avg)
-				cleanOut['Regulators'][regName]['Tap A App Power'] = agg(util.vecPyth(realA,imagA), avg)
-				cleanOut['Regulators'][regName]['Tap B App Power'] = agg(util.vecPyth(realB,imagB), avg)
-				cleanOut['Regulators'][regName]['Tap C App Power'] = agg(util.vecPyth(realC,imagC), avg)
+				cleanOut['Regulators'][regName]['Power Factor'] = self._agg(util.threePhasePowFac(realA,realB,realC,imagA,imagB,imagC), avg, level)
+				cleanOut['Regulators'][regName]['Tap A App Power'] = self._agg(util.vecPyth(realA,imagA), avg, level)
+				cleanOut['Regulators'][regName]['Tap B App Power'] = self._agg(util.vecPyth(realB,imagB), avg, level)
+				cleanOut['Regulators'][regName]['Tap C App Power'] = self._agg(util.vecPyth(realC,imagC), avg, level)
 		# Meter Powerflow
 		for key in rawOut:
 			if key.startswith('meterRecorder_') and key.endswith('.csv'):
 				if 'Meters' not in cleanOut: cleanOut['Meters'] = {}
 				meterName = key[14:-4]
 				cleanOut['Meters'][meterName] = {}
-				cleanOut['Meters'][meterName]['Voltage (V)'] = agg(util.vecPyth(rawOut[key]['voltage_12.real'],rawOut[key]['voltage_12.imag']), avg)
-				cleanOut['Meters'][meterName]['Load (kW)'] = agg(rawOut[key]['measured_power'], avg)
+				cleanOut['Meters'][meterName]['Voltage (V)'] = self._agg(util.vecPyth(rawOut[key]['voltage_12.real'],rawOut[key]['voltage_12.imag']), avg, level)
+				cleanOut['Meters'][meterName]['Load (kW)'] = self._agg(rawOut[key]['measured_power'], avg, level)
 		# Power Consumption
 		cleanOut['Consumption'] = {}
 		for key in rawOut:
 			if key.startswith('SwingKids_') and key.endswith('.csv'):
-				oneSwingPower = agg(util.vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), avg)
+				oneSwingPower = self._agg(util.vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), avg, level)
 				if 'Power' not in cleanOut['Consumption']:
 					cleanOut['Consumption']['Power'] = oneSwingPower
 				else:
@@ -143,7 +145,7 @@ class Gridlabd:
 				imagA = rawOut[key]['power_A.imag']
 				imagB = rawOut[key]['power_B.imag']
 				imagC = rawOut[key]['power_C.imag']
-				oneDgPower = agg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), avg)
+				oneDgPower = self._agg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), avg, level)
 				if 'DG' not in cleanOut['Consumption']:
 					cleanOut['Consumption']['DG'] = oneDgPower
 				else:
@@ -164,7 +166,7 @@ class Gridlabd:
 				powerA = util.vecProd(util.vecPyth(vrA,viA),util.vecPyth(crA,ciA))
 				powerB = util.vecProd(util.vecPyth(vrB,viB),util.vecPyth(crB,ciB))
 				powerC = util.vecProd(util.vecPyth(vrC,viC),util.vecPyth(crC,ciC))
-				oneDgPower = agg(util.vecSum(powerA,powerB,powerC), avg)
+				oneDgPower = self._agg(util.vecSum(powerA,powerB,powerC), avg, level)
 				if 'DG' not in cleanOut['Consumption']:
 					cleanOut['Consumption']['DG'] = oneDgPower
 				else:
@@ -176,7 +178,7 @@ class Gridlabd:
 				imagB = rawOut[key]['sum(power_losses_B.imag)']
 				realC = rawOut[key]['sum(power_losses_C.real)']
 				imagC = rawOut[key]['sum(power_losses_C.imag)']
-				oneLoss = agg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), avg)
+				oneLoss = self._agg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), avg, level)
 				if 'Losses' not in cleanOut['Consumption']:
 					cleanOut['Consumption']['Losses'] = oneLoss
 				else:
