@@ -20,6 +20,9 @@ IGNORE_DIRS = [
 # takes a long time.
 IGNORE_FILES = [
     # "milToGridlab.py", 
+
+    # runAllTests.py will try to run itself in an infinite loop
+    # because the file contains the string "def _tests():"
     "runAllTests.py",
 ]
 
