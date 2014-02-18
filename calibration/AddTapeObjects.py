@@ -6,14 +6,16 @@ Created on Jun 7, 2013
 
 import TechnologyParameters
 
+def _unused_key(last_key, recorder_dict):
+    if last_key in recorder_dict.keys():
+        while last_key in recorder_dict.keys():
+            last_key += 1
+    
+    return last_key
+
 def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=0):
     # Check is last_key is already in glm dictionary
-    def unused_key(last_key):
-        if last_key in recorder_dict.keys():
-            while last_key in recorder_dict.keys():
-                last_key += 1
-        
-        return last_key
+
     
     use_flags = {}
     tech_data, use_flags = TechnologyParameters.TechnologyParametersFunc(case_flag, case_flag)
@@ -54,14 +56,14 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
             if recorder_dict[x]['object'] == 'waterheater':
                 have_waterheaters = 1
                         
-    last_key = unused_key(last_key)            
+    last_key = _unused_key(last_key, recorder_dict)
     # Determine whether we are using mySQL or tape
     if use_mysql == 1:
         recorder_dict[last_key] = {'module' : 'mysql'}
-        last_key = unused_key(last_key)
+        last_key = _unused_key(last_key, recorder_dict)
         
         recorder_dict[last_key] = {'object' : 'database'}
-        last_key = unused_key(last_key)
+        last_key = _unused_key(last_key, recorder_dict)
         
         # Add mysql recorder to swing bus for calibration purposes
         recorder_dict[last_key] = {'object' : 'mysql.recorder',
@@ -70,7 +72,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                    'property' : 'measured_real_power,measured_real_energy',
                                    'interval' : '300',
                                    'limit' : '11520'}
-        last_key = unused_key(last_key)
+        last_key = _unused_key(last_key, recorder_dict)
     
     if use_tape == 1:
         # Measure substation transformer output
@@ -80,7 +82,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                    'interval' : '{:d}'.format(tech_data['meas_interval']),
                                    'limit' : '{:d}'.format(tech_data['meas_limit']),
                                    'property' : 'power_out_A.real,power_out_A.imag,power_out_B.real,power_out_B.imag,power_out_C.real,power_out_C.imag,power_out.real,power_out.imag,power_losses_A.real,power_losses_A.imag,power_losses_B.real,power_losses_B.imag,power_losses_C.real,power_losses_C.imag'}
-        last_key = unused_key(last_key)
+        last_key = _unused_key(last_key, recorder_dict)
         
         # Measure Feeder Source Output
         if swing_node != None:
@@ -90,7 +92,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                        'interval' : '{:d}'.format(tech_data['meas_interval']),
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'measured_current_A.real,measured_current_A.imag,measured_current_B.real,measured_current_B.imag,measured_current_C.real,measured_current_C.imag,measured_voltage_A.real,measured_voltage_A.imag,measured_voltage_B.real,measured_voltage_B.imag,measured_voltage_C.real,measured_voltage_C.imag,measured_real_power,measured_reactive_power'}
-            last_key = unused_key(last_key)
+            last_key = _unused_key(last_key, recorder_dict)
         
         # Measure outside temperature
         if climate_name != None:
@@ -100,7 +102,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                        'interval' : '{:d}'.format(tech_data['meas_interval']),
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'temperature'}
-            last_key = unused_key(last_key)
+            last_key = _unused_key(last_key, recorder_dict)
         
         # Measure residential data
         if have_resp_zips == 1:
@@ -110,7 +112,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                        'interval' : '{:d}'.format(tech_data['meas_interval']),
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
-            last_key = unused_key(last_key)
+            last_key = _unused_key(last_key, recorder_dict)
             
         if have_unresp_zips == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
@@ -119,7 +121,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                        'interval' : '{:d}'.format(tech_data['meas_interval']),
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
-            last_key = unused_key(last_key)
+            last_key = _unused_key(last_key, recorder_dict)
             
         if have_waterheaters == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
@@ -128,7 +130,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                        'interval' : '{:d}'.format(tech_data['meas_interval']),
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(actual_load)'}
-            last_key = unused_key(last_key)
+            last_key = _unused_key(last_key, recorder_dict)
             
         if have_lights == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
@@ -137,7 +139,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                        'interval' : '{:d}'.format(tech_data['meas_interval']),
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
-            last_key = unused_key(last_key)
+            last_key = _unused_key(last_key, recorder_dict)
             
         if have_plugs == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
@@ -146,7 +148,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                        'interval' : '{:d}'.format(tech_data['meas_interval']),
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
-            last_key = unused_key(last_key)
+            last_key = _unused_key(last_key, recorder_dict)
             
         if have_gas_waterheaters == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
@@ -155,7 +157,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                        'interval' : '{:d}'.format(tech_data['meas_interval']),
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
-            last_key = unused_key(last_key)
+            last_key = _unused_key(last_key, recorder_dict)
             
         if have_occupancy == 1:
             recorder_dict[last_key] = {'object' : 'tape.collector',
@@ -164,7 +166,7 @@ def add_recorders(recorder_dict,case_flag,use_mysql,use_tape,FeederID, last_key=
                                        'interval' : '{:d}'.format(tech_data['meas_interval']),
                                        'limit' : '{:d}'.format(tech_data['meas_limit']),
                                        'property' : 'sum(base_power)'}
-            last_key = unused_key(last_key)
+            last_key = _unused_key(last_key, recorder_dict)
             
         return (recorder_dict, last_key)
             
