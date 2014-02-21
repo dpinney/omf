@@ -1316,13 +1316,16 @@ def _latCount(name):
 	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
 def _tests(keepFiles=False):
-	''' Test convert every windmil feeder we have (in uploads). Retun number of exceptions we hit. '''
+	''' Test convert every windmil feeder we have (in uploads). Return number of exceptions we hit. '''
 	import os, json, traceback, shutil
 	from solvers import gridlabd
 	from matplotlib import pyplot as plt
 	openPrefix = './uploads/'
 	outPrefix = './running/milToGridlabTests/'
-	os.mkdir(outPrefix)
+	try:
+		os.mkdir(outPrefix)
+	except:
+		pass # Directory already there.
 	exceptionCount = 0
 	testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
 		('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),

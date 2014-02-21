@@ -315,7 +315,7 @@ def groupSwingKids(tree):
 		tree[biggestKey] = insert
 		biggestKey += 1
 
-def phaseCount(phaseString):
+def _phaseCount(phaseString):
 	''' Return number of phases not including neutrals. '''
 	return sum([phaseString.lower().count(x) for x in ['a','b','c']])
 
@@ -330,7 +330,7 @@ def treeToNxGraph(inTree):
 				outGraph.node[item['name']]['type']=item['object']
 				outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
 			elif 'from' in item.keys():
-				myPhase = phaseCount(item.get('phases','AN'))
+				myPhase = _phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase})
 			elif item['name'] in outGraph:
 				# Edge already led to node's addition, so just set the attributes:
