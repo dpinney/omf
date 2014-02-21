@@ -58,7 +58,7 @@ def threePhasePowFac(ra,rb,rc,ia,ib,ic):
 
 def roundPosSig(y, sig):
 	return round(y, sig-int(math.floor(math.log10(y)))-1)
-	
+
 def roundSig(x, sig=3):
 	if x == 0: return 0
 	elif x < 0: return -1*_roundPosSig(-1*x, sig)
