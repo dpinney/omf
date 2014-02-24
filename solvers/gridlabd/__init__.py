@@ -1,12 +1,13 @@
 #!/usr/bin/env python
 
-if __name__ == '__main__':
-	# Setup for tests.
-	import os, sys
-	os.chdir('./../..')
-	sys.path.append(os.getcwd())
+import sys, os, subprocess, platform, re, datetime, shutil, traceback, math
 
-import sys, struct, subprocess, os, platform, re, feeder, datetime, shutil, traceback, math
+# Path magic.
+myDir = os.path.dirname(__file__)
+sys.path.append(os.path.dirname(os.path.dirname(myDir)))
+
+# OMF imports.
+import feeder
 
 def run(studyObject):
 	# Choose our platform:
@@ -166,12 +167,13 @@ def anaDataTree(studyPath, fileNameTest):
 	return data
 
 def _tests():
+	#TODO: fix the running directory.
 	# On the Python side, this test runs fine, but it gets fatal errors in gridlab because it is looking for a file called "climate.tmy2"
 	import json
 	# import storage, studies
 	# store = storage.Filestore('data')
 	# testStudy = studies.gridlabd.Gridlabd('NoSolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---NoSolar'), store.get('Study','zSolar Trio---NoSolar'))
-	with open("data\\Feeder\\public_Olin Barre.json") as feederFile:
+	with open("../../data/Feeder/public_Olin Barre.json") as feederFile:
 		feederJson = json.load(feederFile)
 	print "tree:", feederJson["tree"]
 	print "attachments:", feederJson["attachments"]
