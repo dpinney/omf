@@ -10,5 +10,4 @@ sys.path.append(myDir)
 __all__ = [x for x in os.listdir(myDir) if not x.startswith('__')]
 
 # Import of all the sub-modules:
-import gridlabd
-import nrelsam
+for name in __all__: exec('import ' + name)
