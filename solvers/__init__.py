@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import os, sys, imp
+import os, sys
 
 # Path magic.
 myDir = os.path.dirname(__file__)

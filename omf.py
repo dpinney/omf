@@ -128,7 +128,7 @@ def send_link(email, message, u={}):
 	u["registered"] = False
 	u["email"] = email
 	store.put("User", email, u)
-	outDict = c.send_email("david.pinney@nreca.coop",
+	outDict = c.send_email("david.pinney@omf.coop",
 						   "OMF Registration Link",
 						   message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
 						   [email])
