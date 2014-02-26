@@ -57,7 +57,7 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	#print("Calling TechnologyParameters.py\n")
 	tech_data,use_flags = TechnologyParameters.TechnologyParametersFunc(use_flags,case_flag)
 
-	#tmy = 'schedules\\\\SCADA_weather_ISW_gld.csv'
+	#tmy = 'schedules/SCADA_weather_ISW_gld.csv'
 	tmy = config_data['weather']
 
 	#find name of swingbus of static model dictionary
@@ -81,25 +81,25 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 
 	# Create dictionaries of preprocessor directives
 	if use_flags['use_homes'] != 0:
-		glmCaseDict[last_key] = {'#include' : 'schedules\\appliance_schedules.glm'}
+		glmCaseDict[last_key] = {'#include' : '../schedules/appliance_schedules.glm'}
 		last_key += 1
-		glmCaseDict[last_key] = {'#include' : 'schedules\\water_and_setpoint_schedule_v5.glm'}
+		glmCaseDict[last_key] = {'#include' : '../schedules/water_and_setpoint_schedule_v5.glm'}
 		last_key += 1
 
 	if use_flags['use_battery'] == 1 or use_flags['use_battery'] == 2:
-		glmCaseDict[last_key] = {'#include' : 'schedules\\battery_schedule.glm'}
+		glmCaseDict[last_key] = {'#include' : '../schedules/battery_schedule.glm'}
 		last_key += 1
 
 	if use_flags['use_commercial'] == 1:
-		glmCaseDict[last_key] = {'#include' : 'schedules\\commercial_schedules.glm'}
+		glmCaseDict[last_key] = {'#include' : '../schedules/commercial_schedules.glm'}
 		last_key += 1
 
 	if use_flags['use_market'] == 1 or use_flags['use_market'] == 2:
-		glmCaseDict[last_key] = {'#include' : 'schedules\\daily_elasticity_schedules.glm'}
+		glmCaseDict[last_key] = {'#include' : '../schedules/daily_elasticity_schedules.glm'}
 		last_key += 1
 
 	if use_flags['use_ts'] == 2 or use_flags['use_ts'] == 4:
-		glmCaseDict[last_key] = {'#include' : 'schedules\\thermal_storage_schedule_R{:d}.glm'.format(config_data['region'])}
+		glmCaseDict[last_key] = {'#include' : '../schedules/thermal_storage_schedule_R{:d}.glm'.format(config_data['region'])}
 		last_key += 1
 
 	glmCaseDict[last_key] = {'#define' : 'stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0'}
@@ -921,9 +921,9 @@ def main():
 						  'nominal_voltage' : '2400'}
 
 
-	baseGLM, last_key = GLD_Feeder(glm_object_dict,-1,'C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration')
+	baseGLM, last_key = GLD_Feeder(glm_object_dict,-1,'C:/Projects/NRECEA/OMF/omf_calibration_27/src/feeder_calibration_scripts/omf/calibration')
 	glm_string = feeder.sortedWrite(baseGLM)
-	file = open('C:\\Projects\\NRECEA\\OMF\\omf_calibration_27\\src\\feeder_calibration_scripts\\omf\\calibration\\four_node_loadshapes_test1.glm','w')
+	file = open('C:/Projects/NRECEA/OMF/omf_calibration_27/src/feeder_calibration_scripts/omf/calibration/four_node_loadshapes_test1.glm','w')
 	file.write(glm_string)
 	file.close()
 	print('success!')

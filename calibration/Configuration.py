@@ -23,8 +23,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 	else:
 		classID = classification
 		
-	working_directory = re.sub('\\\\','\\\\\\\\',wdir)
-	dir = working_directory+'\\\\schedules\\\\'
+	dir = wdir + '../schedules/'
 	data["directory"] = dir
 	
 	default_weather_by_region = { 	1:	['CA-San_francisco.tmy2', 	'PST+8PDT'],
@@ -44,7 +43,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		
 		# TODO: These variables should be filled in automatically, probably from 'make weather file' script. Within that function we should get the appropriate timestamp and region ID too. 
 		#data["weather"] = 'schedules\\\\SCADA_weather_ISW_gld.csv'
-		data["weather"] = 'schedules\\\\SCADA_weather_NC_gld_shifted.csv'
+		data["weather"] = '../schedules/SCADA_weather_NC_gld_shifted.csv'
 		data["timezone"] = 'PST+8PDT'
 		region = 4
 		
@@ -55,7 +54,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		
 		if "weather" not in data.keys() or not data["weather"]:
 			print ("Using default weather file for climate region "+str(region))
-			data["weather"] = 'schedules\\\\'+default_weather_by_region[region][0]
+			data["weather"] = '../schedules/'+default_weather_by_region[region][0]
 			data["timezone"] = default_weather_by_region[region][1]
 		elif "timezone" not in data.keys() or not data["timezone"]:
 			data["timezone"] = default_weather_by_region[region][1]
@@ -70,9 +69,9 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		data["nom_volt2"] = 14400 #was set to 480 for taxonomy feeders
 		#data["load_shape_norm"] = dir + "FRIENDSHIP_2012_normalized_loadshape.player"
 		data["load_shape_norm"] = dir + 'load_shape_player.player'
-		vA='schedules\\\\VA.player'
-		vB='schedules\\\\VB.player'
-		vC='schedules\\\\VC.player'
+		vA='../schedules/VA.player'
+		vB='../schedules/VB.player'
+		vC='../schedules/VC.player'
 		data["voltage_players"] = ['"{:s}"'.format(vA),'"{:s}"'.format(vB),'"{:s}"'.format(vC)]
 		
 		# Voltage Regulation

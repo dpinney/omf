@@ -586,7 +586,7 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 							
 	# Name and create batch file.
 	if os.name=='nt':
-		batch_file = dir + '\\calibration_batch_file.bat'
+		batch_file = dir + '/calibration_batch_file.bat'
 		gld_job_handler.create_batch_file(dir,batch_file)
 	else:
 		batch_file = ''

@@ -1,4 +1,4 @@
-# /home/afisher/projects/NRECA_OMF/OMF_source/omf/calibration/workingDir/Calib_ID0_Config_ID4.txt
+# C:\Users\dwp0\Dropbox\OMF\omf\calibration\workingDir\Calib_ID0_Config_ID4.txt
 all,15000,35000,0,2,2,0,0,0,0,2700,0.15,0,1.75
 # Determines how many houses to populate (bigger avg_house = less houses)
 avg_house,15000
