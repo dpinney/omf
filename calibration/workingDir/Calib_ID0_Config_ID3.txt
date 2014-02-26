@@ -1,0 +1,28 @@
+# /home/afisher/projects/NRECA_OMF/OMF_source/omf/calibration/workingDir/Calib_ID0_Config_ID3.txt
+all,15000,35000,0,2,2,0,0,0,0,2700,0.15,0,1.5
+# Determines how many houses to populate (bigger avg_house = less houses)
+avg_house,15000
+# Determines sizing of commercial loads (bigger avg_commercial = less houses)
+avg_comm,35000
+# Scale the responsive and unresponsive loads (percentage)
+base_load_scalar,0
+# cooling offset
+cooling_offset,2
+# heating offset
+heating_offset,2
+# COP high scalar
+COP_high_scalar,0
+# COP low scalar
+COP_low_scalar,0
+# variable to shift the residential schedule skew (seconds)
+res_skew_shift,0
+# decrease gas heating percentage
+decrease_gas,0
+# widen schedule skew
+sched_skew_std,2700
+# window wall ratio
+window_wall_ratio,0.15
+# additional set point degrees
+addtl_heat_degrees,0
+# normalized load shape scalar
+load_shape_scalar,1.5

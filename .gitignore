@@ -9,3 +9,4 @@ data/Study/*
 # But include a few example analyses:
 !analyses/public_z*
 S3KEY.*
+calibration/workingDir

@@ -19,7 +19,7 @@ def add_normalized_residential_ziploads(loadshape_dict, residenntial_dict, confi
 		#if tpload_parent != 'None':
 		#	loadshape_dict[last_key]['parent'] = tpload_parent
 		#else:
-		loadshape_dict[last_key]['parent'] = tpload_name
+		loadshape_dict[last_key]['parent'] = tpload_parent
 			
 		if bp > 0.0:         
 			loadshape_dict[last_key]['base_power_12'] = 'norm_feeder_loadshape.value*{:f}'.format(bp)
