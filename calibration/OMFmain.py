@@ -118,10 +118,16 @@ def OMFmain(milsoft, feeder_info, scada, case_flag, feeder_config, calibration_c
 			pass
 		
 def main():
-	# test run with pre-made dictionary simuating output from milToGridlab.py. All other parameters are None. Note that SCADA input just needs to be not None for this test-- the values are imput directily into processSCADA.py rather than actually being taken from a file right now.
-	with open('../uploads/ACEC-FRIENDSHIP.std','r') as stdFile, open('../uploads/ACEC.seq','r') as seqFile:
-		milsoft,x,y = milToGridlab.convert(stdFile.read(), seqFile.read())
+	# # test run with pre-made dictionary simuating output from milToGridlab.py. All other parameters are None. Note that SCADA input just needs to be not None for this test-- the values are imput directily into processSCADA.py rather than actually being taken from a file right now.
+	# with open('../uploads/ABEC-FRANK.std','r') as stdFile, open('../uploads/ACEC.seq','r') as seqFile:
+	# 	milsoft,x,y = milToGridlab.convert(stdFile.read(), seqFile.read())
 	
+	# # Save the output as necessary.
+	# with open('OUTFILE.glm','w') as outFile:
+	# 	outFile.write(feeder.sortedWrite(milsoft))
+	
+	milsoft = feeder.parse('OUTFILE.glm')
+
 	model_name = 'testing_model_IEEE13'
 	feeder_info = None # place holder for future feeder information input from the user. 
 	scada = 'make_believe_scada_file.xlsx' # place holder for file with scada that will be processed for certain values. 

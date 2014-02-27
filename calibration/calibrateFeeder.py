@@ -7,10 +7,10 @@ import datetime
 import os
 import glob
 import re
-import gld_job_handler
 import importlib
 import Milsoft_GridLAB_D_Feeder_Generation
 import makeGLM
+import subprocess
 
 # Set flag to save 'losing' files as opposed to deleting them during cleanUP() (0 = delete, 1 = save)
 savelosers = 0
@@ -453,14 +453,7 @@ def calibrateLoop(glm_name, main_mets, scada, days, eval, counter, baseGLM, case
 	for i in calibration_config_files:
 		# need everything necessary to run Milsoft_GridLAB_D_Feeder_Generation.py
 		glms_ran.extend(makeGLM.makeGLM(clockDates(days), i, baseGLM, case_flag, feeder_config, dir))
-		
-	# Run all the .glms by executing the batch file.
-	print ('Begining simulations in GridLab-D.')
-	if os.name == 'nt':
-		gld_job_handler.run_batch_file(dir,batch_file)
-	else:
-		gld_job_handler.run_shell_script(dir)
-		
+
 	# Get comparison metrics between simulation outputs and SCADA.
 	raw_metrics = gleanMetrics.funcRawMetsDict(dir, glms_ran, scada, days)
 	
@@ -559,15 +552,13 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 	def runGLMS(glms,batch):
 		# Run those .glms by executing a batch file.
 		print ('Begining simulations in GridLab-D.')
-		try:
-			if os.name=='nt':
-				gld_job_handler.run_batch_file(dir,batch)
-			else:
-				gld_job_handler.run_shell_script(dir)
-		except KeyboardInterrupt:
-			print ('GridLAB-D simulations interrupted during intial round.\n')
-			return None, None, None
-		# Get comparison metrics from simulation outputs
+		#XXYYXX
+		glmFiles = [x for x in os.listdir(dir) if x.endswith('.glm')]
+		for glm in glmFiles:
+			with open(dir+'/stdout.txt','w') as stdout, open(dir+'/stderr.txt','w') as stderr, open(dir+'/PID.txt','w') as pidFile:
+				proc = subprocess.Popen(['gridlabd', glm], cwd=dir, stdout=stdout, stderr=stderr)
+				pidFile.write(str(proc.pid))
+				proc.wait()
 		print ('Beginning comparison of intitial simulation output with SCADA.')
 		raw_metrics = gleanMetrics.funcRawMetsDict(dir, glms, SCADA, days)
 		return raw_metrics
@@ -583,15 +574,7 @@ def calibrateFeeder(baseGLM, days, SCADA, case_flag, feeder_config, calibration_
 							Peak Val., Peak Time, Total Energy, Min. Val., Min. Time,\
 							Peak Val., Peak Time, Total Energy, Min. Val., Min. Time,\
 							Peak Val., Peak Time, Total Energy, Min. Val., Min. Time \n')
-							
-	# Name and create batch file.
-	if os.name=='nt':
-		batch_file = dir + '/calibration_batch_file.bat'
-		gld_job_handler.create_batch_file(dir,batch_file)
-	else:
-		batch_file = ''
-		gld_job_handler.create_shell_script(dir)
-	
+
 	# Do initial run. 
 	print ('Beginning initial run for calibration.')
 	
