@@ -8,8 +8,6 @@ import processSCADA #TODO: write this module
 import feeder
 import AddTapeObjects
 #import writeFeederConfig #TODO: future work (after June 1 deadline)
-import four_node_commercial # feeder dictionary just for testing
-import four_node_residential # feeder dictionary just for testing
 
 # MilSoft model ( milsoft = [stdPath, seqPath])
 # Case Flag

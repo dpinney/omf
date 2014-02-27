@@ -1,24 +1,24 @@
 # If the first choice action (the one determined in chooseAction.py) fails to produce a .glm with a better WSM score, try the second choice, then third, etc. If nothing produces a better WSM score, we'll have to kick out of the loop. 
 
 next_choice_actions = {}
-action_desc ={ 	 1: 'raise load',
-				-1: 'lower load',
-				 2: 'raise winter load',
-				-2: 'lower winter load',
-				 3: 'raise winter peak',
-				-3: 'lower winter peak',
-				 4: 'raise winter & summer',
-				-4: 'lower winter & summer',
-				 5: 'raise summer load',
-				-5: 'lower summer load',
-				 6: 'raise summer & winter',
-				-6: 'lower summer & winter',
-				 7: 'raise peaks',
-				-7: 'lower peaks',
-				 8: 'raise summer & lower winter',
-				-8: 'lower summer & raise winter',
-				 0: 'stop calibration',
-				-0: 'stop calibration' };
+action_desc ={	 1: 'raise load',
+							-1: 'lower load',
+							 2: 'raise winter load',
+							-2: 'lower winter load',
+							 3: 'raise winter peak',
+							-3: 'lower winter peak',
+							 4: 'raise winter & summer',
+							-4: 'lower winter & summer',
+							 5: 'raise summer load',
+							-5: 'lower summer load',
+							 6: 'raise summer & winter',
+							-6: 'lower summer & winter',
+							 7: 'raise peaks',
+							-7: 'lower peaks',
+							 8: 'raise summer & lower winter',
+							-8: 'lower summer & raise winter',
+							 0: 'stop calibration',
+							-0: 'stop calibration' };
 
 # 1 - 1 : load overall 
 # 2 - 7 : peaks overall 
