@@ -2,10 +2,6 @@
 # @author Matt Hauer
 #
 
-import cmath
-import math
-import random
-import datetime
 import os
 from datetime import timedelta
 from datetime import datetime
@@ -28,12 +24,12 @@ def GetWeather(start, end, airport, dir='temp', startYear = 2012):
         print("ERROR: no airport code given!")
         return None
     # static data
-    days_in_month = {"Jan" : 31, "Feb" : 28,
-                     "Mar" : 31, "Apr" : 30,
-                     "May" : 31, "Jun" : 30,
-                     "Jul" : 31, "Aug" : 31,
-                     "Sept" : 30, "Oct" : 31,
-                     "Nov" : 30, "Dec" : 31}
+    days_in_month = {	"Jan" : 31, "Feb" : 28,
+									"Mar" : 31, "Apr" : 30,
+									"May" : 31, "Jun" : 30,
+									"Jul" : 31, "Aug" : 31,
+									"Sept" : 30, "Oct" : 31,
+									"Nov" : 30, "Dec" : 31}
     # initializers from Matlab script
     currDir = os.getcwd()
     year = startYear

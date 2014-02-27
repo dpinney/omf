@@ -9,44 +9,44 @@ import math
 # @todo export this to TechnologyParameters.py
 def TechnologyParametersFunc(use_flags, TechToTest):
 	#rv = {"data" : {data}, "use_flags" : {use_flags}}
-	data = {'tech_flag' : TechToTest,
-			'use_tech' : 0,
-			'measure_losses' : 0,
-			'dump_bills' : 0,
-			'measure_capacitor' : 0,
-			'measure_regulators' : 0,
-			'collect_setpoints' : 0,
-			'measure_EOL_voltage' : 0,
-			'measure_loads' : 0,
-			'include_stats' : 0,
-			'meter_consumption' : 0,
-			'dump_voltage' : 0,
-			'measure_market' : 0,
-			'get_IEEE_stats' : 0,
-			'ts_SOC' : 0,
-			'k_ts' : 0}
+	data = {	'tech_flag' : TechToTest,
+					'use_tech' : 0,
+					'measure_losses' : 0,
+					'dump_bills' : 0,
+					'measure_capacitor' : 0,
+					'measure_regulators' : 0,
+					'collect_setpoints' : 0,
+					'measure_EOL_voltage' : 0,
+					'measure_loads' : 0,
+					'include_stats' : 0,
+					'meter_consumption' : 0,
+					'dump_voltage' : 0,
+					'measure_market' : 0,
+					'get_IEEE_stats' : 0,
+					'ts_SOC' : 0,
+					'k_ts' : 0}
 
 	# start nasty long copy/paste block (about 670 lines)
 	data["tech_flag"] = TechToTest;
 	data["use_tech"] = 0;
 
 	# initialize use_flags
-	use_flags = {'use_normalized_loadshapes' : 0,
-				 'use_homes' : 0,
-				 'use_commercial' : 0,
-				 'use_billing' : 0,
-				 'use_capacitor_outtages' : 0,
-				 'use_vvc' : 0,
-				 'use_emissions' : 0,
-				 'use_market' : 0,
-				 'use_ts' : 0,
-				 'use_solar' : 0,
-				 'use_solar_res' : 0,
-				 'use_solar_com' : 0,
-				 'use_battery' : 0,
-				 'use_phev' : 0,
-				 'use_da' : 0,
-				 'use_wind' : 0}
+	use_flags = {	'use_normalized_loadshapes' : 0,
+							'use_homes' : 0,
+							'use_commercial' : 0,
+							'use_billing' : 0,
+							'use_capacitor_outtages' : 0,
+							'use_vvc' : 0,
+							'use_emissions' : 0,
+							'use_market' : 0,
+							'use_ts' : 0,
+							'use_solar' : 0,
+							'use_solar_res' : 0,
+							'use_solar_com' : 0,
+							'use_battery' : 0,
+							'use_phev' : 0,
+							'use_da' : 0,
+							'use_wind' : 0}
 	
 	# quick case. Use load shapes instead of house objects.
 	if TechToTest == -1:

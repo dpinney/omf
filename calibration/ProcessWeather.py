@@ -1,4 +1,3 @@
-import datetime
 from datetime import datetime
 from datetime import timedelta
 #from datetime import timezone # v3.0
@@ -49,7 +48,7 @@ def ParseWeather(line, hdr):
 	rv.Temp = float(line[1])
 	
 
-def ProcessWeather(start, end, airport='', dir='.', interpolate="linear"):
+def ProcessWeather(start, end, airport='', wdir='.', interpolate="linear"):
 	# sanity checks
 	startDate = datetime.strptime(start, "%m-%d-%Y")
 	endDate = datetime.strptime(end, "%m-%d-%Y")
@@ -59,157 +58,156 @@ def ProcessWeather(start, end, airport='', dir='.', interpolate="linear"):
 
 	# condition dictionary
 	conditionDict = {"Clear" : (1.0, 1.0, 1.0),
-					 "Partly Cloudy" : (0.9, 1.1, 0.95),
-					 "Scattered Clouds" : (0.8, 1.2, 0.9),
-					 "Light Rain" : (0.8, 1.2, 0.9),
-					 "Mostly Cloudy" : (0.75, 1.25, 0.85),
-					 'Rain' : (0.75, 1.25, 0.85),
-					 'Overcast' : (0.7, 1.3, 0.8),
-        			 'Heavy Rain' : (0.7, 1.3, 0.8),
-					 'Fog' : (0.7, 1.3, 0.8),
-					 'Haze' : (0.7, 1.3, 0.8),
-					 'Thunderstorm' : (0.7, 1.3, 0.8),
-					 'Heavy Thunderstorm' : (0.8, 1.4, 0.75),
-					 'Light Drizzle' : (0.75, 1.25, 0.85),
-					 'Mist' : (0.7, 1.3, 0.8),
- 					 'Light Ice Pellets' : (0.75, 1.25, 0.85),
- 					 'Light Snow' : (0.8, 1.2, 0.9),
- 					 'Squalls' : (0.75, 1.25, 0.85)
-					 }
-	moreConditionDict = {"Light Drizzle" : 		(0.8, 1.2, 0.9), 
-						"Drizzle" : 			(0.75, 1.25, 0.85),
-						"Heavy Drizzle" : 		(0.7, 1.3, 0.8),
-						"Light Rain" : 			(0.8, 1.2, 0.9),
-						"Rain" : 				(0.75, 1.25, 0.85),
-						'Heavy Rain' : 			(0.7, 1.3, 0.8),
-						"Light Snow" : 			(0.8, 1.2, 0.9),
-						"Snow" :				(0.8, 1.2, 0.9), #
-						"Heavy Snow" :			(0.8, 1.2, 0.9), #
-						"Light Snow Grains" : 	(0.8, 1.2, 0.9), # from 'light snow'
-						"Snow Grains" : 		(0.8, 1.2, 0.9), #
-						"Heavy Snow Grains" : 	(0.8, 1.2, 0.9), #
-						"Light Ice Crystals" : 	(0.8, 1.2, 0.9), # from 'light snow'
-						"Ice Crystals" : 		(0.8, 1.2, 0.9), #
-						"Heavy Ice Crystals" : 	(0.8, 1.2, 0.9), #
-						"Light Ice Pellets" : 	(0.8, 1.2, 0.9), # from 'light snow'
-						"Ice Pellets" : 		(0.8, 1.2, 0.9), #
-						"Heavy Ice Pellets" : 	(0.8, 1.2, 0.9), #
-						"Light Hail" : 			(0.75, 1.25, 0.85), # from 'light rain'
-						"Hail" :  				(0.75, 1.25, 0.85), #
-						"Heavy Hail" :  		(0.75, 1.25, 0.85), #
-						"LightMist" : 			(0.7, 1.3, 0.8), #
-						"Mist" : 				(0.7, 1.3, 0.8),
-						"Heavy Mist" : 			(0.7, 1.3, 0.8), #
-						"Light Fog" : 			(0.7, 1.3, 0.8), #
-						"Fog" : 				(0.7, 1.3, 0.8),
-						"Heavy Fog" : 			(0.7, 1.3, 0.8), #
-						"Light Fog Patches" : 	(0.7, 1.3, 0.8), #
-						"Fog Patches" :			(0.7, 1.3, 0.8), # copied from "Fog"
-						"Heavy Fog Patches" : 	(0.7, 1.3, 0.8), #
-						"Light Smoke" : 		(1.0, 1.0, 1.0), #
-						"Smoke" : 				(1.0, 1.0, 1.0), #
-						"Heavy Smoke" : 		(1.0, 1.0, 1.0), #
-						"Light Volcanic Ash" : 	(1.0, 1.0, 1.0), # 
-						"Volcanic Ash" : (1.0, 1.0, 1.0),  #
-						"Heavy Volcanic Ash" : (1.0, 1.0, 1.0), #
-						"Light Widespread Dust" : (1.0, 1.0, 1.0), # 
-						"Widespread Dust" : (1.0, 1.0, 1.0),  #
-						"Heavy Widespread Dust" : (1.0, 1.0, 1.0), #
-						"Light Sand" : (1.0, 1.0, 1.0),  #
-						"Sand" : (1.0, 1.0, 1.0),  #
-						"Heavy Sand" : (1.0, 1.0, 1.0), #
-						"Light Haze" : (1.0, 1.0, 1.0),  #
-						"Haze" : (1.0, 1.0, 1.0),  #
-						"Heavy Haze" : (1.0, 1.0, 1.0), #
-						"Light Spray" : (1.0, 1.0, 1.0),  #
-						"Spray" : (1.0, 1.0, 1.0),  #
-						"Heavy Spray" : (1.0, 1.0, 1.0), #
-						"Light Dust Whirls" : (1.0, 1.0, 1.0), # 
-						"Dust Whirls" : (1.0, 1.0, 1.0), # 
-						"Heavy Dust Whirls" : (1.0, 1.0, 1.0), #
-						"Light Sandstorm" : (1.0, 1.0, 1.0),  #
-						"Sandstorm" : (1.0, 1.0, 1.0),  #
-						"Heavy Sandstorm" : (1.0, 1.0, 1.0), #
-						"Light Low Drifting Snow" : (1.0, 1.0, 1.0), # 
-						"Low Drifting Snow" : (1.0, 1.0, 1.0),  #
-						"Heavy Low Drifting Snow" : (1.0, 1.0, 1.0), #
-						"Light Low Drifting Widespread Dust" : (1.0, 1.0, 1.0), # 
-						"Low Drifting Widespread Dust" : (1.0, 1.0, 1.0),  #
-						"Heavy Low Drifting Widespread Dust" : (1.0, 1.0, 1.0), #
-						"Light Low Drifting Sand" : (1.0, 1.0, 1.0),  #
-						"Low Drifting Sand" : (1.0, 1.0, 1.0),  #
-						"Heavy Low Drifting Sand" : (1.0, 1.0, 1.0), #
-						"Light Blowing Snow" : (1.0, 1.0, 1.0),  #
-						"Blowing Snow" : (1.0, 1.0, 1.0),  #
-						"Heavy Blowing Snow" : (1.0, 1.0, 1.0), #
-						"Light Blowing Widespread Dust" : (1.0, 1.0, 1.0), # 
-						"Blowing Widespread Dust" : (1.0, 1.0, 1.0), # 
-						"Heavy Blowing Widespread Dust" : (1.0, 1.0, 1.0), #
-						"Light Blowing Sand" : (1.0, 1.0, 1.0),  #
-						"Blowing Sand" : (1.0, 1.0, 1.0),  #
-						"Heavy Blowing Sand" : (1.0, 1.0, 1.0), #
-						"Light Rain Mist" : (1.0, 1.0, 1.0), # 
-						"Rain Mist" : (1.0, 1.0, 1.0),  #
-						"Heavy Rain Mist" : (1.0, 1.0, 1.0), #
-						"Light Rain Showers" : (1.0, 1.0, 1.0), # 
-						"Rain Showers" : (1.0, 1.0, 1.0), # 
-						"Heavy Rain Showers" : (1.0, 1.0, 1.0), #
-						"Light Snow Showers" : (1.0, 1.0, 1.0), # 
-						"Snow Showers" : (1.0, 1.0, 1.0), # 
-						"Heavy Snow Showers" : (1.0, 1.0, 1.0), #
-						"Light Snow Blowing Snow Mist" : (1.0, 1.0, 1.0), #
-						"Snow Blowing Snow Mist" : (1.0, 1.0, 1.0),  #
-						"Heavy Snow Blowing Snow Mist" : (1.0, 1.0, 1.0), #
-						"Light Ice Pellet Showers" : (1.0, 1.0, 1.0), #
-						"Ice Pellet Showers" : (1.0, 1.0, 1.0), #
-						"Heavy Ice Pellet Showers" : (1.0, 1.0, 1.0), #
-						"Light Hail Showers" : (1.0, 1.0, 1.0), #
-						"Hail Showers" : (1.0, 1.0, 1.0), #
-						"Heavy Hail Showers" : (1.0, 1.0, 1.0), #
-						"Light Small Hail Showers" : (1.0, 1.0, 1.0), #
-						"Small Hail Showers" : (1.0, 1.0, 1.0), #
-						"Heavy Small Hail Showers" : (1.0, 1.0, 1.0), #
-						"Light Thunderstorm" : (1.0, 1.0, 1.0), #
-						"Thunderstorm" : (1.0, 1.0, 1.0), # 
-						"Heavy Thunderstorm" : (1.0, 1.0, 1.0), #
-						"Light Thunderstorms and Rain" : (1.0, 1.0, 1.0), # 
-						"Thunderstorms and Rain" : (1.0, 1.0, 1.0), # 
-						"Heavy Thunderstorms and Rain" : (1.0, 1.0, 1.0), #
-						"Light Thunderstorms and Snow" : (1.0, 1.0, 1.0), # 
-						"Thunderstorms and Snow" : (1.0, 1.0, 1.0), # 
-						"Heavy Thunderstorms and Snow" : (1.0, 1.0, 1.0), #
-						"Light Thunderstorms and Ice Pellets" : (1.0, 1.0, 1.0), # 
-						"Thunderstorms and Ice Pellets" : (1.0, 1.0, 1.0), # 
-						"Heavy Thunderstorms and Ice Pellets" : (1.0, 1.0, 1.0), #
-						"Light Thunderstorms with Hail" : (1.0, 1.0, 1.0), # 
-						"Thunderstorms with Hail" : (1.0, 1.0, 1.0), # 
-						"Heavy Thunderstorms with Hail" : (1.0, 1.0, 1.0), #
-						"Light Thunderstorms with Small Hail" : (1.0, 1.0, 1.0), # 
-						"Thunderstorms with Small Hail" : (1.0, 1.0, 1.0), # 
-						"Heavy Thunderstorms with Small Hail" : (1.0, 1.0, 1.0), #
-						"Light Freezing Drizzle" : (1.0, 1.0, 1.0), # 
-						"Freezing Drizzle" : (1.0, 1.0, 1.0), # 
-						"Heavy Freezing Drizzle" : (1.0, 1.0, 1.0), #
-						"Light Freezing Rain" : (1.0, 1.0, 1.0), # 
-						"Freezing Rain" : (1.0, 1.0, 1.0), # 
-						"Heavy Freezing Rain" : (1.0, 1.0, 1.0), #
-						"Light Freezing Fog" : (1.0, 1.0, 1.0), # 
-						"Freezing Fog" : (1.0, 1.0, 1.0), # 
-						"Heavy Freezing Fog" : (1.0, 1.0, 1.0), #
-						"Patches of Fog" : (1.0, 1.0, 1.0), #
-						"Shallow Fog" : (1.0, 1.0, 1.0), #
-						"Partial Fog" : (1.0, 1.0, 1.0), #
-						"Overcast" : (1.0, 1.0, 1.0), #
-						"Clear" : (1.0, 1.0, 1.0),
-						"Partly Cloudy" : (0.9, 1.1, 0.95),
-						"Mostly Cloudy" : (1.0, 1.0, 1.0), #
-						"Scattered Clouds" : (1.0, 1.0, 1.0), #
-						"Small Hail" : (1.0, 1.0, 1.0), #
-						"Squalls" : (1.0, 1.0, 1.0), #
-						"Funnel Cloud" : (1.0, 1.0, 1.0), #
-						"Unknown Precipitation" : (1.0, 1.0, 1.0), #
-						"Unknown" : (1.0, 1.0, 1.0) #
-						}
+								"Partly Cloudy" : (0.9, 1.1, 0.95),
+								"Scattered Clouds" : (0.8, 1.2, 0.9),
+								"Light Rain" : (0.8, 1.2, 0.9),
+								"Mostly Cloudy" : (0.75, 1.25, 0.85),
+								'Rain' : (0.75, 1.25, 0.85),
+								'Overcast' : (0.7, 1.3, 0.8),
+								'Heavy Rain' : (0.7, 1.3, 0.8),
+								'Fog' : (0.7, 1.3, 0.8),
+								'Haze' : (0.7, 1.3, 0.8),
+								'Thunderstorm' : (0.7, 1.3, 0.8),
+								'Heavy Thunderstorm' : (0.8, 1.4, 0.75),
+								'Light Drizzle' : (0.75, 1.25, 0.85),
+								'Mist' : (0.7, 1.3, 0.8),
+								'Light Ice Pellets' : (0.75, 1.25, 0.85),
+								'Light Snow' : (0.8, 1.2, 0.9),
+								'Squalls' : (0.75, 1.25, 0.85)}
+	moreConditionDict = {	"Light Drizzle" : 		(0.8, 1.2, 0.9), 
+											"Drizzle" : 			(0.75, 1.25, 0.85),
+											"Heavy Drizzle" : 		(0.7, 1.3, 0.8),
+											"Light Rain" : 			(0.8, 1.2, 0.9),
+											"Rain" : 				(0.75, 1.25, 0.85),
+											'Heavy Rain' : 			(0.7, 1.3, 0.8),
+											"Light Snow" : 			(0.8, 1.2, 0.9),
+											"Snow" :				(0.8, 1.2, 0.9), #
+											"Heavy Snow" :			(0.8, 1.2, 0.9), #
+											"Light Snow Grains" : 	(0.8, 1.2, 0.9), # from 'light snow'
+											"Snow Grains" : 		(0.8, 1.2, 0.9), #
+											"Heavy Snow Grains" : 	(0.8, 1.2, 0.9), #
+											"Light Ice Crystals" : 	(0.8, 1.2, 0.9), # from 'light snow'
+											"Ice Crystals" : 		(0.8, 1.2, 0.9), #
+											"Heavy Ice Crystals" : 	(0.8, 1.2, 0.9), #
+											"Light Ice Pellets" : 	(0.8, 1.2, 0.9), # from 'light snow'
+											"Ice Pellets" : 		(0.8, 1.2, 0.9), #
+											"Heavy Ice Pellets" : 	(0.8, 1.2, 0.9), #
+											"Light Hail" : 			(0.75, 1.25, 0.85), # from 'light rain'
+											"Hail" :  				(0.75, 1.25, 0.85), #
+											"Heavy Hail" :  		(0.75, 1.25, 0.85), #
+											"LightMist" : 			(0.7, 1.3, 0.8), #
+											"Mist" : 				(0.7, 1.3, 0.8),
+											"Heavy Mist" : 			(0.7, 1.3, 0.8), #
+											"Light Fog" : 			(0.7, 1.3, 0.8), #
+											"Fog" : 				(0.7, 1.3, 0.8),
+											"Heavy Fog" : 			(0.7, 1.3, 0.8), #
+											"Light Fog Patches" : 	(0.7, 1.3, 0.8), #
+											"Fog Patches" :			(0.7, 1.3, 0.8), # copied from "Fog"
+											"Heavy Fog Patches" : 	(0.7, 1.3, 0.8), #
+											"Light Smoke" : 		(1.0, 1.0, 1.0), #
+											"Smoke" : 				(1.0, 1.0, 1.0), #
+											"Heavy Smoke" : 		(1.0, 1.0, 1.0), #
+											"Light Volcanic Ash" : 	(1.0, 1.0, 1.0), # 
+											"Volcanic Ash" : (1.0, 1.0, 1.0),  #
+											"Heavy Volcanic Ash" : (1.0, 1.0, 1.0), #
+											"Light Widespread Dust" : (1.0, 1.0, 1.0), # 
+											"Widespread Dust" : (1.0, 1.0, 1.0),  #
+											"Heavy Widespread Dust" : (1.0, 1.0, 1.0), #
+											"Light Sand" : (1.0, 1.0, 1.0),  #
+											"Sand" : (1.0, 1.0, 1.0),  #
+											"Heavy Sand" : (1.0, 1.0, 1.0), #
+											"Light Haze" : (1.0, 1.0, 1.0),  #
+											"Haze" : (1.0, 1.0, 1.0),  #
+											"Heavy Haze" : (1.0, 1.0, 1.0), #
+											"Light Spray" : (1.0, 1.0, 1.0),  #
+											"Spray" : (1.0, 1.0, 1.0),  #
+											"Heavy Spray" : (1.0, 1.0, 1.0), #
+											"Light Dust Whirls" : (1.0, 1.0, 1.0), # 
+											"Dust Whirls" : (1.0, 1.0, 1.0), # 
+											"Heavy Dust Whirls" : (1.0, 1.0, 1.0), #
+											"Light Sandstorm" : (1.0, 1.0, 1.0),  #
+											"Sandstorm" : (1.0, 1.0, 1.0),  #
+											"Heavy Sandstorm" : (1.0, 1.0, 1.0), #
+											"Light Low Drifting Snow" : (1.0, 1.0, 1.0), # 
+											"Low Drifting Snow" : (1.0, 1.0, 1.0),  #
+											"Heavy Low Drifting Snow" : (1.0, 1.0, 1.0), #
+											"Light Low Drifting Widespread Dust" : (1.0, 1.0, 1.0), # 
+											"Low Drifting Widespread Dust" : (1.0, 1.0, 1.0),  #
+											"Heavy Low Drifting Widespread Dust" : (1.0, 1.0, 1.0), #
+											"Light Low Drifting Sand" : (1.0, 1.0, 1.0),  #
+											"Low Drifting Sand" : (1.0, 1.0, 1.0),  #
+											"Heavy Low Drifting Sand" : (1.0, 1.0, 1.0), #
+											"Light Blowing Snow" : (1.0, 1.0, 1.0),  #
+											"Blowing Snow" : (1.0, 1.0, 1.0),  #
+											"Heavy Blowing Snow" : (1.0, 1.0, 1.0), #
+											"Light Blowing Widespread Dust" : (1.0, 1.0, 1.0), # 
+											"Blowing Widespread Dust" : (1.0, 1.0, 1.0), # 
+											"Heavy Blowing Widespread Dust" : (1.0, 1.0, 1.0), #
+											"Light Blowing Sand" : (1.0, 1.0, 1.0),  #
+											"Blowing Sand" : (1.0, 1.0, 1.0),  #
+											"Heavy Blowing Sand" : (1.0, 1.0, 1.0), #
+											"Light Rain Mist" : (1.0, 1.0, 1.0), # 
+											"Rain Mist" : (1.0, 1.0, 1.0),  #
+											"Heavy Rain Mist" : (1.0, 1.0, 1.0), #
+											"Light Rain Showers" : (1.0, 1.0, 1.0), # 
+											"Rain Showers" : (1.0, 1.0, 1.0), # 
+											"Heavy Rain Showers" : (1.0, 1.0, 1.0), #
+											"Light Snow Showers" : (1.0, 1.0, 1.0), # 
+											"Snow Showers" : (1.0, 1.0, 1.0), # 
+											"Heavy Snow Showers" : (1.0, 1.0, 1.0), #
+											"Light Snow Blowing Snow Mist" : (1.0, 1.0, 1.0), #
+											"Snow Blowing Snow Mist" : (1.0, 1.0, 1.0),  #
+											"Heavy Snow Blowing Snow Mist" : (1.0, 1.0, 1.0), #
+											"Light Ice Pellet Showers" : (1.0, 1.0, 1.0), #
+											"Ice Pellet Showers" : (1.0, 1.0, 1.0), #
+											"Heavy Ice Pellet Showers" : (1.0, 1.0, 1.0), #
+											"Light Hail Showers" : (1.0, 1.0, 1.0), #
+											"Hail Showers" : (1.0, 1.0, 1.0), #
+											"Heavy Hail Showers" : (1.0, 1.0, 1.0), #
+											"Light Small Hail Showers" : (1.0, 1.0, 1.0), #
+											"Small Hail Showers" : (1.0, 1.0, 1.0), #
+											"Heavy Small Hail Showers" : (1.0, 1.0, 1.0), #
+											"Light Thunderstorm" : (1.0, 1.0, 1.0), #
+											"Thunderstorm" : (1.0, 1.0, 1.0), # 
+											"Heavy Thunderstorm" : (1.0, 1.0, 1.0), #
+											"Light Thunderstorms and Rain" : (1.0, 1.0, 1.0), # 
+											"Thunderstorms and Rain" : (1.0, 1.0, 1.0), # 
+											"Heavy Thunderstorms and Rain" : (1.0, 1.0, 1.0), #
+											"Light Thunderstorms and Snow" : (1.0, 1.0, 1.0), # 
+											"Thunderstorms and Snow" : (1.0, 1.0, 1.0), # 
+											"Heavy Thunderstorms and Snow" : (1.0, 1.0, 1.0), #
+											"Light Thunderstorms and Ice Pellets" : (1.0, 1.0, 1.0), # 
+											"Thunderstorms and Ice Pellets" : (1.0, 1.0, 1.0), # 
+											"Heavy Thunderstorms and Ice Pellets" : (1.0, 1.0, 1.0), #
+											"Light Thunderstorms with Hail" : (1.0, 1.0, 1.0), # 
+											"Thunderstorms with Hail" : (1.0, 1.0, 1.0), # 
+											"Heavy Thunderstorms with Hail" : (1.0, 1.0, 1.0), #
+											"Light Thunderstorms with Small Hail" : (1.0, 1.0, 1.0), # 
+											"Thunderstorms with Small Hail" : (1.0, 1.0, 1.0), # 
+											"Heavy Thunderstorms with Small Hail" : (1.0, 1.0, 1.0), #
+											"Light Freezing Drizzle" : (1.0, 1.0, 1.0), # 
+											"Freezing Drizzle" : (1.0, 1.0, 1.0), # 
+											"Heavy Freezing Drizzle" : (1.0, 1.0, 1.0), #
+											"Light Freezing Rain" : (1.0, 1.0, 1.0), # 
+											"Freezing Rain" : (1.0, 1.0, 1.0), # 
+											"Heavy Freezing Rain" : (1.0, 1.0, 1.0), #
+											"Light Freezing Fog" : (1.0, 1.0, 1.0), # 
+											"Freezing Fog" : (1.0, 1.0, 1.0), # 
+											"Heavy Freezing Fog" : (1.0, 1.0, 1.0), #
+											"Patches of Fog" : (1.0, 1.0, 1.0), #
+											"Shallow Fog" : (1.0, 1.0, 1.0), #
+											"Partial Fog" : (1.0, 1.0, 1.0), #
+											"Overcast" : (1.0, 1.0, 1.0), #
+											"Clear" : (1.0, 1.0, 1.0),
+											"Partly Cloudy" : (0.9, 1.1, 0.95),
+											"Mostly Cloudy" : (1.0, 1.0, 1.0), #
+											"Scattered Clouds" : (1.0, 1.0, 1.0), #
+											"Small Hail" : (1.0, 1.0, 1.0), #
+											"Squalls" : (1.0, 1.0, 1.0), #
+											"Funnel Cloud" : (1.0, 1.0, 1.0), #
+											"Unknown Precipitation" : (1.0, 1.0, 1.0), #
+											"Unknown" : (1.0, 1.0, 1.0) #
+											}
 
 	#for item in moreConditionDict:
 	#	a, b, c = moreConditionDict[item]
@@ -218,18 +216,18 @@ def ProcessWeather(start, end, airport='', dir='.', interpolate="linear"):
 	# interpolation options
 	interpolateList = ["none", "linear", "quadratic"]
 	# scan for files
-	fileList = os.listdir(dir)
+	fileList = os.listdir(wdir)
 	filePtrn = re.compile("weather_(?P<loc>[A-Z]+)_(?P<raw_date>[0-9]+_[0-9]+_[0-9]+).csv")
 	matchedFiles = list(filter(filePtrn.match, fileList))
 	if len(matchedFiles) is 0:
-		print("no weather files found in {}".format(dir))
+		print("no weather files found in {}".format(wdir))
 		return -1
 	# identify desired files
 	matchedList = [filePtrn.match(x) for x in matchedFiles]
 	fileParts = [m.groupdict() for m in matchedList]
 	filteredParts = list(filter(lambda x: x["loc"] == airport, fileParts))
 	if len(filteredParts) is 0:
-		print("no weather files found in {} that match airport {}".format(dir, airport))
+		print("no weather files found in {} that match airport {}".format(wdir, airport))
 		return -1
 	# filteredParts now contains a list of dictionaries where "loc" == airport
 	# process dates into datetime objects
@@ -253,7 +251,7 @@ def ProcessWeather(start, end, airport='', dir='.', interpolate="linear"):
 	weatherData = []
 	
 	currDir = os.getcwd()
-	os.chdir(dir)
+	os.chdir(wdir)
 	for eachFile in useFiles:
 		myFile = open(eachFile["file"], "r")
 		myLines = myFile.readlines()
@@ -420,27 +418,27 @@ def ProcessWeather(start, end, airport='', dir='.', interpolate="linear"):
 				
 	# add 00:00:00 to each day
 	
-	seasons = {"Winter" : ([], "solar_{}_winter_csv".format(airport)),
-				"Spring" : ([], "solar_{}_spring.csv".format(airport)),
-				"Summer" : ([], "solar_{}_summer.csv".format(airport)),
-				"Fall" : ([], "solar_{}_fall.csv".format(airport)) }
+	seasons = {	"Winter" : ([], "solar_{}_winter_csv".format(airport)),
+						"Spring" : ([], "solar_{}_spring.csv".format(airport)),
+						"Summer" : ([], "solar_{}_summer.csv".format(airport)),
+						"Fall" : ([], "solar_{}_fall.csv".format(airport))}
 	
 	# look for the solar files
-	if os.path.isdir(dir):
-		os.chdir(dir)
+	if os.path.isdir(wdir):
+		os.chdir(wdir)
 	if not os.path.isfile(seasons["Winter"][1]):
 		os.chdir(currDir)
-		rv = GetPeakSolar.GetPeakSolar(airport, dir)
+		rv = GetPeakSolar.GetPeakSolar(airport, wdir)
 		os.chdir(currDir) # in case it's left dirty
 		if rv is None:
 			print("ERROR: unable to retrieve solar information")
 			return -1
 
 	# load and parse these files for key in seasons.keys():
-	seasonCount = {"Winter" : 0,
-				   "Spring" : 0,
-				   "Summer" : 0,
-				   "Fall" : 0}
+	seasonCount = {	"Winter" : 0,
+								"Spring" : 0,
+								"Summer" : 0,
+								"Fall" : 0}
 	for line in weatherList:
 		seasonCount[line.Seas] += 1
 		
@@ -450,8 +448,8 @@ def ProcessWeather(start, end, airport='', dir='.', interpolate="linear"):
 		# Time(HH:MM), GHI_Normal, DNI_Normal and DHI_Normal
 		#  * {2-4} used for 'real data'.
 		seasonData, seasonFileName = seasons[season]
-		if os.path.isdir(dir):
-			os.chdir(dir)
+		if os.path.isdir(wdir):
+			os.chdir(wdir)
 		seasonFile = open(seasonFileName, "r")
 		os.chdir(currDir)
 		seasonFileLines = seasonFile.readlines()
@@ -463,11 +461,11 @@ def ProcessWeather(start, end, airport='', dir='.', interpolate="linear"):
 	
 	# find solar data per-season, interpolate from hourly to the sample time, add into weather dictionary
 	for sample in weatherList:
-		dir, dif, glo = sample.Cond
+		wdir, dif, glo = sample.Cond
 		sampleHour = sample.Time.hour
 		seasonData, Season = seasons[sample.Seas]
 		dirMod, difMod, gloMod = seasonData[sampleHour]
-		sample.Solar = (dir*dirMod, dif*difMod, glo*gloMod)
+		sample.Solar = (wdir*dirMod, dif*difMod, glo*gloMod)
 		#print(str(sample.Time)+": "+str(sample.Cond)+" * "+str(seasonData[sampleHour])+" = "+str(sample.Solar))
 	
 	# interpolate downloaded data into 
@@ -590,16 +588,16 @@ def ProcessWeather(start, end, airport='', dir='.', interpolate="linear"):
 	
 	return 0
 
-def GenerateWeatherFiles(start, end, airport, dir=''):
-	rv = ExtractWeather.GetWeather(start, end, airport, dir)
+def GenerateWeatherFiles(start, end, airport, wdir=''):
+	rv = ExtractWeather.GetWeather(start, end, airport, wdir)
 	if rv != None:
-		rv2 = ProcessWeather(start, end, airport, dir)
+		rv2 = ProcessWeather(start, end, airport, wdir)
 		if rv2 == None:
-			print("ERROR: ProcessWeather({}, {}, {}, {}) failed!".format(start, end, airport, dir))
+			print("ERROR: ProcessWeather({}, {}, {}, {}) failed!".format(start, end, airport, wdir))
 			return None
 		return 0
 	else:
-		print("ERROR: ExtractWeather.GetWeather({}, {}, {}, {}) failed!".format(start, end, airport, dir))
+		print("ERROR: ExtractWeather.GetWeather({}, {}, {}, {}) failed!".format(start, end, airport, wdir))
 		return None
 	
 if __name__ is '__main__':

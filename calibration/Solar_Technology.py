@@ -80,35 +80,35 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
                     for y in xrange(0,pv_units_per_office):
                         # Write the PV meter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'meter',
-                                                  'name' : 'pv_meter{:d}_{:s}'.format(y,parent),
-                                                  'parent' : '{:s}'.format(parent),
-                                                  'phases' : '{:s}'.format(phases),
-                                                  'nominal_voltage' : '{:f}'.format(config_data['nom_volt2']),
-                                                  'group_id' : 'Commercial_m_solar_office'}
+                        PV_Tech_Dict[last_key] = {	'object' : 'meter',
+																		'name' : 'pv_meter{:d}_{:s}'.format(y,parent),
+																		'parent' : '{:s}'.format(parent),
+																		'phases' : '{:s}'.format(phases),
+																		'nominal_voltage' : '{:f}'.format(config_data['nom_volt2']),
+																		'group_id' : 'Commercial_m_solar_office'}
                         
                         # Write the PV inverter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'inverter',
-                                                  'name' : 'pv_inverter_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'phases' : '{:s}'.format(phases),
-                                                  'generator_mode' : 'CONSTANT_PF',
-                                                  'generator_status' : 'ONLINE',
-                                                  'inverter_type' : 'PWM',
-                                                  'power_factor' : '1.0',
-                                                  'rated_power' : '{:.0f}'.format(math.ceil(solar_rating))}
+                        PV_Tech_Dict[last_key] = {	'object' : 'inverter',
+																		'name' : 'pv_inverter_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'phases' : '{:s}'.format(phases),
+																		'generator_mode' : 'CONSTANT_PF',
+																		'generator_status' : 'ONLINE',
+																		'inverter_type' : 'PWM',
+																		'power_factor' : '1.0',
+																		'rated_power' : '{:.0f}'.format(math.ceil(solar_rating))}
                                                   
                         # Write the PV inverter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'solar',
-                                                  'name' : 'sol_panel_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'generator_mode' : 'SUPPLY_DRIVEN',
-                                                  'generator_status' : 'ONLINE',
-                                                  'panel_type' : 'SINGLE_CRYSTAL_SILICON',
-                                                  'efficiency' : '0.2',
-                                                  'area' : '{:.0f}'.format(floor_area)}
+                        PV_Tech_Dict[last_key] = {	'object' : 'solar',
+																		'name' : 'sol_panel_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'generator_mode' : 'SUPPLY_DRIVEN',
+																		'generator_status' : 'ONLINE',
+																		'panel_type' : 'SINGLE_CRYSTAL_SILICON',
+																		'efficiency' : '0.2',
+																		'area' : '{:.0f}'.format(floor_area)}
         
         # Determine total number of PV we must add to bigbox commercial
         if penetration_bigbox > 0:    # solar_bigbox_array = list(number of bigbox meters attached to com loads,list(bigbox meter names attached to loads),list(phases of bigbox meters attached to loads))
@@ -138,35 +138,35 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
                     for y in xrange(pv_units_per_bigbox):
                         # Write the PV meter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'meter',
-                                                  'name' : 'pv_meter{:d}_{:s}'.format(y,parent),
-                                                  'parent' : '{:s}'.format(parent),
-                                                  'phases' : '{:s}'.format(phases),
-                                                  'nominal_voltage' : '{:f}'.format(config_data['nom_volt2']),
-                                                  'group_id' : 'Commercial_m_solar_bigbox'}
+                        PV_Tech_Dict[last_key] = {	'object' : 'meter',
+																		'name' : 'pv_meter{:d}_{:s}'.format(y,parent),
+																		'parent' : '{:s}'.format(parent),
+																		'phases' : '{:s}'.format(phases),
+																		'nominal_voltage' : '{:f}'.format(config_data['nom_volt2']),
+																		'group_id' : 'Commercial_m_solar_bigbox'}
                         
                         # Write the PV inverter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'inverter',
-                                                  'name' : 'pv_inverter_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'phases' : '{:s}'.format(phases),
-                                                  'generator_mode' : 'CONSTANT_PF',
-                                                  'generator_status' : 'ONLINE',
-                                                  'inverter_type' : 'PWM',
-                                                  'power_factor' : '1.0',
-                                                  'rated_power' : '{:.0f}'.format(math.ceil(solar_rating))}
+                        PV_Tech_Dict[last_key] = {	'object' : 'inverter',
+																		'name' : 'pv_inverter_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'phases' : '{:s}'.format(phases),
+																		'generator_mode' : 'CONSTANT_PF',
+																		'generator_status' : 'ONLINE',
+																		'inverter_type' : 'PWM',
+																		'power_factor' : '1.0',
+																		'rated_power' : '{:.0f}'.format(math.ceil(solar_rating))}
                                                   
                         # Write the PV inverter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'solar',
-                                                  'name' : 'sol_panel_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'generator_mode' : 'SUPPLY_DRIVEN',
-                                                  'generator_status' : 'ONLINE',
-                                                  'panel_type' : 'SINGLE_CRYSTAL_SILICON',
-                                                  'efficiency' : '0.2',
-                                                  'area' : '{:.0f}'.format(floor_area)}
+                        PV_Tech_Dict[last_key] = {	'object' : 'solar',
+																		'name' : 'sol_panel_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'generator_mode' : 'SUPPLY_DRIVEN',
+																		'generator_status' : 'ONLINE',
+																		'panel_type' : 'SINGLE_CRYSTAL_SILICON',
+																		'efficiency' : '0.2',
+																		'area' : '{:.0f}'.format(floor_area)}
                                                   
         # Determine total number of PV we must add to stripmall commercial
         if penetration_stripmall > 0:    # solar_stripmall_array = list(number of stripmall meters attached to com loads,list(stripmall meter names attached to loads),list(phases of stripmall meters attached to loads))
@@ -196,35 +196,35 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
                     for y in xrange(pv_units_per_stripmall):
                         # Write the PV meter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'triplex_meter',
-                                                  'name' : 'pv_triplex_meter{:d}_{:s}'.format(y,parent),
-                                                  'parent' : '{:s}'.format(parent),
-                                                  'phases' : '{:s}'.format(phases),
-                                                  'nominal_voltage' : '120',
-                                                  'group_id' : 'Commercial_tm_solar_stripmall'}
+                        PV_Tech_Dict[last_key] = {	'object' : 'triplex_meter',
+																		'name' : 'pv_triplex_meter{:d}_{:s}'.format(y,parent),
+																		'parent' : '{:s}'.format(parent),
+																		'phases' : '{:s}'.format(phases),
+																		'nominal_voltage' : '120',
+																		'group_id' : 'Commercial_tm_solar_stripmall'}
                         
                         # Write the PV inverter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'inverter',
-                                                  'name' : 'pv_inverter_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'phases' : '{:s}'.format(phases),
-                                                  'generator_mode' : 'CONSTANT_PF',
-                                                  'generator_status' : 'ONLINE',
-                                                  'inverter_type' : 'PWM',
-                                                  'power_factor' : '1.0',
-                                                  'rated_power' : '{:.0f}'.format(math.ceil(solar_rating))}
+                        PV_Tech_Dict[last_key] = {	'object' : 'inverter',
+																		'name' : 'pv_inverter_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'phases' : '{:s}'.format(phases),
+																		'generator_mode' : 'CONSTANT_PF',
+																		'generator_status' : 'ONLINE',
+																		'inverter_type' : 'PWM',
+																		'power_factor' : '1.0',
+																		'rated_power' : '{:.0f}'.format(math.ceil(solar_rating))}
                                                   
                         # Write the PV inverter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'solar',
-                                                  'name' : 'sol_panel_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'generator_mode' : 'SUPPLY_DRIVEN',
-                                                  'generator_status' : 'ONLINE',
-                                                  'panel_type' : 'SINGLE_CRYSTAL_SILICON',
-                                                  'efficiency' : '0.2',
-                                                  'area' : '{:.0f}'.format(floor_area)}
+                        PV_Tech_Dict[last_key] = {	'object' : 'solar',
+																		'name' : 'sol_panel_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'generator_mode' : 'SUPPLY_DRIVEN',
+																		'generator_status' : 'ONLINE',
+																		'panel_type' : 'SINGLE_CRYSTAL_SILICON',
+																		'efficiency' : '0.2',
+																		'area' : '{:.0f}'.format(floor_area)}
                                                   
     # Add Residential PV
     if use_flags['use_solar'] != 0 or use_flags['use_solar_res'] != 0:
@@ -266,33 +266,33 @@ def Append_Solar(PV_Tech_Dict, use_flags, config_data, tech_data, last_key, sola
                     for y in xrange(pv_units_per_residential):
                         # Write the PV meter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'triplex_meter',
-                                                  'name' : 'pv_triplex_meter{:d}_{:s}'.format(y,parent),
-                                                  'parent' : '{:s}'.format(parent),
-                                                  'phases' : '{:s}'.format(phases),
-                                                  'nominal_voltage' : '120',
-                                                  'group_id' : 'Residential_tm_solar'}
+                        PV_Tech_Dict[last_key] = {	'object' : 'triplex_meter',
+																		'name' : 'pv_triplex_meter{:d}_{:s}'.format(y,parent),
+																		'parent' : '{:s}'.format(parent),
+																		'phases' : '{:s}'.format(phases),
+																		'nominal_voltage' : '120',
+																		'group_id' : 'Residential_tm_solar'}
                         # Write the PV inverter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'inverter',
-                                                  'name' : 'pv_inverter_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'phases' : '{:s}'.format(phases),
-                                                  'generator_mode' : 'CONSTANT_PF',
-                                                  'generator_status' : 'ONLINE',
-                                                  'inverter_type' : 'PWM',
-                                                  'power_factor' : '1.0',
-                                                  'rated_power' : '{:.0f}'.format(math.ceil(solar_rating))}
+                        PV_Tech_Dict[last_key] = {	'object' : 'inverter',
+																		'name' : 'pv_inverter_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'phases' : '{:s}'.format(phases),
+																		'generator_mode' : 'CONSTANT_PF',
+																		'generator_status' : 'ONLINE',
+																		'inverter_type' : 'PWM',
+																		'power_factor' : '1.0',
+																		'rated_power' : '{:.0f}'.format(math.ceil(solar_rating))}
                         # Write the PV inverter
                         last_key += 1
-                        PV_Tech_Dict[last_key] = {'object' : 'solar',
-                                                  'name' : 'sol_panel_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
-                                                  'generator_mode' : 'SUPPLY_DRIVEN',
-                                                  'generator_status' : 'ONLINE',
-                                                  'panel_type' : 'SINGLE_CRYSTAL_SILICON',
-                                                  'efficiency' : '0.2',
-                                                  'area' : '{:.0f}'.format(floor_area)}
+                        PV_Tech_Dict[last_key] = {	'object' : 'solar',
+																		'name' : 'sol_panel_{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'parent' : '{:s}'.format(PV_Tech_Dict[last_key-1]['name']),
+																		'generator_mode' : 'SUPPLY_DRIVEN',
+																		'generator_status' : 'ONLINE',
+																		'panel_type' : 'SINGLE_CRYSTAL_SILICON',
+																		'efficiency' : '0.2',
+																		'area' : '{:.0f}'.format(floor_area)}
             
     return PV_Tech_Dict
             

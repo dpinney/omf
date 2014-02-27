@@ -30,10 +30,10 @@ if use_mysql == 1:
 #					'v6': [[-0.0091,0.0033,-0.0050,0.1273,0.0104],	[-0.1232,-0.0175,-0.0349,-0.1179,0.0033],	[0.1262,-0.2154,0.1218,0.3190,-0.0729]] };
 
 
-def getValues(dir,glm_filenames,days):
+def getValues(vdir,glm_filenames,days):
 	''' Take list of all .glms that were ran and return measurements for each metric.
 	
-	dir -- path to the working directory
+	vdir -- path to the working directory
 	glm_filenames -- List of filenames for every .glm that was ran in GridLab-D 
 	days -- List of dates for summer, winter, and spring. Should match the dates referenced in the .glm filenames
 	
@@ -64,7 +64,7 @@ def getValues(dir,glm_filenames,days):
 				continue
 		else:
 			c = 0
-			filename = dir+'\\csv_output\\'+re.sub('\.glm$','_network_node_recorder.csv',i)
+			filename = vdir+'/csv_output/'+re.sub('\.glm$','_network_node_recorder.csv',i)
 			if not os.path.isfile(filename):
 				print ("	Missing simulation output for "+i)
 				continue
@@ -188,10 +188,10 @@ def calcDiffs (glm_vals, scada):
 	return diffs;
 
 # We'll need to calculate the 5 metrics for each season for each comparison run. 
-def funcRawMetsDict (dir, glms,scada,days):
+def funcRawMetsDict (wdir, glms,scada,days):
 	'''Create dictionary of metrics for each .glm in question
 	
-	dir -- Path to the working directory
+	wdir -- Path to the working directory
 	glms -- A list of file names of .glms to compare
 	scada -- The SCADA values to be compared with .glm simulation output
 	days -- The list of dates for summer, winter, shoulder
@@ -199,7 +199,7 @@ def funcRawMetsDict (dir, glms,scada,days):
 	'''
 	# Create dictionary with measurements for each successfuly ran *.glm.
 	# Note: "Successfully ran" means that each of the three days ran successfully for a certain calibration.
-	measurements = getValues(dir, glms,days)
+	measurements = getValues(wdir, glms,days)
 	raw_metrics = {};
 	for i in measurements.keys():
 		# Set up an entry in the raw metrics dictionary for each calibrated *.glm.

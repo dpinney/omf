@@ -10,8 +10,6 @@ import random
 import Configuration
 import TechnologyParameters
 import Solar_Technology
-import feeder
-import AddTapeObjects
 import AddLoadShapes
 import copy
 
@@ -73,10 +71,10 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	last_key = len(glmCaseDict)
 
 	# Create clock dictionary
-	glmCaseDict[last_key] = {'clock' : '',
-							 'timezone' : '{:s}'.format(config_data['timezone']),
-							 'starttime' : "'{:s}'".format(tech_data['start_date']),
-							 'stoptime' : "'{:s}'".format(tech_data['end_date'])}
+	glmCaseDict[last_key] = {	'clock' : '',
+												'timezone' : '{:s}'.format(config_data['timezone']),
+												'starttime' : "'{:s}'".format(tech_data['start_date']),
+												'stoptime' : "'{:s}'".format(tech_data['end_date'])}
 	last_key += 1
 
 	# Create dictionaries of preprocessor directives
@@ -121,13 +119,13 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	glmCaseDict[last_key] = {'module' : 'climate'}
 	last_key += 1
 
-	glmCaseDict[last_key] = {'module' : 'residential',
-							 'implicit_enduses' : 'NONE'}
+	glmCaseDict[last_key] = {	'module' : 'residential',
+							 					'implicit_enduses' : 'NONE'}
 	last_key += 1
 
-	glmCaseDict[last_key] = {'module' : 'powerflow',
-							 'solver_method' : 'NR',
-							 'NR_iteration_limit' : '50'}
+	glmCaseDict[last_key] = {	'module' : 'powerflow',
+												'solver_method' : 'NR',
+												'NR_iteration_limit' : '50'}
 	last_key += 1
 
 	if use_flags['use_solar'] != 0 or use_flags['use_solar_res'] != 0 or use_flags['use_solar_com'] != 0 or use_flags['use_battery'] == 1 or use_flags['use_battery'] == 2:
@@ -139,34 +137,34 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 		last_key += 1
 
 	# Add the class player dictionary to glmCaseDict
-	glmCaseDict[last_key] = {'class' : 'player',
-							 'variable_types' : ['double'],
-							 'variable_names' : ['value']}
+	glmCaseDict[last_key] = {	'class' : 'player',
+												'variable_types' : ['double'],
+												'variable_names' : ['value']}
 	last_key += 1
 	
 	if use_flags['use_normalized_loadshapes'] == 1:
-		glmCaseDict[last_key] = {'object' : 'player',
-								 'name' : 'norm_feeder_loadshape',
-								 'property' : 'value',
-								 'file' : '{:s}'.format(config_data['load_shape_norm']),
-								 'loop' : '14600',
-								 'comment' : '// Will loop file for 40 years assuming the file has data for a 24 hour period'}
+		glmCaseDict[last_key] = {	'object' : 'player',
+													'name' : 'norm_feeder_loadshape',
+													'property' : 'value',
+													'file' : '{:s}'.format(config_data['load_shape_norm']),
+													'loop' : '14600',
+													'comment' : '// Will loop file for 40 years assuming the file has data for a 24 hour period'}
 		last_key += 1
 
 	# Include the objects for the TOU case flags
 	if use_flags['use_market'] != 0:
 		# Add class auction dictionary to glmCaseDict
-		glmCaseDict[last_key] = {'class' : 'auction',
-								 'variable_types' : ['double','double'],
-								 'variable_names' : ['my_avg','my_std']}
+		glmCaseDict[last_key] = {	'class' : 'auction',
+													'variable_types' : ['double','double'],
+													'variable_names' : ['my_avg','my_std']}
 		last_key += 1
 
 		# Add CPP player dictionary to glmCaseDict
 		CPP_flag_name = config_data['CPP_flag'] # Strip '.player' from config_data['CPP_flag']
 		CPP_flag_name.replace('.player','')
-		glmCaseDict[last_key] = {'object' : 'player',
-								 'name' : CPP_flag_name,
-								 'file' : config_data['CPP_flag']}
+		glmCaseDict[last_key] = {	'object' : 'player',
+													'name' : CPP_flag_name,
+													'file' : config_data['CPP_flag']}
 		last_key += 1
 
 		# Add auction object dictionary to glmCaseDict
@@ -178,13 +176,13 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 			temp_avg = config_data['CPP_stats'][0]
 			temp_std = config_data['CPP_stats'][1]
 
-		glmCaseDict[last_key] = {'object' : 'auction',
-								 'name' : tech_data['market_info'][0],
-								 'period' : "{:.0f}".format(tech_data['market_info'][1]),
-								 'special_mode' : 'BUYERS_ONLY',
-								 'unit' : 'kW',
-								 'my_avg' : temp_avg,
-								 'my_std' : temp_std}
+		glmCaseDict[last_key] = {	'object' : 'auction',
+													'name' : tech_data['market_info'][0],
+													'period' : "{:.0f}".format(tech_data['market_info'][1]),
+													'special_mode' : 'BUYERS_ONLY',
+													'unit' : 'kW',
+													'my_avg' : temp_avg,
+													'my_std' : temp_std}
 		parent_key = last_key
 		last_key += 1
 
@@ -195,11 +193,11 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 		elif use_flags['use_market'] == 2 or use_flags['use_market'] == 3: #TOU/CPP
 			auction_price_file = config_data['CPP_price_player']
 
-		glmCaseDict[last_key] = {'object' : 'player',
-								 'parent' : glmCaseDict[parent_key]['name'],
-								 'file' : auction_price_file,
-								 'loop' : '10',
-								 'property' : 'current_market.clearing_price'}
+		glmCaseDict[last_key] = {	'object' : 'player',
+													'parent' : glmCaseDict[parent_key]['name'],
+													'file' : auction_price_file,
+													'loop' : '10',
+													'property' : 'current_market.clearing_price'}
 		last_key += 1
 	else:
 		CPP_flag_name = None;
@@ -207,17 +205,17 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	# Add climate dictionaries
 	if '.csv' in tmy:
 		# Climate file is a cvs file. Need to add csv_reader object
-		glmCaseDict[last_key] = {'object' : 'csv_reader',
-								 'name' : 'CsvReader',
-								 'filename' : '"{:s}"'.format(tmy)}
+		glmCaseDict[last_key] = {	'object' : 'csv_reader',
+													'name' : 'CsvReader',
+													'filename' : '"{:s}"'.format(tmy)}
 		last_key += 1
 		climate_name = tmy.replace('.csv','')
 	elif '.tmy2' in tmy:
 		climate_name = tmy.replace('.tmy2','')
 
-	glmCaseDict[last_key] = {'object' : 'climate',
-							 'name' : '"{:s}"'.format(climate_name),
-							 'tmyfile' : '"{:s}"'.format(tmy)}
+	glmCaseDict[last_key] = {	'object' : 'climate',
+												'name' : '"{:s}"'.format(climate_name),
+												'tmyfile' : '"{:s}"'.format(tmy)}
 	if '.tmy2' in tmy:
 		glmCaseDict[last_key]['interpolate'] = 'QUADRATIC'
 	elif '.csv' in tmy:
@@ -225,35 +223,35 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	last_key += 1
 
 	# Add substation transformer transformer_configuration
-	glmCaseDict[last_key] = {'object' : 'transformer_configuration',
-							 'name' : 'trans_config_to_feeder',
-							 'connect_type' : 'WYE_WYE',
-							 'install_type' : 'PADMOUNT',
-							 'primary_voltage' : '{:d}'.format(config_data['nom_volt']),
-							 'secondary_voltage' : '{:s}'.format(nom_volt),
-							 'power_rating' : '{:.1f} MVA'.format(config_data['feeder_rating']),
-							 'impedance' : '0.00033+0.0022j'}
+	glmCaseDict[last_key] = {	'object' : 'transformer_configuration',
+												'name' : 'trans_config_to_feeder',
+												'connect_type' : 'WYE_WYE',
+												'install_type' : 'PADMOUNT',
+												'primary_voltage' : '{:d}'.format(config_data['nom_volt']),
+												'secondary_voltage' : '{:s}'.format(nom_volt),
+												'power_rating' : '{:.1f} MVA'.format(config_data['feeder_rating']),
+												'impedance' : '0.00033+0.0022j'}
 	last_key += 1
 
 	# Add CVR controller
 	if use_flags['use_vvc'] == 1:
 		# TODO: pull all of these out and put into TechnologyParameters()
-		glmCaseDict[last_key] = {'object' : 'volt_var_control',
-								 'name' : 'volt_var_control',
-								 'control_method' : 'ACTIVE',
-								 'capacitor_delay' : '60.0',
-								 'regulator_delay' : '60.0',
-								 'desired_pf' : '0.99',
-								 'd_max' : '0.8',
-								 'd_min' : '0.1',
-								 'substation_link' : 'substation_transfromer',
-								 'regulator_list' : '"{:s}"'.format(','.join(config_data['regulators'])), # config_data['regulators'] should contain a list of the names of the regulators that use CVR
-								 'maximum_voltage' : '{:.2f}'.format(config_data['voltage_regulation'][2]),
-								 'minimum_voltage' : '{:.2f}'.format(config_data['voltage_regulation'][1]),
-								 'max_vdrop' : '50',
-								 'high_load_deadband' :'{:.2f}'.format(config_data['voltage_regulation'][4]),
-								 'desired_voltages' : '{:.2f}'.format(config_data['voltage_regulation'][0]),
-								 'low_load_deadband' : '{:.2f}'.format(config_data['voltage_regulation'][3])}
+		glmCaseDict[last_key] = {	'object' : 'volt_var_control',
+													'name' : 'volt_var_control',
+													'control_method' : 'ACTIVE',
+													'capacitor_delay' : '60.0',
+													'regulator_delay' : '60.0',
+													'desired_pf' : '0.99',
+													'd_max' : '0.8',
+													'd_min' : '0.1',
+													'substation_link' : 'substation_transfromer',
+													'regulator_list' : '"{:s}"'.format(','.join(config_data['regulators'])), # config_data['regulators'] should contain a list of the names of the regulators that use CVR
+													'maximum_voltage' : '{:.2f}'.format(config_data['voltage_regulation'][2]),
+													'minimum_voltage' : '{:.2f}'.format(config_data['voltage_regulation'][1]),
+													'max_vdrop' : '50',
+													'high_load_deadband' :'{:.2f}'.format(config_data['voltage_regulation'][4]),
+													'desired_voltages' : '{:.2f}'.format(config_data['voltage_regulation'][0]),
+													'low_load_deadband' : '{:.2f}'.format(config_data['voltage_regulation'][3])}
 
 		num_caps = len(config_data['capacitor_outage'])
 		if num_caps > 0:
@@ -278,42 +276,42 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 		last_key += 1
 
 	# Add substation swing bus and substation transformer dictionaries
-	glmCaseDict[last_key] = {'object' : 'meter',
-							 'name' : 'network_node',
-							 'bustype' : 'SWING',
-							 'nominal_voltage' : '{:d}'.format(config_data['nom_volt']),
-							 'phases' : 'ABCN'}
+	glmCaseDict[last_key] = {	'object' : 'meter',
+												'name' : 'network_node',
+												'bustype' : 'SWING',
+												'nominal_voltage' : '{:d}'.format(config_data['nom_volt']),
+												'phases' : 'ABCN'}
 	# Add transmission voltage players
 	parent_key = last_key
 	last_key += 1
 
-	glmCaseDict[last_key] = {'object' : 'player',
-							 'property' : 'voltage_A',
-							 'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
-							 'loop' : '10',
-							 'file' : '{:s}'.format(config_data["voltage_players"][0])}
+	glmCaseDict[last_key] = {	'object' : 'player',
+												'property' : 'voltage_A',
+												'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
+												'loop' : '10',
+												'file' : '{:s}'.format(config_data["voltage_players"][0])}
 	last_key += 1
 
-	glmCaseDict[last_key] = {'object' : 'player',
-							 'property' : 'voltage_B',
-							 'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
-							 'loop' : '10',
-							 'file' : '{:s}'.format(config_data["voltage_players"][1])}
+	glmCaseDict[last_key] = {	'object' : 'player',
+												'property' : 'voltage_B',
+												'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
+												'loop' : '10',
+												'file' : '{:s}'.format(config_data["voltage_players"][1])}
 	last_key += 1
 
-	glmCaseDict[last_key] = {'object' : 'player',
-							 'property' : 'voltage_C',
-							 'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
-							 'loop' : '10',
-							 'file' : '{:s}'.format(config_data["voltage_players"][2])}
+	glmCaseDict[last_key] = {	'object' : 'player',
+												'property' : 'voltage_C',
+												'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
+												'loop' : '10',
+												'file' : '{:s}'.format(config_data["voltage_players"][2])}
 	last_key += 1
 
-	glmCaseDict[last_key] = {'object' : 'transformer',
-							 'name' : 'substation_transformer',
-							 'from' : 'network_node',
-							 'to' : '{:s}'.format(swing_bus_name),
-							 'phases' : 'ABCN',
-							 'configuration' : 'trans_config_to_feeder'}
+	glmCaseDict[last_key] = {	'object' : 'transformer',
+												'name' : 'substation_transformer',
+												'from' : 'network_node',
+												'to' : '{:s}'.format(swing_bus_name),
+												'phases' : 'ABCN',
+												'configuration' : 'trans_config_to_feeder'}
 	last_key += 1
 
 	# Copy static powerflow model glm dictionary into case dictionary
@@ -348,13 +346,13 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 
 		for x in glmCaseDict:
 			if 'object' in glmCaseDict[x] and glmCaseDict[x]['object'] == 'load':
-				commercial_dict[commercial_key] = {'name' : glmCaseDict[x]['name'],
-												   'parent' : 'None',
-												   'load_classification' : 'None',
-												   'load' : [0,0,0],
-												   'number_of_houses' : [0,0,0], #[phase A, phase B, phase C]
-												   'nom_volt' : glmCaseDict[x]['nominal_voltage'],
-												   'phases' : glmCaseDict[x]['phases']}
+				commercial_dict[commercial_key] = {	'name' : glmCaseDict[x]['name'],
+																				'parent' : 'None',
+																				'load_classification' : 'None',
+																				'load' : [0,0,0],
+																				'number_of_houses' : [0,0,0], #[phase A, phase B, phase C]
+																				'nom_volt' : glmCaseDict[x]['nominal_voltage'],
+																				'phases' : glmCaseDict[x]['phases']}
 				
 				if 'parent' in glmCaseDict[x]:
 					commercial_dict[commercial_key]['parent'] = glmCaseDict[x]['parent']
@@ -552,13 +550,13 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 		for x in glmCaseDict:
 			if 'object' in glmCaseDict[x] and glmCaseDict[x]['object'] == 'triplex_node':
 				if 'power_1' in glmCaseDict[x] or 'power_12' in glmCaseDict[x]:
-					residential_dict[residential_key] = {'name' : glmCaseDict[x]['name'],
-														 'parent' : 'None',
-														 'load_classification' : 'None',
-														 'number_of_houses' : 0,
-														 'load' : 0,
-														 'large_vs_small' : 0.0,
-														 'phases' : glmCaseDict[x]['phases']}
+					residential_dict[residential_key] = {	'name' : glmCaseDict[x]['name'],
+																				'parent' : 'None',
+																				'load_classification' : 'None',
+																				'number_of_houses' : 0,
+																				'load' : 0,
+																				'large_vs_small' : 0.0,
+																				'phases' : glmCaseDict[x]['phases']}
 					
 					if 'parent' in glmCaseDict[x]:
 						residential_dict[residential_key]['parent'] = glmCaseDict[x]['parent']
@@ -799,134 +797,7 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	return (glmCaseDict, last_key)
 
 def main():
-	#tests here
-	glm_object_dict = {}
-	glm_object_dict[0] = {'object' : 'overhead_line_conductor',
-						  'name' : 'ohlc_100',
-						  'geometric_mean_radius' : '0.0244',
-						  'resistance' : '0.306'}
-
-	glm_object_dict[1] = {'object' : 'overhead_line_conductor',
-						  'name' : 'ohlc_101',
-						  'geometric_mean_radius' : '0.00814',
-						  'resistance' : '0.592'}
-
-	glm_object_dict[2] = {'object' : 'line_spacing',
-						  'name' : 'ls_200',
-						  'distance_AB' : '2.5',
-						  'distance_BC' : '4.5',
-						  'distance_AC' : '7.0',
-						  'distance_AN' : '5.656854',
-						  'distance_BN' : '4.272002',
-						  'distance_CN' : '5.0'}
-
-	glm_object_dict[3] = {'object' : 'line_configuration',
-						  'name' : 'lc_300',
-						  'conductor_A' : 'ohlc_100',
-						  'conductor_B' : 'ohlc_100',
-						  'conductor_C' : 'ohlc_100',
-						  'conductor_N' : 'ohlc_101',
-						  'spacing' : 'ls_200'}
-
-	glm_object_dict[4] = {'object' : 'transformer_configuration',
-						  'name' : 'tc_400',
-						  'connect_type' : '1',
-						  'power_rating' : '7000',
-						  'powerA_rating' : '875',
-						  'powerB_rating' : '1750',
-						  'powerC_rating' : '4375',
-						  'primary_voltage' : '7200',
-						  'secondary_voltage' : '2400',
-						  'resistance' : '0.01',
-						  'reactance' : '0.06'}
-
-	glm_object_dict[5] = {'object' : 'node',
-						  'name' : 'node1',
-						  'phases' : 'ABCN',
-                          'bustype' : 'SWING',
-						  'voltage_A' : '+7199.558+0.000j',
-						  'voltage_B' : '-3599.779-6235.000j',
-						  'voltage_C' : '-3599.779+6235.000j',
-						  'nominal_voltage' : '7200'}
-
-	glm_object_dict[6] = {'object' : 'overhead_line',
-						  'name' : 'oh_12',
-						  'phases' : 'ABCN',
-						  'from' : 'node1',
-						  'to' : 'node2',
-						  'length' : '2000',
-						  'configuration' : 'lc_300'}
-
-	glm_object_dict[7] = {'object' : 'node',
-						  'name' : 'node2',
-						  'phases' : 'ABCN',
-						  'voltage_A' : '+7199.558+0.000j',
-						  'voltage_B' : '-3599.779-6235.000j',
-						  'voltage_C' : '-3599.779+6235.000j',
-						  'nominal_voltage' : '7200'}
-
-	glm_object_dict[8] = {'object' : 'transformer',
-						  'name' : 't_23',
-						  'phases' : 'ABCN',
-						  'from' : 'node2',
-						  'to' : 'node3',
-						  'configuration' : 'tc_400'}
-
-	glm_object_dict[9] = {'object' : 'node',
-						  'name' : 'node3',
-						  'phases' : 'ABCN',
-						  'voltage_A' : '+2401.777+0.000j',
-						  'voltage_B' : '-1200.889-2080.000j',
-						  'voltage_C' : '-1200.889+2080.000j',
-						  'nominal_voltage' : '2400'}
-
-	glm_object_dict[10] = {'object' : 'overhead_line',
-						  'name' : 'oh_34',
-						  'phases' : 'ABCN',
-						  'from' : 'node3',
-						  'to' : 'node4',
-						  'length' : '2500',
-						  'configuration' : 'lc_300'}
-
-	glm_object_dict[11] = {'object' : 'node',
-						  'name' : 'node4',
-						  'phases' : 'ABCN',
-						  'voltage_A' : '+2401.777+0.000j',
-						  'voltage_B' : '-1200.889-2080.000j',
-						  'voltage_C' : '-1200.889+2080.000j',
-						  'nominal_voltage' : '2400'}
-
-	glm_object_dict[12] = {'object' : 'load',
-						  'parent' : 'node4',
-						  'name' : 'l4A',
-						  'phases' : 'AN',
-						  'constant_power_A' : '785369.750+258138.553j',
-						  'load_class' : 'C',
-						  'nominal_voltage' : '2400'}
-
-	glm_object_dict[13] = {'object' : 'load',
-						  'parent' : 'node4',
-						  'name' : 'l4B',
-						  'phases' : 'BN',
-						  'constant_power_B' : '1570739.500+516277.107j',
-						  'load_class' : 'C',
-						  'nominal_voltage' : '2400'}
-
-	glm_object_dict[14] = {'object' : 'load',
-						  'parent' : 'node4',
-						  'name' : 'l4C',
-						  'phases' : 'CN',
-						  'constant_power_C' : '3926848.750+1290692.768j',
-						  'load_class' : 'C',
-						  'nominal_voltage' : '2400'}
-
-
-	baseGLM, last_key = GLD_Feeder(glm_object_dict,-1,'C:/Projects/NRECEA/OMF/omf_calibration_27/src/feeder_calibration_scripts/omf/calibration')
-	glm_string = feeder.sortedWrite(baseGLM)
-	file = open('C:/Projects/NRECEA/OMF/omf_calibration_27/src/feeder_calibration_scripts/omf/calibration/four_node_loadshapes_test1.glm','w')
-	file.write(glm_string)
-	file.close()
-	print('success!')
-
+	# tests go here
+	pass
 if __name__ ==  '__main__':
 	main()

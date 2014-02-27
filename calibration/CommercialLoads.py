@@ -40,103 +40,103 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 
 	if len(commercial_dict) > 0 and use_flags["use_commercial"] == 1:
 		# setup all of the line configurations we may need
-		glmCaseDict[last_object_key] = {"object" : "triplex_line_conductor",
-										"name" : "comm_line_cfg_cnd1",
-										"resistance" : "0.48",
-										"geometric_mean_radius" : "0.0158"}
+		glmCaseDict[last_object_key] = {	"object" : "triplex_line_conductor",
+																"name" : "comm_line_cfg_cnd1",
+																"resistance" : "0.48",
+																"geometric_mean_radius" : "0.0158"}
 		last_object_key += 1
 		
-		glmCaseDict[last_object_key] = {"object" : "triplex_line_conductor",
-										"name" : "comm_line_cfg_cnd2",
-										"resistance" : "0.48",
-										"geometric_mean_radius" : "0.0158"}
+		glmCaseDict[last_object_key] = {	"object" : "triplex_line_conductor",
+																"name" : "comm_line_cfg_cnd2",
+																"resistance" : "0.48",
+																"geometric_mean_radius" : "0.0158"}
 
 		last_object_key += 1
 		
-		glmCaseDict[last_object_key] = {"object" : "triplex_line_conductor",
-										"name" : "comm_line_cfg_cndN",
-										"resistance" : "0.48",
-										"geometric_mean_radius" : "0.0158"}
+		glmCaseDict[last_object_key] = {	"object" : "triplex_line_conductor",
+																"name" : "comm_line_cfg_cndN",
+																"resistance" : "0.48",
+																"geometric_mean_radius" : "0.0158"}
 		last_object_key += 1
 		
-		glmCaseDict[last_object_key] = {"object" : "triplex_line_configuration",
-										"name" : "commercial_line_config",
-										"conductor_1" : "comm_line_cfg_cnd1", 
-										"conductor_2" : "comm_line_cfg_cnd2",
-										"conductor_N" : "comm_line_cfg_cndN",
-										"insulation_thickness" : "0.08",
-										"diameter" : "0.522"}
+		glmCaseDict[last_object_key] = {	"object" : "triplex_line_configuration",
+																"name" : "commercial_line_config",
+																"conductor_1" : "comm_line_cfg_cnd1", 
+																"conductor_2" : "comm_line_cfg_cnd2",
+																"conductor_N" : "comm_line_cfg_cndN",
+																"insulation_thickness" : "0.08",
+																"diameter" : "0.522"}
 		last_object_key += 1
 		
-		glmCaseDict[last_object_key] = {"object" : "line_spacing",     
-										"name" : "line_spacing_commABC",     
-										"distance_AB" : "53.19999999996 in",    
-										"distance_BC" : "53.19999999996 in",    
-										"distance_AC" : "53.19999999996 in",    
-										"distance_AN" : "69.80000000004 in",    
-										"distance_BN" : "69.80000000004 in",    
-										"distance_CN" : "69.80000000004 in"}
+		glmCaseDict[last_object_key] = {	"object" : "line_spacing",     
+																"name" : "line_spacing_commABC",     
+																"distance_AB" : "53.19999999996 in",    
+																"distance_BC" : "53.19999999996 in",    
+																"distance_AC" : "53.19999999996 in",    
+																"distance_AN" : "69.80000000004 in",    
+																"distance_BN" : "69.80000000004 in",    
+																"distance_CN" : "69.80000000004 in"}
 		last_object_key += 1;
 
-		glmCaseDict[last_object_key] = {"object" : "overhead_line_conductor",     
-										"name" : "overhead_line_conductor_comm",     
-										"rating.summer.continuous" : "443.0",     
-										"geometric_mean_radius" : "0.02270 ft",    
-										"resistance" : "0.05230"}
+		glmCaseDict[last_object_key] = {	"object" : "overhead_line_conductor",     
+																"name" : "overhead_line_conductor_comm",     
+																"rating.summer.continuous" : "443.0",     
+																"geometric_mean_radius" : "0.02270 ft",    
+																"resistance" : "0.05230"}
 		last_object_key += 1
 
-		glmCaseDict[last_object_key] = {"object" : "line_configuration",     
-										"name" : "line_configuration_commABC",     
-										"conductor_A" : "overhead_line_conductor_comm",     
-										"conductor_B" : "overhead_line_conductor_comm",     
-										"conductor_C" : "overhead_line_conductor_comm",     
-										"conductor_N" : "overhead_line_conductor_comm",     
-										"spacing" : "line_spacing_commABC"}
+		glmCaseDict[last_object_key] = {	"object" : "line_configuration",     
+																"name" : "line_configuration_commABC",     
+																"conductor_A" : "overhead_line_conductor_comm",     
+																"conductor_B" : "overhead_line_conductor_comm",     
+																"conductor_C" : "overhead_line_conductor_comm",     
+																"conductor_N" : "overhead_line_conductor_comm",     
+																"spacing" : "line_spacing_commABC"}
 		last_object_key += 1 
 
-		glmCaseDict[last_object_key] = {"object" : "line_configuration",     
-										"name" : "line_configuration_commAB",     
-										"conductor_A" : "overhead_line_conductor_comm",     
-										"conductor_B" : "overhead_line_conductor_comm",         
-										"conductor_N" : "overhead_line_conductor_comm",     
-										"spacing" : "line_spacing_commABC"}
+		glmCaseDict[last_object_key] = {	"object" : "line_configuration",     
+																"name" : "line_configuration_commAB",     
+																"conductor_A" : "overhead_line_conductor_comm",     
+																"conductor_B" : "overhead_line_conductor_comm",         
+																"conductor_N" : "overhead_line_conductor_comm",     
+																"spacing" : "line_spacing_commABC"}
 		last_object_key += 1 
 
-		glmCaseDict[last_object_key] = {"object" : "line_configuration",     
-										"name" : "line_configuration_commAC",     
-										"conductor_A" : "overhead_line_conductor_comm",          
-										"conductor_C" : "overhead_line_conductor_comm",     
-										"conductor_N" : "overhead_line_conductor_comm",     
-										"spacing" : "line_spacing_commABC"}     
+		glmCaseDict[last_object_key] = {	"object" : "line_configuration",     
+																"name" : "line_configuration_commAC",     
+																"conductor_A" : "overhead_line_conductor_comm",          
+																"conductor_C" : "overhead_line_conductor_comm",     
+																"conductor_N" : "overhead_line_conductor_comm",     
+																"spacing" : "line_spacing_commABC"}     
 		last_object_key += 1
 
-		glmCaseDict[last_object_key] = {"object" : "line_configuration",     
-										"name" : "line_configuration_commBC",         
-										"conductor_B" : "overhead_line_conductor_comm",     
-										"conductor_C" : "overhead_line_conductor_comm",     
-										"conductor_N" : "overhead_line_conductor_comm",     
-										"spacing" : "line_spacing_commABC"}
+		glmCaseDict[last_object_key] = {	"object" : "line_configuration",     
+																"name" : "line_configuration_commBC",         
+																"conductor_B" : "overhead_line_conductor_comm",     
+																"conductor_C" : "overhead_line_conductor_comm",     
+																"conductor_N" : "overhead_line_conductor_comm",     
+																"spacing" : "line_spacing_commABC"}
 		last_object_key += 1 
 
-		glmCaseDict[last_object_key] = {"object" : "line_configuration",     
-										"name" : "line_configuration_commA",     
-										"conductor_A" : "overhead_line_conductor_comm",        
-										"conductor_N" : "overhead_line_conductor_comm",     
-										"spacing" : "line_spacing_commABC"}     
+		glmCaseDict[last_object_key] = {	"object" : "line_configuration",     
+																"name" : "line_configuration_commA",     
+																"conductor_A" : "overhead_line_conductor_comm",        
+																"conductor_N" : "overhead_line_conductor_comm",     
+																"spacing" : "line_spacing_commABC"}     
 		last_object_key += 1
 
-		glmCaseDict[last_object_key] = {"object" : "line_configuration",     
-										"name" : "line_configuration_commB",        
-										"conductor_B" : "overhead_line_conductor_comm",         
-										"conductor_N" : "overhead_line_conductor_comm",     
-										"spacing" : "line_spacing_commABC"}     
+		glmCaseDict[last_object_key] = {	"object" : "line_configuration",     
+																"name" : "line_configuration_commB",        
+																"conductor_B" : "overhead_line_conductor_comm",         
+																"conductor_N" : "overhead_line_conductor_comm",     
+																"spacing" : "line_spacing_commABC"}     
 		last_object_key += 1
 
-		glmCaseDict[last_object_key] = {"object" : "line_configuration",     
-										"name" : "line_configuration_commC",        
-										"conductor_C" : "overhead_line_conductor_comm",         
-										"conductor_N" : "overhead_line_conductor_comm",     
-										"spacing" : "line_spacing_commABC"}
+		glmCaseDict[last_object_key] = {	"object" : "line_configuration",     
+																"name" : "line_configuration_commC",        
+																"conductor_C" : "overhead_line_conductor_comm",         
+																"conductor_N" : "overhead_line_conductor_comm",     
+																"spacing" : "line_spacing_commABC"}
 		last_object_key += 1
 
 		#initializations for the commercial "house" list
@@ -205,37 +205,37 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 				no_of_offices = int(round(total_comm_houses / 15))
 				if (no_of_offices == 0):
 					no_of_offices = 1
-				glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
-												"name" : "CTTF_config_A_{:s}".format(my_name),
-												"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
-												"install_type" : "POLETOP",
-												"impedance" : "0.00033+0.0022j",
-												"shunt_impedance" : "10000+10000j",
-												"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
-												"secondary_voltage" : "{:.3f}".format(120),
-												"powerA_rating" : "50 kVA"}
+				glmCaseDict[last_object_key] = {	"object" : "transformer_configuration",
+																		"name" : "CTTF_config_A_{:s}".format(my_name),
+																		"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
+																		"install_type" : "POLETOP",
+																		"impedance" : "0.00033+0.0022j",
+																		"shunt_impedance" : "10000+10000j",
+																		"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
+																		"secondary_voltage" : "{:.3f}".format(120),
+																		"powerA_rating" : "50 kVA"}
 				last_object_key += 1
 				
-				glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
-												"name" : "CTTF_config_B_{:s}".format(my_name),
-												"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
-												"install_type" : "POLETOP",
-												"impedance" : "0.00033+0.0022j",
-												"shunt_impedance" : "10000+10000j",
-												"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
-												"secondary_voltage" : "{:.3f}".format(120),
-												"powerB_rating" : "50 kVA"}
+				glmCaseDict[last_object_key] = {	"object" : "transformer_configuration",
+																		"name" : "CTTF_config_B_{:s}".format(my_name),
+																		"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
+																		"install_type" : "POLETOP",
+																		"impedance" : "0.00033+0.0022j",
+																		"shunt_impedance" : "10000+10000j",
+																		"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
+																		"secondary_voltage" : "{:.3f}".format(120),
+																		"powerB_rating" : "50 kVA"}
 				last_object_key += 1
 
-				glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
-												"name" : "CTTF_config_C_{:s}".format(my_name),
-												"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
-												"install_type" : "POLETOP",
-												"impedance" : "0.00033+0.0022j",
-												"shunt_impedance" : "10000+10000j",
-												"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
-												"secondary_voltage" : "{:.3f}".format(120),
-												"powerC_rating" : "50 kVA"}
+				glmCaseDict[last_object_key] = {	"object" : "transformer_configuration",
+																		"name" : "CTTF_config_C_{:s}".format(my_name),
+																		"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
+																		"install_type" : "POLETOP",
+																		"impedance" : "0.00033+0.0022j",
+																		"shunt_impedance" : "10000+10000j",
+																		"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
+																		"secondary_voltage" : "{:.3f}".format(120),
+																		"powerC_rating" : "50 kVA"}
 				last_object_key += 1
 				#print('iterating over number of offices')
 				for jjj in xrange(no_of_offices):
@@ -252,20 +252,20 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 					window_frame = 'NONE';             #config_data.thermal_properties[0](7)
 					int_gains = 3.24; #W/sf
 
-					glmCaseDict[last_object_key] = {"object" : "overhead_line",
-													"from" : "{:s}".format(my_parent),
-													"to" : "{:s}_office_meter{:.0f}".format(my_name,jjj),
-													"phases" : "{:s}".format(commercial_dict[iii]['phases']),
-													"length" : "50ft",
-													"configuration" : "line_configuration_comm{:s}".format(ph)}
+					glmCaseDict[last_object_key] = {	"object" : "overhead_line",
+																			"from" : "{:s}".format(my_parent),
+																			"to" : "{:s}_office_meter{:.0f}".format(my_name,jjj),
+																			"phases" : "{:s}".format(commercial_dict[iii]['phases']),
+																			"length" : "50ft",
+																			"configuration" : "line_configuration_comm{:s}".format(ph)}
 					last_object_key += 1
 
-					glmCaseDict[last_object_key] = {"object" : "meter",            
-													"phases" : "{:s}".format(commercial_dict[iii]['phases']),
-													"name" : "{:s}_office_meter{:.0f}".format(my_name,jjj),
-													"groupid" : "Commercial_Meter",
-													"meter_power_consumption" : "{:s}".format(tech_data["comm_meter_cons"]),
-													"nominal_voltage" : "{:f}".format(nom_volt)}
+					glmCaseDict[last_object_key] = {	"object" : "meter",            
+																			"phases" : "{:s}".format(commercial_dict[iii]['phases']),
+																			"name" : "{:s}_office_meter{:.0f}".format(my_name,jjj),
+																			"groupid" : "Commercial_Meter",
+																			"meter_power_consumption" : "{:s}".format(tech_data["comm_meter_cons"]),
+																			"nominal_voltage" : "{:f}".format(nom_volt)}
 
 					# Store solar technology parent information
 					if use_flags["use_solar"] != 0 or use_flags["use_solar_com"] != 0:
@@ -279,35 +279,35 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 						homes_stored = 0
 
 					if use_flags["use_billing"] == 1:
-						glmCaseDict[last_object_key].update( {"bill_mode" : "UNIFORM",
-															  "price" : "{:.5f}".format(tech_data["comm_flat_price"]),
-															  "monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
-															  "bill_day" : "1"} )
+						glmCaseDict[last_object_key].update({	"bill_mode" : "UNIFORM",
+																						"price" : "{:.5f}".format(tech_data["comm_flat_price"]),
+																						"monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
+																						"bill_day" : "1"})
 					elif (use_flags["use_billing"] == 2): # TIERED
 						raise Exception('use_flag.use_billing == 2 not functional at this time');
 					elif (use_flags["use_billing"] == 3): # TOU or RTP
-						glmCaseDict[last_object_key].update({"bill_mode" : "HOURLY",
-															 "monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
-															 "bill_day" : "1",
-															 "power_market" : "{:s}".format(tech_data["market_info"][0])})
+						glmCaseDict[last_object_key].update({	"bill_mode" : "HOURLY",
+																						"monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
+																						"bill_day" : "1",
+																						"power_market" : "{:s}".format(tech_data["market_info"][0])})
 					last_object_key += 1;
 					
 					#for phind = 1:3 #for each of three floors (5 zones each)
 					#for phind = 1:no_of_phases #jlh
 					for phind in xrange(no_of_phases):
-						glmCaseDict[last_object_key] = {"object" : "transformer",
-														"name" : "{:s}_CTTF_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"phases" : "{:s}S".format(ph[phind]),
-														"from" : "{:s}_office_meter{:.0f}".format(my_name,jjj),
-														"to" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"groupid" : "Distribution_Trans",
-														"configuration" : "CTTF_config_{:s}_{:s}".format(ph[phind],my_name)}
+						glmCaseDict[last_object_key] = {	"object" : "transformer",
+																				"name" : "{:s}_CTTF_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"phases" : "{:s}S".format(ph[phind]),
+																				"from" : "{:s}_office_meter{:.0f}".format(my_name,jjj),
+																				"to" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"groupid" : "Distribution_Trans",
+																				"configuration" : "CTTF_config_{:s}_{:s}".format(ph[phind],my_name)}
 						last_object_key += 1;
 
-						glmCaseDict[last_object_key] = {"object" : "triplex_meter",
-														"name" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"phases" : "{:s}S".format(ph[phind]),
-														"nominal_voltage" : "120"}
+						glmCaseDict[last_object_key] = {	"object" : "triplex_meter",
+																				"name" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"phases" : "{:s}S".format(ph[phind]),
+																				"nominal_voltage" : "120"}
 						last_object_key += 1;
 
 					# split total number of zones as close to evenly as possible between phases #jlh
@@ -393,39 +393,39 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							init_temp = 68 + 4*random.random();
 							os_rand = config_data["over_sizing_factor"][0] * (.8 + 0.4*random.random());
 							COP_A = tech_data["cooling_COP"] * (0.8 + 0.4*random.random());
-							glmCaseDict[last_object_key] = {"object" : "house",
-															"name" :  "office{:s}_{:s}{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
-															"parent" : "{:s}_tm_{:s}_{:.0f}".format(my_name,my_phases[phind],jjj),
-															"groupid" : "Commercial",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"floor_area" : "{:.0f}".format(floor_area),
-															"design_internal_gains" : "{:.0f}".format(int_gains*floor_area*3.413),
-															"number_of_doors" : "{:.0f}".format(no_of_doors),
-															"aspect_ratio" : "{:.2f}".format(aspect_ratio),
-															"total_thermal_mass_per_floor_area" : "{:1.2f}".format(thermal_mass_per_floor_area),
-															"interior_surface_heat_transfer_coeff" : "{:1.2f}".format(surface_heat_trans_coeff),
-															"interior_exterior_wall_ratio" : "{:2.1f}".format(interior_exterior_wall_ratio),
-															"exterior_floor_fraction" : "{:.3f}".format(exterior_floor_fraction),
-															"exterior_ceiling_fraction" : "{:.3f}".format(exterior_ceiling_fraction),
-															"Rwall" : "{:2.1f}".format(Rwall),
-															"Rroof" : "{:2.1f}".format(Rroof),
-															"Rfloor" : "{:.2f}".format(Rfloor),
-															"Rdoors" : "{:2.1f}".format(Rdoors),
-															"exterior_wall_fraction" : "{:.2f}".format(exterior_wall_fraction),
-															"glazing_layers" : "{:s}".format(glazing_layers),
-															"glass_type" : "{:s}".format(glass_type),
-															"glazing_treatment" : "{:s}".format(glazing_treatment),
-															"window_frame" : "{:s}".format(window_frame),            
-															"airchange_per_hour" : "{:.2f}".format(airchange_per_hour),    
-															"window_wall_ratio" : "{:0.3f}".format(window_wall_ratio),    
-															"heating_system_type" : "{:s}".format(heat_type),
-															"auxiliary_system_type" : "{:s}".format(aux_type),
-															"fan_type" : "{:s}".format(fan_type),
-															"cooling_system_type" : "{:s}".format(cool_type),
-															"air_temperature" : "{:.2f}".format(init_temp),
-															"mass_temperature" : "{:.2f}".format(init_temp),
-															"over_sizing_factor" : "{:.1f}".format(os_rand),
-															"cooling_COP" : "{:2.2f}".format(COP_A)}
+							glmCaseDict[last_object_key] = {	"object" : "house",
+																					"name" :  "office{:s}_{:s}{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
+																					"parent" : "{:s}_tm_{:s}_{:.0f}".format(my_name,my_phases[phind],jjj),
+																					"groupid" : "Commercial",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"floor_area" : "{:.0f}".format(floor_area),
+																					"design_internal_gains" : "{:.0f}".format(int_gains*floor_area*3.413),
+																					"number_of_doors" : "{:.0f}".format(no_of_doors),
+																					"aspect_ratio" : "{:.2f}".format(aspect_ratio),
+																					"total_thermal_mass_per_floor_area" : "{:1.2f}".format(thermal_mass_per_floor_area),
+																					"interior_surface_heat_transfer_coeff" : "{:1.2f}".format(surface_heat_trans_coeff),
+																					"interior_exterior_wall_ratio" : "{:2.1f}".format(interior_exterior_wall_ratio),
+																					"exterior_floor_fraction" : "{:.3f}".format(exterior_floor_fraction),
+																					"exterior_ceiling_fraction" : "{:.3f}".format(exterior_ceiling_fraction),
+																					"Rwall" : "{:2.1f}".format(Rwall),
+																					"Rroof" : "{:2.1f}".format(Rroof),
+																					"Rfloor" : "{:.2f}".format(Rfloor),
+																					"Rdoors" : "{:2.1f}".format(Rdoors),
+																					"exterior_wall_fraction" : "{:.2f}".format(exterior_wall_fraction),
+																					"glazing_layers" : "{:s}".format(glazing_layers),
+																					"glass_type" : "{:s}".format(glass_type),
+																					"glazing_treatment" : "{:s}".format(glazing_treatment),
+																					"window_frame" : "{:s}".format(window_frame),            
+																					"airchange_per_hour" : "{:.2f}".format(airchange_per_hour),    
+																					"window_wall_ratio" : "{:0.3f}".format(window_wall_ratio),    
+																					"heating_system_type" : "{:s}".format(heat_type),
+																					"auxiliary_system_type" : "{:s}".format(aux_type),
+																					"fan_type" : "{:s}".format(fan_type),
+																					"cooling_system_type" : "{:s}".format(cool_type),
+																					"air_temperature" : "{:.2f}".format(init_temp),
+																					"mass_temperature" : "{:.2f}".format(init_temp),
+																					"over_sizing_factor" : "{:.1f}".format(os_rand),
+																					"cooling_COP" : "{:2.2f}".format(COP_A)}
 							parent_house = glmCaseDict[last_object_key] 
 
 							# Store thermal storage technology parent information
@@ -449,28 +449,28 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 								crh2 = s_tstat + (1 - slider) * (3 - s_tstat);
 								hrl2 = -s_tstat - (1 - slider) * (3 - s_tstat);
 								crl2 = s_tstat + (1 - slider) * (3 - s_tstat);
-								glmCaseDict[last_object_key] = {"object" : "controller",
-																"name" : parent_house["name"]+"_cntlr",
-																"parent" : parent_house["name"],
-																"schedule_skew" : "{:.0f}".format(skew_value),
-																"market" : "{:s}".format(tech_data["market_info"][0]),
-																"bid_mode" : "OFF",
-																"control_mode" : "RAMP",
-																"range_high" : "{:.3f}".format(crh),
-																"range_low" : "{:.3f}".format(crl),
-																"ramp_high" : "{:.3f}".format(crh2),
-																"ramp_low" : "{:.3f}".format(crl2),
-																"base_setpoint" : "office_cooling",
-																"period" : "{:.0f}".format(tech_data["market_info"][1]),
-																"average_target" : "my_avg",
-																"standard_deviation_target" : "my_std",
-																"target" : "air_temperature",
-																"setpoint" : "cooling_setpoint",
-																"demand" : "last_cooling_load",
-																"deadband" : "thermostat_deadband",
-																"total" : "hvac_load",
-																"load" : "hvac_load",
-																"state" : "power_state"}
+								glmCaseDict[last_object_key] = {	"object" : "controller",
+																						"name" : parent_house["name"]+"_cntlr",
+																						"parent" : parent_house["name"],
+																						"schedule_skew" : "{:.0f}".format(skew_value),
+																						"market" : "{:s}".format(tech_data["market_info"][0]),
+																						"bid_mode" : "OFF",
+																						"control_mode" : "RAMP",
+																						"range_high" : "{:.3f}".format(crh),
+																						"range_low" : "{:.3f}".format(crl),
+																						"ramp_high" : "{:.3f}".format(crh2),
+																						"ramp_low" : "{:.3f}".format(crl2),
+																						"base_setpoint" : "office_cooling",
+																						"period" : "{:.0f}".format(tech_data["market_info"][1]),
+																						"average_target" : "my_avg",
+																						"standard_deviation_target" : "my_std",
+																						"target" : "air_temperature",
+																						"setpoint" : "cooling_setpoint",
+																						"demand" : "last_cooling_load",
+																						"deadband" : "thermostat_deadband",
+																						"total" : "hvac_load",
+																						"load" : "hvac_load",
+																						"state" : "power_state"}
 								last_object_key += 1
 								parent_house["cooling_setpoint"] = "85"
 							else:
@@ -479,18 +479,18 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 									c_on = 600 + 600*dlc_c_rand( (iii-1) * no_of_offices + jjj );
 									temp_c = 0.2+0.3*dlc_c_rand2( (iii-1) * no_of_offices + jjj );
 									c_off = c_on * ( temp_c / (1 - temp_c) ); # 30-50# of the total time should be "off"
-									glmCaseDict[last_object_key] = {"object" : "passive_controller",
-																	"name" : parent_house["name"]+"_psv_cntlr",
-																	"parent" : parent_house["name"],
-																	"control_mode" : "DIRECT_LOAD_CONTROL",
-																	"dlc_mode" : "CYCLING",
-																	"cycle_length_on" : "{:.0f}".format(c_on),
-																	"cycle_length_off" : "{:.0f}".format(c_off),
-																	"period" : "0",
-																	"state_property" : "override",
-																	"observation_object" : "{:s}".format(tech_data["market_info"][0]),
-																	"observation_property" : "past_market.clearing_price",
-																	"second_tier_price" : "{:f}".format(config_data["CPP_prices"][2])}
+									glmCaseDict[last_object_key] = {	"object" : "passive_controller",
+																							"name" : parent_house["name"]+"_psv_cntlr",
+																							"parent" : parent_house["name"],
+																							"control_mode" : "DIRECT_LOAD_CONTROL",
+																							"dlc_mode" : "CYCLING",
+																							"cycle_length_on" : "{:.0f}".format(c_on),
+																							"cycle_length_off" : "{:.0f}".format(c_off),
+																							"period" : "0",
+																							"state_property" : "override",
+																							"observation_object" : "{:s}".format(tech_data["market_info"][0]),
+																							"observation_property" : "past_market.clearing_price",
+																							"second_tier_price" : "{:f}".format(config_data["CPP_prices"][2])}
 									last_object_key += 1
 									#@todo: extend above house with "heating_setpoint"
 									#"heating_setpoint" : "office_heating",
@@ -498,83 +498,83 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							# Need all of the "appliances"
 							# Lights
 							adj_lights = (0.9 + 0.1*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW
-							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "lights_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name, my_phases[phind], jjj, zoneind, flrind), #added floor ID #jlh
-															"parent" : parent_house["name"],
-															"groupid" : "Lights",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"heatgain_fraction" : "1.0",
-															"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
-															"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
-															"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
-															"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
-															"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
-															"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
-															"base_power" : "office_lights*{:.2f}".format(adj_lights)}
+							glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																					"name" : "lights_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name, my_phases[phind], jjj, zoneind, flrind), #added floor ID #jlh
+																					"parent" : parent_house["name"],
+																					"groupid" : "Lights",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"heatgain_fraction" : "1.0",
+																					"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
+																					"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
+																					"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
+																					"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
+																					"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
+																					"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
+																					"base_power" : "office_lights*{:.2f}".format(adj_lights)}
 							last_object_key += 1;
 
 							# Plugs
 							adj_plugs = (0.9 + 0.2*random.random()) * floor_area / 1000; # randomize 20# then convert W/sf -> kW
-							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "plugs_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
-															"parent" : parent_house["name"],
-															"groupid" : "Plugs",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"heatgain_fraction" : "1.0",
-															"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
-															"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
-															"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
-															"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
-															"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
-															"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
-															"base_power" : "office_plugs*{:.2f}".format(adj_plugs)}
+							glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																					"name" : "plugs_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
+																					"parent" : parent_house["name"],
+																					"groupid" : "Plugs",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"heatgain_fraction" : "1.0",
+																					"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
+																					"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
+																					"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
+																					"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
+																					"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
+																					"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
+																					"base_power" : "office_plugs*{:.2f}".format(adj_plugs)}
 							last_object_key += 1;
 
 							# Gas Waterheater
 							adj_gas = (0.9 + 0.2*random.random()) * floor_area / 1000; # randomize 20# then convert W/sf -> kW
-							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "wh_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
-															"parent" : parent_house["name"],
-															"groupid" : "Gas_waterheater",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"heatgain_fraction" : "1.0",
-															"power_fraction" : "0.0",
-															"impedance_fraction" : "0.0",
-															"current_fraction" : "0.0",
-															"power_pf" : "1.0",  
-															"base_power" : "office_gas*{:.2f}".format(adj_gas)}
+							glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																					"name" : "wh_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
+																					"parent" : parent_house["name"],
+																					"groupid" : "Gas_waterheater",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"heatgain_fraction" : "1.0",
+																					"power_fraction" : "0.0",
+																					"impedance_fraction" : "0.0",
+																					"current_fraction" : "0.0",
+																					"power_pf" : "1.0",  
+																					"base_power" : "office_gas*{:.2f}".format(adj_gas)}
 							last_object_key += 1;
 
 							# Exterior Lighting
 							adj_ext = (0.9 + 0.1*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW
-							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "ext_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
-															"parent" : parent_house["name"],
-															"groupid" : "Exterior_lighting",
-															"schedule_skew" : "{:.0f}".format(skew_value), 
-															"heatgain_fraction" : "0.0",
-															"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
-															"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
-															"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
-															"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
-															"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
-															"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
-															"base_power" : "office_exterior*{:.2f}".format(adj_ext)}
+							glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																					"name" : "ext_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
+																					"parent" : parent_house["name"],
+																					"groupid" : "Exterior_lighting",
+																					"schedule_skew" : "{:.0f}".format(skew_value), 
+																					"heatgain_fraction" : "0.0",
+																					"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
+																					"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
+																					"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
+																					"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
+																					"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
+																					"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
+																					"base_power" : "office_exterior*{:.2f}".format(adj_ext)}
 							last_object_key += 1;
 
 							# Occupancy
 							adj_occ = (0.9 + 0.1*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW 
-							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "occ_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
-															"parent" : parent_house["name"],
-															"groupid" : "Occupancy",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"heatgain_fraction" : "1.0",
-															"power_fraction" : "0.0",
-															"impedance_fraction" : "0.0",
-															"current_fraction" : "0.0",
-															"power_pf" : "1.0",  
-															"base_power" : "office_occupancy*{:.2f}".format(adj_occ)}
+							glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																					"name" : "occ_{:s}_{:s}_{:.0f}_zone{:.0f}_fl{:.0f}".format(my_name,my_phases[phind],jjj,zoneind,flrind), #added floor ID #jlh
+																					"parent" : parent_house["name"],
+																					"groupid" : "Occupancy",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"heatgain_fraction" : "1.0",
+																					"power_fraction" : "0.0",
+																					"impedance_fraction" : "0.0",
+																					"current_fraction" : "0.0",
+																					"power_pf" : "1.0",  
+																					"base_power" : "office_occupancy*{:.2f}".format(adj_occ)}
 							last_object_key += 1;
 							# @todo: TODO fix object location/ordering!
 							
@@ -591,39 +591,39 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 					no_of_bigboxes = 1
 
 				if (has_phase_A == 1):
-					glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
-													"name" : "CTTF_config_A_{:s}".format(my_name),
-													"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
-													"install_type" : "POLETOP",
-													"impedance" : "0.00033+0.0022j",
-													"shunt_impedance" : "10000+10000j",
-													"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
-													"secondary_voltage" : "{:.3f}".format(120),
-													"powerA_rating" : "50 kVA"}
+					glmCaseDict[last_object_key] = {	"object" : "transformer_configuration",
+																			"name" : "CTTF_config_A_{:s}".format(my_name),
+																			"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
+																			"install_type" : "POLETOP",
+																			"impedance" : "0.00033+0.0022j",
+																			"shunt_impedance" : "10000+10000j",
+																			"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
+																			"secondary_voltage" : "{:.3f}".format(120),
+																			"powerA_rating" : "50 kVA"}
 					last_object_key += 1;							
 
 				if (has_phase_B == 1):
-					glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
-													"name" : "CTTF_config_B_{:s}".format(my_name),
-													"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
-													"install_type" : "POLETOP",
-													"impedance" : "0.00033+0.0022j",
-													"shunt_impedance" : "10000+10000j",
-													"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
-													"secondary_voltage" : "{:.3f}".format(120),
-													"powerB_rating" : "50 kVA"}
+					glmCaseDict[last_object_key] = {	"object" : "transformer_configuration",
+																			"name" : "CTTF_config_B_{:s}".format(my_name),
+																			"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
+																			"install_type" : "POLETOP",
+																			"impedance" : "0.00033+0.0022j",
+																			"shunt_impedance" : "10000+10000j",
+																			"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
+																			"secondary_voltage" : "{:.3f}".format(120),
+																			"powerB_rating" : "50 kVA"}
 					last_object_key += 1;
 
 				if (has_phase_C == 1):
-					glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
-													"name" : "CTTF_config_C_{:s}".format(my_name),
-													"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
-													"install_type" : "POLETOP",
-													"impedance" : "0.00033+0.0022j",
-													"shunt_impedance" : "10000+10000j",
-													"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
-													"secondary_voltage" : "{:.3f}".format(120),
-													"powerC_rating" : "50 kVA"}
+					glmCaseDict[last_object_key] = {	"object" : "transformer_configuration",
+																			"name" : "CTTF_config_C_{:s}".format(my_name),
+																			"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
+																			"install_type" : "POLETOP",
+																			"impedance" : "0.00033+0.0022j",
+																			"shunt_impedance" : "10000+10000j",
+																			"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
+																			"secondary_voltage" : "{:.3f}".format(120),
+																			"powerC_rating" : "50 kVA"}
 					last_object_key += 1;
 				#print('iterating over number of big boxes')
 				for jjj in xrange(no_of_bigboxes):
@@ -640,20 +640,20 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 					window_frame = 'NONE';
 					int_gains = 3.6; #W/sf
 
-					glmCaseDict[last_object_key] = {"object" : "overhead_line",
-													"from" : "{:s}".format(my_parent),
-													"to" : "{:s}_bigbox_meter{:.0f}".format(my_name,jjj),
-													"phases" : "{:s}".format(commercial_dict[iii]["phases"]),
-													"length" : "50ft",
-													"configuration" : "line_configuration_comm{:s}".format(ph)}
+					glmCaseDict[last_object_key] = {	"object" : "overhead_line",
+																			"from" : "{:s}".format(my_parent),
+																			"to" : "{:s}_bigbox_meter{:.0f}".format(my_name,jjj),
+																			"phases" : "{:s}".format(commercial_dict[iii]["phases"]),
+																			"length" : "50ft",
+																			"configuration" : "line_configuration_comm{:s}".format(ph)}
 					last_object_key += 1;
 
-					glmCaseDict[last_object_key] = {"object" : "meter",            
-													"phases" : "{:s}".format(commercial_dict[iii]["phases"]),
-													"name" : "{:s}_bigbox_meter{:.0f}".format(my_name,jjj),
-													"groupid" : "Commercial_Meter",
-													"nominal_voltage" : "{:f}".format(nom_volt),
-													"meter_power_consumption" : "{:s}".format(tech_data["comm_meter_cons"])}
+					glmCaseDict[last_object_key] = {	"object" : "meter",            
+																			"phases" : "{:s}".format(commercial_dict[iii]["phases"]),
+																			"name" : "{:s}_bigbox_meter{:.0f}".format(my_name,jjj),
+																			"groupid" : "Commercial_Meter",
+																			"nominal_voltage" : "{:f}".format(nom_volt),
+																			"meter_power_consumption" : "{:s}".format(tech_data["comm_meter_cons"])}
 													
 					# Store solar technology parent information
 					if use_flags["use_solar"] != 0 or use_flags["use_solar_com"] != 0:
@@ -668,17 +668,17 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 
 					# add the conditional billing mode properties
 					if (use_flags["use_billing"] == 1):
-						glmCaseDict[last_object_key].update({"bill_mode" : "UNIFORM",
-															 "price" : "{:.5f}".format(tech_data["comm_flat_price"]),
-															 "monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
-															 "bill_day" : "1"})
+						glmCaseDict[last_object_key].update({	"bill_mode" : "UNIFORM",
+																						"price" : "{:.5f}".format(tech_data["comm_flat_price"]),
+																						"monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
+																						"bill_day" : "1"})
 					elif (use_flags["use_billing"] == 2): # TIERED
 						raise Exception('use_flag.use_billing == 2 not functional at this time');
 					elif (use_flags["use_billing"] == 3): # TOU or RTP
-						glmCaseDict[last_object_key].update({"bill_mode" : "HOURLY",
-															 "monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
-															 "bill_day" : "1",
-															 "power_market" : "{:s}".format(tech_data["market_info"][0])})
+						glmCaseDict[last_object_key].update({	"bill_mode" : "HOURLY",
+																						"monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
+																						"bill_day" : "1",
+																						"power_market" : "{:s}".format(tech_data["market_info"][0])})
 					last_object_key += 1;
 
 					# skew each big box zone identically
@@ -692,20 +692,20 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 					total_index = 0;
 
 					for phind in xrange(no_of_phases):
-						glmCaseDict[last_object_key] = {"object" : "transformer",
-														"name" : "{:s}_CTTF_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"phases" : "{:s}S".format(ph[phind]),
-														"from" : "{:s}_bigbox_meter{:.0f}".format(my_name,jjj),
-														"to" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"groupid" : "Distribution_Trans",
-														"configuration" : "CTTF_config_{:s}_{:s}".format(ph[phind],my_name)}
+						glmCaseDict[last_object_key] = {	"object" : "transformer",
+																				"name" : "{:s}_CTTF_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"phases" : "{:s}S".format(ph[phind]),
+																				"from" : "{:s}_bigbox_meter{:.0f}".format(my_name,jjj),
+																				"to" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"groupid" : "Distribution_Trans",
+																				"configuration" : "CTTF_config_{:s}_{:s}".format(ph[phind],my_name)}
 						last_object_key += 1
 
 
-						glmCaseDict[last_object_key] = {"object" : "triplex_meter",
-														"name" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"phases" : "{:s}S".format(ph[phind]),
-														"nominal_voltage" : "120"}
+						glmCaseDict[last_object_key] = {	"object" : "triplex_meter",
+																				"name" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"phases" : "{:s}S".format(ph[phind]),
+																				"nominal_voltage" : "120"}
 						last_object_key += 1;
 
 						zones_per_phase = int(6 / no_of_phases);
@@ -747,39 +747,39 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							init_temp = 68 + 4*random.random();
 							os_rand = config_data["over_sizing_factor"][0] * (.8 + 0.4*random.random());
 							COP_A = tech_data["cooling_COP"] * (0.8 + 0.4*random.random());
-							glmCaseDict[last_object_key] = {"object" : "house",
-															"name" : "bigbox{:s}_{:s}{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
-															"groupid" : "Commercial",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"parent" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-															"floor_area" : "{:.0f}".format(floor_area),
-															"design_internal_gains" : "{:.0f}".format(int_gains*floor_area*3.413),
-															"number_of_doors" : "{:.0f}".format(no_of_doors),
-															"aspect_ratio" : "{:.2f}".format(aspect_ratio),
-															"total_thermal_mass_per_floor_area" : "{:1.2f}".format(thermal_mass_per_floor_area),
-															"interior_surface_heat_transfer_coeff" : "{:1.2f}".format(surface_heat_trans_coeff),
-															"interior_exterior_wall_ratio" : "{:2.1f}".format(interior_exterior_wall_ratio),
-															"exterior_floor_fraction" : "{:.3f}".format(exterior_floor_fraction),
-															"exterior_ceiling_fraction" : "{:.3f}".format(exterior_ceiling_fraction),
-															"Rwall" : "{:2.1f}".format(Rwall),
-															"Rroof" : "{:2.1f}".format(Rroof),
-															"Rfloor" : "{:.2f}".format(Rfloor),
-															"Rdoors" : "{:2.1f}".format(Rdoors),
-															"exterior_wall_fraction" : "{:.2f}".format(exterior_wall_fraction),
-															"glazing_layers" : "{:s}".format(glazing_layers),
-															"glass_type" : "{:s}".format(glass_type),
-															"glazing_treatment" : "{:s}".format(glazing_treatment),
-															"window_frame" : "{:s}".format(window_frame),            
-															"airchange_per_hour" : "{:.2f}".format(airchange_per_hour),    
-															"window_wall_ratio" : "{:0.3f}".format(window_wall_ratio),    
-															"heating_system_type" : "{:s}".format(heat_type),
-															"auxiliary_system_type" : "{:s}".format(aux_type),
-															"fan_type" : "{:s}".format(fan_type),
-															"cooling_system_type" : "{:s}".format(cool_type),
-															"air_temperature" : "{:.2f}".format(init_temp),
-															"mass_temperature" : "{:.2f}".format(init_temp),
-															"over_sizing_factor" : "{:.1f}".format(os_rand),
-															"cooling_COP" : "{:2.2f}".format(COP_A)}
+							glmCaseDict[last_object_key] = {	"object" : "house",
+																					"name" : "bigbox{:s}_{:s}{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
+																					"groupid" : "Commercial",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"parent" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																					"floor_area" : "{:.0f}".format(floor_area),
+																					"design_internal_gains" : "{:.0f}".format(int_gains*floor_area*3.413),
+																					"number_of_doors" : "{:.0f}".format(no_of_doors),
+																					"aspect_ratio" : "{:.2f}".format(aspect_ratio),
+																					"total_thermal_mass_per_floor_area" : "{:1.2f}".format(thermal_mass_per_floor_area),
+																					"interior_surface_heat_transfer_coeff" : "{:1.2f}".format(surface_heat_trans_coeff),
+																					"interior_exterior_wall_ratio" : "{:2.1f}".format(interior_exterior_wall_ratio),
+																					"exterior_floor_fraction" : "{:.3f}".format(exterior_floor_fraction),
+																					"exterior_ceiling_fraction" : "{:.3f}".format(exterior_ceiling_fraction),
+																					"Rwall" : "{:2.1f}".format(Rwall),
+																					"Rroof" : "{:2.1f}".format(Rroof),
+																					"Rfloor" : "{:.2f}".format(Rfloor),
+																					"Rdoors" : "{:2.1f}".format(Rdoors),
+																					"exterior_wall_fraction" : "{:.2f}".format(exterior_wall_fraction),
+																					"glazing_layers" : "{:s}".format(glazing_layers),
+																					"glass_type" : "{:s}".format(glass_type),
+																					"glazing_treatment" : "{:s}".format(glazing_treatment),
+																					"window_frame" : "{:s}".format(window_frame),            
+																					"airchange_per_hour" : "{:.2f}".format(airchange_per_hour),    
+																					"window_wall_ratio" : "{:0.3f}".format(window_wall_ratio),    
+																					"heating_system_type" : "{:s}".format(heat_type),
+																					"auxiliary_system_type" : "{:s}".format(aux_type),
+																					"fan_type" : "{:s}".format(fan_type),
+																					"cooling_system_type" : "{:s}".format(cool_type),
+																					"air_temperature" : "{:.2f}".format(init_temp),
+																					"mass_temperature" : "{:.2f}".format(init_temp),
+																					"over_sizing_factor" : "{:.1f}".format(os_rand),
+																					"cooling_COP" : "{:2.2f}".format(COP_A)}
 							parent_house = glmCaseDict[last_object_key] # cache this for a second...
 														
 							# Store thermal storage technology parent information
@@ -803,27 +803,27 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 								crh2 = s_tstat + (1 - slider) * (3 - s_tstat);
 								hrl2 = -s_tstat - (1 - slider) * (3 - s_tstat);
 								crl2 = s_tstat + (1 - slider) * (3 - s_tstat);
-								glmCaseDict[last_object_key] = {"object" : "controller",
-																"parent" : parent_house["name"],
-																"schedule_skew" : "{:.0f}".format(skew_value),
-																"market" : "{:s}".format(tech_data["market_info"][0]),
-																"bid_mode" : "OFF",
-																"control_mode" : "RAMP",
-																"range_high" : "{:.3f}".format(crh),
-																"range_low" : "{:.3f}".format(crl),
-																"ramp_high" : "{:.3f}".format(crh2),
-																"ramp_low" : "{:.3f}".format(crl2),
-																"base_setpoint" : "bigbox_cooling",
-																"period" : "{:.0f}".format(tech_data["market_info"][1]),
-																"average_target" : "my_avg",
-																"standard_deviation_target" : "my_std",
-																"target" : "air_temperature",
-																"setpoint" : "cooling_setpoint",
-																"demand" : "last_cooling_load",
-																"deadband" : "thermostat_deadband",
-																"total" : "hvac_load",
-																"load" : "hvac_load",
-																"state" : "power_state"}
+								glmCaseDict[last_object_key] = {	"object" : "controller",
+																						"parent" : parent_house["name"],
+																						"schedule_skew" : "{:.0f}".format(skew_value),
+																						"market" : "{:s}".format(tech_data["market_info"][0]),
+																						"bid_mode" : "OFF",
+																						"control_mode" : "RAMP",
+																						"range_high" : "{:.3f}".format(crh),
+																						"range_low" : "{:.3f}".format(crl),
+																						"ramp_high" : "{:.3f}".format(crh2),
+																						"ramp_low" : "{:.3f}".format(crl2),
+																						"base_setpoint" : "bigbox_cooling",
+																						"period" : "{:.0f}".format(tech_data["market_info"][1]),
+																						"average_target" : "my_avg",
+																						"standard_deviation_target" : "my_std",
+																						"target" : "air_temperature",
+																						"setpoint" : "cooling_setpoint",
+																						"demand" : "last_cooling_load",
+																						"deadband" : "thermostat_deadband",
+																						"total" : "hvac_load",
+																						"load" : "hvac_load",
+																						"state" : "power_state"}
 								last_object_key += 1
 
 								parent_house["cooling_setpoint"] = "85"
@@ -834,17 +834,17 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 									c_on = 600 + 600*dlc_c_rand( (iii-1) * no_of_bigboxes + jjj + phind)
 									temp_c = 0.2+0.3*dlc_c_rand2((iii-1)*no_of_bigboxes + jjj +phind)
 									c_off = c_on * ( temp_c / (1 - temp_c) ); # 30-50# of the total time should be "off"
-									glmCaseDict[last_object_key] = {"object" : "passive_controller",
-																	"parent" : parent_house["name"],
-																	"control_mode" : "DIRECT_LOAD_CONTROL",
-																	"dlc_mode" : "CYCLING",
-																	"cycle_length_on" : "{:.0f}".format(c_on),
-																	"cycle_length_off" : "{:.0f}".format(c_off),
-																	"period" : "0",
-																	"state_property" : "override",
-																	"observation_object" : "{:s}".format(tech_data["market_info"][0]),
-																	"observation_property" : "past_market.clearing_price",
-																	"second_tier_price" : "{:f}".format(config_data["CPP_prices"](3))}
+									glmCaseDict[last_object_key] = {	"object" : "passive_controller",
+																							"parent" : parent_house["name"],
+																							"control_mode" : "DIRECT_LOAD_CONTROL",
+																							"dlc_mode" : "CYCLING",
+																							"cycle_length_on" : "{:.0f}".format(c_on),
+																							"cycle_length_off" : "{:.0f}".format(c_off),
+																							"period" : "0",
+																							"state_property" : "override",
+																							"observation_object" : "{:s}".format(tech_data["market_info"][0]),
+																							"observation_property" : "past_market.clearing_price",
+																							"second_tier_price" : "{:f}".format(config_data["CPP_prices"](3))}
 									last_object_key += 1
 								#end
 
@@ -853,83 +853,83 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							# Need all of the "appliances"
 							# Lights
 							adj_lights = 1.2 * (0.9 + 0.1*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW
-							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "lights_{:s}_{:s}_{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
-															"parent" : parent_house["name"],
-															"groupid" : "Lights",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"heatgain_fraction" : "1.0",
-															"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
-															"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
-															"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
-															"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
-															"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
-															"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]), 
-															"base_power" : "bigbox_lights*{:.2f}".format(adj_lights)}
+							glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																					"name" : "lights_{:s}_{:s}_{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
+																					"parent" : parent_house["name"],
+																					"groupid" : "Lights",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"heatgain_fraction" : "1.0",
+																					"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
+																					"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
+																					"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
+																					"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
+																					"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
+																					"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]), 
+																					"base_power" : "bigbox_lights*{:.2f}".format(adj_lights)}
 							last_object_key += 1
 
 							# Plugs
 							adj_plugs = (0.9 + 0.2*random.random()) * floor_area / 1000; # randomize 20# then convert W/sf -> kW 
-							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" :  "plugs_{:s}_{:s}_{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
-															"parent" : parent_house["name"],
-															"groupid" : "Plugs",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"heatgain_fraction" : "1.0",
-															"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
-															"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
-															"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
-															"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
-															"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
-															"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
-															"base_power" : "bigbox_plugs*{:.2f}".format(adj_plugs)}
+							glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																					"name" :  "plugs_{:s}_{:s}_{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
+																					"parent" : parent_house["name"],
+																					"groupid" : "Plugs",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"heatgain_fraction" : "1.0",
+																					"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
+																					"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
+																					"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
+																					"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
+																					"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
+																					"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
+																					"base_power" : "bigbox_plugs*{:.2f}".format(adj_plugs)}
 							last_object_key += 1
 
 							# Gas Waterheater
 							adj_gas = (0.9 + 0.2*random.random()) * floor_area / 1000; # randomize 20# then convert W/sf -> kW 
-							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "wh_{:s}_{:s}_{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
-															"parent" : parent_house["name"],
-															"groupid" : "Gas_waterheater",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"heatgain_fraction" : "1.0",
-															"power_fraction" : "0.0",
-															"impedance_fraction" : "0.0",
-															"current_fraction" : "0.0",
-															"power_pf" : "1.0",
-															"base_power" : "bigbox_gas*{:.2f}".format(adj_gas)}
+							glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																					"name" : "wh_{:s}_{:s}_{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
+																					"parent" : parent_house["name"],
+																					"groupid" : "Gas_waterheater",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"heatgain_fraction" : "1.0",
+																					"power_fraction" : "0.0",
+																					"impedance_fraction" : "0.0",
+																					"current_fraction" : "0.0",
+																					"power_pf" : "1.0",
+																					"base_power" : "bigbox_gas*{:.2f}".format(adj_gas)}
 							last_object_key += 1
 
 							# Exterior Lighting
 							adj_ext = (0.9 + 0.1*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW 
-							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "ext_{:s}_{:s}_{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
-															"parent" : parent_house["name"],
-															"groupid" : "Exterior_lighting",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"heatgain_fraction" : "0.0",
-															"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
-															"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
-															"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
-															"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
-															"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
-															"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
-															"base_power" : "bigbox_exterior*{:.2f}".format(adj_ext)}
+							glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																					"name" : "ext_{:s}_{:s}_{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
+																					"parent" : parent_house["name"],
+																					"groupid" : "Exterior_lighting",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"heatgain_fraction" : "0.0",
+																					"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
+																					"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
+																					"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
+																					"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
+																					"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
+																					"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
+																					"base_power" : "bigbox_exterior*{:.2f}".format(adj_ext)}
 							last_object_key += 1
 
 							# Occupancy
 							adj_occ = (0.9 + 0.1*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW 
-							glmCaseDict[last_object_key] = {"object" : "ZIPload",
-															"name" : "occ_{:s}_{:s}_{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
-															"parent" : parent_house["name"],
-															"groupid" : "Occupancy",
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"heatgain_fraction" : "1.0",
-															"power_fraction" : "0.0",
-															"impedance_fraction" : "0.0",
-															"current_fraction" : "0.0",
-															"power_pf" : "1.0",
-															"base_power" : "bigbox_occupancy*{:.2f}".format(adj_occ)}
+							glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																					"name" : "occ_{:s}_{:s}_{:.0f}_zone{:.0f}".format(my_name,ph[phind],jjj,zoneind),
+																					"parent" : parent_house["name"],
+																					"groupid" : "Occupancy",
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"heatgain_fraction" : "1.0",
+																					"power_fraction" : "0.0",
+																					"impedance_fraction" : "0.0",
+																					"current_fraction" : "0.0",
+																					"power_pf" : "1.0",
+																					"base_power" : "bigbox_occupancy*{:.2f}".format(adj_occ)}
 							last_object_key += 1
 															
 						#end #zone index
@@ -941,56 +941,56 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 				no_of_strip = total_comm_houses;
 				strip_per_phase = int(math.ceil(no_of_strip / no_of_phases))
 				if (has_phase_A == 1):
-					glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
-													"name" : "CTTF_config_A_{:s}".format(my_name),
-													"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
-													"install_type" : "POLETOP",
-													"impedance" : "0.00033+0.0022j",
-													"shunt_impedance" : "100000+100000j",
-													"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
-													"secondary_voltage" : "{:.3f}".format(120),
-													"powerA_rating" : "{:.0f} kVA".format(50*strip_per_phase)}
+					glmCaseDict[last_object_key] = {	"object" : "transformer_configuration",
+																			"name" : "CTTF_config_A_{:s}".format(my_name),
+																			"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
+																			"install_type" : "POLETOP",
+																			"impedance" : "0.00033+0.0022j",
+																			"shunt_impedance" : "100000+100000j",
+																			"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
+																			"secondary_voltage" : "{:.3f}".format(120),
+																			"powerA_rating" : "{:.0f} kVA".format(50*strip_per_phase)}
 
 					last_object_key += 1;
 
 				if (has_phase_B == 1):
-					glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
-													"name" : "CTTF_config_B_{:s}".format(my_name),
-													"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
-													"install_type" : "POLETOP",
-													"impedance" : "0.00033+0.0022j",
-													"shunt_impedance" : "100000+100000j",
-													"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
-													"secondary_voltage" : "{:.3f}".format(120),
-													"powerB_rating" : "{:.0f} kVA".format(50*strip_per_phase)}
+					glmCaseDict[last_object_key] = {	"object" : "transformer_configuration",
+																			"name" : "CTTF_config_B_{:s}".format(my_name),
+																			"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
+																			"install_type" : "POLETOP",
+																			"impedance" : "0.00033+0.0022j",
+																			"shunt_impedance" : "100000+100000j",
+																			"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
+																			"secondary_voltage" : "{:.3f}".format(120),
+																			"powerB_rating" : "{:.0f} kVA".format(50*strip_per_phase)}
 
 					last_object_key += 1;
 
 				if (has_phase_C == 1):
-					glmCaseDict[last_object_key] = {"object" : "transformer_configuration",
-													"name" : "CTTF_config_C_{:s}".format(my_name),
-													"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
-													"install_type" : "POLETOP",
-													"impedance" : "0.00033+0.0022j",
-													"shunt_impedance" : "100000+100000j",
-													"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
-													"secondary_voltage" : "{:.3f}".format(120),
-													"powerC_rating" : "{:.0f} kVA".format(50*strip_per_phase)}
+					glmCaseDict[last_object_key] = {	"object" : "transformer_configuration",
+																			"name" : "CTTF_config_C_{:s}".format(my_name),
+																			"connect_type" : "SINGLE_PHASE_CENTER_TAPPED",
+																			"install_type" : "POLETOP",
+																			"impedance" : "0.00033+0.0022j",
+																			"shunt_impedance" : "100000+100000j",
+																			"primary_voltage" : "{:.3f}".format(nom_volt), #might have to change to 7200/sqrt(3)
+																			"secondary_voltage" : "{:.3f}".format(120),
+																			"powerC_rating" : "{:.0f} kVA".format(50*strip_per_phase)}
 
 					last_object_key += 1;
 
-				glmCaseDict[last_object_key] = {"object" : "overhead_line",
-												"from" : "{:s}".format(my_parent),
-												"to" : "{:s}_strip_node".format(my_name),
-												"phases" : "{:s}".format(commercial_dict[iii]["phases"]),
-												"length" : "50ft",
-												"configuration" : "line_configuration_comm{:s}".format(ph)}
+				glmCaseDict[last_object_key] = {	"object" : "overhead_line",
+																		"from" : "{:s}".format(my_parent),
+																		"to" : "{:s}_strip_node".format(my_name),
+																		"phases" : "{:s}".format(commercial_dict[iii]["phases"]),
+																		"length" : "50ft",
+																		"configuration" : "line_configuration_comm{:s}".format(ph)}
 				last_object_key += 1;
 
-				glmCaseDict[last_object_key] = {"object" : "node",            
-												"phases" : "{:s}".format(commercial_dict[iii]["phases"]),
-												"name" : "{:s}_strip_node".format(my_name),
-												"nominal_voltage" : "{:f}".format(nom_volt)}
+				glmCaseDict[last_object_key] = {	"object" : "node",            
+																		"phases" : "{:s}".format(commercial_dict[iii]["phases"]),
+																		"name" : "{:s}_strip_node".format(my_name),
+																		"nominal_voltage" : "{:f}".format(nom_volt)}
 				last_object_key += 1;
 
 				# Store solar technology parent information
@@ -1056,31 +1056,31 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 
 						no_of_doors = 1;
 
-						glmCaseDict[last_object_key] = {"object" : "transformer",
-														"name" : "{:s}_CTTF_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"phases" : "{:s}S".format(ph[phind]),
-														"from" : "{:s}_strip_node".format(my_name),
-														"to" : "{:s}_tn_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"groupid" : "Distribution_Trans'",
-														"configuration" : "CTTF_config_{:s}_{:s}".format(ph[phind],my_name)}
+						glmCaseDict[last_object_key] = {	"object" : "transformer",
+																				"name" : "{:s}_CTTF_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"phases" : "{:s}S".format(ph[phind]),
+																				"from" : "{:s}_strip_node".format(my_name),
+																				"to" : "{:s}_tn_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"groupid" : "Distribution_Trans'",
+																				"configuration" : "CTTF_config_{:s}_{:s}".format(ph[phind],my_name)}
 						last_object_key += 1;
 
 
-						glmCaseDict[last_object_key] = {"object" : "triplex_node",
-														"name" : "{:s}_tn_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"phases" : "{:s}S".format(ph[phind]),
-														"nominal_voltage" : "120"}
+						glmCaseDict[last_object_key] = {	"object" : "triplex_node",
+																				"name" : "{:s}_tn_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"phases" : "{:s}S".format(ph[phind]),
+																				"nominal_voltage" : "120"}
 						last_object_key += 1;
 
 						# divide by 3 since these are smaller units
 						my_variable = complex(tech_data["comm_meter_cons"])/3; 
-						glmCaseDict[last_object_key] = {"object" : "triplex_meter",
-														"parent" : "{:s}_tn_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"name" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"phases" : "{:s}S".format(ph[phind]),
-														"groupid" : "Commercial_Meter",
-														"meter_power_consumption" : "{:f}+{:f}j".format(my_variable.real, my_variable.imag), # was 'real(my_var), imag(my_var), but it's an int above
-														"nominal_voltage" : "120"}
+						glmCaseDict[last_object_key] = {	"object" : "triplex_meter",
+																				"parent" : "{:s}_tn_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"name" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"phases" : "{:s}S".format(ph[phind]),
+																				"groupid" : "Commercial_Meter",
+																				"meter_power_consumption" : "{:f}+{:f}j".format(my_variable.real, my_variable.imag), # was 'real(my_var), imag(my_var), but it's an int above
+																				"nominal_voltage" : "120"}
 
 						# Store solar technology parent information
 						if (use_flags["use_solar"] != 0 or use_flags["use_solar_com"] != 0) and meters_stored == 0:
@@ -1089,55 +1089,55 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							meters_stored = 1
 														
 						if (use_flags["use_billing"] == 1):
-							glmCaseDict[last_object_key].update( {"bill_mode" : "UNIFORM",
-											  "price" : "{:.5f}".format(tech_data["comm_flat_price"]),
-											  "monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
-											  "bill_day" : "1"} )
+							glmCaseDict[last_object_key].update({	"bill_mode" : "UNIFORM",
+																							"price" : "{:.5f}".format(tech_data["comm_flat_price"]),
+																							"monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
+																							"bill_day" : "1"})
 						elif (use_flags["use_billing"] == 2): # TIERED
 							raise Exception('use_flag.use_billing == 2 not functional at this time');
 						elif (use_flags["use_billing"] == 3): # TOU or RTP
-							glmCaseDict[last_object_key].update( {"bill_mode" : "HOURLY",
-											  "monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
-											  "bill_day" : "1",
-											  "power_market" : "{:s}".format(tech_data["market_info"][0])} )
+							glmCaseDict[last_object_key].update({	"bill_mode" : "HOURLY",
+																							"monthly_fee" : "{:.2f}".format(tech_data["comm_monthly_fee"]),
+																							"bill_day" : "1",
+																							"power_market" : "{:s}".format(tech_data["market_info"][0])})
 						last_object_key += 1;
 						
 						init_temp = 68 + 4*random.random();
 						os_rand = config_data["over_sizing_factor"][0] * (.8 + 0.4*random.random());
 						COP_A = tech_data["cooling_COP"] * (0.8 + 0.4*random.random());
-						glmCaseDict[last_object_key] = {"object" : "house",
-														"name" : "stripmall{:s}_{:s}{:.0f}".format(my_name,ph[phind],jjj),
-														"groupid" : "Commercial",
-														"schedule_skew" : "{:.0f}".format(skew_value),
-														"parent" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"floor_area" : "{:.0f}".format(floor_area),
-														"design_internal_gains" : "{:.0f}".format(int_gains*floor_area*3.413),
-														"number_of_doors" : "{:.0f}".format(no_of_doors),
-														"aspect_ratio" : "{:.2f}".format(aspect_ratio),
-														"total_thermal_mass_per_floor_area" : "{:1.2f}".format(thermal_mass_per_floor_area),
-														"interior_surface_heat_transfer_coeff" : "{:1.2f}".format(surface_heat_trans_coeff),
-														"interior_exterior_wall_ratio" : "{:2.1f}".format(interior_exterior_wall_ratio),
-														"exterior_floor_fraction" : "{:.3f}".format(exterior_floor_fraction),
-														"exterior_ceiling_fraction" : "{:.3f}".format(exterior_ceiling_fraction),
-														"Rwall" : "{:2.1f}".format(Rwall),
-														"Rroof" : "{:2.1f}".format(Rroof),
-														"Rfloor" : "{:.2f}".format(Rfloor),
-														"Rdoors" : "{:2.1f}".format(Rdoors),
-														"exterior_wall_fraction" : "{:.2f}".format(exterior_wall_fraction),
-														"glazing_layers" : "{:s}".format(glazing_layers),
-														"glass_type" : "{:s}".format(glass_type),
-														"glazing_treatment" : "{:s}".format(glazing_treatment),
-														"window_frame" : "{:s}".format(window_frame),            
-														"airchange_per_hour" : "{:.2f}".format(airchange_per_hour),    
-														"window_wall_ratio" : "{:0.3f}".format(window_wall_ratio),    
-														"heating_system_type" : "{:s}".format(heat_type),
-														"auxiliary_system_type" : "{:s}".format(aux_type),
-														"fan_type" : "{:s}".format(fan_type),
-														"cooling_system_type" : "{:s}".format(cool_type),
-														"air_temperature" : "{:.2f}".format(init_temp),
-														"mass_temperature" : "{:.2f}".format(init_temp),
-														"over_sizing_factor" : "{:.1f}".format(os_rand),
-														"cooling_COP" : "{:2.2f}".format(COP_A)}
+						glmCaseDict[last_object_key] = {	"object" : "house",
+																				"name" : "stripmall{:s}_{:s}{:.0f}".format(my_name,ph[phind],jjj),
+																				"groupid" : "Commercial",
+																				"schedule_skew" : "{:.0f}".format(skew_value),
+																				"parent" : "{:s}_tm_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"floor_area" : "{:.0f}".format(floor_area),
+																				"design_internal_gains" : "{:.0f}".format(int_gains*floor_area*3.413),
+																				"number_of_doors" : "{:.0f}".format(no_of_doors),
+																				"aspect_ratio" : "{:.2f}".format(aspect_ratio),
+																				"total_thermal_mass_per_floor_area" : "{:1.2f}".format(thermal_mass_per_floor_area),
+																				"interior_surface_heat_transfer_coeff" : "{:1.2f}".format(surface_heat_trans_coeff),
+																				"interior_exterior_wall_ratio" : "{:2.1f}".format(interior_exterior_wall_ratio),
+																				"exterior_floor_fraction" : "{:.3f}".format(exterior_floor_fraction),
+																				"exterior_ceiling_fraction" : "{:.3f}".format(exterior_ceiling_fraction),
+																				"Rwall" : "{:2.1f}".format(Rwall),
+																				"Rroof" : "{:2.1f}".format(Rroof),
+																				"Rfloor" : "{:.2f}".format(Rfloor),
+																				"Rdoors" : "{:2.1f}".format(Rdoors),
+																				"exterior_wall_fraction" : "{:.2f}".format(exterior_wall_fraction),
+																				"glazing_layers" : "{:s}".format(glazing_layers),
+																				"glass_type" : "{:s}".format(glass_type),
+																				"glazing_treatment" : "{:s}".format(glazing_treatment),
+																				"window_frame" : "{:s}".format(window_frame),            
+																				"airchange_per_hour" : "{:.2f}".format(airchange_per_hour),    
+																				"window_wall_ratio" : "{:0.3f}".format(window_wall_ratio),    
+																				"heating_system_type" : "{:s}".format(heat_type),
+																				"auxiliary_system_type" : "{:s}".format(aux_type),
+																				"fan_type" : "{:s}".format(fan_type),
+																				"cooling_system_type" : "{:s}".format(cool_type),
+																				"air_temperature" : "{:.2f}".format(init_temp),
+																				"mass_temperature" : "{:.2f}".format(init_temp),
+																				"over_sizing_factor" : "{:.1f}".format(os_rand),
+																				"cooling_COP" : "{:2.2f}".format(COP_A)}
 						parent_house = glmCaseDict[last_object_key]
 						
 						# Store thermal storage technology parent information
@@ -1161,27 +1161,27 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 							crh2 = s_tstat + (1 - slider) * (3 - s_tstat);
 							hrl2 = -s_tstat - (1 - slider) * (3 - s_tstat);
 							crl2 = s_tstat + (1 - slider) * (3 - s_tstat);
-							glmCaseDict[last_object_key] = {"object" : "controller",
-															"parent" : parent_house["name"],
-															"schedule_skew" : "{:.0f}".format(skew_value),
-															"market" : "{:s}".format(tech_data["market_info"][0]),
-															"bid_mode" : "OFF",
-															"control_mode" : "RAMP",
-															"range_high" : "{:.3f}".format(crh),
-															"range_low" : "{:.3f}".format(crl),
-															"ramp_high" : "{:.3f}".format(crh2),
-															"ramp_low" : "{:.3f}".format(crl2),
-															"base_setpoint" : "stripmall_cooling",
-															"period" : "{:.0f}".format(tech_data["market_info"][1]),
-															"average_target" : "my_avg",
-															"standard_deviation_target" : "my_std",
-															"target" : "air_temperature",
-															"setpoint" : "cooling_setpoint",
-															"demand" : "last_cooling_load",
-															"deadband" : "thermostat_deadband",
-															"total" : "hvac_load",
-															"load" : "hvac_load",
-															"state" : "power_state"}
+							glmCaseDict[last_object_key] = {	"object" : "controller",
+																					"parent" : parent_house["name"],
+																					"schedule_skew" : "{:.0f}".format(skew_value),
+																					"market" : "{:s}".format(tech_data["market_info"][0]),
+																					"bid_mode" : "OFF",
+																					"control_mode" : "RAMP",
+																					"range_high" : "{:.3f}".format(crh),
+																					"range_low" : "{:.3f}".format(crl),
+																					"ramp_high" : "{:.3f}".format(crh2),
+																					"ramp_low" : "{:.3f}".format(crl2),
+																					"base_setpoint" : "stripmall_cooling",
+																					"period" : "{:.0f}".format(tech_data["market_info"][1]),
+																					"average_target" : "my_avg",
+																					"standard_deviation_target" : "my_std",
+																					"target" : "air_temperature",
+																					"setpoint" : "cooling_setpoint",
+																					"demand" : "last_cooling_load",
+																					"deadband" : "thermostat_deadband",
+																					"total" : "hvac_load",
+																					"load" : "hvac_load",
+																					"state" : "power_state"}
 
 							parent_house["cooling_setpoint"] = "85"
 							last_object_key += 1
@@ -1191,16 +1191,16 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 								c_on = 600 + 600*dlc_c_rand( (iii-1) * strip_per_phase + jjj + phind );
 								temp_c = 0.2+0.3*dlc_c_rand2((iii-1)*strip_per_phase + jjj + phind);
 								c_off = c_on * ( temp_c / (1 - temp_c) ); # 30-50# of the total time should be "off"
-								glmCaseDict[last_object_key] = {"object" : "passive_controller",
-																"control_mode" : "DIRECT_LOAD_CONTROL",
-																"dlc_mode" : "CYCLING",
-																"cycle_length_on" : "{:.0f}".format(c_on),
-																"cycle_length_off" : "{:.0f}".format(c_off),
-																"period" : "0",
-																"state_property" : "override",
-																"observation_object" : "{:s}".format(tech_data["market_info"][0]),
-																"observation_property" : "past_market.clearing_price",
-																"second_tier_price" : "{:f}".format(config_data["CPP_prices"](3))}
+								glmCaseDict[last_object_key] = {	"object" : "passive_controller",
+																						"control_mode" : "DIRECT_LOAD_CONTROL",
+																						"dlc_mode" : "CYCLING",
+																						"cycle_length_on" : "{:.0f}".format(c_on),
+																						"cycle_length_off" : "{:.0f}".format(c_off),
+																						"period" : "0",
+																						"state_property" : "override",
+																						"observation_object" : "{:s}".format(tech_data["market_info"][0]),
+																						"observation_property" : "past_market.clearing_price",
+																						"second_tier_price" : "{:f}".format(config_data["CPP_prices"](3))}
 
 								last_object_key += 1
 
@@ -1210,83 +1210,83 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 						# Need all of the "appliances"
 						# Lights
 						adj_lights = (0.8 + 0.4*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW 
-						glmCaseDict[last_object_key] = {"object" : "ZIPload",
-														"name" : "lights_{:s}_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"parent" : parent_house["name"],
-														"groupid" : "Lights",
-														"schedule_skew" : "{:.0f}".format(skew_value),
-														"heatgain_fraction" : "1.0",
-														"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
-														"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
-														"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
-														"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
-														"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
-														"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
-														"base_power" : "stripmall_lights*{:.2f}".format(adj_lights)}
+						glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																				"name" : "lights_{:s}_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"parent" : parent_house["name"],
+																				"groupid" : "Lights",
+																				"schedule_skew" : "{:.0f}".format(skew_value),
+																				"heatgain_fraction" : "1.0",
+																				"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
+																				"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
+																				"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
+																				"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
+																				"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
+																				"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
+																				"base_power" : "stripmall_lights*{:.2f}".format(adj_lights)}
 						last_object_key += 1
 
 						# Plugs
 						adj_plugs = (0.8 + 0.4*random.random()) * floor_area / 1000; # randomize 20# then convert W/sf -> kW 
-						glmCaseDict[last_object_key] = {"object" : "ZIPload",
-														"name" : "plugs_{:s}_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"parent" : parent_house["name"],
-														"groupid" : "Plugs",
-														"schedule_skew" : "{:.0f}".format(skew_value),
-														"heatgain_fraction" : "1.0",
-														"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
-														"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
-														"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
-														"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
-														"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
-														"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
-														"base_power" : "stripmall_plugs*{:.2f}".format(adj_plugs)}
+						glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																				"name" : "plugs_{:s}_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"parent" : parent_house["name"],
+																				"groupid" : "Plugs",
+																				"schedule_skew" : "{:.0f}".format(skew_value),
+																				"heatgain_fraction" : "1.0",
+																				"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
+																				"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
+																				"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
+																				"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
+																				"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
+																				"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]),
+																				"base_power" : "stripmall_plugs*{:.2f}".format(adj_plugs)}
 						last_object_key += 1
 
 						# Gas Waterheater
 						adj_gas = (0.8 + 0.4*random.random()) * floor_area / 1000; # randomize 20# then convert W/sf -> kW
-						glmCaseDict[last_object_key] = {"object" : "ZIPload",
-														"name" : "wh_{:s}_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"parent" : parent_house["name"],
-														"groupid" : "Gas_waterheater",
-														"schedule_skew" : "{:.0f}".format(skew_value),
-														"heatgain_fraction" : "1.0",
-														"power_fraction" : "0.0",
-														"impedance_fraction" : "0.0",
-														"current_fraction" : "0.0",
-														"power_pf" : "1.0", 
-														"base_power" : "stripmall_gas*{:.2f}".format(adj_gas)}
+						glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																				"name" : "wh_{:s}_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"parent" : parent_house["name"],
+																				"groupid" : "Gas_waterheater",
+																				"schedule_skew" : "{:.0f}".format(skew_value),
+																				"heatgain_fraction" : "1.0",
+																				"power_fraction" : "0.0",
+																				"impedance_fraction" : "0.0",
+																				"current_fraction" : "0.0",
+																				"power_pf" : "1.0", 
+																				"base_power" : "stripmall_gas*{:.2f}".format(adj_gas)}
 						last_object_key += 1
 
 						# Exterior Lighting
 						adj_ext = (0.8 + 0.4*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW
-						glmCaseDict[last_object_key] = {"object" : "ZIPload",
-														"name" : "ext_{:s}_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
-														"parent" : parent_house["name"],
-														"groupid" : "Exterior_lighting",
-														"schedule_skew" : "{:.0f}".format(skew_value),
-														"heatgain_fraction" : "0.0",
-														"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
-														"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
-														"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
-														"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
-														"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
-														"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]), 
-														"base_power" : "stripmall_exterior*{:.2f}".format(adj_ext)}
+						glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																				"name" : "ext_{:s}_{:s}_{:.0f}".format(my_name,ph[phind],jjj),
+																				"parent" : parent_house["name"],
+																				"groupid" : "Exterior_lighting",
+																				"schedule_skew" : "{:.0f}".format(skew_value),
+																				"heatgain_fraction" : "0.0",
+																				"power_fraction" : "{:.2f}".format(tech_data["c_pfrac"]),
+																				"impedance_fraction" : "{:.2f}".format(tech_data["c_zfrac"]),
+																				"current_fraction" : "{:.2f}".format(tech_data["c_ifrac"]),
+																				"power_pf" : "{:.2f}".format(tech_data["c_p_pf"]),
+																				"current_pf" : "{:.2f}".format(tech_data["c_i_pf"]),
+																				"impedance_pf" : "{:.2f}".format(tech_data["c_z_pf"]), 
+																				"base_power" : "stripmall_exterior*{:.2f}".format(adj_ext)}
 						last_object_key += 1
 
 						# Occupancy
 						adj_occ = (0.8 + 0.4*random.random()) * floor_area / 1000; # randomize 10# then convert W/sf -> kW
-						glmCaseDict[last_object_key] = {"object" : "ZIPload",
-														"name" : "occ_{:s}_{:s}_{:.0f}".format(my_name, ph[phind], jjj),
-														"parent" : parent_house["name"],
-														"groupid" : "Occupancy",
-														"schedule_skew" : "{:.0f}".format(skew_value),
-														"heatgain_fraction" : "1.0",
-														"power_fraction" : "0.0",
-														"impedance_fraction" : "0.0",
-														"current_fraction" : "0.0",
-														"power_pf" : "1.0", 
-														"base_power" : "stripmall_occupancy*{:.2f}".format(adj_occ)}
+						glmCaseDict[last_object_key] = {	"object" : "ZIPload",
+																				"name" : "occ_{:s}_{:s}_{:.0f}".format(my_name, ph[phind], jjj),
+																				"parent" : parent_house["name"],
+																				"groupid" : "Occupancy",
+																				"schedule_skew" : "{:.0f}".format(skew_value),
+																				"heatgain_fraction" : "1.0",
+																				"power_fraction" : "0.0",
+																				"impedance_fraction" : "0.0",
+																				"current_fraction" : "0.0",
+																				"power_pf" : "1.0", 
+																				"base_power" : "stripmall_occupancy*{:.2f}".format(adj_occ)}
 						last_object_key += 1
 						#end
 					#end #number of strip zones
@@ -1298,12 +1298,11 @@ def append_commercial(glmCaseDict, use_flags, tech_data, last_object_key, commer
 			# have any "grandchildren"
 			elif total_comm_houses == 0 and sum(commercial_dict[iii]['load']) > 0:
 				#print('writing street_light')
-				glmCaseDict[last_object_key] = {"object" : "load",
-												"parent" : "{:s}".format(my_parent),
-												"name" : "str_light_{:s}{:s}".format(ph,commercial_dict[iii]['name']),
-												"nominal_voltage" : "{:.2f}".format(nom_volt),
-												"phases" : "{:s}".format(ph)
-												}
+				glmCaseDict[last_object_key] = {	"object" : "load",
+																		"parent" : "{:s}".format(my_parent),
+																		"name" : "str_light_{:s}{:s}".format(ph,commercial_dict[iii]['name']),
+																		"nominal_voltage" : "{:.2f}".format(nom_volt),
+																		"phases" : "{:s}".format(ph)}
 				if has_phase_A == 1 and commercial_dict[iii]['load'][0] > 0:
 					glmCaseDict[last_object_key]["base_power_A"] = "street_lighting*{:f}".format(tech_data["light_scalar_comm"]*commercial_dict[iii]['load'][0])
 					glmCaseDict[last_object_key]["power_pf_A"] = "{:f}".format(tech_data["c_p_pf"])

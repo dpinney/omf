@@ -57,13 +57,13 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 				#print('iterating over number of houses')
 				# Start adding house dictionaries
 				for y in xrange(no_houses):
-					ResTechDict[last_object_key] = {'object' : 'triplex_meter',
-													'phases' : '{:s}'.format(phase),
-													'name' : 'tpm{:d}_{:s}'.format(y,my_name),
-													'parent' : '{:s}'.format(my_parent),
-													'groupid' : 'Residential_Meter',
-													'meter_power_consumption' : '{:s}'.format(tech_data['res_meter_cons']),
-													'nominal_voltage' : '120'}
+					ResTechDict[last_object_key] = {	'object' : 'triplex_meter',
+																			'phases' : '{:s}'.format(phase),
+																			'name' : 'tpm{:d}_{:s}'.format(y,my_name),
+																			'parent' : '{:s}'.format(my_parent),
+																			'groupid' : 'Residential_Meter',
+																			'meter_power_consumption' : '{:s}'.format(tech_data['res_meter_cons']),
+																			'nominal_voltage' : '120'}
 													
 					if use_flags['use_billing'] == 1:
 						ResTechDict[last_object_key]['bill_mode'] = 'UNIFORM'
@@ -357,15 +357,15 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					#print('finished house')
 					# Put in passive controller for DLC use_flags.use_market = 3 line 2224
 					if use_flags['use_market'] == 3:
-						ResTechDict[last_object_key] = {'object' : 'passive_controller',
-														'control_mode' : 'DIRECT_LOAD_CONTROL',
-														'parent' : 'house' + str(y) + '_' + my_name,
-														'dlc_mode' : 'CYCLING',
-														'period' : '0',
-														'state_property' : 'override',
-														'observation_object' : tech_data['market_info'][0],
-														'observation_property' : 'past_market.clearing_price',
-														'second_tier_price' : config_data['CPP_prices'][2]}
+						ResTechDict[last_object_key] = {	'object' : 'passive_controller',
+																				'control_mode' : 'DIRECT_LOAD_CONTROL',
+																				'parent' : 'house' + str(y) + '_' + my_name,
+																				'dlc_mode' : 'CYCLING',
+																				'period' : '0',
+																				'state_property' : 'override',
+																				'observation_object' : tech_data['market_info'][0],
+																				'observation_property' : 'past_market.clearing_price',
+																				'second_tier_price' : config_data['CPP_prices'][2]}
 						
 						c_on = 300 + (600 * dlc_rand[y*len(residential_dict) + x])
 						temp_c = 0.3 + (0.4 * xval[y*len(residential_dict) + x])
@@ -397,113 +397,113 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 							crl2 = s_tstat + (1 - slider) * (3 - s_tstat)
 							
 							if ht == 'HP': # Control both therm setpoints
-								ResTechDict[last_object_key] = {'object' : 'controller',
-																'parent' : 'house{:s}_{:s}'.format(y,my_name),
-																'schedule_skew' : '{:.0f}'.format(skew_value),
-																'market' : '{:s}'.format(tech_data['market_info'][0]),
-																'bid_mode' : 'OFF',
-																'control_mode' : 'DOUBLE_RAMP',
-																'resolve_mode' : 'DEADBAND',
-																'heating_range_high' : '{:.3f}'.format(hrh),
-																'cooling_range_high' : '{:.3f}'.format(crh),
-																'heating_range_low' : '{:.3f}'.format(hrl),
-																'cooling_range_low' : '{:.3f}'.format(crl),
-																'heating_ramp_high' : '{:.3f}'.format(hrh2),
-																'cooling_ramp_high' : '{:.3f}'.format(crh2),
-																'heating_ramp_low' : '{:.3f}'.format(hrl2),
-																'cooling_ramp_low' : '{:.3f}'.format(crl2),
-																'cooling_base_setpoint' : 'cooling{:d}*{:.2f}+{:.2f}'.format(cooling_set,cool_night_diff,cool_night),
-																'heating_base_setpoint' : 'heating{:d}*{:.2f}+{:.2f}'.format(heating_set,heat_night_diff,heat_night),
-																'period' : '{:.0f}'.format(tech_data['market_info'][1]),
-																'average_target' : 'my_avg',
-																'standard_deviation_target' : 'my_std',
-																'target' : 'air_temperature',
-																'heating_setpoint' : 'heating_setpoint',
-																'heating_demand' : 'last_heating_load',
-																'cooling_setpoint' : 'cooling_setpoint',
-																'cooling_demand' : 'last_cooling_load',
-																'deadband' : 'thermostat_deadband',
-																'total' : 'hvac_load',
-																'load' : 'hvac_load',
-																'state' : 'power_state'}
+								ResTechDict[last_object_key] = {	'object' : 'controller',
+																						'parent' : 'house{:s}_{:s}'.format(y,my_name),
+																						'schedule_skew' : '{:.0f}'.format(skew_value),
+																						'market' : '{:s}'.format(tech_data['market_info'][0]),
+																						'bid_mode' : 'OFF',
+																						'control_mode' : 'DOUBLE_RAMP',
+																						'resolve_mode' : 'DEADBAND',
+																						'heating_range_high' : '{:.3f}'.format(hrh),
+																						'cooling_range_high' : '{:.3f}'.format(crh),
+																						'heating_range_low' : '{:.3f}'.format(hrl),
+																						'cooling_range_low' : '{:.3f}'.format(crl),
+																						'heating_ramp_high' : '{:.3f}'.format(hrh2),
+																						'cooling_ramp_high' : '{:.3f}'.format(crh2),
+																						'heating_ramp_low' : '{:.3f}'.format(hrl2),
+																						'cooling_ramp_low' : '{:.3f}'.format(crl2),
+																						'cooling_base_setpoint' : 'cooling{:d}*{:.2f}+{:.2f}'.format(cooling_set,cool_night_diff,cool_night),
+																						'heating_base_setpoint' : 'heating{:d}*{:.2f}+{:.2f}'.format(heating_set,heat_night_diff,heat_night),
+																						'period' : '{:.0f}'.format(tech_data['market_info'][1]),
+																						'average_target' : 'my_avg',
+																						'standard_deviation_target' : 'my_std',
+																						'target' : 'air_temperature',
+																						'heating_setpoint' : 'heating_setpoint',
+																						'heating_demand' : 'last_heating_load',
+																						'cooling_setpoint' : 'cooling_setpoint',
+																						'cooling_demand' : 'last_cooling_load',
+																						'deadband' : 'thermostat_deadband',
+																						'total' : 'hvac_load',
+																						'load' : 'hvac_load',
+																						'state' : 'power_state'}
 								last_object_key += 1
 							elif ht == 'ELEC': # Control the heat, but check to see if we have AC
 								if ct == 'ELEC': # get to control just like a heat pump
-									ResTechDict[last_object_key] = {'object' : 'controller',
-																	'parent' : 'house{:s}_{:s}'.format(y,my_name),
-																	'schedule_skew' : '{:.0f}'.format(skew_value),
-																	'market' : '{:s}'.format(tech_data['market_info'][0]),
-																	'bid_mode' : 'OFF',
-																	'control_mode' : 'DOUBLE_RAMP',
-																	'resolve_mode' : 'DEADBAND',
-																	'heating_range_high' : '{:.3f}'.format(hrh),
-																	'cooling_range_high' : '{:.3f}'.format(crh),
-																	'heating_range_low' : '{:.3f}'.format(hrl),
-																	'cooling_range_low' : '{:.3f}'.format(crl),
-																	'heating_ramp_high' : '{:.3f}'.format(hrh2),
-																	'cooling_ramp_high' : '{:.3f}'.format(crh2),
-																	'heating_ramp_low' : '{:.3f}'.format(hrl2),
-																	'cooling_ramp_low' : '{:.3f}'.format(crl2),
-																	'cooling_base_setpoint' : 'cooling{:d}*{:.2f}+{:.2f}'.format(cooling_set,cool_night_diff,cool_night),
-																	'heating_base_setpoint' : 'heating{:d}*{:.2f}+{:.2f}'.format(heating_set,heat_night_diff,heat_night),
-																	'period' : '{:.0f}'.format(tech_data['market_info'][1]),
-																	'average_target' : 'my_avg',
-																	'standard_deviation_target' : 'my_std',
-																	'target' : 'air_temperature',
-																	'heating_setpoint' : 'heating_setpoint',
-																	'heating_demand' : 'last_heating_load',
-																	'cooling_setpoint' : 'cooling_setpoint',
-																	'cooling_demand' : 'last_cooling_load',
-																	'deadband' : 'thermostat_deadband',
-																	'total' : 'hvac_load',
-																	'load' : 'hvac_load',
-																	'state' : 'power_state'}
+									ResTechDict[last_object_key] = {	'object' : 'controller',
+																							'parent' : 'house{:s}_{:s}'.format(y,my_name),
+																							'schedule_skew' : '{:.0f}'.format(skew_value),
+																							'market' : '{:s}'.format(tech_data['market_info'][0]),
+																							'bid_mode' : 'OFF',
+																							'control_mode' : 'DOUBLE_RAMP',
+																							'resolve_mode' : 'DEADBAND',
+																							'heating_range_high' : '{:.3f}'.format(hrh),
+																							'cooling_range_high' : '{:.3f}'.format(crh),
+																							'heating_range_low' : '{:.3f}'.format(hrl),
+																							'cooling_range_low' : '{:.3f}'.format(crl),
+																							'heating_ramp_high' : '{:.3f}'.format(hrh2),
+																							'cooling_ramp_high' : '{:.3f}'.format(crh2),
+																							'heating_ramp_low' : '{:.3f}'.format(hrl2),
+																							'cooling_ramp_low' : '{:.3f}'.format(crl2),
+																							'cooling_base_setpoint' : 'cooling{:d}*{:.2f}+{:.2f}'.format(cooling_set,cool_night_diff,cool_night),
+																							'heating_base_setpoint' : 'heating{:d}*{:.2f}+{:.2f}'.format(heating_set,heat_night_diff,heat_night),
+																							'period' : '{:.0f}'.format(tech_data['market_info'][1]),
+																							'average_target' : 'my_avg',
+																							'standard_deviation_target' : 'my_std',
+																							'target' : 'air_temperature',
+																							'heating_setpoint' : 'heating_setpoint',
+																							'heating_demand' : 'last_heating_load',
+																							'cooling_setpoint' : 'cooling_setpoint',
+																							'cooling_demand' : 'last_cooling_load',
+																							'deadband' : 'thermostat_deadband',
+																							'total' : 'hvac_load',
+																							'load' : 'hvac_load',
+																							'state' : 'power_state'}
 									last_object_key += 1
 								else: # control only the heat
-									ResTechDict[last_object_key] = {'object' : 'controller',
-																	'parent' : 'house{:s}_{:s}'.format(y,my_name),
-																	'schedule_skew' : '{:.0f}'.format(skew_value),
-																	'market' : '{:s}'.format(tech_data['market_info'][0]),
-																	'bid_mode' : 'OFF',
-																	'control_mode' : 'RAMP',
-																	'range_high' : '{:.3f}'.format(hrh),
-																	'range_low' : '{:.3f}'.format(hrl),
-																	'ramp_high' : '{:.3f}'.format(hrh2),
-																	'ramp_low' : '{:.3f}'.format(hrl2),
-																	'base_setpoint' : 'heating{:d}*{:.2f}+{:.2f}'.format(heating_set,heat_night_diff,heat_night),
-																	'period' : '{:.0f}'.format(tech_data['market_info'][1]),
-																	'average_target' : 'my_avg',
-																	'standard_deviation_target' : 'my_std',
-																	'target' : 'air_temperature',
-																	'setpoint' : 'heating_setpoint',
-																	'demand' : 'last_heating_load',
-																	'deadband' : 'thermostat_deadband',
-																	'total' : 'hvac_load',
-																	'load' : 'hvac_load',
-																	'state' : 'power_state'}
+									ResTechDict[last_object_key] = {	'object' : 'controller',
+																							'parent' : 'house{:s}_{:s}'.format(y,my_name),
+																							'schedule_skew' : '{:.0f}'.format(skew_value),
+																							'market' : '{:s}'.format(tech_data['market_info'][0]),
+																							'bid_mode' : 'OFF',
+																							'control_mode' : 'RAMP',
+																							'range_high' : '{:.3f}'.format(hrh),
+																							'range_low' : '{:.3f}'.format(hrl),
+																							'ramp_high' : '{:.3f}'.format(hrh2),
+																							'ramp_low' : '{:.3f}'.format(hrl2),
+																							'base_setpoint' : 'heating{:d}*{:.2f}+{:.2f}'.format(heating_set,heat_night_diff,heat_night),
+																							'period' : '{:.0f}'.format(tech_data['market_info'][1]),
+																							'average_target' : 'my_avg',
+																							'standard_deviation_target' : 'my_std',
+																							'target' : 'air_temperature',
+																							'setpoint' : 'heating_setpoint',
+																							'demand' : 'last_heating_load',
+																							'deadband' : 'thermostat_deadband',
+																							'total' : 'hvac_load',
+																							'load' : 'hvac_load',
+																							'state' : 'power_state'}
 									last_object_key += 1
 							elif ct == 'ELEC': # Gas heat, cut control the AC
-								ResTechDict[last_object_key] = {'object' : 'controller',
-																'parent' : 'house{:s}_{:s}'.format(y,my_name),
-																'schedule_skew' : '{:.0f}'.format(skew_value),
-																'market' : '{:s}'.format(tech_data['market_info'][0]),
-																'bid_mode' : 'OFF',
-																'control_mode' : 'RAMP',
-																'range_high' : '{:.3f}'.format(crh),
-																'range_low' : '{:.3f}'.format(crl),
-																'ramp_high' : '{:.3f}'.format(crh2),
-																'ramp_low' : '{:.3f}'.format(crl2),
-																'base_setpoint' : 'cooling{:d}*{:.2f}+{:.2f}'.format(cooling_set,cool_night_diff,cool_night),
-																'period' : '{:.0f}'.format(tech_data['market_info'][1]),
-																'average_target' : 'my_avg',
-																'standard_deviation_target' : 'my_std',
-																'target' : 'air_temperature',
-																'setpoint' : 'cooling_setpoint',
-																'demand' : 'last_cooling_load',
-																'deadband' : 'thermostat_deadband',
-																'total' : 'hvac_load',
-																'load' : 'hvac_load',
-																'state' : 'power_state'}
+								ResTechDict[last_object_key] = {	'object' : 'controller',
+																						'parent' : 'house{:s}_{:s}'.format(y,my_name),
+																						'schedule_skew' : '{:.0f}'.format(skew_value),
+																						'market' : '{:s}'.format(tech_data['market_info'][0]),
+																						'bid_mode' : 'OFF',
+																						'control_mode' : 'RAMP',
+																						'range_high' : '{:.3f}'.format(crh),
+																						'range_low' : '{:.3f}'.format(crl),
+																						'ramp_high' : '{:.3f}'.format(crh2),
+																						'ramp_low' : '{:.3f}'.format(crl2),
+																						'base_setpoint' : 'cooling{:d}*{:.2f}+{:.2f}'.format(cooling_set,cool_night_diff,cool_night),
+																						'period' : '{:.0f}'.format(tech_data['market_info'][1]),
+																						'average_target' : 'my_avg',
+																						'standard_deviation_target' : 'my_std',
+																						'target' : 'air_temperature',
+																						'setpoint' : 'cooling_setpoint',
+																						'demand' : 'last_cooling_load',
+																						'deadband' : 'thermostat_deadband',
+																						'total' : 'hvac_load',
+																						'load' : 'hvac_load',
+																						'state' : 'power_state'}
 								last_object_key += 1
 					
 					# Add the end-use ZIPload objects to the house
@@ -529,33 +529,33 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					
 					# Add responsive ZIPload
 					
-					ResTechDict[last_object_key] = {'object' : 'ZIPload',
-													'name' : 'house{:d}_resp_{:s}'.format(y,my_name),
-													'parent' : 'house{:d}_{:s}'.format(y,my_name),
-													'comment' : '// Responsive load',
-													'groupid' : 'Responsive_load',
-													'schedule_skew' : '{:.0f}'.format(skew_value),
-													'base_power' : 'responsive_loads*{:.2f}'.format(resp_scalar),
-													'heatgain_fraction' : '{:.3f}'.format(tech_data['heat_fraction']),
-													'power_pf' : '{:.3f}'.format(tech_data['p_pf']),
-													'current_pf' : '{:.3f}'.format(tech_data['i_pf']),
-													'impedance_pf' : '{:.3f}'.format(tech_data['z_pf']),
-													'impedance_fraction' : '{:f}'.format(tech_data['zfrac']),
-													'current_fraction' : '{:f}'.format(tech_data['ifrac']),
-													'power_fraction' : '{:f}'.format(tech_data['pfrac'])}
+					ResTechDict[last_object_key] = {	'object' : 'ZIPload',
+																			'name' : 'house{:d}_resp_{:s}'.format(y,my_name),
+																			'parent' : 'house{:d}_{:s}'.format(y,my_name),
+																			'comment' : '// Responsive load',
+																			'groupid' : 'Responsive_load',
+																			'schedule_skew' : '{:.0f}'.format(skew_value),
+																			'base_power' : 'responsive_loads*{:.2f}'.format(resp_scalar),
+																			'heatgain_fraction' : '{:.3f}'.format(tech_data['heat_fraction']),
+																			'power_pf' : '{:.3f}'.format(tech_data['p_pf']),
+																			'current_pf' : '{:.3f}'.format(tech_data['i_pf']),
+																			'impedance_pf' : '{:.3f}'.format(tech_data['z_pf']),
+																			'impedance_fraction' : '{:f}'.format(tech_data['zfrac']),
+																			'current_fraction' : '{:f}'.format(tech_data['ifrac']),
+																			'power_fraction' : '{:f}'.format(tech_data['pfrac'])}
 					last_object_key += 1
 					#print('finished responsive zipload')
 					if use_flags['use_market'] == 1 or use_flags['use_market'] == 2:
-						ResTechDict[last_object_key] = {'object' : 'passive_controller',
-														'parent' : 'house{:d}_resp_{:s}'.format(y,my_name),
-														'period' : '{:.0f}'.format(tech_data['market_info'][1]),
-														'control_mode' : 'ELASTICITY_MODEL',
-														'two_tier_cpp' : '{:s}'.format(tech_data['two_tier_cpp']),
-														'observation_object' : '{:s}'.format(tech_data['market_info'][0]),
-														'observation_property' : 'past_market.clearing_price',
-														'state_property' : 'multiplier',
-														'linearize_elasticity' : 'true',
-														'price_offset' : '0.01'}
+						ResTechDict[last_object_key] = {	'object' : 'passive_controller',
+																				'parent' : 'house{:d}_resp_{:s}'.format(y,my_name),
+																				'period' : '{:.0f}'.format(tech_data['market_info'][1]),
+																				'control_mode' : 'ELASTICITY_MODEL',
+																				'two_tier_cpp' : '{:s}'.format(tech_data['two_tier_cpp']),
+																				'observation_object' : '{:s}'.format(tech_data['market_info'][0]),
+																				'observation_property' : 'past_market.clearing_price',
+																				'state_property' : 'multiplier',
+																				'linearize_elasticity' : 'true',
+																				'price_offset' : '0.01'}
 						
 						if use_flags['use_market'] == 2: # CPP
 							ResTechDict[last_object_key]['critical_day'] = '{:s}.value'.format(CPP_flag_name)
@@ -583,42 +583,42 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 						last_object_key += 1
 					
 					# Add unresponsive ZIPload object
-					ResTechDict[last_object_key] = {'object' : 'ZIPload',
-													'name' : 'house{:d}_unresp_{:s}'.format(y,my_name),
-													'parent' : 'house{:d}_{:s}'.format(y,my_name),
-													'comment' : '// Unresponsive load',
-													'groupid' : 'Unresponsive_load',
-													'schedule_skew' : '{:.0f}'.format(skew_value),
-													'base_power' : 'unresponsive_loads*{:.2f}'.format(unresp_scalar),
-													'heatgain_fraction' : '{:.3f}'.format(tech_data['heat_fraction']),
-													'power_pf' : '{:.3f}'.format(tech_data['p_pf']),
-													'current_pf' : '{:.3f}'.format(tech_data['i_pf']),
-													'impedance_pf' : '{:.3f}'.format(tech_data['z_pf']),
-													'impedance_fraction' : '{:f}'.format(tech_data['zfrac']),
-													'current_fraction' : '{:f}'.format(tech_data['ifrac']),
-													'power_fraction' : '{:f}'.format(tech_data['pfrac'])}
+					ResTechDict[last_object_key] = {	'object' : 'ZIPload',
+																			'name' : 'house{:d}_unresp_{:s}'.format(y,my_name),
+																			'parent' : 'house{:d}_{:s}'.format(y,my_name),
+																			'comment' : '// Unresponsive load',
+																			'groupid' : 'Unresponsive_load',
+																			'schedule_skew' : '{:.0f}'.format(skew_value),
+																			'base_power' : 'unresponsive_loads*{:.2f}'.format(unresp_scalar),
+																			'heatgain_fraction' : '{:.3f}'.format(tech_data['heat_fraction']),
+																			'power_pf' : '{:.3f}'.format(tech_data['p_pf']),
+																			'current_pf' : '{:.3f}'.format(tech_data['i_pf']),
+																			'impedance_pf' : '{:.3f}'.format(tech_data['z_pf']),
+																			'impedance_fraction' : '{:f}'.format(tech_data['zfrac']),
+																			'current_fraction' : '{:f}'.format(tech_data['ifrac']),
+																			'power_fraction' : '{:f}'.format(tech_data['pfrac'])}
 					last_object_key += 1
 					#print('finished unresponsive zipload')
 					# Add pool pumps only on single-family homes
 					if pool_pump_perc < (2*config_data['perc_poolpumps']) and no_pool_pumps >= 1 and row_ti == 0:
-						ResTechDict[last_object_key] = {'object' : 'ZIPload',
-														'name' : 'house{:d}_ppump_{:s}'.format(y,my_name),
-														'parent' : 'house{:d}_{:s}'.format(y,my_name),
-														'comment' : '// Pool Pump',
-														'groupid' : 'Pool_Pump',
-														'schedule_skew' : '{:.0f}'.format(pp_skew_value),
-														'base_power' : 'pool_pump_season*{:.2f}'.format(pool_pump_power),
-														'duty_cycle' : '{:.2f}'.format(pp_dutycycle),
-														'phase' : '{:.2f}'.format(pp_init_phase),
-														'period' : '{:.2f}'.format(pp_period),
-														'heatgain_fraction' : '0.0',
-														'power_pf' : '{:.3f}'.format(tech_data['p_pf']),
-														'current_pf' : '{:.3f}'.format(tech_data['i_pf']),
-														'impedance_pf' : '{:.3f}'.format(tech_data['z_pf']),
-														'impedance_fraction' : '{:f}'.format(tech_data['zfrac']),
-														'current_fraction' : '{:f}'.format(tech_data['ifrac']),
-														'power_fraction' : '{:f}'.format(tech_data['pfrac']),
-														'is_240' : 'TRUE'}
+						ResTechDict[last_object_key] = {	'object' : 'ZIPload',
+																				'name' : 'house{:d}_ppump_{:s}'.format(y,my_name),
+																				'parent' : 'house{:d}_{:s}'.format(y,my_name),
+																				'comment' : '// Pool Pump',
+																				'groupid' : 'Pool_Pump',
+																				'schedule_skew' : '{:.0f}'.format(pp_skew_value),
+																				'base_power' : 'pool_pump_season*{:.2f}'.format(pool_pump_power),
+																				'duty_cycle' : '{:.2f}'.format(pp_dutycycle),
+																				'phase' : '{:.2f}'.format(pp_init_phase),
+																				'period' : '{:.2f}'.format(pp_period),
+																				'heatgain_fraction' : '0.0',
+																				'power_pf' : '{:.3f}'.format(tech_data['p_pf']),
+																				'current_pf' : '{:.3f}'.format(tech_data['i_pf']),
+																				'impedance_pf' : '{:.3f}'.format(tech_data['z_pf']),
+																				'impedance_fraction' : '{:f}'.format(tech_data['zfrac']),
+																				'current_fraction' : '{:f}'.format(tech_data['ifrac']),
+																				'power_fraction' : '{:f}'.format(tech_data['pfrac']),
+																				'is_240' : 'TRUE'}
 						
 						if (use_flags['use_market'] == 1 or use_flags['use_market'] == 2) and tech_data['use_tech'] == 1: # TOU
 							ResTechDict[last_object_key]['recovery_duty_cycle'] = '{:.2f}'.format(pp_dutycycle * (1 + pool_pump_recovery_random[y*len(residential_dict) + x]))
@@ -626,16 +626,16 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 						
 						# Add passive_controllers to the pool pump ZIPloads
 						if (use_flags['use_market'] == 1 or use_flags['use_market'] == 2) and tech_data['use_tech'] == 1: # TOU
-							ResTechDict[last_object_key] = {'object' : 'passive_controller',
-															'parent' : 'house{:d}_ppump_{:s}'.format(y,my_name),
-															'period' : '{:.0f}'.format(tech_data['market_info'][1]),
-															'control_mode' : 'DUTYCYCLE',
-															'pool_pump_model' : 'TRUE',
-															'observation_object' : '{:s}'.format(tech_data['market_info'][0]),
-															'observation_property' : 'past_market.clearing_price',
-															'state_property' : 'override',
-															'base_duty_cycle' : '{:.2f}'.format(pp_dutycycle),
-															'setpoint' : 'duty_cycle'}
+							ResTechDict[last_object_key] = {	'object' : 'passive_controller',
+																					'parent' : 'house{:d}_ppump_{:s}'.format(y,my_name),
+																					'period' : '{:.0f}'.format(tech_data['market_info'][1]),
+																					'control_mode' : 'DUTYCYCLE',
+																					'pool_pump_model' : 'TRUE',
+																					'observation_object' : '{:s}'.format(tech_data['market_info'][0]),
+																					'observation_property' : 'past_market.clearing_price',
+																					'state_property' : 'override',
+																					'base_duty_cycle' : '{:.2f}'.format(pp_dutycycle),
+																					'setpoint' : 'duty_cycle'}
 															
 							if use_flags['use_market'] == 2: # CPP
 								ResTechDict[last_object_key]['first_tier_hours'] = '{:.0f}'.format(config_data['TOU_hours'][0])
@@ -651,15 +651,15 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 								ResTechDict[last_object_key]['second_tier_price'] = '{:.6f}'.format(config_data['TOU_prices'][1])
 							last_object_key += 1
 							
-							ResTechDict[last_object_key] = {'object' : 'passive_controller',
-															'parent' : 'house{:d}_ppump_{:s}'.format(y,my_name),
-															'period' : '0',
-															'control_mode' : 'DIRECT_LOAD_CONTROL',
-															'dlc_mode' : 'OFF',
-															'observation_object' : '{:s}'.format(tech_data['market_info'][0]),
-															'observation_property' : 'past_market.clearing_price',
-															'state_property' : 'override',
-															'second_tier_price' : '{:f}'.format(config_data['CPP_prices'][2])}
+							ResTechDict[last_object_key] = {	'object' : 'passive_controller',
+																					'parent' : 'house{:d}_ppump_{:s}'.format(y,my_name),
+																					'period' : '0',
+																					'control_mode' : 'DIRECT_LOAD_CONTROL',
+																					'dlc_mode' : 'OFF',
+																					'observation_object' : '{:s}'.format(tech_data['market_info'][0]),
+																					'observation_property' : 'past_market.clearing_price',
+																					'state_property' : 'override',
+																					'second_tier_price' : '{:f}'.format(config_data['CPP_prices'][2])}
 							last_object_key += 1
 						
 						no_pool_pumps -= 1
@@ -676,16 +676,16 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 					
 					if heat_type > (1 - config_data['wh_electric']) and tech_data['use_wh'] == 1:
 						last_object_key += 1
-						ResTechDict[last_object_key] = {'object' : 'waterheater',
-														'name' : 'house{:d}_wh_{:s}'.format(y,my_name),
-														'parent' : 'house{:d}_{:s}'.format(y,my_name),
-														'schedule_skew' : '{:.0f}'.format(wh_skew_value),
-														'heating_element_capacity' : '{:.1f} kW'.format(heat_element),
-														'tank_setpoint' : '{:.1f}'.format(tank_set),
-														'temperature' : '132',
-														'thermostat_deadband' : '{:.1f}'.format(therm_dead),
-														'location' : 'INSIDE',
-														'tank_UA' : '{:.1f}'.format(tank_UA)}
+						ResTechDict[last_object_key] = {	'object' : 'waterheater',
+																				'name' : 'house{:d}_wh_{:s}'.format(y,my_name),
+																				'parent' : 'house{:d}_{:s}'.format(y,my_name),
+																				'schedule_skew' : '{:.0f}'.format(wh_skew_value),
+																				'heating_element_capacity' : '{:.1f} kW'.format(heat_element),
+																				'tank_setpoint' : '{:.1f}'.format(tank_set),
+																				'temperature' : '132',
+																				'thermostat_deadband' : '{:.1f}'.format(therm_dead),
+																				'location' : 'INSIDE',
+																				'tank_UA' : '{:.1f}'.format(tank_UA)}
 														
 						if wh_size_test < config_data['wh_size'][0]:
 							ResTechDict[last_object_key]['demand'] = 'small_{:.0f}*{:.02f}'.format(water_sch,water_var)
@@ -714,34 +714,34 @@ def append_residential(ResTechDict, use_flags, tech_data, residential_dict, last
 							
 						# Add passive controllers to the waterheaters
 						if use_flags['use_market'] == 1 or use_flags['use_market'] == 2:
-							ResTechDict[last_object_key] = {'object' : 'passive_controller',
-															'parent' : 'house{:d}_wh_{:s}'.format(y,my_name),
-															'period' : '{:.0f}'.format(tech_data['market_info'][1]),
-															'control_mode' : 'PROBABILITY_OFF',
-															'distribution_type' : 'NORMAL',
-															'observation_object' : '{:s}'.format(tech_data['market_info'][0]),
-															'observation_property' : 'past_market.clearing_price',
-															'stdev_observation_property' : 'my_std',
-															'expectation_object' : '{:s}'.format(tech_data['market_info'][0]),
-															'expectation_property' : 'my_avg',
-															'comfort_level' : '{:.2f}'.format(slider_random[y*len(residential_dict) + x]),
-															'state_property' : 'override'}
+							ResTechDict[last_object_key] = {	'object' : 'passive_controller',
+																					'parent' : 'house{:d}_wh_{:s}'.format(y,my_name),
+																					'period' : '{:.0f}'.format(tech_data['market_info'][1]),
+																					'control_mode' : 'PROBABILITY_OFF',
+																					'distribution_type' : 'NORMAL',
+																					'observation_object' : '{:s}'.format(tech_data['market_info'][0]),
+																					'observation_property' : 'past_market.clearing_price',
+																					'stdev_observation_property' : 'my_std',
+																					'expectation_object' : '{:s}'.format(tech_data['market_info'][0]),
+																					'expectation_property' : 'my_avg',
+																					'comfort_level' : '{:.2f}'.format(slider_random[y*len(residential_dict) + x]),
+																					'state_property' : 'override'}
 							last_object_key += 1
 						elif use_flags['use_market'] == 3:
 							c_on = 180 + (120 * dlc_rand[y*len(residential_dict) + x])
 							c_off = 1080 + (720 * xval[y*len(residential_dict) + x])
-							ResTechDict[last_object_key] = {'object' : 'passive_controller',
-															'parent' : 'house{:d}_wh_{:s}'.format(y,my_name),
-															'period' : '0',
-															'control_mode' : 'DIRECT_LOAD_CONTROL',
-															'dlc_mode' : 'CYCLING',
-															'observation_object' : '{:s}'.format(tech_data['market_info'][0]),
-															'observation_property' : 'past_market.clearing_price',
-															'cycle_length_on' : '{:.0f}'.format(c_on),
-															'cycle_length_off' : '{:.0f}'.format(c_off),
-															'comfort_level' : '9999',
-															'second_tier_price' : '{:f}'.format(config_data['CPP_prices'][2]),
-															'state_property' : 'override'}
+							ResTechDict[last_object_key] = {	'object' : 'passive_controller',
+																					'parent' : 'house{:d}_wh_{:s}'.format(y,my_name),
+																					'period' : '0',
+																					'control_mode' : 'DIRECT_LOAD_CONTROL',
+																					'dlc_mode' : 'CYCLING',
+																					'observation_object' : '{:s}'.format(tech_data['market_info'][0]),
+																					'observation_property' : 'past_market.clearing_price',
+																					'cycle_length_on' : '{:.0f}'.format(c_on),
+																					'cycle_length_off' : '{:.0f}'.format(c_off),
+																					'comfort_level' : '9999',
+																					'second_tier_price' : '{:f}'.format(config_data['CPP_prices'][2]),
+																					'state_property' : 'override'}
 							last_object_key += 1
 				#print('finished water heater')
 			#print('finished iterating over number of houses')
