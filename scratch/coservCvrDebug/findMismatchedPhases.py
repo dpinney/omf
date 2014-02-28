@@ -1,16 +1,39 @@
 
 from omf import feeder
 
-# Using these switches instead of functions because I want access to pretty much
-# all the vars below at the interpreter.
-parseNewGuy = True
-getLinks = True
-getpblinks = True
-
 def gp(obj):
 	# gp for get phases
 	objStr = obj["phases"].strip('"')
 	return objStr[:-1] if objStr[-1] == "N" else objStr
+
+def prLnkRng(lower, upper, probLinks):
+	for i in range(lower, upper):
+		if i < len(probLinks):
+			printOneLink(probLinks[i])
+		else:
+			print "All links have been printed"
+			return
+
+def printOneLink(l):
+	fromnode, ldata, tonode = l["fromnode"], l["ldata"], l["tonode"]
+	print "phase mismatch at", ldata["object"], ldata["name"],":"
+	print "linkobj:\n", ldata
+	print "tonode:\n", tonode
+	print "fromnode:\n",fromnode, "\n\n"
+
+def printProbLinks(probLinks):
+	for l in probLinks:
+		printOneLink(l)
+	print "that's all of em!"
+
+# Using these switches instead of functions because I want access to pretty much
+# all the vars below at the interpreter, but I want the option not to execute 
+# certain if blocks.  feeder.parse takes a long time and I don't need to do it
+# each time I make a tiny change to this script.
+parseNewGuy = True
+getLinks = True
+getpblinks = True
+
 
 if parseNewGuy:
 	print "parsing RectorAlphaPhases.glm"
@@ -41,25 +64,4 @@ if getpblinks:
 
 	print len(problemlinks), "problemlinks"
 	print "found all the problem links!  use printProbLinks if there's not too many!"
-
-def prLnkRng(upper=len(problemlinks), lower=0, probLinks=problemlinks):
-	# upper before lower is a little unintuitive...
-	for i in range(lower, upper):
-		if i < len(probLinks):
-			printOneLink(probLinks[i])
-		else:
-			print "All links have been printed"
-			return
-
-def printOneLink(l):
-	fromnode, ldata, tonode = l["fromnode"], l["ldata"], l["tonode"]
-	print "phase mismatch at", ldata["object"], ldata["name"],":"
-	print "linkobj:\n", ldata
-	print "tonode:\n", tonode
-	print "fromnode:\n",fromnode, "\n\n"
-
-def printProbLinks(probLinks):
-	for l in probLinks:
-		printOneLink(l)
-	print "that's all of em!"
 
