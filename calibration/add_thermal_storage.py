@@ -49,7 +49,7 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
     # Initialize psuedo-random seed
     random.seed(4)
     
-    use_ts = 0
+
     #                 0 = none
     # 1 = add thermal storage using the defaults,            2 = add thermal storage with a randomized schedule,
     # 3 = add thermal storage to all houses using defaults,  4 = add thermal storage to all houses with a randomized schedule
@@ -108,16 +108,16 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
                                     if ts_office_array[jj][jjj][jjjj][jjjjj].length() > 0:
                                         parent = ts_office_array[jj][jjj][jjjj][jjjjj];
                                         TS_Tech_Dict[last_object_key] = {"object" : "thermal_storage",
-                                                                "parent" : "{:s}".format(parent),
-                                                                "name" : "thermal_storage_office_{:.0f}_#.0f_#.0f_#.0f".format(jj,jjj,jjjj,jjjjj),
-                                                                "SOC" : "{:0.2f}".format(tech_data.ts_SOC),
-                                                                "k" : "{:.2f}".format(tech_data.k_ts)}
+									                                                            "parent" : "{:s}".format(parent),
+									                                                            "name" : "thermal_storage_office_{:.0f}_#.0f_#.0f_#.0f".format(jj,jjj,jjjj,jjjjj),
+									                                                            "SOC" : "{:0.2f}".format(tech_data.ts_SOC),
+									                                                            "k" : "{:.2f}".format(tech_data.k_ts)}
                                         if ((use_flags["use_ts"]==2) or (use_flags["use_ts"]==4)):
-                                            TS_Tech_Dict[last_object_key].extend({"discharge_schedule_type" : "EXTERNAL",
-                                                                        "recharge_schedule_type" : "EXTERNAL",
-                                                                        "schedule_skew" : "{:.0f}".format(900*(9*random.uniform(0, 1)-4)),
-                                                                        "recharge_time" : "ts_recharge_schedule*1",
-                                                                        "discharge_time" : "ts_discharge_schedule*1"})
+                                            TS_Tech_Dict[last_object_key].extend({	"discharge_schedule_type" : "EXTERNAL",
+										                                                                        "recharge_schedule_type" : "EXTERNAL",
+										                                                                        "schedule_skew" : "{:.0f}".format(900*(9*random.uniform(0, 1)-4)),
+										                                                                        "recharge_time" : "ts_recharge_schedule*1",
+										                                                                        "discharge_time" : "ts_discharge_schedule*1"})
                                         last_object_key += 1
                                         office_count += 1
         
@@ -150,17 +150,16 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
                                     if ts_bigbox_array[jj][jjj][jjjj][jjjjj].length() > 0:
                                         parent = ts_bigbox_array[jj][jjj][jjjj][jjjjj];
                                         TS_Tech_Dict[last_object_key] = {"object" : "thermal_storage",
-                                        "parent" : "{:s}".format(parent),
-                                        "name" :  "thermal_storage_bigbox_#.0f_#.0f_#.0f_#.0f".format(jj,jjj,jjjj,jjjjj),
-                                        "SOC" : "{:0.2f}".format(tech_data.ts_SOC),
-                                        "k" : "{:.2f}".format(tech_data.k_ts)
-                                        }
+														                                        "parent" : "{:s}".format(parent),
+														                                        "name" :  "thermal_storage_bigbox_#.0f_#.0f_#.0f_#.0f".format(jj,jjj,jjjj,jjjjj),
+														                                        "SOC" : "{:0.2f}".format(tech_data.ts_SOC),
+														                                        "k" : "{:.2f}".format(tech_data.k_ts)}
                                         if ((use_flags["use_ts"]==2) or (use_flags["use_ts"]==4)):
-                                            TS_Tech_Dict.extend({"discharge_schedule_type" : "EXTERNAL",
-					                                            "recharge_schedule_type" : "EXTERNAL",
-					                                            "schedule_skew" : "#.0f".format(900*(9*random.random()-4)),
-					                                            "recharge_time" : "ts_recharge_schedule*1",
-					                                            "discharge_time" : "ts_discharge_schedule*1"})
+                                            TS_Tech_Dict.extend({	"discharge_schedule_type" : "EXTERNAL",
+										                                            "recharge_schedule_type" : "EXTERNAL",
+										                                            "schedule_skew" : "#.0f".format(900*(9*random.random()-4)),
+										                                            "recharge_time" : "ts_recharge_schedule*1",
+										                                            "discharge_time" : "ts_discharge_schedule*1"})
                                         bigbox_count += 1
                                         last_object_key += 1
 
@@ -189,16 +188,16 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
                                 if ts_stripmall_array[jj][jjj][jjjj].length() > 0:
                                     parent = ts_stripmall_array[jj][jjj][jjjj];
                                     TS_Tech_Dict[last_object_key] = {"object" : "thermal_storage",
-								                                    "parent" : "{:s}".format(parent),
-								                                    "name" : "thermal_storage_stripmall_{:.0f}_{:.0f}_{:.0f}".format(jj,jjj,jjjj),
-								                                    "SOC" : "{:0.2f}".format(tech_data.ts_SOC),
-								                                    "k" : "{:.2f}".format(tech_data.k_ts)}
+														                                    "parent" : "{:s}".format(parent),
+														                                    "name" : "thermal_storage_stripmall_{:.0f}_{:.0f}_{:.0f}".format(jj,jjj,jjjj),
+														                                    "SOC" : "{:0.2f}".format(tech_data.ts_SOC),
+														                                    "k" : "{:.2f}".format(tech_data.k_ts)}
                                     if ((use_flags["use_ts"]==2) or (use_flags["use_ts"]==4)):
-                                        TS_Tech_Dict[last_object_key].extend({"discharge_schedule_type" : "EXTERNAL",
-                                        "recharge_schedule_type" : "EXTERNAL",
-                                        "schedule_skew" :  "{:.0f}".format(900*(9*random.random()-4)),
-                                        "recharge_time" : "ts_recharge_schedule*1",
-                                        "discharge_time" : "ts_discharge_schedule*1"})
+                                        TS_Tech_Dict[last_object_key].extend({	"discharge_schedule_type" : "EXTERNAL",
+																	                                        "recharge_schedule_type" : "EXTERNAL",
+																	                                        "schedule_skew" :  "{:.0f}".format(900*(9*random.random()-4)),
+																	                                        "recharge_time" : "ts_recharge_schedule*1",
+																	                                        "discharge_time" : "ts_discharge_schedule*1"})
                                     stripmall_count += 1;
                                     last_object_key += 1
         
@@ -225,17 +224,16 @@ def Append_TS(TS_Tech_Dict, use_flags, config_data, tech_data, ts_bigbox_array=N
                             if (residential_penetration[residential_count] <= thermal_storage_penetration_level):
                                 parent = ts_residential_array[jj][jjj];
                                 TS_Tech_Dict[last_object_key] = {"object" : "thermal_storage",
-                                "parent" : "{:s}".format(parent),
-                                "name" : "thermal_storage_residential_{:.0f}_{:.0f}".format(jj,jjj),
-                                "SOC" : "{:0.2f}".format(tech_data.ts_SOC),
-                                "k" : "{:.2f}".format(tech_data.k_ts)
-                                }
+														                                "parent" : "{:s}".format(parent),
+														                                "name" : "thermal_storage_residential_{:.0f}_{:.0f}".format(jj,jjj),
+														                                "SOC" : "{:0.2f}".format(tech_data.ts_SOC),
+														                                "k" : "{:.2f}".format(tech_data.k_ts)}
                                 if ((use_flags["use_ts"]==2) or (use_flags["use_ts"]==4)):
-                                    TS_Tech_Dict[last_object_key].extend( {"discharge_schedule_type" : "EXTERNAL",
-                                                                            "recharge_schedule_type" : "EXTERNAL",
-                                                                            "schedule_skew" : "#.0f".format(900* (9*random.random()-4) ),
-                                                                            "recharge_time" : "ts_recharge_schedule*1",
-                                                                            "discharge_time" : "ts_discharge_schedule*1" } )
+                                    TS_Tech_Dict[last_object_key].extend({	"discharge_schedule_type" : "EXTERNAL",
+							                                                                            "recharge_schedule_type" : "EXTERNAL",
+							                                                                            "schedule_skew" : "#.0f".format(900* (9*random.random()-4) ),
+							                                                                            "recharge_time" : "ts_recharge_schedule*1",
+							                                                                            "discharge_time" : "ts_discharge_schedule*1" })
                                 residential_count += 1
                                 last_object_key += 1
     return TS_Tech_Dict

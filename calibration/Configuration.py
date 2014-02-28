@@ -23,16 +23,15 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 	else:
 		classID = classification
 		
-	working_directory = re.sub('\\\\','\\\\\\\\',wdir)
-	dir = working_directory+'\\\\schedules\\\\'
+	dir = wdir + '../schedules/'
 	data["directory"] = dir
 	
 	default_weather_by_region = { 	1:	['CA-San_francisco.tmy2', 	'PST+8PDT'],
-									2:	['IL-Chicago.tmy2', 		'CST+6CDT'],
-									3:	['AZ-Phoenix.tmy2', 		'MST+7MDT'],
-									4:	['TN-Nashville.tmy2', 		'CST+6CDT'],
-									5:	['FL-Miami.tmy2', 			'EST+5EDT'],
-									6:	['HI-Honolulu.tmy2', 		'HST10'] }
+														2:	['IL-Chicago.tmy2', 		'CST+6CDT'],
+														3:	['AZ-Phoenix.tmy2', 		'MST+7MDT'],
+														4:	['TN-Nashville.tmy2', 		'CST+6CDT'],
+														5:	['FL-Miami.tmy2', 			'EST+5EDT'],
+														6:	['HI-Honolulu.tmy2', 		'HST10'] }
 		
 	if file_to_extract == None:
 		# Use default values.
@@ -44,7 +43,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		
 		# TODO: These variables should be filled in automatically, probably from 'make weather file' script. Within that function we should get the appropriate timestamp and region ID too. 
 		#data["weather"] = 'schedules\\\\SCADA_weather_ISW_gld.csv'
-		data["weather"] = 'schedules\\\\SCADA_weather_NC_gld_shifted.csv'
+		data["weather"] = '../schedules/SCADA_weather_NC_gld_shifted.csv'
 		data["timezone"] = 'PST+8PDT'
 		region = 4
 		
@@ -55,7 +54,7 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		
 		if "weather" not in data.keys() or not data["weather"]:
 			print ("Using default weather file for climate region "+str(region))
-			data["weather"] = 'schedules\\\\'+default_weather_by_region[region][0]
+			data["weather"] = '../schedules/'+default_weather_by_region[region][0]
 			data["timezone"] = default_weather_by_region[region][1]
 		elif "timezone" not in data.keys() or not data["timezone"]:
 			data["timezone"] = default_weather_by_region[region][1]
@@ -70,9 +69,9 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		data["nom_volt2"] = 14400 #was set to 480 for taxonomy feeders
 		#data["load_shape_norm"] = dir + "FRIENDSHIP_2012_normalized_loadshape.player"
 		data["load_shape_norm"] = dir + 'load_shape_player.player'
-		vA='schedules\\\\VA.player'
-		vB='schedules\\\\VB.player'
-		vC='schedules\\\\VC.player'
+		vA='../schedules/VA.player'
+		vB='../schedules/VB.player'
+		vC='../schedules/VC.player'
 		data["voltage_players"] = ['"{:s}"'.format(vA),'"{:s}"'.format(vB),'"{:s}"'.format(vC)]
 		
 		# Voltage Regulation
@@ -128,12 +127,12 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		# Using values from the old regionalization.m script. 
 		# Retooled the old thermal percentages values into this new "matrix" form for classifications.
 		if region == 1:
-			thermal_percentages = [	[0.1652, 0.4935, 0.1652, 0.4935, 0.0000, 0.1940, 1, 1, 1],  #1
-									[0.1486, 0.5064, 0.1486, 0.5064, 0.7535, 0.6664, 0, 0, 0], 	#2
-									[0.2238, 0.0000, 0.2238, 0.0000, 0.2462, 0.1395, 0, 0, 0], 	#3
-									[0.1780, 0.0000, 0.1780, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
-									[0.2841, 0.0000, 0.2841, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
-									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			thermal_percentages = [[0.1652, 0.4935, 0.1652, 0.4935, 0.0000, 0.1940, 1, 1, 1],  #1
+													[0.1486, 0.5064, 0.1486, 0.5064, 0.7535, 0.6664, 0, 0, 0], 	#2
+													[0.2238, 0.0000, 0.2238, 0.0000, 0.2462, 0.1395, 0, 0, 0], 	#3
+													[0.1780, 0.0000, 0.1780, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+													[0.2841, 0.0000, 0.2841, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+													[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
 			data["floor_area"] = [2209, 2209, 2209, 2209, 1054, 820, 0, 0, 0]
 			data["one_story"] = [0.6887] * 9
 			perc_gas = [0.7051] * 9 
@@ -147,12 +146,12 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
 			perc_pool_pumps= [0.0904] * 9
 		elif region == 2:
-			thermal_percentages = [	[0.2873, 0.3268, 0.2873, 0.3268, 0.0000, 0.2878, 1, 1, 1],  #1
-									[0.1281, 0.6731, 0.1281, 0.6731, 0.6480, 0.5308, 0, 0, 0], 	#2
-									[0.2354, 0.0000, 0.2354, 0.0000, 0.3519, 0.1813, 0, 0, 0], 	#3
-									[0.1772, 0.0000, 0.1772, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
-									[0.1717, 0.0000, 0.1717, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
-									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			thermal_percentages = [[0.2873, 0.3268, 0.2873, 0.3268, 0.0000, 0.2878, 1, 1, 1],  #1
+													[0.1281, 0.6731, 0.1281, 0.6731, 0.6480, 0.5308, 0, 0, 0], 	#2
+													[0.2354, 0.0000, 0.2354, 0.0000, 0.3519, 0.1813, 0, 0, 0], 	#3
+													[0.1772, 0.0000, 0.1772, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+													[0.1717, 0.0000, 0.1717, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+													[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
 			data["floor_area"] = [2951] * 9
 			data["one_story"] = [0.5210] * 9
 			perc_gas = [0.8927] * 9
@@ -166,12 +165,12 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
 			perc_pool_pumps= [0.0591] * 9
 		elif region == 3:
-			thermal_percentages = [	[0.1240, 0.3529, 0.1240, 0.3529, 0.0000, 0.1079, 1, 1, 1],  #1
-									[0.0697, 0.6470, 0.0697, 0.6470, 0.6343, 0.6316, 0, 0, 0], 	#2
-									[0.2445, 0.0000, 0.2445, 0.0000, 0.3656, 0.2604, 0, 0, 0], 	#3
-									[0.2334, 0.0000, 0.2334, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
-									[0.3281, 0.0000, 0.3281, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
-									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			thermal_percentages = [[0.1240, 0.3529, 0.1240, 0.3529, 0.0000, 0.1079, 1, 1, 1],  #1
+													[0.0697, 0.6470, 0.0697, 0.6470, 0.6343, 0.6316, 0, 0, 0], 	#2
+													[0.2445, 0.0000, 0.2445, 0.0000, 0.3656, 0.2604, 0, 0, 0], 	#3
+													[0.2334, 0.0000, 0.2334, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+													[0.3281, 0.0000, 0.3281, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+													[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
 			data["floor_area"] = [2370] * 9
 			data["one_story"] = [0.7745] * 9
 			perc_gas = [0.6723] * 9
@@ -180,17 +179,17 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 			wh_electric = [0.6520] * 9
 			wh_size = [[0.2072,0.5135,0.2793]] * 9
 			AC_type = [	[1, 1, 1, 1, 1, 1, 0, 0, 0], # central
-						[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+								[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
 			over_sizing_factor = [	[ 0.2, 0.2, 0.2, 0.2, 0.2, 0.2, 0, 0, 0], # central
-									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+												[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
 			perc_pool_pumps= [0.0818] * 9
 		elif region == 4:
-			thermal_percentages = [	[0.1470, 0.3297, 0.1470, 0.3297, 0.0000, 0.1198, 1, 1, 1],  #1
-									[0.0942, 0.6702, 0.0942, 0.6702, 0.5958, 0.6027, 0, 0, 0], 	#2
-									[0.2253, 0.0000, 0.2253, 0.0000, 0.4041, 0.2773, 0, 0, 0], 	#3
-									[0.2311, 0.0000, 0.2311, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
-									[0.3022, 0.0000, 0.3022, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
-									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			thermal_percentages = [[0.1470, 0.3297, 0.1470, 0.3297, 0.0000, 0.1198, 1, 1, 1],  #1
+													[0.0942, 0.6702, 0.0942, 0.6702, 0.5958, 0.6027, 0, 0, 0], 	#2
+													[0.2253, 0.0000, 0.2253, 0.0000, 0.4041, 0.2773, 0, 0, 0], 	#3
+													[0.2311, 0.0000, 0.2311, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+													[0.3022, 0.0000, 0.3022, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+													[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
 			data["floor_area"] = [2655] * 9
 			data["one_story"] = [0.7043] * 9
 			perc_gas = [0.4425] * 9
@@ -199,17 +198,17 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 			wh_electric = [0.3572] * 9
 			wh_size = [[0.2259,0.5267,0.2475]] * 9
 			AC_type = [	[1, 1, 1, 1, 1, 1, 0, 0, 0], # central
-						[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+								[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
 			over_sizing_factor = [	[ 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0, 0, 0], # central
-									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+												[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
 			perc_pool_pumps= [0.0657] * 9
 		elif region == 5:
-			thermal_percentages = [	[0.1470, 0.3297, 0.1470, 0.3297, 0.0000, 0.1198, 1, 1, 1],  #1
-									[0.0942, 0.6702, 0.0942, 0.6702, 0.5958, 0.6027, 0, 0, 0], 	#2
-									[0.2253, 0.0000, 0.2253, 0.0000, 0.4041, 0.2773, 0, 0, 0], 	#3
-									[0.2311, 0.0000, 0.2311, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
-									[0.3022, 0.0000, 0.3022, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
-									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			thermal_percentages = [[0.1470, 0.3297, 0.1470, 0.3297, 0.0000, 0.1198, 1, 1, 1],  #1
+													[0.0942, 0.6702, 0.0942, 0.6702, 0.5958, 0.6027, 0, 0, 0], 	#2
+													[0.2253, 0.0000, 0.2253, 0.0000, 0.4041, 0.2773, 0, 0, 0], 	#3
+													[0.2311, 0.0000, 0.2311, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+													[0.3022, 0.0000, 0.3022, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+													[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
 			data["floor_area"] = [2655] * 9
 			data["one_story"] = [0.7043] * 9
 			perc_gas = [0.4425] * 9
@@ -218,17 +217,17 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 			wh_electric = [0.3572] * 9
 			wh_size = [[0.2259,0.5267,0.2475]] * 9
 			AC_type = [	[1, 1, 1, 1, 1, 1, 0, 0, 0], # central
-						[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+								[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
 			over_sizing_factor = [	[ 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0, 0, 0], # central
-									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+												[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
 			perc_pool_pumps= [0.0657] * 9
 		elif region == 6:
-			thermal_percentages = [	[0.2184, 0.3545, 0.2184, 0.3545, 0.0289, 0.2919, 1, 1, 1],  #1
-									[0.0818, 0.6454, 0.0818, 0.6454, 0.6057, 0.5169, 0, 0, 0], 	#2
-									[0.2390, 0.0000, 0.2390, 0.0000, 0.3652, 0.1911, 0, 0, 0], 	#3
-									[0.2049, 0.0000, 0.2049, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
-									[0.2556, 0.0000, 0.2556, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
-									[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
+			thermal_percentages = [[0.2184, 0.3545, 0.2184, 0.3545, 0.0289, 0.2919, 1, 1, 1],  #1
+													[0.0818, 0.6454, 0.0818, 0.6454, 0.6057, 0.5169, 0, 0, 0], 	#2
+													[0.2390, 0.0000, 0.2390, 0.0000, 0.3652, 0.1911, 0, 0, 0], 	#3
+													[0.2049, 0.0000, 0.2049, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#4
+													[0.2556, 0.0000, 0.2556, 0.0000, 0.0000, 0.0000, 0, 0, 0], 	#5
+													[0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0.0000, 0, 0, 0]] 	#6 
 			data["floor_area"] = [2655] * 9
 			data["one_story"] = [0.7043] * 9
 			perc_gas = [0.4425] * 9
@@ -237,42 +236,42 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 			wh_electric = [0.3572] * 9
 			wh_size = [[0.2259,0.5267,0.2475]] * 9
 			AC_type = [	[1, 1, 1, 1, 1, 1, 0, 0, 0], # central
-						[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+								[0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
 			over_sizing_factor = [	[ 0.3, 0.3, 0.3, 0.3, 0.3, 0.3, 0, 0, 0], # central
-									[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
+												[ 0, 0, 0, 0, 0, 0, 0, 0, 0]] # window/wall unit
 			perc_pool_pumps= [0.0657] * 9
 			
 			
 		# Single-Family Homes
 		# - Designate the percentage of SFH in each classification
-		SFH = [[1, 1, 1, 1, 0, 0, 0, 0, 0], # Res1-Res4 are 100% SFH.
-               [1, 1, 1, 1, 0, 0, 0, 0, 0],
-               [1, 1, 1, 1, 0, 0, 0, 0, 0],
-               [1, 1, 1, 1, 0, 0, 0, 0, 0],
-               [1, 1, 1, 1, 0, 0, 0, 0, 0],
-               [1, 1, 1, 1, 0, 0, 0, 0, 0]] 
+		SFH = [	[1, 1, 1, 1, 0, 0, 0, 0, 0], # Res1-Res4 are 100% SFH.
+						[1, 1, 1, 1, 0, 0, 0, 0, 0],
+						[1, 1, 1, 1, 0, 0, 0, 0, 0],
+						[1, 1, 1, 1, 0, 0, 0, 0, 0],
+						[1, 1, 1, 1, 0, 0, 0, 0, 0],
+						[1, 1, 1, 1, 0, 0, 0, 0, 0]] 
 
 		# Commercial Buildings
 		# - Designate what type of commercial building each classification represents.
-		com_buildings = [[0, 0, 0, 0, 0, 0, 0, 0, 1],  # office buildings 
-                         [0, 0, 0, 0, 0, 0, 0, 1, 0],  # big box 
-                         [0, 0, 0, 0, 0, 0, 1, 0, 0]]  # strip mall
+		com_buildings = [	[0, 0, 0, 0, 0, 0, 0, 0, 1],  # office buildings 
+										[0, 0, 0, 0, 0, 0, 0, 1, 0],  # big box 
+										[0, 0, 0, 0, 0, 0, 1, 0, 0]]  # strip mall
 
 		# COP High/Low Values
 		# - "columns" represent load classifications. The "rows" represent the sub-classifications (See thermal_percentages).
-		cop_high = [[2.8, 3.8, 2.8, 3.8, 0.0, 2.8, 0, 0, 0], 
-                    [3.0, 4.0, 3.0, 4.0, 2.8, 3.0, 0, 0, 0], 
-                    [3.2, 0.0, 3.2, 0.0, 3.5, 3.2, 0, 0, 0], 
-                    [3.4, 0.0, 3.4, 0.0, 0.0, 0.0, 0, 0, 0], 
-                    [3.6, 0.0, 3.6, 0.0, 0.0, 0.0, 0, 0, 0], 
-                    [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0]]
+		cop_high = [	[2.8, 3.8, 2.8, 3.8, 0.0, 2.8, 0, 0, 0], 
+								[3.0, 4.0, 3.0, 4.0, 2.8, 3.0, 0, 0, 0], 
+								[3.2, 0.0, 3.2, 0.0, 3.5, 3.2, 0, 0, 0], 
+								[3.4, 0.0, 3.4, 0.0, 0.0, 0.0, 0, 0, 0], 
+								[3.6, 0.0, 3.6, 0.0, 0.0, 0.0, 0, 0, 0], 
+								[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0]]
 		
-		cop_low = [[2.4, 3.0, 2.4, 3.0, 0.0, 1.9, 0, 0, 0], 
-                   [2.5, 3.0, 2.5, 3.0, 1.9, 2.0, 0, 0, 0], 
-                   [2.6, 0.0, 2.6, 0.0, 2.2, 2.1, 0, 0, 0], 
-                   [2.8, 0.0, 2.8, 0.0, 0.0, 0.0, 0, 0, 0], 
-                   [3.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0, 0, 0], 
-                   [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0]]
+		cop_low = [	[2.4, 3.0, 2.4, 3.0, 0.0, 1.9, 0, 0, 0], 
+							[2.5, 3.0, 2.5, 3.0, 1.9, 2.0, 0, 0, 0], 
+							[2.6, 0.0, 2.6, 0.0, 2.2, 2.1, 0, 0, 0], 
+							[2.8, 0.0, 2.8, 0.0, 0.0, 0.0, 0, 0, 0], 
+							[3.0, 0.0, 3.0, 0.0, 0.0, 0.0, 0, 0, 0], 
+							[0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0, 0, 0]]
 
 		# Thermal Properties
 		# - There should be a list of properties for each entry in thermal_percentages. (Each sub-classification in each classification)
@@ -366,140 +365,140 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		# [nighttime percentage, high bin value, low bin value]
 		cooling_setpoint = [None] * 9
 		
-		cooling_setpoint[0] =  [[0.098, 69, 65], #Res1
-                                [0.140, 70, 70],
-                                [0.166, 73, 71],
-                                [0.306, 76, 74],
-                                [0.206, 79, 77],
-                                [0.084, 85, 80]]
+		cooling_setpoint[0] =  [	[0.098, 69, 65], #Res1
+												[0.140, 70, 70],
+												[0.166, 73, 71],
+												[0.306, 76, 74],
+												[0.206, 79, 77],
+												[0.084, 85, 80]]
 		
-		cooling_setpoint[1] =  [[0.098, 69, 65], #Res2
-                                [0.140, 70, 70],
-                                [0.166, 73, 71],
-                                [0.306, 76, 74],
-                                [0.206, 79, 77],
-                                [0.084, 85, 80]]
+		cooling_setpoint[1] =  [	[0.098, 69, 65], #Res2
+				                                [0.140, 70, 70],
+				                                [0.166, 73, 71],
+				                                [0.306, 76, 74],
+				                                [0.206, 79, 77],
+				                                [0.084, 85, 80]]
 		
-		cooling_setpoint[2] =  [[0.098, 69, 65], #Res3
-                                [0.140, 70, 70],
-                                [0.166, 73, 71],
-                                [0.306, 76, 74],
-                                [0.206, 79, 77],
-                                [0.084, 85, 80]]
+		cooling_setpoint[2] =  [	[0.098, 69, 65], #Res3
+				                                [0.140, 70, 70],
+				                                [0.166, 73, 71],
+				                                [0.306, 76, 74],
+				                                [0.206, 79, 77],
+				                                [0.084, 85, 80]]
 		
-		cooling_setpoint[3] =  [[0.098, 69, 65], #Res4
-                                [0.140, 70, 70],
-                                [0.166, 73, 71],
-                                [0.306, 76, 74],
-                                [0.206, 79, 77],
-                                [0.084, 85, 80]]
+		cooling_setpoint[3] =  [	[0.098, 69, 65], #Res4
+				                                [0.140, 70, 70],
+				                                [0.166, 73, 71],
+				                                [0.306, 76, 74],
+				                                [0.206, 79, 77],
+				                                [0.084, 85, 80]]
 		
-		cooling_setpoint[4] =  [[0.138, 69, 65], #Res5
-                                [0.172, 70, 70],
-                                [0.172, 73, 71],
-                                [0.276, 76, 74],
-                                [0.138, 79, 77],
-                                [0.103, 85, 80]]
+		cooling_setpoint[4] =  [	[0.138, 69, 65], #Res5
+				                                [0.172, 70, 70],
+				                                [0.172, 73, 71],
+				                                [0.276, 76, 74],
+				                                [0.138, 79, 77],
+				                                [0.103, 85, 80]]
 		
-		cooling_setpoint[5] =  [[0.155, 69, 65], #Res6
-                                [0.207, 70, 70],
-                                [0.103, 73, 71],
-                                [0.310, 76, 74],
-                                [0.155, 79, 77],
-                                [0.069, 85, 80]]
+		cooling_setpoint[5] =  [	[0.155, 69, 65], #Res6
+				                                [0.207, 70, 70],
+				                                [0.103, 73, 71],
+				                                [0.310, 76, 74],
+				                                [0.155, 79, 77],
+				                                [0.069, 85, 80]]
 		
-		cooling_setpoint[6] =  [[0.098, 69, 65], #Com1
-                                [0.140, 70, 70],
-                                [0.166, 73, 71],
-                                [0.306, 76, 74],
-                                [0.206, 79, 77],
-                                [0.084, 85, 80]]
+		cooling_setpoint[6] =  [	[0.098, 69, 65], #Com1
+				                                [0.140, 70, 70],
+				                                [0.166, 73, 71],
+				                                [0.306, 76, 74],
+				                                [0.206, 79, 77],
+				                                [0.084, 85, 80]]
 		
-		cooling_setpoint[7] =  [[0.098, 69, 65], #Com2
-                                [0.140, 70, 70],
-                                [0.166, 73, 71],
-                                [0.306, 76, 74],
-                                [0.206, 79, 77],
-                                [0.084, 85, 80]]
+		cooling_setpoint[7] =  [	[0.098, 69, 65], #Com2
+				                                [0.140, 70, 70],
+				                                [0.166, 73, 71],
+				                                [0.306, 76, 74],
+				                                [0.206, 79, 77],
+				                                [0.084, 85, 80]]
 		
-		cooling_setpoint[8] =  [[0.098, 69, 65], #Com3
-                                [0.140, 70, 70],
-                                [0.166, 73, 71],
-                                [0.306, 76, 74],
-                                [0.206, 79, 77],
-                                [0.084, 85, 80]]
+		cooling_setpoint[8] =  [	[0.098, 69, 65], #Com3
+				                                [0.140, 70, 70],
+				                                [0.166, 73, 71],
+				                                [0.306, 76, 74],
+				                                [0.206, 79, 77],
+				                                [0.084, 85, 80]]
 
 		# Heating Setpoint Bins by Classification
 		heating_setpoint = [None] * 9
 		
-		heating_setpoint[0] =  [[0.141, 63, 59], #Res1
-                                [0.204, 66, 64],
-                                [0.231, 69, 67],
-                                [0.163, 70, 70],
-                                [0.120, 73, 71],
-                                [0.141, 79, 74]]
+		heating_setpoint[0] =  [	[0.141, 63, 59], #Res1
+				                                [0.204, 66, 64],
+				                                [0.231, 69, 67],
+				                                [0.163, 70, 70],
+				                                [0.120, 73, 71],
+				                                [0.141, 79, 74]]
 		
-		heating_setpoint[1] =  [[0.141, 63, 59], #Res2
-                                [0.204, 66, 64],
-                                [0.231, 69, 67],
-                                [0.163, 70, 70],
-                                [0.120, 73, 71],
-                                [0.141, 79, 74]]
+		heating_setpoint[1] =  [	[0.141, 63, 59], #Res2
+				                                [0.204, 66, 64],
+				                                [0.231, 69, 67],
+				                                [0.163, 70, 70],
+				                                [0.120, 73, 71],
+				                                [0.141, 79, 74]]
 		
-		heating_setpoint[2] =  [[0.141, 63, 59], #Res3
-                                [0.204, 66, 64],
-                                [0.231, 69, 67],
-                                [0.163, 70, 70],
-                                [0.120, 73, 71],
-                                [0.141, 79, 74]]
+		heating_setpoint[2] =  [	[0.141, 63, 59], #Res3
+				                                [0.204, 66, 64],
+				                                [0.231, 69, 67],
+				                                [0.163, 70, 70],
+				                                [0.120, 73, 71],
+				                                [0.141, 79, 74]]
 		
-		heating_setpoint[3] =  [[0.141, 63, 59], #Res4
-                                [0.204, 66, 64],
-                                [0.231, 69, 67],
-                                [0.163, 70, 70],
-                                [0.120, 73, 71],
-                                [0.141, 79, 74]]
+		heating_setpoint[3] =  [	[0.141, 63, 59], #Res4
+				                                [0.204, 66, 64],
+				                                [0.231, 69, 67],
+				                                [0.163, 70, 70],
+				                                [0.120, 73, 71],
+				                                [0.141, 79, 74]]
 		
-		heating_setpoint[4] =  [[0.129, 63, 59], #Res5
-                                [0.177, 66, 64],
-                                [0.161, 69, 67],
-                                [0.274, 70, 70],
-                                [0.081, 73, 71],
-                                [0.177, 79, 74]]
+		heating_setpoint[4] =  [	[0.129, 63, 59], #Res5
+				                                [0.177, 66, 64],
+				                                [0.161, 69, 67],
+				                                [0.274, 70, 70],
+				                                [0.081, 73, 71],
+				                                [0.177, 79, 74]]
 		
-		heating_setpoint[5] =  [[0.085, 63, 59], #Res6
-                                [0.132, 66, 64],
-                                [0.147, 69, 67],
-                                [0.279, 70, 70],
-                                [0.109, 73, 71],
-                                [0.248, 79, 74]]
+		heating_setpoint[5] =  [	[0.085, 63, 59], #Res6
+				                                [0.132, 66, 64],
+				                                [0.147, 69, 67],
+				                                [0.279, 70, 70],
+				                                [0.109, 73, 71],
+				                                [0.248, 79, 74]]
 		
-		heating_setpoint[6] =  [[0.141, 63, 59], #Com1
-                                [0.204, 66, 64],
-                                [0.231, 69, 67],
-                                [0.163, 70, 70],
-                                [0.120, 73, 71],
-                                [0.141, 79, 74]]
+		heating_setpoint[6] =  [	[0.141, 63, 59], #Com1
+				                                [0.204, 66, 64],
+				                                [0.231, 69, 67],
+				                                [0.163, 70, 70],
+				                                [0.120, 73, 71],
+				                                [0.141, 79, 74]]
 		
-		heating_setpoint[7] =  [[0.141, 63, 59], #Com2
-                                [0.204, 66, 64],
-                                [0.231, 69, 67],
-                                [0.163, 70, 70],
-                                [0.120, 73, 71],
-                                [0.141, 79, 74]]
+		heating_setpoint[7] =  [	[0.141, 63, 59], #Com2
+				                                [0.204, 66, 64],
+				                                [0.231, 69, 67],
+				                                [0.163, 70, 70],
+				                                [0.120, 73, 71],
+				                                [0.141, 79, 74]]
 		
-		heating_setpoint[8] =  [[0.141, 63, 59], #Com3
-                                [0.204, 66, 64],
-                                [0.231, 69, 67],
-                                [0.163, 70, 70],
-                                [0.120, 73, 71],
-                                [0.141, 79, 74]]
+		heating_setpoint[8] =  [	[0.141, 63, 59], #Com3
+				                                [0.204, 66, 64],
+				                                [0.231, 69, 67],
+				                                [0.163, 70, 70],
+				                                [0.120, 73, 71],
+				                                [0.141, 79, 74]]
 		
 		# Heating
 		# - Percentage breakdown of heating system type by classification.
-		#perc_gas     = [0.52, 0.36, 0.52, 0.36, 0.16, 0.33, 0, 0, 0] 
+		#perc_gas = [0.52, 0.36, 0.52, 0.36, 0.16, 0.33, 0, 0, 0] 
 		
-		#perc_pump    = [0.37, 0.57, 0.37, 0.57, 0.34, 0.53, 0, 0, 0]
+		#perc_pump = [0.37, 0.57, 0.37, 0.57, 0.34, 0.53, 0, 0, 0]
 		
 		perc_res = list(map(lambda x, y:1-x-y, perc_pump, perc_gas))
 		
@@ -510,10 +509,10 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		#perc_AC = [0.94, 1.00, 0.94, 1.00, 0.94, 0.93, 0, 0, 0] 
 		
 		# AC_type = [[0.90, 1.00, 0.90, 1.00, 0.88, 0.87, 0, 0, 0],
-                   # [0.10, 0.00, 0.10, 0.00, 0.12, 0.13, 0, 0, 0]]
+							# 	[0.10, 0.00, 0.10, 0.00, 0.12, 0.13, 0, 0, 0]]
 		
-		# over_sizing_factor = [[ 0, 0, 0, 0, 0, 0, 0, 0, 0],
-                              # [ 0, 0, 0, 0, 0, 0, 0, 0, 0]]
+		# over_sizing_factor = [	[ 0, 0, 0, 0, 0, 0, 0, 0, 0],
+												#	[ 0, 0, 0, 0, 0, 0, 0, 0, 0]]
 		
 		# Percent Pool Pumps by Classification
 		#perc_pool_pumps = [0, 0, 0, 0, 0, 0, 0, 0, 0]
@@ -524,14 +523,14 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		#wh_electric = [0.67, 0.49, 0.67, 0.49, 0.73, 0.96, 0, 0, 0]
 		
 		# wh_size = [[0.2259,0.5267, 0.2475],  #Res1
-                   # [0.2259, 0.5267, 0.2475], #Res2
-                   # [0.2259, 0.5267, 0.2475], #Res3
-                   # [0.2259, 0.5267, 0.2475], #Res4
-                   # [0.2259, 0.5267, 0.2475], #Res5
-                   # [0.2259, 0.5267, 0.2475], #Res6
-                   # [0, 0, 0],                #Com1
-                   # [0, 0, 0],                #Com2
-                   # [0, 0, 0]]                #Com3
+							# [0.2259, 0.5267, 0.2475], #Res2
+							# [0.2259, 0.5267, 0.2475], #Res3
+							# [0.2259, 0.5267, 0.2475], #Res4
+							# [0.2259, 0.5267, 0.2475], #Res5
+							# [0.2259, 0.5267, 0.2475], #Res6
+							# [0, 0, 0],                #Com1
+							# [0, 0, 0],                #Com2
+							# [0, 0, 0]]                #Com3
 		
 		# Additional Solar Modules
 		# - penetration (%)
@@ -543,75 +542,75 @@ def ConfigurationFunc(wdir, config_file, file_to_extract=None, classification=No
 		# - inverter object properties to be used
 		# - solar module object properties to be used
 		# if entry is blank (i.e. ''), default property value will be used in in the .glm:
-		sol_inv_properties = ['', #1    # inverter_type (TWO_PULSE|SIX_PULSE|TWELVE_PULSE|PWM|FOUR_QUADRANT)
-							  '', #2    # generator_status (ONLINE|OFFLINE)
-							  '', #3    # generator_mode (UNKNOWN|CONSTANT_V|CONSTANT_PQ|CONSTANT_PF|SUPPLY_DRIVEN), 
-										# -- default is CONSTANT_PF, and this property is irrelevent if inverter type is four quadrant:
-							  '', #4    # V_In [V]
-							  '', #5    # I_In [A]
-							  '', #6    # four_quadrant_control_mode (NONE|CONSTANT_PQ|CONSTANT_PF)
-										# -- this property is necessary only if inverter type is four quadrant:
-							  '', #7    # P_Out [VA]  -- used for constant PQ mode
-							  '', #8    # Q_Out [VAr] -- used for constant PQ mode
-							  '', #9    # power_factor [pu] (used for constant pf mode)
-							  '', #10   # rated_power [W]
-							  '', #11   # use_multipoint_efficiency (TRUE|FALSE)
-							  '', #12   # inverter_manufacturer (NONE|FRONIUS|SMA|XANTREX)
-										#-- only used if multipoint efficiency:
-							  '', #13   # maximum_dc_power [W] -- used if multipoint efficiency:
-							  '', #14   # maximum_dc_voltage [V] -- used if multipoint effici ency:
-							  '', #15   # minimum_dc_power [W] -- used if multipoint efficiency:
-							  '', #16   # c_0 -- coefficient descibing the parabolic relationship between AC and DC power of the inverter
-										#-- only used if multipoint efficiency:
-							  '', #17   # c_1 -- coefficient allowing the maximum DC power to vary linearly with DC voltage
-										#-- only used if multipoint efficiency:
-							  '', #18   # c_2 -- coefficient allowing the minimum DC power to vary linearly with DC voltage
-										#-- only used if multipoint efficiency:
-							  ''] #19   # c_3 -- coefficient allowing c_0 to vary linearly with DC voltage
-										#-- only used if multipoint efficiency:
+		sol_inv_properties = [	'', #1   # inverter_type (TWO_PULSE|SIX_PULSE|TWELVE_PULSE|PWM|FOUR_QUADRANT)
+											'', #2   # generator_status (ONLINE|OFFLINE)
+											'', #3   # generator_mode (UNKNOWN|CONSTANT_V|CONSTANT_PQ|CONSTANT_PF|SUPPLY_DRIVEN), 
+														# -- default is CONSTANT_PF, and this property is irrelevent if inverter type is four quadrant:
+											'', #4   # V_In [V]
+											'', #5   # I_In [A]
+											'', #6   # four_quadrant_control_mode (NONE|CONSTANT_PQ|CONSTANT_PF)
+														# -- this property is necessary only if inverter type is four quadrant:
+											'', #7   # P_Out [VA]  -- used for constant PQ mode
+											'', #8   # Q_Out [VAr] -- used for constant PQ mode
+											'', #9   # power_factor [pu] (used for constant pf mode)
+											'', #10 	# rated_power [W]
+											'', #11 	# use_multipoint_efficiency (TRUE|FALSE)
+											'', #12 	# inverter_manufacturer (NONE|FRONIUS|SMA|XANTREX)
+														#-- only used if multipoint efficiency:
+											'', #13 	# maximum_dc_power [W] -- used if multipoint efficiency:
+											'', #14 	# maximum_dc_voltage [V] -- used if multipoint effici ency:
+											'', #15 	# minimum_dc_power [W] -- used if multipoint efficiency:
+											'', #16 	# c_0 -- coefficient descibing the parabolic relationship between AC and DC power of the inverter
+														#-- only used if multipoint efficiency:
+											'', #17 	# c_1 -- coefficient allowing the maximum DC power to vary linearly with DC voltage
+														#-- only used if multipoint efficiency:
+											'', #18 	# c_2 -- coefficient allowing the minimum DC power to vary linearly with DC voltage
+														#-- only used if multipoint efficiency:
+											''] #19	# c_3 -- coefficient allowing c_0 to vary linearly with DC voltage
+														#-- only used if multipoint efficiency:
 
 		# properties of solar modules
-		sol_module_properties = ['', 						#1	# generator_mode (SUPPLY_DRIVEN)
-								 '', 						#2  # generator_status (ONLINE|OFFLINE)
-								 'MULTI_CRYSTAL_SILICON', 	#3  # panel_type (SINGLE_CRYSTAL_SILICON|MULTI_CRYSTAL_SILICON|AMORPHOUS_SILICON|THIN_FILM_GA_AS|CONCENTRATOR)
-								 '', 						#4  # NOCT [degF] --default is 118.4 degF, used to calculate Tmodule
-								 '', 						#5  # Tmodule [degF] -- used to calculate Voc and VA_Out  
-								 '', 						#6  # power_factor [pu] (used for constant pf mode)
-								 '', 						#7  # Rated_Insolation [W/sf] -- default is 92.902
-								 '', 						#8  # Pmax_temp_coeff -- used to calculate VA_Out, set by panel type selection if not set here:
-								 '', 						#9  # Voc_temp_coeff -- used to calculate Voc, set by panel type selection if not set here:
-								 '', 						#10 # V_Max [V] -- default is 27.1 + 0j, used to calculate V_Out
-								 '', 						#11 # Voc_Max [V] -- default is 34 + 0j, used to calculate Voc and V_Out
-								 '', 						#12 # efficiency [unit] -- set by panel type selection if not set here:
-								 '', 						#13 # area [sf] -- default is 323 #TODO: should they be allowed to change this since it's figured out according to load size?
-								 '', 						#14 # shading_factor -- default is 1 (no shading)
-								 '20',  					#15 # tilt_angle -- default is 45 degrees
-								 '', 						#16 # orientation_azimuth -- default is 0 (equator facing)
-								 '', 						#17 # latitude_angle_fix (TRUE|FALSE) -- default is false (this fixes tilt angle to regions latitude as determined by the included climate info
-								 'FIXED_AXIS'] 				#18 # orientation  (FIXED|DEFAULT) -- default is DEFAULT, which means tracking
+		sol_module_properties = [	'', 													#1	# generator_mode (SUPPLY_DRIVEN)
+													'', 													#2  	# generator_status (ONLINE|OFFLINE)
+													'MULTI_CRYSTAL_SILICON', 	#3  	# panel_type (SINGLE_CRYSTAL_SILICON|MULTI_CRYSTAL_SILICON|AMORPHOUS_SILICON|THIN_FILM_GA_AS|CONCENTRATOR)
+													'', 													#4  	# NOCT [degF] --default is 118.4 degF, used to calculate Tmodule
+													'', 													#5  	# Tmodule [degF] -- used to calculate Voc and VA_Out  
+													'', 													#6  	# power_factor [pu] (used for constant pf mode)
+													'', 													#7 	# Rated_Insolation [W/sf] -- default is 92.902
+													'', 													#8  	# Pmax_temp_coeff -- used to calculate VA_Out, set by panel type selection if not set here:
+													'', 													#9  	# Voc_temp_coeff -- used to calculate Voc, set by panel type selection if not set here:
+													'', 													#10 # V_Max [V] -- default is 27.1 + 0j, used to calculate V_Out
+													'', 													#11 # Voc_Max [V] -- default is 34 + 0j, used to calculate Voc and V_Out
+													'', 													#12 # efficiency [unit] -- set by panel type selection if not set here:
+													'', 													#13 # area [sf] -- default is 323 #TODO: should they be allowed to change this since it's figured out according to load size?
+													'', 													#14 # shading_factor -- default is 1 (no shading)
+													'20',  											#15 # tilt_angle -- default is 45 degrees
+													'', 													#16 # orientation_azimuth -- default is 0 (equator facing)
+													'', 													#17 # latitude_angle_fix (TRUE|FALSE) -- default is false (this fixes tilt angle to regions latitude as determined by the included climate info
+													'FIXED_AXIS'] 							#18	# orientation  (FIXED|DEFAULT) -- default is DEFAULT, which means tracking
 
 		# what percentage breakdown of these configurations? (inverter with sol_inv_properties{n} will be parent to solar object with solar_module_properties{n})
-		data["solar_inverter_config_breakdown"] = [1, #Res1
-												   1, #Res2
-												   1, #Res3
-												   1, #Res4
-												   1, #Res5
-												   1, #Res6
-												   1, #Com1
-												   1, #Com2
-												   1] #Com3
+		data["solar_inverter_config_breakdown"] = [	1, #Res1
+																					1, #Res2
+																					1, #Res3
+																					1, #Res4
+																					1, #Res5
+																					1, #Res6
+																					1, #Com1
+																					1, #Com2
+																					1] #Com3
 
 		## emission dispatch order
 		# Nuc Hydro Solar BioMass Wind Coal NG GeoTherm Petro
-		dispatch_order = [[1,5,2,3,4,7,6,8,9],   #Res1
-						  [1,7,2,3,4,5,6,8,9],   #Res2
-						  [1,7,2,3,4,5,6,8,9],   #Res3
-						  [1,7,2,3,4,5,6,8,9],   #Res4
-						  [1,7,2,3,4,6,5,8,9],   #Res5
-						  [1,7,2,3,4,5,6,8,9],   #Res6
-						  [1,7,2,3,4,5,6,8,9],   #Com1
-						  [1,7,2,3,4,5,6,8,9],   #Com2
-						  [1,7,2,3,4,6,5,8,9]]   #Com3
+		dispatch_order = [	[1,5,2,3,4,7,6,8,9],   #Res1
+										[1,7,2,3,4,5,6,8,9],   #Res2
+										[1,7,2,3,4,5,6,8,9],   #Res3
+										[1,7,2,3,4,5,6,8,9],   #Res4
+										[1,7,2,3,4,6,5,8,9],   #Res5
+										[1,7,2,3,4,5,6,8,9],   #Res6
+										[1,7,2,3,4,5,6,8,9],   #Com1
+										[1,7,2,3,4,5,6,8,9],   #Com2
+										[1,7,2,3,4,6,5,8,9]]   #Com3
 	else:
 		# set dictionary values for basic configuration data for this feeder.
 		pass

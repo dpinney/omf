@@ -4,7 +4,7 @@ Currently, this is just a place holder for a function that will take the name of
 
 '''
 
-def getValues(input):
+def getValues(ginput):
 
 	# From the SCADA available, choose three days representing summer, winter, and spring (shoulder).
 	# Ideally, summer and winter days are seasonal peak days.

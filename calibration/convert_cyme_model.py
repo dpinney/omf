@@ -3,6 +3,8 @@ Created on Nov 19, 2013
 
 @author: fish334
 '''
+import sys
+sys.path.append('..')
 import pyodbc
 import feeder
 import os
@@ -15,388 +17,388 @@ import copy
 import add_glm_object_dictionary
 import warnings
 
-    #glm_parameters is a list containing all the user inputs for the object in a certain order as strings
-        # node
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'parent'
-        #    3 : 'bustype'
-        #    4 : 'phases'
-        #    5 : 'nominal_voltage'
-        #    6 : 'comments'
-        
-        # meter
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'parent'
-        #    3 : 'bustype'
-        #    4 : 'phases'
-		#	5 : 'voltage_A'
-		#	6 : 'voltage_B'
-		#	7 : 'voltage_C'
-        #    8 : 'nominal_voltage'
-        #    9 : 'comments'
-        
-        # load
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'parent'
-        #    3 : 'bustype'
-        #    4 : 'phases'
-        #    5 : 'nominal_voltage'
-        #    6 : 'load_class'
-        #    7 : 'constant_power_A'
-        #    8 : 'constant_power_B'
-        #    9 : 'constant_power_C'
-        #    10 : 'constant_current_A'
-        #    11 : 'constant_current_B'
-        #    12 : 'constant_current_C'
-        #    13 : 'constant_impedance_A'
-        #    14 : 'constant_impedance_B'
-        #    15 : 'constant_impedance_C'
-        #    16 : 'base_power_A'
-        #    17 : 'base_power_B'
-        #    18 : 'base_power_C'
-        #    19 : 'power_pf_A'
-        #    20 : 'power_pf_B'
-        #    21 : 'power_pf_C'
-        #    22 : 'current_pf_A'
-        #    23 : 'current_pf_B'
-        #    24 : 'current_pf_C'
-        #    25 : 'impedance_pf_A'
-        #    26 : 'impedance_pf_B'
-        #    27 : 'impedance_pf_C'
-        #    28 : 'power_fraction_A'
-        #    29 : 'power_fraction_B'
-        #    30 : 'power_fraction_C'
-        #    31 : 'current_fraction_A'
-        #    32 : 'current_fraction_B'
-        #    33 : 'current_fraction_C'
-        #    34 : 'impedance_fraction_A'
-        #    35 : 'impedance_fraction_B'
-        #    36 : 'impedance_fraction_C'
-        #    37 : 'comments'
-        
-        # triplex_node
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'parent'
-        #    3 : 'bustype'
-        #    4 : 'phases'
-        #    5 : 'nominal_voltage'
-        #    6 : 'power_12'
-        #    7 : 'comments'
-        
-        # triplex_meter
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'parent'
-        #    3 : 'bustype'
-        #    4 : 'phases'
-        #    5 : 'nominal_voltage'
-        #    6 : 'comments'
-        
-        # triplex_load
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'parent'
-        #    3 : 'bustype'
-        #    4 : 'phases'
-        #    5 : 'nominal_voltage'
-        #    6 : 'load_class'
-        #    7 : 'constant_power_1'
-        #    8 : 'constant_power_2'
-        #    9 : 'constant_power_12'
-        #    10 : 'constant_current_1'
-        #    11 : 'constant_current_2'
-        #    12 : 'constant_current_12'
-        #    13 : 'constant_impedance_1'
-        #    14 : 'constant_impedance_2'
-        #    15 : 'constant_impedance_12'
-        #    16 : 'base_power_1'
-        #    17 : 'base_power_2'
-        #    18 : 'base_power_12'
-        #    19 : 'power_pf_1'
-        #    20 : 'power_pf_2'
-        #    21 : 'power_pf_12'
-        #    22 : 'current_pf_1'
-        #    23 : 'current_pf_2'
-        #    24 : 'current_pf_12'
-        #    25 : 'impedance_pf_1'
-        #    26 : 'impedance_pf_2'
-        #    27 : 'impedance_pf_12'
-        #    28 : 'power_fraction_1'
-        #    29 : 'power_fraction_2'
-        #    30 : 'power_fraction_12'
-        #    31 : 'current_fraction_1'
-        #    32 : 'current_fraction_2'
-        #    33 : 'current_fraction_12'
-        #    34 : 'impedance_fraction_1'
-        #    35 : 'impedance_fraction_2'
-        #    36 : 'impedance_fraction_12'
-        #    37 : 'comments'
-        
-        # capacitor
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'parent'
-        #    3 : 'phases'
-        #    4 : 'nominal_voltage'
-        #    5 : 'pt_phase'
-        #    6 : 'phases_connected'
-        #    7 : 'switchA'
-        #    8 : 'switchB'
-        #    9 : 'switchC'
-        #    10 : 'control'
-        #    11 : 'voltage_set_high'
-        #    12 : 'voltage_set_low'
-        #    13 : 'VAr_set_high'
-        #    14 : 'VAr_set_low'
-        #    15 : 'current_set_high'
-        #    16 : 'current_set_low'
-        #    17 : 'capacitor_A'
-        #    18 : 'capacitor_B'
-        #    19 : 'capacitor_C'
-        #    20 : 'cap_nominal_voltage'
-        #    21 : 'time_delay'
-        #    22 : 'dwell_time'
-        #    23 : 'lockout_time'
-        #    24 : 'remote_sense'
-        #    25 : 'remote_sense_B'
-        #    26 : 'control_level'
-        #    27 : 'comments'
-        
-        # fuse
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'phases'
-        #    3 : 'from'
-        #    4 : 'to'
-        #    5 : 'phase_A_status'
-        #    6 : 'phase_B_status'
-        #    7 : 'phase_C_status'
-        #    8 : 'repair_dist_type'
-        #    9 : 'current_limit'
-        #    10 : 'mean_replacement_time'
-        #    11 : 'comments'
+	#glm_parameters is a list containing all the user inputs for the object in a certain order as strings
+		# node
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'parent'
+		#    3 : 'bustype'
+		#    4 : 'phases'
+		#    5 : 'nominal_voltage'
+		#    6 : 'comments'
+		
+		# meter
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'parent'
+		#    3 : 'bustype'
+		#    4 : 'phases'
+		#		5 : 'voltage_A'
+		#		6 : 'voltage_B'
+		#		7 : 'voltage_C'
+		#    8 : 'nominal_voltage'
+		#    9 : 'comments'
+		
+		# load
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'parent'
+		#    3 : 'bustype'
+		#    4 : 'phases'
+		#    5 : 'nominal_voltage'
+		#    6 : 'load_class'
+		#    7 : 'constant_power_A'
+		#    8 : 'constant_power_B'
+		#    9 : 'constant_power_C'
+		#    10 : 'constant_current_A'
+		#    11 : 'constant_current_B'
+		#    12 : 'constant_current_C'
+		#    13 : 'constant_impedance_A'
+		#    14 : 'constant_impedance_B'
+		#    15 : 'constant_impedance_C'
+		#    16 : 'base_power_A'
+		#    17 : 'base_power_B'
+		#    18 : 'base_power_C'
+		#    19 : 'power_pf_A'
+		#    20 : 'power_pf_B'
+		#    21 : 'power_pf_C'
+		#    22 : 'current_pf_A'
+		#    23 : 'current_pf_B'
+		#    24 : 'current_pf_C'
+		#    25 : 'impedance_pf_A'
+		#    26 : 'impedance_pf_B'
+		#    27 : 'impedance_pf_C'
+		#    28 : 'power_fraction_A'
+		#    29 : 'power_fraction_B'
+		#    30 : 'power_fraction_C'
+		#    31 : 'current_fraction_A'
+		#    32 : 'current_fraction_B'
+		#    33 : 'current_fraction_C'
+		#    34 : 'impedance_fraction_A'
+		#    35 : 'impedance_fraction_B'
+		#    36 : 'impedance_fraction_C'
+		#    37 : 'comments'
+		
+		# triplex_node
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'parent'
+		#    3 : 'bustype'
+		#    4 : 'phases'
+		#    5 : 'nominal_voltage'
+		#    6 : 'power_12'
+		#    7 : 'comments'
+		
+		# triplex_meter
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'parent'
+		#    3 : 'bustype'
+		#    4 : 'phases'
+		#    5 : 'nominal_voltage'
+		#    6 : 'comments'
+		
+		# triplex_load
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'parent'
+		#    3 : 'bustype'
+		#    4 : 'phases'
+		#    5 : 'nominal_voltage'
+		#    6 : 'load_class'
+		#    7 : 'constant_power_1'
+		#    8 : 'constant_power_2'
+		#    9 : 'constant_power_12'
+		#    10 : 'constant_current_1'
+		#    11 : 'constant_current_2'
+		#    12 : 'constant_current_12'
+		#    13 : 'constant_impedance_1'
+		#    14 : 'constant_impedance_2'
+		#    15 : 'constant_impedance_12'
+		#    16 : 'base_power_1'
+		#    17 : 'base_power_2'
+		#    18 : 'base_power_12'
+		#    19 : 'power_pf_1'
+		#    20 : 'power_pf_2'
+		#    21 : 'power_pf_12'
+		#    22 : 'current_pf_1'
+		#    23 : 'current_pf_2'
+		#    24 : 'current_pf_12'
+		#    25 : 'impedance_pf_1'
+		#    26 : 'impedance_pf_2'
+		#    27 : 'impedance_pf_12'
+		#    28 : 'power_fraction_1'
+		#    29 : 'power_fraction_2'
+		#    30 : 'power_fraction_12'
+		#    31 : 'current_fraction_1'
+		#    32 : 'current_fraction_2'
+		#    33 : 'current_fraction_12'
+		#    34 : 'impedance_fraction_1'
+		#    35 : 'impedance_fraction_2'
+		#    36 : 'impedance_fraction_12'
+		#    37 : 'comments'
+		
+		# capacitor
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'parent'
+		#    3 : 'phases'
+		#    4 : 'nominal_voltage'
+		#    5 : 'pt_phase'
+		#    6 : 'phases_connected'
+		#    7 : 'switchA'
+		#    8 : 'switchB'
+		#    9 : 'switchC'
+		#    10 : 'control'
+		#    11 : 'voltage_set_high'
+		#    12 : 'voltage_set_low'
+		#    13 : 'VAr_set_high'
+		#    14 : 'VAr_set_low'
+		#    15 : 'current_set_high'
+		#    16 : 'current_set_low'
+		#    17 : 'capacitor_A'
+		#    18 : 'capacitor_B'
+		#    19 : 'capacitor_C'
+		#    20 : 'cap_nominal_voltage'
+		#    21 : 'time_delay'
+		#    22 : 'dwell_time'
+		#    23 : 'lockout_time'
+		#    24 : 'remote_sense'
+		#    25 : 'remote_sense_B'
+		#    26 : 'control_level'
+		#    27 : 'comments'
+		
+		# fuse
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'phases'
+		#    3 : 'from'
+		#    4 : 'to'
+		#    5 : 'phase_A_status'
+		#    6 : 'phase_B_status'
+		#    7 : 'phase_C_status'
+		#    8 : 'repair_dist_type'
+		#    9 : 'current_limit'
+		#    10 : 'mean_replacement_time'
+		#    11 : 'comments'
 		#    12 : 'status'
-        
-        # switch
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'phases'
-        #    3 : 'from'
-        #    4 : 'to'
-        #    5 : 'phase_A_state'
-        #    6 : 'phase_B_state'
-        #    7 : 'phase_C_state'
-        #    8 : 'operating_mode'
-        #    9 : 'comments'
-        
-        # overhead_line
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'phases'
-        #    3 : 'from'
-        #    4 : 'to'
-        #    5 : 'length'
-        #    6 : 'configuration'
-        #    7 : 'comments'
-        
-        # underground_line
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'phases'
-        #    3 : 'from'
-        #    4 : 'to'
-        #    5 : 'length'
-        #    6 : 'configuration'
-        #    7 : 'comments'
-        
-        # triplex_line
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'phases'
-        #    3 : 'from'
-        #    4 : 'to'
-        #    5 : 'length'
-        #    6 : 'configuration'
-        #    7 : 'comments'
-        
-        # transformer
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'phases'
-        #    3 : 'from'
-        #    4 : 'to'
-        #    5 : 'configuration'
-        #    6 : 'climate'
-        #    7 : 'aging_constant'
-        #    8 : 'use_thermal_model'
-        #    9 : 'aging_granularity'
-        #    10 : 'comments'
-        
-        # regulator
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'phases'
-        #    3 : 'from'
-        #    4 : 'to'
-        #    5 : 'configuration'
-        #    6 : 'sense_node'
-        #    7 : 'comments'
-        
-        # line_configuration
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'conductor_A'
-        #    3 : 'conductor_B'
-        #    4 : 'conductor_C'
-        #    5 : 'conductor_N'
-        #    6 : 'spacing'
-        #    7 : 'z11'
-        #    8 : 'z12'
-        #    9 : 'z13'
-        #    10 : 'z21'
-        #    11 : 'z22'
-        #    12 : 'z23'
-        #    13 : 'z31'
-        #    14 : 'z32'
-        #    15 : 'z33'
-        #    16 : 'comments'
-        
-        # triplex_line_configuration
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'conductor_1'
-        #    3 : 'conductor_2'
-        #    4 : 'conductor_N'
-        #    5 : 'insulation_thickness'
-        #    6 : 'diameter'
-        #    7 : 'spacing'
-        #    8 : 'z11'
-        #    9 : 'z12'
-        #    10 : 'z21'
-        #    11 : 'z22'
-        #    12 : 'comments'
-        
-        # transformer_configuration
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'connect_type'
-        #    3 : 'install_type'
-        #    4 : 'coolant_type'
-        #    5 : 'cooling_type'
-        #    6 : 'primary_voltage'
-        #    7 : 'secondary_voltage'
-        #    8 : 'power_rating'
-        #    9 : 'powerA_rating'
-        #    10 : 'powerB_rating'
-        #    11 : 'powerC_rating'
-        #    12 : 'impedance'
-        #    13 : 'shunt_impedance'
-        #    14 : 'core_coil_weight'
-        #    15 : 'tank_fittings_weight'
-        #    16 : 'oil_volume'
-        #    17 : 'rated_winding_time_constant'
-        #    18 : 'rated_winding_hot_spot_rise'
-        #    19 : 'rated_top_oil_rice'
-        #    20 : 'no_load_loss'
-        #    21 : 'full_load_loss'
-        #    22 : 'reactance_resistance_ratio'
-        #    23 : 'installed_insulation_life'
-        #    24 : 'comments'
-        
-        # regulator_configuration
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'connect_type'
-        #    3 : 'band_center'
-        #    4 : 'band_width'
-        #    5 : 'time_delay'
-        #    6 : 'dwell_time'
-        #    7 : 'raise_taps'
-        #    8 : 'lower_taps'
-        #    9 : 'current_transducer_ratio'
-        #    10 : 'power_transducer_ratio'
-        #    11 : 'compensator_r_setting_A'
-        #    12 : 'compensator_x_setting_A'
-        #    13 : 'compensator_r_setting_B'
-        #    14 : 'compensator_x_setting_B'
-        #    15 : 'compensator_r_setting_C'
-        #    16 : 'compensator_x_setting_C'
-        #    17 : 'CT_phase'
-        #    18 : 'PT_phase'
-        #    19 : 'regulation'
-        #    20 : 'control_level'
-        #    21 : 'Control'
-        #    22 : 'Type'
-        #    23 : 'tap_pos_A'
-        #    24 : 'tap_pos_B'
-        #    25 : 'tap_pos_C'
-        #    26 : 'comments'
-        
-        # line_spacing
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'distance_AB'
-        #    3 : 'distance_AC'
-        #    4 : 'distance_AN'
-        #    5 : 'distance_AE'
-        #    6 : 'distance_BC'
-        #    7 : 'distance_BN'
-        #    8 : 'distance_BE'
-        #    9 : 'distance_CN'
-        #    10 : 'distance_CE'
-        #    11 : 'distance_NE'
-        #    12 : 'comments'
-        
-        # overhead_line_conductor
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'geometric_mean_radius'
-        #    3 : 'resistance'
-        #    4 : 'diameter'
-        #    5 : 'rating.summer.continuous'
-        #    6 : 'rating.summer.emergency'
-        #    7 : 'rating.winter.continuous'
-        #    8 : 'rating.winter.emergency'
-        #    9 : 'comments'
-        
-        # underground_line_conductor
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'outer_diameter'
-        #    3 : 'conductor_gmr'
-        #    4 : 'conductor_diameter'
-        #    5 : 'conductor_resistance'
-        #    6 : 'neutral_gmr'
-        #    7 : 'neutral_diameter'
-        #    8 : 'neutral_resistance'
-        #    9 : 'neutral_strands'
-        #    10 : 'insulation_relative_permativitty'
-        #    11 : 'shield_gmr'
-        #    12 : 'shield_resistance'
-        #    13 : 'rating.summer.continuous'
-        #    14: 'rating.summer.emergency'
-        #    15 : 'rating.winter.continuous'
-        #    16 : 'rating.winter.emergency'
-        #    17 : 'comments'
-        
-        # overhead_line_conductor
-        #    0 : 'name'
-        #    1 : 'groupid'
-        #    2 : 'resistance'
-        #    3 : 'geometric_mean_radius'
-        #    4 : 'rating.summer.continuous'
-        #    5 : 'rating.summer.emergency'
-        #    6 : 'rating.winter.continuous'
-        #    7 : 'rating.winter.emergency'
-        #    8 : 'comments'
+		
+		# switch
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'phases'
+		#    3 : 'from'
+		#    4 : 'to'
+		#    5 : 'phase_A_state'
+		#    6 : 'phase_B_state'
+		#    7 : 'phase_C_state'
+		#    8 : 'operating_mode'
+		#    9 : 'comments'
+		
+		# overhead_line
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'phases'
+		#    3 : 'from'
+		#    4 : 'to'
+		#    5 : 'length'
+		#    6 : 'configuration'
+		#    7 : 'comments'
+		
+		# underground_line
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'phases'
+		#    3 : 'from'
+		#    4 : 'to'
+		#    5 : 'length'
+		#    6 : 'configuration'
+		#    7 : 'comments'
+		
+		# triplex_line
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'phases'
+		#    3 : 'from'
+		#    4 : 'to'
+		#    5 : 'length'
+		#    6 : 'configuration'
+		#    7 : 'comments'
+		
+		# transformer
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'phases'
+		#    3 : 'from'
+		#    4 : 'to'
+		#    5 : 'configuration'
+		#    6 : 'climate'
+		#    7 : 'aging_constant'
+		#    8 : 'use_thermal_model'
+		#    9 : 'aging_granularity'
+		#    10 : 'comments'
+		
+		# regulator
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'phases'
+		#    3 : 'from'
+		#    4 : 'to'
+		#    5 : 'configuration'
+		#    6 : 'sense_node'
+		#    7 : 'comments'
+		
+		# line_configuration
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'conductor_A'
+		#    3 : 'conductor_B'
+		#    4 : 'conductor_C'
+		#    5 : 'conductor_N'
+		#    6 : 'spacing'
+		#    7 : 'z11'
+		#    8 : 'z12'
+		#    9 : 'z13'
+		#    10 : 'z21'
+		#    11 : 'z22'
+		#    12 : 'z23'
+		#    13 : 'z31'
+		#    14 : 'z32'
+		#    15 : 'z33'
+		#    16 : 'comments'
+		
+		# triplex_line_configuration
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'conductor_1'
+		#    3 : 'conductor_2'
+		#    4 : 'conductor_N'
+		#    5 : 'insulation_thickness'
+		#    6 : 'diameter'
+		#    7 : 'spacing'
+		#    8 : 'z11'
+		#    9 : 'z12'
+		#    10 : 'z21'
+		#    11 : 'z22'
+		#    12 : 'comments'
+		
+		# transformer_configuration
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'connect_type'
+		#    3 : 'install_type'
+		#    4 : 'coolant_type'
+		#    5 : 'cooling_type'
+		#    6 : 'primary_voltage'
+		#    7 : 'secondary_voltage'
+		#    8 : 'power_rating'
+		#    9 : 'powerA_rating'
+		#    10 : 'powerB_rating'
+		#    11 : 'powerC_rating'
+		#    12 : 'impedance'
+		#    13 : 'shunt_impedance'
+		#    14 : 'core_coil_weight'
+		#    15 : 'tank_fittings_weight'
+		#    16 : 'oil_volume'
+		#    17 : 'rated_winding_time_constant'
+		#    18 : 'rated_winding_hot_spot_rise'
+		#    19 : 'rated_top_oil_rice'
+		#    20 : 'no_load_loss'
+		#    21 : 'full_load_loss'
+		#    22 : 'reactance_resistance_ratio'
+		#    23 : 'installed_insulation_life'
+		#    24 : 'comments'
+		
+		# regulator_configuration
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'connect_type'
+		#    3 : 'band_center'
+		#    4 : 'band_width'
+		#    5 : 'time_delay'
+		#    6 : 'dwell_time'
+		#    7 : 'raise_taps'
+		#    8 : 'lower_taps'
+		#    9 : 'current_transducer_ratio'
+		#    10 : 'power_transducer_ratio'
+		#    11 : 'compensator_r_setting_A'
+		#    12 : 'compensator_x_setting_A'
+		#    13 : 'compensator_r_setting_B'
+		#    14 : 'compensator_x_setting_B'
+		#    15 : 'compensator_r_setting_C'
+		#    16 : 'compensator_x_setting_C'
+		#    17 : 'CT_phase'
+		#    18 : 'PT_phase'
+		#    19 : 'regulation'
+		#    20 : 'control_level'
+		#    21 : 'Control'
+		#    22 : 'Type'
+		#    23 : 'tap_pos_A'
+		#    24 : 'tap_pos_B'
+		#    25 : 'tap_pos_C'
+		#    26 : 'comments'
+		
+		# line_spacing
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'distance_AB'
+		#    3 : 'distance_AC'
+		#    4 : 'distance_AN'
+		#    5 : 'distance_AE'
+		#    6 : 'distance_BC'
+		#    7 : 'distance_BN'
+		#    8 : 'distance_BE'
+		#    9 : 'distance_CN'
+		#    10 : 'distance_CE'
+		#    11 : 'distance_NE'
+		#    12 : 'comments'
+		
+		# overhead_line_conductor
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'geometric_mean_radius'
+		#    3 : 'resistance'
+		#    4 : 'diameter'
+		#    5 : 'rating.summer.continuous'
+		#    6 : 'rating.summer.emergency'
+		#    7 : 'rating.winter.continuous'
+		#    8 : 'rating.winter.emergency'
+		#    9 : 'comments'
+		
+		# underground_line_conductor
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'outer_diameter'
+		#    3 : 'conductor_gmr'
+		#    4 : 'conductor_diameter'
+		#    5 : 'conductor_resistance'
+		#    6 : 'neutral_gmr'
+		#    7 : 'neutral_diameter'
+		#    8 : 'neutral_resistance'
+		#    9 : 'neutral_strands'
+		#    10 : 'insulation_relative_permativitty'
+		#    11 : 'shield_gmr'
+		#    12 : 'shield_resistance'
+		#    13 : 'rating.summer.continuous'
+		#    14: 'rating.summer.emergency'
+		#    15 : 'rating.winter.continuous'
+		#    16 : 'rating.winter.emergency'
+		#    17 : 'comments'
+		
+		# overhead_line_conductor
+		#    0 : 'name'
+		#    1 : 'groupid'
+		#    2 : 'resistance'
+		#    3 : 'geometric_mean_radius'
+		#    4 : 'rating.summer.continuous'
+		#    5 : 'rating.summer.emergency'
+		#    6 : 'rating.winter.continuous'
+		#    7 : 'rating.winter.emergency'
+		#    8 : 'comments'
 
 def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=None):
 	glmTree = {}    # Dictionary that will hold the feeder model for conversion to .glm format 
-    
+
 	node_prop_list = [None]*7                           # the size of the node property list is 7
 	meter_prop_list = [None]*10                          # the size of the meter property list is 7
 	load_prop_list = [None]*38                          # the size of the load property list is 38
@@ -579,22 +581,22 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 		if feeder_id_is_valid == 0:
 			raise RuntimeError("The feeder_id given does not match any of the feeders listed in the database. Please choose from this list {:s}.\n".format(valid_feeder_id))
 
-    # if feeder_id == None:
-        # raise RuntimeError("No feeder_id was give. Please specify a feeder_id.")
-    # else:
-        # feeder_id_is_valid = 0
-        # if len(feeder_db) >= 1:
-            # for row in feeder_db:
-                # valid_feeder_id.append(row.NewtorkId)
-                # if row.NetworkId == feeder_id:
-                    # feeder_id_is_valid = 1
-            
-            # if feeder_id_is_valid == 0:
-                # raise RuntimeError("The feeder_id given is not in the network database file. Please choose from this list {:s}.".format(valid_feeder_id))
-        # else:
-            # feeder_kVLL = row.DesiredVoltage
-            
-    # Convert Feeder voltage to V line to neutral.
+	# if feeder_id == None:
+		# raise RuntimeError("No feeder_id was give. Please specify a feeder_id.")
+	# else:
+		# feeder_id_is_valid = 0
+		# if len(feeder_db) >= 1:
+			# for row in feeder_db:
+				# valid_feeder_id.append(row.NewtorkId)
+				# if row.NetworkId == feeder_id:
+					# feeder_id_is_valid = 1
+
+			# if feeder_id_is_valid == 0:
+				# raise RuntimeError("The feeder_id given is not in the network database file. Please choose from this list {:s}.".format(valid_feeder_id))
+		# else:
+			# feeder_kVLL = row.DesiredVoltage
+
+	# Convert Feeder voltage to V line to neutral.
 	feeder_VLN = float(feeder_kVLL)*1000/math.sqrt(3)
 	
 	# -1-CYME CYMSOURCE *********************************************************************************************************************************************************************
@@ -626,13 +628,13 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	
 	# -3-CYME OVERHEADBYPHASE ****************************************************************************************************************************************************************
 	cymoverheadbyphase = {}                     # Stores information found in CYMOVERHEADBYPHASE in the network database
-	CYMOVERHEADBYPHASE = { 'name' : None,       # Information structure for each object found in CYMOVERHEADBYPHASE
-                           'conductorA' : None,
-                           'conductorB' : None,
-                           'conductorC' : None,
-                           'conductorN' : None,
-                           'spacing' : None,
-                           'length' : None}
+	CYMOVERHEADBYPHASE = {	'name' : None,       # Information structure for each object found in CYMOVERHEADBYPHASE
+														'conductorA' : None,
+														'conductorB' : None,
+														'conductorC' : None,
+														'conductorN' : None,
+														'spacing' : None,
+														'length' : None}
 	
 	overheadbyphase_db = net_db.execute("SELECT DeviceNumber, PhaseConductorIdA, PhaseConductorIdB, PhaseConductorIdC, NeutralConductorId, ConductorSpacingId, Length FROM CYMOVERHEADBYPHASE WHERE NetworkId = ?", feeder_id).fetchall()
 	if len(overheadbyphase_db) == 0:
@@ -660,10 +662,10 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	
 	# -4-CYME UNDERGROUNDLINE ****************************************************************************************************************************************************************
 	cymundergroundline = {}                         # Stores information found in CYMUNDERGOUNDLINE in the network database
-	CYMUNDERGROUNDLINE = { 'name' : None,           # Information structure for each object found in CYMUNDERGROUNDLINE
-                           'length' : None,
-						   'cable_id': None,
-                           'device_number' : None}
+	CYMUNDERGROUNDLINE = {	'name' : None,           # Information structure for each object found in CYMUNDERGROUNDLINE
+														'length' : None,
+														'cable_id': None,
+														'device_number' : None}
 	
 	ug_line_db = net_db.execute("SELECT DeviceNumber, CableId, Length FROM CYMUNDERGROUNDLINE WHERE NetworkId = ?", feeder_id).fetchall()
 	if len(ug_line_db) == 0:
@@ -680,10 +682,10 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 					
 	# -5-CYME CYMSECTION ****************************************************************************************************************************************************************
 	cymsection = {}                         # Stores information found in CYMSECTION in the network database
-	CYMSECTION = { 'name' : None,           # Information structure for each object found in CYMSECTION
-                   'from' : None,
-                   'to' : None,
-                   'phases' : None}
+	CYMSECTION = {	'name' : None,           # Information structure for each object found in CYMSECTION
+									'from' : None,
+									'to' : None,
+									'phases' : None}
 	
 	section_db = net_db.execute("SELECT SectionId, FromNodeId, ToNodeId, Phase FROM CYMSECTION WHERE NetworkId = ?", feeder_id).fetchall()
 	if len(section_db) == 0:
@@ -706,10 +708,10 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	capacitor_sections = {}
 	sx_section = []
 	cymsectiondevice = {}                         # Stores information found in CYMSECTIONDEVICE in the network database
-	CYMSECTIONDEVICE = { 'name' : None,           # Information structure for each object found in CYMSECTIONDEVICE
-						'device_type' : None,
-						'section_name' : None,
-						'location' : None}
+	CYMSECTIONDEVICE = {	'name' : None,           # Information structure for each object found in CYMSECTIONDEVICE
+												'device_type' : None,
+												'section_name' : None,
+												'location' : None}
 	section_device_db = net_db.execute("SELECT DeviceNumber, DeviceType, SectionId, Location FROM CYMSECTIONDEVICE WHERE NetworkId = ?", feeder_id).fetchall()
 	if len(section_device_db) == 0:
 		warnings.warn("No section device information was found in CYMSECTIONDEVICE for feeder_id: {:s}.".format(feeder_id), RuntimeWarning)
@@ -738,9 +740,9 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 					
 	# -5-CYME CYMSWITCH**********************************************************************************************************************************************************************
 	cymswitch = {}                          # Stores information found in CYMSWITCH in the network database
-	CYMSWITCH = { 'name' : None,            # Information structure for each object found in CYMSWITCH
-                  'equipment_name' : None,
-                  'status' : None}
+	CYMSWITCH = {	'name' : None,            # Information structure for each object found in CYMSWITCH
+									'equipment_name' : None,
+									'status' : None}
 	
 	switch_db = net_db.execute("SELECT DeviceNumber, EquipmentId, IIF(ClosedPhase <> 0, 1, 0) as Status FROM CYMSWITCH WHERE NetworkId = ?", feeder_id).fetchall()
 	if len(switch_db) == 0:
@@ -759,8 +761,8 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	# -6-CYME CYMSECTIONALIZER**********************************************************************************************************************************************************************
 	cymsectionalizer = {}                           # Stores information found in CYMSECTIONALIZER in the network database
 	CYMSECTIONALIZER = { 'name' : None,             # Information structure for each object found in CYMSECTIONALIZER
-                         'status' : None}
-						 
+                         						'status' : None}
+						
 	sectionalizer_db = net_db.execute("SELECT DeviceNumber, NormalStatus FROM CYMSECTIONALIZER WHERE NetworkId = ?", feeder_id).fetchall()
 	if len(sectionalizer_db) == 0:
 		warnings.warn("No sectionalizer objects were found in CYMSECTIONALIZER for feeder_id: {:s}.".format(feeder_id),RuntimeWarning)
@@ -773,12 +775,12 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 					cymsectionalizer[row.DeviceNumber]['status'] = 0
 				else:
 					cymsectionalizer[row.DeviceNumber]['status'] = 1
-                
+
 	# -7-CYME CYMFUSE**********************************************************************************************************************************************************************
 	cymfuse = {}                           # Stores information found in CYMFUSE in the network database
-	CYMFUSE = { 'name' : None,             # Information structure for each object found in CYMFUSE
-                'status' : None,
-				'equipment_id' : None}
+	CYMFUSE = {	'name' : None,             # Information structure for each object found in CYMFUSE
+							'status' : None,
+							'equipment_id' : None}
 				
 	fuse_db = net_db.execute("SELECT DeviceNumber, EquipmentId, NormalStatus FROM CYMFUSE WHERE NetworkId = ?", feeder_id).fetchall()
 	if len(fuse_db) == 0:
@@ -797,7 +799,7 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	# - -CYME CYMRECLOSER**********************************************************************************************************************************************************************
 	cymrecloser = {}
 	CYMRECLOSER = {	'name' : None,
-					'status' : None}
+										'status' : None}
 					
 	recloser_db = net_db.execute("SELECT DeviceNumber, NormalStatus FROM CYMRECLOSER WHERE NetworkId = ?", feeder_id).fetchall()
 	if len(recloser_db) == 0:
@@ -815,14 +817,14 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	# -8-CYME CYMREGULATOR**********************************************************************************************************************************************************************
 	cymregulator = {}                           # Stores information found in CYMREGULATOR in the network database
 	CYMREGULATOR = { 'name' : None,             # Information structure for each object found in CYMREGULATOR
-                     'equipment_name' : None,
-                     'ct_rating' : None,
-                     'pt_transducer_ratio' : None,
-                     'band_width' : None,
-                     'tap_pos_A' : None,
-                     'tap_pos_B' : None,
-                     'tap_pos_C' : None}
-					 
+					                     'equipment_name' : None,
+					                     'ct_rating' : None,
+					                     'pt_transducer_ratio' : None,
+					                     'band_width' : None,
+					                     'tap_pos_A' : None,
+					                     'tap_pos_B' : None,
+					                     'tap_pos_C' : None}
+					
 	regulator_db = net_db.execute("SELECT DeviceNumber, EquipmentId, CTPrimaryRating, PTRatio, BandWidth, TapPositionA, TapPositionB, TapPositionC FROM CYMREGULATOR WHERE NetworkId = ?", feeder_id).fetchall()
 	if len(regulator_db) == 0:
 		warnings.warn("No regulator objects were found in CYMREGULATOR for feeder_id: {:s}".format(feeder_id), RuntimeWarning)
@@ -841,22 +843,22 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	
 	# -9-CYME CYMSHUNTCAPACITOR**********************************************************************************************************************************************************************
 	cymshuntcapacitor = {}                           # Stores information found in CYMSHUNTCAPACITOR in the network database
-	CYMSHUNTCAPACITOR = { 'name' : None,             # Information structure for each object found in CYMSHUNTCAPACITOR
-                          'equipment_name' : None,
-                          'status' : None,
-                          'phases' : None,
-                          'capacitor_A' : None,
-                          'capacitor_B' : None,
-                          'capacitor_C' : None,
-                          'control' : None,
-                          'voltage_set_high' : None,
-                          'voltage_set_low' : None,
-                          'VAr_set_high' : None,
-                          'VAr_set_low' : None,
-                          'current_set_high' : None,
-                          'current_set_low' : None,
-                          'pt_phase' : None}
-						  
+	CYMSHUNTCAPACITOR = {	'name' : None,             # Information structure for each object found in CYMSHUNTCAPACITOR
+													'equipment_name' : None,
+													'status' : None,
+													'phases' : None,
+													'capacitor_A' : None,
+													'capacitor_B' : None,
+													'capacitor_C' : None,
+													'control' : None,
+													'voltage_set_high' : None,
+													'voltage_set_low' : None,
+													'VAr_set_high' : None,
+													'VAr_set_low' : None,
+													'current_set_high' : None,
+													'current_set_low' : None,
+													'pt_phase' : None}
+						
 	shuntcapacitor_db = net_db.execute("SELECT DeviceNumber, EquipmentId, Status, Phase, KVARA, KVARB, KVARC, CapacitorControlType, OnValue, OffValue FROM CYMSHUNTCAPACITOR WHERE NetworkId = ?", feeder_id).fetchall()
 	if len(shuntcapacitor_db) == 0:
 		warnings.warn("No capacitor objects were found in CYMSHUNTCAPACITOR for feeder_id: {:s}".format(feeder_id), RuntimeWarning)
@@ -895,14 +897,14 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	
 	# -9-CYME CYMCUSTOMERLOAD**********************************************************************************************************************************************************************
 	cymcustomerload = {}                           # Stores information found in CYMCUSTOMERLOAD in the network database
-	CYMCUSTOMERLOAD = { 'name' : None,             # Information structure for each object found in CYMCUSTERLOAD
-                      'phases' : None,
-                      'constant_power_A' : None,
-                      'constant_power_B' : None,
-                      'constant_power_C' : None,
-					  'load_real' : None,
-					  'load_imag' : None,
-                      'load_class' : 'R'}
+	CYMCUSTOMERLOAD = {	'name' : None,             # Information structure for each object found in CYMCUSTERLOAD
+													'phases' : None,
+													'constant_power_A' : None,
+													'constant_power_B' : None,
+													'constant_power_C' : None,
+													'load_real' : None,
+													'load_imag' : None,
+													'load_class' : 'R'}
 	load_real = 0
 	load_imag = 0
 	
@@ -994,10 +996,10 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 					
 	# -1-CYME CYMEQCONDUCTOR**********************************************************************************************************************************************************************
 	cymeqconductor = {}                           # Stores information found in CYMEQCONDUCTOR in the equipment database
-	CYMEQCONDUCTOR = { 'name' : None,             # Information structure for each object found in CYMEQCONDUCTOR
-                       'rating.summer_continuous' : None,
-                       'geometric_mean_radius' : None,
-                       'resistance' : None}
+	CYMEQCONDUCTOR = {	'name' : None,             # Information structure for each object found in CYMEQCONDUCTOR
+												'rating.summer_continuous' : None,
+												'geometric_mean_radius' : None,
+												'resistance' : None}
 	cymeqconductor_db = eqp_db.execute("SELECT EquipmentId, FirstRating, GMR, R50 FROM CYMEQCONDUCTOR").fetchall()
 	if len(cymeqconductor_db) == 0:
 		warnings.warn("No conductor objects were found in CYMEQCONDUCTOR for feeder_id: {:s}.".format(feeder_id), RuntimeWarning)
@@ -1012,13 +1014,13 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	
 	# -2-CYME CYMEQGEOMETRICALARRANGEMENT**********************************************************************************************************************************************************************
 	cymeqgeometricalarrangement = {}                           # Stores information found in CYMEQGEOMETRICALARRANGEMENT in the equipment database
-	CYMEQGEOMETRICALARRANGEMENT = { 'name' : None,             # Information structure for each object found in CYMEQGEOMETRICALARRANGEMENT
-                                    'distance_AB' : None,
-                                    'distance_AC' : None,
-                                    'distance_AN' : None,
-                                    'distance_BC' : None,
-                                    'distance_BN' : None,
-                                    'distance_CN' : None}
+	CYMEQGEOMETRICALARRANGEMENT = {	'name' : None,             # Information structure for each object found in CYMEQGEOMETRICALARRANGEMENT
+																				'distance_AB' : None,
+																				'distance_AC' : None,
+																				'distance_AN' : None,
+																				'distance_BC' : None,
+																				'distance_BN' : None,
+																				'distance_CN' : None}
 	cymeqgeometricalarrangement_db = eqp_db.execute("SELECT EquipmentId, ConductorA_Horizontal, ConductorA_Vertical, ConductorB_Horizontal, ConductorB_Vertical, ConductorC_Horizontal, ConductorC_Vertical, NeutralConductor_Horizontal, NeutralConductor_Vertical FROM CYMEQGEOMETRICALARRANGEMENT").fetchall()
 	if len(cymeqgeometricalarrangement_db) == 0:
 		warnings.warn("No geometric spacing information was found in CYMEQGEOMETRICALARRANGEMENT for feeder_id: {:s}.".format(feeder_id), RuntimeWarning)
@@ -1036,21 +1038,21 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	
 	# -3-CYME Read XLSX Sheet**********************************************************************************************************************************************************************
 	cymcsvundergroundcable = {}
-	CYMCSVUNDERGROUNDCABLE = { 'name' : None,
-                               'rating.summer_continuous' : None,
-                               'outer_diameter' : None,
-                               'conductor_resistance' : None,
-                               'conductor_gmr' : None,
-                               'neutral_resistance' : None,
-                               'neutral_gmr' : None,
-                               'neutral_diameter' : None,
-                               'neutral_strands' : None,
-                               'distance_AB' : None,
-                               'distance_AC' : None,
-                               'distance_AN' : None,
-                               'distance_BC' : None,
-                               'distance_BN' : None,
-                               'distance_CN' : None}
+	CYMCSVUNDERGROUNDCABLE = { 	'name' : None,
+																	'rating.summer_continuous' : None,
+																	'outer_diameter' : None,
+																	'conductor_resistance' : None,
+																	'conductor_gmr' : None,
+																	'neutral_resistance' : None,
+																	'neutral_gmr' : None,
+																	'neutral_diameter' : None,
+																	'neutral_strands' : None,
+																	'distance_AB' : None,
+																	'distance_AC' : None,
+																	'distance_AN' : None,
+																	'distance_BC' : None,
+																	'distance_BN' : None,
+																	'distance_CN' : None}
 	
 	if conductor_data_csv != None:
 		underground_cable_array = csvToArray(conductor_data_csv)[1:]# skip the first row as it is header information
@@ -1077,9 +1079,9 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	
 	# -4-CYME CYMEQSHUNTCAPACITOR**********************************************************************************************************************************************************************
 	cymeqshuntcapacitor = {}                           # Stores information found in CYMEQSHUNTCAPACITOR in the equipment database
-	CYMEQSHUNTCAPACITOR = { 'name' : None,             # Information structure for each object found in CYMEQSHUNTCAPACITOR
-                            'ratedKVAR' : None,
-                            'nominal_voltage' : None}
+	CYMEQSHUNTCAPACITOR = {'name' : None,             # Information structure for each object found in CYMEQSHUNTCAPACITOR
+														'ratedKVAR' : None,
+														'nominal_voltage' : None}
 	cymeqshuntcapacitor_db = eqp_db.execute("SELECT EquipmentId, RatedKVAR, RatedVoltageKVLL FROM CYMEQSHUNTCAPACITOR").fetchall()
 	if len(cymeqshuntcapacitor_db) == 0:
 		warnings.warn("No capacitor equipment was found in CYMEQSHUNTCAPACITOR for feeder_id: {:s}.".format(feeder_id), RuntimeWarning)
@@ -1093,8 +1095,8 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	
 	# -5-CYME CYMEQFUSE**********************************************************************************************************************************************************************
 	cymeqfuse = {}                           # Stores information found in CYMEQFUSE in the equipment database
-	CYMEQFUSE = { 'name' : None,             # Information structure for each object found in CYMEQFUSE
-                  'current_limit' : None}
+	CYMEQFUSE = { 	'name' : None,             # Information structure for each object found in CYMEQFUSE
+									'current_limit' : None}
 	cymeqfuse_db = eqp_db.execute("SELECT EquipmentId, FirstRatedCurrent FROM CYMEQFUSE").fetchall()
 	if len(cymeqfuse_db) == 0:
 		warnings.warn("No fuse equipment was found in CYMEQFUSE for feeder_id: {:s}.".format(feeder_id), RuntimeWarning)
@@ -1107,9 +1109,9 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	
 	# -6-CYME CYMEQREGULATOR**********************************************************************************************************************************************************************
 	cymeqregulator = {}                           # Stores information found in CYMEQREGULATOR in the equipment database
-	CYMEQREGULATOR = { 'name' : None,             # Information structure for each object found in CYMEQREGULATOR
-                       'raise_taps' : None,
-                       'lower_taps' : None}
+	CYMEQREGULATOR = {	'name' : None,             # Information structure for each object found in CYMEQREGULATOR
+												'raise_taps' : None,
+												'lower_taps' : None}
 	cymeqregulator_db = eqp_db.execute("SELECT EquipmentId, NumberOfTaps FROM CYMEQREGULATOR").fetchall()
 	if len(cymeqregulator_db) == 0:
 		warnings.warn("No regulator equipment was found in CYMEQREGULATOR for feeder_id: {:s}.".format(feeder_id), RuntimeWarning)
@@ -1123,11 +1125,11 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	
 	# -7-CYME CYMEQOVERHEADLINE**********************************************************************************************************************************************************************
 	cymeqoverheadline = {}                           # Stores information found in CYMEQOVERHEADLINE in the equipment database
-	CYMEQOVERHEADLINE = { 'name' : None,             # Information structure for each object found in CYMEQOVERHEADLINE
-                          'phase_conductor' : None,
-                          'neutral_conductor' : None,
-                          'rating.summer_continuous' : None,
-                          'spacing' : None}
+	CYMEQOVERHEADLINE = {'name' : None,             # Information structure for each object found in CYMEQOVERHEADLINE
+													'phase_conductor' : None,
+													'neutral_conductor' : None,
+													'rating.summer_continuous' : None,
+													'spacing' : None}
 	cymeqoverheadline_db = eqp_db.execute("SELECT EquipmentId, PhaseConductorId, NeutralConductorId, ConductorSpacingId, FirstRating FROM CYMEQOVERHEADLINE").fetchall()
 	if len(cymeqoverheadline_db) == 0:
 		warnings.warn("No overhead line equipment was found in CYMEQOVERHEADLINE for feeder_id: {:s}.".format(feeder_id), RuntimeWarning)
@@ -1157,12 +1159,12 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 	for i in cymoverheadbyphase.keys():
 		sectionId = cymsectiondevice[i]['section_name']
 		spacing = [cymoverheadbyphase[i]['spacing'], cymsection[sectionId]['phases']]
-		configuration = [	cymoverheadbyphase[i]['conductorA'], 
-							cymoverheadbyphase[i]['conductorB'],
-							cymoverheadbyphase[i]['conductorC'],
-							cymoverheadbyphase[i]['conductorN'],
-							spacing[0],
-							spacing[1]]
+		configuration = [cymoverheadbyphase[i]['conductorA'], 
+									cymoverheadbyphase[i]['conductorB'],
+									cymoverheadbyphase[i]['conductorC'],
+									cymoverheadbyphase[i]['conductorN'],
+									spacing[0],
+									spacing[1]]
 		if spacing not in collected_line_spacings:
 			collected_line_spacings.append(spacing)
 		if configuration not in collected_line_configs:
@@ -1179,8 +1181,8 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 			collected_ug_line_configs.append(spacing)
 		if sectionId not in section_configuration.keys():
 			section_configuration[sectionId] = spacing
-    
-    # CYMSOURCE contains the swing bus for the model. That swing bus is represented by a meter object so I must enter it into the list meters.
+
+	# CYMSOURCE contains the swing bus for the model. That swing bus is represented by a meter object so I must enter it into the list meters.
 	number_of_swing_nodes = len(cymsource)
 	if len(cymsource) > 1:
 		raise RuntimeError("There is more than one swing bus for feeder_id {:s}.\n".format(feeder_id))
@@ -1261,7 +1263,7 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 			ug_line_conds[index][11] = str(0.00)
 			ug_line_conds[index][12] = str(0.00)
 		else:
-			warnings.warn("No conductor data was found in {:s} for underground line conductor: {:s}.".format(conductor_data_csv,cable_id), RuntimeWarning)
+			warnings.warn("No conductor data was found in {:s} for underground line conductor: {:s}.".format(conductor_data_csv, x), RuntimeWarning)
 			
 	# Triplex Line Conductor
 	index = len(tp_line_conds)
@@ -1471,7 +1473,7 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 			device_lines_collected.append([x,sectionalizernode,'sectionalizer','from'])
 		if cymsectiondevice[sectionalizer_sections[x]]['location'] == 2: #to side
 			switches[index][3] = sectionalizernode
-			swtiches[index][4] = '{:s}_{:s}'.format(feeder_name,cymsection[x]['to'])
+			switches[index][4] = '{:s}_{:s}'.format(feeder_name,cymsection[x]['to'])
 			device_lines_collected.append([x,sectionalizernode,'sectionalizer','to'])
 		if cymsectionalizer[sectionalizer_sections[x]]['status'] == 0:
 			status = 'OPEN'
@@ -1740,112 +1742,112 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 				warnings.warn("Section: {:s} is found in neither CYMUNDERGROUNDLINE nor CYMOVERHEADBYPHASE.\n".format(sectionId),RuntimeWarning)
 	
 	# FINISHED CONVERSION FROM THE DATABASES****************************************************************************************************************************************************
-    
+
 	# Add all node objects to glmTree
 	if len(nodes) > 0:
 		for x in nodes.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'node', nodes[x])
-    
+
 	# Add all meter objects to glmTree
 	if len(meters) > 0:
 		for x in meters.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'meter', meters[x])
-    
+
 	# Add all load objects to glmTree
 	if len(loads) > 0:
 		for x in loads.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'load', loads[x])
-            
+
 	# Add all triplex_node objects to glmTree
 	if len(tp_nodes) > 0:
 		for x in tp_nodes.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'triplex_node', tp_nodes[x])
-            
+
 	# Add all triplex_meter objects to glmTree
 	if len(tp_meters) > 0:
 		for x in tp_meters.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'triplex_meter', tp_meters[x])
-            
+
 	# Add all capacitor objects to glmTree
 	if len(capacitors) > 0:
 		for x in capacitors.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'capacitor', capacitors[x])
-            
+
 	# Add all fuse objects to glmTree
 	if len(fuses) > 0:
 		for x in fuses.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'fuse', fuses[x])
-            
+
 	# Add all switch objects to glmTree
 	if len(switches) > 0:
 		for x in switches.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'switch', switches[x])
-            
+
 	# Add all overhead_line objects to glmTree
 	if len(oh_lines) > 0:
 		for x in oh_lines.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'overhead_line', oh_lines[x])
-            
+
 	# Add all underground_line objects to glmTree
 	if len(ug_lines) > 0:
 		for x in ug_lines.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'underground_line', ug_lines[x])
-            
+
 	# Add all triplex_line objects to glmTree
 	if len(tp_lines) > 0:
 		for x in tp_lines.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'triplex_line', tp_lines[x])
-            
+
 	# Add all transformer objects to glmTree
 	if len(transformers) > 0:
 		for x in transformers.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'transformer', transformers[x])
-            
+
 	# Add all regulator objects to glmTree
 	if len(regulators) > 0:
 		for x in regulators.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'regulator', regulators[x])
-            
+
 	# Add all line_configuration objects to glmTree
 	if len(line_configs) > 0:
 		for x in line_configs.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'line_configuration', line_configs[x])
-            
+
 	# Add all triplex_line_configuration objects to glmTree
 	if len(tp_line_configs) > 0:
 		for x in tp_line_configs.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'triplex_line_configuration', tp_line_configs[x])
-            
+
 	# Add all transformer_configuration objects to glmTree
 	if len(transformer_configs) > 0:
 		for x in transformer_configs.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'transformer_configuration', transformer_configs[x])
-            
+
 	# Add all regulator_configuration objects to glmTree
 	if len(regulator_configs) > 0:
 		for x in regulator_configs.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'regulator_configuration', regulator_configs[x])
-            
+
 	# Add all line_spacing objects to glmTree 
 	if len(line_spacings) > 0:
 		for x in line_spacings.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'line_spacing', line_spacings[x])
-            
+
 	# Add all overhead_line_conductors objects to glmTree
 	if len(oh_line_conds) > 0:
 		for x in oh_line_conds.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'overhead_line_conductor', oh_line_conds[x])
-            
+
 	# Add all underground_line_conductors objects to glmTree
 	if len(ug_line_conds) > 0:
 		for x in ug_line_conds.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'underground_line_conductor', ug_line_conds[x])
-            
+
 	# Add all triplex_line_conductors objects to glmTree
 	if len(tp_line_conds) > 0:
 		for x in tp_line_conds.keys():
 			glmTree = add_glm_object_dictionary.create_glm_object_dictionary(glmTree, 'triplex_line_conductor', tp_line_conds[x])
-    
+
 	# Delete any malformed links        
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
@@ -1853,7 +1855,7 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 			print ('Deleting malformed link')
 			print [glmTree[key]['name'], glmTree[key]['object']]
 			del glmTree[key]
-    
+
 	# Delete any islanded nodes and fix phase mismatches
 	
 	# Create list of all from and to node names
@@ -1871,7 +1873,7 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 				to_node_phases[glmTree[key]['to']] = glmTree[key]['phases']
 			else:
 				to_node_phases[glmTree[key]['to']] = to_node_phases[glmTree[key]['to']] + glmTree[key]['phases']
-    
+
 	# Determine a phase mismatch            
 	for node in from_node_phases.keys():
 		if node in to_node_phases.keys():
@@ -1880,7 +1882,7 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 					if phase not in to_node_phases[node]:
 						#raise RuntimeError("Phase Mismatch on node type object {:s}.".format(node))
 						warnings.warn("Phase mismatch on node type object {:s}. From: {:s} To: {:s}.".format(node, from_node_phases[node],to_node_phases[node]),RuntimeWarning)
-    
+
 	# Determine the phases for the node object
 	# Combine all the phases collected from the 'to' and 'from' links
 	for fnode in from_node_phases.keys():
@@ -1888,12 +1890,12 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 		for tnode in to_node_phases.keys():
 			if tnode == fnode:
 				node_phases[fnode] = from_node_phases[fnode] + to_node_phases[fnode]
-    
+
 	# If there are no 'from' links connected to the node object collect phases from the 'to' links                
 	for tnode in to_node_phases.keys():
 		if tnode not in node_phases.keys():
 			node_phases[tnode] = to_node_phases[tnode]
-    
+
 	# Find the unique phase information and place them in the node like object dictionaries
 	for node in node_phases.keys():
 		phase = ''
@@ -1907,11 +1909,11 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 			phase = phase + 'N'
 		elif 'S' in node_phases[node]:
 			phase = phase + 'S'
-            
+
 		for x in glmTree.keys():
 			if 'name' in glmTree[x].keys() and glmTree[x]['name'] == node and 'phases' not in glmTree[x].keys():
 				glmTree[x]['phases'] = phase
-                      
+
 	# Delete islanded nodes
 	for key in glmTree.keys():
 		if 'object' in glmTree[key].keys() and glmTree[key]['object'] in ['node','meter','load','triplex_node','triplex_meter','triplex_load'] and ('parent' in glmTree[key].keys() and 'parent' not in glmTree[key].keys()):
@@ -1919,7 +1921,7 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 				print('Deleting islanded object.')
 				print(glmTree[key]['name'])
 				del glmTree[key]
-                    
+
 	# Fix nominal voltage
 	def fix_nominal_voltage(glm_dict, volt_dict):
 		for x in glm_dict:
@@ -1943,22 +1945,22 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 							glm_dict[y]['nominal_voltage'] = glm_dict[x]['nominal_voltage']
 							volt_dict[glm_dict[y]['name']] = glm_dict[y]['nominal_voltage'] 
 						else:
-							warn.warnings("No nominal voltage for object name {:s}.".format(glm_dict[x]['name']),RuntimeWarning)
-                                   
+							warnings.warn("No nominal voltage for object name {:s}.".format(glm_dict[x]['name']),RuntimeWarning)
+
 	parent_voltage = {}
 	current_parents = len(parent_voltage)
 	previous_parents = 0
-    
+
 	for obj in glmTree:
 		if 'bustype' in glmTree[obj] and glmTree[obj]['bustype'] == 'SWING':
 			parent_voltage[glmTree[obj]['name']] = glmTree[obj]['nominal_voltage']
 			current_parents = len(parent_voltage)
-            
+
 	while current_parents > previous_parents:
 		fix_nominal_voltage(glmTree, parent_voltage)
 		previous_parents = current_parents
 		current_parents = len(parent_voltage)
-        
+
 	# figure out the PT rating for regulators
 	for x in glmTree.keys():
 		if 'object' in glmTree[x].keys() and glmTree[x]['object'] == 'regulator':
@@ -1966,19 +1968,19 @@ def convert_cyme_model(network_db, equipment_db, feeder_id, conductor_data_csv=N
 				if type(glmTree[x][y]) is dict:
 					if 'Control' in glmTree[x][y].keys() and glmTree[x][y]['Control'] == 'LINE_DROP_COMP': 
 						glmTree[x][y]['power_transducer_ratio'] = str(float(glmTree[x]['nominal_voltage'])/120)
-                        
+
 					elif 'Control' in glmTree[x][y].keys() and glmTree[x][y]['Control'] == 'OUTPUT_VOLTAGE':
 						band_center = float(glmTree[x][y]['band_center'])
 						band_width = float(glmTree[x][y]['band_width'])
 						glmTree[x][y]['band_center'] = str(band_center*float(glmTree[x]['nominal_voltage']))
 						glmTree[x][y]['band_width'] = str(band_width*float(glmTree[x]['nominal_voltage']))
-    
+
 	# Delete nominal_voltage from link objects
 	del_nom_volt_list = ['overhead_line', 'underground_line', 'regulator', 'transformer', 'switch', 'fuse', 'ZIPload', 'diesel_dg']
 	for x in glmTree:
 		if 'object' in glmTree[x].keys() and glmTree[x]['object'] in del_nom_volt_list and 'nominal_voltage' in glmTree[x].keys():
 			del glmTree[x]['nominal_voltage']
-    
+
 	return glmTree
 	
 def print_base_GLM(baseDict,f_out):
@@ -1994,16 +1996,16 @@ def print_base_GLM(baseDict,f_out):
 				del baseDict[x]['load_class']
 
 	glm_string = feeder.sortedWrite(baseDict)
-	file = open(f_out, 'w')
-	file.write('#set iteration_limit=50\n')
-	file.write('#set profiler=1\n')
-	file.write('#set pauseatexit=1\n')
-	file.write('#define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0\n\n')
-	file.write('clock{\n\ttimezone EST+5EDT;\n\ttimestamp \'2000-01-01 0:00:00\';\n}\n\n')
-	file.write('module powerflow {\n\tsolver_method NR;\n\tdefault_maximum_voltage_error 1e-9;\n};\n\n')
-	file.write('module tape;\n\n')
-	file.write(glm_string)
-	file.close()
+	gfile = open(f_out, 'w')
+	gfile.write('#set iteration_limit=50\n')
+	gfile.write('#set profiler=1\n')
+	gfile.write('#set pauseatexit=1\n')
+	gfile.write('#define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0\n\n')
+	gfile.write('clock{\n\ttimezone EST+5EDT;\n\ttimestamp \'2000-01-01 0:00:00\';\n}\n\n')
+	gfile.write('module powerflow {\n\tsolver_method NR;\n\tdefault_maximum_voltage_error 1e-9;\n};\n\n')
+	gfile.write('module tape;\n\n')
+	gfile.write(glm_string)
+	gfile.close()
 	
 def main():
 	db_network = 'Duke_2407_Net.mdb'

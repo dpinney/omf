@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-import sys, os, subprocess, platform, re, datetime, shutil, traceback, math
+import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, time
 
 # Path magic.
 myDir = os.path.dirname(__file__)
@@ -104,8 +104,12 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False):
 		if not keepFiles:
 			# HACK: if we don't sleep 1 second, windows intermittantly fails to delete things and an exception is thrown.
 			# Probably cus dropbox is monkeying around in these folders on my dev machine. Disabled for now since it works when dropbox is off.
-			# time.sleep(1)
-			shutil.rmtree(studyPath)
+			for attempt in range(5):
+				try:
+					shutil.rmtree(studyPath)
+					break
+				except WindowsError:
+					time.sleep(2)
 		return rawOut
 	except:
 		traceback.print_exc()

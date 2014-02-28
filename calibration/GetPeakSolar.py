@@ -19,16 +19,15 @@ import urllib
 import os
 import csv
 import math
-import datetime
 from datetime import datetime
 
-# GetPeakSoalr(airport, dir=None)
+# GetPeakSoalr(airport, wdir=None)
 #   a method to get the peak non-cloudy solar data from a locale.  takes the ten most solar-energetic days and averages
 #   the values out into one 24-hour TMY3 file.
 # @param airport    the airport code to look for solar data near
-# @param dir        the directory to write the files into
+# @param wdir        the directory to write the files into
 
-def GetPeakSolar(airport, dir=None, metaFileName="TMY3_StationsMeta.csv", dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
+def GetPeakSolar(airport, wdir=None, metaFileName="TMY3_StationsMeta.csv", dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
     if airport == None:
         #error
         return None
@@ -60,8 +59,8 @@ def GetPeakSolar(airport, dir=None, metaFileName="TMY3_StationsMeta.csv", dniSca
     #print('Airport \'{}\' located at ({}, {})'.format(airport, str(lat), str(long)))
     # look for metadata file
     metafile = None
-    if os.path.isdir(dir):
-        os.chdir(dir)
+    if os.path.isdir(wdir):
+        os.chdir(wdir)
     if not os.path.isfile(metaFileName):
         address = 'http://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/tmy3/TMY3_StationsMeta.csv'
         urllib.urlretrieve(address, metaFileName) # if this fails, we let it break.
@@ -98,8 +97,8 @@ def GetPeakSolar(airport, dir=None, metaFileName="TMY3_StationsMeta.csv", dniSca
     stationId = stationResult[0] # ID string from the first result
     
     # check if peak data exists for specified location
-    if os.path.isdir(dir):
-        os.chdir(dir)
+    if os.path.isdir(wdir):
+        os.chdir(wdir)
     if os.path.isfile("solar_{}_winter.csv".format(airport)):
         #  * if yes, return true ~ already done here
         os.chdir(currDir)
@@ -178,8 +177,8 @@ def GetPeakSolar(airport, dir=None, metaFileName="TMY3_StationsMeta.csv", dniSca
                 tGhi[i] += ghi[i]
         # write average day to file
         fileName = "solar_{}_{}.csv".format(airport, season.lower())
-        if os.path.isdir(dir):
-            os.chdir(dir)
+        if os.path.isdir(wdir):
+            os.chdir(wdir)
         outFile = open(fileName, "w")
         os.chdir(currDir)
         # Time(HH:MM), GHI_Normal, DNI_Normal and DHI_Normal

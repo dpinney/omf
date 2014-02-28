@@ -68,7 +68,7 @@ def send_reg_email(sender, instance, created, raw, using, update_fields, **kwarg
 								   aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
 								   aws_secret_access_key="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")
 	reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
-	outDict = c.send_email("david.pinney@nreca.coop",
+	outDict = c.send_email("david.pinney@omf.coop",
 						   "OMF Registration Link",
 						   message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
 						   [email])

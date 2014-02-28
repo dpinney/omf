@@ -1,4 +1,6 @@
 '''Writes the necessary .glm files for a calibration round. Define recording interval and MySQL schema name here.'''
+import sys
+sys.path.append('..')
 from __future__ import division
 import datetime 
 import re
@@ -17,7 +19,7 @@ use_mysql = 0 # 0 => .csv files; 1 => mysql database
 schema = 'CalibrationDB'
 
 
-def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
+def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, mdir):
 	'''Create populated dict and write it to .glm file
 	
 	- clock (dictionary) links the three seasonal dates with start and stop timestamps (start simulation full 24 hour before day we're recording)
@@ -25,16 +27,16 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 	- baseGLM (dictionary) -- orignal base dictionary for use in Milsoft_GridLAB_D_Feeder_Generation.py
 	- case_flag (int) -- flag technologies to test
 	- feeder_config (string TODO: this is future work, leave as 'None')-- feeder configuration file (weather, sizing, etc)
-	- dir(string)-- directory in which to store created .glm files
+	- mdir(string)-- directory in which to store created .glm files
 	'''
 	# Create populated dictionary.
 	if calib_file is not None:
 		print ('Populating feeder using calibration file '+calib_file+'.')
-		calib_fullpath = dir+'\\'+calib_file
+		calib_fullpath = mdir+'/'+calib_file
 	else:
 		print ('Populating feeder using default calibrations.')
 		calib_fullpath = None
-	glmDict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(baseGLM,case_flag,dir,calib_fullpath,feeder_config) 
+	glmDict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(baseGLM,case_flag,mdir,calib_fullpath,feeder_config) 
 	
 	fnames =  []
 	for i in clock.keys():
@@ -99,9 +101,9 @@ def makeGLM(clock, calib_file, baseGLM, case_flag, feeder_config, dir):
 										
 		# Turn dictionary into a *.glm string and print it to a file in the given directory.
 		glmstring = feeder.sortedWrite(populated_dict)
-		file = open(dir+'\\'+filename, 'w')
-		file.write(glmstring)
-		file.close()
+		gfile = open(mdir+'/'+filename, 'w')
+		gfile.write(glmstring)
+		gfile.close()
 		print ("\t"+filename+ " is ready.")
 		
 		fnames.append(filename)
@@ -111,4 +113,4 @@ def main():
 	print (__doc__)
 	print (makeGLM.__doc__)
 if __name__ ==  '__main__':
-	 main();
+	main();

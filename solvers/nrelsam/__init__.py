@@ -6,23 +6,25 @@
 # #####################################################################
 
 
-import string, sys, struct, math
+import string, sys, struct, math, os
 from ctypes import *
+
+myDir = os.path.dirname(__file__)
 
 c_number = c_float # must be c_double or c_float depending on how defined in sscapi.h
 class SSCAPI:
 
 	if sys.platform == 'win32' or sys.platform == 'cygwin':
 		if 8*struct.calcsize("P") == 64:
-			_dll = CDLL("solvers/nrelsam/ssc64.dll") 
+			_dll = CDLL(os.path.join(myDir,"ssc64.dll")) 
 		else:
-			_dll = CDLL("solvers/nrelsam/ssc32.dll") 
+			_dll = CDLL(os.path.join(myDir,"ssc32.dll"))
 #		return _dll
 	elif sys.platform == 'darwin':
-		_dll = CDLL("solvers/nrelsam/ssc64.dylib") 
+		_dll = CDLL(os.path.join(myDir,"ssc64.dylib"))
 #		return _dll
 	elif sys.platform == 'linux2':
-		_dll = CDLL("solvers/nrelsam/ssc64.so") 
+		_dll = CDLL(os.path.join(myDir,"ssc64.so"))
 #		return _dll
 	else:
 		print "Platform not supported ", sys.platform
