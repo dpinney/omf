@@ -1,7 +1,5 @@
 ''' Calculate CVR impacts using a targetted set of static loadflows. '''
 
-# ### Section 0: Imports
-
 import os, csv, math, re, sys, shutil
 sys.path.append('../..')
 sys.path.append('../../solvers/')
