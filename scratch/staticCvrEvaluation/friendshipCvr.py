@@ -8,8 +8,6 @@ from pprint import pprint as pp
 from copy import copy
 from matplotlib import pyplot as plt
 
-
-''' Basic operations that somehow didn't make it into the standard library. '''
 def roundSig(x, sig=3):
     ''' Round a float to a given number of sig figs. '''
     return round(x, sig-int(math.floor(math.log10(x)))-1)
