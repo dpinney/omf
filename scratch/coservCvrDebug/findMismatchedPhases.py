@@ -26,14 +26,28 @@ def printProbLinks(probLinks):
 		printOneLink(l)
 	print "that's all of em!"
 
+def phasEq(n1, n2):
+	return n1["phases"] == n2["phases"]
+
+def twoOutta3(lnk):
+	# We know that at least one object is mismatched.
+	# If one object is different from the other two, it returns that
+	# But if all three are different, it implicitly returns None
+	a, b, c = lnk["fromnode"], lnk["tonode"], lnk["ldata"]
+	if phasEq(a, b):
+		return c
+	elif phasEq(a, c):
+		return b
+	elif phasEq(b, c):
+		return a
+
 # Using these switches instead of functions because I want access to pretty much
 # all the vars below at the interpreter, but I want the option not to execute 
 # certain if blocks.  feeder.parse takes a long time and I don't need to do it
 # each time I make a tiny change to this script.
-parseNewGuy = True
+parseNewGuy = False
 getLinks = True
 getpblinks = True
-
 
 if parseNewGuy:
 	print "parsing RectorAlphaPhases.glm"
