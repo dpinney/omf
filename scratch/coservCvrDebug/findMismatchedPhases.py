@@ -47,8 +47,7 @@ def twoOutta3(lnk):
 def invalidPhaseNum(lnk):
 	# returns True if any of the objects have invalid phase numbers, like 26N, 17N, XXX, etc.
 	# implicitly returns None otherwise
-	# However, this would not catch something like ABABN, but I don't think there are any like that
-	# anyway
+	# However, this would not catch something like ABABN, but I don't think there are any like that anyway
 	for k, gridobj in lnk.items():
 		for char in gridobj["phases"].strip('"'):
 			if char not in "ABCN":
@@ -57,15 +56,25 @@ def invalidPhaseNum(lnk):
 def fltr(pred):
 	return len(filter(pred, problemlinks))
 
-# parsing the feeder takes a few seconds and it only needs to be done the first time you run the script
-parseNewGuy = False
+def dictcopy(d):
+	newd = {}
+	for k, v in d.items():
+		newd[k] = v
+	return newd
+
+# Parsing RectorAlphaPhases takes a while, and I only need to do it once, but I need to make many changes and re-run this script a lot.  Hence the if...else.. block below
+if "parseNewGuy" in globals():
+	parseNewGuy = False
+else:
+	parseNewGuy = True
 
 if parseNewGuy:
 	print "parsing RectorAlphaPhases.glm"
 	p = feeder.parse("RectorAlphaPhases.glm")
 	newtree = {}
 	print "Parsing done, converting dict"
-	for guid, treeObj in p.items():
+	for guid, t in p.items():
+		treeObj = dictcopy(t)
 		if treeObj.get("name") and treeObj.get("phases"):
 			treeObj["id"] = guid
 			newtree[treeObj["name"]] = treeObj
