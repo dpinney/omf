@@ -80,5 +80,3 @@ def oneIsSuperset(lnk):
 				return False
 	return True
 
-def tingytang():
-	print "tingytangXXXX"

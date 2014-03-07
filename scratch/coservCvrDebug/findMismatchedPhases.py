@@ -42,4 +42,3 @@ print len(omov), "exactly one mismatch and exactly one invalid.  Logical deducti
 mmbss = filter(oneIsSuperset, problemlinks)
 print
 print len(mmbss), "mismatched, but one object is a superset of the others"
-tingytang()
