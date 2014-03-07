@@ -3,9 +3,13 @@
 import datetime, copy, os, re, warnings, networkx as nx, json
 from matplotlib import pyplot as plt
 
-def tokenizeGlm(glmFileName):
-	with open(glmFileName,'r') as glmFile:
-		data = glmFile.read()
+def tokenizeGlm(inputStr, filePath=True):
+	if filePath:
+		with open(inputStr,'r') as glmFile:
+			data = glmFile.read()
+	else:
+		data = inputStr
+
 	# Get rid of http for stylesheets because we don't need it and it conflicts with comment syntax.
 	data = re.sub(r'http:\/\/', '', data)  
 	# Strip comments.
@@ -80,8 +84,8 @@ def parseTokenList(tokenList):
 					_currentLeafAdd('omfEmbeddedConfigObject', fullToken[0] + ' ' + _listToString(fullToken), tree, guidStack)
 	return tree
 
-def parse(glmFileName):
-	tokens = tokenizeGlm(glmFileName)
+def parse(inputStr, filePath=True):
+	tokens = tokenizeGlm(inputStr, filePath)
 	return parseTokenList(tokens)
 
 def _gatherKeyValues(inDict, keyToAvoid):

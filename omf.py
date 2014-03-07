@@ -578,7 +578,7 @@ def gridlabdImport():
 	current_user = user_manager.get(flask_login.current_user.get_id())
 
 	newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
-	newFeeder['tree'] = flask.request.files['glmFile'].stream.read()
+	newFeeder['tree'] = feeder.parse(flask.request.files['glmFile'].stream.read(), False)
 
 	newFeeder['layoutVars']['xScale'] = 0
 	newFeeder['layoutVars']['yScale'] = 0
