@@ -62,23 +62,20 @@ def dictcopy(d):
 		newd[k] = v
 	return newd
 
-# Parsing RectorAlphaPhases takes a while, and I only need to do it once, but I need to make many changes and re-run this script a lot.  Hence the if...else.. block below
-if "parseNewGuy" in globals():
-	parseNewGuy = False
-else:
-	parseNewGuy = True
-
-if parseNewGuy:
+if "parsedFeeder" not in globals():
+	# Parsing the feeder takes a long time, so I don't want to do it every time I modify and re-run this script
 	print "parsing RectorAlphaPhases.glm"
-	p = feeder.parse("RectorAlphaPhases.glm")
-	newtree = {}
-	print "Parsing done, converting dict"
-	for guid, t in p.items():
-		treeObj = dictcopy(t)
-		if treeObj.get("name") and treeObj.get("phases"):
-			treeObj["id"] = guid
-			newtree[treeObj["name"]] = treeObj
-	print "Done"
+	parsedFeeder = feeder.parse("RectorAlphaPhases.glm")
+
+
+newtree = {}
+print "Parsing done, converting dict"
+for guid, t in parsedFeeder.items():
+	treeObj = dictcopy(t)
+	if treeObj.get("name") and treeObj.get("phases"):
+		treeObj["id"] = guid
+		newtree[treeObj["name"]] = treeObj
+print "Done"
 
 links = {k:v for k, v in newtree.items() if v.get("from") and v.get("to")}
 
