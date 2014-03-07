@@ -42,3 +42,9 @@ print len(omov), "exactly one mismatch and exactly one invalid.  Logical deducti
 mmbss = filter(oneIsSuperset, problemlinks)
 print
 print len(mmbss), "mismatched, but one object is a superset of the others"
+
+def lineInvalid(lnk):
+	return is_invalid(lnk["ldata"]["phases"])
+
+justLine = filter(lambda x: lineInvalid(x), omov)
+print len(justLine), "only the line is invalid.  Possibly the easiest fix - just set the line to the phases of its nodes, which are the same"

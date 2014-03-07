@@ -14,9 +14,10 @@ def prLnkRng(lower, upper, probLinks):
 def printOneLink(l):
 	fromnode, ldata, tonode = l["fromnode"], l["ldata"], l["tonode"]
 	print "phase mismatch at", ldata["object"], ldata["name"],":"
+	print "fromnode:\n",fromnode
 	print "linkobj:\n", ldata
-	print "tonode:\n", tonode
-	print "fromnode:\n",fromnode, "\n\n"
+	print "tonode:\n", tonode, "\n\n"
+
 
 def printProbLinks(probLinks):
 	for l in probLinks:
