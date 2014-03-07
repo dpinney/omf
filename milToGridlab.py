@@ -4,7 +4,7 @@ import feeder, csv, random, math, copy
 from StringIO import StringIO
 
 def convert(stdPath,seqPath):
-	''' Take in a .std and .seq from Milsoft and spit out a .glm string.'''
+	''' Take in a .std and .seq from Milsoft and spit out a (json dict, int, int).'''
 
 	print 'Beginning Windmil to GLM conversion.'
 
