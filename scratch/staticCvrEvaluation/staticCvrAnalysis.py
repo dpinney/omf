@@ -302,16 +302,16 @@ def runAnalysis(tree, monthData, rates):
 	plt.xticks([t+0.5 for t in ticks],indices)
 	plt.ylabel('Utility Savings ($)')
 
-def _scadaCleanup():
+def _scadaCleanup(acecMeterId):
 	''' Take a SCADA csv to monthData '''
 	# Meter code to name mappings:
-	subCodeToName = {468670:"Glen", 468706:"Cambria", 469573:"Chateau", 469616:"Turtle", 469628:"Roslin",
-		469653:"Lewiston", 469661:"Montello", 469664:"Doylestown", 470190:"Wautoma", 470201:"Plainfield",
-		470221:"Hancock", 470246:"Richford", 470284:"Wild Rose", 470382:"Friendship", 470386:"Quincy",
-		470394:"Grant", 470396:"Sherwood", 470396:"SherwoodArrow", 470493:"Winnebago", 470508:"Dellwood",
-		470538:"Brooks", 471059:"Spring Lake", 471135:"Coloma", 558087:"Wild Rose Pumps", 638717:"Foxhill",
-		664054:"Poy Sippi", 664054:"Poysippi", 664613:"Friesland", 664614:"Friesland ACEC WPL",
-		664616:"Friesland WPL", 693716:"Columbus", 710462:"Badger West", 7180863:"Arrowhead", 7180864:"Lakehead"}
+	subCodeToName = {468670:'Glen', 468706:'Cambria', 469573:'Chateau', 469616:'Turtle', 469628:'Roslin',
+		469653:'Lewiston', 469661:'Montello', 469664:'Doylestown', 470190:'Wautoma', 470201:'Plainfield',
+		470221:'Hancock', 470246:'Richford', 470284:'Wild Rose', 470382:'Friendship', 470386:'Quincy',
+		470394:'Grant', 470396:'Sherwood', 470396:'SherwoodArrow', 470493:'Winnebago', 470508:'Dellwood',
+		470538:'Brooks', 471059:'Spring Lake', 471135:'Coloma', 558087:'Wild Rose Pumps', 638717:'Foxhill',
+		664054:'Poy Sippi', 664054:'Poysippi', 664613:'Friesland', 664614:'Friesland ACEC WPL',
+		664616:'Friesland WPL', 693716:'Columbus', 710462:'Badger West', 7180863:'Arrowhead', 7180864:'Lakehead'}
 
 	# MonthName -> Ordinal mapping:
 	monthToOrd = {'January':1, 'February':2, 'March':3, 'April':4, 'May':5, 'June':6, 'July':7, 'August':8,
@@ -325,7 +325,7 @@ def _scadaCleanup():
 	# Read in the COLOMA data from the tsv.
 	with open('sourceData/ACECSCADA2.tsv', 'rb') as csvFile:
 		scadaReader = csv.DictReader(csvFile, delimiter='\t')
-		allData = [row for row in scadaReader if row['meterId']=='470382']
+		allData = [row for row in scadaReader if row['meterId']==acecMeterId]
 	print allData[3]
 
 	# Calculations on rows helper functions.
@@ -369,7 +369,7 @@ def _tests():
 		'peakDemandCostWinterPerKw': 8.0 }
 	# Test on Friendship:
 	tree = feeder.parse('sourceData/ACEC-Friendship.glm')
-	monthData = _scadaCleanup()
+	monthData = _scadaCleanup('470382')
 	runAnalysis(tree, monthData, rates)
 	plt.show()
 

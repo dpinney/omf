@@ -26,12 +26,12 @@ plt.title('Hello Basemap')
 
 ''' Getting image from OSM to show map features. '''
 
-import urllib
-fname, headers = urllib.urlretrieve('http://render.openstreetmap.org/cgi-bin/export?bbox=-80.05067825317383,38.39379044654673,-79.96004104614258,38.4377914419658&scale=27116&format=png', filename='test.png')
-print 'Downloaded file:', fname
-im = plt.imread(fname)
-	
-m.imshow(im, interpolation='lanczos', origin='upper')
+# import urllib2
+# fname, headers = urllib2.urlretrieve('http://render.openstreetmap.org/cgi-bin/export?bbox=-80.05067825317383,38.39379044654673,-79.96004104614258,38.4377914419658&scale=27116&format=png', filename='test.png')
+# print 'Downloaded file:', fname
+# im = plt.imread(fname)
+# m.imshow(interpolation='lanczos', origin='upper')
+
 plt.show()
 
 #TODO: make the lat/lon coordinates agree. Because clearly the current behavior is wacky.

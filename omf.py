@@ -525,12 +525,12 @@ def saveFeeder(public):
 			flask_login.current_user.put("Feeder", str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
 	return flask.redirect(flask.request.form.get("ref", "/#feeders"))
 
-@app.route("/feederName/<new_name>")
+@app.route('/feederName/<new_name>')
 @flask_login.login_required
 def feederName(new_name):
-	if flask_login.current_user.get("Feeder", new_name):
-		return "Nope"
-	return "Yep"
+	if flask_login.current_user.get('Feeder', new_name):
+		return 'Nope'
+	return 'Yep'
 
 @app.route('/runStatus')
 @flask_login.login_required
