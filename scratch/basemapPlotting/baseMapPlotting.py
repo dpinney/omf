@@ -37,10 +37,18 @@ lats = [p[1] for p in randPoints]
 sizes = [p[2] for p in randPoints]
 colors = [p[3] for p in randPoints]
 
-# Try a scatter plot
-m.scatter(lons, lats, latlon=True, c=colors, s=sizes)
+# # Try a scatter plot
+# m.scatter(lons, lats, latlon=True, c=colors, s=sizes)
 # # Try a mesh
 # m.pcolor(lons, lats, sizes, latlon=True, tri=True)
+
+# Try a TMY2 Scatter Plot.
+from tmy2Wrangling import points
+lons = [p[0] for p in points]
+lats = [p[1] for p in points]
+sizes = [p[2] for p in points]
+
+m.scatter(lons, lats, latlon=True, c='red', s=sizes)
 
 # Output
 plt.show()
