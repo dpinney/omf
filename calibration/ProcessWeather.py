@@ -1,10 +1,7 @@
-from datetime import datetime
-from datetime import timedelta
+from datetime import datetime, timedelta
 #from datetime import timezone # v3.0
 #from datetime import tzinfo #v2.7
-import math
-import os
-import re
+import math, os, re
 
 # custom imports
 import GetPeakSolar

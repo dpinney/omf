@@ -8,17 +8,22 @@ from pprint import pprint as pp
 from copy import copy
 from matplotlib import pyplot as plt
 
-# This conversion of the friendship feeder takes, a couple minutes, so only do it if necessary.
-def _convertForCvr(stdPath, seqPath, outFilePath):
-	with open(stdPath) as stdFile, open(seqPath) as seqFile:
-		stdString = stdFile.read()
-		seqString = seqFile.read()
-	tree,xScale,yScale = milToGridlab.convert(stdString,seqString)
-	with open(outFilePath,'w') as glmFile:
-		glmFile.write(feeder.sortedWrite(tree))
+
+def _roundOne(x,direc):
+	''' Round x in direc (up/down) to 1 sig fig. '''
+	thou = 10.0**math.floor(math.log10(x))
+	decForm = x/thou
+	if direc=='up':
+		return math.ceil(decForm)*thou
+	elif direc=='down':
+		return math.floor(decForm)*thou
+	else:
+		raise Exception
+
 
 def runAnalysis(tree, monthData, rates):
 	''' Run CVR analysis. '''
+
 	# Graph the SCADA data.
 	fig = plt.figure(figsize=(17,5))
 	indices = [r['monthName'] for r in monthData]
@@ -35,38 +40,40 @@ def runAnalysis(tree, monthData, rates):
 	feeder.latLonNxGraph(myGraph, neatoLayout=False)
 
 	# Get the load levels we need to test.
-	def roundOne(x,direc):
-		''' Round x in direc (up/down) to 1 sig fig. '''
-		thou = 10.0**math.floor(math.log10(x))
-		decForm = x/thou
-		if direc=='up':
-			return math.ceil(decForm)*thou
-		elif direc=='down':
-			return math.floor(decForm)*thou
-		else:
-			raise Exception
 	allLoadLevels = [x.get('histPeak',0) for x in monthData] + [y.get('histAverage',0) for y in monthData]
-	maxLev = roundOne(max(allLoadLevels),'up')
-	minLev = roundOne(min(allLoadLevels),'down')
+	maxLev = _roundOne(max(allLoadLevels),'up')
+	minLev = _roundOne(min(allLoadLevels),'down')
 	tenLoadLevels = range(int(minLev),int(maxLev),int((maxLev-minLev)/10))
 
-	# Make sure the clock object is correct, and remove all includes.
-	badKeys = []
-	for key in tree:
+	# Gather variables from the feeder.
+	for key in tree.keys():
+		# Set clock to single timestep.
 		if tree[key].get('clock','') == 'clock':
-			tree[key]={"timezone":"PST+8PDT", "stoptime":"'2013-01-01 00:00:00'", "starttime":"'2013-01-01 00:00:00'", "clock":"clock"}
+			tree[key] = {"timezone":"PST+8PDT",
+				"stoptime":"'2013-01-01 00:00:00'",
+				"starttime":"'2013-01-01 00:00:00'",
+				"clock":"clock"}
+		# Remove all includes.
 		if tree[key].get('omftype','') == '#include':
-			badKeys.append(key)
-	for key in badKeys:
-		del tree[key]
+			del key
+		# Save swing node index.
+		if tree[key].get('bustype','').lower() == 'swing':
+			swingIndex = key
+			swingName = tree[key].get('name')
 
-	# Make sure the regulator is configured for manual operation.
+	# Find the substation regulator and config.
 	for key in tree:
-		if tree[key].get('object','') == 'regulator_configuration':
-			confIndex = key
+		if tree[key].get('object','') == 'regulator' and tree[key].get('from','') == swingName:
+			regIndex = key
+			regConfName = tree[key]['configuration']
+	for key in tree:
+		if tree[key].get('name','') == regConfName:
+			regConfIndex = key
+
+	# Set substation regulator to manual operation.
 	baselineTap = 3 # GLOBAL VARIABLE FOR DEFAULT TAP POSITION
-	tree[confIndex] = { # manual regulation 
-		'name':'REG27-CONFIG',
+	tree[regConfIndex] = {
+		'name':tree[regConfIndex]['name'],
 		'object':'regulator_configuration',
 		'connect_type':'1',
 		'raise_taps':'10',
@@ -101,7 +108,7 @@ def runAnalysis(tree, monthData, rates):
 		{'object': 'recorder',
 		'file': 'Zregulator.csv',
 		'limit': '0',
-		'parent': 'REG27', #TODO: don't hard code this value.
+		'parent': tree[regIndex]['name'],
 		'property': 'tap_A,tap_B,tap_C,power_in.real,power_in.imag'},
 		{'object': 'collector',
 		'file': 'ZvoltageJiggle.csv',
@@ -111,12 +118,12 @@ def runAnalysis(tree, monthData, rates):
 		{'object': 'recorder',
 		'file': 'ZsubstationTop.csv',
 		'limit': '0',
-		'parent': 'FRIENDSHIP', #TODO: don't hard code this value.
+		'parent': tree[swingIndex]['name'],
 		'property': 'voltage_A,voltage_B,voltage_C'},
 		{'object': 'recorder',
 		'file': 'ZsubstationBottom.csv',
 		'limit': '0',
-		'parent': 'node958175REG27', #TODO: don't hard code this value.
+		'parent': tree[regIndex]['to'],
 		'property': 'voltage_A,voltage_B,voltage_C'} ]
 	biggest = 1 + max(tree.keys())
 	for index, rec in enumerate(recorders):
@@ -161,8 +168,8 @@ def runAnalysis(tree, monthData, rates):
 		else:
 			return baselineTap - lower
 
-	powerflows = []
 	# Run all the powerflows.
+	powerflows = []
 	for doingCvr in [False, True]:
 		# For each load level in the tenLoadLevels, run a powerflow with the load objects scaled to the level.
 		for desiredLoad in tenLoadLevels:
@@ -187,9 +194,9 @@ def runAnalysis(tree, monthData, rates):
 						newTapPos = loweringPotential(row.get('lowVoltage',114))
 				# Tap it down to there.
 				# TODO: do each phase separately because that's how it's done in the field... Oof.
-				tree[confIndex]['tap_pos_A'] = str(newTapPos)
-				tree[confIndex]['tap_pos_B'] = str(newTapPos)
-				tree[confIndex]['tap_pos_C'] = str(newTapPos)
+				tree[regConfIndex]['tap_pos_A'] = str(newTapPos)
+				tree[regConfIndex]['tap_pos_B'] = str(newTapPos)
+				tree[regConfIndex]['tap_pos_C'] = str(newTapPos)
 			# Run the model through gridlab and put outputs in the table.
 			output = gridlabd.runInFilesystem(tree, keepFiles=False)
 			p = output['Zregulator.csv']['power_in.real'][0]
@@ -302,16 +309,30 @@ def runAnalysis(tree, monthData, rates):
 	plt.xticks([t+0.5 for t in ticks],indices)
 	plt.ylabel('Utility Savings ($)')
 
-def _scadaCleanup(acecMeterId):
-	''' Take a SCADA csv to monthData '''
-	# Meter code to name mappings:
-	subCodeToName = {468670:'Glen', 468706:'Cambria', 469573:'Chateau', 469616:'Turtle', 469628:'Roslin',
-		469653:'Lewiston', 469661:'Montello', 469664:'Doylestown', 470190:'Wautoma', 470201:'Plainfield',
-		470221:'Hancock', 470246:'Richford', 470284:'Wild Rose', 470382:'Friendship', 470386:'Quincy',
-		470394:'Grant', 470396:'Sherwood', 470396:'SherwoodArrow', 470493:'Winnebago', 470508:'Dellwood',
-		470538:'Brooks', 471059:'Spring Lake', 471135:'Coloma', 558087:'Wild Rose Pumps', 638717:'Foxhill',
-		664054:'Poy Sippi', 664054:'Poysippi', 664613:'Friesland', 664614:'Friesland ACEC WPL',
-		664616:'Friesland WPL', 693716:'Columbus', 710462:'Badger West', 7180863:'Arrowhead', 7180864:'Lakehead'}
+	# Graph the cumulative savings.
+	fig = plt.figure(figsize=(17,8))
+	annualSavings = sum(d1) + sum(d2) + sum(d3)
+	annualSave = lambda x:(annualSavings - rates['omCost']) * x - rates['capitalCost']
+	simplePayback = rates['capitalCost']/(annualSavings - rates['omCost'])
+	plt.xlabel('Year After Installation')
+	plt.xlim(0,30)
+	plt.ylabel('Cumulative Savings ($)')
+	plt.plot([0 for x in range(31)],c='gray')
+	plt.axvline(x=simplePayback, ymin=0, ymax=1, c='gray', linestyle='--')
+	plt.plot([annualSave(x) for x in range(31)], c='green')
+
+
+def _scadaCleanup(meterName):
+	''' Take a SCADA csv and spit out a nice monthData structure. '''
+
+	# Meter name to code mappings:
+	nameToSubcode = {'Glen':468670, 'Cambria':468706, 'Chateau':469573, 'Turtle':469616, 'Roslin':469628,
+		'Lewiston':469653, 'Montello':469661, 'Doylestown':469664,'Wautoma':470190,'Plainfield':470201,
+		'Hancock':470221,'Richford':470246,'Wild Rose':470284, 'Friendship':470382,'Quincy':470386,
+		'Grant':470394, 'Sherwood':470396, 'SherwoodArrow':470396, 'Winnebago':470493, 'Dellwood':470508,
+		'Brooks':470538, 'Spring Lake':471059, 'Coloma':471135, 'Wild Rose Pumps':558087, 'Foxhill':638717,
+		'Poy Sippi':664054, 'Poysippi':664054, 'Friesland':664613, 'Friesland ACEC WPL':664614, 'Friesland WPL':664616,
+		'Columbus':693716, 'Badger West':710462, 'Arrowhead':7180863, 'Lakehead':7180864}
 
 	# MonthName -> Ordinal mapping:
 	monthToOrd = {'January':1, 'February':2, 'March':3, 'April':4, 'May':5, 'June':6, 'July':7, 'August':8,
@@ -325,7 +346,7 @@ def _scadaCleanup(acecMeterId):
 	# Read in the COLOMA data from the tsv.
 	with open('sourceData/ACECSCADA2.tsv', 'rb') as csvFile:
 		scadaReader = csv.DictReader(csvFile, delimiter='\t')
-		allData = [row for row in scadaReader if row['meterId']==acecMeterId]
+		allData = [row for row in scadaReader if row['meterId']==str(nameToSubcode[meterName])]
 	print allData[3]
 
 	# Calculations on rows helper functions.
@@ -353,24 +374,43 @@ def _scadaCleanup(acecMeterId):
 	print '\nPeak to Mean Ratios', [roundSig(m['histPeak']/m['histAverage']) for m in monthData]
 	return monthData
 
+
+def _convertForCvr(stdPath, seqPath, outFilePath):
+	''' Convert a feeder to a GLM'''
+	with open(stdPath) as stdFile, open(seqPath) as seqFile:
+		stdString = stdFile.read()
+		seqString = seqFile.read()
+	tree,xScale,yScale = milToGridlab.convert(stdString,seqString)
+	with open(outFilePath,'w') as glmFile:
+		glmFile.write(feeder.sortedWrite(tree))
+
+
 def _tests():
-	# Feeder conversion:
+	# Setup with feeder conversion (if necessary):
 	for fName in ['ACEC-Friendship', 'ACEC-Coloma']:
 		if not os.path.isfile('sourceData/' + fName + '.glm'):
 			_convertForCvr('sourceData/' + fName + '.std','sourceData/ACEC.seq',
 						   'sourceData/' + fName + '.glm')
 	# Test Variables:
-	rates = {
+	rates = {'capitalCost': 30000,
+		'omCost': 1000,
 		'wholesaleEnergyCostPerKwh': 0.06,
 		'retailEnergyCostPerKwh': 0.10,
 		'peakDemandCostSpringPerKw': 5.0,
 		'peakDemandCostSummerPerKw': 10.0,
 		'peakDemandCostFallPerKw': 6.0,
 		'peakDemandCostWinterPerKw': 8.0 }
-	# Test on Friendship:
-	tree = feeder.parse('sourceData/ACEC-Friendship.glm')
-	monthData = _scadaCleanup('470382')
-	runAnalysis(tree, monthData, rates)
+	# Def and run tests:
+	def testFriendship():
+		tree = feeder.parse('sourceData/ACEC-Friendship.glm')
+		monthData = _scadaCleanup('Friendship')
+		runAnalysis(tree, monthData, rates)
+	def testColoma():
+		tree = feeder.parse('sourceData/ACEC-Coloma.glm')
+		monthData = _scadaCleanup('Coloma')
+		runAnalysis(tree, monthData, rates)
+	testColoma()
+	# Show all plots:
 	plt.show()
 
 if __name__ == '__main__':
