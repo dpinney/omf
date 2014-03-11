@@ -8,7 +8,6 @@ from pprint import pprint as pp
 from copy import copy
 from matplotlib import pyplot as plt
 
-
 def _roundOne(x,direc):
 	''' Round x in direc (up/down) to 1 sig fig. '''
 	thou = 10.0**math.floor(math.log10(x))
@@ -391,7 +390,7 @@ def _tests():
 		if not os.path.isfile('sourceData/' + fName + '.glm'):
 			_convertForCvr('sourceData/' + fName + '.std','sourceData/ACEC.seq',
 						   'sourceData/' + fName + '.glm')
-	# Test Variables:
+	# Variables for all tests:
 	rates = {'capitalCost': 30000,
 		'omCost': 1000,
 		'wholesaleEnergyCostPerKwh': 0.06,

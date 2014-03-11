@@ -4,25 +4,25 @@ Core profiler results
 
 Total objects               1705 objects
 Parallelism                    1 thread
-Total time                   1.0 seconds
-  Core time                  0.6 seconds (58.0%)
-    Compiler                 0.2 seconds (17.5%)
+Total time                   2.0 seconds
+  Core time                  1.6 seconds (79.3%)
+    Compiler                 0.2 seconds (9.0%)
     Instances                0.0 seconds (0.0%)
     Random variables         0.0 seconds (0.0%)
     Schedules                0.0 seconds (0.0%)
     Loadshapes               0.0 seconds (0.0%)
     Enduses                  0.0 seconds (0.0%)
     Transforms               0.0 seconds (0.0%)
-  Model time                 0.4 seconds/thread (42.0%)
+  Model time                 0.4 seconds/thread (20.7%)
 Simulation time                1 days
-Simulation speed              41k object.hours/second
+Simulation speed              20k object.hours/second
 Passes completed              27 passes
 Time steps completed          26 timesteps
 Convergence efficiency      1.04 passes/timestep
 Read lock contention        0.0%
 Write lock contention       0.0%
 Average timestep           3323 seconds/timestep
-Simulation rate           86400 x realtime
+Simulation rate           43200 x realtime
 
 
 Model profiler results
@@ -30,15 +30,16 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-node               0.277     66.0%      0.6
-climate            0.098     23.3%     98.0
-voltdump           0.011      2.6%     11.0
-overhead_line      0.010      2.4%      0.0
-triplex_meter      0.009      2.1%      0.0
-triplex_node       0.008      1.9%      0.0
-underground_line   0.003      0.7%      0.0
-transformer        0.003      0.7%      0.0
-capacitor          0.001      0.2%      1.0
+node               0.274     66.3%      0.6
+climate            0.094     22.8%     94.0
+triplex_node       0.013      3.1%      0.0
+voltdump           0.011      2.7%     11.0
+triplex_meter      0.010      2.4%      0.1
+overhead_line      0.006      1.5%      0.0
+underground_line   0.002      0.5%      0.0
+fuse               0.001      0.2%      0.0
+transformer        0.001      0.2%      0.0
+switch             0.001      0.2%      0.1
 ================ ======== ======== ========
-Total              0.420    100.0%      0.2
+Total              0.413    100.0%      0.2
 
