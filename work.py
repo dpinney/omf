@@ -56,7 +56,7 @@ class LocalWorker:
 		self.jobRecorder[time.time()] = runThread
 		runThread.start()
 
-	def _studyInstance(self, studyName, anaObject):
+	def _studyInstance(self, studyName, anaObject, store):
 		studyData = store.get('Study', anaObject.name + '---' + studyName)
 		studyData.update({'name':studyName,'analysisName':anaObject.name})
 		moduleRef = getattr(studies, studyData['studyType'])
@@ -67,7 +67,7 @@ class LocalWorker:
 		# Setup.
 		self.runningJobCount.increment()
 
-		studyList = [self._studyInstance(studyName, anaObject) for studyName in anaObject.studyNames]
+		studyList = [self._studyInstance(studyName, anaObject, store) for studyName in anaObject.studyNames]
 		# Run.
 		anaObject.run(studyList)
 		# Storing result.
@@ -81,6 +81,16 @@ class LocalWorker:
 		importThread = Thread(target=self.milImportBackground, args=[store, feederName, stdString, seqString])
 		importThread.start()
 		self.runningJobCount.decrement()
+
+	def boilerplate(func):
+		newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
+		func(newFeeder)
+		with open('./schedules.glm','r') as schedFile:
+			newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+		store.put('Feeder', feederName, newFeeder)
+		# store.delete('Conversion', feederName)
+
+
 	def milImportBackground(self, store, feederName, stdString, seqString):
 		newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
 		[newFeeder['tree'], xScale, yScale] = milToGridlab.convert(stdString, seqString)
