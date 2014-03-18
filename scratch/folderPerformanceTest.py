@@ -1,6 +1,6 @@
 ''' See what the performance looks like for readings lots of files.
 	
-	Assuming 10,000 analyses, then listing and paging MD takes
+	Assuming 10,000 analyses (high coop estimated volume) then listing and paging MD takes
 	only 0.4 seconds total.
 '''
 
