@@ -4,10 +4,10 @@
 		#output {height:200px; width:1000px; background:orange}
 	</style>
 	<script src='metadata.js'></script>
+	<script src='modelOutput.js'></script>
 	<script>
 		function init() {
-			document.getElementById('input').innerHTML = 'SCRIPTS ARE POWERFUL BUT SO ARE YOU'
-			alert(metadata.myName)
+			if (metadata.status=='preRun') {document.getElementById('output').innerHTML = 'NO OUTPUT YET'}
 		}
 	</script>
 </head>
