@@ -9,7 +9,6 @@ def tokenizeGlm(inputStr, filePath=True):
 			data = glmFile.read()
 	else:
 		data = inputStr
-
 	# Get rid of http for stylesheets because we don't need it and it conflicts with comment syntax.
 	data = re.sub(r'http:\/\/', '', data)  
 	# Strip comments.
@@ -85,6 +84,7 @@ def parseTokenList(tokenList):
 	return tree
 
 def parse(inputStr, filePath=True):
+	''' Parse a GLM to a omf.feeder tree. Can take filepath or GLM string. '''
 	tokens = tokenizeGlm(inputStr, filePath)
 	return parseTokenList(tokens)
 
@@ -109,8 +109,7 @@ def _gatherKeyValues(inDict, keyToAvoid):
 	return otherKeyValues
 
 def dictToString(inDict):
-	# Helper function: given a single dict, concatenate it into a string.
-
+	''' Helper function: given a single dict representing a GLM object, concatenate it into a string. '''
 	# Handle the different types of dictionaries that are leafs of the tree root:
 	if 'omftype' in inDict:
 		return inDict['omftype'] + ' ' + inDict['argument'] + ';'
@@ -161,6 +160,7 @@ def sortedWrite(inTree):
 	return output
 
 def adjustTime(tree, simLength, simLengthUnits, simStartDate):
+	''' Adjust a GLM clock and recorders to start/stop/step specified. '''
 	# translate LengthUnits to minutes.
 	if simLengthUnits == 'minutes':
 		lengthInSeconds = simLength * 60
@@ -195,6 +195,7 @@ def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 			leaf['argument'] = 'minimum_timestep=' + str(interval)
 
 def _deEmbedOnce(glmTree):
+	''' Take all objects nested inside top-level objects and move them to the top level. '''
 	iterTree = copy.deepcopy(glmTree)
 	for x in iterTree:
 		for y in iterTree[x]:
@@ -246,6 +247,7 @@ def _deEmbedOnce(glmTree):
 				del glmTree[x][y]
 
 def fullyDeEmbed(glmTree):
+	''' Make a GLM a list of objects with no embedded objects. '''
 	lenDiff = 1
 	while lenDiff != 0:
 		currLen = len(glmTree)
