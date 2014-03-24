@@ -1,8 +1,8 @@
 <head>
 	<title>Open Modeling Framework</title>
-	<meta charset='utf-8'>
-	<link href='../../static/omf.css' type='text/css' rel='stylesheet'/>
-	<link rel='shortcut icon' href='../../static/favicon.ico'>
+	<meta charset="utf-8">
+	<link href="../../static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="../../static/favicon.ico">
 	<style>
 		/*INPUT*/
 		table.modelOptions {width:70%; text-align:left; margin-left:auto;}
@@ -13,24 +13,21 @@
 		div.tightContent div {margin-top:0px;margin-bottom:0px; border:none;}
 		div.tightContent div + div {margin-top:0px; margin-bottom:0px;}
 		p.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt;}
-		div.studyTitleBox {position: absolute; width:30px; left:-30px; height:100%; top:-1px; background-color:lightgray; border-style: solid !important; border-color:gray !important; border-width:1px 0px 1px 0px !important; font-size:10pt; overflow:hidden;}
-		p.studyTitle {writing-mode:tb-rl; filter: flipv fliph; -webkit-transform:rotate(90deg); -moz-transform:rotate(90deg); -o-transform: rotate(90deg); white-space:nowrap; display:block; padding:10px;}
-		div.studyContainer {position:relative;}
 		#input {margin-top: 0px;}
 		input {border-bottom:thin dotted black;text-align:right;padding-right:5px}
 		button {width:auto;}
 		td,th {text-align: right}
 	</style>
-	<!-- Includes -->
-	<script type='text/javascript' src='../../static/omf.js'></script>
-	<script type="text/javascript" src='../../static/jquery-1.9.1.js'></script>
-	<script src='../../static/highcharts.src.js'></script>	
-	<!-- Data -->
-	<script src='metadata.js'></script>
-	<script src='allOutputData.js'></script>
+	<!-- Library Imports -->
+	<script type="text/javascript" src="../../static/omf.js"></script>
+	<script type="text/javascript" src="../../static/jquery-1.9.1.js"></script>
+	<script src="../../static/highcharts.src.js"></script>	
+	<!-- Data  Imports -->
+	<script src="metadata.js"></script>
+	<script src="allOutputData.js"></script>
 	<script type="text/javascript">
 		function init() {
-			gebi('title').innerHTML += metadata.modelName
+			gebi("title").innerHTML += metadata.modelName
 		}
 
 		function saveModel() {
@@ -42,58 +39,67 @@
 		}
 	</script>
 </head>
-<body onload='init()'>
-	<div id='title'>
-		<div id='logoBox'><a href='/'>▦</a></div>
+<body onload="init()">
+	<div id="title">
+		<div id="logoBox"><a href="/">▦</a></div>
 		<!--Title:-->
 	</div>
-	<p class='reportTitle'>Model Input</p>
-	<div id='input' class='content'>
-		<table class='modelOptions'>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<table class="modelOptions">
 			<tr>
-				<td>Model Name</td><td><input type='text' id='modelName'/></td>
+				<td>Model Name</td><td><input type="text" id="modelName"/></td>
 			</tr>
 			<tr>
-				<td>Feeder Name</td><td><input type='text' id='feederName'/></td>
+				<td>Feeder Name</td><td><input type="text" id="feederName"/></td>
 			</tr>
 			<tr>
-				<td>Climate</td><td><input type='text' id='climateName'/></td>
+				<td>Climate</td><td><input type="text" id="climateName"/></td>
 			</tr>
 			<tr>
-				<td>Simulation Length</td><td><input type='text' id='simLength'/></td>
+				<td>Simulation Length</td><td><input type="text" id="simLength"/></td>
 			</tr>
 			<tr>
-				<td></td><td><input type='radio' id='minutes' class='radio' name='simLengthUnits' value='minutes'/> Minutes <input type='radio' id='hours' class='radio' name='simLengthUnits' value='hours'/> Hours <input type='radio' id='days' class='radio' name='simLengthUnits' value='days'/> Days </td></tr>
+				<td></td><td><input type="radio" id="minutes" class="radio" name="simLengthUnits" value="minutes"/> Minutes <input type="radio" id="hours" class="radio" name="simLengthUnits" value="hours"/> Hours <input type="radio" id="days" class="radio" name="simLengthUnits" value="days"/> Days </td></tr>
 				<tr>
-					<td>Simulation Start Date <br/> (YYYY-MM-DD)</td><td><input type='text' id='simStartDate'/></td>
+					<td>Simulation Start Date <br/> (YYYY-MM-DD)</td><td><input type="text" id="simStartDate"/></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button onclick='javascript:saveAnalysis()'>Save Model</button><button onclick='javascript:runAnalysis()'>Run Model</button></td>
+					<td><button onclick="javascript:saveAnalysis()">Save Model</button><button onclick="javascript:runAnalysis()">Run Model</button></td>
 				</tr>
 		</table>
 	</div>
-	<div id='output'>
+	<div id="output">
 		<p class="reportTitle">Climate</p>
 		<div id="climateReport" class="tightContent">
-			<div id="climateStudy" class="studyContainer">
-				<div id="climateChartDiv" style="height:250px"></div>
-				<script>
+			<div id="climateChartDiv"></div>
+			<script>
 				climateSeriesData = [
-					{"name":"Rain Fall (in/h)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate['Rain Fall (in/h)']},
-					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate['Wind Speed (m/s)']},
-					{"name":"Direct Insolation (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate['Direct Insolation (W/m^2)']},
-					{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate['Temperature (F)']},
-					{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate['Snow Depth (in)']}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})</script>
-			</div>
+					{"name":"Rain Fall (in/h)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Rain Fall (in/h)"]},
+					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
+					{"name":"Direct Insolation (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Insolation (W/m^2)"]},
+					{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Temperature (F)"]},
+					{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Snow Depth (in)"]}]
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
 		</div>
 
 		<p class="reportTitle">Power Consumption From Transmission System</p>
+		<div id="powerConsumptionReport" class="tightContent">
+			<div id="powerTimeSeries"></div>
+			<div id="energyBalance"></div>
+			<!-- TODO: Make the energy chart sum the arrays. -->
+			<script>
+				powerSeries = [{"marker":{"enabled":false},"color":"red","data":allOutputData.Consumption.Power,"name":"Substation Powerflow"}]
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338508800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"column":{"stacking":"normal","shadow":false},"spline":{"marker":{"radius":8},"shadow":false,"lineWidth":0}},"xAxis":{"tickColor":"gray","lineColor":"gray","categories":["20Sol"]},"title":{"text":null},"series":[{"color":"orangered","data":[5944255.196466643],"type":"column","name":"Losses"},{"color":"darkorange","data":[142295363.20363092],"type":"column","name":"Loads"},{"color":"seagreen","data":[24543460.52],"type":"spline","name":"DG"}],"yAxis":{"title":{"text":"Energy (Wh)","style":{"color":"gray"}}},"chart":{"height":250,"marginBottom":20,"renderTo":"energyBalance","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
 
 		<p class="reportTitle">Triplex Meter Voltages</p>
-		<div id='triplexMeterVoltageReport' class='tightContent'>
-			<div id='triplexMeterVoltageChart' style='height:250px'></div>
+		<div id="triplexMeterVoltageReport" class="tightContent">
+			<div id="triplexMeterVoltageChart" style="height:250px"></div>
 			<script>
 				triplexSeriesData = [{"marker":{"enabled":false},"color":"gray","data":allOutputData.allMeterVoltages.Min,"name":"Min"},
 					{"marker":{"enabled":false},"color":"blue","data":allOutputData.allMeterVoltages.Mean,"name":"Mean"},{"marker":{"enabled":false},"color":"gray","data":allOutputData.allMeterVoltages.Max,"name":"Max"}]
