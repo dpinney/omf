@@ -1,0 +1,4 @@
+allInputData =
+{
+	"hasCherryOnTop":true
+}
