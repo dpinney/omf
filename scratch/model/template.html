@@ -5,7 +5,7 @@
 	<link rel='shortcut icon' href='../../static/favicon.ico'>
 	<style>
 		/*INPUT*/
-		table.analysisOptions {width:70%; text-align:left; margin-left:auto;}
+		table.modelOptions {width:70%; text-align:left; margin-left:auto;}
 		/*OUTPUT*/
 		pre.stdoutBlock {display:inline-block; width:490px; overflow-x:hidden; padding-left:10px; vertical-align:top;}
 		div.stdouts {overflow-x:auto;white-space: nowrap; margin-top:0px;}
@@ -27,12 +27,18 @@
 	<script src='../../static/highcharts.src.js'></script>	
 	<!-- Data -->
 	<script src='metadata.js'></script>
+	<script src='allOutputData.js'></script>
 	<script type="text/javascript">
 		function init() {
-			gebi('title').innerHTML += metadata.analysisName
+			gebi('title').innerHTML += metadata.modelName
 		}
 
-		function saveAnalysis() {
+		function saveModel() {
+		}
+
+		function runModel() {
+			saveModel()
+			// Actually run here.
 		}
 	</script>
 </head>
@@ -43,12 +49,12 @@
 	</div>
 	<p class='reportTitle'>Model Input</p>
 	<div id='input' class='content'>
-		<table class='analysisOptions'>
+		<table class='modelOptions'>
 			<tr>
-				<td>Model Name</td><td><input type='text' id='analysisName'/></td>
+				<td>Model Name</td><td><input type='text' id='modelName'/></td>
 			</tr>
 			<tr>
-				<td>Feeder</td><td><input type='text' id='feederName'/></td>
+				<td>Feeder Name</td><td><input type='text' id='feederName'/></td>
 			</tr>
 			<tr>
 				<td>Climate</td><td><input type='text' id='climateName'/></td>
@@ -72,7 +78,14 @@
 		<div id="climateReport" class="tightContent">
 			<div id="climateStudy" class="studyContainer">
 				<div id="climateChartDiv" style="height:250px"></div>
-				<script>new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":[{"marker":{"enabled":false},"color":"dimgray","data":[0.55118,0.55118,0.55118,0.51181,0.51181,0.51181,0.55118,0.55118,0.55118,0.55118,0.59055,0.59055,0.59055,0.59055,0.59055,0.62992,0.62992,0.62992,0.62992,0.62992,0.62992,0.62992,0.62992,0.62992,0.62992,0.62992,0.62992,0.62992,0.62992,0.62992,0.66929,0.66929,0.66929,0.70866,0.70866,0.70866,0.74803,0.74803,0.74803,0.7874,0.7874,0.74803,0.74803,0.70866,0.66929,0.66929,0.62992,0.59055,0.59055,0.55118,0.51181,0.51181,0.47244,0.47244,0.43307,0.43307,0.43307,0.43307,0.3937,0.3937,0.3937,0.3937,0.35433,0.35433,0.35433,0.35433,0.35433,0.35433,0.35433,0.35433,0.35433,0.3937,0.3937,0.3937,0.3937,0.3937,0.3937,0.3937,0.3937,0.3937,0.43307,0.43307,0.43307,0.43307,0.43307,0.43307,0.47244,0.47244,0.47244,0.47244,0.43307,0.43307,0.43307,0.3937,0.3937,0.3937],"name":"Rain Fall (in/h)"},{"marker":{"enabled":false},"color":"darkgray","data":[6.9345,6.9345,6.9345,9.17144,5.81603,8.05297,5.81603,6.9345,4.69757,6.9345,14.9875,5.81603,9.17144,11.6321,16.1059,16.1059,18.3429,12.7505,19.685,13.869,9.17144,5.81603,6.9345,8.05297,9.17144,9.17144,12.7505,11.6321,9.17144,8.05297,8.05297,6.9345,5.81603,6.9345,5.81603,4.69757,3.3554,6.9345,11.6321,11.6321,14.9875,10.2899,14.9875,8.05297,10.2899,9.17144,6.9345,9.17144,5.81603,4.69757,3.3554,0.0,0.0,4.69757,3.3554,3.3554,9.17144,6.9345,11.6321,3.3554,3.3554,11.6321,6.9345,4.69757,3.3554,6.9345,9.17144,6.9345,8.05297,8.05297,9.17144,11.6321,9.17144,10.2899,10.2899,5.81603,8.05297,6.9345,6.9345,6.9345,3.3554,3.3554,6.9345,4.69757,3.3554,9.17144,5.81603,10.2899,6.9345,9.17144,6.9345,8.05297,8.05297,8.05297,8.05297,4.69757],"name":"Wind Speed (m/s)"},{"marker":{"enabled":false},"color":"darkgray","data":[0.0,0.0,0.0,0.0,0.0,2.04387,3.43741,5.75999,24.6193,28.0567,58.1573,64.1031,45.8941,44.2218,30.1935,34.9315,29.8219,12.2632,0.464515,0.185806,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.092903,0.650321,0.836127,0.185806,0.278709,0.185806,0.092903,0.092903,0.0,0.0,0.092903,0.092903,0.0,0.092903,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,2.50838,2.60129,0.92903,0.743224,1.95096,1.20774,0.650321,21.9251,11.9845,0.836127,57.9715,66.7973,55.7418,24.5264,4.83096,2.04387,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,6.0387,51.2825,71.5353,80.6398,85.4708,83.6127,84.5418,85.1921,80.454,75.9018,79.8037,81.6618,75.2515,67.076,50.7251,7.71095,0.0,0.0,0.0,0.0],"name":"Direct Insolation (W/m^2)"},{"marker":{"enabled":false},"color":"gainsboro","data":[57.022,55.042,51.982,51.982,51.982,53.062,53.062,55.942,57.922,62.962,66.022,69.082,71.062,71.062,64.942,69.082,69.082,66.922,55.942,53.962,53.062,51.982,51.982,51.982,53.062,53.062,50.002,50.002,48.022,46.942,46.942,48.022,48.022,48.922,51.082,51.982,51.982,51.982,53.062,53.962,48.922,46.942,46.942,46.042,44.962,44.962,44.062,44.962,44.962,44.962,44.062,44.062,44.062,44.962,44.962,44.962,48.922,48.022,46.942,46.942,48.922,46.942,50.002,53.062,55.042,55.942,53.062,50.002,48.922,46.942,46.042,44.962,44.962,46.042,46.042,42.082,42.082,44.962,51.982,57.922,64.042,66.922,69.082,69.982,71.962,73.942,75.022,75.922,73.942,73.942,69.982,62.962,59.002,57.922,55.942,51.982],"name":"Temperature (F)"},{"marker":{"enabled":false},"color":"gainsboro","data":[0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0],"name":"Snow Depth (in)"}],"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})</script>
+				<script>
+				climateSeriesData = [
+					{"name":"Rain Fall (in/h)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate['Rain Fall (in/h)']},
+					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate['Wind Speed (m/s)']},
+					{"name":"Direct Insolation (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate['Direct Insolation (W/m^2)']},
+					{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate['Temperature (F)']},
+					{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate['Snow Depth (in)']}]
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})</script>
 			</div>
 		</div>
 
@@ -81,13 +94,16 @@
 		<p class="reportTitle">Triplex Meter Voltages</p>
 		<div id='triplexMeterVoltageReport' class='tightContent'>
 			<div id='triplexMeterVoltageChart' style='height:250px'></div>
-			<script>new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":[{"marker":{"enabled":false},"color":"gray","data":[240.646,241.405,241.409,241.407,241.425,241.402,241.37,241.334,241.263,241.315,241.325,240.789,241.364,241.391,240.857,241.389,241.349,241.312,240.76,241.236,241.252,241.259,241.3,241.342,241.386,241.405,241.409,241.407,241.425,241.402,241.37,240.633,241.263,241.315,241.325,241.352,241.364,241.391,241.397,241.389,241.349,241.312,241.248,241.236,241.252,241.259,241.3,241.342,241.386,241.405,241.409,240.729,241.425,241.402,241.37,241.334,241.263,241.315,241.325,241.352,241.364,241.391,241.397,241.389,241.349,241.312,241.248,241.236,241.252,241.259,241.3,241.342,241.386,241.405,241.409,241.407,240.759,241.402,241.37,240.594,241.263,241.315,240.763,241.352,241.364,241.391,240.805,241.389,241.349,240.725,241.248,241.236,241.252,241.259,241.3,241.342],"name":"Min"},{"marker":{"enabled":false},"color":"blue","data":[240.929,241.436,241.439,241.437,241.45,241.435,241.415,241.395,241.352,241.386,241.4,241.041,241.424,241.441,241.08,241.437,241.408,241.379,241.004,241.323,241.334,241.338,241.366,241.394,241.424,241.436,241.439,241.437,241.45,241.435,241.414,240.921,241.344,241.38,241.388,241.406,241.414,241.432,241.436,241.43,241.402,241.376,241.332,241.323,241.334,241.338,241.366,241.394,241.424,241.436,241.439,240.983,241.45,241.436,241.414,241.391,241.344,241.38,241.387,241.41,241.418,241.431,241.449,241.442,241.413,241.382,241.333,241.324,241.334,241.338,241.366,241.394,241.424,241.436,241.439,241.437,241.004,241.444,241.427,240.911,241.359,241.394,241.024,241.419,241.428,241.445,241.052,241.444,241.415,240.994,241.341,241.325,241.334,241.338,241.366,241.394],"name":"Mean"},{"marker":{"enabled":false},"color":"gray","data":[241.495,241.499,241.499,241.499,241.499,241.501,241.503,241.508,241.514,241.513,241.524,241.517,241.522,241.52,241.508,241.515,241.512,241.506,241.491,241.498,241.497,241.497,241.498,241.498,241.499,241.499,241.499,241.499,241.499,241.5,241.501,241.492,241.503,241.505,241.506,241.506,241.506,241.506,241.505,241.505,241.503,241.501,241.498,241.498,241.497,241.497,241.498,241.498,241.499,241.499,241.499,241.489,241.5,241.501,241.501,241.501,241.503,241.504,241.505,241.513,241.512,241.505,241.525,241.523,241.519,241.51,241.5,241.498,241.497,241.497,241.498,241.498,241.499,241.499,241.499,241.499,241.491,241.515,241.521,241.52,241.525,241.525,241.518,241.527,241.527,241.526,241.517,241.526,241.523,241.51,241.513,241.5,241.497,241.497,241.498,241.498],"name":"Max"}],"yAxis":{"title":{"text":null,"style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"triplexMeterVoltageChart","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			<script>
+				triplexSeriesData = [{"marker":{"enabled":false},"color":"gray","data":allOutputData.allMeterVoltages.Min,"name":"Min"},
+					{"marker":{"enabled":false},"color":"blue","data":allOutputData.allMeterVoltages.Mean,"name":"Mean"},{"marker":{"enabled":false},"color":"gray","data":allOutputData.allMeterVoltages.Max,"name":"Max"}]
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":triplexSeriesData,"yAxis":{"title":{"text":"Volts","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"triplexMeterVoltageChart","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
 
 		<p class="reportTitle">Model Runtime Statistics</p>
 
-		<p class="reportTitle">Study Details</p>
+		<p class="reportTitle">Model Details</p>
 
 	</div>
 </body>

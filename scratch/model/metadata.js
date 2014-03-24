@@ -2,7 +2,7 @@ metadata=
 {
     "status": "preRun", 
     "created": "2013-10-03 11:59:24.514000", 
-    "analysisType": "test",
+    "modelType": "gridlabSingle",
     "runTime": "0:00:20",
-    "analysisName": "Single Gridlab Run"
+    "modelName": "Single Gridlab Run"
 }
