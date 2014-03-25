@@ -23,16 +23,35 @@
 	<script type="text/javascript" src="../../static/jquery-1.9.1.js"></script>
 	<script src="../../static/highcharts.src.js"></script>	
 	<!-- Data  Imports -->
-	<script src="metadata.js"></script>
+	<script src="allInputData.js"></script>
 	<script src="allOutputData.js"></script>
+	<!-- Global Functions -->
 	<script type="text/javascript">
 		function init() {
-			gebi("title").innerHTML += metadata.modelName
+			// Set up various things on load.
+			gebi("title").innerHTML += allInputData.modelName
+			if (typeof allInputData.status == undefined) {
+				// Case 0: model just started.
+				console.log("NORUN")
+			} else if (allInputData.status == "preRun") {
+				// Case 1: model saved but not run.
+				console.log("PRERUN")
+			} else if (allInputData.status == "running") {
+				// Case 2: model running.
+				console.log("PRERUN")
+			} else if (allInputData.status == "postRun") {
+				// Case 3: model run complete.
+				console.log("POSTRUN")
+				for (index in allInputData) {
+					try {
+						document.querySelector("input#" + index).value = allInputData[index]
+					}
+					catch(err){}
+				}
+			}
 		}
-
 		function saveModel() {
 		}
-
 		function runModel() {
 			saveModel()
 			// Actually run here.
@@ -60,7 +79,7 @@
 				<td>Simulation Length</td><td><input type="text" id="simLength"/></td>
 			</tr>
 			<tr>
-				<td></td><td><input type="radio" id="minutes" class="radio" name="simLengthUnits" value="minutes"/> Minutes <input type="radio" id="hours" class="radio" name="simLengthUnits" value="hours"/> Hours <input type="radio" id="days" class="radio" name="simLengthUnits" value="days"/> Days </td></tr>
+				<td></td><td><input type="radio" id="minutes" class="radio" name="simLengthUnits" value="minutes"/> Minutes <input type="radio" id="hours" class="radio" name="simLengthUnits" value="hours"/> Hours <input type="radio" id="days" class="radio" name="simLengthUnits" value="days"/> Days</td></tr>
 				<tr>
 					<td>Simulation Start Date <br/> (YYYY-MM-DD)</td><td><input type="text" id="simStartDate"/></td>
 				</tr>
