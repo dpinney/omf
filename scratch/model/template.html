@@ -37,19 +37,23 @@
 			} else if (allInputData.status == "preRun") {
 				// Case 1: model saved but not run.
 				console.log("PRERUN")
+				restoreInputs()
 			} else if (allInputData.status == "running") {
 				// Case 2: model running.
-				console.log("PRERUN")
+				console.log("RUNNING")
+				restoreInputs()
 			} else if (allInputData.status == "postRun") {
 				// Case 3: model run complete.
 				console.log("POSTRUN")
-				for (index in allInputData) {
-					try {
-						document.querySelector("input#" + index).value = allInputData[index]
-					}
-					catch(err){}
-				}
-				$('.postRun').show()
+				restoreInputs()
+				$(".postRun").show()
+				$("#runButton")[0].innerHTML = "Re-Run Model"
+			}
+		}
+		function restoreInputs() {
+			for (index in allInputData) {
+				try {document.querySelector("input#" + index).value = allInputData[index]}
+				catch(err){}
 			}
 		}
 		function runModel() {
@@ -66,7 +70,16 @@
 	<div id="input" class="content">
 		<table class="modelOptions">
 			<tr>
+				<td>Model Type</td><td><input type="text" id="modelType" value="gridlabSingle" disabled/></td>
+			</tr>
+			<tr>
 				<td>Model Name</td><td><input type="text" id="modelName"/></td>
+			</tr>
+			<tr class="postRun">
+				<td>Created</td><td><input type="text" id="created" disabled/></td>
+			</tr>
+			<tr class="postRun">
+				<td>Run Time</td><td><input type="text" id="runTime" disabled/></td>
 			</tr>
 			<tr>
 				<td>Feeder Name</td><td><input type="text" id="feederName"/></td>
@@ -78,13 +91,17 @@
 				<td>Simulation Length</td><td><input type="text" id="simLength"/></td>
 			</tr>
 			<tr>
-				<td></td><td><input type="radio" id="minutes" class="radio" name="simLengthUnits" value="minutes"/> Minutes <input type="radio" id="hours" class="radio" name="simLengthUnits" value="hours"/> Hours <input type="radio" id="days" class="radio" name="simLengthUnits" value="days"/> Days</td></tr>
+				<td></td><td>
+					<label><input type="radio" id="minutes" class="radio" name="simLengthUnits" value="minutes"/> Minutes</label>
+					<label><input type="radio" id="hours" class="radio" name="simLengthUnits" value="hours"/> Hours</label>
+					<label><input type="radio" id="days" class="radio" name="simLengthUnits" value="days"/> Days</label>
+				</td></tr>
 				<tr>
 					<td>Simulation Start Date <br/> (YYYY-MM-DD)</td><td><input type="text" id="simStartDate"/></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td><button in="runButton" onclick="javascript:runAnalysis()">Run Model</button></td>
+					<td><button id="runButton" onclick="javascript:runAnalysis()">Run Model</button></td>
 				</tr>
 		</table>
 	</div>
@@ -106,7 +123,7 @@
 			<script>
 				triplexSeriesData = [{"marker":{"enabled":false},"color":"gray","data":allOutputData.allMeterVoltages.Min,"name":"Min"},
 					{"marker":{"enabled":false},"color":"blue","data":allOutputData.allMeterVoltages.Mean,"name":"Mean"},{"marker":{"enabled":false},"color":"gray","data":allOutputData.allMeterVoltages.Max,"name":"Max"}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":triplexSeriesData,"yAxis":{"title":{"text":"Volts","style":{"color":"gray"}}},"chart":{"height":250,"marginBottom":20,"zoomType":"x","renderTo":"triplexMeterVoltageChart","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":triplexSeriesData,"yAxis":{"title":{"text":"Volts","style":{"color":"gray"}}},"chart":{"height":250,"width":1000,"marginBottom":20,"zoomType":"x","renderTo":"triplexMeterVoltageChart","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Climate</p>
