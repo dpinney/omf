@@ -6,8 +6,8 @@ app = Flask(__name__)
 
 # Debug section
 print "Available models: " + str(models.__all__)
-print getattr(models, 'gridlabModel')
 
+# URLS
 @app.route("/")
 def mainScreen():
 	return "This is the home screen."
@@ -15,18 +15,12 @@ def mainScreen():
 @app.route("/newModel/<modelName>")
 def newModel(modelName):
 	''' Display the module template for creating a new model. '''
-	return getattr(models, modelName).template
+	return getattr(models, modelName).renderTemplate()
 
 @app.route("/model/<savedModelName>")
 def showModel(savedModelName):
 	''' Render a model template with saved data. '''
-	return send_from_directory("./data/Model/savedModelName/", "template.html")
+	pass
 
 if __name__ == '__main__':
 	app.run()
-
-
-# with open('./gridlabModel.html','r') as modelFile:
-# 	template = Template(modelFile.read())
-# print template
-# return template.render()
