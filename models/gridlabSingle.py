@@ -26,15 +26,24 @@ def renderTemplate(workingDirectory='.', absolutePaths=False):
 	return template.render(allInputData=allInputData, allOutputData=allOutputData,
 		pathPrefix=pathPrefix)
 
-def run(workingDirectory, inputDataDictionary=None):
-	''' Run or create/run the model. '''
+def firstRun(parentDirectory, inputDataDictionary):
+	name = inputDataDictionary['modelName']
+	workDir = os.path.join(parentDirectory, name)
+	os.createdir(workDir)
+	with open(os.path.join(workDir, 'allInputData.json'),'w') as inputFile:
+		json.dump(inputDataDictionary, inputFile)
+
+def reRun(workingDirectory):
+	''' Run the model. '''
 	if inputDataDictionary:
 		# Create a new model
-		pass
+		firstRun(workingDirectory)
 	else:
 		# Re-run existing model.
 		pass
 	# Make a directory. Put files into it. Translate files to needed format. Run Gridlab.
+
+
 
 def _tests():
 	# Test rendering a no-input template:
