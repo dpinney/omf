@@ -42,20 +42,19 @@ def _tests():
 		temp.write(renderTemplate(absolutePaths=True))
 		temp.flush()
 		os.rename(temp.name, temp.name + '.html')
-		fullArg= 'file://' + temp.name + '.html'
+		fullArg = 'file://' + temp.name + '.html'
 		webbrowser.open(fullArg)
 		# It's going to SPACE! Could you give it a SECOND to get back from SPACE?!
-		time.sleep(2)
+		time.sleep(1)
 	# Render completed template
 	with tempfile.NamedTemporaryFile() as temp:
 		testDir = os.path.dirname(_myDir) + '/data/Model/Single Gridlab Run'
 		temp.write(renderTemplate(workingDirectory=testDir, absolutePaths=True))
 		temp.flush()
 		os.rename(temp.name, temp.name + '.html')
-		fullArg= 'file://' + temp.name + '.html'
+		fullArg = 'file://' + temp.name + '.html'
 		webbrowser.open(fullArg)
-		# It's going to SPACE! Could you give it a SECOND to get back from SPACE?!
-		time.sleep(2)
+		time.sleep(1)
 
 if __name__ == '__main__':
 	_tests()

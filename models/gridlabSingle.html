@@ -52,7 +52,7 @@
 		function restoreInputs() {
 			gebi("titleText").innerHTML = allInputData.modelName
 			for (index in allInputData) {
-				try {document.querySelector("input#" + index).value = allInputData[index]}
+				try {document.querySelector("#" + index).value = allInputData[index]}
 				catch(err){}
 			}
 		}
@@ -91,10 +91,12 @@
 				<td>Simulation Length</td><td><input type="text" id="simLength"/></td>
 			</tr>
 			<tr>
-				<td></td><td>
-					<label><input type="radio" id="minutes" class="radio" name="simLengthUnits" value="minutes"/> Minutes</label>
-					<label><input type="radio" id="hours" class="radio" name="simLengthUnits" value="hours"/> Hours</label>
-					<label><input type="radio" id="days" class="radio" name="simLengthUnits" value="days"/> Days</label>
+				<td>Length Units</td><td>
+					<select id="simLengthUnits">
+						<option value="minutes">Minutes</option>
+						<option value="hours">Hours</option>
+						<option value="days">Days</option>
+					</select>
 				</td></tr>
 				<tr>
 					<td>Simulation Start Date <br/> (YYYY-MM-DD)</td><td><input type="text" id="simStartDate"/></td>

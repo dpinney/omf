@@ -7,6 +7,6 @@
     "feederName": "Test Feeder",
     "climateName": "Test Climate",
     "simLength": "2048",
-    "simLengthUnits": "House",
+    "simLengthUnits": "hours",
     "simStartDate": "2014-01-01"
 }
