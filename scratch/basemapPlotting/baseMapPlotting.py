@@ -59,7 +59,7 @@ def tmy2Scatter():
 def readNsol():
 	# Take in nsol Data, don't chart anything.
 	nsolData = []
-	with open('nsolOutputs.csv', 'r') as csvFile:
+	with open('nsolOutputsWithInsolation.csv', 'r') as csvFile:
 		read = csv.reader(csvFile, quoting=csv.QUOTE_NONNUMERIC)
 		for row in read:
 			nsolData.append(row)
@@ -71,8 +71,8 @@ def nsolScatter():
 	# TMY2 stations sized by PV output estimates.
 	m = baseMapSetup()
 	nsolTable = readNsol()
-	lons = [p['Lon'] for p in nsolTable]
-	lats = [p['Lat'] for p in nsolTable]
+	lons = [p['LonW'] for p in nsolTable]
+	lats = [p['LatN'] for p in nsolTable]
 	sizes = [p['ArrayOutput'] for p in nsolTable]
 	m.scatter(lons, lats, latlon=True, c='gold', s=sizes)
 
@@ -80,12 +80,42 @@ def nsolMesh():
 	# TMY2 stations colored w/ mesh by PV output estimates.
 	m = baseMapSetup()
 	nsolTable = readNsol()
-	lons = [p['Lon'] for p in nsolTable]
-	lats = [p['Lat'] for p in nsolTable]
+	lons = [p['LonW'] for p in nsolTable]
+	lats = [p['LatN'] for p in nsolTable]
 	sizes = [p['ArrayOutput'] for p in nsolTable]
 	m.pcolor(lons, lats, sizes, latlon=True, tri=True)
 
+def nsolLots():
+	''' Compare nSol estimates to insolation. '''
+	# Read the data first:
+	nsolTable = readNsol()
+	lons = [p['LonW'] for p in nsolTable]
+	lats = [p['LatN'] for p in nsolTable]
+	sizes = [p['ArrayOutput'] for p in nsolTable]
+	insolSizes = [p['TotalAnnualInsolation'] for p in nsolTable]
+	bmOptions = {'projection':'merc', 'lon_0':-95, 'lat_0':35, 'llcrnrlat':20, 'urcrnrlat':50,
+		'llcrnrlon':-130, 'urcrnrlon':-60, 'rsphere':6371200., 'resolution':'l', 'area_thresh':10000}
+	# First Plot
+	plt.subplot(211)
+	m1 = Basemap(**bmOptions)
+	m1.drawcoastlines()
+	m1.drawstates()
+	m1.drawcountries()
+	plt.title('Panel Output')
+	mesh1 = m1.pcolor(lons, lats, sizes, latlon=True, tri=True)
+	cbar1 = m1.colorbar(mesh1,location='right',pad='5%')
+	cbar1.set_label('kWh')
+	# Second Plot
+	plt.subplot(212)
+	m2 = Basemap(**bmOptions)
+	m2.drawcoastlines()
+	m2.drawstates()
+	m2.drawcountries()
+	plt.title('Annual Insolation')
+	mesh2 = m2.pcolor(lons, lats, insolSizes, latlon=True, tri=True)
+	cbar2 = m2.colorbar(mesh2,location='right',pad='5%')
+	cbar2.set_label('kWh/m^2')
+
 if __name__ == '__main__':
-	nsolScatter()
-	nsolMesh()
+	nsolLots()
 	plt.show()

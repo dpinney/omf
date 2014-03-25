@@ -25,10 +25,10 @@ except:
 	print 'Running on local file system.'
 
 def some_random_string():
+	# Generate a cryptographically secure random string for signing/encrypting cookies.
 	if 'COOKIE_KEY' in globals():
 		return COOKIE_KEY
 	else:
-		# Random string for signing/encrypting cookies.
 		return hashlib.md5(str(random.random())+str(time.time())).hexdigest()
 	
 login_manager = flask_login.LoginManager()

@@ -1,6 +1,6 @@
 #SOURCE
-import os, subprocess
-sh = subprocess.check_output
+import os
+from subprocess import check_output as sh
 mods = [x[0:x.find('.dll')] for x in os.listdir('C:\Program Files\GridLAB-D\lib') if x.endswith('.dll')]
 #print mods
 for mod in mods:
