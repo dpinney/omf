@@ -1,29 +1,24 @@
 from flask import Flask, send_from_directory
 from jinja2 import Template
-import models, json
+import models, json, os
 
 app = Flask(__name__)
-
-# Debug section
-print "Available models: " + str(models.__all__)
 
 # URLS
 @app.route("/")
 def mainScreen():
-	return "This is the home screen."
+	outStr = "New model of type: " + ', '.join(models.__all__) + "</br>"
+	outStr += "Instances: " + ', '.join(os.listdir("./data/Model/"))
+	return outStr
 
 @app.route("/newModel/<modelType>")
 def newModel(modelType):
 	''' Display the module template for creating a new model. '''
 	return getattr(models, modelType).renderTemplate()
 
-@app.route("/saveModel/")
-def saveModel():
-	pass
-
-@app.route("/runModel/")
+@app.route("/runModel/", methods=['POST'])
 def runModel():
-	pass
+	pData = flask.request.form.to_dict()
 
 @app.route("/model/<modelName>")
 def showModel(modelName):

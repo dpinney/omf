@@ -25,8 +25,7 @@ machineInput = {
 	"runTime": None
 }
 
-
-def renderTemplate(workingDirectory='.', absolutePaths=False):
+def renderTemplate(workingDirectory="", absolutePaths=False):
 	''' Render the model template. By default render a blank one for new input.
 	If workingDirectory is valid, render results post-model-run.
 	If absolutePaths, the HTML can be opened without a server. '''
@@ -46,7 +45,7 @@ def renderTemplate(workingDirectory='.', absolutePaths=False):
 	return template.render(allInputData=allInputData, allOutputData=allOutputData,
 		pathPrefix=pathPrefix)
 
-def setup(workingDirectory, inputDataDictionary):
+def create(workingDirectory, inputDataDictionary):
 	name = inputDataDictionary['modelName']
 	with open(os.path.join(workDir, 'allInputData.json'),'w') as inputFile:
 		json.dump(inputDataDictionary, inputFile)
@@ -60,9 +59,6 @@ def run(workingDirectory):
 		# Re-run existing model.
 		pass
 	# Make a directory. Put files into it. Translate files to needed format. Run Gridlab.
-
-def reallyReallyRun():
-	pass
 
 def _tests():
 	# Test rendering a no-input template:
