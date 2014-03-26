@@ -1,15 +1,27 @@
-from flask import Flask, send_from_directory
+from flask import Flask, send_from_directory, request
 from jinja2 import Template
 import models, json, os
 
 app = Flask(__name__)
 
+homeTemplate = '''
+<body>
+	<p>New Model of Type:</p>
+	{% for x in modTypes %}
+		<a href='/newModel/{{ x }}'>{{ x }}</a>
+	{% endfor %}
+	<p>Instances:</p>
+	{% for x in instances %}
+		<a href='/model/{{ x }}'>{{ x }}</a>
+	{% endfor %}
+</body>
+'''
+
 # URLS
 @app.route("/")
 def mainScreen():
-	outStr = "New model of type: " + ', '.join(models.__all__) + "</br>"
-	outStr += "Instances: " + ', '.join(os.listdir("./data/Model/"))
-	return outStr
+	return Template(homeTemplate).render(modTypes=models.__all__,
+		instances=os.listdir('./data/Model/'))
 
 @app.route("/newModel/<modelType>")
 def newModel(modelType):
@@ -18,7 +30,8 @@ def newModel(modelType):
 
 @app.route("/runModel/", methods=['POST'])
 def runModel():
-	pData = flask.request.form.to_dict()
+	pData = request.form.to_dict()
+	return str(pData)
 
 @app.route("/model/<modelName>")
 def showModel(modelName):

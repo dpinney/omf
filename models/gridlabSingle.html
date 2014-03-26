@@ -18,6 +18,7 @@
 		button {width:auto;}
 		td,th {text-align: right}
 		.postrun {display:none;}
+		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
 	</style>
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
@@ -68,44 +69,46 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<table class="modelOptions">
-			<tr>
-				<td>Model Type</td><td><input type="text" id="modelType" value="gridlabSingle" disabled/></td>
-			</tr>
-			<tr>
-				<td>Model Name</td><td><input type="text" id="modelName"/></td>
-			</tr>
-			<tr class="postRun">
-				<td>Created</td><td><input type="text" id="created" disabled/></td>
-			</tr>
-			<tr class="postRun">
-				<td>Run Time</td><td><input type="text" id="runTime" disabled/></td>
-			</tr>
-			<tr>
-				<td>Feeder Name</td><td><input type="text" id="feederName"/></td>
-			</tr>
-			<tr>
-				<td>Climate</td><td><input type="text" id="climateName"/></td>
-			</tr>
-			<tr>
-				<td>Simulation Length</td><td><input type="text" id="simLength"/></td>
-			</tr>
-			<tr>
-				<td>Length Units</td><td>
-					<select id="simLengthUnits">
-						<option value="minutes">Minutes</option>
-						<option value="hours">Hours</option>
-						<option value="days">Days</option>
-					</select>
-				</td></tr>
+		<form name="inputForm" action="/runModel/" method="post">
+			<table class="modelOptions">
 				<tr>
-					<td>Simulation Start Date <br/> (YYYY-MM-DD)</td><td><input type="text" id="simStartDate"/></td>
+					<td>Model Type</td><td><input type="text" id="modelType" name="modelType" value="gridlabSingle" readonly/></td>
 				</tr>
 				<tr>
-					<td></td>
-					<td><button id="runButton" onclick="javascript:runModel()">Run Model</button></td>
+					<td>Model Name</td><td><input type="text" id="modelName" name="modelName"/></td>
 				</tr>
-		</table>
+				<tr class="postRun">
+					<td>Created</td><td><input type="text" id="created" name="created" readonly/></td>
+				</tr>
+				<tr class="postRun">
+					<td>Run Time</td><td><input type="text" id="runTime" name="runTime" readonly/></td>
+				</tr>
+				<tr>
+					<td>Feeder Name</td><td><input type="text" id="feederName" name="feederName"/></td>
+				</tr>
+				<tr>
+					<td>Climate</td><td><input type="text" id="climateName" name="climateName"/></td>
+				</tr>
+				<tr>
+					<td>Simulation Length</td><td><input type="text" id="simLength" name="simLength"/></td>
+				</tr>
+				<tr>
+					<td>Length Units</td><td>
+						<select id="simLengthUnits">
+							<option value="minutes">Minutes</option>
+							<option value="hours">Hours</option>
+							<option value="days">Days</option>
+						</select>
+					</td></tr>
+					<tr>
+						<td>Simulation Start Date <br/> (YYYY-MM-DD)</td><td><input type="text" id="simStartDate"/></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><button id="runButton" type="submit">Run Model</button></td>
+					</tr>
+			</table>
+		</form>
 	</div>
 	<div id="output">
 		<p class="reportTitle postRun">Power Consumption From Transmission System</p>
