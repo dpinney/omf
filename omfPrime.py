@@ -17,6 +17,10 @@ def newModel(modelType):
 	''' Display the module template for creating a new model. '''
 	return getattr(models, modelType).renderTemplate()
 
+@app.route("/saveModel/")
+def saveModel():
+	pass
+
 @app.route("/runModel/")
 def runModel():
 	pass
