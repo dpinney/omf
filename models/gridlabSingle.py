@@ -8,6 +8,24 @@ _myDir = os.path.dirname(__file__)
 with open(_myDir + "/gridlabSingle.html","r") as tempFile:
 	template = Template(tempFile.read())
 
+userInput = {
+	"modelName": "Single Gridlab Run",
+	"simLength": "2048",
+	"simLengthUnits": "hours",
+	"simStartDate": "2014-01-01"
+}
+userInputNeedsTranslation = {
+	"feederName": "Test Feeder",
+	"climateName": "Test Climate"
+}
+machineInput = {
+	"status": None, 
+	"created": None,
+	"modelType": "gridlabSingle",
+	"runTime": None
+}
+
+
 def renderTemplate(workingDirectory='.', absolutePaths=False):
 	''' Render the model template. By default render a blank one for new input.
 	If workingDirectory is valid, render results post-model-run.
@@ -42,6 +60,9 @@ def run(workingDirectory):
 		# Re-run existing model.
 		pass
 	# Make a directory. Put files into it. Translate files to needed format. Run Gridlab.
+
+def reallyReallyRun():
+	pass
 
 def _tests():
 	# Test rendering a no-input template:
