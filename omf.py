@@ -3,26 +3,15 @@
 # third party modules
 import flask, werkzeug, json, time, datetime, copy, flask_login, boto.ses, hashlib, random, traceback, hashlib, time, random
 # our modules
-import analysis, feeder, reports, studies, storage, work, User
+import analysis, feeder, reports, studies, storage, work, user
 
 app = flask.Flask(__name__)
 
-try:
-	with open('S3KEY.txt','r') as keyFile:
-		USER_PASS = keyFile.read()
-	with open('COOKIEKEY.txt','r') as cookieKeyFile:
-		COOKIE_KEY = cookieKeyFile.read()
-	store = storage.S3store('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnomf')
-	worker = work.ClusterWorker('AKIAISPAZIA6NBEX5J3A', USER_PASS, 'crnOmfJobQueue', 'crnOmfTerminateQueue', 'crnOmfImportQueue', store)
-	URL = 'www.omf.coop'
-	print 'Running on S3 cluster.'
-except:
-	traceback.print_exc()
-	USER_PASS = 'YEAHRIGHT'
-	store = storage.Filestore('data')
-	worker = work.LocalWorker()
-	URL = 'localhost:5001'
-	print 'Running on local file system.'
+USER_PASS = 'YEAHRIGHT'
+store = storage.Filestore('data')
+worker = work.LocalWorker()
+URL = 'localhost:5001'
+print 'Running on local file system.'
 
 def some_random_string():
 	# Generate a cryptographically secure random string for signing/encrypting cookies.
@@ -35,7 +24,7 @@ login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login_page'
 app.secret_key = some_random_string()
-user_manager = User.UserManager(store)
+user_manager = user.UserManager(store)
 
 @app.before_request
 def csrf_protect():

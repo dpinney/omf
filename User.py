@@ -8,7 +8,6 @@ class UserManager:
 		self.store = store
 		
 	def create_user(self, username, password, confirm_password):
-		# For now, just creating user in file store
 		if self.store.exists("User", username):
 			return
 		if username and  password == confirm_password and username not in ["admin","public"]:
@@ -49,12 +48,16 @@ class User:
 		return self.username == "admin"
 
 	def is_authenticated(self):
+		# TODO: does this do anything??
 		return True
 
 	def is_active(self):
+		# TODO: does this do anything??
 		return True
 
 	def is_anonymous(self):
+		# TODO: does this do anything??
+		''' NEVER CALLED. Needed for flask user_auth. '''
 		return False
 
 	def get_id(self):

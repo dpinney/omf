@@ -28,8 +28,6 @@ import os, tempfile, time
 from multiprocessing import Value, Lock
 from threading import Thread, Timer
 import studies, analysis, milToGridlab
-from boto.sqs.connection import SQSConnection
-from boto.sqs.message import Message
 
 JOB_LIMIT = 1
 
@@ -120,93 +118,3 @@ class LocalWorker:
 			time.sleep(2)
 	def status(self):
 		return [[key,self.jobRecorder[key].name,self.jobRecorder[key].is_alive()] for key in self.jobRecorder]
-
-class ClusterWorker:
-	def __init__(self, userKey, passKey, workQueueName, terminateQueueName, importQueueName, store):
-		self.conn = SQSConnection(userKey, passKey)
-		self.workQueue = self.conn.get_queue(workQueueName)
-		self.terminateQueue = self.conn.get_queue(terminateQueueName)
-		self.importQueue = self.conn.get_queue(importQueueName)
-		self.daemonWorker = LocalWorker()
-		self.daemonThread = Thread(target=self.__monitorClusterQueue__,args=(passKey, store, self.daemonWorker))
-		self.daemonThread.start()
-	def run(self, analysisObject, store):
-		#TODO: make sure the queue isn't full, i.e. has fewer than 10 messages!
-		m = Message()
-		m.set_body(analysisObject.name)
-		status = self.workQueue.write(m)
-		return status
-	def terminate(self, anaName):
-		# Check for non-running queued messages:
-		jobList = self.workQueue.get_messages(num_messages=10)
-		for jobMess in jobList:
-			bod = jobMess.get_body()
-			if bod == anaName:
-				self.workQueue.delete_message(jobMess)
-				print 'Removing from job queue analysis', anaName
-				return True
-		# Else write the terminate message:
-		m = Message()
-		m.set_body(anaName)
-		status = self.terminateQueue.write(m)
-		return status
-	def milImport(self, store, feederName, stdString, seqString):
-		store.put('Conversion',feederName,{'stdString':stdString,'seqString':seqString})
-		m = Message()
-		m.set_body(feederName)
-		status = self.importQueue.write(m)
-		return status
-
-	def _popJob(self, queueObject):
-		mList = queueObject.get_messages(1)
-		if len(mList) == 1:
-			anaName = mList[0].get_body()
-			queueObject.delete_message(mList[0])
-			return anaName
-		else:
-			return False		
-
-	def _peakJob(self, queueObject):
-		mList = queueObject.get_messages(1)
-		if len(mList) == 1:
-			return mList[0]
-		else:
-			return False
-
-	def _endlessLoop(self, daemonWorker, jobQueue, importQueue, terminateQueue):
-		if daemonWorker.runningJobCount.value() < JOB_LIMIT:
-			anaName = self._popJob(jobQueue)
-			if anaName != False:
-				print 'Daemon running', anaName
-				thisAnalysis = analysis.Analysis(store.get('Analysis', anaName))
-				daemonWorker.run(thisAnalysis, store)
-		if daemonWorker.runningJobCount.value() < JOB_LIMIT:
-			feederName = self._popJob(importQueue)
-			if feederName != False:
-				print 'Daemon importing', feederName
-				convo = store.get('Conversion', feederName)
-				daemonWorker.milImport(store, feederName, convo['stdString'], convo['seqString'])
-		if daemonWorker.runningJobCount.value() > 0:
-			termMessage = self._peakJob(terminateQueue)
-			if termMessage != False:				
-				runningAnas = [stat[1] for stat in daemonWorker.status() if stat[2]==True]
-				anaName = termMessage.get_body()
-				if anaName in runningAnas:
-					print 'Daemon attempting to terminate', anaName
-					daemonWorker.terminate(anaName)
-					terminateQueue.delete_message(termMessage)
-		# Check again in 1 second:
-		Timer(1, endlessLoop).start()			
-
-	def __monitorClusterQueue__(self, passKey, store, daemonWorker):
-		print 'Entering Daemon Mode.'
-		conn = SQSConnection('AKIAISPAZIA6NBEX5J3A', passKey)
-		jobQueue = conn.get_queue('crnOmfJobQueue')
-		importQueue = conn.get_queue('crnOmfImportQueue')
-		terminateQueue = conn.get_queue('crnOmfTerminateQueue')
-
-		# Putting this in a separate function might be unnecessary
-		self._endlessLoop(daemonWorker, jobQueue, importQueue, terminateQueue)
-
-	def status(self):
-		return self.daemonWorker.status()
