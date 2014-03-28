@@ -2,55 +2,63 @@ import json, os, sys, tempfile, webbrowser, time, shutil
 from jinja2 import Template
 
 _myDir = os.path.dirname(__file__)
+_omfDir = os.path.dirname(_myDir)
 # TODO: import feeder.py, etc.
 # sys.path.append(os.path.dirname(_myDir))
 
 with open(_myDir + "/gridlabSingle.html","r") as tempFile:
 	template = Template(tempFile.read())
 
-userInput = {
-	"modelName": "Single Gridlab Run",
-	"simLength": "2048",
-	"simLengthUnits": "hours",
-	"simStartDate": "2014-01-01"
-}
-userInputNeedsTranslation = {
-	"feederName": "Test Feeder",
-	"climateName": "Test Climate"
-}
-machineInput = {
-	"status": None, 
-	"created": None,
-	"modelType": "gridlabSingle",
-	"runTime": None
-}
+# userInput = {
+# 	"modelName": "Single Gridlab Run",
+# 	"simLength": "2048",
+# 	"simLengthUnits": "hours",
+# 	"simStartDate": "2014-01-01"
+# }
+# userInputNeedsTranslation = {
+# 	"feederName": "Test Feeder",
+# 	"climateName": "Test Climate"
+# }
+# machineInput = {
+# 	"user": "admin",
+# 	"status": None, 
+# 	"created": None,
+# 	"modelType": "gridlabSingle",
+# 	"runTime": None
+# }
 
-def renderTemplate(workingDirectory="", absolutePaths=False, datastoreNames={}):
+def renderTemplate(modelDirectory="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template. By default render a blank one for new input.
-	If workingDirectory is valid, render results post-model-run.
+	If modelDirectory is valid, render results post-model-run.
 	If absolutePaths, the HTML can be opened without a server. '''
 	try:
-		with open(workingDirectory + '/allInputData.json','r') as inFile:
+		with open(modelDirectory + '/allInputData.json','r') as inFile:
 			allInputData = inFile.read()
-		with open(workingDirectory + '/allOutputData.json','r') as outFile:
+		with open(modelDirectory + '/allOutputData.json','r') as outFile:
 			allOutputData = outFile.read()
 	except IOError:
 		allInputData = None
 		allOutputData = None
 	if absolutePaths:
 		# Parent of current folder.
-		pathPrefix = os.path.dirname(_myDir)
+		pathPrefix = _omfDir
 	else:
 		pathPrefix = ""
 	return template.render(allInputData=allInputData, allOutputData=allOutputData,
 		pathPrefix=pathPrefix, datastoreNames=datastoreNames)
 
-def create(workingDirectory, inputDataDictionary):
-	name = inputDataDictionary['modelName']
-	with open(os.path.join(workDir, 'allInputData.json'),'w') as inputFile:
-		json.dump(inputDataDictionary, inputFile)
+def create(parentDirectory, inData):
+	''' Make a directory for the model to live in, and put the input data into it. '''
+	modelDirName = parentDirectory + "/" + inData["user"] + "_" + inData["modelName"] + "/"
+	os.mkdir(modelDirName)
+	with open(modelDirName + "allInputData.json","w") as inputFile:
+		json.dump(inData, inputFile, indent=4)
+	# Move datastore data.
+	shutil.copy(os.path.join(_omfDir,"data","Feeder",inData["feederName"] + ".json"),
+		modelDirName)
+	shutil.copy(os.path.join(_omfDir,"data","Weather",inData["climateName"] + ".json"), modelDirName)
 
-def run(workingDirectory):
+def run(modelDirectory):
 	''' Run the model. '''
 	pass
 	# Translate files to needed format. Run Gridlab.
@@ -67,8 +75,8 @@ def _tests():
 		time.sleep(1)
 	# Render completed template.
 	with tempfile.NamedTemporaryFile() as temp:
-		testDir = os.path.dirname(_myDir) + '/data/Model/Single Gridlab Run'
-		temp.write(renderTemplate(workingDirectory=testDir, absolutePaths=True))
+		testDir = os.path.dirname(_myDir) + '/data/Model/admin_Single Gridlab Run'
+		temp.write(renderTemplate(modelDirectory=testDir, absolutePaths=True))
 		temp.flush()
 		os.rename(temp.name, temp.name + '.html')
 		fullArg = 'file://' + temp.name + '.html'

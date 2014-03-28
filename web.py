@@ -133,22 +133,25 @@ def newModel(modelType):
 	''' Display the module template for creating a new model. '''
 	return getattr(models, modelType).renderTemplate(datastoreNames=getDataNames())
 
-@app.route("/runModel/", methods=['POST'])
+@app.route("/runModel/", methods=["POST"])
 @flask_login.login_required
 def runModel():
 	pData = request.form.to_dict()
-	return str(pData)
+	pData["user"] = flask_login.current_user.username
+	pData["status"] = "preRun"
+	getattr(models, pData["modelType"]).create('./data/Model/', pData)
+	return redirect("/model/" + pData["user"] + "_" + pData["modelName"])
 
 @app.route("/model/<modelName>")
 @flask_login.login_required
 def showModel(modelName):
 	''' Render a model template with saved data. '''
-	workDir = './data/Model/' + modelName + '/'
-	with open(workDir + 'allInputData.json') as inJson:
-		modelType = json.load(inJson)['modelType']
-	return getattr(models, modelType).renderTemplate(workingDirectory=workDir,
+	workDir = "./data/Model/" + modelName + "/"
+	with open(workDir + "allInputData.json") as inJson:
+		modelType = json.load(inJson)["modelType"]
+	return getattr(models, modelType).renderTemplate(modelDirectory=workDir,
 		datastoreNames=getDataNames())
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 	# TODO: remove debug and extra_files arguments.
-	app.run(debug=True, extra_files=['./models/gridlabSingle.html'])
+	app.run(debug=True, extra_files=["./models/gridlabSingle.html"])
