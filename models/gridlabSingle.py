@@ -32,20 +32,21 @@ def renderTemplate(modelDirectory="", absolutePaths=False, datastoreNames={}):
 	If modelDirectory is valid, render results post-model-run.
 	If absolutePaths, the HTML can be opened without a server. '''
 	try:
-		with open(modelDirectory + '/allInputData.json','r') as inFile:
-			allInputData = inFile.read()
-		with open(modelDirectory + '/allOutputData.json','r') as outFile:
-			allOutputData = outFile.read()
+		allInputData = open(modelDirectory + '/allInputData.json').read()
 	except IOError:
 		allInputData = None
+	try:
+		allOutputData = open(modelDirectory + '/allOutputData.json').read()
+	except IOError:
 		allOutputData = None
 	if absolutePaths:
 		# Parent of current folder.
 		pathPrefix = _omfDir
 	else:
 		pathPrefix = ""
-	return template.render(allInputData=allInputData, allOutputData=allOutputData,
-		pathPrefix=pathPrefix, datastoreNames=datastoreNames)
+	return template.render(allInputData=allInputData,
+		allOutputData=allOutputData, pathPrefix=pathPrefix,
+		datastoreNames=datastoreNames)
 
 def create(parentDirectory, inData):
 	''' Make a directory for the model to live in, and put the input data into it. '''
@@ -53,10 +54,11 @@ def create(parentDirectory, inData):
 	os.mkdir(modelDirName)
 	with open(modelDirName + "allInputData.json","w") as inputFile:
 		json.dump(inData, inputFile, indent=4)
-	# Move datastore data.
+	# Copy datastore data.
 	shutil.copy(os.path.join(_omfDir,"data","Feeder",inData["feederName"] + ".json"),
 		modelDirName)
-	shutil.copy(os.path.join(_omfDir,"data","Weather",inData["climateName"] + ".json"), modelDirName)
+	shutil.copy(os.path.join(_omfDir,"data","Weather",inData["climateName"] + ".json"),
+		modelDirName)
 
 def run(modelDirectory):
 	''' Run the model. '''

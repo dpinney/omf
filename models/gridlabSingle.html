@@ -72,16 +72,20 @@
 		<form name="inputForm" action="/runModel/" method="post">
 			<table class="modelOptions">
 				<tr>
-					<td>Model Type</td><td><input type="text" id="modelType" name="modelType" value="gridlabSingle" readonly/></td>
+					<td>Model Type</td>
+					<td><input type="text" id="modelType" name="modelType" value="gridlabSingle" readonly/></td>
 				</tr>
 				<tr>
-					<td>Model Name</td><td><input type="text" id="modelName" name="modelName"/></td>
+					<td>Model Name</td>
+					<td><input type="text" id="modelName" name="modelName"/></td>
 				</tr>
 				<tr class="postRun">
-					<td>Created</td><td><input type="text" id="created" name="created" readonly/></td>
+					<td>Created</td>
+					<td><input type="text" id="created" name="created" readonly/></td>
 				</tr>
 				<tr class="postRun">
-					<td>Run Time</td><td><input type="text" id="runTime" name="runTime" readonly/></td>
+					<td>Run Time</td>
+					<td><input type="text" id="runTime" name="runTime" readonly/></td>
 				</tr>
 				<tr>
 					<td>Feeder</td>
@@ -109,18 +113,20 @@
 					</td>
 				</tr>
 				<tr>
-					<td>Simulation Length</td><td><input type="text" id="simLength" name="simLength"/></td>
+					<td>Simulation Length</td>
+					<td><input type="text" id="simLength" name="simLength"/></td>
 				</tr>
 				<tr>
 					<td>Length Units</td><td>
-						<select id="simLengthUnits">
+						<select id="simLengthUnits" name="simLengthUnits">
 							<option value="minutes">Minutes</option>
 							<option value="hours">Hours</option>
 							<option value="days">Days</option>
 						</select>
 					</td></tr>
 					<tr>
-						<td>Simulation Start Date <br/> (YYYY-MM-DD)</td><td><input type="text" id="simStartDate"/></td>
+						<td>Simulation Start Date <br/> (YYYY-MM-DD)</td>
+						<td><input type="text" id="simStartDate" name="simStartDate"/></td>
 					</tr>
 					<tr>
 						<td></td>

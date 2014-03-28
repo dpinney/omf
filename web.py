@@ -146,10 +146,10 @@ def runModel():
 @flask_login.login_required
 def showModel(modelName):
 	''' Render a model template with saved data. '''
-	workDir = "./data/Model/" + modelName + "/"
-	with open(workDir + "allInputData.json") as inJson:
+	modelDir = "./data/Model/" + modelName
+	with open(modelDir + "/allInputData.json") as inJson:
 		modelType = json.load(inJson)["modelType"]
-	return getattr(models, modelType).renderTemplate(modelDirectory=workDir,
+	return getattr(models, modelType).renderTemplate(modelDirectory=modelDir,
 		datastoreNames=getDataNames())
 
 if __name__ == "__main__":
