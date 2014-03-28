@@ -1,4 +1,4 @@
-import json, os, sys, tempfile, webbrowser, time
+import json, os, sys, tempfile, webbrowser, time, shutil
 from jinja2 import Template
 
 _myDir = os.path.dirname(__file__)
@@ -25,7 +25,7 @@ machineInput = {
 	"runTime": None
 }
 
-def renderTemplate(workingDirectory="", absolutePaths=False):
+def renderTemplate(workingDirectory="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template. By default render a blank one for new input.
 	If workingDirectory is valid, render results post-model-run.
 	If absolutePaths, the HTML can be opened without a server. '''
@@ -43,7 +43,7 @@ def renderTemplate(workingDirectory="", absolutePaths=False):
 	else:
 		pathPrefix = ""
 	return template.render(allInputData=allInputData, allOutputData=allOutputData,
-		pathPrefix=pathPrefix)
+		pathPrefix=pathPrefix, datastoreNames=datastoreNames)
 
 def create(workingDirectory, inputDataDictionary):
 	name = inputDataDictionary['modelName']
@@ -52,13 +52,8 @@ def create(workingDirectory, inputDataDictionary):
 
 def run(workingDirectory):
 	''' Run the model. '''
-	if inputDataDictionary:
-		# Create a new model
-		setup(workingDirectory)
-	else:
-		# Re-run existing model.
-		pass
-	# Make a directory. Put files into it. Translate files to needed format. Run Gridlab.
+	pass
+	# Translate files to needed format. Run Gridlab.
 
 def _tests():
 	# Test rendering a no-input template:

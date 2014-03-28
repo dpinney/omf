@@ -1,3 +1,5 @@
+''' Web server for model-oriented OMF interface. '''
+
 from flask import Flask, send_from_directory, request
 from jinja2 import Template
 import models, json, os
@@ -17,6 +19,12 @@ homeTemplate = '''
 </body>
 '''
 
+def getDataNames():
+	''' Query the OMF datastore to list all the names of things we might need.'''
+	feeders = [x[0:-5] for x in os.listdir('./data/Feeder/')]
+	climates = [x[0:-5] for x in os.listdir('./data/Weather/')]
+	return 	{'feeders':feeders, 'climates':climates}
+
 # URLS
 @app.route("/")
 def mainScreen():
@@ -26,7 +34,7 @@ def mainScreen():
 @app.route("/newModel/<modelType>")
 def newModel(modelType):
 	''' Display the module template for creating a new model. '''
-	return getattr(models, modelType).renderTemplate()
+	return getattr(models, modelType).renderTemplate(datastoreNames=getDataNames())
 
 @app.route("/runModel/", methods=['POST'])
 def runModel():
@@ -39,7 +47,11 @@ def showModel(modelName):
 	workDir = './data/Model/' + modelName + '/'
 	with open(workDir + 'allInputData.json') as inJson:
 		modelType = json.load(inJson)['modelType']
-	return getattr(models, modelType).renderTemplate(workingDirectory=workDir)
+	return getattr(models, modelType).renderTemplate(workingDirectory=workDir,
+		datastoreNames=getDataNames())
+
+
 
 if __name__ == '__main__':
-	app.run(debug=True)
+	# TODO: remove debug code.
+	app.run(debug=True, extra_files=['./models/gridlabSingle.html'])

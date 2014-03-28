@@ -84,10 +84,24 @@
 					<td>Run Time</td><td><input type="text" id="runTime" name="runTime" readonly/></td>
 				</tr>
 				<tr>
-					<td>Feeder Name</td><td><input type="text" id="feederName" name="feederName"/></td>
+					<td>Feeder</td>
+					<td>
+						<select id="feederName" name="feederName"/>
+							{% for feeder in datastoreNames['feeders'] %}
+								<option value='{{ feeder }}'>{{ feeder }}</option>
+							{% endfor %}
+						</select>
+					</td>
 				</tr>
 				<tr>
-					<td>Climate</td><td><input type="text" id="climateName" name="climateName"/></td>
+					<td>Climate</td>
+					<td>
+						<select id='climateName' name='climateName'>
+							{% for climate in datastoreNames['climates'] %}
+								<option value='{{ climate }}'>{{ climate }}</option>
+							{% endfor %}
+						</select>
+					</td>
 				</tr>
 				<tr>
 					<td>Simulation Length</td><td><input type="text" id="simLength" name="simLength"/></td>
