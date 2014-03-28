@@ -87,8 +87,13 @@
 					<td>Feeder</td>
 					<td>
 						<select id="feederName" name="feederName"/>
+							<option disabled><strong>Personal Feeders</strong></option>
 							{% for feeder in datastoreNames['feeders'] %}
-								<option value='{{ feeder }}'>{{ feeder }}</option>
+								<option value="{{ datastoreNames['currentUser'].username + '_' + feeder }}">{{ feeder }}</option>
+							{% endfor %}
+							<option disabled><strong>Public Feeders</strong></option>
+							{% for pFeeder in datastoreNames['publicFeeders'] %}
+								<option value="{{ 'public_' + pFeeder }}">{{ pFeeder }}</option>
 							{% endfor %}
 						</select>
 					</td>

@@ -24,16 +24,21 @@ homeTemplate = '''
 
 def getDataNames():
 	''' Query the OMF datastore to list all the names of things we might need.'''
-	feeders = [x[0:-5] for x in os.listdir('./data/Feeder/')]
-	climates = [x[0:-5] for x in os.listdir('./data/Weather/')]
-	return 	{'feeders':feeders, 'climates':climates}
-
+	currUser = flask_login.current_user
+	feeders = [x[len(currUser.username)+1:-5] for x in os.listdir('./data/Feeder/')
+		if x.startswith(currUser.username + "_")]
+	publicFeeders = [x[7:-5] for x in os.listdir('./data/Feeder/')
+		if x.startswith('public_')]
+	climates = [x[:-5] for x in os.listdir('./data/Weather/')]
+	return 	{'feeders':feeders, 'publicFeeders':publicFeeders, 'climates':climates, 
+		'currentUser':currUser.__dict__}
 
 @app.before_request
 def csrf_protect():
 	pass
-	# if request.user_agent.browser == 'msie' or request.user_agent.browser == 'firefox':
-	# 	return 'The OMF currently must be accessed by Chrome or Safari.'
+	if request.user_agent.browser == 'msie' or request.user_agent.browser == 'firefox':
+		return 'The OMF currently must be accessed by Chrome or Safari.'
+	# TODO: fix csrf stuff.
 	# if request.method == "POST":
 	# 	token = session.get('_csrf_token', None)
 	# 	if not token or token != request.form.get('_csrf_token'):
