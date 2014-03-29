@@ -2,7 +2,7 @@
 
 from flask import Flask, send_from_directory, request, redirect, render_template, session, abort
 from jinja2 import Template
-import models, json, os, flask_login, hashlib, random, time
+import models, json, os, flask_login, hashlib, random, time, datetime
 from passlib.hash import pbkdf2_sha512
 
 app = Flask("omf")
@@ -137,10 +137,16 @@ def newModel(modelType):
 @flask_login.login_required
 def runModel():
 	pData = request.form.to_dict()
-	pData["user"] = flask_login.current_user.username
-	pData["status"] = "preRun"
-	getattr(models, pData["modelType"]).create('./data/Model/', pData)
-	return redirect("/model/" + pData["user"] + "_" + pData["modelName"])
+	if "status" not in pData:
+		# New model.
+		pData["user"] = flask_login.current_user.username
+		pData["status"] = "preRun"
+		pData["created"] = str(datetime.datetime.now())
+		getattr(models, pData["modelType"]).create('./data/Model/', pData)
+		return redirect("/model/" + pData["user"] + "_" + pData["modelName"])
+	else:
+		# Rerunning existing model.
+		pass
 
 @app.route("/model/<modelName>")
 @flask_login.login_required
