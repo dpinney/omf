@@ -5,6 +5,8 @@ _myDir = os.path.dirname(__file__)
 _omfDir = os.path.dirname(_myDir)
 # TODO: import feeder.py, etc.
 # sys.path.append(os.path.dirname(_myDir))
+# Hey, this is a model we need to wait for:
+fastModel = False
 
 with open(_myDir + "/gridlabSingle.html","r") as tempFile:
 	template = Template(tempFile.read())
@@ -34,11 +36,11 @@ def renderTemplate(modelDirectory="", absolutePaths=False, datastoreNames={}):
 	try:
 		allInputData = open(modelDirectory + '/allInputData.json').read()
 	except IOError:
-		allInputData = None
+		allInputData = {}
 	try:
 		allOutputData = open(modelDirectory + '/allOutputData.json').read()
 	except IOError:
-		allOutputData = None
+		allOutputData = {}
 	if absolutePaths:
 		# Parent of current folder.
 		pathPrefix = _omfDir
@@ -47,6 +49,17 @@ def renderTemplate(modelDirectory="", absolutePaths=False, datastoreNames={}):
 	return template.render(allInputData=allInputData,
 		allOutputData=allOutputData, pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames)
+
+def renderAndShow(modelDirectory="", datastoreNames={}):
+	''' Render and open a template in a local browser. '''
+	with tempfile.NamedTemporaryFile() as temp:
+		temp.write(renderTemplate(modelDirectory=modelDirectory, absolutePaths=True))
+		temp.flush()
+		os.rename(temp.name, temp.name + '.html')
+		fullArg = 'file://' + temp.name + '.html'
+		webbrowser.open(fullArg)
+		# It's going to SPACE! Could you give it a SECOND to get back from SPACE?!
+		time.sleep(1)
 
 def create(parentDirectory, inData):
 	''' Make a directory for the model to live in, and put the input data into it. '''
@@ -62,28 +75,22 @@ def create(parentDirectory, inData):
 
 def run(modelDirectory):
 	''' Run the model. '''
-	pass
+	with open(modelDirectory + "allInputData.json","r") as inputFile:
+		allInputData = json.load(inputFile)
+	# Do stuff in the background here...
+	with open(modelDirectory + "allInputData.json","w") as inputFile:
+		allInputData = json.load(inputFile)
 	# Translate files to needed format. Run Gridlab.
 
 def _tests():
 	# Test rendering a no-input template:
-	with tempfile.NamedTemporaryFile() as temp:
-		temp.write(renderTemplate(absolutePaths=True))
-		temp.flush()
-		os.rename(temp.name, temp.name + '.html')
-		fullArg = 'file://' + temp.name + '.html'
-		webbrowser.open(fullArg)
-		# It's going to SPACE! Could you give it a SECOND to get back from SPACE?!
-		time.sleep(1)
+	renderAndShow()
+	# Render running template.
+	testDir = os.path.dirname(_myDir) + '/data/Model/admin_Running Example'
+	renderAndShow(modelDirectory=testDir)
 	# Render completed template.
-	with tempfile.NamedTemporaryFile() as temp:
-		testDir = os.path.dirname(_myDir) + '/data/Model/admin_Single Gridlab Run'
-		temp.write(renderTemplate(modelDirectory=testDir, absolutePaths=True))
-		temp.flush()
-		os.rename(temp.name, temp.name + '.html')
-		fullArg = 'file://' + temp.name + '.html'
-		webbrowser.open(fullArg)
-		time.sleep(1)
+	testDir = os.path.dirname(_myDir) + '/data/Model/admin_Single Gridlab Run'
+	renderAndShow(modelDirectory=testDir)
 
 if __name__ == '__main__':
 	_tests()

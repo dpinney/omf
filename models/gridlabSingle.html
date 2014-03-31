@@ -16,8 +16,10 @@
 		#input {margin-top: 0px;}
 		input {border-bottom:thin dotted black;text-align:right;padding-right:5px}
 		button {width:auto;}
+		#cancelButton {background:crimson;}
+		#cancelButton:hover {background:red;}		
 		td,th {text-align: right}
-		.postrun, #running {display:none;}
+		.preRun, .running, .postRun {display:none;}
 		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
 	</style>
 	<!-- Library Imports -->
@@ -25,30 +27,32 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
 	<!-- Data  Imports -->
-	{% if allInputData %}<script>allInputData={{allInputData | safe}}</script>{% endif %}
-	{% if allOutputData %}<script>allOutputData={{allOutputData | safe}}</script>{% endif %}
+	<script>allInputData={{allInputData | safe}}</script>
+	<script>allOutputData={{allOutputData | safe}}</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		function init() {
 			// Set up various things on load.
-			if (typeof allInputData.status == undefined) {
+			if (typeof allInputData.status == "undefined") {
 				// Case 0: model just started.
 				console.log("NORUN")
+				$(".preRun").show()
 			} else if (allInputData.status == "preRun") {
 				// Case 1: model saved but not run. We don't use this much.
 				console.log("PRERUN")
+				$(".preRun").show()
 				restoreInputs()
 			} else if (allInputData.status == "running") {
 				// Case 2: model running.
 				console.log("RUNNING")
-				$("#running").show()
+				$(".running").show()
+				$('input').prop('readonly', true);
 				restoreInputs()
 			} else if (allInputData.status == "postRun") {
 				// Case 3: model run complete.
 				console.log("POSTRUN")
 				restoreInputs()
 				$(".postRun").show()
-				$("#runButton")[0].innerHTML = "Re-Run Model"
 			}
 		}
 		function restoreInputs() {
@@ -88,7 +92,7 @@
 					<td>Model Name</td>
 					<td><input type="text" id="modelName" name="modelName"/></td>
 				</tr>
-				<tr class="postRun">
+				<tr class="running postRun">
 					<td>Created</td>
 					<td><input type="text" id="created" name="created" readonly/></td>
 				</tr>
@@ -139,12 +143,16 @@
 					</tr>
 					<tr>
 						<td></td>
-						<td><button id="runButton" type="submit">Run Model</button></td>
+						<td>
+							<button id="runButton" type="submit" class="preRun">Run Model</button>
+							<button id="cancelButton" class="running" type="button" onclick="alert('RUN CANCELED')">Cancel</button>
+							<button id="rerunButton" type="submit" class="postRun">Re-Run Model</button>
+						</td>
 					</tr>
 			</table>
 		</form>
 	</div>
-	<div id ="running" class="content">
+	<div id ="runIndicator" class="content running">
 		Model running on server. Results will appear here when complete.
 	</div>
 	<div id="output">
