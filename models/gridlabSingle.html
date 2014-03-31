@@ -17,7 +17,7 @@
 		input {border-bottom:thin dotted black;text-align:right;padding-right:5px}
 		button {width:auto;}
 		td,th {text-align: right}
-		.postrun {display:none;}
+		.postrun, #running {display:none;}
 		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
 	</style>
 	<!-- Library Imports -->
@@ -35,12 +35,13 @@
 				// Case 0: model just started.
 				console.log("NORUN")
 			} else if (allInputData.status == "preRun") {
-				// Case 1: model saved but not run.
+				// Case 1: model saved but not run. We don't use this much.
 				console.log("PRERUN")
 				restoreInputs()
 			} else if (allInputData.status == "running") {
 				// Case 2: model running.
 				console.log("RUNNING")
+				$("#running").show()
 				restoreInputs()
 			} else if (allInputData.status == "postRun") {
 				// Case 3: model run complete.
@@ -60,6 +61,14 @@
 		function runModel() {
 			// Actually run here.
 		}
+		function validateForm() {
+			if (gebi("modelName").value == "X") {
+				alert("Form incorrectly filled out.")
+				return false
+			} else {
+				return true
+			}
+		}
 	</script>
 </head>
 <body onload="init()">
@@ -69,7 +78,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post">
+		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
 			<table class="modelOptions">
 				<tr>
 					<td>Model Type</td>
@@ -134,6 +143,9 @@
 					</tr>
 			</table>
 		</form>
+	</div>
+	<div id ="running" class="content">
+		Model running on server. Results will appear here when complete.
 	</div>
 	<div id="output">
 		<p class="reportTitle postRun">Power Consumption From Transmission System</p>
