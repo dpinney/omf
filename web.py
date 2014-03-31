@@ -137,16 +137,22 @@ def newModel(modelType):
 @flask_login.login_required
 def runModel():
 	pData = request.form.to_dict()
-	if "status" not in pData:
+	if pData.get("created","NOKEY") == "":
 		# New model.
 		pData["user"] = flask_login.current_user.username
-		pData["status"] = "preRun"
 		pData["created"] = str(datetime.datetime.now())
-		getattr(models, pData["modelType"]).create('./data/Model/', pData)
-		return redirect("/model/" + pData["user"] + "_" + pData["modelName"])
+		modelModule = getattr(models, pData["modelType"])
+		modelModule.create('./data/Model/', pData)
+		if modelModule.fastModel:
+			pass
+			#TODO: add model run in foreground here.
+		else:
+			pass
+			#TODO: add BACKGROUND model run here.
 	else:
-		# Rerunning existing model.
+		# TODO: Rerun existing model.
 		pass
+	return redirect("/model/" + pData["user"] + "_" + pData["modelName"])
 
 @app.route("/model/<modelName>")
 @flask_login.login_required

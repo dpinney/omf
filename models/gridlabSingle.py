@@ -5,7 +5,8 @@ _myDir = os.path.dirname(__file__)
 _omfDir = os.path.dirname(_myDir)
 # TODO: import feeder.py, etc.
 # sys.path.append(os.path.dirname(_myDir))
-# Hey, this is a model we need to wait for:
+
+# Speed of model execution so our web server knows whether to wait for results on run:
 fastModel = False
 
 with open(_myDir + "/gridlabSingle.html","r") as tempFile:
@@ -36,11 +37,11 @@ def renderTemplate(modelDirectory="", absolutePaths=False, datastoreNames={}):
 	try:
 		allInputData = open(modelDirectory + '/allInputData.json').read()
 	except IOError:
-		allInputData = {}
+		allInputData = None
 	try:
 		allOutputData = open(modelDirectory + '/allOutputData.json').read()
 	except IOError:
-		allOutputData = {}
+		allOutputData = None
 	if absolutePaths:
 		# Parent of current folder.
 		pathPrefix = _omfDir
@@ -77,13 +78,13 @@ def run(modelDirectory):
 	''' Run the model. '''
 	with open(modelDirectory + "allInputData.json","r") as inputFile:
 		allInputData = json.load(inputFile)
-	# Do stuff in the background here...
+	# TODO: Do stuff in the background here...
 	with open(modelDirectory + "allInputData.json","w") as inputFile:
 		allInputData = json.load(inputFile)
 	# Translate files to needed format. Run Gridlab.
 
 def _tests():
-	# Test rendering a no-input template:
+	# Render a no-input template.
 	renderAndShow()
 	# Render running template.
 	testDir = os.path.dirname(_myDir) + '/data/Model/admin_Running Example'
