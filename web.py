@@ -116,15 +116,20 @@ def login():
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
 
-# @app.route("/")
-# @flask_login.login_required
-# def root():
-# 	analyses = []
-# 	anadir = "./data/Analysis/"
-# 	for fname in os.listdir(anadir):
-# 		name = fname[:-len(".json")]
-# 		if name:
-# 			anasjon = json.load(open(anadir+fname))
+@app.route("/root")
+@flask_login.login_required
+def root():
+	analyses = []
+	anadir = "./data/Analysis/"
+	for fname in os.listdir(anadir):
+		name = fname[:-len(".json")]
+		if name:
+			anaJson = json.load(open(anadir+fname))
+			if anaJson['owner'] in ["public", flask_login.current_user.username]:
+				analyses.append(anaJson)
+
+	# analyses = [json.load(open(anadir+fname)) for fname in os.listdir(anadir) if fname[:-len(".json")]]
+
 
 @app.route("/")
 @flask_login.login_required
