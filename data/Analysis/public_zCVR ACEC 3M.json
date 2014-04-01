@@ -29,5 +29,7 @@
         "CVR", 
         "NoCVR"
     ], 
+    "owner": "public", 
+    "name2": "zCVR ACEC 3M", 
     "runTime": "0:16:30"
 }

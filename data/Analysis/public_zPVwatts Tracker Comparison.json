@@ -39,5 +39,7 @@
         "2Axis", 
         "Fixed"
     ], 
+    "owner": "public", 
+    "name2": "zPVwatts Tracker Comparison", 
     "runTime": "0:00:00"
 }

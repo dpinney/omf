@@ -35,5 +35,7 @@
         "Batt", 
         "NoBatt"
     ], 
+    "owner": "public", 
+    "name2": "z13 Node Battery Peak Shaving", 
     "runTime": "0:08:10"
 }

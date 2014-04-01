@@ -41,5 +41,7 @@
         "GridlabSolar", 
         "PvwattsSolar"
     ], 
+    "owner": "public", 
+    "name2": "zGridlab Vs PVwatts", 
     "runTime": "0:00:06"
 }

@@ -37,5 +37,7 @@
         "Batt4", 
         "NoBatt"
     ], 
+    "owner": "public", 
+    "name2": "zBattery Comp", 
     "runTime": "0:05:03"
 }

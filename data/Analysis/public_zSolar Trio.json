@@ -29,5 +29,7 @@
         "IndySolar", 
         "NoSolar"
     ], 
+    "owner": "public", 
+    "name2": "zSolar Trio", 
     "runTime": "0:00:14"
 }

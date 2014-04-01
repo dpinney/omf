@@ -25,5 +25,7 @@
         "NoWind", 
         "Wind"
     ], 
+    "owner": "public", 
+    "name2": "zWind Olin Barre", 
     "runTime": "0:10:49"
 }

@@ -31,5 +31,7 @@
         "90Sol", 
         "NoSol"
     ], 
+    "owner": "public", 
+    "name2": "zSolar Distributed VariablePen", 
     "runTime": "0:16:42"
 }
