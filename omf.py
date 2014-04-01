@@ -437,7 +437,7 @@ def saveAnalysis():
 					'reports': pData['reports'],
 					'studyNames': [stud['studyName'] for stud in pData['studies']],
 					'owner':owner,
-					'name':pData['name'] }
+					'name2':pData['name'] }
 	flask_login.current_user.put('Analysis', adminPrefix+pData['analysisName'], analysisData)
 	for study in pData['studies']:
 		studyData = {	'simLength': pData.get('simLength',0),

@@ -127,8 +127,7 @@ def root():
 			anaJson = json.load(open(anadir+fname))
 			if anaJson['owner'] in ["public", flask_login.current_user.username]:
 				analyses.append(anaJson)
-
-	# analyses = [json.load(open(anadir+fname)) for fname in os.listdir(anadir) if fname[:-len(".json")]]
+	return render_template('home.html', analyses=analyses, current_user=flask_login.current_user.username)
 
 
 @app.route("/")
