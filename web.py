@@ -82,6 +82,16 @@ def generate_csrf_token():
 
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
+# @app.route("/")
+# @flask_login.login_required
+# def root():
+# 	analyses = []
+# 	anadir = "./data/Analysis/"
+# 	for fname in os.listdir(anadir):
+# 		name = fname[:-len(".json")]
+# 		if name:
+# 			anasjon = json.load(open(anadir+fname))
+
 @app.route("/login_page")
 def login_page():
 	if flask_login.current_user.is_authenticated():
