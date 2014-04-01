@@ -7,6 +7,8 @@ logs/*.log
 data/Analysis/*
 data/Study/*
 # But include a few example analyses:
-!analyses/public_z*
+!data/Analysis/public_z*
+!data/Study/public_z*
+!data/Feeder/public_z*
 S3KEY.*
 calibration/workingDir

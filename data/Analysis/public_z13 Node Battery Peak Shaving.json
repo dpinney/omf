@@ -1,0 +1,39 @@
+{
+    "status": "postRun", 
+    "climate": "CA-BRAWLEY.tmy2", 
+    "name": "public_z13 Node Battery Peak Shaving", 
+    "simStartDate": "2012-06-01", 
+    "simLengthUnits": "hours", 
+    "created": "2013-02-25 15:24:28.323000", 
+    "sourceFeeder": "13 Node Ref Feeder Laid Out ZERO CVR, Battery 13 Node Centralized", 
+    "simLength": 240, 
+    "reports": [
+        {
+            "reportType": "climate"
+        }, 
+        {
+            "reportType": "feederPowerConsumption"
+        }, 
+        {
+            "opAndMaintCost": "1000", 
+            "distrCapacityRate": "18", 
+            "distrEnergyRate": "0.07", 
+            "equipAndInstallCost": "300000", 
+            "reportType": "monetization"
+        }, 
+        {
+            "reportType": "runtimeStats"
+        }, 
+        {
+            "reportType": "studyDetails"
+        }, 
+        {
+            "reportType": "voltageBand"
+        }
+    ], 
+    "studyNames": [
+        "Batt", 
+        "NoBatt"
+    ], 
+    "runTime": "0:08:10"
+}

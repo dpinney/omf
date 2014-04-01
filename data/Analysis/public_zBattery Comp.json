@@ -1,0 +1,41 @@
+{
+    "status": "postRun", 
+    "climate": "WA-EPHRATA.tmy2", 
+    "simStartDate": "2012-06-06", 
+    "simLengthUnits": "hours", 
+    "created": "2013-02-26 12:05:41.824000", 
+    "sourceFeeder": "Olin Barre Housed, Olin Barre Housed Battery", 
+    "simLength": 148, 
+    "reports": [
+        {
+            "reportType": "climate"
+        }, 
+        {
+            "reportType": "feederPowerConsumption"
+        }, 
+        {
+            "opAndMaintCost": "1000", 
+            "distrCapacityRate": "18", 
+            "distrEnergyRate": "0.07", 
+            "equipAndInstallCost": "300000", 
+            "reportType": "monetization"
+        }, 
+        {
+            "reportType": "runtimeStats"
+        }, 
+        {
+            "reportType": "studyDetails"
+        }, 
+        {
+            "reportType": "voltageBand"
+        }
+    ], 
+    "studyNames": [
+        "Batt1", 
+        "Batt2", 
+        "Batt3", 
+        "Batt4", 
+        "NoBatt"
+    ], 
+    "runTime": "0:05:03"
+}
