@@ -45,29 +45,32 @@
 				$("input").prop("readonly", true)
 				$("select").prop("disabled", true)
 			} else {
-				// Case 3: model run complete.
+				// Case 3: one model run complete.
 				console.log("POSTRUN")
 				restoreInputs()
 				$(".postRun").show()
 			}
 		}
 		function restoreInputs() {
+			// Restore all the input values that were used and stored in allInputData.json.
 			gebi("titleText").innerHTML = allInputData.modelName
 			for (index in allInputData) {
 				try {document.querySelector("#" + index).value = allInputData[index]}
 				catch(err){}
 			}
 		}
-		function runModel() {
-			// Actually run here.
-		}
 		function validateForm() {
-			if (gebi("modelName").value == "X") {
-				alert("Form incorrectly filled out.")
-				return false
-			} else {
-				return true
+			// Make sure each field matches its validation regex. TODO: highlight wrong fields.
+			allFields = $("input")
+			for (i=0; i < allFields.length; i++) {
+				currVal = allFields[i].value + ""
+				regex = allFields[i].getAttribute("data-validRegex")
+				if (regex != null && currVal.match(regex) != currVal) {
+					alert("Some form values are null or don't match the required format.")
+					return false
+				}
 			}
+			return true
 		}
 	</script>
 </head>
@@ -86,7 +89,7 @@
 				</tr>
 				<tr>
 					<td>Model Name</td>
-					<td><input type="text" id="modelName" name="modelName"/></td>
+					<td><input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
 				</tr>
 				<tr class="running postRun">
 					<td>Created</td>
@@ -123,7 +126,7 @@
 				</tr>
 				<tr>
 					<td>Simulation Length</td>
-					<td><input type="text" id="simLength" name="simLength"/></td>
+					<td><input type="text" id="simLength" name="simLength" data-validRegex="\d+"/></td>
 				</tr>
 				<tr>
 					<td>Length Units</td><td>
@@ -135,13 +138,13 @@
 					</td></tr>
 					<tr>
 						<td>Simulation Start Date <br/> (YYYY-MM-DD)</td>
-						<td><input type="text" id="simStartDate" name="simStartDate"/></td>
+						<td><input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/></td>
 					</tr>
 					<tr>
 						<td></td>
 						<td>
 							<button id="runButton" type="submit" class="preRun">Run Model</button>
-							<button id="cancelButton" class="running" type="button" onclick="alert('RUN CANCELED')">Cancel</button>
+							<button id="cancelButton" class="running" type="button" onclick="alert('RUN CANCELED')">Cancel Run</button>
 							<button id="rerunButton" type="submit" class="postRun">Re-Run Model</button>
 						</td>
 					</tr>

@@ -51,14 +51,9 @@ def csrf_protect():
 class User:
 	def __init__(self, jsonBlob):
 		self.username = jsonBlob["username"]
-
-	def is_admin(self):
-		return self.username == "admin"
-
-	def get_id(self):
-		return self.username	
-
-	# Required flask_login functions
+	# Required flask_login functions.
+	def is_admin(self):	return self.username == "admin"
+	def get_id(self): return self.username	
 	def is_authenticated(self): return True
 	def is_active(self): return True
 	def is_anonymous(self):	return False

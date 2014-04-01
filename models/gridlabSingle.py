@@ -75,7 +75,7 @@ def create(parentDirectory, inData):
 		modelDirName)
 
 def run(modelDirectory):
-	''' Run the model. '''
+	''' Run the model in its directory. '''
 	with open(modelDirectory + "allInputData.json","r") as inputFile:
 		allInputData = json.load(inputFile)
 	# TODO: Do stuff in the background here...
@@ -87,10 +87,10 @@ def _tests():
 	# Render a no-input template.
 	renderAndShow()
 	# Render running template.
-	testDir = os.path.dirname(_myDir) + '/data/Model/admin_Running Example'
+	testDir = os.path.dirname(_myDir) + "/data/Model/admin_Running Example"
 	renderAndShow(modelDirectory=testDir)
 	# Render completed template.
-	testDir = os.path.dirname(_myDir) + '/data/Model/admin_Single Gridlab Run'
+	testDir = os.path.dirname(_myDir) + "/data/Model/admin_Single Gridlab Run"
 	renderAndShow(modelDirectory=testDir)
 
 if __name__ == '__main__':
