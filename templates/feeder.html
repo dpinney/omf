@@ -1,27 +1,23 @@
-{% for feed in value["feeders"] %}
-{% if (is_admin and (key == "Private" and feed[:feed.find("_")] != "public")) or key == "Public" or not is_admin %}
-<tr class="{{ feed.replace('_', '__').replace(' ', '_') }}">
+<tr class="{{ feed['name'].replace('_', '__').replace(' ', '_') }}">
+  <td>{{ feed['owner'] }}</td>
   <td>
-    <a name="{{ feed }}" href='/feeder/{{ feed }}{{ value["url"] }}'>
-      {% if is_admin and key == "Private" %}
+    <a name="{{ feed['name'] }}" href='/feeder/{{ feed['name'] }}{{ feed["url"] }}'>
 
-      <span class="owner">{{ feed[:feed.find("_")] }}: </span>
-      <span class="feederName">{{ feed[feed.find("_")+1:] }}</span>
+      {#<span class="owner">{{ feed[:feed.find("_")] }}: </span>#}
+
+      <span class="feederName">{{ feed['name'] }}</span>
       
-      {% else %}
-      {{ feed }}
-      {% endif %}
     </a>
   </td>
   <td>Ready</td>
   <td>
-    {% if "false" in value["url"] or is_admin %}
+    {% if "false" in feed["url"] or is_admin %}
     <div class="buttonGroup">
       <button class='pill' onclick='dropPill(this, "Action")'>Action ▾</button>
       <ul class='menu right'>
-	<li><a href="javascript:delete_feeder('{% if key == "Public" %}public_{% endif %}{{ feed }}')">Delete</a></li>
-	{% if "false" in value["url"] %}
-	<li><a class="makePublic" objectType="Feeder" objectName="{{ feed }}" href="/makePublic/Feeder/{{ feed }}">Publish</a></li>
+	<li><a href="javascript:delete_feeder('{% if key == "Public" %}public_{% endif %}{{ feed['name'] }}')">Delete</a></li>
+	{% if "false" in feed["url"] %}
+	<li><a class="makePublic" objectType="Feeder" objectName="{{ feed['name'] }}" href="/makePublic/Feeder/{{ feed['name'] }}">Publish</a></li>
 	{% endif %}
       </ul>
     </div>
@@ -29,9 +25,8 @@
   </td>
   {% endif %}
 </tr>
-{% endif %}
-{% endfor %}
 
+{#
 {% for feed in value["conversions"] %}
 <tr>
   {% if is_admin %}
@@ -42,4 +37,4 @@
   <td class='running'>Processing</td>
   <td></td>
 </tr>
-{% endfor %}
+#}

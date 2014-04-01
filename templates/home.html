@@ -212,24 +212,21 @@
   <div id='analyses'>
     <div class='content'>
       <table id='anaTable'>
-	{% for key, value in d.items() %}
+
+
 	<thead>
 	  <tr>
-	    <th style="text-align:center" colspan="6">{{ key }} Analyses</th>
+	    <th style="text-align:center" colspan="6">Analyses</th>
 	  </tr>
-	  <tr><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr>
+	  <tr><th>Owner</th><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr>
 	</thead>
-	<tbody class="{{ key }} {{ key }}Analyses">
-	  {% include 'metadata_loop.html' %}
+	<tbody class="Analyses">
+		{% for md in analyses %}
+		{% include 'metadata.html' %}
+		{% endfor %}
+{#	  {% include 'metadata_loop.html' %} #}
 	</tbody>
-	<tr>
-	  <td style="text-align:center;" colspan="6" id="{{ key }}analysispages">
-	    {% for i in range(1, value["amount_of_analysis_pages"] + 1) %}
-	    <a type="{{key}}" class="analysis_page" href="#">{{ i }}</a>{% if i != value["amount_of_analysis_pages"] %} | {% endif %}
-	    {% endfor %}
-	  </td>
-	</tbody>
-	{% endfor %}
+
 
       </table>
     </div>
@@ -237,37 +234,37 @@
 <div class='content'><a href='/newAnalysis/'>New Analysis</a></div>
 </div>
 
+
+
+
 <div id='feeders'>
+
+
   <div class='content'>
     <table id='anaTable'>
-      {% for key, value in d.items() %}
+      
       <thead>
 	<tr>
-	  <th style="text-align:center" colspan="3">{{ key }} Feeders</th>
+	  <th style="text-align:center" colspan="3">Feeders</th>
 	</tr>
 	<tr>
-	  <th>Feeder Name</th>
-	  <th>Status</th>
-	  <th></th>
+		<th>Owner</th>
+		<th>Feeder Name</th>
+		<th>Status</th>
+		<th></th>
 	</tr>
 	</thead>
-      <tbody class="{{ key }}Feeders">
-
-	{% include "feeder.html" %}
+      <tbody class="Feeders">
+      	{% for feed in feeders %}
+      	{% include "feeder.html" %}
+      	{% endfor %}
       </tbody>
-      <tr>
-	<td style="text-align:center;" colspan="3" id="{{ key }}feederpages">
-	  <!-- <a class="feeder_page" href="#">1</a> | -->
-	  {% for i in range(1, value["amount_of_feeder_pages"]+ 1) %}
-	  <a type="{{ key }}" class="feeder_page" href="#">{{ i }}</a>{% if i != value["amount_of_feeder_pages"] %} | {% endif %}
-	  {% endfor %}
-	  
-	  
-	</td>
-      </tr>
-      {% endfor %}
+
+      
     </table>
   </div>
+
+
   <div class='content'>
     <form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
       <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />

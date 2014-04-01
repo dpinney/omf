@@ -116,18 +116,47 @@ def login():
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
 
-@app.route("/root")
-@flask_login.login_required
-def root():
+def getanalyses():
 	analyses = []
 	anadir = "./data/Analysis/"
 	for fname in os.listdir(anadir):
 		name = fname[:-len(".json")]
 		if name:
 			anaJson = json.load(open(anadir+fname))
-			if anaJson['owner'] in ["public", flask_login.current_user.username]:
-				analyses.append(anaJson)
-	return render_template('home.html', analyses=analyses, current_user=flask_login.current_user.username)
+			if anaJson['owner'] == 'public':
+				anaJson['url'] = '?public=true'
+			elif anaJson['owner'] == flask_login.current_user.username:
+				anaJson['url'] = '?public=false'
+			elif flask_login.current_user.username != "admin":
+				continue
+			analyses.append(anaJson)
+	return analyses
+
+def getfeeders():
+	feeders = []
+	feederdir = './data/Feeder/'
+	for fname in os.listdir(feederdir):
+		name = fname[:-len(".json")]
+		if name:
+			owner, name = name.split("_")
+			feed = {"owner":owner, "name":name, "status":"Ready"}
+			if owner == 'public':
+				feed['url'] = '?public=true'
+			elif owner == flask_login.current_user.username:
+				feed['url'] = '?public=false'
+			elif flask_login.current_user.username != "admin":
+				continue
+			feeders.append(feed)
+	return feeders
+
+@app.route("/root")
+@flask_login.login_required
+def root():
+	return render_template('home.html', 
+		analyses=getanalyses(), 
+		feeders=getfeeders(),
+		current_user=flask_login.current_user.username, 
+		is_admin = flask_login.current_user.username == "admin")
 
 
 @app.route("/")
