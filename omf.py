@@ -423,6 +423,7 @@ def saveAnalysis():
 	pData = json.loads(flask.request.form.to_dict()['json'])
 	user = (user_manager.get("public") if pData["is_public"] == "True" else flask_login.current_user)
 	adminPrefix = ("admin_" if flask_login.current_user.username == "admin" else "")
+	owner = flask_login.current_user.username
 	def uniqJoin(stringList):
 		return ', '.join(set(stringList))
 	analysisData = {'status':'preRun',
@@ -434,7 +435,9 @@ def saveAnalysis():
 					'simLengthUnits': pData['simLengthUnits'],
 					'runTime': '',
 					'reports': pData['reports'],
-					'studyNames': [stud['studyName'] for stud in pData['studies']] }
+					'studyNames': [stud['studyName'] for stud in pData['studies']],
+					'owner':owner,
+					'name':pData['name'] }
 	flask_login.current_user.put('Analysis', adminPrefix+pData['analysisName'], analysisData)
 	for study in pData['studies']:
 		studyData = {	'simLength': pData.get('simLength',0),
