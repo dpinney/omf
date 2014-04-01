@@ -60,17 +60,20 @@
 			}
 		}
 		function validateForm() {
-			// Make sure each field matches its validation regex. TODO: highlight wrong fields.
+			// Make sure each field matches its validation regex.
 			allFields = $("input")
 			for (i=0; i < allFields.length; i++) {
+				allFields[i].style["border-color"] = "white"
 				currVal = allFields[i].value + ""
 				regex = allFields[i].getAttribute("data-validRegex")
+				returnVal = true
 				if (regex != null && currVal.match(regex) != currVal) {
-					alert("Some form values are null or don't match the required format.")
-					return false
+					allFields[i].style["border-color"] = "crimson"
+					returnVal = false
 				}
 			}
-			return true
+			if (!returnVal) {alert("Form values bordered in red don't match the required format.")}
+			return returnVal
 		}
 	</script>
 </head>
