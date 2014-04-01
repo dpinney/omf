@@ -434,6 +434,8 @@
             "impedance_pf": "1.000000"
         }
     }, 
+    "name2": "Simple Market System Indy Solar", 
+    "owner": "public", 
     "nodes": [], 
     "hiddenLinks": [], 
     "layoutVars": {

@@ -414,6 +414,8 @@
             "impedance_pf": "1.000000"
         }
     }, 
+    "name2": "Simple Market System Comm Solar", 
+    "owner": "public", 
     "nodes": [], 
     "hiddenLinks": [], 
     "layoutVars": {

@@ -17,7 +17,6 @@
                 "chargeMultiple": 1, 
                 "treeIndex": 16
             }, 
-            "treeIndex": 17, 
             "target": {
                 "index": 9, 
                 "name": "n630", 
@@ -30,6 +29,7 @@
                 "chargeMultiple": 1, 
                 "treeIndex": 18
             }, 
+            "treeIndex": 17, 
             "objectType": "fromTo"
         }, 
         {
@@ -45,7 +45,6 @@
                 "chargeMultiple": 1, 
                 "treeIndex": 18
             }, 
-            "treeIndex": 19, 
             "target": {
                 "index": 12, 
                 "name": "tn_1", 
@@ -58,6 +57,7 @@
                 "chargeMultiple": 1, 
                 "treeIndex": 23
             }, 
+            "treeIndex": 19, 
             "objectType": "fromTo"
         }, 
         {
@@ -73,7 +73,6 @@
                 "chargeMultiple": 1, 
                 "treeIndex": 18
             }, 
-            "treeIndex": 22, 
             "target": {
                 "index": 13, 
                 "name": "tn_2", 
@@ -86,6 +85,7 @@
                 "chargeMultiple": 1, 
                 "treeIndex": 24
             }, 
+            "treeIndex": 22, 
             "objectType": "fromTo"
         }, 
         {
@@ -101,7 +101,6 @@
                 "chargeMultiple": 1, 
                 "treeIndex": 23
             }, 
-            "treeIndex": 25, 
             "target": {
                 "index": 14, 
                 "name": "tm_1", 
@@ -115,6 +114,7 @@
                 "chargeMultiple": 1, 
                 "treeIndex": 27
             }, 
+            "treeIndex": 25, 
             "objectType": "fromTo"
         }, 
         {
@@ -130,7 +130,6 @@
                 "chargeMultiple": 1, 
                 "treeIndex": 24
             }, 
-            "treeIndex": 26, 
             "target": {
                 "index": 15, 
                 "name": "tm_2", 
@@ -144,6 +143,7 @@
                 "chargeMultiple": 1, 
                 "treeIndex": 28
             }, 
+            "treeIndex": 26, 
             "objectType": "fromTo"
         }, 
         {
@@ -322,14 +322,14 @@
         {
             "source": {
                 "index": 22, 
-                "fixed": 0, 
                 "name": "house2", 
                 "weight": 6, 
                 "px": 501.57134612971925, 
                 "py": 486.2081337134759, 
+                "objectType": "house", 
                 "y": 486.20067673735394, 
                 "x": 501.5734347692784, 
-                "objectType": "house", 
+                "fixed": 0, 
                 "chargeMultiple": 1, 
                 "treeIndex": 35
             }, 
@@ -363,14 +363,14 @@
             }, 
             "target": {
                 "index": 22, 
-                "fixed": 0, 
                 "name": "house2", 
                 "weight": 6, 
                 "px": 501.57134612971925, 
                 "py": 486.2081337134759, 
+                "objectType": "house", 
                 "y": 486.20067673735394, 
                 "x": 501.5734347692784, 
-                "objectType": "house", 
+                "fixed": 0, 
                 "chargeMultiple": 1, 
                 "treeIndex": 35
             }, 
@@ -392,14 +392,14 @@
             }, 
             "target": {
                 "index": 22, 
-                "fixed": 0, 
                 "name": "house2", 
                 "weight": 6, 
                 "px": 501.57134612971925, 
                 "py": 486.2081337134759, 
+                "objectType": "house", 
                 "y": 486.20067673735394, 
                 "x": 501.5734347692784, 
-                "objectType": "house", 
+                "fixed": 0, 
                 "chargeMultiple": 1, 
                 "treeIndex": 35
             }, 
@@ -420,14 +420,14 @@
             }, 
             "target": {
                 "index": 22, 
-                "fixed": 0, 
                 "name": "house2", 
                 "weight": 6, 
                 "px": 501.57134612971925, 
                 "py": 486.2081337134759, 
+                "objectType": "house", 
                 "y": 486.20067673735394, 
                 "x": 501.5734347692784, 
-                "objectType": "house", 
+                "fixed": 0, 
                 "chargeMultiple": 1, 
                 "treeIndex": 35
             }, 
@@ -448,14 +448,14 @@
             }, 
             "target": {
                 "index": 22, 
-                "fixed": 0, 
                 "name": "house2", 
                 "weight": 6, 
                 "px": 501.57134612971925, 
                 "py": 486.2081337134759, 
+                "objectType": "house", 
                 "y": 486.20067673735394, 
                 "x": 501.5734347692784, 
-                "objectType": "house", 
+                "fixed": 0, 
                 "chargeMultiple": 1, 
                 "treeIndex": 35
             }, 
@@ -476,14 +476,14 @@
             }, 
             "target": {
                 "index": 22, 
-                "fixed": 0, 
                 "name": "house2", 
                 "weight": 6, 
                 "px": 501.57134612971925, 
                 "py": 486.2081337134759, 
+                "objectType": "house", 
                 "y": 486.20067673735394, 
                 "x": 501.5734347692784, 
-                "objectType": "house", 
+                "fixed": 0, 
                 "chargeMultiple": 1, 
                 "treeIndex": 35
             }, 
@@ -881,6 +881,8 @@
             "impedance_pf": "1.000000"
         }
     }, 
+    "name2": "Simple Market System", 
+    "owner": "public", 
     "nodes": [
         {
             "index": 0, 
@@ -1154,14 +1156,14 @@
         }, 
         {
             "index": 22, 
-            "fixed": 0, 
             "name": "house2", 
             "weight": 6, 
             "px": 501.57134612971925, 
             "py": 486.2081337134759, 
+            "objectType": "house", 
             "y": 486.20067673735394, 
             "x": 501.5734347692784, 
-            "objectType": "house", 
+            "fixed": 0, 
             "chargeMultiple": 1, 
             "treeIndex": 35
         }, 

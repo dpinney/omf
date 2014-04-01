@@ -94,10 +94,10 @@
         }, 
         "27": {
             "phases": "AN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "263-31-260", 
             "parent": "node263-31-260PROH279", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "10864.8", 
@@ -123,10 +123,10 @@
         }, 
         "22": {
             "phases": "CN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "263-32-311", 
             "parent": "node263-32-311PRUG3297", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "9444.03", 
             "constant_power_B": "100", 
             "constant_power_A": "100", 
@@ -172,12 +172,6 @@
         "8": {
             "module": "residential", 
             "implicit_enduses": "NONE"
-        }, 
-        "119": {
-            "phases": "BN", 
-            "object": "node", 
-            "nominal_voltage": "2400", 
-            "name": "nodeFUSE_434PROH16622"
         }, 
         "120": {
             "phases": "BN", 
@@ -239,12 +233,6 @@
             "nominal_voltage": "2400", 
             "name": "node283-06-131PROH266"
         }, 
-        "118": {
-            "phases": "ABN", 
-            "object": "node", 
-            "nominal_voltage": "2400", 
-            "name": "nodePROH16622PRUG3303"
-        }, 
         "59": {
             "phases": "AN", 
             "from": "nodePROH20016PROH19456", 
@@ -283,10 +271,10 @@
         }, 
         "57": {
             "phases": "AN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "283-06-130", 
             "parent": "node283-06-131PROH266", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "3173.78", 
@@ -294,10 +282,10 @@
         }, 
         "56": {
             "phases": "AN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "283-06-131", 
             "parent": "node283-06-131PROH266", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "125.363", 
@@ -361,10 +349,10 @@
         }, 
         "89": {
             "phases": "BN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "283-05-830", 
             "parent": "node283-05-830PROH2877", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "100", 
@@ -405,10 +393,10 @@
         }, 
         "83": {
             "phases": "BN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "283-17-120", 
             "parent": "node283-17-120PROH16516", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "668.604", 
             "constant_power_A": "100", 
@@ -425,34 +413,26 @@
         }, 
         "81": {
             "phases": "BN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "283-08-710", 
             "parent": "node283-08-710PRUG834", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "8023.25", 
             "constant_power_A": "100", 
             "nominal_voltage": "120"
         }, 
-        "86": {
+        "119": {
             "phases": "BN", 
-            "object": "load", 
-            "name": "283-08-120", 
-            "parent": "node283-08-120PROH2878", 
-            "load_class": "R", 
-            "constant_power_C": "100", 
-            "constant_power_B": "2686.95", 
-            "constant_power_A": "100", 
-            "nominal_voltage": "120"
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodeFUSE_434PROH16622"
         }, 
-        "87": {
-            "phases": "BN", 
-            "from": "nodePROH2878PROH11498", 
-            "name": "PROH11499", 
-            "object": "overhead_line", 
-            "to": "nodePROH2877PROH11499", 
-            "length": "1448.01", 
-            "configuration": "PROH16513line_configuration6001"
+        "118": {
+            "phases": "ABN", 
+            "object": "node", 
+            "nominal_voltage": "2400", 
+            "name": "nodePROH16622PRUG3303"
         }, 
         "84": {
             "phases": "BN", 
@@ -542,10 +522,10 @@
         }, 
         "39": {
             "phases": "BN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "263-32-310", 
             "parent": "node263-32-310PRUG85", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "100", 
@@ -562,10 +542,10 @@
         }, 
         "33": {
             "phases": "AN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "263-30-850", 
             "parent": "node263-30-850PRUG84", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "4116.09", 
@@ -615,10 +595,10 @@
         }, 
         "36": {
             "phases": "AN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "263-30-380", 
             "parent": "node263-30-380PROH277", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "5599.56", 
@@ -652,17 +632,17 @@
             "configuration": "PROH19454line_configuration3901"
         }, 
         "61": {
+            "geometric_mean_radius": "0.031300", 
             "object": "overhead_line_conductor", 
             "resistance": "0.185900", 
-            "name": "PROH268line_configuration4701overhead_line_conductor4704", 
-            "geometric_mean_radius": "0.031300"
+            "name": "PROH268line_configuration4701overhead_line_conductor4704"
         }, 
         "62": {
             "phases": "AN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "282-01-180", 
             "parent": "node282-01-180PROH268", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "919.33", 
@@ -697,10 +677,10 @@
         }, 
         "66": {
             "phases": "AN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "282-01-680", 
             "parent": "node282-01-680PRUG81", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "10279.8", 
@@ -755,10 +735,10 @@
         }, 
         "91": {
             "phases": "BN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "283-08-170", 
             "parent": "node283-08-170PROH11500", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "3468.38", 
             "constant_power_A": "100", 
@@ -792,10 +772,10 @@
         }, 
         "95": {
             "phases": "ABCN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "263-32-710", 
             "parent": "node263-32-710PRUG4176", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "1853700.0", 
             "constant_power_B": "1853700.0", 
             "constant_power_A": "1853700.0", 
@@ -821,12 +801,12 @@
         "96": {
             "control": "VOLT", 
             "phases": "ABCN", 
-            "object": "capacitor", 
+            "capacitor_A": "0.10 MVAr", 
             "name": "NEWCAP-1D1DC669", 
             "parent": "node263-32-710PRUG4176", 
             "capacitor_B": "0.10 MVAr", 
             "capacitor_C": "0.10 MVAr", 
-            "capacitor_A": "0.10 MVAr", 
+            "object": "capacitor", 
             "time_delay": "300.0", 
             "pt_phase": "ABCN", 
             "nominal_voltage": "2401.7771", 
@@ -966,10 +946,10 @@
         }, 
         "48": {
             "phases": "BN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "263-32-860", 
             "parent": "node263-32-860PROH2886", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "100", 
@@ -993,14 +973,16 @@
             "length": "3290.55", 
             "configuration": "PROH16513line_configuration6001"
         }, 
-        "47": {
+        "86": {
             "phases": "BN", 
-            "from": "nodePROH2886PROH16624", 
-            "name": "PROH2886", 
-            "object": "overhead_line", 
-            "to": "node263-32-860PROH2886", 
-            "length": "661.995", 
-            "configuration": "PROH16513line_configuration6001"
+            "load_class": "R", 
+            "name": "283-08-120", 
+            "parent": "node283-08-120PROH2878", 
+            "object": "load", 
+            "constant_power_C": "100", 
+            "constant_power_B": "2686.95", 
+            "constant_power_A": "100", 
+            "nominal_voltage": "120"
         }, 
         "44": {
             "phases": "BN", 
@@ -1013,10 +995,10 @@
         }, 
         "45": {
             "phases": "BN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "283-05-120", 
             "parent": "node283-05-120PROH2887", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "835.755", 
             "constant_power_A": "100", 
@@ -1048,13 +1030,13 @@
             "length": "836.732", 
             "configuration": "PRUG84line_configuration2001"
         }, 
-        "41": {
+        "87": {
             "phases": "BN", 
-            "from": "nodePROH16622PRUG3303", 
-            "name": "PROH16622", 
+            "from": "nodePROH2878PROH11498", 
+            "name": "PROH11499", 
             "object": "overhead_line", 
-            "to": "nodeFUSE_434PROH16622", 
-            "length": "242.872", 
+            "to": "nodePROH2877PROH11499", 
+            "length": "1448.01", 
             "configuration": "PROH16513line_configuration6001"
         }, 
         "1": {
@@ -1139,10 +1121,10 @@
             "to": "nodePROH16514RECL_845"
         }, 
         "76": {
+            "geometric_mean_radius": "0", 
             "object": "overhead_line_conductor", 
             "resistance": "0", 
-            "name": "PROH16513line_configuration6001overhead_line_conductor6006", 
-            "geometric_mean_radius": "0"
+            "name": "PROH16513line_configuration6001overhead_line_conductor6006"
         }, 
         "75": {
             "distance_BC": "7.0", 
@@ -1174,10 +1156,10 @@
         }, 
         "72": {
             "phases": "AN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "283-06-310", 
             "parent": "node283-06-310PROH269", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "2705.76", 
@@ -1194,10 +1176,10 @@
         }, 
         "70": {
             "phases": "AN", 
-            "object": "load", 
+            "load_class": "R", 
             "name": "283-06-720", 
             "parent": "node283-06-720PROH270", 
-            "load_class": "R", 
+            "object": "load", 
             "constant_power_C": "100", 
             "constant_power_B": "100", 
             "constant_power_A": "5683.13", 
@@ -1220,8 +1202,28 @@
             "to": "nodePROH16515PROH16514", 
             "length": "5239", 
             "configuration": "PROH16513line_configuration6001"
+        }, 
+        "41": {
+            "phases": "BN", 
+            "from": "nodePROH16622PRUG3303", 
+            "name": "PROH16622", 
+            "object": "overhead_line", 
+            "to": "nodeFUSE_434PROH16622", 
+            "length": "242.872", 
+            "configuration": "PROH16513line_configuration6001"
+        }, 
+        "47": {
+            "phases": "BN", 
+            "from": "nodePROH2886PROH16624", 
+            "name": "PROH2886", 
+            "object": "overhead_line", 
+            "to": "node263-32-860PROH2886", 
+            "length": "661.995", 
+            "configuration": "PROH16513line_configuration6001"
         }
     }, 
+    "name2": "INEC Renoir", 
+    "owner": "public", 
     "nodes": [], 
     "hiddenLinks": [], 
     "layoutVars": {
