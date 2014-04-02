@@ -12,24 +12,6 @@ fastModel = False
 with open(_myDir + "/gridlabSingle.html","r") as tempFile:
 	template = Template(tempFile.read())
 
-# userInput = {
-# 	"modelName": "Single Gridlab Run",
-# 	"simLength": "2048",
-# 	"simLengthUnits": "hours",
-# 	"simStartDate": "2014-01-01"
-# }
-# userInputNeedsTranslation = {
-# 	"feederName": "Test Feeder",
-# 	"climateName": "Test Climate"
-# }
-# machineInput = {
-# 	"user": "admin",
-# 	"status": None, 
-# 	"created": None,
-# 	"modelType": "gridlabSingle",
-# 	"runTime": None
-# }
-
 def renderTemplate(modelDirectory="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template. By default render a blank one for new input.
 	If modelDirectory is valid, render results post-model-run.
@@ -82,6 +64,11 @@ def run(modelDirectory):
 	with open(modelDirectory + "allInputData.json","w") as inputFile:
 		allInputData = json.load(inputFile)
 	# Translate files to needed format. Run Gridlab.
+
+def cancel(modelDirectory):
+	''' Try to cancel a currently running model. '''
+	#TODO: implement me.
+	pass
 
 def _tests():
 	# Render a no-input template.
