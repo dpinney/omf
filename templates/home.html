@@ -74,7 +74,7 @@
 						e.preventDefault();
 						return false;
 					}
-					if(confirm("When a feeder or analysis is published, all users can view it and it cannot be altered or un-published.  Do you want to continue?")){
+					if(confirm("When a feeder or model is published, all users can view it and it cannot be altered or un-published.  Do you want to continue?")){
 						$.ajax({
 							url:"/makePublic/"+objectType+"/"+objectName,
 							data:{
@@ -205,7 +205,7 @@ function delete_feeder(feederName) {
 	</div>
 	<div id='toolbar'>
 
-		<p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Analyses</p>
+		<p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Models</p>
 		<p id='feedersTab' class='tab' style='' onclick='feedersClick()'>Feeders</p>
 	</div>
 	<div id="placeholder"></div>
@@ -216,9 +216,9 @@ function delete_feeder(feederName) {
 
 				<thead>
 					<tr>
-						<th style="text-align:center" colspan="6">Analyses</th>
+						<th style="text-align:center" colspan="6">Models</th>
 					</tr>
-					<tr><th>Owner</th><th>Analysis</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th>Status</th><th></th></tr>
+					<tr><th>Owner</th><th>Model Name</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th></th></tr>
 				</thead>
 				<tbody class="Analyses">
 					{% for md in analyses %}
@@ -231,7 +231,7 @@ function delete_feeder(feederName) {
 			</table>
 		</div>
 
-		<div class='content'><a href='/newAnalysis/'>New Analysis</a></div>
+		<div class='content'><a href='/newAnalysis/'>New Model</a></div>
 	</div>
 
 

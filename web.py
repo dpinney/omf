@@ -149,17 +149,35 @@ def getfeeders():
 			feeders.append(feed)
 	return feeders
 
-@app.route("/root")
+def getmodels(owner):
+	path = os.path.join("data", "Model", owner)
+	allmodels = []
+	for modelFolder in os.listdir(path):
+		model = json.load(open(os.path.join(path, modelFolder, "allInputData.json")))
+		model["owner"] = owner
+		allmodels.append(model)
+	return allmodels
+
+def getAllModels():
+	if flask_login.current_user.username == "admin":
+		# The line below will break if we have other things in the Model dir besides dirs that are usernames
+		owners = os.listdir("data/Model")
+	else:
+		owners = ["public", flask_login.current_user.username]
+	return reduce(lambda a, b: a+b, map(getmodels, owners))
+
+
+@app.route("/")
 @flask_login.login_required
 def root():
 	return render_template('home.html', 
-		analyses=getanalyses(), 
-		feeders=getfeeders(),
+		analyses=getAllModels(), 
+		feeders=[],
 		current_user=flask_login.current_user.username, 
 		is_admin = flask_login.current_user.username == "admin")
 
 
-@app.route("/")
+@app.route("/root")
 @flask_login.login_required
 def mainScreen():
 	return Template(homeTemplate).render(modTypes=models.__all__,
