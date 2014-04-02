@@ -116,42 +116,36 @@ def login():
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
 
-def upd(d):
-	if d["owner"] == "public":
-		return dict(url="?public=true", **d)
-	return dict(url="?public=false", **d)
-
-def getstuff(path, owner, func):
-	return [upd(func(path, owner, item)) for item in os.listdir(os.path.join(path, owner))]
-
-def getmodels(owner):
-	return getstuff(os.path.join("data", "Model"), owner, modelhelper)
-
-def getfeeders(owner):
-	return getstuff(os.path.join("data", "Feeder"), owner, feederhelper)
-
-def modelhelper(path, owner, modelFolder):
-	model = json.load(open(os.path.join(path, owner, modelFolder, "allInputData.json")))
-	model["owner"] = owner
-	return model
-
-def feederhelper(path, owner, fname):
-	return {"owner":owner, "name":fname, "status":"Ready"}
-
-def getAllData(func, path):
+def getAllData(dataType):
+	if dataType == "Feeder":
+		path = os.path.join("data", "Feeder")
+	elif dataType == "Model":
+		path = os.path.join("data", "Model")
 	if flask_login.current_user.username == "admin":
-		# The line below will break if we have other things in the dir besides dirs that are usernames
 		owners = os.listdir(path)
 	else:
 		owners = ["public", flask_login.current_user.username]
-	return reduce(lambda a, b: a + b, map(func, owners))
+	allData = []
+	for o in owners:
+		for fname in os.listdir(os.path.join(path, o)):
+			if dataType == "Feeder":
+				datum = {"name":fname, "status":"Ready"}
+			elif dataType == "Model":
+				datum = json.load(open(os.path.join(path, o, fname, "allInputData.json")))
+			datum["owner"] = o
+			if o == "public":
+				datum["url"] = "?public=true"
+			else:
+				datum["url"] = "?public=false"
+			allData.append(datum)
+	return allData
 
 @app.route("/")
 @flask_login.login_required
 def root():
 	return render_template('home.html', 
-		analyses=getAllData(getmodels, "data/Model"), 
-		feeders=getAllData(getfeeders, "data/Feeder"),
+		analyses=getAllData("Model"), 
+		feeders=getAllData("Feeder"),
 		current_user=flask_login.current_user.username, 
 		is_admin = flask_login.current_user.username == "admin")
 
