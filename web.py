@@ -116,63 +116,42 @@ def login():
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
 
-def getanalyses():
-	analyses = []
-	anadir = "./data/Analysis/"
-	for fname in os.listdir(anadir):
-		name = fname[:-len(".json")]
-		if name:
-			anaJson = json.load(open(anadir+fname))
-			if anaJson['owner'] == 'public':
-				anaJson['url'] = '?public=true'
-			elif anaJson['owner'] == flask_login.current_user.username:
-				anaJson['url'] = '?public=false'
-			elif flask_login.current_user.username != "admin":
-				continue
-			analyses.append(anaJson)
-	return analyses
+def upd(d):
+	if d["owner"] == "public":
+		return dict(url="?public=true", **d)
+	return dict(url="?public=false", **d)
 
-def getfeeders():
-	feeders = []
-	feederdir = './data/Feeder/'
-	for fname in os.listdir(feederdir):
-		name = fname[:-len(".json")]
-		if name:
-			owner, name = name.split("_")
-			feed = {"owner":owner, "name":name, "status":"Ready"}
-			if owner == 'public':
-				feed['url'] = '?public=true'
-			elif owner == flask_login.current_user.username:
-				feed['url'] = '?public=false'
-			elif flask_login.current_user.username != "admin":
-				continue
-			feeders.append(feed)
-	return feeders
+def getstuff(path, owner, func):
+	return [upd(func(path, owner, item)) for item in os.listdir(os.path.join(path, owner))]
 
 def getmodels(owner):
-	path = os.path.join("data", "Model", owner)
-	allmodels = []
-	for modelFolder in os.listdir(path):
-		model = json.load(open(os.path.join(path, modelFolder, "allInputData.json")))
-		model["owner"] = owner
-		allmodels.append(model)
-	return allmodels
+	return getstuff(os.path.join("data", "Model"), owner, modelhelper)
 
-def getAllModels():
+def getfeeders(owner):
+	return getstuff(os.path.join("data", "Feeder"), owner, feederhelper)
+
+def modelhelper(path, owner, modelFolder):
+	model = json.load(open(os.path.join(path, owner, modelFolder, "allInputData.json")))
+	model["owner"] = owner
+	return model
+
+def feederhelper(path, owner, fname):
+	return {"owner":owner, "name":fname, "status":"Ready"}
+
+def getAllData(func, path):
 	if flask_login.current_user.username == "admin":
-		# The line below will break if we have other things in the Model dir besides dirs that are usernames
-		owners = os.listdir("data/Model")
+		# The line below will break if we have other things in the dir besides dirs that are usernames
+		owners = os.listdir(path)
 	else:
 		owners = ["public", flask_login.current_user.username]
-	return reduce(lambda a, b: a+b, map(getmodels, owners))
-
+	return reduce(lambda a, b: a + b, map(func, owners))
 
 @app.route("/")
 @flask_login.login_required
 def root():
 	return render_template('home.html', 
-		analyses=getAllModels(), 
-		feeders=[],
+		analyses=getAllData(getmodels, "data/Model"), 
+		feeders=getAllData(getfeeders, "data/Feeder"),
 		current_user=flask_login.current_user.username, 
 		is_admin = flask_login.current_user.username == "admin")
 
