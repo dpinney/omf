@@ -11,3 +11,4 @@ sys.path.append(myDir)
 # Import sub-packages.
 import feeder
 import solvers
+import models

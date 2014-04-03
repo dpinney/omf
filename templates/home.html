@@ -194,7 +194,6 @@ function delete_feeder(feederName) {
 	<div id='title'>
 		<div id='logoBox'><a href='/'>&#10059;</a></div>
 		<!--Title:-->Open Modeling Framework
-
 	</div>
 	<div id="account_links">
 		<div><a href="logout">Log Out</a></div>
@@ -212,12 +211,7 @@ function delete_feeder(feederName) {
 	<div id='analyses'>
 		<div class='content'>
 			<table id='anaTable'>
-
-
 				<thead>
-					<tr>
-						<th style="text-align:center" colspan="6">Models</th>
-					</tr>
 					<tr><th>Owner</th><th>Model Name</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th></th></tr>
 				</thead>
 				<tbody class="Analyses">
@@ -226,26 +220,15 @@ function delete_feeder(feederName) {
 					{% endfor %}
 					{#	  {% include 'metadata_loop.html' %} #}
 				</tbody>
-
-
 			</table>
 		</div>
-
 		<div class='content'><a href='/newAnalysis/'>New Model</a></div>
 	</div>
 
-
-
-
 	<div id='feeders'>
-
-
 		<div class='content'>
 			<table id='anaTable'>
 				<thead>
-					<tr>
-						<th style="text-align:center" colspan="3">Feeders</th>
-					</tr>
 					<tr>
 						<th>Owner</th>
 						<th>Feeder Name</th>
@@ -258,8 +241,6 @@ function delete_feeder(feederName) {
 					{% include "feeder.html" %}
 					{% endfor %}
 				</tbody>
-
-
 			</table>
 		</div>
 

@@ -7,21 +7,6 @@ from passlib.hash import pbkdf2_sha512
 
 app = Flask("omf")
 
-homeTemplate = '''
-<body>
-	<p>New Model of Type:</p>
-	{% for x in modTypes %}
-		<a href='/newModel/{{ x }}'>{{ x }}</a>
-	{% endfor %}
-	<p>Instances:</p>
-	{% for x in instances %}
-		<a href='/model/{{ x }}'>{{ x }}</a>
-	{% endfor %}
-	<p> Other Stuff</p>
-	<a href="/logout">Logout</a>
-</body>
-'''
-
 def getDataNames():
 	''' Query the OMF datastore to list all the names of things that can be included.'''
 	currUser = flask_login.current_user
@@ -32,6 +17,32 @@ def getDataNames():
 	climates = [x[:-5] for x in os.listdir('./data/Weather/')]
 	return 	{'feeders':feeders, 'publicFeeders':publicFeeders, 'climates':climates, 
 		'currentUser':currUser.__dict__}
+
+
+def getAllData(dataType):
+	''' Get metadata for everything we need for the home screen. '''
+	if dataType == "Feeder":
+		path = os.path.join("data", "Feeder")
+	elif dataType == "Model":
+		path = os.path.join("data", "Model")
+	if flask_login.current_user.username == "admin":
+		owners = os.listdir(path)
+	else:
+		owners = ["public", flask_login.current_user.username]
+	allData = []
+	for o in owners:
+		for fname in os.listdir(os.path.join(path, o)):
+			if dataType == "Feeder":
+				datum = {"name":fname, "status":"Ready"}
+			elif dataType == "Model":
+				datum = json.load(open(os.path.join(path, o, fname, "allInputData.json")))
+			datum["owner"] = o
+			if o == "public":
+				datum["url"] = "?public=true"
+			else:
+				datum["url"] = "?public=false"
+			allData.append(datum)
+	return allData
 
 @app.before_request
 def csrf_protect():
@@ -109,36 +120,12 @@ def login():
 	return redirect("/")
 
 ###################################################
-# MISCELLANEOUS VIEWS
+# VIEWS
 ###################################################
 
 @app.route("/robots.txt")
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
-
-def getAllData(dataType):
-	if dataType == "Feeder":
-		path = os.path.join("data", "Feeder")
-	elif dataType == "Model":
-		path = os.path.join("data", "Model")
-	if flask_login.current_user.username == "admin":
-		owners = os.listdir(path)
-	else:
-		owners = ["public", flask_login.current_user.username]
-	allData = []
-	for o in owners:
-		for fname in os.listdir(os.path.join(path, o)):
-			if dataType == "Feeder":
-				datum = {"name":fname, "status":"Ready"}
-			elif dataType == "Model":
-				datum = json.load(open(os.path.join(path, o, fname, "allInputData.json")))
-			datum["owner"] = o
-			if o == "public":
-				datum["url"] = "?public=true"
-			else:
-				datum["url"] = "?public=false"
-			allData.append(datum)
-	return allData
 
 @app.route("/")
 @flask_login.login_required
