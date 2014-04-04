@@ -2,11 +2,22 @@
 	<title>Open Modeling Framework</title>
 	<meta charset='utf-8'>
 	<meta name='Description' content='The Open Modeling Framework for smart grid cost-benefit analysis.'>
-	<link rel='stylesheet' href='/static/omf.css'/>
+	<link rel='stylesheet' href='/static/omf.css'/> 
 	<script type='text/javascript' src='/static/omf.js'></script>
 	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
+    <script type='text/javascript' src='/static/underscore.js'></script>
 	<script type='text/javascript' src='/static/pagination.js'></script>
 	<link rel='shortcut icon' href='/static/favicon.ico'>
+    <script>
+      {% if is_admin %}
+      var is_admin = true
+      {% else %}
+      var is_admin = false
+      {% endif %}
+    </script><!-- for underscore templating -->
+    {% include "jsmetadata.html" %}
+    {% include "jsfeeder.html" %}
+    <script type='text/javascript' src='/static/tablesort.js'></script>
 	<style>
 	#spinner{
 		display:none;
@@ -212,13 +223,17 @@ function delete_feeder(feederName) {
 		<div class='content'>
 			<table id='anaTable'>
 				<thead>
-					<tr><th>Owner</th><th>Model Name</th><th>Feeder</th><th>Climate</th><th>Runtime (H:M:S)</th><th></th></tr>
+					<tr>
+                      <th class="mowner">Owner</th>
+                      <th id="mname">Model Name</th>
+                      <th>Feeder</th>
+                      <th>Climate</th>
+                      <th>Runtime (H:M:S)</th>
+                      <th id="mdate">Date Created</th>
+                      <th></th>
+                    </tr>
 				</thead>
 				<tbody class="Analyses">
-					{% for md in analyses %}
-					{% include 'metadata.html' %}
-					{% endfor %}
-					{#	  {% include 'metadata_loop.html' %} #}
 				</tbody>
 			</table>
 		</div>
@@ -230,16 +245,14 @@ function delete_feeder(feederName) {
 			<table id='anaTable'>
 				<thead>
 					<tr>
-						<th>Owner</th>
-						<th>Feeder Name</th>
+						<th class="fowner">Owner</th>
+						<th id="fname">Feeder Name</th>
 						<th>Status</th>
+                        <th id="fdate">Date Created</th>
 						<th></th>
 					</tr>
 				</thead>
 				<tbody class="Feeders">
-					{% for feed in feeders %}
-					{% include "feeder.html" %}
-					{% endfor %}
 				</tbody>
 			</table>
 		</div>
