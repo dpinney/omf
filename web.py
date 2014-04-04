@@ -35,7 +35,6 @@ def getAllData(dataType):
             if dataType == "Feeder":
                 datum = {"name":fname[:-len(".json")], "status":"Ready"}
                 statstruct = os.stat(os.path.join(path, o, fname))
-                
             elif dataType == "Model":
                 datum = json.load(open(os.path.join(path, o, fname, "allInputData.json")))
                 datum["name"] = datum["modelName"]
@@ -95,7 +94,7 @@ class User:
     def get_id(self): return self.username  
     def is_authenticated(self): return True
     def is_active(self): return True
-    def is_anonymous(self):     return False
+    def is_anonymous(self): return False
 
 def cryptoRandomString():
     ''' Generate a cryptographically secure random string for signing/encrypting cookies. '''
@@ -180,14 +179,8 @@ def sortData(dataType, column):
         userJson["sort"][dataType] = [column, 1]
     userJson["sort"][dataType][1] *= -1
     with open(fname, "w") as jfile:
-        json.dump(userJson, jfile)
+        json.dump(userJson, jfile, indent=4)
     return "OK"
-
-@app.route("/root")
-@flask_login.login_required
-def mainScreen():
-    return Template(homeTemplate).render(modTypes=models.__all__,
-        instances=os.listdir("./data/Model/"))
 
 @app.route("/newModel/<modelType>")
 @flask_login.login_required
