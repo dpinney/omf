@@ -13,7 +13,8 @@ with open(_myDir + "/gridlabSingle.html","r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(modelDirectory="", absolutePaths=False, datastoreNames={}):
-	''' Render the model template. By default render a blank one for new input.
+	''' Render the model template to an HTML string.
+	By default render a blank one for new input.
 	If modelDirectory is valid, render results post-model-run.
 	If absolutePaths, the HTML can be opened without a server. '''
 	try:
@@ -34,7 +35,7 @@ def renderTemplate(modelDirectory="", absolutePaths=False, datastoreNames={}):
 		datastoreNames=datastoreNames)
 
 def renderAndShow(modelDirectory="", datastoreNames={}):
-	''' Render and open a template in a local browser. '''
+	''' Render and open a template (blank or with output) in a local browser. '''
 	with tempfile.NamedTemporaryFile() as temp:
 		temp.write(renderTemplate(modelDirectory=modelDirectory, absolutePaths=True))
 		temp.flush()
@@ -53,7 +54,7 @@ def create(parentDirectory, inData):
 	# Copy datastore data.
 	shutil.copy(os.path.join(_omfDir,"data","Feeder",inData["feederName"] + ".json"),
 		modelDirName)
-	shutil.copy(os.path.join(_omfDir,"data","Weather",inData["climateName"] + ".json"),
+	shutil.copy(os.path.join(_omfDir,"data","Climate",inData["climateName"] + ".tmy2"),
 		modelDirName)
 
 def run(modelDirectory):
@@ -74,10 +75,10 @@ def _tests():
 	# Render a no-input template.
 	renderAndShow()
 	# Render running template.
-	testDir = os.path.dirname(_myDir) + "/data/Model/admin_Running Example"
+	testDir = os.path.dirname(_myDir) + "/data/Model/admin/Running Example"
 	renderAndShow(modelDirectory=testDir)
 	# Render completed template.
-	testDir = os.path.dirname(_myDir) + "/data/Model/admin_Single Gridlab Run"
+	testDir = os.path.dirname(_myDir) + "/data/Model/admin/Single Gridlab Run"
 	renderAndShow(modelDirectory=testDir)
 
 if __name__ == '__main__':

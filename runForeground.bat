@@ -1,1 +1,1 @@
-start python omf.py
+start python web.py

@@ -2,10 +2,10 @@
     "modelName": "Running Example", 
     "simStartDate": "2012-04-01", 
     "simLengthUnits": "hours", 
-    "feederName": "admin_Simple Market System", 
+    "feederName": "Simple Market System", 
     "created": "2014-03-31 16:19:30.848000", 
     "modelType": "gridlabSingle", 
-    "climateName": "AL-ONEONTA", 
+    "climateName": "AL-HUNSTVILLE.tmy2", 
     "simLength": "100", 
     "user": "admin", 
     "runTime": ""
