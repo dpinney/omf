@@ -68,7 +68,7 @@ def sortAccPreferences(allData, dataType):
         if column == "name":
             return sorted(allData, cmp=lambda x, y: i*strcmp(x["name"], y["name"]))
         elif column == "ctime":
-            return sorted(allData, cmp=lambda x, y: i*(x["ctime"] - y["ctime"]))
+            return sorted(allData, cmp=lambda x, y: int(i*(x["ctime"] - y["ctime"])))
     return allData
 
 @app.before_request
