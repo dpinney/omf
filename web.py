@@ -195,7 +195,6 @@ def runModel():
     if pData.get("created","NOKEY") == "":
         # New model.
         pData["user"] = flask_login.current_user.username
-        pData["created"] = str(datetime.datetime.now())
         modelModule = getattr(models, pData["modelType"])
         modelModule.create('./data/Model/', pData)
         if modelModule.fastModel:
