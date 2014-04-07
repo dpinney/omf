@@ -21,31 +21,33 @@ function updateFeeders(){
     updateTable("/getAllData/Feeder", ".Feeders", "#feedertemplate", "feed")
 }
 
+function attachEvt(selector, dataType, attr){
+    $(selector).click(function(){
+        $.ajax({
+            url:"/sort/"+dataType+"/"+attr,
+            type:"POST"
+        }).done(function(){
+            if (dataType === "Model"){
+                updateModels()
+            }
+            if (dataType == "Feeder"){
+                updateFeeders()
+            }
+                
+        })
+    })
+}
+
 $(function(){
     updateModels()
     updateFeeders()
-    $("#mname").click(function(){
-        $.ajax({
-            url:"/sort/Model/name",
-            type:"POST"
-        }).done(updateModels)
-    })
-    $("#fname").click(function(){
-        $.ajax({
-            url:"/sort/Feeder/name",
-            type:"POST"
-        }).done(updateFeeders)
-    })
-    $("#fdate").click(function(){
-        $.ajax({
-            url:"/sort/Feeder/ctime",
-            type:"POST"
-        }).done(updateFeeders)
-    })
-    $("#mdate").click(function(){
-        $.ajax({
-            url:"/sort/Model/ctime",
-            type:"POST"
-        }).done(updateModels)
+    var setup = [
+        ["#mname", "Model", "name"],
+        ["#mdate", "Model", "ctime"],
+        ["#fname", "Feeder", "name"],
+        ["#fdate", "Feeder", "ctime"],
+    ]
+    setup.forEach(function(e){
+        attachEvt(e[0], e[1], e[2])
     })
 })
