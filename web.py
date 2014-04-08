@@ -192,27 +192,19 @@ def newModel(modelType):
 @flask_login.login_required
 def runModel():
     pData = request.form.to_dict()
+    modelModule = getattr(models, pData["modelType"])
     if pData.get("created","NOKEY") == "":
         # New model.
         pData["user"] = flask_login.current_user.username
-        modelModule = getattr(models, pData["modelType"])
-        modelModule.create('./data/Model/', pData)
-        if modelModule.fastModel:
-            pass
-            #TODO: add model run in foreground here.
-        else:
-            pass
-            #TODO: add BACKGROUND model run here.
-    else:
-        # TODO: Rerun existing model.
-        pass
-    return redirect("/model/" + pData["user"] + "_" + pData["modelName"])
+        modelModule.create("./data/Model/" + pData["user"] + "/", pData)
+    modelModule.run("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
+    return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
-@app.route("/model/<modelName>")
+@app.route("/model/<user>/<modelName>")
 @flask_login.login_required
 def showModel(modelName):
     ''' Render a model template with saved data. '''
-    modelDir = "./data/Model/" + modelName
+    modelDir = "./data/Model/" + user + "/" + modelName
     with open(modelDir + "/allInputData.json") as inJson:
         modelType = json.load(inJson)["modelType"]
     return getattr(models, modelType).renderTemplate(modelDirectory=modelDir,
