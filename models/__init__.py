@@ -1,7 +1,7 @@
 import os, sys
 
 # Make sure this module is on the path regardless of where its imported from.
-myDir = os.path.dirname(__file__)
+myDir = os.path.dirname(os.path.abspath(__file__))
 sys.path.append(myDir)
 
 # Grab all our submodules and include them whenever we include this package:

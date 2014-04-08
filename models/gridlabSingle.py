@@ -1,19 +1,18 @@
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, datetime as dt
+import multiprocessing
 from os.path import join as pJoin
 from jinja2 import Template
 
 # Locational variables so we don't have to rely on OMF being in the system path.
-_myDir = os.path.dirname(__file__)
+_myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
 
 # OMF imports
 sys.path.append(_omfDir)
 import feeder
-from omf.solvers import gridlabd
+from solvers import gridlabd
 
-# Speed of model execution so our web server knows whether to wait for results on run:
-fastModel = False
-
+# Our HTML template for the interface:
 with open(pJoin(_myDir,"gridlabSingle.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
@@ -65,6 +64,13 @@ def create(parentDirectory, inData):
 		pJoin(modelDir,"climate.tmy2"))
 
 def run(modelDir):
+	''' Run the model in a separate process. web.py calls this to run the model.
+	This function will return fast, but results take a while to hit the file system.'''
+	backProc = multiprocessing.Process(target=runForeground, args=(modelDir,))
+	backProc.start()
+	print "SENT TO BACKGROUND", modelDir
+
+def runForeground(modelDir):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
 	print "STARTING TO RUN", modelDir
 	startTime = dt.datetime.now()
@@ -100,25 +106,14 @@ def run(modelDir):
 	os.remove(pJoin(modelDir,"PID.txt"))
 	print "DONE RUNNING", modelDir
 
-def runBackground(modelDir):
-	''' Run the model in a separate process. '''
-	pass
-
 def cancel(modelDir):
 	''' Try to cancel a currently running model. '''
-	#TODO: implement me.
-	pass
-
-def _oldTests():
-	''' REMOVE ME '''
-	# Render a no-input template.
-	renderAndShow()
-	# Render running template.
-	testDir = pJoin(_omfDir,"data","Model","admin","Running Example")
-	renderAndShow(modelDir=testDir)
-	# Render completed template.
-	testDir = pJoin(_omfDir,"data","Model","admin","Single Gridlab Run")
-	renderAndShow(modelDir=testDir)
+	try:
+		with open(pJoin(modelDir,"PID.txt"),"r") as pidFile:
+			pid = int(pidFile.read())
+			os.kill(pid, 15)
+	except:
+		print "ATTEMPTED AND FAILED TO KILL", modelDir
 
 def _tests():
 	# Variables
@@ -130,7 +125,7 @@ def _tests():
 		"modelType": "gridlabSingle",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "100",
-		"user": "admin", # Only set by web.py.
+		"user": "admin", # Really only used with web.py.
 		"runTime": ""}
 	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
 	# Blow away old test results if necessary.
@@ -141,19 +136,19 @@ def _tests():
 		pass
 	# No-input template.
 	renderAndShow()
-	# As if we were actually inputting stuff:
-	# create a model.
+	# Create a model.
 	create(workDir, inData)
-	# Show the model.
+	# Show the model (should look like it's running).
 	renderAndShow(modelDir=modelLoc)
-	# run the model.
+	# Run the model.
 	run(modelLoc)
-	# cancel the model.
-	# run the model again.
+	## Cancel the model.
+	# time.sleep(2)
+	# cancel(modelLoc)
 	# Show the output.
 	renderAndShow(modelDir=modelLoc)
-	# delete the model.
-	# shutil.rmtree(modelLoc)
+	# Delete the model.
+	shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
