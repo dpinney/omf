@@ -2,11 +2,14 @@ import json, os, sys, tempfile, webbrowser, time, shutil, datetime
 from os.path import join as pJoin
 from jinja2 import Template
 
+# Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(__file__)
 _omfDir = os.path.dirname(_myDir)
-# TODO: import feeder.py, etc.
+
+# OMF imports
 sys.path.append(_omfDir)
 import feeder
+from solvers import gridlabd
 
 # Speed of model execution so our web server knows whether to wait for results on run:
 fastModel = False
@@ -64,17 +67,32 @@ def create(parentDirectory, inData):
 def run(modelDir):
 	''' Run the model in its directory. '''
 	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
-	# Write the GLM and its associated files.
 	feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
+	tree = feederJson["tree"]
+	# Set up GLM with correct time and recorders:
+	feeder.attachRecorders(tree, "Regulator", "object", "regulator")
+	feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
+	feeder.attachRecorders(tree, "Inverter", "object", "inverter")
+	feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
+	feeder.attachRecorders(tree, "CollectorVoltage", None, None)
+	feeder.attachRecorders(tree, "Climate", "object", "climate")
+	feeder.attachRecorders(tree, "OverheadLosses", None, None)
+	feeder.attachRecorders(tree, "UndergroundLosses", None, None)
+	feeder.attachRecorders(tree, "TriplexLosses", None, None)
+	feeder.attachRecorders(tree, "TransformerLosses", None, None)
+	feeder.groupSwingKids(tree)
+	feeder.adjustTime(tree=tree, simLength=float(allInputData["simLength"]),
+		simLengthUnits=allInputData["simLengthUnits"], simStartDate=allInputData["simStartDate"])
+	# Write GLM and attachments as backup.
 	with open(pJoin(modelDir,"feeder.glm"),"w") as glmFile:
-		glmFile.write(feeder.sortedWrite(feederJson["tree"]))
+		glmFile.write(feeder.sortedWrite(tree))
 	for fName in feederJson["attachments"]:
 		with open(pJoin(modelDir,fName),"w") as attachFile:
 			attachFile.write(feederJson["attachments"][fName])
-	# TODO: Do stuff here...
-	
+	#TODO:Run Gridlab.
+	gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], keepFiles=True)
+	#TODO:calculate output.json.
 	print "RUNNING"
-	# Translate files to needed format. Run Gridlab.
 	print "OKAY we're in", modelDir
 
 def cancel(modelDir):
@@ -98,7 +116,7 @@ def _tests():
 	workDir = pJoin(_omfDir,"data","Model")
 	# No-input template.
 	renderAndShow()
-	# If we were actually inputting stuff:
+	# As if we were actually inputting stuff:
 	inData = { "modelName": "Automated Testing",
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
@@ -106,18 +124,18 @@ def _tests():
 		"modelType": "gridlabSingle",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "100",
-		"user": "admin", # Only set by web.py
+		"user": "admin", # Only set by web.py.
 		"runTime": ""}
 	# create a model.
 	create(workDir, inData)
 	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
-	# Show a thing.
+	# Show the model.
 	renderAndShow(modelDir=modelLoc)
-	# run a thing.
+	# run the model.
 	run(modelLoc)
-	# cancel a thing.
-	# run a thing again.
-	# delete a thing.
+	# cancel the model.
+	# run the model again.
+	# delete the model.
 	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
