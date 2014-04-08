@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 
 import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, time
+from os.path import join as pJoin
 
 # Path magic.
 myDir = os.path.dirname(__file__)
@@ -71,42 +72,44 @@ def run(studyObject):
 		traceback.print_exc()
 		return False
 
-def runInFilesystem(feederTree, attachments=[], keepFiles=False):
+def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 	''' Execute gridlab in the local filesystem. Return a nice dictionary of results. '''
 	try:
-		# Create a running directory and fill it.
-		studyPath = 'running/' + str(datetime.datetime.now()).replace(':','_') + '/'
-		os.makedirs(studyPath)
+		# Create a running directory and fill it, unless we've specified where we're running.
+		if not workDir:
+			workDir = pJoin('running',str(datetime.datetime.now()).replace(':','_'))
+			os.makedirs(workDir)
 		# Need to zero out lat/lon data because it frequently breaks Gridlab.
 		for key in feederTree:
 			if 'latitude' in feederTree[key]: feederTree[key]['latitude'] = '0'
 			if 'longitude' in feederTree[key]: feederTree[key]['longitude'] = '0'
 		# Write attachments and glm.
 		for attach in attachments:
-			with open (studyPath + attach,'w') as attachFile:
+			with open (pJoin(workDir,attach),'w') as attachFile:
 				attachFile.write(attachments[attach])
 		glmString = feeder.sortedWrite(feederTree)
-		with open(studyPath + 'main.glm','w') as glmFile:
+		with open(pJoin(workDir,'main.glm'),'w') as glmFile:
 			glmFile.write(glmString)
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-		with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr, open(studyPath + '/PID.txt','w') as pidFile:
+		with open(pJoin(workDir,'stdout.txt'),'w') as stdout, open(pJoin(workDir,'stderr.txt'),'w') as stderr, open(pJoin(workDir,'PID.txt'),'w') as pidFile:
 			# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-			proc = subprocess.Popen(['gridlabd','-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr)
+			proc = subprocess.Popen(['gridlabd','-w','main.glm'], cwd=workDir, stdout=stdout, stderr=stderr)
 			pidFile.write(str(proc.pid))
 		returnCode = proc.wait()
 		# Build raw JSON output.
-		rawOut = anaDataTree(studyPath, lambda x:True)
-		with open(studyPath + '/stderr.txt','r') as stderrFile:
+		rawOut = anaDataTree(workDir, lambda x:True)
+		with open(pJoin(workDir,'stderr.txt'),'r') as stderrFile:
 			rawOut['stderr'] = stderrFile.read().strip()
-		with open(studyPath + '/stdout.txt','r') as stdoutFile:
+		with open(pJoin(workDir,'stdout.txt'),'r') as stdoutFile:
 			rawOut['stdout'] = stdoutFile.read().strip()
 		# Delete the folder and return.
-		if not keepFiles:
+		if not keepFiles and not workDir:
+			# NOTE: if we've specify a working directory, don't just blow it away.
 			# HACK: if we don't sleep 1 second, windows intermittantly fails to delete things and an exception is thrown.
 			# Probably cus dropbox is monkeying around in these folders on my dev machine. Disabled for now since it works when dropbox is off.
 			for attempt in range(5):
 				try:
-					shutil.rmtree(studyPath)
+					shutil.rmtree(workDir)
 					break
 				except WindowsError:
 					time.sleep(2)
@@ -143,9 +146,7 @@ def _strClean(x):
 
 def csvToArray(fileName):
 	''' Take a Gridlab-export csv filename, return a list of timeseries vectors. Internal method. 
-		testStringsThatPass = ['+954.877', '+2.18351e+006', '+7244.99+1.20333e-005d', '+7244.99+120d', '+3.76184','1','+7200+0d','']
-	'''
-
+		testStringsThatPass = ['+954.877', '+2.18351e+006', '+7244.99+1.20333e-005d', '+7244.99+120d', '+3.76184','1','+7200+0d','']'''
 	with open(fileName) as openfile:
 		data = openfile.read()
 	lines = data.splitlines()
@@ -161,7 +162,6 @@ def _seriesTranspose(theArray):
 
 def anaDataTree(studyPath, fileNameTest):
 	''' Take a study and put all its data into a nested object {fileName:{metricName:[...]}} '''
-
 	data = {}
 	csvFiles = os.listdir(studyPath)
 	for cName in csvFiles:
