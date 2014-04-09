@@ -192,6 +192,17 @@ def new_user():
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\nreg_link"
 	return send_link(email, message)
 
+@app.route("/forgotpwd", methods=["POST"])
+def forgotpwd():
+	email = flask.request.form.get("email")
+	try:
+		user = json.load(open("data/User/"+email+".json")) # I'm repeating this idiom quite a lot.  Should abstract somehow
+		message = "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\nreg_link"
+		return send_link(email,message,user)
+	except Exception, e:
+		print e
+		return "Error"
+
 @app.route("/robots.txt")
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
