@@ -1,75 +1,40 @@
-#!/usr/bin/env python
+''' Code for running Gridlab and getting results into pythonic data structures. '''
 
 import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, time
 from os.path import join as pJoin
 
-# Path magic.
-myDir = os.path.dirname(__file__)
-sys.path.append(os.path.dirname(os.path.dirname(myDir)))
+# Locational variables so we don't have to rely on OMF being in the system path.
+_myDir = os.path.dirname(os.path.abspath(__file__))
+_omfDir = os.path.dirname(os.path.dirname(_myDir))
+sys.path.append(_omfDir)
 
 # OMF imports.
 import feeder
 
-def run(studyObject):
-	# Choose our platform:
-	thisFile = os.path.realpath(__file__)
-	solverRoot = os.path.split(thisFile)[0]
+def _getPlatform():
+	''' Figure out what platform we're on and choose a suitable Gridlab binary. '''
+	# TODO: work this into runInFilesystem.
 	enviro = os.environ
 	if sys.platform == 'win32' or sys.platform == 'cygwin':
 		if platform.machine().endswith('64'):
-			binary = solverRoot + "\\win64\\gridlabd.exe"
-			enviro['GRIDLABD'] = solverRoot + "\\win64"
-			enviro['GLPATH'] = solverRoot + "\\win64\\"
+			binary = _myDir + "\\win64\\gridlabd.exe"
+			enviro['GRIDLABD'] = _myDir + "\\win64"
+			enviro['GLPATH'] = _myDir + "\\win64\\"
 		else:
-			binary = solverRoot + "\\win32\\gridlabd.exe"
-			enviro['GRIDLABD'] = solverRoot + "\\win32"
-			enviro['GLPATH'] = solverRoot + "\\win32\\"
+			binary = _myDir + "\\win32\\gridlabd.exe"
+			enviro['GRIDLABD'] = _myDir + "\\win32"
+			enviro['GLPATH'] = _myDir + "\\win32\\"
 	elif sys.platform == 'darwin':
 		# Implement me, maybe.
 		pass
 	elif sys.platform == 'linux2':
-		binary = solverRoot + "/linx64/gridlabd.bin"
-		enviro['GRIDLABD'] = solverRoot + "/linx64"
-		enviro['GLPATH'] = solverRoot + "/linx64"
+		binary = _myDir + "/linx64/gridlabd.bin"
+		enviro['GRIDLABD'] = _myDir + "/linx64"
+		enviro['GLPATH'] = _myDir + "/linx64"
 		# Uncomment the following line if we ever get all the linux libraries bundled. Hard!
 		# enviro['LD_LIBRARY_PATH'] = enviro['LD_LIBRARY_PATH'] + ':' + solverRoot + "/linx64"
 	else:
 		print "Platform not supported ", sys.platform
-		return False
-	try:
-		# Create a running directory and fill it.
-		studyPath = 'running/' + studyObject.analysisName + '---' + studyObject.name + '___' + str(datetime.datetime.now()).replace(':','_') + '/'
-		os.makedirs(studyPath)
-		# Write attachments and glm.
-		attachments = studyObject.inputJson['attachments']
-		for attach in attachments:
-			with open (studyPath + attach,'w') as attachFile:
-				attachFile.write(attachments[attach])
-		glmString = feeder.sortedWrite(studyObject.inputJson['tree'])
-		with open(studyPath + 'main.glm','w') as glmFile:
-			glmFile.write(glmString)
-		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-		with open(studyPath + '/stdout.txt','w') as stdout, open(studyPath + '/stderr.txt','w') as stderr, open(studyPath + '/PID.txt','w') as pidFile:
-			# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-			proc = subprocess.Popen([binary,'-w','main.glm'], cwd=studyPath, stdout=stdout, stderr=stderr, env=enviro)
-			pidFile.write(str(proc.pid))
-		returnCode = proc.wait()
-		if returnCode == 15:
-			# Stop running studies because we were terminated.
-			shutil.rmtree(studyPath)
-			return False
-		# Build raw JSON output.
-		rawOut = anaDataTree(studyPath, lambda x:True)
-		with open(studyPath + '/stderr.txt','r') as stderrFile:
-			rawOut['stderr'] = stderrFile.read().strip()
-		with open(studyPath + '/stdout.txt','r') as stdoutFile:
-			rawOut['stdout'] = stdoutFile.read().strip()
-		rawOut['glmTree'] = feeder.parse(studyPath + '/main.glm')
-		# Delete the folder and return.
-		shutil.rmtree(studyPath)
-		return rawOut
-	except:
-		traceback.print_exc()
 		return False
 
 def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
@@ -119,7 +84,8 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 		return {}
 
 def _strClean(x):
-	# Helper function that translates csv values to reasonable floats (or header values to strings):
+	''' Helper function that translates csv values to reasonable floats (or header values to strings). '''
+	# TODO: write tests for this crazy function.
 	if x == 'OPEN':
 		return 1.0
 	elif x == 'CLOSED':
@@ -145,7 +111,7 @@ def _strClean(x):
 		return x
 
 def csvToArray(fileName):
-	''' Take a Gridlab-export csv filename, return a list of timeseries vectors. Internal method. 
+	''' Take a Gridlab-export csv filename, return a list of timeseries vectors.
 		testStringsThatPass = ['+954.877', '+2.18351e+006', '+7244.99+1.20333e-005d', '+7244.99+120d', '+3.76184','1','+7200+0d','']'''
 	with open(fileName) as openfile:
 		data = openfile.read()
@@ -158,6 +124,7 @@ def csvToArray(fileName):
 	return arrayNoHeaders
 
 def _seriesTranspose(theArray):
+	''' Transpose every matrix that's a value in a dictionary. Yikes. '''
 	return {i[0]:list(i)[1:] for i in zip(*theArray)}
 
 def anaDataTree(studyPath, fileNameTest):
@@ -171,13 +138,9 @@ def anaDataTree(studyPath, fileNameTest):
 	return data
 
 def _tests():
-	#TODO: fix the running directory.
-	# On the Python side, this test runs fine, but it gets fatal errors in gridlab because it is looking for a file called "climate.tmy2"
+	# TODO: On the Python side, this test runs fine, but it gets fatal errors in gridlab because it is looking for a file called "climate.tmy2"
 	import json
-	# import storage, studies
-	# store = storage.Filestore('data')
-	# testStudy = studies.gridlabd.Gridlabd('NoSolar', 'zSolar Trio', store.getMetadata('Study','zSolar Trio---NoSolar'), store.get('Study','zSolar Trio---NoSolar'))
-	with open("../../data/Feeder/public_Olin Barre.json") as feederFile:
+	with open(pJoin(_omfDir,"data","Feeder","public","Olin Barre.json"),"r") as feederFile:
 		feederJson = json.load(feederFile)
 	print "tree:", feederJson["tree"]
 	print "attachments:", feederJson["attachments"]
