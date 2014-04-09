@@ -111,6 +111,17 @@ class User:
 	def is_active(self): return True
 	def is_anonymous(self): return False
 
+	# I found myself repeating the idioms in these functions all the time, so I abstracted them into class methods.  If you want to read a user dict from json on disk, just do User.gu(<username>) and to dump do User.du(<userdict>).  Short function names because I hate typing.
+	@classmethod
+	def gu(self, username):
+		# get user
+		return json.load(open("data/User/"+username+".json"))
+
+	@classmethod
+	def du(self, userdict):
+		# dump user
+		json.dump(userdict, open("data/User/"+userdict["username"]+".json", "w"))
+	
 def cryptoRandomString():
 	''' Generate a cryptographically secure random string for signing/encrypting cookies. '''
 	if 'COOKIE_KEY' in globals():
@@ -186,7 +197,7 @@ def new_user():
 		return flask.redirect("/")
 	email = flask.request.form.get("email")
 	if email in [f.replace(".json", "") for f in os.listdir("data/User")]:
-		u = json.load(open("data/User/"+email+".json"))
+		u = User.gu(email)
 		if u.get("password_digest") or not flask.request.form.get("resend"):
 			return "Already Exists"
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\nreg_link"
@@ -196,12 +207,36 @@ def new_user():
 def forgotpwd():
 	email = flask.request.form.get("email")
 	try:
-		user = json.load(open("data/User/"+email+".json")) # I'm repeating this idiom quite a lot.  Should abstract somehow
+		user = User.gu(email)
 		message = "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\nreg_link"
 		return send_link(email,message,user)
 	except Exception, e:
 		print e
 		return "Error"
+	
+@app.route("/register/<email>/<reg_key>", methods=["GET", "POST"])
+def register(email, reg_key):
+	if flask_login.current_user.is_authenticated():
+		return flask.redirect("/")
+	# This is super ug, sorry
+	try:
+		user = User.gu(email)
+	except Exception:
+		user = None
+	if not (user and
+			reg_key == user.get("reg_key") and
+			user.get("timestamp") and
+			datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user.get("timestamp"), "%c")):
+		return "This page either expired, or you are not supposed to access it.  It might not even exist"
+	if flask.request.method == "GET":
+		return flask.render_template("register.html", email=email)
+	password, confirm_password = map(flask.request.form.get, ["password", "confirm_password"])
+	if password == confirm_password:
+		user["username"] = email
+		user["password_digest"] = pbkdf2_sha512.encrypt(password)
+		flask_login.login_user(User(user))
+		User.du(user)
+	return flask.redirect("/")
 
 @app.route("/robots.txt")
 def static_from_root():
