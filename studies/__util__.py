@@ -20,7 +20,6 @@ def aggSeries(timeStamps, timeSeries, func, level):
 	if level=='months': endPos = 7
 	elif level=='days': endPos = 10
 	combo = zip(timeStamps, timeSeries)
-
 	# Group by level:
 	groupedCombo = _groupBy(combo, lambda x1,x2: x1[0][0:endPos]==x2[0][0:endPos])
 	# Get rid of the timestamps:
