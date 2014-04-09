@@ -2,7 +2,7 @@
 
 from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify
 from jinja2 import Template
-import models, json, os, flask_login, hashlib, random, time, datetime
+import models, json, os, flask_login, hashlib, random, time, datetime, shutil
 from passlib.hash import pbkdf2_sha512
 
 app = Flask("omf")
@@ -149,6 +149,20 @@ def login():
 ###################################################
 # VIEWS
 ###################################################
+
+@app.route("/deleteUser", methods=["POST"])
+@flask_login.login_required
+def deleteUser():
+	if flask_login.current_user.username != "admin":
+		return "You are not authorized to delete users"
+	username = flask.request.form.get("username")
+    for objectType in ["Model", "Feeder"]:
+        try:
+            shutil.rmtree("data/"+username+objectType)
+        except Exception, e:
+            print e
+            return "Failure"
+	return "Success"
 
 @app.route("/robots.txt")
 def static_from_root():
