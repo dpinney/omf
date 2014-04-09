@@ -42,13 +42,13 @@ class Gridlabd:
 			# Modify the glm with time variables:
 			feeder.adjustTime(tree=tree, simLength=self.simLength, simLengthUnits=str(self.simLengthUnits), simStartDate=self.simStartDate)
 
-	# WARNING! Run does not care about performance and will happily run for a long, long time. Spawn a thread or process for this nonsense.
 	def _agg(self, series, func, level):
 		if level in ['days','months']:
 			return util.aggSeries(stamps, series, func, level)
 		else:
 			return series	
 
+	# WARNING! Run does not care about performance and will happily run for a long, long time. Spawn a thread or process for this nonsense.
 	def run(self):
 		# Execute the solver, the process output.
 		rawOut = solvers.gridlabd.run(self)

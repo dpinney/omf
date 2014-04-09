@@ -197,7 +197,14 @@
 			<pre id="stdout" class="stdoutBlock"></pre>
 			<script>
 				gebi("stdout").innerHTML = allOutputData.stdout
-				gebi("stderr").innerHTML = allOutputData.stderr.substring(0,80*19) + 'STDERR TRUNCATED'
+				stderr = allOutputData.stderr
+				if (stderr.length > 80*19) {
+					gebi("stderr").innerHTML = stderr.substring(0,80*9) +
+						"\nSTDERR TRUNCATED\n" + stderr.substring(stderr.length-80*9)
+				} else {
+					gebi("stderr").innerHTML = allOutputData.stderr
+				}
+
 			</script>
 		</div>
 	</div>

@@ -1,16 +1,18 @@
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, datetime as dt
+import multiprocessing
 from os.path import join as pJoin
 from jinja2 import Template
 
-_myDir = os.path.dirname(__file__)
+# Locational variables so we don't have to rely on OMF being in the system path.
+_myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
-# TODO: import feeder.py, etc.
+
+# OMF imports
 sys.path.append(_omfDir)
 import feeder
+from solvers import gridlabd
 
-# Speed of model execution so our web server knows whether to wait for results on run:
-fastModel = False
-
+# Our HTML template for the interface:
 with open(pJoin(_myDir,"gridlabSingle.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
@@ -62,43 +64,60 @@ def create(parentDirectory, inData):
 		pJoin(modelDir,"climate.tmy2"))
 
 def run(modelDir):
-	''' Run the model in its directory. '''
+	''' Run the model in a separate process. web.py calls this to run the model.
+	This function will return fast, but results take a while to hit the file system.'''
+	backProc = multiprocessing.Process(target=runForeground, args=(modelDir,))
+	backProc.start()
+	print "SENT TO BACKGROUND", modelDir
+
+def runForeground(modelDir):
+	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
+	print "STARTING TO RUN", modelDir
+	startTime = dt.datetime.now()
 	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
-	# Write the GLM and its associated files.
 	feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
-	with open(pJoin(modelDir,"feeder.glm"),"w") as glmFile:
-		glmFile.write(feeder.sortedWrite(feederJson["tree"]))
-	for fName in feederJson["attachments"]:
-		with open(pJoin(modelDir,fName),"w") as attachFile:
-			attachFile.write(feederJson["attachments"][fName])
-	# TODO: Do stuff here...
-	
-	print "RUNNING"
-	# Translate files to needed format. Run Gridlab.
-	print "OKAY we're in", modelDir
+	tree = feederJson["tree"]
+	# Set up GLM with correct time and recorders:
+	feeder.attachRecorders(tree, "Regulator", "object", "regulator")
+	feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
+	feeder.attachRecorders(tree, "Inverter", "object", "inverter")
+	feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
+	feeder.attachRecorders(tree, "CollectorVoltage", None, None)
+	feeder.attachRecorders(tree, "Climate", "object", "climate")
+	feeder.attachRecorders(tree, "OverheadLosses", None, None)
+	feeder.attachRecorders(tree, "UndergroundLosses", None, None)
+	feeder.attachRecorders(tree, "TriplexLosses", None, None)
+	feeder.attachRecorders(tree, "TransformerLosses", None, None)
+	feeder.groupSwingKids(tree)
+	feeder.adjustTime(tree=tree, simLength=float(allInputData["simLength"]),
+		simLengthUnits=allInputData["simLengthUnits"], simStartDate=allInputData["simStartDate"])
+	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
+	rawOutput = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
+		keepFiles=True, workDir=modelDir)
+	# Write the output.
+	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+		json.dump(rawOutput, outFile, indent=4)
+	endTime = dt.datetime.now()
+	allInputData["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+	# Update the runTime in the input file.
+	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+		json.dump(allInputData, inFile, indent=4)
+	# Clean up the PID file.
+	os.remove(pJoin(modelDir,"PID.txt"))
+	print "DONE RUNNING", modelDir
 
 def cancel(modelDir):
 	''' Try to cancel a currently running model. '''
-	#TODO: implement me.
-	pass
-
-def _oldTests():
-	''' REMOVE ME '''
-	# Render a no-input template.
-	renderAndShow()
-	# Render running template.
-	testDir = pJoin(_omfDir,"data","Model","admin","Running Example")
-	renderAndShow(modelDir=testDir)
-	# Render completed template.
-	testDir = pJoin(_omfDir,"data","Model","admin","Single Gridlab Run")
-	renderAndShow(modelDir=testDir)
+	try:
+		with open(pJoin(modelDir,"PID.txt"),"r") as pidFile:
+			pid = int(pidFile.read())
+			os.kill(pid, 15)
+	except:
+		print "ATTEMPTED AND FAILED TO KILL", modelDir
 
 def _tests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
-	# No-input template.
-	renderAndShow()
-	# If we were actually inputting stuff:
 	inData = { "modelName": "Automated Testing",
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
@@ -106,19 +125,30 @@ def _tests():
 		"modelType": "gridlabSingle",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "100",
-		"user": "admin", # Only set by web.py
+		"user": "admin", # Really only used with web.py.
 		"runTime": ""}
-	# create a model.
-	create(workDir, inData)
 	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
-	# Show a thing.
+	# Blow away old test results if necessary.
+	try:
+		shutil.rmtree(modelLoc)
+	except:
+		# No previous test results.
+		pass
+	# No-input template.
+	renderAndShow()
+	# Create a model.
+	create(workDir, inData)
+	# Show the model (should look like it's running).
 	renderAndShow(modelDir=modelLoc)
-	# run a thing.
+	# Run the model.
 	run(modelLoc)
-	# cancel a thing.
-	# run a thing again.
-	# delete a thing.
-	# shutil.rmtree(modelLoc)
+	## Cancel the model.
+	# time.sleep(2)
+	# cancel(modelLoc)
+	# Show the output.
+	renderAndShow(modelDir=modelLoc)
+	# Delete the model.
+	shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
