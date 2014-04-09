@@ -1,6 +1,6 @@
 ''' Web server for model-oriented OMF interface. '''
 
-from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify
+from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, Response
 from jinja2 import Template
 import models, json, os, flask_login, hashlib, random, time, datetime, shutil
 from passlib.hash import pbkdf2_sha512
@@ -181,7 +181,7 @@ def login():
 def deleteUser():
 	if flask_login.current_user.username != "admin":
 		return "You are not authorized to delete users"
-	username = flask.request.form.get("username")
+	username = request.form.get("username")
 	for objectType in ["Model", "Feeder"]:
 		try:
 			shutil.rmtree("data/"+username+objectType)
@@ -194,18 +194,18 @@ def deleteUser():
 @flask_login.login_required
 def new_user():
 	if flask_login.current_user.username != "admin":
-		return flask.redirect("/")
-	email = flask.request.form.get("email")
+		return redirect("/")
+	email = request.form.get("email")
 	if email in [f.replace(".json", "") for f in os.listdir("data/User")]:
 		u = User.gu(email)
-		if u.get("password_digest") or not flask.request.form.get("resend"):
+		if u.get("password_digest") or not request.form.get("resend"):
 			return "Already Exists"
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\nreg_link"
 	return send_link(email, message)
 
 @app.route("/forgotpwd", methods=["POST"])
 def forgotpwd():
-	email = flask.request.form.get("email")
+	email = request.form.get("email")
 	try:
 		user = User.gu(email)
 		message = "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\nreg_link"
@@ -217,7 +217,7 @@ def forgotpwd():
 @app.route("/register/<email>/<reg_key>", methods=["GET", "POST"])
 def register(email, reg_key):
 	if flask_login.current_user.is_authenticated():
-		return flask.redirect("/")
+		return redirect("/")
 	# This is super ug, sorry
 	try:
 		user = User.gu(email)
@@ -228,15 +228,39 @@ def register(email, reg_key):
 			user.get("timestamp") and
 			datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user.get("timestamp"), "%c")):
 		return "This page either expired, or you are not supposed to access it.  It might not even exist"
-	if flask.request.method == "GET":
-		return flask.render_template("register.html", email=email)
-	password, confirm_password = map(flask.request.form.get, ["password", "confirm_password"])
+	if request.method == "GET":
+		return render_template("register.html", email=email)
+	password, confirm_password = map(request.form.get, ["password", "confirm_password"])
 	if password == confirm_password:
 		user["username"] = email
 		user["password_digest"] = pbkdf2_sha512.encrypt(password)
 		flask_login.login_user(User(user))
 		User.du(user)
-	return flask.redirect("/")
+	return redirect("/")
+
+@app.route("/adminControls")
+@flask_login.login_required
+def adminControls():
+	if flask_login.current_user.username != "admin":
+		return redirect("/")
+	users = []
+	for username in [f.replace(".json", "") for f in os.listdir("data/User")]:
+		if username != "admin" and username != "public":
+			u = {"username":username}
+			user_dict = User.gu(username)
+			try:
+				if user_dict.get("password_digest"):
+					u["status"] = u["status_class"] = "Registered"
+				elif datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user_dict["timestamp"], "%c"):
+					u["status"] = "Email sent"
+					u["status_class"] = "emailSent"
+				else:
+					u["status"] = "Email expired"
+					u["status_class"] = "emailExpired"
+			except KeyError:
+				return Response(str(user_dict)+"\n"+username, content_type="text/plain")
+			users.append(u)
+	return render_template("adminControls.html", users = users)
 
 @app.route("/robots.txt")
 def static_from_root():
