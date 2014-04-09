@@ -1,3 +1,5 @@
+''' Container for all models. '''
+
 import os, sys
 
 # Make sure this module is on the path regardless of where its imported from.
