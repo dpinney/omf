@@ -103,6 +103,8 @@ def send_link(email, message, u={}):
 
 class User:
 	def __init__(self, jsonBlob):
+		# I think it could possibly be useful to be able to access the json blob after the user has been loaded
+		self.jsonBlob = jsonBlob
 		self.username = jsonBlob["username"]
 	# Required flask_login functions.
 	def is_admin(self):		return self.username == "admin"
@@ -110,6 +112,10 @@ class User:
 	def is_authenticated(self): return True
 	def is_active(self): return True
 	def is_anonymous(self): return False
+
+	def __getitem__(self, key):
+		# This allows us to access the json blob with user["username"], for example, instead of doing user.jsonBlob["username"]
+		return self.jsonBlob[key]
 
 	# I found myself repeating the idioms in these functions all the time, so I abstracted them into class methods.  If you want to read a user dict from json on disk, just do User.gu(<username>) and to dump do User.du(<userdict>).  Short function names because I hate typing.
 	@classmethod
@@ -261,6 +267,27 @@ def adminControls():
 				return Response(str(user_dict)+"\n"+username, content_type="text/plain")
 			users.append(u)
 	return render_template("adminControls.html", users = users)
+
+@app.route("/myaccount")
+@flask_login.login_required
+def myaccount():
+	return render_template("myaccount.html",
+						   user=flask_login.current_user)
+
+@app.route("/changepwd", methods=["POST"])
+@flask_login.login_required
+def changepwd():
+	old_pwd, new_pwd, conf_pwd = map(flask.request.form.get, ["old_pwd", "new_pwd", "conf_pwd"])
+	user = User.gu(flask_login.current_user.username)
+	if pbkdf2_sha512.verify(old_pwd, user["password_digest"]):
+		if new_pwd == conf_pwd:
+			user["password_digest"] = pbkdf2_sha512.encrypt(new_pwd)
+			User.du(user)
+			return "Success"
+		else:
+			return "not_match"
+	else:
+		return "not_auth"
 
 @app.route("/robots.txt")
 def static_from_root():
