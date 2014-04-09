@@ -191,9 +191,9 @@ def runForeground(modelDir):
 	# Write the output.
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 		json.dump(cleanOut, outFile, indent=4)
+	# Update the runTime in the input file.
 	endTime = dt.datetime.now()
 	allInputData["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
-	# Update the runTime in the input file.
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(allInputData, inFile, indent=4)
 	# Clean up the PID file.

@@ -65,85 +65,76 @@ def create(parentDirectory, inData):
 
 def run(modelDir):
 	''' Run the model in its directory. '''
-	try:
-		# Create a running directory and fill it.
-		studyPath = 'running/' + self.analysisName + '---' + self.name + '___' + str(datetime.now()).replace(':','_') + '/'
-		os.makedirs(studyPath)
-		# Write attachments and glm.
-		attachments = self.inputJson['attachments']
-		for attach in attachments:
-			with open (studyPath + attach,'w') as attachFile:
-				attachFile.write(attachments[attach])
-		# setup data structures
-		ssc = solvers.nrelsam.SSCAPI()
-		dat = ssc.ssc_data_create()
-		# required inputs
-		ssc.ssc_data_set_string(dat, "file_name", studyPath + "/climate.tmy2")
-		ssc.ssc_data_set_number(dat, "system_size", float(self.inputJson['systemSize']))
-		ssc.ssc_data_set_number(dat, "derate", float(self.inputJson['derate']))
-		ssc.ssc_data_set_number(dat, "track_mode", float(self.inputJson['trackingMode']))
-		ssc.ssc_data_set_number(dat, "azimuth", float(self.inputJson['azimuth']))
-		# default inputs exposed
-		ssc.ssc_data_set_number(dat, 'rotlim', float(self.inputJson['rotlim']))
-		ssc.ssc_data_set_number(dat, 't_noct', float(self.inputJson['t_noct']))
-		ssc.ssc_data_set_number(dat, 't_ref', float(self.inputJson['t_ref']))
-		ssc.ssc_data_set_number(dat, 'gamma', float(self.inputJson['gamma']))
-		ssc.ssc_data_set_number(dat, 'inv_eff', float(self.inputJson['inv_eff']))
-		ssc.ssc_data_set_number(dat, 'fd', float(self.inputJson['fd']))
-		ssc.ssc_data_set_number(dat, 'i_ref', float(self.inputJson['i_ref']))
-		ssc.ssc_data_set_number(dat, 'poa_cutin', float(self.inputJson['poa_cutin']))
-		ssc.ssc_data_set_number(dat, 'w_stow', float(self.inputJson['w_stow']))
-		# complicated optional inputs
-		ssc.ssc_data_set_number(dat, 'tilt_eq_lat', 1)
-		# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
-		# ssc.ssc_data_set_matrix(dat, 'shading_mxh', ...) 		# Month x Hour beam shading factors
-		# ssc.ssc_data_set_matrix(dat, 'shading_azal', ...) 	# Azimuth x altitude beam shading factors
-		# ssc.ssc_data_set_number(dat, 'shading_diff', ...) 	# Diffuse shading factor
-		# ssc.ssc_data_set_number(dat, 'enable_user_poa', ...)	# Enable user-defined POA irradiance input = 0 or 1
-		# ssc.ssc_data_set_array(dat, 'user_poa', ...) 			# User-defined POA irradiance in W/m2
-		# ssc.ssc_data_set_number(dat, 'tilt', 999)
-
-		# run PV system simulation
-		mod = ssc.ssc_module_create("pvwattsv1")
-		ssc.ssc_module_exec(mod, dat)
-
-		# MD calc.
-		if self.simLengthUnits == 'days':
-			startDateTime = self.simStartDate
-		else:
-			startDateTime = self.simStartDate + ' 00:00:00 PDT'
-
-		# Extract data.
-		# Timestamps.
-		outData = {}
-		outData['timeStamps'] = [startDateTime for x in range(self.simLength)]
-		# Geodata.
-		outData['city'] = ssc.ssc_data_get_string(dat, 'city')
-		outData['state'] = ssc.ssc_data_get_string(dat, 'state')
-		outData['lat'] = ssc.ssc_data_get_number(dat, 'lat')
-		outData['lon'] = ssc.ssc_data_get_number(dat, 'lon')
-		outData['elev'] = ssc.ssc_data_get_number(dat, 'elev')
-		# Weather
-		outData['climate'] = {}
-		outData['climate']['irrad'] = _aggData('dn', util.avg)
-		outData['climate']['diffIrrad'] = _aggData('df', util.avg)
-		outData['climate']['temp'] = _aggData('tamb', util.avg)
-		outData['climate']['cellTemp'] = _aggData('tcell', util.avg)
-		outData['climate']['wind'] = _aggData('wspd', util.avg)
-		# Power generation.
-		outData['Consumption'] = {}
-		outData['Consumption']['Power'] = [-1*x for x in _aggData('ac', util.avg)]
-		outData['Consumption']['Losses'] = [0 for x in _aggData('ac', util.avg)]
-		outData['Consumption']['DG'] = _aggData('ac', util.avg)
-		# Stdout/stderr.
-		outData['stdout'] = 'Success'
-		outData['stderr'] = ''
-		# componentNames.
-		outData['componentNames'] = []
-		shutil.rmtree(studyPath)
-		self.outputJson = outData
-	except:
-		self.outputJson = {'stdout':'Failure'}
+	# TODO: test implementation.
+	startTime = dt.datetime.now()
+	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
+	# Set up SAM data structures.
+	ssc = solvers.nrelsam.SSCAPI()
+	dat = ssc.ssc_data_create()
+	# Required user inputs.
+	ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
+	ssc.ssc_data_set_number(dat, "system_size", float(allInputData['systemSize']))
+	ssc.ssc_data_set_number(dat, "derate", float(allInputData['derate']))
+	ssc.ssc_data_set_number(dat, "track_mode", float(allInputData['trackingMode']))
+	ssc.ssc_data_set_number(dat, "azimuth", float(allInputData['azimuth']))
+	# Advanced inputs with defaults.
+	ssc.ssc_data_set_number(dat, 'rotlim', float(allInputData['rotlim']))
+	ssc.ssc_data_set_number(dat, 't_noct', float(allInputData['t_noct']))
+	ssc.ssc_data_set_number(dat, 't_ref', float(allInputData['t_ref']))
+	ssc.ssc_data_set_number(dat, 'gamma', float(allInputData['gamma']))
+	ssc.ssc_data_set_number(dat, 'inv_eff', float(allInputData['inv_eff']))
+	ssc.ssc_data_set_number(dat, 'fd', float(allInputData['fd']))
+	ssc.ssc_data_set_number(dat, 'i_ref', float(allInputData['i_ref']))
+	ssc.ssc_data_set_number(dat, 'poa_cutin', float(allInputData['poa_cutin']))
+	ssc.ssc_data_set_number(dat, 'w_stow', float(allInputData['w_stow']))
+	# Complicated optional inputs.
+	ssc.ssc_data_set_number(dat, 'tilt_eq_lat', 1)
+	# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
+	# ssc.ssc_data_set_matrix(dat, 'shading_mxh', ...) 		# Month x Hour beam shading factors
+	# ssc.ssc_data_set_matrix(dat, 'shading_azal', ...) 	# Azimuth x altitude beam shading factors
+	# ssc.ssc_data_set_number(dat, 'shading_diff', ...) 	# Diffuse shading factor
+	# ssc.ssc_data_set_number(dat, 'enable_user_poa', ...)	# Enable user-defined POA irradiance input = 0 or 1
+	# ssc.ssc_data_set_array(dat, 'user_poa', ...) 			# User-defined POA irradiance in W/m2
+	# ssc.ssc_data_set_number(dat, 'tilt', 999)
+	# Run PV system simulation.
+	mod = ssc.ssc_module_create("pvwattsv1")
+	ssc.ssc_module_exec(mod, dat)
+	# MD calc.
+	startDateTime = allInputData.get("simLengthUnits","")
+	if startDateTime != 'days':
+		startDateTime = simStartDate + ' 00:00:00 PDT'
+	# Timestamp output.
+	outData = {}
+	outData['timeStamps'] = [startDateTime for x in range(allInputData["simLength"])]
+	# Geodata output.
+	outData['city'] = ssc.ssc_data_get_string(dat, 'city')
+	outData['state'] = ssc.ssc_data_get_string(dat, 'state')
+	outData['lat'] = ssc.ssc_data_get_number(dat, 'lat')
+	outData['lon'] = ssc.ssc_data_get_number(dat, 'lon')
+	outData['elev'] = ssc.ssc_data_get_number(dat, 'elev')
+	# Weather output.
+	outData['climate'] = {}
+	outData['climate']['irrad'] = _aggData('dn', util.avg)
+	outData['climate']['diffIrrad'] = _aggData('df', util.avg)
+	outData['climate']['temp'] = _aggData('tamb', util.avg)
+	outData['climate']['cellTemp'] = _aggData('tcell', util.avg)
+	outData['climate']['wind'] = _aggData('wspd', util.avg)
+	# Power generation.
+	outData['Consumption'] = {}
+	outData['Consumption']['Power'] = [-1*x for x in _aggData('ac', util.avg)]
+	outData['Consumption']['Losses'] = [0 for x in _aggData('ac', util.avg)]
+	outData['Consumption']['DG'] = _aggData('ac', util.avg)
+	# Stdout/stderr.
+	outData['stdout'] = 'Success'
+	outData['stderr'] = ''
+	# Write the output.
+	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+		json.dump(outData, outFile, indent=4)
+	# Update the runTime in the input file.
+	endTime = dt.datetime.now()
+	allInputData["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+		json.dump(allInputData, inFile, indent=4)
 
 def _aggData(key, aggFun):
 	''' Function to aggregate output if we need something other than hour level. '''
@@ -156,13 +147,13 @@ def _aggData(key, aggFun):
 		multiplier = 24
 	else:
 		multiplier = 1
-	hourData = [fullData[(initHour+i)%8760] for i in xrange(self.simLength*multiplier)]
-	if self.simLengthUnits == 'minutes':
+	hourData = [fullData[(initHour+i)%8760] for i in xrange(int(allInputData["simLength"])*multiplier)]
+	if allInputData["simLengthUnits"] == 'minutes':
 		pass
-	elif self.simLengthUnits == 'hours':
+	elif allInputData["simLengthUnits"] == 'hours':
 		return hourData
-	elif self.simLengthUnits == 'days':
-		split = [hourData[x:x+24] for x in xrange(self.simLength)]
+	elif allInputData["simLengthUnits"] == 'days':
+		split = [hourData[x:x+24] for x in xrange(int(allInputData["simLength"]))]
 		return map(aggFun, split)
 
 def cancel(modelDir):
