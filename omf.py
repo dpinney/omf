@@ -28,17 +28,17 @@ user_manager = User.UserManager(store)
 
 @app.before_request
 def csrf_protect():
-    if flask.request.user_agent.browser == 'msie' or flask.request.user_agent.browser == 'firefox':
+	if flask.request.user_agent.browser == 'msie' or flask.request.user_agent.browser == 'firefox':
 		return 'The OMF currently must be accessed by Chrome or Safari.'
-    if flask.request.method == "POST":
-        token = flask.session.get('_csrf_token', None)
-        if not token or token != flask.request.form.get('_csrf_token'):
-            flask.abort(403)
+	if flask.request.method == "POST":
+		token = flask.session.get('_csrf_token', None)
+		if not token or token != flask.request.form.get('_csrf_token'):
+			flask.abort(403)
 
 def generate_csrf_token():
-    if '_csrf_token' not in flask.session:
-        flask.session['_csrf_token'] = some_random_string()
-    return flask.session['_csrf_token']
+	if '_csrf_token' not in flask.session:
+		flask.session['_csrf_token'] = some_random_string()
+	return flask.session['_csrf_token']
 
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
@@ -48,7 +48,7 @@ def load_user(username):
 
 @app.route('/robots.txt')
 def static_from_root():
-    return flask.send_from_directory(app.static_folder, flask.request.path[1:])
+	return flask.send_from_directory(app.static_folder, flask.request.path[1:])
 
 ###################################################
 # VIEWS
@@ -130,7 +130,7 @@ def forgotpwd():
 	user = user_manager.get(flask.request.form.get("email"))
 	if user:
 		return send_link(user.username,
-						 "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\nreg_link",
+						 "Click the link below to reset your password for the OMF.	This link will expire in 24 hours.\nreg_link",
 						 store.get("User", user.username))
 	
 @app.route("/register/<email>/<reg_key>", methods=["GET", "POST"])
@@ -142,7 +142,7 @@ def register(email, reg_key):
 			reg_key == user.get("reg_key") and
 			user.get("timestamp") and
 			datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user.get("timestamp"), "%c")):
-		return "This page either expired, or you are not supposed to access it.  It might not even exist"
+		return "This page either expired, or you are not supposed to access it.	 It might not even exist"
 	if flask.request.method == "GET":
 		return flask.render_template("register.html", email=email)
 	password, confirm_password = map(flask.request.form.get, ["password", "confirm_password"])
@@ -163,8 +163,8 @@ def adminControls():
 		return flask.redirect("/")
 	users = []
 	# for username in store.listAll("User"):
-	# 	if username not in ["public", "admin"] and store.get("User", username).get("username"):
-	# 		users.append(user_manager.get(username))
+	#	if username not in ["public", "admin"] and store.get("User", username).get("username"):
+	#		users.append(user_manager.get(username))
 	for username in store.listAll("User"):
 		if username != "admin" and username != "public":
 			u = {"username":username}
@@ -281,9 +281,9 @@ def newAnalysis(analysisName=None):
 	public_feeders = user_manager.get("public").listAll("Feeder")
 	private_feeders = [f for f in flask_login.current_user.listAll("Feeder") if f[:f.find("_")] != "public"]
 	# if flask_login.current_user.username == "admin":
-	# 	private_feeders
+	#	private_feeders
 	# else:
-	# 	private_feeders = flask_login.current_user.listAll("Feeder")
+	#	private_feeders = flask_login.current_user.listAll("Feeder")
 	feeders = {"Private":private_feeders, "Public":public_feeders}
 	# feeders = user.listAll('Feeder')
 	analyses = user.listAll('Analysis')
@@ -335,7 +335,7 @@ def viewReports(analysisName):
 		studyData['name'] = studyName
 		studyData['analysisName'] = thisAnalysis.name
 		moduleRef = getattr(studies, studyData['studyType'])
-		classRef =  getattr(moduleRef, studyData['studyType'].capitalize())
+		classRef =	getattr(moduleRef, studyData['studyType'].capitalize())
 		studyList.append(classRef(studyData))
 	reportList = thisAnalysis.generateReportHtml(studyList)
 	return flask.render_template('viewReports.html', analysisName=analysisName, reportList=reportList, public = is_public)
@@ -461,7 +461,7 @@ def saveAnalysis():
 		elif studyData['studyType'] == 'scada':
 			studyData['inputJson'] = study
 		moduleRef = getattr(studies, studyData['studyType'])
-		classRef =  getattr(moduleRef, studyData['studyType'].capitalize())
+		classRef =	getattr(moduleRef, studyData['studyType'].capitalize())
 		studyObj = classRef(studyData, new=True)
 		flask_login.current_user.put('Study', adminPrefix+pData['analysisName'] + '---' + study['studyName'], studyObj.__dict__)
 	return flask.redirect('/')

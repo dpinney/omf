@@ -117,7 +117,7 @@ class User:
 		# This allows us to access the json blob with user["username"], for example, instead of doing user.jsonBlob["username"]
 		return self.jsonBlob[key]
 
-	# I found myself repeating the idioms in these functions all the time, so I abstracted them into class methods.  If you want to read a user dict from json on disk, just do User.gu(<username>) and to dump do User.du(<userdict>).  Short function names because I hate typing.
+	# I found myself repeating the idioms in these functions all the time, so I abstracted them into class methods.  If you want to read a user dict from json on disk, just do User.gu(<username>) and to dump do User.du(<userdict>).  Short function names because I hate typing.  They are class methods which means you don't need to instantiate the User to use them.
 	@classmethod
 	def gu(self, username):
 		# get user
@@ -288,6 +288,35 @@ def changepwd():
 			return "not_match"
 	else:
 		return "not_auth"
+
+def objIn(objectName, directory, mapfunc=lambda x: x):
+	# I repeat this idiom frequently: objectName in [f.replace(".json", "") for f in os.listdir("data/Feeder/public")]
+	# To do the same with this function you would do:
+	# objIn(objectName, "data/Feeder/public", lambda f: f.replace(".json", ""))
+	# Or to do objectName in os.listdir("data/Model/public")
+	# You would simply do:
+	# objIn(objectName, "data/Model/public")
+	# I think this will make our code cleaner and safer and more concise
+	
+	return objectName in map(mapfunc, os.listdir(directory))
+
+def nojson(objectType, directory):
+	# A wrapper for objIn.  I remove ".json" from the end of files a lot
+	return objIn(objectName, directory, lambda x: x.replace(".json", ""))
+
+def pubhelper(objectType, objectName):
+	# publicObject was poorly thought out and it returns "Yep"/"Nope" instead of simply true/false, so this is a helper that just returns a boolean value that is used in the actual view function to return "Yep"/"Nope"
+	if objectType == "Feeder":
+		return nojson(objectName, "data/Feeder/public")
+	elif objectType == "Model":
+		return objIn(objectName, "data/Model/public") # heck this one could also use nojson and it would be the same thing.... maybe default should be to use nojson and then we always have the underlying objIn if we want something more specific?
+	
+@app.route("/publicObject/<objectType>/<objectName>")
+def publicObject(objectType, objectName):
+	# This is supposed to be for when you are going to publish an object, and we are looking for name conflicts.
+	# So it's like two layers of stupid because it returns Nope if it IS the name of a public object and Yep otherwise... I guess the intention is, Can I publish this? Nope, because it has the same name as a public object, or Yep, you can because there is no public object with that name
+	# A refactor so that the front end expects true/false rather than Yep/Nope is definitely necessary
+	return "Nope" if pubhelper(objectType, objectName) else "Yep"
 
 @app.route("/robots.txt")
 def static_from_root():
