@@ -367,6 +367,40 @@ def sortData(dataType, column):
 		json.dump(userJson, jfile, indent=4)
 	return "OK"
 
+@app.route('/feeder/<feederName>')
+@flask_login.login_required
+def feederGet(feederName):
+	return render_template('gridEdit.html',
+						   feederName=feederName,
+						   ref = request.referrer,
+						   is_admin = flask_login.current_user.username == "admin",
+						   anaFeeder=False,
+						   public = request.args.get("public") == "true")
+
+@app.route('/feederData/<anaFeeder>/<feederName>.json')
+@flask_login.login_required
+def feederData(anaFeeder, feederName):
+	# Not worrying about analysis feeders for right now
+	# if anaFeeder == 'True':
+	# 	#TODO: fix this.
+	# 	data = user.get('Study', feederName)['inputJson']
+	# 	del data['attachments']
+	# 	return json.dumps(data)
+	# else:
+	path = "data/Feeder/"
+	if request.args.get("public") == "true":
+		path += "public"
+	else:
+		path += flask_login.current_user.username
+	path += "/"+feederName+".json"
+	return jsonify(**json.load(open(path)))
+
+@app.route('/getComponents/')
+def getComponents():
+	path = "data/Component/"
+	components = {name.replace(".json", ""):json.load(open(path+name)) for name in os.listdir(path)}
+	return jsonify(**components)		# The flask function for returning json.  Probably takes care of some "Content-Type" headers or something
+
 @app.route("/newModel/<modelType>")
 @flask_login.login_required
 def newModel(modelType):
