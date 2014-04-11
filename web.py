@@ -318,6 +318,19 @@ def publicObject(objectType, objectName):
 	# A refactor so that the front end expects true/false rather than Yep/Nope is definitely necessary
 	return "Nope" if pubhelper(objectType, objectName) else "Yep"
 
+@app.route("/makePublic/<objectType>/<objectName>", methods=["POST"])
+@flask_login.login_required
+def makePublic(objectType, objectName):
+	username = flask.current_user.username
+	if objectType == "Feeder":
+		ext = ".json"
+	else:
+		ext = ""
+	srcpth = "data/"+objectType+"/"+username+"/"+objectName+ext
+	destpth = "data/"+objectType+"/public/"+objectName+ext
+	shutil.move(srcpth, destpth)
+	return flask.redirect('/')
+
 @app.route("/robots.txt")
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
