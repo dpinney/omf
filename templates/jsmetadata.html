@@ -3,7 +3,7 @@
   <td class="public" style="display:none;"><% if (md["url"].indexOf("true") > -1){ %>true<% } else{ %>false<% } %></td>
   <td style="display:none"><a name="<%= md['name'] %>"></a></td>
   <td class="owner"><%= md['owner'] %></td>
-  <td class="name"><%= md["modelName"] %></td>
+  <td class="name"><a href="/model/<%= md.owner %>/<%= md.modelName %>"><%= md["modelName"] %></a></td>
   <td class="sourceFeeder"><%= md['feederName'] %></td>
   <td class="climate"><%= md['climateName'] %></td>
   <td class="runTime"><%= md['runTime'] %></td>
