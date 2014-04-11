@@ -356,7 +356,11 @@ def sortData(dataType, column):
 	userJson = json.load(open(fname))
 	if not userJson.get("sort"):
 		userJson["sort"] = {}
-	if not userJson["sort"].get(dataType):
+	l = userJson["sort"].get(dataType)
+	# Boolean logic is tricky with negatives so I did it this way
+	if l and l[0] == column:
+		pass
+	else:
 		userJson["sort"][dataType] = [column, 1]
 	userJson["sort"][dataType][1] *= -1
 	with open(fname, "w") as jfile:

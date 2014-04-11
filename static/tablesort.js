@@ -27,7 +27,7 @@ function attachEvt(selector, dataType, attr){
             url:"/sort/"+dataType+"/"+attr,
             type:"POST"
         }).done(function(){
-            if (dataType === "Model"){
+            if (dataType == "Model"){
                 updateModels()
             }
             if (dataType == "Feeder"){
