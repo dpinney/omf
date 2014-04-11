@@ -14,7 +14,7 @@ def getDataNames():
 		if x.startswith(currUser.username + "_")]
 	publicFeeders = [x[7:-5] for x in os.listdir('./data/Feeder/')
 		if x.startswith('public_')]
-	climates = [x[:-5] for x in os.listdir('./data/Weather/')]
+	climates = [x[:-5] for x in os.listdir('./data/Climate/')]
 	return		{'feeders':feeders, 'publicFeeders':publicFeeders, 'climates':climates, 
 		'currentUser':currUser.__dict__}
 
@@ -367,8 +367,6 @@ def sortData(dataType, column):
 		json.dump(userJson, jfile, indent=4)
 	return "OK"
 
-
-
 @app.route("/newModel/<modelType>")
 @flask_login.login_required
 def newModel(modelType):
@@ -389,13 +387,12 @@ def runModel():
 
 @app.route("/model/<user>/<modelName>")
 @flask_login.login_required
-def showModel(modelName):
+def showModel(user, modelName):
 	''' Render a model template with saved data. '''
 	modelDir = "./data/Model/" + user + "/" + modelName
 	with open(modelDir + "/allInputData.json") as inJson:
 		modelType = json.load(inJson)["modelType"]
-	return getattr(models, modelType).renderTemplate(modelDirectory=modelDir,
-		datastoreNames=getDataNames())
+	return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
 
 if __name__ == "__main__":
 	# TODO: remove debug and extra_files arguments.
