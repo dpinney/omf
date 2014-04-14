@@ -342,7 +342,8 @@ def root():
 		analyses=[], 
 		feeders=getAllData("Feeder"),
 		current_user=flask_login.current_user.username, 
-		is_admin = flask_login.current_user.username == "admin")
+		is_admin = flask_login.current_user.username == "admin",
+		modelNames = models.__all__)
 
 @app.route("/getAllData/<dataType>")
 @flask_login.login_required

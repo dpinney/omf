@@ -10,6 +10,7 @@
 		.current_page{pointer-events:none; cursor:default; color:black;}
 		div#feeders {display:none;}
 		h2{text-align:center;}
+		select, button {width:initial;}
 		table#anaTable {width:100%; text-align:left;}
 		table#anaTable tr td:last-child {text-align:right;}
 		table#anaTable tr th:last-child {text-align:right;}
@@ -215,7 +216,15 @@
 				</tbody>
 			</table>
 		</div>
-		<div class='content'><a href='/newModel/gridlabSingle'>New Model</a></div>
+		<div class="content">
+			New model of type 
+			<select id="modelName">
+				{% for name in modelNames %}
+				<option value="{{ name }}">{{ name }}</option>
+				{% endfor %}
+			</select>
+			<button id="createModel" onclick="location.href = '/newModel/'+gebi('modelName').value">Create Model</button>
+		</div>
 	</div>
 	<div id='feeders'>
 		<div class='content'>
