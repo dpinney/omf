@@ -397,8 +397,9 @@ def feederData(anaFeeder, feederName):
 @app.route('/getComponents/')
 def getComponents():
 	path = "data/Component/"
-	components = {name.replace(".json", ""):json.load(open(path+name)) for name in os.listdir(path)}
-	return jsonify(**components)		# The flask function for returning json.  Probably takes care of some "Content-Type" headers or something
+	components = {name.replace(".json", ""):json.load(open(path+name))
+		for name in os.listdir(path)}
+	return jsonify(**components)
 
 @app.route("/newModel/<modelType>")
 @flask_login.login_required
@@ -414,7 +415,7 @@ def runModel():
 	if pData.get("created","NOKEY") == "":
 		# New model.
 		pData["user"] = flask_login.current_user.username
-		modelModule.create("./data/Model/" + pData["user"] + "/", pData)
+		modelModule.create("./data/Model/", pData)
 	modelModule.run("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
@@ -429,4 +430,4 @@ def showModel(user, modelName):
 
 if __name__ == "__main__":
 	# TODO: remove debug and extra_files arguments.
-	app.run(debug=True, extra_files=["./models/gridlabSingle.html"])
+	app.run(debug=True)
