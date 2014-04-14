@@ -151,7 +151,6 @@ def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 		multiplier = 24
 	else:
 		multiplier = 1
-	print 'HEY', simLength,
 	hourData = [fullData[(initHour+i)%8760] for i in xrange(simLength*multiplier)]
 	if simLengthUnits == "minutes":
 		pass
@@ -204,12 +203,10 @@ def _tests():
 	renderAndShow(modelDir=modelLoc)
 	# Run the model.
 	run(modelLoc)
-	## Cancel the model.
-	# time.sleep(2)
-	# cancel(modelLoc)
 	# Show the output.
 	renderAndShow(modelDir=modelLoc)
-	# Delete the model.
+	# # Delete the model.
+	# time.sleep(2)
 	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':

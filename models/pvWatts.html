@@ -120,9 +120,9 @@
 				<tr>
 					<td>Climate</td>
 					<td>
-						<select id='climateName' name='climateName'>
-							{% for climate in datastoreNames['climates'] %}
-								<option value='{{ climate }}'>{{ climate }}</option>
+						<select id="climateName" name="climateName">
+							{% for climate in datastoreNames["climates"] %}
+								<option value="{{ climate }}">{{ climate }}</option>
 							{% endfor %}
 						</select>
 					</td>
@@ -146,66 +146,66 @@
 				</tr>
 				<tr>
 					<td>System Size (kW)</td>
-					<td><input type='text' class='systemSize'/></td>
+					<td><input type="text" id="systemSize" name="systemSize"/></td>
 				</tr>
 				<tr>
 					<td>Derate (%)</td>
-					<td><input type='text' class='derate'/></td>
+					<td><input type="text" id="derate" name="derate"/></td>
 				</tr>
 				<tr>
 					<td>Tracking Mode</td>
 					<td>
-						<select class='trackingMode'/>
-							<option value='0'>Fixed</option>
-							<option value='1'>1 Axis</option>
-							<option value='2'>2 Axis</option>
-							<option value='3'>Azimuth Axis</option>
+						<select id="trackingMode" name="trackingMode"/>
+							<option value="0">Fixed</option>
+							<option value="1">1 Axis</option>
+							<option value="2">2 Axis</option>
+							<option value="3">Azimuth Axis</option>
 						</select>
 					</td>
 				</tr>
 				<tr>
 					<td>Azimuth (degrees)</td>
-					<td><input type='text' class='azimuth'/></td>
+					<td><input type="text" id="azimuth" name="azimuth"/></td>
 				</tr>
 				<tr>
 					<td></td>
-					<td style='text-align:right'><p class='discloser' onclick='javascript:toggleAdvanced(this)'>&#9654; Advanced Options</p></td>
+					<td style="text-align:right"><p class="discloser" onclick="javascript:toggleAdvanced(this)">&#9654; Advanced Options</p></td>
 				</tr>
-				<tr class='advancedOption'>
+				<tr class="advancedOption">
 					<td>Tracker rotation limit (deg)</td>
-					<td><input type='text' class='rotlim' value='45.0'/></td>
+					<td><input type="text" id="rotlim" name="rotlim" value="45.0"/></td>
 				</tr>
-				<tr class='advancedOption'>
+				<tr class="advancedOption">
 					<td>Nominal operating cell temperature (C)</td>
-					<td><input type='text' class='t_noct' value='45.0'/></td>
+					<td><input type="text" id="t_noct" name="t_noct" value="45.0"/></td>
 				</tr>
-				<tr class='advancedOption'>
+				<tr class="advancedOption">
 					<td>Reference cell temperature (C)</td>
-					<td><input type='text' class='t_ref' value='25.0'/></td>
+					<td><input type="text" id="t_ref" name="t_ref" value="25.0"/></td>
 				</tr>
-				<tr class='advancedOption'>
+				<tr class="advancedOption">
 					<td>Max power temperature coefficient (%/C)</td>
-					<td><input type='text' class='gamma' value='-0.5'/></td>
+					<td><input type="text" id="gamma" name="gamma" value="-0.5"/></td>
 				</tr>
-				<tr class='advancedOption'>
+				<tr class="advancedOption">
 					<td>Inverter efficiency at rated power (frac)</td>
-					<td><input type='text' class='inv_eff' value='0.92'/></td>
+					<td><input type="text" id="inv_eff" name="inv_eff" value="0.92"/></td>
 				</tr>
-				<tr class='advancedOption'>
+				<tr class="advancedOption">
 					<td>Diffuse fraction (0..1)</td>
-					<td><input type='text' class='fd' value='1.0'/></td>
+					<td><input type="text" id="fd" name="fd" value="1.0"/></td>
 				</tr>
-				<tr class='advancedOption'>
+				<tr class="advancedOption">
 					<td>Rating condition irradiance (W/m2)</td>
-					<td><input type='text' class='i_ref' value='1000'/></td>
+					<td><input type="text" id="i_ref" name="i_ref" value="1000"/></td>
 				</tr>
-				<tr class='advancedOption'>
+				<tr class="advancedOption">
 					<td>Min reqd irradiance for operation (W/m2)</td>
-					<td><input type='text' class='poa_cutin' value='0'/></td>
+					<td><input type="text" id="poa_cutin" name="poa_cutin" value="0"/></td>
 				</tr>
-				<tr class='advancedOption'>
+				<tr class="advancedOption">
 					<td>Wind stow speed	(m/s)</td>
-					<td><input type='text' class='w_stow' value='0'/></td>
+					<td><input type="text" id="w_stow" name="w_stow" value="0"/></td>
 				</tr>
 				<tr>
 					<td></td>
@@ -230,7 +230,6 @@
 			<script>
 				powerSeries = [{"marker":{"enabled":false},"color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
 				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338508800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"column":{"stacking":"normal","shadow":false},"spline":{"marker":{"radius":8},"shadow":false,"lineWidth":0}},"xAxis":{"tickColor":"gray","lineColor":"gray","categories":["20Sol"]},"title":{"text":null},"series":[{"color":"orangered","data":[5944255.196466643],"type":"column","name":"Losses"},{"color":"darkorange","data":[142295363.20363092],"type":"column","name":"Loads"},{"color":"seagreen","data":[24543460.52],"type":"spline","name":"DG"}],"yAxis":{"title":{"text":"Energy (Wh)","style":{"color":"gray"}}},"chart":{"width":1000,"height":250,"marginBottom":20,"renderTo":"energyBalance","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Climate</p>

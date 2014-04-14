@@ -3,50 +3,18 @@
 	<meta charset='utf-8'>
 	<meta name='Description' content='The Open Modeling Framework for smart grid cost-benefit analysis.'>
 	<link rel='stylesheet' href='/static/omf.css'/> 
-	<script type='text/javascript' src='/static/omf.js'></script>
-	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
-    <script type='text/javascript' src='/static/underscore.js'></script>
-	<script type='text/javascript' src='/static/pagination.js'></script>
 	<link rel='shortcut icon' href='/static/favicon.ico'>
-    <script><!-- for underscore templating -->
-      {% if is_admin %}
-      var is_admin = true
-      {% else %}
-      var is_admin = false
-      {% endif %}
-    </script>
-    {% include "jsmetadata.html" %}
-    {% include "jsfeeder.html" %}
-    <script type='text/javascript' src='/static/tablesort.js'></script>
 	<style>
-    #mname, #mdate, #fname, #fdate{cursor:pointer;}
-	#spinner{
-		display:none;
-		/* position:absolute; */
-		position:fixed;
-	}
-	.current_page{
-		pointer-events:none;
-		cursor:default;
-		color:black;
-	}
-	div#feeders {display:none;}
-	h2{text-align:center;}
-	table#anaTable {width:100%; text-align:left;}
-	table#anaTable tr td:last-child {text-align:right;}
-	table#anaTable tr th:last-child {text-align:right;}
-	div#toolbar {padding: 0px;
-		height:40px;
-		line-height:40px;
-		position:fixed;
-		top:65px;
-		z-index:1;
-		} /*over-riding some toolbar defaults so tabs look good.*/
-		div#title{
-			position:fixed;
-			top:0;
-			z-index:1;
-		}
+		#mname, #mdate, #fname, #fdate{cursor:pointer;}
+		#spinner {display:none;	position:fixed;}
+		.current_page{pointer-events:none; cursor:default; color:black;}
+		div#feeders {display:none;}
+		h2{text-align:center;}
+		table#anaTable {width:100%; text-align:left;}
+		table#anaTable tr td:last-child {text-align:right;}
+		table#anaTable tr th:last-child {text-align:right;}
+		div#toolbar {padding: 0px; height:40px;	line-height:40px; position:fixed; top:65px;	z-index:1;} /*over-riding some toolbar defaults so tabs look good.*/
+		div#title{position:fixed; top:0; z-index:1;}
 		p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
 		p.tabSelected {background:gray; color:white;}
 		td.running {color:red;}
@@ -61,145 +29,155 @@
 		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
 		/*a#consoleLink {width:20px; height:20px; position:absolute; top:0; right:0; background-color:dimgray; border-bottom-left-radius:5px; color: #303030; text-align:center;}*/   
 		.owner{font-weight:bold}
-		#placeholder{
-			height:90px;
-		}
-
-		</style>
-		<script>
-		$(function(){
-			localStorage.clear();
-			$(document).on("click", ".run, .reRun", function(e){
-				e.preventDefault();
-				return false;
-			}).on("click", ".makePublic", function(e){
-				var objectName = $(this).attr("objectName");
-				var objectType = $(this).attr("objectType");
-				var url = $(this).attr;
-				console.log(objectName+" "+objectType);
-				$.ajax({
-					url:"publicObject/"+objectType+"/"+objectName,
-					async:false
-				}).done(function(data){
-					if (data == "Nope"){
-						alert("There is already a public "+objectType+" with that name!");
-						e.preventDefault();
-						return false;
-					}
-					if(confirm("When a feeder or model is published, all users can view it and it cannot be altered or un-published.  Do you want to continue?")){
-						$.ajax({
-							url:"/makePublic/"+objectType+"/"+objectName,
-							data:{
-								_csrf_token:"{{ csrf_token() }}"
-							},
-							method:"post"
-						})
-					}
+		#placeholder{height:90px;}
+	</style>
+	<script type='text/javascript' src='/static/omf.js'></script>
+	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
+	<script type='text/javascript' src='/static/underscore.js'></script>
+	<script type='text/javascript' src='/static/pagination.js'></script>
+	<script><!-- for underscore templating -->
+	  {% if is_admin %}
+	  var is_admin = true
+	  {% else %}
+	  var is_admin = false
+	  {% endif %}
+	</script>
+	{% include "jsmetadata.html" %}
+	{% include "jsfeeder.html" %}
+	<script type='text/javascript' src='/static/tablesort.js'></script>
+	<script>
+	$(function(){
+		localStorage.clear();
+		$(document).on("click", ".run, .reRun", function(e){
+			e.preventDefault();
+			return false;
+		}).on("click", ".makePublic", function(e){
+			var objectName = $(this).attr("objectName");
+			var objectType = $(this).attr("objectType");
+			var url = $(this).attr;
+			console.log(objectName+" "+objectType);
+			$.ajax({
+				url:"publicObject/"+objectType+"/"+objectName,
+				async:false
+			}).done(function(data){
+				if (data == "Nope"){
+					alert("There is already a public "+objectType+" with that name!");
 					e.preventDefault();
 					return false;
+				}
+				if(confirm("When a feeder or model is published, all users can view it and it cannot be altered or un-published.  Do you want to continue?")){
+					$.ajax({
+						url:"/makePublic/"+objectType+"/"+objectName,
+						data:{
+							_csrf_token:"{{ csrf_token() }}"
+						},
+						method:"post"
+					})
+				}
+				e.preventDefault();
+				return false;
 
-				})
+			})
 
-			});
-
-			run_statuses();
 		});
 
-var all_intervals = {};
-
-function run_statuses(){
-	var metadatas = pull_html_data();
-	var i;
-	for(i=0; i<metadatas.length; i++){
-		startPolling(metadatas[i]);
-	}
-}
-
-function run_analysis(url, analysisName){
-	console.log(url);
-	console.log(analysisName);
-	$.ajax({
-		type:"post",
-		url:url,
-		data:{analysisName:analysisName,
-			"_csrf_token":"{{ csrf_token() }}"
-		}
-
-	}).done(function(data){
-		console.log("sent the request!");
-		var p = url.indexOf("true") > -1 ? ".Public" : ".Private";
-		replace_row(p, analysisName, data)
-		startPolling({"name":analysisName, "public":""+(url.indexOf("true") > -1)});
-		return false;
+		run_statuses();
 	});
-	return false;
-}
 
-function replace_row(p, analysisName, data){
-	var my_tr = $.makeArray($(p+" tr")).filter(function(tr){return $(tr).attr("class") == "analysis "+analysisName.replace(/_/g, '__').replace(/ /g, '_')})[0];
-	$(my_tr).html($("<div>").html(data)[0].getElementsByTagName("tr")[0].innerHTML);
-}
+	var all_intervals = {};
 
-function startPolling(md){
-	// console.log(md)
-	var i = setInterval(function(){
-		$.ajax({
-			url:"/runStatus",
-			data:{name:md.name,
-				is_public:md["public"]
-			}
-		}).done(function(data){
-			if (data != "waiting"){
-				var p = md["public"] == "true" ? ".Public" : ".Private";
-				repalce_row(p, md.name)
-				clearInterval(i);
-			}
-		});
-	}, 5000);
-	all_intervals[Object.keys(all_intervals).length] = i;
-}
-
-function pull_html_data(){ 
-	var metadatas = [];
-	for(i=0; i<$(".analysis").length; i++){
-		var attr_names = ["name", "sourceFeeder", "climate", "runTime", "status", "public"];
-		var md={};
-		for(j=0; j<attr_names.length; j++){
-			md[attr_names[j]] = $($(".analysis")[i]).children("."+attr_names[j]).html();
-		}
-		if (md.status == "running"){
-			console.log(md);
-			metadatas.push(md);
+	function run_statuses(){
+		var metadatas = pull_html_data();
+		var i;
+		for(i=0; i<metadatas.length; i++){
+			startPolling(metadatas[i]);
 		}
 	}
-	return metadatas;
-}
-window.onload = function() {if (window.location.hash=='#feeders') {gebi('feedersTab').click()}}
 
-function feedersClick() {
-	window.location.hash = 'feeders'
-	gebi('analyses').style.display = 'none'
-	gebi('feeders').style.display = 'inline'
-	gebi('analysesTab').className = 'tab'
-	gebi('feedersTab').className = 'tab tabSelected'
-}
+	function run_analysis(url, analysisName){
+		console.log(url);
+		console.log(analysisName);
+		$.ajax({
+			type:"post",
+			url:url,
+			data:{analysisName:analysisName,
+				"_csrf_token":"{{ csrf_token() }}"
+			}
 
-function analysesClick() {
-	window.location.hash = ''
-	gebi('analyses').style.display = 'inline'
-	gebi('feeders').style.display = 'none'
-	gebi('analysesTab').className = 'tab tabSelected'
-	gebi('feedersTab').className = 'tab'
-}
+		}).done(function(data){
+			console.log("sent the request!");
+			var p = url.indexOf("true") > -1 ? ".Public" : ".Private";
+			replace_row(p, analysisName, data)
+			startPolling({"name":analysisName, "public":""+(url.indexOf("true") > -1)});
+			return false;
+		});
+		return false;
+	}
 
-function makePublic(name){
-	
-}
+	function replace_row(p, analysisName, data){
+		var my_tr = $.makeArray($(p+" tr")).filter(function(tr){return $(tr).attr("class") == "analysis "+analysisName.replace(/_/g, '__').replace(/ /g, '_')})[0];
+		$(my_tr).html($("<div>").html(data)[0].getElementsByTagName("tr")[0].innerHTML);
+	}
 
-function delete_feeder(feederName) {
-	post_to_url('deleteFeeder/', {'feedername':feederName, '_csrf_token':'{{ csrf_token() }}'})
-}
+	function startPolling(md){
+		// console.log(md)
+		var i = setInterval(function(){
+			$.ajax({
+				url:"/runStatus",
+				data:{name:md.name,
+					is_public:md["public"]
+				}
+			}).done(function(data){
+				if (data != "waiting"){
+					var p = md["public"] == "true" ? ".Public" : ".Private";
+					repalce_row(p, md.name)
+					clearInterval(i);
+				}
+			});
+		}, 5000);
+		all_intervals[Object.keys(all_intervals).length] = i;
+	}
 
+	function pull_html_data(){ 
+		var metadatas = [];
+		for(i=0; i<$(".analysis").length; i++){
+			var attr_names = ["name", "sourceFeeder", "climate", "runTime", "status", "public"];
+			var md={};
+			for(j=0; j<attr_names.length; j++){
+				md[attr_names[j]] = $($(".analysis")[i]).children("."+attr_names[j]).html();
+			}
+			if (md.status == "running"){
+				console.log(md);
+				metadatas.push(md);
+			}
+		}
+		return metadatas;
+	}
+	window.onload = function() {if (window.location.hash=='#feeders') {gebi('feedersTab').click()}}
+
+	function feedersClick() {
+		window.location.hash = 'feeders'
+		gebi('analyses').style.display = 'none'
+		gebi('feeders').style.display = 'inline'
+		gebi('analysesTab').className = 'tab'
+		gebi('feedersTab').className = 'tab tabSelected'
+	}
+
+	function analysesClick() {
+		window.location.hash = ''
+		gebi('analyses').style.display = 'inline'
+		gebi('feeders').style.display = 'none'
+		gebi('analysesTab').className = 'tab tabSelected'
+		gebi('feedersTab').className = 'tab'
+	}
+
+	function makePublic(name){
+		
+	}
+
+	function delete_feeder(feederName) {
+		post_to_url('deleteFeeder/', {'feedername':feederName, '_csrf_token':'{{ csrf_token() }}'})
+	}
 </script>
 </head>
 <body>
@@ -215,7 +193,6 @@ function delete_feeder(feederName) {
 		{% endif %}
 	</div>
 	<div id='toolbar'>
-
 		<p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Models</p>
 		<p id='feedersTab' class='tab' style='' onclick='feedersClick()'>Feeders</p>
 	</div>
@@ -225,14 +202,14 @@ function delete_feeder(feederName) {
 			<table id='anaTable'>
 				<thead>
 					<tr>
-                      <th class="mowner">Owner</th>
-                      <th id="mname" title="Sort by Model Name">Model Name</th>
-                      <th>Feeder</th>
-                      <th>Climate</th>
-                      <th>Runtime (H:M:S)</th>
-                      <th id="mdate" title="Sort by Date Created">Date Created</th>
-                      <th></th>
-                    </tr>
+						<th class="mowner">Owner</th>
+						<th id="mname" title="Sort by Model Name">Model Name</th>
+						<th>Feeder</th>
+						<th>Climate</th>
+						<th>Runtime (H:M:S)</th>
+						<th id="mdate" title="Sort by Date Created">Date Created</th>
+						<th></th>
+					</tr>
 				</thead>
 				<tbody class="Analyses">
 				</tbody>
@@ -240,7 +217,6 @@ function delete_feeder(feederName) {
 		</div>
 		<div class='content'><a href='/newModel/gridlabSingle'>New Model</a></div>
 	</div>
-
 	<div id='feeders'>
 		<div class='content'>
 			<table id='anaTable'>
@@ -249,7 +225,7 @@ function delete_feeder(feederName) {
 						<th class="fowner">Owner</th>
 						<th id="fname" title="Sort by Feeder Name">Feeder Name</th>
 						<th>Status</th>
-                        <th id="fdate" title="Sort by Date Created">Date Created</th>
+						<th id="fdate" title="Sort by Date Created">Date Created</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -257,8 +233,6 @@ function delete_feeder(feederName) {
 				</tbody>
 			</table>
 		</div>
-
-
 		<div class='content'>
 			<form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
 				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
@@ -283,7 +257,6 @@ function delete_feeder(feederName) {
 				</table>
 			</form>
 		</div>
-
 		<div class='content'>
 			<form action='/gridlabdImport/' enctype='multipart/form-data' method='post'>
 				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
@@ -297,18 +270,13 @@ function delete_feeder(feederName) {
 						<td>Feeder Data File (.glm)</td>
 						<td><input type='file' name='glmFile' accept = '.glm'/></td>
 					</tr>
-<!-- 	<tr>
-	  <td>Equipment Database File (.seq)</td>
-	  <td><input type='file' name='seqFile' accept = '.seq'/></td>
-	</tr> -->
-	<tr>
-		<td></td>
-		<td><input type='submit' value='Begin Import'/></td>
-	</tr>
-</table>
-</form>
-</div>
-
-</div>
+					<tr>
+						<td></td>
+						<td><input type='submit' value='Begin Import'/></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+	</div>
 <img src="/static/spinner.gif" id="spinner" />
 </body>
