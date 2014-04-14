@@ -10,12 +10,10 @@ app = Flask("omf")
 def getDataNames():
 	''' Query the OMF datastore to list all the names of things that can be included.'''
 	currUser = flask_login.current_user
-	feeders = [x[len(currUser.username)+1:-5] for x in os.listdir('./data/Feeder/')
-		if x.startswith(currUser.username + "_")]
-	publicFeeders = [x[7:-5] for x in os.listdir('./data/Feeder/')
-		if x.startswith('public_')]
+	feeders = [x[:-5] for x in os.listdir('./data/Feeder/' + currUser.username)]
+	publicFeeders = [x[:-5] for x in os.listdir('./data/Feeder/public/')]
 	climates = [x[:-5] for x in os.listdir('./data/Climate/')]
-	return		{'feeders':feeders, 'publicFeeders':publicFeeders, 'climates':climates, 
+	return {'feeders':feeders, 'publicFeeders':publicFeeders, 'climates':climates, 
 		'currentUser':currUser.__dict__}
 
 def getAllData(dataType):
@@ -83,8 +81,8 @@ def csrf_protect():
 
 def send_link(email, message, u={}):
 	c = boto.ses.connect_to_region("us-east-1",
-								   aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
-								   aws_secret_access_key="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")
+		aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
+		aws_secret_access_key="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")
 	reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
 	u["reg_key"] = reg_key
 	u["timestamp"] = datetime.datetime.strftime(datetime.datetime.now(), format="%c")
@@ -92,9 +90,9 @@ def send_link(email, message, u={}):
 	u["email"] = email
 	json.dump(u, open("data/User/"+email+".json", "w"))
 	outDict = c.send_email("david.pinney@omf.coop",
-						   "OMF Registration Link",
-						   message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
-						   [email])
+		"OMF Registration Link",
+		message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
+		[email])
 	return "Success"
 
 ###################################################
