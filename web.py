@@ -300,7 +300,6 @@ def objIn(objectName, directory, mapfunc=lambda x: x):
 	# You would simply do:
 	# objIn(objectName, "data/Model/public")
 	# I think this will make our code cleaner and safer and more concise
-	
 	return objectName in map(mapfunc, os.listdir(directory))
 
 def nojson(objectType, directory):
@@ -399,7 +398,7 @@ def feederData(anaFeeder, feederName):
 	path += "/"+feederName+".json"
 	return jsonify(**json.load(open(path)))
 
-@app.route('/getComponents/')
+@app.route("/getComponents/")
 def getComponents():
 	path = "data/Component/"
 	components = {name.replace(".json", ""):json.load(open(path+name))
@@ -440,5 +439,5 @@ def uniqueName(objectType, name):
 	return nojson(objectType, name)
 
 if __name__ == "__main__":
-	# TODO: remove debug and extra_files arguments.
+	# TODO: remove debug.
 	app.run(debug=True)
