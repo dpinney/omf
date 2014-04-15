@@ -5,23 +5,20 @@
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
 		/*INPUT*/
-		table.modelOptions {width:70%; text-align:left; margin-left:auto;}
-		/*OUTPUT*/
-		pre.stdoutBlock {display:inline-block; width:475px; overflow-x:hidden; padding-left:10px; vertical-align:top; font-size:8pt}
-		div.stdouts {overflow-x:auto;white-space: nowrap; margin-top:0px;}
-		div.tightContent {width:1000px; margin-left:auto; margin-right:auto; margin-top:0px; margin-bottom:20px; border-style: solid; border-color:gray; border-width:1px 0px 1px 0px; background-color:white;}
-		div.tightContent div {margin-top:0px;margin-bottom:0px; border:none;}
-		div.tightContent div + div {margin-top:0px; margin-bottom:0px;}
-		p.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt;}
+		.shortInput {width:446px; display:inline-block;}
+		.wideInput {width:892;}
+		label {width:138px; line-height:32px; float:left; text-align:right;}
+		input[type="text"], select {width:300px; float:right; text-align:left; font-size:medium;}
 		#input {margin-top: 0px;}
-		input {border-bottom:thin dotted black;text-align:right;padding-right:5px}
 		button {width:auto;}
 		#cancelButton {background:crimson;}
-		#cancelButton:hover {background:red;}		
+		#cancelButton:hover {background:red;}
+		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
+		/*OUTPUT*/
+		div.tightContent {width:1000px; margin-left:auto; margin-right:auto; margin-top:0px; margin-bottom:20px; border-style: solid; border-color:gray; border-width:1px 0px 1px 0px; background-color:white;}
+		p.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt;}
 		td,th {text-align: right}
 		.preRun, .running, .postRun {display:none;}
-		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
-		.advancedOption {display:none;}
 	</style>
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
@@ -100,51 +97,44 @@
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
-			<table class="modelOptions">
-				<tr>
-					<td>Model Type</td>
-					<td><input type="text" id="modelType" name="modelType" value="cvrStatic" readonly/></td>
-				</tr>
-				<tr>
-					<td>Model Name</td>
-					<td><input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
-				</tr>
-				<tr class="running postRun">
-					<td>User</td>
-					<td><input type="text" id="user" name="user" readonly/></td>
-				</tr>
-				<tr class="running postRun">
-					<td>Created</td>
-					<td><input type="text" id="created" name="created" readonly/></td>
-				</tr>
-				<tr class="postRun">
-					<td>Run Time</td>
-					<td><input type="text" id="runTime" name="runTime" readonly/></td>
-				</tr>
-				<tr>
-					<td>Feeder</td>
-					<td>
-						<select id="feederName" name="feederName"/>
-							<option disabled><strong>Personal Feeders</strong></option>
-							{% for feeder in datastoreNames['feeders'] %}
-								<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
-							{% endfor %}
-							<option disabled><strong>Public Feeders</strong></option>
-							{% for pFeeder in datastoreNames['publicFeeders'] %}
-								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
-							{% endfor %}
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>
-						<button id="runButton" type="submit" class="preRun">Run Model</button>
-						<button id="cancelButton" class="running" type="button" onclick="alert('RUN CANCELED')">Cancel Run</button>
-						<button id="rerunButton" type="submit" class="postRun">Re-Run Model</button>
-					</td>
-				</tr>
-			</table>
+			<div class="shortInput">
+				<label>Model Type</label>
+				<input type="text" id="modelType" name="modelType" value="cvrStatic" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput running postRun">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/></td>
+			</div>
+			<div class="shortInput running postRun">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/></td>
+			</div>
+			<div class="shortInput postRun">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/></td>
+			</div>
+			<div class="shortInput">
+				<label>Feeder</label>
+				<select id="feederName" name="feederName"/>
+					<option disabled><strong>Personal Feeders</strong></option>
+					{% for feeder in datastoreNames['feeders'] %}
+						<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
+					{% endfor %}
+					<option disabled><strong>Public Feeders</strong></option>
+					{% for pFeeder in datastoreNames['publicFeeders'] %}
+						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="wideInput" style="text-align:right">
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
+				<button id="cancelButton" class="running" type="button" onclick="alert('RUN CANCELED')">Cancel Run</button>
+				<button id="rerunButton" type="submit" class="postRun">Re-Run Model</button>
+			</div>
 		</form>
 	</div>
 	<div id ="runIndicator" class="content running">
