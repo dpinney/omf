@@ -125,6 +125,11 @@ class User:
 	def du(self, userdict):
 		# dump user
 		json.dump(userdict, open("data/User/"+userdict["username"]+".json", "w"))
+
+	@classmethod
+	def cu(self):
+		"""Returns current user's username"""
+		return falsk_login.current_user.username
 	
 def cryptoRandomString():
 	''' Generate a cryptographically secure random string for signing/encrypting cookies. '''
@@ -427,6 +432,12 @@ def showModel(user, modelName):
 	with open(modelDir + "/allInputData.json") as inJson:
 		modelType = json.load(inJson)["modelType"]
 	return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
+
+# This route is called in newAnalysis.html, so I'm including it if we want to use it when we make new models
+@app.route('/uniqueName/<objectType>/<name>')
+@flask_login.login_required
+def uniqueName(objectType, name):
+	return nojson(objectType, name)
 
 if __name__ == "__main__":
 	# TODO: remove debug and extra_files arguments.
