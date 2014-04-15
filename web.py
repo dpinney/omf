@@ -6,6 +6,8 @@ import models, json, os, flask_login, hashlib, random, time, datetime, shutil
 from passlib.hash import pbkdf2_sha512
 
 app = Flask("omf")
+# os.path.join is supposed to be a platform independent way to do paths, although our unix paths seem to work on windows, but also I personally find it annoying to do the string concats everywhere, and it'll git rid of errors where we forget to add a slash.  I made a really obvious variable name so that we don't have to type out the whole thing, but we know exactly which function it is.
+OS_PJ = os.path.join
 
 def getDataNames():
 	''' Query the OMF datastore to list all the names of things that can be included.'''
@@ -432,11 +434,31 @@ def showModel(user, modelName):
 		modelType = json.load(inJson)["modelType"]
 	return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
 
-# This route is called in newAnalysis.html, so I'm including it if we want to use it when we make new models
 @app.route('/uniqueName/<objectType>/<name>')
 @flask_login.login_required
 def uniqueName(objectType, name):
 	return nojson(objectType, name)
+
+def feederPath(owner, name):
+	return OS_PJ("data", "Feeder", owner, name+".json")
+
+def modelPath(owner, name):
+	return OS_PJ("data", "Model", owner, name)
+
+@app.route("/delete/<objectType>/<name>/<owner>")
+@flask_login.login_required
+def delete(objectType, name, owner):
+	if owner != User.cu() and User.cu() != "admin":
+		return
+	try:
+		# Just in case someone tries to delete something not through the web interface or for some reason the web interface is displaying something that doesn't actually exist
+		if objectType == "Feeder":
+			os.remove(feederPath(owner, name))
+		elif objectType == "Model":
+			shutil.rmtree(modelPath(owner, name))
+	except Exception:
+		pass
+	return
 
 if __name__ == "__main__":
 	# TODO: remove debug.
