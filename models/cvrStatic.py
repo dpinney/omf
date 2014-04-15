@@ -452,7 +452,7 @@ def _oldTests():
 	# Show all plots:
 	plt.show()
 
-def _tests():
+def _newTests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
 	#TODO: fix this.
@@ -497,6 +497,9 @@ def _tests():
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)
+
+def _tests():
+	renderAndShow()
 
 if __name__ == '__main__':
 	_tests()
