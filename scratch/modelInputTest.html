@@ -1,125 +1,70 @@
+<!-- Testing the way to get lots of variables into a model input. -->
 <head>
 	<title>Open Modeling Framework</title>
 	<meta charset="utf-8">
-	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
-	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<link href="../static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="../static/favicon.ico">
 	<style>
 		/*INPUT*/
-		.shortInput {width:446px; display:inline-block;}
-		.wideInput {width:892;}
+		table.modelOptions {width:70%; text-align:left; margin-left:auto;}
+		div.shortInput {width:446px; display:inline-block;}
+		div.wideInput {width:892;}
 		label {width:138px; line-height:32px; float:left; text-align:right;}
-		input[type="text"], select {width:300px; float:right; text-align:left; font-size:medium;}
-		#input {margin-top: 0px;}
-		button {width:auto;}
+		input.modelInput, select.modelInput {width:300px; float:right; text-align:left; font-size:medium;}
 		#cancelButton {background:crimson;}
 		#cancelButton:hover {background:red;}
-		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
 		/*OUTPUT*/
+		pre.stdoutBlock {display:inline-block; width:475px; overflow-x:hidden; padding-left:10px; vertical-align:top; font-size:8pt}
+		div.stdouts {overflow-x:auto;white-space: nowrap; margin-top:0px;}
 		div.tightContent {width:1000px; margin-left:auto; margin-right:auto; margin-top:0px; margin-bottom:20px; border-style: solid; border-color:gray; border-width:1px 0px 1px 0px; background-color:white;}
+		div.tightContent div {margin-top:0px;margin-bottom:0px; border:none;}
+		div.tightContent div + div {margin-top:0px; margin-bottom:0px;}
 		p.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt;}
+		#input {margin-top: 0px;}
+		input {border-bottom:thin dotted black;text-align:right;padding-right:5px}
+		button {width:auto;}
 		td,th {text-align: right}
 		.preRun, .running, .postRun {display:none;}
+		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
+		.advancedOption {display:none;}
 	</style>
 	<!-- Library Imports -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
-	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
-	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<script type="text/javascript" src="../static/omf.js"></script>
+	<script type="text/javascript" src="../static/jquery-1.9.1.js"></script>
+	<script src="../static/highcharts.src.js"></script>
 	<!-- Data  Imports -->
-	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
-	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
-	<!-- Global Functions -->
-	<script type="text/javascript">
-		function init() {
-			// Set up various things on load.
-			if (allInputData == null && allOutputData == null) {
-				// Case 1: model just started.
-				console.log("NORUN")
-				$(".preRun").show()
-			} else if (allInputData != null && allOutputData == null) {
-				// Case 2: model running.
-				console.log("RUNNING")
-				$(".running").show()
-				restoreInputs()
-				$("input").prop("readonly", true)
-				$("select").prop("disabled", true)
-			} else {
-				// Case 3: one model run complete.
-				console.log("POSTRUN")
-				restoreInputs()
-				$(".postRun").show()
-			}
-		}
-		function restoreInputs() {
-			// Restore all the input values that were used and stored in allInputData.json.
-			gebi("titleText").innerHTML = allInputData.modelName
-			for (index in allInputData) {
-				try {document.querySelector("#" + index).value = allInputData[index]}
-				catch(err){}
-			}
-		}
-		function validateForm() {
-			// Make sure each field matches its validation regex.
-			allFields = $("input")
-			for (i=0; i < allFields.length; i++) {
-				allFields[i].style["border-color"] = "white"
-				currVal = allFields[i].value + ""
-				regex = allFields[i].getAttribute("data-validRegex")
-				returnVal = true
-				if (regex != null && currVal.match(regex) != currVal) {
-					allFields[i].style["border-color"] = "crimson"
-					returnVal = false
-				}
-			}
-			if (!returnVal) {alert("Form values bordered in red don't match the required format.")}
-			return returnVal
-		}
-		// Little function here to get discloser triangles:
-		function toggleAdvanced(clickedObject) {
-			siblings = clickedObject.parentNode.parentNode.parentNode.querySelectorAll('.advancedOption')
-			for (i=0;i<siblings.length;i++) {
-				visible = (getComputedStyle(siblings[i])['display'] == 'none')
-				if (visible) {
-					siblings[i].style.display='table-row'
-				} else {
-					siblings[i].style.display='none'
-				}
-			}
-			if (visible) {code = 9660} else {code = 9654}
-				clickedObject.textContent = String.fromCharCode(code) + ' Advanced Options'
-		}
-	</script>
 </head>
 <body onload="init()">
 	<div id="title">
 		<div id="logoBox"><a href="/">&#10059;</a></div>
 		<p id="titleText">New Static CVR Model</p>
 	</div>
-	<p class="reportTitle">Model Input</p>
+	<p class="reportTitle">New Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
 			<div class="shortInput">
 				<label>Model Type</label>
-				<input type="text" id="modelType" name="modelType" value="cvrStatic" readonly/>
+				<input class="modelInput" type="text" id="modelType" name="modelType" value="cvrStatic" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
+				<input class="modelInput" type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
 			</div>
-			<div class="shortInput running postRun">
+			<div class="shortInput" class="running postRun">
 				<label>User</label>
-				<input type="text" id="user" name="user" readonly/></td>
+				<input class="modelInput" type="text" id="user" name="user" readonly/>
 			</div>
-			<div class="shortInput running postRun">
+			<div class="shortInput" class="running postRun">
 				<label>Created</label>
-				<input type="text" id="created" name="created" readonly/></td>
+				<input class="modelInput" type="text" id="created" name="created" readonly/>
 			</div>
-			<div class="shortInput postRun">
+			<div class="shortInput" class="postRun">
 				<label>Run Time</label>
-				<input type="text" id="runTime" name="runTime" readonly/></td>
+				<input class="modelInput" type="text" id="runTime" name="runTime" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Feeder</label>
-				<select id="feederName" name="feederName"/>
+				<select class="modelInput" id="feederName" name="feederName"/>
 					<option disabled><strong>Personal Feeders</strong></option>
 					{% for feeder in datastoreNames['feeders'] %}
 						<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
@@ -130,11 +75,59 @@
 					{% endfor %}
 				</select>
 			</div>
-			<div class="wideInput" style="text-align:right">
-				<button id="runButton" type="submit" class="preRun">Run Model</button>
-				<button id="cancelButton" class="running" type="button" onclick="alert('RUN CANCELED')">Cancel Run</button>
-				<button id="rerunButton" type="submit" class="postRun">Re-Run Model</button>
-			</div>
+			<div class="wideInput">
+				<p> I AM A POTATO  I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO I AM A POTATO</p>
+			</div> 
+				<button id="runButton" type="submit">Run Model</button>
+			</div>			
+		</form>
+	</div>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
+			<table class="modelOptions">
+				<tr>
+					<td>Model Type</td>
+					<td><input type="text" id="modelType" name="modelType" value="cvrStatic" readonly/></td>
+				</tr>
+				<tr>
+					<td>Model Name</td>
+					<td><input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
+				</tr>
+				<tr class="running postRun">
+					<td>User</td>
+					<td><input type="text" id="user" name="user" readonly/></td>
+				</tr>
+				<tr class="running postRun">
+					<td>Created</td>
+					<td><input type="text" id="created" name="created" readonly/></td>
+				</tr>
+				<tr class="postRun">
+					<td>Run Time</td>
+					<td><input type="text" id="runTime" name="runTime" readonly/></td>
+				</tr>
+				<tr>
+					<td>Feeder</td>
+					<td>
+						<select id="feederName" name="feederName"/>
+							<option disabled><strong>Personal Feeders</strong></option>
+							{% for feeder in datastoreNames['feeders'] %}
+								<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
+							{% endfor %}
+							<option disabled><strong>Public Feeders</strong></option>
+							{% for pFeeder in datastoreNames['publicFeeders'] %}
+								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+							{% endfor %}
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<button id="runButton" type="submit">Run Model</button>
+					</td>
+				</tr>
+			</table>
 		</form>
 	</div>
 	<div id ="runIndicator" class="content running">
