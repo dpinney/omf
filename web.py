@@ -131,8 +131,13 @@ class User:
 	@classmethod
 	def cu(self):
 		"""Returns current user's username"""
-		return falsk_login.current_user.username
-	
+		return flask_login.current_user.username
+
+	@classmethod
+	def ia(self):
+		"""ia == is admin.  Returns if the current user is the admin"""
+		return self.cu() == "admin"
+
 def cryptoRandomString():
 	''' Generate a cryptographically secure random string for signing/encrypting cookies. '''
 	if 'COOKIE_KEY' in globals():
@@ -294,6 +299,12 @@ def changepwd():
 	else:
 		return "not_auth"
 
+def feederPath(owner, name):
+	return OS_PJ("data", "Feeder", owner, name+".json")
+
+def modelPath(owner, name):
+	return OS_PJ("data", "Model", owner, name)
+
 def objIn(objectName, directory, mapfunc=lambda x: x):
 	# I repeat this idiom frequently: objectName in [f.replace(".json", "") for f in os.listdir("data/Feeder/public")]
 	# To do the same with this function you would do:
@@ -380,7 +391,8 @@ def feederGet(feederName):
 						   ref = request.referrer,
 						   is_admin = flask_login.current_user.username == "admin",
 						   anaFeeder=False,
-						   public = request.args.get("public") == "true")
+						   public = request.args.get("public") == "true", # Kinda want to get rid of this
+						   currUser = User.cu())
 
 @app.route('/feederData/<anaFeeder>/<feederName>.json')
 @flask_login.login_required
@@ -439,11 +451,6 @@ def showModel(user, modelName):
 def uniqueName(objectType, name):
 	return nojson(objectType, name)
 
-def feederPath(owner, name):
-	return OS_PJ("data", "Feeder", owner, name+".json")
-
-def modelPath(owner, name):
-	return OS_PJ("data", "Model", owner, name)
 
 @app.route("/delete/<objectType>/<name>/<owner>")
 @flask_login.login_required
@@ -459,6 +466,30 @@ def delete(objectType, name, owner):
 	except Exception:
 		pass
 	return
+
+# Need to do some massive feeder refactoring before I get started on this badboy
+# @app.route('/saveFeeder/<public>', methods=['POST'])
+# @flask_login.login_required
+# def saveFeeder(public):
+# 	# public == True/False refers to whether we should try to save it as a public feeder (True) or not (False)
+# 	postObject = flask.request.form.to_dict()
+# 	if public == "True":
+# 		if User.ia():
+# 			json.dump(json.loads(postObject["feederObjectJson"]),
+# 					  open(feederPath("public", postObject["name"]), "w"))
+# 		else:
+# 			return "You are not authorized to modify public feeders"
+# 	else:
+# 		if User.ia():
+			
+# 			json.dump()
+# 			if store.get("Feeder", str(postObject["name"])):
+# 				store.put("Feeder", str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
+# 			else:
+# 				store.put("Feeder", "admin_"+str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
+# 		else:
+# 			flask_login.current_user.put("Feeder", str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
+# 	return flask.redirect(flask.request.form.get("ref", "/#feeders"))
 
 if __name__ == "__main__":
 	# TODO: remove debug.
