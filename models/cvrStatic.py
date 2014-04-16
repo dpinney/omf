@@ -385,8 +385,8 @@ def _scadaCleanup(meterName):
 		'September':9, 'October':10, 'November':11, 'December':12 }
 	# MonthName -> Season mapping:
 	monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
-				   'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
-				   'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
+		'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
+		'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
 	# Read in the COLOMA data from the tsv.
 	with open('sourceData/ACECSCADA2.tsv', 'rb') as csvFile:
 		scadaReader = csv.DictReader(csvFile, delimiter='\t')

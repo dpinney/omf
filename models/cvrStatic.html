@@ -105,6 +105,19 @@
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
 			</div>
+			<div class="shortInput">
+				<label>Feeder</label>
+				<select id="feederName" name="feederName"/>
+					<option disabled><strong>Personal Feeders</strong></option>
+					{% for feeder in datastoreNames['feeders'] %}
+						<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
+					{% endfor %}
+					<option disabled><strong>Public Feeders</strong></option>
+					{% for pFeeder in datastoreNames['publicFeeders'] %}
+						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+					{% endfor %}
+				</select>
+			</div>
 			<div class="shortInput running postRun">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/></td>
@@ -118,17 +131,105 @@
 				<input type="text" id="runTime" name="runTime" readonly/></td>
 			</div>
 			<div class="shortInput">
-				<label>Feeder</label>
-				<select id="feederName" name="feederName"/>
-					<option disabled><strong>Personal Feeders</strong></option>
-					{% for feeder in datastoreNames['feeders'] %}
-						<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
-					{% endfor %}
-					<option disabled><strong>Public Feeders</strong></option>
-					{% for pFeeder in datastoreNames['publicFeeders'] %}
-						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
-					{% endfor %}
-				</select>
+				<label>Capital Cost</label>
+				<input type="text" id="capitalCost" name="capitalCost" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>OM Cost</label>
+				<input type="text" id="omCost" name="omCost" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Wholesale Energy Cost ($/kWh)</label>
+				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Retail Energy Cost ($/kWh)</label>
+				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Spring Peak Demand ($/kW)</label>
+				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Summer Peak Demand ($/kW)</label>
+				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Fall Peak Demand ($/kW)</label>
+				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Winter Peak Demand ($/kW)</label>
+				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<table>
+					<tr>
+						<th>Month</th>
+						<th>Avg Load</th>
+						<th>Peak Load</th>
+					</tr>
+					<tr>
+						<td>January</td>
+						<td><input type="text" name="janAvg"></td>
+						<td><input type="text" name="janPeak"></td>
+					</tr>
+					<tr>
+						<td>February</td>
+						<td><input type="text" name="febAvg"></td>
+						<td><input type="text" name="febPeak"></td>
+					</tr>
+					<tr>
+						<td>March</td>
+						<td><input type="text" name="marAvg"></td>
+						<td><input type="text" name="marPeak"></td>
+					</tr>
+					<tr>
+						<td>April</td>
+						<td><input type="text" name="aprAvg"></td>
+						<td><input type="text" name="aprPeak"></td>
+					</tr>
+					<tr>
+						<td>May</td>
+						<td><input type="text" name="mayAvg"></td>
+						<td><input type="text" name="mayPeak"></td>
+					</tr>
+					<tr>
+						<td>June</td>
+						<td><input type="text" name="junAvg"></td>
+						<td><input type="text" name="junPeak"></td>
+					</tr>
+					<tr>
+						<td>July</td>
+						<td><input type="text" name="julAvg"></td>
+						<td><input type="text" name="julPeak"></td>
+					</tr>
+					<tr>
+						<td>August</td>
+						<td><input type="text" name="augAvg"></td>
+						<td><input type="text" name="augPeak"></td>
+					</tr>
+					<tr>
+						<td>September</td>
+						<td><input type="text" name="sepAvg"></td>
+						<td><input type="text" name="sepPeak"></td>
+					</tr>
+					<tr>
+						<td>October</td>
+						<td><input type="text" name="octAvg"></td>
+						<td><input type="text" name="octPeak"></td>
+					</tr>
+					<tr>
+						<td>November</td>
+						<td><input type="text" name="novAvg"></td>
+						<td><input type="text" name="novPeak"></td>
+					</tr>
+					<tr>
+						<td>December</td>
+						<td><input type="text" name="decAvg"></td>
+						<td><input type="text" name="decPeak"></td>
+					</tr>
+				</table>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="runButton" type="submit" class="preRun">Run Model</button>
