@@ -1,4 +1,4 @@
-''' Powerflow results for one Gridlab instance. '''
+''' Calculate solar photovoltaic system output using PVWatts. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, datetime as dt
 import multiprocessing
