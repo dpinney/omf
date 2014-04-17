@@ -1352,11 +1352,13 @@ function zoomToFit(){
 		       "_csrf_token":"{{ csrf_token() }}",
 		       ref: "{{ ref }}"
 		      }
-	    if (!new_name)
-		post_to_url('/saveFeeder/{% if public %}True{% else %}False{% endif %}', payload)
-	    else{
-		post_to_url("/saveFeeder/False", payload);
-	    }
+
+		if (new_name){			// There would only be a new_name if they had used the save as button, so it should necessarily be saved to the current user's feeder directory
+			post_to_url("/saveFeeder/{{ currUser }}/"+new_name, payload)
+		}else{
+			// Otherwise attempt to save it to the original owner's directory.  The button to save a feeder should only appear if the user is the admin or if this is a user's private feeder... normals user's cannot save public feeders or other user's feeders
+			post_to_url("/saveFeeder/{{ owner }}/{{ feederName }}", payload)
+		}
 	}
 
 	function rename() {
@@ -1380,13 +1382,13 @@ function zoomToFit(){
 	    var new_name = prompt("Save as", $("#gridName").html());
 	    if (new_name){
 		$.ajax({
-		    url:"/feederName/"+new_name
+		    url:"/uniqObjName/Feeder/{{ currUser }}/"+new_name
 		}).done(function(data){
-		    if (data == "Nope"){
-			alert("You already have a feeder named "+new_name);
-			saveas();
+		    if (data.exists){
+				alert("You already have a feeder named "+new_name);
+				saveas();
 		    }else{
-			saveModel(new_name);
+				saveModel(new_name);
 		    }
 		    
 		})
@@ -1662,7 +1664,7 @@ function zoomToFit(){
 			
 	// INIT FUNCTIONS FOLLOW:
 	d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
-	var apiAddress = '/feederData/{{ anaFeeder }}/{{ feederName }}.json' + "?public={% if public %}true{% else %}false{% endif %}";
+    var apiAddress = "/feederData/{{ owner }}/{{ feederName }}/{{ modelFeeder }}"
 	d3.json(apiAddress, function (json) {
 		tree = json['tree']
 		attachments = json['attachments']

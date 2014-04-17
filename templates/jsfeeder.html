@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 <script type="text/template" id="feedertemplate">
   <tr class="<%= feed['name'].replace(/_/g, '__').replace(/ /g, '_') %>">
     <td><%= feed['owner'] %></td>
     <td>
-      <a name="<%= feed['name'] %>" href='/feeder/<%= feed['name'] %><%= feed["url"] %>'>
+      <a name="<%= feed['name'] %>" href='/feeder/<%= feed.owner %>/<%= feed['name'] %><%= feed["url"] %>'>
 
 
         <span class="feederName"><%= feed['name'] %></span>

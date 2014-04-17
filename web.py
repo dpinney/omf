@@ -4,10 +4,10 @@ from flask import Flask, send_from_directory, request, redirect, render_template
 from jinja2 import Template
 import models, json, os, flask_login, hashlib, random, time, datetime, shutil
 from passlib.hash import pbkdf2_sha512
+import helperfuncs as hlp
+from omfuser import User
 
 app = Flask("omf")
-# os.path.join is supposed to be a platform independent way to do paths, although our unix paths seem to work on windows, but also I personally find it annoying to do the string concats everywhere, and it'll git rid of errors where we forget to add a slash.  I made a really obvious variable name so that we don't have to type out the whole thing, but we know exactly which function it is.
-OS_PJ = os.path.join
 
 def getDataNames():
 	''' Query the OMF datastore to list all the names of things that can be included.'''
@@ -100,43 +100,6 @@ def send_link(email, message, u={}):
 ###################################################
 # AUTHENTICATION AND SECURITY STUFF
 ###################################################
-
-class User:
-	def __init__(self, jsonBlob):
-		# I think it could possibly be useful to be able to access the json blob after the user has been loaded
-		self.jsonBlob = jsonBlob
-		self.username = jsonBlob["username"]
-	# Required flask_login functions.
-	def is_admin(self):		return self.username == "admin"
-	def get_id(self): return self.username	
-	def is_authenticated(self): return True
-	def is_active(self): return True
-	def is_anonymous(self): return False
-
-	def __getitem__(self, key):
-		# This allows us to access the json blob with user["username"], for example, instead of doing user.jsonBlob["username"]
-		return self.jsonBlob[key]
-
-	# I found myself repeating the idioms in these functions all the time, so I abstracted them into class methods.  If you want to read a user dict from json on disk, just do User.gu(<username>) and to dump do User.du(<userdict>).  Short function names because I hate typing.  They are class methods which means you don't need to instantiate the User to use them.
-	@classmethod
-	def gu(self, username):
-		# get user
-		return json.load(open("data/User/"+username+".json"))
-
-	@classmethod
-	def du(self, userdict):
-		# dump user
-		json.dump(userdict, open("data/User/"+userdict["username"]+".json", "w"))
-
-	@classmethod
-	def cu(self):
-		"""Returns current user's username"""
-		return flask_login.current_user.username
-
-	@classmethod
-	def ia(self):
-		"""ia == is admin.  Returns if the current user is the admin"""
-		return self.cu() == "admin"
 
 def cryptoRandomString():
 	''' Generate a cryptographically secure random string for signing/encrypting cookies. '''
@@ -299,39 +262,22 @@ def changepwd():
 	else:
 		return "not_auth"
 
-def feederPath(owner, name):
-	return OS_PJ("data", "Feeder", owner, name+".json")
-
-def modelPath(owner, name):
-	return OS_PJ("data", "Model", owner, name)
-
-def objIn(objectName, directory, mapfunc=lambda x: x):
-	# I repeat this idiom frequently: objectName in [f.replace(".json", "") for f in os.listdir("data/Feeder/public")]
-	# To do the same with this function you would do:
-	# objIn(objectName, "data/Feeder/public", lambda f: f.replace(".json", ""))
-	# Or to do objectName in os.listdir("data/Model/public")
-	# You would simply do:
-	# objIn(objectName, "data/Model/public")
-	# I think this will make our code cleaner and safer and more concise
-	return objectName in map(mapfunc, os.listdir(directory))
-
-def nojson(objectType, directory):
-	# A wrapper for objIn.  I remove ".json" from the end of files a lot
-	return objIn(objectName, directory, lambda x: x.replace(".json", ""))
-
-def pubhelper(objectType, objectName):
-	# publicObject was poorly thought out and it returns "Yep"/"Nope" instead of simply true/false, so this is a helper that just returns a boolean value that is used in the actual view function to return "Yep"/"Nope"
-	if objectType == "Feeder":
-		return nojson(objectName, "data/Feeder/public")
-	elif objectType == "Model":
-		return objIn(objectName, "data/Model/public") # heck this one could also use nojson and it would be the same thing.... maybe default should be to use nojson and then we always have the underlying objIn if we want something more specific?
-	
+@app.route("/uniqObjName/<objtype>/<owner>/<name>")
+@flask_login.login_required
+def uniqObjName(objtype, owner, name):
+	# This should replace all the functions that check for unique names
+	if objtype == "Model":
+		path = hlp.modelPath(owner, name)
+	elif objtype == "Feeder":
+		path = hlp.feederPath(owner, name)
+	return jsonify(exists=os.path.exists(path))
+			
 @app.route("/publicObject/<objectType>/<objectName>")
 def publicObject(objectType, objectName):
 	# This is supposed to be for when you are going to publish an object, and we are looking for name conflicts.
 	# So it's like two layers of stupid because it returns Nope if it IS the name of a public object and Yep otherwise... I guess the intention is, Can I publish this? Nope, because it has the same name as a public object, or Yep, you can because there is no public object with that name
 	# A refactor so that the front end expects true/false rather than Yep/Nope is definitely necessary
-	return "Nope" if pubhelper(objectType, objectName) else "Yep"
+	return "Nope" if hlp.pubhelper(objectType, objectName) else "Yep"
 
 @app.route("/makePublic/<objectType>/<objectName>", methods=["POST"])
 @flask_login.login_required
@@ -383,34 +329,27 @@ def sortData(dataType, column):
 		json.dump(userJson, jfile, indent=4)
 	return "OK"
 
-@app.route('/feeder/<feederName>')
+@app.route('/feeder/<owner>/<feederName>')
 @flask_login.login_required
-def feederGet(feederName):
+def feederGet(owner, feederName):
 	return render_template('gridEdit.html',
 						   feederName=feederName,
 						   ref = request.referrer,
-						   is_admin = flask_login.current_user.username == "admin",
-						   anaFeeder=False,
-						   public = request.args.get("public") == "true", # Kinda want to get rid of this
-						   currUser = User.cu())
+						   is_admin = User.ia(),
+						   modelFeeder=False,
+						   public = owner == "public", 
+						   # ^Kinda want to get rid of this
+						   currUser = User.cu(),
+						   owner = owner)
 
-@app.route('/feederData/<anaFeeder>/<feederName>.json')
+@app.route("/feederData/<owner>/<feederName>/") 
+@app.route("/feederData/<owner>/<feederName>/<modelFeeder>") # None of this .json nonsense, ya silly goose
 @flask_login.login_required
-def feederData(anaFeeder, feederName):
-	# Not worrying about analysis feeders for right now
-	# if anaFeeder == 'True':
-	# 	#TODO: fix this.
-	# 	data = user.get('Study', feederName)['inputJson']
-	# 	del data['attachments']
-	# 	return json.dumps(data)
-	# else:
-	path = "data/Feeder/"
-	if request.args.get("public") == "true":
-		path += "public"
-	else:
-		path += flask_login.current_user.username
-	path += "/"+feederName+".json"
-	return jsonify(**json.load(open(path)))
+def feederData(owner, feederName, modelFeeder=False):
+	# Dealing with this modelFeeder stuff later
+	if User.ia() or owner == User.cu() or owner == "public":
+		# This is so weird.  the json.load returned a unicode string for some reason so I used json.loads around it to turn it into a dictionary.  Something wonky is going on here because that doesn't make sense.
+		return jsonify(**json.loads(json.load(open(hlp.feederPath(owner, feederName)))))
 
 @app.route("/getComponents/")
 def getComponents():
@@ -449,7 +388,7 @@ def showModel(user, modelName):
 @app.route('/uniqueName/<objectType>/<name>')
 @flask_login.login_required
 def uniqueName(objectType, name):
-	return nojson(objectType, name)
+	return hlp.nojson(objectType, name)
 
 
 @app.route("/delete/<objectType>/<name>/<owner>")
@@ -460,36 +399,24 @@ def delete(objectType, name, owner):
 	try:
 		# Just in case someone tries to delete something not through the web interface or for some reason the web interface is displaying something that doesn't actually exist
 		if objectType == "Feeder":
-			os.remove(feederPath(owner, name))
+			os.remove(hlp.feederPath(owner, name))
 		elif objectType == "Model":
-			shutil.rmtree(modelPath(owner, name))
+			shutil.rmtree(hlp.modelPath(owner, name))
 	except Exception:
 		pass
 	return
 
 # Need to do some massive feeder refactoring before I get started on this badboy
-# @app.route('/saveFeeder/<public>', methods=['POST'])
-# @flask_login.login_required
-# def saveFeeder(public):
-# 	# public == True/False refers to whether we should try to save it as a public feeder (True) or not (False)
-# 	postObject = flask.request.form.to_dict()
-# 	if public == "True":
-# 		if User.ia():
-# 			json.dump(json.loads(postObject["feederObjectJson"]),
-# 					  open(feederPath("public", postObject["name"]), "w"))
-# 		else:
-# 			return "You are not authorized to modify public feeders"
-# 	else:
-# 		if User.ia():
-			
-# 			json.dump()
-# 			if store.get("Feeder", str(postObject["name"])):
-# 				store.put("Feeder", str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
-# 			else:
-# 				store.put("Feeder", "admin_"+str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
-# 		else:
-# 			flask_login.current_user.put("Feeder", str(postObject["name"]), json.loads(postObject["feederObjectJson"]))
-# 	return flask.redirect(flask.request.form.get("ref", "/#feeders"))
+@app.route('/saveFeeder/<owner>/<feederName>', methods=['POST'])
+@flask_login.login_required
+def saveFeeder(owner, feederName):
+	# If the owner is public, then the current user must be admin
+	# The admin is also allowed to do whatever the durn eff he pleases
+	postObject = request.form.to_dict()
+	if owner == User.cu() or User.ia():
+		# Then feel free to dump
+		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"))
+	return redirect(request.form.get("ref", "/#feeders"))
 
 if __name__ == "__main__":
 	# TODO: remove debug.
