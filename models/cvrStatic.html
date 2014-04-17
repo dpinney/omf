@@ -5,10 +5,11 @@
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
 		/*INPUT*/
-		.shortInput {width:446px; display:inline-block;}
-		.wideInput {width:892;}
-		label {width:138px; line-height:32px; float:left; text-align:right;}
-		input[type="text"], select {width:300px; float:right; text-align:left; font-size:medium;}
+		div.content {width:1000px;}
+		.shortInput {width:330px; display:inline-block; margin-bottom:10px;}
+		.wideInput {width:1000;}
+		label {display:block; line-height:16pt;}
+		input[type="text"], select {font-size:medium; display:block; margin:0px;}
 		#input {margin-top: 0px;}
 		button {width:auto;}
 		#cancelButton {background:crimson;}
@@ -162,71 +163,51 @@
 				<label>Winter Peak Demand ($/kW)</label>
 				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" data-validRegex="[\w\s]+"/></td>
 			</div>
-			<div class="shortInput">
+			<div class="wideInput">
 				<table>
 					<tr>
-						<th>Month</th>
-						<th>Avg Load</th>
+						<th></th>
+						<th>January</th>
+						<th>February</th>
+						<th>March</th>
+						<th>April</th>
+						<th>May</th>
+						<th>June</th>
+						<th>July</th>
+						<th>August</th>
+						<th>September</th>
+						<th>October</th>
+						<th>November</th>
+						<th>December</th>
+					</tr>						
+					<tr>
 						<th>Peak Load</th>
-					</tr>
-					<tr>
-						<td>January</td>
 						<td><input type="text" name="janAvg"></td>
-						<td><input type="text" name="janPeak"></td>
-					</tr>
-					<tr>
-						<td>February</td>
 						<td><input type="text" name="febAvg"></td>
-						<td><input type="text" name="febPeak"></td>
-					</tr>
-					<tr>
-						<td>March</td>
 						<td><input type="text" name="marAvg"></td>
-						<td><input type="text" name="marPeak"></td>
-					</tr>
-					<tr>
-						<td>April</td>
 						<td><input type="text" name="aprAvg"></td>
-						<td><input type="text" name="aprPeak"></td>
-					</tr>
-					<tr>
-						<td>May</td>
 						<td><input type="text" name="mayAvg"></td>
-						<td><input type="text" name="mayPeak"></td>
-					</tr>
-					<tr>
-						<td>June</td>
 						<td><input type="text" name="junAvg"></td>
-						<td><input type="text" name="junPeak"></td>
-					</tr>
-					<tr>
-						<td>July</td>
 						<td><input type="text" name="julAvg"></td>
-						<td><input type="text" name="julPeak"></td>
-					</tr>
-					<tr>
-						<td>August</td>
 						<td><input type="text" name="augAvg"></td>
-						<td><input type="text" name="augPeak"></td>
-					</tr>
-					<tr>
-						<td>September</td>
 						<td><input type="text" name="sepAvg"></td>
-						<td><input type="text" name="sepPeak"></td>
-					</tr>
-					<tr>
-						<td>October</td>
 						<td><input type="text" name="octAvg"></td>
-						<td><input type="text" name="octPeak"></td>
-					</tr>
-					<tr>
-						<td>November</td>
 						<td><input type="text" name="novAvg"></td>
-						<td><input type="text" name="novPeak"></td>
+						<td><input type="text" name="decAvg"></td>
 					</tr>
 					<tr>
-						<td>December</td>
-						<td><input type="text" name="decAvg"></td>
+						<th>Avg Load</th>
+						<td><input type="text" name="janPeak"></td>
+						<td><input type="text" name="febPeak"></td>
+						<td><input type="text" name="marPeak"></td>
+						<td><input type="text" name="aprPeak"></td>
+						<td><input type="text" name="mayPeak"></td>
+						<td><input type="text" name="junPeak"></td>
+						<td><input type="text" name="julPeak"></td>
+						<td><input type="text" name="augPeak"></td>
+						<td><input type="text" name="sepPeak"></td>
+						<td><input type="text" name="octPeak"></td>
+						<td><input type="text" name="novPeak"></td>
 						<td><input type="text" name="decPeak"></td>
 					</tr>
 				</table>
