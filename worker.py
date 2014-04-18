@@ -51,7 +51,7 @@ runningJobCount = MultiCounter(0)
 
 newFeederWireframe = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
 
-def milImportBackground(self, owner, feederName, stdString, seqString):
+def milImportBackground(owner, feederName, stdString, seqString):
 	newFeeder = dict(**newFeederWireframe)
 	[newFeeder['tree'], xScale, yScale] = milToGridlab.convert(stdString, seqString)
 	newFeeder['layoutVars']['xScale'] = xScale

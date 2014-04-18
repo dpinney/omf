@@ -10,7 +10,7 @@
         
       </a>
     </td>
-    <td>Ready</td>
+    <td><%= feed.status %></td>
     <td><%= feed.formattedctime %></td>
     <td>
       <% if (feed["url"].indexOf("false") > -1 || is_admin){ %>

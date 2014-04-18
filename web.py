@@ -20,10 +20,8 @@ def getDataNames():
 
 def getAllData(dataType):
 	''' Get metadata for everything we need for the home screen. '''
-	if dataType == "Feeder":
-		path = os.path.join("data", "Feeder")
-	elif dataType == "Model":
-		path = os.path.join("data", "Model")
+	# This is turning into a beast.  Requires clean up at some point.
+	path = hlp.OS_PJ("data", dataType)
 	if flask_login.current_user.username == "admin":
 		owners = os.listdir(path)
 	else:
@@ -31,8 +29,12 @@ def getAllData(dataType):
 	allData = []
 	for o in owners:
 		for fname in os.listdir(os.path.join(path, o)):
-			if dataType == "Feeder":
-				datum = {"name":fname[:-len(".json")], "status":"Ready"}
+			if dataType in ["Feeder", "Conversion"]:
+				datum = {"name":fname[:-len(".json")]}
+				if dataType == "Feeder":
+					datum["status"] = "Ready"
+				elif dataType == "Conversion":
+					datum["status"] = "converting"
 				statstruct = os.stat(os.path.join(path, o, fname))
 			elif dataType == "Model":
 				datum = json.load(open(os.path.join(path, o, fname, "allInputData.json")))
@@ -41,11 +43,6 @@ def getAllData(dataType):
 			datum["ctime"] = statstruct.st_ctime
 			datum["formattedctime"] = time.ctime(datum["ctime"])
 			datum["owner"] = o
-			
-			if o == "public":
-				datum["url"] = "?public=true"
-			else:
-				datum["url"] = "?public=false"
 			allData.append(datum)
 	return sortAccPreferences(allData, dataType)
 
@@ -309,6 +306,8 @@ def root():
 @app.route("/getAllData/<dataType>")
 @flask_login.login_required
 def getAllDataView(dataType):
+	if dataType == "Feeder":
+		return jsonify(data=getAllData("Feeder")+getAllData("Conversion"))
 	return jsonify(data=getAllData(dataType))
 
 @app.route("/sort/<dataType>/<column>", methods=["POST"])
