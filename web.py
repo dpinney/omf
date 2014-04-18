@@ -418,6 +418,28 @@ def saveFeeder(owner, feederName):
 		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"))
 	return redirect(request.form.get("ref", "/#feeders"))
 
+@app.route('/milsoftImport/', methods=['POST'])
+@flask_login.login_required
+def milsoftImport():
+	feederName = str(flask.request.form.to_dict()['feederName'])
+	stdString, seqString = map(lambda x: flask.request.files[x].stream.read(), ["stdFile", "seqFile"])
+	worker.milImport(User.cu(), current_user.prepend+feederName, stdString, seqString)
+	hlp.conversionDump(User.cu(), feederName, {"data":"none"})
+	return flask.redirect('/#feeders')
+
+@app.route('/gridlabdImport/', methods=['POST'])
+@flask_login.login_required
+def gridlabdImport():
+	feederName = str(flask.request.form.to_dict()['feederName'])
+	newFeeder = dict(**hlp.newFeederWireframe)	# copies the dictionary..
+	newFeeder['tree'] = feeder.parse(flask.request.files['glmFile'].stream.read(), False)
+	newFeeder['layoutVars']['xScale'] = 0
+	newFeeder['layoutVars']['yScale'] = 0
+	with open('./schedules.glm','r') as schedFile:
+		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	hlp.feederDump(User.cu(), feederName, newFeeder)
+	return flask.redirect('/#feeders')
+
 if __name__ == "__main__":
 	# TODO: remove debug.
 	app.run(debug=True)

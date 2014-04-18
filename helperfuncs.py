@@ -3,10 +3,26 @@
 
 # os.path.join is supposed to be a platform independent way to do paths, although our unix paths seem to work on windows, but also I personally find it annoying to do the string concats everywhere, and it'll git rid of errors where we forget to add a slash.  I made a really obvious variable name so that we don't have to type out the whole thing, but we know exactly which function it is.
 import os
+import json
 OS_PJ = os.path.join
 
+def feederDump(owner, name, data):
+	convOrFeedDump("Feeder", owner, name, data)
+	
+def conversionDump(owner, name, data):
+	convOrFeedDump("Conversion", owner, name, data)
+
+def conversionPath(owner, name):
+	return convOrFeedPath("Conversion", owner, name)
+	
+def convOrFeedDump(objType, owner, name, data):
+	json.dump(data, open(convOrFeedPath(objType, owner, name), "w"))
+
+def convOrFeedPath(objType, owner, name):
+	return OS_PJ("data", objType, owner, name+".json")
+
 def feederPath(owner, name):
-	return OS_PJ("data", "Feeder", owner, name+".json")
+	return convOrFeedPath("Feeder", owner, name)
 
 def modelPath(owner, name):
 	return OS_PJ("data", "Model", owner, name)
