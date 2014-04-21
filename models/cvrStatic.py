@@ -371,20 +371,6 @@ def _runAnalysis(tree, monthData, rates):
 	plt.plot([annualSave(x) for x in range(31)], c='green')
 
 def _oldTests():
-	# Setup with feeder conversion (if necessary):
-	for fName in ['ACEC-Friendship', 'ACEC-Coloma']:
-		if not os.path.isfile('sourceData/' + fName + '.glm'):
-			_convertForCvr('sourceData/' + fName + '.std','sourceData/ACEC.seq',
-						   'sourceData/' + fName + '.glm')
-	# Variables for all tests:
-	rates = {'capitalCost': 30000,
-		'omCost': 1000,
-		'wholesaleEnergyCostPerKwh': 0.06,
-		'retailEnergyCostPerKwh': 0.10,
-		'peakDemandCostSpringPerKw': 5.0,
-		'peakDemandCostSummerPerKw': 10.0,
-		'peakDemandCostFallPerKw': 6.0,
-		'peakDemandCostWinterPerKw': 8.0 }
 	# Def and run tests:
 	def testFriendship():
 		tree = feeder.parse('sourceData/ACEC-Friendship.glm')
@@ -402,6 +388,14 @@ def _newTests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
 	#TODO: fix this.
+	rates = {'capitalCost': 30000,
+		'omCost': 1000,
+		'wholesaleEnergyCostPerKwh': 0.06,
+		'retailEnergyCostPerKwh': 0.10,
+		'peakDemandCostSpringPerKw': 5.0,
+		'peakDemandCostSummerPerKw': 10.0,
+		'peakDemandCostFallPerKw': 6.0,
+		'peakDemandCostWinterPerKw': 8.0}
 	colomaData =[{"janAvg": 914000.0, "janPeak": 1290000.0},
 		{"febAvg": 897000.00, "febPeak": 1110000.0},
 		{"marAvg": 731000.00, "marPeak": 1030000.0},
@@ -434,6 +428,7 @@ def _newTests():
 		"simLength": "100",
 		"user": "admin", # Really only used with web.py.
 		"runTime": "" }
+	# Todo: get friendship and coloma feeders.
 	modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
 	# Blow away old test results if necessary.
 	try:
