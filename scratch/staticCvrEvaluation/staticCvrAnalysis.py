@@ -408,7 +408,7 @@ def _tests():
 		tree = feeder.parse('sourceData/ACEC-Coloma.glm')
 		monthData = _scadaCleanup('Coloma')
 		runAnalysis(tree, monthData, rates)
-	testColoma()
+	testFriendship()
 	# Show all plots:
 	plt.show()
 
