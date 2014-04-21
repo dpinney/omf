@@ -370,60 +370,6 @@ def _runAnalysis(tree, monthData, rates):
 	plt.axvline(x=simplePayback, ymin=0, ymax=1, c='gray', linestyle='--')
 	plt.plot([annualSave(x) for x in range(31)], c='green')
 
-def _scadaCleanup(meterName):
-	''' Take a SCADA csv and spit out a nice monthData structure. '''
-	# Meter name to code mappings:
-	nameToSubcode = {'Glen':468670, 'Cambria':468706, 'Chateau':469573, 'Turtle':469616, 'Roslin':469628,
-		'Lewiston':469653, 'Montello':469661, 'Doylestown':469664,'Wautoma':470190,'Plainfield':470201,
-		'Hancock':470221,'Richford':470246,'Wild Rose':470284, 'Friendship':470382,'Quincy':470386,
-		'Grant':470394, 'Sherwood':470396, 'SherwoodArrow':470396, 'Winnebago':470493, 'Dellwood':470508,
-		'Brooks':470538, 'Spring Lake':471059, 'Coloma':471135, 'Wild Rose Pumps':558087, 'Foxhill':638717,
-		'Poy Sippi':664054, 'Poysippi':664054, 'Friesland':664613, 'Friesland ACEC WPL':664614, 'Friesland WPL':664616,
-		'Columbus':693716, 'Badger West':710462, 'Arrowhead':7180863, 'Lakehead':7180864}
-	# MonthName -> Ordinal mapping:
-	monthToOrd = {'January':1, 'February':2, 'March':3, 'April':4, 'May':5, 'June':6, 'July':7, 'August':8,
-		'September':9, 'October':10, 'November':11, 'December':12 }
-	# MonthName -> Season mapping:
-	monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
-		'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
-		'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
-	# Read in the COLOMA data from the tsv.
-	with open('sourceData/ACECSCADA2.tsv', 'rb') as csvFile:
-		scadaReader = csv.DictReader(csvFile, delimiter='\t')
-		allData = [row for row in scadaReader if row['meterId']==str(nameToSubcode[meterName])]
-	print allData[3]
-	# Calculations on rows helper functions.
-	def monthRows(monthName):
-		monthNum = monthToOrd[monthName]
-		if monthNum<6: return [row for row in allData if re.match(r'^' + str(monthNum) + r'/\d*/12 .*', row['timestamp'])]
-		else: return [row for row in allData if re.match(r'^' + str(monthNum) + r'/\d*/11 .*', row['timestamp'])]
-	def mapOnPower(monthName, inFun):
-		monthData = monthRows(monthName)
-		return inFun([float(row['power']) for row in monthData])
-	# All monthly SCADA data:
-	avg = lambda x:sum(x)/len(x)
-	def roundSig(x, sig=3):
-		''' Round a float to a given number of sig figs. '''
-		return round(x, sig-int(math.floor(math.log10(x)))-1)
-	monthData = [{'monthId':monthToOrd[m],
-				  'monthName':m,
-				  'season':monthToSeason[m],
-				  'histPeak':roundSig(mapOnPower(m,max)*1000),
-				  'histAverage':roundSig(mapOnPower(m,avg)*1000)} for m in sorted(monthToOrd, key=monthToOrd.get)]
-	# Print it compactly along with PMR sanity test:
-	for row in monthData: print row
-	print '\nPeak to Mean Ratios', [roundSig(m['histPeak']/m['histAverage']) for m in monthData]
-	return monthData
-
-def _convertForCvr(stdPath, seqPath, outFilePath):
-	''' Convert a feeder to a GLM.'''
-	with open(stdPath) as stdFile, open(seqPath) as seqFile:
-		stdString = stdFile.read()
-		seqString = seqFile.read()
-	tree,xScale,yScale = milToGridlab.convert(stdString,seqString)
-	with open(outFilePath,'w') as glmFile:
-		glmFile.write(feeder.sortedWrite(tree))
-
 def _oldTests():
 	# Setup with feeder conversion (if necessary):
 	for fName in ['ACEC-Friendship', 'ACEC-Coloma']:
@@ -456,28 +402,39 @@ def _newTests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
 	#TODO: fix this.
+	colomaData =[{"janAvg": 914000.0, "janPeak": 1290000.0},
+		{"febAvg": 897000.00, "febPeak": 1110000.0},
+		{"marAvg": 731000.00, "marPeak": 1030000.0},
+		{"aprAvg": 864000.00, "aprPeak": 2170000.0},
+		{"mayAvg": 1620000.0, "mayPeak": 4580000.0},
+		{"junAvg": 2210000.0, "junPeak": 5550000.0},
+		{"julAvg": 3570000.0, "julPeak": 6260000.0},
+		{"augAvg": 3380000.0, "augPeak": 5610000.0},
+		{"sepAvg": 1370000.0, "sepPeak": 3740000.0},
+		{"octAvg": 1030000.0, "octPeak": 1940000.0},
+		{"novAvg": 1020000.0, "novPeak": 1340000.0},
+		{"decAvg": 1030000.0, "decPeak": 1280000.0}]
+	friendshipData = [{"janAvg": 2740000.0, "janPeak": 4240000.0},
+		{"febAvg": 2480000.0, "febPeak": 3310000.0},
+		{"marAvg": 2030000.0, "marPeak": 2960000.0},
+		{"aprAvg": 2110000.0, "aprPeak": 3030000.0},
+		{"mayAvg": 2340000.0, "mayPeak": 4080000.0},
+		{"junAvg": 2770000.0, "junPeak": 5810000.0},
+		{"julAvg": 3970000.0, "julPeak": 6750000.0},
+		{"augAvg": 3270000.0, "augPeak": 5200000.0},
+		{"sepAvg": 2130000.0, "sepPeak": 4900000.0},
+		{"octAvg": 1750000.0, "octPeak": 2340000.0},
+		{"novAvg": 2210000.0, "novPeak": 3550000.0},
+		{"decAvg": 2480000.0, "decPeak": 3370000.0}]
 	inData = { "modelName": "Automated staticCVR Testing",
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"modelType": "pvWatts",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "100",
-		"systemSize":"10",
-		"derate":"0.97",
-		"trackingMode":"0",
-		"azimuth":"180",
 		"user": "admin", # Really only used with web.py.
-		"runTime": "",
-		"rotlim":"45.0",
-		"t_noct":"45.0",
-		"t_ref":"25.0",
-		"gamma":"-0.5",
-		"inv_eff":"0.92",
-		"fd":"1.0",
-		"i_ref":"1000",
-		"poa_cutin":"0",
-		"w_stow":"0"}
-	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
+		"runTime": "" }
+	modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
