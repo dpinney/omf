@@ -375,6 +375,7 @@ def _newTests():
 	workDir = pJoin(_omfDir,"data","Model")
 	#TODO: fix this tree.
 	tree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Frank LO.json")))["tree"]
+	colomaTree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Columbia.json")))["tree"]
 	rates = {"capitalCost": 30000,
 		"omCost": 1000,
 		"wholesaleEnergyCostPerKwh": 0.06,
