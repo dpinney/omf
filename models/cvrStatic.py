@@ -370,20 +370,6 @@ def _runAnalysis(tree, monthData, rates):
 	plt.axvline(x=simplePayback, ymin=0, ymax=1, c='gray', linestyle='--')
 	plt.plot([annualSave(x) for x in range(31)], c='green')
 
-def _oldTests():
-	# Def and run tests:
-	def testFriendship():
-		tree = feeder.parse('sourceData/ACEC-Friendship.glm')
-		monthData = _scadaCleanup('Friendship')
-		runAnalysis(tree, monthData, rates)
-	def testColoma():
-		tree = feeder.parse('sourceData/ACEC-Coloma.glm')
-		monthData = _scadaCleanup('Coloma')
-		runAnalysis(tree, monthData, rates)
-	testColoma()
-	# Show all plots:
-	plt.show()
-
 def _newTests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
@@ -425,8 +411,9 @@ def _newTests():
 		"modelType": "cvrStatic",
 		"user": "admin", # Really only used with web.py.
 		"runTime": "" }
-	# Todo: get friendship and coloma feeders.
 	modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
+	# Hmmm, might need to show plots.
+	plt.show()
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
