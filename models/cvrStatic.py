@@ -387,7 +387,8 @@ def _oldTests():
 def _newTests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
-	#TODO: fix this.
+	#TODO: fix this tree.
+	tree = {}
 	rates = {"capitalCost": 30000,
 		"omCost": 1000,
 		"wholesaleEnergyCostPerKwh": 0.06,
@@ -396,7 +397,7 @@ def _newTests():
 		"peakDemandCostSummerPerKw": 10.0,
 		"peakDemandCostFallPerKw": 6.0,
 		"peakDemandCostWinterPerKw": 8.0}
-	colomaData = {"janAvg": 914000.0, "janPeak": 1290000.0,
+	colomaMonths = {"janAvg": 914000.0, "janPeak": 1290000.0,
 		"febAvg": 897000.00, "febPeak": 1110000.0,
 		"marAvg": 731000.00, "marPeak": 1030000.0,
 		"aprAvg": 864000.00, "aprPeak": 2170000.0,
@@ -408,7 +409,7 @@ def _newTests():
 		"octAvg": 1030000.0, "octPeak": 1940000.0,
 		"novAvg": 1020000.0, "novPeak": 1340000.0,
 		"decAvg": 1030000.0, "decPeak": 1280000.0}
-	friendshipData = {"janAvg": 2740000.0, "janPeak": 4240000.0,
+	friendshipMonths = {"janAvg": 2740000.0, "janPeak": 4240000.0,
 		"febAvg": 2480000.0, "febPeak": 3310000.0,
 		"marAvg": 2030000.0, "marPeak": 2960000.0,
 		"aprAvg": 2110000.0, "aprPeak": 3030000.0,
@@ -421,11 +422,7 @@ def _newTests():
 		"novAvg": 2210000.0, "novPeak": 3550000.0,
 		"decAvg": 2480000.0, "decPeak": 3370000.0}
 	inData = { "modelName": "Automated staticCVR Testing",
-		"simStartDate": "2012-04-01",
-		"simLengthUnits": "hours",
-		"modelType": "pvWatts",
-		"climateName": "AL-HUNTSVILLE",
-		"simLength": "100",
+		"modelType": "cvrStatic",
 		"user": "admin", # Really only used with web.py.
 		"runTime": "" }
 	# Todo: get friendship and coloma feeders.

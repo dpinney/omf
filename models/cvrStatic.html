@@ -233,18 +233,5 @@
 				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338508800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Climate</p>
-		<div id="climateReport" class="tightContent postRun">
-			<div id="climateChartDiv"></div>
-			<script>
-				climateSeriesData = [
-					{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"]},
-					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
-					{"name":"Direct Irradiance (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Irradiance (W/m^2)"]},
-					{"name":"Difuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Difuse Irradiance (W/m^2)"]},
-					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>
 	</div>
 </body>
