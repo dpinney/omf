@@ -16,7 +16,7 @@ def conversionPath(owner, name):
 	return convOrFeedPath("Conversion", owner, name)
 	
 def convOrFeedDump(objType, owner, name, data):
-	json.dump(data, open(convOrFeedPath(objType, owner, name), "w"))
+	json.dump(data, open(convOrFeedPath(objType, owner, name), "w"), indent=4)
 
 def convOrFeedPath(objType, owner, name):
 	return OS_PJ("data", objType, owner, name+".json")

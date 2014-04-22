@@ -87,7 +87,7 @@ def send_link(email, message, u={}):
 	u["timestamp"] = datetime.datetime.strftime(datetime.datetime.now(), format="%c")
 	u["registered"] = False
 	u["email"] = email
-	json.dump(u, open("data/User/"+email+".json", "w"))
+	json.dump(u, open("data/User/"+email+".json", "w"), indent=4)
 	outDict = c.send_email("david.pinney@omf.coop",
 		"OMF Registration Link",
 		message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
@@ -414,7 +414,7 @@ def saveFeeder(owner, feederName):
 	postObject = request.form.to_dict()
 	if owner == User.cu() or User.ia():
 		# Then feel free to dump
-		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"))
+		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"), indent=4)
 	return redirect(request.form.get("ref", "/#feeders"))
 
 @app.route('/milsoftImport/', methods=['POST'])
