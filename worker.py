@@ -25,10 +25,9 @@ We need to handle two cases:
 2. S3 cluster case. Have a cluterQueue class, and also have a daemon.
 '''
 
-import os, tempfile, time
+import os, tempfile, time, milToGridlab
 from multiprocessing import Value, Lock
 from threading import Thread, Timer
-import studies, analysis, milToGridlab
 import helperfuncs as hlp
 
 JOB_LIMIT = 1
@@ -61,8 +60,8 @@ def milImportBackground(owner, feederName, stdString, seqString):
 	hlp.feederDump(owner, feederName, newFeeder)
 	
 def milImport(owner, feederName, stdString, seqString):
-		# Setup.
-		runningJobCount.increment()
-		importThread = Thread(target=milImportBackground, args=[owner, feederName, stdString, seqString])
-		importThread.start()
-		runningJobCount.decrement()
+	# Setup.
+	runningJobCount.increment()
+	importThread = Thread(target=milImportBackground, args=[owner, feederName, stdString, seqString])
+	importThread.start()
+	runningJobCount.decrement()

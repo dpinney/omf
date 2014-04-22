@@ -374,7 +374,7 @@ def _newTests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
 	#TODO: fix this tree.
-	tree = {}
+	tree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Frank LO.json")))["tree"]
 	rates = {"capitalCost": 30000,
 		"omCost": 1000,
 		"wholesaleEnergyCostPerKwh": 0.06,
@@ -411,31 +411,31 @@ def _newTests():
 		"modelType": "cvrStatic",
 		"user": "admin", # Really only used with web.py.
 		"runTime": "" }
-	modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
+	# modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
 	# Hmmm, might need to show plots.
-	plt.show()
-	# Blow away old test results if necessary.
-	try:
-		shutil.rmtree(modelLoc)
-	except:
-		# No previous test results.
-		pass
-	# No-input template.
-	renderAndShow()
-	# Create a model.
-	create(workDir, inData)
-	# Show the model (should look like it's running).
-	renderAndShow(modelDir=modelLoc)
-	# Run the model.
-	run(modelLoc)
-	# Show the output.
-	renderAndShow(modelDir=modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
+	# plt.show()
+	# # Blow away old test results if necessary.
+	# try:
+	# 	shutil.rmtree(modelLoc)
+	# except:
+	# 	# No previous test results.
+	# 	pass
+	# # No-input template.
+	# renderAndShow()
+	# # Create a model.
+	# create(workDir, inData)
+	# # Show the model (should look like it's running).
+	# renderAndShow(modelDir=modelLoc)
+	# # Run the model.
+	# run(modelLoc)
+	# # Show the output.
+	# renderAndShow(modelDir=modelLoc)
+	# # # Delete the model.
+	# # time.sleep(2)
+	# # shutil.rmtree(modelLoc)
 
 def _tests():
 	renderAndShow()
 
 if __name__ == '__main__':
-	_tests()
+	_newTests()
