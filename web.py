@@ -298,7 +298,7 @@ def static_from_root():
 def root():
 	return render_template('home.html', 
 		analyses=[], 
-		feeders=getAllData("Feeder"),
+		feeders=[],
 		current_user=flask_login.current_user.username, 
 		is_admin = flask_login.current_user.username == "admin",
 		modelNames = models.__all__)
@@ -307,7 +307,7 @@ def root():
 @flask_login.login_required
 def getAllDataView(dataType):
 	if dataType == "Feeder":
-		return jsonify(data=getAllData("Feeder")+getAllData("Conversion"))
+		return jsonify(data=getAllData("Feeder"))
 	return jsonify(data=getAllData(dataType))
 
 @app.route("/sort/<dataType>/<column>", methods=["POST"])

@@ -1,6 +1,7 @@
+# -*- coding: utf-8 -*-
 <script type="text/template" id="jsmetadata">
 <tr class="analysis <%= md['modelName'].replace(/_/g, '__').replace(/ /g, '_') %>">
-  <td class="public" style="display:none;"><% if (md["url"].indexOf("true") > -1){ %>true<% } else{ %>false<% } %></td>
+  <td class="public" style="display:none;"><% if (md.owner == "public"){ %>true<% } else{ %>false<% } %></td>
   <td style="display:none"><a name="<%= md['name'] %>"></a></td>
   <td class="owner"><%= md['owner'] %></td>
   <td class="name"><a href="/model/<%= md.owner %>/<%= md.modelName %>"><%= md["modelName"] %></a></td>
@@ -21,14 +22,14 @@
 	<li><a href='/newAnalysis/<%= md["name"] %><%= md["url"] %>'>Duplicate</a></li>
 
 
-    <% if(md.url.indexOf("false") > -1 || is_admin) { %>
+    <% if(md.owner == "public" || is_admin) { %>
 	
 	<% if (md['status'] == 'preRun'){ %>
-	<li><a class="run" href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="<%= md['name'] %>";run_analysis("/run/<%= md['url'] %>", "<%= md['name'] %>")'>Run</a></li>
+	<li><a class="run" href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="<%= md['name'] %>";run_analysis("/run/<%= md['url'] %>", "<%= md['name'] %>">Run</a></li>
 	<% } %>
 
-	<% if (["postRun", "terminated", "ERROR"].indexOf(md["status"]) > -1){ %>
-	<li><a class="reRun" href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="<%= md['name'] %>";run_analysis("/reRun/<%= md['url'] %>","<%= md['name'] %>")'>Re-Run</a></li>
+	<% if (["postRun", "terminated", "ERROR"].indexOf(md["status"] > -1){ %>
+	<li><a class="reRun" href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="<%= md['name'] %>";run_analysis("/reRun/<%= md['url'] %>","<%= md['name'] %>")>Re-Run</a></li>
 	<% } %>
 
 	<% if (md['status'] != 'running'){ %>
@@ -39,7 +40,7 @@
 	<li><a href='#' onclick='var dict={_csrf_token:"{{ csrf_token() }}"};dict.analysisName="<%= md['name'] %>";post_to_url("/terminate/<%= md['url'] %>",dict)'>Terminate</a></li>
 	<% } %>
 	
-    <% if (md.url.indexOf("false") > -1){ %>
+    <% if (md.owner == "public"){ %>
 	<li><a class="makePublic" objectType="Analysis" objectName="<%= md['name'] %>" href="/makePublic/Analysis/<%= md['name'] %>">Publish</a></li>
 	<% } %>
 
