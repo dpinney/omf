@@ -23,7 +23,7 @@ class Filestore:
 			if self.exists(objectType, objectName):
 				self.delete(objectType, objectName)
 			with open(basePath + '.json', 'w') as objectFile:
-				json.dump(putDict, objectFile, indent=4)
+				json.dump(putDict, objectFile)
 			return True
 		except:
 			traceback.print_exc()

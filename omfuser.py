@@ -25,7 +25,7 @@ class User:
 	@classmethod
 	def du(self, userdict):
 		# dump user
-		json.dump(userdict, open("data/User/"+userdict["username"]+".json", "w"), indent=4)
+		json.dump(userdict, open("data/User/"+userdict["username"]+".json", "w"))
 
 	@classmethod
 	def cu(self):

@@ -1351,7 +1351,7 @@ def _tests(keepFiles=False):
 				# Run powerflow on the GLM.
 				output = gridlabd.runInFilesystem(outGlm, keepFiles=False)
 				with open(outPrefix + stdPath.replace('.std','.json'),'w') as outFile:
-					json.dump(output, outFile, indent=4)
+					json.dump(output, outFile)
 				print 'RAN GRIDLAB ON', stdPath					
 			except:
 				exceptionCount += 1

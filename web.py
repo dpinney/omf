@@ -87,7 +87,7 @@ def send_link(email, message, u={}):
 	u["timestamp"] = datetime.datetime.strftime(datetime.datetime.now(), format="%c")
 	u["registered"] = False
 	u["email"] = email
-	json.dump(u, open("data/User/"+email+".json", "w"), indent=4)
+	json.dump(u, open("data/User/"+email+".json", "w"))
 	outDict = c.send_email("david.pinney@omf.coop",
 		"OMF Registration Link",
 		message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
@@ -325,7 +325,7 @@ def sortData(dataType, column):
 		userJson["sort"][dataType] = [column, 1]
 	userJson["sort"][dataType][1] *= -1
 	with open(fname, "w") as jfile:
-		json.dump(userJson, jfile, indent=4)
+		json.dump(userJson, jfile)
 	return "OK"
 
 @app.route('/feeder/<owner>/<feederName>')
@@ -417,7 +417,7 @@ def saveFeeder(owner, feederName):
 	postObject = request.form.to_dict()
 	if owner == User.cu() or User.ia():
 		# Then feel free to dump
-		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"), indent=4)
+		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"))
 	return redirect(request.form.get("ref", "/#feeders"))
 
 @app.route('/milsoftImport/', methods=['POST'])
