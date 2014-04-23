@@ -577,6 +577,57 @@ def gridlabdImport():
 	current_user.put('Feeder', feederName, newFeeder)
 	return flask.redirect('/#feeders')
 
+@app.route('/gridlabdImport/', methods=['POST'])
+@flask_login.login_required
+def gridlabdImport():
+	feederName = str(flask.request.form.to_dict()['feederName'])
+	if flask_login.current_user.username == "admin":
+		feederName = "admin_" + feederName 
+	current_user = user_manager.get(flask_login.current_user.get_id())
+
+	newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
+	newFeeder['tree'] = feeder.parse(flask.request.files['glmFile'].stream.read(), False)
+
+	newFeeder['layoutVars']['xScale'] = 0
+	newFeeder['layoutVars']['yScale'] = 0
+	with open('./schedules.glm','r') as schedFile:
+		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	current_user.put('Feeder', feederName, newFeeder)
+	return flask.redirect('/#feeders')
+@app.route('/gridlabdImport/', methods=['POST'])
+@flask_login.login_required
+def gridlabdImport():
+	feederName = str(flask.request.form.to_dict()['feederName'])
+	if flask_login.current_user.username == "admin":
+		feederName = "admin_" + feederName 
+	current_user = user_manager.get(flask_login.current_user.get_id())
+
+	newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
+	newFeeder['tree'] = feeder.parse(flask.request.files['glmFile'].stream.read(), False)
+
+	newFeeder['layoutVars']['xScale'] = 0
+	newFeeder['layoutVars']['yScale'] = 0
+	with open('./schedules.glm','r') as schedFile:
+		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	current_user.put('Feeder', feederName, newFeeder)
+	return flask.redirect('/#feeders')
+@app.route('/gridlabdImport/', methods=['POST'])
+@flask_login.login_required
+def gridlabdImport():
+	feederName = str(flask.request.form.to_dict()['feederName'])
+	if flask_login.current_user.username == "admin":
+		feederName = "admin_" + feederName 
+	current_user = user_manager.get(flask_login.current_user.get_id())
+
+	newFeeder = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
+	newFeeder['tree'] = feeder.parse(flask.request.files['glmFile'].stream.read(), False)
+
+	newFeeder['layoutVars']['xScale'] = 0
+	newFeeder['layoutVars']['yScale'] = 0
+	with open('./schedules.glm','r') as schedFile:
+		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	current_user.put('Feeder', feederName, newFeeder)
+	return flask.redirect('/#feeders')
 
 if __name__ == '__main__':
 	# Run a debug server all interface IPs.
