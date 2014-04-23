@@ -1,0 +1,8 @@
+
+def getAllData(dataType):
+	path = hlp.OS_PJ("data", dataType)
+	if User.ia():
+		owners = os.listdir(path)
+	else:
+		owners = ["public", User.cu()]
+	

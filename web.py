@@ -387,6 +387,7 @@ def showModel(user, modelName):
 @app.route('/uniqueName/<objectType>/<name>')
 @flask_login.login_required
 def uniqueName(objectType, name):
+	# hello
 	return hlp.nojson(objectType, name)
 
 
@@ -395,6 +396,7 @@ def uniqueName(objectType, name):
 def delete(objectType, name, owner):
 	if owner != User.cu() and User.cu() != "admin":
 		return
+	# comment
 	try:
 		# Just in case someone tries to delete something not through the web interface or for some reason the web interface is displaying something that doesn't actually exist
 		if objectType == "Feeder":
@@ -409,6 +411,7 @@ def delete(objectType, name, owner):
 @app.route('/saveFeeder/<owner>/<feederName>', methods=['POST'])
 @flask_login.login_required
 def saveFeeder(owner, feederName):
+	"""How to save the feeder"""
 	# If the owner is public, then the current user must be admin
 	# The admin is also allowed to do whatever the durn eff he pleases
 	postObject = request.form.to_dict()
@@ -420,6 +423,7 @@ def saveFeeder(owner, feederName):
 @app.route('/milsoftImport/', methods=['POST'])
 @flask_login.login_required
 def milsoftImport():
+	"""This function is used for milsoftImporting"""
 	feederName = str(flask.request.form.to_dict()['feederName'])
 	stdString, seqString = map(lambda x: flask.request.files[x].stream.read(), ["stdFile", "seqFile"])
 	worker.milImport(User.cu(), current_user.prepend+feederName, stdString, seqString)
@@ -429,6 +433,7 @@ def milsoftImport():
 @app.route('/gridlabdImport/', methods=['POST'])
 @flask_login.login_required
 def gridlabdImport():
+	"""This function is used for gridlabdImporting"""
 	feederName = str(flask.request.form.to_dict()['feederName'])
 	newFeeder = dict(**hlp.newFeederWireframe)	# copies the dictionary..
 	newFeeder['tree'] = feeder.parse(flask.request.files['glmFile'].stream.read(), False)
