@@ -1321,7 +1321,7 @@ def _tests(keepFiles=False):
 	from solvers import gridlabd
 	from matplotlib import pyplot as plt
 	openPrefix = './uploads/'
-	outPrefix = './running/milToGridlabTests/'
+	outPrefix = './scratch/milToGridlabTests/'
 	try:
 		os.mkdir(outPrefix)
 	except:

@@ -55,7 +55,7 @@ def renderAndShow(modelDir="", datastoreNames={}):
 def create(parentDirectory, inData):
 	''' Make a directory for the model to live in, and put the input data into it. '''
 	modelDir = pJoin(parentDirectory,inData["user"],inData["modelName"])
-	os.mkdir(modelDir)
+	os.makedirs(modelDir)
 	inData["created"] = str(datetime.datetime.now())
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inData, inputFile, indent=4)
