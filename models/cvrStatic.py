@@ -414,8 +414,8 @@ def _tests():
 		"modelType": "cvrStatic",
 		"user": "admin",
 		"feederName": "public___ABEC Columbia",
-		"runTime": "" }
-	inData["rates"] = {"capitalCost": 30000,
+		"runTime": "",
+		"capitalCost": 30000,
 		"omCost": 1000,
 		"wholesaleEnergyCostPerKwh": 0.06,
 		"retailEnergyCostPerKwh": 0.10,

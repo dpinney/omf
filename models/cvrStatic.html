@@ -35,11 +35,11 @@
 			if (allInputData == null && allOutputData == null) {
 				// Case 1: model just started.
 				console.log("NORUN")
-				$(".preRun").show()
+				$(".preRun").css('display', 'inline-block')
 			} else if (allInputData != null && allOutputData == null) {
 				// Case 2: model running.
 				console.log("RUNNING")
-				$(".running").show()
+				$(".running").css('display', 'inline-block')
 				restoreInputs()
 				$("input").prop("readonly", true)
 				$("select").prop("disabled", true)
@@ -47,7 +47,7 @@
 				// Case 3: one model run complete.
 				console.log("POSTRUN")
 				restoreInputs()
-				$(".postRun").show()
+				$(".postRun").css('display', 'inline-block')
 			}
 		}
 		function restoreInputs() {
