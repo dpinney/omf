@@ -3,6 +3,7 @@
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
 import math, re, datetime as dt
 import multiprocessing
+from copy import copy
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
@@ -85,12 +86,32 @@ def run(modelDir):
 
 def runForeground(modelDir):
 	''' Run the model in the foreground. WARNING: can take about a minute. '''
+	# Load the data from the model directory.
 	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
 	feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
 	tree = feederJson.get("tree",{})
-	monthData = allInputData.get("monthData",[])
-	rates = allInputData.get("rates",{})
 	''' Run CVR analysis. '''
+	# Reformate monthData and rates.
+	# TODO: just get rid of these monthData and rates containers.
+	rates = {k:allInputData[k] for k in ["capitalCost", "omCost", "wholesaleEnergyCostPerKwh",
+		"retailEnergyCostPerKwh", "peakDemandCostSpringPerKw", "peakDemandCostSummerPerKw",
+		"peakDemandCostFallPerKw", "peakDemandCostWinterPerKw"]}
+	print "RATES", rates
+	monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
+		"September", "October", "November", "December"]
+	monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
+		'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
+		'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
+	monthData = []
+	for i, x in enumerate(monthNames):
+		monShort = x[0:3].lower()
+		season = monthToSeason[x]
+		histAvg = float(allInputData.get(monShort + "Avg", 0))
+		histPeak = float(allInputData.get(monShort + "Peak", 0))
+		monthData.append({"monthId":i, "monthName":x, "histAverage":histAvg,
+			"histPeak":histPeak, "season":season})
+	for row in monthData:
+		print row
 	# Graph the SCADA data.
 	fig = plt.figure(figsize=(17,5))
 	indices = [r['monthName'] for r in monthData]
@@ -386,30 +407,30 @@ def _tests():
 	#TODO: fix this tree.
 	friendshipTree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Frank LO.json")))["tree"]
 	colomaTree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Columbia.json")))["tree"]
-	colomaMonths = [{'season': 'Winter', 'histAverage': 914000.0, 'monthName': 'January', 'monthId': 1, 'histPeak': 1290000.0},
-		{'season': 'Winter', 'histAverage': 897000.0, 'monthName': 'February', 'monthId': 2, 'histPeak': 1110000.0},
-		{'season': 'Spring', 'histAverage': 731000.0, 'monthName': 'March', 'monthId': 3, 'histPeak': 1030000.0},
-		{'season': 'Spring', 'histAverage': 864000.0, 'monthName': 'April', 'monthId': 4, 'histPeak': 2170000.0},
-		{'season': 'Spring', 'histAverage': 1620000.0, 'monthName': 'May', 'monthId': 5, 'histPeak': 4580000.0},
-		{'season': 'Summer', 'histAverage': 2210000.0, 'monthName': 'June', 'monthId': 6, 'histPeak': 5550000.0},
-		{'season': 'Summer', 'histAverage': 3570000.0, 'monthName': 'July', 'monthId': 7, 'histPeak': 6260000.0},
-		{'season': 'Summer', 'histAverage': 3380000.0, 'monthName': 'August', 'monthId': 8, 'histPeak': 5610000.0},
-		{'season': 'Fall', 'histAverage': 1370000.0, 'monthName': 'September', 'monthId': 9, 'histPeak': 3740000.0},
-		{'season': 'Fall', 'histAverage': 1030000.0, 'monthName': 'October', 'monthId': 10, 'histPeak': 1940000.0},
-		{'season': 'Fall', 'histAverage': 1020000.0, 'monthName': 'November', 'monthId': 11, 'histPeak': 1340000.0},
-		{'season': 'Winter', 'histAverage': 1030000.0, 'monthName': 'December', 'monthId': 12, 'histPeak': 1280000.0}]
-	# friendshipMonths = [{'season': 'Winter', 'histAverage': 2740000.0, 'monthName': 'January', 'monthId': 1, 'histPeak': 4240000.0},
-	# 	{'season': 'Winter', 'histAverage': 2480000.0, 'monthName': 'February', 'monthId': 2, 'histPeak': 3310000.0},
-	# 	{'season': 'Spring', 'histAverage': 2030000.0, 'monthName': 'March', 'monthId': 3, 'histPeak': 2960000.0},
-	# 	{'season': 'Spring', 'histAverage': 2110000.0, 'monthName': 'April', 'monthId': 4, 'histPeak': 3030000.0},
-	# 	{'season': 'Spring', 'histAverage': 2340000.0, 'monthName': 'May', 'monthId': 5, 'histPeak': 4080000.0},
-	# 	{'season': 'Summer', 'histAverage': 2770000.0, 'monthName': 'June', 'monthId': 6, 'histPeak': 5810000.0},
-	# 	{'season': 'Summer', 'histAverage': 3970000.0, 'monthName': 'July', 'monthId': 7, 'histPeak': 6750000.0},
-	# 	{'season': 'Summer', 'histAverage': 3270000.0, 'monthName': 'August', 'monthId': 8, 'histPeak': 5200000.0},
-	# 	{'season': 'Fall', 'histAverage': 2130000.0, 'monthName': 'September', 'monthId': 9, 'histPeak': 4900000.0},
-	# 	{'season': 'Fall', 'histAverage': 1750000.0, 'monthName': 'October', 'monthId': 10, 'histPeak': 2340000.0},
-	# 	{'season': 'Fall', 'histAverage': 2210000.0, 'monthName': 'November', 'monthId': 11, 'histPeak': 3550000.0},
-	# 	{'season': 'Winter', 'histAverage': 2480000.0, 'monthName': 'December', 'monthId': 12, 'histPeak': 3370000.0}]
+	colomaMonths = {"janAvg": 914000.0, "janPeak": 1290000.0,
+		"febAvg": 897000.00, "febPeak": 1110000.0,
+		"marAvg": 731000.00, "marPeak": 1030000.0,
+		"aprAvg": 864000.00, "aprPeak": 2170000.0,
+		"mayAvg": 1620000.0, "mayPeak": 4580000.0,
+		"junAvg": 2210000.0, "junPeak": 5550000.0,
+		"julAvg": 3570000.0, "julPeak": 6260000.0,
+		"augAvg": 3380000.0, "augPeak": 5610000.0,
+		"sepAvg": 1370000.0, "sepPeak": 3740000.0,
+		"octAvg": 1030000.0, "octPeak": 1940000.0,
+		"novAvg": 1020000.0, "novPeak": 1340000.0,
+		"decAvg": 1030000.0, "decPeak": 1280000.0}
+	# friendshipMonths = {"janAvg": 2740000.0, "janPeak": 4240000.0,
+	# 	"febAvg": 2480000.0, "febPeak": 3310000.0,
+	# 	"marAvg": 2030000.0, "marPeak": 2960000.0,
+	# 	"aprAvg": 2110000.0, "aprPeak": 3030000.0,
+	# 	"mayAvg": 2340000.0, "mayPeak": 4080000.0,
+	# 	"junAvg": 2770000.0, "junPeak": 5810000.0,
+	# 	"julAvg": 3970000.0, "julPeak": 6750000.0,
+	# 	"augAvg": 3270000.0, "augPeak": 5200000.0,
+	# 	"sepAvg": 2130000.0, "sepPeak": 4900000.0,
+	# 	"octAvg": 1750000.0, "octPeak": 2340000.0,
+	# 	"novAvg": 2210000.0, "novPeak": 3550000.0,
+	# 	"decAvg": 2480000.0, "decPeak": 3370000.0}
 	inData = { "modelName": "Automated staticCVR Testing",
 		"modelType": "cvrStatic",
 		"user": "admin",
@@ -423,7 +444,8 @@ def _tests():
 		"peakDemandCostSummerPerKw": 10.0,
 		"peakDemandCostFallPerKw": 6.0,
 		"peakDemandCostWinterPerKw": 8.0}
-	inData["monthData"] = colomaMonths
+	for key in colomaMonths:
+		inData[key] = colomaMonths[key]
 	modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
 	# Blow away old test results if necessary.
 	try:
@@ -437,8 +459,8 @@ def _tests():
 	create(workDir, inData)
 	# Show the model (should look like it's running).
 	renderAndShow(modelDir=modelLoc)
-	# # Run the model.
-	# run(modelLoc)
+	# Run the model.
+	runForeground(modelLoc)
 	# # Show the output.
 	# renderAndShow(modelDir=modelLoc)
 	# # # Delete the model.
