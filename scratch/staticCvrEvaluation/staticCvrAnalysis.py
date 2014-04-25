@@ -124,7 +124,7 @@ def runAnalysis(tree, monthData, rates):
 		'limit': '0',
 		'parent': tree[regIndex]['to'],
 		'property': 'voltage_A,voltage_B,voltage_C'} ]
-	biggest = 1 + max(tree.keys())
+	biggest = 1 + max([int(k) for k in tree.keys()])
 	for index, rec in enumerate(recorders):
 		tree[biggest + index] = rec
 
@@ -408,7 +408,14 @@ def _tests():
 		tree = feeder.parse('sourceData/ACEC-Coloma.glm')
 		monthData = _scadaCleanup('Coloma')
 		runAnalysis(tree, monthData, rates)
-	testFriendship()
+	def neoColoma():
+		# tree = feeder.parse('sourceData/ACEC-Friendship.glm')
+		import json
+		with open("../../data/Feeder/public/ABEC Columbia.json") as inFile:
+			tree = json.load(inFile)["tree"]
+		monthData = _scadaCleanup('Coloma')
+		runAnalysis(tree, monthData, rates)
+	neoColoma()
 	# Show all plots:
 	plt.show()
 

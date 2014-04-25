@@ -439,4 +439,4 @@ def _tests():
 	renderAndShow()
 
 if __name__ == '__main__':
-	_newTests()
+	_tests()
