@@ -61,7 +61,9 @@ def create(parentDirectory, inData):
 	inData["created"] = str(datetime.datetime.now())
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inData, inputFile, indent=4)
-	# TODO: copy datastore data we need.
+	feederDir, feederName = inData["feederName"].split("___")
+	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
+		pJoin(modelDir,"feeder.json"))
 
 def _roundOne(x,direc):
 	''' Round x in direc (up/down) to 1 sig fig. '''
@@ -75,21 +77,19 @@ def _roundOne(x,direc):
 		raise Exception
 
 def run(modelDir):
-	''' Run the model in its directory. '''
-	# TODO: implement.
-	pass
+	''' Run the model in a separate process. web.py calls this to run the model.
+	This function will return fast, but results take a while to hit the file system.'''
+	backProc = multiprocessing.Process(target=runForeground, args=(modelDir,))
+	backProc.start()
+	print "SENT TO BACKGROUND", modelDir
 
 def runForeground(modelDir):
 	''' Run the model in the foreground. WARNING: can take about a minute. '''
-	# TODO: implment.
-	pass
-
-def cancel(modelDir):
-	''' PV Watts runs so fast it's pointless to cancel a run. '''
-	# TODO: implement.
-	pass
-
-def _runAnalysis(tree, monthData, rates):
+	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
+	feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
+	tree = feederJson.get("tree",{})
+	monthData = allInputData.get("monthData",[])
+	rates = allInputData.get("rates",{})
 	''' Run CVR analysis. '''
 	# Graph the SCADA data.
 	fig = plt.figure(figsize=(17,5))
@@ -117,13 +117,13 @@ def _runAnalysis(tree, monthData, rates):
 				"stoptime":"'2013-01-01 00:00:00'",
 				"starttime":"'2013-01-01 00:00:00'",
 				"clock":"clock"}
-		# Remove all includes.
-		if tree[key].get('omftype','') == '#include':
-			del key
 		# Save swing node index.
 		if tree[key].get('bustype','').lower() == 'swing':
 			swingIndex = key
 			swingName = tree[key].get('name')
+		# Remove all includes.
+		if tree[key].get('omftype','') == '#include':
+			del key
 	# Find the substation regulator and config.
 	for key in tree:
 		if tree[key].get('object','') == 'regulator' and tree[key].get('from','') == swingName:
@@ -186,7 +186,7 @@ def _runAnalysis(tree, monthData, rates):
 		'limit': '0',
 		'parent': tree[regIndex]['to'],
 		'property': 'voltage_A,voltage_B,voltage_C'} ]
-	biggest = 1 + max(tree.keys())
+	biggest = 1 + max([int(k) for k in tree.keys()])
 	for index, rec in enumerate(recorders):
 		tree[biggest + index] = rec
 	# Change constant PF loads to ZIP loads. (See evernote for rationale about 50/50 power/impedance mix.)
@@ -369,14 +369,53 @@ def _runAnalysis(tree, monthData, rates):
 	plt.plot([0 for x in range(31)],c='gray')
 	plt.axvline(x=simplePayback, ymin=0, ymax=1, c='gray', linestyle='--')
 	plt.plot([annualSave(x) for x in range(31)], c='green')
+	#TODO: put plots... on disk?
 
-def _newTests():
+def cancel(modelDir):
+	''' Try to cancel a currently running model. '''
+	try:
+		with open(pJoin(modelDir,"PID.txt"),"r") as pidFile:
+			pid = int(pidFile.read())
+			os.kill(pid, 15)
+	except:
+		print "ATTEMPTED AND FAILED TO KILL", modelDir
+
+def _tests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
 	#TODO: fix this tree.
-	tree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Frank LO.json")))["tree"]
+	friendshipTree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Frank LO.json")))["tree"]
 	colomaTree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Columbia.json")))["tree"]
-	rates = {"capitalCost": 30000,
+	colomaMonths = [{'season': 'Winter', 'histAverage': 914000.0, 'monthName': 'January', 'monthId': 1, 'histPeak': 1290000.0},
+		{'season': 'Winter', 'histAverage': 897000.0, 'monthName': 'February', 'monthId': 2, 'histPeak': 1110000.0},
+		{'season': 'Spring', 'histAverage': 731000.0, 'monthName': 'March', 'monthId': 3, 'histPeak': 1030000.0},
+		{'season': 'Spring', 'histAverage': 864000.0, 'monthName': 'April', 'monthId': 4, 'histPeak': 2170000.0},
+		{'season': 'Spring', 'histAverage': 1620000.0, 'monthName': 'May', 'monthId': 5, 'histPeak': 4580000.0},
+		{'season': 'Summer', 'histAverage': 2210000.0, 'monthName': 'June', 'monthId': 6, 'histPeak': 5550000.0},
+		{'season': 'Summer', 'histAverage': 3570000.0, 'monthName': 'July', 'monthId': 7, 'histPeak': 6260000.0},
+		{'season': 'Summer', 'histAverage': 3380000.0, 'monthName': 'August', 'monthId': 8, 'histPeak': 5610000.0},
+		{'season': 'Fall', 'histAverage': 1370000.0, 'monthName': 'September', 'monthId': 9, 'histPeak': 3740000.0},
+		{'season': 'Fall', 'histAverage': 1030000.0, 'monthName': 'October', 'monthId': 10, 'histPeak': 1940000.0},
+		{'season': 'Fall', 'histAverage': 1020000.0, 'monthName': 'November', 'monthId': 11, 'histPeak': 1340000.0},
+		{'season': 'Winter', 'histAverage': 1030000.0, 'monthName': 'December', 'monthId': 12, 'histPeak': 1280000.0}]
+	# friendshipMonths = [{'season': 'Winter', 'histAverage': 2740000.0, 'monthName': 'January', 'monthId': 1, 'histPeak': 4240000.0},
+	# 	{'season': 'Winter', 'histAverage': 2480000.0, 'monthName': 'February', 'monthId': 2, 'histPeak': 3310000.0},
+	# 	{'season': 'Spring', 'histAverage': 2030000.0, 'monthName': 'March', 'monthId': 3, 'histPeak': 2960000.0},
+	# 	{'season': 'Spring', 'histAverage': 2110000.0, 'monthName': 'April', 'monthId': 4, 'histPeak': 3030000.0},
+	# 	{'season': 'Spring', 'histAverage': 2340000.0, 'monthName': 'May', 'monthId': 5, 'histPeak': 4080000.0},
+	# 	{'season': 'Summer', 'histAverage': 2770000.0, 'monthName': 'June', 'monthId': 6, 'histPeak': 5810000.0},
+	# 	{'season': 'Summer', 'histAverage': 3970000.0, 'monthName': 'July', 'monthId': 7, 'histPeak': 6750000.0},
+	# 	{'season': 'Summer', 'histAverage': 3270000.0, 'monthName': 'August', 'monthId': 8, 'histPeak': 5200000.0},
+	# 	{'season': 'Fall', 'histAverage': 2130000.0, 'monthName': 'September', 'monthId': 9, 'histPeak': 4900000.0},
+	# 	{'season': 'Fall', 'histAverage': 1750000.0, 'monthName': 'October', 'monthId': 10, 'histPeak': 2340000.0},
+	# 	{'season': 'Fall', 'histAverage': 2210000.0, 'monthName': 'November', 'monthId': 11, 'histPeak': 3550000.0},
+	# 	{'season': 'Winter', 'histAverage': 2480000.0, 'monthName': 'December', 'monthId': 12, 'histPeak': 3370000.0}]
+	inData = { "modelName": "Automated staticCVR Testing",
+		"modelType": "cvrStatic",
+		"user": "admin",
+		"feederName": "public___ABEC Columbia",
+		"runTime": "" }
+	inData["rates"] = {"capitalCost": 30000,
 		"omCost": 1000,
 		"wholesaleEnergyCostPerKwh": 0.06,
 		"retailEnergyCostPerKwh": 0.10,
@@ -384,49 +423,20 @@ def _newTests():
 		"peakDemandCostSummerPerKw": 10.0,
 		"peakDemandCostFallPerKw": 6.0,
 		"peakDemandCostWinterPerKw": 8.0}
-	colomaMonths = {"janAvg": 914000.0, "janPeak": 1290000.0,
-		"febAvg": 897000.00, "febPeak": 1110000.0,
-		"marAvg": 731000.00, "marPeak": 1030000.0,
-		"aprAvg": 864000.00, "aprPeak": 2170000.0,
-		"mayAvg": 1620000.0, "mayPeak": 4580000.0,
-		"junAvg": 2210000.0, "junPeak": 5550000.0,
-		"julAvg": 3570000.0, "julPeak": 6260000.0,
-		"augAvg": 3380000.0, "augPeak": 5610000.0,
-		"sepAvg": 1370000.0, "sepPeak": 3740000.0,
-		"octAvg": 1030000.0, "octPeak": 1940000.0,
-		"novAvg": 1020000.0, "novPeak": 1340000.0,
-		"decAvg": 1030000.0, "decPeak": 1280000.0}
-	friendshipMonths = {"janAvg": 2740000.0, "janPeak": 4240000.0,
-		"febAvg": 2480000.0, "febPeak": 3310000.0,
-		"marAvg": 2030000.0, "marPeak": 2960000.0,
-		"aprAvg": 2110000.0, "aprPeak": 3030000.0,
-		"mayAvg": 2340000.0, "mayPeak": 4080000.0,
-		"junAvg": 2770000.0, "junPeak": 5810000.0,
-		"julAvg": 3970000.0, "julPeak": 6750000.0,
-		"augAvg": 3270000.0, "augPeak": 5200000.0,
-		"sepAvg": 2130000.0, "sepPeak": 4900000.0,
-		"octAvg": 1750000.0, "octPeak": 2340000.0,
-		"novAvg": 2210000.0, "novPeak": 3550000.0,
-		"decAvg": 2480000.0, "decPeak": 3370000.0}
-	inData = { "modelName": "Automated staticCVR Testing",
-		"modelType": "cvrStatic",
-		"user": "admin", # Really only used with web.py.
-		"runTime": "" }
-	# modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
-	# Hmmm, might need to show plots.
-	# plt.show()
-	# # Blow away old test results if necessary.
-	# try:
-	# 	shutil.rmtree(modelLoc)
-	# except:
-	# 	# No previous test results.
-	# 	pass
-	# # No-input template.
-	# renderAndShow()
-	# # Create a model.
-	# create(workDir, inData)
-	# # Show the model (should look like it's running).
-	# renderAndShow(modelDir=modelLoc)
+	inData["monthData"] = colomaMonths
+	modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
+	# Blow away old test results if necessary.
+	try:
+		shutil.rmtree(modelLoc)
+	except:
+		# No previous test results.
+		pass
+	# No-input template.
+	renderAndShow()
+	# Create a model.
+	create(workDir, inData)
+	# Show the model (should look like it's running).
+	renderAndShow(modelDir=modelLoc)
 	# # Run the model.
 	# run(modelLoc)
 	# # Show the output.
@@ -434,9 +444,6 @@ def _newTests():
 	# # # Delete the model.
 	# # time.sleep(2)
 	# # shutil.rmtree(modelLoc)
-
-def _tests():
-	renderAndShow()
 
 if __name__ == '__main__':
 	_tests()

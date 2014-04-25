@@ -426,4 +426,5 @@ def _tests():
 	plt.show()
 
 if __name__ == '__main__':
-	_tests()
+	# _tests()
+	print _scadaCleanup("Coloma")
