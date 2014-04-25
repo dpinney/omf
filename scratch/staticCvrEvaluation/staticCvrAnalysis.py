@@ -52,13 +52,13 @@ def runAnalysis(tree, monthData, rates):
 				"stoptime":"'2013-01-01 00:00:00'",
 				"starttime":"'2013-01-01 00:00:00'",
 				"clock":"clock"}
-		# Remove all includes.
-		if tree[key].get('omftype','') == '#include':
-			del key
 		# Save swing node index.
 		if tree[key].get('bustype','').lower() == 'swing':
 			swingIndex = key
 			swingName = tree[key].get('name')
+		# Remove all includes.
+		if tree[key].get('omftype','') == '#include':
+			del key
 
 	# Find the substation regulator and config.
 	for key in tree:
@@ -415,7 +415,13 @@ def _tests():
 			tree = json.load(inFile)["tree"]
 		monthData = _scadaCleanup('Coloma')
 		runAnalysis(tree, monthData, rates)
-	neoColoma()
+	def neoFriendship():
+		import json
+		with open("../../data/Feeder/public/ABEC Frank LO.json") as inFile:
+			tree = json.load(inFile)["tree"]
+		monthData = _scadaCleanup("Friendship")
+		runAnalysis(tree, monthData, rates)
+	neoFriendship()
 	# Show all plots:
 	plt.show()
 
