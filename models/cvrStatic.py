@@ -90,6 +90,7 @@ def runForeground(modelDir):
 	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
 	feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
 	tree = feederJson.get("tree",{})
+	attachments = feederJson.get("attachments",{})
 	''' Run CVR analysis. '''
 	# Reformate monthData and rates.
 	# TODO: just get rid of these monthData and rates containers.
@@ -277,7 +278,8 @@ def runForeground(modelDir):
 				tree[regConfIndex]['tap_pos_B'] = str(newTapPos)
 				tree[regConfIndex]['tap_pos_C'] = str(newTapPos)
 			# Run the model through gridlab and put outputs in the table.
-			output = gridlabd.runInFilesystem(tree, keepFiles=False)
+			output = gridlabd.runInFilesystem(tree, attachments=attachments,
+				keepFiles=False, workDir=modelDir)
 			p = output['Zregulator.csv']['power_in.real'][0]
 			q = output['Zregulator.csv']['power_in.imag'][0]
 			s = math.sqrt(p**2+q**2)

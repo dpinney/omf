@@ -46,17 +46,12 @@ def getAllData(dataType):
 			allData.append(datum)
 	return sortAccPreferences(allData, dataType)
 
-def strcmp(a, b):
-	# Python doesn't have this built in even though it runs on top of C.  What the heck, man?
-	if a < b:
-		return -1
-	if a == b:
-		return 0
-	if a > b:
-		return 1
-
 def sortAccPreferences(allData, dataType):
 	'''Sort according to user preferences'''
+	def strcmp(a, b):
+		if a < b: return -1
+		elif a == b: return 0
+		elif a > b: return 1
 	fname = "./data/User/"+flask_login.current_user.username+".json"
 	userJson = json.load(open(fname))
 	if userJson.get("sort"):
@@ -107,6 +102,7 @@ def milImportBackground(owner, feederName, stdString, seqString):
 	
 def milImport(owner, feederName, stdString, seqString):
 	# Setup.
+	# TODO: switch to multiprocessing for better control.
 	importThread = Thread(target=milImportBackground, args=[owner, feederName, stdString, seqString])
 	importThread.start()
 
