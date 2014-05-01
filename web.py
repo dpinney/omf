@@ -4,7 +4,6 @@ from flask import Flask, send_from_directory, request, redirect, render_template
 from jinja2 import Template
 import models, json, os, flask_login, hashlib, random, time, datetime, shutil, milToGridlab
 from passlib.hash import pbkdf2_sha512
-import helperfuncs as hlp
 from omfuser import User
 
 app = Flask("omf")
@@ -17,50 +16,6 @@ def getDataNames():
 	climates = [x[:-5] for x in os.listdir('./data/Climate/')]
 	return {'feeders':feeders, 'publicFeeders':publicFeeders, 'climates':climates, 
 		'currentUser':currUser.__dict__}
-
-def getAllData(dataType):
-	''' Get metadata for everything we need for the home screen. '''
-	# This is turning into a beast.  Requires clean up at some point.
-	path = hlp.OS_PJ("data", dataType)
-	if flask_login.current_user.username == "admin":
-		owners = os.listdir(path)
-	else:
-		owners = ["public", flask_login.current_user.username]
-	allData = []
-	for o in owners:
-		for fname in os.listdir(os.path.join(path, o)):
-			if dataType in ["Feeder", "Conversion"]:
-				datum = {"name":fname[:-len(".json")]}
-				if dataType == "Feeder":
-					datum["status"] = "Ready"
-				elif dataType == "Conversion":
-					datum["status"] = "converting"
-				statstruct = os.stat(os.path.join(path, o, fname))
-			elif dataType == "Model":
-				datum = json.load(open(os.path.join(path, o, fname, "allInputData.json")))
-				datum["name"] = datum["modelName"]
-				statstruct = os.stat(os.path.join(path, o, fname, "allInputData.json"))
-			datum["ctime"] = statstruct.st_ctime
-			datum["formattedctime"] = time.ctime(datum["ctime"])
-			datum["owner"] = o
-			allData.append(datum)
-	return sortAccPreferences(allData, dataType)
-
-def sortAccPreferences(allData, dataType):
-	'''Sort according to user preferences'''
-	def strcmp(a, b):
-		if a < b: return -1
-		elif a == b: return 0
-		elif a > b: return 1
-	fname = "./data/User/"+flask_login.current_user.username+".json"
-	userJson = json.load(open(fname))
-	if userJson.get("sort"):
-		column, i = userJson["sort"][dataType]
-		if column == "name":
-			return sorted(allData, cmp=lambda x, y: i*strcmp(x["name"], y["name"]))
-		elif column == "ctime":
-			return sorted(allData, cmp=lambda x, y: int(i*(x["ctime"] - y["ctime"])))
-	return allData
 
 @app.before_request
 def csrf_protect():
@@ -311,6 +266,47 @@ def gridlabdImport():
 # VIEWS
 ###################################################
 
+@app.route("/")
+@flask_login.login_required
+def root():
+	isAdmin = flask_login.current_user.username == "admin"
+	uName = flask_login.current_user.username
+	publicModels = [{"owner":"public","name":x} for x in os.listdir("data/Model/public/")]
+	userModels = [{"owner":uName, "name":x} for x in os.listdir("data/Model/" + uName)]
+	publicFeeders = [{"owner":"public","name":x[0:-5]} for x in os.listdir("data/Feeder/public/")]
+	userFeeders = [{"owner":uName,"name":x[0:-5]} for x in os.listdir("data/Feeder/" + uName)]
+	return render_template("home.html", 
+		models = publicModels + userModels, feeders = publicFeeders + userFeeders,
+		current_user = flask_login.current_user.username, is_admin = isAdmin, modelNames = models.__all__)
+
+@app.route("/model/<user>/<modelName>")
+@flask_login.login_required
+def showModel(user, modelName):
+	''' Render a model template with saved data. '''
+	modelDir = "./data/Model/" + user + "/" + modelName
+	with open(modelDir + "/allInputData.json") as inJson:
+		modelType = json.load(inJson)["modelType"]
+	return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
+
+@app.route("/newModel/<modelType>")
+@flask_login.login_required
+def newModel(modelType):
+	''' Display the module template for creating a new model. '''
+	return getattr(models, modelType).renderTemplate(datastoreNames=getDataNames())
+
+@app.route("/runModel/", methods=["POST"])
+@flask_login.login_required
+def runModel():
+	''' Start a model running and redirect to its running screen. '''
+	pData = request.form.to_dict()
+	modelModule = getattr(models, pData["modelType"])
+	if pData.get("created","NOKEY") == "":
+		# New model.
+		pData["user"] = flask_login.current_user.username
+		modelModule.create("./data/Model/", pData)
+	modelModule.run("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
+	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
+
 @app.route("/adminControls")
 @flask_login.login_required
 def adminControls():
@@ -338,8 +334,7 @@ def adminControls():
 @app.route("/myaccount")
 @flask_login.login_required
 def myaccount():
-	return render_template("myaccount.html",
-						   user=flask_login.current_user)
+	return render_template("myaccount.html", user=flask_login.current_user)
 
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
 @flask_login.login_required
@@ -363,53 +358,12 @@ def publicObject(objectType, objectName):
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
 
-@app.route("/")
-@flask_login.login_required
-def root():
-	return render_template('home.html', 
-		analyses=[], 
-		feeders=[],
-		current_user=flask_login.current_user.username, 
-		is_admin = flask_login.current_user.username == "admin",
-		modelNames = models.__all__)
-
-@app.route("/getAllData/<dataType>")
-@flask_login.login_required
-def getAllDataView(dataType):
-	if dataType == "Feeder":
-		return jsonify(data=getAllData("Feeder"))
-	return jsonify(data=getAllData(dataType))
-
-@app.route("/sort/<dataType>/<column>", methods=["POST"])
-@flask_login.login_required
-def sortData(dataType, column):
-	fname = "./data/User/"+flask_login.current_user.username+".json"
-	userJson = json.load(open(fname))
-	if not userJson.get("sort"):
-		userJson["sort"] = {}
-	l = userJson["sort"].get(dataType)
-	# Boolean logic is tricky with negatives so I did it this way
-	if l and l[0] == column:
-		pass
-	else:
-		userJson["sort"][dataType] = [column, 1]
-	userJson["sort"][dataType][1] *= -1
-	with open(fname, "w") as jfile:
-		json.dump(userJson, jfile)
-	return "OK"
-
 @app.route('/feeder/<owner>/<feederName>')
 @flask_login.login_required
 def feederGet(owner, feederName):
-	return render_template('gridEdit.html',
-						   feederName=feederName,
-						   ref = request.referrer,
-						   is_admin = User.ia(),
-						   modelFeeder=False,
-						   public = owner == "public", 
-						   # ^Kinda want to get rid of this
-						   currUser = User.cu(),
-						   owner = owner)
+	return render_template('gridEdit.html', feederName = feederName, ref = request.referrer,
+		is_admin = User.ia(), modelFeeder=False, public = owner == "public", currUser = User.cu(),
+		owner = owner)
 
 @app.route("/feederData/<owner>/<feederName>/") 
 @app.route("/feederData/<owner>/<feederName>/<modelFeeder>")
@@ -426,34 +380,6 @@ def getComponents():
 	components = {name.replace(".json", ""):json.load(open(path+name))
 		for name in os.listdir(path)}
 	return jsonify(**components)
-
-@app.route("/newModel/<modelType>")
-@flask_login.login_required
-def newModel(modelType):
-	''' Display the module template for creating a new model. '''
-	return getattr(models, modelType).renderTemplate(datastoreNames=getDataNames())
-
-@app.route("/runModel/", methods=["POST"])
-@flask_login.login_required
-def runModel():
-	''' Start a model running and redirect to its running screen. '''
-	pData = request.form.to_dict()
-	modelModule = getattr(models, pData["modelType"])
-	if pData.get("created","NOKEY") == "":
-		# New model.
-		pData["user"] = flask_login.current_user.username
-		modelModule.create("./data/Model/", pData)
-	modelModule.run("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
-	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
-
-@app.route("/model/<user>/<modelName>")
-@flask_login.login_required
-def showModel(user, modelName):
-	''' Render a model template with saved data. '''
-	modelDir = "./data/Model/" + user + "/" + modelName
-	with open(modelDir + "/allInputData.json") as inJson:
-		modelType = json.load(inJson)["modelType"]
-	return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
 
 @app.route('/uniqueName/<objectType>/<name>')
 @flask_login.login_required

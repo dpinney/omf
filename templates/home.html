@@ -18,6 +18,7 @@
 		div#title{position:fixed; top:0; z-index:1;}
 		p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
 		p.tabSelected {background:gray; color:white;}
+		td {padding:5px;}
 		td.running {color:red;}
 		td.preRun {color:orange;}
 		td.postRun {color:black;}
@@ -34,126 +35,7 @@
 	</style>
 	<script type='text/javascript' src='/static/omf.js'></script>
 	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
-	<script type='text/javascript' src='/static/underscore.js'></script>
-	<script type='text/javascript' src='/static/pagination.js'></script>
-	<script><!-- for underscore templating -->
-	  {% if is_admin %}
-	  var is_admin = true
-	  {% else %}
-	  var is_admin = false
-	  {% endif %}
-	</script>
-	{% include "jsmetadata.html" %}
-	{% include "jsfeeder.html" %}
-	<script type='text/javascript' src='/static/tablesort.js'></script>
 	<script>
-	$(function(){
-		localStorage.clear();
-		$(document).on("click", ".run, .reRun", function(e){
-			e.preventDefault();
-			return false;
-		}).on("click", ".makePublic", function(e){
-			var objectName = $(this).attr("objectName");
-			var objectType = $(this).attr("objectType");
-			var url = $(this).attr;
-			console.log(objectName+" "+objectType);
-			$.ajax({
-				url:"publicObject/"+objectType+"/"+objectName,
-				async:false
-			}).done(function(data){
-				if (data == "Nope"){
-					alert("There is already a public "+objectType+" with that name!");
-					e.preventDefault();
-					return false;
-				}
-				if(confirm("When a feeder or model is published, all users can view it and it cannot be altered or un-published.  Do you want to continue?")){
-					$.ajax({
-						url:"/makePublic/"+objectType+"/"+objectName,
-						data:{
-							_csrf_token:"{{ csrf_token() }}"
-						},
-						method:"post"
-					})
-				}
-				e.preventDefault();
-				return false;
-
-			})
-
-		});
-
-		run_statuses();
-	});
-
-	var all_intervals = {};
-
-	function run_statuses(){
-		var metadatas = pull_html_data();
-		var i;
-		for(i=0; i<metadatas.length; i++){
-			startPolling(metadatas[i]);
-		}
-	}
-
-	function run_analysis(url, analysisName){
-		console.log(url);
-		console.log(analysisName);
-		$.ajax({
-			type:"post",
-			url:url,
-			data:{analysisName:analysisName,
-				"_csrf_token":"{{ csrf_token() }}"
-			}
-
-		}).done(function(data){
-			console.log("sent the request!");
-			var p = url.indexOf("true") > -1 ? ".Public" : ".Private";
-			replace_row(p, analysisName, data)
-			startPolling({"name":analysisName, "public":""+(url.indexOf("true") > -1)});
-			return false;
-		});
-		return false;
-	}
-
-	function replace_row(p, analysisName, data){
-		var my_tr = $.makeArray($(p+" tr")).filter(function(tr){return $(tr).attr("class") == "analysis "+analysisName.replace(/_/g, '__').replace(/ /g, '_')})[0];
-		$(my_tr).html($("<div>").html(data)[0].getElementsByTagName("tr")[0].innerHTML);
-	}
-
-	function startPolling(md){
-		// console.log(md)
-		var i = setInterval(function(){
-			$.ajax({
-				url:"/runStatus",
-				data:{name:md.name,
-					is_public:md["public"]
-				}
-			}).done(function(data){
-				if (data != "waiting"){
-					var p = md["public"] == "true" ? ".Public" : ".Private";
-					repalce_row(p, md.name)
-					clearInterval(i);
-				}
-			});
-		}, 5000);
-		all_intervals[Object.keys(all_intervals).length] = i;
-	}
-
-	function pull_html_data(){ 
-		var metadatas = [];
-		for(i=0; i<$(".analysis").length; i++){
-			var attr_names = ["name", "sourceFeeder", "climate", "runTime", "status", "public"];
-			var md={};
-			for(j=0; j<attr_names.length; j++){
-				md[attr_names[j]] = $($(".analysis")[i]).children("."+attr_names[j]).html();
-			}
-			if (md.status == "running"){
-				console.log(md);
-				metadatas.push(md);
-			}
-		}
-		return metadatas;
-	}
 	window.onload = function() {if (window.location.hash=='#feeders') {gebi('feedersTab').click()}}
 
 	function feedersClick() {
@@ -209,10 +91,21 @@
 						<th>Climate</th>
 						<th>Runtime (H:M:S)</th>
 						<th id="mdate" title="Sort by Date Created">Date Created</th>
-						<th></th>
+						<th>Status</th>
 					</tr>
 				</thead>
 				<tbody class="Analyses">
+					{% for model in models %}
+					<tr>
+						<td>{{ model.owner }}</td>
+						<td><a href = "{{'./model/' + model.owner + '/' + model.name}}">{{ model.name }}</a></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					{% endfor %}
 				</tbody>
 			</table>
 		</div>
@@ -239,6 +132,15 @@
 					</tr>
 				</thead>
 				<tbody class="Feeders">
+					{% for feeder in feeders %}
+					<tr>
+						<td>{{ feeder.owner }}</td>
+						<td><a href = "{{'./feeder/' + feeder.owner + '/' + feeder.name}}">{{ feeder.name }}</a></td>
+						<td></td>
+						<td></td>
+						<td></td>
+					</tr>
+					{% endfor %}
 				</tbody>
 			</table>
 		</div>
