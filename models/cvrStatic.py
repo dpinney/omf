@@ -86,11 +86,12 @@ def run(modelDir):
 
 def runForeground(modelDir):
 	''' Run the model in the foreground. WARNING: can take about a minute. '''
-	# Load the data from the model directory.
+	# Global vars, and load data from the model directory.
 	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
 	feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
 	tree = feederJson.get("tree",{})
 	attachments = feederJson.get("attachments",{})
+	allOutput = {}
 	''' Run CVR analysis. '''
 	# Reformate monthData and rates.
 	# TODO: just get rid of these monthData and rates containers.
@@ -392,7 +393,12 @@ def runForeground(modelDir):
 	plt.plot([0 for x in range(31)],c='gray')
 	plt.axvline(x=simplePayback, ymin=0, ymax=1, c='gray', linestyle='--')
 	plt.plot([annualSave(x) for x in range(31)], c='green')
-	#TODO: put plots... on disk?
+	with open(pJoin(modelDir,"savingsChart.png"), "w") as savingsFile:
+		plt.savefig(savingsFile)
+	with open(pJoin(modelDir,"savingsChart.png"), "rb") as savingsFile:
+		allOutput['savingsChart'] = savingsFile.read().encode("base64")
+	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+		json.dump(allOutput, outFile, indent=4)
 
 def cancel(modelDir):
 	''' Try to cancel a currently running model. '''
@@ -450,11 +456,8 @@ def _tests():
 		inData[key] = colomaMonths[key]
 	modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
 	# Blow away old test results if necessary.
-	try:
-		shutil.rmtree(modelLoc)
-	except:
-		# No previous test results.
-		pass
+	try: shutil.rmtree(modelLoc)
+	except: pass
 	# No-input template.
 	renderAndShow()
 	# Create a model.
@@ -464,7 +467,7 @@ def _tests():
 	# Run the model.
 	runForeground(modelLoc)
 	# # Show the output.
-	# renderAndShow(modelDir=modelLoc)
+	renderAndShow(modelDir=modelLoc)
 	# # # Delete the model.
 	# # time.sleep(2)
 	# # shutil.rmtree(modelLoc)

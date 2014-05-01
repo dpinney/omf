@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+''' Functions for manipulting electrical distribution feeder models. '''
 
 import datetime, copy, os, re, warnings, networkx as nx, json
 from matplotlib import pyplot as plt

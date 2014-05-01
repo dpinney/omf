@@ -260,7 +260,6 @@ def makePublic(objectType, objectName):
 def delete(objectType, name, owner):
 	if owner != User.cu() and User.cu() != "admin":
 		return
-	# comment
 	try:
 		# Just in case someone tries to delete something not through the web interface or for some reason the web interface is displaying something that doesn't actually exist
 		if objectType == "Feeder":
@@ -413,7 +412,7 @@ def feederGet(owner, feederName):
 						   owner = owner)
 
 @app.route("/feederData/<owner>/<feederName>/") 
-@app.route("/feederData/<owner>/<feederName>/<modelFeeder>") # None of this .json nonsense, ya silly goose
+@app.route("/feederData/<owner>/<feederName>/<modelFeeder>")
 @flask_login.login_required
 def feederData(owner, feederName, modelFeeder=False):
 	# Dealing with this modelFeeder stuff later
@@ -437,6 +436,7 @@ def newModel(modelType):
 @app.route("/runModel/", methods=["POST"])
 @flask_login.login_required
 def runModel():
+	''' Start a model running and redirect to its running screen. '''
 	pData = request.form.to_dict()
 	modelModule = getattr(models, pData["modelType"])
 	if pData.get("created","NOKEY") == "":

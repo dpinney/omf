@@ -223,15 +223,11 @@
 		Model running on server. Results will appear here when complete.
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun">Power Consumption From Transmission System</p>
-		<div id="powerGenerationReport" class="tightContent postRun">
-			<div id="powerTimeSeries"></div>
-			<div id="energyBalance"></div>
-			<!-- TODO: Make the energy chart sum the arrays. -->
-			<script>
-				powerSeries = [{"marker":{"enabled":false},"color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338508800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
+		<p class="reportTitle postRun">Projected Avoided Cost</p>
+		<div id="savingsReport" class="tightContent postRun">
+			<p> Test chart </p>
+			<img id="savingsChart" />
+			<script type="text/javascript">gebi("savingsChart").src = "data:image/gif;base64," + allOutputData.savingsChart</script>
 		</div>
 	</div>
 </body>
