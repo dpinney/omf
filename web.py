@@ -2,7 +2,7 @@
 
 from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, Response
 from jinja2 import Template
-import models, json, os, flask_login, hashlib, random, time, datetime, shutil
+import models, json, os, flask_login, hashlib, random, time, datetime, shutil, milToGridlab
 from passlib.hash import pbkdf2_sha512
 import helperfuncs as hlp
 from omfuser import User
@@ -94,6 +94,22 @@ def send_link(email, message, u={}):
 		[email])
 	return "Success"
 
+def milImportBackground(owner, feederName, stdString, seqString):
+	newFeederWireframe = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],
+		'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
+	newFeeder = dict(**newFeederWireframe)
+	[newFeeder['tree'], xScale, yScale] = milToGridlab.convert(stdString, seqString)
+	newFeeder['layoutVars']['xScale'] = xScale
+	newFeeder['layoutVars']['yScale'] = yScale
+	with open('./schedules.glm','r') as schedFile:
+		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	hlp.feederDump(owner, feederName, newFeeder)
+	
+def milImport(owner, feederName, stdString, seqString):
+	# Setup.
+	importThread = Thread(target=milImportBackground, args=[owner, feederName, stdString, seqString])
+	importThread.start()
+
 ###################################################
 # AUTHENTICATION AND SECURITY STUFF
 ###################################################
@@ -149,7 +165,7 @@ def login():
 	return redirect("/")
 
 ###################################################
-# VIEWS
+# API CALLS
 ###################################################
 
 @app.route("/deleteUser", methods=["POST"])
@@ -214,6 +230,92 @@ def register(email, reg_key):
 		User.du(user)
 	return redirect("/")
 
+@app.route("/changepwd", methods=["POST"])
+@flask_login.login_required
+def changepwd():
+	old_pwd, new_pwd, conf_pwd = map(flask.request.form.get, ["old_pwd", "new_pwd", "conf_pwd"])
+	user = User.gu(flask_login.current_user.username)
+	if pbkdf2_sha512.verify(old_pwd, user["password_digest"]):
+		if new_pwd == conf_pwd:
+			user["password_digest"] = pbkdf2_sha512.encrypt(new_pwd)
+			User.du(user)
+			return "Success"
+		else:
+			return "not_match"
+	else:
+		return "not_auth"
+
+@app.route("/makePublic/<objectType>/<objectName>", methods=["POST"])
+@flask_login.login_required
+def makePublic(objectType, objectName):
+	username = flask.current_user.username
+	if objectType == "Feeder":
+		ext = ".json"
+	else:
+		ext = ""
+	srcpth = "data/"+objectType+"/"+username+"/"+objectName+ext
+	destpth = "data/"+objectType+"/public/"+objectName+ext
+	shutil.move(srcpth, destpth)
+	return flask.redirect('/')
+
+
+@app.route("/delete/<objectType>/<name>/<owner>")
+@flask_login.login_required
+def delete(objectType, name, owner):
+	if owner != User.cu() and User.cu() != "admin":
+		return
+	# comment
+	try:
+		# Just in case someone tries to delete something not through the web interface or for some reason the web interface is displaying something that doesn't actually exist
+		if objectType == "Feeder":
+			os.remove(hlp.feederPath(owner, name))
+		elif objectType == "Model":
+			shutil.rmtree(hlp.modelPath(owner, name))
+	except Exception:
+		pass
+	return
+
+# Need to do some massive feeder refactoring before I get started on this badboy
+@app.route('/saveFeeder/<owner>/<feederName>', methods=['POST'])
+@flask_login.login_required
+def saveFeeder(owner, feederName):
+	"""How to save the feeder"""
+	# If the owner is public, then the current user must be admin
+	# The admin is also allowed to do whatever the durn eff he pleases
+	postObject = request.form.to_dict()
+	if owner == User.cu() or User.ia():
+		# Then feel free to dump
+		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"))
+	return redirect(request.form.get("ref", "/#feeders"))
+
+@app.route('/milsoftImport/', methods=['POST'])
+@flask_login.login_required
+def milsoftImport():
+	"""This function is used for milsoftImporting"""
+	feederName = str(flask.request.form.to_dict()['feederName'])
+	stdString, seqString = map(lambda x: flask.request.files[x].stream.read(), ["stdFile", "seqFile"])
+	milImport(User.cu(), current_user.prepend+feederName, stdString, seqString)
+	hlp.conversionDump(User.cu(), feederName, {"data":"none"})
+	return flask.redirect('/#feeders')
+
+@app.route('/gridlabdImport/', methods=['POST'])
+@flask_login.login_required
+def gridlabdImport():
+	"""This function is used for gridlabdImporting"""
+	feederName = str(flask.request.form.to_dict()['feederName'])
+	newFeeder = dict(**hlp.newFeederWireframe)	# copies the dictionary..
+	newFeeder['tree'] = feeder.parse(flask.request.files['glmFile'].stream.read(), False)
+	newFeeder['layoutVars']['xScale'] = 0
+	newFeeder['layoutVars']['yScale'] = 0
+	with open('./schedules.glm','r') as schedFile:
+		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	hlp.feederDump(User.cu(), feederName, newFeeder)
+	return flask.redirect('/#feeders')
+
+###################################################
+# VIEWS
+###################################################
+
 @app.route("/adminControls")
 @flask_login.login_required
 def adminControls():
@@ -244,21 +346,6 @@ def myaccount():
 	return render_template("myaccount.html",
 						   user=flask_login.current_user)
 
-@app.route("/changepwd", methods=["POST"])
-@flask_login.login_required
-def changepwd():
-	old_pwd, new_pwd, conf_pwd = map(flask.request.form.get, ["old_pwd", "new_pwd", "conf_pwd"])
-	user = User.gu(flask_login.current_user.username)
-	if pbkdf2_sha512.verify(old_pwd, user["password_digest"]):
-		if new_pwd == conf_pwd:
-			user["password_digest"] = pbkdf2_sha512.encrypt(new_pwd)
-			User.du(user)
-			return "Success"
-		else:
-			return "not_match"
-	else:
-		return "not_auth"
-
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
 @flask_login.login_required
 def uniqObjName(objtype, owner, name):
@@ -268,26 +355,14 @@ def uniqObjName(objtype, owner, name):
 	elif objtype == "Feeder":
 		path = hlp.feederPath(owner, name)
 	return jsonify(exists=os.path.exists(path))
-			
+
 @app.route("/publicObject/<objectType>/<objectName>")
 def publicObject(objectType, objectName):
 	# This is supposed to be for when you are going to publish an object, and we are looking for name conflicts.
-	# So it's like two layers of stupid because it returns Nope if it IS the name of a public object and Yep otherwise... I guess the intention is, Can I publish this? Nope, because it has the same name as a public object, or Yep, you can because there is no public object with that name
+	# So it's like two layers of stupid because it returns Nope if it IS the name of a public object and Yep otherwise...
+	# I guess the intention is, Can I publish this? Nope, because it has the same name as a public object, or Yep, you can because there is no public object with that name
 	# A refactor so that the front end expects true/false rather than Yep/Nope is definitely necessary
 	return "Nope" if hlp.pubhelper(objectType, objectName) else "Yep"
-
-@app.route("/makePublic/<objectType>/<objectName>", methods=["POST"])
-@flask_login.login_required
-def makePublic(objectType, objectName):
-	username = flask.current_user.username
-	if objectType == "Feeder":
-		ext = ".json"
-	else:
-		ext = ""
-	srcpth = "data/"+objectType+"/"+username+"/"+objectName+ext
-	destpth = "data/"+objectType+"/public/"+objectName+ext
-	shutil.move(srcpth, destpth)
-	return flask.redirect('/')
 
 @app.route("/robots.txt")
 def static_from_root():
@@ -389,60 +464,6 @@ def showModel(user, modelName):
 def uniqueName(objectType, name):
 	# hello
 	return hlp.nojson(objectType, name)
-
-
-@app.route("/delete/<objectType>/<name>/<owner>")
-@flask_login.login_required
-def delete(objectType, name, owner):
-	if owner != User.cu() and User.cu() != "admin":
-		return
-	# comment
-	try:
-		# Just in case someone tries to delete something not through the web interface or for some reason the web interface is displaying something that doesn't actually exist
-		if objectType == "Feeder":
-			os.remove(hlp.feederPath(owner, name))
-		elif objectType == "Model":
-			shutil.rmtree(hlp.modelPath(owner, name))
-	except Exception:
-		pass
-	return
-
-# Need to do some massive feeder refactoring before I get started on this badboy
-@app.route('/saveFeeder/<owner>/<feederName>', methods=['POST'])
-@flask_login.login_required
-def saveFeeder(owner, feederName):
-	"""How to save the feeder"""
-	# If the owner is public, then the current user must be admin
-	# The admin is also allowed to do whatever the durn eff he pleases
-	postObject = request.form.to_dict()
-	if owner == User.cu() or User.ia():
-		# Then feel free to dump
-		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"))
-	return redirect(request.form.get("ref", "/#feeders"))
-
-@app.route('/milsoftImport/', methods=['POST'])
-@flask_login.login_required
-def milsoftImport():
-	"""This function is used for milsoftImporting"""
-	feederName = str(flask.request.form.to_dict()['feederName'])
-	stdString, seqString = map(lambda x: flask.request.files[x].stream.read(), ["stdFile", "seqFile"])
-	worker.milImport(User.cu(), current_user.prepend+feederName, stdString, seqString)
-	hlp.conversionDump(User.cu(), feederName, {"data":"none"})
-	return flask.redirect('/#feeders')
-
-@app.route('/gridlabdImport/', methods=['POST'])
-@flask_login.login_required
-def gridlabdImport():
-	"""This function is used for gridlabdImporting"""
-	feederName = str(flask.request.form.to_dict()['feederName'])
-	newFeeder = dict(**hlp.newFeederWireframe)	# copies the dictionary..
-	newFeeder['tree'] = feeder.parse(flask.request.files['glmFile'].stream.read(), False)
-	newFeeder['layoutVars']['xScale'] = 0
-	newFeeder['layoutVars']['yScale'] = 0
-	with open('./schedules.glm','r') as schedFile:
-		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
-	hlp.feederDump(User.cu(), feederName, newFeeder)
-	return flask.redirect('/#feeders')
 
 if __name__ == "__main__":
 	# TODO: remove debug?
