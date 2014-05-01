@@ -17,9 +17,9 @@
 		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
 		/*OUTPUT*/
 		div.tightContent {width:1000px; margin-left:auto; margin-right:auto; margin-top:0px; margin-bottom:20px; border-style: solid; border-color:gray; border-width:1px 0px 1px 0px; background-color:white;}
-		p.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt;}
+		p.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt; display:block;}
 		td,th {text-align: right}
-		.preRun, .running, .postRun {display:none;}
+		.preRun, .running, .postRun, .runningInline, .postRunInline {display:none;}
 	</style>
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
@@ -39,7 +39,8 @@
 			} else if (allInputData != null && allOutputData == null) {
 				// Case 2: model running.
 				console.log("RUNNING")
-				$(".running").css('display', 'inline-block')
+				$(".running").css('display', 'block')
+				$(".runningInline").css('display', 'inline-block')
 				restoreInputs()
 				$("input").prop("readonly", true)
 				$("select").prop("disabled", true)
@@ -47,7 +48,8 @@
 				// Case 3: one model run complete.
 				console.log("POSTRUN")
 				restoreInputs()
-				$(".postRun").css('display', 'inline-block')
+				$(".postRun").css('display', 'block')
+				$(".postRunInline").css('display', 'inline-block')
 			}
 		}
 		function restoreInputs() {
@@ -119,15 +121,15 @@
 					{% endfor %}
 				</select>
 			</div>
-			<div class="shortInput running postRun">
+			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/></td>
 			</div>
-			<div class="shortInput running postRun">
+			<div class="shortInput runningInline postRunInline">
 				<label>Created</label>
 				<input type="text" id="created" name="created" readonly/></td>
 			</div>
-			<div class="shortInput postRun">
+			<div class="shortInput postRunInline">
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/></td>
 			</div>
@@ -214,8 +216,8 @@
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="runButton" type="submit" class="preRun">Run Model</button>
-				<button id="cancelButton" class="running" type="button" onclick="alert('RUN CANCELED')">Cancel Run</button>
-				<button id="rerunButton" type="submit" class="postRun">Re-Run Model</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="alert('RUN CANCELED')">Cancel Run</button>
+				<button id="rerunButton" type="submit" class="postRunInline">Re-Run Model</button>
 			</div>
 		</form>
 	</div>
@@ -225,9 +227,8 @@
 	<div id="output">
 		<p class="reportTitle postRun">Projected Avoided Cost</p>
 		<div id="savingsReport" class="tightContent postRun">
-			<p> Test chart </p>
 			<img id="savingsChart" />
-			<script type="text/javascript">gebi("savingsChart").src = "data:image/gif;base64," + allOutputData.savingsChart</script>
+			<script type="text/javascript">gebi("savingsChart").src = "data:image/png;base64," + allOutputData.savingsChart</script>
 		</div>
 	</div>
 </body>

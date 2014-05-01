@@ -280,7 +280,8 @@ def runForeground(modelDir):
 				tree[regConfIndex]['tap_pos_C'] = str(newTapPos)
 			# Run the model through gridlab and put outputs in the table.
 			output = gridlabd.runInFilesystem(tree, attachments=attachments,
-				keepFiles=False, workDir=modelDir)
+				keepFiles=True, workDir=modelDir)
+			os.remove(pJoin(modelDir,"PID.txt"))
 			p = output['Zregulator.csv']['power_in.real'][0]
 			q = output['Zregulator.csv']['power_in.imag'][0]
 			s = math.sqrt(p**2+q**2)
@@ -383,7 +384,7 @@ def runForeground(modelDir):
 	plt.xticks([t+0.5 for t in ticks],indices)
 	plt.ylabel('Utility Savings ($)')
 	# Graph the cumulative savings.
-	fig = plt.figure(figsize=(17,8))
+	fig = plt.figure(figsize=(10,5))
 	annualSavings = sum(d1) + sum(d2) + sum(d3)
 	annualSave = lambda x:(annualSavings - rates['omCost']) * x - rates['capitalCost']
 	simplePayback = rates['capitalCost']/(annualSavings - rates['omCost'])
@@ -393,10 +394,10 @@ def runForeground(modelDir):
 	plt.plot([0 for x in range(31)],c='gray')
 	plt.axvline(x=simplePayback, ymin=0, ymax=1, c='gray', linestyle='--')
 	plt.plot([annualSave(x) for x in range(31)], c='green')
-	with open(pJoin(modelDir,"savingsChart.png"), "w") as savingsFile:
-		plt.savefig(savingsFile)
-	with open(pJoin(modelDir,"savingsChart.png"), "rb") as savingsFile:
-		allOutput['savingsChart'] = savingsFile.read().encode("base64")
+	plt.savefig(pJoin(modelDir,"savingsChart.png"))
+	with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
+		allOutput["savingsChart"] = inFile.read().encode("base64")
+	# Write output file.
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 		json.dump(allOutput, outFile, indent=4)
 
