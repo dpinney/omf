@@ -11,7 +11,7 @@ def parse(inputStr, filePath=True):
 	return _parseTokenList(tokens)
 
 def write(inTree):
-	''' Turn an om.feeder tree object into a GLM-formatted string. '''
+	''' Turn an omf.feeder tree object into a GLM-formatted string. '''
 	output = ''
 	for key in inTree:
 		output += _dictToString(inTree[key]) + '\n'
