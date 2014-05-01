@@ -115,7 +115,7 @@ def runForeground(modelDir):
 	for row in monthData:
 		print row
 	# Graph the SCADA data.
-	fig = plt.figure(figsize=(17,5))
+	fig = plt.figure(figsize=(10,5))
 	indices = [r['monthName'] for r in monthData]
 	d1 = [r['histPeak']/(10**3) for r in monthData]
 	d2 = [r['histAverage']/(10**3) for r in monthData]
@@ -124,9 +124,17 @@ def runForeground(modelDir):
 	plt.bar(ticks,d2,color='dimgray')
 	plt.xticks([t+0.5 for t in ticks],indices)
 	plt.ylabel('Mean and peak historical power consumptions (kW)')
+	fig.autofmt_xdate()
+	plt.savefig(pJoin(modelDir,"scadaChart.png"))
+	with open(pJoin(modelDir,"scadaChart.png"),"rb") as inFile:
+		allOutput["scadaChart"] = inFile.read().encode("base64")
 	# Graph feeder.
+	fig = plt.figure(figsize=(10,10))
 	myGraph = feeder.treeToNxGraph(tree)
 	feeder.latLonNxGraph(myGraph, neatoLayout=False)
+	plt.savefig(pJoin(modelDir,"feederChart.png"))
+	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
+		allOutput["feederChart"] = inFile.read().encode("base64")
 	# Get the load levels we need to test.
 	allLoadLevels = [x.get('histPeak',0) for x in monthData] + [y.get('histAverage',0) for y in monthData]
 	maxLev = _roundOne(max(allLoadLevels),'up')
@@ -354,7 +362,7 @@ def runForeground(modelDir):
 		row['lossReductionDollars'] = row['lossReduction'] * rates['wholesaleEnergyCostPerKwh']
 	# Pretty output
 	def plotTable(inData):
-		fig = plt.figure(figsize=(20,10))
+		fig = plt.figure(figsize=(10,5))
 		plt.axis('off')
 		plt.tight_layout()
 		plt.table(cellText=[row[1:] for row in inData[1:]], 
@@ -372,7 +380,7 @@ def runForeground(modelDir):
 	# Monetary results.
 	plotTable(dictalToMatrix(monthData))
 	# Graph the money data.
-	fig = plt.figure(figsize=(17,10))
+	fig = plt.figure(figsize=(10,5))
 	indices = [r['monthName'] for r in monthData]
 	d1 = [r['energyReductionDollars'] for r in monthData]
 	d2 = [r['lossReductionDollars'] for r in monthData]
@@ -383,6 +391,10 @@ def runForeground(modelDir):
 	plt.bar(ticks,d3,color='blue',yerr=d2)
 	plt.xticks([t+0.5 for t in ticks],indices)
 	plt.ylabel('Utility Savings ($)')
+	fig.autofmt_xdate()
+	plt.savefig(pJoin(modelDir,"spendChart.png"))
+	with open(pJoin(modelDir,"spendChart.png"),"rb") as inFile:
+		allOutput["spendChart"] = inFile.read().encode("base64")
 	# Graph the cumulative savings.
 	fig = plt.figure(figsize=(10,5))
 	annualSavings = sum(d1) + sum(d2) + sum(d3)

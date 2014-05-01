@@ -17,9 +17,9 @@
 		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
 		/*OUTPUT*/
 		div.tightContent {width:1000px; margin-left:auto; margin-right:auto; margin-top:0px; margin-bottom:20px; border-style: solid; border-color:gray; border-width:1px 0px 1px 0px; background-color:white;}
-		p.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt; display:block;}
+		.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt; display:block;}
 		td,th {text-align: right}
-		.preRun, .running, .postRun, .runningInline, .postRunInline {display:none;}
+		.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline {display:none;}
 	</style>
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
@@ -225,6 +225,21 @@
 		Model running on server. Results will appear here when complete.
 	</div>
 	<div id="output">
+		<p class="reportTitle postRun">Historical Loads</p>
+		<div id="scadaReport" class="tightContent postRun">
+			<img id="scadaChart" />
+			<script type="text/javascript">gebi("scadaChart").src = "data:image/png;base64," + allOutputData.scadaChart</script>
+		</div>
+		<p class="reportTitle postRun">One Line Diagram</p>
+		<div id="feederReport" class="tightContent postRun">
+			<img id="feederChart" />
+			<script type="text/javascript">gebi("feederChart").src = "data:image/png;base64," + allOutputData.feederChart</script>
+		</div>
+		<p class="reportTitle postRun">Projected Spend by Month</p>
+		<div id="spendReport" class="tightContent postRun">
+			<img id="spendChart" />
+			<script type="text/javascript">gebi("spendChart").src = "data:image/png;base64," + allOutputData.spendChart</script>
+		</div>
 		<p class="reportTitle postRun">Projected Avoided Cost</p>
 		<div id="savingsReport" class="tightContent postRun">
 			<img id="savingsChart" />

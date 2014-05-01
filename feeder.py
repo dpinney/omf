@@ -176,7 +176,6 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 	''' Draw a networkx graph representing a feeder.
 	Must call matplotlib.pyplot.show() separately to view the output.
 	'''
-	plt.figure(figsize=(15,15))
 	plt.axis('off')
 	plt.tight_layout()
 	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
