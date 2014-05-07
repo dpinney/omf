@@ -66,11 +66,9 @@ def milImport(owner, feederName, stdString, seqString):
 
 class User:
 	def __init__(self, jsonBlob):
-		# I think it could possibly be useful to be able to access the json blob after the user has been loaded
-		self.jsonBlob = jsonBlob
 		self.username = jsonBlob["username"]
 	# Required flask_login functions.
-	def is_admin(self):		return self.username == "admin"
+	def is_admin(self): return self.username == "admin"
 	def get_id(self): return self.username	
 	def is_authenticated(self): return True
 	def is_active(self): return True
@@ -332,16 +330,16 @@ def root():
 	# Grab metadata for models and feeders.
 	allModels = publicModels + userModels
 	for mod in allModels:
-		inputPath = "data/Model/" + mod["owner"] + "/" + mod["name"] + "/allInputData.json"
-		allInput = json.load(open(inputPath,"r"))
+		modPath = "data/Model/" + mod["owner"] + "/" + mod["name"] + "/allInputData.json"
+		allInput = json.load(open(modPath,"r"))
 		mod["runTime"] = allInput.get("runTime","")
 		mod["modelType"] = allInput.get("modelType","")
 		# mod["created"] = allInput.get("created","")
-		mod["editDate"] = time.ctime(os.stat(inputPath).st_ctime)
+		mod["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(modPath).st_ctime)) 
 	allFeeders = publicFeeders + userFeeders
 	for feed in allFeeders:
-		feedPath = "data/Model/" + feed["owner"] + "/" + feed["name"] + "/allInputData.json"
-		feed["editDate"] = time.ctime(os.stat(inputPath).st_ctime)
+		feedPath = "data/Feeder/" + feed["owner"] + "/" + feed["name"] + ".json"
+		feed["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(feedPath).st_ctime))
 		feed["status"] = "Ready"
 	#TODO: get status into feeders/models.
 	return render_template("home.html", models = allModels, feeders = allFeeders,
@@ -375,6 +373,15 @@ def runModel():
 		modelModule.create("./data/Model/", pData)
 	modelModule.run("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
+
+@app.route('/feeder/<owner>/<feederName>')
+@flask_login.login_required
+def feederGet(owner, feederName):
+	# TODO: fix modelFeeder
+	return render_template('gridEdit.html', feederName=feederName, ref=request.referrer,
+		is_admin=flask_login.current_user.username=="admin", modelFeeder=False, public=owner=="public",
+		currUser = flask_login.current_user.username,
+		owner = owner)
 
 @app.route("/adminControls")
 @flask_login.login_required
@@ -410,15 +417,6 @@ def myaccount():
 @app.route("/robots.txt")
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
-
-@app.route('/feeder/<owner>/<feederName>')
-@flask_login.login_required
-def feederGet(owner, feederName):
-	# TODO: fix modelFeeder
-	return render_template('gridEdit.html', feederName=feederName, ref=request.referrer,
-		is_admin=flask_login.current_user.username=="admin", modelFeeder=False, public=owner=="public",
-		currUser = flask_login.current_user.username,
-		owner = owner)
 
 if __name__ == "__main__":
 	# TODO: remove debug?
