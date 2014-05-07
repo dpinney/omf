@@ -2,17 +2,22 @@
 
 from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, Response
 from jinja2 import Template
-import models, json, os, flask_login, hashlib, random, time, datetime, shutil, milToGridlab
+import models, json, os, flask_login, hashlib, random, time, datetime, shutil, milToGridlab, boto
 from passlib.hash import pbkdf2_sha512
 
 app = Flask("omf")
 
+def safeListdir(path):
+	''' Helper function that returns [] for dirs that don't exist. '''
+	try: return os.listdir(path)
+	except:	return []
+
 def getDataNames():
 	''' Query the OMF datastore to list all the names of things that can be included.'''
 	currUser = flask_login.current_user
-	feeders = [x[:-5] for x in os.listdir('./data/Feeder/' + currUser.username)]
-	publicFeeders = [x[:-5] for x in os.listdir('./data/Feeder/public/')]
-	climates = [x[:-5] for x in os.listdir('./data/Climate/')]
+	feeders = [x[:-5] for x in safeListdir('./data/Feeder/' + currUser.username)]
+	publicFeeders = [x[:-5] for x in safeListdir('./data/Feeder/public/')]
+	climates = [x[:-5] for x in safeListdir('./data/Climate/')]
 	return {'feeders':feeders, 'publicFeeders':publicFeeders, 'climates':climates, 
 		'currentUser':currUser.__dict__}
 
@@ -42,23 +47,6 @@ def send_link(email, message, u={}):
 		message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
 		[email])
 	return "Success"
-
-def milImportBackground(owner, feederName, stdString, seqString):
-	newFeederWireframe = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],
-		'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
-	newFeeder = dict(**newFeederWireframe)
-	[newFeeder['tree'], xScale, yScale] = milToGridlab.convert(stdString, seqString)
-	newFeeder['layoutVars']['xScale'] = xScale
-	newFeeder['layoutVars']['yScale'] = yScale
-	with open('./schedules.glm','r') as schedFile:
-		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
-	hlp.feederDump(owner, feederName, newFeeder)
-	
-def milImport(owner, feederName, stdString, seqString):
-	# Setup.
-	# TODO: switch to multiprocessing for better control.
-	importThread = Thread(target=milImportBackground, args=[owner, feederName, stdString, seqString])
-	importThread.start()
 
 ###################################################
 # AUTHENTICATION AND SECURITY STUFF
@@ -311,6 +299,23 @@ def publicObject(objectType, objectName):
 	# A refactor so that the front end expects true/false rather than Yep/Nope is definitely necessary
 	return "Nope" if hlp.pubhelper(objectType, objectName) else "Yep"
 
+def milImportBackground(owner, feederName, stdString, seqString):
+	newFeederWireframe = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],
+		'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
+	newFeeder = dict(**newFeederWireframe)
+	[newFeeder['tree'], xScale, yScale] = milToGridlab.convert(stdString, seqString)
+	newFeeder['layoutVars']['xScale'] = xScale
+	newFeeder['layoutVars']['yScale'] = yScale
+	with open('./schedules.glm','r') as schedFile:
+		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	hlp.feederDump(owner, feederName, newFeeder)
+	
+def milImport(owner, feederName, stdString, seqString):
+	# Setup.
+	# TODO: switch to multiprocessing for better control.
+	importThread = Thread(target=milImportBackground, args=[owner, feederName, stdString, seqString])
+	importThread.start()
+
 ###################################################
 # VIEWS
 ###################################################
@@ -321,11 +326,11 @@ def root():
 	''' Render the home screen of the OMF. '''
 	isAdmin = flask_login.current_user.username == "admin"
 	uName = flask_login.current_user.username
-	publicModels = [{"owner":"public","name":x} for x in os.listdir("data/Model/public/")]
-	userModels = [{"owner":uName, "name":x} for x in os.listdir("data/Model/" + uName)]
+	publicModels = [{"owner":"public","name":x} for x in safeListdir("data/Model/public/")]
+	userModels = [{"owner":uName, "name":x} for x in safeListdir("data/Model/" + uName)]
 	# TODO: allow admin to see all models.
-	publicFeeders = [{"owner":"public","name":x[0:-5]} for x in os.listdir("data/Feeder/public/")]
-	userFeeders = [{"owner":uName,"name":x[0:-5]} for x in os.listdir("data/Feeder/" + uName)]
+	publicFeeders = [{"owner":"public","name":x[0:-5]} for x in safeListdir("data/Feeder/public/")]
+	userFeeders = [{"owner":uName,"name":x[0:-5]} for x in safeListdir("data/Feeder/" + uName)]
 	# Grab metadata for models and feeders.
 	allModels = publicModels + userModels
 	for mod in allModels:
