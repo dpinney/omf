@@ -86,7 +86,7 @@
 						<th>Model Name</th>
 						<th>Type</th>
 						<th>Runtime (H:M:S)</th>
-						<th>Date Created</th>
+						<th>Edit Date</th>
 						<th>Status</th>
 					</tr>
 				</thead>
@@ -95,9 +95,9 @@
 					<tr>
 						<td>{{ model.owner }}</td>
 						<td><a href = "{{'./model/' + model.owner + '/' + model.name}}">{{ model.name }}</a></td>
-						<td>{{ model.type }}</td>
+						<td>{{ model.modelType }}</td>
 						<td>{{ model.runTime }}</td>
-						<td>{{ model.created }}</td>
+						<td>{{ model.editDate }}</td>
 						<td>{{ model.status }}</td>
 					</tr>
 					{% endfor %}
@@ -119,10 +119,10 @@
 			<table id='anaTable'>
 				<thead>
 					<tr>
-						<th class="fowner">Owner</th>
-						<th id="fname" title="Sort by Feeder Name">Feeder Name</th>
+						<th>Owner</th>
+						<th>Feeder Name</th>
 						<th>Status</th>
-						<th id="fdate" title="Sort by Date Created">Date Created</th>
+						<th>Edit Date</th>
 						<th></th>
 					</tr>
 				</thead>
@@ -131,8 +131,8 @@
 					<tr>
 						<td>{{ feeder.owner }}</td>
 						<td><a href = "{{'./feeder/' + feeder.owner + '/' + feeder.name}}">{{ feeder.name }}</a></td>
-						<td></td>
-						<td></td>
+						<td>{{ feeder.status }}</td>
+						<td>{{ feeder.editDate }}</td>
 						<td></td>
 					</tr>
 					{% endfor %}

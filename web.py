@@ -326,10 +326,25 @@ def root():
 	uName = flask_login.current_user.username
 	publicModels = [{"owner":"public","name":x} for x in os.listdir("data/Model/public/")]
 	userModels = [{"owner":uName, "name":x} for x in os.listdir("data/Model/" + uName)]
+	# TODO: allow admin to see all models.
 	publicFeeders = [{"owner":"public","name":x[0:-5]} for x in os.listdir("data/Feeder/public/")]
 	userFeeders = [{"owner":uName,"name":x[0:-5]} for x in os.listdir("data/Feeder/" + uName)]
-	return render_template("home.html", 
-		models = publicModels + userModels, feeders = publicFeeders + userFeeders,
+	# Grab metadata for models and feeders.
+	allModels = publicModels + userModels
+	for mod in allModels:
+		inputPath = "data/Model/" + mod["owner"] + "/" + mod["name"] + "/allInputData.json"
+		allInput = json.load(open(inputPath,"r"))
+		mod["runTime"] = allInput.get("runTime","")
+		mod["modelType"] = allInput.get("modelType","")
+		# mod["created"] = allInput.get("created","")
+		mod["editDate"] = time.ctime(os.stat(inputPath).st_ctime)
+	allFeeders = publicFeeders + userFeeders
+	for feed in allFeeders:
+		feedPath = "data/Model/" + feed["owner"] + "/" + feed["name"] + "/allInputData.json"
+		feed["editDate"] = time.ctime(os.stat(inputPath).st_ctime)
+		feed["status"] = "Ready"
+	#TODO: get status into feeders/models.
+	return render_template("home.html", models = allModels, feeders = allFeeders,
 		current_user = flask_login.current_user.username, is_admin = isAdmin, modelNames = models.__all__)
 
 @app.route("/model/<user>/<modelName>")
