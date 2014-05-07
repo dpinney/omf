@@ -11,9 +11,10 @@
 		div#feeders {display:none;}
 		h2{text-align:center;}
 		select, button {width:initial;}
-		table#anaTable {width:100%; text-align:left;}
-		table#anaTable tr td:last-child {text-align:right;}
-		table#anaTable tr th:last-child {text-align:right;}
+		table {width:100%; text-align:left;}
+		table tr td:last-child {text-align:right;}
+		table tr th:last-child {text-align:right;}
+		table thead {cursor:pointer;}
 		div#toolbar {padding: 0px; height:40px;	line-height:40px; position:fixed; top:65px;	z-index:1;} /*over-riding some toolbar defaults so tabs look good.*/
 		div#title{position:fixed; top:0; z-index:1;}
 		p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
@@ -34,6 +35,7 @@
 	</style>
 	<script type='text/javascript' src='/static/omf.js'></script>
 	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
+	<script src="/static/sorttable.js"></script>
 	<script>
 	window.onload = function() {
 		if (window.location.hash=='#feeders') {gebi('feedersTab').click()}
@@ -79,7 +81,7 @@
 	<div id="placeholder"></div>
 	<div id='analyses'>
 		<div class='content'>
-			<table id='anaTable'>
+			<table class="sortable">
 				<thead>
 					<tr>
 						<th>Owner</th>
@@ -116,7 +118,7 @@
 	</div>
 	<div id='feeders'>
 		<div class='content'>
-			<table id='anaTable'>
+			<table class="sortable">
 				<thead>
 					<tr>
 						<th>Owner</th>
