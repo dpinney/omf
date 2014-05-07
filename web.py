@@ -278,12 +278,10 @@ def gridlabdImport():
 @flask_login.login_required
 def feederData(owner, feederName, modelFeeder=False):
 	#TODO: fix modelFeeder capability.
-	if User.is_admin() or owner == User.get_id() or owner == "public":
-		# This is so weird.
-		#the json.load returned a unicode string for some reason so I used json.loads
-		# around it to turn it into a dictionary.  Something wonky is going on here because
-		# that doesn't make sense.
-		return jsonify(**json.loads(json.load(open(hlp.feederPath(owner, feederName)))))
+	cUser = flask_login.current_user.username
+	if cUser=="admin" or owner==cUser or owner=="public":
+		with open("data/Feeder/" + owner + "/" + feederName + ".json", "r") as feedFile:
+			return feedFile.read()
 
 @app.route("/getComponents/")
 def getComponents():
@@ -338,6 +336,7 @@ def root():
 @flask_login.login_required
 def showModel(user, modelName):
 	''' Render a model template with saved data. '''
+	# TODO: do user check.
 	modelDir = "./data/Model/" + user + "/" + modelName
 	with open(modelDir + "/allInputData.json") as inJson:
 		modelType = json.load(inJson)["modelType"]
