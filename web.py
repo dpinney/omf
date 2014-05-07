@@ -4,7 +4,6 @@ from flask import Flask, send_from_directory, request, redirect, render_template
 from jinja2 import Template
 import models, json, os, flask_login, hashlib, random, time, datetime, shutil, milToGridlab
 from passlib.hash import pbkdf2_sha512
-from omfuser import User
 
 app = Flask("omf")
 
@@ -64,6 +63,18 @@ def milImport(owner, feederName, stdString, seqString):
 ###################################################
 # AUTHENTICATION AND SECURITY STUFF
 ###################################################
+
+class User:
+	def __init__(self, jsonBlob):
+		# I think it could possibly be useful to be able to access the json blob after the user has been loaded
+		self.jsonBlob = jsonBlob
+		self.username = jsonBlob["username"]
+	# Required flask_login functions.
+	def is_admin(self):		return self.username == "admin"
+	def get_id(self): return self.username	
+	def is_authenticated(self): return True
+	def is_active(self): return True
+	def is_anonymous(self): return False
 
 def cryptoRandomString():
 	''' Generate a cryptographically secure random string for signing/encrypting cookies. '''
@@ -233,7 +244,7 @@ def saveFeeder(owner, feederName):
 	# If the owner is public, then the current user must be admin
 	# The admin is also allowed to do whatever the durn eff he pleases
 	postObject = request.form.to_dict()
-	if owner == User.cu() or User.ia():
+	if owner == User.cu() or User.is_admin():
 		# Then feel free to dump
 		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"))
 	return redirect(request.form.get("ref", "/#feeders"))
@@ -262,6 +273,49 @@ def gridlabdImport():
 	hlp.feederDump(User.cu(), feederName, newFeeder)
 	return flask.redirect('/#feeders')
 
+@app.route("/feederData/<owner>/<feederName>/") 
+@app.route("/feederData/<owner>/<feederName>/<modelFeeder>")
+@flask_login.login_required
+def feederData(owner, feederName, modelFeeder=False):
+	#TODO: fix modelFeeder capability.
+	if User.is_admin() or owner == User.get_id() or owner == "public":
+		# This is so weird.
+		#the json.load returned a unicode string for some reason so I used json.loads
+		# around it to turn it into a dictionary.  Something wonky is going on here because
+		# that doesn't make sense.
+		return jsonify(**json.loads(json.load(open(hlp.feederPath(owner, feederName)))))
+
+@app.route("/getComponents/")
+def getComponents():
+	path = "data/Component/"
+	components = {name.replace(".json", ""):json.load(open(path+name))
+		for name in os.listdir(path)}
+	return jsonify(**components)
+
+@app.route('/uniqueName/<objectType>/<name>')
+@flask_login.login_required
+def uniqueName(objectType, name):
+	# hello
+	return hlp.nojson(objectType, name)
+
+@app.route("/uniqObjName/<objtype>/<owner>/<name>")
+@flask_login.login_required
+def uniqObjName(objtype, owner, name):
+	# This should replace all the functions that check for unique names
+	if objtype == "Model":
+		path = hlp.modelPath(owner, name)
+	elif objtype == "Feeder":
+		path = hlp.feederPath(owner, name)
+	return jsonify(exists=os.path.exists(path))
+
+@app.route("/publicObject/<objectType>/<objectName>")
+def publicObject(objectType, objectName):
+	# This is supposed to be for when you are going to publish an object, and we are looking for name conflicts.
+	# So it's like two layers of stupid because it returns Nope if it IS the name of a public object and Yep otherwise...
+	# I guess the intention is, Can I publish this? Nope, because it has the same name as a public object, or Yep, you can because there is no public object with that name
+	# A refactor so that the front end expects true/false rather than Yep/Nope is definitely necessary
+	return "Nope" if hlp.pubhelper(objectType, objectName) else "Yep"
+
 ###################################################
 # VIEWS
 ###################################################
@@ -269,6 +323,7 @@ def gridlabdImport():
 @app.route("/")
 @flask_login.login_required
 def root():
+	''' Render the home screen of the OMF. '''
 	isAdmin = flask_login.current_user.username == "admin"
 	uName = flask_login.current_user.username
 	publicModels = [{"owner":"public","name":x} for x in os.listdir("data/Model/public/")]
@@ -310,6 +365,7 @@ def runModel():
 @app.route("/adminControls")
 @flask_login.login_required
 def adminControls():
+	''' Render admin controls. '''
 	if flask_login.current_user.username != "admin":
 		return redirect("/")
 	users = []
@@ -334,25 +390,8 @@ def adminControls():
 @app.route("/myaccount")
 @flask_login.login_required
 def myaccount():
+	''' Render account info for any user. '''
 	return render_template("myaccount.html", user=flask_login.current_user)
-
-@app.route("/uniqObjName/<objtype>/<owner>/<name>")
-@flask_login.login_required
-def uniqObjName(objtype, owner, name):
-	# This should replace all the functions that check for unique names
-	if objtype == "Model":
-		path = hlp.modelPath(owner, name)
-	elif objtype == "Feeder":
-		path = hlp.feederPath(owner, name)
-	return jsonify(exists=os.path.exists(path))
-
-@app.route("/publicObject/<objectType>/<objectName>")
-def publicObject(objectType, objectName):
-	# This is supposed to be for when you are going to publish an object, and we are looking for name conflicts.
-	# So it's like two layers of stupid because it returns Nope if it IS the name of a public object and Yep otherwise...
-	# I guess the intention is, Can I publish this? Nope, because it has the same name as a public object, or Yep, you can because there is no public object with that name
-	# A refactor so that the front end expects true/false rather than Yep/Nope is definitely necessary
-	return "Nope" if hlp.pubhelper(objectType, objectName) else "Yep"
 
 @app.route("/robots.txt")
 def static_from_root():
@@ -361,32 +400,14 @@ def static_from_root():
 @app.route('/feeder/<owner>/<feederName>')
 @flask_login.login_required
 def feederGet(owner, feederName):
-	return render_template('gridEdit.html', feederName = feederName, ref = request.referrer,
-		is_admin = User.ia(), modelFeeder=False, public = owner == "public", currUser = User.cu(),
+	# TODO: fix modelFeeder
+	return render_template('gridEdit.html', feederName=feederName, ref=request.referrer,
+		is_admin=flask_login.current_user.username=="admin", modelFeeder=False, public=owner=="public",
+		currUser = flask_login.current_user.username,
 		owner = owner)
-
-@app.route("/feederData/<owner>/<feederName>/") 
-@app.route("/feederData/<owner>/<feederName>/<modelFeeder>")
-@flask_login.login_required
-def feederData(owner, feederName, modelFeeder=False):
-	# Dealing with this modelFeeder stuff later
-	if User.ia() or owner == User.cu() or owner == "public":
-		# This is so weird.  the json.load returned a unicode string for some reason so I used json.loads around it to turn it into a dictionary.  Something wonky is going on here because that doesn't make sense.
-		return jsonify(**json.loads(json.load(open(hlp.feederPath(owner, feederName)))))
-
-@app.route("/getComponents/")
-def getComponents():
-	path = "data/Component/"
-	components = {name.replace(".json", ""):json.load(open(path+name))
-		for name in os.listdir(path)}
-	return jsonify(**components)
-
-@app.route('/uniqueName/<objectType>/<name>')
-@flask_login.login_required
-def uniqueName(objectType, name):
-	# hello
-	return hlp.nojson(objectType, name)
 
 if __name__ == "__main__":
 	# TODO: remove debug?
-	app.run(debug=True)
+	template_files = ["templates/"+ x  for x in os.listdir("templates")]
+	app.run(debug=True, extra_files=template_files)
+

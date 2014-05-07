@@ -29,14 +29,15 @@
 		table.importOptions tr td:first-child {width:40%;}
 		table.importOptions td {border-bottom: none}
 		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
-		/*a#consoleLink {width:20px; height:20px; position:absolute; top:0; right:0; background-color:dimgray; border-bottom-left-radius:5px; color: #303030; text-align:center;}*/   
 		.owner{font-weight:bold}
-		#placeholder{height:90px;}
+		#placeholder{height:120px;} /*Crazy float behavior for titlebar means we need this. */
 	</style>
 	<script type='text/javascript' src='/static/omf.js'></script>
 	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
 	<script>
-	window.onload = function() {if (window.location.hash=='#feeders') {gebi('feedersTab').click()}}
+	window.onload = function() {
+		if (window.location.hash=='#feeders') {gebi('feedersTab').click()}
+	}
 
 	function feedersClick() {
 		window.location.hash = 'feeders'
@@ -52,10 +53,6 @@
 		gebi('feeders').style.display = 'none'
 		gebi('analysesTab').className = 'tab tabSelected'
 		gebi('feedersTab').className = 'tab'
-	}
-
-	function makePublic(name){
-
 	}
 
 	function delete_feeder(feederName) {
@@ -85,25 +82,23 @@
 			<table id='anaTable'>
 				<thead>
 					<tr>
-						<th class="mowner">Owner</th>
-						<th id="mname" title="Sort by Model Name">Model Name</th>
-						<th>Feeder</th>
-						<th>Climate</th>
+						<th>Owner</th>
+						<th>Model Name</th>
+						<th>Type</th>
 						<th>Runtime (H:M:S)</th>
-						<th id="mdate" title="Sort by Date Created">Date Created</th>
+						<th>Date Created</th>
 						<th>Status</th>
 					</tr>
 				</thead>
-				<tbody class="Analyses">
+				<tbody>
 					{% for model in models %}
 					<tr>
 						<td>{{ model.owner }}</td>
 						<td><a href = "{{'./model/' + model.owner + '/' + model.name}}">{{ model.name }}</a></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
-						<td></td>
+						<td>{{ model.type }}</td>
+						<td>{{ model.runTime }}</td>
+						<td>{{ model.created }}</td>
+						<td>{{ model.status }}</td>
 					</tr>
 					{% endfor %}
 				</tbody>
