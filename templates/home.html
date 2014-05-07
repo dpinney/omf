@@ -23,7 +23,7 @@
 		td.running {color:red;}
 		td.preRun {color:orange;}
 		td.postRun {color:black;}
-		td.terminated {color:purple;}
+		td.cancelled {color:purple;}
 		td {border-bottom:1px dashed gray;}
 		tr:last-child td {border-bottom:none;}
 		table.importOptions {width:70%; text-align:left; margin-left:auto;}
@@ -88,8 +88,8 @@
 						<th>Model Name</th>
 						<th>Type</th>
 						<th>Runtime (H:M:S)</th>
-						<th>Edit Date</th>
 						<th>Status</th>
+						<th>Last Edit</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -99,8 +99,8 @@
 						<td><a href = "{{'./model/' + model.owner + '/' + model.name}}">{{ model.name }}</a></td>
 						<td>{{ model.modelType }}</td>
 						<td>{{ model.runTime }}</td>
+						<td class="{{ model.status }}">{{ model.status }}</td>
 						<td>{{ model.editDate }}</td>
-						<td>{{ model.status }}</td>
 					</tr>
 					{% endfor %}
 				</tbody>
@@ -124,8 +124,7 @@
 						<th>Owner</th>
 						<th>Feeder Name</th>
 						<th>Status</th>
-						<th>Edit Date</th>
-						<th></th>
+						<th>Last Edit</th>
 					</tr>
 				</thead>
 				<tbody class="Feeders">
@@ -135,7 +134,6 @@
 						<td><a href = "{{'./feeder/' + feeder.owner + '/' + feeder.name}}">{{ feeder.name }}</a></td>
 						<td>{{ feeder.status }}</td>
 						<td>{{ feeder.editDate }}</td>
-						<td></td>
 					</tr>
 					{% endfor %}
 				</tbody>

@@ -284,9 +284,8 @@ def feederData(owner, feederName, modelFeeder=False):
 @app.route("/getComponents/")
 def getComponents():
 	path = "data/Component/"
-	components = {name.replace(".json", ""):json.load(open(path+name))
-		for name in os.listdir(path)}
-	return jsonify(**components)
+	components = {name[0:-5]:json.load(open(path+name))	for name in os.listdir(path)}
+	return json.dumps(components)
 
 @app.route('/uniqueName/<objectType>/<name>')
 @flask_login.login_required
@@ -330,10 +329,20 @@ def root():
 	# Grab metadata for models and feeders.
 	allModels = publicModels + userModels
 	for mod in allModels:
-		modPath = "data/Model/" + mod["owner"] + "/" + mod["name"] + "/allInputData.json"
-		allInput = json.load(open(modPath,"r"))
+		modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
+		allInput = json.load(open(modPath + "/allInputData.json","r"))
+		hasOutput = os.path.isfile(modPath + "/allOutputData.json")
+		hasPID = os.path.isfile(modPath + "/PID.txt")
 		mod["runTime"] = allInput.get("runTime","")
 		mod["modelType"] = allInput.get("modelType","")
+		if hasPID and not hasOutput:
+			mod["status"] = "running"
+		elif not hasPID and hasOutput:
+			mod["status"] = "postRun"
+		elif not hasPID and not hasOutput:
+			mod["status"] = "cancelled"
+		else: # hasPID and hasOutput
+			mod["status"] = "running"
 		# mod["created"] = allInput.get("created","")
 		mod["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(modPath).st_ctime)) 
 	allFeeders = publicFeeders + userFeeders
@@ -422,4 +431,3 @@ if __name__ == "__main__":
 	# TODO: remove debug?
 	template_files = ["templates/"+ x  for x in os.listdir("templates")]
 	app.run(debug=True, extra_files=template_files)
-

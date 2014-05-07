@@ -206,6 +206,7 @@ def cancel(modelDir):
 		with open(pJoin(modelDir,"PID.txt"),"r") as pidFile:
 			pid = int(pidFile.read())
 			os.kill(pid, 15)
+		os.remove(pJoin(modelDir, "PID.txt"))
 	except:
 		print "ATTEMPTED AND FAILED TO KILL", modelDir
 
