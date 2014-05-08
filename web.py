@@ -207,7 +207,8 @@ def delete(objectType, name, owner):
 	if owner != User.cu() and User.cu() != "admin":
 		return
 	try:
-		# Just in case someone tries to delete something not through the web interface or for some reason the web interface is displaying something that doesn't actually exist
+		# Just in case someone tries to delete something not through the web interface or
+		# for some reason the web interface is displaying something that doesn't actually exist
 		if objectType == "Feeder":
 			os.remove(hlp.feederPath(owner, name))
 		elif objectType == "Model":
@@ -221,6 +222,9 @@ def delete(objectType, name, owner):
 def saveFeeder(owner, feederName):
 	''' Save feeder data. '''
 	if owner == User.cu() or "admin" == User.cu():
+		# If we have a new user, make sure to make their folder:
+		if not os.path.isdir("data/Feeder/" + owner):
+			os.makedirs("data/Feeder/" + owner)
 		with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
 			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 			json.dump(payload, outFile, indent=4)
@@ -262,7 +266,7 @@ def feederData(owner, feederName, modelFeeder=False):
 @app.route("/getComponents/")
 def getComponents():
 	path = "data/Component/"
-	components = {name[0:-5]:json.load(open(path+name))for name in os.listdir(path)}
+	components = {name[0:-5]:json.load(open(path + name)) for name in os.listdir(path)}
 	return json.dumps(components)
 
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
