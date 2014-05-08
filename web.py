@@ -7,13 +7,18 @@ from passlib.hash import pbkdf2_sha512
 
 app = Flask("omf")
 
+###################################################
+# HELPER FUNCTIONS
+###################################################
+
+
 def safeListdir(path):
-	''' Helper function that returns [] for dirs that don't exist. '''
+	''' Helper function that returns [] for dirs that don't exist. Otherwise new users can cause exceptions. '''
 	try: return os.listdir(path)
 	except:	return []
 
 def getDataNames():
-	''' Query the OMF datastore to list all the names of things that can be included.'''
+	''' Query the OMF datastore to get names of all objects.'''
 	currUser = flask_login.current_user
 	feeders = [x[:-5] for x in safeListdir('./data/Feeder/' + currUser.username)]
 	publicFeeders = [x[:-5] for x in safeListdir('./data/Feeder/public/')]
@@ -33,6 +38,7 @@ def csrf_protect():
 	#		abort(403)
 
 def send_link(email, message, u={}):
+	''' Send message to email using Amazon SES. '''
 	c = boto.ses.connect_to_region("us-east-1",
 		aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
 		aws_secret_access_key="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")
@@ -49,12 +55,11 @@ def send_link(email, message, u={}):
 	return "Success"
 
 ###################################################
-# AUTHENTICATION AND SECURITY STUFF
+# AUTHENTICATION AND SECURITY SETUP
 ###################################################
 
 class User:
-	def __init__(self, jsonBlob):
-		self.username = jsonBlob["username"]
+	def __init__(self, jsonBlob): self.username = jsonBlob["username"]
 	# Required flask_login functions.
 	def is_admin(self): return self.username == "admin"
 	def get_id(self): return self.username	
@@ -86,16 +91,9 @@ def generate_csrf_token():
 
 app.jinja_env.globals['csrf_token'] = generate_csrf_token
 
-@app.route("/login_page")
-def login_page():
-	if flask_login.current_user.is_authenticated():
-		return redirect("/")
-	return render_template("clusterLogin.html")
-
-@app.route("/logout")
-def logout():
-	flask_login.logout_user()
-	return redirect("/")
+###################################################
+# API CALLS
+###################################################
 
 @app.route("/login", methods = ["POST"])
 def login():
@@ -111,10 +109,6 @@ def login():
 		user = User(userJson)
 		flask_login.login_user(user, remember = remember == "on")
 	return redirect("/")
-
-###################################################
-# API CALLS
-###################################################
 
 @app.route("/deleteUser", methods=["POST"])
 @flask_login.login_required
@@ -206,7 +200,6 @@ def makePublic(objectType, objectName):
 	shutil.move(srcpth, destpth)
 	return flask.redirect('/')
 
-
 @app.route("/delete/<objectType>/<name>/<owner>")
 @flask_login.login_required
 def delete(objectType, name, owner):
@@ -222,7 +215,6 @@ def delete(objectType, name, owner):
 		pass
 	return
 
-# Need to do some massive feeder refactoring before I get started on this badboy
 @app.route('/saveFeeder/<owner>/<feederName>', methods=['POST'])
 @flask_login.login_required
 def saveFeeder(owner, feederName):
@@ -324,13 +316,19 @@ def milImport(owner, feederName, stdString, seqString):
 @flask_login.login_required
 def root():
 	''' Render the home screen of the OMF. '''
-	isAdmin = flask_login.current_user.username == "admin"
+	# Gather object names.
 	uName = flask_login.current_user.username
 	publicModels = [{"owner":"public","name":x} for x in safeListdir("data/Model/public/")]
 	userModels = [{"owner":uName, "name":x} for x in safeListdir("data/Model/" + uName)]
-	# TODO: allow admin to see all models.
 	publicFeeders = [{"owner":"public","name":x[0:-5]} for x in safeListdir("data/Feeder/public/")]
 	userFeeders = [{"owner":uName,"name":x[0:-5]} for x in safeListdir("data/Feeder/" + uName)]
+	# Allow admin to see all models.
+	isAdmin = uName == "admin"
+	if isAdmin:
+		userFeeders = [{"owner":owner,"name":feed[0:-5]} for owner in safeListdir("data/Feeder/")
+			for feed in safeListdir("data/Feeder/" + owner)]
+		userModels = [{"owner":owner, "name":mod} for owner in safeListdir("data/Model/") 
+			for mod in safeListdir("data/Model/" + owner)]
 	# Grab metadata for models and feeders.
 	allModels = publicModels + userModels
 	for mod in allModels:
@@ -338,8 +336,6 @@ def root():
 		allInput = json.load(open(modPath + "/allInputData.json","r"))
 		hasOutput = os.path.isfile(modPath + "/allOutputData.json")
 		hasPID = os.path.isfile(modPath + "/PID.txt")
-		mod["runTime"] = allInput.get("runTime","")
-		mod["modelType"] = allInput.get("modelType","")
 		if hasPID and not hasOutput:
 			mod["status"] = "running"
 		elif not hasPID and hasOutput:
@@ -348,6 +344,8 @@ def root():
 			mod["status"] = "cancelled"
 		else: # hasPID and hasOutput
 			mod["status"] = "running"
+		mod["runTime"] = allInput.get("runTime","")
+		mod["modelType"] = allInput.get("modelType","")
 		# mod["created"] = allInput.get("created","")
 		mod["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(modPath).st_ctime)) 
 	allFeeders = publicFeeders + userFeeders
@@ -355,7 +353,6 @@ def root():
 		feedPath = "data/Feeder/" + feed["owner"] + "/" + feed["name"] + ".json"
 		feed["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(feedPath).st_ctime))
 		feed["status"] = "Ready"
-	#TODO: get status into feeders/models.
 	return render_template("home.html", models = allModels, feeders = allFeeders,
 		current_user = flask_login.current_user.username, is_admin = isAdmin, modelNames = models.__all__)
 
@@ -431,6 +428,17 @@ def myaccount():
 @app.route("/robots.txt")
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
+
+@app.route("/login_page")
+def login_page():
+	if flask_login.current_user.is_authenticated():
+		return redirect("/")
+	return render_template("clusterLogin.html")
+
+@app.route("/logout")
+def logout():
+	flask_login.logout_user()
+	return redirect("/")
 
 if __name__ == "__main__":
 	# TODO: remove debug?
