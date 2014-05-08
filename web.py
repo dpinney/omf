@@ -2,15 +2,15 @@
 
 from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, Response
 from jinja2 import Template
-import models, json, os, flask_login, hashlib, random, time, datetime, shutil, milToGridlab, boto
+import models, json, os, flask_login, hashlib, random, time, datetime, shutil, milToGridlab, boto.ses
 from passlib.hash import pbkdf2_sha512
 
 app = Flask("omf")
+URL = "http://omf.coop/"
 
 ###################################################
 # HELPER FUNCTIONS
 ###################################################
-
 
 def safeListdir(path):
 	''' Helper function that returns [] for dirs that don't exist. Otherwise new users can cause exceptions. '''
@@ -47,7 +47,7 @@ def send_link(email, message, u={}):
 	u["timestamp"] = datetime.datetime.strftime(datetime.datetime.now(), format="%c")
 	u["registered"] = False
 	u["email"] = email
-	json.dump(u, open("data/User/"+email+".json", "w"))
+	json.dump(u, open("data/User/"+email+".json", "w"), indent=4)
 	outDict = c.send_email("david.pinney@omf.coop",
 		"OMF Registration Link",
 		message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
@@ -224,7 +224,7 @@ def saveFeeder(owner, feederName):
 	postObject = request.form.to_dict()
 	if owner == User.cu() or User.is_admin():
 		# Then feel free to dump
-		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"))
+		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"), indent=4)
 	return redirect(request.form.get("ref", "/#feeders"))
 
 @app.route('/milsoftImport/', methods=['POST'])
@@ -435,5 +435,6 @@ def logout():
 
 if __name__ == "__main__":
 	# TODO: remove debug?
+	URL = "http://localhost:5001"
 	template_files = ["templates/"+ x  for x in os.listdir("templates")]
 	app.run(debug=True, extra_files=template_files)
