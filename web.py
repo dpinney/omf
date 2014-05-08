@@ -304,7 +304,7 @@ def milImportBackground(owner, feederName, stdString, seqString):
 	
 def milImport(owner, feederName, stdString, seqString):
 	# Setup.
-	# TODO: switch to multiprocessing for better control.
+	# TODO: switch to multiprocessing for better control and performance.
 	importThread = Thread(target=milImportBackground, args=[owner, feederName, stdString, seqString])
 	importThread.start()
 
@@ -400,23 +400,21 @@ def adminControls():
 	''' Render admin controls. '''
 	if flask_login.current_user.username != "admin":
 		return redirect("/")
-	users = []
-	for username in [f.replace(".json", "") for f in os.listdir("data/User")]:
-		if username != "admin" and username != "public":
-			u = {"username":username}
-			user_dict = User.gu(username)
-			try:
-				if user_dict.get("password_digest"):
-					u["status"] = u["status_class"] = "Registered"
-				elif datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user_dict["timestamp"], "%c"):
-					u["status"] = "Email sent"
-					u["status_class"] = "emailSent"
-				else:
-					u["status"] = "Email expired"
-					u["status_class"] = "emailExpired"
-			except KeyError:
-				return Response(str(user_dict)+"\n"+username, content_type="text/plain")
-			users.append(u)
+	users = [{"username":f[0:-5]} for f in safeListdir("data/User")
+		if f not in ["admin.json","public.json"]]
+	for user in users:
+		userDict = json.load(open("data/User/" + user["username"] + ".json"))
+		try:
+			if userDict.get("password_digest"):
+				user["status"] = user["status_class"] = "Registered"
+			elif datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(userDict["timestamp"], "%c"):
+				user["status"] = "Email sent"
+				user["status_class"] = "emailSent"
+			else:
+				user["status"] = "Email expired"
+				user["status_class"] = "emailExpired"
+		except KeyError:
+			return Response(str(userDict)+"\n"+user["username"], content_type="text/plain")
 	return render_template("adminControls.html", users = users)
 
 @app.route("/myaccount")
