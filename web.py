@@ -66,6 +66,10 @@ class User:
 	def is_authenticated(self): return True
 	def is_active(self): return True
 	def is_anonymous(self): return False
+	@classmethod
+	def cu(self):
+		"""Returns current user's username"""
+		return flask_login.current_user.username
 
 def cryptoRandomString():
 	''' Generate a cryptographically secure random string for signing/encrypting cookies. '''
@@ -113,7 +117,7 @@ def login():
 @app.route("/deleteUser", methods=["POST"])
 @flask_login.login_required
 def deleteUser():
-	if flask_login.current_user.username != "admin":
+	if User.cu() != "admin":
 		return "You are not authorized to delete users"
 	username = request.form.get("username")
 	for objectType in ["Model", "Feeder"]:
@@ -127,7 +131,7 @@ def deleteUser():
 @app.route("/new_user", methods=["POST"])
 @flask_login.login_required
 def new_user():
-	if flask_login.current_user.username != "admin":
+	if User.cu() != "admin":
 		return redirect("/")
 	email = request.form.get("email")
 	if email in [f.replace(".json", "") for f in os.listdir("data/User")]:
@@ -176,7 +180,7 @@ def register(email, reg_key):
 @flask_login.login_required
 def changepwd():
 	old_pwd, new_pwd, conf_pwd = map(flask.request.form.get, ["old_pwd", "new_pwd", "conf_pwd"])
-	user = User.gu(flask_login.current_user.username)
+	user = User.gu(User.cu())
 	if pbkdf2_sha512.verify(old_pwd, user["password_digest"]):
 		if new_pwd == conf_pwd:
 			user["password_digest"] = pbkdf2_sha512.encrypt(new_pwd)
@@ -190,13 +194,10 @@ def changepwd():
 @app.route("/makePublic/<objectType>/<objectName>", methods=["POST"])
 @flask_login.login_required
 def makePublic(objectType, objectName):
-	username = flask.current_user.username
-	if objectType == "Feeder":
-		ext = ".json"
-	else:
-		ext = ""
-	srcpth = "data/"+objectType+"/"+username+"/"+objectName+ext
-	destpth = "data/"+objectType+"/public/"+objectName+ext
+	if objectType == "Feeder": ext = ".json"
+	else: ext = ""
+	srcpth = "data/" + objectType + "/" + User.cu() + "/" + objectName + ext
+	destpth = "data/" + objectType + "/public/" + objectName + ext
 	shutil.move(srcpth, destpth)
 	return flask.redirect('/')
 
@@ -218,13 +219,10 @@ def delete(objectType, name, owner):
 @app.route('/saveFeeder/<owner>/<feederName>', methods=['POST'])
 @flask_login.login_required
 def saveFeeder(owner, feederName):
-	"""How to save the feeder"""
-	# If the owner is public, then the current user must be admin
-	# The admin is also allowed to do whatever the durn eff he pleases
-	postObject = request.form.to_dict()
-	if owner == User.cu() or User.is_admin():
-		# Then feel free to dump
-		json.dump(postObject["feederObjectJson"], open(hlp.feederPath(owner, feederName), "w"), indent=4)
+	''' Save feeder data. '''
+	if owner == User.cu() or "admin" == User.cu():
+		with open("data/Feeder/" + owner + "/" + feederName + ".json", "w"):
+			json.dump(request.form.to_dict().get("feederObjectJson",""), outFile, indent=4)
 	return redirect(request.form.get("ref", "/#feeders"))
 
 @app.route('/milsoftImport/', methods=['POST'])
@@ -256,8 +254,7 @@ def gridlabdImport():
 @flask_login.login_required
 def feederData(owner, feederName, modelFeeder=False):
 	#TODO: fix modelFeeder capability.
-	cUser = flask_login.current_user.username
-	if cUser=="admin" or owner==cUser or owner=="public":
+	if User.cu()=="admin" or owner==User.cu() or owner=="public":
 		with open("data/Feeder/" + owner + "/" + feederName + ".json", "r") as feedFile:
 			return feedFile.read()
 
@@ -317,13 +314,12 @@ def milImport(owner, feederName, stdString, seqString):
 def root():
 	''' Render the home screen of the OMF. '''
 	# Gather object names.
-	uName = flask_login.current_user.username
 	publicModels = [{"owner":"public","name":x} for x in safeListdir("data/Model/public/")]
-	userModels = [{"owner":uName, "name":x} for x in safeListdir("data/Model/" + uName)]
+	userModels = [{"owner":User.cu(), "name":x} for x in safeListdir("data/Model/" + User.cu())]
 	publicFeeders = [{"owner":"public","name":x[0:-5]} for x in safeListdir("data/Feeder/public/")]
-	userFeeders = [{"owner":uName,"name":x[0:-5]} for x in safeListdir("data/Feeder/" + uName)]
+	userFeeders = [{"owner":User.cu(),"name":x[0:-5]} for x in safeListdir("data/Feeder/" + User.cu())]
 	# Allow admin to see all models.
-	isAdmin = uName == "admin"
+	isAdmin = User.cu() == "admin"
 	if isAdmin:
 		userFeeders = [{"owner":owner,"name":feed[0:-5]} for owner in safeListdir("data/Feeder/")
 			for feed in safeListdir("data/Feeder/" + owner)]
@@ -354,7 +350,7 @@ def root():
 		feed["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(feedPath).st_ctime))
 		feed["status"] = "Ready"
 	return render_template("home.html", models = allModels, feeders = allFeeders,
-		current_user = flask_login.current_user.username, is_admin = isAdmin, modelNames = models.__all__)
+		current_user = User.cu(), is_admin = isAdmin, modelNames = models.__all__)
 
 @app.route("/model/<user>/<modelName>")
 @flask_login.login_required
@@ -380,7 +376,7 @@ def runModel():
 	modelModule = getattr(models, pData["modelType"])
 	if pData.get("created","NOKEY") == "":
 		# New model.
-		pData["user"] = flask_login.current_user.username
+		pData["user"] = User.cu()
 		modelModule.create("./data/Model/", pData)
 	modelModule.run("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
@@ -390,15 +386,14 @@ def runModel():
 def feederGet(owner, feederName):
 	# TODO: fix modelFeeder
 	return render_template('gridEdit.html', feederName=feederName, ref=request.referrer,
-		is_admin=flask_login.current_user.username=="admin", modelFeeder=False, public=owner=="public",
-		currUser = flask_login.current_user.username,
-		owner = owner)
+		is_admin=User.cu()=="admin", modelFeeder=False, public=owner=="public",
+		currUser = User.cu(), owner = owner)
 
 @app.route("/adminControls")
 @flask_login.login_required
 def adminControls():
 	''' Render admin controls. '''
-	if flask_login.current_user.username != "admin":
+	if User.cu() != "admin":
 		return redirect("/")
 	users = [{"username":f[0:-5]} for f in safeListdir("data/User")
 		if f not in ["admin.json","public.json"]]
@@ -416,7 +411,7 @@ def adminControls():
 @flask_login.login_required
 def myaccount():
 	''' Render account info for any user. '''
-	return render_template("myaccount.html", user=flask_login.current_user)
+	return render_template("myaccount.html", user=User.cu())
 
 @app.route("/robots.txt")
 def static_from_root():
