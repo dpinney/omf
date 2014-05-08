@@ -112,11 +112,6 @@
 	  <br />
 	  <input type="submit" value="Submit">
 	</form>
-	<!-- <ul> -->
-	<!-- {% for u in users %} -->
-	<!-- <li><span class="username">{{ u.username }}</span><button name="{{ u.username }}"  class="deleteButton">Delete</button></li> -->
-	<!-- {% endfor %} -->
-	<!-- </ul> -->
 	<table id="userTable">
 	  <tr>
 		<th>User</th>
@@ -126,7 +121,7 @@
 	  {% for user in users %}
 	  <tr id="{{ user.username }}">
 		<td>{{ user.username }}</td>
-		<td class="{{ user.status_class }}">{{ user.status }}</td>
+		<td class="{{ user.status }}">{{ user.status }}</td>
 		<td>
 		  <button name="{{ user.username }}" class="deleteButton">Delete</button>
 		  {% if user.status != "Registered" %}

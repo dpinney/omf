@@ -404,17 +404,12 @@ def adminControls():
 		if f not in ["admin.json","public.json"]]
 	for user in users:
 		userDict = json.load(open("data/User/" + user["username"] + ".json"))
-		try:
-			if userDict.get("password_digest"):
-				user["status"] = user["status_class"] = "Registered"
-			elif datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(userDict["timestamp"], "%c"):
-				user["status"] = "Email sent"
-				user["status_class"] = "emailSent"
-			else:
-				user["status"] = "Email expired"
-				user["status_class"] = "emailExpired"
-		except KeyError:
-			return Response(str(userDict)+"\n"+user["username"], content_type="text/plain")
+		if userDict.get("password_digest"):
+			user["status"] = "Registered"
+		elif datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(userDict.get("timestamp",""), "%c"):
+			user["status"] = "emailSent"
+		else:
+			user["status"] = "emailExpired"
 	return render_template("adminControls.html", users = users)
 
 @app.route("/myaccount")
