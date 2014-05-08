@@ -6,6 +6,7 @@
 	<link rel='shortcut icon' href='/static/favicon.ico'>
 	<style>
 		div#toolbar {padding: 0px; height:40px;	line-height:40px; position:fixed; top:65px;	z-index:1;} /*over-riding some toolbar defaults so tabs look good.*/
+		div#placeholder{height:120px;} /*Crazy float behavior for titlebar means we need this. */
 		div#title{position:fixed; top:0; z-index:1;}
 		p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
 		p.tabSelected {background:gray; color:white;}
@@ -26,7 +27,6 @@
 		table.importOptions tr td:first-child {width:40%;}
 		table.importOptions td {border-bottom: none}
 		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
-		div#placeholder{height:120px;} /*Crazy float behavior for titlebar means we need this. */
 	</style>
 	<script type='text/javascript' src='/static/omf.js'></script>
 	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>

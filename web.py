@@ -3,6 +3,7 @@
 from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, Response
 from jinja2 import Template
 import models, json, os, flask_login, hashlib, random, time, datetime, shutil, milToGridlab, boto.ses
+from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 
 app = Flask("omf")
@@ -219,14 +220,16 @@ def saveFeeder(owner, feederName):
 @app.route('/milsoftImport/', methods=['POST'])
 @flask_login.login_required
 def milsoftImport():
-	"""This function is used for milsoftImporting"""
+	''' API for importing a milsoft feeder. '''
 	feederName = str(flask.request.form.to_dict()['feederName'])
 	stdString, seqString = map(lambda x: flask.request.files[x].stream.read(), ["stdFile", "seqFile"])
-	milImport(User.cu(), current_user.prepend+feederName, stdString, seqString)
+	importProc = Process(target=milImportBackground, args=[owner, feederName, stdString, seqString])
+	importProc.start()
 	hlp.conversionDump(User.cu(), feederName, {"data":"none"})
 	return flask.redirect('/#feeders')
 
 def milImportBackground(owner, feederName, stdString, seqString):
+	''' Function to run in the background for Milsoft import. '''
 	newFeederWireframe = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],
 		'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
 	newFeeder = dict(**newFeederWireframe)
@@ -237,12 +240,6 @@ def milImportBackground(owner, feederName, stdString, seqString):
 		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
 	hlp.feederDump(owner, feederName, newFeeder)
 	
-def milImport(owner, feederName, stdString, seqString):
-	# Setup.
-	# TODO: switch to multiprocessing for better control and performance.
-	importThread = Thread(target=milImportBackground, args=[owner, feederName, stdString, seqString])
-	importThread.start()
-
 @app.route('/gridlabdImport/', methods=['POST'])
 @flask_login.login_required
 def gridlabdImport():
