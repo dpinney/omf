@@ -28,7 +28,6 @@ def getDataNames():
 
 @app.before_request
 def csrf_protect():
-	pass
 	if request.user_agent.browser == 'msie' or request.user_agent.browser == 'firefox':
 		return 'The OMF currently must be accessed by Chrome or Safari.'
 	# TODO: fix csrf validation.
@@ -203,21 +202,17 @@ def makePublic(objectType, objectName):
 	shutil.move(srcpth, destpth)
 	return flask.redirect('/')
 
-@app.route("/delete/<objectType>/<name>/<owner>")
+@app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
 @flask_login.login_required
-def delete(objectType, name, owner):
+def delete(objectType, objectName, owner):
+	''' Delete models or feeders. '''
 	if owner != User.cu() and User.cu() != "admin":
-		return
-	try:
-		# Just in case someone tries to delete something not through the web interface or
-		# for some reason the web interface is displaying something that doesn't actually exist
-		if objectType == "Feeder":
-			os.remove(hlp.feederPath(owner, name))
-		elif objectType == "Model":
-			shutil.rmtree(hlp.modelPath(owner, name))
-	except Exception:
-		pass
-	return
+		return False
+	if objectType == "Feeder":
+		os.remove("data/Feeder/" + owner + "/" + objectName + ".json")
+	elif objectType == "Model":
+		shutil.rmtree("data/Model/" + owner + "/" + objectName)
+	return redirect("/")
 
 @app.route('/saveFeeder/<owner>/<feederName>', methods=['POST'])
 @flask_login.login_required

@@ -140,10 +140,10 @@
 		<li><a href="javascript:publish()">Make Public </a></li>
 		{% endif %}
 		{% if is_admin or not public %}
-		<li id='deleteMenuItem'><a href='javascript:deleteFeeder()'>Delete</a></li>
-		<li id='renameMenuItem'><a href='javascript:rename()'>Rename</a></li>
-		<li id='duplicateMenuItem'><a href='javascript:duplicate()'>Duplicate</a></li>
-		<li id='saveMenuItem'><a href='javascript:saveModel()'>Save</a></li>
+		<li><a href='javascript:deleteFeeder()'>Delete</a></li>
+		<li><a href='javascript:rename()'>Rename</a></li>
+		<li><a href='javascript:savePrivate()'>Duplicate</a></li>
+		<li><a href='javascript:saveModel()'>Save</a></li>
 		<li><a href='javascript:history.back()'>Leave &#x2192;</a></li>
 		{% endif %}
 	  </ul>
@@ -1301,9 +1301,16 @@ function saveModel(new_name) {
 		  }
 	if (new_name){			// There would only be a new_name if they had used the save as button, so it should necessarily be saved to the current user's feeder directory
 		post_to_url("/saveFeeder/{{ currUser }}/"+new_name, payload)
-	}else{
+	} else {
 		// Otherwise attempt to save it to the original owner's directory.  The button to save a feeder should only appear if the user is the admin or if this is a user's private feeder... normals user's cannot save public feeders or other user's feeders
 		post_to_url("/saveFeeder/{{ owner }}/{{ feederName }}", payload)
+	}
+}
+
+function deleteFeeder() {
+	confirmation = confirm("Are you sure you want to delete?")
+	if (confirmation) {
+		post_to_url("/delete/Feeder/{{ owner }}/{{ feederName }}")
 	}
 }
 
@@ -1312,16 +1319,16 @@ function rename() {
 }
 
 function savePrivate(){
-	var new_name = prompt("Save as", $("#gridName").html());
-	if (new_name){
+	new_name = prompt("Save copy as", $("#gridName").html())
+	if (new_name) {
 	$.ajax({
 		url:"/uniqObjName/Feeder/{{ currUser }}/" + new_name
 	}).done(function(data){
 		if (data.exists){
-			alert("You already have a feeder named " + new_name);
-			savePrivate();
+			alert("You already have a feeder named " + new_name)
+			savePrivate()
 		} else {
-			saveModel(new_name);
+			saveModel(new_name)
 		}
 	})
 	}
