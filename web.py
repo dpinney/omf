@@ -7,7 +7,7 @@ from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 
 app = Flask("omf")
-URL = "http://omf.coop/"
+URL = "http://omf.coop"
 
 ###################################################
 # HELPER FUNCTIONS
@@ -48,10 +48,8 @@ def send_link(email, message, u={}):
 	u["registered"] = False
 	u["email"] = email
 	json.dump(u, open("data/User/"+email+".json", "w"), indent=4)
-	outDict = c.send_email("david.pinney@omf.coop",
-		"OMF Registration Link",
-		message.replace("reg_link", "http://"+URL+"/register/"+email+"/"+reg_key),	
-		[email])
+	outDict = c.send_email("admin@omf.coop", "OMF Registration Link",
+		message.replace("reg_link", URL+"/register/"+email+"/"+reg_key), [email])
 	return "Success"
 
 ###################################################
@@ -120,12 +118,13 @@ def deleteUser():
 	if User.cu() != "admin":
 		return "You are not authorized to delete users"
 	username = request.form.get("username")
+	# Clean up user data.
 	for objectType in ["Model", "Feeder"]:
 		try:
-			shutil.rmtree("data/"+username+objectType)
+			shutil.rmtree("data/" + objectType + "/" + username)
 		except Exception, e:
-			print e
-			return "Failure"
+			print "USER DATA DELETION FAILED FOR", e
+	os.remove("data/User/" + username + ".json")
 	return "Success"
 
 @app.route("/new_user", methods=["POST"])
@@ -138,7 +137,7 @@ def new_user():
 		u = User.gu(email)
 		if u.get("password_digest") or not request.form.get("resend"):
 			return "Already Exists"
-	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\nreg_link"
+	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\n\nreg_link"
 	return send_link(email, message)
 
 @app.route("/forgotpwd", methods=["POST"])
@@ -146,7 +145,7 @@ def forgotpwd():
 	email = request.form.get("email")
 	try:
 		user = User.gu(email)
-		message = "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\nreg_link"
+		message = "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\n\nreg_link"
 		return send_link(email,message,user)
 	except Exception, e:
 		print e
@@ -405,6 +404,6 @@ def logout():
 
 if __name__ == "__main__":
 	# TODO: remove debug?
-	URL = "http://localhost:5001"
+	URL = "http://localhost:5000"
 	template_files = ["templates/"+ x  for x in os.listdir("templates")]
 	app.run(debug=True, extra_files=template_files)
