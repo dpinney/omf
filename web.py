@@ -221,8 +221,9 @@ def delete(objectType, name, owner):
 def saveFeeder(owner, feederName):
 	''' Save feeder data. '''
 	if owner == User.cu() or "admin" == User.cu():
-		with open("data/Feeder/" + owner + "/" + feederName + ".json", "w"):
-			json.dump(request.form.to_dict().get("feederObjectJson",""), outFile, indent=4)
+		with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
+			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
+			json.dump(payload, outFile, indent=4)
 	return redirect(request.form.get("ref", "/#feeders"))
 
 @app.route('/milsoftImport/', methods=['POST'])
@@ -261,23 +262,17 @@ def feederData(owner, feederName, modelFeeder=False):
 @app.route("/getComponents/")
 def getComponents():
 	path = "data/Component/"
-	components = {name[0:-5]:json.load(open(path+name))	for name in os.listdir(path)}
+	components = {name[0:-5]:json.load(open(path+name))for name in os.listdir(path)}
 	return json.dumps(components)
-
-@app.route('/uniqueName/<objectType>/<name>')
-@flask_login.login_required
-def uniqueName(objectType, name):
-	# hello
-	return hlp.nojson(objectType, name)
 
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
 @flask_login.login_required
 def uniqObjName(objtype, owner, name):
 	# This should replace all the functions that check for unique names
 	if objtype == "Model":
-		path = hlp.modelPath(owner, name)
+		path = "data/Model/" + owner + "/" + name
 	elif objtype == "Feeder":
-		path = hlp.feederPath(owner, name)
+		path = "data/Feeder/" + owner + "/" + name
 	return jsonify(exists=os.path.exists(path))
 
 @app.route("/publicObject/<objectType>/<objectName>")
