@@ -190,18 +190,6 @@ def changepwd():
 	else:
 		return "not_auth"
 
-@app.route("/makePublic/<objectType>/<objectName>", methods=["POST"])
-@flask_login.login_required
-def makePublic(objectType, objectName):
-	if objectType == "Feeder":
-		ext = ".json"
-	else:
-		ext = ""
-	srcpth = "data/" + objectType + "/" + User.cu() + "/" + objectName + ext
-	destpth = "data/" + objectType + "/public/" + objectName + ext
-	shutil.move(srcpth, destpth)
-	return flask.redirect('/')
-
 @app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
 @flask_login.login_required
 def delete(objectType, objectName, owner):
@@ -218,10 +206,11 @@ def delete(objectType, objectName, owner):
 @flask_login.login_required
 def saveFeeder(owner, feederName):
 	''' Save feeder data. '''
-	if owner == User.cu() or "admin" == User.cu():
+	if owner == User.cu() or "admin" == User.cu() or owner=="public":
 		# If we have a new user, make sure to make their folder:
 		if not os.path.isdir("data/Feeder/" + owner):
 			os.makedirs("data/Feeder/" + owner)
+		#TODO: make sure non-admins can't overwrite public feeders.
 		with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
 			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 			json.dump(payload, outFile, indent=4)
@@ -292,14 +281,6 @@ def uniqObjName(objtype, owner, name):
 	elif objtype == "Feeder":
 		path = "data/Feeder/" + owner + "/" + name
 	return jsonify(exists=os.path.exists(path))
-
-@app.route("/publicObject/<objectType>/<objectName>")
-def publicObject(objectType, objectName):
-	# This is supposed to be for when you are going to publish an object, and we are looking for name conflicts.
-	# So it's like two layers of stupid because it returns Nope if it IS the name of a public object and Yep otherwise...
-	# I guess the intention is, Can I publish this? Nope, because it has the same name as a public object, or Yep, you can because there is no public object with that name
-	# A refactor so that the front end expects true/false rather than Yep/Nope is definitely necessary
-	return "Nope" if hlp.pubhelper(objectType, objectName) else "Yep"
 
 ###################################################
 # VIEWS

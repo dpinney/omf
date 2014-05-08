@@ -1,11 +1,11 @@
 ﻿<head>
-  <script type="text/javascript" src="/static/d3.v3.js"></script>
-  <script type="text/javascript" src="/static/omf.js"></script>
-  <script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
-  <script type="text/javascript" src="/static/tablescript.js"></script>
-  <link rel="stylesheet" href="/static/omf.css" />
-  <link rel="shortcut icon" href="/static/favicon.ico" />
-  <style type="text/css">
+<script type="text/javascript" src="/static/d3.v3.js"></script>
+<script type="text/javascript" src="/static/omf.js"></script>
+<script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
+<script type="text/javascript" src="/static/tablescript.js"></script>
+<link rel="stylesheet" href="/static/omf.css" />
+<link rel="shortcut icon" href="/static/favicon.ico" />
+<style type="text/css">
 	body {overflow:hidden; height:100%; background:white;}
 	div#title p {display:inline-block;}
 	/*hacks to get D3 responsive sizing*/
@@ -54,170 +54,165 @@
 	.axis text { font-family:sans-serif; font-size:11px; text-anchor:middle; }
 	text.markerText {fill:gray; font-size:6}
 	rect {fill:#fff;}
-  </style>
+</style>
 </head>
 <body onkeypress='hotkeys()' onload="showProgressDialog('Rendering feeder.')">
-<!-- <body > -->
-  <div id='title'>
+<div id='title'>
 	<div id='logoBox'><a href='/'>&#10059;</a></div>
 	<p>Grid Editor: </p>
-	
 	<p id='gridName'>{{feederName}}</p>
-  </div>
-  <div id='toolbar'>
+</div>
+<div id='toolbar'>
 	<div class='buttonGroup leftToolbar'>
-	  <button class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
-	  <ul id='newObjectMenu' class='menu'></ul>
-	</div>
-	<div class='buttonGroup leftToolbar'>
-	  <button class='pill' onclick='dropPillAndStay(this, "Edit")'>Edit ▾</button>
-	  <ul class='menu'>
-	<table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
-		  <tr>
-			<td>Zoom Reset</td>
-			<td><button onclick='javascript:zoomReset()'>Go</button></td>
-		  </tr>
-		  <tr>
-			<td>Toggle Scale Grid</td>
-			<td><button onclick='javascript:toggleScaleGrid()'>Go</button></td>
-		  </tr>
-		  <tr>
-			<td>Static Loads to Houses</td>
-			<td><button onclick='javascript:staticLoadsToHouses()'>Go</button></td>
-		  </tr>
-		  <tr>
-			<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
-			<td><button onclick='javascript:solarAdding()'>Go</button></td>
-		  </tr>
-		  
-	</table>
-	  </ul>
+		<button class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
+		<ul id='newObjectMenu' class='menu'></ul>
 	</div>
 	<div class='buttonGroup leftToolbar'>
-	  <button class='pill' onclick='dropPill(this, "Pinning")'>Pinning ▾</button>
-	  <ul class='menu'>
-	<li><a href='javascript:pinAll()' id='pinUnpinAll'>Pin All</a></li>
-	<li><a href='javascript:unPinAll()'>Unpin All</a></li>
-	<li><a href='javascript:toggleSelectedPin()'>Toggle Selected Pin (p)</a></li>
-	  </ul>
-	</div>
-	<div class='buttonGroup leftToolbar'>
-	  <button class='pill' onclick='dropPill(this, "Folding")'>Folding ▾</button>
-	  <ul class='menu'>
-	<li><a href='javascript:foldOneLevel()'>One Level Fold</a></li>
-	<li><a href='javascript:unfoldOneLevel()'>One Level Unfold</a></li>
-	<li><a href='javascript:unfoldAll()'>Unfold All</a></li>
-	<li><a href='javascript:foldAtSelected()'>Fold at Selected (f)</a></li>
-	<li><a href='javascript:unfoldAtSelected()'>Unfold at Selected (u)</a></li>
-	  </ul>
-	</div>
-	<div class='buttonGroup leftToolbar'>
-	  <button class='pill' onclick='dropPillAndStay(this, "Find")'>Find ▾</button>
-	  <ul class='menu'>
-	  <table style='padding:4px;word-wrap:break-word'>
-		  <tr>
-			<td>Term</td>
-			<td><input id='searchTerm' type='text'></td>
-		  </tr>
-		  <tr>
-			<td><button onclick='backButton()'>Back</button></td>
-			<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
-		  </tr>
-		  <tr>
-			<td style='padding-top:10px'><button onclick='findPrevious()'>Previous</button></td>
-			<td style='padding-top:10px'><button onclick='findNext()'>Next</button></td>
-		  </tr>
-	  </table>
-	  </ul>
-	</div>
-	<div class='buttonGroup rightToolbar'>
-	  <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
-	  <ul class='menu right'>
-		{% if public %}
-		<li><a href="javascript:savePrivate()">Save Private Copy</a></li>
-		{% endif %}
-		{% if not public %}
-		<li><a href="javascript:publish()">Make Public </a></li>
-		{% endif %}
-		{% if is_admin or not public %}
-		<li><a href='javascript:deleteFeeder()'>Delete</a></li>
-		<li><a href='javascript:rename()'>Rename</a></li>
-		<li><a href='javascript:savePrivate()'>Duplicate</a></li>
-		<li><a href='javascript:saveModel()'>Save</a></li>
-		<li><a href='javascript:history.back()'>Leave &#x2192;</a></li>
-		{% endif %}
-	  </ul>
-	</div>
-	<div class='buttonGroup rightToolbar'>
-	  <button class='pill' onclick='dropPillAndStay(this, "Layout")'>Layout ▾</button>
-	  <ul class='menu right'>
-	<table style='padding:4px;word-wrap:break-word'>
-		  <tr>
-			<td>GraphNodes</td>
-			<td id='nodesBox'></td>
-		  </tr>
-		  <tr>
-			<td colspan=2 style='padding:0px 0px 10px 0px'>
-			  <div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
-			</td>
+		<button class='pill' onclick='dropPillAndStay(this, "Edit")'>Edit ▾</button>
+		<ul class='menu'>
+		<table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
 			<tr>
-			  <tr>
-		<td>Gravity</td>
-		<td><input id='gravityBox' type='text'></td>
-			  </tr>
-			  <tr>
-		<td>Theta</td>
-		<td><input id='thetaBox' type='text'></td>
-			  </tr>
-			  <tr>
-		<td>Friction</td>
-		<td><input id='frictionBox' type='text'></td>
-			  </tr>
-			  <tr>
-		<td>Link Strength</td>
-		<td><input id='linkStrengthBox' type='text'></td>
-			  </tr>
-			  <tr>
-		<td>Link Distance</td>
-		<td><input id='linkDistanceBox' type='text'></td>
-			  </tr>
-			  <tr>
-		<td>Charge</td>
-		<td><input id='chargeBox' type='text'></td>
-			  </tr>
-			  <tr>
-		<td></td>
-		<td style='padding-top:10px'><button onclick='layoutMenuApply()'>Apply</button></td>
-			  </tr>
+				<td>Zoom Reset</td>
+				<td><button onclick='javascript:zoomReset()'>Go</button></td>
+			</tr>
+			<tr>
+				<td>Toggle Scale Grid</td>
+				<td><button onclick='javascript:toggleScaleGrid()'>Go</button></td>
+			</tr>
+			<tr>
+				<td>Static Loads to Houses</td>
+				<td><button onclick='javascript:staticLoadsToHouses()'>Go</button></td>
+			</tr>
+			<tr>
+				<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
+				<td><button onclick='javascript:solarAdding()'>Go</button></td>
+			</tr>
+			  
 		</table>
-	  </ul>
+		</ul>
 	</div>
-	  </div>
-
+	<div class='buttonGroup leftToolbar'>
+		<button class='pill' onclick='dropPill(this, "Pinning")'>Pinning ▾</button>
+		<ul class='menu'>
+		<li><a href='javascript:pinAll()' id='pinUnpinAll'>Pin All</a></li>
+		<li><a href='javascript:unPinAll()'>Unpin All</a></li>
+		<li><a href='javascript:toggleSelectedPin()'>Toggle Selected Pin (p)</a></li>
+		</ul>
+	</div>
+	<div class='buttonGroup leftToolbar'>
+		<button class='pill' onclick='dropPill(this, "Folding")'>Folding ▾</button>
+		<ul class='menu'>
+		<li><a href='javascript:foldOneLevel()'>One Level Fold</a></li>
+		<li><a href='javascript:unfoldOneLevel()'>One Level Unfold</a></li>
+		<li><a href='javascript:unfoldAll()'>Unfold All</a></li>
+		<li><a href='javascript:foldAtSelected()'>Fold at Selected (f)</a></li>
+		<li><a href='javascript:unfoldAtSelected()'>Unfold at Selected (u)</a></li>
+		</ul>
+	</div>
+	<div class='buttonGroup leftToolbar'>
+		<button class='pill' onclick='dropPillAndStay(this, "Find")'>Find ▾</button>
+		<ul class='menu'>
+		<table style='padding:4px;word-wrap:break-word'>
+			<tr>
+				<td>Term</td>
+				<td><input id='searchTerm' type='text'></td>
+			</tr>
+			<tr>
+				<td><button onclick='backButton()'>Back</button></td>
+				<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
+			</tr>
+			<tr>
+				<td style='padding-top:10px'><button onclick='findPrevious()'>Previous</button></td>
+				<td style='padding-top:10px'><button onclick='findNext()'>Next</button></td>
+			</tr>
+		</table>
+		</ul>
+	</div>
+	<div class='buttonGroup rightToolbar'>
+		<button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
+		<ul class='menu right'>
+			{% if public %}
+			<li><a href="javascript:savePrivateFeeder()">Save Private Copy</a></li>
+			{% endif %}
+			{% if not public %}
+			<li><a href="javascript:publishFeeder()">Make Public </a></li>
+			{% endif %}
+			{% if is_admin or not public %}
+			<li><a href='javascript:deleteFeeder()'>Delete</a></li>
+			<li><a href='javascript:duplicateFeeder()'>Duplicate</a></li>
+			<li><a href='javascript:saveFeeder()'>Save</a></li>
+			<li><a href='javascript:history.back()'>Leave &#x2192;</a></li>
+			{% endif %}
+		</ul>
+	</div>
+	<div class='buttonGroup rightToolbar'>
+		<button class='pill' onclick='dropPillAndStay(this, "Layout")'>Layout ▾</button>
+		<ul class='menu right'>
+		<table style='padding:4px;word-wrap:break-word'>
+			<tr>
+				<td>GraphNodes</td>
+				<td id='nodesBox'></td>
+			</tr>
+			<tr>
+				<td colspan=2 style='padding:0px 0px 10px 0px'>
+				<div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
+				</td>
+				<tr>
+				<tr>
+			<td>Gravity</td>
+			<td><input id='gravityBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Theta</td>
+			<td><input id='thetaBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Friction</td>
+			<td><input id='frictionBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Link Strength</td>
+			<td><input id='linkStrengthBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Link Distance</td>
+			<td><input id='linkDistanceBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Charge</td>
+			<td><input id='chargeBox' type='text'></td>
+				</tr>
+				<tr>
+			<td></td>
+			<td style='padding-top:10px'><button onclick='layoutMenuApply()'>Apply</button></td>
+				</tr>
+			</table>
+		</ul>
+		</div>
+	</div>
 	<div id="selected">
-	  <table id="selHead">
-		<tr>
-		  <td id="objmod" colspan="2"></td>
-		  <td id="value" colspan="2"></td>
-		</tr>
-	  </table>
-	  <table id="daButtons">
-		<tr id="editButtonRow">
-		  <td colspan="4"><button id="editButton">Edit</button></td>
-		</tr>
-		<tr id="otherButtons">
-		  <td><button id="deleteObject" class="deleteButton">Delete</button></td>
-		  <td><button id="addAttribute">Add Attribute</button></td>
-		  <td><button id="saveObject">Save</button></td>
-		  <td><button id="cancelButton">Cancel</button></td>
-		</tr>
-	  </table>
-	  <div id="selBody">
-		<table id="body">
+		<table id="selHead">
+			<tr>
+			<td id="objmod" colspan="2"></td>
+			<td id="value" colspan="2"></td>
+			</tr>
 		</table>
-	  </div>
+		<table id="daButtons">
+			<tr id="editButtonRow">
+			<td colspan="4"><button id="editButton">Edit</button></td>
+			</tr>
+			<tr id="otherButtons">
+			<td><button id="deleteObject" class="deleteButton">Delete</button></td>
+			<td><button id="addAttribute">Add Attribute</button></td>
+			<td><button id="saveObject">Save</button></td>
+			<td><button id="cancelButton">Cancel</button></td>
+			</tr>
+		</table>
+		<div id="selBody">
+			<table id="body">
+			</table>
+		</div>
 	</div>
-	
 </div>
 	  
 <script type="text/javascript">
@@ -1284,27 +1279,36 @@ function solarAdding() {
 }
 
 // MODEL SAVING
-function saveModel(new_name) {
-	feederObject = {tree:tree,
-			nodes:nodes,
-			hiddenNodes:hiddenNodes,
-			links:links,
-			hiddenLinks:hiddenLinks,
-			layoutVars:{'gravity':force.gravity(),'theta':force.theta(),'friction':force.friction(),'linkStrength':force.linkStrength(),'charge':force.charge(),'linkDistance':force.linkDistance()},
-			attachments:attachments
-		   }
-	var name = new_name ? new_name : gebi("gridName").innerHTML
+function savePoster(name, user) {
+	feederObject = {tree:tree, nodes:nodes, hiddenNodes:hiddenNodes, links:links, hiddenLinks:hiddenLinks, layoutVars:{'gravity':force.gravity(),'theta':force.theta(),'friction':force.friction(),'linkStrength':force.linkStrength(),'charge':force.charge(),'linkDistance':force.linkDistance()}, 			attachments:attachments}
 	payload = {'name':name,
-		   'feederObjectJson':JSON.stringify(feederObject, null, '    '),
+		   'feederObjectJson':JSON.stringify(feederObject),
 		   "_csrf_token":"{{ csrf_token() }}",
-		   ref: "{{ ref }}"
-		  }
-	if (new_name){			// There would only be a new_name if they had used the save as button, so it should necessarily be saved to the current user's feeder directory
-		post_to_url("/saveFeeder/{{ currUser }}/"+new_name, payload)
-	} else {
-		// Otherwise attempt to save it to the original owner's directory.  The button to save a feeder should only appear if the user is the admin or if this is a user's private feeder... normals user's cannot save public feeders or other user's feeders
-		post_to_url("/saveFeeder/{{ owner }}/{{ feederName }}", payload)
+		   ref: "{{ ref }}"  }
+	post_to_url("/saveFeeder/" + user + "/" + name, payload)
+}
+
+function saveFeeder() {
+	savePoster("{{ feederName }}","{{ owner }}")
+}
+
+function duplicateFeeder() {
+	newName = prompt("Save copy as", $("#gridName").html())
+	if (newName) {
+		$.ajax({url:"/uniqObjName/Feeder/{{ currUser }}/" + newName}).done(function(data) {
+			if (data.exists) {
+				alert("You already have a feeder named " + newName)
+				duplicateFeeder()
+			} else {
+				savePoster(newName,"{{ currUser}}")
+			}
+		})
 	}
+}
+
+function savePrivateFeeder(){
+	// Saving a private feeder is the same as duplicating a public feeder.
+	duplicateFeeder()
 }
 
 function deleteFeeder() {
@@ -1314,27 +1318,22 @@ function deleteFeeder() {
 	}
 }
 
-function rename() {
-	//TODO: IMPLEMENT
-}
-
-function savePrivate(){
-	new_name = prompt("Save copy as", $("#gridName").html())
-	if (new_name) {
-	$.ajax({
-		url:"/uniqObjName/Feeder/{{ currUser }}/" + new_name
-	}).done(function(data){
-		if (data.exists){
-			alert("You already have a feeder named " + new_name)
-			savePrivate()
-		} else {
-			saveModel(new_name)
-		}
-	})
+function publishFeeder() {
+	newName = prompt("Publish a copy with name", $("#gridName").html())
+	if (newName) {
+		$.ajax({url:"/uniqObjName/Feeder/public/" + newName}).done(function(data) {
+			if (data.exists) {
+				alert("There is already a public feeder named " + newName)
+				publishFeeder()
+			} else {
+				savePoster(newName, "public")
+			}
+		})
 	}
 }
 
 // PINNING FUNCTIONS
+
 function pinAll() {
 	for (node in nodes) {
 		gebi('pin' + nodes[node].treeIndex).setAttribute('class','nodeIsPinned')
