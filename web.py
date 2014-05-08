@@ -194,8 +194,10 @@ def changepwd():
 @app.route("/makePublic/<objectType>/<objectName>", methods=["POST"])
 @flask_login.login_required
 def makePublic(objectType, objectName):
-	if objectType == "Feeder": ext = ".json"
-	else: ext = ""
+	if objectType == "Feeder":
+		ext = ".json"
+	else:
+		ext = ""
 	srcpth = "data/" + objectType + "/" + User.cu() + "/" + objectName + ext
 	destpth = "data/" + objectType + "/public/" + objectName + ext
 	shutil.move(srcpth, destpth)
@@ -239,6 +241,23 @@ def milsoftImport():
 	milImport(User.cu(), current_user.prepend+feederName, stdString, seqString)
 	hlp.conversionDump(User.cu(), feederName, {"data":"none"})
 	return flask.redirect('/#feeders')
+
+def milImportBackground(owner, feederName, stdString, seqString):
+	newFeederWireframe = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],
+		'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
+	newFeeder = dict(**newFeederWireframe)
+	[newFeeder['tree'], xScale, yScale] = milToGridlab.convert(stdString, seqString)
+	newFeeder['layoutVars']['xScale'] = xScale
+	newFeeder['layoutVars']['yScale'] = yScale
+	with open('./schedules.glm','r') as schedFile:
+		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	hlp.feederDump(owner, feederName, newFeeder)
+	
+def milImport(owner, feederName, stdString, seqString):
+	# Setup.
+	# TODO: switch to multiprocessing for better control and performance.
+	importThread = Thread(target=milImportBackground, args=[owner, feederName, stdString, seqString])
+	importThread.start()
 
 @app.route('/gridlabdImport/', methods=['POST'])
 @flask_login.login_required
@@ -286,23 +305,6 @@ def publicObject(objectType, objectName):
 	# I guess the intention is, Can I publish this? Nope, because it has the same name as a public object, or Yep, you can because there is no public object with that name
 	# A refactor so that the front end expects true/false rather than Yep/Nope is definitely necessary
 	return "Nope" if hlp.pubhelper(objectType, objectName) else "Yep"
-
-def milImportBackground(owner, feederName, stdString, seqString):
-	newFeederWireframe = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],
-		'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
-	newFeeder = dict(**newFeederWireframe)
-	[newFeeder['tree'], xScale, yScale] = milToGridlab.convert(stdString, seqString)
-	newFeeder['layoutVars']['xScale'] = xScale
-	newFeeder['layoutVars']['yScale'] = yScale
-	with open('./schedules.glm','r') as schedFile:
-		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
-	hlp.feederDump(owner, feederName, newFeeder)
-	
-def milImport(owner, feederName, stdString, seqString):
-	# Setup.
-	# TODO: switch to multiprocessing for better control and performance.
-	importThread = Thread(target=milImportBackground, args=[owner, feederName, stdString, seqString])
-	importThread.start()
 
 ###################################################
 # VIEWS
@@ -383,6 +385,7 @@ def runModel():
 @app.route('/feeder/<owner>/<feederName>')
 @flask_login.login_required
 def feederGet(owner, feederName):
+	''' Editing interface for feeders. '''
 	# TODO: fix modelFeeder
 	return render_template('gridEdit.html', feederName=feederName, ref=request.referrer,
 		is_admin=User.cu()=="admin", modelFeeder=False, public=owner=="public",

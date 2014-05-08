@@ -134,7 +134,7 @@
 	  <button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
 	  <ul class='menu right'>
 		{% if public %}
-		<li><a href="javascript:saveas()">Save As Private Feeder </a></li>
+		<li><a href="javascript:savePrivate()">Save Private Copy</a></li>
 		{% endif %}
 		{% if not public %}
 		<li><a href="javascript:publish()">Make Public </a></li>
@@ -142,6 +142,7 @@
 		{% if is_admin or not public %}
 		<li id='deleteMenuItem'><a href='javascript:deleteFeeder()'>Delete</a></li>
 		<li id='renameMenuItem'><a href='javascript:rename()'>Rename</a></li>
+		<li id='duplicateMenuItem'><a href='javascript:duplicate()'>Duplicate</a></li>
 		<li id='saveMenuItem'><a href='javascript:saveModel()'>Save</a></li>
 		<li><a href='javascript:history.back()'>Leave &#x2192;</a></li>
 		{% endif %}
@@ -1298,7 +1299,6 @@ function saveModel(new_name) {
 		   "_csrf_token":"{{ csrf_token() }}",
 		   ref: "{{ ref }}"
 		  }
-
 	if (new_name){			// There would only be a new_name if they had used the save as button, so it should necessarily be saved to the current user's feeder directory
 		post_to_url("/saveFeeder/{{ currUser }}/"+new_name, payload)
 	}else{
@@ -1308,23 +1308,10 @@ function saveModel(new_name) {
 }
 
 function rename() {
-	gebi('renameMenuItem').style.display = 'none'
-	gebi('saveMenuItem').style.display = 'none'
-	gridNameP = gebi('gridName')
-	currentName = gridNameP.innerHTML
-	{% if is_admin and not public %}
-	var i = currentName.indexOf("_");
-	var p = $("#title p")[0];
-	$(p).html($(p).html()+currentName.substr(0,i))
-	currentName = currentName.substr(i+1);
-	{% endif %}
-	inputBox = '<input type="text" id="gridNameEdit" name="gridNameEdit" data-old="' + currentName + '" value="' + currentName + '"/>'
-	acceptButton = '<button class="smallButton" id="acceptButton" onclick="acceptRename()">✔</button>'
-	cancelButton = '<button class="smallButton" id="cancelButton" onclick="cancelRename()">✘</button>'
-	gridNameP.innerHTML = inputBox + acceptButton + cancelButton
+	//TODO: IMPLEMENT
 }
 
-function saveas(){
+function savePrivate(){
 	var new_name = prompt("Save as", $("#gridName").html());
 	if (new_name){
 	$.ajax({
@@ -1332,28 +1319,12 @@ function saveas(){
 	}).done(function(data){
 		if (data.exists){
 			alert("You already have a feeder named " + new_name);
-			saveas();
+			savePrivate();
 		} else {
 			saveModel(new_name);
 		}
 	})
 	}
-}
-
-function cancelRename() {
-	gebi('renameMenuItem').style.display = 'block'
-	gebi('saveMenuItem').style.display = 'block'
-	gridNameP = gebi('gridName')
-	oldName = gebi('gridNameEdit').getAttribute('data-old')
-	gridNameP.innerHTML = oldName
-}
-
-function acceptRename() {
-	gebi('renameMenuItem').style.display = 'block'
-	gebi('saveMenuItem').style.display = 'block'
-	gridNameP = gebi('gridName')
-	newName = gebi('gridNameEdit').value
-	gridNameP.innerHTML = newName
 }
 
 // PINNING FUNCTIONS
@@ -1606,7 +1577,7 @@ function foldSecSys() {
 	}
 	redraw()
 }
-		
+
 // INIT FUNCTIONS FOLLOW:
 d3.json('/getComponents/', function(json){components=json;fillComponentMenu()})
 var apiAddress = "/feederData/{{ owner }}/{{ feederName }}/{{ modelFeeder }}"
