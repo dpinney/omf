@@ -133,8 +133,8 @@ def new_user():
 	if User.cu() != "admin":
 		return redirect("/")
 	email = request.form.get("email")
-	if email in [f.replace(".json", "") for f in os.listdir("data/User")]:
-		u = User.gu(email)
+	if email in [f[0:-5] for f in os.listdir("data/User")]:
+		u = json.load(open("data/User/" + email + ".json"))
 		if u.get("password_digest") or not request.form.get("resend"):
 			return "Already Exists"
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\n\nreg_link"
@@ -155,9 +155,8 @@ def forgotpwd():
 def register(email, reg_key):
 	if flask_login.current_user.is_authenticated():
 		return redirect("/")
-	# This is super ug, sorry
 	try:
-		user = User.gu(email)
+		user = json.load(open("data/User/" + email + ".json"))
 	except Exception:
 		user = None
 	if not (user and
@@ -172,7 +171,8 @@ def register(email, reg_key):
 		user["username"] = email
 		user["password_digest"] = pbkdf2_sha512.encrypt(password)
 		flask_login.login_user(User(user))
-		User.du(user)
+		with open("data/User/"+user["username"]+".json","w") as outFile:
+			json.dump(user, outFile)
 	return redirect("/")
 
 @app.route("/changepwd", methods=["POST"])
