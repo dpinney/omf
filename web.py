@@ -354,6 +354,15 @@ def runModel():
 	modelModule.run("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
+@app.route("/cancelModel/", methods=["POST"])
+@flask_login.login_required
+def runModel():
+	''' Start a model running and redirect to its running screen. '''
+	pData = request.form.to_dict()
+	modelModule = getattr(models, pData["modelType"])
+	modelModule.cancel("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
+	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
+
 @app.route('/feeder/<owner>/<feederName>')
 @flask_login.login_required
 def feederGet(owner, feederName):
