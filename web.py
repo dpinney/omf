@@ -21,20 +21,20 @@ def safeListdir(path):
 def getDataNames():
 	''' Query the OMF datastore to get names of all objects.'''
 	currUser = flask_login.current_user
-	feeders = [x[:-5] for x in safeListdir('./data/Feeder/' + currUser.username)]
-	publicFeeders = [x[:-5] for x in safeListdir('./data/Feeder/public/')]
-	climates = [x[:-5] for x in safeListdir('./data/Climate/')]
-	return {'feeders':feeders, 'publicFeeders':publicFeeders, 'climates':climates, 
-		'currentUser':currUser.__dict__}
+	feeders = [x[:-5] for x in safeListdir("./data/Feeder/" + currUser.username)]
+	publicFeeders = [x[:-5] for x in safeListdir("./data/Feeder/public/")]
+	climates = [x[:-5] for x in safeListdir("./data/Climate/")]
+	return {"feeders":feeders, "publicFeeders":publicFeeders, "climates":climates, 
+		"currentUser":currUser.__dict__}
 
 @app.before_request
 def csrf_protect():
-	if request.user_agent.browser == 'msie' or request.user_agent.browser == 'firefox':
-		return 'The OMF currently must be accessed by Chrome or Safari.'
+	if request.user_agent.browser == "msie" or request.user_agent.browser == "firefox":
+		return "The OMF currently must be accessed by Chrome or Safari."
 	# TODO: fix csrf validation.
 	# if request.method == "POST":
-	#	token = session.get('_csrf_token', None)
-	#	if not token or token != request.form.get('_csrf_token'):
+	#	token = session.get("_csrf_token", None)
+	#	if not token or token != request.form.get("_csrf_token"):
 	#		abort(403)
 
 def send_link(email, message, u={}):
@@ -78,7 +78,7 @@ def cryptoRandomString():
 
 login_manager = flask_login.LoginManager()
 login_manager.init_app(app)
-login_manager.login_view = 'login_page'
+login_manager.login_view = "login_page"
 app.secret_key = cryptoRandomString()
 
 @login_manager.user_loader
@@ -87,11 +87,11 @@ def load_user(username):
 	return User(json.load(open("./data/User/" + username + ".json")))
 
 def generate_csrf_token():
-	if '_csrf_token' not in session:
-		session['_csrf_token'] = cryptoRandomString()
-	return session['_csrf_token']
+	if "_csrf_token" not in session:
+		session["_csrf_token"] = cryptoRandomString()
+	return session["_csrf_token"]
 
-app.jinja_env.globals['csrf_token'] = generate_csrf_token
+app.jinja_env.globals["csrf_token"] = generate_csrf_token
 
 ###################################################
 # API CALLS
@@ -202,7 +202,7 @@ def delete(objectType, objectName, owner):
 		shutil.rmtree("data/Model/" + owner + "/" + objectName)
 	return redirect("/")
 
-@app.route('/saveFeeder/<owner>/<feederName>', methods=['POST'])
+@app.route("/saveFeeder/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
 def saveFeeder(owner, feederName):
 	''' Save feeder data. '''
@@ -216,42 +216,43 @@ def saveFeeder(owner, feederName):
 			json.dump(payload, outFile, indent=4)
 	return redirect(request.form.get("ref", "/#feeders"))
 
-@app.route('/milsoftImport/', methods=['POST'])
+@app.route("/milsoftImport/", methods=["POST"])
 @flask_login.login_required
 def milsoftImport():
 	''' API for importing a milsoft feeder. '''
-	feederName = str(flask.request.form.to_dict()['feederName'])
+	feederName = str(flask.request.form.to_dict()["feederName"])
 	stdString, seqString = map(lambda x: flask.request.files[x].stream.read(), ["stdFile", "seqFile"])
 	importProc = Process(target=milImportBackground, args=[owner, feederName, stdString, seqString])
 	importProc.start()
 	hlp.conversionDump(User.cu(), feederName, {"data":"none"})
-	return flask.redirect('/#feeders')
+	return flask.redirect("/#feeders")
 
 def milImportBackground(owner, feederName, stdString, seqString):
 	''' Function to run in the background for Milsoft import. '''
-	newFeederWireframe = {'links':[],'hiddenLinks':[],'nodes':[],'hiddenNodes':[],
-		'layoutVars':{'theta':'0.8','gravity':'0.01','friction':'0.9','linkStrength':'5','linkDistance':'5','charge':'-5'}}
+	newFeederWireframe = {"links":[],"hiddenLinks":[],"nodes":[],"hiddenNodes":[],
+		"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5",
+		"linkDistance":"5","charge":"-5"}}
 	newFeeder = dict(**newFeederWireframe)
-	[newFeeder['tree'], xScale, yScale] = milToGridlab.convert(stdString, seqString)
-	newFeeder['layoutVars']['xScale'] = xScale
-	newFeeder['layoutVars']['yScale'] = yScale
-	with open('./schedules.glm','r') as schedFile:
-		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	[newFeeder["tree"], xScale, yScale] = milToGridlab.convert(stdString, seqString)
+	newFeeder["layoutVars"]["xScale"] = xScale
+	newFeeder["layoutVars"]["yScale"] = yScale
+	with open("./schedules.glm","r") as schedFile:
+		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	hlp.feederDump(owner, feederName, newFeeder)
 	
-@app.route('/gridlabdImport/', methods=['POST'])
+@app.route("/gridlabdImport/", methods=["POST"])
 @flask_login.login_required
 def gridlabdImport():
-	"""This function is used for gridlabdImporting"""
-	feederName = str(flask.request.form.to_dict()['feederName'])
+	'''This function is used for gridlabdImporting'''
+	feederName = str(flask.request.form.to_dict()["feederName"])
 	newFeeder = dict(**hlp.newFeederWireframe)	# copies the dictionary..
-	newFeeder['tree'] = feeder.parse(flask.request.files['glmFile'].stream.read(), False)
-	newFeeder['layoutVars']['xScale'] = 0
-	newFeeder['layoutVars']['yScale'] = 0
-	with open('./schedules.glm','r') as schedFile:
-		newFeeder['attachments'] = {'schedules.glm':schedFile.read()}
+	newFeeder["tree"] = feeder.parse(flask.request.files["glmFile"].stream.read(), False)
+	newFeeder["layoutVars"]["xScale"] = 0
+	newFeeder["layoutVars"]["yScale"] = 0
+	with open("./schedules.glm","r") as schedFile:
+		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	hlp.feederDump(User.cu(), feederName, newFeeder)
-	return flask.redirect('/#feeders')
+	return flask.redirect("/#feeders")
 
 @app.route("/feederData/<owner>/<feederName>/") 
 @app.route("/feederData/<owner>/<feederName>/<modelFeeder>")
