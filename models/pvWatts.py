@@ -60,7 +60,7 @@ def getStatus(modelDir):
 		modFiles = []
 	hasInput = "allInputData.json" in modFiles
 	hasPID = "PID.txt" in modFiles
-	hasOutput = "allInputData.json" 
+	hasOutput = "allOutputData.json" in modFiles
 	if hasInput and not hasOutput and not hasPID:
 		return "stopped"
 	elif hasInput and not hasOutput and hasPID:

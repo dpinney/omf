@@ -303,19 +303,10 @@ def root():
 	# Grab metadata for models and feeders.
 	for mod in allModels:
 		modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
-		allInput = json.load(open(modPath + "/allInputData.json","r"))
-		hasOutput = os.path.isfile(modPath + "/allOutputData.json")
-		hasPID = os.path.isfile(modPath + "/PID.txt")
-		if hasPID and not hasOutput:
-			mod["status"] = "running"
-		elif not hasPID and hasOutput:
-			mod["status"] = "postRun"
-		elif not hasPID and not hasOutput:
-			mod["status"] = "cancelled"
-		else: # hasPID and hasOutput
-			mod["status"] = "running"
+		allInput = json.load(open(modPath + "/allInputData.json"))
 		mod["runTime"] = allInput.get("runTime","")
 		mod["modelType"] = allInput.get("modelType","")
+		mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
 		# mod["created"] = allInput.get("created","")
 		mod["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(modPath).st_ctime)) 
 	for feed in allFeeders:
