@@ -75,6 +75,12 @@
 			if (returnVal == false) {alert("Form values bordered in red don't match the required format.")}
 			return returnVal
 		}
+		function cancelModel() {
+			params = {user:allInputData.user,
+				modelName:allInputData.modelName,
+				modelType:allInputData.modelType}
+			post_to_url("/cancelModel/", params, "POST")
+		}
 	</script>
 </head>
 <body onload="init()">
@@ -152,7 +158,7 @@
 					<td></td>
 					<td>
 						<button id="runButton" type="submit" class="preRun">Run Model</button>
-						<button id="cancelButton" class="running" type="button" onclick="alert('RUN CANCELED')">Cancel Run</button>
+						<button id="cancelButton" class="running" type="button" onclick="cancelModel()">Cancel Run</button>
 						<button id="rerunButton" type="submit" class="postRun">Re-Run Model</button>
 					</td>
 				</tr>

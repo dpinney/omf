@@ -211,8 +211,12 @@ def cancel(modelDir):
 			pid = int(pidFile.read())
 			os.kill(pid, 15)
 		os.remove(pJoin(modelDir, "PID.txt"))
+		print "CANCELED", modelDir
 	except:
-		print "ATTEMPTED AND FAILED TO KILL", modelDir
+		print "ATTEMPTED AND FAILED TO CANCEL", modelDir
+		for fName in os.listdir(modelDir):
+			if fName in ["PID.txt","allOutputData.json"]:
+				os.remove(pJoin(modelDir,fName))
 
 def _tests():
 	# Variables
