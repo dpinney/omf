@@ -356,7 +356,7 @@ def runModel():
 
 @app.route("/cancelModel/", methods=["POST"])
 @flask_login.login_required
-def runModel():
+def cancelModel():
 	''' Start a model running and redirect to its running screen. '''
 	pData = request.form.to_dict()
 	modelModule = getattr(models, pData["modelType"])
