@@ -29,26 +29,25 @@
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		function init() {
 			// Set up various things on load.
-			if (allInputData == null && allOutputData == null) {
-				// Case 1: model just started.
-				console.log("NORUN")
-				$(".preRun").show()
-			} else if (allInputData != null && allOutputData == null) {
-				// Case 2: model running.
+			if (modelStatus == "finished") {
+				console.log("FINISHED")
+				restoreInputs()
+				$(".postRun").show()
+			} else if (modelStatus == "running") {
 				console.log("RUNNING")
 				$(".running").show()
 				restoreInputs()
 				$("input").prop("readonly", true)
 				$("select").prop("disabled", true)
-			} else {
-				// Case 3: one model run complete.
-				console.log("POSTRUN")
-				restoreInputs()
-				$(".postRun").show()
+			} else /* Stopped */ {
+				console.log("STOPPED")
+				$(".preRun").show()
+				if (allInputData != null) {restoreInputs()}
 			}
 		}
 		function restoreInputs() {

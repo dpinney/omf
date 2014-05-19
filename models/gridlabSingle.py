@@ -38,7 +38,7 @@ def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
 	else:
 		pathPrefix = ""
 	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, pathPrefix=pathPrefix,
+		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames)
 
 def renderAndShow(modelDir="", datastoreNames={}):
@@ -76,6 +76,25 @@ def run(modelDir):
 	backProc = multiprocessing.Process(target=runForeground, args=(modelDir,))
 	backProc.start()
 	print "SENT TO BACKGROUND", modelDir
+
+def getStatus(modelDir):
+	''' Is the model stopped, running or finished? '''
+	try:
+		modFiles = os.listdir(modelDir)
+	except:
+		modFiles = []
+	hasInput = "allInputData.json" in modFiles
+	hasPID = "PID.txt" in modFiles
+	hasOutput = "allInputData.json" 
+	if hasInput and not hasOutput and not hasPID:
+		return "stopped"
+	elif hasInput and not hasOutput and hasPID:
+		return "running"
+	elif hasInput and hasOutput and not hasPID:
+		return "finished"
+	else:
+		# Broken! Make the safest choice:
+		return "stopped"
 
 def runForeground(modelDir):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''

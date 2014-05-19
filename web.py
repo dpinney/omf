@@ -7,7 +7,7 @@ from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 
 app = Flask("omf")
-URL = "http://omf.coop"
+URL = "http://www.omf.coop"
 
 ###################################################
 # HELPER FUNCTIONS

@@ -52,6 +52,25 @@ def renderAndShow(modelDir="", datastoreNames={}):
 		# It's going to SPACE! Could you give it a SECOND to get back from SPACE?!
 		time.sleep(1)
 
+def getStatus(modelDir):
+	''' Is the model stopped, running or finished? '''
+	try:
+		modFiles = os.listdir(modelDir)
+	except:
+		modFiles = []
+	hasInput = "allInputData.json" in modFiles
+	hasPID = "PID.txt" in modFiles
+	hasOutput = "allInputData.json" 
+	if hasInput and not hasOutput and not hasPID:
+		return "stopped"
+	elif hasInput and not hasOutput and hasPID:
+		return "running"
+	elif hasInput and hasOutput and not hasPID:
+		return "finished"
+	else:
+		# Broken! Make the safest choice:
+		return "stopped"
+
 def create(parentDirectory, inData):
 	''' Make a directory for the model to live in, and put the input data into it. '''
 	modelDir = pJoin(parentDirectory,inData["user"],inData["modelName"])

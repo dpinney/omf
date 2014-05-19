@@ -41,7 +41,7 @@ def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
 	else:
 		pathPrefix = ""
 	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, pathPrefix=pathPrefix,
+		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames)
 
 def renderAndShow(modelDir="", datastoreNames={}):
@@ -65,6 +65,25 @@ def create(parentDirectory, inData):
 	feederDir, feederName = inData["feederName"].split("___")
 	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
 		pJoin(modelDir,"feeder.json"))
+
+def getStatus(modelDir):
+	''' Is the model stopped, running or finished? '''
+	try:
+		modFiles = os.listdir(modelDir)
+	except:
+		modFiles = []
+	hasInput = "allInputData.json" in modFiles
+	hasPID = "PID.txt" in modFiles
+	hasOutput = "allInputData.json" 
+	if hasInput and not hasOutput and not hasPID:
+		return "stopped"
+	elif hasInput and not hasOutput and hasPID:
+		return "running"
+	elif hasInput and hasOutput and not hasPID:
+		return "finished"
+	else:
+		# Broken! Make the safest choice:
+		return "stopped"
 
 def _roundOne(x,direc):
 	''' Round x in direc (up/down) to 1 sig fig. '''
