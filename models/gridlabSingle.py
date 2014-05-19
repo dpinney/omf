@@ -69,10 +69,15 @@ def create(parentDirectory, inData):
 def run(modelDir):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
-	# If we are re-running, remove outputs and PIDs:
-	for fName in os.listdir(modelDir):
-		if fName in ["PID.txt","allOutputData.json"]:
-			os.remove(pJoin(modelDir,fName))
+	# Touch the PID to indicate the run has started.
+	with open(pJoin(modelDir,"PID.txt"), 'a'):
+		os.utime(pJoin(modelDir,"PID.txt"), None)
+	# If we are re-running, remove output:
+	try:
+		os.remove(pJoin(modelDir,"allOutputData.json"))
+	except:
+		pass
+	# Start the computation.
 	backProc = multiprocessing.Process(target=runForeground, args=(modelDir,))
 	backProc.start()
 	print "SENT TO BACKGROUND", modelDir
@@ -229,8 +234,8 @@ def cancel(modelDir):
 		with open(pJoin(modelDir,"PID.txt"),"r") as pidFile:
 			pid = int(pidFile.read())
 			os.kill(pid, 15)
-		os.remove(pJoin(modelDir, "PID.txt"))
 		print "CANCELED", modelDir
+		os.remove(pJoin(modelDir, "PID.txt"))
 	except:
 		print "ATTEMPTED AND FAILED TO CANCEL", modelDir
 		for fName in os.listdir(modelDir):
