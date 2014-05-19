@@ -69,6 +69,10 @@ def create(parentDirectory, inData):
 def run(modelDir):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
+	# If we are re-running, remove outputs and PIDs:
+	for fName in os.listdir(modelDir):
+		if fName in ["PID.txt","allOutputData.json"]:
+			os.remove(pJoin(modelDir,fName))
 	backProc = multiprocessing.Process(target=runForeground, args=(modelDir,))
 	backProc.start()
 	print "SENT TO BACKGROUND", modelDir

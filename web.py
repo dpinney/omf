@@ -271,11 +271,11 @@ def getComponents():
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
 @flask_login.login_required
 def uniqObjName(objtype, owner, name):
-	# This should replace all the functions that check for unique names
+	''' Checks if a given object type/owner/name is unique. '''
 	if objtype == "Model":
 		path = "data/Model/" + owner + "/" + name
 	elif objtype == "Feeder":
-		path = "data/Feeder/" + owner + "/" + name
+		path = "data/Feeder/" + owner + "/" + name + ".json"
 	return jsonify(exists=os.path.exists(path))
 
 ###################################################
