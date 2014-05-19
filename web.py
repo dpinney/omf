@@ -2,7 +2,7 @@
 
 from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, Response
 from jinja2 import Template
-import models, json, os, flask_login, hashlib, random, time, datetime, shutil, milToGridlab, boto.ses
+import models, json, os, flask_login, hashlib, random, time, datetime as dt, shutil, milToGridlab, boto.ses
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 
@@ -44,7 +44,7 @@ def send_link(email, message, u={}):
 		aws_secret_access_key="stNtF2dlPiuSigHNcs95JKw06aEkOAyoktnWqXq+")
 	reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
 	u["reg_key"] = reg_key
-	u["timestamp"] = datetime.datetime.strftime(datetime.datetime.now(), format="%c")
+	u["timestamp"] = dt.datetime.strftime(dt.datetime.now(), format="%c")
 	u["registered"] = False
 	u["email"] = email
 	json.dump(u, open("data/User/"+email+".json", "w"), indent=4)
@@ -162,7 +162,7 @@ def register(email, reg_key):
 	if not (user and
 			reg_key == user.get("reg_key") and
 			user.get("timestamp") and
-			datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(user.get("timestamp"), "%c")):
+			dt.timedelta(1) > dt.datetime.now() - dt.datetime.strptime(user.get("timestamp"), "%c")):
 		return "This page either expired, or you are not supposed to access it.  It might not even exist"
 	if request.method == "GET":
 		return render_template("register.html", email=email)
@@ -382,9 +382,10 @@ def adminControls():
 		if f not in ["admin.json","public.json"]]
 	for user in users:
 		userDict = json.load(open("data/User/" + user["username"] + ".json"))
+		tStamp = userDict.get("timestamp","")
 		if userDict.get("password_digest"):
 			user["status"] = "Registered"
-		elif datetime.timedelta(1) > datetime.datetime.now() - datetime.datetime.strptime(userDict.get("timestamp",""), "%c"):
+		elif dt.timedelta(1) > dt.datetime.now() - dt.datetime.strptime(tStamp, "%c"):
 			user["status"] = "emailSent"
 		else:
 			user["status"] = "emailExpired"
