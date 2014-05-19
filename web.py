@@ -291,15 +291,16 @@ def root():
 	userModels = [{"owner":User.cu(), "name":x} for x in safeListdir("data/Model/" + User.cu())]
 	publicFeeders = [{"owner":"public","name":x[0:-5]} for x in safeListdir("data/Feeder/public/")]
 	userFeeders = [{"owner":User.cu(),"name":x[0:-5]} for x in safeListdir("data/Feeder/" + User.cu())]
-	# Allow admin to see all models.
+	allModels = publicModels + userModels
+	allFeeders = publicFeeders + userFeeders
+	# Allow admin to see all models and feeders.
 	isAdmin = User.cu() == "admin"
 	if isAdmin:
-		userFeeders = [{"owner":owner,"name":feed[0:-5]} for owner in safeListdir("data/Feeder/")
+		allFeeders = [{"owner":owner,"name":feed[0:-5]} for owner in safeListdir("data/Feeder/")
 			for feed in safeListdir("data/Feeder/" + owner)]
-		userModels = [{"owner":owner, "name":mod} for owner in safeListdir("data/Model/") 
+		allModels = [{"owner":owner, "name":mod} for owner in safeListdir("data/Model/") 
 			for mod in safeListdir("data/Model/" + owner)]
 	# Grab metadata for models and feeders.
-	allModels = publicModels + userModels
 	for mod in allModels:
 		modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
 		allInput = json.load(open(modPath + "/allInputData.json","r"))
@@ -317,7 +318,6 @@ def root():
 		mod["modelType"] = allInput.get("modelType","")
 		# mod["created"] = allInput.get("created","")
 		mod["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(modPath).st_ctime)) 
-	allFeeders = publicFeeders + userFeeders
 	for feed in allFeeders:
 		feedPath = "data/Feeder/" + feed["owner"] + "/" + feed["name"] + ".json"
 		feed["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(feedPath).st_ctime))
