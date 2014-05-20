@@ -38,7 +38,7 @@ def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
 	else:
 		pathPrefix = ""
 	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, pathPrefix=pathPrefix,
+		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames)
 
 def renderAndShow(modelDir="", datastoreNames={}):

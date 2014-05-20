@@ -19,7 +19,7 @@
 		#cancelButton {background:crimson;}
 		#cancelButton:hover {background:red;}		
 		td,th {text-align: right}
-		.preRun, .running, .postRun {display:none;}
+		.preRun, .running, .postRun, .stopped {display:none;}
 		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
 		.advancedOption {display:none;}
 	</style>
@@ -34,23 +34,26 @@
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		function init() {
-			// Set up various things on load.
-			if (allInputData == null && allOutputData == null) {
-				// Case 1: model just started.
-				console.log("NORUN")
-				$(".preRun").show()
-			} else if (allInputData != null && allOutputData == null) {
-				// Case 2: model running.
+			// If we have input, put it back.
+			if (allInputData != null) {
+				restoreInputs()
+			}
+			// Depending on status, show different things.
+			if (modelStatus == "finished") {
+				console.log("FINISHED")
+				$(".postRun").show()
+			} else if (modelStatus == "running") {
 				console.log("RUNNING")
 				$(".running").show()
-				restoreInputs()
 				$("input").prop("readonly", true)
 				$("select").prop("disabled", true)
-			} else {
-				// Case 3: one model run complete.
-				console.log("POSTRUN")
-				restoreInputs()
-				$(".postRun").show()
+			} else /* Stopped */ {
+				if (allInputData != null) {
+					$(".stopped").show()
+				} else {
+					console.log("PRERUN")
+					$(".preRun").show()
+				}
 			}
 		}
 		function restoreInputs() {
@@ -90,6 +93,13 @@
 			}
 			if (visible) {code = 9660} else {code = 9654}
 				clickedObject.textContent = String.fromCharCode(code) + ' Advanced Options'
+		}
+		function deleteModel() {
+			if (confirm("Deleting this model cannot be undone. Continue?")){
+				post_to_url("/delete/Model/"+allInputData.user+"/"+allInputData.modelName, {}, "POST")
+			} else {
+				return false
+			}
 		}
 	</script>
 </head>
@@ -215,6 +225,9 @@
 				<tr>
 					<td></td>
 					<td>
+						<button id="deleteButton" type="button" class="stopped postRun" onclick="deleteModel()">Delete</button>
+						<button id="publishButton" type="button" class="postRun" onclick="publishModel()">Publish</button>
+						<button id="duplicateButton" type="button" class="postRun" onclick="duplicateModel()">Duplicate</button>
 						<button id="runButton" type="submit" class="preRun">Run Model</button>
 						<button id="rerunButton" type="submit" class="postRun">Re-Run Model</button>
 					</td>
