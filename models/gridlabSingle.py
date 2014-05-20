@@ -58,7 +58,7 @@ def create(parentDirectory, inData):
 	os.makedirs(modelDir)
 	inData["created"] = str(datetime.datetime.now())
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
-		json.dump(inData, inputFile)
+		json.dump(inData, inputFile, indent=4)
 	# Copy datastore data.
 	feederDir, feederName = inData["feederName"].split("___")
 	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
@@ -218,12 +218,12 @@ def runForeground(modelDir):
 		cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
 	# Write the output.
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-		json.dump(cleanOut, outFile)
+		json.dump(cleanOut, outFile, indent=4)
 	# Update the runTime in the input file.
 	endTime = dt.datetime.now()
 	allInputData["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-		json.dump(allInputData, inFile)
+		json.dump(allInputData, inFile, indent=4)
 	# Clean up the PID file.
 	os.remove(pJoin(modelDir,"PID.txt"))
 	print "DONE RUNNING", modelDir
