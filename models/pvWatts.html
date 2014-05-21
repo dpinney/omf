@@ -101,6 +101,32 @@
 				return false
 			}
 		}
+		function publishModel() {
+			newName = prompt("Publish a copy with name", allInputData.modelName)
+			if (newName) {
+				$.ajax({url:"/uniqObjName/Model/public/" + newName}).done(function(data) {
+					if (data.exists) {
+						alert("There is already a public Model named " + newName)
+						publishModel()
+					} else {
+						post_to_url("/publishModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
+					}
+				})
+			}
+		}
+		function duplicateModel() {
+			newName = prompt("Create a duplicate with name", allInputData.modelName)
+			if (newName) {
+				$.ajax({url:"/uniqObjName/Model/" + allInputData.user + "/" + newName}).done(function(data) {
+					if (data.exists) {
+						alert("There is already a model named " + newName)
+						duplicateModel()
+					} else {
+						post_to_url("/duplicateModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
+					}
+				})
+			}
+		}
 	</script>
 </head>
 <body onload="init()">

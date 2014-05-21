@@ -56,7 +56,7 @@ def create(parentDirectory, inData):
 	''' Make a directory for the model to live in, and put the input data into it. '''
 	modelDir = pJoin(parentDirectory,inData["user"],inData["modelName"])
 	os.makedirs(modelDir)
-	inData["created"] = str(datetime.datetime.now())
+	inData["created"] = \
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inData, inputFile, indent=4)
 	# Copy datastore data.

@@ -7,5 +7,6 @@
     "climateName": "Test Climate",
     "simLength": "2048",
     "simLengthUnits": "hours",
-    "simStartDate": "2014-01-01"
+    "simStartDate": "2014-01-01",
+    "user":"public"
 }

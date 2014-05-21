@@ -274,8 +274,20 @@ def cancelModel():
 @app.route("/duplicateModel/<owner>/<modelName>/", methods=["POST"])
 @flask_login.login_required
 def duplicateModel(owner, modelName):
-	#TODO: IMPLEMENT
-	pass
+	newName = request.form.get("newName","")
+	if owner==User.cu() or "admin"==User.cu() or "public"==owner:
+		destinationPath = "./data/Model/" + User.cu() + "/" + newName
+		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
+		with open(destinationPath + "/allInputData.json","r+") as inFile:
+			inData = json.load(inFile)
+			inData["user"] = User.cu()
+			inData["modelName"] = str(newName)
+			inData["created"] = str(dt.datetime.now())
+			inFile.seek(0)
+			json.dump(inData, inFile, indent=4)
+		return redirect("/model/" + User.cu() + "/" + newName)
+	else:
+		return False
 
 @app.route("/publishModel/<owner>/<modelName>/", methods=["POST"])
 @flask_login.login_required
