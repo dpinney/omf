@@ -95,6 +95,7 @@ app.jinja_env.globals["csrf_token"] = generate_csrf_token
 
 @app.route("/login", methods = ["POST"])
 def login():
+	''' Authenticate a user and send them to the URL they requested. '''
 	username, password, remember = map(request.form.get, ["username",
 		"password", "remember"])
 	userJson = None
