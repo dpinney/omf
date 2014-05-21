@@ -385,7 +385,7 @@ def saveFeeder(owner, feederName):
 		with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
 			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 			json.dump(payload, outFile, indent=4)
-	return redirect(request.form.get("ref", "/#feeders"))
+	return redirect("/#feeders")
 
 ###################################################
 # OTHER FUNCTIONS
@@ -433,6 +433,7 @@ def delete(objectType, objectName, owner):
 		return False
 	if objectType == "Feeder":
 		os.remove("data/Feeder/" + owner + "/" + objectName + ".json")
+		return redirect("/#feeders")
 	elif objectType == "Model":
 		shutil.rmtree("data/Model/" + owner + "/" + objectName)
 	return redirect("/")
