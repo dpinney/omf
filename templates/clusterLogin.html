@@ -25,18 +25,17 @@
 	<script>
 	$(function(){
 		// Show/hide forgot password field.
-		$("input[name=username]").focus();
 		$("#forgotpwd").click(function(e){
-		$(this).hide();
-		$(".Success, .Error").hide();
-		$(".fdiv").fadeIn();
-		$("input[name=email]").focus();
+			$(this).hide();
+			$(".Success, .Error").hide();
+			$(".fdiv").fadeIn();
+			$("input[name=email]").focus();
 		});
 		$("#cancel").click(function(e){
-		$(".fdiv").fadeOut();
-		$("#forgotpwd").fadeIn();
-		$("input[name=email]").val("");
-		$("input[name=username]").focus();
+			$(".fdiv").fadeOut();
+			$("#forgotpwd").fadeIn();
+			$("input[name=email]").val("");
+			$("input[name=username]").focus();
 		})
 		$(".forgot_pwd").submit(function(e){
 		$.ajax({
@@ -77,7 +76,7 @@
 			<form id='loginForm' method='POST' action='login'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 			<input type="hidden" name="next" value="{{ next }}" />
-			<input type='text' placeholder='Username' name='username'><br/>
+			<input type='text' placeholder='Username' name='username' autofocus><br/>
 			<input type='password' placeholder='Password' name='password'><br/>
 			<button type='submit'>Login</button>
 			<label id='remember'>Remember Me <input name="remember" type='checkbox'></label>

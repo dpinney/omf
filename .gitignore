@@ -4,11 +4,15 @@ log.txt
 *.sublime-workspace
 analyses/*
 logs/*.log
-data/Analysis/*
-data/Study/*
+data/Model/*
+data/Feeder/*
+data/User/*
 # But include a few example analyses:
-!data/Analysis/public_z*
-!data/Study/public_z*
+!data/Model/admin/z*
+!data/Model/admin/z*
+!data/Model/public/*
 !data/Feeder/public_z*
+!data/User/admin.json
+!data/User/public.json
 S3KEY.*
 calibration/workingDir

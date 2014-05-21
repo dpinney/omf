@@ -31,7 +31,7 @@ def getDataNames():
 def csrf_protect():
 	if request.user_agent.browser == "msie" or request.user_agent.browser == "firefox":
 		return "The OMF currently must be accessed by Chrome or Safari."
-	# TODO: fix csrf validation.
+	# TODO: fix csrf validation. Some of our POST calls are missing the csrf token.
 	# if request.method == "POST":
 	#	token = session.get("_csrf_token", None)
 	#	if not token or token != request.form.get("_csrf_token"):
@@ -271,17 +271,29 @@ def cancelModel():
 	modelModule.cancel("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
-@app.route("/duplicateModel/<user>/<modelName>/", methods=["POST"])
+@app.route("/duplicateModel/<owner>/<modelName>/", methods=["POST"])
 @flask_login.login_required
-def duplicateModel():
+def duplicateModel(owner, modelName):
 	#TODO: IMPLEMENT
 	pass
 
-@app.route("/publicizeModel/<user>/<modelName>/", methods=["POST"])
+@app.route("/publishModel/<owner>/<modelName>/", methods=["POST"])
 @flask_login.login_required
-def publicizeModel():
-	#TODO: IMPLEMENT
-	pass
+def publishModel(owner, modelName):
+	newName = request.form.get("newName","")
+	if owner==User.cu() or "admin"==User.cu():
+		destinationPath = "./data/Model/public/" + newName
+		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
+		with open(destinationPath + "/allInputData.json","r+") as inFile:
+			inData = json.load(inFile)
+			inData["user"] = "public"
+			inData["modelName"] = str(newName)
+			inData["created"] = str(dt.datetime.now())
+			inFile.seek(0)
+			json.dump(inData, inFile, indent=4)
+		return redirect("/model/public/" + newName)
+	else:
+		return False
 
 ###################################################
 # FEEDER FUNCTIONS
