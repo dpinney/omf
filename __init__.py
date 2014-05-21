@@ -5,8 +5,8 @@ __version__ = 0.1
 import os, sys
 
 # Make sure we're on the path.
-myDir = os.path.dirname(__file__)
-sys.path.append(myDir)
+omfDir = os.path.dirname(__file__)
+sys.path.append(omfDir)
 
 # Import sub-packages.
 import feeder

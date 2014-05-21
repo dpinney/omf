@@ -1,3 +1,7 @@
+/**********************************************
+SHARED STYLES
+**********************************************/
+
 * {margin:0px; padding:0px; border:0px;}
 
 body {
@@ -12,7 +16,6 @@ div#logoBox {float:left; margin-left: 5px;}
 div#logoBox a, a:visited {color:white;}
 
 div#title {
-    
 	overflow:hidden;
 	white-space: nowrap;
 	padding-top: 10px;
@@ -32,25 +35,7 @@ div#title {
 	background: -webkit-gradient(linear, left top, left bottom, from(#404040), to(#101010)); /* for webkit browsers */
 	background: -moz-linear-gradient(top,  #404040,  #101010); /* for firefox 3.6+ */ }
 
-#account_links{
-    position:fixed;
-    z-index:2;
-    
-    font-size:10px;
-    margin-bottom:2;
-    top:5;
-    right:5;
-}
-
-#account_links a{
-    color:white;
-}
-
-
-
 div#toolbar {
-
-    
     height:25px;
     width: 100%;
     padding-bottom: 10px;
@@ -110,7 +95,9 @@ td, th {padding:3px;}
 
 table {border-spacing:0px;}
 
-/* DROPDOWN BUTTON CODE */
+/**********************************************
+DROPDOWN BUTTON CODE 
+**********************************************/
 
 div.buttonGroup { display: inline-block; position:relative; }
 
@@ -166,7 +153,9 @@ ul.menu a {display:block; color:black; padding:4px;}
 
 ul.menu a:hover {color:white;}
 
-/* PROGRESS DIALOG CODE */
+/**********************************************
+PROGRESS DIALOG CODE
+**********************************************/
 
 div#progressBackground {
 	position:fixed;
