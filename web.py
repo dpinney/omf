@@ -37,21 +37,6 @@ def csrf_protect():
 	#	if not token or token != request.form.get("_csrf_token"):
 	#		abort(403)
 
-def send_link(email, message, u={}):
-	''' Send message to email using Amazon SES. '''
-	c = boto.ses.connect_to_region("us-east-1",
-		aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
-		aws_secret_access_key="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")
-	reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
-	u["reg_key"] = reg_key
-	u["timestamp"] = dt.datetime.strftime(dt.datetime.now(), format="%c")
-	u["registered"] = False
-	u["email"] = email
-	json.dump(u, open("data/User/"+email+".json", "w"), indent=4)
-	outDict = c.send_email("admin@omf.coop", "OMF Registration Link",
-		message.replace("reg_link", URL+"/register/"+email+"/"+reg_key), [email])
-	return "Success"
-
 ###################################################
 # AUTHENTICATION AND USER FUNCTIONS
 ###################################################
@@ -81,6 +66,21 @@ login_manager.init_app(app)
 login_manager.login_view = "login_page"
 app.secret_key = cryptoRandomString()
 
+def send_link(email, message, u={}):
+	''' Send message to email using Amazon SES. '''
+	c = boto.ses.connect_to_region("us-east-1",
+		aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
+		aws_secret_access_key="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")
+	reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
+	u["reg_key"] = reg_key
+	u["timestamp"] = dt.datetime.strftime(dt.datetime.now(), format="%c")
+	u["registered"] = False
+	u["email"] = email
+	json.dump(u, open("data/User/"+email+".json", "w"), indent=4)
+	outDict = c.send_email("admin@omf.coop", "OMF Registration Link",
+		message.replace("reg_link", URL+"/register/"+email+"/"+reg_key), [email])
+	return "Success"
+
 @login_manager.user_loader
 def load_user(username):
 	''' Required by flask_login to return instance of the current user '''
@@ -106,6 +106,19 @@ def login():
 			userJson["password_digest"]):
 		user = User(userJson)
 		flask_login.login_user(user, remember = remember == "on")
+	nextUrl = str(request.form.get("next","/"))
+	return redirect(nextUrl)
+
+@app.route("/login_page")
+def login_page():
+	nextUrl = str(request.args.get("next","/"))
+	if flask_login.current_user.is_authenticated():
+		return redirect(urlTarget)
+	return render_template("clusterLogin.html", next=nextUrl)
+
+@app.route("/logout")
+def logout():
+	flask_login.logout_user()
 	return redirect("/")
 
 @app.route("/deleteUser", methods=["POST"])
@@ -215,17 +228,6 @@ def myaccount():
 def static_from_root():
 	return send_from_directory(app.static_folder, request.path[1:])
 
-@app.route("/login_page")
-def login_page():
-	if flask_login.current_user.is_authenticated():
-		return redirect("/")
-	return render_template("clusterLogin.html")
-
-@app.route("/logout")
-def logout():
-	flask_login.logout_user()
-	return redirect("/")
-
 ###################################################
 # MODEL FUNCTIONS
 ###################################################
@@ -262,11 +264,23 @@ def runModel():
 @app.route("/cancelModel/", methods=["POST"])
 @flask_login.login_required
 def cancelModel():
-	''' Start a model running and redirect to its running screen. '''
+	''' Cancel an already running model. '''
 	pData = request.form.to_dict()
 	modelModule = getattr(models, pData["modelType"])
 	modelModule.cancel("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
+
+@app.route("/duplicateModel/<user>/<modelName>/", methods=["POST"])
+@flask_login.login_required
+def duplicateModel():
+	#TODO: IMPLEMENT
+	pass
+
+@app.route("/publicizeModel/<user>/<modelName>/", methods=["POST"])
+@flask_login.login_required
+def publicizeModel():
+	#TODO: IMPLEMENT
+	pass
 
 ###################################################
 # FEEDER FUNCTIONS
