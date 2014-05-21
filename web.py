@@ -53,7 +53,7 @@ def send_link(email, message, u={}):
 	return "Success"
 
 ###################################################
-# AUTHENTICATION AND SECURITY SETUP
+# AUTHENTICATION AND USER FUNCTIONS
 ###################################################
 
 class User:
@@ -92,10 +92,6 @@ def generate_csrf_token():
 	return session["_csrf_token"]
 
 app.jinja_env.globals["csrf_token"] = generate_csrf_token
-
-###################################################
-# API CALLS
-###################################################
 
 @app.route("/login", methods = ["POST"])
 def login():
@@ -190,31 +186,106 @@ def changepwd():
 	else:
 		return "not_auth"
 
-@app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
+@app.route("/adminControls")
 @flask_login.login_required
-def delete(objectType, objectName, owner):
-	''' Delete models or feeders. '''
-	if owner != User.cu() and User.cu() != "admin":
-		return False
-	if objectType == "Feeder":
-		os.remove("data/Feeder/" + owner + "/" + objectName + ".json")
-	elif objectType == "Model":
-		shutil.rmtree("data/Model/" + owner + "/" + objectName)
+def adminControls():
+	''' Render admin controls. '''
+	if User.cu() != "admin":
+		return redirect("/")
+	users = [{"username":f[0:-5]} for f in safeListdir("data/User")
+		if f not in ["admin.json","public.json"]]
+	for user in users:
+		userDict = json.load(open("data/User/" + user["username"] + ".json"))
+		tStamp = userDict.get("timestamp","")
+		if userDict.get("password_digest"):
+			user["status"] = "Registered"
+		elif dt.timedelta(1) > dt.datetime.now() - dt.datetime.strptime(tStamp, "%c"):
+			user["status"] = "emailSent"
+		else:
+			user["status"] = "emailExpired"
+	return render_template("adminControls.html", users = users)
+
+@app.route("/myaccount")
+@flask_login.login_required
+def myaccount():
+	''' Render account info for any user. '''
+	return render_template("myaccount.html", user=User.cu())
+
+@app.route("/robots.txt")
+def static_from_root():
+	return send_from_directory(app.static_folder, request.path[1:])
+
+@app.route("/login_page")
+def login_page():
+	if flask_login.current_user.is_authenticated():
+		return redirect("/")
+	return render_template("clusterLogin.html")
+
+@app.route("/logout")
+def logout():
+	flask_login.logout_user()
 	return redirect("/")
 
-@app.route("/saveFeeder/<owner>/<feederName>", methods=["POST"])
+###################################################
+# MODEL FUNCTIONS
+###################################################
+
+@app.route("/model/<user>/<modelName>")
 @flask_login.login_required
-def saveFeeder(owner, feederName):
-	''' Save feeder data. '''
-	if owner == User.cu() or "admin" == User.cu() or owner=="public":
-		# If we have a new user, make sure to make their folder:
-		if not os.path.isdir("data/Feeder/" + owner):
-			os.makedirs("data/Feeder/" + owner)
-		#TODO: make sure non-admins can't overwrite public feeders.
-		with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
-			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
-			json.dump(payload, outFile, indent=4)
-	return redirect(request.form.get("ref", "/#feeders"))
+def showModel(user, modelName):
+	''' Render a model template with saved data. '''
+	# TODO: do user check.
+	modelDir = "./data/Model/" + user + "/" + modelName
+	with open(modelDir + "/allInputData.json") as inJson:
+		modelType = json.load(inJson)["modelType"]
+	return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
+
+@app.route("/newModel/<modelType>")
+@flask_login.login_required
+def newModel(modelType):
+	''' Display the module template for creating a new model. '''
+	return getattr(models, modelType).renderTemplate(datastoreNames=getDataNames())
+
+@app.route("/runModel/", methods=["POST"])
+@flask_login.login_required
+def runModel():
+	''' Start a model running and redirect to its running screen. '''
+	pData = request.form.to_dict()
+	modelModule = getattr(models, pData["modelType"])
+	if pData.get("created","NOKEY") == "":
+		# New model.
+		pData["user"] = User.cu()
+		modelModule.create("./data/Model/", pData)
+	modelModule.run("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
+	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
+
+@app.route("/cancelModel/", methods=["POST"])
+@flask_login.login_required
+def cancelModel():
+	''' Start a model running and redirect to its running screen. '''
+	pData = request.form.to_dict()
+	modelModule = getattr(models, pData["modelType"])
+	modelModule.cancel("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
+	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
+
+###################################################
+# FEEDER FUNCTIONS
+###################################################
+
+@app.route('/feeder/<owner>/<feederName>')
+@flask_login.login_required
+def feederGet(owner, feederName):
+	''' Editing interface for feeders. '''
+	# TODO: fix modelFeeder
+	return render_template('gridEdit.html', feederName=feederName, ref=request.referrer,
+		is_admin=User.cu()=="admin", modelFeeder=False, public=owner=="public",
+		currUser = User.cu(), owner = owner)
+
+@app.route("/getComponents/")
+def getComponents():
+	path = "data/Component/"
+	components = {name[0:-5]:json.load(open(path + name)) for name in os.listdir(path)}
+	return json.dumps(components)
 
 @app.route("/milsoftImport/", methods=["POST"])
 @flask_login.login_required
@@ -263,24 +334,22 @@ def feederData(owner, feederName, modelFeeder=False):
 		with open("data/Feeder/" + owner + "/" + feederName + ".json", "r") as feedFile:
 			return feedFile.read()
 
-@app.route("/getComponents/")
-def getComponents():
-	path = "data/Component/"
-	components = {name[0:-5]:json.load(open(path + name)) for name in os.listdir(path)}
-	return json.dumps(components)
-
-@app.route("/uniqObjName/<objtype>/<owner>/<name>")
+@app.route("/saveFeeder/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
-def uniqObjName(objtype, owner, name):
-	''' Checks if a given object type/owner/name is unique. '''
-	if objtype == "Model":
-		path = "data/Model/" + owner + "/" + name
-	elif objtype == "Feeder":
-		path = "data/Feeder/" + owner + "/" + name + ".json"
-	return jsonify(exists=os.path.exists(path))
+def saveFeeder(owner, feederName):
+	''' Save feeder data. '''
+	if owner == User.cu() or "admin" == User.cu() or owner=="public":
+		# If we have a new user, make sure to make their folder:
+		if not os.path.isdir("data/Feeder/" + owner):
+			os.makedirs("data/Feeder/" + owner)
+		#TODO: make sure non-admins can't overwrite public feeders.
+		with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
+			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
+			json.dump(payload, outFile, indent=4)
+	return redirect(request.form.get("ref", "/#feeders"))
 
 ###################################################
-# VIEWS
+# OTHER FUNCTIONS
 ###################################################
 
 @app.route("/")
@@ -317,92 +386,27 @@ def root():
 	return render_template("home.html", models = allModels, feeders = allFeeders,
 		current_user = User.cu(), is_admin = isAdmin, modelNames = models.__all__)
 
-@app.route("/model/<user>/<modelName>")
+@app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
 @flask_login.login_required
-def showModel(user, modelName):
-	''' Render a model template with saved data. '''
-	# TODO: do user check.
-	modelDir = "./data/Model/" + user + "/" + modelName
-	with open(modelDir + "/allInputData.json") as inJson:
-		modelType = json.load(inJson)["modelType"]
-	return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
-
-@app.route("/newModel/<modelType>")
-@flask_login.login_required
-def newModel(modelType):
-	''' Display the module template for creating a new model. '''
-	return getattr(models, modelType).renderTemplate(datastoreNames=getDataNames())
-
-@app.route("/runModel/", methods=["POST"])
-@flask_login.login_required
-def runModel():
-	''' Start a model running and redirect to its running screen. '''
-	pData = request.form.to_dict()
-	modelModule = getattr(models, pData["modelType"])
-	if pData.get("created","NOKEY") == "":
-		# New model.
-		pData["user"] = User.cu()
-		modelModule.create("./data/Model/", pData)
-	modelModule.run("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
-	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
-
-@app.route("/cancelModel/", methods=["POST"])
-@flask_login.login_required
-def cancelModel():
-	''' Start a model running and redirect to its running screen. '''
-	pData = request.form.to_dict()
-	modelModule = getattr(models, pData["modelType"])
-	modelModule.cancel("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
-	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
-
-@app.route('/feeder/<owner>/<feederName>')
-@flask_login.login_required
-def feederGet(owner, feederName):
-	''' Editing interface for feeders. '''
-	# TODO: fix modelFeeder
-	return render_template('gridEdit.html', feederName=feederName, ref=request.referrer,
-		is_admin=User.cu()=="admin", modelFeeder=False, public=owner=="public",
-		currUser = User.cu(), owner = owner)
-
-@app.route("/adminControls")
-@flask_login.login_required
-def adminControls():
-	''' Render admin controls. '''
-	if User.cu() != "admin":
-		return redirect("/")
-	users = [{"username":f[0:-5]} for f in safeListdir("data/User")
-		if f not in ["admin.json","public.json"]]
-	for user in users:
-		userDict = json.load(open("data/User/" + user["username"] + ".json"))
-		tStamp = userDict.get("timestamp","")
-		if userDict.get("password_digest"):
-			user["status"] = "Registered"
-		elif dt.timedelta(1) > dt.datetime.now() - dt.datetime.strptime(tStamp, "%c"):
-			user["status"] = "emailSent"
-		else:
-			user["status"] = "emailExpired"
-	return render_template("adminControls.html", users = users)
-
-@app.route("/myaccount")
-@flask_login.login_required
-def myaccount():
-	''' Render account info for any user. '''
-	return render_template("myaccount.html", user=User.cu())
-
-@app.route("/robots.txt")
-def static_from_root():
-	return send_from_directory(app.static_folder, request.path[1:])
-
-@app.route("/login_page")
-def login_page():
-	if flask_login.current_user.is_authenticated():
-		return redirect("/")
-	return render_template("clusterLogin.html")
-
-@app.route("/logout")
-def logout():
-	flask_login.logout_user()
+def delete(objectType, objectName, owner):
+	''' Delete models or feeders. '''
+	if owner != User.cu() and User.cu() != "admin":
+		return False
+	if objectType == "Feeder":
+		os.remove("data/Feeder/" + owner + "/" + objectName + ".json")
+	elif objectType == "Model":
+		shutil.rmtree("data/Model/" + owner + "/" + objectName)
 	return redirect("/")
+
+@app.route("/uniqObjName/<objtype>/<owner>/<name>")
+@flask_login.login_required
+def uniqObjName(objtype, owner, name):
+	''' Checks if a given object type/owner/name is unique. '''
+	if objtype == "Model":
+		path = "data/Model/" + owner + "/" + name
+	elif objtype == "Feeder":
+		path = "data/Feeder/" + owner + "/" + name + ".json"
+	return jsonify(exists=os.path.exists(path))
 
 if __name__ == "__main__":
 	# TODO: remove debug?
