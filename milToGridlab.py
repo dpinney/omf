@@ -3,8 +3,8 @@
 import feeder, csv, random, math, copy
 from StringIO import StringIO
 
-def convert(stdPath,seqPath):
-	''' Take in a .std and .seq from Milsoft and spit out a (json dict, int, int).'''
+def convert(stdString,seqString):
+	''' Take in a .std and .seq strings from Milsoft and spit out a (json dict, int, int).'''
 
 	print 'Beginning Windmil to GLM conversion.'
 
@@ -17,9 +17,9 @@ def convert(stdPath,seqPath):
 		return outArray
 
 	# Get all components from the .std:
-	components = csvToArray(stdPath)[1:]
+	components = csvToArray(stdString)[1:]
 	# Get all hardware stats from the .seq:
-	hardwareStats = csvToArray(seqPath)[1:]
+	hardwareStats = csvToArray(seqString)[1:]
 	# We dropped the first rows which are metadata (n.b. there are no headers)
 
 	# Get nominal voltage:
@@ -1330,34 +1330,34 @@ def _tests(keepFiles=False):
 	testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
 		('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
 		('ABEC-Frank.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq')]
-	for stdPath, seqPath in testFiles:
+	for stdString, seqString in testFiles:
 		try:
 			# Convert the std+seq.
-			with open(openPrefix + stdPath,'r') as stdFile, open(openPrefix + seqPath,'r') as seqFile:
+			with open(openPrefix + stdString,'r') as stdFile, open(openPrefix + seqString,'r') as seqFile:
 				outGlm,x,y = convert(stdFile.read(),seqFile.read())
-			with open(outPrefix + stdPath.replace('.std','.glm'),'w') as outFile:
+			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.write(feeder.sortedWrite(outGlm))
-			print 'WROTE GLM FOR', stdPath
+			print 'WROTE GLM FOR', stdString
 			try:
 				# Draw the GLM.
 				myGraph = feeder.treeToNxGraph(outGlm)
 				feeder.latLonNxGraph(myGraph, neatoLayout=False)
-				plt.savefig(outPrefix + stdPath.replace('.std','.png'))
-				print 'DREW GLM OF', stdPath
+				plt.savefig(outPrefix + stdString.replace('.std','.png'))
+				print 'DREW GLM OF', stdString
 			except:
 				exceptionCount += 1
-				print 'FAILED DRAWING', stdPath
+				print 'FAILED DRAWING', stdString
 			try:
 				# Run powerflow on the GLM.
 				output = gridlabd.runInFilesystem(outGlm, keepFiles=False)
-				with open(outPrefix + stdPath.replace('.std','.json'),'w') as outFile:
+				with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
 					json.dump(output, outFile, indent=4)
-				print 'RAN GRIDLAB ON', stdPath					
+				print 'RAN GRIDLAB ON', stdString					
 			except:
 				exceptionCount += 1
-				print 'POWERFLOW FAILED', stdPath
+				print 'POWERFLOW FAILED', stdString
 		except:
-			print 'FAILED CONVERTING', stdPath
+			print 'FAILED CONVERTING', stdString
 			exceptionCount += 1
 			traceback.print_exc()
 	if not keepFiles:
