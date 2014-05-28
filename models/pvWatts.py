@@ -162,9 +162,12 @@ def run(modelDir):
 def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	''' Function to aggregate output if we need something other than hour level. '''
 	u = simStartDate
-	d = dt.datetime(int(u[0:4]),int(u[5:7]),int(u[8:10]))
-	v = d.isocalendar()
-	initHour = int(8760*(v[1]+v[2]/7)/52.0)
+	# pick a common year, ignoring the leap year, it won't affect to calculate the initHour
+	d = dt.datetime(2013, int(u[5:7]),int(u[8:10])) 
+	# first day of the year	
+	sd = dt.datetime(2013, 01, 01) 
+	# convert difference of datedelta object to number of hours 
+	initHour = int((d-sd).total_seconds()/3600)
 	fullData = ssc.ssc_data_get_array(dat, key)
 	if simLengthUnits == "days":
 		multiplier = 24
