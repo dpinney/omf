@@ -215,8 +215,12 @@
 			<div id="energyBalance"></div>
 			<!-- TODO: Make the energy chart sum the arrays. -->
 			<script>
+				Highcharts.setOptions({global: { useUTC: false }});
 				powerSeries = [{"marker":{"enabled":false},"color":"red","data":allOutputData.Consumption.Power,"name":"Substation Powerflow"}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338508800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0]) 
+				pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
+				pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"column":{"stacking":"normal","shadow":false},"spline":{"marker":{"radius":8},"shadow":false,"lineWidth":0}},"xAxis":{"tickColor":"gray","lineColor":"gray","categories":["20Sol"]},"title":{"text":null},"series":[{"color":"orangered","data":[5944255.196466643],"type":"column","name":"Losses"},{"color":"darkorange","data":[142295363.20363092],"type":"column","name":"Loads"},{"color":"seagreen","data":[24543460.52],"type":"spline","name":"DG"}],"yAxis":{"title":{"text":"Energy (Wh)","style":{"color":"gray"}}},"chart":{"width":1000,"height":250,"marginBottom":20,"renderTo":"energyBalance","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
@@ -226,7 +230,7 @@
 			<script>
 				triplexSeriesData = [{"marker":{"enabled":false},"color":"gray","data":allOutputData.allMeterVoltages.Min,"name":"Min"},
 					{"marker":{"enabled":false},"color":"blue","data":allOutputData.allMeterVoltages.Mean,"name":"Mean"},{"marker":{"enabled":false},"color":"gray","data":allOutputData.allMeterVoltages.Max,"name":"Max"}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":triplexSeriesData,"yAxis":{"title":{"text":"Volts","style":{"color":"gray"}}},"chart":{"height":250,"width":1000,"marginBottom":20,"zoomType":"x","renderTo":"triplexMeterVoltageChart","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":triplexSeriesData,"yAxis":{"title":{"text":"Volts","style":{"color":"gray"}}},"chart":{"height":250,"width":1000,"marginBottom":20,"zoomType":"x","renderTo":"triplexMeterVoltageChart","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Climate</p>
@@ -239,7 +243,7 @@
 					{"name":"Direct Insolation (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Insolation (W/m^2)"]},
 					{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Temperature (F)"]},
 					{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Snow Depth (in)"]}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":1338940800000,"shadow":false,"pointInterval":3600000},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Model Runtime Statistics</p>
