@@ -3,6 +3,11 @@
 import datetime, copy, os, re, warnings, networkx as nx, json
 from matplotlib import pyplot as plt
 
+# Wireframe for new feeder objects:
+newFeederWireframe = {"links":[],"hiddenLinks":[],"nodes":[],"hiddenNodes":[],
+	"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5",
+	"linkDistance":"5","charge":"-5"}}
+
 def parse(inputStr, filePath=True):
 	''' Parse a GLM into an omf.feeder tree. This is so we can walk the tree, change things in bulk, etc.
 	Input can be a filepath or GLM string.

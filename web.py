@@ -2,9 +2,10 @@
 
 from flask import Flask, send_from_directory, request, redirect, render_template, session, abort, jsonify, Response
 from jinja2 import Template
-import models, json, os, flask_login, hashlib, random, time, datetime as dt, shutil, milToGridlab, boto.ses
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
+import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses
+import models, feeder, milToGridlab
 
 app = Flask("omf")
 URL = "http://www.omf.coop"
@@ -188,7 +189,7 @@ def register(email, reg_key):
 @app.route("/changepwd", methods=["POST"])
 @flask_login.login_required
 def changepwd():
-	old_pwd, new_pwd, conf_pwd = map(flask.request.form.get, ["old_pwd", "new_pwd", "conf_pwd"])
+	old_pwd, new_pwd, conf_pwd = map(request.form.get, ["old_pwd", "new_pwd", "conf_pwd"])
 	user = User.gu(User.cu())
 	if pbkdf2_sha512.verify(old_pwd, user["password_digest"]):
 		if new_pwd == conf_pwd:
@@ -321,6 +322,7 @@ def feederGet(owner, feederName):
 		currUser = User.cu(), owner = owner)
 
 @app.route("/getComponents/")
+@flask_login.login_required
 def getComponents():
 	path = "data/Component/"
 	components = {name[0:-5]:json.load(open(path + name)) for name in os.listdir(path)}
@@ -330,11 +332,12 @@ def getComponents():
 @flask_login.login_required
 def milsoftImport():
 	''' API for importing a milsoft feeder. '''
-	feederName = str(flask.request.form.to_dict()["feederName"])
-	stdString, seqString = map(lambda x: flask.request.files[x].stream.read(), ["stdFile", "seqFile"])
-	importProc = Process(target=milImportBackground, args=[owner, feederName, stdString, seqString])
-	importProc.start()
-	hlp.conversionDump(User.cu(), feederName, {"data":"none"})
+	feederName = str(request.form.get("feederName",""))
+	stdString, seqString = map(lambda x: request.files[x].stream.read(), ["stdFile", "seqFile"])
+	# importProc = Process(target=milImportBackground, args=[owner, feederName, stdString, seqString])
+	# importProc.start()
+	# hlp.conversionDump(User.cu(), feederName, {"data":"none"})
+	print "HERE WE DID SOME WORK"
 	return flask.redirect("/#feeders")
 
 def milImportBackground(owner, feederName, stdString, seqString):
@@ -349,20 +352,21 @@ def milImportBackground(owner, feederName, stdString, seqString):
 	with open("./schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	hlp.feederDump(owner, feederName, newFeeder)
-	
+
 @app.route("/gridlabdImport/", methods=["POST"])
 @flask_login.login_required
 def gridlabdImport():
 	'''This function is used for gridlabdImporting'''
-	feederName = str(flask.request.form.to_dict()["feederName"])
-	newFeeder = dict(**hlp.newFeederWireframe)	# copies the dictionary..
-	newFeeder["tree"] = feeder.parse(flask.request.files["glmFile"].stream.read(), False)
+	feederName = str(request.form.get("feederName",""))
+	newFeeder = dict(**feeder.newFeederWireframe)
+	newFeeder["tree"] = feeder.parse(request.files["glmFile"].stream.read(), False)
 	newFeeder["layoutVars"]["xScale"] = 0
 	newFeeder["layoutVars"]["yScale"] = 0
 	with open("./schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
-	hlp.feederDump(User.cu(), feederName, newFeeder)
-	return flask.redirect("/#feeders")
+	with open("data/Feeder/" + User.cu() + "/" + feederName + ".json", "w") as outFile:
+		json.dump(newFeeder, outFile)
+	return redirect("/#feeders")
 
 @app.route("/feederData/<owner>/<feederName>/") 
 @app.route("/feederData/<owner>/<feederName>/<modelFeeder>")
