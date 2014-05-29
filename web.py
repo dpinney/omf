@@ -183,7 +183,7 @@ def register(email, reg_key):
 		user["password_digest"] = pbkdf2_sha512.encrypt(password)
 		flask_login.login_user(User(user))
 		with open("data/User/"+user["username"]+".json","w") as outFile:
-			json.dump(user, outFile)
+			json.dump(user, outFile, indent=4)
 	return redirect("/")
 
 @app.route("/changepwd", methods=["POST"])
@@ -334,10 +334,13 @@ def milsoftImport():
 	''' API for importing a milsoft feeder. '''
 	feederName = str(request.form.get("feederName",""))
 	stdString, seqString = map(lambda x: request.files[x].stream.read(), ["stdFile", "seqFile"])
-	importProc = Process(target=milImportBackground, args=[owner, feederName, stdString, seqString])
+	if not os.path.isdir("data/Conversion/" + User.cu()):
+		os.makedirs("data/Conversion/" + User.cu())
+	with open("data/Conversion/" + User.cu() + "/" + feederName + ".json", "w+") as conFile:
+		conFile.write("WORKING")
+	importProc = Process(target=milImportBackground, args=[User.cu(), feederName, stdString, seqString])
 	importProc.start()
-	# hlp.conversionDump(User.cu(), feederName, {"data":"none"})
-	return flask.redirect("/#feeders")
+	return redirect("/#feeders")
 
 def milImportBackground(owner, feederName, stdString, seqString):
 	''' Function to run in the background for Milsoft import. '''
@@ -348,7 +351,8 @@ def milImportBackground(owner, feederName, stdString, seqString):
 	with open("./schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
-		json.dump(newFeeder, outFile)
+		json.dump(newFeeder, outFile, indent=4)
+	os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
 
 @app.route("/gridlabdImport/", methods=["POST"])
 @flask_login.login_required
@@ -362,7 +366,7 @@ def gridlabdImport():
 	with open("./schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
 	with open("data/Feeder/" + User.cu() + "/" + feederName + ".json", "w") as outFile:
-		json.dump(newFeeder, outFile)
+		json.dump(newFeeder, outFile, indent=4)
 	return redirect("/#feeders")
 
 @app.route("/feederData/<owner>/<feederName>/") 
@@ -397,6 +401,7 @@ def saveFeeder(owner, feederName):
 def root():
 	''' Render the home screen of the OMF. '''
 	# Gather object names.
+	#TODO: SHOW CONVERSIONS!!!!
 	publicModels = [{"owner":"public","name":x} for x in safeListdir("data/Model/public/")]
 	userModels = [{"owner":User.cu(), "name":x} for x in safeListdir("data/Model/" + User.cu())]
 	publicFeeders = [{"owner":"public","name":x[0:-5]} for x in safeListdir("data/Feeder/public/")]
