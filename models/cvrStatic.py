@@ -408,17 +408,20 @@ def runForeground(modelDir):
 	# Monetary results.
 	plotTable(dictalToMatrix(monthData))
 	# Graph the money data.
-	fig = plt.figure(figsize=(10,5))
+	fig = plt.figure(figsize=(10,8))
 	indices = [r['monthName'] for r in monthData]
 	d1 = [r['energyReductionDollars'] for r in monthData]
 	d2 = [r['lossReductionDollars'] for r in monthData]
 	d3 = [r['peakReductionDollars'] for r in monthData]
 	ticks = range(len(d1))
-	plt.bar(ticks,d1,color='red')
-	plt.bar(ticks,d2,color='green')
-	plt.bar(ticks,d3,color='blue',yerr=d2)
+	bar_erd = plt.bar(ticks,d1,color='red')
+	bar_lrd = plt.bar(ticks,d2,color='green')
+	bar_prd = plt.bar(ticks,d3,color='blue',yerr=d2)
+	plt.legend([bar_prd[0], bar_lrd[0], bar_erd[0]], ['peakReductionDollars','lossReductionDollars','energyReductionDollars'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
+       ncol=2, mode="expand", borderaxespad=0.1)
 	plt.xticks([t+0.5 for t in ticks],indices)
 	plt.ylabel('Utility Savings ($)')
+	plt.tight_layout(5.5,1.3,1.2)
 	fig.autofmt_xdate()
 	plt.savefig(pJoin(modelDir,"spendChart.png"))
 	with open(pJoin(modelDir,"spendChart.png"),"rb") as inFile:
