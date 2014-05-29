@@ -334,24 +334,21 @@ def milsoftImport():
 	''' API for importing a milsoft feeder. '''
 	feederName = str(request.form.get("feederName",""))
 	stdString, seqString = map(lambda x: request.files[x].stream.read(), ["stdFile", "seqFile"])
-	# importProc = Process(target=milImportBackground, args=[owner, feederName, stdString, seqString])
-	# importProc.start()
+	importProc = Process(target=milImportBackground, args=[owner, feederName, stdString, seqString])
+	importProc.start()
 	# hlp.conversionDump(User.cu(), feederName, {"data":"none"})
-	print "HERE WE DID SOME WORK"
 	return flask.redirect("/#feeders")
 
 def milImportBackground(owner, feederName, stdString, seqString):
 	''' Function to run in the background for Milsoft import. '''
-	newFeederWireframe = {"links":[],"hiddenLinks":[],"nodes":[],"hiddenNodes":[],
-		"layoutVars":{"theta":"0.8","gravity":"0.01","friction":"0.9","linkStrength":"5",
-		"linkDistance":"5","charge":"-5"}}
-	newFeeder = dict(**newFeederWireframe)
+	newFeeder = dict(**feeder.newFeederWireframe)
 	[newFeeder["tree"], xScale, yScale] = milToGridlab.convert(stdString, seqString)
 	newFeeder["layoutVars"]["xScale"] = xScale
 	newFeeder["layoutVars"]["yScale"] = yScale
 	with open("./schedules.glm","r") as schedFile:
 		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
-	hlp.feederDump(owner, feederName, newFeeder)
+	with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
+		json.dump(newFeeder, outFile)
 
 @app.route("/gridlabdImport/", methods=["POST"])
 @flask_login.login_required
