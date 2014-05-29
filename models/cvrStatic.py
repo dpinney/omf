@@ -143,13 +143,15 @@ def runForeground(modelDir):
 	for row in monthData:
 		print row
 	# Graph the SCADA data.
-	fig = plt.figure(figsize=(10,5))
+	fig = plt.figure(figsize=(10,6))
 	indices = [r['monthName'] for r in monthData]
 	d1 = [r['histPeak']/(10**3) for r in monthData]
 	d2 = [r['histAverage']/(10**3) for r in monthData]
 	ticks = range(len(d1))
-	plt.bar(ticks,d1,color='gray')
-	plt.bar(ticks,d2,color='dimgray')
+	bar_peak = plt.bar(ticks,d1,color='gray')
+	bar_avg = plt.bar(ticks,d2,color='dimgray')
+	plt.legend([bar_peak[0],bar_avg[0]],['histPeak','histAverage'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
+       ncol=2, mode="expand", borderaxespad=0.1)
 	plt.xticks([t+0.5 for t in ticks],indices)
 	plt.ylabel('Mean and peak historical power consumptions (kW)')
 	fig.autofmt_xdate()
@@ -405,8 +407,10 @@ def runForeground(modelDir):
 		return matrix
 	# Powerflow results.
 	plotTable(dictalToMatrix(powerflows))
+	plt.savefig(pJoin(modelDir,"powerflowTable.png"))
 	# Monetary results.
 	plotTable(dictalToMatrix(monthData))
+	plt.savefig(pJoin(modelDir,"moneyTable.png"))
 	# Graph the money data.
 	fig = plt.figure(figsize=(10,8))
 	indices = [r['monthName'] for r in monthData]
