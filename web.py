@@ -404,16 +404,17 @@ def root():
 	#TODO: SHOW CONVERSIONS!!!!
 	publicModels = [{"owner":"public","name":x} for x in safeListdir("data/Model/public/")]
 	userModels = [{"owner":User.cu(), "name":x} for x in safeListdir("data/Model/" + User.cu())]
-	publicFeeders = [{"owner":"public","name":x[0:-5]} for x in safeListdir("data/Feeder/public/")]
-	userFeeders = [{"owner":User.cu(),"name":x[0:-5]} for x in safeListdir("data/Feeder/" + User.cu())]
+	publicFeeders = [{"owner":"public","name":x[0:-5],"status":"Ready"} for x in safeListdir("data/Feeder/public/")]
+	userFeeders = [{"owner":User.cu(),"name":x[0:-5],"status":"Ready"} for x in safeListdir("data/Feeder/" + User.cu())]
+	conversions = [{"owner":User.cu(),"name":x[0:-5],"status":"Converting"} for x in safeListdir("data/Conversion/" + User.cu())]
 	allModels = publicModels + userModels
 	allFeeders = publicFeeders + userFeeders
 	# Allow admin to see all models and feeders.
 	isAdmin = User.cu() == "admin"
 	if isAdmin:
-		allFeeders = [{"owner":owner,"name":feed[0:-5]} for owner in safeListdir("data/Feeder/")
+		allFeeders = [{"owner":owner,"name":feed[0:-5],"status":"Ready"} for owner in safeListdir("data/Feeder/")
 			for feed in safeListdir("data/Feeder/" + owner)]
-		allModels = [{"owner":owner, "name":mod} for owner in safeListdir("data/Model/") 
+		allModels = [{"owner":owner,"name":mod} for owner in safeListdir("data/Model/") 
 			for mod in safeListdir("data/Model/" + owner)]
 	# Grab metadata for models and feeders.
 	for mod in allModels:
@@ -427,8 +428,10 @@ def root():
 	for feed in allFeeders:
 		feedPath = "data/Feeder/" + feed["owner"] + "/" + feed["name"] + ".json"
 		feed["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(feedPath).st_ctime))
-		feed["status"] = "Ready"
-	return render_template("home.html", models = allModels, feeders = allFeeders,
+	for conversion in conversions:
+		convPath = "data/Conversion/" + conversion["owner"] + "/" + conversion["name"] + ".json"
+		conversion["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(convPath).st_ctime))		
+	return render_template("home.html", models = allModels, feeders = allFeeders + conversions,
 		current_user = User.cu(), is_admin = isAdmin, modelNames = models.__all__)
 
 @app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
