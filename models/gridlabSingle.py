@@ -159,6 +159,10 @@ def runForeground(modelDir):
 		cleanOut['allMeterVoltages']['Max'] = util.hdmAgg(rawOut['VoltageJiggle.csv']['max(voltage_12.mag)'], max, level)
 	# Power Consumption
 	cleanOut['Consumption'] = {}
+	# Set default value to be 0, avoiding missing value when computing Loads
+	cleanOut['Consumption']['Power'] = [0] * int(allInputData["simLength"])
+	cleanOut['Consumption']['Losses'] = [0] * int(allInputData["simLength"])
+	cleanOut['Consumption']['DG'] = [0] * int(allInputData["simLength"])
 	for key in rawOut:
 		if key.startswith('SwingKids_') and key.endswith('.csv'):
 			oneSwingPower = util.hdmAgg(util.vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), util.avg, level)
