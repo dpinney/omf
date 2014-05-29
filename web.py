@@ -234,15 +234,17 @@ def static_from_root():
 # MODEL FUNCTIONS
 ###################################################
 
-@app.route("/model/<user>/<modelName>")
+@app.route("/model/<owner>/<modelName>")
 @flask_login.login_required
-def showModel(user, modelName):
+def showModel(owner, modelName):
 	''' Render a model template with saved data. '''
-	# TODO: do user check.
-	modelDir = "./data/Model/" + user + "/" + modelName
-	with open(modelDir + "/allInputData.json") as inJson:
-		modelType = json.load(inJson)["modelType"]
-	return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
+	if owner==User.cu() or "admin"==User.cu() or owner=="public":
+		modelDir = "./data/Model/" + owner + "/" + modelName
+		with open(modelDir + "/allInputData.json") as inJson:
+			modelType = json.load(inJson)["modelType"]
+		return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
+	else:
+		return redirect("/")
 
 @app.route("/newModel/<modelType>")
 @flask_login.login_required
@@ -401,7 +403,6 @@ def saveFeeder(owner, feederName):
 def root():
 	''' Render the home screen of the OMF. '''
 	# Gather object names.
-	#TODO: SHOW CONVERSIONS!!!!
 	publicModels = [{"owner":"public","name":x} for x in safeListdir("data/Model/public/")]
 	userModels = [{"owner":User.cu(), "name":x} for x in safeListdir("data/Model/" + User.cu())]
 	publicFeeders = [{"owner":"public","name":x[0:-5],"status":"Ready"} for x in safeListdir("data/Feeder/public/")]
@@ -418,19 +419,28 @@ def root():
 			for mod in safeListdir("data/Model/" + owner)]
 	# Grab metadata for models and feeders.
 	for mod in allModels:
-		modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
-		allInput = json.load(open(modPath + "/allInputData.json"))
-		mod["runTime"] = allInput.get("runTime","")
-		mod["modelType"] = allInput.get("modelType","")
-		mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
-		# mod["created"] = allInput.get("created","")
-		mod["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(modPath).st_ctime)) 
+		try:
+			modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
+			allInput = json.load(open(modPath + "/allInputData.json"))
+			mod["runTime"] = allInput.get("runTime","")
+			mod["modelType"] = allInput.get("modelType","")
+			mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
+			# mod["created"] = allInput.get("created","")
+			mod["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(modPath).st_ctime)) 
+		except:
+			continue
 	for feed in allFeeders:
-		feedPath = "data/Feeder/" + feed["owner"] + "/" + feed["name"] + ".json"
-		feed["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(feedPath).st_ctime))
+		try:
+			feedPath = "data/Feeder/" + feed["owner"] + "/" + feed["name"] + ".json"
+			feed["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(feedPath).st_ctime))
+		except:
+			continue
 	for conversion in conversions:
-		convPath = "data/Conversion/" + conversion["owner"] + "/" + conversion["name"] + ".json"
-		conversion["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(convPath).st_ctime))		
+		try:
+			convPath = "data/Conversion/" + conversion["owner"] + "/" + conversion["name"] + ".json"
+			conversion["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(convPath).st_ctime))		
+		except:
+			continue
 	return render_template("home.html", models = allModels, feeders = allFeeders + conversions,
 		current_user = User.cu(), is_admin = isAdmin, modelNames = models.__all__)
 

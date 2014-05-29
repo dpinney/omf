@@ -97,7 +97,7 @@
 		<div class="content">
 			New model of type 
 			<select id="modelName">
-				{% for name in modelNames %}
+				{% for name in modelNames if not name.startswith('_') %}
 				<option value="{{ name }}">{{ name }}</option>
 				{% endfor %}
 			</select>
