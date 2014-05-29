@@ -119,16 +119,18 @@ def run(modelDir):
 	mod = ssc.ssc_module_create("pvwattsv1")
 	ssc.ssc_module_exec(mod, dat)
 	# Setting options for start time.
-	startDateTime = allInputData.get("simLengthUnits","")
+	simLengthUnits = allInputData.get("simLengthUnits","")
 	simStartDate = allInputData["simStartDate"]
-	if startDateTime != "days":
-		startDateTime = simStartDate + " 00:00:00 PDT"
+	# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html 
+	startDateTime = simStartDate + " 00:00:00 UTC"
 	# Set aggregation function constants.
 	agg = lambda x,y:_aggData(x,y,allInputData["simStartDate"],
 		int(allInputData["simLength"]), allInputData["simLengthUnits"], ssc, dat)
 	# Timestamp output.
 	outData = {}
-	outData["timeStamps"] = [startDateTime for x in range(int(allInputData["simLength"]))]
+	outData["timeStamps"] = [datetime.datetime.strftime(
+		dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
+		datetime.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(allInputData["simLength"]))]
 	# Geodata output.
 	outData["city"] = ssc.ssc_data_get_string(dat, "city")
 	outData["state"] = ssc.ssc_data_get_string(dat, "state")
