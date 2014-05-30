@@ -153,10 +153,10 @@ def runForeground(modelDir):
 	# Voltage Band
 	if 'VoltageJiggle.csv' in rawOut:
 		cleanOut['allMeterVoltages'] = {}
-		cleanOut['allMeterVoltages']['Min'] = util.hdmAgg(rawOut['VoltageJiggle.csv']['min(voltage_12.mag)'], min, level)
-		cleanOut['allMeterVoltages']['Mean'] = util.hdmAgg(rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)'], util.avg, level)
-		cleanOut['allMeterVoltages']['StdDev'] = util.hdmAgg(rawOut['VoltageJiggle.csv']['std(voltage_12.mag)'], util.avg, level)
-		cleanOut['allMeterVoltages']['Max'] = util.hdmAgg(rawOut['VoltageJiggle.csv']['max(voltage_12.mag)'], max, level)
+		cleanOut['allMeterVoltages']['Min'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
+		cleanOut['allMeterVoltages']['Mean'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], util.avg, level)
+		cleanOut['allMeterVoltages']['StdDev'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], util.avg, level)
+		cleanOut['allMeterVoltages']['Max'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
 	# Power Consumption
 	cleanOut['Consumption'] = {}
 	# Set default value to be 0, avoiding missing value when computing Loads

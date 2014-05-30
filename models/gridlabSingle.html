@@ -234,9 +234,11 @@
 		<div id="triplexMeterVoltageReport" class="tightContent postRun">
 			<div id="triplexMeterVoltageChart"></div>
 			<script>
-				triplexSeriesData = [{"marker":{"enabled":false},"color":"gray","data":allOutputData.allMeterVoltages.Min,"name":"Min"},
-					{"marker":{"enabled":false},"color":"blue","data":allOutputData.allMeterVoltages.Mean,"name":"Mean"},{"marker":{"enabled":false},"color":"gray","data":allOutputData.allMeterVoltages.Max,"name":"Max"}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":triplexSeriesData,"yAxis":{"title":{"text":"Volts","style":{"color":"gray"}}},"chart":{"height":250,"width":1000,"marginBottom":20,"zoomType":"x","renderTo":"triplexMeterVoltageChart","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				triplexSeriesData = [
+				{"marker":{"enabled":false},"color":"LightBlue","data":allOutputData.allMeterVoltages.Min,"name":"Min"},
+				{"marker":{"enabled":false},"color":"blue","data":allOutputData.allMeterVoltages.Mean,"name":"Mean"},
+				{"marker":{"enabled":false},"color":"LightBlue","data":allOutputData.allMeterVoltages.Max,"name":"Max"}]
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":triplexSeriesData,"yAxis":{"maxRange":20,"plotLines": [{"color": 'gray',"dashStyle": 'ShortDash',"width": 2,"value": 114,"zIndex": 0}, {"color": 'gray',"dashStyle": 'ShortDash',"width": 2,"value": 126,"zIndex": 0}],"title":{"text":"Volts","style":{"color":"gray"}}},"chart":{"height":250,"width":1000,"marginBottom":20,"zoomType":"x","renderTo":"triplexMeterVoltageChart","type":"line","marginRight":20},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Climate</p>
