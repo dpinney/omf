@@ -1,0 +1,11 @@
+dump to 'gridlabd.xml' complete
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+overhead_line      0.003     60.0%      0.0
+node               0.002     40.0%      0.0
+================ ======== ======== ========
+Total              0.005    100.0%      0.0
+

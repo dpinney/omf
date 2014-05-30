@@ -1,0 +1,9 @@
+dump to 'gridlabd.xml' complete
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+================ ======== ======== ========
+Total              0.000    100.0%      0.0
+
