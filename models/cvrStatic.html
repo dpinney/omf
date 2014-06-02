@@ -19,7 +19,7 @@
 		div.tightContent {width:1000px; margin-left:auto; margin-right:auto; margin-top:0px; margin-bottom:20px; border-style: solid; border-color:gray; border-width:1px 0px 1px 0px; background-color:white;}
 		.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt; display:block;}
 		td,th {text-align: right}
-		.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline {display:none;}
+		.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped {display:none;}
 	</style>
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
@@ -50,6 +50,7 @@
 			} else /* Stopped */ {
 				if (allInputData != null) {
 					$(".stopped").show()
+					$(".stoppedInline").show()
 				} else {
 					console.log("PRERUN")
 					$(".preRun").css('display', 'inline-block')
