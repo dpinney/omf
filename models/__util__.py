@@ -27,23 +27,9 @@ def aggSeries(timeStamps, timeSeries, func, level):
 
 def pyth(x,y):
 	''' Compute the third side of a triangle--BUT KEEP SIGNS THE SAME FOR DG. '''
-	fullSign = _sign(_sign(x)*x*x + _sign(y)*y*y)
+	sign = lambda z:(-1 if z<0 else 1)
+	fullSign = sign(sign(x)*x*x + sign(y)*y*y)
 	return fullSign*math.sqrt(x*x + y*y)
-
-def _sign(z):
-	return (-1 if z<0 else 1)
-
-def _groupBy(inL, func):
-	''' Take a list and func, and group items in place comparing with func. Make sure the func is an equivalence relation, or your brain will hurt. '''
-	if inL == []: return inL
-	if len(inL) == 1: return [inL]
-	newL = [[inL[0]]]
-	for item in inL[1:]:
-		if func(item, newL[-1][0]):
-			newL[-1].append(item)
-		else:
-			newL.append([item])
-	return newL	
 
 def prod(inList):
 	''' Product of all values in a list. '''
@@ -62,30 +48,37 @@ def vecProd(*args):
 	''' Multiply n vectors. '''
 	return map(prod, zip(*args))
 
-def _pfRow(row):
-	''' Power factor calc for one phase. '''
-	return math.cos(math.atan((row[0]+row[1]+row[2])/(row[3]+row[4]+row[5])))
-
 def threePhasePowFac(ra,rb,rc,ia,ib,ic):
 	''' Get power factor for a row of threephase volts and amps. Gridlab-specific. '''
+	pfRow = lambda row:math.cos(math.atan((row[0]+row[1]+row[2])/(row[3]+row[4]+row[5])))
 	rows = zip(ra,rb,rc,ia,ib,ic)
-	return map(_pfRow, rows)
-
-def _roundPosSig(y, sig):
-	return round(y, sig-int(math.floor(math.log10(y)))-1)
+	return map(pfRow, rows)
 
 def roundSig(x, sig=3):
 	''' Round to a given number of sig figs. '''
+	roundPosSig = lambda y,sig: round(y, sig-int(math.floor(math.log10(y)))-1)
 	if x == 0: return 0
-	elif x < 0: return -1*_roundPosSig(-1*x, sig)
-	else: return _roundPosSig(x, sig)
+	elif x < 0: return -1*roundPosSig(-1*x, sig)
+	else: return roundPosSig(x, sig)
 
 def roundSeries(ser):
-	''' Round everythign in a vector to 4 sig figs. '''
+	''' Round everything in a vector to 4 sig figs. '''
 	return map(lambda x:roundSig(x,4), ser)
 
+def _groupBy(inL, func):
+	''' Take a list and func, and group items in place comparing with func. Make sure the func is an equivalence relation, or your brain will hurt. '''
+	if inL == []: return inL
+	if len(inL) == 1: return [inL]
+	newL = [[inL[0]]]
+	for item in inL[1:]:
+		if func(item, newL[-1][0]):
+			newL[-1].append(item)
+		else:
+			newL.append([item])
+	return newL
+
 def _tests():
-	# TODO: this function.
+	# No tests for now. Simple enough, eh?
 	pass
 
 if __name__ == '__main__':
