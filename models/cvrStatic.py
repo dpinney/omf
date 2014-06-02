@@ -115,6 +115,8 @@ def run(modelDir):
 def runForeground(modelDir):
 	''' Run the model in the foreground. WARNING: can take about a minute. '''
 	# Global vars, and load data from the model directory.
+	print "STARTING TO RUN", modelDir
+	startTime = dt.datetime.now()
 	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
 	feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
 	tree = feederJson.get("tree",{})
@@ -123,10 +125,10 @@ def runForeground(modelDir):
 	''' Run CVR analysis. '''
 	# Reformate monthData and rates.
 	# TODO: just get rid of these monthData and rates containers.
-	rates = {k:allInputData[k] for k in ["capitalCost", "omCost", "wholesaleEnergyCostPerKwh",
+	rates = {k:float(allInputData[k]) for k in ["capitalCost", "omCost", "wholesaleEnergyCostPerKwh",
 		"retailEnergyCostPerKwh", "peakDemandCostSpringPerKw", "peakDemandCostSummerPerKw",
 		"peakDemandCostFallPerKw", "peakDemandCostWinterPerKw"]}
-	print "RATES", rates
+	# print "RATES", rates
 	monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
 		"September", "October", "November", "December"]
 	monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
@@ -140,8 +142,8 @@ def runForeground(modelDir):
 		histPeak = float(allInputData.get(monShort + "Peak", 0))
 		monthData.append({"monthId":i, "monthName":x, "histAverage":histAvg,
 			"histPeak":histPeak, "season":season})
-	for row in monthData:
-		print row
+	# for row in monthData:
+	# 	print row
 	# Graph the SCADA data.
 	fig = plt.figure(figsize=(10,6))
 	indices = [r['monthName'] for r in monthData]
@@ -444,9 +446,15 @@ def runForeground(modelDir):
 	plt.savefig(pJoin(modelDir,"savingsChart.png"))
 	with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
 		allOutput["savingsChart"] = inFile.read().encode("base64")
+	# Update the runTime in the input file.
+	endTime = dt.datetime.now()
+	allInputData["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+		json.dump(allInputData, inFile, indent=4)
 	# Write output file.
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 		json.dump(allOutput, outFile, indent=4)
+	print "DONE RUNNING", modelDir
 
 def cancel(modelDir):
 	''' Try to cancel a currently running model. '''
