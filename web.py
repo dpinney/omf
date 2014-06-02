@@ -9,6 +9,7 @@ import models, feeder, milToGridlab
 
 app = Flask("omf")
 URL = "http://www.omf.coop"
+_omfDir = os.path.dirname(os.path.abspath(__file__))
 
 ###################################################
 # HELPER FUNCTIONS
@@ -261,8 +262,8 @@ def runModel():
 	if pData.get("created","NOKEY") == "":
 		# New model.
 		pData["user"] = User.cu()
-		modelModule.create("./data/Model/", pData)
-	modelModule.run("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
+		modelModule.create(os.path.join(_omfDir,"data","Model"), pData)
+	modelModule.run(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"]))
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
 @app.route("/cancelModel/", methods=["POST"])
@@ -271,7 +272,7 @@ def cancelModel():
 	''' Cancel an already running model. '''
 	pData = request.form.to_dict()
 	modelModule = getattr(models, pData["modelType"])
-	modelModule.cancel("./data/Model/" + pData["user"]+ "/" + pData["modelName"])
+	modelModule.cancel(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"]))
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
 @app.route("/duplicateModel/<owner>/<modelName>/", methods=["POST"])
