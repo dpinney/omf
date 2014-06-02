@@ -388,10 +388,11 @@ def runForeground(modelDir):
 		lossRed = lossY[0] + (lossY[1] - lossY[0]) * (avgEnergy - x[0]) / (x[1] - x[0])
 		row['lossReduction'] = lossRed
 	# Multiply by dollars.
+	#sri:changing for data analysis
 	for row in monthData:
-		row['energyReductionDollars'] = row['energyReduction'] * (rates['wholesaleEnergyCostPerKwh'] - rates['retailEnergyCostPerKwh'])
-		row['peakReductionDollars'] = row['peakReduction'] * rates['peakDemandCost' + row['season'] + 'PerKw']
-		row['lossReductionDollars'] = row['lossReduction'] * rates['wholesaleEnergyCostPerKwh']
+		row['energyReductionDollars'] = row['energyReduction']/1000 * (rates['wholesaleEnergyCostPerKwh'] - rates['retailEnergyCostPerKwh'])
+		row['peakReductionDollars'] = row['peakReduction']/1000 * rates['peakDemandCost' + row['season'] + 'PerKw']
+		row['lossReductionDollars'] = row['lossReduction']/1000 * rates['wholesaleEnergyCostPerKwh']
 	# Pretty output
 	def plotTable(inData):
 		fig = plt.figure(figsize=(10,5))
