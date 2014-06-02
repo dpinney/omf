@@ -115,6 +115,8 @@ def run(modelDir):
 def runForeground(modelDir):
 	''' Run the model in the foreground. WARNING: can take about a minute. '''
 	# Global vars, and load data from the model directory.
+	print "STARTING TO RUN", modelDir
+	startTime = dt.datetime.now()
 	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
 	feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
 	tree = feederJson.get("tree",{})
@@ -444,9 +446,15 @@ def runForeground(modelDir):
 	plt.savefig(pJoin(modelDir,"savingsChart.png"))
 	with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
 		allOutput["savingsChart"] = inFile.read().encode("base64")
+	# Update the runTime in the input file.
+	endTime = dt.datetime.now()
+	allInputData["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+		json.dump(allInputData, inFile, indent=4)
 	# Write output file.
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 		json.dump(allOutput, outFile, indent=4)
+	print "DONE RUNNING", modelDir
 
 def cancel(modelDir):
 	''' Try to cancel a currently running model. '''
