@@ -410,8 +410,6 @@ def runForeground(modelDir):
 		return matrix
 	# Powerflow results.
 	plotTable(dictalToMatrix(powerflows))
-	with open(pJoin(modelDir,"table.json"),"w") as jsonFile:
-		json.dump(dictalToMatrix(powerflows), jsonFile, indent=4)
 	plt.savefig(pJoin(modelDir,"powerflowTable.png"))
 	# Monetary results.
 	plotTable(dictalToMatrix(monthData))
