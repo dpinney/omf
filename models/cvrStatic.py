@@ -123,10 +123,10 @@ def runForeground(modelDir):
 	''' Run CVR analysis. '''
 	# Reformate monthData and rates.
 	# TODO: just get rid of these monthData and rates containers.
-	rates = {k:allInputData[k] for k in ["capitalCost", "omCost", "wholesaleEnergyCostPerKwh",
+	rates = {k:float(allInputData[k]) for k in ["capitalCost", "omCost", "wholesaleEnergyCostPerKwh",
 		"retailEnergyCostPerKwh", "peakDemandCostSpringPerKw", "peakDemandCostSummerPerKw",
 		"peakDemandCostFallPerKw", "peakDemandCostWinterPerKw"]}
-	print "RATES", rates
+	# print "RATES", rates
 	monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
 		"September", "October", "November", "December"]
 	monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
@@ -140,8 +140,8 @@ def runForeground(modelDir):
 		histPeak = float(allInputData.get(monShort + "Peak", 0))
 		monthData.append({"monthId":i, "monthName":x, "histAverage":histAvg,
 			"histPeak":histPeak, "season":season})
-	for row in monthData:
-		print row
+	# for row in monthData:
+	# 	print row
 	# Graph the SCADA data.
 	fig = plt.figure(figsize=(10,6))
 	indices = [r['monthName'] for r in monthData]
