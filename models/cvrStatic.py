@@ -398,7 +398,7 @@ def runForeground(modelDir):
 		fig = plt.figure(figsize=(10,5))
 		plt.axis('off')
 		plt.tight_layout()
-		plt.table(cellText=[row[1:] for row in inData[1:]], 
+		plt.table(cellText=[row for row in inData[1:]], 
 			loc = 'center',
 			rowLabels = range(len(inData)-1),
 			colLabels = inData[0])
@@ -410,6 +410,8 @@ def runForeground(modelDir):
 		return matrix
 	# Powerflow results.
 	plotTable(dictalToMatrix(powerflows))
+	with open(pJoin(modelDir,"table.json"),"w") as jsonFile:
+		json.dump(dictalToMatrix(powerflows), jsonFile, indent=4)
 	plt.savefig(pJoin(modelDir,"powerflowTable.png"))
 	# Monetary results.
 	plotTable(dictalToMatrix(monthData))
