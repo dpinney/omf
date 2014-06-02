@@ -400,7 +400,7 @@ def runForeground(modelDir):
 		plt.tight_layout()
 		plt.table(cellText=[row[1:] for row in inData[1:]], 
 			loc = 'center',
-			rowLabels = [row[0] for row in inData[1:]],
+			rowLabels = range(len(inData)-1),
 			colLabels = inData[0])
 	def dictalToMatrix(dictList):
 		''' Take our dictal format to a matrix. '''
