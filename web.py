@@ -263,6 +263,11 @@ def runModel():
 		# New model.
 		pData["user"] = User.cu()
 		modelModule.create(os.path.join(_omfDir,"data","Model"), pData)
+	else:
+		# Existing model.
+		with open(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"],"allInputData.json"),"w") as inDataFile:
+			json.dump(pData, inDataFile, indent=4)
+		#TODO: what about changed feeder data...
 	modelModule.run(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"]))
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
