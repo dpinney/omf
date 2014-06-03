@@ -196,7 +196,7 @@ def runForeground(modelDir):
 		if tree[key].get('name','') == regConfName:
 			regConfIndex = key
 	# Set substation regulator to manual operation.
-	baselineTap = 3 # GLOBAL VARIABLE FOR DEFAULT TAP POSITION
+	baselineTap = int(allInputData.get("baselineTap")) # GLOBAL VARIABLE FOR DEFAULT TAP POSITION
 	tree[regConfIndex] = {
 		'name':tree[regConfIndex]['name'],
 		'object':'regulator_configuration',
@@ -256,13 +256,14 @@ def runForeground(modelDir):
 	blankZipModel = {'object':'triplex_load',
 		'name':'NAMEVARIABLE',
 		'base_power_12':'POWERVARIABLE',
-		'power_fraction_12':'0.5',
-		'impedance_fraction_12':'0.5',
-		'power_pf_12':'0.9', #TODO: we can probably get this PF data from the Milsoft loads.
+		'power_fraction_12': str(allInputData.get("p_percent")),  
+		'impedance_fraction_12': str(allInputData.get("z_percent")),
+		'current_fraction_12': str(allInputData.get("i_percent")),
+		'power_pf_12': str(allInputData.get("power_factor")), #TODO: we can probably get this PF data from the Milsoft loads.
 		'impedance_pf_12':'0.97',
 		'nominal_voltage':'120',
 		'phases':'PHASESVARIABLE',
-		'parent':'PARENTVARIABLE'}
+		'parent':'PARENTVARIABLE' }
 	def powerClean(powerStr):
 		''' take 3339.39+1052.29j to 3339.39 '''
 		return powerStr[0:powerStr.find('+')]
@@ -388,7 +389,6 @@ def runForeground(modelDir):
 		lossRed = lossY[0] + (lossY[1] - lossY[0]) * (avgEnergy - x[0]) / (x[1] - x[0])
 		row['lossReduction'] = lossRed
 	# Multiply by dollars.
-	#sri:changing for data analysis
 	for row in monthData:
 		row['energyReductionDollars'] = row['energyReduction']/1000 * (rates['wholesaleEnergyCostPerKwh'] - rates['retailEnergyCostPerKwh'])
 		row['peakReductionDollars'] = row['peakReduction']/1000 * rates['peakDemandCost' + row['season'] + 'PerKw']
@@ -513,7 +513,12 @@ def _tests():
 		"peakDemandCostSpringPerKw": 5.0,
 		"peakDemandCostSummerPerKw": 10.0,
 		"peakDemandCostFallPerKw": 6.0,
-		"peakDemandCostWinterPerKw": 8.0}
+		"peakDemandCostWinterPerKw": 8.0,
+		"baselineTap": 3.0,
+		"z_percent": 0.5,
+		"i_percent": 0.0,
+		"p_percent": 0.5,
+		"power_factor": 0.9}
 	for key in colomaMonths:
 		inData[key] = colomaMonths[key]
 	modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
