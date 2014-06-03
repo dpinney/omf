@@ -2,14 +2,15 @@
 
 __version__ = 0.1
 
-import os, sys
+import os as _os, sys as _sys
 
 # Make sure we're on the path.
-omfDir = os.path.dirname(__file__)
-sys.path.append(omfDir)
+omfDir = _os.path.dirname(__file__)
+_sys.path.append(omfDir)
 
 # Import sub-packages.
 import feeder
 import solvers
 import models
 import milToGridlab
+import weather
