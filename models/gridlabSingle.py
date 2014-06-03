@@ -225,8 +225,6 @@ def runForeground(modelDir):
 			cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
 		elif level=='months':
 			cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
-		# TODO: test for error before create allOutputData
-		# print backProc
 		# Write the output.
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 			json.dump(cleanOut, outFile, indent=4)
