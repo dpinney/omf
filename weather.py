@@ -4,24 +4,24 @@ can be input to a Gridlab-D Climate object.
 For example, to get a CSV that will play back 1 month of weather data
 for the region near the DCA airport, run in the terminal:
 
-python -c "import weather; makeClimateCsv('2010-07-01', '2010-08-01', 'DCA', './weatherDCA.csv')"
+	python -c "import weather; weather.makeClimateCsv('2010-07-01', '2010-08-01', 'DCA', './weatherDCA.csv')"
 
 To use that data as the climate simulation in a Gridlab model, include
 the following in a .glm:
 
-module tape;
-module climate;
+	module tape;
+	module climate;
 
-object csv_reader {
-	name "weatherReader";
-	filename "weatherDCA.csv";
-};
+	object csv_reader {
+		name "weatherReader";
+		filename "weatherDCA.csv";
+	};
 
-object climate {
-	name "exampleClimate";
-	tmyfile "weatherDCA.csv";
-	reader weatherReader;
-}
+	object climate {
+		name "exampleClimate";
+		tmyfile "weatherDCA.csv";
+		reader weatherReader;
+	}
 
 '''
 
