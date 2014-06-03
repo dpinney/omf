@@ -379,7 +379,6 @@ def _deEmbedOnce(glmTree):
 					pass
 				else:
 					glmTree[x][y]['name'] = glmTree[x]['name'] + glmTree[x][y]['object'] + str(y)
-					
 				# check for key collision, which should technically be impossible:
 				if y in glmTree.keys():
 					print('KEY COLLISION!')
