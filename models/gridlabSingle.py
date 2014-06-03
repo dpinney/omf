@@ -80,7 +80,11 @@ def run(modelDir):
 	# Start the computation.
 	backProc = multiprocessing.Process(target=runForeground, args=(modelDir,))
 	backProc.start()
+	# print "runForeground " + str(backProc.pid)
+	# print "python server " + str(os.getpid())
 	print "SENT TO BACKGROUND", modelDir
+	with open(pJoin(modelDir, "PPID.txt"),"w") as pPidFile:
+		pPidFile.write(str(backProc.pid))
 
 def getStatus(modelDir):
 	''' Is the model stopped, running or finished? '''
@@ -103,148 +107,172 @@ def getStatus(modelDir):
 
 def runForeground(modelDir):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
-	print "STARTING TO RUN", modelDir
-	startTime = dt.datetime.now()
-	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
-	feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
-	tree = feederJson["tree"]
-	# Set up GLM with correct time and recorders:
-	feeder.attachRecorders(tree, "Regulator", "object", "regulator")
-	feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
-	feeder.attachRecorders(tree, "Inverter", "object", "inverter")
-	feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
-	feeder.attachRecorders(tree, "CollectorVoltage", None, None)
-	feeder.attachRecorders(tree, "Climate", "object", "climate")
-	feeder.attachRecorders(tree, "OverheadLosses", None, None)
-	feeder.attachRecorders(tree, "UndergroundLosses", None, None)
-	feeder.attachRecorders(tree, "TriplexLosses", None, None)
-	feeder.attachRecorders(tree, "TransformerLosses", None, None)
-	feeder.groupSwingKids(tree)
-	feeder.adjustTime(tree=tree, simLength=float(allInputData["simLength"]),
-		simLengthUnits=allInputData["simLengthUnits"], simStartDate=allInputData["simStartDate"])
-	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-	rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
-		keepFiles=True, workDir=modelDir)
-	cleanOut = {}
-	# Std Err and Std Out
-	cleanOut['stderr'] = rawOut['stderr']
-	cleanOut['stdout'] = rawOut['stdout']
-	# Time Stamps
-	for key in rawOut:
-		if '# timestamp' in rawOut[key]:
-			cleanOut['timeStamps'] = rawOut[key]['# timestamp']
-			break
-		elif '# property.. timestamp' in rawOut[key]:
-			cleanOut['timeStamps'] = rawOut[key]['# property.. timestamp']
-		else:
-			cleanOut['timeStamps'] = []
-	# Day/Month Aggregation Setup:
-	stamps = cleanOut.get('timeStamps',[])
-	level = allInputData.get('simLengthUnits','hours')
-	# Climate
-	for key in rawOut:
-		if key.startswith('Climate_') and key.endswith('.csv'):
-			cleanOut['climate'] = {}
-			cleanOut['climate']['Rain Fall (in/h)'] = util.hdmAgg(rawOut[key].get('rainfall'), sum, level)
-			cleanOut['climate']['Wind Speed (m/s)'] = util.hdmAgg(rawOut[key].get('wind_speed'), util.avg, level)
-			cleanOut['climate']['Temperature (F)'] = util.hdmAgg(rawOut[key].get('temperature'), max, level)
-			cleanOut['climate']['Snow Depth (in)'] = util.hdmAgg(rawOut[key].get('snowdepth'), max, level)
-			cleanOut['climate']['Direct Insolation (W/m^2)'] = util.hdmAgg(rawOut[key].get('solar_direct'), sum, level)
-	# Voltage Band
-	if 'VoltageJiggle.csv' in rawOut:
-		cleanOut['allMeterVoltages'] = {}
-		cleanOut['allMeterVoltages']['Min'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
-		cleanOut['allMeterVoltages']['Mean'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], util.avg, level)
-		cleanOut['allMeterVoltages']['StdDev'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], util.avg, level)
-		cleanOut['allMeterVoltages']['Max'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
-	# Power Consumption
-	cleanOut['Consumption'] = {}
-	# Set default value to be 0, avoiding missing value when computing Loads
-	cleanOut['Consumption']['Power'] = [0] * int(allInputData["simLength"])
-	cleanOut['Consumption']['Losses'] = [0] * int(allInputData["simLength"])
-	cleanOut['Consumption']['DG'] = [0] * int(allInputData["simLength"])
-	for key in rawOut:
-		if key.startswith('SwingKids_') and key.endswith('.csv'):
-			oneSwingPower = util.hdmAgg(util.vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), util.avg, level)
-			if 'Power' not in cleanOut['Consumption']:
-				cleanOut['Consumption']['Power'] = oneSwingPower
+	try:
+		print "STARTING TO RUN", modelDir
+		startTime = dt.datetime.now()
+		allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
+		feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
+		tree = feederJson["tree"]
+		# Set up GLM with correct time and recorders:
+		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
+		feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
+		feeder.attachRecorders(tree, "Inverter", "object", "inverter")
+		feeder.attachRecorders(tree, "Windmill", "object", "windturb_dg")
+		feeder.attachRecorders(tree, "CollectorVoltage", None, None)
+		feeder.attachRecorders(tree, "Climate", "object", "climate")
+		feeder.attachRecorders(tree, "OverheadLosses", None, None)
+		feeder.attachRecorders(tree, "UndergroundLosses", None, None)
+		feeder.attachRecorders(tree, "TriplexLosses", None, None)
+		feeder.attachRecorders(tree, "TransformerLosses", None, None)
+		feeder.groupSwingKids(tree)
+		feeder.adjustTime(tree=tree, simLength=float(allInputData["simLength"]),
+			simLengthUnits=allInputData["simLengthUnits"], simStartDate=allInputData["simStartDate"])
+		# TODO: test for error before gridlabd running
+		# print backProc
+		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
+		rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
+			keepFiles=True, workDir=modelDir)
+		cleanOut = {}
+		# Std Err and Std Out
+		cleanOut['stderr'] = rawOut['stderr']
+		cleanOut['stdout'] = rawOut['stdout']
+		# Time Stamps
+		for key in rawOut:
+			if '# timestamp' in rawOut[key]:
+				cleanOut['timeStamps'] = rawOut[key]['# timestamp']
+				break
+			elif '# property.. timestamp' in rawOut[key]:
+				cleanOut['timeStamps'] = rawOut[key]['# property.. timestamp']
 			else:
-				cleanOut['Consumption']['Power'] = util.vecSum(oneSwingPower,cleanOut['Consumption']['Power'])
-		elif key.startswith('Inverter_') and key.endswith('.csv'): 	
-			realA = rawOut[key]['power_A.real']
-			realB = rawOut[key]['power_B.real']
-			realC = rawOut[key]['power_C.real']
-			imagA = rawOut[key]['power_A.imag']
-			imagB = rawOut[key]['power_B.imag']
-			imagC = rawOut[key]['power_C.imag']
-			oneDgPower = util.hdmAgg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), util.avg, level)
-			if 'DG' not in cleanOut['Consumption']:
-				cleanOut['Consumption']['DG'] = oneDgPower
-			else:
-				cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG'])
-		elif key.startswith('Windmill_') and key.endswith('.csv'):
-			vrA = rawOut[key]['voltage_A.real']
-			vrB = rawOut[key]['voltage_B.real']
-			vrC = rawOut[key]['voltage_C.real']
-			viA = rawOut[key]['voltage_A.imag']
-			viB = rawOut[key]['voltage_B.imag']
-			viC = rawOut[key]['voltage_C.imag']
-			crB = rawOut[key]['current_B.real']
-			crA = rawOut[key]['current_A.real']
-			crC = rawOut[key]['current_C.real']
-			ciA = rawOut[key]['current_A.imag']
-			ciB = rawOut[key]['current_B.imag']
-			ciC = rawOut[key]['current_C.imag']
-			powerA = util.vecProd(util.vecPyth(vrA,viA),util.vecPyth(crA,ciA))
-			powerB = util.vecProd(util.vecPyth(vrB,viB),util.vecPyth(crB,ciB))
-			powerC = util.vecProd(util.vecPyth(vrC,viC),util.vecPyth(crC,ciC))
-			oneDgPower = util.hdmAgg(util.vecSum(powerA,powerB,powerC), util.avg, level)
-			if 'DG' not in cleanOut['Consumption']:
-				cleanOut['Consumption']['DG'] = oneDgPower
-			else:
-				cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG'])
-		elif key in ['OverheadLosses.csv', 'UndergroundLosses.csv', 'TriplexLosses.csv', 'TransformerLosses.csv']:
-			realA = rawOut[key]['sum(power_losses_A.real)']
-			imagA = rawOut[key]['sum(power_losses_A.imag)']
-			realB = rawOut[key]['sum(power_losses_B.real)']
-			imagB = rawOut[key]['sum(power_losses_B.imag)']
-			realC = rawOut[key]['sum(power_losses_C.real)']
-			imagC = rawOut[key]['sum(power_losses_C.imag)']
-			oneLoss = util.hdmAgg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), util.avg, level)
-			if 'Losses' not in cleanOut['Consumption']:
-				cleanOut['Consumption']['Losses'] = oneLoss
-			else:
-				cleanOut['Consumption']['Losses'] = util.vecSum(oneLoss,cleanOut['Consumption']['Losses'])
-	# Aggregate up the timestamps:
-	if level=='days':
-		cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
-	elif level=='months':
-		cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
-	# Write the output.
-	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-		json.dump(cleanOut, outFile, indent=4)
-	# Update the runTime in the input file.
-	endTime = dt.datetime.now()
-	allInputData["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
-	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-		json.dump(allInputData, inFile, indent=4)
-	# Clean up the PID file.
-	os.remove(pJoin(modelDir,"PID.txt"))
-	print "DONE RUNNING", modelDir
+				cleanOut['timeStamps'] = []
+		# Day/Month Aggregation Setup:
+		stamps = cleanOut.get('timeStamps',[])
+		level = allInputData.get('simLengthUnits','hours')
+		# Climate
+		for key in rawOut:
+			if key.startswith('Climate_') and key.endswith('.csv'):
+				cleanOut['climate'] = {}
+				cleanOut['climate']['Rain Fall (in/h)'] = util.hdmAgg(rawOut[key].get('rainfall'), sum, level)
+				cleanOut['climate']['Wind Speed (m/s)'] = util.hdmAgg(rawOut[key].get('wind_speed'), util.avg, level)
+				cleanOut['climate']['Temperature (F)'] = util.hdmAgg(rawOut[key].get('temperature'), max, level)
+				cleanOut['climate']['Snow Depth (in)'] = util.hdmAgg(rawOut[key].get('snowdepth'), max, level)
+				cleanOut['climate']['Direct Insolation (W/m^2)'] = util.hdmAgg(rawOut[key].get('solar_direct'), sum, level)
+		# Voltage Band
+		if 'VoltageJiggle.csv' in rawOut:
+			cleanOut['allMeterVoltages'] = {}
+			cleanOut['allMeterVoltages']['Min'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
+			cleanOut['allMeterVoltages']['Mean'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], util.avg, level)
+			cleanOut['allMeterVoltages']['StdDev'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], util.avg, level)
+			cleanOut['allMeterVoltages']['Max'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
+		# Power Consumption
+		cleanOut['Consumption'] = {}
+		# Set default value to be 0, avoiding missing value when computing Loads
+		cleanOut['Consumption']['Power'] = [0] * int(allInputData["simLength"])
+		cleanOut['Consumption']['Losses'] = [0] * int(allInputData["simLength"])
+		cleanOut['Consumption']['DG'] = [0] * int(allInputData["simLength"])
+		for key in rawOut:
+			if key.startswith('SwingKids_') and key.endswith('.csv'):
+				oneSwingPower = util.hdmAgg(util.vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), util.avg, level)
+				if 'Power' not in cleanOut['Consumption']:
+					cleanOut['Consumption']['Power'] = oneSwingPower
+				else:
+					cleanOut['Consumption']['Power'] = util.vecSum(oneSwingPower,cleanOut['Consumption']['Power'])
+			elif key.startswith('Inverter_') and key.endswith('.csv'): 	
+				realA = rawOut[key]['power_A.real']
+				realB = rawOut[key]['power_B.real']
+				realC = rawOut[key]['power_C.real']
+				imagA = rawOut[key]['power_A.imag']
+				imagB = rawOut[key]['power_B.imag']
+				imagC = rawOut[key]['power_C.imag']
+				oneDgPower = util.hdmAgg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), util.avg, level)
+				if 'DG' not in cleanOut['Consumption']:
+					cleanOut['Consumption']['DG'] = oneDgPower
+				else:
+					cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG'])
+			elif key.startswith('Windmill_') and key.endswith('.csv'):
+				vrA = rawOut[key]['voltage_A.real']
+				vrB = rawOut[key]['voltage_B.real']
+				vrC = rawOut[key]['voltage_C.real']
+				viA = rawOut[key]['voltage_A.imag']
+				viB = rawOut[key]['voltage_B.imag']
+				viC = rawOut[key]['voltage_C.imag']
+				crB = rawOut[key]['current_B.real']
+				crA = rawOut[key]['current_A.real']
+				crC = rawOut[key]['current_C.real']
+				ciA = rawOut[key]['current_A.imag']
+				ciB = rawOut[key]['current_B.imag']
+				ciC = rawOut[key]['current_C.imag']
+				powerA = util.vecProd(util.vecPyth(vrA,viA),util.vecPyth(crA,ciA))
+				powerB = util.vecProd(util.vecPyth(vrB,viB),util.vecPyth(crB,ciB))
+				powerC = util.vecProd(util.vecPyth(vrC,viC),util.vecPyth(crC,ciC))
+				oneDgPower = util.hdmAgg(util.vecSum(powerA,powerB,powerC), util.avg, level)
+				if 'DG' not in cleanOut['Consumption']:
+					cleanOut['Consumption']['DG'] = oneDgPower
+				else:
+					cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG'])
+			elif key in ['OverheadLosses.csv', 'UndergroundLosses.csv', 'TriplexLosses.csv', 'TransformerLosses.csv']:
+				realA = rawOut[key]['sum(power_losses_A.real)']
+				imagA = rawOut[key]['sum(power_losses_A.imag)']
+				realB = rawOut[key]['sum(power_losses_B.real)']
+				imagB = rawOut[key]['sum(power_losses_B.imag)']
+				realC = rawOut[key]['sum(power_losses_C.real)']
+				imagC = rawOut[key]['sum(power_losses_C.imag)']
+				oneLoss = util.hdmAgg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), util.avg, level)
+				if 'Losses' not in cleanOut['Consumption']:
+					cleanOut['Consumption']['Losses'] = oneLoss
+				else:
+					cleanOut['Consumption']['Losses'] = util.vecSum(oneLoss,cleanOut['Consumption']['Losses'])
+		# Aggregate up the timestamps:
+		if level=='days':
+			cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
+		elif level=='months':
+			cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
+		# TODO: test for error before create allOutputData
+		# print backProc
+		# Write the output.
+		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+			json.dump(cleanOut, outFile, indent=4)
+		# Update the runTime in the input file.
+		endTime = dt.datetime.now()
+		allInputData["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(allInputData, inFile, indent=4)
+		# Clean up the PID file.
+		os.remove(pJoin(modelDir,"PID.txt"))
+		os.remove(pJoin(modelDir,"PPID.txt"))
+		print "DONE RUNNING", modelDir
+	except:
+		print "Oops, Model Crashed!!!" 
+		cancel(modelDir)
 
 def cancel(modelDir):
 	''' Try to cancel a currently running model. '''
+	# Kill GLD process if already been created
 	try:
 		with open(pJoin(modelDir,"PID.txt"),"r") as pidFile:
 			pid = int(pidFile.read())
+			# print "pid " + str(pid)
 			os.kill(pid, 15)
-		print "CANCELED", modelDir
-		os.remove(pJoin(modelDir, "PID.txt"))
+			print "PID KILLED"
 	except:
-		print "ATTEMPTED AND FAILED TO CANCEL", modelDir
+		pass
+	# Kill runForeground process
+	try:
+		with open(pJoin(modelDir, "PPID.txt"), "r") as pPidFile:
+			pPid = int(pPidFile.read())
+			os.kill(pPid, 15)
+			print "PPID KILLED"
+	except:
+		pass
+	# Remove PID, PPID, and allOutputData file if existed
+	try:
 		for fName in os.listdir(modelDir):
-			if fName in ["PID.txt","allOutputData.json"]:
+			if fName in ["PID.txt","PPID.txt","allOutputData.json"]:
 				os.remove(pJoin(modelDir,fName))
+		print "CANCELED", modelDir
+	except:
+		pass
+
 
 def _tests():
 	# Variables
