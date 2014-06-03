@@ -127,8 +127,6 @@ def runForeground(modelDir):
 		feeder.groupSwingKids(tree)
 		feeder.adjustTime(tree=tree, simLength=float(allInputData["simLength"]),
 			simLengthUnits=allInputData["simLengthUnits"], simStartDate=allInputData["simStartDate"])
-		# TODO: test for error before gridlabd running
-		# print backProc
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 		rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
 			keepFiles=True, workDir=modelDir)
