@@ -115,7 +115,7 @@ def convert(stdString,seqString):
 			#print('Converting fuse')
 			fuse = convertGenericObject(ocDeviceList)
 			fuse['phases'] = ocDeviceList[2]
-			#TODO: set fuse current_limit correctly.
+			#MAYBEFIX: set fuse current_limit correctly.
 			fuse['current_limit'] = '9999.0 A'
 			return fuse
 
@@ -124,7 +124,7 @@ def convert(stdString,seqString):
 			generator = convertGenericObject(genList)
 			generator['Gen_mode'] = 'CONSTANTP'
 			generator['Gen_status'] = ('OFFLINE' if genList[26]=='1' else 'ONLINE')
-			# TODO: figure out what other things we need to set.
+			# MAYBEFIX: figure out what other things we need to set.
 			return generator
 
 		def convertMotor(motorList):
@@ -173,7 +173,7 @@ def convert(stdString,seqString):
 					phases = consumer['phases'] + ('D' if len(consList[2]) >= 2 else '')
 					consumer['phases'] = phases
 					
-			#TODO: support kVars.
+			#MAYBEFIX: support kVars.
 			consumer['constant_power_A'] = str(float(consList[12])*1000) + ('+' if float(consList[15]) >= 0.0 else '-') + str(abs(float(consList[15])*1000)) + 'j'
 			consumer['constant_power_B'] = str(float(consList[13])*1000) + ('+' if float(consList[16]) >= 0.0 else '-') + str(abs(float(consList[16])*1000)) + 'j'
 			consumer['constant_power_C'] = str(float(consList[14])*1000) + ('+' if float(consList[17]) >= 0.0 else '-') + str(abs(float(consList[17])*1000)) + 'j'
@@ -192,7 +192,7 @@ def convert(stdString,seqString):
 			else:
 				node['phases'] = nodeList[2] + 'N'
 					
-			#TODO: can we get nominal voltage from the windmil file?
+			#MAYBEFIX: can we get nominal voltage from the windmil file?
 			node['nominal_voltage'] = nominal_voltage
 			
 			if nodeList[15] != '0' or nodeList[16] != '0' or nodeList[17] != '0' or nodeList[18] != '0' or nodeList[19] != '0' or nodeList[20] != '0': # this node is actually a load
@@ -223,7 +223,7 @@ def convert(stdString,seqString):
 				capacitor['phases'] = capList[2] + ('D' if len(capList[2]) >= 2 else '')
 			else:
 				capacitor['phases'] = capList[2] + 'N'
-			#TODO: change these from just default values:
+			#MAYBEFIX: change these from just default values:
 			if capList[19] in capacitor['phases']:
 				capacitor['pt_phase'] = capList[19]
 
@@ -239,7 +239,7 @@ def convert(stdString,seqString):
 			else:
 				capacitor['control'] = 'MANUAL'
 				
-			#TODO: Handle the other control types in WindMil Properly
+			#MAYBEFIX: Handle the other control types in WindMil Properly
 			
 			if 'A' in capacitor['phases']:
 				capacitor['capacitor_A'] = str(float(capList[8])*1000)
@@ -274,7 +274,7 @@ def convert(stdString,seqString):
 			#print('Converting overhead line')
 			myIndex = components.index(objectList)*subObCount
 			overhead = convertGenericObject(ohLineList)
-			# TODO: be smarter about multiple neutrals.
+			# MAYBEFIX: be smarter about multiple neutrals.
 			load_mix = statsByName(ohLineList[14])
 			if load_mix is None or load_mix[5] == 'W':#Wye connected line
 				overhead['phases'] = ohLineList[2] + ('N' if ohLineList[33]=='1' else '')
@@ -406,7 +406,7 @@ def convert(stdString,seqString):
 			#print('Converting underground line')
 			myIndex = components.index(objectList)*subObCount
 			underground = convertGenericObject(ugLineList)
-			# TODO: be smarter about multiple neutrals.
+			# MAYBEFIX: be smarter about multiple neutrals.
 			load_mix = statsByName(ugLineList[14])
 			if load_mix is None or load_mix[5] == 'W':#Wye connected line
 				underground['phases'] = ugLineList[2] + ('N' if ugLineList[33]=='1' else '')
@@ -469,7 +469,7 @@ def convert(stdString,seqString):
 				underground[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(Dcn)
 			else:
 				underground[myIndex+1][myIndex+2]['distance_CN'] = '{:0.1f}'.format(0.0)
-			#TODO: actually get conductor values!
+			#MAYBEFIX: actually get conductor values!
 			eqdbIndex = {'A':8,'B':9,'C':10,'N':11}
 			condIndex = {'A':3,'B':4,'C':5,'N':6}
 			for letter in underground['phases']:
@@ -631,11 +631,11 @@ def convert(stdString,seqString):
 				control = 'OUTPUT_VOLTAGE'
 			
 			
-			#TODO: figure out whether I'll run into trouble if the following integer isn't unique:
+			#MAYBEFIX: figure out whether I'll run into trouble if the following integer isn't unique:
 			regulator[myIndex+1] = {}
 			regulator[myIndex+1]['name'] = regulator['name'] + '-CONFIG'
 			regulator[myIndex+1]['omfEmbeddedConfigObject'] = 'configuration object regulator_configuration'
-			#TODO: change these from just default values:
+			#MAYBEFIX: change these from just default values:
 			regulator[myIndex+1]['connect_type'] = 'WYE_WYE'
 			regulator[myIndex+1]['band_center'] = band_center
 			regulator[myIndex+1]['band_width'] = band_width
@@ -729,9 +729,9 @@ def convert(stdString,seqString):
 			if 1 == len(transPhases):
 				transformer[myIndex+1]['connect_type'] = 'SINGLE_PHASE_CENTER_TAPPED'
 			else:
-				#TODO: support other types of windings (D-D, D-Y, etc.)
+				#MAYBEFIX: support other types of windings (D-D, D-Y, etc.)
 				transformer[myIndex+1]['connect_type'] = 'WYE_WYE'
-			#TODO: change these from just default values:
+			#MAYBEFIX: change these from just default values:
 			transformer[myIndex+1]['power_rating'] = str(float(transList[19]) + float(transList[20]) + float(transList[21]))
 			if float(transList[19]) > 0:
 				transformer[myIndex+1]['powerA_rating'] = transList[19]
@@ -741,7 +741,7 @@ def convert(stdString,seqString):
 				
 			if float(transList[21]) > 0:
 				transformer[myIndex+1]['powerC_rating'] = transList[21]
-			#TODO: and change these, which were added to make the transformer work on multiple phases: 
+			#MAYBEFIX: and change these, which were added to make the transformer work on multiple phases: 
 			return transformer
 
 		# Simple lookup table for which function we need to apply:
@@ -864,7 +864,7 @@ def convert(stdString,seqString):
 	glmTree = {(1+convertedComponents.index(x))*subObCount:x for x in convertedComponents}
 	print('Finished fixing connectivity')
 
-	#TODO: REMOVE THIS DISASTER HERE AND FIGURE OUT WHY SOME LINKS ARE MALFORMED
+	#MAYBEFIX: REMOVE THIS DISASTER HERE AND FIGURE OUT WHY SOME LINKS ARE MALFORMED
 	print 'Components removed because they have totally busted connectivity:'
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):

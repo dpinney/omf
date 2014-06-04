@@ -394,7 +394,7 @@ def saveFeeder(owner, feederName):
 		# If we have a new user, make sure to make their folder:
 		if not os.path.isdir("data/Feeder/" + owner):
 			os.makedirs("data/Feeder/" + owner)
-		#TODO: make sure non-admins can't overwrite public feeders.
+		#TODO: make sure non-admins can't overwrite public feeders if we're not the admin.
 		with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
 			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 			json.dump(payload, outFile, indent=4)
