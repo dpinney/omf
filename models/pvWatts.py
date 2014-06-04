@@ -84,7 +84,6 @@ def create(parentDirectory, inData):
 
 def run(modelDir):
 	''' Run the model in its directory. '''
-	# TODO: test implementation.
 	startTime = dt.datetime.now()
 	allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
 	# Set up SAM data structures.
