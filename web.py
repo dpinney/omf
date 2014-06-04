@@ -474,7 +474,6 @@ def uniqObjName(objtype, owner, name):
 	return jsonify(exists=os.path.exists(path))
 
 if __name__ == "__main__":
-	# TODO: remove debug?
 	URL = "http://localhost:5000"
 	template_files = ["templates/"+ x  for x in os.listdir("templates")]
 	app.run(debug=True, extra_files=template_files)
