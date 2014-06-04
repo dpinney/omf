@@ -32,9 +32,9 @@ def makeClimateCsv(start, end, airport, outFilePath, cleanup=True):
 	''' Generate a climate timeseries CSV. See module docString for full help.'''
 	tempDir = tempfile.mkdtemp()
 	print "Working in", tempDir
-	_downloadWeather(start, end, airport=airport, workDir=tempDir)
-	_getPeakSolar(airport, workDir=tempDir)
-	_processWeather(start, end, airport=airport, workDir=tempDir)
+	_downloadWeather(start, end, airport, tempDir)
+	_getPeakSolar(airport, tempDir)
+	_processWeather(start, end, airport, tempDir)
 	shutil.copyfile(pJoin(tempDir,"weather.csv"), outFilePath)
 	print "Output CSV available at", outFilePath
 	if cleanup:
@@ -88,7 +88,7 @@ def _airportCodeToLatLon(airport):
 	lon = response['result'][0]['/location/location/geolocation'][0]['longitude']
 	return (lat, lon)
 
-def _getPeakSolar(airport, workDir="./", dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
+def _getPeakSolar(airport, workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
 	''' get the peak non-cloudy solar data from a locale.  takes the ten most solar-energetic days and averages
 		the values out into one 24-hour TMY3 file.'''
 	lat, lon = _airportCodeToLatLon(airport)
@@ -188,6 +188,7 @@ def _getPeakSolar(airport, workDir="./", dniScale=1.0, dhiScale=1.0, ghiScale=1.
 		outFile.close()
 
 class Weather:
+	''' Used to store data in _processWeather. '''
 	Time = ""
 	Temp = 68.0
 	Humi = 10.0
@@ -216,7 +217,7 @@ class Weather:
 		self.Solar = 0
 		return self
 
-def _processWeather(start, end, airport='', workDir='./', interpolate="linear"):
+def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	''' Take CSV files in workDir from _downloadWeather and _getPeakSolar, and combine them into a CSV that can be read into GLD's climate object. '''
 	startDate = datetime.strptime(start, "%Y-%m-%d")
 	endDate = datetime.strptime(end, "%Y-%m-%d")
@@ -364,20 +365,11 @@ def _processWeather(start, end, airport='', workDir='./', interpolate="linear"):
 	fileList = os.listdir(workDir)
 	filePtrn = re.compile("weather_(?P<loc>[A-Z]+)_(?P<raw_date>[0-9]+_[0-9]+_[0-9]+).csv")
 	matchedFiles = list(filter(filePtrn.match, fileList))
-	if len(matchedFiles) is 0:
-		print("no weather files found in {}".format(workDir))
-		return -1
 	# identify desired files
 	matchedList = [filePtrn.match(x) for x in matchedFiles]
 	fileParts = [m.groupdict() for m in matchedList]
 	filteredParts = list(filter(lambda x: x["loc"] == airport, fileParts))
-	if len(filteredParts) is 0:
-		print("no weather files found in {} that match airport {}".format(workDir, airport))
-		return -1
 	# filteredParts now contains a list of dictionaries where "loc" == airport
-	# process dates into datetime objects
-	#for part in filteredParts:
-		#part["date"] = datetime.strptime(part["raw_date"], "%Y_%m_%d")
 	fileDict = {}
 	for part in filteredParts:
 	#for part in filterDict:
@@ -671,16 +663,21 @@ def _processWeather(start, end, airport='', workDir='./', interpolate="linear"):
 																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
 	# clean up and exit
 	outFile.close()
-	return 0
+	return
 
 def _tests():
-	# UNIT TESTS
-	#TODO: test _airportCodeToLatLon
-	# _downloadWeather("2010-03-01", "2010-04-01", airport="PDX")
-	# _getPeakSolar("PDX", dniScale=1.0, dhiScale=1.0, ghiScale=1.0)
-	# _processWeather("2010-03-01", "2010-04-01", airport="PDX")
-	# BLACKBOX TEST
-	makeClimateCsv("2010-07-01", "2010-08-01", "DCA", pJoin(tempfile.mkdtemp(),"weatherDCA.csv"), cleanup=True)
+	print "Beginning to test weather.py"
+	workDir = tempfile.mkdtemp()
+	print "DCA lat/lon =", _airportCodeToLatLon("DCA")
+	assert (38.852222, -77.037778)==_airportCodeToLatLon("DCA"), "airportCode lookup failed."
+	print "Weather downloading to", workDir
+	assert None==_downloadWeather("2010-03-01", "2010-04-01", "PDX", workDir)
+	print "Peak solar extraction in", workDir
+	assert None==_getPeakSolar("PDX", workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0)
+	print "Pull weather and solar data together in", workDir
+	assert None==_processWeather("2010-03-01", "2010-04-01", "PDX", workDir)
+	print "Testing the full process together."
+	assert None==makeClimateCsv("2010-07-01", "2010-08-01", "DCA", pJoin(tempfile.mkdtemp(),"weatherDCA.csv"), cleanup=True)
 
 if __name__ == "__main__":
 	_tests()
