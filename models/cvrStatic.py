@@ -55,17 +55,6 @@ def renderAndShow(modelDir="", datastoreNames={}):
 		# It's going to SPACE! Could you give it a SECOND to get back from SPACE?!
 		time.sleep(1)
 
-def create(parentDirectory, inData):
-	''' Make a directory for the model to live in, and put the input data into it. '''
-	modelDir = pJoin(parentDirectory,inData["user"],inData["modelName"])
-	os.makedirs(modelDir)
-	inData["created"] = str(datetime.datetime.now())
-	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
-		json.dump(inData, inputFile, indent=4)
-	feederDir, feederName = inData["feederName"].split("___")
-	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
-		pJoin(modelDir,"feeder.json"))
-
 def getStatus(modelDir):
 	''' Is the model stopped, running or finished? '''
 	try:
@@ -96,9 +85,18 @@ def _roundOne(x,direc):
 	else:
 		raise Exception
 
-def run(modelDir):
+def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
+	if not os.path.isdir(modelDir):
+		os.makedirs(modelDir)
+		inputDict["created"] = str(datetime.datetime.now())
+	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
+	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
+		json.dump(inputDict, inputFile, indent=4)
+	feederDir, feederName = inputDict["feederName"].split("___")
+	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
+		pJoin(modelDir,"feeder.json"))
 	# Touch the PID to indicate the run has started.
 	with open(pJoin(modelDir,"PID.txt"), 'a'):
 		os.utime(pJoin(modelDir,"PID.txt"), None)
@@ -108,27 +106,27 @@ def run(modelDir):
 	except:
 		pass
 	# Start the computation.
-	backProc = multiprocessing.Process(target=runForeground, args=(modelDir,))
+
+	backProc = multiprocessing.Process(target=runForeground, args=(modelDir, inputDict))
 	backProc.start()
 	print "SENT TO BACKGROUND", modelDir
 	with open(pJoin(modelDir, "PPID.txt"),"w") as pPidFile:
 		pPidFile.write(str(backProc.pid))
 
-def runForeground(modelDir):
+def runForeground(modelDir, inputDict):
 	''' Run the model in the foreground. WARNING: can take about a minute. '''
 	# Global vars, and load data from the model directory.
 	
 	try:
 		print "StartRTING TO RUN", modelDir
 		startTime = dt.datetime.now()
-		allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
 		feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
 		tree = feederJson.get("tree",{})
 		attachments = feederJson.get("attachments",{})
 		allOutput = {}
 		''' Run CVR analysis. '''
 		# Reformate monthData and rates.
-		rates = {k:float(allInputData[k]) for k in ["capitalCost", "omCost", "wholesaleEnergyCostPerKwh",
+		rates = {k:float(inputDict[k]) for k in ["capitalCost", "omCost", "wholesaleEnergyCostPerKwh",
 			"retailEnergyCostPerKwh", "peakDemandCostSpringPerKw", "peakDemandCostSummerPerKw",
 			"peakDemandCostFallPerKw", "peakDemandCostWinterPerKw"]}
 		# print "RATES", rates
@@ -141,8 +139,8 @@ def runForeground(modelDir):
 		for i, x in enumerate(monthNames):
 			monShort = x[0:3].lower()
 			season = monthToSeason[x]
-			histAvg = float(allInputData.get(monShort + "Avg", 0))
-			histPeak = float(allInputData.get(monShort + "Peak", 0))
+			histAvg = float(inputDict.get(monShort + "Avg", 0))
+			histPeak = float(inputDict.get(monShort + "Peak", 0))
 			monthData.append({"monthId":i, "monthName":x, "histAverage":histAvg,
 				"histPeak":histPeak, "season":season})
 		# for row in monthData:
@@ -199,7 +197,7 @@ def runForeground(modelDir):
 			if tree[key].get('name','') == regConfName:
 				regConfIndex = key
 		# Set substation regulator to manual operation.
-		baselineTap = int(allInputData.get("baselineTap")) # GLOBAL VARIABLE FOR DEFAULT TAP POSITION
+		baselineTap = int(inputDict.get("baselineTap")) # GLOBAL VARIABLE FOR DEFAULT TAP POSITION
 		tree[regConfIndex] = {
 			'name':tree[regConfIndex]['name'],
 			'object':'regulator_configuration',
@@ -259,10 +257,10 @@ def runForeground(modelDir):
 		blankZipModel = {'object':'triplex_load',
 			'name':'NAMEVARIABLE',
 			'base_power_12':'POWERVARIABLE',
-			'power_fraction_12': str(allInputData.get("p_percent")),  
-			'impedance_fraction_12': str(allInputData.get("z_percent")),
-			'current_fraction_12': str(allInputData.get("i_percent")),
-			'power_pf_12': str(allInputData.get("power_factor")), #MAYBEFIX: we can probably get this PF data from the Milsoft loads.
+			'power_fraction_12': str(inputDict.get("p_percent")),  
+			'impedance_fraction_12': str(inputDict.get("z_percent")),
+			'current_fraction_12': str(inputDict.get("i_percent")),
+			'power_pf_12': str(inputDict.get("power_factor")), #MAYBEFIX: we can probably get this PF data from the Milsoft loads.
 			'impedance_pf_12':'0.97',
 			'nominal_voltage':'120',
 			'phases':'PHASESVARIABLE',
@@ -452,9 +450,9 @@ def runForeground(modelDir):
 			allOutput["savingsChart"] = inFile.read().encode("base64")
 		# Update the runTime in the input file.
 		endTime = dt.datetime.now()
-		allInputData["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+		inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(allInputData, inFile, indent=4)
+			json.dump(inputDict, inFile, indent=4)
 		# Write output file.
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 			json.dump(allOutput, outFile, indent=4)
@@ -551,12 +549,8 @@ def _tests():
 	except: pass
 	# No-input template.
 	renderAndShow()
-	# Create a model.
-	create(workDir, inData)
-	# Show the model (should look like it's running).
-	renderAndShow(modelDir=modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	run(modelLoc, inData)
 	# # Show the output.
 	renderAndShow(modelDir=modelLoc)
 	# # # Delete the model.

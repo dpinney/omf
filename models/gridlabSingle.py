@@ -52,23 +52,22 @@ def renderAndShow(modelDir="", datastoreNames={}):
 		# It's going to SPACE! Could you give it a SECOND to get back from SPACE?!
 		time.sleep(1)
 
-def create(parentDirectory, inData):
-	''' Make a directory for the model to live in, and put the input data into it. '''
-	modelDir = pJoin(parentDirectory,inData["user"],inData["modelName"])
-	os.makedirs(modelDir)
-	inData["created"] = str(datetime.datetime.now())
-	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
-		json.dump(inData, inputFile, indent=4)
-	# Copy datastore data.
-	feederDir, feederName = inData["feederName"].split("___")
-	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
-		pJoin(modelDir,"feeder.json"))
-	shutil.copy(pJoin(_omfDir,"data","Climate",inData["climateName"] + ".tmy2"),
-		pJoin(modelDir,"climate.tmy2"))
-
-def run(modelDir):
+def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
+	# Check whether model exist or not
+	if not os.path.isdir(modelDir):
+		os.makedirs(modelDir)
+		inputDict["created"] = str(datetime.datetime.now())
+	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
+	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
+		json.dump(inputDict, inputFile, indent = 4)
+	feederDir, feederName = inputDict["feederName"].split("___")
+	# Copy data file into model directory
+	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
+		pJoin(modelDir,"feeder.json"))
+	shutil.copy(pJoin(_omfDir,"data","Climate",inputDict["climateName"] + ".tmy2"),
+		pJoin(modelDir,"climate.tmy2"))
 	# Touch the PID to indicate the run has started.
 	with open(pJoin(modelDir,"PID.txt"), 'a'):
 		os.utime(pJoin(modelDir,"PID.txt"), None)
@@ -78,7 +77,7 @@ def run(modelDir):
 	except:
 		pass
 	# Start the computation.
-	backProc = multiprocessing.Process(target=runForeground, args=(modelDir,))
+	backProc = multiprocessing.Process(target=runForeground, args=(modelDir, inputDict,))
 	backProc.start()
 	# print "runForeground " + str(backProc.pid)
 	# print "python server " + str(os.getpid())
@@ -105,12 +104,11 @@ def getStatus(modelDir):
 		# Broken! Make the safest choice:
 		return "stopped"
 
-def runForeground(modelDir):
+def runForeground(modelDir, inputDict):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
 	try:
 		print "STARTING TO RUN", modelDir
 		startTime = dt.datetime.now()
-		allInputData = json.load(open(pJoin(modelDir,"allInputData.json")))
 		feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
 		tree = feederJson["tree"]
 		# Set up GLM with correct time and recorders:
@@ -125,8 +123,8 @@ def runForeground(modelDir):
 		feeder.attachRecorders(tree, "TriplexLosses", None, None)
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
-		feeder.adjustTime(tree=tree, simLength=float(allInputData["simLength"]),
-			simLengthUnits=allInputData["simLengthUnits"], simStartDate=allInputData["simStartDate"])
+		feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
+			simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 		rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
 			keepFiles=True, workDir=modelDir)
@@ -145,7 +143,7 @@ def runForeground(modelDir):
 				cleanOut['timeStamps'] = []
 		# Day/Month Aggregation Setup:
 		stamps = cleanOut.get('timeStamps',[])
-		level = allInputData.get('simLengthUnits','hours')
+		level = inputDict.get('simLengthUnits','hours')
 		# Climate
 		for key in rawOut:
 			if key.startswith('Climate_') and key.endswith('.csv'):
@@ -165,9 +163,9 @@ def runForeground(modelDir):
 		# Power Consumption
 		cleanOut['Consumption'] = {}
 		# Set default value to be 0, avoiding missing value when computing Loads
-		cleanOut['Consumption']['Power'] = [0] * int(allInputData["simLength"])
-		cleanOut['Consumption']['Losses'] = [0] * int(allInputData["simLength"])
-		cleanOut['Consumption']['DG'] = [0] * int(allInputData["simLength"])
+		cleanOut['Consumption']['Power'] = [0] * int(inputDict["simLength"])
+		cleanOut['Consumption']['Losses'] = [0] * int(inputDict["simLength"])
+		cleanOut['Consumption']['DG'] = [0] * int(inputDict["simLength"])
 		for key in rawOut:
 			if key.startswith('SwingKids_') and key.endswith('.csv'):
 				oneSwingPower = util.hdmAgg(util.vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), util.avg, level)
@@ -230,9 +228,9 @@ def runForeground(modelDir):
 			json.dump(cleanOut, outFile, indent=4)
 		# Update the runTime in the input file.
 		endTime = dt.datetime.now()
-		allInputData["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+		inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(allInputData, inFile, indent=4)
+			json.dump(inputDict, inFile, indent=4)
 		# Clean up the PID file.
 		os.remove(pJoin(modelDir,"PID.txt"))
 		# For autotest, there won't be PPID file.
@@ -295,12 +293,8 @@ def _tests():
 		pass
 	# No-input template.
 	renderAndShow()
-	# Create a model.
-	create(workDir, inData)
-	# Show the model (should look like it's running).
-	renderAndShow(modelDir=modelLoc)
 	# Run the model.
-	runForeground(modelLoc)
+	run(modelLoc, inData)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)

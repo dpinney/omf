@@ -259,15 +259,9 @@ def runModel():
 	''' Start a model running and redirect to its running screen. '''
 	pData = request.form.to_dict()
 	modelModule = getattr(models, pData["modelType"])
-	if pData.get("created","NOKEY") == "":
-		# New model.
-		pData["user"] = User.cu()
-		modelModule.create(os.path.join(_omfDir,"data","Model"), pData)
-	else:
-		# Existing model.
-		with open(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"],"allInputData.json"),"w") as inDataFile:
-			json.dump(pData, inDataFile, indent=4)
-	modelModule.run(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"]))
+	#TODO: what if we're an admin viewing public or other peoples' models?
+	pData["user"] = User.cu()
+	modelModule.run(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"]), pData)
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
 @app.route("/cancelModel/", methods=["POST"])
