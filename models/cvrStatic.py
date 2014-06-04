@@ -128,7 +128,6 @@ def runForeground(modelDir):
 		allOutput = {}
 		''' Run CVR analysis. '''
 		# Reformate monthData and rates.
-		# TODO: just get rid of these monthData and rates containers.
 		rates = {k:float(allInputData[k]) for k in ["capitalCost", "omCost", "wholesaleEnergyCostPerKwh",
 			"retailEnergyCostPerKwh", "peakDemandCostSpringPerKw", "peakDemandCostSummerPerKw",
 			"peakDemandCostFallPerKw", "peakDemandCostWinterPerKw"]}
@@ -319,7 +318,7 @@ def runForeground(modelDir):
 						if row.get('loadLevel','') == desiredLoad:
 							newTapPos = loweringPotential(row.get('lowVoltage',114))
 					# Tap it down to there.
-					# TODO: do each phase separately because that's how it's done in the field... Oof.
+					# MAYBEFIX: do each phase separately because that's how it's done in the field... Oof.
 					tree[regConfIndex]['tap_pos_A'] = str(newTapPos)
 					tree[regConfIndex]['tap_pos_B'] = str(newTapPos)
 					tree[regConfIndex]['tap_pos_C'] = str(newTapPos)
@@ -500,7 +499,6 @@ def cancel(modelDir):
 def _tests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
-	#TODO: fix this tree.
 	friendshipTree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Frank LO.json")))["tree"]
 	colomaTree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Columbia.json")))["tree"]
 	colomaMonths = {"janAvg": 914000.0, "janPeak": 1290000.0,
