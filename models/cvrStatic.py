@@ -460,8 +460,7 @@ def runForeground(modelDir):
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 			json.dump(allOutput, outFile, indent=4)
 		print "DONE RUNNING", modelDir
-		# os.remove(pJoin(modelDir,"PID.txt"))
-		os.remove(pJoin(modelDir,"PPID.txt"))
+		# os.remove(pJoin(modelDir,"PPID.txt"))
 	except:
 		print "Oops, Model Crashed!!!" 
 		cancel(modelDir)
