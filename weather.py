@@ -1,5 +1,5 @@
 ''' weather.py pulls weather data from wunderground.com, and formats it as a CSV that
-can be input to a Gridlab-D Climate object.  
+can be input to a Gridlab-D Climate object.
 
 For example, to get a CSV that will play back 1 month of weather data
 for the region near the DCA airport, run in the terminal:
@@ -22,7 +22,6 @@ the following in a .glm:
 		tmyfile "weatherDCA.csv";
 		reader weatherReader;
 	}
-
 '''
 
 import os, urllib, json, csv, math, re, tempfile, shutil

@@ -86,9 +86,8 @@ def fullyDeEmbed(glmTree):
 		_deEmbedOnce(glmTree)
 		lenDiff = len(glmTree) - currLen
 
-def attachRecorders(tree, recorderType, keyToJoin, valueToJoin, sample=False):
+def attachRecorders(tree, recorderType, keyToJoin, valueToJoin):
 	''' Walk through a tree an and attach Gridlab recorders to the indicated type of node.'''
-	# TODO: if sample is a percentage, only attach to that percentage of nodes chosen at random.
 	# HACK: the biggestKey assumption only works for a flat tree or one that has a flat node for the last item...
 	biggestKey = sorted([int(key) for key in tree.keys()])[-1] + 1
 	# Types of recorders we can attach:
@@ -243,7 +242,6 @@ def _tokenizeGlm(inputStr, filePath=True):
 	data = re.sub(r'http:\/\/', '', data)  
 	# Strip comments.
 	data = re.sub(r'\/\/.*\n', '', data)
-	# TODO: If the .glm creator has been lax with semicolons, add them back.
 	# Also strip non-single whitespace because it's only for humans:
 	data = data.replace('\n','').replace('\r','').replace('\t',' ')
 	# Tokenize around semicolons, braces and whitespace.
@@ -262,7 +260,6 @@ def _parseTokenList(tokenList):
 		current[key] = value
 	def listToString(listIn):
 		# Helper function to turn a list of strings into one string with some decent formatting.
-		# TODO: formatting could be nicer, i.e. remove the extra spaces this function puts in.
 		if len(listIn) == 0:
 			return ''
 		else:
@@ -316,7 +313,6 @@ def _gatherKeyValues(inDict, keyToAvoid):
 	for key in inDict:
 		if type(key) is int:
 			# WARNING: RECURSION HERE
-			# TODO (cosmetic): know our depth, and indent the output so it's more human readable.
 			otherKeyValues += _dictToString(inDict[key])
 		elif key != keyToAvoid:
 			if key == 'comment':
@@ -392,7 +388,6 @@ def _deEmbedOnce(glmTree):
 					glmTree[y] = glmTree[x][y]
 				# delete the embedded copy:
 				del glmTree[x][y]
-			# TODO: take this if case and roll it into the if case above to save lots of code and make it easier to read.
 			if type(iterTree[x][y]) is dict and 'omfEmbeddedConfigObject' in iterTree[x][y]:
 				configList = iterTree[x][y]['omfEmbeddedConfigObject'].split()
 				# set the name attribute and the parent's reference:
