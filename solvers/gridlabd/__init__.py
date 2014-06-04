@@ -11,35 +11,44 @@ sys.path.append(_omfDir)
 # OMF imports.
 import feeder
 
-def _getPlatform():
-	''' Figure out what platform we're on and choose a suitable Gridlab binary. '''
-	# TODO: work this into runInFilesystem.
-	enviro = os.environ
-	if sys.platform == 'win32' or sys.platform == 'cygwin':
-		if platform.machine().endswith('64'):
-			binary = _myDir + "\\win64\\gridlabd.exe"
-			enviro['GRIDLABD'] = _myDir + "\\win64"
-			enviro['GLPATH'] = _myDir + "\\win64\\"
-		else:
-			binary = _myDir + "\\win32\\gridlabd.exe"
-			enviro['GRIDLABD'] = _myDir + "\\win32"
-			enviro['GLPATH'] = _myDir + "\\win32\\"
-	elif sys.platform == 'darwin':
-		# Implement me, maybe.
-		pass
-	elif sys.platform == 'linux2':
-		binary = _myDir + "/linx64/gridlabd.bin"
-		enviro['GRIDLABD'] = _myDir + "/linx64"
-		enviro['GLPATH'] = _myDir + "/linx64"
-		# Uncomment the following line if we ever get all the linux libraries bundled. Hard!
-		# enviro['LD_LIBRARY_PATH'] = enviro['LD_LIBRARY_PATH'] + ':' + solverRoot + "/linx64"
+def _addGldToPath():
+	''' Figure out what platform we're on and choose a suitable Gridlab binary.
+	Returns full path to binary as result. '''
+	# Do we have a version of GridlabD available?
+	if 0 == subprocess.call(["gridlabd"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE):
+		# There's a system-level install of Gridlab, so use it:
+		return "gridlabd"
 	else:
-		print "Platform not supported ", sys.platform
-		return False
+		# No system-level version of Gridlab available, so add ours to the path.
+		enviro = os.environ
+		if sys.platform == 'win32' or sys.platform == 'cygwin':
+			if platform.machine().endswith('64'):
+				binary = _myDir + "\\win64\\gridlabd.exe"
+				enviro['GRIDLABD'] = _myDir + "\\win64"
+				enviro['GLPATH'] = _myDir + "\\win64\\"
+			else:
+				binary = _myDir + "\\win32\\gridlabd.exe"
+				enviro['GRIDLABD'] = _myDir + "\\win32"
+				enviro['GLPATH'] = _myDir + "\\win32\\"
+			return binary
+		elif sys.platform == 'darwin':
+			# Implement me, maybe.
+			pass
+		elif sys.platform == 'linux2':
+			binary = _myDir + "/linx64/gridlabd.bin"
+			enviro['GRIDLABD'] = _myDir + "/linx64"
+			enviro['GLPATH'] = _myDir + "/linx64"
+			# Uncomment the following line if we ever get all the linux libraries bundled. Hard!
+			# enviro['LD_LIBRARY_PATH'] = enviro['LD_LIBRARY_PATH'] + ':' + solverRoot + "/linx64"
+			return binary
+		else:
+			# Platform not supported, so just return the standard binary and pray it works:
+			return "gridlabd"
 
 def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 	''' Execute gridlab in the local filesystem. Return a nice dictionary of results. '''
 	try:
+		binaryName = _addGldToPath()
 		# Create a running directory and fill it, unless we've specified where we're running.
 		if not workDir:
 			workDir = tempfile.mkdtemp()
@@ -58,7 +67,7 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 		with open(pJoin(workDir,'stdout.txt'),'w') as stdout, open(pJoin(workDir,'stderr.txt'),'w') as stderr, open(pJoin(workDir,'PID.txt'),'w') as pidFile:
 			# MAYBEFIX: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-			proc = subprocess.Popen(['gridlabd','-w','main.glm'], cwd=workDir, stdout=stdout, stderr=stderr)
+			proc = subprocess.Popen([binaryName,'-w','main.glm'], cwd=workDir, stdout=stdout, stderr=stderr)
 			pidFile.write(str(proc.pid))
 		returnCode = proc.wait()
 		# Build raw JSON output.
@@ -136,6 +145,7 @@ def anaDataTree(studyPath, fileNameTest):
 	return data
 
 def _tests():
+	print "Full path to Gridlab executable we're using:", _addGldToPath()
 	print "Testing string cleaning."
 	strTestCases = [("+954.877", 954.877),
 		("+2.18351e+006", 2183510.0),
