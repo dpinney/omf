@@ -1,9 +1,6 @@
 *.pyc
-log.txt
 *.sublime-project
 *.sublime-workspace
-analyses/*
-logs/*.log
 data/Model/*
 data/Feeder/*
 data/User/*
@@ -11,8 +8,7 @@ data/User/*
 !data/Model/admin/z*
 !data/Model/admin/z*
 !data/Model/public/*
-!data/Feeder/public_z*
+!data/Feeder/public/*
 !data/User/admin.json
 !data/User/public.json
 S3KEY.*
-calibration/workingDir
