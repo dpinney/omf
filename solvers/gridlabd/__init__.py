@@ -138,7 +138,6 @@ def anaDataTree(studyPath, fileNameTest):
 	return data
 
 def _tests():
-	# TODO: On the Python side, this test runs fine, but it gets fatal errors in gridlab because it is looking for a file called "climate.tmy2"
 	# Get a test feeder and test climate.
 	print "Testing GridlabD solver."
 	with open(pJoin(_omfDir,"data","Feeder","public","Simple Market System.json"),"r") as feederFile:
