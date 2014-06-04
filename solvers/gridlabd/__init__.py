@@ -1,6 +1,6 @@
 ''' Code for running Gridlab and getting results into pythonic data structures. '''
 
-import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, time
+import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, time, tempfile, json
 from os.path import join as pJoin
 
 # Locational variables so we don't have to rely on OMF being in the system path.
@@ -42,8 +42,8 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 	try:
 		# Create a running directory and fill it, unless we've specified where we're running.
 		if not workDir:
-			workDir = pJoin('running',str(datetime.datetime.now()).replace(':','_'))
-			os.makedirs(workDir)
+			workDir = tempfile.mkdtemp()
+			print "gridlabD runInFilesystem without no specified workDir. Working in", workDir
 		# Need to zero out lat/lon data because it frequently breaks Gridlab.
 		for key in feederTree:
 			if 'latitude' in feederTree[key]: feederTree[key]['latitude'] = '0'
@@ -57,7 +57,7 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 			glmFile.write(glmString)
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 		with open(pJoin(workDir,'stdout.txt'),'w') as stdout, open(pJoin(workDir,'stderr.txt'),'w') as stderr, open(pJoin(workDir,'PID.txt'),'w') as pidFile:
-			# TODO: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
+			# MAYBEFIX: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
 			proc = subprocess.Popen(['gridlabd','-w','main.glm'], cwd=workDir, stdout=stdout, stderr=stderr)
 			pidFile.write(str(proc.pid))
 		returnCode = proc.wait()
@@ -139,19 +139,18 @@ def anaDataTree(studyPath, fileNameTest):
 
 def _tests():
 	# TODO: On the Python side, this test runs fine, but it gets fatal errors in gridlab because it is looking for a file called "climate.tmy2"
-	import json
-	with open(pJoin(_omfDir,"data","Feeder","public","Olin Barre.json"),"r") as feederFile:
+	# Get a test feeder and test climate.
+	print "Testing GridlabD solver."
+	with open(pJoin(_omfDir,"data","Feeder","public","Simple Market System.json"),"r") as feederFile:
 		feederJson = json.load(feederFile)
-	print "tree:", feederJson["tree"]
-	print "attachments:", feederJson["attachments"]
+	with open(pJoin(_omfDir,"data","Climate","AL-HUNTSVILLE.tmy2"),"r") as climateFile:
+		tmyStr = climateFile.read()
+	# Add climate in.
+	feederJson["attachments"]["climate.tmy2"] = tmyStr
 	testStudy = runInFilesystem(feederJson["tree"], feederJson["attachments"])
-	# print testStudy.name, 
-	print dir(testStudy)
-	# rawOut = run(testStudy)
-	# print rawOut.keys()
-	print "testStudy.keys():", testStudy.keys()
-	print "testStudy['stdout']:", testStudy['stdout']
-	print "testStudy['stderr']:", testStudy['stderr']
+	assert testStudy != {}, "Gridlab run failed and we got blank output."
+	print "GridlabD standard error:", testStudy['stderr']
+	print "GridlabD standard output:", testStudy['stdout']
 
 if __name__ == '__main__':
 	_tests()
