@@ -267,7 +267,6 @@ def runModel():
 		# Existing model.
 		with open(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"],"allInputData.json"),"w") as inDataFile:
 			json.dump(pData, inDataFile, indent=4)
-		#TODO: what about changed feeder data...
 	modelModule.run(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"]))
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
@@ -324,7 +323,7 @@ def publishModel(owner, modelName):
 @flask_login.login_required
 def feederGet(owner, feederName):
 	''' Editing interface for feeders. '''
-	# TODO: fix modelFeeder
+	# MAYBEFIX: fix modelFeeder
 	return render_template('gridEdit.html', feederName=feederName, ref=request.referrer,
 		is_admin=User.cu()=="admin", modelFeeder=False, public=owner=="public",
 		currUser = User.cu(), owner = owner)
@@ -381,7 +380,7 @@ def gridlabdImport():
 @app.route("/feederData/<owner>/<feederName>/<modelFeeder>")
 @flask_login.login_required
 def feederData(owner, feederName, modelFeeder=False):
-	#TODO: fix modelFeeder capability.
+	#MAYBEFIX: fix modelFeeder capability.
 	if User.cu()=="admin" or owner==User.cu() or owner=="public":
 		with open("data/Feeder/" + owner + "/" + feederName + ".json", "r") as feedFile:
 			return feedFile.read()

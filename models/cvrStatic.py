@@ -262,7 +262,7 @@ def runForeground(modelDir):
 			'power_fraction_12': str(allInputData.get("p_percent")),  
 			'impedance_fraction_12': str(allInputData.get("z_percent")),
 			'current_fraction_12': str(allInputData.get("i_percent")),
-			'power_pf_12': str(allInputData.get("power_factor")), #TODO: we can probably get this PF data from the Milsoft loads.
+			'power_pf_12': str(allInputData.get("power_factor")), #MAYBEFIX: we can probably get this PF data from the Milsoft loads.
 			'impedance_pf_12':'0.97',
 			'nominal_voltage':'120',
 			'phases':'PHASESVARIABLE',
