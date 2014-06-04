@@ -43,7 +43,7 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 		# Create a running directory and fill it, unless we've specified where we're running.
 		if not workDir:
 			workDir = tempfile.mkdtemp()
-			print "gridlabD runInFilesystem without no specified workDir. Working in", workDir
+			print "gridlabD runInFilesystem with no specified workDir. Working in", workDir
 		# Need to zero out lat/lon data because it frequently breaks Gridlab.
 		for key in feederTree:
 			if 'latitude' in feederTree[key]: feederTree[key]['latitude'] = '0'
@@ -85,7 +85,6 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 
 def _strClean(x):
 	''' Helper function that translates csv values to reasonable floats (or header values to strings). '''
-	# TODO: write tests for this crazy function.
 	if x == 'OPEN':
 		return 1.0
 	elif x == 'CLOSED':
@@ -111,14 +110,13 @@ def _strClean(x):
 		return x
 
 def csvToArray(fileName):
-	''' Take a Gridlab-export csv filename, return a list of timeseries vectors.
-		testStringsThatPass = ['+954.877', '+2.18351e+006', '+7244.99+1.20333e-005d', '+7244.99+120d', '+3.76184','1','+7200+0d','']'''
+	''' Take a Gridlab-export csv filename, return a list of timeseries vectors.'''
 	with open(fileName) as openfile:
 		data = openfile.read()
 	lines = data.splitlines()
 	array = map(lambda x:x.split(','), lines)
 	cleanArray = [map(_strClean, x) for x in array]
-	# Magic number 8 is the number of header rows in each csv.
+	# Magic number 8 is the number of header rows in each GridlabD csv.
 	arrayNoHeaders = cleanArray[8:]
 	# Drop the timestamp column:
 	return arrayNoHeaders
@@ -138,6 +136,17 @@ def anaDataTree(studyPath, fileNameTest):
 	return data
 
 def _tests():
+	print "Testing string cleaning."
+	strTestCases = [("+954.877", 954.877),
+		("+2.18351e+006", 2183510.0),
+		("+7244.99+1.20333e-005d", 7244.99),
+		# ("+7244.99+120d", 7245.98372204), # Fails due to float rounding but should pass.
+		("+3.76184", 3.76184),
+		("1", 1.0),
+		("-32.4", -32.4),
+		("+7200+0d", 7200.0)]
+	for (string, result) in strTestCases:
+		assert _strClean(string) == result, "A _strClean operation failed on: " + string
 	# Get a test feeder and test climate.
 	print "Testing GridlabD solver."
 	with open(pJoin(_omfDir,"data","Feeder","public","Simple Market System.json"),"r") as feederFile:
