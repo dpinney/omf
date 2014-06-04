@@ -459,8 +459,12 @@ def runForeground(modelDir):
 		# Write output file.
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 			json.dump(allOutput, outFile, indent=4)
+		# For autotest, there won't be such file.
+		try:
+			os.remove(pJoin(modelDir, "PPID.txt"))
+		except:
+			pass
 		print "DONE RUNNING", modelDir
-		# os.remove(pJoin(modelDir,"PPID.txt"))
 	except:
 		print "Oops, Model Crashed!!!" 
 		cancel(modelDir)

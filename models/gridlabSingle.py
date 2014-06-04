@@ -235,7 +235,11 @@ def runForeground(modelDir):
 			json.dump(allInputData, inFile, indent=4)
 		# Clean up the PID file.
 		os.remove(pJoin(modelDir,"PID.txt"))
-		os.remove(pJoin(modelDir,"PPID.txt"))
+		# For autotest, there won't be PPID file.
+		try:
+			os.remove(pJoin(modelDir, "PPID.txt"))
+		except:
+			pass
 		print "DONE RUNNING", modelDir
 	except:
 		print "Oops, Model Crashed!!!" 
