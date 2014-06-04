@@ -33,7 +33,7 @@ def getDataNames():
 def csrf_protect():
 	if request.user_agent.browser == "msie" or request.user_agent.browser == "firefox":
 		return "The OMF currently must be accessed by Chrome or Safari."
-	# TODO: fix csrf validation. Some of our POST calls are missing the csrf token.
+	## NOTE: when we fix csrf validation this needs to be uncommented.
 	# if request.method == "POST":
 	#	token = session.get("_csrf_token", None)
 	#	if not token or token != request.form.get("_csrf_token"):
