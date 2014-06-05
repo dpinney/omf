@@ -36,6 +36,7 @@
 			// If we have input, put it back.
 			if (allInputData != null) {
 				restoreInputs()
+				$("#modelName").prop("readonly", true)
 			}
 			// Depending on status, show different things.
 			if (modelStatus == "finished") {
