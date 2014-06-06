@@ -3,18 +3,134 @@
 #Note: All triplex_node dictionaries must contain a load classification key which tells what type of houses are located at this spot load.
 #Note: All swing node objects must have a Dictionary key
 from __future__ import division
-import ResidentialLoads
-import CommercialLoads
 import math
 import random
 import Configuration
 import TechnologyParameters
-import Solar_Technology
 import AddLoadShapes
 import copy
 
+def _ConfigurationFunc(wdir, config_file, classification=None):
+	'''Create the complete configuration dictionary needed to populate the feeder'''
+	data = {}
+	
+	if classification == None:
+		classID = None
+	else:
+		classID = classification
+		
+	ddir = wdir + '../schedules/'
+	data["directory"] = ddir
+	
+	default_weather_by_region = { 	1:	['CA-San_francisco.tmy2', 	'PST+8PDT'],
+														2:	['IL-Chicago.tmy2', 		'CST+6CDT'],
+														3:	['AZ-Phoenix.tmy2', 		'MST+7MDT'],
+														4:	['TN-Nashville.tmy2', 		'CST+6CDT'],
+														5:	['FL-Miami.tmy2', 			'EST+5EDT'],
+														6:	['HI-Honolulu.tmy2', 		'HST10'] }
+		
+	data["weather"] = '../schedules/SCADA_weather_NC_gld_shifted.csv'
+	data["timezone"] = 'PST+8PDT'
+	region = 4
+	
+	if not region or region not in xrange(1,7):
+		print ("No region ID found. Using region 1 (West Coast, Temperate) to fill in default house configurations.")
+		region = 1
+	data["region"] = region
+	
+	if "weather" not in data.keys() or not data["weather"]:
+		print ("Using default weather file for climate region "+str(region))
+		data["weather"] = '../schedules/'+default_weather_by_region[region][0]
+		data["timezone"] = default_weather_by_region[region][1]
+	elif "timezone" not in data.keys() or not data["timezone"]:
+		data["timezone"] = default_weather_by_region[region][1]
 
-def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=None):
+	# Feeder Properties
+	# - Substation Rating in MVA (Additional 15% gives rated kW & pf = 0.87)
+	# - Nominal Voltage of Feeder Trunk
+	# - Secondary (Load Side) of Transformers
+	# - Voltage Players Read Into Swing Node
+	data["feeder_rating"] = 1.15*14.0
+	data["nom_volt"] = 14400
+	data["nom_volt2"] = 14400 #was set to 480 for taxonomy feeders
+	data["load_shape_norm"] = ddir + 'load_shape_player.player'
+	vA='../schedules/VA.player'
+	vB='../schedules/VB.player'
+	vC='../schedules/VC.player'
+	data["voltage_players"] = ['"{:s}"'.format(vA),'"{:s}"'.format(vB),'"{:s}"'.format(vC)]
+	
+	# Voltage Regulation
+	# - EOL Measurements (name of node, phases to measure (i.e. ['GC-12-47-1_node_7','ABC',1]))
+	# - Voltage Regulationn ( [desired, min, max, high deadband, low deadband] )
+	# - Regulators (list of names)
+	# - Capacitor Outages ( [name of capacitor, outage player file])
+	# - Peak Power of Feeder in kVA 
+	data["EOL_points"] = []
+	data["voltage_regulation"] = [14400, 12420, 15180, 60, 60]     
+	data["regulators"] = []
+	data["capacitor_outtage"] = []
+	data["emissions_peak"] = 13910 # Peak in kVa base .85 pf of 29 (For emissions)
+
+		
+	if config_file==None:
+		# set dictionary values (for default case)
+		# normalized load shape scalar
+		data["normalized_loadshape_scalar"] = 1
+		
+		if 'load_shape_norm' in data.keys() and data['load_shape_norm'] is not None:
+			# commercial zip fractions for loadshapes
+			data["c_z_pf"] = 0.97
+			data["c_i_pf"] = 0.97
+			data["c_p_pf"] = 0.97
+			data["c_zfrac"] = 0.2
+			data["c_ifrac"] = 0.4
+			data["c_pfrac"] = 1 - data["c_zfrac"] - data["c_ifrac"]
+			
+			# residential zip fractions for loadshapes
+			data["r_z_pf"] = 0.97
+			data["r_i_pf"] = 0.97
+			data["r_p_pf"] = 0.97
+			data["r_zfrac"] = 0.2
+			data["r_ifrac"] = 0.4
+			data["r_pfrac"] = 1 - data["r_zfrac"] - data["r_ifrac"]
+		
+	else:
+		if 'avg_house' in config_file.keys():
+			data["avg_house"] = config_file['avg_house']
+		else:
+			data["avg_house"] = 15000
+		
+		if 'avg_comm' in config_file.keys():
+			data["avg_commercial"] = config_file['avg_comm']
+		else:
+			data["avg_commercial"] = 35000
+		
+		if "load_shape_scalar" in config_file.keys():
+			data["normalized_loadshape_scalar"] = config_file['load_shape_scalar']
+		else:
+			data["normalized_loadshape_scalar"] = 1
+			
+		if 'load_shape_norm' in data.keys() and data['load_shape_norm'] is not None:
+			# commercial zip fractions for loadshapes
+			data["c_z_pf"] = 0.97
+			data["c_i_pf"] = 0.97
+			data["c_p_pf"] = 0.97
+			data["c_zfrac"] = 0.2
+			data["c_ifrac"] = 0.4
+			data["c_pfrac"] = 1 - data["c_zfrac"] - data["c_ifrac"]
+			
+			# residential zip fractions for loadshapes
+			data["r_z_pf"] = 0.97
+			data["r_i_pf"] = 0.97
+			data["r_p_pf"] = 0.97
+			data["r_zfrac"] = 0.2
+			data["r_ifrac"] = 0.4
+			data["r_pfrac"] = 1 - data["r_zfrac"] - data["r_ifrac"]
+	
+	data["ts_penetration"] = 10 #0-100, percent of buildings utilizing thermal storage - for all regions
+	return data
+
+def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None):
 	#glmDict is a dictionary containing all the objects in WindMIL model represented as equivalent GridLAB-D objects
 
 	#case_flag is an integer indicating which technology case to tack on to the GridLAB-D model
@@ -78,28 +194,6 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	last_key += 1
 
 	# Create dictionaries of preprocessor directives
-	if use_flags['use_homes'] != 0:
-		glmCaseDict[last_key] = {'#include' : '../schedules/appliance_schedules.glm'}
-		last_key += 1
-		glmCaseDict[last_key] = {'#include' : '../schedules/water_and_setpoint_schedule_v5.glm'}
-		last_key += 1
-
-	if use_flags['use_battery'] == 1 or use_flags['use_battery'] == 2:
-		glmCaseDict[last_key] = {'#include' : '../schedules/battery_schedule.glm'}
-		last_key += 1
-
-	if use_flags['use_commercial'] == 1:
-		glmCaseDict[last_key] = {'#include' : '../schedules/commercial_schedules.glm'}
-		last_key += 1
-
-	if use_flags['use_market'] == 1 or use_flags['use_market'] == 2:
-		glmCaseDict[last_key] = {'#include' : '../schedules/daily_elasticity_schedules.glm'}
-		last_key += 1
-
-	if use_flags['use_ts'] == 2 or use_flags['use_ts'] == 4:
-		glmCaseDict[last_key] = {'#include' : '../schedules/thermal_storage_schedule_R{:d}.glm'.format(config_data['region'])}
-		last_key += 1
-
 	glmCaseDict[last_key] = {'#define' : 'stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0'}
 	last_key += 1
 
@@ -119,10 +213,6 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 	glmCaseDict[last_key] = {'module' : 'climate'}
 	last_key += 1
 
-	glmCaseDict[last_key] = {	'module' : 'residential',
-							 					'implicit_enduses' : 'NONE'}
-	last_key += 1
-
 	glmCaseDict[last_key] = {	'module' : 'powerflow',
 												'solver_method' : 'NR',
 												'NR_iteration_limit' : '50'}
@@ -130,10 +220,6 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 
 	if use_flags['use_solar'] != 0 or use_flags['use_solar_res'] != 0 or use_flags['use_solar_com'] != 0 or use_flags['use_battery'] == 1 or use_flags['use_battery'] == 2:
 		glmCaseDict[last_key] = {'module' : 'generators'}
-		last_key += 1
-
-	if use_flags['use_market'] != 0:
-		glmCaseDict[last_key] = {'module' : 'market'}
 		last_key += 1
 
 	# Add the class player dictionary to glmCaseDict
@@ -150,57 +236,6 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 													'loop' : '14600',
 													'comment' : '// Will loop file for 40 years assuming the file has data for a 24 hour period'}
 		last_key += 1
-
-	# Include the objects for the TOU case flags
-	if use_flags['use_market'] != 0:
-		# Add class auction dictionary to glmCaseDict
-		glmCaseDict[last_key] = {	'class' : 'auction',
-													'variable_types' : ['double','double'],
-													'variable_names' : ['my_avg','my_std']}
-		last_key += 1
-
-		# Add CPP player dictionary to glmCaseDict
-		CPP_flag_name = config_data['CPP_flag'] # Strip '.player' from config_data['CPP_flag']
-		CPP_flag_name.replace('.player','')
-		glmCaseDict[last_key] = {	'object' : 'player',
-													'name' : CPP_flag_name,
-													'file' : config_data['CPP_flag']}
-		last_key += 1
-
-		# Add auction object dictionary to glmCaseDict
-		# Determine which stat to use for my_avg and my_std
-		if use_flags['use_market'] == 1: #TOU
-			temp_avg = config_data['TOU_stats'][0]
-			temp_std = config_data['TOU_stats'][1]
-		elif use_flags['use_market'] == 2 or use_flags['use_market'] == 3: #TOU/CPP
-			temp_avg = config_data['CPP_stats'][0]
-			temp_std = config_data['CPP_stats'][1]
-
-		glmCaseDict[last_key] = {	'object' : 'auction',
-													'name' : tech_data['market_info'][0],
-													'period' : "{:.0f}".format(tech_data['market_info'][1]),
-													'special_mode' : 'BUYERS_ONLY',
-													'unit' : 'kW',
-													'my_avg' : temp_avg,
-													'my_std' : temp_std}
-		parent_key = last_key
-		last_key += 1
-
-		# Add player object dictionary for the auction object's clearing price
-		# Determine which file to use for the clear_price
-		if use_flags['use_market'] == 1: #TOU
-			auction_price_file = config_data['TOU_price_player']
-		elif use_flags['use_market'] == 2 or use_flags['use_market'] == 3: #TOU/CPP
-			auction_price_file = config_data['CPP_price_player']
-
-		glmCaseDict[last_key] = {	'object' : 'player',
-													'parent' : glmCaseDict[parent_key]['name'],
-													'file' : auction_price_file,
-													'loop' : '10',
-													'property' : 'current_market.clearing_price'}
-		last_key += 1
-	else:
-		CPP_flag_name = None;
 
 	# Add climate dictionaries
 	if '.csv' in tmy:
@@ -774,8 +809,7 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 		#print('calling ResidentialLoads.py\n')
 		if use_flags['use_normalized_loadshapes'] == 1:
 			glmCaseDict, last_key = AddLoadShapes.add_normalized_residential_ziploads(glmCaseDict, residential_dict, config_data, last_key)
-		else:
-			glmCaseDict, solar_residential_array, ts_residential_array, last_key = ResidentialLoads.append_residential(glmCaseDict, use_flags, tech_data, residential_dict, last_key, CPP_flag_name, market_penetration_random, dlc_rand, pool_pump_recovery_random, slider_random, xval, elasticity_random, wdir,configuration_file)
+
 	# End addition of residential loads ########################################################################################################################
 
 	# TODO: Call Commercial Function
@@ -783,21 +817,12 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None,file_to_extract=No
 		#print('calling CommercialLoads.py\n')
 		if use_flags['use_normalized_loadshapes'] == 1:
 			glmCaseDict, last_key = AddLoadShapes.add_normalized_commercial_ziploads(glmCaseDict, commercial_dict, config_data, last_key)
-		else:
-			glmCaseDict, solar_office_array, solar_bigbox_array, solar_stripmall_array, ts_office_array, ts_bigbox_array, ts_stripmall_array, last_key = CommercialLoads.append_commercial(glmCaseDict, use_flags, tech_data, last_key, commercial_dict, comm_slider_random, dlc_c_rand, dlc_c_rand2, wdir, configuration_file)
-			
-	# Append Solar: Call append_solar(feeder_dict, use_flags, config_file, solar_bigbox_array, solar_office_array, solar_stripmall_array, solar_residential_array, last_key)
-	if use_flags['use_solar'] != 0 or use_flags['use_solar_res'] != 0 or use_flags['use_solar_com'] != 0:
-		glmCaseDict = Solar_Technology.Append_Solar(glmCaseDict, use_flags, configuration_file, solar_bigbox_array, solar_office_array, solar_stripmall_array, solar_residential_array, last_key)
-		
-	# Append recorders
-	#glmCaseDict, last_key = AddTapeObjects.add_recorders(glmCaseDict,case_flag,0,1,'four_node_basecase_test', last_key)
 
 
 	return (glmCaseDict, last_key)
 
-def main():
+def _test():
 	# tests go here
 	pass
 if __name__ ==  '__main__':
-	main()
+	_test()
