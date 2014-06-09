@@ -1486,22 +1486,18 @@ def _test():
 	import sys, os
 	sys.path.append('..')
 	import feeder
-	
 	glmbase = feeder.parse('IEEE13.glm')
-	
 	working_dir = './population_test/'
-	
 	try:
 		os.mkdir(working_dir)
 	except:
 		pass # directory already exists
-	
 	glmpopulated, last_key = GLD_Feeder(glmbase, -1, working_dir, None)
 	glmstring = feeder.sortedWrite(glmpopulated)
 	gfile = open(os.path.join(working_dir, 'IEEE13pop.glm'), 'w')
 	gfile.write(glmstring)
 	gfile.close()
 	print('success')
-	pass
+
 if __name__ ==  '__main__':
 	_test()

@@ -1,4 +1,4 @@
-''' Model type hidden to users for special missions. '''
+''' Model type hidden to users. Usable for top secret missions. '''
 
 def getStatus():
 	return "finished"
