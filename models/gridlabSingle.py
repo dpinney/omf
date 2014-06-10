@@ -275,7 +275,7 @@ def cancel(modelDir):
 def _tests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
-	inData = { "modelName": "Automated Testing",
+	inData = { "modelName": "Automated GridlabD Testing",
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"feederName": "public___Simple Market System",

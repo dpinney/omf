@@ -1,7 +1,6 @@
 ''' Calculate solar photovoltaic system output using PVWatts. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, datetime as dt
-import multiprocessing
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt
 from os.path import join as pJoin
 from jinja2 import Template
 import __util__ as util
@@ -76,7 +75,7 @@ def run(modelDir, inputDict):
 	# Check whether model exist or not
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
-		inputDict["created"] = str(datetime.datetime.now())
+		inputDict["created"] = str(dt.datetime.now())
 	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
@@ -126,9 +125,9 @@ def run(modelDir, inputDict):
 		int(inputDict["simLength"]), inputDict["simLengthUnits"], ssc, dat)
 	# Timestamp output.
 	outData = {}
-	outData["timeStamps"] = [datetime.datetime.strftime(
+	outData["timeStamps"] = [dt.datetime.strftime(
 		dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
-		datetime.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict["simLength"]))]
+		dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict["simLength"]))]
 	# Geodata output.
 	outData["city"] = ssc.ssc_data_get_string(dat, "city")
 	outData["state"] = ssc.ssc_data_get_string(dat, "state")
