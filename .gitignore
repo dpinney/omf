@@ -12,3 +12,6 @@ data/User/*
 !data/User/admin.json
 !data/User/public.json
 S3KEY.*
+build
+dist
+omf.egg-info
