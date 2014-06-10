@@ -77,9 +77,9 @@ def run(modelDir, inputDict):
 		inputDict["created"] = str(dt.datetime.now())
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
-	# Copy spcific climate data into model directory
-	shutil.copy(pJoin(_omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
-		pJoin(modelDir, "climate.tmy2"))
+	# # Copy spcific climate data into model directory
+	# shutil.copy(pJoin(_omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
+	# 	pJoin(modelDir, "climate.tmy2"))
 	# Ready to run
 	startTime = dt.datetime.now()
 	### TODO:DO SOMETHING HERE.
@@ -99,6 +99,83 @@ def run(modelDir, inputDict):
 	inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent=4)
+
+def voltPlot(tree, workDir=None):
+	''' Draw a color-coded map of the voltage drop on a feeder.
+	Returns a matplotlib object. '''
+	# Get rid of schedules:
+	for key in tree.keys():
+		if tree[key].get("argument","") == "\"schedules.glm\"":
+			del tree[key]
+	# Make sure we have a voltDump:
+	# object voltdump {
+	# 	filename voltDump.csv;
+	# };
+	# Run Gridlab. First write GLM:
+	gridlabOut = gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
+	# with open('voltDump.csv','r') as dumpFile:
+	# 	reader = csv.reader(dumpFile)
+	# 	print 'Headers:', reader.next()
+	# 	keys = reader.next()
+	# 	print 'Keys:', keys
+	# 	voltTable = []
+	# 	for row in reader:
+	# 		rowDict = {}
+	# 		for pos,key in enumerate(keys):
+	# 			rowDict[key] = row[pos]
+	# 		voltTable.append(rowDict)
+	print gridlabOut.keys()
+	return False
+	# Calculate average node voltage deviation. First, helper functions.
+	def pythag(x,y):
+		''' For right triangle with sides a and b, return the hypotenuse. '''
+		return math.sqrt(x**2+y**2)
+	def digits(x):
+		''' Returns number of digits before the decimal in the float x. '''
+		return ceil(log10(x+1))
+	def avg(l):
+		''' Average of a list of ints or floats. '''
+		return sum(l)/len(l)
+	# Detect the feeder nominal voltage:
+	for key in tree:
+		ob = tree[key]
+		if type(ob)==dict and ob.get('bustype','')=='SWING':
+			feedVoltage = float(ob.get('nominal_voltage',1))
+	# Tot it all up.
+	nodeVolts = {}
+	for row in voltTable:
+		allVolts = []
+		for phase in ['A','B','C']:
+			phaseVolt = pythag(float(row['volt'+phase+'_real']),
+							   float(row['volt'+phase+'_imag']))
+			if phaseVolt != 0.0:
+				if digits(phaseVolt)>3:
+					# Normalize to 120 V standard
+					phaseVolt = phaseVolt*(120/feedVoltage)
+				allVolts.append(phaseVolt)
+		nodeVolts[row.get('node_name','')] = avg(allVolts)
+	# Examples.
+	print 'Example Deviations:'
+	for key in nodeVolts.keys()[0:5]:
+		print key, nodeVolts[key]
+	# Color nodes by VOLTAGE.
+	fGraph = feeder.treeToNxGraph(tree)
+	voltChart = plt.figure(figsize=(12,10))
+	plt.axes(frameon = 0)
+	plt.axis('off')
+	positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+	edgeIm = nx.draw_networkx_edges(fGraph, positions)
+	nodeIm = nx.draw_networkx_nodes(fGraph,
+		pos = positions,
+		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
+		linewidths = 0,
+		node_size = 30,
+		cmap = plt.cm.jet)
+	plt.sci(nodeIm)
+	plt.clim(110,130)
+	plt.colorbar()
+	# plt.show()
+	return voltChart
 
 def cancel(modelDir):
 	''' Voltage drop runs so fast it's pointless to cancel a run. '''
@@ -130,5 +207,12 @@ def _tests():
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)
 
+def _newTest():
+	#TODO: delete me and change main back.
+	import json
+	tree = json.load(open("../data/Feeder/public/Olin Barre Geo.json")).get("tree",{})
+	voltPlot(tree)
+
 if __name__ == '__main__':
-	_tests()
+	_newTest()
+	#_tests()
