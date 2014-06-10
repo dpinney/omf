@@ -1,8 +1,10 @@
 ''' Graph the voltage drop on a feeder. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
 from os.path import join as pJoin
 from jinja2 import Template
+from matplotlib import pyplot as plt
+import networkx as nx
 
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
@@ -113,28 +115,28 @@ def voltPlot(tree, workDir=None):
 		except: return 0
 	biggestKey = max([safeInt(x) for x in tree.keys()])
 	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
-	# Run Gridlab. First write GLM:
+	# Run Gridlab.
+	if not workDir:
+		workDir = tempfile.mkdtemp()
+		print "gridlabD runInFilesystem with no specified workDir. Working in", workDir
 	gridlabOut = gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
-	# with open('voltDump.csv','r') as dumpFile:
-	# 	reader = csv.reader(dumpFile)
-	# 	print 'Headers:', reader.next()
-	# 	keys = reader.next()
-	# 	print 'Keys:', keys
-	# 	voltTable = []
-	# 	for row in reader:
-	# 		rowDict = {}
-	# 		for pos,key in enumerate(keys):
-	# 			rowDict[key] = row[pos]
-	# 		voltTable.append(rowDict)
-	voltTable = gridlabOut.get("voltDump.csv",[])
-	print voltTable
+	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
+		reader = csv.reader(dumpFile)
+		reader.next() # Burn the header.
+		keys = reader.next()
+		voltTable = []
+		for row in reader:
+			rowDict = {}
+			for pos,key in enumerate(keys):
+				rowDict[key] = row[pos]
+			voltTable.append(rowDict)
 	# Calculate average node voltage deviation. First, helper functions.
 	def pythag(x,y):
 		''' For right triangle with sides a and b, return the hypotenuse. '''
 		return math.sqrt(x**2+y**2)
 	def digits(x):
 		''' Returns number of digits before the decimal in the float x. '''
-		return ceil(log10(x+1))
+		return math.ceil(math.log10(x+1))
 	def avg(l):
 		''' Average of a list of ints or floats. '''
 		return sum(l)/len(l)
@@ -157,14 +159,16 @@ def voltPlot(tree, workDir=None):
 				allVolts.append(phaseVolt)
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
 	# Examples.
-	print 'Example Deviations:'
-	for key in nodeVolts.keys()[0:5]:
-		print key, nodeVolts[key]
+	# print 'Example Deviations:'
+	# for key in nodeVolts.keys()[0:5]:
+	# 	print key, nodeVolts[key]
 	# Color nodes by VOLTAGE.
 	fGraph = feeder.treeToNxGraph(tree)
 	voltChart = plt.figure(figsize=(12,10))
 	plt.axes(frameon = 0)
 	plt.axis('off')
+	for x in fGraph:
+		print fGraph.node[x]
 	positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 	edgeIm = nx.draw_networkx_edges(fGraph, positions)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
@@ -176,7 +180,7 @@ def voltPlot(tree, workDir=None):
 	plt.sci(nodeIm)
 	plt.clim(110,130)
 	plt.colorbar()
-	# plt.show()
+	plt.show()
 	return voltChart
 
 def cancel(modelDir):
