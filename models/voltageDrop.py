@@ -158,7 +158,6 @@ def voltPlot(tree, workDir=None):
 					phaseVolt = phaseVolt*(120/feedVoltage)
 				allVolts.append(phaseVolt)
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
-	# Examples.
 	# print 'Example Deviations:'
 	# for key in nodeVolts.keys()[0:5]:
 	# 	print key, nodeVolts[key]
@@ -180,7 +179,6 @@ def voltPlot(tree, workDir=None):
 	plt.sci(nodeIm)
 	plt.clim(110,130)
 	plt.colorbar()
-	plt.show()
 	return voltChart
 
 def cancel(modelDir):
@@ -217,7 +215,8 @@ def _newTest():
 	#TODO: delete me and change main back.
 	import json
 	tree = json.load(open("../data/Feeder/public/Olin Barre Geo.json")).get("tree",{})
-	voltPlot(tree)
+	chart = voltPlot(tree)
+	chart.show()
 
 if __name__ == '__main__':
 	_newTest()

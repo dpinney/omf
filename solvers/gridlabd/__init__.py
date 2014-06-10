@@ -2,6 +2,7 @@
 
 import sys, os, subprocess, platform, re, datetime, shutil, traceback, math, time, tempfile, json
 from os.path import join as pJoin
+from copy import deepcopy
 
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
@@ -53,15 +54,16 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 		if not workDir:
 			workDir = tempfile.mkdtemp()
 			print "gridlabD runInFilesystem with no specified workDir. Working in", workDir
-		# Need to zero out lat/lon data because it frequently breaks Gridlab.
-		for key in feederTree:
-			if 'latitude' in feederTree[key]: feederTree[key]['latitude'] = '0'
-			if 'longitude' in feederTree[key]: feederTree[key]['longitude'] = '0'
+		# Need to zero out lat/lon data on copy because it frequently breaks Gridlab.
+		localTree = deepcopy(feederTree)
+		for key in localTree:
+			if 'latitude' in localTree[key]: localTree[key]['latitude'] = '0'
+			if 'longitude' in localTree[key]: localTree[key]['longitude'] = '0'
 		# Write attachments and glm.
 		for attach in attachments:
 			with open (pJoin(workDir,attach),'w') as attachFile:
 				attachFile.write(attachments[attach])
-		glmString = feeder.sortedWrite(feederTree)
+		glmString = feeder.sortedWrite(localTree)
 		with open(pJoin(workDir,'main.glm'),'w') as glmFile:
 			glmFile.write(glmString)
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
