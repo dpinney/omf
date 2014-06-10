@@ -1,0 +1,4 @@
+recursive-include * *.*
+prune scratch/*
+prune build/*
+prune data/Model/admin/*
