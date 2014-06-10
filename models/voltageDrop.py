@@ -166,8 +166,6 @@ def voltPlot(tree, workDir=None):
 	voltChart = plt.figure(figsize=(12,10))
 	plt.axes(frameon = 0)
 	plt.axis('off')
-	for x in fGraph:
-		print fGraph.node[x]
 	positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 	edgeIm = nx.draw_networkx_edges(fGraph, positions)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
@@ -216,7 +214,7 @@ def _newTest():
 	import json
 	tree = json.load(open("../data/Feeder/public/Olin Barre Geo.json")).get("tree",{})
 	chart = voltPlot(tree)
-	chart.show()
+	plt.show()
 
 if __name__ == '__main__':
 	_newTest()
