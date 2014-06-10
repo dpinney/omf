@@ -103,14 +103,16 @@ def run(modelDir, inputDict):
 def voltPlot(tree, workDir=None):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	Returns a matplotlib object. '''
-	# Get rid of schedules:
+	# Get rid of schedules and climate:
 	for key in tree.keys():
-		if tree[key].get("argument","") == "\"schedules.glm\"":
+		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
 			del tree[key]
 	# Make sure we have a voltDump:
-	# object voltdump {
-	# 	filename voltDump.csv;
-	# };
+	def safeInt(x):
+		try: return int(x)
+		except: return 0
+	biggestKey = max([safeInt(x) for x in tree.keys()])
+	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
 	# Run Gridlab. First write GLM:
 	gridlabOut = gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
 	# with open('voltDump.csv','r') as dumpFile:
@@ -124,8 +126,8 @@ def voltPlot(tree, workDir=None):
 	# 		for pos,key in enumerate(keys):
 	# 			rowDict[key] = row[pos]
 	# 		voltTable.append(rowDict)
-	print gridlabOut.keys()
-	return False
+	voltTable = gridlabOut.get("voltDump.csv",[])
+	print voltTable
 	# Calculate average node voltage deviation. First, helper functions.
 	def pythag(x,y):
 		''' For right triangle with sides a and b, return the hypotenuse. '''
