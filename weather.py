@@ -647,13 +647,6 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	outFile = open(pJoin(workDir,"weather.csv"), "w")
 	# write header
 	outFile.write('#weather file\n');
-	outFile.write('$state_name=North Carolina\n');
-	outFile.write('$city_name=Charlotte\n');
-	outFile.write('$lat_deg=35\n');
-	outFile.write('$lat_min=13\n');
-	outFile.write('$long_deg=-80\n');
-	outFile.write('$long_min=56\n');
-	outFile.write('$timezone_offset=-4\n');
 	outFile.write('temperature,wind_speed,humidity,solar_dir,solar_diff,solar_global\n');
 	outFile.write('#month:day:hour:minute:second\n');
 	# write samples per-line
