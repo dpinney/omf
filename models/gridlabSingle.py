@@ -68,9 +68,6 @@ def run(modelDir, inputDict):
 		pJoin(modelDir,"feeder.json"))
 	shutil.copy(pJoin(_omfDir,"data","Climate",inputDict["climateName"] + ".tmy2"),
 		pJoin(modelDir,"climate.tmy2"))
-	# Touch the PID to indicate the run has started.
-	with open(pJoin(modelDir,"PID.txt"), 'a'):
-		os.utime(pJoin(modelDir,"PID.txt"), None)
 	# If we are re-running, remove output:
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
@@ -92,7 +89,7 @@ def getStatus(modelDir):
 	except:
 		modFiles = []
 	hasInput = "allInputData.json" in modFiles
-	hasPID = "PID.txt" in modFiles
+	hasPID = "PPID.txt" in modFiles
 	hasOutput = "allOutputData.json" in modFiles
 	if hasInput and not hasOutput and not hasPID:
 		return "stopped"

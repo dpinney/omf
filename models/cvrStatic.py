@@ -62,7 +62,7 @@ def getStatus(modelDir):
 	except:
 		modFiles = []
 	hasInput = "allInputData.json" in modFiles
-	hasPID = "PID.txt" in modFiles
+	hasPID = "PPID.txt" in modFiles
 	hasOutput = "allOutputData.json" in modFiles
 	if hasInput and not hasOutput and not hasPID:
 		return "stopped"
@@ -97,16 +97,12 @@ def run(modelDir, inputDict):
 	feederDir, feederName = inputDict["feederName"].split("___")
 	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
 		pJoin(modelDir,"feeder.json"))
-	# Touch the PID to indicate the run has started.
-	with open(pJoin(modelDir,"PID.txt"), 'a'):
-		os.utime(pJoin(modelDir,"PID.txt"), None)
 	# If we are re-running, remove output:
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
 	except:
 		pass
 	# Start the computation.
-
 	backProc = multiprocessing.Process(target=runForeground, args=(modelDir, inputDict))
 	backProc.start()
 	print "SENT TO BACKGROUND", modelDir
