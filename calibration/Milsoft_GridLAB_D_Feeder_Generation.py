@@ -1305,6 +1305,7 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None):
 		if use_flags['use_normalized_loadshapes'] == 1:
 			glmCaseDict, last_key = _add_normalized_commercial_ziploads(glmCaseDict, commercial_dict, config_data, last_key)
 	return glmCaseDict, last_key
+
 def _test():
 	import sys, os
 	sys.path.append('..')
