@@ -1,0 +1,330 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<style>
+		/*INPUT*/
+		div.content {width:1000px;}
+		.shortInput {width:330px; display:inline-block; margin-bottom:10px;}
+		.wideInput {width:1000; margin-bottom:10px;}
+		label {display:block; line-height:16pt;}
+		input[type="text"], select {font-size:medium; display:block; margin:0px;}
+		#input {margin-top: 0px;}
+		button {width:auto;}
+		#cancelButton {background:crimson;}
+		#cancelButton:hover {background:red;}
+		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
+		/*OUTPUT*/
+		div.tightContent {width:1000px; margin-left:auto; margin-right:auto; margin-top:0px; margin-bottom:20px; border-style: solid; border-color:gray; border-width:1px 0px 1px 0px; background-color:white;}
+		.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt; display:block;}
+		td,th {text-align: right}
+		.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped {display:none;}
+	</style>
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<!-- Global Functions -->
+	<script type="text/javascript">
+		function init() {
+			// If we have input, put it back.
+			if (allInputData != null) {
+				restoreInputs()
+				$("#modelName").prop("readonly", true)
+			}
+			// Depending on status, show different things.
+			if (modelStatus == "finished") {
+				console.log("FINISHED")
+				$(".postRun").css('display', 'block')
+				$(".postRunInline").css('display', 'inline-block')
+			} else if (modelStatus == "running") {
+				console.log("RUNNING")
+				$(".running").css('display', 'block')
+				$(".runningInline").css('display', 'inline-block')
+				$("input").prop("readonly", true)
+				$("select").prop("disabled", true)
+			} else /* Stopped */ {
+				if (allInputData != null) {
+					$(".stopped").show()
+					$(".stoppedInline").show()
+				} else {
+					console.log("PRERUN")
+					$(".preRun").css('display', 'inline-block')
+				}
+			}
+		}
+		function restoreInputs() {
+			// Restore all the input values that were used and stored in allInputData.json.
+			gebi("titleText").innerHTML = allInputData.modelName
+			for (index in allInputData) {
+				try {document.querySelector("#" + index).value = allInputData[index]}
+				catch(err){}
+			}
+		}
+		function validateForm() {
+			// Make sure each field matches its validation regex.
+			allFields = $("input")
+			returnVal = true
+			for (i=0; i < allFields.length; i++) {
+				allFields[i].style["border-color"] = "white"
+				currVal = allFields[i].value + ""
+				regex = allFields[i].getAttribute("data-validRegex")
+				if (regex != null && currVal.match(regex) != currVal) {
+					allFields[i].style["border-color"] = "crimson"
+					returnVal = false
+				}
+			}
+			if (returnVal == false) {alert("Form values bordered in red don't match the required format.")}
+			return returnVal
+		}
+		// Little function here to get discloser triangles:
+		function toggleAdvanced(clickedObject) {
+			siblings = clickedObject.parentNode.parentNode.parentNode.querySelectorAll('.advancedOption')
+			for (i=0;i<siblings.length;i++) {
+				visible = (getComputedStyle(siblings[i])['display'] == 'none')
+				if (visible) {
+					siblings[i].style.display='table-row'
+				} else {
+					siblings[i].style.display='none'
+				}
+			}
+			if (visible) {code = 9660} else {code = 9654}
+				clickedObject.textContent = String.fromCharCode(code) + ' Advanced Options'
+		}
+		function cancelModel() {
+			params = {user:allInputData.user,
+				modelName:allInputData.modelName,
+				modelType:allInputData.modelType}
+			post_to_url("/cancelModel/", params, "POST")
+		}
+		function deleteModel() {
+			if (confirm("Deleting this model cannot be undone. Continue?")){
+				post_to_url("/delete/Model/"+allInputData.user+"/"+allInputData.modelName, {}, "POST")
+			} else {
+				return false
+			}
+		}
+		function publishModel() {
+			newName = prompt("Publish a copy with name", allInputData.modelName)
+			if (newName) {
+				$.ajax({url:"/uniqObjName/Model/public/" + newName}).done(function(data) {
+					if (data.exists) {
+						alert("There is already a public Model named " + newName)
+						publishModel()
+					} else {
+						post_to_url("/publishModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
+					}
+				})
+			}
+		}
+		function duplicateModel() {
+			newName = prompt("Create a duplicate with name", allInputData.modelName)
+			if (newName) {
+				$.ajax({url:"/uniqObjName/Model/" + allInputData.user + "/" + newName}).done(function(data) {
+					if (data.exists) {
+						alert("There is already a model named " + newName)
+						duplicateModel()
+					} else {
+						post_to_url("/duplicateModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
+					}
+				})
+			}
+		}
+	</script>
+</head>
+<body onload="init()">
+	<div id="title">
+		<div id="logoBox"><a href="/">&#10059;</a></div>
+		<p id="titleText">New Static CVR Model</p>
+	</div>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
+			<div class="shortInput">
+				<label>Model Type</label>
+				<input type="text" id="modelType" name="modelType" value="cvrStatic" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Feeder</label>
+				<select id="feederName" name="feederName"/>
+					<option disabled><strong>Personal Feeders</strong></option>
+					{% for feeder in datastoreNames['feeders'] %}
+						<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
+					{% endfor %}
+					<option disabled><strong>Public Feeders</strong></option>
+					{% for pFeeder in datastoreNames['publicFeeders'] %}
+						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/></td>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/></td>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/></td>
+			</div>
+			<div class="shortInput">
+				<label>Capital Cost</label>
+				<input type="text" id="capitalCost" name="capitalCost" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>OM Cost</label>
+				<input type="text" id="omCost" name="omCost" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Wholesale Energy Cost ($/kWh)</label>
+				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Retail Energy Cost ($/kWh)</label>
+				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Spring Demand Charge ($/kW)</label>
+				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Summer Demand Charge ($/kW)</label>
+				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Fall Demand Charge ($/kW)</label>
+				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Winter Demand Charge ($/kW)</label>
+				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>baselineTap</label>
+				<input type="text" id="baselineTap" name="baselineTap" value="3"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Z (%)</label>
+				<input type="text" id="z_percent" name="z_percent"  value="0.5"/></td>
+			</div>
+			<div class="shortInput">
+				<label>I (%)</label>
+				<input type="text" id="i_percent" name="i_percent" value="0"/></td>
+			</div>
+			<div class="shortInput">
+				<label>P (%)</label>
+				<input type="text" id="p_percent" name="p_percent"  value="0.5"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Power factor</label>
+				<input type="text" id="power_factor" name="power_factor" value="0.9"/></td>
+			</div>
+			<div class="wideInput">
+				<table>
+					<tr>
+						<th></th>
+						<th>January</th>
+						<th>February</th>
+						<th>March</th>
+						<th>April</th>
+						<th>May</th>
+						<th>June</th>
+						<th>July</th>
+						<th>August</th>
+						<th>September</th>
+						<th>October</th>
+						<th>November</th>
+						<th>December</th>
+					</tr>						
+					<tr>
+						<th>Peak Load</th>
+						<td><input type="text" id="janAvg" name="janAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febAvg" name="febAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marAvg" name="marAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprAvg" name="aprAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="mayAvg" name="mayAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junAvg" name="junAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julAvg" name="julAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augAvg" name="augAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepAvg" name="sepAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octAvg" name="octAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novAvg" name="novAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decAvg" name="decAvg" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+					<tr>
+						<th>Avg Load</th>
+						<td><input type="text" id="janPeak" name="janPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febPeak" name="febPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marPeak" name="marPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprPeak" name="aprPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="mayPeak" name="mayPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junPeak" name="junPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julPeak" name="julPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augPeak" name="augPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepPeak" name="sepPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octPeak" name="octPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novPeak" name="novPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decPeak" name="decPeak" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+				</table>
+			</div>
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="rerunButton" type="submit" class="postRunInline stoppedInline">Re-Run Model</button>
+			</div>
+		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results.
+	</div>
+	<div id ="stopIndicator" class="content stopped">
+		Model cancelled or encountered an error. Please change inputs and re-run.
+	</div>
+	<div id="output">
+		<p class="reportTitle postRun">Historical Loads</p>
+		<div id="scadaReport" class="tightContent postRun">
+			<img id="scadaChart" />
+			<script type="text/javascript">gebi("scadaChart").src = "data:image/png;base64," + allOutputData.scadaChart</script>
+		</div>
+		<p class="reportTitle postRun">One Line Diagram</p>
+		<div id="feederReport" class="tightContent postRun">
+			<img id="feederChart" />
+			<script type="text/javascript">gebi("feederChart").src = "data:image/png;base64," + allOutputData.feederChart</script>
+		</div>
+		<p class="reportTitle postRun">Projected Savings by Month</p>
+		<div id="spendReport" class="tightContent postRun">
+			<img id="spendChart" />
+			<script type="text/javascript">gebi("spendChart").src = "data:image/png;base64," + allOutputData.spendChart</script>
+		</div>
+		<p class="reportTitle postRun">Projected Avoided Cost</p>
+		<div id="savingsReport" class="tightContent postRun">
+			<img id="savingsChart" />
+			<script type="text/javascript">gebi("savingsChart").src = "data:image/png;base64," + allOutputData.savingsChart</script>
+		</div>
+		<p class="reportTitle postRun">Power Flows at Various Loads</p>
+		<div id="powerflowReport" class="tightContent postRun">
+			<img id="powerflowTable" />
+			<script type="text/javascript">gebi("powerflowTable").src = "data:image/png;base64," + allOutputData.powerflowTable</script>
+		</div>
+		<p class="reportTitle postRun">Savings at Various Loads</p>
+		<div id="moneyReport" class="tightContent postRun">
+			<img id="moneyTable" />
+			<script type="text/javascript">gebi("moneyTable").src = "data:image/png;base64," + allOutputData.moneyTable</script>
+		</div>
+	</div>
+</body>

@@ -1,0 +1,134 @@
+<head>
+	<style>
+	.error{color:red; display:none;}
+	.success{color:green; display:none;}
+	.owner{font-weight:bold;}
+	table{text-align:left;}
+	.Registered{color:green;}
+	.emailSent{color:blue;}
+	.emailExpired{color:red;}
+	</style>
+	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
+	<script>
+		$(function(){
+			// What the hell does this function do?
+			$(".new_user").submit(function(e){
+			var email = $("input[name=email]").val()
+			$(".error, .success").hide()
+			$.ajax({
+				url:"new_user",
+				data:{
+					_csrf_token:"{{ csrf_token() }}",
+				email:email
+				},
+				method:"post"
+			}).done(function(data){
+				if (data == "Already Exists"){
+				$("#alreadyExists").fadeIn();
+				$("input[name=email]").select()
+				$($.makeArray($("tr")).filter(function(tr){
+					return $(tr).attr("id") == email;
+				})[0]).hide().css("background-color", "yellow").fadeIn();
+				}else if(data == "Success"){
+				// $("#userTable").append(
+				$("<tr>")
+					.attr("id", email)
+					.append($("<td>")
+						.html(email))
+					.append($("<td>")
+						.addClass("emailSent")
+						.html("Email sent"))
+					.append($("<td>")
+						.append($("<button>")
+							.attr("name", email)
+							.addClass("deleteButton")
+							.html("Delete"))
+						.append($("<button>")
+							.attr("name", email)
+							.addClass("resendEmail")
+							.html("Resend Email")))
+					.hide().appendTo("#userTable").fadeIn();
+					
+				$("input[name=email]").val("");
+							   
+				}
+				else
+				document.write(data);
+			})
+			e.preventDefault();
+			return false;
+			})
+			$(document).on("click", ".resendEmail", function(e){
+			var username = $(this).attr("name");
+			var self = this;
+			$.ajax({
+				url:"/new_user",
+				data:{
+				email:username,
+				_csrf_token: "{{ csrf_token() }}",
+				resend:true
+				},
+				method:"post"
+			}).done(function(data){
+				alert(data);
+				$(self).parent().parent().children(".emailExpired").html("Email sent").attr("class", "emailSent")
+			})
+			})
+			$(document).on("click", ".deleteButton", function(e){
+			var username = $(this).attr("name");
+			var self = this;
+			if (confirm("Are you sure you want to delete this user and all associated data?")){
+				$.ajax({
+				url:"deleteUser",
+				data:{
+					username:username,
+					_csrf_token: "{{ csrf_token() }}"
+				},
+				method:"post"
+				}).done(function(data){
+				if (data == "Success"){
+					// $(self).parent().remove();
+					// alert("User succesfully deleted!");
+					$(self).parent().parent().fadeOut();
+					// $("tr #"+username).remove();
+				}else{
+					alert("Something has gone wrong!")
+				}
+				})
+			}
+			})
+		})
+		</script>
+</head>
+<body>
+	<h1>Admin Controls</h1>
+	<a href="/">Home</a>
+	<h2>Users</h2>
+	<h3>Create New User!</h3>
+	<form class="new_user">
+	  <input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+	  <input type="text" name="email" placeholder="User's Email Address"/>
+	  <span id="alreadyExists" class="error">A user with that email already exists!</span>
+	  <br />
+	  <input type="submit" value="Submit">
+	</form>
+	<table id="userTable">
+	  <tr>
+		<th>User</th>
+		<th>Status</th>
+		<th>Options</th>
+	  </tr>
+	  {% for user in users %}
+	  <tr id="{{ user.username }}">
+		<td>{{ user.username }}</td>
+		<td class="{{ user.status }}">{{ user.status }}</td>
+		<td>
+		  <button name="{{ user.username }}" class="deleteButton">Delete</button>
+		  {% if user.status != "Registered" %}
+		  <button name="{{ user.username }}" class="resendEmail">Resend Email</button>
+		  {% endif %}
+		</td>
+	  </tr>
+	  {% endfor %}
+	</table>
+</body>

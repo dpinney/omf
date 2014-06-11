@@ -1,6 +1,0 @@
-{
-    "username": "test", 
-    "password_digest": "$pbkdf2-sha512$12000$H8P4HwPA2Pvfu5eyltJaaw$tenWEWe4.UfqUhr3hzAyNvkn7.NyszDb1hoWsoIN.RvsXgA/rybxQUFtowh.cMPAi5/cpTfsmYlBDRbBtiNW/g", 
-    "name": "test", 
-    "csrf": "13ce25528d8556e9c6c80e832a872cee"
-}

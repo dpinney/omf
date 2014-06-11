@@ -1,4 +1,10 @@
-recursive-include * *.*
-prune scratch/*
-prune build/*
-prune data/Model/admin/*
+include *.*
+include omf/*.*
+recursive-include omf/* *.*
+recursive-include omf/models *.*
+prune omf/.git
+prune omf/data/Model/admin
+prune omf/scratch
+prune omf/build
+prune omf/dist
+prune omf/omf.egg-info

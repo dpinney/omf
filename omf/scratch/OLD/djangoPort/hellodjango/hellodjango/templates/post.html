@@ -1,0 +1,19 @@
+<div class="post" id="{{ p.id }}">
+  <h1>{{ p.title }}</h1>
+  <p>{{ p.author }}</p>
+  <p>{{ p.text }}</p>
+  <p><strong>Comments</strong></p>
+  <div class="comments">
+    {% for c in p.comment_set.all %}
+    {% include "comment.html" %}
+    {% endfor %}
+  </div>
+  <p><strong>Write a comment!</strong></p>
+  <form action="{% url 'dj_unchained.views.comment' %}" method="post" class="commentForm">
+    {% csrf_token %}
+    <input type="hidden" name="post_id" value="{{ p.id }}" />
+    <input type="text" name="author" placeholder="Author" /><br>
+    <textarea name="text" rows="2" cols="50"></textarea><br>
+    <input type="submit" value="Submit">
+  </form>
+</div>

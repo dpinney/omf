@@ -1,0 +1,26 @@
+<!-- Prove that we can dynamically add/read elements to forms. -->
+<head>
+	<script>
+	function sub() {
+		// Put the data in the URL.
+		document.forms[0].serializeArray()
+		return false
+	}
+	function plus() {
+		// Add another form element.
+		form = document.querySelector("form")
+		newIn = document.createElement("input")
+		newIn.name = "string1"
+		form.appendChild(newIn)
+	}
+	</script>
+</head>
+<body>
+	<p>Input Form</p>
+	<form onsubmit="return sub()">
+		<button type="button" onclick="plus()">+</button>
+		<label>string</label>
+		<input id="string0" name="string0" type="text"/>
+		<button type="submit">submit button</button>
+	</form>
+</body>

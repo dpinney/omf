@@ -1,0 +1,540 @@
+/* example script for running pvsamv1
+   for webservice, designed for concept3D requirements
+   
+   runs 1 sub-array, cec 5 par module, snl inverter */
+
+clear();
+
+
+// web service input variables
+latitude = 33;
+longitude = 104;
+
+// array parameters
+ac_derate = 0.99;
+num_modules = 80;
+
+// module parameters
+cec_area = 1.244;
+cec_alpha_sc = 2.651e-003;
+cec_beta_oc = -1.423e-001;
+cec_gamma_r = -4.070e-001;
+cec_i_mp_ref = 5.25;
+cec_i_sc_ref = 5.75;
+cec_n_s = 72;
+cec_t_noct = 49.2;
+cec_v_mp_ref = 41;
+cec_v_oc_ref = 47.7;
+cec_standoff = 6;
+cec_height = 0;
+cec_r_s = 0.105;
+cec_r_sh_ref = 160.48;
+cec_i_o_ref = 1.919e-010;
+cec_i_l_ref = 5.754;
+cec_adjust = 20.8;
+cec_a_ref = 1.9816;
+
+// inverter parameters
+inv_snl_c0 = -6.57929e-006;
+inv_snl_c1 = 4.72925e-005;
+inv_snl_c2 = 0.00202195;
+inv_snl_c3 = 0.000285321;
+inv_snl_paco = 4000;
+inv_snl_pdco = 4186;
+inv_snl_pnt = 0.17;
+inv_snl_pso = 19.7391;
+inv_snl_vdco = 310.67;
+inv_snl_vdcmax = 0;
+inv_snl_vmin = 250;
+inv_snl_vmax = 480;
+
+tilt = 30;
+azimuth = 180;
+track_mode = 0;
+soiling = 0.95;
+dc_derate = 0.95558;
+
+// shading derate table
+shading_mxh =
+	[ [ 0,0,0,0,0,0,0,0,0.475,0.95,1,1,0.7875,0.2375,0.25,0.3625,0,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0,0,0,0.4875,1,1,1,0.925,0.6375,0.6625,0.225,0,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0,0,0.15,0.925,1,1,1,1,1,0.75,0.2,0,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0,0,0.45,0.9125,1,1,1,1,1,0.625,0.375,0,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0.075,0.05,0.7875,1,1,1,1,1,1,0.625,0.4875,0.025,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0.15,0.075,0.9,1,1,1,1,1,1,0.675,0.5,0.05,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0.1,0.0625,0.8375,1,1,1,1,1,1,0.6375,0.4875,0.025,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0,0,0.6625,0.9625,1,1,1,1,1,0.6125,0.4,0,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0,0,0.2,0.9125,1,1,1,1,1,0.7375,0.2125,0,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0,0,0.0625,0.7,1,1,1,0.9375,0.8,0.7,0.1875,0,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0,0,0,0.45,0.95,1,1,0.8125,0.3625,0.3625,0.375,0,0,0,0,0,0,0,0 ],
+	  [ 0,0,0,0,0,0,0,0.0125,0.525,0.95,1,0.9875,0.75,0.175,0.2125,0.275,0,0,0,0,0,0,0,0 ] ];
+
+// out-years system performance
+	  	  
+analysis_years = 30;
+availability = 100;
+degradation = 0.5;
+
+// financial
+federal_tax_rate = 35;
+state_tax_rate = 7;
+property_tax_rate = 1;
+prop_tax_cost_assessed_percent = 100;
+prop_tax_assessed_decline = 0;
+sales_tax_rate = 5;
+real_discount_rate = 5.2;
+inflation_rate = 2.5;
+insurance_rate = 0.5;
+system_capacity = 17.22;
+system_heat_rate = 0;
+loan_term = 30;
+loan_rate = 7;
+loan_debt = 50;
+optimize_lcoe_wrt_debt_fraction = 0;
+optimize_lcoe_wrt_ppa_escalation = 0;
+min_irr_target = 15;
+ppa_escalation = 0;
+salvage_percentage = 0;
+constr_total_financing = 1601.36;
+total_installed_cost = 80068.2;
+om_fixed = 0;
+om_fixed_escal = 0;
+om_production = 0;
+om_production_escal = 0;
+om_capacity = 20;
+om_capacity_escal = 0;
+om_fuel_cost = 0;
+om_fuel_cost_escal = 0;
+depr_fed_macrs = 1;
+depr_sta_macrs = 1;
+
+// incentives
+
+itc_fed_amount = 0;
+itc_fed_amount_deprbas_fed = 1;
+itc_fed_amount_deprbas_sta = 1;
+itc_sta_amount = 0;
+itc_sta_amount_deprbas_fed = 0;
+itc_sta_amount_deprbas_sta = 0;
+itc_fed_percent = 30;
+itc_fed_percent_maxvalue = 1e99;
+itc_fed_percent_deprbas_fed = 1;
+itc_fed_percent_deprbas_sta = 1;
+itc_sta_percent = 0;
+itc_sta_percent_maxvalue = 1e99;
+itc_sta_percent_deprbas_fed = 0;
+itc_sta_percent_deprbas_sta = 0;
+ptc_fed_amount = [0];
+ptc_fed_term = 10;
+ptc_fed_escal = 2;
+ptc_sta_amount = [0];
+ptc_sta_term = 10;
+ptc_sta_escal = 2;
+ibi_fed_amount = 0;
+ibi_fed_amount_tax_fed = 1;
+ibi_fed_amount_tax_sta = 1;
+ibi_fed_amount_deprbas_fed = 0;
+ibi_fed_amount_deprbas_sta = 0;
+ibi_sta_amount = 0;
+ibi_sta_amount_tax_fed = 1;
+ibi_sta_amount_tax_sta = 1;
+ibi_sta_amount_deprbas_fed = 0;
+ibi_sta_amount_deprbas_sta = 0;
+ibi_uti_amount = 0;
+ibi_uti_amount_tax_fed = 1;
+ibi_uti_amount_tax_sta = 1;
+ibi_uti_amount_deprbas_fed = 0;
+ibi_uti_amount_deprbas_sta = 0;
+ibi_oth_amount = 0;
+ibi_oth_amount_tax_fed = 1;
+ibi_oth_amount_tax_sta = 1;
+ibi_oth_amount_deprbas_fed = 0;
+ibi_oth_amount_deprbas_sta = 0;
+ibi_fed_percent = 0;
+ibi_fed_percent_maxvalue = 1e99;
+ibi_fed_percent_tax_fed = 1;
+ibi_fed_percent_tax_sta = 1;
+ibi_fed_percent_deprbas_fed = 0;
+ibi_fed_percent_deprbas_sta = 0;
+ibi_sta_percent = 0;
+ibi_sta_percent_maxvalue = 1e99;
+ibi_sta_percent_tax_fed = 1;
+ibi_sta_percent_tax_sta = 1;
+ibi_sta_percent_deprbas_fed = 0;
+ibi_sta_percent_deprbas_sta = 0;
+ibi_uti_percent = 0;
+ibi_uti_percent_maxvalue = 1e99;
+ibi_uti_percent_tax_fed = 1;
+ibi_uti_percent_tax_sta = 1;
+ibi_uti_percent_deprbas_fed = 0;
+ibi_uti_percent_deprbas_sta = 0;
+ibi_oth_percent = 0;
+ibi_oth_percent_maxvalue = 1e99;
+ibi_oth_percent_tax_fed = 1;
+ibi_oth_percent_tax_sta = 1;
+ibi_oth_percent_deprbas_fed = 0;
+ibi_oth_percent_deprbas_sta = 0;
+cbi_fed_amount = 0;
+cbi_fed_maxvalue = 1e99;
+cbi_fed_tax_fed = 1;
+cbi_fed_tax_sta = 1;
+cbi_fed_deprbas_fed = 0;
+cbi_fed_deprbas_sta = 0;
+cbi_sta_amount = 0;
+cbi_sta_maxvalue = 1e99;
+cbi_sta_tax_fed = 1;
+cbi_sta_tax_sta = 1;
+cbi_sta_deprbas_fed = 0;
+cbi_sta_deprbas_sta = 0;
+cbi_uti_amount = 0;
+cbi_uti_maxvalue = 1e99;
+cbi_uti_tax_fed = 1;
+cbi_uti_tax_sta = 1;
+cbi_uti_deprbas_fed = 0;
+cbi_uti_deprbas_sta = 0;
+cbi_oth_amount = 0;
+cbi_oth_maxvalue = 1e99;
+cbi_oth_tax_fed = 1;
+cbi_oth_tax_sta = 1;
+cbi_oth_deprbas_fed = 0;
+cbi_oth_deprbas_sta = 0;
+pbi_fed_amount = [0];
+pbi_fed_term = 10;
+pbi_fed_escal = 0;
+pbi_fed_tax_fed = 1;
+pbi_fed_tax_sta = 1;
+pbi_sta_amount = [0];
+pbi_sta_term = 10;
+pbi_sta_escal = 0;
+pbi_sta_tax_fed = 1;
+pbi_sta_tax_sta = 1;
+pbi_uti_amount = [0];
+pbi_uti_term = 10;
+pbi_uti_escal = 0;
+pbi_uti_tax_fed = 1;
+pbi_uti_tax_sta = 1;
+pbi_oth_amount = [0];
+pbi_oth_term = 10;
+pbi_oth_escal = 0;
+pbi_oth_tax_fed = 1;
+pbi_oth_tax_sta = 1;
+
+
+/* END OF INPUT VARIABLES */
+
+
+
+
+
+
+
+
+
+// internal calculations to determine array electrical wiring
+mod_power = cec_v_mp_ref * cec_i_mp_ref;
+num_series = 0.5 * (inv_snl_vmin + inv_snl_vmax) / cec_v_mp_ref;
+
+if (inv_snl_vdcmax > 0)
+{
+	while ((num_series > 0) && ((num_series * cec_v_oc_ref) > inv_snl_vdcmax))
+		num_series--;
+}
+
+if (num_series < 1)
+	num_series = 1;
+
+num_series = to_int( num_series );
+
+num_parallel = num_modules / num_series;
+if (num_parallel < 1) 
+	num_parallel = 1;
+
+num_inverters = ceil(num_series * num_parallel * mod_power / inv_snl_paco);
+if (num_inverters < 1)
+	num_inverters = 1;
+
+num_parallel = to_int( num_parallel );
+num_inverters = to_int( num_inverters );
+
+
+outln( num_parallel );
+outln( num_series );
+outln( num_inverters );
+
+// set the weather file.  the web service should take a 
+// lat-long and use the perez satellite data or tmy2/3 data
+// in the same way that the PVWatts service specifies the weather data
+// --> essentially, this service and PVWatts should use exactly the same
+//     method to get weather data for a location request
+var( 'weather_file', 'C:/Users/dwp0/Dropbox/OMF/omf/scratch/systemAdvisoryModel/examples/abilene.tm2' );
+var( 'ac_derate', ac_derate );
+var( 'modules_per_string', num_series );
+var( 'strings_in_parallel', num_parallel );
+var( 'inverter_count', num_inverters );
+var( 'subarray1_tilt', tilt );
+var( 'subarray1_azimuth', azimuth );
+var( 'subarray1_track_mode', track_mode );
+var( 'subarray1_shading_mxh', shading_mxh );
+var( 'subarray1_soiling', [soiling, soiling, soiling, soiling, soiling, soiling,
+	soiling, soiling, soiling, soiling, soiling, soiling ] );
+var( 'subarray1_derate', dc_derate );
+
+// set up values for other sub arrays - not used (currently)
+var( 'subarray2_tilt', 0 );
+var( 'subarray3_tilt', 0 );
+var( 'subarray4_tilt', 0 );
+
+var( 'module_model', 1 );
+
+var( 'cec_area', cec_area );
+var( 'cec_a_ref', cec_a_ref );
+var( 'cec_adjust', cec_adjust );
+var( 'cec_alpha_sc', cec_alpha_sc );
+var( 'cec_beta_oc', cec_beta_oc );
+var( 'cec_gamma_r', cec_gamma_r );
+var( 'cec_i_l_ref', cec_i_l_ref );
+var( 'cec_i_mp_ref', cec_i_mp_ref );
+var( 'cec_i_o_ref', cec_i_o_ref );
+var( 'cec_i_sc_ref', cec_i_sc_ref );
+var( 'cec_n_s', cec_n_s );
+var( 'cec_r_s', cec_r_s );
+var( 'cec_r_sh_ref', cec_r_sh_ref );
+var( 'cec_t_noct', cec_t_noct );
+var( 'cec_v_mp_ref', cec_v_mp_ref );
+var( 'cec_v_oc_ref', cec_v_oc_ref );
+var( 'cec_temp_corr_mode', 0 );
+var( 'cec_standoff', cec_standoff );
+var( 'cec_height', cec_height );
+
+var( 'inverter_model', 1 );
+
+var( 'inv_snl_c0', inv_snl_c0 );
+var( 'inv_snl_c1', inv_snl_c1 );
+var( 'inv_snl_c2', inv_snl_c2 );
+var( 'inv_snl_c3', inv_snl_c3 );
+var( 'inv_snl_paco', inv_snl_paco );
+var( 'inv_snl_pdco', inv_snl_pdco );
+var( 'inv_snl_pnt', inv_snl_pnt );
+var( 'inv_snl_pso', inv_snl_pso );
+var( 'inv_snl_vdco', inv_snl_vdco );
+var( 'inv_snl_vdcmax', inv_snl_vdcmax );
+
+
+// all variables have been set up for pvsamv1
+// run the model
+run( 'pvsamv1' );
+
+
+// return the relevant outputs desired
+
+ac_hourly = var('hourly_ac_net');
+ac_monthly = var('monthly_ac_net');
+ac_annual = var('annual_ac_net');
+
+outln( 'ac_monthly (kWh) = ' + ac_monthly);
+outln( 'ac_annual (kWh) = ' + ac_annual);
+
+// end of PV performance calculations
+
+
+
+
+
+
+
+
+// start economic analysis
+
+// calculate annualized output of the system for each year of its life
+
+// setup curtailment schedule (no curtailment, factor=1)
+curtailment = alloc( 12,24 );
+for (r=0;r<12;r++)
+	for (c=0;c<24;c++)
+		curtailment[r][c] = 1;
+
+
+var( 'analysis_years', analysis_years );
+var( 'energy_availability', [ availability ] ); // 100% availability
+var( 'energy_degradation', [ degradation ] ); // 0.5% per year
+var( 'energy_curtailment', curtailment );
+var( 'system_use_lifetime_output', 0 );
+var( 'energy_net_hourly',  ac_hourly );
+run( 'annualoutput' );
+
+// now configure financial model
+
+system_capacity = num_series*num_parallel*mod_power*0.001;
+
+
+dgr_arr = var('annual_degradation');
+avl_arr = var('annual_availability');
+for (i=1;i<#dgr_arr;i++)
+{
+	dgr_arr2[i-1] = dgr_arr[i];
+	avl_arr2[i-1] = avl_arr[i];
+}
+
+hourly_delivered_kwh = var('hourly_e_net_delivered');
+outln( 'annual e_net_delivered (kWh) = ' + var('annual_e_net_delivered') );
+var('energy_net_hourly', hourly_delivered_kwh);
+var( 'energy_degradation',  dgr_arr2 );
+var( 'energy_availability', avl_arr2 );
+
+
+var( 'federal_tax_rate', federal_tax_rate );
+var( 'state_tax_rate', state_tax_rate );
+var( 'property_tax_rate', property_tax_rate );
+var( 'prop_tax_cost_assessed_percent', prop_tax_cost_assessed_percent );
+var( 'prop_tax_assessed_decline', prop_tax_assessed_decline );
+var( 'sales_tax_rate', sales_tax_rate );
+var( 'real_discount_rate', real_discount_rate );
+var( 'inflation_rate', inflation_rate );
+var( 'insurance_rate', insurance_rate );
+var( 'system_capacity', system_capacity );
+var( 'system_heat_rate', system_heat_rate );
+var( 'loan_term', loan_term );
+var( 'loan_rate', loan_rate );
+var( 'loan_debt', loan_debt );
+var( 'om_fixed', [om_fixed] );
+var( 'om_fixed_escal', om_fixed_escal );
+var( 'om_production', [om_production] );
+var( 'om_production_escal', om_production_escal );
+var( 'om_capacity', [om_capacity] );
+var( 'om_capacity_escal', om_capacity_escal );
+var( 'om_fuel_cost', [om_fuel_cost] );
+var( 'om_fuel_cost_escal', om_fuel_cost_escal );
+var( 'annual_fuel_usage', 0 );
+var( 'depr_fed_type', depr_fed_macrs );
+var( 'depr_sta_type', depr_sta_macrs );
+var( 'itc_fed_amount', itc_fed_amount );
+var( 'itc_fed_amount_deprbas_fed', itc_fed_amount_deprbas_fed );
+var( 'itc_fed_amount_deprbas_sta', itc_fed_amount_deprbas_sta );
+var( 'itc_sta_amount', itc_sta_amount );
+var( 'itc_sta_amount_deprbas_fed', itc_sta_amount_deprbas_fed );
+var( 'itc_sta_amount_deprbas_sta', itc_sta_amount_deprbas_sta );
+var( 'itc_fed_percent', itc_fed_percent );
+var( 'itc_fed_percent_maxvalue', itc_fed_percent_maxvalue );
+var( 'itc_fed_percent_deprbas_fed', itc_fed_percent_deprbas_fed );
+var( 'itc_fed_percent_deprbas_sta', itc_fed_percent_deprbas_sta );
+var( 'itc_sta_percent', itc_sta_percent );
+var( 'itc_sta_percent_maxvalue', itc_sta_percent_maxvalue );
+var( 'itc_sta_percent_deprbas_fed', itc_sta_percent_deprbas_fed );
+var( 'itc_sta_percent_deprbas_sta', itc_sta_percent_deprbas_sta );
+var( 'ptc_fed_amount', ptc_fed_amount );
+var( 'ptc_fed_term', ptc_fed_term );
+var( 'ptc_fed_escal', ptc_fed_escal );
+var( 'ptc_sta_amount', ptc_sta_amount );
+var( 'ptc_sta_term', ptc_sta_term );
+var( 'ptc_sta_escal', ptc_sta_escal );
+var( 'ibi_fed_amount', ibi_fed_amount );
+var( 'ibi_fed_amount_tax_fed', ibi_fed_amount_tax_fed );
+var( 'ibi_fed_amount_tax_sta', ibi_fed_amount_tax_sta );
+var( 'ibi_fed_amount_deprbas_fed', ibi_fed_amount_deprbas_fed );
+var( 'ibi_fed_amount_deprbas_sta', ibi_fed_amount_deprbas_sta );
+var( 'ibi_sta_amount', ibi_sta_amount );
+var( 'ibi_sta_amount_tax_fed', ibi_sta_amount_tax_fed );
+var( 'ibi_sta_amount_tax_sta', ibi_sta_amount_tax_sta );
+var( 'ibi_sta_amount_deprbas_fed', ibi_sta_amount_deprbas_fed );
+var( 'ibi_sta_amount_deprbas_sta', ibi_sta_amount_deprbas_sta );
+var( 'ibi_uti_amount', ibi_uti_amount );
+var( 'ibi_uti_amount_tax_fed', ibi_uti_amount_tax_fed );
+var( 'ibi_uti_amount_tax_sta', ibi_uti_amount_tax_sta );
+var( 'ibi_uti_amount_deprbas_fed', ibi_uti_amount_deprbas_fed );
+var( 'ibi_uti_amount_deprbas_sta', ibi_uti_amount_deprbas_sta );
+var( 'ibi_oth_amount', ibi_oth_amount );
+var( 'ibi_oth_amount_tax_fed', ibi_oth_amount_tax_fed );
+var( 'ibi_oth_amount_tax_sta', ibi_oth_amount_tax_sta );
+var( 'ibi_oth_amount_deprbas_fed', ibi_oth_amount_deprbas_fed );
+var( 'ibi_oth_amount_deprbas_sta', ibi_oth_amount_deprbas_sta );
+var( 'ibi_fed_percent', ibi_fed_percent );
+var( 'ibi_fed_percent_maxvalue', ibi_fed_percent_maxvalue );
+var( 'ibi_fed_percent_tax_fed', ibi_fed_percent_tax_fed );
+var( 'ibi_fed_percent_tax_sta', ibi_fed_percent_tax_sta );
+var( 'ibi_fed_percent_deprbas_fed', ibi_fed_percent_deprbas_fed );
+var( 'ibi_fed_percent_deprbas_sta', ibi_fed_percent_deprbas_sta );
+var( 'ibi_sta_percent', ibi_sta_percent );
+var( 'ibi_sta_percent_maxvalue', ibi_sta_percent_maxvalue );
+var( 'ibi_sta_percent_tax_fed', ibi_sta_percent_tax_fed );
+var( 'ibi_sta_percent_tax_sta', ibi_sta_percent_tax_sta );
+var( 'ibi_sta_percent_deprbas_fed', ibi_sta_percent_deprbas_fed );
+var( 'ibi_sta_percent_deprbas_sta', ibi_sta_percent_deprbas_sta );
+var( 'ibi_uti_percent', ibi_uti_percent );
+var( 'ibi_uti_percent_maxvalue', ibi_uti_percent_maxvalue );
+var( 'ibi_uti_percent_tax_fed', ibi_uti_percent_tax_fed );
+var( 'ibi_uti_percent_tax_sta', ibi_uti_percent_tax_sta );
+var( 'ibi_uti_percent_deprbas_fed', ibi_uti_percent_deprbas_fed );
+var( 'ibi_uti_percent_deprbas_sta', ibi_uti_percent_deprbas_sta );
+var( 'ibi_oth_percent', ibi_oth_percent );
+var( 'ibi_oth_percent_maxvalue', ibi_oth_percent_maxvalue );
+var( 'ibi_oth_percent_tax_fed', ibi_oth_percent_tax_fed );
+var( 'ibi_oth_percent_tax_sta', ibi_oth_percent_tax_sta );
+var( 'ibi_oth_percent_deprbas_fed', ibi_oth_percent_deprbas_fed );
+var( 'ibi_oth_percent_deprbas_sta', ibi_oth_percent_deprbas_sta );
+var( 'cbi_fed_amount', cbi_fed_amount );
+var( 'cbi_fed_maxvalue', cbi_fed_maxvalue );
+var( 'cbi_fed_tax_fed', cbi_fed_tax_fed );
+var( 'cbi_fed_tax_sta', cbi_fed_tax_sta );
+var( 'cbi_fed_deprbas_fed', cbi_fed_deprbas_fed );
+var( 'cbi_fed_deprbas_sta', cbi_fed_deprbas_sta );
+var( 'cbi_sta_amount', cbi_sta_amount );
+var( 'cbi_sta_maxvalue', cbi_sta_maxvalue );
+var( 'cbi_sta_tax_fed', cbi_sta_tax_fed );
+var( 'cbi_sta_tax_sta', cbi_sta_tax_sta );
+var( 'cbi_sta_deprbas_fed', cbi_sta_deprbas_fed );
+var( 'cbi_sta_deprbas_sta', cbi_sta_deprbas_sta );
+var( 'cbi_uti_amount', cbi_uti_amount );
+var( 'cbi_uti_maxvalue', cbi_uti_maxvalue );
+var( 'cbi_uti_tax_fed', cbi_uti_tax_fed );
+var( 'cbi_uti_tax_sta', cbi_uti_tax_sta );
+var( 'cbi_uti_deprbas_fed', cbi_uti_deprbas_fed );
+var( 'cbi_uti_deprbas_sta', cbi_uti_deprbas_sta );
+var( 'cbi_oth_amount', cbi_oth_amount );
+var( 'cbi_oth_maxvalue', cbi_oth_maxvalue );
+var( 'cbi_oth_tax_fed', cbi_oth_tax_fed );
+var( 'cbi_oth_tax_sta', cbi_oth_tax_sta );
+var( 'cbi_oth_deprbas_fed', cbi_oth_deprbas_fed );
+var( 'cbi_oth_deprbas_sta', cbi_oth_deprbas_sta );
+var( 'pbi_fed_amount', pbi_fed_amount );
+var( 'pbi_fed_term', pbi_fed_term );
+var( 'pbi_fed_escal', pbi_fed_escal );
+var( 'pbi_fed_tax_fed', pbi_fed_tax_fed );
+var( 'pbi_fed_tax_sta', pbi_fed_tax_sta );
+var( 'pbi_sta_amount', pbi_sta_amount );
+var( 'pbi_sta_term', pbi_sta_term );
+var( 'pbi_sta_escal', pbi_sta_escal );
+var( 'pbi_sta_tax_fed', pbi_sta_tax_fed );
+var( 'pbi_sta_tax_sta', pbi_sta_tax_sta );
+var( 'pbi_uti_amount', pbi_uti_amount );
+var( 'pbi_uti_term', pbi_uti_term );
+var( 'pbi_uti_escal', pbi_uti_escal );
+var( 'pbi_uti_tax_fed', pbi_uti_tax_fed );
+var( 'pbi_uti_tax_sta', pbi_uti_tax_sta );
+var( 'pbi_oth_amount', pbi_oth_amount );
+var( 'pbi_oth_term', pbi_oth_term );
+var( 'pbi_oth_escal', pbi_oth_escal );
+var( 'pbi_oth_tax_fed', pbi_oth_tax_fed );
+var( 'pbi_oth_tax_sta', pbi_oth_tax_sta );
+var( 'market', 1 );
+var( 'system_capacity', system_capacity );
+var( 'ppa_escalation', ppa_escalation );
+var( 'constr_total_financing', constr_total_financing );
+var( 'total_installed_cost', total_installed_cost );
+var( 'salvage_percentage', salvage_percentage );
+var( 'min_irr_target', min_irr_target );
+var( 'min_dscr_required', 0 );
+var( 'positive_cashflow_required', 0 );
+var( 'optimize_lcoe_wrt_debt_fraction', optimize_lcoe_wrt_debt_fraction );
+var( 'optimize_lcoe_wrt_ppa_escalation', optimize_lcoe_wrt_ppa_escalation );
+var( 'ppa_soln_mode', 0 );
+var( 'ppa_soln_tolerance', 0.0001 );
+var( 'ppa_soln_min', 0 );
+var( 'ppa_soln_max', 100 );
+var( 'ppa_soln_max_iterations', 100 );
+
+
+run( 'ippppa' );
+
+outln( 'lcoe_real=' + var('lcoe_real'));
+outln( 'lcoe_nom=' + var('lcoe_nom'));
+outln( 'ppa=' + var('ppa'));

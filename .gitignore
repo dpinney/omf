@@ -1,17 +1,18 @@
 *.pyc
 *.sublime-project
 *.sublime-workspace
-data/Model/*
-data/Feeder/*
-data/User/*
-# But include a few example analyses:
-!data/Model/admin/z*
-!data/Model/admin/z*
-!data/Model/public/*
-!data/Feeder/public/*
-!data/User/admin.json
-!data/User/public.json
-S3KEY.*
+omf/data/Model/*
+omf/data/Feeder/*
+omf/data/User/*
+omf/S3KEY.*
 build
 dist
 omf.egg-info
+
+# But include a few example analyses:
+!omf/data/Model/admin/z*
+!omf/data/Model/admin/z*
+!omf/data/Model/public/*
+!omf/data/Feeder/public/*
+!omf/data/User/admin.json
+!omf/data/User/public.json

@@ -1,0 +1,57 @@
+<head>
+	<style>
+		.success{color:green;display:none;}
+		.error{color:red;display:none;}
+	</style>
+	<script src="/static/jquery-1.9.1.js"></script>
+	<script>
+	$(function(){
+		$(".submitty").submit(function(e){
+		$.ajax({
+			url:"/changepwd",
+			method:"post",
+			data:{
+			old_pwd:$("input[name=old_pwd]").val(),
+			new_pwd:$("input[name=new_pwd]").val(),
+			conf_pwd:$("input[name=conf_pwd]").val(),
+			_csrf_token:"{{ csrf_token() }}"
+			},
+			async:false
+		}).done(function(data){
+			switch(data)
+			{
+			case "not_match":
+			$("input[name=new_pwd]").focus().select();
+			break;
+			case "not_auth":
+			$("input[name=old_pwd]").focus().select();
+			break;
+			case "Success":
+			$("input[type=password]").blur().val("");
+			}
+			$(".success, .error").hide()
+			$("#"+data).fadeIn()
+			e.preventDefault();
+			return false;
+		})
+		})
+	})
+	</script>
+<head>
+<body>
+	<h1>{{ user.username }}</h1>
+	<h2>Change Password</h2>
+	<p id="Success" class="success">Your password has been changed!</p>
+	<form class="submitty">
+		<input type="password" name="old_pwd" placeholder="Old Password">
+		<span id="not_auth"  class="error">Your old password is not correct</span>
+		<br />
+		<input  type="password" name="new_pwd" placeholder="New Password" />
+		<span id="not_match" class="error">Your new passwords do not match</span>
+		<br>
+		<input type="password" name="conf_pwd" placeholder="Confirm New Password" />
+		<br>
+		<input class="submitty" type="submit" value="Submit">
+	</form>
+	<a href="/">Home</a>
+</body>
