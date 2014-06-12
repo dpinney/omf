@@ -1,6 +1,6 @@
 ''' Calculate solar photovoltaic system output using PVWatts. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime
 from os.path import join as pJoin
 from jinja2 import Template
 import __util__ as util
@@ -75,7 +75,7 @@ def run(modelDir, inputDict):
 	# Check whether model exist or not
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
-		inputDict["created"] = str(dt.datetime.now())
+		inputDict["created"] = str(datetime.datetime.now())
 	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
@@ -83,7 +83,7 @@ def run(modelDir, inputDict):
 	shutil.copy(pJoin(_omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 		pJoin(modelDir, "climate.tmy2"))
 	# Ready to run
-	startTime = dt.datetime.now()
+	startTime = datetime.datetime.now()
 	# Set up SAM data structures.
 	ssc = nrelsam.SSCAPI()
 	dat = ssc.ssc_data_create()
@@ -125,9 +125,9 @@ def run(modelDir, inputDict):
 		int(inputDict["simLength"]), inputDict["simLengthUnits"], ssc, dat)
 	# Timestamp output.
 	outData = {}
-	outData["timeStamps"] = [dt.datetime.strftime(
-		dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
-		dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict["simLength"]))]
+	outData["timeStamps"] = [datetime.datetime.strftime(
+		datetime.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
+		datetime.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict["simLength"]))]
 	# Geodata output.
 	outData["city"] = ssc.ssc_data_get_string(dat, "city")
 	outData["state"] = ssc.ssc_data_get_string(dat, "state")
@@ -153,8 +153,8 @@ def run(modelDir, inputDict):
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 		json.dump(outData, outFile, indent=4)
 	# Update the runTime in the input file.
-	endTime = dt.datetime.now()
-	inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+	endTime = datetime.datetime.now()
+	inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent=4)
 
@@ -162,9 +162,9 @@ def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	''' Function to aggregate output if we need something other than hour level. '''
 	u = simStartDate
 	# pick a common year, ignoring the leap year, it won't affect to calculate the initHour
-	d = dt.datetime(2013, int(u[5:7]),int(u[8:10])) 
+	d = datetime.datetime(2013, int(u[5:7]),int(u[8:10])) 
 	# first day of the year	
-	sd = dt.datetime(2013, 01, 01) 
+	sd = datetime.datetime(2013, 01, 01) 
 	# convert difference of datedelta object to number of hours 
 	initHour = int((d-sd).total_seconds()/3600)
 	fullData = ssc.ssc_data_get_array(dat, key)

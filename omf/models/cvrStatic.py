@@ -1,7 +1,7 @@
 ''' Calculate CVR impacts using a targetted set of static loadflows. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
-import math, re, datetime as dt
+import math, re
 import multiprocessing
 from copy import copy
 from os.path import join as pJoin
@@ -112,10 +112,9 @@ def run(modelDir, inputDict):
 def runForeground(modelDir, inputDict):
 	''' Run the model in the foreground. WARNING: can take about a minute. '''
 	# Global vars, and load data from the model directory.
-	
+	print "StartRTING TO RUN", modelDir
 	try:
-		print "StartRTING TO RUN", modelDir
-		startTime = dt.datetime.now()
+		startTime = datetime.datetime.now()
 		feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
 		tree = feederJson.get("tree",{})
 		attachments = feederJson.get("attachments",{})
@@ -449,8 +448,8 @@ def runForeground(modelDir, inputDict):
 		with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
 			allOutput["savingsChart"] = inFile.read().encode("base64")
 		# Update the runTime in the input file.
-		endTime = dt.datetime.now()
-		inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+		endTime = datetime.datetime.now()
+		inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 		# Write output file.
@@ -462,9 +461,10 @@ def runForeground(modelDir, inputDict):
 		except:
 			pass
 		print "DONE RUNNING", modelDir
-	except:
+	except Exception as e:
 		print "Oops, Model Crashed!!!" 
 		cancel(modelDir)
+		print e
 		
 def cancel(modelDir):
 	''' Try to cancel a currently running model. '''

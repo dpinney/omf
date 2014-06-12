@@ -1,6 +1,6 @@
 ''' Powerflow results for one Gridlab instance. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, datetime as dt
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
 import multiprocessing
 from os.path import join as pJoin
 from jinja2 import Template
@@ -103,9 +103,9 @@ def getStatus(modelDir):
 
 def runForeground(modelDir, inputDict):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
+	print "STARTING TO RUN", modelDir
 	try:
-		print "STARTING TO RUN", modelDir
-		startTime = dt.datetime.now()
+		startTime = datetime.datetime.now()
 		feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
 		tree = feederJson["tree"]
 		# Set up GLM with correct time and recorders:
@@ -224,8 +224,8 @@ def runForeground(modelDir, inputDict):
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 			json.dump(cleanOut, outFile, indent=4)
 		# Update the runTime in the input file.
-		endTime = dt.datetime.now()
-		inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+		endTime = datetime.datetime.now()
+		inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 		# Clean up the PID file.
@@ -236,9 +236,10 @@ def runForeground(modelDir, inputDict):
 		except:
 			pass
 		print "DONE RUNNING", modelDir
-	except:
+	except Exception as e:
 		print "Oops, Model Crashed!!!" 
 		cancel(modelDir)
+		print e
 
 def cancel(modelDir):
 	''' Try to cancel a currently running model. '''
