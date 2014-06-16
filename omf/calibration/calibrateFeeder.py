@@ -693,7 +693,7 @@ def _runGLMS(fdir, SCADA, days):
 		glmFiles = [x for x in os.listdir(fdir) if x.endswith('.glm')]
 		for glm in glmFiles:
 			with open(fdir+'/stdout.txt','w') as stdout, open(fdir+'/stderr.txt','w') as stderr, open(fdir+'/PID.txt','w') as pidFile:
-				proc = subprocess.Popen(['../solvers/gridlabd/linx64/gridlabd', glm], cwd=fdir, stdout=stdout, stderr=stderr)
+				proc = subprocess.Popen(['gridlabd', glm], cwd=fdir, stdout=stdout, stderr=stderr)
 				pidFile.write(str(proc.pid))
 				proc.wait()
 		print ('Beginning comparison of intitial simulation output with SCADA.')
