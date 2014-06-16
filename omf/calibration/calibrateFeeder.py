@@ -8,7 +8,6 @@ import math
 import sys
 sys.path.append('..')
 import feeder
-import AddTapeObjects
 
 # Set flag to save 'losing' files as opposed to deleting them during cleanUP() (0 = delete, 1 = save)
 savelosers = 0
