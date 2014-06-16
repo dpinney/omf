@@ -1,7 +1,8 @@
-#Python Extraction and Calibration Version of MATLAB Scripts
-#Note: This assumes that dictionary being passed in already contains split-phase center-tapped transformers with spot loads ( triplex_nodes ) on the secondary side.
-#Note: All triplex_node dictionaries must contain a load classification key which tells what type of houses are located at this spot load.
-#Note: All swing node objects must have a Dictionary key
+'''this library is used to populate a base feeder tree with different load and technology models and returns a new feeder tree with the desired technology models.
+For example, to attach a feeder tree, baseTree, with ziploads run in the terminal
+
+	python -c "import Milsoft_GridLAB-D_Feeder_Generation; newTree, key = Milsoft_GridLAB-D_Feeder_Generation.GLD_Feeder(basetree, -1, "./desired_working_directory", None)"
+'''
 from __future__ import division
 import math
 import random
@@ -876,16 +877,14 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None):
 													'name' : 'CsvReader',
 													'filename' : '"{:s}"'.format(tmy)}
 		last_key += 1
-		climate_name = tmy.replace('.csv','')
 	elif '.tmy2' in tmy:
-		climate_name = tmy.replace('.tmy2','')
-	glmCaseDict[last_key] = {	'object' : 'climate',
-												'tmyfile' : '"{:s}"'.format(tmy)}
-	if '.tmy2' in tmy:
-		glmCaseDict[last_key]['interpolate'] = 'QUADRATIC'
-	elif '.csv' in tmy:
-		glmCaseDict[last_key]['reader'] = 'CsvReader'
-	last_key += 1
+		glmCaseDict[last_key] = {	'object' : 'climate',
+													'tmyfile' : '"{:s}"'.format(tmy)}
+		if '.tmy2' in tmy:
+			glmCaseDict[last_key]['interpolate'] = 'QUADRATIC'
+		elif '.csv' in tmy:
+			glmCaseDict[last_key]['reader'] = 'CsvReader'
+		last_key += 1
 	# Add substation transformer transformer_configuration
 	glmCaseDict[last_key] = {	'object' : 'transformer_configuration',
 												'name' : 'trans_config_to_feeder',
@@ -973,7 +972,6 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None):
 			glmCaseDict[last_key] = copy.deepcopy(glmDict[x])
 			# Remove original swing bus from static model
 			if 'bustype' in glmCaseDict[last_key] and glmCaseDict[last_key]['bustype'] == 'SWING':
-				swing_node = glmCaseDict[last_key]['name']
 				del glmCaseDict[last_key]['bustype']
 				glmCaseDict[last_key]['object'] = 'meter'
 			last_key += 1
@@ -1305,7 +1303,6 @@ def GLD_Feeder(glmDict,case_flag,wdir,configuration_file=None):
 		if use_flags['use_normalized_loadshapes'] == 1:
 			glmCaseDict, last_key = _add_normalized_commercial_ziploads(glmCaseDict, commercial_dict, config_data, last_key)
 	return glmCaseDict, last_key
-
 def _test():
 	import sys, os
 	sys.path.append('..')
