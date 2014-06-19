@@ -1307,6 +1307,19 @@ def startPopulation(glmDict,case_flag,wdir,configuration_file=None):
         if use_flags['use_normalized_loadshapes'] == 1:
             glmCaseDict, last_key = _add_normalized_commercial_ziploads(glmCaseDict, commercial_dict, config_data, last_key)
     return glmCaseDict, last_key
+
+def _append_solar():
+    # NOTE: deleted, find in git history in Solar_Technology.py.
+    pass
+
+def _append_residential():
+    # NOTE: deleted, find in git history in ResidentialLoads.py.
+    pass
+
+def _append_commercial():
+    # NOTE: deleted, find in git history in CommercialLoads.py.
+    pass
+
 def _test():
     import sys, os
     sys.path.append('..')
