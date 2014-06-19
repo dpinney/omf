@@ -256,7 +256,8 @@ def runForeground(modelDir, inputDict):
 			'impedance_fraction_12': str(inputDict.get("z_percent")),
 			'current_fraction_12': str(inputDict.get("i_percent")),
 			'power_pf_12': str(inputDict.get("power_factor")), #MAYBEFIX: we can probably get this PF data from the Milsoft loads.
-			'impedance_pf_12':'0.97',
+			'impedance_pf_12':str(inputDict.get("power_factor")),
+			'current_pf_12':str(inputDict.get("power_factor")),
 			'nominal_voltage':'120',
 			'phases':'PHASESVARIABLE',
 			'parent':'PARENTVARIABLE' }
