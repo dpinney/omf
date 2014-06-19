@@ -649,7 +649,7 @@ def _TechnologyParametersFunc(use_flags, TechToTest):
 	# end nasty long copy/paste block
 	return (data, use_flags)
 
-def _ConfigurationFunc(wdir, config_file, classification=None):
+def _ConfigurationFunc(config_file, classification=None):
 	'''Create the complete configuration dictionary needed to populate the feeder'''
 	data = {}
 	if config_file == None:    
@@ -790,7 +790,7 @@ def _ConfigurationFunc(wdir, config_file, classification=None):
 			data["weather"] = '../schedules/SCADA_weather_NC_gld_shifted.csv'
 	return data
 
-def startPopulation(glmDict,case_flag,wdir,configuration_file=None):
+def startPopulation(glmDict,case_flag,configuration_file=None):
 	'''glmDict is a dictionary containing all the objects in WindMIL model represented as equivalent GridLAB-D objects
 	case_flag is an integer indicating which technology case to tack on to the GridLAB-D model
 		case_flag : technology
@@ -818,7 +818,7 @@ def startPopulation(glmDict,case_flag,wdir,configuration_file=None):
 	if case_flag > 13:
 		case_flag = 13
 	# Get information about each feeder from Configuration() and  TechnologyParameters()
-	config_data = _ConfigurationFunc(wdir,configuration_file,None)
+	config_data = _ConfigurationFunc(configuration_file,None)
 	#set up default flags
 	use_flags = {}
 	tech_data,use_flags = _TechnologyParametersFunc(use_flags,case_flag)
@@ -1334,7 +1334,7 @@ def _test():
 		'loadshape_scalar' : 1.1,
 		'load_shape_player_file' : './uploads/load_shape_player.player',
 		'weather_file' : './uploads/SCADA_weather_NC_gld_shifted.csv'}
-	glmpopulated, last_key = startPopulation(glmbase, -1, feeder_config, None)
+	glmpopulated, last_key = startPopulation(glmbase, -1, feeder_config)
 	assert 75776==last_key
 
 if __name__ == '__main__':

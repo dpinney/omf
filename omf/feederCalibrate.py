@@ -645,7 +645,7 @@ def _makeGLM(clock, calib_file, baseGLM, case_flag, mdir):
 	else:
 		print ('Populating feeder using default calibrations.')
 		calib_obj = None
-	glmDict, last_key = feederPopulate.startPopulation(baseGLM,case_flag,mdir,calib_obj) 
+	glmDict, last_key = feederPopulate.startPopulation(baseGLM,case_flag,calib_obj) 
 	fnames =  []
 	for i in clock.keys():
 		# Simulation start
@@ -800,7 +800,7 @@ def _calibrateFeeder(baseGLM, days, SCADA, case_flag, calibration_config, fdir):
 	for calib in winning_calibration_IDs:
 		if 'ID' in calib.keys() and m.group() in calib['ID']:
 			winning_cal = calib
-	final_dict, last_key = feederPopulate.startPopulation(baseGLM,case_flag,fdir,winning_cal)
+	final_dict, last_key = feederPopulate.startPopulation(baseGLM,case_flag,winning_cal)
 	_cleanUP(os.path.join(fdir,'winners'))
 	_cleanUP(os.path.join(fdir, 'csv_output'))
 	os.removedirs(os.path.join(fdir,'winners'))
@@ -849,10 +849,10 @@ def _test():
 		'region' : 6,
 		'feeder_rating' : 600,
 		'nom_volt' : 66395,
-		'voltage_players' : ['./uploads/VA.player', './uploads/VB.player', './uploads/VC.player'],
+		'voltage_players' : [os.path.abspath('./uploads/VA.player').replace('\\', '/'), os.path.abspath('./uploads/VB.player').replace('\\', '/'), os.path.abspath('./uploads/VC.player').replace('\\', '/')],
 		'loadshape_scalar' : 1.0,
-		'load_shape_player_file' : './uploads/load_shape_player.player',
-		'weather_file' : './uploads/SCADA_weather_NC_gld_shifted.csv'}
+		'load_shape_player_file' : os.path.abspath('./uploads/load_shape_player.player').replace('\\', '/'),
+		'weather_file' : os.path.abspath('./uploads/SCADA_weather_NC_gld_shifted.csv').replace('\\', '/')}
 	calibratedFeederTree, calibrationConfiguration = startCalibration(working_directory, feederTree, scada, model_name, calibration_config)
 	assert None != calibratedFeederTree
 	assert None != calibrationConfiguration
