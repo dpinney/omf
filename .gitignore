@@ -6,7 +6,6 @@ omf/data/Model/*
 omf/data/User/*
 omf/S3KEY.*
 build
-dist
 omf.egg-info
 
 # But include a few example analyses:
