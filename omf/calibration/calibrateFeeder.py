@@ -2,7 +2,7 @@ import datetime
 import os
 import glob
 import re
-import Milsoft_GridLAB_D_Feeder_Generation
+import populateFeeder
 import subprocess
 import math
 import sys
@@ -423,8 +423,8 @@ def _calibrateLoop(glm_name, main_mets, scada, days, eval_int, counter, baseGLM,
 	days (list)-- list of dates for summer, winter, and spring
 	eval_int (int)-- result of evaluating WSM score against acceptable WSM and previous WSM. 0 = continue with first choice action, 2 = try "next choice" action
 	counter (int)-- Advances each time this function is called.
-	baseGLM (dictionary)-- orignal base dictionary for use in Milsoft_GridLAB_D_Feeder_Generation.py
-	case_flag (int)-- also for use in Milsoft_GridLAB_D_Feeder_Generation.py
+	baseGLM (dictionary)-- orignal base dictionary for use in populateFeeder.py
+	case_flag (int)-- also for use in populateFeeder.py
 	feeder_config (string)-- (string TODO: this is future work, leave as 'None')-- feeder configuration file (weather, sizing, etc)
 	cal_dir (string)-- directory where files for this feeder are being stored and ran
 	batch_file (string)-- filename of the batch file that was created to run .glms in directory
@@ -580,7 +580,7 @@ def _calibrateLoop(glm_name, main_mets, scada, days, eval_int, counter, baseGLM,
 	# Populate feeder .glms for each file listed in calibration_config_files
 	glms_ran = []
 	for i in calibration_config_files:
-		# need everything necessary to run Milsoft_GridLAB_D_Feeder_Generation.py
+		# need everything necessary to run populateFeeder.py
 		glms_ran.extend(_makeGLM(_clockDates(days), i, baseGLM, case_flag, cal_dir))
 	# Run all the .glms:
 	raw_metrics = _runGLMS(cal_dir, scada, days)
@@ -627,7 +627,7 @@ def _makeGLM(clock, calib_file, baseGLM, case_flag, mdir):
 	'''Create populated dict and write it to .glm file
 	- clock (dictionary) links the three seasonal dates with start and stop timestamps (start simulation full 24 hour before day we're recording)
 	- calib_file (dictionary) -- dictionary containing calibration parameters.
-	- baseGLM (dictionary) -- orignal base dictionary for use in Milsoft_GridLAB_D_Feeder_Generation.py
+	- baseGLM (dictionary) -- orignal base dictionary for use in populateFeeder.py
 	- case_flag (int) -- flag technologies to test
 	- feeder_config (string TODO: this is future work, leave as 'None')-- feeder configuration file (weather, sizing, etc)
 	- mdir(string)-- directory in which to store created .glm files
@@ -638,7 +638,7 @@ def _makeGLM(clock, calib_file, baseGLM, case_flag, mdir):
 	else:
 		print ('Populating feeder using default calibrations.')
 		calib_obj = None
-	glmDict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(baseGLM,case_flag,mdir,calib_obj) 
+	glmDict, last_key = populateFeeder.startPopulation(baseGLM,case_flag,mdir,calib_obj) 
 	fnames =  []
 	for i in clock.keys():
 		# Simulation start
@@ -793,7 +793,7 @@ def _calibrateFeeder(baseGLM, days, SCADA, case_flag, calibration_config, fdir):
 	for calib in winning_calibration_IDs:
 		if 'ID' in calib.keys() and m.group() in calib['ID']:
 			winning_cal = calib
-	final_dict, last_key = Milsoft_GridLAB_D_Feeder_Generation.GLD_Feeder(baseGLM,case_flag,fdir,winning_cal)
+	final_dict, last_key = populateFeeder.startPopulation(baseGLM,case_flag,fdir,winning_cal)
 	_cleanUP(os.path.join(fdir,'winners'))
 	_cleanUP(os.path.join(fdir, 'csv_output'))
 	os.removedirs(os.path.join(fdir,'winners'))
