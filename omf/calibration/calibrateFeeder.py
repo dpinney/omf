@@ -99,21 +99,21 @@ def _convert(d):
 def _chooseAction(difs):
 	'''Using 4 main metrics, decide which action to take.'''
 	actionDict = {  1:[ 'raise load',[1,1,1,1],[2,1,1,1],[2,1,2,1]],
-						-1: ['lower load',[3,3,3,3],[2,3,3,3],[2,3,2,3]],
-						 2: ['raise winter load',[3,3,1,1],[3,2,1,1],[2,3,1,1],[2,2,1,1],[2,3,2,1],[2,2,2,1]],
-						-2: ['lower winter load',[1,1,3,3],[1,2,3,3],[2,1,3,3],[2,2,3,3],[2,1,2,3],[2,2,2,3]],
-						 3: ['raise winter peak',[3,3,1,3],[2,3,1,3],[2,2,1,3],[2,2,1,2],[2,3,1,2],[3,3,1,2]],
-						-3: ['lower winter peak',[1,1,3,1],[2,1,3,1],[2,2,3,1],[2,2,3,2],[2,1,3,2],[1,1,3,2]],
-						 4: ['raise winter & summer',[1,1,1,3],[2,1,1,3],[2,1,1,2],[1,1,1,2]],
-						-4: ['lower winter & summer',[3,3,3,1],[2,3,3,1],[2,3,3,2],[3,3,3,2]],
-						 5: ['raise summer load',[1,3,3,3],[1,3,2,3],[1,3,2,2],[1,2,2,3],[1,2,2,2],[1,1,2,2],[1,1,2,3],[2,1,2,2]],
-						-5: ['lower summer load',[3,1,1,1],[3,1,2,1],[3,1,2,2],[3,2,2,1],[3,2,2,2],[3,3,2,2],[3,3,2,1],[2,3,2,2]],
-						 6: ['raise summer & winter',[1,3,1,1],[1,3,2,1],[1,1,2,1],[1,2,2,1]],
-						-6: ['lower summer & winter',[3,1,3,3],[3,1,2,3],[3,3,2,3],[3,1,1,3]],
-						 7: ['raise peaks',[1,3,1,3],[1,3,1,2],[1,2,1,2],[1,2,1,3],[1,2,1,1]],
-						-7: ['lower peaks',[3,1,3,1],[3,1,3,2],[3,2,3,2],[3,2,3,1],[3,2,3,3]],
-						 8: ['raise summer & lower winter',[1,3,3,1],[1,2,3,1],[1,2,3,2],[1,3,3,2]],
-						-8: ['lower summer & raise winter',[3,1,1,3],[3,1,1,2],[3,2,1,3],[3,2,1,2]] };
+		-1: ['lower load',[3,3,3,3],[2,3,3,3],[2,3,2,3]],
+		 2: ['raise winter load',[3,3,1,1],[3,2,1,1],[2,3,1,1],[2,2,1,1],[2,3,2,1],[2,2,2,1]],
+		-2: ['lower winter load',[1,1,3,3],[1,2,3,3],[2,1,3,3],[2,2,3,3],[2,1,2,3],[2,2,2,3]],
+		 3: ['raise winter peak',[3,3,1,3],[2,3,1,3],[2,2,1,3],[2,2,1,2],[2,3,1,2],[3,3,1,2]],
+		-3: ['lower winter peak',[1,1,3,1],[2,1,3,1],[2,2,3,1],[2,2,3,2],[2,1,3,2],[1,1,3,2]],
+		 4: ['raise winter & summer',[1,1,1,3],[2,1,1,3],[2,1,1,2],[1,1,1,2]],
+		-4: ['lower winter & summer',[3,3,3,1],[2,3,3,1],[2,3,3,2],[3,3,3,2]],
+		 5: ['raise summer load',[1,3,3,3],[1,3,2,3],[1,3,2,2],[1,2,2,3],[1,2,2,2],[1,1,2,2],[1,1,2,3],[2,1,2,2]],
+		-5: ['lower summer load',[3,1,1,1],[3,1,2,1],[3,1,2,2],[3,2,2,1],[3,2,2,2],[3,3,2,2],[3,3,2,1],[2,3,2,2]],
+		 6: ['raise summer & winter',[1,3,1,1],[1,3,2,1],[1,1,2,1],[1,2,2,1]],
+		-6: ['lower summer & winter',[3,1,3,3],[3,1,2,3],[3,3,2,3],[3,1,1,3]],
+		 7: ['raise peaks',[1,3,1,3],[1,3,1,2],[1,2,1,2],[1,2,1,3],[1,2,1,1]],
+		-7: ['lower peaks',[3,1,3,1],[3,1,3,2],[3,2,3,2],[3,2,3,1],[3,2,3,3]],
+		 8: ['raise summer & lower winter',[1,3,3,1],[1,2,3,1],[1,2,3,2],[1,3,3,2]],
+		-8: ['lower summer & raise winter',[3,1,1,3],[3,1,1,2],[3,2,1,3],[3,2,1,2]] };
 	checkVal = _convert(difs);
 	if  0 in checkVal:
 		print ("Ooops! Something is the matter.");
@@ -821,42 +821,41 @@ def _test():
 		os.mkdir(working_directory)
 	except:
 		pass # directory already exists
-	scada = {	'summerDay' : '2012-06-29',
-					'winterDay' : '2012-01-19',
-					'shoulderDay' : '2012-04-10',
-					'summerPeakKW' : 5931.56,
-					'summerTotalEnergy' : 107380.8,
-					'summerPeakHour' : 17,
-					'summerMinimumKW' : 2988,
-					'summerMinimumHour' : 6,
-					'winterPeakKW' : 3646.08,
-					'winterTotalEnergy' : 75604.32,
-					'winterPeakHour' : 21,
-					'winterMinimumKW' : 2469.60,
-					'winterMinimumHour' : 1,
-					'shoulderPeakKW' : 2518.56 ,
-					'shoulderTotalEnergy' : 52316.64,
-					'shoulderPeakHour' : 21,
-					'shoulderMinimumKW' : 1738.08,
-					'shoulderMinimumHour' : 2} 
-	calibration_config = 	{	'timezone' : 'EST+5EDT',
-											'startdate' : '2013-01-01 0:00:00',
-											'stopdate' : '2014-01-01 0:00:00',
-											'region' : 6,
-											'feeder_rating' : 600,
-											'nom_volt' : 66395,
-											'voltage_players' : ['../schedules/VA.player', '../schedules/VB.player', '../schedules/VC.player'],
-											'loadshape_scalar' : 1.0,
-											'load_shape_player_file' : '../schedules/load_shape_player.player',
-											'weather_file' : '../schedules/SCADA_weather_NC_gld_shifted.csv'}
+	scada = {'summerDay' : '2012-06-29',
+		'winterDay' : '2012-01-19',
+		'shoulderDay' : '2012-04-10',
+		'summerPeakKW' : 5931.56,
+		'summerTotalEnergy' : 107380.8,
+		'summerPeakHour' : 17,
+		'summerMinimumKW' : 2988,
+		'summerMinimumHour' : 6,
+		'winterPeakKW' : 3646.08,
+		'winterTotalEnergy' : 75604.32,
+		'winterPeakHour' : 21,
+		'winterMinimumKW' : 2469.60,
+		'winterMinimumHour' : 1,
+		'shoulderPeakKW' : 2518.56 ,
+		'shoulderTotalEnergy' : 52316.64,
+		'shoulderPeakHour' : 21,
+		'shoulderMinimumKW' : 1738.08,
+		'shoulderMinimumHour' : 2} 
+	calibration_config = {'timezone' : 'EST+5EDT',
+		'startdate' : '2013-01-01 0:00:00',
+		'stopdate' : '2014-01-01 0:00:00',
+		'region' : 6,
+		'feeder_rating' : 600,
+		'nom_volt' : 66395,
+		'voltage_players' : ['../schedules/VA.player', '../schedules/VB.player', '../schedules/VC.player'],
+		'loadshape_scalar' : 1.0,
+		'load_shape_player_file' : '../schedules/load_shape_player.player',
+		'weather_file' : '../schedules/SCADA_weather_NC_gld_shifted.csv'}
 	try:
 		calibratedFeederTree, calibrationConfiguration = startCalibration(working_directory, feederTree, scada, model_name, calibration_config)
 	except:
 		calibratedFeederTree = None
 		calibrationConfiguration = None
-	
 	assert None != calibratedFeederTree
 	assert None != calibrationConfiguration
-	
+
 if __name__ ==  '__main__':
 	_test()
