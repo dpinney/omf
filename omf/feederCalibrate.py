@@ -10,11 +10,10 @@ import datetime
 import os
 import glob
 import re
-import populateFeeder
 import subprocess
 import math
-import sys
-sys.path.append('..')
+import tempfile
+import feederPopulate
 import feeder
 
 # Set flag to save 'losing' files as opposed to deleting them during cleanUP() (0 = delete, 1 = save)
@@ -70,9 +69,9 @@ action_failed_count = {}
 fail_lim = 1
 # The default parameters. NOTE: These should match the defaults within Configuration.py.
 default_params = [15000,35000,0,2,2,0,0,0,0,2700,.15,0]
-log = open('calibration_log.csv','a')
-log.write('-- Begin Calibration Log --\n')
-log.write('ID,\tWSM,\tActionID,\tWSMeval,\tAvg. House,Avg. Comm.,Base Load Scalar,Cooling Offset,Heating Offset,COP high scalar,COP low scalar, Res. Sched. Skew, Decrease Gas Heat, Sched. Skew. Std. Dev., Window Wall Ratio, Additional Heat Degrees, Load Shape Scalar,Summer Peak, Summer Total Energy, Winter Peak, Winter Total Energy\n')
+# log = open('calibration_log.csv','a')
+# log.write('-- Begin Calibration Log --\n')
+# log.write('ID,\tWSM,\tActionID,\tWSMeval,\tAvg. House,Avg. Comm.,Base Load Scalar,Cooling Offset,Heating Offset,COP high scalar,COP low scalar, Res. Sched. Skew, Decrease Gas Heat, Sched. Skew. Std. Dev., Window Wall Ratio, Additional Heat Degrees, Load Shape Scalar,Summer Peak, Summer Total Energy, Winter Peak, Winter Total Energy\n')
 
 def _convert(d):
 	'''Takes list of 4 numbers and returns coded list based on higher, equal, less than 0.'''
@@ -431,8 +430,8 @@ def _calibrateLoop(glm_name, main_mets, scada, days, eval_int, counter, baseGLM,
 	days (list)-- list of dates for summer, winter, and spring
 	eval_int (int)-- result of evaluating WSM score against acceptable WSM and previous WSM. 0 = continue with first choice action, 2 = try "next choice" action
 	counter (int)-- Advances each time this function is called.
-	baseGLM (dictionary)-- orignal base dictionary for use in populateFeeder.py
-	case_flag (int)-- also for use in populateFeeder.py
+	baseGLM (dictionary)-- orignal base dictionary for use in feederPopulate.py
+	case_flag (int)-- also for use in feederPopulate.py
 	feeder_config (string)-- (string TODO: this is future work, leave as 'None')-- feeder configuration file (weather, sizing, etc)
 	cal_dir (string)-- directory where files for this feeder are being stored and ran
 	batch_file (string)-- filename of the batch file that was created to run .glms in directory
@@ -588,7 +587,7 @@ def _calibrateLoop(glm_name, main_mets, scada, days, eval_int, counter, baseGLM,
 	# Populate feeder .glms for each file listed in calibration_config_files
 	glms_ran = []
 	for i in calibration_config_files:
-		# need everything necessary to run populateFeeder.py
+		# need everything necessary to run feederPopulate.py
 		glms_ran.extend(_makeGLM(_clockDates(days), i, baseGLM, case_flag, cal_dir))
 	# Run all the .glms:
 	raw_metrics = _runGLMS(cal_dir, scada, days)
@@ -635,7 +634,7 @@ def _makeGLM(clock, calib_file, baseGLM, case_flag, mdir):
 	'''Create populated dict and write it to .glm file
 	- clock (dictionary) links the three seasonal dates with start and stop timestamps (start simulation full 24 hour before day we're recording)
 	- calib_file (dictionary) -- dictionary containing calibration parameters.
-	- baseGLM (dictionary) -- orignal base dictionary for use in populateFeeder.py
+	- baseGLM (dictionary) -- orignal base dictionary for use in feederPopulate.py
 	- case_flag (int) -- flag technologies to test
 	- feeder_config (string TODO: this is future work, leave as 'None')-- feeder configuration file (weather, sizing, etc)
 	- mdir(string)-- directory in which to store created .glm files
@@ -646,7 +645,7 @@ def _makeGLM(clock, calib_file, baseGLM, case_flag, mdir):
 	else:
 		print ('Populating feeder using default calibrations.')
 		calib_obj = None
-	glmDict, last_key = populateFeeder.startPopulation(baseGLM,case_flag,mdir,calib_obj) 
+	glmDict, last_key = feederPopulate.startPopulation(baseGLM,case_flag,mdir,calib_obj) 
 	fnames =  []
 	for i in clock.keys():
 		# Simulation start
@@ -700,7 +699,7 @@ def _runGLMS(fdir, SCADA, days):
 		print ('Begining simulations in GridLab-D.')
 		glmFiles = [x for x in os.listdir(fdir) if x.endswith('.glm')]
 		for glm in glmFiles:
-			with open(fdir+'/stdout.txt','w') as stdout, open(fdir+'/stderr.txt','w') as stderr, open(fdir+'/PID.txt','w') as pidFile:
+			with open(os.path.join(fdir,'stdout.txt'),'w') as stdout, open(os.path.join(fdir,'stderr.txt'),'w') as stderr, open(os.path.join(fdir,'PID.txt'),'w') as pidFile:
 				proc = subprocess.Popen(['gridlabd', glm], cwd=fdir, stdout=stdout, stderr=stderr)
 				pidFile.write(str(proc.pid))
 				proc.wait()
@@ -740,7 +739,7 @@ def _calibrateFeeder(baseGLM, days, SCADA, case_flag, calibration_config, fdir):
 	if len(raw_metrics) == 0:
 		# if we can't even get the initial .glm to run... how will we continue? We need to carefully pick our defaults, for one thing.
 		print ('All the .glms in '+str(glms_init)+' failed to run or record complete simulation output in GridLab-D. Please evaluate what the error is before trying to calibrate again.')
-		log.write('*all runs failed to run or record complete simulation output \n')
+		# log.write('*all runs failed to run or record complete simulation output \n')
 		calib_record[r] = ['*all runs failed', None, -1, None]
 		if case_flag == -1:
 			_cleanUP(fdir)
@@ -794,14 +793,14 @@ def _calibrateFeeder(baseGLM, days, SCADA, case_flag, calibration_config, fdir):
 			print ("Interuppted at calibration loop number "+str(last_count)+" where the best .glm was "+calib_record[last_count][0]+" with WSM score of "+str(calib_record[last_count][1])+".")
 			final_glm_file = calib_record[last_count][0]
 			_cleanUP(fdir)
-	log.close()
+	# log.close()
 	# Get calibration file from final_glm_file (filename)
 	m = re.match(r'^Calib_ID(\d*)_Config_ID(\d*)',final_glm_file)
 	winning_cal = None
 	for calib in winning_calibration_IDs:
 		if 'ID' in calib.keys() and m.group() in calib['ID']:
 			winning_cal = calib
-	final_dict, last_key = populateFeeder.startPopulation(baseGLM,case_flag,fdir,winning_cal)
+	final_dict, last_key = feederPopulate.startPopulation(baseGLM,case_flag,fdir,winning_cal)
 	_cleanUP(os.path.join(fdir,'winners'))
 	_cleanUP(os.path.join(fdir, 'csv_output'))
 	os.removedirs(os.path.join(fdir,'winners'))
@@ -822,13 +821,10 @@ def startCalibration(working_directory, feederTree, scadaInfo, fileName, feederC
 
 def _test():
 	''' Calibrates an IEEE 13 test feeder using loadshapes and returns the resulting feeder tree and calibration configuration dictionary.'''
-	feederTree = feeder.parse('../uploads/IEEE-13.glm')
+	feederTree = feeder.parse('./uploads/IEEE-13.glm')
 	model_name = 'calibrated_model_IEEE13'
-	working_directory = './calibration_work/'
-	try:
-		os.mkdir(working_directory)
-	except:
-		pass # directory already exists
+	working_directory = tempfile.mkdtemp()
+	print "Calibration testing in ", working_directory
 	scada = {'summerDay' : '2012-06-29',
 		'winterDay' : '2012-01-19',
 		'shoulderDay' : '2012-04-10',
@@ -853,15 +849,11 @@ def _test():
 		'region' : 6,
 		'feeder_rating' : 600,
 		'nom_volt' : 66395,
-		'voltage_players' : ['../schedules/VA.player', '../schedules/VB.player', '../schedules/VC.player'],
+		'voltage_players' : ['./uploads/VA.player', './uploads/VB.player', './uploads/VC.player'],
 		'loadshape_scalar' : 1.0,
-		'load_shape_player_file' : '../schedules/load_shape_player.player',
-		'weather_file' : '../schedules/SCADA_weather_NC_gld_shifted.csv'}
-	try:
-		calibratedFeederTree, calibrationConfiguration = startCalibration(working_directory, feederTree, scada, model_name, calibration_config)
-	except:
-		calibratedFeederTree = None
-		calibrationConfiguration = None
+		'load_shape_player_file' : './uploads/load_shape_player.player',
+		'weather_file' : './uploads/SCADA_weather_NC_gld_shifted.csv'}
+	calibratedFeederTree, calibrationConfiguration = startCalibration(working_directory, feederTree, scada, model_name, calibration_config)
 	assert None != calibratedFeederTree
 	assert None != calibrationConfiguration
 
