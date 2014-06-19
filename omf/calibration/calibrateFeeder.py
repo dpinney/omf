@@ -1,3 +1,11 @@
+'''
+Take in a Feeder and an appropriate set of SCADA data, and return the feeder with load shape models attached.
+
+TODO: small example on how to actually use this.
+
+@author: Andrew Fisher
+'''
+
 import datetime
 import os
 import glob

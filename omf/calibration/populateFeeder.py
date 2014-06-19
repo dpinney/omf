@@ -1,6 +1,5 @@
 '''
-Created on Jun 19, 2014
-this library is used to populate a base feeder tree with different load and technology models and returns a new feeder tree with the desired technology models.
+This library is used to populate a base feeder tree with different load and technology models and returns a new feeder tree with the desired technology models.
 For example, to attach a feeder tree, baseTree, with ziploads run in the terminal
 
     python -c "import populateFeeder; newTree, key = populateFeeder.startPopulation(basetree, -1, "./desired_working_directory", None)"
