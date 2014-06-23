@@ -413,7 +413,18 @@ def runForeground(modelDir, inputDict):
 		with open(pJoin(modelDir,"powerflows.json"),"w") as outFile:
 			json.dump(dictalToMatrix(powerflows), outFile, indent=4)
 		# Monetary results.
-		plotTable(dictalToMatrix(monthData))
+		## To print partial money table
+		monthDataMat = dictalToMatrix(monthData)
+		dimX = len(monthDataMat)
+		dimY = len(monthDataMat[0])
+		monthDataPart = []
+		for k in range (0,dimX):
+			monthDatatemp = []
+			for m in range (4,dimY):
+				monthDatatemp.append(monthDataMat[k][m])
+			monthDataPart.append(monthDatatemp)
+
+		plotTable(monthDataPart)
 		plt.savefig(pJoin(modelDir,"moneyTable.png"))
 		with open(pJoin(modelDir,"moneyTable.png"),"rb") as inFile:
 			allOutput["moneyTable"] = inFile.read().encode("base64")
