@@ -417,7 +417,7 @@ def runForeground(modelDir, inputDict):
 		plt.savefig(pJoin(modelDir,"moneyTable.png"))
 		with open(pJoin(modelDir,"moneyTable.png"),"rb") as inFile:
 			allOutput["moneyTable"] = inFile.read().encode("base64")
-		with open(pJoin(modelDir,"monthData.json"),"w") as outFile:
+		with open(pJoin(modelDir,"moneyTable.json"),"w") as outFile:
 			json.dump(dictalToMatrix(monthData), outFile, indent=4)
 
 		# Graph the money data.
