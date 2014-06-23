@@ -59,7 +59,7 @@ def getStatus(modelDir):
 	except:
 		modFiles = []
 	hasInput = "allInputData.json" in modFiles
-	hasPID = "PID.txt" in modFiles
+	hasPID = "PPID.txt" in modFiles
 	hasOutput = "allOutputData.json" in modFiles
 	if hasInput and not hasOutput and not hasPID:
 		return "stopped"
@@ -73,29 +73,26 @@ def getStatus(modelDir):
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
+	startTime = dt.datetime.now()
+	allOutput = {}
 	# Check whether model exist or not
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 		inputDict["created"] = str(dt.datetime.now())
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
-	# # Copy spcific climate data into model directory
-	# shutil.copy(pJoin(_omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
-	# 	pJoin(modelDir, "climate.tmy2"))
-	# Ready to run
-	startTime = dt.datetime.now()
-	### TODO:DO SOMETHING HERE.
-	# Setting options for start time.
-	simLengthUnits = inputDict.get("simLengthUnits","")
-	simStartDate = inputDict.get("simStartDate","")
-	# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html 
-	startDateTime = simStartDate + " 00:00:00 UTC"
-	# Timestamp output.
-	outData = {}
-	### TODO:DO SOMETHING HERE.
-	# Write the output.
+	# Copy feeder data into the model directory.
+	feederDir, feederName = inputDict["feederName"].split("___")
+	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
+		pJoin(modelDir,"feeder.json"))
+	# Create voltage drop plot.
+	tree = json.load(open(pJoin(modelDir,"feeder.json"))).get("tree",{})
+	chart = voltPlot(tree, workDir=modelDir)
+	chart.savefig(pJoin(modelDir,"output.png"))
+	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
+		allOutput["voltageDrop"] = inFile.read().encode("base64")
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-		json.dump(outData, outFile, indent=4)
+		json.dump(allOutput, outFile, indent=4)
 	# Update the runTime in the input file.
 	endTime = dt.datetime.now()
 	inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
@@ -158,9 +155,6 @@ def voltPlot(tree, workDir=None):
 					phaseVolt = phaseVolt*(120/feedVoltage)
 				allVolts.append(phaseVolt)
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
-	# print 'Example Deviations:'
-	# for key in nodeVolts.keys()[0:5]:
-	# 	print key, nodeVolts[key]
 	# Color nodes by VOLTAGE.
 	fGraph = feeder.treeToNxGraph(tree)
 	voltChart = plt.figure(figsize=(12,10))
@@ -184,12 +178,18 @@ def cancel(modelDir):
 	pass
 
 def _tests():
+	# First just test the charting.
+	# tree = json.load(open("../data/Feeder/public/Olin Barre Geo.json")).get("tree",{})
+	# chart = voltPlot(tree)
+	# chart.savefig("/Users/dwp0/Desktop/testChart.png")
+	# plt.show()
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
 	inData = { "modelName": "Automated voltageDrop Testing",
+		"feederName": "public___Olin Barre Geo",
 		"modelType": "voltageDrop",
 		"user": "admin",
-		"runTime": "" }
+		"runTime": ""}
 	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
 	# Blow away old test results if necessary.
 	try:
@@ -199,8 +199,6 @@ def _tests():
 		pass
 	# No-input template.
 	renderAndShow()
-	# Show the model (should look like it's running).
-	renderAndShow(modelDir=modelLoc)
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
@@ -209,13 +207,5 @@ def _tests():
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)
 
-def _newTest():
-	#TODO: delete me and change main back.
-	import json
-	tree = json.load(open("../data/Feeder/public/Olin Barre Geo.json")).get("tree",{})
-	chart = voltPlot(tree)
-	plt.show()
-
 if __name__ == '__main__':
-	_newTest()
-	#_tests()
+	_tests()

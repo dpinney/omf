@@ -58,7 +58,7 @@ def getStatus(modelDir):
 	except:
 		modFiles = []
 	hasInput = "allInputData.json" in modFiles
-	hasPID = "PID.txt" in modFiles
+	hasPID = "PPID.txt" in modFiles
 	hasOutput = "allOutputData.json" in modFiles
 	if hasInput and not hasOutput and not hasPID:
 		return "stopped"
@@ -218,8 +218,6 @@ def _tests():
 		pass
 	# No-input template.
 	renderAndShow()
-	# Show the model (should look like it's running).
-	renderAndShow(modelDir=modelLoc)
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.

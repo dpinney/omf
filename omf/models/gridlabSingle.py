@@ -269,7 +269,6 @@ def cancel(modelDir):
 	except:
 		pass
 
-
 def _tests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
