@@ -410,11 +410,16 @@ def runForeground(modelDir, inputDict):
 		plt.savefig(pJoin(modelDir,"powerflowTable.png"))
 		with open(pJoin(modelDir,"powerflowTable.png"),"rb") as inFile:
 			allOutput["powerflowTable"] = inFile.read().encode("base64")
+		with open(pJoin(modelDir,"powerflows.json"),"w") as outFile:
+			json.dump(dictalToMatrix(powerflows), outFile, indent=4)
 		# Monetary results.
 		plotTable(dictalToMatrix(monthData))
 		plt.savefig(pJoin(modelDir,"moneyTable.png"))
 		with open(pJoin(modelDir,"moneyTable.png"),"rb") as inFile:
 			allOutput["moneyTable"] = inFile.read().encode("base64")
+		with open(pJoin(modelDir,"monthData.json"),"w") as outFile:
+			json.dump(dictalToMatrix(monthData), outFile, indent=4)
+
 		# Graph the money data.
 		fig = plt.figure(figsize=(10,8))
 		indices = [r['monthName'] for r in monthData]
