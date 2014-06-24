@@ -37,9 +37,21 @@ def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
 		pathPrefix = _omfDir
 	else:
 		pathPrefix = ""
+	
+	feederList = []
+	feederIDs = []
+	try:
+		inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))
+		for key in inputDict:
+			if key.startswith("feederName"):
+				feederIDs.append(key) 
+				feederList.append(inputDict[key])
+	except IOError:
+		# feederIDs = []
+		pass
 	return template.render(allInputData=allInputData,
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames)
+		datastoreNames=datastoreNames, feederIDs = feederIDs, feederList = feederList)
 
 def renderAndShow(modelDir="", datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
@@ -97,7 +109,7 @@ def runForeground(modelDir, inputDict):
 	print "STARTING TO RUN", modelDir
 	beginTime = datetime.datetime.now()
 	feederList = []
-	
+
 	def preRun(modelDir):
 		""" Get prepare of data and clean workspace if re-run"""
 		# If re-run remove all the data in the subfolders
@@ -263,30 +275,39 @@ def runForeground(modelDir, inputDict):
 		json.dump(inputDict, inFile, indent = 4)
 
 	def afterRun(modelDir):
-		""" Integrate data into allOutputData.json at model directory"""
-		output = {}
-		numOfFeeders = 0
-		for root, dirs, files in os.walk(modelDir):
-			if "allOutputData.json" in files:
-				with open(pJoin(modelDir, root, "allOutputData.json"), "r") as feederOutputData:
-					numOfFeeders += 1
-					feederOutput = json.load(feederOutputData)
-					# TODO: a better feeder name
-					output["feeder"+str(numOfFeeders)] = {}
-					output["feeder"+str(numOfFeeders)]["Consumption"] = feederOutput["Consumption"]
-					output["feeder"+str(numOfFeeders)]["allMeterVoltages"] = feederOutput["allMeterVoltages"]
-					output["feeder"+str(numOfFeeders)]["stderr"] = feederOutput["stderr"]
-					output["feeder"+str(numOfFeeders)]["stdout"] = feederOutput["stdout"]
-					# output[root] = {feederOutput["Consumption"], feederOutput["allMeterVoltages"], feederOutput["stdout"], feederOutput["stderr"]}
-		output["numOfFeeders"] = numOfFeeders
-		output["timeStamps"] = feederOutput["timeStamps"]
-		output["climate"] = feederOutput["climate"]
-		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-			json.dump(output, outFile, indent=4)
+		""" Integrate data into allOutputData.json, if error happens, cancel it """
 		try:
-			os.remove(pJoin(modelDir, "PPID.txt"))
-		except:
-			pass
+			output = {}
+			numOfFeeders = 0
+			for root, dirs, files in os.walk(modelDir):
+				if "allOutputData.json" in files:
+					with open(pJoin(modelDir, root, "allOutputData.json"), "r") as feederOutputData:
+						numOfFeeders += 1
+						feederOutput = json.load(feederOutputData)
+						# TODO: a better feeder name
+						output["feeder_"+str(os.path.split(root)[-1])] = {}
+						output["feeder_"+str(os.path.split(root)[-1])]["Consumption"] = feederOutput["Consumption"]
+						output["feeder_"+str(os.path.split(root)[-1])]["allMeterVoltages"] = feederOutput["allMeterVoltages"]
+						output["feeder_"+str(os.path.split(root)[-1])]["stderr"] = feederOutput["stderr"]
+						output["feeder_"+str(os.path.split(root)[-1])]["stdout"] = feederOutput["stdout"]
+						# output[root] = {feederOutput["Consumption"], feederOutput["allMeterVoltages"], feederOutput["stdout"], feederOutput["stderr"]}
+			output["numOfFeeders"] = numOfFeeders
+			output["timeStamps"] = feederOutput["timeStamps"]
+			output["climate"] = feederOutput["climate"]
+			with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+				json.dump(output, outFile, indent=4)
+			try:
+				os.remove(pJoin(modelDir, "PPID.txt"))
+			except:
+				pass
+		except Exception, e:
+			print "Crashed"
+			try:
+				os.remove(pJoin(modelDir, "PPID.txt"))
+			except:
+				pass
+			cancel(modelDir)
+		
 	afterRun(modelDir)
 
 def cancel(modelDir):
