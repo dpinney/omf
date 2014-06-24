@@ -47,7 +47,6 @@ def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
 				feederIDs.append(key) 
 				feederList.append(inputDict[key])
 	except IOError:
-		# feederIDs = []
 		pass
 	return template.render(allInputData=allInputData,
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
