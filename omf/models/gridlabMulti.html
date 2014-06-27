@@ -619,13 +619,13 @@
 						if (undefined != study) {
 							// Update the capacity graph.
 							capStudyIndex = indexFind(monCapCostGraph['series'], function (x) {return x.name == study})
-							function maxAvg(arr) {max=arrMax(arr); len=arr.length; return arr.map(function(x){return max/len})}
+							function maxAvg(arr) {max=arrMax(arr.filter(function(n){return n!=undefined})); len=arr.length; return arr.map(function(x){return max/len})}
 							powerAgged = monthAgg(allOutputData.timeStamps, allOutputData[study].Consumption.Power, maxAvg)
 							monthlyPower = powerAgged.map(function(x){return round(x*capRate/1000,4)})
 							monCapCostGraph['series'][capStudyIndex].setData(monthlyPower)
 							// Update the energy graph.
 							enStudyIndex = indexFind(monEnergyCostGraph['series'], function (x) {return x.name == study})
-							function avg(arr) {total=arrSum(arr); len=arr.length; return arr.map(function(x){return total/len})}
+							function avg(arr) {total=arrSum(arr.filter(function(n){return n!=undefined})); len=arr.length; return arr.map(function(x){return total/len})}
 							energyAgged = monthAgg(allOutputData.timeStamps, allOutputData[study].Consumption.Power, avg)
 							monthlyEnergy = energyAgged.map(function(x){return round(x*energyRate/1000,4)})
 							monEnergyCostGraph['series'][enStudyIndex].setData(monthlyEnergy)
