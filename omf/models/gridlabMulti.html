@@ -534,11 +534,13 @@
 					localHighChart["chart"]["width"] = 1000
 					localHighChart["chart"]["renderTo"] = "costGrowthContainer"
 					localHighChart["yAxis"]["title"]["text"] = "Cumulative Savings ($)"
-					localHighChart["xAxis"] = {"type": "linear", "tickColor": "gray", "lineColor": "gray", "title": {"text": "Years After Install"}}
+					localHighChart["xAxis"] = {"labels": {enabled: true}, "type": "linear", "tickColor": "gray", "lineColor": "gray", "title": {"text": "Years After Install"}}
+					localHighChart["xAxis"]["plotLines"] = [{"color": "silver", "width": 1, "value": yearPercentage}]
+					localHighChart["plotOptions"]["series"]["pointInterval"] = 1
+					localHighChart["plotOptions"]["series"]["pointStart"] = 0
 					for (key in allOutputData){
 							if (key.substring(0, 6) == "feeder"){
 								localHighChart["series"].push({"name": key, data: []})
-								localHighChart["xAxis"]["plotLines"] = [{"color": "silver", "width": 1, "value": yearPercentage}]
 							}
 						}
 					costGrowthGraph = new Highcharts.Chart(localHighChart)
@@ -606,7 +608,6 @@
 				 * This is for HighCharts display for monetization
 				 */
 				recalculateCostBenefit()
-				// TODO: unmatched array size (Consumption.Power)
 				function recalculateCostBenefit() {
 					/*
 					 * Calculate the cost of power and energy, also power 
