@@ -24,6 +24,8 @@
 		td,th {text-align: right}
 		.preRun, .running, .postRun, .stopped {display:none;}
 		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
+		table#detailsTable th, table#detailsTable td {text-align: center; padding:5px; vertical-align:top; }
+		.HighlightCircle{fill: rgb(16, 150, 24);}
 	</style>
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
@@ -704,77 +706,37 @@
 					<td rowspan="7" style = "width:100%">
 						<div id="mapHere">
 							<style type="text/css">
-								table#detailsTable th, table#detailsTable td {
-									/* text-align:left; */
-									text-align: center;
-									/* // border:1px solid black; */
-									padding:5px;
-									vertical-align:top;
-								}
-								#stnames{
-									text-align:left;
-								}
-								.HighlightCircle{
-									fill: rgb(16, 150, 24);
-								}
-								#states{
-									fill: #aaa;
-									stroke: #fff;
-									stroke-width: 1.5px;
-								}
-								.cont{
-									/* position:absolute; */
-									/* top:-20; */
-									/* left:-100; */
-								}
-								#mapHere{
-									/* position:relative; */
-									/* left:50%; */
-									height:100%;
-									width:100%;
-								}
-								#studies{
-									text-align: center;
-								}
+								
+								
 							</style>
 							<script type="text/javascript">
-								var width = 580, height = 450;
-								var sf = 0.7;
-								var projection = d3.geo.albers()
-									.scale(sf*1000)
-									.center([17,40]);
+								var width = 500,
+									height = 450;
+
+								var projection = d3.geo.albersUsa().scale(600).translate([width/2, width/2]);
 
 								var path = d3.geo.path()
-									.projection(projection)
-									.pointRadius(2);
+									.projection(projection);
 
 								var svg = d3.select("#mapHere").append("svg")
 									.attr("width", width)
-									.attr("height", height)
-									.attr("class", "cont");
+									.attr("height", height);
 
-								var g = svg.append("g")
-									.attr("id", "states");
+								var group = svg.append("g");
 
-								var ak_transform = "translate("+300*sf+","+sf*175+") scale(0.5)"; // scale(0.75) rotate(-30)";
-								var hi_transform = "translate("+sf*1950+","+sf*-950+") scale(2.75)"; //
-
-								d3.json("{{pathPrefix}}/static/state_boundaries.json", function(json){
-									g.selectAll("path")
-										.data(json.features)
-										.enter().append("path")
-										.attr("d", path)
-										.attr("transform", function(d){
-										if(d.properties.name == "Alaska")
-											return ak_transform;
-										else if(d.properties.name == "Hawaii")
-											return hi_transform;
-										})
-
-								})
+								group.attr("transorm", "scale(.2, .2)");
+								d3.json('/static/state_boundaries.json', function(collection) {
+									group.selectAll('path')
+										.data(collection.features)
+										.enter().append('path')
+										.attr('d', d3.geo.path().projection(projection))
+										.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+										.style('fill', 'gray')
+										.style('stroke', 'white')
+										.style('stroke-width', 1);
+								});
 
 								d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
-									// {{allInputData.climateName}}.forEach(function(climate){
 									climate = allInputData.climateName
 									var ST_NAME = climate.split("-");
 									var ST = ST_NAME[0], NAME = ST_NAME[1];
@@ -783,16 +745,8 @@
 									svg.append("circle")
 										.attr("cx", my_coords[0])
 										.attr("cy", my_coords[1])
-										.attr("r", function(){
-											if (ST == "AK") return r * 1/0.5;
-											else if (ST == "HI") return r* 1/2.75;
-											return r;
-										})
+										.attr("r", 5)
 										.attr("class", "HighlightCircle")
-										.attr("transform", function(){
-											if (ST == "AK") return ak_transform;
-											else if (ST == "HI") return hi_transform;
-										})
 								})
 							</script>
 						</div>
@@ -860,7 +814,7 @@
 									if (key.substring(0,6) == "feeder") {
 										studyUser = allInputData[key].split(/[_]+/)[0]
 										studyName = allInputData[key].split(/[_]+/)[1]
-										insideHTML += "<span> " + studyName + " <a href='/feeder/"+studyUser+"/"+ studyName +"'" + "> - " + studyName + "</a></span><br/>"
+										insideHTML += "<span> " + " <a href='/feeder/"+studyUser+"/"+ studyName +"'" + "> - " + studyName + "</a></span><br/>"
 									}
 								}
 								$("#stnames").append(insideHTML)
