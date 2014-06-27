@@ -814,6 +814,12 @@
 					<td id="GC">
 						<div id="comparisonPieChart" style="min-width: 400px; height: 200px; margin: 0 auto">
 							<script type="text/javascript">
+								pieData = []
+								for (index in studyList){
+									size = parseInt(allOutputData[studyList[index]]["stdout"].split("\n")[3].split(/[ ]+/)[2])
+
+									pieData.push([studyList[index], size])
+								}
 								$(function(){
 									$("#comparisonPieChart").highcharts({
 										credits:{
@@ -824,8 +830,7 @@
 										},
 										series: [{
 											type: "pie",
-											// TODO data: {{ pieChartData }}.splice(1),
-											data: [10, 20, 40]
+											data: pieData
 										}],
 										plotOptions: {
 											pie: {
