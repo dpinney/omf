@@ -759,7 +759,6 @@
 											return ak_transform;
 										else if(d.properties.name == "Hawaii")
 											return hi_transform;
-										// return "translate(0, 0)";
 										})
 
 								})
@@ -783,13 +782,7 @@
 										.attr("transform", function(){
 											if (ST == "AK") return ak_transform;
 											else if (ST == "HI") return hi_transform;
-											// return "translate(0, 0)";
 										})
-										// .scale(function(){
-										//     if (ST == "AK") return 100;
-										//     return 1000;
-										// })
-									// })
 								})
 							</script>
 						</div>
@@ -852,15 +845,16 @@
 					<td>
 						<div id="stnames">
 							<script type="text/javascript">
-								for (index in studyList){
-									studyName = studyList[index].split("_")[1]
-									// TODO: 
-									$("#stnames").append("<span> " + studyName + " <a href='/feeder/public/"+ studyName +"'" + "> - " + studyName + "</a></span><br/>")
+								insideHTML = ""
+								for (key in allInputData) {
+									if (key.substring(0,6) == "feeder") {
+										studyUser = allInputData[key].split(/[_]+/)[0]
+										studyName = allInputData[key].split(/[_]+/)[1]
+										insideHTML += "<span> " + studyName + " <a href='/feeder/"+studyUser+"/"+ studyName +"'" + "> - " + studyName + "</a></span><br/>"
+									}
 								}
+								$("#stnames").append(insideHTML)
 							</script>
-							<!-- {%- for study in outputList -%}
-							<span>{{ study.studyName }} - <a href="/analysisFeeder/{{ana.name}}/{{study.studyName}}">{{study.sourceFeederName}}</a></span><br />
-							{%- endfor -%} -->
 						</div>
 					</td>
 				</tr>
