@@ -668,7 +668,7 @@
 							annualSave = baseAnnual - annualCost
 							thisRow.querySelector('.annualSave').innerHTML = round(annualSave,4)
 							thisRow.querySelector('.payback').innerHTML = round(Math.abs(y1save/annualSave),2)
-							// update the costBen graph. TODO: values.
+							// update the costBen graph.
 							costGrowthIndex = indexFind(costGrowthGraph['series'], function (x) {return x.name == study})
 							costSeries = []
 							for (i=0;i<30;i++) {costSeries.push(round(baseCost-y1cost+i*(baseAnnual-annualCost),4))}
@@ -705,10 +705,6 @@
 					</td>
 					<td rowspan="7" style = "width:100%">
 						<div id="mapHere">
-							<style type="text/css">
-								
-								
-							</style>
 							<script type="text/javascript">
 								var width = 500,
 									height = 450;
