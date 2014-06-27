@@ -35,9 +35,6 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
-		/**
-		 * Functional actions setup
-		 */
 		function init() {
 			// If we have input, put it back.
 			if (allInputData != null) {
@@ -322,6 +319,9 @@
 		<p class="reportTitle postRun">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="powerConsumptionReport" class="tightContent postRun">
 			<script type="text/javascript">
+				/*
+				 * This is a HighChart display for power consumption and energy balance
+				 */
 				for (index in studyList) {
 					study = studyList[index]
 					$("<div/>").appendTo("#powerConsumptionReport")
@@ -425,6 +425,9 @@
 		<p class="reportTitle postRun">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="triplexMeterVoltageReport" class="tightContent postRun">
 			<script type="text/javascript">
+				/*
+				 * This is a HighChart for triplex meter voltages
+				 */
 				for (index in studyList) {
 					study = studyList[index]
 					// Create div for triplex meter voltage chart appending to powerConsumption
@@ -494,6 +497,9 @@
 			<div class="studyContainer" style="position:relative; height: 200px">
 				<div id="monetizedPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:500px;height:200px">
 					<script type="text/javascript">
+						/*
+						 * HighChart template for power time series, data renders at recalculateCostBenefit func.
+						 */
 						var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 						localHighChart["chart"]["height"] = 200
 						localHighChart["chart"]["width"] = 500
@@ -510,6 +516,9 @@
 				</div>
 				<div id="monetizedEnergyBalance" style="position:absolute;top:0px;left:500px;width:500px;height:200px">
 					<script type="text/javascript">
+						/*
+						 * HighChart template for energy balance, data renders at recalculateCostBenefit func.
+						 */
 						var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 						localHighChart["chart"]["height"] = 200
 						localHighChart["chart"]["width"] = 500
@@ -527,6 +536,9 @@
 			</div>
 			<div id="costGrowthContainer" class="studyContainer" style="height: 200px">
 				<script type="text/javascript">
+					/*
+					 * HighChart template for culumative savings, data renders at recalculateCostBenefit func.
+					 */
 					intervalMap = {"minutes": 60, "hours": 3600, "days": 86400}
 					yearPercentage = intervalMap[allInputData.simLengthUnits]*(allOutputData.timeStamps.length)/(365*34*60*60.0)
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
@@ -604,13 +616,11 @@
 				</table>
 			</div>
 			<script type="text/javascript">
-				/*
-				 * This is for HighCharts display for monetization
-				 */
+				// render data for monetization charts
 				recalculateCostBenefit()
 				function recalculateCostBenefit() {
 					/*
-					 * Calculate the cost of power and energy, also power 
+					 * Calculate the cost of power and energy
 					 */
 					energyRate = (parseFloat(gebi('distrEnergyRate').value) || 0.08)
 					capRate = (parseFloat(gebi('distrCapacityRate').value) || 15) 
@@ -679,7 +689,7 @@
 		<p class="reportTitle postRun" style = "display:none !important">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative" style="display:none !important">
 			
-			<script src="/static/d3.v3.js"></script>
+			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 			<table id="detailsTable">
 				<tr>
 					<th class="hozHead"> Analysis Creation Date</th>
@@ -864,6 +874,9 @@
 		<p class="reportTitle postRun">Climate <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="climateReport" class="tightContent postRun">
 			<script type="text/javascript">
+				/*
+				 * HighChart for climate data.
+				 */
 				for (index in studyList) {
 					study = studyList[index]
 					$("<div/>").appendTo("#climateReport")
@@ -882,6 +895,9 @@
 		<p class="reportTitle postRun">Model Runtime Statistics <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="runtimeStatsReport" class="tightContent stdouts postRun" style="height:600px">
 			<script type="text/javascript">
+				/*
+				 * display stdout, NOTE: stderr ignored here
+				 */
 				for (index in studyList) {
 					study = studyList[index]
 					$("<pre/>").appendTo("#runtimeStatsReport")
