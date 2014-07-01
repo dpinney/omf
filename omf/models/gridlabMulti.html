@@ -368,44 +368,54 @@
 					localHighChart["series"] = [powerSeries, lossesSeries, DGSeries]
 					localHighChart["yAxis"]["title"] = {"text": "Power (W)", "style": {"color": "gray"}}
 					new Highcharts.Chart(localHighChart);
+				}
 
+				// Draw energy balance chart
+				$("<div/>").appendTo("#powerConsumptionReport")
+					.attr("id", "energyBalance")
+				var tLossesSeries = {
+					"pointWidth": 40, 
+					"color":"orangered",
+					"data":[],
+					"type":"column",
+					"name":"Losses"
+				}
+				var tLoadsSeries = {
+					"pointWidth": 40,
+					"color":"darkorange",
+					"data":[],
+					"type":"column",
+					"name":"Loads"
+				}
+				var tDGSeries = {
+					"color":"seagreen",
+					"data":[],
+					"type":"spline",
+					"name":"DG"
+				}
+				var cateList = []
+				for (index in studyList) {
+					study = studyList[index]
 					// energy balance bar
-					$("<div/>").appendTo("#powerConsumptionReport .studyContainer:last")
-						.attr("id", "energyBalance_" + study)
 					var tPower = eval(allOutputData[study].Consumption.Power.join("+"));
 					var tLosses = eval(allOutputData[study].Consumption.Losses.join("+"));
 					var tDG = eval(allOutputData[study].Consumption.DG.join("+"));
 					var tLoads = tPower + tDG - tLosses;
-					var tLossesSeries = {
-						"pointWidth": 20, 
-						"color":"orangered",
-						"data":[tLosses],
-						"type":"column",
-						"name":"Losses"
-					}
-					var tLoadsSeries = {
-						"pointWidth": 20,
-						"color":"darkorange",
-						"data":[tLoads],
-						"type":"column",
-						"name":"Loads"
-					}
-					var tDGSeries = {
-						"color":"seagreen",
-						"data":[tDG],
-						"type":"spline",
-						"name":"DG"
-					}
+					tLossesSeries["data"].push(tLosses)
+					tLoadsSeries["data"].push(tLoads)
+					tDGSeries["data"].push(tDG)
+					cateList.push(study.substring(7))
+				}
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-					localHighChart["chart"]["renderTo"] = "energyBalance_" + study
-					localHighChart["chart"]["inverted"] = true
-					localHighChart["chart"]["height"] = 100
+					localHighChart["chart"]["renderTo"] = "energyBalance"
+					localHighChart["chart"]["inverted"] = false
+					localHighChart["chart"]["height"] = 250
 					localHighChart["chart"]["width"] = 1000
 					localHighChart["series"] = [tLossesSeries, tLoadsSeries, tDGSeries]
 					localHighChart["xAxis"] = {
 						"tickColor":"gray",
 						"lineColor":"gray",
-						"categories":["Energy (Wh)"]
+						"categories":cateList
 					}
 					localHighChart["yAxis"] = {
 						"title":{
@@ -420,7 +430,7 @@
 						"spline":{"marker":{"radius":8}, "shadow":false, "lineWidth":0 }
 						}
 					new Highcharts.Chart(localHighChart);
-				}
+				
 			</script>
 		</div>
 		
