@@ -132,7 +132,7 @@
 					alert('Please Do Not Add More Than 5 Feaders');
 					return false;
 				}
-				var feeder_html = $('<tr class="feederList"><td><label for="feeder' + n + '">Feeder <span class="feeder-number">'+n+' </span></label><a class="remove-feeder" href="#">&#8854;</a></td><td><select id="feederName'+n+'" name="feederName'+n+'"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"].username + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select></td></tr>');
+				var feeder_html = $('<tr class="feederList"><td><label for="feeder' + n + '">Feeder <span class="feeder-number">'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a></td><td><select id="feederName'+n+'" name="feederName'+n+'"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"].username + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select></td></tr>');
 				feeder_html.hide();
 				$('.content .feederList:last').after(feeder_html);
 				feeder_html.fadeIn('slow');
@@ -226,7 +226,7 @@
 				<tr class="feederList">
 					<td><label for="feeder1">Feeder <span class="feeder-number">1</span>
 						</label>
-							<a class='add-feeder' href='#'>&#8853;</a>
+							<a class='add-feeder postRun preRun stopped' href='#'>&#8853;</a>
 					</td>
 					<td>
 						<select id="feederName" name="feederName">
@@ -247,9 +247,9 @@
 					<td><label for="feeder1">Feeder <span class="feeder-number">{{feederIDs.index(feederID) + 1}}</span>
 						</label>
 						{% if feederIDs.index(feederID)+1 == 1 %}
-							<a class='add-feeder' href='#'>&#8853;</a>
+							<a class='add-feeder postRun preRun stopped' href='#'>&#8853;</a>
 						{% else %}
-							<a class='remove-feeder' href='#'>&#8854;</a>
+							<a class='remove-feeder postRun preRun stopped' href='#'>&#8854;</a>
 						{% endif %}
 					</td>
 					<td>
