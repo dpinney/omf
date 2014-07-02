@@ -1,0 +1,8 @@
+{
+    "modelName": "zVoltageDrop Test", 
+    "created": "2014-07-02 10:21:46.139000", 
+    "feederName": "public___Olin Barre Geo", 
+    "modelType": "voltageDrop", 
+    "user": "admin", 
+    "runTime": "0:00:00"
+}
