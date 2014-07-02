@@ -870,4 +870,20 @@
 			</script>
 		</div>
 	</div>
+
+	<script type="text/javascript">
+		/* Highlight failing feeders */
+		$(window).bind("load", function(){
+			if (allOutputData != null) {
+				$("select[id*='feederName']").each(function() { 
+					name = "feeder_" + $(this).val().split("___")[1]
+					if (allOutputData[name] == undefined) {
+						$(this).parents("tr").css("background-color", "#FFF000");
+					}
+
+				})
+			}
+		})
+		
+	</script>
 </body>
