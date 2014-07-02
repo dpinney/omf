@@ -10,7 +10,6 @@ omf.egg-info
 
 # But include a few example analyses:
 !omf/data/Model/admin/z*
-!omf/data/Model/admin/z*
 !omf/data/Model/public/*
 !omf/data/Feeder/public/*
 !omf/data/User/admin.json
