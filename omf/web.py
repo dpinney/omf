@@ -468,4 +468,5 @@ def uniqObjName(objtype, owner, name):
 if __name__ == "__main__":
 	URL = "http://localhost:5000"
 	template_files = ["templates/"+ x  for x in os.listdir("templates")]
-	app.run(debug=True, extra_files=template_files)
+	model_files = ["models/" + x for x in os.listdir("models")]
+	app.run(debug=True, extra_files=template_files + model_files)
