@@ -148,7 +148,7 @@
 				<tr>
 					<td>Feeder</td>
 					<td>
-						<select id="feederName" name="feederName"/>
+						<select id="feederName" name="feederName">
 							<option disabled><strong>Personal Feeders</strong></option>
 							{% for feeder in datastoreNames['feeders'] %}
 								<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
@@ -157,6 +157,15 @@
 							{% for pFeeder in datastoreNames['publicFeeders'] %}
 								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 							{% endfor %}
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Layout Algorithm</td>
+					<td>
+						<select id="layoutAlgorithm" name="layoutAlgorithm">
+							<option value="geospatial">Geospatial</option>
+							<option value="forceDirected">Force Directed</option>
 						</select>
 					</td>
 				</tr>

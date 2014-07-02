@@ -87,7 +87,11 @@ def run(modelDir, inputDict):
 		pJoin(modelDir,"feeder.json"))
 	# Create voltage drop plot.
 	tree = json.load(open(pJoin(modelDir,"feeder.json"))).get("tree",{})
-	chart = voltPlot(tree, workDir=modelDir)
+	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
+		neato = False
+	else:
+		neato = True 
+	chart = voltPlot(tree, workDir=modelDir, neatoLayout=neato)
 	chart.savefig(pJoin(modelDir,"output.png"))
 	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 		allOutput["voltageDrop"] = inFile.read().encode("base64")
@@ -195,7 +199,8 @@ def _tests():
 		"feederName": "public___Olin Barre Geo",
 		"modelType": "voltageDrop",
 		"user": "admin",
-		"runTime": ""}
+		"runTime": "",
+		"layoutAlgorithm": "geospatial"}
 	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
 	# Blow away old test results if necessary.
 	try:
