@@ -1,6 +1,7 @@
 *.pyc
 *.sublime-project
 *.sublime-workspace
+omf/omf/data/Conversion/*
 omf/omf/data/Model/*
 omf/omf/data/Feeder/*
 omf/omf/data/User/*
