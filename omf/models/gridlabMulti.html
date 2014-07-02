@@ -132,7 +132,7 @@
 					alert('Please Do Not Add More Than 5 Feaders');
 					return false;
 				}
-				var feeder_html = $('<tr class="feederList"><td><label for="feeder' + n + '">Feeder <span class="feeder-number">'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a></td><td><select id="feederName'+n+'" name="feederName'+n+'"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"].username + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select></td></tr>');
+				var feeder_html = $('<tr class="feederList"><td><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a></td><td><select id="feederName'+n+'" name="feederName'+n+'" style="width:95%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"].username + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" href="#" style="display: inline;"> &#9997;</a></td></tr>');
 				feeder_html.hide();
 				$('.content .feederList:last').after(feeder_html);
 				feeder_html.fadeIn('slow');
@@ -229,7 +229,7 @@
 							<a class='add-feeder postRun preRun stopped' href='#'>&#8853;</a>
 					</td>
 					<td>
-						<select id="feederName" name="feederName">
+						<select id="feederName" name="feederName" style="width:95%">
 							<option disabled><strong>Personal Feeders</strong></option>
 							{% for feeder in datastoreNames['feeders'] %}
 								<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
@@ -239,6 +239,7 @@
 								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 							{% endfor %}
 						</select>
+						<a class="edit-feeder postRun preRun stopped" href="#">&#9997;</a>
 					</td>
 				</tr>
 				{% else %}
@@ -254,7 +255,7 @@
 					</td>
 					<td>
 						<!-- <select id="{{feederName}}" name="{{feederName}}"> -->
-						<select id="{{feederID}}" name="{{feederID}}">
+						<select id="{{feederID}}" name="{{feederID}}" style="width:95%">
 							<option disabled><strong>Personal Feeders</strong></option>
 							{% for feeder in datastoreNames['feeders'] %}
 								<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
@@ -264,6 +265,7 @@
 								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 							{% endfor %}
 						</select>
+						<a class="edit-feeder postRun preRun stopped" href="#">&#9997;</a>
 					</td>
 				</tr>
 				{% endfor %}
