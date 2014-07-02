@@ -99,7 +99,7 @@ def run(modelDir, inputDict):
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent=4)
 
-def voltPlot(tree, workDir=None):
+def voltPlot(tree, workDir=None, neatoLayout=False):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	Returns a matplotlib object. '''
 	# Get rid of schedules and climate:
@@ -160,7 +160,13 @@ def voltPlot(tree, workDir=None):
 	voltChart = plt.figure(figsize=(12,10))
 	plt.axes(frameon = 0)
 	plt.axis('off')
-	positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+	if neatoLayout:
+		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
+		cleanG = nx.Graph(fGraph.edges())
+		cleanG.add_nodes_from(fGraph)
+		positions = nx.graphviz_layout(cleanG, prog='neato')
+	else:
+		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 	edgeIm = nx.draw_networkx_edges(fGraph, positions)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,

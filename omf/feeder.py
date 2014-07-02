@@ -183,7 +183,10 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-		pos = nx.graphviz_layout(nx.Graph(inGraph.edges()),prog='neato')
+		cleanG = nx.Graph(inGraph.edges())
+		# HACK2: might miss nodes without edges without the following.
+		cleanG.add_nodes_from(fGraph)
+		pos = nx.graphviz_layout(cleanG, prog='neato')
 	else:
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
 	# Draw all the edges.
