@@ -279,7 +279,10 @@ def runForeground(modelDir, inputDict):
 			output = {}
 			numOfFeeders = 0
 			for root, dirs, files in os.walk(modelDir):
-				if "allOutputData.json" in files:
+				if "allOutputData.json" in files and "stderr.txt" in files:
+					with open(pJoin(modelDir, root, "stderr.txt"), "r") as stderr:
+						if "ERROR" in stderr.read() or "FATAL" in stderr.read():
+							continue
 					with open(pJoin(modelDir, root, "allOutputData.json"), "r") as feederOutputData:
 						numOfFeeders += 1
 						feederOutput = json.load(feederOutputData)
@@ -340,14 +343,46 @@ def cancel(modelDir):
 def _tests():
 	# Variables
 	workDir = pJoin(_omfDir,"data","Model")
-	inData = { "modelName": "Automated Multiple GridlabD Testing",
+	inData = { 
+		"modelName": "Automated Multiple GridlabD Testing",
+		# "modelName": "All",
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName": "public___Simple Market System",
-		"feederName2": "public___13 Node Ref Feeder Flat",
+		# "feederName": "admin___Simple Market System",
+		# "feederName2": "admin___Simple Market System BROKEN",
+		# "feederName3": "public___13 Node Embedded DO NOT SAVE",
+		# "feederName4": "public___13 Node Ref Feeder Flat",
+		# "feederName5": "public___13 Node Ref Feeder Laid Out ZERO CVR",
+		# "feederName6": "public___13 Node Ref Feeder Laid Out",
+		# "feederName7": "public___ABEC Columbia",
+		# "feederName8": "public___ABEC Frank LO Houses",
+		# "feederName9": "public___ABEC Frank LO",
+		# "feederName10": "public___ACEC Geo",
+		# "feederName11": "public___Battery 13 Node Centralized",
+		# "feederName12": "public___Battery 13 Node Distributed",
+		# "feederName13": "public___DEC Red Base",
+		# "feederName14": "public___DEC Red Battery",
+		# "feederName15": "public___DEC Red CVR",
+		# "feederName16": "public___DEC Red DG",
+		# "feederName17": "public___INEC Renoir",
+		# "feederName18": "public___Olin Barre CVR Base",
+		# "feederName19": "public___Olin Barre Geo",
+		# "feederName20": "public___Olin Barre Housed 05Perc Solar",
+		# "feederName21": "public___Olin Barre Housed 20Perc Solar",
+		# "feederName22": "public___Olin Barre Housed 50Perc Solar",
+		# "feederName23": "public___Olin Barre Housed 90Perc Solar",
+		# "feederName24": "public___Olin Barre Housed Battery",
+		# "feederName25": "public___Olin Barre Housed Wind",
+		# "feederName26": "public___Olin Barre Housed",
+		# "feederName27": "public___Olin Barre",
+		# "feederName28": "public___PNNL Taxonomy Feeder 1",
+		# "feederName29": "public___Simple Market System Comm Solar",
+		# "feederName30": "public___Simple Market System Indy Solar",
+		"feederName31": "public___Simple Market System",
+		"feederName": "public___Battery 13 Node Distributed",		
 		"modelType": "gridlabMulti",
 		"climateName": "AL-HUNTSVILLE",
-		"simLength": "100",
+		"simLength": "24",
 		"user": "admin", # Really only used with web.py.
 		"runTime": ""}
 	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
