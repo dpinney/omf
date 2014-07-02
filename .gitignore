@@ -1,17 +1,17 @@
 *.pyc
 *.sublime-project
 *.sublime-workspace
-omf/omf/data/Conversion/*
-omf/omf/data/Model/*
-omf/omf/data/Feeder/*
-omf/omf/data/User/*
-omf/omf/S3KEY.*
+omf/data/Conversion/*
+omf/data/Model/*
+omf/data/Feeder/*
+omf/data/User/*
+omf/S3KEY.*
 build
 omf.egg-info
 
 # But include a few example data files:
-!omf/omf/data/Model/admin/z*
-!omf/omf/data/Model/public/*
-!omf/omf/data/Feeder/public/*
-!omf/omf/data/User/admin.json
-!omf/omf/data/User/public.json
+!omf/data/Model/admin/z*
+!omf/data/Model/public/*
+!omf/data/Feeder/public/*
+!omf/data/User/admin.json
+!omf/data/User/public.json
