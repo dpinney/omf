@@ -858,7 +858,7 @@
 		<div id="runtimeStatsReport" class="tightContent stdouts postRun" style="height:600px">
 			<script type="text/javascript">
 				/*
-				 * display stdout, NOTE: stderr ignored here
+				 * display stdout
 				 */
 				for (index in studyList) {
 					study = studyList[index]
@@ -867,23 +867,30 @@
 						.attr("class", "stdoutBlock")
 					gebi("stdout_"+study).innerHTML = study + "\n"+allOutputData[study].stdout
 				}
+				// TODO: add stderr if some failed feeders exist.
+
 			</script>
 		</div>
 	</div>
 
 	<script type="text/javascript">
-		/* Highlight failing feeders */
+		/* Highlight failed feeders */
 		$(window).bind("load", function(){
 			if (allOutputData != null) {
 				$("select[id*='feederName']").each(function() { 
-					name = "feeder_" + $(this).val().split("___")[1]
+					study = $(this).val().split("___")[1]
+					name = "feeder_" + study
 					if (allOutputData[name] == undefined) {
+						// highlight feeders in input form
 						$(this).parents("tr").css("background-color", "#FFF000");
+						// render stderr to runtimeStatsReport
+						$("<pre/>").appendTo("#runtimeStatsReport")
+							.attr("id", "stderr_" + study)
+							.attr("class", "stdoutBlock")
+						gebi("stderr_" + study).innerHTML = study + "\n\n" + allOutputData["failures"][name]["stderr"]
 					}
-
 				})
 			}
 		})
-		
 	</script>
 </body>

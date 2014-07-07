@@ -5,6 +5,7 @@ import multiprocessing
 from os.path import join as pJoin
 from jinja2 import Template
 import __util__ as util
+import traceback
 
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
@@ -259,15 +260,13 @@ def runForeground(modelDir, inputDict):
 					json.dump(inputDict, inFile, indent=4)
 				# Clean up the PID file.
 				os.remove(pJoin(modelDir, feederName,"PID.txt"))
-				# For autotest, there won't be PPID file.
-				# TODO: check stuff after running
-				
-				# checkFinished(modelDir)
 				print "DONE RUNNING", modelDir, feederName
 			except Exception as e:
 				print "Oops, Model Crashed!!!" 
 				cancel(pJoin(modelDir, feederName))
-				print e
+				with open(pJoin(modelDir, feederName, "stderr.txt"), "w") as stderrFile:
+					traceback.print_exc(file = stderrFile)
+
 	finishTime = datetime.datetime.now()
 	inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
@@ -277,12 +276,18 @@ def runForeground(modelDir, inputDict):
 		""" Integrate data into allOutputData.json, if error happens, cancel it """
 		try:
 			output = {}
+			output["failures"] = {}
 			numOfFeeders = 0
 			for root, dirs, files in os.walk(modelDir):
-				if "allOutputData.json" in files and "stderr.txt" in files:
-					with open(pJoin(modelDir, root, "stderr.txt"), "r") as stderr:
-						if "ERROR" in stderr.read() or "FATAL" in stderr.read():
+				# dump error info into dict
+				if "stderr.txt" in files:
+					with open(pJoin(modelDir, root, "stderr.txt"), "r") as stderrFile:
+						tempString = stderrFile.read()
+						if "ERROR" in tempString or "FATAL" in tempString or "Traceback" in tempString:
+							output["failures"]["feeder_" + str(os.path.split(root)[-1])] = {"stderr": tempString}
 							continue
+				# dump simulated data into dict
+				if "allOutputData.json" in files:
 					with open(pJoin(modelDir, root, "allOutputData.json"), "r") as feederOutputData:
 						numOfFeeders += 1
 						feederOutput = json.load(feederOutputData)
@@ -303,7 +308,7 @@ def runForeground(modelDir, inputDict):
 			except:
 				pass
 		except Exception, e:
-			print "Crashed"
+			print "Crashed", e
 			try:
 				os.remove(pJoin(modelDir, "PPID.txt"))
 			except:
@@ -349,13 +354,13 @@ def _tests():
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		# "feederName": "admin___Simple Market System",
-		# "feederName2": "admin___Simple Market System BROKEN",
-		# "feederName3": "public___13 Node Embedded DO NOT SAVE",
+		# "feederName2": "admin___Simple Market System BROKEN", 		# configure error
+		# "feederName3": "public___13 Node Embedded DO NOT SAVE",		# feeder error
 		# "feederName4": "public___13 Node Ref Feeder Flat",
 		# "feederName5": "public___13 Node Ref Feeder Laid Out ZERO CVR",
 		# "feederName6": "public___13 Node Ref Feeder Laid Out",
 		# "feederName7": "public___ABEC Columbia",
-		# "feederName8": "public___ABEC Frank LO Houses",
+		# "feederName8": "public___ABEC Frank LO Houses",				# feeder error
 		# "feederName9": "public___ABEC Frank LO",
 		# "feederName10": "public___ACEC Geo",
 		# "feederName11": "public___Battery 13 Node Centralized",
@@ -374,12 +379,12 @@ def _tests():
 		# "feederName24": "public___Olin Barre Housed Battery",
 		# "feederName25": "public___Olin Barre Housed Wind",
 		# "feederName26": "public___Olin Barre Housed",
-		# "feederName27": "public___Olin Barre",
+		# "feederName27": "public___Olin Barre", 						# feeder error
 		# "feederName28": "public___PNNL Taxonomy Feeder 1",
 		# "feederName29": "public___Simple Market System Comm Solar",
 		# "feederName30": "public___Simple Market System Indy Solar",
 		"feederName31": "public___Simple Market System",
-		"feederName": "public___Battery 13 Node Distributed",		
+		# "feederName": "public___Battery 13 Node Distributed",		
 		"modelType": "gridlabMulti",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "24",
