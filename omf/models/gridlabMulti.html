@@ -26,6 +26,7 @@
 		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
 		table#detailsTable th, table#detailsTable td {text-align: center; padding:5px; vertical-align:top; }
 		.HighlightCircle{fill: rgb(16, 150, 24);}
+		a {cursor: hand;}
 	</style>
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
@@ -124,7 +125,14 @@
 				})
 			}
 		}
-
+		function editFeeder() {
+			$(".edit-feeder").click(function(){
+				studyUser = $(this).siblings("select").val().split(/[_]+/)[0]
+				studyName = $(this).siblings("select").val().split(/[_]+/)[1]
+				$(this).attr("href", "/feeder/" + studyUser +"/"+ studyName)
+					.attr("target", "_blank");
+			});
+		}
 		$(document).ready(function(){
 			$('.content .add-feeder').click(function(){
 				var n = $('.feederList').length + 1;
@@ -132,7 +140,7 @@
 					alert('Please Do Not Add More Than 5 Feaders');
 					return false;
 				}
-				var feeder_html = $('<tr class="feederList"><td><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a></td><td><select id="feederName'+n+'" name="feederName'+n+'" style="width:95%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"].username + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" href="#" style="display: inline;"> &#9997;</a></td></tr>');
+				var feeder_html = $('<tr class="feederList"><td><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a></td><td><select id="feederName'+n+'" name="feederName'+n+'" style="width:95%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"].username + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" onclick="editFeeder();" target="_blank" style="display: inline;"> &#9997;</a></td></tr>');
 				feeder_html.hide();
 				$('.content .feederList:last').after(feeder_html);
 				feeder_html.fadeIn('slow');
@@ -239,7 +247,7 @@
 								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 							{% endfor %}
 						</select>
-						<a class="edit-feeder postRun preRun stopped" href="#">&#9997;</a>
+						<a class="edit-feeder postRun preRun stopped" target="_blank" onclick="editFeeder();">&#9997;</a>
 					</td>
 				</tr>
 				{% else %}
@@ -265,7 +273,7 @@
 								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 							{% endfor %}
 						</select>
-						<a class="edit-feeder postRun preRun stopped" href="#">&#9997;</a>
+						<a class="edit-feeder postRun preRun stopped" target="_blank" onclick="editFeeder();">&#9997;</a>
 					</td>
 				</tr>
 				{% endfor %}
