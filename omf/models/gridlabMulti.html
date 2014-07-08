@@ -718,22 +718,17 @@
 			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 			<table id="detailsTable">
 				<tr>
-					<th class="hozHead"> Analysis Creation Date</th>
 					<th id="SL">Simulation Location</th>
+					<th>Grid Components</th>
 				</tr>
 				<tr>
-					<td id="createdOutput">
-						<script type="text/javascript">
-							$("#createdOutput").text(function(){return allInputData.created})
-						</script>
-					</td>
 					<td rowspan="7" style = "width:100%">
 						<div id="mapHere">
 							<script type="text/javascript">
 								var width = 500,
-									height = 450;
+									height = 350;
 
-								var projection = d3.geo.albersUsa().scale(600).translate([width/2, width/2]);
+								var projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2]);
 
 								var path = d3.geo.path()
 									.projection(projection);
@@ -773,23 +768,8 @@
 					</td>
 				</tr>
 				<tr>
-					<th class="hozHead">Simulation Length</th>
-				</tr>
-				<tr>
-					<td class="hozHead" id="simLengthOutput">
-						<script type="text/javascript">
-							$("#simLengthOutput").text(function () {
-								return allInputData.simLength + " " + allInputData.simLengthUnits
-							})
-						</script>
-					</td>
-				</tr>
-				<tr>
-					<th>Grid Components</th>
-				</tr>
-				<tr>
 					<td id="GC">
-						<div id="comparisonPieChart" style="min-width: 400px; height: 200px; margin: 0 auto">
+						<div id="comparisonPieChart" style="min-width: 400px; height: 300px; margin: 0 auto">
 							<script type="text/javascript">
 								pieData = []
 								for (index in studyList){
@@ -818,26 +798,6 @@
 										}
 									});
 								});
-							</script>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<th id="studies">Studies</th>
-				</tr>
-				<tr>
-					<td>
-						<div id="stnames">
-							<script type="text/javascript">
-								insideHTML = ""
-								for (key in allInputData) {
-									if (key.substring(0,6) == "feeder") {
-										studyUser = allInputData[key].split(/[_]+/)[0]
-										studyName = allInputData[key].split(/[_]+/)[1]
-										insideHTML += "<span> " + " <a href='/feeder/"+studyUser+"/"+ studyName +"'" + "> - " + studyName + "</a></span><br/>"
-									}
-								}
-								$("#stnames").append(insideHTML)
 							</script>
 						</div>
 					</td>
