@@ -332,7 +332,7 @@
 		<div id="powerConsumptionReport" class="tightContent postRun">
 			<script type="text/javascript">
 				/*
-				 * This is a HighChart display for power consumption and energy balance
+				 * This is a HighChart display for power consumption
 				 */
 				for (index in studyList) {
 					study = studyList[index]
@@ -379,10 +379,15 @@
 					localHighChart["yAxis"]["title"] = {"text": "Power (W)", "style": {"color": "gray"}}
 					new Highcharts.Chart(localHighChart);
 				}
+			</script>
+		</div>
 
-				// Draw energy balance chart
-				$("<div/>").appendTo("#powerConsumptionReport")
-					.attr("id", "energyBalance")
+		<p class="reportTitle postRun">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="energyBalanceReport" class="tightContent postRun">
+			<script type="text/javascript">
+				/*
+				 * This is a HighChart display for energy balance
+				 */
 				var tLossesSeries = {
 					"pointWidth": 40, 
 					"color":"orangered",
@@ -417,7 +422,7 @@
 					cateList.push(study.substring(7))
 				}
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-					localHighChart["chart"]["renderTo"] = "energyBalance"
+					localHighChart["chart"]["renderTo"] = "energyBalanceReport"
 					localHighChart["chart"]["inverted"] = false
 					localHighChart["chart"]["height"] = 250
 					localHighChart["chart"]["width"] = 1000
@@ -440,10 +445,9 @@
 						"spline":{"marker":{"radius":8}, "shadow":false, "lineWidth":0 }
 						}
 					new Highcharts.Chart(localHighChart);
-				
 			</script>
 		</div>
-		
+
 		<p class="reportTitle postRun">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="triplexMeterVoltageReport" class="tightContent postRun">
 			<script type="text/javascript">
