@@ -264,7 +264,7 @@ def runForeground(modelDir, inputDict):
 			except Exception as e:
 				print "Oops, Model Crashed!!!" 
 				cancel(pJoin(modelDir, feederName))
-				with open(pJoin(modelDir, feederName, "stderr.txt"), "w") as stderrFile:
+				with open(pJoin(modelDir, feederName, "stderr.txt"), "a+") as stderrFile:
 					traceback.print_exc(file = stderrFile)
 
 	finishTime = datetime.datetime.now()
