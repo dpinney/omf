@@ -2,7 +2,7 @@
 This library is used to populate a base feeder tree with different load and technology models and returns a new feeder tree with the desired technology models.
 For example, to attach a feeder tree, baseTree, with ziploads run in the terminal
 
-	python -c "import populateFeeder; newTree, key = populateFeeder.startPopulation(loadshape_dict, residenntial_dict, config_data, last_key)"
+	python -c "import populateFeeder; newTree, key = feederPopulate.startPopulation(loadshape_dict, residenntial_dict, config_data, last_key)"
 	
 @author: Andrew Fisher
 '''
@@ -10,14 +10,14 @@ import math
 import random
 import copy
 
-def _add_normalized_residential_ziploads(loadshape_dict, residenntial_dict, config_data, last_key):
+def _add_normalized_residential_ziploads(loadshape_dict, residential_dict, config_data, last_key):
 	'''This function adds triplex_load dictionary with load shape information to the population feeder tree.'''
-	for x in residenntial_dict.keys():
-		tpload_name = residenntial_dict[x]['name']
-		tpload_parent = residenntial_dict[x]['parent']
-		tpphases = residenntial_dict[x]['phases']
+	for x in residential_dict.keys():
+		tpload_name = residential_dict[x]['name']
+		tpload_parent = residential_dict[x]['parent']
+		tpphases = residential_dict[x]['phases']
 		tpnom_volt = '120.0'
-		bp = residenntial_dict[x]['load']*config_data['normalized_loadshape_scalar']
+		bp = residential_dict[x]['load']*config_data['normalized_loadshape_scalar']
 		loadshape_dict[last_key] = {    'object' : 'triplex_load',
 														'name' : '{:s}_loadshape'.format(tpload_name),
 														'phases' : tpphases,
@@ -25,12 +25,20 @@ def _add_normalized_residential_ziploads(loadshape_dict, residenntial_dict, conf
 		loadshape_dict[last_key]['parent'] = tpload_parent
 		if bp > 0.0:         
 			loadshape_dict[last_key]['base_power_12'] = 'norm_feeder_loadshape.value*{:f}'.format(bp)
-			loadshape_dict[last_key]['power_pf_12'] = '{:f}'.format(config_data['r_p_pf'])
 			loadshape_dict[last_key]['current_pf_12'] = '{:f}'.format(config_data['r_i_pf'])
 			loadshape_dict[last_key]['impedance_pf_12'] = '{:f}'.format(config_data['r_z_pf'])
 			loadshape_dict[last_key]['power_fraction_12'] = '{:f}'.format(config_data['r_pfrac'])
 			loadshape_dict[last_key]['current_fraction_12'] = '{:f}'.format(config_data['r_ifrac'])
 			loadshape_dict[last_key]['impedance_fraction_12'] = '{:f}'.format(config_data['r_zfrac'])
+			if config_data['r_p_pf'] == None:
+				if 'A' in tpphases:
+					loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfA.value*1.0'
+				elif 'B' in tpphases:
+					loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfB.value*1.0'
+				elif 'C' in tpphases:
+					loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfC.value*1.0'
+			else:
+				loadshape_dict[last_key]['power_pf_12'] = '{:f}'.format(config_data['r_p_pf'])
 		last_key += last_key
 	return (loadshape_dict, last_key)
 
@@ -52,12 +60,15 @@ def _add_normalized_commercial_ziploads(loadshape_dict, commercial_dict, config_
 			loadshape_dict[last_key]['parent'] = load_parent
 		if 'A' in phases and bp_A > 0.0:         
 			loadshape_dict[last_key]['base_power_A'] = 'norm_feeder_loadshape.value*{:f}'.format(bp_A)
-			loadshape_dict[last_key]['power_pf_A'] = '{:f}'.format(config_data['c_p_pf'])
 			loadshape_dict[last_key]['current_pf_A'] = '{:f}'.format(config_data['c_i_pf'])
 			loadshape_dict[last_key]['impedance_pf_A'] = '{:f}'.format(config_data['c_z_pf'])
 			loadshape_dict[last_key]['power_fraction_A'] = '{:f}'.format(config_data['c_pfrac'])
 			loadshape_dict[last_key]['current_fraction_A'] = '{:f}'.format(config_data['c_ifrac'])
 			loadshape_dict[last_key]['impedance_fraction_A'] = '{:f}'.format(config_data['c_zfrac'])
+			if config_data['c_p_pf'] == None:
+				loadshape_dict[last_key]['power_pf_A'] = 'commercial_power_pfA.value*1.0'
+			else:
+				loadshape_dict[last_key]['power_pf_A'] = '{:f}'.format(config_data['c_p_pf'])
 		if 'B' in phases and bp_B > 0.0:
 			loadshape_dict[last_key]['base_power_B'] = 'norm_feeder_loadshape.value*{:f}'.format(bp_B)
 			loadshape_dict[last_key]['power_pf_B'] = '{:f}'.format(config_data['c_p_pf'])
@@ -66,6 +77,10 @@ def _add_normalized_commercial_ziploads(loadshape_dict, commercial_dict, config_
 			loadshape_dict[last_key]['power_fraction_B'] = '{:f}'.format(config_data['c_pfrac'])
 			loadshape_dict[last_key]['current_fraction_B'] = '{:f}'.format(config_data['c_ifrac'])
 			loadshape_dict[last_key]['impedance_fraction_B'] = '{:f}'.format(config_data['c_zfrac'])
+			if config_data['c_p_pf'] == None:
+				loadshape_dict[last_key]['power_pf_B'] = 'commercial_power_pfB.value*1.0'
+			else:
+				loadshape_dict[last_key]['power_pf_B'] = '{:f}'.format(config_data['c_p_pf'])
 		if 'C' in phases and bp_C > 0.0:
 			loadshape_dict[last_key]['base_power_C'] = 'norm_feeder_loadshape.value*{:f}'.format(bp_C)
 			loadshape_dict[last_key]['power_pf_C'] = '{:f}'.format(config_data['c_p_pf'])
@@ -74,6 +89,10 @@ def _add_normalized_commercial_ziploads(loadshape_dict, commercial_dict, config_
 			loadshape_dict[last_key]['power_fraction_C'] = '{:f}'.format(config_data['c_pfrac'])
 			loadshape_dict[last_key]['current_fraction_C'] = '{:f}'.format(config_data['c_ifrac'])
 			loadshape_dict[last_key]['impedance_fraction_C'] = '{:f}'.format(config_data['c_zfrac'])
+			if config_data['c_p_pf'] == None:
+				loadshape_dict[last_key]['power_pf_C'] = 'commercial_power_pfC.value*1.0'
+			else:
+				loadshape_dict[last_key]['power_pf_C'] = '{:f}'.format(config_data['c_p_pf'])
 		last_key += last_key
 	return (loadshape_dict, last_key)
 
@@ -773,21 +792,39 @@ def _ConfigurationFunc(config_file, classification=None):
 			# commercial zip fractions for loadshapes
 			data["c_z_pf"] = 0.97
 			data["c_i_pf"] = 0.97
-			data["c_p_pf"] = 0.97
-			data["c_zfrac"] = 0.2
-			data["c_ifrac"] = 0.4
-			data["c_pfrac"] = 1 - data["c_zfrac"] - data["c_ifrac"]
+			if 'c_p_pfA' in config_file.keys() and 'c_p_pfB' in config_file.keys() and 'c_p_pfC' in config_file.keys():
+				data["c_p_pf"] = None
+				data['c_p_pfA'] = config_file['c_p_pfA']
+				data['c_p_pfB'] = config_file['c_p_pfB']
+				data['c_p_pfC'] = config_file['c_p_pfC']
+				data["c_zfrac"] = 0.0
+				data["c_ifrac"] = 0.0
+				data["c_pfrac"] = 1.0
+			else:
+				data["c_p_pf"] = 0.97
+				data["c_zfrac"] = 0.2
+				data["c_ifrac"] = 0.4
+				data["c_pfrac"] = 1 - data["c_zfrac"] - data["c_ifrac"]
 			# residential zip fractions for loadshapes
 			data["r_z_pf"] = 0.97
 			data["r_i_pf"] = 0.97
-			data["r_p_pf"] = 0.97
-			data["r_zfrac"] = 0.2
-			data["r_ifrac"] = 0.4
-			data["r_pfrac"] = 1 - data["r_zfrac"] - data["r_ifrac"]
+			if 'r_p_pfA' in config_file.keys() and 'r_p_pfB' in config_file.keys() and 'r_p_pfC' in config_file.keys():
+				data["r_p_pf"] = None
+				data['r_p_pfA'] = config_file['r_p_pfA']
+				data['r_p_pfB'] = config_file['r_p_pfB']
+				data['r_p_pfC'] = config_file['r_p_pfC']
+				data["r_zfrac"] = 0.0
+				data["r_ifrac"] = 0.0
+				data["r_pfrac"] = 1.0
+			else:
+				data["r_p_pf"] = 0.97
+				data["r_zfrac"] = 0.2
+				data["r_ifrac"] = 0.4
+				data["r_pfrac"] = 1 - data["c_zfrac"] - data["c_ifrac"]
 		if 'weather_file' in config_file.keys():
 			data['weather'] = config_file['weather_file']
 		else:
-			data["weather"] = '../schedules/SCADA_weather_NC_gld_shifted.csv'
+			data["weather"] = None
 	return data
 
 def startPopulation(glmDict,case_flag,configuration_file=None):
@@ -870,24 +907,65 @@ def startPopulation(glmDict,case_flag,configuration_file=None):
 			'name' : 'norm_feeder_loadshape',
 			'property' : 'value',
 			'file' : '{:s}'.format(config_data['load_shape_norm']),
-			'loop' : '14600',
-			'comment' : '// Will loop file for 40 years assuming the file has data for a 24 hour period'}
+			'loop' : '0'}
 		last_key += 1
+		if 'r_p_pfA' in config_data.keys():
+			glmCaseDict[last_key] = {    'object' : 'player',
+														'name' : 'residential_power_pfA',
+														'property' : 'value',
+														'file' : '{:s}'.format(config_data['r_p_pfA']),
+														'loop' : '0'}
+			last_key += 1
+		if 'r_p_pfB' in config_data.keys():
+			glmCaseDict[last_key] = {    'object' : 'player',
+														'name' : 'residential_power_pfB',
+														'property' : 'value',
+														'file' : '{:s}'.format(config_data['r_p_pfB']),
+														'loop' : '0'}
+			last_key += 1
+		if 'r_p_pfC' in config_data.keys():
+			glmCaseDict[last_key] = {    'object' : 'player',
+														'name' : 'residential_power_pfC',
+														'property' : 'value',
+														'file' : '{:s}'.format(config_data['r_p_pfC']),
+														'loop' : '0'}
+			last_key += 1
+		if 'c_p_pfA' in config_data.keys():
+			glmCaseDict[last_key] = {    'object' : 'player',
+														'name' : 'commercial_power_pfA',
+														'property' : 'value',
+														'file' : '{:s}'.format(config_data['c_p_pfA']),
+														'loop' : '0'}
+		if 'c_p_pfB' in config_data.keys():
+			glmCaseDict[last_key] = {    'object' : 'player',
+														'name' : 'commercial_power_pfB',
+														'property' : 'value',
+														'file' : '{:s}'.format(config_data['c_p_pfB']),
+														'loop' : '0'}
+			last_key += 1
+		if 'c_p_pfC' in config_data.keys():
+			glmCaseDict[last_key] = {    'object' : 'player',
+														'name' : 'commercial_power_pfC',
+														'property' : 'value',
+														'file' : '{:s}'.format(config_data['c_p_pfC']),
+														'loop' : '0'}
+			last_key += 1
 	# Add climate dictionaries
-	if '.csv' in tmy:
-		# Climate file is a cvs file. Need to add csv_reader object
-		glmCaseDict[last_key] = {    'object' : 'csv_reader',
-													'name' : 'CsvReader',
-													'filename' : '"{:s}"'.format(tmy)}
-		last_key += 1
-	elif '.tmy2' in tmy:
-		glmCaseDict[last_key] = {    'object' : 'climate',
-													'tmyfile' : '"{:s}"'.format(tmy)}
-		if '.tmy2' in tmy:
-			glmCaseDict[last_key]['interpolate'] = 'QUADRATIC'
-		elif '.csv' in tmy:
-			glmCaseDict[last_key]['reader'] = 'CsvReader'
-		last_key += 1
+	if tmy != None:
+		if '.csv' in tmy:
+			# Climate file is a cvs file. Need to add csv_reader object
+			glmCaseDict[last_key] = {    'object' : 'csv_reader',
+														'name' : 'CsvReader',
+														'filename' : '"{:s}"'.format(tmy)}
+			last_key += 1
+		elif '.tmy2' in tmy:
+			glmCaseDict[last_key] = {    'object' : 'climate',
+														'tmyfile' : '"{:s}"'.format(tmy)}
+			if '.tmy2' in tmy:
+				glmCaseDict[last_key]['interpolate'] = 'QUADRATIC'
+			elif '.csv' in tmy:
+				glmCaseDict[last_key]['reader'] = 'CsvReader'
+			last_key += 1
 	# Add substation transformer transformer_configuration
 	glmCaseDict[last_key] = {    'object' : 'transformer_configuration',
 		'name' : 'trans_config_to_feeder',
@@ -947,19 +1025,19 @@ def startPopulation(glmDict,case_flag,configuration_file=None):
 	glmCaseDict[last_key] = {    'object' : 'player',
 		'property' : 'voltage_A',
 		'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
-		'loop' : '10',
+		'loop' : '0',
 		'file' : '{:s}'.format(config_data["voltage_players"][0])}
 	last_key += 1
 	glmCaseDict[last_key] = {    'object' : 'player',
 		'property' : 'voltage_B',
 		'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
-		'loop' : '10',
+		'loop' : '0',
 		'file' : '{:s}'.format(config_data["voltage_players"][1])}
 	last_key += 1
 	glmCaseDict[last_key] = {    'object' : 'player',
 		'property' : 'voltage_C',
 		'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
-		'loop' : '10',
+		'loop' : '0',
 		'file' : '{:s}'.format(config_data["voltage_players"][2])}
 	last_key += 1
 	glmCaseDict[last_key] = {    'object' : 'transformer',
@@ -1320,7 +1398,7 @@ def _append_commercial():
 	pass
 
 def _test():
-	import sys, os
+	import sys
 	sys.path.append('..')
 	import feeder
 	glmbase = feeder.parse('./uploads/IEEE-13.glm')
@@ -1329,13 +1407,14 @@ def _test():
 		'stopdate' : '2014-01-01 0:00:00',
 		'region' : 6,
 		'feeder_rating' : 600,
-		'nom_volt' : 66395,
+		'nom_volt' : 15000,
 		'voltage_players' : ['./uploads/VA.player', './uploads/VB.player', './uploads/VC.player'],
-		'loadshape_scalar' : 1.1,
+		'load_shape_scalar' : 1.1,
 		'load_shape_player_file' : './uploads/load_shape_player.player',
 		'weather_file' : './uploads/SCADA_weather_NC_gld_shifted.csv'}
 	glmpopulated, last_key = startPopulation(glmbase, -1, feeder_config)
 	assert 75776==last_key
+	
 
 if __name__ == '__main__':
 	_test()

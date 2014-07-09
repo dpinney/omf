@@ -1,7 +1,7 @@
 clock {
 	timezone PST+8PDT;
 	starttime '2000-01-01 00:00:00';
-	stoptime '2000-01-01 00:00:00';
+	stoptime '2000-01-01 00:01:00';
 };
 
 #set minimum_timestep=60;
@@ -18,13 +18,18 @@ module powerflow {
 	NR_iteration_limit 50;
 };
 
-object node {
+object meter {
 	phases ABCN;
 	name STONECITY(25);
 	bustype SWING;
 	longitude 798.55956165;
 	nominal_voltage 7200.0;
 	latitude 80.7468912822;
+	object recorder {
+		property measured_power.real, measured_power.imag;
+		file mavaCapBank.csv;
+		interval 1;
+	};
 };
 
 object overhead_line {
@@ -698,12 +703,12 @@ object capacitor {
 	capacitor_B 50000.0;
 	phases_connected ABCN;
 	longitude 408.393489134;
-	switchC CLOSED;
+	switchC OPEN;
 	nominal_voltage 7200.0;
 	capacitor_C 50000.0;
 	latitude 148.884343895;
-	switchB CLOSED;
-	switchA CLOSED;
+	switchB OPEN;
+	switchA OPEN;
 	pt_phase A;
 };
 

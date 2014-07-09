@@ -1,7 +1,7 @@
 '''
 Take in a Feeder and an appropriate set of SCADA data, and return the feeder with load shape models attached.
 
-TODO: small example on how to actually use this.
+python -c "import populateFeeder; newTree, key = feederCalibrate.startCalibration(working_directory, feederTree, scadaInfo, fileName, feederConfig=None):"
 
 @author: Andrew Fisher
 '''
@@ -141,7 +141,7 @@ def _getValues(vdir,glm_filenames,days):
 	orig_len = len(glm_filenames)
 	for i in glm_filenames:
 		print ("Attempting to gather measurements from "+i)
-		# Check that each feeder version has records for three days, and that each ran .glm has a complete (or nearly complete) record set (288 entries). 
+		# Check that each feeder version has records for three days, and that each ran .glm has a complete (or nearly complete) record set (96 entries). 
 		c = 0
 		filename = os.path.join(vdir, 'csv_output', re.sub('\.glm$','_network_node_recorder.csv',i))
 		if not os.path.isfile(filename):
@@ -155,9 +155,9 @@ def _getValues(vdir,glm_filenames,days):
 					continue
 				else:
 					c += 1
-			if c < 288:
+			if c < 96:
 				csv.close()
-				print ("	Missing simulation output for "+i+". "+str(c)+"/288 five-minute intervals were recorded.")
+				print ("	Missing simulation output for "+i+". "+str(c)+"/96 five-minute intervals were recorded.")
 				continue
 		# Get annual .glm ID by stripping the date from the filename. 
 		m = re.match(r'^Calib_ID(\d*)_Config_ID(\d*)',i)
@@ -181,30 +181,30 @@ def _getValues(vdir,glm_filenames,days):
 			print ("File "+str(i)+" isn't matching any of "+str(days)+".")
 			measurements[glm_ID] = None
 		else:
-			measured_power_dict = {}
-			measured_power = []
-			measured_energy = []
+			pv = 0.0
+			mv = 1e15
+			te = 0.0
 			for l in lines:
 				if l.startswith("#"):
 					continue
 				else:
 					vals = l.split(',')
-					measured_power_dict[vals[0]] = float(vals[1])/1000
-					measured_power.append(float(vals[1])/1000)
-					measured_energy.append(float(vals[2])/1000)
+					if pv < float(vals[1]):
+						pv = float(vals[1])
+						pt_stamp = re.sub('\s\w{3}','',vals[0])
+					if mv > float(vals[1]):
+						mv = float(vals[1])
+						mt_stamp = re.sub('\s\w{3}','',vals[0])
+					if te < float(vals[2]):
+						te = float(vals[2])
 			csv.close()
-			pv = max(measured_power)
-			mv = min(measured_power)
-			te = max(measured_energy)
-			for i in measured_power_dict.keys():
-				if measured_power_dict[i] == pv:
-					pt_stamp = re.sub('\s\w{3}','',i)
-				elif measured_power_dict[i] == mv:
-					mt_stamp = re.sub('\s\w{3}','',i)
 			pt_date = datetime.datetime.strptime(pt_stamp,'%Y-%m-%d %H:%M:%S')
 			mt_date = datetime.datetime.strptime(mt_stamp,'%Y-%m-%d %H:%M:%S')
-			pt = int(pt_date.strftime('%H')) + (int(pt_date.strftime('%M')) / 60)
-			mt = int(mt_date.strftime('%H')) + (int(mt_date.strftime('%M')) / 60)
+			pt = int(pt_date.hour) + (int(pt_date.minute) / 60.0)
+			mt = int(mt_date.hour) + (int(mt_date.minute) / 60.0)
+			pv = pv/1000.0
+			te = te/1000.0
+			mv = mv/1000.0
 			measurements[glm_ID][season] = [pv,pt,te,mv,mt]
 	# Make sure we only continue evaluation with glms that have all three days completely recorded. 
 	topop=[]
@@ -229,8 +229,13 @@ def _calcDiffs (glm_vals, scada):
 	diffs = [];
 	for i in xrange(len(glm_vals)):
 		if i == 1 or i == 4: # time of peak or time of minimum
-			j = round((glm_vals[i] - scada[i])/24,4);
-		else: 
+			j = round((glm_vals[i] - scada[i])/24.0,4);
+		elif scada[i] == 0.0 or glm_vals[i] == 0.0:
+			if glm_vals[i] != scada[i]:
+				j = (glm_vals[i] - scada[i])/abs(glm_vals[i] - scada[i])
+			else:
+				j = 0.0  
+		else:
 			j = round((glm_vals[i] - scada[i])/scada[i],4);
 		diffs.append(j);
 	return diffs;
@@ -330,10 +335,10 @@ def _writeLIB (cl_id, calib_id, config_dict, load_shape_scalar):
 	if config_dict != None:
 		calibration_config = deepcopy(config_dict)
 		calibration_config['ID'] = 'Calib_ID'+str(calib_id)+'_Config_ID'+str(cl_id)
-		calibration_config['loadshape_scalar'] = load_shape_scalar
+		calibration_config['load_shape_scalar'] = load_shape_scalar
 	else:
 		calibration_config = {'ID' : 'Calib_ID'+str(calib_id)+'_Config_ID'+str(cl_id),
-											'loadshape_scalar' : load_shape_scalar}
+											'load_shape_scalar' : load_shape_scalar}
 		
 	return calibration_config
 
@@ -574,7 +579,7 @@ def _calibrateLoop(glm_name, main_mets, scada, days, eval_int, counter, baseGLM,
 		# Scaling normalized load shape
 		if abs(main_mets[0]) + abs(main_mets[2]) != abs(main_mets[0] + main_mets[2]):
 			print ('*** Warning: One peak is high and one peak is low... this shouldn\'t happen with load shape scaling...')
-		last_scalar = feeder_config['loadshape_scalar']
+		last_scalar = feeder_config['load_shape_scalar']
 		avg_peak_diff = (main_mets[0] + main_mets[2])/2
 		ideal_scalar = round(last_scalar * (1/(avg_peak_diff + 1)),4)
 		a = round(last_scalar + (ideal_scalar - last_scalar) * 0.25,4)
@@ -682,7 +687,7 @@ def _makeGLM(clock, calib_file, baseGLM, case_flag, mdir):
 									'file' : './csv_output/{:s}_{:s}_network_node_recorder.csv'.format(ident,date),
 									'parent' : 'network_node',
 									'property' : 'measured_real_power,measured_real_energy',
-									'interval' : '{:d}'.format(300),
+									'interval' : '{:d}'.format(900),
 									'limit' : '{:d}'.format(limit),
 									'in': "'{:s}'".format(rec_starttime) }
 		# Turn dictionary into a *.glm string and print it to a file in the given directory.
@@ -698,11 +703,10 @@ def _runGLMS(fdir, SCADA, days):
 		'''Run all the .glm files found in the directory and return the metrics for each run.'''
 		print ('Begining simulations in GridLab-D.')
 		glmFiles = [x for x in os.listdir(fdir) if x.endswith('.glm')]
-		for glm in glmFiles:
-			with open(os.path.join(fdir,'stdout.txt'),'w') as stdout, open(os.path.join(fdir,'stderr.txt'),'w') as stderr, open(os.path.join(fdir,'PID.txt'),'w') as pidFile:
-				proc = subprocess.Popen(['gridlabd', glm], cwd=fdir, stdout=stdout, stderr=stderr)
-				pidFile.write(str(proc.pid))
-				proc.wait()
+		with open(os.path.join(fdir,'stdout.txt'),'w') as stdout, open(os.path.join(fdir,'stderr.txt'),'w') as stderr, open(os.path.join(fdir,'PID.txt'),'w') as pidFile:
+			proc = subprocess.Popen(['gridlabd', '-T', '24', '--job'], cwd=fdir, stdout=stdout, stderr=stderr)
+			pidFile.write(str(proc.pid))
+			proc.wait()
 		print ('Beginning comparison of intitial simulation output with SCADA.')
 		raw_metrics = _funcRawMetsDict(fdir, glmFiles, SCADA, days)
 		return raw_metrics
@@ -730,7 +734,7 @@ def _calibrateFeeder(baseGLM, days, SCADA, case_flag, calibration_config, fdir):
 	c = 0
 	calibration_config_files = []
 	print("Begin writing calibration files...")
-	for val in [0.25, 0.50, 1, 1.50, 1.75]:
+	for val in [0.25, 0.50, 0.75, 1.0, 1.25, 1.50, 1.75, 2.0]:
 		calibration_config_files.append(_writeLIB (c, r, calibration_config, val))
 		c += 1
 	for i in calibration_config_files:
@@ -843,14 +847,14 @@ def _test():
 		'shoulderPeakHour' : 21,
 		'shoulderMinimumKW' : 1738.08,
 		'shoulderMinimumHour' : 2} 
-	calibration_config = {'timezone' : 'EST+5EDT',
+	calibration_config = {'timezone' : 'CST+5CDT',
 		'startdate' : '2013-01-01 0:00:00',
 		'stopdate' : '2014-01-01 0:00:00',
 		'region' : 6,
 		'feeder_rating' : 600,
-		'nom_volt' : 66395,
+		'nom_volt' : 15000,
 		'voltage_players' : [os.path.abspath('./uploads/VA.player').replace('\\', '/'), os.path.abspath('./uploads/VB.player').replace('\\', '/'), os.path.abspath('./uploads/VC.player').replace('\\', '/')],
-		'loadshape_scalar' : 1.0,
+		'load_shape_scalar' : 1.0,
 		'load_shape_player_file' : os.path.abspath('./uploads/load_shape_player.player').replace('\\', '/'),
 		'weather_file' : os.path.abspath('./uploads/SCADA_weather_NC_gld_shifted.csv').replace('\\', '/')}
 	calibratedFeederTree, calibrationConfiguration = startCalibration(working_directory, feederTree, scada, model_name, calibration_config)
