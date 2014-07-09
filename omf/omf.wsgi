@@ -1,4 +1,4 @@
 import sys, os
-sys.path.insert(0, '/omf')
-os.chdir('/omf')
-from omf import app as application
+sys.path.insert(0, '/omf/omf')
+os.chdir('/omf/omf')
+from web import app as application
