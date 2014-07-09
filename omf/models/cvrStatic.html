@@ -3,28 +3,13 @@
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-		/*INPUT*/
-		div.content {width:1000px;}
-		.shortInput {width:330px; display:inline-block; margin-bottom:10px;}
-		.wideInput {width:1000; margin-bottom:10px;}
-		label {display:block; line-height:16pt;}
-		input[type="text"], select {font-size:medium; display:block; margin:0px;}
-		#input {margin-top: 0px;}
-		button {width:auto;}
-		#cancelButton {background:crimson;}
-		#cancelButton:hover {background:red;}
-		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
-		/*OUTPUT*/
-		div.tightContent {width:1000px; margin-left:auto; margin-right:auto; margin-top:0px; margin-bottom:20px; border-style: solid; border-color:gray; border-width:1px 0px 1px 0px; background-color:white;}
-		.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt; display:block;}
-		td,th {text-align: right}
-		.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped {display:none;}
-	</style>
+	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<!-- Global Funcs Import -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
@@ -58,30 +43,7 @@
 				}
 			}
 		}
-		function restoreInputs() {
-			// Restore all the input values that were used and stored in allInputData.json.
-			gebi("titleText").innerHTML = allInputData.modelName
-			for (index in allInputData) {
-				try {document.querySelector("#" + index).value = allInputData[index]}
-				catch(err){}
-			}
-		}
-		function validateForm() {
-			// Make sure each field matches its validation regex.
-			allFields = $("input")
-			returnVal = true
-			for (i=0; i < allFields.length; i++) {
-				allFields[i].style["border-color"] = "white"
-				currVal = allFields[i].value + ""
-				regex = allFields[i].getAttribute("data-validRegex")
-				if (regex != null && currVal.match(regex) != currVal) {
-					allFields[i].style["border-color"] = "crimson"
-					returnVal = false
-				}
-			}
-			if (returnVal == false) {alert("Form values bordered in red don't match the required format.")}
-			return returnVal
-		}
+		
 		// Little function here to get discloser triangles:
 		function toggleAdvanced(clickedObject) {
 			siblings = clickedObject.parentNode.parentNode.parentNode.querySelectorAll('.advancedOption')
@@ -95,45 +57,6 @@
 			}
 			if (visible) {code = 9660} else {code = 9654}
 				clickedObject.textContent = String.fromCharCode(code) + ' Advanced Options'
-		}
-		function cancelModel() {
-			params = {user:allInputData.user,
-				modelName:allInputData.modelName,
-				modelType:allInputData.modelType}
-			post_to_url("/cancelModel/", params, "POST")
-		}
-		function deleteModel() {
-			if (confirm("Deleting this model cannot be undone. Continue?")){
-				post_to_url("/delete/Model/"+allInputData.user+"/"+allInputData.modelName, {}, "POST")
-			} else {
-				return false
-			}
-		}
-		function publishModel() {
-			newName = prompt("Publish a copy with name", allInputData.modelName)
-			if (newName) {
-				$.ajax({url:"/uniqObjName/Model/public/" + newName}).done(function(data) {
-					if (data.exists) {
-						alert("There is already a public Model named " + newName)
-						publishModel()
-					} else {
-						post_to_url("/publishModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
-					}
-				})
-			}
-		}
-		function duplicateModel() {
-			newName = prompt("Create a duplicate with name", allInputData.modelName)
-			if (newName) {
-				$.ajax({url:"/uniqObjName/Model/" + allInputData.user + "/" + newName}).done(function(data) {
-					if (data.exists) {
-						alert("There is already a model named " + newName)
-						duplicateModel()
-					} else {
-						post_to_url("/duplicateModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
-					}
-				})
-			}
 		}
 	</script>
 </head>
@@ -327,4 +250,15 @@
 			<script type="text/javascript">gebi("moneyTable").src = "data:image/png;base64," + allOutputData.moneyTable</script>
 		</div>
 	</div>
+	<script type="text/javascript">
+		$(window).bind("load", function(){
+			modelUser = document.URL.split("/")[4] // MAYBE: get model user from url, or from template data.
+			currentUser = "{{datastoreNames['currentUser'].username}}"
+			if (modelUser == "public" && currentUser != "admin") {
+				$("button#deleteButton").hide();
+				$("button#publishButton").hide();
+				$("button#rerunButton").hide();
+			}
+		})
+	</script>
 </body>

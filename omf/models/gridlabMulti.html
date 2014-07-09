@@ -1,0 +1,765 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<link type="text/css" href="{{pathPrefix}}/static/models.css" rel="stylesheet"/>
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<!-- Global Funcs Import -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<!-- Global Functions -->
+	<script type="text/javascript">
+		function editFeeder(e) {
+			studyUser = $(e).siblings("select").val().split(/[_]+/)[0]
+			studyName = $(e).siblings("select").val().split(/[_]+/)[1]
+			$(e).attr("href", "/feeder/" + studyUser +"/"+ studyName)
+				.attr("target", "_blank");
+			// window.open("/feeder/" + studyUser + "/" + studyName, "_blank")
+		}
+		$(document).ready(function(){
+			$('.content .add-feeder').click(function(){
+				var n = $('.feederList').length + 1;
+				if( 5 < n ) {
+					alert('Please Do Not Add More Than 5 Feaders');
+					return false;
+				}
+				var feeder_html = $('<tr class="feederList"><td><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a></td><td><select id="feederName'+n+'" name="feederName'+n+'" style="width:95%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"].username + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" onclick="editFeeder(this);" target="_blank" style="display: inline;"> &#9997;</a></td></tr>');
+				feeder_html.hide();
+				$('.content .feederList:last').after(feeder_html);
+				feeder_html.fadeIn('slow');
+				return false;
+			});
+			$('.content').on('click', '.remove-feeder', function(){
+				$(this).parent().parent().css( 'background-color', '#FF6C6C' );
+				$(this).parent().fadeOut("slow", function() {
+					$(this).parent().remove();
+					$('.feeder-number').each(function(index){
+						$(this).text( index + 1 + " ");
+					});
+					$('select[id*="feederName"]').each(function(index){
+						$(this).attr("id", "feederName" + index + 1);
+					});
+					// $('select[id*="feederName"]').each(function(index){$(this).attr("id","feederID"+index)})
+				});
+				return false;
+			});
+		});
+
+		$(document).ready(function(){
+			$(".toggle").click(function(){
+				$(this).parent().next().toggle(500)
+			})
+		})
+	</script>
+	<script type="text/javascript">
+		/* 
+		 * Global setting of Highcharts
+		 */
+		Highcharts.setOptions({
+			global: { 
+				useUTC: false 
+			}
+		});
+		var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0]) 
+		var pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
+		var pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
+		highChartsTemplate = {
+			"chart":{"renderTo":"", "marginRight":20, "marginBottom":20, "zoomType":"x"},
+			"title":{"text":null},
+			"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+			"credits":{"enabled":false},
+			"xAxis":{"type":"datetime","maxZoom":108000000, "tickColor":"gray","lineColor":"gray"},
+			"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+			"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
+			"tooltip":{"valueDecimals":1},
+			"series":[]
+		}
+
+		studyList = []
+		for (key in allOutputData){
+			if (key.substring(0,6) == "feeder"){
+				studyList.push(key)
+			}
+		}
+	</script>
+	
+</head>
+<body onload="init()">
+	<div id="title">
+		<div id="logoBox"><a href="/">&#10059;</a></div>
+		<p id="titleText">New Multiple GridlabD Model</p>
+	</div>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
+			<table class="modelOptions">
+				<tr>
+					<td>Model Type</td>
+					<td><input type="text" id="modelType" name="modelType" value="gridlabMulti" readonly/></td>
+				</tr>
+				<tr>
+					<td>Model Name</td>
+					<td><input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
+				</tr>
+				<tr class="running postRun">
+					<td>User</td>
+					<td><input type="text" id="user" name="user" readonly/></td>
+				</tr>
+				<tr class="running postRun">
+					<td>Created</td>
+					<td><input type="text" id="created" name="created" readonly/></td>
+				</tr>
+				<tr class="postRun">
+					<td>Run Time</td>
+					<td><input type="text" id="runTime" name="runTime" readonly/></td>
+				</tr>
+				{% if not feederIDs %}
+				<tr class="feederList">
+					<td><label for="feeder1">Feeder <span class="feeder-number">1</span>
+						</label>
+							<a class='add-feeder postRun preRun stopped' href='#'>&#8853;</a>
+					</td>
+					<td>
+						<select id="feederName" name="feederName" style="width:95%">
+							<option disabled><strong>Personal Feeders</strong></option>
+							{% for feeder in datastoreNames['feeders'] %}
+								<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
+							{% endfor %}
+							<option disabled><strong>Public Feeders</strong></option>
+							{% for pFeeder in datastoreNames['publicFeeders'] %}
+								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+							{% endfor %}
+						</select>
+						<a class="edit-feeder postRun preRun stopped" target="_blank" onclick="javascript:editFeeder(this);">&#9997;</a>
+					</td>
+				</tr>
+				{% else %}
+				{% for feederID in feederIDs %}
+				<tr class="feederList">
+					<td><label for="feeder1">Feeder <span class="feeder-number">{{feederIDs.index(feederID) + 1}}</span>
+						</label>
+						{% if feederIDs.index(feederID)+1 == 1 %}
+							<a class='add-feeder postRun preRun stopped' href='#'>&#8853;</a>
+						{% else %}
+							<a class='remove-feeder postRun preRun stopped' href='#'>&#8854;</a>
+						{% endif %}
+					</td>
+					<td>
+						<!-- <select id="{{feederName}}" name="{{feederName}}"> -->
+						<select id="{{feederID}}" name="{{feederID}}" style="width:95%">
+							<option disabled><strong>Personal Feeders</strong></option>
+							{% for feeder in datastoreNames['feeders'] %}
+								<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
+							{% endfor %}
+							<option disabled><strong>Public Feeders</strong></option>
+							{% for pFeeder in datastoreNames['publicFeeders'] %}
+								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+							{% endfor %}
+						</select>
+						<a class="edit-feeder postRun preRun stopped" target="_blank" onclick="javascript:editFeeder(this);">&#9997;</a>
+					</td>
+				</tr>
+				{% endfor %}
+				{% endif %}
+				<tr>
+					<td>Climate</td>
+					<td>
+						<select id='climateName' name='climateName'>
+							{% for climate in datastoreNames['climates'] %}
+								<option value='{{ climate }}'>{{ climate }}</option>
+							{% endfor %}
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Simulation Length</td>
+					<td><input type="text" id="simLength" name="simLength" data-validRegex="\d+"/></td>
+				</tr>
+				<tr>
+					<td>Length Units</td><td>
+						<select id="simLengthUnits" name="simLengthUnits">
+							<option value="minutes">Minutes</option>
+							<option value="hours">Hours</option>
+							<option value="days">Days</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Simulation Start Date <br/> (YYYY-MM-DD)</td>
+					<td><input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td>
+						<button id="deleteButton" type="button" class="stopped postRun" onclick="deleteModel()">Delete</button>
+						<button id="publishButton" type="button" class="postRun" onclick="publishModel()">Publish</button>
+						<button id="duplicateButton" type="button" class="postRun" onclick="duplicateModel()">Duplicate</button>
+						<button id="cancelButton" class="running" type="button" onclick="cancelModel()">Cancel Run</button>
+						<button id="runButton" type="submit" class="preRun">Run Model</button>
+						<button id="rerunButton" type="submit" class="stopped postRun">Re-Run Model</button>
+					</td>
+				</tr>
+			</table>
+		</form>
+	</div>
+	
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results.
+	</div>
+	<div id ="stopIndicator" class="content stopped">
+		Model cancelled or encountered an error. Please change inputs and re-run.
+	</div>
+
+	<div id="output">
+		<p class="reportTitle postRun">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="powerConsumptionReport" class="tightContent postRun">
+			<script type="text/javascript">
+				/*
+				 * This is a HighChart display for power consumption
+				 */
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#powerConsumptionReport")
+						.attr("class", "studyContainer")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(7)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#powerConsumptionReport .studyContainer:last")
+						.attr("id", "powerTimeSeries_" + study)
+					// power series data
+					var powerSeries = {
+						"marker":{
+							"enabled":false
+						},
+						"color":"red",
+						"data":allOutputData[study].Consumption.Power,
+						"name":"Substation Powerflow"
+					}
+					var lossesSeries = {
+						"marker":{
+							"enabled":false
+						},
+						"color":"orangered",
+						"data":allOutputData[study].Consumption.Losses,
+						"name":"Technical Losses",
+						"visible": false
+					}
+					var DGSeries = {
+						"marker":{
+							"enabled":false
+						},
+						"color":"seagreen",
+						"data":allOutputData[study].Consumption.DG,
+						"name":"DG Power",
+						"visible": false
+					}
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "powerTimeSeries_" + study
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 150
+					localHighChart["series"] = [powerSeries, lossesSeries, DGSeries]
+					localHighChart["yAxis"]["title"] = {"text": "Power (W)", "style": {"color": "gray"}}
+					new Highcharts.Chart(localHighChart);
+				}
+			</script>
+		</div>
+
+		<p class="reportTitle postRun">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="energyBalanceReport" class="tightContent postRun">
+			<script type="text/javascript">
+				/*
+				 * This is a HighChart display for energy balance
+				 */
+				var tLossesSeries = {
+					"pointWidth": 40, 
+					"color":"orangered",
+					"data":[],
+					"type":"column",
+					"name":"Losses"
+				}
+				var tLoadsSeries = {
+					"pointWidth": 40,
+					"color":"darkorange",
+					"data":[],
+					"type":"column",
+					"name":"Loads"
+				}
+				var tDGSeries = {
+					"color":"seagreen",
+					"data":[],
+					"type":"spline",
+					"name":"DG"
+				}
+				var cateList = []
+				for (index in studyList) {
+					study = studyList[index]
+					// energy balance bar
+					var tPower = eval(allOutputData[study].Consumption.Power.join("+"));
+					var tLosses = eval(allOutputData[study].Consumption.Losses.join("+"));
+					var tDG = eval(allOutputData[study].Consumption.DG.join("+"));
+					var tLoads = tPower + tDG - tLosses;
+					tLossesSeries["data"].push(tLosses)
+					tLoadsSeries["data"].push(tLoads)
+					tDGSeries["data"].push(tDG)
+					cateList.push(study.substring(7))
+				}
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "energyBalanceReport"
+					localHighChart["chart"]["inverted"] = false
+					localHighChart["chart"]["height"] = 250
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["series"] = [tLossesSeries, tLoadsSeries, tDGSeries]
+					localHighChart["xAxis"] = {
+						"tickColor":"gray",
+						"lineColor":"gray",
+						"categories":cateList
+					}
+					localHighChart["yAxis"] = {
+						"title":{
+							"text":"Energy (Wh)",
+							"style":{
+								"color":"gray"
+							}
+						}
+					}
+					localHighChart["plotOptions"] = {
+						"column":{"stacking":"normal", "shadow":false}, 
+						"spline":{"marker":{"radius":8}, "shadow":false, "lineWidth":0 }
+						}
+					new Highcharts.Chart(localHighChart);
+			</script>
+		</div>
+
+		<p class="reportTitle postRun">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="triplexMeterVoltageReport" class="tightContent postRun">
+			<script type="text/javascript">
+				/*
+				 * This is a HighChart for triplex meter voltages
+				 */
+				for (index in studyList) {
+					study = studyList[index]
+					// Create div for triplex meter voltage chart appending to powerConsumption
+					$("<div/>").appendTo("#triplexMeterVoltageReport")
+						.attr("class", "studyContainer")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(7)+"</p></div>")
+					$("<div/>").appendTo("#triplexMeterVoltageReport .studyContainer:last")
+						.attr("id", "triplexMeterVoltageChart_"+study)
+					triplexSeriesData = [{
+						"marker":{
+							"enabled":false
+						},
+						"color":"LightBlue",
+						"data":allOutputData[study].allMeterVoltages.Min,
+						"name":"Min"
+					},{
+						"marker":{
+							"enabled":false
+						},
+						"color":"blue",
+						"data":allOutputData[study].allMeterVoltages.Mean,
+						"name":"Mean"
+					},{
+						"marker":{
+							"enabled":false
+						},
+						"color":"LightBlue",
+						"data":allOutputData[study].allMeterVoltages.Max,
+						"name":"Max"
+					}]	
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "triplexMeterVoltageChart_" + study
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["series"] = triplexSeriesData
+					localHighChart["yAxis"] = {
+						"maxRange":20,
+						"plotLines": [{
+							"color": 'gray',
+							"dashStyle": 'ShortDash',
+							"width": 2,
+							"value": 114, // voltage lower bound
+							"zIndex": 0
+						}, {
+							"color": 'gray',
+							"dashStyle": 'ShortDash',
+							"width": 2,
+							"value": 126, // voltage upper bound
+							"zIndex": 0
+						}],
+						"title":{
+							"text":"Volts",
+							"style":{
+								"color":"gray"
+							}
+						}
+					}
+					new Highcharts.Chart(localHighChart);
+				}
+			</script>
+		</div>
+		
+		<p class="reportTitle postRun">Cost Benefit Analysis <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="monetizationReport" class="tightContent postRun">
+			<div class="studyContainer" style="position:relative; height: 200px">
+				<div id="monetizedPowerTimeSeries" style="position:absolute;top:0px;left:0px;width:500px;height:200px">
+					<script type="text/javascript">
+						/*
+						 * HighChart template for power time series, data renders at recalculateCostBenefit func.
+						 */
+						var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+						localHighChart["chart"]["height"] = 200
+						localHighChart["chart"]["width"] = 500
+						localHighChart["chart"]["type"] = "line"
+						localHighChart["chart"]["renderTo"] = "monetizedPowerTimeSeries"
+						localHighChart["yAxis"]["title"]["text"] = "Capacity Cost ($)"
+						for (key in allOutputData){
+							if (key.substring(0, 6) == "feeder"){
+								localHighChart["series"].push({"name": key, data: []})
+							}
+						}
+						monCapCostGraph = new Highcharts.Chart(localHighChart)
+					</script>
+				</div>
+				<div id="monetizedEnergyBalance" style="position:absolute;top:0px;left:500px;width:500px;height:200px">
+					<script type="text/javascript">
+						/*
+						 * HighChart template for energy balance, data renders at recalculateCostBenefit func.
+						 */
+						var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+						localHighChart["chart"]["height"] = 200
+						localHighChart["chart"]["width"] = 500
+						localHighChart["chart"]["type"] = "line"
+						localHighChart["chart"]["renderTo"] = "monetizedEnergyBalance"
+						localHighChart["yAxis"]["title"]["text"] = "Energy Cost ($)"
+						for (key in allOutputData){
+							if (key.substring(0, 6) == "feeder"){
+								localHighChart["series"].push({"name": key, data: []})
+							}
+						}
+						monEnergyCostGraph = new Highcharts.Chart(localHighChart)
+					</script>
+				</div>
+			</div>
+			<div id="costGrowthContainer" class="studyContainer" style="height: 200px">
+				<script type="text/javascript">
+					/*
+					 * HighChart template for culumative savings, data renders at recalculateCostBenefit func.
+					 */
+					intervalMap = {"minutes": 60, "hours": 3600, "days": 86400}
+					yearPercentage = intervalMap[allInputData.simLengthUnits]*(allOutputData.timeStamps.length)/(365*34*60*60.0)
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["renderTo"] = "costGrowthContainer"
+					localHighChart["yAxis"]["title"]["text"] = "Cumulative Savings ($)"
+					localHighChart["xAxis"] = {"labels": {enabled: true}, "type": "linear", "tickColor": "gray", "lineColor": "gray", "title": {"text": "Years After Install"}}
+					localHighChart["xAxis"]["plotLines"] = [{"color": "silver", "width": 1, "value": yearPercentage}]
+					localHighChart["plotOptions"]["series"]["pointInterval"] = 1
+					localHighChart["plotOptions"]["series"]["pointStart"] = 0
+					for (key in allOutputData){
+							if (key.substring(0, 6) == "feeder"){
+								localHighChart["series"].push({"name": key, data: []})
+							}
+						}
+					costGrowthGraph = new Highcharts.Chart(localHighChart)
+				</script>
+			</div>
+			<div id="additionalMetrics" class="studyContainer">
+				<div style="width: 1000px; padding: 5px 5px 5px 5px">
+					Co-op Energy Rate ($/kWh) <input id="distrEnergyRate" value> 
+					Capacity Rate ($/kW) <input id="distrCapacityRate" value> 
+					<button style="width: 100px" onclick="recalculateCostBenefit()">Recalculate</button>
+				</div>
+				<table style="width:980px;padding-bottom:10px">
+					<thead>
+						<tr>
+							<th>Study</th>
+							<th>Baseline</th>
+							<th>Capacity</th>
+							<th>O&amp;M Cost</th>
+							<th>Cap. Cost</th>
+							<th>En. Cost</th>
+							<th>Y1 Save</th>
+							<th>Annual Save</th>
+							<th>Payback (Y)</th>
+						</tr>
+					</thead>
+					<tbody id="additionalMetricsTable">
+						<script type="text/javascript">
+							gebi('distrEnergyRate').value = (allInputData.distrEnergyRate || 0.08)
+							gebi('distrCapacityRate').value = (allInputData.distrCapacityRate || 15)
+							firstTime = true
+							for (index in studyList) {
+								study = studyList[index]
+								if (undefined != study) {
+									// Add table row:
+									table = gebi('additionalMetricsTable')
+									newRow = table.insertRow()
+									newRow.id = 'row' + study
+									if (firstTime) {
+										checked = 'checked'; 
+										cap = '0'; 
+										om = '0'; 
+										firstTime = false
+									} else {
+										checked = ''; 
+										cap = (allInputData['equipAndInstallCost'] || 30000); 
+										om = (allInputData['opAndMaintCost'] || 1000) 
+									}
+									newRow.innerHTML = '<td class="studyName">' + study + '</td>' +
+									'<td><input type="radio" name="baseline" class="baseline" ' + checked + '/></td>' +
+									'<td><input class="capCost" value="' + cap + '"/></td>' +
+									'<td><input class="omCost" value="' + om + '"/></td>' +
+									'<td class="capacityCost">calcMe</td>' +
+									'<td class="energyCost">calcMe</td>' +
+									'<td class="y1save">calcMe</td>' +
+									'<td class="annualSave">calcMe</td>' +
+									'<td class="payback">calcMe</td>'
+								}
+							}
+						</script>
+					</tbody>
+				</table>
+			</div>
+			<script type="text/javascript">
+				// render data for monetization charts
+				recalculateCostBenefit()
+				function recalculateCostBenefit() {
+					/*
+					 * Calculate the cost of power and energy
+					 */
+					energyRate = (parseFloat(gebi('distrEnergyRate').value) || 0.08)
+					capRate = (parseFloat(gebi('distrCapacityRate').value) || 15) 
+					// Update everything not depending on baseline diff.
+					for (index in studyList) {
+						study = studyList[index]
+						if (undefined != study) {
+							// Update the capacity graph.
+							capStudyIndex = indexFind(monCapCostGraph['series'], function (x) {return x.name == study})
+							function maxAvg(arr) {max=arrMax(arr.filter(function(n){return n!=undefined})); len=arr.length; return arr.map(function(x){return max/len})}
+							powerAgged = monthAgg(allOutputData.timeStamps, allOutputData[study].Consumption.Power, maxAvg)
+							monthlyPower = powerAgged.map(function(x){return round(x*capRate/1000,4)})
+							monCapCostGraph['series'][capStudyIndex].setData(monthlyPower)
+							// Update the energy graph.
+							enStudyIndex = indexFind(monEnergyCostGraph['series'], function (x) {return x.name == study})
+							function avg(arr) {total=arrSum(arr.filter(function(n){return n!=undefined})); len=arr.length; return arr.map(function(x){return total/len})}
+							energyAgged = monthAgg(allOutputData.timeStamps, allOutputData[study].Consumption.Power, avg)
+							monthlyEnergy = energyAgged.map(function(x){return round(x*energyRate/1000,4)})
+							monEnergyCostGraph['series'][enStudyIndex].setData(monthlyEnergy)
+							// update the table:
+							thisRow = gebi('row' + study)
+							thisRow.querySelector('.capacityCost').innerHTML = round(arrSum(monthlyPower),4)
+							thisRow.querySelector('.energyCost').innerHTML = round(arrSum(monthlyEnergy),4)
+						}
+					}
+					// Calculate baseline.
+					baseRow = gebi('additionalMetricsTable').querySelector('[checked]').parentElement.parentElement
+					baseAnnual = parseFloat(baseRow.querySelector('.omCost').value) + parseFloat(baseRow.querySelector('.capacityCost').innerHTML)/yearPercentage + parseFloat(baseRow.querySelector('.energyCost').innerHTML)/yearPercentage
+					baseCost = baseAnnual + parseFloat(baseRow.querySelector('.capCost').value)
+					baseRow.querySelector('.y1save').innerHTML = '0'
+					baseRow.querySelector('.annualSave').innerHTML = '0'
+					baseRow.querySelector('.payback').innerHTML = '0'
+					// Update things that depend on the baseline diff.
+					for (index in studyList) {
+						study = studyList[index]
+						if (undefined != study) {
+							// Update the table:
+							thisRow = gebi('row' + study)
+							annualCost = parseFloat(thisRow.querySelector('.omCost').value) + parseFloat(thisRow.querySelector('.capacityCost').innerHTML)/yearPercentage + parseFloat(thisRow.querySelector('.energyCost').innerHTML)/yearPercentage
+							y1cost = annualCost + parseFloat(thisRow.querySelector('.capCost').value)
+							y1save = baseCost - y1cost
+							thisRow.querySelector('.y1save').innerHTML = round(y1save,4)
+							annualSave = baseAnnual - annualCost
+							thisRow.querySelector('.annualSave').innerHTML = round(annualSave,4)
+							thisRow.querySelector('.payback').innerHTML = round(Math.abs(y1save/annualSave),2)
+							// update the costBen graph.
+							costGrowthIndex = indexFind(costGrowthGraph['series'], function (x) {return x.name == study})
+							costSeries = []
+							for (i=0;i<30;i++) {costSeries.push(round(baseCost-y1cost+i*(baseAnnual-annualCost),4))}
+							costGrowthGraph['series'][costGrowthIndex].setData(costSeries)
+						}
+					}
+				}
+				function monthAgg(stamps, power, func) {
+					// Aggregate a month's worth of power.
+					combo = zip([stamps,power])
+					grouped = partition(combo, function(x,y){return x[0].substring(5,7)==y[0].substring(5,7)})
+					function dropStamp(pairArr) {return pairArr.map(function(x){return x[1]})}
+					noStamps = grouped.map(dropStamp)
+					applied = noStamps.map(func)
+					return flatten1(applied)
+				} 
+			</script>
+		</div>
+
+		<p class="reportTitle postRun" style = "display:none !important">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative" style="display:none !important">
+			
+			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
+			<table id="detailsTable">
+				<tr>
+					<th id="SL">Simulation Location</th>
+					<th>Grid Components</th>
+				</tr>
+				<tr>
+					<td rowspan="7" style = "width:100%">
+						<div id="mapHere">
+							<script type="text/javascript">
+								var width = 500,
+									height = 350;
+
+								var projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2]);
+
+								var path = d3.geo.path()
+									.projection(projection);
+
+								var svg = d3.select("#mapHere").append("svg")
+									.attr("width", width)
+									.attr("height", height);
+
+								var group = svg.append("g");
+
+								group.attr("transorm", "scale(.2, .2)");
+								d3.json('/static/state_boundaries.json', function(collection) {
+									group.selectAll('path')
+										.data(collection.features)
+										.enter().append('path')
+										.attr('d', d3.geo.path().projection(projection))
+										.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+										.style('fill', 'gray')
+										.style('stroke', 'white')
+										.style('stroke-width', 1);
+								});
+
+								d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
+									climate = allInputData.climateName
+									var ST_NAME = climate.split("-");
+									var ST = ST_NAME[0], NAME = ST_NAME[1];
+									var my_coords = projection(new_us_places[ST][NAME]);
+									var r = 5;
+									svg.append("circle")
+										.attr("cx", my_coords[0])
+										.attr("cy", my_coords[1])
+										.attr("r", 5)
+										.attr("class", "HighlightCircle")
+								})
+							</script>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td id="GC">
+						<div id="comparisonPieChart" style="min-width: 400px; height: 300px; margin: 0 auto">
+							<script type="text/javascript">
+								pieData = []
+								for (index in studyList){
+									size = parseInt(allOutputData[studyList[index]]["stdout"].split("\n")[3].split(/[ ]+/)[2])
+
+									pieData.push([studyList[index], size])
+								}
+								$(function(){
+									$("#comparisonPieChart").highcharts({
+										credits:{
+											enabled:false
+										},
+										title: {
+											text: ''
+										},
+										series: [{
+											type: "pie",
+											data: pieData
+										}],
+										plotOptions: {
+											pie: {
+												dataLabels: {
+													enabled: false,
+												}
+											}
+										}
+									});
+								});
+							</script>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+		
+		<p class="reportTitle postRun">Climate <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="climateReport" class="tightContent postRun">
+			<script type="text/javascript">
+				/*
+				 * HighChart for climate data.
+				 */
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#climateReport")
+						.attr("id", "climateChartDiv")
+					climateSeriesData = [
+						{"name":"Rain Fall (in/h)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Rain Fall (in/h)"]},
+						{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
+						{"name":"Direct Insolation (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Insolation (W/m^2)"]},
+						{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Temperature (F)"]},
+						{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Snow Depth (in)"]}]
+					new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				}
+			</script>
+		</div>
+		
+		<p class="reportTitle postRun">Model Runtime Statistics <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="runtimeStatsReport" class="tightContent stdouts postRun" style="height:600px">
+			<script type="text/javascript">
+				/*
+				 * display stdout
+				 */
+				for (index in studyList) {
+					study = studyList[index]
+					$("<pre/>").appendTo("#runtimeStatsReport")
+						.attr("id", "stdout_" + study)
+						.attr("class", "stdoutBlock")
+					gebi("stdout_"+study).innerHTML = study + "\n"+allOutputData[study].stdout
+				}
+				// TODO: add stderr if some failed feeders exist.
+
+			</script>
+		</div>
+	</div>
+
+	<script type="text/javascript">
+		/* Highlight failed feeders */
+		$(window).bind("load", function(){
+			if (allOutputData != null) {
+				$("select[id*='feederName']").each(function() { 
+					study = $(this).val().split("___")[1]
+					name = "feeder_" + study
+					if (allOutputData[name] == undefined) {
+						// highlight feeders in input form
+						$(this).parents("tr").css("background-color", "#FFF000");
+						// render stderr to runtimeStatsReport
+						$("<pre/>").appendTo("#runtimeStatsReport")
+							.attr("id", "stderr_" + study)
+							.attr("class", "stdoutBlock")
+						gebi("stderr_" + study).innerHTML = study + "\n\n" + allOutputData["failures"][name]["stderr"]
+					}
+				})
+			}
+			modelUser = document.URL.split("/")[4] // MAYBE: get model user from url, or from template data.
+			currentUser = "{{datastoreNames['currentUser'].username}}"
+			if (modelUser == "public" && currentUser != "admin") {
+				$("button#deleteButton").hide();
+				$("button#publishButton").hide();
+				$("button#rerunButton").hide();
+			}
+		})
+	</script>
+</body>

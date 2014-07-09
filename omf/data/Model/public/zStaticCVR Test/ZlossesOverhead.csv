@@ -1,0 +1,10 @@
+# file...... ZlossesOverhead.csv
+# date...... Wed Jul 02 10:20:30 2014
+# user...... dwp0
+# host...... (null)
+# group..... class=overhead_line
+# trigger... (none)
+# interval.. -1
+# limit..... 0
+# property.. timestamp,sum(power_losses_A.real),sum(power_losses_A.imag),sum(power_losses_B.real),sum(power_losses_B.imag),sum(power_losses_C.real),sum(power_losses_C.imag)
+2013-01-01 00:00:00 PST,+155232,+147484,+82026.8,+116698,+49894.3,+65221.4

@@ -3,118 +3,17 @@
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<style>
-		/*INPUT*/
-		table.modelOptions {width:70%; text-align:left; margin-left:auto;}
-		/*OUTPUT*/
-		pre.stdoutBlock {display:inline-block; width:475px; overflow-x:hidden; padding-left:10px; vertical-align:top; font-size:8pt}
-		div.stdouts {overflow-x:auto;white-space: nowrap; margin-top:0px;}
-		div.tightContent {width:1000px; margin-left:auto; margin-right:auto; margin-top:0px; margin-bottom:20px; border-style: solid; border-color:gray; border-width:1px 0px 1px 0px; background-color:white;}
-		div.tightContent div {margin-top:0px;margin-bottom:0px; border:none;}
-		div.tightContent div + div {margin-top:0px; margin-bottom:0px;}
-		p.reportTitle {padding:10px; width:1000px; margin:20px auto 0px auto; font-size:16pt;}
-		#input {margin-top: 0px;}
-		input {border-bottom:thin dotted black;text-align:right;padding-right:5px}
-		button {width:auto;}
-		#cancelButton {background:crimson;}
-		#cancelButton:hover {background:red;}		
-		td,th {text-align: right}
-		.preRun, .running, .postRun, .stopped {display:none;}
-		input[readonly="readonly"], input[readonly], textarea[readonly] {color:gray;}
-		.advancedOption {display:none;}
-	</style>
+	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<!-- Global Funcs Import -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
-	<!-- Global Functions -->
-	<script type="text/javascript">
-		function init() {
-			// If we have input, put it back.
-			if (allInputData != null) {
-				restoreInputs()
-				$("#modelName").prop("readonly", true)
-			}
-			// Depending on status, show different things.
-			if (modelStatus == "finished") {
-				console.log("FINISHED")
-				$(".postRun").show()
-			} else if (modelStatus == "running") {
-				console.log("RUNNING")
-				$(".running").show()
-				$("input").prop("readonly", true)
-				$("select").prop("disabled", true)
-			} else /* Stopped */ {
-				if (allInputData != null) {
-					$(".stopped").show()
-				} else {
-					console.log("PRERUN")
-					$(".preRun").show()
-				}
-			}
-		}
-		function restoreInputs() {
-			// Restore all the input values that were used and stored in allInputData.json.
-			gebi("titleText").innerHTML = allInputData.modelName
-			for (index in allInputData) {
-				try {document.querySelector("#" + index).value = allInputData[index]}
-				catch(err){}
-			}
-		}
-		function validateForm() {
-			// Make sure each field matches its validation regex.
-			allFields = $("input")
-			returnVal = true
-			for (i=0; i < allFields.length; i++) {
-				allFields[i].style["border-color"] = "white"
-				currVal = allFields[i].value + ""
-				regex = allFields[i].getAttribute("data-validRegex")
-				if (regex != null && currVal.match(regex) != currVal) {
-					allFields[i].style["border-color"] = "crimson"
-					returnVal = false
-				}
-			}
-			if (returnVal == false) {alert("Form values bordered in red don't match the required format.")}
-			return returnVal
-		}
-		function deleteModel() {
-			if (confirm("Deleting this model cannot be undone. Continue?")){
-				post_to_url("/delete/Model/"+allInputData.user+"/"+allInputData.modelName, {}, "POST")
-			} else {
-				return false
-			}
-		}
-		function publishModel() {
-			newName = prompt("Publish a copy with name", allInputData.modelName)
-			if (newName) {
-				$.ajax({url:"/uniqObjName/Model/public/" + newName}).done(function(data) {
-					if (data.exists) {
-						alert("There is already a public Model named " + newName)
-						publishModel()
-					} else {
-						post_to_url("/publishModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
-					}
-				})
-			}
-		}
-		function duplicateModel() {
-			newName = prompt("Create a duplicate with name", allInputData.modelName)
-			if (newName) {
-				$.ajax({url:"/uniqObjName/Model/" + allInputData.user + "/" + newName}).done(function(data) {
-					if (data.exists) {
-						alert("There is already a model named " + newName)
-						duplicateModel()
-					} else {
-						post_to_url("/duplicateModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
-					}
-				})
-			}
-		}
-	</script>
 </head>
 <body onload="init()">
 	<div id="title">
@@ -148,7 +47,7 @@
 				<tr>
 					<td>Feeder</td>
 					<td>
-						<select id="feederName" name="feederName"/>
+						<select id="feederName" name="feederName">
 							<option disabled><strong>Personal Feeders</strong></option>
 							{% for feeder in datastoreNames['feeders'] %}
 								<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
@@ -157,6 +56,15 @@
 							{% for pFeeder in datastoreNames['publicFeeders'] %}
 								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 							{% endfor %}
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>Layout Algorithm</td>
+					<td>
+						<select id="layoutAlgorithm" name="layoutAlgorithm">
+							<option value="geospatial">Geospatial</option>
+							<option value="forceDirected">Force Directed</option>
 						</select>
 					</td>
 				</tr>
@@ -181,17 +89,21 @@
 		Model cancelled or encountered an error. Please change inputs and re-run.
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun">Voltage Drop Chart</p>
-		<div id="powerGenerationReport" class="tightContent postRun">
-			<div id="powerTimeSeries"></div>
-			<script>
-				Highcharts.setOptions({global: { useUTC: false }});
-				powerSeries = [{"marker":{"enabled":false},"color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
-				var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
-				pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
-				pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
+		<p class="reportTitle postRun">Voltage Drop Diagram</p>
+		<div id="voltageDropDiagram" class="tightContent postRun">
+			<img id="voltageDropChart" style="width:1000px;height:1000px;" />
+			<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltageDrop</script>
 		</div>
 	</div>
+	<script type="text/javascript">
+		$(window).bind("load", function(){
+			modelUser = document.URL.split("/")[4] // MAYBE: get model user from url, or from template data.
+			currentUser = "{{datastoreNames['currentUser'].username}}"
+			if (modelUser == "public" && currentUser != "admin") {
+				$("button#deleteButton").hide();
+				$("button#publishButton").hide();
+				$("button#rerunButton").hide();
+			}
+		})
+	</script>
 </body>

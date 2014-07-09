@@ -7,7 +7,7 @@ from passlib.hash import pbkdf2_sha512
 import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses
 import models, feeder, milToGridlab
 
-app = Flask("omf")
+app = Flask("web")
 URL = "http://www.omf.coop"
 _omfDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -468,4 +468,5 @@ def uniqObjName(objtype, owner, name):
 if __name__ == "__main__":
 	URL = "http://localhost:5000"
 	template_files = ["templates/"+ x  for x in os.listdir("templates")]
-	app.run(debug=True, extra_files=template_files)
+	model_files = ["models/" + x for x in os.listdir("models")]
+	app.run(debug=True, extra_files=template_files + model_files)

@@ -91,7 +91,8 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 					time.sleep(2)
 		return rawOut
 	except:
-		traceback.print_exc()
+		with open(pJoin(workDir, "stderr.txt"), "a+") as stderrFile:
+			traceback.print_exc(file = stderrFile)
 		return {}
 
 def _strClean(x):

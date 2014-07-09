@@ -8,7 +8,8 @@ from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
 import __util__ as util
-
+import _temp
+from _temp import *
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
@@ -21,6 +22,7 @@ from solvers import gridlabd
 # Our HTML template for the interface:
 with open(pJoin(_myDir,"cvrStatic.html"),"r") as tempFile:
 	template = Template(tempFile.read())
+	_temp.template = template
 
 def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
@@ -43,36 +45,6 @@ def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
 	return template.render(allInputData=allInputData,
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames)
-
-def renderAndShow(modelDir="", datastoreNames={}):
-	''' Render and open a template (blank or with output) in a local browser. '''
-	with tempfile.NamedTemporaryFile() as temp:
-		temp.write(renderTemplate(modelDir=modelDir, absolutePaths=True))
-		temp.flush()
-		os.rename(temp.name, temp.name + ".html")
-		fullArg = "file://" + temp.name + ".html"
-		webbrowser.open(fullArg)
-		# It's going to SPACE! Could you give it a SECOND to get back from SPACE?!
-		time.sleep(1)
-
-def getStatus(modelDir):
-	''' Is the model stopped, running or finished? '''
-	try:
-		modFiles = os.listdir(modelDir)
-	except:
-		modFiles = []
-	hasInput = "allInputData.json" in modFiles
-	hasPID = "PPID.txt" in modFiles
-	hasOutput = "allOutputData.json" in modFiles
-	if hasInput and not hasOutput and not hasPID:
-		return "stopped"
-	elif hasInput and not hasOutput and hasPID:
-		return "running"
-	elif hasInput and hasOutput and not hasPID:
-		return "finished"
-	else:
-		# Broken! Make the safest choice:
-		return "stopped"
 
 def _roundOne(x,direc):
 	''' Round x in direc (up/down) to 1 sig fig. '''
@@ -410,11 +382,27 @@ def runForeground(modelDir, inputDict):
 		plt.savefig(pJoin(modelDir,"powerflowTable.png"))
 		with open(pJoin(modelDir,"powerflowTable.png"),"rb") as inFile:
 			allOutput["powerflowTable"] = inFile.read().encode("base64")
+		with open(pJoin(modelDir,"powerflows.json"),"w") as outFile:
+			json.dump(dictalToMatrix(powerflows), outFile, indent=4)
 		# Monetary results.
-		plotTable(dictalToMatrix(monthData))
+		## To print partial money table
+		monthDataMat = dictalToMatrix(monthData)
+		dimX = len(monthDataMat)
+		dimY = len(monthDataMat[0])
+		monthDataPart = []
+		for k in range (0,dimX):
+			monthDatatemp = []
+			for m in range (4,dimY):
+				monthDatatemp.append(monthDataMat[k][m])
+			monthDataPart.append(monthDatatemp)
+
+		plotTable(monthDataPart)
 		plt.savefig(pJoin(modelDir,"moneyTable.png"))
 		with open(pJoin(modelDir,"moneyTable.png"),"rb") as inFile:
 			allOutput["moneyTable"] = inFile.read().encode("base64")
+		with open(pJoin(modelDir,"moneyTable.json"),"w") as outFile:
+			json.dump(dictalToMatrix(monthData), outFile, indent=4)
+
 		# Graph the money data.
 		fig = plt.figure(figsize=(10,8))
 		indices = [r['monthName'] for r in monthData]
@@ -466,34 +454,6 @@ def runForeground(modelDir, inputDict):
 		print "Oops, Model Crashed!!!" 
 		cancel(modelDir)
 		print e
-		
-def cancel(modelDir):
-	''' Try to cancel a currently running model. '''
-	# Kill GLD process if already been created
-	try:
-		with open(pJoin(modelDir,"PID.txt"),"r") as pidFile:
-			pid = int(pidFile.read())
-			# print "pid " + str(pid)
-			os.kill(pid, 15)
-			print "PID KILLED"
-	except:
-		pass
-	# Kill runForeground process
-	try:
-		with open(pJoin(modelDir, "PPID.txt"), "r") as pPidFile:
-			pPid = int(pPidFile.read())
-			os.kill(pPid, 15)
-			print "PPID KILLED"
-	except:
-		pass
-	# Remove PID, PPID, and allOutputData file if existed
-	try:
-		for fName in os.listdir(modelDir):
-			if fName in ["PID.txt","PPID.txt","allOutputData.json"]:
-				os.remove(pJoin(modelDir,fName))
-		print "CANCELED", modelDir
-	except:
-		pass
 
 def _tests():
 	# Variables

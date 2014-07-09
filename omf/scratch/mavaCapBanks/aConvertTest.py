@@ -6,7 +6,7 @@ def convert():
 		seqString = seqFile.read()
 		stdString = stdFile.read() 
 	(tree, x, y) = omf.milToGridlab.convert(stdString, seqString)
-	# BUG: transformer impedances with zero reactances cause powerflow failure.
+	# BUGFIX: transformer impedances with zero reactances cause powerflow failure.
 	for key in tree:
 		if tree[key].get("object","") == "transformer_configuration":
 			tree[key]["impedance"] = tree[key]["impedance"].replace("+0.0j","+0.0022j")
@@ -31,11 +31,4 @@ def draw():
 	plt.show()
 
 if __name__ == '__main__':
-	powerTest()
-
-
-# with open("mscheibe@mvec.com_25-01.json","r") as inFile:
-# 	allData = json.load(inFile)
-# stdString = allData["stdString"]
-# seqString = allData["seqString"]
-# print "KEYS from JSON input:", allData.keys()
+	draw()
