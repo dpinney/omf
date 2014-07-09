@@ -21,6 +21,28 @@ with open(pJoin(_myDir,"voltageDrop.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 	_temp.template = template
 
+def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
+	''' Render the model template to an HTML string.
+	By default render a blank one for new input.
+	If modelDir is valid, render results post-model-run.
+	If absolutePaths, the HTML can be opened without a server. '''
+	try:
+		allInputData = open(pJoin(modelDir,"allInputData.json")).read()
+	except IOError:
+		allInputData = None
+	try:
+		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
+	except IOError:
+		allOutputData = None
+	if absolutePaths:
+		# Parent of current folder.
+		pathPrefix = _omfDir
+	else:
+		pathPrefix = ""
+	return template.render(allInputData=allInputData,
+		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
+		datastoreNames=datastoreNames)
+
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	startTime = dt.datetime.now()
