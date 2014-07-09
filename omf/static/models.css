@@ -48,9 +48,6 @@ button#cancelButton:hover {
 td,th {
 	text-align: right;
 }
-.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped {
-	display: none;
-}
 a {
 	cursor: hand;
 }
@@ -131,4 +128,7 @@ table#detailsTable th, table#detailsTable td {
 	text-align: center; 
 	padding: 5px; 
 	vertical-align:top; 
+}
+.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped {
+	display: none;
 }
