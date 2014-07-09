@@ -8,108 +8,12 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<!-- Global Funcs Import -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
-	<!-- Global Functions -->
-	<script type="text/javascript">
-		function init() {
-			// If we have input, put it back.
-			if (allInputData != null) {
-				restoreInputs()
-				$("#modelName").prop("readonly", true)
-			}
-			// Depending on status, show different things.
-			if (modelStatus == "finished") {
-				console.log("FINISHED")
-				$(".postRun").show()
-			} else if (modelStatus == "running") {
-				console.log("RUNNING")
-				$(".running").show()
-				$("input").prop("readonly", true)
-				$("select").prop("disabled", true)
-			} else /* Stopped */ {
-				if (allInputData != null) {
-					$(".stopped").show()
-				} else {
-					console.log("PRERUN")
-					$(".preRun").show()
-				}
-			}
-		}
-		function restoreInputs() {
-			// Restore all the input values that were used and stored in allInputData.json.
-			gebi("titleText").innerHTML = allInputData.modelName
-			for (index in allInputData) {
-				try {document.querySelector("#" + index).value = allInputData[index]}
-				catch(err){}
-			}
-		}
-		function validateForm() {
-			// Make sure each field matches its validation regex.
-			allFields = $("input")
-			returnVal = true
-			for (i=0; i < allFields.length; i++) {
-				allFields[i].style["border-color"] = "white"
-				currVal = allFields[i].value + ""
-				regex = allFields[i].getAttribute("data-validRegex")
-				if (regex != null && currVal.match(regex) != currVal) {
-					allFields[i].style["border-color"] = "crimson"
-					returnVal = false
-				}
-			}
-			if (returnVal == false) {alert("Form values bordered in red don't match the required format.")}
-			return returnVal
-		}
-		// Little function here to get discloser triangles:
-		function toggleAdvanced(clickedObject) {
-			siblings = clickedObject.parentNode.parentNode.parentNode.querySelectorAll('.advancedOption')
-			for (i=0;i<siblings.length;i++) {
-				visible = (getComputedStyle(siblings[i])['display'] == 'none')
-				if (visible) {
-					siblings[i].style.display='table-row'
-				} else {
-					siblings[i].style.display='none'
-				}
-			}
-			if (visible) {code = 9660} else {code = 9654}
-				clickedObject.textContent = String.fromCharCode(code) + ' Advanced Options'
-		}
-		function deleteModel() {
-			if (confirm("Deleting this model cannot be undone. Continue?")){
-				post_to_url("/delete/Model/"+allInputData.user+"/"+allInputData.modelName, {}, "POST")
-			} else {
-				return false
-			}
-		}
-		function publishModel() {
-			newName = prompt("Publish a copy with name", allInputData.modelName)
-			if (newName) {
-				$.ajax({url:"/uniqObjName/Model/public/" + newName}).done(function(data) {
-					if (data.exists) {
-						alert("There is already a public Model named " + newName)
-						publishModel()
-					} else {
-						post_to_url("/publishModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
-					}
-				})
-			}
-		}
-		function duplicateModel() {
-			newName = prompt("Create a duplicate with name", allInputData.modelName)
-			if (newName) {
-				$.ajax({url:"/uniqObjName/Model/" + allInputData.user + "/" + newName}).done(function(data) {
-					if (data.exists) {
-						alert("There is already a model named " + newName)
-						duplicateModel()
-					} else {
-						post_to_url("/duplicateModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
-					}
-				})
-			}
-		}
-	</script>
 </head>
 <body onload="init()">
 	<div id="title">
