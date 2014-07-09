@@ -124,6 +124,11 @@ pre.stdoutBlock {
 	vertical-align: top; 
 	font-size: 8pt;
 }
+div.stdouts {
+	overflow-x: auto;
+	white-space: nowrap; 
+	margin-top: 0px;
+}
 table#detailsTable th, table#detailsTable td {
 	text-align: center; 
 	padding: 5px; 
