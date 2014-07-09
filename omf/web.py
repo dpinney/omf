@@ -7,7 +7,7 @@ from passlib.hash import pbkdf2_sha512
 import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses
 import models, feeder, milToGridlab
 
-app = Flask("omf")
+app = Flask("web")
 URL = "http://www.omf.coop"
 _omfDir = os.path.dirname(os.path.abspath(__file__))
 
