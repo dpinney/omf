@@ -5,7 +5,8 @@ from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
 import networkx as nx
-
+import _temp
+from _temp import *
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
@@ -18,58 +19,7 @@ from solvers import gridlabd
 # Our HTML template for the interface:
 with open(pJoin(_myDir,"voltageDrop.html"),"r") as tempFile:
 	template = Template(tempFile.read())
-
-def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
-	''' Render the model template to an HTML string.
-	By default render a blank one for new input.
-	If modelDir is valid, render results post-model-run.
-	If absolutePaths, the HTML can be opened without a server. '''
-	try:
-		allInputData = open(pJoin(modelDir,"allInputData.json")).read()
-	except IOError:
-		allInputData = None
-	try:
-		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
-	except IOError:
-		allOutputData = None
-	if absolutePaths:
-		# Parent of current folder.
-		pathPrefix = _omfDir
-	else:
-		pathPrefix = ""
-	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames)
-
-def renderAndShow(modelDir="", datastoreNames={}):
-	''' Render and open a template (blank or with output) in a local browser. '''
-	with tempfile.NamedTemporaryFile() as temp:
-		temp.write(renderTemplate(modelDir=modelDir, absolutePaths=True))
-		temp.flush()
-		os.rename(temp.name, temp.name + ".html")
-		fullArg = "file://" + temp.name + ".html"
-		webbrowser.open(fullArg)
-		# It's going to SPACE! Could you give it a SECOND to get back from SPACE?!
-		time.sleep(1)
-
-def getStatus(modelDir):
-	''' Is the model stopped, running or finished? '''
-	try:
-		modFiles = os.listdir(modelDir)
-	except:
-		modFiles = []
-	hasInput = "allInputData.json" in modFiles
-	hasPID = "PPID.txt" in modFiles
-	hasOutput = "allOutputData.json" in modFiles
-	if hasInput and not hasOutput and not hasPID:
-		return "stopped"
-	elif hasInput and not hasOutput and hasPID:
-		return "running"
-	elif hasInput and hasOutput and not hasPID:
-		return "finished"
-	else:
-		# Broken! Make the safest choice:
-		return "stopped"
+	_temp.template = template
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
