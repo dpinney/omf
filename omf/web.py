@@ -243,7 +243,7 @@ def showModel(owner, modelName):
 	if owner==User.cu() or "admin"==User.cu() or owner=="public":
 		modelDir = "./data/Model/" + owner + "/" + modelName
 		with open(modelDir + "/allInputData.json") as inJson:
-			modelType = json.load(inJson)["modelType"]
+			modelType = json.load(inJson).get("modelType","")
 		return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
 	else:
 		return redirect("/")
@@ -281,13 +281,13 @@ def duplicateModel(owner, modelName):
 	if owner==User.cu() or "admin"==User.cu() or "public"==owner:
 		destinationPath = "./data/Model/" + User.cu() + "/" + newName
 		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
-		with open(destinationPath + "/allInputData.json","r+") as inFile:
+		with open(destinationPath + "/allInputData.json","r") as inFile:
 			inData = json.load(inFile)
-			inData["user"] = User.cu()
-			inData["modelName"] = str(newName)
-			inData["created"] = str(dt.datetime.now())
-			inFile.seek(0)
-			json.dump(inData, inFile, indent=4)
+		inData["user"] = User.cu()
+		inData["modelName"] = str(newName)
+		inData["created"] = str(dt.datetime.now())
+		with open(destinationPath + "/allInputData.json","w") as outFile:
+			json.dump(inData, outFile, indent=4)
 		return redirect("/model/" + User.cu() + "/" + newName)
 	else:
 		return False
