@@ -8,9 +8,6 @@ import __util__ as util
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
 
-# OMF imports
-sys.path.append(_omfDir)
-
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
 	By default render a blank one for new input.
