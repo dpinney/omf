@@ -124,3 +124,22 @@ function duplicateModel() {
 		})
 	}
 }
+
+/**
+ * Little function here to get discloser triangles
+ * @param {Object} clickedObject
+ * @return {null}
+ */
+function toggleAdvanced(clickedObject) {
+	siblings = clickedObject.parentNode.parentNode.parentNode.querySelectorAll('.advancedOption')
+	for (i=0;i<siblings.length;i++) {
+		visible = (getComputedStyle(siblings[i])['display'] == 'none')
+		if (visible) {
+			siblings[i].style.display='table-row'
+		} else {
+			siblings[i].style.display='none'
+		}
+	}
+	if (visible) {code = 9660} else {code = 9654}
+		clickedObject.textContent = String.fromCharCode(code) + ' Advanced Options'
+}
