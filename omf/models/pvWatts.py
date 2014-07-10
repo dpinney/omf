@@ -189,13 +189,11 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	# _temp.renderAndShow()
 	renderAndShow()
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
-	# _temp.renderAndShow(modelDir=modelLoc)
-	renderAndShow()
+	renderAndShow(modelDir = modelLoc)
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)

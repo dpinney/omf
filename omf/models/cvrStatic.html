@@ -238,7 +238,11 @@
 	<script type="text/javascript">
 		$(window).bind("load", function(){
 			modelUser = document.URL.split("/")[4] // MAYBE: get model user from url, or from template data.
-			currentUser = "{{datastoreNames['currentUser'].username}}"
+			{% if "currentUser" in datastoreNames %}
+			currentUser = "{{ datastoreNames['currentUser'].username }}"
+			{% else %}
+			currentUser = "test"
+			{% endif %}
 			if (modelUser == "public" && currentUser != "admin") {
 				$("button#deleteButton").hide();
 				$("button#publishButton").hide();

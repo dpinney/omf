@@ -342,14 +342,14 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	# renderAndShow()
+	renderAndShow()
 	# Run the model.
 	run(modelLoc, inData)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)
 	# Show the output.
-	# renderAndShow(modelDir=modelLoc)
+	renderAndShow(modelDir=modelLoc)
 	# Delete the model.
 	# shutil.rmtree(modelLoc)
 
