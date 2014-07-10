@@ -1,9 +1,7 @@
 """ Common functions for all models """
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime
+import json, os, sys, tempfile, webbrowser, time
 from os.path import join as pJoin
-from jinja2 import Template
-import __util__ as util
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
@@ -30,11 +28,10 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames)
 
-
-def renderAndShow(modelDir="", datastoreNames={}):
+def renderAndShow(template, modelDir="", datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
 	with tempfile.NamedTemporaryFile() as temp:
-		temp.write(renderTemplate(modelDir=modelDir, absolutePaths=True))
+		temp.write(renderTemplate(template, modelDir=modelDir, absolutePaths=True))
 		temp.flush()
 		os.rename(temp.name, temp.name + ".html")
 		fullArg = "file://" + temp.name + ".html"

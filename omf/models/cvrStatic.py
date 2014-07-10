@@ -7,24 +7,20 @@ from copy import copy
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
-import __util__ as util
-import _temp
-from _temp import *
-# Locational variables so we don't have to rely on OMF being in the system path.
-_myDir = os.path.dirname(os.path.abspath(__file__))
-_omfDir = os.path.dirname(_myDir)
+import __metaModel__
+from __metaModel__ import *
 
 # OMF imports
-sys.path.append(_omfDir)
+sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import gridlabd
 
 # Our HTML template for the interface:
-with open(pJoin(_myDir,"cvrStatic.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"cvrStatic.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
-	return _temp.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
 def _roundOne(x,direc):
 	''' Round x in direc (up/down) to 1 sig fig. '''
@@ -47,7 +43,7 @@ def run(modelDir, inputDict):
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent=4)
 	feederDir, feederName = inputDict["feederName"].split("___")
-	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
+	shutil.copy(pJoin(__metaModel__._omfDir,"data","Feeder",feederDir,feederName+".json"),
 		pJoin(modelDir,"feeder.json"))
 	# If we are re-running, remove output:
 	try:
@@ -437,9 +433,9 @@ def runForeground(modelDir, inputDict):
 
 def _tests():
 	# Variables
-	workDir = pJoin(_omfDir,"data","Model")
-	friendshipTree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Frank LO.json")))["tree"]
-	colomaTree = json.load(open(pJoin(_omfDir, "data", "Feeder", "public", "ABEC Columbia.json")))["tree"]
+	workDir = pJoin(__metaModel__._omfDir,"data","Model")
+	friendshipTree = json.load(open(pJoin(__metaModel__._omfDir, "data", "Feeder", "public", "ABEC Frank LO.json")))["tree"]
+	colomaTree = json.load(open(pJoin(__metaModel__._omfDir, "data", "Feeder", "public", "ABEC Columbia.json")))["tree"]
 	colomaMonths = {"janAvg": 914000.0, "janPeak": 1290000.0,
 		"febAvg": 897000.00, "febPeak": 1110000.0,
 		"marAvg": 731000.00, "marPeak": 1030000.0,
@@ -489,11 +485,11 @@ def _tests():
 	try: shutil.rmtree(modelLoc)
 	except: pass
 	# No-input template.
-	renderAndShow()
+	renderAndShow(template)
 	# Run the model.
 	run(modelLoc, inData)
 	# # Show the output.
-	renderAndShow(modelDir=modelLoc)
+	renderAndShow(template, modelDir=modelLoc)
 	# # # Delete the model.
 	# # time.sleep(2)
 	# # shutil.rmtree(modelLoc)

@@ -4,21 +4,17 @@ import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
 import multiprocessing
 from os.path import join as pJoin
 from jinja2 import Template
-import __util__ as util
 import traceback
-import _temp
-from _temp import *
-# Locational variables so we don't have to rely on OMF being in the system path.
-_myDir = os.path.dirname(os.path.abspath(__file__))
-_omfDir = os.path.dirname(_myDir)
+import __metaModel__
+from __metaModel__ import *
 
 # OMF imports
-sys.path.append(_omfDir)
+sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import gridlabd
 
 # Our HTML template for the interface:
-with open(pJoin(_myDir,"gridlabMulti.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"gridlabMulti.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 	
 def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
@@ -36,7 +32,7 @@ def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
 		allOutputData = None
 	if absolutePaths:
 		# Parent of current folder.
-		pathPrefix = _omfDir
+		pathPrefix = __metaModel__._omfDir
 	else:
 		pathPrefix = ""
 	feederList = []
@@ -100,9 +96,9 @@ def runForeground(modelDir, inputDict):
 				pass
 			if not os.path.isdir(pJoin(modelDir, feederName)):
 				os.makedirs(pJoin(modelDir, feederName)) # create subfolders for feeders
-			shutil.copy(pJoin(_omfDir, "data", "Feeder", feederDir, feederName + ".json"),
+			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Feeder", feederDir, feederName + ".json"),
 				pJoin(modelDir, feederName, "feeder.json"))
-			shutil.copy(pJoin(_omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
+			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 				pJoin(modelDir, feederName, "climate.tmy2"))
 			try:
 				startTime = datetime.datetime.now()
@@ -145,18 +141,18 @@ def runForeground(modelDir, inputDict):
 				for key in rawOut:
 					if key.startswith('Climate_') and key.endswith('.csv'):
 						cleanOut['climate'] = {}
-						cleanOut['climate']['Rain Fall (in/h)'] = util.hdmAgg(rawOut[key].get('rainfall'), sum, level)
-						cleanOut['climate']['Wind Speed (m/s)'] = util.hdmAgg(rawOut[key].get('wind_speed'), util.avg, level)
-						cleanOut['climate']['Temperature (F)'] = util.hdmAgg(rawOut[key].get('temperature'), max, level)
-						cleanOut['climate']['Snow Depth (in)'] = util.hdmAgg(rawOut[key].get('snowdepth'), max, level)
-						cleanOut['climate']['Direct Insolation (W/m^2)'] = util.hdmAgg(rawOut[key].get('solar_direct'), sum, level)
+						cleanOut['climate']['Rain Fall (in/h)'] = hdmAgg(rawOut[key].get('rainfall'), sum, level)
+						cleanOut['climate']['Wind Speed (m/s)'] = hdmAgg(rawOut[key].get('wind_speed'), avg, level)
+						cleanOut['climate']['Temperature (F)'] = hdmAgg(rawOut[key].get('temperature'), max, level)
+						cleanOut['climate']['Snow Depth (in)'] = hdmAgg(rawOut[key].get('snowdepth'), max, level)
+						cleanOut['climate']['Direct Insolation (W/m^2)'] = hdmAgg(rawOut[key].get('solar_direct'), sum, level)
 				# Voltage Band
 				if 'VoltageJiggle.csv' in rawOut:
 					cleanOut['allMeterVoltages'] = {}
-					cleanOut['allMeterVoltages']['Min'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
-					cleanOut['allMeterVoltages']['Mean'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], util.avg, level)
-					cleanOut['allMeterVoltages']['StdDev'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], util.avg, level)
-					cleanOut['allMeterVoltages']['Max'] = util.hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
+					cleanOut['allMeterVoltages']['Min'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
+					cleanOut['allMeterVoltages']['Mean'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], avg, level)
+					cleanOut['allMeterVoltages']['StdDev'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], avg, level)
+					cleanOut['allMeterVoltages']['Max'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
 				# Power Consumption
 				cleanOut['Consumption'] = {}
 				# Set default value to be 0, avoiding missing value when computing Loads
@@ -165,11 +161,11 @@ def runForeground(modelDir, inputDict):
 				cleanOut['Consumption']['DG'] = [0] * int(inputDict["simLength"])
 				for key in rawOut:
 					if key.startswith('SwingKids_') and key.endswith('.csv'):
-						oneSwingPower = util.hdmAgg(util.vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), util.avg, level)
+						oneSwingPower = hdmAgg(vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), avg, level)
 						if 'Power' not in cleanOut['Consumption']:
 							cleanOut['Consumption']['Power'] = oneSwingPower
 						else:
-							cleanOut['Consumption']['Power'] = util.vecSum(oneSwingPower,cleanOut['Consumption']['Power'])
+							cleanOut['Consumption']['Power'] = vecSum(oneSwingPower,cleanOut['Consumption']['Power'])
 					elif key.startswith('Inverter_') and key.endswith('.csv'): 	
 						realA = rawOut[key]['power_A.real']
 						realB = rawOut[key]['power_B.real']
@@ -177,11 +173,11 @@ def runForeground(modelDir, inputDict):
 						imagA = rawOut[key]['power_A.imag']
 						imagB = rawOut[key]['power_B.imag']
 						imagC = rawOut[key]['power_C.imag']
-						oneDgPower = util.hdmAgg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), util.avg, level)
+						oneDgPower = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
 						if 'DG' not in cleanOut['Consumption']:
 							cleanOut['Consumption']['DG'] = oneDgPower
 						else:
-							cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG'])
+							cleanOut['Consumption']['DG'] = vecSum(oneDgPower,cleanOut['Consumption']['DG'])
 					elif key.startswith('Windmill_') and key.endswith('.csv'):
 						vrA = rawOut[key]['voltage_A.real']
 						vrB = rawOut[key]['voltage_B.real']
@@ -195,14 +191,14 @@ def runForeground(modelDir, inputDict):
 						ciA = rawOut[key]['current_A.imag']
 						ciB = rawOut[key]['current_B.imag']
 						ciC = rawOut[key]['current_C.imag']
-						powerA = util.vecProd(util.vecPyth(vrA,viA),util.vecPyth(crA,ciA))
-						powerB = util.vecProd(util.vecPyth(vrB,viB),util.vecPyth(crB,ciB))
-						powerC = util.vecProd(util.vecPyth(vrC,viC),util.vecPyth(crC,ciC))
-						oneDgPower = util.hdmAgg(util.vecSum(powerA,powerB,powerC), util.avg, level)
+						powerA = vecProd(vecPyth(vrA,viA),vecPyth(crA,ciA))
+						powerB = vecProd(vecPyth(vrB,viB),vecPyth(crB,ciB))
+						powerC = vecProd(vecPyth(vrC,viC),vecPyth(crC,ciC))
+						oneDgPower = hdmAgg(vecSum(powerA,powerB,powerC), avg, level)
 						if 'DG' not in cleanOut['Consumption']:
 							cleanOut['Consumption']['DG'] = oneDgPower
 						else:
-							cleanOut['Consumption']['DG'] = util.vecSum(oneDgPower,cleanOut['Consumption']['DG'])
+							cleanOut['Consumption']['DG'] = vecSum(oneDgPower,cleanOut['Consumption']['DG'])
 					elif key in ['OverheadLosses.csv', 'UndergroundLosses.csv', 'TriplexLosses.csv', 'TransformerLosses.csv']:
 						realA = rawOut[key]['sum(power_losses_A.real)']
 						imagA = rawOut[key]['sum(power_losses_A.imag)']
@@ -210,16 +206,16 @@ def runForeground(modelDir, inputDict):
 						imagB = rawOut[key]['sum(power_losses_B.imag)']
 						realC = rawOut[key]['sum(power_losses_C.real)']
 						imagC = rawOut[key]['sum(power_losses_C.imag)']
-						oneLoss = util.hdmAgg(util.vecSum(util.vecPyth(realA,imagA),util.vecPyth(realB,imagB),util.vecPyth(realC,imagC)), util.avg, level)
+						oneLoss = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
 						if 'Losses' not in cleanOut['Consumption']:
 							cleanOut['Consumption']['Losses'] = oneLoss
 						else:
-							cleanOut['Consumption']['Losses'] = util.vecSum(oneLoss,cleanOut['Consumption']['Losses'])
+							cleanOut['Consumption']['Losses'] = vecSum(oneLoss,cleanOut['Consumption']['Losses'])
 				# Aggregate up the timestamps:
 				if level=='days':
-					cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
+					cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
 				elif level=='months':
-					cleanOut['timeStamps'] = util.aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
+					cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
 				# Write the output.
 				with open(pJoin(modelDir, feederName, "allOutputData.json"),"w") as outFile:
 					json.dump(cleanOut, outFile, indent=4)
@@ -284,12 +280,86 @@ def runForeground(modelDir, inputDict):
 			except:
 				pass
 			cancel(modelDir)
-		
 	afterRun(modelDir)
+
+def avg(inList):
+	''' Average a list. Really wish this was built-in. '''
+	return sum(inList)/len(inList)
+
+def hdmAgg(series, func, level):
+	''' Simple hour/day/month aggregation for Gridlab. '''
+	if level in ['days','months']:
+		return aggSeries(stamps, series, func, level)
+	else:
+		return series
+
+def aggSeries(timeStamps, timeSeries, func, level):
+	''' Aggregate a list + timeStamps up to the required time level. '''
+	# Different substring depending on what level we aggregate to:
+	if level=='months': endPos = 7
+	elif level=='days': endPos = 10
+	combo = zip(timeStamps, timeSeries)
+	# Group by level:
+	groupedCombo = _groupBy(combo, lambda x1,x2: x1[0][0:endPos]==x2[0][0:endPos])
+	# Get rid of the timestamps:
+	groupedRaw = [[pair[1] for pair in group] for group in groupedCombo]
+	return map(func, groupedRaw)
+
+def _pyth(x,y):
+	''' Compute the third side of a triangle--BUT KEEP SIGNS THE SAME FOR DG. '''
+	sign = lambda z:(-1 if z<0 else 1)
+	fullSign = sign(sign(x)*x*x + sign(y)*y*y)
+	return fullSign*math.sqrt(x*x + y*y)
+
+def vecPyth(vx,vy):
+	''' Pythagorean theorem for pairwise elements from two vectors. '''
+	rows = zip(vx,vy)
+	return map(lambda x:_pyth(*x), rows)
+
+def vecSum(*args):
+	''' Add n vectors. '''
+	return map(sum,zip(*args))
+
+def _prod(inList):
+	''' Product of all values in a list. '''
+	return reduce(lambda x,y:x*y, inList, 1)
+
+def vecProd(*args):
+	''' Multiply n vectors. '''
+	return map(_prod, zip(*args))
+
+def threePhasePowFac(ra,rb,rc,ia,ib,ic):
+	''' Get power factor for a row of threephase volts and amps. Gridlab-specific. '''
+	pfRow = lambda row:math.cos(math.atan((row[0]+row[1]+row[2])/(row[3]+row[4]+row[5])))
+	rows = zip(ra,rb,rc,ia,ib,ic)
+	return map(pfRow, rows)
+
+def roundSig(x, sig=3):
+	''' Round to a given number of sig figs. '''
+	roundPosSig = lambda y,sig: round(y, sig-int(math.floor(math.log10(y)))-1)
+	if x == 0: return 0
+	elif x < 0: return -1*roundPosSig(-1*x, sig)
+	else: return roundPosSig(x, sig)
+
+def roundSeries(ser):
+	''' Round everything in a vector to 4 sig figs. '''
+	return map(lambda x:roundSig(x,4), ser)
+
+def _groupBy(inL, func):
+	''' Take a list and func, and group items in place comparing with func. Make sure the func is an equivalence relation, or your brain will hurt. '''
+	if inL == []: return inL
+	if len(inL) == 1: return [inL]
+	newL = [[inL[0]]]
+	for item in inL[1:]:
+		if func(item, newL[-1][0]):
+			newL[-1].append(item)
+		else:
+			newL.append([item])
+	return newL
 
 def _tests():
 	# Variables
-	workDir = pJoin(_omfDir,"data","Model")
+	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = { 
 		"modelName": "Automated Multiple GridlabD Testing",
 		# "modelName": "All",
@@ -340,14 +410,14 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	renderAndShow()
+	renderAndShow(template)
 	# Run the model.
 	run(modelLoc, inData)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)
 	# Show the output.
-	renderAndShow(modelDir=modelLoc)
+	renderAndShow(template, modelDir=modelLoc)
 	# Delete the model.
 	# shutil.rmtree(modelLoc)
 

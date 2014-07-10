@@ -5,23 +5,19 @@ from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
 import networkx as nx
-import _temp
-from _temp import *
-# Locational variables so we don't have to rely on OMF being in the system path.
-_myDir = os.path.dirname(os.path.abspath(__file__))
-_omfDir = os.path.dirname(_myDir)
-
+import __metaModel__
+from __metaModel__ import *
 # OMF imports
-sys.path.append(_omfDir)
+sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import gridlabd
 
 # Our HTML template for the interface:
-with open(pJoin(_myDir,"voltageDrop.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"voltageDrop.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
-	return _temp.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -35,7 +31,7 @@ def run(modelDir, inputDict):
 		json.dump(inputDict, inputFile, indent = 4)
 	# Copy feeder data into the model directory.
 	feederDir, feederName = inputDict["feederName"].split("___")
-	shutil.copy(pJoin(_omfDir,"data","Feeder",feederDir,feederName+".json"),
+	shutil.copy(pJoin(__metaModel__._omfDir,"data","Feeder",feederDir,feederName+".json"),
 		pJoin(modelDir,"feeder.json"))
 	# Create voltage drop plot.
 	tree = json.load(open(pJoin(modelDir,"feeder.json"))).get("tree",{})
@@ -146,7 +142,7 @@ def _tests():
 	# chart.savefig("/Users/dwp0/Desktop/testChart.png")
 	# plt.show()
 	# Variables
-	workDir = pJoin(_omfDir,"data","Model")
+	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = { "modelName": "Automated voltageDrop Testing",
 		"feederName": "public___Olin Barre Geo",
 		"modelType": "voltageDrop",
@@ -161,11 +157,11 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	renderAndShow()
+	renderAndShow(template)
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
-	renderAndShow(modelDir=modelLoc)
+	renderAndShow(template, modelDir=modelLoc)
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)

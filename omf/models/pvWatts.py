@@ -3,24 +3,20 @@
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime
 from os.path import join as pJoin
 from jinja2 import Template
-import __util__ as util
-import _temp
-from _temp import *
-# Locational variables so we don't have to rely on OMF being in the system path.
-_myDir = os.path.dirname(os.path.abspath(__file__))
-_omfDir = os.path.dirname(_myDir)
+import __metaModel__
+from __metaModel__ import *
 
 # OMF imports
-sys.path.append(_omfDir)
+sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import nrelsam
 
 # Our HTML template for the interface:
-with open(pJoin(_myDir,"pvWatts.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"pvWatts.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
-	return _temp.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -32,7 +28,7 @@ def run(modelDir, inputDict):
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
 	# Copy spcific climate data into model directory
-	shutil.copy(pJoin(_omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
+	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 		pJoin(modelDir, "climate.tmy2"))
 	# Ready to run
 	startTime = datetime.datetime.now()
@@ -75,6 +71,7 @@ def run(modelDir, inputDict):
 	# Set aggregation function constants.
 	agg = lambda x,y:_aggData(x,y,inputDict["simStartDate"],
 		int(inputDict["simLength"]), inputDict["simLengthUnits"], ssc, dat)
+	avg = lambda x:sum(x)/len(x)
 	# Timestamp output.
 	outData = {}
 	outData["timeStamps"] = [datetime.datetime.strftime(
@@ -88,16 +85,16 @@ def run(modelDir, inputDict):
 	outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
 	# Weather output.
 	outData["climate"] = {}
-	outData["climate"]["Direct Irradiance (W/m^2)"] = agg("dn", util.avg)
-	outData["climate"]["Difuse Irradiance (W/m^2)"] = agg("df", util.avg)
-	outData["climate"]["Ambient Temperature (F)"] = agg("tamb", util.avg)
-	outData["climate"]["Cell Temperature (F)"] = agg("tcell", util.avg)
-	outData["climate"]["Wind Speed (m/s)"] = agg("wspd", util.avg)
+	outData["climate"]["Direct Irradiance (W/m^2)"] = agg("dn", avg)
+	outData["climate"]["Difuse Irradiance (W/m^2)"] = agg("df", avg)
+	outData["climate"]["Ambient Temperature (F)"] = agg("tamb", avg)
+	outData["climate"]["Cell Temperature (F)"] = agg("tcell", avg)
+	outData["climate"]["Wind Speed (m/s)"] = agg("wspd", avg)
 	# Power generation.
 	outData["Consumption"] = {}
-	outData["Consumption"]["Power"] = [x for x in agg("ac", util.avg)]
-	outData["Consumption"]["Losses"] = [0 for x in agg("ac", util.avg)]
-	outData["Consumption"]["DG"] = agg("ac", util.avg)
+	outData["Consumption"]["Power"] = [x for x in agg("ac", avg)]
+	outData["Consumption"]["Losses"] = [0 for x in agg("ac", avg)]
+	outData["Consumption"]["DG"] = agg("ac", avg)
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
@@ -139,7 +136,7 @@ def cancel(modelDir):
 
 def _tests():
 	# Variables
-	workDir = pJoin(_omfDir,"data","Model")
+	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = { "modelName": "Automated pvWatts Testing",
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
@@ -169,11 +166,11 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	renderAndShow()
+	renderAndShow(template)
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
-	renderAndShow(modelDir = modelLoc)
+	renderAndShow(template, modelDir = modelLoc)
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)
