@@ -20,7 +20,6 @@ from solvers import gridlabd
 # Our HTML template for the interface:
 with open(pJoin(_myDir,"gridlabMulti.html"),"r") as tempFile:
 	template = Template(tempFile.read())
-	_temp.template = template
 	
 def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
@@ -40,7 +39,6 @@ def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
 		pathPrefix = _omfDir
 	else:
 		pathPrefix = ""
-	
 	feederList = []
 	feederIDs = []
 	try:
