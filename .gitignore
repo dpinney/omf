@@ -15,3 +15,4 @@ omf.egg-info
 !omf/data/Feeder/public/*
 !omf/data/User/admin.json
 !omf/data/User/public.json
+!omf/data/User/test.json
