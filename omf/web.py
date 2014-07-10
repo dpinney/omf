@@ -196,7 +196,7 @@ def changepwd():
 		if new_pwd == conf_pwd:
 			user["password_digest"] = pbkdf2_sha512.encrypt(new_pwd)
 			with open("./data/User/" + User.cu() + ".json","w") as outFile:
-				json.dump(user,outFile)
+				json.dump(user, outFile, indent=4)
 			return "Success"
 		else:
 			return "not_match"
