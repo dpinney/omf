@@ -11,7 +11,7 @@
     "simLength": "100", 
     "derate": "0.97", 
     "fd": "1.0", 
-    "user": "admin", 
+    "user": "public", 
     "systemSize": "10", 
     "runTime": "0:00:00", 
     "t_ref": "25.0", 

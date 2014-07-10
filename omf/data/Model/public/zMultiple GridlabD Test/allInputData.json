@@ -7,7 +7,7 @@
     "modelType": "gridlabMulti", 
     "climateName": "AL-HUNTSVILLE", 
     "simLength": "99", 
-    "user": "admin", 
+    "user": "public", 
     "feederName2": "public___13 Node Ref Feeder Flat", 
     "runTime": "0:00:39"
 }
