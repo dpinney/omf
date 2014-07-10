@@ -1,6 +1,6 @@
 ''' Powerflow results for one Gridlab instance. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math
 import multiprocessing
 from os.path import join as pJoin
 from jinja2 import Template
@@ -228,7 +228,7 @@ def runForeground(modelDir, inputDict):
 				os.remove(pJoin(modelDir, feederName,"PID.txt"))
 				print "DONE RUNNING", modelDir, feederName
 			except Exception as e:
-				print "Oops, Model Crashed!!!" 
+				print "Oops, Model Crashed!!!", e
 				cancel(pJoin(modelDir, feederName))
 				with open(pJoin(modelDir, feederName, "stderr.txt"), "a+") as stderrFile:
 					traceback.print_exc(file = stderrFile)
