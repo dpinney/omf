@@ -16,7 +16,7 @@ from solvers import gridlabd
 with open(pJoin(__metaModel__._myDir,"voltageDrop.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
+def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
 def run(modelDir, inputDict):

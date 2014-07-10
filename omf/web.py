@@ -244,7 +244,8 @@ def showModel(owner, modelName):
 		modelDir = "./data/Model/" + owner + "/" + modelName
 		with open(modelDir + "/allInputData.json") as inJson:
 			modelType = json.load(inJson).get("modelType","")
-		return getattr(models, modelType).renderTemplate(modelDir, False, getDataNames())
+		thisModel = getattr(models, modelType) 
+		return thisModel.renderTemplate(thisModel.template, modelDir, False, getDataNames())
 	else:
 		return redirect("/")
 
@@ -252,7 +253,8 @@ def showModel(owner, modelName):
 @flask_login.login_required
 def newModel(modelType):
 	''' Display the module template for creating a new model. '''
-	return getattr(models, modelType).renderTemplate(datastoreNames=getDataNames())
+	thisModel = getattr(models, modelType)
+	return thisModel.renderTemplate(thisModel.template, datastoreNames=getDataNames())
 
 @app.route("/runModel/", methods=["POST"])
 @flask_login.login_required

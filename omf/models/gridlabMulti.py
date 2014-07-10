@@ -17,7 +17,7 @@ from solvers import gridlabd
 with open(pJoin(__metaModel__._myDir,"gridlabMulti.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 	
-def renderTemplate(modelDir="", absolutePaths=False, datastoreNames={}):
+def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
 	By default render a blank one for new input.
 	If modelDir is valid, render results post-model-run.
