@@ -191,11 +191,12 @@ def register(email, reg_key):
 @flask_login.login_required
 def changepwd():
 	old_pwd, new_pwd, conf_pwd = map(request.form.get, ["old_pwd", "new_pwd", "conf_pwd"])
-	user = User.gu(User.cu())
+	user = json.load(open("./data/User/" + User.cu() + ".json"))
 	if pbkdf2_sha512.verify(old_pwd, user["password_digest"]):
 		if new_pwd == conf_pwd:
 			user["password_digest"] = pbkdf2_sha512.encrypt(new_pwd)
-			User.du(user)
+			with open("./data/User/" + User.cu() + ".json","w") as outFile:
+				json.dump(user,outFile)
 			return "Success"
 		else:
 			return "not_match"
