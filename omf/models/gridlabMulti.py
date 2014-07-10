@@ -75,16 +75,11 @@ def runForeground(modelDir, inputDict):
 	print "STARTING TO RUN", modelDir
 	beginTime = datetime.datetime.now()
 	feederList = []
-
-	def preRun(modelDir):
-		""" Get prepare of data and clean workspace if re-run"""
-		# If re-run remove all the data in the subfolders
-		for dirs in os.listdir(modelDir):
-			if os.path.isdir(pJoin(modelDir, dirs)):
-				print "remove subfolders"
-				shutil.rmtree(pJoin(modelDir, dirs))
-
-	preRun(modelDir)
+	# Get prepare of data and clean workspace if re-run, If re-run remove all the data in the subfolders
+	for dirs in os.listdir(modelDir):
+		if os.path.isdir(pJoin(modelDir, dirs)):
+			print "remove subfolders"
+			shutil.rmtree(pJoin(modelDir, dirs))
 	# Get each feeder, prepare data in separate folders, and run there.
 	for key in inputDict:
 		if key.startswith("feederName"):
@@ -237,50 +232,47 @@ def runForeground(modelDir, inputDict):
 	inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent = 4)
-
-	def afterRun(modelDir):
-		""" Integrate data into allOutputData.json, if error happens, cancel it """
+	# Integrate data into allOutputData.json, if error happens, cancel it 
+	try:
+		output = {}
+		output["failures"] = {}
+		numOfFeeders = 0
+		for root, dirs, files in os.walk(modelDir):
+			# dump error info into dict
+			if "stderr.txt" in files:
+				with open(pJoin(modelDir, root, "stderr.txt"), "r") as stderrFile:
+					tempString = stderrFile.read()
+					if "ERROR" in tempString or "FATAL" in tempString or "Traceback" in tempString:
+						output["failures"]["feeder_" + str(os.path.split(root)[-1])] = {"stderr": tempString}
+						continue
+			# dump simulated data into dict
+			if "allOutputData.json" in files:
+				with open(pJoin(modelDir, root, "allOutputData.json"), "r") as feederOutputData:
+					numOfFeeders += 1
+					feederOutput = json.load(feederOutputData)
+					# TODO: a better feeder name
+					output["feeder_"+str(os.path.split(root)[-1])] = {}
+					output["feeder_"+str(os.path.split(root)[-1])]["Consumption"] = feederOutput["Consumption"]
+					output["feeder_"+str(os.path.split(root)[-1])]["allMeterVoltages"] = feederOutput["allMeterVoltages"]
+					output["feeder_"+str(os.path.split(root)[-1])]["stderr"] = feederOutput["stderr"]
+					output["feeder_"+str(os.path.split(root)[-1])]["stdout"] = feederOutput["stdout"]
+					# output[root] = {feederOutput["Consumption"], feederOutput["allMeterVoltages"], feederOutput["stdout"], feederOutput["stderr"]}
+		output["numOfFeeders"] = numOfFeeders
+		output["timeStamps"] = feederOutput["timeStamps"]
+		output["climate"] = feederOutput["climate"]
+		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+			json.dump(output, outFile, indent=4)
 		try:
-			output = {}
-			output["failures"] = {}
-			numOfFeeders = 0
-			for root, dirs, files in os.walk(modelDir):
-				# dump error info into dict
-				if "stderr.txt" in files:
-					with open(pJoin(modelDir, root, "stderr.txt"), "r") as stderrFile:
-						tempString = stderrFile.read()
-						if "ERROR" in tempString or "FATAL" in tempString or "Traceback" in tempString:
-							output["failures"]["feeder_" + str(os.path.split(root)[-1])] = {"stderr": tempString}
-							continue
-				# dump simulated data into dict
-				if "allOutputData.json" in files:
-					with open(pJoin(modelDir, root, "allOutputData.json"), "r") as feederOutputData:
-						numOfFeeders += 1
-						feederOutput = json.load(feederOutputData)
-						# TODO: a better feeder name
-						output["feeder_"+str(os.path.split(root)[-1])] = {}
-						output["feeder_"+str(os.path.split(root)[-1])]["Consumption"] = feederOutput["Consumption"]
-						output["feeder_"+str(os.path.split(root)[-1])]["allMeterVoltages"] = feederOutput["allMeterVoltages"]
-						output["feeder_"+str(os.path.split(root)[-1])]["stderr"] = feederOutput["stderr"]
-						output["feeder_"+str(os.path.split(root)[-1])]["stdout"] = feederOutput["stdout"]
-						# output[root] = {feederOutput["Consumption"], feederOutput["allMeterVoltages"], feederOutput["stdout"], feederOutput["stderr"]}
-			output["numOfFeeders"] = numOfFeeders
-			output["timeStamps"] = feederOutput["timeStamps"]
-			output["climate"] = feederOutput["climate"]
-			with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-				json.dump(output, outFile, indent=4)
-			try:
-				os.remove(pJoin(modelDir, "PPID.txt"))
-			except:
-				pass
-		except Exception, e:
-			print "Crashed", e
-			try:
-				os.remove(pJoin(modelDir, "PPID.txt"))
-			except:
-				pass
-			cancel(modelDir)
-	afterRun(modelDir)
+			os.remove(pJoin(modelDir, "PPID.txt"))
+		except:
+			pass
+	except Exception, e:
+		print "Crashed", e
+		try:
+			os.remove(pJoin(modelDir, "PPID.txt"))
+		except:
+			pass
+		cancel(modelDir)
 
 def avg(inList):
 	''' Average a list. Really wish this was built-in. '''
