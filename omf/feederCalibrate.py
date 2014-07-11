@@ -703,10 +703,11 @@ def _runGLMS(fdir, SCADA, days):
 		'''Run all the .glm files found in the directory and return the metrics for each run.'''
 		print ('Begining simulations in GridLab-D.')
 		glmFiles = [x for x in os.listdir(fdir) if x.endswith('.glm')]
-		with open(os.path.join(fdir,'stdout.txt'),'w') as stdout, open(os.path.join(fdir,'stderr.txt'),'w') as stderr, open(os.path.join(fdir,'PID.txt'),'w') as pidFile:
-			proc = subprocess.Popen(['gridlabd', '-T', '24', '--job'], cwd=fdir, stdout=stdout, stderr=stderr)
-			pidFile.write(str(proc.pid))
-			proc.wait()
+		for glm in glmFiles:
+			with open(os.path.join(fdir,'stdout.txt'),'w') as stdout, open(os.path.join(fdir,'stderr.txt'),'w') as stderr, open(os.path.join(fdir,'PID.txt'),'w') as pidFile:
+				proc = subprocess.Popen(['gridlabd', glm], cwd=fdir, stdout=stdout, stderr=stderr)
+				pidFile.write(str(proc.pid))
+				proc.wait()
 		print ('Beginning comparison of intitial simulation output with SCADA.')
 		raw_metrics = _funcRawMetsDict(fdir, glmFiles, SCADA, days)
 		return raw_metrics
