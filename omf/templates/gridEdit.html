@@ -208,16 +208,6 @@ var body = d3.select('body')
 	// .attr('pointer-events', 'all')
 	// .call(zoomer.on('zoom', zoomRedraw))
 
-// add scalegrid to the lower layer
-var vis2 = body.append("svg:g")
-	.attr('id', 'scaleGrid')
-	// .attr('viewBox', '0 0 ' + width+' '+ height)
-	// TODO: optimize the translate position
-	.attr('transform', 'translate(' + 0 + ',' + 0 + ')')
-	// .attr('preserveAspectRatio', 'xMidYMid slice')
-// for onSvgBlankCanvasClick function
-vis2.append('rect').attr('width', width).attr('height', height);	
-
 // add powergrid to the upper layer
 var vis = body.append('svg:g')
 	.attr('id', 'powerGrid')
@@ -437,9 +427,6 @@ function zoomRedraw() {
 	}
 	if (dynamicShow)
 		dynamicFoldAndUnfold()
-	// change scale grid
-	vis2.select(".x.axis").call(xAxis)
-	vis2.select(".y.axis").call(yAxis)
 	d3.selectAll('.nodetext').style('font-size', 30/d3.event.scale)
 			.text(function(d) { 
 				if (d.chargeMultiple != 1){
@@ -471,8 +458,6 @@ function scaleRedraw(){
 
 	xAxis = d3.svg.axis().scale(x).orient("bottom").tickSize(-height);
 	yAxis = d3.svg.axis().scale(y).orient("right").ticks(8).tickSize(width);
-	vis2.append('g').attr('class', 'x axis').attr("transform", "translate(0," + height + ")").call(xAxis);
-	vis2.append("g").attr("class", "y axis").call(yAxis);
 	d3.selectAll(".x.axis").select()
 	body.call(zoomer.x(x).y(y).on('zoom', zoomRedraw))
 }
@@ -513,9 +498,6 @@ function zoomReset() {
 	var scale = zoomer.scale()
 	// TODO: rework our algorithm so we can zoom to fill the screen with the graph, not just go back to zoom level zero.
 	zoom(0,0,1)
-	// reset scale grid
-	vis2.select(".x.axis").call(xAxis)
-	vis2.select(".y.axis").call(yAxis)
 }
 function zoomToFit() {
 	// If this function zooms out, the lines may become much lighter, and if this function is used to zoom in, the lines may become much thicker.  Probably a Chrome bug.  The display goes back to normal after using the mouse wheel to zoom.
