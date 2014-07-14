@@ -975,6 +975,9 @@ def startPopulation(glmDict,case_flag,configuration_file=None):
 		'secondary_voltage' : '{:s}'.format(nom_volt),
 		'power_rating' : '{:.1f} MVA'.format(config_data['feeder_rating']),
 		'impedance' : '0.00033+0.0022j'}
+	# TODO: Remove this if statement when we adopt 3.1.
+	if float(nom_volt) == float(config_data['nom_volt']):
+		glmCaseDict[last_key]['secondary_voltage'] = str(float(nom_volt) + 0.001)
 	last_key += 1
 	# Add CVR controller
 	if use_flags['use_vvc'] == 1:

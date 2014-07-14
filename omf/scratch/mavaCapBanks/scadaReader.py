@@ -43,17 +43,17 @@ def readSCADA(scadaFile):
                         'winterDay' : None,
                         'shoulderDay' : None,
                         'summerPeakKW' : 0,
-                        'summerTotalEnergy' : 29907.5686,
+                        'summerTotalEnergy' : 30134.0730,
                         'summerPeakHour' : None,
                         'summerMinimumKW' : 1e15,
                         'summerMinimumHour' : None,
                         'winterPeakKW' : 0,
-                        'winterTotalEnergy' : 35090.6581,
+                        'winterTotalEnergy' : 37252.8585,
                         'winterPeakHour' : None,
                         'winterMinimumKW' : 1e15,
                         'winterMinimumHour' : None,
                         'shoulderPeakKW' : 0,
-                        'shoulderTotalEnergy' : 38442.0961,
+                        'shoulderTotalEnergy' : 38226.7564,
                         'shoulderPeakHour' : None,
                         'shoulderMinimumKW' : 1e15,
                         'shoulderMinimumHour' : None}
@@ -319,11 +319,12 @@ def readSCADA(scadaFile):
         'r_p_pfC' : os.path.abspath('./phaseCpf.player').replace('\\', '/'),
         'load_shape_player_file' : os.path.abspath('./loadShapeScalar.player').replace('\\', '/')}
     working_directory = tempfile.mkdtemp()
-    feederTree = feeder.parse('./faNewestConversion.glm')
+    feederTree = feeder.parse('./faNewestConversionNoRecorder.glm')
     calibratedFeederTree, calibrationConfiguration = feederCalibrate.startCalibration(working_directory, feederTree, scadaInfo, 'MavaCapBank', configInfo)
     print(calibrationConfiguration['load_shape_scalar'])
     calibratedFile = open('./mavaCapBanksBaseCase.glm', 'w')
     glmstring = feeder.sortedWrite(calibratedFeederTree)
+    calibratedFile.write(glmstring)
     calibratedFile.close()
 if __name__ == '__main__':
     startCPU = time.clock()

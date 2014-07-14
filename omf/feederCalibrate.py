@@ -20,7 +20,7 @@ import feeder
 savelosers = 0
 winning_calibration_IDs = []
 # Set WSM score under which we'll kick out the simultion as "close enough" (0.0500, might be an Ok value)
-wsm_acceptable = 0.0500
+wsm_acceptable = 0.0400
 # The weighted priorities assigned to each metric to produce the overall WSM score.
 def _calcPriorities ():
 	'''Calculate weights for each "difference metric" based on pairwise comparisons defined earlier.
