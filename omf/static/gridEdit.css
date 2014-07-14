@@ -1,0 +1,194 @@
+body {
+	overflow: hidden;
+	height: 100%;
+	background: white;
+}
+div#title p {
+	display: inline-block;
+}
+/*hacks to get D3 responsive sizing*/
+div#title {
+	position: absolute;
+	top: 0;
+}
+div#toolbar {
+	position: absolute;
+	top:65px;
+}
+/*div#svgGraph{
+	position: absolute;width:100%;height: 100%;}*/
+/*other styles*/  
+input#gridNameEdit {
+	font-size: 28pt;
+	line-height: 28pt;
+	text-shadow: 0px 3px 3px #4d4d4d;
+	height: 50px;
+	color: gray;
+	padding: 3px;
+	margin-bottom: 5px;
+	width: 85%;
+}
+button.smallButton {
+	height: 20px;
+	width: 20px;
+	display: inline-block;
+	float: right;
+	padding: 2px;
+	margin-left: 5px;
+}
+/* Edit object table style */
+button.deleteButton {
+	width: 100%;
+	float: right;
+	background-color: #CC0000;
+	color: white;
+}
+button.deleteButton:hover {
+	background: #FF0000;
+}
+#selected {
+	min-width: 350px;
+	position: absolute;
+	top: 90pt;
+	left: 4pt;
+}
+#selected table{
+	border: 1px solid black;
+	border-bottom: 0px;
+	display: none;
+	width: 100%;
+}
+#selected button{
+	width: 100%;
+}
+#selected #otherButtons{
+	display: none;
+}
+#selHead tr td {
+	background: black;
+	color: white;
+}
+#selBody{
+	max-height: 100%;
+	max-width: 100%;
+	overflow-y: auto;
+}
+#selected #selBody td {
+	padding: 5px;
+	border-bottom: 1px solid black;
+}
+#selected button{
+	width: 100%;
+}
+#selBody td{
+	word-break: break-all;
+	max-width: 100px;
+}
+#selBody td, #daButtons td{
+	background: white;
+	color: black;
+}
+.leftToolbar {
+	float: left;
+	margin-left: 5px !important;
+}
+.rightToolbar {
+	float: right;
+	margin-right: 5px;
+}
+input {
+	min-width: 100px;
+}	
+/* Start graph elements. */
+.nodetext {
+	pointer-events: none;
+	font-size: 10;
+	z-index: 10;
+}
+g.node {
+	fill: gray;
+	stroke: #fff;
+}
+line.link {
+	stroke: black;
+	stroke-opacity: 1;
+	stroke-width: 6px;
+}
+line.parentChild {
+	stroke-dasharray: 0.4,0.4;
+}
+line.selected {
+	stroke: lime;
+	stroke-width: 8px;
+	stroke-opacity: 1.0;
+}
+g.selected {
+	stroke: lime;
+	stroke-width: 2px;
+	stroke-opacity: 1.0;
+}
+g.multiselected {
+	stroke: lime;
+	stroke-width: 4px;
+	stroke-opacity: 1.0;
+	stroke-dasharray: 1,1;
+}
+g.house {
+	fill: #3366FF;
+}
+g.load {
+	fill: #3366FF;
+}
+g.ZIPload, g.waterheater {
+	fill: #66CCFF;
+}
+g.triplex_meter {
+	fill: #FF6600;
+}
+g.triplex_node {
+	fill: #FFCC00;
+}
+g.gridNode {
+	fill: #CC0000;
+}
+g.swingNode {
+	fill: hotpink;
+}
+g text {
+	fill: black;
+	stroke: black;
+	stroke-width: 0px;
+	stroke-opacity: 1;
+	font-size: 15;
+	pointer-events: none;
+}
+circle.nodeIsPinned {
+	fill: none;
+	stroke: black;
+	pointer-events: none;
+}
+circle.nodeNotPinned {
+	fill: none;
+	pointer-events: none;
+}
+.node:not(:hover) .nodetext {
+	display: none;
+}
+.axis path,.axis line {
+	fill: none;
+	stroke: #ddd;
+	stroke-width: 1px;
+	shape-rendering: crispEdges
+}
+.axis text {
+	font-family: sans-serif;
+	font-size: 11px;
+	text-anchor: middle;
+}
+text.markerText {
+	fill: gray;
+	font-size: 6px;
+}
+rect {
+	fill: #fff;
+}
