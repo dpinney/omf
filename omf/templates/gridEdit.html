@@ -198,6 +198,7 @@ var body = d3.select('body')
 // add powergrid to the upper layer
 var vis = body.append('svg:g')
 	.attr('id', 'powerGrid')
+	vis.append("rect").attr("width", width).attr("height", height);
 // add marker data
 vis.append('svg:defs').selectAll('marker')
 	.data(['transformerMarker', 'regulatorMarker', 'fuseMarker'])
