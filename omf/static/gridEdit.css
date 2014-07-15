@@ -16,7 +16,10 @@ div#toolbar {
 	top:65px;
 }
 /*div#svgGraph{
-	position: absolute;width:100%;height: 100%;}*/
+	position: absolute;
+	width: 100%;
+	height: 100%;
+}*/
 /*other styles*/  
 input#gridNameEdit {
 	font-size: 28pt;
@@ -102,8 +105,10 @@ input {
 /* Start graph elements. */
 .nodetext {
 	pointer-events: none;
-	font-size: 10;
 	z-index: 10;
+	text-anchor: start;
+	fill: #DDDDDD;
+	stroke: #000000;
 }
 g.node {
 	fill: gray;
@@ -171,7 +176,7 @@ circle.nodeNotPinned {
 	fill: none;
 	pointer-events: none;
 }
-.node:not(:hover) .nodetext {
+.node:not(:hover) .nodetext{
 	display: none;
 }
 .axis path,.axis line {
