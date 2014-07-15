@@ -182,7 +182,7 @@ var NODE_CIRCLE_RADIUS = 3/5
 var PINNED_NODE_STROKE_SIZE = 1/5
 var PINNED_NODE_CIRCLE_RADIUS = 0.5/5
 var UNPINNED_NODE_CIRCLE_RADIUS = 3/5
-var TEXT_FONT_SIZE = 30
+var TEXT_FONT_SIZE = 35
 
 // SCALE DRAW GLOBAL LAYOUT VARIABLES
 var xScale = 1, yScale = 1;
@@ -390,7 +390,7 @@ function redraw() {
 		.attr('id', function (d) {return 'pin' + d.treeIndex})
 
 	node.append("svg:text")
-			.attr("class", "nodetext");
+		.attr("class", "nodetext")
 	// Get rid of deleted nodes.
 	vis.selectAll('.node').data(nodes, function (d) {return d.treeIndex}).exit().remove()
 
@@ -418,6 +418,7 @@ function redraw() {
 function fontSizeRedraw (scale) {
 	d3.selectAll('.nodetext')
 		.style('font-size', TEXT_FONT_SIZE / scale )
+		.style("stroke-width", 1/scale)
 		.text(function (d) { 
 			if (d.chargeMultiple != 1){
 				return d.objectType + ' has hidden children'
