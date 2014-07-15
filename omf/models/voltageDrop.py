@@ -3,10 +3,6 @@
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
 from os.path import join as pJoin
 from jinja2 import Template
-if sys.platform == "linux2":
-	# Specify unix-friendly backend:
-	from matplotlib import use
-	use('Agg')
 from matplotlib import pyplot as plt
 import networkx as nx
 import __metaModel__
