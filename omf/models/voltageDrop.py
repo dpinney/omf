@@ -3,6 +3,10 @@
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
 from os.path import join as pJoin
 from jinja2 import Template
+if sys.platform == "linux2":
+	# Specify unix-friendly backend:
+	from matplotlib import use
+	use('Agg')
 from matplotlib import pyplot as plt
 import networkx as nx
 import __metaModel__
@@ -136,7 +140,7 @@ def cancel(modelDir):
 	pass
 
 def _tests():
-	# First just test the charting.
+	# # First just test the charting.
 	# tree = json.load(open("../data/Feeder/public/Olin Barre Geo.json")).get("tree",{})
 	# chart = voltPlot(tree)
 	# chart.savefig("/Users/dwp0/Desktop/testChart.png")
