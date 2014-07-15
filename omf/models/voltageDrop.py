@@ -109,7 +109,7 @@ def voltPlot(tree, workDir=None, neatoLayout=False):
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
 	# Color nodes by VOLTAGE.
 	fGraph = feeder.treeToNxGraph(tree)
-	voltChart = plt.figure(figsize=(12,10))
+	voltChart = plt.figure(figsize=(10,10))
 	plt.axes(frameon = 0)
 	plt.axis('off')
 	if neatoLayout:
