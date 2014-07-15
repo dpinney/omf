@@ -27,10 +27,6 @@
 				<td><button onclick='javascript:zoomReset()'>Go</button></td>
 			</tr>
 			<tr>
-				<td>Toggle Scale Grid</td>
-				<td><button onclick='javascript:toggleScaleGrid()'>Go</button></td>
-			</tr>
-			<tr>
 				<td>Static Loads to Houses</td>
 				<td><button onclick='javascript:staticLoadsToHouses()'>Go</button></td>
 			</tr>
@@ -185,28 +181,19 @@ var NODE_CIRCLE_RADIUS = 3/5
 var PINNED_NODE_STROKE_SIZE = 1/5
 var PINNED_NODE_CIRCLE_RADIUS = 0.5/5
 var UNPINNED_NODE_CIRCLE_RADIUS = 3/5
-var TEXT_FONT_SIZE = '30px'
+var TEXT_FONT_SIZE = 30
 
 // SCALE DRAW GLOBAL LAYOUT VARIABLES
 var xScale = 1, yScale = 1;
 var width = window.screen.availWidth-45;
 var height = window.screen.availHeight-100;
-// TODO: for the size of the scale grid, may not suitable for specific window size
-// 		check: document.body.clientWidth || document.body.offsetWidth || document.body.scrollWidth || document.body.scrollTop 
-//   			|| window.screenTop || window.screen.width || window.screen.availWidth 
-// var width = document.body.scrollWidth-45
-// var height = document.body.scrollHeight -20
 
 // CREATE LAYOUT
 var body = d3.select('body')
 	.append('svg:svg')
 	.attr('id','graphSvg')
 	.on('click', onSvgBlankCanvasClick)
-	// TODO: for more info: http://www.w3.org/TR/SVG/coords.html#ViewBoxAttribute
-	// .attr('viewBox', '0 0 ' + w + ' ' + h  )
-	// .attr('preserveAspectRatio', 'xMidYMid')
-	// .attr('pointer-events', 'all')
-	// .call(zoomer.on('zoom', zoomRedraw))
+	.call(zoomer.on('zoom', zoomRedraw))
 
 // add powergrid to the upper layer
 var vis = body.append('svg:g')
@@ -341,7 +328,6 @@ function draw() {
 
 	// Start drawing.
 	redraw()
-	scaleRedraw()
 }
 
 function redraw() {
@@ -375,7 +361,7 @@ function redraw() {
 	node.append("svg:text")
 			.attr("class", "nodetext");
 			
-	d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE)
+	d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE / zoomer.scale())
 			.text(function(d) { 
 				if (d.chargeMultiple != 1){
 					return d.objectType + ' has hidden children'}
@@ -427,11 +413,11 @@ function zoomRedraw() {
 	}
 	if (dynamicShow)
 		dynamicFoldAndUnfold()
-	d3.selectAll('.nodetext').style('font-size', 30/d3.event.scale)
+	d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/d3.event.scale)
 			.text(function(d) { 
 				if (d.chargeMultiple != 1){
 					return d.objectType + ' has hidden children'}
-				else {return d.objectType}})	
+				else {return d.objectType}})
 	previourLevel = d3.event.scale;
 
 	function dynamicFoldAndUnfold() {
@@ -448,27 +434,6 @@ function changeDynamicShow() {
 		dynamicShow = true
 	else 
 		dynamicShow = false
-}
-
-function scaleRedraw(){
-	// x-scale renewed
-	x = d3.scale.linear().domain([ options.xmin, options.xmax]).range([ 0, width  ]);
-	// y-scale renewed
-	y = d3.scale.linear().domain([ options.ymin, options.ymax]).range([ 0, height  ]);
-
-	xAxis = d3.svg.axis().scale(x).orient("bottom").tickSize(-height);
-	yAxis = d3.svg.axis().scale(y).orient("right").ticks(8).tickSize(width);
-	d3.selectAll(".x.axis").select()
-	body.call(zoomer.x(x).y(y).on('zoom', zoomRedraw))
-}
-
-function toggleScaleGrid(){
-	grid = d3.select('#scaleGrid')
-	if (grid.style('display') == 'none') {
-		grid.style('display','inline-block')
-	} else {
-		grid.style('display','none')
-	}
 }
 
 function preLayout() {
@@ -490,8 +455,12 @@ function zoom(x,y,s) {
 	if (s < 1){
 		d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH/s);
 	}
-	// Set the scale grid to the current size.
-	// scaleRedraw()
+	// redraw font-size
+	d3.selectAll('.nodetext').style('font-size', TEXT_FONT_SIZE/s)
+			.text(function(d) { 
+				if (d.chargeMultiple != 1){
+					return d.objectType + ' has hidden children'}
+				else {return d.objectType}})
 }
 
 function zoomReset() {
