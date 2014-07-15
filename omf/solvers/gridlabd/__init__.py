@@ -49,7 +49,7 @@ def _addGldToPath():
 def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 	''' Execute gridlab in the local filesystem. Return a nice dictionary of results. '''
 	try:
-		binaryName = _addGldToPath()
+		binaryName = "gridlabd"
 		# Create a running directory and fill it, unless we've specified where we're running.
 		if not workDir:
 			workDir = tempfile.mkdtemp()
