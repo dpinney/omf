@@ -13,6 +13,4 @@ omf.egg-info
 !omf/data/Model/admin/z*
 !omf/data/Model/public/*
 !omf/data/Feeder/public/*
-!omf/data/User/admin.json
-!omf/data/User/public.json
 !omf/data/User/test.json
