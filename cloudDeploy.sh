@@ -5,9 +5,12 @@ if [ "$(id -u)" != "0" ]; then
 else
 	echo "** Backing up data folder."
 	tar -czf ~/dataBackup.tgz /omf/omf/data
+	cp /omf/omf/data/User/admin.json ~/admin.json
 	echo "** Pulling the latest source from git."
 	git reset --hard
 	git pull
+	echo "** Restoring our admin user."
+	cp ~/admin.json /omf/omf/data/User/admin.json
 	echo "** Setting permissions."
 	chown -R omfwsgi *
 	chgrp -R omfwsgi *
