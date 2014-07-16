@@ -7,6 +7,7 @@ omf/data/User/*
 omf/S3KEY.*
 build
 omf.egg-info
+omf/emailCredentials.key
 # But include a few things:
 !omf/data/Model/admin/z*
 !omf/data/Model/admin/z*

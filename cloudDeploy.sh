@@ -6,11 +6,13 @@ else
 	echo "** Backing up data folder."
 	tar -czf ~/dataBackup.tgz /omf/omf/data
 	cp /omf/omf/data/User/admin.json ~/admin.json
+	cp /omf/omf/emailCredentials.key ~/emailCredentials.key
 	echo "** Pulling the latest source from git."
 	git reset --hard
 	git pull
-	echo "** Restoring our admin user."
+	echo "** Restoring our admin user and keys."
 	cp ~/admin.json /omf/omf/data/User/admin.json
+	cp ~/emailCredentials.key /omf/omf/emailCredentials.key	
 	echo "** Setting permissions."
 	chown -R omfwsgi *
 	chgrp -R omfwsgi *

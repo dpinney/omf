@@ -70,9 +70,13 @@ app.secret_key = cryptoRandomString()
 
 def send_link(email, message, u={}):
 	''' Send message to email using Amazon SES. '''
+	try:
+		key = open("emailCredentials.key").read()
+	except:
+		key = "NO_WAY_JOSE"
 	c = boto.ses.connect_to_region("us-east-1",
-		aws_access_key_id="AKIAIFNNIT7VXOXVFPIQ",
-		aws_secret_access_key="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")
+		aws_access_key_id="AKIAJLART4NXGCNFEJIQ",
+		aws_secret_access_key=key)
 	reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
 	u["reg_key"] = reg_key
 	u["timestamp"] = dt.datetime.strftime(dt.datetime.now(), format="%c")
@@ -137,6 +141,7 @@ def deleteUser():
 		except Exception, e:
 			print "USER DATA DELETION FAILED FOR", e
 	os.remove("data/User/" + username + ".json")
+	print "SUCCESFULLY DELETE USER", username
 	return "Success"
 
 @app.route("/new_user", methods=["POST"])
