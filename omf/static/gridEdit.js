@@ -86,14 +86,13 @@ function draw() {
 	
 	// Feeder loading
 	var interval = setInterval(function() {
-		if (force.alpha() < 0.02) {
+		if (force.alpha() < 0.1) {
 			removeProgressDialog()
 			clearInterval(interval)
 		} else if (nodes[parseInt(Math.random() * nodes.length)].fixed) {
 			removeProgressDialog()
 			clearInterval(interval)
 		} else {
-			preLayout()
 			force.tick()
 		}
 	}, 1500)
@@ -205,7 +204,7 @@ function zoomRedraw() {
 }
 
 /**
- * UNKNOWN
+ * UNKNOWN: Intent to quickly converge d3.force drawing
  */
 function preLayout() {
 	function fiveTicks() {
@@ -451,7 +450,6 @@ function selectViaTreeIndex(treeIndex) {
 
 /**
  * graphSvg click handler function, clear selected component.
- * @return {[type]}
  */
 function onSvgBlankCanvasClick() {
 	if (window.event.toElement.tagName == 'rect') {
@@ -475,8 +473,7 @@ function getSelectedNode() {
 }
 
 /**
- * Return a node object, if multinodes selected?
- * @todo multiselected element?
+ * Return a node object, if multinodes selected.
  * @return {Object} node 
  */
 function getAltSelectedNode() {
@@ -636,7 +633,7 @@ function newLink(componentName) {
 
 /**
  * Add a new child node at selected component
- * @param  {[type]} componentName
+ * @param  {string} componentName
  */
 function newChildAtSelected(componentName) {
 	if (undefined == getSelectedNode()) {
@@ -902,7 +899,6 @@ function replaceLoadWithTriplex() {
 
 /**
  * Handler function of adding solar based on percentage it wants to add.
- * @return {[type]}
  */
 function solarAdding() {
 	function makeNewInverter(phases) {
@@ -1331,9 +1327,8 @@ function publishFeeder() {
 // FUNCTIONS FOR GRAPH FOLDING:
 //*********************************************
 /**
- * [hideNode description]
- * @param  {[type]} node
- * @return {[type]}
+ * Hide one node, and change its parent's chargemultiple to 1.5
+ * @param  {object} node
  */
 function hideNode(node) {
 	// helper function to hide links:
@@ -1515,7 +1510,6 @@ function foldAtSelected() {
 
 /**
  * Fold Secondary system. Fold all nodes after triplex_meters. Also fold their associated links.
- * @return {[type]}
  */
 function foldSecSys() {
 	// filter out all links in secondary system, put them into hiddenLinks
@@ -1579,3 +1573,255 @@ function foldSecSys() {
 	}
 	redraw()
 }
+
+//**************************************************
+// TABLE EDITTING FUNCTIONS TODO: huge improvement, rename functions 
+//************************************************** 
+/**
+ * Fit table according to window size.
+ */
+function fit_table() {
+	var raw_height = $("#selBody").height() + $("#daButtons").height() + $("#selHead").height();
+	var win_height = window.innerHeight * 0.6;
+	$("#selected").css("height", win_height > raw_height ? raw_height : win_height)
+}
+
+$(window).resize(fit_table);
+
+/**
+ * Create table for selected node
+ */
+function create_table() {
+	deselect();
+	for (prop in treeData) {
+		if (prop == "object" || prop == "module") {
+			$("#objmod").html(prop)
+			$("#value").html(treeData[prop])
+		} else if (prop != 'from' && prop != 'to' && prop != 'parent' && prop != 'file') { // Avoid editing machine-written properties!
+			var valueEl;
+			if (prop == "configuration") {
+				valueEl = $("<a>").html(treeData[prop]).attr("href", "#").click(function(e) {
+					var myname = $(this).html()
+					$("#searchTerm").val("\"name\":\"" + myname + "\"")
+					findNext()
+					var theButton = $.makeArray($("button")).filter(function(b) {
+						return $(b).html().indexOf("Find") > -1
+					})[0]
+					var dispStatus = theButton.nextSibling.nextSibling.style.display
+					if (dispStatus == "" || dispStatus == "none")
+						dropPillAndStay(theButton, "Find")
+					e.preventDefault()
+					return false
+				})
+			} else
+				valueEl = treeData[prop]
+			$("#body").append($("<tr>")
+				.append($("<td>").html(prop))
+				.append($("<td>").html(valueEl)))
+		}
+
+	}
+}
+
+/**
+ * Show selected node and its table.
+ */
+function selectNode() {
+	create_table();
+	$("#selected").show();
+	$("#selected table").show()
+	fit_table();
+}
+
+/**
+ * Deselect node and its table.
+ * @return {[type]}
+ */
+function deselect() {
+	$("#objmod, #value, #body").html("")
+	$("#selected").css("height", "auto");
+	$("#editButtonRow").show()
+	$("#otherButtons").hide();
+	$("#selected table").hide()
+	$("#selected").hide();
+}
+
+/**
+ * Validate about edit fields. Check validation on selected components, and its function. 
+ * 		If not valid, return true.
+ * @param  {string} selector
+ * @param  {function} testfunc
+ * @param  {string} error_msg
+ * @return {boolean} invalid
+ */
+function validation(selector, testfunc, error_msg) {
+	var invalid = false;
+	$.makeArray($(selector)).forEach(function(e) {
+		if (testfunc(e)) {
+			$(e).css("border", "1px solid red");
+			if (!invalid)
+				$(e).focus();
+			invalid = true;
+		}
+	})
+	if (invalid) {
+		alert(error_msg);
+	}
+	return invalid;
+}
+
+/**
+ * Validate blanks, if invalid return true
+ * @param  {string} selector
+ * @return {boolean} 
+ */
+function validate_blanks(selector) {
+	return validation(selector, function(e) {
+		return $(e).val().trim() == "";
+	})
+}
+
+/**
+ * Validate name, if invalid return true
+ * @param  {string} selector
+ * @return {boolean}
+ */
+function validate_name(selector) {
+	return validation(selector, function(e) {
+		var m = $(e).val().match(/[A-z0-9_]+/);
+		return m == null || m != $(e).val();
+	}, "Invalid field values.  Letters, numbers, underscores, no spaces.")
+}
+
+$(function() {
+	var delete_prop_button = $("<button>")
+		.addClass("deleteButton")
+		.addClass("deleteProperty")
+		.html("╳")
+
+	$("#selected").hide();
+	$("#editButton").click(function(e) {
+		$("#editButtonRow").hide();
+		$("#otherButtons").show();
+		$("#body").html("")
+		for (prop in treeData) {
+			if (prop != "object" && prop != "module") {
+				var tr = $("<tr>")
+					.append($("<td>").addClass("propertyName").html(prop))
+					.append($("<td>")
+						.append($("<input>")
+							.val(treeData[prop])
+							.attr("name", prop)
+							.attr("type", "text")))
+				if (prop != "name")
+					tr.prepend($("<td>")
+						.append(delete_prop_button.clone()))
+				else
+					tr.prepend($("<td>"))
+				$("#body").append(tr);
+			}
+		}
+		console.log(treeData);
+	})
+	$("#cancelButton").click(function(e) {
+		$("#editButtonRow").show();
+		$("#otherButtons").hide();
+		$("#body").html("");
+		selectNode();
+	})
+	$("#saveObject").click(function(e) {
+		if (validate_blanks("#body input"))
+			return;
+		if (validate_name(".newPropertyName"))
+			return;
+
+		function isNameAlreadyUsed(testValue) {
+			// Helper function to make sure we don't make non-unique names.
+			for (leaf in tree) {
+				for (attrKey in tree[leaf]) {
+					if (attrKey == 'name' && tree[leaf][attrKey] == testValue) {
+						return true
+					}
+				}
+			}
+			return false
+		}
+		var propNames = $("#body td.propertyName");
+		for (i = 0; i < propNames.length; i++) {
+			var key = propNames[i].innerHTML;
+			var newValue = $("#body input[name=" + key + "]").val();
+			var oldValue = treeData[key];
+			if (key == 'name') {
+				// 1. If the name is already the name of something else, skip the renaming.
+				if (isNameAlreadyUsed(newValue) && oldValue != newValue) {
+					// cell.innerHTML = oldValue
+					$("#body input[name=name]").val(oldValue);
+					alert('Please choose a unique name.');
+				} else {
+					treeData[key] = newValue
+					// cell.innerHTML = newValue
+					// k.innerHTML = key
+					// 2. If the name is unique, go through EVERY attribute in the tree and replace the old name with the new one.
+
+					for (leaf in tree) {
+						for (attrKey in tree[leaf]) {
+							if (oldValue == tree[leaf][attrKey]) {
+								console.log(tree[leaf]);
+								tree[leaf][attrKey] = newValue
+							}
+						}
+					}
+					// 3. Go through the nodes and replace the name there too. UGH!
+					nodeIndex = findIndex(nodes, 'name', oldValue)
+					if (nodeIndex != "") {
+						nodes[nodeIndex]['name'] = newValue
+					}
+				}
+			} else {
+				treeData[key] = newValue;
+			}
+		}
+		Object.keys(treeData).filter(function(e) {
+			return $.makeArray(propNames).map(function(x) {
+				return x.innerHTML;
+			}).indexOf(e) == -1;
+		}).forEach(function(e) {
+			if (e != "object" && e != "module")
+				delete treeData[e];
+		})
+		$.makeArray($("#body input.newPropertyName")).map(function(e) {
+			return e.value;
+		}).forEach(function(e, i) {
+			if (e.trim() != "")
+				treeData[e] = $("#body input.newPropertyValue")[i].value;
+		})
+		$("#otherButtons").hide();
+		$("#editButtonRow").show();
+		selectNode();
+	})
+	$(document).on("click", ".deleteProperty", function(e) {
+		$(this).parent().parent().remove();
+	})
+	$("#addAttribute").click(function(e) {
+		if (validate_blanks(".newPropertyName, .newPropertyValue"))
+			return;
+		var new_name = $("<input>")
+			.addClass("newPropertyName")
+			.attr("type", "text");
+
+		$("#body").append($("<tr>")
+			.append($("<td>")
+				.append(delete_prop_button.clone()))
+			.append($("<td>")
+				.append(new_name))
+			.append($("<td>")
+				.append($("<input>")
+					.addClass("newPropertyValue")
+					.attr("type", "text"))));
+		fit_table();
+		new_name.focus();
+	})
+	$("#deleteObject").click(function(e) {
+		deleteObject(ti);
+	})
+})
