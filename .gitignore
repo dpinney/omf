@@ -7,10 +7,10 @@ omf/data/User/*
 omf/S3KEY.*
 build
 omf.egg-info
-
-# But include a few example analyses:
+# But include a few things:
 !omf/data/Model/admin/z*
 !omf/data/Model/admin/z*
 !omf/data/Model/public/*
 !omf/data/Feeder/public/*
 !omf/data/User/test.json
+!omf/data/User/public.json
