@@ -35,6 +35,11 @@ def sortedWrite(inTree):
 		raise Exception
 	return output
 
+def getMaxKey(inTree):
+	''' Find the largest key value in the tree. We need this because de-embedding causes noncontiguous keys. '''
+	keys = [int(x) for x in inTree.keys()]
+	return max(keys)
+
 def adjustTime(tree, simLength, simLengthUnits, simStartDate):
 	''' Adjust a GLM clock and recorders to start/stop/step specified. '''
 	# translate LengthUnits to minutes.
