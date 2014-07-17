@@ -20,7 +20,7 @@ import feeder
 savelosers = 0
 winning_calibration_IDs = []
 # Set WSM score under which we'll kick out the simultion as "close enough" (0.0500, might be an Ok value)
-wsm_acceptable = 0.0400
+wsm_acceptable = 0.00500
 # The weighted priorities assigned to each metric to produce the overall WSM score.
 def _calcPriorities ():
 	'''Calculate weights for each "difference metric" based on pairwise comparisons defined earlier.
@@ -577,8 +577,6 @@ def _calibrateLoop(glm_name, main_mets, scada, days, eval_int, counter, baseGLM,
 	calibration_config_files = []
 	if case_flag == -1:
 		# Scaling normalized load shape
-		if abs(main_mets[0]) + abs(main_mets[2]) != abs(main_mets[0] + main_mets[2]):
-			print ('*** Warning: One peak is high and one peak is low... this shouldn\'t happen with load shape scaling...')
 		last_scalar = feeder_config['load_shape_scalar']
 		avg_peak_diff = (main_mets[0] + main_mets[2])/2
 		ideal_scalar = round(last_scalar * (1/(avg_peak_diff + 1)),4)
@@ -848,9 +846,9 @@ def _test():
 		'shoulderPeakHour' : 21,
 		'shoulderMinimumKW' : 1738.08,
 		'shoulderMinimumHour' : 2} 
-	calibration_config = {'timezone' : 'CST+5CDT',
-		'startdate' : '2013-01-01 0:00:00',
-		'stopdate' : '2014-01-01 0:00:00',
+	calibration_config = {'timezone' : 'CST+6CDT',
+		'startdate' : '2012-01-01 0:00:00',
+		'stopdate' : '2013-01-01 0:00:00',
 		'region' : 6,
 		'feeder_rating' : 600,
 		'nom_volt' : 15000,

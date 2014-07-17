@@ -31,12 +31,20 @@ def _add_normalized_residential_ziploads(loadshape_dict, residential_dict, confi
 			loadshape_dict[last_key]['current_fraction_12'] = '{:f}'.format(config_data['r_ifrac'])
 			loadshape_dict[last_key]['impedance_fraction_12'] = '{:f}'.format(config_data['r_zfrac'])
 			if config_data['r_p_pf'] == None:
-				if 'A' in tpphases:
-					loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfA.value*1.0'
-				elif 'B' in tpphases:
-					loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfB.value*1.0'
-				elif 'C' in tpphases:
-					loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfC.value*1.0'
+				if residential_dict[x]['powerFactor'] != None:
+					if 'A' in tpphases:
+						loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfA.value*{:f}'.format(residential_dict[x]['powerFactor'])
+					elif 'B' in tpphases:
+						loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfB.value*{:f}'.format(residential_dict[x]['powerFactor'])
+					elif 'C' in tpphases:
+						loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfC.value*{:f}'.format(residential_dict[x]['powerFactor'])
+				else:
+					if 'A' in tpphases:
+						loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfA.value*1.0'
+					elif 'B' in tpphases:
+						loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfB.value*1.0'
+					elif 'C' in tpphases:
+						loadshape_dict[last_key]['power_pf_12'] = 'residential_power_pfC.value*1.0'
 			else:
 				loadshape_dict[last_key]['power_pf_12'] = '{:f}'.format(config_data['r_p_pf'])
 		last_key += last_key
@@ -669,6 +677,7 @@ def _TechnologyParametersFunc(use_flags, TechToTest):
 	return (data, use_flags)
 
 def _ConfigurationFunc(config_file, classification=None):
+	import os
 	'''Create the complete configuration dictionary needed to populate the feeder'''
 	data = {}
 	if config_file == None:    
@@ -683,9 +692,9 @@ def _ConfigurationFunc(config_file, classification=None):
 		# - Voltage Players Read Into Swing Node
 		data["feeder_rating"] = 1.15*14.0
 		data["nom_volt"] = 14400
-		vA='../schedules/VA.player'
-		vB='../schedules/VB.player'
-		vC='../schedules/VC.player'
+		vA=os.path.abspath('./uploads/VA.player').replace('\\', '/')
+		vB=os.path.abspath('./uploads/VB.player').replace('\\', '/')
+		vC=os.path.abspath('./uploads/VC.player').replace('\\', '/')
 		data["voltage_players"] = ['"{:s}"'.format(vA),'"{:s}"'.format(vB),'"{:s}"'.format(vC)]
 		# Voltage Regulation
 		# - EOL Measurements (name of node, phases to measure (i.e. ['GC-12-47-1_node_7','ABC',1]))
@@ -703,7 +712,7 @@ def _ConfigurationFunc(config_file, classification=None):
 		data["avg_commercial"] = 35000
 		# normalized load shape scalar
 		data["normalized_loadshape_scalar"] = 1
-		data["load_shape_norm"] = '../schedules/load_shape_player.player'
+		data["load_shape_norm"] = os.path.abspath('./uploads/load_shape_player.player').replace('\\', '/')
 		if 'load_shape_norm' in data.keys() and data['load_shape_norm'] is not None:
 			# commercial zip fractions for loadshapes
 			data["c_z_pf"] = 0.97
@@ -719,7 +728,7 @@ def _ConfigurationFunc(config_file, classification=None):
 			data["r_zfrac"] = 0.2
 			data["r_ifrac"] = 0.4
 			data["r_pfrac"] = 1 - data["r_zfrac"] - data["r_ifrac"]
-		data["weather"] = '../schedules/SCADA_weather_NC_gld_shifted.csv'
+		data["weather"] = os.path.abspath('./uploads/SCADA_weather_NC_gld_shifted.csv').replace('\\', '/')
 	else:
 		if 'timezone' in config_file.keys():
 			data['timezone'] = config_file['timezone']
@@ -746,12 +755,11 @@ def _ConfigurationFunc(config_file, classification=None):
 		else:
 			data["nom_volt"] = 14400
 		if 'voltage_players' in config_file.keys():
-			data['voltage_players'] = config_file['voltage_players']
+			data['voltage_players'] = []
+			for vfile in config_file['voltage_players']:
+				data['voltage_players'].append(vfile.replace('\\', '/'))
 		else:
-			vA='../schedules/VA.player'
-			vB='../schedules/VB.player'
-			vC='../schedules/VC.player'
-			data["voltage_players"] = ['"{:s}"'.format(vA),'"{:s}"'.format(vB),'"{:s}"'.format(vC)]
+			data["voltage_players"] = None
 		if 'EOL_points' in config_file.keys():
 			data['EOL_points'] = config_file['EOL_points']
 		else:
@@ -785,18 +793,18 @@ def _ConfigurationFunc(config_file, classification=None):
 		else:
 			data["normalized_loadshape_scalar"] = 1
 		if 'load_shape_player_file' in config_file.keys():
-			data['load_shape_norm'] = config_file['load_shape_player_file']
+			data['load_shape_norm'] = config_file['load_shape_player_file'].replace('\\','/')
 		else:
-			data["load_shape_norm"] = '../schedules/load_shape_player.player'
+			data["load_shape_norm"] = os.path.abspath('./uploads/load_shape_player.player').replace('\\', '/')
 		if 'load_shape_norm' in data.keys() and data['load_shape_norm'] is not None:
 			# commercial zip fractions for loadshapes
 			data["c_z_pf"] = 0.97
 			data["c_i_pf"] = 0.97
 			if 'c_p_pfA' in config_file.keys() and 'c_p_pfB' in config_file.keys() and 'c_p_pfC' in config_file.keys():
 				data["c_p_pf"] = None
-				data['c_p_pfA'] = config_file['c_p_pfA']
-				data['c_p_pfB'] = config_file['c_p_pfB']
-				data['c_p_pfC'] = config_file['c_p_pfC']
+				data['c_p_pfA'] = config_file['c_p_pfA'].replace('\\','/')
+				data['c_p_pfB'] = config_file['c_p_pfB'].replace('\\','/')
+				data['c_p_pfC'] = config_file['c_p_pfC'].replace('\\','/')
 				data["c_zfrac"] = 0.0
 				data["c_ifrac"] = 0.0
 				data["c_pfrac"] = 1.0
@@ -810,9 +818,9 @@ def _ConfigurationFunc(config_file, classification=None):
 			data["r_i_pf"] = 0.97
 			if 'r_p_pfA' in config_file.keys() and 'r_p_pfB' in config_file.keys() and 'r_p_pfC' in config_file.keys():
 				data["r_p_pf"] = None
-				data['r_p_pfA'] = config_file['r_p_pfA']
-				data['r_p_pfB'] = config_file['r_p_pfB']
-				data['r_p_pfC'] = config_file['r_p_pfC']
+				data['r_p_pfA'] = config_file['r_p_pfA'].replace('\\','/')
+				data['r_p_pfB'] = config_file['r_p_pfB'].replace('\\','/')
+				data['r_p_pfC'] = config_file['r_p_pfC'].replace('\\','/')
 				data["r_zfrac"] = 0.0
 				data["r_ifrac"] = 0.0
 				data["r_pfrac"] = 1.0
@@ -822,7 +830,7 @@ def _ConfigurationFunc(config_file, classification=None):
 				data["r_ifrac"] = 0.4
 				data["r_pfrac"] = 1 - data["c_zfrac"] - data["c_ifrac"]
 		if 'weather_file' in config_file.keys():
-			data['weather'] = config_file['weather_file']
+			data['weather'] = config_file['weather_file'].replace('\\','/')
 		else:
 			data["weather"] = None
 	return data
@@ -879,7 +887,7 @@ def startPopulation(glmDict,case_flag,configuration_file=None):
 	# Create dictionaries of preprocessor directives
 	glmCaseDict[last_key] = {'#define' : 'stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0'}
 	last_key += 1
-	glmCaseDict[last_key] = {'#set' : 'minimum_timestep=300'}
+	glmCaseDict[last_key] = {'#set' : 'minimum_timestep=60'}
 	last_key += 1
 	glmCaseDict[last_key] = {'#set' : 'profiler=1'}
 	last_key += 1
@@ -1025,24 +1033,25 @@ def startPopulation(glmDict,case_flag,configuration_file=None):
 	# Add transmission voltage players
 	parent_key = last_key
 	last_key += 1
-	glmCaseDict[last_key] = {    'object' : 'player',
-		'property' : 'voltage_A',
-		'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
-		'loop' : '0',
-		'file' : '{:s}'.format(config_data["voltage_players"][0])}
-	last_key += 1
-	glmCaseDict[last_key] = {    'object' : 'player',
-		'property' : 'voltage_B',
-		'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
-		'loop' : '0',
-		'file' : '{:s}'.format(config_data["voltage_players"][1])}
-	last_key += 1
-	glmCaseDict[last_key] = {    'object' : 'player',
-		'property' : 'voltage_C',
-		'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
-		'loop' : '0',
-		'file' : '{:s}'.format(config_data["voltage_players"][2])}
-	last_key += 1
+	if config_data['voltage_players'] != None:
+		glmCaseDict[last_key] = {    'object' : 'player',
+			'property' : 'voltage_A',
+			'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
+			'loop' : '0',
+			'file' : '{:s}'.format(config_data["voltage_players"][0])}
+		last_key += 1
+		glmCaseDict[last_key] = {    'object' : 'player',
+			'property' : 'voltage_B',
+			'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
+			'loop' : '0',
+			'file' : '{:s}'.format(config_data["voltage_players"][1])}
+		last_key += 1
+		glmCaseDict[last_key] = {    'object' : 'player',
+			'property' : 'voltage_C',
+			'parent' : '{:s}'.format(glmCaseDict[parent_key]['name']),
+			'loop' : '0',
+			'file' : '{:s}'.format(config_data["voltage_players"][2])}
+		last_key += 1
 	glmCaseDict[last_key] = {    'object' : 'transformer',
 		'name' : 'substation_transformer',
 		'from' : 'network_node',
@@ -1052,7 +1061,7 @@ def startPopulation(glmDict,case_flag,configuration_file=None):
 	last_key += 1
 	# Copy static powerflow model glm dictionary into case dictionary
 	for x in glmDict:
-		if 'clock' not in glmDict[x].keys() and '# set' not in glmDict[x].keys() and '# define' not in glmDict[x].keys() and 'module' not in glmDict[x].keys():
+		if 'clock' not in glmDict[x].keys() and '#set' not in glmDict[x].keys() and '#define' not in glmDict[x].keys() and 'module' not in glmDict[x].keys() and 'omftype' not in glmDict[x].keys():
 			glmCaseDict[last_key] = copy.deepcopy(glmDict[x])
 			# Remove original swing bus from static model
 			if 'bustype' in glmCaseDict[last_key] and glmCaseDict[last_key]['bustype'] == 'SWING':
@@ -1255,7 +1264,8 @@ def startPopulation(glmDict,case_flag,configuration_file=None):
 						'number_of_houses' : 0,
 						'load' : 0,
 						'large_vs_small' : 0.0,
-						'phases' : glmCaseDict[x]['phases']}
+						'phases' : glmCaseDict[x]['phases'],
+						'powerFactor' : 0.0}
 					if 'parent' in glmCaseDict[x]:
 						residential_dict[residential_key]['parent'] = glmCaseDict[x]['parent']
 					else:
@@ -1268,9 +1278,23 @@ def startPopulation(glmDict,case_flag,configuration_file=None):
 					if 'power_1' in glmCaseDict[x]:
 						c_num = complex(glmCaseDict[x]['power_1'])
 						load += abs(c_num)
+						if abs(c_num) != 0.0:
+							if c_num.imag >= 0.0:
+								residential_dict[residential_key]['powerFactor'] = c_num.real/abs(c_num)
+							else:
+								residential_dict[residential_key]['powerFactor'] = -c_num.real/abs(c_num)
+						else:
+							residential_dict[residential_key]['powerFactor'] = 1.0
 					if 'power_12' in glmCaseDict[x]:
 						c_num = complex(glmCaseDict[x]['power_12'])
 						load += abs(c_num)
+						if abs(c_num) != 0.0:
+							if c_num.imag >= 0.0:
+								residential_dict[residential_key]['powerFactor'] = c_num.real/abs(c_num)
+							else:
+								residential_dict[residential_key]['powerFactor'] = -c_num.real/abs(c_num)
+						else:
+							residential_dict[residential_key]['powerFactor'] = 1.0
 					residential_dict[residential_key]['load'] = load    
 					residential_dict[residential_key]['number_of_houses'] = int(round(load/config_data['avg_house']))
 					total_house_number += residential_dict[residential_key]['number_of_houses']
@@ -1416,7 +1440,7 @@ def _test():
 		'load_shape_player_file' : './uploads/load_shape_player.player',
 		'weather_file' : './uploads/SCADA_weather_NC_gld_shifted.csv'}
 	glmpopulated, last_key = startPopulation(glmbase, -1, feeder_config)
-	assert 75776==last_key
+	assert 72704==last_key
 	
 
 if __name__ == '__main__':

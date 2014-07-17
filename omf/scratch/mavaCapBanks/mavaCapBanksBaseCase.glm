@@ -1,12 +1,12 @@
 clock {
 	timezone CST+6CDT;
-	starttime '2013-11-24 0:00:00';
-	stoptime '2014-11-25 0:00:00';
+	starttime '2013-01-01 0:00:00';
+	stoptime '2014-01-01 0:00:00';
 };
 
 #define stylesheet=http://gridlab-d.svn.sourceforge.net/viewvc/gridlab-d/trunk/core/gridlabd-2_0
 
-#set minimum_timestep=300
+#set minimum_timestep=60
 
 #set profiler=1
 
@@ -102,11 +102,6 @@ object transformer {
 	groupid Distribution_Trans;
 };
 
-#set minimum_timestep=60;
-#set profiler=1;
-#set relax_naming_rules=1;
-module generators;
-module tape;
 object meter {
 	phases ABCN;
 	name STONECITY(25);
@@ -836,12 +831,12 @@ object capacitor {
 	capacitor_C 50000.0;
 	capacitor_A 50000.0;
 	longitude 408.393489134;
-	switchC OPEN;
+	switchC CLOSED;
 	nominal_voltage 7200.0;
 	control_level BANK;
 	latitude 148.884343895;
-	switchB OPEN;
-	switchA OPEN;
+	switchB CLOSED;
+	switchA CLOSED;
 	phases_connected ABCN;
 	pt_phase A;
 };
@@ -22403,574 +22398,574 @@ object triplex_load {
 	phases BS;
 	name 99290292_B_loadshape;
 	parent node99290292T99290292_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*16.897561;
+	base_power_12 norm_feeder_loadshape.value*18.281445;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290185_B_loadshape;
 	parent node99290185T99290185_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6421.069839;
+	base_power_12 norm_feeder_loadshape.value*6946.945332;
 };
 
 object triplex_load {
 	phases CS;
 	name 99260134_C_loadshape;
 	parent node99260134T99260129_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*144.228053;
+	base_power_12 norm_feeder_loadshape.value*156.040103;
 };
 
 object triplex_load {
 	phases CS;
 	name 99260129_C_loadshape;
 	parent node99260134T99260129_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6474.232946;
+	base_power_12 norm_feeder_loadshape.value*7004.462413;
 };
 
 object triplex_load {
 	phases AS;
 	name 99250124_A_loadshape;
 	parent node99250124T99250124_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5324.855922;
+	base_power_12 norm_feeder_loadshape.value*5760.953224;
 };
 
 object triplex_load {
 	phases BS;
 	name 99200091_B_loadshape;
 	parent node99200091T99200091_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*13991.171610;
+	base_power_12 norm_feeder_loadshape.value*15137.026498;
 };
 
 object triplex_load {
 	phases CS;
 	name 99070042_C_loadshape;
 	parent node99070042T99070042_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*24658.368327;
+	base_power_12 norm_feeder_loadshape.value*26677.849802;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340236_C_loadshape;
 	parent node99340236T99340236_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5640.924312;
+	base_power_12 norm_feeder_loadshape.value*6102.907117;
 };
 
 object triplex_load {
 	phases CS;
 	name 99150063_C_loadshape;
 	parent node99150063T99150063_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4807.597534;
+	base_power_12 norm_feeder_loadshape.value*5201.332189;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290160_B_loadshape;
 	parent node99290160T99290160_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7104.366966;
+	base_power_12 norm_feeder_loadshape.value*7686.203415;
 };
 
 object triplex_load {
 	phases AS;
 	name 14320131_A_loadshape;
 	parent node14320131T14320131_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*9522.079195;
+	base_power_12 norm_feeder_loadshape.value*10301.922463;
 };
 
 object triplex_load {
 	phases AS;
 	name 99250121_A_loadshape;
 	parent node99250121T99250121_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2161.269577;
+	base_power_12 norm_feeder_loadshape.value*2338.274146;
 };
 
 object triplex_load {
 	phases AS;
 	name 99250125_A_loadshape;
 	parent node99250125T99250125_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4040.627731;
+	base_power_12 norm_feeder_loadshape.value*4371.548769;
 };
 
 object triplex_load {
 	phases BS;
 	name 99340225_B_loadshape;
 	parent node99340225T99340225_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6818.166746;
+	base_power_12 norm_feeder_loadshape.value*7376.563849;
 };
 
 object triplex_load {
 	phases AS;
 	name 99030015_A_loadshape;
 	parent node99030015T99030015_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3837.021974;
+	base_power_12 norm_feeder_loadshape.value*4151.268022;
 };
 
 object triplex_load {
 	phases CS;
 	name 99270136_C_loadshape;
 	parent node99270136T99270136_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2227.516705;
+	base_power_12 norm_feeder_loadshape.value*2409.946810;
 };
 
 object triplex_load {
 	phases BS;
 	name 99180312_B_loadshape;
 	parent node99180312T99180312_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*20783.990993;
+	base_power_12 norm_feeder_loadshape.value*22486.167075;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290184_B_loadshape;
 	parent node99290184T99290184_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3210.534920;
+	base_power_12 norm_feeder_loadshape.value*3473.472666;
 };
 
 object triplex_load {
 	phases CS;
 	name 99210098_C_loadshape;
 	parent node99210098T99210098_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6281.931513;
+	base_power_12 norm_feeder_loadshape.value*6796.411796;
 };
 
 object triplex_load {
 	phases AS;
 	name 99250127_A_loadshape;
 	parent node99250127T99250127_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3304.535078;
+	base_power_12 norm_feeder_loadshape.value*3575.171289;
 };
 
 object triplex_load {
 	phases CS;
 	name 99210094_C_loadshape;
 	parent node99210094T99210094_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4647.347551;
+	base_power_12 norm_feeder_loadshape.value*5027.957986;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290147_B_loadshape;
 	parent node99290147T99290147_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2990.868817;
+	base_power_12 norm_feeder_loadshape.value*3235.816256;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290173_B_loadshape;
 	parent node99290173T99290173_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1774.238017;
+	base_power_12 norm_feeder_loadshape.value*1919.545313;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290175_B_loadshape;
 	parent node99290173T99290173_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*605.112124;
+	base_power_12 norm_feeder_loadshape.value*654.669853;
 };
 
 object triplex_load {
 	phases CS;
 	name 99270137_C_loadshape;
 	parent node99270137T99270137_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5688.988780;
+	base_power_12 norm_feeder_loadshape.value*6154.907989;
 };
 
 object triplex_load {
 	phases CS;
 	name 99270138_C_loadshape;
 	parent node99270137T99270137_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*496.786022;
+	base_power_12 norm_feeder_loadshape.value*537.472014;
 };
 
 object triplex_load {
 	phases AS;
 	name 99250126_A_loadshape;
 	parent node99250126T99250126_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2709.404199;
+	base_power_12 norm_feeder_loadshape.value*2931.300129;
 };
 
 object triplex_load {
 	phases CS;
 	name 99160073_C_loadshape;
 	parent node99160073T99160073_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1928.202635;
+	base_power_12 norm_feeder_loadshape.value*2086.119390;
 };
 
 object triplex_load {
 	phases AS;
 	name 99250123_A_loadshape;
 	parent node99250123T99250123_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4964.638375;
+	base_power_12 norm_feeder_loadshape.value*5371.234428;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290148_B_loadshape;
 	parent node99290148T99290148_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*202.770987;
+	base_power_12 norm_feeder_loadshape.value*219.377611;
 };
 
 object triplex_load {
 	phases AS;
 	name 95060019_A_loadshape;
 	parent node95060019T95060019_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1737.911063;
+	base_power_12 norm_feeder_loadshape.value*1880.243238;
 };
 
 object triplex_load {
 	phases CS;
 	name 95060019_C_loadshape;
 	parent node95060019T95060019_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1778.296776;
+	base_power_12 norm_feeder_loadshape.value*1923.936477;
 };
 
 object triplex_load {
 	phases BS;
 	name 95060019_B_loadshape;
 	parent node95060019T95060019_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1875.088854;
+	base_power_12 norm_feeder_loadshape.value*2028.655673;
 };
 
 object triplex_load {
 	phases CS;
 	name 99070280_C_loadshape;
 	parent node99070280T99070280_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5769.117407;
+	base_power_12 norm_feeder_loadshape.value*6241.599023;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290156_B_loadshape;
 	parent node99290156T99290162_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2636.018954;
+	base_power_12 norm_feeder_loadshape.value*2851.904748;
 };
 
 object triplex_load {
 	phases AS;
 	name 13330068_A_loadshape;
 	parent node13330068T13330068_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*328.383306;
+	base_power_12 norm_feeder_loadshape.value*355.277381;
 };
 
 object triplex_load {
 	phases CS;
 	name 99220111_C_loadshape;
 	parent node99220111T99220111_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3253.143829;
+	base_power_12 norm_feeder_loadshape.value*3519.571178;
 };
 
 object triplex_load {
 	phases AS;
 	name 99260131_A_loadshape;
 	parent node99260131T99260131_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4259.883962;
+	base_power_12 norm_feeder_loadshape.value*4608.761740;
 };
 
 object triplex_load {
 	phases BS;
 	name 99340232_B_loadshape;
 	parent node99340232T99340232_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6218.298956;
+	base_power_12 norm_feeder_loadshape.value*6727.567833;
 };
 
 object triplex_load {
 	phases CS;
 	name 99160075_C_loadshape;
 	parent node99160075T99160075_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4983.873241;
+	base_power_12 norm_feeder_loadshape.value*5392.044599;
 };
 
 object triplex_load {
 	phases AS;
 	name 14290174_A_loadshape;
 	parent node14290174T14290174_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6358.493308;
+	base_power_12 norm_feeder_loadshape.value*6879.243881;
 };
 
 object triplex_load {
@@ -22984,14 +22979,14 @@ object triplex_load {
 	phases AS;
 	name 99260132_A_loadshape;
 	parent node99260132T99260132_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6750.032388;
+	base_power_12 norm_feeder_loadshape.value*7302.849394;
 };
 
 object triplex_load {
@@ -23005,42 +23000,42 @@ object triplex_load {
 	phases BS;
 	name 99330206_B_loadshape;
 	parent node99330206T99330206_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3734.362104;
+	base_power_12 norm_feeder_loadshape.value*4040.200471;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330318_B_loadshape;
 	parent node99330206T99330206_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1064.545248;
+	base_power_12 norm_feeder_loadshape.value*1151.729825;
 };
 
 object triplex_load {
 	phases BS;
 	name 99340224_B_loadshape;
 	parent node99340224T99340224_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*709.697556;
+	base_power_12 norm_feeder_loadshape.value*767.820666;
 };
 
 object triplex_load {
@@ -23054,112 +23049,112 @@ object triplex_load {
 	phases CS;
 	name 99210102_C_loadshape;
 	parent node99210103T99210102_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*9182.515025;
+	base_power_12 norm_feeder_loadshape.value*9934.548523;
 };
 
 object triplex_load {
 	phases AS;
 	name 10290009_A_loadshape;
 	parent node10290009T10290009_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7908.973529;
+	base_power_12 norm_feeder_loadshape.value*8556.705987;
 };
 
 object triplex_load {
 	phases AS;
 	name 10290016_A_loadshape;
 	parent node10290009T10290009_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7407.806792;
+	base_power_12 norm_feeder_loadshape.value*8014.494484;
 };
 
 object triplex_load {
 	phases CS;
 	name 99210317_C_loadshape;
 	parent node99210317T99210317_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*77562.582217;
+	base_power_12 norm_feeder_loadshape.value*83914.835369;
 };
 
 object triplex_load {
 	phases CS;
 	name 99070043_C_loadshape;
 	parent node99070043T99070043_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*11217.740286;
+	base_power_12 norm_feeder_loadshape.value*12136.455523;
 };
 
 object triplex_load {
 	phases AS;
 	name 13340058_A_loadshape;
 	parent node13340058T13340058_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*626.452871;
+	base_power_12 norm_feeder_loadshape.value*677.758373;
 };
 
 object triplex_load {
 	phases AS;
 	name 14320132_A_loadshape;
 	parent node14320132T14320132_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4275.542438;
+	base_power_12 norm_feeder_loadshape.value*4625.702620;
 };
 
 object triplex_load {
 	phases BS;
 	name 99210104_B_loadshape;
 	parent node99210104T99210104_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7147.666123;
+	base_power_12 norm_feeder_loadshape.value*7733.048705;
 };
 
 object triplex_load {
@@ -23180,168 +23175,168 @@ object triplex_load {
 	phases CS;
 	name 99210096_C_loadshape;
 	parent node99220108T99210101_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3413.393268;
+	base_power_12 norm_feeder_loadshape.value*3692.944793;
 };
 
 object triplex_load {
 	phases CS;
 	name 99210101_C_loadshape;
 	parent node99220108T99210101_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3365.314461;
+	base_power_12 norm_feeder_loadshape.value*3640.928408;
 };
 
 object triplex_load {
 	phases AS;
 	name 99260133_A_loadshape;
 	parent node99260133T99260133_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*20453.728543;
+	base_power_12 norm_feeder_loadshape.value*22128.856651;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340256_C_loadshape;
 	parent node99340256T99340256_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3862.103386;
+	base_power_12 norm_feeder_loadshape.value*4178.403562;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340255_C_loadshape;
 	parent node99340256T99340256_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4406.968942;
+	base_power_12 norm_feeder_loadshape.value*4767.892748;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340320_C_loadshape;
 	parent node99340256T99340256_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3926.206287;
+	base_power_12 norm_feeder_loadshape.value*4247.756389;
 };
 
 object triplex_load {
 	phases BS;
 	name 99210106_B_loadshape;
 	parent node99210106T99210106_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*10865.134793;
+	base_power_12 norm_feeder_loadshape.value*11754.972196;
 };
 
 object triplex_load {
 	phases BS;
 	name 99340308_B_loadshape;
 	parent node99340308T99340308_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2838.788499;
+	base_power_12 norm_feeder_loadshape.value*3071.280799;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290170_B_loadshape;
 	parent node99290170T99290169_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2891.185906;
+	base_power_12 norm_feeder_loadshape.value*3127.969471;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290169_B_loadshape;
 	parent node99290170T99290169_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2330.411940;
+	base_power_12 norm_feeder_loadshape.value*2521.269002;
 };
 
 object triplex_load {
 	phases CS;
 	name 99220110_C_loadshape;
 	parent node99220110T99220110_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919376;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*17307.421196;
+	base_power_12 norm_feeder_loadshape.value*18724.871695;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330214_B_loadshape;
 	parent node99330214T99330214_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4275.085847;
+	base_power_12 norm_feeder_loadshape.value*4625.208635;
 };
 
 object triplex_load {
@@ -23362,154 +23357,154 @@ object triplex_load {
 	phases AS;
 	name 99230117_A_loadshape;
 	parent node99230117T99230117_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7987.275072;
+	base_power_12 norm_feeder_loadshape.value*8641.420303;
 };
 
 object triplex_load {
 	phases CS;
 	name 99180080_C_loadshape;
 	parent node99180080T99180080_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*57691.174069;
+	base_power_12 norm_feeder_loadshape.value*62415.990235;
 };
 
 object triplex_load {
 	phases BS;
 	name 99200090_B_loadshape;
 	parent node99200090T99200090_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1013.853405;
+	base_power_12 norm_feeder_loadshape.value*1096.886400;
 };
 
 object triplex_load {
 	phases BS;
 	name 99340270_B_loadshape;
 	parent node99340270T99340270_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6319.693169;
+	base_power_12 norm_feeder_loadshape.value*6837.266072;
 };
 
 object triplex_load {
 	phases CS;
 	name 99060041_C_loadshape;
 	parent node99060041T99060041_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5875.952541;
+	base_power_12 norm_feeder_loadshape.value*6357.183787;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290154_B_loadshape;
 	parent node99290154T99290154_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2934.543191;
+	base_power_12 norm_feeder_loadshape.value*3174.877650;
 };
 
 object triplex_load {
 	phases AS;
 	name 14310125_A_loadshape;
 	parent node14310125T13360064_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2709.404199;
+	base_power_12 norm_feeder_loadshape.value*2931.300129;
 };
 
 object triplex_load {
 	phases AS;
 	name 13360064_A_loadshape;
 	parent node14310125T13360064_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6828.338512;
+	base_power_12 norm_feeder_loadshape.value*7387.568666;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340254_C_loadshape;
 	parent node99340254T99340254_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*11906.830100;
+	base_power_12 norm_feeder_loadshape.value*12881.980705;
 };
 
 object triplex_load {
 	phases BS;
 	name 99300187_B_loadshape;
 	parent node99300187T99300187_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5677.575213;
+	base_power_12 norm_feeder_loadshape.value*6142.559668;
 };
 
 object triplex_load {
 	phases AS;
 	name 13330067_A_loadshape;
 	parent node13330067T13330067_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1205.922525;
+	base_power_12 norm_feeder_loadshape.value*1304.685678;
 };
 
 object triplex_load {
@@ -23523,112 +23518,112 @@ object triplex_load {
 	phases BS;
 	name 99340231_B_loadshape;
 	parent node99340231T99340231_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*8685.341480;
+	base_power_12 norm_feeder_loadshape.value*9396.657249;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290155_B_loadshape;
 	parent node99290155T99290155_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1774.238017;
+	base_power_12 norm_feeder_loadshape.value*1919.545313;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290171_B_loadshape;
 	parent node99290155T99290155_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2626.803555;
+	base_power_12 norm_feeder_loadshape.value*2841.934623;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340257_C_loadshape;
 	parent node99340257T99340257_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6922.944151;
+	base_power_12 norm_feeder_loadshape.value*7489.922358;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340273_C_loadshape;
 	parent node99340257T99340257_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3189.038753;
+	base_power_12 norm_feeder_loadshape.value*3450.215998;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340252_C_loadshape;
 	parent node99340257T99340257_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3717.879128;
+	base_power_12 norm_feeder_loadshape.value*4022.367565;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340279_C_loadshape;
 	parent node99340257T99340257_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2804.435343;
+	base_power_12 norm_feeder_loadshape.value*3034.114175;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290183_B_loadshape;
 	parent node99290183T99290183_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5533.952838;
+	base_power_12 norm_feeder_loadshape.value*5987.174847;
 };
 
 object triplex_load {
@@ -23642,98 +23637,98 @@ object triplex_load {
 	phases BS;
 	name 99200087_B_loadshape;
 	parent node99200087T99200087_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3497.799890;
+	base_power_12 norm_feeder_loadshape.value*3784.264184;
 };
 
 object triplex_load {
 	phases BS;
 	name 99340229_B_loadshape;
 	parent node99340229T99340229_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6674.526827;
+	base_power_12 norm_feeder_loadshape.value*7221.160047;
 };
 
 object triplex_load {
 	phases AS;
 	name 99040031_A_loadshape;
 	parent node99040031T99040031_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7955.953538;
+	base_power_12 norm_feeder_loadshape.value*8607.533585;
 };
 
 object triplex_load {
 	phases AS;
 	name 13360063_A_loadshape;
 	parent node13360063T13360063_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*44478.131621;
+	base_power_12 norm_feeder_loadshape.value*48120.820450;
 };
 
 object triplex_load {
 	phases AS;
 	name 99230319_A_loadshape;
 	parent node99230319T99230319_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5199.552166;
+	base_power_12 norm_feeder_loadshape.value*5625.387288;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290149_B_loadshape;
 	parent node99290149T99290149_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*262.851218;
+	base_power_12 norm_feeder_loadshape.value*284.378318;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290179_B_loadshape;
 	parent node99290179T99290179_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4967.877271;
+	base_power_12 norm_feeder_loadshape.value*5374.738585;
 };
 
 object triplex_load {
@@ -23747,154 +23742,154 @@ object triplex_load {
 	phases AS;
 	name 99040029_A_loadshape;
 	parent node99040029T99040029_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1378.196316;
+	base_power_12 norm_feeder_loadshape.value*1491.068420;
 };
 
 object triplex_load {
 	phases CS;
 	name 99160070_C_loadshape;
 	parent node99160070T99160070_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3285.196367;
+	base_power_12 norm_feeder_loadshape.value*3554.248769;
 };
 
 object triplex_load {
 	phases CS;
 	name 99190083_C_loadshape;
 	parent node99190083T99190083_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919376;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*288.456614;
+	base_power_12 norm_feeder_loadshape.value*312.080756;
 };
 
 object triplex_load {
 	phases CS;
 	name 75130012_C_loadshape;
 	parent node75130012T75130012_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7612.033964;
+	base_power_12 norm_feeder_loadshape.value*8235.447540;
 };
 
 object triplex_load {
 	phases BS;
 	name 99060277_B_loadshape;
 	parent node99060277T99060277_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*10966.511463;
+	base_power_12 norm_feeder_loadshape.value*11864.651455;
 };
 
 object triplex_load {
 	phases AS;
 	name 13360065_A_loadshape;
 	parent node13360065T13360065_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1331.213099;
+	base_power_12 norm_feeder_loadshape.value*1440.237353;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340251_C_loadshape;
 	parent node99340251T99340251_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5721.040231;
+	base_power_12 norm_feeder_loadshape.value*6189.584403;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340250_C_loadshape;
 	parent node99340251T99340251_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3749.930579;
+	base_power_12 norm_feeder_loadshape.value*4057.043979;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330202_B_loadshape;
 	parent node99330202T99330202_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4782.004730;
+	base_power_12 norm_feeder_loadshape.value*5173.643375;
 };
 
 object triplex_load {
 	phases CS;
 	name 99160069_C_loadshape;
 	parent node99160069T99160069_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3397.366999;
+	base_power_12 norm_feeder_loadshape.value*3675.605998;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330205_B_loadshape;
 	parent node99330205T99330213_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3917.942950;
+	base_power_12 norm_feeder_loadshape.value*4238.816298;
 };
 
 object triplex_load {
@@ -23908,98 +23903,98 @@ object triplex_load {
 	phases BS;
 	name 99290152_B_loadshape;
 	parent node99290153T99290152_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1706.652232;
+	base_power_12 norm_feeder_loadshape.value*1846.424358;
 };
 
 object triplex_load {
 	phases AS;
 	name 99040027_A_loadshape;
 	parent node99040027T99040027_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4009.305739;
+	base_power_12 norm_feeder_loadshape.value*4337.661556;
 };
 
 object triplex_load {
 	phases AS;
 	name 13360062_A_loadshape;
 	parent node13360062T13360062_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6170.564108;
+	base_power_12 norm_feeder_loadshape.value*6675.923576;
 };
 
 object triplex_load {
 	phases AS;
 	name 10280005_A_loadshape;
 	parent node10280005T10280005_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*924.018081;
+	base_power_12 norm_feeder_loadshape.value*999.693705;
 };
 
 object triplex_load {
 	phases CS;
 	name 99190085_C_loadshape;
 	parent node99190085T99190084_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7531.899901;
+	base_power_12 norm_feeder_loadshape.value*8148.750623;
 };
 
 object triplex_load {
 	phases CS;
 	name 99190084_C_loadshape;
 	parent node99190085T99190084_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2003.162734;
+	base_power_12 norm_feeder_loadshape.value*2167.218602;
 };
 
 object triplex_load {
 	phases CS;
 	name 99160074_C_loadshape;
 	parent node99160074T99160074_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*144.228053;
+	base_power_12 norm_feeder_loadshape.value*156.040103;
 };
 
 object triplex_load {
@@ -24013,42 +24008,42 @@ object triplex_load {
 	phases BS;
 	name 99330219_B_loadshape;
 	parent node99330219T99330215_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2348.753983;
+	base_power_12 norm_feeder_loadshape.value*2541.113230;
 };
 
 object triplex_load {
 	phases BS;
 	name 99050033_B_loadshape;
 	parent node99050033T99050033_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4342.670740;
+	base_power_12 norm_feeder_loadshape.value*4698.328624;
 };
 
 object triplex_load {
 	phases AS;
 	name 99040281_A_loadshape;
 	parent node99040281T99040281_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7282.520658;
+	base_power_12 norm_feeder_loadshape.value*7878.947614;
 };
 
 object triplex_load {
@@ -24069,182 +24064,182 @@ object triplex_load {
 	phases AS;
 	name 99140057_A_loadshape;
 	parent node99140058T99140058_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*27.786250;
+	base_power_12 norm_feeder_loadshape.value*30.061900;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340241_C_loadshape;
 	parent node99340241T99340240_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6794.745619;
+	base_power_12 norm_feeder_loadshape.value*7351.224568;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340240_C_loadshape;
 	parent node99340241T99340240_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4118.507720;
+	base_power_12 norm_feeder_loadshape.value*4455.807006;
 };
 
 object triplex_load {
 	phases AS;
 	name 10210002_A_loadshape;
 	parent node10210002T10210002_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3633.428800;
+	base_power_12 norm_feeder_loadshape.value*3931.000889;
 };
 
 object triplex_load {
 	phases BS;
 	name 99050034_B_loadshape;
 	parent node99050034T99050034_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4393.361305;
+	base_power_12 norm_feeder_loadshape.value*4753.170667;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290167_B_loadshape;
 	parent node99290167T99290167_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6421.069839;
+	base_power_12 norm_feeder_loadshape.value*6946.945332;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330208_B_loadshape;
 	parent node99330208T99330208_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*50.692670;
+	base_power_12 norm_feeder_loadshape.value*54.844320;
 };
 
 object triplex_load {
 	phases AS;
 	name 13250054_A_loadshape;
 	parent node13250054T13250052_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2631.098991;
+	base_power_12 norm_feeder_loadshape.value*2846.581849;
 };
 
 object triplex_load {
 	phases AS;
 	name 13250052_A_loadshape;
 	parent node13250054T13250052_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2458.828267;
+	base_power_12 norm_feeder_loadshape.value*2660.202424;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330209_B_loadshape;
 	parent node99330209T99330209_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*8052.061756;
+	base_power_12 norm_feeder_loadshape.value*8711.512914;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340237_C_loadshape;
 	parent node99340237T99340237_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2644.185905;
+	base_power_12 norm_feeder_loadshape.value*2860.740560;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340239_C_loadshape;
 	parent node99340237T99340237_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4374.917491;
+	base_power_12 norm_feeder_loadshape.value*4733.216334;
 };
 
 object triplex_load {
 	phases AS;
 	name 99130056_A_loadshape;
 	parent node99130056T99130056_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2505.811025;
+	base_power_12 norm_feeder_loadshape.value*2711.032996;
 };
 
 object triplex_load {
@@ -24258,126 +24253,126 @@ object triplex_load {
 	phases BS;
 	name 99290182_B_loadshape;
 	parent node99290182T99290168_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4038.510104;
+	base_power_12 norm_feeder_loadshape.value*4369.257712;
 };
 
 object triplex_load {
 	phases AS;
 	name 99260130_A_loadshape;
 	parent node99260130T99260130_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3758.716766;
+	base_power_12 norm_feeder_loadshape.value*4066.549741;
 };
 
 object triplex_load {
 	phases BS;
 	name 99170078_B_loadshape;
 	parent node99170078T99170078_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6759.022698;
+	base_power_12 norm_feeder_loadshape.value*7312.575997;
 };
 
 object triplex_load {
 	phases AS;
 	name 13350061_A_loadshape;
 	parent node13350061T13350061_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*313.226390;
+	base_power_12 norm_feeder_loadshape.value*338.879137;
 };
 
 object triplex_load {
 	phases BS;
 	name 99320193_B_loadshape;
 	parent node99320193T99320193_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2754.306602;
+	base_power_12 norm_feeder_loadshape.value*2979.879969;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340223_C_loadshape;
 	parent node99340223T99340223_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4102.481995;
+	base_power_12 norm_feeder_loadshape.value*4438.468799;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290305_B_loadshape;
 	parent node99290305T99290305_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*506.926702;
+	base_power_12 norm_feeder_loadshape.value*548.443200;
 };
 
 object triplex_load {
 	phases AS;
 	name 13350060_A_loadshape;
 	parent node13350060T13350060_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5638.075837;
+	base_power_12 norm_feeder_loadshape.value*6099.825356;
 };
 
 object triplex_load {
 	phases AS;
 	name 99140059_A_loadshape;
 	parent node99140059T99140059_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6483.797063;
+	base_power_12 norm_feeder_loadshape.value*7014.809817;
 };
 
 object triplex_load {
@@ -24391,56 +24386,56 @@ object triplex_load {
 	phases BS;
 	name 99320196_B_loadshape;
 	parent node99320196T99320196_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*59.141383;
+	base_power_12 norm_feeder_loadshape.value*63.984969;
 };
 
 object triplex_load {
 	phases AS;
 	name 99040025_A_loadshape;
 	parent node99040025T99040025_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*8457.120276;
+	base_power_12 norm_feeder_loadshape.value*9149.745088;
 };
 
 object triplex_load {
 	phases BS;
 	name 99320201_B_loadshape;
 	parent node99320201T99320201_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3075.351159;
+	base_power_12 norm_feeder_loadshape.value*3327.217569;
 };
 
 object triplex_load {
 	phases BS;
 	name 99200088_B_loadshape;
 	parent node99200088T99200088_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4815.810036;
+	base_power_12 norm_feeder_loadshape.value*5210.217282;
 };
 
 object triplex_load {
@@ -24454,224 +24449,224 @@ object triplex_load {
 	phases CS;
 	name 99270307_C_loadshape;
 	parent node99270309T99270309_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4390.943217;
+	base_power_12 norm_feeder_loadshape.value*4750.554541;
 };
 
 object triplex_load {
 	phases AS;
 	name 10280004_A_loadshape;
 	parent node10280004T10280004_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2505.811025;
+	base_power_12 norm_feeder_loadshape.value*2711.032996;
 };
 
 object triplex_load {
 	phases AS;
 	name 99030023_A_loadshape;
 	parent node99030023T99030017_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3805.699983;
+	base_power_12 norm_feeder_loadshape.value*4117.380809;
 };
 
 object triplex_load {
 	phases AS;
 	name 99030017_A_loadshape;
 	parent node99030023T99030017_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*9177.537747;
+	base_power_12 norm_feeder_loadshape.value*9929.163613;
 };
 
 object triplex_load {
 	phases AS;
 	name 10280006_A_loadshape;
 	parent node10280006T10280006_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*845.712028;
+	base_power_12 norm_feeder_loadshape.value*914.974509;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290166_B_loadshape;
 	parent node99290166T99290166_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3798.427909;
+	base_power_12 norm_feeder_loadshape.value*4109.513164;
 };
 
 object triplex_load {
 	phases CS;
 	name 99030020_C_loadshape;
 	parent node99030020T99030020_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919376;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5592.841699;
+	base_power_12 norm_feeder_loadshape.value*6050.886613;
 };
 
 object triplex_load {
 	phases AS;
 	name 10290007_A_loadshape;
 	parent node10290007T10290007_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7360.822201;
+	base_power_12 norm_feeder_loadshape.value*7963.661930;
 };
 
 object triplex_load {
 	phases BS;
 	name 99090050_B_loadshape;
 	parent node99090050T99090050_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6556.256276;
+	base_power_12 norm_feeder_loadshape.value*7093.203324;
 };
 
 object triplex_load {
 	phases BS;
 	name 99320194_B_loadshape;
 	parent node99320194T99320194_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4131.928501;
+	base_power_12 norm_feeder_loadshape.value*4470.326928;
 };
 
 object triplex_load {
 	phases AS;
 	name 99150061_A_loadshape;
 	parent node99150061T99150061_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3367.179061;
+	base_power_12 norm_feeder_loadshape.value*3642.945715;
 };
 
 object triplex_load {
 	phases AS;
 	name 99290150_A_loadshape;
 	parent node99290150T99290150_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4651.418460;
+	base_power_12 norm_feeder_loadshape.value*5032.362296;
 };
 
 object triplex_load {
 	phases AS;
 	name 13340059_A_loadshape;
 	parent node13340059T13340059_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4228.557847;
+	base_power_12 norm_feeder_loadshape.value*4574.870066;
 };
 
 object triplex_load {
 	phases CS;
 	name 99270139_C_loadshape;
 	parent node99270139T99270139_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5496.687347;
+	base_power_12 norm_feeder_loadshape.value*5946.857372;
 };
 
 object triplex_load {
 	phases BS;
 	name 99320195_B_loadshape;
 	parent node99320195T99320195_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1196.287733;
+	base_power_12 norm_feeder_loadshape.value*1294.261812;
 };
 
 object triplex_load {
 	phases AS;
 	name 10290010_A_loadshape;
 	parent node10290010T10290010_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*908.357315;
+	base_power_12 norm_feeder_loadshape.value*982.750346;
 };
 
 object triplex_load {
@@ -24685,70 +24680,70 @@ object triplex_load {
 	phases CS;
 	name 99290178_C_loadshape;
 	parent node99290178T99290164_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4583.244650;
+	base_power_12 norm_feeder_loadshape.value*4958.605158;
 };
 
 object triplex_load {
 	phases CS;
 	name 99280143_C_loadshape;
 	parent node99280143T99280143_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919376;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*192.304410;
+	base_power_12 norm_feeder_loadshape.value*208.053837;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340243_C_loadshape;
 	parent node99340243T99340242_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1907.017827;
+	base_power_12 norm_feeder_loadshape.value*2063.199580;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340242_C_loadshape;
 	parent node99340243T99340242_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3333.275175;
+	base_power_12 norm_feeder_loadshape.value*3606.265154;
 };
 
 object triplex_load {
 	phases AS;
 	name 99150062_A_loadshape;
 	parent node99150062T99150062_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3147.925121;
+	base_power_12 norm_feeder_loadshape.value*3405.735223;
 };
 
 object triplex_load {
@@ -24762,196 +24757,196 @@ object triplex_load {
 	phases BS;
 	name 99090051_B_loadshape;
 	parent node99090051T99090051_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2027.709872;
+	base_power_12 norm_feeder_loadshape.value*2193.776113;
 };
 
 object triplex_load {
 	phases BS;
 	name 99320282_B_loadshape;
 	parent node99320282T99320282_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3824.757514;
+	base_power_12 norm_feeder_loadshape.value*4137.999122;
 };
 
 object triplex_load {
 	phases AS;
 	name 99030018_A_loadshape;
 	parent node99030018T99030018_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5450.142055;
+	base_power_12 norm_feeder_loadshape.value*5896.500094;
 };
 
 object triplex_load {
 	phases AS;
 	name 10280003_A_loadshape;
 	parent node10280003T10280003_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3962.309940;
+	base_power_12 norm_feeder_loadshape.value*4286.816875;
 };
 
 object triplex_load {
 	phases BS;
 	name 99280144_B_loadshape;
 	parent node99280144T99280144_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7730.626950;
+	base_power_12 norm_feeder_loadshape.value*8363.753104;
 };
 
 object triplex_load {
 	phases AS;
 	name 99300186_A_loadshape;
 	parent node99300186T99300186_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7674.042116;
+	base_power_12 norm_feeder_loadshape.value*8302.534062;
 };
 
 object triplex_load {
 	phases CS;
 	name 99280145_C_loadshape;
 	parent node99280145T99280145_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5496.687347;
+	base_power_12 norm_feeder_loadshape.value*5946.857372;
 };
 
 object triplex_load {
 	phases AS;
 	name 99350260_A_loadshape;
 	parent node99350260T99350260_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5794.683504;
+	base_power_12 norm_feeder_loadshape.value*6269.258943;
 };
 
 object triplex_load {
 	phases BS;
 	name 99090287_B_loadshape;
 	parent node99090287T99090287_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1639.066893;
+	base_power_12 norm_feeder_loadshape.value*1773.303887;
 };
 
 object triplex_load {
 	phases AS;
 	name 99030022_A_loadshape;
 	parent node99030022T99030022_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5857.344192;
+	base_power_12 norm_feeder_loadshape.value*6337.051444;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340303_C_loadshape;
 	parent node99340303T99340244_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3669.801952;
+	base_power_12 norm_feeder_loadshape.value*3970.352944;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340244_C_loadshape;
 	parent node99340303T99340244_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3156.986759;
+	base_power_12 norm_feeder_loadshape.value*3415.538995;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340245_C_loadshape;
 	parent node99340303T99340244_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2291.621781;
+	base_power_12 norm_feeder_loadshape.value*2479.301991;
 };
 
 object triplex_load {
 	phases AS;
 	name 99150065_A_loadshape;
 	parent node99150065T99150065_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7204.214534;
+	base_power_12 norm_feeder_loadshape.value*7794.228342;
 };
 
 object triplex_load {
@@ -24965,154 +24960,154 @@ object triplex_load {
 	phases BS;
 	name 99280140_B_loadshape;
 	parent node99280141T99280140_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2086.853919;
+	base_power_12 norm_feeder_loadshape.value*2257.763964;
 };
 
 object triplex_load {
 	phases BS;
 	name 99320200_B_loadshape;
 	parent node99320200T99320200_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2450.145520;
+	base_power_12 norm_feeder_loadshape.value*2650.808574;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290297_B_loadshape;
 	parent node99290297T99290297_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*8127.723856;
+	base_power_12 norm_feeder_loadshape.value*8793.371621;
 };
 
 object triplex_load {
 	phases CS;
 	name 99280142_C_loadshape;
 	parent node99280142T99280142_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5576.815974;
+	base_power_12 norm_feeder_loadshape.value*6033.548406;
 };
 
 object triplex_load {
 	phases AS;
 	name 10200001_A_loadshape;
 	parent node10200001T10200001_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*10649.698803;
+	base_power_12 norm_feeder_loadshape.value*11521.892338;
 };
 
 object triplex_load {
 	phases AS;
 	name 99050036_A_loadshape;
 	parent node99050036T99050036_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3993.631932;
+	base_power_12 norm_feeder_loadshape.value*4320.704088;
 };
 
 object triplex_load {
 	phases AS;
 	name 99140060_A_loadshape;
 	parent node99140060T99140060_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4009.305739;
+	base_power_12 norm_feeder_loadshape.value*4337.661556;
 };
 
 object triplex_load {
 	phases BS;
 	name 99160067_B_loadshape;
 	parent node99160067T99160067_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2703.604293;
+	base_power_12 norm_feeder_loadshape.value*2925.025220;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290181_B_loadshape;
 	parent node99290181T99290181_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1082.592248;
+	base_power_12 norm_feeder_loadshape.value*1171.254846;
 };
 
 object triplex_load {
 	phases CS;
 	name 99300188_C_loadshape;
 	parent node99300188T99300188_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3237.117560;
+	base_power_12 norm_feeder_loadshape.value*3502.232383;
 };
 
 object triplex_load {
 	phases CS;
 	name 99290165_C_loadshape;
 	parent node99300188T99300188_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3942.232012;
+	base_power_12 norm_feeder_loadshape.value*4265.094596;
 };
 
 object triplex_load {
@@ -25126,154 +25121,154 @@ object triplex_load {
 	phases AS;
 	name 10290013_A_loadshape;
 	parent node10290013T10290013_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*8034.259663;
+	base_power_12 norm_feeder_loadshape.value*8692.252857;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330210_B_loadshape;
 	parent node99330210T99330210_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4765.106388;
+	base_power_12 norm_feeder_loadshape.value*5155.361086;
 };
 
 object triplex_load {
 	phases AS;
 	name 99040026_A_loadshape;
 	parent node99040026T99040026_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4855.010718;
+	base_power_12 norm_feeder_loadshape.value*5252.628439;
 };
 
 object triplex_load {
 	phases CS;
 	name 99080045_C_loadshape;
 	parent node99080045T99080045_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*16986.901253;
+	base_power_12 norm_feeder_loadshape.value*18378.101674;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340246_C_loadshape;
 	parent node99340246T99340247_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4983.873241;
+	base_power_12 norm_feeder_loadshape.value*5392.044599;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340247_C_loadshape;
 	parent node99340246T99340247_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3733.904854;
+	base_power_12 norm_feeder_loadshape.value*4039.705772;
 };
 
 object triplex_load {
 	phases AS;
 	name 95020006_A_loadshape;
 	parent node95020006T95020006_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1409.519611;
+	base_power_12 norm_feeder_loadshape.value*1524.957044;
 };
 
 object triplex_load {
 	phases BS;
 	name 99160066_B_loadshape;
 	parent node99160066T99160066_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6285.887863;
+	base_power_12 norm_feeder_loadshape.value*6800.692165;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290151_B_loadshape;
 	parent node99290151T99290151_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4766.623085;
+	base_power_12 norm_feeder_loadshape.value*5157.001997;
 };
 
 object triplex_load {
 	phases CS;
 	name 99210105_C_loadshape;
 	parent node99210105T99210105_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1570.479973;
+	base_power_12 norm_feeder_loadshape.value*1699.099806;
 };
 
 object triplex_load {
 	phases CS;
 	name 99020013_C_loadshape;
 	parent node99020013T99020013_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7563.956789;
+	base_power_12 norm_feeder_loadshape.value*8183.432920;
 };
 
 object triplex_load {
@@ -25287,70 +25282,70 @@ object triplex_load {
 	phases AS;
 	name 99230115_A_loadshape;
 	parent node99230115T99230115_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*15.661387;
+	base_power_12 norm_feeder_loadshape.value*16.944030;
 };
 
 object triplex_load {
 	phases CS;
 	name 99310191_C_loadshape;
 	parent node99310191T99310191_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919376;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5416.565991;
+	base_power_12 norm_feeder_loadshape.value*5860.174203;
 };
 
 object triplex_load {
 	phases CS;
 	name 99080046_C_loadshape;
 	parent node99080046T99080046_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2708.277729;
+	base_power_12 norm_feeder_loadshape.value*2930.081404;
 };
 
 object triplex_load {
 	phases BS;
 	name 99340230_B_loadshape;
 	parent node99340230T99340230_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4021.613546;
+	base_power_12 norm_feeder_loadshape.value*4350.977353;
 };
 
 object triplex_load {
 	phases CS;
 	name 99210099_C_loadshape;
 	parent node99210099T99210099_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4294.783428;
+	base_power_12 norm_feeder_loadshape.value*4646.519417;
 };
 
 object triplex_load {
@@ -25364,154 +25359,154 @@ object triplex_load {
 	phases AS;
 	name 95020009_A_loadshape;
 	parent node95020009T95020007_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*798.727507;
+	base_power_12 norm_feeder_loadshape.value*864.142030;
 };
 
 object triplex_load {
 	phases AS;
 	name 10290021_A_loadshape;
 	parent node10290021T10290021_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2208.252335;
+	base_power_12 norm_feeder_loadshape.value*2389.104718;
 };
 
 object triplex_load {
 	phases CS;
 	name 99180081_C_loadshape;
 	parent node99180081T99180081_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919376;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4487.097568;
+	base_power_12 norm_feeder_loadshape.value*4854.583782;
 };
 
 object triplex_load {
 	phases BS;
 	name 99080049_B_loadshape;
 	parent node99080049T99080049_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*972.969664;
+	base_power_12 norm_feeder_loadshape.value*1052.654345;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290298_B_loadshape;
 	parent node99290298T99290298_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2926.058638;
+	base_power_12 norm_feeder_loadshape.value*3165.698225;
 };
 
 object triplex_load {
 	phases CS;
 	name 99080047_C_loadshape;
 	parent node99080047T99080047_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7547.925626;
+	base_power_12 norm_feeder_loadshape.value*8166.088830;
 };
 
 object triplex_load {
 	phases AS;
 	name 99230116_A_loadshape;
 	parent node99230116T99230116_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*328.887385;
+	base_power_12 norm_feeder_loadshape.value*355.822743;
 };
 
 object triplex_load {
 	phases BS;
 	name 99310190_B_loadshape;
 	parent node99310190T99310190_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5998.634191;
+	base_power_12 norm_feeder_loadshape.value*6489.912870;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340249_C_loadshape;
 	parent node99340249T99340248_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5560.790248;
+	base_power_12 norm_feeder_loadshape.value*6016.210199;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340248_C_loadshape;
 	parent node99340249T99340248_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5336.437365;
+	base_power_12 norm_feeder_loadshape.value*5773.483168;
 };
 
 object triplex_load {
 	phases AS;
 	name 99350261_A_loadshape;
 	parent node99350261T99350261_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6405.477898;
+	base_power_12 norm_feeder_loadshape.value*6930.076436;
 };
 
 object triplex_load {
@@ -25525,476 +25520,476 @@ object triplex_load {
 	phases BS;
 	name 99290163_B_loadshape;
 	parent node99290159T99290163_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1311.258242;
+	base_power_12 norm_feeder_loadshape.value*1418.648224;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290174_B_loadshape;
 	parent node99290159T99290163_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6748.086484;
+	base_power_12 norm_feeder_loadshape.value*7300.744124;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290157_B_loadshape;
 	parent node99290159T99290163_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2744.828955;
+	base_power_12 norm_feeder_loadshape.value*2969.626118;
 };
 
 object triplex_load {
 	phases AS;
 	name 99200089_A_loadshape;
 	parent node99200089T99200089_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943474;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4604.425410;
+	base_power_12 norm_feeder_loadshape.value*4981.520589;
 };
 
 object triplex_load {
 	phases CS;
 	name 99110055_C_loadshape;
 	parent node99110055T99110055_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2740.330267;
+	base_power_12 norm_feeder_loadshape.value*2964.758994;
 };
 
 object triplex_load {
 	phases AS;
 	name 99080284_A_loadshape;
 	parent node99080284T99080284_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5254.125627;
+	base_power_12 norm_feeder_loadshape.value*5684.430229;
 };
 
 object triplex_load {
 	phases CS;
 	name 99080284_C_loadshape;
 	parent node99080284T99080284_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5376.247587;
+	base_power_12 norm_feeder_loadshape.value*5816.553785;
 };
 
 object triplex_load {
 	phases BS;
 	name 99080284_B_loadshape;
 	parent node99080284T99080284_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5668.859484;
+	base_power_12 norm_feeder_loadshape.value*6133.130134;
 };
 
 object triplex_load {
 	phases AS;
 	name 10290008_A_loadshape;
 	parent node10290008T10290008_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*9866.633684;
+	base_power_12 norm_feeder_loadshape.value*10674.695421;
 };
 
 object triplex_load {
 	phases AS;
 	name 99220109_A_loadshape;
 	parent node99220109T99220109_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5747.703494;
+	base_power_12 norm_feeder_loadshape.value*6218.431345;
 };
 
 object triplex_load {
 	phases AS;
 	name 99310192_A_loadshape;
 	parent node99310192T99310189_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*830.050803;
+	base_power_12 norm_feeder_loadshape.value*898.030654;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340226_C_loadshape;
 	parent node99340226T99340226_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2820.461612;
+	base_power_12 norm_feeder_loadshape.value*3051.452970;
 };
 
 object triplex_load {
 	phases AS;
 	name 99350267_A_loadshape;
 	parent node99350267T99350266_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7799.345872;
+	base_power_12 norm_feeder_loadshape.value*8438.099997;
 };
 
 object triplex_load {
 	phases CS;
 	name 99020012_C_loadshape;
 	parent node99020012T99020012_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6730.642717;
+	base_power_12 norm_feeder_loadshape.value*7281.871741;
 };
 
 object triplex_load {
 	phases AS;
 	name 10290012_A_loadshape;
 	parent node10290012T10290012_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*31.322639;
+	base_power_12 norm_feeder_loadshape.value*33.887914;
 };
 
 object triplex_load {
 	phases BS;
 	name 99220112_B_loadshape;
 	parent node99220112T99220112_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7603.893995;
+	base_power_12 norm_feeder_loadshape.value*8226.640920;
 };
 
 object triplex_load {
 	phases CS;
 	name 99270234_C_loadshape;
 	parent node99270234T99270234_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2564.054559;
+	base_power_12 norm_feeder_loadshape.value*2774.046584;
 };
 
 object triplex_load {
 	phases AS;
 	name 99350265_A_loadshape;
 	parent node99350265T99350265_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7501.771392;
+	base_power_12 norm_feeder_loadshape.value*8116.154637;
 };
 
 object triplex_load {
 	phases AS;
 	name 99170079_A_loadshape;
 	parent node99170079T99170079_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6917.892249;
+	base_power_12 norm_feeder_loadshape.value*7484.456713;
 };
 
 object triplex_load {
 	phases AS;
 	name 14300124_A_loadshape;
 	parent node14300124T14300124_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6264.528708;
+	base_power_12 norm_feeder_loadshape.value*6777.583728;
 };
 
 object triplex_load {
 	phases CS;
 	name 99030016_C_loadshape;
 	parent node99030016T99030016_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6410.130045;
+	base_power_12 norm_feeder_loadshape.value*6935.109585;
 };
 
 object triplex_load {
 	phases AS;
 	name 10300019_A_loadshape;
 	parent node10300019T10300019_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4933.316842;
+	base_power_12 norm_feeder_loadshape.value*5337.347711;
 };
 
 object triplex_load {
 	phases BS;
 	name 99340235_B_loadshape;
 	parent node99340235T99340235_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6184.506732;
+	base_power_12 norm_feeder_loadshape.value*6691.008080;
 };
 
 object triplex_load {
 	phases BS;
 	name 99340268_B_loadshape;
 	parent node99340235T99340235_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5897.244439;
+	base_power_12 norm_feeder_loadshape.value*6380.219457;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290177_B_loadshape;
 	parent node99290177T99290177_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4038.510104;
+	base_power_12 norm_feeder_loadshape.value*4369.257712;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340227_C_loadshape;
 	parent node99340227T99340222_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919376;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4166.584896;
+	base_power_12 norm_feeder_loadshape.value*4507.821627;
 };
 
 object triplex_load {
 	phases AS;
 	name 99350259_A_loadshape;
 	parent node99350259T99350259_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1237.244517;
+	base_power_12 norm_feeder_loadshape.value*1338.572891;
 };
 
 object triplex_load {
 	phases AS;
 	name 99220107_A_loadshape;
 	parent node99220107T99220107_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3680.412017;
+	base_power_12 norm_feeder_loadshape.value*3981.831956;
 };
 
 object triplex_load {
 	phases CS;
 	name 99100052_C_loadshape;
 	parent node99100052T99100052_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7692.162591;
+	base_power_12 norm_feeder_loadshape.value*8322.138575;
 };
 
 object triplex_load {
 	phases AS;
 	name 99210095_A_loadshape;
 	parent node99210095T99210095_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1712.961790;
+	base_power_12 norm_feeder_loadshape.value*1853.250659;
 };
 
 object triplex_load {
 	phases CS;
 	name 99210095_C_loadshape;
 	parent node99210095T99210095_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1752.769049;
+	base_power_12 norm_feeder_loadshape.value*1896.318069;
 };
 
 object triplex_load {
 	phases BS;
 	name 99210095_B_loadshape;
 	parent node99210095T99210095_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1848.174395;
+	base_power_12 norm_feeder_loadshape.value*1999.536963;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330203_B_loadshape;
 	parent node99330203T99330203_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3345.719126;
+	base_power_12 norm_feeder_loadshape.value*3619.728245;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290161_B_loadshape;
 	parent node99290161T99290161_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*963.160699;
+	base_power_12 norm_feeder_loadshape.value*1042.042041;
 };
 
 object triplex_load {
@@ -26008,56 +26003,56 @@ object triplex_load {
 	phases AS;
 	name 14310128_A_loadshape;
 	parent node14310130T14310126_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5732.040437;
+	base_power_12 norm_feeder_loadshape.value*6201.485508;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340233_C_loadshape;
 	parent node99340233T99340233_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6922.944151;
+	base_power_12 norm_feeder_loadshape.value*7489.922358;
 };
 
 object triplex_load {
 	phases AS;
 	name 99350264_A_loadshape;
 	parent node99350264T99350263_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*233.702744;
+	base_power_12 norm_feeder_loadshape.value*252.842630;
 };
 
 object triplex_load {
 	phases AS;
 	name 99350263_A_loadshape;
 	parent node99350264T99350263_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3852.682741;
+	base_power_12 norm_feeder_loadshape.value*4168.211381;
 };
 
 object triplex_load {
@@ -26071,112 +26066,112 @@ object triplex_load {
 	phases AS;
 	name 99210093_A_loadshape;
 	parent node99210093T99210093_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3132.263896;
+	base_power_12 norm_feeder_loadshape.value*3388.791369;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330216_B_loadshape;
 	parent node99330216T99330216_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*2906.373838;
+	base_power_12 norm_feeder_loadshape.value*3144.401271;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290172_B_loadshape;
 	parent node99290172T99290172_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*473.131416;
+	base_power_12 norm_feeder_loadshape.value*511.880133;
 };
 
 object triplex_load {
 	phases CS;
 	name 99340221_C_loadshape;
 	parent node99340221T99340221_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4895.484932;
+	base_power_12 norm_feeder_loadshape.value*5296.417427;
 };
 
 object triplex_load {
 	phases CS;
 	name 99270228_C_loadshape;
 	parent node99270228T99270228_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3541.603420;
+	base_power_12 norm_feeder_loadshape.value*3831.655155;
 };
 
 object triplex_load {
 	phases CS;
 	name 99100053_C_loadshape;
 	parent node99100053T99100053_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7051.155390;
+	base_power_12 norm_feeder_loadshape.value*7628.633896;
 };
 
 object triplex_load {
 	phases AS;
 	name 10300018_A_loadshape;
 	parent node10300018T10300017_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*1205.922525;
+	base_power_12 norm_feeder_loadshape.value*1304.685678;
 };
 
 object triplex_load {
 	phases AS;
 	name 99030021_A_loadshape;
 	parent node99030021T99030019_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5951.308793;
+	base_power_12 norm_feeder_loadshape.value*6438.711596;
 };
 
 object triplex_load {
@@ -26190,112 +26185,112 @@ object triplex_load {
 	phases BS;
 	name 99290271_B_loadshape;
 	parent node99290271T99290271_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3227.431477;
+	base_power_12 norm_feeder_loadshape.value*3491.753025;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330218_B_loadshape;
 	parent node99330218T99330218_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4055.419744;
+	base_power_12 norm_feeder_loadshape.value*4387.552225;
 };
 
 object triplex_load {
 	phases CS;
 	name 99100054_C_loadshape;
 	parent node99100054T99100054_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*4118.507720;
+	base_power_12 norm_feeder_loadshape.value*4455.807006;
 };
 
 object triplex_load {
 	phases AS;
 	name 14310129_A_loadshape;
 	parent node14310129T14310127_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5168.230633;
+	base_power_12 norm_feeder_loadshape.value*5591.500571;
 };
 
 object triplex_load {
 	phases AS;
 	name 99250120_A_loadshape;
 	parent node99250120T99250120_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*16914.266633;
+	base_power_12 norm_feeder_loadshape.value*18299.518393;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290276_B_loadshape;
 	parent node99290276T99290274_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*16.897561;
+	base_power_12 norm_feeder_loadshape.value*18.281445;
 };
 
 object triplex_load {
 	phases BS;
 	name 99290274_B_loadshape;
 	parent node99290276T99290274_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*5170.648155;
+	base_power_12 norm_feeder_loadshape.value*5594.116084;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330306_B_loadshape;
 	parent node99330306T99330306_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946486;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*3041.558044;
+	base_power_12 norm_feeder_loadshape.value*3290.656851;
 };
 
 object triplex_load {
@@ -26309,41 +26304,41 @@ object triplex_load {
 	phases AS;
 	name 99250122_A_loadshape;
 	parent node99250122T99250119_A;
-	power_pf_12 residential_power_pfA.value*1.0;
+	power_pf_12 residential_power_pfA.value*0.943475;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*6405.477898;
+	base_power_12 norm_feeder_loadshape.value*6930.076436;
 };
 
 object triplex_load {
 	phases BS;
 	name 99330217_B_loadshape;
 	parent node99330217T99330204_B;
-	power_pf_12 residential_power_pfB.value*1.0;
+	power_pf_12 residential_power_pfB.value*0.946485;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*7941.851315;
+	base_power_12 norm_feeder_loadshape.value*8592.276412;
 };
 
 object triplex_load {
 	phases CS;
 	name 99150295_C_loadshape;
 	parent node99150295T99150295_C;
-	power_pf_12 residential_power_pfC.value*1.0;
+	power_pf_12 residential_power_pfC.value*0.919375;
 	impedance_pf_12 0.970000;
 	current_pf_12 0.970000;
 	impedance_fraction_12 0.000000;
 	current_fraction_12 0.000000;
 	nominal_voltage 120.0;
 	power_fraction_12 1.000000;
-	base_power_12 norm_feeder_loadshape.value*96.151951;
+	base_power_12 norm_feeder_loadshape.value*104.026644;
 };
 
