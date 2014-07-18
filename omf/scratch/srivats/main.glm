@@ -28,7 +28,7 @@ class player{
 };
 
 object player {
-	file C:\Users\sxs15\Documents\GitHub\omf3\omf\data\Model\admin\Automated DynamicCVR Testing\loadShapeScalar.player;
+	file loadShapeScalar.player;
 	property value;
 	name norm_feeder_loadshape;
 	loop 0;
