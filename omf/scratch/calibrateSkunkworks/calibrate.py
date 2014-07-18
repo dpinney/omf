@@ -18,7 +18,7 @@ with open(PLAYER_FNAME,"w") as playFile:
 	for row in allData:
 		timestamp = dt.datetime.strptime(row["timestamp"], "%m/%d/%Y %H:%M:%S")
 		power = float(row["power"]) / maxPower
-		line = timestamp.strftime("%Y/%m/%d %H:%M:%S") + " EDT," + str(power) + "\n"
+		line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(power) + "\n"
 		playFile.write(line)
 
 # Get tree.
@@ -67,15 +67,15 @@ for key in tree.keys():
 		del tree[key]["longitude"]
 	except:
 		pass # No lat lons.
-omf.feeder.adjustTime(tree, 1, "days", "2013-01-01")
+omf.feeder.adjustTime(tree, 100, "hours", "2011-01-01")
 with open("out.glm","w") as outGlm:
 	outGlm.write(omf.feeder.sortedWrite(tree))
 proc = subprocess.Popen(['gridlabd', "-w", "out.glm"])
 proc.wait()
 
 # Do some plotting.
-plt.plot([float(row["power"]) for row in allData[:1000]])
-plt.show()
+# plt.plot([float(row["power"]) for row in allData[:1000]])
+# plt.show()
 
 # WHAT NEXT? csv to table format.
 
