@@ -6,15 +6,27 @@
  */
 function draw() {
 	// d3.js bookkeeping to set what happens on each time tick in the simulation:
-	force.on('tick', function () {
+	force.on('tick', function() {
 		vis.selectAll('line.link')
-		.attr('x1', function (d) { return d.source.x; })
-		.attr('y1', function (d) { return d.source.y; })
-		.attr('x2', function (d) { return d.target.x; })
-		.attr('y2', function (d) { return d.target.y; });
+			.attr('x1', function(d) {
+				return d.source.x;
+			})
+			.attr('y1', function(d) {
+				return d.source.y;
+			})
+			.attr('x2', function(d) {
+				return d.target.x;
+			})
+			.attr('y2', function(d) {
+				return d.target.y;
+			});
 		vis.selectAll('.node')
-		.attr("fixed", function (d){return d.fixed }) // fixed a node
-		.attr("transform", function (d) { return "translate(" + d.x + "," + d.y + ")"; });
+			.attr("fixed", function(d) {
+				return d.fixed
+			}) // fixed a node
+		.attr("transform", function(d) {
+			return "translate(" + d.x + "," + d.y + ")";
+		});
 	});
 	var name2nodeIndex = {}
 	if (nodes.length == 0) {
@@ -24,30 +36,31 @@ function draw() {
 				//TODO: Think about allowing access to other objects here.
 				nodeName = tree[x].name
 				nodeObject = tree[x].object
-				if (tree[x].latitude != undefined && tree[x].longitude != undefined){
+				if (tree[x].latitude != undefined && tree[x].longitude != undefined) {
 					x_pixel = tree[x].latitude
 					y_pixel = tree[x].longitude
 					isfixed = true
-				}else{
+				} else {
 					x_pixel = tree[x].latitude
 					y_pixel = tree[x].longitude
 					isfixed = false
 				}
 
 				// Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
-				if (nodeObject == 'node') 
+				if (nodeObject == 'node')
 					nodeObject = 'gridNode'
-				if (undefined != tree[x].bustype && tree[x].bustype == 'SWING') 
+				if (undefined != tree[x].bustype && tree[x].bustype == 'SWING')
 					nodeObject += ' swingNode'
 				nodeIndex = nodes.length
 				nodes.push({
-					name : nodeName,
-					treeIndex : parseInt(x),
-					objectType : nodeObject,
-					chargeMultiple : 1,
-					x : x_pixel,
-					y : y_pixel,
-					fixed : isfixed })
+					name: nodeName,
+					treeIndex: parseInt(x),
+					objectType: nodeObject,
+					chargeMultiple: 1,
+					x: x_pixel,
+					y: y_pixel,
+					fixed: isfixed
+				})
 				name2nodeIndex[nodeName] = nodeIndex
 			}
 		}
@@ -80,10 +93,10 @@ function draw() {
 		.style('opacity', 1);
 	// Start the layout.
 	force.start();
-	
+
 	// Run the layout in the background until performance is acceptable.
 	// preLayout()
-	
+
 	// Feeder loading
 	var interval = setInterval(function() {
 		if (force.alpha() < 0.1) {
@@ -187,6 +200,7 @@ function fontSizeRedraw(scale) {
 				return d.objectType
 			}
 		});
+	
 }
 
 /**
@@ -232,7 +246,11 @@ function zoom(x, y, s) {
 	// reset link width
 	if (s < 1) {
 		d3.selectAll('.link').style("stroke-width", LINE_LINK_STROKE_WIDTH / s);
+	} else {
+		d3.selectAll("line.link").style("stroke-width", LINE_LINK_STROKE_WIDTH);
 	}
+	
+	// console.log(zoomer.scale(), s)
 	// redraw font-size
 	fontSizeRedraw(s)
 }
@@ -249,21 +267,18 @@ function zoomReset() {
  * Zoom to fix window size
  */
 function zoomToFit() {
-	// TODO: If this function zooms out, the lines may become much lighter, and if this function is used to zoom in, the lines may become much thicker.  Probably a Chrome bug.  The display goes back to normal after using the mouse wheel to zoom.
 	function fly(attr_func, comp_func) {
 		var largest;
 		var my_n;
 		for (i = 0; i < nodes.length; i++) {
-			if (!largest || comp_func(attr_func(nodes[i]), largest)) {
-				largest = attr_func(nodes[i])
-				my_n = nodes[i]
+			if (undefined != nodes[i].objectType && nodes[i].objectType.indexOf("configur") >=0 ){
+				if (!largest || comp_func(attr_func(nodes[i]), largest)) {
+					largest = attr_func(nodes[i])
+					my_n = nodes[i]
+				}
 			}
 		}
 		return my_n;
-	}
-
-	function actual_scale() {
-		return $(window).height() / 1000
 	}
 
 	function the_center(bounds, i) {
@@ -279,13 +294,13 @@ function zoomToFit() {
 	}
 
 	function window_hoz_center() {
-		return ($(window).width() / 2) / actual_scale()
+		return ($(window).width() / 2) / ($(window).width() / 1000);
 	}
 
 	function window_vert_center() {
 		var extra = $("#title").outerHeight() + $("#toolbar").outerHeight()
 		var win_height = $(window).height() - extra
-		return (win_height / 2 + extra) / actual_scale();
+		return (win_height / 2 + extra) / ($(window).height() / 1000);
 	}
 
 	function center_feeder() {
@@ -320,7 +335,7 @@ function zoomToFit() {
 	function win_h() {
 		var extra = $("#title").outerHeight() + $("#toolbar").outerHeight()
 		var win_h = $(window).height() - extra
-		return win_h / actual_scale()
+		return win_h / ($(window).height() / 1000)
 	}
 
 	function get_width(bounds, i) {
