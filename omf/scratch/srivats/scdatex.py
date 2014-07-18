@@ -143,16 +143,16 @@ def comparesol(modelDir,localTree):
 	print regKeys
 	print regstr, type(regstr)
 
-	localTree[max_key+1] = {'object' : 'volt_var_control',
-	'name' : 'volt_var_control',
-	'control_method' : 'ACTIVE',
-	'capacitor_delay' : '30.0',
-	'regulator_delay' : '30.0',
-	'desired_pf' : '0.99',
-	'd_max' : '0.6',
-	'd_min' : '0.1',
-	'substation_link' : 'substation_transformer',
-	'regulator_list' : regstr } 
+	# localTree[max_key+1] = {'object' : 'volt_var_control',
+	# 'name' : 'volt_var_control',
+	# 'control_method' : 'ACTIVE',
+	# 'capacitor_delay' : '30.0',
+	# 'regulator_delay' : '30.0',
+	# 'desired_pf' : '0.99',
+	# 'd_max' : '0.6',
+	# 'd_min' : '0.1',
+	# 'substation_link' : 'substation_transformer',
+	# 'regulator_list' : regstr } 
 
 
 	feeder.adjustTime(tree=localTree, simLength=float("8760"),
