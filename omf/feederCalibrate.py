@@ -701,20 +701,10 @@ def _runGLMS(fdir, SCADA, days):
 		'''Run all the .glm files found in the directory and return the metrics for each run.'''
 		print ('Begining simulations in GridLab-D.')
 		glmFiles = [x for x in os.listdir(fdir) if x.endswith('.glm')]
-# 		for glm in glmFiles:
-# 			with open(os.path.join(fdir,'stdout.txt'),'w') as stdout, open(os.path.join(fdir,'stderr.txt'),'w') as stderr, open(os.path.join(fdir,'PID.txt'),'w') as pidFile:
-# 				proc = subprocess.Popen(['C:/Projects/GridLAB-D_Builds/gld3.0/VS2005/Win32/Release/gridlabd.exe', glm], cwd=fdir, stdout=stdout, stderr=stderr)
-# 				pidFile.write(str(proc.pid))
-# 				proc.wait()
-# 		with open(os.path.join(fdir,'stdout.txt'),'w') as stdout, open(os.path.join(fdir,'stderr.txt'),'w') as stderr, open(os.path.join(fdir,'PID.txt'),'w') as pidFile:
-# 			proc = subprocess.Popen(['C:/Projects/GridLAB-D_Builds/gld3.0/VS2005/Win32/Release/gridlabd.exe', '-T', '24', '--job'], cwd=fdir, stdout=stdout, stderr=stderr)
-# 			pidFile.write(str(proc.pid))
-# 			proc.wait()
 		proc = []
 		for glm in glmFiles:
 			with open(os.path.join(fdir,'stdout.txt'),'w') as stdout, open(os.path.join(fdir,'stderr.txt'),'w') as stderr, open(os.path.join(fdir,'PID.txt'),'w') as pidFile:
-				proc.append(subprocess.Popen(['C:/Projects/GridLAB-D_Builds/gld3.0/VS2005/Win32/Release/gridlabd.exe', glm], cwd=fdir, stdout=stdout, stderr=stderr))
-#				pidFile.write(str(proc.pid))
+				proc.append(subprocess.Popen(['gridlabd', glm], cwd=fdir, stdout=stdout, stderr=stderr))
 		for p in proc:
 			p.wait()
 		print ('Beginning comparison of intitial simulation output with SCADA.')
