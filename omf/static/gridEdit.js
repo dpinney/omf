@@ -467,7 +467,7 @@ function selectViaTreeIndex(treeIndex) {
  * graphSvg click handler function, clear selected component.
  */
 function onSvgBlankCanvasClick() {
-	if (window.event.toElement.tagName == 'rect') {
+	if (window.event.toElement.tagName == 'svg') {
 		clearSelection()
 	}
 }
@@ -1597,7 +1597,7 @@ function foldSecSys() {
  */
 function fit_table() {
 	var raw_height = $("#selBody").height() + $("#daButtons").height() + $("#selHead").height();
-	var win_height = window.innerHeight * 0.6;
+	var win_height = window.innerHeight * 0.8;
 	$("#selected").css("height", win_height > raw_height ? raw_height : win_height)
 }
 
