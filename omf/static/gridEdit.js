@@ -6,25 +6,25 @@
  */
 function draw() {
 	// d3.js bookkeeping to set what happens on each time tick in the simulation:
-	force.on('tick', function() {
+	force.on('tick', function () {
 		vis.selectAll('line.link')
-			.attr('x1', function(d) {
+			.attr('x1', function (d) {
 				return d.source.x;
 			})
-			.attr('y1', function(d) {
+			.attr('y1', function (d) {
 				return d.source.y;
 			})
-			.attr('x2', function(d) {
+			.attr('x2', function (d) {
 				return d.target.x;
 			})
-			.attr('y2', function(d) {
+			.attr('y2', function (d) {
 				return d.target.y;
 			});
 		vis.selectAll('.node')
-			.attr("fixed", function(d) {
+			.attr("fixed", function (d) {
 				return d.fixed
 			}) // fixed a node
-		.attr("transform", function(d) {
+		.attr("transform", function (d) {
 			return "translate(" + d.x + "," + d.y + ")";
 		});
 	});
@@ -33,22 +33,10 @@ function draw() {
 		// Go through the first time and set up the nodes with indices:
 		for (x in tree) {
 			if ((tree[x].name != undefined || tree[x].module != undefined) && tree[x].from == undefined) {
-				//TODO: Think about allowing access to other objects here.
 				nodeName = tree[x].name
-				nodeObject = tree[x].object
-				if (tree[x].latitude != undefined && tree[x].longitude != undefined) {
-					x_pixel = tree[x].latitude
-					y_pixel = tree[x].longitude
-					isfixed = true
-				} else {
-					x_pixel = tree[x].latitude
-					y_pixel = tree[x].longitude
-					isfixed = false
-				}
-
+				nodeObject = (tree[x].object == "node") ? "gridNode" : tree[x].object
+				isfixed = (tree[x].latitude != undefined && tree[x].longitude != undefined) ? true : false
 				// Hack to make sure electrical nodes are classed differently than graph nodes for coloring purposes:
-				if (nodeObject == 'node')
-					nodeObject = 'gridNode'
 				if (undefined != tree[x].bustype && tree[x].bustype == 'SWING')
 					nodeObject += ' swingNode'
 				nodeIndex = nodes.length
@@ -57,8 +45,8 @@ function draw() {
 					treeIndex: parseInt(x),
 					objectType: nodeObject,
 					chargeMultiple: 1,
-					x: x_pixel,
-					y: y_pixel,
+					x: tree[x].latitude,
+					y: tree[x].longitude,
 					fixed: isfixed
 				})
 				name2nodeIndex[nodeName] = nodeIndex
@@ -94,93 +82,129 @@ function draw() {
 	// Start the layout.
 	force.start();
 
-	// Run the layout in the background until performance is acceptable.
-	// preLayout()
-
 	// Feeder loading
-	var interval = setInterval(function() {
-		if (force.alpha() < 0.1) {
+	var interval = setInterval(function () {
+		if (force.alpha() < 0.05) {
 			removeProgressDialog()
 			clearInterval(interval)
 		} else if (nodes[parseInt(Math.random() * nodes.length)].fixed) {
 			removeProgressDialog()
 			clearInterval(interval)
 		} else {
-			force.tick()
+			// Run the layout in the background until performance is acceptable.
+			for (i = 0; i < 10; ++i) force.tick()		
 		}
-	}, 1500)
+	}, 1000)
 
 	// Start drawing.
 	redraw()
 }
 
 /**
- * Draw svg elements. Start d3.force at the end.
+ * Draw svg elements. Start d3.force at the end. TODO: performance issue.
  */
 function redraw() {
 	link = d3.select('#linkLayer').selectAll('line.link')
-		.data(links, function (d) {return d.source.treeIndex + '-' + d.target.treeIndex})
-	
+		.data(links, function (d) {
+			return d.source.treeIndex + '-' + d.target.treeIndex
+		})
+
 	link.enter().append('svg:line')
 		.on('click', onCompClick)
-		.attr('class', function (d) { return 'link ' + d.objectType })
-		.attr('id', function (d) { return 'n' + d.treeIndex })
+		.attr('class', function (d) {
+			return 'link ' + d.objectType
+		})
+		.attr('id', function (d) {
+			return 'n' + d.treeIndex
+		})
 		.style('stroke-width', LINE_LINK_STROKE_WIDTH)
 		.attr('marker-start',
 			function (d) {
 				// console.log(d);
 				treeData = tree[d.treeIndex]
-				if (d.objectType=='fromTo') {
-					if (treeData.object == "transformer") {return "url(#transformerMarker)"};
-					if (treeData.object == "fuse") {return "url(#fuseMarker)"};
-					if (treeData.object == "regulator") {return "url(#regulatorMarker)"};
+				if (d.objectType == 'fromTo') {
+					if (treeData.object == "transformer") {
+						return "url(#transformerMarker)"
+					};
+					if (treeData.object == "fuse") {
+						return "url(#fuseMarker)"
+					};
+					if (treeData.object == "regulator") {
+						return "url(#regulatorMarker)"
+					};
 				};
 			})
 	link.exit().remove()
 
-	node = vis.selectAll('.node').data(nodes, function (d) {return d.treeIndex}).enter()
+	node = vis.selectAll('.node').data(nodes, function (d) {
+		return d.treeIndex
+	}).enter()
 		.append("g")
 		.call(force.drag)
-		.attr('class', function (d) {return 'node ' + d.objectType})
-		.attr('id', function (d) {return 'n' + d.treeIndex})
+		.attr('class', function (d) {
+			return 'node ' + d.objectType
+		})
+		.attr('id', function (d) {
+			return 'n' + d.treeIndex
+		})
 		.on('click', onCompClick)
 	fontSizeRedraw(zoomer.scale());
-	
+
 	// Put the main circle on there, sized according to its size.
 	node.append('svg:circle')
-		.attr('id', function (d) {return 'circ' + d.treeIndex})
+		.attr('id', function (d) {
+			return 'circ' + d.treeIndex
+		})
 		.attr('class', 'nodeCircle')
 		.attr('cx', 0)
 		.attr('cy', 0)
-		.attr('r', function (d) {return d.chargeMultiple * NODE_CIRCLE_RADIUS })
-		// .attr("r", 100)
-		.style('stroke-width', NODE_STROKE_WIDTH-0.2);
+		.attr('r', function (d) {
+			return d.chargeMultiple * NODE_CIRCLE_RADIUS
+		})
+	// .attr("r", 100)
+	.style('stroke-width', NODE_STROKE_WIDTH - 0.2);
 
 	node.append('svg:circle')
-		.attr('class', function (d) {if(d.fixed) {return 'nodeIsPinned'} else {return 'nodeNotPinned'}})
-		
+		.attr('class', function (d) {
+			if (d.fixed) {
+				return 'nodeIsPinned'
+			} else {
+				return 'nodeNotPinned'
+			}
+		})
+
 	node.selectAll('.nodeIsPinned')
-		.attr('id', function (d) {return 'pin' + d.treeIndex})
+		.attr('id', function (d) {
+			return 'pin' + d.treeIndex
+		})
 	node.selectAll('.nodeNotPinned')
-		.attr('id', function (d) {return 'pin' + d.treeIndex})
+		.attr('id', function (d) {
+			return 'pin' + d.treeIndex
+		})
 
 	node.append("svg:text")
 		.attr("class", "nodetext")
 	// Get rid of deleted nodes.
-	vis.selectAll('.node').data(nodes, function (d) {return d.treeIndex}).exit().remove()
+	vis.selectAll('.node').data(nodes, function (d) {
+		return d.treeIndex
+	}).exit().remove()
 
 	d3.selectAll('.nodeIsPinned')
-					.attr('cx', 0)
-					.attr('cy', 0)
-					.attr('r', PINNED_NODE_CIRCLE_RADIUS)
-					.style('stroke-width', PINNED_NODE_STROKE_SIZE);
+		.attr('cx', 0)
+		.attr('cy', 0)
+		.attr('r', PINNED_NODE_CIRCLE_RADIUS)
+		.style('stroke-width', PINNED_NODE_STROKE_SIZE);
 	d3.selectAll('.nodeNotPinned').attr('r', null)
 	d3.selectAll('.node.selected').style('stroke-width', NODE_SELECTED_STROKE_WIDTH)
 
 	// Updata sizes
-	vis.selectAll('.nodeCircle').data(nodes, function (d){return d.treeIndex})
-		.attr('r', function (d){ return d.chargeMultiple * NODE_CIRCLE_RADIUS})
-	
+	vis.selectAll('.nodeCircle').data(nodes, function (d) {
+		return d.treeIndex
+	})
+		.attr('r', function (d) {
+			return d.chargeMultiple * NODE_CIRCLE_RADIUS
+		})
+
 	// Show scalegrid. 
 	force.start()
 }
@@ -193,7 +217,7 @@ function fontSizeRedraw(scale) {
 	d3.selectAll('.nodetext')
 		.style('font-size', TEXT_FONT_SIZE / scale)
 		.style("stroke-width", 1 / scale)
-		.text(function(d) {
+		.text(function (d) {
 			if (d.chargeMultiple != 1) {
 				return d.objectType + ' has hidden children'
 			} else {
@@ -308,16 +332,16 @@ function zoomToFit() {
 		var trans_amt_y = window_vert_center() - ycenter();
 		zoom(trans_amt_x, trans_amt_y, zoomer.scale())
 	}
-	var rets_x = function(n) {
+	var rets_x = function (n) {
 		return n.x;
 	};
-	var rets_y = function(n) {
+	var rets_y = function (n) {
 		return n.y;
 	};
-	var lt = function(a, b) {
+	var lt = function (a, b) {
 		return a < b;
 	};
-	var gt = function(a, b) {
+	var gt = function (a, b) {
 		return a > b;
 	};
 
@@ -1292,7 +1316,7 @@ function duplicateFeeder() {
 	if (newName) {
 		$.ajax({
 			url: "/uniqObjName/Feeder/{{ currUser }}/" + newName
-		}).done(function(data) {
+		}).done(function (data) {
 			if (data.exists) {
 				alert("You already have a feeder named " + newName)
 				duplicateFeeder()
@@ -1328,7 +1352,7 @@ function publishFeeder() {
 	if (newName) {
 		$.ajax({
 			url: "/uniqObjName/Feeder/public/" + newName
-		}).done(function(data) {
+		}).done(function (data) {
 			if (data.exists) {
 				alert("There is already a public feeder named " + newName)
 				publishFeeder()
@@ -1353,20 +1377,20 @@ function hideNode(node) {
 	// Pop the node of the nodes list and push it onto the hiddenNodes list:
 	hiddenNodes.push(nodes.splice(nodes.indexOf(node), 1)[0])
 	// Pop/push any connected Links:
-	toHideLinks = links.filter(function(lin) {
+	toHideLinks = links.filter(function (lin) {
 		return node.name == lin.source.name || node.name == lin.target.name
 	})
 	toHideLinks.map(hideLink)
 	// Make the parents big!
-	linkedNames = toHideLinks.map(function(x) {
+	linkedNames = toHideLinks.map(function (x) {
 		return x.source.name
-	}).concat(toHideLinks.map(function(y) {
+	}).concat(toHideLinks.map(function (y) {
 		return y.target.name
 	}))
-	toGrow = nodes.filter(function(thisNode) {
+	toGrow = nodes.filter(function (thisNode) {
 		return linkedNames.indexOf(thisNode.name) != -1
 	})
-	toGrow.map(function(d) {
+	toGrow.map(function (d) {
 		d.chargeMultiple = 1.5
 	})
 }
@@ -1422,20 +1446,20 @@ function foldOneLevel() {
 function unfoldOneLevel() {
 	// Find the hidden links that are connected to visible nodes:
 	function attachedToVizNode(link) {
-		return nodes.some(function(d) {
+		return nodes.some(function (d) {
 			return d.name == link.source.name || d.name == link.target.name
 		})
 	}
 	linksToReveal = hiddenLinks.filter(attachedToVizNode)
 	// Find the nodes that are attached to the revealed links:
 	function attachedToRevealed(node) {
-		return linksToReveal.some(function(d) {
+		return linksToReveal.some(function (d) {
 			return node.name == d.source.name || node.name == d.target.name
 		})
 	}
 	// Size the parents of revealed elements correctly.
 	nodesToResize = nodes.filter(attachedToRevealed)
-	nodesToResize.map(function(d) {
+	nodesToResize.map(function (d) {
 		d.chargeMultiple = 1
 	})
 	// Actually do the revealing.
@@ -1444,7 +1468,7 @@ function unfoldOneLevel() {
 	nodesToReveal.map(showNode)
 	updateHiddenPerc()
 	redraw()
-	d3.selectAll('.node').attr('stroke-width', function(d) {
+	d3.selectAll('.node').attr('stroke-width', function (d) {
 		return d.chargeMultiple * NODE_STROKE_WIDTH
 	})
 }
@@ -1459,7 +1483,7 @@ function unfoldAll() {
 	while (hiddenNodes.length != 0) {
 		nodes.push(hiddenNodes.pop())
 	}
-	nodes.map(function(d) {
+	nodes.map(function (d) {
 		d.chargeMultiple = 1
 	})
 	updateHiddenPerc()
@@ -1477,14 +1501,14 @@ function unfoldAtSelected() {
 	linksToReveal = hiddenLinks.filter(attachedToSelected)
 	// Find the nodes that are attached to the revealed links:
 	function attachedToRevealed(node) {
-		return linksToReveal.some(function(d) {
+		return linksToReveal.some(function (d) {
 			return node.name == d.source.name || node.name == d.target.name
 		})
 	}
 	nodesToReveal = hiddenNodes.filter(attachedToRevealed)
 	// Size the parents of revealed elements correctly.
 	nodesToResize = nodes.filter(attachedToRevealed)
-	nodesToResize.map(function(d) {
+	nodesToResize.map(function (d) {
 		d.chargeMultiple = 1
 	})
 	// Actually do the revealing.
@@ -1505,12 +1529,12 @@ function foldAtSelected() {
 	linksToHide = links.filter(attachedToSelected)
 	// Find the nodes that are attached to the revealed links:
 	function attachedToRevealed(node) {
-		return linksToHide.some(function(d) {
+		return linksToHide.some(function (d) {
 			return node.name == d.source.name || node.name == d.target.name
 		})
 	}
 	attachedNodes = nodes.filter(attachedToRevealed)
-	nodesToHide = attachedNodes.filter(function(node) {
+	nodesToHide = attachedNodes.filter(function (node) {
 		return node.weight == 1 && node.name != selNode.name
 	})
 	// Size the parent correctly.
@@ -1528,7 +1552,7 @@ function foldAtSelected() {
  */
 function foldSecSys() {
 	// filter out all links in secondary system, put them into hiddenLinks
-	secLinks = links.filter(function(link) {
+	secLinks = links.filter(function (link) {
 		if (link.objectType == 'parentChild') {
 			hiddenLinks.push(link)
 			nodes[link.target.index].chargeMultiple = 1.5
@@ -1567,14 +1591,14 @@ function foldSecSys() {
 		}
 	}
 	// put nodes into hiddenNodes
-	secLinks.filter(function(link) {
-		if (!hiddenNodes.some(function(d) {
+	secLinks.filter(function (link) {
+		if (!hiddenNodes.some(function (d) {
 			return (d.index == link.target.index)
 		})) {
 			hiddenNodes.push(link.target);
 		}
 
-		if (!hiddenNodes.some(function(d) {
+		if (!hiddenNodes.some(function (d) {
 			return (d.index == link.source.index)
 		}))
 			if (link.source.objectType != 'gridNode')
@@ -1615,11 +1639,11 @@ function create_table() {
 		} else if (prop != 'from' && prop != 'to' && prop != 'parent' && prop != 'file') { // Avoid editing machine-written properties!
 			var valueEl;
 			if (prop == "configuration") {
-				valueEl = $("<a>").html(treeData[prop]).attr("href", "#").click(function(e) {
+				valueEl = $("<a>").html(treeData[prop]).attr("href", "#").click(function (e) {
 					var myname = $(this).html()
 					$("#searchTerm").val("\"name\":\"" + myname + "\"")
 					findNext()
-					var theButton = $.makeArray($("button")).filter(function(b) {
+					var theButton = $.makeArray($("button")).filter(function (b) {
 						return $(b).html().indexOf("Find") > -1
 					})[0]
 					var dispStatus = theButton.nextSibling.nextSibling.style.display
@@ -1671,7 +1695,7 @@ function deselect() {
  */
 function validation(selector, testfunc, error_msg) {
 	var invalid = false;
-	$.makeArray($(selector)).forEach(function(e) {
+	$.makeArray($(selector)).forEach(function (e) {
 		if (testfunc(e)) {
 			$(e).css("border", "1px solid red");
 			if (!invalid)
@@ -1691,7 +1715,7 @@ function validation(selector, testfunc, error_msg) {
  * @return {boolean} 
  */
 function validate_blanks(selector) {
-	return validation(selector, function(e) {
+	return validation(selector, function (e) {
 		return $(e).val().trim() == "";
 	})
 }
@@ -1702,20 +1726,20 @@ function validate_blanks(selector) {
  * @return {boolean}
  */
 function validate_name(selector) {
-	return validation(selector, function(e) {
+	return validation(selector, function (e) {
 		var m = $(e).val().match(/[A-z0-9_]+/);
 		return m == null || m != $(e).val();
 	}, "Invalid field values.  Letters, numbers, underscores, no spaces.")
 }
 
-$(function() {
+$(function () {
 	var delete_prop_button = $("<button>")
 		.addClass("deleteButton")
 		.addClass("deleteProperty")
 		.html("╳")
 
 	$("#selected").hide();
-	$("#editButton").click(function(e) {
+	$("#editButton").click(function (e) {
 		$("#editButtonRow").hide();
 		$("#otherButtons").show();
 		$("#body").html("")
@@ -1738,13 +1762,13 @@ $(function() {
 		}
 		console.log(treeData);
 	})
-	$("#cancelButton").click(function(e) {
+	$("#cancelButton").click(function (e) {
 		$("#editButtonRow").show();
 		$("#otherButtons").hide();
 		$("#body").html("");
 		selectNode();
 	})
-	$("#saveObject").click(function(e) {
+	$("#saveObject").click(function (e) {
 		if (validate_blanks("#body input"))
 			return;
 		if (validate_name(".newPropertyName"))
@@ -1796,17 +1820,17 @@ $(function() {
 				treeData[key] = newValue;
 			}
 		}
-		Object.keys(treeData).filter(function(e) {
-			return $.makeArray(propNames).map(function(x) {
+		Object.keys(treeData).filter(function (e) {
+			return $.makeArray(propNames).map(function (x) {
 				return x.innerHTML;
 			}).indexOf(e) == -1;
-		}).forEach(function(e) {
+		}).forEach(function (e) {
 			if (e != "object" && e != "module")
 				delete treeData[e];
 		})
-		$.makeArray($("#body input.newPropertyName")).map(function(e) {
+		$.makeArray($("#body input.newPropertyName")).map(function (e) {
 			return e.value;
-		}).forEach(function(e, i) {
+		}).forEach(function (e, i) {
 			if (e.trim() != "")
 				treeData[e] = $("#body input.newPropertyValue")[i].value;
 		})
@@ -1814,10 +1838,10 @@ $(function() {
 		$("#editButtonRow").show();
 		selectNode();
 	})
-	$(document).on("click", ".deleteProperty", function(e) {
+	$(document).on("click", ".deleteProperty", function (e) {
 		$(this).parent().parent().remove();
 	})
-	$("#addAttribute").click(function(e) {
+	$("#addAttribute").click(function (e) {
 		if (validate_blanks(".newPropertyName, .newPropertyValue"))
 			return;
 		var new_name = $("<input>")
@@ -1836,7 +1860,7 @@ $(function() {
 		fit_table();
 		new_name.focus();
 	})
-	$("#deleteObject").click(function(e) {
+	$("#deleteObject").click(function (e) {
 		deleteObject(ti);
 	})
 })
