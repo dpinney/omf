@@ -99,17 +99,17 @@ def readSCADA(scadaFile):
                 if scadaInfo['winterPeakKW'] < scada['totalVA'][index].real/1000.0:
                     scadaInfo['winterPeakKW'] = scada['totalVA'][index].real/1000.0
                     scadaInfo['winterDay'] = scada['timestamp'][index].strftime("%Y-%m-%d")
-                    scadaInfo['winterPeakHour'] = float(scada['timestamp'][index].hour) + (int(scada['timestamp'][index].minute)/60.0)
+                    scadaInfo['winterPeakHour'] = float(scada['timestamp'][index].hour)
             elif scada['timestamp'][index].month in [3, 4, 5, 9, 10, 11]:
                 if scadaInfo['shoulderPeakKW'] < scada['totalVA'][index].real/1000.0:
                     scadaInfo['shoulderPeakKW'] = scada['totalVA'][index].real/1000.0
                     scadaInfo['shoulderDay'] = scada['timestamp'][index].strftime("%Y-%m-%d")
-                    scadaInfo['shoulderPeakHour'] = float(scada['timestamp'][index].hour) + (int(scada['timestamp'][index].minute)/60.0)
+                    scadaInfo['shoulderPeakHour'] = float(scada['timestamp'][index].hour)
             elif scada['timestamp'][index].month in [6, 7 , 8]:
                 if scadaInfo['summerPeakKW'] < scada['totalVA'][index].real/1000.0:
                     scadaInfo['summerPeakKW'] = scada['totalVA'][index].real/1000.0
                     scadaInfo['summerDay'] = scada['timestamp'][index].strftime("%Y-%m-%d")
-                    scadaInfo['summerPeakHour'] = float(scada['timestamp'][index].hour) + (int(scada['timestamp'][index].minute)/60.0)
+                    scadaInfo['summerPeakHour'] = float(scada['timestamp'][index].hour)
             if loadMax <= abs(scada['totalVA'][index]):
                 loadMax = abs(scada['totalVA'][index])
         index += 1
@@ -118,13 +118,13 @@ def readSCADA(scadaFile):
     for index in xrange(len(scada['timestamp'])):
         if scadaInfo['winterDay'] == scada['timestamp'][index].strftime("%Y-%m-%d") and scadaInfo['winterMinimumKW'] > scada['totalVA'][index].real/1000.0 and scada['totalVA'][index] != 0.0:
             scadaInfo['winterMinimumKW'] = scada['totalVA'][index].real/1000.0
-            scadaInfo['winterMinimumHour'] = float(scada['timestamp'][index].hour) + (int(scada['timestamp'][index].minute)/60.0)
+            scadaInfo['winterMinimumHour'] = float(scada['timestamp'][index].hour)
         if scadaInfo['summerDay'] == scada['timestamp'][index].strftime("%Y-%m-%d") and scadaInfo['summerMinimumKW'] > scada['totalVA'][index].real/1000.0 and scada['totalVA'][index] != 0.0:
             scadaInfo['summerMinimumKW'] = scada['totalVA'][index].real/1000.0
-            scadaInfo['summerMinimumHour'] = float(scada['timestamp'][index].hour) + (int(scada['timestamp'][index].minute)/60.0)
+            scadaInfo['summerMinimumHour'] = float(scada['timestamp'][index].hour)
         if scadaInfo['shoulderDay'] == scada['timestamp'][index].strftime("%Y-%m-%d") and scadaInfo['shoulderMinimumKW'] > scada['totalVA'][index].real/1000.0 and scada['totalVA'][index] != 0.0:
             scadaInfo['shoulderMinimumKW'] = scada['totalVA'][index].real/1000.0
-            scadaInfo['shoulderMinimumHour'] = float(scada['timestamp'][index].hour) + (int(scada['timestamp'][index].minute)/60.0)
+            scadaInfo['shoulderMinimumHour'] = float(scada['timestamp'][index].hour)
     for key in scadaInfo.keys():
         print key, scadaInfo[key]
     loadShapeFile = open('./loadShapeScalar.player', 'w')
