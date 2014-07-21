@@ -196,8 +196,9 @@ var height = window.screen.availHeight-100;
 // CREATE LAYOUT
 var body = d3.select('body')
 	.append('svg:svg')
-	.attr('id','graphSvg')
+	.attr('id', 'graphSvg')
 	.on('click', onSvgBlankCanvasClick)
+	.attr('viewBox', '0 0 ' + w + ' ' + h)
 	.call(zoomer.on('zoom', zoomRedraw));
 
 // add powergrid to the upper layer
