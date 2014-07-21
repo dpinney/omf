@@ -242,21 +242,6 @@ function zoomRedraw() {
 }
 
 /**
- * UNKNOWN: Intent to quickly converge d3.force drawing
- */
-function preLayout() {
-	function fiveTicks() {
-		for (i = 0; i < 5; ++i) force.tick()
-	}
-	fiveTicksTime = 1000
-	// while performance is bad keep rendering in the background:
-	while (fiveTicksTime > 200) {
-		fiveTicksTime = time(fiveTicks)
-		console.log(fiveTicksTime)
-	}
-}
-
-/**
  * Using zoomer to translate position(x, y) and set scale s
  * @param {number} x  
  * @param {number} y 
