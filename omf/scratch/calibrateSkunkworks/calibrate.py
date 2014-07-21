@@ -98,15 +98,14 @@ def _calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
 		except:
 			pass # No lat lons.
 
-	feeder.adjustTime(tree, 100, "hours", "2011-01-01")
+	HOURS = 1000
+
+	feeder.adjustTime(tree, HOURS, "hours", "2011-01-01")
 	with open("out.glm","w") as outGlm:
 		outGlm.write(feeder.sortedWrite(tree))
 	proc = subprocess.Popen(['gridlabd', "-w", "out.glm"])
 	proc.wait()
 
-
-	#calculate scaling constant here
-	SCAL_CONST = 300.0
 
 	# Do some plotting.
 	listdict = []
@@ -122,10 +121,19 @@ def _calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
 
 	powerdata = []
 	for rowt in tempdata:
-		powerdata.append(float(rowt[1])/SCAL_CONST)
+		powerdata.append(float(rowt[1]))
+
+
+	#calculate scaling constant here
+	SCAL_CONST = sum(powerdata)/sum(inputData[:len(powerdata)])
+
+	scaledPowerData = []
+
+	for element in powerdata:
+		scaledPowerData.append(float(element)/SCAL_CONST)
 
 	plt.plot
-	plt.plot(range(len(powerdata)), powerdata,range(len(powerdata)),inputData[:len(powerdata)])
+	plt.plot(range(len(powerdata)), scaledPowerData,range(len(powerdata)),inputData[:len(powerdata)])
 	plt.show()
 
 	return None
@@ -142,7 +150,7 @@ def _tests():
 	'''test function for ABEC Coloma and Frank feeders'''
 	SCADA_FNAME = "colScada.tsv"
 	PQPLAYER_FNAME = "scada.player"
-	FEEDER_FNAME = "ABEC Frank Lo.json"
+	FEEDER_FNAME = "ABEC Frank LO.json"
 	#SUB_REG_NAME = "REG27"
 
 	omfCalibrate(FEEDER_FNAME,SCADA_FNAME,PQPLAYER_FNAME)
