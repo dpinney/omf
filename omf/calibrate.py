@@ -51,8 +51,8 @@ def omfCalibrate(workDir,feeder_path,scadaPath):
 			newOb["parent"] = ob.get("parent", "")
 			newOb["phases"] = ob.get("phases", "")
 			newOb["nominal_voltage"] = ob.get("nominal_voltage","")
-			newOb["latitude"] = ob.get("latitude","")
-			newOb["longitude"] = ob.get("longitude","")
+			newOb["latitude"] = ob.get("latitude","0")
+			newOb["longitude"] = ob.get("longitude","0")
 			oldPow = ob.get("power_12","").replace("j","d")
 			pythagPower = gridlabd._strClean(oldPow)
 			newOb["base_power_12"] = "scadaLoads.value*" + str(pythagPower)
@@ -101,6 +101,10 @@ def omfCalibrate(workDir,feeder_path,scadaPath):
 			playerFile.write(row)
 	# plt.plot(range(len(powerdata)), scaledPowerData,range(len(powerdata)),inputData[:len(powerdata)])
 	# plt.show()
+	try:
+		os.remove(pJoin(workDir, "main.glm"))
+	except:
+		pass # Main.glm failed to write.
 
 def _tests():
 	'''test function for ABEC Coloma and Frank feeders'''
