@@ -276,6 +276,7 @@ function zoomReset() {
  * Zoom to fix window size
  */
 function zoomToFit() {
+	// TODO: fix the zoom level and center coordinate.
 	function fly(attr_func, comp_func) {
 		var largest;
 		var my_n;
@@ -528,7 +529,6 @@ function getSelectedLink() {
 
 /**
  * Hotkeys binding the page onkeypress event.
- * TODO: disable hotkey when edit in the input text field.
  */
 function hotkeys() {
 	// IE8 and earlier
@@ -540,7 +540,7 @@ function hotkeys() {
 		x = event.which
 	}
 	keychar = String.fromCharCode(x);
-	if (event.target.type != 'text') {
+	if (event.target.type != 'text' && $("#otherButtons").css("display") == "none") {
 		// Dispatch the key:
 		if (keychar == 'p') {
 			toggleSelectedPin()
