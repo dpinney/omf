@@ -9,44 +9,37 @@ import feeder
 from solvers import gridlabd
 
 # Get SCADA data.
-def getScadaData(workDir,scadaPath):
+def _getScadaData(workDir,scadaPath):
 	'''generate a SCADA player file from raw SCADA data'''
 	with open(scadaPath,"r") as scadaFile:
 		scadaReader = csv.DictReader(scadaFile, delimiter='\t')
 		allData = [row for row in scadaReader]
-
 	inputData = [float(row["power"]) for row in allData]
-
-	PQPLAYER_FNAME = "scada.player"
-	VPLAYER_FNAME = None	
-
 	# Write the player.
 	maxPower = max(inputData)
-	with open(pJoin(workDir,PQPLAYER_FNAME),"w") as playFile:
+	with open(pJoin(workDir,"subScada.player"),"w") as playFile:
 		for row in allData:
 			timestamp = dt.datetime.strptime(row["timestamp"], "%m/%d/%Y %H:%M:%S")
 			power = float(row["power"]) / maxPower
 			line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(power) + "\n"
 			playFile.write(line)
-	print PQPLAYER_FNAME, "created player file" 
-	
+	print "subScada.player", "created player file" 
+	return inputData
 
-	return inputData, PQPLAYER_FNAME, VPLAYER_FNAME
-
-def calibrateFeeder(workDir,inputData,feeder_path,PQPLAYER_FNAME,VPLAYER_FNAME=None):
+def omfCalibrate(workDir,feeder_path,scadaPath):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
 	jsonIn = json.load(open(feeder_path))
 	tree = jsonIn.get("tree", {})
-
-	playerPath = "/".join(PQPLAYER_FNAME.split('\\'))
-	
+	inputData = _getScadaData(workDir,scadaPath)
+	plaPath = pJoin(workDir,"subScada.player")
+	print plaPath
+	playerPath = "/".join(plaPath.split('\\')) 
 	# Attach player.
 	classOb = {"class":"player", "variable_names":["value"], "variable_types":["double"]}
 	playerOb = {"object":"player", "property":"value", "name":"scadaLoads", "file":playerPath, "loop":"0"}
 	maxKey = feeder.getMaxKey(tree)
 	tree[maxKey+1] = classOb
 	tree[maxKey+2] = playerOb
-
 	# Make loads reference player.
 	loadTemplate = {"object": "triplex_load",
 	"power_pf_12": "0.95",
@@ -54,7 +47,6 @@ def calibrateFeeder(workDir,inputData,feeder_path,PQPLAYER_FNAME,VPLAYER_FNAME=N
 	"power_pf_12": "0.90",
 	"impedance_fraction_12": "0.7",
 	"power_fraction_12": "0.3"}
-
 	for key in tree:
 		ob = tree[key]
 		if ob.get("object","") == "triplex_node" and ob.get("power_12","") != "":
@@ -69,26 +61,21 @@ def calibrateFeeder(workDir,inputData,feeder_path,PQPLAYER_FNAME,VPLAYER_FNAME=N
 			pythagPower = gridlabd._strClean(oldPow)
 			newOb["base_power_12"] = "scadaLoads.value*" + str(pythagPower)
 			tree[key] = newOb
-
 	#search for the substation regulator
 	for key in tree:
 		if tree[key].get('bustype','').lower() == 'swing':
 			swingIndex = key
 			swingName = tree[key].get('name')
-
 	for key in tree:
 		if tree[key].get('object','') == 'regulator' and tree[key].get('from','') == swingName:
 			regIndex = key
 			SUB_REG_NAME = tree[key]['name']
-
-
 	# Give it a test run.
 	recOb = {"object": "recorder",
 	"parent": SUB_REG_NAME,
 	"property": "power_in.real, power_in.imag",
 	"file": "outPower.csv",
 	"interval": "900"}
-
 	tree[maxKey + 3] = recOb
 	for key in tree.keys():
 		try:
@@ -96,59 +83,26 @@ def calibrateFeeder(workDir,inputData,feeder_path,PQPLAYER_FNAME,VPLAYER_FNAME=N
 			del tree[key]["longitude"]
 		except:
 			pass # No lat lons.
-
 	#creating a copy of the calibrated feeder in the outpath
 	with open(pJoin(workDir,"calibrated feeder.json"),"w") as outFile:
 		json.dump(tree, outFile, indent=4)
-
 	HOURS = 100
-
 	feeder.adjustTime(tree, HOURS, "hours", "2011-01-01")
 	glmFilePath = pJoin(workDir, "out.glm")
 	with open(glmFilePath,"w") as outGlm:
 		outGlm.write(feeder.sortedWrite(tree))
-
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-	with open(pJoin(workDir,'stdout.txt'),'w') as stdout, open(pJoin(workDir,'stderr.txt'),'w') as stderr, open(pJoin(workDir,'PID.txt'),'w') as pidFile:
-		# MAYBEFIX: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-		proc = subprocess.Popen(['gridlabd','-w',glmFilePath], cwd=workDir, stdout=stdout, stderr=stderr)
-		pidFile.write(str(proc.pid))
-	returnCode = proc.wait()
-
+	output = gridlabd.runInFilesystem(tree,keepFiles=True,workDir=workDir)
 	# Do some plotting.
-	listdict = []
-	outPowerPath = pJoin(workDir, "outPower.csv")
-	with open(outPowerPath,"r") as outcsvFile:
-		for i,line in enumerate(outcsvFile):
-			if i > 8:
-				listdict.append(line)
-
-	tempdata = []
-	for row in listdict:
-		tempdata.append(row.split(','))
-
-
-	powerdata = []
-	for rowt in tempdata:
-		powerdata.append(float(rowt[1]))
-
-
+	powerdata = output['outPower.csv']['power_in.real']
 	#calculate scaling constant here
 	SCAL_CONST = sum(powerdata)/sum(inputData[:len(powerdata)])
-
 	scaledPowerData = []
-
 	for element in powerdata:
 		scaledPowerData.append(float(element)/SCAL_CONST)
-
 	plt.plot
 	plt.plot(range(len(powerdata)), scaledPowerData,range(len(powerdata)),inputData[:len(powerdata)])
 	plt.show()
-
-def omfCalibrate(workDir,feeder_path,scadaPath):
-	'''calls _calibrateFeeder and gets the work done'''
-	inputData, PQPLAYER_FNAME, VPLAYER_FNAME = getScadaData(workDir,scadaPath) 
-	calibrateFeeder(workDir,inputData,feeder_path,PQPLAYER_FNAME, VPLAYER_FNAME) #passing input data for scaling 
 
 def _tests():
 	'''test function for ABEC Coloma and Frank feeders'''
