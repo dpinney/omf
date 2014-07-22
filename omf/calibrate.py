@@ -91,6 +91,14 @@ def omfCalibrate(workDir,feeder_path,scadaPath):
 	for element in powerdata:
 		scaledPowerData.append(float(element)/SCAL_CONST)
 	#TODO: rewrite the subScada.player file so all the power values are multiplied by the SCAL_CONSTANT.
+	temp = []
+	with open(pJoin(workDir,"subScada.player"),"r") as playerFile:
+		for line in playerFile:
+			(key,val) = line.split(',')
+			temp.append(str(key) + ',' +str(float(val)*SCAL_CONST) + "\n")
+	with open(pJoin(workDir,"subScada.player"),"w") as playerFile:
+		for row in temp:
+			playerFile.write(row)
 	# plt.plot(range(len(powerdata)), scaledPowerData,range(len(powerdata)),inputData[:len(powerdata)])
 	# plt.show()
 
