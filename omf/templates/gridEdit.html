@@ -198,7 +198,8 @@ var body = d3.select('body')
 	.append('svg:svg')
 	.attr('id', 'graphSvg')
 	.on('click', onSvgBlankCanvasClick)
-	.attr('viewBox', '0 0 ' + w + ' ' + h)
+	.attr('viewBox', '0 0 ' + window.innerWidth + ' ' + window.innerHeight)
+	.attr("preserveAspectRatio", "xMinYMin meet")
 	.call(zoomer.on('zoom', zoomRedraw));
 
 // add powergrid to the upper layer
