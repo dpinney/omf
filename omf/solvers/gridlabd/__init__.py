@@ -56,9 +56,12 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 			print "gridlabD runInFilesystem with no specified workDir. Working in", workDir
 		# Need to zero out lat/lon data on copy because it frequently breaks Gridlab.
 		localTree = deepcopy(feederTree)
-		for key in localTree:
-			if 'latitude' in localTree[key]: localTree[key]['latitude'] = '0'
-			if 'longitude' in localTree[key]: localTree[key]['longitude'] = '0'
+		for key in localTree.keys():
+			try:
+				del localTree[key]["latitude"]
+				del localTree[key]["longitude"]
+			except:
+				pass # No lat lons.
 		# Write attachments and glm.
 		for attach in attachments:
 			with open (pJoin(workDir,attach),'w') as attachFile:

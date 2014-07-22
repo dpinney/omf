@@ -9,7 +9,7 @@ import feeder
 from solvers import gridlabd
 
 # Get SCADA data.
-def _getScadaData(workDir,scadaPath):
+def _processScadaData(workDir,scadaPath):
 	'''generate a SCADA player file from raw SCADA data'''
 	with open(scadaPath,"r") as scadaFile:
 		scadaReader = csv.DictReader(scadaFile, delimiter='\t')
@@ -23,30 +23,26 @@ def _getScadaData(workDir,scadaPath):
 			power = float(row["power"]) / maxPower
 			line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(power) + "\n"
 			playFile.write(line)
-	print "subScada.player", "created player file" 
 	return inputData
 
 def omfCalibrate(workDir,feeder_path,scadaPath):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
 	jsonIn = json.load(open(feeder_path))
 	tree = jsonIn.get("tree", {})
-	inputData = _getScadaData(workDir,scadaPath)
-	plaPath = pJoin(workDir,"subScada.player")
-	print plaPath
-	playerPath = "/".join(plaPath.split('\\')) 
+	inputData = _processScadaData(workDir,scadaPath)
 	# Attach player.
 	classOb = {"class":"player", "variable_names":["value"], "variable_types":["double"]}
-	playerOb = {"object":"player", "property":"value", "name":"scadaLoads", "file":playerPath, "loop":"0"}
+	playerOb = {"object":"player", "property":"value", "name":"scadaLoads", "file":"subScada.player", "loop":"0"}
 	maxKey = feeder.getMaxKey(tree)
 	tree[maxKey+1] = classOb
 	tree[maxKey+2] = playerOb
 	# Make loads reference player.
 	loadTemplate = {"object": "triplex_load",
-	"power_pf_12": "0.95",
-	"impedance_pf_12": "0.98",
-	"power_pf_12": "0.90",
-	"impedance_fraction_12": "0.7",
-	"power_fraction_12": "0.3"}
+		"power_pf_12": "0.95",
+		"impedance_pf_12": "0.98",
+		"power_pf_12": "0.90",
+		"impedance_fraction_12": "0.7",
+		"power_fraction_12": "0.3"}
 	for key in tree:
 		ob = tree[key]
 		if ob.get("object","") == "triplex_node" and ob.get("power_12","") != "":
@@ -72,18 +68,12 @@ def omfCalibrate(workDir,feeder_path,scadaPath):
 			SUB_REG_NAME = tree[key]['name']
 	# Give it a test run.
 	recOb = {"object": "recorder",
-	"parent": SUB_REG_NAME,
-	"property": "power_in.real, power_in.imag",
-	"file": "outPower.csv",
-	"interval": "900"}
+		"parent": SUB_REG_NAME,
+		"property": "power_in.real, power_in.imag",
+		"file": "outPower.csv",
+		"interval": "900"}
 	tree[maxKey + 3] = recOb
-	for key in tree.keys():
-		try:
-			del tree[key]["latitude"]
-			del tree[key]["longitude"]
-		except:
-			pass # No lat lons.
-	#creating a copy of the calibrated feeder in the outpath
+	# Creating a copy of the calibrated feeder in the outpath.
 	with open(pJoin(workDir,"calibrated feeder.json"),"w") as outFile:
 		json.dump(tree, outFile, indent=4)
 	HOURS = 100
@@ -100,9 +90,9 @@ def omfCalibrate(workDir,feeder_path,scadaPath):
 	scaledPowerData = []
 	for element in powerdata:
 		scaledPowerData.append(float(element)/SCAL_CONST)
-	plt.plot
-	plt.plot(range(len(powerdata)), scaledPowerData,range(len(powerdata)),inputData[:len(powerdata)])
-	plt.show()
+	#TODO: rewrite the subScada.player file so all the power values are multiplied by the SCAL_CONSTANT.
+	# plt.plot(range(len(powerdata)), scaledPowerData,range(len(powerdata)),inputData[:len(powerdata)])
+	# plt.show()
 
 def _tests():
 	'''test function for ABEC Coloma and Frank feeders'''
