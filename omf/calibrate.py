@@ -32,12 +32,12 @@ def getScadaData(SCADA_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
 			power = float(row["power"]) / maxPower
 			line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(power) + "\n"
 			playFile.write(line)
-	print PQPLAYER_FNAME, "created" 
+	print PQPLAYER_FNAME, "created player file" 		
 
 	return inputData
 
 # Get tree.
-def calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
+def calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,OUTPATH,VPLAYER_FNAME=None):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
 	jsonIn = json.load(open(FEEDER_FNAME))
 	tree = jsonIn.get("tree", {})
@@ -102,7 +102,11 @@ def calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
 		except:
 			pass # No lat lons.
 
-	HOURS = 1000
+	#creating a copy of the calibrated feeder in the outpath
+	with open(pJoin(OUTPATH,"calibrated feeder.json"),"w") as outFile:
+		json.dump(feeder.sortedWrite(tree), outFile, indent=4)
+
+	HOURS = 100
 
 	feeder.adjustTime(tree, HOURS, "hours", "2011-01-01")
 	with open("out.glm","w") as outGlm:
@@ -142,10 +146,10 @@ def calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
 
 	return None
 
-def omfCalibrate(FEEDER_FNAME,SCADA_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
+def omfCalibrate(FEEDER_FNAME,SCADA_FNAME,OUTPATH,PQPLAYER_FNAME,VPLAYER_FNAME=None):
 	'''calls _calibrateFeeder and gets the work done'''
 	inputData = getScadaData(SCADA_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME) 
-	calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME) #passing input data for scaling 
+	calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,OUTPATH,VPLAYER_FNAME) #passing input data for scaling 
 
 	return None
 
@@ -158,8 +162,9 @@ def _tests():
 	SCADA_FNAME = pJoin(_omfDir,"omf","uploads","colScada.tsv")
 	PQPLAYER_FNAME = pJoin(workDir,"scada.player")
 	FEEDER_FNAME = pJoin(_omfDir,"omf","data", "Feeder", "public","ABEC Frank LO.json")
+	OUTPATH = workDir
 
-	assert None == omfCalibrate(FEEDER_FNAME,SCADA_FNAME,PQPLAYER_FNAME), "feeder calibration failed"
+	assert None == omfCalibrate(FEEDER_FNAME,SCADA_FNAME,OUTPATH,PQPLAYER_FNAME), "feeder calibration failed"
 
 	return None
 
