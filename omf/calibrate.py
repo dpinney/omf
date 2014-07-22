@@ -99,6 +99,7 @@ def omfCalibrate(workDir,feeder_path,scadaPath):
 	with open(pJoin(workDir,"subScada.player"),"w") as playerFile:
 		for row in temp:
 			playerFile.write(row)
+	# # Plotting functions for debug.
 	# plt.plot(range(len(powerdata)), scaledPowerData,range(len(powerdata)),inputData[:len(powerdata)])
 	# plt.show()
 	try:
