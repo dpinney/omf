@@ -3,22 +3,15 @@ from matplotlib import pyplot as plt
 import os, re, sys, shutil
 import tempfile
 from os.path import join as pJoin
-# Locational variables so we don't have to rely on OMF being in the system path.
-_myDir = os.path.dirname(os.path.abspath(__file__))
-_omfDir = os.path.dirname(_myDir)
-print _omfDir
 
 # OMF imports
-sys.path.append(_omfDir)
 import feeder
-import feederCalibrate
 from solvers import gridlabd
 
-
 # Get SCADA data.
-def getScadaData(workDir,SCADA_FNAME):
+def getScadaData(workDir,scadaPath):
 	'''generate a SCADA player file from raw SCADA data'''
-	with open(SCADA_FNAME,"r") as scadaFile:
+	with open(scadaPath,"r") as scadaFile:
 		scadaReader = csv.DictReader(scadaFile, delimiter='\t')
 		allData = [row for row in scadaReader]
 
@@ -40,15 +33,13 @@ def getScadaData(workDir,SCADA_FNAME):
 
 	return inputData, PQPLAYER_FNAME, VPLAYER_FNAME
 
-# Get tree.
-def calibrateFeeder(workDir,inputData,FEEDER_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
+def calibrateFeeder(workDir,inputData,feeder_path,PQPLAYER_FNAME,VPLAYER_FNAME=None):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
-	jsonIn = json.load(open(FEEDER_FNAME))
+	jsonIn = json.load(open(feeder_path))
 	tree = jsonIn.get("tree", {})
 
 	playerPath = "/".join(PQPLAYER_FNAME.split('\\'))
 	
-
 	# Attach player.
 	classOb = {"class":"player", "variable_names":["value"], "variable_types":["double"]}
 	playerOb = {"object":"player", "property":"value", "name":"scadaLoads", "file":playerPath, "loop":"0"}
@@ -113,15 +104,21 @@ def calibrateFeeder(workDir,inputData,FEEDER_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=
 	HOURS = 100
 
 	feeder.adjustTime(tree, HOURS, "hours", "2011-01-01")
-	with open("out.glm","w") as outGlm:
+	glmFilePath = pJoin(workDir, "out.glm")
+	with open(glmFilePath,"w") as outGlm:
 		outGlm.write(feeder.sortedWrite(tree))
-	proc = subprocess.Popen(['gridlabd', "-w", "out.glm"])
-	proc.wait()
 
+	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
+	with open(pJoin(workDir,'stdout.txt'),'w') as stdout, open(pJoin(workDir,'stderr.txt'),'w') as stderr, open(pJoin(workDir,'PID.txt'),'w') as pidFile:
+		# MAYBEFIX: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
+		proc = subprocess.Popen(['gridlabd','-w',glmFilePath], cwd=workDir, stdout=stdout, stderr=stderr)
+		pidFile.write(str(proc.pid))
+	returnCode = proc.wait()
 
 	# Do some plotting.
 	listdict = []
-	with open("outPower.csv","r") as outcsvFile:
+	outPowerPath = pJoin(workDir, "outPower.csv")
+	with open(outPowerPath,"r") as outcsvFile:
 		for i,line in enumerate(outcsvFile):
 			if i > 8:
 				listdict.append(line)
@@ -148,29 +145,19 @@ def calibrateFeeder(workDir,inputData,FEEDER_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=
 	plt.plot(range(len(powerdata)), scaledPowerData,range(len(powerdata)),inputData[:len(powerdata)])
 	plt.show()
 
-	return None
-
-def omfCalibrate(workDir,FEEDER_FNAME,SCADA_FNAME):
+def omfCalibrate(workDir,feeder_path,scadaPath):
 	'''calls _calibrateFeeder and gets the work done'''
-	inputData, PQPLAYER_FNAME, VPLAYER_FNAME = getScadaData(workDir,SCADA_FNAME) 
-	calibrateFeeder(workDir,inputData,FEEDER_FNAME,PQPLAYER_FNAME, VPLAYER_FNAME) #passing input data for scaling 
-
-	return None
-
+	inputData, PQPLAYER_FNAME, VPLAYER_FNAME = getScadaData(workDir,scadaPath) 
+	calibrateFeeder(workDir,inputData,feeder_path,PQPLAYER_FNAME, VPLAYER_FNAME) #passing input data for scaling 
 
 def _tests():
 	'''test function for ABEC Coloma and Frank feeders'''
 	print "Beginning to test calibrate.py"
 	workDir = tempfile.mkdtemp()
 	print "currently working in", workDir
-	SCADA_FNAME = pJoin(_omfDir,"omf","uploads","colScada.tsv")
-	#PQPLAYER_FNAME = pJoin(workDir,"scada.player")
-	FEEDER_FNAME = pJoin(_omfDir,"omf","data", "Feeder", "public","ABEC Frank LO.json")
-
-	assert None == omfCalibrate(workDir,FEEDER_FNAME,SCADA_FNAME), "feeder calibration failed"
-
-	return None
-
+	scadaPath = pJoin("uploads","colScada.tsv")
+	feeder_path = pJoin("data", "Feeder", "public","ABEC Frank LO.json")
+	assert None == omfCalibrate(workDir,feeder_path,scadaPath), "feeder calibration failed"
 
 if __name__ == '__main__':
 	'''runs certain test functions for feeder calibration'''
