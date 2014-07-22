@@ -16,7 +16,7 @@ from solvers import gridlabd
 
 
 # Get SCADA data.
-def getScadaData(SCADA_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
+def getScadaData(workDir,SCADA_FNAME):
 	'''generate a SCADA player file from raw SCADA data'''
 	with open(SCADA_FNAME,"r") as scadaFile:
 		scadaReader = csv.DictReader(scadaFile, delimiter='\t')
@@ -24,20 +24,24 @@ def getScadaData(SCADA_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
 
 	inputData = [float(row["power"]) for row in allData]
 
+	PQPLAYER_FNAME = "scada.player"
+	VPLAYER_FNAME = None	
+
 	# Write the player.
 	maxPower = max(inputData)
-	with open(PQPLAYER_FNAME,"w") as playFile:
+	with open(pJoin(workDir,PQPLAYER_FNAME),"w") as playFile:
 		for row in allData:
 			timestamp = dt.datetime.strptime(row["timestamp"], "%m/%d/%Y %H:%M:%S")
 			power = float(row["power"]) / maxPower
 			line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(power) + "\n"
 			playFile.write(line)
-	print PQPLAYER_FNAME, "created player file" 		
+	print PQPLAYER_FNAME, "created player file" 
+	
 
-	return inputData
+	return inputData, PQPLAYER_FNAME, VPLAYER_FNAME
 
 # Get tree.
-def calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,OUTPATH,VPLAYER_FNAME=None):
+def calibrateFeeder(workDir,inputData,FEEDER_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME=None):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
 	jsonIn = json.load(open(FEEDER_FNAME))
 	tree = jsonIn.get("tree", {})
@@ -103,8 +107,8 @@ def calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,OUTPATH,VPLAYER_FNAME=
 			pass # No lat lons.
 
 	#creating a copy of the calibrated feeder in the outpath
-	with open(pJoin(OUTPATH,"calibrated feeder.json"),"w") as outFile:
-		json.dump(feeder.sortedWrite(tree), outFile, indent=4)
+	with open(pJoin(workDir,"calibrated feeder.json"),"w") as outFile:
+		json.dump(tree, outFile, indent=4)
 
 	HOURS = 100
 
@@ -146,10 +150,10 @@ def calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,OUTPATH,VPLAYER_FNAME=
 
 	return None
 
-def omfCalibrate(FEEDER_FNAME,SCADA_FNAME,OUTPATH,PQPLAYER_FNAME,VPLAYER_FNAME=None):
+def omfCalibrate(workDir,FEEDER_FNAME,SCADA_FNAME):
 	'''calls _calibrateFeeder and gets the work done'''
-	inputData = getScadaData(SCADA_FNAME,PQPLAYER_FNAME,VPLAYER_FNAME) 
-	calibrateFeeder(inputData,FEEDER_FNAME,PQPLAYER_FNAME,OUTPATH,VPLAYER_FNAME) #passing input data for scaling 
+	inputData, PQPLAYER_FNAME, VPLAYER_FNAME = getScadaData(workDir,SCADA_FNAME) 
+	calibrateFeeder(workDir,inputData,FEEDER_FNAME,PQPLAYER_FNAME, VPLAYER_FNAME) #passing input data for scaling 
 
 	return None
 
@@ -160,11 +164,10 @@ def _tests():
 	workDir = tempfile.mkdtemp()
 	print "currently working in", workDir
 	SCADA_FNAME = pJoin(_omfDir,"omf","uploads","colScada.tsv")
-	PQPLAYER_FNAME = pJoin(workDir,"scada.player")
+	#PQPLAYER_FNAME = pJoin(workDir,"scada.player")
 	FEEDER_FNAME = pJoin(_omfDir,"omf","data", "Feeder", "public","ABEC Frank LO.json")
-	OUTPATH = workDir
 
-	assert None == omfCalibrate(FEEDER_FNAME,SCADA_FNAME,OUTPATH,PQPLAYER_FNAME), "feeder calibration failed"
+	assert None == omfCalibrate(workDir,FEEDER_FNAME,SCADA_FNAME), "feeder calibration failed"
 
 	return None
 
