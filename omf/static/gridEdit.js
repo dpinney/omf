@@ -276,16 +276,13 @@ function zoomReset() {
  * Zoom to fix window size
  */
 function zoomToFit() {
-	// TODO: fix the zoom level and center coordinate.
 	function fly(attr_func, comp_func) {
 		var largest;
 		var my_n;
 		for (i = 0; i < nodes.length; i++) {
-			if (undefined != nodes[i].objectType && nodes[i].objectType.indexOf("configur") >=0 ){
-				if (!largest || comp_func(attr_func(nodes[i]), largest)) {
-					largest = attr_func(nodes[i])
-					my_n = nodes[i]
-				}
+			if (!largest || comp_func(attr_func(nodes[i]), largest)) {
+				largest = attr_func(nodes[i])
+				my_n = nodes[i]
 			}
 		}
 		return my_n;
