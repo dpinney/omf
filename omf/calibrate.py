@@ -82,7 +82,7 @@ def omfCalibrate(workDir,feeder_path,scadaPath):
 	with open(glmFilePath,"w") as outGlm:
 		outGlm.write(feeder.sortedWrite(tree))
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-	output = gridlabd.runInFilesystem(tree,keepFiles=True,workDir=workDir)
+	output = gridlabd.runInFilesystem(tree,keepFiles=False,workDir=workDir)
 	# Do some plotting.
 	powerdata = output['outPower.csv']['power_in.real']
 	#calculate scaling constant here
@@ -92,13 +92,13 @@ def omfCalibrate(workDir,feeder_path,scadaPath):
 		scaledPowerData.append(float(element)/SCAL_CONST)
 	#TODO: rewrite the subScada.player file so all the power values are multiplied by the SCAL_CONSTANT.
 	temp = []
-	with open(pJoin(workDir,"subScada.player"),"r") as playerFile:
-		for line in playerFile:
-			(key,val) = line.split(',')
-			temp.append(str(key) + ',' +str(float(val)*SCAL_CONST) + "\n")
-	with open(pJoin(workDir,"subScada.player"),"w") as playerFile:
-		for row in temp:
-			playerFile.write(row)
+	# with open(pJoin(workDir,"subScada.player"),"r") as playerFile:
+	# 	for line in playerFile:
+	# 		(key,val) = line.split(',')
+	# 		temp.append(str(key) + ',' +str(float(val)*SCAL_CONST) + "\n")
+	# with open(pJoin(workDir,"subScada.player"),"w") as playerFile:
+	# 	for row in temp:
+	# 		playerFile.write(row)
 	# # Plotting functions for debug.
 	# plt.plot(range(len(powerdata)), scaledPowerData,range(len(powerdata)),inputData[:len(powerdata)])
 	# plt.show()

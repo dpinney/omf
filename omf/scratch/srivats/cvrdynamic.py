@@ -388,7 +388,7 @@ def comparesol(modelDir,localTree):
 
 
 	feeder.adjustTime(tree=localTree, simLength=float("8760"),
-			simLengthUnits="hours", simStartDate="2012-01-01")	
+			simLengthUnits="hours", simStartDate="2011-01-01")	
 
 	output = gridlabd.runInFilesystem(localTree,keepFiles=True,workDir=modelDir)
 	os.remove(pJoin(modelDir,"PID.txt"))
