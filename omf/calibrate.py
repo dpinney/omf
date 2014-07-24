@@ -5,23 +5,6 @@ from os.path import join as pJoin
 import feeder
 from solvers import gridlabd
 
-# Get SCADA data.
-def _processScadaData(workDir,scadaPath):
-	'''generate a SCADA player file from raw SCADA data'''
-	with open(scadaPath,"r") as scadaFile:
-		scadaReader = csv.DictReader(scadaFile, delimiter='\t')
-		allData = [row for row in scadaReader]
-	scadaSubPower = [float(row["power"]) for row in allData]
-	# Write the player.
-	maxPower = max(scadaSubPower)
-	with open(pJoin(workDir,"subScada.player"),"w") as playFile:
-		for row in allData:
-			timestamp = dt.datetime.strptime(row["timestamp"], "%m/%d/%Y %H:%M:%S")
-			power = float(row["power"]) / maxPower
-			line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(power) + "\n"
-			playFile.write(line)
-	return scadaSubPower
-
 def omfCalibrate(workDir, feederPath, scadaPath):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
 	with open(feederPath, "r") as jsonIn:
@@ -110,6 +93,22 @@ def omfCalibrate(workDir, feederPath, scadaPath):
 		feederJson["tree"] = tree
 		json.dump(feederJson, outJson, indent=4)
 	return
+
+def _processScadaData(workDir,scadaPath):
+	'''generate a SCADA player file from raw SCADA data'''
+	with open(scadaPath,"r") as scadaFile:
+		scadaReader = csv.DictReader(scadaFile, delimiter='\t')
+		allData = [row for row in scadaReader]
+	scadaSubPower = [float(row["power"]) for row in allData]
+	# Write the player.
+	maxPower = max(scadaSubPower)
+	with open(pJoin(workDir,"subScada.player"),"w") as playFile:
+		for row in allData:
+			timestamp = dt.datetime.strptime(row["timestamp"], "%m/%d/%Y %H:%M:%S")
+			power = float(row["power"]) / maxPower
+			line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(power) + "\n"
+			playFile.write(line)
+	return scadaSubPower
 
 def _tests():
 	print "Beginning to test calibrate.py"
