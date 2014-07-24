@@ -280,9 +280,11 @@ function zoomToFit() {
 		var largest;
 		var my_n;
 		for (i = 0; i < nodes.length; i++) {
-			if (!largest || comp_func(attr_func(nodes[i]), largest)) {
-				largest = attr_func(nodes[i])
-				my_n = nodes[i]
+			if (nodes[i].fixed === true) {
+				if (!largest || comp_func(attr_func(nodes[i]), largest)) {
+					largest = attr_func(nodes[i])
+					my_n = nodes[i]
+				}
 			}
 		}
 		return my_n;
