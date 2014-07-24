@@ -1,6 +1,6 @@
 import csv, datetime as dt, json, subprocess
 from matplotlib import pyplot as plt
-import os, re, sys, shutil
+import os, re, shutil
 import tempfile
 from os.path import join as pJoin
 
@@ -14,22 +14,26 @@ def _processScadaData(workDir,scadaPath):
 	with open(scadaPath,"r") as scadaFile:
 		scadaReader = csv.DictReader(scadaFile, delimiter='\t')
 		allData = [row for row in scadaReader]
-	inputData = [float(row["power"]) for row in allData]
+	scadaSubPower = [float(row["power"]) for row in allData]
 	# Write the player.
-	maxPower = max(inputData)
+	maxPower = max(scadaSubPower)
 	with open(pJoin(workDir,"subScada.player"),"w") as playFile:
 		for row in allData:
 			timestamp = dt.datetime.strptime(row["timestamp"], "%m/%d/%Y %H:%M:%S")
 			power = float(row["power"]) / maxPower
 			line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(power) + "\n"
 			playFile.write(line)
-	return inputData
+	return scadaSubPower
 
-def omfCalibrate(workDir,feeder_path,scadaPath):
+def omfCalibrate(workDir, feederPath, scadaPath):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
-	jsonIn = json.load(open(feeder_path))
+	jsonIn = json.load(open(feederPath))
 	tree = jsonIn.get("tree", {})
-	inputData = _processScadaData(workDir,scadaPath)
+	scadaSubPower = _processScadaData(workDir,scadaPath)
+	# Force FBS powerflow, because NR fails a lot.
+	for key in tree:
+		if tree[key].get("module","").lower() == "powerflow":
+			tree[key] = {"module":"powerflow","solver_method":"FBS"}
 	# Attach player.
 	classOb = {"class":"player", "variable_names":["value"], "variable_types":["double"]}
 	playerOb = {"object":"player", "property":"value", "name":"scadaLoads", "file":"subScada.player", "loop":"0"}
@@ -57,65 +61,59 @@ def omfCalibrate(workDir,feeder_path,scadaPath):
 			pythagPower = gridlabd._strClean(oldPow)
 			newOb["base_power_12"] = "scadaLoads.value*" + str(pythagPower)
 			tree[key] = newOb
-	#search for the substation regulator
+	# Search for the substation regulator and attach a recorder there.
 	for key in tree:
 		if tree[key].get('bustype','').lower() == 'swing':
-			swingIndex = key
 			swingName = tree[key].get('name')
 	for key in tree:
 		if tree[key].get('object','') == 'regulator' and tree[key].get('from','') == swingName:
 			regIndex = key
 			SUB_REG_NAME = tree[key]['name']
-	# Give it a test run.
 	recOb = {"object": "recorder",
 		"parent": SUB_REG_NAME,
-		"property": "power_in.real, power_in.imag",
-		"file": "outPower.csv",
+		"property": "power_in.real,power_in.imag",
+		"file": "caliSub.csv",
 		"interval": "900"}
 	tree[maxKey + 3] = recOb
-	# Creating a copy of the calibrated feeder in the outpath.
-	with open(pJoin(workDir,"calibrated feeder.json"),"w") as outFile:
-		json.dump(tree, outFile, indent=4)
 	HOURS = 100
 	feeder.adjustTime(tree, HOURS, "hours", "2011-01-01")
-	glmFilePath = pJoin(workDir, "out.glm")
-	with open(glmFilePath,"w") as outGlm:
-		outGlm.write(feeder.sortedWrite(tree))
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-	output = gridlabd.runInFilesystem(tree,keepFiles=False,workDir=workDir)
-	# Do some plotting.
-	powerdata = output['outPower.csv']['power_in.real']
-	#calculate scaling constant here
-	SCAL_CONST = sum(powerdata)/sum(inputData[:len(powerdata)])
-	scaledPowerData = []
-	for element in powerdata:
-		scaledPowerData.append(float(element)/SCAL_CONST)
-	#TODO: rewrite the subScada.player file so all the power values are multiplied by the SCAL_CONSTANT.
-	temp = []
-	# with open(pJoin(workDir,"subScada.player"),"r") as playerFile:
-	# 	for line in playerFile:
-	# 		(key,val) = line.split(',')
-	# 		temp.append(str(key) + ',' +str(float(val)*SCAL_CONST) + "\n")
-	# with open(pJoin(workDir,"subScada.player"),"w") as playerFile:
-	# 	for row in temp:
-	# 		playerFile.write(row)
-	# # Plotting functions for debug.
-	# plt.plot(range(len(powerdata)), scaledPowerData,range(len(powerdata)),inputData[:len(powerdata)])
-	# plt.show()
-	try:
-		os.remove(pJoin(workDir, "main.glm"))
-	except:
-		pass # Main.glm failed to write.
+	output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=workDir)
+	# Calculate scaling constant.
+	outRealPow = output["caliSub.csv"]["power_in.real"]
+	outImagPower = output["caliSub.csv"]["power_in.imag"]
+	outAppPowerKw = [(x[0]**2 + x[1]**2)**0.5/1000 for x in zip(outRealPow, outImagPower)]
+	# HACK: ignore first time step in output and input because GLD sometimes breaks the first step.
+	SCAL_CONST = sum(scadaSubPower[1:HOURS])/sum(outAppPowerKw[1:HOURS])
+	# Rewrite the subScada.player file so all the power values are multiplied by the SCAL_CONSTANT.
+	newPlayData = []
+	with open(pJoin(workDir, "subScada.player"), "r") as playerFile:
+		for line in playerFile:
+			(key,val) = line.split(',')
+			newPlayData.append(str(key) + ',' + str(float(val)*SCAL_CONST) + "\n")
+	with open(pJoin(workDir, "subScadaCalibrated.player"), "w") as playerFile:
+		for row in newPlayData:
+			playerFile.write(row)
+	# Test by running a glm with subScadaCalibrated.player and caliSub.csv2.
+	tree[maxKey+2]["file"] = "subScadaCalibrated.player"
+	tree[maxKey + 3]["file"] = "caliSubCheck.csv"
+	secondOutput = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=workDir)
+	plt.plot(outAppPowerKw[1:HOURS])
+	plt.plot(scadaSubPower[1:HOURS])
+	secondAppKw = [(x[0]**2 + x[1]**2)**0.5/1000
+		for x in zip(secondOutput["caliSubCheck.csv"]["power_in.real"], secondOutput["caliSubCheck.csv"]["power_in.imag"])]
+	plt.plot(secondAppKw[1:HOURS])
+	plt.savefig(pJoin(workDir,"caliCheckPlot.png"))
+	# TODO: write final output.
+	return
 
 def _tests():
-	'''test function for ABEC Coloma and Frank feeders'''
 	print "Beginning to test calibrate.py"
 	workDir = tempfile.mkdtemp()
-	print "currently working in", workDir
-	scadaPath = pJoin("uploads","colScada.tsv")
-	feeder_path = pJoin("data", "Feeder", "public","ABEC Frank LO.json")
-	assert None == omfCalibrate(workDir,feeder_path,scadaPath), "feeder calibration failed"
+	print "Currently working in: ", workDir
+	scadaPath = pJoin("uploads", "colScada.tsv")
+	feederPath = pJoin("data", "Feeder", "public","ABEC Frank LO.json")
+	assert None == omfCalibrate(workDir, feederPath, scadaPath), "feeder calibration failed"
 
 if __name__ == '__main__':
-	'''runs certain test functions for feeder calibration'''
 	_tests()
