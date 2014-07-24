@@ -77,7 +77,7 @@ def omfCalibrate(workDir, feederPath, scadaPath):
 	tree[maxKey + 3] = recOb
 	HOURS = 100
 	feeder.adjustTime(tree, HOURS, "hours", "2011-01-01")
-	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
+	# Run Gridlabd.
 	output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=workDir)
 	# Calculate scaling constant.
 	outRealPow = output["caliSub.csv"]["power_in.real"]
