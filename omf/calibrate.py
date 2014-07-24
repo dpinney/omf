@@ -1,9 +1,6 @@
-import csv, datetime as dt, json, subprocess
+import csv, datetime as dt, json, tempfile
 from matplotlib import pyplot as plt
-import os, re, shutil
-import tempfile
 from os.path import join as pJoin
-
 # OMF imports
 import feeder
 from solvers import gridlabd
@@ -27,8 +24,9 @@ def _processScadaData(workDir,scadaPath):
 
 def omfCalibrate(workDir, feederPath, scadaPath):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
-	jsonIn = json.load(open(feederPath))
-	tree = jsonIn.get("tree", {})
+	with open(feederPath, "r") as jsonIn:
+		feederJson = json.load(jsonIn)
+		tree = feederJson.get("tree", {})
 	scadaSubPower = _processScadaData(workDir,scadaPath)
 	# Force FBS powerflow, because NR fails a lot.
 	for key in tree:
@@ -98,13 +96,19 @@ def omfCalibrate(workDir, feederPath, scadaPath):
 	tree[maxKey+2]["file"] = "subScadaCalibrated.player"
 	tree[maxKey + 3]["file"] = "caliSubCheck.csv"
 	secondOutput = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=workDir)
-	plt.plot(outAppPowerKw[1:HOURS])
-	plt.plot(scadaSubPower[1:HOURS])
+	plt.plot(outAppPowerKw[1:HOURS], label="initialGuess")
+	plt.plot(scadaSubPower[1:HOURS], label="scadaSubPower")
 	secondAppKw = [(x[0]**2 + x[1]**2)**0.5/1000
 		for x in zip(secondOutput["caliSubCheck.csv"]["power_in.real"], secondOutput["caliSubCheck.csv"]["power_in.imag"])]
-	plt.plot(secondAppKw[1:HOURS])
+	plt.plot(secondAppKw[1:HOURS], label="finalGuess")
+	plt.legend(loc=3)
 	plt.savefig(pJoin(workDir,"caliCheckPlot.png"))
-	# TODO: write final output.
+	# Write the final output.
+	with open(pJoin(workDir,"calibratedFeeder.json"),"w") as outJson:
+		playerString = open(pJoin(workDir,"subScadaCalibrated.player")).read()
+		feederJson["attachments"]["subScadaCalibrated.player"] = playerString
+		feederJson["tree"] = tree
+		json.dump(feederJson, outJson, indent=4)
 	return
 
 def _tests():
