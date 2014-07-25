@@ -307,4 +307,102 @@ d3.json(apiAddress, function (json) {
 })
 
 </script>
+
+<script type="text/javascript">
+//*********************************************
+// MODEL SAVING, LEFT TOOLBOX HANDLER FUNCTIONS
+//*********************************************
+/**
+ * Post to new saved feeder.
+ * @param  {string} name feeder name
+ * @param  {string} user username
+ */
+function savePoster(name, user) {
+	feederObject = {
+		tree: tree,
+		nodes: nodes,
+		hiddenNodes: hiddenNodes,
+		links: links,
+		hiddenLinks: hiddenLinks,
+		layoutVars: {
+			'gravity': force.gravity(),
+			'theta': force.theta(),
+			'friction': force.friction(),
+			'linkStrength': force.linkStrength(),
+			'charge': force.charge(),
+			'linkDistance': force.linkDistance()
+		},
+		attachments: attachments
+	}
+	payload = {
+		'name': name,
+		'feederObjectJson': JSON.stringify(feederObject),
+		"_csrf_token": "{{ csrf_token() }}",
+		ref: "{{ ref }}"
+	}
+	post_to_url("/saveFeeder/" + user + "/" + name, payload)
+}
+
+/**
+ * Save the modified feeder data, and cover the one already in filesystems.
+ */
+function saveFeeder() {
+	savePoster("{{ feederName }}", "{{ owner }}")
+}
+
+/**
+ * Duplicate a feeder to current user.
+ */
+function duplicateFeeder() {
+	newName = prompt("Save copy as", $("#gridName").html())
+	if (newName) {
+		$.ajax({
+			url: "/uniqObjName/Feeder/{{ currUser }}/" + newName
+		}).done(function (data) {
+			if (data.exists) {
+				alert("You already have a feeder named " + newName)
+				duplicateFeeder()
+			} else {
+				savePoster(newName, "{{ currUser }}")
+			}
+		})
+	}
+}
+
+/**
+ * Saving a private feeder is the same as duplicating a public feeder.
+ */
+function savePrivateFeeder() {
+	duplicateFeeder()
+}
+
+/**
+ * Handler function of deleting a feeder
+ */
+function deleteFeeder() {
+	confirmation = confirm("Are you sure you want to delete?")
+	if (confirmation) {
+		post_to_url("/delete/Feeder/{{ owner }}/{{ feederName }}")
+	}
+}
+
+/**
+ * Publish a private feeder to public.
+ */
+function publishFeeder() {
+	newName = prompt("Publish a copy with name", $("#gridName").html())
+	if (newName) {
+		$.ajax({
+			url: "/uniqObjName/Feeder/public/" + newName
+		}).done(function (data) {
+			if (data.exists) {
+				alert("There is already a public feeder named " + newName)
+				publishFeeder()
+			} else {
+				savePoster(newName, "public")
+			}
+		})
+	}
+}
+</script>
 </body>
