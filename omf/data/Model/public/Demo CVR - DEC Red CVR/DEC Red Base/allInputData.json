@@ -1,0 +1,13 @@
+{
+    "modelName": "DEMO of CVR", 
+    "created": "2014-07-25 11:57:42.608000", 
+    "simLengthUnits": "hours", 
+    "feederName": "public___DEC Red CVR", 
+    "simStartDate": "2014-07-30", 
+    "modelType": "gridlabMulti", 
+    "climateName": "DE-WILMINGTON", 
+    "simLength": "100", 
+    "user": "admin", 
+    "feederName2": "public___DEC Red Base", 
+    "runTime": "0:01:09"
+}

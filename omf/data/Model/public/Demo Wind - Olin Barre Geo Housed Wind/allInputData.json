@@ -1,0 +1,13 @@
+{
+    "modelName": "Demo Wind - Olin Barre Geo Housed Wind", 
+    "simStartDate": "2014-07-30", 
+    "simLengthUnits": "hours", 
+    "feederName": "public___Olin Barre Geo Housed", 
+    "created": "2014-07-25 17:59:29.753000", 
+    "modelType": "gridlabMulti", 
+    "climateName": "AK-ANCHORAGE", 
+    "simLength": "100", 
+    "user": "public", 
+    "feederName2": "public___Olin Barre Geo Housed Wind", 
+    "runTime": "0:00:56"
+}

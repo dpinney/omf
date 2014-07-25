@@ -1,0 +1,10 @@
+# file...... Zregulator.csv
+# date...... Fri Jul 25 16:13:27 2014
+# user...... jxh10
+# host...... (null)
+# target.... regulator 2
+# trigger... (none)
+# interval.. -1
+# limit..... 0
+# timestamp,tap_A,tap_B,tap_C,power_in.real,power_in.imag
+2013-01-01 00:00:00 PST,3,3,3,+5.83666e+006,+3.07309e+006

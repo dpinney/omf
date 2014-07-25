@@ -1,0 +1,16 @@
+{
+    "modelName": "DEMO of solar", 
+    "created": "2014-07-25 12:07:58.776000", 
+    "simLengthUnits": "hours", 
+    "feederName": "public___Olin Barre Geo Housed", 
+    "simStartDate": "2014-07-30", 
+    "modelType": "gridlabMulti", 
+    "climateName": "AZ-PRESCOTT", 
+    "simLength": "240", 
+    "user": "admin", 
+    "feederName3": "public___Olin Barre Geo Housed 05Perc Solar", 
+    "feederName2": "public___Olin Barre Geo Housed 20Perc Solar", 
+    "runTime": "0:00:34", 
+    "feederName5": "public___Olin Barre Geo Housed 50Perc Solar", 
+    "feederName4": "public___Olin Barre Geo Housed 90Perc Solar"
+}

@@ -1,0 +1,13 @@
+{
+    "modelName": "DEMO of Battery", 
+    "created": "2014-07-25 11:40:47.373000", 
+    "simLengthUnits": "hours", 
+    "feederName": "public___Olin Barre Geo Housed", 
+    "simStartDate": "2014-07-30", 
+    "modelType": "gridlabMulti", 
+    "climateName": "PA-ERIE", 
+    "simLength": "100", 
+    "user": "admin", 
+    "feederName2": "public___Olin Barre Geo Housed Battery", 
+    "runTime": "0:00:20"
+}

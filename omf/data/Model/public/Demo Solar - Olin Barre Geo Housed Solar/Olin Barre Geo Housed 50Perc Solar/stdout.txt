@@ -1,0 +1,51 @@
+                                                                                                                                                                                                                                                                                                                                                                                            
+Core profiler results
+======================
+
+Total objects               2805 objects
+Parallelism                    1 thread
+Total time                  17.0 seconds
+  Core time                  1.2 seconds (7.3%)
+    Compiler                16.4 seconds (96.3%)
+    Instances                0.0 seconds (0.0%)
+    Random variables         0.0 seconds (0.0%)
+    Schedules                0.0 seconds (0.0%)
+    Loadshapes               0.0 seconds (0.2%)
+    Enduses                  0.0 seconds (0.2%)
+    Transforms               0.1 seconds (0.4%)
+  Model time                15.8 seconds/thread (92.7%)
+Simulation time               10 days
+Simulation speed              40k object.hours/second
+Passes completed             242 passes
+Time steps completed         241 timesteps
+Convergence efficiency      1.00 passes/timestep
+Read lock contention        0.0%
+Write lock contention       0.0%
+Average timestep           3585 seconds/timestep
+Simulation rate           50824 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+node               8.391     53.3%     17.3
+recorder           5.604     35.6%     31.5
+collector          0.642      4.1%    128.4
+house              0.395      2.5%      1.2
+triplex_meter      0.182      1.2%      0.9
+climate            0.114      0.7%    114.0
+overhead_line      0.093      0.6%      0.3
+waterheater        0.083      0.5%      0.4
+transformer        0.061      0.4%      0.3
+solar              0.053      0.3%      0.3
+inverter           0.041      0.3%      0.2
+ZIPload            0.038      0.2%      0.1
+underground_line   0.032      0.2%      0.3
+fuse               0.017      0.1%      0.4
+switch             0.004      0.0%      0.3
+capacitor          0.002      0.0%      2.0
+================ ======== ======== ========
+Total             15.752    100.0%      5.6
+

@@ -1,0 +1,9 @@
+{
+    "modelName": "Demo VoltageDrop - ACEC Geo", 
+    "created": "2014-07-25 17:29:52.277000", 
+    "feederName": "public___ACEC Geo", 
+    "modelType": "voltageDrop", 
+    "layoutAlgorithm": "geospatial", 
+    "runTime": "0:00:09", 
+    "user": "public"
+}
