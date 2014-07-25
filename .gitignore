@@ -12,6 +12,6 @@ omf/emailCredentials.key
 !omf/data/Model/admin/z*
 !omf/data/Model/admin/z*
 !omf/data/Model/public/*
-!omf/data/Feeder/public/*
+!omf/data/Feeder/public
 !omf/data/User/test.json
 !omf/data/User/public.json
