@@ -19,11 +19,11 @@ import feeder
 import calibrate
 from solvers import gridlabd
 
-def realPart(complexStr):
-	''' real Part of a complex number.
+def sepRealImag(complexStr):
+	''' real and imaginary parts of a complex number.
 	handles string if the string starts with a '+' or a '-'
 	handles negative or positive, real and imaginary parts 
-	example realPart(-20.5-6j) = -20.5'''
+	example sepRealImag(-20.5-6j) = (-20.5, -6)'''
 	if complexStr[0] == '+' or complexStr[0] == '-':
 		complexStr1 = complexStr[1:len(complexStr)+1]
 		sign = complexStr[0] + '1' 
@@ -31,12 +31,20 @@ def realPart(complexStr):
 		complexStr1 = complexStr
 		sign = 1
 	if complexStr1.find('+')>0:
-		return float(complexStr1[0:complexStr1.find('+')])*float(sign)
+		real = float(complexStr1[0:complexStr1.find('+')])*float(sign)
+		imag = float(complexStr1[complexStr1.find('+')+1:-1])
 	else:
 		if complexStr1.find('-')>0:
-			return float(complexStr1[0:complexStr1.find('-')])*float(sign)
+			real = float(complexStr1[0:complexStr1.find('-')])*float(sign)
+			imag = float(complexStr1[complexStr1.find('-')+1:-1])*-1
 		else:
-			return float(complexStr1)*float(sign)
+			if complexStr1.find('j')>0:
+				real = 0.0
+				imag = float(complexStr1[0:complexStr1.find('j')])*float(sign)
+			else:
+				real = float(complexStr1)*float(sign)
+				imag = 0.0
+	return real,imag
 
 def runModel(modelDir,localTree):
 	'''This reads a glm file, changes the method of powerflow and reruns'''
@@ -180,8 +188,11 @@ def runModel(modelDir,localTree):
 		imagLossnew.append(inew)
 	#voltage calculations and tap calculations
 	lowVoltage = []
+	meanVoltage = []
 	highVoltage = []
 	lowVoltagenew = []
+	meanVoltagenew = []
+	highVoltagenew = []
 	tap = {'A':[],'B':[],'C':[]}
 	tapnew = {'A':[],'B':[],'C':[]}
 	volt = {'A':[],'B':[],'C':[]}
@@ -192,58 +203,112 @@ def runModel(modelDir,localTree):
 		for letter in ['A','B','C']:
 			tap[letter].append(output['Zregulator.csv']['tap_' + letter][element])
 			tapnew[letter].append(output1['Zregulator.csv']['tap_' + letter][element])
-			volt[letter].append(realPart(output['ZsubstationBottom.csv']['voltage_'+letter][element])/60)
-			voltnew[letter].append(realPart(output1['ZsubstationBottom.csv']['voltage_'+letter][element])/60)
+			#voltage real, imag
+			vr, vi = sepRealImag(output['ZsubstationBottom.csv']['voltage_'+letter][element])
+			volt[letter].append(math.sqrt(vr**2+vi**2)/60)
+			vrnew, vinew = sepRealImag(output1['ZsubstationBottom.csv']['voltage_'+letter][element])
+			voltnew[letter].append(math.sqrt(vrnew**2+vinew**2)/60)
 			switch[letter].append(output['ZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter][element])
 			switchnew[letter].append(output1['ZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter][element])
 		lowVoltage.append(float(output['ZvoltageJiggle.csv']['min(voltage_12.mag)'][element])/2.0)
+		meanVoltage.append(float(output['ZvoltageJiggle.csv']['mean(voltage_12.mag)'][element])/2.0)
 		highVoltage.append(float(output['ZvoltageJiggle.csv']['max(voltage_12.mag)'][element])/2.0)
 		lowVoltagenew.append(float(output1['ZvoltageJiggle.csv']['min(voltage_12.mag)'][element])/2.0)
-	#for debug
+		meanVoltagenew.append(float(output1['ZvoltageJiggle.csv']['mean(voltage_12.mag)'][element])/2.0)
+		highVoltagenew.append(float(output1['ZvoltageJiggle.csv']['max(voltage_12.mag)'][element])/2.0)
+	#plots
+	#real and imaginary power
 	plt.clf()
-	plt.plot(p,label="substation real power without IVVC")
-	plt.plot(pnew,label="substation real power with IVVC")
-	plt.legend(loc=1)
+	plt.ylabel("substation real power (MW)")
+	pMW = [element/1000.0 for element in p]
+	pMWn = [element/1000.0 for element in pnew]
+	pw = plt.plot(pMW)
+	npw = plt.plot(pMWn)
+	plt.legend([pw[0], npw[0]], ['NO IVVC','WITH IVVC'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
+		ncol=2, mode="expand", borderaxespad=0.1)
 	plt.savefig(pJoin(modelDir,"real power.png"))
 	plt.figure("imaginary power")
-	plt.plot(q,label="substation imag. power without IVVC")
-	plt.plot(qnew,label="substation imag. power with IVVC")
-	plt.legend(loc=1)
+	plt.ylabel("substation imaginary power (MVAR)")
+	qMVAR = [element/1000.0 for element in q]
+	qMVARn = [element/1000.0 for element in qnew]
+	iw = plt.plot(qMVAR)
+	niw = plt.plot(qMVARn)
+	plt.legend([iw[0], niw[0]], ['NO IVVC','WITH IVVC'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
+		ncol=2, mode="expand", borderaxespad=0.1)
 	plt.savefig(pJoin(modelDir,"imaginary power.png"))
-	plt.figure("real losses")
-	plt.plot(realLoss,label="total losses real without IVVC")
-	plt.plot(realLossnew,label="total losses real with IVVC")
-	plt.legend(loc=1)
-	plt.savefig(pJoin(modelDir,"real losses.png"))
-	plt.figure("imaginary losses")
-	plt.plot(imagLoss,label="total losses imag. without IVVC")
-	plt.plot(imagLossnew,label="total losses imag. with IVVC")
-	plt.legend(loc=1)
-	plt.savefig(pJoin(modelDir,"imaginary losses.png"))
-	plt.figure("lowVoltage voltage as a function of time")
-	plt.plot(lowVoltage,label="EOL voltage without IVVC as a function of time")
-	plt.plot(lowVoltagenew,label="EOL voltage with IVVC as a function of time")
-	plt.legend(loc=1)
-	plt.axis([0,HOURS,50.0,250.0])
-	plt.savefig(pJoin(modelDir,"EOL voltage.png"))
-	plt.figure("TAP positions as a function of time")
-	plt.plot(tap['A'],label="TAP A without IVVC as a function of time")
-	plt.plot(tapnew['A'], label="TAP A with IVVC as a function of time")
-	plt.legend(loc=1)
-	plt.axis([0,HOURS,-20.0,20.0])
-	plt.savefig(pJoin(modelDir,"TAP A positions.png"))
+	#real and imaginary losses
+	# plt.figure("real losses")
+	# plt.plot(realLoss,label="total losses real without IVVC")
+	# plt.plot(realLossnew,label="total losses real with IVVC")
+	# plt.legend(loc=1)
+	# plt.savefig(pJoin(modelDir,"real losses.png"))
+	# plt.figure("imaginary losses")
+	# plt.plot(imagLoss,label="total losses imag. without IVVC")
+	# plt.plot(imagLossnew,label="total losses imag. with IVVC")
+	# plt.legend(loc=1)
+	# plt.savefig(pJoin(modelDir,"imaginary losses.png"))
+	#EOL voltage
+	plt.figure("voltages as a function of time")
+	f,ax = plt.subplots(2,sharex=True)
+	lv = ax[0].plot(lowVoltage)
+	mv = ax[0].plot(meanVoltage)
+	hv = ax[0].plot(highVoltage)
+	ax[0].legend([lv[0], mv[0], hv[0]], ['low voltage','mean voltage','high voltage'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
+		ncol=3, mode="expand", borderaxespad=0.1)
+	ax[0].set_ylabel('NO IVVC')
+	nlv = ax[1].plot(lowVoltagenew)
+	nmv = ax[1].plot(meanVoltagenew)
+	nhv = ax[1].plot(highVoltagenew)
+	ax[1].set_ylabel('WITH IVVC')
+	plt.savefig(pJoin(modelDir,"Voltages.png"))
+	#tap positions
+	plt.figure("TAP positions as a function of time",figsize=(10,10))
+	f,ax = plt.subplots(6,sharex=True)
+	ax[0].plot(tap['A'])
+	ax[0].set_title("NO IVVC")
+	ax[0].set_ylabel("TAP A")
+	ax[1].plot(tap['B'])
+	ax[1].set_ylabel("TAP B")
+	ax[2].plot(tap['C'])
+	ax[2].set_ylabel("TAP C")
+	ax[3].plot(tapnew['A'])
+	ax[3].set_title("WITH IVVC")
+	ax[3].set_ylabel("TAP A")
+	ax[4].plot(tapnew['B'])
+	ax[4].set_ylabel("TAP B")
+	ax[5].plot(tapnew['C'])
+	ax[5].set_ylabel("TAP C")
+	plt.savefig(pJoin(modelDir,"Regulator TAP positions.png"))
+	#substation voltages
 	plt.figure("substation voltage as a function of time")
-	plt.plot(volt['A'],label="sub. volt. A without IVVC as a function of time")
-	plt.plot(voltnew['A'],label="sub. volt. A with IVVC as a function of time")
-	plt.legend(loc=1)
-	plt.axis([0,HOURS,50.0,250.0])
-	plt.savefig(pJoin(modelDir,"substation volatage A.png"))
+	f,ax = plt.subplots(3,2)
+	ax[0,0].plot(volt['A'])
+	ax[0,0].set_title('NO IVVC')
+	ax[0,0].set_ylabel('voltage A')
+	ax[0,1].plot(volt['B'])
+	ax[0,1].set_ylabel('voltage B')
+	ax[2,0].plot(volt['C'])
+	ax[2,0].set_ylabel('voltage C')
+	ax[0,1].plot(voltnew['A'])
+	ax[0,1].set_title("WITH IVVC")
+	ax[1,1].plot(voltnew['B'])
+	ax[2,1].plot(voltnew['C'])
+	plt.savefig(pJoin(modelDir,"substation voltages.png"))
+	#cap switches
 	plt.figure("capacitor switch state as a function of time")
-	plt.plot(switch['A'],label="cap. switch A without IVVC as a function of time")
-	plt.plot(switchnew['A'],label="cap. switch A with IVVC as a function of time")
-	plt.legend(loc=1)
-	plt.axis([0,HOURS,-2.0,2.0])
-	plt.savefig(pJoin(modelDir,"capacitor switch A.png"))
+	f,ax = plt.subplots(3,2)
+	ax[0,0].plot(switch['A'])
+	ax[0,0].set_title("NO IVVC")
+	ax[0,0].set_ylabel("switch A")
+	ax[1,0].plot(switch['B'])
+	ax[1,0].set_ylabel("switch B")
+	ax[2,0].plot(switch['C'])
+	ax[2,0].set_ylabel("switch C")
+	ax[0,1].plot(switchnew['A'])
+	ax[0,1].set_title("WITH IVVC")
+	ax[1,1].plot(switchnew['B'])
+	ax[2,1].plot(switchnew['C'])
+	plt.savefig(pJoin(modelDir,"capacitor switch.png"))
 	#plt.show()
 	print "DONE RUNNING", modelDir
 
