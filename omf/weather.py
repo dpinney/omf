@@ -670,7 +670,7 @@ def _tests():
 	print "Pull weather and solar data together in", workDir
 	assert None==_processWeather("2010-03-01", "2010-04-01", "PDX", workDir)
 	print "Testing the full process together."
-	assert None==makeClimateCsv("2010-01-01", "2011-01-01", "DCA", pJoin(tempfile.mkdtemp(),"weatherDCA.csv"), cleanup=True)
+	assert None==makeClimateCsv("2010-04-01", "2010-06-30", "DCA", pJoin(tempfile.mkdtemp(),"weatherDCA.csv"), cleanup=True)
 
 if __name__ == "__main__":
 	_tests()
