@@ -114,7 +114,7 @@ def _tests():
 	print "Beginning to test calibrate.py"
 	workDir = tempfile.mkdtemp()
 	print "Currently working in: ", workDir
-	scadaPath = pJoin("uploads", "colScada.tsv")
+	scadaPath = pJoin("uploads", "FrankScada.tsv")
 	feederPath = pJoin("data", "Feeder", "public","ABEC Frank LO.json")
 	assert None == omfCalibrate(workDir, feederPath, scadaPath), "feeder calibration failed"
 
