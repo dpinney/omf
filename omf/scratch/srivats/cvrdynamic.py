@@ -122,7 +122,7 @@ def runModel(modelDir,localTree):
 	for index, rec in enumerate(recorders):
 		localTree[biggest + index] = rec
 	#run a reference load flow
-	HOURS = float(500)
+	HOURS = float(100)
 	feeder.adjustTime(localTree,HOURS,"hours","2011-01-01")	
 	output = gridlabd.runInFilesystem(localTree,keepFiles=False,workDir=modelDir)
 	os.remove(pJoin(modelDir,"PID.txt"))

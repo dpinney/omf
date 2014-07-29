@@ -155,7 +155,7 @@ def comparesol(modelDir,localTree):
 	# 'regulator_list' : regstr } 
 
 
-	feeder.adjustTime(tree=localTree, simLength=float("8760"),
+	feeder.adjustTime(tree=localTree, simLength=float("100"),
 			simLengthUnits="hours", simStartDate="2012-01-01")	
 
 	output = gridlabd.runInFilesystem(localTree,keepFiles=True,workDir=modelDir)
@@ -176,7 +176,7 @@ def comparesol(modelDir,localTree):
 
 	xaxtick = str(xtime['timeStamps'])
 
-	plt.plot(range(8760),p)
+	plt.plot(range(100),p)
 	plt.show()
 
 	print "p=" , p
