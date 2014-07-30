@@ -1,51 +1,0 @@
-                                                                                                                                                                                                                                                                                                                                                                                            
-Core profiler results
-======================
-
-Total objects               2436 objects
-Parallelism                    1 thread
-Total time                  13.0 seconds
-  Core time                  1.2 seconds (8.9%)
-    Compiler                16.4 seconds (126.2%)
-    Instances                0.0 seconds (0.0%)
-    Random variables         0.0 seconds (0.0%)
-    Schedules                0.0 seconds (0.1%)
-    Loadshapes               0.0 seconds (0.2%)
-    Enduses                  0.0 seconds (0.2%)
-    Transforms               0.1 seconds (0.5%)
-  Model time                11.8 seconds/thread (91.1%)
-Simulation time               10 days
-Simulation speed              45k object.hours/second
-Passes completed             242 passes
-Time steps completed         241 timesteps
-Convergence efficiency      1.00 passes/timestep
-Read lock contention        0.0%
-Write lock contention       0.0%
-Average timestep           3585 seconds/timestep
-Simulation rate           66462 x realtime
-
-
-Model profiler results
-======================
-
-Class            Time (s) Time (%) msec/obj
----------------- -------- -------- --------
-node               8.563     72.3%     17.7
-recorder           1.753     14.8%     31.9
-collector          0.559      4.7%    111.8
-house              0.377      3.2%      1.1
-triplex_meter      0.130      1.1%      0.7
-climate            0.115      1.0%    115.0
-overhead_line      0.093      0.8%      0.3
-waterheater        0.080      0.7%      0.3
-transformer        0.060      0.5%      0.3
-ZIPload            0.033      0.3%      0.1
-underground_line   0.033      0.3%      0.4
-inverter           0.016      0.1%      0.3
-solar              0.016      0.1%      0.3
-fuse               0.012      0.1%      0.3
-switch             0.006      0.1%      0.5
-capacitor          0.002      0.0%      2.0
-================ ======== ======== ========
-Total             11.848    100.0%      4.9
-
