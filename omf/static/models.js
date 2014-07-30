@@ -94,7 +94,7 @@ function deleteModel() {
  */
 function publishModel() {
 	newName = prompt("Publish a copy with name", allInputData.modelName)
-	while (! /^[a-zA-Z0-9_\s]+$/.test(newName)){
+	while (! /^[\w\s]+$/.test(newName)){
 		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
 	}
 	if (newName) {
@@ -116,7 +116,7 @@ function publishModel() {
  */
 function duplicateModel() {
 	newName = prompt("Create a duplicate with name", allInputData.modelName)
-	while (! /^[a-zA-Z0-9_\s]+$/.test(newName)){
+	while (! /^[\w\s]+$/.test(newName)){
 		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
 	}
 	if (newName) {
