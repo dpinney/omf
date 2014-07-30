@@ -3,14 +3,14 @@
     "simStartDate": "2014-07-30", 
     "simLengthUnits": "hours", 
     "feederName": "public___Olin Barre GH", 
-    "created": "2014-07-30 11:26:31.071000", 
+    "created": "2014-07-30 11:50:34.263000", 
     "modelType": "gridlabMulti", 
     "climateName": "AZ-PRESCOTT", 
     "simLength": "240", 
     "user": "public", 
     "feederName3": "public___Olin Barre GH 05Perc Solar", 
-    "feederName2": "public___Olin Barre Housed 20Perc Solar", 
-    "runTime": "0:02:27", 
-    "feederName5": "public___Olin Barre Housed 50Perc Solar", 
+    "feederName2": "public___Olin Barre GH 20Perc Solar", 
+    "runTime": "0:02:13", 
+    "feederName5": "public___Olin Barre GH 50Perc Solar", 
     "feederName4": "public___Olin Barre GH 90Perc Solar"
 }
