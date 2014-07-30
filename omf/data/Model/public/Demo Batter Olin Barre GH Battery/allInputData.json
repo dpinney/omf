@@ -1,0 +1,13 @@
+{
+    "modelName": "Demo Batter Olin Barre GH Battery", 
+    "simStartDate": "2014-07-30", 
+    "simLengthUnits": "hours", 
+    "feederName": "public___Olin Barre GH", 
+    "created": "2014-07-30 11:04:17.994000", 
+    "modelType": "gridlabMulti", 
+    "climateName": "PA-ERIE", 
+    "simLength": "100", 
+    "user": "public", 
+    "feederName2": "public___Olin Barre GH Battery", 
+    "runTime": "0:00:33"
+}

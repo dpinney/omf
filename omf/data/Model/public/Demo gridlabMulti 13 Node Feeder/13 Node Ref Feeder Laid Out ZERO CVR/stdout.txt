@@ -1,0 +1,48 @@
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        
+Core profiler results
+======================
+
+Total objects               3080 objects
+Parallelism                    1 thread
+Total time                  62.0 seconds
+  Core time                  2.4 seconds (3.9%)
+    Compiler                11.6 seconds (18.8%)
+    Instances                0.0 seconds (0.0%)
+    Random variables         0.0 seconds (0.0%)
+    Schedules                0.0 seconds (0.0%)
+    Loadshapes               0.1 seconds (0.1%)
+    Enduses                  0.1 seconds (0.1%)
+    Transforms               0.1 seconds (0.1%)
+  Model time                59.6 seconds/thread (96.1%)
+Simulation time                4 days
+Simulation speed             5.0k object.hours/second
+Passes completed             202 passes
+Time steps completed         101 timesteps
+Convergence efficiency      2.00 passes/timestep
+Read lock contention        0.0%
+Write lock contention       0.0%
+Average timestep           3564 seconds/timestep
+Simulation rate            5806 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+node              57.343     96.2%   3373.1
+house              0.680      1.1%      1.1
+collector          0.603      1.0%    100.5
+triplex_meter      0.468      0.8%      0.7
+triplex_line       0.145      0.2%      0.2
+waterheater        0.128      0.2%      0.3
+climate            0.113      0.2%    113.0
+ZIPload            0.069      0.1%      0.1
+recorder           0.027      0.0%      6.8
+transformer        0.005      0.0%      0.2
+overhead_line      0.002      0.0%      0.2
+regulator          0.002      0.0%      2.0
+capacitor          0.001      0.0%      0.5
+================ ======== ======== ========
+Total             59.586    100.0%     19.3
+
