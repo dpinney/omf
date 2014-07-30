@@ -26,7 +26,7 @@ def getDataNames():
 	feeders = [x[:-5] for x in safeListdir("./data/Feeder/" + currUser.username)]
 	publicFeeders = [x[:-5] for x in safeListdir("./data/Feeder/public/")]
 	climates = [x[:-5] for x in safeListdir("./data/Climate/")]
-	return {"feeders":feeders, "publicFeeders":publicFeeders, "climates":climates, 
+	return {"feeders":sorted(feeders), "publicFeeders":sorted(publicFeeders), "climates":sorted(climates), 
 		"currentUser":currUser.__dict__}
 
 @app.before_request
