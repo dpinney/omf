@@ -1,7 +1,7 @@
 *.pyc
 *.sublime-project
 *.sublime-workspace
-#omf/data/Model/*
+omf/data/Model/*
 omf/data/Feeder/*
 omf/data/User/*
 omf/S3KEY.*
