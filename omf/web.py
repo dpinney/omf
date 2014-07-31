@@ -268,7 +268,7 @@ def runModel():
 	pData = request.form.to_dict()
 	modelModule = getattr(models, pData["modelType"])
 	#TODO: what if we're an admin viewing public or other peoples' models?
-	pData["user"] = User.cu()
+	pData["user"] = User.cu() if pData["user"] != "public" else "public"
 	modelModule.run(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"]), pData)
 	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
 
