@@ -81,7 +81,7 @@ def runForeground(modelDir, inputDict):
 			print "remove subfolders"
 			shutil.rmtree(pJoin(modelDir, dirs))
 	# Get each feeder, prepare data in separate folders, and run there.
-	for key in inputDict:
+	for key in sorted(inputDict, key=inputDict.get):
 		if key.startswith("feederName"):
 			feederDir, feederName = inputDict[key].split("___")
 			feederList.append(feederName)
