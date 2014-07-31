@@ -78,6 +78,9 @@ def runModel(modelDir,localTree):
 		if localTree[key].get("object","") == "capacitor":
 			accum_cap += localTree[key].get("name","ERROR") + ","
 			capKeys.append(key)
+			if localTree[key].get("control","").lower() == "manual":
+				localTree[key]['control'] = "VOLT"
+				print "changing capacitor control from manual to volt"
 	capstr = accum_cap[:-1]
 	print capKeys
 	# Attach recorders relevant to CVR.
@@ -130,7 +133,7 @@ def runModel(modelDir,localTree):
 	for index, rec in enumerate(recorders):
 		localTree[biggest + index] = rec
 	#run a reference load flow
-	HOURS = float(100)
+	HOURS = float(8760)
 	feeder.adjustTime(localTree,HOURS,"hours","2011-01-01")	
 	output = gridlabd.runInFilesystem(localTree,keepFiles=False,workDir=modelDir)
 	os.remove(pJoin(modelDir,"PID.txt"))
@@ -365,8 +368,8 @@ if __name__ == '__main__':
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 	#calibrate and run cvrdynamic	
-	feederPath = pJoin(_omfDir,"data", "Feeder", "admin","ABEC Frank new.json")
-	scadaPath = pJoin(_omfDir,"uploads","FrankScada.tsv")
+	feederPath = pJoin(_omfDir,"data", "Feeder", "public","ABEC Columbia.json")
+	scadaPath = pJoin(_omfDir,"uploads","colScada.tsv")
 	calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 	try:
 		os.remove(pJoin(modelDir,"stderr.txt"))
