@@ -11,6 +11,5 @@ omf/emailCredentials.key
 # But include a few things:
 !omf/data/Model/public/*
 !omf/data/Feeder/public/*
-!omf/data/Feeder/admin
 !omf/data/User/test.json
 !omf/data/User/public.json
