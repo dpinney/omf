@@ -46,7 +46,7 @@ def sepRealImag(complexStr):
 				imag = 0.0
 	return real,imag
 
-def runModel(modelDir,localTree):
+def runModel(modelDir,localTree,inData):
 	'''This reads a glm file, changes the method of powerflow and reruns'''
 	print "Testing GridlabD solver."
 	startTime = datetime.now()
@@ -134,6 +134,7 @@ def runModel(modelDir,localTree):
 		localTree[biggest + index] = rec
 	#run a reference load flow
 	HOURS = float(8760)
+	year_lp = False   #leap year
 	feeder.adjustTime(localTree,HOURS,"hours","2011-01-01")	
 	output = gridlabd.runInFilesystem(localTree,keepFiles=False,workDir=modelDir)
 	os.remove(pJoin(modelDir,"PID.txt"))
@@ -236,8 +237,11 @@ def runModel(modelDir,localTree):
 	whLosses.append(sum(realLossnew)/1000.0)
 	whLoads.append((sum(pnew)-sum(realLossnew))/1000.0)
 	indices = ['No IVVC', 'With IVVC']
-	ticks = []
+	energySalesRed = (whLoads[1]-whLoads[0])*(inData['wholesaleEnergyCostPerKwh'])*1000
+	lossSav = (whLosses[0]-whLosses[1])*inData['wholesaleEnergyCostPerKwh']*1000
+	print energySalesRed, lossSav
 	#plots
+	ticks = []
 	plt.clf()
 	plt.title("total energy")
 	plt.ylabel("total load and losses (MWh)")
@@ -354,22 +358,76 @@ def runModel(modelDir,localTree):
 		f.tight_layout()
 		plt.savefig(pJoin(modelDir,"capacitor switch.png"))
 	#plt.show()
+	#monetization
+	monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
+		"September", "October", "November", "December"]
+	monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
+		'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
+		'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
+	if year_lp == True:
+		febDays = 29
+	else:
+		febDays = 28
+	monthHours = [int(31*24),int(febDays*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24)]
+	#find simulation months
+	temp = 0
+	cumulHours = []
+	for x in range(12):
+		temp += monthHours[x]
+		cumulHours.append(temp)
+	for i in range(12):
+		if i == 0:
+			lowval = 0
+		else:
+			lowval = cumulHours[i-1]
+		if HOURS<=cumulHours[i] and HOURS>=lowval:
+			hourMonth = monthNames[i]
+			hourIndex = i
+	#calculate peaks for the number of months in simulation
+	previndex = 0
+	monthPeak = {}
+	monthPeakNew = {}
+	peakSave = {}
+	for month in range(hourIndex+1):
+		index1 = int(previndex)
+		index2 = int(min((index1 + int(monthHours[month])), HOURS))
+		monthPeak[monthNames[month]] = max(p[index1:index2])
+		monthPeakNew[monthNames[month]] = max(pnew[index1:index2])
+		peakSave[monthNames[month]] = (monthPeak[monthNames[month]]-monthPeakNew[monthNames[month]])*inData['peakDemandCost'+str(monthToSeason[monthNames[month]])+'PerKw']
+		previndex = index2
+	print monthPeak
+	print monthPeakNew
+	print peakSave
 	print "DONE RUNNING", modelDir
 
 if __name__ == '__main__':
 	'''a compare solver functions which takes model directory as an input and compares two powerflow methods'''
 	'''this model will first calibrate the feeder using SCADA data, from feederCalibrate.py'''
-	#creating a work directory
+	#creating a work directory and initializing data
 	inData = { "modelName": "Automated DynamicCVR Testing",
 		"modelType": "cvrDynamic",
-		"user": "admin"}
+		"user": "admin",
+		"runTime": "",
+		"capitalCost": 30000,
+		"omCost": 1000,
+		"wholesaleEnergyCostPerKwh": 0.06,
+		"retailEnergyCostPerKwh": 0.10,
+		"peakDemandCostSpringPerKw": 5.0,
+		"peakDemandCostSummerPerKw": 10.0,
+		"peakDemandCostFallPerKw": 6.0,
+		"peakDemandCostWinterPerKw": 8.0}
+		# "baselineTap": 3.0,
+		# "z_percent": 0.5,
+		# "i_percent": 0.0,
+		# "p_percent": 0.5,
+		# "power_factor": 0.9}
 	workDir = pJoin(_omfDir,"data","Model")
 	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 	#calibrate and run cvrdynamic	
-	feederPath = pJoin(_omfDir,"data", "Feeder", "public","ABEC Columbia.json")
-	scadaPath = pJoin(_omfDir,"uploads","colScada.tsv")
+	feederPath = pJoin(_omfDir,"data", "Feeder", "admin","ABEC Frank new.json")
+	scadaPath = pJoin(_omfDir,"uploads","FrankScada.tsv")
 	calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 	try:
 		os.remove(pJoin(modelDir,"stderr.txt"))
@@ -379,4 +437,4 @@ if __name__ == '__main__':
 	with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
 		feederJson = json.load(jsonIn)
 		localTree = feederJson.get("tree", {})
-	runModel(modelDir,localTree)
+	runModel(modelDir,localTree,inData)
