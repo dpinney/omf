@@ -46,9 +46,9 @@ div#toolbar {
     text-align:center;
     vertical-align:center;
     background-color:black; /* for browsers that can't do gradients */
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#B0B0B0', endColorstr='#696969 '); /* for IE */
-    background: -webkit-gradient(linear, left top, left bottom, from(#B0B0B0), to(#696969)); /* for webkit browsers */
-    background: -moz-linear-gradient(top,  #B0B0B0,  #696969); /* for firefox 3.6+ */
+    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#B0B0B0', endColorstr='#999999 '); /* for IE */
+    background: -webkit-gradient(linear, left top, left bottom, from(#B0B0B0), to(#999999)); /* for webkit browsers */
+    background: -moz-linear-gradient(top,  #B0B0B0,  #999999); /* for firefox 3.6+ */
 }
 
 div.content {
