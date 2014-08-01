@@ -325,12 +325,12 @@ def _gatherKeyValues(inDict, keyToAvoid):
 				otherKeyValues += (inDict[key] + '\n')
 			elif key == 'name' or key == 'parent':
 				if len(inDict[key]) <= 62:
-					otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
+					otherKeyValues += ('\t' + key + ' ' + str(inDict[key]) + ';\n')
 				else:
 					warnings.warn("{:s} argument is longer that 64 characters. Truncating.".format(key), RuntimeWarning)
-					otherKeyValues += ('\t' + key + ' ' + inDict[key][0:62] + '; // truncated from {:s}\n'.format(inDict[key]))
+					otherKeyValues += ('\t' + key + ' ' + str(inDict[key])[0:62] + '; // truncated from {:s}\n'.format(inDict[key]))
 			else:
-				otherKeyValues += ('\t' + key + ' ' + inDict[key] + ';\n')
+				otherKeyValues += ('\t' + key + ' ' + str(inDict[key]) + ';\n')
 	return otherKeyValues
 
 def _dictToString(inDict):
