@@ -51,7 +51,7 @@ def sepRealImag(complexStr):
 				imag = 0.0
 	return real,imag
 
-def runModel(modelDir,localTree,inData):
+def run(modelDir,inData):
 	'''This reads a glm file, changes the method of powerflow and reruns'''
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
@@ -65,6 +65,9 @@ def runModel(modelDir,localTree,inData):
 		json.dump(inData, inputFile, indent=4)
 	binaryName = "gridlabd"
 	startTime = datetime.now()
+	with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
+		feederJson = json.load(jsonIn)
+		localTree = feederJson.get("tree", {})
 	for key in localTree:
 		if "solver_method" in localTree[key].keys():
 			print "current solver method", localTree[key]["solver_method"] 
@@ -491,10 +494,7 @@ def _tests():
 		os.remove(pJoin(modelDir,"stdout.txt"))
 	except:
 		pass
-	with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
-		feederJson = json.load(jsonIn)
-		localTree = feederJson.get("tree", {})
-	runModel(modelDir,localTree,inData)
+	run(modelDir,inData)
 
 if __name__ == '__main__':
 	_tests()
