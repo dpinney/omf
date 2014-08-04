@@ -1,5 +1,4 @@
 {
-    "modelName": "Demo gridlabMulti 13 Node Feeder", 
     "simStartDate": "2014-07-30", 
     "simLengthUnits": "hours", 
     "feederName": "public___13 Node Ref Feeder Flat", 
@@ -7,7 +6,6 @@
     "modelType": "gridlabMulti", 
     "climateName": "TX-ABILENE", 
     "simLength": "100", 
-    "user": "public", 
     "feederName2": "public___13 Node Ref Feeder Laid Out ZERO CVR", 
     "runTime": "0:01:39"
 }

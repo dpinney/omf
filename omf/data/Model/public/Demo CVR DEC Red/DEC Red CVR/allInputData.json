@@ -1,5 +1,4 @@
 {
-    "modelName": "Demo CVR DEC Red CVR", 
     "created": "2014-07-30 11:35:33.705000", 
     "simLengthUnits": "hours", 
     "feederName": "public___DEC Red Base", 
@@ -7,7 +6,6 @@
     "modelType": "gridlabMulti", 
     "climateName": "DE-WILMINGTON", 
     "simLength": "720", 
-    "user": "public", 
     "feederName2": "public___DEC Red CVR", 
     "runTime": "0:20:24"
 }

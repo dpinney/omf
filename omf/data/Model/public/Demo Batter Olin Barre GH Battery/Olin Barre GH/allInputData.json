@@ -1,5 +1,4 @@
 {
-    "modelName": "DEMO of Battery", 
     "created": "2014-07-25 11:40:47.373000", 
     "simLengthUnits": "hours", 
     "feederName": "public___Olin Barre GH", 
@@ -7,7 +6,6 @@
     "modelType": "gridlabMulti", 
     "climateName": "PA-ERIE", 
     "simLength": "100", 
-    "user": "admin", 
     "feederName2": "public___Olin Barre GH Battery", 
     "runTime": "0:00:16"
 }

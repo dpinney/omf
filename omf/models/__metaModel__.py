@@ -2,6 +2,7 @@
 
 import json, os, sys, tempfile, webbrowser, time
 from os.path import join as pJoin
+from os.path import split as pSplit
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
@@ -12,7 +13,12 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 	If modelDir is valid, render results post-model-run.
 	If absolutePaths, the HTML can be opened without a server. '''
 	try:
-		allInputData = open(pJoin(modelDir,"allInputData.json")).read()
+		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
+		modelPath, modelName = pSplit(modelDir)
+		deepPath, user = pSplit(modelPath)
+		inJson["modelName"] = modelName
+		inJson["user"] = user
+		allInputData = json.dumps(inJson)
 	except IOError:
 		allInputData = None
 	try:

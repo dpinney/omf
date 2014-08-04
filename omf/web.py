@@ -267,13 +267,17 @@ def runModel():
 	''' Start a model running and redirect to its running screen. '''
 	pData = request.form.to_dict()
 	modelModule = getattr(models, pData["modelType"])
-	#TODO: what if we're an admin viewing public or other peoples' models?
+	# Handle the user.
 	if User.cu() == "admin" and pData["user"] == "public":
-		pData["user"] = "public"
+		user = "public"
 	else:
-		pData["user"] = User.cu()
-	modelModule.run(os.path.join(_omfDir,"data","Model",pData["user"],pData["modelName"]), pData)
-	return redirect("/model/" + pData["user"] + "/" + pData["modelName"])
+		user = User.cu()
+	del pData["user"]
+	# Handle the model name.
+	modelName = pData["modelName"]
+	del pData["modelName"]
+	modelModule.run(os.path.join(_omfDir, "data", "Model", user, modelName), pData)
+	return redirect("/model/" + user + "/" + modelName)
 
 @app.route("/cancelModel/", methods=["POST"])
 @flask_login.login_required
@@ -293,8 +297,8 @@ def duplicateModel(owner, modelName):
 		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
 		with open(destinationPath + "/allInputData.json","r") as inFile:
 			inData = json.load(inFile)
-		inData["user"] = User.cu()
-		inData["modelName"] = str(newName)
+		# inData["user"] = User.cu()
+		# inData["modelName"] = str(newName)
 		inData["created"] = str(dt.datetime.now())
 		with open(destinationPath + "/allInputData.json","w") as outFile:
 			json.dump(inData, outFile, indent=4)
@@ -311,8 +315,8 @@ def publishModel(owner, modelName):
 		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
 		with open(destinationPath + "/allInputData.json","r+") as inFile:
 			inData = json.load(inFile)
-			inData["user"] = "public"
-			inData["modelName"] = str(newName)
+			# inData["user"] = "public"
+			# inData["modelName"] = str(newName)
 			inData["created"] = str(dt.datetime.now())
 			inFile.seek(0)
 			json.dump(inData, inFile, indent=4)

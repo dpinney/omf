@@ -1,9 +1,7 @@
 {
-    "modelName": "Demo voltageDrop ABEC Columbia", 
     "created": "2014-07-30 11:18:52.495000", 
     "feederName": "public___ABEC Columbia", 
     "modelType": "voltageDrop", 
     "layoutAlgorithm": "geospatial", 
-    "runTime": "0:00:02", 
-    "user": "public"
+    "runTime": "0:00:02"
 }

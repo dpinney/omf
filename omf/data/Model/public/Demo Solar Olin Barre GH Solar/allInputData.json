@@ -1,5 +1,4 @@
 {
-    "modelName": "Demo Solar Olin Barre GH Solar", 
     "simStartDate": "2014-07-30", 
     "simLengthUnits": "hours", 
     "feederName": "public___Olin Barre GH", 
@@ -7,7 +6,6 @@
     "modelType": "gridlabMulti", 
     "climateName": "AZ-PRESCOTT", 
     "simLength": "240", 
-    "user": "public", 
     "feederName3": "public___Olin Barre GH 05Perc Solar", 
     "feederName2": "public___Olin Barre GH 20Perc Solar", 
     "runTime": "0:02:13", 
