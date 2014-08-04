@@ -55,16 +55,17 @@
 		<div id='logoBox'><a href='/'>&#10059;</a></div>
 		<!--Title:-->Open Modeling Framework
 	</div>
-	<div id="account_links">
-		<div><a href="logout">Log Out</a></div>
-		<div><a href="myaccount">My Account</a></div>
-		{% if is_admin %}
-		<div><a href="adminControls">Admin Controls</a></div>
-		{% endif %}
-	</div>
 	<div id='toolbar'>
 		<p id='analysesTab' class='tab tabSelected' onclick='analysesClick()'>Models</p>
 		<p id='feedersTab' class='tab' style='' onclick='feedersClick()'>Feeders</p>
+		<p id='accountTab' class='tab' style='float: right;' onclick='dropPill(this, "Account")'>Account ▾</p>
+		<ul class='menu right'>
+		<li><a href="logout">Log Out</a></li>
+		<li><a href="myaccount">My Account</a></li>
+		{% if is_admin %}
+		<li><a href="adminControls">Admin Controls</a></li>
+		{% endif %}
+		</ul>
 	</div>
 	<div id="placeholder"></div>
 	<div id='analyses'>
