@@ -76,10 +76,38 @@
 					<td><input type="text" id="systemSize" name="systemSize" data-validRegex="\d+\.?\d*"/></td>
 				</tr>
 				<tr>
-					<td>Derate (%)</td>
-					<td><input type="text" id="derate" name="derate" data-validRegex="\d+\.?\d*"/></td>
+					<td>System Installation Cost</td>
+					<td><input type="text" id="installCost" name="installCost" data-validRegex="\d+\.?\d*"/></td>
 				</tr>
 				<tr>
+					<td>System O and M Cost</td>
+					<td><input type="text" id="omCost" name="omCost" data-validRegex="\d+\.?\d*"/></td>
+				</tr>
+				<tr>
+					<td>Projected Life of System (Years)</td>
+					<td><input type="text" id="lifeSpan" name="lifeSpan" data-validRegex="\d+" value="30"/></td>
+				</tr>
+				<tr>
+					<td>Annual Array Degredation</td>
+					<td><input type="text" id="degredation" name="degredation" data-validRegex="\d+\.?\d*" value="0.005"/></td>
+				</tr>
+				<tr>
+					<td>Wholesale Energy Cost ($)</td>
+					<td><input type="text" id="wholesaleCost" name="wholesaleCost" data-validRegex="\d+\.?\d*" value="0.10"/></td>
+				</tr>
+				<tr>
+					<td>Discount Rate</td>
+					<td><input type="text" id="discountRate" name="discountRate" data-validRegex="\d+\.?\d*" value="0.07"/></td>
+				</tr>
+				<tr>
+					<td></td>
+					<td style="text-align:right"><p class="discloser" onclick="javascript:toggleAdvanced(this)">&#9654; Advanced Options</p></td>
+				</tr>
+				<tr class="advancedOption">
+					<td>Derate (%)</td>
+					<td><input type="text" id="derate" name="derate" data-validRegex="\d+\.?\d*" value="0.77"/></td>
+				</tr>
+				<tr class="advancedOption">
 					<td>Tracking Mode</td>
 					<td>
 						<select id="trackingMode" name="trackingMode"/>
@@ -90,13 +118,13 @@
 						</select>
 					</td>
 				</tr>
-				<tr>
-					<td>Azimuth (degrees)</td>
-					<td><input type="text" id="azimuth" name="azimuth"/></td>
+				<tr class="advancedOption">
+					<td>Tilt = Latitude</td>
+					<td><input type="text" id="tilt" name="tilt" value="True"/></td>
 				</tr>
-				<tr>
-					<td></td>
-					<td style="text-align:right"><p class="discloser" onclick="javascript:toggleAdvanced(this)">&#9654; Advanced Options</p></td>
+				<tr class="advancedOption">
+					<td>Azimuth (degrees)</td>
+					<td><input type="text" id="azimuth" name="azimuth" value="180"/></td>
 				</tr>
 				<tr class="advancedOption">
 					<td>Tracker rotation limit (deg)</td>
@@ -164,7 +192,7 @@
 				var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
 				pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
 				pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Climate</p>
@@ -177,8 +205,11 @@
 					{"name":"Direct Irradiance (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Irradiance (W/m^2)"]},
 					{"name":"Difuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Difuse Irradiance (W/m^2)"]},
 					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
+		</div>
+		<p class="reportTitle postRun">Monetization</p>
+		<div id="monetizationReport" class="tightContent postRun">
 		</div>
 	</div>
 	<script type="text/javascript">
