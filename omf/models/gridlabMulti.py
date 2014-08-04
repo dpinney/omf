@@ -3,6 +3,7 @@
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math
 import multiprocessing
 from os.path import join as pJoin
+from os.path import split as pSplit
 from jinja2 import Template
 import traceback
 import __metaModel__
@@ -23,7 +24,12 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 	If modelDir is valid, render results post-model-run.
 	If absolutePaths, the HTML can be opened without a server. '''
 	try:
-		allInputData = open(pJoin(modelDir,"allInputData.json")).read()
+		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
+		modelPath, modelName = pSplit(modelDir)
+		deepPath, user = pSplit(modelPath)
+		inJson["modelName"] = modelName
+		inJson["user"] = user
+		allInputData = json.dumps(inJson)
 	except IOError:
 		allInputData = None
 	try:
@@ -81,7 +87,7 @@ def runForeground(modelDir, inputDict):
 			print "remove subfolders"
 			shutil.rmtree(pJoin(modelDir, dirs))
 	# Get each feeder, prepare data in separate folders, and run there.
-	for key in inputDict:
+	for key in sorted(inputDict, key=inputDict.get):
 		if key.startswith("feederName"):
 			feederDir, feederName = inputDict[key].split("___")
 			feederList.append(feederName)
@@ -352,10 +358,7 @@ def _groupBy(inL, func):
 def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = { 
-		"modelName": "Automated Multiple GridlabD Testing",
-		# "modelName": "All",
-		"simStartDate": "2012-04-01",
+	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		# "feederName": "admin___Simple Market System",
 		# "feederName2": "admin___Simple Market System BROKEN", 		# configure error
@@ -392,9 +395,8 @@ def _tests():
 		"modelType": "gridlabMulti",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "24",
-		"user": "admin", # Really only used with web.py.
 		"runTime": ""}
-	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
+	modelLoc = pJoin(workDir,"admin","Automated Multiple GridlabD Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)

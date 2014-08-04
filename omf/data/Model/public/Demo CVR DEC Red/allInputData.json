@@ -1,0 +1,11 @@
+{
+    "created": "2014-07-30 11:35:33.705000", 
+    "simLengthUnits": "hours", 
+    "feederName": "public___DEC Red Base", 
+    "simStartDate": "2014-07-30", 
+    "modelType": "gridlabMulti", 
+    "climateName": "DE-WILMINGTON", 
+    "simLength": "720", 
+    "feederName2": "public___DEC Red CVR", 
+    "runTime": "0:46:45"
+}

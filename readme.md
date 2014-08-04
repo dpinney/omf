@@ -1,5 +1,5 @@
-What is the OMF?
-===
+### What is the OMF?
+
 
 The Open Modeling Framework (OMF) is a set of Python libraries for simulating power systems behavior with an emphasis on cost-benefit analysis of emerging technologies: distributed generation, storage, networked controls, etc.
 
@@ -7,14 +7,12 @@ Included is a web interface. For NRECA members, access to a production system is
 
 Full documentation is available on our [OMF wiki](https://github.com/dpinney/omf/wiki).
 
-How to install the OMF?
-===
-NRECA members can log in to the web interface directly at https://www.omf.coop/
+### How to install?
+NRECA members can log in to the web interface directly at http://www.omf.coop/
 
 Others can follow the [developer installation instructions](https://github.com/dpinney/omf/wiki/Developer-Documentation).
 
-Example Screenshots
-===
+### Example Screenshots
 
 WYSIWYG Circuit Editor
 

@@ -143,13 +143,11 @@ def _tests():
 	# plt.show()
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = { "modelName": "Automated voltageDrop Testing",
-		"feederName": "public___Olin Barre Geo",
+	inData = {"feederName": "public___Olin Barre Geo",
 		"modelType": "voltageDrop",
-		"user": "admin",
 		"runTime": "",
 		"layoutAlgorithm": "geospatial"}
-	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
+	modelLoc = pJoin(workDir,"admin","Automated voltageDrop Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)

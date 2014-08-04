@@ -94,6 +94,9 @@ function deleteModel() {
  */
 function publishModel() {
 	newName = prompt("Publish a copy with name", allInputData.modelName)
+	while (! /^[\w\s]+$/.test(newName)){
+		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
+	}
 	if (newName) {
 		$.ajax({url:"/uniqObjName/Model/public/" + newName}).done(function(data) {
 			if (data.exists) {
@@ -113,6 +116,9 @@ function publishModel() {
  */
 function duplicateModel() {
 	newName = prompt("Create a duplicate with name", allInputData.modelName)
+	while (! /^[\w\s]+$/.test(newName)){
+		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
+	}
 	if (newName) {
 		$.ajax({url:"/uniqObjName/Model/" + allInputData.user + "/" + newName}).done(function(data) {
 			if (data.exists) {

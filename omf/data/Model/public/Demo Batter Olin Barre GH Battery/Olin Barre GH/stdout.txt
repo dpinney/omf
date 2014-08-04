@@ -1,0 +1,49 @@
+                                                                                                                  
+Core profiler results
+======================
+
+Total objects               2277 objects
+Parallelism                    1 thread
+Total time                   5.0 seconds
+  Core time                  1.2 seconds (23.8%)
+    Compiler                11.8 seconds (236.9%)
+    Instances                0.0 seconds (0.0%)
+    Random variables         0.0 seconds (0.0%)
+    Schedules                0.0 seconds (0.0%)
+    Loadshapes               0.0 seconds (0.3%)
+    Enduses                  0.0 seconds (0.2%)
+    Transforms               0.0 seconds (0.3%)
+  Model time                 3.8 seconds/thread (76.2%)
+Simulation time                4 days
+Simulation speed              46k object.hours/second
+Passes completed             102 passes
+Time steps completed         101 timesteps
+Convergence efficiency      1.01 passes/timestep
+Read lock contention        0.0%
+Write lock contention       0.0%
+Average timestep           3564 seconds/timestep
+Simulation rate           72000 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+node               3.196     83.9%      6.6
+collector          0.162      4.3%     32.4
+house              0.160      4.2%      0.5
+climate            0.112      2.9%    112.0
+recorder           0.045      1.2%     22.5
+triplex_meter      0.044      1.2%      0.2
+overhead_line      0.028      0.7%      0.1
+waterheater        0.025      0.7%      0.1
+transformer        0.014      0.4%      0.1
+ZIPload            0.010      0.3%      0.0
+capacitor          0.005      0.1%      5.0
+underground_line   0.005      0.1%      0.1
+fuse               0.004      0.1%      0.1
+switch             0.001      0.0%      0.1
+================ ======== ======== ========
+Total              3.811    100.0%      1.7
+

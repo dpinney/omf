@@ -1,0 +1,11 @@
+{
+    "created": "2014-07-25 12:16:05.926000", 
+    "simLengthUnits": "hours", 
+    "feederName": "public___Olin Barre GH", 
+    "simStartDate": "2014-07-30", 
+    "modelType": "gridlabMulti", 
+    "climateName": "AK-ANCHORAGE", 
+    "simLength": "100", 
+    "feederName2": "public___Olin Barre GH Wind", 
+    "runTime": "0:00:17"
+}

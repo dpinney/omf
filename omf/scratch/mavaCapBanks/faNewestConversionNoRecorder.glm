@@ -698,12 +698,12 @@ object capacitor {
 	capacitor_B 50000.0;
 	phases_connected ABCN;
 	longitude 408.393489134;
-	switchC OPEN;
+	switchC CLOSED;
 	nominal_voltage 7200.0;
 	capacitor_C 50000.0;
 	latitude 148.884343895;
-	switchB OPEN;
-	switchA OPEN;
+	switchB CLOSED;
+	switchA CLOSED;
 	pt_phase A;
 };
 

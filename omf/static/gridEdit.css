@@ -24,7 +24,7 @@ div#toolbar {
 input#gridNameEdit {
 	font-size: 28pt;
 	line-height: 28pt;
-	text-shadow: 0px 3px 3px #4d4d4d;
+	text-shadow: 0px 1px 1px #4d4d4d;
 	height: 50px;
 	color: gray;
 	padding: 3px;

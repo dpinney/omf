@@ -1,0 +1,22 @@
+{
+    "rotlim": "45.0", 
+    "simLengthUnits": "hours", 
+    "modelType": "pvWatts", 
+    "i_ref": "1000", 
+    "trackingMode": "0", 
+    "simStartDate": "2014-07-30", 
+    "poa_cutin": "0", 
+    "climateName": "AZ-PRESCOTT", 
+    "simLength": "240", 
+    "derate": "0.97", 
+    "fd": "1.0", 
+    "systemSize": "10", 
+    "runTime": "0:00:00", 
+    "t_ref": "25.0", 
+    "w_stow": "0", 
+    "created": "2014-07-25 18:00:13.412000", 
+    "t_noct": "45.0", 
+    "inv_eff": "0.92", 
+    "azimuth": "180", 
+    "gamma": "-0.5"
+}

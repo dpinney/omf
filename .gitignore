@@ -9,8 +9,6 @@ build
 omf.egg-info
 omf/emailCredentials.key
 # But include a few things:
-!omf/data/Model/admin/z*
-!omf/data/Model/admin/z*
 !omf/data/Model/public/*
 !omf/data/Feeder/public/*
 !omf/data/User/test.json

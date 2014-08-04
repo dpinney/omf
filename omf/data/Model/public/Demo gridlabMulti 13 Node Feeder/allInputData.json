@@ -1,0 +1,11 @@
+{
+    "simStartDate": "2014-07-30", 
+    "simLengthUnits": "hours", 
+    "feederName": "public___13 Node Ref Feeder Flat", 
+    "created": "2014-07-30 11:21:37.074000", 
+    "modelType": "gridlabMulti", 
+    "climateName": "TX-ABILENE", 
+    "simLength": "100", 
+    "feederName2": "public___13 Node Ref Feeder Laid Out ZERO CVR", 
+    "runTime": "0:01:39"
+}

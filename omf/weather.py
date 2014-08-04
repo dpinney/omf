@@ -527,7 +527,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 					n += 1
 				entry.Cond = moreConditionDict[weatherList[n].Cond]
 	# add 00:00:00 to each day
-	seasons = {	"Winter" : ([], "solar_{}_winter_csv".format(airport)),
+	seasons = {	"Winter" : ([], "solar_{}_winter.csv".format(airport)),
 						"Spring" : ([], "solar_{}_spring.csv".format(airport)),
 						"Summer" : ([], "solar_{}_summer.csv".format(airport)),
 						"Fall" : ([], "solar_{}_fall.csv".format(airport))}
@@ -670,7 +670,7 @@ def _tests():
 	print "Pull weather and solar data together in", workDir
 	assert None==_processWeather("2010-03-01", "2010-04-01", "PDX", workDir)
 	print "Testing the full process together."
-	assert None==makeClimateCsv("2010-07-01", "2010-08-01", "DCA", pJoin(tempfile.mkdtemp(),"weatherDCA.csv"), cleanup=True)
+	assert None==makeClimateCsv("2010-04-01", "2010-06-30", "DCA", pJoin(tempfile.mkdtemp(),"weatherDCA.csv"), cleanup=True)
 
 if __name__ == "__main__":
 	_tests()

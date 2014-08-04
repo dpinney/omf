@@ -1,0 +1,10 @@
+# file...... ZvoltageJiggle.csv
+# date...... Wed Jul 30 11:31:07 2014
+# user...... jxh10
+# host...... (null)
+# group..... class=triplex_meter
+# trigger... (none)
+# interval.. -1
+# limit..... 0
+# property.. timestamp,min(voltage_12.mag),mean(voltage_12.mag),max(voltage_12.mag),std(voltage_12.mag)
+2013-01-01 00:00:00 PST,+186.44,+224.133,+245.92,+11.6707

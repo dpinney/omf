@@ -137,8 +137,7 @@ def cancel(modelDir):
 def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = { "modelName": "Automated pvWatts Testing",
-		"simStartDate": "2012-04-01",
+	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"modelType": "pvWatts",
 		"climateName": "AL-HUNTSVILLE",
@@ -147,7 +146,6 @@ def _tests():
 		"derate":"0.97",
 		"trackingMode":"0",
 		"azimuth":"180",
-		"user": "admin", # Really only used with web.py.
 		"runTime": "",
 		"rotlim":"45.0",
 		"t_noct":"45.0",
@@ -158,7 +156,7 @@ def _tests():
 		"i_ref":"1000",
 		"poa_cutin":"0",
 		"w_stow":"0"}
-	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
+	modelLoc = pJoin(workDir,"admin","Automated pvWatts Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)

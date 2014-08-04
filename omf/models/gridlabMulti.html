@@ -83,9 +83,12 @@
 		}
 
 		studyList = []
-		for (key in allOutputData){
-			if (key.substring(0,6) == "feeder"){
-				studyList.push(key)
+		for (key in allInputData){
+			if (key.substring(0,10) === "feederName"){
+				feederKey = "feeder_" + allInputData[key].split("___")[1]
+				if (allOutputData[feederKey] != undefined){
+					studyList.push(feederKey)
+				}
 			}
 		}
 	</script>

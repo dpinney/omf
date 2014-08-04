@@ -56,20 +56,24 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 			print "gridlabD runInFilesystem with no specified workDir. Working in", workDir
 		# Need to zero out lat/lon data on copy because it frequently breaks Gridlab.
 		localTree = deepcopy(feederTree)
-		for key in localTree:
-			if 'latitude' in localTree[key]: localTree[key]['latitude'] = '0'
-			if 'longitude' in localTree[key]: localTree[key]['longitude'] = '0'
+		for key in localTree.keys():
+			try:
+				del localTree[key]["latitude"]
+				del localTree[key]["longitude"]
+			except:
+				pass # No lat lons.
 		# Write attachments and glm.
 		for attach in attachments:
 			with open (pJoin(workDir,attach),'w') as attachFile:
 				attachFile.write(attachments[attach])
 		glmString = feeder.sortedWrite(localTree)
-		with open(pJoin(workDir,'main.glm'),'w') as glmFile:
+		glmName = "main." + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + ".glm"
+		with open(pJoin(workDir, glmName),'w') as glmFile:
 			glmFile.write(glmString)
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 		with open(pJoin(workDir,'stdout.txt'),'w') as stdout, open(pJoin(workDir,'stderr.txt'),'w') as stderr, open(pJoin(workDir,'PID.txt'),'w') as pidFile:
 			# MAYBEFIX: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
-			proc = subprocess.Popen([binaryName,'-w','main.glm'], cwd=workDir, stdout=stdout, stderr=stderr)
+			proc = subprocess.Popen([binaryName,'-w', glmName], cwd=workDir, stdout=stdout, stderr=stderr)
 			pidFile.write(str(proc.pid))
 		returnCode = proc.wait()
 		# Build raw JSON output.
