@@ -433,9 +433,8 @@ def runModel(modelDir,localTree,inData):
 	plt.savefig(pJoin(modelDir,"cumulative savings.png"))
 	print "DONE RUNNING", modelDir
 
-if __name__ == '__main__':
-	'''a compare solver functions which takes model directory as an input and compares two powerflow methods'''
-	'''this model will first calibrate the feeder using SCADA data, from feederCalibrate.py'''
+def _tests():
+	"runs local tests for dynamic CVR model"
 	#creating a work directory and initializing data
 	inData = { "modelName": "Automated DynamicCVR Testing",
 		"modelType": "cvrDynamic",
@@ -471,3 +470,6 @@ if __name__ == '__main__':
 		feederJson = json.load(jsonIn)
 		localTree = feederJson.get("tree", {})
 	runModel(modelDir,localTree,inData)
+
+if __name__ == '__main__':
+	_tests()
