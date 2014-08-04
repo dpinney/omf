@@ -230,16 +230,16 @@ def runModel(modelDir,localTree,inData):
 	whEnergy = []
 	whLosses = []
 	whLoads = []
-	whEnergy.append(sum(p)/1000.0)
-	whLosses.append(sum(realLoss)/1000.0)
-	whLoads.append((sum(p)-sum(realLoss))/1000.0)
-	whEnergy.append(sum(pnew)/1000.0)
-	whLosses.append(sum(realLossnew)/1000.0)
-	whLoads.append((sum(pnew)-sum(realLossnew))/1000.0)
+	whEnergy.append(sum(p)/10**6)
+	whLosses.append(sum(realLoss)/10**6)
+	whLoads.append((sum(p)-sum(realLoss))/10**6)
+	whEnergy.append(sum(pnew)/10**6)
+	whLosses.append(sum(realLossnew)/10**6)
+	whLoads.append((sum(pnew)-sum(realLossnew))/10**6)
 	indices = ['No IVVC', 'With IVVC']
-	energySalesRed = (whLoads[1]-whLoads[0])*(inData['wholesaleEnergyCostPerKwh'])*1000
-	lossSav = (whLosses[0]-whLosses[1])*inData['wholesaleEnergyCostPerKwh']*1000
-	print energySalesRed, lossSav
+	# energySalesRed = (whLoads[1]-whLoads[0])*(inData['wholesaleEnergyCostPerKwh'])*1000
+	# lossSav = (whLosses[0]-whLosses[1])*inData['wholesaleEnergyCostPerKwh']*1000
+	# print energySalesRed, lossSav
 	#plots
 	ticks = []
 	plt.clf()
@@ -257,8 +257,8 @@ def runModel(modelDir,localTree,inData):
 	plt.figure("real power")
 	plt.title("Real Power at substation")
 	plt.ylabel("substation real power (MW)")
-	pMW = [element/1000.0 for element in p]
-	pMWn = [element/1000.0 for element in pnew]
+	pMW = [element/10**6 for element in p]
+	pMWn = [element/10**6 for element in pnew]
 	pw = plt.plot(pMW)
 	npw = plt.plot(pMWn)
 	plt.legend([pw[0], npw[0]], ['NO IVVC','WITH IVVC'],bbox_to_anchor=(0., 0.915, 1., .102), loc=3,
@@ -267,8 +267,8 @@ def runModel(modelDir,localTree,inData):
 	plt.figure("Reactive power")
 	plt.title("Reactive Power at substation")
 	plt.ylabel("substation reactive power (MVAR)")
-	qMVAR = [element/1000.0 for element in q]
-	qMVARn = [element/1000.0 for element in qnew]
+	qMVAR = [element/10**6 for element in q]
+	qMVARn = [element/10**6 for element in qnew]
 	iw = plt.plot(qMVAR)
 	niw = plt.plot(qMVARn)
 	plt.legend([iw[0], niw[0]], ['NO IVVC','WITH IVVC'],bbox_to_anchor=(0., 0.915, 1., .102), loc=3,
@@ -387,17 +387,50 @@ def runModel(modelDir,localTree,inData):
 	previndex = 0
 	monthPeak = {}
 	monthPeakNew = {}
-	peakSave = {}
+	peakSaveDollars = {}
+	energyLostDollars = {}
+	lossRedDollars = {}
 	for month in range(hourIndex+1):
 		index1 = int(previndex)
 		index2 = int(min((index1 + int(monthHours[month])), HOURS))
-		monthPeak[monthNames[month]] = max(p[index1:index2])
-		monthPeakNew[monthNames[month]] = max(pnew[index1:index2])
-		peakSave[monthNames[month]] = (monthPeak[monthNames[month]]-monthPeakNew[monthNames[month]])*inData['peakDemandCost'+str(monthToSeason[monthNames[month]])+'PerKw']
+		monthPeak[monthNames[month]] = max(p[index1:index2])/1000.0
+		monthPeakNew[monthNames[month]] = max(pnew[index1:index2])/1000.0
+		peakSaveDollars[monthNames[month]] = (monthPeak[monthNames[month]]-monthPeakNew[monthNames[month]])*inData['peakDemandCost'+str(monthToSeason[monthNames[month]])+'PerKw']
+		lossRedDollars[monthNames[month]] = (sum(realLoss[index1:index2])/1000.0 - sum(realLossnew[index1:index2])/1000.0)*(inData['wholesaleEnergyCostPerKwh'])
+		energyLostDollars[monthNames[month]] = (sum(p[index1:index2])/1000.0  - sum(pnew[index1:index2])/1000.0  - sum(realLoss[index1:index2])/1000.0  
+			+ sum(realLossnew[index1:index2])/1000.0 )*(inData['wholesaleEnergyCostPerKwh'] - inData['retailEnergyCostPerKwh'])
 		previndex = index2
-	print monthPeak
-	print monthPeakNew
-	print peakSave
+	#money charts
+	simMonths = monthNames[:hourIndex+1]
+	fig = plt.figure("cost benefit barchart",figsize=(10,8))
+	ticks = range(len(simMonths))
+	ticks1 = [element+0.15 for element in ticks]
+	ticks2 = [element+0.30 for element in ticks]
+	print ticks
+	eld = [energyLostDollars[month] for month in simMonths]
+	lrd = [lossRedDollars[month] for month in simMonths]
+	psd = [peakSaveDollars[month] for month in simMonths]
+	bar_eld = plt.bar(ticks,eld,0.15,color='red') 
+	bar_psd = plt.bar(ticks1,psd,0.15,color='blue')
+	bar_lrd = plt.bar(ticks2,lrd,0.15,color='green')
+	plt.legend([bar_eld[0], bar_psd[0], bar_lrd[0]], ['energyLostDollars','peakReductionDollars','lossReductionDollars'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
+		ncol=2, mode="expand", borderaxespad=0.1)
+	monShort = [element[0:3] for element in simMonths]
+	plt.xticks([t+0.15 for t in ticks],monShort)
+	plt.ylabel('Utility Savings ($)')
+	plt.savefig(pJoin(modelDir,"cost benefit barchart.png"))
+	#cumulative savings graphs
+	fig = plt.figure("cost benefit barchart",figsize=(10,5))
+	annualSavings = sum(eld) + sum(lrd) + sum(psd)
+	annualSave = lambda x:(annualSavings - inData['omCost']) * x - inData['capitalCost']
+	simplePayback = inData['capitalCost']/(annualSavings - inData['omCost'])
+	plt.xlabel('Year After Installation')
+	plt.xlim(0,30)
+	plt.ylabel('Cumulative Savings ($)')
+	plt.plot([0 for x in range(31)],c='gray')
+	plt.axvline(x=simplePayback, ymin=0, ymax=1, c='gray', linestyle='--')
+	plt.plot([annualSave(x) for x in range(31)], c='green')
+	plt.savefig(pJoin(modelDir,"cumulative savings.png"))
 	print "DONE RUNNING", modelDir
 
 if __name__ == '__main__':
