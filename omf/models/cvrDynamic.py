@@ -7,22 +7,18 @@ from copy import deepcopy
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
+import __metaModel__
+from __metaModel__ import *
 
-# Locational variables so we don't have to rely on OMF being in the system path.
-_myDir = os.path.dirname(os.getcwd())
-_omfDir = os.path.dirname(_myDir)
-print _omfDir
 # OMF imports
-sys.path.append(_omfDir)
+sys.path.append(__metaModel__._omfDir)
 import feeder
 import calibrate
 from solvers import gridlabd
-from models import __metaModel__
-from __metaModel__ import *
 
 # Our HTML template for the interface:
-with open("cvrDynamic.html","r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"cvrDynamic.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -68,6 +64,7 @@ def runModel(modelDir,localTree,inData):
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inData, inputFile, indent=4)
 	binaryName = "gridlabd"
+	startTime = datetime.now()
 	for key in localTree:
 		if "solver_method" in localTree[key].keys():
 			print "current solver method", localTree[key]["solver_method"] 
@@ -453,8 +450,8 @@ def runModel(modelDir,localTree,inData):
 	with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
 		allOutput["savingsChart"] = inFile.read().encode("base64")
 	# Update the runTime in the input file.
-	# endTime = datetime.now()
-	# inDat["runTime"] = str(timedelta(seconds=int((endTime - startTime).total_seconds())))
+	endTime = datetime.now()
+	inData["runTime"] = str(timedelta(seconds=int((endTime - startTime).total_seconds())))
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(inData, inFile, indent=4)
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
@@ -481,13 +478,13 @@ def _tests():
 		# "i_percent": 0.0,
 		# "p_percent": 0.5,
 		# "power_factor": 0.9}
-	workDir = pJoin(_omfDir,"data","Model")
+	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 	#calibrate and run cvrdynamic	
-	feederPath = pJoin(_omfDir,"data", "Feeder", "admin","ABEC Frank new.json")
-	scadaPath = pJoin(_omfDir,"uploads","FrankScada.tsv")
+	feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "admin","ABEC Frank new.json")
+	scadaPath = pJoin(__metaModel__._omfDir,"uploads","FrankScada.tsv")
 	calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 	try:
 		os.remove(pJoin(modelDir,"stderr.txt"))
