@@ -412,10 +412,10 @@ def run(modelDir,inData):
 		index2 = int(min((index1 + int(monthHours[month])), HOURS))
 		monthPeak[monthNames[month]] = max(p[index1:index2])/1000.0
 		monthPeakNew[monthNames[month]] = max(pnew[index1:index2])/1000.0
-		peakSaveDollars[monthNames[month]] = (monthPeak[monthNames[month]]-monthPeakNew[monthNames[month]])*inData['peakDemandCost'+str(monthToSeason[monthNames[month]])+'PerKw']
-		lossRedDollars[monthNames[month]] = (sum(realLoss[index1:index2])/1000.0 - sum(realLossnew[index1:index2])/1000.0)*(inData['wholesaleEnergyCostPerKwh'])
+		peakSaveDollars[monthNames[month]] = (monthPeak[monthNames[month]]-monthPeakNew[monthNames[month]])*float(inData['peakDemandCost'+str(monthToSeason[monthNames[month]])+'PerKw'])
+		lossRedDollars[monthNames[month]] = (sum(realLoss[index1:index2])/1000.0 - sum(realLossnew[index1:index2])/1000.0)*(float(inData['wholesaleEnergyCostPerKwh']))
 		energyLostDollars[monthNames[month]] = (sum(p[index1:index2])/1000.0  - sum(pnew[index1:index2])/1000.0  - sum(realLoss[index1:index2])/1000.0  
-			+ sum(realLossnew[index1:index2])/1000.0 )*(inData['wholesaleEnergyCostPerKwh'] - inData['retailEnergyCostPerKwh'])
+			+ sum(realLossnew[index1:index2])/1000.0 )*(float(inData['wholesaleEnergyCostPerKwh']) - float(inData['retailEnergyCostPerKwh']))
 		previndex = index2
 	#money charts
 	simMonths = monthNames[:hourIndex+1]
@@ -441,8 +441,8 @@ def run(modelDir,inData):
 	#cumulative savings graphs
 	fig = plt.figure("cost benefit barchart",figsize=(10,5))
 	annualSavings = sum(eld) + sum(lrd) + sum(psd)
-	annualSave = lambda x:(annualSavings - inData['omCost']) * x - inData['capitalCost']
-	simplePayback = inData['capitalCost']/(annualSavings - inData['omCost'])
+	annualSave = lambda x:(annualSavings - float(inData['omCost'])) * x - float(inData['capitalCost'])
+	simplePayback = float(inData['capitalCost'])/(annualSavings - float(inData['omCost']))
 	plt.xlabel('Year After Installation')
 	plt.xlim(0,30)
 	plt.ylabel('Cumulative Savings ($)')
