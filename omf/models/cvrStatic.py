@@ -460,9 +460,7 @@ def _tests():
 	# 	"octAvg": 1750000.0, "octPeak": 2340000.0,
 	# 	"novAvg": 2210000.0, "novPeak": 3550000.0,
 	# 	"decAvg": 2480000.0, "decPeak": 3370000.0}
-	inData = { "modelName": "Automated staticCVR Testing",
-		"modelType": "cvrStatic",
-		"user": "admin",
+	inData = {"modelType": "cvrStatic",
 		"feederName": "public___ABEC Columbia",
 		"runTime": "",
 		"capitalCost": 30000,
@@ -480,7 +478,7 @@ def _tests():
 		"power_factor": 0.9}
 	for key in colomaMonths:
 		inData[key] = colomaMonths[key]
-	modelLoc = pJoin(workDir, inData["user"], inData["modelName"])
+	modelLoc = pJoin(workDir, "admin", "Automated staticCVR Testing")
 	# Blow away old test results if necessary.
 	try: shutil.rmtree(modelLoc)
 	except: pass

@@ -358,10 +358,7 @@ def _groupBy(inL, func):
 def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = { 
-		"modelName": "Automated Multiple GridlabD Testing",
-		# "modelName": "All",
-		"simStartDate": "2012-04-01",
+	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		# "feederName": "admin___Simple Market System",
 		# "feederName2": "admin___Simple Market System BROKEN", 		# configure error
@@ -398,9 +395,8 @@ def _tests():
 		"modelType": "gridlabMulti",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "24",
-		"user": "admin", # Really only used with web.py.
 		"runTime": ""}
-	modelLoc = pJoin(workDir,inData["user"],inData["modelName"])
+	modelLoc = pJoin(workDir,"admin","Automated Multiple GridlabD Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
