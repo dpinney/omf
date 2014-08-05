@@ -136,6 +136,31 @@
 		Model cancelled or encountered an error. Please change inputs and re-run.
 	</div>
 	<div id="output">
+		<p class="reportTitle postRun">Total loads and Losses</p>
+		<div id="totalEnergyReport" class="tightContent postRun">
+			<img id="totalEnergy" />
+			<script type="text/javascript">gebi("totalEnergy").src = "data:image/png;base64," + allOutputData.totalEnergy</script>
+		</div>
+		<p class="reportTitle postRun">Real Powerflow Substation</p>
+		<div id="realPowerflow" class="tightContent postRun">
+			<img id="realPower" />
+			<script type="text/javascript">gebi("realPower").src = "data:image/png;base64," + allOutputData.realPower</script>
+		</div>
+		<p class="reportTitle postRun">Min and Max voltages on the Feeder</p>
+		<div id="minMaxVoltRecord" class="tightContent postRun">
+			<img id="Voltages" />
+			<script type="text/javascript">gebi("Voltages").src = "data:image/png;base64," + allOutputData.minMaxvolts</script>
+		</div>
+		<p class="reportTitle postRun">Regulator Tap Positions</p>
+		<div id="tapStatus" class="tightContent postRun">
+			<img id="RegulatorTAPpositions" />
+			<script type="text/javascript">gebi("RegulatorTAPpositions").src = "data:image/png;base64," + allOutputData.regulatorTap</script>
+		</div>
+		<p class="reportTitle postRun">Substation Voltages</p>
+		<div id="voltagePlots" class="tightContent postRun">
+			<img id="substationVoltages" />
+			<script type="text/javascript">gebi("substationVoltages").src = "data:image/png;base64," + allOutputData.substationVoltages</script>
+		</div>
 		<p class="reportTitle postRun">Projected Savings by Month</p>
 		<div id="spendReport" class="tightContent postRun">
 			<img id="spendChart" />
