@@ -187,7 +187,8 @@ def run(modelDir,inData):
 	'regulator_list' : regstr,
 	'capacitor_list': capstr} 
 	#running powerflow analysis via gridalab after attaching a regulator
-	feeder.adjustTime(localTree,HOURS,"hours","2011-01-01")	
+	simStartDate = inData['simStart']
+	feeder.adjustTime(localTree,HOURS,"hours",simStartDate)	
 	output1 = gridlabd.runInFilesystem(localTree,keepFiles=True,workDir=modelDir)
 	os.remove(pJoin(modelDir,"PID.txt"))
 	pnew = output1['NewZregulator.csv']['power_in.real']
@@ -362,32 +363,31 @@ def run(modelDir,inData):
 	plt.savefig(pJoin(modelDir,"substationVoltages.png"))
 	with open(pJoin(modelDir,"substationVoltages.png"),"rb") as inFile:
 		allOutput["substationVoltages"] = inFile.read().encode("base64")
-	#cap switches - plotted if capacitors are present
-	if capKeys != []:
-		plt.figure("capacitor switch state as a function of time")
-		f,ax = plt.subplots(6,sharex=True)
-		f.set_size_inches(10,12.0)
-		#f.suptitle("Capacitor switch state NO IVVC")
-		ax[0].plot(switch['A'])
-		ax[0].set_title("Capacitor switch state NO IVVC")
-		ax[0].set_ylabel("switch A")
-		ax[1].plot(switch['B'])
-		ax[1].set_ylabel("switch B")
-		ax[2].plot(switch['C'])
-		ax[2].set_ylabel("switch C")
-		ax[3].plot(switchnew['A'])
-		ax[3].set_title("WITH IVVC")
-		ax[3].set_ylabel("switch A")
-		ax[4].plot(switchnew['B'])
-		ax[4].set_ylabel("switch B")
-		ax[5].plot(switchnew['C'])
-		ax[5].set_ylabel("switch C")
-		for subplot in range(6):
-			ax[subplot].set_ylim(-2,2)
-		f.tight_layout()
-		plt.savefig(pJoin(modelDir,"capacitor switch.png"))
-		with open(pJoin(modelDir,"capacitor switch.png"),"rb") as inFile:
-			allOutput["capacitorswitch"] = inFile.read().encode("base64")
+	#cap switches
+	plt.figure("capacitor switch state as a function of time")
+	f,ax = plt.subplots(6,sharex=True)
+	f.set_size_inches(10,12.0)
+	#f.suptitle("Capacitor switch state NO IVVC")
+	ax[0].plot(switch['A'])
+	ax[0].set_title("Capacitor switch state NO IVVC")
+	ax[0].set_ylabel("switch A")
+	ax[1].plot(switch['B'])
+	ax[1].set_ylabel("switch B")
+	ax[2].plot(switch['C'])
+	ax[2].set_ylabel("switch C")
+	ax[3].plot(switchnew['A'])
+	ax[3].set_title("WITH IVVC")
+	ax[3].set_ylabel("switch A")
+	ax[4].plot(switchnew['B'])
+	ax[4].set_ylabel("switch B")
+	ax[5].plot(switchnew['C'])
+	ax[5].set_ylabel("switch C")
+	for subplot in range(6):
+		ax[subplot].set_ylim(-2,2)
+	f.tight_layout()
+	plt.savefig(pJoin(modelDir,"capacitorSwitch.png"))
+	with open(pJoin(modelDir,"capacitorSwitch.png"),"rb") as inFile:
+		allOutput["capacitorSwitch"] = inFile.read().encode("base64")
 	#plt.show()
 	#monetization
 	monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
@@ -466,6 +466,30 @@ def run(modelDir,inData):
 	plt.savefig(pJoin(modelDir,"savingsChart.png"))
 	with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
 		allOutput["savingsChart"] = inFile.read().encode("base64")
+	#data for highcharts
+	simStartTimestamp = simStartDate + " 00:00:00"
+	timestamps = []
+	for y in range(int(HOURS)):
+		timestamps.append(datetime.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S") + timedelta(hours =y))
+	allOutput["timestamps"] = timestamps
+	allOutput["noCVRPower"] = p
+	allOutput["withCVRPower"] = pnew
+	allOutput["noCVRLoad"] = whLoads[0]
+	allOutput["withCVRLoad"] = whLoads[1]
+	allOutput["noCVRLosses"] = whLosses[0]
+	allOutput["withCVRLosses"] = whLosses[1]
+	allOutput["noCVRTaps"] = tap
+	allOutput["withCVRTaps"] = tapnew
+	allOutput["noCVRSubVolts"] = volt
+	allOutput["withCVRSubVolts"] = voltnew
+	allOutput["noCVRCapSwitch"] = switch
+	allOutput["withCVRCapSwitch"] = switchnew
+	allOutput["noCVRHighVolt"] = highVoltage
+	allOutput["withCVRHighVolt"] = highVoltagenew
+	allOutput["noCVRLowVolt"] = lowVoltage
+	allOutput["withCVRLowVolt"] = lowVoltagenew
+	allOutput["noCVRMeanVolt"] = meanVoltage
+	allOutput["withCVRMeanVolt"] = meanVoltagenew
 	# Update the runTime in the input file.
 	endTime = datetime.now()
 	inData["runTime"] = str(timedelta(seconds=int((endTime - startTime).total_seconds())))
@@ -489,12 +513,8 @@ def _tests():
 		"peakDemandCostSpringPerKw": 5.0,
 		"peakDemandCostSummerPerKw": 10.0,
 		"peakDemandCostFallPerKw": 6.0,
-		"peakDemandCostWinterPerKw": 8.0}
-		# "baselineTap": 3.0,
-		# "z_percent": 0.5,
-		# "i_percent": 0.0,
-		# "p_percent": 0.5,
-		# "power_factor": 0.9}
+		"peakDemandCostWinterPerKw": 8.0,
+		"simStart": "2011-01-01"}
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
 	if not os.path.isdir(modelDir):

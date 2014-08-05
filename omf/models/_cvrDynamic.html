@@ -56,7 +56,7 @@
 		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
 			<div class="shortInput">
 				<label>Model Type</label>
-				<input type="text" id="modelType" name="modelType" value="cvrDynamic" readonly/>
+				<input type="text" id="modelType" name="modelType" value="_cvrDynamic" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
@@ -119,6 +119,10 @@
 				<label>Winter Demand Charge ($/kW)</label>
 				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
 			</div>
+			<div class="shortInput">
+				<label>simulation start date (YYYY-MM-DD)</label>
+				<input type="text" id="simStart" name="simStart" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
@@ -155,6 +159,11 @@
 		<div id="tapStatus" class="tightContent postRun">
 			<img id="RegulatorTAPpositions" />
 			<script type="text/javascript">gebi("RegulatorTAPpositions").src = "data:image/png;base64," + allOutputData.regulatorTap</script>
+		</div>
+		<p class="reportTitle postRun">Capacitor Switch</p>
+		<div id="CapSwitchStat" class="tightContent postRun">
+			<img id="capacitorSwitch" />
+			<script type="text/javascript">gebi("capacitorSwitch").src = "data:image/png;base64," + allOutputData.capacitorSwitch</script>
 		</div>
 		<p class="reportTitle postRun">Substation Voltages</p>
 		<div id="voltagePlots" class="tightContent postRun">
