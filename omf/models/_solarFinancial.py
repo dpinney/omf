@@ -1,6 +1,6 @@
-''' Calculate solar photovoltaic system output using PVWatts. '''
+''' Calculate solar photovoltaic system output using our special financial model. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, math, datetime as dt
 from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
@@ -105,16 +105,13 @@ def run(modelDir, inputDict):
 	outData["netCashFlow"] = [x+y+z for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
-	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x))])
+	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
 	outData["monthlyGeneration"] = [[a, totMonNum(b)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
 	# Hourly plus Monthly aggregation outputs.
 	hours = range(24)
 	from random import random
-	import math
-	def roundSig(x, sig=3):
-		''' Round a float to a given number of sig figs. '''
-		return round(x, sig-int(math.floor(math.log10(x)))-1)
-	outData["seasonalPerformance"] = [[x,y,roundSig(random()*120, sig=2)] for x in months.values() for y in hours]
+	totHourMon = lambda h,m:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y[5:7]=="{0:02d}".format(m+1) and y[11:13]=="{0:02d}".format(h+1)])
+	outData["seasonalPerformance"] = [[x,y,totHourMon(y,x)] for x in months.values() for y in hours]
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
@@ -126,6 +123,10 @@ def run(modelDir, inputDict):
 	inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent=4)
+
+def _roundSig(x, sig=3):
+	''' Round a float to a given number of sig figs. '''
+	return round(x, sig-int(math.floor(math.log10(x)))-1)
 
 def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	''' Function to aggregate output if we need something other than hour level. '''
@@ -151,7 +152,7 @@ def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 		return map(aggFun, split)
 
 def cancel(modelDir):
-	''' PV Watts runs so fast it's pointless to cancel a run. '''
+	''' solarFinancial runs so fast it's pointless to cancel a run. '''
 	pass
 
 def _tests():
