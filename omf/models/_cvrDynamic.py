@@ -18,7 +18,7 @@ import calibrate
 from solvers import gridlabd
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"cvrDynamic.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"_cvrDynamic.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -470,7 +470,8 @@ def run(modelDir,inData):
 	simStartTimestamp = simStartDate + " 00:00:00"
 	timestamps = []
 	for y in range(int(HOURS)):
-		timestamps.append(datetime.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S") + timedelta(hours =y))
+		formatDate = datetime.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S") + timedelta(hours =y)
+		timestamps.append(formatDate.strftime("%Y-%m-%d %H:%M:%S"))
 	allOutput["timestamps"] = timestamps
 	allOutput["noCVRPower"] = p
 	allOutput["withCVRPower"] = pnew
@@ -503,7 +504,7 @@ def _tests():
 	"runs local tests for dynamic CVR model"
 	#creating a work directory and initializing data
 	inData = { "modelName": "Automated DynamicCVR Testing",
-		"modelType": "cvrDynamic",
+		"modelType": "_cvrDynamic",
 		"user": "admin",
 		"runTime": "",
 		"capitalCost": 30000,
