@@ -104,9 +104,17 @@ def run(modelDir, inputDict):
 	outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
 	outData["netCashFlow"] = [x+y+z for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
 	# Monthly aggregation outputs.
-	months = {"Jan":1,"Feb":2,"Mar":3,"Apr":4,"May":5,"Jun":6,"Jul":6,"Aug":8,"Sep":9,"Oct":10,"Nov":11,"Dec":12}
-	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith("2012-" + "{0:02d}".format(x))])
+	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
+	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x))])
 	outData["monthlyGeneration"] = [[a, totMonNum(b)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
+	# Hourly plus Monthly aggregation outputs.
+	hours = range(24)
+	from random import random
+	import math
+	def roundSig(x, sig=3):
+		''' Round a float to a given number of sig figs. '''
+		return round(x, sig-int(math.floor(math.log10(x)))-1)
+	outData["seasonalPerformance"] = [[x,y,roundSig(random()*120, sig=2)] for x in months.values() for y in hours]
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
@@ -152,7 +160,7 @@ def _tests():
 	# TODO: Fix inData because it's out of date.
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"modelType": "pvWatts",
+		"modelType": "_solarFinancial",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "100",
 		"systemSize":"10",
@@ -169,7 +177,7 @@ def _tests():
 		"i_ref":"1000",
 		"poa_cutin":"0",
 		"w_stow":"0"}
-	modelLoc = pJoin(workDir,"admin","Automated pvWatts Testing")
+	modelLoc = pJoin(workDir,"admin","Automated solarFinancial Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
