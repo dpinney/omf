@@ -26,6 +26,13 @@ function init() {
 			$(".preRun").show()
 		}
 	}
+	// Hide buttons we don't use:
+	modelUser = allInputData["user"]
+	if (modelUser == "public" && currentUser != "admin") {
+		$("button#deleteButton").hide();
+		$("button#publishButton").hide();
+		$("button#rerunButton").hide();
+	}
 }
 
 /**

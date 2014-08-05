@@ -14,6 +14,7 @@
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames['currentUser']}}"</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		function editFeeder(e) {
@@ -30,7 +31,7 @@
 					alert('Please Do Not Add More Than 5 Feaders');
 					return false;
 				}
-				var feeder_html = $('<tr class="feederList"><td><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a></td><td><select id="feederName'+n+'" name="feederName'+n+'" style="width:95%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"].username + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" onclick="editFeeder(this);" target="_blank" style="display: inline;"> &#9997;</a></td></tr>');
+				var feeder_html = $('<tr class="feederList"><td><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a></td><td><select id="feederName'+n+'" name="feederName'+n+'" style="width:95%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"] + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" onclick="editFeeder(this);" target="_blank" style="display: inline;"> &#9997;</a></td></tr>');
 				feeder_html.hide();
 				$('.content .feederList:last').after(feeder_html);
 				feeder_html.fadeIn('slow');
@@ -133,7 +134,7 @@
 						<select id="feederName" name="feederName" style="width:95%">
 							<option disabled><strong>Personal Feeders</strong></option>
 							{% for feeder in datastoreNames['feeders'] %}
-								<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
+								<option value="{{ datastoreNames['currentUser'] + '___' + feeder }}">{{ feeder }}</option>
 							{% endfor %}
 							<option disabled><strong>Public Feeders</strong></option>
 							{% for pFeeder in datastoreNames['publicFeeders'] %}
@@ -159,7 +160,7 @@
 						<select id="{{feederID}}" name="{{feederID}}" style="width:95%">
 							<option disabled><strong>Personal Feeders</strong></option>
 							{% for feeder in datastoreNames['feeders'] %}
-								<option value="{{ datastoreNames['currentUser'].username + '___' + feeder }}">{{ feeder }}</option>
+								<option value="{{ datastoreNames['currentUser'] + '___' + feeder }}">{{ feeder }}</option>
 							{% endfor %}
 							<option disabled><strong>Public Feeders</strong></option>
 							{% for pFeeder in datastoreNames['publicFeeders'] %}
@@ -737,7 +738,6 @@
 			</script>
 		</div>
 	</div>
-
 	<script type="text/javascript">
 		/* Highlight failed feeders */
 		$(window).bind("load", function(){
@@ -755,17 +755,6 @@
 						gebi("stderr_" + study).innerHTML = study + "\n\n" + allOutputData["failures"][name]["stderr"]
 					}
 				})
-			}
-			modelUser = document.URL.split("/")[4] // MAYBE: get model user from url, or from template data.
-			{% if "currentUser" in datastoreNames %}
-			currentUser = "{{ datastoreNames['currentUser'].username }}"
-			{% else %}
-			currentUser = "test"
-			{% endif %}
-			if (modelUser == "public" && currentUser != "admin") {
-				$("button#deleteButton").hide();
-				$("button#publishButton").hide();
-				$("button#rerunButton").hide();
 			}
 		})
 	</script>

@@ -22,12 +22,12 @@ def safeListdir(path):
 
 def getDataNames():
 	''' Query the OMF datastore to get names of all objects.'''
-	currUser = flask_login.current_user
-	feeders = [x[:-5] for x in safeListdir("./data/Feeder/" + currUser.username)]
+	currUser = User.cu()
+	feeders = [x[:-5] for x in safeListdir("./data/Feeder/" + currUser)]
 	publicFeeders = [x[:-5] for x in safeListdir("./data/Feeder/public/")]
 	climates = [x[:-5] for x in safeListdir("./data/Climate/")]
 	return {"feeders":sorted(feeders), "publicFeeders":sorted(publicFeeders), "climates":sorted(climates), 
-		"currentUser":currUser.__dict__}
+		"currentUser":currUser}
 
 @app.before_request
 def csrf_protect():

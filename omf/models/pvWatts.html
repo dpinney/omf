@@ -14,6 +14,7 @@
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames['currentUser']}}"</script>
 </head>
 <body onload="init()">
 	<div id="title">
@@ -181,19 +182,4 @@
 			</script>
 		</div>
 	</div>
-	<script type="text/javascript">
-		$(window).bind("load", function(){
-			modelUser = document.URL.split("/")[4] // MAYBE: get model user from url, or from template data.
-			{% if "currentUser" in datastoreNames %}
-			currentUser = "{{ datastoreNames['currentUser'].username }}"
-			{% else %}
-			currentUser = "test"
-			{% endif %}
-			if (modelUser == "public" && currentUser != "admin") {
-				$("button#deleteButton").hide();
-				$("button#publishButton").hide();
-				$("button#rerunButton").hide();
-			}
-		})
-	</script>
 </body>
