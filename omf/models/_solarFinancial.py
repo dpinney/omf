@@ -1,6 +1,6 @@
 ''' Calculate solar photovoltaic system output using PVWatts. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt
 from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
@@ -23,7 +23,7 @@ def run(modelDir, inputDict):
 	# Check whether model exist or not
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
-		inputDict["created"] = str(datetime.datetime.now())
+		inputDict["created"] = str(dt.datetime.now())
 	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
@@ -31,7 +31,7 @@ def run(modelDir, inputDict):
 	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 		pJoin(modelDir, "climate.tmy2"))
 	# Ready to run
-	startTime = datetime.datetime.now()
+	startTime = dt.datetime.now()
 	# Set up SAM data structures.
 	ssc = nrelsam.SSCAPI()
 	dat = ssc.ssc_data_create()
@@ -74,9 +74,9 @@ def run(modelDir, inputDict):
 	avg = lambda x:sum(x)/len(x)
 	# Timestamp output.
 	outData = {}
-	outData["timeStamps"] = [datetime.datetime.strftime(
-		datetime.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
-		datetime.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict["simLength"]))]
+	outData["timeStamps"] = [dt.datetime.strftime(
+		dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
+		dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict["simLength"]))]
 	# Geodata output.
 	outData["city"] = ssc.ssc_data_get_string(dat, "city")
 	outData["state"] = ssc.ssc_data_get_string(dat, "state")
@@ -91,10 +91,22 @@ def run(modelDir, inputDict):
 	outData["climate"]["Cell Temperature (F)"] = agg("tcell", avg)
 	outData["climate"]["Wind Speed (m/s)"] = agg("wspd", avg)
 	# Power generation.
-	outData["Consumption"] = {}
-	outData["Consumption"]["Power"] = [x for x in agg("ac", avg)]
-	outData["Consumption"]["Losses"] = [0 for x in agg("ac", avg)]
-	outData["Consumption"]["DG"] = agg("ac", avg)
+	outData["powerOutputAc"] = [x for x in agg("ac", avg)]
+	# Cashflow outputs.
+	lifeSpan = int(inputDict.get("lifeSpan",30))
+	lifeYears = range(1, 1 + lifeSpan)
+	retailCost = float(inputDict.get("retailCost",0.0))
+	degredation = float(inputDict.get("degredation",0.005))
+	installCost = float(inputDict.get("installCost",0.0))
+	outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
+	outData["lifeGenerationDollars"] = [retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degredation)) for x in lifeYears]
+	outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
+	outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
+	outData["netCashFlow"] = [x+y+z for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
+	# Monthly aggregation outputs.
+	months = {"Jan":1,"Feb":2,"Mar":3,"Apr":4,"May":5,"Jun":6,"Jul":6,"Aug":8,"Sep":9,"Oct":10,"Nov":11,"Dec":12}
+	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith("2012-" + "{0:02d}".format(x))])
+	outData["monthlyGeneration"] = [[a, totMonNum(b)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
@@ -102,8 +114,8 @@ def run(modelDir, inputDict):
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 		json.dump(outData, outFile, indent=4)
 	# Update the runTime in the input file.
-	endTime = datetime.datetime.now()
-	inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
+	endTime = dt.datetime.now()
+	inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent=4)
 
@@ -111,9 +123,9 @@ def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	''' Function to aggregate output if we need something other than hour level. '''
 	u = simStartDate
 	# pick a common year, ignoring the leap year, it won't affect to calculate the initHour
-	d = datetime.datetime(2013, int(u[5:7]),int(u[8:10])) 
+	d = dt.datetime(2013, int(u[5:7]),int(u[8:10])) 
 	# first day of the year	
-	sd = datetime.datetime(2013, 01, 01) 
+	sd = dt.datetime(2013, 01, 01) 
 	# convert difference of datedelta object to number of hours 
 	initHour = int((d-sd).total_seconds()/3600)
 	fullData = ssc.ssc_data_get_array(dat, key)
@@ -137,6 +149,7 @@ def cancel(modelDir):
 def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
+	# TODO: Fix inData because it's out of date.
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"modelType": "pvWatts",
