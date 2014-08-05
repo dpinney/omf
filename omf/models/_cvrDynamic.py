@@ -521,7 +521,7 @@ def _tests():
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 	#calibrate and run cvrdynamic	
-	feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "admin","ABEC Frank new.json")
+	feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "public","ABEC Frank pre calib.json")
 	scadaPath = pJoin(__metaModel__._omfDir,"uploads","FrankScada.tsv")
 	calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 	try:
