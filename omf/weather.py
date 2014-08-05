@@ -528,9 +528,9 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 				entry.Cond = moreConditionDict[weatherList[n].Cond]
 	# add 00:00:00 to each day
 	seasons = {	"Winter" : ([], "solar_{}_winter.csv".format(airport)),
-						"Spring" : ([], "solar_{}_spring.csv".format(airport)),
-						"Summer" : ([], "solar_{}_summer.csv".format(airport)),
-						"Fall" : ([], "solar_{}_fall.csv".format(airport))}
+		"Spring" : ([], "solar_{}_spring.csv".format(airport)),
+		"Summer" : ([], "solar_{}_summer.csv".format(airport)),
+		"Fall" : ([], "solar_{}_fall.csv".format(airport))}
 	# load and parse solar files for key in seasons.keys():
 	seasonCount = {	"Winter":0,	"Spring":0, "Summer":0, "Fall":0}
 	for line in weatherList:
@@ -547,7 +547,6 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 		seasonDataStr = [str.split(line, ",") for line in seasonFileLines]
 		#print(seasonDataStr)
 		seasonData.extend([(float(data[2]), float(data[3]), float(data[1])) for data in seasonDataStr]) # skip time in index 0
-	pass
 	# find solar data per-season, interpolate from hourly to the sample time, add into weather dictionary
 	for sample in weatherList:
 		wDir, dif, glo = sample.Cond
