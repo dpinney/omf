@@ -54,9 +54,7 @@ td,th {
 a {
 	cursor: hand;
 }
-.advancedOption {
-	display: none;
-}
+
 .add-feeder, .edit-feeder {
 	display: inline;
 }
@@ -139,4 +137,8 @@ table#detailsTable th, table#detailsTable td {
 }
 .preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped, div.preRun, div.running, div.postRun, div.runningInline, div.postRunInline, div.stoppedInline, div.stopped {
 	display: none;
+}
+.advancedOption.shortInput {
+	display: none;
+	text-align: right;
 }

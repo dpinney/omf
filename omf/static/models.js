@@ -188,7 +188,7 @@ function toggleAdvanced(clickedObject) {
 	for (i=0;i<siblings.length;i++) {
 		visible = (getComputedStyle(siblings[i])['display'] == 'none')
 		if (visible) {
-			siblings[i].style.display='table-row'
+			siblings[i].style.display='inline-block'
 		} else {
 			siblings[i].style.display='none'
 		}
