@@ -186,6 +186,7 @@ def _tests():
 		"fd":"1.0",
 		"i_ref":"1000",
 		"poa_cutin":"0",
+		"omCost": "1000",
 		"w_stow":"0"}
 	modelLoc = pJoin(workDir,"admin","Automated solarFinancial Testing")
 	# Blow away old test results if necessary.

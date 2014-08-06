@@ -139,36 +139,358 @@
 	<div id ="stopIndicator" class="content stopped">
 		Model cancelled or encountered an error. Please change inputs and re-run.
 	</div>
+	<script type="text/javascript">
+		/* 
+		 * Global setting of Highcharts
+		 */
+		Highcharts.setOptions({
+			global: { 
+				useUTC: false 
+			}
+		});
+		var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0]) 
+		var pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
+		var pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
+		highChartsTemplate = {
+			"chart":{"renderTo":"", "marginRight":20, "marginBottom":20, "zoomType":"x"},
+			"title":{"text":null},
+			"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+			"credits":{"enabled":false},
+			"xAxis":{"type":"datetime","maxZoom":108000000, "tickColor":"gray","lineColor":"gray"},
+			"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+			"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
+			"tooltip":{"valueDecimals":1},
+			"series":[]
+		}
+	</script>
 	<div id="output">
 		<p class="reportTitle postRun">Total loads and Losses</p>
 		<div id="totalEnergyReport" class="tightContent postRun">
 			<img id="totalEnergy" />
 			<script type="text/javascript">gebi("totalEnergy").src = "data:image/png;base64," + allOutputData.totalEnergy</script>
 		</div>
+		
 		<p class="reportTitle postRun">Real Powerflow Substation</p>
 		<div id="realPowerflow" class="tightContent postRun">
-			<img id="realPower" />
-			<script type="text/javascript">gebi("realPower").src = "data:image/png;base64," + allOutputData.realPower</script>
+			<script type="text/javascript">
+				powerData = [{
+					"marker":{
+						"enabled": false
+					},
+					// "color":"LightBlue",
+					"data":allOutputData["withCVRPower"],
+					"name":"With IVVC"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					// "color":"LightBlue",
+					"data":allOutputData["noCVRPower"],
+					"name":"No IVVC"
+				}]
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "realPowerflow"
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["series"] = powerData
+				localHighChart["yAxis"] = {"title":{
+							"text":"substation real power (W)",
+							"style":{
+								"color":"gray"
+							}
+						}}
+				new Highcharts.Chart(localHighChart);		
+			</script>
 		</div>
 		<p class="reportTitle postRun">Min and Max voltages on the Feeder</p>
-		<div id="minMaxVoltRecord" class="tightContent postRun">
+		<!-- <div id="minMaxVoltRecord" class="tightContent postRun">
 			<img id="Voltages" />
 			<script type="text/javascript">gebi("Voltages").src = "data:image/png;base64," + allOutputData.minMaxvolts</script>
+		</div> -->
+		<div id="minMaxVoltRecord" class="tightContent postRun">
+			<script type="text/javascript">
+				voltsData = [{
+					"marker":{
+						"enabled": false
+					},
+					"color":"Blue",
+					"data":allOutputData["withCVRMeanVolt"],
+					"name":"With IVVC Mean Volts"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"color":"DarkBlue",
+					"data":allOutputData["withCVRHighVolt"],
+					"name":"With IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"color":"LightBlue",
+					"data":allOutputData["withCVRLowVolt"],
+					"name":"With IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"Green",
+					"data":allOutputData["noCVRMeanVolt"],
+					"name":"No IVVC Mean Volts"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"DarkGreen",
+					"data":allOutputData["noCVRHighVolt"],
+					"name":"No IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"LightGreen",
+					"data":allOutputData["noCVRLowVolt"],
+					"name":"No IVVC Mean Volts",
+					"visible": false
+				}]
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "minMaxVoltRecord"
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["series"] = voltsData
+				localHighChart["yAxis"] = {"title":{
+							"text":"substation real power (W)",
+							"style":{
+								"color":"gray"
+							}
+						}}
+				new Highcharts.Chart(localHighChart);
+			</script>
 		</div>
 		<p class="reportTitle postRun">Regulator Tap Positions</p>
-		<div id="tapStatus" class="tightContent postRun">
+		<!-- <div id="tapStatus" class="tightContent postRun">
 			<img id="RegulatorTAPpositions" />
 			<script type="text/javascript">gebi("RegulatorTAPpositions").src = "data:image/png;base64," + allOutputData.regulatorTap</script>
+		</div> -->
+		<div id="tapStatus" class="tightContent postRun">
+			<script type="text/javascript">
+				tapsData = [{
+					"marker":{
+						"enabled": false
+					},
+					"color":"Blue",
+					"data":allOutputData["withCVRTaps"]["A"],
+					"name":"With IVVC A"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"color":"DarkBlue",
+					"data":allOutputData["withCVRTaps"]["B"],
+					"name":"With IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"color":"LightBlue",
+					"data":allOutputData["withCVRTaps"]["C"],
+					"name":"With IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"Green",
+					"data":allOutputData["noCVRTaps"]["A"],
+					"name":"No IVVC Mean Volts"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"DarkGreen",
+					"data":allOutputData["noCVRTaps"]["B"],
+					"name":"No IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"LightGreen",
+					"data":allOutputData["noCVRTaps"]["C"],
+					"name":"No IVVC Mean Volts",
+					"visible": false
+				}]
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "tapStatus"
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["series"] = tapsData
+				localHighChart["yAxis"] = {"title":{
+							"text":"substation real power (W)",
+							"style":{
+								"color":"gray"
+							}
+						}}
+				new Highcharts.Chart(localHighChart);
+			</script>
 		</div>
 		<p class="reportTitle postRun">Capacitor Switch</p>
-		<div id="CapSwitchStat" class="tightContent postRun">
+		<!-- <div id="CapSwitchStat" class="tightContent postRun">
 			<img id="capacitorSwitch" />
 			<script type="text/javascript">gebi("capacitorSwitch").src = "data:image/png;base64," + allOutputData.capacitorSwitch</script>
+		</div> -->
+		<div id="CapSwitchStat" class="tightContent postRun">
+			<script type="text/javascript">
+				capSwitchData = [{
+					"marker":{
+						"enabled": false
+					},
+					"color":"Blue",
+					"data":allOutputData["withCVRCapSwitch"]["A"],
+					"name":"With IVVC A"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"color":"DarkBlue",
+					"data":allOutputData["withCVRCapSwitch"]["B"],
+					"name":"With IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"color":"LightBlue",
+					"data":allOutputData["withCVRCapSwitch"]["C"],
+					"name":"With IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"Green",
+					"data":allOutputData["noCVRCapSwitch"]["A"],
+					"name":"No IVVC Mean Volts"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"DarkGreen",
+					"data":allOutputData["noCVRCapSwitch"]["B"],
+					"name":"No IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"LightGreen",
+					"data":allOutputData["noCVRCapSwitch"]["C"],
+					"name":"No IVVC Mean Volts",
+					"visible": false
+				}]
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "CapSwitchStat"
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["series"] = capSwitchData
+				localHighChart["yAxis"] = {"title":{
+							"text":"substation real power (W)",
+							"style":{
+								"color":"gray"
+							}
+						}}
+				new Highcharts.Chart(localHighChart);
+			</script>
 		</div>
+
 		<p class="reportTitle postRun">Substation Voltages</p>
-		<div id="voltagePlots" class="tightContent postRun">
+		<!-- <div id="voltagePlots" class="tightContent postRun">
 			<img id="substationVoltages" />
 			<script type="text/javascript">gebi("substationVoltages").src = "data:image/png;base64," + allOutputData.substationVoltages</script>
+		</div> -->
+		<div id="voltagePlots" class="tightContent postRun">
+			<script type="text/javascript">
+				subVoltsData = [{
+					"marker":{
+						"enabled": false
+					},
+					"color":"Blue",
+					"data":allOutputData["withCVRSubVolts"]["A"],
+					"name":"With IVVC A"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"color":"DarkBlue",
+					"data":allOutputData["withCVRSubVolts"]["B"],
+					"name":"With IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"color":"LightBlue",
+					"data":allOutputData["withCVRSubVolts"]["C"],
+					"name":"With IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"Green",
+					"data":allOutputData["noCVRSubVolts"]["A"],
+					"name":"No IVVC Mean Volts"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"DarkGreen",
+					"data":allOutputData["noCVRSubVolts"]["B"],
+					"name":"No IVVC Mean Volts",
+					"visible": false
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"LightGreen",
+					"data":allOutputData["noCVRSubVolts"]["C"],
+					"name":"No IVVC Mean Volts",
+					"visible": false
+				}]
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "voltagePlots"
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["series"] = subVoltsData
+				localHighChart["yAxis"] = {"title":{
+							"text":"substation real power (W)",
+							"style":{
+								"color":"gray"
+							}
+						}}
+				new Highcharts.Chart(localHighChart);
+			</script>
 		</div>
 		<p class="reportTitle postRun">Projected Savings by Month</p>
 		<div id="spendReport" class="tightContent postRun">
