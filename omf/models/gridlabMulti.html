@@ -31,16 +31,16 @@
 					alert('Please Do Not Add More Than 5 Feaders');
 					return false;
 				}
-				var feeder_html = $('<tr class="feederList"><td><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a></td><td><select id="feederName'+n+'" name="feederName'+n+'" style="width:95%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"] + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" onclick="editFeeder(this);" target="_blank" style="display: inline;"> &#9997;</a></td></tr>');
+				var feeder_html = $('<div class="feederList shortInput"><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a><select id="feederName'+n+'" name="feederName'+n+'" style="width:90%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"] + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" onclick="editFeeder(this);" target="_blank" style="display: inline;"> &#9997;</a></div>');
 				feeder_html.hide();
 				$('.content .feederList:last').after(feeder_html);
 				feeder_html.fadeIn('slow');
 				return false;
 			});
 			$('.content').on('click', '.remove-feeder', function(){
-				$(this).parent().parent().css( 'background-color', '#FF6C6C' );
+				$(this).parent().css( 'background-color', '#FF6C6C' );
 				$(this).parent().fadeOut("slow", function() {
-					$(this).parent().remove();
+					$(this).remove();
 					$('.feeder-number').each(function(index){
 						$(this).text( index + 1 + " ");
 					});
@@ -103,114 +103,102 @@
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
-			<table class="modelOptions">
-				<tr>
-					<td>Model Type</td>
-					<td><input type="text" id="modelType" name="modelType" value="gridlabMulti" readonly/></td>
-				</tr>
-				<tr>
-					<td>Model Name</td>
-					<td><input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
-				</tr>
-				<tr class="running postRun">
-					<td>User</td>
-					<td><input type="text" id="user" name="user" readonly/></td>
-				</tr>
-				<tr class="running postRun">
-					<td>Created</td>
-					<td><input type="text" id="created" name="created" readonly/></td>
-				</tr>
-				<tr class="postRun">
-					<td>Run Time</td>
-					<td><input type="text" id="runTime" name="runTime" readonly/></td>
-				</tr>
+			<!-- <table class="modelOptions"> -->
+				<div class="shortInput">
+					<label>Model Type</label>
+					<input type="text" id="modelType" name="modelType" value="gridlabMulti" readonly/>
+				</div>
+				<div class="shortInput">
+					<label>Model Name</label>
+					<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
+				</div>
+				<div class="shortInput runningInline postRunInline" style="display: inline-block;">
+					<label>User</label>
+					<input type="text" id="user" name="user" readonly/></td>
+				</div>
+				<div class="running postRun shortInput" style="display: inline-block;">
+					<label>Created</label>
+					<input type="text" id="created" name="created" readonly/>
+				</div>
+				<div class="postRun shortInput" style="display: inline-block;">
+					<label>Run Time</label>
+					<input type="text" id="runTime" name="runTime" readonly/>
+				</div>
+				<hr>
 				{% if not feederIDs %}
-				<tr class="feederList">
-					<td><label for="feeder1">Feeder <span class="feeder-number">1</span>
-						</label>
-							<a class='add-feeder postRun preRun stopped' href='#'>&#8853;</a>
-					</td>
-					<td>
-						<select id="feederName" name="feederName" style="width:95%">
-							<option disabled><strong>Personal Feeders</strong></option>
-							{% for feeder in datastoreNames['feeders'] %}
-								<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
-							{% endfor %}
-							<option disabled><strong>Public Feeders</strong></option>
-							{% for pFeeder in datastoreNames['publicFeeders'] %}
-								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
-							{% endfor %}
-						</select>
+				<div class="feederList shortInput">
+					<label for="feeder1">Feeder <span class="feeder-number">1</span></label>
+						<a class='add-feeder postRun preRun stopped' href='#'>&#8853;</a>
+					<select id="feederName" name="feederName" style="width:90%">
+						<option disabled><strong>Personal Feeders</strong></option>
+						{% for feeder in datastoreNames['feeders'] %}
+							<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
+						{% endfor %}
+						<option disabled><strong>Public Feeders</strong></option>
+						{% for pFeeder in datastoreNames['publicFeeders'] %}
+							<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+						{% endfor %}
+					</select>
 						<a class="edit-feeder postRun preRun stopped" target="_blank" onclick="javascript:editFeeder(this);">&#9997;</a>
-					</td>
-				</tr>
+				</div>
 				{% else %}
 				{% for feederID in feederIDs %}
-				<tr class="feederList">
-					<td><label for="feeder1">Feeder <span class="feeder-number">{{feederIDs.index(feederID) + 1}}</span>
-						</label>
+				<div class="feederList shortInput">
+					<label for="feeder1">Feeder <span class="feeder-number">{{feederIDs.index(feederID) + 1}}</span></label>
 						{% if feederIDs.index(feederID)+1 == 1 %}
 							<a class='add-feeder postRun preRun stopped' href='#'>&#8853;</a>
 						{% else %}
 							<a class='remove-feeder postRun preRun stopped' href='#'>&#8854;</a>
 						{% endif %}
-					</td>
-					<td>
 						<!-- <select id="{{feederName}}" name="{{feederName}}"> -->
-						<select id="{{feederID}}" name="{{feederID}}" style="width:95%">
-							<option disabled><strong>Personal Feeders</strong></option>
-							{% for feeder in datastoreNames['feeders'] %}
-								<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
-							{% endfor %}
-							<option disabled><strong>Public Feeders</strong></option>
-							{% for pFeeder in datastoreNames['publicFeeders'] %}
-								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
-							{% endfor %}
-						</select>
+					<select id="{{feederID}}" name="{{feederID}}" style="width:90%">
+						<option disabled><strong>Personal Feeders</strong></option>
+						{% for feeder in datastoreNames['feeders'] %}
+							<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
+						{% endfor %}
+						<option disabled><strong>Public Feeders</strong></option>
+						{% for pFeeder in datastoreNames['publicFeeders'] %}
+							<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+						{% endfor %}
+					</select>
 						<a class="edit-feeder postRun preRun stopped" target="_blank" onclick="javascript:editFeeder(this);">&#9997;</a>
-					</td>
-				</tr>
+				</div>
 				{% endfor %}
 				{% endif %}
-				<tr>
-					<td>Climate</td>
-					<td>
-						<select id='climateName' name='climateName'>
-							{% for climate in datastoreNames['climates'] %}
-								<option value='{{ climate }}'>{{ climate }}</option>
-							{% endfor %}
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>Simulation Length</td>
-					<td><input type="text" id="simLength" name="simLength" data-validRegex="\d+"/></td>
-				</tr>
-				<tr>
-					<td>Length Units</td><td>
-						<select id="simLengthUnits" name="simLengthUnits">
-							<option value="minutes">Minutes</option>
-							<option value="hours">Hours</option>
-							<option value="days">Days</option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>Simulation Start Date <br/> (YYYY-MM-DD)</td>
-					<td><input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>
-						<button id="deleteButton" type="button" class="stopped postRun" onclick="deleteModel()">Delete</button>
-						<button id="publishButton" type="button" class="postRun" onclick="publishModel()">Publish</button>
-						<button id="duplicateButton" type="button" class="postRun" onclick="duplicateModel()">Duplicate</button>
-						<button id="cancelButton" class="running" type="button" onclick="cancelModel()">Cancel Run</button>
-						<button id="runButton" type="submit" class="preRun">Run Model</button>
-						<button id="rerunButton" type="submit" class="stopped postRun">Re-Run Model</button>
-					</td>
-				</tr>
-			</table>
+				<hr>
+				<div class="shortInput">
+					<label>Climate</label>
+					<select id='climateName' name='climateName'>
+						{% for climate in datastoreNames['climates'] %}
+							<option value='{{ climate }}'>{{ climate }}</option>
+						{% endfor %}
+					</select>
+				</div>
+				<div class="shortInput">
+					<label>Simulation Length</label>
+					<input type="text" id="simLength" name="simLength" data-validRegex="\d+"/>				
+				</div>
+				<div class="shortInput">
+					<label>Length Units</label>
+					<select id="simLengthUnits" name="simLengthUnits">
+						<option value="minutes">Minutes</option>
+						<option value="hours">Hours</option>
+						<option value="days">Days</option>
+					</select>
+				</div>
+				<div class="shortInput">
+					<label>Simulation Start Date (YYYY-MM-DD)</label>
+					<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
+				</div>
+				<div class="wideInput" style="text-align:right">
+					<button id="deleteButton" type="button" class="stopped postRun" onclick="deleteModel()">Delete</button>
+					<button id="publishButton" type="button" class="postRun" onclick="publishModel()">Publish</button>
+					<button id="duplicateButton" type="button" class="postRun" onclick="duplicateModel()">Duplicate</button>
+					<button id="cancelButton" class="running" type="button" onclick="cancelModel()">Cancel Run</button>
+					<button id="runButton" type="submit" class="preRun">Run Model</button>
+					<button id="rerunButton" type="submit" class="stopped postRun">Re-Run Model</button>
+				</div>
+			<!-- </table> -->
 		</form>
 	</div>
 	
