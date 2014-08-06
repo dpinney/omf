@@ -17,7 +17,7 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="init()">
+<body onload="newInit()">
 	<div id="title">
 		<div id="logoBox"><a href="/">&#10059;</a></div>
 		<p id="titleText">New Solar Financial Model</p>
@@ -25,156 +25,144 @@
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
-			<table class="modelOptions">
-				<tr>
-					<td>Model Type</td>
-					<td><input type="text" id="modelType" name="modelType" value="_solarFinancial" readonly/></td>
-				</tr>
-				<tr>
-					<td>Model Name</td>
-					<td><input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
-				</tr>
-				<tr class="running postRun">
-					<td>User</td>
-					<td><input type="text" id="user" name="user" readonly/></td>
-				</tr>
-				<tr class="running postRun">
-					<td>Created</td>
-					<td><input type="text" id="created" name="created" readonly/></td>
-				</tr>
-				<tr class="postRun">
-					<td>Run Time</td>
-					<td><input type="text" id="runTime" name="runTime" readonly/></td>
-				</tr>
-				<tr>
-					<td>Climate</td>
-					<td>
-						<select id="climateName" name="climateName">
-							{% for climate in datastoreNames["climates"] %}
-								<option value="{{ climate }}">{{ climate }}</option>
-							{% endfor %}
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>Simulation Length</td>
-					<td><input type="text" id="simLength" name="simLength" data-validRegex="\d+"/></td>
-				</tr>
-				<tr>
-					<td>Length Units</td><td>
-						<select id="simLengthUnits" name="simLengthUnits">
- 							<!--<option value="minutes">Minutes</option> -->
-							<option value="hours">Hours</option>
-							<option value="days">Days</option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>Simulation Start Date <br/> (YYYY-MM-DD)</td>
-					<td><input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/></td>
-				</tr>
-				<tr>
-					<td>System Size (kWp-DC)</td>
-					<td><input type="text" id="systemSize" name="systemSize" data-validRegex="\d+\.?\d*"/></td>
-				</tr>
-				<tr>
-					<td>Installation Cost ($)</td>
-					<td><input type="text" id="installCost" name="installCost" data-validRegex="\d+\.?\d*"/></td>
-				</tr>
-				<tr>
-					<td>Op. and Maint. Cost ($)</td>
-					<td><input type="text" id="omCost" name="omCost" data-validRegex="\d+\.?\d*"/></td>
-				</tr>
-				<tr>
-					<td>Projected Life of System (Years)</td>
-					<td><input type="text" id="lifeSpan" name="lifeSpan" data-validRegex="\d+" value="30"/></td>
-				</tr>
-				<tr>
-					<td>Annual Array Degredation (%/Year)</td>
-					<td><input type="text" id="degredation" name="degredation" data-validRegex="\d+\.?\d*" value="0.005"/></td>
-				</tr>
-				<tr>
-					<td>Retail Energy Cost ($/kWh)</td>
-					<td><input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/></td>
-				</tr>
-				<tr>
-					<td>Discount Rate (%)</td>
-					<td><input type="text" id="discountRate" name="discountRate" data-validRegex="\d+\.?\d*" value="0.07"/></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td style="text-align:right"><p class="discloser" onclick="javascript:toggleAdvanced(this)">&#9654; Advanced Options</p></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Derate (%)</td>
-					<td><input type="text" id="derate" name="derate" data-validRegex="\d+\.?\d*" value="0.77"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Tracking Mode</td>
-					<td>
-						<select id="trackingMode" name="trackingMode"/>
-							<option value="0">Fixed</option>
-							<option value="1">1 Axis</option>
-							<option value="2">2 Axis</option>
-							<option value="3">Azimuth Axis</option>
-						</select>
-					</td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Tilt = Latitude</td>
-					<td><input type="text" id="tilt" name="tilt" value="True"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Azimuth (degrees)</td>
-					<td><input type="text" id="azimuth" name="azimuth" value="180"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Tracker rotation limit (deg)</td>
-					<td><input type="text" id="rotlim" name="rotlim" value="45.0"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Nominal operating cell temperature (C)</td>
-					<td><input type="text" id="t_noct" name="t_noct" value="45.0"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Reference cell temperature (C)</td>
-					<td><input type="text" id="t_ref" name="t_ref" value="25.0"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Max power temperature coefficient (%/C)</td>
-					<td><input type="text" id="gamma" name="gamma" value="-0.5"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Inverter efficiency at rated power (frac)</td>
-					<td><input type="text" id="inv_eff" name="inv_eff" value="0.92"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Diffuse fraction (0..1)</td>
-					<td><input type="text" id="fd" name="fd" value="1.0"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Rating condition irradiance (W/m2)</td>
-					<td><input type="text" id="i_ref" name="i_ref" value="1000"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Min reqd irradiance for operation (W/m2)</td>
-					<td><input type="text" id="poa_cutin" name="poa_cutin" value="0"/></td>
-				</tr>
-				<tr class="advancedOption">
-					<td>Wind stow speed	(m/s)</td>
-					<td><input type="text" id="w_stow" name="w_stow" value="0"/></td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>
-						<button id="deleteButton" type="button" class="stopped postRun" onclick="deleteModel()">Delete</button>
-						<button id="publishButton" type="button" class="postRun" onclick="publishModel()">Publish</button>
-						<button id="duplicateButton" type="button" class="postRun" onclick="duplicateModel()">Duplicate</button>
-						<button id="runButton" type="submit" class="preRun">Run Model</button>
-						<button id="rerunButton" type="submit" class="stopped postRun">Re-Run Model</button>
-					</td>
-				</tr>
-			</table>
+			<div class="shortInput">
+				<label>Model Type</label>
+				<input type="text" id="modelType" name="modelType" value="_solarFinancial" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Climate</label>
+				<select id="climateName" name="climateName">
+					{% for climate in datastoreNames["climates"] %}
+						<option value="{{ climate }}">{{ climate }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label>System Size (kWp-DC)</label>
+				<input type="text" id="systemSize" name="systemSize" data-validRegex="\d+\.?\d*"/>
+			</div>
+			<div class="shortInput">
+				<label>Installation Cost ($)</label>
+				<input type="text" id="installCost" name="installCost" data-validRegex="\d+\.?\d*"/>
+			</div>
+			<div class="shortInput">
+				<label>Op. and Maint. Cost ($)</label>
+				<input type="text" id="omCost" name="omCost" data-validRegex="\d+\.?\d*"/>
+			</div>
+			<div class="shortInput">
+				<label>Projected Life of System (Years)</label>
+				<input type="text" id="lifeSpan" name="lifeSpan" data-validRegex="\d+" value="30"/>
+			</div>
+			<div class="shortInput">
+				<label>Annual Array Degredation (%/Year)</label>
+				<input type="text" id="degredation" name="degredation" data-validRegex="\d+\.?\d*" value="0.005"/>
+			</div>
+			<div class="shortInput">
+				<label>Retail Energy Cost ($/kWh)</label>
+				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
+			</div>
+			<div class="shortInput">
+				<label>Discount Rate (%)</label>
+				<input type="text" id="discountRate" name="discountRate" data-validRegex="\d+\.?\d*" value="0.07"/>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label>Simulation Length</label>
+				<input type="text" id="simLength" name="simLength" data-validRegex="\d+"/>
+			</div>
+			<div class="shortInput">
+				<label>Length Units</label><label>
+				<select id="simLengthUnits" name="simLengthUnits">
+					<!--<option value="minutes">Minutes</option> -->
+					<option value="hours">Hours</option>
+					<option value="days">Days</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label>Simulation Start Date (YYYY-MM-DD)</label>
+				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
+			</div>
+			<div class="shortInput">
+				<label>Derate (%)</label>
+				<input type="text" id="derate" name="derate" data-validRegex="\d+\.?\d*" value="0.77"/>
+			</div>
+			<div class="shortInput">
+				<label>Tracking Mode</label>
+				<select id="trackingMode" name="trackingMode"/>
+					<option value="0">Fixed</option>
+					<option value="1">1 Axis</option>
+					<option value="2">2 Axis</option>
+					<option value="3">Azimuth Axis</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label>Tilt = Latitude</label>
+				<input type="text" id="tilt" name="tilt" value="True"/>
+			</div>
+			<div class="shortInput">
+				<label>Azimuth (degrees)</label>
+				<input type="text" id="azimuth" name="azimuth" value="180"/>
+			</div>
+			<div class="shortInput">
+				<label>Tracker rotation limit (deg)</label>
+				<input type="text" id="rotlim" name="rotlim" value="45.0"/>
+			</div>
+			<div class="shortInput">
+				<label>Nominal operating cell temperature (C)</label>
+				<input type="text" id="t_noct" name="t_noct" value="45.0"/>
+			</div>
+			<div class="shortInput">
+				<label>Reference cell temperature (C)</label>
+				<input type="text" id="t_ref" name="t_ref" value="25.0"/>
+			</div>
+			<div class="shortInput">
+				<label>Max power temperature coefficient (%/C)</label>
+				<input type="text" id="gamma" name="gamma" value="-0.5"/>
+			</div>
+			<div class="shortInput">
+				<label>Inverter efficiency at rated power (frac)</label>
+				<input type="text" id="inv_eff" name="inv_eff" value="0.92"/>
+			</div>
+			<div class="shortInput">
+				<label>Diffuse fraction (0..1)</label>
+				<input type="text" id="fd" name="fd" value="1.0"/>
+			</div>
+			<div class="shortInput">
+				<label>Rating condition irradiance (W/m2)</label>
+				<input type="text" id="i_ref" name="i_ref" value="1000"/>
+			</div>
+			<div class="shortInput">
+				<label>Min reqd irradiance for operation (W/m2)</label>
+				<input type="text" id="poa_cutin" name="poa_cutin" value="0"/>
+			</div>
+			<div class="shortInput">
+				<label>Wind stow speed	(m/s)</label>
+				<input type="text" id="w_stow" name="w_stow" value="0"/>
+			</div>
+			<div class="wideInput" style="text-align:right">
+					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+					<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+					<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+					<button id="runButton" type="submit" class="preRunInline">Run Model</button>
+					<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
+			</div>
 		</form>
 	</div>
 	<div id ="runIndicator" class="content running">

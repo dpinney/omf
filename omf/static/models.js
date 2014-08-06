@@ -36,6 +36,46 @@ function init() {
 }
 
 /**
+ * Initalize page, assuming we are using the new input styles.
+ * @param {null}
+ * @return {null}
+ */
+function newInit() {
+	// If we have input, put it back.
+	if (allInputData != null) {
+		restoreInputs()
+		$("#modelName").prop("readonly", true)
+	}
+	// Depending on status, show different things.
+	if (modelStatus == "finished") {
+		console.log("FINISHED")
+		$(".postRun").css('display', 'block')
+		$(".postRunInline").css('display', 'inline-block')
+	} else if (modelStatus == "running") {
+		console.log("RUNNING")
+		$(".running").css('display', 'block')
+		$(".runningInline").css('display', 'inline-block')
+		$("input").prop("readonly", true)
+		$("select").prop("disabled", true)
+	} else /* Stopped */ {
+		if (allInputData != null) {
+			$(".stopped").show()
+			$(".stoppedInline").show()
+		} else {
+			console.log("PRERUN")
+			$(".preRun").css('display', 'inline-block')
+		}
+	}
+	// Hide buttons we don't use:
+	modelUser = allInputData["user"]
+	if (modelUser == "public" && currentUser != "admin") {
+		$("button#deleteButton").hide();
+		$("button#publishButton").hide();
+		$("button#rerunButton").hide();
+	}
+}
+
+/**
  * Restore all the input values that were used and stored in allInputData.json
  * @param {null}
  * @return {null}
