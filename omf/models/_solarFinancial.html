@@ -17,7 +17,7 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="newInit()">
+<body onload="init()">
 	<div id="title">
 		<div id="logoBox"><a href="/">&#10059;</a></div>
 		<p id="titleText">New Solar Financial Model</p>
@@ -160,7 +160,7 @@
 					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 					<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 					<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-					<button id="runButton" type="submit" class="preRunInline">Run Model</button>
+					<button id="runButton" type="submit" class="preRun">Run Model</button>
 					<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
 		</form>

@@ -28,7 +28,7 @@
 			$('.content .add-feeder').click(function(){
 				var n = $('.feederList').length + 1;
 				if( 5 < n ) {
-					alert('Please Do Not Add More Than 5 Feaders');
+					alert('Please do not add more than 5 feeders.');
 					return false;
 				}
 				var feeder_html = $('<div class="feederList shortInput"><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a><select id="feederName'+n+'" name="feederName'+n+'" style="width:90%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"] + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" onclick="editFeeder(this);" target="_blank" style="display: inline;"> &#9997;</a></div>');
@@ -112,15 +112,15 @@
 					<label>Model Name</label>
 					<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
 				</div>
-				<div class="shortInput runningInline postRunInline" style="display: inline-block;">
+				<div class="shortInput runningInline postRunInline">
 					<label>User</label>
 					<input type="text" id="user" name="user" readonly/></td>
 				</div>
-				<div class="running postRun shortInput" style="display: inline-block;">
+				<div class="runningInline postRunInline shortInput">
 					<label>Created</label>
 					<input type="text" id="created" name="created" readonly/>
 				</div>
-				<div class="postRun shortInput" style="display: inline-block;">
+				<div class="postRunInline shortInput">
 					<label>Run Time</label>
 					<input type="text" id="runTime" name="runTime" readonly/>
 				</div>
@@ -146,9 +146,9 @@
 				<div class="feederList shortInput">
 					<label for="feeder1">Feeder <span class="feeder-number">{{feederIDs.index(feederID) + 1}}</span></label>
 						{% if feederIDs.index(feederID)+1 == 1 %}
-							<a class='add-feeder postRun preRun stopped' href='#'>&#8853;</a>
+							<a class='add-feeder postRunInline preRun stoppedInline' href='#'>&#8853;</a>
 						{% else %}
-							<a class='remove-feeder postRun preRun stopped' href='#'>&#8854;</a>
+							<a class='remove-feeder postRunInline preRun stoppedInline' href='#'>&#8854;</a>
 						{% endif %}
 						<!-- <select id="{{feederName}}" name="{{feederName}}"> -->
 					<select id="{{feederID}}" name="{{feederID}}" style="width:90%">
@@ -161,7 +161,7 @@
 							<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 						{% endfor %}
 					</select>
-						<a class="edit-feeder postRun preRun stopped" target="_blank" onclick="javascript:editFeeder(this);">&#9997;</a>
+						<a class="edit-feeder postRunInline preRun stoppedInline" target="_blank" onclick="javascript:editFeeder(this);">&#9997;</a>
 				</div>
 				{% endfor %}
 				{% endif %}
@@ -191,12 +191,12 @@
 					<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
 				</div>
 				<div class="wideInput" style="text-align:right">
-					<button id="deleteButton" type="button" class="stopped postRun" onclick="deleteModel()">Delete</button>
-					<button id="publishButton" type="button" class="postRun" onclick="publishModel()">Publish</button>
-					<button id="duplicateButton" type="button" class="postRun" onclick="duplicateModel()">Duplicate</button>
-					<button id="cancelButton" class="running" type="button" onclick="cancelModel()">Cancel Run</button>
+					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+					<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+					<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+					<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 					<button id="runButton" type="submit" class="preRun">Run Model</button>
-					<button id="rerunButton" type="submit" class="stopped postRun">Re-Run Model</button>
+					<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 				</div>
 			<!-- </table> -->
 		</form>
@@ -594,8 +594,8 @@
 			</script>
 		</div>
 
-		<p class="reportTitle postRun" style = "display:none !important">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative" style="display:none !important">
+		<p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative">
 			
 			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 			<table id="detailsTable">
@@ -735,7 +735,7 @@
 					name = "feeder_" + study
 					if (allOutputData[name] == undefined) {
 						// highlight feeders in input form
-						$(this).parents("tr").css("background-color", "#FFF000");
+						$(this).parent("div").css("background-color", "#FFF000");
 						// render stderr to runtimeStatsReport
 						$("<pre/>").appendTo("#runtimeStatsReport")
 							.attr("id", "stderr_" + study)

@@ -12,43 +12,6 @@ function init() {
 	// Depending on status, show different things.
 	if (modelStatus == "finished") {
 		console.log("FINISHED")
-		$(".postRun").show()
-	} else if (modelStatus == "running") {
-		console.log("RUNNING")
-		$(".running").show()
-		$("input").prop("readonly", true)
-		$("select").prop("disabled", true)
-	} else /* Stopped */ {
-		if (allInputData != null) {
-			$(".stopped").show()
-		} else {
-			console.log("PRERUN")
-			$(".preRun").show()
-		}
-	}
-	// Hide buttons we don't use:
-	modelUser = allInputData["user"]
-	if (modelUser == "public" && currentUser != "admin") {
-		$("button#deleteButton").hide();
-		$("button#publishButton").hide();
-		$("button#rerunButton").hide();
-	}
-}
-
-/**
- * Initalize page, assuming we are using the new input styles.
- * @param {null}
- * @return {null}
- */
-function newInit() {
-	// If we have input, put it back.
-	if (allInputData != null) {
-		restoreInputs()
-		$("#modelName").prop("readonly", true)
-	}
-	// Depending on status, show different things.
-	if (modelStatus == "finished") {
-		console.log("FINISHED")
 		$(".postRun").css('display', 'block')
 		$(".postRunInline").css('display', 'inline-block')
 	} else if (modelStatus == "running") {
@@ -188,7 +151,7 @@ function toggleAdvanced(clickedObject) {
 	for (i=0;i<siblings.length;i++) {
 		visible = (getComputedStyle(siblings[i])['display'] == 'none')
 		if (visible) {
-			siblings[i].style.display='table-row'
+			siblings[i].style.display='inline-block'
 		} else {
 			siblings[i].style.display='none'
 		}
