@@ -32,15 +32,15 @@
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
 			</div>
-			<div class="running postRun shortInput" style="display: inline-block;">
+			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/>
 			</div>
-			<div class="running postRun shortInput" style="display: inline-block;">
+			<div class="shortInput runningInline postRunInline ">
 				<label>Created</label>
 				<input type="text" id="created" name="created" readonly/>
 			</div>
-			<div class="postRun shortInput" style="display: inline-block;">
+			<div class="shortInput postRunInline">
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
@@ -131,11 +131,11 @@
 				<input type="text" id="w_stow" name="w_stow" value="0"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
-				<button id="deleteButton" type="button" class="stopped postRun" onclick="deleteModel()">Delete</button>
-				<button id="publishButton" type="button" class="postRun" onclick="publishModel()">Publish</button>
-				<button id="duplicateButton" type="button" class="postRun" onclick="duplicateModel()">Duplicate</button>
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="runButton" type="submit" class="preRun">Run Model</button>
-				<button id="rerunButton" type="submit" class="stopped postRun">Re-Run Model</button>
+				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
 		</form>
 	</div>
