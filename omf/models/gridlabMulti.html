@@ -28,7 +28,7 @@
 			$('.content .add-feeder').click(function(){
 				var n = $('.feederList').length + 1;
 				if( 5 < n ) {
-					alert('Please Do Not Add More Than 5 Feaders');
+					alert('Please do not add more than 5 feeders.');
 					return false;
 				}
 				var feeder_html = $('<div class="feederList shortInput"><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline">&#8854;</a><select id="feederName'+n+'" name="feederName'+n+'" style="width:90%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"] + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" onclick="editFeeder(this);" target="_blank" style="display: inline;"> &#9997;</a></div>');
@@ -146,9 +146,9 @@
 				<div class="feederList shortInput">
 					<label for="feeder1">Feeder <span class="feeder-number">{{feederIDs.index(feederID) + 1}}</span></label>
 						{% if feederIDs.index(feederID)+1 == 1 %}
-							<a class='add-feeder postRunInline preRunInline stoppedInline' href='#'>&#8853;</a>
+							<a class='add-feeder postRunInline preRun stoppedInline' href='#'>&#8853;</a>
 						{% else %}
-							<a class='remove-feeder postRunInline preRunInline stoppedInline' href='#'>&#8854;</a>
+							<a class='remove-feeder postRunInline preRun stoppedInline' href='#'>&#8854;</a>
 						{% endif %}
 						<!-- <select id="{{feederName}}" name="{{feederName}}"> -->
 					<select id="{{feederID}}" name="{{feederID}}" style="width:90%">
@@ -161,7 +161,7 @@
 							<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 						{% endfor %}
 					</select>
-						<a class="edit-feeder postRunInline preRunInline stoppedInline" target="_blank" onclick="javascript:editFeeder(this);">&#9997;</a>
+						<a class="edit-feeder postRunInline preRun stoppedInline" target="_blank" onclick="javascript:editFeeder(this);">&#9997;</a>
 				</div>
 				{% endfor %}
 				{% endif %}
