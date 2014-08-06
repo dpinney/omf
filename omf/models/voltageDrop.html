@@ -24,63 +24,55 @@
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
-			<table class="modelOptions">
-				<tr>
-					<td>Model Type</td>
-					<td><input type="text" id="modelType" name="modelType" value="voltageDrop" readonly/></td>
-				</tr>
-				<tr>
-					<td>Model Name</td>
-					<td><input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
-				</tr>
-				<tr class="running postRun">
-					<td>User</td>
-					<td><input type="text" id="user" name="user" readonly/></td>
-				</tr>
-				<tr class="running postRun">
-					<td>Created</td>
-					<td><input type="text" id="created" name="created" readonly/></td>
-				</tr>
-				<tr class="postRun">
-					<td>Run Time</td>
-					<td><input type="text" id="runTime" name="runTime" readonly/></td>
-				</tr>
-				<tr>
-					<td>Feeder</td>
-					<td>
-						<select id="feederName" name="feederName">
-							<option disabled><strong>Personal Feeders</strong></option>
-							{% for feeder in datastoreNames['feeders'] %}
-								<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
-							{% endfor %}
-							<option disabled><strong>Public Feeders</strong></option>
-							{% for pFeeder in datastoreNames['publicFeeders'] %}
-								<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
-							{% endfor %}
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>Layout Algorithm</td>
-					<td>
-						<select id="layoutAlgorithm" name="layoutAlgorithm">
-							<option value="geospatial">Geospatial</option>
-							<option value="forceDirected">Force Directed</option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td></td>
-					<td>
-						<button id="deleteButton" type="button" class="stopped postRun" onclick="deleteModel()">Delete</button>
-						<button id="publishButton" type="button" class="postRun" onclick="publishModel()">Publish</button>
-						<button id="duplicateButton" type="button" class="postRun" onclick="duplicateModel()">Duplicate</button>
-						<button id="cancelButton" class="running" type="button" onclick="cancelModel()">Cancel Run</button>
-						<button id="runButton" type="submit" class="preRun">Run Model</button>
-						<button id="rerunButton" type="submit" class="stopped postRun">Re-Run Model</button>
-					</td>
-				</tr>
-			</table>
+			<div class="shortInput">
+				<label>Model Type</label>
+				<input type="text" id="modelType" name="modelType" value="voltageDrop" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
+			</div>
+			<div class="running postRun shortInput" style="display: inline-block;">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="running postRun shortInput" style="display: inline-block;">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="postRun shortInput" style="display: inline-block;">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label>Feeder</label>
+				<select id="feederName" name="feederName">
+					<option disabled><strong>Personal Feeders</strong></option>
+					{% for feeder in datastoreNames['feeders'] %}
+						<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
+					{% endfor %}
+					<option disabled><strong>Public Feeders</strong></option>
+					{% for pFeeder in datastoreNames['publicFeeders'] %}
+						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="shortInput">
+				<label>Layout Algorithm</label>
+				<select id="layoutAlgorithm" name="layoutAlgorithm">
+					<option value="geospatial">Geospatial</option>
+					<option value="forceDirected">Force Directed</option>
+				</select>
+			</div>
+			<div class="wideInput">
+					<button id="deleteButton" type="button" class="stopped postRun" onclick="deleteModel()">Delete</button>
+					<button id="publishButton" type="button" class="postRun" onclick="publishModel()">Publish</button>
+					<button id="duplicateButton" type="button" class="postRun" onclick="duplicateModel()">Duplicate</button>
+					<button id="cancelButton" class="running" type="button" onclick="cancelModel()">Cancel Run</button>
+					<button id="runButton" type="submit" class="preRun">Run Model</button>
+					<button id="rerunButton" type="submit" class="stopped postRun">Re-Run Model</button>
+			</div>
 		</form>
 	</div>
 	<div id ="runIndicator" class="content running">
