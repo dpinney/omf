@@ -31,12 +31,12 @@ div.content {
 	width: 980px;
 }
 div.shortInput {
-	width: 330px; 
+	width: 323px; 
 	display: inline-block; 
 	margin-bottom: 10px;
 }
 div.wideInput {
-	width: 1000px; 
+	width: 980px; 
 	margin-bottom: 10px;
 }
 button#cancelButton {
