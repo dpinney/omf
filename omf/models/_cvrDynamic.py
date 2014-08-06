@@ -150,9 +150,10 @@ def run(modelDir,inData):
 	for index, rec in enumerate(recorders):
 		localTree[biggest + index] = rec
 	#run a reference load flow
-	HOURS = float(100)
-	year_lp = False   #leap year
-	feeder.adjustTime(localTree,HOURS,"hours","2011-01-01")	
+	HOURS = float(inData['simLengthHours'])
+	year_lp = inData['leapYear']   #leap year
+	simStartDate = inData['simStart']
+	feeder.adjustTime(localTree,HOURS,"hours",simStartDate)	
 	output = gridlabd.runInFilesystem(localTree,keepFiles=False,workDir=modelDir)
 	os.remove(pJoin(modelDir,"PID.txt"))
 	p = output['Zregulator.csv']['power_in.real']
@@ -187,7 +188,6 @@ def run(modelDir,inData):
 	'regulator_list' : regstr,
 	'capacitor_list': capstr} 
 	#running powerflow analysis via gridalab after attaching a regulator
-	simStartDate = inData['simStart']
 	feeder.adjustTime(localTree,HOURS,"hours",simStartDate)	
 	output1 = gridlabd.runInFilesystem(localTree,keepFiles=True,workDir=modelDir)
 	os.remove(pJoin(modelDir,"PID.txt"))
@@ -395,7 +395,7 @@ def run(modelDir,inData):
 	monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
 		'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
 		'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
-	if year_lp == True:
+	if year_lp == 'Yes':
 		febDays = 29
 	else:
 		febDays = 28
@@ -491,6 +491,11 @@ def run(modelDir,inData):
 	allOutput["withCVRLowVolt"] = lowVoltagenew
 	allOutput["noCVRMeanVolt"] = meanVoltage
 	allOutput["withCVRMeanVolt"] = meanVoltagenew
+	#monetization
+	allOutput["simMonths"] = monShort
+	allOutput["energyLostDollars"] = energyLostDollars
+	allOutput["lossRedDollars"] = lossRedDollars
+	allOutput["peakSaveDollars"] = peakSaveDollars
 	# Update the runTime in the input file.
 	endTime = datetime.now()
 	inData["runTime"] = str(timedelta(seconds=int((endTime - startTime).total_seconds())))
@@ -506,6 +511,7 @@ def _tests():
 	inData = { "modelName": "Automated DynamicCVR Testing",
 		"modelType": "_cvrDynamic",
 		"user": "admin",
+		"feederName": "ABEC Frank pre calib.json",
 		"runTime": "",
 		"capitalCost": 30000,
 		"omCost": 1000,
@@ -515,13 +521,15 @@ def _tests():
 		"peakDemandCostSummerPerKw": 10.0,
 		"peakDemandCostFallPerKw": 6.0,
 		"peakDemandCostWinterPerKw": 8.0,
-		"simStart": "2011-01-01"}
+		"simStart": "2011-01-01",
+		"simLengthHours": 100,
+		"leapYear":"No"}
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 	#calibrate and run cvrdynamic	
-	feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "public","ABEC Frank pre calib.json")
+	feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "public",inData["feederName"])
 	scadaPath = pJoin(__metaModel__._omfDir,"uploads","FrankScada.tsv")
 	calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 	try:
