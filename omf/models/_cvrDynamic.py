@@ -55,15 +55,6 @@ def sepRealImag(complexStr):
 def run(modelDir, inData):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
-	if not os.path.isdir(modelDir):
-		os.makedirs(modelDir)
-		inData["created"] = str(datetime.now())
-	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
-	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
-		json.dump(inData, inputFile, indent=4)
-	# feederDir, feederName = inputDict["feederName"]
-	# shutil.copy(pJoin(__metaModel__._omfDir,"data","Feeder",feederDir,feederName+".json"),
-	# 	pJoin(modelDir,"feeder.json"))
 	# If we are re-running, remove output:
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
@@ -78,11 +69,16 @@ def run(modelDir, inData):
 
 def runForeground(modelDir,inData):
 	'''This reads a glm file, changes the method of powerflow and reruns'''
+	if not os.path.isdir(modelDir):
+		os.makedirs(modelDir)
+		inData["created"] = str(datetime.now())
+		startTime = datetime.now()
+	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
+		json.dump(inData, inputFile, indent=4)
 	#calibrate and run cvrdynamic	
 	feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "public",inData["feederName"])
 	scadaPath = pJoin(__metaModel__._omfDir,"uploads",inData["scadaFile"])
 	calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
-	startTime = datetime.now()
 	allOutput = {}
 	with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
 		feederJson = json.load(jsonIn)
@@ -213,25 +209,19 @@ def runForeground(modelDir,inData):
 	pnew = output1['NewZregulator.csv']['power_in.real']
 	qnew = output1['NewZregulator.csv']['power_in.imag']
 	#total real and imaginary losses as a function of time
-	realLoss = []
-	imagLoss = []
-	realLossnew = []
-	imagLossnew = []
-	for element in range(int(HOURS)):
-		r = 0.0
-		i = 0.0
-		rnew = 0.0
-		inew = 0.0
-		for device in ['ZlossesOverhead.csv','ZlossesTransformer.csv','ZlossesUnderground.csv']:
-			for letter in ['A','B','C']:
-				r += output[device]['sum(power_losses_' + letter + '.real)'][element]
-				i += output[device]['sum(power_losses_' + letter + '.imag)'][element]
-				rnew += output1['New'+device]['sum(power_losses_' + letter + '.real)'][element]
-				inew += output1['New'+device]['sum(power_losses_' + letter + '.imag)'][element]
-		realLoss.append(r)
-		imagLoss.append(i)
-		realLossnew.append(rnew)
-		imagLossnew.append(inew)
+	def vecSum(u,v):
+		''' Add vectors u and v element-wise. Return has len <= len(u) and <=len(v). '''
+		return map(sum, zip(u,v))
+	def zeroVec(length):
+		''' Give a zero vector of input length. '''
+		return [0 for x in xrange(length)]
+	(realLoss, imagLoss, realLossnew, imagLossnew) = (zeroVec(int(HOURS)) for x in range(4))
+	for device in ['ZlossesOverhead.csv','ZlossesTransformer.csv','ZlossesUnderground.csv']:
+		for letter in ['A','B','C']:
+			realLoss = vecSum(realLoss, output[device]['sum(power_losses_' + letter + '.real)'])
+			imagLoss = vecSum(imagLoss, output[device]['sum(power_losses_' + letter + '.imag)'])
+			realLossnew = vecSum(realLossnew, output1['New'+device]['sum(power_losses_' + letter + '.real)'])
+			imagLossnew = vecSum(imagLossnew, output1['New'+device]['sum(power_losses_' + letter + '.imag)'])
 	#voltage calculations and tap calculations
 	lowVoltage = []
 	meanVoltage = []
@@ -245,7 +235,7 @@ def runForeground(modelDir,inData):
 	voltnew = {'A':[],'B':[],'C':[]}
 	switch = {'A':[],'B':[],'C':[]}
 	switchnew = {'A':[],'B':[],'C':[]}
-	for element in range(int(HOURS)):
+	for element in range(int(len(p))):
 		for letter in ['A','B','C']:
 			tap[letter].append(output['Zregulator.csv']['tap_' + letter][element])
 			tapnew[letter].append(output1['NewZregulator.csv']['tap_' + letter][element])
@@ -414,7 +404,7 @@ def runForeground(modelDir,inData):
 	monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
 		'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
 		'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
-	if year_lp == 'Yes':
+	if (year_lp).lower() == 'yes':
 		febDays = 29
 	else:
 		febDays = 28
@@ -488,7 +478,7 @@ def runForeground(modelDir,inData):
 	#data for highcharts
 	simStartTimestamp = simStartDate + " 00:00:00"
 	timestamps = []
-	for y in range(int(HOURS)):
+	for y in range(int(len(p))):
 		formatDate = datetime.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S") + timedelta(hours =y)
 		timestamps.append(formatDate.strftime("%Y-%m-%d %H:%M:%S"))
 	allOutput["timeStamps"] = timestamps
@@ -546,19 +536,17 @@ def _tests():
 		"peakDemandCostSummerPerKw": 10.0,
 		"peakDemandCostFallPerKw": 6.0,
 		"peakDemandCostWinterPerKw": 8.0,
-		"simStart": "2011-01-01",
+		"simStart": "2011-03-12",
 		"simLengthHours": 100,
 		"leapYear":"No"}
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
-	# if not os.path.isdir(modelDir):
-	# 	os.makedirs(modelDir)
+	# Clean up previous run.
 	try:
-		os.remove(pJoin(modelDir,"stderr.txt"))
-		os.remove(pJoin(modelDir,"stdout.txt"))
+		shutil.rmtree(modelDir)
 	except:
 		pass
-	run(modelDir,inData)
+	runForeground(modelDir, inData)
 
 if __name__ == '__main__':
 	_tests()
