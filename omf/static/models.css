@@ -137,6 +137,6 @@ table#detailsTable th, table#detailsTable td {
 	padding: 5px; 
 	vertical-align:top; 
 }
-.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped {
+.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped, div.preRun, div.running, div.postRun, div.runningInline, div.postRunInline, div.stoppedInline, div.stopped {
 	display: none;
 }
