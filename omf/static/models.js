@@ -12,18 +12,21 @@ function init() {
 	// Depending on status, show different things.
 	if (modelStatus == "finished") {
 		console.log("FINISHED")
-		$(".postRun").show()
+		$(".postRun").css('display', 'block')
+		$(".postRunInline").css('display', 'inline-block')
 	} else if (modelStatus == "running") {
 		console.log("RUNNING")
-		$(".running").show()
+		$(".running").css('display', 'block')
+		$(".runningInline").css('display', 'inline-block')
 		$("input").prop("readonly", true)
 		$("select").prop("disabled", true)
 	} else /* Stopped */ {
 		if (allInputData != null) {
 			$(".stopped").show()
+			$(".stoppedInline").show()
 		} else {
 			console.log("PRERUN")
-			$(".preRun").show()
+			$(".preRun").css('display', 'inline-block')
 		}
 	}
 	// Hide buttons we don't use:
