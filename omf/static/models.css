@@ -24,6 +24,9 @@ label {
 button {
 	width: auto;
 }
+
+hr {height:2px; width:100%; border-top: 2px dashed gray; margin: 10px 0px 10px 0px;}
+
 div#input {
 	margin-top: 0px;
 }
