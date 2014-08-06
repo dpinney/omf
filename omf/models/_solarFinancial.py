@@ -103,15 +103,20 @@ def run(modelDir, inputDict):
 	outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
 	outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
 	outData["netCashFlow"] = [x+y+z for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
+	outData["cumCashFlow"] = _runningSum(outData["netCashFlow"])
+	outData["ROI"] = _roundSig(sum(outData["netCashFlow"]))
+	#TODO: implement these two.
+	outData["NPV"] = "TBD"
+	outData["IRR"] = "TBD"
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
 	outData["monthlyGeneration"] = [[a, totMonNum(b)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
-	# Hourly plus Monthly aggregation outputs.
+	# Heatmaped hour+month outputs.
 	hours = range(24)
 	from random import random
 	totHourMon = lambda h,m:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y[5:7]=="{0:02d}".format(m+1) and y[11:13]=="{0:02d}".format(h+1)])
-	outData["seasonalPerformance"] = [[x,y,totHourMon(y,x)] for x in months.values() for y in hours]
+	outData["seasonalPerformance"] = [[x,y,totHourMon(x,y)] for x in hours for y in months.values()]
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
@@ -127,6 +132,10 @@ def run(modelDir, inputDict):
 def _roundSig(x, sig=3):
 	''' Round a float to a given number of sig figs. '''
 	return round(x, sig-int(math.floor(math.log10(x)))-1)
+
+def _runningSum(inList):
+	''' Give a list of running sums of inList. '''
+	return [sum(inList[:i+1]) for (i,val) in enumerate(inList)]
 
 def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	''' Function to aggregate output if we need something other than hour level. '''
