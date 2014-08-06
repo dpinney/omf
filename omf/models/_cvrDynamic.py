@@ -51,20 +51,39 @@ def sepRealImag(complexStr):
 				imag = 0.0
 	return real,imag
 
-def run(modelDir,inData):
-	'''This reads a glm file, changes the method of powerflow and reruns'''
+
+def run(modelDir, inData):
+	''' Run the model in a separate process. web.py calls this to run the model.
+	This function will return fast, but results take a while to hit the file system.'''
+	if not os.path.isdir(modelDir):
+		os.makedirs(modelDir)
+		inData["created"] = str(datetime.now())
+	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
+	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
+		json.dump(inData, inputFile, indent=4)
+	# feederDir, feederName = inputDict["feederName"]
+	# shutil.copy(pJoin(__metaModel__._omfDir,"data","Feeder",feederDir,feederName+".json"),
+	# 	pJoin(modelDir,"feeder.json"))
+	# If we are re-running, remove output:
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
 	except:
 		pass
-	allOutput = {}
-	if not os.path.isdir(modelDir):
-		os.makedirs(modelDir)
-		inData["created"] = str(datetime.now())
-	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
-		json.dump(inData, inputFile, indent=4)
-	binaryName = "gridlabd"
+	# Start the computation.
+	backProc = multiprocessing.Process(target=runForeground, args=(modelDir, inData))
+	backProc.start()
+	print "SENT TO BACKGROUND", modelDir
+	with open(pJoin(modelDir, "PPID.txt"),"w") as pPidFile:
+		pPidFile.write(str(backProc.pid))
+
+def runForeground(modelDir,inData):
+	'''This reads a glm file, changes the method of powerflow and reruns'''
+	#calibrate and run cvrdynamic	
+	feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "public",inData["feederName"])
+	scadaPath = pJoin(__metaModel__._omfDir,"uploads",inData["scadaFile"])
+	calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 	startTime = datetime.now()
+	allOutput = {}
 	with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
 		feederJson = json.load(jsonIn)
 		localTree = feederJson.get("tree", {})
@@ -503,6 +522,11 @@ def run(modelDir,inData):
 		json.dump(inData, inFile, indent=4)
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 		json.dump(allOutput, outFile, indent=4)
+	# For autotest, there won't be such file.
+	try:
+		os.remove(pJoin(modelDir, "PPID.txt"))
+	except:
+		pass
 	print "DONE RUNNING", modelDir
 
 def _tests():
@@ -512,6 +536,7 @@ def _tests():
 		"modelType": "_cvrDynamic",
 		"user": "admin",
 		"feederName": "ABEC Frank pre calib.json",
+		"scadaFile": "FrankScada.tsv",
 		"runTime": "",
 		"capitalCost": 30000,
 		"omCost": 1000,
@@ -526,12 +551,8 @@ def _tests():
 		"leapYear":"No"}
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
-	if not os.path.isdir(modelDir):
-		os.makedirs(modelDir)
-	#calibrate and run cvrdynamic	
-	feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "public",inData["feederName"])
-	scadaPath = pJoin(__metaModel__._omfDir,"uploads","FrankScada.tsv")
-	calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
+	# if not os.path.isdir(modelDir):
+	# 	os.makedirs(modelDir)
 	try:
 		os.remove(pJoin(modelDir,"stderr.txt"))
 		os.remove(pJoin(modelDir,"stdout.txt"))
