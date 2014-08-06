@@ -472,7 +472,7 @@ def run(modelDir,inData):
 	for y in range(int(HOURS)):
 		formatDate = datetime.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S") + timedelta(hours =y)
 		timestamps.append(formatDate.strftime("%Y-%m-%d %H:%M:%S"))
-	allOutput["timestamps"] = timestamps
+	allOutput["timeStamps"] = timestamps
 	allOutput["noCVRPower"] = p
 	allOutput["withCVRPower"] = pnew
 	allOutput["noCVRLoad"] = whLoads[0]

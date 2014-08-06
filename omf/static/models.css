@@ -24,19 +24,22 @@ label {
 button {
 	width: auto;
 }
+
+hr {height:2px; width:1000px; border-top: 2px dashed gray; margin: 10px 0px 10px -10px;}
+
 div#input {
 	margin-top: 0px;
 }
 div.content {
-	width: 1000px;
+	width: 980px;
 }
 div.shortInput {
-	width: 330px; 
+	width: 323px; 
 	display: inline-block; 
 	margin-bottom: 10px;
 }
 div.wideInput {
-	width: 1000px; 
+	width: 980px; 
 	margin-bottom: 10px;
 }
 button#cancelButton {
@@ -134,6 +137,6 @@ table#detailsTable th, table#detailsTable td {
 	padding: 5px; 
 	vertical-align:top; 
 }
-.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped {
+.preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped, div.preRun, div.running, div.postRun, div.runningInline, div.postRunInline, div.stoppedInline, div.stopped {
 	display: none;
 }

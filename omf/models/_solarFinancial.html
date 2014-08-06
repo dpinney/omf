@@ -229,16 +229,16 @@
 			<div id="seasonalPerformanceDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
-					"chart":{"marginBottom":55,"renderTo":"seasonalPerformanceDiv","type":"heatmap","marginRight":20, width:1000, height:600},
+					"chart":{"marginBottom":55,"renderTo":"seasonalPerformanceDiv","type":"heatmap","marginRight":20, width:1000, height:400},
 					title: false,
-					xAxis: {categories: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]},
-					yAxis: {categories: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23], title: null},
-					colorAxis: {min: 0, minColor: '#FFFFFF', maxColor: Highcharts.getOptions().colors[0]},
+					yAxis: {categories: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], title:null},
+					xAxis: {categories: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23], title: null},
+					colorAxis: {min: 0, minColor: '#FFFFFF', maxColor:"#c4463a"}, //Highcharts.getOptions().colors[0]
 					legend:{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"},
 					tooltip: false,
 					series: [{
 						name: "System Output (AC)",
-						borderWidth: 1,
+						borderWidth: 0,
 						data: allOutputData.seasonalPerformance,
 						dataLabels: {enabled:false}}]})
 			</script>
@@ -267,18 +267,23 @@
 			<div id="cashFlowChartDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
+					"plotOptions":{"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","lineColor":"gray"},
-					"title":{"text":null},
+					"title":{"text":"ROI:" + allOutputData.ROI + ", NPV:" + allOutputData.NPV + ", IRR:" + allOutputData.IRR, "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[{"name":"Energy Sales", "data":allOutputData.lifeGenerationDollars},
 						{"name":"Op. and Maint. Costs", "data":allOutputData.lifeOmCosts},
 						{"name":"Purchase Costs", "data":allOutputData.lifePurchaseCosts},
-						{"name":"Net", "type":"spline", "data":allOutputData.netCashFlow}],
+						{"name":"Net", "type":"spline", "data":allOutputData.netCashFlow},
+						{"name":"Cumulative", "type":"spline", "data":allOutputData.cumCashFlow, "visible": false}],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
+		</div>
+		<p class="reportTitle postRun">Output Summary</p>
+		<div id="outputSummaryReport" class="tightContent postRun">
+			<p>Put table here.</p>
 		</div>
 	</div>
 </body>
