@@ -514,6 +514,7 @@ def runForeground(modelDir,inData):
 		allOutput["energyLostDollars"] = energyLostDollars
 		allOutput["lossRedDollars"] = lossRedDollars
 		allOutput["peakSaveDollars"] = peakSaveDollars
+		allOutput["annualSave"] = [annualSave(x) for x in range(31)]
 		# Update the runTime in the input file.
 		endTime = datetime.now()
 		inData["runTime"] = str(timedelta(seconds=int((endTime - startTime).total_seconds())))

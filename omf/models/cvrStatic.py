@@ -104,6 +104,9 @@ def runForeground(modelDir, inputDict):
 		plt.savefig(pJoin(modelDir,"scadaChart.png"))
 		with open(pJoin(modelDir,"scadaChart.png"),"rb") as inFile:
 			allOutput["scadaChart"] = inFile.read().encode("base64")
+		allOutput["histPeak"] = d1
+		allOutput["histAverage"] = d2
+		allOutput["monthName"] = [name[0:3] for name in monthNames]
 		# Graph feeder.
 		fig = plt.figure(figsize=(10,10))
 		myGraph = feeder.treeToNxGraph(tree)
@@ -378,7 +381,8 @@ def runForeground(modelDir, inputDict):
 			allOutput["moneyTable"] = inFile.read().encode("base64")
 		with open(pJoin(modelDir,"moneyTable.json"),"w") as outFile:
 			json.dump(dictalToMatrix(monthData), outFile, indent=4)
-
+		allOutput["monthDataMat"] = dictalToMatrix(monthData)
+		allOutput["monthDataPart"] = monthDataPart
 		# Graph the money data.
 		fig = plt.figure(figsize=(10,8))
 		indices = [r['monthName'] for r in monthData]
@@ -398,6 +402,9 @@ def runForeground(modelDir, inputDict):
 		plt.savefig(pJoin(modelDir,"spendChart.png"))
 		with open(pJoin(modelDir,"spendChart.png"),"rb") as inFile:
 			allOutput["spendChart"] = inFile.read().encode("base64")
+		allOutput["energyReductionDollars"] = d1
+		allOutput["lossReductionDollars"] = d2
+		allOutput["peakReductionDollars"] = d3
 		# Graph the cumulative savings.
 		fig = plt.figure(figsize=(10,5))
 		annualSavings = sum(d1) + sum(d2) + sum(d3)
@@ -412,6 +419,7 @@ def runForeground(modelDir, inputDict):
 		plt.savefig(pJoin(modelDir,"savingsChart.png"))
 		with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
 			allOutput["savingsChart"] = inFile.read().encode("base64")
+		allOutput["annualSave"] = [annualSave(x) for x in range(31)]
 		# Update the runTime in the input file.
 		endTime = datetime.datetime.now()
 		inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))

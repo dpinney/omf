@@ -182,8 +182,66 @@
 	<div id="output">
 		<p class="reportTitle postRun">Total loads and Losses</p>
 		<div id="totalEnergyReport" class="tightContent postRun">
-			<img id="totalEnergy" />
+<!-- 			<img id="totalEnergy" />
 			<script type="text/javascript">gebi("totalEnergy").src = "data:image/png;base64," + allOutputData.totalEnergy</script>
+ -->		
+			<script type="text/javascript">
+				new Highcharts.Chart({
+					"chart":{
+						"height": 200,
+						"width": 1000,
+						"renderTo": "totalEnergyReport",
+						"type": "column"
+					},
+					"title":{
+						"text":null
+					},
+					"legend":{
+						"layout":"horizontal", 
+						"align":"top", 
+						"verticalAlign":"top", 
+						"x":50, 
+						"y":-10, 
+						"borderWidth":0
+					},
+					"credits":{
+						"enabled":false
+					},
+					"tooltip":{
+						"valueDecimals":1
+					},
+					"xAxis": {
+						"categories": ["With CVR", "No CVR"]
+					},
+					"yAxis": {
+						"title": {
+							"text": "Total Load and Losses (MWh)",
+							"style":{
+								"color":"gray"
+							}
+						}
+					},
+					"plotOptions": {
+						// "column": {
+						// 	"pointPadding": 0.8,
+						// 	"borderWidth": 0
+						// }
+					},
+					"series":[{
+						"pointWidth": 40,
+						"data": [allOutputData["withCVRLoad"],allOutputData["noCVRLoad"]],
+						"type": "column",
+						"color": "darkorange",
+						"name": "Load"
+					},{
+						"pointWidth": 40,
+						"data": [allOutputData["withCVRLosses"],allOutputData["noCVRLosses"]],
+						"type": "column",
+						"color": "orangered",
+						"name": "Losses"
+					}]
+				})
+			</script>
 		</div>
 		
 		<p class="reportTitle postRun">Real Powerflow Substation</p>
@@ -193,14 +251,14 @@
 					"marker":{
 						"enabled": false
 					},
-					// "color":"LightBlue",
+					"color":"Blue",
 					"data":allOutputData["withCVRPower"],
 					"name":"With IVVC"
 				},{
 					"marker":{
 						"enabled": false
 					},
-					// "color":"LightBlue",
+					"color":"Green",
 					"data":allOutputData["noCVRPower"],
 					"name":"No IVVC"
 				}]
@@ -283,7 +341,7 @@
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = voltsData
 				localHighChart["yAxis"] = {"title":{
-							"text":"substation real power (W)",
+							"text":"Voltages",
 							"style":{
 								"color":"gray"
 							}
@@ -355,7 +413,7 @@
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = tapsData
 				localHighChart["yAxis"] = {"title":{
-							"text":"substation real power (W)",
+							"text":"Tap Positions",
 							"style":{
 								"color":"gray"
 							}
@@ -427,7 +485,7 @@
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = capSwitchData
 				localHighChart["yAxis"] = {"title":{
-							"text":"substation real power (W)",
+							"text":"Switch Status (1: open, 0: close)",
 							"style":{
 								"color":"gray"
 							}
@@ -500,7 +558,7 @@
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = subVoltsData
 				localHighChart["yAxis"] = {"title":{
-							"text":"substation real power (W)",
+							"text":"Voltages",
 							"style":{
 								"color":"gray"
 							}
@@ -510,13 +568,120 @@
 		</div>
 		<p class="reportTitle postRun">Projected Savings by Month</p>
 		<div id="spendReport" class="tightContent postRun">
-			<img id="spendChart" />
+<!-- 			<img id="spendChart" />
 			<script type="text/javascript">gebi("spendChart").src = "data:image/png;base64," + allOutputData.spendChart</script>
+ -->	
+ 			<script type="text/javascript">
+ 				new Highcharts.Chart({
+					"chart":{
+						"height": 200,
+						"width": 1000,
+						"renderTo": "spendReport",
+						"type": "column"
+					},
+					"title":{
+						"text":null
+					},
+					"legend":{
+						"layout":"horizontal", 
+						"align":"top", 
+						"verticalAlign":"top", 
+						"x":50, 
+						"y":-10, 
+						"borderWidth":0
+					},
+					"credits":{
+						"enabled":false
+					},
+					"tooltip":{
+						"valueDecimals":1
+					},
+					"xAxis": {
+						"categories": allOutputData["simMonthList"]
+					},
+					"yAxis": {
+						"title": {
+							"text": "Utility Savings ($)",
+							"style":{
+								"color":"gray"
+							}
+						}
+					},
+					"plotOptions": {
+						// "column": {
+						// 	"pointPadding": 0.2,
+						// 	"borderWidth": 0
+						// }
+					},
+					"series":[{
+						"data": $.map(allOutputData["peakSaveDollars"], function(key, value){return key}),
+						"type": "column",
+						"color": "blue",
+						"name": "Peak Reduction"
+					},{
+						"data": $.map(allOutputData["lossRedDollars"], function(key, value){return key}),
+						"type": "column",
+						"color": "green",
+						"name": "Losses Reduction"
+					},{
+						"data": $.map(allOutputData["energyLostDollars"], function(key, value){return key}),
+						"type": "column",
+						"color": "red",
+						"name": "Energy Reduction"
+					}]
+				})
+ 			</script>	
 		</div>
 		<p class="reportTitle postRun">Projected Avoided Cost</p>
 		<div id="savingsReport" class="tightContent postRun">
-			<img id="savingsChart" />
+<!-- 			<img id="savingsChart" />
 			<script type="text/javascript">gebi("savingsChart").src = "data:image/png;base64," + allOutputData.savingsChart</script>
+ -->	
+ 			<script type="text/javascript">
+ 				new Highcharts.Chart({
+					"chart":{
+						"height": 200,
+						"width": 1000,
+						"renderTo": "savingsReport",
+						"type": "line"
+					},
+					"title":{
+						"text":null
+					},
+					"legend":{
+						"layout":"horizontal", 
+						"align":"top", 
+						"verticalAlign":"top", 
+						"x":50, 
+						"y":-10, 
+						"borderWidth":0
+					},
+					"credits":{
+						"enabled":false
+					},
+					"tooltip":{
+						"valueDecimals":1
+					},
+					"xAxis": {
+					},
+					"yAxis": {
+						"title": {
+							"text": "Cumulative Savings($)",
+							"style":{
+								"color":"gray"
+							}
+						}
+					},
+					"plotOptions": {
+					},
+					"series":[{
+						"data": allOutputData["annualSave"],
+						"color": "blue",
+						"name": "Annual Savings"
+					}]
+				})
+ 				
+ 			</script>
 		</div>
 	</div>
 </body>

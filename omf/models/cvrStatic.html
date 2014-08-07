@@ -177,10 +177,78 @@
 		Model cancelled or encountered an error. Please change inputs and re-run.
 	</div>
 	<div id="output">
+		<script type="text/javascript">
+		function insertMetric(tableId, name, vector) {
+				// Add a vector to a table as a row.
+				table = gebi(tableId)
+				newRow = table.insertRow()
+				newRow.insertCell().innerHTML = name
+				for (i=0; i<vector.length; i++) {
+					cell = newRow.insertCell()
+					cell.innerHTML = vector[i]
+				}
+			}
+		</script>
 		<p class="reportTitle postRun">Historical Loads</p>
 		<div id="scadaReport" class="tightContent postRun">
-			<img id="scadaChart" />
+<!-- 			<img id="scadaChart" />
 			<script type="text/javascript">gebi("scadaChart").src = "data:image/png;base64," + allOutputData.scadaChart</script>
+ -->		
+			<script type="text/javascript">
+				new Highcharts.Chart({
+					"chart":{
+						"height": 200,
+						"width": 1000,
+						"renderTo": "scadaReport",
+						"type": "column"
+					},
+					"title":{
+						"text":null
+					},
+					"legend":{
+						"layout":"horizontal", 
+						"align":"top", 
+						"verticalAlign":"top", 
+						"x":50, 
+						"y":-10, 
+						"borderWidth":0
+					},
+					"credits":{
+						"enabled":false
+					},
+					"tooltip":{
+						"valueDecimals":1
+					},
+					"xAxis": {
+						"categories": allOutputData["monthName"]
+					},
+					"yAxis": {
+						"title": {
+							"text": "Historical Power Con(KW)",
+							"style":{
+								"color":"gray"
+							}
+						}
+					},
+					"plotOptions": {
+						"column": {
+							"pointPadding": 0.2,
+							"borderWidth": 0
+						}
+					},
+					"series":[{
+						"data": allOutputData["histPeak"],
+						"type": "column",
+						"color": "darkgrey",
+						"name": "histPeak"
+					},{
+						"data": allOutputData["histAverage"],
+						"type": "column",
+						"color": "grey",
+						"name": "histAverage"
+					}]
+				})
+			</script>
 		</div>
 		<p class="reportTitle postRun">One Line Diagram</p>
 		<div id="feederReport" class="tightContent postRun">
@@ -189,23 +257,143 @@
 		</div>
 		<p class="reportTitle postRun">Projected Savings by Month</p>
 		<div id="spendReport" class="tightContent postRun">
-			<img id="spendChart" />
+<!-- 			<img id="spendChart" />
 			<script type="text/javascript">gebi("spendChart").src = "data:image/png;base64," + allOutputData.spendChart</script>
+ -->		
+			<script type="text/javascript">
+				new Highcharts.Chart({
+					"chart":{
+						"height": 200,
+						"width": 1000,
+						"renderTo": "spendReport",
+						"type": "column"
+					},
+					"title":{
+						"text":null
+					},
+					"legend":{
+						"layout":"horizontal", 
+						"align":"top", 
+						"verticalAlign":"top", 
+						"x":50, 
+						"y":-10, 
+						"borderWidth":0
+					},
+					"credits":{
+						"enabled":false
+					},
+					"tooltip":{
+						"valueDecimals":1
+					},
+					"xAxis": {
+						"categories": allOutputData["monthName"]
+					},
+					"yAxis": {
+						"title": {
+							"text": "Utility Savings ($)",
+							"style":{
+								"color":"gray"
+							}
+						}
+					},
+					"plotOptions": {
+						"column": {
+							"pointPadding": 0.2,
+							"borderWidth": 0
+						}
+					},
+					"series":[{
+						"data": allOutputData["energyReductionDollars"],
+						"type": "column",
+						"color": "blue",
+						"name": "Peak Reduction"
+					},{
+						"data": allOutputData["lossReductionDollars"],
+						"type": "column",
+						"color": "green",
+						"name": "Losses Reduction"
+					},{
+						"data": allOutputData["peakReductionDollars"],
+						"type": "column",
+						"color": "red",
+						"name": "Energy Reduction"
+					}]
+				})
+			</script>
 		</div>
 		<p class="reportTitle postRun">Projected Avoided Cost</p>
 		<div id="savingsReport" class="tightContent postRun">
-			<img id="savingsChart" />
+<!-- 			<img id="savingsChart" />
 			<script type="text/javascript">gebi("savingsChart").src = "data:image/png;base64," + allOutputData.savingsChart</script>
+ -->		
+			<script type="text/javascript">
+				new Highcharts.Chart({
+					"chart":{
+						"height": 200,
+						"width": 1000,
+						"renderTo": "savingsReport",
+						"type": "line"
+					},
+					"title":{
+						"text":null
+					},
+					"legend":{
+						"layout":"horizontal", 
+						"align":"top", 
+						"verticalAlign":"top", 
+						"x":50, 
+						"y":-10, 
+						"borderWidth":0
+					},
+					"credits":{
+						"enabled":false
+					},
+					"tooltip":{
+						"valueDecimals":1
+					},
+					"xAxis": {
+					},
+					"yAxis": {
+						"title": {
+							"text": "Cumulative Savings($)",
+							"style":{
+								"color":"gray"
+							}
+						}
+					},
+					"plotOptions": {
+					},
+					"series":[{
+						"data": allOutputData["annualSave"],
+						"color": "blue",
+						"name": "Annual Savings"
+					}]
+				})
+			</script>
 		</div>
 		<p class="reportTitle postRun">Power Flows at Various Loads</p>
 		<div id="powerflowReport" class="tightContent postRun">
-			<img id="powerflowTable" />
+			<table id="powerflowReportTable"></table>
+<!-- 			<img id="powerflowTable" />
 			<script type="text/javascript">gebi("powerflowTable").src = "data:image/png;base64," + allOutputData.powerflowTable</script>
+ -->	
+ 			<script type="text/javascript">
+ 				for (row in allOutputData["monthDataMat"]){
+ 					insertMetric("powerflowReportTable","", allOutputData["monthDataMat"][row])
+ 				}
+ 			</script>	
 		</div>
 		<p class="reportTitle postRun">Savings at Various Loads</p>
 		<div id="moneyReport" class="tightContent postRun">
-			<img id="moneyTable" />
+			<table id="moneyReportTable"></table>
+<!-- 			<img id="moneyTable" />
 			<script type="text/javascript">gebi("moneyTable").src = "data:image/png;base64," + allOutputData.moneyTable</script>
+ -->		
+			<script type="text/javascript">
+				for (row in allOutputData["monthDataPart"]){
+ 					insertMetric("moneyReportTable","", allOutputData["monthDataPart"][row])
+ 				}
+			</script>
 		</div>
 	</div>
 </body>
