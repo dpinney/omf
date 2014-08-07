@@ -77,10 +77,11 @@ def runForeground(modelDir,inData):
 	try:
 		startTime = datetime.now()
 		#calibrate and run cvrdynamic	
-		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "public",(inData["feederName"]+'.json'))
+		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", inData["feederName"].split("___")[0], inData["feederName"].split("___")[1]+'.json')
 		scadaPath = pJoin(__metaModel__._omfDir,"uploads",(inData["scadaFile"]+'.tsv'))
 		calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 		allOutput = {}
+		print "here"
 		with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
 			feederJson = json.load(jsonIn)
 			localTree = feederJson.get("tree", {})
@@ -537,7 +538,7 @@ def _tests():
 	inData = { "modelName": "Automated DynamicCVR Testing",
 		"modelType": "_cvrDynamic",
 		"user": "admin",
-		"feederName": "ABEC Frank pre calib",
+		"feederName": "public___ABEC Frank pre calib",
 		"scadaFile": "FrankScada",
 		"runTime": "",
 		"capitalCost": 30000,

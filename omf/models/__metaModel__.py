@@ -1,6 +1,6 @@
 """ Common functions for all models """
 
-import json, os, sys, tempfile, webbrowser, time
+import json, os, sys, tempfile, webbrowser, time, math
 from os.path import join as pJoin
 from os.path import split as pSplit
 # Locational variables so we don't have to rely on OMF being in the system path.
@@ -92,6 +92,13 @@ def cancel(modelDir):
 		print "CANCELED", modelDir
 	except:
 		pass
+
+def roundSig(x, sig=3):
+	''' Round to a given number of sig figs. '''
+	roundPosSig = lambda y,sig: round(y, sig-int(math.floor(math.log10(y)))-1)
+	if x == 0: return 0
+	elif x < 0: return -1*roundPosSig(-1*x, sig)
+	else: return roundPosSig(x, sig)
 
 def _test():
 	""" No test required for this file. """
