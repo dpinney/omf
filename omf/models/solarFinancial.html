@@ -16,7 +16,7 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<style type="text/css">thead{font-weight:bold}</style>
+	<style type="text/css">thead{font-weight:bold} table{width:980px; font-size:12}</style>
 </head>
 <body onload="init()">
 	<div id="title">
@@ -28,7 +28,7 @@
 		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
 			<div class="shortInput">
 				<label>Model Type</label>
-				<input type="text" id="modelType" name="modelType" value="_solarFinancial" readonly/>
+				<input type="text" id="modelType" name="modelType" value="solarFinancial" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
@@ -294,7 +294,7 @@
 			<table id="annualSummaryTable">
 			</table>
 			<script>
-				insertMetric("annualSummaryTable","Year", [1,2,3,4,5,6,7,8,9,10])
+				insertMetric("annualSummaryTable","Year", Array.apply(null, {length: parseFloat(allInputData.lifeSpan)}).map(Number.call, Number))
 				insertMetric("annualSummaryTable","Generation Income", allOutputData.lifeGenerationDollars)
 				insertMetric("annualSummaryTable","Purchase Costs", allOutputData.lifePurchaseCosts)
 				insertMetric("annualSummaryTable","Op. and Maint. Costs", allOutputData.lifeOmCosts)

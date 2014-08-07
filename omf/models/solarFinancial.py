@@ -12,7 +12,7 @@ import feeder
 from solvers import nrelsam
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"_solarFinancial.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"solarFinancial.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -99,11 +99,11 @@ def run(modelDir, inputDict):
 	degredation = float(inputDict.get("degredation",0.005))
 	installCost = float(inputDict.get("installCost",0.0))
 	outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
-	outData["lifeGenerationDollars"] = [retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degredation)) for x in lifeYears]
+	outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degredation)),2) for x in lifeYears]
 	outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
 	outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
-	outData["netCashFlow"] = [x+y+z for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
-	outData["cumCashFlow"] = _runningSum(outData["netCashFlow"])
+	outData["netCashFlow"] = [roundSig(x+y+z,2) for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
+	outData["cumCashFlow"] = map(lambda x:roundSig(x,2), _runningSum(outData["netCashFlow"]))
 	outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 2)
 	#TODO: implement these two.
 	outData["NPV"] = "TBD"
@@ -111,7 +111,7 @@ def run(modelDir, inputDict):
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
-	outData["monthlyGeneration"] = [[a, totMonNum(b)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
+	outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
 	# Heatmaped hour+month outputs.
 	hours = range(24)
 	from random import random
@@ -166,7 +166,7 @@ def _tests():
 	# TODO: Fix inData because it's out of date.
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"modelType": "_solarFinancial",
+		"modelType": "solarFinancial",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "100",
 		"systemSize":"10",
