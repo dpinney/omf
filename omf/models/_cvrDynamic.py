@@ -174,6 +174,8 @@ def runForeground(modelDir,inData):
 		os.remove(pJoin(modelDir,"PID.txt"))
 		p = output['Zregulator.csv']['power_in.real']
 		q = output['Zregulator.csv']['power_in.imag']
+		#calculating length of simulation because it migth be different from the simulation input HOURS
+		simRealLength = int(len(p))
 		#time delays from configuration files
 		time_delay_reg = '30.0'  
 		time_delay_cap = '300.0'
@@ -236,7 +238,7 @@ def runForeground(modelDir,inData):
 		voltnew = {'A':[],'B':[],'C':[]}
 		switch = {'A':[],'B':[],'C':[]}
 		switchnew = {'A':[],'B':[],'C':[]}
-		for element in range(int(len(p))):
+		for element in range(simRealLength):
 			for letter in ['A','B','C']:
 				tap[letter].append(output['Zregulator.csv']['tap_' + letter][element])
 				tapnew[letter].append(output1['NewZregulator.csv']['tap_' + letter][element])
@@ -410,20 +412,23 @@ def runForeground(modelDir,inData):
 		else:
 			febDays = 28
 		monthHours = [int(31*24),int(febDays*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24)]
-		#find simulation months
+		#calculate the month and hour of simulation start and month and hour of simulation end
+		simStartTimestamp = simStartDate + " 00:00:00"
+		simFormattedDate = datetime.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S")
+		simStartMonthNum = int(simFormattedDate.strftime('%m'))
+		simstartMonth = monthNames[simStartMonthNum-1]
+		simStartDay = int(simFormattedDate.strftime('%d'))
+		simStartIndex = int(sum(monthHours[:(simStartMonthNum-1)])+(simStartDay-1)*24)
 		temp = 0
-		cumulHours = []
+		cumulHours = [0]
 		for x in range(12):
 			temp += monthHours[x]
 			cumulHours.append(temp)
-		for i in range(12):
-			if i == 0:
-				lowval = 0
-			else:
-				lowval = cumulHours[i-1]
-			if HOURS<=cumulHours[i] and HOURS>=lowval:
-				hourMonth = monthNames[i]
-				hourIndex = i
+		for i in range((simStartMonthNum),13):
+			if int(simStartIndex+simRealLength)<=cumulHours[i] and int(simStartIndex+simRealLength)>cumulHours[i-1]:
+				simEndMonthNum = i-1
+				simEndMonth = monthNames[simEndMonthNum]
+		print simstartMonth,simEndMonth
 		#calculate peaks for the number of months in simulation
 		previndex = 0
 		monthPeak = {}
@@ -431,32 +436,35 @@ def runForeground(modelDir,inData):
 		peakSaveDollars = {}
 		energyLostDollars = {}
 		lossRedDollars = {}
-		for month in range(hourIndex+1):
+		simMonthList = monthNames[monthNames.index(simstartMonth):(monthNames.index(simEndMonth)+1)] 
+		print simMonthList
+		for monthElement in simMonthList:
+			print monthElement
+			month = monthNames.index(monthElement)
 			index1 = int(previndex)
-			index2 = int(min((index1 + int(monthHours[month])), HOURS))
-			monthPeak[monthNames[month]] = max(p[index1:index2])/1000.0
-			monthPeakNew[monthNames[month]] = max(pnew[index1:index2])/1000.0
-			peakSaveDollars[monthNames[month]] = (monthPeak[monthNames[month]]-monthPeakNew[monthNames[month]])*float(inData['peakDemandCost'+str(monthToSeason[monthNames[month]])+'PerKw'])
-			lossRedDollars[monthNames[month]] = (sum(realLoss[index1:index2])/1000.0 - sum(realLossnew[index1:index2])/1000.0)*(float(inData['wholesaleEnergyCostPerKwh']))
-			energyLostDollars[monthNames[month]] = (sum(p[index1:index2])/1000.0  - sum(pnew[index1:index2])/1000.0  - sum(realLoss[index1:index2])/1000.0  
+			index2 = int(min((index1 + int(monthHours[month])), simRealLength))
+			monthPeak[monthElement] = max(p[index1:index2])/1000.0
+			monthPeakNew[monthElement] = max(pnew[index1:index2])/1000.0
+			peakSaveDollars[monthElement] = (monthPeak[monthElement]-monthPeakNew[monthElement])*float(inData['peakDemandCost'+str(monthToSeason[monthElement])+'PerKw'])
+			lossRedDollars[monthElement] = (sum(realLoss[index1:index2])/1000.0 - sum(realLossnew[index1:index2])/1000.0)*(float(inData['wholesaleEnergyCostPerKwh']))
+			energyLostDollars[monthElement] = (sum(p[index1:index2])/1000.0  - sum(pnew[index1:index2])/1000.0  - sum(realLoss[index1:index2])/1000.0  
 				+ sum(realLossnew[index1:index2])/1000.0 )*(float(inData['wholesaleEnergyCostPerKwh']) - float(inData['retailEnergyCostPerKwh']))
 			previndex = index2
 		#money charts
-		simMonths = monthNames[:hourIndex+1]
 		fig = plt.figure("cost benefit barchart",figsize=(10,8))
-		ticks = range(len(simMonths))
+		ticks = range(len(simMonthList))
 		ticks1 = [element+0.15 for element in ticks]
 		ticks2 = [element+0.30 for element in ticks]
 		print ticks
-		eld = [energyLostDollars[month] for month in simMonths]
-		lrd = [lossRedDollars[month] for month in simMonths]
-		psd = [peakSaveDollars[month] for month in simMonths]
+		eld = [energyLostDollars[month] for month in simMonthList]
+		lrd = [lossRedDollars[month] for month in simMonthList]
+		psd = [peakSaveDollars[month] for month in simMonthList]
 		bar_eld = plt.bar(ticks,eld,0.15,color='red') 
 		bar_psd = plt.bar(ticks1,psd,0.15,color='blue')
 		bar_lrd = plt.bar(ticks2,lrd,0.15,color='green')
 		plt.legend([bar_eld[0], bar_psd[0], bar_lrd[0]], ['energyLostDollars','peakReductionDollars','lossReductionDollars'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
 			ncol=2, mode="expand", borderaxespad=0.1)
-		monShort = [element[0:3] for element in simMonths]
+		monShort = [element[0:3] for element in simMonthList]
 		plt.xticks([t+0.15 for t in ticks],monShort)
 		plt.ylabel('Utility Savings ($)')
 		plt.savefig(pJoin(modelDir,"spendChart.png"))
@@ -477,9 +485,8 @@ def runForeground(modelDir,inData):
 		with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
 			allOutput["savingsChart"] = inFile.read().encode("base64")
 		#data for highcharts
-		simStartTimestamp = simStartDate + " 00:00:00"
 		timestamps = []
-		for y in range(int(len(p))):
+		for y in range(simRealLength):
 			formatDate = datetime.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S") + timedelta(hours =y)
 			timestamps.append(formatDate.strftime("%Y-%m-%d %H:%M:%S"))
 		allOutput["timeStamps"] = timestamps
@@ -502,7 +509,7 @@ def runForeground(modelDir,inData):
 		allOutput["noCVRMeanVolt"] = meanVoltage
 		allOutput["withCVRMeanVolt"] = meanVoltagenew
 		#monetization
-		allOutput["simMonths"] = monShort
+		allOutput["simMonthList"] = monShort
 		allOutput["energyLostDollars"] = energyLostDollars
 		allOutput["lossRedDollars"] = lossRedDollars
 		allOutput["peakSaveDollars"] = peakSaveDollars
@@ -541,8 +548,8 @@ def _tests():
 		"peakDemandCostSummerPerKw": 10.0,
 		"peakDemandCostFallPerKw": 6.0,
 		"peakDemandCostWinterPerKw": 8.0,
-		"simStart": "2011-03-12",
-		"simLengthHours": 100,
+		"simStart": "2011-03-01",
+		"simLengthHours": 1000,
 		"leapYear":"No"}
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
