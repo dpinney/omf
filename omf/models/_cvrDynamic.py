@@ -76,8 +76,8 @@ def runForeground(modelDir,inData):
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inData, inputFile, indent=4)
 	#calibrate and run cvrdynamic	
-	feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "public",inData["feederName"])
-	scadaPath = pJoin(__metaModel__._omfDir,"uploads",inData["scadaFile"])
+	feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", "public",(inData["feederName"]+'.json'))
+	scadaPath = pJoin(__metaModel__._omfDir,"uploads",(inData["scadaFile"]+'.tsv'))
 	calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 	allOutput = {}
 	with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
@@ -525,8 +525,8 @@ def _tests():
 	inData = { "modelName": "Automated DynamicCVR Testing",
 		"modelType": "_cvrDynamic",
 		"user": "admin",
-		"feederName": "ABEC Frank pre calib.json",
-		"scadaFile": "FrankScada.tsv",
+		"feederName": "ABEC Frank pre calib",
+		"scadaFile": "FrankScada",
 		"runTime": "",
 		"capitalCost": 30000,
 		"omCost": 1000,
