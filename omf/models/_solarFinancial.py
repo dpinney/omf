@@ -104,7 +104,7 @@ def run(modelDir, inputDict):
 	outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
 	outData["netCashFlow"] = [x+y+z for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
 	outData["cumCashFlow"] = _runningSum(outData["netCashFlow"])
-	outData["ROI"] = _roundSig(sum(outData["netCashFlow"]))
+	outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 2)
 	#TODO: implement these two.
 	outData["NPV"] = "TBD"
 	outData["IRR"] = "TBD"
@@ -128,10 +128,6 @@ def run(modelDir, inputDict):
 	inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent=4)
-
-def _roundSig(x, sig=3):
-	''' Round a float to a given number of sig figs. '''
-	return round(x, sig-int(math.floor(math.log10(x)))-1)
 
 def _runningSum(inList):
 	''' Give a list of running sums of inList. '''

@@ -16,6 +16,7 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<style type="text/css">thead{font-weight:bold}</style>
 </head>
 <body onload="init()">
 	<div id="title">
@@ -177,6 +178,16 @@
 			var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
 			pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
 			pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
+			function insertMetric(tableId, name, vector) {
+				// Add a vector to a table as a row.
+				table = gebi(tableId)
+				newRow = table.insertRow()
+				newRow.insertCell().innerHTML = name
+				for (i=0; i<vector.length; i++) {
+					cell = newRow.insertCell()
+					cell.innerHTML = vector[i]
+				}
+			}
 		</script>
 		<p class="reportTitle postRun">Hourly System Performance</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
@@ -221,7 +232,7 @@
 					title: false,
 					yAxis: {categories: ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"], title:null},
 					xAxis: {categories: [0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23], title: null},
-					colorAxis: {min: 0, minColor: '#FFFFFF', maxColor:"#c4463a"}, //Highcharts.getOptions().colors[0]
+					colorAxis: {min: 0, minColor: '#FFFFFF', maxColor:"#c4463a"},
 					legend:{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"},
 					tooltip: false,
 					series: [{
@@ -269,9 +280,25 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Output Summary</p>
-		<div id="outputSummaryReport" class="tightContent postRun">
-			<p>Put table here.</p>
+		<p class="reportTitle postRun">Monthly Data Table</p>
+		<div id="monthlySummaryReport" class="tightContent postRun">
+			<table id="monthlySummaryTable">
+			</table>
+			<script>
+				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
+				insertMetric("monthlySummaryTable","Generation", allOutputData.monthlyGeneration.map(function(x){return x[1]}))
+			</script>
+		</div>
+		<p class="reportTitle postRun">Annual Data Table</p>
+		<div id="annualSummaryREport" class="tightContent postRun">
+			<table id="annualSummaryTable">
+			</table>
+			<script>
+				insertMetric("annualSummaryTable","Year", [1,2,3,4,5,6,7,8,9,10])
+				insertMetric("annualSummaryTable","Generation Income", allOutputData.lifeGenerationDollars)
+				insertMetric("annualSummaryTable","Net Income", allOutputData.netCashFlow)
+				insertMetric("annualSummaryTable","Cumulative Income", allOutputData.cumCashFlow)
+			</script>
 		</div>
 	</div>
 </body>
