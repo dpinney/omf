@@ -191,9 +191,6 @@
 		</script>
 		<p class="reportTitle postRun">Historical Loads</p>
 		<div id="scadaReport" class="tightContent postRun">
-<!-- 			<img id="scadaChart" />
-			<script type="text/javascript">gebi("scadaChart").src = "data:image/png;base64," + allOutputData.scadaChart</script>
- -->		
 			<script type="text/javascript">
 				new Highcharts.Chart({
 					"chart":{
@@ -257,9 +254,6 @@
 		</div>
 		<p class="reportTitle postRun">Projected Savings by Month</p>
 		<div id="spendReport" class="tightContent postRun">
-<!-- 			<img id="spendChart" />
-			<script type="text/javascript">gebi("spendChart").src = "data:image/png;base64," + allOutputData.spendChart</script>
- -->		
 			<script type="text/javascript">
 				new Highcharts.Chart({
 					"chart":{
@@ -323,10 +317,11 @@
 		</div>
 		<p class="reportTitle postRun">Projected Avoided Cost</p>
 		<div id="savingsReport" class="tightContent postRun">
-<!-- 			<img id="savingsChart" />
-			<script type="text/javascript">gebi("savingsChart").src = "data:image/png;base64," + allOutputData.savingsChart</script>
- -->		
 			<script type="text/javascript">
+				for (i=0; i<=30; i++){
+					if (allOutputData["annualSave"][i]<=0 && allOutputData["annualSave"][i+1] >= 0)
+						paybackYear = i + (-allOutputData["annualSave"][i])/(allOutputData["annualSave"][i+1] + allOutputData["annualSave"][i])
+				}
 				new Highcharts.Chart({
 					"chart":{
 						"height": 200,
@@ -352,6 +347,14 @@
 						"valueDecimals":1
 					},
 					"xAxis": {
+						"plotLines": [{
+						    "color": 'green', // Color value
+						    "value": paybackYear||null, // Value of where the line will appear
+						    "width": 1, // Width of the line    
+						    "label": {
+				                "text": "payback after " + paybackYear.toFixed(2)||null,
+				            }
+						}]
 					},
 					"yAxis": {
 						"title": {
@@ -374,9 +377,6 @@
 		<p class="reportTitle postRun">Power Flows at Various Loads</p>
 		<div id="powerflowReport" class="tightContent postRun tableReport">
 			<table id="powerflowReportTable"></table>
-<!-- 			<img id="powerflowTable" />
-			<script type="text/javascript">gebi("powerflowTable").src = "data:image/png;base64," + allOutputData.powerflowTable</script>
- -->	
  			<script type="text/javascript">
  				for (row in allOutputData["monthDataMat"]){
  					insertMetric("powerflowReportTable","", allOutputData["monthDataMat"][row])
@@ -386,9 +386,6 @@
 		<p class="reportTitle postRun">Savings at Various Loads</p>
 		<div id="moneyReport" class="tightContent postRun tableReport">
 			<table id="moneyReportTable"></table>
-<!-- 			<img id="moneyTable" />
-			<script type="text/javascript">gebi("moneyTable").src = "data:image/png;base64," + allOutputData.moneyTable</script>
- -->		
 			<script type="text/javascript">
 				for (row in allOutputData["monthDataPart"]){
  					insertMetric("moneyReportTable","", allOutputData["monthDataPart"][row])
