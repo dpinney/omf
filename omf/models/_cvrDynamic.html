@@ -228,13 +228,13 @@
 						// }
 					},
 					"series":[{
-						"pointWidth": 40,
+						"pointWidth": 30,
 						"data": [allOutputData["withCVRLoad"],allOutputData["noCVRLoad"]],
 						"type": "column",
 						"color": "darkorange",
 						"name": "Load"
 					},{
-						"pointWidth": 40,
+						"pointWidth": 30,
 						"data": [allOutputData["withCVRLosses"],allOutputData["noCVRLosses"]],
 						"type": "column",
 						"color": "orangered",
@@ -369,7 +369,7 @@
 					},
 					"color":"DarkBlue",
 					"data":allOutputData["withCVRTaps"]["B"],
-					"name":"With IVVC Mean Volts",
+					"name":"With IVVC B",
 					"visible": false
 				},{
 					"marker":{
@@ -377,7 +377,7 @@
 					},
 					"color":"LightBlue",
 					"data":allOutputData["withCVRTaps"]["C"],
-					"name":"With IVVC Mean Volts",
+					"name":"With IVVC C",
 					"visible": false
 				},{
 					"marker":{
@@ -386,7 +386,7 @@
 					"dashStyle": "ShortDash",
 					"color":"Green",
 					"data":allOutputData["noCVRTaps"]["A"],
-					"name":"No IVVC Mean Volts"
+					"name":"No IVVC A"
 				},{
 					"marker":{
 						"enabled": false
@@ -394,7 +394,7 @@
 					"dashStyle": "ShortDash",
 					"color":"DarkGreen",
 					"data":allOutputData["noCVRTaps"]["B"],
-					"name":"No IVVC Mean Volts",
+					"name":"No IVVC B",
 					"visible": false
 				},{
 					"marker":{
@@ -403,7 +403,7 @@
 					"dashStyle": "ShortDash",
 					"color":"LightGreen",
 					"data":allOutputData["noCVRTaps"]["C"],
-					"name":"No IVVC Mean Volts",
+					"name":"No IVVC C",
 					"visible": false
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
@@ -441,7 +441,7 @@
 					},
 					"color":"DarkBlue",
 					"data":allOutputData["withCVRCapSwitch"]["B"],
-					"name":"With IVVC Mean Volts",
+					"name":"With IVVC B",
 					"visible": false
 				},{
 					"marker":{
@@ -449,7 +449,7 @@
 					},
 					"color":"LightBlue",
 					"data":allOutputData["withCVRCapSwitch"]["C"],
-					"name":"With IVVC Mean Volts",
+					"name":"With IVVC C",
 					"visible": false
 				},{
 					"marker":{
@@ -458,7 +458,7 @@
 					"dashStyle": "ShortDash",
 					"color":"Green",
 					"data":allOutputData["noCVRCapSwitch"]["A"],
-					"name":"No IVVC Mean Volts"
+					"name":"No IVVC A"
 				},{
 					"marker":{
 						"enabled": false
@@ -466,7 +466,7 @@
 					"dashStyle": "ShortDash",
 					"color":"DarkGreen",
 					"data":allOutputData["noCVRCapSwitch"]["B"],
-					"name":"No IVVC Mean Volts",
+					"name":"No IVVC B",
 					"visible": false
 				},{
 					"marker":{
@@ -475,7 +475,7 @@
 					"dashStyle": "ShortDash",
 					"color":"LightGreen",
 					"data":allOutputData["noCVRCapSwitch"]["C"],
-					"name":"No IVVC Mean Volts",
+					"name":"No IVVC C",
 					"visible": false
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
@@ -485,7 +485,7 @@
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = capSwitchData
 				localHighChart["yAxis"] = {"title":{
-							"text":"Switch Status (1: open, 0: close)",
+							"text":"Switch Status",
 							"style":{
 								"color":"gray"
 							}
@@ -514,7 +514,7 @@
 					},
 					"color":"DarkBlue",
 					"data":allOutputData["withCVRSubVolts"]["B"],
-					"name":"With IVVC Mean Volts",
+					"name":"With IVVC B",
 					"visible": false
 				},{
 					"marker":{
@@ -522,7 +522,7 @@
 					},
 					"color":"LightBlue",
 					"data":allOutputData["withCVRSubVolts"]["C"],
-					"name":"With IVVC Mean Volts",
+					"name":"With IVVC C",
 					"visible": false
 				},{
 					"marker":{
@@ -531,7 +531,7 @@
 					"dashStyle": "ShortDash",
 					"color":"Green",
 					"data":allOutputData["noCVRSubVolts"]["A"],
-					"name":"No IVVC Mean Volts"
+					"name":"No IVVC A"
 				},{
 					"marker":{
 						"enabled": false
@@ -539,7 +539,7 @@
 					"dashStyle": "ShortDash",
 					"color":"DarkGreen",
 					"data":allOutputData["noCVRSubVolts"]["B"],
-					"name":"No IVVC Mean Volts",
+					"name":"No IVVC B",
 					"visible": false
 				},{
 					"marker":{
@@ -548,7 +548,7 @@
 					"dashStyle": "ShortDash",
 					"color":"LightGreen",
 					"data":allOutputData["noCVRSubVolts"]["C"],
-					"name":"No IVVC Mean Volts",
+					"name":"No IVVC C",
 					"visible": false
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
@@ -614,16 +614,19 @@
 						// }
 					},
 					"series":[{
+						"pointWidth": 30,
 						"data": $.map(allOutputData["peakSaveDollars"], function(key, value){return key}),
 						"type": "column",
 						"color": "blue",
 						"name": "Peak Reduction"
 					},{
+						"pointWidth": 30,
 						"data": $.map(allOutputData["lossRedDollars"], function(key, value){return key}),
 						"type": "column",
 						"color": "green",
 						"name": "Losses Reduction"
 					},{
+						"pointWidth": 30,
 						"data": $.map(allOutputData["energyLostDollars"], function(key, value){return key}),
 						"type": "column",
 						"color": "red",
