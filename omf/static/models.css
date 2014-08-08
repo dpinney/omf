@@ -99,6 +99,11 @@ div.studyTitleBox {
 div.studyContainer {
 	position: relative;
 }
+
+div.tableReport {
+	overflow-x: scroll;
+}
+
 p.reportTitle {
 	padding: 10px; 
 	width: 1000px; 
