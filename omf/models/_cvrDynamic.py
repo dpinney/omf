@@ -284,8 +284,8 @@ def runForeground(modelDir,inData):
 			       ncol=2, mode="expand", borderaxespad=0.1)
 		plt.xticks([t+0.15 for t in ticks],indices)
 		plt.savefig(pJoin(modelDir,"totalEnergy.png"))
-		with open(pJoin(modelDir,"totalEnergy.png"),"rb") as inFile:
-			allOutput["totalEnergy"] = inFile.read().encode("base64")
+		# with open(pJoin(modelDir,"totalEnergy.png"),"rb") as inFile:
+		# 	allOutput["totalEnergy"] = inFile.read().encode("base64")
 		#real and imaginary power
 		plt.figure("real power")
 		plt.title("Real Power at substation")
@@ -297,8 +297,8 @@ def runForeground(modelDir,inData):
 		plt.legend([pw[0], npw[0]], ['NO IVVC','WITH IVVC'],bbox_to_anchor=(0., 0.915, 1., .102), loc=3,
 			ncol=2, mode="expand", borderaxespad=0.1)
 		plt.savefig(pJoin(modelDir,"realPower.png"))
-		with open(pJoin(modelDir,"realPower.png"),"rb") as inFile:
-			allOutput["realPower"] = inFile.read().encode("base64")
+		# with open(pJoin(modelDir,"realPower.png"),"rb") as inFile:
+		# 	allOutput["realPower"] = inFile.read().encode("base64")
 		plt.figure("Reactive power")
 		plt.title("Reactive Power at substation")
 		plt.ylabel("substation reactive power (MVAR)")
@@ -309,8 +309,8 @@ def runForeground(modelDir,inData):
 		plt.legend([iw[0], niw[0]], ['NO IVVC','WITH IVVC'],bbox_to_anchor=(0., 0.915, 1., .102), loc=3,
 			ncol=2, mode="expand", borderaxespad=0.1)
 		plt.savefig(pJoin(modelDir,"imaginaryPower.png"))
-		with open(pJoin(modelDir,"imaginaryPower.png"),"rb") as inFile:
-			allOutput["imaginaryPower"] = inFile.read().encode("base64")
+		# with open(pJoin(modelDir,"imaginaryPower.png"),"rb") as inFile:
+		# 	allOutput["imaginaryPower"] = inFile.read().encode("base64")
 		#voltage plots
 		plt.figure("voltages as a function of time")
 		f,ax = plt.subplots(2,sharex=True)
@@ -326,8 +326,8 @@ def runForeground(modelDir,inData):
 		nhv = ax[1].plot(highVoltagenew, color = 'cadetblue')
 		ax[1].set_ylabel('WITH IVVC')
 		plt.savefig(pJoin(modelDir,"Voltages.png"))
-		with open(pJoin(modelDir,"Voltages.png"),"rb") as inFile:
-			allOutput["minMaxvolts"] = inFile.read().encode("base64")
+		# with open(pJoin(modelDir,"Voltages.png"),"rb") as inFile:
+		# 	allOutput["minMaxvolts"] = inFile.read().encode("base64")
 		#tap positions
 		plt.figure("TAP positions NO IVVC")
 		f,ax = plt.subplots(6,sharex=True)
@@ -351,8 +351,8 @@ def runForeground(modelDir,inData):
 			ax[subplot].set_ylim(-20,20)
 		f.tight_layout()
 		plt.savefig(pJoin(modelDir,"RegulatorTAPpositions.png"))
-		with open(pJoin(modelDir,"RegulatorTAPpositions.png"),"rb") as inFile:
-			allOutput["regulatorTap"] = inFile.read().encode("base64")
+		# with open(pJoin(modelDir,"RegulatorTAPpositions.png"),"rb") as inFile:
+		# 	allOutput["regulatorTap"] = inFile.read().encode("base64")
 		#substation voltages
 		plt.figure("substation voltage as a function of time")
 		f,ax = plt.subplots(6,sharex=True)
@@ -374,8 +374,8 @@ def runForeground(modelDir,inData):
 		ax[5].set_ylabel('voltage C')
 		f.tight_layout()
 		plt.savefig(pJoin(modelDir,"substationVoltages.png"))
-		with open(pJoin(modelDir,"substationVoltages.png"),"rb") as inFile:
-			allOutput["substationVoltages"] = inFile.read().encode("base64")
+		# with open(pJoin(modelDir,"substationVoltages.png"),"rb") as inFile:
+		# 	allOutput["substationVoltages"] = inFile.read().encode("base64")
 		#cap switches
 		plt.figure("capacitor switch state as a function of time")
 		f,ax = plt.subplots(6,sharex=True)
@@ -399,8 +399,8 @@ def runForeground(modelDir,inData):
 			ax[subplot].set_ylim(-2,2)
 		f.tight_layout()
 		plt.savefig(pJoin(modelDir,"capacitorSwitch.png"))
-		with open(pJoin(modelDir,"capacitorSwitch.png"),"rb") as inFile:
-			allOutput["capacitorSwitch"] = inFile.read().encode("base64")
+		# with open(pJoin(modelDir,"capacitorSwitch.png"),"rb") as inFile:
+		# 	allOutput["capacitorSwitch"] = inFile.read().encode("base64")
 		#plt.show()
 		#monetization
 		monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
@@ -469,8 +469,8 @@ def runForeground(modelDir,inData):
 		plt.xticks([t+0.15 for t in ticks],monShort)
 		plt.ylabel('Utility Savings ($)')
 		plt.savefig(pJoin(modelDir,"spendChart.png"))
-		with open(pJoin(modelDir,"spendChart.png"),"rb") as inFile:
-			allOutput["spendChart"] = inFile.read().encode("base64")
+		# with open(pJoin(modelDir,"spendChart.png"),"rb") as inFile:
+		# 	allOutput["spendChart"] = inFile.read().encode("base64")
 		#cumulative savings graphs
 		fig = plt.figure("cost benefit barchart",figsize=(10,5))
 		annualSavings = sum(eld) + sum(lrd) + sum(psd)
@@ -483,8 +483,8 @@ def runForeground(modelDir,inData):
 		plt.axvline(x=simplePayback, ymin=0, ymax=1, c='gray', linestyle='--')
 		plt.plot([annualSave(x) for x in range(31)], c='green')
 		plt.savefig(pJoin(modelDir,"savingsChart.png"))
-		with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
-			allOutput["savingsChart"] = inFile.read().encode("base64")
+		# with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
+		# 	allOutput["savingsChart"] = inFile.read().encode("base64")
 		#get exact time stamps from the CSV files generated by Gridlab-D
 		timeWithZone =  output['Zregulator.csv']['# timestamp']
 		timestamps = [element[:19] for element in timeWithZone]
