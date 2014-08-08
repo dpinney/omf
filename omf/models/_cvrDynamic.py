@@ -1,7 +1,7 @@
 ''' Calculate CVR impacts using a targetted set of dynamic loadflows. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
-import math, re, csv
+import math, re, csv, calendar
 import multiprocessing
 from copy import deepcopy
 from os.path import join as pJoin
@@ -167,7 +167,6 @@ def runForeground(modelDir,inData):
 			localTree[biggest + index] = rec
 		#run a reference load flow
 		HOURS = float(inData['simLengthHours'])
-		year_lp = inData['leapYear']   #leap year
 		simStartDate = inData['simStart']
 		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)	
 		output = gridlabd.runInFilesystem(localTree,keepFiles=False,workDir=modelDir)
@@ -406,17 +405,17 @@ def runForeground(modelDir,inData):
 		monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
 			'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
 			'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
-		if (year_lp).lower() == 'yes':
-			febDays = 29
-		else:
-			febDays = 28
-		monthHours = [int(31*24),int(febDays*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24)]
 		#calculate the month and hour of simulation start and month and hour of simulation end
 		simStartTimestamp = simStartDate + " 00:00:00"
 		simFormattedDate = datetime.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S")
 		simStartMonthNum = int(simFormattedDate.strftime('%m'))
 		simstartMonth = monthNames[simStartMonthNum-1]
 		simStartDay = int(simFormattedDate.strftime('%d'))
+		if calendar.isleap(int(simFormattedDate.strftime('%Y'))):
+			febDays = 29
+		else:
+			febDays = 28
+		monthHours = [int(31*24),int(febDays*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24)]
 		simStartIndex = int(sum(monthHours[:(simStartMonthNum-1)])+(simStartDay-1)*24)
 		temp = 0
 		cumulHours = [0]
@@ -548,8 +547,7 @@ def _tests():
 		"peakDemandCostFallPerKw": 6.0,
 		"peakDemandCostWinterPerKw": 8.0,
 		"simStart": "2011-01-01",
-		"simLengthHours": 100,
-		"leapYear":"No"}
+		"simLengthHours": 100}
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
 	# Clean up previous run.
