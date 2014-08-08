@@ -24,11 +24,10 @@ with open(pJoin(__metaModel__._myDir,"_cvrDynamic.html"),"r") as tempFile:
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
-def sepRealImag(complexStr):
-	''' real and imaginary parts of a complex number.
+def returnMag(complexStr):
+	''' real and imaginary parts of a complex number and returns magnitude
 	handles string if the string starts with a '+' or a '-'
-	handles negative or positive, real and imaginary parts 
-	example sepRealImag(-20.5-6j) = (-20.5, -6)'''
+	handles negative or positive, real and imaginary parts'''
 	if complexStr[0] == '+' or complexStr[0] == '-':
 		complexStr1 = complexStr[1:len(complexStr)+1]
 		sign = complexStr[0] + '1' 
@@ -49,7 +48,7 @@ def sepRealImag(complexStr):
 			else:
 				real = float(complexStr1)*float(sign)
 				imag = 0.0
-	return real,imag
+	return (math.sqrt(real**2+imag**2))/60.0
 
 
 def run(modelDir, inData):
@@ -227,6 +226,9 @@ def runForeground(modelDir,inData):
 				realLossnew = vecSum(realLossnew, output1['New'+device]['sum(power_losses_' + letter + '.real)'])
 				imagLossnew = vecSum(imagLossnew, output1['New'+device]['sum(power_losses_' + letter + '.imag)'])
 		#voltage calculations and tap calculations
+		def divby2(u):
+			'''divides by 2'''
+			return u/2
 		lowVoltage = []
 		meanVoltage = []
 		highVoltage = []
@@ -239,24 +241,20 @@ def runForeground(modelDir,inData):
 		voltnew = {'A':[],'B':[],'C':[]}
 		switch = {'A':[],'B':[],'C':[]}
 		switchnew = {'A':[],'B':[],'C':[]}
-		for element in range(simRealLength):
-			for letter in ['A','B','C']:
-				tap[letter].append(output['Zregulator.csv']['tap_' + letter][element])
-				tapnew[letter].append(output1['NewZregulator.csv']['tap_' + letter][element])
-				#voltage real, imag
-				vr, vi = sepRealImag(output['ZsubstationBottom.csv']['voltage_'+letter][element])
-				volt[letter].append(math.sqrt(vr**2+vi**2)/60)
-				vrnew, vinew = sepRealImag(output1['NewZsubstationBottom.csv']['voltage_'+letter][element])
-				voltnew[letter].append(math.sqrt(vrnew**2+vinew**2)/60)
-				if capKeys != []:
-					switch[letter].append(output['ZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter][element])
-					switchnew[letter].append(output1['NewZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter][element])
-			lowVoltage.append(float(output['ZvoltageJiggle.csv']['min(voltage_12.mag)'][element])/2.0)
-			meanVoltage.append(float(output['ZvoltageJiggle.csv']['mean(voltage_12.mag)'][element])/2.0)
-			highVoltage.append(float(output['ZvoltageJiggle.csv']['max(voltage_12.mag)'][element])/2.0)
-			lowVoltagenew.append(float(output1['NewZvoltageJiggle.csv']['min(voltage_12.mag)'][element])/2.0)
-			meanVoltagenew.append(float(output1['NewZvoltageJiggle.csv']['mean(voltage_12.mag)'][element])/2.0)
-			highVoltagenew.append(float(output1['NewZvoltageJiggle.csv']['max(voltage_12.mag)'][element])/2.0)
+		for letter in ['A','B','C']:
+			tap[letter] = output['Zregulator.csv']['tap_' + letter]
+			tapnew[letter] = output1['NewZregulator.csv']['tap_' + letter]
+			if capKeys != []:
+				switch[letter] = output['ZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter]
+				switchnew[letter] = output1['NewZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter]
+			volt[letter] = map(returnMag,output['ZsubstationBottom.csv']['voltage_'+letter])
+			voltnew[letter] = map(returnMag,output1['NewZsubstationBottom.csv']['voltage_'+letter])
+		lowVoltage = map(divby2,output['ZvoltageJiggle.csv']['min(voltage_12.mag)'])
+		lowVoltagenew = map(divby2,output1['NewZvoltageJiggle.csv']['min(voltage_12.mag)'])
+		meanVoltage = map(divby2,output['ZvoltageJiggle.csv']['mean(voltage_12.mag)'])
+		meanVoltagenew = map(divby2,output1['NewZvoltageJiggle.csv']['mean(voltage_12.mag)'])
+		highVoltage = map(divby2,output['ZvoltageJiggle.csv']['max(voltage_12.mag)'])
+		highVoltagenew = map(divby2,output1['NewZvoltageJiggle.csv']['max(voltage_12.mag)'])
 		#energy calculations
 		whEnergy = []
 		whLosses = []
