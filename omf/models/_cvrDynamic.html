@@ -75,7 +75,7 @@
 					{% endfor %}
 				</select>
 			</div>
-			<div class="shortInput runningInline postRunInline">
+			<div class="shortInput">
 				<label>Scada File name</label>
 				<input type="text" id="scadaFile" name="scadaFile" data-validRegex="[\w\s]+"/></td>
 			</div>
@@ -297,16 +297,14 @@
 					},
 					"color":"DarkBlue",
 					"data":allOutputData["withCVRHighVolt"],
-					"name":"With IVVC Mean Volts",
-					"visible": false
+					"name":"With IVVC High Volts",
 				},{
 					"marker":{
 						"enabled": false
 					},
 					"color":"LightBlue",
 					"data":allOutputData["withCVRLowVolt"],
-					"name":"With IVVC Mean Volts",
-					"visible": false
+					"name":"With IVVC Low Volts",
 				},{
 					"marker":{
 						"enabled": false
@@ -322,8 +320,7 @@
 					"dashStyle": "ShortDash",
 					"color":"DarkGreen",
 					"data":allOutputData["noCVRHighVolt"],
-					"name":"No IVVC Mean Volts",
-					"visible": false
+					"name":"No IVVC High Volts",
 				},{
 					"marker":{
 						"enabled": false
@@ -331,8 +328,7 @@
 					"dashStyle": "ShortDash",
 					"color":"LightGreen",
 					"data":allOutputData["noCVRLowVolt"],
-					"name":"No IVVC Mean Volts",
-					"visible": false
+					"name":"No IVVC Low Volts",
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "minMaxVoltRecord"
@@ -370,7 +366,6 @@
 					"color":"DarkBlue",
 					"data":allOutputData["withCVRTaps"]["B"],
 					"name":"With IVVC B",
-					"visible": false
 				},{
 					"marker":{
 						"enabled": false
@@ -378,7 +373,6 @@
 					"color":"LightBlue",
 					"data":allOutputData["withCVRTaps"]["C"],
 					"name":"With IVVC C",
-					"visible": false
 				},{
 					"marker":{
 						"enabled": false
@@ -395,7 +389,6 @@
 					"color":"DarkGreen",
 					"data":allOutputData["noCVRTaps"]["B"],
 					"name":"No IVVC B",
-					"visible": false
 				},{
 					"marker":{
 						"enabled": false
@@ -404,7 +397,6 @@
 					"color":"LightGreen",
 					"data":allOutputData["noCVRTaps"]["C"],
 					"name":"No IVVC C",
-					"visible": false
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "tapStatus"
@@ -442,7 +434,6 @@
 					"color":"DarkBlue",
 					"data":allOutputData["withCVRCapSwitch"]["B"],
 					"name":"With IVVC B",
-					"visible": false
 				},{
 					"marker":{
 						"enabled": false
@@ -450,7 +441,6 @@
 					"color":"LightBlue",
 					"data":allOutputData["withCVRCapSwitch"]["C"],
 					"name":"With IVVC C",
-					"visible": false
 				},{
 					"marker":{
 						"enabled": false
@@ -467,7 +457,6 @@
 					"color":"DarkGreen",
 					"data":allOutputData["noCVRCapSwitch"]["B"],
 					"name":"No IVVC B",
-					"visible": false
 				},{
 					"marker":{
 						"enabled": false
@@ -476,7 +465,6 @@
 					"color":"LightGreen",
 					"data":allOutputData["noCVRCapSwitch"]["C"],
 					"name":"No IVVC C",
-					"visible": false
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "CapSwitchStat"
@@ -515,7 +503,6 @@
 					"color":"DarkBlue",
 					"data":allOutputData["withCVRSubVolts"]["B"],
 					"name":"With IVVC B",
-					"visible": false
 				},{
 					"marker":{
 						"enabled": false
@@ -523,7 +510,6 @@
 					"color":"LightBlue",
 					"data":allOutputData["withCVRSubVolts"]["C"],
 					"name":"With IVVC C",
-					"visible": false
 				},{
 					"marker":{
 						"enabled": false
@@ -540,7 +526,6 @@
 					"color":"DarkGreen",
 					"data":allOutputData["noCVRSubVolts"]["B"],
 					"name":"No IVVC B",
-					"visible": false
 				},{
 					"marker":{
 						"enabled": false
@@ -549,7 +534,6 @@
 					"color":"LightGreen",
 					"data":allOutputData["noCVRSubVolts"]["C"],
 					"name":"No IVVC C",
-					"visible": false
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "voltagePlots"
