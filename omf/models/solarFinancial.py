@@ -164,13 +164,14 @@ def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	# TODO: Fix inData because it's out of date.
-	inData = {"simStartDate": "2012-04-01",
+	inData = {"simStartDate": "2013-01-01",
 		"simLengthUnits": "hours",
 		"modelType": "solarFinancial",
 		"climateName": "AL-HUNTSVILLE",
-		"simLength": "100",
-		"systemSize":"10",
-		"derate":"0.97",
+		"simLength": "8760",
+		"systemSize":"100",
+		"installCost":"100000",
+		"derate":"0.77",
 		"trackingMode":"0",
 		"azimuth":"180",
 		"runTime": "",
