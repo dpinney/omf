@@ -175,9 +175,6 @@
 	<div id="output">
 		<p class="reportTitle postRun">Total loads and Losses</p>
 		<div id="totalEnergyReport" class="tightContent postRun">
-<!-- 			<img id="totalEnergy" />
-			<script type="text/javascript">gebi("totalEnergy").src = "data:image/png;base64," + allOutputData.totalEnergy</script>
- -->		
 			<script type="text/javascript">
 				new Highcharts.Chart({
 					"chart":{
@@ -213,12 +210,6 @@
 								"color":"gray"
 							}
 						}
-					},
-					"plotOptions": {
-						// "column": {
-						// 	"pointPadding": 0.8,
-						// 	"borderWidth": 0
-						// }
 					},
 					"series":[{
 						"pointWidth": 30,
@@ -271,10 +262,6 @@
 			</script>
 		</div>
 		<p class="reportTitle postRun">Min and Max voltages on the Feeder</p>
-		<!-- <div id="minMaxVoltRecord" class="tightContent postRun">
-			<img id="Voltages" />
-			<script type="text/javascript">gebi("Voltages").src = "data:image/png;base64," + allOutputData.minMaxvolts</script>
-		</div> -->
 		<div id="minMaxVoltRecord" class="tightContent postRun">
 			<script type="text/javascript">
 				voltsData = [{
@@ -339,10 +326,6 @@
 			</script>
 		</div>
 		<p class="reportTitle postRun">Regulator Tap Positions</p>
-		<!-- <div id="tapStatus" class="tightContent postRun">
-			<img id="RegulatorTAPpositions" />
-			<script type="text/javascript">gebi("RegulatorTAPpositions").src = "data:image/png;base64," + allOutputData.regulatorTap</script>
-		</div> -->
 		<div id="tapStatus" class="tightContent postRun">
 			<script type="text/javascript">
 				tapsData = [{
@@ -407,10 +390,6 @@
 			</script>
 		</div>
 		<p class="reportTitle postRun">Capacitor Switch</p>
-		<!-- <div id="CapSwitchStat" class="tightContent postRun">
-			<img id="capacitorSwitch" />
-			<script type="text/javascript">gebi("capacitorSwitch").src = "data:image/png;base64," + allOutputData.capacitorSwitch</script>
-		</div> -->
 		<div id="CapSwitchStat" class="tightContent postRun">
 			<script type="text/javascript">
 				capSwitchData = [{
@@ -476,10 +455,6 @@
 		</div>
 
 		<p class="reportTitle postRun">Substation Voltages</p>
-		<!-- <div id="voltagePlots" class="tightContent postRun">
-			<img id="substationVoltages" />
-			<script type="text/javascript">gebi("substationVoltages").src = "data:image/png;base64," + allOutputData.substationVoltages</script>
-		</div> -->
 		<div id="voltagePlots" class="tightContent postRun">
 			<script type="text/javascript">
 				subVoltsData = [{
@@ -545,9 +520,6 @@
 		</div>
 		<p class="reportTitle postRun">Projected Savings by Month</p>
 		<div id="spendReport" class="tightContent postRun">
-<!-- 			<img id="spendChart" />
-			<script type="text/javascript">gebi("spendChart").src = "data:image/png;base64," + allOutputData.spendChart</script>
- -->	
  			<script type="text/javascript">
  				new Highcharts.Chart({
 					"chart":{
@@ -584,12 +556,6 @@
 							}
 						}
 					},
-					"plotOptions": {
-						// "column": {
-						// 	"pointPadding": 0.2,
-						// 	"borderWidth": 0
-						// }
-					},
 					"series":[{
 						"pointWidth": 30,
 						"data": $.map(allOutputData["peakSaveDollars"], function(key, value){return key}),
@@ -614,9 +580,6 @@
 		</div>
 		<p class="reportTitle postRun">Projected Avoided Cost</p>
 		<div id="savingsReport" class="tightContent postRun">
-<!-- 			<img id="savingsChart" />
-			<script type="text/javascript">gebi("savingsChart").src = "data:image/png;base64," + allOutputData.savingsChart</script>
- -->	
  			<script type="text/javascript">
  				new Highcharts.Chart({
 					"chart":{
