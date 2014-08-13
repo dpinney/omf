@@ -1,7 +1,7 @@
 ''' Calculate CVR impacts using a targetted set of dynamic loadflows. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
-import math, re, csv
+import math, re, csv, calendar
 import multiprocessing
 from copy import deepcopy
 from os.path import join as pJoin
@@ -24,11 +24,10 @@ with open(pJoin(__metaModel__._myDir,"_cvrDynamic.html"),"r") as tempFile:
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
-def sepRealImag(complexStr):
-	''' real and imaginary parts of a complex number.
+def returnMag(complexStr):
+	''' real and imaginary parts of a complex number and returns magnitude
 	handles string if the string starts with a '+' or a '-'
-	handles negative or positive, real and imaginary parts 
-	example sepRealImag(-20.5-6j) = (-20.5, -6)'''
+	handles negative or positive, real and imaginary parts'''
 	if complexStr[0] == '+' or complexStr[0] == '-':
 		complexStr1 = complexStr[1:len(complexStr)+1]
 		sign = complexStr[0] + '1' 
@@ -49,7 +48,7 @@ def sepRealImag(complexStr):
 			else:
 				real = float(complexStr1)*float(sign)
 				imag = 0.0
-	return real,imag
+	return (math.sqrt(real**2+imag**2))/60.0
 
 
 def run(modelDir, inData):
@@ -168,7 +167,6 @@ def runForeground(modelDir,inData):
 			localTree[biggest + index] = rec
 		#run a reference load flow
 		HOURS = float(inData['simLengthHours'])
-		year_lp = inData['leapYear']   #leap year
 		simStartDate = inData['simStart']
 		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)	
 		output = gridlabd.runInFilesystem(localTree,keepFiles=False,workDir=modelDir)
@@ -227,6 +225,9 @@ def runForeground(modelDir,inData):
 				realLossnew = vecSum(realLossnew, output1['New'+device]['sum(power_losses_' + letter + '.real)'])
 				imagLossnew = vecSum(imagLossnew, output1['New'+device]['sum(power_losses_' + letter + '.imag)'])
 		#voltage calculations and tap calculations
+		def divby2(u):
+			'''divides by 2'''
+			return u/2
 		lowVoltage = []
 		meanVoltage = []
 		highVoltage = []
@@ -239,24 +240,20 @@ def runForeground(modelDir,inData):
 		voltnew = {'A':[],'B':[],'C':[]}
 		switch = {'A':[],'B':[],'C':[]}
 		switchnew = {'A':[],'B':[],'C':[]}
-		for element in range(simRealLength):
-			for letter in ['A','B','C']:
-				tap[letter].append(output['Zregulator.csv']['tap_' + letter][element])
-				tapnew[letter].append(output1['NewZregulator.csv']['tap_' + letter][element])
-				#voltage real, imag
-				vr, vi = sepRealImag(output['ZsubstationBottom.csv']['voltage_'+letter][element])
-				volt[letter].append(math.sqrt(vr**2+vi**2)/60)
-				vrnew, vinew = sepRealImag(output1['NewZsubstationBottom.csv']['voltage_'+letter][element])
-				voltnew[letter].append(math.sqrt(vrnew**2+vinew**2)/60)
-				if capKeys != []:
-					switch[letter].append(output['ZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter][element])
-					switchnew[letter].append(output1['NewZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter][element])
-			lowVoltage.append(float(output['ZvoltageJiggle.csv']['min(voltage_12.mag)'][element])/2.0)
-			meanVoltage.append(float(output['ZvoltageJiggle.csv']['mean(voltage_12.mag)'][element])/2.0)
-			highVoltage.append(float(output['ZvoltageJiggle.csv']['max(voltage_12.mag)'][element])/2.0)
-			lowVoltagenew.append(float(output1['NewZvoltageJiggle.csv']['min(voltage_12.mag)'][element])/2.0)
-			meanVoltagenew.append(float(output1['NewZvoltageJiggle.csv']['mean(voltage_12.mag)'][element])/2.0)
-			highVoltagenew.append(float(output1['NewZvoltageJiggle.csv']['max(voltage_12.mag)'][element])/2.0)
+		for letter in ['A','B','C']:
+			tap[letter] = output['Zregulator.csv']['tap_' + letter]
+			tapnew[letter] = output1['NewZregulator.csv']['tap_' + letter]
+			if capKeys != []:
+				switch[letter] = output['ZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter]
+				switchnew[letter] = output1['NewZcapSwitch' + str(int(capKeys[0])) + '.csv']['switch'+ letter]
+			volt[letter] = map(returnMag,output['ZsubstationBottom.csv']['voltage_'+letter])
+			voltnew[letter] = map(returnMag,output1['NewZsubstationBottom.csv']['voltage_'+letter])
+		lowVoltage = map(divby2,output['ZvoltageJiggle.csv']['min(voltage_12.mag)'])
+		lowVoltagenew = map(divby2,output1['NewZvoltageJiggle.csv']['min(voltage_12.mag)'])
+		meanVoltage = map(divby2,output['ZvoltageJiggle.csv']['mean(voltage_12.mag)'])
+		meanVoltagenew = map(divby2,output1['NewZvoltageJiggle.csv']['mean(voltage_12.mag)'])
+		highVoltage = map(divby2,output['ZvoltageJiggle.csv']['max(voltage_12.mag)'])
+		highVoltagenew = map(divby2,output1['NewZvoltageJiggle.csv']['max(voltage_12.mag)'])
 		#energy calculations
 		whEnergy = []
 		whLosses = []
@@ -284,8 +281,6 @@ def runForeground(modelDir,inData):
 			       ncol=2, mode="expand", borderaxespad=0.1)
 		plt.xticks([t+0.15 for t in ticks],indices)
 		plt.savefig(pJoin(modelDir,"totalEnergy.png"))
-		with open(pJoin(modelDir,"totalEnergy.png"),"rb") as inFile:
-			allOutput["totalEnergy"] = inFile.read().encode("base64")
 		#real and imaginary power
 		plt.figure("real power")
 		plt.title("Real Power at substation")
@@ -297,8 +292,6 @@ def runForeground(modelDir,inData):
 		plt.legend([pw[0], npw[0]], ['NO IVVC','WITH IVVC'],bbox_to_anchor=(0., 0.915, 1., .102), loc=3,
 			ncol=2, mode="expand", borderaxespad=0.1)
 		plt.savefig(pJoin(modelDir,"realPower.png"))
-		with open(pJoin(modelDir,"realPower.png"),"rb") as inFile:
-			allOutput["realPower"] = inFile.read().encode("base64")
 		plt.figure("Reactive power")
 		plt.title("Reactive Power at substation")
 		plt.ylabel("substation reactive power (MVAR)")
@@ -309,8 +302,6 @@ def runForeground(modelDir,inData):
 		plt.legend([iw[0], niw[0]], ['NO IVVC','WITH IVVC'],bbox_to_anchor=(0., 0.915, 1., .102), loc=3,
 			ncol=2, mode="expand", borderaxespad=0.1)
 		plt.savefig(pJoin(modelDir,"imaginaryPower.png"))
-		with open(pJoin(modelDir,"imaginaryPower.png"),"rb") as inFile:
-			allOutput["imaginaryPower"] = inFile.read().encode("base64")
 		#voltage plots
 		plt.figure("voltages as a function of time")
 		f,ax = plt.subplots(2,sharex=True)
@@ -326,8 +317,6 @@ def runForeground(modelDir,inData):
 		nhv = ax[1].plot(highVoltagenew, color = 'cadetblue')
 		ax[1].set_ylabel('WITH IVVC')
 		plt.savefig(pJoin(modelDir,"Voltages.png"))
-		with open(pJoin(modelDir,"Voltages.png"),"rb") as inFile:
-			allOutput["minMaxvolts"] = inFile.read().encode("base64")
 		#tap positions
 		plt.figure("TAP positions NO IVVC")
 		f,ax = plt.subplots(6,sharex=True)
@@ -351,8 +340,6 @@ def runForeground(modelDir,inData):
 			ax[subplot].set_ylim(-20,20)
 		f.tight_layout()
 		plt.savefig(pJoin(modelDir,"RegulatorTAPpositions.png"))
-		with open(pJoin(modelDir,"RegulatorTAPpositions.png"),"rb") as inFile:
-			allOutput["regulatorTap"] = inFile.read().encode("base64")
 		#substation voltages
 		plt.figure("substation voltage as a function of time")
 		f,ax = plt.subplots(6,sharex=True)
@@ -374,8 +361,6 @@ def runForeground(modelDir,inData):
 		ax[5].set_ylabel('voltage C')
 		f.tight_layout()
 		plt.savefig(pJoin(modelDir,"substationVoltages.png"))
-		with open(pJoin(modelDir,"substationVoltages.png"),"rb") as inFile:
-			allOutput["substationVoltages"] = inFile.read().encode("base64")
 		#cap switches
 		plt.figure("capacitor switch state as a function of time")
 		f,ax = plt.subplots(6,sharex=True)
@@ -399,8 +384,6 @@ def runForeground(modelDir,inData):
 			ax[subplot].set_ylim(-2,2)
 		f.tight_layout()
 		plt.savefig(pJoin(modelDir,"capacitorSwitch.png"))
-		with open(pJoin(modelDir,"capacitorSwitch.png"),"rb") as inFile:
-			allOutput["capacitorSwitch"] = inFile.read().encode("base64")
 		#plt.show()
 		#monetization
 		monthNames = ["January", "February", "March", "April", "May", "June", "July", "August",
@@ -408,17 +391,17 @@ def runForeground(modelDir,inData):
 		monthToSeason = {'January':'Winter','February':'Winter','March':'Spring','April':'Spring',
 			'May':'Spring','June':'Summer','July':'Summer','August':'Summer',
 			'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
-		if (year_lp).lower() == 'yes':
-			febDays = 29
-		else:
-			febDays = 28
-		monthHours = [int(31*24),int(febDays*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24)]
 		#calculate the month and hour of simulation start and month and hour of simulation end
 		simStartTimestamp = simStartDate + " 00:00:00"
 		simFormattedDate = datetime.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S")
 		simStartMonthNum = int(simFormattedDate.strftime('%m'))
 		simstartMonth = monthNames[simStartMonthNum-1]
 		simStartDay = int(simFormattedDate.strftime('%d'))
+		if calendar.isleap(int(simFormattedDate.strftime('%Y'))):
+			febDays = 29
+		else:
+			febDays = 28
+		monthHours = [int(31*24),int(febDays*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24),int(31*24),int(30*24),int(31*24),int(30*24),int(31*24)]
 		simStartIndex = int(sum(monthHours[:(simStartMonthNum-1)])+(simStartDay-1)*24)
 		temp = 0
 		cumulHours = [0]
@@ -469,8 +452,6 @@ def runForeground(modelDir,inData):
 		plt.xticks([t+0.15 for t in ticks],monShort)
 		plt.ylabel('Utility Savings ($)')
 		plt.savefig(pJoin(modelDir,"spendChart.png"))
-		with open(pJoin(modelDir,"spendChart.png"),"rb") as inFile:
-			allOutput["spendChart"] = inFile.read().encode("base64")
 		#cumulative savings graphs
 		fig = plt.figure("cost benefit barchart",figsize=(10,5))
 		annualSavings = sum(eld) + sum(lrd) + sum(psd)
@@ -483,8 +464,6 @@ def runForeground(modelDir,inData):
 		plt.axvline(x=simplePayback, ymin=0, ymax=1, c='gray', linestyle='--')
 		plt.plot([annualSave(x) for x in range(31)], c='green')
 		plt.savefig(pJoin(modelDir,"savingsChart.png"))
-		with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
-			allOutput["savingsChart"] = inFile.read().encode("base64")
 		#get exact time stamps from the CSV files generated by Gridlab-D
 		timeWithZone =  output['Zregulator.csv']['# timestamp']
 		timestamps = [element[:19] for element in timeWithZone]
@@ -550,8 +529,7 @@ def _tests():
 		"peakDemandCostFallPerKw": 6.0,
 		"peakDemandCostWinterPerKw": 8.0,
 		"simStart": "2011-01-01",
-		"simLengthHours": 100,
-		"leapYear":"No"}
+		"simLengthHours": 100}
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
 	# Clean up previous run.

@@ -102,8 +102,6 @@ def runForeground(modelDir, inputDict):
 		plt.ylabel('Mean and peak historical power consumptions (kW)')
 		fig.autofmt_xdate()
 		plt.savefig(pJoin(modelDir,"scadaChart.png"))
-		with open(pJoin(modelDir,"scadaChart.png"),"rb") as inFile:
-			allOutput["scadaChart"] = inFile.read().encode("base64")
 		allOutput["histPeak"] = d1
 		allOutput["histAverage"] = d2
 		allOutput["monthName"] = [name[0:3] for name in monthNames]
@@ -359,10 +357,6 @@ def runForeground(modelDir, inputDict):
 		# Powerflow results.
 		plotTable(dictalToMatrix(powerflows))
 		plt.savefig(pJoin(modelDir,"powerflowTable.png"))
-		with open(pJoin(modelDir,"powerflowTable.png"),"rb") as inFile:
-			allOutput["powerflowTable"] = inFile.read().encode("base64")
-		with open(pJoin(modelDir,"powerflows.json"),"w") as outFile:
-			json.dump(dictalToMatrix(powerflows), outFile, indent=4)
 		# Monetary results.
 		## To print partial money table
 		monthDataMat = dictalToMatrix(monthData)
@@ -377,10 +371,6 @@ def runForeground(modelDir, inputDict):
 
 		plotTable(monthDataPart)
 		plt.savefig(pJoin(modelDir,"moneyTable.png"))
-		with open(pJoin(modelDir,"moneyTable.png"),"rb") as inFile:
-			allOutput["moneyTable"] = inFile.read().encode("base64")
-		with open(pJoin(modelDir,"moneyTable.json"),"w") as outFile:
-			json.dump(dictalToMatrix(monthData), outFile, indent=4)
 		allOutput["monthDataMat"] = dictalToMatrix(monthData)
 		allOutput["monthDataPart"] = monthDataPart
 		# Graph the money data.
@@ -400,8 +390,6 @@ def runForeground(modelDir, inputDict):
 		plt.tight_layout(5.5,1.3,1.2)
 		fig.autofmt_xdate()
 		plt.savefig(pJoin(modelDir,"spendChart.png"))
-		with open(pJoin(modelDir,"spendChart.png"),"rb") as inFile:
-			allOutput["spendChart"] = inFile.read().encode("base64")
 		allOutput["energyReductionDollars"] = d1
 		allOutput["lossReductionDollars"] = d2
 		allOutput["peakReductionDollars"] = d3
@@ -417,8 +405,6 @@ def runForeground(modelDir, inputDict):
 		plt.axvline(x=simplePayback, ymin=0, ymax=1, c='gray', linestyle='--')
 		plt.plot([annualSave(x) for x in range(31)], c='green')
 		plt.savefig(pJoin(modelDir,"savingsChart.png"))
-		with open(pJoin(modelDir,"savingsChart.png"),"rb") as inFile:
-			allOutput["savingsChart"] = inFile.read().encode("base64")
 		allOutput["annualSave"] = [annualSave(x) for x in range(31)]
 		# Update the runTime in the input file.
 		endTime = datetime.datetime.now()
