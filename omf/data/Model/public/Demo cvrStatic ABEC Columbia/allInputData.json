@@ -37,11 +37,7 @@
     "decPeak": "1280000", 
     "marPeak": "1030000", 
     "junAvg": "2210000", 
-<<<<<<< HEAD
-    "runTime": "0:00:21", 
-=======
     "runTime": "0:00:58", 
->>>>>>> origin/master
     "octPeak": "1940000", 
     "i_percent": "0"
 }
