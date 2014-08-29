@@ -25,6 +25,7 @@ import csv
 import math
 import warnings
 import copy
+import random
 
 m2ft = 1.0/0.3048             # Conversion factor for meters to feet
 
@@ -335,12 +336,20 @@ def _splitLinkObjects(sectionDict, deviceDict, linkDict, overheadDict, undergrou
                 sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
                 sectionDict[newLinkId]['name'] = newLinkId
                 sectionDict[newLinkId]['to'] = 'node' + newLinkId
+                sectionDict[newLinkId]['toX'] = str(float(sectionDict[lineId]['fromX']) + random.uniform(-10,10))
+                sectionDict[newLinkId]['toY'] = str(float(sectionDict[lineId]['fromY']) + random.uniform(-10,10))
                 sectionDict[lineId]['from'] = 'node' + newLinkId
+                sectionDict[lineId]['fromX'] = sectionDict[newLinkId]['toX']
+                sectionDict[lineId]['fromY'] = sectionDict[newLinkId]['toY']
             else: # device is at the to side of a section
                 sectionDict[newLinkId] = copy.deepcopy(sectionDict[lineId])
                 sectionDict[newLinkId]['name'] = newLinkId
                 sectionDict[newLinkId]['from'] = 'node' + newLinkId
+                sectionDict[newLinkId]['fromX'] = str(float(sectionDict[lineId]['toX']) + random.uniform(-10,10))
+                sectionDict[newLinkId]['fromY'] = str(float(sectionDict[lineId]['toY']) + random.uniform(-10,10))
                 sectionDict[lineId]['to'] = 'node' + newLinkId
+                sectionDict[lineId]['toX'] = sectionDict[newLinkId]['fromX']
+                sectionDict[lineId]['toY'] = sectionDict[newLinkId]['fromY']
             for phase in ['N', 'D']:
                 sectionDict[newLinkId]['phases'] = sectionDict[newLinkId]['phases'].replace(phase, '')
             deviceDict[newLinkId]['section_name'] = newLinkId
@@ -1187,11 +1196,21 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                                                                                             'latitude' : cymsectiondevice[device]['toLatitude'],
                                                                                             'longitude' : cymsectiondevice[device]['toLongitude']}
         else:
+            cymsectiondevice[device]['fromLatitude'] = cymsection[cymsectiondevice[device]['section_name']]['fromX']
+            cymsectiondevice[device]['fromLongitude'] = cymsection[cymsectiondevice[device]['section_name']]['fromY']
+            cymsectiondevice[device]['toLatitude'] = cymsection[cymsectiondevice[device]['section_name']]['toX']
+            cymsectiondevice[device]['toLongitude'] = cymsection[cymsectiondevice[device]['section_name']]['toY']
             if cymsectiondevice[device]['parent'] not in nodes.keys() and cymsectiondevice[device]['parent'] != swingBus:
                 nodes[cymsectiondevice[device]['parent']] = {'object' : 'node',
                                                                                             'name' : cymsectiondevice[device]['parent'],
                                                                                             'phases' : cymsectiondevice[device]['phases'],
                                                                                             'nominal_voltage' : str(feeder_VLN)}
+                if cymsectiondevice[device]['location'] == 2:
+                    nodes[cymsectiondevice[device]['parent']]['latitude'] = cymsectiondevice[device]['toLatitude']
+                    nodes[cymsectiondevice[device]['parent']]['longitude'] = cymsectiondevice[device]['toLongitude']
+                else:
+                    nodes[cymsectiondevice[device]['parent']]['latitude'] = cymsectiondevice[device]['fromLatitude']
+                    nodes[cymsectiondevice[device]['parent']]['longitude'] = cymsectiondevice[device]['fromLongitude']
     # Create overhead line conductor dictionaries
     ohl_conds = {}
     for olc in OH_conductors:
@@ -1268,7 +1287,9 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                     nodes[ohl + 'parNode'] = {'object' : 'node',
                                                                     'name' : ohl + 'parNode',
                                                                     'phases' : cymsectiondevice[ohl]['phases'],
-                                                                    'nominal_voltage' : str(feeder_VLN)}
+                                                                    'nominal_voltage' : str(feeder_VLN),
+                                                                    'latitude' : str((float(cymsectiondevice[ohl]['fromLatitude']) + float(cymsectiondevice[ohl]['toLatitude']))/2.0),
+                                                                    'longitude' : str((float(cymsectiondevice[ohl]['fromLongitude']) + float(cymsectiondevice[ohl]['toLongitude']))/2.0)}
         elif cymsectiondevice[ohl]['device_type'] == 23:
             if ohl not in cymUnbalancedOverheadLine.keys():
                 raise RuntimeError("There is no line spec for {:s} in the network database provided.\n".format(ohl))
@@ -1299,7 +1320,9 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                     nodes[ohl + 'parNode'] = {'object' : 'node',
                                                                     'name' : ohl + 'parNode',
                                                                     'phases' : cymsectiondevice[ohl]['phases'],
-                                                                    'nominal_voltage' : str(feeder_VLN)}
+                                                                    'nominal_voltage' : str(feeder_VLN),
+                                                                    'latitude' : str((float(cymsectiondevice[ohl]['fromLatitude']) + float(cymsectiondevice[ohl]['toLatitude']))/2.0),
+                                                                    'longitude' : str((float(cymsectiondevice[ohl]['fromLongitude']) + float(cymsectiondevice[ohl]['toLongitude']))/2.0)}
                 
     # Create underground line conductor, and spacing dictionaries
     ugl_conds = {}
@@ -1485,7 +1508,9 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                                         'control' : 'MANUAL',
                                         'cap_nominal_voltage' : str(feeder_VLN),
                                         'time_delay' : '2',
-                                        'dwell_time' : '3'}
+                                        'dwell_time' : '3',
+                                        'latitude' : str(float(nodes[cymsectiondevice[cap]['parent']]['latitude']) + random.uniform(-5, 5)),
+                                        'longitude' : str(float(nodes[cymsectiondevice[cap]['parent']]['longitude']) + random.uniform(-5, 5))}
                 if cymshuntcapacitor[cap]['status'] == 0:
                     status = 'OPEN'
                 else:
@@ -1536,13 +1561,17 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                         tpms['tpm{:s}{:s}'.format(load, phase)] = {'object' : 'triplex_meter',
                                                                                                     'name' : 'tpm{:s}{:s}'.format(load, phase),
                                                                                                     'phases' : '{:s}S'.format(phase),
-                                                                                                    'nominal_voltage' : '120'}
+                                                                                                    'nominal_voltage' : '120',
+                                                                                                    'latitude' : str(float(nodes[cymsectiondevice[load]['parent']]['latitude']) + random.uniform(-5, 5)),
+                                                                                                    'longitude' : str(float(nodes[cymsectiondevice[load]['parent']]['longitude']) + random.uniform(-5, 5))}
                         tpns['tpn{:s}{:s}'.format(load, phase)] = {'object' : 'triplex_node',
                                                                                                     'name' : 'tpn{:s}{:s}'.format(load, phase),
                                                                                                     'phases' : '{:s}S'.format(phase),
                                                                                                     'nominal_voltage' : '120',
                                                                                                     'parent' : 'tpm{:s}{:s}'.format(load, phase),
-                                                                                                    'power_12' : cymcustomerload[load]['constant_power_{:s}'.format(phase)]}
+                                                                                                    'power_12' : cymcustomerload[load]['constant_power_{:s}'.format(phase)],
+                                                                                                    'latitude' : str(float(tpms['tpm{:s}{:s}'.format(load, phase)]['latitude']) + random.uniform(-5, 5)),
+                                                                                                    'longitude' : str(float(tpms['tpm{:s}{:s}'.format(load, phase)]['longitude']) + random.uniform(-5, 5))}
     # Create regulator and regulator configuration dictionaries
     reg_cfgs = {}
     regs = {}
@@ -1702,10 +1731,7 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
             print ('Deleting malformed link')
             print [glmTree[key]['name'], glmTree[key]['object']]
             del glmTree[key]
-    
-    # Take care of open switches
-    
-    
+            
     print('Delete any islanded nodes and fix phase mismatches')
     # Create list of all from and to node names
     LinkedNodes = {}
