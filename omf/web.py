@@ -328,12 +328,12 @@ def publishModel(owner, modelName):
 # FEEDER FUNCTIONS
 ###################################################
 
-@app.route('/feeder/<owner>/<feederName>')
+@app.route("/feeder/<owner>/<feederName>")
 @flask_login.login_required
 def feederGet(owner, feederName):
 	''' Editing interface for feeders. '''
 	# MAYBEFIX: fix modelFeeder
-	return render_template('gridEdit.html', feederName=feederName, ref=request.referrer,
+	return render_template("gridEdit.html", feederName=feederName, ref=request.referrer,
 		is_admin=User.cu()=="admin", modelFeeder=False, public=owner=="public",
 		currUser = User.cu(), owner = owner)
 
@@ -439,19 +439,19 @@ def root():
 			mod["modelType"] = allInput.get("modelType","")
 			mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
 			# mod["created"] = allInput.get("created","")
-			mod["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(modPath).st_ctime)) 
+			mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime)) 
 		except:
 			continue
 	for feed in allFeeders:
 		try:
 			feedPath = "data/Feeder/" + feed["owner"] + "/" + feed["name"] + ".json"
-			feed["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(feedPath).st_ctime))
+			feed["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(feedPath).st_ctime))
 		except:
 			continue
 	for conversion in conversions:
 		try:
 			convPath = "data/Conversion/" + conversion["owner"] + "/" + conversion["name"] + ".json"
-			conversion["editDate"] = time.strftime('%Y-%m-%d %H:%M:%S', time.gmtime(os.stat(convPath).st_ctime))		
+			conversion["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(convPath).st_ctime))		
 		except:
 			continue
 	return render_template("home.html", models = allModels, feeders = allFeeders + conversions,
