@@ -264,8 +264,8 @@ def runForeground(modelDir, inputDict):
 					output["feeder_"+str(os.path.split(root)[-1])]["stdout"] = feederOutput["stdout"]
 					# output[root] = {feederOutput["Consumption"], feederOutput["allMeterVoltages"], feederOutput["stdout"], feederOutput["stderr"]}
 		output["numOfFeeders"] = numOfFeeders
-		output["timeStamps"] = feederOutput["timeStamps"]
-		output["climate"] = feederOutput["climate"]
+		output["timeStamps"] = feederOutput.get("timeStamps", [])
+		output["climate"] = feederOutput.get("climate", [])
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 			json.dump(output, outFile, indent=4)
 		try:
