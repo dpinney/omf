@@ -24,9 +24,11 @@ the following in a .glm:
 	}
 '''
 
-import os, urllib, json, csv, math, re, tempfile, shutil
+import os, urllib, json, csv, math, re, tempfile, shutil, urllib2
 from os.path import join as pJoin
 from datetime import timedelta, datetime
+from math import modf
+from bs4 import BeautifulSoup
 
 def makeClimateCsv(start, end, airport, outFilePath, cleanup=True):
 	''' Generate a climate timeseries CSV. See module docString for full help.'''
@@ -78,8 +80,23 @@ def _airportCodeToLatLon(airport):
 	response = json.loads(urllib.urlopen(url).read())
 	# if zero results, fail
 	if len(response['result']) == 0:
-		print("Failed to return any airport location for", airport)
-		return None
+		p=re.compile('([0-9\.\-\/])+')
+		try:
+			url2 = urllib2.urlopen('http://www.airport-data.com/airport/'+airport+'/#location')
+			soup = BeautifulSoup(url2)
+			latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[2])
+			latlon_val = p.search(latlon_str)
+			latlon_val = latlon_val.group()
+			latlon_split=latlon_val.split('/') #latlon_split[0] is longitude; latlon_split[1] is latitude
+			lat = float(latlon_split[1])
+			lon = float(latlon_split[0])
+		except urllib2.URLError, e:
+			print 'Requested URL generated error code:',e.code
+			lat = float(raw_input('Please enter latitude manually:'))
+			lon = float(raw_input('Please enter longitude manually:'))
+		return(lat,lon)			
+		#print("Failed to return any airport location for", airport)
+		#return None
 	# if more than one result, get first one
 	if len(response['result']) > 1:
 		print("Multiple airport results (strange!), using the first result")
@@ -216,8 +233,18 @@ class Weather:
 		self.Seas = seasonDict[self.Time.month]
 		self.Solar = 0
 		return self
+def _latlonprocess(lat,lon):
+	minlat, lat = modf(lat)
+	minlat = abs(minlat*100000)
+	lat_string = 'lat_deg='+str(int(lat))+'\n'+'lat_min='+str(int(minlat))+'\n'
+	minlon, lon = modf(lon)
+	minlon = abs(minlon*100000)
+	lon_string = 'lon_deg='+str(int(lon))+'\n'+'lon_min='+str(int(minlon))+'\n'
+	return lat_string, lon_string
 
 def _processWeather(start, end, airport, workDir, interpolate="linear"):
+	lat, lon = _airportCodeToLatLon(airport)
+	lat_string,lon_string=_latlonprocess(lat,lon)
 	''' Take CSV files in workDir from _downloadWeather and _getPeakSolar, and combine them into a CSV that can be read into GLD's climate object. '''
 	startDate = datetime.strptime(start, "%Y-%m-%d")
 	endDate = datetime.strptime(end, "%Y-%m-%d")
@@ -319,6 +346,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 							"Light Small Hail Showers" : (0.1,1.37,0.32),#light ice pellets
 							"Small Hail Showers" : (0,1.405,0.3),#ice pellets
 							"Heavy Small Hail Showers" : (0,1.48,0.29),#heavy ice pellets
+							"Heavy Small Hail" : (0,1.48,0.29),#heavy ice pellets
 							"Light Thunderstorm" : (0.36, 1.635,0.74),
 							"Thunderstorm" : (0.25,2.21,0.84),
 							"Heavy Thunderstorm" : (0.1,1.375,0.45),
@@ -350,20 +378,21 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 							"Shallow Fog" : (0,1.435,0.22),#fog
 							"Partial Fog" : (0,1.24,0.24), #heavy fog
 							"Overcast" : (0.07,2.3,0.6),
-							"Clear" : (1.0,1,1.0),
+							"Clear" : (1.0,1.0,1.0),
 							"Mostly Cloudy" : (0.6,1.395,0.88),
 							"Scattered Clouds" : (0.42,1.915,0.75),
 							"Small Hail" : (0.1,1.39,0.32),#light ice pellets
 							"Squalls" : (0.07,1.06,0.35),#heavy haze
 							"Funnel Cloud" : (0.6,1.395,0.88),#mostly cloudy
 							"Unknown Precipitation" : (0.17,0.35,0.55), #unknown
-							"Unknown" : (0.17,0.35,0.55) }#sri done
+							"Unknown" : (0.17,0.35,0.55), 
+							"" : (1.0,1.0,1.0)}#no data in WU-default set. sri done
 	seasonDict = {1 : "Winter", 2 : "Winter", 3 : "Spring", 4 : "Spring", 5 : "Spring", 6 : "Summer", 7 : "Summer", 8 : "Summer", 9 : "Fall", 10 : "Fall", 11 : "Fall", 12 : "Winter"}
 	# interpolation options
 	interpolateList = ["none", "linear", "quadratic"]
 	# scan for files
 	fileList = os.listdir(workDir)
-	filePtrn = re.compile("weather_(?P<loc>[A-Z]+)_(?P<raw_date>[0-9]+_[0-9]+_[0-9]+).csv")
+	filePtrn = re.compile("weather_(?P<loc>[A-Za-z0-9]+)_(?P<raw_date>[0-9]+_[0-9]+_[0-9]+).csv")
 	matchedFiles = list(filter(filePtrn.match, fileList))
 	# identify desired files
 	matchedList = [filePtrn.match(x) for x in matchedFiles]
@@ -389,6 +418,10 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	for eachFile in useFiles:
 		myFile = open(pJoin(workDir, eachFile["file"]), "r")
 		myLines = myFile.readlines()
+		invalid_phrase = 'No daily or hourly history data available'
+		if invalid_phrase in str(myLines[2]):
+			print 'WARNING:BAD RECORD/DAY FILE-Skipping'
+			continue
 		#myLines = [line+","+eachFile["file"] for line in myLinesPre]
 		myData.extend(myLines)
 	weatherDataInt = list(filter(lambda x: len(x) > 1, myData))						# remove all "<br />" lines
@@ -456,6 +489,8 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 			if entry in moreConditionDict.keys():
 				weatherData[index][condIndex] = moreConditionDict[entry]
 				#print("index {:d} to ".format(index)+str(weatherData[index][condIndex]))
+				if entry is "":
+					print "WARNING: Weather Condition missing in WeatherUnderground datapage"
 			else:
 				print("index {:d} invalid conditions '{}'".format(index, entry))
 	else:
@@ -646,6 +681,8 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	outFile = open(pJoin(workDir,"weather.csv"), "w")
 	# write header
 	outFile.write('#weather file\n');
+	outFile.write(lat_string);
+	outFile.write(lon_string);
 	outFile.write('temperature,wind_speed,humidity,solar_dir,solar_diff,solar_global\n');
 	outFile.write('#month:day:hour:minute:second\n');
 	# write samples per-line
