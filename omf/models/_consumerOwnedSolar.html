@@ -46,6 +46,7 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
+			<hr>
 			<div class="shortInput">
 				<label>Climate</label>
 				<select id="climateName" name="climateName">
@@ -54,34 +55,30 @@
 					{% endfor %}
 				</select>
 			</div>
+			<div class="shortInput">
+				<label>Average System Size (kWp-DC)</label>
+				<input type="text" id="avgSystemSize" name="avgSystemSize" data-validRegex="\d+\.?\d*"/>
+			</div>
+			<div class="shortInput">
+				<label>Residential Customers With Solar (%)</label>
+				<input type="text" id="resPenetration" name="resPenetration" data-validRegex="\d+\.?\d*"/>
+			</div>
 			<hr>
 			<div class="shortInput">
-				<label>System Size (kWp-DC)</label>
-				<input type="text" id="systemSize" name="systemSize" data-validRegex="\d+\.?\d*"/>
-			</div>
-			<div class="shortInput">
-				<label>Installation Cost ($)</label>
-				<input type="text" id="installCost" name="installCost" data-validRegex="\d+\.?\d*"/>
-			</div>
-			<div class="shortInput">
-				<label>Op. and Maint. Cost ($)</label>
-				<input type="text" id="omCost" name="omCost" data-validRegex="\d+\.?\d*"/>
-			</div>
-			<div class="shortInput">
-				<label>Projected Life of System (Years)</label>
-				<input type="text" id="lifeSpan" name="lifeSpan" data-validRegex="\d+" value="30"/>
-			</div>
-			<div class="shortInput">
-				<label>Annual Array Degredation (%/Year)</label>
-				<input type="text" id="degredation" name="degredation" data-validRegex="\d+\.?\d*" value="0.005"/>
+				<label>Customer Service Charge ($)</label>
+				<input type="text" id="serviceCharge" name="serviceCharge" data-validRegex="\d+\.?\d*" value="15"/>
 			</div>
 			<div class="shortInput">
 				<label>Retail Energy Cost ($/kWh)</label>
 				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
 			</div>
 			<div class="shortInput">
-				<label>Discount Rate (%)</label>
-				<input type="text" id="discountRate" name="discountRate" data-validRegex="\d+\.?\d*" value="0.07"/>
+				<label>Net Metering Maximum Export (%)</label>
+				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
+			</div>
+			<div class="shortInput">
+				<label>Wholesale Energy Cost ($/kWh)</label>
+				<input type="text" id="wholesaleCost" name="wholesaleCost" data-validRegex="\d+\.?\d*" value="0.08"/>
 			</div>
 			<hr>
 			<div class="shortInput">

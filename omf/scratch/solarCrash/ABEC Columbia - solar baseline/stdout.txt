@@ -1,47 +1,0 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          
-Core profiler results
-======================
-
-Total objects               3036 objects
-Parallelism                    1 thread
-Total time                  17.0 seconds
-  Core time                  2.9 seconds (17.0%)
-    Compiler                 0.2 seconds (1.4%)
-    Instances                0.0 seconds (0.0%)
-    Random variables         0.0 seconds (0.0%)
-    Schedules                0.0 seconds (0.0%)
-    Loadshapes               0.0 seconds (0.0%)
-    Enduses                  0.0 seconds (0.0%)
-    Transforms               0.0 seconds (0.0%)
-  Model time                14.1 seconds/thread (83.0%)
-Simulation time                7 days
-Simulation speed              30k object.hours/second
-Passes completed             340 passes
-Time steps completed         169 timesteps
-Convergence efficiency      2.01 passes/timestep
-Read lock contention        0.0%
-Write lock contention       0.0%
-Average timestep           3579 seconds/timestep
-Simulation rate           35576 x realtime
-
-
-Model profiler results
-======================
-
-Class            Time (s) Time (%) msec/obj
----------------- -------- -------- --------
-node               8.198     58.1%      9.5
-underground_line   1.199      8.5%      2.5
-triplex_node       1.118      7.9%      2.5
-triplex_meter      1.116      7.9%      2.9
-transformer        0.984      7.0%      2.5
-overhead_line      0.688      4.9%      2.4
-collector          0.585      4.1%    117.0
-fuse               0.191      1.4%      2.4
-switch             0.011      0.1%      1.8
-recorder           0.008      0.1%      4.0
-regulator          0.005      0.0%      2.5
-line_configurati   0.001      0.0%      0.0
-================ ======== ======== ========
-Total             14.104    100.0%      4.6
-
