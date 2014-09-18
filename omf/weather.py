@@ -24,7 +24,7 @@ the following in a .glm:
 	}
 '''
 
-import os, urllib, json, csv, math, re, tempfile, shutil, urllib2
+import os, urllib, json, csv, math, re, tempfile, shutil, urllib2, sys
 from os.path import join as pJoin
 from datetime import timedelta, datetime
 from math import modf
@@ -420,6 +420,8 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 		myLines = myFile.readlines()
 		invalid_phrase = 'No daily or hourly history data available'
 		if invalid_phrase in str(myLines[2]):
+			if startDate == eachFile["date"]:
+				sys.exit("ERROR: Given startDate has no WU recorded data. Please give a startDate with some WU data. Use Example: http://www.wunderground.com/history/airport/AJO/2012/7/2/DailyHistory.html?format=126 .Edit airport code, date to check as per your request")
 			print 'WARNING:BAD RECORD/DAY FILE-Skipping for date:',eachFile["raw_date"]
 			continue
 		#myLines = [line+","+eachFile["file"] for line in myLinesPre]
