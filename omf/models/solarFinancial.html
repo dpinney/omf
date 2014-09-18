@@ -72,8 +72,8 @@
 				<input type="text" id="lifeSpan" name="lifeSpan" data-validRegex="\d+" value="30"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Annual Array Degredation (%/Year)<span class="classic">Annual Array Degredation</span></label>
-				<input type="text" id="degredation" name="degredation" data-validRegex="\d+\.?\d*" value="0.005"/>
+				<label class="tooltip">Annual Array Degradation (%/Year)<span class="classic">Annual Array Degradation</span></label>
+				<input type="text" id="degradation" name="degradation" data-validRegex="\d+\.?\d*" value="0.005"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail Energy Cost</span></label>
@@ -115,7 +115,22 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tilt = Latitude<span class="classic">Tilt = Latitude</span></label>
-				<input type="text" id="tilt" name="tilt" value="True"/>
+				<select id="tilt" name="tilt">
+					<option value="True">True</option>
+					<option value="False">False</option>
+				</select>
+			</div>
+			<script type="text/javascript">
+			$("#tilt").change(function (){
+				if ($(this).val() == "False")
+					$("#manualTilt").prop({readonly: false})
+				else
+					$("#manualTilt").prop({readonly: true})
+			})
+			</script>
+			<div class="shortInput">
+				<label class="tooltip">Manual Tilt<span class="classic">Manual Tilt</span></label>
+				<input type="text" id="manualTilt" name="manualTilt" readonly />
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Azimuth</span></label>

@@ -10,7 +10,7 @@
     "tilt": "True", 
     "poa_cutin": "0", 
     "climateName": "AL-HUNTSVILLE", 
-    "degredation": "0.005", 
+    "degradation": "0.005", 
     "simLength": "8760", 
     "installCost": "100000", 
     "discountRate": "0.07", 

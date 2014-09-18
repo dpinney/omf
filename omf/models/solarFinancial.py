@@ -96,10 +96,10 @@ def run(modelDir, inputDict):
 	lifeSpan = int(inputDict.get("lifeSpan",30))
 	lifeYears = range(1, 1 + lifeSpan)
 	retailCost = float(inputDict.get("retailCost",0.0))
-	degredation = float(inputDict.get("degredation",0.005))
+	degradation = float(inputDict.get("degradation",0.005))
 	installCost = float(inputDict.get("installCost",0.0))
 	outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
-	outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degredation)),2) for x in lifeYears]
+	outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)),2) for x in lifeYears]
 	outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
 	outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
 	outData["netCashFlow"] = [roundSig(x+y+z,2) for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
