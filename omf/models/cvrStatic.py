@@ -60,7 +60,7 @@ def run(modelDir, inputDict):
 def runForeground(modelDir, inputDict):
 	''' Run the model in the foreground. WARNING: can take about a minute. '''
 	# Global vars, and load data from the model directory.
-	print "StartRTING TO RUN", modelDir
+	print "STARTING TO RUN", modelDir
 	try:
 		startTime = datetime.datetime.now()
 		feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
@@ -422,7 +422,7 @@ def runForeground(modelDir, inputDict):
 		print "DONE RUNNING", modelDir
 	except Exception as e:
 		print "Oops, Model Crashed!!!" 
-		cancel(modelDir)
+		# cancel(modelDir)
 		print e
 
 def _tests():

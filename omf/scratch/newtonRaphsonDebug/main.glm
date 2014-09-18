@@ -1,9 +1,9 @@
 clock {
 	timezone PST+8PDT;
 	starttime '2011-01-01 00:00:00';
-	stoptime '2011-01-05 04:00:00';
+	stoptime '2011-01-04 06:00:00';
 };
-
+#set debugger=1
 #set minimum_timestep=3600;
 #set profiler=1;
 #set relax_naming_rules=1;
@@ -19728,7 +19728,7 @@ object capacitor {
 	capacitor_C 0.10 MVAr;
 	phases_connected ABCN;
 	time_delay 300.0;
-	nominal_voltage 2401.7771;
+	nominal_voltage 2400;//2401.7771;
 	voltage_set_low 2340.0;
 	switchC CLOSED;
 	control_level INDIVIDUAL;
