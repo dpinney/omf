@@ -16,6 +16,9 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
+<style type="text/css">
+
+</style>
 <body onload="init()">
 	<div id="title">
 		<div id="logoBox"><a href="/">&#10059;</a></div>
@@ -59,55 +62,55 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label>Capital Cost</label>
+				<label class="tooltip">Capital Cost<span class="classic">Installation captial cost<br> Type: <em>float</em></span></label>
 				<input type="text" id="capitalCost" name="capitalCost" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
 			</div>
 			<div class="shortInput">
-				<label>OM Cost</label>
+				<label class="tooltip">OM Cost<span class="classic">Operating and maintain cost<br> Type: <em>float</em></span></label>	
 				<input type="text" id="omCost" name="omCost" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
 			</div>
 			<div class="shortInput">
-				<label>Wholesale Energy Cost ($/kWh)</label>
+				<label class="tooltip">Wholesale Energy Cost ($/kWh)</label>
 				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
 			</div>
 			<div class="shortInput">
-				<label>Retail Energy Cost ($/kWh)</label>
+				<label class="tooltip">Retail Energy Cost ($/kWh)</label>
 				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
 			</div>
 			<div class="shortInput">
-				<label>Spring Demand Charge ($/kW)</label>
+				<label class="tooltip">Spring Demand Charge ($/kW)</label>
 				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
 			</div>
 			<div class="shortInput">
-				<label>Summer Demand Charge ($/kW)</label>
+				<label class="tooltip">Summer Demand Charge ($/kW)</label>
 				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
 			</div>
 			<div class="shortInput">
-				<label>Fall Demand Charge ($/kW)</label>
+				<label class="tooltip">Fall Demand Charge ($/kW)</label>
 				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
 			</div>
 			<div class="shortInput">
-				<label>Winter Demand Charge ($/kW)</label>
+				<label class="tooltip">Winter Demand Charge ($/kW)</label>
 				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
 			</div>
 			<div class="shortInput">
-				<label>baselineTap</label>
+				<label class="tooltip">baselineTap</label>
 				<input type="text" id="baselineTap" name="baselineTap" value="3"/></td>
 			</div>
 			<div class="shortInput">
-				<label>Z (%)</label>
+				<label class="tooltip">Z (%)</label>
 				<input type="text" id="z_percent" name="z_percent"  value="0.5"/></td>
 			</div>
 			<div class="shortInput">
-				<label>I (%)</label>
+				<label class="tooltip">I (%)</label>
 				<input type="text" id="i_percent" name="i_percent" value="0"/></td>
 			</div>
 			<div class="shortInput">
-				<label>P (%)</label>
+				<label class="tooltip">P (%)</label>
 				<input type="text" id="p_percent" name="p_percent"  value="0.5"/></td>
 			</div>
 			<div class="shortInput">
-				<label>Power factor</label>
+				<label class="tooltip">Power factor</label>
 				<input type="text" id="power_factor" name="power_factor" value="0.9"/></td>
 			</div>
 			<hr>
