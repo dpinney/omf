@@ -57,7 +57,7 @@ def _downloadWeather(start, end, airport, workDir):
 		year = work_day.year
 		month = work_day.month
 		day = work_day.day
-		address = "http://www.wunderground.com/history/airport/{}/{:d}/{:d}/{:d}/DailyHistory.html?req_city=NA&reqstate=NA&req_statename=NA&format=1".format(airport, year, month, day)
+		address = "http://www.wunderground.com/history/airport/{}/{:d}/{:d}/{:d}/DailyHistory.html?format=1".format(airport, year, month, day)
 		filename = pJoin(workDir,"weather_{}_{:d}_{:d}_{:d}.csv".format(airport, year, month, day))
 		if os.path.isfile(filename):
 			continue # We have the file already, don't re-download it.
@@ -230,7 +230,6 @@ class Weather:
 		t2 = datetime.strptime(tm, "%I:%M %p")
 		#self.Time = datetime(t1.year, t1.month, t1.day, t2.hour, t2.minute, 0)
 		self.Time = t1 - tz
-		print 'self.Time in Build:',self.Time
 		self.Seas = seasonDict[self.Time.month]
 		self.Solar = 0
 		return self
