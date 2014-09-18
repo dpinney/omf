@@ -229,17 +229,18 @@ class Weather:
 		t1 = datetime.strptime(dt2[0], "%Y-%m-%d %H:%M:%S")
 		t2 = datetime.strptime(tm, "%I:%M %p")
 		#self.Time = datetime(t1.year, t1.month, t1.day, t2.hour, t2.minute, 0)
-		self.Time = t1 + tz
+		self.Time = t1 - tz
+		print 'self.Time in Build:',self.Time
 		self.Seas = seasonDict[self.Time.month]
 		self.Solar = 0
 		return self
 def _latlonprocess(lat,lon):
 	minlat, lat = modf(lat)
 	minlat = abs(minlat*100000)
-	lat_string = 'lat_deg='+str(int(lat))+'\n'+'lat_min='+str(int(minlat))+'\n'
+	lat_string = '$lat_deg='+str(int(lat))+'\n'+'$lat_min='+str(int(minlat))+'\n'
 	minlon, lon = modf(lon)
 	minlon = abs(minlon*100000)
-	lon_string = 'lon_deg='+str(int(lon))+'\n'+'lon_min='+str(int(minlon))+'\n'
+	lon_string = '$lon_deg='+str(int(lon))+'\n'+'$lon_min='+str(int(minlon))+'\n'
 	return lat_string, lon_string
 
 def _processWeather(start, end, airport, workDir, interpolate="linear"):
@@ -420,7 +421,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 		myLines = myFile.readlines()
 		invalid_phrase = 'No daily or hourly history data available'
 		if invalid_phrase in str(myLines[2]):
-			print 'WARNING:BAD RECORD/DAY FILE-Skipping'
+			print 'WARNING:BAD RECORD/DAY FILE-Skipping for date:',eachFile["raw_date"]
 			continue
 		#myLines = [line+","+eachFile["file"] for line in myLinesPre]
 		myData.extend(myLines)
@@ -451,7 +452,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	firstDt = datetime.strptime(weatherData[0][timeIndex], "%I:%M %p")
 	t1 = datetime(year=startDate.year, month=startDate.month, day=startDate.day, hour=firstDt.hour, minute=firstDt.minute) # local
 	t2 = datetime.strptime(weatherData[0][utcIndex].split("<")[0], "%Y-%m-%d %H:%M:%S") # GMT
-	tzDelta = t1 - t2
+	tzDelta = t2 - t1
 	# replace "Calm" wind with 0
 	windIndex = 0
 	windKey = "Wind SpeedMPH"
@@ -508,6 +509,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	# def Weather(self, tm, dt, tz, t, h, w, c, d):
 	for entry in weatherData:
 		sample = Weather().Build(entry[timeIndex], entry[utcIndex], tzDelta, entry[heatIndex], entry[humidIndex], entry[windIndex], entry[condIndex], entry)
+		#print tzDelta
 		weatherList.append(sample)
 	# sanity-check numbers
 	for index,entry in enumerate(weatherList):
