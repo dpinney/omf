@@ -24,7 +24,7 @@ the following in a .glm:
 	}
 '''
 
-import os, urllib, json, csv, math, re, tempfile, shutil, urllib2
+import os, urllib, json, csv, math, re, tempfile, shutil, urllib2, sys
 from os.path import join as pJoin
 from datetime import timedelta, datetime
 from math import modf
@@ -57,7 +57,7 @@ def _downloadWeather(start, end, airport, workDir):
 		year = work_day.year
 		month = work_day.month
 		day = work_day.day
-		address = "http://www.wunderground.com/history/airport/{}/{:d}/{:d}/{:d}/DailyHistory.html?req_city=NA&reqstate=NA&req_statename=NA&format=1".format(airport, year, month, day)
+		address = "http://www.wunderground.com/history/airport/{}/{:d}/{:d}/{:d}/DailyHistory.html?format=1".format(airport, year, month, day)
 		filename = pJoin(workDir,"weather_{}_{:d}_{:d}_{:d}.csv".format(airport, year, month, day))
 		if os.path.isfile(filename):
 			continue # We have the file already, don't re-download it.
@@ -230,7 +230,6 @@ class Weather:
 		t2 = datetime.strptime(tm, "%I:%M %p")
 		#self.Time = datetime(t1.year, t1.month, t1.day, t2.hour, t2.minute, 0)
 		self.Time = t1 - tz
-		print 'self.Time in Build:',self.Time
 		self.Seas = seasonDict[self.Time.month]
 		self.Solar = 0
 		return self
@@ -421,6 +420,8 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 		myLines = myFile.readlines()
 		invalid_phrase = 'No daily or hourly history data available'
 		if invalid_phrase in str(myLines[2]):
+			if startDate == eachFile["date"]:
+				sys.exit("ERROR: Given startDate has no WU recorded data. Please give a startDate with some WU data. Use Example: http://www.wunderground.com/history/airport/AJO/2012/7/2/DailyHistory.html?format=126 .Edit airport code, date to check as per your request")
 			print 'WARNING:BAD RECORD/DAY FILE-Skipping for date:',eachFile["raw_date"]
 			continue
 		#myLines = [line+","+eachFile["file"] for line in myLinesPre]
