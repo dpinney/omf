@@ -37,25 +37,25 @@ def run(modelDir, inputDict):
 	dat = ssc.ssc_data_create()
 	# Required user inputs.
 	ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
-	ssc.ssc_data_set_number(dat, "system_size", float(inputDict["systemSize"]))
-	ssc.ssc_data_set_number(dat, "derate", float(inputDict["derate"]))
-	ssc.ssc_data_set_number(dat, "track_mode", float(inputDict["trackingMode"]))
-	ssc.ssc_data_set_number(dat, "azimuth", float(inputDict["azimuth"]))
+	ssc.ssc_data_set_number(dat, "system_size", float(inputDict.get("systemSize", 100)))
+	ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("derate", 0.77)))
+	ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
+	ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 	# Advanced inputs with defaults.
-	ssc.ssc_data_set_number(dat, "rotlim", float(inputDict["rotlim"]))
-	ssc.ssc_data_set_number(dat, "t_noct", float(inputDict["t_noct"]))
-	ssc.ssc_data_set_number(dat, "t_ref", float(inputDict["t_ref"]))
-	ssc.ssc_data_set_number(dat, "gamma", float(inputDict["gamma"]))
-	ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict["inv_eff"]))
-	ssc.ssc_data_set_number(dat, "fd", float(inputDict["fd"]))
-	ssc.ssc_data_set_number(dat, "i_ref", float(inputDict["i_ref"]))
-	ssc.ssc_data_set_number(dat, "poa_cutin", float(inputDict["poa_cutin"]))
-	ssc.ssc_data_set_number(dat, "w_stow", float(inputDict["w_stow"]))
+	ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
+	ssc.ssc_data_set_number(dat, "t_noct", float(inputDict.get("t_noct", 45)))
+	ssc.ssc_data_set_number(dat, "t_ref", float(inputDict.get("t_ref", 25)))
+	ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5)))
+	ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict.get("inv_eff", 0.92)))
+	ssc.ssc_data_set_number(dat, "fd", float(inputDict.get("fd", 1)))
+	ssc.ssc_data_set_number(dat, "i_ref", float(inputDict.get("i_ref", 1000)))
+	ssc.ssc_data_set_number(dat, "poa_cutin", float(inputDict.get("poa_cutin", 0)))
+	ssc.ssc_data_set_number(dat, "w_stow", float(inputDict.get("w_stow", 0)))
 	# Complicated optional inputs.
 	ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
 	# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
 	# ssc.ssc_data_set_matrix(dat, 'shading_mxh', ...) 		# Month x Hour beam shading factors
-	# ssc.ssc_data_set_matrix(dat, 'shading_azal', ...) 	# Azimuth x altitude beam shading factors
+	# ssc.ssc_data_set_matrix(dat, ' shading_azal', ...) 	# Azimuth x altitude beam shading factors
 	# ssc.ssc_data_set_number(dat, 'shading_diff', ...) 	# Diffuse shading factor
 	# ssc.ssc_data_set_number(dat, 'enable_user_poa', ...)	# Enable user-defined POA irradiance input = 0 or 1
 	# ssc.ssc_data_set_array(dat, 'user_poa', ...) 			# User-defined POA irradiance in W/m2
@@ -64,19 +64,19 @@ def run(modelDir, inputDict):
 	mod = ssc.ssc_module_create("pvwattsv1")
 	ssc.ssc_module_exec(mod, dat)
 	# Setting options for start time.
-	simLengthUnits = inputDict.get("simLengthUnits","")
-	simStartDate = inputDict["simStartDate"]
+	simLengthUnits = inputDict.get("simLengthUnits","hours")
+	simStartDate = inputDict.get("simStartDate", "2014-01-01")
 	# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html 
 	startDateTime = simStartDate + " 00:00:00 UTC"
 	# Set aggregation function constants.
 	agg = lambda x,y:_aggData(x,y,inputDict["simStartDate"],
-		int(inputDict["simLength"]), inputDict["simLengthUnits"], ssc, dat)
+		int(inputDict["simLength"]), inputDict.get("simLengthUnits","hours"), ssc, dat)
 	avg = lambda x:sum(x)/len(x)
 	# Timestamp output.
 	outData = {}
 	outData["timeStamps"] = [dt.datetime.strftime(
 		dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
-		dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict["simLength"]))]
+		dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict.get("simLength", 8760)))]
 	# Geodata output.
 	outData["city"] = ssc.ssc_data_get_string(dat, "city")
 	outData["state"] = ssc.ssc_data_get_string(dat, "state")
@@ -96,7 +96,7 @@ def run(modelDir, inputDict):
 	lifeSpan = int(inputDict.get("lifeSpan",30))
 	lifeYears = range(1, 1 + lifeSpan)
 	retailCost = float(inputDict.get("retailCost",0.0))
-	degradation = float(inputDict.get("degradation",0.005))
+	degradation = float(inputDict.get("degradation",0.5))/100
 	installCost = float(inputDict.get("installCost",0.0))
 	outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
 	outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)),2) for x in lifeYears]

@@ -72,11 +72,11 @@
 				<input type="text" id="lifeSpan" name="lifeSpan" data-validRegex="\d+" value="30"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Annual Array Degradation (%/Year)<span class="classic">Annual Array Degradation</span></label>
+				<label class="tooltip">Annual Array Degradation (%/Year)<span class="classic">Annual Array Degradation<br>Type: percentage [0..100]</span></label>
 				<input type="text" id="degradation" name="degradation" data-validRegex="\d+\.?\d*" value="0.005"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail Energy Cost</span></label>
+				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Energy Cost</span></label>
 				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
 			</div>
 			<div class="shortInput">
@@ -85,24 +85,20 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
-				<input type="text" id="simLength" name="simLength" data-validRegex="\d+"/>
+				<label class="tooltip">Simulation Length<span class="classic">Simulation Length<br>Note: It will run 8760 Hours as it is fixed</span></label>
+				<input type="text" id="simLength" name="simLength" data-validRegex="\d+" value="8760" readonly />
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
-				<select id="simLengthUnits" name="simLengthUnits">
-					<!--<option value="minutes">Minutes</option> -->
-					<option value="hours">Hours</option>
+				<label class="tooltip">Length Units<span class="classic">Length Units<br>Note: 8760 hours</span></label>
+				<select id="simLengthUnits" name="simLengthUnits" disabled="true">
+					<option value="minutes">Minutes</option> 
+					<option value="hours" selected>Hours</option>
 					<option value="days">Days</option>
 				</select>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date</span></label>
-				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Derate (%)<span class="classic">Derate</span></label>
-				<input type="text" id="derate" name="derate" data-validRegex="\d+\.?\d*" value="0.77"/>
+				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d" value="2014-01-01" readonly/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tracking Mode<span class="classic">Tracking Mode</span></label>
@@ -133,7 +129,7 @@
 				<input type="text" id="manualTilt" name="manualTilt" readonly />
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Azimuth (degrees)<span class="classic">Azimuth</span></label>
+				<label class="tooltip">Azimuth (degrees)<span class="classic">Azimuth in degrees<br>NOTE: 0 - north, 90 - east, 180 - south, 270 - west<br>Range: [0..360]</span></label>
 				<input type="text" id="azimuth" name="azimuth" value="180"/>
 			</div>
 			<div class="shortInput">
@@ -141,32 +137,8 @@
 				<input type="text" id="rotlim" name="rotlim" value="45.0"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Nominal operating cell temperature (C)<span class="classic">Nominal operating cell temperature</span></label>
-				<input type="text" id="t_noct" name="t_noct" value="45.0"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Reference cell temperature (C)<span class="classic">Reference cell temperature </span></label>
-				<input type="text" id="t_ref" name="t_ref" value="25.0"/>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Max power temperature coefficient (%/C)<span class="classic">Max power temperature coefficient</span></label>
 				<input type="text" id="gamma" name="gamma" value="-0.5"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Inverter efficiency at rated power (frac)<span class="classic">Inverter efficiency at rated power</span></label>
-				<input type="text" id="inv_eff" name="inv_eff" value="0.92"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Diffuse fraction (0..1)<span class="classic">Diffuse fraction</span></label>
-				<input type="text" id="fd" name="fd" value="1.0"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Rating condition irradiance (W/m2)<span class="classic">Rating condition irradiance</span></label>
-				<input type="text" id="i_ref" name="i_ref" value="1000"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Min reqd irradiance for operation (W/m2)<span class="classic">Min reqd irradiance for operation</span></label>
-				<input type="text" id="poa_cutin" name="poa_cutin" value="0"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wind stow speed (m/s)<span class="classic">Wind stow speed</span></label>
@@ -213,7 +185,7 @@
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
 					"title":{"text":null},
 					"series": [{"marker":{"enabled":false},"color":"red","data":allOutputData.powerOutputAc,"name":"Power Generated"}],
-					"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}},"plotLines":[{"color": "orange",
+					"yAxis":{"title":{"text":"Power (W-AC)","style":{"color":"gray"}},"plotLines":[{"color": "orange",
 						"dashStyle": "ShortDash",
 						"width": 2,
 						"label":{"text":"Nameplate","align":"right","y":12,"x":0},
@@ -232,7 +204,7 @@
 					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
 					"title":{"text":null},
 					"series":[{"name":"Power Generated", "color":"orange", "data":allOutputData.monthlyGeneration, "dataLabels":{"enabled":false}}],
-					"yAxis":{"title":{"text":"Energy (Wh)","style":{"color":"gray"}}},
+					"yAxis":{"title":{"text":"Energy (Wh-AC)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
