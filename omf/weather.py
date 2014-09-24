@@ -235,11 +235,11 @@ class Weather:
 		return self
 def _latlonprocess(lat,lon):
 	minlat, lat = modf(lat)
-	minlat = abs(minlat*100000)
-	lat_string = '$lat_deg='+str(int(lat))+'\n'+'$lat_min='+str(int(minlat))+'\n'
+	minlat = abs(int(minlat*60))
+	lat_string = '$lat_deg='+str(int(lat))+'\n'+'$lat_min='+str(minlat)+'\n'
 	minlon, lon = modf(lon)
-	minlon = abs(minlon*100000)
-	lon_string = '$lon_deg='+str(int(lon))+'\n'+'$lon_min='+str(int(minlon))+'\n'
+	minlon = abs(int(minlon*60))
+	lon_string = '$lon_deg='+str(int(lon))+'\n'+'$lon_min='+str(minlon)+'\n'
 	return lat_string, lon_string
 
 def _processWeather(start, end, airport, workDir, interpolate="linear"):
@@ -418,6 +418,9 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	for eachFile in useFiles:
 		myFile = open(pJoin(workDir, eachFile["file"]), "r")
 		myLines = myFile.readlines()
+		if len(myLines) < 3:
+			print 'WARNING:No Data available for this day-Skipping for date:',eachFile["raw_date"]
+			continue
 		invalid_phrase = 'No daily or hourly history data available'
 		if invalid_phrase in str(myLines[2]):
 			if startDate == eachFile["date"]:
@@ -690,9 +693,65 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	outFile.write('#month:day:hour:minute:second\n');
 	# write samples per-line
 	for line in outData:
-		# write each line
-		outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+		if line.Time.month == 1:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
 																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 2:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 3:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 4:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 5:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 6:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 7:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 8:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 9:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 10:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 11:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
+	for line in outData:
+		if line.Time.month == 12:
+			# write each line
+			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
+																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))																
 	# clean up and exit
 	outFile.close()
 	return
