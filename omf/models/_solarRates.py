@@ -12,7 +12,7 @@ import feeder
 from solvers import nrelsam
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"_consumerOwnedSolar.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"_solarRates.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -141,7 +141,7 @@ def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 		return map(aggFun, split)
 
 def cancel(modelDir):
-	''' _consumerOwnedSolar runs so fast it's pointless to cancel a run. '''
+	''' _solarRates runs so fast it's pointless to cancel a run. '''
 	pass
 
 def _tests():
@@ -150,7 +150,7 @@ def _tests():
 	# TODO: Fix inData because it's out of date.
 	inData = {"simStartDate": "2013-01-01",
 		"simLengthUnits": "hours",
-		"modelType": "_consumerOwnedSolar",
+		"modelType": "_solarRates",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "8760",
 		"systemSize":"100",
@@ -169,7 +169,7 @@ def _tests():
 		"poa_cutin":"0",
 		"omCost": "1000",
 		"w_stow":"0"}
-	modelLoc = pJoin(workDir,"admin","Automated _consumerOwnedSolar Testing")
+	modelLoc = pJoin(workDir,"admin","Automated _solarRates Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
