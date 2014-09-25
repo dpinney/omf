@@ -639,11 +639,12 @@
 									var ST = ST_NAME[0], NAME = ST_NAME[1];
 									var my_coords = projection(new_us_places[ST][NAME]);
 									var r = 5;
-									svg.append("circle")
+									circle = svg.append("circle")
 										.attr("cx", my_coords[0])
 										.attr("cy", my_coords[1])
 										.attr("r", 5)
-										.attr("class", "HighlightCircle")
+										.attr("class", "HighlightCircle");
+									circle.append("svg:title").text(climate);
 								})
 							</script>
 						</div>
