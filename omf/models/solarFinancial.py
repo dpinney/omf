@@ -124,8 +124,9 @@ def run(modelDir, inputDict):
 	outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
 	# Heatmaped hour+month outputs.
 	hours = range(24)
+	from calendar import monthrange
 	totHourMon = lambda h,m:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y[5:7]=="{0:02d}".format(m+1) and y[11:13]=="{0:02d}".format(h+1)])
-	outData["seasonalPerformance"] = [[x,y,totHourMon(x,y)] for x in hours for y in months.values()]
+	outData["seasonalPerformance"] = [[x,y,totHourMon(x,y) / monthrange(int(simStartDate[:4]), y+1)[1]] for x in hours for y in months.values()]
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
