@@ -5,6 +5,7 @@ from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
+from random import random
 
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
@@ -38,7 +39,16 @@ def run(modelDir, inputDict):
 	# Required user inputs.
 	ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
 	ssc.ssc_data_set_number(dat, "system_size", float(inputDict.get("systemSize", 100)))
-	ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("derate", 0.77)))
+	derate = float(inputDict.get("pvModuleDerate", 0.995)) \
+		* float(inputDict.get("mismatch", 0.995)) \
+		* float(inputDict.get("diodes", 0.995)) \
+		* float(inputDict.get("dcWiring", 0.995)) \
+		* float(inputDict.get("acWiring", 0.995)) \
+		* float(inputDict.get("soiling", 0.995)) \
+		* float(inputDict.get("shading", 0.995)) \
+		* float(inputDict.get("sysAvail", 0.995)) \
+		* float(inputDict.get("age", 0.995))
+	ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("derate", derate)))
 	ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
 	ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 	# Advanced inputs with defaults.
@@ -114,7 +124,6 @@ def run(modelDir, inputDict):
 	outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
 	# Heatmaped hour+month outputs.
 	hours = range(24)
-	from random import random
 	totHourMon = lambda h,m:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y[5:7]=="{0:02d}".format(m+1) and y[11:13]=="{0:02d}".format(h+1)])
 	outData["seasonalPerformance"] = [[x,y,totHourMon(x,y)] for x in hours for y in months.values()]
 	# Stdout/stderr.
