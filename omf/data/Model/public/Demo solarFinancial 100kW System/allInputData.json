@@ -14,7 +14,7 @@
     "simLength": "8760", 
     "installCost": "100000", 
     "discountRate": "0.07", 
-    "manualTilt": "100", 
+    "manualTilt": "34.65", 
     "mismatch": "0.995", 
     "diodes": "0.995", 
     "degradation": "0.5", 

@@ -154,10 +154,13 @@
 			</div>
 			<script type="text/javascript">
 			$("#tilt").change(function (){
-				if ($(this).val() == "False")
+				if ($(this).val() == "False"){
 					$("#manualTilt").prop({readonly: false})
-				else
+						.attr("value", parseFloat(allOutputData.lat).toFixed(2))
+				}else{
 					$("#manualTilt").prop({readonly: true})
+						.attr("value", parseFloat(allOutputData.lat).toFixed(2))
+				}
 			})
 			</script>
 			<div class="shortInput">
