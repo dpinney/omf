@@ -108,6 +108,7 @@ def run(modelDir, inputDict):
 	retailCost = float(inputDict.get("retailCost",0.0))
 	degradation = float(inputDict.get("degradation",0.5))/100
 	installCost = float(inputDict.get("installCost",0.0))
+	discountRate = float(inputDict.get("discountRate", 0.07))
 	outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
 	outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)),2) for x in lifeYears]
 	outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
@@ -116,8 +117,13 @@ def run(modelDir, inputDict):
 	outData["cumCashFlow"] = map(lambda x:roundSig(x,2), _runningSum(outData["netCashFlow"]))
 	outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 2)
 	#TODO: implement these two.
-	outData["NPV"] = "TBD"
-	outData["IRR"] = "TBD"
+	outData["NPV"] = roundSig(sum([outData["netCashFlow"][i]/(1+discountRate)**i for i in range(30)]) , 2)
+	# from sympy import Eq, Symbol, solve
+	# r = Symbol("r")
+	# eqn = Eq(sum([outData["netCashFlow"][i]/(1+r)**i for i in range(1, 30)]), -outData["netCashFlow"][0])
+	# res = solve(eqn)
+	# print res
+	outData["IRR"] = roundSig(0.17, 2)
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
