@@ -20,7 +20,9 @@ Output: Feeder model dictionary with specified battery/batteries added.
                 'invDischargeOnThresholdkW': 1800,
                 'invDischargeOffThresholdkW': 1750,
                 }
-        FeederModelWithBatteries = addBattery(battDict)
+                
+Function call:                
+        FeederModelWithAddedBatteries = addBattery(battDict)
                 
 addBattery function only supports one battery being added to a given node/meter.
 
