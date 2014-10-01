@@ -6,6 +6,7 @@ from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
 from random import random
+from numpy import irr, npv
 
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
@@ -116,14 +117,8 @@ def run(modelDir, inputDict):
 	outData["netCashFlow"] = [roundSig(x+y+z,2) for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
 	outData["cumCashFlow"] = map(lambda x:roundSig(x,2), _runningSum(outData["netCashFlow"]))
 	outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 2)
-	#TODO: implement these two.
-	outData["NPV"] = roundSig(sum([outData["netCashFlow"][i]/(1+discountRate)**i for i in range(30)]) , 2)
-	# from sympy import Eq, Symbol, solve
-	# r = Symbol("r")
-	# eqn = Eq(sum([outData["netCashFlow"][i]/(1+r)**i for i in range(1, 30)]), -outData["netCashFlow"][0])
-	# res = solve(eqn)
-	# print res
-	outData["IRR"] = roundSig(0.17, 2)
+	outData["NPV"] = roundSig(npv(discountRate, outData["netCashFlow"]), 2)
+	outData["IRR"] = roundSig(irr(outData["netCashFlow"]), 2)
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
