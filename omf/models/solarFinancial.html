@@ -73,15 +73,15 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Annual Array Degradation (%/Year)<span class="classic">Annual Array Degradation<br>Type: percentage [0..100]</span></label>
-				<input type="text" id="degradation" name="degradation" data-validRegex="\d+\.?\d*" value="0.005"/>
+				<input type="text" id="degradation" name="degradation" data-validRegex="\d+\.?\d*" value="0.5"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Energy Cost</span></label>
 				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Discount Rate (%)<span class="classic">Discount Rate</span></label>
-				<input type="text" id="discountRate" name="discountRate" data-validRegex="\d+\.?\d*" value="0.07"/>
+				<label class="tooltip">Discount Rate (%)<span class="classic">Discount Rate<br>Type: percentage [0..100]</span></label>
+				<input type="text" id="discountRate" name="discountRate" data-validRegex="\d+\.?\d*" value="7"/>
 			</div>
 			<hr>
 			<div class="shortInput">
@@ -176,7 +176,7 @@
 				<input type="text" id="rotlim" name="rotlim" value="45.0"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Max power temperature coefficient (%/C)<span class="classic">Max power temperature coefficient</span></label>
+				<label class="tooltip">Max power temperature coefficient (%/C)<span class="classic">Max power temperature coefficient<br>Type: percentage [0..100]</span></label>
 				<input type="text" id="gamma" name="gamma" value="-0.5"/>
 			</div>
 			<div class="shortInput">

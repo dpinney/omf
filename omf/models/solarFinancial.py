@@ -109,7 +109,7 @@ def run(modelDir, inputDict):
 	retailCost = float(inputDict.get("retailCost",0.0))
 	degradation = float(inputDict.get("degradation",0.5))/100
 	installCost = float(inputDict.get("installCost",0.0))
-	discountRate = float(inputDict.get("discountRate", 0.07))
+	discountRate = float(inputDict.get("discountRate", 7))/100
 	outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
 	outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)),2) for x in lifeYears]
 	outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
