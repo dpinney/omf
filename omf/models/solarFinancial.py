@@ -114,7 +114,9 @@ def run(modelDir, inputDict):
 	outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)),2) for x in lifeYears]
 	outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
 	outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
-	outData["netCashFlow"] = [roundSig(x+y+z,2) for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
+	srec = inputDict.get("srecCashFlow", "").split(",")
+	outData["srecCashFlow"] = map(float,srec) + [0 for x in lifeYears[len(srec):]]
+	outData["netCashFlow"] = [roundSig(x+y+z+a,2) for (x,y,z,a) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"], outData["srecCashFlow"])]
 	outData["cumCashFlow"] = map(lambda x:roundSig(x,2), _runningSum(outData["netCashFlow"]))
 	outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 2)
 	outData["NPV"] = roundSig(npv(discountRate, outData["netCashFlow"]), 2)
@@ -195,6 +197,7 @@ def _tests():
 		"sysAvail": "0.995",
 		"age": "0.995",
 		"tilt": "True",
+		"srecCashFlow": "5,5,3,3,2",
 		# "derate":"0.77",
 		"trackingMode":"0",
 		"azimuth":"180",
