@@ -13,7 +13,7 @@
     "climateName": "AL-HUNTSVILLE", 
     "simLength": "8760", 
     "installCost": "100000", 
-    "discountRate": "7", 
+    "discountRate": 7, 
     "manualTilt": "34.65", 
     "mismatch": "0.995", 
     "diodes": "0.995", 

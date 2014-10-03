@@ -74,5 +74,6 @@ sh4.write(0, 11, "NPV")
 sh4.write(1, 11, outJson["NPV"])
 sh4.write(0, 12, "IRR")
 sh4.write(1, 12, outJson["IRR"])
-
+# sh4.write(2, 11, xlwt.Formula("NPV(('All Input Data'!B15/100,'Annual Data'!B2:B31))"))
+sh4.write(2, 12, xlwt.Formula("IRR(B2:B31)"))
 wb.save("Sample Output.xls")
