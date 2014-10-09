@@ -470,6 +470,11 @@ def delete(objectType, objectName, owner):
 		shutil.rmtree("data/Model/" + owner + "/" + objectName)
 	return redirect("/")
 
+@app.route("/downloadModelData/<owner>/<modelName>/<fileName>")
+@flask_login.login_required
+def downloadModelData(owner, modelName, fileName):
+    return send_from_directory("data/Model/"+owner+"/"+modelName, fileName) 
+
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
 @flask_login.login_required
 def uniqObjName(objtype, owner, name):
