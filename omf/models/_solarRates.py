@@ -328,7 +328,34 @@ def run(modelDir, inputDict):
 		+ outData["Solar"]["genTransCapCredits"]\
 		+ outData["Solar"]["otherCapCreditsPatroDivident"]\
 		+ outData["Solar"]["extraItems"]
-
+	# E37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71), update after Form 7 model
+	outData["BAU"]["nonPowerCosts"] = outData["BAU"]["transExpense"] \
+		+ outData["BAU"]["distriExpenseO"] \
+		+ outData["BAU"]["distriExpenseM"] \
+		+ outData["BAU"]["customerAccountExpense"] \
+		+ outData["BAU"]["customerServiceExpense"] \
+		+ outData["BAU"]["salesExpense"] \
+		+ outData["BAU"]["adminGeneralExpense"] \
+		+ outData["BAU"]["depreAmortiExpense"] \
+		+ outData["BAU"]["taxExpensePG"] \
+		+ outData["BAU"]["taxExpense"] \
+		+ outData["BAU"]["interestLongTerm"] \
+		+ outData["BAU"]["interestConstruction"] \
+		+ outData["BAU"]["interestExpense"] \
+		+ outData["BAU"]["otherDeductions"] \
+		- (outData["BAU"]["nonOpMarginInterest"] \
+		+ outData["BAU"]["fundsUsedConstruc"] \
+		+ outData["BAU"]["incomeEquityInvest"] \
+		+ outData["BAU"]["nonOpMarginOther"] \
+		+ outData["BAU"]["genTransCapCredits"] \
+		+ outData["BAU"]["otherCapCreditsPatroDivident"] \
+		+ outData["BAU"]["extraItems"])
+	# E42 = E63/E24, update after Form 7 model
+	outData["BAU"]["idealRate"] = outData["BAU"]["totalCostElecService"] / outData["BAU"]["totalKWhSales"]
+	# F37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71) = E37, update after Form 7 model
+	outData["Solar"]["nonPowerCosts"] = outData["BAU"]["nonPowerCosts"]
+	# F42 = F63/F24, update after Form 7 model
+	outData["Solar"]["idealRate"] = outData["Solar"]["totalCostElecService"] / outData["Solar"]["totalKWhSales"]
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
