@@ -1,0 +1,676 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
+	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
+	<!-- Global Funcs Import -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<style type="text/css">thead{font-weight:bold} table{width:980px; font-size:12}</style>
+</head>
+<body onload="init()">
+	<div id="title">
+		<div id="logoBox"><a href="/">&#10059;</a></div>
+		<p id="titleText">New Solar Rates Model</p>
+	</div>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
+			<div class="shortInput">
+				<label>Model Type</label>
+				<input type="text" id="modelType" name="modelType" value="_solarRates" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Climate<span class="classic">Pick a climate data</span></label>
+				<select id="climateName" name="climateName">
+					{% for climate in datastoreNames["climates"] %}
+						<option value="{{ climate }}">{{ climate }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Average System Size (kWp-DC)<span class="classic">Average System Size<br>Type: <em>float</em></span></label>
+				<input type="text" id="avgSystemSize" name="avgSystemSize" data-validRegex="\d+\.?\d*"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Residential Customers With Solar (%)<span class="classic">Residential Customers With Solar<br>Type: <em>float</em> [0..1]</span></label>
+				<input type="text" id="resPenetration" name="resPenetration" data-validRegex="\d+\.?\d*"/>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Customer Service Charge ($)<span class="classic">Customer Service Charge</span></label>
+				<input type="text" id="serviceCharge" name="serviceCharge" data-validRegex="\d+\.?\d*" value="15"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail Energy Cost</span></label>
+				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Net Metering Maximum Export (%)<span class="classic">Net Metering Maximum Export</span></label>
+				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Wholesale Energy Cost ($/kWh)<span class="classic">Wholesale Energy Cost</span></label>
+				<input type="text" id="wholesaleCost" name="wholesaleCost" data-validRegex="\d+\.?\d*" value="0.08"/>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
+				<input type="text" id="simLength" name="simLength" data-validRegex="\d+"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
+				<select id="simLengthUnits" name="simLengthUnits">
+					<!--<option value="minutes">Minutes</option> -->
+					<option value="hours">Hours</option>
+					<option value="days">Days</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date</span></label>
+				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Derate (%)<span class="classic">Derate</span></label>
+				<input type="text" id="derate" name="derate" data-validRegex="\d+\.?\d*" value="0.77"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tracking Mode<span class="classic">Tracking Mode</span></label>
+				<select id="trackingMode" name="trackingMode"/>
+					<option value="0">Fixed</option>
+					<option value="1">1 Axis</option>
+					<option value="2">2 Axis</option>
+					<option value="3">Azimuth Axis</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tilt = Latitude<span class="classic">Tilt = Latitude<br>Type: <em>boolean</em></span></label>
+				<input type="text" id="tilt" name="tilt" value="True"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Azimuth (degrees)<span class="classic">Azimuth</span></label>
+				<input type="text" id="azimuth" name="azimuth" value="180"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tracker rotation limit (deg)<span class="classic">Tracker rotation limit</span></label>
+				<input type="text" id="rotlim" name="rotlim" value="45.0"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Nominal operating cell temperature (C)<span class="classic">Nominal operating cell temperature</span></label>
+				<input type="text" id="t_noct" name="t_noct" value="45.0"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Reference cell temperature (C)<span class="classic">Reference cell temperature</span></label>
+				<input type="text" id="t_ref" name="t_ref" value="25.0"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Max power temperature coefficient (%/C)<span class="classic">Max power temperature coefficient</span></label>
+				<input type="text" id="gamma" name="gamma" value="-0.5"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Inverter efficiency at rated power (frac)<span class="classic">Inverter efficiency at rated power</span></label>
+				<input type="text" id="inv_eff" name="inv_eff" value="0.92"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Diffuse fraction (0..1)<span class="classic">Diffuse fraction</span></label>
+				<input type="text" id="fd" name="fd" value="1.0"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Rating condition irradiance (W/m2)<span class="classic">Rating condition irradiance</span></label>
+				<input type="text" id="i_ref" name="i_ref" value="1000"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Min reqd irradiance for operation (W/m2)<span class="classic">Min reqd irradiance for operation</span></label>
+				<input type="text" id="poa_cutin" name="poa_cutin" value="0"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Wind stow speed (m/s)<span class="classic">Wind stow speed</span></label>
+				<input type="text" id="w_stow" name="w_stow" value="0"/>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Power Production Expense
+				<span class="classic">Power Production Expense
+				</span></label>
+				<input type="text" id="powerProExpense" name="powerProExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cost of Purchased Power
+				<span class="classic">Cost of Purchased Power
+				</span></label>
+				<input type="text" id="costPurchasedPower" name="costPurchasedPower"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Transmission Expense
+				<span class="classic">Transmission Expense
+				</span></label>
+				<input type="text" id="transExpense" name="transExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Distribution Expense - Operation
+				<span class="classic">Distribution Expense - Operation
+				</span></label>
+				<input type="text" id="distriExpenseO" name="distriExpenseO"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Distribution Expense - Maintenance
+				<span class="classic">Distribution Expense - Maintenance
+				</span></label>
+				<input type="text" id="distriExpenseM" name="distriExpenseM"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Customer Accounts Expense
+				<span class="classic">Customer Accounts Expense
+				</span></label>
+				<input type="text" id="customerAccountExpense" name="customerAccountExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Customer Service and Informational Expense
+				<span class="classic">Customer Service and Informational Expense
+				</span></label>
+				<input type="text" id="customerServiceExpense" name="customerServiceExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Sales Expense
+				<span class="classic">Sales Expense
+				</span></label>
+				<input type="text" id="salesExpense" name="salesExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Administrative and General Expense
+				<span class="classic">Administrative and General Expense
+				</span></label>
+				<input type="text" id="adminGeneralExpense" name="adminGeneralExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Depreciation and Amortization Expense
+				<span class="classic">Depreciation and Amortization Expense
+				</span></label>
+				<input type="text" id="depreAmortiExpense" name="depreAmortiExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tax Expense - Property &amp; Gross Receipts
+				<span class="classic">Tax Expense - Property &amp; Gross Receipts
+				</span></label>
+				<input type="text" id="taxExpensePG" name="taxExpensePG"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tax Expense - Other
+				<span class="classic">Tax Expense - Other
+				</span></label>
+				<input type="text" id="taxExpense" name="taxExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Interest on Long-Term Debt
+				<span class="classic">Interest on Long-Term Debt
+				</span></label>
+				<input type="text" id="interestLongTerm" name="interestLongTerm"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Interest Charged to Construction - Credit
+				<span class="classic">Interest Charged to Construction - Credit
+				</span></label>
+				<input type="text" id="interestConstruction" name="interestConstruction"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Interest Expense - Other
+				<span class="classic">Interest Expense - Other
+				</span></label>
+				<input type="text" id="interestExpense" name="interestExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Other Deductions
+				<span class="classic">Other Deductions
+				</span></label>
+				<input type="text" id="otherDeductions" name="otherDeductions"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Non Operating Margins - Interest
+				<span class="classic">Non Operating Margins - Interest
+				</span></label>
+				<input type="text" id="nonOpMarginInterest" name="nonOpMarginInterest"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Allowance for Funds Used During Construction
+				<span class="classic">Allowance for Funds Used During Construction
+				</span></label>
+				<input type="text" id="fundsUsedConstruc" name="fundsUsedConstruc"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Income (Loss) from Equity Investments
+				<span class="classic">Income (Loss) from Equity Investments
+				</span></label>
+				<input type="text" id="incomeEquityInvest" name="incomeEquityInvest"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Non Operating Margins - Other
+				<span class="classic">Non Operating Margins - Other
+				</span></label>
+				<input type="text" id="nonOpMarginOther" name="nonOpMarginOther"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Generation and Transmission Capital Credits
+				<span class="classic">Generation and Transmission Capital Credits
+				</span></label>
+				<input type="text" id="genTransCapCredits" name="genTransCapCredits"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Other Capital Credits and Patronage Dividends
+				<span class="classic">Other Capital Credits and Patronage Dividends
+				</span></label>
+				<input type="text" id="otherCapCreditsPatroDivident" name="otherCapCreditsPatroDivident"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Extraordinary Items
+				<span class="classic">Extraordinary Items
+				</span></label>
+				<input type="text" id="extraItems" name="extraItems"/>
+			</div>
+			<hr>
+			<div class="wideInput">
+				<table>
+					<tr>
+						<th></th>
+						<th>Jan</th>
+						<th>Feb</th>
+						<th>Mar</th>
+						<th>Apr</th>
+						<th>May</th>
+						<th>Jun</th>
+						<th>Jul</th>
+						<th>Aug</th>
+						<th>Sep</th>
+						<th>Oct</th>
+						<th>Nov</th>
+						<th>Dec</th>
+					</tr>						
+					<tr>
+						<th>Consumer Served Sales</th>
+						<td><input type="text" id="janSale" name="janSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febSale" name="febSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marSale" name="marSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprSale" name="aprSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="maySale" name="maySale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junSale" name="junSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julSale" name="julSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augSale" name="augSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepSale" name="sepSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octSale" name="octSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novSale" name="novSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decSale" name="decSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+					<tr>
+						<th>KWh Sold</th>
+						<td><input type="text" id="janKWh" name="janKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febKWh" name="febKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marKWh" name="marKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprKWh" name="aprKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="mayKWh" name="mayKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junKWh" name="junKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julKWh" name="julKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augKWh" name="augKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepKWh" name="sepKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octKWh" name="octKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novKWh" name="novKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decKWh" name="decKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+					<tr>
+						<th>Revenue</th>
+						<td><input type="text" id="janRev" name="janRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febRev" name="febRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marRev" name="marRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprRev" name="aprRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="mayRev" name="mayRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junRev" name="junRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julRev" name="julRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augRev" name="augRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepRev" name="sepRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octRev" name="octRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novRev" name="novRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decRev" name="decRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+					<tr>
+						<th>Total KWh Sold</th>
+						<td><input type="text" id="janKWhT" name="janKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febKWhT" name="febKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marKWhT" name="marKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprKWhT" name="aprKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="mayKWhT" name="mayKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junKWhT" name="junKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julKWhT" name="julKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augKWhT" name="augKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepKWhT" name="sepKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octKWhT" name="octKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novKWhT" name="novKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decKWhT" name="decKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+					<tr>
+						<th>Total Revenue</th>
+						<td><input type="text" id="janRevT" name="janRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febRevT" name="febRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marRevT" name="marRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprRevT" name="aprRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="mayRevT" name="mayRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junRevT" name="junRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julRevT" name="julRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augRevT" name="augRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepRevT" name="sepRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octRevT" name="octRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novRevT" name="novRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decRevT" name="decRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+				</table>
+			</div>
+			<div class="wideInput" style="text-align:right">
+					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+					<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+					<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+					<button id="runButton" type="submit" class="preRun">Run Model</button>
+					<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
+			</div>
+		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results.
+	</div>
+	<div id ="stopIndicator" class="content stopped">
+		Model cancelled or encountered an error. Please change inputs and re-run.
+	</div>
+	<div id="output">
+		<script id="globalOutputScripting">
+			Highcharts.setOptions({global: { useUTC: false }})
+			var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
+			pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
+			pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
+			function insertMetric(tableId, name, vector) {
+				// Add a vector to a table as a row.
+				table = gebi(tableId)
+				newRow = table.insertRow()
+				newRow.insertCell().innerHTML = name
+				for (i=0; i<vector.length; i++) {
+					cell = newRow.insertCell()
+					cell.innerHTML = vector[i]
+				}
+			}
+		</script>
+		<p class="reportTitle postRun">Hourly System Performance</p>
+		<div id="powerGenerationReport" class="tightContent postRun">
+			<div id="powerTimeSeries"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series": [{"marker":{"enabled":false},"color":"red","data":allOutputData.powerOutputAc,"name":"Power Generated"}],
+					"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}},"plotLines":[{"color": "orange",
+						"dashStyle": "ShortDash",
+						"width": 2,
+						"label":{"text":"Nameplate","align":"right","y":12,"x":0},
+						"value": parseFloat(allInputData.systemSize)*1000,"zIndex": 0}]},
+					"chart":{"zoomType":"x","marginBottom":40,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Monthly System Performance</p>
+		<div id="monthlyPerformanceReport" class="tightContent postRun">
+			<div id="monthlyPerformanceDiv"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
+					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
+					"title":{"text":null},
+					"series":[{"name":"Solar Generated", "color":"orange", "data":allOutputData.monthlyGeneration, "dataLabels":{"enabled":false}},{"name":"Total Generation", "color":"green", "data":allOutputData.totalGeneration, "dataLabels":{"enabled":false}}],
+					"yAxis":[{"title":{"text":"Energy (Wh)","style":{"color":"gray"}}}],
+					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Climate</p>
+		<div id="climateReport" class="tightContent postRun">
+			<div id="climateChartDiv"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":[{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"]},
+						{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
+						{"name":"Direct Irradiance (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Irradiance (W/m^2)"]},
+						{"name":"Difuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Difuse Irradiance (W/m^2)"]},
+						{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]}],
+					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
+					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Monthly Data Table</p>
+		<div id="monthlySummaryReport" class="tightContent postRun tableReport">
+			<table id="monthlySummaryTable">
+			</table>
+			<script>
+				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
+				insertMetric("monthlySummaryTable","Generation(Wh)", allOutputData.monthlyGeneration.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total Generation(kWh)", allOutputData.totalGeneration.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable", "No. Consumer Served", allOutputData.monthlyNoConsumerServedSales.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","KWh Sold", allOutputData.monthlyKWhSold.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Revenue", allOutputData.monthlyRevenue.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total KWh Sold", allOutputData.totalKWhSold.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total Revenue from Sales of Electric Energy", allOutputData.totalRevenue.map(function(x){return x[1]}))
+			</script>
+		</div>
+		<p class="reportTitle  postRun">Graphic Chart</p>
+		<div id="graphicChart" class="tightContent postRun tableReport">
+			<div id="mapHere">
+				<script src="http://d3js.org/d3.v3.min.js"></script>
+				<style>
+				.link {
+				  fill: none;
+				  stroke: #666;
+				  stroke-width: 4px;
+				}
+				#cash {
+				  fill: green;
+				}
+				#power {
+				  fill: orange;
+				}
+				.link.cash {
+				  stroke: green;
+				}
+				.link.power {
+				  stroke: orange;
+				}
+				circle {
+				  fill: #ccc;
+				  stroke: #333;
+				  stroke-width: 1.5px;
+				}
+				text {
+				  font: 20px sans-serif;
+				  pointer-events: none;
+				  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
+				}
+				text.shadow {
+				  stroke: #fff;
+				  stroke-width: 3px;
+				  stroke-opacity: .8;
+				}
+				</style>
+				<script>
+				var links = [{source: "D", target: "L", type: "power", value: allOutputData.Solar.losses.toFixed(2)},
+				  {source: "D", target: "P", type: "cash", value: allOutputData.Solar.patCaptial.toFixed(2)},
+				  {source: "D", target: "G", type: "cash", value: allOutputData.Solar.costPurchasedPower.toFixed(2)},
+				  {source: "D", target: "V", type: "cash", value: allOutputData.BAU.nonPowerCosts.toFixed(2)},
+				  {source: "D", target: "Cs", type: "power", value: allOutputData.Solar.resNonSolarKWhSold.toFixed(2)},
+				  {source: "D", target: "Cci", type: "power", value: allOutputData.BAU.nonResKWhSold.toFixed(2)},
+				  {source: "D", target: "Cn", type: "power", value: allOutputData.Solar.solarResSold.toFixed(2)},
+				  {source: "G", target: "D", type: "power", value: allOutputData.Solar.totalKWhPurchased.toFixed(2)},
+				  {source: "Cs", target: "D", type: "cash", value: allOutputData.Solar.solarResRev.toFixed(2)},
+				  {source: "Cci", target: "D", type: "cash", value: allOutputData.Solar.nonResRev.toFixed(2)},
+				  {source: "Cn", target: "D", type: "cash", value: allOutputData.Solar.resNonSolarRev.toFixed(2)},
+				  {source: "Cs", target: "S", type: "power", value: allOutputData.Solar.costSolarGen.toFixed(2)},
+				  {source: "S", target: "Cs", type: "cash", value: allOutputData.Solar.annualSolarGen.toFixed(2)}
+				  ];
+				//sort links by source, then target
+				links.sort(function(a,b) {
+					if (a.source > b.source) {return 1;}
+					else if (a.source < b.source) {return -1;}
+					else {
+						if (a.target > b.target) {return 1;}
+						if (a.target < b.target) {return -1;}
+						else {return 0;}
+					}
+				});
+				//any links with duplicate source and target get an incremented 'linknum'
+				for (var i=0; i<links.length; i++) {
+					if (i != 0 &&
+						links[i].source == links[i-1].source &&
+						links[i].target == links[i-1].target) {
+							links[i].linknum = links[i-1].linknum + 1;
+						}
+					else {links[i].linknum = 1;};
+				};
+				var nodes = {};
+				// Compute the distinct nodes from the links.
+				links.forEach(function(link) {
+				  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
+				  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+				});
+				var w = 960,
+					h = 500;
+				var force = d3.layout.force()
+					.nodes(d3.values(nodes))
+					.links(links)
+					.size([w, h])
+					.linkDistance(180)
+					.linkStrength(0.1)
+					.charge(-300)
+					.gravity(0.01)
+					.on("tick", tick)
+					.start();
+				var svg = d3.select("#mapHere").append("svg:svg")
+					.attr("width", w)
+					.attr("height", h)
+				// Per-type markers, as they don't inherit styles.
+				svg.append("svg:defs").selectAll("marker")
+					.data(["power", "cash"])
+					.enter().append("svg:marker")
+					.attr("id", String)
+					.attr("viewBox", "0 -5 10 10")
+					.attr("refX", 15)
+					.attr("refY", -1.5)
+					.attr("markerWidth", 6)
+					.attr("markerHeight", 6)
+					.attr("orient", "auto")
+					.append("svg:path")
+					.attr("d", "M0,-5L10,0L0,5");
+				var path = svg.append("svg:g").selectAll("path")
+					.data(force.links())
+					.enter().append("svg:path")
+					.attr("class", function(d) { return "link " + d.type; })
+					.attr("id",function(d,i) { return "linkId_" + i; })
+					.attr("marker-end", function(d) { return "url(#" + d.type + ")"; });
+				var linktext = svg.append("svg:g").selectAll("g.linklabelholder").data(force.links());
+					linktext.enter().append("g").attr("class", "linklabelholder")
+					.append("text")
+					.attr("class", "linklabel")
+					.style("font-size", "13px")
+					.attr("x", "50")
+					.attr("y", "-20")
+					.attr("text-anchor", "start")
+					.style("fill","#000")
+					.append("textPath")
+					.attr("xlink:href",function(d,i) { return "#linkId_" + i;})
+					.text(function(d) { return d.value; });
+				var circle = svg.append("svg:g").selectAll("circle")
+					.data(force.nodes())
+					.enter().append("svg:circle")
+					.attr("r", 20)
+					.style("fill", "gray")
+					.call(force.drag);
+				var text = svg.append("svg:g").selectAll("g")
+					.data(force.nodes())
+					.enter().append("svg:g");
+					text.append("svg:text")
+					.attr("x", "-1em")
+					.attr("y", ".31em")
+					.style("font-size", "13px")
+					.text(function(d) { return d.name; });
+				// Use elliptical arc path segments to doubly-encode directionality.
+				function tick() {
+				  path.attr("d", function(d) {
+					var dx = d.target.x - d.source.x,
+						dy = d.target.y - d.source.y,
+						// dr = 75/d.linknum;  //linknum is defined above
+						dr = Math.sqrt(dx * dx + dy * dy);
+					return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
+				  });
+				  circle.attr("transform", function(d) {
+					return "translate(" + d.x + "," + d.y + ")";
+				  });
+				  text.attr("transform", function(d) {
+					return "translate(" + d.x + "," + d.y + ")";
+				  });
+				}
+				</script>
+			</div>
+		</div>
+		<!-- TODO: Split into two separate sheet -->
+		<p class="reportTitle postRun">BAU v.s. Solar Table</p>
+		<div id="tableReport" class="tightContent postRun tableReport">
+			<table id="solarTableReport">
+			</table>
+			<script>
+			table = gebi("solarTableReport")
+			var row = table.insertRow()
+			var cell0 = row.insertCell(0);
+			var cell1 = row.insertCell(1);
+			var cell2 = row.insertCell(2);
+			cell0.innerHTML = "<strong>Property</strong>"
+			cell1.innerHTML = "<strong>BAU</strong>";
+			cell2.innerHTML = "<strong>Solar</strong>";
+				for (key in allOutputData.BAU){
+					table = gebi("solarTableReport")
+					newRow = table.insertRow()
+					cell0 = newRow.insertCell(0)
+					cell1 = newRow.insertCell(1)
+					cell2 = newRow.insertCell(2)
+					cell0.innerHTML = key
+					cell1.innerHTML = allOutputData.BAU[key]
+					cell2.innerHTML = allOutputData.Solar[key]
+				}
+			</script>
+		</div>
+	</div>
+</body>

@@ -31,8 +31,10 @@ def getDataNames():
 
 @app.before_request
 def csrf_protect():
-	if request.user_agent.browser == "msie" or request.user_agent.browser == "firefox":
-		return "The OMF currently must be accessed by Chrome or Safari."
+	if request.user_agent.browser != "chrome":
+		return "<img style='width:400px;margin-right:auto; margin-left:auto;display:block;' \
+			src='http://goo.gl/1GvUMA'><br> \
+			<h2 style='text-align:center'>The OMF currently must be accessed by <a href='http://goo.gl/X2ZGhb''>Chrome</a></h2>"
 	## NOTE: when we fix csrf validation this needs to be uncommented.
 	# if request.method == "POST":
 	#	token = session.get("_csrf_token", None)
@@ -469,6 +471,11 @@ def delete(objectType, objectName, owner):
 	elif objectType == "Model":
 		shutil.rmtree("data/Model/" + owner + "/" + objectName)
 	return redirect("/")
+
+@app.route("/downloadModelData/<owner>/<modelName>/<fileName>")
+@flask_login.login_required
+def downloadModelData(owner, modelName, fileName):
+    return send_from_directory("data/Model/"+owner+"/"+modelName, fileName) 
 
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
 @flask_login.login_required

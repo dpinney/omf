@@ -1,6 +1,6 @@
 """ Common functions for all models """
 
-import json, os, sys, tempfile, webbrowser, time, math
+import json, os, sys, tempfile, webbrowser, math, shutil
 from os.path import join as pJoin
 from os.path import split as pSplit
 # Locational variables so we don't have to rely on OMF being in the system path.
@@ -36,14 +36,10 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 
 def renderAndShow(template, modelDir="", datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
-	with tempfile.NamedTemporaryFile() as temp:
+	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
 		temp.write(renderTemplate(template, modelDir=modelDir, absolutePaths=True))
 		temp.flush()
-		os.rename(temp.name, temp.name + ".html")
-		fullArg = "file://" + temp.name + ".html"
-		webbrowser.open(fullArg)
-		# It's going to SPACE! Could you give it a SECOND to get back from SPACE?!
-		time.sleep(1)
+		webbrowser.open("file://" + temp.name)
 
 def getStatus(modelDir):
 	''' Is the model stopped, running or finished? '''

@@ -73,15 +73,19 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Annual Array Degradation (%/Year)<span class="classic">Annual Array Degradation<br>Type: percentage [0..100]</span></label>
-				<input type="text" id="degradation" name="degradation" data-validRegex="\d+\.?\d*" value="0.005"/>
+				<input type="text" id="degradation" name="degradation" data-validRegex="\d+\.?\d*" value="0.5"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Energy Cost ($/kWh)<span class="classic">Energy Cost</span></label>
 				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Discount Rate (%)<span class="classic">Discount Rate</span></label>
-				<input type="text" id="discountRate" name="discountRate" data-validRegex="\d+\.?\d*" value="0.07"/>
+				<label class="tooltip">Discount Rate (%)<span class="classic">Discount Rate<br>Type: percentage [0..100]</span></label>
+				<input type="text" id="discountRate" name="discountRate" data-validRegex="\d+\.?\d*" value="7"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">SREC cashflow<span class="classic">SREC cashflow<br>Note: separate by comma</label>
+				<input type="text" id="srecCashFlow" name="srecCashFlow"/>
 			</div>
 			<hr>
 			<div class="shortInput">
@@ -101,6 +105,42 @@
 				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d" value="2014-01-01" readonly/>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">PV Module Derate<span class="classic">PV Module Derate<br>Range: [0..1]</span></label>
+				<input type="text" id="pvModuleDerate" name="pvModuleDerate" value="0.995">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Mismatch<span class="classic">Mismatch<br>Range: [0..1]</span></label>
+				<input type="text" id="mismatch" name="mismatch" value="0.995">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Diodes/Connection<span class="classic">Diodes/Connection<br>Range: [0..1]</span></label>
+				<input type="text" id="diodes" name="diodes" value="0.995">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">DC Wiring<span class="classic">DC Wiring<br>Range: [0..1]</span></label>
+				<input type="text" id="dcWiring" name="dcWiring" value="0.995">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">AC Wiring<span class="classic">AC Wiring<br>Range: [0..1]</span></label>
+				<input type="text" id="acWiring" name="acWiring" value="0.995">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Soiling<span class="classic">Soiling<br>Range: [0..1]</span></label>
+				<input type="text" id="soiling" name="soiling" value="0.995">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Shading<span class="classic">Shading<br>Range: [0..1]</span></label>
+				<input type="text" id="shading" name="shading" value="0.995">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">System Availibility<span class="classic">System Availibility<br>Range: [0..1]</span></label>
+				<input type="text" id="sysAvail" name="sysAvail" value="0.995">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Age<span class="classic">Age<br>Range: [0..1]</span></label>
+				<input type="text" id="age" name="age" value="0.995">
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Tracking Mode<span class="classic">Tracking Mode</span></label>
 				<select id="trackingMode" name="trackingMode"/>
 					<option value="0">Fixed</option>
@@ -118,10 +158,13 @@
 			</div>
 			<script type="text/javascript">
 			$("#tilt").change(function (){
-				if ($(this).val() == "False")
+				if ($(this).val() == "False"){
 					$("#manualTilt").prop({readonly: false})
-				else
+						.attr("value", parseFloat(allOutputData.lat).toFixed(2))
+				}else{
 					$("#manualTilt").prop({readonly: true})
+						.attr("value", parseFloat(allOutputData.lat).toFixed(2))
+				}
 			})
 			</script>
 			<div class="shortInput">
@@ -137,7 +180,7 @@
 				<input type="text" id="rotlim" name="rotlim" value="45.0"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Max power temperature coefficient (%/C)<span class="classic">Max power temperature coefficient</span></label>
+				<label class="tooltip">Max power temperature coefficient (%/C)<span class="classic">Max power temperature coefficient<br>Type: percentage [0..100]</span></label>
 				<input type="text" id="gamma" name="gamma" value="-0.5"/>
 			</div>
 			<div class="shortInput">
@@ -145,11 +188,17 @@
 				<input type="text" id="w_stow" name="w_stow" value="0"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
-					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-					<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
-					<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-					<button id="runButton" type="submit" class="preRun">Run Model</button>
-					<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
+				<a id="downloadLink" type="button" class="stoppedInline postRunInline" href="#" download>Download Excel</a>
+				<script type="text/javascript">
+					$("#downloadLink").attr("href", "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/"+allOutputData.excel)
+				</script>
+			</div>
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
+				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
 		</form>
 	</div>
@@ -210,7 +259,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Seasonal System Performance</p>
+		<p class="reportTitle postRun">Average Seasonal System Performance</p>
 		<div id="seasonalPerformanceChart" class="tightContent postRun">
 			<div id="seasonalPerformanceDiv"></div>
 			<script>
@@ -267,6 +316,66 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
+
+		<p class="reportTitle postRun">Simulation Location
+		</p>
+		<div id="studyDetail mapHere" class="tightContent postRun detailsContainer" style="position: relative">
+			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
+			<table id="detailsTable">
+				<tr>
+					<th id="SL">Simulation Location</th>
+				</tr>
+				<tr>
+					<td rowspan="7" style = "width:100%">
+						<div id="mapHere">
+							<script type="text/javascript">
+								var width = 500,
+									height = 350;
+
+								var projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2]);
+
+								var path = d3.geo.path()
+									.projection(projection);
+
+								var svg = d3.select("#mapHere").append("svg")
+									.attr("width", width)
+									.attr("height", height);
+
+								var group = svg.append("g");
+
+								group.attr("transorm", "scale(.2, .2)");
+								d3.json('/static/state_boundaries.json', function(collection) {
+									group.selectAll('path')
+										.data(collection.features)
+										.enter().append('path')
+										.attr('d', d3.geo.path().projection(projection))
+										.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+										.style('fill', 'gray')
+										.style('stroke', 'white')
+										.style('stroke-width', 1);
+								});
+
+								d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
+									climate = allInputData.climateName
+									var ST_NAME = climate.split("-");
+									var ST = ST_NAME[0], NAME = ST_NAME[1];
+									var my_coords = projection(new_us_places[ST][NAME]);
+									var r = 5;
+									circle = svg.append("circle")
+										.attr("cx", my_coords[0])
+										.attr("cy", my_coords[1])
+										.attr("r", 5)
+										.attr("class", "HighlightCircle")
+									circle.append("svg:title").text(climate);
+								})
+							</script>
+						</div>
+					</td>
+				</tr>
+			</table>
+		</div>
+
+
 		<p class="reportTitle postRun">Monthly Data Table</p>
 		<div id="monthlySummaryReport" class="tightContent postRun tableReport">
 			<table id="monthlySummaryTable">

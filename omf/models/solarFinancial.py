@@ -5,7 +5,9 @@ from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
-
+from random import random
+from numpy import irr, npv
+import xlwt
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 import feeder
@@ -38,18 +40,27 @@ def run(modelDir, inputDict):
 	# Required user inputs.
 	ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
 	ssc.ssc_data_set_number(dat, "system_size", float(inputDict.get("systemSize", 100)))
-	ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("derate", 0.77)))
+	derate = float(inputDict.get("pvModuleDerate", 0.995)) \
+		* float(inputDict.get("mismatch", 0.995)) \
+		* float(inputDict.get("diodes", 0.995)) \
+		* float(inputDict.get("dcWiring", 0.995)) \
+		* float(inputDict.get("acWiring", 0.995)) \
+		* float(inputDict.get("soiling", 0.995)) \
+		* float(inputDict.get("shading", 0.995)) \
+		* float(inputDict.get("sysAvail", 0.995)) \
+		* float(inputDict.get("age", 0.995))
+	ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("derate", derate)))
 	ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
 	ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 	# Advanced inputs with defaults.
 	ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
-	ssc.ssc_data_set_number(dat, "t_noct", float(inputDict.get("t_noct", 45)))
-	ssc.ssc_data_set_number(dat, "t_ref", float(inputDict.get("t_ref", 25)))
+	# ssc.ssc_data_set_number(dat, "t_noct", float(inputDict.get("t_noct", 45)))
+	# ssc.ssc_data_set_number(dat, "t_ref", float(inputDict.get("t_ref", 25)))
 	ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5)))
-	ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict.get("inv_eff", 0.92)))
-	ssc.ssc_data_set_number(dat, "fd", float(inputDict.get("fd", 1)))
-	ssc.ssc_data_set_number(dat, "i_ref", float(inputDict.get("i_ref", 1000)))
-	ssc.ssc_data_set_number(dat, "poa_cutin", float(inputDict.get("poa_cutin", 0)))
+	# ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict.get("inv_eff", 0.92)))
+	# ssc.ssc_data_set_number(dat, "fd", float(inputDict.get("fd", 1)))
+	# ssc.ssc_data_set_number(dat, "i_ref", float(inputDict.get("i_ref", 1000)))
+	# ssc.ssc_data_set_number(dat, "poa_cutin", float(inputDict.get("poa_cutin", 0)))
 	ssc.ssc_data_set_number(dat, "w_stow", float(inputDict.get("w_stow", 0)))
 	# Complicated optional inputs.
 	ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
@@ -98,25 +109,27 @@ def run(modelDir, inputDict):
 	retailCost = float(inputDict.get("retailCost",0.0))
 	degradation = float(inputDict.get("degradation",0.5))/100
 	installCost = float(inputDict.get("installCost",0.0))
+	discountRate = float(inputDict.get("discountRate", 7))/100
 	outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
 	outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)),2) for x in lifeYears]
 	outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
 	outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
-	outData["netCashFlow"] = [roundSig(x+y+z,2) for (x,y,z) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"])]
+	srec = inputDict.get("srecCashFlow", "").split(",")
+	outData["srecCashFlow"] = map(float,srec) + [0 for x in lifeYears[len(srec):]]
+	outData["netCashFlow"] = [roundSig(x+y+z+a,2) for (x,y,z,a) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"], outData["srecCashFlow"])]
 	outData["cumCashFlow"] = map(lambda x:roundSig(x,2), _runningSum(outData["netCashFlow"]))
 	outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 2)
-	#TODO: implement these two.
-	outData["NPV"] = "TBD"
-	outData["IRR"] = "TBD"
+	outData["NPV"] = roundSig(npv(discountRate, outData["netCashFlow"]), 2)
+	outData["IRR"] = roundSig(irr(outData["netCashFlow"]), 2)
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
 	outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
 	# Heatmaped hour+month outputs.
 	hours = range(24)
-	from random import random
+	from calendar import monthrange
 	totHourMon = lambda h,m:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y[5:7]=="{0:02d}".format(m+1) and y[11:13]=="{0:02d}".format(h+1)])
-	outData["seasonalPerformance"] = [[x,y,totHourMon(x,y)] for x in hours for y in months.values()]
+	outData["seasonalPerformance"] = [[x,y,totHourMon(x,y) / monthrange(int(simStartDate[:4]), y+1)[1]] for x in hours for y in months.values()]
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
@@ -128,6 +141,90 @@ def run(modelDir, inputDict):
 	inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent=4)
+	_dumpDataToExcel(modelDir)
+
+def _dumpDataToExcel(modelDir):
+	""" Dump data into .xls file in model workspace """
+	# TODO: Think about a universal function
+	wb = xlwt.Workbook()
+	sh1 = wb.add_sheet("All Input Data")
+	inJson = json.load(open(pJoin(modelDir, "allInputData.json")))
+	size = len(inJson.keys())
+	for i in range(size):
+		sh1.write(i, 0, inJson.keys()[i])
+
+	for i in range(size):
+		sh1.write(i, 1, inJson.values()[i])
+
+	outJson = json.load(open(pJoin(modelDir, "allOutputData.json")))
+	sh1.write(0, 5, "Lat")
+	sh1.write(0, 6, "Lon")
+	sh1.write(0, 7, "Elev")
+	sh1.write(1, 5, outJson["lat"])
+	sh1.write(1, 6, outJson["lon"])
+	sh1.write(1, 7, outJson["elev"])
+
+	sh2 = wb.add_sheet("Houly Data")
+	sh2.write(0, 0, "TimeStamp")
+	sh2.write(0, 1, "Power(W-AC)")
+	sh2.write(0, 2, "Difuse Irradiance (W/m^2)")
+	sh2.write(0, 3, "Direct Irradiance (W/m^2)")
+	sh2.write(0, 4, "Wind Speed (m/s)")
+	sh2.write(0, 5, "Ambient Temperature (F)")
+	sh2.write(0, 6, "Cell Temperature (F)")
+
+	for i in range(8760):
+		sh2.write(i + 1, 0, outJson["timeStamps"][i])
+		sh2.write(i + 1, 1, outJson["powerOutputAc"][i])
+		sh2.write(i + 1, 2, outJson["climate"]["Difuse Irradiance (W/m^2)"][i])
+		sh2.write(i + 1, 3, outJson["climate"]["Direct Irradiance (W/m^2)"][i])
+		sh2.write(i + 1, 4, outJson["climate"]["Wind Speed (m/s)"][i])
+		sh2.write(i + 1, 5, outJson["climate"]["Ambient Temperature (F)"][i])
+		sh2.write(i + 1, 6, outJson["climate"]["Cell Temperature (F)"][i])
+
+	sh2.panes_frozen = True
+	sh2.vert_split_pos = 1
+
+	sh3 = wb.add_sheet("Monthly Data")
+	sh3.write(0, 1, "Monthly Generation")
+	for i in range(24):
+		sh3.write(0, 3 + i, i + 1)
+	for i in range(12):
+		sh3.write(i + 1, 0, outJson["monthlyGeneration"][i][0])
+		sh3.write(i + 1, 1, outJson["monthlyGeneration"][i][1])
+	for i in range(len(outJson["seasonalPerformance"])):
+		sh3.write(outJson["seasonalPerformance"][i][1] + 1, outJson["seasonalPerformance"]
+				  [i][0] + 3, outJson["seasonalPerformance"][i][2])
+	sh3.panes_frozen = True
+	sh3.vert_split_pos = 3
+	sh3.horz_split_pos = 1
+
+	sh4 = wb.add_sheet("Annual Data")
+	sh4.write(0, 0, "Year No.")
+	for i in range(30):
+		sh4.write(i + 1, 0, i)
+	sh4.write(0, 1, "Net Cash Flow ($)")
+	sh4.write(0, 2, "Life O&M Costs ($)")
+	sh4.write(0, 3, "Life Purchase Costs ($)")
+	sh4.write(0, 4, "Cumulative Cash Flow ($)")
+	for i in range(30):
+		sh4.write(i + 1, 1, outJson["netCashFlow"][i])
+		sh4.write(i + 1, 2, outJson["lifeOmCosts"][i])
+		sh4.write(i + 1, 3, outJson["lifePurchaseCosts"][i])
+		sh4.write(i + 1, 4, outJson["cumCashFlow"][i])
+	sh4.write(0, 10, "ROI")
+	sh4.write(1, 10, outJson["ROI"])
+	sh4.write(0, 11, "NPV")
+	sh4.write(1, 11, outJson["NPV"])
+	sh4.write(0, 12, "IRR")
+	sh4.write(1, 12, outJson["IRR"])
+	# sh4.write(2, 11, xlwt.Formula("NPV(('All Input Data'!B15/100,'Annual Data'!B2:B31))"))
+	sh4.write(2, 12, xlwt.Formula("IRR(B2:B31)"))
+	filename = inJson.get("climateName","")+" solarFinancial.xls"
+	wb.save(pJoin(modelDir, filename))
+	outJson["excel"] = filename
+	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+		json.dump(outJson, outFile, indent=4)
 
 def _runningSum(inList):
 	''' Give a list of running sums of inList. '''
@@ -171,18 +268,32 @@ def _tests():
 		"simLength": "8760",
 		"systemSize":"100",
 		"installCost":"100000",
-		"derate":"0.77",
+		"lifeSpan": "30",
+		"degradation": "0.5",
+		"retailCost": "0.01",
+		"discountRate": "0.07",
+		"pvModuleDerate": "0.995",
+		"mismatch": "0.995",
+		"dcWiring": "0.995",
+		"acWiring": "0.995",
+		"soiling": "0.995",
+		"shading": "0.995",
+		"sysAvail": "0.995",
+		"age": "0.995",
+		"tilt": "True",
+		"srecCashFlow": "5,5,3,3,2",
+		# "derate":"0.77",
 		"trackingMode":"0",
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",
-		"t_noct":"45.0",
-		"t_ref":"25.0",
+		# "t_noct":"45.0",
+		# "t_ref":"25.0",
 		"gamma":"-0.5",
-		"inv_eff":"0.92",
-		"fd":"1.0",
-		"i_ref":"1000",
-		"poa_cutin":"0",
+		# "inv_eff":"0.92",
+		# "fd":"1.0",
+		# "i_ref":"1000",
+		# "poa_cutin":"0",
 		"omCost": "1000",
 		"w_stow":"0"}
 	modelLoc = pJoin(workDir,"admin","Automated solarFinancial Testing")
