@@ -70,7 +70,7 @@ def _downloadWeather(start, end, airport, workDir):
 
 def _airportCodeToLatLon(airport):
 	''' Airport three letter code -> lat/lon of that location. ''' 
-	api_key = 'AIzaSyDR9Iwhp1xbs31c6FpO-5g0bdEXCyN1JL8'
+	'''api_key = 'AIzaSyDR9Iwhp1xbs31c6FpO-5g0bdEXCyN1JL8'
 	service_url = 'https://www.googleapis.com/freebase/v1/mqlread'
 	query = [{'id':None, 'name':None, 'type': '/aviation/airport', 'iata' : airport,
 		'/location/location/geolocation' : [{'latitude' : None, 'longitude':None, 'elevation':None}] }]
@@ -79,31 +79,31 @@ def _airportCodeToLatLon(airport):
 	# query Freebase for specified IATA airport code
 	response = json.loads(urllib.urlopen(url).read())
 	# if zero results, fail
-	if len(response['result']) == 0:
-		p=re.compile('([0-9\.\-\/])+')
-		try:
-			url2 = urllib2.urlopen('http://www.airport-data.com/airport/'+airport+'/#location')
-			soup = BeautifulSoup(url2)
-			latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[2])
-			latlon_val = p.search(latlon_str)
-			latlon_val = latlon_val.group()
-			latlon_split=latlon_val.split('/') #latlon_split[0] is longitude; latlon_split[1] is latitude
-			lat = float(latlon_split[1])
-			lon = float(latlon_split[0])
-		except urllib2.URLError, e:
-			print 'Requested URL generated error code:',e.code
-			lat = float(raw_input('Please enter latitude manually:'))
-			lon = float(raw_input('Please enter longitude manually:'))
-		return(lat,lon)			
-		#print("Failed to return any airport location for", airport)
-		#return None
+	if len(response['result']) == 0:'''
+	p=re.compile('([0-9\.\-\/])+')
+	try:
+		url2 = urllib2.urlopen('http://www.airport-data.com/airport/'+airport+'/#location')
+		soup = BeautifulSoup(url2)
+		latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[2])
+		latlon_val = p.search(latlon_str)
+		latlon_val = latlon_val.group()
+		latlon_split=latlon_val.split('/') #latlon_split[0] is longitude; latlon_split[1] is latitude
+		lat = float(latlon_split[1])
+		lon = float(latlon_split[0])
+	except urllib2.URLError, e:
+		print 'Requested URL generated error code:',e.code
+		lat = float(raw_input('Please enter latitude manually:'))
+		lon = float(raw_input('Please enter longitude manually:'))
+	return(lat,lon)			
+	#print("Failed to return any airport location for", airport)
+	#return None
 	# if more than one result, get first one
-	if len(response['result']) > 1:
+	'''if len(response['result']) > 1:
 		print("Multiple airport results (strange!), using the first result")
 	# get GPS from result
 	lat = response['result'][0]['/location/location/geolocation'][0]['latitude']
 	lon = response['result'][0]['/location/location/geolocation'][0]['longitude']
-	return (lat, lon)
+	return (lat, lon)'''
 
 def _getPeakSolar(airport, workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
 	''' get the peak non-cloudy solar data from a locale.  takes the ten most solar-energetic days and averages
@@ -170,7 +170,7 @@ def _getPeakSolar(airport, workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
 		energyDict[season] = []
 	for key in dayDict: # for each day,
 		day = dayDict[key]
-		# calculate
+		# calculate using irradiances in tmy3 file for a day
 		dhi = [float(value[dhiIndex]) for value in day]
 		dni = [float(value[dniIndex]) for value in day]
 		ghi = [float(value[ghiIndex]) for value in day]
@@ -239,7 +239,7 @@ def _latlonprocess(lat,lon):
 	lat_string = '$lat_deg='+str(int(lat))+'\n'+'$lat_min='+str(minlat)+'\n'
 	minlon, lon = modf(lon)
 	minlon = abs(int(minlon*60))
-	lon_string = '$lon_deg='+str(int(lon))+'\n'+'$lon_min='+str(minlon)+'\n'
+	lon_string = '$long_deg='+str(int(lon))+'\n'+'$long_min='+str(minlon)+'\n'
 	return lat_string, lon_string
 
 def _processWeather(start, end, airport, workDir, interpolate="linear"):
@@ -452,6 +452,24 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 			utcIndex = index
 	# slice timezone from keys
 	tz = weatherKeys[timeIndex][4:7]
+	if tz == ('PDT'):
+		timezone_offset='$timezone_offset='+str(-8)+'\n'
+	elif tz == ('PST'):
+		timezone_offset='$timezone_offset='+str(-8)+'\n'
+	elif tz == ('MDT'):
+		timezone_offset='$timezone_offset='+str(-7)+'\n'
+	elif tz == ('MST'):
+		timezone_offset='$timezone_offset='+str(-7)+'\n'
+	elif tz == ('CDT'):
+		timezone_offset='$timezone_offset='+str(-6)+'\n'
+	elif tz == ('CST'):
+		timezone_offset='$timezone_offset='+str(-6)+'\n'
+	elif tz == ('EDT'):
+		timezone_offset='$timezone_offset='+str(-5)+'\n'
+	elif tz == ('EST'):
+		timezone_offset='$timezone_offset='+str(-5)+'\n'
+	else:
+		timezone_offset='$timezone_offset=unkown\n'
 	# use the first sample to determine TZ offset
 	firstDt = datetime.strptime(weatherData[0][timeIndex], "%I:%M %p")
 	t1 = datetime(year=startDate.year, month=startDate.month, day=startDate.day, hour=firstDt.hour, minute=firstDt.minute) # local
@@ -464,6 +482,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 		windIndex = weatherKeys.index(windKey)
 		windDataList = [sample[windIndex] for sample in weatherData]
 		#print(windDataList)
+		#if windspeed has a value, keep the value. if it has text:"calm", give it a value
 		for index,entry in enumerate(windDataList): 
 			if entry == "Calm":
 				weatherData[index][windIndex] = 0.0
@@ -477,6 +496,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	# replace "N/A" humidity with 0
 	humidKey = "Humidity"
 	humidIndex = 0
+	#if humidspeed has a value, keep the value. if it has text:"N/A", give it a value
 	if humidKey in weatherKeys:
 		humidIndex = weatherKeys.index(humidKey)
 		for index,entry in enumerate(sample[humidIndex] for sample in weatherData): 
@@ -490,6 +510,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	condIndex = 0
 	if condKey in weatherKeys:
 		condIndex = weatherKeys.index(condKey)
+		#replace the "text" weather conditions with "values" from huge dictionary created above
 		for index,entry in enumerate(sample[condIndex] for sample in weatherData):
 			if entry in moreConditionDict.keys():
 				weatherData[index][condIndex] = moreConditionDict[entry]
@@ -511,12 +532,15 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	# convert to useful values
 	weatherList = []
 	# def Weather(self, tm, dt, tz, t, h, w, c, d):
+	#Now in weatherData, we have all text (ex: calm, cloudy, N/A) replaced with numbers
 	for entry in weatherData:
 		sample = Weather().Build(entry[timeIndex], entry[utcIndex], tzDelta, entry[heatIndex], entry[humidIndex], entry[windIndex], entry[condIndex], entry)
 		#print tzDelta
+		#print sample.Data # print all records going to be append to weatherList
 		weatherList.append(sample)
 	# sanity-check numbers
 	for index,entry in enumerate(weatherList):
+		#print entry.Data # print all records going in weatherList
 		# * temperature
 		if entry.Temp > 150.0 or entry.Temp < -20:
 			if index > 0:
@@ -568,6 +592,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 					n += 1
 				entry.Cond = moreConditionDict[weatherList[n].Cond]
 	# add 00:00:00 to each day
+	#remember we formed season based .csv files. grab them
 	seasons = {	"Winter" : ([], "solar_{}_winter.csv".format(airport)),
 		"Spring" : ([], "solar_{}_spring.csv".format(airport)),
 		"Summer" : ([], "solar_{}_summer.csv".format(airport)),
@@ -576,6 +601,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	seasonCount = {	"Winter":0,	"Spring":0, "Summer":0, "Fall":0}
 	for line in weatherList:
 		seasonCount[line.Seas] += 1
+	#now pick the season_.csv file that is non-zero i.e., the season of the file month running
 	for season in seasonCount:
 		if seasonCount[season] == 0:
 			continue
@@ -583,6 +609,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 		#  * {2-4} used for 'real data'.
 		seasonData, seasonFileName = seasons[season]
 		seasonFile = open(pJoin(workDir, seasonFileName), "r")
+		#get the ideal irradiances to from the season_.csv file
 		seasonFileLines = seasonFile.readlines()
 		seasonFileLines.pop(0) # header
 		seasonDataStr = [str.split(line, ",") for line in seasonFileLines]
@@ -594,6 +621,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 		sampleHour = sample.Time.hour
 		seasonData, Season = seasons[sample.Seas]
 		dirMod, difMod, gloMod = seasonData[sampleHour]
+		#multiply values from season_.csv with matching ratios in Conditions dictionary
 		sample.Solar = (wDir*dirMod, dif*difMod, glo*gloMod)
 		#print(str(sample.Time)+": "+str(sample.Cond)+" * "+str(seasonData[sampleHour])+" = "+str(sample.Solar))
 	# interpolate downloaded data into 
@@ -641,10 +669,19 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 					sample.Wind = lerp(entry.Wind, nxEntry.Wind, ratio)
 					sDir, sDif, sGlo = entry.Solar
 					nDir, nDif, nGlo = nxEntry.Solar
+					#Below: all the normal existing irradiances are modified/interpolated
 					sample.Solar = (lerp(sDir, nDir, ratio), lerp(sDif, nDif, ratio), lerp(sGlo, nGlo, ratio))
 					sample.Time = entry.Time + n * interval
-					sample.Seas = seasonDict[sample.Time.month]
-					outData.append(sample)
+					#For the days not starting at midnight and doesn't go till 11:55PM
+					#The script interpolates for all the remaining hours based on the next
+					#available record. This is causing to generate incorrect data.
+					#Example: gnerating irradiance values at night (IMPOSSIBLE! right?)
+					if sample.Time < entry.Time+timedelta(hours = 1):
+						#we want to stop "saving" interpolated records when we hit the very last record of the day.
+						#without the if case below, the script will create a "non-existing" extra hour for that day.
+						if weatherList[index+1].Time.strftime('%Y-%m-%d') <= weatherList[index].Time.strftime('%Y-%m-%d'):
+							sample.Seas = seasonDict[sample.Time.month]
+							outData.append(sample)
 		elif "quadratic" in interpolate:
 			if timeStep > interval:
 				steps = int(math.floor(timeStep.seconds / interval.seconds))
@@ -689,6 +726,7 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	outFile.write('#weather file\n');
 	outFile.write(lat_string);
 	outFile.write(lon_string);
+	outFile.write(timezone_offset);
 	outFile.write('temperature,wind_speed,humidity,solar_dir,solar_diff,solar_global\n');
 	outFile.write('#month:day:hour:minute:second\n');
 	# write samples per-line
