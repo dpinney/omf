@@ -489,7 +489,7 @@
 				insertMetric("monthlySummaryTable","Total Revenue from Sales of Electric Energy", allOutputData.totalRevenue.map(function(x){return x[1]}))
 			</script>
 		</div>
-		<p class="reportTitle  postRun">Graphic Chart</p>
+		<p class="reportTitle  postRun">Annual Cash and Power Flow Model</p>
 		<div id="graphicChart" class="tightContent postRun tableReport">
 			<div id="mapHere">
 				<script src="http://d3js.org/d3.v3.min.js"></script>
@@ -519,29 +519,75 @@
 				text {
 				  font: 20px sans-serif;
 				  pointer-events: none;
-				  text-shadow: 0 1px 0 #fff, 1px 0 0 #fff, 0 -1px 0 #fff, -1px 0 0 #fff;
-				}
-				text.shadow {
-				  stroke: #fff;
-				  stroke-width: 3px;
-				  stroke-opacity: .8;
 				}
 				</style>
 				<script>
-				var links = [{source: "D", target: "L", type: "power", value: allOutputData.Solar.losses.toFixed(2)},
-				  {source: "D", target: "P", type: "cash", value: allOutputData.Solar.patCaptial.toFixed(2)},
-				  {source: "D", target: "G", type: "cash", value: allOutputData.Solar.costPurchasedPower.toFixed(2)},
-				  {source: "D", target: "V", type: "cash", value: allOutputData.BAU.nonPowerCosts.toFixed(2)},
-				  {source: "D", target: "Cs", type: "power", value: allOutputData.Solar.resNonSolarKWhSold.toFixed(2)},
-				  {source: "D", target: "Cci", type: "power", value: allOutputData.BAU.nonResKWhSold.toFixed(2)},
-				  {source: "D", target: "Cn", type: "power", value: allOutputData.Solar.solarResSold.toFixed(2)},
-				  {source: "G", target: "D", type: "power", value: allOutputData.Solar.totalKWhPurchased.toFixed(2)},
-				  {source: "Cs", target: "D", type: "cash", value: allOutputData.Solar.solarResRev.toFixed(2)},
-				  {source: "Cci", target: "D", type: "cash", value: allOutputData.Solar.nonResRev.toFixed(2)},
-				  {source: "Cn", target: "D", type: "cash", value: allOutputData.Solar.resNonSolarRev.toFixed(2)},
-				  {source: "Cs", target: "S", type: "power", value: allOutputData.Solar.costSolarGen.toFixed(2)},
-				  {source: "S", target: "Cs", type: "cash", value: allOutputData.Solar.annualSolarGen.toFixed(2)}
-				  ];
+				var links = [{
+				    "source": "D",
+				    "target": "L",
+				    "type": "power",
+				    "value": allOutputData.Solar.losses.toFixed(2) + " kWh"
+				}, {
+				    "source": "D",
+				    "target": "P",
+				    "type": "cash",
+				    "value": allOutputData.Solar.patCaptial.toFixed(2)
+				}, {
+				    "source": "D",
+				    "target": "G",
+				    "type": "cash",
+				    "value": allOutputData.Solar.costPurchasedPower.toFixed(2)
+				}, {
+				    "source": "D",
+				    "target": "V",
+				    "type": "cash",
+				    "value": allOutputData.BAU.nonPowerCosts.toFixed(2)
+				}, {
+				    "source": "D",
+				    "target": "Cs",
+				    "type": "power",
+				    "value": allOutputData.Solar.resNonSolarKWhSold.toFixed(2) + " kWh"
+				}, {
+				    "source": "D",
+				    "target": "Cci",
+				    "type": "power",
+				    "value": allOutputData.BAU.nonResKWhSold.toFixed(2) + " kWh"
+				}, {
+				    "source": "D",
+				    "target": "Cn",
+				    "type": "power",
+				    "value": allOutputData.Solar.solarResSold.toFixed(2) + " kWh"
+				}, {
+				    "source": "G",
+				    "target": "D",
+				    "type": "power",
+				    "value": allOutputData.Solar.totalKWhPurchased.toFixed(2) + " kWh"
+				}, {
+				    "source": "Cs",
+				    "target": "D",
+				    "type": "cash",
+				    "value": allOutputData.Solar.solarResRev.toFixed(2)
+				}, {
+				    "source": "Cci",
+				    "target": "D",
+				    "type": "cash",
+				    "value": allOutputData.Solar.nonResRev.toFixed(2)
+				}, {
+				    "source": "Cn",
+				    "target": "D",
+				    "type": "cash",
+				    "value": allOutputData.Solar.resNonSolarRev.toFixed(2)
+				}, {
+				    "source": "Cs",
+				    "target": "S",
+				    "type": "power",
+				    "value": allOutputData.Solar.costSolarGen.toFixed(2) + " kWh"
+				}, {
+				    "source": "S",
+				    "target": "Cs",
+				    "type": "cash",
+				    "value": allOutputData.Solar.annualSolarGen.toFixed(2)
+				}];
 				//sort links by source, then target
 				links.sort(function(a,b) {
 					if (a.source > b.source) {return 1;}
@@ -562,12 +608,14 @@
 					else {links[i].linknum = 1;};
 				};
 				var nodes = {};
-				// Compute the distinct nodes from the links.
+				// // Compute the distinct nodes from the links.
 				links.forEach(function(link) {
-				  link.source = nodes[link.source] || (nodes[link.source] = {name: link.source});
-				  link.target = nodes[link.target] || (nodes[link.target] = {name: link.target});
+				  link.source = nodes[link.source] || (nodes[link.source] 
+				  	= {name: link.source});
+				  link.target = nodes[link.target] || (nodes[link.target] 
+				  	= {name: link.target});
 				});
-				var w = 960,
+				var w = 1000,
 					h = 500;
 				var force = d3.layout.force()
 					.nodes(d3.values(nodes))
@@ -613,20 +661,31 @@
 					.append("textPath")
 					.attr("xlink:href",function(d,i) { return "#linkId_" + i;})
 					.text(function(d) { return d.value; });
+
 				var circle = svg.append("svg:g").selectAll("circle")
 					.data(force.nodes())
 					.enter().append("svg:circle")
 					.attr("r", 20)
 					.style("fill", "gray")
 					.call(force.drag);
+					circle.append("svg:text").text(function (d){return d.name})
 				var text = svg.append("svg:g").selectAll("g")
 					.data(force.nodes())
 					.enter().append("svg:g");
 					text.append("svg:text")
-					.attr("x", "-1em")
+					.attr("x", "0em")
 					.attr("y", ".31em")
 					.style("font-size", "13px")
 					.text(function(d) { return d.name; });
+				text.append("svg:text")
+					.attr("x", "-1em")
+					.attr("y", "2.5em")
+					.style("font-size", "13px")
+					.text(function(d){
+						if (d.name == "Cs") return allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(2)
+						else if (d.name =="Cn") return allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(2)
+							else return ""
+				})
 				// Use elliptical arc path segments to doubly-encode directionality.
 				function tick() {
 				  path.attr("d", function(d) {
@@ -647,7 +706,7 @@
 			</div>
 		</div>
 		<!-- TODO: Split into two separate sheet -->
-		<p class="reportTitle postRun">BAU v.s. Solar Table</p>
+		<p class="reportTitle postRun">Business as Usual v.s. Solar Table</p>
 		<div id="tableReport" class="tightContent postRun tableReport">
 			<table id="solarTableReport">
 			</table>
@@ -658,7 +717,7 @@
 			var cell1 = row.insertCell(1);
 			var cell2 = row.insertCell(2);
 			cell0.innerHTML = "<strong>Property</strong>"
-			cell1.innerHTML = "<strong>BAU</strong>";
+			cell1.innerHTML = "<strong>Business as Usual</strong>";
 			cell2.innerHTML = "<strong>Solar</strong>";
 				for (key in allOutputData.BAU){
 					table = gebi("solarTableReport")
