@@ -10,6 +10,8 @@
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
+	<script src='{{pathPrefix}}/static/jquery.tipsy.js'></script>
+	<link rel="stylesheet" type="text/css" href="{{pathPrefix}}/static/tipsy.css">
 	<!-- Global Funcs Import -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
@@ -491,220 +493,86 @@
 		</div>
 		<p class="reportTitle  postRun">Annual Cash and Power Flow Model</p>
 		<div id="graphicChart" class="tightContent postRun tableReport">
-			<div id="mapHere">
-				<script src="http://d3js.org/d3.v3.min.js"></script>
-				<style>
-				.link {
-				  fill: none;
-				  stroke: #666;
-				  stroke-width: 4px;
-				}
-				#cash {
-				  fill: green;
-				}
-				#power {
-				  fill: orange;
-				}
-				.link.cash {
-				  stroke: green;
-				}
-				.link.power {
-				  stroke: orange;
-				}
-				circle {
-				  fill: #ccc;
-				  stroke: #333;
-				  stroke-width: 1.5px;
-				}
-				text {
-				  font: 20px sans-serif;
-				  pointer-events: none;
-				}
-				</style>
-				<script>
-				var links = [{
-				    "source": "D",
-				    "target": "L",
-				    "type": "power",
-				    "value": allOutputData.Solar.losses.toFixed(2) + " kWh"
-				}, {
-				    "source": "D",
-				    "target": "P",
-				    "type": "cash",
-				    "value": allOutputData.Solar.patCaptial.toFixed(2)
-				}, {
-				    "source": "D",
-				    "target": "G",
-				    "type": "cash",
-				    "value": allOutputData.Solar.costPurchasedPower.toFixed(2)
-				}, {
-				    "source": "D",
-				    "target": "V",
-				    "type": "cash",
-				    "value": allOutputData.BAU.nonPowerCosts.toFixed(2)
-				}, {
-				    "source": "D",
-				    "target": "Cs",
-				    "type": "power",
-				    "value": allOutputData.Solar.resNonSolarKWhSold.toFixed(2) + " kWh"
-				}, {
-				    "source": "D",
-				    "target": "Cci",
-				    "type": "power",
-				    "value": allOutputData.BAU.nonResKWhSold.toFixed(2) + " kWh"
-				}, {
-				    "source": "D",
-				    "target": "Cn",
-				    "type": "power",
-				    "value": allOutputData.Solar.solarResSold.toFixed(2) + " kWh"
-				}, {
-				    "source": "G",
-				    "target": "D",
-				    "type": "power",
-				    "value": allOutputData.Solar.totalKWhPurchased.toFixed(2) + " kWh"
-				}, {
-				    "source": "Cs",
-				    "target": "D",
-				    "type": "cash",
-				    "value": allOutputData.Solar.solarResRev.toFixed(2)
-				}, {
-				    "source": "Cci",
-				    "target": "D",
-				    "type": "cash",
-				    "value": allOutputData.Solar.nonResRev.toFixed(2)
-				}, {
-				    "source": "Cn",
-				    "target": "D",
-				    "type": "cash",
-				    "value": allOutputData.Solar.resNonSolarRev.toFixed(2)
-				}, {
-				    "source": "Cs",
-				    "target": "S",
-				    "type": "power",
-				    "value": allOutputData.Solar.costSolarGen.toFixed(2) + " kWh"
-				}, {
-				    "source": "S",
-				    "target": "Cs",
-				    "type": "cash",
-				    "value": allOutputData.Solar.annualSolarGen.toFixed(2)
-				}];
-				//sort links by source, then target
-				links.sort(function(a,b) {
-					if (a.source > b.source) {return 1;}
-					else if (a.source < b.source) {return -1;}
-					else {
-						if (a.target > b.target) {return 1;}
-						if (a.target < b.target) {return -1;}
-						else {return 0;}
-					}
-				});
-				//any links with duplicate source and target get an incremented 'linknum'
-				for (var i=0; i<links.length; i++) {
-					if (i != 0 &&
-						links[i].source == links[i-1].source &&
-						links[i].target == links[i-1].target) {
-							links[i].linknum = links[i-1].linknum + 1;
-						}
-					else {links[i].linknum = 1;};
-				};
-				var nodes = {};
-				// // Compute the distinct nodes from the links.
-				links.forEach(function(link) {
-				  link.source = nodes[link.source] || (nodes[link.source] 
-				  	= {name: link.source});
-				  link.target = nodes[link.target] || (nodes[link.target] 
-				  	= {name: link.target});
-				});
-				var w = 1000,
-					h = 500;
-				var force = d3.layout.force()
-					.nodes(d3.values(nodes))
-					.links(links)
-					.size([w, h])
-					.linkDistance(180)
-					.linkStrength(0.1)
-					.charge(-300)
-					.gravity(0.01)
-					.on("tick", tick)
-					.start();
-				var svg = d3.select("#mapHere").append("svg:svg")
-					.attr("width", w)
-					.attr("height", h)
-				// Per-type markers, as they don't inherit styles.
-				svg.append("svg:defs").selectAll("marker")
-					.data(["power", "cash"])
-					.enter().append("svg:marker")
-					.attr("id", String)
-					.attr("viewBox", "0 -5 10 10")
-					.attr("refX", 15)
-					.attr("refY", -1.5)
-					.attr("markerWidth", 6)
-					.attr("markerHeight", 6)
-					.attr("orient", "auto")
-					.append("svg:path")
-					.attr("d", "M0,-5L10,0L0,5");
-				var path = svg.append("svg:g").selectAll("path")
-					.data(force.links())
-					.enter().append("svg:path")
-					.attr("class", function(d) { return "link " + d.type; })
-					.attr("id",function(d,i) { return "linkId_" + i; })
-					.attr("marker-end", function(d) { return "url(#" + d.type + ")"; });
-				var linktext = svg.append("svg:g").selectAll("g.linklabelholder").data(force.links());
-					linktext.enter().append("g").attr("class", "linklabelholder")
-					.append("text")
-					.attr("class", "linklabel")
-					.style("font-size", "13px")
-					.attr("x", "50")
-					.attr("y", "-20")
-					.attr("text-anchor", "start")
-					.style("fill","#000")
-					.append("textPath")
-					.attr("xlink:href",function(d,i) { return "#linkId_" + i;})
-					.text(function(d) { return d.value; });
+			<style type="text/css">
+			g.node rect{
+		        fill:lightgray;
+		        stroke:black;
+		    }
+		    g.node circle{
+		        fill:lightgray;
+		        stroke:black;
+		    }
+		    g.node text{
+		        font-size: 10px;
+		    }
+			</style>
+		<svg width="980px" height="490px" viewBox="0.00 0.00 800.00 400.00">
+		<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(150 0)">
+		<defs>
+			<marker id="markerArrow" markerWidth="13" markerHeight="13" refx="2" refy="6" orient="auto">
+				<path d="M2,3 L2,10 L13,6 Z" style="fill:darkgray;" />
+			</marker>
+		</defs>
+		<path id='linkDL' class='link' d="M200,190 L120,190" style="stroke: orange; stroke-width: 2px; fill: none; marker-start: url(#markerCircle);  marker-end: url(#markerArrow);"/>
+		<path id='linkDP' class='link' d="M200,150 L155,120" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkGD' class='link' d="M230,70 L230,140" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkDG' class='link' d="M250,150 L250,80" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkDV' class='link' d="M280,190 L350,190" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkDCn' class='link' d="M280,230 L366,290 " style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkCnD' class='link' d="M340,320 L290,245" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkDCci' class='link' d="M230,230 L230,290" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkCciD' class='link' d="M250,300 L250,240" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkDCs' class='link' d="M200,230 L140,290" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkCsD' class='link' d="M160,300 L190,250" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkSCs' class='link' d="M50,310 L90,310" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkCsS' class='link' d="M100,330 L70,330" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
 
-				var circle = svg.append("svg:g").selectAll("circle")
-					.data(force.nodes())
-					.enter().append("svg:circle")
-					.attr("r", 20)
-					.style("fill", "gray")
-					.call(force.drag);
-					circle.append("svg:text").text(function (d){return d.name})
-				var text = svg.append("svg:g").selectAll("g")
-					.data(force.nodes())
-					.enter().append("svg:g");
-					text.append("svg:text")
-					.attr("x", "0em")
-					.attr("y", ".31em")
-					.style("font-size", "13px")
-					.text(function(d) { return d.name; });
-				text.append("svg:text")
-					.attr("x", "-1em")
-					.attr("y", "2.5em")
-					.style("font-size", "13px")
-					.text(function(d){
-						if (d.name == "Cs") return allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(2)
-						else if (d.name =="Cn") return allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(2)
-							else return ""
-				})
-				// Use elliptical arc path segments to doubly-encode directionality.
-				function tick() {
-				  path.attr("d", function(d) {
-					var dx = d.target.x - d.source.x,
-						dy = d.target.y - d.source.y,
-						// dr = 75/d.linknum;  //linknum is defined above
-						dr = Math.sqrt(dx * dx + dy * dy);
-					return "M" + d.source.x + "," + d.source.y + "A" + dr + "," + dr + " 0 0,1 " + d.target.x + "," + d.target.y;
-				  });
-				  circle.attr("transform", function(d) {
-					return "translate(" + d.x + "," + d.y + ")";
-				  });
-				  text.attr("transform", function(d) {
-					return "translate(" + d.x + "," + d.y + ")";
-				  });
-				}
-				</script>
-			</div>
+		<g id='nodeD' class='node'>	<rect width='80' height='80' x='200' y='150'></rect><text x="240" y="190" text-anchor="middle">D</text></g>
+		<g id='nodeL' class='node'><circle cx='80' cy='190' r='30'></circle><text x="80" y="190" text-anchor="middle">L</text></g>
+		<g id='nodeP' class='node'><circle cx='120' cy='100' r='30'></circle><text x="120" y="100" text-anchor="middle">P</text></g>
+		<g id='nodeG' class='node'><circle cx='240' cy='40' r='30'></circle><text x="240" y="40" text-anchor="middle">G</text></g>
+		<g id='nodeV' class='node'><circle cx='400' cy='190' r='30'></circle><text x="400" y="190" text-anchor="middle">V</text></g>
+		<g id='nodeCn' class='node'><rect width='60' height='40' x='340' y='300'></rect><text x="370" y="330" text-anchor="middle">Cn</text></g>
+		<g id='nodeCs' class='node'><rect width='60' height='40' x='100' y='300'></rect><text x="130" y="330" text-anchor="middle">Cs</text></g>
+		<g id='nodeCci' class='node'><rect width='60' height='40' x='210' y='300'></rect><text x="240" y="330" text-anchor="middle">Cci</text></g>
+		<g id='nodeS' class='node'><circle cx='40' cy='320' r='20'></circle><text x="40" y="320" text-anchor="middle">S</text></g>
+		</g>
+		</svg>
+	<script type="text/javascript">
+		$('#nodeD').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Distribution Utility<br>'+'$ '+allOutputData.BAU.idealRate.toFixed(2)+' -> $ '+ allOutputData.Solar.idealRate.toFixed(2)+'</center>'
+		});
+		$('#nodeL').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Energy Losses</center>'
+		});
+		$('#nodeP').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Patronage Capital</center>'
+		});
+		$('#nodeG').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>G&T or other Power Provider</center>'
+		});
+		$('#nodeV').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Vender, Staff, Banks etc.</center>'
+		});
+		$('#nodeCn').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Non-solar Residential Customers<br>'+"$ "+allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(2)+'</center>'
+		});
+		$('#nodeCci').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Commercial and Industrial Customers</center>'
+		});
+		$('#nodeCs').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar Residential Customers<br>'+"$ "+allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(2)+'</center>'
+		});
+		$('#nodeS').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar</center>'
+		});
+		$('path#linkDL').tipsy({gravity:'sw', hoverlock:true, html:true, fallback: allOutputData.Solar.losses.toFixed(2).toString()+" kWh"});
+		$('path#linkDP').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.patCaptial.toFixed(2)});
+		$('path#linkGD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.totalKWhPurchased.toFixed(2) + " kWh"});
+		$('path#linkDG').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.costPurchasedPower.toFixed(2)});
+		$('path#linkDV').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.BAU.nonPowerCosts.toFixed(2)});
+		$('path#linkDCn').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.solarResSold.toFixed(2) + " kWh"});
+		$('path#linkCnD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.resNonSolarRev.toFixed(2)});
+		$('path#linkDCci').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.BAU.nonResKWhSold.toFixed(2) + " kWh"});
+		$('path#linkCciD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.nonResRev.toFixed(2)});
+		$('path#linkDCs').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.resNonSolarKWhSold.toFixed(2) + " kWh"});
+		$('path#linkCsD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.solarResRev.toFixed(2)});
+		$('path#linkSCs').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.annualSolarGen.toFixed(2)});
+		$('path#linkCsS').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.costSolarGen.toFixed(2) + " kWh"});
+	</script>
 		</div>
+		
 		<!-- TODO: Split into two separate sheet -->
 		<p class="reportTitle postRun">Business as Usual v.s. Solar Table</p>
 		<div id="tableReport" class="tightContent postRun tableReport">
