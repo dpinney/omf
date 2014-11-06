@@ -12,7 +12,7 @@ import feeder
 from solvers import gridlabd
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"_solarEngineering.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"_solarEngineeringDavid.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -61,7 +61,7 @@ def _tests():
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"modelType": "_solarEngineering",
+		"modelType": "_solarEngineeringDavid",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "100",
 		"systemSize":"10",
@@ -78,7 +78,7 @@ def _tests():
 		"i_ref":"1000",
 		"poa_cutin":"0",
 		"w_stow":"0"}
-	modelLoc = pJoin(workDir,"admin","Automated _solarEngineering Testing")
+	modelLoc = pJoin(workDir,"admin","Automated _solarEngineeringDavid Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
