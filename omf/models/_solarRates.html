@@ -9,6 +9,9 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
+	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
+	<script src='{{pathPrefix}}/static/jquery.tipsy.js'></script>
+	<link rel="stylesheet" type="text/css" href="{{pathPrefix}}/static/tipsy.css">
 	<!-- Global Funcs Import -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
@@ -154,6 +157,240 @@
 				<label class="tooltip">Wind stow speed (m/s)<span class="classic">Wind stow speed</span></label>
 				<input type="text" id="w_stow" name="w_stow" value="0"/>
 			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Power Production Expense
+				<span class="classic">Power Production Expense
+				</span></label>
+				<input type="text" id="powerProExpense" name="powerProExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Cost of Purchased Power
+				<span class="classic">Cost of Purchased Power
+				</span></label>
+				<input type="text" id="costPurchasedPower" name="costPurchasedPower"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Transmission Expense
+				<span class="classic">Transmission Expense
+				</span></label>
+				<input type="text" id="transExpense" name="transExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Distribution Expense - Operation
+				<span class="classic">Distribution Expense - Operation
+				</span></label>
+				<input type="text" id="distriExpenseO" name="distriExpenseO"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Distribution Expense - Maintenance
+				<span class="classic">Distribution Expense - Maintenance
+				</span></label>
+				<input type="text" id="distriExpenseM" name="distriExpenseM"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Customer Accounts Expense
+				<span class="classic">Customer Accounts Expense
+				</span></label>
+				<input type="text" id="customerAccountExpense" name="customerAccountExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Customer Service and Informational Expense
+				<span class="classic">Customer Service and Informational Expense
+				</span></label>
+				<input type="text" id="customerServiceExpense" name="customerServiceExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Sales Expense
+				<span class="classic">Sales Expense
+				</span></label>
+				<input type="text" id="salesExpense" name="salesExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Administrative and General Expense
+				<span class="classic">Administrative and General Expense
+				</span></label>
+				<input type="text" id="adminGeneralExpense" name="adminGeneralExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Depreciation and Amortization Expense
+				<span class="classic">Depreciation and Amortization Expense
+				</span></label>
+				<input type="text" id="depreAmortiExpense" name="depreAmortiExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tax Expense - Property &amp; Gross Receipts
+				<span class="classic">Tax Expense - Property &amp; Gross Receipts
+				</span></label>
+				<input type="text" id="taxExpensePG" name="taxExpensePG"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tax Expense - Other
+				<span class="classic">Tax Expense - Other
+				</span></label>
+				<input type="text" id="taxExpense" name="taxExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Interest on Long-Term Debt
+				<span class="classic">Interest on Long-Term Debt
+				</span></label>
+				<input type="text" id="interestLongTerm" name="interestLongTerm"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Interest Charged to Construction - Credit
+				<span class="classic">Interest Charged to Construction - Credit
+				</span></label>
+				<input type="text" id="interestConstruction" name="interestConstruction"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Interest Expense - Other
+				<span class="classic">Interest Expense - Other
+				</span></label>
+				<input type="text" id="interestExpense" name="interestExpense"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Other Deductions
+				<span class="classic">Other Deductions
+				</span></label>
+				<input type="text" id="otherDeductions" name="otherDeductions"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Non Operating Margins - Interest
+				<span class="classic">Non Operating Margins - Interest
+				</span></label>
+				<input type="text" id="nonOpMarginInterest" name="nonOpMarginInterest"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Allowance for Funds Used During Construction
+				<span class="classic">Allowance for Funds Used During Construction
+				</span></label>
+				<input type="text" id="fundsUsedConstruc" name="fundsUsedConstruc"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Income (Loss) from Equity Investments
+				<span class="classic">Income (Loss) from Equity Investments
+				</span></label>
+				<input type="text" id="incomeEquityInvest" name="incomeEquityInvest"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Non Operating Margins - Other
+				<span class="classic">Non Operating Margins - Other
+				</span></label>
+				<input type="text" id="nonOpMarginOther" name="nonOpMarginOther"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Generation and Transmission Capital Credits
+				<span class="classic">Generation and Transmission Capital Credits
+				</span></label>
+				<input type="text" id="genTransCapCredits" name="genTransCapCredits"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Other Capital Credits and Patronage Dividends
+				<span class="classic">Other Capital Credits and Patronage Dividends
+				</span></label>
+				<input type="text" id="otherCapCreditsPatroDivident" name="otherCapCreditsPatroDivident"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Extraordinary Items
+				<span class="classic">Extraordinary Items
+				</span></label>
+				<input type="text" id="extraItems" name="extraItems"/>
+			</div>
+			<hr>
+			<div class="wideInput">
+				<table>
+					<tr>
+						<th></th>
+						<th>Jan</th>
+						<th>Feb</th>
+						<th>Mar</th>
+						<th>Apr</th>
+						<th>May</th>
+						<th>Jun</th>
+						<th>Jul</th>
+						<th>Aug</th>
+						<th>Sep</th>
+						<th>Oct</th>
+						<th>Nov</th>
+						<th>Dec</th>
+					</tr>						
+					<tr>
+						<th>Consumer Served Sales</th>
+						<td><input type="text" id="janSale" name="janSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febSale" name="febSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marSale" name="marSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprSale" name="aprSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="maySale" name="maySale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junSale" name="junSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julSale" name="julSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augSale" name="augSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepSale" name="sepSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octSale" name="octSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novSale" name="novSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decSale" name="decSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+					<tr>
+						<th>KWh Sold</th>
+						<td><input type="text" id="janKWh" name="janKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febKWh" name="febKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marKWh" name="marKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprKWh" name="aprKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="mayKWh" name="mayKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junKWh" name="junKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julKWh" name="julKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augKWh" name="augKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepKWh" name="sepKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octKWh" name="octKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novKWh" name="novKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decKWh" name="decKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+					<tr>
+						<th>Revenue</th>
+						<td><input type="text" id="janRev" name="janRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febRev" name="febRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marRev" name="marRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprRev" name="aprRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="mayRev" name="mayRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junRev" name="junRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julRev" name="julRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augRev" name="augRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepRev" name="sepRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octRev" name="octRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novRev" name="novRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decRev" name="decRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+					<tr>
+						<th>Total KWh Sold</th>
+						<td><input type="text" id="janKWhT" name="janKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febKWhT" name="febKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marKWhT" name="marKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprKWhT" name="aprKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="mayKWhT" name="mayKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junKWhT" name="junKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julKWhT" name="julKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augKWhT" name="augKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepKWhT" name="sepKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octKWhT" name="octKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novKWhT" name="novKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decKWhT" name="decKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+					<tr>
+						<th>Total Revenue</th>
+						<td><input type="text" id="janRevT" name="janRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="febRevT" name="febRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="marRevT" name="marRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="aprRevT" name="aprRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="mayRevT" name="mayRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="junRevT" name="junRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="julRevT" name="julRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="augRevT" name="augRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="sepRevT" name="sepRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="octRevT" name="octRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="novRevT" name="novRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="decRevT" name="decRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+					</tr>
+				</table>
+			</div>
 			<div class="wideInput" style="text-align:right">
 					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 					<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
@@ -213,8 +450,8 @@
 					"plotOptions":{"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
 					"title":{"text":null},
-					"series":[{"name":"Power Generated", "color":"orange", "data":allOutputData.monthlyGeneration, "dataLabels":{"enabled":false}}],
-					"yAxis":{"title":{"text":"Energy (Wh)","style":{"color":"gray"}}},
+					"series":[{"name":"Solar Generated", "color":"orange", "data":allOutputData.monthlyGeneration, "dataLabels":{"enabled":false}},{"name":"Total Generation", "color":"green", "data":allOutputData.totalGeneration, "dataLabels":{"enabled":false}}],
+					"yAxis":[{"title":{"text":"Energy (Wh)","style":{"color":"gray"}}}],
 					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
@@ -245,20 +482,121 @@
 			</table>
 			<script>
 				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
-				insertMetric("monthlySummaryTable","Generation", allOutputData.monthlyGeneration.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Generation(Wh)", allOutputData.monthlyGeneration.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total Generation(kWh)", allOutputData.totalGeneration.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable", "No. Consumer Served", allOutputData.monthlyNoConsumerServedSales.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","KWh Sold", allOutputData.monthlyKWhSold.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Revenue", allOutputData.monthlyRevenue.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total KWh Sold", allOutputData.totalKWhSold.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total Revenue from Sales of Electric Energy", allOutputData.totalRevenue.map(function(x){return x[1]}))
 			</script>
 		</div>
-		<p class="reportTitle postRun">Annual Data Table</p>
-		<div id="annualSummaryReport" class="tightContent postRun tableReport">
-			<table id="annualSummaryTable">
+		<p class="reportTitle  postRun">Annual Cash and Power Flow Model</p>
+		<div id="graphicChart" class="tightContent postRun tableReport">
+			<style type="text/css">
+			g.node rect{
+		        fill:lightgray;
+		        stroke:black;
+		    }
+		    g.node circle{
+		        fill:lightgray;
+		        stroke:black;
+		    }
+		    g.node text{
+		        font-size: 10px;
+		    }
+			</style>
+		<svg width="980px" height="490px" viewBox="0.00 0.00 800.00 400.00">
+		<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(150 0)">
+		<defs>
+			<marker id="markerArrow" markerWidth="13" markerHeight="13" refx="2" refy="6" orient="auto">
+				<path d="M2,3 L2,10 L13,6 Z" style="fill:darkgray;" />
+			</marker>
+		</defs>
+		<path id='linkDL' class='link' d="M200,190 L120,190" style="stroke: orange; stroke-width: 2px; fill: none; marker-start: url(#markerCircle);  marker-end: url(#markerArrow);"/>
+		<path id='linkDP' class='link' d="M200,150 L155,120" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkGD' class='link' d="M230,70 L230,140" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkDG' class='link' d="M250,150 L250,80" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkDV' class='link' d="M280,190 L350,190" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkDCn' class='link' d="M280,230 L366,290 " style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkCnD' class='link' d="M340,320 L290,245" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkDCci' class='link' d="M230,230 L230,290" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkCciD' class='link' d="M250,300 L250,240" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkDCs' class='link' d="M200,230 L140,290" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkCsD' class='link' d="M160,300 L190,250" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkSCs' class='link' d="M50,310 L90,310" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+		<path id='linkCsS' class='link' d="M100,330 L70,330" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+
+		<g id='nodeD' class='node'>	<rect width='80' height='80' x='200' y='150'></rect><text x="240" y="190" text-anchor="middle">D</text></g>
+		<g id='nodeL' class='node'><circle cx='80' cy='190' r='30'></circle><text x="80" y="190" text-anchor="middle">L</text></g>
+		<g id='nodeP' class='node'><circle cx='120' cy='100' r='30'></circle><text x="120" y="100" text-anchor="middle">P</text></g>
+		<g id='nodeG' class='node'><circle cx='240' cy='40' r='30'></circle><text x="240" y="40" text-anchor="middle">G</text></g>
+		<g id='nodeV' class='node'><circle cx='400' cy='190' r='30'></circle><text x="400" y="190" text-anchor="middle">V</text></g>
+		<g id='nodeCn' class='node'><rect width='60' height='40' x='340' y='300'></rect><text x="370" y="330" text-anchor="middle">Cn</text></g>
+		<g id='nodeCs' class='node'><rect width='60' height='40' x='100' y='300'></rect><text x="130" y="330" text-anchor="middle">Cs</text></g>
+		<g id='nodeCci' class='node'><rect width='60' height='40' x='210' y='300'></rect><text x="240" y="330" text-anchor="middle">Cci</text></g>
+		<g id='nodeS' class='node'><circle cx='40' cy='320' r='20'></circle><text x="40" y="320" text-anchor="middle">S</text></g>
+		</g>
+		</svg>
+	<script type="text/javascript">
+		$('#nodeD').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Distribution Utility<br>'+'$ '+allOutputData.BAU.idealRate.toFixed(2)+' -> $ '+ allOutputData.Solar.idealRate.toFixed(2)+'</center>'
+		});
+		$('#nodeL').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Energy Losses</center>'
+		});
+		$('#nodeP').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Patronage Capital</center>'
+		});
+		$('#nodeG').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>G&T or other Power Provider</center>'
+		});
+		$('#nodeV').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Vender, Staff, Banks etc.</center>'
+		});
+		$('#nodeCn').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Non-solar Residential Customers<br>'+"$ "+allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(2)+'</center>'
+		});
+		$('#nodeCci').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Commercial and Industrial Customers</center>'
+		});
+		$('#nodeCs').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar Residential Customers<br>'+"$ "+allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(2)+'</center>'
+		});
+		$('#nodeS').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar</center>'
+		});
+		$('path#linkDL').tipsy({gravity:'sw', hoverlock:true, html:true, fallback: allOutputData.Solar.losses.toFixed(2).toString()+" kWh"});
+		$('path#linkDP').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.patCaptial.toFixed(2)});
+		$('path#linkGD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.totalKWhPurchased.toFixed(2) + " kWh"});
+		$('path#linkDG').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.costPurchasedPower.toFixed(2)});
+		$('path#linkDV').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.BAU.nonPowerCosts.toFixed(2)});
+		$('path#linkDCn').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.solarResSold.toFixed(2) + " kWh"});
+		$('path#linkCnD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.resNonSolarRev.toFixed(2)});
+		$('path#linkDCci').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.BAU.nonResKWhSold.toFixed(2) + " kWh"});
+		$('path#linkCciD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.nonResRev.toFixed(2)});
+		$('path#linkDCs').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.resNonSolarKWhSold.toFixed(2) + " kWh"});
+		$('path#linkCsD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.solarResRev.toFixed(2)});
+		$('path#linkSCs').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.annualSolarGen.toFixed(2)});
+		$('path#linkCsS').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.costSolarGen.toFixed(2) + " kWh"});
+	</script>
+		</div>
+		
+		<!-- TODO: Split into two separate sheet -->
+		<p class="reportTitle postRun">Business as Usual v.s. Solar Table</p>
+		<div id="tableReport" class="tightContent postRun tableReport">
+			<table id="solarTableReport">
 			</table>
 			<script>
-				insertMetric("annualSummaryTable","Year", Array.apply(null, {length: parseFloat(allInputData.lifeSpan)}).map(Number.call, Number))
-				insertMetric("annualSummaryTable","Generation Income", allOutputData.lifeGenerationDollars)
-				insertMetric("annualSummaryTable","Purchase Costs", allOutputData.lifePurchaseCosts)
-				insertMetric("annualSummaryTable","Op. and Maint. Costs", allOutputData.lifeOmCosts)
-				insertMetric("annualSummaryTable","Net Income", allOutputData.netCashFlow)
-				insertMetric("annualSummaryTable","Cumulative Income", allOutputData.cumCashFlow)
+			table = gebi("solarTableReport")
+			var row = table.insertRow()
+			var cell0 = row.insertCell(0);
+			var cell1 = row.insertCell(1);
+			var cell2 = row.insertCell(2);
+			cell0.innerHTML = "<strong>Property</strong>"
+			cell1.innerHTML = "<strong>Business as Usual</strong>";
+			cell2.innerHTML = "<strong>Solar</strong>";
+				for (key in allOutputData.BAU){
+					table = gebi("solarTableReport")
+					newRow = table.insertRow()
+					cell0 = newRow.insertCell(0)
+					cell1 = newRow.insertCell(1)
+					cell2 = newRow.insertCell(2)
+					cell0.innerHTML = key
+					cell1.innerHTML = allOutputData.BAU[key]
+					cell2.innerHTML = allOutputData.Solar[key]
+				}
 			</script>
 		</div>
 	</div>
