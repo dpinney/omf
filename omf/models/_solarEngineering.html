@@ -1,0 +1,213 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<!-- Global Funcs Import -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<!-- Global Functions -->
+	<script type="text/javascript">
+		function init() {
+			// If we have input, put it back.
+			if (allInputData != null) {
+				restoreInputs()
+				$("#modelName").prop("readonly", true)
+			}
+			// Depending on status, show different things.
+			if (modelStatus == "finished") {
+				console.log("FINISHED")
+				$(".postRun").css('display', 'block')
+				$(".postRunInline").css('display', 'inline-block')
+			} else if (modelStatus == "running") {
+				console.log("RUNNING")
+				$(".running").css('display', 'block')
+				$(".runningInline").css('display', 'inline-block')
+				$("input").prop("readonly", true)
+				$("select").prop("disabled", true)
+			} else /* Stopped */ {
+				if (allInputData != null) {
+					$(".stopped").show()
+					$(".stoppedInline").show()
+				} else {
+					console.log("PRERUN")
+					$(".preRun").css('display', 'inline-block')
+				}
+			}
+		}
+	</script>
+</head>
+<body onload="init()">
+	<div id="title">
+		<div id="logoBox"><a href="/">&#10059;</a></div>
+		<p id="titleText">New Dynamic CVR Model</p>
+	</div>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
+			<div class="shortInput">
+				<label>Model Type</label>
+				<input type="text" id="modelType" name="modelType" value="_solarEngineering" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Feeder</label>
+				<select id="feederName" name="feederName"/>
+					<option disabled><strong>Personal Feeders</strong></option>
+					{% for feeder in datastoreNames['feeders'] %}
+						<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
+					{% endfor %}
+					<option disabled><strong>Public Feeders</strong></option>
+					{% for pFeeder in datastoreNames['publicFeeders'] %}
+						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="shortInput">
+				<label>Scada File name</label>
+				<input type="text" id="scadaFile" name="scadaFile" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/></td>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/></td>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/></td>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Climate<span class="classic">Climate</span></label>
+				<select id='climateName' name='climateName'>
+					{% for climate in datastoreNames['climates'] %}
+						<option value='{{ climate }}'>{{ climate }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
+				<input type="text" id="simLength" name="simLength" data-validRegex="\d+"/>				
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
+				<select id="simLengthUnits" name="simLengthUnits">
+					<option value="minutes">Minutes</option>
+					<option value="hours">Hours</option>
+					<option value="days">Days</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date (YYYY-MM-DD)</span></label>
+				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
+			</div>
+			<!-- TODO: Add a table, and addiable and removable rows. -->
+			<hr>
+			<div class='shortInput'>
+			<table id="myTable" class="order-list">
+			    <thead>
+			        <tr>
+			            <td>Node Name</td>
+			            <td>Size</td>
+			        </tr>
+			    </thead>
+			    <tbody>
+			        <tr>
+			            <td>
+			                <input type="text" name="name1"/>
+			            </td>
+			            <td>
+			                <input type="text" name="size1" data-validRegex="[\w\s]+"/>
+			            </td>
+			            <td>
+			            	<a class='add-row postRunInline preRun stoppedInline' href='#' title="Add row">&#8853;</a>
+			            </td>
+			        </tr>
+			    </tbody>
+			</table>
+			</div>
+			<script type="text/javascript">
+			var counter = 0;
+		    $(".add-row").on("click", function () {
+		        counter = $('#myTable tr').length - 2;
+		        var newRow = $("<tr>");
+		        var cols = "";
+		        cols += '<td><input type="text" name="name' + counter + '"/></td>';
+		        cols += '<td><input type="text" name="size' + counter + '"/></td>';
+		        cols += '<td><a class="remove-row postRunInline preRun stoppedInline" style="display:inline" href="#" title="Remove row">&#8854;</a></td>'
+		        newRow.append(cols);
+		        if (counter == 4) $('#addrow').attr('disabled', true).prop('value', "You've reached the limit");
+		        $("table.order-list").append(newRow);
+		        counter++;
+		    });
+		    $("table.order-list").on("change", 'input[name^="price"]', function (event) {
+		        calculateRow($(this).closest("tr"));
+		        calculateGrandTotal();                
+		    });
+		    $("table.order-list").on("click", ".remove-row", function (event) {
+		        $(this).closest("tr").remove();
+		        calculateGrandTotal();
+		        counter -= 1
+		        $('#addrow').attr('disabled', false).prop('value', "Add Row");
+		    });
+			</script>
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="rerunButton" type="submit" class="postRunInline stoppedInline">Re-Run Model</button>
+			</div>
+		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results.
+	</div>
+	<div id ="stopIndicator" class="content stopped">
+		Model cancelled or encountered an error. Please change inputs and re-run.
+	</div>
+	<div id="output">
+	<!-- TODO: Add more charts -->
+	<p class="reportTitle postRun">System Outputs</p>
+	<div id="powerGenerationReport" class="tightContent postRun">
+		<div id="powerTimeSeries"></div>
+		<div id="energyBalance"></div>
+		<script>
+			Highcharts.setOptions({global: { useUTC: false }});
+			powerSeries = [{"marker":{"enabled":false},"color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
+			var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
+			pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
+			pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
+			new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+		</script>
+	</div>
+	<p class="reportTitle postRun">Climate</p>
+	<div id="climateReport" class="tightContent postRun">
+		<div id="climateChartDiv"></div>
+		<script>
+			climateSeriesData = [
+				{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"]},
+				{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
+				{"name":"Direct Irradiance (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Irradiance (W/m^2)"]},
+				{"name":"Difuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Difuse Irradiance (W/m^2)"]},
+				{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]}]
+			new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+		</script>
+	</div>
+</body>
