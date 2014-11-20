@@ -93,6 +93,7 @@ def roundSig(x, sig=3):
 	''' Round to a given number of sig figs. '''
 	roundPosSig = lambda y,sig: round(y, sig-int(math.floor(math.log10(y)))-1)
 	if x == 0: return 0
+	elif x!=x: return 0 # This is handling float's NaN.
 	elif x < 0: return -1*roundPosSig(-1*x, sig)
 	else: return roundPosSig(x, sig)
 
