@@ -106,7 +106,7 @@ def _tests():
 		"i_ref":"1000",
 		"poa_cutin":"0",
 		"w_stow":"0"}
-	modelLoc = pJoin(workDir,"admin","Automated _solarEngineeringDavid Testing")
+	modelLoc = pJoin(workDir,"admin","Automated _solarEngineering Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)

@@ -123,16 +123,16 @@
 			    <thead>
 			        <tr>
 			            <td>Node Name</td>
-			            <td>Size</td>
+			            <td>Size (kW-AC)</td>
 			        </tr>
 			    </thead>
 			    <tbody>
 			        <tr>
 			            <td>
-			                <input type="text" name="name1"/>
+			                <input type="text" id="nodename1" name="nodename1"/>
 			            </td>
 			            <td>
-			                <input type="text" name="size1" data-validRegex="[\w\s]+"/>
+			                <input type="text" id="nodesize1" name="nodesize1" data-validRegex="[\w\s]+"/>
 			            </td>
 			            <td>
 			            	<a class='add-row postRunInline preRun stoppedInline' href='#' title="Add row">&#8853;</a>
@@ -144,11 +144,11 @@
 			<script type="text/javascript">
 			var counter = 0;
 		    $(".add-row").on("click", function () {
-		        counter = $('#myTable tr').length - 2;
+		        counter = $('#myTable tr').length - 1;
 		        var newRow = $("<tr>");
 		        var cols = "";
-		        cols += '<td><input type="text" name="name' + counter + '"/></td>';
-		        cols += '<td><input type="text" name="size' + counter + '"/></td>';
+		        cols += '<td><input type="text" id="nodename'+ counter +'" name="nodename' + counter + '"/></td>';
+		        cols += '<td><input type="text" id="nodesize'+ counter +'" name="nodesize' + counter + '"/></td>';
 		        cols += '<td><a class="remove-row postRunInline preRun stoppedInline" style="display:inline" href="#" title="Remove row">&#8854;</a></td>'
 		        newRow.append(cols);
 		        if (counter == 4) $('#addrow').attr('disabled', true).prop('value', "You've reached the limit");
