@@ -84,7 +84,64 @@ def run(modelDir, inputDict):
 		outData['allMeterVoltages']['Mean'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], avg, level)
 		outData['allMeterVoltages']['StdDev'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], avg, level)
 		outData['allMeterVoltages']['Max'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
-
+	# Power Consumption
+	outData['Consumption'] = {}
+	# Set default value to be 0, avoiding missing value when computing Loads
+	outData['Consumption']['Power'] = [0] * int(inputDict["simLength"])
+	outData['Consumption']['Losses'] = [0] * int(inputDict["simLength"])
+	outData['Consumption']['DG'] = [0] * int(inputDict["simLength"])
+	for key in rawOut:
+		if key.startswith('SwingKids_') and key.endswith('.csv'):
+			oneSwingPower = hdmAgg(vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), avg, level)
+			if 'Power' not in outData['Consumption']:
+				outData['Consumption']['Power'] = oneSwingPower
+			else:
+				outData['Consumption']['Power'] = vecSum(oneSwingPower,outData['Consumption']['Power'])
+		elif key.startswith('Inverter_') and key.endswith('.csv'): 	
+			realA = rawOut[key]['power_A.real']
+			realB = rawOut[key]['power_B.real']
+			realC = rawOut[key]['power_C.real']
+			imagA = rawOut[key]['power_A.imag']
+			imagB = rawOut[key]['power_B.imag']
+			imagC = rawOut[key]['power_C.imag']
+			oneDgPower = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
+			if 'DG' not in outData['Consumption']:
+				outData['Consumption']['DG'] = oneDgPower
+			else:
+				outData['Consumption']['DG'] = vecSum(oneDgPower,outData['Consumption']['DG'])
+		elif key.startswith('Windmill_') and key.endswith('.csv'):
+			vrA = rawOut[key]['voltage_A.real']
+			vrB = rawOut[key]['voltage_B.real']
+			vrC = rawOut[key]['voltage_C.real']
+			viA = rawOut[key]['voltage_A.imag']
+			viB = rawOut[key]['voltage_B.imag']
+			viC = rawOut[key]['voltage_C.imag']
+			crB = rawOut[key]['current_B.real']
+			crA = rawOut[key]['current_A.real']
+			crC = rawOut[key]['current_C.real']
+			ciA = rawOut[key]['current_A.imag']
+			ciB = rawOut[key]['current_B.imag']
+			ciC = rawOut[key]['current_C.imag']
+			powerA = vecProd(vecPyth(vrA,viA),vecPyth(crA,ciA))
+			powerB = vecProd(vecPyth(vrB,viB),vecPyth(crB,ciB))
+			powerC = vecProd(vecPyth(vrC,viC),vecPyth(crC,ciC))
+			oneDgPower = hdmAgg(vecSum(powerA,powerB,powerC), avg, level)
+			if 'DG' not in outData['Consumption']:
+				outData['Consumption']['DG'] = oneDgPower
+			else:
+				outData['Consumption']['DG'] = vecSum(oneDgPower,outData['Consumption']['DG'])
+		elif key in ['OverheadLosses.csv', 'UndergroundLosses.csv', 'TriplexLosses.csv', 'TransformerLosses.csv']:
+			realA = rawOut[key]['sum(power_losses_A.real)']
+			imagA = rawOut[key]['sum(power_losses_A.imag)']
+			realB = rawOut[key]['sum(power_losses_B.real)']
+			imagB = rawOut[key]['sum(power_losses_B.imag)']
+			realC = rawOut[key]['sum(power_losses_C.real)']
+			imagC = rawOut[key]['sum(power_losses_C.imag)']
+			oneLoss = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
+			if 'Losses' not in outData['Consumption']:
+				outData['Consumption']['Losses'] = oneLoss
+			else:
+				outData['Consumption']['Losses'] = vecSum(oneLoss,outData['Consumption']['Losses'])
 	# TODO: Stdout/stderr.
 	# Write the output.
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
@@ -113,6 +170,63 @@ def hdmAgg(series, func, level):
 		return aggSeries(stamps, series, func, level)
 	else:
 		return series
+
+def aggSeries(timeStamps, timeSeries, func, level):
+	''' Aggregate a list + timeStamps up to the required time level. '''
+	# Different substring depending on what level we aggregate to:
+	if level=='months': endPos = 7
+	elif level=='days': endPos = 10
+	combo = zip(timeStamps, timeSeries)
+	# Group by level:
+	groupedCombo = _groupBy(combo, lambda x1,x2: x1[0][0:endPos]==x2[0][0:endPos])
+	# Get rid of the timestamps:
+	groupedRaw = [[pair[1] for pair in group] for group in groupedCombo]
+	return map(func, groupedRaw)
+
+def _pyth(x,y):
+	''' Compute the third side of a triangle--BUT KEEP SIGNS THE SAME FOR DG. '''
+	sign = lambda z:(-1 if z<0 else 1)
+	fullSign = sign(sign(x)*x*x + sign(y)*y*y)
+	return fullSign*math.sqrt(x*x + y*y)
+
+def vecPyth(vx,vy):
+	''' Pythagorean theorem for pairwise elements from two vectors. '''
+	rows = zip(vx,vy)
+	return map(lambda x:_pyth(*x), rows)
+
+def vecSum(*args):
+	''' Add n vectors. '''
+	return map(sum,zip(*args))
+
+def _prod(inList):
+	''' Product of all values in a list. '''
+	return reduce(lambda x,y:x*y, inList, 1)
+
+def vecProd(*args):
+	''' Multiply n vectors. '''
+	return map(_prod, zip(*args))
+
+def threePhasePowFac(ra,rb,rc,ia,ib,ic):
+	''' Get power factor for a row of threephase volts and amps. Gridlab-specific. '''
+	pfRow = lambda row:math.cos(math.atan((row[0]+row[1]+row[2])/(row[3]+row[4]+row[5])))
+	rows = zip(ra,rb,rc,ia,ib,ic)
+	return map(pfRow, rows)
+
+def roundSeries(ser):
+	''' Round everything in a vector to 4 sig figs. '''
+	return map(lambda x:roundSig(x,4), ser)
+
+def _groupBy(inL, func):
+	''' Take a list and func, and group items in place comparing with func. Make sure the func is an equivalence relation, or your brain will hurt. '''
+	if inL == []: return inL
+	if len(inL) == 1: return [inL]
+	newL = [[inL[0]]]
+	for item in inL[1:]:
+		if func(item, newL[-1][0]):
+			newL[-1].append(item)
+		else:
+			newL.append([item])
+	return newL
 
 def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	''' Function to aggregate output if we need something other than hour level. '''
