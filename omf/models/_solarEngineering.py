@@ -77,6 +77,14 @@ def run(modelDir, inputDict):
 			outData['climate']['Temperature (F)'] = hdmAgg(rawOut[key].get('temperature'), max, level)
 			outData['climate']['Snow Depth (in)'] = hdmAgg(rawOut[key].get('snowdepth'), max, level)
 			outData['climate']['Direct Insolation (W/m^2)'] = hdmAgg(rawOut[key].get('solar_direct'), sum, level)
+	# Voltage Band
+	if 'VoltageJiggle.csv' in rawOut:
+		outData['allMeterVoltages'] = {}
+		outData['allMeterVoltages']['Min'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
+		outData['allMeterVoltages']['Mean'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], avg, level)
+		outData['allMeterVoltages']['StdDev'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], avg, level)
+		outData['allMeterVoltages']['Max'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
+
 	# TODO: Stdout/stderr.
 	# Write the output.
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
