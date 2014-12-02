@@ -90,6 +90,7 @@ def run(modelDir, inputDict):
 	outData['Consumption']['Power'] = [0] * int(inputDict["simLength"])
 	outData['Consumption']['Losses'] = [0] * int(inputDict["simLength"])
 	outData['Consumption']['DG'] = [0] * int(inputDict["simLength"])
+	outData['Consumption']['Load'] = [0] * int(inputDict["simLength"])
 	for key in rawOut:
 		if key.startswith('SwingKids_') and key.endswith('.csv'):
 			oneSwingPower = hdmAgg(vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), avg, level)
@@ -142,6 +143,7 @@ def run(modelDir, inputDict):
 				outData['Consumption']['Losses'] = oneLoss
 			else:
 				outData['Consumption']['Losses'] = vecSum(oneLoss,outData['Consumption']['Losses'])
+	outData['Consumption']['Load'] = [i-j+k for i, j, k in zip(outData['Consumption']['Power'], outData['Consumption']['Losses'], outData['Consumption']['DG'])]
 	# TODO: Stdout/stderr.
 	# Write the output.
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:

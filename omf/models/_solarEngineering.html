@@ -193,8 +193,11 @@
 			var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
 			pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
 			pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
-			// powerSeries = [{"marker":{"enabled":false},"color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
-			// new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			powerSeries = {"marker":{"enabled":false},"color":"red","data":allOutputData.Consumption.Power,"name":"Power"}
+			lossesSeries = {"marker":{"enabled":false},"color":"orangered","data":allOutputData.Consumption.Losses,"name":"Losses"}
+			DGSeries = {"marker":{"enabled":false},"color":"seagreen","data":allOutputData.Consumption.DG,"name":"DG"}
+			loadSeries = {"marker":{"enabled":false},"color":"brown","data":allOutputData.Consumption.Load,"name":"Load"}
+			new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":[powerSeries,lossesSeries,DGSeries,loadSeries],"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 		</script>
 	</div>
 	<p class="reportTitle postRun">Climate</p>
