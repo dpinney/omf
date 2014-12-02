@@ -193,11 +193,93 @@
 			var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
 			pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
 			pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
+			highChartsTemplate = {
+				"chart":{"renderTo":"", "marginRight":20, "marginBottom":20, "zoomType":"x"},
+				"title":{"text":null},
+				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+				"credits":{"enabled":false},
+				"xAxis":{"type":"datetime","maxZoom":108000000, "tickColor":"gray","lineColor":"gray"},
+				"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
+				"tooltip":{"valueDecimals":1},
+				"series":[]
+			}
 			powerSeries = {"marker":{"enabled":false},"color":"red","data":allOutputData.Consumption.Power,"name":"Power"}
 			lossesSeries = {"marker":{"enabled":false},"color":"orangered","data":allOutputData.Consumption.Losses,"name":"Losses"}
 			DGSeries = {"marker":{"enabled":false},"color":"seagreen","data":allOutputData.Consumption.DG,"name":"DG"}
-			loadSeries = {"marker":{"enabled":false},"color":"brown","data":allOutputData.Consumption.Load,"name":"Load"}
-			new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":[powerSeries,lossesSeries,DGSeries,loadSeries],"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			loadSeries = {"marker":{"enabled":false},"color":"darkorange","data":allOutputData.Consumption.Load,"name":"Load"}
+			var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "powerTimeSeries"
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 150
+					localHighChart["series"] = [powerSeries,lossesSeries,DGSeries,loadSeries]
+					localHighChart["yAxis"]["title"] = {"text": "Power (W)", "style": {"color": "gray"}}
+			new Highcharts.Chart(localHighChart);
+		</script>
+		<script type="text/javascript">
+		var tPower = eval(allOutputData.Consumption.Power.join("+"));
+		var tLosses = eval(allOutputData.Consumption.Losses.join("+"));
+		var tDG = eval(allOutputData.Consumption.DG.join("+"));
+		var tLoad = eval(allOutputData.Consumption.Load.join("+"));
+		inPower = {name:'in', data:[tPower, tDG], stack: 'male'}
+		outPower = {name:'out', data:[tLosses, tLoad], stack:'female'}
+		var tPowerSeries = {
+			"pointWidth": 40, 
+			"color":"red",
+			"data":[tPower],
+			"type":"column",
+			"name":"Power",
+			"stack":"male"
+		}
+		var tLossesSeries = {
+			"pointWidth": 40, 
+			"color":"orangered",
+			"data":[tLosses],
+			"type":"column",
+			"name":"Losses",
+			"stack":"female"
+		}
+		var tLoadsSeries = {
+			"pointWidth": 40,
+			"color":"darkorange",
+			"data":[tLoad],
+			"type":"column",
+			"name":"Loads",
+			"stack":"female"
+		}
+		var tDGSeries = {
+			"pointWidth": 40,
+			"color":"seagreen",
+			"data":[tDG],
+			"type":"column",
+			"name":"DG",
+			"stack":"male"
+		}
+		var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+							localHighChart["chart"]["renderTo"] = "energyBalance"
+							localHighChart["chart"]["inverted"] = false
+							localHighChart["chart"]["height"] = 150
+							localHighChart["chart"]["width"] = 1000
+							localHighChart["series"] = [tPowerSeries, tDGSeries, tLossesSeries, tLoadsSeries]
+							localHighChart["xAxis"] = {
+								"tickColor":"gray",
+								"lineColor":"gray",
+								"categories": ['energy']
+							}
+							localHighChart["yAxis"] = {
+								"title":{
+									"text":"Energy (Wh)",
+									"style":{
+										"color":"gray"
+									}
+								}
+							}
+							localHighChart["plotOptions"] = {
+								"column":{"stacking":"normal", "shadow":false}, 
+								"spline":{"marker":{"radius":8}, "shadow":false, "lineWidth":0 }
+								}
+		new Highcharts.Chart(localHighChart);
 		</script>
 	</div>
 	<p class="reportTitle postRun">Climate</p>
