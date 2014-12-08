@@ -1,11 +1,13 @@
 ''' Calculate solar engineering impacts using GridLabD. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, csv
 from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
 import multiprocessing
 from __metaModel__ import *
+from matplotlib import pyplot as plt
+import networkx as nx
 
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
@@ -144,6 +146,33 @@ def run(modelDir, inputDict):
 			else:
 				outData['Consumption']['Losses'] = vecSum(oneLoss,outData['Consumption']['Losses'])
 	outData['Consumption']['Load'] = [i-j+k for i, j, k in zip(outData['Consumption']['Power'], outData['Consumption']['Losses'], outData['Consumption']['DG'])]
+	tree = json.load(open(pJoin(modelDir,"feeder.json"))).get("tree",{})
+	# TODO: nodename list
+	# for key in tree:
+	# 	if tree[key].get("name", "") == inputDict.get("nodename1"):
+	# 		meterIndex = findIndex(str(int(max(tree.keys()))+1), 'name', tree[key]['parent'])
+	# 		newInverter = makeNewInverter(tree, tree[key]['phases'])
+	# 		newPanels = newPanel(str(int(max(tree.keys()))+2), inputDict.get('nodesize1', '100'))
+	# 		# newchildatlocation
+	# 		newName = newInverter['object'] + str(index)
+	# 		newInverter['parent'] = tree[index]['name']
+	# 		if (tree[treeIndex].latitude != undefined and tree[treeIndex].longitude != undefined):
+	# 			newInverter['latitude'] = tree[treeIndex].latitude + Math.random() * 4 - 2
+	# 			newInverter['longitude'] = tree[treeIndex].longitude + Math.random() * 4 - 2
+	# 			tree[index] = newInverter
+	# 			tree[index].name = newName
+
+	# 		inverterIndex = findIndex(tree, 'name', newInverter['name'])
+	# 		newChildAtLocation(newPanels, inverterIndex)
+
+	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
+		neato = False
+	else:
+		neato = True 
+	chart = voltPlot(tree, workDir=modelDir, neatoLayout=neato)
+	chart.savefig(pJoin(modelDir,"output.png"))
+	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
+		outData["voltageDrop"] = inFile.read().encode("base64")
 	# TODO: Stdout/stderr.
 	# Write the output.
 	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
@@ -161,6 +190,44 @@ def runForeground(modelDir, inputDict):
 def cancel(modelDir):
 	''' TODO: INSERT CANCEL CODE HERE '''
 	pass
+
+def makeNewInverter(index, phases):
+	newInverter = {}
+	newInverter['object'] = 'inverter'
+	newInverter['phases'] = phases
+	newInverter['generator_status'] = 'ONLINE'
+	newInverter['inverter_type'] = 'PWM'
+	newInverter['generator_mode'] = 'CONSTANT_PF'
+	treeNewIndex = index
+	newInverter['name'] = 'synInverter' + treeNewIndex
+	return newInverter
+
+def newPanel(index, size):
+	newPanels = {}
+	newPanels['object'] = 'solar'
+	newPanels['generator_mode'] = 'SUPPLY_DRIVEN'
+	newPanels['generator_status'] = 'ONLINE'
+	newPanels['panel_type'] = 'SINGLE_CRYSTAL_SILICON'
+	newPanels['efficiency'] = '0.1' + randomInt(0, 5)
+	newPanels['area'] = str(size) + ' sf'
+	treeNewIndex = index
+	newInverter['name'] = 'synSolar' + treeNewIndex
+	return newPanels
+
+def newChildAtLocation(tree, component, treeIndex):
+	newName = component['object'] + str(index)
+	component['parent'] = tree[treeIndex]['name']
+	if (tree[treeIndex].latitude != undefined and tree[treeIndex].longitude != undefined):
+		component['latitude'] = tree[treeIndex].latitude + Math.random() * 4 - 2
+		component['longitude'] = tree[treeIndex].longitude + Math.random() * 4 - 2
+		tree[index] = component
+		tree[index].name = newName
+
+def findIndex(inOb, field, val) :
+	for key in inOb: 
+		if inOb[key][field] == val:
+			return key
+	return ''
 
 def avg(inList):
 	''' Average a list. Really wish this was built-in. '''
@@ -253,6 +320,86 @@ def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 		split = [hourData[x:x+24] for x in xrange(simLength)]
 		return map(aggFun, split)
 
+def voltPlot(tree, workDir=None, neatoLayout=False):
+	''' Draw a color-coded map of the voltage drop on a feeder.
+	Returns a matplotlib object. '''
+	# Get rid of schedules and climate:
+	for key in tree.keys():
+		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
+			del tree[key]
+	# Make sure we have a voltDump:
+	def safeInt(x):
+		try: return int(x)
+		except: return 0
+	biggestKey = max([safeInt(x) for x in tree.keys()])
+	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
+	# Run Gridlab.
+	if not workDir:
+		workDir = tempfile.mkdtemp()
+		print "gridlabD runInFilesystem with no specified workDir. Working in", workDir
+	gridlabOut = gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
+	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
+		reader = csv.reader(dumpFile)
+		reader.next() # Burn the header.
+		keys = reader.next()
+		voltTable = []
+		for row in reader:
+			rowDict = {}
+			for pos,key in enumerate(keys):
+				rowDict[key] = row[pos]
+			voltTable.append(rowDict)
+	# Calculate average node voltage deviation. First, helper functions.
+	def pythag(x,y):
+		''' For right triangle with sides a and b, return the hypotenuse. '''
+		return math.sqrt(x**2+y**2)
+	def digits(x):
+		''' Returns number of digits before the decimal in the float x. '''
+		return math.ceil(math.log10(x+1))
+	def avg(l):
+		''' Average of a list of ints or floats. '''
+		return sum(l)/len(l)
+	# Detect the feeder nominal voltage:
+	for key in tree:
+		ob = tree[key]
+		if type(ob)==dict and ob.get('bustype','')=='SWING':
+			feedVoltage = float(ob.get('nominal_voltage',1))
+	# Tot it all up.
+	nodeVolts = {}
+	for row in voltTable:
+		allVolts = []
+		for phase in ['A','B','C']:
+			phaseVolt = pythag(float(row['volt'+phase+'_real']),
+							   float(row['volt'+phase+'_imag']))
+			if phaseVolt != 0.0:
+				if digits(phaseVolt)>3:
+					# Normalize to 120 V standard
+					phaseVolt = phaseVolt*(120/feedVoltage)
+				allVolts.append(phaseVolt)
+		nodeVolts[row.get('node_name','')] = avg(allVolts)
+	# Color nodes by VOLTAGE.
+	fGraph = feeder.treeToNxGraph(tree)
+	voltChart = plt.figure(figsize=(10,10))
+	plt.axes(frameon = 0)
+	plt.axis('off')
+	if neatoLayout:
+		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
+		cleanG = nx.Graph(fGraph.edges())
+		cleanG.add_nodes_from(fGraph)
+		positions = nx.graphviz_layout(cleanG, prog='neato')
+	else:
+		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+	edgeIm = nx.draw_networkx_edges(fGraph, positions)
+	nodeIm = nx.draw_networkx_nodes(fGraph,
+		pos = positions,
+		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
+		linewidths = 0,
+		node_size = 30,
+		cmap = plt.cm.jet)
+	plt.sci(nodeIm)
+	plt.clim(110,130)
+	plt.colorbar()
+	return voltChart
+
 def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
@@ -261,6 +408,7 @@ def _tests():
 		"feederName": "public___Olin Barre Geo",
 		"modelType": "_solarEngineering",
 		"climateName": "AL-HUNTSVILLE",
+		"scadaFile": "FrankScada",
 		"simLength": "100",
 		"systemSize":"10",
 		"derate":"0.97",
@@ -275,7 +423,9 @@ def _tests():
 		"fd":"1.0",
 		"i_ref":"1000",
 		"poa_cutin":"0",
-		"w_stow":"0"}
+		"w_stow":"0",
+		"nodename1":"62462057655",
+		"nodesize1":"200"}
 	modelLoc = pJoin(workDir,"admin","Automated _solarEngineering Testing")
 	# Blow away old test results if necessary.
 	try:
