@@ -455,7 +455,7 @@ def _tests():
 	attachRecorders(tree, 'Voltage', 'object', 'node')
 	print 'All the objects after recorder attach: ', set([ob.get('object','') for ob in tree.values()])
 	# Testing The De-Embedding
-	tree = _testImportTree('public/13 Node Embedded DO NOT SAVE')
+	tree = _testImportTree('admin/13 Node Embedded DO NOT SAVE')
 	fullyDeEmbed(tree)
 	embeddedDicts = 0
 	for ob in tree.values():
