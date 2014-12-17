@@ -320,7 +320,7 @@ def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 		split = [hourData[x:x+24] for x in xrange(simLength)]
 		return map(aggFun, split)
 
-def voltPlot(tree, workDir=None, neatoLayout=False):
+def voltPlot(tree, index=0, workDir=None, neatoLayout=False):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	Returns a matplotlib object. '''
 	# Get rid of schedules and climate:
@@ -331,8 +331,15 @@ def voltPlot(tree, workDir=None, neatoLayout=False):
 	def safeInt(x):
 		try: return int(x)
 		except: return 0
+	# print tree.keys()
 	biggestKey = max([safeInt(x) for x in tree.keys()])
 	tree[str(biggestKey*10)] = {"object":"voltdump","filename":"voltDump.csv"}
+	# tree[str(biggestKey*20)] = {"object":"recorder", 
+	# 	"filename":"regTap.csv", 
+	# 	"limit": 0,
+	# 	"parent": "", # name of parent node
+	# 	"property": "tap_A,tap_B,tap_C, tap_A_counter,tap_B_change_count,tap_C_change_count"}
+	# tree[str(biggestKey*20)] = {"object": "group_recorder", "filename": "mine.csv", "group": "class=node", "property": "voltage_A", "interval": 3600}
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
