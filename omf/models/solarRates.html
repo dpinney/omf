@@ -53,7 +53,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Climate<span class="classic">Pick a climate data</span></label>
+				<label class="tooltip">Climate<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
 				<select id="climateName" name="climateName">
 					{% for climate in datastoreNames["climates"] %}
 						<option value="{{ climate }}">{{ climate }}</option>
@@ -61,11 +61,11 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Average System Size (kWp-DC)<span class="classic">Average System Size<br>Type: <em>float</em></span></label>
+				<label class="tooltip">Average System Size (kWp-DC)<span class="classic">Average residential PV system size in your service territory.</span></label>
 				<input type="text" id="avgSystemSize" name="avgSystemSize" data-validRegex="\d+\.?\d*"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Residential Customers With Solar (%)<span class="classic">Residential Customers With Solar<br>Type: <em>float</em> [0..1]</span></label>
+				<label class="tooltip">Residential Customers With Solar (%)<span class="classic">Percentage of residential customers who own PV systems.</span></label>
 				<input type="text" id="resPenetration" name="resPenetration" data-validRegex="\d+\.?\d*"/>
 			</div>
 			<div class="wideInput">
@@ -73,19 +73,15 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Customer Service Charge ($)<span class="classic">Customer Service Charge</span></label>
+				<label class="tooltip">Customer Service Charge ($)<span class="classic">Monthly service charge for residential customers if any.</span></label>
 				<input type="text" id="serviceCharge" name="serviceCharge" data-validRegex="\d+\.?\d*" value="15"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail Energy Cost</span></label>
+				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail rate for residential consumers.</span></label>
 				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Net Metering Maximum Export (%)<span class="classic">Net Metering Maximum Export</span></label>
-				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Wholesale Energy Cost ($/kWh)<span class="classic">Wholesale Energy Cost</span></label>
+				<label class="tooltip">Wholesale Energy Cost ($/kWh)<span class="classic">Wholesale cost of power, which can be calculated from Form 7 as R.17.m/R.15.m.</span></label>
 				<input type="text" id="wholesaleCost" name="wholesaleCost" data-validRegex="\d+\.?\d*" value="0.08"/>
 			</div>
 			<div class="wideInput">
@@ -93,143 +89,101 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Power Production Expense
-				<span class="classic">Power Production Expense
-				</span></label>
+				<label>A.2 Power Production Expense</label>
 				<input type="text" id="powerProExpense" name="powerProExpense"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Cost of Purchased Power
-				<span class="classic">Cost of Purchased Power
-				</span></label>
+				<label>A.3 Cost of Purchased Power</label>
 				<input type="text" id="costPurchasedPower" name="costPurchasedPower"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Transmission Expense
-				<span class="classic">Transmission Expense
-				</span></label>
+				<label>A.4 Transmission Expense</label>
 				<input type="text" id="transExpense" name="transExpense"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Distribution Expense - Operation
-				<span class="classic">Distribution Expense - Operation
-				</span></label>
+				<label>A.5 Distribution Expense - Operation</label>
 				<input type="text" id="distriExpenseO" name="distriExpenseO"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Distribution Expense - Maintenance
-				<span class="classic">Distribution Expense - Maintenance
-				</span></label>
+				<label>A.6 Distribution Expense - Maintenance</label>
 				<input type="text" id="distriExpenseM" name="distriExpenseM"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Customer Accounts Expense
-				<span class="classic">Customer Accounts Expense
-				</span></label>
+				<label>A.7 Customer Accounts Expense</label>
 				<input type="text" id="customerAccountExpense" name="customerAccountExpense"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Customer Service and Informational Expense
-				<span class="classic">Customer Service and Informational Expense
-				</span></label>
+				<label>A.8 Customer Service and Informational Expense</label>
 				<input type="text" id="customerServiceExpense" name="customerServiceExpense"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Sales Expense
-				<span class="classic">Sales Expense
-				</span></label>
+				<label>A.9 Sales Expense</label>
 				<input type="text" id="salesExpense" name="salesExpense"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Administrative and General Expense
-				<span class="classic">Administrative and General Expense
-				</span></label>
+				<label>A.10 Administrative and General Expense</label>
 				<input type="text" id="adminGeneralExpense" name="adminGeneralExpense"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Depreciation and Amortization Expense
-				<span class="classic">Depreciation and Amortization Expense
-				</span></label>
+				<label>A.12 Depreciation and Amortization Expense</label>
 				<input type="text" id="depreAmortiExpense" name="depreAmortiExpense"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Tax Expense - Property &amp; Gross Receipts
-				<span class="classic">Tax Expense - Property &amp; Gross Receipts
-				</span></label>
+				<label>A.13 Tax Expense - Property &amp; Gross Receipts</label>
 				<input type="text" id="taxExpensePG" name="taxExpensePG"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Tax Expense - Other
-				<span class="classic">Tax Expense - Other
-				</span></label>
+				<label>A.14 Tax Expense - Other</label>
 				<input type="text" id="taxExpense" name="taxExpense"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Interest on Long-Term Debt
-				<span class="classic">Interest on Long-Term Debt
-				</span></label>
+				<label>A.15 Interest on Long-Term Debt</label>
 				<input type="text" id="interestLongTerm" name="interestLongTerm"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Interest Charged to Construction - Credit
-				<span class="classic">Interest Charged to Construction - Credit
-				</span></label>
+				<label>A.16 Interest Charged to Construction - Credit</label>
 				<input type="text" id="interestConstruction" name="interestConstruction"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Interest Expense - Other
-				<span class="classic">Interest Expense - Other
-				</span></label>
+				<label>A.17 Interest Expense - Other</label>
 				<input type="text" id="interestExpense" name="interestExpense"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Other Deductions
-				<span class="classic">Other Deductions
-				</span></label>
+				<label>A.18 Other Deductions</label>
 				<input type="text" id="otherDeductions" name="otherDeductions"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Non Operating Margins - Interest
-				<span class="classic">Non Operating Margins - Interest
-				</span></label>
+				<label>A.21 Non Operating Margins - Interest</label>
 				<input type="text" id="nonOpMarginInterest" name="nonOpMarginInterest"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Allowance for Funds Used During Construction
-				<span class="classic">Allowance for Funds Used During Construction
-				</span></label>
+				<label>A.22 Allowance for Funds Used During Construction</label>
 				<input type="text" id="fundsUsedConstruc" name="fundsUsedConstruc"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Income (Loss) from Equity Investments
-				<span class="classic">Income (Loss) from Equity Investments
-				</span></label>
+				<label>A.23 Income (Loss) from Equity Investments</label>
 				<input type="text" id="incomeEquityInvest" name="incomeEquityInvest"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Non Operating Margins - Other
-				<span class="classic">Non Operating Margins - Other
-				</span></label>
+				<label>A.24 Non Operating Margins - Other</label>
 				<input type="text" id="nonOpMarginOther" name="nonOpMarginOther"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Generation and Transmission Capital Credits
-				<span class="classic">Generation and Transmission Capital Credits
-				</span></label>
+				<label>A.25 Generation and Transmission Capital Credits</label>
 				<input type="text" id="genTransCapCredits" name="genTransCapCredits"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Other Capital Credits and Patronage Dividends
-				<span class="classic">Other Capital Credits and Patronage Dividends
-				</span></label>
+				<label>A.26 Other Capital Credits and Patronage Dividends</label>
 				<input type="text" id="otherCapCreditsPatroDivident" name="otherCapCreditsPatroDivident"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Extraordinary Items
-				<span class="classic">Extraordinary Items
-				</span></label>
+				<label>A.27 Extraordinary Items</label>
 				<input type="text" id="extraItems" name="extraItems"/>
 			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Form 7 Table R Variables</p>
+			</div>
+			<hr>
 			<div class="wideInput">
 				<table>
 					<tr>

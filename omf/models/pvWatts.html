@@ -46,7 +46,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Climate<span class="classic">Climate</span></label>
+				<label class="tooltip">Climate<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
 				<select id="climateName" name="climateName">
 					{% for climate in datastoreNames["climates"] %}
 						<option value="{{ climate }}">{{ climate }}</option>
@@ -54,11 +54,11 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
+				<label>Simulation Length</label>
 				<input type="text" id="simLength" name="simLength" data-validRegex="\d+"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
+				<label>Length Units</label>
 				<select id="simLengthUnits" name="simLengthUnits">
 					<!--<option value="minutes">Minutes</option> -->
 					<option value="hours">Hours</option>
@@ -66,19 +66,19 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date</span></label>
+				<label>Simulation Start Date (YYYY-MM-DD)</label>
 				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">System Size (kW)<span class="classic">System Size</span></label>
+				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
 				<input type="text" id="systemSize" name="systemSize" data-validRegex="\d+\.?\d*"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Derate (%)<span class="classic">Derate</span></label>
+				<label class="tooltip">Derate (%)<span class="classic">Percentage of energy that is not lost due to panel soiling, DC-AC conversion, wire losses, etc.</span></label>
 				<input type="text" id="derate" name="derate" data-validRegex="\d+\.?\d*"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Tracking Mode<span class="classic">Tracking Mode<br>Fixed:<br>1 Axis:<br>2 Axis:<br>Azimuth Axis:</span></label>
+				<label class="tooltip">Tracking Mode<span class="classic">Type of tracking system the PV array will use if any.</span></label>
 				<select id="trackingMode" name="trackingMode"/>
 					<option value="0">Fixed</option>
 					<option value="1">1 Axis</option>
@@ -87,47 +87,47 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Azimuth (degrees)<span class="classic">Azimuth (degrees)</span></label>
-				<input type="text" id="azimuth" name="azimuth"/>
+				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northenr hemisphere is due South.</span></label>
+				<input type="text" id="azimuth" name="azimuth" value="180"/>
 			</div>
 			<hr>
 			<div>
 				<label style="text-align:right;cursor:hand"><p class="discloser" onclick="javascript:toggleAdvanced(this)" title="to show more options">&#9654; Advanced Options</p></label>
 			</div>
 			<div class="advancedOption shortInput">
-				<label class="tooltip">Tracker rotation limit (deg)<span class="classic">Tracker rotation limit</span></label>
+				<label class="tooltip">Tracker Rotation Limit (Degrees)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker.</span></label>
 				<input type="text" id="rotlim" name="rotlim" value="45.0"/>
 			</div>
 			<div class="advancedOption shortInput">
-				<label class="tooltip">Nominal operating cell temperature (C)<span class="classic">Nominal operating cell temperature</span></label>
+				<label>Nominal Operating Cell Temperature (C)</label>
 				<input type="text" id="t_noct" name="t_noct" value="45.0"/>
 			</div>
 			<div class="advancedOption shortInput">
-				<label class="tooltip">Reference cell temperature (C)<span class="classic">Reference cell temperature</span></label>
+				<label class="tooltip">Reference cell temperature (C)</label>
 				<input type="text" id="t_ref" name="t_ref" value="25.0"/>
 			</div>
 			<div class="advancedOption shortInput">
-				<label class="tooltip">Max power temperature coefficient (%/C)<span class="classic">Max power temperature coefficient</span></label>
+				<label class="tooltip">Max power temperature coefficient (Fraction/C)<span class="classic">Percentage decrease  of the solar array's output power for every degree over 25 degrees centigrade.</span></label>
 				<input type="text" id="gamma" name="gamma" value="-0.5"/>
 			</div>
 			<div class="advancedOption shortInput">
-				<label class="tooltip">Inverter efficiency at rated power (frac)<span class="classic">Inverter efficiency at rated power</span></label>
+				<label class="tooltip">Inverter Efficiency at Rated Power (Fraction)</label>
 				<input type="text" id="inv_eff" name="inv_eff" value="0.92"/>
 			</div>
 			<div class="advancedOption shortInput">
-				<label class="tooltip">Diffuse fraction (0..1)<span class="classic">Diffuse fraction</span></label>
+				<label>Diffuse fraction (Fraction)</label>
 				<input type="text" id="fd" name="fd" value="1.0"/>
 			</div>
 			<div class="advancedOption shortInput">
-				<label class="tooltip">Rating condition irradiance (W/m2)<span class="classic">Rating condition irradiance</span></label>
+				<label>Rating Condition Irradiance (W/m2)</label>
 				<input type="text" id="i_ref" name="i_ref" value="1000"/>
 			</div>
 			<div class="advancedOption shortInput">
-				<label class="tooltip">Min reqd irradiance for operation (W/m2)<span class="classic">Min reqd irradiance for operation</span></label>
+				<label>Min. Required Irradiance For Operation (W/m2)</label>
 				<input type="text" id="poa_cutin" name="poa_cutin" value="0"/>
 			</div>
 			<div class="advancedOption shortInput">
-				<label class="tooltip">Wind stow speed	(m/s)<span class="classic"Wind stow speed></span></label>
+				<label class="tooltip">Wind stow speed (m/s)<span class="classic">When the wind velocity from the weather file for the current hour is greater than or equal to this value, the concentrator moves into stow position to prevent wind damage. The solar power intercepted by the receiver is zero during this hour.</span></label>
 				<input type="text" id="w_stow" name="w_stow" value="0"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
