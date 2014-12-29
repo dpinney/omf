@@ -12,7 +12,7 @@ import feeder
 from solvers import nrelsam
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"_solarRates.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"solarRates.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -337,7 +337,7 @@ def run(modelDir, inputDict):
 		json.dump(inputDict, inFile, indent=4)
 
 def cancel(modelDir):
-	''' _solarRates runs so fast it's pointless to cancel a run. '''
+	''' solarRates runs so fast it's pointless to cancel a run. '''
 	pass
 
 def _tests():
@@ -359,7 +359,7 @@ def _tests():
 	"decSale": "47081", "decKWh": "53354283", "decRev": "7014717", "decKWhT": "73335526", "decRevT": "9385203"
 	}
 	inData = {
-		"modelType": "_solarRates",
+		"modelType": "solarRates",
 		"climateName": "AL-HUNTSVILLE",
 		"systemSize":"100",
 		"installCost":"100000",
@@ -407,7 +407,7 @@ def _tests():
 		}
 	for key in monthlyData:
 		inData[key] = monthlyData[key]
-	modelLoc = pJoin(workDir,"admin","Automated _solarRates Testing")
+	modelLoc = pJoin(workDir,"admin","Automated solarRates Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
