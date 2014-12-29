@@ -61,7 +61,7 @@ def run(modelDir, inputDict):
 	# ssc.ssc_data_set_number(dat, "fd", float(inputDict.get("fd", 1)))
 	# ssc.ssc_data_set_number(dat, "i_ref", float(inputDict.get("i_ref", 1000)))
 	# ssc.ssc_data_set_number(dat, "poa_cutin", float(inputDict.get("poa_cutin", 0)))
-	ssc.ssc_data_set_number(dat, "w_stow", float(inputDict.get("w_stow", 0)))
+	# ssc.ssc_data_set_number(dat, "w_stow", float(inputDict.get("w_stow", 0)))
 	# Complicated optional inputs.
 	ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
 	# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
@@ -294,8 +294,7 @@ def _tests():
 		# "fd":"1.0",
 		# "i_ref":"1000",
 		# "poa_cutin":"0",
-		"omCost": "1000",
-		"w_stow":"0"}
+		"omCost": "1000"}
 	modelLoc = pJoin(workDir,"admin","Automated solarFinancial Testing")
 	# Blow away old test results if necessary.
 	try:
