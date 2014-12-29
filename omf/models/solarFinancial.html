@@ -9,6 +9,7 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
+	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 	<!-- Global Funcs Import -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
@@ -315,62 +316,51 @@
 
 		<p class="reportTitle postRun">Simulation Location
 		</p>
-		<div id="studyDetail mapHere" class="tightContent postRun detailsContainer" style="position: relative">
-			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-			<table id="detailsTable">
-				<tr>
-					<th id="SL">Simulation Location</th>
-				</tr>
-				<tr>
-					<td rowspan="7" style = "width:100%">
-						<div id="mapHere">
-							<script type="text/javascript">
-								var width = 500,
-									height = 350;
+		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
+			<div id="mapHere">
+				<script type="text/javascript">
+					var width = 1000,
+						height = 350;
 
-								var projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2]);
+					var projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2]);
 
-								var path = d3.geo.path()
-									.projection(projection);
+					var path = d3.geo.path()
+						.projection(projection);
 
-								var svg = d3.select("#mapHere").append("svg")
-									.attr("width", width)
-									.attr("height", height);
+					var svg = d3.select("#mapHere").append("svg")
+						.attr("width", width)
+						.attr("height", height);
 
-								var group = svg.append("g");
+					var group = svg.append("g");
 
-								group.attr("transorm", "scale(.2, .2)");
-								d3.json('/static/state_boundaries.json', function(collection) {
-									group.selectAll('path')
-										.data(collection.features)
-										.enter().append('path')
-										.attr('d', d3.geo.path().projection(projection))
-										.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
-										.style('fill', 'gray')
-										.style('stroke', 'white')
-										.style('stroke-width', 1);
-								});
+					group.attr("transorm", "scale(.2, .2)");
+					d3.json('/static/state_boundaries.json', function(collection) {
+						group.selectAll('path')
+							.data(collection.features)
+							.enter().append('path')
+							.attr('d', d3.geo.path().projection(projection))
+							.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+							.style('fill', 'gray')
+							.style('stroke', 'white')
+							.style('stroke-width', 1);
+					});
 
-								d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
-									climate = allInputData.climateName
-									var ST_NAME = climate.split("-");
-									var ST = ST_NAME[0], NAME = ST_NAME[1];
-									var my_coords = projection(new_us_places[ST][NAME]);
-									var r = 5;
-									circle = svg.append("circle")
-										.attr("cx", my_coords[0])
-										.attr("cy", my_coords[1])
-										.attr("r", 5)
-										.attr("class", "HighlightCircle")
-									circle.append("svg:title").text(climate);
-								})
-							</script>
-						</div>
-					</td>
-				</tr>
-			</table>
+					d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
+						climate = allInputData.climateName
+						var ST_NAME = climate.split("-");
+						var ST = ST_NAME[0], NAME = ST_NAME[1];
+						var my_coords = projection(new_us_places[ST][NAME]);
+						var r = 5;
+						circle = svg.append("circle")
+							.attr("cx", my_coords[0])
+							.attr("cy", my_coords[1])
+							.attr("r", 5)
+							.attr("class", "HighlightCircle")
+						circle.append("svg:title").text(climate);
+					})
+				</script>
+			</div>
 		</div>
-
 
 		<p class="reportTitle postRun">Monthly Data Table</p>
 		<div id="monthlySummaryReport" class="tightContent postRun tableReport">
