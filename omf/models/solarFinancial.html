@@ -222,7 +222,7 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun">Hourly System Performance</p>
+		<p class="reportTitle postRun">Hourly System Average Power Output</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
 			<div id="powerTimeSeries"></div>
 			<script>
@@ -238,10 +238,10 @@
 						"value": parseFloat(allInputData.systemSize)*1000,"zIndex": 0}]},
 					"chart":{"zoomType":"x","marginBottom":40,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
 					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+					"legend":false})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Monthly System Performance</p>
+		<p class="reportTitle postRun">Monthly System Energy Output</p>
 		<div id="monthlyPerformanceReport" class="tightContent postRun">
 			<div id="monthlyPerformanceDiv"></div>
 			<script>
@@ -249,11 +249,11 @@
 					"plotOptions":{"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
 					"title":{"text":null},
-					"series":[{"name":"Power Generated", "color":"orange", "data":allOutputData.monthlyGeneration, "dataLabels":{"enabled":false}}],
+					"series":[{"name":"Energy Generated", "color":"orange", "data":allOutputData.monthlyGeneration, "dataLabels":{"enabled":false}}],
 					"yAxis":{"title":{"text":"Energy (Wh-AC)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+					"legend":false})
 			</script>
 		</div>
 		<p class="reportTitle postRun">Average Seasonal System Performance</p>
