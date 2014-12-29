@@ -59,6 +59,12 @@ a {
 	display: inline;
 }
 
+p.inputSectionHeader {
+	margin-top: 15px;
+	font-size: 14pt;
+	font-style: italic;
+}
+
 /*OUTPUT*/
 circle.HighlightCircle{
 	fill: rgb(16, 150, 24);
