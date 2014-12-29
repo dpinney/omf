@@ -46,20 +46,13 @@ def run(modelDir, inputDict):
 	# Run PV system simulation.
 	mod = ssc.ssc_module_create("pvwattsv1")
 	ssc.ssc_module_exec(mod, dat)
-	# Setting options for start time.
-	simLengthUnits = inputDict.get("simLengthUnits","")
-	simStartDate = inputDict.get("simStartDate","")
-	# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html 
-	startDateTime = simStartDate + " 00:00:00 UTC"
-	# Set aggregation function constants.
-	agg = lambda x,y:_aggData(x,y,inputDict["simStartDate"],
-		int(inputDict["simLength"]), inputDict["simLengthUnits"], ssc, dat)
-	avg = lambda x:sum(x)/len(x)
+	# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html
+	startDateTime = "2013-01-01 00:00:00 UTC"
 	# Timestamp output.
 	outData = {}
 	outData["timeStamps"] = [dt.datetime.strftime(
 		dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
-		dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict["simLength"]))]
+		dt.timedelta(**{"hours":x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(8760))]
 	# Geodata output.
 	outData["city"] = ssc.ssc_data_get_string(dat, "city")
 	outData["state"] = ssc.ssc_data_get_string(dat, "state")
@@ -68,16 +61,16 @@ def run(modelDir, inputDict):
 	outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
 	# Weather output.
 	outData["climate"] = {}
-	outData["climate"]["Direct Irradiance (W/m^2)"] = agg("dn", avg)
-	outData["climate"]["Difuse Irradiance (W/m^2)"] = agg("df", avg)
-	outData["climate"]["Ambient Temperature (F)"] = agg("tamb", avg)
-	outData["climate"]["Cell Temperature (F)"] = agg("tcell", avg)
-	outData["climate"]["Wind Speed (m/s)"] = agg("wspd", avg)
+	outData["climate"]["Direct Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "dn")
+	outData["climate"]["Difuse Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "df")
+	outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
+	outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
+	outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
 	# Power generation.
-	outData["powerOutputAc"] = [x for x in agg("ac", avg)]
+	outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
-	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
+	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(startDateTime[0:4] + "-{0:02d}".format(x+1))])
 	outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
 	# TODO: ???
 	monthlyNoConsumerServedSales = []
@@ -344,33 +337,6 @@ def run(modelDir, inputDict):
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent=4)
 
-def _runningSum(inList):
-	''' Give a list of running sums of inList. '''
-	return [sum(inList[:i+1]) for (i,val) in enumerate(inList)]
-
-def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
-	''' Function to aggregate output if we need something other than hour level. '''
-	u = simStartDate
-	# pick a common year, ignoring the leap year, it won't affect to calculate the initHour
-	d = dt.datetime(2013, int(u[5:7]),int(u[8:10])) 
-	# first day of the year	
-	sd = dt.datetime(2013, 01, 01) 
-	# convert difference of datedelta object to number of hours 
-	initHour = int((d-sd).total_seconds()/3600)
-	fullData = ssc.ssc_data_get_array(dat, key)
-	if simLengthUnits == "days":
-		multiplier = 24
-	else:
-		multiplier = 1
-	hourData = [fullData[(initHour+i)%8760] for i in xrange(simLength*multiplier)]
-	if simLengthUnits == "minutes":
-		pass
-	elif simLengthUnits == "hours":
-		return hourData
-	elif simLengthUnits == "days":
-		split = [hourData[x:x+24] for x in xrange(simLength)]
-		return map(aggFun, split)
-
 def cancel(modelDir):
 	''' _solarRates runs so fast it's pointless to cancel a run. '''
 	pass
@@ -394,11 +360,8 @@ def _tests():
 	"decSale": "47081", "decKWh": "53354283", "decRev": "7014717", "decKWhT": "73335526", "decRevT": "9385203"
 	}
 	inData = {
-		"simStartDate": "2013-01-01",
-		"simLengthUnits": "hours",
 		"modelType": "_solarRates",
 		"climateName": "AL-HUNTSVILLE",
-		"simLength": "8760",
 		"systemSize":"100",
 		"installCost":"100000",
 		"runTime": "",
