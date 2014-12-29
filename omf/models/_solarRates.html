@@ -4,6 +4,7 @@
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
+	<link rel="stylesheet" type="text/css" href="{{pathPrefix}}/static/tipsy.css">
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
@@ -11,8 +12,6 @@
 	<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 	<script src='{{pathPrefix}}/static/jquery.tipsy.js'></script>
-	<link rel="stylesheet" type="text/css" href="{{pathPrefix}}/static/tipsy.css">
-	<!-- Global Funcs Import -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
@@ -423,7 +422,7 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun">Hourly System Performance</p>
+		<p class="reportTitle postRun">Hourly Average Power Per Solar Generator</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
 			<div id="powerTimeSeries"></div>
 			<script>
@@ -439,10 +438,10 @@
 						"value": parseFloat(allInputData.systemSize)*1000,"zIndex": 0}]},
 					"chart":{"zoomType":"x","marginBottom":40,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
 					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+					"legend":false})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Monthly System Performance</p>
+		<p class="reportTitle postRun">Monthly Utility Energy Consumption</p>
 		<div id="monthlyPerformanceReport" class="tightContent postRun">
 			<div id="monthlyPerformanceDiv"></div>
 			<script>
@@ -450,7 +449,7 @@
 					"plotOptions":{"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
 					"title":{"text":null},
-					"series":[{"name":"Solar Generated", "color":"orange", "data":allOutputData.monthlyGeneration, "dataLabels":{"enabled":false}},{"name":"Total Generation", "color":"green", "data":allOutputData.totalGeneration, "dataLabels":{"enabled":false}}],
+					"series":[{"name":"From Solar", "color":"orange", "data":allOutputData.monthlyGeneration, "dataLabels":{"enabled":false}},{"name":"From G&T", "color":"green", "data":allOutputData.totalGeneration, "dataLabels":{"enabled":false}}],
 					"yAxis":[{"title":{"text":"Energy (Wh)","style":{"color":"gray"}}}],
 					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
@@ -476,105 +475,80 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Monthly Data Table</p>
-		<div id="monthlySummaryReport" class="tightContent postRun tableReport">
-			<table id="monthlySummaryTable">
-			</table>
-			<script>
-				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
-				insertMetric("monthlySummaryTable","Generation(Wh)", allOutputData.monthlyGeneration.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable","Total Generation(kWh)", allOutputData.totalGeneration.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable", "No. Consumer Served", allOutputData.monthlyNoConsumerServedSales.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable","KWh Sold", allOutputData.monthlyKWhSold.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable","Revenue", allOutputData.monthlyRevenue.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable","Total KWh Sold", allOutputData.totalKWhSold.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable","Total Revenue from Sales of Electric Energy", allOutputData.totalRevenue.map(function(x){return x[1]}))
-			</script>
-		</div>
-		<p class="reportTitle  postRun">Annual Cash and Power Flow Model</p>
+		<p class="reportTitle  postRun">Annual Cash and Power Flows</p>
 		<div id="graphicChart" class="tightContent postRun tableReport">
 			<style type="text/css">
-			g.node rect{
-		        fill:lightgray;
-		        stroke:black;
-		    }
-		    g.node circle{
-		        fill:lightgray;
-		        stroke:black;
-		    }
-		    g.node text{
-		        font-size: 10px;
-		    }
+				g.node rect{fill:lightgray; stroke:black}
+				g.node circle{fill:lightgray; stroke:black}
+				g.node text{font-size:10px}
 			</style>
-		<svg width="980px" height="490px" viewBox="0.00 0.00 800.00 400.00">
-		<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(150 0)">
-		<defs>
-			<marker id="markerArrow" markerWidth="13" markerHeight="13" refx="2" refy="6" orient="auto">
-				<path d="M2,3 L2,10 L13,6 Z" style="fill:darkgray;" />
-			</marker>
-		</defs>
-		<path id='linkDL' class='link' d="M200,190 L120,190" style="stroke: orange; stroke-width: 2px; fill: none; marker-start: url(#markerCircle);  marker-end: url(#markerArrow);"/>
-		<path id='linkDP' class='link' d="M200,150 L155,120" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkGD' class='link' d="M230,70 L230,140" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkDG' class='link' d="M250,150 L250,80" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkDV' class='link' d="M280,190 L350,190" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkDCn' class='link' d="M280,230 L366,290 " style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkCnD' class='link' d="M340,320 L290,245" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkDCci' class='link' d="M230,230 L230,290" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkCciD' class='link' d="M250,300 L250,240" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkDCs' class='link' d="M200,230 L140,290" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkCsD' class='link' d="M160,300 L190,250" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkSCs' class='link' d="M50,310 L90,310" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-		<path id='linkCsS' class='link' d="M100,330 L70,330" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-
-		<g id='nodeD' class='node'>	<rect width='80' height='80' x='200' y='150'></rect><text x="240" y="190" text-anchor="middle">D</text></g>
-		<g id='nodeL' class='node'><circle cx='80' cy='190' r='30'></circle><text x="80" y="190" text-anchor="middle">L</text></g>
-		<g id='nodeP' class='node'><circle cx='120' cy='100' r='30'></circle><text x="120" y="100" text-anchor="middle">P</text></g>
-		<g id='nodeG' class='node'><circle cx='240' cy='40' r='30'></circle><text x="240" y="40" text-anchor="middle">G</text></g>
-		<g id='nodeV' class='node'><circle cx='400' cy='190' r='30'></circle><text x="400" y="190" text-anchor="middle">V</text></g>
-		<g id='nodeCn' class='node'><rect width='60' height='40' x='340' y='300'></rect><text x="370" y="330" text-anchor="middle">Cn</text></g>
-		<g id='nodeCs' class='node'><rect width='60' height='40' x='100' y='300'></rect><text x="130" y="330" text-anchor="middle">Cs</text></g>
-		<g id='nodeCci' class='node'><rect width='60' height='40' x='210' y='300'></rect><text x="240" y="330" text-anchor="middle">Cci</text></g>
-		<g id='nodeS' class='node'><circle cx='40' cy='320' r='20'></circle><text x="40" y="320" text-anchor="middle">S</text></g>
-		</g>
-		</svg>
-	<script type="text/javascript">
-		$('#nodeD').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Distribution Utility<br>'+'$ '+allOutputData.BAU.idealRate.toFixed(2)+' -> $ '+ allOutputData.Solar.idealRate.toFixed(2)+'</center>'
-		});
-		$('#nodeL').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Energy Losses</center>'
-		});
-		$('#nodeP').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Patronage Capital</center>'
-		});
-		$('#nodeG').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>G&T or other Power Provider</center>'
-		});
-		$('#nodeV').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Vender, Staff, Banks etc.</center>'
-		});
-		$('#nodeCn').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Non-solar Residential Customers<br>'+"$ "+allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(2)+'</center>'
-		});
-		$('#nodeCci').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Commercial and Industrial Customers</center>'
-		});
-		$('#nodeCs').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar Residential Customers<br>'+"$ "+allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(2)+'</center>'
-		});
-		$('#nodeS').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar</center>'
-		});
-		$('path#linkDL').tipsy({gravity:'sw', hoverlock:true, html:true, fallback: allOutputData.Solar.losses.toFixed(2).toString()+" kWh"});
-		$('path#linkDP').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.patCaptial.toFixed(2)});
-		$('path#linkGD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.totalKWhPurchased.toFixed(2) + " kWh"});
-		$('path#linkDG').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.costPurchasedPower.toFixed(2)});
-		$('path#linkDV').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.BAU.nonPowerCosts.toFixed(2)});
-		$('path#linkDCn').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.solarResSold.toFixed(2) + " kWh"});
-		$('path#linkCnD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.resNonSolarRev.toFixed(2)});
-		$('path#linkDCci').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.BAU.nonResKWhSold.toFixed(2) + " kWh"});
-		$('path#linkCciD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.nonResRev.toFixed(2)});
-		$('path#linkDCs').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.resNonSolarKWhSold.toFixed(2) + " kWh"});
-		$('path#linkCsD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.solarResRev.toFixed(2)});
-		$('path#linkSCs').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.annualSolarGen.toFixed(2)});
-		$('path#linkCsS').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.costSolarGen.toFixed(2) + " kWh"});
-	</script>
+			<svg width="980px" height="490px" viewBox="0.00 0.00 800.00 400.00">
+				<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(150 0)">
+					<defs>
+						<marker id="markerArrow" markerWidth="13" markerHeight="13" refx="2" refy="6" orient="auto">
+							<path d="M2,3 L2,10 L13,6 Z" style="fill:darkgray;" />
+						</marker>
+					</defs>
+					<path id='linkDL' class='link' d="M200,190 L120,190" style="stroke: orange; stroke-width: 2px; fill: none; marker-start: url(#markerCircle);  marker-end: url(#markerArrow);"/>
+					<path id='linkDP' class='link' d="M200,150 L155,120" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkGD' class='link' d="M230,70 L230,140" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkDG' class='link' d="M250,150 L250,80" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkDV' class='link' d="M280,190 L350,190" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkDCn' class='link' d="M280,230 L366,290 " style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkCnD' class='link' d="M340,320 L290,245" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkDCci' class='link' d="M230,230 L230,290" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkCciD' class='link' d="M250,300 L250,240" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkDCs' class='link' d="M200,230 L140,290" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkCsD' class='link' d="M160,300 L190,250" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkSCs' class='link' d="M50,310 L90,310" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<path id='linkCsS' class='link' d="M100,330 L70,330" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
+					<g id='nodeD' class='node'>	<rect width='80' height='80' x='200' y='150'></rect><text x="240" y="190" text-anchor="middle">D</text></g>
+					<g id='nodeL' class='node'><circle cx='80' cy='190' r='30'></circle><text x="80" y="190" text-anchor="middle">L</text></g>
+					<g id='nodeP' class='node'><circle cx='120' cy='100' r='30'></circle><text x="120" y="100" text-anchor="middle">P</text></g>
+					<g id='nodeG' class='node'><circle cx='240' cy='40' r='30'></circle><text x="240" y="40" text-anchor="middle">G</text></g>
+					<g id='nodeV' class='node'><circle cx='400' cy='190' r='30'></circle><text x="400" y="190" text-anchor="middle">V</text></g>
+					<g id='nodeCn' class='node'><rect width='60' height='40' x='340' y='300'></rect><text x="370" y="330" text-anchor="middle">Cn</text></g>
+					<g id='nodeCs' class='node'><rect width='60' height='40' x='100' y='300'></rect><text x="130" y="330" text-anchor="middle">Cs</text></g>
+					<g id='nodeCci' class='node'><rect width='60' height='40' x='210' y='300'></rect><text x="240" y="330" text-anchor="middle">Cci</text></g>
+					<g id='nodeS' class='node'><circle cx='40' cy='320' r='20'></circle><text x="40" y="320" text-anchor="middle">S</text></g>
+				</g>
+			</svg>
+			<script type="text/javascript">
+				$('#nodeD').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Distribution Utility<br>'+'$ '+allOutputData.BAU.idealRate.toFixed(2)+' -> $ '+ allOutputData.Solar.idealRate.toFixed(2)+'</center>'
+				});
+				$('#nodeL').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Energy Losses</center>'
+				});
+				$('#nodeP').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Patronage Capital</center>'
+				});
+				$('#nodeG').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>G&T or other Power Provider</center>'
+				});
+				$('#nodeV').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Vender, Staff, Banks etc.</center>'
+				});
+				$('#nodeCn').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Non-solar Residential Customers<br>'+"$ "+allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(2)+'</center>'
+				});
+				$('#nodeCci').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Commercial and Industrial Customers</center>'
+				});
+				$('#nodeCs').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar Residential Customers<br>'+"$ "+allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(2)+'</center>'
+				});
+				$('#nodeS').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar</center>'
+				});
+				$('path#linkDL').tipsy({gravity:'sw', hoverlock:true, html:true, fallback: allOutputData.Solar.losses.toFixed(2).toString()+" kWh"});
+				$('path#linkDP').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.patCaptial.toFixed(2)});
+				$('path#linkGD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.totalKWhPurchased.toFixed(2) + " kWh"});
+				$('path#linkDG').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.costPurchasedPower.toFixed(2)});
+				$('path#linkDV').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.BAU.nonPowerCosts.toFixed(2)});
+				$('path#linkDCn').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.solarResSold.toFixed(2) + " kWh"});
+				$('path#linkCnD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.resNonSolarRev.toFixed(2)});
+				$('path#linkDCci').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.BAU.nonResKWhSold.toFixed(2) + " kWh"});
+				$('path#linkCciD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.nonResRev.toFixed(2)});
+				$('path#linkDCs').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.resNonSolarKWhSold.toFixed(2) + " kWh"});
+				$('path#linkCsD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.solarResRev.toFixed(2)});
+				$('path#linkSCs').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.annualSolarGen.toFixed(2)});
+				$('path#linkCsS').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.costSolarGen.toFixed(2) + " kWh"});
+			</script>
 		</div>
-		
 		<!-- TODO: Split into two separate sheet -->
-		<p class="reportTitle postRun">Business as Usual v.s. Solar Table</p>
+		<p class="reportTitle postRun">Business as Usual Versus Solar Generation</p>
 		<div id="tableReport" class="tightContent postRun tableReport">
 			<table id="solarTableReport">
 			</table>
@@ -597,6 +571,21 @@
 					cell1.innerHTML = allOutputData.BAU[key]
 					cell2.innerHTML = allOutputData.Solar[key]
 				}
+			</script>
+		</div>
+		<p class="reportTitle postRun">Monthly Data Table</p>
+		<div id="monthlySummaryReport" class="tightContent postRun tableReport">
+			<table id="monthlySummaryTable">
+			</table>
+			<script>
+				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
+				insertMetric("monthlySummaryTable","Generation(Wh)", allOutputData.monthlyGeneration.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total Generation(kWh)", allOutputData.totalGeneration.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable", "No. Consumer Served", allOutputData.monthlyNoConsumerServedSales.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","KWh Sold", allOutputData.monthlyKWhSold.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Revenue", allOutputData.monthlyRevenue.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total KWh Sold", allOutputData.totalKWhSold.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Total Revenue from Sales of Electric Energy", allOutputData.totalRevenue.map(function(x){return x[1]}))
 			</script>
 		</div>
 	</div>
