@@ -49,28 +49,14 @@ def run(modelDir, inputDict):
 		* float(inputDict.get("shading", 0.995)) \
 		* float(inputDict.get("sysAvail", 0.995)) \
 		* float(inputDict.get("age", 0.995))
-	ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("derate", derate)))
+	ssc.ssc_data_set_number(dat, "derate", derate)
 	ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
 	ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 	# Advanced inputs with defaults.
 	ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
-	# ssc.ssc_data_set_number(dat, "t_noct", float(inputDict.get("t_noct", 45)))
-	# ssc.ssc_data_set_number(dat, "t_ref", float(inputDict.get("t_ref", 25)))
 	ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5)))
-	# ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict.get("inv_eff", 0.92)))
-	# ssc.ssc_data_set_number(dat, "fd", float(inputDict.get("fd", 1)))
-	# ssc.ssc_data_set_number(dat, "i_ref", float(inputDict.get("i_ref", 1000)))
-	# ssc.ssc_data_set_number(dat, "poa_cutin", float(inputDict.get("poa_cutin", 0)))
-	# ssc.ssc_data_set_number(dat, "w_stow", float(inputDict.get("w_stow", 0)))
 	# Complicated optional inputs.
 	ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
-	# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
-	# ssc.ssc_data_set_matrix(dat, 'shading_mxh', ...) 		# Month x Hour beam shading factors
-	# ssc.ssc_data_set_matrix(dat, ' shading_azal', ...) 	# Azimuth x altitude beam shading factors
-	# ssc.ssc_data_set_number(dat, 'shading_diff', ...) 	# Diffuse shading factor
-	# ssc.ssc_data_set_number(dat, 'enable_user_poa', ...)	# Enable user-defined POA irradiance input = 0 or 1
-	# ssc.ssc_data_set_array(dat, 'user_poa', ...) 			# User-defined POA irradiance in W/m2
-	# ssc.ssc_data_set_number(dat, 'tilt', 999)
 	# Run PV system simulation.
 	mod = ssc.ssc_module_create("pvwattsv1")
 	ssc.ssc_module_exec(mod, dat)
@@ -282,18 +268,11 @@ def _tests():
 		"age": "0.995",
 		"tilt": "True",
 		"srecCashFlow": "5,5,3,3,2",
-		# "derate":"0.77",
 		"trackingMode":"0",
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",
-		# "t_noct":"45.0",
-		# "t_ref":"25.0",
 		"gamma":"-0.5",
-		# "inv_eff":"0.92",
-		# "fd":"1.0",
-		# "i_ref":"1000",
-		# "poa_cutin":"0",
 		"omCost": "1000"}
 	modelLoc = pJoin(workDir,"admin","Automated solarFinancial Testing")
 	# Blow away old test results if necessary.
