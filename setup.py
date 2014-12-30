@@ -2,7 +2,7 @@
 omf
 -----
 
-omf, the Open Modeling Framework, is a set of Python libraries for simulating 
+OMF, the Open Modeling Framework, is a set of Python libraries for simulating 
 the elctrical grid with an emphasis on cost-benefit analysis of emerging technologies: 
 distributed generation, storage, networked controls, etc.
 
