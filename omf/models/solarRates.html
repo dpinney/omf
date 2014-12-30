@@ -68,13 +68,21 @@
 				<label class="tooltip">Residential Customers With Solar (%)<span class="classic">Percentage of residential customers who own PV systems.</span></label>
 				<input type="text" id="resPenetration" name="resPenetration" data-validRegex="\d+\.?\d*"/>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Solar Interconnection Charge ($)<span class="classic">Monthly charge for residential customers with solar installed.</span></label>
+				<input type="text" id="solarInterconCharge" name="solarInterconCharge" data-validRegex="\d+\.?\d*"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Solar Levelized Cost of Energy ($/kWh)<span class="classic">Estimated levelized costs for the energy provided from solar. This estimate effects average bill size for solar residential customers but it doesn't impact rate change assessments.</span></label>
+				<input type="text" id="solarLCoE" name="solarLCoE" data-validRegex="\d+\.?\d*"/>
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Miscellaneous Financial Variables</p>
 			</div>
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Customer Service Charge ($)<span class="classic">Monthly service charge for residential customers if any.</span></label>
-				<input type="text" id="serviceCharge" name="serviceCharge" data-validRegex="\d+\.?\d*" value="15"/>
+				<input type="text" id="customServiceCharge" name="customServiceCharge" data-validRegex="\d+\.?\d*" value="15"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail rate for residential consumers.</span></label>
@@ -82,7 +90,15 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wholesale Energy Cost ($/kWh)<span class="classic">Wholesale cost of power, which can be calculated from Form 7 as R.17.m/R.15.m.</span></label>
-				<input type="text" id="wholesaleCost" name="wholesaleCost" data-validRegex="\d+\.?\d*" value="0.08"/>
+				<input type="text" id="wholesaleEnergyCost" name="wholesaleEnergyCost" data-validRegex="\d+\.?\d*" value="0.08"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Form 7.R.13.TOTAL Other Electric Revenue.<span class="classic">Additional revenue from Form 7 Table R.</span></label>
+				<input type="text" id="otherElecRevenue" name="otherElecRevenue" data-validRegex="\d+\.?\d*" value="0.08"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Form 7.L.5.c TOTAL kWh Purchased<span class="classic">Total energy purchased from Form 7 Table R.</span></label>
+				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" data-validRegex="\d+\.?\d*" value="0.08"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Form 7 Financial Variables</p>

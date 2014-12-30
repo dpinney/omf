@@ -37,7 +37,8 @@ def run(modelDir, inputDict):
 	dat = ssc.ssc_data_create()
 	# Required user inputs.
 	ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
-	ssc.ssc_data_set_number(dat, "system_size", float(inputDict["systemSize"]))
+	# TODO: FIX THIS!!!! IT SHOULD BE AVGSYS*PEN*RESCUSTOMERS
+	ssc.ssc_data_set_number(dat, "system_size", float(inputDict["avgSystemSize"]))
 	# SAM options where we take defaults.
 	ssc.ssc_data_set_number(dat, "derate", 0.97)
 	ssc.ssc_data_set_number(dat, "track_mode", 0)
@@ -97,6 +98,9 @@ def run(modelDir, inputDict):
 	outData["lossesBAU"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)]) 
 	outData["lineLossRate"] = outData.get("lossesBAU", 0) / float(inputDict.get("totalKWhPurchased", 0))
 	outData["totalGeneration"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["monthlyGeneration"][i][1]*monthlyNoConsumerServedSales[i][1]*float(inputDict.get("resPenetration", 0.05))/1000] for i in range(12)]
+	##################
+	# TODO: add retailCost to the calculation.
+	##################
 	## Flow Diagram Calculations, and order of calculation matters
 	# BAU case
 	outData["BAU"] = {}
@@ -356,15 +360,11 @@ def _tests():
 	"sepSale": "47140", "sepKWh": "59707578", "sepRev": "7809767", "sepKWhT": "88193645", "sepRevT": "11052318", 
 	"octSale": "47088", "octKWh": "46451858", "octRev": "6146975", "octKWhT": "70425336", "octRevT": "8936767", 
 	"novSale": "47173", "novKWh": "41668828", "novRev": "5551288", "novKWhT": "65008851", "novRevT": "8228072", 
-	"decSale": "47081", "decKWh": "53354283", "decRev": "7014717", "decKWhT": "73335526", "decRevT": "9385203"
-	}
+	"decSale": "47081", "decKWh": "53354283", "decRev": "7014717", "decKWhT": "73335526", "decRevT": "9385203" }
 	inData = {
 		"modelType": "solarRates",
 		"climateName": "AL-HUNTSVILLE",
-		"systemSize":"100",
-		"installCost":"100000",
 		"runTime": "",
-		"omCost": "1000",
 		# Single data point
 		"avgSystemSize": "5",
 		"resPenetration": "0.05",
@@ -374,12 +374,6 @@ def _tests():
 		"solarLCoE": "0.07",
 		"otherElecRevenue": "1544165",
 		"totalKWhPurchased": "999330657",
-		# Monthly data
-		# "monthlyNoConsumerServedSales" :[46668,46724,46876,46858,46919,46977,47013,47114,47140,47088,47173,47081],
-		# "monthlyKWhSold" : [64467874,66646882,62467031,49781827,41078029,40835343,58018686,67825037,59707578,46451858,41668828,53354283],
-		# "monthlyRevenue" : [8093137,8812203,8277498,6664021,5567683,5528717,7585,8836269,7809767,6146975,5551288,7014717],
-		# "totalKWhSold" : [85628959,89818661,84780954,70552865,63397699,64781785,86140915,98032727,88193645,70425336,65008851,73335526],
-		# "totalRevenue" : [10464278,11508047,10874720,9122130,8214078,8332117,10793395,12219454,11052318,8936767,8228072,9385203],
 		# Form 7 data
 		"powerProExpense": "0",
 		"costPurchasedPower": "80466749",
@@ -403,8 +397,7 @@ def _tests():
 		"nonOpMarginOther": "811043",
 		"genTransCapCredits": "1015764",
 		"otherCapCreditsPatroDivident": "1135379",
-		"extraItems":"0"
-		}
+		"extraItems":"0" }
 	for key in monthlyData:
 		inData[key] = monthlyData[key]
 	modelLoc = pJoin(workDir,"admin","Automated solarRates Testing")
