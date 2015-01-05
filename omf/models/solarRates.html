@@ -380,41 +380,45 @@
 			</script>
 		</div>
 		<p class="reportTitle  postRun">Annual Cash and Power Flows</p>
-		<div id="graphicChart" class="tightContent postRun tableReport">
+		<div id="graphicChart" class="tightContent postRun tableReport" style="overflow-x:hidden">
 			<style type="text/css">
-				g.node rect{fill:lightgray; stroke:black}
-				g.node circle{fill:lightgray; stroke:black}
+				g.node rect{fill:lightgray}
+				g.node circle{fill:lightgray}
 				g.node text{font-size:10px}
+				path.link {stroke-width:8px; fill:none}
 			</style>
-			<svg width="980px" height="490px" viewBox="0.00 0.00 800.00 400.00">
-				<g id="graph0" class="graph" transform="scale(1 1) rotate(0) translate(150 0)">
+			<svg width="1000px" height="520px" viewBox="0.00 0.00 1000.00 500.00">
+				<g id="graph0" class="graph">
 					<defs>
-						<marker id="markerArrow" markerWidth="13" markerHeight="13" refx="2" refy="6" orient="auto">
-							<path d="M2,3 L2,10 L13,6 Z" style="fill:darkgray;" />
+						<marker id="greenArrow" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="2" markerHeight="2" orient="auto" markerUnits="strokeWidth">
+							<path d="M0,0 L10,5 L0,10 Z" style="fill:green"/>
+						</marker>
+						<marker id="orangeArrow" viewBox="0 0 10 10" refX="0" refY="5" markerWidth="2" markerHeight="2" orient="auto" markerUnits="strokeWidth">
+							<path d="M0,0 L10,5 L0,10 Z" style="fill:orange"/>
 						</marker>
 					</defs>
-					<path id='linkDL' class='link' d="M200,190 L120,190" style="stroke: orange; stroke-width: 2px; fill: none; marker-start: url(#markerCircle);  marker-end: url(#markerArrow);"/>
-					<path id='linkDP' class='link' d="M200,150 L155,120" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkGD' class='link' d="M230,70 L230,140" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkDG' class='link' d="M250,150 L250,80" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkDV' class='link' d="M280,190 L350,190" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkDCn' class='link' d="M280,230 L366,290 " style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkCnD' class='link' d="M340,320 L290,245" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkDCci' class='link' d="M230,230 L230,290" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkCciD' class='link' d="M250,300 L250,240" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkDCs' class='link' d="M200,230 L140,290" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkCsD' class='link' d="M160,300 L190,250" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkSCs' class='link' d="M50,310 L90,310" style="stroke: orange; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<path id='linkCsS' class='link' d="M100,330 L70,330" style="stroke: green; stroke-width: 2px; fill: none;marker-end: url(#markerArrow);"/>
-					<g id='nodeD' class='node'>	<rect width='80' height='80' x='200' y='150'></rect><text x="240" y="190" text-anchor="middle">D</text></g>
-					<g id='nodeL' class='node'><circle cx='80' cy='190' r='30'></circle><text x="80" y="190" text-anchor="middle">L</text></g>
-					<g id='nodeP' class='node'><circle cx='120' cy='100' r='30'></circle><text x="120" y="100" text-anchor="middle">P</text></g>
-					<g id='nodeG' class='node'><circle cx='240' cy='40' r='30'></circle><text x="240" y="40" text-anchor="middle">G</text></g>
-					<g id='nodeV' class='node'><circle cx='400' cy='190' r='30'></circle><text x="400" y="190" text-anchor="middle">V</text></g>
-					<g id='nodeCn' class='node'><rect width='60' height='40' x='340' y='300'></rect><text x="370" y="330" text-anchor="middle">Cn</text></g>
-					<g id='nodeCs' class='node'><rect width='60' height='40' x='100' y='300'></rect><text x="130" y="330" text-anchor="middle">Cs</text></g>
-					<g id='nodeCci' class='node'><rect width='60' height='40' x='210' y='300'></rect><text x="240" y="330" text-anchor="middle">Cci</text></g>
-					<g id='nodeS' class='node'><circle cx='40' cy='320' r='20'></circle><text x="40" y="320" text-anchor="middle">S</text></g>
+					<g id="nodeL" class="node"><circle cx="250" cy="50" r="45"></circle><text x="250" y="50" text-anchor="middle">L</text></g>
+					<g id="nodeG" class="node"><circle cx="150" cy="250" r="100"></circle><text x="150" y="250" text-anchor="middle">G</text></g>
+					<g id="nodeV" class="node"><circle cx="250" cy="450" r="45"></circle><text x="250" y="450" text-anchor="middle">V</text></g>
+					<g id="nodeP" class="node"><circle cx="500" cy="50" r="45"></circle><text x="500" y="50" text-anchor="middle">P</text></g>
+					<g id="nodeD" class="node"><rect x="400" y="150" width="200" height="200"></rect><text x="500" y="250" text-anchor="middle">Distribution Utility</text></g>
+					<g id="nodeS" class="node"><circle cx="850" cy="40" r="30"></circle><text x="850" y="40" text-anchor="middle">Solar</text></g>
+					<g id="nodeCs" class="node"><rect x="750" y="120" width="200" height="90"></rect><text x="850" y="165" text-anchor="middle">Solar Residential Consumers</text></g>
+					<g id="nodeCn" class="node"><rect x="750" y="240" width="200" height="90"></rect><text x="850" y="285" text-anchor="middle">Non-Solar Residential Consumers</text></g>
+					<g id="nodeCci" class="node"><rect x="750" y="350" width="200" height="90"></rect><text x="850" y="395" text-anchor="middle">Commercial and Industrial Consumers</text></g>
+					<path id="linkDP" class="link" d="M500,140 L500,120" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="linkDL" class="link" d="M395,145 L310,90" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<path id="linkDV" class="link" d="M395,355 L310,420" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="linkDGO" class="link" d="M390,240 L275,240" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<path id="linkDGG" class="link" d="M390,260 L275,260" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="linkDCciO" class="link" d="M610,340 L720,380" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<path id="linkDCciG" class="link" d="M610,360 L720,400" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="linkDCnO" class="link" d="M610,240 L720,265" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<path id="linkDCnG" class="link" d="M610,260 L720,285" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="linkDCsO" class="link" d="M610,140 L720,140" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<path id="linkDCsG" class="link" d="M610,160 L720,160" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="linkSCsG" class="link" d="M840,80 L840,90" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="linkSCsO" class="link" d="M860,80 L860,90" style="stroke:orange; marker-end:url(#orangeArrow)"/>
 				</g>
 			</svg>
 			<script type="text/javascript">
