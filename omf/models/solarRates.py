@@ -258,7 +258,7 @@ def run(modelDir, inputDict):
 	# E64 = E45-E63
 	outData["BAU"]["patCapOperMargins"] = outData["BAU"]["operRevPatroCap"] - outData["BAU"]["totalCostElecService"]
 	# E72 = SUM(E64:E71)
-	outData["BAU"]["patCaptial"] = outData["BAU"]["patCapOperMargins"]\
+	outData["BAU"]["patCapital"] = outData["BAU"]["patCapOperMargins"]\
 		+ float(inputDict.get("nonOpMarginInterest"))\
 		+ float(inputDict.get("fundsUsedConstruc"))\
 		+ float(inputDict.get("incomeEquityInvest"))\
@@ -292,7 +292,7 @@ def run(modelDir, inputDict):
 	# F64 = F45 - F63
 	outData["Solar"]["patCapOperMargins"] = outData["Solar"]["operRevPatroCap"] - outData["Solar"]["totalCostElecService"]
 	# F72 = SUM(F64:F71)
-	outData["Solar"]["patCaptial"] = outData["Solar"]["patCapOperMargins"]\
+	outData["Solar"]["patCapital"] = outData["Solar"]["patCapOperMargins"]\
 		+ outData["Solar"]["nonOpMarginInterest"]\
 		+ outData["Solar"]["fundsUsedConstruc"]\
 		+ outData["Solar"]["incomeEquityInvest"]\

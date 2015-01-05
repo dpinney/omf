@@ -18,7 +18,7 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<style type="text/css">thead{font-weight:bold} table{width:980px; font-size:12}</style>
+	<style type="text/css">thead{font-weight:bold} table{width:980px; font-size:12}</style> <!--TODO:Find a better place for this.-->
 </head>
 <body onload="init()">
 	<div id="title">
@@ -105,95 +105,95 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label>A.2 Power Production Expense</label>
+				<label>A.2.b Power Production Expense</label>
 				<input type="text" id="powerProExpense" name="powerProExpense"/>
 			</div>
 			<div class="shortInput">
-				<label>A.3 Cost of Purchased Power</label>
+				<label>A.3.b Cost of Purchased Power</label>
 				<input type="text" id="costPurchasedPower" name="costPurchasedPower"/>
 			</div>
 			<div class="shortInput">
-				<label>A.4 Transmission Expense</label>
+				<label>A.4.b Transmission Expense</label>
 				<input type="text" id="transExpense" name="transExpense"/>
 			</div>
 			<div class="shortInput">
-				<label>A.5 Distribution Expense - Operation</label>
+				<label>A.5.b Distribution Expense - Operation</label>
 				<input type="text" id="distriExpenseO" name="distriExpenseO"/>
 			</div>
 			<div class="shortInput">
-				<label>A.6 Distribution Expense - Maintenance</label>
+				<label>A.6.b Distribution Expense - Maintenance</label>
 				<input type="text" id="distriExpenseM" name="distriExpenseM"/>
 			</div>
 			<div class="shortInput">
-				<label>A.7 Customer Accounts Expense</label>
+				<label>A.7.b Customer Accounts Expense</label>
 				<input type="text" id="customerAccountExpense" name="customerAccountExpense"/>
 			</div>
 			<div class="shortInput">
-				<label>A.8 Customer Service and Informational Expense</label>
+				<label>A.8.b Customer Service and Informational Expense</label>
 				<input type="text" id="customerServiceExpense" name="customerServiceExpense"/>
 			</div>
 			<div class="shortInput">
-				<label>A.9 Sales Expense</label>
+				<label>A.9.b Sales Expense</label>
 				<input type="text" id="salesExpense" name="salesExpense"/>
 			</div>
 			<div class="shortInput">
-				<label>A.10 Administrative and General Expense</label>
+				<label>A.10.b Administrative and General Expense</label>
 				<input type="text" id="adminGeneralExpense" name="adminGeneralExpense"/>
 			</div>
 			<div class="shortInput">
-				<label>A.12 Depreciation and Amortization Expense</label>
+				<label>A.12.b Depreciation and Amortization Expense</label>
 				<input type="text" id="depreAmortiExpense" name="depreAmortiExpense"/>
 			</div>
 			<div class="shortInput">
-				<label>A.13 Tax Expense - Property &amp; Gross Receipts</label>
+				<label>A.13.b Tax Expense - Property &amp; Gross Receipts</label>
 				<input type="text" id="taxExpensePG" name="taxExpensePG"/>
 			</div>
 			<div class="shortInput">
-				<label>A.14 Tax Expense - Other</label>
+				<label>A.14.b Tax Expense - Other</label>
 				<input type="text" id="taxExpense" name="taxExpense"/>
 			</div>
 			<div class="shortInput">
-				<label>A.15 Interest on Long-Term Debt</label>
+				<label>A.15.b Interest on Long-Term Debt</label>
 				<input type="text" id="interestLongTerm" name="interestLongTerm"/>
 			</div>
 			<div class="shortInput">
-				<label>A.16 Interest Charged to Construction - Credit</label>
+				<label>A.16.b Interest Charged to Construction - Credit</label>
 				<input type="text" id="interestConstruction" name="interestConstruction"/>
 			</div>
 			<div class="shortInput">
-				<label>A.17 Interest Expense - Other</label>
+				<label>A.17.b Interest Expense - Other</label>
 				<input type="text" id="interestExpense" name="interestExpense"/>
 			</div>
 			<div class="shortInput">
-				<label>A.18 Other Deductions</label>
+				<label>A.18.b Other Deductions</label>
 				<input type="text" id="otherDeductions" name="otherDeductions"/>
 			</div>
 			<div class="shortInput">
-				<label>A.21 Non Operating Margins - Interest</label>
+				<label>A.21.b Non Operating Margins - Interest</label>
 				<input type="text" id="nonOpMarginInterest" name="nonOpMarginInterest"/>
 			</div>
 			<div class="shortInput">
-				<label>A.22 Allowance for Funds Used During Construction</label>
+				<label>A.22.b Allowance for Funds Used During Construction</label>
 				<input type="text" id="fundsUsedConstruc" name="fundsUsedConstruc"/>
 			</div>
 			<div class="shortInput">
-				<label>A.23 Income (Loss) from Equity Investments</label>
+				<label>A.23.b Income (Loss) from Equity Investments</label>
 				<input type="text" id="incomeEquityInvest" name="incomeEquityInvest"/>
 			</div>
 			<div class="shortInput">
-				<label>A.24 Non Operating Margins - Other</label>
+				<label>A.24.b Non Operating Margins - Other</label>
 				<input type="text" id="nonOpMarginOther" name="nonOpMarginOther"/>
 			</div>
 			<div class="shortInput">
-				<label>A.25 Generation and Transmission Capital Credits</label>
+				<label>A.25.b Generation and Transmission Capital Credits</label>
 				<input type="text" id="genTransCapCredits" name="genTransCapCredits"/>
 			</div>
 			<div class="shortInput">
-				<label>A.26 Other Capital Credits and Patronage Dividends</label>
+				<label>A.26.b Other Capital Credits and Patronage Dividends</label>
 				<input type="text" id="otherCapCreditsPatroDivident" name="otherCapCreditsPatroDivident"/>
 			</div>
 			<div class="shortInput">
-				<label>A.27 Extraordinary Items</label>
+				<label>A.27.b Extraordinary Items</label>
 				<input type="text" id="extraItems" name="extraItems"/>
 			</div>
 			<div class="wideInput">
@@ -437,7 +437,7 @@
 				$('#nodeS').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar</center>'
 				});
 				$('path#linkDL').tipsy({gravity:'sw', hoverlock:true, html:true, fallback: allOutputData.Solar.losses.toFixed(2).toString()+" kWh"});
-				$('path#linkDP').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.patCaptial.toFixed(2)});
+				$('path#linkDP').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.patCapital.toFixed(2)});
 				$('path#linkGD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.totalKWhPurchased.toFixed(2) + " kWh"});
 				$('path#linkDG').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.costPurchasedPower.toFixed(2)});
 				$('path#linkDV').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.BAU.nonPowerCosts.toFixed(2)});
@@ -451,8 +451,52 @@
 				$('path#linkCsS').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.costSolarGen.toFixed(2) + " kWh"});
 			</script>
 		</div>
+		<p class="reportTitle postRun">Form 7.A Statement of Operations - Business as Usual Versus Residential Solar</p>
+		<div id="tableReport" class="tightContent postRun tableReport">
+			<style>.inVal {text-decoration:underline}</style>
+			<table id="bauVersusSolarTable">
+				<tr><th>ID</th><th>Item</th><th><label class="tooltip">Business as Usual<span class="classic">Underlined values comes directly from the input. All other values in this table are calculated.</span></label></th><th>Solar</th></tr>
+				<tr><td>7.A.1.b</td><td>Operating Revenue and Patronage Capital</td><td id="bau_operRevPatroCap" class="inVal"></td><td id="sol_operRevPatroCap"></td></tr>
+				<tr><td>7.A.2.b</td><td>Power Production Expense</td><td id="bau_powerProExpense" class="inVal"></td><td id="sol_powerProExpense"></td></tr>
+				<tr><td>7.A.3.b</td><td>Cost of Purchased Power</td><td id="bau_costPurchasedPower" class="inVal"></td><td id="sol_costPurchasedPower"></td></tr>
+				<tr><td>7.A.4.b</td><td>Transmission Expense</td><td id="bau_transExpense" class="inVal"></td><td id="sol_transExpense"></td></tr>
+				<tr><td>7.A.5.b</td><td>Distribution Expense - Operation</td><td id="bau_distriExpenseO" class="inVal"></td><td id="sol_distriExpenseO"></td></tr>
+				<tr><td>7.A.6.b</td><td>Distribution Expense - Maintenance</td><td id="bau_distriExpenseM" class="inVal"></td><td id="sol_distriExpenseM"></td></tr>
+				<tr><td>7.A.7.b</td><td>Customer Accounts Expense</td><td id="bau_customerAccountExpense" class="inVal"></td><td id="sol_customerAccountExpense"></td></tr>
+				<tr><td>7.A.8.b</td><td>Customer Service and Informational Expense</td><td id="bau_customerServiceExpense" class="inVal"></td><td id="sol_customerServiceExpense"></td></tr>
+				<tr><td>7.A.9.b</td><td>Sales Expense</td><td id="bau_salesExpense" class="inVal"></td><td id="sol_salesExpense"></td></tr>
+				<tr><td>7.A.10.b</td><td>Administrative and General Expense</td><td id="bau_adminGeneralExpense" class="inVal"></td><td id="sol_adminGeneralExpense"></td></tr>
+				<tr><td>7.A.11.b</td><td>Total Operation &amp; Maintenance Expense (2 thru 10)</td><td id="bau_totalOMExpense"></td><td id="sol_totalOMExpense"></td></tr>
+				<tr><td>7.A.12.b</td><td>Depreciation and Amortization Expense</td><td id="bau_depreAmortiExpense" class="inVal"></td><td id="sol_depreAmortiExpense"></td></tr>
+				<tr><td>7.A.13.b</td><td>Tax Expense - Property &amp; Gross Receipts</td><td id="bau_taxExpensePG" class="inVal"></td><td id="sol_taxExpensePG"></td></tr>
+				<tr><td>7.A.14.b</td><td>Tax Expense - Other</td><td id="bau_taxExpense" class="inVal"></td><td id="sol_taxExpense"></td></tr>
+				<tr><td>7.A.15.b</td><td>Interest on Long-Term Debt</td><td id="bau_interestLongTerm" class="inVal"></td><td id="sol_interestLongTerm"></td></tr>
+				<tr><td>7.A.16.b</td><td>Interest Charged to Construction - Credit</td><td id="bau_interestConstruction" class="inVal"></td><td id="sol_interestConstruction"></td></tr>
+				<tr><td>7.A.17.b</td><td>Interest Expense - Other</td><td id="bau_interestExpense" class="inVal"></td><td id="sol_interestExpense"></td></tr>
+				<tr><td>7.A.18.b</td><td>Other Deductions</td><td id="bau_otherDeductions" class="inVal"></td><td id="sol_otherDeductions"></td></tr>
+				<tr><td>7.A.19.b</td><td>Total Cost of Electric Service (11 thru 18)</td><td id="bau_totalCostElecService"></td><td id="sol_totalCostElecService"></td></tr>
+				<tr><td>7.A.20.b</td><td>Patronage Capital &amp; Operating Margins (1 minus 19)</td><td id="bau_patCapOperMargins"></td><td id="sol_patCapOperMargins"></td></tr>
+				<tr><td>7.A.21.b</td><td>Non Operating Margins - Interest</td><td id="bau_nonOpMarginInterest" class="inVal"></td><td id="sol_nonOpMarginInterest"></td></tr>
+				<tr><td>7.A.22.b</td><td>Allowance for Funds Used During Construction</td><td id="bau_fundsUsedConstruc" class="inVal"></td><td id="sol_fundsUsedConstruc"></td></tr>
+				<tr><td>7.A.23.b</td><td>Income (Loss) from Equity Investments</td><td id="bau_incomeEquityInvest" class="inVal"></td><td id="sol_incomeEquityInvest"></td></tr>
+				<tr><td>7.A.24.b</td><td>Non Operating Margins - Other</td><td id="bau_nonOpMarginOther" class="inVal"></td><td id="sol_nonOpMarginOther"></td></tr>
+				<tr><td>7.A.25.b</td><td>Generation and Transmission Capital Credits</td><td id="bau_genTransCapCredits" class="inVal"></td><td id="sol_genTransCapCredits"></td></tr>
+				<tr><td>7.A.26.b</td><td>Other Capital Credits and Patronage Dividends</td><td id="bau_otherCapCreditsPatroDivident" class="inVal"></td><td id="sol_otherCapCreditsPatroDivident"></td></tr>
+				<tr><td>7.A.27.b</td><td>Extraordinary Items</td><td id="bau_extraItems" class="inVal"></td><td id="sol_extraItems"></td></tr>
+				<tr><td>7.A.28.b</td><td>Patronage Capital or Margins (20 thru 27)</td><td id="bau_patCapital"></td><td id="sol_patCapital"></td></tr>
+			</table>
+			<script>
+				// Set all the values in the above table by mapping ID<->allOutput.
+				table = gebi("bauVersusSolarTable")
+				rows = table.children[0].children
+				for (i=1; i<rows.length; i++) {
+					tds = rows[i].children
+					tds[2].innerHTML = allOutputData.BAU[tds[2].id.substring(4)]
+					tds[3].innerHTML = allOutputData.Solar[tds[3].id.substring(4)] }
+			</script>
+		</div>
 		<!-- TODO: Split into two separate sheet -->
-		<p class="reportTitle postRun">Business as Usual Versus Solar Generation</p>
+		<p class="reportTitle postRun">Full Variable Dump</p>
 		<div id="tableReport" class="tightContent postRun tableReport">
 			<table id="solarTableReport">
 			</table>
