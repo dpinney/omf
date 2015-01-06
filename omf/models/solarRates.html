@@ -326,6 +326,7 @@
 				}
 			}
 		</script>
+<!--
 		<p class="reportTitle postRun">Hourly Average Power Per Solar Generator</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
 			<div id="powerTimeSeries"></div>
@@ -379,13 +380,15 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
+-->
 		<p class="reportTitle  postRun">Annual Cash and Power Flows</p>
 		<div id="graphicChart" class="tightContent postRun tableReport" style="overflow-x:hidden">
 			<style type="text/css">
-				g.node rect{fill:lightgray}
-				g.node circle{fill:lightgray}
-				g.node text{font-size:10px}
+				g.node rect, circle {fill:lightgray}
+				
+				g.node text{font-size:10pt}
 				path.link {stroke-width:8px; fill:none}
+				g.text {font-size:12pt}
 			</style>
 			<svg width="1000px" height="520px" viewBox="0.00 0.00 1000.00 500.00">
 				<g id="graph0" class="graph">
@@ -397,63 +400,43 @@
 							<path d="M0,0 L10,5 L0,10 Z" style="fill:orange"/>
 						</marker>
 					</defs>
-					<g id="nodeL" class="node"><circle cx="250" cy="50" r="45"></circle><text x="250" y="50" text-anchor="middle">L</text></g>
-					<g id="nodeG" class="node"><circle cx="150" cy="250" r="100"></circle><text x="150" y="250" text-anchor="middle">G</text></g>
-					<g id="nodeV" class="node"><circle cx="250" cy="450" r="45"></circle><text x="250" y="450" text-anchor="middle">V</text></g>
-					<g id="nodeP" class="node"><circle cx="500" cy="50" r="45"></circle><text x="500" y="50" text-anchor="middle">P</text></g>
-					<g id="nodeD" class="node"><rect x="400" y="150" width="200" height="200"></rect><text x="500" y="250" text-anchor="middle">Distribution Utility</text></g>
-					<g id="nodeS" class="node"><circle cx="850" cy="40" r="30"></circle><text x="850" y="40" text-anchor="middle">Solar</text></g>
-					<g id="nodeCs" class="node"><rect x="750" y="120" width="200" height="90"></rect><text x="850" y="165" text-anchor="middle">Solar Residential Consumers</text></g>
-					<g id="nodeCn" class="node"><rect x="750" y="240" width="200" height="90"></rect><text x="850" y="285" text-anchor="middle">Non-Solar Residential Consumers</text></g>
-					<g id="nodeCci" class="node"><rect x="750" y="350" width="200" height="90"></rect><text x="850" y="395" text-anchor="middle">Commercial and Industrial Consumers</text></g>
-					<path id="linkDP" class="link" d="M500,140 L500,120" style="stroke:green; marker-end:url(#greenArrow)"/>
-					<path id="linkDL" class="link" d="M395,145 L310,90" style="stroke:orange; marker-end:url(#orangeArrow)"/>
-					<path id="linkDV" class="link" d="M395,355 L310,420" style="stroke:green; marker-end:url(#greenArrow)"/>
-					<path id="linkDGO" class="link" d="M390,240 L275,240" style="stroke:orange; marker-end:url(#orangeArrow)"/>
-					<path id="linkDGG" class="link" d="M390,260 L275,260" style="stroke:green; marker-end:url(#greenArrow)"/>
-					<path id="linkDCciO" class="link" d="M610,340 L720,380" style="stroke:orange; marker-end:url(#orangeArrow)"/>
-					<path id="linkDCciG" class="link" d="M610,360 L720,400" style="stroke:green; marker-end:url(#greenArrow)"/>
-					<path id="linkDCnO" class="link" d="M610,240 L720,265" style="stroke:orange; marker-end:url(#orangeArrow)"/>
-					<path id="linkDCnG" class="link" d="M610,260 L720,285" style="stroke:green; marker-end:url(#greenArrow)"/>
-					<path id="linkDCsO" class="link" d="M610,140 L720,140" style="stroke:orange; marker-end:url(#orangeArrow)"/>
-					<path id="linkDCsG" class="link" d="M610,160 L720,160" style="stroke:green; marker-end:url(#greenArrow)"/>
-					<path id="linkSCsG" class="link" d="M840,80 L840,90" style="stroke:green; marker-end:url(#greenArrow)"/>
-					<path id="linkSCsO" class="link" d="M860,80 L860,90" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<g id="lossesNode" class="node"><circle cx="250" cy="50" r="45"></circle><text x="250" y="50" text-anchor="middle">Technical Losses</text></g>
+					<g id="gtNode" class="node"><circle cx="150" cy="250" r="100"></circle><text x="150" y="250" text-anchor="middle">G&amp;T or Other Power Suppliers</text></g>
+					<g id="vendorNode" class="node"><circle cx="250" cy="450" r="45"></circle><text x="250" y="450" text-anchor="middle">Vendors</text></g>
+					<g id="patronageNode" class="node"><circle cx="500" cy="50" r="45"></circle><text x="500" y="50" text-anchor="middle">Patronage Capital</text></g>
+					<g id="distributionNode" class="node"><rect x="400" y="150" width="200" height="200"></rect><text x="500" y="250" text-anchor="middle">Distribution Utility</text></g>
+					<g id="panelsNode" class="node"><circle cx="850" cy="40" r="30"></circle><text x="850" y="40" text-anchor="middle">Panels</text></g>
+					<g id="solarConNode" class="node"><rect x="750" y="120" width="200" height="90"></rect><text x="850" y="165" text-anchor="middle">Solar Res. Consumers</text></g>
+					<g id="nonSolarConNode" class="node"><rect x="750" y="240" width="200" height="90"></rect><text x="850" y="285" text-anchor="middle">Non-Solar Res. Consumers</text></g>
+					<g id="commConNode" class="node"><rect x="750" y="350" width="200" height="90"></rect><text x="850" y="395" text-anchor="middle">C&amp;I Consumers</text></g>
+					<path id="patronageCashLink" class="link" d="M500,140 L500,120" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="lossesEnergyLink" class="link" d="M395,145 L310,90" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<path id="vendorCashLink" class="link" d="M395,355 L310,420" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="gtEnergyLink" class="link" d="M260,240 L375,240" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<path id="gtCashLink" class="link" d="M390,260 L275,260" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="commConEnergyLink" class="link" d="M610,340 L720,380" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<path id="commConCashLink" class="link" d="M735,405 L625,365" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="nonSolarConEnergyLink" class="link" d="M610,240 L720,265" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<path id="nonSolarConCashLink" class="link" d="M735,290 L625,265" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="solarConEnergyLink" class="link" d="M610,140 L720,140" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<path id="solarConCashLink" class="link" d="M735,160 L625,160" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="panelsCashLink" class="link" d="M840,105 L840,95" style="stroke:green; marker-end:url(#greenArrow)"/>
+					<path id="panelsEnergyLink" class="link" d="M860,80 L860,90" style="stroke:orange; marker-end:url(#orangeArrow)"/>
+					<text id="patronageCashLabel" fill="green" x="490" y="130" text-anchor="end">12345</text>
+					<text id="lossesEnergyLabel" fill="orange" x="300" y="100" text-anchor="end">12345</text>
+					<text id="vendorCashLabel" fill="green" x="300" y="400" text-anchor="end">12345</text>
+					<text id="gtEnergyLabel" fill="orange" x="330" y="230" text-anchor="middle">12345</text>
+					<text id="gtCashLabel" fill="green" x="330" y="290" text-anchor="middle">12345</text>
+					<text id="solarConEnergyLabel" fill="orange" x="650" y="140" text-anchor="middle">12345</text>
+					<text id="solarConCashLabel" fill="green" x="650" y="180" text-anchor="middle">12345</text>
+					<text id="nonSolarConEnergyLabel" fill="orange" x="620" y="250" text-anchor="start">12345</text>
+					<text id="nonSolarConCashLabel" fill="green" x="710" y="280" text-anchor="end">12345</text>
+					<text id="commConEnergyLabel" fill="orange" x="610" y="350" text-anchor="start">12345</text>
+					<text id="commConCashLabel" fill="green" x="680" y="380" text-anchor="end">12345</text>					
+					<text id="panelsEnergyLabel" fill="orange" x="870" y="95" text-anchor="start">12345</text>
+					<text id="panelsCashLabel" fill="green" x="830" y="95" text-anchor="end">12345</text>					
 				</g>
 			</svg>
-			<script type="text/javascript">
-				$('#nodeD').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Distribution Utility<br>'+'$ '+allOutputData.BAU.idealRate.toFixed(2)+' -> $ '+ allOutputData.Solar.idealRate.toFixed(2)+'</center>'
-				});
-				$('#nodeL').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Energy Losses</center>'
-				});
-				$('#nodeP').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Patronage Capital</center>'
-				});
-				$('#nodeG').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>G&T or other Power Provider</center>'
-				});
-				$('#nodeV').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Vender, Staff, Banks etc.</center>'
-				});
-				$('#nodeCn').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Non-solar Residential Customers<br>'+"$ "+allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(2)+'</center>'
-				});
-				$('#nodeCci').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Commercial and Industrial Customers</center>'
-				});
-				$('#nodeCs').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar Residential Customers<br>'+"$ "+allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(2)+'</center>'
-				});
-				$('#nodeS').tipsy({gravity:'sw', html:true, hoverlock:true, fallback:'<center>Solar</center>'
-				});
-				$('path#linkDL').tipsy({gravity:'sw', hoverlock:true, html:true, fallback: allOutputData.Solar.losses.toFixed(2).toString()+" kWh"});
-				$('path#linkDP').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.patCapital.toFixed(2)});
-				$('path#linkGD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.totalKWhPurchased.toFixed(2) + " kWh"});
-				$('path#linkDG').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.costPurchasedPower.toFixed(2)});
-				$('path#linkDV').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.BAU.nonPowerCosts.toFixed(2)});
-				$('path#linkDCn').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.solarResSold.toFixed(2) + " kWh"});
-				$('path#linkCnD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.resNonSolarRev.toFixed(2)});
-				$('path#linkDCci').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.BAU.nonResKWhSold.toFixed(2) + " kWh"});
-				$('path#linkCciD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.nonResRev.toFixed(2)});
-				$('path#linkDCs').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.resNonSolarKWhSold.toFixed(2) + " kWh"});
-				$('path#linkCsD').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.solarResRev.toFixed(2)});
-				$('path#linkSCs').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:"$ "+allOutputData.Solar.annualSolarGen.toFixed(2)});
-				$('path#linkCsS').tipsy({gravity:'sw', hoverlock:true, html:true, fallback:allOutputData.Solar.costSolarGen.toFixed(2) + " kWh"});
-			</script>
 		</div>
 		<p class="reportTitle postRun">Form 7.A Statement of Operations - Business as Usual Versus Residential Solar</p>
 		<div id="tableReport" class="tightContent postRun tableReport">
