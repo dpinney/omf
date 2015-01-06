@@ -20,5 +20,4 @@ def feedJsonToFiles():
 
 if __name__ == '__main__':
 	feedJsonToFiles()
-	#addGroupRecorders()
 	pass
