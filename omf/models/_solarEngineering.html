@@ -257,28 +257,28 @@
 			"stack":"male"
 		}
 		var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-							localHighChart["chart"]["renderTo"] = "energyBalance"
-							localHighChart["chart"]["inverted"] = false
-							localHighChart["chart"]["height"] = 150
-							localHighChart["chart"]["width"] = 1000
-							localHighChart["series"] = [tPowerSeries, tDGSeries, tLossesSeries, tLoadsSeries]
-							localHighChart["xAxis"] = {
-								"tickColor":"gray",
-								"lineColor":"gray",
-								"categories": ['energy']
-							}
-							localHighChart["yAxis"] = {
-								"title":{
-									"text":"Energy (Wh)",
-									"style":{
-										"color":"gray"
-									}
-								}
-							}
-							localHighChart["plotOptions"] = {
-								"column":{"stacking":"normal", "shadow":false}, 
-								"spline":{"marker":{"radius":8}, "shadow":false, "lineWidth":0 }
-								}
+		localHighChart["chart"]["renderTo"] = "energyBalance"
+		localHighChart["chart"]["inverted"] = false
+		localHighChart["chart"]["height"] = 150
+		localHighChart["chart"]["width"] = 1000
+		localHighChart["series"] = [tPowerSeries, tDGSeries, tLossesSeries, tLoadsSeries]
+		localHighChart["xAxis"] = {
+			"tickColor":"gray",
+			"lineColor":"gray",
+			"categories": ['energy']
+		}
+		localHighChart["yAxis"] = {
+			"title":{
+				"text":"Energy (Wh)",
+				"style":{
+					"color":"gray"
+				}
+			}
+		}
+		localHighChart["plotOptions"] = {
+			"column":{"stacking":"normal", "shadow":false}, 
+			"spline":{"marker":{"radius":8}, "shadow":false, "lineWidth":0 }
+			}
 		new Highcharts.Chart(localHighChart);
 		</script>
 	</div>
