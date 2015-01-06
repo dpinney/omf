@@ -422,19 +422,35 @@
 					<path id="solarConCashLink" class="link" d="M735,160 L625,160" style="stroke:green; marker-end:url(#greenArrow)"/>
 					<path id="panelsCashLink" class="link" d="M840,105 L840,95" style="stroke:green; marker-end:url(#greenArrow)"/>
 					<path id="panelsEnergyLink" class="link" d="M860,80 L860,90" style="stroke:orange; marker-end:url(#orangeArrow)"/>
-					<text id="patronageCashLabel" fill="green" x="490" y="130" text-anchor="end">12345</text>
-					<text id="lossesEnergyLabel" fill="orange" x="300" y="100" text-anchor="end">12345</text>
-					<text id="vendorCashLabel" fill="green" x="300" y="400" text-anchor="end">12345</text>
-					<text id="gtEnergyLabel" fill="orange" x="330" y="230" text-anchor="middle">12345</text>
-					<text id="gtCashLabel" fill="green" x="330" y="290" text-anchor="middle">12345</text>
-					<text id="solarConEnergyLabel" fill="orange" x="650" y="140" text-anchor="middle">12345</text>
-					<text id="solarConCashLabel" fill="green" x="650" y="180" text-anchor="middle">12345</text>
-					<text id="nonSolarConEnergyLabel" fill="orange" x="620" y="250" text-anchor="start">12345</text>
-					<text id="nonSolarConCashLabel" fill="green" x="710" y="280" text-anchor="end">12345</text>
-					<text id="commConEnergyLabel" fill="orange" x="610" y="350" text-anchor="start">12345</text>
-					<text id="commConCashLabel" fill="green" x="680" y="380" text-anchor="end">12345</text>					
-					<text id="panelsEnergyLabel" fill="orange" x="870" y="95" text-anchor="start">12345</text>
-					<text id="panelsCashLabel" fill="green" x="830" y="95" text-anchor="end">12345</text>					
+					<text id="patronageCashLabel" fill="green" x="490" y="130" text-anchor="end"></text>
+					<text id="lossesEnergyLabel" fill="orange" x="300" y="100" text-anchor="end"></text>
+					<text id="vendorCashLabel" fill="green" x="300" y="400" text-anchor="end"></text>
+					<text id="gtEnergyLabel" fill="orange" x="330" y="230" text-anchor="middle"></text>
+					<text id="gtCashLabel" fill="green" x="330" y="290" text-anchor="middle"></text>
+					<text id="solarConEnergyLabel" fill="orange" x="650" y="140" text-anchor="middle"></text>
+					<text id="solarConCashLabel" fill="green" x="650" y="180" text-anchor="middle"></text>
+					<text id="nonSolarConEnergyLabel" fill="orange" x="620" y="250" text-anchor="start"></text>
+					<text id="nonSolarConCashLabel" fill="green" x="710" y="280" text-anchor="end"></text>
+					<text id="commConEnergyLabel" fill="orange" x="610" y="350" text-anchor="start"></text>
+					<text id="commConCashLabel" fill="green" x="680" y="380" text-anchor="end"></text>					
+					<text id="panelsEnergyLabel" fill="orange" x="870" y="95" text-anchor="start"></text>
+					<text id="panelsCashLabel" fill="green" x="830" y="95" text-anchor="end"></text>					
+					<script type="text/javascript">
+						gebi("patronageCashLabel").innerHTML = "$ "+allOutputData.Solar.patCapital.toFixed(2)
+						gebi("lossesEnergyLabel").innerHTML = allOutputData.Solar.losses.toFixed(2).toString()+" kWh"
+						gebi("vendorCashLabel").innerHTML = 1234567
+						gebi("gtEnergyLabel").innerHTML = allOutputData.Solar.totalKWhPurchased.toFixed(2) + " kWh"
+						gebi("gtCashLabel").innerHTML = "$ "+allOutputData.Solar.costPurchasedPower.toFixed(2)
+						gebi("vendorCashLabel").innerHTML = "$ "+allOutputData.BAU.nonPowerCosts.toFixed(2)
+						gebi("solarConEnergyLabel").innerHTML = allOutputData.Solar.resNonSolarKWhSold.toFixed(2) + " kWh"
+						gebi("solarConCashLabel").innerHTML = "$ "+allOutputData.Solar.solarResRev.toFixed(2)
+						gebi("nonSolarConEnergyLabel").innerHTML = allOutputData.Solar.solarResSold.toFixed(2) + " kWh"
+						gebi("nonSolarConCashLabel").innerHTML = "$ "+allOutputData.Solar.resNonSolarRev.toFixed(2)
+						gebi("commConEnergyLabel").innerHTML = allOutputData.BAU.nonResKWhSold.toFixed(2) + " kWh"
+						gebi("commConCashLabel").innerHTML = "$ "+allOutputData.Solar.nonResRev.toFixed(2)
+						gebi("panelsEnergyLabel").innerHTML = "$ "+allOutputData.Solar.annualSolarGen.toFixed(2)
+						gebi("panelsCashLabel").innerHTML = allOutputData.Solar.costSolarGen.toFixed(2) + " kWh"
+					</script>
 				</g>
 			</svg>
 		</div>
