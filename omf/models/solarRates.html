@@ -326,7 +326,6 @@
 				}
 			}
 		</script>
-<!--
 		<p class="reportTitle postRun">Hourly Average Power Per Solar Generator</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
 			<div id="powerTimeSeries"></div>
@@ -380,15 +379,12 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
--->
 		<p class="reportTitle  postRun">Annual Cash and Power Flows</p>
 		<div id="graphicChart" class="tightContent postRun tableReport" style="overflow-x:hidden">
 			<style type="text/css">
 				g.node rect, circle {fill:lightgray}
-				
-				g.node text{font-size:10pt}
 				path.link {stroke-width:8px; fill:none}
-				g.text {font-size:12pt}
+				text {font-size:10pt}
 			</style>
 			<svg width="1000px" height="520px" viewBox="0.00 0.00 1000.00 500.00">
 				<g id="graph0" class="graph">
@@ -432,24 +428,32 @@
 					<text id="nonSolarConEnergyLabel" fill="orange" x="620" y="250" text-anchor="start"></text>
 					<text id="nonSolarConCashLabel" fill="green" x="710" y="280" text-anchor="end"></text>
 					<text id="commConEnergyLabel" fill="orange" x="610" y="350" text-anchor="start"></text>
-					<text id="commConCashLabel" fill="green" x="680" y="380" text-anchor="end"></text>					
+					<text id="commConCashLabel" fill="green" x="680" y="380" text-anchor="end"></text>
 					<text id="panelsEnergyLabel" fill="orange" x="870" y="95" text-anchor="start"></text>
-					<text id="panelsCashLabel" fill="green" x="830" y="95" text-anchor="end"></text>					
+					<text id="panelsCashLabel" fill="green" x="830" y="95" text-anchor="end"></text>
+					<text id="avgNonSolarBill" fill="darkgray" x="850" y="305" text-anchor="middle"></text>
+					<text id="avgSolarBill" fill="darkgray" x="850" y="185" text-anchor="middle"></text>
+					<text id="currentRate" fill="darkgray" x="500" y="280" text-anchor="middle"></text>
+					<text id="zeroMarginRate" fill="darkgray" x="500" y="300" text-anchor="middle"></text>
 					<script type="text/javascript">
-						gebi("patronageCashLabel").innerHTML = "$ "+allOutputData.Solar.patCapital.toFixed(2)
+						gebi("patronageCashLabel").innerHTML = "$" + allOutputData.Solar.patCapital.toFixed(2)
 						gebi("lossesEnergyLabel").innerHTML = allOutputData.Solar.losses.toFixed(2).toString()+" kWh"
-						gebi("vendorCashLabel").innerHTML = 1234567
+						gebi("vendorCashLabel").innerHTML = "$" + allOutputData.BAU.nonPowerCosts.toFixed(2)
 						gebi("gtEnergyLabel").innerHTML = allOutputData.Solar.totalKWhPurchased.toFixed(2) + " kWh"
-						gebi("gtCashLabel").innerHTML = "$ "+allOutputData.Solar.costPurchasedPower.toFixed(2)
-						gebi("vendorCashLabel").innerHTML = "$ "+allOutputData.BAU.nonPowerCosts.toFixed(2)
+						gebi("gtCashLabel").innerHTML = "$" + allOutputData.Solar.costPurchasedPower.toFixed(2)
+						gebi("vendorCashLabel").innerHTML = "$" + allOutputData.BAU.nonPowerCosts.toFixed(2)
 						gebi("solarConEnergyLabel").innerHTML = allOutputData.Solar.resNonSolarKWhSold.toFixed(2) + " kWh"
-						gebi("solarConCashLabel").innerHTML = "$ "+allOutputData.Solar.solarResRev.toFixed(2)
+						gebi("solarConCashLabel").innerHTML = "$" + allOutputData.Solar.solarResRev.toFixed(2)
 						gebi("nonSolarConEnergyLabel").innerHTML = allOutputData.Solar.solarResSold.toFixed(2) + " kWh"
-						gebi("nonSolarConCashLabel").innerHTML = "$ "+allOutputData.Solar.resNonSolarRev.toFixed(2)
+						gebi("nonSolarConCashLabel").innerHTML = "$" + allOutputData.Solar.resNonSolarRev.toFixed(2)
 						gebi("commConEnergyLabel").innerHTML = allOutputData.BAU.nonResKWhSold.toFixed(2) + " kWh"
-						gebi("commConCashLabel").innerHTML = "$ "+allOutputData.Solar.nonResRev.toFixed(2)
-						gebi("panelsEnergyLabel").innerHTML = "$ "+allOutputData.Solar.annualSolarGen.toFixed(2)
+						gebi("commConCashLabel").innerHTML = "$" + allOutputData.Solar.nonResRev.toFixed(2)
+						gebi("panelsEnergyLabel").innerHTML = "$" + allOutputData.Solar.annualSolarGen.toFixed(2)
 						gebi("panelsCashLabel").innerHTML = allOutputData.Solar.costSolarGen.toFixed(2) + " kWh"
+						gebi("avgNonSolarBill").innerHTML = "Avg. Bill " + allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(2) + " $/Month"
+						gebi("avgSolarBill").innerHTML = "Avg. Bill " + allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(2) + " $/Month"
+						gebi("currentRate").innerHTML = "Current Rate " + allOutputData.BAU.effectiveResRate.toFixed(2) + "$/kWh"
+						gebi("zeroMarginRate").innerHTML = "Zero Margin Rate" + allOutputData.Solar.idealRate.toFixed(2) + "$/kWh"
 					</script>
 				</g>
 			</svg>
