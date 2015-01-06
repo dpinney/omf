@@ -60376,27 +60376,28 @@ object player {
 object recorder {
 	parent REG27;
 	property power_in.real,power_in.imag;
-	file subCheck.csv;
+	file caliSubCheck.csv;
 	interval 3600;
 };
 
 object group_recorder {
-	group "class=node";
 	property voltage_A;
-	interval 3600;
+	group "class=node";
 	file aVoltDump.csv;
-}
+	interval 3600;
+};
 
 object group_recorder {
-	group "class=node";
 	property voltage_B;
-	interval 3600;
+	group "class=node";
 	file bVoltDump.csv;
-}
+	interval 3600;
+};
 
 object group_recorder {
-	group "class=node";
 	property voltage_C;
-	interval 3600;
+	group "class=node";
 	file cVoltDump.csv;
-}
+	interval 3600;
+};
+
