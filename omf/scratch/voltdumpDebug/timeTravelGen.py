@@ -81,7 +81,7 @@ def _plotOneTimeStep(nodeVolts, stepName, tree, fGraph, positions):
 	plt.sci(nodeIm)
 	plt.clim(110,130)
 	plt.colorbar()
-	voltChart.savefig("./pngs/volts" + str(stepName) + ".png")
+	voltChart.savefig("./pngs/volts" + str(stepName).zfill(3) + ".png")
 
 if __name__ == '__main__':
 	main()

@@ -1,0 +1,33 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="../../static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="../../static/favicon.ico">
+	<link href="../../static/models.css" type="text/css" rel="stylesheet"/>
+	<!-- Library Imports -->
+	<script type="text/javascript" src="../../static/omf.js"></script>
+	<script type="text/javascript" src="../../static/jquery-1.9.1.js"></script>
+	<script src="../../static/highcharts.src.js"></script>
+	<!-- Global Funcs Import -->
+	<script type="text/javascript" src="../../static/models.js"></script>
+	<!-- Data  Imports -->
+</head>
+<body>
+	<div id="output">
+		<p class="reportTitle postRun">System Outputs</p>
+		<script type="text/javascript">
+			function pad(n, width, z) {
+				z = z || '0'
+				n = n + ''
+				return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n }
+			function update() {
+				sVal = gebi("slider").value
+				gebi("valShow").innerHTML = sVal
+				gebi("timeTravelImage").src = "./pngs/volts" + pad(sVal, 3, 0) + ".png"}
+		</script>
+		<div id="powerGenerationReport" class="tightContent">
+			<input id="slider" type="range" min="0" max="24" step="1" oninput="update()" onchange="update()"/><p id="valShow" style="display:inline">0</p>
+			<img id="timeTravelImage" src="./pngs/volts000.png">
+		</div>
+	</div>
+</body>
