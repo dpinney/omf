@@ -19,53 +19,15 @@ def main():
 	try: os.remove('PID.txt')
 	except: pass
 	print 'Gridlab ran correctly', allOutputData.keys()
-	'''-----------------------------
-	--VOLTAGE PLOTTING STARTS HERE--
-	-----------------------------'''
-	# Calculate average node voltage deviation. First, helper functions.
-	def pythag(x,y):
-		''' For right triangle with sides x and y, return the hypotenuse. '''
-		return math.sqrt(x**2+y**2)
-	def digits(x):
-		''' Returns number of digits before the decimal in the float x. '''
-		return math.ceil(math.log10(x+1))
-	def avg(l):
-		''' Average of a list of ints or floats. '''
-		return sum(l)/len(l)
+	# PLOTTING STARTS HERE.
 	# Detect the feeder nominal voltage:
 	for key in tree:
 		ob = tree[key]
 		if type(ob)==dict and ob.get('bustype','')=='SWING':
 			feedVoltage = float(ob.get('nominal_voltage',1))
-	# Do all time steps.
-	allNodeNames = [x for x in allOutputData['aVoltDump.csv'].keys() if x != '# timestamp']
-	allTimeSteps = allOutputData['aVoltDump.csv']['# timestamp']
-	# for step, stamp in enumerate(allTimeSteps):
-	step, stamp = (0, '2011-01-01 00:00:00 PST')
-	# TODO: REMOVE ME
-	nodeVolts = {}
-	for nodeName in allNodeNames:
-		allVolts = []
-		for phase in ['A','B','C']:
-			v = complex(allOutputData[phase.lower() + 'VoltDump.csv'][nodeName][step])
-			phaseVolt = pythag(v.real, v.imag)
-			if phaseVolt != 0.0:
-				if digits(phaseVolt)>3:
-					# Normalize to 120 V standard
-					phaseVolt = phaseVolt*(120/feedVoltage)
-				allVolts.append(phaseVolt)
-		# HACK: Take average of all phases to collapse dimensionality.
-		nodeVolts[nodeName] = avg(allVolts)
-	_plotOneTimeStep(nodeVolts, step, tree)
-
-def _plotOneTimeStep(nodeVolts, stepName, tree, neatoLayout=True):
-	''' It's like voltageDrop.py but parameterized on the nodeVolts.
-		Watch out, it saves a png directly to the file system. '''
-	# Color nodes by VOLTAGE.
+	# Make a graph.
+	neatoLayout = True
 	fGraph = omf.feeder.treeToNxGraph(tree)
-	voltChart = plt.figure(figsize=(10,10))
-	plt.axes(frameon = 0)
-	plt.axis('off')
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(fGraph.edges())
@@ -73,6 +35,42 @@ def _plotOneTimeStep(nodeVolts, stepName, tree, neatoLayout=True):
 		positions = nx.graphviz_layout(cleanG, prog='neato')
 	else:
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+	# Plot all time steps.
+	for step, stamp in enumerate(allOutputData['aVoltDump.csv']['# timestamp']):
+		nodeVolts = {}
+		for nodeName in [x for x in allOutputData['aVoltDump.csv'].keys() if x != '# timestamp']:
+			allVolts = []
+			for phase in ['A','B','C']:
+				v = complex(allOutputData[phase.lower() + 'VoltDump.csv'][nodeName][step])
+				phaseVolt = _pythag(v.real, v.imag)
+				if phaseVolt != 0.0:
+					if _digits(phaseVolt)>3:
+						# Normalize to 120 V standard
+						phaseVolt = phaseVolt*(120/feedVoltage)
+					allVolts.append(phaseVolt)
+			# HACK: Take average of all phases to collapse dimensionality.
+			nodeVolts[nodeName] = _avg(allVolts)
+		_plotOneTimeStep(nodeVolts, step, tree, fGraph, positions)
+
+def _pythag(x,y):
+	''' For right triangle with sides x and y, return the length of the hypotenuse. '''
+	return math.sqrt(x**2+y**2)
+
+def _digits(x):
+	''' Returns number of digits before the decimal in the float x. '''
+	return math.ceil(math.log10(x+1))
+
+def _avg(l):
+	''' Average of a list of ints or floats. '''
+	return sum(l)/len(l)
+
+def _plotOneTimeStep(nodeVolts, stepName, tree, fGraph, positions):
+	''' It's like voltageDrop.py but parameterized on the nodeVolts.
+		Watch out, it saves a png directly to the file system. '''
+	# Color nodes by VOLTAGE.
+	voltChart = plt.figure(figsize=(10,10))
+	plt.axes(frameon = 0)
+	plt.axis('off')
 	edgeIm = nx.draw_networkx_edges(fGraph, positions)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
 		pos = positions,
@@ -87,4 +85,3 @@ def _plotOneTimeStep(nodeVolts, stepName, tree, neatoLayout=True):
 
 if __name__ == '__main__':
 	main()
-	pass
