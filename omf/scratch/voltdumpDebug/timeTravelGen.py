@@ -1,5 +1,6 @@
 ''' Working towards a timeTravel chart. '''
-import omf, json, os
+import omf, json, os, math, networkx as nx
+from matplotlib import pyplot as plt
 from omf.solvers.gridlabd import runInFilesystem
 
 def main():
@@ -36,46 +37,53 @@ def main():
 		ob = tree[key]
 		if type(ob)==dict and ob.get('bustype','')=='SWING':
 			feedVoltage = float(ob.get('nominal_voltage',1))
-	# Function to plot all voltages for one time step. 
-	def plotOneTimeStep(voltTable, stepName, neatoLayout=True):
-		nodeVolts = {}
-		for row in voltTable:
-			allVolts = []
-			for phase in ['A','B','C']:
-				phaseVolt = pythag(float(row['volt'+phase+'_real']),
-								   float(row['volt'+phase+'_imag']))
-				if phaseVolt != 0.0:
-					if digits(phaseVolt)>3:
-						# Normalize to 120 V standard
-						phaseVolt = phaseVolt*(120/feedVoltage)
-					allVolts.append(phaseVolt)
-			nodeVolts[row.get('node_name','')] = avg(allVolts)
-		# Color nodes by VOLTAGE.
-		fGraph = feeder.treeToNxGraph(tree)
-		voltChart = plt.figure(figsize=(10,10))
-		plt.axes(frameon = 0)
-		plt.axis('off')
-		if neatoLayout:
-			# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-			cleanG = nx.Graph(fGraph.edges())
-			cleanG.add_nodes_from(fGraph)
-			positions = nx.graphviz_layout(cleanG, prog='neato')
-		else:
-			positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
-		edgeIm = nx.draw_networkx_edges(fGraph, positions)
-		nodeIm = nx.draw_networkx_nodes(fGraph,
-			pos = positions,
-			node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
-			linewidths = 0,
-			node_size = 30,
-			cmap = plt.cm.jet)
-		plt.sci(nodeIm)
-		plt.clim(110,130)
-		plt.colorbar()
-		voltChart.savefig("./pngs/volts" + stepName + ".png")
 	# Do all time steps.
-	# for step in BLAH:
-	# 	plotOneTimeStep()
+	allNodeNames = [x for x in allOutputData['aVoltDump.csv'].keys() if x != '# timestamp']
+	allTimeSteps = allOutputData['aVoltDump.csv']['# timestamp']
+	# for step, stamp in enumerate(allTimeSteps):
+	step, stamp = (0, '2011-01-01 00:00:00 PST')
+	# TODO: REMOVE ME
+	nodeVolts = {}
+	for nodeName in allNodeNames:
+		allVolts = []
+		for phase in ['A','B','C']:
+			v = complex(allOutputData[phase.lower() + 'VoltDump.csv'][nodeName][step])
+			phaseVolt = pythag(v.real, v.imag)
+			if phaseVolt != 0.0:
+				if digits(phaseVolt)>3:
+					# Normalize to 120 V standard
+					phaseVolt = phaseVolt*(120/feedVoltage)
+				allVolts.append(phaseVolt)
+		# HACK: Take average of all phases to collapse dimensionality.
+		nodeVolts[nodeName] = avg(allVolts)
+	_plotOneTimeStep(nodeVolts, step, tree)
+
+def _plotOneTimeStep(nodeVolts, stepName, tree, neatoLayout=True):
+	''' It's like voltageDrop.py but parameterized on the nodeVolts.
+		Watch out, it saves a png directly to the file system. '''
+	# Color nodes by VOLTAGE.
+	fGraph = omf.feeder.treeToNxGraph(tree)
+	voltChart = plt.figure(figsize=(10,10))
+	plt.axes(frameon = 0)
+	plt.axis('off')
+	if neatoLayout:
+		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
+		cleanG = nx.Graph(fGraph.edges())
+		cleanG.add_nodes_from(fGraph)
+		positions = nx.graphviz_layout(cleanG, prog='neato')
+	else:
+		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+	edgeIm = nx.draw_networkx_edges(fGraph, positions)
+	nodeIm = nx.draw_networkx_nodes(fGraph,
+		pos = positions,
+		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
+		linewidths = 0,
+		node_size = 30,
+		cmap = plt.cm.jet)
+	plt.sci(nodeIm)
+	plt.clim(110,130)
+	plt.colorbar()
+	voltChart.savefig("./pngs/volts" + str(stepName) + ".png")
 
 if __name__ == '__main__':
 	main()
