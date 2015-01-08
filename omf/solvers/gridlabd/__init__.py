@@ -46,7 +46,7 @@ def _addGldToPath():
 			# Platform not supported, so just return the standard binary and pray it works:
 			return "gridlabd"
 
-def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
+def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, glmName=None):
 	''' Execute gridlab in the local filesystem. Return a nice dictionary of results. '''
 	try:
 		binaryName = "gridlabd"
@@ -67,7 +67,8 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 			with open (pJoin(workDir,attach),'w') as attachFile:
 				attachFile.write(attachments[attach])
 		glmString = feeder.sortedWrite(localTree)
-		glmName = "main." + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + ".glm"
+		if not glmName:
+			glmName = "main." + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + ".glm"
 		with open(pJoin(workDir, glmName),'w') as glmFile:
 			glmFile.write(glmString)
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
@@ -85,13 +86,13 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None):
 		# Delete the folder and return.
 		if not keepFiles and not workDir:
 			# NOTE: if we've specify a working directory, don't just blow it away.
-			# HACK: if we don't sleep 1 second, windows intermittantly fails to delete things and an exception is thrown.
-			# Probably cus dropbox is monkeying around in these folders on my dev machine. Disabled for now since it works when dropbox is off.
 			for attempt in range(5):
 				try:
 					shutil.rmtree(workDir)
 					break
 				except WindowsError:
+					# HACK: if we don't sleep 1 second, windows intermittantly fails to delete things and an exception is thrown.
+					# Probably cus dropbox is monkeying around in these folders on my dev machine. Disabled for now since it works when dropbox is off.
 					time.sleep(2)
 		return rawOut
 	except:
