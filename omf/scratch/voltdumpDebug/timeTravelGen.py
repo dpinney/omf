@@ -25,7 +25,7 @@ def main():
 		ob = tree[key]
 		if type(ob)==dict and ob.get('bustype','')=='SWING':
 			feedVoltage = float(ob.get('nominal_voltage',1))
-	# Make a graph.
+	# Make a graph object.
 	neatoLayout = True
 	fGraph = omf.feeder.treeToNxGraph(tree)
 	if neatoLayout:
@@ -37,6 +37,7 @@ def main():
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 	# Plot all time steps.
 	for step, stamp in enumerate(allOutputData['aVoltDump.csv']['# timestamp']):
+		# Build voltage map.
 		nodeVolts = {}
 		for nodeName in [x for x in allOutputData['aVoltDump.csv'].keys() if x != '# timestamp']:
 			allVolts = []
@@ -50,7 +51,22 @@ def main():
 					allVolts.append(phaseVolt)
 			# HACK: Take average of all phases to collapse dimensionality.
 			nodeVolts[nodeName] = _avg(allVolts)
-		_plotOneTimeStep(nodeVolts, step, tree, fGraph, positions)
+		# Apply voltage map and chart it.
+		voltChart = plt.figure(figsize=(10,10))
+		plt.axes(frameon = 0)
+		plt.axis('off')
+		edgeIm = nx.draw_networkx_edges(fGraph, positions)
+		nodeIm = nx.draw_networkx_nodes(fGraph,
+			pos = positions,
+			node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
+			linewidths = 0,
+			node_size = 30,
+			cmap = plt.cm.jet)
+		plt.sci(nodeIm)
+		plt.clim(110,130)
+		plt.colorbar()
+		plt.title(stamp)
+		voltChart.savefig("./pngs/volts" + str(step).zfill(3) + ".png")
 
 def _pythag(x,y):
 	''' For right triangle with sides x and y, return the length of the hypotenuse. '''
@@ -63,25 +79,6 @@ def _digits(x):
 def _avg(l):
 	''' Average of a list of ints or floats. '''
 	return sum(l)/len(l)
-
-def _plotOneTimeStep(nodeVolts, stepName, tree, fGraph, positions):
-	''' It's like voltageDrop.py but parameterized on the nodeVolts.
-		Watch out, it saves a png directly to the file system. '''
-	# Color nodes by VOLTAGE.
-	voltChart = plt.figure(figsize=(10,10))
-	plt.axes(frameon = 0)
-	plt.axis('off')
-	edgeIm = nx.draw_networkx_edges(fGraph, positions)
-	nodeIm = nx.draw_networkx_nodes(fGraph,
-		pos = positions,
-		node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
-		linewidths = 0,
-		node_size = 30,
-		cmap = plt.cm.jet)
-	plt.sci(nodeIm)
-	plt.clim(110,130)
-	plt.colorbar()
-	voltChart.savefig("./pngs/volts" + str(stepName).zfill(3) + ".png")
 
 if __name__ == '__main__':
 	main()

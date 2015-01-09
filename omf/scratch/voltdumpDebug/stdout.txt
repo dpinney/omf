@@ -4,25 +4,25 @@ Core profiler results
 
 Total objects               7108 objects
 Parallelism                    1 thread
-Total time                   5.0 seconds
-  Core time                  1.4 seconds (28.6%)
-    Compiler                 1.1 seconds (22.8%)
+Total time                   6.0 seconds
+  Core time                  2.6 seconds (42.6%)
+    Compiler                 1.1 seconds (19.0%)
     Instances                0.0 seconds (0.0%)
     Random variables         0.0 seconds (0.0%)
     Schedules                0.0 seconds (0.0%)
     Loadshapes               0.0 seconds (0.0%)
     Enduses                  0.0 seconds (0.0%)
-    Transforms               0.0 seconds (0.7%)
-  Model time                 3.6 seconds/thread (71.4%)
+    Transforms               0.0 seconds (0.6%)
+  Model time                 3.4 seconds/thread (57.4%)
 Simulation time                1 days
-Simulation speed              34k object.hours/second
+Simulation speed              28k object.hours/second
 Passes completed             321 passes
 Time steps completed          25 timesteps
 Convergence efficiency     12.84 passes/timestep
 Read lock contention        0.0%
 Write lock contention       0.0%
 Average timestep           3456 seconds/timestep
-Simulation rate           17280 x realtime
+Simulation rate           14400 x realtime
 
 
 Model profiler results
@@ -30,17 +30,18 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-triplex_load       0.655     18.4%      0.5
-node               0.598     16.8%      0.3
-transformer        0.504     14.1%      0.6
-underground_line   0.476     13.3%      0.5
-triplex_meter      0.465     13.0%      0.5
-overhead_line      0.455     12.8%      0.5
-group_recorder     0.288      8.1%     96.0
-fuse               0.116      3.3%      0.7
-player             0.007      0.2%      7.0
-recorder           0.003      0.1%      3.0
-capacitor          0.001      0.0%      1.0
+triplex_load       0.634     18.4%      0.5
+node               0.529     15.3%      0.3
+transformer        0.510     14.8%      0.6
+triplex_meter      0.486     14.1%      0.6
+overhead_line      0.465     13.5%      0.5
+underground_line   0.459     13.3%      0.5
+group_recorder     0.252      7.3%     84.0
+fuse               0.101      2.9%      0.6
+player             0.006      0.2%      6.0
+recorder           0.002      0.1%      2.0
+capacitor          0.002      0.1%      2.0
+regulator          0.001      0.0%      1.0
 ================ ======== ======== ========
-Total              3.568    100.0%      0.5
+Total              3.447    100.0%      0.5
 
