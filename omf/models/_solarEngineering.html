@@ -103,105 +103,128 @@
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
-			<!-- <table class="modelOptions"> -->
-				<div class="shortInput">
-					<label>Model Type</label>
-					<input type="text" id="modelType" name="modelType" value="gridlabMulti" title="This is Model Type" readonly/>
-				</div>
-				<div class="shortInput">
-					<label>Model Name</label>
-					<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
-				</div>
-				<div class="shortInput runningInline postRunInline">
-					<label>User</label>
-					<input type="text" id="user" name="user" readonly/></td>
-				</div>
-				<div class="runningInline postRunInline shortInput">
-					<label>Created</label>
-					<input type="text" id="created" name="created" readonly/>
-				</div>
-				<div class="postRunInline shortInput">
-					<label>Run Time</label>
-					<input type="text" id="runTime" name="runTime" readonly/>
-				</div>
-				<hr>
-				{% if not feederIDs %}
-				<div class="feederList shortInput">
-					<label for="feeder1">Feeder <span class="feeder-number">1</span></label>
-						<a class='add-feeder postRun preRun stopped' href='#' title="Add feeder">&#8853;</a>
-					<select id="feederName" name="feederName" style="width:90%">
-						<option disabled><strong>Personal Feeders</strong></option>
-						{% for feeder in datastoreNames['feeders'] %}
-							<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
-						{% endfor %}
-						<option disabled><strong>Public Feeders</strong></option>
-						{% for pFeeder in datastoreNames['publicFeeders'] %}
-							<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
-						{% endfor %}
-					</select>
-						<a class="edit-feeder postRun preRun stopped" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>
-				</div>
-				{% else %}
-				{% for feederID in feederIDs %}
-				<div class="feederList shortInput">
-					<label for="feeder1">Feeder <span class="feeder-number">{{feederIDs.index(feederID) + 1}}</span></label>
-						{% if feederIDs.index(feederID)+1 == 1 %}
-							<a class='add-feeder postRunInline preRun stoppedInline' href='#' title="Add  feeder">&#8853;</a>
-						{% else %}
-							<a class='remove-feeder postRunInline preRun stoppedInline' href='#' title="Remove  feeder">&#8854;</a>
-						{% endif %}
-						<!-- <select id="{{feederName}}" name="{{feederName}}"> -->
-					<select id="{{feederID}}" name="{{feederID}}" style="width:90%">
-						<option disabled><strong>Personal Feeders</strong></option>
-						{% for feeder in datastoreNames['feeders'] %}
-							<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
-						{% endfor %}
-						<option disabled><strong>Public Feeders</strong></option>
-						{% for pFeeder in datastoreNames['publicFeeders'] %}
-							<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
-						{% endfor %}
-					</select>
-						<a class="edit-feeder postRunInline preRun stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>
-				</div>
-				{% endfor %}
-				{% endif %}
-				<hr>
-				<div class="shortInput">
-					<label class="tooltip">Climate<span class="classic">Climate</span></label>
-					<select id='climateName' name='climateName'>
-						{% for climate in datastoreNames['climates'] %}
-							<option value='{{ climate }}'>{{ climate }}</option>
-						{% endfor %}
-					</select>
-				</div>
-				<div class="shortInput">
-					<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
-					<input type="text" id="simLength" name="simLength" data-validRegex="\d+"/>				
-				</div>
-				<div class="shortInput">
-					<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
-					<select id="simLengthUnits" name="simLengthUnits">
-						<option value="minutes">Minutes</option>
-						<option value="hours">Hours</option>
-						<option value="days">Days</option>
-					</select>
-				</div>
-				<div class="shortInput">
-					<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date (YYYY-MM-DD)</span></label>
-					<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
-				</div>
-				<div class="wideInput" style="text-align:right">
-					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-					<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
-					<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-					<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-					<button id="runButton" type="submit" class="preRun">Run Model</button>
-					<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
-				</div>
-			<!-- </table> -->
+			<div class="shortInput">
+				<label>Model Type</label>
+				<input type="text" id="modelType" name="modelType" value="_solarEngineering" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput">
+				<label>Feeder</label>
+				<select id="feederName" name="feederName"/>
+					<option disabled><strong>Personal Feeders</strong></option>
+					{% for feeder in datastoreNames['feeders'] %}
+						<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
+					{% endfor %}
+					<option disabled><strong>Public Feeders</strong></option>
+					{% for pFeeder in datastoreNames['publicFeeders'] %}
+						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="shortInput">
+				<label>Scada File name</label>
+				<input type="text" id="scadaFile" name="scadaFile" data-validRegex="[\w\s]+"/></td>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/></td>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/></td>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/></td>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Climate<span class="classic">Climate</span></label>
+				<select id='climateName' name='climateName'>
+					{% for climate in datastoreNames['climates'] %}
+						<option value='{{ climate }}'>{{ climate }}</option>
+					{% endfor %}
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
+				<input type="text" id="simLength" name="simLength" data-validRegex="\d+"/>				
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
+				<select id="simLengthUnits" name="simLengthUnits">
+					<option value="minutes">Minutes</option>
+					<option value="hours">Hours</option>
+					<option value="days">Days</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date (YYYY-MM-DD)</span></label>
+				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
+			</div>
+			<!-- TODO: Add a table, and addiable and removable rows. -->
+			<hr>
+			<div class='shortInput'>
+			<table id="myTable" class="order-list">
+				<thead>
+					<tr>
+						<td>Node Name</td>
+						<td>Size (sq ft)</td>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>
+							<input type="text" id="nodename1" name="nodename1"/>
+						</td>
+						<td>
+							<input type="text" id="nodesize1" name="nodesize1" data-validRegex="[\w\s]+"/>
+						</td>
+						<td>
+							<a class='add-row postRunInline preRun stoppedInline' href='#' title="Add row">&#8853;</a>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			</div>
+			<script type="text/javascript">
+			var counter = 0;
+			$(".add-row").on("click", function () {
+				counter = $('#myTable tr').length - 1;
+				var newRow = $("<tr>");
+				var cols = "";
+				cols += '<td><input type="text" id="nodename'+ counter +'" name="nodename' + counter + '"/></td>';
+				cols += '<td><input type="text" id="nodesize'+ counter +'" name="nodesize' + counter + '"/></td>';
+				cols += '<td><a class="remove-row postRunInline preRun stoppedInline" style="display:inline" href="#" title="Remove row">&#8854;</a></td>'
+				newRow.append(cols);
+				if (counter == 4) $('#addrow').attr('disabled', true).prop('value', "You've reached the limit");
+				$("table.order-list").append(newRow);
+				counter++;
+			});
+			$("table.order-list").on("change", 'input[name^="price"]', function (event) {
+				calculateRow($(this).closest("tr"));
+				calculateGrandTotal();                
+			});
+			$("table.order-list").on("click", ".remove-row", function (event) {
+				$(this).closest("tr").remove();
+				calculateGrandTotal();
+				counter -= 1
+				$('#addrow').attr('disabled', false).prop('value', "Add Row");
+			});
+			</script>
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="rerunButton" type="submit" class="postRunInline stoppedInline">Re-Run Model</button>
+			</div>
 		</form>
-	</div>
-	
+	</div>	
 	<div id ="runIndicator" class="content running">
 		Model running on server. Refresh the page to check for results.
 	</div>
