@@ -1,19 +1,19 @@
-                                                                                                                  
+                                                                                                                                                        
 Core profiler results
 ======================
 
 Total objects               7108 objects
 Parallelism                    1 thread
 Total time                   6.0 seconds
-  Core time                  2.6 seconds (42.6%)
+  Core time                  2.2 seconds (36.3%)
     Compiler                 1.1 seconds (19.0%)
     Instances                0.0 seconds (0.0%)
     Random variables         0.0 seconds (0.0%)
     Schedules                0.0 seconds (0.0%)
     Loadshapes               0.0 seconds (0.0%)
     Enduses                  0.0 seconds (0.0%)
-    Transforms               0.0 seconds (0.6%)
-  Model time                 3.4 seconds/thread (57.4%)
+    Transforms               0.1 seconds (1.0%)
+  Model time                 3.8 seconds/thread (63.7%)
 Simulation time                1 days
 Simulation speed              28k object.hours/second
 Passes completed             321 passes
@@ -30,18 +30,14 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-triplex_load       0.634     18.4%      0.5
-node               0.529     15.3%      0.3
-transformer        0.510     14.8%      0.6
-triplex_meter      0.486     14.1%      0.6
-overhead_line      0.465     13.5%      0.5
-underground_line   0.459     13.3%      0.5
-group_recorder     0.252      7.3%     84.0
-fuse               0.101      2.9%      0.6
-player             0.006      0.2%      6.0
-recorder           0.002      0.1%      2.0
-capacitor          0.002      0.1%      2.0
-regulator          0.001      0.0%      1.0
+triplex_load       0.727     19.0%      0.6
+transformer        0.641     16.8%      0.7
+node               0.590     15.4%      0.3
+overhead_line      0.557     14.6%      0.6
+underground_line   0.492     12.9%      0.6
+triplex_meter      0.421     11.0%      0.5
+group_recorder     0.300      7.9%    100.0
+fuse               0.092      2.4%      0.5
 ================ ======== ======== ========
-Total              3.447    100.0%      0.5
+Total              3.820    100.0%      0.5
 

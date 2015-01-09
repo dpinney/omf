@@ -5,9 +5,12 @@ from omf.solvers.gridlabd import runInFilesystem
 
 def main():
 	''' JSON manipulation, Gridlab running, etc. goes here. '''
+	# Input data.
+	inputDict = {"simLength":24,"simStartDate":"2011-01-01"}
+	# Import data.
 	feedJson = json.load(open('./ABEC Frank Calibrated.json'))
 	tree = feedJson['tree']
-	# Add recorders here.
+	# Add recorders.
 	stub = {'object':'group_recorder', 'group':'"class=node"', 'property':'voltage_A', 'interval':3600, 'file':'aVoltDump.csv'}
 	for phase in ['A','B','C']:
 		copyStub = dict(stub)
@@ -19,14 +22,15 @@ def main():
 	try: os.remove('PID.txt')
 	except: pass
 	print 'Gridlab ran correctly', allOutputData.keys()
-	# PLOTTING STARTS HERE.
+	# Make plots.
+	#TODO: figure out what to do about neato being a hog.
+	neatoLayout = True
 	# Detect the feeder nominal voltage:
 	for key in tree:
 		ob = tree[key]
 		if type(ob)==dict and ob.get('bustype','')=='SWING':
 			feedVoltage = float(ob.get('nominal_voltage',1))
 	# Make a graph object.
-	neatoLayout = True
 	fGraph = omf.feeder.treeToNxGraph(tree)
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
