@@ -17,57 +17,8 @@
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
-		function editFeeder(e) {
-			studyUser = $(e).siblings("select").val().split(/[_]+/)[0]
-			studyName = $(e).siblings("select").val().split(/[_]+/)[1]
-			$(e).attr("href", "/feeder/" + studyUser +"/"+ studyName)
-				.attr("target", "_blank");
-			// window.open("/feeder/" + studyUser + "/" + studyName, "_blank")
-		}
-		$(document).ready(function(){
-			$('.content .add-feeder').click(function(){
-				var n = $('.feederList').length + 1;
-				if( 5 < n ) {
-					alert('Please do not add more than 5 feeders.');
-					return false;
-				}
-				var feeder_html = $('<div class="feederList shortInput"><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun preRun stopped" href="#" style="display:inline" title="Remove feeder">&#8854;</a><select id="feederName'+n+'" name="feederName'+n+'" style="width:90%"><option disabled><strong>Personal Feeders</strong></option>{% for feeder in datastoreNames["feeders"] %}<option value="{{ datastoreNames["currentUser"] + "___" + feeder }}">{{ feeder }}</option>{% endfor %}<option disabled><strong>Public Feeders</strong></option>{% for pFeeder in datastoreNames["publicFeeders"] %}<option value="{{ "public___" + pFeeder }}">{{ pFeeder }}</option>{% endfor %}</select><a class="edit-feeder postRun preRun stopped" onclick="editFeeder(this);" target="_blank" style="display: inline;" title="Edit feeder"> &#9997;</a></div>');
-				feeder_html.hide();
-				$('.content .feederList:last').after(feeder_html);
-				feeder_html.fadeIn('slow');
-				return false;
-			});
-			$('.content').on('click', '.remove-feeder', function(){
-				$(this).parent().css( 'background-color', '#FF6C6C' );
-				$(this).parent().fadeOut("slow", function() {
-					$(this).remove();
-					$('.feeder-number').each(function(index){
-						$(this).text( index + 1 + " ");
-					});
-					$('select[id*="feederName"]').each(function(index){
-						$(this).attr("id", "feederName" + index + 1);
-					});
-					// $('select[id*="feederName"]').each(function(index){$(this).attr("id","feederID"+index)})
-				});
-				return false;
-			});
-		});
-
-		$(document).ready(function(){
-			$(".toggle").click(function(){
-				$(this).parent().next().toggle(500)
-			})
-		})
-	</script>
-	<script type="text/javascript">
-		/* 
-		 * Global setting of Highcharts
-		 */
-		Highcharts.setOptions({
-			global: { 
-				useUTC: false 
-			}
-		});
+		// Global setting of Highcharts
+		Highcharts.setOptions({global: {useUTC: false}})
 		var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0]) 
 		var pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
 		var pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
@@ -80,20 +31,8 @@
 			"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
 			"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
 			"tooltip":{"valueDecimals":1},
-			"series":[]
-		}
-
-		studyList = []
-		for (key in allInputData){
-			if (key.substring(0,10) === "feederName"){
-				feederKey = "feeder_" + allInputData[key].split("___")[1]
-				if (allOutputData[feederKey] != undefined){
-					studyList.push(feederKey)
-				}
-			}
-		}
-	</script>
-	
+			"series":[]	}
+	</script>	
 </head>
 <body onload="init()">
 	<div id="title">
@@ -231,7 +170,6 @@
 	<div id ="stopIndicator" class="content stopped">
 		Model cancelled or encountered an error. Please change inputs and re-run.
 	</div>
-
 	<div id="output">
 		<p class="reportTitle postRun">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="powerConsumptionReport" class="tightContent postRun">
@@ -286,7 +224,6 @@
 				}
 			</script>
 		</div>
-
 		<p class="reportTitle postRun">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="energyBalanceReport" class="tightContent postRun">
 			<script type="text/javascript">
@@ -352,7 +289,6 @@
 					new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-
 		<p class="reportTitle postRun">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="triplexMeterVoltageReport" class="tightContent postRun">
 			<script type="text/javascript">
