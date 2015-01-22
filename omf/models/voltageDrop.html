@@ -23,14 +23,14 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
+		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
 				<label>Model Type</label>
 				<input type="text" id="modelType" name="modelType" value="voltageDrop" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
 			<div class="runningInline postRunInline shortInput">
 				<label>User</label>
