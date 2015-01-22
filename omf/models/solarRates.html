@@ -27,14 +27,14 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
+		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
 				<label>Model Type</label>
 				<input type="text" id="modelType" name="modelType" value="solarRates" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"> 
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -62,19 +62,19 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Average System Size (kWp-DC)<span class="classic">Average residential PV system size in your service territory.</span></label>
-				<input type="text" id="avgSystemSize" name="avgSystemSize" data-validRegex="\d+\.?\d*"/>
+				<input type="text" id="avgSystemSize" name="avgSystemSize" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Residential Customers With Solar (%)<span class="classic">Percentage of residential customers who own PV systems.</span></label>
-				<input type="text" id="resPenetration" name="resPenetration" data-validRegex="\d+\.?\d*"/>
+				<input type="text" id="resPenetration" name="resPenetration" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar Interconnection Charge ($)<span class="classic">Monthly charge for residential customers with solar installed.</span></label>
-				<input type="text" id="solarInterconCharge" name="solarInterconCharge" data-validRegex="\d+\.?\d*"/>
+				<input type="text" id="solarInterconCharge" name="solarInterconCharge" pattern="^\d+\.?\d*$" required="required"> 
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar Levelized Cost of Energy ($/kWh)<span class="classic">Estimated levelized costs for the energy provided from solar. This estimate effects average bill size for solar residential customers but it doesn't impact rate change assessments.</span></label>
-				<input type="text" id="solarLCoE" name="solarLCoE" data-validRegex="\d+\.?\d*"/>
+				<input type="text" id="solarLCoE" name="solarLCoE" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Miscellaneous Financial Variables</p>
@@ -82,23 +82,23 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Customer Service Charge ($)<span class="classic">Monthly service charge for residential customers if any.</span></label>
-				<input type="text" id="customServiceCharge" name="customServiceCharge" data-validRegex="\d+\.?\d*" value="15"/>
+				<input type="text" id="customServiceCharge" name="customServiceCharge" pattern="^\d+\.?\d*$" value="15" required="required"/> 
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail rate for residential consumers.</span></label>
-				<input type="text" id="retailCost" name="retailCost" data-validRegex="\d+\.?\d*" value="0.10"/>
+				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" value="0.10" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wholesale Energy Cost ($/kWh)<span class="classic">Wholesale cost of power, which can be calculated from Form 7 as R.17.m/R.15.m.</span></label>
-				<input type="text" id="wholesaleEnergyCost" name="wholesaleEnergyCost" data-validRegex="\d+\.?\d*" value="0.08"/>
+				<input type="text" id="wholesaleEnergyCost" name="wholesaleEnergyCost" pattern="^\d+\.?\d*$" value="0.08" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Form 7.R.13.TOTAL Other Electric Revenue.<span class="classic">Additional revenue from Form 7 Table R.</span></label>
-				<input type="text" id="otherElecRevenue" name="otherElecRevenue" data-validRegex="\d+\.?\d*" value="0.08"/>
+				<input type="text" id="otherElecRevenue" name="otherElecRevenue" pattern="^\d+\.?\d*$" value="0.08" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Form 7.L.5.c TOTAL kWh Purchased<span class="classic">Total energy purchased from Form 7 Table R.</span></label>
-				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" data-validRegex="\d+\.?\d*" value="0.08"/>
+				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" pattern="^\d+\.?\d*$" value="0.08" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Form 7 Financial Variables</p>
@@ -219,78 +219,78 @@
 					</tr>						
 					<tr>
 						<th>Consumer Served Sales</th>
-						<td><input type="text" id="janSale" name="janSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="febSale" name="febSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="marSale" name="marSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="aprSale" name="aprSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="maySale" name="maySale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="junSale" name="junSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="julSale" name="julSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="augSale" name="augSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="sepSale" name="sepSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="octSale" name="octSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="novSale" name="novSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="decSale" name="decSale" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="janSale" name="janSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febSale" name="febSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marSale" name="marSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprSale" name="aprSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="maySale" name="maySale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junSale" name="junSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julSale" name="julSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augSale" name="augSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepSale" name="sepSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octSale" name="octSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novSale" name="novSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decSale" name="decSale" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>KWh Sold</th>
-						<td><input type="text" id="janKWh" name="janKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="febKWh" name="febKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="marKWh" name="marKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="aprKWh" name="aprKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="mayKWh" name="mayKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="junKWh" name="junKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="julKWh" name="julKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="augKWh" name="augKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="sepKWh" name="sepKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="octKWh" name="octKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="novKWh" name="novKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="decKWh" name="decKWh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="janKWh" name="janKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febKWh" name="febKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marKWh" name="marKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprKWh" name="aprKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayKWh" name="mayKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junKWh" name="junKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julKWh" name="julKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augKWh" name="augKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepKWh" name="sepKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octKWh" name="octKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novKWh" name="novKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decKWh" name="decKWh" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Revenue</th>
-						<td><input type="text" id="janRev" name="janRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="febRev" name="febRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="marRev" name="marRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="aprRev" name="aprRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="mayRev" name="mayRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="junRev" name="junRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="julRev" name="julRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="augRev" name="augRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="sepRev" name="sepRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="octRev" name="octRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="novRev" name="novRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="decRev" name="decRev" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="janRev" name="janRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febRev" name="febRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marRev" name="marRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprRev" name="aprRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayRev" name="mayRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junRev" name="junRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julRev" name="julRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augRev" name="augRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepRev" name="sepRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octRev" name="octRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novRev" name="novRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decRev" name="decRev" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Total KWh Sold</th>
-						<td><input type="text" id="janKWhT" name="janKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="febKWhT" name="febKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="marKWhT" name="marKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="aprKWhT" name="aprKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="mayKWhT" name="mayKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="junKWhT" name="junKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="julKWhT" name="julKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="augKWhT" name="augKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="sepKWhT" name="sepKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="octKWhT" name="octKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="novKWhT" name="novKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="decKWhT" name="decKWhT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="janKWhT" name="janKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febKWhT" name="febKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marKWhT" name="marKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprKWhT" name="aprKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayKWhT" name="mayKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junKWhT" name="junKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julKWhT" name="julKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augKWhT" name="augKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepKWhT" name="sepKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octKWhT" name="octKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novKWhT" name="novKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decKWhT" name="decKWhT" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Total Revenue</th>
-						<td><input type="text" id="janRevT" name="janRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="febRevT" name="febRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="marRevT" name="marRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="aprRevT" name="aprRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="mayRevT" name="mayRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="junRevT" name="junRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="julRevT" name="julRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="augRevT" name="augRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="sepRevT" name="sepRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="octRevT" name="octRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="novRevT" name="novRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
-						<td><input type="text" id="decRevT" name="decRevT" data-validRegex="[-+]?[0-9]*\.?[0-9]+"></td>
+						<td><input type="text" id="janRevT" name="janRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febRevT" name="febRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marRevT" name="marRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprRevT" name="aprRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayRevT" name="mayRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junRevT" name="junRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julRevT" name="julRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augRevT" name="augRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepRevT" name="sepRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octRevT" name="octRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novRevT" name="novRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decRevT" name="decRevT" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 				</table>
 			</div>

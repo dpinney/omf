@@ -51,26 +51,8 @@ function restoreInputs() {
 	}
 }
 
-/**
- * Make sure each field matches its validation regex.
- * @param {null}
- * @return {boolean} returnVal
- */
-function validateForm() {
-	allFields = $("input")
-	returnVal = true
-	for (i=0; i < allFields.length; i++) {
-		allFields[i].style["border-color"] = "white"
-		currVal = allFields[i].value + ""
-		regex = allFields[i].getAttribute("data-validRegex")
-		if (regex != null && currVal.match(regex) != currVal) {
-			allFields[i].style["border-color"] = "crimson"
-			returnVal = false
-		}
-	}
-	if (returnVal == false) {alert("Form values bordered in red don't match the required format.")}
-	return returnVal
-}
+
+/*validateForm used to reside here*/
 
 /**
  * Cancel model, hander function of "cancel" button

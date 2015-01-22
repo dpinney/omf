@@ -1,0 +1,52 @@
+<html>
+<head>
+</head>
+<body>
+Tests if the solarRates parameters regex is correct.
+</br>True if the regex matches the value, false otherwise.
+</br>
+</body>
+<script type="text/javascript">
+function Validate(regexString, values) 
+{
+    document.write("Regex:", regexString, " ")
+    document.write("</br>")      
+    for (i=0; i < values.length; i++){
+	    result = regexString.test(values[i])
+    	document.write(values[i], " = ")
+    	if (result == false)	  
+    		document.write("<mark>",result,"</mark>")  		   	
+    	else
+    		document.write(result)  
+    	document.write("</br>")   		   		
+    }		
+	return null;	
+}	
+document.write("</br>Test Case: avgSystemSize</br>") 
+Validate(/\d+\.?\d*/, ['-101', 'hello', '-0.1', 'heiwsax', '0.1', 'asd12as',  '@A100', '1001', '1312121', '1,312,121', '12313!A@', '13121@21'])
+
+//Percentage like derate
+document.write("</br>Test Case: resPenetration</br>") 
+Validate(/\d+\.?\d*/,  ['-101', '-10', '-0.1', '0', '0.1', '10', '101', '100', '91.123','91.13', '10a', 'a10', '10.c'])
+
+document.write("</br>Test Case: solarInterconCharge</br>") 
+Validate(/\d+\.?\d*/, ['2014-01-01', '2014-01-1', '0000-01-01', '-101', 'hello', '-0.1', 'heiwsax', '0.1', 'asd12as',  '@A100', '1001', '1312121', '1,312,121', '12313!A@', '13121@21'])
+
+//Could not find
+document.write("</br>Test Case: solarLCOE</br>") 
+Validate(/\d+\.?\d*/, ['-101', 'hello', '-0.1', 'heiwsax', '0.1', 'asd12as',  '@A100', '1001', '1312121', '1,312,121', '12313!A@', '13121@21'])
+
+document.write("</br>Test Case: customServiceCharge</br>") 
+Validate(/\d+\.?\d*/, ['-101', 'hello', '-0.1', 'heiwsax', '0.1', 'asd12as',  '@A100', '1001', '1312121', '1,312,121', '12313!A@', '13121@21'])
+
+document.write("</br>Test Case: wholesaleEnergyCost</br>") 
+Validate(/\d+\.?\d*/, ['-101', 'hello', '-0.1', 'heiwsax', '0.1', 'asd12as',  '@A100', '1001', '1312121', '1,312,121', '12313!A@', '13121@21'])
+
+document.write("</br>Test Case: otherElecRevenue</br>") 
+Validate(/\d+\.?\d*/, ['-101', 'hello', '-0.1', 'heiwsax', '0.1', 'asd12as',  '@A100', '1001', '1312121', '1,312,121', '12313!A@', '13121@21'])
+
+document.write("</br>Test Case: Consumer Served Sales: janSale, Revenue, Total KWh Sold, Total Revenue</br>") 
+Validate(/[-+]?[0-9]*\.?[0-9]+/, ['-101', '-10', '-0.1', '0', '0.1', '10', '101', '100', '91.123','91.13', '10a', 'a10', '10.c'])
+
+</script>
+</html>

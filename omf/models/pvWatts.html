@@ -23,14 +23,14 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
+		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
 				<label>Model Type</label>
 				<input type="text" id="modelType" name="modelType" value="pvWatts" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -55,7 +55,7 @@
 			</div>
 			<div class="shortInput">
 				<label>Simulation Length</label>
-				<input type="text" id="simLength" name="simLength" data-validRegex="\d+"/>
+				<input type="text" id="simLength" name="simLength" pattern="^\d+$" required="required">
 			</div>
 			<div class="shortInput">
 				<label>Length Units</label>
@@ -67,15 +67,15 @@
 			</div>
 			<div class="shortInput">
 				<label>Simulation Start Date (YYYY-MM-DD)</label>
-				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
+				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
-				<input type="text" id="systemSize" name="systemSize" data-validRegex="\d+\.?\d*"/>
+				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Derate (%)<span class="classic">Percentage of energy that is not lost due to panel soiling, DC-AC conversion, wire losses, etc.</span></label>
-				<input type="text" id="derate" name="derate" data-validRegex="\d+\.?\d*"/>
+				<input value="77" type="text" id="derate" name="derate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tracking Mode<span class="classic">Type of tracking system the PV array will use if any.</span></label>
