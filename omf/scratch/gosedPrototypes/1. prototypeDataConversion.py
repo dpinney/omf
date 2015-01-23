@@ -1,6 +1,4 @@
-# Need to convert 1 feeder; Oline Blah?
-# milToGridlab and milToGridlab test in scratch are basically the same code.
-# Get that code in here, run it on the files.
+''' Code to convert all the feeders we have for GOSED. '''
 
 def convertTests():
 	''' Test convert every windmil feeder we have (in uploads). Return number of exceptions we hit. '''
