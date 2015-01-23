@@ -32,6 +32,13 @@
 			"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
 			"tooltip":{"valueDecimals":1},
 			"series":[]	}
+			
+		$(document).ready(function(){
+			$(".toggle").click(function(){
+					$(this).parent().next().toggle(500)
+			})
+		})
+			
 	</script>	
 </head>
 <body onload="init()">
