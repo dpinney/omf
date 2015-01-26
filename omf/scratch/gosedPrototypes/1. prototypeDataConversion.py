@@ -8,7 +8,8 @@ def convertTests():
 	import feeder, milToGridlab
 	from solvers import gridlabd
 	exceptionCount = 0
-	testFiles = [('AutocliAlberich.std','AutocliAlberich.seq'),('OlinBarre.std','OlinBarre.seq'),('OlinBeckenham.std','OlinBeckenham.seq')]
+	testFiles = [('AutocliAlberich.std','AutocliAlberich.seq')]
+	# ,('OlinBarre.std','OlinBarre.seq'),('OlinBeckenham.std','OlinBeckenham.seq')
 	for stdString, seqString in testFiles:
 		try:
 			# Convert the std+seq.

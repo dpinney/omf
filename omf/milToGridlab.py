@@ -82,6 +82,13 @@ def convert(stdString,seqString):
 					return row
 			return None
 
+		def safeGet(arr, pos, default):
+			''' Return item at pos in arr, or if it fails return default. '''
+			try:
+				return arr[pos]
+			except:
+				return default
+
 		def convertGenericObject(objectList):
 			''' this converts attributes that are in every milsoft object regardless of hardware type '''
 			newOb = {}
@@ -595,7 +602,6 @@ def convert(stdString,seqString):
 				raise_taps = '16'
 				lower_taps = '16'
 				regulation = '0.1'
-					
 			if regList[9] == '0': # Each phase is controlled independently
 				band_center = str(float(regList[14])*120)
 				control_level = 'INDIVIDUAL'
@@ -614,23 +620,18 @@ def convert(stdString,seqString):
 				control_level = 'BANK'
 				CT_Phase = 'C'
 				PT_Phase = 'C'
-			
 			if float(band_center) == 0.0:
 				band_center = '122'
-			
 			ldc_r_A = regList[17]
 			ldc_r_B = regList[18]
 			ldc_r_C = regList[19]
 			ldc_x_A = regList[20]
 			ldc_x_B = regList[21]
 			ldc_x_C = regList[22]
-			
 			if float(ldc_r_A) > 0.0 or float(ldc_r_B) > 0.0 or float(ldc_r_C) > 0.0 or float(ldc_x_A) > 0.0 or float(ldc_x_B) > 0.0 or float(ldc_x_C) > 0.0:
 				control = 'LINE_DROP_COMP'
 			else:
 				control = 'OUTPUT_VOLTAGE'
-			
-			
 			#MAYBEFIX: figure out whether I'll run into trouble if the following integer isn't unique:
 			regulator[myIndex+1] = {}
 			regulator[myIndex+1]['name'] = regulator['name'] + '-CONFIG'
@@ -645,45 +646,32 @@ def convert(stdString,seqString):
 			regulator[myIndex+1]['CT_phase'] = regulator['phases']
 			regulator[myIndex+1]['PT_phase'] = regulator['phases']
 			regulator[myIndex+1]['regulation'] = regulation
-			
 			if ctr is not None:
 				regulator[myIndex+1]['current_transducer_ratio'] = ctr
-				
 			if float(ldc_r_A) != 0.0 and 'A' in regulator['phases']:
 				regulator[myIndex+1]['compensator_r_setting_A'] = str(float(ldc_r_A)*120)
-				
 			if float(ldc_x_A) != 0.0 and 'A' in regulator['phases']:
 				regulator[myIndex+1]['compensator_x_setting_A'] = str(float(ldc_x_A)*120)
-				
 			if float(ldc_r_B) != 0.0 and 'B' in regulator['phases']:
 				regulator[myIndex+1]['compensator_r_setting_B'] = str(float(ldc_r_B)*120)
-				
 			if float(ldc_x_B) != 0.0 and 'B' in regulator['phases']:
 				regulator[myIndex+1]['compensator_x_setting_B'] = str(float(ldc_x_B)*120)
-				
 			if float(ldc_r_C) != 0.0 and 'C' in regulator['phases']:
 				regulator[myIndex+1]['compensator_r_setting_C'] = str(float(ldc_r_C)*120)
-				
 			if float(ldc_x_C) != 0.0 and 'C' in regulator['phases']:
 				regulator[myIndex+1]['compensator_x_setting_C'] = str(float(ldc_x_C)*120)
-				
 			regulator[myIndex+1]['Control'] = control
 			regulator[myIndex+1]['control_level'] = control_level
 			regulator[myIndex+1]['Type'] = 'A'
-			
 			if 'A' in regulator['phases']:
 				regulator[myIndex+1]['tap_pos_A'] = '1'
-				
 			if 'B' in regulator['phases']:
 				regulator[myIndex+1]['tap_pos_B'] = '1'
-				
 			if 'C' in regulator['phases']:
 				regulator[myIndex+1]['tap_pos_C'] = '1'
-				
 			return regulator
 
 		def convertTransformer(transList):
-			#print('Converting transformer')
 			myIndex = components.index(objectList)*subObCount
 			transformer = convertGenericObject(transList)
 			transformer['phases'] = transList[2]
@@ -693,29 +681,27 @@ def convert(stdString,seqString):
 			transformer[myIndex+1]['omfEmbeddedConfigObject'] = 'configuration object transformer_configuration'
 			transformer[myIndex+1]['primary_voltage'] = str(float(transList[10])*1000)
 			transformer[myIndex+1]['secondary_voltage'] = str(float(transList[13])*1000)
-			# Grab transformer phase hardware
+			# Grab transformer phase hardware. NOTE: the default values were averages from the test files.
 			if 'A' in transformer['phases']:
 				trans_config = statsByName(transList[24])
-				no_load_loss = trans_config[20]
-				percent_z = trans_config[4]
-				x_r_ratio = trans_config[7]
+				no_load_loss = safeGet(trans_config, 20, 0)
+				percent_z = safeGet(trans_config, 4, 3)
+				x_r_ratio = safeGet(trans_config, 7, 5)
 			elif 'B' in transformer['phases']:
 				trans_config = statsByName(transList[25])
-				no_load_loss = trans_config[21]
-				percent_z = trans_config[5]
-				x_r_ratio = trans_config[8]
+				no_load_loss = safeGet(trans_config, 21, 0)
+				percent_z = safeGet(trans_config, 5, 3)
+				x_r_ratio = safeGet(trans_config, 8, 5)
 			else:
 				trans_config = statsByName(transList[26])
-				no_load_loss = trans_config[22]
-				percent_z = trans_config[6]
-				x_r_ratio = trans_config[9]
-			
+				no_load_loss = safeGet(trans_config, 22, 0)
+				percent_z = safeGet(trans_config, 6, 3)
+				x_r_ratio = safeGet(trans_config, 9, 5)
 			# Set the shunt impedance
 			if float(no_load_loss) > 0.0:
 				r_shunt = float(transList[10])*float(transList[10])*1000/float(no_load_loss)
 				x_shunt = r_shunt*float(x_r_ratio)
 				transformer[myIndex+1]['shunt_impedance'] = str(r_shunt) + '+' + str(x_shunt) + 'j'
-			
 			# Set series impedance
 			if float(percent_z) > 0.0:
 				r_series = float(percent_z)*0.01/math.sqrt(1+(float(x_r_ratio)*float(x_r_ratio)))
@@ -1070,8 +1056,7 @@ def convert(stdString,seqString):
 	def secondarySystemFix(glm):
 		def unused_key(dic, key_multiplier):
 			free_key = (int(max(dic.keys())/key_multiplier) + 1)*key_multiplier
-			return free_key 
-		
+			return free_key 		
 		allLoadKeys = [x for x in glm if 'object' in glm[x] and 'parent' in glm[x] and glm[x]['object']=='load' and 'load_class' in glm[x] and glm[x]['load_class'] == 'R']
 		allNamesNodesOnLoads = list(set([glm[key]['parent'] for key in allLoadKeys]))
 		all2ndTransKeys = []
@@ -1083,7 +1068,6 @@ def convert(stdString,seqString):
 				return []
 			else:
 				return hits
-
 		for key in glm:
 			if 'object' in glm[key] and glm[key]['object'] == 'transformer':
 				#fromName = glm[key]['from']
@@ -1099,7 +1083,6 @@ def convert(stdString,seqString):
 				else:
 					# this ain't no poletop transformer
 					pass
-
 		# Fix da nodes.
 		# {'phases': 'BN', 'object': 'node', 'nominal_voltage': '2400', 'name': 'nodeS1806-32-065T14102'}
 		# object triplex_meter { phases BS; nominal_voltage 120; };
@@ -1113,8 +1096,6 @@ def convert(stdString,seqString):
 									'name' : glm[nodeKey]['name'] + '_' + y,
 									'phases' : y + 'S',
 									'nominal_voltage' : '120'}
-					
-
 		# Fix da loads.
 		#{'phases': 'BN', 'object': 'load', 'name': 'S1806-32-065', 'parent': 'nodeS1806-32-065T14102', 'load_class': 'R', 'constant_power_C': '0', 'constant_power_B': '1.06969', 'constant_power_A': '0', 'nominal_voltage': '120'}
 		for loadKey in all2ndLoadKeys:
@@ -1134,7 +1115,6 @@ def convert(stdString,seqString):
 						glm[new_key]['power_12'] = glm[loadKey]['constant_power_B']
 					elif y == 'C':
 						glm[new_key]['power_12'] = glm[loadKey]['constant_power_C']
-
 		# Gotta fix the transformer phases too...
 		for key in all2ndTransKeys:
 			phases = set(glm[key]['phases'])
@@ -1147,27 +1127,25 @@ def convert(stdString,seqString):
 									'from' : glm[key]['from'],
 									'to' : glm[key]['to'] + '_' + y}
 					for z in glm[key]:
-						if type(z) is int:#
+						if type(z) is int:
 							glm[new_key][new_key+1] = {'omfEmbeddedConfigObject' : 'configuration object transformer_configuration',
 													   'name' : glm[new_key]['name'] + '-CONFIG',
 													   'primary_voltage' : glm[key][z]['primary_voltage'],
 													   'secondary_voltage' : '120.0',
 													   'connect_type' : 'SINGLE_PHASE_CENTER_TAPPED',
 													   'impedance' : glm[key][z]['impedance']}
-							
 							if 'shunt_impedance' in glm[key][z]:
 								glm[new_key][new_key+1]['shunt_impedance'] = glm[key][z]['shunt_impedance']
-							
+							#NOTE: default values are average of all .std data sets we've seen.
 							if y == 'A':
-								glm[new_key][new_key+1]['power_rating'] = glm[key][z]['powerA_rating']
-								glm[new_key][new_key+1]['powerA_rating'] = glm[key][z]['powerA_rating']
+								glm[new_key][new_key+1]['power_rating'] = glm[key][z].get('powerA_rating', 250)
+								glm[new_key][new_key+1]['powerA_rating'] = glm[key][z].get('powerA_rating', 250)
 							elif y == 'B':
-								glm[new_key][new_key+1]['power_rating'] = glm[key][z]['powerB_rating']
-								glm[new_key][new_key+1]['powerB_rating'] = glm[key][z]['powerB_rating']
+								glm[new_key][new_key+1]['power_rating'] = glm[key][z].get('powerB_rating', 250)
+								glm[new_key][new_key+1]['powerB_rating'] = glm[key][z].get('powerB_rating', 250)
 							elif y == 'C':
-								glm[new_key][new_key+1]['power_rating'] = glm[key][z]['powerC_rating']
-								glm[new_key][new_key+1]['powerC_rating'] = glm[key][z]['powerC_rating']
-		
+								glm[new_key][new_key+1]['power_rating'] = glm[key][z].get('powerC_rating', 250)
+								glm[new_key][new_key+1]['powerC_rating'] = glm[key][z].get('powerC_rating', 250)
 		# Delete original transformers, nodes and loads that the split phase objects are representing						
 		for key in all2ndTransKeys:
 			del glm[key]
@@ -1175,7 +1153,6 @@ def convert(stdString,seqString):
 			del glm[key]
 		for key in all2ndNodeKeys:
 			del glm[key]
-
 	# Fixing the secondary (triplex) system.
 	secondarySystemFix(glmTree)
 
