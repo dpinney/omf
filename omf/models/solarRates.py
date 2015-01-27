@@ -72,7 +72,9 @@ def run(modelDir, inputDict):
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(startDateTime[0:4] + "-{0:02d}".format(x+1))])
-	outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
+	#outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
+	#Testing PVWatts Output from 4. GOSED solarRates Spec
+	outData["monthlyGeneration"] = [[0,625000],[1,687500],[2,812500],[3,875000],[4,875000],[5,875000],[6,812500],[7,875000],[8,812500],[9,750000],[10,625000],[11,556250]]	
 	monthlyNoConsumerServedSales = []
 	monthlyKWhSold = []
 	monthlyRevenue = []
@@ -94,10 +96,11 @@ def run(modelDir, inputDict):
 	outData["monthlyKWhSold"] = sorted(monthlyKWhSold, key=lambda x:months[x[0]])
 	outData["monthlyRevenue"] = sorted(monthlyRevenue, key=lambda x:months[x[0]])
 	outData["totalKWhSold"] = sorted(totalKWhSold, key=lambda x:months[x[0]])
+
 	outData["totalRevenue"] = sorted(totalRevenue, key=lambda x:months[x[0]])
 	outData["lossesBAU"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)]) 
 	outData["lineLossRate"] = outData.get("lossesBAU", 0) / float(inputDict.get("totalKWhPurchased", 0))
-	outData["totalGeneration"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["monthlyGeneration"][i][1]*monthlyNoConsumerServedSales[i][1]*float(inputDict.get("resPenetration", 0.05))/1000] for i in range(12)]
+	outData["totalGeneration"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["monthlyGeneration"][i][1]*outData["monthlyNoConsumerServedSales"][i][1]*float(inputDict.get("resPenetration", 0.05))/1000] for i in range(12)]
 	##################
 	# TODO: add retailCost to the calculation.
 	##################
@@ -107,9 +110,15 @@ def run(modelDir, inputDict):
 	# E23 = E11
 	outData["BAU"]["totalKWhPurchased"] = float(inputDict.get("totalKWhPurchased", 0))
 	# E24 = SUM(E19:P19)
-	outData["BAU"]["totalKWhSales"] = sum([monthlyKWhSold[i][1] for i in range(12)])
+	#Wrong
+	#outData["BAU"]["totalKWhSales"] = sum([monthlyKWhSold[i][1] for i in range(12)])
+	#Right
+	outData["BAU"]["totalKWhSales"] = sum([totalKWhSold[i][1] for i in range(12)]) 
 	# E25 = E23-E24
-	outData["BAU"]["losses"] = outData["BAU"]["totalKWhPurchased"] - outData["BAU"]["totalKWhSales"]
+	#Wrong
+	#outData["BAU"]["losses"] = outData["BAU"]["totalKWhPurchased"] - outData["BAU"]["totalKWhSales"]
+	#Right
+	outData["BAU"]["losses"] = outData["lossesBAU"] 
 	# E26 = E25/E23
 	outData["BAU"]["effectiveLossRate"] = outData["BAU"]["losses"] / outData["BAU"]["totalKWhPurchased"]
 	# E27 = 0
@@ -141,19 +150,26 @@ def run(modelDir, inputDict):
 	# E40 = 0
 	outData["BAU"]["avgMonthlyBillSolarCus"] = 0
 	# E41 = E6+E35/AVERAGE(D16:O16)/12
-	outData["BAU"]["avgMonthlyBillNonSolarCus"] = float(inputDict.get("customServiceCharge", 0))+outData["BAU"]["resNonSolarRev"]/sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])/12
+	avgCustomerCount = (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])/12)
+	outData["BAU"]["avgMonthlyBillNonSolarCus"] = float(inputDict.get("customServiceCharge", 0))+outData["BAU"]["resNonSolarRev"]/avgCustomerCount/12
 	# E42 = E63/E24, update after Form 7 model
-	outData["BAU"]["idealRate"] = 0
+	outData["BAU"]["costofService"] = 0
 	# Solar case
 	outData["Solar"] = {}
 	# F27 = SUM(E15:P15)
 	outData["Solar"]["annualSolarGen"] = sum([outData["totalGeneration"][i][1] for i in range(12)])
-	# F24 = E24-F27
-	outData["Solar"]["totalKWhSales"] = outData["BAU"]["totalKWhSales"] - outData["Solar"]["annualSolarGen"]
+	# F24 = E24-F27	    	
+	#Wrong
+	#outData["Solar"]["totalKWhSales"] = outData["BAU"]["totalKWhSales"] - outData["Solar"]["annualSolarGen"]
+	#Right
+	outData["Solar"]["totalKWhSales"] = sum([totalKWhSold[i][1] for i in range(12)]) - outData["Solar"]["annualSolarGen"]	
 	# F23 =F24/(1-E26)
-	outData["Solar"]["totalKWhPurchased"] = outData["Solar"]["totalKWhSales"]/(1-outData["BAU"]["effectiveLossRate"])
+	outData["Solar"]["totalKWhPurchased"] = outData["Solar"]["totalKWhSales"]/ (1-outData["BAU"]["effectiveLossRate"])
 	# F25 = F23-F24
-	outData["Solar"]["losses"] = outData["Solar"]["totalKWhPurchased"] - outData["Solar"]["totalKWhSales"]
+	#Wrong
+	#outData["Solar"]["losses"] = outData["Solar"]["totalKWhPurchased"] - outData["Solar"]["totalKWhSales"]
+	#Right
+	outData["Solar"]["losses"] = (outData["Solar"]["totalKWhPurchased"] - outData["Solar"]["totalKWhSales"])	
 	# F26 = E26
 	outData["Solar"]["effectiveLossRate"] = outData["BAU"]["effectiveLossRate"]
 	# F28 = (1-E5)*E28
@@ -181,11 +197,11 @@ def run(modelDir, inputDict):
 	# F39 = F36+E33+F35-F47-F72-E37
 	outData["Solar"]["dollarAllBal"] = 0
 	# F40 = E6+E7+(F36+F32)/E5/AVERAGE(E16:P16)/12
-	outData["Solar"]["avgMonthlyBillSolarCus"] = float(inputDict.get("customServiceCharge", 0))+float(inputDict.get("solarInterconCharge", 0))+(outData["Solar"]["solarResRev"]+outData["Solar"]["costSolarGen"])/float(inputDict.get("residentialCustomWithSolarRate", 0.05))/sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])/12/12
+	outData["Solar"]["avgMonthlyBillSolarCus"] = float(inputDict.get("customServiceCharge", 0))+float(inputDict.get("solarServiceCharge", 0))+(outData["Solar"]["solarResRev"]+outData["Solar"]["costSolarGen"])/float(inputDict.get("residentialCustomWithSolarRate", 0.05))/avgCustomerCount/12
 	# F41 = E6+F35/(1-E5)/AVERAGE(E16:P16)/12
-	outData["Solar"]["avgMonthlyBillNonSolarCus"] = float(inputDict.get("customServiceCharge", 0)) + outData["Solar"]["resNonSolarRev"]/(1-float(inputDict.get("residentialCustomWithSolarRate", 0.05)))/sum(monthlyNoConsumerServedSales[i][1] for i in range(12))/12/12   +outData["Solar"]["resNonSolarRev"]/sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])/12
+	outData["Solar"]["avgMonthlyBillNonSolarCus"] = float(inputDict.get("customServiceCharge", 0)) + outData["Solar"]["resNonSolarRev"]/(1-float(inputDict.get("residentialCustomWithSolarRate", 0.05)))/avgCustomerCount/12
 	# F42 = F63/F24, update after Form 7 model
-	outData["Solar"]["idealRate"] = 0
+	outData["Solar"]["costofService"] = 0
 
 	## Form 7 Model
 	# E46
@@ -254,7 +270,8 @@ def run(modelDir, inputDict):
 		+ float(inputDict.get("taxExpense"))\
 		+ float(inputDict.get("interestLongTerm"))\
 		+ float(inputDict.get("interestExpense"))\
-		+ float(inputDict.get("interestConstruction"))
+		+ float(inputDict.get("interestConstruction"))\
+		+ outData["BAU"]["otherDeductions"]		
 	# E64 = E45-E63
 	outData["BAU"]["patCapOperMargins"] = outData["BAU"]["operRevPatroCap"] - outData["BAU"]["totalCostElecService"]
 	# E72 = SUM(E64:E71)
@@ -323,11 +340,11 @@ def run(modelDir, inputDict):
 		+ outData["BAU"]["otherCapCreditsPatroDivident"] \
 		+ outData["BAU"]["extraItems"])
 	# E42 = E63/E24, update after Form 7 model
-	outData["BAU"]["idealRate"] = outData["BAU"]["totalCostElecService"] / outData["BAU"]["totalKWhSales"]
+	outData["BAU"]["costofService"] = outData["BAU"]["totalCostElecService"] / (outData["BAU"]["totalKWhSales"] + float(inputDict.get("customServiceCharge", 0)))
 	# F37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71) = E37, update after Form 7 model
 	outData["Solar"]["nonPowerCosts"] = outData["BAU"]["nonPowerCosts"]
 	# F42 = F63/F24, update after Form 7 model
-	outData["Solar"]["idealRate"] = outData["Solar"]["totalCostElecService"] / outData["Solar"]["totalKWhSales"]
+	outData["Solar"]["costofService"] = outData["Solar"]["totalCostElecService"] / (outData["Solar"]["totalKWhSales"] + float(inputDict.get("customServiceCharge", 0)) + (12.0*float(avgCustomerCount)*float(inputDict.get("resPenetration",0)))*float(inputDict.get("solarServiceCharge", 0)))
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
@@ -368,9 +385,10 @@ def _tests():
 		# Single data point
 		"avgSystemSize": "5",
 		"resPenetration": "0.05",
-		"customServiceCharge": "0",
-		"solarInterconCharge": "0",
-		"wholesaleEnergyCost": "0.08",
+		"customServiceCharge": "20",
+		"solarServiceCharge": "10",		
+		#"wholesaleEnergyCost": "0.08",
+		"wholesaleEnergyCost": "0.080520654",		
 		"solarLCoE": "0.07",
 		"otherElecRevenue": "1544165",
 		"totalKWhPurchased": "999330657",
