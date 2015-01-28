@@ -10,8 +10,8 @@ from solvers import gridlabd
 def convertTests():
 	''' Test convert every windmil feeder we have (in uploads). Return number of exceptions we hit. '''
 	exceptionCount = 0
-	testFiles = [('AutocliAlberich.std','AutocliAlberich.seq')]
-	# ,('OlinBarre.std','OlinBarre.seq'),('OlinBeckenham.std','OlinBeckenham.seq')
+	testFiles = [('OrvilleTreePond.std','OrvilleTreePond.seq')]
+	# ,('OlinBarre.std','OlinBarre.seq'),('OlinBeckenham.std','OlinBeckenham.seq'), ('AutocliAlberich.std','AutocliAlberich.seq')
 	for stdString, seqString in testFiles:
 		try:
 			# Convert the std+seq.
@@ -128,5 +128,5 @@ def nameToIndexMap(tree):
 	return index
 
 if __name__ == '__main__':
-	# convertTests()
-	alberichFix()
+	convertTests()
+	# alberichFix()
