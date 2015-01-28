@@ -43815,11 +43815,10 @@
     "BAU": {
         "solarResSold": 0, 
         "costPurchasedPower": 80466749.0, 
-        "idealRate": 0.19063632268608513, 
         "taxExpensePG": 0.0, 
         "interestExpense": 209969.0, 
         "extraItems": 0.0, 
-        "patCapOperMargins": -3677950.0, 
+        "patCapOperMargins": -3804590.0, 
         "taxExpense": 197924.0, 
         "operRevPatroCap": 120674744.0, 
         "otherCapCreditsPatroDivident": 1135379.0, 
@@ -43827,14 +43826,14 @@
         "resNonSolarRev": 78309860.0, 
         "totalOMExpense": 104772951.0, 
         "genTransCapCredits": 1015764.0, 
-        "totalCostElecService": 124352694.0, 
+        "totalCostElecService": 124479334.0, 
         "annualSolarGen": 0, 
         "distriExpenseM": 5535844.0, 
         "transExpense": 15027.0, 
         "otherDeductions": 126640.0, 
         "dollarAllBal": 0, 
         "nonOpMarginInterest": 123401.0, 
-        "avgMonthlyBillNonSolarCus": 11.578180878387927, 
+        "avgMonthlyBillNonSolarCus": 238.93817054065514, 
         "costSolarGen": 0, 
         "totalKWhPurchased": 999330657.0, 
         "nonPowerCosts": 40926998.0, 
@@ -43842,7 +43841,7 @@
         "customerAccountExpense": 4426441.0, 
         "interestLongTerm": 10195988.0, 
         "nonResRev": 42364884.0, 
-        "nonResKWhSold": 0.0, 
+        "nonResKWhSold": 287794667.0, 
         "resNonSolarKWhSold": 652303256.0, 
         "effectiveResRate": 0.12005130938668808, 
         "energyAllBal": 0, 
@@ -43853,63 +43852,64 @@
         "fundsUsedConstruc": 0.0, 
         "solarResDemand": 0, 
         "distriExpenseO": 5294026.0, 
-        "effectiveLossRate": 0.3472598369410376, 
+        "effectiveLossRate": 0.05927240757110086, 
         "solarResRev": 0, 
         "interestConstruction": 0.0, 
-        "losses": 347027401.0, 
-        "patCapital": -592363.0, 
+        "losses": 59232734.0, 
+        "patCapital": -719003.0, 
+        "costofService": 0.1324110156117199, 
         "powerProExpense": 0.0, 
-        "totalKWhSales": 652303256.0, 
+        "totalKWhSales": 940097923.0, 
         "incomeEquityInvest": 0.0
     }, 
     "monthlyGeneration": [
         [
-            "Jan", 
-            530000.0
+            0, 
+            625000
         ], 
         [
-            "Feb", 
-            590000.0
+            1, 
+            687500
         ], 
         [
-            "Mar", 
-            700000.0
+            2, 
+            812500
         ], 
         [
-            "Apr", 
-            760000.0
+            3, 
+            875000
         ], 
         [
-            "May", 
-            750000.0
+            4, 
+            875000
         ], 
         [
-            "Jun", 
-            740000.0
+            5, 
+            875000
         ], 
         [
-            "Jul", 
-            770000.0
+            6, 
+            812500
         ], 
         [
-            "Aug", 
-            770000.0
+            7, 
+            875000
         ], 
         [
-            "Sep", 
-            700000.0
+            8, 
+            812500
         ], 
         [
-            "Oct", 
-            760000.0
+            9, 
+            750000
         ], 
         [
-            "Nov", 
-            550000.0
+            10, 
+            625000
         ], 
         [
-            "Dec", 
-            490000.0
+            11, 
+            556250
         ]
     ], 
     "lossesBAU": 59232734.0, 
@@ -44071,51 +44071,51 @@
     "totalGeneration": [
         [
             "Jan", 
-            1247832.0
+            1458375.0
         ], 
         [
             "Feb", 
-            1382842.0
+            1606137.5
         ], 
         [
             "Mar", 
-            1635340.0
+            1904337.5
         ], 
         [
             "Apr", 
-            1789078.0
+            2050037.5
         ], 
         [
             "May", 
-            1768987.5
+            2052706.25
         ], 
         [
             "Jun", 
-            1743218.0
+            2055243.75
         ], 
         [
             "Jul", 
-            1806381.5
+            1909903.125
         ], 
         [
             "Aug", 
-            1808614.5
+            2061237.5
         ], 
         [
             "Sep", 
-            1633380.0
+            1915062.5
         ], 
         [
             "Oct", 
-            1791320.0
+            1765800.0
         ], 
         [
             "Nov", 
-            1292857.5
+            1474156.25
         ], 
         [
             "Dec", 
-            1148021.0
+            1309440.3125
         ]
     ], 
     "elev": 190.0, 
@@ -61695,37 +61695,36 @@
         0.0
     ], 
     "Solar": {
-        "solarResSold": 13567290.8, 
+        "solarResSold": 11052725.6125, 
         "fundsUsedConstruc": 0.0, 
-        "idealRate": 0.1920623631599285, 
         "taxExpensePG": 0.0, 
         "interestExpense": 209969.0, 
         "extraItems": 0.0, 
-        "patCapOperMargins": -3236503.5094180107, 
+        "patCapOperMargins": -4039210.6735925674, 
         "taxExpense": 197924.0, 
-        "operRevPatroCap": 118388022.02536997, 
+        "operRevPatroCap": 118086145.18207242, 
         "otherCapCreditsPatroDivident": 1135379.0, 
-        "costPurchasedPower": 77611940.53478798, 
+        "costPurchasedPower": 78112770.85566498, 
         "customerServiceExpense": 643418.0, 
         "resNonSolarRev": 74394366.99999999, 
-        "totalOMExpense": 101918142.53478798, 
+        "totalOMExpense": 102418972.85566498, 
         "genTransCapCredits": 1015764.0, 
-        "totalCostElecService": 121624525.53478798, 
-        "annualSolarGen": 19047872.0, 
+        "totalCostElecService": 122125355.85566498, 
+        "annualSolarGen": 21562437.1875, 
         "distriExpenseM": 5535844.0, 
         "transExpense": 15027.0, 
         "otherDeductions": 126640.0, 
         "dollarAllBal": 0, 
         "nonOpMarginInterest": 123401.0, 
-        "avgMonthlyBillNonSolarCus": 11.964120241000858, 
-        "costSolarGen": 1333351.04, 
-        "totalKWhPurchased": 970149256.6848497, 
+        "avgMonthlyBillNonSolarCus": 238.93817054065514, 
+        "costSolarGen": 1509370.6031250001, 
+        "totalKWhPurchased": 976409635.6958123, 
         "nonPowerCosts": 40926998.0, 
-        "avgMonthlyBillSolarCus": 0.7299205373950252, 
+        "avgMonthlyBillSolarCus": 210.64261139637136, 
         "customerAccountExpense": 4426441.0, 
         "interestLongTerm": 10195988.0, 
         "nonResRev": 42364884.0, 
-        "nonResKWhSold": 0.0, 
+        "nonResKWhSold": 287794667.0, 
         "resNonSolarKWhSold": 619688093.1999999, 
         "effectiveResRate": 0.12005130938668808, 
         "energyAllBal": 0, 
@@ -61735,13 +61734,14 @@
         "depreAmortiExpense": 8975862.0, 
         "solarResDemand": 32615162.8, 
         "distriExpenseO": 5294026.0, 
-        "effectiveLossRate": 0.3472598369410376, 
-        "solarResRev": 1628771.0253699669, 
+        "effectiveLossRate": 0.05927240757110086, 
+        "solarResRev": 1326894.1820724092, 
         "interestConstruction": 0.0, 
-        "losses": 336893872.68484974, 
-        "patCapital": -150916.5094180107, 
+        "losses": 57874149.883312345, 
+        "patCapital": -953623.6735925674, 
+        "costofService": 0.13291580642814665, 
         "powerProExpense": 0.0, 
-        "totalKWhSales": 633255384.0, 
+        "totalKWhSales": 918535485.8125, 
         "incomeEquityInvest": 0.0
     }, 
     "monthlyNoConsumerServedSales": [

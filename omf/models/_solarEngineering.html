@@ -32,7 +32,6 @@
 			"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
 			"tooltip":{"valueDecimals":1},
 			"series":[]	}
-			
 		$(document).ready(function(){
 			$(".toggle").click(function(){
 					$(this).parent().next().toggle(500)
@@ -222,46 +221,92 @@
 			</script>
 		</div>
 		<p class="reportTitle postRun">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="energyBalanceReport" class="tightContent postRun">
+		<div id="newEnergyBalanceReport" class="tightContent postRun">
 			<script type="text/javascript">
-				var tLossesSeries = {
-					"pointWidth": 40, 
-					"color":"orangered",
-					"data":[],
-					"type":"column",
-					"name":"Losses"
-				}
-				var tLoadsSeries = {
-					"pointWidth": 40,
-					"color":"darkorange",
-					"data":[],
-					"type":"column",
-					"name":"Loads"
-				}
-				var tDGSeries = {
-					"color":"seagreen",
-					"data":[],
-					"type":"spline",
-					"name":"DG"
-				}
 				var tPower = eval(allOutputData.Consumption.Power.join("+"));
 				var tLosses = eval(allOutputData.Consumption.Losses.join("+"));
 				var tDG = eval(allOutputData.Consumption.DG.join("+"));
 				var tLoads = tPower + tDG - tLosses;
-				tLossesSeries["data"].push(tLosses)
-				tLoadsSeries["data"].push(tLoads)
+				var tDGDirect,tDGExported,tFromGrid;
+				if (tLoads>tDG) 
+				{
+					tDGDirect =tDG;
+				} 
+				else
+				{
+					tDGDirect =tLoads;
+				}
+				if (tLoads>tDG) 
+				{
+					tDGExported=0;
+				} 
+				else
+				{
+					tDGExported= tPower-tLoads-tLosses;
+				}
+				if(tLoads>tDG)
+				{
+					tFromGrid=tPower;
+				}
+				else
+				{
+					tFromGrid=0;
+				}
+				var tLossesSeries = {
+					"pointWidth": 40, 
+					"color":"orangered",
+					"data":[0,tLosses],
+					"type":"bar",
+					"name":"Losses",
+				}
+				var tLoadsSeries = {
+					"pointWidth": 40,
+					"color":"darkorange",
+					"data":[0,tLoads],
+					"type":"bar",
+					"name":"Loads"
+				}
+				var tDGSeries = {
+					"pointWidth": 40,
+					"color":"seagreen",
+					"data":[],
+					"type":"bar",
+					"name":"DG"
+				}
+				var tFromGridSeries = {
+					"pointWidth": 40, 
+					"color":"IndianRed",
+					"data":[tFromGrid,0],
+					"type":"bar",
+					"name":"FromGrid"
+				}
+				var tDGDirectSeries = {
+					"pointWidth": 40,
+					"color":"RoyalBlue",
+					"data":[tDGDirect,0],
+					"type":"bar",
+					"name":"DGDirect"
+				}
+				var tDGExportedSeries = {
+					"pointWidth": 40,
+					"color":"LightSeaGreen",
+					"data":[tDGExported,0],
+					"type":"bar",
+					"name":"DG Exported"
+				}
+				
 				tDGSeries["data"].push(tDG)
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "energyBalanceReport"
+				localHighChart["chart"]["renderTo"] = "newEnergyBalanceReport"
 				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["height"] = 250
 				localHighChart["chart"]["width"] = 1000
-				localHighChart["series"] = [tLossesSeries, tLoadsSeries, tDGSeries]
+				localHighChart["series"] = [tFromGridSeries,tDGDirectSeries,tDGExportedSeries,tLossesSeries,tLoadsSeries]
 				localHighChart["xAxis"] = {
 					"tickColor":"gray",
 					"lineColor":"gray",
-					"categories":"FeederXYZ"
-				}
+					"categories":["Source","Destination"]
+					}
 				localHighChart["yAxis"] = {
 					"title":{
 						"text":"Energy (Wh)",
@@ -271,9 +316,9 @@
 					}
 				}
 				localHighChart["plotOptions"] = {
-					"column":{"stacking":"normal", "shadow":false}, 
-					"spline":{"marker":{"radius":8}, "shadow":false, "lineWidth":0 }
+					"bar":{"stacking":"normal", "shadow":false}, 
 				}
+				
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
