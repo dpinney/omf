@@ -17106,7 +17106,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0557+0.0j;
+	impedance 0.0557+0.001j;
 	powerA_rating 500;
 	power_rating 500;
 };
@@ -17125,7 +17125,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0557+0.0j;
+	impedance 0.0557+0.001j;
 	power_rating 500;
 };
 
@@ -17175,7 +17175,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.028+0.0j;
+	impedance 0.028+0.001j;
 	power_rating 250;
 };
 
@@ -17272,7 +17272,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0276+0.0j;
+	impedance 0.0276+0.001j;
 	powerA_rating 166.667;
 	power_rating 166.667;
 };
@@ -17291,7 +17291,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0276+0.0j;
+	impedance 0.0276+0.001j;
 	power_rating 166.667;
 };
 
@@ -17308,7 +17308,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0276+0.0j;
+	impedance 0.0276+0.001j;
 	powerB_rating 166.667;
 	power_rating 166.667;
 };
@@ -17350,7 +17350,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.025+0.0j;
+	impedance 0.025+0.001j;
 	powerA_rating 75;
 	power_rating 75;
 };
@@ -17369,7 +17369,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.025+0.0j;
+	impedance 0.025+0.001j;
 	power_rating 75;
 };
 
@@ -17386,7 +17386,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.025+0.0j;
+	impedance 0.025+0.001j;
 	powerB_rating 75;
 	power_rating 75;
 };
@@ -17428,7 +17428,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0276+0.0j;
+	impedance 0.0276+0.001j;
 	powerA_rating 250;
 	power_rating 250;
 };
@@ -17447,7 +17447,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0276+0.0j;
+	impedance 0.0276+0.001j;
 	power_rating 250;
 };
 
@@ -17464,7 +17464,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0276+0.0j;
+	impedance 0.0276+0.001j;
 	powerB_rating 250;
 	power_rating 250;
 };
@@ -17538,7 +17538,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.022+0.0j;
+	impedance 0.022+0.001j;
 	powerA_rating 150;
 	power_rating 150;
 };
@@ -17557,7 +17557,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.022+0.0j;
+	impedance 0.022+0.001j;
 	power_rating 150;
 };
 
@@ -17574,7 +17574,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.022+0.0j;
+	impedance 0.022+0.001j;
 	powerB_rating 150;
 	power_rating 150;
 };
@@ -17632,7 +17632,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0256+0.0j;
+	impedance 0.0256+0.001j;
 	powerB_rating 100;
 	power_rating 100;
 };
@@ -17730,7 +17730,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.025+0.0j;
+	impedance 0.025+0.001j;
 	powerA_rating 225;
 	power_rating 225;
 };
@@ -17749,7 +17749,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.025+0.0j;
+	impedance 0.025+0.001j;
 	power_rating 225;
 };
 
@@ -17766,7 +17766,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.025+0.0j;
+	impedance 0.025+0.001j;
 	powerB_rating 225;
 	power_rating 225;
 };
@@ -17784,7 +17784,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.022+0.0j;
+	impedance 0.022+0.001j;
 	powerA_rating 50;
 	power_rating 50;
 };
@@ -17803,7 +17803,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.022+0.0j;
+	impedance 0.022+0.001j;
 	power_rating 50;
 };
 
@@ -17862,7 +17862,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.028+0.0j;
+	impedance 0.028+0.001j;
 	powerA_rating 250;
 	power_rating 250;
 };
@@ -17888,7 +17888,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.028+0.0j;
+	impedance 0.028+0.001j;
 	powerB_rating 250;
 	power_rating 250;
 };
@@ -17906,7 +17906,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0173+0.0j;
+	impedance 0.0173+0.001j;
 	powerA_rating 25;
 	power_rating 25;
 };
@@ -17925,7 +17925,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0173+0.0j;
+	impedance 0.0173+0.001j;
 	power_rating 25;
 };
 
@@ -17942,7 +17942,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0173+0.0j;
+	impedance 0.0173+0.001j;
 	powerB_rating 25;
 	power_rating 25;
 };
@@ -18012,7 +18012,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0557+0.0j;
+	impedance 0.0557+0.001j;
 	powerB_rating 500;
 	power_rating 500;
 };
@@ -18102,7 +18102,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.022+0.0j;
+	impedance 0.022+0.001j;
 	powerB_rating 50;
 	power_rating 50;
 };
@@ -18320,7 +18320,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.017+0.0j;
+	impedance 0.017+0.001j;
 	powerA_rating 75;
 	power_rating 75;
 };
@@ -18339,7 +18339,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.017+0.0j;
+	impedance 0.017+0.001j;
 	power_rating 75;
 };
 
@@ -18356,7 +18356,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.017+0.0j;
+	impedance 0.017+0.001j;
 	powerB_rating 75;
 	power_rating 75;
 };
@@ -18438,7 +18438,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.055+0.0j;
+	impedance 0.055+0.001j;
 	powerA_rating 333.333;
 	power_rating 333.333;
 };
@@ -18457,7 +18457,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.055+0.0j;
+	impedance 0.055+0.001j;
 	power_rating 333.333;
 };
 
@@ -18474,7 +18474,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.055+0.0j;
+	impedance 0.055+0.001j;
 	powerB_rating 333.333;
 	power_rating 333.333;
 };
@@ -18500,7 +18500,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.018+0.0j;
+	impedance 0.018+0.001j;
 	powerA_rating 50;
 	power_rating 50;
 };
@@ -18519,7 +18519,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.018+0.0j;
+	impedance 0.018+0.001j;
 	power_rating 50;
 };
 
@@ -18536,7 +18536,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.018+0.0j;
+	impedance 0.018+0.001j;
 	powerB_rating 50;
 	power_rating 50;
 };
@@ -18578,7 +18578,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.02+0.0j;
+	impedance 0.02+0.001j;
 	powerA_rating 150;
 	power_rating 150;
 };
@@ -18597,7 +18597,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.02+0.0j;
+	impedance 0.02+0.001j;
 	power_rating 150;
 };
 
@@ -18614,7 +18614,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.02+0.0j;
+	impedance 0.02+0.001j;
 	powerB_rating 150;
 	power_rating 150;
 };
@@ -18677,7 +18677,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0256+0.0j;
+	impedance 0.0256+0.001j;
 	power_rating 100;
 };
 
@@ -18711,8 +18711,8 @@ object transformer_configuration {
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
 	impedance 0.00588348405415+0.0294174202707j;
-	powerA_rating 250;
-	power_rating 250;
+	powerA_rating 2500;
+	power_rating 2500;
 };
 
 object transformer {
@@ -18724,13 +18724,13 @@ object transformer {
 };
 
 object transformer_configuration {
-	powerC_rating 250;
+	powerC_rating 2500;
 	name 435666_C-CONFIG;
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
 	impedance 0.00588348405415+0.0294174202707j;
-	power_rating 250;
+	power_rating 2500;
 };
 
 object transformer {
@@ -18747,8 +18747,8 @@ object transformer_configuration {
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
 	impedance 0.00588348405415+0.0294174202707j;
-	powerB_rating 250;
-	power_rating 250;
+	powerB_rating 2500;
+	power_rating 2500;
 };
 
 object transformer {
@@ -18796,7 +18796,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0179+0.0j;
+	impedance 0.0179+0.001j;
 	powerA_rating 15;
 	power_rating 15;
 };
@@ -18854,7 +18854,7 @@ object transformer_configuration {
 	primary_voltage 7200.0;
 	secondary_voltage 120.0;
 	connect_type SINGLE_PHASE_CENTER_TAPPED;
-	impedance 0.0256+0.0j;
+	impedance 0.0256+0.001j;
 	powerA_rating 100;
 	power_rating 100;
 };
