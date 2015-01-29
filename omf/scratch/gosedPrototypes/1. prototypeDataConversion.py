@@ -1,10 +1,10 @@
 ''' Code to convert all the feeders we have for GOSED.
 And some debug stuff. ''' 
 
-import os, json, traceback, shutil, sys
+import os, json, traceback, shutil, sys, tempfile
 from matplotlib import pyplot as plt
 sys.path.append('../..')
-import feeder, milToGridlab
+import feeder, milToGridlab, calibrate
 from solvers import gridlabd
 
 def convertTests():
@@ -127,6 +127,16 @@ def nameToIndexMap(tree):
 		index[val.get('name','')] = key
 	return index
 
+def runCalibration():
+	tree = feeder.parse('./OlinBeckenhamDebugged.glm')
+	wrappedTree = {'tree':tree}
+	with open('olin.json','w') as caliFile:
+		json.dump(wrappedTree, caliFile)
+	workDir = tempfile.mkdtemp()
+	print "Currently working in: ", workDir
+	calibrate.omfCalibrate(workDir, './olin.json', './OlinBeckenhamScada.tsv')
+
 if __name__ == '__main__':
-	convertTests()
+	# convertTests()
 	# alberichFix()
+	runCalibration()
