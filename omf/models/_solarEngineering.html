@@ -322,6 +322,91 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
+		<p class="reportTitle postRun">Cap Bank Activations and Regulator tap changes <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="newRegulatorReport" class="tightContent postRun">
+			<script type="text/javascript">
+				var reg1ATSeries = {
+					"pointWidth": 40, 
+					"color":"RoyalBlue",
+					"data":[1,2,3,-2,5,6,7,2.5,-5],
+					"type":"line",
+					"name":"Reg1ATap",
+				}
+				var reg1BTSeries = {
+					"pointWidth": 40,
+					"color":"IndianRed",
+					"data":[-5,7.5,-12.5,5,10,-2,-12.5,0,3],
+					"type":"line",
+					"name":"Reg1BTap"
+				}
+				//tDGSeries["data"].push(tDG)
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "newRegulatorReport"
+				localHighChart["chart"]["inverted"] = false
+				localHighChart["chart"]["height"] = 250
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["series"] = [reg1ATSeries,reg1BTSeries]
+				localHighChart["xAxis"] = {
+					"tickColor":"gray",
+					"lineColor":"gray",
+					}
+				localHighChart["yAxis"] = {
+					"title":{
+						"style":{
+							"color":"gray"
+						}
+					}
+				}
+				localHighChart["plotOptions"] = {
+					//"bar":{"stacking":"normal", "shadow":false}, 
+				}
+				
+				new Highcharts.Chart(localHighChart);
+			</script>
+		</div>	
+		<div id="newCapbankReport" class="tightContent postRun">
+			<script type="text/javascript">
+				var cap1BSeries = {
+					"pointWidth": 40,
+					"color":"IndianRed",
+					"data":[0,1,1,1,0,0,1,1,1,1],
+					"type":"column",
+					"name":"Cap1B"
+				}
+				var cap1ASeries = {
+					"pointWidth": 40, 
+					"color":"RoyalBlue",
+					"data":[0,0,0,1,1,0,0,1,1,0],
+					"type":"column",
+					"name":"Cap1A",
+				}
+				//tDGSeries["data"].push(tDG)
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "newCapbankReport"
+				localHighChart["chart"]["inverted"] = false
+				localHighChart["chart"]["height"] = 250
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["series"] = [cap1ASeries,cap1BSeries]
+				localHighChart["xAxis"] = {
+					"min":1,
+					"tickColor":"gray",
+					"lineColor":"gray",
+					}
+				localHighChart["yAxis"] = {
+					"tickInterval":2,
+					"title":{
+						"style":{
+							"color":"gray"
+						}
+					}
+				}
+				localHighChart["plotOptions"] = {
+					"column":{"stacking":"normal", "shadow":false}, 
+				}
+				
+				new Highcharts.Chart(localHighChart);
+			</script>
+		</div>
 		<p class="reportTitle postRun">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="triplexMeterVoltageReport" class="tightContent postRun">
 			<script type="text/javascript">

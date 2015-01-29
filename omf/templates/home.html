@@ -172,6 +172,30 @@
 				</table>
 			</form>
 		</div>
+		<div class='content'>
+			<form action='/cymeImport/' enctype='multipart/form-data' method='post'>
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+				<p style='font-weight:bold;float:left'>Cyme Feeder Import</p>
+				<table class='importOptions'>
+					<tr>
+						<td>Feeder Name</td>
+						<td><input type='text' name='feederName'/></td>
+					</tr>
+					<tr>
+						<td>Feeder Network File (.mdb)</td>
+						<td><input type='file' name='stdFile' accept = '.mdb'/></td>
+					</tr>
+					<tr>
+						<td>Feeder Equipment File (.mdb)</td>
+						<td><input type='file' name='seqFile' accept = '.mdb'/></td>
+					</tr>					
+					<tr>
+						<td></td>
+						<td><input type='submit' value='Begin Import'/></td>
+					</tr>
+				</table>
+			</form>
+		</div>		
 	</div>
 <script>
 	if (window.location.hash=='#feeders') {gebi('feedersTab').click()}
