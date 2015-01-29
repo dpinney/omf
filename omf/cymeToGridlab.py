@@ -3,7 +3,7 @@ Created on Nov 19, 2013
 
 @author: fish334
 
-PREREQS!!!!!! sudo apt-get install MDBTools libmdbodvc1
+PREREQS!!!!!! sudo apt-get install mdbtools libmdbodbc1
 
 This script converts a CYME feeder model database to an OMF feeder tree dictionary object. The out put is similar to that produced by milToGridlab.py
 
