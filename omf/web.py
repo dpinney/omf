@@ -6,6 +6,7 @@ from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses
 import models, feeder, milToGridlab
+import cymeToGridlab
 
 app = Flask("web")
 URL = "http://www.omf.coop"
@@ -386,6 +387,34 @@ def gridlabdImport():
 	with open("data/Feeder/" + User.cu() + "/" + feederName + ".json", "w") as outFile:
 		json.dump(newFeeder, outFile, indent=4)
 	return redirect("/#feeders")
+
+@app.route("/cymeImport/", methods=["POST"])
+@flask_login.login_required
+def cymeImport():
+	''' API for importing a cyme feeder. '''
+	feederName = str(request.form.get("feederName",""))
+	stdString, seqString = map(lambda x: request.files[x], ["stdFile", "seqFile"])
+	if not os.path.isdir("data/Conversion/" + User.cu()):
+		os.makedirs("data/Conversion/" + User.cu())
+	with open("data/Conversion/" + User.cu() + "/" + feederName + ".json", "w+") as conFile:
+		conFile.write("WORKING")
+	importProc = Process(target=cymeImportBackground, args=[User.cu(), feederName, stdString.filename, seqString.filename])
+	importProc.start()
+	return redirect("/#feeders")
+
+def cymeImportBackground(owner, feederName, stdString, seqString):
+	''' Function to run in the background for Milsoft import. '''
+	newFeeder = dict(**feeder.newFeederWireframe)
+	[newFeeder["tree"], xScale, yScale] = cymeToGridlab.convertCymeModel(stdString, seqString)
+	newFeeder["layoutVars"]["xScale"] = xScale
+	newFeeder["layoutVars"]["yScale"] = yScale
+	with open("./schedules.glm","r") as schedFile:
+		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
+	with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
+		json.dump(newFeeder, outFile, indent=4)
+	os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
+
+
 
 @app.route("/feederData/<owner>/<feederName>/") 
 @app.route("/feederData/<owner>/<feederName>/<modelFeeder>")

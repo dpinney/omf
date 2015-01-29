@@ -21,18 +21,28 @@ conductors is the full path to a .csv file containing conductor information for 
 Note that db_network and db_equipment can be the same file is both network and equipment databases were exported to one .mdb file from CYME.
 '''
 import pyodbc
-import csv
-import math
+import feeder, csv, random, math, copy
 import warnings
-import copy
-import random
+from StringIO import StringIO
+import sys, os, json, traceback, shutil
+from solvers import gridlabd
+from matplotlib import pyplot as plt
+
 
 m2ft = 1.0/0.3048             # Conversion factor for meters to feet
 
 def _openDatabase(database_file):
     '''Function that creates a connection to a .mdb database file'''
-    connect_string = 'DRIVER={MDBTools};DBQ=' + database_file + ';'
-    #print(connect_string)
+    if sys.platform == 'win32' or sys.platform == 'cygwin':
+        #Windows Driver: {Microsoft Access Driver (*.mdb)}        
+        connect_string = 'DRIVER={Microsoft Access Driver (*.mdb)};DBQ=' + database_file + ';'  
+    elif sys.platform == 'darwin':
+        pass
+    elif sys.platform == 'linux2':
+        #Linux Driver: {MDBTools}           
+        connect_string = 'DRIVER={MDBTools};DBQ=' + database_file + ';'    
+    print(connect_string)
+    print "\n"
     database_connection = pyodbc.connect(connect_string)
     database = database_connection.cursor()
     return database
@@ -121,7 +131,12 @@ def _readCymeSource(networkDatabase,feederId):
     feeder_db = networkDatabase.execute("SELECT NodeId, NetworkId, EquipmentId, DesiredVoltage FROM CYMSOURCE").fetchall()
     if feeder_db == None:
         raise RuntimeError("No source node was found in CYMSOURCE: {:s}.\n".format(feederId))
+    else: 
+        print "FEEDER_DB", feeder_db         
+    '''mj debug'''
     if feederId == None:
+        '''mj debug'''
+        print "NO FEEDER ID\n" 
         if len(feeder_db) >= 1:
             if len(feeder_db) == 1:
                 for row in feeder_db:
@@ -132,9 +147,12 @@ def _readCymeSource(networkDatabase,feederId):
             else:
                 raise RuntimeError("The was no feeder id given and the network database contians more than one feeder. Please specify a feeder id to extract.")
     else:
+        '''mj debug'''
+        print "FEEDER ID", feederId 
         feederIds = []
         for row in feeder_db:
             feederIds.append(row.NetworkId)
+        print "FEEDER IDS READ", feederIds    
         if feederId not in feederIds:
             raise RuntimeError("The feeder id provided is not in the network database. Please specify a valid feeder id to extract.")
         for row in feeder_db:
@@ -178,6 +196,9 @@ def _readCymeNode(networkDatabase, feederId):
                 cymnode[row.NodeId]['name'] = row.NodeId
                 cymnode[row.NodeId]['latitude'] = str(x_scale * float(row.X) + x_b)
                 cymnode[row.NodeId]['longitude'] = str(800 -(y_scale * float(row.Y) + y_b))
+    '''print "CYMNODE", cymnode
+    print "X_SCALE", x_scale
+    print "Y_SCALE", y_scale'''        
     return cymnode, x_scale, y_scale
     
 def _readCymeOverheadByPhase(networkDatabase, feederId):
@@ -739,7 +760,7 @@ def _readEqOverheadLineUnbalanced(networkDatabase, feederId):
                                                                             'z31' : None,
                                                                             'z32' : None,
                                                                             'z33' : None}
-    ug_line_db = networkDatabase.execute("SELECT EquipmentId, SelfResistanceA, SelfResistanceB, SelfResistanceC, SelfReactanceA, SelfReactanceB, SelfReactanceC, MutualResistanceAB, MutualResistanceBC, MutualResistanceCA, MutualReactanceAB, MutualReactanceBC, MutualReactanceCA  FROM CYMEQOVERHEADLINEUNBALANCED WHERE NetworkId = '{:s}'".format(feederId)).fetchall()
+    ug_line_db = networkDatabase.execute("SELECT EquipmentId, SelfResistanceA, SelfResistanceB, SelfResistanceC, SelfReactanceA, SelfReactanceB, SelfReactanceC, MutualResistanceAB, MutualResistanceBC, MutualResistanceCA, MutualReactanceAB, MutualReactanceBC, MutualReactanceCA FROM CYMEQOVERHEADLINEUNBALANCED WHERE EquipmentId = '{:s}'".format("LINE606")).fetchall()
     if len(ug_line_db) == 0:
         warnings.warn("No underground_line configuration objects were found in CYMEQOVERHEADLINEUNBALANCED for feeder_id: {:s}.".format(feederId), RuntimeWarning)
     else:
@@ -945,7 +966,15 @@ def _find_SPCT_rating(load_str):
                 past_rating = rating
         return str(past_rating)
     
-def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=None):
+def convertCymeModel(network_db, equipment_db):
+
+    print 'Beginning MDB to GLM conversion.'
+
+    network_db = "./uploads/" + network_db
+    equipment_db = "./uploads/" + equipment_db    
+    conductor_data_csv = None
+    feeder_id="650"
+    dbflag = 0 
     if 'Duke' in network_db:
         dbflag = 0
     elif 'Paso' in network_db:
@@ -970,6 +999,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     # Open the network database file
     net_db = _openDatabase(network_db)
     # -1-CYME CYMSOURCE *********************************************************************************************************************************************************************
+    #print "net_db is\n"
+    #print net_db
     cymsource, feeder_id, swingBus = _readCymeSource(net_db, feeder_id)
     # -2-CYME CYMNODE *********************************************************************************************************************************************************************
     cymnode, x_scale, y_scale = _readCymeNode(net_db, feeder_id)
@@ -1110,6 +1141,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     # -15-CYME CYMTHREEWINDINGTRANSFORMER******************************************************************************************************************************************************************************************
     cym3wxfmr = _readCymeThreeWindingTransformer(net_db, feeder_id)
     net_db.close()
+    print("Finished reading network")
+
     # Open the equipment database file
     eqp_db = _openDatabase(equipment_db)
     # -16-CYME CYMEQCONDUCTOR**********************************************************************************************************************************************************************
@@ -1130,13 +1163,15 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     # -21-CYME CYMEQAUTOTRANSFORMER**********************************************************************************************************************************************************************
     cymeqautoxfmr = _readEqAutoXfmr(eqp_db, feeder_id)
     # FINISHED READING FROM THE DATABASES*****************************************************************************************************************************************************
+    print("Finished reading equipment")    
     print('Finished reading from databases')
     eqp_db.close()
     
     # Check number of sources
     meters = {}
     if len(cymsource) > 1:
-        raise RuntimeError("There is more than one swing bus for feeder_id {:s}.\n".format(feeder_id))
+        #raise RuntimeError("There is more than one swing bus for feeder_id {:s}.\n".format(feeder_id))
+        print"There is more than one swing bus for feeder_id ", feeder_id, "\n"      
     for x in cymsource.keys():
         meters[x] = { 'object' : 'meter',
                          'name' : '{:s}'.format(cymsource[x]['name']),
@@ -1168,7 +1203,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
             islandNodes.append(node)
     for node in islandNodes:
         if node != swingBus:
-            raise RuntimeError("This feeder is islanded.\n")
+            #raise RuntimeError("This feeder is islanded.\n")
+            print "Feeder islanded\n"            
     # Pass from, to, and phase information from cymsection to cymsectiondevice
     nodes = {}
     for device in cymsectiondevice.keys():
@@ -1221,7 +1257,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                                                 'resistance' : '{:0.6f}'.format(cymeqconductor[olc]['resistance']),
                                                 'geometric_mean_radius' : '{:0.6f}'.format(cymeqconductor[olc]['geometric_mean_radius'])}
         else:
-            raise RuntimeError("There is no conductor spec for {:s} in the equipment database provided.\n".format(olc))
+            #raise RuntimeError("There is no conductor spec for {:s} in the equipment database provided.\n".format(olc))
+            print "There is no conductor spec for ", olc, " in the equipment database provided.\n"              
     # Create overhead line spacing dictionaries
     ohl_spcs = {}
     for ols in uniqueOhSpacing:
@@ -1236,7 +1273,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                                                 'distance_BN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_BN']),
                                                 'distance_CN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_CN'])}
         else:
-            raise RuntimeError("There is no line spacing spec for {:s} in the equipment database provided.\n".format(ols))
+            #raise RuntimeError("There is no line spacing spec for {:s} in the equipment database provided.\n".format(ols))
+            print "There is no line spacing spec for ", ols, "in the equipment database provided.\n"             
     # Create overhead line configuration dictionaries
     ohl_cfgs = {}
     ohl_neutral = []
@@ -1252,14 +1290,16 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
             if olcfg not in ohl_cfgs.keys():
                 ohl_cfgs[olcfg] = copy.deepcopy(cymeqoverheadlineunbalanced[olcfg])
         else:
-            raise RuntimeError("There is no overhead line configuration for {:s} in the equipment database provided.\n".format(olcfg))
+            #raise RuntimeError("There is no overhead line configuration for {:s} in the equipment database provided.\n".format(olcfg))
+            print "There is no overhead line configuration for", olcfg, " in the equipment database provided."
             
     # Create overhead line dictionaries
     ohls = {}
     for ohl in cymsectiondevice.keys():
         if cymsectiondevice[ohl]['device_type'] == 3:
             if ohl not in cymoverheadbyphase.keys():
-                raise RuntimeError("There is no line spec for {:s} in the network database provided.\n".format(ohl))
+                #raise RuntimeError("There is no line spec for {:s} in the network database provided.\n".format(ohl))
+                print "There is no line spec for ", oh1, " in the network database provided.\n"                  
             elif ohl not in ohls.keys():
                 if ohl not in parallelLinks:
                     ohls[ohl] = {'object' : 'overhead_line',
@@ -1292,7 +1332,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                                                                     'longitude' : str((float(cymsectiondevice[ohl]['fromLongitude']) + float(cymsectiondevice[ohl]['toLongitude']))/2.0)}
         elif cymsectiondevice[ohl]['device_type'] == 23:
             if ohl not in cymUnbalancedOverheadLine.keys():
-                raise RuntimeError("There is no line spec for {:s} in the network database provided.\n".format(ohl))
+                #raise RuntimeError("There is no line spec for {:s} in the network database provided.\n".format(ohl))
+                print "There is no line spec for ", oh1, " in the network database provided.\n"  
             elif ohl not in ohls.keys():
                 if ohl not in parallelLinks:
                     ohls[ohl] = {'object' : 'overhead_line',
@@ -1347,7 +1388,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                                                             'distance_AC' : cymcsvundergroundcable[ulc]['distance_AC'],
                                                             'distance_BC' : cymcsvundergroundcable[ulc]['distance_BC']}
         else:
-            raise RuntimeError("There is no configuration spec for {:s} in the underground  csv file provided.\n".format(ulc))
+            #raise RuntimeError("There is no configuration spec for {:s} in the underground  csv file provided.\n".format(ulc))
+            print "Runtimerror: No configuratino spec for {:s} in the underground csv file provided.", ulc
     # Creat Underground line configuration, and link objects.
     ugl_cfgs = {}
     ugls = {}
@@ -1355,7 +1397,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
         if cymsectiondevice[ugl]['device_type'] == 1:
             ph = cymsectiondevice[ugl]['phases'].replace('N', '')
             if ugl not in cymundergroundline.keys():
-                raise RuntimeError("There is no line spec for {:s} in the network database provided.\n".format(ugl))
+                #raise RuntimeError("There is no line spec for {:s} in the network database provided.\n".format(ugl))
+                print "There is no line spec for ", ug1, " in the network database provided.\n"  
             else:
                 phs = 0
                 if 'A' in ph:
@@ -1420,7 +1463,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     for swObj in cymsectiondevice.keys():
         if cymsectiondevice[swObj]['device_type'] == 13:
             if swObj not in cymswitch.keys():
-                raise RuntimeError("There is no switch spec for {:s} in the network database provided.\n".format(swObj))
+                #raise RuntimeError("There is no switch spec for {:s} in the network database provided.\n".format(swObj))
+                print "There is no switch spec for  ", swObj, " in the network database provided.\n"  
             elif swObj not in swObjs.keys():
                 swObjs[swObj] = {'object' : 'switch',
                                                 'name' : swObj,
@@ -1439,7 +1483,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     for rcl in cymsectiondevice.keys():
         if cymsectiondevice[rcl]['device_type'] == 10:
             if rcl not in cymrecloser.keys():
-                raise RuntimeError("There is no recloster spec for {:s} in the network database provided.\n".format(rcl))
+                #raise RuntimeError("There is no recloster spec for {:s} in the network database provided.\n".format(rcl))
+                print "There is no recloster spec for ", rc1, " in the network database provided.\n"  
             elif rcl not in rcls.keys():
                 rcls[rcl] = {'object' : 'recloser',
                                         'name' : rcl,
@@ -1458,7 +1503,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     for sxnlr in cymsectiondevice.keys():
         if cymsectiondevice[sxnlr]['device_type'] == 12:
             if sxnlr not in cymsectionalizer.keys():
-                raise RuntimeError("There is no sectionalizer spec for {:s} in the network database provided.\n".format(sxnlr))
+                #raise RuntimeError("There is no sectionalizer spec for {:s} in the network database provided.\n".format(sxnlr))
+                print "There is no sectionalizer spec for ", sxnlr, " in the network database provided.\n"  
             elif sxnlr not in sxnlrs.keys():
                 sxnlrs[sxnlr] = {'object' : 'sectionalizer',
                                         'name' : sxnlr,
@@ -1477,7 +1523,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     for fuse in cymsectiondevice.keys():
         if cymsectiondevice[fuse]['device_type'] == 14:
             if fuse not in cymfuse.keys():
-                raise RuntimeError("There is no fuse spec for {:s} in the network database provided.\n".format(fuse))
+                #raise RuntimeError("There is no fuse spec for {:s} in the network database provided.\n".format(fuse))
+                print "There is no fuse spec for ", fuse, " in the network database provided.\n"                
             elif fuse not in fuses.keys():
                 fuses[fuse] = {'object' : 'fuse',
                                         'name' : fuse,
@@ -1498,7 +1545,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     for cap in cymsectiondevice.keys():
         if cymsectiondevice[cap]['device_type'] == 17:
             if cap not in cymshuntcapacitor.keys():
-                raise RuntimeError("There is no capacitor spec for {:s} in the network database provided.\n".format(cap))
+                #raise RuntimeError("There is no capacitor spec for {:s} in the network database provided.\n".format(cap))
+                print "There is no capacitor spec for ", cap, " in the network database provided.\n"                
             elif cap not in caps.keys():
                 caps[cap] = {'object' : 'capacitor',
                                         'name' : cap,
@@ -1528,7 +1576,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     for load in cymsectiondevice.keys():
         if cymsectiondevice[load]['device_type'] == 20:
             if load not in cymcustomerload.keys():
-                raise RuntimeError("There is no load spec for {:s} in the network database provided.\n".format(load))
+                #raise RuntimeError("There is no load spec for {:s} in the network database provided.\n".format(load))
+                print "There is no load spec for ", load, " in the network database provided.\n"
             elif load not in loads.keys() and cymcustomerload[load]['load_class'] == 'commercial':
                 loads[load] = {'object' : 'load',
                                         'name' : load,
@@ -1578,7 +1627,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     for reg in cymsectiondevice.keys():
         if cymsectiondevice[reg]['device_type'] == 4:
             if reg not in cymregulator.keys():
-                raise RuntimeError("There is no regulator spec for {:s} in the network database provided.\n".format(reg))
+                #raise RuntimeError("There is no regulator spec for {:s} in the network database provided.\n".format(reg))
+                print "There is no regulator spec for ", reg, " in the network database provided.\n"                
             else:
                 regEq = cymregulator[reg]['equipment_name']
                 if regEq == reg:
@@ -1620,7 +1670,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
     for  xfmr in cymsectiondevice.keys():
         if cymsectiondevice[xfmr]['device_type'] == 47:
             if xfmr not in cymxfmr.keys():
-                raise RuntimeError("There is no xfmr spec for {:s} in the network database provided.\n".format(xfmr))
+                #raise RuntimeError("There is no xfmr spec for {:s} in the network database provided.\n".format(xfmr))
+                print "There is no xmfr spec for ", xmfr, " in the network database provided.\n"                
             else:
                 xfmrEq = cymxfmr[xfmr]['equipment_name']
                 if xfmrEq == xfmr:
@@ -1636,7 +1687,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                 if 'C' in ph:
                     phNum += 1.0
                 if xfmrEq not in cymeqautoxfmr.keys():
-                    raise RuntimeError("There is no xfmr equipment spec for {:s} in the equipment database provided.\n".format(xfmrEq))
+                    #raise RuntimeError("There is no xfmr equipment spec for {:s} in the equipment database provided.\n".format(xfmrEq))
+                    print "There is no xmfr spec for ", xmfrEq, " in the network database provided.\n"                    
                 else:
                     if xfmrEq not in xfmr_cfgs.keys():
                         xfmr_cfgs[xfmrEq] = {'object' : 'transformer_configuration',
@@ -1658,7 +1710,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                                             'configuration' : xfmrEq + suffix}
         elif cymsectiondevice[xfmr]['device_type'] == 48:
             if xfmr not in cym3wxfmr.keys():
-                raise RuntimeError("There is no xfmr spec for {:s} in the network database provided.\n".format(xfmr))
+                #raise RuntimeError("There is no xfmr spec for {:s} in the network database provided.\n".format(xfmr))
+                print "There is no xfmr spec for ", xfmr, " in the network database provided.\n"
             else:
                 xfmrEq = cym3wxfmr[xfmr]['equipment_name']
                 if xfmrEq == xfmr:
@@ -1674,7 +1727,8 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                 if 'C' in ph:
                     phNum += 1.0
                 if xfmrEq not in cymeq3wautoxfmr.keys():
-                    raise RuntimeError("There is no xfmr equipment spec for {:s} in the equipment database provided.\n".format(xfmrEq))
+                    #raise RuntimeError("There is no xfmr equipment spec for {:s} in the equipment database provided.\n".format(xfmrEq))
+                    print "There is no xfmr spec for ", xfmrEq, " in the network database provided.\n"                    
                 else:
                     if xfmrEq not in xfmr_cfgs.keys():
                         xfmr_cfgs[xfmrEq] = {'object' : 'transformer_configuration',
@@ -1866,10 +1920,59 @@ def convertCymeModel(network_db, equipment_db, feeder_id, conductor_data_csv=Non
                 
     return glmTree, x_scale, y_scale
     
-def _tests():
-    import os
+def _tests(keepFiles=True):
+    import os, json, traceback, shutil
+    from solvers import gridlabd
+    from matplotlib import pyplot as plt
     import feeder
-    db_network = os.path.abspath('./uploads/PasoRobles1108.mdb')
+    exceptionCount = 0       
+    try:
+        #db_network = os.path.abspath('./uploads/IEEE13.mdb')
+        #db_equipment = os.path.abspath('./uploads/IEEE13.mdb')
+        db_network = "IEEE13.mdb"
+        db_equipment = "IEEE13.mdb"
+        id_feeder = '650'
+        conductors = os.path.abspath('./uploads/conductor_data.csv')
+        #cyme_base, x, y = convertCymeModel(db_network, db_equipment, id_feeder, conductors)
+        cyme_base, x, y = convertCymeModel(db_network, db_equipment)    
+        glmString = feeder.sortedWrite(cyme_base)
+        gfile = open("./uploads/IEEE13.glm", 'w')
+        gfile.write(glmString)
+        gfile.close()
+        print 'WROTE GLM FOR'
+        outPrefix = './scratch/cymeToGridlabTests/'          
+        try:
+            os.mkdir(outPrefix)
+        except:
+            pass # Directory already there.     
+        '''Attempt to graph'''      
+        try:
+            # Draw the GLM.
+            print "trying to graph"
+            myGraph = feeder.treeToNxGraph(cyme_base)
+            feeder.latLonNxGraph(myGraph, neatoLayout=False)
+            plt.savefig(outPrefix + "IEEE13.png")
+            print 'DREW GLM OF'
+        except:
+            exceptionCount += 1
+            print 'FAILED DRAWING'
+        try:
+            # Run powerflow on the GLM.
+            output = gridlabd.runInFilesystem(glmString, keepFiles=False)
+            with open(outPrefix + "IEEE.JSON",'w') as outFile:
+                json.dump(output, outFile, indent=4)
+            print 'RAN GRIDLAB ON\n'                 
+        except:
+            exceptionCount += 1
+            print 'POWERFLOW FAILED'
+    except:
+        print 'FAILED CONVERTING'
+        exceptionCount += 1
+        traceback.print_exc()
+    if not keepFiles:
+        shutil.rmtree(outPrefix)
+    return exceptionCount    
+    '''db_network = os.path.abspath('./uploads/PasoRobles1108.mdb')
     db_equipment = os.path.abspath('./uploads/PasoRobles1108.mdb')
     id_feeder = '182611108'
     conductors = os.path.abspath('./uploads/conductor_data.csv')
@@ -1877,6 +1980,6 @@ def _tests():
     glmString = feeder.sortedWrite(cyme_base)
     gfile = open("./uploads/PR1108Conversion.glm", 'w')
     gfile.write(glmString)
-    gfile.close()
+    gfile.close()'''
 if __name__ == '__main__':
     _tests()
