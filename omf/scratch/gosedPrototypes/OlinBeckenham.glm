@@ -5690,7 +5690,7 @@ object regulator_configuration {
 	connect_type WYE_WYE;
 	regulation 0.1;
 	CT_phase A;
-	lower_taps 0.0;
+	lower_taps 4.0;
 	tap_pos_A 1;
 	control_level INDIVIDUAL;
 	PT_phase A;
@@ -45948,4 +45948,3 @@ object transformer {
 	to node12097220778T12097220831_C;
 	configuration T12159015903_C-CONFIG;
 };
-
