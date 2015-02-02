@@ -127,17 +127,24 @@ def nameToIndexMap(tree):
 		index[val.get('name','')] = key
 	return index
 
-def runCalibration(fPrefix):
+def makeCalibrationJsons(fPrefix):
 	tree = feeder.parse(fPrefix+'Debugged.glm')
 	wrappedTree = {'tree':tree, 'attachments':{}}
 	with open(fPrefix+'ForCalibration.json','w') as caliFile:
 		json.dump(wrappedTree, caliFile, indent=4)
-	workDir = tempfile.mkdtemp()
-	print "Currently working in: ", workDir
-	calibrate.omfCalibrate(workDir, fPrefix+'ForCalibration.json', fPrefix+'Scada.tsv')
+
+def runCalibration():
+	for fPrefix in ['OlinBeckenham', 'AutocliAlberich', 'OrvilleTreePond']:
+		foldName = '.\\' + fPrefix + 'CaliFolder'
+		try:
+			shutil.rmtree(foldName)
+		except:
+			pass
+		os.mkdir(foldName)
+		print "Currently working in: ", foldName
+		calibrate.omfCalibrate(foldName, fPrefix+'ForCalibration.json', fPrefix+'Scada.tsv')
 
 if __name__ == '__main__':
 	# convertTests()
 	# alberichFix()
-	for name in ['OlinBeckenham', 'AutocliAlberich', 'OrvilleTreePond']:
-		runCalibration(name)
+	runCalibration()
