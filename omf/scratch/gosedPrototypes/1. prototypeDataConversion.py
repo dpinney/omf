@@ -134,7 +134,7 @@ def makeCalibrationJsons(fPrefix):
 		json.dump(wrappedTree, caliFile, indent=4)
 
 def runCalibration():
-	for fPrefix in ['OlinBeckenham', 'AutocliAlberich', 'OrvilleTreePond']:
+	for fPrefix in ['OrvilleTreePond']:#, 'OlinBeckenham', 'AutocliAlberich']:
 		foldName = '.\\' + fPrefix + 'CaliFolder'
 		try:
 			shutil.rmtree(foldName)
