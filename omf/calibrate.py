@@ -79,6 +79,7 @@ def omfCalibrate(workDir, feederPath, scadaPath):
 	tree[maxKey+2]["file"] = "subScadaCalibrated.player"
 	tree[maxKey + 3]["file"] = "caliSubCheck.csv"
 	secondOutput = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=workDir)
+	plt.figure()
 	plt.plot(outAppPowerKw[1:HOURS], label="initialGuess")
 	plt.plot(scadaSubPower[1:HOURS], label="scadaSubPower")
 	secondAppKw = [(x[0]**2 + x[1]**2)**0.5/1000
