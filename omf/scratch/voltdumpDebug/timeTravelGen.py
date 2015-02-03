@@ -1,12 +1,13 @@
 ''' Working towards a timeTravel chart. '''
-import omf, json, os, math, networkx as nx
+import omf, json, os, math, networkx as nx, gc
 from matplotlib import pyplot as plt
 from omf.solvers.gridlabd import runInFilesystem
+from omf import feeder
 
 def main():
 	''' JSON manipulation, Gridlab running, etc. goes here. '''
 	# Input data.
-	inputDict = {"simLength":24,"simStartDate":"2011-01-01"}
+	inputDict = {'simLength':24,'simStartDate':'2011-01-01', 'simLengthUnits':'hours'}
 	# Import data.
 	feedJson = json.load(open('./ABEC Frank Calibrated.json'))
 	tree = feedJson['tree']
@@ -17,13 +18,14 @@ def main():
 		copyStub['property'] = 'voltage_' + phase
 		copyStub['file'] = phase.lower() + 'VoltDump.csv'
 		tree[omf.feeder.getMaxKey(tree) + 1] = copyStub
+	feeder.adjustTime(tree, inputDict['simLength'], inputDict['simLengthUnits'], inputDict['simStartDate'])
 	# Run gridlab.
-	allOutputData = runInFilesystem(tree, attachments=feedJson['attachments'], keepFiles=True, workDir=".", glmName='ABEC Frank SolverGen.glm')
+	allOutputData = runInFilesystem(tree, attachments=feedJson['attachments'], keepFiles=True, workDir='.', glmName='ABEC Frank SolverGen.glm')
 	try: os.remove('PID.txt')
 	except: pass
 	print 'Gridlab ran correctly', allOutputData.keys()
 	# Make plots.
-	#TODO: figure out what to do about neato being a hog.
+	#TODO: figure out what to do about neato taking like 2 minutes to run.
 	neatoLayout = True
 	# Detect the feeder nominal voltage:
 	for key in tree:
@@ -70,7 +72,12 @@ def main():
 		plt.clim(110,130)
 		plt.colorbar()
 		plt.title(stamp)
-		voltChart.savefig("./pngs/volts" + str(step).zfill(3) + ".png")
+		voltChart.savefig('./pngs/volts' + str(step).zfill(3) + '.png')
+		# Reclaim memory by closing, deleting and garbage collecting the last chart.
+		voltChart.clf()
+		plt.close()
+		del voltChart
+		gc.collect()
 
 def _pythag(x,y):
 	''' For right triangle with sides x and y, return the length of the hypotenuse. '''
