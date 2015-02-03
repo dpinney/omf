@@ -322,20 +322,27 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<p class="reportTitle postRun">Cap Bank Activations and Regulator tap changes <a target="_self" class="toggle">Hide / Show</a></p>
+		<p class="reportTitle postRun">Regulator tap changes <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newRegulatorReport" class="tightContent postRun">
 			<script type="text/javascript">
 				var reg1ATSeries = {
 					"pointWidth": 40, 
 					"color":"RoyalBlue",
-					"data":[1,2,3,-2,5,6,7,2.5,-5],
+					"data":allOutputData.Regulator.RegTapA,
 					"type":"line",
 					"name":"Reg1ATap",
 				}
 				var reg1BTSeries = {
 					"pointWidth": 40,
 					"color":"IndianRed",
-					"data":[-5,7.5,-12.5,5,10,-2,-12.5,0,3],
+					"data":allOutputData.Regulator.RegTapB,
+					"type":"line",
+					"name":"Reg1BTap"
+				}
+				var reg1CTSeries = {
+					"pointWidth": 40,
+					"color":"Grey",
+					"data":allOutputData.Regulator.RegTapC,
 					"type":"line",
 					"name":"Reg1BTap"
 				}
@@ -345,7 +352,7 @@
 				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["height"] = 250
 				localHighChart["chart"]["width"] = 1000
-				localHighChart["series"] = [reg1ATSeries,reg1BTSeries]
+				localHighChart["series"] = [reg1ATSeries,reg1BTSeries,reg1CTSeries]
 				localHighChart["xAxis"] = {
 					"tickColor":"gray",
 					"lineColor":"gray",
@@ -364,21 +371,29 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>	
+		<p class="reportTitle postRun">Cap Bank Activations chart <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newCapbankReport" class="tightContent postRun">
 			<script type="text/javascript">
 				var cap1BSeries = {
 					"pointWidth": 40,
 					"color":"IndianRed",
-					"data":[0,1,1,1,0,0,1,1,1,1],
+					"data":allOutputData.Capacitor.Cap1A,
 					"type":"column",
 					"name":"Cap1B"
 				}
 				var cap1ASeries = {
 					"pointWidth": 40, 
 					"color":"RoyalBlue",
-					"data":[0,0,0,1,1,0,0,1,1,0],
+					"data":allOutputData.Capacitor.Cap1B,
 					"type":"column",
 					"name":"Cap1A",
+				}
+				var cap1CSeries = {
+					"pointWidth": 40, 
+					"color":"Grey",
+					"data":allOutputData.Capacitor.Cap1C,
+					"type":"column",
+					"name":"Cap1C",
 				}
 				//tDGSeries["data"].push(tDG)
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
@@ -386,7 +401,7 @@
 				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["height"] = 250
 				localHighChart["chart"]["width"] = 1000
-				localHighChart["series"] = [cap1ASeries,cap1BSeries]
+				localHighChart["series"] = [cap1ASeries,cap1BSeries,cap1CSeries]
 				localHighChart["xAxis"] = {
 					"min":1,
 					"tickColor":"gray",

@@ -59,11 +59,13 @@ def run(modelDir, inputDict):
 	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
-	# If we are re-running, remove output:
+	# If we are re-running, remove output and old GLD run:
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
+		shutil.rmtree(pJoin(modelDir,"gldContainer"))
 	except:
 		pass
+	# Start background process.
 	backProc = multiprocessing.Process(target = runForeground, args = (modelDir, inputDict,))
 	backProc.start()
 	print "SENT TO BACKGROUND", modelDir
@@ -75,11 +77,12 @@ def runForeground(modelDir, inputDict):
 	print "STARTING TO RUN", modelDir
 	beginTime = datetime.datetime.now()
 	# Get feeder name and data in.
+	os.mkdir(pJoin(modelDir,'gldContainer'))
 	feederDir, feederName = inputDict["feederName"].split("___")
 	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Feeder", feederDir, feederName + ".json"),
 		pJoin(modelDir, "feeder.json"))
 	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
-		pJoin(modelDir, "climate.tmy2"))
+		pJoin(modelDir, "gldContainer", "climate.tmy2"))
 	try:
 		startTime = datetime.datetime.now()
 		feederJson = json.load(open(pJoin(modelDir, "feeder.json")))
@@ -100,7 +103,7 @@ def runForeground(modelDir, inputDict):
 			simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 		rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
-			keepFiles=True, workDir=pJoin(modelDir))
+			keepFiles=True, workDir=pJoin(modelDir,'gldContainer'))
 		cleanOut = {}
 		# Std Err and Std Out
 		cleanOut['stderr'] = rawOut['stderr']
@@ -191,6 +194,24 @@ def runForeground(modelDir, inputDict):
 					cleanOut['Consumption']['Losses'] = oneLoss
 				else:
 					cleanOut['Consumption']['Losses'] = vecSum(oneLoss,cleanOut['Consumption']['Losses'])
+			#below code added for Regulator charts
+			elif key.startswith('Regulator_') and key.endswith('.csv'):
+				cleanOut['Regulator'] ={}
+				cleanOut['Regulator']['RegTapA'] = [0] * int(inputDict["simLength"])
+				cleanOut['Regulator']['RegTapB'] = [0] * int(inputDict["simLength"])
+				cleanOut['Regulator']['RegTapC'] = [0] * int(inputDict["simLength"])
+				cleanOut['Regulator']['RegTapA'] = rawOut[key]['tap_A']
+				cleanOut['Regulator']['RegTapB'] = rawOut[key]['tap_B']
+				cleanOut['Regulator']['RegTapC'] = rawOut[key]['tap_C']
+			#below code added for capacitor	chart 
+			elif key.startswith('Capacitor_') and key.endswith('.csv'):
+				cleanOut['Capacitor'] ={}
+				cleanOut['Capacitor']['Cap1A'] = [0] * int(inputDict["simLength"])
+				cleanOut['Capacitor']['Cap1B'] = [0] * int(inputDict["simLength"])
+				cleanOut['Capacitor']['Cap1C'] = [0] * int(inputDict["simLength"])
+				cleanOut['Capacitor']['Cap1A'] = rawOut[key]['switchA']
+				cleanOut['Capacitor']['Cap1B'] = rawOut[key]['switchB']
+				cleanOut['Capacitor']['Cap1C'] = rawOut[key]['switchC']
 		# Aggregate up the timestamps:
 		if level=='days':
 			cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
@@ -205,7 +226,7 @@ def runForeground(modelDir, inputDict):
 		with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 		# Clean up the PID file.
-		os.remove(pJoin(modelDir, "PID.txt"))
+		os.remove(pJoin(modelDir, "gldContainer", "PID.txt"))
 		print "DONE RUNNING", modelDir
 	except Exception as e:
 		print "MODEL CRASHED", e
