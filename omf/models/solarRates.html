@@ -90,15 +90,15 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wholesale Energy Cost ($/kWh)<span class="classic">Wholesale cost of power, which can be calculated from Form 7 as R.17.m/R.15.m.</span></label>
-				<input type="text" id="wholesaleEnergyCost" name="wholesaleEnergyCost" pattern="^\d+\.?\d*$" value="0.08" required="required"/>
+				<input type="text" id="wholesaleEnergyCost" name="wholesaleEnergyCost" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Form 7.R.13.TOTAL Other Electric Revenue.<span class="classic">Additional revenue from Form 7 Table R.</span></label>
-				<input type="text" id="otherElecRevenue" name="otherElecRevenue" pattern="^\d+\.?\d*$" value="0.08" required="required"/>
+				<input type="text" id="otherElecRevenue" name="otherElecRevenue" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Form 7.L.5.c TOTAL kWh Purchased<span class="classic">Total energy purchased from Form 7 Table R.</span></label>
-				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" pattern="^\d+\.?\d*$" value="0.08" required="required"/>
+				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Form 7 Financial Variables</p>
@@ -419,18 +419,18 @@
 					<text id="costofService" fill="darkgray" x="500" y="300" text-anchor="middle"></text>
 					<script type="text/javascript">
 						gebi("patronageCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.patCapital.toFixed(0))
-						gebi("lossesEnergyLabel").innerHTML = delimitNumbers(allOutputData.Solar.losses.toFixed(0).toString()) +" kWh"
+						gebi("lossesEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.losses, 3).toFixed(0)) +" MWh"
 						gebi("vendorCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.BAU.nonPowerCosts.toFixed(0))
-						gebi("gtEnergyLabel").innerHTML = delimitNumbers(allOutputData.Solar.totalKWhPurchased.toFixed(0)) + " kWh"
+						gebi("gtEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.totalKWhPurchased, 3).toFixed(0)) + " MWh"
 						gebi("gtCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.costPurchasedPower.toFixed(0))
 						gebi("vendorCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.BAU.nonPowerCosts.toFixed(0))
-						gebi("solarConEnergyLabel").innerHTML = delimitNumbers(allOutputData.Solar.solarResSold.toFixed(0)) + " kWh"
+						gebi("solarConEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.solarResSold, 3).toFixed(0)) + " MWh"
 						gebi("solarConCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.solarResRev.toFixed(0))
-						gebi("nonSolarConEnergyLabel").innerHTML = delimitNumbers(allOutputData.Solar.resNonSolarKWhSold.toFixed(0)) + " kWh"
+						gebi("nonSolarConEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.resNonSolarKWhSold, 3).toFixed(0)) + " MWh"
 						gebi("nonSolarConCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.resNonSolarRev.toFixed(0))
-						gebi("commConEnergyLabel").innerHTML = delimitNumbers(allOutputData.BAU.nonResKWhSold.toFixed(0)) + " kWh"
+						gebi("commConEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.BAU.nonResKWhSold, 3).toFixed(0)) + " MWh"
 						gebi("commConCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.nonResRev.toFixed(0))
-						gebi("panelsEnergyLabel").innerHTML = delimitNumbers(allOutputData.Solar.annualSolarGen.toFixed(0)) + " kWh"
+						gebi("panelsEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.annualSolarGen, 3).toFixed(0)) + " MWh"
 						gebi("panelsCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.costSolarGen.toFixed(0))
 						gebi("avgNonSolarBill").innerHTML = "Avg Bill " + delimitNumbers(allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(0)) + " $/Month"
 						gebi("avgSolarBill").innerHTML = "Avg Bill " + delimitNumbers(allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(0)) + " $/Month"
@@ -484,17 +484,16 @@
 					tds[3].innerHTML = delimitNumbers(allOutputData.Solar[tds[3].id.substring(4)].toFixed(0)) }
 			</script>
 		</div>
-		<!-- TODO: Split into two separate sheet -->
-		<!-- Variable Dump Was Here -->			
+		<!-- TODO: Split into two separate sheet -->		
 		<p class="reportTitle postRun">Monthly Data Table</p>
 		<div id="monthlySummaryReport" class="tightContent postRun tableReport">
 			<table id="monthlySummaryTable">
 			</table>
 			<script>
 				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
-				insertMetric("monthlySummaryTable","Generation(Wh)", allOutputData.monthlyGeneration.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","No. Consumer Served", allOutputData.monthlyNoConsumerServedSales.map(function(x){return x[1]}))	
+				insertMetric("monthlySummaryTable","Generation(Wh)", allOutputData.monthlyGeneration.map(function(x){return x[1]}))				
 				insertMetric("monthlySummaryTable","Total Generation(kWh)", allOutputData.totalGeneration.map(function(x){return x[1]}))
-				insertMetric("monthlySummaryTable","No. Consumer Served", allOutputData.monthlyNoConsumerServedSales.map(function(x){return x[1]}))
 				insertMetric("monthlySummaryTable","KWh Sold", allOutputData.monthlyKWhSold.map(function(x){return x[1]}))
 				insertMetric("monthlySummaryTable","Revenue", allOutputData.monthlyRevenue.map(function(x){return x[1]}))
 				insertMetric("monthlySummaryTable","Total KWh Sold", allOutputData.totalKWhSold.map(function(x){return x[1]}))
@@ -517,6 +516,6 @@
 					"tooltip":{"enabled":false,"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
-		</div>		
+		</div>			
 	</div>
 </body>
