@@ -194,6 +194,24 @@ def runForeground(modelDir, inputDict):
 					cleanOut['Consumption']['Losses'] = oneLoss
 				else:
 					cleanOut['Consumption']['Losses'] = vecSum(oneLoss,cleanOut['Consumption']['Losses'])
+			#below code added for Regulator charts
+			elif key.startswith('Regulator_') and key.endswith('.csv'):
+				cleanOut['Regulator'] ={}
+				cleanOut['Regulator']['RegTapA'] = [0] * int(inputDict["simLength"])
+				cleanOut['Regulator']['RegTapB'] = [0] * int(inputDict["simLength"])
+				cleanOut['Regulator']['RegTapC'] = [0] * int(inputDict["simLength"])
+				cleanOut['Regulator']['RegTapA'] = rawOut[key]['tap_A']
+				cleanOut['Regulator']['RegTapB'] = rawOut[key]['tap_B']
+				cleanOut['Regulator']['RegTapC'] = rawOut[key]['tap_C']
+			#below code added for capacitor	chart 
+			elif key.startswith('Capacitor_') and key.endswith('.csv'):
+				cleanOut['Capacitor'] ={}
+				cleanOut['Capacitor']['Cap1A'] = [0] * int(inputDict["simLength"])
+				cleanOut['Capacitor']['Cap1B'] = [0] * int(inputDict["simLength"])
+				cleanOut['Capacitor']['Cap1C'] = [0] * int(inputDict["simLength"])
+				cleanOut['Capacitor']['Cap1A'] = rawOut[key]['switchA']
+				cleanOut['Capacitor']['Cap1B'] = rawOut[key]['switchB']
+				cleanOut['Capacitor']['Cap1C'] = rawOut[key]['switchC']
 		# Aggregate up the timestamps:
 		if level=='days':
 			cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
