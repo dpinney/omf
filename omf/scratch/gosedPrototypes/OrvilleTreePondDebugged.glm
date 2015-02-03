@@ -18,10 +18,31 @@ module powerflow {
 	NR_iteration_limit 50;
 };
 
+// BEGIN SWING NODE SIMPLIFICATION
+
+object node {
+	phases ABCN;
+	name SUPER ARBOR LAKE;
+	bustype SWING;
+	longitude 174.153420871;
+	nominal_voltage 7200.0;
+	latitude 619.114798394;
+}
+
+object underground_line {
+	phases ABC;
+	from SUPER ARBOR LAKE;
+	to ARBOR LAKE;
+	nominal_voltage 7200.0;
+	configuration 1151929-LINECONFIG;
+	name SUPER LINK;
+}
+
+// END SWING NODE SIMPLIFICATION
+
 object node {
 	phases ABCN;
 	name ARBOR LAKE;
-	bustype SWING;
 	longitude 174.153420871;
 	nominal_voltage 7200.0;
 	latitude 619.113798394;

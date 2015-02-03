@@ -1,10 +1,10 @@
 ''' Code to convert all the feeders we have for GOSED.
 And some debug stuff. ''' 
 
-import os, json, traceback, shutil, sys
+import os, json, traceback, shutil, sys, tempfile
 from matplotlib import pyplot as plt
 sys.path.append('../..')
-import feeder, milToGridlab
+import feeder, milToGridlab, calibrate
 from solvers import gridlabd
 
 def convertTests():
@@ -127,6 +127,24 @@ def nameToIndexMap(tree):
 		index[val.get('name','')] = key
 	return index
 
+def makeCalibrationJsons(fPrefix):
+	tree = feeder.parse(fPrefix+'Debugged.glm')
+	wrappedTree = {'tree':tree, 'attachments':{}}
+	with open(fPrefix+'ForCalibration.json','w') as caliFile:
+		json.dump(wrappedTree, caliFile, indent=4)
+
+def runCalibration():
+	for fPrefix in ['OlinBeckenham']:#, 'OrvilleTreePond', 'AutocliAlberich']:
+		foldName = '.\\' + fPrefix + 'CaliFolder'
+		try:
+			shutil.rmtree(foldName)
+		except:
+			pass
+		os.mkdir(foldName)
+		print "Currently working in: ", foldName
+		calibrate.omfCalibrate(foldName, fPrefix+'ForCalibration.json', fPrefix+'Scada.tsv')
+
 if __name__ == '__main__':
-	convertTests()
+	# convertTests()
 	# alberichFix()
+	runCalibration()

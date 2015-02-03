@@ -315,7 +315,7 @@ def _tests():
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName": "public___Olin Barre GH 20Perc Solar",
+		"feederName": "public___Simple Market System",
 		"modelType": "_solarEngineering",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "24",
