@@ -10,24 +10,24 @@
 	<script src="../../static/highcharts.src.js"></script>
 	<!-- Global Funcs Import -->
 	<script type="text/javascript" src="../../static/models.js"></script>
-	<!-- Data  Imports -->
+	<script type="text/javascript">
+		function pad(n, width, z) {
+			z = z || '0'
+			n = n + ''
+			return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n }
+		function update() {
+			sVal = gebi("slider").value
+			gebi("valShow").innerHTML = sVal
+			gebi("timeTravelImage").src = "./pngs/volts" + pad(sVal, 3, 0) + ".png"}
+	</script>
 </head>
 <body>
 	<div id="output">
 		<p class="reportTitle postRun">System Outputs</p>
-		<script type="text/javascript">
-			function pad(n, width, z) {
-				z = z || '0'
-				n = n + ''
-				return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n }
-			function update() {
-				sVal = gebi("slider").value
-				gebi("valShow").innerHTML = sVal
-				gebi("timeTravelImage").src = "./pngs/volts" + pad(sVal, 3, 0) + ".png"}
-		</script>
 		<div id="powerGenerationReport" class="tightContent">
-			<input id="slider" type="range" min="0" max="24" step="1" oninput="update()" onchange="update()"/><p id="valShow" style="display:inline">0</p>
-			<img id="timeTravelImage" src="./pngs/volts000.png">
+			<!-- WARNING! max="24" is hard-coded in this demo! -->
+			<input id="slider" type="range" min="1" max="24" step="1" oninput="update()" onchange="update()" autofocus="True" defaultValue="1"/><p id="valShow" style="display:inline">0</p>
+			<img id="timeTravelImage" src="./pngs/volts001.png">
 		</div>
 	</div>
 </body>

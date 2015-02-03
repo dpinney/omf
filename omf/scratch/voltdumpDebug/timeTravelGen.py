@@ -6,11 +6,11 @@ from omf import feeder
 
 def main():
 	''' JSON manipulation, Gridlab running, etc. goes here. '''
-	# Input data.
-	inputDict = {'simLength':24,'simStartDate':'2011-01-01', 'simLengthUnits':'hours'}
 	# Import data.
 	feedJson = json.load(open('./ABEC Frank Calibrated.json'))
 	tree = feedJson['tree']
+	# Input data, model-style.
+	inputDict = {'simLength':24,'simStartDate':'2011-01-01', 'simLengthUnits':'hours'}
 	# Add recorders.
 	stub = {'object':'group_recorder', 'group':'"class=node"', 'property':'voltage_A', 'interval':3600, 'file':'aVoltDump.csv'}
 	for phase in ['A','B','C']:
