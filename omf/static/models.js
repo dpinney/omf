@@ -68,7 +68,13 @@ function delimitNumbers(nStr) {
  return x1 + x2;
 }
 
-
+function convertunits(nStr, places){
+ nStr += '';
+ var x = nStr.split('.');
+ var x1 = x[0];
+ var xint = parseInt(x1) / (Math.pow(10, places));
+ return xint;
+}
 /*validateForm used to reside here*/
 
 /**
