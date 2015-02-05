@@ -1,3 +1,5 @@
+''' Pull down historical weather data, put it on a SCADA-calibrated feeder. '''
+
 from matplotlib import pyplot as plt
 import sys, json
 sys.path.append('../..')
