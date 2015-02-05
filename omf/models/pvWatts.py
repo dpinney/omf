@@ -48,12 +48,13 @@ def run(modelDir, inputDict):
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict["trackingMode"]))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict["azimuth"]))
 		# Advanced inputs with defaults.
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", float(inputDict.get("tilt_eq_lat",1)))
+		ssc.ssc_data_set_number(dat, "tilt", float(inputDict.get("tilt", 45.0)))
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict["rotlim"]))
 		ssc.ssc_data_set_number(dat, "gamma", -1 * float(inputDict["gamma"]))
 		ssc.ssc_data_set_number(dat, "inv_eff", 0.01 * float(inputDict["inv_eff"]))
 		ssc.ssc_data_set_number(dat, "w_stow", float(inputDict["w_stow"]))
 		# Complicated optional inputs that we could enable later.
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
 		# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
 		# ssc.ssc_data_set_matrix(dat, 'shading_mxh', ...) 		# Month x Hour beam shading factors
 		# ssc.ssc_data_set_matrix(dat, 'shading_azal', ...) 	# Azimuth x altitude beam shading factors
@@ -164,6 +165,8 @@ def _tests():
 		"rotlim":"45.0",
 		"gamma":"0.45",
 		"inv_eff":"92",
+		"tilt_eq_lat":"1",
+		"tilt":"45.0",
 		"w_stow":"0"}
 	modelLoc = pJoin(workDir,"admin","Automated pvWatts Testing")
 	# Blow away old test results if necessary.

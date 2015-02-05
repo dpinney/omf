@@ -95,6 +95,15 @@
 				<label style="text-align:left;cursor:hand"><p class="discloser" onclick="javascript:toggleAdvanced(this)" style="margin-bottom:10px">&#9654; Advanced Options</p></label>
 			</div>
 			<div class="advancedOption shortInput">
+				<label class="tooltip">Tilt = Latitude<span class="classic">If True, then the tilt value will be the same as the Climate City's latitude. If False, you can pick your own value in the next input field (manual tilt).</span></label>
+				<select id="tilt_eq_lat" name="tilt_eq_lat"><option value="1" selected="selected">True</option><option value="0">False</option>
+				</select>
+			</div>
+			<div class="advancedOption shortInput">
+				<label class="tooltip">Manual Tilt (degrees)<span class="classic">Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
+				<input type="text" id="tilt" name="tilt" value="45.0" required="required"/>
+			</div>
+			<div class="advancedOption shortInput">
 				<label class="tooltip">Tracker Rotation Limit (Degrees from Horizontal)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker.</span></label>
 				<input type="text" id="rotlim" name="rotlim" value="45.0"/>
 			</div>
@@ -127,7 +136,7 @@
 		Model cancelled or encountered an error. Please change inputs and re-run.
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun">System Outputs</p>
+		<p class="reportTitle postRun">System Output</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
 			<div id="powerTimeSeries"></div>
 			<div id="energyBalance"></div>
@@ -142,7 +151,7 @@
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
 					"title":{"text":null},
 					"series":powerSeries,
-					"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}},"min":0},
+					"yAxis":{"title":{"text":"Power (W-AC)","style":{"color":"gray"}},"min":0},
 					"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})

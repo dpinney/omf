@@ -66,13 +66,33 @@ def run(modelDir, inputDict):
 	except:
 		pass
 	# Start background process.
-	backProc = multiprocessing.Process(target = runForeground, args = (modelDir, inputDict,))
+	backProc = multiprocessing.Process(target = heavyProcessing, args = (modelDir, inputDict,))
 	backProc.start()
 	print "SENT TO BACKGROUND", modelDir
 	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
 		pPidFile.write(str(backProc.pid))
 
 def runForeground(modelDir, inputDict):
+	''' Run the model in the current process. WARNING: LONG RUN TIME. '''
+	# Check whether model exist or not
+	if not os.path.isdir(modelDir):
+		os.makedirs(modelDir)
+		inputDict["created"] = str(datetime.datetime.now())
+	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
+	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
+		json.dump(inputDict, inputFile, indent = 4)
+	# If we are re-running, remove output and old GLD run:
+	try:
+		os.remove(pJoin(modelDir,"allOutputData.json"))
+		shutil.rmtree(pJoin(modelDir,"gldContainer"))
+	except:
+		pass
+	# Start process.
+	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
+		pPidFile.write('-999')
+	heavyProcessing(modelDir, inputDict)
+
+def heavyProcessing(modelDir, inputDict):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
 	print "STARTING TO RUN", modelDir
 	beginTime = datetime.datetime.now()
@@ -330,7 +350,7 @@ def _tests():
 	# No-input template.
 	renderAndShow(template)
 	# Run the model.
-	run(modelLoc, inData)
+	runForeground(modelLoc, inData)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)
