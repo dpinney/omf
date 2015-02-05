@@ -80,12 +80,11 @@ def _airportCodeToLatLon(airport):
 		latlon_split=latlon_val.split('/') #latlon_split[0] is longitude; latlon_split[1] is latitude
 		lat = float(latlon_split[1])
 		lon = float(latlon_split[0])
-		print (lat,lon)
 	except urllib2.URLError, e:
-		print 'Requested URL generated error code:',e.code
+		print 'Requested URL generated error code:', e.code
 		lat = float(raw_input('Please enter latitude manually:'))
 		lon = float(raw_input('Please enter longitude manually:'))
-	return(lat,lon)			
+	return (lat,lon)			
 
 def _getPeakSolar(airport, workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
 	''' get the peak non-cloudy solar data from a locale.  takes the ten most solar-energetic days and averages
@@ -121,8 +120,8 @@ def _getPeakSolar(airport, workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
 	stationResult = [line[1] for line in stationDist if line[0] == minDist]
 	stationId = stationResult[0] # ID string from the first result
 	# Get specified TMY csv file.
-	tmyURL = 'http://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3/' + stationId + 'TY.csv'
-	tmyResult = urllib.urlretrieve(tmyURL, pJoin(workDir,stationId + 'TY.csv'))
+	tmyURL = 'http://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3/' + stationId + 'TYA.csv'
+	tmyResult = urllib.urlretrieve(tmyURL, pJoin(workDir,stationId + 'TYA.csv'))
 	tmyFile = open(tmyResult[0])
 	tmyReader = csv.reader(tmyFile, delimiter=',')
 	tmyLines = [line for line in tmyReader]
@@ -215,18 +214,18 @@ class Weather:
 		self.Seas = seasonDict[self.Time.month]
 		self.Solar = 0
 		return self
-def _latlonprocess(lat,lon):
-	minlat, lat = modf(lat)
-	minlat = abs(int(minlat*60))
-	lat_string = '$lat_deg='+str(int(lat))+'\n'+'$lat_min='+str(minlat)+'\n'
-	minlon, lon = modf(lon)
-	minlon = abs(int(minlon*60))
-	lon_string = '$long_deg='+str(int(lon))+'\n'+'$long_min='+str(minlon)+'\n'
-	return lat_string, lon_string
 
 def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	lat, lon = _airportCodeToLatLon(airport)
-	lat_string,lon_string=_latlonprocess(lat,lon)
+	def latlonprocess(lat,lon):
+		minlat, lat = modf(lat)
+		minlat = abs(int(minlat*60))
+		lat_string = '$lat_deg='+str(int(lat))+'\n'+'$lat_min='+str(minlat)+'\n'
+		minlon, lon = modf(lon)
+		minlon = abs(int(minlon*60))
+		lon_string = '$long_deg='+str(int(lon))+'\n'+'$long_min='+str(minlon)+'\n'
+		return lat_string, lon_string
+	lat_string,lon_string = latlonprocess(lat,lon)
 	''' Take CSV files in workDir from _downloadWeather and _getPeakSolar, and combine them into a CSV that can be read into GLD's climate object. '''
 	startDate = datetime.strptime(start, "%Y-%m-%d")
 	endDate = datetime.strptime(end, "%Y-%m-%d")
