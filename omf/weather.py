@@ -69,41 +69,23 @@ def _downloadWeather(start, end, airport, workDir):
 		work_day = work_day + timedelta(days = 1) # Advance one day
 
 def _airportCodeToLatLon(airport):
-	''' Airport three letter code -> lat/lon of that location. ''' 
-	'''api_key = 'AIzaSyDR9Iwhp1xbs31c6FpO-5g0bdEXCyN1JL8'
-	service_url = 'https://www.googleapis.com/freebase/v1/mqlread'
-	query = [{'id':None, 'name':None, 'type': '/aviation/airport', 'iata' : airport,
-		'/location/location/geolocation' : [{'latitude' : None, 'longitude':None, 'elevation':None}] }]
-	params = {'query' : json.dumps(query), 'key' : api_key}
-	url = service_url + '?' + urllib.urlencode(params)
-	# query Freebase for specified IATA airport code
-	response = json.loads(urllib.urlopen(url).read())
-	# if zero results, fail
-	if len(response['result']) == 0:'''
-	p=re.compile('([0-9\.\-\/])+')
+	''' Airport three letter code -> lat/lon of that location. '''
 	try:
 		url2 = urllib2.urlopen('http://www.airport-data.com/airport/'+airport+'/#location')
 		soup = BeautifulSoup(url2)
-		latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[2])
+		latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[1])
+		p = re.compile('([0-9\.\-\/])+')
 		latlon_val = p.search(latlon_str)
 		latlon_val = latlon_val.group()
 		latlon_split=latlon_val.split('/') #latlon_split[0] is longitude; latlon_split[1] is latitude
 		lat = float(latlon_split[1])
 		lon = float(latlon_split[0])
+		print (lat,lon)
 	except urllib2.URLError, e:
 		print 'Requested URL generated error code:',e.code
 		lat = float(raw_input('Please enter latitude manually:'))
 		lon = float(raw_input('Please enter longitude manually:'))
 	return(lat,lon)			
-	#print("Failed to return any airport location for", airport)
-	#return None
-	# if more than one result, get first one
-	'''if len(response['result']) > 1:
-		print("Multiple airport results (strange!), using the first result")
-	# get GPS from result
-	lat = response['result'][0]['/location/location/geolocation'][0]['latitude']
-	lon = response['result'][0]['/location/location/geolocation'][0]['longitude']
-	return (lat, lon)'''
 
 def _getPeakSolar(airport, workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
 	''' get the peak non-cloudy solar data from a locale.  takes the ten most solar-energetic days and averages
@@ -798,7 +780,7 @@ def _tests():
 	print "Beginning to test weather.py"
 	workDir = tempfile.mkdtemp()
 	print "IAD lat/lon =", _airportCodeToLatLon("IAD")
-	assert (38.9444, -77.4558)==_airportCodeToLatLon("IAD"), "airportCode lookup failed."
+	assert (38.947444, -77.459944)==_airportCodeToLatLon("IAD"), "airportCode lookup failed."
 	print "Weather downloading to", workDir
 	assert None==_downloadWeather("2010-03-01", "2010-04-01", "PDX", workDir)
 	print "Peak solar extraction in", workDir
