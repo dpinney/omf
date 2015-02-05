@@ -702,78 +702,21 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 						sample.Wind = 0 # clip, since qerp can take values below zero
 					outData.append(sample)
 	# open and write the output file
-	outFile = open(pJoin(workDir,"weather.csv"), "w")
-	# write header
-	outFile.write('#weather file\n');
-	outFile.write(lat_string);
-	outFile.write(lon_string);
-	outFile.write(timezone_offset);
-	outFile.write('temperature,wind_speed,humidity,solar_dir,solar_diff,solar_global\n');
-	outFile.write('#month:day:hour:minute:second\n');
-	# write samples per-line
-	for line in outData:
-		if line.Time.month == 1:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 2:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 3:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 4:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 5:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 6:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 7:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 8:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 9:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 10:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 11:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 12:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))																
-	# clean up and exit
-	outFile.close()
-	return
+	with open(pJoin(workDir,"weather.csv"), "w") as outFile:
+		# write header
+		outFile.write('#weather file\n');
+		outFile.write(lat_string);
+		outFile.write(lon_string);
+		outFile.write(timezone_offset);
+		outFile.write('temperature,wind_speed,humidity,solar_dir,solar_diff,solar_global\n');
+		outFile.write('#month:day:hour:minute:second\n');
+		# write samples per-line
+		for line in outData:
+			if line.Time.month in range(1,13):
+				# write each line
+				outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day,
+					line.Time.hour, line.Time.minute, line.Time.second, line.Temp, line.Wind,
+					line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
 
 def _tests():
 	print "Beginning to test weather.py"
