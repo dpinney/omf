@@ -69,41 +69,22 @@ def _downloadWeather(start, end, airport, workDir):
 		work_day = work_day + timedelta(days = 1) # Advance one day
 
 def _airportCodeToLatLon(airport):
-	''' Airport three letter code -> lat/lon of that location. ''' 
-	'''api_key = 'AIzaSyDR9Iwhp1xbs31c6FpO-5g0bdEXCyN1JL8'
-	service_url = 'https://www.googleapis.com/freebase/v1/mqlread'
-	query = [{'id':None, 'name':None, 'type': '/aviation/airport', 'iata' : airport,
-		'/location/location/geolocation' : [{'latitude' : None, 'longitude':None, 'elevation':None}] }]
-	params = {'query' : json.dumps(query), 'key' : api_key}
-	url = service_url + '?' + urllib.urlencode(params)
-	# query Freebase for specified IATA airport code
-	response = json.loads(urllib.urlopen(url).read())
-	# if zero results, fail
-	if len(response['result']) == 0:'''
-	p=re.compile('([0-9\.\-\/])+')
+	''' Airport three letter code -> lat/lon of that location. '''
 	try:
 		url2 = urllib2.urlopen('http://www.airport-data.com/airport/'+airport+'/#location')
 		soup = BeautifulSoup(url2)
-		latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[2])
+		latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[1])
+		p = re.compile('([0-9\.\-\/])+')
 		latlon_val = p.search(latlon_str)
 		latlon_val = latlon_val.group()
 		latlon_split=latlon_val.split('/') #latlon_split[0] is longitude; latlon_split[1] is latitude
 		lat = float(latlon_split[1])
 		lon = float(latlon_split[0])
 	except urllib2.URLError, e:
-		print 'Requested URL generated error code:',e.code
+		print 'Requested URL generated error code:', e.code
 		lat = float(raw_input('Please enter latitude manually:'))
 		lon = float(raw_input('Please enter longitude manually:'))
-	return(lat,lon)			
-	#print("Failed to return any airport location for", airport)
-	#return None
-	# if more than one result, get first one
-	'''if len(response['result']) > 1:
-		print("Multiple airport results (strange!), using the first result")
-	# get GPS from result
-	lat = response['result'][0]['/location/location/geolocation'][0]['latitude']
-	lon = response['result'][0]['/location/location/geolocation'][0]['longitude']
-	return (lat, lon)'''
+	return (lat,lon)			
 
 def _getPeakSolar(airport, workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
 	''' get the peak non-cloudy solar data from a locale.  takes the ten most solar-energetic days and averages
@@ -139,8 +120,8 @@ def _getPeakSolar(airport, workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0):
 	stationResult = [line[1] for line in stationDist if line[0] == minDist]
 	stationId = stationResult[0] # ID string from the first result
 	# Get specified TMY csv file.
-	tmyURL = 'http://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3/' + stationId + 'TY.csv'
-	tmyResult = urllib.urlretrieve(tmyURL, pJoin(workDir,stationId + 'TY.csv'))
+	tmyURL = 'http://rredc.nrel.gov/solar/old_data/nsrdb/1991-2005/data/tmy3/' + stationId + 'TYA.csv'
+	tmyResult = urllib.urlretrieve(tmyURL, pJoin(workDir,stationId + 'TYA.csv'))
 	tmyFile = open(tmyResult[0])
 	tmyReader = csv.reader(tmyFile, delimiter=',')
 	tmyLines = [line for line in tmyReader]
@@ -233,18 +214,18 @@ class Weather:
 		self.Seas = seasonDict[self.Time.month]
 		self.Solar = 0
 		return self
-def _latlonprocess(lat,lon):
-	minlat, lat = modf(lat)
-	minlat = abs(int(minlat*60))
-	lat_string = '$lat_deg='+str(int(lat))+'\n'+'$lat_min='+str(minlat)+'\n'
-	minlon, lon = modf(lon)
-	minlon = abs(int(minlon*60))
-	lon_string = '$long_deg='+str(int(lon))+'\n'+'$long_min='+str(minlon)+'\n'
-	return lat_string, lon_string
 
 def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	lat, lon = _airportCodeToLatLon(airport)
-	lat_string,lon_string=_latlonprocess(lat,lon)
+	def latlonprocess(lat,lon):
+		minlat, lat = modf(lat)
+		minlat = abs(int(minlat*60))
+		lat_string = '$lat_deg='+str(int(lat))+'\n'+'$lat_min='+str(minlat)+'\n'
+		minlon, lon = modf(lon)
+		minlon = abs(int(minlon*60))
+		lon_string = '$long_deg='+str(int(lon))+'\n'+'$long_min='+str(minlon)+'\n'
+		return lat_string, lon_string
+	lat_string,lon_string = latlonprocess(lat,lon)
 	''' Take CSV files in workDir from _downloadWeather and _getPeakSolar, and combine them into a CSV that can be read into GLD's climate object. '''
 	startDate = datetime.strptime(start, "%Y-%m-%d")
 	endDate = datetime.strptime(end, "%Y-%m-%d")
@@ -721,84 +702,27 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 						sample.Wind = 0 # clip, since qerp can take values below zero
 					outData.append(sample)
 	# open and write the output file
-	outFile = open(pJoin(workDir,"weather.csv"), "w")
-	# write header
-	outFile.write('#weather file\n');
-	outFile.write(lat_string);
-	outFile.write(lon_string);
-	outFile.write(timezone_offset);
-	outFile.write('temperature,wind_speed,humidity,solar_dir,solar_diff,solar_global\n');
-	outFile.write('#month:day:hour:minute:second\n');
-	# write samples per-line
-	for line in outData:
-		if line.Time.month == 1:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 2:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 3:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 4:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 5:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 6:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 7:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 8:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 9:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 10:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 11:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
-	for line in outData:
-		if line.Time.month == 12:
-			# write each line
-			outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day, line.Time.hour, line.Time.minute, line.Time.second,
-																line.Temp, line.Wind, line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))																
-	# clean up and exit
-	outFile.close()
-	return
+	with open(pJoin(workDir,"weather.csv"), "w") as outFile:
+		# write header
+		outFile.write('#weather file\n');
+		outFile.write(lat_string);
+		outFile.write(lon_string);
+		outFile.write(timezone_offset);
+		outFile.write('temperature,wind_speed,humidity,solar_dir,solar_diff,solar_global\n');
+		outFile.write('#month:day:hour:minute:second\n');
+		# write samples per-line
+		for line in outData:
+			if line.Time.month in range(1,13):
+				# write each line
+				outFile.write("{}:{}:{}:{}:{},{},{},{},{},{},{}\n".format(line.Time.month, line.Time.day,
+					line.Time.hour, line.Time.minute, line.Time.second, line.Temp, line.Wind,
+					line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
 
 def _tests():
 	print "Beginning to test weather.py"
 	workDir = tempfile.mkdtemp()
 	print "IAD lat/lon =", _airportCodeToLatLon("IAD")
-	assert (38.9444, -77.4558)==_airportCodeToLatLon("IAD"), "airportCode lookup failed."
+	assert (38.947444, -77.459944)==_airportCodeToLatLon("IAD"), "airportCode lookup failed."
 	print "Weather downloading to", workDir
 	assert None==_downloadWeather("2010-03-01", "2010-04-01", "PDX", workDir)
 	print "Peak solar extraction in", workDir
