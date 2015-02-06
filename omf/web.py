@@ -501,10 +501,12 @@ def delete(objectType, objectName, owner):
 		shutil.rmtree("data/Model/" + owner + "/" + objectName)
 	return redirect("/")
 
-@app.route("/downloadModelData/<owner>/<modelName>/<fileName>")
+@app.route("/downloadModelData/<owner>/<modelName>/<path:fullPath>")
 @flask_login.login_required
-def downloadModelData(owner, modelName, fileName):
-    return send_from_directory("data/Model/"+owner+"/"+modelName, fileName) 
+def downloadModelData(owner, modelName, fullPath):
+	pathPieces = fullPath.split('/')
+	print 'YOFOYFOYFOYF', "/".join(pathPieces[0:-1]), pathPieces[-1]
+	return send_from_directory("data/Model/"+owner+"/"+modelName+"/"+"/".join(pathPieces[0:-1]), pathPieces[-1])
 
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
 @flask_login.login_required

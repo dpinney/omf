@@ -526,9 +526,29 @@
 					new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
+		<p class="reportTitle postRun">System Voltage Map <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="systemVoltageMap" class="tightContent postRun">
+			<!-- WARNING! max="24" is hard-coded in this demo! -->
+			<script>
+				function pad(n, width, z) {
+					z = z || '0'
+					n = n + ''
+					return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n }
+				function updateVoltMap() {
+					sVal = gebi("slider").value
+					gebi("valShow").innerHTML = sVal
+					gebi("timeTravelImage").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/pngs/volts" + pad(sVal, 3, 0) + ".png"
+				}
+			</script>
+			<input id="slider" type="range" min="1" max="24" step="1" oninput="updateVoltMap()" onchange="updateVoltMap()" defaultValue="1"/><p id="valShow" style="display:inline">0</p>
+			<img id="timeTravelImage" src="">
+			<script> 
+				/*Init the volt map.*/
+				updateVoltMap()
+			</script>
+		</div>
 		<p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative">
-			
 			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 			<table id="detailsTable">
 				<tr>
@@ -585,41 +605,11 @@
 				<tr>
 					<td id="GC">
 						<div id="comparisonPieChart" style="min-width: 400px; height: 300px; margin: 0 auto">
-							<script type="text/javascript">
-								pieData = []
-								for (index in studyList){
-									size = parseInt(allOutputData[studyList[index]]["stdout"].split("\n")[3].split(/[ ]+/)[2])
-
-									pieData.push([studyList[index], size])
-								}
-								$(function(){
-									$("#comparisonPieChart").highcharts({
-										credits:{
-											enabled:false
-										},
-										title: {
-											text: ''
-										},
-										series: [{
-											type: "pie",
-											data: pieData
-										}],
-										plotOptions: {
-											pie: {
-												dataLabels: {
-													enabled: false,
-												}
-											}
-										}
-									});
-								});
-							</script>
 						</div>
 					</td>
 				</tr>
 			</table>
 		</div>
-		
 		<p class="reportTitle postRun">Climate <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="climateReport" class="tightContent postRun">
 			<script type="text/javascript">
