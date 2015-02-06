@@ -150,10 +150,6 @@ table#detailsTable th, table#detailsTable td {
 .preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped, div.preRun, div.running, div.postRun, div.runningInline, div.postRunInline, div.stoppedInline, div.stopped {
 	display: none;
 }
-.advancedOption.shortInput {
-	display: none;
-	text-align: left;
-}
 .tooltip {
 	border-bottom: 1px dotted #000000; 
 	color: #000000; 
