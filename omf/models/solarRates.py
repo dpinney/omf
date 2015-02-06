@@ -73,9 +73,9 @@ def run(modelDir, inputDict):
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(startDateTime[0:4] + "-{0:02d}".format(x+1))])
-	#outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
-	#Testing PVWatts Output from 4. GOSED solarRates Spec
-	outData["monthlyGeneration"] = [[0,625000],[1,687500],[2,812500],[3,875000],[4,875000],[5,875000],[6,812500],[7,875000],[8,812500],[9,750000],[10,625000],[11,556250]]	
+	outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
+	#Values used for testing PVWatts Output (from file: 4. GOSED solarRates Spec.xlsx)
+	#outData["monthlyGeneration"] = [[0,625000],[1,687500],[2,812500],[3,875000],[4,875000],[5,875000],[6,812500],[7,875000],[8,812500],[9,750000],[10,625000],[11,556250]]	
 	monthlyNoConsumerServedSales = []
 	monthlyKWhSold = []
 	monthlyRevenue = []
@@ -97,7 +97,6 @@ def run(modelDir, inputDict):
 	outData["monthlyKWhSold"] = sorted(monthlyKWhSold, key=lambda x:months[x[0]])
 	outData["monthlyRevenue"] = sorted(monthlyRevenue, key=lambda x:months[x[0]])
 	outData["totalKWhSold"] = sorted(totalKWhSold, key=lambda x:months[x[0]])
-
 	outData["totalRevenue"] = sorted(totalRevenue, key=lambda x:months[x[0]])
 	outData["lossesBAU"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)]) 
 	outData["lineLossRate"] = outData.get("lossesBAU", 0) / float(inputDict.get("totalKWhPurchased", 0))
