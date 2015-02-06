@@ -32,6 +32,13 @@
 			"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
 			"tooltip":{"valueDecimals":1},
 			"series":[]	}
+		function editFeeder(e) {
+			studyUser = $(e).siblings("select").val().split(/[_]+/)[0]
+			studyName = $(e).siblings("select").val().split(/[_]+/)[1]
+			$(e).attr("href", "/feeder/" + studyUser +"/"+ studyName)
+				.attr("target", "_blank");
+			// window.open("/feeder/" + studyUser + "/" + studyName, "_blank")
+		}
 		$(document).ready(function(){
 			$(".toggle").click(function(){
 					$(this).parent().next().toggle(500)
@@ -56,9 +63,9 @@
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
 			</div>
-			<div class="shortInput">
+			<div class="shortInput" style="max-width:60%">
 				<label>Feeder</label>
-				<select id="feederName" name="feederName"/>
+				<select id="feederName" name="feederName" style="width:90%"/>
 					<option disabled><strong>Personal Feeders</strong></option>
 					{% for feeder in datastoreNames['feeders'] %}
 						<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
@@ -68,10 +75,7 @@
 						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 					{% endfor %}
 				</select>
-			</div>
-			<div class="shortInput">
-				<label>Scada File name</label>
-				<input type="text" id="scadaFile" name="scadaFile" data-validRegex="[\w\s]+"/></td>
+				<a class="edit-feeder postRunInline preRun stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -526,18 +530,52 @@
 					new Highcharts.Chart(localHighChart)
 			</script>
 		</div>
+		<p class="reportTitle postRun">System Voltage Map <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="systemVoltageMap" class="tightContent postRun">
+			<!-- WARNING! max="24" is hard-coded in this demo! -->
+			<script>
+				function pad(n, width, z) {
+					z = z || '0'
+					n = n + ''
+					return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n }
+				function updateVoltMap() {
+					sVal = gebi("slider").value
+					gebi("valShow").innerHTML = sVal
+					gebi("timeTravelImage").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/pngs/volts" + pad(sVal, 3, 0) + ".png"
+				}
+			</script>
+			<input id="slider" type="range" min="1" max="24" step="1" oninput="updateVoltMap()" onchange="updateVoltMap()" defaultValue="1"/><p id="valShow" style="display:inline">0</p>
+			<img id="timeTravelImage" src="">
+			<script> 
+				/*Init the volt map.*/
+				updateVoltMap()
+			</script>
+		</div>
+		<p class="reportTitle postRun">Climate <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="climateReport" class="tightContent postRun">
+			<script type="text/javascript">
+				$("<div/>").appendTo("#climateReport")
+					.attr("id", "climateChartDiv")
+				climateSeriesData = [
+					{"name":"Rain Fall (in/h)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Rain Fall (in/h)"]},
+					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
+					{"name":"Direct Insolation (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Insolation (W/m^2)"]},
+					{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Temperature (F)"]},
+					{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Snow Depth (in)"]}]
+				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
 		<p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative">
-			
+		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
 			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 			<table id="detailsTable">
 				<tr>
 					<th id="SL">Simulation Location</th>
-					<th>Grid Components</th>
+					
 				</tr>
 				<tr>
-					<td rowspan="7" style = "width:100%">
-						<div id="mapHere">
+					<td rowspan="7" style = "width:50%">
+						<div id="mapHere" style="width: 350px">
 							<script type="text/javascript">
 								var width = 500,
 									height = 350;
@@ -584,65 +622,20 @@
 				</tr>
 				<tr>
 					<td id="GC">
-						<div id="comparisonPieChart" style="min-width: 400px; height: 300px; margin: 0 auto">
+						<div id="runtimeStatsReport" style="width: 500px; height: 400px; margin: 0;overflow:scroll;overflow-x: hidden">
 							<script type="text/javascript">
-								pieData = []
-								for (index in studyList){
-									size = parseInt(allOutputData[studyList[index]]["stdout"].split("\n")[3].split(/[ ]+/)[2])
-
-									pieData.push([studyList[index], size])
-								}
-								$(function(){
-									$("#comparisonPieChart").highcharts({
-										credits:{
-											enabled:false
-										},
-										title: {
-											text: ''
-										},
-										series: [{
-											type: "pie",
-											data: pieData
-										}],
-										plotOptions: {
-											pie: {
-												dataLabels: {
-													enabled: false,
-												}
-											}
-										}
-									});
-								});
+								$("<pre/>").appendTo("#runtimeStatsReport")
+									.attr("id", "stdout")
+									.attr("class", "stdoutBlock")
+									.attr("style","font-size:13px;text-align:left")
+								gebi("stdout").innerHTML = allOutputData.stdout
+								
+								// TODO: add stderr if some failed feeders exist.
 							</script>
 						</div>
 					</td>
 				</tr>
 			</table>
-		</div>
-		
-		<p class="reportTitle postRun">Climate <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="climateReport" class="tightContent postRun">
-			<script type="text/javascript">
-				$("<div/>").appendTo("#climateReport")
-					.attr("id", "climateChartDiv")
-				climateSeriesData = [
-					{"name":"Rain Fall (in/h)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Rain Fall (in/h)"]},
-					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
-					{"name":"Direct Insolation (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Insolation (W/m^2)"]},
-					{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Temperature (F)"]},
-					{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Snow Depth (in)"]}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>
-		<p class="reportTitle postRun">Model Runtime Statistics <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="runtimeStatsReport" class="tightContent stdouts postRun" style="height:600px">
-			<script type="text/javascript">
-				$("<pre/>").appendTo("#runtimeStatsReport")
-					.attr("id", "stdout")
-					.attr("class", "stdoutBlock")
-				gebi("stdout").innerHTML = allOutputData.stdout
-				// TODO: add stderr if some failed feeders exist.
-			</script>
 		</div>
 	</div>
 </body>
