@@ -490,7 +490,14 @@
 			<table id="monthlySummaryTable">
 			</table>
 			<script>
-				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
+                //insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))                
+				table = gebi("monthlySummaryTable")
+				newRow = table.insertRow()
+				newRow.insertCell().innerHTML = "Month"
+				for (i=0; i<allOutputData.monthlyGeneration.map(function(x){return x[1]}).length; i++) {
+					cell = newRow.insertCell()
+					cell.innerHTML = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i]
+				}
 				insertMetric("monthlySummaryTable","No. Consumer Served", allOutputData.monthlyNoConsumerServedSales.map(function(x){return x[1]}))	
 				insertMetric("monthlySummaryTable","Generation(Wh)", allOutputData.monthlyGeneration.map(function(x){return x[1]}))				
 				insertMetric("monthlySummaryTable","Total Generation(kWh)", allOutputData.totalGeneration.map(function(x){return x[1]}))
