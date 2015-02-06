@@ -571,7 +571,6 @@
 			<table id="detailsTable">
 				<tr>
 					<th id="SL">Simulation Location</th>
-					
 				</tr>
 				<tr>
 					<td rowspan="7" style = "width:50%">
@@ -632,29 +631,11 @@
 								
 								// TODO: add stderr if some failed feeders exist.
 							</script>
-		<p class="reportTitle postRun">Climate <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="climateReport" class="tightContent postRun">
-			<script type="text/javascript">
-				$("<div/>").appendTo("#climateReport")
-					.attr("id", "climateChartDiv")
-				climateSeriesData = [
-					{"name":"Rain Fall (in/h)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Rain Fall (in/h)"]},
-					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
-					{"name":"Direct Insolation (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Insolation (W/m^2)"]},
-					{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Temperature (F)"]},
-					{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Snow Depth (in)"]}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>
-		<p class="reportTitle postRun">Model Runtime Statistics <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="runtimeStatsReport" class="tightContent stdouts postRun" style="height:600px">
-			<script type="text/javascript">
-				$("<pre/>").appendTo("#runtimeStatsReport")
-					.attr("id", "stdout")
-					.attr("class", "stdoutBlock")
-				gebi("stdout").innerHTML = allOutputData.stdout
-				// TODO: add stderr if some failed feeders exist.
-			</script>
-		</div>
+						</div>
+					</td>
+				</tr>
+		</div>					
+		
+		
 	</div>
 </body>
