@@ -116,6 +116,10 @@
 				<input type="text" id="inv_eff" name="inv_eff" value="92" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="advancedOption shortInput">
+				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">If zero, it will be set to the system size.</span></label>
+				<input type="text" id="inverterSize" name="inverterSize" value="0" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+			</div>
+			<div class="advancedOption shortInput">
 				<label class="tooltip">Wind stow speed (m/s)<span class="classic">When the wind velocity from the weather file for the current hour is greater than or equal to this value, the concentrator moves into stow position to prevent wind damage. The solar power intercepted by the receiver is zero during this hour.</span></label>
 				<input type="text" id="w_stow" name="w_stow" value="0" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
@@ -146,27 +150,58 @@
 				var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
 				pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
 				pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval, "animation": false}, "line":{"marker":{"enabled":false}}},
+				// Handle special case for inverter sizing:
+				if (allInputData.inverterSize == 0) {chartInverter = allInputData.systemSize}
+				else {chartInverter = allInputData.inverterSize}
+				new Highcharts.Chart({ "credits":{"enabled":false},
+					"plotOptions":{ "series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval, "animation": false}, "line":{"marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
 					"title":{"text":null},
 					"series":powerSeries,
 					"tooltip": false,
-					"yAxis":{"title":{"text":"Power (W-AC)","style":{"color":"gray"}},"min":0},
+					"yAxis":{"title":{"text":"Power (W-AC)","style":{"color":"gray"}},
+						"min":0,
+						"plotLines":[{"color": "orange",
+							"dashStyle": "ShortDash",
+							"width": 2,
+							"label":{"text":"Panels Nameplate","align":"right","y":12,"x":0},
+							"value": parseFloat(allInputData.systemSize)*1000,"zIndex": 0},
+							{"color": "orange",
+							"dashStyle": "ShortDash",
+							"width": 2,
+							"label":{"text":"Inverter Nameplate","align":"left","y":12,"x":0},
+							"value": parseFloat(chartInverter)*1000,"zIndex": 0} ] },
 					"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
-					"legend":false})
+					"legend":false } )
 			</script>
 		</div>
-		<p class="reportTitle postRun">Climate</p>
+		<p class="reportTitle postRun">Irradiance</p>
+		<div id="irradianceReport" class="tightContent postRun">
+			<div id="irradianceChartDiv"></div>
+			<script>
+				irradianceSeriesData = [
+					{"name":"Plane of Array Irradiance (W/m^2)","marker":{"enabled":false},"color":"yellow","data":allOutputData.climate["Plane of Array Irradiance (W/m^2)"]},
+					{"name":"Beam Normal Irradiance (W/m^2)","marker":{"enabled":false},"color":"gold","data":allOutputData.climate["Beam Normal Irradiance (W/m^2)"]},
+					{"name":"Diffuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"lemonchiffon","data":allOutputData.climate["Diffuse Irradiance (W/m^2)"]} ]
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":irradianceSeriesData,
+					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}, "min":0},
+					"chart":{"marginBottom":20,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Other Climate Variables</p>
 		<div id="climateReport" class="tightContent postRun">
 			<div id="climateChartDiv"></div>
 			<script>
 				climateSeriesData = [
 					{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"]},
-					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
-					{"name":"Direct Irradiance (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Irradiance (W/m^2)"]},
-					{"name":"Difuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Difuse Irradiance (W/m^2)"]},
-					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]}]
+					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]},
+					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]} ]
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},

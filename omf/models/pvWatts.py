@@ -92,8 +92,9 @@ def run(modelDir, inputDict):
 		outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
 		# Weather output.
 		outData["climate"] = {}
-		outData["climate"]["Direct Irradiance (W/m^2)"] = agg("dn", avg)
-		outData["climate"]["Difuse Irradiance (W/m^2)"] = agg("df", avg)
+		outData["climate"]["Plane of Array Irradiance (W/m^2)"] = agg("poa", avg)
+		outData["climate"]["Beam Normal Irradiance (W/m^2)"] = agg("dn", avg)
+		outData["climate"]["Diffuse Irradiance (W/m^2)"] = agg("df", avg)
 		outData["climate"]["Ambient Temperature (F)"] = agg("tamb", avg)
 		outData["climate"]["Cell Temperature (F)"] = agg("tcell", avg)
 		outData["climate"]["Wind Speed (m/s)"] = agg("wspd", avg)
@@ -167,7 +168,8 @@ def _tests():
 		"inv_eff":"92",
 		"tilt_eq_lat":"1",
 		"tilt":"45.0",
-		"w_stow":"0"}
+		"w_stow":"0",
+		"inverterSize":"8"}
 	modelLoc = pJoin(workDir,"admin","Automated pvWatts Testing")
 	# Blow away old test results if necessary.
 	try:
