@@ -507,7 +507,6 @@ def delete(objectType, objectName, owner):
 @flask_login.login_required
 def downloadModelData(owner, modelName, fullPath):
 	pathPieces = fullPath.split('/')
-	print 'YOFOYFOYFOYF', "/".join(pathPieces[0:-1]), pathPieces[-1]
 	return send_from_directory("data/Model/"+owner+"/"+modelName+"/"+"/".join(pathPieces[0:-1]), pathPieces[-1])
 
 @app.route("/uniqObjName/<objtype>/<owner>/<name>")
