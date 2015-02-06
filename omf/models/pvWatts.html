@@ -44,6 +44,9 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">System Specifications</p>
+			</div>
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Climate<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
@@ -90,36 +93,36 @@
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northenr hemisphere is due South.</span></label>
 				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
-			<hr>
-			<div>
-				<label style="text-align:left;cursor:hand"><p class="discloser" onclick="javascript:toggleAdvanced(this)" style="margin-bottom:10px">&#9654; Advanced Options</p></label>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Advanced Options</p>
 			</div>
-			<div class="advancedOption shortInput">
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Tracker Rotation Limit (Degrees from Horizontal)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker.</span></label>
+				<input type="text" id="rotlim" name="rotlim" value="45.0" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Tilt = Latitude<span class="classic">If True, then the tilt value will be the same as the Climate City's latitude. If False, you can pick your own value in the next input field (manual tilt).</span></label>
 				<select id="tilt_eq_lat" name="tilt_eq_lat"><option value="1" selected="selected">True</option><option value="0">False</option>
 				</select>
 			</div>
-			<div class="advancedOption shortInput">
+			<div class="shortInput">
 				<label class="tooltip">Manual Tilt (degrees)<span class="classic">Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
 				<input type="text" id="tilt" name="tilt" value="45.0" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
-			<div class="advancedOption shortInput">
-				<label class="tooltip">Tracker Rotation Limit (Degrees from Horizontal)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker.</span></label>
-				<input type="text" id="rotlim" name="rotlim" value="45.0" pattern="^\d+\.?\d*$" required="required"/>
-			</div>
-			<div class="advancedOption shortInput">
+			<div class="shortInput">
 				<label class="tooltip">Max Power Temperature Coefficient (% per degree C or degree K)<span class="classic">Percentage decrease  of the solar module's output power for every degree over 25 degrees centigrade.</span></label>
 				<input type="text" id="gamma" name="gamma" value="0.45" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="advancedOption shortInput">
+			<div class="shortInput">
 				<label class="tooltip">Inverter Efficiency at Rated Power (%)</label>
 				<input type="text" id="inv_eff" name="inv_eff" value="92" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="advancedOption shortInput">
+			<div class="shortInput">
 				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">If zero, it will be set to the system size.</span></label>
 				<input type="text" id="inverterSize" name="inverterSize" value="0" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="advancedOption shortInput">
+			<div class="shortInput">
 				<label class="tooltip">Wind stow speed (m/s)<span class="classic">When the wind velocity from the weather file for the current hour is greater than or equal to this value, the concentrator moves into stow position to prevent wind damage. The solar power intercepted by the receiver is zero during this hour.</span></label>
 				<input type="text" id="w_stow" name="w_stow" value="0" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
