@@ -1,6 +1,7 @@
 ''' Powerflow results for one Gridlab instance. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx
+from matplotlib import pyplot as plt
 import multiprocessing
 from os.path import join as pJoin
 from os.path import split as pSplit
@@ -66,18 +67,38 @@ def run(modelDir, inputDict):
 	except:
 		pass
 	# Start background process.
-	backProc = multiprocessing.Process(target = runForeground, args = (modelDir, inputDict,))
+	backProc = multiprocessing.Process(target = heavyProcessing, args = (modelDir, inputDict,))
 	backProc.start()
 	print "SENT TO BACKGROUND", modelDir
 	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
 		pPidFile.write(str(backProc.pid))
 
 def runForeground(modelDir, inputDict):
+	''' Run the model in the current process. WARNING: LONG RUN TIME. '''
+	# Check whether model exist or not
+	if not os.path.isdir(modelDir):
+		os.makedirs(modelDir)
+		inputDict["created"] = str(datetime.datetime.now())
+	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
+	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
+		json.dump(inputDict, inputFile, indent = 4)
+	# If we are re-running, remove output and old GLD run:
+	try: os.remove(pJoin(modelDir,"allOutputData.json"))
+	except: pass
+	try: shutil.rmtree(pJoin(modelDir,"gldContainer"))
+	except: pass
+	# Start process.
+	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
+		pPidFile.write('-999')
+	heavyProcessing(modelDir, inputDict)
+
+def heavyProcessing(modelDir, inputDict):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
 	print "STARTING TO RUN", modelDir
 	beginTime = datetime.datetime.now()
 	# Get feeder name and data in.
-	os.mkdir(pJoin(modelDir,'gldContainer'))
+	try: os.mkdir(pJoin(modelDir,'gldContainer'))
+	except: pass
 	feederDir, feederName = inputDict["feederName"].split("___")
 	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Feeder", feederDir, feederName + ".json"),
 		pJoin(modelDir, "feeder.json"))
@@ -99,6 +120,13 @@ def runForeground(modelDir, inputDict):
 		feeder.attachRecorders(tree, "TriplexLosses", None, None)
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
+		# Attach recorders for system voltage map:
+		stub = {'object':'group_recorder', 'group':'"class=node"', 'property':'voltage_A', 'interval':3600, 'file':'aVoltDump.csv'}
+		for phase in ['A','B','C']:
+			copyStub = dict(stub)
+			copyStub['property'] = 'voltage_' + phase
+			copyStub['file'] = phase.lower() + 'VoltDump.csv'
+			tree[feeder.getMaxKey(tree) + 1] = copyStub
 		feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
 			simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
@@ -194,7 +222,6 @@ def runForeground(modelDir, inputDict):
 					cleanOut['Consumption']['Losses'] = oneLoss
 				else:
 					cleanOut['Consumption']['Losses'] = vecSum(oneLoss,cleanOut['Consumption']['Losses'])
-			#below code added for Regulator charts
 			elif key.startswith('Regulator_') and key.endswith('.csv'):
 				cleanOut['Regulator'] ={}
 				cleanOut['Regulator']['RegTapA'] = [0] * int(inputDict["simLength"])
@@ -203,7 +230,6 @@ def runForeground(modelDir, inputDict):
 				cleanOut['Regulator']['RegTapA'] = rawOut[key]['tap_A']
 				cleanOut['Regulator']['RegTapB'] = rawOut[key]['tap_B']
 				cleanOut['Regulator']['RegTapC'] = rawOut[key]['tap_C']
-			#below code added for capacitor	chart 
 			elif key.startswith('Capacitor_') and key.endswith('.csv'):
 				cleanOut['Capacitor'] ={}
 				cleanOut['Capacitor']['Cap1A'] = [0] * int(inputDict["simLength"])
@@ -212,6 +238,8 @@ def runForeground(modelDir, inputDict):
 				cleanOut['Capacitor']['Cap1A'] = rawOut[key]['switchA']
 				cleanOut['Capacitor']['Cap1B'] = rawOut[key]['switchB']
 				cleanOut['Capacitor']['Cap1C'] = rawOut[key]['switchC']
+		# Generate the pngs for the system voltage map time traveling chart.
+		generateVoltChart(tree, rawOut, modelDir)
 		# Aggregate up the timestamps:
 		if level=='days':
 			cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
@@ -242,6 +270,66 @@ def runForeground(modelDir, inputDict):
 	except:
 		pass
 
+def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
+	''' Map the voltages on a feeder over time using a set of PNGs.'''
+	# Make the subfolder we need.
+	try: shutil.rmtree(pJoin(modelDir, 'pngs'))
+	except: pass
+	try: os.mkdir(pJoin(modelDir, 'pngs'))
+	except: pass
+	# Detect the feeder nominal voltage:
+	for key in tree:
+		ob = tree[key]
+		if type(ob)==dict and ob.get('bustype','')=='SWING':
+			feedVoltage = float(ob.get('nominal_voltage',1))
+	# Make a graph object.
+	fGraph = feeder.treeToNxGraph(tree)
+	if neatoLayout:
+		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
+		cleanG = nx.Graph(fGraph.edges())
+		cleanG.add_nodes_from(fGraph)
+		positions = nx.graphviz_layout(cleanG, prog='neato')
+	else:
+		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+	# Plot all time steps.
+	for step, stamp in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
+		# Build voltage map.
+		nodeVolts = {}
+		for nodeName in [x for x in rawOut['aVoltDump.csv'].keys() if x != '# timestamp']:
+			allVolts = []
+			for phase in ['A','B','C']:
+				# HACK: Gridlab complex number format sometimes uses i, sometimes j. WTF?
+				v = complex(rawOut[phase.lower() + 'VoltDump.csv'][nodeName][step].replace('i','j'))
+				phaseVolt = abs(v)
+				if phaseVolt != 0.0:
+					if _digits(phaseVolt)>3:
+						# Normalize to 120 V standard
+						phaseVolt = phaseVolt*(120/feedVoltage)
+					allVolts.append(phaseVolt)
+			# HACK: Take average of all phases to collapse dimensionality.
+			nodeVolts[nodeName] = avg(allVolts)
+		# Apply voltage map and chart it.
+		voltChart = plt.figure(figsize=(10,10))
+		plt.axes(frameon = 0)
+		plt.axis('off')
+		edgeIm = nx.draw_networkx_edges(fGraph, positions)
+		nodeIm = nx.draw_networkx_nodes(fGraph,
+			pos = positions,
+			node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
+			linewidths = 0,
+			node_size = 30,
+			cmap = plt.cm.jet)
+		plt.sci(nodeIm)
+		plt.clim(110,130)
+		plt.colorbar()
+		plt.title(stamp)
+		voltChart.savefig(pJoin(modelDir,'pngs','volts' + str(step).zfill(3) + '.png'))
+		# Reclaim memory by closing, deleting and garbage collecting the last chart.
+		voltChart.clf()
+		plt.close()
+		del voltChart
+		gc.collect()
+
 def avg(inList):
 	''' Average a list. Really wish this was built-in. '''
 	return sum(inList)/len(inList)
@@ -270,6 +358,10 @@ def _pyth(x,y):
 	sign = lambda z:(-1 if z<0 else 1)
 	fullSign = sign(sign(x)*x*x + sign(y)*y*y)
 	return fullSign*math.sqrt(x*x + y*y)
+
+def _digits(x):
+	''' Returns number of digits before the decimal in the float x. '''
+	return math.ceil(math.log10(x+1))
 
 def vecPyth(vx,vy):
 	''' Pythagorean theorem for pairwise elements from two vectors. '''
@@ -330,7 +422,7 @@ def _tests():
 	# No-input template.
 	renderAndShow(template)
 	# Run the model.
-	run(modelLoc, inData)
+	runForeground(modelLoc, inData)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)

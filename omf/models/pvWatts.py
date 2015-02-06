@@ -44,21 +44,17 @@ def run(modelDir, inputDict):
 		# Required user inputs.
 		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
 		ssc.ssc_data_set_number(dat, "system_size", float(inputDict["systemSize"]))
-		ssc.ssc_data_set_number(dat, "derate", float(inputDict["derate"])*0.01)
+		ssc.ssc_data_set_number(dat, "derate", 0.01 * float(inputDict["derate"]))
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict["trackingMode"]))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict["azimuth"]))
 		# Advanced inputs with defaults.
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", float(inputDict.get("tilt_eq_lat",1)))
+		ssc.ssc_data_set_number(dat, "tilt", float(inputDict.get("tilt", 45.0)))
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict["rotlim"]))
-		ssc.ssc_data_set_number(dat, "t_noct", float(inputDict["t_noct"]))
-		ssc.ssc_data_set_number(dat, "t_ref", float(inputDict["t_ref"]))
-		ssc.ssc_data_set_number(dat, "gamma", float(inputDict["gamma"]))
-		ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict["inv_eff"]))
-		ssc.ssc_data_set_number(dat, "fd", float(inputDict["fd"]))
-		ssc.ssc_data_set_number(dat, "i_ref", float(inputDict["i_ref"]))
-		ssc.ssc_data_set_number(dat, "poa_cutin", float(inputDict["poa_cutin"]))
+		ssc.ssc_data_set_number(dat, "gamma", -1 * float(inputDict["gamma"]))
+		ssc.ssc_data_set_number(dat, "inv_eff", 0.01 * float(inputDict["inv_eff"]))
 		ssc.ssc_data_set_number(dat, "w_stow", float(inputDict["w_stow"]))
-		# Complicated optional inputs.
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
+		# Complicated optional inputs that we could enable later.
 		# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
 		# ssc.ssc_data_set_matrix(dat, 'shading_mxh', ...) 		# Month x Hour beam shading factors
 		# ssc.ssc_data_set_matrix(dat, 'shading_azal', ...) 	# Azimuth x altitude beam shading factors
@@ -66,6 +62,11 @@ def run(modelDir, inputDict):
 		# ssc.ssc_data_set_number(dat, 'enable_user_poa', ...)	# Enable user-defined POA irradiance input = 0 or 1
 		# ssc.ssc_data_set_array(dat, 'user_poa', ...) 			# User-defined POA irradiance in W/m2
 		# ssc.ssc_data_set_number(dat, 'tilt', 999)
+		# ssc.ssc_data_set_number(dat, "t_noct", float(inputDict["t_noct"]))
+		# ssc.ssc_data_set_number(dat, "t_ref", float(inputDict["t_ref"]))
+		# ssc.ssc_data_set_number(dat, "fd", float(inputDict["fd"]))
+		# ssc.ssc_data_set_number(dat, "i_ref", float(inputDict["i_ref"]))
+		# ssc.ssc_data_set_number(dat, "poa_cutin", float(inputDict["poa_cutin"]))
 		# Run PV system simulation.
 		mod = ssc.ssc_module_create("pvwattsv1")
 		ssc.ssc_module_exec(mod, dat)
@@ -91,8 +92,9 @@ def run(modelDir, inputDict):
 		outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
 		# Weather output.
 		outData["climate"] = {}
-		outData["climate"]["Direct Irradiance (W/m^2)"] = agg("dn", avg)
-		outData["climate"]["Difuse Irradiance (W/m^2)"] = agg("df", avg)
+		outData["climate"]["Plane of Array Irradiance (W/m^2)"] = agg("poa", avg)
+		outData["climate"]["Beam Normal Irradiance (W/m^2)"] = agg("dn", avg)
+		outData["climate"]["Diffuse Irradiance (W/m^2)"] = agg("df", avg)
 		outData["climate"]["Ambient Temperature (F)"] = agg("tamb", avg)
 		outData["climate"]["Cell Temperature (F)"] = agg("tcell", avg)
 		outData["climate"]["Wind Speed (m/s)"] = agg("wspd", avg)
@@ -157,19 +159,17 @@ def _tests():
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "100",
 		"systemSize":"10",
-		"derate":"0.97",
+		"derate":"77",
 		"trackingMode":"0",
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",
-		"t_noct":"45.0",
-		"t_ref":"25.0",
-		"gamma":"-0.5",
-		"inv_eff":"0.92",
-		"fd":"1.0",
-		"i_ref":"1000",
-		"poa_cutin":"0",
-		"w_stow":"0"}
+		"gamma":"0.45",
+		"inv_eff":"92",
+		"tilt_eq_lat":"1",
+		"tilt":"45.0",
+		"w_stow":"0",
+		"inverterSize":"8"}
 	modelLoc = pJoin(workDir,"admin","Automated pvWatts Testing")
 	# Blow away old test results if necessary.
 	try:

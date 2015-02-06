@@ -73,9 +73,9 @@ def run(modelDir, inputDict):
 	# Monthly aggregation outputs.
 	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(startDateTime[0:4] + "-{0:02d}".format(x+1))])
-	#outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
-	#Testing PVWatts Output from 4. GOSED solarRates Spec
-	outData["monthlyGeneration"] = [[0,625000],[1,687500],[2,812500],[3,875000],[4,875000],[5,875000],[6,812500],[7,875000],[8,812500],[9,750000],[10,625000],[11,556250]]	
+	outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
+	#Values used for testing PVWatts Output (from file: 4. GOSED solarRates Spec.xlsx)
+	#outData["monthlyGeneration"] = [[0,625000],[1,687500],[2,812500],[3,875000],[4,875000],[5,875000],[6,812500],[7,875000],[8,812500],[9,750000],[10,625000],[11,556250]]	
 	monthlyNoConsumerServedSales = []
 	monthlyKWhSold = []
 	monthlyRevenue = []
@@ -97,7 +97,6 @@ def run(modelDir, inputDict):
 	outData["monthlyKWhSold"] = sorted(monthlyKWhSold, key=lambda x:months[x[0]])
 	outData["monthlyRevenue"] = sorted(monthlyRevenue, key=lambda x:months[x[0]])
 	outData["totalKWhSold"] = sorted(totalKWhSold, key=lambda x:months[x[0]])
-
 	outData["totalRevenue"] = sorted(totalRevenue, key=lambda x:months[x[0]])
 	outData["lossesBAU"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)]) 
 	outData["lineLossRate"] = outData.get("lossesBAU", 0) / float(inputDict.get("totalKWhPurchased", 0))
@@ -341,11 +340,11 @@ def run(modelDir, inputDict):
 		+ outData["BAU"]["otherCapCreditsPatroDivident"] \
 		+ outData["BAU"]["extraItems"])
 	# E42 = E63/E24, update after Form 7 model
-	outData["BAU"]["costofService"] = outData["BAU"]["totalCostElecService"] / (outData["BAU"]["totalKWhSales"] + float(inputDict.get("customServiceCharge", 0)))
+	outData["BAU"]["costofService"] = outData["BAU"]["totalCostElecService"] / outData["BAU"]["totalKWhSales"] 
 	# F37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71) = E37, update after Form 7 model
 	outData["Solar"]["nonPowerCosts"] = outData["BAU"]["nonPowerCosts"]
 	# F42 = F63/F24, update after Form 7 model
-	outData["Solar"]["costofService"] = outData["Solar"]["totalCostElecService"] / (outData["Solar"]["totalKWhSales"] + float(inputDict.get("customServiceCharge", 0)) + (12.0*float(avgCustomerCount)*float(inputDict.get("resPenetration",0)))*float(inputDict.get("solarServiceCharge", 0)))
+	outData["Solar"]["costofService"] = outData["Solar"]["totalCostElecService"] / outData["Solar"]["totalKWhSales"]  
 	# Stdout/stderr.
 	outData["stdout"] = "Success"
 	outData["stderr"] = ""
@@ -362,145 +361,79 @@ def cancel(modelDir):
 	''' solarRates runs so fast it's pointless to cancel a run. '''
 	pass
 
-def _tests(companyname):
-	# company - choptank, or coserv
+def _tests():
+	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	# TODO: Fix inData because it's out of date.
-	if (companyname == "choptank"):
-		monthlyData = {
-		"janSale": "46668", "janKWh": "64467874", "janRev": "8093137", "janKWhT": "85628959", "janRevT": "10464278", 
-		"febSale": "46724", "febKWh": "66646882", "febRev": "8812203", "febKWhT": "89818661", "febRevT": "11508047", 
-		"marSale": "46876", "marKWh": "62467031", "marRev": "8277498", "marKWhT": "84780954", "marRevT": "10874720", 
-		"aprSale": "46858", "aprKWh": "49781827", "aprRev": "6664021", "aprKWhT": "70552865", "aprRevT": "9122130", 
-		"maySale": "46919", "mayKWh": "41078029", "mayRev": "5567683", "mayKWhT": "63397699", "mayRevT": "8214078", 
-		"junSale": "46977", "junKWh": "40835343", "junRev": "5528717", "junKWhT": "64781785", "junRevT": "8332117", 
-		"julSale": "47013", "julKWh": "58018686", "julRev": "7585330", "julKWhT": "86140915", "julRevT": "10793395", 
-		"augSale": "47114", "augKWh": "67825037", "augRev": "8836269", "augKWhT": "98032727", "augRevT": "12219454", 
-		"sepSale": "47140", "sepKWh": "59707578", "sepRev": "7809767", "sepKWhT": "88193645", "sepRevT": "11052318", 
-		"octSale": "47088", "octKWh": "46451858", "octRev": "6146975", "octKWhT": "70425336", "octRevT": "8936767", 
-		"novSale": "47173", "novKWh": "41668828", "novRev": "5551288", "novKWhT": "65008851", "novRevT": "8228072", 
-		"decSale": "47081", "decKWh": "53354283", "decRev": "7014717", "decKWhT": "73335526", "decRevT": "9385203" }
-		inData = {
-			"modelType": "solarRates",
-			"climateName": "AL-HUNTSVILLE",
-			"runTime": "",
-			# Single data point
-			"avgSystemSize": "5",
-			"resPenetration": "0.05",
-			"customServiceCharge": "20",
-			"solarServiceCharge": "10",		
-			"wholesaleEnergyCost": "0.080520654",		
-			"solarLCoE": "0.07",
-			"otherElecRevenue": "1544165",
-			"totalKWhPurchased": "999330657",
-			# Form 7 data
-			"powerProExpense": "0",
-			"costPurchasedPower": "80466749",
-			"transExpense": "15027",
-			"distriExpenseO": "5294026",
-			"distriExpenseM": "5535844",
-			"customerAccountExpense": "4426441",
-			"customerServiceExpense": "643418",
-			"salesExpense": "127084",
-			"adminGeneralExpense": "8264362",
-			"depreAmortiExpense": "8975862",
-			"taxExpensePG": "0",
-			"taxExpense": "197924",
-			"interestLongTerm": "10195988",
-			"interestConstruction": "0",
-			"interestExpense": "209969",
-			"otherDeductions": "126640",
-			"nonOpMarginInterest": "123401",
-			"fundsUsedConstruc":"0",
-			"incomeEquityInvest":"0",
-			"nonOpMarginOther": "811043",
-			"genTransCapCredits": "1015764",
-			"otherCapCreditsPatroDivident": "1135379",
-			"extraItems":"0" }
-		for key in monthlyData:
-			inData[key] = monthlyData[key]
-		modelLoc = pJoin(workDir,"admin","Automated solarRates Testing")
-		# Blow away old test results if necessary.
-		try:
-			shutil.rmtree(modelLoc)
-		except:
-			# No previous test results.
-			pass
-		# No-input template.
-		renderAndShow(template)
-		# Run the model.
-		run(modelLoc, inData)
-		# Show the output.
-		renderAndShow(template, modelDir = modelLoc)		
-	elif (companyname == "coserv"):
-		monthlyData = {
-		"janSale": "154491", "janKWh": 237441891.5*1.04, "janRev": 23317522.75*1.04, "janKWhT": 369382665.6*1.04, "janRevT": 33910924.5*1.04, 
-		"febSale": (154491+162579)/2*random.uniform(0.95,1.05), "febKWh": 237441891.5*1.05, "febRev": 23317522.75*1.05, "febKWhT": 369382665.6*1.05, "febRevT": 33910924.5*1.05, 
-		"marSale": (154491+162579)/2*random.uniform(0.95,1.05), "marKWh": 237441891.5*0.95, "marRev": 23317522.75*0.95, "marKWhT": 369382665.6*0.95, "marRevT": 33910924.5*0.95, 
-		"aprSale": (154491+162579)/2*random.uniform(0.95,1.05), "aprKWh": 237441891.5*1.02, "aprRev": 23317522.75*1.02, "aprKWhT": 369382665.6*1.02, "aprRevT": 33910924.5*1.02, 
-		"maySale": (154491+162579)/2*random.uniform(0.95,1.05), "mayKWh": 237441891.5*0.98, "mayRev": 23317522.75*0.98, "mayKWhT": 369382665.6*0.98, "mayRevT": 33910924.5*0.98, 
-		"junSale": (154491+162579)/2*random.uniform(0.95,1.05), "junKWh": 237441891.5*1.07, "junRev": 23317522.75*1.07, "junKWhT": 369382665.6*1.07, "junRevT": 33910924.5*1.07, 
-		"julSale": (154491+162579)/2*random.uniform(0.95,1.05), "julKWh": 237441891.5*0.93, "julRev": 23317522.75*0.93, "julKWhT": 369382665.6*0.93, "julRevT": 33910924.5*0.93, 
-		"augSale": (154491+162579)/2*random.uniform(0.95,1.05), "augKWh": 237441891.5*1.08, "augRev": 23317522.75*1.08, "augKWhT": 369382665.6*1.08, "augRevT": 33910924.5*1.08, 
-		"sepSale": (154491+162579)/2*random.uniform(0.95,1.05), "sepKWh": 237441891.5*0.92, "sepRev": 23317522.75*0.92, "sepKWhT": 369382665.6*0.92, "sepRevT": 33910924.5*0.92, 
-		"octSale": (154491+162579)/2*random.uniform(0.95,1.05), "octKWh": 237441891.5*0.99, "octRev": 23317522.75*0.99, "octKWhT": 369382665.6*0.99, "octRevT": 33910924.5*0.99, 
-		"novSale": (154491+162579)/2*random.uniform(0.95,1.05), "novKWh": 237441891.5*1.01, "novRev": 23317522.75*1.01, "novKWhT": 369382665.6*1.01, "novRevT": 33910924.5*1.01, 
-		"decSale": "162579", "decKWh": 237441891.5*0.96, "decRev": 23317522.75*0.96, "decKWhT": 369382665.6*0.96, "decRevT": 33910924.5*0.96 }
-		inData = {
-			"modelType": "solarRates",
-			"climateName": "AL-HUNTSVILLE",
-			"runTime": "",
-			# Single data point
-			"avgSystemSize": "5",
-			"resPenetration": "0.05",
-			"customServiceCharge": "20",
-			"solarServiceCharge": "10",		
-			"wholesaleEnergyCost": "0.062264851",#=totalcost/totalKWhPurchased=286409564/4599859479	
-			"solarLCoE": "0.07",                 #*missing
-			"otherElecRevenue": "5638935",       #
-			"totalKWhPurchased": "4599859479",   #7.R.16
-			# Form 7 data
-			"powerProExpense": "0",              #
-			"costPurchasedPower": "286409564",   #
-			"transExpense": "0",                 #
-			"distriExpenseO": "6469309",         #
-			"distriExpenseM": "6886801",         #
-			"customerAccountExpense": "5113838", #
-			"customerServiceExpense": "3335811", #
-			"salesExpense": "0",                 #
-			"adminGeneralExpense": "21975870",   #
-			"depreAmortiExpense": "22299922",    #
-			"taxExpensePG": "2355344",           #
-			"taxExpense": "630630",              #
-			"interestLongTerm": "25007662",      #
-			"interestConstruction": "0", 	 	 #
-			"interestExpense": "351550",	     #
-			"otherDeductions": "0",              #
-			"nonOpMarginInterest": "939288",     #
-			"fundsUsedConstruc":"0",             #
-			"incomeEquityInvest":"0",            #
-			"nonOpMarginOther": "2736291",       #*negative value?
-			"genTransCapCredits": "0",     #
-			"otherCapCreditsPatroDivident": "19746046", #
-			"extraItems":"0" }	
-		for key in monthlyData:
-			inData[key] = monthlyData[key]
-		modelLoc = pJoin(workDir,"admin","Automated solarRates Testing")
-		# Blow away old test results if necessary.
-		try:
-			shutil.rmtree(modelLoc)
-		except:
-			# No previous test results.
-			pass
-		# No-input template.
-		renderAndShow(template)
-		# Run the model.
-		run(modelLoc, inData)
-		# Show the output.
-		renderAndShow(template, modelDir = modelLoc)	
-	else:
-		pass	
-
+	monthlyData = {
+	"janSale": "46668", "janKWh": "64467874", "janRev": "8093137", "janKWhT": "85628959", "janRevT": "10464278", 
+	"febSale": "46724", "febKWh": "66646882", "febRev": "8812203", "febKWhT": "89818661", "febRevT": "11508047", 
+	"marSale": "46876", "marKWh": "62467031", "marRev": "8277498", "marKWhT": "84780954", "marRevT": "10874720", 
+	"aprSale": "46858", "aprKWh": "49781827", "aprRev": "6664021", "aprKWhT": "70552865", "aprRevT": "9122130", 
+	"maySale": "46919", "mayKWh": "41078029", "mayRev": "5567683", "mayKWhT": "63397699", "mayRevT": "8214078", 
+	"junSale": "46977", "junKWh": "40835343", "junRev": "5528717", "junKWhT": "64781785", "junRevT": "8332117", 
+	"julSale": "47013", "julKWh": "58018686", "julRev": "7585330", "julKWhT": "86140915", "julRevT": "10793395", 
+	"augSale": "47114", "augKWh": "67825037", "augRev": "8836269", "augKWhT": "98032727", "augRevT": "12219454", 
+	"sepSale": "47140", "sepKWh": "59707578", "sepRev": "7809767", "sepKWhT": "88193645", "sepRevT": "11052318", 
+	"octSale": "47088", "octKWh": "46451858", "octRev": "6146975", "octKWhT": "70425336", "octRevT": "8936767", 
+	"novSale": "47173", "novKWh": "41668828", "novRev": "5551288", "novKWhT": "65008851", "novRevT": "8228072", 
+	"decSale": "47081", "decKWh": "53354283", "decRev": "7014717", "decKWhT": "73335526", "decRevT": "9385203" }
+	inData = {
+		"modelType": "solarRates",
+		"climateName": "AL-HUNTSVILLE",
+		"runTime": "",
+		# Single data point
+		"avgSystemSize": "5",
+		"resPenetration": "0.05",
+		"customServiceCharge": "20",
+		"solarServiceCharge": "10",		
+		#"wholesaleEnergyCost": "0.08",
+		"wholesaleEnergyCost": "0.080520654",		
+		"solarLCoE": "0.07",
+		"otherElecRevenue": "1544165",
+		"totalKWhPurchased": "999330657",
+		# Form 7 data
+		"powerProExpense": "0",
+		"costPurchasedPower": "80466749",
+		"transExpense": "15027",
+		"distriExpenseO": "5294026",
+		"distriExpenseM": "5535844",
+		"customerAccountExpense": "4426441",
+		"customerServiceExpense": "643418",
+		"salesExpense": "127084",
+		"adminGeneralExpense": "8264362",
+		"depreAmortiExpense": "8975862",
+		"taxExpensePG": "0",
+		"taxExpense": "197924",
+		"interestLongTerm": "10195988",
+		"interestConstruction": "0",
+		"interestExpense": "209969",
+		"otherDeductions": "126640",
+		"nonOpMarginInterest": "123401",
+		"fundsUsedConstruc":"0",
+		"incomeEquityInvest":"0",
+		"nonOpMarginOther": "811043",
+		"genTransCapCredits": "1015764",
+		"otherCapCreditsPatroDivident": "1135379",
+		"extraItems":"0" }
+	for key in monthlyData:
+		inData[key] = monthlyData[key]
+	modelLoc = pJoin(workDir,"admin","Automated solarRates Testing")
+	# Blow away old test results if necessary.
+	try:
+		shutil.rmtree(modelLoc)
+	except:
+		# No previous test results.
+		pass
+	# No-input template.
+	renderAndShow(template)
+	# Run the model.
+	run(modelLoc, inData)
+	# Show the output.
+	renderAndShow(template, modelDir = modelLoc)
+	# # Delete the model.
+	# time.sleep(2)
+	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
-	_tests("coserv")
+	_tests()

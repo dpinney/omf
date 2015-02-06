@@ -434,7 +434,7 @@
 						gebi("panelsCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.costSolarGen.toFixed(0))
 						gebi("avgNonSolarBill").innerHTML = "Avg Bill " + delimitNumbers(allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(0)) + " $/Month"
 						gebi("avgSolarBill").innerHTML = "Avg Bill " + delimitNumbers(allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(0)) + " $/Month"
-						gebi("currentRate").innerHTML = "BAU Costs " + delimitNumbers(allOutputData.BAU.effectiveResRate.toFixed(3)) + " $/kWh"
+						gebi("currentRate").innerHTML = "BAU Costs " + delimitNumbers(allOutputData.BAU.costofService.toFixed(3)) + " $/kWh"
 						gebi("costofService").innerHTML = "Solar Costs " + delimitNumbers(allOutputData.Solar.costofService.toFixed(3)) + " $/kWh"
 					</script>
 				</g>
@@ -490,7 +490,14 @@
 			<table id="monthlySummaryTable">
 			</table>
 			<script>
-				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
+                //insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))                
+				table = gebi("monthlySummaryTable")
+				newRow = table.insertRow()
+				newRow.insertCell().innerHTML = "Month"
+				for (i=0; i<allOutputData.monthlyGeneration.map(function(x){return x[1]}).length; i++) {
+					cell = newRow.insertCell()
+					cell.innerHTML = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i]
+				}
 				insertMetric("monthlySummaryTable","No. Consumer Served", allOutputData.monthlyNoConsumerServedSales.map(function(x){return x[1]}))	
 				insertMetric("monthlySummaryTable","Generation(Wh)", allOutputData.monthlyGeneration.map(function(x){return x[1]}))				
 				insertMetric("monthlySummaryTable","Total Generation(kWh)", allOutputData.totalGeneration.map(function(x){return x[1]}))

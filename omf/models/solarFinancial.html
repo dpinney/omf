@@ -124,7 +124,7 @@
 			</script>
 			<div class="shortInput">
 				<label class="tooltip">Manual Tilt (degrees)<span class="classic">Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
-				<input type="text" id="manualTilt" name="manualTilt" readonly />
+				<input type="text" id="manualTilt" name="manualTilt" value="34.65" required="required" readonly/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northenr hemisphere is due South.</span></label>
@@ -233,7 +233,7 @@
 			<div id="powerTimeSeries"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
+					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"enableMouseTracking":false, "marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
 					"title":{"text":null},
 					"series": [{"marker":{"enabled":false},"color":"red","data":allOutputData.powerOutputAc,"name":"Power Generated"}],
@@ -243,7 +243,7 @@
 						"label":{"text":"Nameplate","align":"right","y":12,"x":0},
 						"value": parseFloat(allInputData.systemSize)*1000,"zIndex": 0}]},
 					"chart":{"zoomType":"x","marginBottom":40,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
-					"tooltip":{"valueDecimals":1},
+					"tooltip":{"enabled":false, "valueDecimals":1},
 					"legend":false})
 			</script>
 		</div>
@@ -281,25 +281,6 @@
 						dataLabels: {enabled:false}}]})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Climate</p>
-		<div id="climateReport" class="tightContent postRun">
-			<div id="climateChartDiv"></div>
-			<script>
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
-					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
-					"title":{"text":null},
-					"series":[{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"]},
-						{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
-						{"name":"Direct Irradiance (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Irradiance (W/m^2)"]},
-						{"name":"Difuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Difuse Irradiance (W/m^2)"]},
-						{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]}],
-					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
-					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
-					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>
 		<p class="reportTitle postRun">Cash Flow</p>
 		<div id="cashFlowReport" class="tightContent postRun">
 			<div id="cashFlowChartDiv"></div>
@@ -319,7 +300,45 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-
+		<p class="reportTitle postRun">Monthly Data Table</p>
+		<div id="monthlySummaryReport" class="tightContent postRun tableReport">
+			<table id="monthlySummaryTable">
+			</table>
+			<script>
+				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
+				insertMetric("monthlySummaryTable","Generation", allOutputData.monthlyGeneration.map(function(x){return x[1]}))
+			</script>
+		</div>
+		<p class="reportTitle postRun">Annual Data Table</p>
+		<div id="annualSummaryReport" class="tightContent postRun tableReport">
+			<table id="annualSummaryTable">
+			</table>
+			<script>
+				insertMetric("annualSummaryTable","Year", Array.apply(null, {length: parseFloat(allInputData.lifeSpan)}).map(Number.call, Number))
+				insertMetric("annualSummaryTable","Generation Income", allOutputData.lifeGenerationDollars)
+				insertMetric("annualSummaryTable","Purchase Costs", allOutputData.lifePurchaseCosts)
+				insertMetric("annualSummaryTable","Op. and Maint. Costs", allOutputData.lifeOmCosts)
+				insertMetric("annualSummaryTable","Net Income", allOutputData.netCashFlow)
+				insertMetric("annualSummaryTable","Cumulative Income", allOutputData.cumCashFlow)
+			</script>
+		</div>
+		<p class="reportTitle postRun">Climate</p>
+		<div id="climateReport" class="tightContent postRun">
+			<div id="climateChartDiv"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"enableMouseTracking":false, "marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":[{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"],"visible":false},
+						{"name":"Direct Irradiance (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Irradiance (W/m^2)"],"visible":true},
+						{"name":"Difuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Difuse Irradiance (W/m^2)"],"visible":false}],
+					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
+					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
 		<p class="reportTitle postRun">Simulation Location
 		</p>
 		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
@@ -366,29 +385,6 @@
 					})
 				</script>
 			</div>
-		</div>
-
-		<p class="reportTitle postRun">Monthly Data Table</p>
-		<div id="monthlySummaryReport" class="tightContent postRun tableReport">
-			<table id="monthlySummaryTable">
-			</table>
-			<script>
-				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
-				insertMetric("monthlySummaryTable","Generation", allOutputData.monthlyGeneration.map(function(x){return x[1]}))
-			</script>
-		</div>
-		<p class="reportTitle postRun">Annual Data Table</p>
-		<div id="annualSummaryReport" class="tightContent postRun tableReport">
-			<table id="annualSummaryTable">
-			</table>
-			<script>
-				insertMetric("annualSummaryTable","Year", Array.apply(null, {length: parseFloat(allInputData.lifeSpan)}).map(Number.call, Number))
-				insertMetric("annualSummaryTable","Generation Income", allOutputData.lifeGenerationDollars)
-				insertMetric("annualSummaryTable","Purchase Costs", allOutputData.lifePurchaseCosts)
-				insertMetric("annualSummaryTable","Op. and Maint. Costs", allOutputData.lifeOmCosts)
-				insertMetric("annualSummaryTable","Net Income", allOutputData.netCashFlow)
-				insertMetric("annualSummaryTable","Cumulative Income", allOutputData.cumCashFlow)
-			</script>
-		</div>
+		</div>		
 	</div>
 </body>

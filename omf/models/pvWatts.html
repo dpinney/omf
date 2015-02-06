@@ -19,7 +19,7 @@
 <body onload="init()">
 	<div id="title">
 		<div id="logoBox"><a href="/">&#10059;</a></div>
-		<p id="titleText">New PV Watts Model</p>
+		<p id="titleText">New PVWatts &copy; Model</p>
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
@@ -44,6 +44,9 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">System Specifications</p>
+			</div>
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Climate<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
@@ -55,7 +58,7 @@
 			</div>
 			<div class="shortInput">
 				<label>Simulation Length</label>
-				<input type="text" id="simLength" name="simLength" pattern="^\d+$" required="required">
+				<input type="text" id="simLength" name="simLength" pattern="^\d+$" required="required" value="8760">
 			</div>
 			<div class="shortInput">
 				<label>Length Units</label>
@@ -67,7 +70,7 @@
 			</div>
 			<div class="shortInput">
 				<label>Simulation Start Date (YYYY-MM-DD)</label>
-				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" required="required">
+				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" required="required" value="2012-01-01">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
@@ -79,7 +82,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tracking Mode<span class="classic">Type of tracking system the PV array will use if any.</span></label>
-				<select id="trackingMode" name="trackingMode"/>
+				<select id="trackingMode" name="trackingMode" />
 					<option value="0">Fixed</option>
 					<option value="1">1 Axis</option>
 					<option value="2">2 Axis</option>
@@ -88,47 +91,40 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northenr hemisphere is due South.</span></label>
-				<input type="text" id="azimuth" name="azimuth" value="180"/>
+				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Advanced Options</p>
 			</div>
 			<hr>
-			<div>
-				<label style="text-align:right;cursor:hand"><p class="discloser" onclick="javascript:toggleAdvanced(this)" title="to show more options">&#9654; Advanced Options</p></label>
+			<div class="shortInput">
+				<label class="tooltip">Tracker Rotation Limit (Degrees from Horizontal)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker.</span></label>
+				<input type="text" id="rotlim" name="rotlim" value="45.0" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
-			<div class="advancedOption shortInput">
-				<label class="tooltip">Tracker Rotation Limit (Degrees)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker.</span></label>
-				<input type="text" id="rotlim" name="rotlim" value="45.0"/>
+			<div class="shortInput">
+				<label class="tooltip">Tilt = Latitude<span class="classic">If True, then the tilt value will be the same as the Climate City's latitude. If False, you can pick your own value in the next input field (manual tilt).</span></label>
+				<select id="tilt_eq_lat" name="tilt_eq_lat"><option value="1" selected="selected">True</option><option value="0">False</option>
+				</select>
 			</div>
-			<div class="advancedOption shortInput">
-				<label>Nominal Operating Cell Temperature (C)</label>
-				<input type="text" id="t_noct" name="t_noct" value="45.0"/>
+			<div class="shortInput">
+				<label class="tooltip">Manual Tilt (degrees)<span class="classic">Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
+				<input type="text" id="tilt" name="tilt" value="45.0" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
-			<div class="advancedOption shortInput">
-				<label class="tooltip">Reference cell temperature (C)</label>
-				<input type="text" id="t_ref" name="t_ref" value="25.0"/>
+			<div class="shortInput">
+				<label class="tooltip">Max Power Temperature Coefficient (% per degree C or degree K)<span class="classic">Percentage decrease  of the solar module's output power for every degree over 25 degrees centigrade.</span></label>
+				<input type="text" id="gamma" name="gamma" value="0.45" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="advancedOption shortInput">
-				<label class="tooltip">Max power temperature coefficient (Fraction/C)<span class="classic">Percentage decrease  of the solar array's output power for every degree over 25 degrees centigrade.</span></label>
-				<input type="text" id="gamma" name="gamma" value="-0.5"/>
+			<div class="shortInput">
+				<label class="tooltip">Inverter Efficiency at Rated Power (%)</label>
+				<input type="text" id="inv_eff" name="inv_eff" value="92" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="advancedOption shortInput">
-				<label class="tooltip">Inverter Efficiency at Rated Power (Fraction)</label>
-				<input type="text" id="inv_eff" name="inv_eff" value="0.92"/>
+			<div class="shortInput">
+				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">If zero, it will be set to the system size.</span></label>
+				<input type="text" id="inverterSize" name="inverterSize" value="0" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="advancedOption shortInput">
-				<label>Diffuse fraction (Fraction)</label>
-				<input type="text" id="fd" name="fd" value="1.0"/>
-			</div>
-			<div class="advancedOption shortInput">
-				<label>Rating Condition Irradiance (W/m2)</label>
-				<input type="text" id="i_ref" name="i_ref" value="1000"/>
-			</div>
-			<div class="advancedOption shortInput">
-				<label>Min. Required Irradiance For Operation (W/m2)</label>
-				<input type="text" id="poa_cutin" name="poa_cutin" value="0"/>
-			</div>
-			<div class="advancedOption shortInput">
+			<div class="shortInput">
 				<label class="tooltip">Wind stow speed (m/s)<span class="classic">When the wind velocity from the weather file for the current hour is greater than or equal to this value, the concentrator moves into stow position to prevent wind damage. The solar power intercepted by the receiver is zero during this hour.</span></label>
-				<input type="text" id="w_stow" name="w_stow" value="0"/>
+				<input type="text" id="w_stow" name="w_stow" value="0" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -139,6 +135,7 @@
 			</div>
 		</form>
 	</div>
+	<div id="copyrightNotice" style="width:1000px; margin:-25px auto 10px auto; padding-left:5px; color:gray">PVWatts &copy; was developed by the <a href="http://pvwatts.nrel.gov/">National Renewable Energy Lab</a></div>
 	<div id ="runIndicator" class="content running">
 		Model running on server. Refresh the page to check for results.
 	</div>
@@ -146,30 +143,77 @@
 		Model cancelled or encountered an error. Please change inputs and re-run.
 	</div>
 	<div id="output">
-		<p class="reportTitle postRun">System Outputs</p>
+		<p class="reportTitle postRun">System Output</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
 			<div id="powerTimeSeries"></div>
 			<div id="energyBalance"></div>
 			<script>
 				Highcharts.setOptions({global: { useUTC: false }});
-				powerSeries = [{"marker":{"enabled":false},"color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
+				powerSeries = [{"marker":{"enabled":false},"dataLabels":{"enabled":false}, "color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
 				var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
 				pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
 				pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":powerSeries,"yAxis":{"title":{"text":"Power (W)","style":{"color":"gray"}}},"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+				// Handle special case for inverter sizing:
+				if (allInputData.inverterSize == 0) {chartInverter = allInputData.systemSize}
+				else {chartInverter = allInputData.inverterSize}
+				new Highcharts.Chart({ "credits":{"enabled":false},
+					"plotOptions":{ "series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval, "animation": false}, "line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":powerSeries,
+					"tooltip": false,
+					"yAxis":{"title":{"text":"Power (W-AC)","style":{"color":"gray"}},
+						"min":0,
+						"plotLines":[{"color": "orange",
+							"dashStyle": "ShortDash",
+							"width": 2,
+							"label":{"text":"Panels Nameplate","align":"right","y":12,"x":0},
+							"value": parseFloat(allInputData.systemSize)*1000,"zIndex": 0},
+							{"color": "orange",
+							"dashStyle": "ShortDash",
+							"width": 2,
+							"label":{"text":"Inverter Nameplate","align":"left","y":12,"x":0},
+							"value": parseFloat(chartInverter)*1000,"zIndex": 0} ] },
+					"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
+					"legend":false } )
 			</script>
 		</div>
-		<p class="reportTitle postRun">Climate</p>
+		<p class="reportTitle postRun">Irradiance</p>
+		<div id="irradianceReport" class="tightContent postRun">
+			<div id="irradianceChartDiv"></div>
+			<script>
+				irradianceSeriesData = [
+					{"name":"Plane of Array Irradiance (W/m^2)","marker":{"enabled":false},"color":"yellow","data":allOutputData.climate["Plane of Array Irradiance (W/m^2)"]},
+					{"name":"Beam Normal Irradiance (W/m^2)","marker":{"enabled":false},"color":"gold","data":allOutputData.climate["Beam Normal Irradiance (W/m^2)"]},
+					{"name":"Diffuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"lemonchiffon","data":allOutputData.climate["Diffuse Irradiance (W/m^2)"]} ]
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":irradianceSeriesData,
+					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}, "min":0},
+					"chart":{"marginBottom":20,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Other Climate Variables</p>
 		<div id="climateReport" class="tightContent postRun">
 			<div id="climateChartDiv"></div>
 			<script>
 				climateSeriesData = [
 					{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"]},
-					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
-					{"name":"Direct Irradiance (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Irradiance (W/m^2)"]},
-					{"name":"Difuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Difuse Irradiance (W/m^2)"]},
-					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]}]
-				new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]},
+					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]} ]
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":climateSeriesData,
+					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
+					"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
 	</div>

@@ -289,6 +289,7 @@ def _tests():
 		"sysAvail": "0.995",
 		"age": "0.995",
 		"tilt": "True",
+		"manualTilt":"34.65",	
 		"srecCashFlow": "5,5,3,3,2",
 		"trackingMode":"0",
 		"azimuth":"180",
