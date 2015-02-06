@@ -273,6 +273,8 @@ def runModel():
 	# Handle the user.
 	if User.cu() == "admin" and pData["user"] == "public":
 		user = "public"
+	elif User.cu() == "admin" and pData["user"] != "public":
+		user = pData["user"]
 	else:
 		user = User.cu()
 	del pData["user"]
