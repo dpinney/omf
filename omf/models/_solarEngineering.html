@@ -98,18 +98,37 @@
 					{% endfor %}
 				</select>
 			</div>
+
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
-				<input type="text" id="simLength" name="simLength" data-validRegex="\d+"/>				
+				<input type="text" id="simLength" name="simLength" pattern="" required="required" oninput="setPattern()" onchange="setPattern()"/>		
+						
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
 				<select id="simLengthUnits" name="simLengthUnits">
 					<option value="minutes">Minutes</option>
 					<option value="hours">Hours</option>
-					<option value="days">Days</option>
 				</select>
 			</div>
+			<script type="text/javascript">
+				function setPattern()
+				{
+					var lenUnits = gebi("simLengthUnits").value;
+					//alert(lenUnits); 
+					if (lenUnits=="hours")
+					{
+						gebi("simLength").pattern="^(([1-9])|([1-9][0-9])|([1-2][0-3][0-9])|240)$";
+					//	alert('now hours');
+					}
+					else if(lenUnits=="minutes")
+					{
+						gebi("simLength").pattern="^(([1-9])|([1-9][0-9])|([1-9][0-9][0-9])|(1[1-4][1-4]0))$";
+					//	alert('now minutes');
+					}
+				}	
+			</script>
+
 			<div class="shortInput">
 				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date (YYYY-MM-DD)</span></label>
 				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
@@ -534,17 +553,21 @@
 		<div id="systemVoltageMap" class="tightContent postRun">
 			<!-- WARNING! max="24" is hard-coded in this demo! -->
 			<script>
+				
 				function pad(n, width, z) {
 					z = z || '0'
 					n = n + ''
 					return n.length >= width ? n : new Array(width - n.length + 1).join(z) + n }
 				function updateVoltMap() {
+					// simulation length must be the slider maximum value
+					var simLen= allInputData.simLength;
+					gebi("slider").max=simLen
 					sVal = gebi("slider").value
 					gebi("valShow").innerHTML = sVal
 					gebi("timeTravelImage").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/pngs/volts" + pad(sVal, 3, 0) + ".png"
 				}
 			</script>
-			<input id="slider" type="range" min="1" max="24" step="1" oninput="updateVoltMap()" onchange="updateVoltMap()" defaultValue="1"/><p id="valShow" style="display:inline">0</p>
+			<input id="slider" type="range" min="1" max="" step="1" oninput="updateVoltMap()" onchange="updateVoltMap()" defaultValue="1"/><p id="valShow" style="display:inline">0</p>
 			<img id="timeTravelImage" src="">
 			<script> 
 				/*Init the volt map.*/
