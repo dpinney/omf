@@ -31,7 +31,7 @@ def _tests(companyname):
 			"runTime": "",
 			# Single data point
 			"avgSystemSize": "5",
-			"resPenetration": "0.05",
+			"resPenetration": "5",
 			"customServiceCharge": "20",
 			"solarServiceCharge": "10",		
 			"wholesaleEnergyCost": "0.080520654",		
@@ -95,7 +95,7 @@ def _tests(companyname):
 			"runTime": "",
 			# Single data point
 			"avgSystemSize": "5",
-			"resPenetration": "0.05",
+			"resPenetration": "5",
 			"customServiceCharge": "20",
 			"solarServiceCharge": "10",		
 			"wholesaleEnergyCost": "0.062264851",#=totalcost/totalKWhPurchased=286409564/4599859479	
@@ -159,7 +159,7 @@ def _tests(companyname):
 			"runTime": "",
 			# Single data point
 			"avgSystemSize": "5",
-			"resPenetration": "0.05",
+			"resPenetration": "5",
 			"customServiceCharge": "20",
 			"solarServiceCharge": "10",		
 			"wholesaleEnergyCost": "0.0683",	  		#
@@ -223,7 +223,7 @@ def _tests(companyname):
 			"runTime": "",
 			# Single data point
 			"avgSystemSize": "5",
-			"resPenetration": "0.05",
+			"resPenetration": "5",
 			"customServiceCharge": "20",
 			"solarServiceCharge": "10",		
 			"wholesaleEnergyCost": "0.0615",	  		#

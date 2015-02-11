@@ -18,7 +18,7 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<style type="text/css">thead{font-weight:bold} table{width:980px; font-size:12}</style> <!--TODO:Find a better place for this.-->
+	<style type="text/css">thead{font-weight:bold} table{width:980px; font-size:10}</style> <!--TODO:Find a better place for this.-->
 </head>
 <body onload="init()">
 	<div id="title">
@@ -65,11 +65,11 @@
 				<input type="text" id="avgSystemSize" name="avgSystemSize" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Residential Customers With Solar (%)<span class="classic">Percentage of residential customers who own PV systems.</span></label>
+				<label class="tooltip">Residential Customers With Solar (%)<span class="classic">Percentage of residential customers who own PV systems. A value of five percent should be entered as a "5".</span></label>
 				<input type="text" id="resPenetration" name="resPenetration" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Solar Service Charge ($)<span class="classic">Monthly charge for residential customers with solar installed.</span></label>
+				<label class="tooltip">Solar Service Charge ($/month)<span class="classic">Monthly charge for residential customers with solar installed.</span></label>
 				<input type="text" id="solarServiceCharge" name="solarServiceCharge" pattern="^\d+\.?\d*$" required="required"> 
 			</div>
 			<div class="shortInput">
@@ -106,95 +106,95 @@
 			<hr>
 			<div class="shortInput">
 				<label>A.2.b Power Production Expense</label>
-				<input type="text" id="powerProExpense" name="powerProExpense"/>
+				<input type="text" id="powerProExpense" name="powerProExpense" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.3.b Cost of Purchased Power</label>
-				<input type="text" id="costPurchasedPower" name="costPurchasedPower"/>
+				<input type="text" id="costPurchasedPower" name="costPurchasedPower" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.4.b Transmission Expense</label>
-				<input type="text" id="transExpense" name="transExpense"/>
+				<input type="text" id="transExpense" name="transExpense" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.5.b Distribution Expense - Operation</label>
-				<input type="text" id="distriExpenseO" name="distriExpenseO"/>
+				<input type="text" id="distriExpenseO" name="distriExpenseO" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.6.b Distribution Expense - Maintenance</label>
-				<input type="text" id="distriExpenseM" name="distriExpenseM"/>
+				<input type="text" id="distriExpenseM" name="distriExpenseM" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.7.b Customer Accounts Expense</label>
-				<input type="text" id="customerAccountExpense" name="customerAccountExpense"/>
+				<input type="text" id="customerAccountExpense" name="customerAccountExpense" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.8.b Customer Service and Informational Expense</label>
-				<input type="text" id="customerServiceExpense" name="customerServiceExpense"/>
+				<input type="text" id="customerServiceExpense" name="customerServiceExpense" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.9.b Sales Expense</label>
-				<input type="text" id="salesExpense" name="salesExpense"/>
+				<input type="text" id="salesExpense" name="salesExpense" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.10.b Administrative and General Expense</label>
-				<input type="text" id="adminGeneralExpense" name="adminGeneralExpense"/>
+				<input type="text" id="adminGeneralExpense" name="adminGeneralExpense" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.12.b Depreciation and Amortization Expense</label>
-				<input type="text" id="depreAmortiExpense" name="depreAmortiExpense"/>
+				<input type="text" id="depreAmortiExpense" name="depreAmortiExpense" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.13.b Tax Expense - Property &amp; Gross Receipts</label>
-				<input type="text" id="taxExpensePG" name="taxExpensePG"/>
+				<input type="text" id="taxExpensePG" name="taxExpensePG" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.14.b Tax Expense - Other</label>
-				<input type="text" id="taxExpense" name="taxExpense"/>
+				<input type="text" id="taxExpense" name="taxExpense" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.15.b Interest on Long-Term Debt</label>
-				<input type="text" id="interestLongTerm" name="interestLongTerm"/>
+				<input type="text" id="interestLongTerm" name="interestLongTerm" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.16.b Interest Charged to Construction - Credit</label>
-				<input type="text" id="interestConstruction" name="interestConstruction"/>
+				<input type="text" id="interestConstruction" name="interestConstruction" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.17.b Interest Expense - Other</label>
-				<input type="text" id="interestExpense" name="interestExpense"/>
+				<input type="text" id="interestExpense" name="interestExpense" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.18.b Other Deductions</label>
-				<input type="text" id="otherDeductions" name="otherDeductions"/>
+				<input type="text" id="otherDeductions" name="otherDeductions" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.21.b Non Operating Margins - Interest</label>
-				<input type="text" id="nonOpMarginInterest" name="nonOpMarginInterest"/>
+				<input type="text" id="nonOpMarginInterest" name="nonOpMarginInterest" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.22.b Allowance for Funds Used During Construction</label>
-				<input type="text" id="fundsUsedConstruc" name="fundsUsedConstruc"/>
+				<input type="text" id="fundsUsedConstruc" name="fundsUsedConstruc" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.23.b Income (Loss) from Equity Investments</label>
-				<input type="text" id="incomeEquityInvest" name="incomeEquityInvest"/>
+				<input type="text" id="incomeEquityInvest" name="incomeEquityInvest" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.24.b Non Operating Margins - Other</label>
-				<input type="text" id="nonOpMarginOther" name="nonOpMarginOther"/>
+				<input type="text" id="nonOpMarginOther" name="nonOpMarginOther" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.25.b Generation and Transmission Capital Credits</label>
-				<input type="text" id="genTransCapCredits" name="genTransCapCredits"/>
+				<input type="text" id="genTransCapCredits" name="genTransCapCredits" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.26.b Other Capital Credits and Patronage Dividends</label>
-				<input type="text" id="otherCapCreditsPatroDivident" name="otherCapCreditsPatroDivident"/>
+				<input type="text" id="otherCapCreditsPatroDivident" name="otherCapCreditsPatroDivident" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.27.b Extraordinary Items</label>
-				<input type="text" id="extraItems" name="extraItems"/>
+				<input type="text" id="extraItems" name="extraItems" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Form 7 Table R Variables</p>
@@ -340,7 +340,7 @@
 						"dashStyle": "ShortDash",
 						"width": 2,
 						"label":{"text":"Nameplate","align":"right","y":12,"x":0},
-						"value": parseFloat(allInputData.systemSize)*1000,"zIndex": 0}]},
+						"value": parseFloat(allInputData.systemSize)*1000,"zIndex": 0}],"min":0},
 					"chart":{"zoomType":"x","marginBottom":40,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
 					"tooltip":{"enabled":false, "valueDecimals":1},
 					"legend":false})
@@ -499,12 +499,13 @@
 					cell.innerHTML = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i]
 				}
 				insertMetric("monthlySummaryTable","No. Consumer Served", allOutputData.monthlyNoConsumerServedSales.map(function(x){return x[1]}))	
-				insertMetric("monthlySummaryTable","Generation(Wh)", allOutputData.monthlyGeneration.map(function(x){return x[1]}))				
-				insertMetric("monthlySummaryTable","Total Generation(kWh)", allOutputData.totalGeneration.map(function(x){return x[1]}))
+				insertMetric("monthlySummaryTable","Single Residential PV System Generation(kWh)", allOutputData.monthlyGeneration.map(function(x){return x[1]/1000}))				
+				insertMetric("monthlySummaryTable","Total Residential PV Generation(kWh)", allOutputData.totalGeneration.map(function(x){return x[1]}))
 				insertMetric("monthlySummaryTable","KWh Sold", allOutputData.monthlyKWhSold.map(function(x){return x[1]}))
 				insertMetric("monthlySummaryTable","Revenue", allOutputData.monthlyRevenue.map(function(x){return x[1]}))
 				insertMetric("monthlySummaryTable","Total KWh Sold", allOutputData.totalKWhSold.map(function(x){return x[1]}))
 				insertMetric("monthlySummaryTable","Total Revenue from Sales of Electric Energy", allOutputData.totalRevenue.map(function(x){return x[1]}))
+
 			</script>
 		</div>
 		<p class="reportTitle postRun">Climate</p>  <!-- Windspeed, Cell Temp dropped-->	
@@ -518,7 +519,7 @@
 					"series":[{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"],"visible":false},
 						{"name":"Direct Irradiance (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Irradiance (W/m^2)"], "visible":true},
 						{"name":"Difuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Difuse Irradiance (W/m^2)"],"visible":false}],
-					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
+					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}},"min":0},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
 					"tooltip":{"enabled":false,"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
