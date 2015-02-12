@@ -189,7 +189,7 @@ def _dumpDataToExcel(modelDir):
 	sh2.write(0, 6, "Ambient Temperature (F)")
 	sh2.write(0, 7, "Cell Temperature (F)")
 
-	for i in range(8760):
+	for i in range(len(outJson["timeStamps"])):
 		sh2.write(i + 1, 0, outJson["timeStamps"][i])
 		sh2.write(i + 1, 1, outJson["powerOutputAc"][i])
 		sh2.write(i + 1, 2, outJson["InvClipped"][i])
@@ -218,13 +218,13 @@ def _dumpDataToExcel(modelDir):
 
 	sh4 = wb.add_sheet("Annual Data")
 	sh4.write(0, 0, "Year No.")
-	for i in range(30):
+	for i in range(len(outJson["netCashFlow"])):
 		sh4.write(i + 1, 0, i)
 	sh4.write(0, 1, "Net Cash Flow ($)")
 	sh4.write(0, 2, "Life O&M Costs ($)")
 	sh4.write(0, 3, "Life Purchase Costs ($)")
 	sh4.write(0, 4, "Cumulative Cash Flow ($)")
-	for i in range(30):
+	for i in range(len(outJson["netCashFlow"])):
 		sh4.write(i + 1, 1, outJson["netCashFlow"][i])
 		sh4.write(i + 1, 2, outJson["lifeOmCosts"][i])
 		sh4.write(i + 1, 3, outJson["lifePurchaseCosts"][i])
