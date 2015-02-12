@@ -54,14 +54,14 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post" onsubmit="return validateForm()">
+		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
 				<label>Model Type</label>
 				<input type="text" id="modelType" name="modelType" value="_solarEngineering" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
+				<input type="text" id="modelName" name="modelName" required="required" pattern="^[\w\s]+$"/></td>
 			</div>
 			<div class="shortInput" style="max-width:60%">
 				<label>Feeder</label>
@@ -98,11 +98,9 @@
 					{% endfor %}
 				</select>
 			</div>
-
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
-				<input type="text" id="simLength" name="simLength" pattern="" required="required" oninput="setPattern()" onchange="setPattern()"/>		
-						
+				<input type="text" id="simLength" name="simLength" required="required" pattern="^(\d|\d\d|[12]/d/d)$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
@@ -111,27 +109,9 @@
 					<option value="hours">Hours</option>
 				</select>
 			</div>
-			<script type="text/javascript">
-				function setPattern()
-				{
-					var lenUnits = gebi("simLengthUnits").value;
-					//alert(lenUnits); 
-					if (lenUnits=="hours")
-					{
-						gebi("simLength").pattern="^(([1-9])|([1-9][0-9])|([1-2][0-3][0-9])|240)$";
-					//	alert('now hours');
-					}
-					else if(lenUnits=="minutes")
-					{
-						gebi("simLength").pattern="^(([1-9])|([1-9][0-9])|([1-9][0-9][0-9])|(1[1-4][1-4]0))$";
-					//	alert('now minutes');
-					}
-				}	
-			</script>
-
 			<div class="shortInput">
 				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date (YYYY-MM-DD)</span></label>
-				<input type="text" id="simStartDate" name="simStartDate" data-validRegex="\d\d\d\d-\d\d-\d\d"/>
+				<input type="text" id="simStartDate" name="simStartDate" required="required" pattern="^\d\d\d\d-\d\d-\d\d$"/>
 			</div>
 			<!-- TODO: Add a table, and addiable and removable rows. -->
 			<hr>
@@ -149,7 +129,7 @@
 							<input type="text" id="nodename1" name="nodename1"/>
 						</td>
 						<td>
-							<input type="text" id="nodesize1" name="nodesize1" data-validRegex="[\w\s]+"/>
+							<input type="text" id="nodesize1" name="nodesize1"/>
 						</td>
 						<td>
 							<a class='add-row postRunInline preRun stoppedInline' href='#' title="Add row">&#8853;</a>

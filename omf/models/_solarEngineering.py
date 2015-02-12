@@ -261,6 +261,7 @@ def heavyProcessing(modelDir, inputDict):
 		cancel(pJoin(modelDir))
 		with open(pJoin(modelDir, "stderr.txt"), "a+") as stderrFile:
 			traceback.print_exc(file = stderrFile)
+		os.remove(pJoin(modelDir,"allOutputData.json"))
 	finishTime = datetime.datetime.now()
 	inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
