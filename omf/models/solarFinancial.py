@@ -46,21 +46,22 @@ def run(modelDir, inputDict):
 		# Required user inputs.
 		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
 		ssc.ssc_data_set_number(dat, "system_size", float(inputDict.get("systemSize", 100)))
-		derate = float(inputDict.get("pvModuleDerate", 0.995)) \
-			* float(inputDict.get("mismatch", 0.995)) \
-			* float(inputDict.get("diodes", 0.995)) \
-			* float(inputDict.get("dcWiring", 0.995)) \
-			* float(inputDict.get("acWiring", 0.995)) \
-			* float(inputDict.get("soiling", 0.995)) \
-			* float(inputDict.get("shading", 0.995)) \
-			* float(inputDict.get("sysAvail", 0.995)) \
-			* float(inputDict.get("age", 0.995))
+		derate = float(inputDict.get("pvModuleDerate", 99.5))/100 \
+			* float(inputDict.get("mismatch", 99.5))/100 \
+			* float(inputDict.get("diodes", 99.5))/100 \
+			* float(inputDict.get("dcWiring", 99.5))/100 \
+			* float(inputDict.get("acWiring", 99.5))/100 \
+			* float(inputDict.get("soiling", 99.5))/100 \
+			* float(inputDict.get("shading", 99.5))/100 \
+			* float(inputDict.get("sysAvail", 99.5))/100 \
+			* float(inputDict.get("age", 99.5))/100 \
+			* float(inputDict.get("inverterEff", 98.5))/100
 		ssc.ssc_data_set_number(dat, "derate", derate)
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 		# Advanced inputs with defaults.
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
-		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5)))
+		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)
 		# Complicated optional inputs.
 		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
 		# Run PV system simulation.
@@ -88,13 +89,19 @@ def run(modelDir, inputDict):
 		outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
 		# Weather output.
 		outData["climate"] = {}
-		outData["climate"]["Direct Irradiance (W/m^2)"] = agg("dn", avg)
-		outData["climate"]["Difuse Irradiance (W/m^2)"] = agg("df", avg)
+		outData["climate"]["Global Horizontal Radiation (W/m^2)"] = agg("gh", avg)	#tym2manual: Table 3-2 p.19
+		outData["climate"]["Plane of Array Irradiance (W/m^2)"] = agg("poa", avg)
 		outData["climate"]["Ambient Temperature (F)"] = agg("tamb", avg)
 		outData["climate"]["Cell Temperature (F)"] = agg("tcell", avg)
 		outData["climate"]["Wind Speed (m/s)"] = agg("wspd", avg)
 		# Power generation.
 		outData["powerOutputAc"] = [x for x in agg("ac", avg)]
+		outData["InvClipped"] = [x for x in agg("ac", avg)]
+		# Convert power to kilowatts & clip it due to inverters
+		for i in range (0, len(outData["InvClipped"])):
+			outData["InvClipped"][i] = outData["powerOutputAc"][i] 
+			if (float(inputDict.get("inverterSize", 0))*1000 - float(outData["InvClipped"][i])) < 0:
+				outData["InvClipped"][i] = float(inputDict.get("inverterSize", 0))*1000			
 		# Cashflow outputs.
 		lifeSpan = int(inputDict.get("lifeSpan",30))
 		lifeYears = range(1, 1 + lifeSpan)
@@ -103,24 +110,24 @@ def run(modelDir, inputDict):
 		installCost = float(inputDict.get("installCost",0.0))
 		discountRate = float(inputDict.get("discountRate", 7))/100
 		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
-		outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000.0)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)),2) for x in lifeYears]
+		outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)),3) for x in lifeYears]
 		outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
 		outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
 		srec = inputDict.get("srecCashFlow", "").split(",")
 		outData["srecCashFlow"] = map(float,srec) + [0 for x in lifeYears[len(srec):]]
-		outData["netCashFlow"] = [roundSig(x+y+z+a,2) for (x,y,z,a) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"], outData["srecCashFlow"])]
+		outData["netCashFlow"] = [roundSig(x+y+z+a,3) for (x,y,z,a) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"], outData["srecCashFlow"])]
 		outData["cumCashFlow"] = map(lambda x:roundSig(x,2), _runningSum(outData["netCashFlow"]))
-		outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 2)
-		outData["NPV"] = roundSig(npv(discountRate, outData["netCashFlow"]), 2)
+		outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 3) / (-1*roundSig(sum(outData["lifeOmCosts"]), 3) + -1*roundSig(sum(outData["lifePurchaseCosts"], 3)))
+		outData["NPV"] = roundSig(npv(discountRate, outData["netCashFlow"]), 3) 
 		try:
 			# The IRR function is very bad.
-			outData["IRR"] = roundSig(irr(outData["netCashFlow"]), 2)
+			outData["IRR"] = roundSig(irr(outData["netCashFlow"]), 3)
 		except:
 			outData["IRR"] = "Undefined"
 		# Monthly aggregation outputs.
 		months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 		totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
-		outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
+		outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),3)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
 		# Heatmaped hour+month outputs.
 		hours = range(24)
 		from calendar import monthrange
@@ -172,23 +179,25 @@ def _dumpDataToExcel(modelDir):
 	sh1.write(1, 6, outJson["lon"])
 	sh1.write(1, 7, outJson["elev"])
 
-	sh2 = wb.add_sheet("Houly Data")
+	sh2 = wb.add_sheet("Hourly Data")
 	sh2.write(0, 0, "TimeStamp")
-	sh2.write(0, 1, "Power(W-AC)")
-	sh2.write(0, 2, "Difuse Irradiance (W/m^2)")
-	sh2.write(0, 3, "Direct Irradiance (W/m^2)")
-	sh2.write(0, 4, "Wind Speed (m/s)")
-	sh2.write(0, 5, "Ambient Temperature (F)")
-	sh2.write(0, 6, "Cell Temperature (F)")
+	sh2.write(0, 1, "Power(kW-AC)")
+	sh2.write(0, 2, "Power due to Inverter clipping(kW-AC)")	
+	sh2.write(0, 3, "Plane of Array Irradiance (W/m^2)")	
+	sh2.write(0, 4, "Global Horizontal Radiation(W/m^2)")	
+	sh2.write(0, 5, "Wind Speed (m/s)")
+	sh2.write(0, 6, "Ambient Temperature (F)")
+	sh2.write(0, 7, "Cell Temperature (F)")
 
 	for i in range(8760):
 		sh2.write(i + 1, 0, outJson["timeStamps"][i])
 		sh2.write(i + 1, 1, outJson["powerOutputAc"][i])
-		sh2.write(i + 1, 2, outJson["climate"]["Difuse Irradiance (W/m^2)"][i])
-		sh2.write(i + 1, 3, outJson["climate"]["Direct Irradiance (W/m^2)"][i])
-		sh2.write(i + 1, 4, outJson["climate"]["Wind Speed (m/s)"][i])
-		sh2.write(i + 1, 5, outJson["climate"]["Ambient Temperature (F)"][i])
-		sh2.write(i + 1, 6, outJson["climate"]["Cell Temperature (F)"][i])
+		sh2.write(i + 1, 2, outJson["InvClipped"][i])
+		sh2.write(i + 1, 3, outJson["climate"]["Plane of Array Irradiance (W/m^2)"][i])			
+		sh2.write(i + 1, 4, outJson["climate"]["Global Horizontal Radiation (W/m^2)"][i])		
+		sh2.write(i + 1, 5, outJson["climate"]["Wind Speed (m/s)"][i])
+		sh2.write(i + 1, 6, outJson["climate"]["Ambient Temperature (F)"][i])
+		sh2.write(i + 1, 7, outJson["climate"]["Cell Temperature (F)"][i])
 
 	sh2.panes_frozen = True
 	sh2.vert_split_pos = 1
@@ -278,16 +287,18 @@ def _tests():
 		"installCost":"100000",
 		"lifeSpan": "30",
 		"degradation": "0.5",
-		"retailCost": "0.01",
-		"discountRate": "0.07",
-		"pvModuleDerate": "0.995",
-		"mismatch": "0.995",
-		"dcWiring": "0.995",
-		"acWiring": "0.995",
-		"soiling": "0.995",
-		"shading": "0.995",
-		"sysAvail": "0.995",
-		"age": "0.995",
+		"retailCost": "0.10",
+		"discountRate": "7",
+		"pvModuleDerate": "100",
+		"mismatch": "98",
+		"dcWiring": "98",
+		"acWiring": "99",
+		"soiling": "95",
+		"shading": "100",
+		"sysAvail": "100",
+		"age": "100",		
+		"inverterEff": "96.5",
+		"inverterSize": "75",
 		"tilt": "True",
 		"manualTilt":"34.65",	
 		"srecCashFlow": "5,5,3,3,2",
@@ -295,9 +306,9 @@ def _tests():
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",
-		"gamma":"-0.5",
+		"gamma":"-0.45",
 		"omCost": "1000"}
-	modelLoc = pJoin(workDir,"admin","Automated solarFinancial Testing")
+	modelLoc = pJoin(workDir,"admin","Automated solarFinancial Testing")	
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
@@ -316,3 +327,5 @@ def _tests():
 
 if __name__ == '__main__':
 	_tests()
+
+	'''		'''
