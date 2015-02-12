@@ -117,11 +117,9 @@ def run(modelDir, inputDict):
 	except:
 		#if input range wasn't valid delete output and pass
 		try:
-			os.remove(pJoin(modelDir,"allOutputData.json"))	
+			os.remove(pJoin(modelDir,"allOutputData.json"))
 		except Exception, e:
-			pass			
-
-	
+			pass
 
 def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	''' Function to aggregate output if we need something other than hour level. '''

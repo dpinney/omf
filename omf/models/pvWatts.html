@@ -120,7 +120,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">If zero, it will be set to the system size.</span></label>
-				<input type="text" id="inverterSize" name="inverterSize" value="0" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="inverterSize" name="inverterSize" value="0" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wind stow speed (m/s)<span class="classic">When the wind velocity from the weather file for the current hour is greater than or equal to this value, the concentrator moves into stow position to prevent wind damage. The solar power intercepted by the receiver is zero during this hour.</span></label>
