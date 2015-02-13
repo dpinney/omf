@@ -224,21 +224,29 @@ def heavyProcessing(modelDir, inputDict):
 				else:
 					cleanOut['Consumption']['Losses'] = vecSum(oneLoss,cleanOut['Consumption']['Losses'])
 			elif key.startswith('Regulator_') and key.endswith('.csv'):
-				cleanOut['Regulator'] ={}
-				cleanOut['Regulator']['RegTapA'] = [0] * int(inputDict["simLength"])
-				cleanOut['Regulator']['RegTapB'] = [0] * int(inputDict["simLength"])
-				cleanOut['Regulator']['RegTapC'] = [0] * int(inputDict["simLength"])
-				cleanOut['Regulator']['RegTapA'] = rawOut[key]['tap_A']
-				cleanOut['Regulator']['RegTapB'] = rawOut[key]['tap_B']
-				cleanOut['Regulator']['RegTapC'] = rawOut[key]['tap_C']
+				#split function to strip off .csv from filename and user rest of the file name as key. for example- Regulator_VR10.csv -> key would be Regulator_VR10
+				regName=""
+				regName = key
+				newkey=regName.split(".")[0]
+				cleanOut[newkey] ={}
+				cleanOut[newkey]['RegTapA'] = [0] * int(inputDict["simLength"])
+				cleanOut[newkey]['RegTapB'] = [0] * int(inputDict["simLength"])
+				cleanOut[newkey]['RegTapC'] = [0] * int(inputDict["simLength"])
+				cleanOut[newkey]['RegTapA'] = rawOut[key]['tap_A']
+				cleanOut[newkey]['RegTapB'] = rawOut[key]['tap_B']
+				cleanOut[newkey]['RegTapC'] = rawOut[key]['tap_C']
 			elif key.startswith('Capacitor_') and key.endswith('.csv'):
-				cleanOut['Capacitor'] ={}
-				cleanOut['Capacitor']['Cap1A'] = [0] * int(inputDict["simLength"])
-				cleanOut['Capacitor']['Cap1B'] = [0] * int(inputDict["simLength"])
-				cleanOut['Capacitor']['Cap1C'] = [0] * int(inputDict["simLength"])
-				cleanOut['Capacitor']['Cap1A'] = rawOut[key]['switchA']
-				cleanOut['Capacitor']['Cap1B'] = rawOut[key]['switchB']
-				cleanOut['Capacitor']['Cap1C'] = rawOut[key]['switchC']
+				capName=""
+				capName = key
+				newkey=capName.split(".")[0]
+				cleanOut[newkey] ={}
+				cleanOut[newkey]['Cap1A'] = [0] * int(inputDict["simLength"])
+				cleanOut[newkey]['Cap1B'] = [0] * int(inputDict["simLength"])
+				cleanOut[newkey]['Cap1C'] = [0] * int(inputDict["simLength"])
+				cleanOut[newkey]['Cap1A'] = rawOut[key]['switchA']
+				cleanOut[newkey]['Cap1B'] = rawOut[key]['switchB']
+				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
+
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 		latPerc = 1.0*len(latKeys)/len(tree)
