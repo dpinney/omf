@@ -16,7 +16,7 @@ import feeder
 from solvers import gridlabd
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"_solarEngineering.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"solarEngineering.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 	
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -426,7 +426,7 @@ def _tests():
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"feederName": "public___Simple Market System",
-		"modelType": "_solarEngineering",
+		"modelType": "solarEngineering",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "24",
 		"runTime": ""}
