@@ -239,7 +239,8 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut['Capacitor']['Cap1B'] = rawOut[key]['switchB']
 				cleanOut['Capacitor']['Cap1C'] = rawOut[key]['switchC']
 		# Generate the pngs for the system voltage map time traveling chart.
-		generateVoltChart(tree, rawOut, modelDir)
+		genTime = generateVoltChart(tree, rawOut, modelDir)
+		cleanOut['genTime'] = genTime
 		# Aggregate up the timestamps:
 		if level=='days':
 			cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
@@ -277,6 +278,8 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 	except: pass
 	try: os.mkdir(pJoin(modelDir, 'pngs'))
 	except: pass
+	# We need to timestamp images with the system clock to make sure the browser caches them appropriately.
+	genTime = str(datetime.datetime.now()).replace(':','.')
 	# Detect the feeder nominal voltage:
 	for key in tree:
 		ob = tree[key]
@@ -325,12 +328,13 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		plt.clim(110,130)
 		plt.colorbar()
 		plt.title(stamp)
-		voltChart.savefig(pJoin(modelDir,'pngs','volts' + str(step).zfill(3) + '.png'))
+		voltChart.savefig(pJoin(modelDir,'pngs','volts' + str(step).zfill(3) + "-" + genTime + '.png'))
 		# Reclaim memory by closing, deleting and garbage collecting the last chart.
 		voltChart.clf()
 		plt.close()
 		del voltChart
 		gc.collect()
+	return genTime
 
 def avg(inList):
 	''' Average a list. Really wish this was built-in. '''

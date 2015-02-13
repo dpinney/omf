@@ -109,7 +109,7 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Simulation Start Date (YYYY-MM-DD)</span></label>
+				<label>Simulation Start Date (YYYY-MM-DD)</label>
 				<input type="text" id="simStartDate" name="simStartDate" required="required" pattern="^\d\d\d\d-\d\d-\d\d$"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
@@ -493,7 +493,7 @@
 					gebi("slider").max=simLen
 					sVal = gebi("slider").value
 					gebi("valShow").innerHTML = sVal
-					gebi("timeTravelImage").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/pngs/volts" + pad(sVal, 3, 0) + ".png"
+					gebi("timeTravelImage").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/pngs/volts" + pad(sVal, 3, 0) + "-" + allOutputData.genTime + ".png"
 				}
 			</script>
 			<input id="slider" type="range" min="1" max="" step="1" oninput="updateVoltMap()" onchange="updateVoltMap()" defaultValue="1"/><p id="valShow" style="display:inline">0</p>
