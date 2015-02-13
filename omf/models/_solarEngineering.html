@@ -37,14 +37,13 @@
 			studyName = $(e).siblings("select").val().split(/[_]+/)[1]
 			$(e).attr("href", "/feeder/" + studyUser +"/"+ studyName)
 				.attr("target", "_blank");
-			// window.open("/feeder/" + studyUser + "/" + studyName, "_blank")
 		}
+		// Code to make the toggles work:
 		$(document).ready(function(){
 			$(".toggle").click(function(){
 					$(this).parent().next().toggle(500)
 			})
-		})
-			
+		})			
 	</script>	
 </head>
 <body onload="init()">
@@ -75,7 +74,7 @@
 						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 					{% endfor %}
 				</select>
-				<a class="edit-feeder postRunInline preRun stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>
+				<a class="edit-feeder postRunInline preRunInline runningInline stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -91,7 +90,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Climate<span class="classic">Climate</span></label>
+				<label class="tooltip">Climate<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
 				<select id='climateName' name='climateName'>
 					{% for climate in datastoreNames['climates'] %}
 						<option value='{{ climate }}'>{{ climate }}</option>
@@ -99,11 +98,11 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
+				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. Due to large data volumes, the current limit is 300.</span></label>
 				<input type="text" id="simLength" name="simLength" required="required" pattern="^(\d|\d\d|[12]/d/d)$"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
+				<label>Length Units</label>
 				<select id="simLengthUnits" name="simLengthUnits">
 					<option value="minutes">Minutes</option>
 					<option value="hours">Hours</option>

@@ -258,10 +258,9 @@ def heavyProcessing(modelDir, inputDict):
 		print "DONE RUNNING", modelDir
 	except Exception as e:
 		print "MODEL CRASHED", e
-		cancel(pJoin(modelDir))
 		with open(pJoin(modelDir, "stderr.txt"), "a+") as stderrFile:
 			traceback.print_exc(file = stderrFile)
-		os.remove(pJoin(modelDir,"allOutputData.json"))
+		cancel(modelDir)
 	finishTime = datetime.datetime.now()
 	inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
@@ -298,9 +297,11 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		nodeVolts = {}
 		for nodeName in [x for x in rawOut['aVoltDump.csv'].keys() if x != '# timestamp']:
 			allVolts = []
-			for phase in ['A','B','C']:
-				# HACK: Gridlab complex number format sometimes uses i, sometimes j. WTF?
-				v = complex(rawOut[phase.lower() + 'VoltDump.csv'][nodeName][step].replace('i','j'))
+			for phase in ['a','b','c']:
+				voltStep = rawOut[phase + 'VoltDump.csv'][nodeName][step]
+				# HACK: Gridlab complex number format sometimes uses i, sometimes j, sometimes d. WTF?
+				if type(voltStep) is str: voltStep.replace('i','j').replace('d','j')
+				v = complex(voltStep)
 				phaseVolt = abs(v)
 				if phaseVolt != 0.0:
 					if _digits(phaseVolt)>3:
