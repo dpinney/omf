@@ -300,7 +300,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 			for phase in ['a','b','c']:
 				voltStep = rawOut[phase + 'VoltDump.csv'][nodeName][step]
 				# HACK: Gridlab complex number format sometimes uses i, sometimes j, sometimes d. WTF?
-				if type(voltStep) is str: voltStep.replace('i','j').replace('d','j')
+				if type(voltStep) is str: voltStep = voltStep.replace('i','j')
 				v = complex(voltStep)
 				phaseVolt = abs(v)
 				if phaseVolt != 0.0:

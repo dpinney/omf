@@ -233,7 +233,6 @@ def runForeground(modelDir, inputDict):
 				cancel(pJoin(modelDir, feederName))
 				with open(pJoin(modelDir, feederName, "stderr.txt"), "a+") as stderrFile:
 					traceback.print_exc(file = stderrFile)
-
 	finishTime = datetime.datetime.now()
 	inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
