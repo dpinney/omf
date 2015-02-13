@@ -74,7 +74,7 @@
     "febRevT": "11508047", 
     "janKWh": "64467874", 
     "modelType": "solarRates", 
-    "resPenetration": "0.05", 
+    "resPenetration": "5", 
     "decKWh": "53354283", 
     "customerServiceExpense": "643418", 
     "julKWh": "58018686", 
