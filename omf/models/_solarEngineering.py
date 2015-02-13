@@ -238,8 +238,13 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut['Capacitor']['Cap1A'] = rawOut[key]['switchA']
 				cleanOut['Capacitor']['Cap1B'] = rawOut[key]['switchB']
 				cleanOut['Capacitor']['Cap1C'] = rawOut[key]['switchC']
+		# What percentage of our keys have lat lon data?
+		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
+		latPerc = 1.0*len(latKeys)/len(tree)
+		if latPerc < 0.25: doNeato = True
+		else: doNeato = False
 		# Generate the pngs for the system voltage map time traveling chart.
-		genTime = generateVoltChart(tree, rawOut, modelDir)
+		genTime = generateVoltChart(tree, rawOut, modelDir, neatoLayout=doNeato)
 		cleanOut['genTime'] = genTime
 		# Aggregate up the timestamps:
 		if level=='days':
@@ -261,7 +266,14 @@ def heavyProcessing(modelDir, inputDict):
 		print "MODEL CRASHED", e
 		with open(pJoin(modelDir, "stderr.txt"), "a+") as stderrFile:
 			traceback.print_exc(file = stderrFile)
-		cancel(modelDir)
+		# Cancel to get rid of extra background processes.
+		try: os.remove(pJoin(modelDir,'PPID.txt'))
+		except: pass
+		# Dump input with error included.
+		thisErr = traceback.format_exc()
+		inputDict['stderr'] = thisErr
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
 	finishTime = datetime.datetime.now()
 	inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:

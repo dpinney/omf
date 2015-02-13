@@ -127,6 +127,8 @@
 	</div>
 	<div id ="stopIndicator" class="content stopped">
 		Model cancelled or encountered an error. Please change inputs and re-run.
+		<pre id='errorText'></pre>
+		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>
 	</div>
 	<div id="output">
 		<p class="reportTitle postRun">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
@@ -492,16 +494,12 @@
 					var simLen= allInputData.simLength;
 					gebi("slider").max=simLen
 					sVal = gebi("slider").value
-					gebi("valShow").innerHTML = sVal
 					gebi("timeTravelImage").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/pngs/volts" + pad(sVal, 3, 0) + "-" + allOutputData.genTime + ".png"
 				}
 			</script>
-			<input id="slider" type="range" min="1" max="" step="1" oninput="updateVoltMap()" onchange="updateVoltMap()" defaultValue="1"/><p id="valShow" style="display:inline">0</p>
+			<input id="slider" type="range" min="1" max="" step="1" oninput="updateVoltMap()" onchange="updateVoltMap()" defaultValue="1" style="width:100%; padding:5 0 0 5"/>
 			<img id="timeTravelImage" src="">
-			<script> 
-				/*Init the volt map.*/
-				updateVoltMap()
-			</script>
+			<script>/*Init the volt map after loading.*/ updateVoltMap()</script>
 		</div>
 		<p class="reportTitle postRun">Climate <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="climateReport" class="tightContent postRun">
