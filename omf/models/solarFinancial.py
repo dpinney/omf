@@ -146,7 +146,7 @@ def run(modelDir, inputDict):
 			json.dump(inputDict, inFile, indent=4)
 		_dumpDataToExcel(modelDir)
 	except:
-		#if input range wasn't valid delete output, write error to disk.
+		# If input range wasn't valid delete output, write error to disk.
 		thisErr = traceback.format_exc()
 		inputDict['stderr'] = thisErr
 		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
