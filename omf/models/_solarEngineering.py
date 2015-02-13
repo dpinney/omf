@@ -264,14 +264,14 @@ def heavyProcessing(modelDir, inputDict):
 		print "DONE RUNNING", modelDir
 	except Exception as e:
 		print "MODEL CRASHED", e
-		with open(pJoin(modelDir, "stderr.txt"), "a+") as stderrFile:
-			traceback.print_exc(file = stderrFile)
 		# Cancel to get rid of extra background processes.
 		try: os.remove(pJoin(modelDir,'PPID.txt'))
 		except: pass
-		# Dump input with error included.
 		thisErr = traceback.format_exc()
 		inputDict['stderr'] = thisErr
+		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
+			errorFile.write(thisErr)
+		# Dump input with error included.
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 	finishTime = datetime.datetime.now()
