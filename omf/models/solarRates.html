@@ -354,7 +354,7 @@
 					"plotOptions":{"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
 					"title":{"text":null},
-					"series":[{"name":"From Solar", "color":"orange", "data":allOutputData.monthlyGeneration, "dataLabels":{"enabled":false}},{"name":"From G&T", "color":"green", "data":allOutputData.totalGeneration, "dataLabels":{"enabled":false}}],
+					"series":[{"name":"From Solar", "color":"orange", "data":allOutputData.totalGeneration, "dataLabels":{"enabled":false}},{"name":"From G&T", "color":"green", "data":allOutputData.totalsolarmonthly, "dataLabels":{"enabled":false}}],
 					"yAxis":[{"title":{"text":"Energy (Wh)","style":{"color":"gray"}}}],
 					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},
@@ -508,22 +508,42 @@
 
 			</script>
 		</div>
-		<p class="reportTitle postRun">Climate</p>  <!-- Windspeed, Cell Temp dropped-->	
+		<p class="reportTitle postRun">Irradiance</p>
+		<div id="irradianceReport" class="tightContent postRun">
+			<div id="irradianceChartDiv"></div>
+			<script>
+				irradianceSeriesData = [
+					{"name":"Plane of Array Irradiance","marker":{"enabled":false},"color":"gold","data":allOutputData.climate["Plane of Array Irradiance (W/m^2)"],"visible":true},
+					{"name":"Global Horizontal Radiation","marker":{"enabled":false},"color":"yellow","data":allOutputData.climate["Global Horizontal Radiation (W/m^2)"],"visible":true} ]			
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":true}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":irradianceSeriesData,
+					"yAxis":{"title":{"text":"Irradiance (W/m^2)","style":{"color":"gray"}}, "min":0},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":300,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>		
+		<p class="reportTitle postRun">Other Climate Variables</p>
 		<div id="climateReport" class="tightContent postRun">
 			<div id="climateChartDiv"></div>
 			<script>
+				climateSeriesData = [
+					{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"]},
+					{"name":"Cell Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Cell Temperature (F)"]},
+					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]} ]
 				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"enableMouseTracking":false, "marker":{"enabled":false}}},
+					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
 					"title":{"text":null},
-					"series":[{"name":"Ambient Temperature (F)","marker":{"enabled":false},"color":"dimgray","data":allOutputData.climate["Ambient Temperature (F)"],"visible":false},
-						{"name":"Direct Irradiance (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Irradiance (W/m^2)"], "visible":true},
-						{"name":"Difuse Irradiance (W/m^2)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Difuse Irradiance (W/m^2)"],"visible":false}],
-					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}},"min":0},
-					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
-					"tooltip":{"enabled":false,"valueDecimals":1},
+					"series":climateSeriesData,
+					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}, "min":0},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
-		</div>			
+		</div>		
 	</div>
 </body>
