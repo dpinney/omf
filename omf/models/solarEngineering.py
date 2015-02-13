@@ -157,6 +157,7 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut['climate']['Temperature (F)'] = hdmAgg(rawOut[key].get('temperature'), max, level)
 				cleanOut['climate']['Snow Depth (in)'] = hdmAgg(rawOut[key].get('snowdepth'), max, level)
 				cleanOut['climate']['Direct Normal (W/sf)'] = hdmAgg(rawOut[key].get('solar_direct'), sum, level)
+				cleanOut['climate']['Global Horizontal (W/sf)'] = hdmAgg(rawOut[key].get('solar_global'), sum, level)				
 		# Voltage Band
 		if 'VoltageJiggle.csv' in rawOut:
 			cleanOut['allMeterVoltages'] = {}
