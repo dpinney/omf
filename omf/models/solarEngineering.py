@@ -1,6 +1,6 @@
 ''' Powerflow results for one Gridlab instance. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx, matplotlib
 from matplotlib import pyplot as plt
 import multiprocessing
 from os.path import join as pJoin
@@ -338,13 +338,14 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		voltChart = plt.figure(figsize=(10,10))
 		plt.axes(frameon = 0)
 		plt.axis('off')
+		custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.25,'darkgray'),(0.75,'darkgray'),(1.0,'yellow')])
 		edgeIm = nx.draw_networkx_edges(fGraph, positions)
 		nodeIm = nx.draw_networkx_nodes(fGraph,
 			pos = positions,
 			node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
 			linewidths = 0,
 			node_size = 30,
-			cmap = plt.cm.jet)
+			cmap = custom_cm)
 		plt.sci(nodeIm)
 		plt.clim(110,130)
 		plt.colorbar()
