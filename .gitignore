@@ -9,6 +9,7 @@ omf/S3KEY.*
 build
 omf.egg-info
 omf/emailCredentials.key
+**/.DS_Store
 # But include a few things:
 !omf/data/Model/public/*
 !omf/data/Feeder/public/*

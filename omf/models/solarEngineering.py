@@ -314,7 +314,12 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		cleanG.add_nodes_from(fGraph)
 		positions = nx.graphviz_layout(cleanG, prog='neato')
 	else:
-		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+		rawPositions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
+		#HACK: the import code reverses the y coords.
+		def yFlip(pair):
+			try: return (pair[0], pair[1])
+			except: return (0,0)
+		positions = {k:yFlip(rawPositions[k]) for k in rawPositions}
 	# Plot all time steps.
 	for step, stamp in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
 		# Build voltage map.
