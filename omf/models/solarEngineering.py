@@ -317,7 +317,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		rawPositions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 		#HACK: the import code reverses the y coords.
 		def yFlip(pair):
-			try: return (pair[0], pair[1])
+			try: return (pair[0], -1.0*pair[1])
 			except: return (0,0)
 		positions = {k:yFlip(rawPositions[k]) for k in rawPositions}
 	# Plot all time steps.
