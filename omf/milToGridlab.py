@@ -5,9 +5,6 @@ from StringIO import StringIO
 
 def convert(stdString,seqString):
 	''' Take in a .std and .seq strings from Milsoft and spit out a (json dict, int, int).'''
-
-	print 'Beginning Windmil to GLM conversion.'
-
 	def csvToArray(csvString):
 		''' Simple csv data ingester. '''
 		csvReader = csv.reader(StringIO(csvString))
@@ -15,23 +12,17 @@ def convert(stdString,seqString):
 		for row in csvReader:
 			outArray += [row]
 		return outArray
-
 	# Get all components from the .std:
 	components = csvToArray(stdString)[1:]
 	# Get all hardware stats from the .seq:
 	hardwareStats = csvToArray(seqString)[1:]
 	# We dropped the first rows which are metadata (n.b. there are no headers)
-
 	# Get nominal voltage:
 	nominal_voltage = 2400
 	for ob in components:
 		if ob[1] == 9: nominal_voltage = str(float(ob[14])*1000)
-
-	print 'Nominal feeder voltage', nominal_voltage
-
 	# The number of allowable sub objects:
 	subObCount = 100
-
 	# Helper for lat/lon conversion.
 	def convertToPixel():
 		x_list = []
@@ -51,8 +42,6 @@ def convert(stdString,seqString):
 			x_a,x_b,y_a,y_b = (0,0,0,0)
 		return x_a, x_b, y_a, y_b
 	[x_scale, x_b, y_scale, y_b] = convertToPixel()
-
-
 	def obConvert(objectList):
 		''' take a row in the milsoft .std and turn it into a gridlab-type dict'''
 
@@ -110,16 +99,13 @@ def convert(stdString,seqString):
 		# -----------------------------------------------
 		# Conversion functions for each type of hardware:
 		# -----------------------------------------------
-
 		def convertSwitch(switchList):
-			#print('Converting switch')
 			switch = convertGenericObject(switchList)
 			switch['status'] = ('OPEN' if switchList[9]=='O' else 'CLOSED')
 			switch['phases'] = switchList[2]
 			return switch
 
 		def convertOvercurrentDevice(ocDeviceList):
-			#print('Converting fuse')
 			fuse = convertGenericObject(ocDeviceList)
 			fuse['phases'] = ocDeviceList[2]
 			#MAYBEFIX: set fuse current_limit correctly.
@@ -127,7 +113,6 @@ def convert(stdString,seqString):
 			return fuse
 
 		def convertGenerator(genList):
-			#print('Converting generator')
 			generator = convertGenericObject(genList)
 			generator['Gen_mode'] = 'CONSTANTP'
 			generator['Gen_status'] = ('OFFLINE' if genList[26]=='1' else 'ONLINE')
@@ -135,7 +120,6 @@ def convert(stdString,seqString):
 			return generator
 
 		def convertMotor(motorList):
-			#print('Converting motor')
 			motor = convertGenericObject(motorList)
 			motor['Gen_mode'] = 'CONSTANTP'
 			# Convert horsepower to kW:
@@ -150,7 +134,6 @@ def convert(stdString,seqString):
 			return motor
 
 		def convertConsumer(consList):
-			#print('Converting load')
 			consumer = convertGenericObject(consList)
 			consumer['phases'] = consList[2]
 			
@@ -188,7 +171,6 @@ def convert(stdString,seqString):
 			return consumer
 
 		def convertNode(nodeList):
-			#print('Converting node')
 			node = convertGenericObject(nodeList)
 			#Find the connect type
 			load_mix = statsByName(nodeList[8])
@@ -212,7 +194,6 @@ def convert(stdString,seqString):
 			return node
 
 		def convertSource(sourceList):
-			#print('Converting swing node')
 			source = convertGenericObject(sourceList)
 			#Find the connect type
 			if sourceList[16] == 'W':#Wye connected
@@ -224,7 +205,6 @@ def convert(stdString,seqString):
 			return source
 
 		def convertCapacitor(capList):
-			#print('Converting capacitor')
 			capacitor = convertGenericObject(capList)
 			if  capList[17] == '1': #Delta connected
 				capacitor['phases'] = capList[2] + ('D' if len(capList[2]) >= 2 else '')
@@ -233,7 +213,6 @@ def convert(stdString,seqString):
 			#MAYBEFIX: change these from just default values:
 			if capList[19] in capacitor['phases']:
 				capacitor['pt_phase'] = capList[19]
-
 			capacitor['phases_connected'] = capacitor['phases']
 			if capList[12] == '0': 
 				capacitor['control'] = 'MANUAL'
@@ -245,40 +224,33 @@ def convert(stdString,seqString):
 				capacitor['dwell_time'] = '0.0'
 			else:
 				capacitor['control'] = 'MANUAL'
-				
 			#MAYBEFIX: Handle the other control types in WindMil Properly
-			
 			if 'A' in capacitor['phases']:
 				capacitor['capacitor_A'] = str(float(capList[8])*1000)
 				if capList[13] == '1':
 					capacitor['switchA'] = 'CLOSED'
 				else:
 					capacitor['switchA'] = 'OPEN'
-					
 			if 'B' in capacitor['phases']:
 				capacitor['capacitor_B'] = str(float(capList[9])*1000)
 				if capList[13] == '1':
 					capacitor['switchB'] = 'CLOSED'
 				else:
 					capacitor['switchB'] = 'OPEN'
-					
 			if 'C' in capacitor['phases']:
 				capacitor['capacitor_C'] = str(float(capList[10])*1000)
 				if capList[13] == '1':
 					capacitor['switchC'] = 'CLOSED'
 				else:
 					capacitor['switchC'] = 'OPEN'
-					
 			if len(capacitor['phases']) > 1:
 				capacitor['control_level'] = 'BANK'
 			else:
 				capacitor['control_level'] = 'INDIVIDUAL'
-			
 			capacitor['nominal_voltage'] = nominal_voltage
 			return capacitor
 
 		def convertOhLine(ohLineList):
-			#print('Converting overhead line')
 			myIndex = components.index(objectList)*subObCount
 			overhead = convertGenericObject(ohLineList)
 			# MAYBEFIX: be smarter about multiple neutrals.
@@ -301,7 +273,6 @@ def convert(stdString,seqString):
 				construction_description = 'SystemCnstDefault'
 			else:
 				construction_description = ohLineList[13]
-			
 			# Find the construction code in hardwareStats
 			construction_stats = statsByName(construction_description)
 			if construction_stats is None:
@@ -320,7 +291,6 @@ def convert(stdString,seqString):
 				Dbc = math.sqrt(((float(construction_stats[20]) - float(construction_stats[21]))*(float(construction_stats[20]) - float(construction_stats[21]))) + ((float(construction_stats[24]) - float(construction_stats[25]))*(float(construction_stats[24]) - float(construction_stats[25]))))/12
 				Dbn = math.sqrt(((float(construction_stats[20]) - float(construction_stats[22]))*(float(construction_stats[20]) - float(construction_stats[22]))) + ((float(construction_stats[24]) - float(construction_stats[26]))*(float(construction_stats[24]) - float(construction_stats[26]))))/12
 				Dcn = math.sqrt(((float(construction_stats[21]) - float(construction_stats[22]))*(float(construction_stats[21]) - float(construction_stats[22]))) + ((float(construction_stats[25]) - float(construction_stats[26]))*(float(construction_stats[25]) - float(construction_stats[26]))))/12
-			
 			# Add distances to dictionary when appropriate
 			if 'A' in overhead['phases'] and 'B' in overhead['phases']:
 				if Dab > 0:
@@ -329,7 +299,6 @@ def convert(stdString,seqString):
 					overhead[myIndex+1][myIndex+2]['distance_AB'] = '{:0.6f}'.format(2.5)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_AB'] = '{:0.6f}'.format(0.0)
-				
 			if 'A' in overhead['phases'] and 'C' in overhead['phases']:
 				if Dac > 0:
 					overhead[myIndex+1][myIndex+2]['distance_AC'] = '{:0.6f}'.format(Dac)
@@ -337,7 +306,6 @@ def convert(stdString,seqString):
 					overhead[myIndex+1][myIndex+2]['distance_AC'] = '{:0.6f}'.format(7.0)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_AC'] = '{:0.6f}'.format(0.0)
-				
 			if 'A' in overhead['phases'] and 'N' in overhead['phases']:
 				if Dan > 0:
 					overhead[myIndex+1][myIndex+2]['distance_AN'] = '{:0.6f}'.format(Dan)
@@ -345,7 +313,6 @@ def convert(stdString,seqString):
 					overhead[myIndex+1][myIndex+2]['distance_AN'] = '{:0.6f}'.format(5.656854)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_AN'] = '{:0.6f}'.format(0.0)
-				
 			if 'B' in overhead['phases'] and 'C' in overhead['phases']:
 				if Dbc > 0:
 					overhead[myIndex+1][myIndex+2]['distance_BC'] = '{:0.6f}'.format(Dbc)
@@ -353,7 +320,6 @@ def convert(stdString,seqString):
 					overhead[myIndex+1][myIndex+2]['distance_BC'] = '{:0.6f}'.format(4.5)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_BC'] = '{:0.6f}'.format(0.0)
-				
 			if 'B' in overhead['phases'] and 'N' in overhead['phases']:
 				if Dbn > 0:
 					overhead[myIndex+1][myIndex+2]['distance_BN'] = '{:0.6f}'.format(Dbn)
@@ -361,7 +327,6 @@ def convert(stdString,seqString):
 					overhead[myIndex+1][myIndex+2]['distance_BN'] = '{:0.6f}'.format(4.272002)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_BN'] = '{:0.6f}'.format(0.0)
-				
 			if 'C' in overhead['phases'] and 'N' in overhead['phases']:
 				if Dcn > 0:
 					overhead[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(Dcn)
@@ -369,10 +334,8 @@ def convert(stdString,seqString):
 					overhead[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(5.0)
 			else:
 				overhead[myIndex+1][myIndex+2]['distance_CN'] = '{:0.6f}'.format(0.0)
-					
 			eqdbIndex = {'A':8,'B':9,'C':10,'N':11}
 			condIndex = {'A':3,'B':4,'C':5,'N':6}
-			
 			for letter in overhead['phases']:
 				lineIndex = eqdbIndex[letter]
 				hardware = statsByName(ohLineList[lineIndex])
@@ -384,21 +347,17 @@ def convert(stdString,seqString):
 					res = hardware[5]
 					if res == '0':
 						res = '0.306'
-						
 					geoRad = hardware[6]
 					if geoRad == '0':
 						geoRad = '0.0244'
-						
 					diameter = hardware[8]
 					if diameter == '0':
 						diameter = '0.721'
-						
 				overhead[myIndex+1][myIndex+condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object overhead_line_conductor',
 															'name': overhead['name'] + '_conductor_' + letter,
 															'resistance': res,
 															'geometric_mean_radius': geoRad,
 															'diameter' : diameter}
-				
 			# Check to see if there is distributed load on the line
 			if 'A' in overhead['phases'] and (ohLineList[19] != '0' or ohLineList[22] != '0'):
 				overhead['distributed_load_A'] = float(ohLineList[19])*1000 + float(ohLineList[22])*1000j
@@ -406,11 +365,9 @@ def convert(stdString,seqString):
 				overhead['distributed_load_B'] = float(ohLineList[20])*1000 + float(ohLineList[23])*1000j
 			if 'C' in overhead['phases'] and (ohLineList[21] != '0' or ohLineList[24] != '0'):
 				overhead['distributed_load_C'] = float(ohLineList[21])*1000 + float(ohLineList[24])*1000j
-			
 			return overhead
 
 		def convertUgLine(ugLineList):
-			#print('Converting underground line')
 			myIndex = components.index(objectList)*subObCount
 			underground = convertGenericObject(ugLineList)
 			# MAYBEFIX: be smarter about multiple neutrals.
@@ -431,8 +388,7 @@ def convert(stdString,seqString):
 			if ugLineList[13] == 'NONE':
 				construction_description = 'SystemCnstDefault'
 			else:
-				construction_description = ugLineList[13]
-			
+				construction_description = ugLineList[13]			
 			# Find the construction code in hardwareStats
 			construction_stats = statsByName(construction_description)
 			if construction_stats is None:
@@ -493,7 +449,6 @@ def convert(stdString,seqString):
 					neutral_strands = '6'
 					outer_diameter = 0.98
 					insulation_relative_permitivity = '1'
-					
 					underground[myIndex+1][myIndex+condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
 																			'conductor_resistance' : conductor_resistance,
 																			'shield_resistance' : '0.000000',
@@ -510,39 +465,30 @@ def convert(stdString,seqString):
 					conductor_resistance = hardware[4]
 					if conductor_resistance == '0':
 						conductor_resistance = '1.541000'
-						
 					conductor_diameter = float(hardware[17])*12
 					if conductor_diameter == 0.0:
 						conductor_diameter = 0.292
-						
 					conductor_gmr = hardware[5]
 					if conductor_gmr == '0':
 						conductor_gmr = '0.008830'
-						
 					neutral_resistance = hardware[6]
 					if neutral_resistance == '0':
 						neutral_resistance = '14.087220'
-	
 					neutral_diameter = (float(hardware[9]) - float(hardware[12]))*12
 					if neutral_diameter == 0.0:
 						neutral_diameter = 0.0641
-						
 					neutral_gmr = hardware[16]
 					if neutral_gmr == '0':
 						neutral_gmr = '0.002080'
-						
 					neutral_strands = hardware[7]
 					if neutral_strands == '0':
 						neutral_strands = '6'
-						
 					outer_diameter = float(hardware[9])*12
 					if outer_diameter == 0.0:
 						outer_diameter = 0.98
-						
 					insulation_relative_permitivity = hardware[11]
 					if insulation_relative_permitivity == '0':
 						insulation_relative_permitivity = '1'
-					
 					underground[myIndex+1][myIndex+condIndex[letter]] = {	'omfEmbeddedConfigObject':'conductor_' + letter + ' object underground_line_conductor',
 																			'conductor_resistance' : conductor_resistance,
 																			'shield_resistance' : '0.000000',
@@ -555,19 +501,16 @@ def convert(stdString,seqString):
 																			'shield_gmr' : '0.000000',
 																			'conductor_gmr' : conductor_gmr,
 																			'insulation_relative_permitivitty' : insulation_relative_permitivity}
-					
-				# Check to see if there is distributed load on the line
+			# Check to see if there is distributed load on the line
 			if 'A' in underground['phases'] and (ugLineList[19] != '0' or ugLineList[22] != '0'):
 				underground['distributed_load_A'] = float(ugLineList[19])*1000 + ('+' if float(ugLineList[22]) >= 0.0 else '-') + abs(float(ugLineList[22]))*1000j
 			if 'B' in underground['phases'] and (ugLineList[20] != '0' or ugLineList[23] != '0'):
 				underground['distributed_load_B'] = float(ugLineList[20])*1000 + ('+' if float(ugLineList[23]) >= 0.0 else '-') + abs(float(ugLineList[23]))*1000j
 			if 'C' in underground['phases'] and (ugLineList[21] != '0' or ugLineList[24] != '0'):
 				underground['distributed_load_C'] = float(ugLineList[21])*1000 + ('+' if float(ugLineList[24]) >= 0.0 else '-') + abs(float(ugLineList[24]))*1000j
-				
 			return underground
 
 		def convertRegulator(regList):
-			#print('Converting regulator')
 			myIndex = components.index(objectList)*subObCount
 			regulator = convertGenericObject(regList)
 			regulator['phases'] = regList[2]
@@ -729,7 +672,6 @@ def convert(stdString,seqString):
 				transformer[myIndex+1]['powerC_rating'] = transList[21]
 			#MAYBEFIX: and change these, which were added to make the transformer work on multiple phases: 
 			return transformer
-
 		# Simple lookup table for which function we need to apply:
 		objectToFun =	 {	1 : convertOhLine,
 							2 : convertCapacitor,
@@ -754,7 +696,6 @@ def convert(stdString,seqString):
 
 	# Convert to a list of dicts:
 	convertedComponents = [obConvert(x) for x in components]
-	print('Finished converting components')
 
 	def fixCompConnectivity(comp):
 		''' Rejigger the connectivity attributes to work with Gridlab '''
@@ -848,14 +789,12 @@ def convert(stdString,seqString):
 
 	# Go to a dictionary format so we have a valid glmTree. Start at 1 so we have room for headers:
 	glmTree = {(1+convertedComponents.index(x))*subObCount:x for x in convertedComponents}
-	print('Finished fixing connectivity')
 
 	#MAYBEFIX: REMOVE THIS DISASTER HERE AND FIGURE OUT WHY SOME LINKS ARE MALFORMED
-	print 'Components removed because they have totally busted connectivity:'
 	for key in glmTree.keys():
 		# if ('from' in glmTree[key].keys() and 'to' not in glmTree[key].keys()) or ('to' in glmTree[key].keys() and 'from' not in glmTree[key].keys()):
 		if glmTree[key]['object'] in ['overhead_line','underground_line','regulator','transformer','switch','fuse'] and ('to' not in glmTree[key].keys() or 'from' not in glmTree[key].keys()):
-			print [glmTree[key]['name'], glmTree[key]['object']]
+			# print [glmTree[key]['name'], glmTree[key]['object']]
 			del glmTree[key]
 
 	#Strip guids:
@@ -1254,6 +1193,7 @@ def convert(stdString,seqString):
 						{"omftype":"#set","argument":"minimum_timestep=60"},
 						{"omftype":"#set","argument":"profiler=1"},
 						{"omftype":"#set","argument":"relax_naming_rules=1"},
+						{"omftype":"#include","argument":"\"schedules.glm\""},
 						{"omftype":"module","argument":"generators"},
 						{"omftype":"module","argument":"tape"},
 						{"module":"residential","implicit_enduses":"NONE"},
@@ -1325,8 +1265,8 @@ def _tests(keepFiles=False):
 				exceptionCount += 1
 				print 'FAILED DRAWING', stdString
 			try:
-				# Run powerflow on the GLM.
-				output = gridlabd.runInFilesystem(outGlm, keepFiles=False)
+				# Run powerflow on the GLM. HACK:attachment for schedules.
+				output = gridlabd.runInFilesystem(outGlm, attachments={'schedules.glm':''}, keepFiles=False)
 				with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
 					json.dump(output, outFile, indent=4)
 				print 'RAN GRIDLAB ON', stdString					

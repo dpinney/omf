@@ -166,7 +166,9 @@ def treeToNxGraph(inTree):
 			if 'parent' in item.keys():
 				outGraph.add_edge(item['name'],item['parent'], attr_dict={'type':'parentChild','phases':1})
 				outGraph.node[item['name']]['type']=item['object']
-				outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
+				# Note that attached houses via gridEdit.html won't have lat/lon values, so this try is a workaround.
+				try: outGraph.node[item['name']]['pos']=(float(item.get('latitude',0)),float(item.get('longitude',0)))
+				except: outGraph.node[item['name']]['pos']=(0.0,0.0)
 			elif 'from' in item.keys():
 				myPhase = _phaseCount(item.get('phases','AN'))
 				outGraph.add_edge(item['from'],item['to'],attr_dict={'type':item['object'],'phases':myPhase})
@@ -176,7 +178,8 @@ def treeToNxGraph(inTree):
 			else:
 				outGraph.add_node(item['name'],attr_dict={'type':item['object']})
 			if 'latitude' in item.keys() and 'longitude' in item.keys():
-				outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
+				try: outGraph.node.get(item['name'],{})['pos']=(float(item['latitude']),float(item['longitude']))
+				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
 	return outGraph
 
 def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
