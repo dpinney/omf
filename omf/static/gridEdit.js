@@ -682,8 +682,8 @@ function newChildAtLocation(component, treeIndex) {
 	component['parent'] = tree[treeIndex]['name']
 	// decide which attribute should be put into node and tree
 	if (tree[treeIndex].latitude != undefined && tree[treeIndex].longitude != undefined) {
-		component['latitude'] = tree[treeIndex].latitude + Math.random() * 4 - 2
-		component['longitude'] = tree[treeIndex].longitude + Math.random() * 4 - 2
+		component['latitude'] = parseFloat(tree[treeIndex].latitude) + Math.random() * 4 - 2
+		component['longitude'] = parseFloat(tree[treeIndex].longitude) + Math.random() * 4 - 2
 		// Put the component in the tree with a new name.
 		tree[treeNewIndex] = component
 		tree[treeNewIndex].name = newName
