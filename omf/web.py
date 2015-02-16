@@ -416,8 +416,6 @@ def cymeImportBackground(owner, feederName, stdString, seqString):
 		json.dump(newFeeder, outFile, indent=4)
 	os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
 
-
-
 @app.route("/feederData/<owner>/<feederName>/") 
 @app.route("/feederData/<owner>/<feederName>/<modelFeeder>")
 @flask_login.login_required

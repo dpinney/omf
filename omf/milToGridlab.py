@@ -1197,7 +1197,9 @@ def convert(stdString,seqString):
 						{"omftype":"module","argument":"generators"},
 						{"omftype":"module","argument":"tape"},
 						{"module":"residential","implicit_enduses":"NONE"},
-						{"solver_method":"NR","NR_iteration_limit":"50","module":"powerflow"}]
+						{"solver_method":"NR","NR_iteration_limit":"50","module":"powerflow"},
+						{"omftype": "module", "argument": "climate"},
+						{"object":"climate", "name":"Climate", "interpolate": "QUADRATIC", "tmyfile": "climate.tmy2"}]
 	for headId in xrange(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
 
@@ -1247,6 +1249,7 @@ def _tests(keepFiles=False):
 	testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
 		('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
 		('ABEC-Frank.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq')]
+	testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
 	for stdString, seqString in testFiles:
 		try:
 			# Convert the std+seq.
@@ -1265,8 +1268,8 @@ def _tests(keepFiles=False):
 				exceptionCount += 1
 				print 'FAILED DRAWING', stdString
 			try:
-				# Run powerflow on the GLM. HACK:attachment for schedules.
-				output = gridlabd.runInFilesystem(outGlm, attachments={'schedules.glm':''}, keepFiles=False)
+				# Run powerflow on the GLM. HACK:blank attachments for now.
+				output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
 				with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
 					json.dump(output, outFile, indent=4)
 				print 'RAN GRIDLAB ON', stdString					
