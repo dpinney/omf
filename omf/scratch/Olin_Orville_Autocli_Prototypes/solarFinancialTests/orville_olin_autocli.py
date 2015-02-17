@@ -6,12 +6,10 @@ from solarFinancial import *
 
 
 def _tests(companyname):
-	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	# No-input template.
 	#renderAndShow(template)	
-	# TODO: Fix inData because it's out of date.
-	if ("default" in companyname):	 #confirm this is choptank
+	if ("default" in companyname):	 
 		inData = {"simStartDate": "2013-01-01",
 			"simLengthUnits": "hours",
 			"modelType": "solarFinancial",
@@ -22,169 +20,152 @@ def _tests(companyname):
 			"lifeSpan": "30",
 			"degradation": "0.5",
 			"retailCost": "0.10",
-			"discountRate": "0.07",
-			"pvModuleDerate": "0.995",
-			"mismatch": "0.995",
-			"dcWiring": "0.995",
-			"acWiring": "0.995",
-			"soiling": "0.995",
-			"shading": "0.995",
-			"sysAvail": "0.995",
-			"age": "0.995",
-			"tilt": "False",
-			"manualTilt":"34.65",			
+			"discountRate": "7",
+			"pvModuleDerate": "100",
+			"mismatch": "98",
+			"diodes": "99.5",		
+			"dcWiring": "98",
+			"acWiring": "99",
+			"soiling": "95",
+			"shading": "100",
+			"sysAvail": "100",
+			"age": "100",		
+			"inverterEff": "96.5",
+			"inverterSize": "90",
+			"tilt": "True",
+			"manualTilt":"34.65",	
 			"srecCashFlow": "5,5,3,3,2",
 			"trackingMode":"0",
 			"azimuth":"180",
 			"runTime": "",
 			"rotlim":"45.0",
-			"gamma":"-0.5",
+			"gamma":"-0.45",
 			"omCost": "1000"}
 		modelLoc = pJoin(workDir,"admin","Automated solarFinancial Testing")
-		# Blow away old test results if necessary.
 		try:
 			shutil.rmtree(modelLoc)
 		except:
-			# No previous test results.
 			pass
-		# Run the model.
 		run(modelLoc, inData)
-		# Show the output.
 		renderAndShow(template, modelDir = modelLoc)
-		# # Delete the model.
-		# time.sleep(2)
-		# shutil.rmtree(modelLoc) 
-	if ("orville" in companyname):	                 #Used PVSyst - MG Suniva
-		inData = {"simStartDate": "2013-01-01",  #These 2 & Length should be from GLM
+	if ("orville" in companyname):	             #Most data from PVSyst - MG Suniva
+		inData = {"simStartDate": "2013-01-01",  
 			"simLengthUnits": "hours",
 			"modelType": "solarFinancial",
-			"climateName": "MN-SAINT_CLOUD",     #Minneapolis - pick MN- Saint Cloud, doesn't work for this
-			"simLength": "8760",                 ##16h25m used for PVSyst
-			"systemSize":"95.4",                 #Pnom p.2
-			"installCost":"362338",              #use 1MW Estimated Cost for coserv system: 9.5% of (780000+168,100)+50010+49000+19926+1000
+			"climateName": "MN-SAINT_CLOUD",     #Pick for Minneapolis
+			"simLength": "8760",                 #16h25m in PVSyst
+			"systemSize":"95.4",                 #Pnom p.2 (9.5% of coserv system)
+			"installCost":"362338",              #Taken as 9.5% of 1MW coserv system 
 			"lifeSpan": "30",                    #
-			"degradation": "0.65",               #Suniva Datasheet: (25-12)/(10%)/2
-			"retailCost": "0.099",                #
-			"discountRate": "0.07",              #
-			"pvModuleDerate": "0.994",           #Inverter losses: 4.9%?
-			"mismatch": "0.99",                  #1%
-			"dcWiring": "0.985",                 #1.5%
-			"acWiring": "0.985",                 #1.5%
-			"soiling": "0.99",                   #1%
-			"shading": "0.995",                  #  
-			"sysAvail": "0.995",                 #
-			"age": "0.995",                      #
-			"tilt": "False",                     #Add tilt: 20 degrees
-			"manualTilt":"20",			
-			"srecCashFlow": "0",         #
-			"trackingMode":"0",                  #
-			"azimuth":"180",                     #
+			"degradation": "0.65",               #Suniva Datasheet (SD) Linear Relation: (25-12)/(10%)/2
+			"retailCost": "0.099",               #solarRates
+			"discountRate": "7",                 
+			"pvModuleDerate": "97",              
+			"mismatch": "99",                    #PVS 1%
+			"diodes": "99.5",				
+			"dcWiring": "98.5",                  #PVS 1.5%
+			"acWiring": "98.5",                  #PVS 1.5%
+			"soiling": "99",                     #PVS 1%
+			"shading": "99.5",                   #PVS 0% 
+			"sysAvail": "99.5",                  
+			"age": "99.5",                       
+			"inverterEff": "95.1",               #Inverter losses: 4.9%, 4% combined with transformer http://www.gosolarcalifornia.ca.gov/equipment/inverters.php
+			"inverterSize": "100",				 #PVS		 
+			"tilt": "False",                     #PVS
+			"manualTilt":"20",			         #PVS: 20 degrees
+			"srecCashFlow": "0",                 
+			"trackingMode":"0",                  
+			"azimuth":"180",                     
 			"runTime": "",                      
-			"rotlim":"46.0",                     #suniva datasheet: noct?
-			"gamma":"-0.42",                     #suniva
+			"rotlim":"46.0",                     #SD: noct
+			"gamma":"-0.42",                     #SD
 			"omCost": "1000"}	
 		modelLoc = pJoin(workDir,"admin","Orville solarFinancial Testing")
-		# Blow away old test results if necessary.
 		try:
 			shutil.rmtree(modelLoc)
 		except:
-			# No previous test results.
 			pass
-		# Run the model.
 		run(modelLoc, inData)
-		# Show the output.
 		renderAndShow(template, modelDir = modelLoc)
-		# # Delete the model.
-		# time.sleep(2)
-		# shutil.rmtree(modelLoc)
-	if ("autocli" in companyname):	             #Using NRECA CoServ Ike Byrom - PVSyst Phase 1 V1 
-		inData = {"simStartDate": "2013-01-01",  #These 2 & Length should be from GLM
-			"simLengthUnits": "hours",
+	if ("autocli" in companyname):	             #PVSYS CoServ Ike Byrom - PVSyst Phase 1 V1 
+		inData = {"simStartDate": "2013-01-01", 
 			"modelType": "solarFinancial",        
 			"climateName": "TX-ABILENE",         #For TX Fort Worth
-			"simLength": "8760",                 #
-			"systemSize":"1000",                 #1MW because limited by inverter Pmax of 1MW
+			"simLength": "8760",                 
+			"systemSize":"1358",                 #PVS
 			"installCost":"2121046.54",          #1MW Estimated Cost.xlsx
-			"lifeSpan": "30",                    #code above requires 30
-			"degradation": "0.5", 				 #cant find on panel datasheet
-			"retailCost": "0.085",				 #
-			"discountRate": "0.07",				 #
-			"pvModuleDerate": "0.995",			 #
-			"mismatch": "0.995",                 #PVS
-			"dcWiring": "0.985",                 #PVS
-			"acWiring": "0.985",                 #Does this include transformer losses?
-			"soiling": "0.97",                   #PVSyst
-			"shading": "0.998",                  #Is this Shadings: electrical or Shadings Horizon/Irradiance loss?
-			"sysAvail": "0.995",                 #
-			"age": "0.995",                      #Different from soiling?
-			"tilt": "False",                     #Add 25 deg
-			"manualTilt":"25",			
+			"lifeSpan": "30",                    
+			"degradation": "0.5", 				 
+			"retailCost": "0.085",				 #solarRates
+			"discountRate": "7",				 
+			"pvModuleDerate": "98",			     #SW Datasheet (SWD)
+			"diodes": "99.5",
+			"mismatch": "99.5",                  #PVS
+			"dcWiring": "98.5",                  #PVS: total wiring losses
+			"acWiring": "98.5",                  #PVS: total wiring losses
+			"soiling": "97",                     #PVS
+			"shading": "98.1",                   #1.9%: All shadings on loss diagram
+			"sysAvail": "99.5",                  
+			"age": "99.5",                       
+			"inverterEff": "98",                 #PVS Loss Diagram: Doesn't include Transf losses
+			"inverterSize": "1000",				 					
+			"tilt": "False",                     #
+			"manualTilt":"25",			         #PVS 
 			"srecCashFlow": "0",
 			"trackingMode":"0",
-			"azimuth":"0",                       #0
+			"azimuth":"0",                       #PVS
 			"runTime": "",
 			"rotlim":"45.0",
-			"gamma":"-0.5",                      #Max power temp coefficient 25.22
+			"gamma":"-0.5",                       
 			"omCost": "1000"}
 		modelLoc = pJoin(workDir,"admin","Autocli solarFinancial Testing")
-		# Blow away old test results if necessary.
 		try:
 			shutil.rmtree(modelLoc)
 		except:
-			# No previous test results.
 			pass
-		# Run the model.
 		run(modelLoc, inData)
-		# Show the output.
 		renderAndShow(template, modelDir = modelLoc)
-		# # Delete the model.
-		# time.sleep(2)
-		# shutil.rmtree(modelLoc)
-	if ("olin" in companyname):	                 #Using oservs solar system data but half of install costs
-		inData = {"simStartDate": "2013-01-01",  #These 2 & Length should be from GLM
+	if ("olin" in companyname):	                 #Based on coserv data but half of costs
+		inData = {"simStartDate": "2013-01-01",  
 			"simLengthUnits": "hours",
 			"modelType": "solarFinancial",        
-			"climateName": "KY-LEXINGTON",       #
-			"simLength": "8760",                 #
-			"systemSize":"1000",                 #
-			"installCost":"1060523",             #
-			"lifeSpan": "30",                    #
-			"degradation": "0.5", 				 #
-			"retailCost": "0.078",				 #
-			"discountRate": "0.07",				 #
-			"pvModuleDerate": "0.995",			 #
-			"mismatch": "0.995",                 #
-			"dcWiring": "0.985",                 #
-			"acWiring": "0.985",                 #
-			"soiling": "0.97",                   #
-			"shading": "0.998",                  #
-			"sysAvail": "0.995",                 #
-			"age": "0.995",                      #
+			"climateName": "KY-LEXINGTON",       #Kentucky
+			"simLength": "8760",                 
+			"systemSize":"679",                  #Half size
+			"installCost":"1060523",             #Half cost
+			"lifeSpan": "30",                    
+			"degradation": "0.5", 				 
+			"retailCost": "0.085",				 #solarRates
+			"discountRate": "7",				 
+			"pvModuleDerate": "98",			     #SW Datasheet (SWD)
+			"diodes": "99.5",
+			"mismatch": "99.5",                  #PVS
+			"dcWiring": "98.5",                  #PVS: total wiring losses
+			"acWiring": "98.5",                  #PVS: total wiring losses
+			"soiling": "97",                     #PVS
+			"shading": "98.1",                   #1.9%: All shadings on loss diagram
+			"sysAvail": "99.5",                  
+			"age": "99.5",                       
+			"inverterEff": "98",                 #PVS Loss Diagram: Doesn't include Transf losses
+			"inverterSize": "500",				 					
 			"tilt": "False",                     #
-			"manualTilt":"25",			         #
-			"srecCashFlow": "0",                 #
-			"trackingMode":"0",                  #
-			"azimuth":"0",                       #
-			"runTime": "",                       #
-			"rotlim":"45.0",                     #
-			"gamma":"-0.5",                      #
+			"manualTilt":"25",			         #PVS 
+			"srecCashFlow": "0",
+			"trackingMode":"0",
+			"azimuth":"0",                       #PVS
+			"runTime": "",
+			"rotlim":"45.0",
+			"gamma":"-0.5",                       
 			"omCost": "1000"}
 		modelLoc = pJoin(workDir,"admin","Olin solarFinancial Testing")
-		# Blow away old test results if necessary.		
 		try:
 			shutil.rmtree(modelLoc)
 		except:
-			# No previous test results.
 			pass
-		# Run the model.
 		run(modelLoc, inData)
-		# Show the output.
 		renderAndShow(template, modelDir = modelLoc)
-		# # Delete the model.
-		# time.sleep(2)
-		# shutil.rmtree(modelLoc)
 	if (len(companyname) == 0):
 		pass	
 
 if __name__ == '__main__':
-	_tests("default autocli olin orville")
+	_tests("autocli orville olin")

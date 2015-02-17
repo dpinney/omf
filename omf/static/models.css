@@ -12,12 +12,30 @@ input {
 input[readonly="readonly"], input[readonly], textarea[readonly] {
 	color: gray;
 }
+
+input[readonly="out"], input[out], textarea[out] {
+	font-size: smaller;
+	color: black;
+	background-color: white;
+	text-align: left;
+	font-style: italic;
+}
+
 input[type="text"], select {
 	font-size: medium; 
 	display: inline; 
 	margin:0px;
 }
+
+
 label {
+	display: inline; 
+	line-height: 16pt;
+}
+
+reportLabel {
+	font-style: inline;
+	font-weight: 600;
 	display: inline; 
 	line-height: 16pt;
 }
@@ -150,6 +168,7 @@ table#detailsTable th, table#detailsTable td {
 .preRun, .running, .postRun, p.postRun, .runningInline, .postRunInline, .stoppedInline, .stopped, div.preRun, div.running, div.postRun, div.runningInline, div.postRunInline, div.stoppedInline, div.stopped {
 	display: none;
 }
+
 .tooltip {
 	border-bottom: 1px dotted #000000; 
 	color: #000000; 

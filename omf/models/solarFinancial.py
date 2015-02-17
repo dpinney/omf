@@ -97,11 +97,18 @@ def run(modelDir, inputDict):
 		# Power generation.
 		outData["powerOutputAc"] = [x for x in agg("ac", avg)]
 		outData["InvClipped"] = [x for x in agg("ac", avg)]
-		# Convert power to kilowatts & clip it due to inverters
-		for i in range (0, len(outData["InvClipped"])):
-			outData["InvClipped"][i] = outData["powerOutputAc"][i] 
-			if (float(inputDict.get("inverterSize", 0))*1000 - float(outData["InvClipped"][i])) < 0:
-				outData["InvClipped"][i] = float(inputDict.get("inverterSize", 0))*1000			
+		outData["lossInvClipping"] = [x for x in agg("ac", avg)]
+		#Calculate loss and percent
+		for i in range (0, len(outData["powerOutputAc"])):
+			if (float(outData["powerOutputAc"][i])- float(inputDict.get("inverterSize", 0))*1000) > 0:
+				outData["InvClipped"][i] = float(inputDict.get("inverterSize", 0))*1000						
+				outData["lossInvClipping"][i] = float(outData["powerOutputAc"][i])- float(inputDict.get("inverterSize", 0))*1000	
+				print "loss", outData["lossInvClipping"][i], "power", outData["powerOutputAc"][i]
+			else:
+				outData["InvClipped"][i] = outData["powerOutputAc"][i]	
+				outData["lossInvClipping"][i] = 0
+		print "sum loss", sum(outData["lossInvClipping"]), "sum power", sum(outData["powerOutputAc"])
+		outData["percentClipped"] = (sum(outData["lossInvClipping"])/sum(outData["powerOutputAc"]))*100			
 		# Cashflow outputs.
 		lifeSpan = int(inputDict.get("lifeSpan",30))
 		lifeYears = range(1, 1 + lifeSpan)
@@ -119,6 +126,8 @@ def run(modelDir, inputDict):
 		outData["cumCashFlow"] = map(lambda x:roundSig(x,2), _runningSum(outData["netCashFlow"]))
 		outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 3) / (-1*roundSig(sum(outData["lifeOmCosts"]), 3) + -1*roundSig(sum(outData["lifePurchaseCosts"], 3)))
 		outData["NPV"] = roundSig(npv(discountRate, outData["netCashFlow"]), 3) 
+		outData["lifeGenerationWh"] = sum(outData["powerOutputAc"])*lifeSpan	
+		outData["lifeEnergySales"] = sum(outData["lifeGenerationDollars"])
 		try:
 			# The IRR function is very bad.
 			outData["IRR"] = roundSig(irr(outData["netCashFlow"]), 3)
@@ -291,6 +300,7 @@ def _tests():
 		"discountRate": "7",
 		"pvModuleDerate": "100",
 		"mismatch": "98",
+		"diodes": "99.5",		
 		"dcWiring": "98",
 		"acWiring": "99",
 		"soiling": "95",
