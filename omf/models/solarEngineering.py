@@ -355,6 +355,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		plt.clim(110,130)
 		plt.colorbar()
 		plt.title(stamp)
+		voltChart.tight_layout()
 		voltChart.savefig(pJoin(modelDir,'pngs','volts' + str(step).zfill(3) + "-" + genTime + '.png'))
 		# Reclaim memory by closing, deleting and garbage collecting the last chart.
 		voltChart.clf()
