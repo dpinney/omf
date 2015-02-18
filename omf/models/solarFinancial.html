@@ -316,7 +316,7 @@
 				$("#purchCost").attr("value", "$" + delimitNumbers(parseFloat(allInputData.installCost)))
 				$("#costperKWP").attr("value", (parseFloat(allInputData.installCost)/parseFloat(allInputData.systemSize)).toFixed(0)) 
 				$("#1yearKWH").attr("value", delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000).toFixed(0))) 
-				$("#1yearSales").attr("value", "$" + delimitNumbers(allOutputData.lifeGenerationDollars[0]).toFixed(0))
+				$("#1yearSales").attr("value", "$" + delimitNumbers(allOutputData.lifeGenerationDollars[0].toFixed(0)))
 				$("#1yearOM").attr("value", "$" + delimitNumbers(parseFloat(allInputData.omCost).toFixed(0)))
 				$("#lifeKWH").attr("value", delimitNumbers((parseFloat(allOutputData.lifeGenerationWh)/1000).toFixed(0))) 	
 				$("#lifeOM").attr("value", "$" + delimitNumbers((parseFloat(allInputData.omCost)*parseFloat(allInputData.lifeSpan)).toFixed(0)))
