@@ -314,6 +314,7 @@
 						"data":eval(regNamesArray[i].concat(".RegTapC")),
 						"name":"C",
 					}
+					phaseValue= eval(reg.concat(".RegPhases"))
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "regulatorSeries_" + reg
 					localHighChart["chart"]["inverted"] = false
@@ -321,7 +322,7 @@
 					localHighChart["chart"]["width"] = 1000
 					localHighChart["chart"]["type"] = "line"
 					localHighChart["title"]["text"] = reg.substr(14)
-					localHighChart["series"] = [reg1ATSeries,reg1BTSeries,reg1CTSeries]
+					localHighChart["series"] = []
 					localHighChart["xAxis"] = { "type":"datetime",
 						"tickColor":"gray",
 						"lineColor":"gray",
@@ -337,7 +338,19 @@
 					localHighChart["plotOptions"] = {
 						//"bar":{"stacking":"normal", "shadow":false}, 
 					}
-					new Highcharts.Chart(localHighChart);
+					chart = new Highcharts.Chart(localHighChart);
+					if(phaseValue.indexOf('A') != -1)   
+					{
+  						chart.addSeries(reg1ATSeries)
+  					}
+  					if(phaseValue.indexOf('B') != -1)
+					{
+  						chart.addSeries(reg1BTSeries)
+					}	
+					if(phaseValue.indexOf('C') != -1)
+					{
+  						chart.addSeries(reg1CTSeries)
+  					}
 				}
 			</script>
 		</div>	
@@ -385,7 +398,7 @@
 						"data":eval(capNamesArray[i].concat(".Cap1C")),
 						"name":"C"
 					}
-					//tDGSeries["data"].push(tDG)
+					phaseValue= eval(cap.concat(".CapPhases"))
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "capacitorSeries_" + cap
 					localHighChart["chart"]["inverted"] = false
@@ -393,7 +406,7 @@
 					localHighChart["chart"]["width"] = 1000
 					localHighChart["chart"]["type"] = "column"
 					localHighChart["title"]["text"] = cap.substr(14)
-					localHighChart["series"] = [cap1ASeries,cap1BSeries,cap1CSeries]
+					localHighChart["series"] = []
 					localHighChart["xAxis"] = {
 						"type":"datetime",
 						"tickColor":"gray",
@@ -412,8 +425,19 @@
 						"column":{"stacking":"normal", "shadow":false}, 
 					}
 					localHighChart["chart"]["title"] = {"align":"center","text":"CapCHART",}
-										
-					new Highcharts.Chart(localHighChart);
+					chart = new Highcharts.Chart(localHighChart);
+					if(phaseValue.indexOf('A') != -1)
+					{
+  						chart.addSeries(cap1ASeries)
+  					}
+  					if(phaseValue.indexOf('B') != -1)
+					{
+  						chart.addSeries(cap1BSeries)
+					}	
+					if(phaseValue.indexOf('C') != -1)
+					{
+  						chart.addSeries(cap1CSeries)
+  					}
 				}	
 			</script>
 		</div>

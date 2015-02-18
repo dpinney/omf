@@ -235,6 +235,7 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['RegTapA'] = rawOut[key]['tap_A']
 				cleanOut[newkey]['RegTapB'] = rawOut[key]['tap_B']
 				cleanOut[newkey]['RegTapC'] = rawOut[key]['tap_C']
+				cleanOut[newkey]['RegPhases'] = rawOut[key]['phases'][0]
 			elif key.startswith('Capacitor_') and key.endswith('.csv'):
 				capName=""
 				capName = key
@@ -246,7 +247,7 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['Cap1A'] = rawOut[key]['switchA']
 				cleanOut[newkey]['Cap1B'] = rawOut[key]['switchB']
 				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
-
+				cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 		latPerc = 1.0*len(latKeys)/len(tree)
@@ -441,7 +442,7 @@ def _tests():
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName": "public___Simple Market System",
+		"feederName": "admin___Olin Beckenham Calibrated",
 		"modelType": "solarEngineering",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "24",
