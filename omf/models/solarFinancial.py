@@ -111,13 +111,13 @@ def run(modelDir, inputDict):
 		installCost = float(inputDict.get("installCost",0.0))
 		discountRate = float(inputDict.get("discountRate", 7))/100
 		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
-		outData["lifeGenerationDollars"] = [roundSig(retailCost*(1.0/1000)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)),3) for x in lifeYears]
+		outData["lifeGenerationDollars"] = [retailCost*(1.0/1000)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)) for x in lifeYears]
 		outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
 		outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
 		srec = inputDict.get("srecCashFlow", "").split(",")
 		outData["srecCashFlow"] = map(float,srec) + [0 for x in lifeYears[len(srec):]]
-		outData["netCashFlow"] = [roundSig(x+y+z+a,3) for (x,y,z,a) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"], outData["srecCashFlow"])]
-		outData["cumCashFlow"] = map(lambda x:roundSig(x,2), _runningSum(outData["netCashFlow"]))
+		outData["netCashFlow"] = [x+y+z+a for (x,y,z,a) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"], outData["srecCashFlow"])]
+		outData["cumCashFlow"] = map(lambda x:x, _runningSum(outData["netCashFlow"]))
 		outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 3) / (-1*roundSig(sum(outData["lifeOmCosts"]), 3) + -1*roundSig(sum(outData["lifePurchaseCosts"], 3)))
 		outData["NPV"] = roundSig(npv(discountRate, outData["netCashFlow"]), 3) 
 		outData["lifeGenerationWh"] = sum(outData["powerOutputAc"])*lifeSpan	
@@ -130,7 +130,7 @@ def run(modelDir, inputDict):
 		# Monthly aggregation outputs.
 		months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
 		totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
-		outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),3)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
+		outData["monthlyGeneration"] = [[a, totMonNum(b)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
 		# Heatmaped hour+month outputs.
 		hours = range(24)
 		from calendar import monthrange

@@ -232,7 +232,7 @@
 				newRow.insertCell().innerHTML = name
 				for (i=0; i<vector.length; i++) {
 					cell = newRow.insertCell()
-					cell.innerHTML = delimitNumbers(vector[i])
+					cell.innerHTML = delimitNumbers(vector[i].toFixed(0))
 				}
 			}
 		</script>
@@ -316,10 +316,10 @@
 				$("#purchCost").attr("value", "$" + delimitNumbers(parseFloat(allInputData.installCost)))
 				$("#costperKWP").attr("value", (parseFloat(allInputData.installCost)/parseFloat(allInputData.systemSize)).toFixed(0)) 
 				$("#1yearKWH").attr("value", delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000).toFixed(0))) 
-				$("#1yearSales").attr("value", "$" + delimitNumbers(allOutputData.lifeGenerationDollars[0]))
-				$("#1yearOM").attr("value", "$" + delimitNumbers(parseFloat(allInputData.omCost)))
+				$("#1yearSales").attr("value", "$" + delimitNumbers(allOutputData.lifeGenerationDollars[0]).toFixed(0))
+				$("#1yearOM").attr("value", "$" + delimitNumbers(parseFloat(allInputData.omCost).toFixed(0)))
 				$("#lifeKWH").attr("value", delimitNumbers((parseFloat(allOutputData.lifeGenerationWh)/1000).toFixed(0))) 	
-				$("#lifeOM").attr("value", "$" + delimitNumbers(parseFloat(allInputData.omCost)*parseFloat(allInputData.lifeSpan)))
+				$("#lifeOM").attr("value", "$" + delimitNumbers((parseFloat(allInputData.omCost)*parseFloat(allInputData.lifeSpan)).toFixed(0)))
 				$("#lifeEnergy").attr("value", "$" + delimitNumbers(allOutputData.lifeEnergySales.toFixed(0)))
 				$("#ROI").attr("value", parseFloat(allOutputData.ROI).toFixed(3))
 				$("#NPV").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.NPV.toFixed(0))))		
@@ -409,7 +409,13 @@
 			<table id="monthlySummaryTable">
 			</table>
 			<script>
-				insertMetric("monthlySummaryTable","Month", allOutputData.monthlyGeneration.map(function(x){return x[0]}))
+				table = gebi("monthlySummaryTable")
+				newRow = table.insertRow()
+				newRow.insertCell().innerHTML = "Month"
+				for (i=0; i<allOutputData.monthlyGeneration.map(function(x){return x[1]}).length; i++) {
+					cell = newRow.insertCell()
+					cell.innerHTML = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][i]
+				}
 				insertMetric("monthlySummaryTable","Single Residential PV System Generation (kWh)", allOutputData.monthlyGeneration.map(function(x){return x[1]/1000}))
 			</script>
 		</div>
