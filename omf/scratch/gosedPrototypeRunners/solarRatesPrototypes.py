@@ -24,7 +24,7 @@ def _tests(companyname):
 		"decSale": "162579", "decKWh": 237441891.5*0.96, "decRev": 23317522.75*0.96, "decKWhT": 369382665.6*0.96, "decRevT": 33910924.5*0.96 }
 		inData = {
 			"modelType": "solarRates",
-			"climateName": "AL-HUNTSVILLE",
+			"climateName": "TX-ABILENE",
 			"runTime": "",
 			# Single data point
 			"avgSystemSize": "5",
@@ -88,7 +88,7 @@ def _tests(companyname):
 		"decSale": "42299", "decKWh": 45564364*0.96, "decRev": 5034093*0.96, "decKWhT": 75311980*0.96, "decRevT": 7605792*0.96 }
 		inData = {
 			"modelType": "solarRates",
-			"climateName": "AL-HUNTSVILLE",
+			"climateName": "MN-SAINT_CLOUD",
 			"runTime": "",
 			# Single data point
 			"avgSystemSize": "5",
@@ -152,7 +152,7 @@ def _tests(companyname):
 		"decSale": "55444",                           "decKWh": 61374580*0.96, "decRev": 6619927*0.96, "decKWhT": 185459376.2*0.96, "decRevT": 14063772.08*0.96 }
 		inData = {
 			"modelType": "solarRates",
-			"climateName": "AL-HUNTSVILLE",
+			"climateName": "KY-LEXINGTON",
 			"runTime": "",
 			# Single data point
 			"avgSystemSize": "5",
