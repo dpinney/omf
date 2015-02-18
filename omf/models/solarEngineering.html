@@ -255,15 +255,16 @@
 				localHighChart["chart"]["inverted"] = false
 				localHighChart["chart"]["height"] = 250
 				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["marginBottom"] = 50
 				localHighChart["series"] = [tFromGridSeries,tDGDirectSeries,tDGExportedSeries,tLossesSeries,tLoadsSeries]
 				localHighChart["xAxis"] = {
 					"tickColor":"gray",
 					"lineColor":"gray",
 					"categories":["Source","Destination"]
 					}
-				localHighChart["yAxis"] = {"title":{"text":"Energy (Wh)","style":{"color":"gray"}}}
+				localHighChart["yAxis"] = {"title": {"text": 'Energy (Wh)',"style":{"color":"gray"},"offset":20}},
 				localHighChart["plotOptions"] = {
-					"bar":{"stacking":"normal", "shadow":false}, 
+					"bar":{"stacking":"normal"}, 
 				}
 				
 				new Highcharts.Chart(localHighChart);
