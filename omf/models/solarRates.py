@@ -6,6 +6,7 @@ from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
 from operator import sub
+import traceback
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 import feeder
@@ -20,338 +21,356 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
 def run(modelDir, inputDict):
-	''' Run the model in its directory. '''
-	# Check whether model exist or not
-	if not os.path.isdir(modelDir):
-		os.makedirs(modelDir)
-		inputDict["created"] = str(dt.datetime.now())
-	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
-	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
-		json.dump(inputDict, inputFile, indent = 4)
-	# Copy spcific climate data into model directory
-	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
-		pJoin(modelDir, "climate.tmy2"))
-	# Ready to run
-	startTime = dt.datetime.now()
-	# Set up SAM data structures.
-	ssc = nrelsam.SSCAPI()
-	dat = ssc.ssc_data_create()
-	# Required user inputs.
-	ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
-	# TODO: FIX THIS!!!! IT SHOULD BE AVGSYS*PEN*RESCUSTOMERS
-	ssc.ssc_data_set_number(dat, "system_size", float(inputDict["avgSystemSize"]))
-	# SAM options where we take defaults.
-	ssc.ssc_data_set_number(dat, "derate", 0.97)
-	ssc.ssc_data_set_number(dat, "track_mode", 0)
-	ssc.ssc_data_set_number(dat, "azimuth", 180)
-	ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
-	# Run PV system simulation.
-	mod = ssc.ssc_module_create("pvwattsv1")
-	ssc.ssc_module_exec(mod, dat)
-	# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html
-	startDateTime = "2013-01-01 00:00:00 UTC"
-	# Timestamp output.
-	outData = {}
-	outData["timeStamps"] = [dt.datetime.strftime(
-		dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
-		dt.timedelta(**{"hours":x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(8760))]
-	# Geodata output.
-	outData["city"] = ssc.ssc_data_get_string(dat, "city")
-	outData["state"] = ssc.ssc_data_get_string(dat, "state")
-	outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
-	outData["lon"] = ssc.ssc_data_get_number(dat, "lon")
-	outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
-	# Weather output.
-	outData["climate"] = {}
-	outData["climate"]["Global Horizontal Radiation (W/m^2)"] = ssc.ssc_data_get_array(dat, "gh")
-	outData["climate"]["Plane of Array Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "poa")
-	outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
-	outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
-	outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
-	# Power generation.
-	outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
-	# Monthly aggregation outputs.
-	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
-	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(startDateTime[0:4] + "-{0:02d}".format(x+1))])
-	outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
-	monthlyNoConsumerServedSales = []
-	monthlyKWhSold = []
-	monthlyRevenue = []
-	totalKWhSold = []
-	totalRevenue = []
-	for key in inputDict:
-		# MAYBEFIX: data in list may not be ordered by month.
-		if key.endswith("Sale"):
-			monthlyNoConsumerServedSales.append([key[:3].title(),float(inputDict.get(key, 0))])
-		elif key.endswith("KWh"):# the order of calculation matters
-			monthlyKWhSold.append([key[:3].title(),float(inputDict.get(key, 0))])
-		elif key.endswith("Rev"):
-			monthlyRevenue.append([key[:3].title(),float(inputDict.get(key, 0))])
-		elif key.endswith("KWhT"):
-			totalKWhSold.append([key[:3].title(),float(inputDict.get(key, 0))])
-		elif key.endswith("RevT"):
-			totalRevenue.append([key[:3].title(),float(inputDict.get(key, 0))])
-	outData["monthlyNoConsumerServedSales"] = sorted(monthlyNoConsumerServedSales, key=lambda x:months[x[0]])
-	outData["monthlyKWhSold"] = sorted(monthlyKWhSold, key=lambda x:months[x[0]])
-	outData["monthlyRevenue"] = sorted(monthlyRevenue, key=lambda x:months[x[0]])
-	outData["totalKWhSold"] = sorted(totalKWhSold, key=lambda x:months[x[0]])
-	outData["totalRevenue"] = sorted(totalRevenue, key=lambda x:months[x[0]])
-	outData["lossesBAU"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)]) 
-	outData["lineLossRate"] = outData.get("lossesBAU", 0) / float(inputDict.get("totalKWhPurchased", 0))
-	outData["totalGeneration"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["monthlyGeneration"][i][1]*outData["monthlyNoConsumerServedSales"][i][1]*(float(inputDict.get("resPenetration", 0.05))/100)/1000] for i in range(12)]
-	outData["totalSolarSold"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["totalKWhSold"][i][1] - outData["totalGeneration"][i][1]] for i in range(12)]
-	##################
-	# TODO: add retailCost to the calculation.
-	##################
-	## Flow Diagram Calculations, and order of calculation matters
-	# BAU case
-	outData["BAU"] = {}
-	# E23 = E11
-	outData["BAU"]["totalKWhPurchased"] = float(inputDict.get("totalKWhPurchased", 0))
-	# E24 = SUM(E19:P19)
-	outData["BAU"]["totalKWhSales"] = sum([totalKWhSold[i][1] for i in range(12)]) 
-	# E25 = E23-E24
-	outData["BAU"]["losses"] = outData["lossesBAU"] 
-	# E26 = E25/E23
-	outData["BAU"]["effectiveLossRate"] = outData["BAU"]["losses"] / outData["BAU"]["totalKWhPurchased"]
-	# E27 = 0
-	outData["BAU"]["annualSolarGen"] = 0
-	# E28 = SUM(E17:P17)
-	outData["BAU"]["resNonSolarKWhSold"] = sum([monthlyKWhSold[i][1] for i in range(12)])
-	# E29 = 0
-	outData["BAU"]["solarResDemand"] = 0
-	# E30 = 0
-	outData["BAU"]["solarResSold"] = 0
-	# E31 = E24-E28
-	outData["BAU"]["nonResKWhSold"] = outData["BAU"]["totalKWhSales"] - outData["BAU"]["resNonSolarKWhSold"]
-	# E32 = 0
-	outData["BAU"]["costSolarGen"] = 0
-	# E33 = SUM(E20:P20)-SUM(E18:P18)+E10
-	outData["BAU"]["nonResRev"] = sum([totalRevenue[i][1] for i in range(12)]) - sum([monthlyRevenue[i][1] for i in range(12)]) + float(inputDict.get("otherElecRevenue"))
-	# E34 = (SUM(E18:P18)-SUM(E16:P16)*E6)/SUM(E17:P17)
-	outData["BAU"]["effectiveResRate"] = (sum ([monthlyRevenue[i][1] for i in range(12)]) - sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("customServiceCharge", 0)))/sum([monthlyKWhSold[i][1] for i in range(12)])
-	# E35 = E34*E28+SUM(E16:P16)*E6
-	outData["BAU"]["resNonSolarRev"] = outData["BAU"]["effectiveResRate"] * outData["BAU"]["resNonSolarKWhSold"] + sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("customServiceCharge", 0))
-	# E36 = E30*E34
-	outData["BAU"]["solarResRev"] = 0
-	# E37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71), update after Form 7 model
-	outData["BAU"]["nonPowerCosts"] = 0 
-	# E38 = E23-E25-E28-E30-E31
-	outData["BAU"]["energyAllBal"] = 0
-	# E39 = E36+E33+E35-E47-E72-E37
-	outData["BAU"]["dollarAllBal"] = 0
-	# E40 = 0
-	outData["BAU"]["avgMonthlyBillSolarCus"] = 0
-	# E41 = E35/SUM(E16:P16)
-	avgCustomerCount = (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])/12)
-	outData["BAU"]["avgMonthlyBillNonSolarCus"] = outData["BAU"]["resNonSolarRev"] / sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])
-	# E42 = E63/E24, update after Form 7 model
-	outData["BAU"]["costofService"] = 0
-	# Solar case
-	outData["Solar"] = {}
-	# F27 = SUM(E15:P15)
-	outData["Solar"]["annualSolarGen"] = sum([outData["totalGeneration"][i][1] for i in range(12)])
-	# F24 = E24-F27	    	
-	outData["Solar"]["totalKWhSales"] = sum([totalKWhSold[i][1] for i in range(12)]) - outData["Solar"]["annualSolarGen"]	
-	# F23 =F24/(1-E26)
-	outData["Solar"]["totalKWhPurchased"] = outData["Solar"]["totalKWhSales"]/ (1-outData["BAU"]["effectiveLossRate"])
-	outData["totalsolarmonthly"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["totalSolarSold"][i][1] / (1-outData["BAU"]["effectiveLossRate"])] for i in range(12)]
-	# F25 = F23-F24
-	outData["Solar"]["losses"] = (outData["Solar"]["totalKWhPurchased"] - outData["Solar"]["totalKWhSales"])	
-	# F26 = E26
-	outData["Solar"]["effectiveLossRate"] = outData["BAU"]["effectiveLossRate"]
-	# F28 = (1-E5)*E28
-	outData["Solar"]["resNonSolarKWhSold"] = (1-float(inputDict.get("residentialCustomWithSolarRate", 0.05)))*outData["BAU"]["resNonSolarKWhSold"]
-	# F29 = E5*E28
-	outData["Solar"]["solarResDemand"] = float(inputDict.get("residentialCustomWithSolarRate", 0.05))*outData["BAU"]["resNonSolarKWhSold"]
-	# F30 = F29-F27
-	outData["Solar"]["solarResSold"] = outData["Solar"]["solarResDemand"] - outData["Solar"]["annualSolarGen"]
-	# F31 = E31
-	outData["Solar"]["nonResKWhSold"] = outData["BAU"]["nonResKWhSold"]
-	# F32 = E9*F27
-	outData["Solar"]["costSolarGen"] = float(inputDict.get("solarLCoE", 0.07))*outData["Solar"]["annualSolarGen"]
-	# F33 = E33
-	outData["Solar"]["nonResRev"] = outData["BAU"]["nonResRev"]
-	# F34 = E34
-	outData["Solar"]["effectiveResRate"] = outData["BAU"]["effectiveResRate"]
-	# F35 = E35*(1-E5)
-	outData["Solar"]["resNonSolarRev"] = outData["BAU"]["resNonSolarRev"] * (1 - float(inputDict.get("resPenetration", 0.05))/100)
-	# F30*E34 = Solar revenue from selling at residential rate
-	solarSoldRateRev = outData["Solar"]["solarResSold"] * outData["Solar"]["effectiveResRate"]
-	# (E6+E7)*SUM(E16:P16)*E5 = Solar revenue from charges
-	solarChargesRev = (float(inputDict.get("customServiceCharge", 0))+float(inputDict.get("solarServiceCharge", 0)))*sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("resPenetration", 0.05))/100
-	# F36 = F30*E34+(E6+E7)*SUM(E16:P16)*E5 = solarSoldRate + solarChargesRev
-	outData["Solar"]["solarResRev"] = solarSoldRateRev + solarChargesRev
-	# F37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71) = E37, update after Form 7 model
-	outData["Solar"]["nonPowerCosts"] = 0
-	# F38 = F23-F25-F28-F30-E31
-	outData["Solar"]["energyAllBal"] = 0
-	# F39 = F36+E33+F35-F47-F72-E37
-	outData["Solar"]["dollarAllBal"] = 0
-	# F41 = (F35)/(SUM(E16:P16)*(1-E5))
-	outData["Solar"]["avgMonthlyBillNonSolarCus"] = outData["Solar"]["resNonSolarRev"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])* (1 - float(inputDict.get("resPenetration", 0.05))/100))
-	# F42 = F30*E34/(SUM(E16:P16)*E5)+E6+E7
-	outData["Solar"]["avgMonthlyBillSolarCus"] = outData["Solar"]["solarResSold"] * outData["BAU"]["effectiveResRate"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)]) * float(inputDict.get("resPenetration", 0.05))/100) + float(inputDict.get("customServiceCharge", 0))+float(inputDict.get("solarServiceCharge", 0))
-	# F43 = (F27/(SUM(E16:P16)*E5))*E9
-	outData["Solar"]["avgMonthlyBillSolarSolarCus"] = (outData["Solar"]["annualSolarGen"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)]) * float(inputDict.get("resPenetration", 0.05))/100)) * float(inputDict.get("solarLCoE", 0.07))
-	# Net Average Monthly Bill
-	avgMonthlyBillSolarNet = outData["Solar"]["avgMonthlyBillSolarCus"] + outData["Solar"]["avgMonthlyBillSolarSolarCus"]	
-	outData["Solar"]["avgMonthlyBillSolarCus"] = avgMonthlyBillSolarNet
-	# F45 = F63/F24, update after Form 7 model
-	outData["Solar"]["costofService"] = 0
-	## Form 7 Model
-	# E46
-	outData["Solar"]["powerProExpense"] = outData["BAU"]["powerProExpense"] = float(inputDict.get("powerProExpense", 0))
-	# E47 != F47
-	outData["BAU"]["costPurchasedPower"] = float(inputDict.get("costPurchasedPower", 0))
-	# E48
-	outData["Solar"]["transExpense"] = outData["BAU"]["transExpense"] = float(inputDict.get("transExpense", 0))
-	# E49
-	outData["Solar"]["distriExpenseO"] = outData["BAU"]["distriExpenseO"] = float(inputDict.get("distriExpenseO", 0))
-	# E50
-	outData["Solar"]["distriExpenseM"] = outData["BAU"]["distriExpenseM"] = float(inputDict.get("distriExpenseM", 0))
-	# E51
-	outData["Solar"]["customerAccountExpense"] = outData["BAU"]["customerAccountExpense"] = float(inputDict.get("customerAccountExpense", 0))
-	# E52
-	outData["Solar"]["customerServiceExpense"] = outData["BAU"]["customerServiceExpense"] = float(inputDict.get("customerServiceExpense", 0))
-	# E53
-	outData["Solar"]["salesExpense"] = outData["BAU"]["salesExpense"] = float(inputDict.get("salesExpense", 0))
-	# E54
-	outData["Solar"]["adminGeneralExpense"] = outData["BAU"]["adminGeneralExpense"] = float(inputDict.get("adminGeneralExpense", 0))
-	# E56
-	outData["Solar"]["depreAmortiExpense"] = outData["BAU"]["depreAmortiExpense"] = float(inputDict.get("depreAmortiExpense", 0))
-	# E57
-	outData["Solar"]["taxExpensePG"] = outData["BAU"]["taxExpensePG"] = float(inputDict.get("taxExpensePG", 0))
-	# E58
-	outData["Solar"]["taxExpense"] = outData["BAU"]["taxExpense"] = float(inputDict.get("taxExpense", 0))
-	# E59
-	outData["Solar"]["interestLongTerm"] = outData["BAU"]["interestLongTerm"] = float(inputDict.get("interestLongTerm", 0))
-	# E60
-	outData["Solar"]["interestConstruction"] = outData["BAU"]["interestConstruction"] = float(inputDict.get("interestConstruction", 0))
-	# E61
-	outData["Solar"]["interestExpense"] = outData["BAU"]["interestExpense"] = float(inputDict.get("interestExpense", 0))
-	# E62
-	outData["Solar"]["otherDeductions"] = outData["BAU"]["otherDeductions"] = float(inputDict.get("otherDeductions", 0))
-	# E65
-	outData["Solar"]["nonOpMarginInterest"] = outData["BAU"]["nonOpMarginInterest"] = float(inputDict.get("nonOpMarginInterest", 0))
-	# E66
-	outData["Solar"]["fundsUsedConstruc"] = outData["BAU"]["fundsUsedConstruc"] = float(inputDict.get("fundsUsedConstruc", 0))
-	# E67
-	outData["Solar"]["incomeEquityInvest"] = outData["BAU"]["incomeEquityInvest"] = float(inputDict.get("incomeEquityInvest", 0))
-	# E68
-	outData["Solar"]["nonOpMarginOther"] = outData["BAU"]["nonOpMarginOther"] = float(inputDict.get("nonOpMarginOther", 0))
-	# E69
-	outData["Solar"]["genTransCapCredits"] = outData["BAU"]["genTransCapCredits"] = float(inputDict.get("genTransCapCredits", 0))
-	# E70
-	outData["Solar"]["otherCapCreditsPatroDivident"] = outData["BAU"]["otherCapCreditsPatroDivident"] = float(inputDict.get("otherCapCreditsPatroDivident", 0))
-	# E71
-	outData["Solar"]["extraItems"] = outData["BAU"]["extraItems"] = float(inputDict.get("extraItems", 0))
-	# Calculation
-	# E45 = SUM(E20:P20)+E10
-	outData["BAU"]["operRevPatroCap"] = sum([totalRevenue[i][1] for i in range(12)])+float(inputDict.get("otherElecRevenue", 0))
-	# E55 = SUM(E46:E54)
-	outData["BAU"]["totalOMExpense"] = float(inputDict.get("powerProExpense")) \
-		+ float(inputDict.get("costPurchasedPower")) \
-		+ float(inputDict.get("transExpense")) \
-		+ float(inputDict.get("distriExpenseO")) \
-		+ float(inputDict.get("distriExpenseM")) \
-		+ float(inputDict.get("customerAccountExpense")) \
-		+ float(inputDict.get("customerServiceExpense")) \
-		+ float(inputDict.get("salesExpense"))  \
-		+ float(inputDict.get("adminGeneralExpense"))
-	# E63 = SUM(E55:E62)
-	outData["BAU"]["totalCostElecService"] = outData["BAU"]["totalOMExpense"] \
-		+ float(inputDict.get("depreAmortiExpense"))\
-		+ float(inputDict.get("taxExpensePG"))\
-		+ float(inputDict.get("taxExpense"))\
-		+ float(inputDict.get("interestLongTerm"))\
-		+ float(inputDict.get("interestExpense"))\
-		+ float(inputDict.get("interestConstruction"))\
-		+ outData["BAU"]["otherDeductions"]		
-	# E64 = E45-E63
-	outData["BAU"]["patCapOperMargins"] = outData["BAU"]["operRevPatroCap"] - outData["BAU"]["totalCostElecService"]
-	# E72 = SUM(E64:E71)
-	outData["BAU"]["patCapital"] = outData["BAU"]["patCapOperMargins"]\
-		+ float(inputDict.get("nonOpMarginInterest"))\
-		+ float(inputDict.get("fundsUsedConstruc"))\
-		+ float(inputDict.get("incomeEquityInvest"))\
-		+ float(inputDict.get("nonOpMarginOther"))\
-		+ float(inputDict.get("genTransCapCredits"))\
-		+ float(inputDict.get("otherCapCreditsPatroDivident"))\
-		+ float(inputDict.get("extraItems"))
-	# F48 = E48-F27*E34+SUM(E16:P16)*E5*E7
-	outData["Solar"]["operRevPatroCap"] = outData["BAU"]["operRevPatroCap"] - outData["BAU"]["effectiveResRate"]*outData["Solar"]["annualSolarGen"] + sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("resPenetration", 0.05))/100*float(inputDict.get("solarServiceCharge", 0))	
-	# F47 = (F23)*E8
-	outData["Solar"]["costPurchasedPower"] = outData["Solar"]["totalKWhPurchased"] * float(inputDict.get("wholesaleEnergyCost", 0))
-	# F55 = SUM(F46:F54)
-	outData["Solar"]["totalOMExpense"] = outData["Solar"]["powerProExpense"]\
-		+ outData["Solar"]["costPurchasedPower"]\
-		+ outData["Solar"]["transExpense"]\
-		+ outData["Solar"]["distriExpenseO"]\
-		+ outData["Solar"]["distriExpenseM"]\
-		+ outData["Solar"]["customerAccountExpense"]\
-		+ outData["Solar"]["customerServiceExpense"]\
-		+ outData["Solar"]["salesExpense"]\
-		+ outData["Solar"]["adminGeneralExpense"]
-	# F63 = E63
-	outData["Solar"]["totalCostElecService"] = outData["Solar"]["totalOMExpense"]\
-		+ outData["Solar"]["depreAmortiExpense"]\
-		+ outData["Solar"]["taxExpensePG"]\
-		+ outData["Solar"]["taxExpense"]\
-		+ outData["Solar"]["interestLongTerm"]\
-		+ outData["Solar"]["interestConstruction"]\
-		+ outData["Solar"]["interestExpense"]\
-		+ outData["Solar"]["otherDeductions"]
-	# F64 = F45 - F63
-	outData["Solar"]["patCapOperMargins"] = outData["Solar"]["operRevPatroCap"] - outData["Solar"]["totalCostElecService"]
-	# F72 = SUM(F64:F71)
-	outData["Solar"]["patCapital"] = outData["Solar"]["patCapOperMargins"]\
-		+ outData["Solar"]["nonOpMarginInterest"]\
-		+ outData["Solar"]["fundsUsedConstruc"]\
-		+ outData["Solar"]["incomeEquityInvest"]\
-		+ outData["Solar"]["nonOpMarginOther"]\
-		+ outData["Solar"]["genTransCapCredits"]\
-		+ outData["Solar"]["otherCapCreditsPatroDivident"]\
-		+ outData["Solar"]["extraItems"]
-	# E37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71), update after Form 7 model
-	outData["BAU"]["nonPowerCosts"] = outData["BAU"]["transExpense"] \
-		+ outData["BAU"]["distriExpenseO"] \
-		+ outData["BAU"]["distriExpenseM"] \
-		+ outData["BAU"]["customerAccountExpense"] \
-		+ outData["BAU"]["customerServiceExpense"] \
-		+ outData["BAU"]["salesExpense"] \
-		+ outData["BAU"]["adminGeneralExpense"] \
-		+ outData["BAU"]["depreAmortiExpense"] \
-		+ outData["BAU"]["taxExpensePG"] \
-		+ outData["BAU"]["taxExpense"] \
-		+ outData["BAU"]["interestLongTerm"] \
-		+ outData["BAU"]["interestConstruction"] \
-		+ outData["BAU"]["interestExpense"] \
-		+ outData["BAU"]["otherDeductions"] \
-		- (outData["BAU"]["nonOpMarginInterest"] \
-		+ outData["BAU"]["fundsUsedConstruc"] \
-		+ outData["BAU"]["incomeEquityInvest"] \
-		+ outData["BAU"]["nonOpMarginOther"] \
-		+ outData["BAU"]["genTransCapCredits"] \
-		+ outData["BAU"]["otherCapCreditsPatroDivident"] \
-		+ outData["BAU"]["extraItems"])
-	# E42 = E63/E24, update after Form 7 model
-	outData["BAU"]["costofService"] = outData["BAU"]["totalCostElecService"] / outData["BAU"]["totalKWhSales"] 
-	# F37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71) = E37, update after Form 7 model
-	outData["Solar"]["nonPowerCosts"] = outData["BAU"]["nonPowerCosts"]
-	# F42 = F63/F24, update after Form 7 model
-	outData["Solar"]["costofService"] = outData["Solar"]["totalCostElecService"] / outData["Solar"]["totalKWhSales"]  
-	# Stdout/stderr.
-	outData["stdout"] = "Success"
-	outData["stderr"] = ""
-	# Write the output.
-	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-		json.dump(outData, outFile, indent=4)
-	# Update the runTime in the input file.
-	endTime = dt.datetime.now()
-	inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
-	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-		json.dump(inputDict, inFile, indent=4)
+	try:
+		''' Run the model in its directory. '''
+		# Check whether model exist or not
+		if not os.path.isdir(modelDir):
+			os.makedirs(modelDir)
+			inputDict["created"] = str(dt.datetime.now())
+		# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
+		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
+			json.dump(inputDict, inputFile, indent = 4)
+		# Copy spcific climate data into model directory
+		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
+			pJoin(modelDir, "climate.tmy2"))
+		# Ready to run
+		startTime = dt.datetime.now()
+		# Set up SAM data structures.
+		ssc = nrelsam.SSCAPI()
+		dat = ssc.ssc_data_create()
+		# Required user inputs.
+		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
+		# TODO: FIX THIS!!!! IT SHOULD BE AVGSYS*PEN*RESCUSTOMERS
+		ssc.ssc_data_set_number(dat, "system_size", float(inputDict["avgSystemSize"]))
+		# SAM options where we take defaults.
+		ssc.ssc_data_set_number(dat, "derate", 0.97)
+		ssc.ssc_data_set_number(dat, "track_mode", 0)
+		ssc.ssc_data_set_number(dat, "azimuth", 180)
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
+		# Run PV system simulation.
+		mod = ssc.ssc_module_create("pvwattsv1")
+		ssc.ssc_module_exec(mod, dat)
+		# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html
+		startDateTime = "2013-01-01 00:00:00 UTC"
+		# Timestamp output.
+		outData = {}
+		outData["timeStamps"] = [dt.datetime.strftime(
+			dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
+			dt.timedelta(**{"hours":x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(8760))]
+		# Geodata output.
+		outData["city"] = ssc.ssc_data_get_string(dat, "city")
+		outData["state"] = ssc.ssc_data_get_string(dat, "state")
+		outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
+		outData["lon"] = ssc.ssc_data_get_number(dat, "lon")
+		outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
+		# Weather output.
+		outData["climate"] = {}
+		outData["climate"]["Global Horizontal Radiation (W/m^2)"] = ssc.ssc_data_get_array(dat, "gh")
+		outData["climate"]["Plane of Array Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "poa")
+		outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
+		outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
+		outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
+		# Power generation.
+		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
+		# Monthly aggregation outputs.
+		months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
+		totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(startDateTime[0:4] + "-{0:02d}".format(x+1))])
+		outData["monthlyGeneration"] = [[a, roundSig(totMonNum(b),2)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
+		monthlyNoConsumerServedSales = []
+		monthlyKWhSold = []
+		monthlyRevenue = []
+		totalKWhSold = []
+		totalRevenue = []
+		for key in inputDict:
+			# MAYBEFIX: data in list may not be ordered by month.
+			if key.endswith("Sale"):
+				monthlyNoConsumerServedSales.append([key[:3].title(),float(inputDict.get(key, 0))])
+			elif key.endswith("KWh"):# the order of calculation matters
+				monthlyKWhSold.append([key[:3].title(),float(inputDict.get(key, 0))])
+			elif key.endswith("Rev"):
+				monthlyRevenue.append([key[:3].title(),float(inputDict.get(key, 0))])
+			elif key.endswith("KWhT"):
+				totalKWhSold.append([key[:3].title(),float(inputDict.get(key, 0))])
+			elif key.endswith("RevT"):
+				totalRevenue.append([key[:3].title(),float(inputDict.get(key, 0))])
+		outData["monthlyNoConsumerServedSales"] = sorted(monthlyNoConsumerServedSales, key=lambda x:months[x[0]])
+		outData["monthlyKWhSold"] = sorted(monthlyKWhSold, key=lambda x:months[x[0]])
+		outData["monthlyRevenue"] = sorted(monthlyRevenue, key=lambda x:months[x[0]])
+		outData["totalKWhSold"] = sorted(totalKWhSold, key=lambda x:months[x[0]])
+		outData["totalRevenue"] = sorted(totalRevenue, key=lambda x:months[x[0]])
+		outData["lossesBAU"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)]) 
+		outData["lineLossRate"] = outData.get("lossesBAU", 0) / float(inputDict.get("totalKWhPurchased", 0))
+		outData["totalGeneration"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["monthlyGeneration"][i][1]*outData["monthlyNoConsumerServedSales"][i][1]*(float(inputDict.get("resPenetration", 5))/100/1000)] for i in range(12)]
+		outData["totalSolarSold"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["totalKWhSold"][i][1] - outData["totalGeneration"][i][1]] for i in range(12)]
+		##################
+		# TODO: add retailCost to the calculation.
+		##################
+		## Flow Diagram Calculations, and order of calculation matters
+		# BAU case
+		outData["BAU"] = {}
+		# E23 = E11
+		outData["BAU"]["totalKWhPurchased"] = float(inputDict.get("totalKWhPurchased", 0))
+		# E24 = SUM(E19:P19)
+		outData["BAU"]["totalKWhSales"] = sum([totalKWhSold[i][1] for i in range(12)]) 
+		# E25 = E23-E24
+		outData["BAU"]["losses"] = outData["lossesBAU"] 
+		# E26 = E25/E23
+		outData["BAU"]["effectiveLossRate"] = outData["BAU"]["losses"] / outData["BAU"]["totalKWhPurchased"]
+		# E27 = 0
+		outData["BAU"]["annualSolarGen"] = 0
+		# E28 = SUM(E17:P17)
+		outData["BAU"]["resNonSolarKWhSold"] = sum([monthlyKWhSold[i][1] for i in range(12)])
+		# E29 = 0
+		outData["BAU"]["solarResDemand"] = 0
+		# E30 = 0
+		outData["BAU"]["solarResSold"] = 0
+		# E31 = E24-E28
+		outData["BAU"]["nonResKWhSold"] = outData["BAU"]["totalKWhSales"] - outData["BAU"]["resNonSolarKWhSold"]
+		# E32 = 0
+		outData["BAU"]["costSolarGen"] = 0
+		# E33 = SUM(E20:P20)-SUM(E18:P18)+E10
+		outData["BAU"]["nonResRev"] = sum([totalRevenue[i][1] for i in range(12)]) - sum([monthlyRevenue[i][1] for i in range(12)]) + float(inputDict.get("otherElecRevenue"))
+		# E34 = (SUM(E18:P18)-SUM(E16:P16)*E6)/SUM(E17:P17)
+		outData["BAU"]["effectiveResRate"] = (sum ([monthlyRevenue[i][1] for i in range(12)]) - sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("customServiceCharge", 0)))/sum([monthlyKWhSold[i][1] for i in range(12)])
+		# E35 = E34*E28+SUM(E16:P16)*E6
+		outData["BAU"]["resNonSolarRev"] = outData["BAU"]["effectiveResRate"] * outData["BAU"]["resNonSolarKWhSold"] + sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("customServiceCharge", 0))
+		# E36 = E30*E34
+		outData["BAU"]["solarResRev"] = 0
+		# E37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71), update after Form 7 model
+		outData["BAU"]["nonPowerCosts"] = 0 
+		# E38 = E23-E25-E28-E30-E31
+		outData["BAU"]["energyAllBal"] = 0
+		# E39 = E36+E33+E35-E47-E72-E37
+		outData["BAU"]["dollarAllBal"] = 0
+		# E40 = 0
+		outData["BAU"]["avgMonthlyBillSolarCus"] = 0
+		# E41 = E35/SUM(E16:P16)
+		avgCustomerCount = (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])/12)
+		outData["BAU"]["avgMonthlyBillNonSolarCus"] = outData["BAU"]["resNonSolarRev"] / sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])
+		# E42 = E63/E24, update after Form 7 model
+		outData["BAU"]["costofService"] = 0
+		# Solar case
+		outData["Solar"] = {}
+		# F27 = SUM(E15:P15)
+		outData["Solar"]["annualSolarGen"] = sum([outData["totalGeneration"][i][1] for i in range(12)])
+		# F24 = E24-F27	    	
+		outData["Solar"]["totalKWhSales"] = sum([totalKWhSold[i][1] for i in range(12)]) - outData["Solar"]["annualSolarGen"]	
+		# F23 =F24/(1-E26)
+		outData["Solar"]["totalKWhPurchased"] = outData["Solar"]["totalKWhSales"]/ (1-outData["BAU"]["effectiveLossRate"])
+		outData["totalsolarmonthly"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["totalSolarSold"][i][1] / (1-outData["BAU"]["effectiveLossRate"])] for i in range(12)]
+		# F25 = F23-F24
+		outData["Solar"]["losses"] = (outData["Solar"]["totalKWhPurchased"] - outData["Solar"]["totalKWhSales"])	
+		# F26 = E26
+		outData["Solar"]["effectiveLossRate"] = outData["BAU"]["effectiveLossRate"]
+		# F28 = (1-E5)*E28
+		outData["Solar"]["resNonSolarKWhSold"] = (1-float(inputDict.get("resPenetration", 0))/100)*outData["BAU"]["resNonSolarKWhSold"]
+		# F29 = E5*E28
+		outData["Solar"]["solarResDemand"] = float(inputDict.get("resPenetration", 0))/100*outData["BAU"]["resNonSolarKWhSold"]
+		# F30 = F29-F27
+		outData["Solar"]["solarResSold"] = outData["Solar"]["solarResDemand"] - outData["Solar"]["annualSolarGen"]
+		# F31 = E31
+		outData["Solar"]["nonResKWhSold"] = outData["BAU"]["nonResKWhSold"]
+		# F32 = E9*F27
+		outData["Solar"]["costSolarGen"] = float(inputDict.get("solarLCoE", 0.07))*outData["Solar"]["annualSolarGen"]
+		# F33 = E33
+		outData["Solar"]["nonResRev"] = outData["BAU"]["nonResRev"]
+		# F34 = E34
+		outData["Solar"]["effectiveResRate"] = outData["BAU"]["effectiveResRate"]
+		# F35 = E35*(1-E5)
+		outData["Solar"]["resNonSolarRev"] = outData["BAU"]["resNonSolarRev"] * (1 - float(inputDict.get("resPenetration", 0.05))/100)
+		# F30*E34 = Solar revenue from selling at residential rate
+		solarSoldRateRev = outData["Solar"]["solarResSold"] * outData["Solar"]["effectiveResRate"]
+		# (E6+E7)*SUM(E16:P16)*E5 = Solar revenue from charges
+		solarChargesRev = (float(inputDict.get("customServiceCharge", 0))+float(inputDict.get("solarServiceCharge", 0)))*sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("resPenetration", 0.05))/100
+		# F36 = F30*E34+(E6+E7)*SUM(E16:P16)*E5 = solarSoldRate + solarChargesRev
+		outData["Solar"]["solarResRev"] = solarSoldRateRev + solarChargesRev
+		# F37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71) = E37, update after Form 7 model
+		outData["Solar"]["nonPowerCosts"] = 0
+		# F38 = F23-F25-F28-F30-E31
+		outData["Solar"]["energyAllBal"] = 0
+		# F39 = F36+E33+F35-F47-F72-E37
+		outData["Solar"]["dollarAllBal"] = 0
+		if (float(inputDict.get("resPenetration", 0.05)) > 0):
+			# F41 = (F35)/(SUM(E16:P16)*(1-E5))
+			outData["Solar"]["avgMonthlyBillNonSolarCus"] = outData["Solar"]["resNonSolarRev"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])* (1 - float(inputDict.get("resPenetration", 0.05))/100))
+			# F42 = F30*E34/(SUM(E16:P16)*E5)+E6+E7
+			outData["Solar"]["avgMonthlyBillSolarCus"] = outData["Solar"]["solarResSold"] * outData["BAU"]["effectiveResRate"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)]) * float(inputDict.get("resPenetration", 0.05))/100) + float(inputDict.get("customServiceCharge", 0))+float(inputDict.get("solarServiceCharge", 0))
+			# F43 = (F27/(SUM(E16:P16)*E5))*E9
+			outData["Solar"]["avgMonthlyBillSolarSolarCus"] = (outData["Solar"]["annualSolarGen"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)]) * float(inputDict.get("resPenetration", 0.05))/100)) * float(inputDict.get("solarLCoE", 0.07))
+		else: 
+			outData["Solar"]["avgMonthlyBillNonSolarCus"] = 0	
+			outData["Solar"]["avgMonthlyBillSolarCus"] = 0
+			outData["Solar"]["avgMonthlyBillSolarSolarCus"] = 0	
+		# Net Average Monthly Bill
+		avgMonthlyBillSolarNet = outData["Solar"]["avgMonthlyBillSolarCus"] + outData["Solar"]["avgMonthlyBillSolarSolarCus"]	
+		outData["Solar"]["avgMonthlyBillSolarCus"] = avgMonthlyBillSolarNet
+		# F45 = F63/F24, update after Form 7 model
+		outData["Solar"]["costofService"] = 0
+		## Form 7 Model
+		# E46
+		outData["Solar"]["powerProExpense"] = outData["BAU"]["powerProExpense"] = float(inputDict.get("powerProExpense", 0))
+		# E47 != F47
+		outData["BAU"]["costPurchasedPower"] = float(inputDict.get("costPurchasedPower", 0))
+		# E48
+		outData["Solar"]["transExpense"] = outData["BAU"]["transExpense"] = float(inputDict.get("transExpense", 0))
+		# E49
+		outData["Solar"]["distriExpenseO"] = outData["BAU"]["distriExpenseO"] = float(inputDict.get("distriExpenseO", 0))
+		# E50
+		outData["Solar"]["distriExpenseM"] = outData["BAU"]["distriExpenseM"] = float(inputDict.get("distriExpenseM", 0))
+		# E51
+		outData["Solar"]["customerAccountExpense"] = outData["BAU"]["customerAccountExpense"] = float(inputDict.get("customerAccountExpense", 0))
+		# E52
+		outData["Solar"]["customerServiceExpense"] = outData["BAU"]["customerServiceExpense"] = float(inputDict.get("customerServiceExpense", 0))
+		# E53
+		outData["Solar"]["salesExpense"] = outData["BAU"]["salesExpense"] = float(inputDict.get("salesExpense", 0))
+		# E54
+		outData["Solar"]["adminGeneralExpense"] = outData["BAU"]["adminGeneralExpense"] = float(inputDict.get("adminGeneralExpense", 0))
+		# E56
+		outData["Solar"]["depreAmortiExpense"] = outData["BAU"]["depreAmortiExpense"] = float(inputDict.get("depreAmortiExpense", 0))
+		# E57
+		outData["Solar"]["taxExpensePG"] = outData["BAU"]["taxExpensePG"] = float(inputDict.get("taxExpensePG", 0))
+		# E58
+		outData["Solar"]["taxExpense"] = outData["BAU"]["taxExpense"] = float(inputDict.get("taxExpense", 0))
+		# E59
+		outData["Solar"]["interestLongTerm"] = outData["BAU"]["interestLongTerm"] = float(inputDict.get("interestLongTerm", 0))
+		# E60
+		outData["Solar"]["interestConstruction"] = outData["BAU"]["interestConstruction"] = float(inputDict.get("interestConstruction", 0))
+		# E61
+		outData["Solar"]["interestExpense"] = outData["BAU"]["interestExpense"] = float(inputDict.get("interestExpense", 0))
+		# E62
+		outData["Solar"]["otherDeductions"] = outData["BAU"]["otherDeductions"] = float(inputDict.get("otherDeductions", 0))
+		# E65
+		outData["Solar"]["nonOpMarginInterest"] = outData["BAU"]["nonOpMarginInterest"] = float(inputDict.get("nonOpMarginInterest", 0))
+		# E66
+		outData["Solar"]["fundsUsedConstruc"] = outData["BAU"]["fundsUsedConstruc"] = float(inputDict.get("fundsUsedConstruc", 0))
+		# E67
+		outData["Solar"]["incomeEquityInvest"] = outData["BAU"]["incomeEquityInvest"] = float(inputDict.get("incomeEquityInvest", 0))
+		# E68
+		outData["Solar"]["nonOpMarginOther"] = outData["BAU"]["nonOpMarginOther"] = float(inputDict.get("nonOpMarginOther", 0))
+		# E69
+		outData["Solar"]["genTransCapCredits"] = outData["BAU"]["genTransCapCredits"] = float(inputDict.get("genTransCapCredits", 0))
+		# E70
+		outData["Solar"]["otherCapCreditsPatroDivident"] = outData["BAU"]["otherCapCreditsPatroDivident"] = float(inputDict.get("otherCapCreditsPatroDivident", 0))
+		# E71
+		outData["Solar"]["extraItems"] = outData["BAU"]["extraItems"] = float(inputDict.get("extraItems", 0))
+		# Calculation
+		# E45 = SUM(E20:P20)+E10
+		outData["BAU"]["operRevPatroCap"] = sum([totalRevenue[i][1] for i in range(12)])+float(inputDict.get("otherElecRevenue", 0))
+		# E55 = SUM(E46:E54)
+		outData["BAU"]["totalOMExpense"] = float(inputDict.get("powerProExpense")) \
+			+ float(inputDict.get("costPurchasedPower")) \
+			+ float(inputDict.get("transExpense")) \
+			+ float(inputDict.get("distriExpenseO")) \
+			+ float(inputDict.get("distriExpenseM")) \
+			+ float(inputDict.get("customerAccountExpense")) \
+			+ float(inputDict.get("customerServiceExpense")) \
+			+ float(inputDict.get("salesExpense"))  \
+			+ float(inputDict.get("adminGeneralExpense"))
+		# E63 = SUM(E55:E62)
+		outData["BAU"]["totalCostElecService"] = outData["BAU"]["totalOMExpense"] \
+			+ float(inputDict.get("depreAmortiExpense"))\
+			+ float(inputDict.get("taxExpensePG"))\
+			+ float(inputDict.get("taxExpense"))\
+			+ float(inputDict.get("interestLongTerm"))\
+			+ float(inputDict.get("interestExpense"))\
+			+ float(inputDict.get("interestConstruction"))\
+			+ outData["BAU"]["otherDeductions"]		
+		# E64 = E45-E63
+		outData["BAU"]["patCapOperMargins"] = outData["BAU"]["operRevPatroCap"] - outData["BAU"]["totalCostElecService"]
+		# E72 = SUM(E64:E71)
+		outData["BAU"]["patCapital"] = outData["BAU"]["patCapOperMargins"]\
+			+ float(inputDict.get("nonOpMarginInterest"))\
+			+ float(inputDict.get("fundsUsedConstruc"))\
+			+ float(inputDict.get("incomeEquityInvest"))\
+			+ float(inputDict.get("nonOpMarginOther"))\
+			+ float(inputDict.get("genTransCapCredits"))\
+			+ float(inputDict.get("otherCapCreditsPatroDivident"))\
+			+ float(inputDict.get("extraItems"))
+		# F48 = E48-F27*E34+SUM(E16:P16)*E5*E7
+		outData["Solar"]["operRevPatroCap"] = outData["BAU"]["operRevPatroCap"] - outData["BAU"]["effectiveResRate"]*outData["Solar"]["annualSolarGen"] + sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("resPenetration", 0.05))/100*float(inputDict.get("solarServiceCharge", 0))	
+		# F47 = (F23)*E8
+		outData["Solar"]["costPurchasedPower"] = outData["Solar"]["totalKWhPurchased"] * float(inputDict.get("wholesaleEnergyCost", 0))
+		# F55 = SUM(F46:F54)
+		outData["Solar"]["totalOMExpense"] = outData["Solar"]["powerProExpense"]\
+			+ outData["Solar"]["costPurchasedPower"]\
+			+ outData["Solar"]["transExpense"]\
+			+ outData["Solar"]["distriExpenseO"]\
+			+ outData["Solar"]["distriExpenseM"]\
+			+ outData["Solar"]["customerAccountExpense"]\
+			+ outData["Solar"]["customerServiceExpense"]\
+			+ outData["Solar"]["salesExpense"]\
+			+ outData["Solar"]["adminGeneralExpense"]
+		# F63 = E63
+		outData["Solar"]["totalCostElecService"] = outData["Solar"]["totalOMExpense"]\
+			+ outData["Solar"]["depreAmortiExpense"]\
+			+ outData["Solar"]["taxExpensePG"]\
+			+ outData["Solar"]["taxExpense"]\
+			+ outData["Solar"]["interestLongTerm"]\
+			+ outData["Solar"]["interestConstruction"]\
+			+ outData["Solar"]["interestExpense"]\
+			+ outData["Solar"]["otherDeductions"]
+		# F64 = F45 - F63
+		outData["Solar"]["patCapOperMargins"] = outData["Solar"]["operRevPatroCap"] - outData["Solar"]["totalCostElecService"]
+		# F72 = SUM(F64:F71)
+		outData["Solar"]["patCapital"] = outData["Solar"]["patCapOperMargins"]\
+			+ outData["Solar"]["nonOpMarginInterest"]\
+			+ outData["Solar"]["fundsUsedConstruc"]\
+			+ outData["Solar"]["incomeEquityInvest"]\
+			+ outData["Solar"]["nonOpMarginOther"]\
+			+ outData["Solar"]["genTransCapCredits"]\
+			+ outData["Solar"]["otherCapCreditsPatroDivident"]\
+			+ outData["Solar"]["extraItems"]
+		# E37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71), update after Form 7 model
+		outData["BAU"]["nonPowerCosts"] = outData["BAU"]["transExpense"] \
+			+ outData["BAU"]["distriExpenseO"] \
+			+ outData["BAU"]["distriExpenseM"] \
+			+ outData["BAU"]["customerAccountExpense"] \
+			+ outData["BAU"]["customerServiceExpense"] \
+			+ outData["BAU"]["salesExpense"] \
+			+ outData["BAU"]["adminGeneralExpense"] \
+			+ outData["BAU"]["depreAmortiExpense"] \
+			+ outData["BAU"]["taxExpensePG"] \
+			+ outData["BAU"]["taxExpense"] \
+			+ outData["BAU"]["interestLongTerm"] \
+			+ outData["BAU"]["interestConstruction"] \
+			+ outData["BAU"]["interestExpense"] \
+			+ outData["BAU"]["otherDeductions"] \
+			- (outData["BAU"]["nonOpMarginInterest"] \
+			+ outData["BAU"]["fundsUsedConstruc"] \
+			+ outData["BAU"]["incomeEquityInvest"] \
+			+ outData["BAU"]["nonOpMarginOther"] \
+			+ outData["BAU"]["genTransCapCredits"] \
+			+ outData["BAU"]["otherCapCreditsPatroDivident"] \
+			+ outData["BAU"]["extraItems"])
+		# E42 = E63/E24, update after Form 7 model
+		outData["BAU"]["costofService"] = outData["BAU"]["totalCostElecService"] / outData["BAU"]["totalKWhSales"] 
+		# F37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71) = E37, update after Form 7 model
+		outData["Solar"]["nonPowerCosts"] = outData["BAU"]["nonPowerCosts"]
+		# F42 = F63/F24, update after Form 7 model
+		outData["Solar"]["costofService"] = outData["Solar"]["totalCostElecService"] / outData["Solar"]["totalKWhSales"]  
+		# Stdout/stderr.
+		outData["stdout"] = "Success"
+		outData["stderr"] = ""
+		# Write the output.
+		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+			json.dump(outData, outFile, indent=4)
+		# Update the runTime in the input file.
+		endTime = dt.datetime.now()
+		inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
+	except:
+		# If input range wasn't valid delete output, write error to disk.
+		thisErr = traceback.format_exc()
+		inputDict['stderr'] = thisErr
+		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
+			errorFile.write(thisErr)
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
+		try:
+			os.remove(pJoin(modelDir,"allOutputData.json"))
+		except Exception, e:
+			pass
 
 def cancel(modelDir):
 	''' solarRates runs so fast it's pointless to cancel a run. '''

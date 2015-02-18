@@ -380,7 +380,7 @@
 					</defs>
 					<g id="lossesNode" class="node"><circle cx="250" cy="50" r="45"></circle><text x="250" y="50" text-anchor="middle">Technical Losses</text></g>
 					<g id="gtNode" class="node"><circle cx="150" cy="250" r="100"></circle><text x="150" y="250" text-anchor="middle">G&amp;T or Other Power Suppliers</text></g>
-					<g id="vendorNode" class="node"><circle cx="250" cy="450" r="45"></circle><text x="250" y="450" text-anchor="middle">Vendors</text></g>
+					<g id="vendorNode" class="node"><circle cx="250" cy="450" r="45"></circle><text x="250" y="450" text-anchor="middle">Non-Power Costs</text></g>
 					<g id="patronageNode" class="node"><circle cx="500" cy="50" r="45"></circle><text x="500" y="50" text-anchor="middle">Patronage Capital</text></g>
 					<g id="distributionNode" class="node"><rect x="400" y="150" width="200" height="200"></rect><text x="500" y="250" text-anchor="middle">Distribution Utility</text></g>
 					<g id="panelsNode" class="node"><circle cx="850" cy="40" r="30"></circle><text x="850" y="40" text-anchor="middle">Panels</text></g>
@@ -514,7 +514,7 @@
 			<script>
 				irradianceSeriesData = [
 					{"name":"Plane of Array Irradiance","marker":{"enabled":false},"color":"gold","data":allOutputData.climate["Plane of Array Irradiance (W/m^2)"],"visible":true},
-					{"name":"Global Horizontal Radiation","marker":{"enabled":false},"color":"yellow","data":allOutputData.climate["Global Horizontal Radiation (W/m^2)"],"visible":true} ]			
+					{"name":"Global Horizontal Radiation","marker":{"enabled":false},"color":"goldenrod","data":allOutputData.climate["Global Horizontal Radiation (W/m^2)"],"visible":true} ]			
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":true}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},

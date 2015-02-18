@@ -103,11 +103,9 @@ def run(modelDir, inputDict):
 			if (float(outData["powerOutputAc"][i])- float(inputDict.get("inverterSize", 0))*1000) > 0:
 				outData["InvClipped"][i] = float(inputDict.get("inverterSize", 0))*1000						
 				outData["lossInvClipping"][i] = float(outData["powerOutputAc"][i])- float(inputDict.get("inverterSize", 0))*1000	
-				print "loss", outData["lossInvClipping"][i], "power", outData["powerOutputAc"][i]
 			else:
 				outData["InvClipped"][i] = outData["powerOutputAc"][i]	
 				outData["lossInvClipping"][i] = 0
-		print "sum loss", sum(outData["lossInvClipping"]), "sum power", sum(outData["powerOutputAc"])
 		outData["percentClipped"] = (sum(outData["lossInvClipping"])/sum(outData["powerOutputAc"]))*100			
 		# Cashflow outputs.
 		lifeSpan = int(inputDict.get("lifeSpan",30))
