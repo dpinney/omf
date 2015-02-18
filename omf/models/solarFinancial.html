@@ -237,8 +237,8 @@
 			}
 		</script>
 		<!-- Summary of Results -->
-		<p class="reportTitle">Solar Financial Model Summary of Analysis</p>
-		<div id="input" class="content">
+		<p class="reportTitle postRun">Solar Financial Model Summary of Analysis</p>
+		<div id="input" class="content postRun">
 			<form name="inputForm" action="/runModel/" method="post">
 				<div class="shortInput">
 					<reportLabel>Project Name: </reportLabel>
@@ -431,14 +431,14 @@
 			<div id="irradianceChartDiv"></div>
 			<script>
 				irradianceSeriesData = [
-					{"name":"Plane of Array Irradiance (W/m^2)","marker":{"enabled":false},"color":"gold","data":allOutputData.climate["Plane of Array Irradiance (W/m^2)"],"visible":true},
-					{"name":"Global Horizontal Radiation (W/m^2)","marker":{"enabled":false},"color":"goldenrod","data":allOutputData.climate["Global Horizontal Radiation (W/m^2)"],"visible":true} ]			
+					{"name":"Plane of Array Irradiance","marker":{"enabled":false},"color":"gold","data":allOutputData.climate["Plane of Array Irradiance (W/m^2)"],"visible":true},
+					{"name":"Global Horizontal Radiation","marker":{"enabled":false},"color":"goldenrod","data":allOutputData.climate["Global Horizontal Radiation (W/m^2)"],"visible":true} ]
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":true}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
 					"title":{"text":null},
 					"series":irradianceSeriesData,
-					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}, "min":0},
+					"yAxis":{"title":{"text":"Irradiance (W/m^2)","style":{"color":"gray"}}, "min":0},
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":300,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})

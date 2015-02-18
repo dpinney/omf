@@ -72,10 +72,6 @@ def run(modelDir, inputDict):
 		simStartDate = inputDict.get("simStartDate", "2014-01-01")
 		# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html 
 		startDateTime = simStartDate + " 00:00:00 UTC"
-		# Set aggregation function constants.
-		agg = lambda x,y:_aggData(x,y,inputDict["simStartDate"],
-			int(inputDict["simLength"]), inputDict.get("simLengthUnits","hours"), ssc, dat)
-		avg = lambda x:sum(x)/len(x)
 		# Timestamp output.
 		outData = {}
 		outData["timeStamps"] = [dt.datetime.strftime(
@@ -89,15 +85,15 @@ def run(modelDir, inputDict):
 		outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
 		# Weather output.
 		outData["climate"] = {}
-		outData["climate"]["Global Horizontal Radiation (W/m^2)"] = agg("gh", avg)	#tym2manual: Table 3-2 p.19
-		outData["climate"]["Plane of Array Irradiance (W/m^2)"] = agg("poa", avg)
-		outData["climate"]["Ambient Temperature (F)"] = agg("tamb", avg)
-		outData["climate"]["Cell Temperature (F)"] = agg("tcell", avg)
-		outData["climate"]["Wind Speed (m/s)"] = agg("wspd", avg)
+		outData["climate"]["Global Horizontal Radiation (W/m^2)"] = ssc.ssc_data_get_array(dat, "gh")
+		outData["climate"]["Plane of Array Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "poa")
+		outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
+		outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
+		outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
 		# Power generation.
-		outData["powerOutputAc"] = [x for x in agg("ac", avg)]
-		outData["InvClipped"] = [x for x in agg("ac", avg)]
-		outData["lossInvClipping"] = [x for x in agg("ac", avg)]
+		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
+		outData["InvClipped"] = ssc.ssc_data_get_array(dat, "ac")
+		outData["lossInvClipping"] = ssc.ssc_data_get_array(dat, "ac")
 		#Calculate loss and percent
 		for i in range (0, len(outData["powerOutputAc"])):
 			if (float(outData["powerOutputAc"][i])- float(inputDict.get("inverterSize", 0))*1000) > 0:
@@ -253,29 +249,6 @@ def _dumpDataToExcel(modelDir):
 def _runningSum(inList):
 	''' Give a list of running sums of inList. '''
 	return [sum(inList[:i+1]) for (i,val) in enumerate(inList)]
-
-def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
-	''' Function to aggregate output if we need something other than hour level. '''
-	u = simStartDate
-	# pick a common year, ignoring the leap year, it won't affect to calculate the initHour
-	d = dt.datetime(2013, int(u[5:7]),int(u[8:10])) 
-	# first day of the year	
-	sd = dt.datetime(2013, 01, 01) 
-	# convert difference of datedelta object to number of hours 
-	initHour = int((d-sd).total_seconds()/3600)
-	fullData = ssc.ssc_data_get_array(dat, key)
-	if simLengthUnits == "days":
-		multiplier = 24
-	else:
-		multiplier = 1
-	hourData = [fullData[(initHour+i)%8760] for i in xrange(simLength*multiplier)]
-	if simLengthUnits == "minutes":
-		pass
-	elif simLengthUnits == "hours":
-		return hourData
-	elif simLengthUnits == "days":
-		split = [hourData[x:x+24] for x in xrange(simLength)]
-		return map(aggFun, split)
 
 def cancel(modelDir):
 	''' solarFinancial runs so fast it's pointless to cancel a run. '''
