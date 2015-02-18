@@ -957,15 +957,14 @@ function solarAdding() {
 			var limit = i + 100
 			for (; i < tkeys.length && i < limit; i++) {
 				index = tkeys[i]
-				if (tree[index].hasOwnProperty('object') && tree[index]['object'] == 'house') {
+				if (tree[index].hasOwnProperty('object') && tree[index]['object'] == 'triplex_meter') {
 					if (Math.random() < (gebi('solarAddingPercentage').value / 100.0)) {
-						meterIndex = findIndex(tree, 'name', tree[index]['parent'])
 						newInverter = makeNewInverter(tree[index]['phases'])
 						newPanels = newRandomPanels()
-						newChildAtLocation(newInverter, meterIndex)
+						newChildAtLocation(newInverter, index)
 						inverterIndex = findIndex(tree, 'name', newInverter['name'])
 						newChildAtLocation(newPanels, inverterIndex)
-						redraw() // fix overlap nodes
+						redraw()
 					}
 				}
 			}
@@ -984,9 +983,9 @@ function solarAdding() {
 			document.getElementById('progColor').style.width = percentage + '%'
 	}
 
-	function noHouse() {
+	function noMeter() {
 		for (x in hiddenNodes) {
-			if (hiddenNodes[x].objectType != undefined && hiddenNodes[x].objectType == 'house')
+			if (hiddenNodes[x].objectType != undefined && hiddenNodes[x].objectType == 'triplex_meter')
 				return true
 		}
 		return false
@@ -995,8 +994,8 @@ function solarAdding() {
 	percentage = 0;
 	in_use = false;
 	tkeys = Object.keys(tree)
-	if (noHouse()) {
-		alert('Houses have been hidden in the layout, please unfold it first.')
+	if (noMeter()) {
+		alert('Meters have been hidden in the layout. Please unfold everything before adding solar.')
 	} else {
 		showProgressBar('Please wait. Solar is being generated.')
 		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
