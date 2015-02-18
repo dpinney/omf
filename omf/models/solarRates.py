@@ -98,7 +98,7 @@ def run(modelDir, inputDict):
 	outData["totalRevenue"] = sorted(totalRevenue, key=lambda x:months[x[0]])
 	outData["lossesBAU"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)]) 
 	outData["lineLossRate"] = outData.get("lossesBAU", 0) / float(inputDict.get("totalKWhPurchased", 0))
-	outData["totalGeneration"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["monthlyGeneration"][i][1]*outData["monthlyNoConsumerServedSales"][i][1]*(float(inputDict.get("resPenetration", 0.05))/100)/1000] for i in range(12)]
+	outData["totalGeneration"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["monthlyGeneration"][i][1]*outData["monthlyNoConsumerServedSales"][i][1]*(float(inputDict.get("resPenetration", 5))/100/1000)] for i in range(12)]
 	outData["totalSolarSold"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["totalKWhSold"][i][1] - outData["totalGeneration"][i][1]] for i in range(12)]
 	##################
 	# TODO: add retailCost to the calculation.
@@ -161,9 +161,9 @@ def run(modelDir, inputDict):
 	# F26 = E26
 	outData["Solar"]["effectiveLossRate"] = outData["BAU"]["effectiveLossRate"]
 	# F28 = (1-E5)*E28
-	outData["Solar"]["resNonSolarKWhSold"] = (1-float(inputDict.get("residentialCustomWithSolarRate", 0.05)))*outData["BAU"]["resNonSolarKWhSold"]
+	outData["Solar"]["resNonSolarKWhSold"] = (1-float(inputDict.get("resPenetration", 0))/100)*outData["BAU"]["resNonSolarKWhSold"]
 	# F29 = E5*E28
-	outData["Solar"]["solarResDemand"] = float(inputDict.get("residentialCustomWithSolarRate", 0.05))*outData["BAU"]["resNonSolarKWhSold"]
+	outData["Solar"]["solarResDemand"] = float(inputDict.get("resPenetration", 0))/100*outData["BAU"]["resNonSolarKWhSold"]
 	# F30 = F29-F27
 	outData["Solar"]["solarResSold"] = outData["Solar"]["solarResDemand"] - outData["Solar"]["annualSolarGen"]
 	# F31 = E31
@@ -188,12 +188,17 @@ def run(modelDir, inputDict):
 	outData["Solar"]["energyAllBal"] = 0
 	# F39 = F36+E33+F35-F47-F72-E37
 	outData["Solar"]["dollarAllBal"] = 0
-	# F41 = (F35)/(SUM(E16:P16)*(1-E5))
-	outData["Solar"]["avgMonthlyBillNonSolarCus"] = outData["Solar"]["resNonSolarRev"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])* (1 - float(inputDict.get("resPenetration", 0.05))/100))
-	# F42 = F30*E34/(SUM(E16:P16)*E5)+E6+E7
-	outData["Solar"]["avgMonthlyBillSolarCus"] = outData["Solar"]["solarResSold"] * outData["BAU"]["effectiveResRate"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)]) * float(inputDict.get("resPenetration", 0.05))/100) + float(inputDict.get("customServiceCharge", 0))+float(inputDict.get("solarServiceCharge", 0))
-	# F43 = (F27/(SUM(E16:P16)*E5))*E9
-	outData["Solar"]["avgMonthlyBillSolarSolarCus"] = (outData["Solar"]["annualSolarGen"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)]) * float(inputDict.get("resPenetration", 0.05))/100)) * float(inputDict.get("solarLCoE", 0.07))
+	if (float(inputDict.get("resPenetration", 0.05)) > 0):
+		# F41 = (F35)/(SUM(E16:P16)*(1-E5))
+		outData["Solar"]["avgMonthlyBillNonSolarCus"] = outData["Solar"]["resNonSolarRev"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])* (1 - float(inputDict.get("resPenetration", 0.05))/100))
+		# F42 = F30*E34/(SUM(E16:P16)*E5)+E6+E7
+		outData["Solar"]["avgMonthlyBillSolarCus"] = outData["Solar"]["solarResSold"] * outData["BAU"]["effectiveResRate"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)]) * float(inputDict.get("resPenetration", 0.05))/100) + float(inputDict.get("customServiceCharge", 0))+float(inputDict.get("solarServiceCharge", 0))
+		# F43 = (F27/(SUM(E16:P16)*E5))*E9
+		outData["Solar"]["avgMonthlyBillSolarSolarCus"] = (outData["Solar"]["annualSolarGen"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)]) * float(inputDict.get("resPenetration", 0.05))/100)) * float(inputDict.get("solarLCoE", 0.07))
+	else: 
+		outData["Solar"]["avgMonthlyBillNonSolarCus"] = 0	
+		outData["Solar"]["avgMonthlyBillSolarCus"] = 0
+		outData["Solar"]["avgMonthlyBillSolarSolarCus"] = 0	
 	# Net Average Monthly Bill
 	avgMonthlyBillSolarNet = outData["Solar"]["avgMonthlyBillSolarCus"] + outData["Solar"]["avgMonthlyBillSolarSolarCus"]	
 	outData["Solar"]["avgMonthlyBillSolarCus"] = avgMonthlyBillSolarNet
@@ -352,6 +357,7 @@ def run(modelDir, inputDict):
 	inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent=4)
+
 
 def cancel(modelDir):
 	''' solarRates runs so fast it's pointless to cancel a run. '''
