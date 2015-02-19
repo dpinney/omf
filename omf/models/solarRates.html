@@ -89,8 +89,8 @@
 				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" value="0.10" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Wholesale Energy Cost ($/kWh)<span class="classic">Wholesale cost of power, which can be calculated from Form 7 as R.17.m/R.15.m.</span></label>
-				<input type="text" id="wholesaleEnergyCost" name="wholesaleEnergyCost" pattern="^\d+\.?\d*$" required="required"/>
+				<label class="tooltip">Average Cost of Purchased Power ($/kWh)<span class="classic">Automatically calculated from other inputs as: Form 7 R.17.m/R.15.m.</span></label>
+				<input type="text" id="costofPower" name="costofPower" value = "N/A" pattern="^\d+\.?\d*$" required="required" readonly/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Form 7.R.13.TOTAL Other Electric Revenue.<span class="classic">Additional revenue from Form 7 Table R.</span></label>

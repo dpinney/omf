@@ -289,7 +289,9 @@ def run(modelDir, inputDict):
 		# F48 = E48-F27*E34+SUM(E16:P16)*E5*E7
 		outData["Solar"]["operRevPatroCap"] = outData["BAU"]["operRevPatroCap"] - outData["BAU"]["effectiveResRate"]*outData["Solar"]["annualSolarGen"] + sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("resPenetration", 0.05))/100*float(inputDict.get("solarServiceCharge", 0))	
 		# F47 = (F23)*E8
-		outData["Solar"]["costPurchasedPower"] = outData["Solar"]["totalKWhPurchased"] * float(inputDict.get("wholesaleEnergyCost", 0))
+		inputDict["costofPower"] = float(inputDict.get("costPurchasedPower", 0)) /  float(inputDict.get("totalKWhPurchased", 0))		
+		outData["Solar"]["costPurchasedPower"] = outData["Solar"]["totalKWhPurchased"] * float(inputDict.get("costofPower", 0))
+		inputDict["costofPower"] = round(inputDict["costofPower"],3)	
 		# F55 = SUM(F46:F54)
 		outData["Solar"]["totalOMExpense"] = outData["Solar"]["powerProExpense"]\
 			+ outData["Solar"]["costPurchasedPower"]\
@@ -402,7 +404,6 @@ def _tests():
 		"resPenetration": "5",
 		"customServiceCharge": "20",
 		"solarServiceCharge": "0",		
-		"wholesaleEnergyCost": "0.080520654",		
 		"solarLCoE": "0.09",
 		"otherElecRevenue": "1544165",
 		"totalKWhPurchased": "999330657",

@@ -31,7 +31,6 @@ def _tests(companyname):
 			"resPenetration": "10",
 			"customServiceCharge": "20",
 			"solarServiceCharge": "10",		
-			"wholesaleEnergyCost": "0.062264851",#=totalcost/totalKWhPurchased=286409564/4599859479	
 			"solarLCoE": "0.07",                 #*missing
 			"otherElecRevenue": "5638935",       #
 			"totalKWhPurchased": "4599859479",   #7.R.16
@@ -95,7 +94,6 @@ def _tests(companyname):
 			"resPenetration": "10",
 			"customServiceCharge": "20",
 			"solarServiceCharge": "10",		
-			"wholesaleEnergyCost": "0.0683",	  		#
 			"solarLCoE": "0.07",                        #missing
 			"otherElecRevenue": "662497",         		#
 			"totalKWhPurchased": "940757466",     		#
@@ -159,7 +157,6 @@ def _tests(companyname):
 			"resPenetration": "10",
 			"customServiceCharge": "20",
 			"solarServiceCharge": "10",		
-			"wholesaleEnergyCost": "0.0615",	  		#
 			"solarLCoE": "0.07",                        #missing
 			"otherElecRevenue": "2078588",         		#
 			"totalKWhPurchased": "2275532176",     		#
