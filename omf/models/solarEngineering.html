@@ -186,15 +186,14 @@
 				tDG = eval(allOutputData.Consumption.DG.join("+"))
 				tLoads = tPower + tDG - tLosses
 				dgExported = []
+				fromGrid = []
 				for (i = 0; i < allOutputData.Consumption.Power.length; i++) {
 					curVal = allOutputData.Consumption.Power[i]
-					if (curVal < 0) {dgExported.push(curVal)}
+					if (curVal < 0) {dgExported.push(curVal)} else {fromGrid.push(curVal)}
 				}
 				tDGExported = arrSum(dgExported)
-				if (tLoads > tDG) {tDGDirect = tDG} 
-				else {tDGDirect = tLoads}
-				if (tLoads > tDG) {tFromGrid = tPower}
-				else {tFromGrid = 0}
+				tFromGrid = arrSum(fromGrid)
+				tDGDirect = tLoads + tLosses - tFromGrid
 				// Series formatting.
 				var tLossesSeries = {
 					"pointWidth": 40, 
