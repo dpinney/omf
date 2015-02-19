@@ -230,15 +230,6 @@ def adminControls():
 			user["status"] = "emailExpired"
 	return render_template("adminControls.html", users = users)
 
-@app.route("/errorLog")
-@flask_login.login_required
-def errorLog():
-	if User.cu() != "admin":
-		return redirect("/")
-	with open("../error.log","r") as errLog:
-		errors = errLog.read()
-	return "<pre>" + errors + "</pre>"
-
 @app.route("/myaccount")
 @flask_login.login_required
 def myaccount():
