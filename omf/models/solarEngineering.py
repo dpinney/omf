@@ -157,7 +157,11 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut['climate']['Temperature (F)'] = hdmAgg(rawOut[key].get('temperature'), max, level)
 				cleanOut['climate']['Snow Depth (in)'] = hdmAgg(rawOut[key].get('snowdepth'), max, level)
 				cleanOut['climate']['Direct Normal (W/sf)'] = hdmAgg(rawOut[key].get('solar_direct'), sum, level)
-				cleanOut['climate']['Global Horizontal (W/sf)'] = hdmAgg(rawOut[key].get('solar_global'), sum, level)				
+				#cleanOut['climate']['Global Horizontal (W/sf)'] = hdmAgg(rawOut[key].get('solar_global'), sum, level)	
+				climateWbySFList= hdmAgg(rawOut[key].get('solar_global'), sum, level)
+				#converting W/sf to W/sm
+				climateWbySMList= [x*10.76392 for x in climateWbySFList]
+				cleanOut['climate']['Global Horizontal (W/sm)']=climateWbySMList			
 		# Voltage Band
 		if 'VoltageJiggle.csv' in rawOut:
 			cleanOut['allMeterVoltages'] = {}

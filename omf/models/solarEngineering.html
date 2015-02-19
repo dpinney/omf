@@ -517,18 +517,18 @@
 			<img id="timeTravelImage" src="">
 			<script>/*Init the volt map after loading.*/ updateVoltMap()</script>
 		</div>
-		<p class="reportTitle postRun">Irradiance <a target="_self" class="toggle">Hide / Show</a></p>
+		<p class="reportTitle postRun">Solar Data <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="irradianceReport" class="tightContent postRun">
 			<div id="irradianceChartDiv"></div>
 			<script>
 				irradianceSeriesData = [
-					{"name":'Global Horizontal (W/sf)',"marker":{"enabled":false},"color":"gold","data":allOutputData.climate['Global Horizontal (W/sf)'],"visible":true}]
+					{"name":'Global Horizontal',"marker":{"enabled":false},"color":"gold","data":allOutputData.climate['Global Horizontal (W/sm)'],"visible":true}]
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":true}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
 					"title":{"text":null},
 					"series":irradianceSeriesData,
-					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}, "min":0},
+					"yAxis":{"title":{"text":"Irradiance ( W / m^2 )","style":{"color":"gray"}}, "min":0},
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":300,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
