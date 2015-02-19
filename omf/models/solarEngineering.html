@@ -177,7 +177,10 @@
 		<p class="reportTitle postRun">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newEnergyBalanceReport" class="tightContent postRun">
 			<script type="text/javascript">
-				function arrSum(arr) {return eval(arr.join("+"))}
+				function arrSum(arr) {
+					myVal = eval(arr.join("+"))
+					if (typeof myVal == "undefined") {return 0} else {return myVal}
+				}
 				tPower = eval(allOutputData.Consumption.Power.join("+"))
 				tLosses = eval(allOutputData.Consumption.Losses.join("+"))
 				tDG = eval(allOutputData.Consumption.DG.join("+"))
