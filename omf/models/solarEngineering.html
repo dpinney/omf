@@ -177,35 +177,22 @@
 		<p class="reportTitle postRun">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newEnergyBalanceReport" class="tightContent postRun">
 			<script type="text/javascript">
-				var tPower = eval(allOutputData.Consumption.Power.join("+"));
-				var tLosses = eval(allOutputData.Consumption.Losses.join("+"));
-				var tDG = eval(allOutputData.Consumption.DG.join("+"));
-				var tLoads = tPower + tDG - tLosses;
-				var tDGDirect,tDGExported,tFromGrid;
-				if (tLoads>tDG) 
-				{
-					tDGDirect =tDG;
-				} 
-				else
-				{
-					tDGDirect =tLoads;
+				function arrSum(arr) {return eval(arr.join("+"))}
+				tPower = eval(allOutputData.Consumption.Power.join("+"))
+				tLosses = eval(allOutputData.Consumption.Losses.join("+"))
+				tDG = eval(allOutputData.Consumption.DG.join("+"))
+				tLoads = tPower + tDG - tLosses
+				dgExported = []
+				for (i = 0; i < allOutputData.Consumption.Power.length; i++) {
+					curVal = allOutputData.Consumption.Power[i]
+					if (curVal < 0) {dgExported.push(curVal)}
 				}
-				if (tLoads>tDG) 
-				{
-					tDGExported=0;
-				} 
-				else
-				{
-					tDGExported= tPower-tLoads-tLosses;
-				}
-				if(tLoads>tDG)
-				{
-					tFromGrid=tPower;
-				}
-				else
-				{
-					tFromGrid=0;
-				}
+				tDGExported = arrSum(dgExported)
+				if (tLoads > tDG) {tDGDirect = tDG} 
+				else {tDGDirect = tLoads}
+				if (tLoads > tDG) {tFromGrid = tPower}
+				else {tFromGrid = 0}
+				// Series formatting.
 				var tLossesSeries = {
 					"pointWidth": 40, 
 					"color":"orangered",
