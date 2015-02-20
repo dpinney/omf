@@ -1,6 +1,6 @@
 ''' The Open Modeling Framework for Power System Simulation. '''
 
-__version__ = 0.1
+__version__ = 0.2
 
 import os as _os, sys as _sys
 

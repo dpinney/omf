@@ -17,7 +17,7 @@ from setuptools import find_packages
 
 setup(
 	name = 'omf',
-	version = '0.1',
+	version = '0.2',
 	description = 'An Open Modeling Framework (omf) for power systems simulation.',
 	long_description = __doc__,
 	author = 'David Pinney',
