@@ -18275,7 +18275,7 @@ object inverter {
 object solar {
 	name solar172879;
 	parent solEngInverter;
-	area 300 sf;
+	area 30000 sf;
 	generator_status ONLINE;
 	efficiency 0.14;
 	generator_mode SUPPLY_DRIVEN;
