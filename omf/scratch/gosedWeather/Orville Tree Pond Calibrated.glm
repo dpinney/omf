@@ -18282,11 +18282,3 @@ object solar {
 	panel_type SINGLE_CRYSTAL_SILICON;
 };
 
-object recorder {
-	interval 3600;
-	parent solEngInverter;
-	limit 0;
-	file Inverter_solEngInverter.csv;
-	property power_A,power_B,power_C;
-};
-

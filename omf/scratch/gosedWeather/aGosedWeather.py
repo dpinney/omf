@@ -34,12 +34,12 @@ myTree[oldMax + 6] = {'generator_mode':'SUPPLY_DRIVEN',
 	'object':'solar', 
 	'efficiency':'0.14', 
 	'panel_type':'SINGLE_CRYSTAL_SILICON' }
-myTree[oldMax + 7] = { 'interval':'3600',
-	'parent':'solEngInverter',
-	'limit':'0',
-	'file':'Inverter_solEngInverter.csv',
-	'property':'power_A,power_B,power_C',
-	'object': 'recorder'}
+# myTree[oldMax + 7] = { 'interval':'3600',
+# 	'parent':'solEngInverter',
+# 	'limit':'0',
+# 	'file':'Inverter_solEngInverter.csv',
+# 	'property':'power_A,power_B,power_C',
+# 	'object': 'recorder'}
 feeder.adjustTime(myTree, 240, 'hours', '2014-01-01')
 
 # Run here to test.

@@ -5473,14 +5473,6 @@
             "efficiency": "0.14", 
             "object": "solar"
         }, 
-        "2037": {
-            "object": "recorder", 
-            "parent": "solEngInverter", 
-            "interval": "3600", 
-            "limit": "0", 
-            "file": "Inverter_solEngInverter.csv", 
-            "property": "power_A,power_B,power_C"
-        }, 
         "1256": {
             "impedance_pf_12": "0.98", 
             "name": "19 23DB 119_A", 
