@@ -55,7 +55,7 @@ def run(modelDir, inputDict):
 			* float(inputDict.get("shading", 99.5))/100 \
 			* float(inputDict.get("sysAvail", 99.5))/100 \
 			* float(inputDict.get("age", 99.5))/100 \
-			* float(inputDict.get("inverterEff", 98.5))/100
+			* float(inputDict.get("inverterEfficiency", 98.5))/100
 		ssc.ssc_data_set_number(dat, "derate", derate)
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
@@ -102,7 +102,10 @@ def run(modelDir, inputDict):
 			else:
 				outData["InvClipped"][i] = outData["powerOutputAc"][i]	
 				outData["lossInvClipping"][i] = 0
-		outData["percentClipped"] = (sum(outData["lossInvClipping"])/sum(outData["powerOutputAc"]))*100			
+		if (derate == 0):
+			outData["percentClipped"] = 0		
+		else:
+			outData["percentClipped"] = (sum(outData["lossInvClipping"])/sum(outData["powerOutputAc"]))*100			
 		# Cashflow outputs.
 		lifeSpan = int(inputDict.get("lifeSpan",30))
 		lifeYears = range(1, 1 + lifeSpan)
@@ -278,7 +281,7 @@ def _tests():
 		"shading": "100",
 		"sysAvail": "100",
 		"age": "100",		
-		"inverterEff": "96.5",
+		"inverterEfficiency": "96.5",
 		"inverterSize": "75",
 		"tilt": "True",
 		"manualTilt":"34.65",	
