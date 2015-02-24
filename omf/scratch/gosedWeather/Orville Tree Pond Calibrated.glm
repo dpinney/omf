@@ -18275,18 +18275,10 @@ object inverter {
 object solar {
 	name solar172879;
 	parent solEngInverter;
-	area 300 sf;
+	area 30000 sf;
 	generator_status ONLINE;
 	efficiency 0.14;
 	generator_mode SUPPLY_DRIVEN;
 	panel_type SINGLE_CRYSTAL_SILICON;
-};
-
-object recorder {
-	interval 3600;
-	parent solEngInverter;
-	limit 0;
-	file Inverter_solEngInverter.csv;
-	property power_A,power_B,power_C;
 };
 

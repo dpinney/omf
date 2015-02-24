@@ -8,6 +8,7 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 	<!-- Global Funcs Import -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
@@ -177,35 +178,24 @@
 		<p class="reportTitle postRun">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newEnergyBalanceReport" class="tightContent postRun">
 			<script type="text/javascript">
-				var tPower = eval(allOutputData.Consumption.Power.join("+"));
-				var tLosses = eval(allOutputData.Consumption.Losses.join("+"));
-				var tDG = eval(allOutputData.Consumption.DG.join("+"));
-				var tLoads = tPower + tDG - tLosses;
-				var tDGDirect,tDGExported,tFromGrid;
-				if (tLoads>tDG) 
-				{
-					tDGDirect =tDG;
-				} 
-				else
-				{
-					tDGDirect =tLoads;
+				function arrSum(arr) {
+					myVal = eval(arr.join("+"))
+					if (typeof myVal == "undefined") {return 0} else {return myVal}
 				}
-				if (tLoads>tDG) 
-				{
-					tDGExported=0;
-				} 
-				else
-				{
-					tDGExported= tPower-tLoads-tLosses;
+				tPower = eval(allOutputData.Consumption.Power.join("+"))
+				tLosses = eval(allOutputData.Consumption.Losses.join("+"))
+				tDG = eval(allOutputData.Consumption.DG.join("+"))
+				tLoads = tPower + tDG - tLosses
+				dgExported = []
+				fromGrid = []
+				for (i = 0; i < allOutputData.Consumption.Power.length; i++) {
+					curVal = allOutputData.Consumption.Power[i]
+					if (curVal < 0) {dgExported.push(curVal)} else {fromGrid.push(curVal)}
 				}
-				if(tLoads>tDG)
-				{
-					tFromGrid=tPower;
-				}
-				else
-				{
-					tFromGrid=0;
-				}
+				tDGExported = arrSum(dgExported)
+				tFromGrid = arrSum(fromGrid)
+				tDGDirect = tLoads + tLosses - tFromGrid
+				// Series formatting.
 				var tLossesSeries = {
 					"pointWidth": 40, 
 					"color":"orangered",
@@ -548,75 +538,52 @@
 		</div>
 		<p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative;">
-			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-			<table id="detailsTable">
-				<tr>
-					<th id="SL">Simulation Location</th>
-				</tr>
-				<tr>
-					<td rowspan="7" style = "width:50%">
-						<div id="mapHere" style="width: 350px">
-							<script type="text/javascript">
-								var width = 500,
-									height = 350;
+			<div id="mapHere" style="width:500px; height:300px; display:inline-block"></div>
+			<script type="text/javascript">
+				var width = 500,
+					height = 350;
 
-								var projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2]);
+				var projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2]);
 
-								var path = d3.geo.path()
-									.projection(projection);
+				var path = d3.geo.path()
+					.projection(projection);
 
-								var svg = d3.select("#mapHere").append("svg")
-									.attr("width", width)
-									.attr("height", height);
+				var svg = d3.select("#mapHere").append("svg")
+					.attr("width", width)
+					.attr("height", height);
 
-								var group = svg.append("g");
+				var group = svg.append("g");
 
-								group.attr("transorm", "scale(.2, .2)");
-								d3.json('/static/state_boundaries.json', function(collection) {
-									group.selectAll('path')
-										.data(collection.features)
-										.enter().append('path')
-										.attr('d', d3.geo.path().projection(projection))
-										.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
-										.style('fill', 'gray')
-										.style('stroke', 'white')
-										.style('stroke-width', 1);
-								});
+				group.attr("transorm", "scale(.2, .2)");
+				d3.json('/static/state_boundaries.json', function(collection) {
+					group.selectAll('path')
+						.data(collection.features)
+						.enter().append('path')
+						.attr('d', d3.geo.path().projection(projection))
+						.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+						.style('fill', 'gray')
+						.style('stroke', 'white')
+						.style('stroke-width', 1);
+				});
 
-								d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
-									climate = allInputData.climateName
-									var ST_NAME = climate.split("-");
-									var ST = ST_NAME[0], NAME = ST_NAME[1];
-									var my_coords = projection(new_us_places[ST][NAME]);
-									var r = 5;
-									circle = svg.append("circle")
-										.attr("cx", my_coords[0])
-										.attr("cy", my_coords[1])
-										.attr("r", 5)
-										.attr("class", "HighlightCircle");
-									circle.append("svg:title").text(climate);
-								})
-							</script>
-						</div>
-					</td>
-				</tr>
-				<tr>
-					<td id="GC">
-						<div id="runtimeStatsReport" style="width: 500px; height: 400px; margin: 0;overflow:scroll;overflow-x: hidden">
-							<script type="text/javascript">
-								$("<pre/>").appendTo("#runtimeStatsReport")
-									.attr("id", "stdout")
-									.attr("class", "stdoutBlock")
-									.attr("style","font-size:13px;text-align:left")
-								gebi("stdout").innerHTML = allOutputData.stdout
-								
-								// TODO: add stderr if some failed feeders exist.
-							</script>
-						</div>
-					</td>
-				</tr>
-		</div>					
-		
-		
+				d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
+					climate = allInputData.climateName
+					var ST_NAME = climate.split("-");
+					var ST = ST_NAME[0], NAME = ST_NAME[1];
+					var my_coords = projection(new_us_places[ST][NAME]);
+					var r = 5;
+					circle = svg.append("circle")
+						.attr("cx", my_coords[0])
+						.attr("cy", my_coords[1])
+						.attr("r", 5)
+						.attr("class", "HighlightCircle");
+					circle.append("svg:title").text(climate);
+				})
+			</script>
+			<div id="runtimeStatsReport" style="width:495px; height:340px; margin:20 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
+				<pre id="stdout" style="font-size:13px; text-align:left"></pre>
+			</div>
+			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
+		</div>
 	</div>
 </body>

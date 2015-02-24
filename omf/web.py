@@ -164,11 +164,11 @@ def new_user():
 def forgotpwd():
 	email = request.form.get("email")
 	try:
-		user = User.gu(email)
+		user = json.load(open("data/User/" + email + ".json"))
 		message = "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\n\nreg_link"
-		return send_link(email,message,user)
+		return send_link(email, message, user)
 	except Exception, e:
-		print e
+		print "ERROR: failed to password reset user", email, "with exception", e
 		return "Error"
 	
 @app.route("/register/<email>/<reg_key>", methods=["GET", "POST"])

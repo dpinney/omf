@@ -441,10 +441,6 @@ def _obToCol(obStr):
 		'underground_line':'black'}
 	return obToColor.get(obStr,'black')
 
-def _testImportTree(feederName):
-	with open('data/Feeder/'+feederName+'.json','r') as inJ:
-		return json.load(inJ)['tree']
-
 def _tests():
 	# Parser Test
 	tokens = ['clock','{','clockey','valley','}','object','house','{','name','myhouse',';',
@@ -453,12 +449,14 @@ def _tests():
 	print 'Parsed tokens into object of type:', obType
 	assert obType is dict
 	# Recorder Attachment Test
-	tree = _testImportTree('public/Olin Barre Geo')
+	with open('data/Feeder/public/Olin Barre Geo.json') as inFile:
+		tree = json.load(inFile)['tree']
 	attachRecorders(tree, 'Regulator', 'object', 'regulator')
 	attachRecorders(tree, 'Voltage', 'object', 'node')
 	print 'All the objects after recorder attach: ', set([ob.get('object','') for ob in tree.values()])
 	# Testing The De-Embedding
-	tree = _testImportTree('admin/13 Node Embedded DO NOT SAVE')
+	with open('data/Feeder/admin/13 Node Embedded DO NOT SAVE.json') as inFile:
+		tree = json.load(inFile)['tree']
 	fullyDeEmbed(tree)
 	embeddedDicts = 0
 	for ob in tree.values():
@@ -468,19 +466,22 @@ def _tests():
 	print 'Number of objects still embedded:', embeddedDicts
 	assert embeddedDicts == 0, 'Some objects failed to disembed.'
 	# groupSwingKids test
-	tree = _testImportTree('public/13 Node Ref Feeder Flat')
+	with open('data/Feeder/public/13 Node Ref Feeder Flat.json') as inFile:
+		tree = json.load(inFile)['tree']
 	groupSwingKids(tree)
 	for ob in tree.values():
 		if ob.get('object','') == 'collector':
 			print 'Swing collector:', ob
 	# Time Adjustment Test
-	test = _testImportTree('public/Simple Market System')
+	with open('data/Feeder/public/Simple Market System.json') as inFile:
+		tree = json.load(inFile)['tree']
 	adjustTime(tree, 100, 'hours', '2000-09-01')
 	for ob in tree.values():
 		if ob.get('object','') in ['recorder','collector']:
 			print 'Time-adjusted collector:', ob 
 	# Graph Test
-	tree = _testImportTree('public/Olin Barre Geo')
+	with open('data/Feeder/public/Olin Barre Geo.json') as inFile:
+		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)
 	# plt.show()

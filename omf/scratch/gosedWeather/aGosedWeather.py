@@ -29,23 +29,34 @@ myTree[oldMax + 5] = {'name':'solEngInverter',
 myTree[oldMax + 6] = {'generator_mode':'SUPPLY_DRIVEN', 
 	'name':'solar172879', 
 	'parent':'solEngInverter', 
-	'area':'300 sf', 
+	'area':'30000 sf', 
 	'generator_status':'ONLINE', 
 	'object':'solar', 
 	'efficiency':'0.14', 
 	'panel_type':'SINGLE_CRYSTAL_SILICON' }
-myTree[oldMax + 7] = { 'interval':'3600',
-	'parent':'solEngInverter',
-	'limit':'0',
-	'file':'Inverter_solEngInverter.csv',
-	'property':'power_A,power_B,power_C',
-	'object': 'recorder'}
+# myTree[oldMax + 7] = { 'interval':'3600',
+# 	'parent':'solEngInverter',
+# 	'limit':'0',
+# 	'file':'Inverter_solEngInverter.csv',
+# 	'property':'power_A,power_B,power_C',
+# 	'object': 'recorder'}
 feeder.adjustTime(myTree, 240, 'hours', '2014-01-01')
 
-# Run here.
+# Run here to test.
 rawOut = runInFilesystem(myTree, attachments=myFeed['attachments'], keepFiles=True, workDir='.', glmName='Orville Tree Pond Calibrated.glm')
 
-# Show some output.
-print 'Output Keys:', rawOut.keys()
-plt.plot([abs(complex(x)) for x in rawOut['Inverter_solEngInverter.csv']['power_A']])
-plt.show()
+# # Show some output.
+# print 'Output Keys:', rawOut.keys()
+# plt.plot([abs(complex(x)) for x in rawOut['Inverter_solEngInverter.csv']['power_A']])
+# plt.show()
+
+# Write back the full feeder.
+outJson = dict(myFeed)
+with open('mspWeather.csv','r') as weatherFile:
+	weatherString = weatherFile.read()
+outJson['attachments']['mspWeather.csv'] = weatherString
+outJson['tree'] = myTree
+try: os.remove('./Orville Tree Pond Calibrated With Weather.json')
+except: pass
+with open('./Orville Tree Pond Calibrated With Weather.json', 'w') as outFile:
+	json.dump(outJson, outFile, indent=4)

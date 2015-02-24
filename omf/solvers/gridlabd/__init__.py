@@ -122,7 +122,8 @@ def _strClean(x):
 		if len(matches)==0:
 			return 0.0
 		else:
-			return float(matches[0])
+			try: return float(matches[0])
+			except: return 0.0 # Hack for crazy WTF occasional Gridlab output.
 	else:
 		return x
 
@@ -162,7 +163,8 @@ def _tests():
 		("+3.76184", 3.76184),
 		("1", 1.0),
 		("-32.4", -32.4),
-		("+7200+0d", 7200.0)]
+		("+7200+0d", 7200.0),
+		("+175020+003133", 0.0)]
 	for (string, result) in strTestCases:
 		assert _strClean(string) == result, "A _strClean operation failed on: " + string
 	# Get a test feeder and test climate.
