@@ -55,7 +55,7 @@ def run(modelDir, inputDict):
 			* float(inputDict.get("shading", 99.5))/100 \
 			* float(inputDict.get("sysAvail", 99.5))/100 \
 			* float(inputDict.get("age", 99.5))/100 \
-			* float(inputDict.get("inverterEfficiency", 98.5))/100
+			* float(inputDict.get("inverterEfficiency", 92))/100
 		ssc.ssc_data_set_number(dat, "derate", derate)
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
@@ -281,7 +281,7 @@ def _tests():
 		"shading": "100",
 		"sysAvail": "100",
 		"age": "100",		
-		"inverterEfficiency": "96.5",
+		"inverterEfficiency": "92",
 		"inverterSize": "75",
 		"tilt": "True",
 		"manualTilt":"34.65",	
