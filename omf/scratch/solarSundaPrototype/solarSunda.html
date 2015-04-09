@@ -134,15 +134,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Targeted Tax Equity Return (%)<span class="classic">Loan discount rate.</span></label>
 				<input type="text" id="taxEquityReturn" name="taxEquityReturn" value="8.50" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Climate<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
-				<select id="climateName" name="climateName">
-					{% for climate in datastoreNames["climates"] %}
-						<option value="{{ climate }}">{{ climate }}</option>
-					{% endfor %}
-				</select>
-			</div>										
+			</div>									
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Currently we only support a yearlong analysis, i.e. 8760 hours.</span></label>
 				<input type="text" id="simLength" name="simLength" pattern="^\d+$" value="8760" readonly />
@@ -206,9 +198,13 @@
 					<input type="text" id="projName" name = "projName" value="N/A" readonly out/>
 				</div>
 				<div class="shortInput">
-					<reportLabel>Climate Zipcode: </reportLabel>
-					<input type="text" id="zipCode" name = "zipCode" value="N/A" readonly out/>
-				</div>		
+					<label class="tooltip">Climate Tested:<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
+					<select id="climateName" name="climateName" readonly/>
+						{% for climate in datastoreNames["climates"] %}
+							<option value="{{ climate }}">{{ climate }}</option>
+						{% endfor %}
+					</select>
+				</div>			
 				<div class="shortInput">
 					<reportLabel>System Output (first year, kWh):</reportLabel>
 					<input type="text" id="1yearKWH" name = "1yearKWH" value="N/A" readonly out/>

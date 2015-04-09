@@ -6,7 +6,7 @@ from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
 from random import random
-import xlwt, traceback
+import xlwt, traceback, csv
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 import feeder
@@ -38,7 +38,10 @@ def run(modelDir, inputDict):
 		inputDict["simStartDate"] = "2013-01-01"
 		inputDict["simLengthUnits"] = "hours"
 		inputDict["modelType"] = "solarSunda"
-		inputDict["climateName"] = "VA-STERLING"
+		# Associate zipcode to climate data		
+		inputDict["climateName"] = zipCodeToclimateName(inputDict["zipCode"])	
+		print inputDict["climateName"]
+		#inputDict["climateName"] = "VA-STERLING"
 		inputDict["simLength"] = "350"
 		inputDict["degradation"] = "0.5"         #*paul: 0.8?
 		inputDict["derate"] = "87"		
@@ -150,6 +153,52 @@ def run(modelDir, inputDict):
 		except Exception, e:
 			pass
 
+#Maps zipcode from excel data if zipcodes mapped to city, state, lat/lon 
+#https://www.gaslampmedia.com/download-zip-code-latitude-longitude-city-state-county-csv/
+def zipCodeToclimateName(zipCode):
+	def compareLatLon(LatLon, LatLon2):
+		differenceLat = float(LatLon[0]) - float(LatLon2[0]) 
+		differenceLon = float(LatLon[1]) - float(LatLon2[1])
+		distance = math.sqrt(math.pow(differenceLat, 2) + math.pow(differenceLon,2))
+		return distance
+
+	#only has data for states: A,  and V
+	climateNames = {"AK" : "ANCHORAGE", "AL": "HUNTSVILLE", "AZ": "PRESCOTT", "VA": "STERLING", "VT": "BURLINGTON"}
+	climateCity = []
+	lowestDistance = 1000
+
+	#Parse .csv file with city/state zip codes and lat/lon
+	with open('C:\Users\Asus\Documents\GitHub\NRECA\omf\omf\data\Climate\zip_codes_states.csv', 'rt') as f:
+	     reader = csv.reader(f, delimiter=',') 
+	     for row in reader:
+	          for field in row:
+	              if field == zipCode:
+	                  zipState = row[4] 
+	                  zipCity = row[3]
+	                  ziplatlon  = row[1], row[2]
+
+	#Look for climate data matches by looking for data available for that state
+	#Stores all city matches in climateCity list
+	for key in climateNames:
+		if key == zipState:
+			climateCity.append(climateNames[zipState])
+
+    #Parse the cities distances to zipcode city to determine closest climate
+	with open('C:\Users\Asus\Documents\GitHub\NRECA\omf\omf\data\Climate\zip_codes_states.csv', 'rt') as f:
+	     reader = csv.reader(f, delimiter=',') 
+	     for row in reader:
+	          for field in row:
+	          	for city in climateCity:
+	          		  if row[4].lower() == zipState.lower():
+			              if field.lower() == climateCity[0].lower():
+			                  climatelatlon  = row[1], row[2]
+			                  distance = compareLatLon(ziplatlon, climatelatlon)
+			                  if (distance < lowestDistance):
+			                  	lowestDistance = distance
+			                  	                  
+	climateName = zipState + "-" + climateCity[0]
+	return climateName
+
 def _runningSum(inList):
 	''' Give a list of running sums of inList. '''
 	return [sum(inList[:i+1]) for (i,val) in enumerate(inList)]
@@ -165,7 +214,7 @@ def _tests():
 	inData = {"simStartDate": "2013-01-01",
 		"simLengthUnits": "hours",
 		"modelType": "solarSunda",
-		"climateName": "VA-STERLING",
+		"zipCode": "35899",
 		"simLength": "8760",
 		"costAcre": "10000",
 		"systemSize":"250",
@@ -193,7 +242,7 @@ def _tests():
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",
-		"gamma":"-0.45",}
+		"gamma":"-0.45"}
 	modelLoc = pJoin(workDir,"admin","Automated solarSunda Testing")	
 	# Blow away old test results if necessary.
 	try:
