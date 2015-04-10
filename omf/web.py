@@ -18,7 +18,7 @@ _omfDir = os.path.dirname(os.path.abspath(__file__))
 
 def safeListdir(path):
 	''' Helper function that returns [] for dirs that don't exist. Otherwise new users can cause exceptions. '''
-	try: return os.listdir(path)
+	try: return [x for x in os.listdir(path) if not x.startswith(".")]
 	except:	return []
 
 def getDataNames():
