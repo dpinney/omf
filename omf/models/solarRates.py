@@ -98,8 +98,6 @@ def run(modelDir, inputDict):
 		outData["monthlyRevenue"] = sorted(monthlyRevenue, key=lambda x:months[x[0]])
 		outData["totalKWhSold"] = sorted(totalKWhSold, key=lambda x:months[x[0]])
 		outData["totalRevenue"] = sorted(totalRevenue, key=lambda x:months[x[0]])
-		outData["lossesBAU"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)]) 
-		outData["lineLossRate"] = outData.get("lossesBAU", 0) / float(inputDict.get("totalKWhPurchased", 0))
 		outData["totalGeneration"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["monthlyGeneration"][i][1]*outData["monthlyNoConsumerServedSales"][i][1]*(float(inputDict.get("resPenetration", 5))/100/1000)] for i in range(12)]
 		outData["totalSolarSold"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["totalKWhSold"][i][1] - outData["totalGeneration"][i][1]] for i in range(12)]
 		##################
@@ -109,11 +107,11 @@ def run(modelDir, inputDict):
 		# BAU case
 		outData["BAU"] = {}
 		# E23 = E11
-		outData["BAU"]["totalKWhPurchased"] = float(inputDict.get("totalKWhPurchased", 0))
+		outData["BAU"]["totalKWhPurchased"] = float(inputDict.get("totalKWhPurchased", 1))
 		# E24 = SUM(E19:P19)
 		outData["BAU"]["totalKWhSales"] = sum([totalKWhSold[i][1] for i in range(12)]) 
 		# E25 = E23-E24
-		outData["BAU"]["losses"] = outData["lossesBAU"] 
+		outData["BAU"]["losses"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)])
 		# E26 = E25/E23
 		outData["BAU"]["effectiveLossRate"] = outData["BAU"]["losses"] / outData["BAU"]["totalKWhPurchased"]
 		# E27 = 0
