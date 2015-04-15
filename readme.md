@@ -7,6 +7,7 @@ Included is a web interface. For NRECA members, access to a production system is
 Full documentation is available on our [OMF wiki](https://github.com/dpinney/omf/wiki).
 
 ### How to install?
+
 NRECA members can log in to the web interface directly at http://www.omf.coop/
 
 Others can follow the [developer installation instructions](https://github.com/dpinney/omf/wiki/Developer-Documentation).

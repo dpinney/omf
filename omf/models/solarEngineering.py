@@ -257,7 +257,7 @@ def heavyProcessing(modelDir, inputDict):
 		latPerc = 1.0*len(latKeys)/len(tree)
 		if latPerc < 0.25: doNeato = True
 		else: doNeato = False
-		# Generate the pngs for the system voltage map time traveling chart.
+		# Generate the images for the system voltage map time traveling chart.
 		genTime = generateVoltChart(tree, rawOut, modelDir, neatoLayout=doNeato)
 		cleanOut['genTime'] = genTime
 		# Aggregate up the timestamps:
@@ -298,11 +298,11 @@ def heavyProcessing(modelDir, inputDict):
 		pass
 
 def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
-	''' Map the voltages on a feeder over time using a set of PNGs.'''
+	''' Map the voltages on a feeder over time using a set of images.'''
 	# Make the subfolder we need.
-	try: shutil.rmtree(pJoin(modelDir, 'pngs'))
+	try: shutil.rmtree(pJoin(modelDir, 'images'))
 	except: pass
-	try: os.mkdir(pJoin(modelDir, 'pngs'))
+	try: os.mkdir(pJoin(modelDir, 'images'))
 	except: pass
 	# We need to timestamp images with the system clock to make sure the browser caches them appropriately.
 	genTime = str(datetime.datetime.now()).replace(':','.')
@@ -360,7 +360,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		plt.clim(110,130)
 		plt.colorbar()
 		plt.title(stamp)
-		voltChart.savefig(pJoin(modelDir,'pngs','volts' + str(step).zfill(3) + "-" + genTime + '.png'))
+		voltChart.savefig(pJoin(modelDir,'images','volts' + str(step).zfill(3) + "-" + genTime + '.png'), dpi=100)
 		# Reclaim memory by closing, deleting and garbage collecting the last chart.
 		voltChart.clf()
 		plt.close()
@@ -458,7 +458,7 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	renderAndShow(template)
+	# renderAndShow(template)
 	# Run the model.
 	runForeground(modelLoc, inData)
 	## Cancel the model.
