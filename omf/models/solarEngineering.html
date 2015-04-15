@@ -500,7 +500,7 @@
 					var simLen= allInputData.simLength;
 					gebi("slider").max=simLen
 					sVal = gebi("slider").value
-					gebi("timeTravelImage").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/images/volts" + pad(sVal, 3, 0) + "-" + allOutputData.genTime + ".jpg"
+					gebi("timeTravelImage").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/images/volts" + pad(sVal, 3, 0) + "-" + allOutputData.genTime + ".png"
 				}
 			</script>
 			<input id="slider" type="range" min="1" max="" step="1" oninput="updateVoltMap()" onchange="updateVoltMap()" defaultValue="1" style="width:100%; padding:5 5 5 5; height:20px"/>
