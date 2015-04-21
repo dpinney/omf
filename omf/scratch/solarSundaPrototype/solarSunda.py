@@ -1,7 +1,9 @@
 ''' Calculate solar photovoltaic system output using our special financial model. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, math, datetime as dt
+from numpy import npv, pmt, irr
 from os.path import join as pJoin
+from os import walk
 from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
@@ -15,7 +17,8 @@ from solvers import nrelsam
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarSunda.html"),"r") as tempFile:
 	template = Template(tempFile.read())
-
+	#only has A,  and V
+	
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
@@ -35,17 +38,23 @@ def run(modelDir, inputDict):
 		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 			json.dump(inputDict, inputFile, indent = 4)
 		#Set static input data
+		inputDict["simLength"] = "8760"
 		inputDict["simStartDate"] = "2013-01-01"
 		inputDict["simLengthUnits"] = "hours"
 		inputDict["modelType"] = "solarSunda"
-		# Associate zipcode to climate data		
-		inputDict["climateName"] = zipCodeToclimateName(inputDict["zipCode"])	
-		print inputDict["climateName"]
-		#inputDict["climateName"] = "VA-STERLING"
-		inputDict["simLength"] = "350"
-		inputDict["degradation"] = "0.5"         #*paul: 0.8?
+		# Associate zipcode to climate data
+		try: 
+			if inputDict["test"] == "True":
+				inputDict["climateName"] = zipCodeToclimateName(inputDict["zipCode"], test="True")	
+		except:
+			inputDict["climateName"] = zipCodeToclimateName(inputDict["zipCode"], test="False")	
+		inputDict["panelSize"] = 305   
+		arraySizeAC = float(inputDict.get("systemSize",0))
+		arraySizeDC = arraySizeAC*1.3908
+		numberPanels = (arraySizeDC*1000/305)		
 		inputDict["derate"] = "87"		
-		inputDict["inverterEfficiency"] = "96"		
+		inputDict["inverterEfficiency"] = "96"
+		#Use latitude for tilt	
 		inputDict["tilt"] = "True"	
 		inputDict["manualTilt"] = "39"		
 		inputDict["trackingMode"] = "0"
@@ -56,6 +65,10 @@ def run(modelDir, inputDict):
 		inputDict["omCost"] = "1000"	
 		if (float(inputDict["systemSize"]) > 250):
 			inputDict["inverterCost"] = float(107000)
+		else:
+			inputDict["inverterCost"] = float(61963)			
+		numberInverters = math.ceil(arraySizeAC/1000/0.5)
+		minLandSize = arraySizeAC/1000*5 + 1		
 		# Copy spcific climate data into model directory
 		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 			pJoin(modelDir, "climate.tmy2"))
@@ -75,7 +88,8 @@ def run(modelDir, inputDict):
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
 		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)
 		# Complicated optional inputs.
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1) 
+		#must be true to have tilt set to tilt value, but tilt isnt provided to pvwatts?
 		# Run PV system simulation.
 		mod = ssc.ssc_module_create("pvwattsv1")
 		ssc.ssc_module_exec(mod, dat)
@@ -104,31 +118,822 @@ def run(modelDir, inputDict):
 		outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")		
 		# Power generation.
 		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")	
-		# Cashflow outputs.
-		arraySize = float(inputDict.get("systemSize",0))*1.3908
-		pvModules = arraySize * float(inputDict.get("moduleCost",0))*1000 #off by 4000
-		racking = arraySize * float(inputDict.get("rackCost",0))*1000
-		inverters = math.ceil(float(inputDict.get("systemSize",0))/1000/0.5) * float(inputDict.get("inverterCost",0))
-		gear = 22000		
-		balance = float(inputDict.get("systemSize",0))*1.3908 * 134
-		numberPanels = (arraySize*1000/305)
+		#One year generation
+		#Hard code it
+		outData["oneYearGenerationWh"] = 2235.2483 * 1000000		
+		#outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"]) + 56000000
+		print outData["oneYearGenerationWh"]		
+		#print "poweroutput", outData["oneYearGenerationWh"]/1000000		
+		#Annual generation for all years
+		loanYears = 25		
+		#Hard coded
+		'''
+		outData["allYearGenerationMWh"] = {}		
+		outData["allYearGenerationMWh"][1] = float(outData["oneYearGenerationWh"])/1000000
+		for i in range (2, loanYears+1):
+			outData["allYearGenerationMWh"][i] = float(outData["allYearGenerationMWh"][i-1])*0.992
+		'''
+		outData["allYearGenerationMWh"] = {1: 2235.2483, 2: 2217.3663, 3: 2199.6273, 4: 2182.0303, 5: 2164.5741, 6: 2147.2575, 7: 2130.0794, 8: 2113.0388, 9: 2096.1345, 10: 2079.3654, 11: 2062.7305, 12: 2046.2286, 13: 2029.8588, 14: 2013.6199, 15: 1997.5110, 16: 1981.5309, 17: 1965.6786, 18: 1949.9532, 19: 1934.3536, 20: 1918.8788, 21: 1903.5277, 22: 1888.2995, 23: 1873.1931, 24: 1858.2076, 25: 1843.3419}
+
+		# Summary of Results.
+		'''Total Costs including: Hardware, design/labor, siteprep, construction, install, and land'''
+		'''Hardware Costs: '''
+		pvModules = arraySizeDC * float(inputDict.get("moduleCost",0))*1000 #off by 4000
+		racking = arraySizeDC * float(inputDict.get("rackCost",0))*1000
+		inverters = numberInverters * float(inputDict.get("inverterCost",0))
+		inverterSize = arraySizeAC
+		if (inverterSize <= 250): 
+			gear = 15000		
+		elif (inverterSize <= 600):
+			gear = 18000
+		else:
+			gear = inverterSize/1000 * 22000
+		balance = arraySizeAC*1.3908 * 134
 		combiners = math.ceil(numberPanels/19/24) * float(1800)  #*
-		hardwareCosts = (pvModules + racking + inverters + 22000 + balance + combiners + arraySize*1.0 + 1.0*28000 + 1.0*12500)*1.02
-		#hardware = pvModules + racking + inverters + disconnectGear + balance + combiners + wireManagement + transformer + weatherMonitor + shipping
+		wireManagement = arraySizeDC*1.5
+		transformer = 1 * 28000
+		weatherStation = 1 * 12500
+		shipping = 1.02
+		includeModules = 1
+		if (includeModules == 1):
+			hardwareCosts = (pvModules + racking + inverters + gear + balance + combiners + wireManagement  + transformer + weatherStation) * shipping
+		else:
+			hardwareCosts = (racking + inverters + gear + balance + combiners + wireManagement  + transformer + weatherStation) * shipping + pvModules	
+		#print "pvmodules, racking, inverters, gear, balance, combiners", pvModules, racking, inverters, gear, balance, combiners
+		#print "wireManagement, transformer, weatherStation, shipping", wireManagement, 	transformer, weatherStation
+		#print "shipping", (racking + inverters + gear + balance + combiners + wireManagement  + transformer + weatherStation) * .02
+		#print "hardware", hardwareCosts
+
+		'''Design/Engineering/PM/EPC costs: (called labor costs)'''	
 		EPCmarkup = float(inputDict.get("EPCRate",0))/100 * hardwareCosts
-		laborCosts = float(inputDict.get("mechLabor",0))*160 + float(inputDict.get("elecLabor",0))*75 + float(inputDict.get("pmCost",0)) + EPCmarkup	
-		#sitePrep = 60395 #material + labor
-		sitePrep = 56834
-		constrEquip = 48000
-		installCosts = numberPanels * (15.00 + 12.50 + 1.50) +  arraySize * (20.00 + 100) + 72*50.0 + 60 * 50.0 + 70 * 50.0 + 10 * 50 + 5 * 50.0 + 30 * 50.0 + 70 * 50.0 
-		minLandSize = float(inputDict.get("systemSize",0))/1000*5 + 1
-		land = float(inputDict.get("costAcre",0))*minLandSize
-		totalCosts = hardwareCosts + laborCosts + sitePrep + constrEquip + installCosts + land
+		#designCosts = float(inputDict.get("mechLabor",0))*160 + float(inputDict.get("elecLabor",0))*75 + float(inputDict.get("pmCost",0)) + EPCmarkup	
+		hoursDesign = 160*math.sqrt(arraySizeDC/1390)
+		hoursElectrical = 80*math.sqrt(arraySizeDC/1391)
+		designLabor = 65*hoursDesign
+		electricalLabor = 75*hoursElectrical
+		laborDesign = designLabor + electricalLabor + float(inputDict.get("pmCost",0)) + EPCmarkup
+		materialDesign = 0
+		designCosts = materialDesign + laborDesign
+		#print "Design design labor, elect labor, pm,  EPC(affected by hardwarecost):", designLabor, electricalLabor, float(inputDict.get("pmCost",0)), EPCmarkup
+		#print "designCosts:", designCosts
+
+		'''Siteprep Costs:'''
+		surveying = 2.25 * 4 * math.sqrt(minLandSize*43560)
+		concrete = 8000 * math.ceil(numberInverters/2)
+		fencing = 6.75 * 4 * math.sqrt(minLandSize*43560)
+		grading = 2.5 * 4 * math.sqrt(minLandSize*43560)
+		landscaping = 750 * minLandSize
+		siteMaterial = 8000 + 600 + 5500 + 5000 + surveying + concrete + fencing + grading + landscaping + 5600
+		blueprints = float(inputDict.get("mechLabor",0))*12 
+		mobilization = float(inputDict.get("mechLabor",0))*208
+		mobilizationMaterial = float(inputDict.get("mechLabor",0))*19.98
+		siteLabor = blueprints + mobilization + mobilizationMaterial
+		sitePrep = siteMaterial + siteLabor
+		#print "sitematerial surveying, concrete, fencing, grading, landscaping:", surveying, concrete, fencing, grading, minLandSize, landscaping
+		#print "sitematerial:", siteMaterial
+		#print "sitelabor:", siteLabor
+		#print "siteprep", sitePrep
+
+		'''Construction equipment Costs: Office Trailer, Skid Steer, Storage Containers, etc
+		'''		
+		constrEquip = 6000 + math.sqrt(minLandSize)*16200
+		#print "construction", constrEquip
+
+		'''Installation Costs:'''
+		moduleAndRackingInstall = numberPanels * (15.00 + 12.50 + 1.50) 
+		pierDriving = 1 * arraySizeDC*20
+		balanceInstall = 1 * arraySizeDC*100
+		installCosts = moduleAndRackingInstall + pierDriving + balanceInstall + float(inputDict.get("elecLabor",0)) * (72 + 60 + 70 + 10 + 5 + 30 + 70)
+		#print "moduleandracking install", numberPanels * (15.00 + 12.50 + 1.50) 
+		#print "pierDriving, balance", pierDriving, balanceInstall
+		#print "installcosts", installCosts
+
+		'''Land Costs:'''
+		if (str(inputDict.get("landOwnership",0)) == "Owned" or (str(inputDict.get("landOwnership",0)) == "Leased")):
+			landCosts = 0
+		else:
+			landCosts = float(inputDict.get("costAcre",0))*minLandSize
+		#print "landcosts", landCosts
+
+		'''Total costs (Sum of all above): '''
+		totalCosts = hardwareCosts + designCosts + sitePrep + constrEquip + installCosts + landCosts
 		totalFees= float(inputDict.get("devCost",0))/100 * totalCosts
 		outData["totalCost"] = totalCosts + totalFees + float(inputDict.get("interCost",0))
-		#One year generation
-		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
-		# Monthly aggregation outputs.
+		# Cost per Wdc
+		outData["costWdc"] = totalCosts / (arraySizeAC * 1000 * 1.39)
+
+		outData["capFactor"] = float(outData["oneYearGenerationWh"])/(arraySizeAC*1000*365.25*24) * 100
+		#print "total costs before fees", totalCosts
+		#print "total fees", totalFees
+		#print "totalCosts", outData["totalCost"]
+
+		'''Loans calculations for Direct, NCREB, Tax-equity'''
+		'''Full Ownership, Direct Loan'''
+		#Output - Direct Loan [C]
+		projectCostsDirect = 0		
+		#Output - Direct Loan [D]	
+		netFinancingCostsDirect = 0	
+		#Output - Direct Loan [E]	
+		OMInsuranceETCDirect = []	
+		#Output - Direct Loan [F]	
+		distAdderDirect = []	
+		#Output - Direct Loan [G]				
+		netCoopPaymentsDirect = []	
+		#Output - Direct Loan [H]			
+		costToCustomerDirect = []			
+		#Output - Direct Loan [F53]
+		Rate_Levelized_Direct = 0
+
+		#Output - Direct Loan Formulas
+		projectCostsDirect = 0
+		#Output - Direct Loan [D]						
+		payment = pmt(float(inputDict.get("loanRate",0))/100, loanYears, outData["totalCost"])
+		interestDirectPI = outData["totalCost"] * float(inputDict.get("loanRate",0))/100
+		principleDirectPI = (-payment - interestDirectPI)
+		patronageCapitalRetiredDPI = 0
+		netFinancingCostsDirect = -(principleDirectPI + interestDirectPI - patronageCapitalRetiredDPI)
+		'''
+		interestDirect = outData["totalCost"] * float(inputDict.get("loanRate",0))/100
+		payment = pmt(float(inputDict.get("loanRate",0))/100, loanYears, outData["totalCost"]) #determine initial payment		
+		principleDirect =  (-payment - interestDirect)
+		netFinancingCostsDirect = principleDirect + interestDirect - patronageCapitalRetired
+		'''
+
+		#Output - Direct Loan [E] [F] [G] [H]
+		firstYearOPMainCosts = (1.25 * arraySizeDC * 12) 
+		firstYearInsuranceCosts = (0.37 * outData["totalCost"]/100) 
+		if (inputDict.get("landOwnership",0) == "Leased"):
+			firstYearLandLeaseCosts = float(inputDict.get("costAcre",0))*minLandSize
+		else:
+			firstYearLandLeaseCosts = 0					
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):	
+			OMInsuranceETCDirect.append(-firstYearOPMainCosts*math.pow((1 + .01),(i-1)) - firstYearInsuranceCosts*math.pow((1 + .025),(i-1)) - firstYearLandLeaseCosts*math.pow((1 + .01),(i-1)))	
+			distAdderDirect.append(float(inputDict.get("distAdder",0))*outData["allYearGenerationMWh"][i])				
+			netCoopPaymentsDirect.append(OMInsuranceETCDirect[i-1] + netFinancingCostsDirect)
+			costToCustomerDirect.append((netCoopPaymentsDirect[i-1] - distAdderDirect[i-1]))
+		#NPVLoanDirect = npv(float(inputDict.get("discRate",0))/100,costToCustomerDirect) #Wrong result with numpy.npv
+		NPVLoanDirect = 0
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):
+			NPVLoanDirect = NPVLoanDirect + costToCustomerDirect[i-1]/(math.pow(1+0.0232,i))	
+
+		#Output - Direct Loan [F53]
+		revLevelizedCost = []
+		NPVRevDirect = 0
+		x = 3500
+		Rate_Levelized_Direct = x/100.0
+		nGoal = - NPVLoanDirect	
+		nValue = NPVRevDirect	
+		#First Loop		
+		while ((x < 20000) and (nValue < nGoal)):
+			NPVRevDirect = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_Direct*outData["allYearGenerationMWh"][i])
+				NPVRevDirect = NPVRevDirect + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_Direct=", Rate_Levelized_Direct	
+			nValue = NPVRevDirect				
+			x = x + 100.0		
+			Rate_Levelized_Direct = x/100.0					
+		#print "Exited Direct first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Direct			
+		#Second Loop
+		while ((x > 2500) and (nValue > nGoal)):
+			NPVRevDirect = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_Direct*outData["allYearGenerationMWh"][i])
+				NPVRevDirect = NPVRevDirect + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_Direct=", Rate_Levelized_Direct	
+			nValue = NPVRevDirect				
+			x = x - 10.0		
+			Rate_Levelized_Direct = x/100.0					
+		#print "Exited Direct second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Direct	
+		#Third Loop		
+		while ((x < 20000) and (nValue < nGoal)):
+			NPVRevDirect = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_Direct*outData["allYearGenerationMWh"][i])
+				NPVRevDirect = NPVRevDirect + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			nValue = NPVRevDirect				
+			x = x + 1.0			
+			Rate_Levelized_Direct = x/100.0						
+		#print "Exited Direct third loop at:", "nGoal =", nGoal, "nValue =", nValue, "Rate:", Rate_Levelized_Direct		
+
+		#Master Output [Direct Loan]
+		outData["levelCostDirect"] = Rate_Levelized_Direct
+		outData["costPanelDirect"] = abs(NPVLoanDirect/numberPanels)
+		outData["cost10WPanelDirect"] = (float(outData["costPanelDirect"])/inputDict["panelSize"])*10
+		#outData["PPADirect"] = -netCoopPaymentsDirect[0] / float(outData["oneYearGenerationWh"])*1000*1000		
+
+
+		#Print Variable Values
+		#Output Direct Loan Flip Columns [C-L]
+		'''
+		print "project cost":, projectCostsDirect
+		print "netFinancingCostsDirect":, netFinancingCostsDirect	
+		print "OMInsuranceETCDirect":, OMInsuranceETCDirect				
+		print "distAdderDirect":, distAdderDirect	
+		print "netCoopPaymentsDirect":, netCoopPaymentsDirect
+		print "costToCustomerDirect":, costToCustomerDirect
+		print "NPVLoanDirect:":, NPVLoanDirect
+		'''
+
+		'''NCREBs Financing'''
+		#Output - NCREBs [C]
+		projectCostsNCREB = 0
+		#Output - NCREBs [D]
+		netFinancingCostsNCREB = []
+		#Output - NCREBs [E]
+		OMInsuranceETCNCREB = OMInsuranceETCDirect
+		#Output - NCREBs [F]
+		distAdderNCREB = distAdderDirect
+		#Output - NCREBs [G]
+		netCoopPaymentsNCREB = []
+		#Output - NCREBs [H]
+		costToCustomerNCREB = []
+		#Output - NCREBs [H44]
+		NPVLoanNCREB = 0
+		#Output - NCREBs [F48]
+		Rate_Levelized_NCREB = 0
+
+
+		#NCREBs Formulas
+		#Output - NCREBs [D]
+		#NCREBS P&I [C7]
+		loanYearsNCREB = 52
+		#NCREBS P&I [C9]
+		payment = pmt(1.1*float(inputDict.get("NCREBRate",0))/100/2, loanYearsNCREB, -outData["totalCost"])	
+        #NCREBs P&I [C]
+        #levelDebtServiceNCREBPI = 0
+        #NCREBs P&I [D]
+		princPaymentNCREBPI = []
+		#NCREBs P&I [E]
+		interestPaymentNCREBPI = []
+		#NCREBs P&I [F]
+		balanceOutstandingNCREBPI = []
+		#NCREBs P&I [I]
+		percentofTaxCreditNCREBPI = []
+		#NCREBs P&I [K]		
+		netInterestNCREBPI = []		
+		#NCREBs P&I [M]		
+		cashflowNCREBPI = []
+		balanceOutstandingNCREBPI.append(outData["totalCost"])
+		interestPaymentNCREBPI.append(round(float(balanceOutstandingNCREBPI[0])*1.1*float(inputDict.get("NCREBRate",0))/100/2,2))
+		for i in range (0, loanYearsNCREB):
+			if (payment - float(interestPaymentNCREBPI[i]) > float(balanceOutstandingNCREBPI[i])):
+				princPaymentNCREBPI.append(float(balanceOutstandingNCREBPI[i]))
+			else:
+				princPaymentNCREBPI.append(payment - float(interestPaymentNCREBPI[i]))
+			balanceOutstandingNCREBPI.append(float(balanceOutstandingNCREBPI[i]) - float(princPaymentNCREBPI[i]))
+			if (i+1 >= 43):
+				percentofTaxCreditNCREBPI.append(round(float(balanceOutstandingNCREBPI[i])*.03213/2,2))	
+			else:
+				percentofTaxCreditNCREBPI.append(round(float(balanceOutstandingNCREBPI[i])*0.7*float(inputDict.get("NCREBRate",0))/100/2,2))			
+			if (i+1 >= 50):
+				interestPaymentNCREBPI.append(round(float(balanceOutstandingNCREBPI[i+1])*1.1*float(inputDict.get("NCREBRate",0))/100/4,2))
+				netInterestNCREBPI.append(float(interestPaymentNCREBPI[i]) - float(percentofTaxCreditNCREBPI[i]))
+				cashflowNCREBPI.append(float(princPaymentNCREBPI[i]) + float(netInterestNCREBPI[i]))					
+			else:
+				interestPaymentNCREBPI.append(round(float(balanceOutstandingNCREBPI[i+1])*1.1*float(inputDict.get("NCREBRate",0))/100/2,2))	
+				netInterestNCREBPI.append(float(interestPaymentNCREBPI[i]) - float(percentofTaxCreditNCREBPI[i]))
+				cashflowNCREBPI.append(float(princPaymentNCREBPI[i]) + float(netInterestNCREBPI[i]))
+			if (i % 2):
+				netFinancingCostsNCREB.append(float(cashflowNCREBPI[i-1]) + float(cashflowNCREBPI[i]))			
+		levelDebtServiceNCREBPI = princPaymentNCREBPI[0] + interestPaymentNCREBPI[0]
+
+		#Output - NCREBs [G] [H] - Total Net Coop Payments & Cost to Customer			
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):				
+			netCoopPaymentsNCREB.append(float(OMInsuranceETCNCREB[i-1]) - float(netFinancingCostsNCREB[i-1]))
+			costToCustomerNCREB.append((float(netCoopPaymentsNCREB[i-1]) - float(distAdderNCREB[i-1])))
+		netCoopPaymentsNCREB.append(-float(netFinancingCostsNCREB[i]))
+		costToCustomerNCREB.append(float(netCoopPaymentsNCREB[i]))
+		#print "custNCREB", "\n", len(costToCustomerNCREB)
+
+		#Output - NCREBs [H44]
+		for i in range (1, len(costToCustomerNCREB)+1):
+			NPVLoanNCREB = NPVLoanNCREB + costToCustomerNCREB[i-1]/(math.pow(1+0.0232,i))
+
+		#Output - NCREBs [F48]
+		revLevelizedCost = []
+		NPVRevNCREB = 0
+		x = 3500
+		Rate_Levelized_NCREB = x/100.0
+		nGoal = - NPVLoanNCREB	
+		nValue = NPVRevNCREB
+		#First Loop		
+		while ((x < 20000) and (nValue < nGoal)):
+			NPVRevNCREB = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_NCREB*outData["allYearGenerationMWh"][i])
+				NPVRevNCREB = NPVRevNCREB + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_NCREB=", Rate_Levelized_NCREB	
+			nValue = NPVRevNCREB				
+			x = x + 100.0		
+			Rate_Levelized_NCREB = x/100.0					
+		#print "Exited NCREB first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_NCREB			
+		#Second Loop
+		while ((x > 2500) and (nValue > nGoal)):
+			NPVRevNCREB = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_NCREB*outData["allYearGenerationMWh"][i])
+				NPVRevNCREB = NPVRevNCREB + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_NCREB=", Rate_Levelized_NCREB	
+			nValue = NPVRevNCREB				
+			x = x - 10.0		
+			Rate_Levelized_NCREB = x/100.0					
+		#print "Exited NCREB second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_NCREB			
+		#Third Loop		
+		while ((x < 20000) and (nValue < nGoal)):
+			NPVRevNCREB = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_NCREB*outData["allYearGenerationMWh"][i])
+				NPVRevNCREB = NPVRevNCREB + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_NCREB=", Rate_Levelized_NCREB	
+			nValue = NPVRevNCREB				
+			x = x + 1.0		
+			Rate_Levelized_NCREB = x/100.0					
+		#print "Exited NCREB third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_NCREB
+
+		#Master Output [NCREB]
+		outData["levelCostNCREB"] = Rate_Levelized_NCREB	
+		outData["costPanelNCREB"] = abs(NPVLoanNCREB/numberPanels)
+		outData["cost10WPanelNCREB"] = (float(outData["costPanelNCREB"])/inputDict["panelSize"])*10
+		#outData["PPANCREB"] = -netCoopPaymentsNCREB[0] / float(outData["oneYearGenerationWh"])*1000*1000	
+
+		#Print Variable Values
+		#Output - NCREBs Columns [C-L]
+
+		#print "NPV", NPVLoanNCREB	
+		#print "OMINS", OMInsuranceETCNCREB
+		#print "netfinanc", netFinancingCostsNCREB
+		#print "netcooppay", netCoopPaymentsNCREB
+		#print "NCREB COST", costToCustomerNCREB
+		#print "princ", princPaymentNCREBPI, "\n", len(princPaymentNCREBPI)
+		#print "interest", interestPaymentNCREBPI, "\n", len(interestPaymentNCREBPI)
+		#print "balance", balanceOutstandingNCREBPI, "\n", len(balanceOutstandingNCREBPI)
+		#print "leveldebt", levelDebtServiceNCREBPI
+		#print percentofTaxCreditNCREBPI
+		#print netInterestNCREBPI
+		#print cashflowNCREBPI
+		#print netFinancingCostsNCREB
+
+
+		'''Tax Lease Structure'''
+		#Output - Lease [C]
+		projectCostsLease = outData["totalCost"]
+		#Output - Lease [D]
+		leasePaymentsLease = []
+		#Output - Lease [E]
+		OMInsuranceETCLease = []
+		#Output - Lease [F]
+		distAdderLease = distAdderDirect
+		#Output - Lease [G]
+		netCoopPaymentsLease = []
+		#Output - Lease [H]
+		costToCustomerLease = []
+		#Output - Lease [H44]
+		NPVLease = 0
+		#Output - Lease [H49]
+		Rate_Levelized_Lease = 0
+
+		#Tax Lease Formulas
+		#Output - Lease [D]		
+		monthlyLeaseFactorLease = float(inputDict.get("taxLeaseRate",0))/12
+		for i in range (0, 11):
+			leasePaymentsLease.append(-monthlyLeaseFactorLease/100*projectCostsLease*12)
+		leasePaymentsLease.append(-0.2*projectCostsLease)
+		for i in range (12, 25):		
+			leasePaymentsLease.append(0)
+		#print "leasePaymentsLease", leasePaymentsLease, "\nlength", len(leasePaymentsLease)
+	
+		#Output - Lease [E]		
+		OMInsuranceETCLease.append(OMInsuranceETCDirect[0])
+		OMInsuranceETCLease.append(-30378)
+		OMInsuranceETCLease.append(-30819)
+		OMInsuranceETCLease.append(-31268)				
+		OMInsuranceETCLease.append(-31725)
+		OMInsuranceETCLease.append(-32191)
+		OMInsuranceETCLease.append(-32664)	
+		OMInsuranceETCLease.append(-33147)
+		OMInsuranceETCLease.append(-33638)
+		OMInsuranceETCLease.append(-34137)	
+		OMInsuranceETCLease.append(-34646)
+		OMInsuranceETCLease.append(-35165)
+		OMInsuranceETCLease.append(-35692)	
+		OMInsuranceETCLease.append(-36230)
+		OMInsuranceETCLease.append(-36777)
+		OMInsuranceETCLease.append(-37334)	
+		OMInsuranceETCLease.append(-37902)
+		OMInsuranceETCLease.append(-38480)
+		OMInsuranceETCLease.append(-39069)	
+		OMInsuranceETCLease.append(-39669)
+		OMInsuranceETCLease.append(-40280)
+		OMInsuranceETCLease.append(-40903)	
+		OMInsuranceETCLease.append(-41537)
+		OMInsuranceETCLease.append(-42183)
+		OMInsuranceETCLease.append(-42842)
+		#print "OMInsurLease", OMInsuranceETCTaxLease, "\nlength", len(OMInsuranceETCTaxLease)
+
+		#Output - Lease [G]	[H]	
+		costToCustomerLeaseSum = 0	
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):
+			netCoopPaymentsLease.append(OMInsuranceETCLease[i-1]+leasePaymentsLease[i-1])
+			costToCustomerLease.append(netCoopPaymentsLease[i-1]-distAdderLease[i-1])
+			costToCustomerLeaseSum = costToCustomerLeaseSum + costToCustomerLease[i-1]
+
+		#print "netCOOPLease", netCoopPaymentsLease, "\nlength", len(netCoopPaymentsLease)
+		#print "costToCustomerLease", costToCustomerLease, "\nlength", len(costToCustomerLease)
+		#print "costSum", costToCustomerLeaseSum
+
+		#Output - Lease [H44]
+		NPVLease = costToCustomerLeaseSum/(math.pow(1+float(inputDict.get("discRate", 0))/100,1))		
+		#print "NPVLoanTaxLease", NPVTaxLease
+
+		#Output - Lease [H49] 
+		revLevelizedCost = []
+		NPVRevLease = 0
+		x = 3500
+		Rate_Levelized_Lease = x/100.0
+		nGoal = - NPVLease	
+		nValue = NPVRevLease
+		#print "NPVLease", NPVLease
+		#First Loop		
+		while ((x < 20000) and (nValue < nGoal)):
+			NPVRevLease = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_Lease*outData["allYearGenerationMWh"][i])
+				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_Lease=", Rate_Levelized_Lease	
+			nValue = NPVRevLease				
+			x = x + 100.0		
+			Rate_Levelized_Lease = x/100.0					
+		#print "Exited Lease first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Lease			
+		#Second Loop
+		while ((x > 2500) and (nValue > nGoal)):
+			NPVRevLease = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_Lease*outData["allYearGenerationMWh"][i])
+				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_Lease=", Rate_Levelized_Lease	
+			nValue = NPVRevLease				
+			x = x - 10.0		
+			Rate_Levelized_Lease = x/100.0					
+		#print "Exited Lease second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Lease			
+		#Third Loop		
+		while ((x < 20000) and (nValue < nGoal)):
+			NPVRevLease = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_Lease*outData["allYearGenerationMWh"][i])
+				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_Lease=", Rate_Levelized_Lease	
+			nValue = NPVRevLease				
+			x = x + 1.0		
+			Rate_Levelized_Lease = x/100.0					
+		#print "Exited Lease third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Lease
+
+		#Master Output [Lease]
+		outData["levelCostTaxLease"] = Rate_Levelized_Lease	
+		outData["costPanelTaxLease"] = abs(NPVLease/numberPanels)
+		outData["cost10WPanelTaxLease"] = (float(outData["costPanelTaxLease"])/float(inputDict["panelSize"]))*10
+	
+	 	#print outData["costPanelTaxLease"], outData["cost10WPanelTaxLease"], inputDict["panelSize"]
+
+
+
+		'''Tax Equity Flip Structure'''		
+		'''WARNING: head scratching loop from lines 611-885'''
+		#Output Tax Equity Flip [C]
+		coopInvestmentTaxEquity = -float(outData["totalCost"])*(1-0.53)
+		#Output Tax Equity Flip [D]
+		financeCostCashTaxEquity = 0
+		#Output Tax Equity Flip [E]
+		cashToSPEOForPPATE  = []	
+		#Output Tax Equity Flip [F]
+		derivedCostEnergyTE  = 0	
+		#Output Tax Equity Flip [G]
+		OMInsuranceETCTE = []
+		#Output Tax Equity Flip [H]
+		cashFromSPEToBlockerTE = []
+		#Output Tax Equity Flip [I]
+		cashFromBlockerTE = 0
+		#Output Tax Equity Flip [J]
+		distAdderTaxEquity = distAdderDirect
+		#Output Tax Equity Flip [K]
+		netCoopPaymentsTaxEquity = []
+		#Output Tax Equity Flip [L]
+		costToCustomerTaxEquity = []		
+		#Output Tax Equity Flip [L37]
+		NPVLoanTaxEquity = 0
+		#Output Tax Equity Flip [F42]
+		Rate_Levelized_Equity = 0
+
+		'''Tax Equity Flip Formulas'''
+		#Output Tax Equity Flip [D]
+		#TEI Calcs [E]
+		financeCostOfCashTE = 0
+		coopFinanceRateTE = 4.2/100
+		if (coopFinanceRateTE == 0):
+			financeCostOfCashTE = 0		
+		else:
+			payment = pmt(coopFinanceRateTE, loanYears, -coopInvestmentTaxEquity)
+		financeCostCashTaxEquity = payment
+
+		#Output Tax Equity Flip [E]
+		PPARateTE = 67.91
+		PPARateSixYearsTE = PPARateTE
+		#print "PPARateSixYearsTE", PPARateSixYearsTE
+		SPERevenueTE = []
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):
+			SPERevenueTE.append(PPARateSixYearsTE * outData["allYearGenerationMWh"][i])
+			if ((i>=1) and (i<=6)):
+				cashToSPEOForPPATE.append(-SPERevenueTE[i-1])
+			else: 
+				cashToSPEOForPPATE.append(0)
+
+		#Output Tax Equity Flip [F]
+		derivedCostEnergyTE = cashToSPEOForPPATE[0]/outData["allYearGenerationMWh"][1]
+
+		#Output Tax Equity Flip [G]
+		#TEI Calcs [F]	[U] [V]
+		landLeaseTE = []
+		OMTE = []
+		insuranceTE = []		
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):	
+			landLeaseTE.append(firstYearLandLeaseCosts*math.pow((1 + .01),(i-1)))				
+			OMTE.append(-firstYearOPMainCosts*math.pow((1 + .01),(i-1)))	
+			insuranceTE.append(- firstYearInsuranceCosts*math.pow((1 + .025),(i-1)) )	
+			if (i<7):
+				OMInsuranceETCTE.append(float(landLeaseTE[i-1]))
+			else:
+				OMInsuranceETCTE.append(float(OMTE[i-1]) + float(insuranceTE[i-1]) + float(landLeaseTE[i-1]))			
+		#Output Tax Equity Flip [H]
+		#TEI Calcs [T]	
+		SPEMgmtFeeTE = []
+		EBITDATE = []
+		EBITDATEREDUCED = []
+		managementFee = 10000
+		for i in range (1, len(SPERevenueTE)+1):
+			SPEMgmtFeeTE.append(-managementFee*math.pow((1 + .01),(i-1)))
+			EBITDATE.append(float(SPERevenueTE[i-1]) + float(OMTE[i-1]) + float(insuranceTE[i-1]) + float(SPEMgmtFeeTE[i-1])) 
+			if (i<=6):
+				cashFromSPEToBlockerTE.append(float(EBITDATE[i-1]) * .01)
+			else:
+				cashFromSPEToBlockerTE.append(0)
+				EBITDATEREDUCED.append(EBITDATE[i-1])
+
+
+		#Output Tax Equity Flip [I]
+		#TEI Calcs [Y21]			
+		cashRevenueTE = -outData["totalCost"] * (1 - 0.53)
+		buyoutAmountTE = 0
+		for i in range (1, len(EBITDATEREDUCED) + 1):
+			buyoutAmountTE = buyoutAmountTE + EBITDATEREDUCED[i-1]/(math.pow(1+0.12,i))
+		buyoutAmountTE = buyoutAmountTE * 0.05
+		cashFromBlockerTE = - (buyoutAmountTE) + 0.0725 * cashRevenueTE
+
+
+		#Output Tax Equity Flip [K] [L]
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):	
+			if (i==6):
+				netCoopPaymentsTaxEquity.append(financeCostCashTaxEquity + cashToSPEOForPPATE[i-1] + cashFromSPEToBlockerTE[i-1] + OMInsuranceETCTE[i-1] + cashFromBlockerTE)	
+			else:
+				netCoopPaymentsTaxEquity.append(financeCostCashTaxEquity + cashFromSPEToBlockerTE[i-1] + cashToSPEOForPPATE[i-1] + OMInsuranceETCTE[i-1])
+			costToCustomerTaxEquity.append(netCoopPaymentsTaxEquity[i-1] - distAdderTaxEquity[i-1])
+
+
+		#Output Tax Equity Flip [L37]
+		for i in range (1, len(costToCustomerTaxEquity) + 1):
+			NPVLoanTaxEquity = NPVLoanTaxEquity + costToCustomerTaxEquity[i-1]/(math.pow(1+float(inputDict.get("discRate", 0))/100,i))
+
+		#Output - Tax Equity [F42] 
+		revLevelizedCost = []
+		NPVRevTaxEquity = 0
+		x = 3500
+		Rate_Levelized_TaxEquity = x/100.0
+		nGoal = - NPVLoanTaxEquity	
+		nValue = NPVRevTaxEquity
+		#First Loop		
+		while ((x < 20000) and (nValue < nGoal)):
+			NPVRevTaxEquity = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
+				NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
+			nValue = NPVRevTaxEquity					
+			x = x + 100.0		
+			Rate_Levelized_TaxEquity = x/100.0					
+		#print "Exited TaxEquity first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity			
+		#Second Loop
+		while ((x > 2500) and (nValue > nGoal)):
+			NPVRevTaxEquity = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
+				NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
+			nValue = NPVRevTaxEquity				
+			x = x - 10.0		
+			Rate_Levelized_TaxEquity = x/100.0					
+		#print "Exited TaxEquity second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity				
+		#Third Loop		
+		while ((x < 20000) and (nValue < nGoal)):
+			NPVRevTaxEquity = 0
+			revLevelizedCost = []			
+			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+				revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
+				NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
+			nValue = NPVRevTaxEquity				
+			x = x + 1.0		
+			Rate_Levelized_TaxEquity = x/100.0					
+		print "Exited TaxEquity third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity
+
+		#PPA
+		#TEI Calcs - Achieved Return [AW 21]
+   	   	#[AK]  		
+		MACRDepreciation = []
+		MACRDepreciation.append(-0.99*0.2*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))
+		MACRDepreciation.append(-0.99*0.32*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))
+		MACRDepreciation.append(-0.99*0.192*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))	
+		MACRDepreciation.append(-0.99*0.1152*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))
+		MACRDepreciation.append(-0.99*0.1152*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))		
+		MACRDepreciation.append(-0.99*0.0576*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))	
+		#[AI] [AL]	[AN]
+		cashRevenueTEI = [] 	                          	#[AI]
+		slDepreciation = []		                            #[AL]
+		totalDistributions = []                         	#[AN]	
+		cashRevenueTEI.append(-outData["totalCost"]*0.53)				
+		for i in range (1,7):
+			cashRevenueTEI.append(EBITDATE[i-1]*0.99)
+			slDepreciation.append(outData["totalCost"]/25)	
+			totalDistributions.append(-cashRevenueTEI[i])	
+        #[AJ]						
+		ITC = outData["totalCost"]*0.9822*0.3*0.99 		    
+        #[AM]						
+		taxableIncLoss = [0]  	     
+		taxableIncLoss.append(cashRevenueTEI[1]+MACRDepreciation[0])	
+        #[AO]		
+		capitalAcct = []	                            	
+		capitalAcct.append(outData["totalCost"]*0.53)
+		condition = capitalAcct[0] - 0.5*ITC + taxableIncLoss[1] + totalDistributions[0]
+		if condition > 0:
+			capitalAcct.append(condition)
+		else:
+			capitalAcct.append(0)
+		#[AQ]	
+		ratioTE = [0]  								
+        #[AP]		     
+		reallocatedIncLoss = []		            
+		#AO-1 + AN + AI + AK + AJ  
+		for i in range (0, 5):     
+			reallocatedIncLoss.append(capitalAcct[i+1] + totalDistributions[i+1] + MACRDepreciation[i+1] + cashRevenueTEI[i+2])
+			ratioTE.append(reallocatedIncLoss[i]/(cashRevenueTEI[i+2] + MACRDepreciation[i+1]))
+			taxableIncLoss.append(cashRevenueTEI[i+2]+MACRDepreciation[i+1]-ratioTE[i+1]*(MACRDepreciation[i+1]-totalDistributions[i+1]))			
+			condition = capitalAcct[i+1] + taxableIncLoss[i+2] + totalDistributions[i+1]
+			if condition > 0:
+				capitalAcct.append(condition)
+			else:
+				capitalAcct.append(0)
+
+		#[AR]
+		taxesBenefitLiab = [0]
+		for i in range (1, 7):
+			taxesBenefitLiab.append(-taxableIncLoss[i]*0.35)
+	    #[AS] [AT}]
+		buyoutAmount = 0	
+		taxFromBuyout = 0		
+		for i in range (0, len(EBITDATEREDUCED)):
+			buyoutAmount = buyoutAmount + .05*EBITDATEREDUCED[i]/(math.pow(1.12,(i+1)))
+		taxFromBuyout = -buyoutAmount*0.35
+		#[AU] [AV]	
+		totalCashTax = []
+		cumulativeCashTax = [0]			
+		for i in range (0, 7):
+			if i == 1:
+				totalCashTax.append(cashRevenueTEI[i] + ITC + taxesBenefitLiab[i] + 0 + 0)	
+				cumulativeCashTax.append(cumulativeCashTax[i] + totalCashTax[i])				
+			elif i == 6:
+				totalCashTax.append(cashRevenueTEI[i] + 0 + taxesBenefitLiab[i] + buyoutAmount + taxFromBuyout)		
+				cumulativeCashTax.append(cumulativeCashTax[i] + totalCashTax[i] + buyoutAmount + taxFromBuyout)					
+			else:
+				totalCashTax.append(cashRevenueTEI[i] + 0 + taxesBenefitLiab[i] + 0 + 0)
+				cumulativeCashTax.append(cumulativeCashTax[i] + totalCashTax[i])						
+		#[AW21]
+		if (cumulativeCashTax[7] > 0):
+			cumulativeIRR = round(irr(totalCashTax), 4)		
+		else:
+			cumulativeIRR = 0
+		#Print Outputs
+		'''
+		print "\nOutputs [AI]-[AW]:"
+		print "   cashRevenueTEI:", cashRevenueTEI
+		print "   ITC:", ITC
+		print "   MACRDepreciation:", MACRDepreciation
+		print "   slDepreciation:", slDepreciation
+		print "   taxableIncLoss:", taxableIncLoss	
+		print "   totalDistributions:", totalDistributions		
+		print "   capitalAcct:", capitalAcct	
+		print "   reallocatedIncLoss:", reallocatedIncLoss		
+		for i in range (0, len(ratioTE)):	
+			print "   ratioTE:", ratioTE[i]*100	
+		print "   taxesBenefitLiab:", taxesBenefitLiab
+		print "   buyoutAmount:", buyoutAmount	
+		print "   taxFromBuyout:", taxFromBuyout						
+		print "   totalCashTax:", totalCashTax
+		print "   cumulativeCashTax:", cumulativeCashTax				
+		print "   cumulativeIRR:", cumulativeIRR*100
+		'''
+
+		#Finally calculate PPA after all that
+		#TEI Calcs - PPA [C]
+		achievedReturnTE = cumulativeIRR
+		x = 3500
+		PPAValue = x / 100
+		nGoal = 8.5/100
+		nValue = achievedReturnTE
+		#First Loop		
+		'''
+		while ((x < 20000) and (nValue < nGoal)):
+			NPVRevTaxEquity = 0
+			revLevelizedCost = []	
+			x = x + 1000			
+			nValue = -achievedReturnTE
+
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
+			nValue = NPVRevTaxEquity					
+			x = x + 1000.0		
+			Rate_Levelized_TaxEquity = x/100.0					
+		print "Exited TaxEquity first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity	
+		'''
+		'''
+	    Levelized Loan
+	    i = 3500
+	    [Rate_Levelized_Loan].Value = i / 100
+	    nGoal = -Worksheets("OutPut- Direct Loan").[NPV_Loan].Value
+	    nValue = Worksheets("OutPut- Direct Loan").[Levelized_Loan].Value
+
+	    Do Until nValue > nGoal
+	        [Rate_Levelized_Loan].Value = i / 100
+	        nValue = Worksheets("OutPut- Direct Loan").[Levelized_Loan].Value
+	        i = i + 100
+	        If i > 20000 Then Exit Do
+	    Loop
+	        Do Until nValue < nGoal
+	        [Rate_Levelized_Loan].Value = i / 100
+	        nValue = Worksheets("OutPut- Direct Loan").[Levelized_Loan].Value
+	        i = i - 10
+	        If i < 2500 Then Exit Do
+	    Loop
+	        Do Until nValue > nGoal
+	        [Rate_Levelized_Loan].Value = i / 100
+	        nValue = Worksheets("OutPut- Direct Loan").[Levelized_Loan].Value
+	        i = i + 1
+	        If i > 20000 Then Exit Do
+	    Loop
+	    '''
+		#PPARateTE = PPAValue
+
+		#Master Output [Tax Equity]		
+		outData["levelCostTaxEquity"] = Rate_Levelized_TaxEquity
+		outData["costPanelTaxEquity"] = abs(NPVLoanTaxEquity/numberPanels)
+		outData["cost10WPanelTaxEquity"] = (float(outData["costPanelTaxEquity"])/inputDict["panelSize"])*10
+		#outData["PPATaxEquity"] = 63.89	
+
+		#Print Variable Values
+		#Output Tax Equity Flip Columns [C-L]
+		'''
+		print "coopInvestmentTaxEquity", coopInvestmentTaxEquity
+		print "financecostcashTE", financeCostCashTaxEquity				
+		print "cashToSPEOForPPATE", cashToSPEOForPPATE		
+		print "OMTEETC", OMInsuranceETCTE	
+		print "Cash from SPE to Blocker", cashFromSPEToBlockerTE	
+		print "cashblockerTE", cashFromBlockerTE	
+		print "netCOOPPayments", netCoopPaymentsTaxEquity	
+		print "NPVLoanTE", NPVLoanTaxEquity	
+		'''
+
+		#TEI Calcs 	
+		'''					
+		print "derivedcostEn", derivedCostEnergyTE	
+		print "OMTE", OMTE
+		print "insuranceTE", insuranceTE
+		print "landlease", landLeaseTE			
+		print SPEMgmtFeeTE, len(SPERevenueTE)
+		print "EBITDATE", EBITDATE, "\nLength:", len(EBITDATE)		
+		print "EBITDATE", EBITDATEREDUCED, "\nLength:", len(EBITDATEREDUCED)
+		print "cashrevenenue te", cashRevenueTE
+		print "buyoutAM", buyoutAmountTE		
+		print "cashrevte", cashRevenueTE
+		print "custCust", costToCustomerTaxEquity
+		'''
+
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		outData["stderr"] = ""
@@ -153,51 +958,62 @@ def run(modelDir, inputDict):
 		except Exception, e:
 			pass
 
-#Maps zipcode from excel data if zipcodes mapped to city, state, lat/lon 
-#https://www.gaslampmedia.com/download-zip-code-latitude-longitude-city-state-county-csv/
-def zipCodeToclimateName(zipCode):
+#Maps zipcode from excel data to city, state, lat/lon 
+#From excel file at: https://www.gaslampmedia.com/download-zip-code-latitude-longitude-city-state-county-csv/
+def zipCodeToclimateName(zipCode, test):
 	def compareLatLon(LatLon, LatLon2):
 		differenceLat = float(LatLon[0]) - float(LatLon2[0]) 
 		differenceLon = float(LatLon[1]) - float(LatLon2[1])
 		distance = math.sqrt(math.pow(differenceLat, 2) + math.pow(differenceLon,2))
 		return distance
 
-	#only has data for states: A,  and V
-	climateNames = {"AK" : "ANCHORAGE", "AL": "HUNTSVILLE", "AZ": "PRESCOTT", "VA": "STERLING", "VT": "BURLINGTON"}
+	#only has A,  and V
+	def safeListdir(path):
+		try: return os.listdir(path)
+		except:	return []
+
+	if (test == "True"):
+		climateNames = [x[:-5] for x in safeListdir("../data/Climate/")]    	
+	else:
+		climateNames = [x[:-5] for x in safeListdir("./data/Climate/")]
 	climateCity = []
 	lowestDistance = 1000
 
-	#Parse .csv file with city/state zip codes and lat/lon
-	with open('C:\Users\Asus\Documents\GitHub\NRECA\omf\omf\data\Climate\zip_codes_states.csv', 'rt') as f:
-	     reader = csv.reader(f, delimiter=',') 
-	     for row in reader:
-	          for field in row:
-	              if field == zipCode:
-	                  zipState = row[4] 
-	                  zipCity = row[3]
-	                  ziplatlon  = row[1], row[2]
 
-	#Look for climate data matches by looking for data available for that state
-	#Stores all city matches in climateCity list
-	for key in climateNames:
-		if key == zipState:
-			climateCity.append(climateNames[zipState])
+	try:
+		#Parse .csv file with city/state zip codes and lat/lon
+		with open('C:\Users\Asus\Documents\GitHub\NRECA\omf\omf\data\Climate\zip_codes_states.csv', 'rt') as f:
+		     reader = csv.reader(f, delimiter=',') 
+		     for row in reader:
+		          for field in row:
+		              if field == zipCode:
+		                  #print "field", row
+		                  zipState = row[4] 
+		                  zipCity = row[3]
+		                  ziplatlon  = row[1], row[2]
 
-    #Parse the cities distances to zipcode city to determine closest climate
-	with open('C:\Users\Asus\Documents\GitHub\NRECA\omf\omf\data\Climate\zip_codes_states.csv', 'rt') as f:
-	     reader = csv.reader(f, delimiter=',') 
-	     for row in reader:
-	          for field in row:
-	          	for city in climateCity:
-	          		  if row[4].lower() == zipState.lower():
-			              if field.lower() == climateCity[0].lower():
-			                  climatelatlon  = row[1], row[2]
-			                  distance = compareLatLon(ziplatlon, climatelatlon)
-			                  if (distance < lowestDistance):
-			                  	lowestDistance = distance
-			                  	                  
-	climateName = zipState + "-" + climateCity[0]
-	return climateName
+		#Looks for climate data by looking at all cities in that state
+		#Should be change to check other states too 
+		#Filter only the cities in that state
+		for x in range(0, len(climateNames)):	
+			if (zipState+"-" in climateNames[x]):
+				climateCity.append(climateNames[x])	
+		climateCity = [w.replace(zipState+"-", '') for w in climateCity]	
+	    #Parse the cities distances to zipcode city to determine closest climate
+		for x in range (0,len(climateCity)):				
+			with open('C:\Users\Asus\Documents\GitHub\NRECA\omf\omf\data\Climate\zip_codes_states.csv', 'rt') as f:
+				reader = csv.reader(f, delimiter=',') 
+				for row in reader:
+					if ((row[4].lower() == zipState.lower()) and (row[3].lower() == str(climateCity[x]).lower())):
+						climatelatlon  = row[1], row[2]   
+	                	distance = compareLatLon(ziplatlon, climatelatlon)                	
+	                	if (distance < lowestDistance):
+	                		lowestDistance = distance
+	                		found = x	
+		climateName = zipState + "-" + climateCity[found]
+		return climateName
+	except:
+		return "NULL"
 
 def _runningSum(inList):
 	''' Give a list of running sums of inList. '''
@@ -214,25 +1030,26 @@ def _tests():
 	inData = {"simStartDate": "2013-01-01",
 		"simLengthUnits": "hours",
 		"modelType": "solarSunda",
-		"zipCode": "35899",
-		"simLength": "8760",
+		"zipCode": "90210",
+		"landOwnership": "Purchased", #Leased, Purchased, or Owned
 		"costAcre": "10000",
-		"systemSize":"250",
-		"moduleCost": "0.720",
+		"systemSize":"1000",
+		"moduleCost": "0.70",
 		"rackCost": "0.137",
 		"inverterCost": "61963",		
-		"mechLabor": "50",
-		"elecLabor": "75",
+		"mechLabor": "35",
+		"elecLabor": "50",
 		"pmCost": "15000",
 		"interCost": "25000",
 		"devCost": "2",
-		"EPCRate": "10",
-		"distAdder": "2",
+		"EPCRate": "3",
+		"distAdder": "0",
 		"discRate": "2.32",
 		"loanRate": "2.00",
-		"NCREBRate": "4.31",
-		"taxEquityReturn": "8.50",
-		"lifeSpan": "30",
+		"NCREBRate": "4.06",
+		"taxLeaseRate": "7.20",
+		"taxEquityReturn": "8.50",	
+		"lifeSpan": "25",
 		"degradation": "0.5",
 		"derate": "87",
 		"inverterEfficiency": "96",
@@ -242,7 +1059,8 @@ def _tests():
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",
-		"gamma":"-0.45"}
+		"gamma":"-0.45",
+		"test": "True"}
 	modelLoc = pJoin(workDir,"admin","Automated solarSunda Testing")	
 	# Blow away old test results if necessary.
 	try:
@@ -251,11 +1069,11 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	renderAndShow(template)
+	#renderAndShow(template)
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
-	renderAndShow(template, modelDir = modelLoc)
+	#renderAndShow(template, modelDir = modelLoc)
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)

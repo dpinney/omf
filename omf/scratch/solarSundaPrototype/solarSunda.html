@@ -24,7 +24,7 @@
 		<div id="logoBox"><a href="/">&#10059;</a></div>
 		<p id="titleText">New Solar Sunda Model</p>
 	</div>
-	<p class="reportTitle">Model Input</p>
+	<p class="reportTitle">Model Description</p>
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
@@ -53,14 +53,14 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the systems geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" value="22203" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+				<input type="text" id="zipCode" name="zipCode" value="90210" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>				
 			<div class="shortInput">
 				<label class="tooltip">Land<span class="classic">Whether the land is owned, purchased or leased.</span></label>
 				<select id="landOwnership" name="landOwnership">
-				    <option value="owned">Owned</option>
-				    <option value="purchased">Purchased</option>
-				    <option value="leased">Leased</option>
+				    <option value="Owned">Owned</option>
+				    <option value="Purchased">Purchased</option>
+				    <option value="Leased">Leased</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -70,11 +70,11 @@
 			<!--Size between 250 - 5000-->		
 			<div class="shortInput">
 				<label class="tooltip">Array Size (kW-AC)<span class="classic">Size of the solar array kW-AC.</span></label>
-				<input type="text" id="systemSize" name="systemSize" value="250" required="required" pattern="^\d+\.?\d*?$">
+				<input type="text" id="systemSize" name="systemSize" value="500" required="required" pattern="^\d+\.?\d*?$">
 			</div>				
 			<div class="shortInput">
 				<label class="tooltip">Module Cost ($/Wp)<span class="classic">Cost per watt.</span></label>
-				<input type="text" id="moduleCost" name="moduleCost" value="0.720" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="moduleCost" name="moduleCost" value="0.70" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Racking Cost ($/Wp)<span class="classic">Cost per watt.</span></label>
@@ -89,14 +89,14 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Mechanical Labor ($/hr)<span class="classic">Hourly labor cost.</span></label>
-				<input type="text" id="mechLabor" name="mechLabor" value="50" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="mechLabor" name="mechLabor" value="35" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Electrical Labor ($/hr)<span class="classic">Hourly labor cost.</span></label>
-				<input type="text" id="elecLabor" name="elecLabor" value="75" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="elecLabor" name="elecLabor" value="50" pattern="^\d+\.?\d*$" required="required">
 			</div>						
 			<div class="shortInput">
-				<label class="tooltip">Project Management Cost ($)<span class="classic">Cost for the project manager.</span></label>
+				<label class="tooltip">Project Management Cost ($)<span class="classic">Covers the cost for co-op time and expense in doing the project.</span></label>
 				<input type="text" id="pmCost" name="pmCost" value="15000" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
@@ -109,11 +109,11 @@
 			</div>								
 			<div class="shortInput">
 				<label class="tooltip">EPC Markup (%)<span class="classic">EPC Markup percentage.</span></label>
-				<input type="text" id="EPCRate" name="EPCRate" pattern="^(100|\d\d|\d)(\.\d+)?$" value="10" required="required"/>
+				<input type="text" id="EPCRate" name="EPCRate" pattern="^(100|\d\d|\d)(\.\d+)?$" value="3" required="required"/>
 			</div>						
 			<div class="shortInput">
 				<label class="tooltip">Distribution Adder ($/kWH)<span class="classic">Provides comparison for existing PV rate to existing retail rate. </span></label>
-				<input type="text" id="distAdder" name="distAdder" value="2" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="distAdder" name="distAdder" value="1.25" pattern="^\d+\.?\d*$" required="required">
 			</div>	
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financing Information</p>
@@ -129,12 +129,20 @@
 			</div>							
 			<div class="shortInput">
 				<label class="tooltip">NCREB Tax Credit Rate (%)<span class="classic">Loan discount rate.</span></label>
-				<input type="text" id="NCREBRate" name="NCREBRate" value="4.31" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
-			</div>			
+				<input type="text" id="NCREBRate" name="NCREBRate" value="4.06" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tax Lease Rate (%)<span class="classic">Loan discount rate.</span></label>
+				<input type="text" id="taxLeaseRate" name="taxLeaseRate" value="7.20" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+			</div>							
 			<div class="shortInput">
 				<label class="tooltip">Targeted Tax Equity Return (%)<span class="classic">Loan discount rate.</span></label>
 				<input type="text" id="taxEquityReturn" name="taxEquityReturn" value="8.50" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
-			</div>									
+			</div>				
+			<div class="wideInput">
+				<p class="inputSectionHeader">Simulation Parameters </p>
+			</div>
+			<hr>								
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Currently we only support a yearlong analysis, i.e. 8760 hours.</span></label>
 				<input type="text" id="simLength" name="simLength" pattern="^\d+$" value="8760" readonly />
@@ -190,69 +198,195 @@
 			}
 		</script>
 		<!-- Summary of Results -->
+		<!-- Add everything on output page; Could add a cost to payback -->
 		<p class="reportTitle postRun">Solar Sunda Model Summary of Analysis</p>
 		<div id="input" class="content postRun">
-			<form name="inputForm" action="/runModel/" method="post">				
+			<form name="inputForm" action="/runModel/" method="post">		
+				<p class="inputSectionHeader">Cooperative: XYZ, EC	 </p>
+				<br></br>						
 				<div class="shortInput">
-					<reportLabel>Project Name: </reportLabel>
-					<input type="text" id="projName" name = "projName" value="N/A" readonly out/>
-				</div>
-				<div class="shortInput">
-					<label class="tooltip">Climate Tested:<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
-					<select id="climateName" name="climateName" readonly/>
-						{% for climate in datastoreNames["climates"] %}
-							<option value="{{ climate }}">{{ climate }}</option>
-						{% endfor %}
-					</select>
-				</div>			
-				<div class="shortInput">
-					<reportLabel>System Output (first year, kWh):</reportLabel>
-					<input type="text" id="1yearKWH" name = "1yearKWH" value="N/A" readonly out/>
-				</div>										
-				<div class="shortInput">
-					<reportLabel>Total System Cost: </reportLabel>
-					<input type="text" id="totalCost" name = "totalCost" value="$819,884" readonly out/>			
-				</div>					
-				<div class="shortInput">
-					<reportLabel>$/Wdc Installed: </reportLabel>
-					<input type="text" id="costWdc" name = "costWdc" value="$2.36" readonly out/>
-				</div>
-				<div class="shortInput">
-					<reportLabel>Capacity Factor: </reportLabel>
-					<input type="text" id="capFactor" name = "capFactor" value="22%" readonly out/>
-				</div>				
-				<br /><br/>
-				<pre>Full Ownership, Direct Loan                  Community Solar Project</pre>
-				<hr>
-				<div class="shortInput">
-					<reportLabel>Levelized Cost of Energy: ($/MWh)</reportLabel>
-					<input type="text" id="levelCost" name = "levelCost" value="N/A" readonly out/>
-				</div>				
-				<div class="shortInput">
-					<reportLabel>Cost per Panel (prepay): </reportLabel> 
-					<input type="text" id="costPanel" name = "costPanel" value="N/A" readonly out/>
-				</div>	
-				<div class="shortInput">
-					<reportLabel>Cost per 10W of Panel (prepay): </reportLabel> 
-					<input type="text" id="cost10WPanel" name = "cost10WPanel" value="N/A" readonly out/>
-				</div>	
-				<br>	
-				<div class="shortInput">
-					<reportLabel>PPA Equivalent: </reportLabel> 
-					<input type="text" id="cost10WPanel" name = "cost10WPanel" value="N/A" readonly out/>
+					<reportLabel>Installed System Cost: </reportLabel>
+					<input type="text" id="totalCost" name = "totalCost" readonly out/>			
 				</div>		
 				<div class="shortInput">
-					<reportLabel>System Size (kWp-DC): </reportLabel>
+					<reportLabel>$/Wdc Installed: </reportLabel>
+					<input type="text" id="costWdc" name = "costWdc" readonly out/>
+				</div>		
+				<div class="shortInput">
+					<reportLabel>Capacity Factor: </reportLabel>
+					<input type="text" id="capFactor" name = "capFactor" readonly out/>
+				</div>
+				<div class="shortInput">
+					<reportLabel>Annual System Output (MWh-AC):</reportLabel>
+					<input type="text" id="1yearMWH" name = "1yearMWH" readonly out/>
+				</div>																
+				<div class="shortInput">
+					<reportLabel>Climate Data Selected:</reportLabel>
+					<input type="text" id="climSource" name = "climSource" readonly out/>
+				</div>															
+				<!-- Direct Loan-->	
+				<hr>							
+				<p class="inputSectionHeader">Direct Loan</p>
+				<br></br>
+				<div class="shortInput">
+					<reportLabel>Levelized Cost of Energy: ($/MWh)</reportLabel>
+					<input type="text" id="levelCostDirect" name = "levelCostDirect" value="N/A" readonly out/>
+				</div>	
+				<br>
+				<div class="shortInput">
+					<reportLabel>Community Solar Project</reportLabel>
+					<input type="text" id="communitySolarProject" name = "communitySolarProject" value="" readonly out/>
+				</div>				                		
+				<div class="shortInput">
+					<label>Cost per Panel (prepay):</label>
+					<input type="text" id="costPanelDirect" name = "costPanelDirect" value="N/A" readonly out/>
+				</div>	
+				<div class="shortInput">
+					<label>Cost per 10W of Panel (prepay):</label>
+					<input type="text" id="cost10WPanelDirect" name = "cost10WPanelDirect" value="N/A" readonly out/>
+				</div>	
+				<!-- NCREBs Financing -->	
+				<hr>							
+				<p class="inputSectionHeader">NCREBs Financing</p>
+				<br></br>
+				<div class="shortInput">
+					<reportLabel>Levelized Cost of Energy: ($/MWh)</reportLabel>
+					<input type="text" id="levelCostNCREB" name = "levelCostNCREB" value="N/A" readonly out/>
+				</div>	
+				<br>
+				<div class="shortInput">
+					<reportLabel>Community Solar Project</reportLabel>
+					<input type="text" id="communitySolarProject" name = "communitySolarProject" value="" readonly out/>
+				</div>				                		
+				<div class="shortInput">
+					<label>Cost per Panel (prepay):</label>
+					<input type="text" id="costPanelNCREB" name = "costPanelNCREB" value="N/A" readonly out/>
+				</div>	
+				<div class="shortInput">
+					<label>Cost per 10W of Panel (prepay):</label>
+					<input type="text" id="cost10WPanelNCREB" name = "cost10WPanelNCREB" value="N/A" readonly out/>
+				</div>		
+				<!-- Tax Lease Financing -->	
+				<hr>							
+				<p class="inputSectionHeader">Tax Lease Structure</p>
+				<br></br>
+				<div class="shortInput">
+					<reportLabel>Levelized Cost of Energy: ($/MWh)</reportLabel>
+					<input type="text" id="levelCostTaxLease" name = "levelCostTaxLease" value="N/A" readonly out/>
+				</div>	
+				<br>
+				<div class="shortInput">
+					<reportLabel>Community Solar Project</reportLabel>
+					<input type="text" id="communitySolarProject" name = "communitySolarProject" value="" readonly out/>
+				</div>				                		
+				<div class="shortInput">
+					<label>Cost per Panel (prepay):</label>
+					<input type="text" id="costPanelTaxLease" name = "costPanelTaxLease" value="N/A" readonly out/>
+				</div>	
+				<div class="shortInput">
+					<label>Cost per 10W of Panel (prepay):</label>
+					<input type="text" id="cost10WPanelTaxLease" name = "cost10WPanelTaxLease" value="N/A" readonly out/>
+				</div>								
+				<!-- Tax Equity Flip -->
+				<hr>								
+				<p class="inputSectionHeader">Tax Equity Flip Structure</p>
+				<br></br>
+				<div class="shortInput">
+					<reportLabel>Levelized Cost of Energy: ($/MWh)</reportLabel>
+					<input type="text" id="levelCostTaxEquity" name = "levelCostTaxEquity" value="N/A" readonly out/>
+				</div>	
+				<br>
+				<div class="shortInput">
+					<reportLabel>Community Solar Project</reportLabel>
+					<input type="text" id="communitySolarProject" name = "communitySolarProject" value="" readonly out/>
+				</div>				                		
+				<div class="shortInput">
+					<label>Cost per Panel (prepay):</label>
+					<input type="text" id="costPanelTaxEquity" name = "costPanelTaxEquity" value="N/A" readonly out/>
+				</div>	
+				<div class="shortInput">
+					<label>Cost per 10W of Panel (prepay):</label>
+					<input type="text" id="cost10WPanelTaxEquity" name = "cost10WPanelTaxEquity" value="N/A" readonly out/>
+				</div>	
+				<!-- PPA Comparison -->
+				<hr>								
+				<p class="inputSectionHeader">PPA Comparison</p>
+				<br></br>
+				<div class="shortInput">
+					<reportLabel>Levelized Cost of Energy: ($/MWh)</reportLabel>
+					<input type="text" id="levelCostTaxEquity" name = "levelCostTaxEquity" value="$68.27" readonly out/>
+				</div>	
+				<br>
+				<div class="shortInput">
+					<reportLabel>First Year Cost/kWh:</reportLabel>
+					<input type="text" id="firstYearCostKWh" name = "firstYearCostKWh" value="$55.00" readonly out/>
+				</div>				                			
+				<br>
+				<div class="shortInput">
+					<reportLabel>Yearly Escalation:</reportLabel>
+					<input type="text" id="yearlyEscalation" name = "yearlyEscalation" value="2%" readonly out/>
+				</div>				                			
+				<br>					
+				<!--Loan PPAs and System Size
+				<div class="shortInput">
+					<reportLabel>PPA Equivalent: </reportLabel> 
+					<input type="text" id="PPANCREB" name = "PPANCREB" value="N/A" readonly out/>
+				</div>					
+				<div class="shortInput">
+					<reportLabel>PPA Equivalent: </reportLabel> 
+					<input type="text" id="PPADirect" name = "PPADirect" value="N/A" readonly out/>
+				</div>									
+				<div class="shortInput">
+					<reportLabel>PPA Equivalent: </reportLabel> 
+					<input type="text" id="PPATaxEquity" name = "PPATaxEquity" value="N/A" readonly out/>
+				</div>													
+				<div class="shortInput">
+					<label>System Size (kWp-DC): </label>
 					<input type="text" id="sysSize" name = "sysSize" value="N/A" readonly out/>			
 				</div>	
+			    -->
+			    <!--Potential Double Column Layout
+				<hr>								
+				<p class="inputSectionHeader">Tax Equity Flip Structure</p>
+				<br></br>
+				<div class="shortInput">
+					<reportLabel>Levelized Cost of Energy: ($/MWh)</reportLabel>
+					<input type="text" id="levelCostTaxEquity" name = "levelCostTaxEquity" value="N/A" readonly out/>
+				</div>	
+				<br>
+				<div class="shortInput">
+					<reportLabel>Community Solar Project</reportLabel>
+					<br><br><label>Cost per Panel (prepay):</label>
+					<input type="text" id="costPanelTaxEquity" name = "costPanelTaxEquity" value="" readonly out/>
+					<br><br><label>Cost per 10W of Panel (prepay):</label>
+					<input type="text" id="cost10WPanelTaxEquity" name = "cost10WPanelTaxEquity" value="N/A" readonly out/>					
+				</div>
+				<br>			    
+				-->
 
 				<!-- Set Values -->	
 				<script type="text/javascript">
-				$("#projName").attr("value", allInputData.modelName)
 				$("#climSource").attr("value", allInputData.climateName)	
-				$("#1yearKWH").attr("value", delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000).toFixed(0))) 		
+				$("#1yearMWH").attr("value", delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000000).toFixed(0))) 	
 				$("#totalCost").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.totalCost).toFixed(0)))
-				$("#sysSize").attr("value", parseFloat(allInputData.systemSize))				
+				$("#costWdc").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costWdc).toFixed(2)))			
+				$("#capFactor").attr("value", delimitNumbers(parseFloat(allOutputData.capFactor).toFixed(0)) +  "%")	
+				$("#levelCostDirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostDirect).toFixed(2)))	
+				$("#costPanelDirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelDirect).toFixed(2)))		
+				$("#cost10WPanelDirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelDirect).toFixed(2)))
+				$("#PPADirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.PPADirect).toFixed(2)))		
+				$("#levelCostNCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostNCREB).toFixed(2)))	
+				$("#costPanelNCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelNCREB).toFixed(2)))		
+				$("#cost10WPanelNCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelNCREB).toFixed(2)))
+				$("#PPANCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.PPANCREB).toFixed(2)))		
+				$("#levelCostTaxLease").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxLease).toFixed(2)))	
+				$("#costPanelTaxLease").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxLease).toFixed(2)))		
+				$("#cost10WPanelTaxLease").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxLease).toFixed(2)))	
+				$("#levelCostTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxEquity).toFixed(2)))
+				$("#costPanelTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxEquity).toFixed(2)))		
+				$("#cost10WPanelTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxEquity).toFixed(2)))
+				$("#PPATaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.PPATaxEquity).toFixed(2)))					
+				$("#sysSize").attr("value", parseFloat(allInputData.systemSize))						
 				</script>																							
 			</form>
 		</div>		
