@@ -1,7 +1,8 @@
 ''' Powerflow results for one Gridlab instance. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx, matplotlib
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx, matplotlib, numpy as np
 from matplotlib import pyplot as plt
+from matplotlib.animation import FuncAnimation
 import multiprocessing
 from os.path import join as pJoin
 from os.path import split as pSplit
@@ -326,9 +327,10 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 			except: return (0,0)
 		positions = {k:yFlip(rawPositions[k]) for k in rawPositions}
 	# Plot all time steps.
+	nodeVolts = {}
 	for step, stamp in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
 		# Build voltage map.
-		nodeVolts = {}
+		nodeVolts[step] = {}
 		for nodeName in [x for x in rawOut['aVoltDump.csv'].keys() if x != '# timestamp']:
 			allVolts = []
 			for phase in ['a','b','c']:
@@ -343,29 +345,36 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 						phaseVolt = phaseVolt*(120/feedVoltage)
 					allVolts.append(phaseVolt)
 			# HACK: Take average of all phases to collapse dimensionality.
-			nodeVolts[nodeName] = avg(allVolts)
-		# Apply voltage map and chart it.
-		voltChart = plt.figure(figsize=(10,10))
-		plt.axes(frameon = 0)
-		plt.axis('off')
-		custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.25,'darkgray'),(0.75,'darkgray'),(1.0,'yellow')])
-		edgeIm = nx.draw_networkx_edges(fGraph, positions)
-		nodeIm = nx.draw_networkx_nodes(fGraph,
-			pos = positions,
-			node_color = [nodeVolts.get(n,0) for n in fGraph.nodes()],
-			linewidths = 0,
-			node_size = 30,
-			cmap = custom_cm)
-		plt.sci(nodeIm)
-		plt.clim(110,130)
-		plt.colorbar()
-		plt.title(stamp)
-		voltChart.savefig(pJoin(modelDir,'images','volts' + str(step).zfill(3) + "-" + genTime + '.png'), dpi=100)
-		# Reclaim memory by closing, deleting and garbage collecting the last chart.
-		voltChart.clf()
-		plt.close()
-		del voltChart
-		gc.collect()
+			nodeVolts[step][nodeName] = avg(allVolts)
+	# Draw animation.
+	voltChart = plt.figure(figsize=(10,10))
+	plt.axes(frameon = 0)
+	plt.axis('off')
+	voltChart.subplots_adjust(left=0.03, bottom=0.03, right=0.97, top=0.97, wspace=None, hspace=None)
+	custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.25,'darkgray'),(0.75,'darkgray'),(1.0,'yellow')])
+	edgeIm = nx.draw_networkx_edges(fGraph, positions)
+	nodeIm = nx.draw_networkx_nodes(fGraph,
+		pos = positions,
+		node_color = [nodeVolts[0].get(n,0) for n in fGraph.nodes()],
+		linewidths = 0,
+		node_size = 30,
+		cmap = custom_cm)
+	plt.sci(nodeIm)
+	plt.clim(110,130)
+	plt.colorbar()
+	plt.title(rawOut['aVoltDump.csv']['# timestamp'][0])
+	def update(step):
+		nodeColors = np.array([nodeVolts[step].get(n,0) for n in fGraph.nodes()])
+		plt.title(rawOut['aVoltDump.csv']['# timestamp'][step])
+		nodeIm.set_array(nodeColors)
+		return nodeColors,
+	anim = FuncAnimation(voltChart, update, frames=len(rawOut['aVoltDump.csv']['# timestamp']), interval=200, blit=False)
+	anim.save(pJoin(modelDir,'voltageChart.mp4'), codec='h264')
+	# Reclaim memory by closing, deleting and garbage collecting the last chart.
+	voltChart.clf()
+	plt.close()
+	del voltChart
+	gc.collect()
 	return genTime
 
 def avg(inList):
@@ -445,7 +454,7 @@ def _tests():
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName": "admin___Olin Beckenham Calibrated",
+		"feederName": "public___Olin Barre GH EOL Solar",
 		"modelType": "solarEngineering",
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "24",
@@ -465,7 +474,7 @@ def _tests():
 	# time.sleep(2)
 	# cancel(modelLoc)
 	# Show the output.
-	renderAndShow(template, modelDir=modelLoc)
+	# renderAndShow(template, modelDir=modelLoc)
 	# Delete the model.
 	# shutil.rmtree(modelLoc)
 
