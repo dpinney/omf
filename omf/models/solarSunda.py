@@ -619,7 +619,6 @@ def run(modelDir, inputDict):
 		outData["firstYearCostKWhPPA"] = float(inputDict.get("firstYearEnergyCostPPA",0))
 		outData["yearlyEscalationPPA"] = float(inputDict.get("annualEscRatePPA", 0))
 
-
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		outData["stderr"] = ""
@@ -892,26 +891,31 @@ def zipCodeToclimateName(zipCode):
 					zipState = row[4] 
 					zipCity = row[3]
 					ziplatlon  = row[1], row[2]
+
+
 	# Looks for climate data by looking at all cities in that state.
 	# TODO: check other states too.
 	# Filter only the cities in that state:
 	for x in range(0, len(climateNames)):	
 		if (zipState+"-" in climateNames[x]):
 			climateCity.append(climateNames[x])	
-	climateCity = [w.replace(zipState+"-", '') for w in climateCity]
+	climateCity = [w.replace(zipState+"-", '') for w in climateCity]	
 	# Parse the cities distances to zipcode city to determine closest climate:
-	for x in range (0,len(climateCity)):				
+	for x in range (0,len(climateCity)):			
 		with open(zipCsvPath, 'rt') as f:
 			reader = csv.reader(f, delimiter=',') 
 			for row in reader:
 				city = row[3].replace (" ", "_") 				
 				if ((row[4].lower() == zipState.lower()) and (city.lower() == str(climateCity[x]).lower())):
 					climatelatlon  = row[1], row[2]   
-                	distance = compareLatLon(ziplatlon, climatelatlon)
-                	if (distance < lowestDistance):
-                		latforpvwatts = int(round((float(climatelatlon[0])-10)/5.0)*5.0)          
-                		lowestDistance = distance
-                		found = x	
+					try:
+						distance = compareLatLon(ziplatlon, climatelatlon)
+						if (distance < lowestDistance):
+							latforpvwatts = int(round((float(climatelatlon[0])-10)/5.0)*5.0)          
+							lowestDistance = distance
+							found = x		
+					except:
+						print "no latlon"
 	climateName = zipState + "-" + climateCity[found]
 	return climateName, latforpvwatts
 
@@ -930,7 +934,7 @@ def _tests():
 	inData = {"simStartDate": "2013-01-01",
 		"simLengthUnits": "hours",
 		"modelType": "solarSunda",
-		"zipCode": "20166",
+		"zipCode": "90210",
 		"landOwnership": "Purchased", #Leased, Purchased, or Owned
 		"costAcre": "10000",
 		"systemSize":"1000",
@@ -961,7 +965,7 @@ def _tests():
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",
-		"gamma":"-0.45",}
+		"gamma":"-0.45"}
 	modelLoc = pJoin(workDir,"admin","Automated solarSunda Testing")	
 	# Blow away old test results if necessary.
 	try:
