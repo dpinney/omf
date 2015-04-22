@@ -43,7 +43,7 @@ def run(modelDir, inputDict):
 		inputDict["simLengthUnits"] = "hours"
 		inputDict["modelType"] = "solarSunda"
 		# Associate zipcode to climate data
-		inputDict["climateName"] = zipCodeToclimateName(inputDict["zipCode"])
+		inputDict["climateName"], latforpvwatts = zipCodeToclimateName(inputDict["zipCode"])
 		inputDict["panelSize"] = 305   
 		arraySizeAC = float(inputDict.get("systemSize",0))
 		arraySizeDC = arraySizeAC*1.3908
@@ -72,22 +72,18 @@ def run(modelDir, inputDict):
 		ssc = nrelsam.SSCAPI()
 		dat = ssc.ssc_data_create()
 		# Required user inputs.
-		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
-		#ssc.ssc_data_set_string(dat, "lat", "34.10")
-		#ssc.ssc_data_set_string(dat, "lon", "-118.410")		
-		ssc.ssc_data_set_string(dat, "radius", "0")					
-		ssc.ssc_data_set_number(dat, "system_size", float(inputDict.get("systemSize", 100))*1.3908)
-		derate = float(inputDict.get("derate", 100))/100 * float(inputDict.get("inverterEfficiency", 96))/100 * 1.0108
+		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")			
+		ssc.ssc_data_set_number(dat, "system_size", arraySizeDC)
+		derate = float(inputDict.get("derate", 100))/100 * float(inputDict.get("inverterEfficiency", 96))/100 * 0.968
 		#Derate = systemlosses * inverter losses (.13*.96) * adjustment
 		ssc.ssc_data_set_number(dat, "derate", derate)
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))	
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 		# Advanced inputs with defaults.
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
-		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)	
-		ssc.ssc_data_set_number(dat, "tilt", int(inputDict.get("manualTilt", 30)))		
-		#print "LAT:", 	int(inputDict.get("manualTilt", 30))
-		#ssc.ssc_data_set_number(dat, "tilt_eq_lat", 0)   #0 if tilt is provided
+		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)
+		ssc.ssc_data_set_number(dat, "tilt", latforpvwatts)		
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 0)   #0 if tilt is provided
 		# Run PV system simulation.
 		mod = ssc.ssc_module_create("pvwattsv1")
 		ssc.ssc_module_exec(mod, dat)
@@ -118,7 +114,6 @@ def run(modelDir, inputDict):
 		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")	
 		#One year generation	
 		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"]) 
-		print "Output first year:", outData["oneYearGenerationWh"]/1000000
 		#Annual generation for all years
 		loanYears = 25		
 		outData["allYearGenerationMWh"] = {}		
@@ -884,7 +879,7 @@ def zipCodeToclimateName(zipCode):
 		try: return os.listdir(path)
 		except:	return []
 	path = pJoin(__metaModel__._omfDir,"data","Climate")
-	climateNames = [x[:-5] for x in safeListdir(path)]
+	climateNames = [x[:-5] for x in safeListdir(path)]	
 	climateCity = []
 	lowestDistance = 1000
 	# Parse .csv file with city/state zip codes and lat/lon
@@ -909,14 +904,16 @@ def zipCodeToclimateName(zipCode):
 		with open(zipCsvPath, 'rt') as f:
 			reader = csv.reader(f, delimiter=',') 
 			for row in reader:
-				if ((row[4].lower() == zipState.lower()) and (row[3].lower() == str(climateCity[x]).lower())):
+				city = row[3].replace (" ", "_") 				
+				if ((row[4].lower() == zipState.lower()) and (city.lower() == str(climateCity[x]).lower())):
 					climatelatlon  = row[1], row[2]   
                 	distance = compareLatLon(ziplatlon, climatelatlon)
                 	if (distance < lowestDistance):
+                		latforpvwatts = int(round((float(climatelatlon[0])-10)/5.0)*5.0)          
                 		lowestDistance = distance
                 		found = x	
 	climateName = zipState + "-" + climateCity[found]
-	return climateName
+	return climateName, latforpvwatts
 
 def _runningSum(inList):
 	''' Give a list of running sums of inList. '''
@@ -933,7 +930,7 @@ def _tests():
 	inData = {"simStartDate": "2013-01-01",
 		"simLengthUnits": "hours",
 		"modelType": "solarSunda",
-		"zipCode": "90210",
+		"zipCode": "20166",
 		"landOwnership": "Purchased", #Leased, Purchased, or Owned
 		"costAcre": "10000",
 		"systemSize":"1000",
@@ -960,12 +957,11 @@ def _tests():
 		"inverterEfficiency": "96",
 		"tilt": "True",
 		"trackingMode":"0",
-		"module_type":"1", #PVWatts v5 feature: 1 = premium
+		"module_type":"1",               #PVWatts v5 feature: 1 = premium
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",
-		"gamma":"-0.45",
-		"test": "True"}
+		"gamma":"-0.45",}
 	modelLoc = pJoin(workDir,"admin","Automated solarSunda Testing")	
 	# Blow away old test results if necessary.
 	try:
