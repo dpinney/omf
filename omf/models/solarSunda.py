@@ -118,15 +118,10 @@ def run(modelDir, inputDict):
 		outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")		
 		# Power generation.
 		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")	
-		#One year generation
-		#Hard coded
-		# outData["oneYearGenerationWh"] = 2235.2483 * 1000000		
-		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"]) #`+ 56000000
-		print "First year Output:", outData["oneYearGenerationWh"] / 1000000, "MWh"		
+		#One year generation	
+		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"]) 
 		#Annual generation for all years
 		loanYears = 25		
-		#Hard coded	PVWatts results
-		# outData["allYearGenerationMWh"] = {1: 2235.2483, 2: 2217.3663, 3: 2199.6273, 4: 2182.0303, 5: 2164.5741, 6: 2147.2575, 7: 2130.0794, 8: 2113.0388, 9: 2096.1345, 10: 2079.3654, 11: 2062.7305, 12: 2046.2286, 13: 2029.8588, 14: 2013.6199, 15: 1997.5110, 16: 1981.5309, 17: 1965.6786, 18: 1949.9532, 19: 1934.3536, 20: 1918.8788, 21: 1903.5277, 22: 1888.2995, 23: 1873.1931, 24: 1858.2076, 25: 1843.3419}
 		outData["allYearGenerationMWh"] = {}		
 		outData["allYearGenerationMWh"][1] = float(outData["oneYearGenerationWh"])/1000000
 		for i in range (2, loanYears+1):
@@ -157,10 +152,6 @@ def run(modelDir, inputDict):
 			hardwareCosts = (pvModules + racking + inverters + gear + balance + combiners + wireManagement  + transformer + weatherStation) * shipping
 		else:
 			hardwareCosts = (racking + inverters + gear + balance + combiners + wireManagement  + transformer + weatherStation) * shipping + pvModules	
-		#print "pvmodules, racking, inverters, gear, balance, combiners", pvModules, racking, inverters, gear, balance, combiners
-		#print "wireManagement, transformer, weatherStation, shipping", wireManagement, 	transformer, weatherStation
-		#print "shipping", (racking + inverters + gear + balance + combiners + wireManagement  + transformer + weatherStation) * .02
-		#print "hardware", hardwareCosts
 
 		'''Design/Engineering/PM/EPC costs: (called labor costs)'''	
 		EPCmarkup = float(inputDict.get("EPCRate",0))/100 * hardwareCosts
@@ -172,8 +163,6 @@ def run(modelDir, inputDict):
 		laborDesign = designLabor + electricalLabor + float(inputDict.get("pmCost",0)) + EPCmarkup
 		materialDesign = 0
 		designCosts = materialDesign + laborDesign
-		#print "Design design labor, elect labor, pm,  EPC(affected by hardwarecost):", designLabor, electricalLabor, float(inputDict.get("pmCost",0)), EPCmarkup
-		#print "designCosts:", designCosts
 
 		'''Siteprep Costs:'''
 		surveying = 2.25 * 4 * math.sqrt(minLandSize*43560)
@@ -187,31 +176,22 @@ def run(modelDir, inputDict):
 		mobilizationMaterial = float(inputDict.get("mechLabor",0))*19.98
 		siteLabor = blueprints + mobilization + mobilizationMaterial
 		sitePrep = siteMaterial + siteLabor
-		#print "sitematerial surveying, concrete, fencing, grading, landscaping:", surveying, concrete, fencing, grading, minLandSize, landscaping
-		#print "sitematerial:", siteMaterial
-		#print "sitelabor:", siteLabor
-		#print "siteprep", sitePrep
 
 		'''Construction equipment Costs: Office Trailer, Skid Steer, Storage Containers, etc
 		'''		
 		constrEquip = 6000 + math.sqrt(minLandSize)*16200
-		#print "construction", constrEquip
 
 		'''Installation Costs:'''
 		moduleAndRackingInstall = numberPanels * (15.00 + 12.50 + 1.50) 
 		pierDriving = 1 * arraySizeDC*20
 		balanceInstall = 1 * arraySizeDC*100
 		installCosts = moduleAndRackingInstall + pierDriving + balanceInstall + float(inputDict.get("elecLabor",0)) * (72 + 60 + 70 + 10 + 5 + 30 + 70)
-		#print "moduleandracking install", numberPanels * (15.00 + 12.50 + 1.50) 
-		#print "pierDriving, balance", pierDriving, balanceInstall
-		#print "installcosts", installCosts
 
 		'''Land Costs:'''
 		if (str(inputDict.get("landOwnership",0)) == "Owned" or (str(inputDict.get("landOwnership",0)) == "Leased")):
 			landCosts = 0
 		else:
 			landCosts = float(inputDict.get("costAcre",0))*minLandSize
-		#print "landcosts", landCosts
 
 		'''Total costs (Sum of all above): '''
 		totalCosts = hardwareCosts + designCosts + sitePrep + constrEquip + installCosts + landCosts
@@ -221,9 +201,6 @@ def run(modelDir, inputDict):
 		outData["costWdc"] = totalCosts / (arraySizeAC * 1000 * 1.39)
 
 		outData["capFactor"] = float(outData["oneYearGenerationWh"])/(arraySizeAC*1000*365.25*24) * 100
-		#print "total costs before fees", totalCosts
-		#print "total fees", totalFees
-		#print "totalCosts", outData["totalCost"]
 
 		'''Loans calculations for Direct, NCREB, Lease, Tax-equity, and PPA'''
 		'''Full Ownership, Direct Loan'''
@@ -288,24 +265,18 @@ def run(modelDir, inputDict):
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_Direct*outData["allYearGenerationMWh"][i])
 				NPVRevDirect = NPVRevDirect + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_Direct=", Rate_Levelized_Direct	
 			nValue = NPVRevDirect				
 			x = x + 100.0		
 			Rate_Levelized_Direct = x/100.0					
-		#print "Exited Direct first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Direct			
-		#Second Loop
 		while ((x > 2500) and (nValue > nGoal)):
 			NPVRevDirect = 0
 			revLevelizedCost = []			
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_Direct*outData["allYearGenerationMWh"][i])
 				NPVRevDirect = NPVRevDirect + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_Direct=", Rate_Levelized_Direct	
 			nValue = NPVRevDirect				
 			x = x - 10.0		
-			Rate_Levelized_Direct = x/100.0					
-		#print "Exited Direct second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Direct	
-		#Third Loop		
+			Rate_Levelized_Direct = x/100.0						
 		while ((x < 20000) and (nValue < nGoal)):
 			NPVRevDirect = 0
 			revLevelizedCost = []			
@@ -314,27 +285,13 @@ def run(modelDir, inputDict):
 				NPVRevDirect = NPVRevDirect + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
 			nValue = NPVRevDirect				
 			x = x + 1.0			
-			Rate_Levelized_Direct = x/100.0						
-		print "Exited Direct third loop at:", "nGoal =", nGoal, "nValue =", nValue, "Rate:", Rate_Levelized_Direct		
+			Rate_Levelized_Direct = x/100.0							
 
 		#Master Output [Direct Loan]
 		outData["levelCostDirect"] = Rate_Levelized_Direct
 		outData["costPanelDirect"] = abs(NPVLoanDirect/numberPanels)
 		outData["cost10WPanelDirect"] = (float(outData["costPanelDirect"])/inputDict["panelSize"])*10
-		#outData["PPADirect"] = -netCoopPaymentsDirect[0] / float(outData["oneYearGenerationWh"])*1000*1000		
 
-
-		#Print Variable Values
-		#Output Direct Loan Flip Columns [C-L]
-		'''
-		print "project cost":, projectCostsDirect
-		print "netFinancingCostsDirect":, netFinancingCostsDirect	
-		print "OMInsuranceETCDirect":, OMInsuranceETCDirect				
-		print "distAdderDirect":, distAdderDirect	
-		print "netCoopPaymentsDirect":, netCoopPaymentsDirect
-		print "costToCustomerDirect":, costToCustomerDirect
-		print "NPVLoanDirect:":, NPVLoanDirect
-		'''
 
 		'''NCREBs Financing'''
 		#Output - NCREBs [C]
@@ -405,7 +362,6 @@ def run(modelDir, inputDict):
 			costToCustomerNCREB.append((float(netCoopPaymentsNCREB[i-1]) - float(distAdderNCREB[i-1])))
 		netCoopPaymentsNCREB.append(-float(netFinancingCostsNCREB[i]))
 		costToCustomerNCREB.append(float(netCoopPaymentsNCREB[i]))
-		#print "custNCREB", "\n", len(costToCustomerNCREB)
 
 		#Output - NCREBs [H44]
 		for i in range (1, len(costToCustomerNCREB)+1):
@@ -425,11 +381,9 @@ def run(modelDir, inputDict):
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_NCREB*outData["allYearGenerationMWh"][i])
 				NPVRevNCREB = NPVRevNCREB + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_NCREB=", Rate_Levelized_NCREB	
 			nValue = NPVRevNCREB				
 			x = x + 100.0		
 			Rate_Levelized_NCREB = x/100.0					
-		#print "Exited NCREB first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_NCREB			
 		#Second Loop
 		while ((x > 2500) and (nValue > nGoal)):
 			NPVRevNCREB = 0
@@ -437,11 +391,9 @@ def run(modelDir, inputDict):
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_NCREB*outData["allYearGenerationMWh"][i])
 				NPVRevNCREB = NPVRevNCREB + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_NCREB=", Rate_Levelized_NCREB	
 			nValue = NPVRevNCREB				
 			x = x - 10.0		
-			Rate_Levelized_NCREB = x/100.0					
-		#print "Exited NCREB second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_NCREB			
+			Rate_Levelized_NCREB = x/100.0						
 		#Third Loop		
 		while ((x < 20000) and (nValue < nGoal)):
 			NPVRevNCREB = 0
@@ -449,35 +401,14 @@ def run(modelDir, inputDict):
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_NCREB*outData["allYearGenerationMWh"][i])
 				NPVRevNCREB = NPVRevNCREB + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_NCREB=", Rate_Levelized_NCREB	
 			nValue = NPVRevNCREB				
 			x = x + 1.0		
 			Rate_Levelized_NCREB = x/100.0					
-		print "Exited NCREB third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_NCREB
 
 		#Master Output [NCREB]
 		outData["levelCostNCREB"] = Rate_Levelized_NCREB	
 		outData["costPanelNCREB"] = abs(NPVLoanNCREB/numberPanels)
 		outData["cost10WPanelNCREB"] = (float(outData["costPanelNCREB"])/inputDict["panelSize"])*10
-		#outData["PPANCREB"] = -netCoopPaymentsNCREB[0] / float(outData["oneYearGenerationWh"])*1000*1000	
-
-		#Print Variable Values
-		#Output - NCREBs Columns [C-L]
-
-		#print "NPV", NPVLoanNCREB	
-		#print "OMINS", OMInsuranceETCNCREB
-		#print "netfinanc", netFinancingCostsNCREB
-		#print "netcooppay", netCoopPaymentsNCREB
-		#print "NCREB COST", costToCustomerNCREB
-		#print "princ", princPaymentNCREBPI, "\n", len(princPaymentNCREBPI)
-		#print "interest", interestPaymentNCREBPI, "\n", len(interestPaymentNCREBPI)
-		#print "balance", balanceOutstandingNCREBPI, "\n", len(balanceOutstandingNCREBPI)
-		#print "leveldebt", levelDebtServiceNCREBPI
-		#print percentofTaxCreditNCREBPI
-		#print netInterestNCREBPI
-		#print cashflowNCREBPI
-		#print netFinancingCostsNCREB
-
 
 		'''Tax Lease Structure'''
 		#Output - Lease [C]
@@ -505,7 +436,6 @@ def run(modelDir, inputDict):
 		leasePaymentsLease.append(-0.2*projectCostsLease)
 		for i in range (12, 25):		
 			leasePaymentsLease.append(0)
-		#print "leasePaymentsLease", leasePaymentsLease, "\nlength", len(leasePaymentsLease)
 	
 		#Output - Lease [E]		
 		OMInsuranceETCLease.append(OMInsuranceETCDirect[0])
@@ -533,7 +463,6 @@ def run(modelDir, inputDict):
 		OMInsuranceETCLease.append(-41537)
 		OMInsuranceETCLease.append(-42183)
 		OMInsuranceETCLease.append(-42842)
-		#print "OMInsurLease", OMInsuranceETCTaxLease, "\nlength", len(OMInsuranceETCTaxLease)
 
 		#Output - Lease [G]	[H]	
 		costToCustomerLeaseSum = 0	
@@ -542,13 +471,8 @@ def run(modelDir, inputDict):
 			costToCustomerLease.append(netCoopPaymentsLease[i-1]-distAdderLease[i-1])
 			costToCustomerLeaseSum = costToCustomerLeaseSum + costToCustomerLease[i-1]
 
-		#print "netCOOPLease", netCoopPaymentsLease, "\nlength", len(netCoopPaymentsLease)
-		#print "costToCustomerLease", costToCustomerLease, "\nlength", len(costToCustomerLease)
-		#print "costSum", costToCustomerLeaseSum
-
 		#Output - Lease [H44]
 		NPVLease = costToCustomerLeaseSum/(math.pow(1+float(inputDict.get("discRate", 0))/100,1))		
-		#print "NPVLoanTaxLease", NPVTaxLease
 
 		#Output - Lease [H49] 
 		revLevelizedCost = []
@@ -557,19 +481,16 @@ def run(modelDir, inputDict):
 		Rate_Levelized_Lease = x/100.0
 		nGoal = - NPVLease	
 		nValue = NPVRevLease
-		#print "NPVLease", NPVLease
 		#First Loop		
 		while ((x < 20000) and (nValue < nGoal)):
 			NPVRevLease = 0
 			revLevelizedCost = []			
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_Lease*outData["allYearGenerationMWh"][i])
-				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_Lease=", Rate_Levelized_Lease	
+				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]	
 			nValue = NPVRevLease				
 			x = x + 100.0		
-			Rate_Levelized_Lease = x/100.0					
-		#print "Exited Lease first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Lease			
+			Rate_Levelized_Lease = x/100.0						
 		#Second Loop
 		while ((x > 2500) and (nValue > nGoal)):
 			NPVRevLease = 0
@@ -577,36 +498,29 @@ def run(modelDir, inputDict):
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_Lease*outData["allYearGenerationMWh"][i])
 				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_Lease=", Rate_Levelized_Lease	
 			nValue = NPVRevLease				
 			x = x - 10.0		
-			Rate_Levelized_Lease = x/100.0					
-		#print "Exited Lease second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Lease			
+			Rate_Levelized_Lease = x/100.0						
 		#Third Loop		
 		while ((x < 20000) and (nValue < nGoal)):
 			NPVRevLease = 0
 			revLevelizedCost = []			
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_Lease*outData["allYearGenerationMWh"][i])
-				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_Lease=", Rate_Levelized_Lease	
+				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]	
 			nValue = NPVRevLease				
 			x = x + 1.0		
 			Rate_Levelized_Lease = x/100.0					
-		print "Exited Lease third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Lease
-
+			
 		#Master Output [Lease]
 		outData["levelCostTaxLease"] = Rate_Levelized_Lease	
 		outData["costPanelTaxLease"] = abs(NPVLease/numberPanels)
 		outData["cost10WPanelTaxLease"] = (float(outData["costPanelTaxLease"])/float(inputDict["panelSize"]))*10
-	
-	 	#print outData["costPanelTaxLease"], outData["cost10WPanelTaxLease"], inputDict["panelSize"]
 
 
 		'''Tax Equity Flip Structure'''		
 		z = 6791 
 		PPARateSixYearsTE = z/100		
-		#print "PPARateSixYearsTE", PPARateSixYearsTE	
 		nGoal = float(inputDict.get("taxEquityReturn",0))/100
 		nValue = 0		
 		#First Loop		
@@ -617,8 +531,7 @@ def run(modelDir, inputDict):
 			nValue = achievedReturnTE
 			z = z + 1000
 			PPARateSixYearsTE = z/100.0
-			#Loop back until nValue > nGoal (or Achieved Rate > Desired Rate)
-		#print "Exited TE_PPA first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", PPARateSixYearsTE			
+			#Loop back until nValue > nGoal (or Achieved Rate > Desired Rate)	
 		#Second Loop		
 		while ((z > 2500) and (nValue > nGoal)):	
 			IRRReturn = taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
@@ -626,8 +539,7 @@ def run(modelDir, inputDict):
 			achievedReturnTE = IRRReturn
 			nValue = achievedReturnTE
 			z = z - 100
-			PPARateSixYearsTE = z/100.0
-		#print "Exited TE_PPA second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", PPARateSixYearsTE			
+			PPARateSixYearsTE = z/100.0			
 		#Third Loop		
 		while ((z < 20000) and (nValue < nGoal)):	
 			IRRReturn = taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
@@ -635,8 +547,7 @@ def run(modelDir, inputDict):
 			achievedReturnTE = IRRReturn
 			nValue = achievedReturnTE
 			z = z + 10
-			PPARateSixYearsTE = z/100.0		
-		#print "Exited TE_PPA third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", PPARateSixYearsTE				
+			PPARateSixYearsTE = z/100.0					
 		#Fourth Loop		
 		while ((z > 2500) and (nValue > nGoal)):	
 			IRRReturn = taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
@@ -645,7 +556,6 @@ def run(modelDir, inputDict):
 			nValue = achievedReturnTE
 			z = z - 1
 			PPARateSixYearsTE = z/100.0
-		print "Exited TE_PPA fourth loop at:", "nGoal =", nGoal, "nValue(IRR) =", nValue	, "Rate:", PPARateSixYearsTE
 
 
 		'''PPA Comparison'''
@@ -686,23 +596,19 @@ def run(modelDir, inputDict):
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_PPA*outData["allYearGenerationMWh"][i])
 				NPVRevPPA = NPVRevPPA + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_PPA=", Rate_Levelized_PPA	
 			nValue = NPVRevPPA				
 			x = x + 100.0		
-			Rate_Levelized_PPA = x/100.0					
-		#print "Exited PPA first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_PPA			
+			Rate_Levelized_PPA = x/100.0							
 		#Second Loop		
 		while ((x > 2500) and (nValue > nGoal)):
 			NPVRevPPA = 0
 			revLevelizedCost = []			
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_PPA*outData["allYearGenerationMWh"][i])
-				NPVRevPPA = NPVRevPPA + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_PPA=", Rate_Levelized_PPA	
+				NPVRevPPA = NPVRevPPA + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))	
 			nValue = NPVRevPPA				
 			x = x - 10.0		
-			Rate_Levelized_PPA = x/100.0					
-		#print "Exited PPA second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_PPA		
+			Rate_Levelized_PPA = x/100.0						
 		#Third Loop		
 		while ((x < 20000) and (nValue < nGoal)):
 			NPVRevPPA = 0
@@ -710,23 +616,15 @@ def run(modelDir, inputDict):
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 				revLevelizedCost.append(Rate_Levelized_PPA*outData["allYearGenerationMWh"][i])
 				NPVRevPPA = NPVRevPPA + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_PPA=", Rate_Levelized_PPA	
 			nValue = NPVRevPPA				
 			x = x + 1.0		
-			Rate_Levelized_PPA = x/100.0					
-		print "Exited PPA first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_PPA		
+			Rate_Levelized_PPA = x/100.0						
 
 		#Master PPA [Lease]
 		outData["levelCostPPA"] = Rate_Levelized_PPA
 		outData["firstYearCostKWhPPA"] = float(inputDict.get("firstYearEnergyCostPPA",0))
 		outData["yearlyEscalationPPA"] = float(inputDict.get("annualEscRatePPA", 0))
 
-		#Print Variable Values
-		'''
-		print "   netCoopPaymentsPPA:", netCoopPaymentsPPA
-		print "   costToCustomerPPA:", costToCustomerPPA
-		print "NPVLoanPPA", NPVLoanPPA		
-		'''
 
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
@@ -791,7 +689,6 @@ def taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYe
 	financeCostCashTaxEquity = payment
 
 	#Output Tax Equity Flip [E]
-	#print "PPARateSixYearsTE", PPARateSixYearsTE
 	SPERevenueTE = []
 	for i in range (1, len(outData["allYearGenerationMWh"])+1):
 		SPERevenueTE.append(PPARateSixYearsTE * outData["allYearGenerationMWh"][i])
@@ -869,11 +766,9 @@ def taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYe
 		for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 			revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
 			NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-		#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
 		nValue = NPVRevTaxEquity					
 		x = x + 100.0		
-		Rate_Levelized_TaxEquity = x/100.0					
-	#print "Exited TaxEquity first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity			
+		Rate_Levelized_TaxEquity = x/100.0							
 	#Second Loop
 	while ((x > 2500) and (nValue > nGoal)):
 		NPVRevTaxEquity = 0
@@ -881,11 +776,9 @@ def taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYe
 		for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 			revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
 			NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-		#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
 		nValue = NPVRevTaxEquity				
 		x = x - 10.0		
-		Rate_Levelized_TaxEquity = x/100.0					
-	#print "Exited TaxEquity second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity				
+		Rate_Levelized_TaxEquity = x/100.0							
 	#Third Loop		
 	while ((x < 20000) and (nValue < nGoal)):
 		NPVRevTaxEquity = 0
@@ -893,11 +786,9 @@ def taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYe
 		for i in range (1, len(outData["allYearGenerationMWh"])+1):		
 			revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
 			NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-		#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
 		nValue = NPVRevTaxEquity				
 		x = x + 1.0		
 		Rate_Levelized_TaxEquity = x/100.0					
-	#print "Exited TaxEquity third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity
 
 	#PPA
 	#TEI Calcs - Achieved Return [AW 21]
@@ -975,58 +866,10 @@ def taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYe
 	else:
 		cumulativeIRR = 0
 
-	#Print Variable Values
-	#Output Tax Equity Flip Columns [C-L]
-	'''
-	print "coopInvestmentTaxEquity", coopInvestmentTaxEquity
-	print "financecostcashTE", financeCostCashTaxEquity				
-	print "cashToSPEOForPPATE", cashToSPEOForPPATE		
-	print "OMTEETC", OMInsuranceETCTE	
-	print "Cash from SPE to Blocker", cashFromSPEToBlockerTE	
-	print "cashblockerTE", cashFromBlockerTE	
-	print "netCOOPPayments", netCoopPaymentsTaxEquity	
-	print "NPVLoanTE", NPVLoanTaxEquity	
-	'''
-
-	#TEI Calcs 	
-	'''					
-	print "derivedcostEn", derivedCostEnergyTE	
-	print "OMTE", OMTE
-	print "insuranceTE", insuranceTE
-	print "landlease", landLeaseTE			
-	print SPEMgmtFeeTE, len(SPERevenueTE)
-	print "EBITDATE", EBITDATE, "\nLength:", len(EBITDATE)		
-	print "EBITDATE", EBITDATEREDUCED, "\nLength:", len(EBITDATEREDUCED)
-	print "cashrevenenue te", cashRevenueTE
-	print "buyoutAM", buyoutAmountTE		
-	print "cashrevte", cashRevenueTE
-	print "custCust", costToCustomerTaxEquity
-	'''	
-	'''
-	print "\nOutputs [AI]-[AW]:"
-	print "   cashRevenueTEI:", cashRevenueTEI
-	print "   ITC:", ITC
-	print "   MACRDepreciation:", MACRDepreciation
-	print "   slDepreciation:", slDepreciation
-	print "   taxableIncLoss:", taxableIncLoss	
-	print "   totalDistributions:", totalDistributions		
-	print "   capitalAcct:", capitalAcct	
-	print "   reallocatedIncLoss:", reallocatedIncLoss		
-	for i in range (0, len(ratioTE)):	
-		print "   ratioTE:", ratioTE[i]*100	
-	print "   taxesBenefitLiab:", taxesBenefitLiab
-	print "   buyoutAmount:", buyoutAmount	
-	print "   taxFromBuyout:", taxFromBuyout						
-	print "   totalCashTax:", totalCashTax
-	print "   cumulativeCashTax:", cumulativeCashTax			
-	print "   cumulativeIRR:", cumulativeIRR*100
-	'''
-
 	#Master Output [Tax Equity]		
 	outData["levelCostTaxEquity"] = Rate_Levelized_TaxEquity
 	outData["costPanelTaxEquity"] = abs(NPVLoanTaxEquity/numberPanels)
 	outData["cost10WPanelTaxEquity"] = (float(outData["costPanelTaxEquity"])/inputDict["panelSize"])*10
-	#outData["PPATaxEquity"] = 63.89	
 
 	return cumulativeIRR
 
@@ -1050,8 +893,6 @@ def zipCodeToclimateName(zipCode, test):
 	else:
 		path = "./data/Climate/"
 		climateNames = [x[:-5] for x in safeListdir(path)]
-	#print "\nDirectory:", os.path.abspath(path)		
-	#print "climate Files:", climateNames
 	climateCity = []
 	lowestDistance = 1000
 
@@ -1062,15 +903,12 @@ def zipCodeToclimateName(zipCode, test):
 		if (test == "True"):
 			zipCodeCSVDirectory = os.path.abspath("../static/") + "\zip_codes_states.csv"
 		else:
-			zipCodeCSVDirectory = os.path.abspath("./static/") + "\zip_codes_states.csv"			
-		#print "Directory (zipcode CSV):", zipCodeCSVDirectory		
+			zipCodeCSVDirectory = os.path.abspath("./static/") + "\zip_codes_states.csv"				
 		with open(zipCodeCSVDirectory, 'rt') as f:
-		#with open('C:\Users\Asus\Documents\GitHub\NRECA\omf\omf\static\zip_codes_states.csv', 'rt') as f:
 		     reader = csv.reader(f, delimiter=',') 
 		     for row in reader:
 		          for field in row:
 		              if field == zipCode:
-		                  #print "field", row
 		                  zipState = row[4] 
 		                  zipCity = row[3]
 		                  ziplatlon  = row[1], row[2]
@@ -1094,7 +932,6 @@ def zipCodeToclimateName(zipCode, test):
 	                		lowestDistance = distance
 	                		found = x	
 		climateName = zipState + "-" + climateCity[found]
-		#print "State-City used in PVWatts:", climateName
 		return climateName
 	except:
 		return "NULL"

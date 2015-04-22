@@ -172,10 +172,12 @@
 				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" value="2014-01-01" readonly/>
 			</div>
 			<div class="wideInput" style="text-align:right">
+				<!--
 				<a id="downloadLink" type="button" class="stoppedInline postRunInline" href="#" download>Download Excel</a>
 				<script type="text/javascript">
 					$("#downloadLink").attr("href", "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/"+allOutputData.excel)
 				</script>
+			    -->
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
