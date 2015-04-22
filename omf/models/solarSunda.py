@@ -45,9 +45,9 @@ def run(modelDir, inputDict):
 		# Associate zipcode to climate data
 		try: 
 			if inputDict["test"] == "True":
-				inputDict["climateName"] = zipCodeToclimateName(inputDict["zipCode"], test="True")	
+				inputDict["climateName"] = zipCodeToclimateName(inputDict["zipCode"], inputDict, test="True")	
 		except:
-			inputDict["climateName"] = zipCodeToclimateName(inputDict["zipCode"], test="False")	
+			inputDict["climateName"] = zipCodeToclimateName(inputDict["zipCode"], inputDict, test="False")	
 		inputDict["panelSize"] = 305   
 		arraySizeAC = float(inputDict.get("systemSize",0))
 		arraySizeDC = arraySizeAC*1.3908
@@ -55,14 +55,12 @@ def run(modelDir, inputDict):
 		inputDict["derate"] = "87"		
 		inputDict["inverterEfficiency"] = "96"
 		#Use latitude for tilt	
-		inputDict["tilt"] = "True"	
-		inputDict["manualTilt"] = "39"		
+		inputDict["tilt"] = "True"			
 		inputDict["trackingMode"] = "0"
 		inputDict["azimuth"] = "180"		
 		inputDict["runTime"] = ""				
 		inputDict["rotlim"] = "45.0"
 		inputDict["gamma"] = "-0.45"
-		inputDict["omCost"] = "1000"	
 		if (float(inputDict["systemSize"]) > 250):
 			inputDict["inverterCost"] = float(107000)
 		else:
@@ -79,17 +77,21 @@ def run(modelDir, inputDict):
 		dat = ssc.ssc_data_create()
 		# Required user inputs.
 		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
-		ssc.ssc_data_set_number(dat, "system_size", float(inputDict.get("systemSize", 100)))
-		derate = float(inputDict.get("derate", 100))/100 * float(inputDict.get("inverterEfficiency", 92))/100
+		#ssc.ssc_data_set_string(dat, "lat", "34.10")
+		#ssc.ssc_data_set_string(dat, "lon", "-118.410")		
+		ssc.ssc_data_set_string(dat, "radius", "0")					
+		ssc.ssc_data_set_number(dat, "system_size", float(inputDict.get("systemSize", 100))*1.3908)
+		derate = float(inputDict.get("derate", 100))/100 * float(inputDict.get("inverterEfficiency", 96))/100 * 1.0108
+		#Derate = systemlosses * inverter losses (.13*.96) * adjustment
 		ssc.ssc_data_set_number(dat, "derate", derate)
-		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
+		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))	
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 		# Advanced inputs with defaults.
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
-		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)
-		# Complicated optional inputs.
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1) 
-		#must be true to have tilt set to tilt value, but tilt isnt provided to pvwatts?
+		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)	
+		ssc.ssc_data_set_number(dat, "tilt", int(inputDict.get("manualTilt", 30)))		
+		#print "LAT:", 	int(inputDict.get("manualTilt", 30))
+		#ssc.ssc_data_set_number(dat, "tilt_eq_lat", 0)   #0 if tilt is provided
 		# Run PV system simulation.
 		mod = ssc.ssc_module_create("pvwattsv1")
 		ssc.ssc_module_exec(mod, dat)
@@ -120,6 +122,7 @@ def run(modelDir, inputDict):
 		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")	
 		#One year generation	
 		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"]) 
+		print "Output first year:", outData["oneYearGenerationWh"]/1000000
 		#Annual generation for all years
 		loanYears = 25		
 		outData["allYearGenerationMWh"] = {}		
@@ -511,7 +514,7 @@ def run(modelDir, inputDict):
 			nValue = NPVRevLease				
 			x = x + 1.0		
 			Rate_Levelized_Lease = x/100.0					
-			
+
 		#Master Output [Lease]
 		outData["levelCostTaxLease"] = Rate_Levelized_Lease	
 		outData["costPanelTaxLease"] = abs(NPVLease/numberPanels)
@@ -875,7 +878,7 @@ def taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYe
 
 #Maps zipcode from excel data to city, state, lat/lon 
 #From excel file at: https://www.gaslampmedia.com/download-zip-code-latitude-longitude-city-state-county-csv/
-def zipCodeToclimateName(zipCode, test):
+def zipCodeToclimateName(zipCode, inputDict, test):
 	def compareLatLon(LatLon, LatLon2):
 		differenceLat = float(LatLon[0]) - float(LatLon2[0]) 
 		differenceLon = float(LatLon[1]) - float(LatLon2[1])
@@ -893,6 +896,8 @@ def zipCodeToclimateName(zipCode, test):
 	else:
 		path = "./data/Climate/"
 		climateNames = [x[:-5] for x in safeListdir(path)]
+	#print "\nDirectory:", os.path.abspath(path)		
+	print "climate Files:", climateNames		
 	climateCity = []
 	lowestDistance = 1000
 
@@ -910,7 +915,8 @@ def zipCodeToclimateName(zipCode, test):
 		          for field in row:
 		              if field == zipCode:
 		                  zipState = row[4] 
-		                  zipCity = row[3]
+		                  zipCity = row[3]	
+		                  zipCity = zipCity.replace (" ", "_")                
 		                  ziplatlon  = row[1], row[2]
 
 		#Looks for climate data by looking at all cities in that state
@@ -920,18 +926,32 @@ def zipCodeToclimateName(zipCode, test):
 			if (zipState+"-" in climateNames[x]):
 				climateCity.append(climateNames[x])	
 		climateCity = [w.replace(zipState+"-", '') for w in climateCity]	
+		print "    State_City: ", zipState + "_" + zipCity
+		print "    Lat/Lon: ", ziplatlon						
+		print "    Climate Cities found:", climateCity	
+	    #Parse the cities distances to zipcode city to determine closest climate
+		print "\nNow matching closest city by lat/lon:"		
 	    #Parse the cities distances to zipcode city to determine closest climate
 		for x in range (0,len(climateCity)):				
 			with open(zipCodeCSVDirectory, 'rt') as f:
-				reader = csv.reader(f, delimiter=',') 
+				reader = csv.reader(f, delimiter=',') 				
 				for row in reader:
-					if ((row[4].lower() == zipState.lower()) and (row[3].lower() == str(climateCity[x]).lower())):
-						climatelatlon  = row[1], row[2]   
+					city = row[3].replace (" ", "_") 
+					#if (climateCity[x].lower() == city.lower()):
+					#	print "   ", climateCity[x].lower(), row[3].lower()		
+					if ((row[4].lower() == zipState.lower()) and (city.lower() == str(climateCity[x]).lower())):
+						climatelatlon  = row[1], row[2]   					
+						#print "   ClimateCity:", city.lower()
+						#print "   Climatelatlon:", row[1], row[2]
 	                	distance = compareLatLon(ziplatlon, climatelatlon)                	
 	                	if (distance < lowestDistance):
+	                		latarray = int(round((float(climatelatlon[0])-10)/5.0)*5.0)
+	                		print "LATARRAY:", (float(climatelatlon[0])-10)
 	                		lowestDistance = distance
 	                		found = x	
 		climateName = zipState + "-" + climateCity[found]
+		inputDict["manualTilt"] = latarray
+		print "State-City used in PVWatts:", climateName				
 		return climateName
 	except:
 		return "NULL"
@@ -973,12 +993,12 @@ def _tests():
 		"firstYearEnergyCostPPA": "55",
 		"annualEscRatePPA": "2",		
 		"lifeSpan": "25",
-		"degradation": "0.5",
+		"degradation": "0.8",
 		"derate": "87",
 		"inverterEfficiency": "96",
 		"tilt": "True",
-		"manualTilt":"34.65",	
 		"trackingMode":"0",
+		"module_type":"1", #PVWatts v5 feature: 1 = premium
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",
