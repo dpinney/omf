@@ -119,21 +119,19 @@ def run(modelDir, inputDict):
 		# Power generation.
 		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")	
 		#One year generation
-		#Hard code it
-		outData["oneYearGenerationWh"] = 2235.2483 * 1000000		
-		#outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"]) + 56000000
-		print outData["oneYearGenerationWh"]		
-		#print "poweroutput", outData["oneYearGenerationWh"]/1000000		
+		#Hard coded
+		#outData["oneYearGenerationWh"] = 2235.2483 * 1000000		
+		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"]) + 56000000
+		print outData["oneYearGenerationWh"] / 1000000		
 		#Annual generation for all years
 		loanYears = 25		
-		#Hard coded
-		'''
+		#Hard coded		
+		#outData["allYearGenerationMWh"] = {1: 2235.2483, 2: 2217.3663, 3: 2199.6273, 4: 2182.0303, 5: 2164.5741, 6: 2147.2575, 7: 2130.0794, 8: 2113.0388, 9: 2096.1345, 10: 2079.3654, 11: 2062.7305, 12: 2046.2286, 13: 2029.8588, 14: 2013.6199, 15: 1997.5110, 16: 1981.5309, 17: 1965.6786, 18: 1949.9532, 19: 1934.3536, 20: 1918.8788, 21: 1903.5277, 22: 1888.2995, 23: 1873.1931, 24: 1858.2076, 25: 1843.3419}
 		outData["allYearGenerationMWh"] = {}		
 		outData["allYearGenerationMWh"][1] = float(outData["oneYearGenerationWh"])/1000000
 		for i in range (2, loanYears+1):
 			outData["allYearGenerationMWh"][i] = float(outData["allYearGenerationMWh"][i-1])*0.992
-		'''
-		outData["allYearGenerationMWh"] = {1: 2235.2483, 2: 2217.3663, 3: 2199.6273, 4: 2182.0303, 5: 2164.5741, 6: 2147.2575, 7: 2130.0794, 8: 2113.0388, 9: 2096.1345, 10: 2079.3654, 11: 2062.7305, 12: 2046.2286, 13: 2029.8588, 14: 2013.6199, 15: 1997.5110, 16: 1981.5309, 17: 1965.6786, 18: 1949.9532, 19: 1934.3536, 20: 1918.8788, 21: 1903.5277, 22: 1888.2995, 23: 1873.1931, 24: 1858.2076, 25: 1843.3419}
+
 
 		# Summary of Results.
 		'''Total Costs including: Hardware, design/labor, siteprep, construction, install, and land'''
@@ -227,7 +225,7 @@ def run(modelDir, inputDict):
 		#print "total fees", totalFees
 		#print "totalCosts", outData["totalCost"]
 
-		'''Loans calculations for Direct, NCREB, Tax-equity'''
+		'''Loans calculations for Direct, NCREB, Lease, Tax-equity, and PPA'''
 		'''Full Ownership, Direct Loan'''
 		#Output - Direct Loan [C]
 		projectCostsDirect = 0		
@@ -317,7 +315,7 @@ def run(modelDir, inputDict):
 			nValue = NPVRevDirect				
 			x = x + 1.0			
 			Rate_Levelized_Direct = x/100.0						
-		#print "Exited Direct third loop at:", "nGoal =", nGoal, "nValue =", nValue, "Rate:", Rate_Levelized_Direct		
+		print "Exited Direct third loop at:", "nGoal =", nGoal, "nValue =", nValue, "Rate:", Rate_Levelized_Direct		
 
 		#Master Output [Direct Loan]
 		outData["levelCostDirect"] = Rate_Levelized_Direct
@@ -455,7 +453,7 @@ def run(modelDir, inputDict):
 			nValue = NPVRevNCREB				
 			x = x + 1.0		
 			Rate_Levelized_NCREB = x/100.0					
-		#print "Exited NCREB third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_NCREB
+		print "Exited NCREB third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_NCREB
 
 		#Master Output [NCREB]
 		outData["levelCostNCREB"] = Rate_Levelized_NCREB	
@@ -595,7 +593,7 @@ def run(modelDir, inputDict):
 			nValue = NPVRevLease				
 			x = x + 1.0		
 			Rate_Levelized_Lease = x/100.0					
-		#print "Exited Lease third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Lease
+		print "Exited Lease third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_Lease
 
 		#Master Output [Lease]
 		outData["levelCostTaxLease"] = Rate_Levelized_Lease	
@@ -605,333 +603,129 @@ def run(modelDir, inputDict):
 	 	#print outData["costPanelTaxLease"], outData["cost10WPanelTaxLease"], inputDict["panelSize"]
 
 
-
 		'''Tax Equity Flip Structure'''		
-		'''WARNING: head scratching loop from lines 611-885'''
-		#Output Tax Equity Flip [C]
-		coopInvestmentTaxEquity = -float(outData["totalCost"])*(1-0.53)
-		#Output Tax Equity Flip [D]
-		financeCostCashTaxEquity = 0
-		#Output Tax Equity Flip [E]
-		cashToSPEOForPPATE  = []	
-		#Output Tax Equity Flip [F]
-		derivedCostEnergyTE  = 0	
-		#Output Tax Equity Flip [G]
-		OMInsuranceETCTE = []
-		#Output Tax Equity Flip [H]
-		cashFromSPEToBlockerTE = []
-		#Output Tax Equity Flip [I]
-		cashFromBlockerTE = 0
-		#Output Tax Equity Flip [J]
-		distAdderTaxEquity = distAdderDirect
-		#Output Tax Equity Flip [K]
-		netCoopPaymentsTaxEquity = []
-		#Output Tax Equity Flip [L]
-		costToCustomerTaxEquity = []		
-		#Output Tax Equity Flip [L37]
-		NPVLoanTaxEquity = 0
-		#Output Tax Equity Flip [F42]
-		Rate_Levelized_Equity = 0
+		z = 6791 
+		PPARateSixYearsTE = z/100		
+		#print "PPARateSixYearsTE", PPARateSixYearsTE	
+		nGoal = float(inputDict.get("taxEquityReturn",0))/100
+		nValue = 0		
+		#First Loop		
+		while ((z < 20000) and (nValue < nGoal)):	
+			IRRReturn = taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
+			#TEI Calcs - PPA [C]
+			achievedReturnTE = IRRReturn
+			nValue = achievedReturnTE
+			z = z + 1000
+			PPARateSixYearsTE = z/100.0
+			#Loop back until nValue > nGoal (or Achieved Rate > Desired Rate)
+		#print "Exited TE_PPA first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", PPARateSixYearsTE			
+		#Second Loop		
+		while ((z > 2500) and (nValue > nGoal)):	
+			IRRReturn = taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
+			#TEI Calcs - PPA [C]
+			achievedReturnTE = IRRReturn
+			nValue = achievedReturnTE
+			z = z - 100
+			PPARateSixYearsTE = z/100.0
+		#print "Exited TE_PPA second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", PPARateSixYearsTE			
+		#Third Loop		
+		while ((z < 20000) and (nValue < nGoal)):	
+			IRRReturn = taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
+			#TEI Calcs - PPA [C]
+			achievedReturnTE = IRRReturn
+			nValue = achievedReturnTE
+			z = z + 10
+			PPARateSixYearsTE = z/100.0		
+		#print "Exited TE_PPA third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", PPARateSixYearsTE				
+		#Fourth Loop		
+		while ((z > 2500) and (nValue > nGoal)):	
+			IRRReturn = taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
+			#TEI Calcs - PPA [C]
+			achievedReturnTE = IRRReturn
+			nValue = achievedReturnTE
+			z = z - 1
+			PPARateSixYearsTE = z/100.0
+		print "Exited TE_PPA fourth loop at:", "nGoal =", nGoal, "nValue(IRR) =", nValue	, "Rate:", PPARateSixYearsTE
 
-		'''Tax Equity Flip Formulas'''
-		#Output Tax Equity Flip [D]
-		#TEI Calcs [E]
-		financeCostOfCashTE = 0
-		coopFinanceRateTE = 4.2/100
-		if (coopFinanceRateTE == 0):
-			financeCostOfCashTE = 0		
-		else:
-			payment = pmt(coopFinanceRateTE, loanYears, -coopInvestmentTaxEquity)
-		financeCostCashTaxEquity = payment
 
-		#Output Tax Equity Flip [E]
-		PPARateTE = 67.91
-		PPARateSixYearsTE = PPARateTE
-		#print "PPARateSixYearsTE", PPARateSixYearsTE
-		SPERevenueTE = []
+		'''PPA Comparison'''
+		#Output - PPA [F]
+		distAdderPPA = distAdderDirect
+		#Output - PPA [G]
+		netCoopPaymentsPPA = []
+		#Output - PPA [H]
+		costToCustomerPPA = []
+		#Output - PPA [I]
+		costToCustomerPPA = []		
+		#Output - PPA [H40]
+		NPVLoanPPA = 0
+		#Output - PPA [I40]
+		Rate_Levelized_PPA = 0
+
+		#PPA Formulas
+		#Output - PPA [G] [H]
 		for i in range (1, len(outData["allYearGenerationMWh"])+1):
-			SPERevenueTE.append(PPARateSixYearsTE * outData["allYearGenerationMWh"][i])
-			if ((i>=1) and (i<=6)):
-				cashToSPEOForPPATE.append(-SPERevenueTE[i-1])
-			else: 
-				cashToSPEOForPPATE.append(0)
+			netCoopPaymentsPPA.append(-outData["allYearGenerationMWh"][i]*float(inputDict.get("firstYearEnergyCostPPA",0))*math.pow((1 + float(inputDict.get("annualEscRatePPA", 0))/100),(i-1)))
+			costToCustomerPPA.append(netCoopPaymentsPPA[i-1]-distAdderPPA[i-1])
 
-		#Output Tax Equity Flip [F]
-		derivedCostEnergyTE = cashToSPEOForPPATE[0]/outData["allYearGenerationMWh"][1]
+		#Output - PPA [H40]
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+			NPVLoanPPA = NPVLoanPPA + costToCustomerPPA[i-1]/(math.pow(1+0.0232,i))
 
-		#Output Tax Equity Flip [G]
-		#TEI Calcs [F]	[U] [V]
-		landLeaseTE = []
-		OMTE = []
-		insuranceTE = []		
-		for i in range (1, len(outData["allYearGenerationMWh"])+1):	
-			landLeaseTE.append(firstYearLandLeaseCosts*math.pow((1 + .01),(i-1)))				
-			OMTE.append(-firstYearOPMainCosts*math.pow((1 + .01),(i-1)))	
-			insuranceTE.append(- firstYearInsuranceCosts*math.pow((1 + .025),(i-1)) )	
-			if (i<7):
-				OMInsuranceETCTE.append(float(landLeaseTE[i-1]))
-			else:
-				OMInsuranceETCTE.append(float(OMTE[i-1]) + float(insuranceTE[i-1]) + float(landLeaseTE[i-1]))			
-		#Output Tax Equity Flip [H]
-		#TEI Calcs [T]	
-		SPEMgmtFeeTE = []
-		EBITDATE = []
-		EBITDATEREDUCED = []
-		managementFee = 10000
-		for i in range (1, len(SPERevenueTE)+1):
-			SPEMgmtFeeTE.append(-managementFee*math.pow((1 + .01),(i-1)))
-			EBITDATE.append(float(SPERevenueTE[i-1]) + float(OMTE[i-1]) + float(insuranceTE[i-1]) + float(SPEMgmtFeeTE[i-1])) 
-			if (i<=6):
-				cashFromSPEToBlockerTE.append(float(EBITDATE[i-1]) * .01)
-			else:
-				cashFromSPEToBlockerTE.append(0)
-				EBITDATEREDUCED.append(EBITDATE[i-1])
-
-
-		#Output Tax Equity Flip [I]
-		#TEI Calcs [Y21]			
-		cashRevenueTE = -outData["totalCost"] * (1 - 0.53)
-		buyoutAmountTE = 0
-		for i in range (1, len(EBITDATEREDUCED) + 1):
-			buyoutAmountTE = buyoutAmountTE + EBITDATEREDUCED[i-1]/(math.pow(1+0.12,i))
-		buyoutAmountTE = buyoutAmountTE * 0.05
-		cashFromBlockerTE = - (buyoutAmountTE) + 0.0725 * cashRevenueTE
-
-
-		#Output Tax Equity Flip [K] [L]
-		for i in range (1, len(outData["allYearGenerationMWh"])+1):	
-			if (i==6):
-				netCoopPaymentsTaxEquity.append(financeCostCashTaxEquity + cashToSPEOForPPATE[i-1] + cashFromSPEToBlockerTE[i-1] + OMInsuranceETCTE[i-1] + cashFromBlockerTE)	
-			else:
-				netCoopPaymentsTaxEquity.append(financeCostCashTaxEquity + cashFromSPEToBlockerTE[i-1] + cashToSPEOForPPATE[i-1] + OMInsuranceETCTE[i-1])
-			costToCustomerTaxEquity.append(netCoopPaymentsTaxEquity[i-1] - distAdderTaxEquity[i-1])
-
-
-		#Output Tax Equity Flip [L37]
-		for i in range (1, len(costToCustomerTaxEquity) + 1):
-			NPVLoanTaxEquity = NPVLoanTaxEquity + costToCustomerTaxEquity[i-1]/(math.pow(1+float(inputDict.get("discRate", 0))/100,i))
-
-		#Output - Tax Equity [F42] 
+		#Output - PPA [F44] [I40] 
 		revLevelizedCost = []
-		NPVRevTaxEquity = 0
+		NPVRevPPA = 0
 		x = 3500
-		Rate_Levelized_TaxEquity = x/100.0
-		nGoal = - NPVLoanTaxEquity	
-		nValue = NPVRevTaxEquity
+		Rate_Levelized_PPA = x/100.0
+		nGoal = - NPVLoanPPA	
+		nValue = NPVRevPPA
 		#First Loop		
 		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevTaxEquity = 0
+			NPVRevPPA = 0
 			revLevelizedCost = []			
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
-				revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
-				NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
-			nValue = NPVRevTaxEquity					
+				revLevelizedCost.append(Rate_Levelized_PPA*outData["allYearGenerationMWh"][i])
+				NPVRevPPA = NPVRevPPA + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_PPA=", Rate_Levelized_PPA	
+			nValue = NPVRevPPA				
 			x = x + 100.0		
-			Rate_Levelized_TaxEquity = x/100.0					
-		#print "Exited TaxEquity first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity			
-		#Second Loop
+			Rate_Levelized_PPA = x/100.0					
+		#print "Exited PPA first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_PPA			
+		#Second Loop		
 		while ((x > 2500) and (nValue > nGoal)):
-			NPVRevTaxEquity = 0
+			NPVRevPPA = 0
 			revLevelizedCost = []			
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
-				revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
-				NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
-			nValue = NPVRevTaxEquity				
+				revLevelizedCost.append(Rate_Levelized_PPA*outData["allYearGenerationMWh"][i])
+				NPVRevPPA = NPVRevPPA + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_PPA=", Rate_Levelized_PPA	
+			nValue = NPVRevPPA				
 			x = x - 10.0		
-			Rate_Levelized_TaxEquity = x/100.0					
-		#print "Exited TaxEquity second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity				
+			Rate_Levelized_PPA = x/100.0					
+		#print "Exited PPA second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_PPA		
 		#Third Loop		
 		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevTaxEquity = 0
+			NPVRevPPA = 0
 			revLevelizedCost = []			
 			for i in range (1, len(outData["allYearGenerationMWh"])+1):		
-				revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
-				NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
-			nValue = NPVRevTaxEquity				
+				revLevelizedCost.append(Rate_Levelized_PPA*outData["allYearGenerationMWh"][i])
+				NPVRevPPA = NPVRevPPA + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+			#print "x", x, "nValue=", nValue, "Rate_Levelized_PPA=", Rate_Levelized_PPA	
+			nValue = NPVRevPPA				
 			x = x + 1.0		
-			Rate_Levelized_TaxEquity = x/100.0					
-		print "Exited TaxEquity third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity
+			Rate_Levelized_PPA = x/100.0					
+		print "Exited PPA first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_PPA		
 
-		#PPA
-		#TEI Calcs - Achieved Return [AW 21]
-   	   	#[AK]  		
-		MACRDepreciation = []
-		MACRDepreciation.append(-0.99*0.2*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))
-		MACRDepreciation.append(-0.99*0.32*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))
-		MACRDepreciation.append(-0.99*0.192*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))	
-		MACRDepreciation.append(-0.99*0.1152*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))
-		MACRDepreciation.append(-0.99*0.1152*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))		
-		MACRDepreciation.append(-0.99*0.0576*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))	
-		#[AI] [AL]	[AN]
-		cashRevenueTEI = [] 	                          	#[AI]
-		slDepreciation = []		                            #[AL]
-		totalDistributions = []                         	#[AN]	
-		cashRevenueTEI.append(-outData["totalCost"]*0.53)				
-		for i in range (1,7):
-			cashRevenueTEI.append(EBITDATE[i-1]*0.99)
-			slDepreciation.append(outData["totalCost"]/25)	
-			totalDistributions.append(-cashRevenueTEI[i])	
-        #[AJ]						
-		ITC = outData["totalCost"]*0.9822*0.3*0.99 		    
-        #[AM]						
-		taxableIncLoss = [0]  	     
-		taxableIncLoss.append(cashRevenueTEI[1]+MACRDepreciation[0])	
-        #[AO]		
-		capitalAcct = []	                            	
-		capitalAcct.append(outData["totalCost"]*0.53)
-		condition = capitalAcct[0] - 0.5*ITC + taxableIncLoss[1] + totalDistributions[0]
-		if condition > 0:
-			capitalAcct.append(condition)
-		else:
-			capitalAcct.append(0)
-		#[AQ]	
-		ratioTE = [0]  								
-        #[AP]		     
-		reallocatedIncLoss = []		            
-		#AO-1 + AN + AI + AK + AJ  
-		for i in range (0, 5):     
-			reallocatedIncLoss.append(capitalAcct[i+1] + totalDistributions[i+1] + MACRDepreciation[i+1] + cashRevenueTEI[i+2])
-			ratioTE.append(reallocatedIncLoss[i]/(cashRevenueTEI[i+2] + MACRDepreciation[i+1]))
-			taxableIncLoss.append(cashRevenueTEI[i+2]+MACRDepreciation[i+1]-ratioTE[i+1]*(MACRDepreciation[i+1]-totalDistributions[i+1]))			
-			condition = capitalAcct[i+1] + taxableIncLoss[i+2] + totalDistributions[i+1]
-			if condition > 0:
-				capitalAcct.append(condition)
-			else:
-				capitalAcct.append(0)
-
-		#[AR]
-		taxesBenefitLiab = [0]
-		for i in range (1, 7):
-			taxesBenefitLiab.append(-taxableIncLoss[i]*0.35)
-	    #[AS] [AT}]
-		buyoutAmount = 0	
-		taxFromBuyout = 0		
-		for i in range (0, len(EBITDATEREDUCED)):
-			buyoutAmount = buyoutAmount + .05*EBITDATEREDUCED[i]/(math.pow(1.12,(i+1)))
-		taxFromBuyout = -buyoutAmount*0.35
-		#[AU] [AV]	
-		totalCashTax = []
-		cumulativeCashTax = [0]			
-		for i in range (0, 7):
-			if i == 1:
-				totalCashTax.append(cashRevenueTEI[i] + ITC + taxesBenefitLiab[i] + 0 + 0)	
-				cumulativeCashTax.append(cumulativeCashTax[i] + totalCashTax[i])				
-			elif i == 6:
-				totalCashTax.append(cashRevenueTEI[i] + 0 + taxesBenefitLiab[i] + buyoutAmount + taxFromBuyout)		
-				cumulativeCashTax.append(cumulativeCashTax[i] + totalCashTax[i] + buyoutAmount + taxFromBuyout)					
-			else:
-				totalCashTax.append(cashRevenueTEI[i] + 0 + taxesBenefitLiab[i] + 0 + 0)
-				cumulativeCashTax.append(cumulativeCashTax[i] + totalCashTax[i])						
-		#[AW21]
-		if (cumulativeCashTax[7] > 0):
-			cumulativeIRR = round(irr(totalCashTax), 4)		
-		else:
-			cumulativeIRR = 0
-		#Print Outputs
-		'''
-		print "\nOutputs [AI]-[AW]:"
-		print "   cashRevenueTEI:", cashRevenueTEI
-		print "   ITC:", ITC
-		print "   MACRDepreciation:", MACRDepreciation
-		print "   slDepreciation:", slDepreciation
-		print "   taxableIncLoss:", taxableIncLoss	
-		print "   totalDistributions:", totalDistributions		
-		print "   capitalAcct:", capitalAcct	
-		print "   reallocatedIncLoss:", reallocatedIncLoss		
-		for i in range (0, len(ratioTE)):	
-			print "   ratioTE:", ratioTE[i]*100	
-		print "   taxesBenefitLiab:", taxesBenefitLiab
-		print "   buyoutAmount:", buyoutAmount	
-		print "   taxFromBuyout:", taxFromBuyout						
-		print "   totalCashTax:", totalCashTax
-		print "   cumulativeCashTax:", cumulativeCashTax				
-		print "   cumulativeIRR:", cumulativeIRR*100
-		'''
-
-		#Finally calculate PPA after all that
-		#TEI Calcs - PPA [C]
-		achievedReturnTE = cumulativeIRR
-		x = 3500
-		PPAValue = x / 100
-		nGoal = 8.5/100
-		nValue = achievedReturnTE
-		#First Loop		
-		'''
-		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevTaxEquity = 0
-			revLevelizedCost = []	
-			x = x + 1000			
-			nValue = -achievedReturnTE
-
-			#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
-			nValue = NPVRevTaxEquity					
-			x = x + 1000.0		
-			Rate_Levelized_TaxEquity = x/100.0					
-		print "Exited TaxEquity first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity	
-		'''
-		'''
-	    Levelized Loan
-	    i = 3500
-	    [Rate_Levelized_Loan].Value = i / 100
-	    nGoal = -Worksheets("OutPut- Direct Loan").[NPV_Loan].Value
-	    nValue = Worksheets("OutPut- Direct Loan").[Levelized_Loan].Value
-
-	    Do Until nValue > nGoal
-	        [Rate_Levelized_Loan].Value = i / 100
-	        nValue = Worksheets("OutPut- Direct Loan").[Levelized_Loan].Value
-	        i = i + 100
-	        If i > 20000 Then Exit Do
-	    Loop
-	        Do Until nValue < nGoal
-	        [Rate_Levelized_Loan].Value = i / 100
-	        nValue = Worksheets("OutPut- Direct Loan").[Levelized_Loan].Value
-	        i = i - 10
-	        If i < 2500 Then Exit Do
-	    Loop
-	        Do Until nValue > nGoal
-	        [Rate_Levelized_Loan].Value = i / 100
-	        nValue = Worksheets("OutPut- Direct Loan").[Levelized_Loan].Value
-	        i = i + 1
-	        If i > 20000 Then Exit Do
-	    Loop
-	    '''
-		#PPARateTE = PPAValue
-
-		#Master Output [Tax Equity]		
-		outData["levelCostTaxEquity"] = Rate_Levelized_TaxEquity
-		outData["costPanelTaxEquity"] = abs(NPVLoanTaxEquity/numberPanels)
-		outData["cost10WPanelTaxEquity"] = (float(outData["costPanelTaxEquity"])/inputDict["panelSize"])*10
-		#outData["PPATaxEquity"] = 63.89	
+		#Master PPA [Lease]
+		outData["levelCostPPA"] = Rate_Levelized_PPA
+		outData["firstYearCostKWhPPA"] = float(inputDict.get("firstYearEnergyCostPPA",0))
+		outData["yearlyEscalationPPA"] = float(inputDict.get("annualEscRatePPA", 0))
 
 		#Print Variable Values
-		#Output Tax Equity Flip Columns [C-L]
 		'''
-		print "coopInvestmentTaxEquity", coopInvestmentTaxEquity
-		print "financecostcashTE", financeCostCashTaxEquity				
-		print "cashToSPEOForPPATE", cashToSPEOForPPATE		
-		print "OMTEETC", OMInsuranceETCTE	
-		print "Cash from SPE to Blocker", cashFromSPEToBlockerTE	
-		print "cashblockerTE", cashFromBlockerTE	
-		print "netCOOPPayments", netCoopPaymentsTaxEquity	
-		print "NPVLoanTE", NPVLoanTaxEquity	
-		'''
-
-		#TEI Calcs 	
-		'''					
-		print "derivedcostEn", derivedCostEnergyTE	
-		print "OMTE", OMTE
-		print "insuranceTE", insuranceTE
-		print "landlease", landLeaseTE			
-		print SPEMgmtFeeTE, len(SPERevenueTE)
-		print "EBITDATE", EBITDATE, "\nLength:", len(EBITDATE)		
-		print "EBITDATE", EBITDATEREDUCED, "\nLength:", len(EBITDATEREDUCED)
-		print "cashrevenenue te", cashRevenueTE
-		print "buyoutAM", buyoutAmountTE		
-		print "cashrevte", cashRevenueTE
-		print "custCust", costToCustomerTaxEquity
+		print "   netCoopPaymentsPPA:", netCoopPaymentsPPA
+		print "   costToCustomerPPA:", costToCustomerPPA
+		print "NPVLoanPPA", NPVLoanPPA		
 		'''
 
 		# Stdout/stderr.
@@ -957,6 +751,285 @@ def run(modelDir, inputDict):
 			os.remove(pJoin(modelDir,"allOutputData.json"))
 		except Exception, e:
 			pass
+
+#Tax Equity Flip Structure
+def taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels):
+	#Output Tax Equity Flip [C]
+	coopInvestmentTaxEquity = -float(outData["totalCost"])*(1-0.53)
+	#Output Tax Equity Flip [D]
+	financeCostCashTaxEquity = 0
+	#Output Tax Equity Flip [E]
+	cashToSPEOForPPATE  = []	
+	#Output Tax Equity Flip [F]
+	derivedCostEnergyTE  = 0	
+	#Output Tax Equity Flip [G]
+	OMInsuranceETCTE = []
+	#Output Tax Equity Flip [H]
+	cashFromSPEToBlockerTE = []
+	#Output Tax Equity Flip [I]
+	cashFromBlockerTE = 0
+	#Output Tax Equity Flip [J]
+	distAdderTaxEquity = distAdderDirect
+	#Output Tax Equity Flip [K]
+	netCoopPaymentsTaxEquity = []
+	#Output Tax Equity Flip [L]
+	costToCustomerTaxEquity = []		
+	#Output Tax Equity Flip [L37]
+	NPVLoanTaxEquity = 0
+	#Output Tax Equity Flip [F42]
+	Rate_Levelized_Equity = 0
+
+	'''Tax Equity Flip Formulas'''
+	#Output Tax Equity Flip [D]
+	#TEI Calcs [E]
+	financeCostOfCashTE = 0
+	coopFinanceRateTE = 4.2/100
+	if (coopFinanceRateTE == 0):
+		financeCostOfCashTE = 0		
+	else:
+		payment = pmt(coopFinanceRateTE, loanYears, -coopInvestmentTaxEquity)
+	financeCostCashTaxEquity = payment
+
+	#Output Tax Equity Flip [E]
+	#print "PPARateSixYearsTE", PPARateSixYearsTE
+	SPERevenueTE = []
+	for i in range (1, len(outData["allYearGenerationMWh"])+1):
+		SPERevenueTE.append(PPARateSixYearsTE * outData["allYearGenerationMWh"][i])
+		if ((i>=1) and (i<=6)):
+			cashToSPEOForPPATE.append(-SPERevenueTE[i-1])
+		else: 
+			cashToSPEOForPPATE.append(0)
+
+	#Output Tax Equity Flip [F]
+	derivedCostEnergyTE = cashToSPEOForPPATE[0]/outData["allYearGenerationMWh"][1]
+
+	#Output Tax Equity Flip [G]
+	#TEI Calcs [F]	[U] [V]
+	landLeaseTE = []
+	OMTE = []
+	insuranceTE = []		
+	for i in range (1, len(outData["allYearGenerationMWh"])+1):	
+		landLeaseTE.append(firstYearLandLeaseCosts*math.pow((1 + .01),(i-1)))				
+		OMTE.append(-firstYearOPMainCosts*math.pow((1 + .01),(i-1)))	
+		insuranceTE.append(- firstYearInsuranceCosts*math.pow((1 + .025),(i-1)) )	
+		if (i<7):
+			OMInsuranceETCTE.append(float(landLeaseTE[i-1]))
+		else:
+			OMInsuranceETCTE.append(float(OMTE[i-1]) + float(insuranceTE[i-1]) + float(landLeaseTE[i-1]))					
+	#Output Tax Equity Flip [H]
+	#TEI Calcs [T]	
+	SPEMgmtFeeTE = []
+	EBITDATE = []
+	EBITDATEREDUCED = []
+	managementFee = 10000
+	for i in range (1, len(SPERevenueTE)+1):
+		SPEMgmtFeeTE.append(-managementFee*math.pow((1 + .01),(i-1)))
+		EBITDATE.append(float(SPERevenueTE[i-1]) + float(OMTE[i-1]) + float(insuranceTE[i-1]) + float(SPEMgmtFeeTE[i-1])) 
+		if (i<=6):
+			cashFromSPEToBlockerTE.append(float(EBITDATE[i-1]) * .01)
+		else:
+			cashFromSPEToBlockerTE.append(0)
+			EBITDATEREDUCED.append(EBITDATE[i-1])
+
+
+	#Output Tax Equity Flip [I]
+	#TEI Calcs [Y21]			
+	cashRevenueTE = -outData["totalCost"] * (1 - 0.53)
+	buyoutAmountTE = 0
+	for i in range (1, len(EBITDATEREDUCED) + 1):
+		buyoutAmountTE = buyoutAmountTE + EBITDATEREDUCED[i-1]/(math.pow(1+0.12,i))
+	buyoutAmountTE = buyoutAmountTE * 0.05
+	cashFromBlockerTE = - (buyoutAmountTE) + 0.0725 * cashRevenueTE
+
+
+	#Output Tax Equity Flip [K] [L]
+	for i in range (1, len(outData["allYearGenerationMWh"])+1):	
+		if (i==6):
+			netCoopPaymentsTaxEquity.append(financeCostCashTaxEquity + cashToSPEOForPPATE[i-1] + cashFromSPEToBlockerTE[i-1] + OMInsuranceETCTE[i-1] + cashFromBlockerTE)	
+		else:
+			netCoopPaymentsTaxEquity.append(financeCostCashTaxEquity + cashFromSPEToBlockerTE[i-1] + cashToSPEOForPPATE[i-1] + OMInsuranceETCTE[i-1])
+		costToCustomerTaxEquity.append(netCoopPaymentsTaxEquity[i-1] - distAdderTaxEquity[i-1])
+
+
+	#Output Tax Equity Flip [L37]
+	for i in range (1, len(costToCustomerTaxEquity) + 1):
+		NPVLoanTaxEquity = NPVLoanTaxEquity + costToCustomerTaxEquity[i-1]/(math.pow(1+float(inputDict.get("discRate", 0))/100,i))
+
+	#Output - Tax Equity [F42] 
+	revLevelizedCost = []
+	NPVRevTaxEquity = 0
+	x = 3500
+	Rate_Levelized_TaxEquity = x/100.0
+	nGoal = - NPVLoanTaxEquity	
+	nValue = NPVRevTaxEquity
+	#First Loop		
+	while ((x < 20000) and (nValue < nGoal)):
+		NPVRevTaxEquity = 0
+		revLevelizedCost = []			
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+			revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
+			NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+		#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
+		nValue = NPVRevTaxEquity					
+		x = x + 100.0		
+		Rate_Levelized_TaxEquity = x/100.0					
+	#print "Exited TaxEquity first loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity			
+	#Second Loop
+	while ((x > 2500) and (nValue > nGoal)):
+		NPVRevTaxEquity = 0
+		revLevelizedCost = []			
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+			revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
+			NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+		#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
+		nValue = NPVRevTaxEquity				
+		x = x - 10.0		
+		Rate_Levelized_TaxEquity = x/100.0					
+	#print "Exited TaxEquity second loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity				
+	#Third Loop		
+	while ((x < 20000) and (nValue < nGoal)):
+		NPVRevTaxEquity = 0
+		revLevelizedCost = []			
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):		
+			revLevelizedCost.append(Rate_Levelized_TaxEquity*outData["allYearGenerationMWh"][i])
+			NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+0.0232,i))
+		#print "x", x, "nValue=", nValue, "Rate_Levelized_TaxEquity=", Rate_Levelized_TaxEquity	
+		nValue = NPVRevTaxEquity				
+		x = x + 1.0		
+		Rate_Levelized_TaxEquity = x/100.0					
+	#print "Exited TaxEquity third loop at:", "nGoal =", nGoal, "nValue =", nValue	, "Rate:", Rate_Levelized_TaxEquity
+
+	#PPA
+	#TEI Calcs - Achieved Return [AW 21]
+	   	#[AK]  		
+	MACRDepreciation = []
+	MACRDepreciation.append(-0.99*0.2*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))
+	MACRDepreciation.append(-0.99*0.32*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))
+	MACRDepreciation.append(-0.99*0.192*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))	
+	MACRDepreciation.append(-0.99*0.1152*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))
+	MACRDepreciation.append(-0.99*0.1152*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))		
+	MACRDepreciation.append(-0.99*0.0576*(outData["totalCost"]-outData["totalCost"]*0.5*0.9822*0.3))	
+	#[AI] [AL]	[AN]
+	cashRevenueTEI = [] 	                          	#[AI]
+	slDepreciation = []		                            #[AL]
+	totalDistributions = []                         	#[AN]	
+	cashRevenueTEI.append(-outData["totalCost"]*0.53)				
+	for i in range (1,7):
+		cashRevenueTEI.append(EBITDATE[i-1]*0.99)
+		slDepreciation.append(outData["totalCost"]/25)	
+		totalDistributions.append(-cashRevenueTEI[i])	
+    #[AJ]						
+	ITC = outData["totalCost"]*0.9822*0.3*0.99 		    
+    #[AM]						
+	taxableIncLoss = [0]  	     
+	taxableIncLoss.append(cashRevenueTEI[1]+MACRDepreciation[0])	
+    #[AO]		
+	capitalAcct = []	                            	
+	capitalAcct.append(outData["totalCost"]*0.53)
+	condition = capitalAcct[0] - 0.5*ITC + taxableIncLoss[1] + totalDistributions[0]
+	if condition > 0:
+		capitalAcct.append(condition)
+	else:
+		capitalAcct.append(0)
+	#[AQ]	
+	ratioTE = [0]  								
+    #[AP]		     
+	reallocatedIncLoss = []		            
+	#AO-1 + AN + AI + AK + AJ  
+	for i in range (0, 5):     
+		reallocatedIncLoss.append(capitalAcct[i+1] + totalDistributions[i+1] + MACRDepreciation[i+1] + cashRevenueTEI[i+2])
+		ratioTE.append(reallocatedIncLoss[i]/(cashRevenueTEI[i+2] + MACRDepreciation[i+1]))
+		taxableIncLoss.append(cashRevenueTEI[i+2]+MACRDepreciation[i+1]-ratioTE[i+1]*(MACRDepreciation[i+1]-totalDistributions[i+1]))			
+		condition = capitalAcct[i+1] + taxableIncLoss[i+2] + totalDistributions[i+1]
+		if condition > 0:
+			capitalAcct.append(condition)
+		else:
+			capitalAcct.append(0)
+
+	#[AR]
+	taxesBenefitLiab = [0]
+	for i in range (1, 7):
+		taxesBenefitLiab.append(-taxableIncLoss[i]*0.35)
+    #[AS] [AT}]
+	buyoutAmount = 0	
+	taxFromBuyout = 0		
+	for i in range (0, len(EBITDATEREDUCED)):
+		buyoutAmount = buyoutAmount + .05*EBITDATEREDUCED[i]/(math.pow(1.12,(i+1)))
+	taxFromBuyout = -buyoutAmount*0.35
+	#[AU] [AV]	
+	totalCashTax = []
+	cumulativeCashTax = [0]			
+	for i in range (0, 7):
+		if i == 1:
+			totalCashTax.append(cashRevenueTEI[i] + ITC + taxesBenefitLiab[i] + 0 + 0)	
+			cumulativeCashTax.append(cumulativeCashTax[i] + totalCashTax[i])				
+		elif i == 6:
+			totalCashTax.append(cashRevenueTEI[i] + 0 + taxesBenefitLiab[i] + buyoutAmount + taxFromBuyout)		
+			cumulativeCashTax.append(cumulativeCashTax[i] + totalCashTax[i] + buyoutAmount + taxFromBuyout)					
+		else:
+			totalCashTax.append(cashRevenueTEI[i] + 0 + taxesBenefitLiab[i] + 0 + 0)
+			cumulativeCashTax.append(cumulativeCashTax[i] + totalCashTax[i])						
+	#[AW21]
+	if (cumulativeCashTax[7] > 0):
+		cumulativeIRR = round(irr(totalCashTax), 4)		
+	else:
+		cumulativeIRR = 0
+
+	#Print Variable Values
+	#Output Tax Equity Flip Columns [C-L]
+	'''
+	print "coopInvestmentTaxEquity", coopInvestmentTaxEquity
+	print "financecostcashTE", financeCostCashTaxEquity				
+	print "cashToSPEOForPPATE", cashToSPEOForPPATE		
+	print "OMTEETC", OMInsuranceETCTE	
+	print "Cash from SPE to Blocker", cashFromSPEToBlockerTE	
+	print "cashblockerTE", cashFromBlockerTE	
+	print "netCOOPPayments", netCoopPaymentsTaxEquity	
+	print "NPVLoanTE", NPVLoanTaxEquity	
+	'''
+
+	#TEI Calcs 	
+	'''					
+	print "derivedcostEn", derivedCostEnergyTE	
+	print "OMTE", OMTE
+	print "insuranceTE", insuranceTE
+	print "landlease", landLeaseTE			
+	print SPEMgmtFeeTE, len(SPERevenueTE)
+	print "EBITDATE", EBITDATE, "\nLength:", len(EBITDATE)		
+	print "EBITDATE", EBITDATEREDUCED, "\nLength:", len(EBITDATEREDUCED)
+	print "cashrevenenue te", cashRevenueTE
+	print "buyoutAM", buyoutAmountTE		
+	print "cashrevte", cashRevenueTE
+	print "custCust", costToCustomerTaxEquity
+	'''	
+	'''
+	print "\nOutputs [AI]-[AW]:"
+	print "   cashRevenueTEI:", cashRevenueTEI
+	print "   ITC:", ITC
+	print "   MACRDepreciation:", MACRDepreciation
+	print "   slDepreciation:", slDepreciation
+	print "   taxableIncLoss:", taxableIncLoss	
+	print "   totalDistributions:", totalDistributions		
+	print "   capitalAcct:", capitalAcct	
+	print "   reallocatedIncLoss:", reallocatedIncLoss		
+	for i in range (0, len(ratioTE)):	
+		print "   ratioTE:", ratioTE[i]*100	
+	print "   taxesBenefitLiab:", taxesBenefitLiab
+	print "   buyoutAmount:", buyoutAmount	
+	print "   taxFromBuyout:", taxFromBuyout						
+	print "   totalCashTax:", totalCashTax
+	print "   cumulativeCashTax:", cumulativeCashTax			
+	print "   cumulativeIRR:", cumulativeIRR*100
+	'''
+
+	#Master Output [Tax Equity]		
+	outData["levelCostTaxEquity"] = Rate_Levelized_TaxEquity
+	outData["costPanelTaxEquity"] = abs(NPVLoanTaxEquity/numberPanels)
+	outData["cost10WPanelTaxEquity"] = (float(outData["costPanelTaxEquity"])/inputDict["panelSize"])*10
+	#outData["PPATaxEquity"] = 63.89	
+
+
+	return cumulativeIRR
 
 #Maps zipcode from excel data to city, state, lat/lon 
 #From excel file at: https://www.gaslampmedia.com/download-zip-code-latitude-longitude-city-state-county-csv/
@@ -1049,6 +1122,8 @@ def _tests():
 		"NCREBRate": "4.06",
 		"taxLeaseRate": "7.20",
 		"taxEquityReturn": "8.50",	
+		"firstYearEnergyCostPPA": "55",
+		"annualEscRatePPA": "2",		
 		"lifeSpan": "25",
 		"degradation": "0.5",
 		"derate": "87",

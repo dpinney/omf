@@ -138,7 +138,19 @@
 			<div class="shortInput">
 				<label class="tooltip">Targeted Tax Equity Return (%)<span class="classic">Loan discount rate.</span></label>
 				<input type="text" id="taxEquityReturn" name="taxEquityReturn" value="8.50" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
-			</div>				
+			</div>		
+			<div class="wideInput">
+				<p class="inputSectionHeader">PPA Information</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">First year energy cost ($/MWh)<span class="classic">Loan discount rate.</span></label>
+				<input type="text" id="firstYearEnergyCostPPA" name="firstYearEnergyCostPPA" value="55" pattern="^\d+\.?\d*?$" required="required"/>
+			</div>						
+			<div class="shortInput">
+				<label class="tooltip">Annual Escalation Rate<span class="classic">Loan discount rate.</span></label>
+				<input type="text" id="annualEscRatePPA" name="annualEscRatePPA" value="2.00" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+			</div>												
 			<div class="wideInput">
 				<p class="inputSectionHeader">Simulation Parameters </p>
 			</div>
@@ -314,17 +326,17 @@
 				<br></br>
 				<div class="shortInput">
 					<reportLabel>Levelized Cost of Energy: ($/MWh)</reportLabel>
-					<input type="text" id="levelCostTaxEquity" name = "levelCostTaxEquity" value="$68.27" readonly out/>
+					<input type="text" id="levelCostPPA" name = "levelCostPPA" value="$68.27" readonly out/>
 				</div>	
 				<br>
 				<div class="shortInput">
 					<reportLabel>First Year Cost/kWh:</reportLabel>
-					<input type="text" id="firstYearCostKWh" name = "firstYearCostKWh" value="$55.00" readonly out/>
+					<input type="text" id="firstYearCostKWhPPA" name = "firstYearCostKWhPPA" value="$55.00" readonly out/>
 				</div>				                			
 				<br>
 				<div class="shortInput">
 					<reportLabel>Yearly Escalation:</reportLabel>
-					<input type="text" id="yearlyEscalation" name = "yearlyEscalation" value="2%" readonly out/>
+					<input type="text" id="yearlyEscalationPPA" name = "yearlyEscalationPPA" value="2%" readonly out/>
 				</div>				                			
 				<br>					
 				<!--Loan PPAs and System Size
@@ -374,7 +386,6 @@
 				$("#levelCostDirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostDirect).toFixed(2)))	
 				$("#costPanelDirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelDirect).toFixed(2)))		
 				$("#cost10WPanelDirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelDirect).toFixed(2)))
-				$("#PPADirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.PPADirect).toFixed(2)))		
 				$("#levelCostNCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostNCREB).toFixed(2)))	
 				$("#costPanelNCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelNCREB).toFixed(2)))		
 				$("#cost10WPanelNCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelNCREB).toFixed(2)))
@@ -385,7 +396,7 @@
 				$("#levelCostTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxEquity).toFixed(2)))
 				$("#costPanelTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxEquity).toFixed(2)))		
 				$("#cost10WPanelTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxEquity).toFixed(2)))
-				$("#PPATaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.PPATaxEquity).toFixed(2)))					
+
 				$("#sysSize").attr("value", parseFloat(allInputData.systemSize))						
 				</script>																							
 			</form>
