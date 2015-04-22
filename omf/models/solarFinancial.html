@@ -28,7 +28,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
-				<label>Model Type</label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarFinancial">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="solarFinancial" readonly/>
 			</div>
 			<div class="shortInput">
@@ -128,7 +128,7 @@
 			</script>
 			<div class="shortInput">
 				<label class="tooltip">Manual Tilt (degrees)<span class="classic">Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
-				<input type="text" id="manualTilt" name="manualTilt" value="34.65" pattern="^\d+\.?\d*$" required="required" readonly/>
+				<input type="text" id="manualTilt" name="manualTilt" value="" pattern="^\d*$" required="required" readonly/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
