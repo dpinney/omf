@@ -25,7 +25,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
-				<label>Model Type</label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-voltageDrop">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="voltageDrop" readonly/>
 			</div>
 			<div class="shortInput">
@@ -58,7 +58,7 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Layout Algorithm<span class="classic">Layout Algorithm<br>Geospatial:<br>Force Directed:</span></label>
+				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
 				<select id="layoutAlgorithm" name="layoutAlgorithm">
 					<option value="geospatial">Geospatial</option>
 					<option value="forceDirected">Force Directed</option>
