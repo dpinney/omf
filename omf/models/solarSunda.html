@@ -328,17 +328,17 @@
 				<br></br>
 				<div class="shortInput">
 					<reportLabel>Levelized Cost of Energy: ($/MWh)</reportLabel>
-					<input type="text" id="levelCostPPA" name = "levelCostPPA" value="$68.27" readonly out/>
+					<input type="text" id="levelCostPPA" name = "levelCostPPA" value="N/A" readonly out/>
 				</div>	
 				<br>
 				<div class="shortInput">
 					<reportLabel>First Year Cost/kWh:</reportLabel>
-					<input type="text" id="firstYearCostKWhPPA" name = "firstYearCostKWhPPA" value="$55.00" readonly out/>
+					<input type="text" id="firstYearCostKWhPPA" name = "firstYearCostKWhPPA" value="N/A" readonly out/>
 				</div>				                			
 				<br>
 				<div class="shortInput">
 					<reportLabel>Yearly Escalation:</reportLabel>
-					<input type="text" id="yearlyEscalationPPA" name = "yearlyEscalationPPA" value="2%" readonly out/>
+					<input type="text" id="yearlyEscalationPPA" name = "yearlyEscalationPPA" value="N/A" readonly out/>
 				</div>				                			
 				<br>					
 				<!--Loan PPAs and System Size
@@ -398,9 +398,10 @@
 				$("#levelCostTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxEquity).toFixed(2)))
 				$("#costPanelTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxEquity).toFixed(2)))		
 				$("#cost10WPanelTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxEquity).toFixed(2)))
-
-				$("#sysSize").attr("value", parseFloat(allInputData.systemSize))						
-				</script>																							
+				$("#levelCostPPA").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostPPA).toFixed(2)))	
+				$("#firstYearCostKWhPPA").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.firstYearCostKWhPPA).toFixed(2)))			
+				$("#yearlyEscalationPPA").attr("value", delimitNumbers(parseFloat(allOutputData.yearlyEscalationPPA).toFixed(0)) + "%")										
+				</script>			
 			</form>
 		</div>		
 		<p class="reportTitle postRun">Simulation Location
