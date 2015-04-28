@@ -8,6 +8,7 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/hightables.js"></script>
 	<script src="{{pathPrefix}}/static/heatmap.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 	<!-- Global Funcs Import -->
@@ -28,7 +29,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
-				<label>Model Type</label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarSunda">Help?</a> </label>
 				<input type="text" id="modelType" name="modelType" value="solarSunda" readonly/>
 			</div>
 			<div class="shortInput">
@@ -211,16 +212,79 @@
 				}
 			}
 		</script>
+        <!--Output-->
+		<!--Output Graphs-->
+		<p class="reportTitle postRun">Total System and Levelized Costs Breakdown</p>
+		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative">
+			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
+			<table id="detailsTable">
+				<tr>
+   					<td rowspan="7" style = "width:100%">
+                        <div id="comparisonPieChart" style="min-width: 470px; height: 400px; margin: 0 auto">
+                            <script type="text/javascript">
+                                $(function(){
+                                    $("#comparisonPieChart").highcharts({
+                                        credits:{
+                                            enabled:false
+                                        },
+                                        title: {
+                                            text: 'SUNDA PV System Cost for 1.4 MWp/1.0 MW-AC Design'
+                                        },
+                                        series: [{
+                                            type: "pie",
+                                            name: "% of Total Cost",
+                                            data: allOutputData.costsPieChart
+                                        }],
+                                        tooltip: {
+                                            pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'
+                                        },
+                                        plotOptions: {
+                                            pie: {
+                                                dataLabels: {
+                                                    enabled: false,
+                                                    style: {
+                                                         color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'
+                                                     },
+                                                     connectorColor: 'silver'
+                                                },
+                                                showInLegend:true
+                                            }
+                                        }
+                                    });
+                                });
+                            </script>
+                        </div>
+                    </td>
+				</tr>
+                <tr>
+   					<td>
+                        <div id="monthlyPerformanceReport" class="tightContent postRun">
+                            <div id="monthlyPerformanceDiv" ></div>
+                            <script>
+                                new Highcharts.Chart({"credits":{"enabled":false},
+                                    "plotOptions":{"column":{"pointPadding":0.2,"borderWidth":0},"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
+                                    "xAxis":{"type":"category","tickColor":"gray","lineColor":"gray","crosshair":true},
+                                    "title":{"text":"Levelized Costs"},
+                                    "series":[{"color":"green", "data":allOutputData.LevelizedCosts, "dataLabels":{"enabled":false}}],
+                                    "yAxis":{"title":{"text":"Cost ($)","style":{"color":"black"}}},
+                                    "chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"marginBottom":70,"height":400,"width":430,"backgroundColor":null},
+                                    "tooltip":{"valueDecimals":1},
+                                    "legend":false})
+                            </script>
+                        </div>
+                </tr>
+			</table>
+		</div>
 		<!-- Summary of Results -->
 		<!-- Add everything on output page; Could add a cost to payback -->
-		<p class="reportTitle postRun">Solar Sunda Model Summary of Analysis</p>
+		<p class="reportTitle postRun">Summary of Financial Analysis:</p>
 		<div id="input" class="content postRun">
-			<form name="inputForm" action="/runModel/" method="post">		
+			<form name="inputForm" action="/runModel/" method="post">
 				<p class="inputSectionHeader">Cooperative: XYZ, EC	 </p>
-				<br></br>						
+				<br></br>
 				<div class="shortInput">
 					<reportLabel>Installed System Cost: </reportLabel>
-					<input type="text" id="totalCost" name = "totalCost" readonly out/>			
+					<input type="text" id="totalCost" name = "totalCost" readonly out/>
 				</div>		
 				<div class="shortInput">
 					<reportLabel>$/Wdc Installed: </reportLabel>
@@ -403,7 +467,7 @@
 				$("#yearlyEscalationPPA").attr("value", delimitNumbers(parseFloat(allOutputData.yearlyEscalationPPA).toFixed(0)) + "%")										
 				</script>			
 			</form>
-		</div>		
+		</div>
 		<p class="reportTitle postRun">Simulation Location
 		</p>
 		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
@@ -450,6 +514,5 @@
 					})
 				</script>
 			</div>
-		</div>		
-	</div>
+		</div>	
 </body>
