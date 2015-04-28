@@ -23,7 +23,10 @@ def safeListdir(path):
 
 def getDataNames():
 	''' Query the OMF datastore to get names of all objects.'''
-	currUser = User.cu()
+	try:
+		currUser = User.cu()
+	except:
+		currUser = "public"
 	feeders = [x[:-5] for x in safeListdir("./data/Feeder/" + currUser)]
 	publicFeeders = [x[:-5] for x in safeListdir("./data/Feeder/public/")]
 	climates = [x[:-5] for x in safeListdir("./data/Climate/")]
@@ -284,6 +287,32 @@ def runModel():
 	modelModule.run(os.path.join(_omfDir, "data", "Model", user, modelName), pData)
 	return redirect("/model/" + user + "/" + modelName)
 
+@app.route("/quickNew/<modelType>")
+def quickNew(modelType):
+	thisModel = getattr(models, modelType)
+	if hasattr(thisModel, 'quickRender'):
+		return thisModel.quickRender(thisModel.template, datastoreNames=getDataNames())
+	else:
+		return redirect("/")
+
+@app.route("/quickRun/", methods=["POST"])
+def quickRun():
+	pData = request.form.to_dict()
+	modelModule = getattr(models, pData["modelType"])
+	user = pData["quickRunEmail"]
+	modelName = "QUICKRUN-" + pData["modelType"]
+	modelModule.run(os.path.join(_omfDir, "data", "Model", user, modelName), pData)
+	return redirect("/quickModel/" + user + "/" + modelName)
+
+@app.route("/quickModel/<owner>/<modelName>")
+def quickModel(owner, modelName):
+	''' Render a quickrun model template with saved data. '''
+	modelDir = "./data/Model/" + owner + "/" + modelName
+	with open(modelDir + "/allInputData.json") as inJson:
+		modelType = json.load(inJson).get("modelType","")
+	thisModel = getattr(models, modelType)
+	return thisModel.quickRender(thisModel.template, modelDir, False, getDataNames())
+
 @app.route("/cancelModel/", methods=["POST"])
 @flask_login.login_required
 def cancelModel():
@@ -302,8 +331,6 @@ def duplicateModel(owner, modelName):
 		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
 		with open(destinationPath + "/allInputData.json","r") as inFile:
 			inData = json.load(inFile)
-		# inData["user"] = User.cu()
-		# inData["modelName"] = str(newName)
 		inData["created"] = str(dt.datetime.now())
 		with open(destinationPath + "/allInputData.json","w") as outFile:
 			json.dump(inData, outFile, indent=4)
@@ -320,8 +347,6 @@ def publishModel(owner, modelName):
 		shutil.copytree("./data/Model/" + owner + "/" + modelName, destinationPath)
 		with open(destinationPath + "/allInputData.json","r+") as inFile:
 			inData = json.load(inFile)
-			# inData["user"] = "public"
-			# inData["modelName"] = str(newName)
 			inData["created"] = str(dt.datetime.now())
 			inFile.seek(0)
 			json.dump(inData, inFile, indent=4)

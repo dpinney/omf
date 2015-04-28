@@ -71,7 +71,7 @@ a:visited {color:seagreen;}
 
 form {line-height:10pt; padding: 0px; margin: 0px;}
 
-select, input[type='text'], button {
+select, input[type='text'], input[type='email'], button {
 	width:100%;
 	background:gainsboro;
 	padding:4px;

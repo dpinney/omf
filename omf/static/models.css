@@ -21,12 +21,11 @@ input[readonly="out"], input[out], textarea[out] {
 	font-style: italic;
 }
 
-input[type="text"], select {
+input[type="text"], input[type="email"], select {
 	font-size: medium; 
 	display: inline; 
 	margin:0px;
 }
-
 
 label {
 	display: inline; 
