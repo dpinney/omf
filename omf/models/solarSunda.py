@@ -65,8 +65,8 @@ def run(modelDir, inputDict):
         else:
             inputDict["inverterCost"] = float(61963)
         numberInverters = math.ceil(arraySizeAC/1000/0.5)
-        minLandSize = arraySizeAC/1000*5 + 1
-        # Copy spcific climate data into model directory
+        minLandSize = round((arraySizeAC/1000*5 + 1)*math.cos(math.radians(22.5))/math.cos(math.radians(latforpvwatts)),0)
+        # Copy specific climate data into model directory
         shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
             pJoin(modelDir, "climate.tmy2"))
         # Ready to run
@@ -117,7 +117,7 @@ def run(modelDir, inputDict):
         outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
         #One year generation
         outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
-        print "   Power Output First Year KWh:", outData["oneYearGenerationWh"]/1000
+
         #Annual generation for all years
         loanYears = 25
         outData["allYearGenerationMWh"] = {}
@@ -425,7 +425,7 @@ def run(modelDir, inputDict):
         #Output - Lease [D]
         leasePaymentsLease = []
         #Output - Lease [E]
-        OMInsuranceETCLease = []
+        OMInsuranceETCLease = OMInsuranceETCDirect
         #Output - Lease [F]
         distAdderLease = distAdderDirect
         #Output - Lease [G]
@@ -445,33 +445,6 @@ def run(modelDir, inputDict):
         leasePaymentsLease.append(-0.2*projectCostsLease)
         for i in range (12, 25):
             leasePaymentsLease.append(0)
-
-        #Output - Lease [E]
-        OMInsuranceETCLease.append(OMInsuranceETCDirect[0])
-        OMInsuranceETCLease.append(-30378)
-        OMInsuranceETCLease.append(-30819)
-        OMInsuranceETCLease.append(-31268)
-        OMInsuranceETCLease.append(-31725)
-        OMInsuranceETCLease.append(-32191)
-        OMInsuranceETCLease.append(-32664)
-        OMInsuranceETCLease.append(-33147)
-        OMInsuranceETCLease.append(-33638)
-        OMInsuranceETCLease.append(-34137)
-        OMInsuranceETCLease.append(-34646)
-        OMInsuranceETCLease.append(-35165)
-        OMInsuranceETCLease.append(-35692)
-        OMInsuranceETCLease.append(-36230)
-        OMInsuranceETCLease.append(-36777)
-        OMInsuranceETCLease.append(-37334)
-        OMInsuranceETCLease.append(-37902)
-        OMInsuranceETCLease.append(-38480)
-        OMInsuranceETCLease.append(-39069)
-        OMInsuranceETCLease.append(-39669)
-        OMInsuranceETCLease.append(-40280)
-        OMInsuranceETCLease.append(-40903)
-        OMInsuranceETCLease.append(-41537)
-        OMInsuranceETCLease.append(-42183)
-        OMInsuranceETCLease.append(-42842)
 
         #Output - Lease [G]	[H]
         costToCustomerLeaseSum = 0
@@ -636,7 +609,6 @@ def run(modelDir, inputDict):
         outData["firstYearCostKWhPPA"] = float(inputDict.get("firstYearEnergyCostPPA",0))
         outData["yearlyEscalationPPA"] = float(inputDict.get("annualEscRatePPA", 0))
         outData["LevelizedCosts"].append(["PPA Comparison", Rate_Levelized_PPA])
-        print "outdataLev", outData["LevelizedCosts"]
 
         # Stdout/stderr.
         outData["stdout"] = "Success"
@@ -910,13 +882,16 @@ def zipCodeToclimateName(zipCode):
                     zipCity = row[3]
                     ziplatlon  = row[1], row[2]
 
-
     # Looks for climate data by looking at all cities in that state.
     # TODO: check other states too.
     # Filter only the cities in that state:
-    for x in range(0, len(climateNames)):
-        if (zipState+"-" in climateNames[x]):
-            climateCity.append(climateNames[x])
+    try:
+        for x in range(0, len(climateNames)):
+            if (zipState+"-" in climateNames[x]):
+                climateCity.append(climateNames[x])
+    except:
+        raise ValueError('Invalid Zipcode entered:', zipCode)
+
     climateCity = [w.replace(zipState+"-", '') for w in climateCity]
     # Parse the cities distances to zipcode city to determine closest climate:
     for x in range (0,len(climateCity)):
@@ -934,7 +909,7 @@ def zipCodeToclimateName(zipCode):
                             found = x
                     except:
                         pass
-    #print "\n   ClimateName selected:", climateCity[found], "\n   Lat/Lon:", climatelatlon, "\n   Array Tilt:", latforpvwatts
+
     climateName = zipState + "-" + climateCity[found]
     return climateName, latforpvwatts
 
@@ -954,9 +929,9 @@ def _tests():
         "simLengthUnits": "hours",
         "modelType": "solarSunda",
         #Cooperative
-        "zipCode": "90210",
-        "systemSize":"1000",
-        "landOwnership": "Purchased", #Leased, Purchased, or Owned
+        "zipCode": "12398",
+        "systemSize":"2000",
+        "landOwnership": "Owned", #Leased, Purchased, or Owned
         "costAcre": "10000",
         "moduleCost": "0.70",
         "rackCost": "0.137",
@@ -969,14 +944,14 @@ def _tests():
         "interCost": "25000",
         "distAdder": "0",
         #Financing Information
-        "discRate": "10.32",
+        "discRate": "2.32",
         "loanRate": "2.00",
         "NCREBRate": "4.06",
-        "taxLeaseRate": "7.20",
+        "taxLeaseRate": "8.45",
         "taxEquityReturn": "8.50",
         #PPA Information
-        "firstYearEnergyCostPPA": "55",
-        "annualEscRatePPA": "2",
+        "firstYearEnergyCostPPA": "57.5",
+        "annualEscRatePPA": "3",
         #Misc
         "lifeSpan": "25",
         "degradation": "0.8",
