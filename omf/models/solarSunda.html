@@ -133,7 +133,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tax Lease Rate (%)<span class="classic">Loan discount rate.</span></label>
-				<input type="text" id="taxLeaseRate" name="taxLeaseRate" value="7.20" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+				<input type="text" id="taxLeaseRate" name="taxLeaseRate" value="8.45" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>							
 			<div class="shortInput">
 				<label class="tooltip">Targeted Tax Equity Return (%)<span class="classic">Loan discount rate.</span></label>
@@ -145,31 +145,11 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">First year energy cost ($/MWh)<span class="classic">Loan discount rate.</span></label>
-				<input type="text" id="firstYearEnergyCostPPA" name="firstYearEnergyCostPPA" value="55" pattern="^\d+\.?\d*?$" required="required"/>
+				<input type="text" id="firstYearEnergyCostPPA" name="firstYearEnergyCostPPA" value="57.5" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>						
 			<div class="shortInput">
-				<label class="tooltip">Annual Escalation Rate<span class="classic">Loan discount rate.</span></label>
-				<input type="text" id="annualEscRatePPA" name="annualEscRatePPA" value="2.00" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
-			</div>												
-			<div class="wideInput">
-				<p class="inputSectionHeader">Simulation Parameters </p>
-			</div>
-			<hr>								
-			<div class="shortInput">
-				<label class="tooltip">Simulation Length<span class="classic">Currently we only support a yearlong analysis, i.e. 8760 hours.</span></label>
-				<input type="text" id="simLength" name="simLength" pattern="^\d+$" value="8760" readonly />
-			</div>
-			<div class="shortInput">
-				<label>Length Units</label>
-				<select id="simLengthUnits" name="simLengthUnits" disabled="true">
-					<option value="minutes">Minutes</option> 
-					<option value="hours" selected>Hours</option>
-					<option value="days">Days</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Currently we only support a yearlong analysis starting on 1 Jan; the year has no effect on the results.</span></label>
-				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" value="2014-01-01" readonly/>
+				<label class="tooltip">Annual Escalation Rate (%)<span class="classic">Loan discount rate.</span></label>
+				<input type="text" id="annualEscRatePPA" name="annualEscRatePPA" value="3.00" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<!--
@@ -232,7 +212,7 @@
 					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray","crosshair":true},
 					"title":{"text":"Levelized Costs"},
 					"series":[{"color":"green", "data":allOutputData.LevelizedCosts, "dataLabels":{"enabled":false}}],
-					"yAxis":{"title":{"text":"Cost ($)","style":{"color":"black"}}},
+					"yAxis":{"title":{"text":"Levelized Cost ($/MWh)","style":{"color":"black"}}},
 					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"marginBottom":70,"height":400,"width":490,"backgroundColor":null},
 					"tooltip":{"valueDecimals":1},
 					"legend":false})
