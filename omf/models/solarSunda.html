@@ -100,15 +100,15 @@
 				<input type="text" id="pmCost" name="pmCost" value="15000" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Interconnect Costs ($)<span class="classic">Costs for connecting from the transformer to the substation.</span></label>
+				<label class="tooltip">Interconnect Costs ($)<span class="classic">Costs for connecting from the medium voltage transformer to the substation.</span></label>
 				<input type="text" id="interCost" name="interCost" value="25000" pattern="^\d+\.?\d*$" required="required">
 			</div>		
 			<div class="shortInput">
-				<label class="tooltip">Development Costs (%)<span class="classic">The cost for development as a percent.</span></label>
+				<label class="tooltip">Development Costs (%)<span class="classic">The legal costs associated with setting up such a system, if doing a Tax Equity flip this may be as much as 5%.</span></label>
 				<input type="text" id="devCost" name="devCost" value="2" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>								
 			<div class="shortInput">
-				<label class="tooltip">EPC Markup (%)<span class="classic">EPC Markup percentage.</span></label>
+				<label class="tooltip">EPC Markup (%)<span class="classic">Costs as a percent of hardware costs. Usually 10% of Hardware Costs, but since they can allow the co-op to purchase PV modules, inverters and racking from National Discount program and only charge the 10% on the balance of the system hardware needed to complete, this can also be 3% in that case.</span></label>
 				<input type="text" id="EPCRate" name="EPCRate" pattern="^(100|\d\d|\d)(\.\d+)?$" value="3" required="required"/>
 			</div>						
 			<div class="shortInput">
@@ -120,23 +120,23 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Discount Rate (%)<span class="classic">Loan discount rate.</span></label>
+				<label class="tooltip">Discount Rate (%)<span class="classic">The cost of capital to the co-op, close to the 20yr Treasury-bill rate for the project period.</span></label>
 				<input type="text" id="discRate" name="discRate" value="2.32" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>						
 			<div class="shortInput">
-				<label class="tooltip">Loan Interest Rate (%)<span class="classic">Loan discount rate.</span></label>
+				<label class="tooltip">Loan Interest Rate (%)<span class="classic">Loan interest rate, usually from 2.0% for RUS to 8.5% for a commercial lender.</span></label>
 				<input type="text" id="loanRate" name="loanRate" value="2.00" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>							
 			<div class="shortInput">
-				<label class="tooltip">NCREB Tax Credit Rate (%)<span class="classic">Loan discount rate.</span></label>
+				<label class="tooltip">NCREB Tax Credit Rate (%)<span class="classic">The rate used by the Treasury Department to calculate the 70% interest reimbursement.</span></label>
 				<input type="text" id="NCREBRate" name="NCREBRate" value="4.06" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Tax Lease Rate (%)<span class="classic">Loan discount rate.</span></label>
+				<label class="tooltip">Tax Lease Rate (%)<span class="classic">Tax lease rate, usually utilized by the for-profit subsidiary owned by the co-op.</span></label>
 				<input type="text" id="taxLeaseRate" name="taxLeaseRate" value="8.45" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>							
 			<div class="shortInput">
-				<label class="tooltip">Targeted Tax Equity Return (%)<span class="classic">Loan discount rate.</span></label>
+				<label class="tooltip">Targeted Tax Equity Return (%)<span class="classic">Tax equity return rate, typical Tax equity partners in the renewable market are looking for about 8.5%</span></label>
 				<input type="text" id="taxEquityReturn" name="taxEquityReturn" value="8.50" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>		
 			<div class="wideInput">
@@ -144,20 +144,14 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">First year energy cost ($/MWh)<span class="classic">Loan discount rate.</span></label>
+				<label class="tooltip">First year energy cost ($/MWh)<span class="classic">Used to compare Utility-owned facilities to 3rd party PPA offerings.  Set to 0 if unneeded.</span></label>
 				<input type="text" id="firstYearEnergyCostPPA" name="firstYearEnergyCostPPA" value="57.5" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>						
 			<div class="shortInput">
-				<label class="tooltip">Annual Escalation Rate (%)<span class="classic">Loan discount rate.</span></label>
+				<label class="tooltip">Annual Escalation Rate (%)<span class="classic">A fixed escalation rate at which the price will increase year to year.</span></label>
 				<input type="text" id="annualEscRatePPA" name="annualEscRatePPA" value="3.00" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
-				<!--
-				<a id="downloadLink" type="button" class="stoppedInline postRunInline" href="#" download>Download Excel</a>
-				<script type="text/javascript">
-					$("#downloadLink").attr("href", "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/"+allOutputData.excel)
-				</script>
-				-->
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
@@ -234,7 +228,7 @@
 					<input type="text" id="costWdc" name = "costWdc" readonly out/>
 				</div>		
 				<div class="shortInput">
-					<reportLabel>Capacity Factor: </reportLabel>
+					<reportLabel>Calculated Capacity Factor: </reportLabel>
 					<input type="text" id="capFactor" name = "capFactor" readonly out/>
 				</div>
 				<div class="shortInput">
