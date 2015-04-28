@@ -10,7 +10,7 @@ Full documentation is available on our [OMF wiki](https://github.com/dpinney/omf
 
 NRECA members can log in to the web interface directly at http://www.omf.coop/
 
-Others can follow the [developer installation instructions](https://github.com/dpinney/omf/wiki/Developer-Documentation).
+Others can follow the [developer installation instructions](https://github.com/dpinney/omf/wiki/Dev:-Installation-Instructions).
 
 ### Example Screenshots
 
