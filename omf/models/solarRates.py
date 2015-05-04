@@ -109,7 +109,7 @@ def run(modelDir, inputDict):
 		# E23 = E11
 		outData["BAU"]["totalKWhPurchased"] = float(inputDict.get("totalKWhPurchased", 1))
 		# E24 = SUM(E19:P19)
-		outData["BAU"]["totalKWhSales"] = sum([x[1] for x in totalKWhSold[i][1]]) 
+		outData["BAU"]["totalKWhSales"] = sum([x[1] for x in totalKWhSold]) 
 		# E25 = E23-E24
 		outData["BAU"]["losses"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)])
 		# E26 = E25/E23
