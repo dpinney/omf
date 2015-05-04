@@ -612,7 +612,7 @@ def run(modelDir, inputDict):
 		outData["levelCostPPA"] = Rate_Levelized_PPA
 		outData["firstYearCostKWhPPA"] = float(inputDict.get("firstYearEnergyCostPPA",0))
 		outData["yearlyEscalationPPA"] = float(inputDict.get("annualEscRatePPA", 0))
-		outData["LevelizedCosts"].append(["PPA Comparison", Rate_Levelized_PPA])
+		outData["LevelizedCosts"].append({"name":"PPA Comparison", "y":Rate_Levelized_PPA, "color":"gold"})
 
 		# Stdout/stderr.
 		outData["stdout"] = "Success"

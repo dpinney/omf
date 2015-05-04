@@ -17,7 +17,6 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<style type="text/css">thead{font-weight:bold} table{width:980px; font-size:10}</style>
 </head>
 <body onload="init()">
 	<div id="title">
@@ -181,20 +180,10 @@
 	</div>
 	<div id="output">
 		<script id="globalOutputScripting">
-			Highcharts.setOptions({global: { useUTC: false }})
+			Highcharts.setOptions({global: { useUTC: false }, credits:{enabled:false} })
 			var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
 			pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
 			pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
-			function insertMetric(tableId, name, vector) {
-				// Add a vector to a table as a row.
-				table = gebi(tableId)
-				newRow = table.insertRow()
-				newRow.insertCell().innerHTML = name
-				for (i=0; i<vector.length; i++) {
-					cell = newRow.insertCell()
-					cell.innerHTML = delimitNumbers(vector[i].toFixed(0))
-				}
-			}
 		</script>
 		<!--Output-->
 		<!--Output Graphs-->
@@ -202,7 +191,7 @@
 		<div id="studyDetails" class="tightContent postRun detailsContainer">
 			<div id="comparisonPieChart" style="display:inline-block"></div>
 			<script>
-				new Highcharts.Chart({credits:{enabled:false},
+				costChart = new Highcharts.Chart({
 						title: {text: 'SUNDA PV System Cost for 1.4 MWp/1.0 MW-AC Design'},
 						series: [{type: "pie", name:"% of Total Cost", data:allOutputData.costsPieChart}],
 						tooltip: {pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'},
@@ -212,15 +201,15 @@
 			</script>
 			<div id="monthlyPerformanceDiv" style="display:inline-block"></div>
 			<script>
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"column":{"pointPadding":0.2,"borderWidth":0},"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
-					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray","crosshair":true},
-					"title":{"text":"Levelized Costs"},
-					"series":[{"color":"green", "data":allOutputData.LevelizedCosts, "dataLabels":{"enabled":false}}],
-					"yAxis":{"title":{"text":"Levelized Cost ($/MWh)","style":{"color":"black"}}},
-					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"marginBottom":70,"height":400,"width":490,"backgroundColor":null},
-					"tooltip":{"valueDecimals":1},
-					"legend":false})
+				levelizedChart = new Highcharts.Chart({
+					plotOptions:{column:{dataLabels:{enabled:true}, pointPadding:0.2, borderWidth:0}},
+					xAxis:{type:'category',tickColor:'gray',lineColor:'gray',crosshair:true},
+					yAxis:{title:{text:'Levelized Cost ($/MWh)'}},
+					title:{text:'Levelized Cost Comparison'},
+					series:[{name:'Levelized Cost ($/MWh)',color:'green', data:allOutputData.LevelizedCosts}],
+					chart:{marginBottom:40,zoomType:'disabled',renderTo:'monthlyPerformanceDiv',type:'column', marginRight:20, marginBottom:70, height:400, width:490,backgroundColor:null},
+					tooltip:false,
+					legend:false})
 			</script>
 		</div>
 
