@@ -1,8 +1,5 @@
-/**
- * Initalize page
- * @param {null}
- * @return {null}
- */
+// Javascript functions shared by all OMF models.
+
 function init() {
 	// If we have input, put it back.
 	if (allInputData != null) {
@@ -38,12 +35,8 @@ function init() {
 	}
 }
 
-/**
- * Restore all the input values that were used and stored in allInputData.json
- * @param {null}
- * @return {null}
- */
 function restoreInputs() {
+	// Restore all the input values that were used and stored in allInputData.json
 	gebi("titleText").innerHTML = allInputData.modelName
 	for (index in allInputData) {
 		try {document.querySelector("#" + index).value = allInputData[index]}
@@ -51,37 +44,19 @@ function restoreInputs() {
 	}
 }
 
-/**
- * Add commas to numbers
- * @param {any string}
- * @return {string properly formatted}
- */
 function delimitNumbers(nStr) {
- nStr += '';
- var x = nStr.split('.');
- var x1 = x[0];
- var x2 = x.length > 1 ? '.' + x[1] : '';
- var rgx = /(\d+)(\d{3})/;
- while (rgx.test(x1)) {
-  x1 = x1.replace(rgx, '$1' + ',' + '$2');
- }
- return x1 + x2;
+	// Add commas to numbers and round to a decent length.
+	nStr += ''
+	x = nStr.split('.')
+	x1 = x[0]
+	x2 = x.length > 1 ? '.' + x[1] : ''
+	rgx = /(\d+)(\d{3})/
+	while (rgx.test(x1)) {
+		x1 = x1.replace(rgx, '$1' + ',' + '$2')
+	}
+	return x1 + x2
 }
 
-function convertunits(nStr, places){
- nStr += '';
- var x = nStr.split('.');
- var x1 = x[0];
- var xint = parseInt(x1) / (Math.pow(10, places));
- return xint;
-}
-/*validateForm used to reside here*/
-
-/**
- * Cancel model, hander function of "cancel" button
- * @param {null}
- * @return {null}
- */
 function cancelModel() {
 	params = {user:allInputData.user,
 		modelName:allInputData.modelName,
@@ -89,11 +64,6 @@ function cancelModel() {
 	post_to_url("/cancelModel/", params, "POST")
 }
 
-/**
- * Delete model, handler function of "delete" button
- * @param {null}
- * @return {null}
- */
 function deleteModel() {
 	if (confirm("Deleting this model cannot be undone. Continue?")){
 		post_to_url("/delete/Model/"+allInputData.user+"/"+allInputData.modelName, {}, "POST")
@@ -102,11 +72,6 @@ function deleteModel() {
 	}
 }
 
-/**
- * Publish model, handler function of "publish" button
- * @param {null}
- * @return {null}
- */
 function publishModel() {
 	newName = prompt("Publish a copy with name", allInputData.modelName)
 	while (! /^[\w\s]+$/.test(newName)){
@@ -124,11 +89,6 @@ function publishModel() {
 	}
 }
 
-/**
- * Duplicate model, handler function of "duplicate" button
- * @param {null}
- * @return {null}
- */
 function duplicateModel() {
 	newName = prompt("Create a duplicate with name", allInputData.modelName)
 	while (! /^[\w\s]+$/.test(newName)){

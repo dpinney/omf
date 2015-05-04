@@ -418,6 +418,13 @@
 					<text id="currentRate" fill="darkgray" x="500" y="280" text-anchor="middle"></text>
 					<text id="costofService" fill="darkgray" x="500" y="300" text-anchor="middle"></text>
 					<script type="text/javascript">
+						function convertunits(nStr, places){
+							nStr += ''
+							x = nStr.split('.')
+							x1 = x[0]
+							xint = parseInt(x1) / (Math.pow(10, places))
+							return xint
+						}
 						gebi("patronageCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.patCapital.toFixed(0))
 						gebi("lossesEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.losses, 3).toFixed(0)) +" MWh"
 						gebi("vendorCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.BAU.nonPowerCosts.toFixed(0))
