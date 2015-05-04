@@ -85,8 +85,9 @@ p.inputSectionHeader {
 
 /*OUTPUT*/
 circle.HighlightCircle{
-	fill: rgb(16, 150, 24);
+	fill: yellow;
 }
+
 div.tightContent {
 	width: 1000px; 
 	margin-left: auto; 
