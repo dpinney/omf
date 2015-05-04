@@ -474,7 +474,7 @@ def _tests():
 	# time.sleep(2)
 	# cancel(modelLoc)
 	# Show the output.
-	# renderAndShow(template, modelDir=modelLoc)
+	renderAndShow(template, modelDir=modelLoc)
 	# Delete the model.
 	# shutil.rmtree(modelLoc)
 

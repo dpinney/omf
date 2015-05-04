@@ -489,7 +489,7 @@
 					var group = svg.append("g");
 
 					group.attr("transorm", "scale(.2, .2)");
-					d3.json('/static/state_boundaries.json', function(collection) {
+					d3.json('{{pathPrefix}}/static/state_boundaries.json', function(collection) {
 						group.selectAll('path')
 							.data(collection.features)
 							.enter().append('path')

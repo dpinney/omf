@@ -419,7 +419,7 @@
 		<p class="reportTitle postRun">Simulation Location
 		</p>
 		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
-			<div id="mapHere">
+			<div id="mapHere"></div>
 				<script type="text/javascript">
 					var width = 1000,
 						height = 350;
@@ -436,7 +436,7 @@
 					var group = svg.append("g");
 
 					group.attr("transorm", "scale(.2, .2)");
-					d3.json('/static/state_boundaries.json', function(collection) {
+					d3.json('{{pathPrefix}}/static/state_boundaries.json', function(collection) {
 						group.selectAll('path')
 							.data(collection.features)
 							.enter().append('path')
@@ -461,6 +461,5 @@
 						circle.append("svg:title").text(climate);
 					})
 				</script>
-			</div>
-		</div>	
+		</div>
 </body>
