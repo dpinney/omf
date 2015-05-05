@@ -154,19 +154,23 @@
 		Model cancelled or encountered an error. Please change inputs and re-run.
 	</div>
 	<div id="output">
+		<script type="text/javascript">
+			// Global Highcharts settings.
+			Highcharts.setOptions({global:{useUTC:true}})
+			// Clean up the non-ISO date strings we get.
+			function dateOb(inStr) {return Date.parse(inStr.substr(0,19).replace(" ","T"))}
+			pointStart = dateOb(allOutputData.timeStamps[0])
+			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
+		</script>
 		<p class="reportTitle postRun">System Output</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
 			<div id="powerTimeSeries"></div>
 			<div id="energyBalance"></div>
 			<script>
-				Highcharts.setOptions({global: { useUTC: false }});
-				powerSeries = [{"marker":{"enabled":false},"dataLabels":{"enabled":false}, "color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
-				var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0])
-				pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
-				pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
 				// Handle special case for inverter sizing:
 				if (allInputData.inverterSize == 0) {chartInverter = allInputData.systemSize}
 				else {chartInverter = allInputData.inverterSize}
+				powerSeries = [{"marker":{"enabled":false},"dataLabels":{"enabled":false}, "color":"red","data":allOutputData.Consumption.Power,"name":"Power Generated"}]
 				new Highcharts.Chart({ "credits":{"enabled":false},
 					"plotOptions":{ "series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval, "animation": false}, "line":{"marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
