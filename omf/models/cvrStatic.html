@@ -321,12 +321,18 @@
 		<p class="reportTitle postRun">Projected Avoided Cost</p>
 		<div id="savingsReport" class="tightContent postRun">
 			<script type="text/javascript">
-				for (i=0; i<=30; i++){
-					if (allOutputData["annualSave"][i]<=0 && allOutputData["annualSave"][i+1] >= 0) {
-						paybackYear = (i + (-allOutputData["annualSave"][i])/(allOutputData["annualSave"][i+1] + allOutputData["annualSave"][i])).toFixed(2)
-					} else {
-						paybackYear = null
-					}
+				paybackYear = null
+				for (i=0; i<=30; i++) {
+					if (allOutputData["annualSave"][i]>=0) {paybackYear = i; break}
+				}
+				paybackLine = []
+				if (paybackYear != null) {
+					paybackLine = [{
+						"color": "green", // Color value
+						"value": paybackYear, // Value of where the line will appear
+						"width": 1, // Width of the line    
+						"label": {"text": "Simple Payback"}
+					}]
 				}
 				new Highcharts.Chart({
 					"chart":{
@@ -338,33 +344,21 @@
 					"title":{
 						"text":null
 					},
-					"legend":{
-						"layout":"horizontal", 
-						"align":"top", 
-						"verticalAlign":"top", 
-						"x":50, 
-						"y":-10, 
-						"borderWidth":0
-					},
+					"legend":false,
 					"credits":{
 						"enabled":false
 					},
 					"tooltip":{
-						"valueDecimals":1
+						"valuePrefix":"$",
+						"valueDecimals":1,
+						formatter: function () {return 'Net return after <b>' + this.x + '</b> years is <b>$' + this.y.toFixed(2) + '</b>'}
 					},
 					"xAxis": {
-						"plotLines": [{
-						    "color": 'green', // Color value
-						    "value": paybackYear, // Value of where the line will appear
-						    "width": 1, // Width of the line    
-						    "label": {
-				                "text": "payback after " + paybackYear,
-				            }
-						}]
+						"plotLines": paybackLine
 					},
 					"yAxis": {
 						"title": {
-							"text": "Cumulative Savings($)",
+							"text": "Cumulative Savings ($)",
 							"style":{
 								"color":"gray"
 							}
@@ -375,7 +369,7 @@
 					"series":[{
 						"data": allOutputData["annualSave"],
 						"color": "blue",
-						"name": "Annual Savings"
+						"name": "Cumulative Savings ($)"
 					}]
 				})
 			</script>
@@ -383,19 +377,19 @@
 		<p class="reportTitle postRun">Power Flows at Various Loads</p>
 		<div id="powerflowReport" class="tightContent postRun tableReport">
 			<table id="powerflowReportTable"></table>
- 			<script type="text/javascript">
- 				for (row in allOutputData["monthDataMat"]){
- 					insertMetric("powerflowReportTable","", allOutputData["monthDataMat"][row])
- 				}
- 			</script>	
+			<script type="text/javascript">
+				for (row in allOutputData["monthDataMat"]){
+					insertMetric("powerflowReportTable","", allOutputData["monthDataMat"][row])
+				}
+			</script>	
 		</div>
 		<p class="reportTitle postRun">Savings at Various Loads</p>
 		<div id="moneyReport" class="tightContent postRun tableReport">
 			<table id="moneyReportTable"></table>
 			<script type="text/javascript">
 				for (row in allOutputData["monthDataPart"]){
- 					insertMetric("moneyReportTable","", allOutputData["monthDataPart"][row])
- 				}
+					insertMetric("moneyReportTable","", allOutputData["monthDataPart"][row])
+				}
 			</script>
 		</div>
 	</div>
