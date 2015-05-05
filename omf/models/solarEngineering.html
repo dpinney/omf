@@ -20,9 +20,10 @@
 	<script type="text/javascript">
 		// Global setting of Highcharts
 		Highcharts.setOptions({global: {useUTC: false}})
-		var diff = Date.parse(allOutputData.timeStamps[0].substr(0,19)) - Date.parse(allOutputData.timeStamps[0]) 
-		var pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
-		var pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
+		// Clean up the non-ISO date strings we get.
+		function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
+		pointStart = dateOb(allOutputData.timeStamps[0])
+		pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
 		highChartsTemplate = {
 			"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
 			"title":{"text":null},

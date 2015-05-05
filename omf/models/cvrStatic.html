@@ -322,8 +322,11 @@
 		<div id="savingsReport" class="tightContent postRun">
 			<script type="text/javascript">
 				for (i=0; i<=30; i++){
-					if (allOutputData["annualSave"][i]<=0 && allOutputData["annualSave"][i+1] >= 0)
-						paybackYear = i + (-allOutputData["annualSave"][i])/(allOutputData["annualSave"][i+1] + allOutputData["annualSave"][i])
+					if (allOutputData["annualSave"][i]<=0 && allOutputData["annualSave"][i+1] >= 0) {
+						paybackYear = (i + (-allOutputData["annualSave"][i])/(allOutputData["annualSave"][i+1] + allOutputData["annualSave"][i])).toFixed(2)
+					} else {
+						paybackYear = null
+					}
 				}
 				new Highcharts.Chart({
 					"chart":{
@@ -352,10 +355,10 @@
 					"xAxis": {
 						"plotLines": [{
 						    "color": 'green', // Color value
-						    "value": paybackYear||null, // Value of where the line will appear
+						    "value": paybackYear, // Value of where the line will appear
 						    "width": 1, // Width of the line    
 						    "label": {
-				                "text": "payback after " + paybackYear.toFixed(2)||null,
+				                "text": "payback after " + paybackYear,
 				            }
 						}]
 					},

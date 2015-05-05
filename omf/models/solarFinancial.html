@@ -223,7 +223,7 @@
 		<script id="globalOutputScripting">
 			Highcharts.setOptions({global: { useUTC: true }})
 			// Clean up the non-ISO date strings we get.
-			function dateOb(inStr) {return Date.parse(inStr.substr(0,19).replace(" ","T"))}
+			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
 			pointStart = dateOb(allOutputData.timeStamps[0])
 			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
 			function insertMetric(tableId, name, vector) {
