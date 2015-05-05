@@ -451,7 +451,6 @@ def _groupBy(inL, func):
 
 def _tests():
 	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"feederName": "public___Olin Barre GH EOL Solar",
@@ -459,7 +458,7 @@ def _tests():
 		"climateName": "AL-HUNTSVILLE",
 		"simLength": "24",
 		"runTime": ""}
-	modelLoc = pJoin(workDir,"admin","Automated solarEngineering Test")
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated solarEngineering Test")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)

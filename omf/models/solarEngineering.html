@@ -7,7 +7,7 @@
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
-	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 	<!-- Global Funcs Import -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
@@ -493,7 +493,11 @@
 			<video width="1000" height="1000" controls preload="auto">
 				<source id="timeTravelMovie" src="" type="video/mp4" codecs="h264">
 				Your browser does not support the video tag.
+				{% if pathPrefix == "" %}
 				<script>gebi("timeTravelMovie").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart.mp4"</script>
+				{% else %}
+				<script>gebi("timeTravelMovie").src = "{{pathPrefix}}/data/Model/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart.mp4"</script>				
+				{% endif %}
 			</video>
 		</div>
 		<p class="reportTitle postRun">Solar Data <a target="_self" class="toggle">Hide / Show</a></p>
