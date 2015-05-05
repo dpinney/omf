@@ -7,7 +7,7 @@
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
-	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<!-- Global Funcs Import -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
@@ -72,7 +72,7 @@
 		var pointStart = Date.parse(allOutputData.timeStamps[0]) + diff
 		var pointInterval = Date.parse(allOutputData.timeStamps[1]) - Date.parse(allOutputData.timeStamps[0])
 		highChartsTemplate = {
-			"chart":{"renderTo":"", "marginRight":20, "marginBottom":20, "zoomType":"x"},
+			"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
 			"title":{"text":null},
 			"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
 			"credits":{"enabled":false},
@@ -450,6 +450,7 @@
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 					localHighChart["chart"]["height"] = 200
 					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["marginBottom"] = 45
 					localHighChart["chart"]["renderTo"] = "costGrowthContainer"
 					localHighChart["yAxis"]["title"]["text"] = "Cumulative Savings ($)"
 					localHighChart["xAxis"] = {"labels": {enabled: true}, "type": "linear", "tickColor": "gray", "lineColor": "gray", "title": {"text": "Years After Install"}}
@@ -701,13 +702,13 @@
 						{"name":"Direct Insolation (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Insolation (W/m^2)"]},
 						{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Temperature (F)"]},
 						{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Snow Depth (in)"]}]
-					new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+					new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":35,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 				}
 			</script>
 		</div>
 		
 		<p class="reportTitle postRun">Model Runtime Statistics <a target="_self" class="toggle">Hide / Show</a></p>
-		<div id="runtimeStatsReport" class="tightContent stdouts postRun" style="height:600px">
+		<div id="runtimeStatsReport" class="tightContent stdouts postRun" style="height:630px">
 			<script type="text/javascript">
 				/*
 				 * display stdout
@@ -717,6 +718,7 @@
 					$("<pre/>").appendTo("#runtimeStatsReport")
 						.attr("id", "stdout_" + study)
 						.attr("class", "stdoutBlock")
+						.attr("style", "margin:5 0 5 0")
 					gebi("stdout_"+study).innerHTML = study + "\n"+allOutputData[study].stdout
 				}
 				// TODO: add stderr if some failed feeders exist.

@@ -7,7 +7,7 @@
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
-	<script src="{{pathPrefix}}/static/highcharts.src.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<!-- Global Funcs Import -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
@@ -185,7 +185,7 @@
 							"width": 2,
 							"label":{"text":"Inverter Nameplate","align":"left","y":12,"x":0},
 							"value": parseFloat(chartInverter)*1000,"zIndex": 10} ] },
-					"chart":{"zoomType":"x","marginBottom":20,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
+					"chart":{"zoomType":"x","marginBottom":35,"width":1000,"height":250,"marginRight":20,"renderTo":"powerTimeSeries","type":"line"},
 					"legend":false } )
 			</script>
 		</div>
@@ -203,7 +203,7 @@
 					"title":{"text":null},
 					"series":irradianceSeriesData,
 					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}, "min":0},
-					"chart":{"marginBottom":20,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
@@ -222,7 +222,7 @@
 					"title":{"text":null},
 					"series":climateSeriesData,
 					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
-					"chart":{"marginBottom":20,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
