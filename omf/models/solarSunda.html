@@ -430,37 +430,37 @@
 		</p>
 		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
 			<div id="mapHere"></div>
-				<script type="text/javascript">
-					width = 1000, height = 350
-					projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2])
-					path = d3.geo.path()
-						.projection(projection)
-					svg = d3.select("#mapHere").append("svg")
-						.attr("width", width)
-						.attr("height", height)
-					group = svg.append("g")
-					group.attr("transorm", "scale(.2, .2)")
-					d3.json('{{pathPrefix}}/static/state_boundaries.json', function(collection) {
-						group.selectAll('path')
-							.data(collection.features)
-							.enter().append('path')
-							.attr('d', d3.geo.path().projection(projection))
-							.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
-							.style('fill', 'gray')
-							.style('stroke', 'white')
-							.style('stroke-width', 1)})
-					d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
-						climate = allInputData.climateName
-						ST_NAME = climate.split("-")
-						ST = ST_NAME[0], NAME = ST_NAME[1]
-						my_coords = projection(new_us_places[ST][NAME])
-						r = 5
-						circle = svg.append("circle")
-							.attr("cx", my_coords[0])
-							.attr("cy", my_coords[1])
-							.attr("r", 5)
-							.attr("class", "HighlightCircle")
-						circle.append("svg:title").text(climate)})
-				</script>
+			<script type="text/javascript">
+				width = 1000, height = 350
+				projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2])
+				path = d3.geo.path()
+					.projection(projection)
+				svg = d3.select("#mapHere").append("svg")
+					.attr("width", width)
+					.attr("height", height)
+				group = svg.append("g")
+				group.attr("transorm", "scale(.2, .2)")
+				d3.json('{{pathPrefix}}/static/state_boundaries.json', function(collection) {
+					group.selectAll('path')
+						.data(collection.features)
+						.enter().append('path')
+						.attr('d', d3.geo.path().projection(projection))
+						.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+						.style('fill', 'gray')
+						.style('stroke', 'white')
+						.style('stroke-width', 1)})
+				d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
+					climate = allInputData.climateName
+					ST_NAME = climate.split("-")
+					ST = ST_NAME[0], NAME = ST_NAME[1]
+					my_coords = projection(new_us_places[ST][NAME])
+					r = 5
+					circle = svg.append("circle")
+						.attr("cx", my_coords[0])
+						.attr("cy", my_coords[1])
+						.attr("r", 5)
+						.attr("class", "HighlightCircle")
+					circle.append("svg:title").text(climate)})
+			</script>
 		</div>
 </body>
