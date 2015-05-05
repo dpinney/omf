@@ -258,7 +258,7 @@ def heavyProcessing(modelDir, inputDict):
 		latPerc = 1.0*len(latKeys)/len(tree)
 		if latPerc < 0.25: doNeato = True
 		else: doNeato = False
-		# Generate the images for the system voltage map time traveling chart.
+		# Generate the frames for the system voltage map time traveling chart.
 		genTime = generateVoltChart(tree, rawOut, modelDir, neatoLayout=doNeato)
 		cleanOut['genTime'] = genTime
 		# Aggregate up the timestamps:
@@ -299,13 +299,8 @@ def heavyProcessing(modelDir, inputDict):
 		pass
 
 def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
-	''' Map the voltages on a feeder over time using a set of images.'''
-	# Make the subfolder we need.
-	try: shutil.rmtree(pJoin(modelDir, 'images'))
-	except: pass
-	try: os.mkdir(pJoin(modelDir, 'images'))
-	except: pass
-	# We need to timestamp images with the system clock to make sure the browser caches them appropriately.
+	''' Map the voltages on a feeder over time using a movie.'''
+	# We need to timestamp frames with the system clock to make sure the browser caches them appropriately.
 	genTime = str(datetime.datetime.now()).replace(':','.')
 	# Detect the feeder nominal voltage:
 	for key in tree:
@@ -369,7 +364,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		nodeIm.set_array(nodeColors)
 		return nodeColors,
 	anim = FuncAnimation(voltChart, update, frames=len(rawOut['aVoltDump.csv']['# timestamp']), interval=200, blit=False)
-	anim.save(pJoin(modelDir,'voltageChart.mp4'), codec='h264')
+	anim.save(pJoin(modelDir,'voltageChart.mp4'), codec='h264', extra_args=['-pix_fmt', 'yuv420p'])
 	# Reclaim memory by closing, deleting and garbage collecting the last chart.
 	voltChart.clf()
 	plt.close()
