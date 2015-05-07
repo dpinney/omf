@@ -84,7 +84,6 @@ def runForeground(modelDir, inputDict):
 	# Get prepare of data and clean workspace if re-run, If re-run remove all the data in the subfolders
 	for dirs in os.listdir(modelDir):
 		if os.path.isdir(pJoin(modelDir, dirs)):
-			print "remove subfolders"
 			shutil.rmtree(pJoin(modelDir, dirs))
 	# Get each feeder, prepare data in separate folders, and run there.
 	for key in sorted(inputDict, key=inputDict.get):
@@ -195,7 +194,8 @@ def runForeground(modelDir, inputDict):
 						powerA = vecProd(vecPyth(vrA,viA),vecPyth(crA,ciA))
 						powerB = vecProd(vecPyth(vrB,viB),vecPyth(crB,ciB))
 						powerC = vecProd(vecPyth(vrC,viC),vecPyth(crC,ciC))
-						oneDgPower = hdmAgg(vecSum(powerA,powerB,powerC), avg, level)
+						# HACK: multiply by negative one because turbine power sign is opposite all other DG:
+						oneDgPower = [-1.0 * x for x in hdmAgg(vecSum(powerA,powerB,powerC), avg, level)]
 						if 'DG' not in cleanOut['Consumption']:
 							cleanOut['Consumption']['DG'] = oneDgPower
 						else:
@@ -227,9 +227,9 @@ def runForeground(modelDir, inputDict):
 					json.dump(inputDict, inFile, indent=4)
 				# Clean up the PID file.
 				os.remove(pJoin(modelDir, feederName,"PID.txt"))
-				print "DONE RUNNING", modelDir, feederName
+				print "DONE RUNNING GRIDLABMULTI", modelDir, feederName
 			except Exception as e:
-				print "Oops, Model Crashed!!!", e
+				print "MODEL CRASHED GRIDLABMULTI", e, modelDir, feederName
 				cancel(pJoin(modelDir, feederName))
 				with open(pJoin(modelDir, feederName, "stderr.txt"), "a+") as stderrFile:
 					traceback.print_exc(file = stderrFile)
@@ -272,7 +272,7 @@ def runForeground(modelDir, inputDict):
 		except:
 			pass
 	except Exception, e:
-		print "Crashed", e
+		print "MODEL CRASHED GRIDLABMULTI", e, modelDir
 		try:
 			os.remove(pJoin(modelDir, "PPID.txt"))
 		except:
