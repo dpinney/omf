@@ -115,20 +115,9 @@
 					<option value="False">False</option>
 				</select>
 			</div>
-			<script type="text/javascript">
-			$("#tilt").change(function (){
-				if ($(this).val() == "False"){
-					$("#manualTilt").prop({readonly: false})
-						.attr("value", parseFloat(allOutputData.lat).toFixed(2))
-				}else{
-					$("#manualTilt").prop({readonly: true})
-						.attr("value", parseFloat(allOutputData.lat).toFixed(2))
-				}
-			})
-			</script>
 			<div class="shortInput">
 				<label class="tooltip">Manual Tilt (degrees)<span class="classic">Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
-				<input type="text" id="manualTilt" name="manualTilt" value="" pattern="^\d*$" required="required" readonly/>
+				<input type="text" id="manualTilt" name="manualTilt" value="35" pattern="^\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
@@ -237,96 +226,95 @@
 				}
 			}
 		</script>
-		<!-- Summary of Results -->
 		<p class="reportTitle postRun">Solar Financial Model Summary of Analysis</p>
-		<div id="input" class="content postRun">
-			<form name="inputForm" action="/runModel/" method="post">
-				<div class="shortInput">
-					<reportLabel>Project Name: </reportLabel>
-					<input type="text" id="projName" name = "projName" value="N/A" readonly out/>
-				</div>
-				<div class="shortInput">
-					<reportLabel>Climate Source: </reportLabel>
-					<input type="text" id="climSource" name = "climSource" value="N/A" readonly out/>
-				</div><br / >			
-				<div class="shortInput">
-					<reportLabel>System Size (kWp-DC): </reportLabel>
-					<input type="text" id="sysSize" name = "sysSize" value="N/A" readonly out/>			
-				</div>					
-				<div class="shortInput">
-					<reportLabel>Inverter Size (kW-AC): </reportLabel>
-					<input type="text" id="invSize" name = "invSize" value="N/A" readonly out/>
-				</div>
-				<div class="shortInput">
-					<reportLabel>Percentage Clipping: </reportLabel>
-					<input type="text" id="perClip" name = "perClip" value="N/A" readonly out/>
-				</div>				
-				<br />
-				<div class="shortInput">
-					<reportLabel>Purchase Cost: </reportLabel>
-					<input type="text" id="purchCost" name = "purchCost" value="N/A" readonly out/>
-				</div>		
-				<div class="shortInput">
-					<reportLabel>Cost Per kWp: ($/kWp) </reportLabel> <!--Purch Cost/ Sys size-->
-					<input type="text" id="costperKWP" name = "costperKWP" value="N/A" readonly out/>
-				</div>	
-				<br />					
-				<div class="shortInput">
-					<reportLabel>1st Year kWh:</reportLabel>
-					<input type="text" id="1yearKWH" name = "1yearKWH" value="N/A" readonly out/>
-				</div>		
-				<div class="shortInput">
-					<reportLabel>1st Year Energy Sales:</reportLabel>
-					<input type="text" id="1yearSales" name = "1yearSales" value="N/A" readonly out/>
-				</div>		
-				<div class="shortInput">
-					<reportLabel>1st Year O&M:</reportLabel>
-					<input type="text" id="1yearOM" name = "1yearOM" value="N/A" readonly out/>
-				</div>		
-				<div class="shortInput">
-					<reportLabel>Life kWh Production:</reportLabel>
-					<input type="text" id="lifeKWH" name = "lifeKWH" value="N/A" readonly out/>
-				</div>		
-				<div class="shortInput">
-					<reportLabel>Life Energy Sales:</reportLabel>
-					<input type="text" id="lifeEnergy" name = "lifeEnergy" value="N/A" readonly out/>
-				</div>		
-				<div class="shortInput">
-					<reportLabel>Life O&M Costs:</reportLabel>
-					<input type="text" id="lifeOM" name = "lifeOM" value="N/A" readonly out/>
-				</div>				
-				<div class="shortInput">
-					<reportLabel>ROI:</reportLabel>
-					<input type="text" id="ROI" name = "ROI" value="N/A" readonly out/>
-				</div>		
-				<div class="shortInput">
-					<reportLabel>NPV:</reportLabel>
-					<input type="text" id="NPV" name = "NPV" value="N/A" readonly out/>
-				</div>		
-				<div class="shortInput">
-					<reportLabel>IRR:</reportLabel>
-					<input type="text" id="IRR" name = "IRR" value="N/A" readonly out/>
-				</div>		
-				<!-- Set Values -->	
-				<script type="text/javascript">
-				$("#projName").attr("value", allInputData.modelName)
-				$("#climSource").attr("value", allInputData.climateName)				
-				$("#sysSize").attr("value", parseFloat(allInputData.systemSize))		
-				$("#invSize").attr("value", parseFloat(allInputData.inverterSize))
-				$("#perClip").attr("value", (parseFloat(allOutputData.percentClipped).toFixed(1)) + "%")				
-				$("#purchCost").attr("value", "$" + delimitNumbers(parseFloat(allInputData.installCost)))
-				$("#costperKWP").attr("value", (parseFloat(allInputData.installCost)/parseFloat(allInputData.systemSize)).toFixed(0)) 
-				$("#1yearKWH").attr("value", delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000).toFixed(0))) 
-				$("#1yearSales").attr("value", "$" + delimitNumbers(allOutputData.lifeGenerationDollars[0].toFixed(0)))
-				$("#1yearOM").attr("value", "$" + delimitNumbers(parseFloat(allInputData.omCost).toFixed(0)))
-				$("#lifeKWH").attr("value", delimitNumbers((parseFloat(allOutputData.lifeGenerationWh)/1000).toFixed(0))) 	
-				$("#lifeOM").attr("value", "$" + delimitNumbers((parseFloat(allInputData.omCost)*parseFloat(allInputData.lifeSpan)).toFixed(0)))
-				$("#lifeEnergy").attr("value", "$" + delimitNumbers(allOutputData.lifeEnergySales.toFixed(0)))
-				$("#ROI").attr("value", parseFloat(allOutputData.ROI).toFixed(3))
-				$("#NPV").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.NPV.toFixed(0))))		
-				$("#IRR").attr("value", parseFloat(allOutputData.IRR))													
-				</script>																							
-			</form>
+		<div id="analysisSummary" class="content postRun">
+			<div class="shortInput">
+				<strong>Project Name</strong>
+				<p id="projName"></p>
+			</div>
+			<div class="shortInput">
+				<strong>Climate Source</strong>
+				<p id="climSource"></p>
+			</div>
+			<br/>
+			<div class="shortInput">
+				<strong>System Size (kWp-DC)</strong>
+				<p id="sysSize"></p>			
+			</div>					
+			<div class="shortInput">
+				<strong>Inverter Size (kW-AC)</strong>
+				<p id="invSize"></p>
+			</div>
+			<div class="shortInput">
+				<strong>Percentage Clipping</strong>
+				<p id="perClip"></p>
+			</div>				
+			<br/>
+			<div class="shortInput">
+				<strong>Purchase Cost</strong>
+				<p id="purchCost"></p>
+			</div>		
+			<div class="shortInput">
+				<strong>Cost Per kWp ($/kWp) </strong>
+				<p id="costperKWP"></p>
+			</div>	
+			<br/>					
+			<div class="shortInput">
+				<strong>1st Year kWh</strong>
+				<p id="1yearKWH"></p>
+			</div>		
+			<div class="shortInput">
+				<strong>1st Year Energy Sales</strong>
+				<p id="1yearSales"></p>
+			</div>		
+			<div class="shortInput">
+				<strong>1st Year O&amp;M</strong>
+				<p id="1yearOM"></p>
+			</div>		
+			<div class="shortInput">
+				<strong>Life kWh Production</strong>
+				<p id="lifeKWH"></p>
+			</div>		
+			<div class="shortInput">
+				<strong>Life Energy Sales</strong>
+				<p id="lifeEnergy"></p>
+			</div>		
+			<div class="shortInput">
+				<strong>Life O&amp;M Costs</strong>
+				<p id="lifeOM"></p>
+			</div>				
+			<div class="shortInput">
+				<strong>ROI</strong>
+				<p id="ROI"></p>
+			</div>		
+			<div class="shortInput">
+				<strong>NPV</strong>
+				<p id="NPV"></p>
+			</div>		
+			<div class="shortInput">
+				<strong>IRR</strong>
+				<p id="IRR"></p>
+			</div>		
+			<script type="text/javascript">
+				// Set values for this section.
+				gebi("projName").innerHTML = allInputData.modelName
+				gebi("climSource").innerHTML = allInputData.climateName
+				gebi("sysSize").innerHTML = parseFloat(allInputData.systemSize)
+				gebi("invSize").innerHTML = parseFloat(allInputData.inverterSize)
+				gebi("perClip").innerHTML = (parseFloat(allOutputData.percentClipped).toFixed(1)) + "%"
+				gebi("purchCost").innerHTML = "$" + delimitNumbers(parseFloat(allInputData.installCost))
+				gebi("costperKWP").innerHTML = (parseFloat(allInputData.installCost)/parseFloat(allInputData.systemSize)).toFixed(0)
+				gebi("1yearKWH").innerHTML = delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000).toFixed(0))
+				gebi("1yearSales").innerHTML = "$" + delimitNumbers(allOutputData.lifeGenerationDollars[0].toFixed(0))
+				gebi("1yearOM").innerHTML = "$" + delimitNumbers(parseFloat(allInputData.omCost).toFixed(0))
+				gebi("lifeKWH").innerHTML = delimitNumbers((parseFloat(allOutputData.lifeGenerationWh)/1000).toFixed(0))
+				gebi("lifeOM").innerHTML = "$" + delimitNumbers((parseFloat(allInputData.omCost)*parseFloat(allInputData.lifeSpan)).toFixed(0))
+				gebi("lifeEnergy").innerHTML = "$" + delimitNumbers(allOutputData.lifeEnergySales.toFixed(0))
+				gebi("ROI").innerHTML = parseFloat(allOutputData.ROI).toFixed(3)
+				gebi("NPV").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.NPV.toFixed(0)))
+				gebi("NPV").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.NPV.toFixed(0)))
+				gebi("IRR").innerHTML = parseFloat(allOutputData.IRR)
+			</script>
 		</div>		
 		<p class="reportTitle postRun">Hourly System Average Power Output</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
@@ -470,52 +458,41 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Simulation Location
-		</p>
+		<p class="reportTitle postRun">Simulation Location</p>
 		<div id="studyDetail" class="tightContent postRun detailsContainer" style="position: relative">
-			<div id="mapHere">
-				<script type="text/javascript">
-					var width = 1000,
-						height = 350;
-
-					var projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2]);
-
-					var path = d3.geo.path()
-						.projection(projection);
-
-					var svg = d3.select("#mapHere").append("svg")
-						.attr("width", width)
-						.attr("height", height);
-
-					var group = svg.append("g");
-
-					group.attr("transorm", "scale(.2, .2)");
-					d3.json('{{pathPrefix}}/static/state_boundaries.json', function(collection) {
-						group.selectAll('path')
-							.data(collection.features)
-							.enter().append('path')
-							.attr('d', d3.geo.path().projection(projection))
-							.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
-							.style('fill', 'gray')
-							.style('stroke', 'white')
-							.style('stroke-width', 1);
-					});
-
-					d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
-						climate = allInputData.climateName
-						var ST_NAME = climate.split("-");
-						var ST = ST_NAME[0], NAME = ST_NAME[1];
-						var my_coords = projection(new_us_places[ST][NAME]);
-						var r = 5;
-						circle = svg.append("circle")
-							.attr("cx", my_coords[0])
-							.attr("cy", my_coords[1])
-							.attr("r", 5)
-							.attr("class", "HighlightCircle")
-						circle.append("svg:title").text(climate);
-					})
-				</script>
-			</div>
-		</div>		
+			<div id="mapHere"></div>
+			<script type="text/javascript">
+				width = 1000, height = 350
+				projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2])
+				path = d3.geo.path()
+					.projection(projection)
+				svg = d3.select("#mapHere").append("svg")
+					.attr("width", width)
+					.attr("height", height)
+				group = svg.append("g")
+				group.attr("transorm", "scale(.2, .2)")
+				d3.json('{{pathPrefix}}/static/state_boundaries.json', function(collection) {
+					group.selectAll('path')
+						.data(collection.features)
+						.enter().append('path')
+						.attr('d', d3.geo.path().projection(projection))
+						.attr('id', function(d){return d.properties.name.replace(/\s+/g, '')})
+						.style('fill', 'gray')
+						.style('stroke', 'white')
+						.style('stroke-width', 1)})
+				d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
+					climate = allInputData.climateName
+					ST_NAME = climate.split("-")
+					ST = ST_NAME[0], NAME = ST_NAME[1]
+					my_coords = projection(new_us_places[ST][NAME])
+					r = 5
+					circle = svg.append("circle")
+						.attr("cx", my_coords[0])
+						.attr("cy", my_coords[1])
+						.attr("r", 5)
+						.attr("class", "HighlightCircle")
+					circle.append("svg:title").text(climate)})
+			</script>
+		</div>
 	</div>
 </body>
