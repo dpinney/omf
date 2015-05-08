@@ -4,6 +4,7 @@
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
@@ -174,7 +175,7 @@
 		</form>
 	</div>
 	<div id ="runIndicator" class="content running">
-		Model running on server. Refresh the page to check for results.
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
 	</div>
 	<div id ="stopIndicator" class="content stopped">
 		Model cancelled or encountered an error. Please change inputs and re-run.
