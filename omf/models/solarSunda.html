@@ -207,32 +207,39 @@
 		<p class="reportTitle postRun">Financial Summary</p>
 		<div id="finSummaryReport" class="content postRun" style="margin-top:5px">
 			<div class="shortInput">
-				<label>Installed System Cost</label>
-				<input type="text" id="totalCost" name = "totalCost" readonly financial/>
+				<strong>Installed System Cost</strong>
+				<p id="totalCost"></p>
+				<script>gebi("totalCost").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.totalCost).toFixed(0))</script>
 			</div>
 			<div class="shortInput">
-				<label>$/Wp-DC Installed</label>
-				<input type="text" id="costWdc" name = "costWdc" readonly financial/>
+				<strong>$/Wp-DC Installed</strong>
+				<p id="costWdc"></p>
+				<script>gebi("costWdc").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costWdc).toFixed(2))</script>
 			</div>
 			<div class="shortInput">
-				<p class="tooltip" style="display:inline">Calculated Capacity Factor<span class="classic">Calculated as first year generation (kWh-AC) divided by inverters size (kW-AC).</span></label>
-				<input type="text" id="capFactor" name = "capFactor" readonly financial/>
+				<strong class="tooltip" style="display:inline">Calculated Capacity Factor<span class="classic">Calculated as first year generation (kWh-AC) divided by inverters size (kW-AC).</span></strong>
+				<p id="capFactor"></p>
+				<script>gebi("capFactor").innerHTML = delimitNumbers(parseFloat(allOutputData.capFactor).toFixed(0)) +  "%"</script>
 			</div>
 			<div class="shortInput">
-				<label>First Year System Output (MWh-AC)</label>
-				<input type="text" id="1yearMWH" name = "1yearMWH" readonly financial/>
+				<strong>First Year System Output (MWh-AC)</strong>
+				<p id="1yearMWH"></p>
+				<script>gebi("1yearMWH").innerHTML = delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000000).toFixed(0))</script>
 			</div>
 			<div class="shortInput">
-				<label>Climate Data Selected</label>
-				<input type="text" id="climSource" name = "climSource" readonly financial/>
+				<strong>Climate Data Selected</strong>
+				<p id="climSource"></p>
+				<script>gebi("climSource").innerHTML = allInputData.climateName</script>
 			</div>
 			<div class="shortInput">
-				<label>PPA First Year Cost ($/MWh)</label>
-				<input type="text" id="firstYearCostKWhPPA" name = "firstYearCostKWhPPA" value="N/A" readonly financial/>
+				<strong>PPA First Year Cost ($/MWh)</strong>
+				<p id="firstYearCostKWhPPA"></p>
+				<script>gebi("firstYearCostKWhPPA").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.firstYearCostKWhPPA).toFixed(2))</script>
 			</div>
 			<div class="shortInput">
-				<label>PPA Yearly Escalation</label>
-				<input type="text" id="yearlyEscalationPPA" name = "yearlyEscalationPPA" value="N/A" readonly financial/>
+				<strong>PPA Yearly Escalation</strong>
+				<p id="yearlyEscalationPPA"></p>
+				<script>gebi("yearlyEscalationPPA").innerHTML = delimitNumbers(parseFloat(allOutputData.yearlyEscalationPPA).toFixed(0)) + "%"</script>
 			</div>
 			<hr>
 			<table>
@@ -247,53 +254,42 @@
 				</thead>
 				<tr>
 					<th>Levelized Cost of Energy ($/MWh)</th>
-					<td>$79.34</td>
-					<td>$79.34</td>
-					<td>$79.34</td>
-					<td>$79.34</td>
-					<td>$79.34</td>
+					<td id="levelCostDirect">$79.34</td>
+					<td id="levelCostNCREB">$79.34</td>
+					<td id="levelCostTaxLease">$79.34</td>
+					<td id="levelCostTaxEquity">$79.34</td>
+					<td id="levelCostPPA">$79.34</td>
+					<script>gebi("levelCostDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostDirect).toFixed(2))</script>
+					<script>gebi("levelCostNCREB").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostNCREB).toFixed(2))</script>
+					<script>gebi("levelCostTaxLease").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxLease).toFixed(2))</script>
+					<script>gebi("levelCostTaxEquity").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxEquity).toFixed(2))</script>
+					<script>gebi("levelCostPPA").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostPPA).toFixed(2))</script>
 				</tr>
 				<tr>
 					<th>Cost per Panel, Community Solar</th>
-					<td>$590.92</td>
-					<td>$590.92</td>
-					<td>$590.92</td>
-					<td>$590.92</td>
+					<td id="costPanelDirect">$590.92</td>
+					<td id="costPanelNCREB">$590.92</td>
+					<td id="costPanelTaxLease">$590.92</td>
+					<td id="costPanelTaxEquity">$590.92</td>
 					<td></td>
+					<script>gebi("costPanelDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelDirect).toFixed(2))</script>
+					<script>gebi("costPanelNCREB").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelNCREB).toFixed(2))</script>
+					<script>gebi("costPanelTaxLease").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxLease).toFixed(2))</script>
+					<script>gebi("costPanelTaxEquity").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxEquity).toFixed(2))</script>
 				</tr>
 				<tr>
 					<th>Cost per 10W of Panel, Community Solar</th>
-					<td>$19.37</td>
-					<td>$19.37</td>
-					<td>$19.37</td>
-					<td>$19.37</td>
+					<td id="cost10WPanelDirect">$19.37</td>
+					<td id="cost10WPanelNCREB">$19.37</td>
+					<td id="cost10WPanelTaxLease">$19.37</td>
+					<td id="cost10WPanelTaxEquity">$19.37</td>
 					<td></td>
+					<script>gebi("cost10WPanelDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelDirect).toFixed(2))</script>
+					<script>gebi("cost10WPanelNCREB").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelNCREB).toFixed(2))</script>
+					<script>gebi("cost10WPanelTaxLease").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxLease).toFixed(2))</script>
+					<script>gebi("cost10WPanelTaxEquity").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxEquity).toFixed(2))</script>
 				</tr>
 			</table>
-			<script type="text/javascript">
-				// Get and parse output values from python.
-				$("#climSource").attr("value", allInputData.climateName)
-				$("#1yearMWH").attr("value", delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000000).toFixed(0)))
-				$("#totalCost").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.totalCost).toFixed(0)))
-				$("#costWdc").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costWdc).toFixed(2)))
-				$("#capFactor").attr("value", delimitNumbers(parseFloat(allOutputData.capFactor).toFixed(0)) +  "%")
-				$("#levelCostDirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostDirect).toFixed(2)))
-				$("#costPanelDirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelDirect).toFixed(2)))
-				$("#cost10WPanelDirect").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelDirect).toFixed(2)))
-				$("#levelCostNCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostNCREB).toFixed(2)))
-				$("#costPanelNCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelNCREB).toFixed(2)))
-				$("#cost10WPanelNCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelNCREB).toFixed(2)))
-				$("#PPANCREB").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.PPANCREB).toFixed(2)))
-				$("#levelCostTaxLease").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxLease).toFixed(2)))
-				$("#costPanelTaxLease").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxLease).toFixed(2)))
-				$("#cost10WPanelTaxLease").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxLease).toFixed(2)))
-				$("#levelCostTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxEquity).toFixed(2)))
-				$("#costPanelTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxEquity).toFixed(2)))
-				$("#cost10WPanelTaxEquity").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxEquity).toFixed(2)))
-				$("#levelCostPPA").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.levelCostPPA).toFixed(2)))
-				$("#firstYearCostKWhPPA").attr("value", "$" + delimitNumbers(parseFloat(allOutputData.firstYearCostKWhPPA).toFixed(2)))
-				$("#yearlyEscalationPPA").attr("value", delimitNumbers(parseFloat(allOutputData.yearlyEscalationPPA).toFixed(0)) + "%")
-			</script>
 		</div>
 		<p class="reportTitle postRun">Simulation Location</p>
 		<div id="locationReport" class="tightContent postRun">
