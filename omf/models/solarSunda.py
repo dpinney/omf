@@ -13,9 +13,6 @@ import xlwt, traceback, csv
 sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import nrelsam
-#from pypvwatts import PVWatts
-#PVWatts.api_key = 'RVOaacgtHtIl6tcS9OjifJFKpHrjl84qJ3WgALy8'
-
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarSunda.html"),"r") as tempFile:
@@ -53,23 +50,14 @@ def run(modelDir, inputDict):
 		inputDict["climateName"], latforpvwatts = zipCodeToclimateName(inputDict["zipCode"])
 		inputDict["panelSize"] = 305
 		arraySizeAC = float(inputDict.get("systemSize",0))
-		arraySizeDC = arraySizeAC*1.3908
-		numberPanels = (arraySizeDC*1000/305)
-		inputDict["derate"] = "87"
-		inputDict["inverterEfficiency"] = "96"
+		arraySizeDC = arraySizeAC * 1.3908
+		numberPanels = (arraySizeDC * 1000/305)
 		#Use latitude for tilt
-		inputDict["tilt"] = "True"
 		inputDict["trackingMode"] = "0"
-		inputDict["azimuth"] = "180"
 		inputDict["runTime"] = ""
 		inputDict["rotlim"] = "45.0"
 		inputDict["gamma"] = "-0.45"
-		if (float(inputDict["systemSize"]) > 250):
-			inputDict["inverterCost"] = float(107000)
-		else:
-			inputDict["inverterCost"] = float(61963)
 		numberInverters = math.ceil(arraySizeAC/1000/0.5)
-		minLandSize = round((arraySizeAC/1000*5 + 1)*math.cos(math.radians(22.5))/math.cos(math.radians(latforpvwatts)),0)
 		# Copy specific climate data into model directory
 		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 			pJoin(modelDir, "climate.tmy2"))
@@ -81,16 +69,14 @@ def run(modelDir, inputDict):
 		# Required user inputs.
 		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
 		ssc.ssc_data_set_number(dat, "system_size", arraySizeDC)
-		derate = float(inputDict.get("derate", 100))/100 * float(inputDict.get("inverterEfficiency", 96))/100 * 0.96589
-		#Derate = systemlosses * inverter losses (.13*.96) * adjustment
-		ssc.ssc_data_set_number(dat, "derate", derate)
+		ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("inverterEfficiency", 98))/100 * float(inputDict.get("nonInverterEfficiency", 92))/100)
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 		# Advanced inputs with defaults.
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
 		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)
-		ssc.ssc_data_set_number(dat, "tilt", latforpvwatts)
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 0)   #0 if tilt is provided
+		ssc.ssc_data_set_number(dat, "tilt", float(inputDict.get("manualTilt",0)))
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", float(inputDict.get("tilt_eq_lat",1)))
 		# Run PV system simulation.
 		mod = ssc.ssc_module_create("pvwattsv1")
 		ssc.ssc_module_exec(mod, dat)
@@ -105,6 +91,8 @@ def run(modelDir, inputDict):
 			dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") +
 			dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict.get("simLength", 8760)))]
 		# Geodata output.
+		outData["minLandSize"] = round((arraySizeAC/1000*5 + 1)*math.cos(math.radians(22.5))/math.cos(math.radians(latforpvwatts)),0)
+		landAmount = float(inputDict.get("landAmount", 6.0))
 		outData["city"] = ssc.ssc_data_get_string(dat, "city")
 		outData["state"] = ssc.ssc_data_get_string(dat, "state")
 		outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
@@ -127,7 +115,7 @@ def run(modelDir, inputDict):
 		outData["allYearGenerationMWh"] = {}
 		outData["allYearGenerationMWh"][1] = float(outData["oneYearGenerationWh"])/1000000
 		for i in range (2, loanYears+1):
-			outData["allYearGenerationMWh"][i] = float(outData["allYearGenerationMWh"][i-1])*0.992
+			outData["allYearGenerationMWh"][i] = float(outData["allYearGenerationMWh"][i-1]) * (1 - float(inputDict.get("degradation", 0.5))/100)
 
 
 		# Summary of Results.
@@ -143,9 +131,9 @@ def run(modelDir, inputDict):
 			gear = 18000
 		else:
 			gear = inverterSize/1000 * 22000
-		balance = arraySizeAC*1.3908 * 134
+		balance = arraySizeAC * 1.3908 * 134
 		combiners = math.ceil(numberPanels/19/24) * float(1800)  #*
-		wireManagement = arraySizeDC*1.5
+		wireManagement = arraySizeDC * 1.5
 		transformer = 1 * 28000
 		weatherStation = 1 * 12500
 		shipping = 1.02
@@ -167,11 +155,11 @@ def run(modelDir, inputDict):
 		designCosts = materialDesign + laborDesign
 
 		'''Siteprep Costs:'''
-		surveying = 2.25 * 4 * math.sqrt(minLandSize*43560)
+		surveying = 2.25 * 4 * math.sqrt(landAmount*43560)
 		concrete = 8000 * math.ceil(numberInverters/2)
-		fencing = 6.75 * 4 * math.sqrt(minLandSize*43560)
-		grading = 2.5 * 4 * math.sqrt(minLandSize*43560)
-		landscaping = 750 * minLandSize
+		fencing = 6.75 * 4 * math.sqrt(landAmount*43560)
+		grading = 2.5 * 4 * math.sqrt(landAmount*43560)
+		landscaping = 750 * landAmount
 		siteMaterial = 8000 + 600 + 5500 + 5000 + surveying + concrete + fencing + grading + landscaping + 5600
 		blueprints = float(inputDict.get("mechLabor",0))*12
 		mobilization = float(inputDict.get("mechLabor",0))*208
@@ -181,7 +169,7 @@ def run(modelDir, inputDict):
 
 		'''Construction equipment Costs: Office Trailer, Skid Steer, Storage Containers, etc
 		'''
-		constrEquip = 6000 + math.sqrt(minLandSize)*16200
+		constrEquip = 6000 + math.sqrt(landAmount)*16200
 
 		'''Installation Costs:'''
 		moduleAndRackingInstall = numberPanels * (15.00 + 12.50 + 1.50)
@@ -193,7 +181,7 @@ def run(modelDir, inputDict):
 		if (str(inputDict.get("landOwnership",0)) == "Owned" or (str(inputDict.get("landOwnership",0)) == "Leased")):
 			landCosts = 0
 		else:
-			landCosts = float(inputDict.get("costAcre",0))*minLandSize
+			landCosts = float(inputDict.get("costAcre",0))*landAmount
 
 		'''Total costs (Sum of all above): '''
 		totalCosts = hardwareCosts + designCosts + sitePrep + constrEquip + installCosts + landCosts
@@ -248,7 +236,7 @@ def run(modelDir, inputDict):
 		firstYearOPMainCosts = (1.25 * arraySizeDC * 12)
 		firstYearInsuranceCosts = (0.37 * outData["totalCost"]/100)
 		if (inputDict.get("landOwnership",0) == "Leased"):
-			firstYearLandLeaseCosts = float(inputDict.get("costAcre",0))*minLandSize
+			firstYearLandLeaseCosts = float(inputDict.get("costAcre",0))*landAmount
 		else:
 			firstYearLandLeaseCosts = 0
 		for i in range (1, len(outData["allYearGenerationMWh"])+1):
@@ -502,7 +490,7 @@ def run(modelDir, inputDict):
 		outData["levelCostTaxLease"] = Rate_Levelized_Lease
 		outData["costPanelTaxLease"] = abs(NPVLease/numberPanels)
 		outData["cost10WPanelTaxLease"] = (float(outData["costPanelTaxLease"])/float(inputDict["panelSize"]))*10
-		outData["LevelizedCosts"].append(["Tax Lease Structure", Rate_Levelized_Lease])
+		outData["LevelizedCosts"].append(["Lease Buyback", Rate_Levelized_Lease])
 
 		'''Tax Equity Flip Structure'''
 		#PPA Loop (Four Loops), Calls Tax Equity Function Each Time
@@ -544,7 +532,7 @@ def run(modelDir, inputDict):
 			z = z - 1
 			PPARateSixYearsTE = z/100.0
 		#Return Levelized Cost Output
-		outData["LevelizedCosts"].append(["Tax Equity Flip Structure", Rate_Levelized_TaxEquity])
+		outData["LevelizedCosts"].append(["Tax Equity Flip", Rate_Levelized_TaxEquity])
 
 		'''PPA Comparison'''
 		#Output - PPA [F]
@@ -936,6 +924,7 @@ def _tests():
 		"zipCode": "22203",
 		"systemSize":"2000",
 		"landOwnership": "Owned", #Leased, Purchased, or Owned
+		"landAmount": "12",
 		"costAcre": "10000",
 		"moduleCost": "0.70",
 		"rackCost": "0.137",
@@ -958,10 +947,11 @@ def _tests():
 		"annualEscRatePPA": "3",
 		#Misc
 		"lifeSpan": "25",
-		"degradation": "0.8",
+		"degradation": "0.5",
 		"derate": "87",
 		"inverterEfficiency": "96",
-		"tilt": "True",
+		"manualTilt": "0",
+		"tilt_eq_lat": "1",
 		"trackingMode":"0",
 		"module_type":"1",               #PVWatts v5 feature: 1 = premium
 		"azimuth":"180",

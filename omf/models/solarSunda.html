@@ -64,7 +64,11 @@
 				<input type="text" id="zipCode" name="zipCode" value="90210" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Land<span class="classic">Whether the land is owned, purchased or leased.</span></label>
+				<label>Land (acres)</label>
+				<input type="text" id="landAmount" name="landAmount" value="6" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label>Land Acquisition</label>
 				<select id="landOwnership" name="landOwnership">
 					<option value="Owned">Owned</option>
 					<option value="Purchased">Purchased</option>
@@ -72,7 +76,7 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Cost ($/acre)<span class="classic">Cost of land per acre.</span></label>
+				<label>Land Cost ($/acre)</label>
 				<input type="text" id="costAcre" name="costAcre" value="10000" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
@@ -80,24 +84,50 @@
 				<input type="text" id="systemSize" name="systemSize" value="1000" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Module Cost ($/Wp)<span class="classic">Cost per watt.</span></label>
+				<label class="tooltip">PV Degradation (%/year)<span class="classic">Please note that the default is 0.5% year, not 50% per year.</span></label>
+				<input type="text" id="degradation" name="degradation" value="0.5" required="required" pattern="^\d+\.?\d*?$">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tilt = Latitude<span class="classic">If True, then the tilt value will be the same as the Climate City's latitude. If False, you can pick your own value in the next input field (manual tilt).</span></label>
+				<select id="tilt_eq_lat" name="tilt_eq_lat">
+					<option value="1" selected="selected">True</option>
+					<option value="0">False</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Manual Tilt (degrees)<span class="classic">Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
+				<input type="text" id="manualTilt" name="manualTilt" value="0" pattern="^\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
+				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required" />
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Inverter Efficiency (%)<span class="classic">This value will be available on the inverter spec sheet.</span></label>
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="92" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes in to account losses from soiling, shading, wiring and diode losses, etc.</span></label>
+				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" value="98" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
+			</div>
+			<div class="shortInput">
+				<label>Module Cost ($/Wp)</label>
 				<input type="text" id="moduleCost" name="moduleCost" value="0.70" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Racking Cost ($/Wp)<span class="classic">Cost per watt.</span></label>
+				<label>Racking Cost ($/Wp)</label>
 				<input type="text" id="rackCost" name="rackCost" value="0.137" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Inverter Unit Cost ($)<span class="classic">Cost for inverters: will be set to $61,963 if the array size is less than 250kW-AC, and $107,000 if greater than 250kW-AC.</span></label>
-				<input type="text" id="inverterCost" name="inverterCost" value="61963" pattern="^\d+\.?\d*$" required="required" readonly="true">
-				<script type="text/javascript">$("#inverterCost").attr("value", allInputData.inverterCost)</script>
+				<label class="tooltip">Inverter Unit Cost ($)<span class="classic">For each 500 kW-AC inverter, the SUNDA template cost is $107,000. For smaller systems, a 250kW-AC inverter is available at $61,963.</span></label>
+				<input type="text" id="inverterCost" name="inverterCost" value="107000" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Mechanical Labor ($/hr)<span class="classic">Hourly labor cost.</span></label>
+				<label class="tooltip">Mechanical Labor ($/hr)<span class="classic">For installation.</span></label>
 				<input type="text" id="mechLabor" name="mechLabor" value="35" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Electrical Labor ($/hr)<span class="classic">Hourly labor cost.</span></label>
+				<label class="tooltip">Electrical Labor ($/hr)<span class="classic">For installation.</span></label>
 				<input type="text" id="elecLabor" name="elecLabor" value="50" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
@@ -109,7 +139,7 @@
 				<input type="text" id="interCost" name="interCost" value="25000" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Development Costs (%)<span class="classic">The legal costs associated with setting up such a system, if doing a Tax Equity flip this may be as much as 5%.</span></label>
+				<label class="tooltip">Development Costs (%)<span class="classic">The legal costs associated with setting up such a system. If doing a Tax Equity flip this may be as much as 5%.</span></label>
 				<input type="text" id="devCost" name="devCost" value="2" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>
 			<div class="shortInput">
@@ -125,7 +155,7 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Discount Rate (%)<span class="classic">The cost of capital to the co-op, close to the 20yr Treasury-bill rate for the project period.</span></label>
+				<label class="tooltip">Discount Rate (%)<span class="classic">The cost of capital to the co-op. Teh default is close to the 20yr Treasury-bill rate for the project period.</span></label>
 				<input type="text" id="discRate" name="discRate" value="2.32" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shortInput">
@@ -177,35 +207,122 @@
 	</div>
 	<div id="output">
 		<script id="globalOutputScripting">
+			// Global settings for charts.
 			Highcharts.setOptions({global: { useUTC: false }, credits:{enabled:false} })
+			// Alert the user if some of the inputs were invalid.
+			arrayOfMaxes = allOutputData.LevelizedCosts.filter(function(x){return x[1]==200})
+			if (arrayOfMaxes.length > 0) {alert("Warning: a levelized cost was higher than the loan algorithms could calculate. It is being displayed as $200/MWh.")}
+			if (parseFloat(allInputData.landAmount) < allOutputData.minLandSize) {alert("Warning: the minimum amount of land required for this system based on its latitude is " + allOutputData.minLandSize + " acres, but you have specified " + allInputData.landAmount + " acres.")}
+			// Function to add a vector to a table as a row.
+			function insertMetric(tableId, name, vector) {
+				table = gebi(tableId)
+				newRow = table.insertRow()
+				newRow.insertCell().innerHTML = name
+				for (i=0; i<vector.length; i++) {
+					cell = newRow.insertCell()
+					cell.innerHTML = delimitNumbers(vector[i].toFixed(0))
+				}
+			}
 		</script>
-		<p class="reportTitle postRun">Cost Summary</p>
-		<div id="chartsReport" class="tightContent postRun">
-			<div id="comparisonPieChart" style="display:inline-block"></div>
+		<p class="reportTitle postRun">Levelized Cost Comparison</p>
+		<div id="levelizedCostReport" class="tightContent postRun">
+			<div id="levelizedCostDiv" style="display:inline-block"></div>
 			<script>
-				costChart = new Highcharts.Chart({
-					title: {text: 'System Cost Breakdown'},
-					series: [{type: "pie", name:"% of Total Cost", data:allOutputData.costsPieChart}],
-					tooltip: {pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'},
-					chart:{"marginBottom":40,"zoomType":"disabled","renderTo":"comparisonPieChart","type":"column","marginRight":20,"marginBottom":70,"height":400,"width":490,"backgroundColor":null},
-					plotOptions: {
-						pie: {dataLabels: {enabled:false, style:{color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'}, connectorColor: 'silver'}, showInLegend:true}}})
-			</script>
-			<div id="monthlyPerformanceDiv" style="display:inline-block"></div>
-			<script>
-				levelizedChart = new Highcharts.Chart({
+				levelizedCostChart = new Highcharts.Chart({
 					plotOptions:{column:{dataLabels:{enabled:true}, pointPadding:0.2, borderWidth:0}},
 					xAxis:{type:'category',tickColor:'gray',lineColor:'gray',crosshair:true},
 					yAxis:{title:{text:'Levelized Cost ($/MWh)'}},
-					title:{text:'Levelized Cost Comparison'},
+					title:false,
 					series:[{name:'Levelized Cost ($/MWh)',color:'green', data:allOutputData.LevelizedCosts}],
-					chart:{marginBottom:40,zoomType:'disabled',renderTo:'monthlyPerformanceDiv',type:'column', marginRight:20, marginBottom:70, height:400, width:490,backgroundColor:null},
+					chart:{marginBottom:40,zoomType:'disabled',renderTo:'levelizedCostDiv',type:'column', marginRight:20, marginBottom:60, marginTop:30, height:300, width:490, backgroundColor:null},
 					tooltip:false,
 					legend:false})
 			</script>
+			<div id="levelizedCostTableDiv" style="display:inline-block; width:490px; height:300px">
+				<table style="margin:5px">
+					<style>td, th {padding:5 0 5 20;}</style>
+					<thead>
+						<th></th>
+						<th>Levelized Cost of Energy ($/MWh)</th>
+						<th>Cost per Panel, Community Solar</th>
+						<th>Cost per 10W of Panel, Community Solar</th>
+					</thead>
+					<tr>
+						<th>Direct Loan</th>
+						<td id="levelCostDirect"></td>
+						<script>gebi("levelCostDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostDirect).toFixed(2))</script>
+						<td id="cost10WPanelDirect"></td>
+						<script>gebi("cost10WPanelDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelDirect).toFixed(2))</script>
+						<td id="costPanelDirect"></td>
+						<script>gebi("costPanelDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelDirect).toFixed(2))</script>
+					</tr>
+					<tr>
+						<th>NCREBs Financing</th>
+						<td id="levelCostNCREB"></td>
+						<script>gebi("levelCostNCREB").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostNCREB).toFixed(2))</script>
+						<td id="costPanelNCREB"></td>
+						<script>gebi("costPanelNCREB").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelNCREB).toFixed(2))</script>
+						<td id="cost10WPanelNCREB"></td>
+						<script>gebi("cost10WPanelNCREB").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelNCREB).toFixed(2))</script>
+					</tr>
+						<th>Lease Buyback</th>
+						<td id="levelCostTaxLease"></td>
+						<script>gebi("levelCostTaxLease").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxLease).toFixed(2))</script>
+						<td id="costPanelTaxLease"></td>
+						<script>gebi("costPanelTaxLease").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxLease).toFixed(2))</script>
+						<td id="cost10WPanelTaxLease"></td>
+						<script>gebi("cost10WPanelTaxLease").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxLease).toFixed(2))</script>
+					<tr>
+						<th>Tax Equity Flip</th>
+						<td id="levelCostTaxEquity"></td>
+						<script>gebi("levelCostTaxEquity").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxEquity).toFixed(2))</script>
+						<td id="costPanelTaxEquity"></td>
+						<script>gebi("costPanelTaxEquity").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxEquity).toFixed(2))</script>
+						<td id="cost10WPanelTaxEquity"></td>
+						<script>gebi("cost10WPanelTaxEquity").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxEquity).toFixed(2))</script>
+					</tr>
+					<tr>
+						<th>PPA Comparison</th>
+						<td id="levelCostPPA"></td>
+						<script>gebi("levelCostPPA").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostPPA).toFixed(2))</script>
+						<td></td>
+						<td></td>
+					</tr>
+				</table>
+			</div>
 		</div>
-		<p class="reportTitle postRun">Financial Summary</p>
-		<div id="finSummaryReport" class="content postRun" style="margin-top:5px">
+		<p class="reportTitle postRun">Cost Breakdown</p>
+		<div id="levelizedCostReport" class="tightContent postRun">
+			<div id="breakdownPieChart" style="display:inline-block"></div>
+			<script>
+				costChart = new Highcharts.Chart({
+					title: false,
+					series: [{type: "pie", name:"% of Total Cost", data:allOutputData.costsPieChart}],
+					tooltip: {pointFormat: '{series.name}: <b>{point.percentage:.1f}%</b>'},
+					chart:{"marginBottom":40,"zoomType":"disabled","renderTo":"breakdownPieChart","type":"column","marginRight":20,"marginBottom":70,"height":300,"width":490,"backgroundColor":null},
+					plotOptions: {
+						pie: {dataLabels: {enabled:false, style:{color: (Highcharts.theme && Highcharts.theme.contrastTextColor) || 'black'}, connectorColor: 'silver'}, showInLegend:true}}})
+			</script>
+			<div id="breakdownCostDiv" style="display:inline-block; width:490px; height:300px">
+				<table id="breakdownCostTable" style="margin-top:30px">
+					<style>td, th {padding:5 0 5 20;}</style>
+					<thead>
+						<th>Component Class</th>
+						<th>Cost</th>
+						<th>Percentage of Total</th>
+					</thead>
+				</table>
+				<script>
+					pieRef = allOutputData.costsPieChart
+					for (var chartRow = 0; chartRow < pieRef.length; chartRow++) {
+						thisPerc = pieRef[chartRow].y / allOutputData.totalCost
+						insertMetric("breakdownCostTable", pieRef[chartRow].name, [pieRef[chartRow].y, thisPerc * 100])
+					}
+				</script>
+			</div>
+		</div>
+		<p class="reportTitle postRun">Additional Output</p>
+		<div id="additionalOutputReport" class="content postRun" style="margin-top:5px">
 			<div class="shortInput">
 				<strong>Installed System Cost</strong>
 				<p id="totalCost"></p>
@@ -227,7 +344,11 @@
 				<script>gebi("1yearMWH").innerHTML = delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000000).toFixed(0))</script>
 			</div>
 			<div class="shortInput">
-				<strong>Climate Data Selected</strong>
+				<strong>Length of Analysis</strong>
+				<p id="yearsOfAnalysis">25 years</p>
+			</div>
+			<div class="shortInput">
+				<strong>Climate TMY Data Selected</strong>
 				<p id="climSource"></p>
 				<script>gebi("climSource").innerHTML = allInputData.climateName</script>
 			</div>
@@ -241,55 +362,6 @@
 				<p id="yearlyEscalationPPA"></p>
 				<script>gebi("yearlyEscalationPPA").innerHTML = delimitNumbers(parseFloat(allOutputData.yearlyEscalationPPA).toFixed(0)) + "%"</script>
 			</div>
-			<hr>
-			<table>
-				<style>td, th {padding:5 0 5 20;}</style>
-				<thead>
-					<th style="width:350px"></th>
-					<th style="width:100px">Direct Loan</th>
-					<th style="width:100px">NCREBs Financing</th>
-					<th style="width:100px">Tax Lease Structure</th>
-					<th style="width:100px">Tax Equity Flip Structure</th>
-					<th style="width:100px">PPA Comparison</th>
-				</thead>
-				<tr>
-					<th>Levelized Cost of Energy ($/MWh)</th>
-					<td id="levelCostDirect">$79.34</td>
-					<td id="levelCostNCREB">$79.34</td>
-					<td id="levelCostTaxLease">$79.34</td>
-					<td id="levelCostTaxEquity">$79.34</td>
-					<td id="levelCostPPA">$79.34</td>
-					<script>gebi("levelCostDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostDirect).toFixed(2))</script>
-					<script>gebi("levelCostNCREB").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostNCREB).toFixed(2))</script>
-					<script>gebi("levelCostTaxLease").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxLease).toFixed(2))</script>
-					<script>gebi("levelCostTaxEquity").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostTaxEquity).toFixed(2))</script>
-					<script>gebi("levelCostPPA").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostPPA).toFixed(2))</script>
-				</tr>
-				<tr>
-					<th>Cost per Panel, Community Solar</th>
-					<td id="costPanelDirect">$590.92</td>
-					<td id="costPanelNCREB">$590.92</td>
-					<td id="costPanelTaxLease">$590.92</td>
-					<td id="costPanelTaxEquity">$590.92</td>
-					<td></td>
-					<script>gebi("costPanelDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelDirect).toFixed(2))</script>
-					<script>gebi("costPanelNCREB").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelNCREB).toFixed(2))</script>
-					<script>gebi("costPanelTaxLease").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxLease).toFixed(2))</script>
-					<script>gebi("costPanelTaxEquity").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelTaxEquity).toFixed(2))</script>
-				</tr>
-				<tr>
-					<th>Cost per 10W of Panel, Community Solar</th>
-					<td id="cost10WPanelDirect">$19.37</td>
-					<td id="cost10WPanelNCREB">$19.37</td>
-					<td id="cost10WPanelTaxLease">$19.37</td>
-					<td id="cost10WPanelTaxEquity">$19.37</td>
-					<td></td>
-					<script>gebi("cost10WPanelDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelDirect).toFixed(2))</script>
-					<script>gebi("cost10WPanelNCREB").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelNCREB).toFixed(2))</script>
-					<script>gebi("cost10WPanelTaxLease").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxLease).toFixed(2))</script>
-					<script>gebi("cost10WPanelTaxEquity").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelTaxEquity).toFixed(2))</script>
-				</tr>
-			</table>
 		</div>
 		<p class="reportTitle postRun">Simulation Location</p>
 		<div id="locationReport" class="tightContent postRun">
@@ -327,4 +399,9 @@
 					circle.append("svg:title").text(climate)})
 			</script>
 		</div>
+		<p class="reportTitle postRun">Download Full Model</p>
+		<div id="fullModelDownload" class="content postRun" style="margin-top:5px">
+			<p>A more detailed and fully editable Excel version of this model is <a href="https://www.dropbox.com/s/piyh2qc806c7ab2/SUNDA%20Solar%20Costing%20%20Financing%20Screening%20Tool%20-%20released.xlsm?dl=1">available here.</a></p>
+		</div>
+	</div>
 </body>
