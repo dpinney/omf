@@ -84,6 +84,10 @@
 				<input type="text" id="systemSize" name="systemSize" value="1000" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Panel Size (kW-DC)<span class="classic">Nameplate generation for system panels in kW-DC.</span></label>
+				<input type="text" id="systemDcSize" name="systemDcSize" value="1400" required="required" pattern="^\d+\.?\d*?$">
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">PV Degradation (%/year)<span class="classic">Please note that the default is 0.5% year, not 50% per year.</span></label>
 				<input type="text" id="degradation" name="degradation" value="0.5" required="required" pattern="^\d+\.?\d*?$">
 			</div>
@@ -103,12 +107,12 @@
 				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required" />
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Inverter Efficiency (%)<span class="classic">This value will be available on the inverter spec sheet.</span></label>
-				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="92" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
+				<label class="tooltip">Inverter Efficiency (%)<span class="classic">This value will be available on the inverter datasheet.</span></label>
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="96" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes in to account losses from soiling, shading, wiring and diode losses, etc.</span></label>
-				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" value="98" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
+				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" value="89" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
 			</div>
 			<div class="shortInput">
 				<label>Module Cost ($/Wp)</label>

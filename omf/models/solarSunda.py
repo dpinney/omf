@@ -50,7 +50,7 @@ def run(modelDir, inputDict):
 		inputDict["climateName"], latforpvwatts = zipCodeToclimateName(inputDict["zipCode"])
 		inputDict["panelSize"] = 305
 		arraySizeAC = float(inputDict.get("systemSize",0))
-		arraySizeDC = arraySizeAC * 1.3908
+		arraySizeDC = float(inputDict.get("systemDcSize",0))
 		numberPanels = (arraySizeDC * 1000/305)
 		#Use latitude for tilt
 		inputDict["trackingMode"] = "0"
@@ -69,7 +69,7 @@ def run(modelDir, inputDict):
 		# Required user inputs.
 		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
 		ssc.ssc_data_set_number(dat, "system_size", arraySizeDC)
-		ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("inverterEfficiency", 98))/100 * float(inputDict.get("nonInverterEfficiency", 92))/100)
+		ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("inverterEfficiency", 96))/100 * float(inputDict.get("nonInverterEfficiency", 89))/100)
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 		# Advanced inputs with defaults.
@@ -107,17 +107,16 @@ def run(modelDir, inputDict):
 		outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
 		# Power generation.
 		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
+		# Calculate clipping.
+		outData["powerOuputAcAfterClipping"] = [x for x in outData["powerOutputAc"] if x < arraySizeAC * 1000]
 		#One year generation
 		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
-
 		#Annual generation for all years
 		loanYears = 25
 		outData["allYearGenerationMWh"] = {}
 		outData["allYearGenerationMWh"][1] = float(outData["oneYearGenerationWh"])/1000000
 		for i in range (2, loanYears+1):
 			outData["allYearGenerationMWh"][i] = float(outData["allYearGenerationMWh"][i-1]) * (1 - float(inputDict.get("degradation", 0.5))/100)
-
-
 		# Summary of Results.
 		'''Total Costs including: Hardware, design/labor, siteprep, construction, install, and land'''
 		'''Hardware Costs: '''
@@ -950,6 +949,7 @@ def _tests():
 		"degradation": "0.5",
 		"derate": "87",
 		"inverterEfficiency": "96",
+		"nonInverterEfficiency": "89",
 		"manualTilt": "0",
 		"tilt_eq_lat": "1",
 		"trackingMode":"0",
