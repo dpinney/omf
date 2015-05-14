@@ -416,7 +416,7 @@ def run(modelDir, inputDict):
 		outData["LevelizedCosts"].append(["NCREBs Financing", Rate_Levelized_NCREB])
 
 
-		'''Tax Lease Structure'''
+		'''Lease Buyback Structure'''
 		#Output - Lease [C]
 		projectCostsLease = outData["totalCost"]
 		#Output - Lease [D]
@@ -436,10 +436,11 @@ def run(modelDir, inputDict):
 
 		#Tax Lease Formulas
 		#Output - Lease [D]
-		monthlyLeaseFactorLease = float(inputDict.get("taxLeaseRate",0))/12
-		for i in range (0, 11):
-			leasePaymentsLease.append(-monthlyLeaseFactorLease/100*projectCostsLease*12)
-		leasePaymentsLease.append(-0.2*projectCostsLease)
+		leaseRate = float(inputDict.get("taxLeaseRate",0))/100.0
+		for i in range (0, 12):
+			leasePaymentsLease.append(-1*projectCostsLease/((1.0-(1.0/(1.0+leaseRate)**12))/(leaseRate)))
+		# Last year is different.
+		leasePaymentsLease[11] += -0.2*projectCostsLease
 		for i in range (12, 25):
 			leasePaymentsLease.append(0)
 
@@ -926,14 +927,15 @@ def _tests():
 		"simLengthUnits": "hours",
 		"modelType": "solarSunda",
 		#Cooperative
-		"zipCode": "22203",
-		"systemSize":"2000",
+		"zipCode": "90210",
+		"systemSize":"1000",
+		"systemDcSize":"1400",
 		"landOwnership": "Owned", #Leased, Purchased, or Owned
-		"landAmount": "12",
+		"landAmount": "6",
 		"costAcre": "10000",
 		"moduleCost": "0.70",
 		"rackCost": "0.137",
-		"inverterCost": "61963",
+		"inverterCost": "107000",
 		"pmCost": "15000",
 		"EPCRate": "3",
 		"mechLabor": "35",
@@ -945,25 +947,21 @@ def _tests():
 		"discRate": "2.32",
 		"loanRate": "2.00",
 		"NCREBRate": "4.06",
-		"taxLeaseRate": "8.45",
+		"taxLeaseRate": "7.4",
 		"taxEquityReturn": "8.50",
 		#PPA Information
 		"firstYearEnergyCostPPA": "57.5",
-		"annualEscRatePPA": "3",
+		"annualEscRatePPA": "2",
 		#Misc
 		"lifeSpan": "25",
-		"degradation": "0.5",
-		"derate": "87",
+		"degradation": "0.8",
 		"inverterEfficiency": "96",
 		"nonInverterEfficiency": "87",
 		"manualTilt": "0",
 		"tilt_eq_lat": "1",
 		"trackingMode":"0",
-		"module_type":"1",               #PVWatts v5 feature: 1 = premium
-		"azimuth":"180",
-		"runTime": "",
-		"rotlim":"45.0",
-		"gamma":"-0.45"}
+		"module_type":"1", #PVWatts v5 feature: 1 = premium
+		"azimuth":"180"}
 	modelLoc = pJoin(workDir,"admin","Automated solarSunda Testing")
 	# Blow away old test results if necessary.
 	try:
@@ -976,7 +974,7 @@ def _tests():
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
-	renderAndShow(template, modelDir = modelLoc)
+	# renderAndShow(template, modelDir = modelLoc)
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)

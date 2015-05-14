@@ -147,7 +147,7 @@
 				<input type="text" id="interCost" name="interCost" value="25000" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
-				<label class="tooltip">Development Costs (%)<span class="classic">The legal costs associated with setting up such a system. If doing a Tax Equity flip this may be as much as 5%.</span></label>
+				<label class="tooltip">Development Costs (%)<span class="classic">The consulting, legal and banking costs associated with setting up such a system. If doing a Tax Equity flip this may be as much as 5%.</span></label>
 				<input type="text" id="devCost" name="devCost" value="2" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>
 			<div class="shorterInput">
@@ -171,7 +171,7 @@
 				<input type="text" id="NCREBRate" name="NCREBRate" value="4.06" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shorterInput">
-				<label class="tooltip">Tax Lease Rate (%)<span class="classic">Tax lease rate, usually utilized by the for-profit subsidiary owned by the co-op.</span></label>
+				<label class="tooltip">Lease Buyback Rate (%)<span class="classic">Lease buyback rate, usually utilized by the for-profit subsidiary owned by the co-op.</span></label>
 				<input type="text" id="taxLeaseRate" name="taxLeaseRate" value="8.45" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shorterInput">
@@ -241,7 +241,7 @@
 					xAxis:{type:'category',tickColor:'gray',lineColor:'gray',crosshair:true},
 					yAxis:{title:{text:'Levelized Cost ($/MWh)'}},
 					title:false,
-					series:[{name:'Levelized Cost ($/MWh)',color:'green', data:allOutputData.LevelizedCosts}],
+					series:[{name:'Levelized Cost ($/MWh)', color:'green', data:allOutputData.LevelizedCosts}],
 					chart:{marginBottom:40,zoomType:'disabled',renderTo:'levelizedCostDiv',type:'column', marginRight:20, marginBottom:60, marginTop:30, height:300, width:490, backgroundColor:null},
 					tooltip:false,
 					legend:false})
