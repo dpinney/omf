@@ -637,7 +637,8 @@
 								d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
 									climate = allInputData.climateName
 									var ST_NAME = climate.split("-");
-									var ST = ST_NAME[0], NAME = ST_NAME[1];
+									ST = ST_NAME[0]
+									NAME = ST_NAME[1].replace("_"," ")
 									var my_coords = projection(new_us_places[ST][NAME]);
 									var r = 5;
 									circle = svg.append("circle")

@@ -52,11 +52,19 @@ div#input {
 div.content {
 	width: 980px;
 }
+
 div.shortInput {
 	width: 323px; 
 	display: inline-block; 
 	margin-bottom: 10px;
 }
+
+div.shorterInput {
+	width: 241px; 
+	display: inline-block; 
+	margin-bottom: 10px;
+}
+
 div.wideInput {
 	width: 980px; 
 	margin-bottom: 10px;

@@ -69,7 +69,7 @@ def run(modelDir, inputDict):
 		# Required user inputs.
 		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
 		ssc.ssc_data_set_number(dat, "system_size", arraySizeDC)
-		ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("inverterEfficiency", 96))/100 * float(inputDict.get("nonInverterEfficiency", 89))/100)
+		ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("inverterEfficiency", 96))/100 * float(inputDict.get("nonInverterEfficiency", 87))/100)
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 		# Advanced inputs with defaults.
@@ -108,9 +108,15 @@ def run(modelDir, inputDict):
 		# Power generation.
 		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
 		# Calculate clipping.
-		outData["powerOuputAcAfterClipping"] = [x for x in outData["powerOutputAc"] if x < arraySizeAC * 1000]
+		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
+		invSizeWatts = arraySizeAC * 1000
+		outData["powerOutputAcInvClipped"] = [x if x < invSizeWatts else invSizeWatts for x in outData["powerOutputAc"]]
+		try:
+			outData["percentClipped"] = 100 * (1.0 - sum(outData["powerOutputAcInvClipped"]) / sum(outData["powerOutputAc"]))
+		except ZeroDivisionError:
+			outData["percentClipped"] = 0.0
 		#One year generation
-		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
+		outData["oneYearGenerationWh"] = sum(outData["powerOutputAcInvClipped"])
 		#Annual generation for all years
 		loanYears = 25
 		outData["allYearGenerationMWh"] = {}
@@ -949,7 +955,7 @@ def _tests():
 		"degradation": "0.5",
 		"derate": "87",
 		"inverterEfficiency": "96",
-		"nonInverterEfficiency": "89",
+		"nonInverterEfficiency": "87",
 		"manualTilt": "0",
 		"tilt_eq_lat": "1",
 		"trackingMode":"0",

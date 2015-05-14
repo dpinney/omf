@@ -90,22 +90,14 @@ def run(modelDir, inputDict):
 		outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
 		outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
 		outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
-		# Power generation.
+		# Power generation and clipping.
 		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
-		outData["InvClipped"] = ssc.ssc_data_get_array(dat, "ac")
-		outData["lossInvClipping"] = ssc.ssc_data_get_array(dat, "ac")
-		#Calculate loss and percent
-		for i in range (0, len(outData["powerOutputAc"])):
-			if (float(outData["powerOutputAc"][i])- float(inputDict.get("inverterSize", 0))*1000) > 0:
-				outData["InvClipped"][i] = float(inputDict.get("inverterSize", 0))*1000						
-				outData["lossInvClipping"][i] = float(outData["powerOutputAc"][i])- float(inputDict.get("inverterSize", 0))*1000	
-			else:
-				outData["InvClipped"][i] = outData["powerOutputAc"][i]	
-				outData["lossInvClipping"][i] = 0
-		if (derate == 0):
-			outData["percentClipped"] = 0		
-		else:
-			outData["percentClipped"] = (sum(outData["lossInvClipping"])/sum(outData["powerOutputAc"]))*100			
+		invSizeWatts = float(inputDict.get("inverterSize", 0)) * 1000
+		outData["InvClipped"] = [x if x < invSizeWatts else invSizeWatts for x in outData["powerOutputAc"]]
+		try:
+			outData["percentClipped"] = 100 * (1.0 - sum(outData["InvClipped"]) / sum(outData["powerOutputAc"]))
+		except ZeroDivisionError:
+			outData["percentClipped"] = 0.0
 		# Cashflow outputs.
 		lifeSpan = int(inputDict.get("lifeSpan",30))
 		lifeYears = range(1, 1 + lifeSpan)

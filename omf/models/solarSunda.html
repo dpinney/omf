@@ -26,48 +26,87 @@
 	<p class="reportTitle">Model Description</p>
 	<div id="input" class="content">
 		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %}action="/runModel/"{% endif %} method="post">
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarSunda">Help?</a> </label>
 				<input type="text" id="modelType" name="modelType" value="solarSunda" readonly/>
 			</div>
 			{% if quickRender %}
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label>Email Address</label>
 				<input type="email" id="quickRunEmail" name="quickRunEmail" required="required">
 			</div>
 			{% else %}
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
 			{% endif %}
 			{% if not quickRender %}
-			<div class="shortInput runningInline postRunInline">
+			<div class="shorterInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/>
 			</div>
 			{% endif %}
-			<div class="shortInput runningInline postRunInline">
+			<div class="shorterInput runningInline postRunInline">
 				<label>Created</label>
 				<input type="text" id="created" name="created" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shorterInput postRunInline">
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
-			<div class="wideInput">
-				<p class="inputSectionHeader">System and Co-Op Information</p>
-			</div>
-			<hr>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the systems geographical location.</span></label>
 				<input type="text" id="zipCode" name="zipCode" value="90210" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
+				<label class="tooltip">System Panel Size (kW-DC)<span class="classic">Nameplate generation for system panels in kW-DC.</span></label>
+				<input type="text" id="systemDcSize" name="systemDcSize" value="1000" required="required" pattern="^\d+\.?\d*?$">
+			</div>
+			<div class="shorterInput">
+				<label class="tooltip">System Size (kW-AC)<span class="classic">Size of the inverter in kW-AC for the system. The SUNDA project recommends an inverter size 1.4 times larger than the panel size. E.g. the SUNDA 1 MW-DC template system has inverters rated for 1.4 MW-AC.</span></label>
+				<input type="text" id="systemSize" name="systemSize" value="1400" required="required" pattern="^\d+\.?\d*?$">
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">PV System Specs</p>
+			</div>
+			<hr>
+			<div class="shorterInput">
+				<label class="tooltip">PV Degradation (%/year)<span class="classic">Please note that the default is 0.5% year, not 50% per year.</span></label>
+				<input type="text" id="degradation" name="degradation" value="0.5" required="required" pattern="^\d+\.?\d*?$">
+			</div>
+			<div class="shorterInput">
+				<label class="tooltip">Tilt = Latitude<span class="classic">If True, then the tilt value will be the same as the Climate City's latitude. If False, you can pick your own value in the next input field (manual tilt).</span></label>
+				<select id="tilt_eq_lat" name="tilt_eq_lat">
+					<option value="1" selected="selected">True</option>
+					<option value="0">False</option>
+				</select>
+			</div>
+			<div class="shorterInput">
+				<label class="tooltip">Manual Tilt (degrees)<span class="classic">Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
+				<input type="text" id="manualTilt" name="manualTilt" value="0" pattern="^\d*$" required="required"/>
+			</div>
+			<div class="shorterInput">
+				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
+				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required" />
+			</div>
+			<div class="shorterInput">
+				<label class="tooltip">Inverter Efficiency (%)<span class="classic">This value will be available on the inverter datasheet.</span></label>
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="96" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
+			</div>
+			<div class="shorterInput">
+				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes in to account losses from soiling, shading, wiring and diode losses, etc.</span></label>
+				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" value="87" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Construction Costs</p>
+			</div>
+			<hr>
+			<div class="shorterInput">
 				<label>Land (acres)</label>
 				<input type="text" id="landAmount" name="landAmount" value="6" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label>Land Acquisition</label>
 				<select id="landOwnership" name="landOwnership">
 					<option value="Owned">Owned</option>
@@ -75,118 +114,83 @@
 					<option value="Leased">Leased</option>
 				</select>
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label>Land Cost ($/acre)</label>
 				<input type="text" id="costAcre" name="costAcre" value="10000" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">System Size (kW-AC)<span class="classic">Size of the inverter in kW-AC for the system.</span></label>
-				<input type="text" id="systemSize" name="systemSize" value="1000" required="required" pattern="^\d+\.?\d*?$">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Panel Size (kW-DC)<span class="classic">Nameplate generation for system panels in kW-DC.</span></label>
-				<input type="text" id="systemDcSize" name="systemDcSize" value="1400" required="required" pattern="^\d+\.?\d*?$">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">PV Degradation (%/year)<span class="classic">Please note that the default is 0.5% year, not 50% per year.</span></label>
-				<input type="text" id="degradation" name="degradation" value="0.5" required="required" pattern="^\d+\.?\d*?$">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Tilt = Latitude<span class="classic">If True, then the tilt value will be the same as the Climate City's latitude. If False, you can pick your own value in the next input field (manual tilt).</span></label>
-				<select id="tilt_eq_lat" name="tilt_eq_lat">
-					<option value="1" selected="selected">True</option>
-					<option value="0">False</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Manual Tilt (degrees)<span class="classic">Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
-				<input type="text" id="manualTilt" name="manualTilt" value="0" pattern="^\d*$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
-				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required" />
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Inverter Efficiency (%)<span class="classic">This value will be available on the inverter datasheet.</span></label>
-				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="96" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes in to account losses from soiling, shading, wiring and diode losses, etc.</span></label>
-				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" value="89" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
-			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label>Module Cost ($/Wp)</label>
 				<input type="text" id="moduleCost" name="moduleCost" value="0.70" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label>Racking Cost ($/Wp)</label>
 				<input type="text" id="rackCost" name="rackCost" value="0.137" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Inverter Unit Cost ($)<span class="classic">For each 500 kW-AC inverter, the SUNDA template cost is $107,000. For smaller systems, a 250kW-AC inverter is available at $61,963.</span></label>
 				<input type="text" id="inverterCost" name="inverterCost" value="107000" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Mechanical Labor ($/hr)<span class="classic">For installation.</span></label>
 				<input type="text" id="mechLabor" name="mechLabor" value="35" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Electrical Labor ($/hr)<span class="classic">For installation.</span></label>
 				<input type="text" id="elecLabor" name="elecLabor" value="50" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Project Management Cost ($)<span class="classic">Covers the cost for co-op time and expense in doing the project.</span></label>
 				<input type="text" id="pmCost" name="pmCost" value="15000" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Interconnect Costs ($)<span class="classic">Costs for connecting from the medium voltage transformer to the substation.</span></label>
 				<input type="text" id="interCost" name="interCost" value="25000" pattern="^\d+\.?\d*$" required="required">
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Development Costs (%)<span class="classic">The legal costs associated with setting up such a system. If doing a Tax Equity flip this may be as much as 5%.</span></label>
 				<input type="text" id="devCost" name="devCost" value="2" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">EPC Markup (%)<span class="classic">Costs as a percent of hardware costs. Usually 10% of Hardware Costs, but since they can allow the co-op to purchase PV modules, inverters and racking from National Discount program and only charge the 10% on the balance of the system hardware needed to complete, this can also be 3% in that case.</span></label>
 				<input type="text" id="EPCRate" name="EPCRate" pattern="^(100|\d\d|\d)(\.\d+)?$" value="3" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Distribution Adder ($/kWH)<span class="classic">Provides comparison for existing PV rate to existing retail rate. </span></label>
-				<input type="text" id="distAdder" name="distAdder" value="0" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financing Information</p>
 			</div>
 			<hr>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Discount Rate (%)<span class="classic">The cost of capital to the co-op. Teh default is close to the 20yr Treasury-bill rate for the project period.</span></label>
 				<input type="text" id="discRate" name="discRate" value="2.32" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Loan Interest Rate (%)<span class="classic">Loan interest rate, usually from 2.0% for RUS to 8.5% for a commercial lender.</span></label>
 				<input type="text" id="loanRate" name="loanRate" value="2.00" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">NCREB Tax Credit Rate (%)<span class="classic">The rate used by the Treasury Department to calculate the 70% interest reimbursement.</span></label>
 				<input type="text" id="NCREBRate" name="NCREBRate" value="4.06" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Tax Lease Rate (%)<span class="classic">Tax lease rate, usually utilized by the for-profit subsidiary owned by the co-op.</span></label>
 				<input type="text" id="taxLeaseRate" name="taxLeaseRate" value="8.45" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Targeted Tax Equity Return (%)<span class="classic">Tax equity return rate, typical Tax equity partners in the renewable market are looking for about 8.5%</span></label>
 				<input type="text" id="taxEquityReturn" name="taxEquityReturn" value="8.50" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
+			<div class="shorterInput">
+				<label class="tooltip">Distribution Adder ($/kWH)<span class="classic">Provides comparison for existing PV rate to existing retail rate. </span></label>
+				<input type="text" id="distAdder" name="distAdder" value="0" pattern="^\d+\.?\d*$" required="required">
+			</div>						
 			<div class="wideInput">
 				<p class="inputSectionHeader">PPA Information</p>
 			</div>
 			<hr>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">First year energy cost ($/MWh)<span class="classic">Used to compare Utility-owned facilities to 3rd party PPA offerings.  Set to 0 if unneeded.</span></label>
 				<input type="text" id="firstYearEnergyCostPPA" name="firstYearEnergyCostPPA" value="57.5" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
-			<div class="shortInput">
+			<div class="shorterInput">
 				<label class="tooltip">Annual Escalation Rate (%)<span class="classic">A fixed escalation rate at which the price will increase year to year.</span></label>
 				<input type="text" id="annualEscRatePPA" name="annualEscRatePPA" value="3.00" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
@@ -327,48 +331,6 @@
 		</div>
 		<p class="reportTitle postRun">Additional Output</p>
 		<div id="additionalOutputReport" class="content postRun" style="margin-top:5px">
-			<div class="shortInput">
-				<strong>Installed System Cost</strong>
-				<p id="totalCost"></p>
-				<script>gebi("totalCost").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.totalCost).toFixed(0))</script>
-			</div>
-			<div class="shortInput">
-				<strong>$/Wp-DC Installed</strong>
-				<p id="costWdc"></p>
-				<script>gebi("costWdc").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costWdc).toFixed(2))</script>
-			</div>
-			<div class="shortInput">
-				<strong class="tooltip" style="display:inline">Calculated Capacity Factor<span class="classic">Calculated as first year generation (kWh-AC) divided by inverters size (kW-AC).</span></strong>
-				<p id="capFactor"></p>
-				<script>gebi("capFactor").innerHTML = delimitNumbers(parseFloat(allOutputData.capFactor).toFixed(0)) +  "%"</script>
-			</div>
-			<div class="shortInput">
-				<strong>First Year System Output (MWh-AC)</strong>
-				<p id="1yearMWH"></p>
-				<script>gebi("1yearMWH").innerHTML = delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000000).toFixed(0))</script>
-			</div>
-			<div class="shortInput">
-				<strong>Length of Analysis</strong>
-				<p id="yearsOfAnalysis">25 years</p>
-			</div>
-			<div class="shortInput">
-				<strong>Climate TMY Data Selected</strong>
-				<p id="climSource"></p>
-				<script>gebi("climSource").innerHTML = allInputData.climateName</script>
-			</div>
-			<div class="shortInput">
-				<strong>PPA First Year Cost ($/MWh)</strong>
-				<p id="firstYearCostKWhPPA"></p>
-				<script>gebi("firstYearCostKWhPPA").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.firstYearCostKWhPPA).toFixed(2))</script>
-			</div>
-			<div class="shortInput">
-				<strong>PPA Yearly Escalation</strong>
-				<p id="yearlyEscalationPPA"></p>
-				<script>gebi("yearlyEscalationPPA").innerHTML = delimitNumbers(parseFloat(allOutputData.yearlyEscalationPPA).toFixed(0)) + "%"</script>
-			</div>
-		</div>
-		<p class="reportTitle postRun">Simulation Location</p>
-		<div id="locationReport" class="tightContent postRun">
 			<div id="mapHere"></div>
 			<script type="text/javascript">
 				width = 1000, height = 350
@@ -392,7 +354,8 @@
 				d3.json("{{pathPrefix}}/static/city_locations.json", function(new_us_places){
 					climate = allInputData.climateName
 					ST_NAME = climate.split("-")
-					ST = ST_NAME[0], NAME = ST_NAME[1]
+					ST = ST_NAME[0]
+					NAME = ST_NAME[1].replace("_"," ")
 					my_coords = projection(new_us_places[ST][NAME])
 					r = 5
 					circle = svg.append("circle")
@@ -402,6 +365,50 @@
 						.attr("class", "HighlightCircle")
 					circle.append("svg:title").text(climate)})
 			</script>
+			<div class="shorterInput">
+				<strong>Installed System Cost</strong>
+				<p id="totalCost"></p>
+				<script>gebi("totalCost").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.totalCost).toFixed(0))</script>
+			</div>
+			<div class="shorterInput">
+				<strong>$/Wp-DC Installed</strong>
+				<p id="costWdc"></p>
+				<script>gebi("costWdc").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costWdc).toFixed(2))</script>
+			</div>
+			<div class="shorterInput">
+				<strong class="tooltip" style="display:inline">Calculated Capacity Factor<span class="classic">Calculated as first year generation (kWh-AC) divided by inverters size (kW-AC).</span></strong>
+				<p id="capFactor"></p>
+				<script>gebi("capFactor").innerHTML = delimitNumbers(parseFloat(allOutputData.capFactor).toFixed(0)) +  "%"</script>
+			</div>
+			<div class="shorterInput">
+				<strong>Percentage Clipping</strong>
+				<p id="perClip"></p>
+				<script type="text/javascript">gebi("perClip").innerHTML = (parseFloat(allOutputData.percentClipped).toFixed(1)) + "%"</script>
+			</div>
+			<div class="shorterInput">
+				<strong>First Year System Output (MWh-AC)</strong>
+				<p id="1yearMWH"></p>
+				<script>gebi("1yearMWH").innerHTML = delimitNumbers((parseFloat(allOutputData.oneYearGenerationWh)/1000000).toFixed(0))</script>
+			</div>
+			<div class="shorterInput">
+				<strong>Length of Analysis</strong>
+				<p id="yearsOfAnalysis">25 years</p>
+			</div>
+			<div class="shorterInput">
+				<strong>Climate TMY Data Selected</strong>
+				<p id="climSource"></p>
+				<script>gebi("climSource").innerHTML = allInputData.climateName</script>
+			</div>
+			<div class="shorterInput">
+				<strong>PPA First Year Cost ($/MWh)</strong>
+				<p id="firstYearCostKWhPPA"></p>
+				<script>gebi("firstYearCostKWhPPA").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.firstYearCostKWhPPA).toFixed(2))</script>
+			</div>
+			<div class="shorterInput">
+				<strong>PPA Yearly Escalation</strong>
+				<p id="yearlyEscalationPPA"></p>
+				<script>gebi("yearlyEscalationPPA").innerHTML = delimitNumbers(parseFloat(allOutputData.yearlyEscalationPPA).toFixed(0)) + "%"</script>
+			</div>
 		</div>
 		<p class="reportTitle postRun">Download Full Model</p>
 		<div id="fullModelDownload" class="content postRun" style="margin-top:5px">
