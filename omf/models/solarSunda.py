@@ -927,7 +927,7 @@ def _tests():
 		"simLengthUnits": "hours",
 		"modelType": "solarSunda",
 		#Cooperative
-		"zipCode": "90210",
+		"zipCode": "64735",
 		"systemSize":"1000",
 		"systemDcSize":"1400",
 		"landOwnership": "Owned", #Leased, Purchased, or Owned
