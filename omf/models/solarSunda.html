@@ -24,7 +24,7 @@
 		<p id="titleText">New Solar SUNDA Financial Model</p>
 	</div>
 	<p class="reportTitle">Model Description</p>
-	<div id="input" class="content">
+	<div id="input" class="content" style="page-break-after:always">
 		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %}action="/runModel/"{% endif %} method="post">
 			<div class="shorterInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarSunda">Help?</a> </label>
@@ -330,10 +330,10 @@
 			</div>
 		</div>
 		<p class="reportTitle postRun">Additional Output</p>
-		<div id="additionalOutputReport" class="content postRun" style="margin-top:5px">
-			<div id="mapHere"></div>
-			<script type="text/javascript">
-				width = 1000, height = 350
+		<div id="additionalOutputReport" class="content postRun" style="margin-top:5px; height:300px">
+			<div id="mapHere" style="display:inline-block; width:490px; height:280px; float:left"></div>
+			<script>
+				width = 490, height = 280
 				projection = d3.geo.albersUsa().scale(600).translate([width/2, height/2])
 				path = d3.geo.path()
 					.projection(projection)
