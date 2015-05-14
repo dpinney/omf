@@ -60,12 +60,12 @@
 				<input type="text" id="zipCode" name="zipCode" value="90210" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
 			<div class="shorterInput">
-				<label class="tooltip">System Panel Size (kW-DC)<span class="classic">Nameplate generation for system panels in kW-DC.</span></label>
-				<input type="text" id="systemDcSize" name="systemDcSize" value="1000" required="required" pattern="^\d+\.?\d*?$">
+				<label class="tooltip">System Panel Size (kW-DC)<span class="classic">Nameplate generation for system panels in kW-DC. The SUNDA project recommends panel size 1.4 times larger than the inverter size. E.g. the SUNDA 1 MW-DA template system has panels sized at 1.4 MW-DC nameplate.</span></label>
+				<input type="text" id="systemDcSize" name="systemDcSize" value="1400" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shorterInput">
-				<label class="tooltip">System Size (kW-AC)<span class="classic">Size of the inverter in kW-AC for the system. The SUNDA project recommends an inverter size 1.4 times larger than the panel size. E.g. the SUNDA 1 MW-DC template system has inverters rated for 1.4 MW-AC.</span></label>
-				<input type="text" id="systemSize" name="systemSize" value="1400" required="required" pattern="^\d+\.?\d*?$">
+				<label class="tooltip">System Inverter Size (kW-AC)<span class="classic">Size of the inverter in kW-AC for the system. </span></label>
+				<input type="text" id="systemSize" name="systemSize" value="1000" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">PV System Specs</p>
@@ -259,10 +259,10 @@
 						<th>Direct Loan</th>
 						<td id="levelCostDirect"></td>
 						<script>gebi("levelCostDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.levelCostDirect).toFixed(2))</script>
-						<td id="cost10WPanelDirect"></td>
-						<script>gebi("cost10WPanelDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelDirect).toFixed(2))</script>
 						<td id="costPanelDirect"></td>
 						<script>gebi("costPanelDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.costPanelDirect).toFixed(2))</script>
+						<td id="cost10WPanelDirect"></td>
+						<script>gebi("cost10WPanelDirect").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.cost10WPanelDirect).toFixed(2))</script>
 					</tr>
 					<tr>
 						<th>NCREBs Financing</th>
