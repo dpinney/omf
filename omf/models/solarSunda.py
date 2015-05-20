@@ -28,7 +28,7 @@ def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
-	# Delete output file every run if it exists
+	# Delete output file every run if it exists.
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
 	except Exception, e:
@@ -194,17 +194,13 @@ def run(modelDir, inputDict):
 		outData["totalCost"] = totalCosts + totalFees + float(inputDict.get("interCost",0))
 
 		#Add to Pie Chart
-		#  TODO: display costs on piechart too.
-		outData["costsPieChart"] = []
-		outData["costsPieChart"].append(["Land", landCosts])
-		outData["costsPieChart"].append(["Design/Engineering/PM/EPC", designCosts])
-		outData["costsPieChart"].append(["PV Modules", pvModules*shipping])
-		outData["costsPieChart"].append(["Racking", racking*shipping])
-		outData["costsPieChart"].append(["Inverters & Switchgear", (inverters+gear)*shipping])
-		BOS = (hardwareCosts - pvModules*shipping - racking*shipping - (inverters+gear)*shipping)
-		outData["costsPieChart"].append(["BOS", BOS])
-		siteprepConstrInstall = (siteMaterial + constrEquip) + (siteLabor + installCosts)
-		outData["costsPieChart"].append(["Site Prep, Constr. Eq. and Installation", siteprepConstrInstall])
+		outData["costsPieChart"] = [["Land", landCosts],
+			["Design/Engineering/PM/EPC", designCosts],
+			["PV Modules", pvModules*shipping],
+			["Racking", racking*shipping],
+			["Inverters & Switchgear", (inverters+gear)*shipping],
+			["BOS", hardwareCosts - pvModules*shipping - racking*shipping - (inverters+gear)*shipping],
+			["Site Prep, Constr. Eq. and Installation", (siteMaterial + constrEquip) + (siteLabor + installCosts)]]
 
 		# Cost per Wdc
 		outData["costWdc"] = totalCosts / (arraySizeAC * 1000 * 1.39)
