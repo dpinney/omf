@@ -42,24 +42,24 @@ def run(modelDir, inputDict):
 		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 			json.dump(inputDict, inputFile, indent = 4)
 		#Set static input data
-		inputDict["simLength"] = "8760"
-		inputDict["simStartDate"] = "2013-01-01"
-		inputDict["simLengthUnits"] = "hours"
-		inputDict["modelType"] = "solarSunda"
+		simLength = 8760
+		simStartDate = "2013-01-01"
+		# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html
+		startDateTime = simStartDate + " 00:00:00 UTC"		
+		simLengthUnits = "hours"
 		# Associate zipcode to climate data
-		inputDict["climateName"], latforpvwatts = zipCodeToclimateName(inputDict["zipCode"])
-		inputDict["panelSize"] = 305
+		climateName, latforpvwatts = zipCodeToclimateName(inputDict["zipCode"])
+		panelSize = 305
 		arraySizeAC = float(inputDict.get("systemSize",0))
 		arraySizeDC = float(inputDict.get("systemDcSize",0))
 		numberPanels = (arraySizeDC * 1000/305)
 		#Use latitude for tilt
-		inputDict["trackingMode"] = "0"
-		inputDict["runTime"] = ""
-		inputDict["rotlim"] = "45.0"
-		inputDict["gamma"] = "-0.45"
+		trackingMode = 0
+		rotlim = 45.0
+		gamma = 0.45
 		numberInverters = math.ceil(arraySizeAC/1000/0.5)
 		# Copy specific climate data into model directory
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
+		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateName + ".tmy2"),
 			pJoin(modelDir, "climate.tmy2"))
 		# Ready to run
 		startTime = dt.datetime.now()
@@ -70,26 +70,21 @@ def run(modelDir, inputDict):
 		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
 		ssc.ssc_data_set_number(dat, "system_size", arraySizeDC)
 		ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("inverterEfficiency", 96))/100 * float(inputDict.get("nonInverterEfficiency", 87))/100)
-		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
+		ssc.ssc_data_set_number(dat, "track_mode", float(trackingMode))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 		# Advanced inputs with defaults.
-		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
-		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)
+		ssc.ssc_data_set_number(dat, "rotlim", float(rotlim)
+		ssc.ssc_data_set_number(dat, "gamma", float(-gamma/100)
 		ssc.ssc_data_set_number(dat, "tilt", float(inputDict.get("manualTilt",0)))
 		ssc.ssc_data_set_number(dat, "tilt_eq_lat", float(inputDict.get("tilt_eq_lat",1)))
 		# Run PV system simulation.
 		mod = ssc.ssc_module_create("pvwattsv1")
 		ssc.ssc_module_exec(mod, dat)
-		# Setting options for start time.
-		simLengthUnits = inputDict.get("simLengthUnits","hours")
-		simStartDate = inputDict.get("simStartDate", "2014-01-01")
-		# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html
-		startDateTime = simStartDate + " 00:00:00 UTC"
 		# Timestamp output.
 		outData = {}
 		outData["timeStamps"] = [dt.datetime.strftime(
 			dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") +
-			dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict.get("simLength", 8760)))]
+			dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(simLength]
 		# Geodata output.
 		outData["minLandSize"] = round((arraySizeAC/1000*5 + 1)*math.cos(math.radians(22.5))/math.cos(math.radians(latforpvwatts)),0)
 		landAmount = float(inputDict.get("landAmount", 6.0))
@@ -288,7 +283,7 @@ def run(modelDir, inputDict):
 		#Master Output [Direct Loan]
 		outData["levelCostDirect"] = Rate_Levelized_Direct
 		outData["costPanelDirect"] = abs(NPVLoanDirect/numberPanels)
-		outData["cost10WPanelDirect"] = (float(outData["costPanelDirect"])/inputDict["panelSize"])*10
+		outData["cost10WPanelDirect"] = (float(outData["costPanelDirect"])/panelSize*10
 		outData["LevelizedCosts"] = []
 		outData["LevelizedCosts"].append(["Direct Loan", Rate_Levelized_Direct])
 
@@ -408,7 +403,7 @@ def run(modelDir, inputDict):
 		#Master Output [NCREB]
 		outData["levelCostNCREB"] = Rate_Levelized_NCREB
 		outData["costPanelNCREB"] = abs(NPVLoanNCREB/numberPanels)
-		outData["cost10WPanelNCREB"] = (float(outData["costPanelNCREB"])/inputDict["panelSize"])*10
+		outData["cost10WPanelNCREB"] = (float(outData["costPanelNCREB"])/panelSize*10
 		outData["LevelizedCosts"].append(["NCREBs Financing", Rate_Levelized_NCREB])
 
 
@@ -491,7 +486,7 @@ def run(modelDir, inputDict):
 		#Master Output [Lease]
 		outData["levelCostTaxLease"] = Rate_Levelized_Lease
 		outData["costPanelTaxLease"] = abs(NPVLease/numberPanels)
-		outData["cost10WPanelTaxLease"] = (float(outData["costPanelTaxLease"])/float(inputDict["panelSize"]))*10
+		outData["cost10WPanelTaxLease"] = (float(outData["costPanelTaxLease"])/float(panelSize)*10
 		outData["LevelizedCosts"].append(["Lease Buyback", Rate_Levelized_Lease])
 
 		'''Tax Equity Flip Structure'''
@@ -612,6 +607,7 @@ def run(modelDir, inputDict):
 			json.dump(outData, outFile, indent=4)
 		# Update the runTime in the input file.
 		endTime = dt.datetime.now()
+		inputDict["runTime"] = ""		
 		inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
@@ -846,7 +842,7 @@ def taxEquityFlip(PPARateSixYearsTE, inputDict, outData, distAdderDirect, loanYe
 	#Master Output [Tax Equity]
 	outData["levelCostTaxEquity"] = Rate_Levelized_TaxEquity
 	outData["costPanelTaxEquity"] = abs(NPVLoanTaxEquity/numberPanels)
-	outData["cost10WPanelTaxEquity"] = (float(outData["costPanelTaxEquity"])/inputDict["panelSize"])*10
+	outData["cost10WPanelTaxEquity"] = (float(outData["costPanelTaxEquity"])/panelSize*10
 
 	return cumulativeIRR, Rate_Levelized_TaxEquity
 
@@ -919,9 +915,7 @@ def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	# TODO: Fix inData because it's out of date.
-	inData = {"simStartDate": "2013-01-01",
-		"simLengthUnits": "hours",
-		"modelType": "solarSunda",
+	inData = {"modelType": "solarSunda",
 		#Cooperative
 		"zipCode": "64735",
 		"systemSize":"1000",
@@ -966,11 +960,11 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	#renderAndShow(template)
+	renderAndShow(template)
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
-	# renderAndShow(template, modelDir = modelLoc)
+	renderAndShow(template, modelDir = modelLoc)
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)
