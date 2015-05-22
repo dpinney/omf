@@ -491,46 +491,10 @@ def run(modelDir, inputDict):
 
 
 			#Output Tax Equity Flip [L37]
-			for i in range (1, len(costToCustomerTaxEquity) + 1):
-				NPVLoanTaxEquity = NPVLoanTaxEquity + costToCustomerTaxEquity[i-1]/(math.pow(1+float(discRate)/100,i))
+			NPVLoanTaxEquity = npv(float(inputDict.get("discRate",0))/100, [0,0] + costToCustomerTaxEquity)
 
-			#Output - Tax Equity [F42] (Levelized Cost Three Loops)
-			revLevelizedCost = []
-			NPVRevTaxEquity = 0
-			x = 3500
-			Rate_Levelized_TaxEquity = x/100.0
-			nGoal = - NPVLoanTaxEquity
-			nValue = NPVRevTaxEquity
-			#First Loop
-			while ((x < 20000) and (nValue < nGoal)):
-				NPVRevTaxEquity = 0
-				revLevelizedCost = []
-				for i in range (1, len(allYearGenerationMWh)+1):
-					revLevelizedCost.append(Rate_Levelized_TaxEquity*allYearGenerationMWh[i])
-					NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+float(discRate)/100,i))
-				nValue = NPVRevTaxEquity
-				x = x + 100.0
-				Rate_Levelized_TaxEquity = x/100.0
-			#Second Loop
-			while ((x > 2500) and (nValue > nGoal)):
-				NPVRevTaxEquity = 0
-				revLevelizedCost = []
-				for i in range (1, len(allYearGenerationMWh)+1):
-					revLevelizedCost.append(Rate_Levelized_TaxEquity*allYearGenerationMWh[i])
-					NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+float(discRate)/100,i))
-				nValue = NPVRevTaxEquity
-				x = x - 10.0
-				Rate_Levelized_TaxEquity = x/100.0
-			#Third Loop
-			while ((x < 20000) and (nValue < nGoal)):
-				NPVRevTaxEquity = 0
-				revLevelizedCost = []
-				for i in range (1, len(allYearGenerationMWh)+1):
-					revLevelizedCost.append(Rate_Levelized_TaxEquity*allYearGenerationMWh[i])
-					NPVRevTaxEquity = NPVRevTaxEquity + revLevelizedCost[i-1]/(math.pow(1+float(discRate)/100,i))
-				nValue = NPVRevTaxEquity
-				x = x + 1.0
-				Rate_Levelized_TaxEquity = x/100.0
+			#Output - Tax Equity [F42] 
+			Rate_Levelized_TaxEquity = -NPVLoanTaxEquity/NPVallYearGenerationMWh
 
 			#TEI Calcs - Achieved Return [AW 21]
 				#[AK]
