@@ -192,7 +192,7 @@ def run(modelDir, inputDict):
 		totalFees= float(inputDict.get("devCost",0))/100 * totalCosts
 		outData["totalCost"] = totalCosts + totalFees + float(inputDict.get("interCost",0))
 
-		#Add to Pie Chart
+		# Add to Pie Chart
 		outData["costsPieChart"] = [["Land", landCosts],
 			["Design/Engineering/PM/EPC", designCosts],
 			["PV Modules", pvModules*shipping],
@@ -845,7 +845,7 @@ def _tests():
 		"discRate": "2.32",
 		"loanRate": "2.00",
 		"NCREBRate": "4.06",
-		"taxLeaseRate": "7.4",
+		"taxLeaseRate": "-4.63",
 		"taxEquityReturn": "8.50",
 		#PPA Information
 		"firstYearEnergyCostPPA": "57.5",
@@ -868,11 +868,11 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	renderAndShow(template)
+	# renderAndShow(template)
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
-	renderAndShow(template, modelDir = modelLoc)
+	# renderAndShow(template, modelDir = modelLoc)
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)
