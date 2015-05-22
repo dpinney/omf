@@ -118,6 +118,8 @@ def run(modelDir, inputDict):
 		loanYears = 25
 		outData["allYearGenerationMWh"] = {}
 		outData["allYearGenerationMWh"][1] = float(outData["oneYearGenerationWh"])/1000000
+		# print 'DeL ME'
+		# outData["allYearGenerationMWh"][1] = float(2035.8624)
 		
 		for i in range (2, loanYears+1):
 			outData["allYearGenerationMWh"][i] = float(outData["allYearGenerationMWh"][i-1]) * (1 - float(inputDict.get("degradation", 0.5))/100)
@@ -245,14 +247,12 @@ def run(modelDir, inputDict):
 			distAdderDirect.append(float(inputDict.get("distAdder",0))*outData["allYearGenerationMWh"][i])
 			netCoopPaymentsDirect.append(OMInsuranceETCDirect[i-1] + netFinancingCostsDirect)
 			costToCustomerDirect.append((netCoopPaymentsDirect[i-1] - distAdderDirect[i-1]))
-		NPVLoanDirect = 0
-		for i in range (1, len(outData["allYearGenerationMWh"])+1):
-			NPVLoanDirect = NPVLoanDirect + costToCustomerDirect[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
+		
 
 		#Output - Direct Loan [F53] 
-		NPVallYearGenerationMWh = 0
-		for i in range (1, len(outData["allYearGenerationMWh"])+1):
-			NPVallYearGenerationMWh = NPVallYearGenerationMWh + outData["allYearGenerationMWh"][i]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
+		NPVLoanDirect = npv(float(inputDict.get("discRate",0))/100, [0,0] + costToCustomerDirect)
+		NPVallYearGenerationMWh = npv(float(inputDict.get("discRate",0))/100, [0,0] + outData["allYearGenerationMWh"].values())
+
 		Rate_Levelized_Direct = -NPVLoanDirect/NPVallYearGenerationMWh	
 
 		#Master Output [Direct Loan]
@@ -333,8 +333,7 @@ def run(modelDir, inputDict):
 		costToCustomerNCREB.append(float(netCoopPaymentsNCREB[i]))
 
 		#Output - NCREBs [H44]
-		for i in range (1, len(costToCustomerNCREB)+1):
-			NPVLoanNCREB = NPVLoanNCREB + costToCustomerNCREB[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
+		NPVLoanNCREB = npv(float(inputDict.get("discRate", 0))/100, [0,0]+costToCustomerNCREB)
 
 		#Output - NCREBs [F48] 
 		Rate_Levelized_NCREB = -NPVLoanNCREB/NPVallYearGenerationMWh	
@@ -344,7 +343,6 @@ def run(modelDir, inputDict):
 		outData["costPanelNCREB"] = abs(NPVLoanNCREB/numberPanels)
 		outData["cost10WPanelNCREB"] = (float(outData["costPanelNCREB"])/panelSize)*10
 		outData["LevelizedCosts"].append(["NCREBs Financing", Rate_Levelized_NCREB])
-
 
 		### Lease Buyback Structure
 		#Output - Lease [C]
@@ -383,7 +381,7 @@ def run(modelDir, inputDict):
 			costToCustomerLease.append(netCoopPaymentsLease[i-1]-distAdderLease[i-1])
 
 		#Output - Lease [H44]. Note the extra year at the zero point to get the discounting right.
-		NPVLease = npv(float(inputDict.get("discRate", 0))/100, [0]+costToCustomerLease)
+		NPVLease = npv(float(inputDict.get("discRate", 0))/100, [0,0]+costToCustomerLease)
 		#Output - Lease [H49] (Levelized Cost Three Loops)
 		Rate_Levelized_Lease = -NPVLease/NPVallYearGenerationMWh
 
