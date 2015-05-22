@@ -77,6 +77,7 @@ def run(modelDir, inputDict):
 		ssc.ssc_data_set_number(dat, "gamma", float(-gamma/100))
 		ssc.ssc_data_set_number(dat, "tilt", float(inputDict.get("manualTilt",0)))
 		ssc.ssc_data_set_number(dat, "tilt_eq_lat", float(inputDict.get("tilt_eq_lat",1)))
+
 		# Run PV system simulation.
 		mod = ssc.ssc_module_create("pvwattsv1")
 		ssc.ssc_module_exec(mod, dat)
@@ -368,27 +369,27 @@ def run(modelDir, inputDict):
 
 		## Tax Lease Formulas
 		#Output - Lease [D]
-		leaseRate = float(inputDict.get("taxLeaseRate",0))/100.0
 		for i in range (0, 12):
+			leaseRate = float(inputDict.get("taxLeaseRate",0))/100.0
+			if i>8: # Special behavior in later years:
+				leaseRate = leaseRate - 0.0261
 			leasePaymentsLease.append(-1*projectCostsLease/((1.0-(1.0/(1.0+leaseRate)**12))/(leaseRate)))
+
 		# Last year is different.
 		leasePaymentsLease[11] += -0.2*projectCostsLease
 		for i in range (12, 25):
 			leasePaymentsLease.append(0)
 
 		#Output - Lease [G]	[H]
-		costToCustomerLeaseSum = 0
 		for i in range (1, len(outData["allYearGenerationMWh"])+1):
 			netCoopPaymentsLease.append(OMInsuranceETCLease[i-1]+leasePaymentsLease[i-1])
 			costToCustomerLease.append(netCoopPaymentsLease[i-1]-distAdderLease[i-1])
-			costToCustomerLeaseSum = costToCustomerLeaseSum + costToCustomerLease[i-1]
 
-		#Output - Lease [H44]
-		NPVLease = costToCustomerLeaseSum/(math.pow(1+float(inputDict.get("discRate", 0))/100,1))
-
+		#Output - Lease [H44]. Note the extra year at the zero point to get the discounting right.
+		NPVLease = npv(float(inputDict.get("discRate", 0))/100, [0]+costToCustomerLease)
 		#Output - Lease [H49] (Levelized Cost Three Loops)
-		Rate_Levelized_Lease = -NPVLease/NPVallYearGenerationMWh	
-	
+		Rate_Levelized_Lease = -NPVLease/NPVallYearGenerationMWh
+
 		#Master Output [Lease]
 		outData["levelCostTaxLease"] = Rate_Levelized_Lease
 		outData["costPanelTaxLease"] = abs(NPVLease/numberPanels)
