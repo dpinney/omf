@@ -259,8 +259,6 @@ def run(modelDir, inputDict):
 		outData["levelCostDirect"] = Rate_Levelized_Direct
 		outData["costPanelDirect"] = abs(NPVLoanDirect/numberPanels)
 		outData["cost10WPanelDirect"] = (float(outData["costPanelDirect"])/panelSize)*10
-		outData["LevelizedCosts"] = []
-		outData["LevelizedCosts"].append(["Direct Loan", Rate_Levelized_Direct])
 
 		### NCREBs Financing
 		#Output - NCREBs [C]
@@ -342,7 +340,6 @@ def run(modelDir, inputDict):
 		outData["levelCostNCREB"] = Rate_Levelized_NCREB
 		outData["costPanelNCREB"] = abs(NPVLoanNCREB/numberPanels)
 		outData["cost10WPanelNCREB"] = (float(outData["costPanelNCREB"])/panelSize)*10
-		outData["LevelizedCosts"].append(["NCREBs Financing", Rate_Levelized_NCREB])
 
 		### Lease Buyback Structure
 		#Output - Lease [C]
@@ -389,7 +386,6 @@ def run(modelDir, inputDict):
 		outData["levelCostTaxLease"] = Rate_Levelized_Lease
 		outData["costPanelTaxLease"] = abs(NPVLease/numberPanels)
 		outData["cost10WPanelTaxLease"] = (float(outData["costPanelTaxLease"])/float(panelSize))*10
-		outData["LevelizedCosts"].append(["Lease Buyback", Rate_Levelized_Lease])
 
 		### Tax Equity Flip Structure
 		# Tax Equity Flip Function
@@ -573,7 +569,7 @@ def run(modelDir, inputDict):
 
 			return cumulativeIRR, Rate_Levelized_TaxEquity, NPVLoanTaxEquity
 
-
+		# TODO: Make this simpler
 		#Four Function Calls Below Call Mega Sized Tax Equity Function Above
 		z = 3000
 		PPARateSixYearsTE = z/100
@@ -612,8 +608,6 @@ def run(modelDir, inputDict):
 			nValue = achievedReturnTE
 			z = z - 1
 			PPARateSixYearsTE = z/100.0
-		#Return Levelized Cost Output
-		outData["LevelizedCosts"].append(["Tax Equity Flip", Rate_Levelized_TaxEquity])
 
 		#Master Output [Tax Equity]
 		outData["levelCostTaxEquity"] = Rate_Levelized_TaxEquity
@@ -649,6 +643,12 @@ def run(modelDir, inputDict):
 		outData["levelCostPPA"] = Rate_Levelized_PPA
 		outData["firstYearCostKWhPPA"] = float(inputDict.get("firstYearEnergyCostPPA",0))
 		outData["yearlyEscalationPPA"] = float(inputDict.get("annualEscRatePPA", 0))
+
+		# Add all Levelized Costs to Output
+		outData["LevelizedCosts"] = [["Direct Loan", Rate_Levelized_Direct],
+			["NCREBs Financing", Rate_Levelized_NCREB],
+			["Lease Buyback", Rate_Levelized_Lease],
+			["Tax Equity Flip", Rate_Levelized_TaxEquity]]
 		outData["LevelizedCosts"].append({"name":"PPA Comparison", "y":Rate_Levelized_PPA, "color":"gold"})
 
 		# Stdout/stderr.
