@@ -250,41 +250,11 @@ def run(modelDir, inputDict):
 		for i in range (1, len(outData["allYearGenerationMWh"])+1):
 			NPVLoanDirect = NPVLoanDirect + costToCustomerDirect[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
 
-		#Output - Direct Loan [F53] (Levelized Cost Three Loops)
-		revLevelizedCost = []
-		NPVRevDirect = 0
-		x = 3500
-		Rate_Levelized_Direct = x/100.0
-		nGoal = - NPVLoanDirect
-		nValue = NPVRevDirect
-		#First Loop
-		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevDirect = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_Direct*outData["allYearGenerationMWh"][i])
-				NPVRevDirect = NPVRevDirect + revLevelizedCost[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
-			nValue = NPVRevDirect
-			x = x + 100.0
-			Rate_Levelized_Direct = x/100.0
-		while ((x > 2500) and (nValue > nGoal)):
-			NPVRevDirect = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_Direct*outData["allYearGenerationMWh"][i])
-				NPVRevDirect = NPVRevDirect + revLevelizedCost[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
-			nValue = NPVRevDirect
-			x = x - 10.0
-			Rate_Levelized_Direct = x/100.0
-		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevDirect = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_Direct*outData["allYearGenerationMWh"][i])
-				NPVRevDirect = NPVRevDirect + revLevelizedCost[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
-			nValue = NPVRevDirect
-			x = x + 1.0
-			Rate_Levelized_Direct = x/100.0
+		#Output - Direct Loan [F53] 
+		NPVallYearGenerationMWh = 0
+		for i in range (1, len(outData["allYearGenerationMWh"])+1):
+			NPVallYearGenerationMWh = NPVallYearGenerationMWh + outData["allYearGenerationMWh"][i]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
+		Rate_Levelized_Direct = -NPVLoanDirect/NPVallYearGenerationMWh	
 
 		#Master Output [Direct Loan]
 		outData["levelCostDirect"] = Rate_Levelized_Direct
@@ -368,43 +338,8 @@ def run(modelDir, inputDict):
 		for i in range (1, len(costToCustomerNCREB)+1):
 			NPVLoanNCREB = NPVLoanNCREB + costToCustomerNCREB[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
 
-		#Output - NCREBs [F48] (Levelized Cost Three Loops)
-		revLevelizedCost = []
-		NPVRevNCREB = 0
-		x = 3500
-		Rate_Levelized_NCREB = x/100.0
-		nGoal = - NPVLoanNCREB
-		nValue = NPVRevNCREB
-		#First Loop
-		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevNCREB = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_NCREB*outData["allYearGenerationMWh"][i])
-				NPVRevNCREB = NPVRevNCREB + revLevelizedCost[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
-			nValue = NPVRevNCREB
-			x = x + 100.0
-			Rate_Levelized_NCREB = x/100.0
-		#Second Loop
-		while ((x > 2500) and (nValue > nGoal)):
-			NPVRevNCREB = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_NCREB*outData["allYearGenerationMWh"][i])
-				NPVRevNCREB = NPVRevNCREB + revLevelizedCost[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
-			nValue = NPVRevNCREB
-			x = x - 10.0
-			Rate_Levelized_NCREB = x/100.0
-		#Third Loop
-		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevNCREB = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_NCREB*outData["allYearGenerationMWh"][i])
-				NPVRevNCREB = NPVRevNCREB + revLevelizedCost[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
-			nValue = NPVRevNCREB
-			x = x + 1.0
-			Rate_Levelized_NCREB = x/100.0
+		#Output - NCREBs [F48] 
+		Rate_Levelized_NCREB = -NPVLoanNCREB/NPVallYearGenerationMWh	
 
 		#Master Output [NCREB]
 		outData["levelCostNCREB"] = Rate_Levelized_NCREB
@@ -451,43 +386,8 @@ def run(modelDir, inputDict):
 		#Output - Lease [H44]
 		NPVLease = costToCustomerLeaseSum/(math.pow(1+float(inputDict.get("discRate", 0))/100,1))
 
-		#Output - Lease [H49] (Levelized Cost Three Loops)
-		revLevelizedCost = []
-		NPVRevLease = 0
-		x = 3500
-		Rate_Levelized_Lease = x/100.0
-		nGoal = - NPVLease
-		nValue = NPVRevLease
-		#First Loop
-		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevLease = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_Lease*outData["allYearGenerationMWh"][i])
-				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]
-			nValue = NPVRevLease
-			x = x + 100.0
-			Rate_Levelized_Lease = x/100.0
-		#Second Loop
-		while ((x > 2500) and (nValue > nGoal)):
-			NPVRevLease = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_Lease*outData["allYearGenerationMWh"][i])
-				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]
-			nValue = NPVRevLease
-			x = x - 10.0
-			Rate_Levelized_Lease = x/100.0
-		#Third Loop
-		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevLease = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_Lease*outData["allYearGenerationMWh"][i])
-				NPVRevLease = NPVRevLease + revLevelizedCost[i-1]
-			nValue = NPVRevLease
-			x = x + 1.0
-			Rate_Levelized_Lease = x/100.0
+		#Output - Lease [H49] 
+		Rate_Levelized_NCREB = -NPVLease/NPVallYearGenerationMWh	
 
 		#Master Output [Lease]
 		outData["levelCostTaxLease"] = Rate_Levelized_Lease
