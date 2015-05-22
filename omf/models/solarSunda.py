@@ -118,8 +118,8 @@ def run(modelDir, inputDict):
 		loanYears = 25
 		outData["allYearGenerationMWh"] = {}
 		outData["allYearGenerationMWh"][1] = float(outData["oneYearGenerationWh"])/1000000
-		print 'DELETEME'
-		outData["allYearGenerationMWh"][1] = float(2035.8624)
+		# print 'DELETEME' 
+		# outData["allYearGenerationMWh"][1] = float(2035.8624)
 		
 		for i in range (2, loanYears+1):
 			outData["allYearGenerationMWh"][i] = float(outData["allYearGenerationMWh"][i-1]) * (1 - float(inputDict.get("degradation", 0.5))/100)
@@ -414,16 +414,16 @@ def run(modelDir, inputDict):
 			netCoopPaymentsTaxEquity = []
 			#Output Tax Equity Flip [L]
 			costToCustomerTaxEquity = []
-			#Output Tax Equity Flip [L37]
+			#Output Tax Equity Flip [L64]
 			NPVLoanTaxEquity = 0
-			#Output Tax Equity Flip [F42]
+			#Output Tax Equity Flip [F72]
 			Rate_Levelized_Equity = 0
 
 			## Tax Equity Flip Formulas
 			#Output Tax Equity Flip [D]
 			#TEI Calcs [E]
 			financeCostOfCashTE = 0
-			coopFinanceRateTE = 4.2/100
+			coopFinanceRateTE = 2.7/100
 			if (coopFinanceRateTE == 0):
 				financeCostOfCashTE = 0
 			else:
@@ -676,47 +676,10 @@ def run(modelDir, inputDict):
 			netCoopPaymentsPPA.append(-outData["allYearGenerationMWh"][i]*float(inputDict.get("firstYearEnergyCostPPA",0))*math.pow((1 + float(inputDict.get("annualEscRatePPA", 0))/100),(i-1)))
 			costToCustomerPPA.append(netCoopPaymentsPPA[i-1]-distAdderPPA[i-1])
 
-		#Output - PPA [H40]
-		for i in range (1, len(outData["allYearGenerationMWh"])+1):
-			NPVLoanPPA = NPVLoanPPA + costToCustomerPPA[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
-
-		#Output - PPA [F44] [I40] (Levelized Cost Three Loops)
-		revLevelizedCost = []
-		NPVRevPPA = 0
-		x = 3500
-		Rate_Levelized_PPA = x/100.0
-		nGoal = - NPVLoanPPA
-		nValue = NPVRevPPA
-		#First Loop
-		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevPPA = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_PPA*outData["allYearGenerationMWh"][i])
-				NPVRevPPA = NPVRevPPA + revLevelizedCost[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
-			nValue = NPVRevPPA
-			x = x + 100.0
-			Rate_Levelized_PPA = x/100.0
-		#Second Loop
-		while ((x > 2500) and (nValue > nGoal)):
-			NPVRevPPA = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_PPA*outData["allYearGenerationMWh"][i])
-				NPVRevPPA = NPVRevPPA + revLevelizedCost[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
-			nValue = NPVRevPPA
-			x = x - 10.0
-			Rate_Levelized_PPA = x/100.0
-		#Third Loop
-		while ((x < 20000) and (nValue < nGoal)):
-			NPVRevPPA = 0
-			revLevelizedCost = []
-			for i in range (1, len(outData["allYearGenerationMWh"])+1):
-				revLevelizedCost.append(Rate_Levelized_PPA*outData["allYearGenerationMWh"][i])
-				NPVRevPPA = NPVRevPPA + revLevelizedCost[i-1]/(math.pow(1+float(inputDict.get("discRate",0))/100,i))
-			nValue = NPVRevPPA
-			x = x + 1.0
-			Rate_Levelized_PPA = x/100.0
+		#Output - PPA [H58] 
+		NPVLoanPPA = npv(float(inputDict.get("discRate", 0))/100, [0,0]+costToCustomerPPA)
+		#Output - PPA [F65] 
+		Rate_Levelized_PPA = -NPVLoanPPA/NPVallYearGenerationMWh
 
 		#Master Output [PPA]
 		outData["levelCostPPA"] = Rate_Levelized_PPA
