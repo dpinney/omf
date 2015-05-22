@@ -118,8 +118,10 @@ def run(modelDir, inputDict):
 		loanYears = 25
 		outData["allYearGenerationMWh"] = {}
 		outData["allYearGenerationMWh"][1] = float(outData["oneYearGenerationWh"])/1000000
+		
 		for i in range (2, loanYears+1):
 			outData["allYearGenerationMWh"][i] = float(outData["allYearGenerationMWh"][i-1]) * (1 - float(inputDict.get("degradation", 0.5))/100)
+
 		# Summary of Results.
 		######
 		### Total Costs (sum of): Hardware Costs, Design/Engineering/PM/EPC/Labor Costs, Siteprep Costs, Construction Costs, Installation Costs, Land Costs
@@ -141,11 +143,7 @@ def run(modelDir, inputDict):
 		transformer = 1 * 28000
 		weatherStation = 1 * 12500
 		shipping = 1.02
-		includeModules = 1
-		if (includeModules == 1):
-			hardwareCosts = (pvModules + racking + inverters + gear + balance + combiners + wireManagement  + transformer + weatherStation) * shipping
-		else:
-			hardwareCosts = (racking + inverters + gear + balance + combiners + wireManagement  + transformer + weatherStation) * shipping + pvModules
+		hardwareCosts = (pvModules + racking + inverters + gear + balance + combiners + wireManagement  + transformer + weatherStation) * shipping
 
 		### Design/Engineering/PM/EPC/Labor Costs 
 		EPCmarkup = float(inputDict.get("EPCRate",0))/100 * hardwareCosts
@@ -263,7 +261,6 @@ def run(modelDir, inputDict):
 		outData["cost10WPanelDirect"] = (float(outData["costPanelDirect"])/panelSize)*10
 		outData["LevelizedCosts"] = []
 		outData["LevelizedCosts"].append(["Direct Loan", Rate_Levelized_Direct])
-
 
 		### NCREBs Financing
 		#Output - NCREBs [C]
@@ -828,7 +825,7 @@ def _tests():
 		#Cooperative
 		"zipCode": "64735",
 		"systemSize":"1000",
-		"systemDcSize":"1400",
+		"systemDcSize":"1390.8",
 		"landOwnership": "Owned", #Leased, Purchased, or Owned
 		"landAmount": "6",
 		"costAcre": "10000",
