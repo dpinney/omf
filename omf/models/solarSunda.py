@@ -386,9 +386,9 @@ def run(modelDir, inputDict):
 		#Output - Lease [H44]
 		NPVLease = costToCustomerLeaseSum/(math.pow(1+float(inputDict.get("discRate", 0))/100,1))
 
-		#Output - Lease [H49] 
-		Rate_Levelized_NCREB = -NPVLease/NPVallYearGenerationMWh	
-
+		#Output - Lease [H49] (Levelized Cost Three Loops)
+		Rate_Levelized_Lease = -NPVLease/NPVallYearGenerationMWh	
+	
 		#Master Output [Lease]
 		outData["levelCostTaxLease"] = Rate_Levelized_Lease
 		outData["costPanelTaxLease"] = abs(NPVLease/numberPanels)

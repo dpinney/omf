@@ -237,7 +237,7 @@
 			<div id="levelizedCostDiv" style="display:inline-block"></div>
 			<script>
 				levelizedCostChart = new Highcharts.Chart({
-					plotOptions:{column:{dataLabels:{enabled:true}, pointPadding:0.2, borderWidth:0}},
+					plotOptions:{column:{dataLabels:{enabled:true, format: '{point.y:,.2f}'}, pointPadding:0.2, borderWidth:0}},
 					xAxis:{type:'category',tickColor:'gray',lineColor:'gray',crosshair:true},
 					yAxis:{title:{text:'Levelized Cost ($/MWh)'}},
 					title:false,
