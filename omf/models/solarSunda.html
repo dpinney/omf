@@ -144,7 +144,7 @@
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Interconnect Costs ($)<span class="classic">Costs for connecting from the medium voltage transformer to the substation.</span></label>
-				<input type="text" id="interCost" name="interCost" value="37296" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="interCost" name="interCost" value="25000" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">Development Costs (%)<span class="classic">The consulting, legal and banking costs associated with setting up such a system. If doing a Tax Equity flip this may be as much as 5%.</span></label>
@@ -399,16 +399,6 @@
 				<strong>Climate TMY Data Selected</strong>
 				<p id="climSource"></p>
 				<script>gebi("climSource").innerHTML = allInputData.climateName</script>
-			</div>
-			<div class="shorterInput">
-				<strong>PPA First Year Cost ($/MWh)</strong>
-				<p id="firstYearCostKWhPPA"></p>
-				<script>gebi("firstYearCostKWhPPA").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.firstYearCostKWhPPA).toFixed(2))</script>
-			</div>
-			<div class="shorterInput">
-				<strong>PPA Yearly Escalation</strong>
-				<p id="yearlyEscalationPPA"></p>
-				<script>gebi("yearlyEscalationPPA").innerHTML = delimitNumbers(parseFloat(allOutputData.yearlyEscalationPPA).toFixed(0)) + "%"</script>
 			</div>
 		</div>
 		<p class="reportTitle postRun">Download Full Model</p>

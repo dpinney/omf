@@ -762,7 +762,7 @@ def _tests():
 		"mechLabor": "35",
 		"elecLabor": "50",
 		"devCost": "2",
-		"interCost": "37296",
+		"interCost": "25000",
 		"distAdder": "0",
 		#Financing Information
 		"discRate": "2.32",
@@ -772,7 +772,7 @@ def _tests():
 		"taxEquityReturn": "8.50",
 		#PPA Information
 		"firstYearEnergyCostPPA": "57.5",
-		"annualEscRatePPA": "2",
+		"annualEscRatePPA": "3",
 		#Misc
 		"lifeSpan": "25",
 		"degradation": "0.8",
