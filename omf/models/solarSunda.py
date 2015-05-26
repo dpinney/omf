@@ -118,8 +118,8 @@ def run(modelDir, inputDict):
 		loanYears = 25
 		outData["allYearGenerationMWh"] = {}
 		outData["allYearGenerationMWh"][1] = float(outData["oneYearGenerationWh"])/1000000
-		print 'DELETEME' 
-		outData["allYearGenerationMWh"][1] = float(2019.576)
+		# print 'DELETEME' 
+		# outData["allYearGenerationMWh"][1] = float(2019.576)
 		
 		for i in range (2, loanYears+1):
 			outData["allYearGenerationMWh"][i] = float(outData["allYearGenerationMWh"][i-1]) * (1 - float(inputDict.get("degradation", 0.8))/100)
