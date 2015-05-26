@@ -1,7 +1,7 @@
 ''' Calculate solar photovoltaic system output using our special financial model. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, math, datetime as dt
-from numpy import npv, pmt, irr
+from numpy import npv, pmt, ppmt, ipmt, irr
 from os.path import join as pJoin
 from os import walk
 from jinja2 import Template
@@ -118,8 +118,8 @@ def run(modelDir, inputDict):
 		loanYears = 25
 		outData["allYearGenerationMWh"] = {}
 		outData["allYearGenerationMWh"][1] = float(outData["oneYearGenerationWh"])/1000000
-		# print 'DELETEME' 
-		# outData["allYearGenerationMWh"][1] = float(2035.8624)
+		print 'DELETEME' 
+		outData["allYearGenerationMWh"][1] = float(2019.576)
 		
 		for i in range (2, loanYears+1):
 			outData["allYearGenerationMWh"][i] = float(outData["allYearGenerationMWh"][i-1]) * (1 - float(inputDict.get("degradation", 0.8))/100)
@@ -261,82 +261,22 @@ def run(modelDir, inputDict):
 		outData["cost10WPanelDirect"] = (float(outData["costPanelDirect"])/panelSize)*10
 
 		### NCREBs Financing
-		#Output - NCREBs [C]
-		projectCostsNCREB = 0
-		#Output - NCREBs [D]
-		netFinancingCostsNCREB = []
-		#Output - NCREBs [E]
-		OMInsuranceETCNCREB = OMInsuranceETCDirect
-		#Output - NCREBs [F]
-		distAdderNCREB = distAdderDirect
-		#Output - NCREBs [G]
-		netCoopPaymentsNCREB = []
-		#Output - NCREBs [H]
-		costToCustomerNCREB = []
-		#Output - NCREBs [H44]
-		NPVLoanNCREB = 0
-		#Output - NCREBs [F48]
-		Rate_Levelized_NCREB = 0
-
-
-		## NCREBs Formulas
-		#Output - NCREBs [D]
-		#NCREBS P&I [C7]
-		loanYearsNCREB = 52
-		#NCREBS P&I [C9]
-		payment = pmt(1.1*float(inputDict.get("NCREBRate",0))/100/2, loanYearsNCREB, -outData["totalCost"])
-		#NCREBs P&I [C]
-		#levelDebtServiceNCREBPI = 0
-		#NCREBs P&I [D]
-		princPaymentNCREBPI = []
-		#NCREBs P&I [E]
-		interestPaymentNCREBPI = []
-		#NCREBs P&I [F]
-		balanceOutstandingNCREBPI = []
-		#NCREBs P&I [I]
-		percentofTaxCreditNCREBPI = []
-		#NCREBs P&I [K]
-		netInterestNCREBPI = []
-		#NCREBs P&I [M]
-		cashflowNCREBPI = []
-		balanceOutstandingNCREBPI.append(outData["totalCost"])
-		interestPaymentNCREBPI.append(round(float(balanceOutstandingNCREBPI[0])*1.1*float(inputDict.get("NCREBRate",0))/100/2,2))
-		for i in range (0, loanYearsNCREB):
-			if (payment - float(interestPaymentNCREBPI[i]) > float(balanceOutstandingNCREBPI[i])):
-				princPaymentNCREBPI.append(float(balanceOutstandingNCREBPI[i]))
-			else:
-				princPaymentNCREBPI.append(payment - float(interestPaymentNCREBPI[i]))
-			balanceOutstandingNCREBPI.append(float(balanceOutstandingNCREBPI[i]) - float(princPaymentNCREBPI[i]))
-			if (i+1 >= 43):
-				percentofTaxCreditNCREBPI.append(round(float(balanceOutstandingNCREBPI[i])*.03213/2,2))
-			else:
-				percentofTaxCreditNCREBPI.append(round(float(balanceOutstandingNCREBPI[i])*0.7*float(inputDict.get("NCREBRate",0))/100/2,2))
-			if (i+1 >= 50):
-				interestPaymentNCREBPI.append(round(float(balanceOutstandingNCREBPI[i+1])*1.1*float(inputDict.get("NCREBRate",0))/100/4,2))
-				netInterestNCREBPI.append(float(interestPaymentNCREBPI[i]) - float(percentofTaxCreditNCREBPI[i]))
-				cashflowNCREBPI.append(float(princPaymentNCREBPI[i]) + float(netInterestNCREBPI[i]))
-			else:
-				interestPaymentNCREBPI.append(round(float(balanceOutstandingNCREBPI[i+1])*1.1*float(inputDict.get("NCREBRate",0))/100/2,2))
-				netInterestNCREBPI.append(float(interestPaymentNCREBPI[i]) - float(percentofTaxCreditNCREBPI[i]))
-				cashflowNCREBPI.append(float(princPaymentNCREBPI[i]) + float(netInterestNCREBPI[i]))
-			if (i % 2):
-				netFinancingCostsNCREB.append(float(cashflowNCREBPI[i-1]) + float(cashflowNCREBPI[i]))
-		levelDebtServiceNCREBPI = princPaymentNCREBPI[0] + interestPaymentNCREBPI[0]
-
-		#Output - NCREBs [G] [H] - Total Net Coop Payments & Cost to Customer
+		ncrebsRate = float(inputDict.get("NCREBRate",4.060))/100
+		ncrebBorrowingRate = 1.1 * ncrebsRate
+		ncrebPaymentPeriods = 44
+		ncrebCostToCustomer = []
 		for i in range (1, len(outData["allYearGenerationMWh"])+1):
-			netCoopPaymentsNCREB.append(float(OMInsuranceETCNCREB[i-1]) - float(netFinancingCostsNCREB[i-1]))
-			costToCustomerNCREB.append((float(netCoopPaymentsNCREB[i-1]) - float(distAdderNCREB[i-1])))
-		netCoopPaymentsNCREB.append(-float(netFinancingCostsNCREB[i]))
-		costToCustomerNCREB.append(float(netCoopPaymentsNCREB[i]))
-
-		#Output - NCREBs [H44]
-		NPVLoanNCREB = npv(float(inputDict.get("discRate", 0))/100, [0,0]+costToCustomerNCREB)
-
-		#Output - NCREBs [F48] 
+			coopLoanPayment = 2 * pmt(ncrebBorrowingRate/2.0, ncrebPaymentPeriods, outData["totalCost"]) if i <= ncrebPaymentPeriods / 2 else 0
+			ncrebsCredit = -0.7 * (ipmt(ncrebsRate / 2, 2 * i - 1, ncrebPaymentPeriods, outData["totalCost"])
+				+ ipmt(ncrebsRate / 2, 2 * i, ncrebPaymentPeriods, outData["totalCost"])) if i <= ncrebPaymentPeriods / 2 else 0
+			financingCost = ncrebsCredit + coopLoanPayment
+			omCost = OMInsuranceETCDirect[i - 1]
+			netCoopPayments = financingCost + omCost
+			distrAdder = distAdderDirect[i - 1]
+			costToCustomer = netCoopPayments + distrAdder
+			ncrebCostToCustomer.append(costToCustomer)
+		NPVLoanNCREB = npv(float(inputDict.get("discRate", 0))/100, [0,0] + ncrebCostToCustomer)
 		Rate_Levelized_NCREB = -NPVLoanNCREB/NPVallYearGenerationMWh	
-
-		#Master Output [NCREB]
 		outData["levelCostNCREB"] = Rate_Levelized_NCREB
 		outData["costPanelNCREB"] = abs(NPVLoanNCREB/numberPanels)
 		outData["cost10WPanelNCREB"] = (float(outData["costPanelNCREB"])/panelSize)*10
@@ -666,6 +606,7 @@ def run(modelDir, inputDict):
 	except:
 		# If input range wasn't valid delete output, write error to disk.
 		thisErr = traceback.format_exc()
+		print 'ERROR IN MODEL', modelDir, thisErr
 		inputDict['stderr'] = thisErr
 		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
 			errorFile.write(thisErr)
@@ -795,7 +736,7 @@ def _tests():
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
-	# renderAndShow(template, modelDir = modelLoc)
+	renderAndShow(template, modelDir = modelLoc)
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)
