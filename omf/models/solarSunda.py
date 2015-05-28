@@ -429,7 +429,7 @@ def run(modelDir, inputDict):
 
 
 			#Output Tax Equity Flip [L37]
-			NPVLoanTaxEquity = npv(float(inputDict.get("discRate",0))/100, [0] + costToCustomerTaxEquity)
+			NPVLoanTaxEquity = npv(float(inputDict.get("discRate",0))/100, [0, 0] + costToCustomerTaxEquity)
 
 			#Output - Tax Equity [F42] 
 			Rate_Levelized_TaxEquity = -NPVLoanTaxEquity/NPVallYearGenerationMWh
@@ -540,7 +540,6 @@ def run(modelDir, inputDict):
 		PPARateSixYearsTE = z/100
 
 		#Master Output [Tax Equity]
-		# TODO ASAP: FIX THIS RATE
 		outData["levelCostTaxEquity"] = Rate_Levelized_TaxEquity
 		outData["costPanelTaxEquity"] = abs(NPVLoanTaxEquity/numberPanels)
 		outData["cost10WPanelTaxEquity"] = (float(outData["costPanelTaxEquity"])/panelSize)*10
