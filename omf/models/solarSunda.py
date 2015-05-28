@@ -265,6 +265,7 @@ def run(modelDir, inputDict):
 		ncrebBorrowingRate = 1.1 * ncrebsRate
 		ncrebPaymentPeriods = 44
 		ncrebCostToCustomer = []
+		# TODO ASAP: FIX ARRAY OFFSETS START 0
 		for i in range (1, len(outData["allYearGenerationMWh"])+1):
 			coopLoanPayment = 2 * pmt(ncrebBorrowingRate/2.0, ncrebPaymentPeriods, outData["totalCost"]) if i <= ncrebPaymentPeriods / 2 else 0
 			ncrebsCredit = -0.7 * (ipmt(ncrebsRate / 2, 2 * i - 1, ncrebPaymentPeriods, outData["totalCost"])
@@ -391,6 +392,7 @@ def run(modelDir, inputDict):
 					OMInsuranceETCTE.append(float(landLeaseTE[i-1]))
 				else:
 					OMInsuranceETCTE.append(float(OMTE[i-1]) + float(insuranceTE[i-1]) + float(landLeaseTE[i-1]))
+	
 			#Output Tax Equity Flip [H]
 			#TEI Calcs [T]
 			SPEMgmtFeeTE = []
@@ -427,7 +429,7 @@ def run(modelDir, inputDict):
 
 
 			#Output Tax Equity Flip [L37]
-			NPVLoanTaxEquity = npv(float(inputDict.get("discRate",0))/100, [0,0] + costToCustomerTaxEquity)
+			NPVLoanTaxEquity = npv(float(inputDict.get("discRate",0))/100, [0] + costToCustomerTaxEquity)
 
 			#Output - Tax Equity [F42] 
 			Rate_Levelized_TaxEquity = -NPVLoanTaxEquity/NPVallYearGenerationMWh
@@ -507,49 +509,38 @@ def run(modelDir, inputDict):
 			else:
 				cumulativeIRR = 0
 
+			# Deleteme: Variable Dump for debugging
+			# variableDump = {}
+			# variableDump["TaxEquity"] = {}
+			# variableDump["TaxEquity"]["coopInvestmentTaxEquity"] = coopInvestmentTaxEquity
+			# variableDump["TaxEquity"]["financeCostCashTaxEquity"] = financeCostCashTaxEquity
+			# variableDump["TaxEquity"]["cashToSPEOForPPATE"] = cashToSPEOForPPATE
+			# variableDump["TaxEquity"]["derivedCostEnergyTE"] = derivedCostEnergyTE
+			# variableDump["TaxEquity"]["OMInsuranceETCTE"] = OMInsuranceETCTE
+			# variableDump["TaxEquity"]["cashFromSPEToBlockerTE"] = cashFromSPEToBlockerTE
+			# variableDump["TaxEquity"]["cashFromBlockerTE"] = cashFromBlockerTE
+			# variableDump["TaxEquity"]["distAdderTaxEquity"] = distAdderTaxEquity
+			# variableDump["TaxEquity"]["netCoopPaymentsTaxEquity"] = netCoopPaymentsTaxEquity
+			# variableDump["TaxEquity"]["NPVLoanTaxEquity"] = NPVLoanTaxEquity
+
 			return cumulativeIRR, Rate_Levelized_TaxEquity, NPVLoanTaxEquity
 
-		# TODO: Make this simpler
-		#Four Function Calls Below Call Mega Sized Tax Equity Function Above
-		z = 3000
-		PPARateSixYearsTE = z/100
+		# Function Calls Mega Sized Tax Equity Function Above
+		z = 0
+		PPARateSixYearsTE = z / 100
 		nGoal = float(inputDict.get("taxEquityReturn",0))/100
 		nValue = 0
-		#First Loop
-		while ((z < 20000) and (nValue < nGoal)):
-			IRRReturn, Rate_Levelized_TaxEquity, NPVLoanTaxEquity = taxEquityFlip(PPARateSixYearsTE, inputDict.get("discRate", 0), outData["totalCost"], outData["allYearGenerationMWh"], distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
-			#TEI Calcs - PPA [C]
-			achievedReturnTE = IRRReturn
-			nValue = achievedReturnTE
-			z = z + 1000
-			PPARateSixYearsTE = z/100.0
-			#Loop back until nValue > nGoal (or Achieved Rate > Desired Rate)
-		#Second Loop
-		while ((z > 2500) and (nValue > nGoal)):
-			IRRReturn, Rate_Levelized_TaxEquity, NPVLoanTaxEquity  = taxEquityFlip(PPARateSixYearsTE, inputDict.get("discRate", 0), outData["totalCost"], outData["allYearGenerationMWh"], distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
-			#TEI Calcs - PPA [C]
-			achievedReturnTE = IRRReturn
-			nValue = achievedReturnTE
-			z = z - 100
-			PPARateSixYearsTE = z/100.0
-		#Third Loop
-		while ((z < 20000) and (nValue < nGoal)):
-			IRRReturn, Rate_Levelized_TaxEquity, NPVLoanTaxEquity  = taxEquityFlip(PPARateSixYearsTE, inputDict.get("discRate", 0), outData["totalCost"], outData["allYearGenerationMWh"], distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
-			#TEI Calcs - PPA [C]
-			achievedReturnTE = IRRReturn
-			nValue = achievedReturnTE
-			z = z + 10
-			PPARateSixYearsTE = z/100.0
-		#Fourth Loop
-		while ((z > 2500) and (nValue > nGoal)):
-			IRRReturn, Rate_Levelized_TaxEquity, NPVLoanTaxEquity  = taxEquityFlip(PPARateSixYearsTE, inputDict.get("discRate", 0), outData["totalCost"], outData["allYearGenerationMWh"], distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
-			#TEI Calcs - PPA [C]
-			achievedReturnTE = IRRReturn
-			nValue = achievedReturnTE
-			z = z - 1
-			PPARateSixYearsTE = z/100.0
+		for p in range (0, 3):
+			while ((z < 50000) and (nValue < nGoal)):
+				achievedReturnTE, Rate_Levelized_TaxEquity, NPVLoanTaxEquity = taxEquityFlip(PPARateSixYearsTE, inputDict.get("discRate", 0), outData["totalCost"], outData["allYearGenerationMWh"], distAdderDirect, loanYears, firstYearLandLeaseCosts, firstYearOPMainCosts, firstYearInsuranceCosts, numberPanels)
+				nValue = achievedReturnTE
+				z = z + math.pow(10,p)
+				PPARateSixYearsTE = z/100.0
+		z = z - math.pow(10,p)	
+		PPARateSixYearsTE = z/100
 
 		#Master Output [Tax Equity]
+		# TODO ASAP: FIX THIS RATE
 		outData["levelCostTaxEquity"] = Rate_Levelized_TaxEquity
 		outData["costPanelTaxEquity"] = abs(NPVLoanTaxEquity/numberPanels)
 		outData["cost10WPanelTaxEquity"] = (float(outData["costPanelTaxEquity"])/panelSize)*10
