@@ -50,14 +50,14 @@ def run(modelDir, inputDict):
 		# Associate zipcode to climate data
 		inputDict["climateName"], latforpvwatts = zipCodeToclimateName(inputDict["zipCode"])
 		panelSize = 305
-		arraySizeAC = float(inputDict.get("systemSize",0))
+		inverterSizeAC = float(inputDict.get("systemSize",0))
 		arraySizeDC = float(inputDict.get("systemDcSize",0))
 		numberPanels = (arraySizeDC * 1000/305)
 		#Use latitude for tilt
 		trackingMode = 0
 		rotlim = 45.0
 		gamma = 0.45
-		numberInverters = math.ceil(arraySizeAC/1000/0.5)
+		numberInverters = math.ceil(inverterSizeAC/1000/0.5)
 		# Copy specific climate data into model directory
 		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 			pJoin(modelDir, "climate.tmy2"))
@@ -88,7 +88,7 @@ def run(modelDir, inputDict):
 			dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(simLength)]
 		# Geodata output.			
 		# Geodata output.
-		outData["minLandSize"] = round((arraySizeAC/1000*5 + 1)*math.cos(math.radians(22.5))/math.cos(math.radians(latforpvwatts)),0)
+		outData["minLandSize"] = round((arraySizeDC/1390.8*5 + 1)*math.cos(math.radians(22.5))/math.cos(math.radians(latforpvwatts)),0)
 		landAmount = float(inputDict.get("landAmount", 6.0))
 		outData["city"] = ssc.ssc_data_get_string(dat, "city")
 		outData["state"] = ssc.ssc_data_get_string(dat, "state")
@@ -106,7 +106,7 @@ def run(modelDir, inputDict):
 		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
 		# Calculate clipping.
 		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
-		invSizeWatts = arraySizeAC * 1000
+		invSizeWatts = inverterSizeAC * 1000
 		outData["powerOutputAcInvClipped"] = [x if x < invSizeWatts else invSizeWatts for x in outData["powerOutputAc"]]
 		try:
 			outData["percentClipped"] = 100 * (1.0 - sum(outData["powerOutputAcInvClipped"]) / sum(outData["powerOutputAc"]))
@@ -132,14 +132,14 @@ def run(modelDir, inputDict):
 		pvModules = arraySizeDC * float(inputDict.get("moduleCost",0))*1000 #off by 4000
 		racking = arraySizeDC * float(inputDict.get("rackCost",0))*1000
 		inverters = numberInverters * float(inputDict.get("inverterCost",0))
-		inverterSize = arraySizeAC
+		inverterSize = inverterSizeAC
 		if (inverterSize <= 250):
 			gear = 15000
 		elif (inverterSize <= 600):
 			gear = 18000
 		else:
 			gear = inverterSize/1000 * 22000
-		balance = arraySizeAC * 1.3908 * 134
+		balance = inverterSizeAC * 1.3908 * 134
 		combiners = math.ceil(numberPanels/19/24) * float(1800)  #*
 		wireManagement = arraySizeDC * 1.5
 		transformer = 1 * 28000
@@ -203,9 +203,9 @@ def run(modelDir, inputDict):
 			["Site Prep, Constr. Eq. and Installation", (siteMaterial + constrEquip) + (siteLabor + installCosts)]]
 
 		# Cost per Wdc
-		outData["costWdc"] = totalCosts / (arraySizeAC * 1000 * 1.39)
+		outData["costWdc"] = totalCosts / (inverterSizeAC * 1000 * 1.39)
 
-		outData["capFactor"] = float(outData["oneYearGenerationWh"])/(arraySizeAC*1000*365.25*24) * 100
+		outData["capFactor"] = float(outData["oneYearGenerationWh"])/(inverterSizeAC*1000*365.25*24) * 100
 
 		######
 		### Loans calculations for Direct, NCREB, Lease, Tax-equity, and PPA
