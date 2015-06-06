@@ -203,7 +203,7 @@ def run(modelDir, inputDict):
 			["Site Prep, Constr. Eq. and Installation", (siteMaterial + constrEquip) + (siteLabor + installCosts)]]
 
 		# Cost per Wdc
-		outData["costWdc"] = (totalCosts + totalFees + interCost) / (inverterSizeAC * 1000 * 1.39)
+		outData["costWdc"] = (totalCosts + totalFees + float(inputDict.get("interCost",0))) / (arraySizeDC * 1000)
 
 		outData["capFactor"] = float(outData["oneYearGenerationWh"])/(inverterSizeAC*1000*365.25*24) * 100
 
