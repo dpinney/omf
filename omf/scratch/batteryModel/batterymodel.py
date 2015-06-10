@@ -15,29 +15,28 @@ def findPeakShave(
             cellCapacity  = 100,         # kWhr
             cellDischarge = 30,          # kW
             cellCharge    = 30,          # kW
-            cellQty       = 10,
+            cellQty       = 3,
             battEff       = .92):        # 0<battEff<1
 
     battCapacity    = cellQty * cellCapacity
     battDischarge   = cellQty * cellDischarge
     battCharge      = cellQty * cellCharge
- 
-    battSoC     = battCapacity                      # Battery state of charge; begins full.
-    battDoD     = [battCapacity for x in range(12)] # Depth-of-discharge every month.
 
     dc = [{'datetime': parse(row['timestamp']), 'power': int(row['power'])} for row in csv.DictReader(open(csvFileName))]
+    
     for row in dc:
         row['month'] = row['datetime'].month-1
         row['weekday'] = row['datetime'].weekday
 
     ps = [battDischarge for x in range(12)]
-    dcGroupByMonth = [[t['power'] for t in iter(dc) if t['datetime'].month-1==x] for x in range(12)]
+    dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
     monthlyPeakDemand = [max(dcGroupByMonth[x]) for x in range(12)]
     print monthlyPeakDemand
     
     capacityLimited = True
     while capacityLimited == True:
-        ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
+        battSoC     = battCapacity                      # Battery state of charge; begins full.
+        battDoD     = [battCapacity for x in range(12)] # Depth-of-discharge every month.
         for row in dc:
             month = int(row['datetime'].month)-1
             powerUnderPeak  = monthlyPeakDemand[month] - row['power'] - ps[month]
@@ -61,6 +60,8 @@ def findPeakShave(
             row['battSoC'] = battSoC
 
         capacityLimited = min(battDoD) < 0
+        ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
+
 
   #  dcGroupByMonth = [groupby(dc['month'])[x] for x in range(12)]
     dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
