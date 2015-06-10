@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Created on Wed May 27 16:59:15 2015
-
 @author: george
 """
 
@@ -15,12 +14,12 @@ def findPeakShave(
 	cellCapacity  = 100,         # kWhr
 	cellDischarge = 30,          # kW
 	cellCharge    = 30,          # kW
-	cellQty       = 10,
+	cellQty       = 50,
 	battEff       = .92):        # 0<battEff<1
 	# Pack variables.
-	battCapacity    = cellQty * cellCapacity
-	battDischarge   = cellQty * cellDischarge
-	battCharge      = cellQty * cellCharge
+	battCapacity = cellQty * cellCapacity
+	battDischarge = cellQty * cellDischarge
+	battCharge = cellQty * cellCharge
 	#  Load our CSV file into a list
 	dc = []
 	for row in csv.DictReader(open(csvFileName)):
@@ -39,12 +38,12 @@ def findPeakShave(
 			powerUnderPeak  = monthlyPeakDemand[row['month']] - row['power'] - peakShave[row['month']]
 			isCharging      = powerUnderPeak > 0
 			isDischarging   = powerUnderPeak <= 0
-			charge    = isCharging    * min(powerUnderPeak * battEff,   # Charge rate <= new monthly peak - row['power']
-																		 battCharge,                  # Charge rate <= battery maximum charging rate.
-																		 battCapacity - battSoC)      # Charge rage <= capacity remaining in battery.
-			discharge = isDischarging * min(abs(powerUnderPeak),        # Discharge rate <= new monthly peak - row['power']
-																		 abs(battDischarge),          # Discharge rate <= battery maximum charging rate.
-																		 abs(battSoC+.001))           # Discharge rate <= capacity remaining in battery.
+			charge    = isCharging    * min(powerUnderPeak * battEff, # Charge rate <= new monthly peak - row['power']
+											battCharge, # Charge rate <= battery maximum charging rate.
+											battCapacity - battSoC) # Charge rage <= capacity remaining in battery.
+			discharge = isDischarging * min(abs(powerUnderPeak), # Discharge rate <= new monthly peak - row['power']
+											abs(battDischarge), # Discharge rate <= battery maximum charging rate.
+											abs(battSoC+.001)) # Discharge rate <= capacity remaining in battery.
 			# (Dis)charge battery
 			battSoC += charge
 			battSoC -= discharge
@@ -69,8 +68,9 @@ plt.plot(x2)
 plt.plot(x3)
 plt.show()
 
-# Load demand data
-# V&V
-# Find monthly peaks
-# Find best-case peak-shave
-# Record 
+
+# TODO:
+# XXX Refactor existing solution.
+# XXX Add SoC graph.
+# OOO vertical lines.
+# OOO Financial variables.
