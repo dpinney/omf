@@ -48,33 +48,15 @@ def findPeakShave(
 			# (Dis)charge battery
 			battSoC += charge
 			battSoC -= discharge
+			row['netpower'] = row['power'] + charge/battEff - discharge
 			# Update minimum state-of-charge for this month.
 			battDoD[row['month']] = min(battSoC,battDoD[row['month']])
+			row['battSoC'] = battSoC
 		return battDoD
 	while capacityLimited == True:
 		battDoD = findBattDoD(ps)
 		ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 		capacityLimited = min(battDoD) < 0
-	# Battery Simulation.
-	battSoC     = battCapacity                      # Battery state of charge; begins full.
-	battDoD     = [battCapacity for x in range(12)] # Depth-of-discharge every month.
-	for row in dc:
-		powerUnderPeak  = monthlyPeakDemand[row['month']] - row['power'] - ps[row['month']]
-		isCharging      = powerUnderPeak > 0
-		isDischarging   = powerUnderPeak <= 0
-		charge    = isCharging    * min(powerUnderPeak * battEff,   # Charge rate <= new monthly peak - row['power']
-																	 battCharge,                  # Charge rate <= battery maximum charging rate.
-																	 battCapacity - battSoC)      # Charge rage <= capacity remaining in battery.
-		discharge = isDischarging * min(abs(powerUnderPeak),        # Discharge rate <= new monthly peak - row['power']
-																	 abs(battDischarge),          # Discharge rate <= battery maximum charging rate.
-																	 abs(battSoC+.001))           # Discharge rate <= capacity remaining in battery.
-		# (Dis)charge battery
-		battSoC += charge
-		battSoC -= discharge					
-		row['netpower'] = row['power'] + charge/battEff - discharge
-		# Update minimum state-of-charge for this month.
-		battDoD[row['month']] = min(battSoC,battDoD[row['month']])
-		row['battSoC'] = battSoC
 	oldDemandCurve = [x['power'] for x in dc]
 	newDemandCurve = [x['netpower'] for x in dc]
 	socCurve = [x['battSoC'] for x in dc]
