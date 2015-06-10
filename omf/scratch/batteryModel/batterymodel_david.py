@@ -15,7 +15,7 @@ def findPeakShave(
 	cellCapacity  = 100,         # kWhr
 	cellDischarge = 30,          # kW
 	cellCharge    = 30,          # kW
-	cellQty       = 30,
+	cellQty       = 10,
 	battEff       = .92):        # 0<battEff<1
 	# Pack variables.
 	battCapacity    = cellQty * cellCapacity
@@ -55,8 +55,6 @@ def findPeakShave(
 		battDoD = findBattDoD(ps)
 		ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 		capacityLimited = min(battDoD) < 0
-	oldDemandCurve = [0 for x in range(8784)]
-	newDemandCurve = [0 for x in range(8784)]
 	# Battery Simulation.
 	battSoC     = battCapacity                      # Battery state of charge; begins full.
 	battDoD     = [battCapacity for x in range(12)] # Depth-of-discharge every month.
@@ -77,15 +75,16 @@ def findPeakShave(
 		# Update minimum state-of-charge for this month.
 		battDoD[row['month']] = min(battSoC,battDoD[row['month']])
 		row['battSoC'] = battSoC
-	for idx, row in enumerate(dc):
-		oldDemandCurve[idx] = row['power']
-		newDemandCurve[idx] = row['netpower']
-	return oldDemandCurve, newDemandCurve
+	oldDemandCurve = [x['power'] for x in dc]
+	newDemandCurve = [x['netpower'] for x in dc]
+	socCurve = [x['battSoC'] for x in dc]
+	return oldDemandCurve, newDemandCurve, socCurve
 
 import matplotlib.pyplot as plt
-(x1, x2) = findPeakShave()
+(x1, x2, x3) = findPeakShave()
 plt.plot(x1)
 plt.plot(x2)
+plt.plot(x3)
 plt.show()
 
 # Load demand data
