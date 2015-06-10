@@ -10,12 +10,12 @@ import time
 from dateutil.parser import parse
 
 def findPeakShave(
-	csvFileName="OlinBeckenhamScada.csv",
-	cellCapacity  = 100,         # kWhr
-	cellDischarge = 30,          # kW
-	cellCharge    = 30,          # kW
-	cellQty       = 50,
-	battEff       = .92):        # 0<battEff<1
+	csvFileName = "OlinBeckenhamScada.csv",
+	cellCapacity = 100, # kWhr
+	cellDischarge = 30, # kW
+	cellCharge = 30, # kW
+	cellQty = 50,
+	battEff = .92): # 0<battEff<1
 	# Pack variables.
 	battCapacity = cellQty * cellCapacity
 	battDischarge = cellQty * cellDischarge
@@ -23,19 +23,19 @@ def findPeakShave(
 	#  Load our CSV file into a list
 	dc = []
 	for row in csv.DictReader(open(csvFileName)):
-			d = parse(row['timestamp'])
-			dc.append({'timestamp': int(time.mktime(d.timetuple())), 'month': int(d.month-1), 'day': d.weekday(), 'power': int(row['power'])})
+		d = parse(row['timestamp'])
+		dc.append({'timestamp': int(time.mktime(d.timetuple())), 'month': int(d.month-1), 'day': d.weekday(), 'power': int(row['power'])})
 	ps = [cellDischarge * cellQty for x in range(12)]
 	# Find our demand peaks per month.
 	monthlyPeakDemand  = [0 for x in range(12)]
 	for row in dc:
 			monthlyPeakDemand[row['month']] = max(row['power'], monthlyPeakDemand[row['month']])
 	capacityLimited = True
-	def findBattDoD(peakShave): # kW[]
-		battSoC     = battCapacity                      # Battery state of charge; begins full.
-		battDoD     = [battCapacity for x in range(12)] # Depth-of-discharge every month.
+	while capacityLimited == True:
+		battSoC = battCapacity # Battery state of charge; begins full.
+		battDoD = [battCapacity for x in range(12)] # Depth-of-discharge every month.
 		for row in dc:
-			powerUnderPeak  = monthlyPeakDemand[row['month']] - row['power'] - peakShave[row['month']]
+			powerUnderPeak  = monthlyPeakDemand[row['month']] - row['power'] - ps[row['month']]
 			isCharging      = powerUnderPeak > 0
 			isDischarging   = powerUnderPeak <= 0
 			charge    = isCharging    * min(powerUnderPeak * battEff, # Charge rate <= new monthly peak - row['power']
@@ -51,9 +51,6 @@ def findPeakShave(
 			# Update minimum state-of-charge for this month.
 			battDoD[row['month']] = min(battSoC,battDoD[row['month']])
 			row['battSoC'] = battSoC
-		return battDoD
-	while capacityLimited == True:
-		battDoD = findBattDoD(ps)
 		ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 		capacityLimited = min(battDoD) < 0
 	oldDemandCurve = [x['power'] for x in dc]
