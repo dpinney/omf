@@ -14,48 +14,49 @@ def findPeakShave(
 	cellCapacity = 100, # kWhr
 	cellDischarge = 30, # kW
 	cellCharge = 30, # kW
-	cellQty = 50,
+	cellQty = 30,
 	battEff = .92): # 0<battEff<1
 	# Pack variables.
 	battCapacity = cellQty * cellCapacity
 	battDischarge = cellQty * cellDischarge
 	battCharge = cellQty * cellCharge
-	#  Load our CSV file into a list
+	# Load our CSV file into dc = demandCurve (actually a lot of variables).
 	dc = []
-	for row in csv.DictReader(open(csvFileName)):
-		d = parse(row['timestamp'])
-		dc.append({'timestamp': int(time.mktime(d.timetuple())), 'month': int(d.month-1), 'day': d.weekday(), 'power': int(row['power'])})
+	for t in csv.DictReader(open(csvFileName)):
+		d = parse(t['timestamp'])
+		dc.append({'timestamp': int(time.mktime(d.timetuple())), 'month': int(d.month-1), 'day': d.weekday(), 'power': int(t['power'])})
+	# Maximum peak shave = ps.
 	ps = [cellDischarge * cellQty for x in range(12)]
 	# Find our demand peaks per month.
 	monthlyPeakDemand  = [0 for x in range(12)]
-	for row in dc:
-			monthlyPeakDemand[row['month']] = max(row['power'], monthlyPeakDemand[row['month']])
+	for t in dc:
+		monthlyPeakDemand[t['month']] = max(t['power'], monthlyPeakDemand[t['month']])
 	capacityLimited = True
-	while capacityLimited == True:
+	while capacityLimited:
 		battSoC = battCapacity # Battery state of charge; begins full.
 		battDoD = [battCapacity for x in range(12)] # Depth-of-discharge every month.
-		for row in dc:
-			powerUnderPeak  = monthlyPeakDemand[row['month']] - row['power'] - ps[row['month']]
-			isCharging      = powerUnderPeak > 0
-			isDischarging   = powerUnderPeak <= 0
-			charge    = isCharging    * min(powerUnderPeak * battEff, # Charge rate <= new monthly peak - row['power']
-											battCharge, # Charge rate <= battery maximum charging rate.
-											battCapacity - battSoC) # Charge rage <= capacity remaining in battery.
-			discharge = isDischarging * min(abs(powerUnderPeak), # Discharge rate <= new monthly peak - row['power']
+		for t in dc:
+			powerUnderPeak = monthlyPeakDemand[t['month']] - t['power'] - ps[t['month']]
+			isCharging = powerUnderPeak > 0
+			isDischarging = powerUnderPeak <= 0
+			charge = isCharging * min(powerUnderPeak * battEff, # Charge rate <= new monthly peak - t['power']
+									  battCharge, # Charge rate <= battery maximum charging rate.
+									  battCapacity - battSoC) # Charge rage <= capacity remaining in battery.
+			discharge = isDischarging * min(abs(powerUnderPeak), # Discharge rate <= new monthly peak - t['power']
 											abs(battDischarge), # Discharge rate <= battery maximum charging rate.
 											abs(battSoC+.001)) # Discharge rate <= capacity remaining in battery.
 			# (Dis)charge battery
 			battSoC += charge
 			battSoC -= discharge
-			row['netpower'] = row['power'] + charge/battEff - discharge
+			t['netpower'] = t['power'] + charge/battEff - discharge
 			# Update minimum state-of-charge for this month.
-			battDoD[row['month']] = min(battSoC,battDoD[row['month']])
-			row['battSoC'] = battSoC
+			battDoD[t['month']] = min(battSoC,battDoD[t['month']])
+			t['battSoC'] = battSoC
 		ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 		capacityLimited = min(battDoD) < 0
-	oldDemandCurve = [x['power'] for x in dc]
-	newDemandCurve = [x['netpower'] for x in dc]
-	socCurve = [x['battSoC'] for x in dc]
+	oldDemandCurve = [t['power'] for t in dc]
+	newDemandCurve = [t['netpower'] for t in dc]
+	socCurve = [t['battSoC'] for t in dc]
 	return oldDemandCurve, newDemandCurve, socCurve
 
 import matplotlib.pyplot as plt
