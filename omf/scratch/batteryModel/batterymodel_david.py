@@ -54,9 +54,9 @@ def findPeakShave(
 			t['battSoC'] = battSoC
 		ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 		capacityLimited = min(battDoD) < 0
-	oldDemandCurve = [x['power'] for x in dc]
-	newDemandCurve = [x['netpower'] for x in dc]
-	socCurve = [x['battSoC'] for x in dc]
+	oldDemandCurve = [t['power'] for t in dc]
+	newDemandCurve = [t['netpower'] for t in dc]
+	socCurve = [t['battSoC'] for t in dc]
 	return oldDemandCurve, newDemandCurve, socCurve
 
 import matplotlib.pyplot as plt
