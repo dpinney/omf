@@ -13,8 +13,8 @@ from  dateutil.parser import parse
 def findPeakShave(
             csvFileName="OlinBeckenhamScada.csv",
             cellCapacity  = 100,         # kWhr
-            cellDischarge = 30,          # kW
-            cellCharge    = 30,          # kW
+            cellDischarge = 50,          # kW
+            cellCharge    = 50,          # kW
             cellQty       = 3,
             battEff       = .92):        # 0<battEff<1
 
@@ -67,19 +67,46 @@ def findPeakShave(
     dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
     hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
     
-    oldDemandCurve = [t['power'] for t in dc]
-    newDemandCurve = [t['netpower'] for t in dc]
-    return oldDemandCurve, newDemandCurve, hoursThroughTheMonth
+    oldDemandCurve  = [t['power'] for t in dc]
+    newDemandCurve  = [t['netpower'] for t in dc]
+    battSoCCurve    = [t['battSoC'] for t in dc]
 
+    
+    
+    return oldDemandCurve, newDemandCurve, hoursThroughTheMonth, battSoCCurve, ps
 
 import matplotlib.pyplot as plt
-(x1, x2, x3) = findPeakShave()
-plt.plot(x1)
-plt.plot(x2)
+(oldCurve, newCurve, hoursThroughTheMonth, battSoCCurve, peakShave) = findPeakShave()
+
+demandCharge    = 10    # USD
+discountRate    = .025  # APR
+numberOfYears   = 10    # Years
+cellCost        = 25000
+cellQty         = 3
+
+peakShaveSum = sum(peakShave)
+
+spp = (cellCost*cellQty)/(peakShaveSum*demandCharge)
+print "Simple payback period for this battery is %d" % spp
+
+cashFlowCurve = [peakShaveSum * demandCharge for year in range(numberOfYears)]
+cashFlowCurve[0]-= (cellCost * cellQty)
+
+npv = 0.0
+for idx, annualCashFlow in enumerate(cashFlowCurve):
+    npv += annualCashFlow/(1+discountRate)**idx
+print "Net Present Value %d for this battery is %d" % (numberOfYears, npv)
+
+
+
+plt.plot(oldCurve)
+plt.plot(newCurve)
+plt.plot(battSoCCurve)
 for month in range(12):
-  plt.axvline(x3[month])
+  plt.axvline(hoursThroughTheMonth[month])
 plt.show()
-print x3
+print hoursThroughTheMonth
+print peakShaveSum
 
 # Load demand data
 # V&V
