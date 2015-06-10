@@ -15,7 +15,7 @@ def findPeakShave(
             cellCapacity  = 100,         # kWhr
             cellDischarge = 30,          # kW
             cellCharge    = 30,          # kW
-            cellQty       = 2,
+            cellQty       = 10,
             battEff       = .92):        # 0<battEff<1
 
     battCapacity    = cellQty * cellCapacity
@@ -24,7 +24,6 @@ def findPeakShave(
  
     battSoC     = battCapacity                      # Battery state of charge; begins full.
     battDoD     = [battCapacity for x in range(12)] # Depth-of-discharge every month.
-
 
     dc = [{'datetime': parse(row['timestamp']), 'power': int(row['power'])} for row in csv.DictReader(open(csvFileName))]
     for row in dc:
@@ -42,9 +41,9 @@ def findPeakShave(
         for row in dc:
             month = int(row['datetime'].month)-1
             powerUnderPeak  = monthlyPeakDemand[month] - row['power'] - ps[month]
+
             isCharging      = powerUnderPeak > 0
             isDischarging   = powerUnderPeak <= 0
-    
     
             charge    = isCharging    * min(powerUnderPeak * battEff,   # Charge rate <= new monthly peak - row['power']
                                            battCharge,                  # Charge rate <= battery maximum charging rate.
