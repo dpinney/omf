@@ -23,7 +23,7 @@ input[readonly="out"], input[out], textarea[out] {
 	font-style: italic;
 }
 
-input[type="text"], input[type="email"], select {
+input[type="text"], input[type="email"], input[type="file"], select {
 	font-size: medium; 
 	display: inline; 
 	margin:0px;
