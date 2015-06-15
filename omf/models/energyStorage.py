@@ -53,14 +53,15 @@ def run(modelDir, inputDict):
 		battEff	= float(inputDict['batteryEfficiency']) / 100.0
 		discountRate = float(inputDict['discountRate']) / 100.0
 		projYears = int(inputDict['projYears'])
-		# TODO unhack this.
-		csvFileName="scratch/batteryModel/OlinBeckenhamScada.csv"
+		# Put demand data in to a file.
+		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
+			demandFile.write(inputDict['demandCurve'])
 		# Start running battery simulation.
 		battCapacity = cellQuantity * cellCapacity
 		battDischarge = cellQuantity * dischargeRate
 		battCharge = cellQuantity * chargeRate
 		# Most of our data goes inside the dc "table"
-		dc = [{'datetime': parse(row['timestamp']), 'power': int(row['power'])} for row in csv.DictReader(open(csvFileName))]
+		dc = [{'datetime': parse(row['timestamp']), 'power': int(row['power'])} for row in csv.DictReader(open(pJoin(modelDir,"demand.csv")))]
 		for row in dc:
 			row['month'] = row['datetime'].month-1
 			row['weekday'] = row['datetime'].weekday
@@ -152,7 +153,7 @@ def _tests():
 		"dischargeRate": "50", 
 		"modelType": "energyStorage", 
 		"chargeRate": "50", 
-		"demandCurveFile": "SCADA_weather_NC_gld_shifted.csv", 
+		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","batteryModel","OlinBeckenhamScada.csv")).read(), 
 		"cellCost": "25000", 
 		"cellQuantity": "3", 
 		"runTime": "0:00:03", 

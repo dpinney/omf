@@ -79,6 +79,10 @@
 				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
 				<input id="demandCurve" name="demandCurve" type="hidden">
 				<script>
+					// Make sure the file is required on prerun.
+					if (modelStatus == "preRun" || modelStatus == "stopped") {gebi('demandCurveFile').setAttribute('required', 'required')}
+					else {}
+					// File handler function.
 					function handle_files(files) {
 						// read file to a hidden input field
 						reader = new FileReader()
