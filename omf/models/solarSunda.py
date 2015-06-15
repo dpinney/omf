@@ -61,10 +61,8 @@ def run(modelDir, inputDict):
 		rotlim = 45.0
 		gamma = 0.45
 		if (inputDict.get("tilt",0) == "-"):
-			tilt_eq_lat = 1.0
 			manualTilt = latforpvwatts
 		else:
-			tilt_eq_lat = 0.0
 			manualTilt = float(inputDict.get("tilt",0))
 		numberInverters = math.ceil(inverterSizeAC/1000/0.5)			
 		# Copy specific climate data into model directory
@@ -85,7 +83,7 @@ def run(modelDir, inputDict):
 		ssc.ssc_data_set_number(dat, "rotlim", float(rotlim))
 		ssc.ssc_data_set_number(dat, "gamma", float(-gamma/100))
 		ssc.ssc_data_set_number(dat, "tilt", manualTilt)
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", tilt_eq_lat)
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 0.0)
 
 		# Run PV system simulation.
 		mod = ssc.ssc_module_create("pvwattsv1")
@@ -123,7 +121,6 @@ def run(modelDir, inputDict):
 			outData["percentClipped"] = 0.0
 		#One year generation
 		outData["oneYearGenerationWh"] = sum(outData["powerOutputAcInvClipped"])
-		print "outdata one year", outData["oneYearGenerationWh"]
 		#Annual generation for all years
 		loanYears = 25
 		outData["allYearGenerationMWh"] = {}
@@ -673,6 +670,7 @@ def zipCodeToclimateName(zipCode):
 						pass
 
 	climateName = zipState + "-" + climateCity[found]
+	print "latforpv", latforpvwatts
 	return climateName, latforpvwatts
 
 def _runningSum(inList):
