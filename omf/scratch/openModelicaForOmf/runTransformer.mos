@@ -1,3 +1,0 @@
-loadModel(Modelica);
-loadFile("transformer.mo")
-simulate(SimpleTransformerPinney)
