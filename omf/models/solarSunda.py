@@ -62,7 +62,7 @@ def run(modelDir, inputDict):
 		gamma = 0.45
 		if (inputDict.get("tilt",0) == "-"):
 			tilt_eq_lat = 1.0
-			manualTilt = 0.0
+			manualTilt = latforpvwatts
 		else:
 			tilt_eq_lat = 0.0
 			manualTilt = float(inputDict.get("tilt",0))
