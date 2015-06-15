@@ -75,7 +75,7 @@
 				<input type="text" id="batteryEfficiency" name="batteryEfficiency" value="92" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation for the required format.</span></label>
+				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
 				<input id="demandCurve" name="demandCurve" type="hidden">
 				<script>
