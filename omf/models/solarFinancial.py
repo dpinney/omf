@@ -63,7 +63,14 @@ def run(modelDir, inputDict):
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
 		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)
 		# Complicated optional inputs.
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
+		if (inputDict.get("tilt",0) == "-"):
+			tilt_eq_lat = 1.0
+			manualTilt = 0.0
+		else:
+			tilt_eq_lat = 0.0
+			manualTilt = float(inputDict.get("tilt",0))		
+		ssc.ssc_data_set_number(dat, "tilt", manualTilt)
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", tilt_eq_lat)
 		# Run PV system simulation.
 		mod = ssc.ssc_module_create("pvwattsv1")
 		ssc.ssc_module_exec(mod, dat)
@@ -275,8 +282,7 @@ def _tests():
 		"age": "100",		
 		"inverterEfficiency": "92",
 		"inverterSize": "75",
-		"tilt": "True",
-		"manualTilt":"34.65",	
+		"tilt": "-",
 		"srecCashFlow": "5,5,3,3,2",
 		"trackingMode":"0",
 		"azimuth":"180",

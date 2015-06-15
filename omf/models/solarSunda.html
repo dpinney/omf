@@ -59,9 +59,10 @@
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
 				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
+			<!-- TODO: Use bigger tooltip size -->
 			<div class="shorterInput">
-				<label class="tooltip">System Array Size (kW-DC)<span class="classic">Nameplate generation of array solar panels in kW-dc. The SUNDA project recommends panel size approximately 1.4 times larger than the desired AC output size (inverter size). E.g. the SUNDA 1 MW-ac template system has panels sized at 1.4 MW-dc nameplate capacity.</span></label>
-				<input type="text" id="systemDcSize" name="systemDcSize" value="1390.8" required="required" pattern="^\d+\.?\d*?$">
+				<label class="tooltip">System Array Size (kW-DC)<span class="classic">Nameplate generation of array solar panels in kW-dc. If '-' is entered, a panel size of 1.4 times the System Output Size (kW-AC) will be used. <br><br> The SUNDA project recommends a panel size of 1.4 times larger than the desired System Output Size kW-AC (inverter size). E.g. the SUNDA 1 mW-AC template system has panels sized at 1.4 mW-DC nameplate capacity.</span></label>
+				<input type="text" id="systemDcSize" name="systemDcSize" value="1390.8" required="required" pattern="^\d+\.?\d*?$|-">
 			</div>
 			<div class="shorterInput">
 				<label class="tooltip">System Output Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. </span></label>
@@ -76,21 +77,6 @@
 				<input type="text" id="degradation" name="degradation" value="0.8" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shorterInput">
-				<label class="tooltip">Tilt = Latitude<span class="classic">If True, then the tilt value will be the same as the Climate City's latitude. If False, you can pick your own value in the next input field (manual tilt).</span></label>
-				<select id="tilt_eq_lat" name="tilt_eq_lat">
-					<option value="1" selected="selected">True</option>
-					<option value="0">False</option>
-				</select>
-			</div>
-			<div class="shorterInput">
-				<label class="tooltip">Tilt Override (degrees)<span class="classic">Only used if Tilt = Latitude is false. Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
-				<input type="text" id="manualTilt" name="manualTilt" value="0" pattern="^\d*$" required="required"/>
-			</div>
-			<div class="shorterInput">
-				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
-				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required" />
-			</div>
-			<div class="shorterInput">
 				<label class="tooltip">Inverter Efficiency (%)<span class="classic">This value will be available on the inverter datasheet.</span></label>
 				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="96" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
 			</div>
@@ -98,6 +84,15 @@
 				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes in to account losses from soiling, shading, wiring and diode losses, etc.</span></label>
 				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" value="87" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
 			</div>
+			<br>
+			<div class="shorterInput">
+				<label class="tooltip">Tilt (degrees)<span class="classic">The tilt of the solar panels measured as an angle in degrees between panels and ground. If '-' is entered, the latitude of the zipcode will be used.</span></label>
+				<input type="text" id="tilt" name="tilt" value="-" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
+			</div>
+			<div class="shorterInput">
+				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
+				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required" />
+			</div>			
 			<div class="wideInput">
 				<p class="inputSectionHeader">Construction Costs</p>
 			</div>

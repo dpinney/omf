@@ -110,23 +110,16 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Tilt = Latitude<span class="classic">If True, then the tilt value will be the same as the Climate City's latitude. If False, you can pick your own value in the next input field (manual tilt).</span></label>
-				<select id="tilt" name="tilt">
-					<option value="True">True</option>
-					<option value="False">False</option>
-				</select>
-			</div>
+				<label class="tooltip">Tracker rotation limit (degrees)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker.</span></label>
+				<input type="text" id="rotlim" name="rotlim" value="45.0" pattern="^\d+\.?\d*$" required="required" />
+			</div>			
 			<div class="shortInput">
-				<label class="tooltip">Manual Tilt (degrees)<span class="classic">Tilt of the solar panels measured as an angle in degrees between panels and ground.</span></label>
-				<input type="text" id="manualTilt" name="manualTilt" value="35" pattern="^\d*$" required="required"/>
+				<label class="tooltip">Tilt (degrees)<span class="classic">The tilt of the solar panels measured as an angle in degrees between panels and ground. If '-' is entered, the latitude of the zipcode will be used.</span></label>
+				<input type="text" id="tilt" name="tilt" value="-" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
 				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required" />
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Tracker rotation limit (degrees)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker.</span></label>
-				<input type="text" id="rotlim" name="rotlim" value="45.0" pattern="^\d+\.?\d*$" required="required" />
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Max power temperature coefficient (%/C)<span class="classic">Percentage decrease  of the solar array's output power for every degree over 25 degrees centigrade.</span></label>

@@ -52,8 +52,14 @@ def run(modelDir, inputDict):
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict["trackingMode"]))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict["azimuth"]))
 		# Advanced inputs with defaults.
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", float(inputDict.get("tilt_eq_lat",1)))
-		ssc.ssc_data_set_number(dat, "tilt", float(inputDict.get("tilt", 45.0)))
+		if (inputDict.get("tilt",0) == "-"):
+			tilt_eq_lat = 1.0
+			manualTilt = 0.0
+		else:
+			tilt_eq_lat = 0.0
+			manualTilt = float(inputDict.get("tilt",0))
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", tilt_eq_lat)
+		ssc.ssc_data_set_number(dat, "tilt", manualTilt)
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict["rotlim"]))
 		ssc.ssc_data_set_number(dat, "gamma", -1 * float(inputDict["gamma"]))
 		ssc.ssc_data_set_number(dat, "inv_eff", 0.01 * float(inputDict["inv_eff"]))
@@ -168,7 +174,6 @@ def _tests():
 		"rotlim":"45.0",
 		"gamma":"0.45",
 		"inv_eff":"92",
-		"tilt_eq_lat":"1",
 		"tilt":"45.0",
 		"w_stow":"0",
 		"inverterSize":"8"}

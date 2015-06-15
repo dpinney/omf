@@ -54,6 +54,10 @@
 			</div>
 			<hr>
 			<div class="shortInput">
+				<label class="tooltip">Average System Size (kWp-DC)<span class="classic">Average residential PV system size in your service territory.</span></label>
+				<input type="text" id="avgSystemSize" name="avgSystemSize" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Climate<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
 				<select id="climateName" name="climateName">
 					{% for climate in datastoreNames["climates"] %}
@@ -61,14 +65,11 @@
 					{% endfor %}
 				</select>
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Average System Size (kWp-DC)<span class="classic">Average residential PV system size in your service territory.</span></label>
-				<input type="text" id="avgSystemSize" name="avgSystemSize" pattern="^\d+\.?\d*$" required="required">
-			</div>
+			<br>
 			<div class="shortInput">
 				<label class="tooltip">Residential Customers With Solar (%)<span class="classic">Percentage of residential customers who own PV systems. A value of five percent should be entered as a "5".</span></label>
 				<input type="text" id="resPenetration" name="resPenetration" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
-			</div>
+			</div>						
 			<div class="shortInput">
 				<label class="tooltip">Solar Service Charge ($/month)<span class="classic">Monthly charge for residential customers with solar installed.</span></label>
 				<input type="text" id="solarServiceCharge" name="solarServiceCharge" pattern="^\d+\.?\d*$" required="required"> 

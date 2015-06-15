@@ -49,15 +49,24 @@ def run(modelDir, inputDict):
 		simLengthUnits = "hours"
 		# Associate zipcode to climate data
 		inputDict["climateName"], latforpvwatts = zipCodeToclimateName(inputDict["zipCode"])
-		panelSize = 305
 		inverterSizeAC = float(inputDict.get("systemSize",0))
-		arraySizeDC = float(inputDict.get("systemDcSize",0))
+		if (inputDict.get("systemDcSize",0) == "-"):
+			arraySizeDC = 1.3908 * inverterSizeAC
+		else:
+			arraySizeDC = float(inputDict.get("systemDcSize",0))
 		numberPanels = (arraySizeDC * 1000/305)
-		#Use latitude for tilt
+		# Set constants
+		panelSize = 305		
 		trackingMode = 0
 		rotlim = 45.0
 		gamma = 0.45
-		numberInverters = math.ceil(inverterSizeAC/1000/0.5)
+		if (inputDict.get("tilt",0) == "-"):
+			tilt_eq_lat = 1.0
+			manualTilt = 0.0
+		else:
+			tilt_eq_lat = 0.0
+			manualTilt = float(inputDict.get("tilt",0))
+		numberInverters = math.ceil(inverterSizeAC/1000/0.5)			
 		# Copy specific climate data into model directory
 		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 			pJoin(modelDir, "climate.tmy2"))
@@ -75,8 +84,8 @@ def run(modelDir, inputDict):
 		# Advanced inputs with defaults.
 		ssc.ssc_data_set_number(dat, "rotlim", float(rotlim))
 		ssc.ssc_data_set_number(dat, "gamma", float(-gamma/100))
-		ssc.ssc_data_set_number(dat, "tilt", float(inputDict.get("manualTilt",0)))
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", float(inputDict.get("tilt_eq_lat",1)))
+		ssc.ssc_data_set_number(dat, "tilt", manualTilt)
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", tilt_eq_lat)
 
 		# Run PV system simulation.
 		mod = ssc.ssc_module_create("pvwattsv1")
@@ -114,6 +123,7 @@ def run(modelDir, inputDict):
 			outData["percentClipped"] = 0.0
 		#One year generation
 		outData["oneYearGenerationWh"] = sum(outData["powerOutputAcInvClipped"])
+		print "outdata one year", outData["oneYearGenerationWh"]
 		#Annual generation for all years
 		loanYears = 25
 		outData["allYearGenerationMWh"] = {}
@@ -709,8 +719,7 @@ def _tests():
 		"degradation": "0.8",
 		"inverterEfficiency": "96",
 		"nonInverterEfficiency": "87",
-		"manualTilt": "0",
-		"tilt_eq_lat": "1",
+		"tilt": "-",
 		"trackingMode":"0",
 		"module_type":"1", #PVWatts v5 feature: 1 = premium
 		"azimuth":"180"}
