@@ -59,10 +59,12 @@ def run(modelDir, inputDict):
 		battCapacity = cellQuantity * cellCapacity
 		battDischarge = cellQuantity * dischargeRate
 		battCharge = cellQuantity * chargeRate
+		# Most of our data goes inside the dc "table"
 		dc = [{'datetime': parse(row['timestamp']), 'power': int(row['power'])} for row in csv.DictReader(open(csvFileName))]
 		for row in dc:
 			row['month'] = row['datetime'].month-1
 			row['weekday'] = row['datetime'].weekday
+		outData['startDate'] = dc[0]['datetime'].isoformat()
 		ps = [battDischarge for x in range(12)]
 		dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		monthlyPeakDemand = [max(dcGroupByMonth[x]) for x in range(12)]
@@ -95,12 +97,15 @@ def run(modelDir, inputDict):
 		dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
 		hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
 		peakShaveSum = sum(ps)
-		spp = (cellCost*cellQuantity)/(peakShaveSum*demandCharge)
+		outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandCharge)
 		cashFlowCurve = [peakShaveSum * demandCharge for year in range(projYears)]
 		cashFlowCurve[0]-= (cellCost * cellQuantity)
-		npv = 0.0
-		for idx, annualCashFlow in enumerate(cashFlowCurve):
-			npv += annualCashFlow/(1+discountRate)**idx
+		outData['netCashflow'] = cashFlowCurve
+		outData['cumulativeCashflow'] = [sum(cashFlowCurve[0:i+1]) for i,d in enumerate(cashFlowCurve)]
+		outData['NPV'] = npv(discountRate, cashFlowCurve)
+		outData['demand'] = [t['power']*1000.0 for t in dc]
+		outData['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc]
+		outData['batterySoc'] = [t['battSoC']/battCapacity*100.0 for t in dc]
 		plt.plot([t['power'] for t in dc])
 		plt.plot([t['netpower'] for t in dc])
 		plt.plot([t['battSoC'] for t in dc])
