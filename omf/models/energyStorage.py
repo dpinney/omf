@@ -39,12 +39,10 @@ def run(modelDir, inputDict):
 		if not os.path.isdir(modelDir):
 			os.makedirs(modelDir)
 			inputDict["created"] = str(datetime.datetime.now())
-		# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 			json.dump(inputDict, inputFile, indent = 4)
-		# Ready to run
+		# Ready to run.
 		startTime = datetime.datetime.now()
-		# Timestamp output.
 		outData = {}
 		# Get variables.
 		cellCapacity = float(inputDict['cellCapacity'])
@@ -53,7 +51,7 @@ def run(modelDir, inputDict):
 		battEff	= float(inputDict['batteryEfficiency']) / 100.0
 		discountRate = float(inputDict['discountRate']) / 100.0
 		projYears = int(inputDict['projYears'])
-		# Put demand data in to a file.
+		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
 		# Start running battery simulation.
@@ -71,7 +69,7 @@ def run(modelDir, inputDict):
 		monthlyPeakDemand = [max(dcGroupByMonth[x]) for x in range(12)]
 		capacityLimited = True
 		while capacityLimited:
-			battSoC = battCapacity                      # Battery state of charge; begins full.
+			battSoC = battCapacity # Battery state of charge; begins full.
 			battDoD = [battCapacity for x in range(12)] # Depth-of-discharge every month.
 			for row in dc:
 				month = int(row['datetime'].month)-1
@@ -107,6 +105,7 @@ def run(modelDir, inputDict):
 		outData['demand'] = [t['power']*1000.0 for t in dc]
 		outData['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc]
 		outData['batterySoc'] = [t['battSoC']/battCapacity*100.0 for t in dc]
+		# Output some matplotlib results as well.
 		plt.plot([t['power'] for t in dc])
 		plt.plot([t['netpower'] for t in dc])
 		plt.plot([t['battSoC'] for t in dc])
