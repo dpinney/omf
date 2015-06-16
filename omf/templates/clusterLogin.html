@@ -1,4 +1,4 @@
-﻿<head>
+<head>
 	<title>Open Modeling Framework</title>
 	<meta charset='utf-8'>
 	<style type='text/css'>
@@ -15,10 +15,15 @@
 		div#subLinks {display:inline-block;position:absolute;bottom:-60px;left:-30px;line-height:50px}
 		a.menuEntry {display:inline-block; font-size:18pt; color:gray; margin:0px; padding:7px 10px 7px 10px; text-decoration:none;}
 		a.menuEntry:hover {color:black;}
+		a.forgotPWD {display:inline-block; margin-left:175px; margin-top:-45px; padding:7px 10px 7px 10px; text-decoration:none;}
+		a.forgotPWD:hover {color:black;}
+		a.quickNew {display:inline-block; font-size:16pt;margin-left:25px; margin-top:0px; padding:7px 10px 7px 10px; text-decoration:none;}
+		a.quickNew:hover {color:black;}		
 		a {text-decoration:none;}
 		.Success{color:green;display:none;}
 		.Error{color:red;display:none;}
-		.fdiv{display:none;}
+		.fdiv{display:none;margin-top:0px;margin-left:75px;width:70%;}
+		.quickNewSelector{display:none;}
 	</style>
 	<link rel='shortcut icon' href='/static/favicon.ico'>
 	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
@@ -27,6 +32,7 @@
 		// Show/hide forgot password field.
 		$("#forgotpwd").click(function(e){
 			$(this).hide();
+			$("#quickNewShow").hide();
 			$(".Success, .Error").hide();
 			$(".fdiv").fadeIn();
 			$("input[name=email]").focus();
@@ -34,9 +40,10 @@
 		$("#cancel").click(function(e){
 			$(".fdiv").fadeOut();
 			$("#forgotpwd").fadeIn();
+			$("#quickNewShow").fadeIn();
 			$("input[name=email]").val("");
 			$("input[name=username]").focus();
-		})
+		})	
 		$(".forgot_pwd").submit(function(e){
 		$.ajax({
 			url:"/forgotpwd",
@@ -58,6 +65,15 @@
 			return false;
 		})
 		})
+		$("#quickNewShow").click(function(e){
+			$(this).hide();
+			$(".Success, .Error").hide();
+			$(".quickNewSelector").fadeIn();
+		});
+		$("#quickNewcancel").click(function(e){
+			$(".quickNewSelector").fadeOut();
+			$("#quickNewShow").fadeIn();
+		})					
 	})
 	</script>
 </head>
@@ -81,7 +97,7 @@
 			<button type='submit'>Login</button>
 			<label id='remember'>Remember Me <input name="remember" type='checkbox'></label>
 			</form>
-			<a href="#" id="forgotpwd">Forgot Password?</a>
+			<a class='forgotPWD' href="#" id="forgotpwd">Forgot Password?</a>
 			<div class="fdiv">
 				<p>Enter your email and a password reset link will be sent to you.</p>
 				<form class="forgot_pwd">
@@ -92,6 +108,20 @@
 			</div>
 			<p class="Error">That email is not associated with any account</p>
 			<p class="Success">Email successfully sent! The reset link will expire in 24 hours</p>
+			<a class='quickNew' href="#" id="quickNewShow">Want Guest Access?</a>			
+			<div class="quickNewSelector">
+				<form name="quickNewOptions">
+					<p>Select a model to explore.
+				    <select name="model" onChange="document.location.href=document.quickNewOptions.model.options[document.quickNewOptions.model.selectedIndex].value">
+				    	<option value="">Please select a model:</option> 
+				    	<option value="/quickNew/pvWatts">pvWatts</option>  
+				    	<option value="/quickNew/energyStorage">energyStorage</option>     
+				    	<option value="/quickNew/solarSunda">solarSunda</option>  
+			    	</select>
+			    	</p>
+				</form>     	
+				<a href="#" id="quickNewcancel">Cancel</a>	
+			</div>
 		</div>
 	</div>
 </body>
