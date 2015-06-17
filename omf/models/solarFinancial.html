@@ -57,17 +57,13 @@
 				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+			</div>			
+			<div class="shortInput">
 				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Inverter system size in kW-AC. This is used for a calculation in determining about of power lost due to inverter clipping as shown in the Hourly System Average Power Output graph.</span></label>
 				<input type="text" id="inverterSize" name="inverterSize" required="required" pattern="^\d+\.?\d*?$">
 			</div>					
-			<div class="shortInput">
-				<label class="tooltip">Climate<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
-				<select id="climateName" name="climateName">
-					{% for climate in datastoreNames["climates"] %}
-						<option value="{{ climate }}">{{ climate }}</option>
-					{% endfor %}
-				</select>
-			</div>
 			<div class="shortInput">
 				<label class="tooltip">Installation Cost ($)<span class="classic">Full cost of the system.</span></label>
 				<input type="text" id="installCost" name="installCost" pattern="^\d+\.?\d*$" required="required">

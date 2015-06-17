@@ -15,6 +15,7 @@ from __metaModel__ import *
 sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import gridlabd
+from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarEngineering.html"),"r") as tempFile:
@@ -103,6 +104,7 @@ def heavyProcessing(modelDir, inputDict):
 	feederDir, feederName = inputDict["feederName"].split("___")
 	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Feeder", feederDir, feederName + ".json"),
 		pJoin(modelDir, "feeder.json"))
+	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 		pJoin(modelDir, "gldContainer", "climate.tmy2"))
 	try:
@@ -450,7 +452,7 @@ def _tests():
 		"simLengthUnits": "hours",
 		"feederName": "public___Olin Barre GH EOL Solar",
 		"modelType": "solarEngineering",
-		"climateName": "AL-HUNTSVILLE",
+		"zipCode": "64735",
 		"simLength": "24",
 		"runTime": ""}
 	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated solarEngineering Test")

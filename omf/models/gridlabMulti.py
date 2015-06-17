@@ -13,6 +13,7 @@ from __metaModel__ import *
 sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import gridlabd
+from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"gridlabMulti.html"),"r") as tempFile:
@@ -98,6 +99,7 @@ def runForeground(modelDir, inputDict):
 				os.makedirs(pJoin(modelDir, feederName)) # create subfolders for feeders
 			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Feeder", feederDir, feederName + ".json"),
 				pJoin(modelDir, feederName, "feeder.json"))
+			inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])			
 			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 				pJoin(modelDir, feederName, "climate.tmy2"))
 			try:
@@ -385,7 +387,7 @@ def _tests():
 		"feederName31": "public___Simple Market System",
 		# "feederName": "public___Battery 13 Node Distributed",		
 		"modelType": "gridlabMulti",
-		"climateName": "AL-HUNTSVILLE",
+		"zipCode": "64735",		
 		"simLength": "24",
 		"runTime": ""}
 	modelLoc = pJoin(workDir,"admin","Automated Multiple GridlabD Testing")

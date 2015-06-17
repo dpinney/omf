@@ -13,6 +13,7 @@ import xlwt, traceback, csv
 sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import nrelsam
+from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarSunda.html"),"r") as tempFile:
@@ -48,7 +49,7 @@ def run(modelDir, inputDict):
 		startDateTime = simStartDate + " 00:00:00 UTC"		
 		simLengthUnits = "hours"
 		# Associate zipcode to climate data
-		inputDict["climateName"], latforpvwatts = zipCodeToclimateName(inputDict["zipCode"])
+		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
 		inverterSizeAC = float(inputDict.get("systemSize",0))
 		if (inputDict.get("systemDcSize",0) == "-"):
 			arraySizeDC = 1.3908 * inverterSizeAC
@@ -613,65 +614,6 @@ def run(modelDir, inputDict):
 			os.remove(pJoin(modelDir,"allOutputData.json"))
 		except Exception, e:
 			pass
-
-
-def zipCodeToclimateName(zipCode):
-	''' Maps zipcode from excel data to city, state, lat/lon. '''
-	# From excel file at: https://www.gaslampmedia.com/download-zip-code-latitude-longitude-city-state-county-csv/
-	def compareLatLon(LatLon, LatLon2):
-		differenceLat = float(LatLon[0]) - float(LatLon2[0])
-		differenceLon = float(LatLon[1]) - float(LatLon2[1])
-		distance = math.sqrt(math.pow(differenceLat, 2) + math.pow(differenceLon,2))
-		return distance
-	def safeListdir(path):
-		try: return os.listdir(path)
-		except:	return []
-	path = pJoin(__metaModel__._omfDir,"data","Climate")
-	climateNames = [x[:-5] for x in safeListdir(path)]
-	climateCity = []
-	lowestDistance = 1000
-	# Parse .csv file with city/state zip codes and lat/lon
-	zipCsvPath = pJoin(__metaModel__._omfDir,"static","zip_codes_states.csv")
-	with open(zipCsvPath, 'rt') as f:
-		reader = csv.reader(f, delimiter=',')
-		for row in reader:
-			for field in row:
-				if field == zipCode:
-					zipState = row[4]
-					zipCity = row[3]
-					ziplatlon  = row[1], row[2]
-
-	# Looks for climate data by looking at all cities in that state.
-	# TODO: check other states too.
-	# Filter only the cities in that state:
-	try:
-		for x in range(0, len(climateNames)):
-			if (zipState+"-" in climateNames[x]):
-				climateCity.append(climateNames[x])
-	except:
-		raise ValueError('Invalid Zipcode entered:', zipCode)
-
-	climateCity = [w.replace(zipState+"-", '') for w in climateCity]
-	# Parse the cities distances to zipcode city to determine closest climate:
-	for x in range (0,len(climateCity)):
-		with open(zipCsvPath, 'rt') as f:
-			reader = csv.reader(f, delimiter=',')
-			for row in reader:
-				city = row[3].replace (" ", "_")
-				if ((row[4].lower() == zipState.lower()) and (city.lower() == str(climateCity[x]).lower())):
-					climatelatlon  = row[1], row[2]
-					try:
-						distance = compareLatLon(ziplatlon, climatelatlon)
-						if (distance < lowestDistance):
-							latforpvwatts = int(round((float(climatelatlon[0])-10)/5.0)*5.0)
-							lowestDistance = distance
-							found = x
-					except:
-						pass
-
-	climateName = zipState + "-" + climateCity[found]
-	print "latforpv", latforpvwatts
-	return climateName, latforpvwatts
 
 def _runningSum(inList):
 	''' Give a list of running sums of inList. '''

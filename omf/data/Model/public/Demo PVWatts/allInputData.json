@@ -1,4 +1,5 @@
 {
+    "climateName": "VA-STERLING", 
     "w_stow": "0", 
     "rotlim": "45.0", 
     "trackingMode": "0", 
@@ -9,7 +10,7 @@
     "simStartDate": "2014-07-30", 
     "derate": "0.97", 
     "modelType": "pvWatts", 
-    "climateName": "AZ-PRESCOTT", 
+    "zipCode": "22310", 
     "simLength": "240", 
     "inv_eff": "0.92", 
     "azimuth": "180", 

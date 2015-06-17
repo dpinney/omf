@@ -93,13 +93,10 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Climate<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
-				<select id='climateName' name='climateName'>
-					{% for climate in datastoreNames['climates'] %}
-						<option value='{{ climate }}'>{{ climate }}</option>
-					{% endfor %}
-				</select>
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
+			<br>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. Due to large data volumes, the current limit is 9999.</span></label>
 				<input type="text" id="simLength" name="simLength" required="required" pattern="^(\d{1,4})$"/>

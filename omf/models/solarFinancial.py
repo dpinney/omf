@@ -12,6 +12,7 @@ import xlwt, traceback
 sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import nrelsam
+from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarFinancial.html"),"r") as tempFile:
@@ -36,6 +37,7 @@ def run(modelDir, inputDict):
 		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 			json.dump(inputDict, inputFile, indent = 4)
 		# Copy spcific climate data into model directory
+		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
 		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 			pJoin(modelDir, "climate.tmy2"))
 		# Ready to run
@@ -263,7 +265,7 @@ def _tests():
 	inData = {"simStartDate": "2013-01-01",
 		"simLengthUnits": "hours",
 		"modelType": "solarFinancial",
-		"climateName": "AL-HUNTSVILLE",
+		"zipCode": "64735",
 		"simLength": "8760",
 		"systemSize":"100",
 		"installCost":"100000",

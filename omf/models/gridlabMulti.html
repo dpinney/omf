@@ -168,13 +168,10 @@
 			{% endif %}
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Climate<span class="classic">Climate</span></label>
-				<select id='climateName' name='climateName'>
-					{% for climate in datastoreNames['climates'] %}
-						<option value='{{ climate }}'>{{ climate }}</option>
-					{% endfor %}
-				</select>
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
+			<br>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
 				<input type="text" id="simLength" name="simLength" pattern="^\d+$" required="required">	

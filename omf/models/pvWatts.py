@@ -10,6 +10,7 @@ from __metaModel__ import *
 sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import nrelsam
+from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"pvWatts.html"),"r") as tempFile:
@@ -38,6 +39,7 @@ def run(modelDir, inputDict):
 		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 			json.dump(inputDict, inputFile, indent = 4)
 		# Copy spcific climate data into model directory
+		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
 		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 			pJoin(modelDir, "climate.tmy2"))
 		# Ready to run
@@ -164,7 +166,7 @@ def _tests():
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"modelType": "pvWatts",
-		"climateName": "AL-HUNTSVILLE",
+		"zipCode": "64735",
 		"simLength": "100",
 		"systemSize":"10",
 		"derate":"77",

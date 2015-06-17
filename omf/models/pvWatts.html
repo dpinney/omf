@@ -63,17 +63,13 @@
 				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Derate (%)<span class="classic">Percentage of energy that is not lost due to panel soiling, DC-AC conversion, wire losses, etc.</span></label>
-				<input value="77" type="text" id="derate" name="derate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Climate<span class="classic">City closest to the installation site. Climate data for that site from the Typical Meteorological Year 2 project will be input to the model.</span></label>
-				<select id="climateName" name="climateName">
-					{% for climate in datastoreNames["climates"] %}
-						<option value="{{ climate }}">{{ climate }}</option>
-					{% endfor %}
-				</select>
-			</div>
+				<label class="tooltip">Derate (%)<span class="classic">Percentage of energy that is not lost due to panel soiling, DC-AC conversion, wire losses, etc.</span></label>
+				<input value="77" type="text" id="derate" name="derate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
+			</div>			
 			<div class="shortInput">
 				<label>Simulation Start Date (YYYY-MM-DD)</label>
 				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" required="required" value="2012-01-01">
