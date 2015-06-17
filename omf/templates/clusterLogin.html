@@ -108,15 +108,15 @@
 			</div>
 			<p class="Error">That email is not associated with any account</p>
 			<p class="Success">Email successfully sent! The reset link will expire in 24 hours</p>
-			<a class='quickNew' href="#" id="quickNewShow">Want Guest Access?</a>			
+			<a class='quickNew' href="#" id="quickNewShow">Want Guest Access?</a>	
 			<div class="quickNewSelector">
 				<form name="quickNewOptions">
-					<p>Select a model to explore.
+					<p>Select a model to explore
 				    <select name="model" onChange="document.location.href=document.quickNewOptions.model.options[document.quickNewOptions.model.selectedIndex].value">
 				    	<option value="">Please select a model:</option> 
-				    	<option value="/quickNew/pvWatts">pvWatts</option>  
-				    	<option value="/quickNew/energyStorage">energyStorage</option>     
-				    	<option value="/quickNew/solarSunda">solarSunda</option>  
+				    	{% for modelName in modelNames %}
+				    		<option value="/quickNew/{{ modelName }}">{{ modelName }}</option>
+				    	{% endfor %}
 			    	</select>
 			    	</p>
 				</form>     	

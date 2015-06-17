@@ -127,7 +127,15 @@ def login_page():
 	nextUrl = str(request.args.get("next","/"))
 	if flask_login.current_user.is_authenticated():
 		return redirect(urlTarget)
-	return render_template("clusterLogin.html", next=nextUrl)
+	# Generate list of models with quickRun
+	modelNames = []
+	for modelName in models.__all__:
+		thisModel = getattr(models, modelName)
+		if hasattr(thisModel, 'quickRender'):
+			modelNames.append(modelName)
+	if not modelNames:
+		modelNames.append("No Models Available")
+	return render_template("clusterLogin.html", next=nextUrl, modelNames=modelNames)
 
 @app.route("/logout")
 def logout():
