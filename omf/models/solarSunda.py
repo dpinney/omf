@@ -8,7 +8,7 @@ from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
 from random import random
-import xlwt, traceback, csv
+import traceback, csv
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 import feeder
