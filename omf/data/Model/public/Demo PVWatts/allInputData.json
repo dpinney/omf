@@ -1,5 +1,5 @@
 {
-    "climateName": "VA-STERLING", 
+    "climateName": "MO-KANSAS_CITY", 
     "w_stow": "0", 
     "rotlim": "45.0", 
     "trackingMode": "0", 
@@ -10,7 +10,7 @@
     "simStartDate": "2014-07-30", 
     "derate": "0.97", 
     "modelType": "pvWatts", 
-    "zipCode": "22310", 
+    "zipCode": "64735", 
     "simLength": "240", 
     "inv_eff": "0.92", 
     "azimuth": "180", 

@@ -29,6 +29,10 @@ from os.path import join as pJoin
 from datetime import timedelta, datetime
 from math import modf
 from bs4 import BeautifulSoup
+import xlwt, traceback, csv 
+currentDirectory = os.path.dirname(os.path.realpath(sys.argv[0]))
+sys.path.append(pJoin(currentDirectory, "omf","models"))	
+import __metaModel__	
 
 def makeClimateCsv(start, end, airport, outFilePath, cleanup=True):
 	''' Generate a climate timeseries CSV. See module docString for full help.'''
@@ -719,11 +723,6 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 					line.Humi, line.Solar[0], line.Solar[1], line.Solar[2]))
 
 def zipCodeToClimateName(zipCode):
-	import xlwt, traceback, csv 
-	currentDirectory = os.path.dirname(os.path.realpath(sys.argv[0]))
-	sys.path.append(pJoin(currentDirectory, "omf","models"))	
-	import __metaModel__	
-	
 	''' Maps zipcode from excel data to city, state, lat/lon. '''
 	# From excel file at: https://www.gaslampmedia.com/download-zip-code-latitude-longitude-city-state-county-csv/
 	def compareLatLon(LatLon, LatLon2):
@@ -799,6 +798,8 @@ def _tests():
 	assert None==_processWeather("2010-03-01", "2010-04-01", "PDX", workDir)
 	print "Testing the full process together."
 	assert None==makeClimateCsv("2010-07-01", "2010-08-01", "IAD", pJoin(tempfile.mkdtemp(),"weatherDCA.csv"), cleanup=True)
+	print "Testing the zip code to climate name conversion"
+	assert ('MO-KANSAS_CITY',30)==zipCodeToClimateName(64735)
 
 if __name__ == "__main__":
 	_tests()
