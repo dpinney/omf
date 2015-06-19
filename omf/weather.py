@@ -29,7 +29,6 @@ from os.path import join as pJoin
 from datetime import timedelta, datetime
 from math import modf
 from bs4 import BeautifulSoup
-import xlwt, traceback, csv
 
 def makeClimateCsv(start, end, airport, outFilePath, cleanup=True):
 	''' Generate a climate timeseries CSV. See module docString for full help.'''
