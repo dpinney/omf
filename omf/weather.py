@@ -29,10 +29,7 @@ from os.path import join as pJoin
 from datetime import timedelta, datetime
 from math import modf
 from bs4 import BeautifulSoup
-import xlwt, traceback, csv 
-currentDirectory = os.path.dirname(os.path.realpath(sys.argv[0]))
-sys.path.append(pJoin(currentDirectory, "omf","models"))	
-import __metaModel__	
+import xlwt, traceback, csv
 
 def makeClimateCsv(start, end, airport, outFilePath, cleanup=True):
 	''' Generate a climate timeseries CSV. See module docString for full help.'''
@@ -733,13 +730,15 @@ def zipCodeToClimateName(zipCode):
 	def safeListdir(path):
 		try: return os.listdir(path)
 		except:	return []
-	path = pJoin(__metaModel__._omfDir,"data","Climate")
+	###
+	omfDir = os.path.dirname(os.path.abspath(__file__))
+	path = pJoin(omfDir,"data","Climate")
 	zipCodeStr = str(zipCode)
 	climateNames = [x[:-5] for x in safeListdir(path)]
 	climateCity = []
 	lowestDistance = 1000
 	# Parse .csv file with city/state zip codes and lat/lon
-	zipCsvPath = pJoin(__metaModel__._omfDir,"static","zip_codes_states.csv")
+	zipCsvPath = pJoin(omfDir,"static","zip_codes_states.csv")
 	with open(zipCsvPath, 'rt') as f:
 		reader = csv.reader(f, delimiter=',')
 		for row in reader:
@@ -748,7 +747,6 @@ def zipCodeToClimateName(zipCode):
 					zipState = row[4]
 					zipCity = row[3]
 					ziplatlon  = row[1], row[2]
-
 	# Looks for climate data by looking at all cities in that state.
 	# TODO: check other states too.
 	# Filter only the cities in that state:
@@ -758,7 +756,6 @@ def zipCodeToClimateName(zipCode):
 				climateCity.append(climateNames[x])
 	except:
 		raise ValueError('Invalid Zipcode entered:', zipCodeStr)
-
 	climateCity = [w.replace(zipState+"-", '') for w in climateCity]
 	# Parse the cities distances to zipcode city to determine closest climate:
 	for x in range (0,len(climateCity)):
@@ -776,13 +773,7 @@ def zipCodeToClimateName(zipCode):
 							found = x
 					except:
 						pass
-
 	climateName = zipState + "-" + climateCity[found]
-	print "latforpv", latforpvwatts
-	return climateName, latforpvwatts
-
-	climateName = zipState + "-" + climateCity[found]
-	print "latforpv", latforpvwatts
 	return climateName, latforpvwatts
 
 def _tests():
