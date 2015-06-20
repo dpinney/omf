@@ -413,34 +413,46 @@ def milImportBackground(owner, feederName, stdString, seqString):
 def gridlabdImport():
 	'''This function is used for gridlabdImporting'''
 	feederName = str(request.form.get("feederName",""))
-	newFeeder = dict(**feeder.newFeederWireframe)
-	newFeeder["tree"] = feeder.parse(request.files["glmFile"].stream.read(), False)
-	newFeeder["layoutVars"]["xScale"] = 0
-	newFeeder["layoutVars"]["yScale"] = 0
-	with open("./schedules.glm","r") as schedFile:
-		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
-	with open("data/Feeder/" + User.cu() + "/" + feederName + ".json", "w") as outFile:
-		json.dump(newFeeder, outFile, indent=4)
+	glmString = request.files["glmFile"].stream.read()
+	if not os.path.isdir("data/Conversion/" + User.cu()):
+		os.makedirs("data/Conversion/" + User.cu())
+	with open("data/Conversion/" + User.cu() + "/" + feederName + ".json", "w+") as conFile:
+		conFile.write("WORKING")
+	importProc = Process(target=gridlabImportBackground, args=[User.cu(), feederName, glmString])
+	importProc.start()
 	return redirect("/#feeders")
 
+def gridlabImportBackground(owner, feederName, glmString):
+	''' Function to run in the background for Milsoft import. '''
+	newFeeder = dict(**feeder.newFeederWireframe)
+ 	newFeeder["tree"] = feeder.parse(glmString, False)
+ 	newFeeder["layoutVars"]["xScale"] = 0
+ 	newFeeder["layoutVars"]["yScale"] = 0
+	with open("./schedules.glm","r") as schedFile:
+		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
+	with open("data/Feeder/" + owner + "/" + feederName + ".json", "w") as outFile:
+		json.dump(newFeeder, outFile, indent=4)
+	os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
+
+# TODO: Check if rename mdb files worked
 @app.route("/cymeImport/", methods=["POST"])
 @flask_login.login_required
 def cymeImport():
 	''' API for importing a cyme feeder. '''
 	feederName = str(request.form.get("feederName",""))
-	stdString, seqString = map(lambda x: request.files[x], ["stdFile", "seqFile"])
+	mdbNetString, mdbEqString = map(lambda x: request.files[x], ["mdbNetFile", "mdbEqFile"])
 	if not os.path.isdir("data/Conversion/" + User.cu()):
 		os.makedirs("data/Conversion/" + User.cu())
 	with open("data/Conversion/" + User.cu() + "/" + feederName + ".json", "w+") as conFile:
 		conFile.write("WORKING")
-	importProc = Process(target=cymeImportBackground, args=[User.cu(), feederName, stdString.filename, seqString.filename])
+	importProc = Process(target=cymeImportBackground, args=[User.cu(), feederName, mdbNetString.filename, mdbEqString.filename])
 	importProc.start()
 	return redirect("/#feeders")
 
-def cymeImportBackground(owner, feederName, stdString, seqString):
+def cymeImportBackground(owner, feederName, mdbNetString, mdbEqString):
 	''' Function to run in the background for Milsoft import. '''
 	newFeeder = dict(**feeder.newFeederWireframe)
-	[newFeeder["tree"], xScale, yScale] = cymeToGridlab.convertCymeModel(stdString, seqString)
+	[newFeeder["tree"], xScale, yScale] = cymeToGridlab.convertCymeModel(mdbNetString, mdbEqString)
 	newFeeder["layoutVars"]["xScale"] = xScale
 	newFeeder["layoutVars"]["yScale"] = yScale
 	with open("./schedules.glm","r") as schedFile:

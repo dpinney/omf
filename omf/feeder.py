@@ -295,7 +295,8 @@ def _parseTokenList(tokenList):
 		elif fullToken[-1] == '}':
 			if len(fullToken) > 1:
 				currentLeafAdd(fullToken[0],listToString(fullToken), tree, guidStack)
-			guidStack.pop()
+			if len(guidStack) > 1:
+				guidStack.pop()
 		elif fullToken[0] == 'schedule':
 			# Special code for those ugly schedule objects:
 			if fullToken[0] == 'schedule':
