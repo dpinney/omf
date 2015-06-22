@@ -261,7 +261,7 @@ def _tokenizeGlm(inputStr, filePath=True):
 
 def _parseTokenList(tokenList):
 	''' Given a list of tokens from a GLM, parse those into a tree data structure. '''
-	def currentLeafAdd(key, value, tree, guidStack):
+	def currentLeafAdd(key, value):
 		# Helper function to add to the current leaf we're visiting.
 		current = tree
 		for x in guidStack:
@@ -291,12 +291,11 @@ def _parseTokenList(tokenList):
 				guid += 1
 			# We process if it isn't the empty token (';')
 			elif len(fullToken) > 1:
-				currentLeafAdd(fullToken[0],listToString(fullToken), tree, guidStack)
+				currentLeafAdd(fullToken[0],listToString(fullToken))
 		elif fullToken[-1] == '}':
 			if len(fullToken) > 1:
-				currentLeafAdd(fullToken[0],listToString(fullToken), tree, guidStack)
-			if len(guidStack) > 1:
-				guidStack.pop()
+				currentLeafAdd(fullToken[0],listToString(fullToken))
+			guidStack.pop()
 		elif fullToken[0] == 'schedule':
 			# Special code for those ugly schedule objects:
 			if fullToken[0] == 'schedule':
@@ -305,16 +304,16 @@ def _parseTokenList(tokenList):
 				tree[guid] = {'object':'schedule','name':fullToken[1], 'cron':' '.join(fullToken[3:-2])}
 				guid += 1
 		elif fullToken[-1] == '{':
-			currentLeafAdd(guid,{}, tree, guidStack)
+			currentLeafAdd(guid,{})
 			guidStack.append(guid)
 			guid += 1
 			# Wrapping this currentLeafAdd is defensive coding so we don't crash on malformed glms.
 			if len(fullToken) > 1:
 				# Do we have a clock/object or else an embedded configuration object?
 				if len(fullToken) < 4:
-					currentLeafAdd(fullToken[0],fullToken[-2], tree, guidStack)
+					currentLeafAdd(fullToken[0],fullToken[-2])
 				else:
-					currentLeafAdd('omfEmbeddedConfigObject', fullToken[0] + ' ' + listToString(fullToken), tree, guidStack)
+					currentLeafAdd('omfEmbeddedConfigObject', fullToken[0] + ' ' + listToString(fullToken))
 	return tree
 
 def _gatherKeyValues(inDict, keyToAvoid):
@@ -449,6 +448,11 @@ def _tests():
 	obType = type(_parseTokenList(tokens))
 	print 'Parsed tokens into object of type:', obType
 	assert obType is dict
+	# GLM parsing test.
+	smsTree = parse('scratch/simpleMarket/sms.glm', filePath=True)
+	keyLen = len(smsTree.keys())
+	print 'Parsed a test glm file with', keyLen, 'keys.'
+	assert keyLen == 41
 	# Recorder Attachment Test
 	with open('data/Feeder/public/Olin Barre Geo.json') as inFile:
 		tree = json.load(inFile)['tree']
