@@ -461,6 +461,17 @@ def cymeImportBackground(owner, feederName, mdbNetString, mdbEqString):
 		json.dump(newFeeder, outFile, indent=4)
 	os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
 
+@app.route("/newBlankFeeder/", methods=["POST"])
+@flask_login.login_required
+def newBlankFeeder():
+	'''This function is used for creating a new blank feeder.'''
+	feederName = str(request.form.get("feederName",""))
+	with open("./static/SimpleFeeder.json", "r") as simpleFeederFile:
+		with open("data/Feeder/" + User.cu() + "/" + feederName + ".json", "w") as outFile:
+			outFile.write(simpleFeederFile.read())
+	feederLink = "./feeder/" + User.cu() + "/" + feederName
+	return redirect(feederLink)
+	
 @app.route("/feederData/<owner>/<feederName>/") 
 @app.route("/feederData/<owner>/<feederName>/<modelFeeder>")
 @flask_login.login_required
