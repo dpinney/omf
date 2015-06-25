@@ -14,6 +14,8 @@ sys.path.append(__metaModel__._omfDir)
 import feeder
 from solvers import gridlabd
 from weather import zipCodeToClimateName
+from flask import session
+from web import send_link
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"gridlabMulti.html"),"r") as tempFile:
@@ -273,12 +275,32 @@ def runForeground(modelDir, inputDict):
 			os.remove(pJoin(modelDir, "PPID.txt"))
 		except:
 			pass
+		# Send email to user on successfully run status of model
+		email = session['user_id']
+		try:
+			user = json.load(open("data/User/" + email + ".json"))
+			modelPath, modelName = pSplit(modelDir)
+			message = "The model " + "<i>" + str(modelName) + "</i>" + " has successfully completed running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
+			return send_link(email, message, user)
+		except Exception, e:
+			print "ERROR: failed to send model completed running email to user", email, "with exception", e
+
+
 	except Exception, e:
 		print "MODEL CRASHED GRIDLABMULTI", e, modelDir
 		try:
 			os.remove(pJoin(modelDir, "PPID.txt"))
 		except:
 			pass
+		# Send email to user on failed running status of model
+		email = session['user_id']
+		try:
+			user = json.load(open("data/User/" + email + ".json"))
+			modelPath, modelName = pSplit(modelDir)
+			message = "The model " + "<i>" + str(modelName) + "</i>" + " has failed to complete running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
+			return send_link(email, message, user)
+		except Exception, e:
+			print "ERROR: failed to send model failed running email to user", email, "with exception", e			
 		cancel(modelDir)
 
 def avg(inList):

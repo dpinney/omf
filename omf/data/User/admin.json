@@ -1,5 +1,9 @@
 {
     "username": "admin", 
+    "reg_key": "7d07d92dbfcde9d749d8088b52216922", 
+    "timestamp": "Thu Jun 25 17:32:20 2015", 
+    "registered": false, 
+    "csrf": "13ce25528d8556e9c6c80e832a872cee", 
     "password_digest": "$pbkdf2-sha512$12000$DwEgZEyJMYaQ8v7/vxcCwA$Uxe/q19AwB4hK5S1W/S.3HbsdlJoOa..RzzsaVeb4opTHy.nMZXjQJAj/oEM3yQbu1jGgEhEliCADenX6buf1A", 
-    "csrf": "13ce25528d8556e9c6c80e832a872cee"
+    "email": "admin"
 }
