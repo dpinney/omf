@@ -173,12 +173,11 @@
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
 				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
-			</div>
-			<br>
+			</div>	
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
 				<input type="text" id="simLength" name="simLength" pattern="^\d+$" required="required">	
-			</div>
+			</div>		
 			<div class="shortInput">
 				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
 				<select id="simLengthUnits" name="simLengthUnits">
@@ -192,13 +191,13 @@
 				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" required="required">
 			</div>
 			<div class="wideInput" style="text-align:right">
+				<input name="remember" type='checkbox'><label class="tooltip">&nbsp;Send email after completion&nbsp;<span class="classic">***DOES NOT WORK YET*** Sends an email on the status of the model when it is done running.</span></label>	
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="runButton" type="submit" class="preRun">Run Model</button>
-				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
-				<br><input name="remember" type='checkbox'><label class="tooltip">&nbsp;Send email after completion<span class="classic">***DOES NOT WORK YET*** Sends an email on the status of the model when it is done running.</span></label>				
+				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>		
 			</div>
 		</form>
 	</div>	
