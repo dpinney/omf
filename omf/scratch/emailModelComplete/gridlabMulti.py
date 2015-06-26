@@ -1,7 +1,25 @@
-### Add the following function to gridlabMulti.py ###
-### Under runeForeground replace:                 ###
-###      return send_link(email, message, user)   ###
-### with return emailSender(email, message, user) ###
+###Add this to the end of runeForeground
+emailStatus = inputDict.get('emailStatus', 0)   
+if (emailStatus == "on"):
+  print "\n    EMAIL ALERT ON"
+  email = session['user_id']
+  try:
+    user = json.load(open("data/User/" + email + ".json"))
+    modelPath, modelName = pSplit(modelDir)
+    message = "The model " + "<i>" + str(modelName) + "</i>" + " has successfully completed running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
+    return send_link(email, message, user)
+  except Exception, e:
+    print "ERROR: failed to send model completed running email to user", email, "with exception", e
+else:
+  print "\n   EMAIL ALERT NOT ON"
+
+
+### Add the following function and replace send_link above with emailSender 
+### in order to test sending an email with an online email tool
+### Requires mechanize library
+### Replace:                                      
+###      return send_link(email, message, user)   
+### with return emailSender(email, message, user) 
 import mechanize
 def emailSender(email, message, user):
   try:

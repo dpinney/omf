@@ -1,6 +1,13 @@
 <head>
 	<title>Open Modeling Framework</title>
 	<meta charset="utf-8">
+	<style type='text/css'>
+		label#remember {margin-left:75px; color:gray}
+		#emailSelection {   
+			position:inline;                    
+			margin-right:5px;
+		}  		
+	</style>	
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<link type="text/css" href="{{pathPrefix}}/static/models.css" rel="stylesheet"/>
@@ -170,12 +177,11 @@
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
 				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
-			</div>
-			<br>
+			</div>	
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
 				<input type="text" id="simLength" name="simLength" pattern="^\d+$" required="required">	
-			</div>
+			</div>		
 			<div class="shortInput">
 				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
 				<select id="simLengthUnits" name="simLengthUnits">
@@ -189,16 +195,20 @@
 				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" required="required">
 			</div>
 			<div class="wideInput" style="text-align:right">
+				<div id="emailSelection" class="preRun stoppedInline postRunInline">
+					<input name="emailStatus" id="emailStatus" type="checkbox">
+					<label class="tooltip">&nbsp;Enable Email Update<span class="classic">Sends an email when the model is done running and whether it has completed successfully or encountered an error.</span></label>
+				</div>	
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="runButton" type="submit" class="preRun">Run Model</button>
-				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
+				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>		
 			</div>
 		</form>
-	</div>
-	
+	</div>	
+
 	<div id ="runIndicator" class="content running">
 		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
 	</div>

@@ -276,14 +276,19 @@ def runForeground(modelDir, inputDict):
 		except:
 			pass
 		# Send email to user on successfully run status of model
-		email = session['user_id']
-		try:
-			user = json.load(open("data/User/" + email + ".json"))
-			modelPath, modelName = pSplit(modelDir)
-			message = "The model " + "<i>" + str(modelName) + "</i>" + " has successfully completed running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
-			return send_link(email, message, user)
-		except Exception, e:
-			print "ERROR: failed to send model completed running email to user", email, "with exception", e
+		emailStatus = inputDict.get('emailStatus', 0)		
+		if (emailStatus == "on"):
+			print "\n    EMAIL ALERT ON"
+			email = session['user_id']
+			try:
+				user = json.load(open("data/User/" + email + ".json"))
+				modelPath, modelName = pSplit(modelDir)
+				message = "The model " + "<i>" + str(modelName) + "</i>" + " has successfully completed running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
+				return send_link(email, message, user)
+			except Exception, e:
+				print "ERROR: failed to send model completed running email to user", email, "with exception", e
+		else:
+			print "\n   EMAIL ALERT NOT ON"
 
 
 	except Exception, e:
