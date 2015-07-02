@@ -105,3 +105,17 @@ function duplicateModel() {
 		})
 	}
 }
+
+function checkModelName() {
+	var newName = modelName.value
+	$.ajax({
+		url: "/uniqObjName/Model/" + currentUser + "/" + newName
+	}).done(function (data) {
+		if (data.exists) {
+			alert("You already have a Model named '" + newName + "', please choose a different name.")
+		}
+		else{	
+			inputForm.submit()			
+		}
+	})	
+}

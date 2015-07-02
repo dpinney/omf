@@ -26,7 +26,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %}action="/runModel/"{% endif %} method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-energyStorage">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-energyStorage" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="energyStorage" readonly/>
 			</div>
 			{% if quickRender %}
@@ -55,7 +55,7 @@
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
 			<div class="shortInput">
-				<label>Cell Capacity (kWh)</label>
+				<label>Unit Capacity (kWh-AC)</label>
 				<input type="text" id="cellCapacity" name="cellCapacity" value="100" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
@@ -63,15 +63,19 @@
 				<input type="text" id="cellQuantity" name="cellQuantity" value="3" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput">
-				<label>Discharge Rate (kW)</label>
-				<input type="text" id="dischargeRate" name="dischargeRate" value="50" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>
-			<div class="shortInput">
-				<label>Charge Rate (kW)</label>
+				<label>Charge Rating (kW)</label>
 				<input type="text" id="chargeRate" name="chargeRate" value="50" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
-				<label>Battery Efficiency (%)</label>
+				<label>Discharge Rating (kW)</label>
+				<input type="text" id="dischargeRate" name="dischargeRate" value="50" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Maximum Depth of Discharge (%)</label>
+				<input type="text" id="dodRating" name="dodRating" value="50" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>						
+			<div class="shortInput">
+				<label>Battery System AC Round Trip Efficiency (%)</label>
 				<input type="text" id="batteryEfficiency" name="batteryEfficiency" value="92" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shortInput">
@@ -96,7 +100,7 @@
 				</script>
 			</div>
 			<div class="shortInput">
-				<label>Demand Charge ($/kW)</label>
+				<label>Demand Charge ($/kW/month)</label>
 				<input type="text" id="demandCharge" name="demandCharge" value="50" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
@@ -108,7 +112,7 @@
 				<input type="text" id="projYears" name="projYears" value="10" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput">
-				<label>Cell Cost ($)</label>
+				<label>Unit Cost (installed)</label>
 				<input type="text" id="cellCost" name="cellCost" value="25000" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
@@ -117,7 +121,7 @@
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				{% endif %}
-				<button id="runButton" type="submit" class="preRun">Run Model</button>
+				<button id="runButton" type="button" class="preRun" onclick="javascript:checkModelName()">Run Model</button>
 				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
 		</form>
