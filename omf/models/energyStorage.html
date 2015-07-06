@@ -185,7 +185,7 @@
 						"lineColor":"gray"},
 					"yAxis":
 						{"title":{"text":"SoC (%)","style":{"color":"gray"}}, "min":0, "max":100},
-					"title":{"text":null},
+					"title":{"text":"Cycle Equivalents:" + delimitNumbers(allOutputData.cycleEquivalents.toFixed(1)), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[
 						{"name":"Battery SoC","marker":{"enabled":false},"color":"gray","data":allOutputData.batterySoc} ],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"batterySocChart","type":"line","marginRight":20, "height":250,"width":1000},
