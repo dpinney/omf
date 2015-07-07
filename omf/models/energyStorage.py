@@ -107,7 +107,7 @@ def run(modelDir, inputDict):
 		outData['batterySoc'] = [t['battSoC']/battCapacity*100.0 for t in dc]
 		# Estimate number of cyles the battery went through.
 		SoC = outData['batterySoc']
-		outData['cycleEquivalents'] = sum([-1*(SoC[i+1]-SoC[i]) for i,x in enumerate(SoC[0:-1]) if SoC[i+1]-SoC[i]<0]) / 100.0
+		outData['cycleEquivalents'] = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
 		# Output some matplotlib results as well.
 		plt.plot([t['power'] for t in dc])
 		plt.plot([t['netpower'] for t in dc])
