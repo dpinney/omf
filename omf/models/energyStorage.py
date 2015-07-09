@@ -50,12 +50,17 @@ def run(modelDir, inputDict):
 			[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellQuantity', 'demandCharge', 'cellCost')]
 		battEff	= float(inputDict['batteryEfficiency']) / 100.0
 		discountRate = float(inputDict['discountRate']) / 100.0
+		# CHANGE: DODRATING, DEMANDCHARGEMONTHLY
+		dodRating = float(inputDict['dodRating']) / 100.0	
+		demandChargeMonthly = [demandCharge for x in range(12)]	
 		projYears = int(inputDict['projYears'])
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
 		# Start running battery simulation.
-		battCapacity = cellQuantity * cellCapacity
+		# CHANGE
+		# battCapacity = cellQuantity * cellCapacity
+		battCapacity = cellQuantity * cellCapacity * dodRating # Actual available capacity from depth of discharge rating
 		battDischarge = cellQuantity * dischargeRate
 		battCharge = cellQuantity * chargeRate
 		# Most of our data goes inside the dc "table"
@@ -70,7 +75,7 @@ def run(modelDir, inputDict):
 		capacityLimited = True
 		while capacityLimited:
 			battSoC = battCapacity # Battery state of charge; begins full.
-			battDoD = [battCapacity for x in range(12)] # Depth-of-discharge every month.
+			battDoD = [battCapacity for x in range(12)] # Depth-of-discharge every month.		
 			for row in dc:
 				month = int(row['datetime'].month)-1
 				powerUnderPeak  = monthlyPeakDemand[month] - row['power'] - ps[month]
@@ -96,8 +101,10 @@ def run(modelDir, inputDict):
 		dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
 		hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
 		peakShaveSum = sum(ps)
-		outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandCharge)
-		cashFlowCurve = [peakShaveSum * demandCharge for year in range(projYears)]
+		demandChargeSum = sum(demandChargeMonthly)
+		print "demandChargeSum =", demandChargeSum
+		outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandChargeSum)
+		cashFlowCurve = [peakShaveSum * demandChargeSum for year in range(projYears)]
 		cashFlowCurve[0]-= (cellCost * cellQuantity)
 		outData['netCashflow'] = cashFlowCurve
 		outData['cumulativeCashflow'] = [sum(cashFlowCurve[0:i+1]) for i,d in enumerate(cashFlowCurve)]
@@ -108,6 +115,12 @@ def run(modelDir, inputDict):
 		# Estimate number of cyles the battery went through.
 		SoC = outData['batterySoc']
 		outData['cycleEquivalents'] = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
+		# CHANGE: ADD ARRAY OF DEMANDCHARGE
+		# DELETE:
+		# print "\n   dcGroupByMonth", dcGroupByMonth, "\n     length=", len(dcGroupByMonth)		
+		# print "\n   monthlyPeakDemand", monthlyPeakDemand, "\n     length=", len(monthlyPeakDemand)
+		# print "\n   dcThroughTheMonth", dcThroughTheMonth
+		# print "\n   hoursThroughTheMonth", hoursThroughTheMonth
 		# Output some matplotlib results as well.
 		plt.plot([t['power'] for t in dc])
 		plt.plot([t['netpower'] for t in dc])

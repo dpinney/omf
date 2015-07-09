@@ -6,7 +6,7 @@
     "zipCode": "64735", 
     "modelType": "gridlabMulti", 
     "climateName": "MO-KANSAS_CITY", 
-    "simLength": "100", 
+    "simLength": "300", 
     "feederName2": "public___Olin Barre GH Wind", 
-    "runTime": "0:00:10"
+    "runTime": "0:00:22"
 }
