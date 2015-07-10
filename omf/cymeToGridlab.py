@@ -37,7 +37,8 @@ def _openDatabase(database_file):
         #Windows Driver: {Microsoft Access Driver (*.mdb)}        
         connect_string = 'DRIVER={Microsoft Access Driver (*.mdb)};DBQ=' + str(database_file) + ';'  
     elif sys.platform == 'darwin':
-        pass
+        # Mac
+        connect_string = 'DRIVER={MDBTools};DBQ=' + str(database_file) + ';'    
     elif sys.platform == 'linux2':
         #Linux Driver: {MDBTools}           
         connect_string = 'DRIVER={MDBTools};DBQ=' + str(database_file) + ';'    
@@ -1063,8 +1064,7 @@ def _find_SPCT_rating(load_str):
                 past_rating = rating
         return str(past_rating)
     
-def convertCymeModel(network_db, equipment_db, test, type, feeder_id):
-
+def convertCymeModel(network_db, equipment_db, test=False, type=1, feeder_id=None):
     if (test==False):
         network_db_path = "./uploads/" + network_db 
         equipment_db_path = "./uploads/" + equipment_db   
