@@ -45,7 +45,6 @@ def _openDatabase(database_file):
     print"connect string =",(connect_string)
     database_connection = pyodbc.connect(connect_string)
     database = database_connection.cursor()
-
     return database
 
 def _fixName(name):
