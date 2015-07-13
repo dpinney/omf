@@ -11,7 +11,7 @@ import xlwt, traceback
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 import feeder
-from solvers import nrelsam
+from solvers import nrelsam2015
 from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
@@ -43,11 +43,12 @@ def run(modelDir, inputDict):
 		# Ready to run
 		startTime = dt.datetime.now()
 		# Set up SAM data structures.
-		ssc = nrelsam.SSCAPI()
+		ssc = nrelsam2015.SSCAPI()
 		dat = ssc.ssc_data_create()
 		# Required user inputs.
-		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
-		ssc.ssc_data_set_number(dat, "system_size", float(inputDict.get("systemSize", 100)))
+		ssc.ssc_data_set_string(dat, "solar_resource_file", modelDir + "/climate.tmy2")
+		ssc.ssc_data_set_number(dat, "adjust:constant", 0.0)			
+		ssc.ssc_data_set_number(dat, "system_capacity", float(inputDict["systemSize"]))
 		derate = float(inputDict.get("pvModuleDerate", 99.5))/100 \
 			* float(inputDict.get("mismatch", 99.5))/100 \
 			* float(inputDict.get("diodes", 99.5))/100 \
@@ -56,25 +57,25 @@ def run(modelDir, inputDict):
 			* float(inputDict.get("soiling", 99.5))/100 \
 			* float(inputDict.get("shading", 99.5))/100 \
 			* float(inputDict.get("sysAvail", 99.5))/100 \
-			* float(inputDict.get("age", 99.5))/100 \
-			* float(inputDict.get("inverterEfficiency", 92))/100
-		ssc.ssc_data_set_number(dat, "derate", derate)
-		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
+			* float(inputDict.get("age", 99.5))
+		ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict.get("inverterEfficiency", 92)))
+		ssc.ssc_data_set_number(dat, "losses", 100 - derate)
+		ssc.ssc_data_set_number(dat, "array_type", float(inputDict.get("trackingMode", 0)))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 		# Advanced inputs with defaults.
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
-		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)
+		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)			
 		# Complicated optional inputs.
 		if (inputDict.get("tilt",0) == "-"):
 			tilt_eq_lat = 1.0
-			manualTilt = 0.0
+			manualTilt = latforpvwatts
 		else:
 			tilt_eq_lat = 0.0
 			manualTilt = float(inputDict.get("tilt",0))		
 		ssc.ssc_data_set_number(dat, "tilt", manualTilt)
 		ssc.ssc_data_set_number(dat, "tilt_eq_lat", tilt_eq_lat)
 		# Run PV system simulation.
-		mod = ssc.ssc_module_create("pvwattsv1")
+		mod = ssc.ssc_module_create("pvwattsv5")
 		ssc.ssc_module_exec(mod, dat)
 		# Setting options for start time.
 		simLengthUnits = inputDict.get("simLengthUnits","hours")

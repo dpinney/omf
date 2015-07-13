@@ -10,7 +10,7 @@ import traceback
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 import feeder
-from solvers import nrelsam
+from solvers import nrelsam2015
 import random
 from weather import zipCodeToClimateName
 
@@ -38,19 +38,21 @@ def run(modelDir, inputDict):
 		# Ready to run
 		startTime = dt.datetime.now()
 		# Set up SAM data structures.
-		ssc = nrelsam.SSCAPI()
+		ssc = nrelsam2015.SSCAPI()
 		dat = ssc.ssc_data_create()
 		# Required user inputs.
-		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
+		ssc.ssc_data_set_string(dat, "solar_resource_file", modelDir + "/climate.tmy2")
+		ssc.ssc_data_set_number(dat, "adjust:constant", 0.0)					
 		# TODO: FIX THIS!!!! IT SHOULD BE AVGSYS*PEN*RESCUSTOMERS
-		ssc.ssc_data_set_number(dat, "system_size", float(inputDict["avgSystemSize"]))
+		ssc.ssc_data_set_number(dat, "system_capacity", float(inputDict["avgSystemSize"]))
 		# SAM options where we take defaults.
-		ssc.ssc_data_set_number(dat, "derate", 0.97)
-		ssc.ssc_data_set_number(dat, "track_mode", 0)
+		ssc.ssc_data_set_number(dat, "losses", 0.97)
+		ssc.ssc_data_set_number(dat, "array_type", 0)
 		ssc.ssc_data_set_number(dat, "azimuth", 180)
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
+		ssc.ssc_data_set_number(dat, "tilt", latforpvwatts)			
+		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)	
 		# Run PV system simulation.
-		mod = ssc.ssc_module_create("pvwattsv1")
+		mod = ssc.ssc_module_create("pvwattsv5")
 		ssc.ssc_module_exec(mod, dat)
 		# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html
 		startDateTime = "2013-01-01 00:00:00 UTC"
