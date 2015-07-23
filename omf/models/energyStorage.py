@@ -14,7 +14,6 @@ import matplotlib.pyplot as plt
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 import feeder
-from solvers import nrelsam
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"energyStorage.html"),"r") as tempFile:
@@ -48,19 +47,19 @@ def run(modelDir, inputDict):
 		cellCapacity = float(inputDict['cellCapacity'])
 		(cellCapacity, dischargeRate, chargeRate, cellQuantity, demandCharge, cellCost) = \
 			[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellQuantity', 'demandCharge', 'cellCost')]
-		battEff	= float(inputDict['batteryEfficiency']) / 100.0
-		discountRate = float(inputDict['discountRate']) / 100.0
-		# CHANGE: DODRATING, DEMANDCHARGEMONTHLY
-		dodRating = float(inputDict['dodRating']) / 100.0	
-		demandChargeMonthly = [demandCharge for x in range(12)]	
-		projYears = int(inputDict['projYears'])
+		battEff	= float(inputDict.get("batteryEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0
+		discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
+		elecCost = float(inputDict.get('elecCost', 0.07)) 		
+		# CHANGE: dodFactor, DEMANDCHARGEMONTHLY
+		dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0	
+		projYears = int(inputDict.get('projYears',10))
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
 		# Start running battery simulation.
 		# CHANGE
 		# battCapacity = cellQuantity * cellCapacity
-		battCapacity = cellQuantity * cellCapacity * dodRating # Actual available capacity from depth of discharge rating
+		battCapacity = cellQuantity * cellCapacity * dodFactor
 		battDischarge = cellQuantity * dischargeRate
 		battCharge = cellQuantity * chargeRate
 		# Most of our data goes inside the dc "table"
@@ -73,9 +72,10 @@ def run(modelDir, inputDict):
 		dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		monthlyPeakDemand = [max(dcGroupByMonth[x]) for x in range(12)]
 		capacityLimited = True
+		blah = []
 		while capacityLimited:
 			battSoC = battCapacity # Battery state of charge; begins full.
-			battDoD = [battCapacity for x in range(12)] # Depth-of-discharge every month.		
+			battDoD = [battCapacity for x in range(12)]  # Depth-of-discharge every month, depends on dodFactor.	
 			for row in dc:
 				month = int(row['datetime'].month)-1
 				powerUnderPeak  = monthlyPeakDemand[month] - row['power'] - ps[month]
@@ -96,31 +96,27 @@ def run(modelDir, inputDict):
 				battDoD[month] = min(battSoC,battDoD[month])
 				row['netpower'] = row['power'] + charge/battEff - discharge
 				row['battSoC'] = battSoC
+				# print battSoC
 			capacityLimited = min(battDoD) < 0
 			ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 		dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
 		hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
 		peakShaveSum = sum(ps)
-		demandChargeSum = sum(demandChargeMonthly)
-		print "demandChargeSum =", demandChargeSum
-		outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandChargeSum)
-		cashFlowCurve = [peakShaveSum * demandChargeSum for year in range(projYears)]
+		outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandCharge)
+		cashFlowCurve = [peakShaveSum * demandCharge for year in range(projYears)]
 		cashFlowCurve[0]-= (cellCost * cellQuantity)
 		outData['netCashflow'] = cashFlowCurve
 		outData['cumulativeCashflow'] = [sum(cashFlowCurve[0:i+1]) for i,d in enumerate(cashFlowCurve)]
 		outData['NPV'] = npv(discountRate, cashFlowCurve)
-		outData['demand'] = [t['power']*1000.0 for t in dc]
+		outData['demand'] = [t['power']*1000.0 for t in dc]	
 		outData['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc]
-		outData['batterySoc'] = [t['battSoC']/battCapacity*100.0 for t in dc]
+		# outData['batterySoc'] = [t['battSoC']/battCapacity*100.0 for t in dc]
+		outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
+		# print "\n   battSOC=", blah[750:3000]
+		# print "\n   batterySOC=", outData['batterySoc'][700:750]
 		# Estimate number of cyles the battery went through.
 		SoC = outData['batterySoc']
 		outData['cycleEquivalents'] = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
-		# CHANGE: ADD ARRAY OF DEMANDCHARGE
-		# DELETE:
-		# print "\n   dcGroupByMonth", dcGroupByMonth, "\n     length=", len(dcGroupByMonth)		
-		# print "\n   monthlyPeakDemand", monthlyPeakDemand, "\n     length=", len(monthlyPeakDemand)
-		# print "\n   dcThroughTheMonth", dcThroughTheMonth
-		# print "\n   hoursThroughTheMonth", hoursThroughTheMonth
 		# Output some matplotlib results as well.
 		plt.plot([t['power'] for t in dc])
 		plt.plot([t['netpower'] for t in dc])
@@ -128,6 +124,27 @@ def run(modelDir, inputDict):
 		for month in range(12):
 		  plt.axvline(hoursThroughTheMonth[month])
 		plt.savefig(pJoin(modelDir,"plot.png"))
+		# DRDAN: Summary of results
+		outData['months'] = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]	
+		totMonNum = []
+		monthlyDemand = []		
+		for x in range (0, len(dcGroupByMonth)):
+			totMonNum.append(sum(dcGroupByMonth[x])/1000)
+			monthlyDemand.append([outData['months'][x], totMonNum[x]])	
+		outData['monthlyDemand'] = totMonNum
+		outData['ps'] = ps		# TODO: [Battery Capacity Left]
+		outData['monthlyDemandRed'] = [totMonNum - ps for totMonNum, ps in zip(totMonNum, ps)]		
+		outData['benefitMonthly'] = [x * demandCharge for x in outData['ps']]
+		outData['kWhtoRecharge'] = [battCapacity - x for x in outData['ps']]
+		outData['costtoRecharge'] = [elecCost * x for x in outData['kWhtoRecharge']]
+		benefitMonthly = outData['benefitMonthly']
+		costtoRecharge = outData['costtoRecharge']
+		outData['benefitNet'] = [benefitMonthly - costtoRecharge for benefitMonthly, costtoRecharge in zip(benefitMonthly, costtoRecharge)]
+		# Battery KW
+		demandAfterBattery = outData['demandAfterBattery']
+		demand = outData['demand']
+		outData['batteryDischargekW'] = [demand - demandAfterBattery for demand, demandAfterBattery in zip(demand, demandAfterBattery)]
+		outData['batteryDischargekWMax'] = max(outData['batteryDischargekW'])		
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		outData["stderr"] = ""

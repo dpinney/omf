@@ -185,7 +185,7 @@
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="runButton" type="submit" class="preRun">Run Model</button>
+				<button id="runButton" type="submit" class="preRun" onclick="event.preventDefault(); checkModelName();">Run Model</button>
 				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
 		</form>
