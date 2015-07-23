@@ -176,7 +176,7 @@ def _tests():
 			rates = calcOffPeak(rates, energyProfile)
 			impact_factors = calcImpactFactors(rates, schedule, elastcity, energyProfile)
 			modified_load = applyDR(load_profile, rates, schedule, impact_factors)
-			writeCSV('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_load_mofidifed.csv', modified_load)
+			writeCSV('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_load_modified.csv', modified_load)
 
 
 
