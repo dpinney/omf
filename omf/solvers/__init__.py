@@ -8,7 +8,7 @@ sys.path.append(_myDir)
 
 # Grab all our submodules and include them whenever we include this package:
 __all__ = [x.replace('.py','') for x in os.listdir(_myDir)
-	if x.endswith('.py') and not x.startswith('__')]
+	if x[0] not in ['.','_']]
 
 # Import of all the sub-modules:
 for name in __all__: exec('import ' + name)
