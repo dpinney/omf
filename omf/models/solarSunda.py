@@ -12,7 +12,7 @@ import traceback, csv
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 import feeder
-from solvers import nrelsam2015
+from solvers import nrelsam2013
 from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
@@ -72,15 +72,13 @@ def run(modelDir, inputDict):
 		# Ready to run
 		startTime = dt.datetime.now()
 		# Set up SAM data structures.
-		ssc = nrelsam2015.SSCAPI()
+		ssc = nrelsam2013.SSCAPI()
 		dat = ssc.ssc_data_create()
 		# Required user inputs.
-		ssc.ssc_data_set_string(dat, "solar_resource_file", modelDir + "/climate.tmy2")
-		ssc.ssc_data_set_number(dat, "adjust:constant", 0.0)		
-		ssc.ssc_data_set_number(dat, "system_capacity", arraySizeDC)
-		ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict.get("inverterEfficiency", 96)))		
-		ssc.ssc_data_set_number(dat, "losses", 100 - float(inputDict.get("nonInverterEfficiency", 87)))
-		ssc.ssc_data_set_number(dat, "array_type", float(trackingMode))
+		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
+		ssc.ssc_data_set_number(dat, "system_size", arraySizeDC)
+		ssc.ssc_data_set_number(dat, "derate", float(inputDict.get("inverterEfficiency", 96))/100 * float(inputDict.get("nonInverterEfficiency", 87))/100)
+		ssc.ssc_data_set_number(dat, "track_mode", float(trackingMode))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
 		# Advanced inputs with defaults.
 		ssc.ssc_data_set_number(dat, "rotlim", float(rotlim))
@@ -89,7 +87,7 @@ def run(modelDir, inputDict):
 		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 0.0)
 
 		# Run PV system simulation.
-		mod = ssc.ssc_module_create("pvwattsv5")
+		mod = ssc.ssc_module_create("pvwattsv1")
 		ssc.ssc_module_exec(mod, dat)
 		# Timestamp output.
 		outData = {}

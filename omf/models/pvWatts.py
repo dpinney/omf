@@ -5,12 +5,11 @@ from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
-import warnings
 
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 import feeder
-from solvers import nrelsam2015
+from solvers import nrelsam2013
 from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
@@ -44,21 +43,20 @@ def run(modelDir, inputDict):
 		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
 			pJoin(modelDir, "climate.tmy2"))
 		# Ready to run
-		startTime = datetime.datetime.now()	
-		ssc = nrelsam2015.SSCAPI()
+		startTime = datetime.datetime.now()
+		# Set up SAM data structures.
+		ssc = nrelsam2013.SSCAPI()
 		dat = ssc.ssc_data_create()
-		# Required user inputs.			
-		ssc.ssc_data_set_string(dat, "solar_resource_file", modelDir + "/climate.tmy2")
-		ssc.ssc_data_set_number(dat, "adjust:constant", 0.0)			
-		ssc.ssc_data_set_number(dat, "system_capacity", float(inputDict["systemSize"]))
-		ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict["inv_eff"]))
-		ssc.ssc_data_set_number(dat, "losses", 100 - float(inputDict["derate"]))
-		ssc.ssc_data_set_number(dat, "array_type", float(inputDict["trackingMode"]))
-		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict["azimuth"]))									
+		# Required user inputs.
+		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
+		ssc.ssc_data_set_number(dat, "system_size", float(inputDict["systemSize"]))
+		ssc.ssc_data_set_number(dat, "derate", 0.01 * float(inputDict["derate"]))
+		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict["trackingMode"]))
+		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict["azimuth"]))
 		# Advanced inputs with defaults.
 		if (inputDict.get("tilt",0) == "-"):
 			tilt_eq_lat = 1.0
-			manualTilt = latforpvwatts
+			manualTilt = 0.0
 		else:
 			tilt_eq_lat = 0.0
 			manualTilt = float(inputDict.get("tilt",0))
@@ -66,6 +64,7 @@ def run(modelDir, inputDict):
 		ssc.ssc_data_set_number(dat, "tilt", manualTilt)
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict["rotlim"]))
 		ssc.ssc_data_set_number(dat, "gamma", -1 * float(inputDict["gamma"]))
+		ssc.ssc_data_set_number(dat, "inv_eff", 0.01 * float(inputDict["inv_eff"]))
 		ssc.ssc_data_set_number(dat, "w_stow", float(inputDict["w_stow"]))
 		# Complicated optional inputs that we could enable later.
 		# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
@@ -81,7 +80,7 @@ def run(modelDir, inputDict):
 		# ssc.ssc_data_set_number(dat, "i_ref", float(inputDict["i_ref"]))
 		# ssc.ssc_data_set_number(dat, "poa_cutin", float(inputDict["poa_cutin"]))
 		# Run PV system simulation.
-		mod = ssc.ssc_module_create("pvwattsv5")
+		mod = ssc.ssc_module_create("pvwattsv1")
 		ssc.ssc_module_exec(mod, dat)
 		# Setting options for start time.
 		simLengthUnits = inputDict.get("simLengthUnits","")
