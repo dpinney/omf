@@ -3,6 +3,8 @@ if [ "$(id -u)" != "0" ]; then
 	echo "This script must be run as root" 1>&2
 	exit 1
 else
+	echo "** Stop Apache."
+	apachectl stop
 	echo "** Backing up data folder."
 	tar -czf ~/dataBackup.tgz /omf/omf/data
 	cp /omf/omf/data/User/admin.json ~/admin.json
@@ -17,5 +19,5 @@ else
 	chown -R omfwsgi *
 	chgrp -R omfwsgi *
 	echo "** Restarting Apache."
-	apachectl restart
+	apachectl start
 fi
