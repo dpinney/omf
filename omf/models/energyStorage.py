@@ -72,7 +72,6 @@ def run(modelDir, inputDict):
 		dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		monthlyPeakDemand = [max(dcGroupByMonth[x]) for x in range(12)]
 		capacityLimited = True
-		blah = []
 		while capacityLimited:
 			battSoC = battCapacity # Battery state of charge; begins full.
 			battDoD = [battCapacity for x in range(12)]  # Depth-of-discharge every month, depends on dodFactor.	
@@ -96,7 +95,6 @@ def run(modelDir, inputDict):
 				battDoD[month] = min(battSoC,battDoD[month])
 				row['netpower'] = row['power'] + charge/battEff - discharge
 				row['battSoC'] = battSoC
-				# print battSoC
 			capacityLimited = min(battDoD) < 0
 			ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 		dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
@@ -112,8 +110,6 @@ def run(modelDir, inputDict):
 		outData['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc]
 		# outData['batterySoc'] = [t['battSoC']/battCapacity*100.0 for t in dc]
 		outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
-		# print "\n   battSOC=", blah[750:3000]
-		# print "\n   batterySOC=", outData['batterySoc'][700:750]
 		# Estimate number of cyles the battery went through.
 		SoC = outData['batterySoc']
 		outData['cycleEquivalents'] = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0

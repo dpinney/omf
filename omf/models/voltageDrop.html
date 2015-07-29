@@ -22,10 +22,10 @@
 		<p id="titleText">New Voltage Drop Model</p>
 	</div>
 	<p class="reportTitle">Model Input</p>
-	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post">
+	<div id="input" class="content">	
+			<form name="inputForm" {% if modelStatus != "finished" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-voltageDrop">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-voltageDrop" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="voltageDrop" readonly/>
 			</div>
 			<div class="shortInput">

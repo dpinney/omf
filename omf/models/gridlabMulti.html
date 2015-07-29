@@ -109,9 +109,9 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post">
+		<form name="inputForm" {% if modelStatus != "finished" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-gridlabMulti">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-gridlabMulti" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="gridlabMulti" title="This is Model Type" readonly/>
 			</div>
 			<div class="shortInput">
@@ -195,7 +195,7 @@
 			<div class="wideInput" style="text-align:right">
 				<div id="emailSelection" class="preRun stoppedInline postRunInline">
 					<input name="emailStatus" id="emailStatus" type="checkbox">
-					<label class="tooltip">&nbsp;Enable Email Update<span class="classic">Sends an email when the model is done running and whether it has completed successfully or encountered an error.</span></label>
+					<label class="tooltip">&nbsp;Enable Email Update<span class="classic">Sends an email on the status of the model and whether it has completed successfully or encountered an error.</span></label>
 				</div>	
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
