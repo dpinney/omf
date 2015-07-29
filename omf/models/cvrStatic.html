@@ -18,7 +18,6 @@
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
 <style type="text/css">
-
 </style>
 <body onload="init()">
 	<div id="title">
@@ -29,7 +28,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-cvrStatic" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-cvrStatic">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="cvrStatic" readonly/>
 			</div>
 			<div class="shortInput">
@@ -168,7 +167,7 @@
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="runButton" type="submit" class="preRun" onclick="event.preventDefault(); checkModelName();">Run Model</button>
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="rerunButton" type="submit" class="postRunInline stoppedInline">Re-Run Model</button>
 			</div>

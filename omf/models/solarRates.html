@@ -30,7 +30,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarRates" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarRates">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="solarRates" readonly/>
 			</div>
 			<div class="shortInput">
@@ -295,7 +295,7 @@
 					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 					<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 					<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-					<button id="runButton" type="submit" class="preRun" onclick="event.preventDefault(); checkModelName();">Run Model</button>
+					<button id="runButton" type="submit" class="preRun">Run Model</button>
 					<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
 		</form>
@@ -511,7 +511,6 @@
 				insertMetric("monthlySummaryTable","Revenue", allOutputData.monthlyRevenue.map(function(x){return x[1]}))
 				insertMetric("monthlySummaryTable","Total KWh Sold", allOutputData.totalKWhSold.map(function(x){return x[1]}))
 				insertMetric("monthlySummaryTable","Total Revenue from Sales of Electric Energy", allOutputData.totalRevenue.map(function(x){return x[1]}))
-
 			</script>
 		</div>
 		<p class="reportTitle postRun">Irradiance</p>

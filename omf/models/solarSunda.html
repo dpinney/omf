@@ -27,7 +27,7 @@
 	<div id="input" class="content" style="page-break-after:always">
 		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %}action="/runModel/"{% endif %} method="post">
 			<div class="shorterInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarSunda" target="blank">Help?</a> </label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarSunda">Help?</a> </label>
 				<input type="text" id="modelType" name="modelType" value="solarSunda" readonly/>
 			</div>
 			{% if quickRender %}
@@ -194,7 +194,7 @@
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				{% endif %}
-				<button id="runButton" type="submit" class="preRun" onclick="event.preventDefault(); checkModelName();">Run Model</button>
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
 				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
 		</form>
