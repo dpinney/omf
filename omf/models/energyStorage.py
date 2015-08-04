@@ -1,6 +1,7 @@
 ''' Calculate the costs and benefits of energy storage from a distribution utility perspective. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, csv
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, traceback, csv
+import multiprocessing
 from os.path import join as pJoin
 from  dateutil.parser import parse
 from numpy import npv
@@ -19,27 +20,71 @@ import feeder
 with open(pJoin(__metaModel__._myDir,"energyStorage.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+# def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
+# 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
 # def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 # 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
 # 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
+def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
+	''' Render the model template to an HTML string.
+	By default render a blank one for new input.
+	If modelDir is valid, render results post-model-run.
+	If absolutePaths, the HTML can be opened without a server. '''
+	try:
+		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
+		modelPath, modelName = pSplit(modelDir)
+		deepPath, user = pSplit(modelPath)
+		inJson["modelName"] = modelName
+		inJson["user"] = user
+		allInputData = json.dumps(inJson)
+	except IOError:
+		allInputData = None
+	try:
+		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
+	except IOError:
+		allOutputData = None
+	if absolutePaths:
+		# Parent of current folder.
+		pathPrefix = __metaModel__._omfDir
+	else:
+		pathPrefix = ""
+	try:
+		inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))
+	except IOError:
+		pass
+	return template.render(allInputData=allInputData,
+		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
+		datastoreNames=datastoreNames)
 
 def run(modelDir, inputDict):
-	''' Run the model in its directory. '''
-	# Delete output file every run if it exists
+	''' Run the model in a separate process. web.py calls this to run the model.
+	This function will return fast, but results take a while to hit the file system.'''
+	# Check whether model exist or not
+	if not os.path.isdir(modelDir):
+		os.makedirs(modelDir)
+		inputDict["created"] = str(datetime.datetime.now())
+	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
+	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
+		json.dump(inputDict, inputFile, indent = 4)
+	# If we are re-running, remove output and old GLD run:
 	try:
-		os.remove(pJoin(modelDir,"allOutputData.json"))	
+		os.remove(pJoin(modelDir,"allOutputData.json"))
 	except Exception, e:
 		pass
-	# Check whether model exist or not
+	# Start background process.
+	backProc = multiprocessing.Process(target = runForeground, args = (modelDir, inputDict,))
+	backProc.start()
+	print "SENT TO BACKGROUND", modelDir
+	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
+		pPidFile.write(str(backProc.pid))
+
+
+def runForeground(modelDir, inputDict):
+	''' Run the model in a separate process. web.py calls this to run the model.
+	This function will return fast, but results take a while to hit the file system.'''
+	# Delete output file every run if it exists
 	try:
-		if not os.path.isdir(modelDir):
-			os.makedirs(modelDir)
-			inputDict["created"] = str(datetime.datetime.now())
-		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
-			json.dump(inputDict, inputFile, indent = 4)
 		# Ready to run.
 		startTime = datetime.datetime.now()
 		outData = {}
@@ -152,6 +197,10 @@ def run(modelDir, inputDict):
 		inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
+		try:
+			os.remove(pJoin(modelDir,"PPID.txt"))
+		except:
+			pass		
 	except:
 		# If input range wasn't valid delete output, write error to disk.
 		thisErr = traceback.format_exc()
@@ -197,7 +246,7 @@ def _tests():
 	# No-input template.
 	renderAndShow(template)
 	# Run the model.
-	run(modelLoc, inData)
+	runForeground(modelLoc, inData)
 	# Show the output.
 	renderAndShow(template, modelDir = modelLoc)
 	# # Delete the model.
