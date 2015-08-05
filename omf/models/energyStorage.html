@@ -84,8 +84,31 @@
 			</div>							
 			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var fileName=true;</script>
 				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
 				<input id="demandCurve" name="demandCurve" type="hidden">
+				{% if allOutputData.fileName|string() is defined %}
+					<input type="hidden" id="fileName" name="fileName" readonly="readonly">				
+					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>	
+					<script>
+						var FileName = allOutputData.fileName;
+						document.getElementById('demandCurveFileName').innerHTML = FileName;
+					</script>	
+					<style type="text/css">
+					 #fileExists {
+					   width:175px;
+					   height:25px;
+					   display:fixed;
+					   margin-top:-28px;
+					   margin-left:110px;
+					   background-color:#d3d3d3;
+					   font-size:0.8em;
+					 }	 		 				   
+					input[type='file'] {
+					  color: transparent;
+					}							
+					</style>		
+				{% endif %}
 				<script>
 					// Make sure the file is required on prerun.
 					if (modelStatus == "preRun" || modelStatus == "stopped") {gebi('demandCurveFile').setAttribute('required', 'required')}
@@ -99,8 +122,13 @@
 						function loaded(evt) {
 							evt.target.result
 							gebi("demandCurve").value = reader.result
+							var FileName = gebi("demandCurveFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('demandCurveFileName').innerHTML = FileName;
+							gebi("fileName").value = FileName;
 						}
 					}
+
 				</script>
 			</div>
 			<div class="shortInput">
