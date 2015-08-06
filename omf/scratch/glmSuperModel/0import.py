@@ -3,8 +3,13 @@ Try to import the GLD superModel.
 
 TODO
 XXX Get to JSON.
-XXX Add attachments.
-OOO Run through GLD.
+XXX Add attachments to JSON.
+XXX Run through GLD. Fails with class error on my_std property.
+XXX Make all input files end with .player.
+XXX Support classes with multiple values? Giving each property its own class seems to work... Nope.
+XXX Try to fully disembed. Closer.
+OOO Debug the players.
+OOO Run through GLD successfully. Still problems with classes. Hack the json manually?
 OOO Clean up visuals.
 OOO Put in OMF.
 '''
@@ -20,11 +25,14 @@ if not os.path.isfile(superName):
 else:
 	baseFeed = json.load(open(superName))
 
+# Try deEmbedding all the objects.
+omf.feeder.fullyDeEmbed(baseFeed)
+
 # Add attachments to make an OMF formatted fullFeed.
 fullFeed = dict(omf.feeder.newFeederWireframe)
 fullFeed['tree'] = baseFeed
 fullFeed['attachments'] = {}
-ignoreFileNames = ['0import.py', 'glmSuperModel.json', 'R1_1247_1_t15.glm', 'glmSuperModelOmfFormat.json']
+ignoreFileNames = ['0import.py', 'glmSuperModel.json', 'R1_1247_1_t15.glm', 'glmSuperModelOmfFormat.json', '.DS_Store']
 for fName in [x for x in os.listdir('.') if x not in ignoreFileNames]:
 	fullFeed['attachments'][fName] = open(fName, 'r').read()
 
@@ -36,3 +44,6 @@ except:
 	pass
 with open(omfName,'w') as jFile:
 	json.dump(fullFeed, jFile, indent=4)
+
+# Try running GLD...
+outPut = omf.solvers.gridlabd.runInFilesystem(fullFeed['tree'], attachments=fullFeed['attachments'])
