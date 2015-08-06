@@ -5,6 +5,7 @@ TODO
 XXX Get to JSON.
 XXX Add attachments.
 OOO Run through GLD.
+OOO Clean up visuals.
 OOO Put in OMF.
 '''
 

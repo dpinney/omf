@@ -157,6 +157,7 @@
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				{% endif %}
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="runButton" type="submit" class="preRun">Run Model</button>
 				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
@@ -197,7 +198,7 @@
 		</script>		
 		<p class="reportTitle postRun">Monthly Cost Comparison</p> 
 		<div id="levelizedCostReport" class="tightContent postRun">
-			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:265px; overflow-x:auto; overflow-y:auto;">
+			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:280px; overflow-y:hidden; overflow-x:auto;">
 				<style type="text/css">
 				 #Metric {
 				   font-weight:bold;
