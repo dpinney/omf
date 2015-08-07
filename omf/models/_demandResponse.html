@@ -1,0 +1,246 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<!-- Global Funcs Import -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+</head>
+<body onload="init()">
+	<div id="title">
+		<div id="logoBox"><a href="/">&#10059;</a></div>
+		<p id="titleText">Time of Use Demand Response Program</p>
+	</div>
+	<p class="reportTitle">Model Inputs</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" method="post">
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-demandResponse" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="_demandResponse" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"></td>
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="shortInput runningInline postRunInline ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Base Case</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label>Demand Charge Cost ($/kW)</label>
+				<input type="text" id="DemandChargeCost" name="DemandChargeCost" value="10" required="required" pattern="^\d+$"/>
+			</div>
+			<div class="shortInput">
+				<label>Retail Energy Cost ($/kWh)</label>
+				<input type="text" id="RetailEnergyCost" name="RetailEnergyCost" value="50" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Wholesale Energy Cost($/kWh)</label>
+				<input type="text" id="WholesaleEnergyCost" name="WholesaleEnergyCost" value="50" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label> Scaling Annual (%)</label>
+				<input type="text" id="ScalingAnnual" name="ScalingAnnual" value="102" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>						
+			<div class="shortInput">
+				<label>Customer Energy Growth Rate (%)</label>
+				<input type="text" id="CustomerEnergyGrowthRate" name="CustomerEnergyGrowthRate" value="5" required="required" pattern="^\d+\.?\d*?$">
+			</div>
+			<div class="shortInput">
+				<label>Discount Rate (%)</label>
+				<input type="text" id="DiscountRate" name="DiscountRate" value="5" required="required" pattern="^\d+\.?\d*?$">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
+				<input id="demandCurve" name="demandCurve" type="hidden">
+				<script>
+					// Make sure the file is required on prerun.
+					if (modelStatus == "preRun" || modelStatus == "stopped") {gebi('demandCurveFile').setAttribute('required', 'required')}
+					// File handler function.
+					function handle_files(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("demandCurve").value = reader.result
+						}
+					}
+				</script>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Time of Use Pricing</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label>Program Startup Cost ($)</label>
+				<input type="text" id="DrPurchInstallCost" name="DrPurchInstallCost" value="10000" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Annual DR operation Cost ($/year)</label>
+				<input type="text" id="AnnualDROperationCost" name="AnnualDROperationCost" value="1000" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label> Load Managed by the Program (%)</label>
+				<input type="text" id="LoadunderManagement" name="LoadunderManagement" value="50" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Peak Rate ($)</label>
+				<input type="text" id="PeakRate" name="PeakRate" value="0.20" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Off-Peak Rate ($)</label>
+				<input type="text" id="OffPeakRate" name="OffPeakRate" value="0.083" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class= "shortInput">
+					<label>Daily Price Elasticity of Demand</label>
+					<input type="text" id="DailyPriceElasticity" name="DailyPriceElasticity" value="-0.02302" required="required" pattern="^-?\d+\.?\d*?$">
+			</div>
+			<div class= "shortInput">
+					<label> Substitution Price Elasticity of Demand</label>
+					<input type="text" id="SubstitutionPriceElasticity" name="SubstitutionPriceElasticity" value="-0.09522" required="required" pattern="^-?\d+\.?\d*?$">
+			</div>
+			<div class="shortInput">
+				<label>Starting Month</label>
+				<input type="text" id="startMonth" name="startMonth" value="1" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Ending Month</label>
+				<input type="text" id="stopMonth" name="stopMonth" value="4" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Starting Peak Hour</label>
+				<input type="text" id="startHour" name="startHour" value="12" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Ending Peak Hour</label>
+				<input type="text" id="stopHour" name="stopHour" value="19" required="required" pattern="^\d+$"/>
+			</div>
+			<div class="wideInput" style="text-align:right">
+				{% if not quickRender %}
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				{% endif %}
+				<button id="runButton" type="button" class="preRun" onclick="javascript:checkModelName()">Run Model</button>
+				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
+			</div>
+		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+	<div id ="stopIndicator" class="content stopped">
+		<p>Model cancelled or encountered an error. Please change inputs and re-run.</p>
+		<pre id='errorText'></pre>
+		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>
+	</div>
+	<div id="output">
+		<script type="text/javascript">
+			// Global Highcharts settings.
+			Highcharts.setOptions({global:{useUTC:true}})
+		</script>
+		<p class="reportTitle postRun">Demand Before and After Program</p>
+		<div id="irradianceReport" class="tightContent postRun">
+			<div id="demandBattChart"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							"pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,
+						"tickColor":"gray",
+						"type":"datetime",
+						"lineColor":"gray"},
+					"yAxis":{
+						"title":{"text":"Power (kW)","style":{"color":"gray"}},
+						"min":-300},
+					"title":{"text":null},
+					"series":[
+						{"name":"Historical Demand","marker":{"enabled":false},"color":"red","data":allOutputData.demandLoad},
+						{"name":"Modified Demand","marker":{"enabled":false},"color":"purple","data":allOutputData.modifiedLoad},
+						{"name":"Difference","marker":{"enabled":false},"color":"blue","data":allOutputData.difference}],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"demandBattChart","type":"line","marginRight":20, "height":750,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun"> First Year Financial Impact</p> 
+		<div id="levelizedCostReport" class="tightContent postRun">
+			<style>#firstYearSummaryTable td, th {padding:7 0 5 0; text-align:left; font-size:0.8em;}</style>
+			<table id="firstYearSummaryTable" style="margin:5px; width:100%; font-size: medium">
+				<thead>
+					<th></th>	
+					<th>Annual Demand (kWh)</th>
+					<th>Energy Sales ($)</th>
+					<th>Energy Cost ($)</th>
+					<th>Peak Demand Cost ($)</th>
+					<th>DR Program Cost ($)</th>
+				</thead>
+			</table>     
+			<script>
+				function insertMetric(tableId, name, vector) {
+					// Add a vector to a table as a row.
+					table = gebi(tableId)
+					newRow = table.insertRow()
+					newRow.insertCell().innerHTML = "<div id=\"metric\">" + name + "</div>"		
+					for (i=0; i<vector.length; i++) {
+						cell = newRow.insertCell()
+						cell.innerHTML = delimitNumbers(vector[i].toFixed(0))
+					}
+				}
+				insertMetric("firstYearSummaryTable","Base Case", allOutputData.BaseCase)
+				insertMetric("firstYearSummaryTable","Demand Response Case", allOutputData.DRCase)
+			</script>
+		</div>
+		<p class="reportTitle postRun">Program Lifetime Cash Flow</p>
+		<div id="cashFlowReport" class="tightContent postRun">
+			<div id="cashFlowChartDiv"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
+					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","lineColor":"gray", "min":0},
+					"title":{"text":"NPV:$" + delimitNumbers(allOutputData.npv.toFixed(0)) + ";  Payback:" + parseFloat(allOutputData.SimplePaybackPeriod).toFixed(2) + " years;  Benefit/Cost:" + parseFloat(allOutputData.BenefittoCostRatio).toFixed(2), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"series":[{"name":"Op. and Maint. Costs", "data":allOutputData.AnnualOpCost},
+						{"name":"Purchase Costs", "data":allOutputData.lifePurchaseCosts},
+						{"name":"Energy Sale change Benefit", "type":"column", "data":allOutputData.EnergySaleChangeBenefit},
+						{"name":"Peak Demand Reduction Benefit", "type":"column", "data":allOutputData.PeakDemandReduction},
+						{"name":"Cumulative", "type":"spline", "data":allOutputData.cumulativeNetBenefit}],
+					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
+					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":25, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+
+	</div>
+</body>
