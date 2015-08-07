@@ -112,8 +112,6 @@ def run(modelDir, inputDict):
 		startTime = datetime.datetime.now()
 		outData = {}
 		# Get variables.
-		from pprint import pprint; pprint(inputDict)
-
 		lifeSpan = int(inputDict.get("lifeSpan",25))
 		lifeYears = range(1, 1 + lifeSpan)
 		hours = range(0, 24) 
