@@ -6,10 +6,11 @@ XXX Get to JSON.
 XXX Add attachments to JSON.
 XXX Run through GLD. Fails with class error on my_std property.
 XXX Make all input files end with .player.
-XXX Support classes with multiple values? Giving each property its own class seems to work... Nope.
+XXX Support classes with multiple values? Giving each property its own class seems to work. Nope. Fix is to set up class manually in the JSON.
 XXX Try to fully disembed. Closer.
-OOO Debug the players.
-OOO Run through GLD successfully. Still problems with classes. Hack the json manually?
+XXX Debug the players. One was in the wrong format. Manually changed it in the JSON--it works.
+XXX Run through GLD successfully.
+OOO Get new model that is (1) smaller (2) has more distributed solar and storage.
 OOO Clean up visuals.
 OOO Put in OMF.
 '''
@@ -45,5 +46,5 @@ except:
 with open(omfName,'w') as jFile:
 	json.dump(fullFeed, jFile, indent=4)
 
-# Try running GLD...
+# Try running GLD.
 outPut = omf.solvers.gridlabd.runInFilesystem(fullFeed['tree'], attachments=fullFeed['attachments'])
