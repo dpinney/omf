@@ -122,7 +122,6 @@ def run(modelDir, inputDict):
 		SubElas = float(inputDict.get("SubstitutionPriceElasticity")) 
 		DayElas= float(inputDict.get("DailyPriceElasticity"))
 		wholesaleCost = float(inputDict.get('WholesaleEnergyCost'))
-		CustGrowRate = float(inputDict.get('CustomerEnergyGrowthRate')) / 100.0
 		ManagLoad = float(inputDict.get('LoadunderManagement')) / 100.0
 		DiscountRate = float(inputDict.get("DiscountRate")) / 100
 		ScalingAnnual = float(inputDict.get("ScalingAnnual"))/ 100
@@ -293,7 +292,6 @@ def _tests():
 		"SubstitutionPriceElasticity": "-0.09522",
 		"DailyPriceElasticity": "-0.02302",
 		"DemandChargeCost": "10",
-		"CustomerEnergyGrowthRate":"0.5",
 		"DiscountRate":"3",
 		"ScalingAnnual":"102",
 		"LoadunderManagement":"2",
