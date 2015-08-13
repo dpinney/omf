@@ -1,0 +1,7 @@
+GOAL 
+
+XXX Which prototypical feeder? Smallest (R1-12.47-3_NR). Maybe try R4-25.00-1_NR later.
+XXX Which solution method? Need NR.
+XXX Edit the tiny feeder to remove colon-number naming.
+OOO What all technologies? MANY.
+OOO How to get 'em on there?
