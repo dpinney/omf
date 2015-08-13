@@ -1,4 +1,0 @@
-{
-    "stderr": "ERROR    [INIT] : init_transformer_configuration(obj=1;XFMR150110-CONFIG): kVA_rating(s) must be positive\nERROR    [INIT] : init_by_deferral(): object XFMR150110-CONFIG initialization failed\nERROR    [INIT] : model initialization failed\nFATAL    [INIT] : shutdown after simulation stopped prematurely\nFATAL    [INIT] : environment startup failed: Invalid argument", 
-    "stdout": "dump to 'gridlabd.xml' complete\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\nnode               0.015    100.0%      0.0\n================ ======== ======== ========\nTotal              0.015    100.0%      0.0"
-}

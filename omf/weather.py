@@ -233,141 +233,142 @@ def _processWeather(start, end, airport, workDir, interpolate="linear"):
 	# TimePST,TemperatureF,Dew PointF,Humidity,Sea Level PressureIn,VisibilityMPH,Wind Direction,Wind SpeedMPH,Gust SpeedMPH,PrecipitationIn,Events,Conditions,WindDirDegrees,DateUTC<br />
 	# 12:53 AM,44.1,43.0,96,29.99,9.0,Calm,Calm,-,N/A,,Overcast,0,2010-03-01 08:53:00<br />
 	# condition dictionary
-	moreConditionDict = {	"Light Drizzle" : (0.3,1.05,0.39),#sri start
-							"Drizzle" : (0.2,1.065,0.32),
-							"Heavy Drizzle" : (0.1,1.1,0.28),
-							"Light Rain" : (0.2,1.15,0.34),
-							"Rain" : (0.61,1.765,0.83),
-							"Heavy Rain" : (0,1.015,0.2),
-							"Light Snow" : (0,1.805,0.32),
-							"Snow" : (0,0.97,0.2),
-							"Heavy Snow" : (0,1.585,0.25),
-							"Light Snow Grains" : (0.05,1.925,0.68), 
-							"Snow Grains" : (0,1.37,0.34),
-							"Heavy Snow Grains" : (0,1.42,0.25),
-							"Light Ice Crystals" : (0,1.805,0.32), # from 'light snow'
-							"Ice Crystals" : (0,0.97,0.2),#snow
-							"Heavy Ice Crystals" : (0,1.585,0.25),#heavy snow
-							"Light Ice Pellets" : (0.1,1.39,0.32), 
-							"Ice Pellets" : (0,1.405,0.3),
-							"Heavy Ice Pellets" : (0,1.48,0.29),
-							"Light Hail" : (0.2,1.15,0.34), # from 'light rain'
-							"Hail" : (0.61,1.765,0.83),#rain
-							"Heavy Hail" : (0,1.015,0.2),#heavy rain
-							"LightMist" : (0,1.45,0.23),#light fog
-							"Mist" : (0,1.435,0.22),#fog
-							"Heavy Mist" : (0,1.24,0.24),#heavy fog
-							"Light Fog" : (0,1.45,0.23),
-							"Fog" : (0,1.435,0.22),
-							"Heavy Fog" : (0,1.24,0.24),
-							"Light Fog Patches" : (0,1.45,0.23),
-							"Fog Patches" : (0,1.435,0.22), 
-							"Heavy Fog Patches" : (0,1.24,0.24),
-							"Partly Cloudy" : (0.86,1.225,0.95),
-							"Light Smoke" : (0,1.45,0.23),#light fog
-							"Smoke" : (0,1.435,0.22),#fog
-							"Heavy Smoke" : (0,1.24,0.24),#heavy fog
-							"Light Volcanic Ash" : (0.14,1,0.5), #light haze
-							"Volcanic Ash" : (0.11,1.01,0.46), #haze
-							"Heavy Volcanic Ash" : (0.07,1.06,0.35), #heavy haze
-							"Light Widespread Dust" : (0.14,1,0.5), #light haze
-							"Widespread Dust" : (0.11,1.01,0.46), #haze
-							"Heavy Widespread Dust" : (0.07,1.06,0.35),#heavy haze
-							"Light Sand" : (0.14,1,0.5), #light haze
-							"Sand" : (0.11,1.01,0.46), #haze
-							"Heavy Sand" : (0.07,1.06,0.35),#heavy haze
-							"Light Haze" : (0.14,1,0.5), 
-							"Haze" : (0.11,1.01,0.46), 
-							"Heavy Haze" : (0.07,1.06,0.35),
-							"Light Spray" : (0.2,1.15,0.34), #light rain
-							"Spray" : (0.61,1.765,0.83), #rain
-							"Heavy Spray" : (0,1.015,0.2), #heavy rain
-							"Light Dust Whirls" : (0.14,1,0.5), #light haze
-							"Dust Whirls" : (0.11,1.01,0.46), #haze
-							"Heavy Dust Whirls" : (0.07,1.06,0.35),#heavy haze
-							"Light Sandstorm" : (0.14,1,0.5), #light haze
-							"Sandstorm" : (0.11,1.01,0.46), #haze
-							"Heavy Sandstorm" : (0.07,1.06,0.35),#heavy haze
-							"Light Low Drifting Snow" : (0.07,2.7,0.7), #light blowing snow sri start
-							"Low Drifting Snow" : (0.02,3.32,0.72), #blowing snow
-							"Heavy Low Drifting Snow" : (0,3,0.5),#heavy blowing snow
-							"Light Low Drifting Widespread Dust" : (0.14,1,0.5), #light haze
-							"Low Drifting Widespread Dust" : (0.11,1.01,0.46), #haze
-							"Heavy Low Drifting Widespread Dust" : (0.07,1.06,0.35),#heavy haze
-							"Light Low Drifting Sand" : (0.14,1,0.5), #light haze
-							"Low Drifting Sand" : (0.11,1.01,0.46), #haze
-							"Heavy Low Drifting Sand" : (0.07,1.06,0.35), #heavy haze
-							"Light Blowing Snow" : (0.07,2.9,0.7), 
-							"Blowing Snow" : (0.02,3.32,0.72), 
-							"Heavy Blowing Snow" : (0,3,0.5),
-							"Light Blowing Widespread Dust" : (0.14,1,0.5), #light haze
-							"Blowing Widespread Dust" : (0.11,1.01,0.46), #haze
-							"Heavy Blowing Widespread Dust" : (0.07,1.06,0.35),#heavy haze
-							"Light Blowing Sand" : (0.14,1,0.5), #light haze
-							"Blowing Sand" : (0.11,1.01,0.46), #haze
-							"Heavy Blowing Sand" : (0.07,1.06,0.35),#heavy haze
-							"Light Rain Mist" : (0,1.45,0.23), #light fog
-							"Rain Mist" : (0,1.435,0.22), #fog
-							"Heavy Rain Mist" : (0,1.24,0.24),#heavy fog
-							"Light Rain Showers" : (0.2,1.15,0.34), #light rain
-							"Rain Showers" : (0.61,1.765,0.83), #rain
-							"Heavy Rain Showers" : (0,1.015,0.2),#heavy rain
-							"Light Snow Showers" : (0,1.805,0.32), #light snow
-							"Snow Showers" : (0,0.97,0.2), #snow
-							"Heavy Snow Showers" : (0,1.585,0.25),#heavy snow
-							"Light Snow Blowing Snow Mist" : (0.07,2.9,0.7),#light blowing snow
-							"Snow Blowing Snow Mist" : (0.02,3.32,0.72), #blowing snow
-							"Heavy Snow Blowing Snow Mist" : (0,3,0.5),#heavy blowing snow
-							"Light Ice Pellet Showers" : (0.1,1.39,0.32),#light ice pellets
-							"Ice Pellet Showers" : (0,1.405,0.3),#ice pellets
-							"Heavy Ice Pellet Showers" : (0,1.48,0.29),#heavy ice pellets
-							"Light Hail Showers" : (0.1,1.39,0.32),#light ice pellets
-							"Hail Showers" : (0,1.405,0.3),#ice pellets
-							"Heavy Hail Showers" : (0,1.48,0.29),#heavy ice pellets
-							"Light Small Hail Showers" : (0.1,1.37,0.32),#light ice pellets
-							"Small Hail Showers" : (0,1.405,0.3),#ice pellets
-							"Heavy Small Hail Showers" : (0,1.48,0.29),#heavy ice pellets
-							"Heavy Small Hail" : (0,1.48,0.29),#heavy ice pellets
-							"Light Thunderstorm" : (0.36, 1.635,0.74),
-							"Thunderstorm" : (0.25,2.21,0.84),
-							"Heavy Thunderstorm" : (0.1,1.375,0.45),
-							"Light Thunderstorms and Rain" : (0.36, 1.635,0.74), #Light Thunderstorm (LT)
-							"Thunderstorms and Rain" : (0.25,2.21,0.84),#Thunderstorm (T)
-							"Heavy Thunderstorms and Rain" : (0.1,1.375,0.45),#Heavy Thunderstorm (HT)
-							"Light Thunderstorms and Snow" : (0.7, 1.15, 0.8),#LT
-							"Thunderstorms and Snow" : (0.25,2.21,0.84),#T
-							"Heavy Thunderstorms and Snow" : (0.1,1.375,0.45),#HT
-							"Light Thunderstorms and Ice Pellets" : (0.36, 1.635,0.74),#LT
-							"Thunderstorms and Ice Pellets" : (0.25,2.21,0.84),#T
-							"Heavy Thunderstorms and Ice Pellets" : (0.1,1.375,0.45),#HT
-							"Light Thunderstorms with Hail" : (0.36, 1.635,0.74),#LT
-							"Thunderstorms with Hail" : (0.25,2.21,0.84),#T
-							"Heavy Thunderstorms with Hail" : (0.1,1.375,0.45),#HT
-							"Light Thunderstorms with Small Hail" : (0.36, 1.635,0.74),#LT
-							"Thunderstorms with Small Hail" : (0.25,2.21,0.84),#T
-							"Heavy Thunderstorms with Small Hail" : (0.1,1.375,0.45),#HT
-							"Light Freezing Drizzle" : (0.2,1.15,0.34), #light rain
-							"Freezing Drizzle" : (0.61,1.765,0.83), #rain
-							"Heavy Freezing Drizzle" : (0,1.015,0.2),#heavy rain
-							"Light Freezing Rain" : (0.1,1.39,0.32), #light ice pellets
-							"Freezing Rain" : (0,1.405,0.3), #ice pellets
-							"Heavy Freezing Rain" : (0,1.48,0.29),#heavy ice pellets
-							"Light Freezing Fog" : (0,1.45,0.23), #light fog
-							"Freezing Fog" : (0,1.435,0.22), #fog
-							"Heavy Freezing Fog" : (0,1.24,0.24), #heavy fog
-							"Patches of Fog" : (0,1.45,0.23), #light fog
-							"Shallow Fog" : (0,1.435,0.22),#fog
-							"Partial Fog" : (0,1.24,0.24), #heavy fog
-							"Overcast" : (0.07,2.3,0.6),
-							"Clear" : (1.0,1.0,1.0),
-							"Mostly Cloudy" : (0.6,1.395,0.88),
-							"Scattered Clouds" : (0.42,1.915,0.75),
-							"Small Hail" : (0.1,1.39,0.32),#light ice pellets
-							"Squalls" : (0.07,1.06,0.35),#heavy haze
-							"Funnel Cloud" : (0.6,1.395,0.88),#mostly cloudy
-							"Unknown Precipitation" : (0.17,0.35,0.55), #unknown
-							"Unknown" : (0.17,0.35,0.55), 
-							"" : (1.0,1.0,1.0)}#no data in WU-default set. sri done
+	moreConditionDict = {
+		"Light Drizzle" : (0.3,1.05,0.39),#sri start
+		"Drizzle" : (0.2,1.065,0.32),
+		"Heavy Drizzle" : (0.1,1.1,0.28),
+		"Light Rain" : (0.2,1.15,0.34),
+		"Rain" : (0.61,1.765,0.83),
+		"Heavy Rain" : (0,1.015,0.2),
+		"Light Snow" : (0,1.805,0.32),
+		"Snow" : (0,0.97,0.2),
+		"Heavy Snow" : (0,1.585,0.25),
+		"Light Snow Grains" : (0.05,1.925,0.68), 
+		"Snow Grains" : (0,1.37,0.34),
+		"Heavy Snow Grains" : (0,1.42,0.25),
+		"Light Ice Crystals" : (0,1.805,0.32), # from 'light snow'
+		"Ice Crystals" : (0,0.97,0.2),#snow
+		"Heavy Ice Crystals" : (0,1.585,0.25),#heavy snow
+		"Light Ice Pellets" : (0.1,1.39,0.32), 
+		"Ice Pellets" : (0,1.405,0.3),
+		"Heavy Ice Pellets" : (0,1.48,0.29),
+		"Light Hail" : (0.2,1.15,0.34), # from 'light rain'
+		"Hail" : (0.61,1.765,0.83),#rain
+		"Heavy Hail" : (0,1.015,0.2),#heavy rain
+		"LightMist" : (0,1.45,0.23),#light fog
+		"Mist" : (0,1.435,0.22),#fog
+		"Heavy Mist" : (0,1.24,0.24),#heavy fog
+		"Light Fog" : (0,1.45,0.23),
+		"Fog" : (0,1.435,0.22),
+		"Heavy Fog" : (0,1.24,0.24),
+		"Light Fog Patches" : (0,1.45,0.23),
+		"Fog Patches" : (0,1.435,0.22), 
+		"Heavy Fog Patches" : (0,1.24,0.24),
+		"Partly Cloudy" : (0.86,1.225,0.95),
+		"Light Smoke" : (0,1.45,0.23),#light fog
+		"Smoke" : (0,1.435,0.22),#fog
+		"Heavy Smoke" : (0,1.24,0.24),#heavy fog
+		"Light Volcanic Ash" : (0.14,1,0.5), #light haze
+		"Volcanic Ash" : (0.11,1.01,0.46), #haze
+		"Heavy Volcanic Ash" : (0.07,1.06,0.35), #heavy haze
+		"Light Widespread Dust" : (0.14,1,0.5), #light haze
+		"Widespread Dust" : (0.11,1.01,0.46), #haze
+		"Heavy Widespread Dust" : (0.07,1.06,0.35),#heavy haze
+		"Light Sand" : (0.14,1,0.5), #light haze
+		"Sand" : (0.11,1.01,0.46), #haze
+		"Heavy Sand" : (0.07,1.06,0.35),#heavy haze
+		"Light Haze" : (0.14,1,0.5), 
+		"Haze" : (0.11,1.01,0.46), 
+		"Heavy Haze" : (0.07,1.06,0.35),
+		"Light Spray" : (0.2,1.15,0.34), #light rain
+		"Spray" : (0.61,1.765,0.83), #rain
+		"Heavy Spray" : (0,1.015,0.2), #heavy rain
+		"Light Dust Whirls" : (0.14,1,0.5), #light haze
+		"Dust Whirls" : (0.11,1.01,0.46), #haze
+		"Heavy Dust Whirls" : (0.07,1.06,0.35),#heavy haze
+		"Light Sandstorm" : (0.14,1,0.5), #light haze
+		"Sandstorm" : (0.11,1.01,0.46), #haze
+		"Heavy Sandstorm" : (0.07,1.06,0.35),#heavy haze
+		"Light Low Drifting Snow" : (0.07,2.7,0.7), #light blowing snow sri start
+		"Low Drifting Snow" : (0.02,3.32,0.72), #blowing snow
+		"Heavy Low Drifting Snow" : (0,3,0.5),#heavy blowing snow
+		"Light Low Drifting Widespread Dust" : (0.14,1,0.5), #light haze
+		"Low Drifting Widespread Dust" : (0.11,1.01,0.46), #haze
+		"Heavy Low Drifting Widespread Dust" : (0.07,1.06,0.35),#heavy haze
+		"Light Low Drifting Sand" : (0.14,1,0.5), #light haze
+		"Low Drifting Sand" : (0.11,1.01,0.46), #haze
+		"Heavy Low Drifting Sand" : (0.07,1.06,0.35), #heavy haze
+		"Light Blowing Snow" : (0.07,2.9,0.7), 
+		"Blowing Snow" : (0.02,3.32,0.72), 
+		"Heavy Blowing Snow" : (0,3,0.5),
+		"Light Blowing Widespread Dust" : (0.14,1,0.5), #light haze
+		"Blowing Widespread Dust" : (0.11,1.01,0.46), #haze
+		"Heavy Blowing Widespread Dust" : (0.07,1.06,0.35),#heavy haze
+		"Light Blowing Sand" : (0.14,1,0.5), #light haze
+		"Blowing Sand" : (0.11,1.01,0.46), #haze
+		"Heavy Blowing Sand" : (0.07,1.06,0.35),#heavy haze
+		"Light Rain Mist" : (0,1.45,0.23), #light fog
+		"Rain Mist" : (0,1.435,0.22), #fog
+		"Heavy Rain Mist" : (0,1.24,0.24),#heavy fog
+		"Light Rain Showers" : (0.2,1.15,0.34), #light rain
+		"Rain Showers" : (0.61,1.765,0.83), #rain
+		"Heavy Rain Showers" : (0,1.015,0.2),#heavy rain
+		"Light Snow Showers" : (0,1.805,0.32), #light snow
+		"Snow Showers" : (0,0.97,0.2), #snow
+		"Heavy Snow Showers" : (0,1.585,0.25),#heavy snow
+		"Light Snow Blowing Snow Mist" : (0.07,2.9,0.7),#light blowing snow
+		"Snow Blowing Snow Mist" : (0.02,3.32,0.72), #blowing snow
+		"Heavy Snow Blowing Snow Mist" : (0,3,0.5),#heavy blowing snow
+		"Light Ice Pellet Showers" : (0.1,1.39,0.32),#light ice pellets
+		"Ice Pellet Showers" : (0,1.405,0.3),#ice pellets
+		"Heavy Ice Pellet Showers" : (0,1.48,0.29),#heavy ice pellets
+		"Light Hail Showers" : (0.1,1.39,0.32),#light ice pellets
+		"Hail Showers" : (0,1.405,0.3),#ice pellets
+		"Heavy Hail Showers" : (0,1.48,0.29),#heavy ice pellets
+		"Light Small Hail Showers" : (0.1,1.37,0.32),#light ice pellets
+		"Small Hail Showers" : (0,1.405,0.3),#ice pellets
+		"Heavy Small Hail Showers" : (0,1.48,0.29),#heavy ice pellets
+		"Heavy Small Hail" : (0,1.48,0.29),#heavy ice pellets
+		"Light Thunderstorm" : (0.36, 1.635,0.74),
+		"Thunderstorm" : (0.25,2.21,0.84),
+		"Heavy Thunderstorm" : (0.1,1.375,0.45),
+		"Light Thunderstorms and Rain" : (0.36, 1.635,0.74), #Light Thunderstorm (LT)
+		"Thunderstorms and Rain" : (0.25,2.21,0.84),#Thunderstorm (T)
+		"Heavy Thunderstorms and Rain" : (0.1,1.375,0.45),#Heavy Thunderstorm (HT)
+		"Light Thunderstorms and Snow" : (0.7, 1.15, 0.8),#LT
+		"Thunderstorms and Snow" : (0.25,2.21,0.84),#T
+		"Heavy Thunderstorms and Snow" : (0.1,1.375,0.45),#HT
+		"Light Thunderstorms and Ice Pellets" : (0.36, 1.635,0.74),#LT
+		"Thunderstorms and Ice Pellets" : (0.25,2.21,0.84),#T
+		"Heavy Thunderstorms and Ice Pellets" : (0.1,1.375,0.45),#HT
+		"Light Thunderstorms with Hail" : (0.36, 1.635,0.74),#LT
+		"Thunderstorms with Hail" : (0.25,2.21,0.84),#T
+		"Heavy Thunderstorms with Hail" : (0.1,1.375,0.45),#HT
+		"Light Thunderstorms with Small Hail" : (0.36, 1.635,0.74),#LT
+		"Thunderstorms with Small Hail" : (0.25,2.21,0.84),#T
+		"Heavy Thunderstorms with Small Hail" : (0.1,1.375,0.45),#HT
+		"Light Freezing Drizzle" : (0.2,1.15,0.34), #light rain
+		"Freezing Drizzle" : (0.61,1.765,0.83), #rain
+		"Heavy Freezing Drizzle" : (0,1.015,0.2),#heavy rain
+		"Light Freezing Rain" : (0.1,1.39,0.32), #light ice pellets
+		"Freezing Rain" : (0,1.405,0.3), #ice pellets
+		"Heavy Freezing Rain" : (0,1.48,0.29),#heavy ice pellets
+		"Light Freezing Fog" : (0,1.45,0.23), #light fog
+		"Freezing Fog" : (0,1.435,0.22), #fog
+		"Heavy Freezing Fog" : (0,1.24,0.24), #heavy fog
+		"Patches of Fog" : (0,1.45,0.23), #light fog
+		"Shallow Fog" : (0,1.435,0.22),#fog
+		"Partial Fog" : (0,1.24,0.24), #heavy fog
+		"Overcast" : (0.07,2.3,0.6),
+		"Clear" : (1.0,1.0,1.0),
+		"Mostly Cloudy" : (0.6,1.395,0.88),
+		"Scattered Clouds" : (0.42,1.915,0.75),
+		"Small Hail" : (0.1,1.39,0.32),#light ice pellets
+		"Squalls" : (0.07,1.06,0.35),#heavy haze
+		"Funnel Cloud" : (0.6,1.395,0.88),#mostly cloudy
+		"Unknown Precipitation" : (0.17,0.35,0.55), #unknown
+		"Unknown" : (0.17,0.35,0.55), 
+		"" : (1.0,1.0,1.0)}#no data in WU-default set. sri done
 	seasonDict = {1 : "Winter", 2 : "Winter", 3 : "Spring", 4 : "Spring", 5 : "Spring", 6 : "Summer", 7 : "Summer", 8 : "Summer", 9 : "Fall", 10 : "Fall", 11 : "Fall", 12 : "Winter"}
 	# interpolation options
 	interpolateList = ["none", "linear", "quadratic"]

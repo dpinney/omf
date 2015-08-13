@@ -1,4 +1,0 @@
-{
-    "stderr": "ERROR    [INIT] : init_regulator_configuration(obj=517;VR9-CONFIG): raise and lower taps must be specified to non-zero numbers\nERROR    [INIT] : init_by_deferral(): object VR9-CONFIG initialization failed\nERROR    [INIT] : model initialization failed\nFATAL    [INIT] : shutdown after simulation stopped prematurely\nFATAL    [INIT] : environment startup failed: Invalid argument", 
-    "stdout": "dump to 'gridlabd.xml' complete\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\nnode               0.003     75.0%      0.0\noverhead_line      0.001     25.0%      0.0\n================ ======== ======== ========\nTotal              0.004    100.0%      0.0"
-}

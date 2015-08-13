@@ -1,4 +1,0 @@
-{
-    "stderr": "ERROR    [INIT] : init_transformer_configuration(obj=1804;447022_A-CONFIG): reactance must be non-negative\nERROR    [INIT] : init_by_deferral(): object 447022_A-CONFIG initialization failed\nERROR    [INIT] : model initialization failed\nFATAL    [INIT] : shutdown after simulation stopped prematurely\nFATAL    [INIT] : environment startup failed: Invalid argument", 
-    "stdout": "dump to 'gridlabd.xml' complete\nModel profiler results\n======================\n\nClass            Time (s) Time (%) msec/obj\n---------------- -------- -------- --------\nnode               0.002     33.3%      0.0\noverhead_line      0.001     16.7%      0.1\nunderground_line   0.001     16.7%      0.0\ntransformer_conf   0.001     16.7%      0.0\ntriplex_node       0.001     16.7%      0.0\n================ ======== ======== ========\nTotal              0.006    100.0%      0.0"
-}
