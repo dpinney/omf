@@ -1,11 +1,12 @@
 {
-    "created": "2014-07-25 10:50:36.732000", 
+    "simStartDate": "2014-07-30", 
     "simLengthUnits": "hours", 
     "feederName": "public___13 Node Ref Feeder Flat", 
-    "simStartDate": "2014-07-30", 
+    "created": "2014-07-30 11:21:37.074000", 
+    "zipCode": "64735", 
     "modelType": "gridlabMulti", 
-    "climateName": "TX-ABILENE", 
+    "climateName": "MO-KANSAS_CITY", 
     "simLength": "100", 
     "feederName2": "public___13 Node Ref Feeder Laid Out ZERO CVR", 
-    "runTime": "0:00:25"
+    "runTime": "0:00:19"
 }

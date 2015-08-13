@@ -5,6 +5,8 @@ XXX Which solution method? Need NR.
 XXX Edit the tiny feeder to remove colon-number naming.
 XXX What all technologies? List below.
 OOO How to get 'em on there?
+OOO Clean up visuals.
+OOO Run omf.models.gridlabMulti.
 
 TECHNOLOGIES
 * House models.
