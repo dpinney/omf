@@ -19,3 +19,4 @@ xlwt>=0.7.5
 pathlib>=1.0.1
 pyodbc>=3.0.7
 beautifulsoup4>=4.3
+pydot>=1.0.2
