@@ -2,7 +2,7 @@ language: python
 python:
     - "2.7"
 git:
-    depth: 10
+    depth: 1
 env:
     - DISPLAY=:99.0
 before_install:
