@@ -40,9 +40,8 @@ with open(superName, 'w') as jFile:
 # I feel the need for a way to rapidly test this? What does that mean? Quickly go from... X to Y?
 # TODO: easy way to render... feeder in OMF gridedit???? Or I could just look at lat/lon graph. BTW, it should be easy to do a 
 
-# loadList = [x for x in baseFeed.values() if x.get('object','') == 'load']
-# print loadList
-
+loadList = [x for x in baseFeed.values() if x.get('object','') == 'load']
+print [x.get('constant_power_C','') for x in loadList]
 
 # Try a run.
 output = omf.solvers.gridlabd.runInFilesystem(baseFeed, attachments={}, keepFiles=True, workDir='./runningDir', glmName='glmSuperModelTinyModified.glm')

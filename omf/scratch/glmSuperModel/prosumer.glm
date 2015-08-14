@@ -1,0 +1,241 @@
+// Tiny bit of GLM that models a "prosumer".
+
+object triplex_meter {
+      name house1_triplexMeter;
+      phases AS;
+      parent R1-12-47-1_tm_1;
+      groupid Residential_Meter;
+      meter_power_consumption 2+11j;
+      bill_mode HOURLY;
+      monthly_fee 10.00;
+      bill_day 1;
+      power_market Market_1;
+      nominal_voltage 120;
+}
+
+object house {
+	name house1;
+	parent house1_triplexMeter;
+	groupid Residential;
+	schedule_skew 1083;
+	floor_area 3907;
+	number_of_stories 1;
+	ceiling_height 8;
+	over_sizing_factor 0.1;
+	//Thermal integrity -> Single Family 7
+	Rroof 50.34;
+	Rwall 27.33;
+	Rfloor 35.59;
+	glazing_layers 3;
+	glass_type 2;
+	glazing_treatment 2;
+	window_frame 4;
+	Rdoors 10.51;
+	airchange_per_hour 0.23;
+	cooling_COP 3.8;
+	air_temperature 71.22;
+	mass_temperature 71.22;
+	total_thermal_mass_per_floor_area 3.504;
+	heating_system_type GAS;
+	cooling_system_type NONE;
+	breaker_amps 1000;
+	hvac_breaker_rating 1000;
+	cooling_setpoint cooling6*2.89+69.19;
+	heating_setpoint heating6*0.19+59.01;
+};
+
+object ZIPload {
+	name house1_unresponsiveLoad;
+	parent house1;
+	schedule_skew 1083;
+	base_power unresponsive_loads*1.19;
+	heatgain_fraction 0.900;
+	power_pf 1.000;
+	current_pf 1.000;
+	impedance_pf 1.000;
+	impedance_fraction 0.200000;
+	current_fraction 0.400000;
+	power_fraction 0.400000;
+};
+
+object ZIPload {
+	name house1_responsiveLoad;
+	parent house1;
+	schedule_skew 1083;
+	base_power responsive_loads*1.30;
+	heatgain_fraction 0.900;
+	power_pf 1.000;
+	current_pf 1.000;
+	impedance_pf 1.000;
+	impedance_fraction 0.200000;
+	current_fraction 0.400000;
+	power_fraction 0.400000;
+};
+
+object passive_controller {
+	name house1_responsiveLoad_controller;
+	parent house1_responsiveLoad;
+	period 900;
+	control_mode ELASTICITY_MODEL;
+	two_tier_cpp true;
+	observation_object Market_1;
+	observation_property past_market.clearing_price;
+	state_property multiplier;
+	linearize_elasticity true;
+	price_offset 0.01;
+	critical_day CPP_days_R1.value;
+	first_tier_hours 12;
+	second_tier_hours 12;
+	third_tier_hours 6;
+	first_tier_price 0.069987;
+	second_tier_price 0.139973;
+	third_tier_price 0.699867;
+	old_first_tier_price 0.124300;
+	old_second_tier_price 0.124300;
+	old_third_tier_price 0.124300;
+	daily_elasticity daily_elasticity_wotech*0.1305;
+	sub_elasticity_first_second -0.0099;
+	sub_elasticity_first_third -0.0145;
+};
+
+object waterheater {
+	name house1_waterHeater;
+	parent house1;
+	schedule_skew 4326;
+	heating_element_capacity 4.5 kW;
+	tank_setpoint 132.7;
+	temperature 132;
+	thermostat_deadband 7.8;
+	location INSIDE;
+	tank_UA 3.7;
+	demand large_6*0.99;
+	tank_volume 50;
+};
+
+object passive_controller {
+	name house1_waterHeater_controller;
+	parent house1_waterHeater;	
+	period 900;
+	control_mode PROBABILITY_OFF;
+	distribution_type NORMAL;
+	observation_object Market_1;
+	observation_property past_market.clearing_price;
+	stdev_observation_property my_std;
+	expectation_object Market_1;
+	expectation_property my_avg;
+	comfort_level 0.82;
+	state_property override;
+};
+
+object evcharger_det {
+	name house1_ev;
+	parent house1;
+	variation_mean 300.0;
+	variation_std_dev 100.0;
+	variation_trip_mean 300.0;
+	variation_trip_std_dev 100.0;
+	mileage_classification 33.0;
+	work_charging_available false;
+	travel_distance 15.0;
+	arrival_at_work 900;
+	duration_at_work 9 h;
+	arrival_at_home 1800;
+	duration_at_home 14 h;
+	mileage_efficiency 3.846;
+	maximum_charge_rate 1700;
+	charging_efficiency 0.90;
+};
+
+
+object inverter {
+	name house1_solarInverter;
+	parent house1_triplexMeter;
+	generator_status ONLINE;
+	inverter_type PWM;
+	generator_mode CONSTANT_PF;
+};
+
+object solar {
+	name house1_solar;
+	parent house1_solarInverter;
+	generator_mode SUPPLY_DRIVEN;
+	area 800 sf;
+	generator_status ONLINE;
+	efficiency 0.13;
+	panel_type SINGLE_CRYSTAL_SILICON;
+};
+
+object inverter {
+	name house1_batteryInverter;
+	parent house1_triplexMeter;
+	sense_object house1;
+	phases AS;
+	generator_mode CONSTANT_PQ;
+	generator_status ONLINE;
+	inverter_type FOUR_QUADRANT;
+	four_quadrant_control_mode LOAD_FOLLOWING;
+	max_charge_rate 220 kW;
+	max_discharge_rate 220 kW;
+	rated_power 220 kW;
+	charge_on_threshold 5123 kW;
+	charge_off_threshold 6148 kW;
+	discharge_on_threshold 7915 kW;
+	discharge_off_threshold 7454 kW;
+	inverter_efficiency 0.9;
+	charge_lockout_time 60;
+	discharge_lockout_time 60;
+};
+
+object battery {
+	name house1_battery;
+	parent house1_batteryInverter;
+	generator_mode SUPPLY_DRIVEN;
+	generator_status ONLINE;
+	use_internal_battery_model TRUE;
+	battery_type LI_ION;
+	round_trip_efficiency 0.85;
+	battery_capacity 880 kWh;
+	state_of_charge 1.0;
+	battery_state FULL;
+};
+
+
+object windturb_dg {
+	name house1_windTurbine;
+	parent house1_triplexMeter;
+	phases AS;
+	Gen_status ONLINE;
+	Gen_type SYNCHRONOUS;
+	Gen_mode CONSTANTP;
+	Turbine_Model BERGEY_10kW;
+};
+
+object diesel_dg {
+	name house1_diesel;
+	parent house1_triplexMeter;
+	Gen_mode CONSTANTPQ;
+	Gen_status ONLINE;
+	Gen_type SYNCHRONOUS;
+	phases AS;
+	pf 1.0;
+	cylinders 1;	 
+	stroke 2;
+	pressure 3;
+	speed 10000 1/min;       		 
+	torque 2865 N;
+	time_operation 525600 min;
+	fuel 1.56 kg;
+	w_coolingwater 160 kg;
+	inlet_temperature 32 degC;
+	outlet_temperature 57 degC;
+	air_fuel 30 kg;
+	room_temperature 27 degC;
+	exhaust_temperature 310 degC;		 
+	cylinder_length 0.29 m;
+	cylinder_radius 0.21 m;
+	brake_diameter 1 m;
+	calotific_fuel 44000 kJ/kg;
+	steam_exhaust 1.3 kg;
+	specific_heat_steam 2.093 kJ/kg/K;
+	specific_heat_dry 1.01 kJ/kg/K;
+};
