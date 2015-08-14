@@ -17,4 +17,4 @@ before_install:
 install: "python setup.py develop"
 # command to run tests
 script:
-  - python runAllTests.py omf
+  - python ./omf/runAllTests.py omf
