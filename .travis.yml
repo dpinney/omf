@@ -14,13 +14,9 @@ addons:
     - pkg-config
     - python-dev
     - python-numpy
-    - alien
 before_install:
   - sh -e /etc/init.d/xvfb start
-  - cd omf/solvers/gridlabd
-  - alien gridlabd-3.1.0-1.x86_64.rpm
-  - dpkg -i --force-not-root --root=$HOME gridlabd_3.1.0-2_amd64.deb
-  - cd ~/omf
-install: "python setup.py develop"
+  - dpkg -i --force-not-root --root=$HOME ~/omf/solvers/gridlabd/gridlabd_3.1.0-2_amd64.deb
+install: "python ~/omf/setup.py develop"
 script:
-  - python ~/omf/runAllTests.py omf
+  - python ~/omf/omf/runAllTests.py ~/omf/omf/
