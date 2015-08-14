@@ -16,7 +16,8 @@ addons:
     - python-numpy
 before_install:
   - sh -e /etc/init.d/xvfb start
-  - dpkg -i --force-not-root --root=$HOME ~/omf/solvers/gridlabd/gridlabd_3.1.0-2_amd64.deb
+  - pwd
+  - dpkg -i --force-not-root --root=~ ~/omf/solvers/gridlabd/gridlabd_3.1.0-2_amd64.deb
 install: "python ~/omf/setup.py develop"
 script:
   - python ~/omf/omf/runAllTests.py ~/omf/omf/
