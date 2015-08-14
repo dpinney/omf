@@ -17,8 +17,11 @@ addons:
 before_install:
   - sh -e /etc/init.d/xvfb start
   - pwd
-  - touch ./omf/solvers/gridlabd/gridlabd_3.1.0-2_amd64.deb
-  - dpkg -i --force-not-root ./omf/solvers/gridlabd/gridlabd_3.1.0-2_amd64.deb
+  - mkdir ./var
+  - mkdir ./var/lib
+  - mkdir ./var/lib/dpkg
+  - mkdir ./var/lib/dpkg/status
+  - dpkg -i --force-not-root --root=./ ./omf/solvers/gridlabd/gridlabd_3.1.0-2_amd64.deb
 install: "python setup.py develop"
 script:
   - python ./omf/runAllTests.py ./omf/
