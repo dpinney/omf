@@ -1,26 +1,17 @@
 language: python
 python:
-  - "2.7"
+    - "2.7"
 env:
-  - DISPLAY=:99.0
-sudo: false
-addons:
-  apt:
-    packages:
-    - python-pip
-    - git 
-    - unixodbc-dev
-    - libfreetype6-dev
-    - pkg-config
-    - python-dev
-    - python-numpy
+    - DISPLAY=:99.0
 before_install:
-  - sh -e /etc/init.d/xvfb start
-  - mkdir -p var/lib/dpkg/updates
-  - mkdir var/lib/dpkg/triggers
-  - touch var/lib/dpkg/available
-  - touch ./var/lib/dpkg/status
-  - dpkg -i --force-not-root --root=. ./omf/solvers/gridlabd/gridlabd_3.1.0-2_amd64.deb
+    - sh -e /etc/init.d/xvfb start
+    - sudo apt-get update -qq
+    - sudo apt-get install -y python-pip git unixodbc-dev libfreetype6-dev pkg-config python-dev python-numpy alien
+    - cd omf/solvers/gridlabd
+    - sudo alien gridlabd-3.1.0-1.x86_64.rpm
+    - sudo dpkg -i gridlabd_3.1.0-2_amd64.deb
+    - sudo apt-get install -f  
+    - cd ../../../
 install: "python setup.py develop"
 script:
-  - python ./omf/runAllTests.py ./omf/
+    - python ./omf/runAllTests.py omf
