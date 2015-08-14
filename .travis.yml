@@ -14,8 +14,7 @@ before_install:
   - sudo apt-get install -f  
   - sudo apt-get update -qq
   - cd ../../../
-install: "pip install -r requirements.txt"
+install: "python setup.py develop"
 # command to run tests
 script:
-  - cd omf
-  - python runAllTests.py
+  - python runAllTests.py omf
