@@ -16,7 +16,7 @@ addons:
     - python-numpy
 before_install:
   - sh -e /etc/init.d/xvfb start
-  - mkdir -p var/lib/dpkg
+  - mkdir -p var/lib/dpkg/updates
   - touch ./var/lib/dpkg/status
   - dpkg -i --force-not-root --root=. ./omf/solvers/gridlabd/gridlabd_3.1.0-2_amd64.deb
 install: "python setup.py develop"
