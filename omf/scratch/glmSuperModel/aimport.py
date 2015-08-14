@@ -1,8 +1,8 @@
-'''
-Try to import the GLD superModel.
-'''
+''' Make a GLD superModel. '''
 
 import omf, os, json
+
+''' FIRST PART: GET PROTOYPICAL GLM IN TO JSON '''
 
 # Read in the glm (or cache, if it's cached.)
 superName = './glmSuperModelTiny.json'
@@ -26,15 +26,26 @@ for k in baseFeed:
 		if ':' in thisOb[k2] and 'clock' not in thisOb:
 			thisOb[k2] = thisOb[k2].replace(':','_')
 
-# # Try deEmbedding all the objects.
-# omf.feeder.fullyDeEmbed(baseFeed)
-
-# Try a run.
-output = omf.solvers.gridlabd.runInFilesystem(baseFeed, attachments={})
+# Disembed the feeder.
+omf.feeder.fullyDeEmbed(baseFeed)
 
 # Write out the json version.
 with open(superName, 'w') as jFile:
 	json.dump(baseFeed, jFile, indent=4)
+
+''' SECOND PART: MAKE THE FEEDER SUPER '''
+
+# Replace a load with a house.
+# Why do that? Because it's what we need. What kind of house? Maybe pull one from the previous GLM SM. And then?
+# I feel the need for a way to rapidly test this? What does that mean? Quickly go from... X to Y?
+# TODO: easy way to render... feeder in OMF gridedit???? Or I could just look at lat/lon graph. BTW, it should be easy to do a 
+
+# loadList = [x for x in baseFeed.values() if x.get('object','') == 'load']
+# print loadList
+
+
+# Try a run.
+output = omf.solvers.gridlabd.runInFilesystem(baseFeed, attachments={}, keepFiles=True, workDir='./runningDir', glmName='glmSuperModelTinyModified.glm')
 
 
 
