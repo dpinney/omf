@@ -251,7 +251,7 @@ def _tests():
 		"dischargeRate": "50", 
 		"modelType": "energyStorage", 
 		"chargeRate": "50", 
-		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","batteryModel","OlinBeckenhamScada.csv")).read(), 
+		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","OlinBeckenhamScada.csv")).read(), 
 		"cellCost": "25000", 
 		"cellQuantity": "3", 
 		"runTime": "0:00:03", 
