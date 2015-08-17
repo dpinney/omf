@@ -1,0 +1,354 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<!-- Global Funcs Import -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+</head>
+<body onload="init()">
+	<div id="title">
+		<div id="logoBox"><a href="/">&#10059;</a></div>
+		<p id="titleText">New energyStorage Model</p>
+	</div>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"{% endif %} method="post">
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-energyStorage" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="energyStorage" readonly/>
+			</div>
+			{% if quickRender %}
+			<div class="shortInput">
+				<label>Email Address</label>
+				<input type="email" id="quickRunEmail" name="quickRunEmail" required="required">
+			</div>			
+			{% else %}
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			{% endif %}
+			{% if not quickRender %}
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			{% endif %}
+			<div class="shortInput runningInline postRunInline ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Unit Capacity (kWh-AC)</label>
+				<input type="text" id="cellCapacity" name="cellCapacity" value="100" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Cell Quantity</label>
+				<input type="text" id="cellQuantity" name="cellQuantity" value="3" required="required" pattern="^\d+$"/>
+			</div>
+			<div class="shortInput">
+				<label>Charge Rating (kW)</label>
+				<input type="text" id="chargeRate" name="chargeRate" value="50" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Discharge Rating (kW)</label>
+				<input type="text" id="dischargeRate" name="dischargeRate" value="50" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>			
+			<div class="shortInput">
+				<label class="tooltip">Maximum Depth of Discharge (%)<span class="classic">The maximum safe discharge capacity of the battery system, typically between 80% - 90%.</span></label>
+				<input type="text" id="dodFactor" name="dodFactor" value="85" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>						
+			<div class="shortInput">
+				<label class="tooltip">Battery Round Trip Efficiency (%)<span class="classic">The efficiency of the DC battery system, to be used with the Inverter efficiency to get Battery System AC Round Trip Efficiency equal to this value times <i>Inverter Efficiency &amp; Transformer Efficiency</i> &#178;</span></label>
+				<input type="text" id="batteryEfficiency" name="batteryEfficiency" value="92" required="required" pattern="^\d+\.?\d*?$">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. Used in the Battery System AC Round Trip Efficiency calculation. The Inverter efficiency is obtained from the Weighted Efficiency (CEC) Method.</span></label>
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" value="92" required="required" >
+			</div>							
+			<div class="shortInput">
+				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var fileName=true;</script>
+				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
+				<input id="demandCurve" name="demandCurve" type="hidden">
+				{% if allOutputData.fileName|string() is defined %}
+					<input type="hidden" id="fileName" name="fileName" readonly="readonly">				
+					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>	
+					<script>
+						var FileName = allOutputData.fileName;
+						document.getElementById('demandCurveFileName').innerHTML = FileName;
+					</script>	
+					<style type="text/css">
+					 #fileExists {
+					   width:175px;
+					   height:25px;
+					   display:fixed;
+					   margin-top:-28px;
+					   margin-left:110px;
+					   background-color:#d3d3d3;
+					   font-size:0.8em;
+					 }	 		 				   
+					input[type='file'] {
+					  color: transparent;
+					}				
+					</style>		
+				{% endif %}
+				<script>
+					// Make sure the file is required on prerun.
+					if (modelStatus == "preRun" || modelStatus == "stopped") {gebi('demandCurveFile').setAttribute('required', 'required')}
+					else {}
+					// File handler function.
+					function handle_files(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("demandCurve").value = reader.result
+							var FileName = gebi("demandCurveFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('demandCurveFileName').innerHTML = FileName;
+							gebi("fileName").value = FileName;
+						}
+					}
+
+				</script>
+			</div>
+			<div class="shortInput">
+				<label>Demand Charge ($/kW/month)</label>
+				<input type="text" id="demandCharge" name="demandCharge" value="50" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Electricity Cost ($/kW)<span class="classic">The cost of the electricity used to recharge the battery system.</span></label>
+				<input type="text" id="elecCost" name="elecCost" pattern="^\d+\.?\d*$" value="0.07" required="required">
+			</div>
+			<div class="shortInput">
+				<label>Unit Cost (installed)</label>
+				<input type="text" id="cellCost" name="cellCost" value="25000" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>						
+			<div class="shortInput">
+				<label>Discount Rate (%)</label>
+				<input type="text" id="discountRate" name="discountRate" value="2.5" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Financial Projection Length (years)</label>
+				<input type="text" id="projYears" name="projYears" value="10" required="required" pattern="^\d+$"/>
+			</div>
+			<div class="wideInput" style="text-align:right">
+				{% if not quickRender %}
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				{% endif %}
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
+				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
+			</div>
+			<!-- CSRF Protection -->
+			<input name='csrfToken' type=hidden id='csrfToken2' value="{{ csrf_token() }}">
+		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+	<div id ="stopIndicator" class="content stopped">
+		<p>Model cancelled or encountered an error. Please change inputs and re-run.</p>
+		<pre id='errorText'></pre>
+		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>
+	</div>
+	<div id="output">
+		<script id="globalOutputScripting">
+			function insertMetric(tableId, name, vector) {
+				// Add a vector to a table as a row.
+				table = gebi(tableId)
+				newRow = table.insertRow()
+				newRow.insertCell().innerHTML = "<div id=\"metric\">" + name + "</div>"
+				for (i=0; i<vector.length; i++) {
+					cell = newRow.insertCell()
+					cell.innerHTML = delimitNumbers(vector[i].toFixed(0))
+				}
+			}
+		</script>	
+		<script id="globalOutputScripting">
+			function insertDollarMetric(tableId, name, vector) {
+				// Add a vector to a table as a row.
+				table = gebi(tableId)
+				newRow = table.insertRow()
+				newRow.insertCell().innerHTML = "<div id=\"metric\">" + name + "</div>"		
+				for (i=0; i<vector.length; i++) {
+					cell = newRow.insertCell()
+					cell.innerHTML = "$" + delimitNumbers(vector[i].toFixed(0))
+				}
+			}
+		</script>		
+		<p class="reportTitle postRun">Monthly Cost Comparison</p> 
+		<div id="levelizedCostReport" class="tightContent postRun">
+			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:280px; overflow-y:hidden; overflow-x:auto;">
+				<style type="text/css">
+				 #Metric {
+				   font-weight:bold;
+				   width:175px;
+				 }	
+				 #SPP {
+				   font-weight:bold;
+				 }
+				 #tableHead {
+				   margin-top:20px;
+				 }  				   
+				</style>				
+				<table id="monthlySummaryTable" style="margin:5px;">
+					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
+					<div id="tableHead">
+						<thead>
+							<th></th>
+							<th>Jan</th>
+							<th>Feb</th>
+							<th>Mar</th>
+							<th>Apr</th>
+							<th>May</th>
+							<th>Jun</th>
+							<th>Jul</th>
+							<th>Aug</th>
+							<th>Sep</th>
+							<th>Oct</th>
+							<th>Nov</th>
+							<th>Dec</th>
+						</thead>
+					</div>
+				</table>
+				<script>			
+					insertMetric("monthlySummaryTable","Existing Demand (kW)", allOutputData.monthlyDemand)
+					insertMetric("monthlySummaryTable","Demand with Battery (kW)", allOutputData.monthlyDemandRed)
+					insertMetric("monthlySummaryTable","Reduction Amount (kW)", allOutputData.ps)
+					insertMetric("monthlySummaryTable","kWh to Full-Battery (kW)", allOutputData.kWhtoRecharge)
+					insertDollarMetric("monthlySummaryTable","Value of Reduction ($)", allOutputData.benefitMonthly)
+					insertDollarMetric("monthlySummaryTable","Cost to Recharge Battery ($)", allOutputData.costtoRecharge)
+					insertDollarMetric("monthlySummaryTable","Net Benefit ($)", allOutputData.benefitNet)								
+				</script>		
+				<script>
+					table = gebi("monthlySummaryTable")
+					newRow = table.insertRow()
+					newRow.insertCell().innerHTML = ""								
+					newRow = table.insertRow()
+					newRow.insertCell().innerHTML = "<div id=\"SPP\">Financial Calculations:</div>"								
+					newRow.insertCell().innerHTML = "<div id=\"SPP\">NPV:</div>"	
+					cell = newRow.insertCell()
+					cell.innerHTML = "$" + delimitNumbers(allOutputData.NPV.toFixed(0))	
+					cell = newRow.insertCell()
+					cell.innerHTML + ""			
+					newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"	
+					cell = newRow.insertCell()
+					cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))						
+				</script>				
+			</div>
+		</div>		
+		<script type="text/javascript">
+			// Global Highcharts settings.
+			Highcharts.setOptions({global:{useUTC:true}})
+		</script>
+		<p class="reportTitle postRun">Demand Before and After Storage</p>
+		<div id="irradianceReport" class="tightContent postRun">
+			<div id="demandBattChart"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							"pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,
+						"tickColor":"#D3D3D3",
+						"tickLength":-680,
+						"type":"datetime",
+						"lineColor":"gray"},
+					"yAxis":{
+						"title":{"text":"Power (W)","style":{"color":"gray"}},
+						"min":0,
+						"minorTickColor":"gray", "minorTickInterval":"auto",
+						"plotLines":[{"color": "orange",
+						"dashStyle": "ShortDash",
+						"width": 2,
+						"label":{"text":"Max Power:" + allOutputData.batteryDischargekWMax/1000 + "kW", "align":"right","y":-5,"x":-790, "style":{"color":"orange", "fontsize":"12px"}},
+						"value": allOutputData.batteryDischargekWMax,"zIndex": 10}],"min":0},
+					"title":{"text":null},
+					"series":[
+						{"name":"Demand","marker":{"enabled":false},"color":"red","data":allOutputData.demand,"enableMouseTracking":false},
+						{"name":"Demand After Battery","marker":{"enabled":false},"color":"purple","data":allOutputData.demandAfterBattery,"enableMouseTracking":false},
+						{"name":"Battery Discharge","marker":{"enabled":false},"color":"orange","data":allOutputData.batteryDischargekW}],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"demandBattChart","type":"line","marginRight":20, "height":750,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Battery State of Charge</p>
+		<div id="irradianceReport" class="tightContent postRun">
+			<div id="batterySocChart"></div>
+			<script>
+				var dodFactor = 100 - parseFloat(allInputData.dodFactor)
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{
+							"animation":false,
+							"pointStart":Date.parse(allOutputData.startDate),
+							"shadow":false,
+							"pointInterval":3600000},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,
+						"tickColor":"#D3D3D3",
+						"tickLength":-205,						
+						"type":"datetime",
+						"lineColor":"gray"},
+					"yAxis":
+						{"title":{"text":"SoC (%)","style":{"color":"gray"}}, "min":0, "max":100,
+						"minorTickColor":"gray", "minorTickInterval":5,
+						"plotLines":[{"color": "gray",
+						"dashStyle": "ShortDash",
+						"width": 2,
+						"label":{"text":"Max specified DOD:" + (100 - allInputData.dodFactor) + "%","align":"right","y":-5,"x":-775, "style":{"color":"gray", "fontsize":"12px"}},					
+						"value": dodFactor,"zIndex": 10}],"min":0},
+					"title":{"text":"Cycle Equivalents:" + delimitNumbers(allOutputData.cycleEquivalents.toFixed(1)), "verticalAlign":"bottom", "align":"right", "y":-28-dodFactor*2, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"series":[
+						{"name":"Battery SoC","marker":{"enabled":false},"color":"gray","data":allOutputData.batterySoc} ],
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"batterySocChart","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":false,
+					"legend":false})
+			</script>
+		</div>	
+		<!-- TODO: Make into preview graph: http://jsfiddle.net/gh/get/jquery/1.7.2/highslide-software/highcharts.com/tree/master/samples/stock/xaxis/minorticks/	 -->
+		<p class="reportTitle postRun">Cash Flow</p>
+		<div id="cashFlowReport" class="tightContent postRun">
+			<div id="cashFlowChartDiv"></div>
+			<script>
+				new Highcharts.Chart({"credits":{"enabled":false},
+					"plotOptions":{"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
+					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
+					"title":{"text":"NPV:$" + delimitNumbers(allOutputData.NPV.toFixed(0)) + "; SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"series":[{"name":"Net Benefits", "data":allOutputData.netCashflow},
+						{"name":"Cumulative Return", "type":"spline", "data":allOutputData.cumulativeCashflow}],
+					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
+					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+	</div>
+</body>
