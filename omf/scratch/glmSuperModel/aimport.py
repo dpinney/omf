@@ -1,8 +1,32 @@
 ''' Make a GLD superModel. 
 
-TODO:
-XXX Get one prosumer working (ish).
-XXX Attachments? Added.
+TODO
+XXX Which prototypical feeder? Smallest (R1-12.47-3_NR). Maybe try R4-25.00-1_NR later.
+XXX Which solution method? Need NR.
+XXX Edit the tiny feeder to remove colon-number naming.
+XXX What all technologies? List below.
+XXX How to get 'em on there? Get one prosumer working (ish).
+XXX File attachments? Added.
+XXX Run omf.models.gridlabMulti.
+XXX Any way to disembed that market player? Yes, by name. Added to prosumer.
+XXX Other things to add? Wind. IVVC. 
+XXX Base case feeder.
+XXX Pin everything in the feeder editor.
+XXX Save a nice omf.model.gridlabMulti demo.
+OOO Bonus points? Single phase wind. Get a realistic IVVC.
+
+TECHNOLOGIES
+Per-house:
+* Storage.
+* Solar.
+* Diesel (on a very few).
+* Wind (on a very few).
+* EVs.
+Other stuff:
+* Market auction (RTP?).
+* CPP.
+* IVVC.
+
 '''
 
 
@@ -44,6 +68,13 @@ for key in baseFeed.keys():
 with open(superName, 'w') as jFile:
 	json.dump(baseFeed, jFile, indent=4)
 
+# Create a base case GLM too for comparison.
+caseBaseFeed = dict(omf.feeder.newFeederWireframe)
+caseBaseFeed['tree'] = baseFeed
+caseBaseFeed['attachments'] = {}
+with open('superModelTinyZeroTech.json','w+') as outFile:
+	json.dump(caseBaseFeed, outFile, indent=4)
+
 ''' SECOND PART: MAKE THE FEEDER SUPER '''
 
 # Attach a prosumer.
@@ -57,17 +88,16 @@ for key in superConsumer:
 # Attachments
 superAttach = {fName:open(fName).read() for fName in ['superSchedules.glm','superClimate.tmy2','superCpp.player', 'superClearingPrice.player']}
 
+''' THIRD PART: TEST IN GLD AND SAVE '''
+
 # Try a run.
 output = omf.solvers.gridlabd.runInFilesystem(baseFeed, attachments=superAttach, keepFiles=True, workDir='./runningDir', glmName='superModelTinyModified.glm')
 
-print 'GLD OUTPUT', output['stderr']
+print 'GLD OUTPUT=============\n', output['stderr'],'\n======================'
 
 # If everything worked out, create an OMF-formatted JSON file.
 fullFeed = dict(omf.feeder.newFeederWireframe)
 fullFeed['tree'] = baseFeed
 fullFeed['attachments'] = superAttach
-with open('superModelTiny.json','w') as outFile:
+with open('superModelTiny.json','w+') as outFile:
 	json.dump(fullFeed, outFile, indent=4)
-
-# Try running the new full thing?
-newOutput = omf.solvers.gridlabd.runInFilesystem(fullFeed['tree'], attachments=fullFeed['attachments'])

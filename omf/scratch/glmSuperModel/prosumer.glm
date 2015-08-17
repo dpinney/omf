@@ -27,18 +27,20 @@ object player {
      file superCpp.player;
 };
 
+object player {
+	name superClearing;
+	file superClearingPrice.player;
+	loop 10;
+};
+
 object auction {
-     name Market_1;
-     period 900;
-     special_mode BUYERS_ONLY;
-     unit kW;
-     my_avg 0.110000;
-     my_std 0.037953;
-     object player {
-          file superClearingPrice.player;
-          loop 10;
-          property current_market.clearing_price;
-     };
+	my_std 0.037953;
+	name Market_1;
+	period 900;
+	my_avg 0.110000;
+	special_mode BUYERS_ONLY;
+	unit kW;
+	current_market.clearing_price superClearing.value;
 };
 
 object climate {
@@ -164,7 +166,7 @@ object waterheater {
 
 object passive_controller {
 	name house1_waterHeater_controller;
-	parent house1_waterHeater;	
+	parent house1_waterHeater;
 	period 900;
 	control_mode PROBABILITY_OFF;
 	distribution_type NORMAL;
@@ -249,44 +251,112 @@ object battery {
 	battery_state FULL;
 };
 
-// Single phase windturbine not supported in GLD 3.1.
+// Single phase wind is tricky.
+//object inverter {
+//    name house1_windInverter;
+//    phases BS;
+//    parent house1_triplexMeter;
+//    //rated_power 15000;
+//};
+//
+//object rectifier {
+//    name house1_windRectifier;
+//    parent house1_windInverter;
+//    phases ABCN;
+//    rectifier_type SIX_PULSE;
+//    generator_mode SUPPLY_DRIVEN;
+//};
+//
 //object windturb_dg {
-//	name house1_windTurbine;
-//	parent house1_triplexMeter;
-//	phases BS;
-//	Gen_status ONLINE;
-//	Gen_type SYNCHRONOUS;
-//	Gen_mode CONSTANTP;
-//	Turbine_Model BERGEY_10kW;
+//    name house1_windTurbine;
+//    parent house1_windRectifier;
+//    phases ABCN;
+//    Gen_status ONLINE;
+//    Gen_mode CONSTANTP;
+//    Turbine_Model BERGEY_10kW;
 //};
 
-// Single phase diesel not support in GLD 3.1.
-//object diesel_dg {
-//	name house1_diesel;
-//	parent house1_triplexMeter;
-//	Gen_mode CONSTANTPQ;
-//	Gen_status ONLINE;
-//	Gen_type SYNCHRONOUS;
-//	phases BS;
-//	pf 1.0;
-//	cylinders 1;	 
-//	stroke 2;
-//	pressure 3;
-//	speed 10000 1/min;		 
-//	torque 2865 N;
-//	time_operation 525600 min;
-//	fuel 1.56 kg;
-//	w_coolingwater 160 kg;
-//	inlet_temperature 32 degC;
-//	outlet_temperature 57 degC;
-//	air_fuel 30 kg;
-//	room_temperature 27 degC;
-//	exhaust_temperature 310 degC;		 
-//	cylinder_length 0.29 m;
-//	cylinder_radius 0.21 m;
-//	brake_diameter 1 m;
-//	calotific_fuel 44000 kJ/kg;
-//	steam_exhaust 1.3 kg;
-//	specific_heat_steam 2.093 kJ/kg/K;
-//	specific_heat_dry 1.01 kJ/kg/K;
-//};
+// Single phase diesel not support in GLD 3.1, so attach eslewhere
+object diesel_dg {
+	name utilOwnedDiesel;
+	parent R1-12-47-3_meter_18;
+	Gen_mode CONSTANTPQ;
+	Gen_status ONLINE;
+	Gen_type SYNCHRONOUS;
+	phases ABC;
+	pf 1.0;
+	cylinders 1;
+	stroke 2;
+	pressure 3;
+	speed 10000 1/min;
+	torque 2865 N;
+	time_operation 525600 min;
+	fuel 1.56 kg;
+	w_coolingwater 160 kg;
+	inlet_temperature 32 degC;
+	outlet_temperature 57 degC;
+	air_fuel 30 kg;
+	room_temperature 27 degC;
+	exhaust_temperature 310 degC;
+	cylinder_length 0.29 m;
+	cylinder_radius 0.21 m;
+	brake_diameter 1 m;
+	calotific_fuel 44000 kJ/kg;
+	steam_exhaust 1.3 kg;
+	specific_heat_steam 2.093 kJ/kg/K;
+	specific_heat_dry 1.01 kJ/kg/K;
+};
+
+object windturb_dg {
+	name utilOwnedWind;
+	parent R1-12-47-3_meter_18;
+	phases BS;
+	Gen_status ONLINE;
+	Gen_type SYNCHRONOUS;
+	Gen_mode CONSTANTP;
+	Turbine_Model BERGEY_10kW;
+};
+
+object volt_var_control {
+        name volt_var_control;
+        control_method ACTIVE;
+        capacitor_delay 60.0;
+        regulator_delay 60.0;
+        desired_pf 0.99;
+        d_max 0.8;
+        d_min 0.1;
+        substation_link "R1-12-47-3_reg_1";
+        regulator_list "R1-12-47-3_reg_1";
+        capacitor_list "R1-12-47-1_cap_1";
+        voltage_measurements "R1-12-47-3_meter_22,1,R1-12-47-3_meter_21,1";
+        maximum_voltages 9000.00;
+        minimum_voltages 5000.00;
+        max_vdrop 50;
+        high_load_deadband 60.00;
+        desired_voltages 7080.00;
+        low_load_deadband 60.00;
+}
+
+//R1-12-47-3_node_15
+
+object capacitor {
+      name R1-12-47-1_cap_1;
+      parent R1-12-47-3_node_15;
+      phases ABCN;
+      pt_phase B;
+      phases_connected ABC;
+      control VOLT;
+      voltage_set_high 7300;
+      voltage_set_low 7100;
+      capacitor_A 0.15 MVAr;
+      capacitor_B 0.15 MVAr;
+      capacitor_C 0.15 MVAr;
+      control_level INDIVIDUAL;
+      switchA CLOSED;
+      switchB CLOSED;
+      switchC CLOSED;
+      time_delay 30.0;
+      dwell_time 30.0;
+      cap_nominal_voltage 7220;
+      nominal_voltage 7216.88;
+};

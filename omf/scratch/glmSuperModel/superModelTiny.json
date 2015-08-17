@@ -829,6 +829,15 @@
             "default_maximum_voltage_error": "1e-9", 
             "module": "powerflow"
         }, 
+        "177": {
+            "phases": "CN", 
+            "from": "R1-12-47-3_node_4", 
+            "name": "R1-12-47-3_ol_3", 
+            "object": "overhead_line", 
+            "to": "R1-12-47-3_node_6", 
+            "length": "157.766", 
+            "configuration": "line_configuration_20"
+        }, 
         "7": {
             "Control": "OUTPUT_VOLTAGE", 
             "raise_taps": "16", 
@@ -843,14 +852,6 @@
             "band_width": "120", 
             "tap_pos_C": "0", 
             "lower_taps": "16"
-        }, 
-        "231": {
-            "status": "CLOSED", 
-            "phases": "ABCN", 
-            "from": "R1-12-47-3_node_15", 
-            "name": "R1-12-47-3_switch_4", 
-            "object": "switch", 
-            "to": "R1-12-47-3_node_17"
         }, 
         "313": {
             "variation_trip_std_dev": "100.0", 
@@ -1097,23 +1098,6 @@
             "efficiency": "0.13", 
             "panel_type": "SINGLE_CRYSTAL_SILICON"
         }, 
-        "252": {
-            "phases": "ABCN", 
-            "from": "R1-12-47-3_node_42", 
-            "name": "R1-12-47-3_xfmr_19", 
-            "object": "transformer", 
-            "to": "R1-12-47-3_meter_18", 
-            "configuration": "transformer_configuration_147"
-        }, 
-        "205": {
-            "phases": "ABCN", 
-            "from": "R1-12-47-3_node_27", 
-            "name": "R1-12-47-3_ol_22", 
-            "object": "overhead_line", 
-            "to": "R1-12-47-3_node_31", 
-            "length": "229.262", 
-            "configuration": "line_configuration_27"
-        }, 
         "61": {
             "phases": "BN", 
             "object": "load", 
@@ -1197,14 +1181,13 @@
             "nominal_voltage": "7200", 
             "name": "R1-12-47-3_meter_1"
         }, 
-        "177": {
-            "phases": "CN", 
-            "from": "R1-12-47-3_node_4", 
-            "name": "R1-12-47-3_ol_3", 
-            "object": "overhead_line", 
-            "to": "R1-12-47-3_node_6", 
-            "length": "157.766", 
-            "configuration": "line_configuration_20"
+        "252": {
+            "phases": "ABCN", 
+            "from": "R1-12-47-3_node_42", 
+            "name": "R1-12-47-3_xfmr_19", 
+            "object": "transformer", 
+            "to": "R1-12-47-3_meter_18", 
+            "configuration": "transformer_configuration_147"
         }, 
         "176": {
             "phases": "ACN", 
@@ -1270,6 +1253,16 @@
             "object": "transformer", 
             "to": "R1-12-47-3_meter_21", 
             "configuration": "transformer_configuration_140"
+        }, 
+        "304": {
+            "my_std": "0.037953", 
+            "name": "Market_1", 
+            "object": "auction", 
+            "period": "900", 
+            "my_avg": "0.110000", 
+            "current_market.clearing_price": "superClearing.value", 
+            "special_mode": "BUYERS_ONLY", 
+            "unit": "kW"
         }, 
         "292": {
             "omftype": "module", 
@@ -1522,6 +1515,28 @@
             "name": "cppDays", 
             "file": "superCpp.player"
         }, 
+        "321": {
+            "control": "VOLT", 
+            "dwell_time": "30.0", 
+            "parent": "R1-12-47-3_node_15", 
+            "switchB": "CLOSED", 
+            "object": "capacitor", 
+            "voltage_set_low": "7100", 
+            "switchC": "CLOSED", 
+            "control_level": "INDIVIDUAL", 
+            "switchA": "CLOSED", 
+            "pt_phase": "B", 
+            "voltage_set_high": "7300", 
+            "phases": "ABCN", 
+            "name": "R1-12-47-1_cap_1", 
+            "capacitor_B": "0.15 MVAr", 
+            "capacitor_C": "0.15 MVAr", 
+            "phases_connected": "ABC", 
+            "capacitor_A": "0.15 MVAr", 
+            "time_delay": "30.0", 
+            "nominal_voltage": "7216.88", 
+            "cap_nominal_voltage": "7220"
+        }, 
         "310": {
             "parent": "house1_responsiveLoad", 
             "sub_elasticity_first_second": "-0.0099", 
@@ -1748,6 +1763,36 @@
             "name": "TLC 1/0 AA triplex", 
             "geometric_mean_radius": "0.0111"
         }, 
+        "318": {
+            "parent": "R1-12-47-3_meter_18", 
+            "specific_heat_steam": "2.093 kJ/kg/K", 
+            "Gen_status": "ONLINE", 
+            "outlet_temperature": "57 degC", 
+            "object": "diesel_dg", 
+            "torque": "2865 N", 
+            "specific_heat_dry": "1.01 kJ/kg/K", 
+            "pressure": "3", 
+            "exhaust_temperature": "310 degC", 
+            "calotific_fuel": "44000 kJ/kg", 
+            "w_coolingwater": "160 kg", 
+            "cylinders": "1", 
+            "air_fuel": "30 kg", 
+            "speed": "10000 1/min", 
+            "phases": "ABC", 
+            "brake_diameter": "1 m", 
+            "cylinder_radius": "0.21 m", 
+            "name": "utilOwnedDiesel", 
+            "room_temperature": "27 degC", 
+            "stroke": "2", 
+            "Gen_mode": "CONSTANTPQ", 
+            "time_operation": "525600 min", 
+            "pf": "1.0", 
+            "Gen_type": "SYNCHRONOUS", 
+            "cylinder_length": "0.29 m", 
+            "fuel": "1.56 kg", 
+            "steam_exhaust": "1.3 kg", 
+            "inlet_temperature": "32 degC"
+        }, 
         "274": {
             "diameter": "0.368", 
             "insulation_thickness": "0.08", 
@@ -1765,6 +1810,16 @@
             "to": "R1-12-47-3_node_30", 
             "length": "174.016", 
             "configuration": "line_configuration_32"
+        }, 
+        "319": {
+            "phases": "BS", 
+            "name": "utilOwnedWind", 
+            "parent": "R1-12-47-3_meter_18", 
+            "Gen_status": "ONLINE", 
+            "Turbine_Model": "BERGEY_10kW", 
+            "object": "windturb_dg", 
+            "Gen_mode": "CONSTANTP", 
+            "Gen_type": "SYNCHRONOUS"
         }, 
         "275": {
             "voltage_2": "-60-103.92j", 
@@ -1865,10 +1920,39 @@
             "nominal_voltage": "7200", 
             "constant_power_B": "19800+600j"
         }, 
+        "16": {
+            "name": "line_configuration_18", 
+            "object": "line_configuration", 
+            "spacing": "line_spacing_10", 
+            "conductor_N": "overhead_line_conductor_3", 
+            "conductor_A": "overhead_line_conductor_3", 
+            "conductor_C": "overhead_line_conductor_3", 
+            "conductor_B": "overhead_line_conductor_3"
+        }, 
         "36": {
             "distance_AN": "84.0 in", 
             "object": "line_spacing", 
             "name": "line_spacing_13"
+        }, 
+        "320": {
+            "substation_link": "\"R1-12-47-3_reg_1\"", 
+            "object": "volt_var_control", 
+            "low_load_deadband": "60.00", 
+            "d_max": "0.8", 
+            "max_vdrop": "50", 
+            "desired_voltages": "7080.00", 
+            "desired_pf": "0.99", 
+            "name": "volt_var_control", 
+            "regulator_list": "\"R1-12-47-3_reg_1\"", 
+            "control_method": "ACTIVE", 
+            "capacitor_list": "\"R1-12-47-1_cap_1\"", 
+            "minimum_voltages": "5000.00", 
+            "capacitor_delay": "60.0", 
+            "d_min": "0.1", 
+            "regulator_delay": "60.0", 
+            "maximum_voltages": "9000.00", 
+            "high_load_deadband": "60.00", 
+            "voltage_measurements": "\"R1-12-47-3_meter_22,1,R1-12-47-3_meter_21,1\""
         }, 
         "278": {
             "voltage_2": "-60-103.92j", 
@@ -1920,14 +2004,13 @@
             "to": "R1-12-47-3_meter_1", 
             "configuration": "transformer_configuration_134"
         }, 
-        "16": {
-            "name": "line_configuration_18", 
-            "object": "line_configuration", 
-            "spacing": "line_spacing_10", 
-            "conductor_N": "overhead_line_conductor_3", 
-            "conductor_A": "overhead_line_conductor_3", 
-            "conductor_C": "overhead_line_conductor_3", 
-            "conductor_B": "overhead_line_conductor_3"
+        "236": {
+            "phases": "ABCN", 
+            "from": "R1-12-47-3_node_10", 
+            "name": "R1-12-47-3_xfmr_3", 
+            "object": "transformer", 
+            "to": "R1-12-47-3_meter_2", 
+            "configuration": "transformer_configuration_135"
         }, 
         "237": {
             "phases": "ACN", 
@@ -1945,13 +2028,13 @@
             "object": "switch", 
             "to": "R1-12-47-3_node_49"
         }, 
-        "236": {
+        "231": {
+            "status": "CLOSED", 
             "phases": "ABCN", 
-            "from": "R1-12-47-3_node_10", 
-            "name": "R1-12-47-3_xfmr_3", 
-            "object": "transformer", 
-            "to": "R1-12-47-3_meter_2", 
-            "configuration": "transformer_configuration_135"
+            "from": "R1-12-47-3_node_15", 
+            "name": "R1-12-47-3_switch_4", 
+            "object": "switch", 
+            "to": "R1-12-47-3_node_17"
         }, 
         "232": {
             "status": "CLOSED", 
@@ -2088,6 +2171,13 @@
             "voltage_C": "-3600+6235j", 
             "voltage_A": "7200+0.0j", 
             "nominal_voltage": "7200"
+        }, 
+        "78": {
+            "voltage_B": "-3600-6235j", 
+            "phases": "BN", 
+            "object": "meter", 
+            "nominal_voltage": "7200", 
+            "name": "R1-12-47-3_meter_9"
         }, 
         "146": {
             "voltage_B": "-3600-6235j", 
@@ -2260,12 +2350,14 @@
             "voltage_A": "7200+0.0j", 
             "nominal_voltage": "7200"
         }, 
-        "78": {
-            "voltage_B": "-3600-6235j", 
-            "phases": "BN", 
-            "object": "meter", 
-            "nominal_voltage": "7200", 
-            "name": "R1-12-47-3_meter_9"
+        "205": {
+            "phases": "ABCN", 
+            "from": "R1-12-47-3_node_27", 
+            "name": "R1-12-47-3_ol_22", 
+            "object": "overhead_line", 
+            "to": "R1-12-47-3_node_31", 
+            "length": "229.262", 
+            "configuration": "line_configuration_27"
         }, 
         "2": {
             "omftype": "module", 
@@ -2285,19 +2377,10 @@
             "groupid": "Residential_Meter"
         }, 
         "303": {
-            "my_std": "0.037953", 
-            "name": "Market_1", 
-            "object": "auction", 
-            "12": {
-                "property": "current_market.clearing_price", 
-                "object": "player", 
-                "loop": "10", 
-                "file": "superClearingPrice.player"
-            }, 
-            "period": "900", 
-            "my_avg": "0.110000", 
-            "special_mode": "BUYERS_ONLY", 
-            "unit": "kW"
+            "object": "player", 
+            "name": "superClearing", 
+            "file": "superClearingPrice.player", 
+            "loop": "10"
         }, 
         "261": {
             "powerC_rating": "75.0", 
