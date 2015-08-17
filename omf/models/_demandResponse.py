@@ -286,7 +286,7 @@ def _tests():
 		"modelType":"_demandResponse",
 		"RetailEnergyCost": "0.1", 
 		"WholesaleEnergyCost": "0.07", 
-		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","batteryModel","OlinBeckenhamScada.csv")).read(), 
+		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","OlinBeckenhamScada.csv")).read(), 
 		"DrPurchInstallCost": "100000", 
 		"runTime": "0:00:03", 
 		"SubstitutionPriceElasticity": "-0.09522",

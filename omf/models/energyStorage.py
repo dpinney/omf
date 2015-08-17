@@ -73,7 +73,7 @@ def run(modelDir, inputDict):
 	except Exception, e:
 		pass
 	# Start background process.
-	backProc = multiprocessing.Process(target = runForeground, args = (modelDir, inputDict,))
+	backProc = multiprocessing.Process(target = heavyProcessing, args = (modelDir, inputDict,))
 	backProc.start()
 	print "SENT TO BACKGROUND", modelDir
 	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
@@ -81,6 +81,26 @@ def run(modelDir, inputDict):
 
 
 def runForeground(modelDir, inputDict):
+	''' Run the model in a separate process. web.py calls this to run the model.
+	This function will return fast, but results take a while to hit the file system.'''
+	# Check whether model exist or not
+	if not os.path.isdir(modelDir):
+		os.makedirs(modelDir)
+		inputDict["created"] = str(datetime.datetime.now())
+	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
+	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
+		json.dump(inputDict, inputFile, indent = 4)
+	# If we are re-running, remove output and old GLD run:
+	try:
+		os.remove(pJoin(modelDir,"allOutputData.json"))
+	except Exception, e:
+		pass
+	# Start background process.
+	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
+		pPidFile.write('-999')
+	heavyProcessing(modelDir, inputDict)
+
+def heavyProcessing(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
 	# Delete output file every run if it exists
@@ -231,7 +251,7 @@ def _tests():
 		"dischargeRate": "50", 
 		"modelType": "energyStorage", 
 		"chargeRate": "50", 
-		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","batteryModel","OlinBeckenhamScada.csv")).read(), 
+		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","OlinBeckenhamScada.csv")).read(), 
 		"cellCost": "25000", 
 		"cellQuantity": "3", 
 		"runTime": "0:00:03", 

@@ -38,6 +38,7 @@ def testRunner():
 	for fname, err in mis.items():
 		print fname
 		print err, "\n\n"
+	if i>0: raise Exception # Fail if there were errors.
 
 if __name__ == "__main__":
 	testRunner()

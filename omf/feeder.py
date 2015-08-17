@@ -302,11 +302,16 @@ def _parseTokenList(tokenList):
 				pass
 		elif fullToken[0] == 'schedule':
 			# Special code for those ugly schedule objects:
-			if fullToken[0] == 'schedule':
-				while fullToken[-1] not in ['}']:
-					fullToken.append(tokenList.pop(0))
-				tree[guid] = {'object':'schedule','name':fullToken[1], 'cron':' '.join(fullToken[3:-2])}
-				guid += 1
+			while fullToken[-1] not in ['}']:
+				fullToken.append(tokenList.pop(0))
+			tree[guid] = {'object':'schedule','name':fullToken[1], 'cron':' '.join(fullToken[3:-2])}
+			guid += 1
+		elif fullToken[0] == 'class':
+			# Special code for the weirdo class objects:
+			while fullToken[-1] not in ['}']:
+				fullToken.append(tokenList.pop(0))
+			tree[guid] = {'omftype':'class ' + fullToken[1],'argument':'{\n\t' + ' '.join(fullToken[3:-2]) + ';\n}'}
+			guid += 1
 		elif fullToken[-1] == '{':
 			currentLeafAdd(guid,{})
 			guidStack.append(guid)
@@ -324,7 +329,7 @@ def _gatherKeyValues(inDict, keyToAvoid):
 	''' Helper function: put key/value pairs for objects into the format Gridlab needs. '''
 	otherKeyValues = ''
 	for key in inDict:
-		if type(key) is int:
+		if type(inDict[key]) is dict:
 			# WARNING: RECURSION HERE
 			otherKeyValues += _dictToString(inDict[key])
 		elif key != keyToAvoid:
@@ -348,7 +353,6 @@ def _dictToString(inDict):
 	elif 'module' in inDict:
 		return 'module ' + inDict['module'] + ' {\n' + _gatherKeyValues(inDict, 'module') + '};\n'
 	elif 'clock' in inDict:
-		#return 'clock {\n' + gatherKeyValues(inDict, 'clock') + '};\n'
 		# This object has known property order issues writing it out explicitly
 		clock_string = 'clock {\n' + '\ttimezone ' + inDict['timezone'] + ';\n' + '\tstarttime ' + inDict['starttime'] + ';\n' + '\tstoptime ' + inDict['stoptime'] + ';\n};\n'
 		return clock_string
@@ -364,14 +368,6 @@ def _dictToString(inDict):
 		return '#define ' + inDict['#define'] + '\n'
 	elif '#set' in inDict:
 		return '#set ' + inDict['#set'] + '\n'
-	elif 'class' in inDict:
-		prop = ''
-		if 'variable_types' in inDict.keys() and 'variable_names' in inDict.keys() and len(inDict['variable_types'])==len(inDict['variable_names']):
-			for x in xrange(len(inDict['variable_types'])):
-				prop += '\t' + inDict['variable_types'][x] + ' ' + inDict['variable_names'][x] + ';\n'
-			return 'class ' + inDict['class'] + '{\n' + prop + '};\n'
-		else:
-			return '\n'
 
 def _deEmbedOnce(glmTree):
 	''' Take all objects nested inside top-level objects and move them to the top level.
