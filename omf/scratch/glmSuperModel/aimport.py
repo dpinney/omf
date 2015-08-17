@@ -3,7 +3,6 @@
 TODO:
 XXX Get one prosumer working (ish).
 XXX Attachments? Added.
-
 '''
 
 
@@ -12,9 +11,9 @@ import omf, os, json
 ''' FIRST PART: GET PROTOYPICAL GLM IN TO JSON '''
 
 # Read in the glm (or cache, if it's cached.)
-superName = './superModelTiny.json'
+superName = './superModelTinyBase.json'
 if not os.path.isfile(superName):
-	baseFeed = omf.feeder.parse('./superModelTiny.glm')
+	baseFeed = omf.feeder.parse('./superModelTinyBase.glm')
 else:
 	baseFeed = json.load(open(superName))
 
@@ -41,7 +40,7 @@ for key in baseFeed.keys():
 	if baseFeed[key].get('object','') == 'complex_assert':
 		del baseFeed[key]
 
-# Write out the json version.
+# Cache a json version.
 with open(superName, 'w') as jFile:
 	json.dump(baseFeed, jFile, indent=4)
 
@@ -56,30 +55,19 @@ for key in superConsumer:
 	baseFeed[maxKey+key] = dict(superConsumer[key])
 
 # Attachments
-superAttach = {fName:open(fName).read() for fName in ['./superSchedules.glm','./superClimate.tmy2','superCpp.player', 'superClearingPrice.player']}
+superAttach = {fName:open(fName).read() for fName in ['superSchedules.glm','superClimate.tmy2','superCpp.player', 'superClearingPrice.player']}
 
 # Try a run.
 output = omf.solvers.gridlabd.runInFilesystem(baseFeed, attachments=superAttach, keepFiles=True, workDir='./runningDir', glmName='superModelTinyModified.glm')
 
-print output['stderr']
+print 'GLD OUTPUT', output['stderr']
 
-# # Add attachments to make an OMF formatted fullFeed.
-# fullFeed = dict(omf.feeder.newFeederWireframe)
-# fullFeed['tree'] = baseFeed
-# fullFeed['attachments'] = {}
-# ignoreFileNames = ['0import.py', 'glmSuperModel.json', 'superModelTiny.glm', 'glmSuperModelOmfFormat.json', '.DS_Store']
-# for fName in [x for x in os.listdir('.') if x not in ignoreFileNames]:
-# 	fullFeed['attachments'][fName] = open(fName, 'r').read()
+# If everything worked out, create an OMF-formatted JSON file.
+fullFeed = dict(omf.feeder.newFeederWireframe)
+fullFeed['tree'] = baseFeed
+fullFeed['attachments'] = superAttach
+with open('superModelTiny.json','w') as outFile:
+	json.dump(fullFeed, outFile, indent=4)
 
-
-# # Write full feed.
-# omfName = 'glmSuperModelOmfFormat.json'
-# try:
-# 	os.remove(omfName)
-# except:
-# 	pass
-# with open(omfName,'w') as jFile:
-# 	json.dump(fullFeed, jFile, indent=4)
-
-# # Try running GLD.
-# outPut = omf.solvers.gridlabd.runInFilesystem(fullFeed['tree'], attachments=fullFeed['attachments'])
+# Try running the new full thing?
+newOutput = omf.solvers.gridlabd.runInFilesystem(fullFeed['tree'], attachments=fullFeed['attachments'])

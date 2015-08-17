@@ -329,7 +329,7 @@ def _gatherKeyValues(inDict, keyToAvoid):
 	''' Helper function: put key/value pairs for objects into the format Gridlab needs. '''
 	otherKeyValues = ''
 	for key in inDict:
-		if type(key) is int:
+		if (type(key) is int) or (key.isdigit()):
 			# WARNING: RECURSION HERE
 			otherKeyValues += _dictToString(inDict[key])
 		elif key != keyToAvoid:
