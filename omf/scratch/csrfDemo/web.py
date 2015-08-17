@@ -47,11 +47,9 @@ def csrf_protect():
 			<h2 style='text-align:center'>The OMF currently must be accessed by <a href='http://goo.gl/X2ZGhb''>Chrome</a></h2>"
 	if request.method == "POST":
 	    token = session.pop('_csrf_token', None)
-	    print "POST"
 	    if not token or token != request.form.get('_csrf_token'):
 	    	if token != request.form.get('csrfToken'):
 				abort(403)
-			# abort (403)
 
 ###################################################
 # AUTHENTICATION AND USER FUNCTIONS
