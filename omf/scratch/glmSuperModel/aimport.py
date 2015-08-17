@@ -1,7 +1,7 @@
 ''' Make a GLD superModel. 
 
 TODO
-XXX Which prototypical feeder? Smallest (R1-12.47-3_NR). Maybe try R4-25.00-1_NR later.
+XXX Which prototypical feeder? Smallest (R1-12.47-3_NR). Maybe try R4-25.00-1 later.
 XXX Which solution method? Need NR.
 XXX Edit the tiny feeder to remove colon-number naming.
 XXX What all technologies? List below.
@@ -13,7 +13,14 @@ XXX Other things to add? Wind. IVVC.
 XXX Base case feeder.
 XXX Pin everything in the feeder editor.
 XXX Save a nice omf.model.gridlabMulti demo.
+XXX Take a look at "R4-25.00-1".
+XXX Descriptions of the actual prototype feeders.
+OOO Change all loads to residential...
 OOO Bonus points? Single phase wind. Get a realistic IVVC.
+OOO Publish final to Github.
+
+TINY FEEDER DESCRIPTION
+This feeder is a representation of a moderately populated urban area. This is composed mainly of mid-sized commercial loads with some residences, mostly multi-family. Approximately 85% of the circuit-feet are overhead and 15% underground. It would be expected that this feeder is connected to adjacent feeders through normally open switches. For this reason it would be common to limit the feeder loading to 60% to ensure the ability to transfer load from other feeders, and vice versa. Since this is a small urban core the loading of the feeder is well below 60%. The majority of the load is located relatively near the substation.
 
 TECHNOLOGIES
 Per-house:
