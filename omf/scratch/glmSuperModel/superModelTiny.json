@@ -1,36 +1,4 @@
 {
-    "216": {
-        "object": "complex_assert", 
-        "target": "power_in_C", 
-        "parent": "R1-12-47-3_ol_30", 
-        "within": "1", 
-        "value": "+68652.9+1863.08j", 
-        "name": "R1-12-47-3_ol_30complex_assert216"
-    }, 
-    "217": {
-        "object": "complex_assert", 
-        "target": "power_out_A", 
-        "parent": "R1-12-47-3_ol_30", 
-        "within": "1", 
-        "value": "+76770.3+1950.72j", 
-        "name": "R1-12-47-3_ol_30complex_assert217"
-    }, 
-    "214": {
-        "object": "complex_assert", 
-        "target": "power_in_A", 
-        "parent": "R1-12-47-3_ol_30", 
-        "within": "1", 
-        "value": "+76773.3+1953.27j", 
-        "name": "R1-12-47-3_ol_30complex_assert214"
-    }, 
-    "215": {
-        "object": "complex_assert", 
-        "target": "power_in_B", 
-        "parent": "R1-12-47-3_ol_30", 
-        "within": "1", 
-        "value": "+24782.9+833.065j", 
-        "name": "R1-12-47-3_ol_30complex_assert215"
-    }, 
     "212": {
         "phases": "AN", 
         "from": "R1-12-47-3_node_43", 
@@ -78,22 +46,6 @@
         "reactance": "0.00667", 
         "powerB_rating": "75.0", 
         "name": "transformer_configuration_141"
-    }, 
-    "218": {
-        "object": "complex_assert", 
-        "target": "power_out_B", 
-        "parent": "R1-12-47-3_ol_30", 
-        "within": "1", 
-        "value": "+24782.7+833.121j", 
-        "name": "R1-12-47-3_ol_30complex_assert218"
-    }, 
-    "219": {
-        "object": "complex_assert", 
-        "target": "power_out_C", 
-        "parent": "R1-12-47-3_ol_30", 
-        "within": "1", 
-        "value": "+68649.5+1861.64j", 
-        "name": "R1-12-47-3_ol_30complex_assert219"
     }, 
     "133": {
         "phases": "ABCN", 
@@ -246,14 +198,6 @@
         "name": "line_configuration_25", 
         "object": "line_configuration"
     }, 
-    "160": {
-        "object": "complex_assert", 
-        "target": "voltage_B", 
-        "parent": "R1-12-47-3_node_52", 
-        "within": "1", 
-        "value": "-3600-6235j", 
-        "name": "R1-12-47-3_node_52complex_assert160"
-    }, 
     "28": {
         "name": "line_configuration_30", 
         "object": "line_configuration", 
@@ -268,14 +212,6 @@
         "conductor_A": "overhead_line_conductor_4", 
         "name": "line_configuration_31", 
         "object": "line_configuration"
-    }, 
-    "222": {
-        "object": "complex_assert", 
-        "target": "power_losses_C", 
-        "parent": "R1-12-47-3_ol_30", 
-        "within": "1", 
-        "value": "+3.46533+1.44404j", 
-        "name": "R1-12-47-3_ol_30complex_assert222"
     }, 
     "289": {
         "phases": "ABCN", 
@@ -371,28 +307,31 @@
         "length": "74.300", 
         "configuration": "line_configuration_29"
     }, 
-    "227": {
-        "geometric_mean_radius": "0.01203 ft", 
-        "object": "overhead_line_conductor", 
-        "resistance": "0.95300", 
-        "name": "overhead_line_conductor_7", 
-        "rating.summer.continuous": "230.0"
+    "263": {
+        "powerC_rating": "25.0", 
+        "power_rating": "75.0", 
+        "primary_voltage": "12470.000 V", 
+        "install_type": "POLETOP", 
+        "object": "transformer_configuration", 
+        "secondary_voltage": "480 V", 
+        "connect_type": "WYE_WYE", 
+        "resistance": "0.00133", 
+        "reactance": "0.00667", 
+        "powerB_rating": "25.0", 
+        "powerA_rating": "25.0", 
+        "name": "transformer_configuration_140"
     }, 
-    "120": {
-        "object": "complex_assert", 
-        "target": "voltage_B", 
-        "parent": "R1-12-47-3_node_18", 
-        "within": "1", 
-        "value": "-3607.34-6188.04j", 
-        "name": "R1-12-47-3_node_18complex_assert120"
-    }, 
-    "121": {
-        "object": "complex_assert", 
-        "target": "voltage_C", 
-        "parent": "R1-12-47-3_node_18", 
-        "within": "1", 
-        "value": "-3562.95+6217.09j", 
-        "name": "R1-12-47-3_node_18complex_assert121"
+    "262": {
+        "power_rating": "37.5", 
+        "primary_voltage": "12470.000 V", 
+        "install_type": "POLETOP", 
+        "object": "transformer_configuration", 
+        "secondary_voltage": "480 V", 
+        "connect_type": "WYE_WYE", 
+        "resistance": "0.00267", 
+        "reactance": "0.01333", 
+        "powerA_rating": "37.5", 
+        "name": "transformer_configuration_139"
     }, 
     "122": {
         "phases": "ABCN", 
@@ -403,29 +342,41 @@
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
     }, 
-    "123": {
-        "object": "complex_assert", 
-        "target": "voltage_A", 
-        "parent": "R1-12-47-3_node_19", 
-        "within": "1", 
-        "value": "+7149.61-35.8921j", 
-        "name": "R1-12-47-3_node_19complex_assert123"
+    "260": {
+        "powerC_rating": "50.0", 
+        "power_rating": "50.0", 
+        "primary_voltage": "12470.000 V", 
+        "install_type": "POLETOP", 
+        "object": "transformer_configuration", 
+        "secondary_voltage": "480 V", 
+        "connect_type": "WYE_WYE", 
+        "resistance": "0.00200", 
+        "reactance": "0.01000", 
+        "name": "transformer_configuration_137"
     }, 
-    "124": {
-        "object": "complex_assert", 
-        "target": "voltage_B", 
-        "parent": "R1-12-47-3_node_19", 
-        "within": "1", 
-        "value": "-3607.48-6187.37j", 
-        "name": "R1-12-47-3_node_19complex_assert124"
+    "267": {
+        "power_rating": "25.0", 
+        "primary_voltage": "12470.000 V", 
+        "install_type": "POLETOP", 
+        "object": "transformer_configuration", 
+        "secondary_voltage": "480 V", 
+        "connect_type": "WYE_WYE", 
+        "resistance": "0.00400", 
+        "reactance": "0.02000", 
+        "powerA_rating": "25.0", 
+        "name": "transformer_configuration_144"
     }, 
-    "125": {
-        "object": "complex_assert", 
-        "target": "voltage_C", 
-        "parent": "R1-12-47-3_node_19", 
-        "within": "1", 
-        "value": "-3562.62+6216.46j", 
-        "name": "R1-12-47-3_node_19complex_assert125"
+    "266": {
+        "power_rating": "100.0", 
+        "primary_voltage": "12470.000 V", 
+        "install_type": "POLETOP", 
+        "object": "transformer_configuration", 
+        "secondary_voltage": "480 V", 
+        "connect_type": "WYE_WYE", 
+        "resistance": "0.00100", 
+        "reactance": "0.00500", 
+        "powerA_rating": "100.0", 
+        "name": "transformer_configuration_143"
     }, 
     "265": {
         "powerC_rating": "50.0", 
@@ -491,37 +442,13 @@
         "powerB_rating": "50.0", 
         "name": "transformer_configuration_145"
     }, 
-    "69": {
-        "object": "complex_assert", 
-        "target": "voltage_B", 
-        "parent": "R1-12-47-3_meter_1", 
-        "within": "1", 
-        "value": "+0+0j", 
-        "name": "R1-12-47-3_meter_1complex_assert69"
-    }, 
-    "161": {
-        "object": "complex_assert", 
-        "target": "voltage_C", 
-        "parent": "R1-12-47-3_node_52", 
-        "within": "1", 
-        "value": "-3600+6234.99j", 
-        "name": "R1-12-47-3_node_52complex_assert161"
-    }, 
-    "59": {
-        "object": "complex_assert", 
-        "target": "voltage_B", 
-        "parent": "R1-12-47-3_load_15", 
-        "within": "1", 
-        "value": "-141.403-234.952j", 
-        "name": "R1-12-47-3_load_15complex_assert59"
-    }, 
-    "58": {
-        "object": "complex_assert", 
-        "target": "voltage_A", 
-        "parent": "R1-12-47-3_load_15", 
-        "within": "1", 
-        "value": "+0+0j", 
-        "name": "R1-12-47-3_load_15complex_assert58"
+    "236": {
+        "phases": "ABCN", 
+        "from": "R1-12-47-3_node_10", 
+        "name": "R1-12-47-3_xfmr_3", 
+        "object": "transformer", 
+        "to": "R1-12-47-3_meter_2", 
+        "configuration": "transformer_configuration_135"
     }, 
     "55": {
         "phases": "AN", 
@@ -662,21 +589,12 @@
         "shield_gmr": "0.00", 
         "name": "underground_line_conductor_8"
     }, 
-    "164": {
-        "object": "complex_assert", 
-        "target": "voltage_B", 
-        "parent": "R1-12-47-3_node_53", 
-        "within": "1", 
-        "value": "-3600-6235j", 
-        "name": "R1-12-47-3_node_53complex_assert164"
-    }, 
-    "93": {
-        "object": "complex_assert", 
-        "target": "voltage_C", 
-        "parent": "R1-12-47-3_meter_21", 
-        "within": "1", 
-        "value": "-134.842+239.586j", 
-        "name": "R1-12-47-3_meter_21complex_assert93"
+    "146": {
+        "voltage_B": "-3600-6235j", 
+        "phases": "BN", 
+        "object": "node", 
+        "nominal_voltage": "7200", 
+        "name": "R1-12-47-3_node_40"
     }, 
     "199": {
         "phases": "ABCN", 
@@ -687,13 +605,19 @@
         "length": "275.614", 
         "configuration": "line_configuration_26"
     }, 
-    "198": {
-        "object": "complex_assert", 
-        "target": "power_losses_C", 
-        "parent": "R1-12-47-3_ol_15", 
-        "within": "1", 
-        "value": "+2.69577-0.021659j", 
-        "name": "R1-12-47-3_ol_15complex_assert198"
+    "66": {
+        "phases": "ABCN", 
+        "load_class": "C", 
+        "name": "R1-12-47-3_load_21", 
+        "parent": "R1-12-47-3_meter_21", 
+        "object": "load", 
+        "voltage_B": "-3600-6235j", 
+        "voltage_C": "-3600+6235j", 
+        "voltage_A": "7200+0.0j", 
+        "constant_power_C": "27424.1657+580.5836j", 
+        "constant_power_B": "9908.4297+311.8149j", 
+        "constant_power_A": "30663.2485+573.5732j", 
+        "nominal_voltage": "7200"
     }, 
     "147": {
         "phases": "ABCN", 
@@ -704,30 +628,6 @@
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
     }, 
-    "195": {
-        "object": "complex_assert", 
-        "target": "power_out_C", 
-        "parent": "R1-12-47-3_ol_15", 
-        "within": "1", 
-        "value": "+27466.2+784.838j", 
-        "name": "R1-12-47-3_ol_15complex_assert195"
-    }, 
-    "194": {
-        "object": "complex_assert", 
-        "target": "power_out_B", 
-        "parent": "R1-12-47-3_ol_15", 
-        "within": "1", 
-        "value": "+39689.1+1514.84j", 
-        "name": "R1-12-47-3_ol_15complex_assert194"
-    }, 
-    "197": {
-        "object": "complex_assert", 
-        "target": "power_losses_B", 
-        "parent": "R1-12-47-3_ol_15", 
-        "within": "1", 
-        "value": "+2.75542+2.62092j", 
-        "name": "R1-12-47-3_ol_15complex_assert197"
-    }, 
     "67": {
         "voltage_C": "-3600+6235j", 
         "phases": "CN", 
@@ -735,37 +635,12 @@
         "nominal_voltage": "7200", 
         "name": "R1-12-47-3_meter_1"
     }, 
-    "191": {
-        "object": "complex_assert", 
-        "target": "power_in_B", 
-        "parent": "R1-12-47-3_ol_15", 
-        "within": "1", 
-        "value": "+39691.9+1517.46j", 
-        "name": "R1-12-47-3_ol_15complex_assert191"
-    }, 
-    "190": {
-        "object": "complex_assert", 
-        "target": "power_in_A", 
-        "parent": "R1-12-47-3_ol_15", 
-        "within": "1", 
-        "value": "+74071.1+3684.07j", 
-        "name": "R1-12-47-3_ol_15complex_assert190"
-    }, 
-    "193": {
-        "object": "complex_assert", 
-        "target": "power_out_A", 
-        "parent": "R1-12-47-3_ol_15", 
-        "within": "1", 
-        "value": "+74053.1+3672.82j", 
-        "name": "R1-12-47-3_ol_15complex_assert193"
-    }, 
-    "192": {
-        "object": "complex_assert", 
-        "target": "power_in_C", 
-        "parent": "R1-12-47-3_ol_15", 
-        "within": "1", 
-        "value": "+27468.9+784.816j", 
-        "name": "R1-12-47-3_ol_15complex_assert192"
+    "144": {
+        "voltage_B": "-3600-6235j", 
+        "phases": "BN", 
+        "object": "node", 
+        "nominal_voltage": "7200", 
+        "name": "R1-12-47-3_node_38"
     }, 
     "115": {
         "phases": "ABCN", 
@@ -776,26 +651,21 @@
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
     }, 
-    "271": {
-        "powerC_rating": "37.5", 
-        "power_rating": "112.5", 
-        "primary_voltage": "12470.000 V", 
-        "install_type": "POLETOP", 
-        "object": "transformer_configuration", 
-        "secondary_voltage": "480 V", 
-        "connect_type": "WYE_WYE", 
-        "resistance": "0.00089", 
-        "reactance": "0.00444", 
-        "powerB_rating": "37.5", 
-        "powerA_rating": "37.5", 
-        "name": "transformer_configuration_148"
-    }, 
-    "88": {
-        "phases": "AN", 
-        "object": "meter", 
+    "114": {
+        "voltage_C": "-3600+6235j", 
+        "phases": "CN", 
+        "object": "node", 
         "nominal_voltage": "7200", 
-        "name": "R1-12-47-3_meter_19", 
-        "voltage_A": "7200+0.0j"
+        "name": "R1-12-47-3_node_14"
+    }, 
+    "117": {
+        "phases": "ABCN", 
+        "name": "R1-12-47-3_node_17", 
+        "object": "node", 
+        "voltage_B": "-3600-6235j", 
+        "voltage_C": "-3600+6235j", 
+        "voltage_A": "7200+0.0j", 
+        "nominal_voltage": "7200"
     }, 
     "89": {
         "phases": "ABCN", 
@@ -866,18 +736,17 @@
         "name": "R1-12-47-3_meter_12", 
         "voltage_A": "7200+0.0j"
     }, 
-    "119": {
-        "object": "complex_assert", 
-        "target": "voltage_A", 
-        "parent": "R1-12-47-3_node_18", 
-        "within": "1", 
-        "value": "+7151.41-34.9036j", 
-        "name": "R1-12-47-3_node_18complex_assert119"
+    "86": {
+        "voltage_B": "-3600-6235j", 
+        "phases": "BN", 
+        "object": "meter", 
+        "nominal_voltage": "7200", 
+        "name": "R1-12-47-3_meter_17"
     }, 
-    "118": {
+    "87": {
         "phases": "ABCN", 
-        "name": "R1-12-47-3_node_18", 
-        "object": "node", 
+        "name": "R1-12-47-3_meter_18", 
+        "object": "meter", 
         "voltage_B": "-3600-6235j", 
         "voltage_C": "-3600+6235j", 
         "voltage_A": "7200+0.0j", 
@@ -897,14 +766,6 @@
         "nominal_voltage": "7200", 
         "name": "R1-12-47-3_meter_16"
     }, 
-    "174": {
-        "object": "complex_assert", 
-        "target": "power_losses_B", 
-        "parent": "R1-12-47-3_ol_1", 
-        "within": "1", 
-        "value": "+136.233+162.144j", 
-        "name": "R1-12-47-3_ol_1complex_assert174"
-    }, 
     "140": {
         "phases": "ABCN", 
         "name": "R1-12-47-3_node_34", 
@@ -913,14 +774,6 @@
         "voltage_C": "-3600+6235j", 
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
-    }, 
-    "173": {
-        "object": "complex_assert", 
-        "target": "power_losses_A", 
-        "parent": "R1-12-47-3_ol_1", 
-        "within": "1", 
-        "value": "+153.551+252.632j", 
-        "name": "R1-12-47-3_ol_1complex_assert173"
     }, 
     "141": {
         "phases": "ABCN", 
@@ -931,33 +784,19 @@
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
     }, 
-    "226": {
-        "geometric_mean_radius": "0.00418 ft", 
-        "object": "overhead_line_conductor", 
-        "resistance": "1.62570", 
-        "name": "overhead_line_conductor_6", 
-        "rating.summer.continuous": "180.0"
-    }, 
-    "172": {
-        "object": "complex_assert", 
-        "target": "power_out_C", 
-        "parent": "R1-12-47-3_ol_1", 
-        "within": "1", 
-        "value": "+500332+22816.1j", 
-        "name": "R1-12-47-3_ol_1complex_assert172"
-    }, 
     "3": {
         "solver_method": "NR", 
         "default_maximum_voltage_error": "1e-9", 
         "module": "powerflow"
     }, 
-    "171": {
-        "object": "complex_assert", 
-        "target": "power_out_B", 
-        "parent": "R1-12-47-3_ol_1", 
-        "within": "1", 
-        "value": "+408562+25304.6j", 
-        "name": "R1-12-47-3_ol_1complex_assert171"
+    "177": {
+        "phases": "CN", 
+        "from": "R1-12-47-3_node_4", 
+        "name": "R1-12-47-3_ol_3", 
+        "object": "overhead_line", 
+        "to": "R1-12-47-3_node_6", 
+        "length": "157.766", 
+        "configuration": "line_configuration_20"
     }, 
     "7": {
         "Control": "OUTPUT_VOLTAGE", 
@@ -973,29 +812,6 @@
         "lower_taps": "16", 
         "tap_pos_C": "0", 
         "band_width": "120"
-    }, 
-    "146": {
-        "voltage_B": "-3600-6235j", 
-        "phases": "BN", 
-        "object": "node", 
-        "nominal_voltage": "7200", 
-        "name": "R1-12-47-3_node_40"
-    }, 
-    "92": {
-        "object": "complex_assert", 
-        "target": "voltage_B", 
-        "parent": "R1-12-47-3_meter_21", 
-        "within": "1", 
-        "value": "-139.467-236.952j", 
-        "name": "R1-12-47-3_meter_21complex_assert92"
-    }, 
-    "170": {
-        "object": "complex_assert", 
-        "target": "power_out_A", 
-        "parent": "R1-12-47-3_ol_1", 
-        "within": "1", 
-        "value": "+469698+26022.9j", 
-        "name": "R1-12-47-3_ol_1complex_assert170"
     }, 
     "245": {
         "phases": "AN", 
@@ -1079,22 +895,6 @@
         "voltage_C": "-3600+6235j", 
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
-    }, 
-    "100": {
-        "object": "complex_assert", 
-        "target": "voltage_B", 
-        "parent": "R1-12-47-3_node_1", 
-        "within": "1", 
-        "value": "-3609.81-6170.13j", 
-        "name": "R1-12-47-3_node_1complex_assert100"
-    }, 
-    "101": {
-        "object": "complex_assert", 
-        "target": "voltage_C", 
-        "parent": "R1-12-47-3_node_1", 
-        "within": "1", 
-        "value": "-3559.55+6213.46j", 
-        "name": "R1-12-47-3_node_1complex_assert101"
     }, 
     "106": {
         "voltage_C": "-3600+6235j", 
@@ -1213,45 +1013,12 @@
         "to": "R1-12-47-3_meter_12", 
         "configuration": "transformer_configuration_144"
     }, 
-    "252": {
-        "phases": "ABCN", 
-        "from": "R1-12-47-3_node_42", 
-        "name": "R1-12-47-3_xfmr_19", 
-        "object": "transformer", 
-        "to": "R1-12-47-3_meter_18", 
-        "configuration": "transformer_configuration_147"
-    }, 
-    "205": {
-        "phases": "ABCN", 
-        "from": "R1-12-47-3_node_27", 
-        "name": "R1-12-47-3_ol_22", 
-        "object": "overhead_line", 
-        "to": "R1-12-47-3_node_31", 
-        "length": "229.262", 
-        "configuration": "line_configuration_27"
-    }, 
-    "223": {
-        "geometric_mean_radius": "0.00814 ft", 
-        "object": "overhead_line_conductor", 
-        "resistance": "0.56300", 
-        "name": "overhead_line_conductor_3", 
-        "rating.summer.continuous": "334.0"
-    }, 
-    "70": {
-        "object": "complex_assert", 
-        "target": "voltage_C", 
-        "parent": "R1-12-47-3_meter_1", 
-        "within": "1", 
-        "value": "+274.785+118.071d", 
-        "name": "R1-12-47-3_meter_1complex_assert70"
-    }, 
-    "60": {
-        "object": "complex_assert", 
-        "target": "voltage_C", 
-        "parent": "R1-12-47-3_load_15", 
-        "within": "1", 
-        "value": "+0+0j", 
-        "name": "R1-12-47-3_load_15complex_assert60"
+    "88": {
+        "phases": "AN", 
+        "object": "meter", 
+        "nominal_voltage": "7200", 
+        "name": "R1-12-47-3_meter_19", 
+        "voltage_A": "7200+0.0j"
     }, 
     "61": {
         "phases": "BN", 
@@ -1332,14 +1099,13 @@
         "length": "139.494", 
         "configuration": "line_configuration_18"
     }, 
-    "177": {
-        "phases": "CN", 
-        "from": "R1-12-47-3_node_4", 
-        "name": "R1-12-47-3_ol_3", 
-        "object": "overhead_line", 
-        "to": "R1-12-47-3_node_6", 
-        "length": "157.766", 
-        "configuration": "line_configuration_20"
+    "252": {
+        "phases": "ABCN", 
+        "from": "R1-12-47-3_node_42", 
+        "name": "R1-12-47-3_xfmr_19", 
+        "object": "transformer", 
+        "to": "R1-12-47-3_meter_18", 
+        "configuration": "transformer_configuration_147"
     }, 
     "176": {
         "phases": "ACN", 
@@ -1350,13 +1116,13 @@
         "length": "68.936", 
         "configuration": "line_configuration_19"
     }, 
-    "175": {
-        "object": "complex_assert", 
-        "target": "power_losses_C", 
-        "parent": "R1-12-47-3_ol_1", 
-        "within": "1", 
-        "value": "+221.684+290.772j", 
-        "name": "R1-12-47-3_ol_1complex_assert175"
+    "250": {
+        "phases": "BN", 
+        "from": "R1-12-47-3_node_38", 
+        "name": "R1-12-47-3_xfmr_17", 
+        "object": "transformer", 
+        "to": "R1-12-47-3_meter_16", 
+        "configuration": "transformer_configuration_146"
     }, 
     "251": {
         "phases": "BN", 
@@ -1405,15 +1171,6 @@
         "object": "transformer", 
         "to": "R1-12-47-3_meter_21", 
         "configuration": "transformer_configuration_140"
-    }, 
-    "272": {
-        "phases": "BS", 
-        "from": "R1-12-47-3_tn_1", 
-        "name": "R1-12-47-3_tl_1", 
-        "object": "triplex_line", 
-        "to": "R1-12-47-3_tm_1", 
-        "length": "30", 
-        "configuration": "triplex_line_configuration_1"
     }, 
     "288": {
         "phases": "ABCN", 
@@ -1538,30 +1295,6 @@
         "length": "485.017", 
         "configuration": "line_configuration_24"
     }, 
-    "196": {
-        "object": "complex_assert", 
-        "target": "power_losses_A", 
-        "parent": "R1-12-47-3_ol_15", 
-        "within": "1", 
-        "value": "+18.0766+11.2534j", 
-        "name": "R1-12-47-3_ol_15complex_assert196"
-    }, 
-    "221": {
-        "object": "complex_assert", 
-        "target": "power_losses_B", 
-        "parent": "R1-12-47-3_ol_30", 
-        "within": "1", 
-        "value": "+0.21779-0.0557866j", 
-        "name": "R1-12-47-3_ol_30complex_assert221"
-    }, 
-    "97": {
-        "object": "complex_assert", 
-        "target": "voltage_C", 
-        "parent": "R1-12-47-3_meter_22", 
-        "within": "1", 
-        "value": "-3600+6234.99j", 
-        "name": "R1-12-47-3_meter_22complex_assert97"
-    }, 
     "185": {
         "phases": "CN", 
         "from": "R1-12-47-3_node_13", 
@@ -1571,23 +1304,6 @@
         "length": "275.331", 
         "configuration": "line_configuration_23"
     }, 
-    "142": {
-        "phases": "ABCN", 
-        "name": "R1-12-47-3_node_36", 
-        "object": "node", 
-        "voltage_B": "-3600-6235j", 
-        "voltage_C": "-3600+6235j", 
-        "voltage_A": "7200+0.0j", 
-        "nominal_voltage": "7200"
-    }, 
-    "99": {
-        "object": "complex_assert", 
-        "target": "voltage_A", 
-        "parent": "R1-12-47-3_node_1", 
-        "within": "1", 
-        "value": "+7134.24-41.4401j", 
-        "name": "R1-12-47-3_node_1complex_assert99"
-    }, 
     "98": {
         "phases": "ABCN", 
         "name": "R1-12-47-3_node_1", 
@@ -1596,30 +1312,6 @@
         "voltage_C": "-3600+6235j", 
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
-    }, 
-    "163": {
-        "object": "complex_assert", 
-        "target": "voltage_A", 
-        "parent": "R1-12-47-3_node_53", 
-        "within": "1", 
-        "value": "+7200+0j", 
-        "name": "R1-12-47-3_node_53complex_assert163"
-    }, 
-    "168": {
-        "object": "complex_assert", 
-        "target": "power_in_B", 
-        "parent": "R1-12-47-3_ol_1", 
-        "within": "1", 
-        "value": "+408699+25466.7j", 
-        "name": "R1-12-47-3_ol_1complex_assert168"
-    }, 
-    "169": {
-        "object": "complex_assert", 
-        "target": "power_in_C", 
-        "parent": "R1-12-47-3_ol_1", 
-        "within": "1", 
-        "value": "+500553+23106.9j", 
-        "name": "R1-12-47-3_ol_1complex_assert169"
     }, 
     "229": {
         "status": "CLOSED", 
@@ -1637,21 +1329,19 @@
         "object": "switch", 
         "to": "R1-12-47-3_node_2"
     }, 
-    "91": {
-        "object": "complex_assert", 
-        "target": "voltage_A", 
-        "parent": "R1-12-47-3_meter_21", 
-        "within": "1", 
-        "value": "+273.809-4.01281j", 
-        "name": "R1-12-47-3_meter_21complex_assert91"
+    "227": {
+        "geometric_mean_radius": "0.01203 ft", 
+        "object": "overhead_line_conductor", 
+        "resistance": "0.95300", 
+        "name": "overhead_line_conductor_7", 
+        "rating.summer.continuous": "230.0"
     }, 
-    "165": {
-        "object": "complex_assert", 
-        "target": "voltage_C", 
-        "parent": "R1-12-47-3_node_53", 
-        "within": "1", 
-        "value": "-3600+6235j", 
-        "name": "R1-12-47-3_node_53complex_assert165"
+    "226": {
+        "geometric_mean_radius": "0.00418 ft", 
+        "object": "overhead_line_conductor", 
+        "resistance": "1.62570", 
+        "name": "overhead_line_conductor_6", 
+        "rating.summer.continuous": "180.0"
     }, 
     "225": {
         "geometric_mean_radius": "0.00663 ft", 
@@ -1660,21 +1350,19 @@
         "name": "overhead_line_conductor_5", 
         "rating.summer.continuous": "149.0"
     }, 
-    "167": {
-        "object": "complex_assert", 
-        "target": "power_in_A", 
-        "parent": "R1-12-47-3_ol_1", 
-        "within": "1", 
-        "value": "+469851+26275.5j", 
-        "name": "R1-12-47-3_ol_1complex_assert167"
+    "224": {
+        "geometric_mean_radius": "0.00700 ft", 
+        "object": "overhead_line_conductor", 
+        "resistance": "2.40970", 
+        "name": "overhead_line_conductor_4", 
+        "rating.summer.continuous": "120.0"
     }, 
-    "95": {
-        "object": "complex_assert", 
-        "target": "voltage_A", 
-        "parent": "R1-12-47-3_meter_22", 
-        "within": "1", 
-        "value": "+7199.99+0.00036507j", 
-        "name": "R1-12-47-3_meter_22complex_assert95"
+    "223": {
+        "geometric_mean_radius": "0.00814 ft", 
+        "object": "overhead_line_conductor", 
+        "resistance": "0.56300", 
+        "name": "overhead_line_conductor_3", 
+        "rating.summer.continuous": "334.0"
     }, 
     "94": {
         "phases": "ABCN", 
@@ -1694,14 +1382,6 @@
         "voltage_C": "-3600+6235j", 
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
-    }, 
-    "220": {
-        "object": "complex_assert", 
-        "target": "power_losses_A", 
-        "parent": "R1-12-47-3_ol_30", 
-        "within": "1", 
-        "value": "+2.95652+2.55218j", 
-        "name": "R1-12-47-3_ol_30complex_assert220"
     }, 
     "11": {
         "status": "CLOSED", 
@@ -1762,26 +1442,27 @@
         "to": "R1-12-47-3_node_40", 
         "mean_replacement_time": "1000"
     }, 
-    "66": {
-        "phases": "ABCN", 
-        "load_class": "C", 
-        "name": "R1-12-47-3_load_21", 
-        "parent": "R1-12-47-3_meter_21", 
-        "object": "load", 
-        "voltage_B": "-3600-6235j", 
-        "voltage_C": "-3600+6235j", 
-        "voltage_A": "7200+0.0j", 
-        "constant_power_C": "27424.1657+580.5836j", 
-        "constant_power_B": "9908.4297+311.8149j", 
-        "constant_power_A": "30663.2485+573.5732j", 
-        "nominal_voltage": "7200"
+    "17": {
+        "name": "line_configuration_19", 
+        "object": "line_configuration", 
+        "spacing": "line_spacing_11", 
+        "conductor_N": "overhead_line_conductor_4", 
+        "conductor_A": "overhead_line_conductor_4", 
+        "conductor_C": "overhead_line_conductor_4"
     }, 
-    "114": {
-        "voltage_C": "-3600+6235j", 
-        "phases": "CN", 
-        "object": "node", 
-        "nominal_voltage": "7200", 
-        "name": "R1-12-47-3_node_14"
+    "271": {
+        "powerC_rating": "37.5", 
+        "power_rating": "112.5", 
+        "primary_voltage": "12470.000 V", 
+        "install_type": "POLETOP", 
+        "object": "transformer_configuration", 
+        "secondary_voltage": "480 V", 
+        "connect_type": "WYE_WYE", 
+        "resistance": "0.00089", 
+        "reactance": "0.00444", 
+        "powerB_rating": "37.5", 
+        "powerA_rating": "37.5", 
+        "name": "transformer_configuration_148"
     }, 
     "19": {
         "name": "line_configuration_21", 
@@ -1806,14 +1487,14 @@
         "nominal_voltage": "7200", 
         "name": "R1-12-47-3_node_37"
     }, 
-    "117": {
-        "phases": "ABCN", 
-        "name": "R1-12-47-3_node_17", 
-        "object": "node", 
-        "voltage_B": "-3600-6235j", 
-        "voltage_C": "-3600+6235j", 
-        "voltage_A": "7200+0.0j", 
-        "nominal_voltage": "7200"
+    "272": {
+        "phases": "BS", 
+        "from": "R1-12-47-3_tn_1", 
+        "name": "R1-12-47-3_tl_1", 
+        "object": "triplex_line", 
+        "to": "R1-12-47-3_tm_1", 
+        "length": "30", 
+        "configuration": "triplex_line_configuration_1"
     }, 
     "273": {
         "geometric_mean_radius": "0.0111", 
@@ -1829,14 +1510,6 @@
         "conductor_2": "TLC 1/0 AA triplex", 
         "conductor_N": "TLC 1/0 AA triplex", 
         "name": "triplex_line_configuration_1"
-    }, 
-    "17": {
-        "name": "line_configuration_19", 
-        "object": "line_configuration", 
-        "spacing": "line_spacing_11", 
-        "conductor_N": "overhead_line_conductor_4", 
-        "conductor_A": "overhead_line_conductor_4", 
-        "conductor_C": "overhead_line_conductor_4"
     }, 
     "275": {
         "voltage_2": "-60-103.92j", 
@@ -1917,14 +1590,6 @@
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
     }, 
-    "159": {
-        "object": "complex_assert", 
-        "target": "voltage_A", 
-        "parent": "R1-12-47-3_node_52", 
-        "within": "1", 
-        "value": "+7199.99+0.00036507j", 
-        "name": "R1-12-47-3_node_52complex_assert159"
-    }, 
     "158": {
         "phases": "ABCN", 
         "name": "R1-12-47-3_node_52", 
@@ -1944,23 +1609,6 @@
         "voltage_B": "-3600-6235j", 
         "nominal_voltage": "7200", 
         "constant_power_B": "19800+600j"
-    }, 
-    "277": {
-        "object": "complex_assert", 
-        "target": "voltage_2", 
-        "parent": "R1-12-47-3_tm_1", 
-        "within": "1", 
-        "value": "-59.7137-109.537j", 
-        "name": "R1-12-47-3_tm_1complex_assert277"
-    }, 
-    "16": {
-        "name": "line_configuration_18", 
-        "object": "line_configuration", 
-        "spacing": "line_spacing_10", 
-        "conductor_N": "overhead_line_conductor_3", 
-        "conductor_A": "overhead_line_conductor_3", 
-        "conductor_C": "overhead_line_conductor_3", 
-        "conductor_B": "overhead_line_conductor_3"
     }, 
     "36": {
         "distance_AN": "84.0 in", 
@@ -2001,14 +1649,6 @@
         "to": "R1-12-47-3_meter_5", 
         "configuration": "transformer_configuration_137"
     }, 
-    "279": {
-        "object": "complex_assert", 
-        "target": "voltage_1", 
-        "parent": "R1-12-47-3_tn_1", 
-        "within": "1", 
-        "value": "-60.1663-102.723j", 
-        "name": "R1-12-47-3_tn_1complex_assert279"
-    }, 
     "234": {
         "phases": "BS", 
         "from": "R1-12-47-3_node_40", 
@@ -2025,13 +1665,14 @@
         "to": "R1-12-47-3_meter_1", 
         "configuration": "transformer_configuration_134"
     }, 
-    "236": {
-        "phases": "ABCN", 
-        "from": "R1-12-47-3_node_10", 
-        "name": "R1-12-47-3_xfmr_3", 
-        "object": "transformer", 
-        "to": "R1-12-47-3_meter_2", 
-        "configuration": "transformer_configuration_135"
+    "16": {
+        "name": "line_configuration_18", 
+        "object": "line_configuration", 
+        "spacing": "line_spacing_10", 
+        "conductor_N": "overhead_line_conductor_3", 
+        "conductor_A": "overhead_line_conductor_3", 
+        "conductor_C": "overhead_line_conductor_3", 
+        "conductor_B": "overhead_line_conductor_3"
     }, 
     "237": {
         "phases": "ACN", 
@@ -2073,21 +1714,6 @@
         "object": "switch", 
         "to": "R1-12-47-3_node_50"
     }, 
-    "224": {
-        "geometric_mean_radius": "0.00700 ft", 
-        "object": "overhead_line_conductor", 
-        "resistance": "2.40970", 
-        "name": "overhead_line_conductor_4", 
-        "rating.summer.continuous": "120.0"
-    }, 
-    "280": {
-        "object": "complex_assert", 
-        "target": "voltage_2", 
-        "parent": "R1-12-47-3_tn_1", 
-        "within": "1", 
-        "value": "-60.1726-102.741j", 
-        "name": "R1-12-47-3_tn_1complex_assert280"
-    }, 
     "48": {
         "phases": "ABCN", 
         "load_class": "C", 
@@ -2122,12 +1748,15 @@
         "constant_power_C": "54848.3315+1161.1672j", 
         "nominal_voltage": "7200"
     }, 
-    "86": {
-        "voltage_B": "-3600-6235j", 
-        "phases": "BN", 
-        "object": "meter", 
-        "nominal_voltage": "7200", 
-        "name": "R1-12-47-3_meter_17"
+    "47": {
+        "phases": "CN", 
+        "load_class": "C", 
+        "name": "R1-12-47-3_load_5", 
+        "parent": "R1-12-47-3_meter_5", 
+        "object": "load", 
+        "voltage_C": "-3600+6235j", 
+        "constant_power_C": "54848.3315+1161.1672j", 
+        "nominal_voltage": "7200"
     }, 
     "44": {
         "phases": "ABCN", 
@@ -2155,22 +1784,6 @@
         "constant_power_A": "0+0j", 
         "nominal_voltage": "7200"
     }, 
-    "42": {
-        "object": "complex_assert", 
-        "target": "voltage_B", 
-        "parent": "R1-12-47-3_load_1", 
-        "within": "1", 
-        "value": "+0+0j", 
-        "name": "R1-12-47-3_load_1complex_assert42"
-    }, 
-    "43": {
-        "object": "complex_assert", 
-        "target": "voltage_C", 
-        "parent": "R1-12-47-3_load_1", 
-        "within": "1", 
-        "value": "+274.785+118.071d", 
-        "name": "R1-12-47-3_load_1complex_assert43"
-    }, 
     "40": {
         "phases": "CN", 
         "load_class": "C", 
@@ -2181,10 +1794,10 @@
         "constant_power_C": "54848.3315+1161.1672j", 
         "nominal_voltage": "7200"
     }, 
-    "87": {
+    "118": {
         "phases": "ABCN", 
-        "name": "R1-12-47-3_meter_18", 
-        "object": "meter", 
+        "name": "R1-12-47-3_node_18", 
+        "object": "node", 
         "voltage_B": "-3600-6235j", 
         "voltage_C": "-3600+6235j", 
         "voltage_A": "7200+0.0j", 
@@ -2220,6 +1833,13 @@
         "voltage_C": "-3600+6235j", 
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
+    }, 
+    "78": {
+        "voltage_B": "-3600-6235j", 
+        "phases": "BN", 
+        "object": "meter", 
+        "nominal_voltage": "7200", 
+        "name": "R1-12-47-3_meter_9"
     }, 
     "201": {
         "phases": "BCN", 
@@ -2257,13 +1877,14 @@
         "length": "734.441", 
         "configuration": "line_configuration_27"
     }, 
-    "250": {
-        "phases": "BN", 
-        "from": "R1-12-47-3_node_38", 
-        "name": "R1-12-47-3_xfmr_17", 
-        "object": "transformer", 
-        "to": "R1-12-47-3_meter_16", 
-        "configuration": "transformer_configuration_146"
+    "142": {
+        "phases": "ABCN", 
+        "name": "R1-12-47-3_node_36", 
+        "object": "node", 
+        "voltage_B": "-3600-6235j", 
+        "voltage_C": "-3600+6235j", 
+        "voltage_A": "7200+0.0j", 
+        "nominal_voltage": "7200"
     }, 
     "204": {
         "phases": "AN", 
@@ -2384,22 +2005,6 @@
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
     }, 
-    "68": {
-        "object": "complex_assert", 
-        "target": "voltage_A", 
-        "parent": "R1-12-47-3_meter_1", 
-        "within": "1", 
-        "value": "+0+0j", 
-        "name": "R1-12-47-3_meter_1complex_assert68"
-    }, 
-    "96": {
-        "object": "complex_assert", 
-        "target": "voltage_B", 
-        "parent": "R1-12-47-3_meter_22", 
-        "within": "1", 
-        "value": "-3600-6235j", 
-        "name": "R1-12-47-3_meter_22complex_assert96"
-    }, 
     "79": {
         "phases": "ABCN", 
         "name": "R1-12-47-3_meter_10", 
@@ -2409,49 +2014,18 @@
         "voltage_A": "7200+0.0j", 
         "nominal_voltage": "7200"
     }, 
-    "78": {
-        "voltage_B": "-3600-6235j", 
-        "phases": "BN", 
-        "object": "meter", 
-        "nominal_voltage": "7200", 
-        "name": "R1-12-47-3_meter_9"
+    "205": {
+        "phases": "ABCN", 
+        "from": "R1-12-47-3_node_27", 
+        "name": "R1-12-47-3_ol_22", 
+        "object": "overhead_line", 
+        "to": "R1-12-47-3_node_31", 
+        "length": "229.262", 
+        "configuration": "line_configuration_27"
     }, 
     "2": {
         "omftype": "module", 
         "argument": "tape"
-    }, 
-    "263": {
-        "powerC_rating": "25.0", 
-        "power_rating": "75.0", 
-        "primary_voltage": "12470.000 V", 
-        "install_type": "POLETOP", 
-        "object": "transformer_configuration", 
-        "secondary_voltage": "480 V", 
-        "connect_type": "WYE_WYE", 
-        "resistance": "0.00133", 
-        "reactance": "0.00667", 
-        "powerB_rating": "25.0", 
-        "powerA_rating": "25.0", 
-        "name": "transformer_configuration_140"
-    }, 
-    "144": {
-        "voltage_B": "-3600-6235j", 
-        "phases": "BN", 
-        "object": "node", 
-        "nominal_voltage": "7200", 
-        "name": "R1-12-47-3_node_38"
-    }, 
-    "262": {
-        "power_rating": "37.5", 
-        "primary_voltage": "12470.000 V", 
-        "install_type": "POLETOP", 
-        "object": "transformer_configuration", 
-        "secondary_voltage": "480 V", 
-        "connect_type": "WYE_WYE", 
-        "resistance": "0.00267", 
-        "reactance": "0.01333", 
-        "powerA_rating": "37.5", 
-        "name": "transformer_configuration_139"
     }, 
     "261": {
         "powerC_rating": "75.0", 
@@ -2481,73 +2055,11 @@
         "powerA_rating": "50.0", 
         "name": "transformer_configuration_147"
     }, 
-    "41": {
-        "object": "complex_assert", 
-        "target": "voltage_A", 
-        "parent": "R1-12-47-3_load_1", 
-        "within": "1", 
-        "value": "+0+0j", 
-        "name": "R1-12-47-3_load_1complex_assert41"
-    }, 
-    "260": {
-        "powerC_rating": "50.0", 
-        "power_rating": "50.0", 
-        "primary_voltage": "12470.000 V", 
-        "install_type": "POLETOP", 
-        "object": "transformer_configuration", 
-        "secondary_voltage": "480 V", 
-        "connect_type": "WYE_WYE", 
-        "resistance": "0.00200", 
-        "reactance": "0.01000", 
-        "name": "transformer_configuration_137"
-    }, 
-    "47": {
-        "phases": "CN", 
-        "load_class": "C", 
-        "name": "R1-12-47-3_load_5", 
-        "parent": "R1-12-47-3_meter_5", 
-        "object": "load", 
-        "voltage_C": "-3600+6235j", 
-        "constant_power_C": "54848.3315+1161.1672j", 
-        "nominal_voltage": "7200"
-    }, 
-    "276": {
-        "object": "complex_assert", 
-        "target": "voltage_1", 
-        "parent": "R1-12-47-3_tm_1", 
-        "within": "1", 
-        "value": "-56.6509-87.3958j", 
-        "name": "R1-12-47-3_tm_1complex_assert276"
-    }, 
-    "267": {
-        "power_rating": "25.0", 
-        "primary_voltage": "12470.000 V", 
-        "install_type": "POLETOP", 
-        "object": "transformer_configuration", 
-        "secondary_voltage": "480 V", 
-        "connect_type": "WYE_WYE", 
-        "resistance": "0.00400", 
-        "reactance": "0.02000", 
-        "powerA_rating": "25.0", 
-        "name": "transformer_configuration_144"
-    }, 
     "126": {
         "phases": "AN", 
         "object": "node", 
         "nominal_voltage": "7200", 
         "name": "R1-12-47-3_node_20", 
         "voltage_A": "7200+0.0j"
-    }, 
-    "266": {
-        "power_rating": "100.0", 
-        "primary_voltage": "12470.000 V", 
-        "install_type": "POLETOP", 
-        "object": "transformer_configuration", 
-        "secondary_voltage": "480 V", 
-        "connect_type": "WYE_WYE", 
-        "resistance": "0.00100", 
-        "reactance": "0.00500", 
-        "powerA_rating": "100.0", 
-        "name": "transformer_configuration_143"
     }
 }

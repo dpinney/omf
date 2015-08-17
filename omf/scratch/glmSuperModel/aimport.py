@@ -5,7 +5,7 @@ import omf, os, json
 ''' FIRST PART: GET PROTOYPICAL GLM IN TO JSON '''
 
 # Read in the glm (or cache, if it's cached.)
-superName = './glmSuperModelTiny.json'
+superName = './superModelTiny.json'
 if not os.path.isfile(superName):
 	baseFeed = omf.feeder.parse('./superModelTiny.glm')
 else:
@@ -29,24 +29,34 @@ for k in baseFeed:
 # Disembed the feeder.
 omf.feeder.fullyDeEmbed(baseFeed)
 
+# Remove all asserts.
+for key in baseFeed.keys():
+	if baseFeed[key].get('object','') == 'complex_assert':
+		del baseFeed[key]
+
 # Write out the json version.
 with open(superName, 'w') as jFile:
 	json.dump(baseFeed, jFile, indent=4)
 
 ''' SECOND PART: MAKE THE FEEDER SUPER '''
 
-# Replace a load with a house.
-# Why do that? Because it's what we need. What kind of house? Maybe pull one from the previous GLM SM. And then?
-# I feel the need for a way to rapidly test this? What does that mean? Quickly go from... X to Y?
-# TODO: easy way to render... feeder in OMF gridedit???? Or I could just look at lat/lon graph. BTW, it should be easy to do a 
+# Attach a prosumer.
+superConsumer = omf.feeder.parse('./prosumer.glm')
+maxKey = omf.feeder.getMaxKey(baseFeed) + 1
+meterKey = min([x for x in superConsumer.keys() if superConsumer[x].get('object','')=='triplex_meter'])
+superConsumer[meterKey]['parent'] = 'R1-12-47-3_tn_1' # Meter attaching to a triplex_node.
+for key in superConsumer:
+	baseFeed[maxKey+key] = dict(superConsumer[key])
 
-loadList = [x for x in baseFeed.values() if x.get('object','') == 'load']
-print [x.get('constant_power_C','') for x in loadList]
+''' TODO: GET TOU, PLAYERS, ETC WORKING. '''
+
+
 
 # Try a run.
-output = omf.solvers.gridlabd.runInFilesystem(baseFeed, attachments={}, keepFiles=True, workDir='./runningDir', glmName='glmSuperModelTinyModified.glm')
+output = omf.solvers.gridlabd.runInFilesystem(baseFeed, attachments={}, keepFiles=True, workDir='./runningDir', glmName='superModelTinyModified.glm')
 
-
+print output.keys()
+# print output['stderr']
 
 # # Add attachments to make an OMF formatted fullFeed.
 # fullFeed = dict(omf.feeder.newFeederWireframe)

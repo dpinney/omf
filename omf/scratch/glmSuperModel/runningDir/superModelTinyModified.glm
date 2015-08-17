@@ -317,30 +317,6 @@ object load {
 	nominal_voltage 7200;
 };
 
-object complex_assert {
-	target voltage_A;
-	parent R1-12-47-3_load_1;
-	within 1;
-	value +0+0j;
-	name R1-12-47-3_load_1complex_assert41;
-};
-
-object complex_assert {
-	target voltage_B;
-	parent R1-12-47-3_load_1;
-	within 1;
-	value +0+0j;
-	name R1-12-47-3_load_1complex_assert42;
-};
-
-object complex_assert {
-	target voltage_C;
-	parent R1-12-47-3_load_1;
-	within 1;
-	value +274.785+118.071d;
-	name R1-12-47-3_load_1complex_assert43;
-};
-
 object load {
 	phases ABCN;
 	name R1-12-47-3_load_2;
@@ -499,30 +475,6 @@ object load {
 	constant_power_B 19800+600j;
 };
 
-object complex_assert {
-	target voltage_A;
-	parent R1-12-47-3_load_15;
-	within 1;
-	value +0+0j;
-	name R1-12-47-3_load_15complex_assert58;
-};
-
-object complex_assert {
-	target voltage_B;
-	parent R1-12-47-3_load_15;
-	within 1;
-	value -141.403-234.952j;
-	name R1-12-47-3_load_15complex_assert59;
-};
-
-object complex_assert {
-	target voltage_C;
-	parent R1-12-47-3_load_15;
-	within 1;
-	value +0+0j;
-	name R1-12-47-3_load_15complex_assert60;
-};
-
 object load {
 	phases BN;
 	name R1-12-47-3_load_16;
@@ -600,30 +552,6 @@ object meter {
 	phases CN;
 	nominal_voltage 7200;
 	name R1-12-47-3_meter_1;
-};
-
-object complex_assert {
-	target voltage_A;
-	parent R1-12-47-3_meter_1;
-	within 1;
-	value +0+0j;
-	name R1-12-47-3_meter_1complex_assert68;
-};
-
-object complex_assert {
-	target voltage_B;
-	parent R1-12-47-3_meter_1;
-	within 1;
-	value +0+0j;
-	name R1-12-47-3_meter_1complex_assert69;
-};
-
-object complex_assert {
-	target voltage_C;
-	parent R1-12-47-3_meter_1;
-	within 1;
-	value +274.785+118.071d;
-	name R1-12-47-3_meter_1complex_assert70;
 };
 
 object meter {
@@ -781,30 +709,6 @@ object meter {
 	nominal_voltage 7200;
 };
 
-object complex_assert {
-	target voltage_A;
-	parent R1-12-47-3_meter_21;
-	within 1;
-	value +273.809-4.01281j;
-	name R1-12-47-3_meter_21complex_assert91;
-};
-
-object complex_assert {
-	target voltage_B;
-	parent R1-12-47-3_meter_21;
-	within 1;
-	value -139.467-236.952j;
-	name R1-12-47-3_meter_21complex_assert92;
-};
-
-object complex_assert {
-	target voltage_C;
-	parent R1-12-47-3_meter_21;
-	within 1;
-	value -134.842+239.586j;
-	name R1-12-47-3_meter_21complex_assert93;
-};
-
 object meter {
 	phases ABCN;
 	name R1-12-47-3_meter_22;
@@ -814,30 +718,6 @@ object meter {
 	nominal_voltage 7200;
 };
 
-object complex_assert {
-	target voltage_A;
-	parent R1-12-47-3_meter_22;
-	within 1;
-	value +7199.99+0.00036507j;
-	name R1-12-47-3_meter_22complex_assert95;
-};
-
-object complex_assert {
-	target voltage_B;
-	parent R1-12-47-3_meter_22;
-	within 1;
-	value -3600-6235j;
-	name R1-12-47-3_meter_22complex_assert96;
-};
-
-object complex_assert {
-	target voltage_C;
-	parent R1-12-47-3_meter_22;
-	within 1;
-	value -3600+6234.99j;
-	name R1-12-47-3_meter_22complex_assert97;
-};
-
 object node {
 	phases ABCN;
 	name R1-12-47-3_node_1;
@@ -845,30 +725,6 @@ object node {
 	voltage_C -3600+6235j;
 	voltage_A 7200+0.0j;
 	nominal_voltage 7200;
-};
-
-object complex_assert {
-	target voltage_A;
-	parent R1-12-47-3_node_1;
-	within 1;
-	value +7134.24-41.4401j;
-	name R1-12-47-3_node_1complex_assert99;
-};
-
-object complex_assert {
-	target voltage_B;
-	parent R1-12-47-3_node_1;
-	within 1;
-	value -3609.81-6170.13j;
-	name R1-12-47-3_node_1complex_assert100;
-};
-
-object complex_assert {
-	target voltage_C;
-	parent R1-12-47-3_node_1;
-	within 1;
-	value -3559.55+6213.46j;
-	name R1-12-47-3_node_1complex_assert101;
 };
 
 object node {
@@ -1015,30 +871,6 @@ object node {
 	nominal_voltage 7200;
 };
 
-object complex_assert {
-	target voltage_A;
-	parent R1-12-47-3_node_18;
-	within 1;
-	value +7151.41-34.9036j;
-	name R1-12-47-3_node_18complex_assert119;
-};
-
-object complex_assert {
-	target voltage_B;
-	parent R1-12-47-3_node_18;
-	within 1;
-	value -3607.34-6188.04j;
-	name R1-12-47-3_node_18complex_assert120;
-};
-
-object complex_assert {
-	target voltage_C;
-	parent R1-12-47-3_node_18;
-	within 1;
-	value -3562.95+6217.09j;
-	name R1-12-47-3_node_18complex_assert121;
-};
-
 object node {
 	phases ABCN;
 	name R1-12-47-3_node_19;
@@ -1046,30 +878,6 @@ object node {
 	voltage_C -3600+6235j;
 	voltage_A 7200+0.0j;
 	nominal_voltage 7200;
-};
-
-object complex_assert {
-	target voltage_A;
-	parent R1-12-47-3_node_19;
-	within 1;
-	value +7149.61-35.8921j;
-	name R1-12-47-3_node_19complex_assert123;
-};
-
-object complex_assert {
-	target voltage_B;
-	parent R1-12-47-3_node_19;
-	within 1;
-	value -3607.48-6187.37j;
-	name R1-12-47-3_node_19complex_assert124;
-};
-
-object complex_assert {
-	target voltage_C;
-	parent R1-12-47-3_node_19;
-	within 1;
-	value -3562.62+6216.46j;
-	name R1-12-47-3_node_19complex_assert125;
 };
 
 object node {
@@ -1345,30 +1153,6 @@ object node {
 	nominal_voltage 7200;
 };
 
-object complex_assert {
-	target voltage_A;
-	parent R1-12-47-3_node_52;
-	within 1;
-	value +7199.99+0.00036507j;
-	name R1-12-47-3_node_52complex_assert159;
-};
-
-object complex_assert {
-	target voltage_B;
-	parent R1-12-47-3_node_52;
-	within 1;
-	value -3600-6235j;
-	name R1-12-47-3_node_52complex_assert160;
-};
-
-object complex_assert {
-	target voltage_C;
-	parent R1-12-47-3_node_52;
-	within 1;
-	value -3600+6234.99j;
-	name R1-12-47-3_node_52complex_assert161;
-};
-
 object node {
 	phases ABCN;
 	name R1-12-47-3_node_53;
@@ -1379,30 +1163,6 @@ object node {
 	nominal_voltage 7200;
 };
 
-object complex_assert {
-	target voltage_A;
-	parent R1-12-47-3_node_53;
-	within 1;
-	value +7200+0j;
-	name R1-12-47-3_node_53complex_assert163;
-};
-
-object complex_assert {
-	target voltage_B;
-	parent R1-12-47-3_node_53;
-	within 1;
-	value -3600-6235j;
-	name R1-12-47-3_node_53complex_assert164;
-};
-
-object complex_assert {
-	target voltage_C;
-	parent R1-12-47-3_node_53;
-	within 1;
-	value -3600+6235j;
-	name R1-12-47-3_node_53complex_assert165;
-};
-
 object overhead_line {
 	phases ABCN;
 	from R1-12-47-3_node_3;
@@ -1410,78 +1170,6 @@ object overhead_line {
 	to R1-12-47-3_node_4;
 	length 387.401;
 	configuration line_configuration_18;
-};
-
-object complex_assert {
-	target power_in_A;
-	parent R1-12-47-3_ol_1;
-	within 1;
-	value +469851+26275.5j;
-	name R1-12-47-3_ol_1complex_assert167;
-};
-
-object complex_assert {
-	target power_in_B;
-	parent R1-12-47-3_ol_1;
-	within 1;
-	value +408699+25466.7j;
-	name R1-12-47-3_ol_1complex_assert168;
-};
-
-object complex_assert {
-	target power_in_C;
-	parent R1-12-47-3_ol_1;
-	within 1;
-	value +500553+23106.9j;
-	name R1-12-47-3_ol_1complex_assert169;
-};
-
-object complex_assert {
-	target power_out_A;
-	parent R1-12-47-3_ol_1;
-	within 1;
-	value +469698+26022.9j;
-	name R1-12-47-3_ol_1complex_assert170;
-};
-
-object complex_assert {
-	target power_out_B;
-	parent R1-12-47-3_ol_1;
-	within 1;
-	value +408562+25304.6j;
-	name R1-12-47-3_ol_1complex_assert171;
-};
-
-object complex_assert {
-	target power_out_C;
-	parent R1-12-47-3_ol_1;
-	within 1;
-	value +500332+22816.1j;
-	name R1-12-47-3_ol_1complex_assert172;
-};
-
-object complex_assert {
-	target power_losses_A;
-	parent R1-12-47-3_ol_1;
-	within 1;
-	value +153.551+252.632j;
-	name R1-12-47-3_ol_1complex_assert173;
-};
-
-object complex_assert {
-	target power_losses_B;
-	parent R1-12-47-3_ol_1;
-	within 1;
-	value +136.233+162.144j;
-	name R1-12-47-3_ol_1complex_assert174;
-};
-
-object complex_assert {
-	target power_losses_C;
-	parent R1-12-47-3_ol_1;
-	within 1;
-	value +221.684+290.772j;
-	name R1-12-47-3_ol_1complex_assert175;
 };
 
 object overhead_line {
@@ -1608,78 +1296,6 @@ object overhead_line {
 	to R1-12-47-3_node_19;
 	length 485.017;
 	configuration line_configuration_24;
-};
-
-object complex_assert {
-	target power_in_A;
-	parent R1-12-47-3_ol_15;
-	within 1;
-	value +74071.1+3684.07j;
-	name R1-12-47-3_ol_15complex_assert190;
-};
-
-object complex_assert {
-	target power_in_B;
-	parent R1-12-47-3_ol_15;
-	within 1;
-	value +39691.9+1517.46j;
-	name R1-12-47-3_ol_15complex_assert191;
-};
-
-object complex_assert {
-	target power_in_C;
-	parent R1-12-47-3_ol_15;
-	within 1;
-	value +27468.9+784.816j;
-	name R1-12-47-3_ol_15complex_assert192;
-};
-
-object complex_assert {
-	target power_out_A;
-	parent R1-12-47-3_ol_15;
-	within 1;
-	value +74053.1+3672.82j;
-	name R1-12-47-3_ol_15complex_assert193;
-};
-
-object complex_assert {
-	target power_out_B;
-	parent R1-12-47-3_ol_15;
-	within 1;
-	value +39689.1+1514.84j;
-	name R1-12-47-3_ol_15complex_assert194;
-};
-
-object complex_assert {
-	target power_out_C;
-	parent R1-12-47-3_ol_15;
-	within 1;
-	value +27466.2+784.838j;
-	name R1-12-47-3_ol_15complex_assert195;
-};
-
-object complex_assert {
-	target power_losses_A;
-	parent R1-12-47-3_ol_15;
-	within 1;
-	value +18.0766+11.2534j;
-	name R1-12-47-3_ol_15complex_assert196;
-};
-
-object complex_assert {
-	target power_losses_B;
-	parent R1-12-47-3_ol_15;
-	within 1;
-	value +2.75542+2.62092j;
-	name R1-12-47-3_ol_15complex_assert197;
-};
-
-object complex_assert {
-	target power_losses_C;
-	parent R1-12-47-3_ol_15;
-	within 1;
-	value +2.69577-0.021659j;
-	name R1-12-47-3_ol_15complex_assert198;
 };
 
 object overhead_line {
@@ -1815,78 +1431,6 @@ object overhead_line {
 	to R1-12-47-3_node_45;
 	length 103.017;
 	configuration line_configuration_27;
-};
-
-object complex_assert {
-	target power_in_A;
-	parent R1-12-47-3_ol_30;
-	within 1;
-	value +76773.3+1953.27j;
-	name R1-12-47-3_ol_30complex_assert214;
-};
-
-object complex_assert {
-	target power_in_B;
-	parent R1-12-47-3_ol_30;
-	within 1;
-	value +24782.9+833.065j;
-	name R1-12-47-3_ol_30complex_assert215;
-};
-
-object complex_assert {
-	target power_in_C;
-	parent R1-12-47-3_ol_30;
-	within 1;
-	value +68652.9+1863.08j;
-	name R1-12-47-3_ol_30complex_assert216;
-};
-
-object complex_assert {
-	target power_out_A;
-	parent R1-12-47-3_ol_30;
-	within 1;
-	value +76770.3+1950.72j;
-	name R1-12-47-3_ol_30complex_assert217;
-};
-
-object complex_assert {
-	target power_out_B;
-	parent R1-12-47-3_ol_30;
-	within 1;
-	value +24782.7+833.121j;
-	name R1-12-47-3_ol_30complex_assert218;
-};
-
-object complex_assert {
-	target power_out_C;
-	parent R1-12-47-3_ol_30;
-	within 1;
-	value +68649.5+1861.64j;
-	name R1-12-47-3_ol_30complex_assert219;
-};
-
-object complex_assert {
-	target power_losses_A;
-	parent R1-12-47-3_ol_30;
-	within 1;
-	value +2.95652+2.55218j;
-	name R1-12-47-3_ol_30complex_assert220;
-};
-
-object complex_assert {
-	target power_losses_B;
-	parent R1-12-47-3_ol_30;
-	within 1;
-	value +0.21779-0.0557866j;
-	name R1-12-47-3_ol_30complex_assert221;
-};
-
-object complex_assert {
-	target power_losses_C;
-	parent R1-12-47-3_ol_30;
-	within 1;
-	value +3.46533+1.44404j;
-	name R1-12-47-3_ol_30complex_assert222;
 };
 
 object overhead_line_conductor {
@@ -2386,22 +1930,6 @@ object triplex_meter {
 	voltage_N 0;
 };
 
-object complex_assert {
-	target voltage_1;
-	parent R1-12-47-3_tm_1;
-	within 1;
-	value -56.6509-87.3958j;
-	name R1-12-47-3_tm_1complex_assert276;
-};
-
-object complex_assert {
-	target voltage_2;
-	parent R1-12-47-3_tm_1;
-	within 1;
-	value -59.7137-109.537j;
-	name R1-12-47-3_tm_1complex_assert277;
-};
-
 object triplex_node {
 	voltage_2 -60-103.92j;
 	phases BS;
@@ -2409,22 +1937,6 @@ object triplex_node {
 	name R1-12-47-3_tn_1;
 	nominal_voltage 120;
 	voltage_N 0;
-};
-
-object complex_assert {
-	target voltage_1;
-	parent R1-12-47-3_tn_1;
-	within 1;
-	value -60.1663-102.723j;
-	name R1-12-47-3_tn_1complex_assert279;
-};
-
-object complex_assert {
-	target voltage_2;
-	parent R1-12-47-3_tn_1;
-	within 1;
-	value -60.1726-102.741j;
-	name R1-12-47-3_tn_1complex_assert280;
 };
 
 object triplex_node {
@@ -2538,5 +2050,278 @@ object underground_line_conductor {
 	conductor_diameter 0.362;
 	shield_gmr 0.00;
 	name underground_line_conductor_8;
+};
+
+module residential;
+module generators;
+module market;
+module climate;
+xclass player {
+	double value;
+};
+module market;
+xclass auction {
+	double my_avg ; double my_std;
+};
+object player {
+	name CPP_days_R1;
+	file CPP_days_R1.player;
+};
+
+object auction {
+	my_std 0.037953;
+	name Market_1;
+object player {
+	file R1_1247_1_t0_CPP.player;
+	property current_market.clearing_price;
+	loop 10;
+};
+	period 900;
+	my_avg 0.110000;
+	special_mode BUYERS_ONLY;
+	unit kW;
+};
+
+object climate {
+	name "CA-San_francisco";
+	interpolate QUADRATIC;
+	tmyfile "superClimate.tmy2";
+};
+
+object triplex_meter {
+	parent R1-12-47-3_tn_1;
+	phases BS;
+	name house1_triplexMeter;
+	meter_power_consumption 2+11j;
+	power_market Market_1;
+	monthly_fee 10.00;
+	bill_day 1;
+	bill_mode HOURLY;
+	nominal_voltage 120;
+	groupid Residential_Meter;
+};
+
+object house {
+	glass_type 2;
+	cooling_COP 3.8;
+	hvac_breaker_rating 1000;
+	cooling_system_type NONE;
+	total_thermal_mass_per_floor_area 3.504;
+	cooling_setpoint 69.19;
+	air_temperature 71.22;
+	Rdoors 10.51;
+	heating_system_type GAS;
+	glazing_layers 3;
+	glazing_treatment 2;
+	heating_setpoint 59.01;
+	groupid Residential;
+	schedule_skew 1083;
+	window_frame 4;
+	parent house1_triplexMeter;
+	floor_area 3907;
+	mass_temperature 71.22;
+	number_of_stories 1;
+	Rwall 27.33;
+	name house1;
+	Rfloor 35.59;
+	airchange_per_hour 0.23;
+	Rroof 50.34;
+	ceiling_height 8;
+	breaker_amps 1000;
+	over_sizing_factor 0.1;
+};
+
+object ZIPload {
+	parent house1;
+	schedule_skew 1083;
+	name house1_unresponsiveLoad;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	base_power 1190;
+	impedance_pf 1.000;
+	current_pf 1.000;
+	power_pf 1.000;
+	impedance_fraction 0.200000;
+	heatgain_fraction 0.900;
+};
+
+object ZIPload {
+	parent house1;
+	schedule_skew 1083;
+	name house1_responsiveLoad;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	base_power 1130;
+	impedance_pf 1.000;
+	current_pf 1.000;
+	power_pf 1.000;
+	impedance_fraction 0.200000;
+	heatgain_fraction 0.900;
+};
+
+object passive_controller {
+	period 900;
+	old_first_tier_price 0.124300;
+	second_tier_price 0.139973;
+	sub_elasticity_first_third -0.0145;
+	parent house1_responsiveLoad;
+	third_tier_hours 6;
+	critical_day CPP_days_R1.value;
+	third_tier_price 0.699867;
+	second_tier_hours 12;
+	sub_elasticity_first_second -0.0099;
+	linearize_elasticity true;
+	old_second_tier_price 0.124300;
+	daily_elasticity 0.1305;
+	state_property multiplier;
+	first_tier_hours 12;
+	observation_property past_market.clearing_price;
+	control_mode ELASTICITY_MODEL;
+	name house1_responsiveLoad_controller;
+	price_offset 0.01;
+	two_tier_cpp true;
+	observation_object Market_1;
+	first_tier_price 0.069987;
+	old_third_tier_price 0.124300;
+};
+
+object waterheater {
+	schedule_skew 4326;
+	demand 2299;
+	name house1_waterHeater;
+	parent house1;
+	heating_element_capacity 4.5 kW;
+	thermostat_deadband 7.8;
+	location INSIDE;
+	tank_volume 50;
+	tank_setpoint 132.7;
+	tank_UA 3.7;
+	temperature 132;
+};
+
+object passive_controller {
+	name house1_waterHeater_controller;
+	parent house1_waterHeater;
+	period 900;
+	comfort_level 0.82;
+	distribution_type NORMAL;
+	expectation_object Market_1;
+	observation_object Market_1;
+	state_property override;
+	control_mode PROBABILITY_OFF;
+	expectation_property my_avg;
+	observation_property past_market.clearing_price;
+	stdev_observation_property my_std;
+};
+
+object evcharger_det {
+	variation_trip_std_dev 100.0;
+	parent house1;
+	arrival_at_home 1800;
+	duration_at_work 9 h;
+	variation_trip_mean 300.0;
+	name house1_ev;
+	maximum_charge_rate 1700;
+	duration_at_home 14 h;
+	work_charging_available false;
+	travel_distance 15.0;
+	mileage_classification 33.0;
+	charging_efficiency 0.90;
+	arrival_at_work 900;
+	variation_std_dev 100.0;
+	mileage_efficiency 3.846;
+	variation_mean 300.0;
+};
+
+object inverter {
+	name house1_solarInverter;
+	parent house1_triplexMeter;
+	generator_status ONLINE;
+	inverter_type PWM;
+	generator_mode CONSTANT_PF;
+};
+
+object solar {
+	name house1_solar;
+	parent house1_solarInverter;
+	area 800 sf;
+	generator_status ONLINE;
+	efficiency 0.13;
+	generator_mode SUPPLY_DRIVEN;
+	panel_type SINGLE_CRYSTAL_SILICON;
+};
+
+object inverter {
+	discharge_off_threshold 7454 kW;
+	phases BS;
+	four_quadrant_control_mode LOAD_FOLLOWING;
+	name house1_batteryInverter;
+	parent house1_triplexMeter;
+	generator_status ONLINE;
+	inverter_type FOUR_QUADRANT;
+	sense_object house1;
+	max_charge_rate 220 kW;
+	charge_off_threshold 6148 kW;
+	discharge_lockout_time 60;
+	generator_mode CONSTANT_PQ;
+	rated_power 220 kW;
+	charge_lockout_time 60;
+	max_discharge_rate 220 kW;
+	inverter_efficiency 0.9;
+	discharge_on_threshold 7915 kW;
+	charge_on_threshold 5123 kW;
+};
+
+object battery {
+	state_of_charge 1.0;
+	battery_state FULL;
+	name house1_battery;
+	parent house1_batteryInverter;
+	round_trip_efficiency 0.85;
+	generator_status ONLINE;
+	battery_type LI_ION;
+	generator_mode SUPPLY_DRIVEN;
+	battery_capacity 880 kWh;
+	use_internal_battery_model TRUE;
+};
+
+object windturb_dg {
+	phases BS;
+	name house1_windTurbine;
+	parent house1_triplexMeter;
+	Gen_status ONLINE;
+	Turbine_Model BERGEY_10kW;
+	Gen_mode CONSTANTP;
+	Gen_type SYNCHRONOUS;
+};
+
+object diesel_dg {
+	outlet_temperature 57 degC;
+	torque 2865 N;
+	stroke 2;
+	w_coolingwater 160 kg;
+	air_fuel 30 kg;
+	speed 10000 1/min;
+	phases BS;
+	brake_diameter 1 m;
+	cylinder_radius 0.21 m;
+	room_temperature 27 degC;
+	pf 1.0;
+	Gen_type SYNCHRONOUS;
+	fuel 1.56 kg;
+	parent house1_triplexMeter;
+	specific_heat_steam 2.093 kJ/kg/K;
+	Gen_status ONLINE;
+	specific_heat_dry 1.01 kJ/kg/K;
+	pressure 3;
+	calotific_fuel 44000 kJ/kg;
+	cylinders 1;
+	name house1_diesel;
+	exhaust_temperature 310 degC;
+	Gen_mode CONSTANTPQ;
+	time_operation 525600 min;
+	cylinder_length 0.29 m;
+	steam_exhaust 1.3 kg;
+	inlet_temperature 32 degC;
 };
 

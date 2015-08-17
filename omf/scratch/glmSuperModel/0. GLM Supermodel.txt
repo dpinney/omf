@@ -9,12 +9,13 @@ OOO Clean up visuals.
 OOO Run omf.models.gridlabMulti.
 
 TECHNOLOGIES
-* House models.
-* Storage on houses.
-* Solar on houses.
-* Diesel on (a very few) houses.
-* Wind on (a very few) houses.
+Houses with:
+* Storage.
+* Solar.
+* Diesel (on a very few).
+* Wind (on a very few).
+* EVs.
+Other stuff:
 * Market auction (RTP?).
 * CPP.
 * volt_var_control.
-* EVs.

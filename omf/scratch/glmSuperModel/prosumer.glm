@@ -1,8 +1,54 @@
 // Tiny bit of GLM that models a "prosumer".
 
+module residential;
+module generators;
+module market;
+module climate;
+
+// Start generic market stuff.
+
+class player {
+     double value;
+};
+
+module market;
+
+class auction {
+     double my_avg;
+     double my_std;
+};
+
+object player {
+     name CPP_days_R1;
+     file CPP_days_R1.player;
+};
+
+object auction {
+     name Market_1;
+     period 900;
+     special_mode BUYERS_ONLY;
+     unit kW;
+     my_avg 0.110000;
+     my_std 0.037953;
+     object player {
+          file R1_1247_1_t0_CPP.player;
+          loop 10;
+          property current_market.clearing_price;
+     };
+}
+
+object climate {
+     name "CA-San_francisco";
+     tmyfile "superClimate.tmy2";
+     interpolate QUADRATIC;
+};
+
+
+// End genertic market stuff.
+
 object triplex_meter {
       name house1_triplexMeter;
-      phases AS;
+      phases BS;
       parent R1-12-47-1_tm_1;
       groupid Residential_Meter;
       meter_power_consumption 2+11j;
@@ -11,7 +57,7 @@ object triplex_meter {
       bill_day 1;
       power_market Market_1;
       nominal_voltage 120;
-}
+};
 
 object house {
 	name house1;
@@ -40,15 +86,18 @@ object house {
 	cooling_system_type NONE;
 	breaker_amps 1000;
 	hvac_breaker_rating 1000;
-	cooling_setpoint cooling6*2.89+69.19;
-	heating_setpoint heating6*0.19+59.01;
+	//cooling_setpoint cooling6*2.89+69.19
+	//heating_setpoint heating6*0.19+59.01
+	cooling_setpoint 69.19;
+	heating_setpoint 59.01;
 };
 
 object ZIPload {
 	name house1_unresponsiveLoad;
 	parent house1;
 	schedule_skew 1083;
-	base_power unresponsive_loads*1.19;
+	//base_power unresponsive_loads*1.19
+	base_power 1190;
 	heatgain_fraction 0.900;
 	power_pf 1.000;
 	current_pf 1.000;
@@ -62,7 +111,8 @@ object ZIPload {
 	name house1_responsiveLoad;
 	parent house1;
 	schedule_skew 1083;
-	base_power responsive_loads*1.30;
+	//base_power responsive_loads*1.30
+	base_power 1130;
 	heatgain_fraction 0.900;
 	power_pf 1.000;
 	current_pf 1.000;
@@ -93,7 +143,8 @@ object passive_controller {
 	old_first_tier_price 0.124300;
 	old_second_tier_price 0.124300;
 	old_third_tier_price 0.124300;
-	daily_elasticity daily_elasticity_wotech*0.1305;
+	//daily_elasticity daily_elasticity_wotech*0.1305
+	daily_elasticity 0.1305;
 	sub_elasticity_first_second -0.0099;
 	sub_elasticity_first_third -0.0145;
 };
@@ -108,7 +159,8 @@ object waterheater {
 	thermostat_deadband 7.8;
 	location INSIDE;
 	tank_UA 3.7;
-	demand large_6*0.99;
+	//demand large_6*0.99
+	demand 2299;
 	tank_volume 50;
 };
 
@@ -169,7 +221,7 @@ object inverter {
 	name house1_batteryInverter;
 	parent house1_triplexMeter;
 	sense_object house1;
-	phases AS;
+	phases BS;
 	generator_mode CONSTANT_PQ;
 	generator_status ONLINE;
 	inverter_type FOUR_QUADRANT;
@@ -203,7 +255,7 @@ object battery {
 object windturb_dg {
 	name house1_windTurbine;
 	parent house1_triplexMeter;
-	phases AS;
+	phases BS;
 	Gen_status ONLINE;
 	Gen_type SYNCHRONOUS;
 	Gen_mode CONSTANTP;
@@ -216,7 +268,7 @@ object diesel_dg {
 	Gen_mode CONSTANTPQ;
 	Gen_status ONLINE;
 	Gen_type SYNCHRONOUS;
-	phases AS;
+	phases BS;
 	pf 1.0;
 	cylinders 1;	 
 	stroke 2;
