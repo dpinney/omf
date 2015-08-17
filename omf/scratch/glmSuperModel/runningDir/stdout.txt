@@ -1,0 +1,57 @@
+                                      
+Core profiler results
+======================
+
+Total objects                242 objects
+Parallelism                    1 thread
+Total time                   4.0 seconds
+  Core time                  1.9 seconds (47.1%)
+    Compiler                 3.6 seconds (90.2%)
+    Instances                0.0 seconds (0.0%)
+    Random variables         0.0 seconds (0.0%)
+    Schedules                0.0 seconds (0.0%)
+    Loadshapes               0.0 seconds (0.0%)
+    Enduses                  0.0 seconds (0.0%)
+    Transforms               0.0 seconds (0.0%)
+  Model time                 2.1 seconds/thread (52.9%)
+Simulation time                0 days
+Simulation speed             182 object.hours/second
+Passes completed             362 passes
+Time steps completed         181 timesteps
+Convergence efficiency      2.00 passes/timestep
+Read lock contention        0.0%
+Write lock contention       0.0%
+Average timestep             60 seconds/timestep
+Simulation rate            2700 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+node               1.746     82.5%     32.9
+climate            0.125      5.9%    125.0
+overhead_line      0.043      2.0%      1.4
+transformer        0.039      1.8%      1.8
+meter              0.038      1.8%      1.7
+load               0.034      1.6%      1.6
+underground_line   0.013      0.6%      1.6
+fuse               0.012      0.6%      1.7
+switch             0.012      0.6%      2.0
+regulator          0.009      0.4%      9.0
+triplex_line       0.007      0.3%      7.0
+inverter           0.007      0.3%      3.5
+triplex_meter      0.005      0.2%      2.5
+auction            0.005      0.2%      5.0
+recorder           0.004      0.2%      4.0
+house              0.004      0.2%      4.0
+triplex_node       0.003      0.1%      1.5
+waterheater        0.003      0.1%      3.0
+evcharger_det      0.002      0.1%      2.0
+battery            0.002      0.1%      2.0
+passive_controll   0.002      0.1%      1.0
+player             0.001      0.0%      0.5
+================ ======== ======== ========
+Total              2.116    100.0%      8.7
+

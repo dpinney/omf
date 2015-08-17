@@ -4,6 +4,10 @@ module residential;
 module generators;
 module market;
 module climate;
+module tape;
+module powerflow;
+
+#include "superSchedules.glm";
 
 // Start generic market stuff.
 
@@ -19,8 +23,8 @@ class auction {
 };
 
 object player {
-     name CPP_days_R1;
-     file CPP_days_R1.player;
+     name cppDays;
+     file superCpp.player;
 };
 
 object auction {
@@ -31,11 +35,11 @@ object auction {
      my_avg 0.110000;
      my_std 0.037953;
      object player {
-          file R1_1247_1_t0_CPP.player;
+          file superClearingPrice.player;
           loop 10;
           property current_market.clearing_price;
      };
-}
+};
 
 object climate {
      name "CA-San_francisco";
@@ -47,16 +51,16 @@ object climate {
 // End genertic market stuff.
 
 object triplex_meter {
-      name house1_triplexMeter;
-      phases BS;
-      parent R1-12-47-1_tm_1;
-      groupid Residential_Meter;
-      meter_power_consumption 2+11j;
-      bill_mode HOURLY;
-      monthly_fee 10.00;
-      bill_day 1;
-      power_market Market_1;
-      nominal_voltage 120;
+	name house1_triplexMeter;
+	phases BS;
+	parent REPLACE_ME_PLEASE;
+	groupid Residential_Meter;
+	meter_power_consumption 2+11j;
+	bill_mode HOURLY;
+	monthly_fee 10.00;
+	bill_day 1;
+	power_market Market_1;
+	nominal_voltage 120;
 };
 
 object house {
@@ -86,18 +90,15 @@ object house {
 	cooling_system_type NONE;
 	breaker_amps 1000;
 	hvac_breaker_rating 1000;
-	//cooling_setpoint cooling6*2.89+69.19
-	//heating_setpoint heating6*0.19+59.01
-	cooling_setpoint 69.19;
-	heating_setpoint 59.01;
+	cooling_setpoint cooling6*2.89+69.19;
+	heating_setpoint heating6*0.19+59.01;
 };
 
 object ZIPload {
 	name house1_unresponsiveLoad;
 	parent house1;
 	schedule_skew 1083;
-	//base_power unresponsive_loads*1.19
-	base_power 1190;
+	base_power unresponsive_loads*1.19;
 	heatgain_fraction 0.900;
 	power_pf 1.000;
 	current_pf 1.000;
@@ -111,8 +112,7 @@ object ZIPload {
 	name house1_responsiveLoad;
 	parent house1;
 	schedule_skew 1083;
-	//base_power responsive_loads*1.30
-	base_power 1130;
+	base_power responsive_loads*1.30;
 	heatgain_fraction 0.900;
 	power_pf 1.000;
 	current_pf 1.000;
@@ -133,7 +133,7 @@ object passive_controller {
 	state_property multiplier;
 	linearize_elasticity true;
 	price_offset 0.01;
-	critical_day CPP_days_R1.value;
+	critical_day cppDays.value;
 	first_tier_hours 12;
 	second_tier_hours 12;
 	third_tier_hours 6;
@@ -143,8 +143,7 @@ object passive_controller {
 	old_first_tier_price 0.124300;
 	old_second_tier_price 0.124300;
 	old_third_tier_price 0.124300;
-	//daily_elasticity daily_elasticity_wotech*0.1305
-	daily_elasticity 0.1305;
+	daily_elasticity daily_elasticity_wotech*0.1305;
 	sub_elasticity_first_second -0.0099;
 	sub_elasticity_first_third -0.0145;
 };
@@ -159,8 +158,7 @@ object waterheater {
 	thermostat_deadband 7.8;
 	location INSIDE;
 	tank_UA 3.7;
-	//demand large_6*0.99
-	demand 2299;
+	demand large_6*0.99;
 	tank_volume 50;
 };
 
@@ -220,7 +218,7 @@ object solar {
 object inverter {
 	name house1_batteryInverter;
 	parent house1_triplexMeter;
-	sense_object house1;
+	sense_object house1_triplexMeter;
 	phases BS;
 	generator_mode CONSTANT_PQ;
 	generator_status ONLINE;
@@ -251,43 +249,44 @@ object battery {
 	battery_state FULL;
 };
 
+// Single phase windturbine not supported in GLD 3.1.
+//object windturb_dg {
+//	name house1_windTurbine;
+//	parent house1_triplexMeter;
+//	phases BS;
+//	Gen_status ONLINE;
+//	Gen_type SYNCHRONOUS;
+//	Gen_mode CONSTANTP;
+//	Turbine_Model BERGEY_10kW;
+//};
 
-object windturb_dg {
-	name house1_windTurbine;
-	parent house1_triplexMeter;
-	phases BS;
-	Gen_status ONLINE;
-	Gen_type SYNCHRONOUS;
-	Gen_mode CONSTANTP;
-	Turbine_Model BERGEY_10kW;
-};
-
-object diesel_dg {
-	name house1_diesel;
-	parent house1_triplexMeter;
-	Gen_mode CONSTANTPQ;
-	Gen_status ONLINE;
-	Gen_type SYNCHRONOUS;
-	phases BS;
-	pf 1.0;
-	cylinders 1;	 
-	stroke 2;
-	pressure 3;
-	speed 10000 1/min;       		 
-	torque 2865 N;
-	time_operation 525600 min;
-	fuel 1.56 kg;
-	w_coolingwater 160 kg;
-	inlet_temperature 32 degC;
-	outlet_temperature 57 degC;
-	air_fuel 30 kg;
-	room_temperature 27 degC;
-	exhaust_temperature 310 degC;		 
-	cylinder_length 0.29 m;
-	cylinder_radius 0.21 m;
-	brake_diameter 1 m;
-	calotific_fuel 44000 kJ/kg;
-	steam_exhaust 1.3 kg;
-	specific_heat_steam 2.093 kJ/kg/K;
-	specific_heat_dry 1.01 kJ/kg/K;
-};
+// Single phase diesel not support in GLD 3.1.
+//object diesel_dg {
+//	name house1_diesel;
+//	parent house1_triplexMeter;
+//	Gen_mode CONSTANTPQ;
+//	Gen_status ONLINE;
+//	Gen_type SYNCHRONOUS;
+//	phases BS;
+//	pf 1.0;
+//	cylinders 1;	 
+//	stroke 2;
+//	pressure 3;
+//	speed 10000 1/min;		 
+//	torque 2865 N;
+//	time_operation 525600 min;
+//	fuel 1.56 kg;
+//	w_coolingwater 160 kg;
+//	inlet_temperature 32 degC;
+//	outlet_temperature 57 degC;
+//	air_fuel 30 kg;
+//	room_temperature 27 degC;
+//	exhaust_temperature 310 degC;		 
+//	cylinder_length 0.29 m;
+//	cylinder_radius 0.21 m;
+//	brake_diameter 1 m;
+//	calotific_fuel 44000 kJ/kg;
+//	steam_exhaust 1.3 kg;
+//	specific_heat_steam 2.093 kJ/kg/K;
+//	specific_heat_dry 1.01 kJ/kg/K;
+//};

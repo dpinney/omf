@@ -21,9 +21,9 @@ object regulator {
 };
 
 object recorder {
+	interval 60;
 	name recorder_999;
 	parent R1-12-47-3_reg_1;
-	interval 60;
 	limit 1440;
 	file "superModelTiny.regOutput.csv";
 	property tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag;
@@ -39,9 +39,9 @@ object regulator_configuration {
 	connect_type WYE_WYE;
 	time_delay 30;
 	regulation 0.10;
-	band_width 120;
-	tap_pos_C 0;
 	lower_taps 16;
+	tap_pos_C 0;
+	band_width 120;
 };
 
 object fuse {
@@ -181,9 +181,9 @@ object line_configuration {
 };
 
 object line_configuration {
-	conductor_A overhead_line_conductor_6;
-	conductor_N overhead_line_conductor_6;
 	spacing line_spacing_13;
+	conductor_N overhead_line_conductor_6;
+	conductor_A overhead_line_conductor_6;
 	name line_configuration_25;
 };
 
@@ -229,16 +229,16 @@ object line_configuration {
 };
 
 object line_configuration {
-	conductor_A overhead_line_conductor_4;
-	conductor_N overhead_line_conductor_4;
 	spacing line_spacing_13;
+	conductor_N overhead_line_conductor_4;
+	conductor_A overhead_line_conductor_4;
 	name line_configuration_31;
 };
 
 object line_configuration {
-	conductor_A overhead_line_conductor_5;
-	conductor_N overhead_line_conductor_5;
 	spacing line_spacing_13;
+	conductor_N overhead_line_conductor_5;
+	conductor_A overhead_line_conductor_5;
 	name line_configuration_32;
 };
 
@@ -309,9 +309,9 @@ object line_spacing {
 
 object load {
 	phases CN;
+	load_class C;
 	name R1-12-47-3_load_1;
 	parent R1-12-47-3_meter_1;
-	load_class C;
 	voltage_C -3600+6235j;
 	constant_power_C 54848.3315+1161.1672j;
 	nominal_voltage 7200;
@@ -319,9 +319,9 @@ object load {
 
 object load {
 	phases ABCN;
+	load_class C;
 	name R1-12-47-3_load_2;
 	parent R1-12-47-3_meter_2;
-	load_class C;
 	voltage_B -3600-6235j;
 	voltage_C -3600+6235j;
 	voltage_A 7200+0.0j;
@@ -333,9 +333,9 @@ object load {
 
 object load {
 	phases ACN;
+	load_class C;
 	name R1-12-47-3_load_3;
 	parent R1-12-47-3_meter_3;
-	load_class C;
 	voltage_C -3600+6235j;
 	voltage_A 7200+0.0j;
 	constant_power_C 27424.1657+580.5836j;
@@ -345,9 +345,9 @@ object load {
 
 object load {
 	phases CN;
+	load_class C;
 	name R1-12-47-3_load_4;
 	parent R1-12-47-3_meter_4;
-	load_class C;
 	voltage_C -3600+6235j;
 	constant_power_C 54848.3315+1161.1672j;
 	nominal_voltage 7200;
@@ -355,9 +355,9 @@ object load {
 
 object load {
 	phases CN;
+	load_class C;
 	name R1-12-47-3_load_5;
 	parent R1-12-47-3_meter_5;
-	load_class C;
 	voltage_C -3600+6235j;
 	constant_power_C 54848.3315+1161.1672j;
 	nominal_voltage 7200;
@@ -365,9 +365,9 @@ object load {
 
 object load {
 	phases ABCN;
+	load_class C;
 	name R1-12-47-3_load_6;
 	parent R1-12-47-3_meter_6;
-	load_class C;
 	voltage_B -3600-6235j;
 	voltage_C -3600+6235j;
 	voltage_A 7200+0.0j;
@@ -379,9 +379,9 @@ object load {
 
 object load {
 	phases AN;
+	load_class C;
 	name R1-12-47-3_load_7;
 	parent R1-12-47-3_meter_7;
-	load_class C;
 	voltage_A 7200+0.0j;
 	nominal_voltage 7200;
 	constant_power_A 42928.5478+803.0025j;
@@ -389,9 +389,9 @@ object load {
 
 object load {
 	phases ABCN;
+	load_class C;
 	name R1-12-47-3_load_8;
 	parent R1-12-47-3_meter_8;
-	load_class C;
 	voltage_B -3600-6235j;
 	voltage_C -3600+6235j;
 	voltage_A 7200+0.0j;
@@ -403,9 +403,9 @@ object load {
 
 object load {
 	phases BN;
+	load_class C;
 	name R1-12-47-3_load_9;
 	parent R1-12-47-3_meter_9;
-	load_class C;
 	voltage_B -3600-6235j;
 	nominal_voltage 7200;
 	constant_power_B 29725.289+935.4448j;
@@ -413,9 +413,9 @@ object load {
 
 object load {
 	phases ABCN;
+	load_class C;
 	name R1-12-47-3_load_10;
 	parent R1-12-47-3_meter_10;
-	load_class C;
 	voltage_B -3600-6235j;
 	voltage_C -3600+6235j;
 	voltage_A 7200+0.0j;
@@ -427,9 +427,9 @@ object load {
 
 object load {
 	phases AN;
+	load_class C;
 	name R1-12-47-3_load_11;
 	parent R1-12-47-3_meter_11;
-	load_class C;
 	voltage_A 7200+0.0j;
 	nominal_voltage 7200;
 	constant_power_A 110387.6944+2064.8636j;
@@ -437,9 +437,9 @@ object load {
 
 object load {
 	phases AN;
+	load_class C;
 	name R1-12-47-3_load_12;
 	parent R1-12-47-3_meter_12;
-	load_class C;
 	voltage_A 7200+0.0j;
 	nominal_voltage 7200;
 	constant_power_A 30663.2485+573.5732j;
@@ -447,9 +447,9 @@ object load {
 
 object load {
 	phases AN;
+	load_class C;
 	name R1-12-47-3_load_13;
 	parent R1-12-47-3_meter_13;
-	load_class C;
 	voltage_A 7200+0.0j;
 	nominal_voltage 7200;
 	constant_power_A 30663.2485+573.5732j;
@@ -457,9 +457,9 @@ object load {
 
 object load {
 	phases AN;
+	load_class C;
 	name R1-12-47-3_load_14;
 	parent R1-12-47-3_meter_14;
-	load_class C;
 	voltage_A 7200+0.0j;
 	nominal_voltage 7200;
 	constant_power_A 30663.2485+573.5732j;
@@ -467,9 +467,9 @@ object load {
 
 object load {
 	phases BN;
+	load_class C;
 	name R1-12-47-3_load_15;
 	parent R1-12-47-3_meter_15;
-	load_class C;
 	voltage_B -3600-6235j;
 	nominal_voltage 7200;
 	constant_power_B 19800+600j;
@@ -477,9 +477,9 @@ object load {
 
 object load {
 	phases BN;
+	load_class C;
 	name R1-12-47-3_load_16;
 	parent R1-12-47-3_meter_16;
-	load_class C;
 	voltage_B -3600-6235j;
 	nominal_voltage 7200;
 	constant_power_B 66200+2100j;
@@ -487,9 +487,9 @@ object load {
 
 object load {
 	phases BN;
+	load_class C;
 	name R1-12-47-3_load_17;
 	parent R1-12-47-3_meter_17;
-	load_class C;
 	voltage_B -3600-6235j;
 	nominal_voltage 7200;
 	constant_power_B 19800+600j;
@@ -497,9 +497,9 @@ object load {
 
 object load {
 	phases ABCN;
+	load_class C;
 	name R1-12-47-3_load_18;
 	parent R1-12-47-3_meter_18;
-	load_class C;
 	voltage_B -3600-6235j;
 	voltage_C -3600+6235j;
 	voltage_A 7200+0.0j;
@@ -511,9 +511,9 @@ object load {
 
 object load {
 	phases AN;
+	load_class C;
 	name R1-12-47-3_load_19;
 	parent R1-12-47-3_meter_19;
-	load_class C;
 	voltage_A 7200+0.0j;
 	nominal_voltage 7200;
 	constant_power_A 30663.2485+573.5732j;
@@ -521,9 +521,9 @@ object load {
 
 object load {
 	phases ABCN;
+	load_class C;
 	name R1-12-47-3_load_20;
 	parent R1-12-47-3_meter_20;
-	load_class C;
 	voltage_B -3600-6235j;
 	voltage_C -3600+6235j;
 	voltage_A 7200+0.0j;
@@ -535,9 +535,9 @@ object load {
 
 object load {
 	phases ABCN;
+	load_class C;
 	name R1-12-47-3_load_21;
 	parent R1-12-47-3_meter_21;
-	load_class C;
 	voltage_B -3600-6235j;
 	voltage_C -3600+6235j;
 	voltage_A 7200+0.0j;
@@ -1434,38 +1434,38 @@ object overhead_line {
 };
 
 object overhead_line_conductor {
-	rating.summer.continuous 334.0;
+	geometric_mean_radius 0.00814 ft;
 	resistance 0.56300;
 	name overhead_line_conductor_3;
-	geometric_mean_radius 0.00814 ft;
+	rating.summer.continuous 334.0;
 };
 
 object overhead_line_conductor {
-	rating.summer.continuous 120.0;
+	geometric_mean_radius 0.00700 ft;
 	resistance 2.40970;
 	name overhead_line_conductor_4;
-	geometric_mean_radius 0.00700 ft;
+	rating.summer.continuous 120.0;
 };
 
 object overhead_line_conductor {
-	rating.summer.continuous 149.0;
+	geometric_mean_radius 0.00663 ft;
 	resistance 1.50000;
 	name overhead_line_conductor_5;
-	geometric_mean_radius 0.00663 ft;
+	rating.summer.continuous 149.0;
 };
 
 object overhead_line_conductor {
-	rating.summer.continuous 180.0;
+	geometric_mean_radius 0.00418 ft;
 	resistance 1.62570;
 	name overhead_line_conductor_6;
-	geometric_mean_radius 0.00418 ft;
+	rating.summer.continuous 180.0;
 };
 
 object overhead_line_conductor {
-	rating.summer.continuous 230.0;
+	geometric_mean_radius 0.01203 ft;
 	resistance 0.95300;
 	name overhead_line_conductor_7;
-	geometric_mean_radius 0.01203 ft;
+	rating.summer.continuous 230.0;
 };
 
 object switch {
@@ -1907,9 +1907,9 @@ object triplex_line {
 };
 
 object triplex_line_conductor {
+	geometric_mean_radius 0.0111;
 	resistance 0.97;
 	name TLC 1/0 AA triplex;
-	geometric_mean_radius 0.0111;
 };
 
 object triplex_line_configuration {
@@ -2056,23 +2056,26 @@ module residential;
 module generators;
 module market;
 module climate;
-xclass player {
+module tape;
+module powerflow;
+#include "superSchedules.glm";
+class player {
 	double value;
 };
 module market;
-xclass auction {
+class auction {
 	double my_avg ; double my_std;
 };
 object player {
-	name CPP_days_R1;
-	file CPP_days_R1.player;
+	name cppDays;
+	file superCpp.player;
 };
 
 object auction {
 	my_std 0.037953;
 	name Market_1;
 object player {
-	file R1_1247_1_t0_CPP.player;
+	file superClearingPrice.player;
 	property current_market.clearing_price;
 	loop 10;
 };
@@ -2107,13 +2110,13 @@ object house {
 	hvac_breaker_rating 1000;
 	cooling_system_type NONE;
 	total_thermal_mass_per_floor_area 3.504;
-	cooling_setpoint 69.19;
+	cooling_setpoint cooling6*2.89+69.19;
 	air_temperature 71.22;
 	Rdoors 10.51;
 	heating_system_type GAS;
 	glazing_layers 3;
 	glazing_treatment 2;
-	heating_setpoint 59.01;
+	heating_setpoint heating6*0.19+59.01;
 	groupid Residential;
 	schedule_skew 1083;
 	window_frame 4;
@@ -2137,7 +2140,7 @@ object ZIPload {
 	name house1_unresponsiveLoad;
 	power_fraction 0.400000;
 	current_fraction 0.400000;
-	base_power 1190;
+	base_power unresponsive_loads*1.19;
 	impedance_pf 1.000;
 	current_pf 1.000;
 	power_pf 1.000;
@@ -2151,7 +2154,7 @@ object ZIPload {
 	name house1_responsiveLoad;
 	power_fraction 0.400000;
 	current_fraction 0.400000;
-	base_power 1130;
+	base_power responsive_loads*1.30;
 	impedance_pf 1.000;
 	current_pf 1.000;
 	power_pf 1.000;
@@ -2166,13 +2169,13 @@ object passive_controller {
 	sub_elasticity_first_third -0.0145;
 	parent house1_responsiveLoad;
 	third_tier_hours 6;
-	critical_day CPP_days_R1.value;
+	critical_day cppDays.value;
 	third_tier_price 0.699867;
 	second_tier_hours 12;
 	sub_elasticity_first_second -0.0099;
 	linearize_elasticity true;
 	old_second_tier_price 0.124300;
-	daily_elasticity 0.1305;
+	daily_elasticity daily_elasticity_wotech*0.1305;
 	state_property multiplier;
 	first_tier_hours 12;
 	observation_property past_market.clearing_price;
@@ -2187,7 +2190,7 @@ object passive_controller {
 
 object waterheater {
 	schedule_skew 4326;
-	demand 2299;
+	demand large_6*0.99;
 	name house1_waterHeater;
 	parent house1;
 	heating_element_capacity 4.5 kW;
@@ -2259,7 +2262,7 @@ object inverter {
 	parent house1_triplexMeter;
 	generator_status ONLINE;
 	inverter_type FOUR_QUADRANT;
-	sense_object house1;
+	sense_object house1_triplexMeter;
 	max_charge_rate 220 kW;
 	charge_off_threshold 6148 kW;
 	discharge_lockout_time 60;
@@ -2283,45 +2286,5 @@ object battery {
 	generator_mode SUPPLY_DRIVEN;
 	battery_capacity 880 kWh;
 	use_internal_battery_model TRUE;
-};
-
-object windturb_dg {
-	phases BS;
-	name house1_windTurbine;
-	parent house1_triplexMeter;
-	Gen_status ONLINE;
-	Turbine_Model BERGEY_10kW;
-	Gen_mode CONSTANTP;
-	Gen_type SYNCHRONOUS;
-};
-
-object diesel_dg {
-	outlet_temperature 57 degC;
-	torque 2865 N;
-	stroke 2;
-	w_coolingwater 160 kg;
-	air_fuel 30 kg;
-	speed 10000 1/min;
-	phases BS;
-	brake_diameter 1 m;
-	cylinder_radius 0.21 m;
-	room_temperature 27 degC;
-	pf 1.0;
-	Gen_type SYNCHRONOUS;
-	fuel 1.56 kg;
-	parent house1_triplexMeter;
-	specific_heat_steam 2.093 kJ/kg/K;
-	Gen_status ONLINE;
-	specific_heat_dry 1.01 kJ/kg/K;
-	pressure 3;
-	calotific_fuel 44000 kJ/kg;
-	cylinders 1;
-	name house1_diesel;
-	exhaust_temperature 310 degC;
-	Gen_mode CONSTANTPQ;
-	time_operation 525600 min;
-	cylinder_length 0.29 m;
-	steam_exhaust 1.3 kg;
-	inlet_temperature 32 degC;
 };
 

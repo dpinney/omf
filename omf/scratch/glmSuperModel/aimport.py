@@ -1,4 +1,11 @@
-''' Make a GLD superModel. '''
+''' Make a GLD superModel. 
+
+TODO:
+XXX Get one prosumer working (ish).
+XXX Attachments? Added.
+
+'''
+
 
 import omf, os, json
 
@@ -48,15 +55,13 @@ superConsumer[meterKey]['parent'] = 'R1-12-47-3_tn_1' # Meter attaching to a tri
 for key in superConsumer:
 	baseFeed[maxKey+key] = dict(superConsumer[key])
 
-''' TODO: GET TOU, PLAYERS, ETC WORKING. '''
-
-
+# Attachments
+superAttach = {fName:open(fName).read() for fName in ['./superSchedules.glm','./superClimate.tmy2','superCpp.player', 'superClearingPrice.player']}
 
 # Try a run.
-output = omf.solvers.gridlabd.runInFilesystem(baseFeed, attachments={}, keepFiles=True, workDir='./runningDir', glmName='superModelTinyModified.glm')
+output = omf.solvers.gridlabd.runInFilesystem(baseFeed, attachments=superAttach, keepFiles=True, workDir='./runningDir', glmName='superModelTinyModified.glm')
 
-print output.keys()
-# print output['stderr']
+print output['stderr']
 
 # # Add attachments to make an OMF formatted fullFeed.
 # fullFeed = dict(omf.feeder.newFeederWireframe)
@@ -65,6 +70,7 @@ print output.keys()
 # ignoreFileNames = ['0import.py', 'glmSuperModel.json', 'superModelTiny.glm', 'glmSuperModelOmfFormat.json', '.DS_Store']
 # for fName in [x for x in os.listdir('.') if x not in ignoreFileNames]:
 # 	fullFeed['attachments'][fName] = open(fName, 'r').read()
+
 
 # # Write full feed.
 # omfName = 'glmSuperModelOmfFormat.json'
