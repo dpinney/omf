@@ -18,6 +18,7 @@ import csv
 import datetime
 import calendar
 import math
+import operator
 
 #def findOffPeakRate():
 
@@ -31,6 +32,7 @@ def importLoad(file_path):
 	return load
 
 def importElast(file_path):
+	#DEPRICATED: No longer used as funcationalization passes these values in as part of the input dictionary.
 	elast = dict()
 	elast_file = open(file_path, 'rU')
 	reader = csv.reader(elast_file)
@@ -41,6 +43,7 @@ def importElast(file_path):
 	return elast
 
 def importRates(file_path):
+	#DEPRICATED: No longer used as funcationalization passes these values in as part of the input dictionary.
 	rates = dict()
 	rate_file = open(file_path, 'rU')
 	reader = csv.reader(rate_file)
@@ -51,6 +54,7 @@ def importRates(file_path):
 	return rates
 
 def importSchedule(file_path):
+	#DEPRICATED: No longer used as funcationalization passes these values in as part of the input dictionary.
 	schedule = dict()
 	schedule_file = open(file_path, 'rU')
 	reader = csv.reader(schedule_file)
@@ -62,43 +66,76 @@ def importSchedule(file_path):
 	schedule_file.close
 	return schedule
 
-def calcTimes(schedule):
-	start_date = datetime.date(2009,schedule['start_month'],1)
-	last_day =calendar.monthrange(2009, schedule['stop_month'])
-	stop_date = datetime.date(2009,schedule['stop_month'],last_day[1])
+def calcTimes(prismDRDict):
+	start_date = datetime.date(2009,prismDRDict['startMonth'],1)
+	last_day =calendar.monthrange(2009, prismDRDict['stopMonth'])
+	stop_date = datetime.date(2009,prismDRDict['stopMonth'],last_day[1])
 	day_count = stop_date - start_date
-	schedule['day_count']= day_count.days
+	prismDRDict['dayCount']= day_count.days
 	start_index = start_date - datetime.date(2009,1,1)
-	schedule['start_index'] = start_index.days * 24
-	schedule['stop_index'] = schedule['start_index'] + ((schedule['day_count']+1) * 24) - 1
-	schedule['hrs_on_peak'] = (schedule['stop_hour'] - schedule['start_hour']) * schedule['day_count']
-	schedule['hrs_off_peak'] = (schedule['day_count'] * 24) - schedule['hrs_on_peak']
-	schedule['num_months'] = schedule['stop_month']-schedule['start_month'] + 1
-	schedule['num_hours_on'] = schedule['stop_hour']-schedule['start_hour'] + 1
-	schedule['num_hours_off'] = (24 - schedule['num_hours_on'])
-	schedule['hrs_on_peak_per_month'] = float(schedule['hrs_on_peak']) / float(schedule['num_months'])
-	schedule['hrs_off_peak_per_month'] = float(schedule['hrs_off_peak']) / float(schedule['num_months'])
-	#print 'Start index:', schedule['start_index']
-	#print 'On-peak hours per day:', schedule['num_hours_on']
-	#print 'Off-peak hours per day:', schedule['num_hours_off']
-	#print 'Total hour on-peak:', schedule['hrs_on_peak']						#PRISM Impacts Inputs C51 (enter this value there)
-	#print 'Total hours off-peak:', schedule['hrs_off_peak']					#PRISM Impacts Inputs C52 (enter this value there)
-	#print 'Number of months in cooling season:', schedule['num_months']
-	#print 'Hours on-peak per month:', schedule['hrs_on_peak_per_month']		#PRISM Impacts Inputs D51
-	#print 'Hours off-peak per month:', schedule['hrs_off_peak_per_month']		#PRISM Impacts Inputs D52
-	return schedule
+	prismDRDict['startIndex'] = start_index.days * 24
+	prismDRDict['stopIndex'] = prismDRDict['startIndex'] + ((prismDRDict['dayCount']+1) * 24) - 1
+	prismDRDict['hrsOnPeak'] = (prismDRDict['stopHour'] - prismDRDict['startHour']) * prismDRDict['dayCount']
+	prismDRDict['hrsOffPeak'] = (prismDRDict['dayCount'] * 24) - prismDRDict['hrsOnPeak']
+	prismDRDict['numMonths'] = prismDRDict['stopMonth'] - prismDRDict['startMonth'] + 1
+	prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1
+	prismDRDict['numHoursOff'] = (24 - prismDRDict['numHoursOn'])
+	prismDRDict['hrsOnPeakPerMonth'] = float(prismDRDict['hrsOnPeak']) / float(prismDRDict['numMonths'])
+	prismDRDict['hrsOffPeakPerMonth'] = float(prismDRDict['hrsOffPeak']) / float(prismDRDict['numMonths'])
+	print 'Start index:', prismDRDict['startIndex']
+	print 'Stop index:', prismDRDict['stopIndex']
+	print 'On-peak hours per day:', prismDRDict['numHoursOn']
+	print 'Off-peak hours per day:', prismDRDict['numHoursOff']
+	print 'Total hour on-peak:', prismDRDict['hrsOnPeak']					#PRISM Impacts Inputs C51 (enter this value there)
+	print 'Total hours off-peak:', prismDRDict['hrsOffPeak']					#PRISM Impacts Inputs C52 (enter this value there)
+	print 'Number of months in cooling season:', prismDRDict['numMonths']
+	print 'Hours on-peak per month:', prismDRDict['hrsOnPeakPerMonth']		#PRISM Impacts Inputs D51
+	print 'Hours off-peak per month:', prismDRDict['hrsOffPeakPerMonth']	#PRISM Impacts Inputs D52
+	return prismDRDict
 
-def calcEnergy(energyProfile, schedule, load_profile):
-	for idx, load in enumerate(load_profile[schedule['start_index']:schedule['stop_index']+1]):
-		if ((idx % 24) < schedule['start_hour']) or ((idx % 24 > schedule['stop_hour'])):
-			energyProfile['off_peak'] += load
+def findCPPDays(prismDRDict):
+	#Finds largest load days and designates them CPP days.
+	maxCount = 0
+	tempLoad = prismDRDict['originalLoadProfile']
+	prismDRDict['cppDayIdx'] = []
+	while maxCount < prismDRDict['numCPPDays']:
+		maxIndex, maxLoad = max(enumerate(tempLoad), key=operator.itemgetter(1))
+		#print 'Peak load index', maxIndex
+		maxIndex = (maxIndex // 24) * 24 #First hour of day.
+		#print 'Peak load start of day', maxIndex
+		tempLoad[maxIndex:maxIndex + 23] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] #Zero-ing out so that we don't consider this day again
+		if maxIndex > prismDRDict['startIndex'] & maxIndex < prismDRDict['stopIndex']: #max day was in DR season
+			for idx in range(0,24):
+				prismDRDict['cppDayIdx'].append(maxIndex + idx)
+				#print prismDRDict['cppDayIdx'][-1]
+			maxCount+=1
+	return prismDRDict
+
+
+
+def calcEnergy(prismDRDict):
+	prismDRDict['onPeakWOCPPEnergy'] = 0
+	prismDRDict['offPeakWOCPPEnergy'] = 0
+	prismDRDict['offPeakWCPPEnergy'] = 0
+	prismDRDict['onPeakWCPPEnergy'] = 0
+	#This needs to be reworked
+	for idx, load in enumerate(prismDRDict['originalLoadProfile'][startIndex:stopIndex+1]):
+		if idx in prismDRDict['cppDayIdx']:
+			if ((idx % 24) < schedule['startHour']) or ((idx % 24 > prismDRDict['stopHour'])):
+				prismDRDict['offPeakWOCPPEnergy'] += load
+			else:
+				prismDRDict['onPeakWOCPPEnergy'] += load
+			prismDRDict['totalWOCPP'] = prismDRDict['offPeakWOCPPEnergy'] + prismDRDict['onPeakWOCPPEnergy']
 		else:
-			energyProfile['on_peak'] += load
-		energyProfile['total'] = energyProfile['off_peak'] + energyProfile['on_peak']
+			if ((idx % 24) < schedule['startHour']) or ((idx % 24 > prismDRDict['stopHour'])):
+				prismDRDict['offPeakWCPPEnergy'] += load
+			else:
+				prismDRDict['onPeakWCPPEnergy'] += load
+			prismDRDict['totalWCPP'] = prismDRDict['offPeakWCPPEnergy'] + prismDRDict['onPeakWCPPEnergy']
 	#print 'On-peak energy:', energyProfile['on_peak']		#PRISM Impacts Inputs B13 (enter this value there)
 	#print 'Off-peak energy:', energyProfile['off_peak']	#PRISM Impacts Inputs B14 (enter this value there)
 	#print 'Total energy:', energyProfile['total']			#PRISM Impacts Inputs B15
-	return energyProfile
+	return prismDRDict
 
 def calcOffPeak(rates, energyProfile):
 	original_bill = rates['flat'] * energyProfile['total']
@@ -164,19 +201,32 @@ def writeCSV(filepath, data):
 
 
 def _tests():
-			load_profile = importLoad('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_load.csv')
-			elastcity = importElast('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_elasticity.csv')
-			rates = importRates('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_rates.csv')
-			schedule = importSchedule('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_schedule.csv')
-			schdeule = calcTimes(schedule)
-			energyProfile = dict()
-			energyProfile['off_peak'] = 0
-			energyProfile['on_peak'] = 0
-			energyProfile = calcEnergy(energyProfile, schedule, load_profile)
-			rates = calcOffPeak(rates, energyProfile)
-			impact_factors = calcImpactFactors(rates, schedule, elastcity, energyProfile)
-			modified_load = applyDR(load_profile, rates, schedule, impact_factors)
-			writeCSV('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_load_modified.csv', modified_load)
+	prismDRDict = {'elasticitySub':-0.09522,
+		'elasticityDaily':-0.02302,
+		'offPeakRate': 0.1,
+		'onPeakRate': 0.3,
+		'cppRate': 1.0,
+		'startMonth': 5,
+		'stopMonth': 9,
+		'startHour': 14,
+		'stopHour': 18,
+		'rateStructure': '2tier', #options: 2tier, 3 tier, 2tierCPP
+		'numCPPDays': 10
+		}
+	load_profile = importLoad('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_load.csv')
+	prismDRDict['originalLoadProfile'] = load_profile
+	#print 'Hour 1 load value:', prismDRDict['originalLoadProfile'][1]
+	#print 'Hour 10 load value:', prismDRDict['originalLoadProfile'][10]
+	#DEPRECATED: elastcity = importElast('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_elasticity.csv')
+	#DEPRICATED: rates = importRates('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_rates.csv')
+	#DEPRICATED: schedule = importSchedule('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_schedule.csv')
+	prismDRDict = calcTimes(prismDRDict)
+	prismDRDict = findCPPDays(prismDRDict)
+	#prismDRDict = calcEnergy(prismDRDict)
+	#rates = calcOffPeak(rates, energyProfile)
+	#impact_factors = calcImpactFactors(rates, schedule, elastcity, energyProfile)
+	#modified_load = applyDR(load_profile, rates, schedule, impact_factors)
+	#writeCSV('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_load_modified.csv', modified_load)
 
 
 
