@@ -16,7 +16,7 @@ def omfCalibrate(workDir, feederPath, scadaPath):
 		if tree[key].get("module","").lower() == "powerflow":
 			tree[key] = {"module":"powerflow","solver_method":"FBS"}
 	# Attach player.
-	classOb = {"class":"player", "variable_names":["value"], "variable_types":["double"]}
+	classOb = {'omftype':'class player','argument':'{double value;}'}
 	playerOb = {"object":"player", "property":"value", "name":"scadaLoads", "file":"subScada.player", "loop":"0"}
 	maxKey = feeder.getMaxKey(tree)
 	tree[maxKey+1] = classOb
