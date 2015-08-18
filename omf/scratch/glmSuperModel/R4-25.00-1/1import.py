@@ -7,7 +7,8 @@ This feeder is a representation of a lightly populated rural area. The load is c
 TODO
 XXX Manual bug fixes: change timestamp to starttime in clock. Make sub reg reference its config by name. change the start time to match the prices in the player.
 XXX Attach additional utility tech.
-OOO Attach prosumers. What do we vary? Size of house...
+XXX Attach prosumers.
+OOO Vary prosumers. What do we vary? Size of house...
 '''
 
 import omf
@@ -51,26 +52,46 @@ def nameToKey(tree, name):
 	except:
 		return None
 
-def randomProsumer(size):
-	prosumer = {}
-	# TODO: put it here.
-	return prosumer
+prosumerTemplate = omf.feeder.parse('prosumer.glm')
 
-# Add a prosumer.
+def randomProsumer(feed, nodeKey, houseInt):
+	''' Add a single prosumer to feed replacing triplex_node at nodeKey
+		with house (etc.) with new ID houseInt. '''
+	# tPower = float(feed[nodeKey]['power_1'].replace('j','').split('+')[0])
+	tMeter = feed[nameToKey(feed, feed[nodeKey]['parent'])]
+	del feed[nodeKey]
+	maxKey = omf.feeder.getMaxKey(feed) + 1
+	for key in prosumerTemplate:
+		newKey = maxKey + key
+		feed[newKey] = dict(prosumerTemplate[key])
+		# Make sure the prosumer names are unique according to the houseInt:
+		for prop in ['name','parent']:
+			if prop in feed[newKey]:
+				feed[newKey][prop] += str(houseInt)
+		# Parent to the tMeter:
+		if feed[newKey].get('object','') in ['house','inverter']:
+			feed[newKey]['parent'] = tMeter['name']		
+		if 'sense_object' in feed[newKey]:
+			feed[newKey]['sense_object'] = tMeter['name']
+		# Make phasing match tMeter:
+		if 'phases' in feed[newKey]:
+			feed[newKey]['phases'] = tMeter['phases']
+		# Augment the meter to make it market-aware:
+		marketMeterStuff = 	{
+			'meter_power_consumption':'2+11j',
+			'bill_mode':'HOURLY',
+			'monthly_fee':'10.00',
+			'bill_day':'1',
+			'power_market':'Market_1' }
+		for k2 in marketMeterStuff:
+			tMeter[k2] = marketMeterStuff[k2]
+
 tripLoadKeys = [k for k in baseFeed if baseFeed[k].get('object','')=='triplex_node' and baseFeed[k].get('parent','')!='']
-target = min(tripLoadKeys)
-tPower = float(baseFeed[target]['power_1'].replace('j','').split('+')[0])
-tPhase = baseFeed[target]['phases']
-tParentName = baseFeed[target]['parent']
-tParentKey = nameToKey(baseFeed, tParentName)
-# del baseFeed[target]
-maxKey = omf.feeder.getMaxKey(baseFeed) + 1
-prosumer = omf.feeder.parse('prosumer.glm')
-# TODO: augment the meter.
-for key in prosumer:
-	baseFeed[maxKey + key] = dict(prosumer[key])
-	if baseFeed[maxKey + key].get('object','') == 'triplex_meter': baseFeed[maxKey + key]['parent'] = tParentName
-# TODO: add all the prosumers.
+
+# TODO: add all prosumers.
+# randomProsumer(baseFeed, min(tripLoadKeys), 123)
+for i, tripKey in enumerate(tripLoadKeys):
+	randomProsumer(baseFeed, tripKey, i)
 
 # Get attachments.
 superAttach = {fName:open(fName).read() for fName in ['superSchedules.glm','superClimate.tmy2','superCpp.player', 'superClearingPrice.player']}

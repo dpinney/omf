@@ -1,21 +1,8 @@
 // Tiny bit of GLM that models a "prosumer".
 
-object triplex_meter {
-	name triplexMeter_house;
-	phases BS;
-	parent REPLACE_ME_PLEASE;
-	groupid Residential_Meter;
-	meter_power_consumption 2+11j;
-	bill_mode HOURLY;
-	monthly_fee 10.00;
-	bill_day 1;
-	power_market Market_1;
-	nominal_voltage 120;
-};
-
 object house {
-	name house1;
-	parent triplexMeter_house;
+	name house;
+	parent REPLACE_ME;
 	groupid Residential;
 	schedule_skew 1083;
 	floor_area 3907;
@@ -46,7 +33,7 @@ object house {
 
 object ZIPload {
 	name unresponsiveLoad_house;
-	parent house1;
+	parent house;
 	schedule_skew 1083;
 	base_power unresponsive_loads*1.19;
 	heatgain_fraction 0.900;
@@ -60,7 +47,7 @@ object ZIPload {
 
 object ZIPload {
 	name responsiveLoad_house;
-	parent house1;
+	parent house;
 	schedule_skew 1083;
 	base_power responsive_loads*1.30;
 	heatgain_fraction 0.900;
@@ -100,7 +87,7 @@ object passive_controller {
 
 object waterheater {
 	name waterHeater_house;
-	parent house1;
+	parent house;
 	schedule_skew 4326;
 	heating_element_capacity 4.5 kW;
 	tank_setpoint 132.7;
@@ -129,7 +116,7 @@ object passive_controller {
 
 object evcharger_det {
 	name ev_house;
-	parent house1;
+	parent house;
 	variation_mean 300.0;
 	variation_std_dev 100.0;
 	variation_trip_mean 300.0;
@@ -149,7 +136,7 @@ object evcharger_det {
 
 object inverter {
 	name solarInverter_house;
-	parent triplexMeter_house;
+	parent REPLACE_ME;
 	generator_status ONLINE;
 	inverter_type PWM;
 	generator_mode CONSTANT_PF;
@@ -167,9 +154,9 @@ object solar {
 
 object inverter {
 	name batteryInverter_house;
-	parent triplexMeter_house;
-	sense_object triplexMeter_house;
-	phases BS;
+	parent REPLACE_ME;
+	sense_object REPLACE_ME;
+	phases REPLACE_ME;
 	generator_mode CONSTANT_PQ;
 	generator_status ONLINE;
 	inverter_type FOUR_QUADRANT;
