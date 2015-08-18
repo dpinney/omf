@@ -5,11 +5,12 @@
 // triplex_meter objects
 // also validates power_in and power_out at select transformers
 // written by: alek332
-clock{
-	timezone EST+8EDT;
-	starttime '2000-01-01 0:00:00';
-	stoptime '2000-01-01 1:00:00';
-}
+
+clock {
+	timezone PST+8PDT;
+	starttime '2009-01-01 12:00:00';
+	stoptime '2009-01-01 14:00:00';
+};
 
 #set profiler=1
 //*********************************************
