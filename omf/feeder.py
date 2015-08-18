@@ -193,14 +193,14 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(inGraph.edges())
 		# HACK2: might miss nodes without edges without the following.
-		cleanG.add_nodes_from(fGraph)
+		cleanG.add_nodes_from(inGraph)
 		pos = nx.graphviz_layout(cleanG, prog='neato')
 	else:
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
 	# Draw all the edges.
 	for e in inGraph.edges():
-		eType = inGraph.edge[e[0]][e[1]]['type']
-		ePhases = inGraph.edge[e[0]][e[1]]['phases']
+		eType = inGraph.edge[e[0]][e[1]].get('type','underground_line')
+		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
 		standArgs = {'edgelist':[e],
 					 'edge_color':_obToCol(eType),
 					 'width':2,
@@ -222,7 +222,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 	# Draw nodes and optional labels.
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=pos.keys(),
-						   node_color=[_obToCol(inGraph.node[n]['type']) for n in inGraph],
+						   node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
 						   linewidths=0,
 						   node_size=40)
 	if labels:
@@ -489,7 +489,7 @@ def _tests():
 		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)
-	# plt.show()
+	plt.show()
 
 if __name__ == '__main__':
 	_tests()
