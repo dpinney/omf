@@ -3,12 +3,17 @@ Try to import another rural feeder in to the OMF.
 
 Feeder 16: R4-25.00-1
 This feeder is a representation of a lightly populated rural area. The load is composed on single family residences with some light commercial. Approximately 88% of the circuit-feet are overhead and 12% underground. This feeder has connections to adjacent feeders. This combined with the low load density ensures the ability to transfer most of the loads from other feeders, and vice versa. Most of the load is located at a substantial distance from the substation, as is common for higher voltages in rural areas.
+
+TODO
+XXX Manual bug fixes: change timestamp to starttime in clock. Make sub reg reference its config by name.
+OOO Attach prosumers. What do we vary?
+
 '''
 
 import omf
 
-# Read in the glm (or cache, if it's cached.)
-baseFeed = omf.feeder.parse('../prototypical feeders/test_R4-25.00-1_NR.glm')
+# Read in the glm.
+baseFeed = omf.feeder.parse('base_R4-25.00-1.glm')
 
 # Fix the colon-number things.
 for k in baseFeed:
@@ -33,6 +38,14 @@ for key in baseFeed.keys():
 	if baseFeed[key].get('object','') == 'complex_assert':
 		del baseFeed[key]
 
-# Write a new version.
-with open('anotherAttempt.glm', 'w+') as jFile:
-	jFile.write(omf.feeder.sortedWrite(baseFeed))
+# allMeters = [baseFeed[k]['name'] for k in baseFeed.keys() if baseFeed[k].get('object','') == 'triplex_meter']
+# print allMeters
+
+# Run the thing.
+output = omf.solvers.gridlabd.runInFilesystem(
+	baseFeed,
+	attachments={}, 
+	keepFiles=True, 
+	workDir='./runningDir',
+	glmName='superModelTinyModified.glm')
+print 'GLD OUTPUT=============\n', output['stderr'],'\n======================='

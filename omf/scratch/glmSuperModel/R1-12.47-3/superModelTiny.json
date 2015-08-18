@@ -824,19 +824,22 @@
             "length": "234.203", 
             "configuration": "line_configuration_18"
         }, 
+        "257": {
+            "powerC_rating": "50.0", 
+            "power_rating": "50.0", 
+            "primary_voltage": "12470.000 V", 
+            "install_type": "PADMOUNT", 
+            "object": "transformer_configuration", 
+            "secondary_voltage": "480 V", 
+            "connect_type": "WYE_WYE", 
+            "resistance": "0.00200", 
+            "reactance": "0.01000", 
+            "name": "transformer_configuration_134"
+        }, 
         "3": {
             "solver_method": "NR", 
             "default_maximum_voltage_error": "1e-9", 
             "module": "powerflow"
-        }, 
-        "177": {
-            "phases": "CN", 
-            "from": "R1-12-47-3_node_4", 
-            "name": "R1-12-47-3_ol_3", 
-            "object": "overhead_line", 
-            "to": "R1-12-47-3_node_6", 
-            "length": "157.766", 
-            "configuration": "line_configuration_20"
         }, 
         "7": {
             "Control": "OUTPUT_VOLTAGE", 
@@ -852,6 +855,14 @@
             "band_width": "120", 
             "tap_pos_C": "0", 
             "lower_taps": "16"
+        }, 
+        "231": {
+            "status": "CLOSED", 
+            "phases": "ABCN", 
+            "from": "R1-12-47-3_node_15", 
+            "name": "R1-12-47-3_switch_4", 
+            "object": "switch", 
+            "to": "R1-12-47-3_node_17"
         }, 
         "313": {
             "variation_trip_std_dev": "100.0", 
@@ -1226,17 +1237,14 @@
             "powerB_rating": "450.0", 
             "name": "transformer_configuration_132"
         }, 
-        "257": {
-            "powerC_rating": "50.0", 
-            "power_rating": "50.0", 
-            "primary_voltage": "12470.000 V", 
-            "install_type": "PADMOUNT", 
-            "object": "transformer_configuration", 
-            "secondary_voltage": "480 V", 
-            "connect_type": "WYE_WYE", 
-            "resistance": "0.00200", 
-            "reactance": "0.01000", 
-            "name": "transformer_configuration_134"
+        "177": {
+            "phases": "CN", 
+            "from": "R1-12-47-3_node_4", 
+            "name": "R1-12-47-3_ol_3", 
+            "object": "overhead_line", 
+            "to": "R1-12-47-3_node_6", 
+            "length": "157.766", 
+            "configuration": "line_configuration_20"
         }, 
         "254": {
             "phases": "ABCN", 
@@ -1571,6 +1579,15 @@
             "to": "R1-12-47-3_node_14", 
             "length": "275.331", 
             "configuration": "line_configuration_23"
+        }, 
+        "142": {
+            "phases": "ABCN", 
+            "name": "R1-12-47-3_node_36", 
+            "object": "node", 
+            "voltage_B": "-3600-6235j", 
+            "voltage_C": "-3600+6235j", 
+            "voltage_A": "7200+0.0j", 
+            "nominal_voltage": "7200"
         }, 
         "98": {
             "phases": "ABCN", 
@@ -1920,15 +1937,6 @@
             "nominal_voltage": "7200", 
             "constant_power_B": "19800+600j"
         }, 
-        "16": {
-            "name": "line_configuration_18", 
-            "object": "line_configuration", 
-            "spacing": "line_spacing_10", 
-            "conductor_N": "overhead_line_conductor_3", 
-            "conductor_A": "overhead_line_conductor_3", 
-            "conductor_C": "overhead_line_conductor_3", 
-            "conductor_B": "overhead_line_conductor_3"
-        }, 
         "36": {
             "distance_AN": "84.0 in", 
             "object": "line_spacing", 
@@ -2004,13 +2012,14 @@
             "to": "R1-12-47-3_meter_1", 
             "configuration": "transformer_configuration_134"
         }, 
-        "236": {
-            "phases": "ABCN", 
-            "from": "R1-12-47-3_node_10", 
-            "name": "R1-12-47-3_xfmr_3", 
-            "object": "transformer", 
-            "to": "R1-12-47-3_meter_2", 
-            "configuration": "transformer_configuration_135"
+        "16": {
+            "name": "line_configuration_18", 
+            "object": "line_configuration", 
+            "spacing": "line_spacing_10", 
+            "conductor_N": "overhead_line_conductor_3", 
+            "conductor_A": "overhead_line_conductor_3", 
+            "conductor_C": "overhead_line_conductor_3", 
+            "conductor_B": "overhead_line_conductor_3"
         }, 
         "237": {
             "phases": "ACN", 
@@ -2028,13 +2037,13 @@
             "object": "switch", 
             "to": "R1-12-47-3_node_49"
         }, 
-        "231": {
-            "status": "CLOSED", 
+        "236": {
             "phases": "ABCN", 
-            "from": "R1-12-47-3_node_15", 
-            "name": "R1-12-47-3_switch_4", 
-            "object": "switch", 
-            "to": "R1-12-47-3_node_17"
+            "from": "R1-12-47-3_node_10", 
+            "name": "R1-12-47-3_xfmr_3", 
+            "object": "transformer", 
+            "to": "R1-12-47-3_meter_2", 
+            "configuration": "transformer_configuration_135"
         }, 
         "232": {
             "status": "CLOSED", 
@@ -2172,13 +2181,6 @@
             "voltage_A": "7200+0.0j", 
             "nominal_voltage": "7200"
         }, 
-        "78": {
-            "voltage_B": "-3600-6235j", 
-            "phases": "BN", 
-            "object": "meter", 
-            "nominal_voltage": "7200", 
-            "name": "R1-12-47-3_meter_9"
-        }, 
         "146": {
             "voltage_B": "-3600-6235j", 
             "phases": "BN", 
@@ -2209,14 +2211,14 @@
             "nominal_voltage": "7200", 
             "name": "R1-12-47-3_node_39"
         }, 
-        "142": {
+        "205": {
             "phases": "ABCN", 
-            "name": "R1-12-47-3_node_36", 
-            "object": "node", 
-            "voltage_B": "-3600-6235j", 
-            "voltage_C": "-3600+6235j", 
-            "voltage_A": "7200+0.0j", 
-            "nominal_voltage": "7200"
+            "from": "R1-12-47-3_node_27", 
+            "name": "R1-12-47-3_ol_22", 
+            "object": "overhead_line", 
+            "to": "R1-12-47-3_node_31", 
+            "length": "229.262", 
+            "configuration": "line_configuration_27"
         }, 
         "143": {
             "voltage_B": "-3600-6235j", 
@@ -2350,14 +2352,12 @@
             "voltage_A": "7200+0.0j", 
             "nominal_voltage": "7200"
         }, 
-        "205": {
-            "phases": "ABCN", 
-            "from": "R1-12-47-3_node_27", 
-            "name": "R1-12-47-3_ol_22", 
-            "object": "overhead_line", 
-            "to": "R1-12-47-3_node_31", 
-            "length": "229.262", 
-            "configuration": "line_configuration_27"
+        "78": {
+            "voltage_B": "-3600-6235j", 
+            "phases": "BN", 
+            "object": "meter", 
+            "nominal_voltage": "7200", 
+            "name": "R1-12-47-3_meter_9"
         }, 
         "2": {
             "omftype": "module", 

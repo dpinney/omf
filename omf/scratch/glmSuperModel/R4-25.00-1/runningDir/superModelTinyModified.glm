@@ -16,13 +16,13 @@ object regulator {
 	from R4-25-00-1_node_231;
 	name R4-25-00-1_reg_1;
 	to R4-25-00-1_meter_2;
-	configuration regulator_configuration_1212;
+	configuration feeder_reg_cfg;
 };
 
 object recorder {
-	interval 60;
 	name R4-25-00-1_reg_1recorder5;
 	parent R4-25-00-1_reg_1;
+	interval 60;
 	limit 144;
 	file "R4-25.00-1_reg_output.csv";
 	property tap_A,tap_B,tap_C,power_in_A.real,power_in_A.imag,power_in_B.real,power_in_B.imag,power_in_C.real,power_in_C.imag,power_in.real,power_in.imag;
@@ -38,9 +38,9 @@ object regulator_configuration {
 	connect_type WYE_WYE;
 	time_delay 30;
 	regulation 0.10;
-	lower_taps 16;
-	tap_pos_C 0;
 	band_width 120.3;
+	tap_pos_C 0;
+	lower_taps 16;
 };
 
 object fuse {
@@ -303,10 +303,10 @@ object line_configuration {
 };
 
 object line_configuration {
+	conductor_C overhead_line_conductor_2;
 	conductor_N overhead_line_conductor_2;
 	spacing line_spacing_9;
 	name line_configuration_17;
-	conductor_C overhead_line_conductor_2;
 };
 
 object line_configuration {
@@ -326,24 +326,24 @@ object line_configuration {
 };
 
 object line_configuration {
+	conductor_A overhead_line_conductor_2;
 	conductor_N overhead_line_conductor_2;
 	spacing line_spacing_11;
-	conductor_A overhead_line_conductor_2;
 	name line_configuration_20;
 };
 
 object line_configuration {
+	conductor_C overhead_line_conductor_5;
 	conductor_N overhead_line_conductor_5;
 	spacing line_spacing_9;
 	name line_configuration_21;
-	conductor_C overhead_line_conductor_5;
 };
 
 object line_configuration {
+	conductor_C overhead_line_conductor_5;
 	conductor_N overhead_line_conductor_5;
 	spacing line_spacing_9;
 	name line_configuration_22;
-	conductor_C overhead_line_conductor_5;
 };
 
 object line_configuration {
@@ -355,30 +355,30 @@ object line_configuration {
 };
 
 object line_configuration {
+	conductor_C underground_line_conductor_6;
 	conductor_N underground_line_conductor_6;
 	spacing line_spacing_13;
 	name line_configuration_24;
-	conductor_C underground_line_conductor_6;
 };
 
 object line_configuration {
+	conductor_C underground_line_conductor_6;
 	conductor_N underground_line_conductor_6;
 	spacing line_spacing_9;
 	name line_configuration_25;
-	conductor_C underground_line_conductor_6;
 };
 
 object line_configuration {
+	conductor_A underground_line_conductor_6;
 	conductor_N underground_line_conductor_6;
 	spacing line_spacing_14;
-	conductor_A underground_line_conductor_6;
 	name line_configuration_26;
 };
 
 object line_configuration {
+	conductor_A overhead_line_conductor_4;
 	conductor_N overhead_line_conductor_4;
 	spacing line_spacing_11;
-	conductor_A overhead_line_conductor_4;
 	name line_configuration_27;
 };
 
@@ -445,9 +445,9 @@ object line_spacing {
 
 object load {
 	phases ACN;
-	load_class C;
 	name R4-25-00-1_load_1;
 	parent R4-25-00-1_meter_1;
+	load_class C;
 	voltage_C -7188.01+12450j;
 	voltage_A 14376.02+0.0j;
 	constant_power_C 5000+1000j;
@@ -925,10 +925,10 @@ object node {
 };
 
 object node {
-	phases CN;
-	name R4-25-00-1_node_61;
 	voltage_C -7188.01+12450j;
+	phases CN;
 	nominal_voltage 14376.02;
+	name R4-25-00-1_node_61;
 };
 
 object node {
@@ -1227,10 +1227,10 @@ object node {
 };
 
 object node {
-	phases CN;
-	name R4-25-00-1_node_103;
 	voltage_C -7188.01+12450j;
+	phases CN;
 	nominal_voltage 14376.02;
+	name R4-25-00-1_node_103;
 };
 
 object node {
@@ -3728,38 +3728,38 @@ object overhead_line {
 };
 
 object overhead_line_conductor {
-	resistance 0.94500;
-	geometric_mean_radius 0.00836 ft;
-	name overhead_line_conductor_2;
 	rating.summer.continuous 204.0;
+	resistance 0.94500;
+	name overhead_line_conductor_2;
+	geometric_mean_radius 0.00836 ft;
 };
 
 object overhead_line_conductor {
-	resistance 0.30300;
-	geometric_mean_radius 0.02300 ft;
-	name overhead_line_conductor_3;
 	rating.summer.continuous 530.0;
+	resistance 0.30300;
+	name overhead_line_conductor_3;
+	geometric_mean_radius 0.02300 ft;
 };
 
 object overhead_line_conductor {
-	resistance 1.50000;
-	geometric_mean_radius 0.00663 ft;
-	name overhead_line_conductor_4;
 	rating.summer.continuous 149.0;
+	resistance 1.50000;
+	name overhead_line_conductor_4;
+	geometric_mean_radius 0.00663 ft;
 };
 
 object overhead_line_conductor {
-	resistance 0.16600;
-	geometric_mean_radius 0.01200 ft;
-	name overhead_line_conductor_5;
 	rating.summer.continuous 256.0;
+	resistance 0.16600;
+	name overhead_line_conductor_5;
+	geometric_mean_radius 0.01200 ft;
 };
 
 object overhead_line_conductor {
-	resistance 0.63800;
-	geometric_mean_radius 0.00600 ft;
-	name overhead_line_conductor_7;
 	rating.summer.continuous 300.0;
+	resistance 0.63800;
+	name overhead_line_conductor_7;
+	geometric_mean_radius 0.00600 ft;
 };
 
 object switch {
@@ -6412,9 +6412,9 @@ object triplex_line {
 };
 
 object triplex_line_conductor {
-	geometric_mean_radius 0.0111;
-	name TLC 1/0 AA triplex;
 	resistance 0.97;
+	name TLC 1/0 AA triplex;
+	geometric_mean_radius 0.0111;
 };
 
 object triplex_line_configuration {

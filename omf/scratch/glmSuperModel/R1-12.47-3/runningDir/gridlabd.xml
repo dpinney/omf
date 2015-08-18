@@ -40,7 +40,7 @@
 	<strictnames>TRUE</strictnames>
 	<website>http://www.gridlabd.org/</website>
 	<urlbase>http://www.gridlabd.org/</urlbase>
-	<randomseed>1699556020</randomseed>
+	<randomseed>75381136</randomseed>
 	<include>""</include>
 	<trace>""</trace>
 	<gdb_window>FALSE</gdb_window>
@@ -117,124 +117,216 @@
 			<rank>
 				<ordinal>5</ordinal>
 				<object>
-					<name>R1-12-47-3_meter_1</name>
-					<id>56</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_39</name>
-					<id>116</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_2</name>
-					<id>79</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_46</name>
-					<id>123</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_13</name>
-					<id>90</id>
+					<name>R1-12-47-3_node_28</name>
+					<id>105</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_47</name>
 					<id>124</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_7</name>
-					<id>84</id>
+					<name>R1-12-47-3_node_41</name>
+					<id>118</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_20</name>
-					<id>75</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_2</name>
-					<id>57</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_22</name>
-					<id>99</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_tn_1</name>
-					<id>214</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_49</name>
-					<id>126</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_17</name>
-					<id>72</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_38</name>
-					<id>115</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_34</name>
-					<id>111</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_10</name>
-					<id>87</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_18</name>
-					<id>95</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_4</name>
-					<id>59</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_19</name>
-					<id>96</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_40</name>
-					<id>117</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_29</name>
-					<id>106</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_4</name>
-					<id>81</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_18</name>
-					<id>73</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_21</name>
-					<id>98</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_16</name>
-					<id>93</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_1</name>
-					<id>78</id>
+					<name>R1-12-47-3_node_39</name>
+					<id>116</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_9</name>
 					<id>86</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_44</name>
-					<id>121</id>
+					<name>R1-12-47-3_node_48</name>
+					<id>125</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_41</name>
-					<id>118</id>
+					<name>R1-12-47-3_node_3</name>
+					<id>80</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_16</name>
+					<id>71</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_19</name>
+					<id>74</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_4</name>
+					<id>59</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_5</name>
+					<id>60</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_10</name>
+					<id>87</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_13</name>
+					<id>68</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_20</name>
+					<id>97</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_19</name>
+					<id>96</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_49</name>
+					<id>126</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_21</name>
+					<id>98</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_meter_14</name>
 					<id>69</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_22</name>
+					<id>77</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_1</name>
+					<id>78</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_25</name>
+					<id>102</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_9</name>
+					<id>64</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_5</name>
+					<id>82</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_4</name>
+					<id>81</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_37</name>
+					<id>114</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_10</name>
+					<id>65</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_32</name>
+					<id>109</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_31</name>
+					<id>108</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_2</name>
+					<id>79</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_7</name>
+					<id>84</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_8</name>
+					<id>63</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_11</name>
+					<id>88</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_14</name>
+					<id>91</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_26</name>
+					<id>103</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_17</name>
+					<id>72</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_15</name>
+					<id>70</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_6</name>
+					<id>61</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_33</name>
+					<id>110</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_12</name>
+					<id>67</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_45</name>
+					<id>122</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_7</name>
+					<id>62</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_11</name>
+					<id>66</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_30</name>
+					<id>107</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_27</name>
+					<id>104</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_50</name>
+					<id>127</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_1</name>
+					<id>56</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_21</name>
+					<id>76</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_18</name>
+					<id>95</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_24</name>
+					<id>101</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_44</name>
+					<id>121</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_38</name>
+					<id>115</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_6</name>
+					<id>83</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tm_1</name>
+					<id>213</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_36</name>
@@ -245,187 +337,99 @@
 					<id>92</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_6</name>
-					<id>83</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_11</name>
-					<id>88</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_3</name>
-					<id>80</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_23</name>
-					<id>100</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_19</name>
-					<id>74</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_26</name>
-					<id>103</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_5</name>
-					<id>60</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_12</name>
-					<id>67</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_7</name>
-					<id>62</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_33</name>
-					<id>110</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_24</name>
-					<id>101</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_43</name>
-					<id>120</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_20</name>
-					<id>97</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_32</name>
-					<id>109</id>
+					<name>R1-12-47-3_node_46</name>
+					<id>123</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_12</name>
 					<id>89</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_50</name>
-					<id>127</id>
+					<name>R1-12-47-3_node_22</name>
+					<id>99</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_20</name>
+					<id>75</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_35</name>
 					<id>112</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_tm_1</name>
-					<id>213</id>
+					<name>R1-12-47-3_meter_2</name>
+					<id>57</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_8</name>
-					<id>63</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_42</name>
-					<id>119</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_9</name>
-					<id>64</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_15</name>
-					<id>70</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_14</name>
-					<id>91</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_16</name>
-					<id>71</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_28</name>
-					<id>105</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_5</name>
-					<id>82</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_13</name>
-					<id>68</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_17</name>
-					<id>94</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_45</name>
-					<id>122</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_21</name>
-					<id>76</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_10</name>
-					<id>65</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_31</name>
-					<id>108</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_48</name>
-					<id>125</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_8</name>
-					<id>85</id>
+					<name>R1-12-47-3_node_13</name>
+					<id>90</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_51</name>
 					<id>128</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_6</name>
-					<id>61</id>
+					<name>R1-12-47-3_node_34</name>
+					<id>111</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_37</name>
-					<id>114</id>
+					<name>R1-12-47-3_meter_18</name>
+					<id>73</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_27</name>
-					<id>104</id>
+					<name>R1-12-47-3_node_42</name>
+					<id>119</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_43</name>
+					<id>120</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_8</name>
+					<id>85</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tn_1</name>
+					<id>214</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_16</name>
+					<id>93</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_meter_3</name>
 					<id>58</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_11</name>
-					<id>66</id>
+					<name>R1-12-47-3_node_40</name>
+					<id>117</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_25</name>
-					<id>102</id>
+					<name>R1-12-47-3_node_23</name>
+					<id>100</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_30</name>
-					<id>107</id>
+					<name>R1-12-47-3_node_29</name>
+					<id>106</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_22</name>
-					<id>77</id>
+					<name>R1-12-47-3_node_17</name>
+					<id>94</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>4</ordinal>
 				<object>
+					<name>R1-12-47-3_load_11</name>
+					<id>45</id>
+				</object>
+				<object>
 					<name>R1-12-47-3_load_9</name>
 					<id>43</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_load_16</name>
-					<id>50</id>
+					<name>R1-12-47-3_load_15</name>
+					<id>49</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_load_12</name>
@@ -436,20 +440,44 @@
 					<id>52</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_load_8</name>
-					<id>42</id>
+					<name>R1-12-47-3_load_13</name>
+					<id>47</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_load_19</name>
-					<id>53</id>
+					<name>R1-12-47-3_load_5</name>
+					<id>39</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_load_20</name>
 					<id>54</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_load_11</name>
-					<id>45</id>
+					<name>R1-12-47-3_load_7</name>
+					<id>41</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_19</name>
+					<id>53</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_16</name>
+					<id>50</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_17</name>
+					<id>51</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_1</name>
+					<id>35</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_8</name>
+					<id>42</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_3</name>
+					<id>37</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_load_10</name>
@@ -460,6 +488,22 @@
 					<id>36</id>
 				</object>
 				<object>
+					<name>R1-12-47-1_cap_1</name>
+					<id>248</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tn_2</name>
+					<id>215</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_14</name>
+					<id>48</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_21</name>
+					<id>55</id>
+				</object>
+				<object>
 					<name>R1-12-47-3_load_6</name>
 					<id>40</id>
 				</object>
@@ -468,122 +512,82 @@
 					<id>129</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_load_7</name>
-					<id>41</id>
-				</object>
-				<object>
 					<name>house1_triplexMeter</name>
 					<id>230</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_17</name>
-					<id>51</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_load_4</name>
 					<id>38</id>
 				</object>
-				<object>
-					<name>R1-12-47-3_load_21</name>
-					<id>55</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_tn_2</name>
-					<id>215</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_3</name>
-					<id>37</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_15</name>
-					<id>49</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_5</name>
-					<id>39</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_13</name>
-					<id>47</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_14</name>
-					<id>48</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_1</name>
-					<id>35</id>
-				</object>
 			</rank>
 			<rank>
 				<ordinal>3</ordinal>
 				<object>
-					<name>house1_windInverter</name>
+					<name>inv1</name>
 					<id>242</id>
+				</object>
+				<object>
+					<name>volt_var_control</name>
+					<id>247</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>2</ordinal>
 				<object>
-					<name>R1-12-47-3_ol_24</name>
-					<id>154</id>
+					<name>R1-12-47-3_switch_5</name>
+					<id>170</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_4</name>
-					<id>134</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_21</name>
-					<id>192</id>
+					<name>R1-12-47-3_ol_3</name>
+					<id>133</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_switch_4</name>
 					<id>169</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_8</name>
-					<id>138</id>
+					<name>R1-12-47-3_ol_17</name>
+					<id>147</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_16</name>
-					<id>146</id>
+					<name>R1-12-47-3_ol_27</name>
+					<id>157</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_11</name>
-					<id>182</id>
+					<name>R1-12-47-3_ol_20</name>
+					<id>150</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_12</name>
-					<id>183</id>
+					<name>R1-12-47-3_xfmr_17</name>
+					<id>188</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_19</name>
-					<id>149</id>
+					<name>R1-12-47-3_fuse_6</name>
+					<id>8</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_fuse_4</name>
-					<id>6</id>
+					<name>R1-12-47-3_ol_18</name>
+					<id>148</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_21</name>
-					<id>151</id>
+					<name>R1-12-47-3_xfmr_21</name>
+					<id>192</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_14</name>
-					<id>185</id>
+					<name>rect1</name>
+					<id>243</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_9</name>
+					<id>139</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_1</name>
+					<id>216</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ul_2</name>
 					<id>217</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_3</name>
-					<id>218</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_28</name>
-					<id>158</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ol_10</name>
@@ -598,240 +602,244 @@
 					<id>173</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_29</name>
-					<id>159</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_2</name>
-					<id>167</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_1</name>
-					<id>131</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_13</name>
-					<id>184</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_5</name>
-					<id>170</id>
-				</object>
-				<object>
-					<name>house1_solarInverter</name>
-					<id>238</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_15</name>
-					<id>186</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_3</name>
-					<id>168</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_2</name>
-					<id>132</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_1</name>
-					<id>216</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_20</name>
-					<id>191</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_7</name>
-					<id>9</id>
+					<name>house1</name>
+					<id>231</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ol_7</name>
 					<id>137</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_5</name>
-					<id>135</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_tl_1</name>
-					<id>210</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_3</name>
-					<id>133</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_17</name>
-					<id>147</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_22</name>
-					<id>193</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_1</name>
-					<id>3</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_6</name>
-					<id>171</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_7</name>
-					<id>222</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_12</name>
-					<id>142</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_18</name>
-					<id>148</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_8</name>
-					<id>179</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_23</name>
-					<id>153</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_9</name>
-					<id>180</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_13</name>
-					<id>143</id>
-				</object>
-				<object>
-					<name>house1_windRectifier</name>
-					<id>243</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_6</name>
-					<id>177</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_6</name>
-					<id>8</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_9</name>
-					<id>139</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_30</name>
-					<id>160</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_18</name>
-					<id>189</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_10</name>
-					<id>181</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_3</name>
-					<id>174</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_14</name>
-					<id>144</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_20</name>
-					<id>150</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_5</name>
-					<id>176</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_1</name>
-					<id>166</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_3</name>
-					<id>5</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_1</name>
-					<id>172</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_15</name>
-					<id>145</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_6</name>
-					<id>136</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_4</name>
-					<id>175</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_5</name>
-					<id>220</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_22</name>
-					<id>152</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_11</name>
-					<id>141</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_2</name>
-					<id>4</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_4</name>
-					<id>219</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_26</name>
-					<id>156</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_25</name>
-					<id>155</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_19</name>
-					<id>190</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_6</name>
-					<id>221</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_27</name>
-					<id>157</id>
+					<name>R1-12-47-3_ol_21</name>
+					<id>151</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_xfmr_16</name>
 					<id>187</id>
 				</object>
 				<object>
+					<name>R1-12-47-3_xfmr_8</name>
+					<id>179</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_26</name>
+					<id>156</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_2</name>
+					<id>4</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_24</name>
+					<id>154</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_3</name>
+					<id>168</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_12</name>
+					<id>142</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_6</name>
+					<id>136</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_13</name>
+					<id>143</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_15</name>
+					<id>145</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_14</name>
+					<id>144</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tl_1</name>
+					<id>210</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_2</name>
+					<id>132</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_18</name>
+					<id>189</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_2</name>
+					<id>167</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_12</name>
+					<id>183</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_29</name>
+					<id>159</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_7</name>
+					<id>222</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_4</name>
+					<id>175</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_1</name>
+					<id>172</id>
+				</object>
+				<object>
+					<name>house1_solarInverter</name>
+					<id>238</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_22</name>
+					<id>152</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_3</name>
+					<id>174</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_9</name>
+					<id>180</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_1</name>
+					<id>3</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_16</name>
+					<id>146</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_5</name>
+					<id>135</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_7</name>
+					<id>9</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_1</name>
+					<id>131</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_4</name>
+					<id>219</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_10</name>
+					<id>181</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_1</name>
+					<id>166</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_6</name>
+					<id>171</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_19</name>
+					<id>149</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_23</name>
+					<id>153</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_30</name>
+					<id>160</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_3</name>
+					<id>5</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_8</name>
+					<id>138</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_13</name>
+					<id>184</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_25</name>
+					<id>155</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_20</name>
+					<id>191</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_5</name>
+					<id>220</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_4</name>
+					<id>134</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_15</name>
+					<id>186</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_6</name>
+					<id>221</id>
+				</object>
+				<object>
 					<name>R1-12-47-3_fuse_5</name>
 					<id>7</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_17</name>
-					<id>188</id>
+					<name>R1-12-47-3_ul_3</name>
+					<id>218</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_28</name>
+					<id>158</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_22</name>
+					<id>193</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_11</name>
+					<id>182</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_19</name>
+					<id>190</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_5</name>
+					<id>176</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ul_8</name>
 					<id>223</id>
 				</object>
 				<object>
-					<name>house1</name>
-					<id>231</id>
+					<name>R1-12-47-3_ol_11</name>
+					<id>141</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_4</name>
+					<id>6</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_6</name>
+					<id>177</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_14</name>
+					<id>185</id>
 				</object>
 			</rank>
 			<rank>
@@ -845,20 +853,24 @@
 					<id>239</id>
 				</object>
 				<object>
-					<name>house1_windTurbine</name>
+					<name>windturb1</name>
 					<id>244</id>
-				</object>
-				<object>
-					<name>house1_waterHeater</name>
-					<id>235</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_reg_1</name>
 					<id>0</id>
 				</object>
 				<object>
+					<name>utilOwnedWind</name>
+					<id>246</id>
+				</object>
+				<object>
 					<name>Market_1</name>
 					<id>228</id>
+				</object>
+				<object>
+					<name>house1_waterHeater</name>
+					<id>235</id>
 				</object>
 			</rank>
 			<rank>
@@ -898,55 +910,79 @@
 					<id>234</id>
 				</object>
 				<object>
-					<name>house1_unresponsiveLoad</name>
-					<id>232</id>
-				</object>
-				<object>
 					<name>house1_ev</name>
 					<id>237</id>
 				</object>
 				<object>
-					<name>house1_diesel</name>
-					<id>245</id>
+					<name>house1_waterHeater_controller</name>
+					<id>236</id>
+				</object>
+				<object>
+					<name>house1_unresponsiveLoad</name>
+					<id>232</id>
 				</object>
 				<object>
 					<name>house1_battery</name>
 					<id>241</id>
 				</object>
 				<object>
-					<name>house1_waterHeater_controller</name>
-					<id>236</id>
+					<name>utilOwnedDiesel</name>
+					<id>245</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>1</ordinal>
 				<object>
-					<name>R1-12-47-3_reg_1</name>
-					<id>0</id>
-				</object>
-				<object>
-					<name>house1_waterHeater</name>
-					<id>235</id>
+					<name>windturb1</name>
+					<id>244</id>
 				</object>
 				<object>
 					<name>house1_batteryInverter</name>
 					<id>240</id>
 				</object>
 				<object>
-					<name>house1_responsiveLoad</name>
-					<id>233</id>
+					<name>utilOwnedWind</name>
+					<id>246</id>
 				</object>
 				<object>
-					<name>house1_windTurbine</name>
-					<id>244</id>
+					<name>R1-12-47-3_reg_1</name>
+					<id>0</id>
 				</object>
 				<object>
 					<name>house1_solar</name>
 					<id>239</id>
 				</object>
+				<object>
+					<name>house1_responsiveLoad</name>
+					<id>233</id>
+				</object>
+				<object>
+					<name>house1_waterHeater</name>
+					<id>235</id>
+				</object>
 			</rank>
 			<rank>
 				<ordinal>2</ordinal>
+				<object>
+					<name>R1-12-47-3_ul_8</name>
+					<id>223</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_25</name>
+					<id>155</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_6</name>
+					<id>177</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_21</name>
+					<id>151</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_8</name>
+					<id>138</id>
+				</object>
 				<object>
 					<name>R1-12-47-3_ul_5</name>
 					<id>220</id>
@@ -956,256 +992,104 @@
 					<id>184</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_11</name>
-					<id>182</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_28</name>
-					<id>158</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_3</name>
-					<id>133</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_3</name>
-					<id>5</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_7</name>
-					<id>178</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_8</name>
-					<id>223</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_2</name>
-					<id>132</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_4</name>
-					<id>6</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_1</name>
-					<id>3</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_16</name>
-					<id>146</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_15</name>
-					<id>145</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_3</name>
-					<id>168</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_10</name>
-					<id>181</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_2</name>
-					<id>4</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_20</name>
-					<id>191</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_4</name>
-					<id>169</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_29</name>
-					<id>159</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_8</name>
-					<id>179</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_1</name>
-					<id>166</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_16</name>
-					<id>187</id>
+					<name>R1-12-47-3_ol_7</name>
+					<id>137</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ol_27</name>
 					<id>157</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_6</name>
-					<id>177</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_5</name>
-					<id>135</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_23</name>
-					<id>153</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_4</name>
-					<id>134</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_8</name>
-					<id>138</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_2</name>
-					<id>167</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_13</name>
-					<id>143</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_3</name>
-					<id>174</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_20</name>
-					<id>150</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_22</name>
-					<id>193</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_14</name>
-					<id>185</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_26</name>
-					<id>156</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_7</name>
-					<id>137</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_5</name>
-					<id>176</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_2</name>
-					<id>173</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_1</name>
-					<id>216</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_5</name>
-					<id>170</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_tl_1</name>
-					<id>210</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_30</name>
-					<id>160</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_7</name>
-					<id>222</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_5</name>
-					<id>7</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_17</name>
-					<id>147</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_24</name>
-					<id>154</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_15</name>
-					<id>186</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_3</name>
-					<id>218</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_2</name>
-					<id>217</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_9</name>
-					<id>180</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_6</name>
-					<id>171</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_18</name>
-					<id>189</id>
-				</object>
-				<object>
 					<name>R1-12-47-3_ol_22</name>
 					<id>152</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_6</name>
+					<id>8</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_7</name>
+					<id>9</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ol_14</name>
 					<id>144</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_19</name>
-					<id>190</id>
+					<name>R1-12-47-3_ul_3</name>
+					<id>218</id>
 				</object>
 				<object>
-					<name>house1_solarInverter</name>
-					<id>238</id>
+					<name>R1-12-47-3_xfmr_5</name>
+					<id>176</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_21</name>
-					<id>192</id>
+					<name>R1-12-47-3_ol_16</name>
+					<id>146</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_1</name>
-					<id>131</id>
+					<name>R1-12-47-3_fuse_1</name>
+					<id>3</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_12</name>
-					<id>183</id>
+					<name>R1-12-47-3_ol_28</name>
+					<id>158</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_19</name>
-					<id>149</id>
+					<name>R1-12-47-3_ol_30</name>
+					<id>160</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_25</name>
-					<id>155</id>
+					<name>R1-12-47-3_fuse_5</name>
+					<id>7</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_9</name>
-					<id>139</id>
+					<name>R1-12-47-3_ol_23</name>
+					<id>153</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ul_4</name>
-					<id>219</id>
+					<name>R1-12-47-3_xfmr_11</name>
+					<id>182</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_21</name>
-					<id>151</id>
+					<name>R1-12-47-3_xfmr_2</name>
+					<id>173</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_10</name>
-					<id>140</id>
+					<name>R1-12-47-3_xfmr_1</name>
+					<id>172</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_6</name>
+					<id>171</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_24</name>
+					<id>154</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_15</name>
+					<id>145</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_22</name>
+					<id>193</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_1</name>
+					<id>216</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_3</name>
+					<id>174</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_4</name>
+					<id>169</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_2</name>
+					<id>217</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ol_12</name>
@@ -1216,349 +1100,345 @@
 					<id>221</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_1</name>
-					<id>172</id>
+					<name>R1-12-47-3_ol_17</name>
+					<id>147</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_4</name>
-					<id>175</id>
+					<name>R1-12-47-3_ul_4</name>
+					<id>219</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_fuse_6</name>
-					<id>8</id>
+					<name>R1-12-47-3_ol_1</name>
+					<id>131</id>
 				</object>
 				<object>
-					<name>house1</name>
-					<id>231</id>
+					<name>R1-12-47-3_ol_2</name>
+					<id>132</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_17</name>
-					<id>188</id>
+					<name>R1-12-47-3_xfmr_7</name>
+					<id>178</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_11</name>
-					<id>141</id>
+					<name>R1-12-47-3_ul_7</name>
+					<id>222</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_2</name>
+					<id>167</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ol_6</name>
 					<id>136</id>
 				</object>
 				<object>
+					<name>R1-12-47-3_fuse_2</name>
+					<id>4</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_17</name>
+					<id>188</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_9</name>
+					<id>180</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_5</name>
+					<id>135</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_18</name>
+					<id>189</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_8</name>
+					<id>179</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_10</name>
+					<id>140</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_19</name>
+					<id>190</id>
+				</object>
+				<object>
+					<name>house1_solarInverter</name>
+					<id>238</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_3</name>
+					<id>133</id>
+				</object>
+				<object>
+					<name>rect1</name>
+					<id>243</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_20</name>
+					<id>191</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_9</name>
+					<id>139</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_11</name>
+					<id>141</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_16</name>
+					<id>187</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_12</name>
+					<id>183</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_4</name>
+					<id>6</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_29</name>
+					<id>159</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_5</name>
+					<id>170</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_21</name>
+					<id>192</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_1</name>
+					<id>166</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_26</name>
+					<id>156</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_10</name>
+					<id>181</id>
+				</object>
+				<object>
+					<name>house1</name>
+					<id>231</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_14</name>
+					<id>185</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tl_1</name>
+					<id>210</id>
+				</object>
+				<object>
 					<name>R1-12-47-3_ol_18</name>
 					<id>148</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_fuse_7</name>
-					<id>9</id>
+					<name>R1-12-47-3_fuse_3</name>
+					<id>5</id>
 				</object>
 				<object>
-					<name>house1_windRectifier</name>
-					<id>243</id>
+					<name>R1-12-47-3_ol_20</name>
+					<id>150</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_3</name>
+					<id>168</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_19</name>
+					<id>149</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_15</name>
+					<id>186</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_4</name>
+					<id>175</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_13</name>
+					<id>143</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_4</name>
+					<id>134</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>3</ordinal>
 				<object>
-					<name>house1_windInverter</name>
+					<name>inv1</name>
 					<id>242</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>4</ordinal>
 				<object>
-					<name>R1-12-47-3_tn_2</name>
-					<id>215</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_2</name>
-					<id>36</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_5</name>
-					<id>39</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_17</name>
-					<id>51</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_10</name>
-					<id>44</id>
+					<name>R1-12-47-3_load_6</name>
+					<id>40</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_load_18</name>
 					<id>52</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_52</name>
-					<id>129</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_9</name>
-					<id>43</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_11</name>
-					<id>45</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_3</name>
-					<id>37</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_21</name>
-					<id>55</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_13</name>
-					<id>47</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_7</name>
-					<id>41</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_6</name>
-					<id>40</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_15</name>
-					<id>49</id>
+					<name>R1-12-47-3_load_1</name>
+					<id>35</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_load_19</name>
 					<id>53</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_load_20</name>
-					<id>54</id>
+					<name>R1-12-47-3_load_9</name>
+					<id>43</id>
 				</object>
 				<object>
-					<name>house1_triplexMeter</name>
-					<id>230</id>
+					<name>R1-12-47-3_load_21</name>
+					<id>55</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_7</name>
+					<id>41</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_load_14</name>
 					<id>48</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_load_8</name>
-					<id>42</id>
-				</object>
-				<object>
 					<name>R1-12-47-3_load_12</name>
 					<id>46</id>
+				</object>
+				<object>
+					<name>house1_triplexMeter</name>
+					<id>230</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_4</name>
+					<id>38</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_10</name>
+					<id>44</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_2</name>
+					<id>36</id>
+				</object>
+				<object>
+					<name>R1-12-47-1_cap_1</name>
+					<id>248</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_3</name>
+					<id>37</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_13</name>
+					<id>47</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_52</name>
+					<id>129</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tn_2</name>
+					<id>215</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_11</name>
+					<id>45</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_15</name>
+					<id>49</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_20</name>
+					<id>54</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_load_16</name>
 					<id>50</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_load_1</name>
-					<id>35</id>
+					<name>R1-12-47-3_load_5</name>
+					<id>39</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_load_4</name>
-					<id>38</id>
+					<name>R1-12-47-3_load_8</name>
+					<id>42</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_17</name>
+					<id>51</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>5</ordinal>
 				<object>
-					<name>R1-12-47-3_node_24</name>
-					<id>101</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_25</name>
-					<id>102</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_20</name>
-					<id>97</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_9</name>
-					<id>64</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_14</name>
-					<id>91</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_8</name>
-					<id>85</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_6</name>
-					<id>83</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_22</name>
-					<id>99</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_tm_1</name>
-					<id>213</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_9</name>
-					<id>86</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_44</name>
-					<id>121</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_11</name>
-					<id>88</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_6</name>
-					<id>61</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_32</name>
-					<id>109</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_29</name>
-					<id>106</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_12</name>
-					<id>67</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_40</name>
-					<id>117</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_14</name>
-					<id>69</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_18</name>
-					<id>95</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_42</name>
-					<id>119</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_5</name>
-					<id>82</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_21</name>
-					<id>98</id>
-				</object>
-				<object>
 					<name>R1-12-47-3_meter_3</name>
 					<id>58</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_49</name>
-					<id>126</id>
+					<name>R1-12-47-3_node_10</name>
+					<id>87</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_16</name>
-					<id>93</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_37</name>
-					<id>114</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_26</name>
-					<id>103</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_35</name>
-					<id>112</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_17</name>
-					<id>94</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_19</name>
-					<id>74</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_1</name>
-					<id>78</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_39</name>
-					<id>116</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_48</name>
-					<id>125</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_11</name>
-					<id>66</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_tn_1</name>
-					<id>214</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_31</name>
-					<id>108</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_16</name>
-					<id>71</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_19</name>
-					<id>96</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_38</name>
-					<id>115</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_21</name>
-					<id>76</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_4</name>
-					<id>81</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_27</name>
-					<id>104</id>
+					<name>R1-12-47-3_node_2</name>
+					<id>79</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_43</name>
 					<id>120</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_41</name>
-					<id>118</id>
+					<name>R1-12-47-3_node_8</name>
+					<id>85</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_15</name>
-					<id>70</id>
+					<name>R1-12-47-3_meter_18</name>
+					<id>73</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_14</name>
+					<id>69</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_19</name>
+					<id>74</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_13</name>
+					<id>90</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_6</name>
+					<id>61</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_9</name>
+					<id>64</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_meter_8</name>
 					<id>63</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_34</name>
-					<id>111</id>
+					<name>R1-12-47-3_meter_15</name>
+					<id>70</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_12</name>
-					<id>89</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_50</name>
-					<id>127</id>
+					<name>R1-12-47-3_node_48</name>
+					<id>125</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_23</name>
@@ -1569,100 +1449,240 @@
 					<id>122</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_47</name>
-					<id>124</id>
+					<name>R1-12-47-3_node_20</name>
+					<id>97</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_15</name>
-					<id>92</id>
+					<name>R1-12-47-3_node_49</name>
+					<id>126</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_33</name>
-					<id>110</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_3</name>
-					<id>80</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_10</name>
-					<id>65</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_7</name>
-					<id>62</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_17</name>
-					<id>72</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_2</name>
-					<id>57</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_1</name>
-					<id>56</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_10</name>
-					<id>87</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_46</name>
-					<id>123</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_18</name>
-					<id>73</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_5</name>
-					<id>60</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_2</name>
-					<id>79</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_7</name>
-					<id>84</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_51</name>
-					<id>128</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_13</name>
-					<id>90</id>
+					<name>R1-12-47-3_node_16</name>
+					<id>93</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_28</name>
 					<id>105</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_36</name>
-					<id>113</id>
+					<name>R1-12-47-3_node_26</name>
+					<id>103</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_30</name>
-					<id>107</id>
+					<name>R1-12-47-3_node_15</name>
+					<id>92</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_20</name>
-					<id>75</id>
+					<name>R1-12-47-3_node_17</name>
+					<id>94</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_meter_13</name>
 					<id>68</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_22</name>
-					<id>77</id>
+					<name>R1-12-47-3_node_27</name>
+					<id>104</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_6</name>
+					<id>83</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_12</name>
+					<id>89</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_30</name>
+					<id>107</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_50</name>
+					<id>127</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_7</name>
+					<id>62</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_meter_4</name>
 					<id>59</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_19</name>
+					<id>96</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_51</name>
+					<id>128</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_11</name>
+					<id>88</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_24</name>
+					<id>101</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_25</name>
+					<id>102</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_5</name>
+					<id>82</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_32</name>
+					<id>109</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_12</name>
+					<id>67</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_7</name>
+					<id>84</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_31</name>
+					<id>108</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_40</name>
+					<id>117</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_20</name>
+					<id>75</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_35</name>
+					<id>112</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_29</name>
+					<id>106</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_11</name>
+					<id>66</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_14</name>
+					<id>91</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_33</name>
+					<id>110</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tm_1</name>
+					<id>213</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_21</name>
+					<id>98</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_1</name>
+					<id>56</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_21</name>
+					<id>76</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_17</name>
+					<id>72</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_22</name>
+					<id>99</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_5</name>
+					<id>60</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_46</name>
+					<id>123</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_3</name>
+					<id>80</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_38</name>
+					<id>115</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_36</name>
+					<id>113</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_10</name>
+					<id>65</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_18</name>
+					<id>95</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_47</name>
+					<id>124</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_9</name>
+					<id>86</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_1</name>
+					<id>78</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_41</name>
+					<id>118</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_42</name>
+					<id>119</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_2</name>
+					<id>57</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_16</name>
+					<id>71</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_34</name>
+					<id>111</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_22</name>
+					<id>77</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_4</name>
+					<id>81</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tn_1</name>
+					<id>214</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_37</name>
+					<id>114</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_44</name>
+					<id>121</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_39</name>
+					<id>116</id>
 				</object>
 			</rank>
 			<rank>
@@ -1685,232 +1705,212 @@
 			<rank>
 				<ordinal>5</ordinal>
 				<object>
-					<name>R1-12-47-3_meter_5</name>
-					<id>60</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_14</name>
-					<id>91</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_3</name>
-					<id>80</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_11</name>
-					<id>66</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_24</name>
-					<id>101</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_29</name>
-					<id>106</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_16</name>
-					<id>71</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_18</name>
-					<id>73</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_tm_1</name>
-					<id>213</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_43</name>
-					<id>120</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_3</name>
-					<id>58</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_19</name>
-					<id>74</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_15</name>
-					<id>92</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_20</name>
-					<id>97</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_14</name>
-					<id>69</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_25</name>
-					<id>102</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_13</name>
-					<id>90</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_41</name>
-					<id>118</id>
+					<name>R1-12-47-3_tn_1</name>
+					<id>214</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_30</name>
 					<id>107</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_7</name>
-					<id>62</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_48</name>
-					<id>125</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_19</name>
-					<id>96</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_16</name>
-					<id>93</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_46</name>
-					<id>123</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_42</name>
-					<id>119</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_4</name>
-					<id>81</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_10</name>
-					<id>65</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_36</name>
-					<id>113</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_21</name>
-					<id>98</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_37</name>
-					<id>114</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_31</name>
-					<id>108</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_10</name>
-					<id>87</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_20</name>
-					<id>75</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_23</name>
-					<id>100</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_49</name>
-					<id>126</id>
-				</object>
-				<object>
 					<name>R1-12-47-3_meter_15</name>
 					<id>70</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_tn_1</name>
-					<id>214</id>
+					<name>R1-12-47-3_meter_14</name>
+					<id>69</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_8</name>
-					<id>63</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_27</name>
-					<id>104</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_40</name>
-					<id>117</id>
+					<name>R1-12-47-3_meter_4</name>
+					<id>59</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_6</name>
 					<id>83</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_5</name>
-					<id>82</id>
+					<name>R1-12-47-3_meter_3</name>
+					<id>58</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_47</name>
-					<id>124</id>
+					<name>R1-12-47-3_meter_22</name>
+					<id>77</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_9</name>
-					<id>64</id>
+					<name>R1-12-47-3_node_42</name>
+					<id>119</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_35</name>
-					<id>112</id>
+					<name>R1-12-47-3_node_24</name>
+					<id>101</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_32</name>
-					<id>109</id>
+					<name>R1-12-47-3_meter_18</name>
+					<id>73</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_13</name>
-					<id>68</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_44</name>
-					<id>121</id>
+					<name>R1-12-47-3_node_19</name>
+					<id>96</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_meter_12</name>
 					<id>67</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_7</name>
-					<id>84</id>
+					<name>R1-12-47-3_node_20</name>
+					<id>97</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_39</name>
-					<id>116</id>
+					<name>R1-12-47-3_node_15</name>
+					<id>92</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_33</name>
-					<id>110</id>
+					<name>R1-12-47-3_node_4</name>
+					<id>81</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_9</name>
-					<id>86</id>
+					<name>R1-12-47-3_node_36</name>
+					<id>113</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_49</name>
+					<id>126</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_20</name>
+					<id>75</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_22</name>
+					<id>99</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_38</name>
 					<id>115</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_6</name>
-					<id>61</id>
+					<name>R1-12-47-3_meter_21</name>
+					<id>76</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_17</name>
-					<id>72</id>
+					<name>R1-12-47-3_node_9</name>
+					<id>86</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_35</name>
+					<id>112</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_28</name>
+					<id>105</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_48</name>
+					<id>125</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_33</name>
+					<id>110</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_26</name>
 					<id>103</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_11</name>
+					<id>88</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_1</name>
+					<id>56</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_31</name>
+					<id>108</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_21</name>
+					<id>98</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_46</name>
+					<id>123</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_13</name>
+					<id>90</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_47</name>
+					<id>124</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_10</name>
+					<id>87</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_43</name>
+					<id>120</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_44</name>
+					<id>121</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_10</name>
+					<id>65</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_50</name>
+					<id>127</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_25</name>
+					<id>102</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_27</name>
+					<id>104</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_19</name>
+					<id>74</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_3</name>
+					<id>80</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_6</name>
+					<id>61</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_37</name>
+					<id>114</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_34</name>
+					<id>111</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_9</name>
+					<id>64</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_7</name>
+					<id>84</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_32</name>
+					<id>109</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_29</name>
+					<id>106</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_5</name>
+					<id>82</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_17</name>
@@ -1921,457 +1921,417 @@
 					<id>89</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_2</name>
-					<id>57</id>
+					<name>R1-12-47-3_node_8</name>
+					<id>85</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_51</name>
-					<id>128</id>
+					<name>R1-12-47-3_node_16</name>
+					<id>93</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_meter_4</name>
-					<id>59</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_22</name>
-					<id>77</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_22</name>
-					<id>99</id>
+					<name>R1-12-47-3_meter_7</name>
+					<id>62</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_18</name>
 					<id>95</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_34</name>
-					<id>111</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_50</name>
-					<id>127</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_28</name>
-					<id>105</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_1</name>
-					<id>56</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_11</name>
-					<id>88</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_meter_21</name>
-					<id>76</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_2</name>
-					<id>79</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_45</name>
-					<id>122</id>
+					<name>R1-12-47-3_meter_17</name>
+					<id>72</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_node_1</name>
 					<id>78</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_node_8</name>
-					<id>85</id>
+					<name>R1-12-47-3_node_41</name>
+					<id>118</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_23</name>
+					<id>100</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_2</name>
+					<id>57</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_13</name>
+					<id>68</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tm_1</name>
+					<id>213</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_45</name>
+					<id>122</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_11</name>
+					<id>66</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_14</name>
+					<id>91</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_51</name>
+					<id>128</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_5</name>
+					<id>60</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_8</name>
+					<id>63</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_40</name>
+					<id>117</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_39</name>
+					<id>116</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_meter_16</name>
+					<id>71</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_2</name>
+					<id>79</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>4</ordinal>
 				<object>
-					<name>house1_triplexMeter</name>
-					<id>230</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_20</name>
-					<id>54</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_10</name>
-					<id>44</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_11</name>
-					<id>45</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_15</name>
-					<id>49</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_8</name>
-					<id>42</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_6</name>
-					<id>40</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_2</name>
-					<id>36</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_21</name>
-					<id>55</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_12</name>
-					<id>46</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_4</name>
-					<id>38</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_tn_2</name>
-					<id>215</id>
-				</object>
-				<object>
 					<name>R1-12-47-3_load_18</name>
 					<id>52</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_5</name>
-					<id>39</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_9</name>
-					<id>43</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_node_52</name>
-					<id>129</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_1</name>
-					<id>35</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_3</name>
-					<id>37</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_load_16</name>
 					<id>50</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_load_19</name>
-					<id>53</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_17</name>
-					<id>51</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_load_14</name>
-					<id>48</id>
+					<name>R1-12-47-3_load_1</name>
+					<id>35</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_load_7</name>
 					<id>41</id>
 				</object>
 				<object>
+					<name>R1-12-47-3_load_2</name>
+					<id>36</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_node_52</name>
+					<id>129</id>
+				</object>
+				<object>
 					<name>R1-12-47-3_load_13</name>
 					<id>47</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_15</name>
+					<id>49</id>
+				</object>
+				<object>
+					<name>house1_triplexMeter</name>
+					<id>230</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_4</name>
+					<id>38</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_14</name>
+					<id>48</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_21</name>
+					<id>55</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_8</name>
+					<id>42</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_17</name>
+					<id>51</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_3</name>
+					<id>37</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_11</name>
+					<id>45</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_20</name>
+					<id>54</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tn_2</name>
+					<id>215</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_5</name>
+					<id>39</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_6</name>
+					<id>40</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_9</name>
+					<id>43</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_10</name>
+					<id>44</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_19</name>
+					<id>53</id>
+				</object>
+				<object>
+					<name>R1-12-47-1_cap_1</name>
+					<id>248</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_load_12</name>
+					<id>46</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>3</ordinal>
 				<object>
-					<name>house1_windInverter</name>
+					<name>inv1</name>
 					<id>242</id>
+				</object>
+				<object>
+					<name>volt_var_control</name>
+					<id>247</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>2</ordinal>
 				<object>
-					<name>R1-12-47-3_xfmr_20</name>
-					<id>191</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_1</name>
-					<id>166</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_23</name>
-					<id>153</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_11</name>
-					<id>182</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_21</name>
-					<id>192</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_12</name>
-					<id>183</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_3</name>
-					<id>174</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_11</name>
-					<id>141</id>
+					<name>rect1</name>
+					<id>243</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ul_7</name>
 					<id>222</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_15</name>
-					<id>186</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_6</name>
-					<id>8</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_2</name>
-					<id>173</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_10</name>
-					<id>140</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_8</name>
-					<id>138</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_2</name>
-					<id>167</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_3</name>
-					<id>218</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_4</name>
-					<id>169</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_2</name>
-					<id>132</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_10</name>
-					<id>181</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_7</name>
-					<id>9</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_15</name>
-					<id>145</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_19</name>
-					<id>190</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_21</name>
-					<id>151</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_3</name>
-					<id>5</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_5</name>
-					<id>170</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_13</name>
-					<id>184</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_26</name>
-					<id>156</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_13</name>
-					<id>143</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_14</name>
-					<id>185</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_12</name>
-					<id>142</id>
-				</object>
-				<object>
-					<name>house1</name>
-					<id>231</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_17</name>
-					<id>147</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_5</name>
-					<id>176</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_2</name>
-					<id>4</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_1</name>
-					<id>131</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_5</name>
-					<id>7</id>
-				</object>
-				<object>
 					<name>R1-12-47-3_ol_16</name>
 					<id>146</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_3</name>
-					<id>168</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_7</name>
-					<id>137</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_25</name>
-					<id>155</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_2</name>
-					<id>217</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_18</name>
-					<id>189</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_4</name>
-					<id>134</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_27</name>
-					<id>157</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_8</name>
-					<id>223</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_9</name>
-					<id>139</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_1</name>
-					<id>216</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_tl_1</name>
-					<id>210</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_4</name>
-					<id>6</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_5</name>
-					<id>135</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_9</name>
-					<id>180</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_30</name>
-					<id>160</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_20</name>
-					<id>150</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_16</name>
-					<id>187</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_24</name>
-					<id>154</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_29</name>
-					<id>159</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_7</name>
-					<id>178</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_switch_6</name>
-					<id>171</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_8</name>
-					<id>179</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_6</name>
-					<id>136</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ol_3</name>
-					<id>133</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_xfmr_1</name>
-					<id>172</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_ul_6</name>
-					<id>221</id>
-				</object>
-				<object>
-					<name>R1-12-47-3_fuse_1</name>
-					<id>3</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_xfmr_4</name>
 					<id>175</id>
 				</object>
 				<object>
+					<name>R1-12-47-3_xfmr_14</name>
+					<id>185</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_5</name>
+					<id>176</id>
+				</object>
+				<object>
 					<name>R1-12-47-3_xfmr_6</name>
 					<id>177</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_4</name>
+					<id>134</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_19</name>
+					<id>149</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_4</name>
+					<id>169</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_13</name>
+					<id>143</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_1</name>
+					<id>166</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_6</name>
+					<id>221</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_20</name>
+					<id>191</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_25</name>
+					<id>155</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_19</name>
+					<id>190</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_16</name>
+					<id>187</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_18</name>
+					<id>189</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_3</name>
+					<id>174</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_17</name>
+					<id>147</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_10</name>
+					<id>181</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_12</name>
+					<id>183</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_4</name>
+					<id>6</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_7</name>
+					<id>9</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_5</name>
+					<id>7</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_tl_1</name>
+					<id>210</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_18</name>
+					<id>148</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_11</name>
+					<id>141</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_2</name>
+					<id>132</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_1</name>
+					<id>216</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_3</name>
+					<id>168</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_1</name>
+					<id>172</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_3</name>
+					<id>133</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_17</name>
+					<id>188</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_21</name>
+					<id>192</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_12</name>
+					<id>142</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_3</name>
+					<id>218</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_20</name>
+					<id>150</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_29</name>
+					<id>159</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_8</name>
+					<id>138</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_1</name>
+					<id>131</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ul_4</name>
 					<id>219</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ul_5</name>
-					<id>220</id>
+					<name>R1-12-47-3_ol_27</name>
+					<id>157</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_9</name>
+					<id>139</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_23</name>
+					<id>153</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_8</name>
+					<id>179</id>
+				</object>
+				<object>
+					<name>house1</name>
+					<id>231</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_10</name>
+					<id>140</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ol_22</name>
 					<id>152</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_xfmr_17</name>
-					<id>188</id>
+					<name>R1-12-47-3_xfmr_11</name>
+					<id>182</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_13</name>
+					<id>184</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_2</name>
+					<id>173</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_5</name>
+					<id>220</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_ol_14</name>
@@ -2382,74 +2342,146 @@
 					<id>238</id>
 				</object>
 				<object>
-					<name>house1_windRectifier</name>
-					<id>243</id>
-				</object>
-				<object>
 					<name>R1-12-47-3_ol_28</name>
 					<id>158</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_19</name>
-					<id>149</id>
+					<name>R1-12-47-3_switch_2</name>
+					<id>167</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_8</name>
+					<id>223</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_5</name>
+					<id>170</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_21</name>
+					<id>151</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ul_2</name>
+					<id>217</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_2</name>
+					<id>4</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_15</name>
+					<id>145</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_30</name>
+					<id>160</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_15</name>
+					<id>186</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_xfmr_7</name>
+					<id>178</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_5</name>
+					<id>135</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_3</name>
+					<id>5</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_switch_6</name>
+					<id>171</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_6</name>
+					<id>8</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_6</name>
+					<id>136</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_7</name>
+					<id>137</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_26</name>
+					<id>156</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_ol_24</name>
+					<id>154</id>
 				</object>
 				<object>
 					<name>R1-12-47-3_xfmr_22</name>
 					<id>193</id>
 				</object>
 				<object>
-					<name>R1-12-47-3_ol_18</name>
-					<id>148</id>
+					<name>R1-12-47-3_xfmr_9</name>
+					<id>180</id>
+				</object>
+				<object>
+					<name>R1-12-47-3_fuse_1</name>
+					<id>3</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>1</ordinal>
 				<object>
+					<name>utilOwnedWind</name>
+					<id>246</id>
+				</object>
+				<object>
 					<name>R1-12-47-3_reg_1</name>
 					<id>0</id>
 				</object>
 				<object>
-					<name>house1_solar</name>
-					<id>239</id>
+					<name>windturb1</name>
+					<id>244</id>
 				</object>
 				<object>
 					<name>house1_batteryInverter</name>
 					<id>240</id>
 				</object>
 				<object>
-					<name>house1_waterHeater</name>
-					<id>235</id>
-				</object>
-				<object>
-					<name>house1_windTurbine</name>
-					<id>244</id>
-				</object>
-				<object>
 					<name>Market_1</name>
 					<id>228</id>
+				</object>
+				<object>
+					<name>house1_solar</name>
+					<id>239</id>
+				</object>
+				<object>
+					<name>house1_waterHeater</name>
+					<id>235</id>
 				</object>
 			</rank>
 			<rank>
 				<ordinal>0</ordinal>
 				<object>
-					<name>recorder_999</name>
-					<id>1</id>
-				</object>
-				<object>
-					<name>house1_responsiveLoad_controller</name>
-					<id>234</id>
+					<name>utilOwnedDiesel</name>
+					<id>245</id>
 				</object>
 				<object>
 					<name>house1_battery</name>
 					<id>241</id>
 				</object>
 				<object>
+					<name>house1_responsiveLoad_controller</name>
+					<id>234</id>
+				</object>
+				<object>
 					<name>house1_waterHeater_controller</name>
 					<id>236</id>
 				</object>
 				<object>
-					<name>house1_diesel</name>
-					<id>245</id>
+					<name>recorder_999</name>
+					<id>1</id>
 				</object>
 			</rank>
 		</pass>
@@ -2639,7 +2671,7 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200-1.85281e-12d V</voltage_A>
+				<voltage_A>+7200-1.27381e-12d V</voltage_A>
 				<voltage_B>+7199.67-120.002d V</voltage_B>
 				<voltage_C>+7199.67+120.002d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -2691,7 +2723,7 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200+1.73701e-13d V</voltage_A>
+				<voltage_A>+7200+2.89501e-13d V</voltage_A>
 				<voltage_B>+7199.67-120.002d V</voltage_B>
 				<voltage_C>+7199.67+120.002d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -2847,7 +2879,7 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200+3.98064e-14d V</voltage_A>
+				<voltage_A>+7200+4.34252e-14d V</voltage_A>
 				<voltage_B>+7199.67-120.002d V</voltage_B>
 				<voltage_C>+7199.67+120.002d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -2899,7 +2931,7 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200-7.96128e-14d V</voltage_A>
+				<voltage_A>+7200+1.23038e-13d V</voltage_A>
 				<voltage_B>+7199.67-120.002d V</voltage_B>
 				<voltage_C>+7199.67+120.002d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -2951,7 +2983,7 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200-8.7357e-12d V</voltage_A>
+				<voltage_A>+7200-2.17126e-14d V</voltage_A>
 				<voltage_B>+7199.67-120.002d V</voltage_B>
 				<voltage_C>+7199.67+120.002d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -3263,9 +3295,9 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200-5.83634e-11d V</voltage_A>
-				<voltage_B>+7199.67-120.002d V</voltage_B>
-				<voltage_C>+7199.67+120.002d V</voltage_C>
+				<voltage_A>+7179.28-5.85319e-11d V</voltage_A>
+				<voltage_B>+7210.05-119.859d V</voltage_B>
+				<voltage_C>+7210.05+119.859d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
 				<voltage_BC>+0+0d V</voltage_BC>
 				<voltage_CA>+0+0d V</voltage_CA>
@@ -3275,9 +3307,9 @@
 				<power_A>+0+0i VA</power_A>
 				<power_B>+0+0i VA</power_B>
 				<power_C>+0+0i VA</power_C>
-				<shunt_A>+0+0i S</shunt_A>
-				<shunt_B>+0+0i S</shunt_B>
-				<shunt_C>+0+0i S</shunt_C>
+				<shunt_A>+0+0.00287751i S</shunt_A>
+				<shunt_B>+0+0.00287751i S</shunt_B>
+				<shunt_C>+0+0.00287751i S</shunt_C>
 				<current_AB>+0+0j A</current_AB>
 				<current_BC>+0+0j A</current_BC>
 				<current_CA>+0+0j A</current_CA>
@@ -3471,7 +3503,7 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200+5.41041e-11d V</voltage_A>
+				<voltage_A>+7200-5.67386e-11d V</voltage_A>
 				<voltage_B>+7199.67-120.002d V</voltage_B>
 				<voltage_C>+7199.67+120.002d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -3575,7 +3607,7 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200+2.89501e-14d V</voltage_A>
+				<voltage_A>+7200+2.17126e-14d V</voltage_A>
 				<voltage_B>+7199.67-120.002d V</voltage_B>
 				<voltage_C>+7199.67+120.002d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -4147,7 +4179,7 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200+1.18667e-10d V</voltage_A>
+				<voltage_A>+7200+8.68503e-14d V</voltage_A>
 				<voltage_B>+7199.67-120.002d V</voltage_B>
 				<voltage_C>+7199.67+120.002d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -4615,7 +4647,7 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200-2.38838e-13d V</voltage_A>
+				<voltage_A>+7200-1.30276e-13d V</voltage_A>
 				<voltage_B>+7199.67-120.002d V</voltage_B>
 				<voltage_C>+7199.67+120.002d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -4719,7 +4751,7 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200+2.17126e-13d V</voltage_A>
+				<voltage_A>+7200-2.17126e-13d V</voltage_A>
 				<voltage_B>+7199.67-120.002d V</voltage_B>
 				<voltage_C>+7199.67+120.002d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
@@ -5287,6 +5319,82 @@
 		</link_list>
 		<capacitor_list>
 			<inherits_from>node</inherits_from>
+			<capacitor>
+				<id>248</id>
+				<rank>4</rank>
+				<out_svc>NEVER</out_svc>
+				<parent>R1-12-47-3_node_15</parent>
+				<clock>2009-01-01 12:00:00 PST</clock>
+				<name>R1-12-47-1_cap_1</name>
+				<pt_phase>B</pt_phase>
+				<phases_connected>CBA</phases_connected>
+				<switchA>CLOSED</switchA>
+				<switchB>CLOSED</switchB>
+				<switchC>CLOSED</switchC>
+				<control>MANUAL</control>
+				<cap_A_switch_count>+0</cap_A_switch_count>
+				<cap_B_switch_count>+0</cap_B_switch_count>
+				<cap_C_switch_count>+0</cap_C_switch_count>
+				<voltage_set_high>+7300 V</voltage_set_high>
+				<voltage_set_low>+7100 V</voltage_set_low>
+				<VAr_set_high>+0 VAr</VAr_set_high>
+				<VAr_set_low>+0 VAr</VAr_set_low>
+				<current_set_low>+0 A</current_set_low>
+				<current_set_high>+0 A</current_set_high>
+				<capacitor_A>+150000 VAr</capacitor_A>
+				<capacitor_B>+150000 VAr</capacitor_B>
+				<capacitor_C>+150000 VAr</capacitor_C>
+				<cap_nominal_voltage>+7220 V</cap_nominal_voltage>
+				<time_delay>+30 s</time_delay>
+				<dwell_time>+30 s</dwell_time>
+				<lockout_time>+0 s</lockout_time>
+				<control_level>INDIVIDUAL</control_level>
+				<bustype>PQ</bustype>
+				<busflags>HASSOURCE</busflags>
+				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
+				<voltage_A>+7200+0d V</voltage_A>
+				<voltage_B>+7200-120d V</voltage_B>
+				<voltage_C>+7200+120d V</voltage_C>
+				<voltage_AB>+0+0d V</voltage_AB>
+				<voltage_BC>+0+0d V</voltage_BC>
+				<voltage_CA>+0+0d V</voltage_CA>
+				<current_A>+0+0i A</current_A>
+				<current_B>+0+0i A</current_B>
+				<current_C>+0+0i A</current_C>
+				<power_A>+0+0i VA</power_A>
+				<power_B>+0+0i VA</power_B>
+				<power_C>+0+0i VA</power_C>
+				<shunt_A>+0+0.00287751j S</shunt_A>
+				<shunt_B>+0+0.00287751j S</shunt_B>
+				<shunt_C>+0+0.00287751j S</shunt_C>
+				<current_AB>+0+0j A</current_AB>
+				<current_BC>+0+0j A</current_BC>
+				<current_CA>+0+0j A</current_CA>
+				<current_AN>+0+0j A</current_AN>
+				<current_BN>+0+0j A</current_BN>
+				<current_CN>+0+0j A</current_CN>
+				<power_AB>+0+0j VA</power_AB>
+				<power_BC>+0+0j VA</power_BC>
+				<power_CA>+0+0j VA</power_CA>
+				<power_AN>+0+0j VA</power_AN>
+				<power_BN>+0+0j VA</power_BN>
+				<power_CN>+0+0j VA</power_CN>
+				<shunt_AB>+0+0j S</shunt_AB>
+				<shunt_BC>+0+0j S</shunt_BC>
+				<shunt_CA>+0+0j S</shunt_CA>
+				<shunt_AN>+0+0j S</shunt_AN>
+				<shunt_BN>+0+0j S</shunt_BN>
+				<shunt_CN>+0+0j S</shunt_CN>
+				<mean_repair_time>+0 s</mean_repair_time>
+				<service_status>IN_SERVICE</service_status>
+				<service_status_double>-1</service_status_double>
+				<previous_uptime>-1 min</previous_uptime>
+				<current_uptime>+0 min</current_uptime>
+				<Norton_dynamic>FALSE</Norton_dynamic>
+				<topological_parent>R1-12-47-3_node_15</topological_parent>
+				<phases>ABCN</phases>
+				<nominal_voltage>+7200 V</nominal_voltage>
+			</capacitor>
 		</capacitor_list>
 		<fuse_list>
 			<inherits_from>link</inherits_from>
@@ -7177,9 +7285,9 @@
 				<voltage_AB>+0+0d V</voltage_AB>
 				<voltage_BC>+0+0d V</voltage_BC>
 				<voltage_CA>+0+0d V</voltage_CA>
-				<current_A>-0.509242+0j A</current_A>
-				<current_B>+0.254644+0.44103j A</current_B>
-				<current_C>+0.254644-0.44103j A</current_C>
+				<current_A>-0.560114+0.0158848j A</current_A>
+				<current_B>+0.293838+0.477143j A</current_B>
+				<current_C>+0.266325-0.493029j A</current_C>
 				<power_A>+61326.5+1147.15i VA</power_A>
 				<power_B>+19816.9+623.63i VA</power_B>
 				<power_C>+54848.3+1161.17i VA</power_C>
@@ -7523,9 +7631,9 @@
 				<bustype>PQ</bustype>
 				<busflags>HASSOURCE</busflags>
 				<maximum_voltage_error>+7.2e-06 V</maximum_voltage_error>
-				<voltage_A>+7200+0d V</voltage_A>
-				<voltage_B>+7199.67-120.002d V</voltage_B>
-				<voltage_C>+7199.67+120.002d V</voltage_C>
+				<voltage_A>+447263-89.0776d V</voltage_A>
+				<voltage_B>+440964+29.5338d V</voltage_B>
+				<voltage_C>+453434+149.544d V</voltage_C>
 				<voltage_AB>+0+0d V</voltage_AB>
 				<voltage_BC>+0+0d V</voltage_BC>
 				<voltage_CA>+0+0d V</voltage_CA>
@@ -15142,7 +15250,7 @@
 				<PT_phase>CBA</PT_phase>
 				<regulation>+0.1</regulation>
 				<control_level>INDIVIDUAL</control_level>
-				<Control>OUTPUT_VOLTAGE</Control>
+				<Control>MANUAL</Control>
 				<Type>B</Type>
 				<tap_pos_A>0</tap_pos_A>
 				<tap_pos_B>0</tap_pos_B>
@@ -15158,9 +15266,9 @@
 				<clock>2009-01-01 12:00:00 PST</clock>
 				<name>R1-12-47-3_reg_1</name>
 				<configuration>feeder_reg_cfg</configuration>
-				<tap_A>0</tap_A>
-				<tap_B>0</tap_B>
-				<tap_C>0</tap_C>
+				<tap_A>-1</tap_A>
+				<tap_B>-1</tap_B>
+				<tap_C>-1</tap_C>
 				<tap_A_change_count>+0</tap_A_change_count>
 				<tap_B_change_count>+0</tap_B_change_count>
 				<tap_C_change_count>+0</tap_C_change_count>
@@ -15228,9 +15336,9 @@
 				<current_1_reac>+0 A</current_1_reac>
 				<current_2_reac>+0 A</current_2_reac>
 				<current_N_reac>+0 A</current_N_reac>
-				<current_12>nannani A</current_12>
-				<current_12_real>nan A</current_12_real>
-				<current_12_reac>nan A</current_12_reac>
+				<current_12>+14.4477+25.0242i A</current_12>
+				<current_12_real>+14.4477 A</current_12_real>
+				<current_12_reac>+25.0242 A</current_12_reac>
 				<residential_nominal_current_1>+4.1059-0.0777769j A</residential_nominal_current_1>
 				<residential_nominal_current_2>+0.82943+0j A</residential_nominal_current_2>
 				<residential_nominal_current_12>+0+0j A</residential_nominal_current_12>
@@ -15242,13 +15350,13 @@
 				<residential_nominal_current_12_imag>+0 A</residential_nominal_current_12_imag>
 				<power_1>+694.198+85.1736i VA</power_1>
 				<power_2>+399.557+157.077i VA</power_2>
-				<power_12>+3197+13.8218i VA</power_12>
+				<power_12>+3197nani VA</power_12>
 				<power_1_real>+694.198 W</power_1_real>
 				<power_2_real>+399.557 W</power_2_real>
 				<power_12_real>+3197 W</power_12_real>
 				<power_1_reac>+85.1736 VAr</power_1_reac>
 				<power_2_reac>+157.077 VAr</power_2_reac>
-				<power_12_reac>+13.8218 VAr</power_12_reac>
+				<power_12_reac>nan VAr</power_12_reac>
 				<shunt_1>+0+0j S</shunt_1>
 				<shunt_2>+0+0j S</shunt_2>
 				<shunt_12>+0+0j S</shunt_12>
@@ -15497,9 +15605,9 @@
 				<current_1_reac>+0 A</current_1_reac>
 				<current_2_reac>+0 A</current_2_reac>
 				<current_N_reac>+0 A</current_N_reac>
-				<current_12>nannani A</current_12>
-				<current_12_real>nan A</current_12_real>
-				<current_12_reac>nan A</current_12_reac>
+				<current_12>+14.4477+25.0242i A</current_12>
+				<current_12_real>+14.4477 A</current_12_real>
+				<current_12_reac>+25.0242 A</current_12_reac>
 				<residential_nominal_current_1>+4.1059-0.0777769j A</residential_nominal_current_1>
 				<residential_nominal_current_2>+0.82943+0j A</residential_nominal_current_2>
 				<residential_nominal_current_12>+0+0j A</residential_nominal_current_12>
@@ -15511,13 +15619,13 @@
 				<residential_nominal_current_12_imag>+0 A</residential_nominal_current_12_imag>
 				<power_1>+694.198+85.1736j VA</power_1>
 				<power_2>+399.557+157.077j VA</power_2>
-				<power_12>+3197+13.8218i VA</power_12>
+				<power_12>+3197nani VA</power_12>
 				<power_1_real>+694.198 W</power_1_real>
 				<power_2_real>+399.557 W</power_2_real>
 				<power_12_real>+3197 W</power_12_real>
 				<power_1_reac>+85.1736 VAr</power_1_reac>
 				<power_2_reac>+157.077 VAr</power_2_reac>
-				<power_12_reac>+13.8218 VAr</power_12_reac>
+				<power_12_reac>nan VAr</power_12_reac>
 				<shunt_1>+0.0299211-0.00362886j S</shunt_1>
 				<shunt_2>+0.00430492-0.000411169j S</shunt_2>
 				<shunt_12>+0.0157031-0.00249857j S</shunt_12>
@@ -15914,6 +16022,31 @@
 		<frequency_gen_list>
 		</frequency_gen_list>
 		<volt_var_control_list>
+			<volt_var_control>
+				<id>247</id>
+				<rank>3</rank>
+				<out_svc>NEVER</out_svc>
+				<clock>2009-01-01 12:00:00 PST</clock>
+				<name>volt_var_control</name>
+				<control_method>ACTIVE</control_method>
+				<capacitor_delay>+60 s</capacitor_delay>
+				<regulator_delay>+60 s</regulator_delay>
+				<desired_pf>+0.99</desired_pf>
+				<d_max>+0.8</d_max>
+				<d_min>+0.1</d_min>
+				<substation_link>R1-12-47-3_reg_1</substation_link>
+				<pf_phase>CBA</pf_phase>
+				<regulator_list>R1-12-47-3_reg_1</regulator_list>
+				<capacitor_list>R1-12-47-1_cap_1</capacitor_list>
+				<voltage_measurements>R1-12-47-3_meter_22,1,R1-12-47-3_meter_21,1</voltage_measurements>
+				<minimum_voltages>5000.00</minimum_voltages>
+				<maximum_voltages>9000.00</maximum_voltages>
+				<desired_voltages>7080.00</desired_voltages>
+				<max_vdrop>50</max_vdrop>
+				<high_load_deadband>60.00</high_load_deadband>
+				<low_load_deadband>60.00</low_load_deadband>
+				<pf_signed>FALSE</pf_signed>
+			</volt_var_control>
 		</volt_var_control_list>
 		<fault_check_list>
 		</fault_check_list>
@@ -16418,7 +16551,7 @@
 				<out_svc>NEVER</out_svc>
 				<parent>R1-12-47-3_meter_18</parent>
 				<clock>NEVER</clock>
-				<name>house1_diesel</name>
+				<name>utilOwnedDiesel</name>
 				<Gen_mode>CONSTANTPQ</Gen_mode>
 				<Gen_status>ONLINE</Gen_status>
 				<Gen_type>SYNCHRONOUS</Gen_type>
@@ -16565,9 +16698,9 @@
 				<id>244</id>
 				<rank>1</rank>
 				<out_svc>NEVER</out_svc>
-				<parent>house1_windRectifier</parent>
+				<parent>rect1</parent>
 				<clock>2009-01-01 12:00:00 PST</clock>
-				<name>house1_windTurbine</name>
+				<name>windturb1</name>
 				<Gen_status>ONLINE</Gen_status>
 				<Gen_type>SYNCHRONOUS</Gen_type>
 				<Gen_mode>CONSTANTP</Gen_mode>
@@ -16633,6 +16766,79 @@
 				<Irotor_B>+0+0d V</Irotor_B>
 				<Irotor_C>+0+0d V</Irotor_C>
 				<phases>NCBA</phases>
+			</windturb_dg>
+			<windturb_dg>
+				<id>246</id>
+				<rank>1</rank>
+				<out_svc>NEVER</out_svc>
+				<parent>R1-12-47-3_meter_18</parent>
+				<clock>2009-01-01 12:00:00 PST</clock>
+				<name>utilOwnedWind</name>
+				<Gen_status>ONLINE</Gen_status>
+				<Gen_type>SYNCHRONOUS</Gen_type>
+				<Gen_mode>CONSTANTP</Gen_mode>
+				<Turbine_Model>BERGEY_10kW</Turbine_Model>
+				<turbine_height>+24 m</turbine_height>
+				<roughness_length_factor>+0.055</roughness_length_factor>
+				<blade_diam>+7 m</blade_diam>
+				<blade_diameter>+7 m</blade_diameter>
+				<cut_in_ws>+2 m/s</cut_in_ws>
+				<cut_out_ws>+20 m/s</cut_out_ws>
+				<ws_rated>+12.5 m/s</ws_rated>
+				<ws_maxcp>+8.2 m/s</ws_maxcp>
+				<Cp_max>+0.28 pu</Cp_max>
+				<Cp_rated>+0.275 pu</Cp_rated>
+				<Cp>+0.270461 pu</Cp>
+				<Rated_VA>+10000 VA</Rated_VA>
+				<Rated_V>+360 V</Rated_V>
+				<Pconv>+1098.81 W</Pconv>
+				<P_converted>+1098.81 W</P_converted>
+				<GenElecEff>+99.9995 %</GenElecEff>
+				<generator_efficiency>+99.9995 %</generator_efficiency>
+				<TotalRealPow>+1098.8 W</TotalRealPow>
+				<total_real_power>+1098.8 W</total_real_power>
+				<TotalReacPow>+343.101 VA</TotalReacPow>
+				<total_reactive_power>+343.101 VA</total_reactive_power>
+				<power_A>+366.278+114.37j VA</power_A>
+				<power_B>+366.261+114.365j VA</power_B>
+				<power_C>+366.261+114.365j VA</power_C>
+				<WSadj>+5.48799 m/s</WSadj>
+				<wind_speed_adjusted>+5.48799 m/s</wind_speed_adjusted>
+				<Wind_Speed>+5.48799 m/s</Wind_Speed>
+				<wind_speed>+5.48799 m/s</wind_speed>
+				<air_density>+1.27738 kg/m^3</air_density>
+				<R_stator>+0 pu*Ohm</R_stator>
+				<X_stator>+0 pu*Ohm</X_stator>
+				<R_rotor>+0 pu*Ohm</R_rotor>
+				<X_rotor>+0 pu*Ohm</X_rotor>
+				<R_core>+0 pu*Ohm</R_core>
+				<X_magnetic>+0 pu*Ohm</X_magnetic>
+				<Max_Vrotor>+1.2 pu*V</Max_Vrotor>
+				<Min_Vrotor>+0.8 pu*V</Min_Vrotor>
+				<Rs>+0.05 pu*Ohm</Rs>
+				<Xs>+0.2 pu*Ohm</Xs>
+				<Rg>+0 pu*Ohm</Rg>
+				<Xg>+0 pu*Ohm</Xg>
+				<Max_Ef>+1.2 pu*V</Max_Ef>
+				<Min_Ef>+0.8 pu*V</Min_Ef>
+				<pf>+0.95 pu</pf>
+				<power_factor>+0.95 pu</power_factor>
+				<voltage_A>+7200+0d V</voltage_A>
+				<voltage_B>+7199.67-120.002d V</voltage_B>
+				<voltage_C>+7199.67+120.002d V</voltage_C>
+				<current_A>-0.050872+0.0158848j A</current_A>
+				<current_B>+0.0391936+0.036113j A</current_B>
+				<current_C>+0.0116808-0.0519985j A</current_C>
+				<EfA>+7200.07+0.000967388d V</EfA>
+				<EfB>+7199.53-120.001d V</EfB>
+				<EfC>+7199.74+120.001d V</EfC>
+				<Vrotor_A>+0+0d V</Vrotor_A>
+				<Vrotor_B>+0+0d V</Vrotor_B>
+				<Vrotor_C>+0+0d V</Vrotor_C>
+				<Irotor_A>+0+0d V</Irotor_A>
+				<Irotor_B>+0+0d V</Irotor_B>
+				<Irotor_C>+0+0d V</Irotor_C>
+				<phases>SB</phases>
 			</windturb_dg>
 		</windturb_dg_list>
 		<power_electronics_list>
@@ -16887,8 +17093,8 @@
 				<out_svc>NEVER</out_svc>
 				<parent>house1_triplexMeter</parent>
 				<clock>2009-01-01 12:00:00 PST</clock>
-				<name>house1_windInverter</name>
-				<inverter_type>PWM</inverter_type>
+				<name>inv1</name>
+				<inverter_type>FOUR_QUADRANT</inverter_type>
 				<four_quadrant_control_mode>CONSTANT_PF</four_quadrant_control_mode>
 				<generator_status>ONLINE</generator_status>
 				<generator_mode>CONSTANT_PF</generator_mode>
@@ -16898,23 +17104,23 @@
 				<V_In>+0+0d V</V_In>
 				<I_In>nannanj A</I_In>
 				<VA_In>nannani VA</VA_In>
-				<VA_Out>nannani VA</VA_Out>
+				<VA_Out>+0nanj VA</VA_Out>
 				<Vdc>+480 V</Vdc>
 				<phaseA_V_Out>+240-120d V</phaseA_V_Out>
 				<phaseB_V_Out>+120-120d V</phaseB_V_Out>
 				<phaseC_V_Out>+120-120d V</phaseC_V_Out>
-				<phaseA_I_Out>nannand V</phaseA_I_Out>
+				<phaseA_I_Out>+0+0d V</phaseA_I_Out>
 				<phaseB_I_Out>+0+0d V</phaseB_I_Out>
 				<phaseC_I_Out>+0+0d V</phaseC_I_Out>
-				<power_A>nannanj VA</power_A>
+				<power_A>+0+0i VA</power_A>
 				<power_B>+0+0i VA</power_B>
 				<power_C>+0+0i VA</power_C>
 				<P_Out>+0 VA</P_Out>
-				<Q_Out>+0 VAr</Q_Out>
+				<Q_Out>nan VAr</Q_Out>
 				<power_in>+0 W</power_in>
-				<rated_power>+0 VA</rated_power>
-				<rated_battery_power>+0 W</rated_battery_power>
-				<inverter_efficiency>+0</inverter_efficiency>
+				<rated_power>+10000 VA</rated_power>
+				<rated_battery_power>+11111.1 W</rated_battery_power>
+				<inverter_efficiency>+0.9</inverter_efficiency>
 				<battery_soc>+0 pu</battery_soc>
 				<soc_reserve>+0 pu</soc_reserve>
 				<power_factor>+1 unit</power_factor>
@@ -17009,9 +17215,9 @@
 				<id>243</id>
 				<rank>2</rank>
 				<out_svc>NEVER</out_svc>
-				<parent>house1_windInverter</parent>
+				<parent>inv1</parent>
 				<clock>2009-01-01 12:00:00 PST</clock>
-				<name>house1_windRectifier</name>
+				<name>rect1</name>
 				<rectifier_type>SIX_PULSE</rectifier_type>
 				<generator_mode>SUPPLY_DRIVEN</generator_mode>
 				<V_Out>+480+0d V</V_Out>
