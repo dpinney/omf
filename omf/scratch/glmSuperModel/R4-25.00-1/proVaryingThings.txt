@@ -1,0 +1,12 @@
+House
+	XXX floor_area  - scale to meter load
+	XXX schedule_skew - normalDist*2000
+ZIPload
+	XXX schedule_skew - normalDist*2000
+	XXX base_power - between 0.5 and 3.0
+waterheater
+	XXX schedule_skew - normalDist*2000
+solar
+	XXX area - 400 sf - 1600 sf
+battery
+	XXX battery_capacity - 800 kWh - 4000 kWh

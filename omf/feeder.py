@@ -182,10 +182,8 @@ def treeToNxGraph(inTree):
 				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
 	return outGraph
 
-def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
-	''' Draw a networkx graph representing a feeder.
-	Must call matplotlib.pyplot.show() separately to view the output.
-	'''
+def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
+	''' Draw a networkx graph representing a feeder.'''
 	plt.axis('off')
 	plt.tight_layout()
 	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
@@ -193,14 +191,14 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(inGraph.edges())
 		# HACK2: might miss nodes without edges without the following.
-		cleanG.add_nodes_from(fGraph)
+		cleanG.add_nodes_from(inGraph)
 		pos = nx.graphviz_layout(cleanG, prog='neato')
 	else:
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
 	# Draw all the edges.
 	for e in inGraph.edges():
-		eType = inGraph.edge[e[0]][e[1]]['type']
-		ePhases = inGraph.edge[e[0]][e[1]]['phases']
+		eType = inGraph.edge[e[0]][e[1]].get('type','underground_line')
+		ePhases = inGraph.edge[e[0]][e[1]].get('phases',1)
 		standArgs = {'edgelist':[e],
 					 'edge_color':_obToCol(eType),
 					 'width':2,
@@ -222,7 +220,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 	# Draw nodes and optional labels.
 	nx.draw_networkx_nodes(inGraph,pos,
 						   nodelist=pos.keys(),
-						   node_color=[_obToCol(inGraph.node[n]['type']) for n in inGraph],
+						   node_color=[_obToCol(inGraph.node[n].get('type','underground_line')) for n in inGraph],
 						   linewidths=0,
 						   node_size=40)
 	if labels:
@@ -230,6 +228,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 								font_color='black',
 								font_weight='bold',
 								font_size=0.25)
+	if showPlot: plt.show()
 
 def _tokenizeGlm(inputStr, filePath=True):
 	''' Turn a GLM file/string into a linked list of tokens.
@@ -329,7 +328,7 @@ def _gatherKeyValues(inDict, keyToAvoid):
 	''' Helper function: put key/value pairs for objects into the format Gridlab needs. '''
 	otherKeyValues = ''
 	for key in inDict:
-		if type(key) is int:
+		if type(inDict[key]) is dict:
 			# WARNING: RECURSION HERE
 			otherKeyValues += _dictToString(inDict[key])
 		elif key != keyToAvoid:
@@ -489,7 +488,6 @@ def _tests():
 		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)
-	# plt.show()
 
 if __name__ == '__main__':
 	_tests()

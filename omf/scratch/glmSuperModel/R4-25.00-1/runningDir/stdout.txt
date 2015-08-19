@@ -1,0 +1,59 @@
+
+Core profiler results
+======================
+
+Total objects               2622 objects
+Parallelism                    1 thread
+Total time                   2.0 seconds
+  Core time                  0.9 seconds (45.6%)
+    Compiler                 3.2 seconds (157.7%)
+    Instances                0.0 seconds (0.0%)
+    Random variables         0.0 seconds (0.0%)
+    Schedules                0.0 seconds (0.0%)
+    Loadshapes               0.0 seconds (0.0%)
+    Enduses                  0.0 seconds (0.3%)
+    Transforms               0.0 seconds (0.4%)
+  Model time                 1.1 seconds/thread (54.4%)
+Simulation time                0 days
+Simulation speed             328 object.hours/second
+Passes completed              34 passes
+Time steps completed          17 timesteps
+Convergence efficiency      2.00 passes/timestep
+Read lock contention        0.0%
+Write lock contention       0.0%
+Average timestep             53 seconds/timestep
+Simulation rate             450 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+node               0.605     55.6%      2.6
+climate            0.116     10.7%    116.0
+inverter           0.051      4.7%      0.2
+passive_controll   0.044      4.0%      0.2
+solar              0.035      3.2%      0.2
+house              0.034      3.1%      0.2
+triplex_line       0.029      2.7%      0.2
+triplex_node       0.025      2.3%      0.2
+triplex_meter      0.025      2.3%      0.2
+overhead_line      0.022      2.0%      0.1
+transformer        0.022      2.0%      0.2
+waterheater        0.022      2.0%      0.2
+ZIPload            0.020      1.8%      0.1
+battery            0.016      1.5%      0.1
+fuse               0.005      0.5%      0.2
+underground_line   0.005      0.5%      0.2
+evcharger_det      0.003      0.3%      0.0
+meter              0.002      0.2%      1.0
+switch             0.002      0.2%      0.5
+player             0.001      0.1%      0.5
+recorder           0.001      0.1%      1.0
+load               0.001      0.1%      1.0
+regulator          0.001      0.1%      1.0
+windturb_dg        0.001      0.1%      1.0
+================ ======== ======== ========
+Total              1.088    100.0%      0.4
+

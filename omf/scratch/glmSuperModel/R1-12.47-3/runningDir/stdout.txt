@@ -1,0 +1,62 @@
+                                      
+Core profiler results
+======================
+
+Total objects                246 objects
+Parallelism                    1 thread
+Total time                   3.0 seconds
+  Core time                  0.6 seconds (19.7%)
+    Compiler                 3.3 seconds (109.6%)
+    Instances                0.0 seconds (0.0%)
+    Random variables         0.0 seconds (0.0%)
+    Schedules                0.0 seconds (0.0%)
+    Loadshapes               0.0 seconds (0.0%)
+    Enduses                  0.0 seconds (0.0%)
+    Transforms               0.0 seconds (0.0%)
+  Model time                 2.4 seconds/thread (80.3%)
+Simulation time                0 days
+Simulation speed             246 object.hours/second
+Passes completed             319 passes
+Time steps completed         190 timesteps
+Convergence efficiency      1.68 passes/timestep
+Read lock contention        0.0%
+Write lock contention       0.0%
+Average timestep             57 seconds/timestep
+Simulation rate            3600 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+node               1.997     82.9%     37.7
+climate            0.121      5.0%    121.0
+meter              0.053      2.2%      2.4
+overhead_line      0.051      2.1%      1.7
+load               0.040      1.7%      1.9
+transformer        0.036      1.5%      1.6
+underground_line   0.014      0.6%      1.8
+fuse               0.013      0.5%      1.9
+recorder           0.010      0.4%     10.0
+triplex_meter      0.009      0.4%      4.5
+windturb_dg        0.008      0.3%      8.0
+triplex_node       0.007      0.3%      3.5
+switch             0.007      0.3%      1.2
+house              0.006      0.2%      6.0
+passive_controll   0.006      0.2%      3.0
+regulator          0.004      0.2%      4.0
+inverter           0.004      0.2%      2.0
+player             0.003      0.1%      1.5
+triplex_line       0.003      0.1%      3.0
+volt_var_control   0.003      0.1%      3.0
+waterheater        0.003      0.1%      3.0
+solar              0.003      0.1%      3.0
+auction            0.003      0.1%      3.0
+capacitor          0.002      0.1%      2.0
+evcharger_det      0.002      0.1%      2.0
+ZIPload            0.001      0.0%      0.5
+diesel_dg          0.001      0.0%      1.0
+================ ======== ======== ========
+Total              2.410    100.0%      9.8
+

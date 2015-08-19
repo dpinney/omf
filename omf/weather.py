@@ -72,7 +72,7 @@ def _airportCodeToLatLon(airport):
 	''' Airport three letter code -> lat/lon of that location. '''
 	try:
 		url2 = urllib2.urlopen('http://www.airport-data.com/airport/'+airport+'/#location')
-		soup = BeautifulSoup(url2)
+		soup = BeautifulSoup(url2, "html.parser")
 		latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[1])
 		p = re.compile('([0-9\.\-\/])+')
 		latlon_val = p.search(latlon_str)
