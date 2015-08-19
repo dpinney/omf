@@ -1,0 +1,12 @@
+{
+    "created": "2015-08-19 15:19:54.508942", 
+    "simLengthUnits": "hours", 
+    "feederName": "public___superModel_today", 
+    "simStartDate": "2009-01-01", 
+    "zipCode": "64735", 
+    "modelType": "gridlabMulti", 
+    "climateName": "MO-KANSAS_CITY", 
+    "simLength": "168", 
+    "feederName2": "public___superModel_tomorrow", 
+    "runTime": "0:11:32"
+}
