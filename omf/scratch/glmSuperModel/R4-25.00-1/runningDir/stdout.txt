@@ -5,15 +5,15 @@ Core profiler results
 Total objects               2622 objects
 Parallelism                    1 thread
 Total time                   2.0 seconds
-  Core time                  0.8 seconds (38.6%)
-    Compiler                 3.6 seconds (177.6%)
+  Core time                  0.8 seconds (42.5%)
+    Compiler                 3.6 seconds (178.5%)
     Instances                0.0 seconds (0.0%)
     Random variables         0.0 seconds (0.0%)
     Schedules                0.0 seconds (0.0%)
     Loadshapes               0.0 seconds (0.0%)
     Enduses                  0.0 seconds (0.2%)
-    Transforms               0.0 seconds (0.4%)
-  Model time                 1.2 seconds/thread (61.4%)
+    Transforms               0.0 seconds (0.6%)
+  Model time                 1.2 seconds/thread (57.5%)
 Simulation time                0 days
 Simulation speed             328 object.hours/second
 Passes completed              34 passes
@@ -30,28 +30,29 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-node               0.650     53.0%      2.8
-climate            0.150     12.2%    150.0
-house              0.059      4.8%      0.4
-solar              0.048      3.9%      0.3
-passive_controll   0.046      3.7%      0.2
-inverter           0.034      2.8%      0.1
-overhead_line      0.033      2.7%      0.2
-triplex_node       0.032      2.6%      0.2
-triplex_meter      0.030      2.4%      0.2
-battery            0.027      2.2%      0.2
-transformer        0.024      2.0%      0.2
-triplex_line       0.024      2.0%      0.2
-ZIPload            0.024      2.0%      0.1
-waterheater        0.021      1.7%      0.2
-fuse               0.007      0.6%      0.2
-evcharger_det      0.007      0.6%      0.1
-load               0.004      0.3%      4.0
-underground_line   0.003      0.2%      0.1
-player             0.001      0.1%      0.5
+node               0.595     51.7%      2.6
+climate            0.149     13.0%    149.0
+passive_controll   0.054      4.7%      0.2
+solar              0.050      4.3%      0.4
+inverter           0.049      4.3%      0.2
+house              0.042      3.7%      0.3
+overhead_line      0.033      2.9%      0.2
+transformer        0.029      2.5%      0.2
+triplex_meter      0.025      2.2%      0.2
+triplex_node       0.023      2.0%      0.2
+battery            0.022      1.9%      0.2
+triplex_line       0.019      1.7%      0.1
+ZIPload            0.017      1.5%      0.1
+waterheater        0.016      1.4%      0.1
+fuse               0.008      0.7%      0.3
+evcharger_det      0.006      0.5%      0.0
+underground_line   0.005      0.4%      0.2
+player             0.002      0.2%      1.0
+load               0.002      0.2%      2.0
 recorder           0.001      0.1%      1.0
-capacitor          0.001      0.1%      1.0
 switch             0.001      0.1%      0.2
+diesel_dg          0.001      0.1%      1.0
+windturb_dg        0.001      0.1%      1.0
 ================ ======== ======== ========
-Total              1.227    100.0%      0.5
+Total              1.150    100.0%      0.4
 

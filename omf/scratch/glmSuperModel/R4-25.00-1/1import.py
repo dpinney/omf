@@ -8,10 +8,12 @@ TODO
 XXX Manual bug fixes: change timestamp to starttime in clock. Make sub reg reference its config by name. change the start time to match the prices in the player.
 XXX Attach additional utility tech.
 XXX Attach prosumers.
-OOO Vary prosumers. What do we vary? Size of house...
+XXX Consumer versus prosumer model.
+OOO Bonus: Vary prosumers. What do we vary? Size of house...
+OOO Bonus: IVVC and single phase wind.
 '''
 
-import omf
+import omf, json
 
 # Read in the glm.
 baseFeed = omf.feeder.parse('base_R4-25.00-1.glm')
@@ -40,7 +42,7 @@ for key in baseFeed.keys():
 		del baseFeed[key]
 
 # Attach additional utility technology (DG, Caps, IVVC).
-utilityNewTech = omf.feeder.parse('utilityNewTech.glm')
+utilityNewTech = omf.feeder.parse('proUtility.glm')
 maxKey = omf.feeder.getMaxKey(baseFeed) + 1
 for key in utilityNewTech:
 	baseFeed[maxKey + key] = dict(utilityNewTech[key])
@@ -88,20 +90,39 @@ def randomProsumer(feed, nodeKey, houseInt):
 
 tripLoadKeys = [k for k in baseFeed if baseFeed[k].get('object','')=='triplex_node' and baseFeed[k].get('parent','')!='']
 
-# TODO: add all prosumers.
-# randomProsumer(baseFeed, min(tripLoadKeys), 123)
+# Add all prosumers.
 for i, tripKey in enumerate(tripLoadKeys):
 	randomProsumer(baseFeed, tripKey, i)
 
 # Get attachments.
 superAttach = {fName:open(fName).read() for fName in ['superSchedules.glm','superClimate.tmy2','superCpp.player', 'superClearingPrice.player']}
 
-# Run the thing.
+# Run test the thing.
 print 'GLD OUTPUT============='
 output = omf.solvers.gridlabd.runInFilesystem(
 	baseFeed,
 	attachments=superAttach, 
 	keepFiles=True, 
 	workDir='./runningDir',
-	glmName='superModelTinyModified.glm')
+	glmName='xOut_superModelRural.glm')
 print output['stderr'],'\n======================='
+
+# If everything worked out, create an OMF-formatted JSON file.
+fullFeed = dict(omf.feeder.newFeederWireframe)
+fullFeed['tree'] = baseFeed
+fullFeed['attachments'] = superAttach
+with open('xOut_superModelRural.json','w+') as outFile:
+	json.dump(fullFeed, outFile, indent=4)
+
+# Also create a no-tech version.
+noTechFeed = dict(baseFeed)
+newTech = ['solar', 'battery', 'inverter', 'windturb_dg', 'evcharger_det',
+	'passive_controller', 'diesel_dg', 'capacitor']
+for k in noTechFeed.keys():
+	if noTechFeed[k].get('object','') in newTech:
+		del noTechFeed[k]
+fullNoTech = dict(omf.feeder.newFeederWireframe)
+fullNoTech['tree'] = noTechFeed
+fullNoTech['attachments'] = superAttach
+with open('xOut_regularModelRural.json','w+') as outFile:
+	json.dump(fullNoTech, outFile, indent=4)
