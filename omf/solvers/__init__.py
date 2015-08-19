@@ -11,4 +11,9 @@ __all__ = [x.replace('.py','') for x in os.listdir(_myDir)
 	if x[0] not in ['.','_']]
 
 # Import of all the sub-modules:
-for name in __all__: exec('import ' + name)
+# for name in __all__: exec('import ' + name)
+
+# HACK: manual import for now due to incompatibility of Debian and NREL SAM 2015.
+import gridlabd
+import nrelsam2013
+
