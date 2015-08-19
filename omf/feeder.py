@@ -489,7 +489,7 @@ def _tests():
 		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)
-	plt.show()
+	# plt.show()
 
 if __name__ == '__main__':
 	_tests()
