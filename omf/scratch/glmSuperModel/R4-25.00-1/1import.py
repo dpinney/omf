@@ -9,11 +9,12 @@ XXX Manual bug fixes: change timestamp to starttime in clock. Make sub reg refer
 XXX Attach additional utility tech.
 XXX Attach prosumers.
 XXX Consumer versus prosumer model.
-OOO Bonus: Vary prosumers. What do we vary? Size of house...
+XXX Vary prosumers. What do we vary? See proVaryingThings.txt.
 OOO Bonus: IVVC and single phase wind.
+OOO Bonus: Add a third case (no control?)
 '''
 
-import omf, json
+import omf, json, random
 
 # Read in the glm.
 baseFeed = omf.feeder.parse('base_R4-25.00-1.glm')
@@ -47,20 +48,22 @@ maxKey = omf.feeder.getMaxKey(baseFeed) + 1
 for key in utilityNewTech:
 	baseFeed[maxKey + key] = dict(utilityNewTech[key])
 
-def nameToKey(tree, name):
-	''' Find the key for the object with the name, or None if nothing is found. '''
-	try:
-		return min([k for k in tree if tree[k].get('name','') == name])
-	except:
+def getByKeyVal(tree, key, value, getAll=False):
+	''' Return (one or more) keys to the first item in tree where that objects key=val.'''
+	allMatches = [k for k in tree if tree[k].get(key,'') == value]
+	if getAll:
+		return allMatches
+	elif (not getAll) and len(allMatches) > 0:
+		return allMatches[0]
+	else:
 		return None
-
-prosumerTemplate = omf.feeder.parse('prosumer.glm')
 
 def randomProsumer(feed, nodeKey, houseInt):
 	''' Add a single prosumer to feed replacing triplex_node at nodeKey
 		with house (etc.) with new ID houseInt. '''
-	# tPower = float(feed[nodeKey]['power_1'].replace('j','').split('+')[0])
-	tMeter = feed[nameToKey(feed, feed[nodeKey]['parent'])]
+	prosumerTemplate = omf.feeder.parse('prosumer.glm')
+	tMeter = feed[getByKeyVal(feed, 'name', feed[nodeKey]['parent'])]
+	tPower = float(feed[nodeKey]['power_1'].replace('j','').split('+')[0])
 	del feed[nodeKey]
 	maxKey = omf.feeder.getMaxKey(feed) + 1
 	for key in prosumerTemplate:
@@ -87,15 +90,28 @@ def randomProsumer(feed, nodeKey, houseInt):
 			'power_market':'Market_1' }
 		for k2 in marketMeterStuff:
 			tMeter[k2] = marketMeterStuff[k2]
-
-tripLoadKeys = [k for k in baseFeed if baseFeed[k].get('object','')=='triplex_node' and baseFeed[k].get('parent','')!='']
+		# Vary some things.
+		if 'schedule_skew' in feed[newKey]:
+			feed[newKey]['schedule_skew'] = int(feed[newKey]['schedule_skew'])* \
+				random.gauss(0,1)
+		if 'floor_area' in feed[newKey]:
+			feed[newKey]['floor_area'] = str(tPower)
+		if 'area' in feed[newKey]:
+			feed[newKey]['area'] = str(random.uniform(400,1600)) + ' sf'
+		if 'battery_capacity' in feed[newKey]:
+			feed[newKey]['battery_capacity'] = str(random.uniform(800,4000)) + ' kWh'
+		if 'base_power' in feed[newKey]:
+			feed[newKey]['base_power'] += '*' + str(random.uniform(0.5,3.0))
 
 # Add all prosumers.
+tripNodeKeys = getByKeyVal(baseFeed, 'object', 'triplex_node', getAll=True)
+tripLoadKeys = [k for k in tripNodeKeys if 'parent' in baseFeed[k]]
 for i, tripKey in enumerate(tripLoadKeys):
 	randomProsumer(baseFeed, tripKey, i)
 
 # Get attachments.
-superAttach = {fName:open(fName).read() for fName in ['superSchedules.glm','superClimate.tmy2','superCpp.player', 'superClearingPrice.player']}
+attachNames = ['superSchedules.glm','superClimate.tmy2','superCpp.player', 'superClearingPrice.player']
+superAttach = {fName:open(fName).read() for fName in attachNames}
 
 # Run test the thing.
 print 'GLD OUTPUT============='

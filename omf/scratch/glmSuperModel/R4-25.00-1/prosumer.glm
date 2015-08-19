@@ -35,7 +35,7 @@ object ZIPload {
 	name unresponsiveLoad_house;
 	parent house;
 	schedule_skew 1083;
-	base_power unresponsive_loads*1.19;
+	base_power unresponsive_loads;
 	heatgain_fraction 0.900;
 	power_pf 1.000;
 	current_pf 1.000;
@@ -49,7 +49,7 @@ object ZIPload {
 	name responsiveLoad_house;
 	parent house;
 	schedule_skew 1083;
-	base_power responsive_loads*1.30;
+	base_power responsive_loads;
 	heatgain_fraction 0.900;
 	power_pf 1.000;
 	current_pf 1.000;
