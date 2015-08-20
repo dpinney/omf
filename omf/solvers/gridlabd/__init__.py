@@ -12,6 +12,81 @@ sys.path.append(_omfDir)
 # OMF imports.
 import feeder
 
+def checkStatus(modelDir):
+	'''Reads a current gridlabD simulation time from stdErr.txt,
+	compares it to the total input simulation time and outputs a
+	percent complete as 'floatPercentageStatus'.  
+	'''
+	# TODO: Work with all feeders; take average of all feeders
+	# currently gridlabD does 1 feeder at a time (1 stderr available at at time.)
+		# Resources decision: Can we afford to push each feeder to a separate process??
+	def getFloatPercentage(workDir, endDate, simLength, simLengthUnits):	
+		try:
+			gridlabDTime = ''
+			with open(pJoin(workDir, 'stderr.txt'),'r') as stderrFile:
+				gridlabDTime = stderrFile.read().strip()
+			gridlabDTest = gridlabDTime.split('\r')
+			gridlabDTest = gridlabDTest[len(gridlabDTest)-1]
+			gridlabDTimeFormatted = gridlabDTest.split('Processing ')[1].split('PST...')[0].lstrip().rstrip()
+			gridlabDTimeFormatted = datetime.datetime.strptime(gridlabDTimeFormatted, '%Y-%m-%d %H:%M:%S')	
+			print "\n   gridlabDTime=", gridlabDTimeFormatted							
+			difference = (endDate - gridlabDTimeFormatted)
+			print "\n   difference=", difference
+			if simLengthUnits == 'hours':
+				floatPercentageStatus = -1*(difference.total_seconds()/3600)/(float(simLength)) + 1.0
+			elif simLengthUnits == 'days':
+				floatPercentageStatus = -1*(difference.total_seconds()/86400)/(float(simLength)) + 1.0
+			elif simLengthUnits == 'minutes':
+				floatPercentageStatus = -1*(difference.total_seconds()/60)/(float(simLength)) + 1.0
+		except:
+			print "\n   No std error file, passing."
+			floatPercentageStatus = 0.0
+			pass
+		return floatPercentageStatus
+	def checkstdOutExists(workDir):
+		try:
+			with open(pJoin(workDir, 'stdout.txt'),'r') as stdOutFile:
+				stdOutExists = stdOutFile.read().strip()
+			if stdOutExists != "":
+				return True
+			else:
+				return False
+		except:
+			return False
+	def convertSimLengthToEndDate(simStartDate, simLength, simLengthUnits):
+		startDate = datetime.datetime.strptime(simStartDate, '%Y-%m-%d')
+		if simLengthUnits == "hours":
+			endDate = startDate + datetime.timedelta(hours=float(simLength))
+		elif simLengthUnits == "":
+			endDate = startDate + datetime.timedelta(minutes=float(simLength))
+		elif simLengthUnits == "days":
+			endDate = startDate + datetime.timedelta(days=float(simLength))
+		return endDate
+	inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))	
+	(simStartDate, simLength, simLengthUnits) = \
+				[inputDict[x] for x in ('simStartDate', 'simLength', 'simLengthUnits')]
+	startDate = datetime.datetime.strptime(simStartDate, '%Y-%m-%d')
+	endDate = convertSimLengthToEndDate(simStartDate, simLength, simLengthUnits)
+	print "\n   Simulation startDate=", startDate, ", endDate=", endDate
+	time.sleep(5) # It takes about 5 seconds to start
+	# Reads stdErr output every second, stdErr sometimes doesn't end on the final 
+	# time, so if stdOut exists, the gridlabD simulation for the feeder is complete.
+	for key in sorted(inputDict, key=inputDict.get):
+		if key.startswith("feederName"):
+			feederDir, feederName = inputDict[key].split("___")
+			workDir = pJoin(modelDir, feederName)
+			print "\n   Computing progress for first feeder:", feederName
+			floatPercentageStatus = 0.0
+			while floatPercentageStatus < 1.0:
+				floatPercentageOld = floatPercentageStatus
+				floatPercentageStatus = getFloatPercentage(workDir, endDate, simLength, simLengthUnits)
+				if (floatPercentageOld == floatPercentageStatus) and (checkstdOutExists(workDir) == True):
+					print '\n   The stdOut exists, so the gridlabD simulation is complete for feeder:', feederName
+					floatPercentageStatus = 1.0
+					break
+				print "\n   Current percent complete: ", floatPercentageStatus
+				time.sleep(1)
+
 def _addGldToPath():
 	''' Figure out what platform we're on and choose a suitable Gridlab binary.
 	Returns full path to binary as result. '''
@@ -71,7 +146,7 @@ def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, g
 			glmName = "main." + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S') + ".glm"
 		with open(pJoin(workDir, glmName),'w') as glmFile:
 			glmFile.write(glmString)
-		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
+		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!) 
 		with open(pJoin(workDir,'stdout.txt'),'w') as stdout, open(pJoin(workDir,'stderr.txt'),'w') as stderr, open(pJoin(workDir,'PID.txt'),'w') as pidFile:
 			# MAYBEFIX: turn standerr WARNINGS back on once we figure out how to supress the 500MB of lines gridlabd wants to write...
 			proc = subprocess.Popen([binaryName,'-w', glmName], cwd=workDir, stdout=stdout, stderr=stderr)
