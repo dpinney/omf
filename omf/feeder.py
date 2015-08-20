@@ -182,10 +182,8 @@ def treeToNxGraph(inTree):
 				except: outGraph.node.get(item['name'],{})['pos']=(0.0,0.0)
 	return outGraph
 
-def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
-	''' Draw a networkx graph representing a feeder.
-	Must call matplotlib.pyplot.show() separately to view the output.
-	'''
+def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
+	''' Draw a networkx graph representing a feeder.'''
 	plt.axis('off')
 	plt.tight_layout()
 	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
@@ -230,6 +228,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False):
 								font_color='black',
 								font_weight='bold',
 								font_size=0.25)
+	if showPlot: plt.show()
 
 def _tokenizeGlm(inputStr, filePath=True):
 	''' Turn a GLM file/string into a linked list of tokens.
@@ -489,7 +488,6 @@ def _tests():
 		tree = json.load(inFile)['tree']
 	nxG = treeToNxGraph(tree)
 	x = latLonNxGraph(nxG)
-	plt.show()
 
 if __name__ == '__main__':
 	_tests()
