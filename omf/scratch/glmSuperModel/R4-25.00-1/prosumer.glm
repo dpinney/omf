@@ -180,8 +180,8 @@ object battery {
 	generator_status ONLINE;
 	use_internal_battery_model TRUE;
 	battery_type LI_ION;
-	round_trip_efficiency 0.85;
-	battery_capacity 880 kWh;
+	round_trip_efficiency 0.92;
+	battery_capacity 7 kWh;
 	state_of_charge 1.0;
 	battery_state FULL;
 };

@@ -99,7 +99,7 @@ def randomProsumer(feed, nodeKey, houseInt):
 		if 'area' in feed[newKey]:
 			feed[newKey]['area'] = str(random.uniform(400,1600)) + ' sf'
 		if 'battery_capacity' in feed[newKey]:
-			feed[newKey]['battery_capacity'] = str(random.uniform(800,4000)) + ' kWh'
+			feed[newKey]['battery_capacity'] = '7 kWh' # Tesla Powerwall daily cycle version.
 		if 'base_power' in feed[newKey]:
 			feed[newKey]['base_power'] += '*' + str(random.uniform(0.5,3.0))
 
