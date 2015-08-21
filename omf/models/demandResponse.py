@@ -296,7 +296,7 @@ def _tests():
 		"DemandChargeCost": "10",
 		"DiscountRate":"3",
 		"ScalingAnnual":"102",
-		"LoadunderManagement":"2",
+		"LoadunderManagement":"100",
 		"AnnualDROperationCost":"1000",
 		"PeakRate": "0.20",
 		"OffPeakRate": "0.083",
