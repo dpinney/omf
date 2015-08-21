@@ -19,7 +19,6 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<style type="text/css">thead{font-weight:bold} table{width:980px; font-size:10}</style> <!--TODO:Find a better place for this.-->
 </head>
 <body onload="init()">
 	<div id="title">
@@ -72,7 +71,7 @@
 				</select>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Projected System Life<span class="classic">How many years you expect the system to last.</span></label>
+				<label class="tooltip">Projected System Life (years)<span class="classic">How many years you expect the system to last.</span></label>
 				<input type="text" id="years" name="years" pattern="^\d+\.?\d*$" required="required" value="25">
 			</div>			
 			<div class="wideInput">
@@ -80,15 +79,15 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label>Retail Rate</label>
+				<label>Retail Rate ($/kWh)</label>
 				<input type="text" id="retailRate" name="retailRate" pattern="^\d+\.?\d*$" required="required" value="0.10">
 			</div>
 			<div class="shortInput">
-				<label>Value of Solar Rate</label>
+				<label>Value of Solar Monthly Rate ($)</label>
 				<input type="text" id="valueOfSolarRate" name="valueOfSolarRate" pattern="^\d+\.?\d*$" required="required" value="0.07">
 			</div>
 			<div class="shortInput">
-				<label>Monthly Demand</label>
+				<label class="tooltip">Monthly Demand (kWh CSV)<span class="classic">12 comma-separated demand values for each month of a typical year.</span></label>
 				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^\d+\.?\d*(,\d+\.?\d*)*$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
 			</div>
 			<div class="shortInput">
@@ -100,7 +99,7 @@
 				<input type="text" id="roofUpfrontCosts" name="roofUpfrontCosts" pattern="^\d+\.?\d*$" required="required" value="30000">
 			</div>
 			<div class="shortInput">
-				<label>Rooftop Monthly Charge ($/month)</label>
+				<label>Rooftop Monthly Charge ($)</label>
 				<input type="text" id="roofMonthlyCharge" name="roofMonthlyCharge" pattern="^\d+\.?\d*$" required="required" value="0">
 			</div>
 			<div class="shortInput">
@@ -108,7 +107,7 @@
 				<input type="text" id="3rdPartyRate" name="3rdPartyRate" pattern="^\d+\.?\d*$" required="required" value="0.09">
 			</div>
 			<div class="shortInput">
-				<label>3rd Party Rate Increase (%)</label>
+				<label>3rd Party Annual Rate Increase (%)</label>
 				<input type="text" id="3rdPartyRateIncrease" name="3rdPartyRateIncrease" pattern="^\d+\.?\d*$" required="required" value="3.5">
 			</div>
 			<div class="shortInput">
@@ -120,7 +119,7 @@
 				<input type="text" id="comMonthlyCharge" name="comMonthlyCharge" pattern="^\d+\.?\d*$" required="required" value="10">
 			</div>
 			<div class="shortInput">
-				<label>Community Solar Rate ($)</label>
+				<label>Community Solar Rate ($/kWh)</label>
 				<input type="text" id="comRate" name="comRate" pattern="^\d+\.?\d*$" required="required" value="0">
 			</div>
 			<div class="shortInput">
@@ -128,7 +127,7 @@
 				<input type="text" id="comRateIncrease" name="comRateIncrease" pattern="^\d+\.?\d*$" required="required" value="0">
 			</div>
 			<div class="shortInput">
-				<label>Green-ness of Fuel Mix (%)</label>
+				<label>Renewables in G&amp;T Fuel Mix (%)</label>
 				<input type="text" id="greenFuelMix" name="greenFuelMix" pattern="^\d+\.?\d*$" required="required" value="12">
 			</div>
 			<div class="wideInput" style="text-align:right">
@@ -155,16 +154,6 @@
 			function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
 			pointStart = dateOb(allOutputData.timeStamps[0])
 			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
-			function insertMetric(tableId, name, vector) {
-				// Add a vector to a table as a row.
-				table = gebi(tableId)
-				newRow = table.insertRow()
-				newRow.insertCell().innerHTML = name
-				for (i=0; i<vector.length; i++) {
-					cell = newRow.insertCell()
-					cell.innerHTML = delimitNumbers(vector[i].toFixed(0))
-				}
-			}
 		</script>
 		<p class="reportTitle postRun">Lifetime Energy Costs</p>
 		<div id="lifetimeCostsReport" class="tightContent postRun">
@@ -188,10 +177,10 @@
 		</div>
 		<p class="reportTitle postRun">Cumulative Costs</p>
 		<div id="cumulativeCostsReport" class="tightContent postRun">
-			<div id="cumulativeCostsChartDiv">TODO: implement me.</div>
+			<div id="cumulativeCostsChartDiv"></div>
 			<script>
 				cumulCostChart = new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"enableMouseTracking":false, "marker":{"enabled":false}}},
+					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":Date.parse('2012-02-01')-Date.parse('2012-01-01')},"line":{"enableMouseTracking":false, "marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000, "tickColor":"gray","type":"datetime","lineColor":"gray"},
 					"rangeSelector":{"selected":1,"enabled":true,"inputDateFormat":'%Y-%m-%d'},
 					"title":{"text":null},
@@ -209,17 +198,31 @@
 		</div>
 		<p class="reportTitle postRun">Detailed Costs By Purchase Type</p>
 		<div id="detailedCostsReport" class="tightContent postRun">
+			<style>
+				table{width:980px; font-size:16; padding:5px;}
+				td {padding:2px;}
+			</style>
 			<table id="detailedCostsTable">
 				<th>
-					<td>Total Cost</td>
-					<td>Total Saved vs. Base</td>
-					<td>Average Monthly Cost</td>
-					<td>$/kWh</td>
-					<td>Break Even Point</td>
-					<td>Green Electrons</td>
+					<td>Lifetime Cost</td>
+					<td>Total Saved<br/> vs. Base</td>
+					<td>Average <br/>Monthly Bill</td>
+					<td>Energy Cost<br/> ($/kWh)</td>
+					<td>Simple <br/>Payback (years)</td>
+					<td>Consumption <br/>From Renewables (%)</td>
 				</th>
 			</table>
 			<script>
+				function insertMetric(tableId, name, vector) {
+					// Add a vector to a table as a row.
+					table = gebi(tableId)
+					newRow = table.insertRow()
+					newRow.insertCell().innerHTML = name
+					for (i=0; i<vector.length; i++) {
+						cell = newRow.insertCell()
+						cell.innerHTML = delimitNumbers(vector[i].toFixed(2))
+					}
+				}
 				insertMetric("detailedCostsTable","Base Case",[allOutputData["totalCostBaseCase"],0, allOutputData["avgMonthlyBillBaseCase"],allOutputData["kWhCostBaseCase"], -1,allInputData["greenFuelMix"]])
 				insertMetric("detailedCostsTable","Community Solar",[allOutputData["totalCostComS"],allOutputData["totalSavedByComS"], allOutputData["avgMonthlyBillComS"],allOutputData["kWhCostComS"], allOutputData["breakEvenComS"], allOutputData["greenElectrons"]])
 				insertMetric("detailedCostsTable","Rooftop Solar",[allOutputData["totalCostRoof"],allOutputData["totalSavedByRoof"], allOutputData["avgMonthlyBillRoof"],allOutputData["kWhCostRoof"], allOutputData["breakEvenRoof"], allOutputData["greenElectrons"]])
