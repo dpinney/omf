@@ -242,8 +242,8 @@ def calcOffPeak(prismDRDict):
 #        print 'C35 (enter value): Critical Rate: ', prismDRDict['rateOnPeak']
 #        print 'D35 (enter value): On-Peak rate: ', prismDRDict['rateOnPeak']
 #    print 'E35: Off-peak rate: ', prismDRDict['rateOffPeak']
-#    if prismDRDict['rateOffPeak'] < 0:
-#        print 'Off-peak rate is negative :', prismDRDict['rateOffPeak']
+    if prismDRDict['rateOffPeak'] < 0:
+        print 'ERROR: Off-peak rate is negative :', prismDRDict['rateOffPeak']
     return prismDRDict
 
 def calcImpactFactors(prismDRDict):
