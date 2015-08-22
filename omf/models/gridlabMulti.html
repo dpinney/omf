@@ -195,7 +195,7 @@
 			<div class="wideInput" style="text-align:right">
 				<div id="emailSelection" class="preRun stoppedInline postRunInline">
 					<input name="emailStatus" id="emailStatus" type="checkbox">
-					<label class="tooltip">&nbsp;Enable Email Update<span class="classic">Sends an email on the status of the model and whether it has completed successfully or encountered an error.</span></label>
+					<label class="tooltip">&nbsp;Enable Email Update<span class="classic">Receive an email update on the final status of the model and if it has errored, along with its total runtime.</span></label>
 				</div>	
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
@@ -368,14 +368,14 @@
 						"marker":{
 							"enabled":false
 						},
-						"color":"Orange",
+						"color":"gray",
 						"data":allOutputData[study].allMeterVoltages.stdDevPos,
 						"name":"StdDev"
 					},{
 						"marker":{
 							"enabled":false
 						},
-						"color":"Orange",
+						"color":"gray",
 						"data":allOutputData[study].allMeterVoltages.stdDevNeg,
 						"name":"-StdDev"
 					},{
