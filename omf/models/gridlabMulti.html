@@ -370,14 +370,14 @@
 						},
 						"color":"gray",
 						"data":allOutputData[study].allMeterVoltages.stdDevPos,
-						"name":"StdDev"
+						"name":"StdDev",
 					},{
 						"marker":{
 							"enabled":false
 						},
 						"color":"gray",
 						"data":allOutputData[study].allMeterVoltages.stdDevNeg,
-						"name":"-StdDev"
+						"name":"-StdDev",
 					},{
 						"marker":{
 							"enabled":false
@@ -399,7 +399,8 @@
 							"dashStyle": 'ShortDash',
 							"width": 2,
 							"value": 114, // voltage lower bound
-							"zIndex": 0
+							"zIndex": 0,
+							"label":{"text":"Number of Meters:" + allOutputData[study].allMeterVoltages.triplexMeterCount, "align":"right","y":-115,"x":-10, "style":{"color":"gray", "fontsize":"12px"}}								
 						}, {
 							"color": 'gray',
 							"dashStyle": 'ShortDash',
