@@ -86,25 +86,26 @@ object windturb_dg {
 	Turbine_Model BERGEY_10kW;
 };
 
-object volt_var_control {
-        name volt_var_control;
-        control_method ACTIVE;
-        capacitor_delay 60.0;
-        regulator_delay 60.0;
-        desired_pf 0.99;
-        d_max 0.8;
-        d_min 0.1;
-        substation_link "R4-25-00-1_reg_1";
-        regulator_list "R4-25-00-1_reg_1";
-        capacitor_list "R4-25-00-1_reg_1";
-        voltage_measurements "R4-25-00-1_tm_4,R4-25-00-1_tm_17,R4-25-00-1_tm_78,R4-25-00-1_tm_140";
-        maximum_voltages 16000.00;
-        minimum_voltages 10000.00;
-        max_vdrop 50;
-        high_load_deadband 110.00;
-        desired_voltages 13000.00;
-        low_load_deadband 110.00;
-}
+// Convergence issues with IVVC for some months.
+//object volt_var_control {
+//        name volt_var_control;
+//        control_method ACTIVE;
+//        capacitor_delay 60.0;
+//        regulator_delay 60.0;
+//        desired_pf 0.99;
+//        d_max 0.8;
+//        d_min 0.1;
+//        substation_link "R4-25-00-1_reg_1";
+//        regulator_list "R4-25-00-1_reg_1";
+//        capacitor_list "R4-25-00-1_reg_1";
+//        voltage_measurements "R4-25-00-1_tm_4,R4-25-00-1_tm_17,R4-25-00-1_tm_78,R4-25-00-1_tm_140";
+//        maximum_voltages 16000.00;
+//        minimum_voltages 10000.00;
+//        max_vdrop 50;
+//        high_load_deadband 110.00;
+//        desired_voltages 13000.00;
+//        low_load_deadband 110.00;
+//};
 
 object capacitor {
       name cap_1_threePhase;
