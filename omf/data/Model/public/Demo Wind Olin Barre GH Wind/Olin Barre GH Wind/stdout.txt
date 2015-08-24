@@ -4,25 +4,25 @@ Core profiler results
 
 Total objects               2280 objects
 Parallelism                    1 thread
-Total time                  19.0 seconds
-  Core time                  1.7 seconds (8.9%)
-    Compiler                 3.4 seconds (18.0%)
+Total time                  20.0 seconds
+  Core time                  2.1 seconds (10.6%)
+    Compiler                 4.7 seconds (23.5%)
     Instances                0.0 seconds (0.0%)
     Random variables         0.0 seconds (0.0%)
     Schedules                0.0 seconds (0.0%)
-    Loadshapes               0.0 seconds (0.1%)
-    Enduses                  0.0 seconds (0.1%)
-    Transforms               0.1 seconds (0.6%)
-  Model time                17.3 seconds/thread (91.1%)
+    Loadshapes               0.0 seconds (0.2%)
+    Enduses                  0.0 seconds (0.2%)
+    Transforms               0.2 seconds (0.9%)
+  Model time                17.9 seconds/thread (89.4%)
 Simulation time               12 days
-Simulation speed              36k object.hours/second
+Simulation speed              34k object.hours/second
 Passes completed             448 passes
 Time steps completed         301 timesteps
 Convergence efficiency      1.49 passes/timestep
 Read lock contention        0.0%
 Write lock contention       0.0%
 Average timestep           3588 seconds/timestep
-Simulation rate           56842 x realtime
+Simulation rate           54000 x realtime
 
 
 Model profiler results
@@ -30,22 +30,22 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-node              14.619     84.5%     30.2
-house              0.679      3.9%      2.0
-collector          0.524      3.0%    104.8
-triplex_meter      0.365      2.1%      1.9
-overhead_line      0.296      1.7%      0.9
-waterheater        0.213      1.2%      0.9
-transformer        0.172      1.0%      0.9
-climate            0.162      0.9%    162.0
-ZIPload            0.098      0.6%      0.3
-underground_line   0.098      0.6%      1.1
-fuse               0.043      0.2%      1.0
-switch             0.011      0.1%      0.9
-windturb_dg        0.007      0.0%      7.0
-recorder           0.007      0.0%      2.3
-capacitor          0.006      0.0%      6.0
-meter              0.003      0.0%      3.0
+node              12.975     72.5%     26.8
+collector          1.276      7.1%    255.2
+house              0.953      5.3%      2.9
+overhead_line      0.572      3.2%      1.7
+triplex_meter      0.504      2.8%      2.6
+waterheater        0.479      2.7%      2.1
+transformer        0.378      2.1%      2.0
+ZIPload            0.223      1.2%      0.7
+climate            0.200      1.1%    200.0
+underground_line   0.155      0.9%      1.7
+fuse               0.102      0.6%      2.3
+switch             0.032      0.2%      2.7
+recorder           0.030      0.2%     10.0
+meter              0.004      0.0%      4.0
+windturb_dg        0.003      0.0%      3.0
+capacitor          0.003      0.0%      3.0
 ================ ======== ======== ========
-Total             17.303    100.0%      7.6
+Total             17.889    100.0%      7.8
 
