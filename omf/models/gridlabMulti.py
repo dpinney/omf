@@ -153,10 +153,20 @@ def runForeground(modelDir, inputDict):
 				# Voltage Band
 				if 'VoltageJiggle.csv' in rawOut:
 					cleanOut['allMeterVoltages'] = {}
-					cleanOut['allMeterVoltages']['Min'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
-					cleanOut['allMeterVoltages']['Mean'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], avg, level)
-					cleanOut['allMeterVoltages']['StdDev'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], avg, level)
-					cleanOut['allMeterVoltages']['Max'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
+					cleanOut['allMeterVoltages']['Min'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
+					cleanOut['allMeterVoltages']['Mean'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], avg, level)
+					cleanOut['allMeterVoltages']['StdDev'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], avg, level)
+					cleanOut['allMeterVoltages']['Max'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
+				cleanOut['allMeterVoltages']['stdDevPos'] = [(x+y/2) for x,y in zip(cleanOut['allMeterVoltages']['Mean'], cleanOut['allMeterVoltages']['StdDev'])]
+				cleanOut['allMeterVoltages']['stdDevNeg'] = [(x-y/2) for x,y in zip(cleanOut['allMeterVoltages']['Mean'], cleanOut['allMeterVoltages']['StdDev'])]
+				# Total # of meters
+				count = 0
+				with open(pJoin(modelDir, feederName, "feeder.json")) as f:
+					for line in f:
+						if "\"objectType\": \"triplex_meter\"" in line:
+							count+=1
+				print "count=", count
+				cleanOut['allMeterVoltages']['triplexMeterCount'] = float(count)
 				# Power Consumption
 				cleanOut['Consumption'] = {}
 				# Set default value to be 0, avoiding missing value when computing Loads
@@ -170,7 +180,7 @@ def runForeground(modelDir, inputDict):
 							cleanOut['Consumption']['Power'] = oneSwingPower
 						else:
 							cleanOut['Consumption']['Power'] = vecSum(oneSwingPower,cleanOut['Consumption']['Power'])
-					elif key.startswith('Inverter_') and key.endswith('.csv'): 	
+					elif key.startswith('Inverter_') and key.endswith('.csv'):
 						realA = rawOut[key]['power_A.real']
 						realB = rawOut[key]['power_B.real']
 						realC = rawOut[key]['power_C.real']

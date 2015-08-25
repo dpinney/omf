@@ -1,27 +1,27 @@
-
+                                      
 Core profiler results
 ======================
 
-Total objects               2622 objects
+Total objects               2623 objects
 Parallelism                    1 thread
 Total time                   3.0 seconds
-  Core time                  1.8 seconds (60.5%)
-    Compiler                 3.5 seconds (116.5%)
+  Core time                  1.1 seconds (36.5%)
+    Compiler                 3.7 seconds (122.3%)
     Instances                0.0 seconds (0.0%)
     Random variables         0.0 seconds (0.0%)
     Schedules                0.0 seconds (0.0%)
     Loadshapes               0.0 seconds (0.0%)
     Enduses                  0.0 seconds (0.2%)
-    Transforms               0.0 seconds (0.2%)
-  Model time                 1.2 seconds/thread (39.5%)
+    Transforms               0.0 seconds (0.3%)
+  Model time                 1.9 seconds/thread (63.5%)
 Simulation time                0 days
-Simulation speed             218 object.hours/second
-Passes completed              34 passes
-Time steps completed          17 timesteps
-Convergence efficiency      2.00 passes/timestep
+Simulation speed             219 object.hours/second
+Passes completed              49 passes
+Time steps completed          24 timesteps
+Convergence efficiency      2.04 passes/timestep
 Read lock contention        0.0%
 Write lock contention       0.0%
-Average timestep             53 seconds/timestep
+Average timestep             38 seconds/timestep
 Simulation rate             300 x realtime
 
 
@@ -30,29 +30,29 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-node               0.686     57.9%      3.0
-climate            0.121     10.2%    121.0
-inverter           0.042      3.5%      0.2
-house              0.042      3.5%      0.3
-passive_controll   0.038      3.2%      0.1
-triplex_meter      0.028      2.4%      0.2
-triplex_line       0.028      2.4%      0.2
-solar              0.028      2.4%      0.2
-waterheater        0.028      2.4%      0.2
-overhead_line      0.026      2.2%      0.1
-triplex_node       0.023      1.9%      0.2
-battery            0.023      1.9%      0.2
-transformer        0.022      1.9%      0.2
-ZIPload            0.020      1.7%      0.1
-evcharger_det      0.010      0.8%      0.1
-fuse               0.005      0.4%      0.2
-underground_line   0.005      0.4%      0.2
-player             0.002      0.2%      1.0
-load               0.002      0.2%      2.0
-windturb_dg        0.002      0.2%      2.0
-recorder           0.001      0.1%      1.0
-diesel_dg          0.001      0.1%      1.0
-auction            0.001      0.1%      1.0
+node               1.158     60.8%      5.0
+climate            0.145      7.6%    145.0
+inverter           0.079      4.1%      0.3
+passive_controll   0.066      3.5%      0.2
+house              0.064      3.4%      0.5
+triplex_meter      0.050      2.6%      0.4
+solar              0.048      2.5%      0.3
+overhead_line      0.047      2.5%      0.3
+waterheater        0.045      2.4%      0.3
+triplex_line       0.042      2.2%      0.3
+triplex_node       0.036      1.9%      0.3
+battery            0.035      1.8%      0.2
+transformer        0.026      1.4%      0.2
+ZIPload            0.022      1.2%      0.1
+evcharger_det      0.017      0.9%      0.1
+fuse               0.008      0.4%      0.3
+underground_line   0.007      0.4%      0.3
+load               0.003      0.2%      3.0
+player             0.002      0.1%      1.0
+recorder           0.002      0.1%      2.0
+switch             0.002      0.1%      0.5
+capacitor          0.001      0.1%      1.0
+regulator          0.001      0.1%      1.0
 ================ ======== ======== ========
-Total              1.184    100.0%      0.5
+Total              1.906    100.0%      0.7
 

@@ -195,7 +195,7 @@
 			<div class="wideInput" style="text-align:right">
 				<div id="emailSelection" class="preRun stoppedInline postRunInline">
 					<input name="emailStatus" id="emailStatus" type="checkbox">
-					<label class="tooltip">&nbsp;Enable Email Update<span class="classic">Sends an email on the status of the model and whether it has completed successfully or encountered an error.</span></label>
+					<label class="tooltip">&nbsp;Enable Email Update<span class="classic">Receive an email update on the final status of the model and if it has errored, along with its total runtime.</span></label>
 				</div>	
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
@@ -368,6 +368,20 @@
 						"marker":{
 							"enabled":false
 						},
+						"color":"gray",
+						"data":allOutputData[study].allMeterVoltages.stdDevPos,
+						"name":"StdDev",
+					},{
+						"marker":{
+							"enabled":false
+						},
+						"color":"gray",
+						"data":allOutputData[study].allMeterVoltages.stdDevNeg,
+						"name":"-StdDev",
+					},{
+						"marker":{
+							"enabled":false
+						},
 						"color":"LightBlue",
 						"data":allOutputData[study].allMeterVoltages.Max,
 						"name":"Max"
@@ -385,7 +399,8 @@
 							"dashStyle": 'ShortDash',
 							"width": 2,
 							"value": 114, // voltage lower bound
-							"zIndex": 0
+							"zIndex": 0,
+							"label":{"text":"Number of Meters:" + allOutputData[study].allMeterVoltages.triplexMeterCount, "align":"right","y":-115,"x":-10, "style":{"color":"gray", "fontsize":"12px"}}								
 						}, {
 							"color": 'gray',
 							"dashStyle": 'ShortDash',
@@ -418,6 +433,7 @@
 						localHighChart["chart"]["width"] = 500
 						localHighChart["chart"]["type"] = "line"
 						localHighChart["chart"]["renderTo"] = "monetizedPowerTimeSeries"
+						localHighChart['yAxis']['min'] = 0
 						localHighChart["yAxis"]["title"]["text"] = "Capacity Cost ($)"
 						for (key in allOutputData){
 							if (key.substring(0, 6) == "feeder"){
@@ -438,6 +454,7 @@
 						localHighChart["chart"]["type"] = "line"
 						localHighChart["chart"]["renderTo"] = "monetizedEnergyBalance"
 						localHighChart["yAxis"]["title"]["text"] = "Energy Cost ($)"
+						localHighChart['yAxis']['min'] = 0
 						for (key in allOutputData){
 							if (key.substring(0, 6) == "feeder"){
 								localHighChart["series"].push({"name": key, data: []})
