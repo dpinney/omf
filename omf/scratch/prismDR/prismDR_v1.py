@@ -372,10 +372,6 @@ def initPRISMDRDict(prismDRDict):
         prismDRDict['cppDayIdx'] = []
     return prismDRDict
 
-
-
-
-
 def _tests():
     prismDRInputs = {
         'rateStructure': '2tierCPP', #options: 2tier, 2tierCPP
@@ -394,7 +390,7 @@ def _tests():
 		}
     prismDRDict = initPRISMDRDict(prismDRInputs)
 
-    load_profile = importLoad('/Users/hard312/Gridlab-D/omf/omf/omf/scratch/prismDR/test_load.csv')
+    load_profile = importLoad('./test_load.csv')
     prismDRDict['origLoad'] = load_profile
     #DEPRECATED: elastcity = importElast('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_elasticity.csv')
     #DEPRICATED: rates = importRates('/Users/hard312/Gridlab-D/omf/omf/scratch/prismDR/test_rates.csv')
@@ -406,10 +402,7 @@ def _tests():
     prismDRDict = calcOffPeak(prismDRDict)
     prismDRDict = calcImpactFactors(prismDRDict)
     prismDRDict = applyDR(prismDRDict)
-    writeCSV('/Users/hard312/Gridlab-D/omf/omf/omf/scratch/prismDR/test_load_modified.csv', prismDRDict['modLoad'])
-
-
-
+    writeCSV('./test_load_modified.csv', prismDRDict['modLoad'])
 
 if __name__ == '__main__': #Only run if we are calling from the command line, commonly to test functionality
     _tests()
