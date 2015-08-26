@@ -1,0 +1,7 @@
+ISSUE
+https://github.com/dpinney/omf/issues/247
+
+TODO
+OOO Make scaled random house attachment script.
+OOO Make geo house attachment.
+OOO Make weather script.
