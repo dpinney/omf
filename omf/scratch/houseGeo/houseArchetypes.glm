@@ -1,4 +1,5 @@
-//Region 1 house archetypes
+//Region 1 house archetypes,
+
 object house {
 	name R1_SingleFamilyHome_Pre-1940;
 	floor_area 2209;
@@ -27,7 +28,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_SingleFamilyHome_1940-1949;
@@ -57,7 +58,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_SingleFamilyHome_1950-1959;
@@ -87,7 +88,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_SingleFamilyHome_1960-1969;
@@ -117,7 +118,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_SingleFamilyHome_1970-1979;
@@ -147,7 +148,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_SingleFamilyHome_1980-1989;
@@ -177,7 +178,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_SingleFamilyHome_1990-2005;
@@ -207,7 +208,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_Apartment_Pre-1960;
@@ -237,7 +238,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_Apartment_1960-1989;
@@ -267,7 +268,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_Apartment_1990-2005;
@@ -297,7 +298,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_MobileHome_1960-1989;
@@ -327,7 +328,7 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
 
 object house {
 	name R1_MobileHome_1990-2005;
@@ -357,4 +358,4 @@ object house {
 	motor_efficiency AVERAGE;
 	breaker_amps 1000;// do not vary
 	hvac_breaker_rating 1000;// do not vary
-}
+};
