@@ -185,3 +185,52 @@ object battery {
 	state_of_charge 1.0;
 	battery_state FULL;
 };
+
+// Single Phase Windturb_dg OPTIONAL.
+//object inverter {
+//	name windInverter_house;
+//	phases REPLACE_ME;
+//	parent REPLACE_ME;
+//	rated_power 10000;
+//	generator_status ONLINE;
+//	inverter_type four_quadrant;
+//	four_quadrant_control_mode CONSTANT_PF;
+//	pf = 1;
+//};
+//
+//object rectifier {
+//	name rectifier_house;
+//	parent windInverter_house;
+//	phases ABCN;
+//	rectifier_type SIX_PULSE;
+//	generator_mode SUPPLY_DRIVEN;
+//};
+//
+//object windturb_dg {
+//	name wind_house;
+//	parent rectifier_house;
+//	phases ABCN;
+//	Gen_status ONLINE;
+//	Gen_mode CONSTANTP;
+//	//Turbine_Model BERGEY_10kW;
+//	turbine_height = 24;
+//	blade_diam = 7;
+//	Rated_VA = 10000;
+//	Rated_V = 360;
+//	Max_P = 15000;
+//	Max_Q = 4000;
+//	pf = 0.95;
+//	q = 0;
+//	CP_Data = GENERAL_SMALL;
+//	cut_in_ws = 2;
+//	cut_out_ws = 20;
+//	Cp_max = 0.28;
+//	Cp_rated = 0.275;
+//	ws_maxcp = 8.2;
+//	ws_rated = 12.5;
+//	Gen_type = SYNCHRONOUS;
+//	Rs = 0.05;
+//	Xs = 0.200;
+//	Rg = 0.000;
+//	Xg = 0.000;
+//};

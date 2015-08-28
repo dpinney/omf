@@ -433,6 +433,7 @@
 						localHighChart["chart"]["width"] = 500
 						localHighChart["chart"]["type"] = "line"
 						localHighChart["chart"]["renderTo"] = "monetizedPowerTimeSeries"
+						localHighChart['yAxis']['min'] = 0
 						localHighChart["yAxis"]["title"]["text"] = "Capacity Cost ($)"
 						for (key in allOutputData){
 							if (key.substring(0, 6) == "feeder"){
@@ -453,6 +454,7 @@
 						localHighChart["chart"]["type"] = "line"
 						localHighChart["chart"]["renderTo"] = "monetizedEnergyBalance"
 						localHighChart["yAxis"]["title"]["text"] = "Energy Cost ($)"
+						localHighChart['yAxis']['min'] = 0
 						for (key in allOutputData){
 							if (key.substring(0, 6) == "feeder"){
 								localHighChart["series"].push({"name": key, data: []})

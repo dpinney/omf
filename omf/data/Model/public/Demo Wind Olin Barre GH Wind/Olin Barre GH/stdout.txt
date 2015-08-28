@@ -1,28 +1,28 @@
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
 Core profiler results
 ======================
 
 Total objects               2277 objects
 Parallelism                    1 thread
-Total time                  19.0 seconds
-  Core time                  0.6 seconds (2.9%)
-    Compiler                 3.6 seconds (18.7%)
+Total time                  15.0 seconds
+  Core time                  1.7 seconds (11.6%)
+    Compiler                 3.9 seconds (25.9%)
     Instances                0.0 seconds (0.0%)
     Random variables         0.0 seconds (0.0%)
     Schedules                0.0 seconds (0.0%)
-    Loadshapes               0.0 seconds (0.1%)
-    Enduses                  0.0 seconds (0.1%)
-    Transforms               0.1 seconds (0.4%)
-  Model time                18.4 seconds/thread (97.1%)
+    Loadshapes               0.0 seconds (0.2%)
+    Enduses                  0.0 seconds (0.2%)
+    Transforms               0.1 seconds (0.7%)
+  Model time                13.3 seconds/thread (88.4%)
 Simulation time               12 days
-Simulation speed              36k object.hours/second
+Simulation speed              46k object.hours/second
 Passes completed             302 passes
 Time steps completed         301 timesteps
 Convergence efficiency      1.00 passes/timestep
 Read lock contention        0.0%
 Write lock contention       0.0%
 Average timestep           3588 seconds/timestep
-Simulation rate           56842 x realtime
+Simulation rate           72000 x realtime
 
 
 Model profiler results
@@ -30,20 +30,19 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-node              16.067     87.1%     33.2
-house              0.642      3.5%      1.9
-collector          0.369      2.0%     73.8
-triplex_meter      0.327      1.8%      1.7
-overhead_line      0.255      1.4%      0.8
-climate            0.227      1.2%    227.0
-waterheater        0.185      1.0%      0.8
-transformer        0.142      0.8%      0.7
-ZIPload            0.090      0.5%      0.3
-underground_line   0.070      0.4%      0.8
-fuse               0.045      0.2%      1.0
-switch             0.018      0.1%      1.5
-recorder           0.006      0.0%      3.0
-capacitor          0.002      0.0%      2.0
+node              10.326     77.8%     21.3
+collector          0.621      4.7%    124.2
+house              0.580      4.4%      1.7
+overhead_line      0.372      2.8%      1.1
+waterheater        0.322      2.4%      1.4
+triplex_meter      0.310      2.3%      1.6
+transformer        0.204      1.5%      1.1
+climate            0.198      1.5%    198.0
+ZIPload            0.160      1.2%      0.5
+underground_line   0.096      0.7%      1.0
+fuse               0.061      0.5%      1.4
+switch             0.015      0.1%      1.2
+capacitor          0.001      0.0%      1.0
 ================ ======== ======== ========
-Total             18.445    100.0%      8.1
+Total             13.266    100.0%      5.8
 

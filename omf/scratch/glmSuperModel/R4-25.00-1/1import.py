@@ -10,8 +10,10 @@ XXX Attach additional utility tech.
 XXX Attach prosumers.
 XXX Consumer versus prosumer model.
 XXX Vary prosumers. What do we vary? See proVaryingThings.txt.
-OOO Bonus: IVVC and single phase wind.
-OOO Bonus: Add a third case (no control?)
+XXX Bonus: IVVC.
+XXX Bonus: single phase wind.
+OOO Bonus: Add a third case (different price signals, more utility control).
+OOO Full model update and ship to production.
 '''
 
 import omf, json, random
@@ -41,6 +43,10 @@ omf.feeder.fullyDeEmbed(baseFeed)
 for key in baseFeed.keys():
 	if baseFeed[key].get('object','') == 'complex_assert':
 		del baseFeed[key]
+
+# Write a clean copy of the GLM for testing elsewhere.
+with open('base_R4-25.00-1_CLEAN.glm','w+') as cleanCopy:
+	cleanCopy.write(omf.feeder.sortedWrite(baseFeed))
 
 # Attach additional utility technology (DG, Caps, IVVC).
 utilityNewTech = omf.feeder.parse('proUtility.glm')
