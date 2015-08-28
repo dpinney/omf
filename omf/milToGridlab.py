@@ -1246,7 +1246,7 @@ def _latCount(name):
 				myLatCount += 1
 	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
-def _tests(keepFiles=True):
+def _tests(keepFiles=False):
 	''' Test convert every windmil feeder we have (in uploads). Return number of exceptions we hit. '''
 	import os, json, traceback, shutil
 	from solvers import gridlabd
