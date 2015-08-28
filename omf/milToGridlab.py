@@ -962,8 +962,20 @@ def convert(stdString,seqString):
 				for y in glm_dict:
 					if 'name' in glm_dict[y] and glm_dict[y]['name'] == glm_dict[x]['to']:
 						glm_dict[y]['nominal_voltage'] = glm_dict[x]['nominal_voltage']
-						volt_dict[glm_dict[y]['name']] = glm_dict[y]['nominal_voltage'] 
-				
+						volt_dict[glm_dict[y]['name']] = glm_dict[y]['nominal_voltage']
+			# Regulator_Configuration set to Swing
+			try:
+				if 'SWING' in glm_dict[x].values():
+					nominalVoltageSwing = float(glm_dict[x]['nominal_voltage'])			
+				if 'regulator' in glm_dict[x].values():
+					for key, value in glm_dict[x].iteritems():
+						if 'band_center' in glm_dict[x][key]:				
+							bandWidthRegulator = float(glm_dict[x][key]['band_width'])
+							if (glm_dict[x][key]['band_center'] != nominalVoltageSwing):
+								glm_dict[x][key]['band_center'] = nominalVoltageSwing
+								glm_dict[x][key]['band_width'] =  (bandWidthRegulator * nominalVoltageSwing) / 120
+			except:
+				print "\n   Couldn't set regulator_configuration to the swing bus nominal_voltage."				
 					
 	parent_voltage = {}
 	current_parents = len(parent_voltage)
@@ -1234,7 +1246,7 @@ def _latCount(name):
 				myLatCount += 1
 	print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
-def _tests(keepFiles=False):
+def _tests(keepFiles=True):
 	''' Test convert every windmil feeder we have (in uploads). Return number of exceptions we hit. '''
 	import os, json, traceback, shutil
 	from solvers import gridlabd
