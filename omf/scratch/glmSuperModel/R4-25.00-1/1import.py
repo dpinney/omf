@@ -44,6 +44,10 @@ for key in baseFeed.keys():
 	if baseFeed[key].get('object','') == 'complex_assert':
 		del baseFeed[key]
 
+# Write a clean copy of the GLM for testing elsewhere.
+with open('base_R4-25.00-1_CLEAN.glm','w+') as cleanCopy:
+	cleanCopy.write(omf.feeder.sortedWrite(baseFeed))
+
 # Attach additional utility technology (DG, Caps, IVVC).
 utilityNewTech = omf.feeder.parse('proUtility.glm')
 maxKey = omf.feeder.getMaxKey(baseFeed) + 1

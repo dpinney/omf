@@ -74,7 +74,7 @@
             {
                "long_name" : "Grand St/Bedford Av",
                "short_name" : "Grand St/Bedford Av",
-               "types" : [ "bus_station", "transit_station", "establishment" ]
+               "types" : [ "point_of_interest", "establishment" ]
             },
             {
                "long_name" : "Williamsburg",
@@ -126,125 +126,7 @@
             }
          },
          "place_id" : "ChIJi27VXGBZwokRM8ErPyB91yk",
-         "types" : [ "bus_station", "transit_station", "establishment" ]
-      },
-      {
-         "address_components" : [
-            {
-               "long_name" : "Grand St/Bedford Av",
-               "short_name" : "Grand St/Bedford Av",
-               "types" : [ "bus_station", "transit_station", "establishment" ]
-            },
-            {
-               "long_name" : "Williamsburg",
-               "short_name" : "Williamsburg",
-               "types" : [ "neighborhood", "political" ]
-            },
-            {
-               "long_name" : "Brooklyn",
-               "short_name" : "Brooklyn",
-               "types" : [ "sublocality_level_1", "sublocality", "political" ]
-            },
-            {
-               "long_name" : "Kings County",
-               "short_name" : "Kings County",
-               "types" : [ "administrative_area_level_2", "political" ]
-            },
-            {
-               "long_name" : "New York",
-               "short_name" : "NY",
-               "types" : [ "administrative_area_level_1", "political" ]
-            },
-            {
-               "long_name" : "United States",
-               "short_name" : "US",
-               "types" : [ "country", "political" ]
-            },
-            {
-               "long_name" : "11249",
-               "short_name" : "11249",
-               "types" : [ "postal_code" ]
-            }
-         ],
-         "formatted_address" : "Grand St/Bedford Av, Brooklyn, NY 11249, USA",
-         "geometry" : {
-            "location" : {
-               "lat" : 40.714684,
-               "lng" : -73.961563
-            },
-            "location_type" : "APPROXIMATE",
-            "viewport" : {
-               "northeast" : {
-                  "lat" : 40.71603298029149,
-                  "lng" : -73.9602140197085
-               },
-               "southwest" : {
-                  "lat" : 40.7133350197085,
-                  "lng" : -73.96291198029151
-               }
-            }
-         },
-         "place_id" : "ChIJNwWIWWBZwokR7EMp6Bet1UA",
-         "types" : [ "bus_station", "transit_station", "establishment" ]
-      },
-      {
-         "address_components" : [
-            {
-               "long_name" : "Bedford Av/Grand St",
-               "short_name" : "Bedford Av/Grand St",
-               "types" : [ "bus_station", "transit_station", "establishment" ]
-            },
-            {
-               "long_name" : "Williamsburg",
-               "short_name" : "Williamsburg",
-               "types" : [ "neighborhood", "political" ]
-            },
-            {
-               "long_name" : "Brooklyn",
-               "short_name" : "Brooklyn",
-               "types" : [ "sublocality_level_1", "sublocality", "political" ]
-            },
-            {
-               "long_name" : "Kings County",
-               "short_name" : "Kings County",
-               "types" : [ "administrative_area_level_2", "political" ]
-            },
-            {
-               "long_name" : "New York",
-               "short_name" : "NY",
-               "types" : [ "administrative_area_level_1", "political" ]
-            },
-            {
-               "long_name" : "United States",
-               "short_name" : "US",
-               "types" : [ "country", "political" ]
-            },
-            {
-               "long_name" : "11211",
-               "short_name" : "11211",
-               "types" : [ "postal_code" ]
-            }
-         ],
-         "formatted_address" : "Bedford Av/Grand St, Brooklyn, NY 11211, USA",
-         "geometry" : {
-            "location" : {
-               "lat" : 40.71471,
-               "lng" : -73.960999
-            },
-            "location_type" : "APPROXIMATE",
-            "viewport" : {
-               "northeast" : {
-                  "lat" : 40.7160589802915,
-                  "lng" : -73.95965001970849
-               },
-               "southwest" : {
-                  "lat" : 40.7133610197085,
-                  "lng" : -73.9623479802915
-               }
-            }
-         },
-         "place_id" : "ChIJbQYlXmBZwokRO-gku-oJYx0",
-         "types" : [ "bus_station", "transit_station", "establishment" ]
+         "types" : [ "transit_station", "point_of_interest", "establishment" ]
       },
       {
          "address_components" : [
@@ -583,7 +465,7 @@
             "bounds" : {
                "northeast" : {
                   "lat" : 71.3867745,
-                  "lng" : -66.885417
+                  "lng" : -66.9502861
                },
                "southwest" : {
                   "lat" : 18.9110642,
