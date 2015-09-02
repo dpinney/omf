@@ -25,7 +25,7 @@ def fileNameAndLineCount(fileName):
 def recursiveFileList(direct):
 	fileList = []
 	for x in os.walk(direct):
-		fileList = fileList + [x[0] + '\\' + fPath for fPath in x[2]]
+		fileList = fileList + [x[0] + '/' + fPath for fPath in x[2]]
 	return fileList
 
 allSource = cleanList(recursiveFileList('..'))

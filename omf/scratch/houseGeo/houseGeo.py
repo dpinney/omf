@@ -91,4 +91,4 @@ def _tests():
 		outFile.write(omf.feeder.sortedWrite(testFeed))
 
 if __name__ == '__main__':
-	_tests()
+	_testHouseGeo()
