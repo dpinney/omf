@@ -16,7 +16,7 @@ sys.path.append(__metaModel__._omfDir)
 # with open(pJoin(os.getcwd(), "_circuitRealTime.html"),"r") as tempFile:
 	# template = Template(tempFile.read())
 '''if in models dir'''
-with open(pJoin(__metaModel__._myDir,"circuitRealTime.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"_circuitRealTime.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 #TODO: I think this is where its breaking. Reading hte html file and template.render seeing the include throws it off.
 # Maybe find a way to pass it to .html some other way. 
