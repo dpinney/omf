@@ -13,7 +13,7 @@ from solvers import nrelsam2013
 from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"modelSkeleton.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"_modelSkeleton.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
