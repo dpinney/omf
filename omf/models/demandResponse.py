@@ -315,8 +315,8 @@ def run(modelDir, inputDict):
 			'rateStructure': '2tier', # options: 2tier, 2tierCPP, PTR, 3tier, 24hourly
 			'elasticitySubWOCPP': SubElas, # Substitution elasticty during non-CPP days.
 			'elasticityDailyWOCPP': DayElas, # Daily elasticity during non-CPP days.
-			'elasticitySubWCPP': -0.09698, # Substitution elasticty during CPP days. Only required for 2tierCPP
-			'elasticityDailyWCPP': -0.01607, # Daily elasticity during non-CPP days. Only reuquired for 2tierCPP
+			'elasticitySubWCPP': SubElas, # Substitution elasticty during CPP days. Only required for 2tierCPP
+			'elasticityDailyWCPP': DayElas, # Daily elasticity during non-CPP days. Only reuquired for 2tierCPP
 			'startMonth': startmonth, # 1-12. Beginning month of the cooling season when the DR program will run.
 			'stopMonth': stopmonth, # 1-12. Ending month of the cooling season when the DR program will run.
 			'startHour': starthour, # 0-23. Beginning hour for on-peak and CPP rates.
