@@ -81,6 +81,10 @@ def run(modelDir, inputDict):
 
 def runForeground(modelDir, inputDict):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
+	# Check whether model exist or not
+	if not os.path.isdir(modelDir):
+		os.makedirs(modelDir)
+		inputDict["created"] = str(datetime.datetime.now())	
 	print "STARTING TO RUN", modelDir
 	beginTime = datetime.datetime.now()
 	feederList = []
@@ -388,7 +392,6 @@ def _groupBy(inL, func):
 
 def _tests():
 	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		# "feederName": "admin___Simple Market System",
@@ -427,7 +430,8 @@ def _tests():
 		"zipCode": "64735",		
 		"simLength": "24",
 		"runTime": ""}
-	modelLoc = pJoin(workDir,"admin","Automated Multiple GridlabD Testing")
+	workDir = pJoin(__metaModel__._omfDir,"data","Model")		
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated gridlabMulti Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
@@ -435,9 +439,10 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	renderAndShow(template)
+	# renderAndShow(template)
 	# Run the model.
-	run(modelLoc, inData)
+	# run(modelLoc, inData)
+	runForeground(modelLoc, inData)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)
