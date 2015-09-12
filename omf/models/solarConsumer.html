@@ -165,7 +165,7 @@
 					['3rd Party PPA', allOutputData.totalCost3rdParty],
 					['Rooftop Solar', allOutputData.totalCostRoof]]
 				levelizedCostChart = new Highcharts.Chart({
-					plotOptions:{column:{dataLabels:{enabled:true, format: '{point.y:,.0f}'}, pointPadding:0.2, borderWidth:0}},
+					plotOptions:{column:{stacking:'normal',dataLabels:{enabled:true, format: '{point.y:,.0f}'}, pointPadding:0.2, borderWidth:0}},
 					xAxis:{type:'category',tickColor:'gray',lineColor:'gray',crosshair:true},
 					yAxis:{title:{text:'Cost ($)'}},
 					title:false,

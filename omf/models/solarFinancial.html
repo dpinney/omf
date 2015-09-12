@@ -334,7 +334,7 @@
 			<div id="monthlyPerformanceDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
+					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
 					"title":{"text":null},
 					"series":[{"name":"Energy Generated", "color":"orange", "data":allOutputData.monthlyGeneration, "dataLabels":{"enabled":false}}],

@@ -83,7 +83,7 @@ def runForeground(modelDir,inData):
 		scadaPath = pJoin(__metaModel__._omfDir,"uploads",(inData["scadaFile"]+'.tsv'))
 		calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 		allOutput = {}
-		print "here"
+		print "\nStarted to run in foreground."
 		with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
 			feederJson = json.load(jsonIn)
 			localTree = feederJson.get("tree", {})

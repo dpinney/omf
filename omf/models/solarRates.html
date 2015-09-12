@@ -349,7 +349,7 @@
 			<div id="monthlyPerformanceDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
+					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
 					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
 					"title":{"text":null},
 					"series":[{"name":"From Solar", "color":"orange", "data":allOutputData.totalGeneration, "dataLabels":{"enabled":false}},{"name":"From G&T", "color":"green", "data":allOutputData.totalsolarmonthly, "dataLabels":{"enabled":false}}],
