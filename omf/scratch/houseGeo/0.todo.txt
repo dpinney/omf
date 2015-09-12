@@ -2,8 +2,7 @@ ISSUE
 https://github.com/dpinney/omf/issues/247
 
 TODO
-XXX Make scaled random house attachment script.
-OOO Attachments?
-OOO Make geo house attachment.
-OOO Integrate weather script.
 XXX What to do about non-residential loads? No good commercial multizone in GLD yet, so skip.
+XXX Make scaled random house attachment script.
+OOO Add waterheaters and plug loads.
+OOO Attach geolocated houses. Source for GIS locations?
