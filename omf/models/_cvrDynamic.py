@@ -75,7 +75,10 @@ def runForeground(modelDir,inData):
 	'''This reads a glm file, changes the method of powerflow and reruns'''
 	try:
 		startTime = datetime.now()
-		#calibrate and run cvrdynamic	
+		if not os.path.isdir(modelDir):
+			os.makedirs(modelDir)
+			inData["created"] = str(startTime)
+		#calibrate and run cvrdynamic
 		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", inData["feederName"].split("___")[0], inData["feederName"].split("___")[1]+'.json')
 		scadaPath = pJoin(__metaModel__._omfDir,"uploads",(inData["scadaFile"]+'.tsv'))
 		calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
@@ -537,7 +540,8 @@ def _tests():
 		shutil.rmtree(modelDir)
 	except:
 		pass
-	run(modelDir, inData)
+	runForeground(modelDir, inData)
+	renderAndShow(template, modelDir=modelDir)
 
 if __name__ == '__main__':
 	_tests()
