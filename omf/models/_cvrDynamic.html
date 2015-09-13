@@ -266,67 +266,84 @@
 		</div>
 		<p class="reportTitle postRun">Min and Max voltages on the Feeder</p>
 		<div id="minMaxVoltRecord" class="tightContent postRun">
-			<script type="text/javascript">
-				voltsData = [{
-					"marker":{
-						"enabled": false
-					},
-					"color":"Blue",
-					"data":allOutputData["withCVRMeanVolt"],
-					"name":"With IVVC Mean Volts"
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"color":"DarkBlue",
-					"data":allOutputData["withCVRHighVolt"],
-					"name":"With IVVC High Volts",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"color":"LightBlue",
-					"data":allOutputData["withCVRLowVolt"],
-					"name":"With IVVC Low Volts",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"Green",
-					"data":allOutputData["noCVRMeanVolt"],
-					"name":"No IVVC Mean Volts"
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"DarkGreen",
-					"data":allOutputData["noCVRHighVolt"],
-					"name":"No IVVC High Volts",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"LightGreen",
-					"data":allOutputData["noCVRLowVolt"],
-					"name":"No IVVC Low Volts",
-				}]
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "minMaxVoltRecord"
-				localHighChart["chart"]["width"] = 1000
-				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["series"] = voltsData
-				localHighChart["yAxis"] = {"title":{
-							"text":"Voltages",
-							"style":{
-								"color":"gray"
-							}
-						}}
-				new Highcharts.Chart(localHighChart);
-			</script>
+			<div id="withIVVCVoltagesOnTheFeeder" class="studyContainer" style="height: 200px">
+				<script type="text/javascript">
+					voltsData = [{
+						"marker":{
+							"enabled": false
+						},
+						"color":"Blue",
+						"data":allOutputData["withCVRMeanVolt"],
+						"name":"With IVVC Mean Volts"
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"color":"DarkBlue",
+						"data":allOutputData["withCVRHighVolt"],
+						"name":"With IVVC High Volts",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"color":"LightBlue",
+						"data":allOutputData["withCVRLowVolt"],
+						"name":"With IVVC Low Volts",
+					}]
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "withIVVCVoltagesOnTheFeeder"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["series"] = voltsData
+					localHighChart["yAxis"] = {"title":{
+								"text":"Voltages",
+								"style":{
+									"color":"gray"
+								}
+							}}
+					new Highcharts.Chart(localHighChart);
+				</script>
+			</div>
+			<div id="withoutIVVCVoltagesOnTheFeeder" class="studyContainer" style="height: 200px">
+				<script type="text/javascript">
+					voltsData = [{
+						"marker":{
+							"enabled": false
+						},
+						"color":"Blue",
+						"data":allOutputData["noCVRMeanVolt"],
+						"name":"With IVVC Mean Volts"
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"color":"DarkBlue",
+						"data":allOutputData["noCVRHighVolt"],
+						"name":"With IVVC High Volts",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"color":"LightBlue",
+						"data":allOutputData["noCVRLowVolt"],
+						"name":"With IVVC Low Volts",
+					}]
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "withoutIVVCVoltagesOnTheFeeder"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["series"] = voltsData
+					localHighChart["yAxis"] = {"title":{
+								"text":"Voltages",
+								"style":{
+									"color":"gray"
+								}
+							}}
+					new Highcharts.Chart(localHighChart);
+				</script>
+			</div>			
 		</div>
 		<p class="reportTitle postRun">Regulator Tap Positions</p>
 		<div id="tapStatus" class="tightContent postRun">
@@ -523,64 +540,24 @@
 		</div>
 		<p class="reportTitle postRun">Projected Savings by Month</p>
 		<div id="spendReport" class="tightContent postRun">
- 			<script type="text/javascript">
- 				new Highcharts.Chart({
-					"chart":{
-						"height": 200,
-						"width": 1000,
-						"renderTo": "spendReport",
-						"type": "column"
-					},
-					"plotOptions":{"column":{"stacking":'normal'}},
-					"title":{
-						"text":null
-					},
-					"legend":{
-						"layout":"horizontal", 
-						"align":"top", 
-						"verticalAlign":"top", 
-						"x":50, 
-						"y":-10, 
-						"borderWidth":0
-					},
-					"credits":{
-						"enabled":false
-					},
-					"tooltip":{
-						"valueDecimals":1
-					},
-					"xAxis": {
-						"categories": allOutputData["simMonthList"]
-					},
-					"yAxis": {
-						"title": {
-							"text": "Utility Savings ($)",
-							"style":{
-								"color":"gray"
-							}
-						}
-					},
-					"series":[{
-						"pointWidth": 30,
-						"data": $.map(allOutputData["peakSaveDollars"], function(key, value){return key}),
-						"type": "column",
-						"color": "blue",
-						"name": "Peak Reduction"
-					},{
-						"pointWidth": 30,
-						"data": $.map(allOutputData["lossRedDollars"], function(key, value){return key}),
-						"type": "column",
-						"color": "green",
-						"name": "Losses Reduction"
-					},{
-						"pointWidth": 30,
-						"data": $.map(allOutputData["energyLostDollars"], function(key, value){return key}),
-						"type": "column",
-						"color": "red",
-						"name": "Energy Reduction"
-					}]
-				})
- 			</script>	
+			<table style="margin:5px;text-align:center">
+				<style>td, th {padding:5 0 5 20;}</style>
+				<thead>
+					<th></th>
+					<th>Peak Reduction ($)</th>
+					<th>Losses Reduction ($)</th>
+					<th>Energy Reduction ($)</th>
+				</thead>
+				<tr>
+					<th>January</th>
+					<td id="peakReduc" style="text-align:center"></td>
+					<script>gebi("peakReduc").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.peakSaveDollars.January).toFixed(2))</script>
+					<td id="lossRedDollars" style="text-align:center"></td>
+					<script>gebi("lossRedDollars").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.lossRedDollars.January).toFixed(2))</script>
+					<td id="energyLossDollars" style="text-align:center"></td>
+					<script>gebi("energyLossDollars").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.energyLostDollars.January).toFixed(2))</script>
+				</tr>
+			</table>		
 		</div>
 		<p class="reportTitle postRun">Projected Avoided Cost</p>
 		<div id="savingsReport" class="tightContent postRun">
