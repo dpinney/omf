@@ -24,7 +24,7 @@
 	</div>
 	<p class="reportTitle">Model Inputs</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post">
+		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-demandResponse" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="demandResponse" readonly/>
@@ -59,7 +59,7 @@
 			</div>
 			<div class="shortInput">
 				<label>Wholesale Energy Cost($/kWh)</label>
-				<input type="text" id="WholesaleEnergyCost" name="WholesaleEnergyCost" value="50" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="WholesaleEnergyCost" name="WholesaleEnergyCost" value="0.07" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label> Scaling Annual (%)</label>
@@ -67,7 +67,7 @@
 			</div>						
 			<div class="shortInput">
 				<label>Discount Rate (%)</label>
-				<input type="text" id="DiscountRate" name="DiscountRate" value="5" required="required" pattern="^\d+\.?\d*?$">
+				<input type="text" id="DiscountRate" name="DiscountRate" value="3" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
@@ -122,7 +122,7 @@
 			<hr>
 			<div class="shortInput">
 				<label>Program Startup Cost ($)</label>
-				<input type="text" id="DrPurchInstallCost" name="DrPurchInstallCost" value="10000" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="DrPurchInstallCost" name="DrPurchInstallCost" value="100000" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Annual DR operation Cost ($/year)</label>
@@ -130,8 +130,34 @@
 			</div>
 			<div class="shortInput">
 				<label> Load Managed by the Program (%)</label>
-				<input type="text" id="LoadunderManagement" name="LoadunderManagement" value="50" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="LoadunderManagement" name="LoadunderManagement" value="100" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
+			<div class="shortInput">
+				<label>CPP Rate ($)</label>
+				<input type="text" id="rateCPP" name="rateCPP" value="1.80" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Number of CPP Days</label>
+				<input type="text" id="numCPPDays" name="numCPPDays" value="10" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>24 Hourly Rate (% CSV)</label>
+				<input type="text" id="rate24hourly" name="rate24hourly" value="0.074, 0.041, 0.020, 0.035, 0.100, 0.230, 0.391, 0.550, 0.688, 0.788, 0.859, 0.904, 0.941, 0.962, 0.980, 1.000, 0.999, 0.948, 0.904, 0.880, 0.772, 0.552, 0.341, 0.169" required="required" />
+			</div>
+			<div class="shortInput">
+				<label>PTR Rate ($)</label>
+				<input type="text" id="ratePTR" name="ratePTR" value="2.65" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Rate Structure</label>
+				<select id="rateStruct" name="rateStruct"/>
+					<option value="PTR">PTR</option>
+					<!-- <option value="2tier">2tier</option> -->
+					<option value="2tierCPP">2tierCPP</option>
+					<!-- <option value="3tier">3tier</option> -->
+					<option value="24hourly">24hourly</option>
+				</select>
+			</div>									
 			<div class="shortInput">
 				<label>Peak Rate ($)</label>
 				<input type="text" id="PeakRate" name="PeakRate" value="0.20" required="required" pattern="^\d+\.?\d*?$"/>
@@ -150,7 +176,7 @@
 			</div>
 			<div class="shortInput">
 				<label>Starting Month</label>
-				<input type="text" id="startMonth" name="startMonth" value="1" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="startMonth" name="startMonth" value="2" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Ending Month</label>
@@ -158,11 +184,11 @@
 			</div>
 			<div class="shortInput">
 				<label>Starting Peak Hour</label>
-				<input type="text" id="startHour" name="startHour" value="12" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="startHour" name="startHour" value="6" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Ending Peak Hour</label>
-				<input type="text" id="stopHour" name="stopHour" value="19" required="required" pattern="^\d+$"/>
+				<input type="text" id="stopHour" name="stopHour" value="9" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				{% if not quickRender %}
@@ -170,7 +196,7 @@
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				{% endif %}
-				<button id="runButton" type="button" class="preRun" onclick="javascript:checkModelName()">Run Model</button>
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
 				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
 		</form>

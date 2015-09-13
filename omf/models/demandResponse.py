@@ -255,7 +255,8 @@ def _prismTests():
 		#'rate24hourly': [0.12, 0.054, 0.01, 0.04, 0.172, 0.436, 0.764, 1.086, 1.367, 1.569, 1.714, 1.805, 1.880, 1.923, 1.960, 2, 1.998, 1.895, 1.806, 1.757, 1.538, 1.089, 0.662, 0.313],
 		'ratePTR': 2.65, # Only required for PTR. $/kWh payment to customers for demand reduction on PTR days. Value is entered as a positive value, just like the other rate values, even though it is a rebate.
 		'numCPPDays': 10, # Number of CPP days in a cooling season. Only required for 2tierCPP
-		'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
+		# 'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
+		'origLoad': [float(row['power']) for row in csv.DictReader(open(__metaModel__._omfDir+"/uploads/OlinBeckenhamScada.csv"))] }) # 8760 load values
 	print outputs
 
 def run(modelDir, inputDict):
@@ -295,6 +296,11 @@ def run(modelDir, inputDict):
 		stopmonth = int(inputDict.get("stopMonth"))
 		starthour = int(inputDict.get("startHour"))
 		stophour = int(inputDict.get("stopHour"))
+		rateCPP = float(inputDict.get('rateCPP'))
+		rate24hourly = [float(x) for x in inputDict.get('rate24hourly').split(',')]
+		ratePTR = float(inputDict.get('ratePTR'))
+		numCPPDays = int(inputDict.get('numCPPDays'))
+		rateStruct = inputDict.get('rateStruct')
 		# Price vector creation.
 		OffPeakDailyPrice1 = [OffPeakRate for x in hours[0:starthour]]
 		PeakDailyPrice = [PeakRate for x in hours[starthour-1:stophour]]
@@ -312,7 +318,7 @@ def run(modelDir, inputDict):
 		outData['startDate'] = demandList[0]['datetime'].isoformat()
 		# Run the PRISM model.
 		allPrismOutput = prism({
-			'rateStructure': '2tier', # options: 2tier, 2tierCPP, PTR, 3tier, 24hourly
+			'rateStructure': rateStruct, # options: 2tier, 2tierCPP, PTR, 3tier, 24hourly
 			'elasticitySubWOCPP': SubElas, # Substitution elasticty during non-CPP days.
 			'elasticityDailyWOCPP': DayElas, # Daily elasticity during non-CPP days.
 			'elasticitySubWCPP': SubElas, # Substitution elasticty during CPP days. Only required for 2tierCPP
@@ -326,10 +332,10 @@ def run(modelDir, inputDict):
 			'rateFlat': OffPeakRate, # pre-DR Time-independent rate paid by residential consumers.
 			'rateOnPeak': PeakRate, # Peak hour rate on non-CPP days.
 			'rate3Tier': 0.90, # Only required for 3tier. Super on-peak rate.
-			'rateCPP': 1.80, # Peak hour rate on CPP days. Only required for 2tierCPP
-			'rate24hourly': [0.074, 0.041, 0.020, 0.035, 0.100, 0.230, 0.391, 0.550, 0.688, 0.788, 0.859, 0.904, 0.941, 0.962, 0.980, 1.000, 0.999, 0.948, 0.904, 0.880, 0.772, 0.552, 0.341, 0.169], #Hourly energy price, only needed for 24hourly
-			'ratePTR': 2.65, # Only required for PTR. $/kWh payment to customers for demand reduction on PTR days. Value is entered as a positive value, just like the other rate values, even though it is a rebate.
-			'numCPPDays': 10, # Number of CPP days in a cooling season. Only required for 2tierCPP
+			'rateCPP': rateCPP, # Peak hour rate on CPP days. Only required for 2tierCPP
+			'rate24hourly': rate24hourly, #Hourly energy price, only needed for 24hourly
+			'ratePTR': ratePTR, # Only required for PTR. $/kWh payment to customers for demand reduction on PTR days. Value is entered as a positive value, just like the other rate values, even though it is a rebate.
+			'numCPPDays': numCPPDays, # Number of CPP days in a cooling season. Only required for 2tierCPP
 			'origLoad': demandCurve }) # 8760 load values
 		fullParticipationModLoad = allPrismOutput['modLoad']
 		modifiedLoad = [x*ManagLoad+y*(1-ManagLoad) for x,y in zip(fullParticipationModLoad,demandCurve)]
@@ -461,12 +467,17 @@ def _tests():
 		"ScalingAnnual":"102",
 		"LoadunderManagement":"100",
 		"AnnualDROperationCost":"1000",
+		"rateStruct": "2tierCPP",
 		"PeakRate": "0.20",
 		"OffPeakRate": "0.083",
 		"startMonth": "2",
 		"stopMonth": "4",
 		"startHour": "6",
-		"stopHour": "9"}
+		"stopHour": "9",
+		"rateCPP":"1.80",
+		"numCPPDays":"10",
+		"ratePTR":"2.65",
+		"rate24hourly": "0.074, 0.041, 0.020, 0.035, 0.100, 0.230, 0.391, 0.550, 0.688, 0.788, 0.859, 0.904, 0.941, 0.962, 0.980, 1.000, 0.999, 0.948, 0.904, 0.880, 0.772, 0.552, 0.341, 0.169"}
 	modelLoc = pJoin(workDir,"admin","Automated Demand Response Testing")
 	# Blow away old test results if necessary.
 	try:
