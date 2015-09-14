@@ -46,12 +46,27 @@ def prism(prismDRDict):
 	start_date = datetime.date(2009,prismDRDict['startMonth'],1)
 	last_day = calendar.monthrange(2009, prismDRDict['stopMonth'])
 	stop_date = datetime.date(2009,prismDRDict['stopMonth'],last_day[1])
-	day_count = stop_date - start_date
-	prismDRDict['dayCount']= day_count.days
-	start_index = start_date - datetime.date(2009,1,1)
-	prismDRDict['startIndex'] = (start_index.days * 24)
-	prismDRDict['stopIndex'] = prismDRDict['startIndex'] + ((prismDRDict['dayCount']+1) * 24) - 1
-	prismDRDict['numMonths'] = prismDRDict['stopMonth'] - prismDRDict['startMonth'] + 1
+	if (start_date <= stop_date):
+		day_count = stop_date - start_date
+		prismDRDict['dayCount']= day_count.days + 1
+		start_index = start_date - datetime.date(2009,1,1)
+		stop_index = stop_date  - datetime.date(2009,1,1)
+		prismDRDict['startIndex'] = (start_index.days * 24)
+		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
+		prismDRDict['numMonths'] = prismDRDict['stopMonth'] - prismDRDict['startMonth'] + 1
+	else:
+		day_count = start_date - stop_date
+		prismDRDict['dayCount']= 365 - day_count.days + 1
+		start_index = start_date - datetime.date(2009,1,1)
+		stop_index = stop_date  - datetime.date(2009,1,1)
+		prismDRDict['startIndex'] = (start_index.days * 24)
+		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
+		prismDRDict['numMonths'] = 12 - prismDRDict['startMonth'] - prismDRDict['stopMonth'] + 1
+
+#	print 'Day count: ', prismDRDict['dayCount']
+#	print 'Start index: ', prismDRDict['startIndex']
+#	print 'Stop index: ', prismDRDict['stopIndex']
+#	print 'Num months: ', prismDRDict['numMonths']
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1
 		prismDRDict['numHoursOff'] = (24 - prismDRDict['numHoursOn'])
@@ -104,7 +119,17 @@ def prism(prismDRDict):
 	prismDRDict['onPeakWCPPEnergy'] = 0.0
 	hourlyEnergy = list([0] * 24)
 	for idx, load in enumerate(prismDRDict['origLoad']):
-		if idx >= prismDRDict['startIndex'] and idx <= prismDRDict['stopIndex']: #is hour of year in the cooling season?
+		if prismDRDict['startIndex'] <= prismDRDict['stopIndex']:
+			if idx >= prismDRDict['startIndex'] and idx <= prismDRDict['stopIndex']: #is hour of year in the DR season?
+				inDRSeason = 1
+			else:
+				inDRSeason = 0
+		else:
+			if idx >= prismDRDict['startIndex'] or idx <= prismDRDict['stopIndex']: #is hour of year in the DR season?
+				inDRSeason = 1
+			else:
+				inDRSeason = 0
+		if inDRSeason == 1:
 			hourOfDay = idx % 24
 			if prismDRDict['rateStructure'] == '2tierCPP' or prismDRDict['rateStructure'] == 'PTR':
 				if idx in prismDRDict['cppDayIdx']:
@@ -222,9 +247,18 @@ def prism(prismDRDict):
 	# Make the modified load curve.
 	prismDRDict['modLoad'] = list(prismDRDict['origLoad'])
 	for idx, load in enumerate(prismDRDict['origLoad']):
-		if idx >= prismDRDict['startIndex'] and idx <= prismDRDict['stopIndex']: #is hour of year in the cooling season?
+		if prismDRDict['startIndex'] <= prismDRDict['stopIndex']:
+			if idx >= prismDRDict['startIndex'] and idx <= prismDRDict['stopIndex']: #is hour of year in the DR season?
+				inDRSeason = 1
+			else:
+				inDRSeason = 0
+		else:
+			if idx >= prismDRDict['startIndex'] or idx <= prismDRDict['stopIndex']: #is hour of year in the DR season?
+				inDRSeason = 1
+			else:
+				inDRSeason = 0
+		if inDRSeason == 1:
 			hourOfDay  = idx % 24
-			
 			if prismDRDict['rateStructure'] == '2tierCPP' or prismDRDict['rateStructure'] == 'PTR':
 				if idx in prismDRDict['cppDayIdx']:
 					if (hourOfDay >= prismDRDict['startHour']) and (hourOfDay <= prismDRDict['stopHour']):
@@ -261,8 +295,8 @@ def _tests():
 		'elasticityDailyWOCPP': -0.02302, # Daily elasticity during non-CPP days.
 		'elasticitySubWCPP': -0.09698, # Substitution elasticty during CPP days. Only required for 2tierCPP
 		'elasticityDailyWCPP': -0.01607, # Daily elasticity during non-CPP days. Only reuquired for 2tierCPP
-		'startMonth': 5, # 1-12. Beginning month of the cooling season when the DR program will run.
-		'stopMonth': 9, # 1-12. Ending month of the cooling season when the DR program will run.
+		'startMonth': 1, # 1-12. Beginning month of the cooling season when the DR program will run.
+		'stopMonth': 3, # 1-12. Ending month of the cooling season when the DR program will run.
 		'startHour': 14, # 0-23. Beginning hour for on-peak and CPP rates.
 		'stopHour': 18, # 0-23. Ending hour for on-peak and CPP rates.
 		'start3TierHour' : 16, # 0-23 Only required for 3tier. Must be greater than 'startHour' and less than 'stop3TierHour'
