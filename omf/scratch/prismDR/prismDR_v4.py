@@ -62,11 +62,6 @@ def prism(prismDRDict):
 		prismDRDict['startIndex'] = (start_index.days * 24)
 		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
 		prismDRDict['numMonths'] = 12 - prismDRDict['startMonth'] - prismDRDict['stopMonth'] + 1
-
-#	print 'Day count: ', prismDRDict['dayCount']
-#	print 'Start index: ', prismDRDict['startIndex']
-#	print 'Stop index: ', prismDRDict['stopIndex']
-#	print 'Num months: ', prismDRDict['numMonths']
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1
 		prismDRDict['numHoursOff'] = (24 - prismDRDict['numHoursOn'])
@@ -287,33 +282,61 @@ def prism(prismDRDict):
 		#else: #Load outside of cooling season not modified
 	return prismDRDict
 
-def _tests():
-	# Run PRISM.
-	outputs = prism({
-		'rateStructure': '24hourly', # options: 2tier, 2tierCPP, PTR, 3tier, 24hourly
-		'elasticitySubWOCPP': -0.09522, # Substitution elasticty during non-CPP days.
-		'elasticityDailyWOCPP': -0.02302, # Daily elasticity during non-CPP days.
-		'elasticitySubWCPP': -0.09698, # Substitution elasticty during CPP days. Only required for 2tierCPP
-		'elasticityDailyWCPP': -0.01607, # Daily elasticity during non-CPP days. Only reuquired for 2tierCPP
-		'startMonth': 1, # 1-12. Beginning month of the cooling season when the DR program will run.
-		'stopMonth': 3, # 1-12. Ending month of the cooling season when the DR program will run.
-		'startHour': 14, # 0-23. Beginning hour for on-peak and CPP rates.
-		'stopHour': 18, # 0-23. Ending hour for on-peak and CPP rates.
-		'start3TierHour' : 16, # 0-23 Only required for 3tier. Must be greater than 'startHour' and less than 'stop3TierHour'
-		'stop3TierHour' : 16, # 0-23, Only required for 3tier. Must be greater than 'start3TierHour' and less than 'stopHour'
-		'rateFlat': 0.15, # pre-DR Time-independent rate paid by residential consumers.
-		'rateOnPeak': 0.20, # Peak hour rate on non-CPP days.
-		'rate3Tier': 0.90, # Only required for 3tier. Super on-peak rate.
-		'rateCPP': 1.80, # Peak hour rate on CPP days. Only required for 2tierCPP
-		'rate24hourly': [0.074, 0.041, 0.020, 0.035, 0.100, 0.230, 0.391, 0.550, 0.688, 0.788, 0.859, 0.904, 0.941, 0.962, 0.980, 1.000, 0.999, 0.948, 0.904, 0.880, 0.772, 0.552, 0.341, 0.169], #Hourly energy price, only needed for 24hourly
-		#'rate24hourly': [0.12, 0.054, 0.01, 0.04, 0.172, 0.436, 0.764, 1.086, 1.367, 1.569, 1.714, 1.805, 1.880, 1.923, 1.960, 2, 1.998, 1.895, 1.806, 1.757, 1.538, 1.089, 0.662, 0.313],
-		'ratePTR': 2.65, # Only required for PTR. $/kWh payment to customers for demand reduction on PTR days. Value is entered as a positive value, just like the other rate values, even though it is a rebate.
-		'numCPPDays': 10, # Number of CPP days in a cooling season. Only required for 2tierCPP
-		'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
+def DLC(DLCDict):
+	DLCDict['modLoad'] = list(DLCDict['origLoad'])
+	DLCDict['whTotalPower'] = DLCDict['residenceCount'] * DLCDict['whPercentage'] * DLCDict['whRatingkW'] * DLCDict['whDutyCycle']
+	DLCDict['hvacTotalPower'] = DLCDict['residenceCount'] * DLCDict['hvacPercentage'] * DLCDict['hvacRatingkW'] * DLCDict['hvacDutyCycle']
+	for idx, load in enumerate(DLCDict['origLoad']):
+		if idx in DLCDict['whControlHours']:
+			DLCDict['modLoad'][idx] = load - DLCDict['whTotalPower']
+		if idx in DLCDict['hvacControlHours']:
+			DLCDict['modLoad'][idx] = load - DLCDict['hvacTotalPower']
+	return DLCDict
+
+
+
+
+def _tests(DRType):
+	if DRType == 'DLC':
+		outputs = DLC({
+			'residenceCount': 2000,
+			'whPercentage': 0.30,
+			'hvacPercentage': 0.20,
+			'whRatingkW': 9,
+			'hvacRatingkW': 4,
+			'whDutyCycle': 0.1,
+			'hvacDutyCycle': 0.3,
+			'whControlHours': [0, 1, 2, 3, 4],
+			'hvacControlHours': [6, 7, 8, 9,10],
+			'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
+	else:
+		# Run PRISM.
+		outputs = prism({
+			'rateStructure': '24hourly', # options: 2tier, 2tierCPP, PTR, 3tier, 24hourly
+			'elasticitySubWOCPP': -0.09522, # Substitution elasticty during non-CPP days.
+			'elasticityDailyWOCPP': -0.02302, # Daily elasticity during non-CPP days.
+			'elasticitySubWCPP': -0.09698, # Substitution elasticty during CPP days. Only required for 2tierCPP
+			'elasticityDailyWCPP': -0.01607, # Daily elasticity during non-CPP days. Only reuquired for 2tierCPP
+			'startMonth': 1, # 1-12. Beginning month of the cooling season when the DR program will run.
+			'stopMonth': 3, # 1-12. Ending month of the cooling season when the DR program will run.
+			'startHour': 14, # 0-23. Beginning hour for on-peak and CPP rates.
+			'stopHour': 18, # 0-23. Ending hour for on-peak and CPP rates.
+			'start3TierHour' : 16, # 0-23 Only required for 3tier. Must be greater than 'startHour' and less than 'stop3TierHour'
+			'stop3TierHour' : 16, # 0-23, Only required for 3tier. Must be greater than 'start3TierHour' and less than 'stopHour'
+			'rateFlat': 0.15, # pre-DR Time-independent rate paid by residential consumers.
+			'rateOnPeak': 0.20, # Peak hour rate on non-CPP days.
+			'rate3Tier': 0.90, # Only required for 3tier. Super on-peak rate.
+			'rateCPP': 1.80, # Peak hour rate on CPP days. Only required for 2tierCPP
+			'rate24hourly': [0.074, 0.041, 0.020, 0.035, 0.100, 0.230, 0.391, 0.550, 0.688, 0.788, 0.859, 0.904, 0.941, 0.962, 0.980, 1.000, 0.999, 0.948, 0.904, 0.880, 0.772, 0.552, 0.341, 0.169], #Hourly energy price, only needed for 24hourly
+			#'rate24hourly': [0.12, 0.054, 0.01, 0.04, 0.172, 0.436, 0.764, 1.086, 1.367, 1.569, 1.714, 1.805, 1.880, 1.923, 1.960, 2, 1.998, 1.895, 1.806, 1.757, 1.538, 1.089, 0.662, 0.313],
+			'ratePTR': 2.65, # Only required for PTR. $/kWh payment to customers for demand reduction on PTR days. Value is entered as a positive value, just like the other rate values, even though it is a rebate.
+			'numCPPDays': 10, # Number of CPP days in a cooling season. Only required for 2tierCPP
+			'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
 	# Write CSV.
 	with open('./test_load_modified.csv', 'wb') as outfile:
 		for x in outputs['modLoad']:
 			outfile.write(str(x) + '\n')
 		
 if __name__ == '__main__': #Only run if we are calling from the command line, commonly to test functionality
-	_tests()
+	DRType = 'DLC'
+	_tests(DRType)
