@@ -4,5 +4,8 @@ https://github.com/dpinney/omf/issues/247
 TODO
 XXX What to do about non-residential loads? No good commercial multizone in GLD yet, so skip.
 XXX Make scaled random house attachment script.
+XXX Update test to create a real scaled house from GIS coordinates. Test GIS? My house.
+XXX Harden XML parser.
+XXX Support explicit address lookup? Maybe.
+OOO Finish gldHouse.
 OOO Add waterheaters and plug loads.
-OOO Attach geolocated houses. Source for GIS locations?
