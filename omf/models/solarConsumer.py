@@ -208,18 +208,16 @@ def tjCode(inputs, outData):
 	outData['cumulativeRoof'] = cumulativeRoof = [sum(monthlyBillsRoof[0:i+1]) for i,d in enumerate(monthlyBillsRoof)]
 	#When does communtiy solar and others beat the base case?
 	#Calculate Simple Payback of solar options
-	def simplePayback(BaseCase, Comparison):
-		if Comparison[0] > BaseCase[0]:
-			cumulativeDif = [a-b for a,b in zip(Comparison,BaseCase)]
-			for i in range(len(cumulativeDif)):
-				if cumulativeDif[i]<0:
-					breakEvenPoint = i/float(12)
-					return breakEvenPoint
-		else:
-			return -1
-	outData["breakEvenComS"] = simplePayback(cumulativeBaseCase,cumulativeComS)
-	outData["breakEven3rdParty"] = simplePayback(cumulativeBaseCase,cumulative3rdParty)
-	outData["breakEvenRoof"] = simplePayback(cumulativeBaseCase,cumulativeRoof)	
+	def spp(cashflow):
+		''' Years to pay back the initial investment. Or -1 if it never pays back. '''
+		for i, val in enumerate(cashflow):
+				net = sum(cashflow[0:i+1])
+				if net >= 0:
+						return i + (abs(float(cashflow[i-1]))/val)
+		return -1
+	outData["sppComS"] = spp([x-y for x,y in zip(monthlyBillsBaseCase, monthlyBillsComS)])/12
+	outData["spp3rdParty"] = spp([x-y for x,y in zip(monthlyBillsBaseCase, monthlyBills3rdParty)])/12
+	outData["sppRoof"] = spp([x-y for x,y in zip(monthlyBillsBaseCase, monthlyBillsRoof)])/12
 	# Green electron calculations:
 	sumDemand = sum(inputs["monthlyDemand"])*inputs['years']
 	sumSolarGen = sum(totalSolarGen)
@@ -256,12 +254,12 @@ def tjCode(inputs, outData):
 	plt.table(
 		loc='center',
 		rowLabels=["Base Case", "Community Solar", "Rooftop Solar", "3rd Party Solar"], 
-		colLabels=["Total Cost","Total Saved", "Average Monthly Cost", "$/kWh", "Break Even Point", "Green Electrons"], 
+		colLabels=["Total Cost","Total Saved", "Average Monthly Cost", "$/kWh", "Simple Payback Period", "Green Electrons"], 
 		cellText=[
 			[outData["totalCostBaseCase"],"Not Available", outData["avgMonthlyBillBaseCase"],outData["kWhCostBaseCase"], "Not Available",inputs["greenFuelMix"]],
-			[outData["totalCostComS"],outData["totalSavedByComS"], outData["avgMonthlyBillComS"],outData["kWhCostComS"], outData["breakEvenComS"], outData["greenElectrons"]],
-			[outData["totalCostRoof"],outData["totalSavedByRoof"], outData["avgMonthlyBillRoof"],outData["kWhCostRoof"], outData["breakEvenRoof"], outData["greenElectrons"]],
-			[outData["totalCost3rdParty"],outData["totalSavedBy3rdParty"], outData["avgMonthlyBill3rdParty"],outData["kWhCost3rdParty"], outData["breakEven3rdParty"], outData["greenElectrons"]]])
+			[outData["totalCostComS"],outData["totalSavedByComS"], outData["avgMonthlyBillComS"],outData["kWhCostComS"], outData["sppComS"], outData["greenElectrons"]],
+			[outData["totalCostRoof"],outData["totalSavedByRoof"], outData["avgMonthlyBillRoof"],outData["kWhCostRoof"], outData["sppRoof"], outData["greenElectrons"]],
+			[outData["totalCost3rdParty"],outData["totalSavedBy3rdParty"], outData["avgMonthlyBill3rdParty"],outData["kWhCost3rdParty"], outData["spp3rdParty"], outData["greenElectrons"]]])
 	# plt.show()
 
 def _tests():
