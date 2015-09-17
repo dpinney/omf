@@ -36,6 +36,9 @@ def _roundOne(x,direc):
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
+	if not os.path.isdir(modelDir):
+		os.makedirs(modelDir)
+		inputDict["created"] = str(datetime.datetime.now())	
 	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent=4)
@@ -420,7 +423,7 @@ def runForeground(modelDir, inputDict):
 		print "DONE RUNNING", modelDir
 	except Exception as e:
 		print "Oops, Model Crashed!!!" 
-		# cancel(modelDir)
+		cancel(modelDir)
 		print e
 
 def _tests():
