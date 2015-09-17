@@ -27,7 +27,7 @@
 	<div id="input" class="content" style="page-break-after:always">
 		<form name="inputForm" {% if quickRender %} action="/quickRun/"{% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"{% endif %} method="post">
 			<div class="shorterInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarSunda" target="blank">Help?</a> </label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarSunda" target="blank">Help?</a> </label>
 				<input type="text" id="modelType" name="modelType" value="solarSunda" readonly/>
 			</div>
 			{% if quickRender %}
