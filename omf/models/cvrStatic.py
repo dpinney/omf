@@ -39,9 +39,6 @@ def run(modelDir, inputDict):
 	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent=4)
-	feederDir, feederName = inputDict["feederName"].split("___")
-	shutil.copy(pJoin(__metaModel__._omfDir,"data","Feeder",feederDir,feederName+".json"),
-		pJoin(modelDir,"feeder.json"))
 	# If we are re-running, remove output:
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
