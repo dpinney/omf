@@ -6,6 +6,7 @@ XXX What to do about non-residential loads? No good commercial multizone in GLD 
 XXX Make scaled random house attachment script.
 XXX Update test to create a real scaled house from GIS coordinates. Test GIS? My house.
 XXX Harden XML parser.
-XXX Support explicit address lookup? Maybe.
+XXX Support explicit address lookup? Yep.
+XXX File locations? Use urllib the normal way and it uses a tempfile. Thanks urllib.
 OOO Finish gldHouse.
 OOO Add waterheaters and plug loads.

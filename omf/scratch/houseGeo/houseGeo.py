@@ -6,9 +6,8 @@ def house(lat, lon, addressOverride=None):
 	googleAPI_KEY = ''  # Optional.
 	url = 'https://maps.googleapis.com/maps/api/geocode/json?latlng=' + \
 		str(lat) + ',' + str(lon) + '&key=' + googleAPI_KEY
-	filename = 'out_addressAtLatlon_' + str(lat) + '_' + str(lon) + '.json'
-	urllib.urlretrieve(url, filename)
-	with open(filename, 'r') as jsonInput:
+	fnameGoog, headers = urllib.urlretrieve(url)
+	with open(fnameGoog, 'r') as jsonInput:
 		response_data = json.load(jsonInput)
 	try:
 		firstAdd = response_data['results'][0]['formatted_address']
@@ -26,10 +25,9 @@ def house(lat, lon, addressOverride=None):
 	url = 'http://www.zillow.com/webservice/GetDeepSearchResults.htm?zws-id=' + \
 		zwsID + '&address=' + \
 		street_number.replace(' ', '+') + '&citystatezip=' + zip_code
-	filename = 'out_houseInfo_' + str(lat) + '_' + str(lon) + '.xml'
-	urllib.urlretrieve(url, filename)
+	fnameZill, headers = urllib.urlretrieve(url)
 	# XML parsing.
-	xRoot = ET.parse(filename).getroot()
+	xRoot = ET.parse(fnameZill).getroot()
 	try:
 		results = xRoot.find('response').find('results').findall('result')
 		matches = len(results) # We warn user by putting # of matches in the output.
@@ -65,7 +63,7 @@ def gldHouse(lat, lon, addressOverride=None, pureRandom=False):
 		#TODO: finish implementation.
 	else:
 		houseStats = house(lat, lon)
-		newHouse = {}
+		newHouse = {'name':addressOverride, 'parent':'REPLACE_ME'}
 		#TODO: finish implementation.	
 	return newHouse
 
