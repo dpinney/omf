@@ -266,29 +266,42 @@
 		</div>
 		<p class="reportTitle postRun">Min and Max voltages on the Feeder</p>
 		<div id="minMaxVoltRecord" class="tightContent postRun">
-			<div id="withIVVCVoltagesOnTheFeeder" class="studyContainer" style="height: 200px">
-				<script type="text/javascript">
+			<script type="text/javascript">
+				// Chart #1
+				studyList = []
+				studyList.push("With IVVC")
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#minMaxVoltRecord")
+						.attr("class", "studyContainer")
+						.attr("style", "height: 200px")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(0)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#minMaxVoltRecord .studyContainer:last")
+						.attr("id", "withIVVCVoltagesOnTheFeeder")
+					// voltage series data
 					voltsData = [{
-						"marker":{
-							"enabled": false
-						},
-						"color":"Blue",
-						"data":allOutputData["withCVRMeanVolt"],
-						"name":"With IVVC Mean Volts"
-					},{
 						"marker":{
 							"enabled": false
 						},
 						"color":"DarkBlue",
 						"data":allOutputData["withCVRHighVolt"],
-						"name":"With IVVC High Volts",
+						"name":"IVVC High Volts",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"color":"Blue",
+						"data":allOutputData["withCVRMeanVolt"],
+						"name":"IVVC Mean Volts"
 					},{
 						"marker":{
 							"enabled": false
 						},
 						"color":"LightBlue",
 						"data":allOutputData["withCVRLowVolt"],
-						"name":"With IVVC Low Volts",
+						"name":"IVVC Low Volts",
 					}]
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "withIVVCVoltagesOnTheFeeder"
@@ -297,37 +310,48 @@
 					localHighChart["chart"]["type"] = "line"
 					localHighChart["series"] = voltsData
 					localHighChart["yAxis"] = {"title":{
-								"text":"Voltages",
+								"text":"Voltages (V)",
 								"style":{
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);
-				</script>
-			</div>
-			<div id="withoutIVVCVoltagesOnTheFeeder" class="studyContainer" style="height: 200px">
-				<script type="text/javascript">
+					new Highcharts.Chart(localHighChart);					
+				}
+				// Chart #2
+				studyList = []
+				studyList.push("Without IVVC")
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#minMaxVoltRecord")
+						.attr("class", "studyContainer")
+						.attr("style", "height: 200px")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(0)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#minMaxVoltRecord .studyContainer:last")
+						.attr("id", "withoutIVVCVoltagesOnTheFeeder")
+					// voltage series data
 					voltsData = [{
-						"marker":{
-							"enabled": false
-						},
-						"color":"Blue",
-						"data":allOutputData["noCVRMeanVolt"],
-						"name":"With IVVC Mean Volts"
-					},{
 						"marker":{
 							"enabled": false
 						},
 						"color":"DarkBlue",
 						"data":allOutputData["noCVRHighVolt"],
-						"name":"With IVVC High Volts",
+						"name":"IVVC High Volts",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"color":"Blue",
+						"data":allOutputData["noCVRMeanVolt"],
+						"name":"IVVC Mean Volts"
 					},{
 						"marker":{
 							"enabled": false
 						},
 						"color":"LightBlue",
 						"data":allOutputData["noCVRLowVolt"],
-						"name":"With IVVC Low Volts",
+						"name":"IVVC Low Volts",
 					}]
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "withoutIVVCVoltagesOnTheFeeder"
@@ -336,14 +360,14 @@
 					localHighChart["chart"]["type"] = "line"
 					localHighChart["series"] = voltsData
 					localHighChart["yAxis"] = {"title":{
-								"text":"Voltages",
+								"text":"Voltages (V)",
 								"style":{
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);
-				</script>
-			</div>			
+					new Highcharts.Chart(localHighChart);				
+				}
+			</script>					
 		</div>
 		<p class="reportTitle postRun">Regulator Tap Positions</p>
 		<div id="tapStatus" class="tightContent postRun">
