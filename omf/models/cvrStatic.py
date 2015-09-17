@@ -36,9 +36,6 @@ def _roundOne(x,direc):
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
-	if not os.path.isdir(modelDir):
-		os.makedirs(modelDir)
-		inputDict["created"] = str(datetime.datetime.now())
 	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent=4)
@@ -63,7 +60,11 @@ def runForeground(modelDir, inputDict):
 	print "STARTING TO RUN", modelDir
 	try:
 		startTime = datetime.datetime.now()
-		feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
+		if not os.path.isdir(modelDir):
+			os.makedirs(modelDir)
+			inputDict["created"] = str(startTime)
+		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", inputDict["feederName"].split("___")[0], inputDict["feederName"].split("___")[1]+'.json')		
+		feederJson = json.load(open(feederPath))
 		tree = feederJson.get("tree",{})
 		attachments = feederJson.get("attachments",{})
 		allOutput = {}
@@ -477,9 +478,9 @@ def _tests():
 	try: shutil.rmtree(modelLoc)
 	except: pass
 	# No-input template.
-	renderAndShow(template)
+	# renderAndShow(template)
 	# Run the model.
-	run(modelLoc, inData)
+	runForeground(modelLoc, inData)
 	# # Show the output.
 	renderAndShow(template, modelDir=modelLoc)
 	# # # Delete the model.
