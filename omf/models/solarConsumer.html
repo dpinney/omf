@@ -1,3 +1,4 @@
+<!-- TODO: Make slightly greener, make text black -->
 <head>
 	<title>Open Modeling Framework</title>
 	<meta charset="utf-8">
@@ -88,7 +89,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Monthly Demand (kWh CSV)<span class="classic">12 comma-separated demand values for each month of a typical year.</span></label>
-				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^\d+\.?\d*(,\d+\.?\d*)*$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
+				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){11}$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
 			</div>
 			<div class="shortInput">
 				<label>Rate Increase (%)</label>
