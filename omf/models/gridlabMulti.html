@@ -477,7 +477,7 @@
 					localHighChart["chart"]["marginBottom"] = 45
 					localHighChart["chart"]["renderTo"] = "costGrowthContainer"
 					localHighChart["yAxis"]["title"]["text"] = "Cumulative Savings ($)"
-					localHighChart["xAxis"] = {"labels": {enabled: true}, "type": "linear", "tickColor": "gray", "lineColor": "gray", "title": {"text": "Years After Install"}}
+					localHighChart["xAxis"] = {"labels": {enabled: true}, "type": "linear", "tickColor": "gray", "lineColor": "gray", "title": {"text": "Years After Install"}, "tickInterval":1, "minorTickColor":"gray", "minorTickInterval":5}
 					localHighChart["xAxis"]["plotLines"] = [{"color": "silver", "width": 1, "value": yearPercentage}]
 					localHighChart["plotOptions"]["series"]["pointInterval"] = 1
 					localHighChart["plotOptions"]["series"]["pointStart"] = 0

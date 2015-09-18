@@ -63,35 +63,35 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Capital Cost<span class="classic">Installation captial cost<br> Type: <em>float</em></span></label>
-				<input type="text" id="capitalCost" name="capitalCost" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="capitalCost" name="capitalCost" pattern="^\d+\.?\d*$" value="30000" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">OM Cost<span class="classic">Operating and maintain cost<br> Type: <em>float</em></span></label>	
-				<input type="text" id="omCost" name="omCost" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="omCost" name="omCost" pattern="^\d+\.?\d*$" value="1000" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wholesale Energy Cost ($/kWh)</label>
-				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" pattern="^\d+\.?\d*$" value="0.06" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)</label>
-				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" pattern="^\d+\.?\d*$" value="0.10" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Spring Demand Charge ($/kW)</label>
-				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" pattern="^\d+\.?\d*$" value="5" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Summer Demand Charge ($/kW)</label>
-				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" pattern="^\d+\.?\d*$" value="10" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fall Demand Charge ($/kW)</label>
-				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" pattern="^\d+\.?\d*$" value="6" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Winter Demand Charge ($/kW)</label>
-				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" pattern="^\d+\.?\d*$" required="required"></td>
+				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" pattern="^\d+\.?\d*$" value="8" required="required"></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">baselineTap</label>
@@ -356,7 +356,10 @@
 						formatter: function () {return 'Net return after <b>' + this.x + '</b> years is <b>$' + this.y.toFixed(2) + '</b>'}
 					},
 					"xAxis": {
-						"plotLines": paybackLine
+						"plotLines": paybackLine,
+						"tickInterval":1,
+						"minorTickColor":"gray",
+						"minorTickInterval":5					
 					},
 					"yAxis": {
 						"title": {
