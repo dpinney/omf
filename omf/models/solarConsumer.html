@@ -1,4 +1,3 @@
-<!-- TODO: Make slightly greener, make text black -->
 <head>
 	<title>Open Modeling Framework</title>
 	<meta charset="utf-8">
@@ -88,13 +87,17 @@
 				<input type="text" id="valueOfSolarRate" name="valueOfSolarRate" pattern="^\d+\.?\d*$" required="required" value="0.07">
 			</div>
 			<div class="shortInput">
+				<label>Rate Increase (%)</label>
+				<input type="text" id="rateIncrease" name="rateIncrease" pattern="^\d+\.?\d*$" required="required" value="2.5">
+			</div>			
+			<div class="shortInput" style="width:66.5%">
 				<label class="tooltip">Monthly Demand (kWh CSV)<span class="classic">12 comma-separated demand values for each month of a typical year.</span></label>
 				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){11}$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
 			</div>
 			<div class="shortInput">
-				<label>Rate Increase (%)</label>
-				<input type="text" id="rateIncrease" name="rateIncrease" pattern="^\d+\.?\d*$" required="required" value="2.5">
-			</div>
+				<label>Renewables in G&amp;T Fuel Mix (%)</label>
+				<input type="text" id="greenFuelMix" name="greenFuelMix" pattern="^\d+\.?\d*$" required="required" value="12">
+			</div>			
 			<div class="shortInput">
 				<label>Rooftop Upfront Costs ($)</label>
 				<input type="text" id="roofUpfrontCosts" name="roofUpfrontCosts" pattern="^\d+\.?\d*$" required="required" value="30000">
@@ -126,10 +129,6 @@
 			<div class="shortInput">
 				<label>Community Solar Rate Increase (%)</label>
 				<input type="text" id="comRateIncrease" name="comRateIncrease" pattern="^\d+\.?\d*$" required="required" value="0">
-			</div>
-			<div class="shortInput">
-				<label>Renewables in G&amp;T Fuel Mix (%)</label>
-				<input type="text" id="greenFuelMix" name="greenFuelMix" pattern="^\d+\.?\d*$" required="required" value="12">
 			</div>
 			<div class="wideInput" style="text-align:right">
 					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -166,7 +165,7 @@
 					['3rd Party PPA', allOutputData.totalCost3rdParty],
 					['Rooftop Solar', allOutputData.totalCostRoof]]
 				levelizedCostChart = new Highcharts.Chart({
-					plotOptions:{column:{stacking:'normal',dataLabels:{enabled:true, format: '{point.y:,.0f}'}, pointPadding:0.2, borderWidth:0}},
+					plotOptions:{column:{dataLabels:{enabled:true, format: '{point.y:,.0f}'}, pointPadding:0.2, borderWidth:0}},
 					xAxis:{type:'category',tickColor:'gray',lineColor:'gray',crosshair:true},
 					yAxis:{title:{text:'Cost ($)'}},
 					title:false,
