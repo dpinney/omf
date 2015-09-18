@@ -73,6 +73,7 @@ def run(modelDir, inData):
 
 def runForeground(modelDir,inData):
 	'''This reads a glm file, changes the method of powerflow and reruns'''
+	print "STARTING TO RUN", modelDir	
 	try:
 		startTime = datetime.now()
 		if not os.path.isdir(modelDir):
@@ -80,9 +81,13 @@ def runForeground(modelDir,inData):
 			inData["created"] = str(startTime)
 		#calibrate and run cvrdynamic
 		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", inData["feederName"].split("___")[0], inData["feederName"].split("___")[1]+'.json')
-		scadaPath = pJoin(__metaModel__._omfDir,"uploads",(inData["scadaFile"]+'.tsv'))
+		with open(pJoin(modelDir,"scadaFile.tsv"),"w") as scadaFile:
+			scadaFile.write(inData['scadaFile'])
+		scadaPath = pJoin(modelDir, "scadaFile.tsv")
+		# scadaPath = pJoin(__metaModel__._omfDir,"uploads",(inData["scadaFile"]+'.tsv'))
 		calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 		allOutput = {}
+		allOutput['fileName'] = inData.get("fileName", 0)
 		print "\nStarted to run in foreground."
 		with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
 			feederJson = json.load(jsonIn)
@@ -283,6 +288,7 @@ def runForeground(modelDir,inData):
 		plt.legend([bar_load[0],bar_loss[0]],['total load', 'total losses'],bbox_to_anchor=(0., 0.915, 1., .102), loc=3,
 			       ncol=2, mode="expand", borderaxespad=0.1)
 		plt.xticks([t+0.15 for t in ticks],indices)
+		print "\n   modelDir=", modelDir
 		plt.savefig(pJoin(modelDir,"totalEnergy.png"))
 		#real and imaginary power
 		plt.figure("real power")
@@ -521,7 +527,8 @@ def _tests():
 		"modelType": "_cvrDynamic",
 		"user": "admin",
 		"feederName": "public___ABEC Frank pre calib",
-		"scadaFile": "FrankScada",
+		"scadaFile": open(pJoin(__metaModel__._omfDir,"uploads","FrankScada.tsv")).read(),
+		"fileName":"FrankScada.tsv",
 		"runTime": "",
 		"capitalCost": 30000,
 		"omCost": 1000,
