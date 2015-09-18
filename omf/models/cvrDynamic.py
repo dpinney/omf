@@ -18,7 +18,7 @@ import calibrate
 from solvers import gridlabd
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"_cvrDynamic.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"cvrDynamic.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -529,7 +529,7 @@ def _tests():
 	"runs local tests for dynamic CVR model"
 	#creating a work directory and initializing data
 	inData = { "modelName": "Automated DynamicCVR Testing",
-		"modelType": "_cvrDynamic",
+		"modelType": "cvrDynamic",
 		"user": "admin",
 		"feederName": "public___ABEC Frank pre calib",
 		"scadaFile": open(pJoin(__metaModel__._omfDir,"uploads","FrankScada.tsv")).read(),

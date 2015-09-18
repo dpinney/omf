@@ -62,8 +62,8 @@
 	<div id="input" class="content">
 		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post" onsubmit="return validateForm()">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-cvrDynamic" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="_cvrDynamic" readonly/>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-~-cvrDynamic" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="cvrDynamic" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
@@ -130,11 +130,7 @@
 						}
 					}
 				</script>
-			</div>			
-<!-- 			<div class="shortInput">
-				<label>Scada File Name</label>
-				<input type="text" id="scadaFile" name="scadaFile" data-validRegex="[\w\s]+"/></td>
-			</div> -->
+			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/></td>
