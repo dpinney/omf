@@ -45,6 +45,12 @@
 				}
 			}
 		}
+		function editFeeder(e) {
+			studyUser = $(e).siblings("select").val().split(/[_]+/)[0]
+			studyName = $(e).siblings("select").val().split(/[_]+/)[1]
+			$(e).attr("href", "/feeder/" + studyUser +"/"+ studyName)
+				.attr("target", "_blank");
+		}		
 	</script>
 </head>
 <body onload="init()">
@@ -63,9 +69,9 @@
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
 			</div>
-			<div class="shortInput">
+			<div class="shortInput" style="max-width:60%">
 				<label>Feeder</label>
-				<select id="feederName" name="feederName"/>
+				<select id="feederName" name="feederName" style="width:90%"/>
 					<option disabled><strong>Personal Feeders</strong></option>
 					{% for feeder in datastoreNames['feeders'] %}
 						<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
@@ -75,6 +81,7 @@
 						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 					{% endfor %}
 				</select>
+				<a class="edit-feeder postRunInline preRunInline runningInline stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>				
 			</div>
 			<div class="shortInput preRun runningInline postRunInline stoppedInline">
 				<label class="tooltip">Scada File Name (.tsv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
