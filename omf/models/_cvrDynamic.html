@@ -76,10 +76,58 @@
 					{% endfor %}
 				</select>
 			</div>
-			<div class="shortInput">
+			<div class="shortInput preRun runningInline postRunInline stoppedInline">
+				<label class="tooltip">Scada File Name (.tsv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var fileName=true;</script>
+				<input type="file" id="scadaFileLabel" name="scadaFileLabel" accept=".tsv" onchange="handle_files(this.files)">
+				<input id="scadaFile" name="scadaFile" type="hidden">
+				{% if allOutputData.fileName|string() is defined %}
+					<input type="hidden" id="fileName" name="fileName" readonly="readonly">				
+					<div id="fileExists"><label for="scadaFileLabel" id="scadaFileLabelName"></label></div>	
+					<script>
+						var FileName = allOutputData.fileName;
+						document.getElementById('scadaFileLabelName').innerHTML = FileName;
+					</script>	
+					<style type="text/css">
+					 #fileExists {
+					   width:175px;
+					   height:25px;
+					   display:fixed;
+					   margin-top:-28px;
+					   margin-left:110px;
+					   background-color:#d3d3d3;
+					   font-size:0.8em;
+					 }	 		 				   
+					input[type='file'] {
+					  color: transparent;
+					}				
+					</style>		
+				{% endif %}
+				<script>
+					// Make sure the file is required on prerun.
+					if (modelStatus == "preRun" || modelStatus == "stopped") {gebi('scadaFileLabel').setAttribute('required', 'required')}
+					else {}
+					// File handler function.
+					function handle_files(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("scadaFile").value = reader.result
+							var FileName = gebi("scadaFileLabel").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('scadaFileLabelName').innerHTML = FileName;
+							gebi("fileName").value = FileName;
+						}
+					}
+				</script>
+			</div>			
+<!-- 			<div class="shortInput">
 				<label>Scada File Name</label>
 				<input type="text" id="scadaFile" name="scadaFile" data-validRegex="[\w\s]+"/></td>
-			</div>
+			</div> -->
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/></td>
