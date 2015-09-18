@@ -1,6 +1,6 @@
 ''' Calculate CVR impacts using a targetted set of static loadflows. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, traceback
 import math, re
 import multiprocessing
 from copy import copy
@@ -138,6 +138,7 @@ def runForeground(modelDir, inputDict):
 			if tree[key].get('object','') == 'regulator' and tree[key].get('from','') == swingName:
 				regIndex = key
 				regConfName = tree[key]['configuration']
+		if not regConfName: regConfName = False
 		for key in tree:
 			if tree[key].get('name','') == regConfName:
 				regConfIndex = key
@@ -422,9 +423,15 @@ def runForeground(modelDir, inputDict):
 			pass
 		print "DONE RUNNING", modelDir
 	except Exception as e:
-		print "Oops, Model Crashed!!!" 
-		cancel(modelDir)
-		print e
+		# If input range wasn't valid delete output, write error to disk.
+		cancel(modelDir)				
+		thisErr = traceback.format_exc()
+		print 'ERROR IN MODEL', modelDir, thisErr
+		inputDict['stderr'] = thisErr
+		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
+			errorFile.write(thisErr)
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
 
 def _tests():
 	# Variables

@@ -83,13 +83,12 @@ def cancel(modelDir):
 	except:
 		pass
 	# Remove PID, PPID, and allOutputData file if existed
-	try:
-		for fName in os.listdir(modelDir):
-			if fName in ["PID.txt","PPID.txt","allOutputData.json"]:
-				os.remove(pJoin(modelDir,fName))
-		print "CANCELED", modelDir
-	except:
-		pass
+	for fName in ["PID.txt","PPID.txt","allOutputData.json"]:
+		try: 
+			os.remove(pJoin(modelDir,fName))
+		except:
+			pass
+	print "CANCELED", modelDir
 
 def roundSig(x, sig=3):
 	''' Round to a given number of sig figs. '''

@@ -289,7 +289,7 @@ def runForeground(modelDir, inputDict):
 			os.remove(pJoin(modelDir, "PPID.txt"))
 		except:
 			pass
-		# Send email to user on successfully run status of model
+		# Send email to user on model success.
 		emailStatus = inputDict.get('emailStatus', 0)		
 		if (emailStatus == "on"):
 			print "\n    EMAIL ALERT ON"
@@ -300,18 +300,19 @@ def runForeground(modelDir, inputDict):
 				message = "The model " + "<i>" + str(modelName) + "</i>" + " has successfully completed running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
 				return web.send_link(email, message, user)
 			except Exception, e:
-				print "ERROR: failed to send model completed running email to user", email, "with exception", e
-		else:
-			print "\n   EMAIL ALERT NOT ON"
-
+				print "ERROR: Failed sending model status email to user: ", email, ", with exception: \n", e
 
 	except Exception, e:
-		print "MODEL CRASHED GRIDLABMULTI", e, modelDir
-		try:
-			os.remove(pJoin(modelDir, "PPID.txt"))
-		except:
-			pass
-		# Send email to user on failed running status of model
+		# If input range wasn't valid delete output, write error to disk.
+		cancel(modelDir)	
+		thisErr = traceback.format_exc()
+		print 'ERROR IN MODEL', modelDir, thisErr
+		inputDict['stderr'] = thisErr
+		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
+			errorFile.write(thisErr)
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
+		# Send email to user on model failure.
 		email = session['user_id']
 		try:
 			user = json.load(open("data/User/" + email + ".json"))
@@ -319,8 +320,8 @@ def runForeground(modelDir, inputDict):
 			message = "The model " + "<i>" + str(modelName) + "</i>" + " has failed to complete running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
 			return web.send_link(email, message, user)
 		except Exception, e:
-			print "ERROR: failed to send model failed running email to user", email, "with exception", e			
-		cancel(modelDir)
+			print "ERROR: Failed sending model status email to user: ", email, ", with exception: \n", e
+
 
 def avg(inList):
 	''' Average a list. Really wish this was built-in. '''

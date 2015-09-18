@@ -1,6 +1,6 @@
 ''' A model skeleton for future models: Calculates the sum of two integers. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback
 from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
@@ -58,11 +58,15 @@ def run(modelDir, inputDict):
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 	except:
-		#if input range wasn't valid delete output and pass
-		try:
-			os.remove(pJoin(modelDir,"allOutputData.json"))
-		except Exception, e:
-			pass
+		# If input range wasn't valid delete output, write error to disk.
+		cancel(modelDir)				
+		thisErr = traceback.format_exc()
+		print 'ERROR IN MODEL', modelDir, thisErr
+		inputDict['stderr'] = thisErr
+		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
+			errorFile.write(thisErr)
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
 
 def cancel(modelDir):
 	''' PV Watts runs so fast it's pointless to cancel a run. '''

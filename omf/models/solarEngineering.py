@@ -101,13 +101,13 @@ def heavyProcessing(modelDir, inputDict):
 	# Get feeder name and data in.
 	try: os.mkdir(pJoin(modelDir,'gldContainer'))
 	except: pass
-	feederDir, feederName = inputDict["feederName"].split("___")
-	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Feeder", feederDir, feederName + ".json"),
-		pJoin(modelDir, "feeder.json"))
-	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
-	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
-		pJoin(modelDir, "gldContainer", "climate.tmy2"))
-	try:
+	try:	
+		feederDir, feederName = inputDict["feederName"].split("___")
+		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Feeder", feederDir, feederName + ".json"),
+			pJoin(modelDir, "feeder.json"))
+		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
+			pJoin(modelDir, "gldContainer", "climate.tmy2"))
 		startTime = datetime.datetime.now()
 		feederJson = json.load(open(pJoin(modelDir, "feeder.json")))
 		tree = feederJson["tree"]
@@ -280,15 +280,13 @@ def heavyProcessing(modelDir, inputDict):
 		os.remove(pJoin(modelDir, "gldContainer", "PID.txt"))
 		print "DONE RUNNING", modelDir
 	except Exception as e:
-		print "MODEL CRASHED", e
-		# Cancel to get rid of extra background processes.
-		try: os.remove(pJoin(modelDir,'PPID.txt'))
-		except: pass
+		# If input range wasn't valid delete output, write error to disk.
+		cancel(modelDir)	
 		thisErr = traceback.format_exc()
+		print 'ERROR IN MODEL', modelDir, thisErr
 		inputDict['stderr'] = thisErr
 		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
 			errorFile.write(thisErr)
-		# Dump input with error included.
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 	finishTime = datetime.datetime.now()

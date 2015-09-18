@@ -1,7 +1,7 @@
 ''' Calculate CVR impacts using a targetted set of dynamic loadflows. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
-import math, re, csv, calendar
+import math, re, traceback, csv, calendar
 import multiprocessing
 from copy import deepcopy
 from os.path import join as pJoin
@@ -62,7 +62,7 @@ def run(modelDir, inData):
 	# If we are re-running, remove output:
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
-	except:
+	except Exception, e:
 		pass
 	# Start the computation.
 	backProc = multiprocessing.Process(target=runForeground, args=(modelDir, inData))
@@ -84,7 +84,6 @@ def runForeground(modelDir,inData):
 		with open(pJoin(modelDir,"scadaFile.tsv"),"w") as scadaFile:
 			scadaFile.write(inData['scadaFile'])
 		scadaPath = pJoin(modelDir, "scadaFile.tsv")
-		# scadaPath = pJoin(__metaModel__._omfDir,"uploads",(inData["scadaFile"]+'.tsv'))
 		calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 		allOutput = {}
 		allOutput['fileName'] = inData.get("fileName", 0)
@@ -97,13 +96,15 @@ def runForeground(modelDir,inData):
 				print "current solver method", localTree[key]["solver_method"] 
 				localTree[key]["solver_method"] = 'FBS'
 		#find the swing bus and recorder attached to substation
-		for key in localTree:
-			if localTree[key].get('bustype','').lower() == 'swing':
-				swingIndex = key
-				swingName = localTree[key].get('name')
-			if localTree[key].get('object','') == 'regulator' and localTree[key].get('from','') == swingName:
-				regIndex = key
-				regConfName = localTree[key]['configuration']
+		try:
+			for key in localTree:
+				if localTree[key].get('bustype','').lower() == 'swing':
+					swingIndex = key
+					swingName = localTree[key].get('name')
+				if localTree[key].get('object','') == 'regulator' and localTree[key].get('from','') == swingName:
+					regIndex = key
+					regConfName = localTree[key]['configuration']
+		except: raise ValueError('Invalid feeder selected:', str(inData["feederName"].split("___")[1]))
 		#find the regulator and capacitor names and combine to form a string for volt-var control object
 		regKeys = []
 		accum_reg = ""
@@ -288,7 +289,6 @@ def runForeground(modelDir,inData):
 		plt.legend([bar_load[0],bar_loss[0]],['total load', 'total losses'],bbox_to_anchor=(0., 0.915, 1., .102), loc=3,
 			       ncol=2, mode="expand", borderaxespad=0.1)
 		plt.xticks([t+0.15 for t in ticks],indices)
-		print "\n   modelDir=", modelDir
 		plt.savefig(pJoin(modelDir,"totalEnergy.png"))
 		#real and imaginary power
 		plt.figure("real power")
@@ -512,13 +512,19 @@ def runForeground(modelDir,inData):
 		# For autotest, there won't be such file.
 		try:
 			os.remove(pJoin(modelDir, "PPID.txt"))
-		except:
+		except Exception, e:
 			pass
 		print "DONE RUNNING", modelDir
-	except Exception as e:
-		print "Oops, Model Crashed!!!" 
-		cancel(modelDir)
-		print e
+	except:
+		# If input range wasn't valid delete output, write error to disk.
+		cancel(modelDir)				
+		thisErr = traceback.format_exc()
+		print 'ERROR IN MODEL', modelDir, thisErr
+		inData['stderr'] = thisErr
+		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
+			errorFile.write(thisErr)
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inData, inFile, indent=4)
 
 def _tests():
 	"runs local tests for dynamic CVR model"
