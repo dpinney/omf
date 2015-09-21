@@ -1,6 +1,7 @@
 ''' Graph the voltage drop on a feeder. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
+import traceback
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
@@ -33,24 +34,35 @@ def run(modelDir, inputDict):
 	feederDir, feederName = inputDict["feederName"].split("___")
 	shutil.copy(pJoin(__metaModel__._omfDir,"data","Feeder",feederDir,feederName+".json"),
 		pJoin(modelDir,"feeder.json"))
-	# Create voltage drop plot.
-	tree = json.load(open(pJoin(modelDir,"feeder.json"))).get("tree",{})
-	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
-		neato = False
-	else:
-		neato = True 
-	chart = voltPlot(tree, workDir=modelDir, neatoLayout=neato)
-	chart.savefig(pJoin(modelDir,"output.png"))
-	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
-		allOutput["voltageDrop"] = inFile.read().encode("base64")
-	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-		json.dump(allOutput, outFile, indent=4)
-	# Update the runTime in the input file.
-	endTime = dt.datetime.now()
-	inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
-	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-		json.dump(inputDict, inFile, indent=4)
-
+	try:
+		# Create voltage drop plot.
+		tree = json.load(open(pJoin(modelDir,"feeder.json"))).get("tree",{})
+		if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
+			neato = False
+		else:
+			neato = True 
+		chart = voltPlot(tree, workDir=modelDir, neatoLayout=neato)
+		chart.savefig(pJoin(modelDir,"output.png"))
+		with open(pJoin(modelDir,"output.png"),"rb") as inFile:
+			allOutput["voltageDrop"] = inFile.read().encode("base64")
+		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+			json.dump(allOutput, outFile, indent=4)
+		# Update the runTime in the input file.
+		endTime = dt.datetime.now()
+		inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
+	except:
+		# If input range wasn't valid delete output, write error to disk.
+		cancel(modelDir)	
+		thisErr = traceback.format_exc()
+		print 'ERROR IN MODEL', modelDir, thisErr
+		inputDict['stderr'] = thisErr
+		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
+			errorFile.write(thisErr)
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
+		
 def voltPlot(tree, workDir=None, neatoLayout=False):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	Returns a matplotlib object. '''

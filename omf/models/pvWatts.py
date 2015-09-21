@@ -1,6 +1,6 @@
 ''' Calculate solar photovoltaic system output using PVWatts. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback
 from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
@@ -127,11 +127,15 @@ def run(modelDir, inputDict):
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 	except:
-		#if input range wasn't valid delete output and pass
-		try:
-			os.remove(pJoin(modelDir,"allOutputData.json"))
-		except Exception, e:
-			pass
+		# If input range wasn't valid delete output, write error to disk.
+		cancel(modelDir)	
+		thisErr = traceback.format_exc()
+		print 'ERROR IN MODEL', modelDir, thisErr
+		inputDict['stderr'] = thisErr
+		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
+			errorFile.write(thisErr)
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
 
 def _aggData(key, aggFun, simStartDate, simLength, simLengthUnits, ssc, dat):
 	''' Function to aggregate output if we need something other than hour level. '''

@@ -45,6 +45,12 @@
 				}
 			}
 		}
+		function editFeeder(e) {
+			studyUser = $(e).siblings("select").val().split(/[_]+/)[0]
+			studyName = $(e).siblings("select").val().split(/[_]+/)[1]
+			$(e).attr("href", "/feeder/" + studyUser +"/"+ studyName)
+				.attr("target", "_blank");
+		}		
 	</script>
 </head>
 <body onload="init()">
@@ -56,16 +62,16 @@
 	<div id="input" class="content">
 		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post" onsubmit="return validateForm()">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-cvrDynamic" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="_cvrDynamic" readonly/>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-~-cvrDynamic" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="cvrDynamic" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"/></td>
 			</div>
-			<div class="shortInput">
+			<div class="shortInput" style="max-width:60%">
 				<label>Feeder</label>
-				<select id="feederName" name="feederName"/>
+				<select id="feederName" name="feederName" style="width:90%"/>
 					<option disabled><strong>Personal Feeders</strong></option>
 					{% for feeder in datastoreNames['feeders'] %}
 						<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
@@ -75,6 +81,7 @@
 						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 					{% endfor %}
 				</select>
+				<a class="edit-feeder postRunInline preRunInline runningInline stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>				
 			</div>
 			<div class="shortInput preRun runningInline postRunInline stoppedInline">
 				<label class="tooltip">Scada File Name (.tsv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
@@ -123,11 +130,7 @@
 						}
 					}
 				</script>
-			</div>			
-<!-- 			<div class="shortInput">
-				<label>Scada File Name</label>
-				<input type="text" id="scadaFile" name="scadaFile" data-validRegex="[\w\s]+"/></td>
-			</div> -->
+			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/></td>
@@ -143,43 +146,43 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Capital Cost<span class="classic">Capital Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="capitalCost" name="capitalCost" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="capitalCost" name="capitalCost" value="30000" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">OM Cost<span class="classic">OM Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="omCost" name="omCost" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="omCost" name="omCost" value="1000" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wholesale Energy Cost ($/kWh)<span class="classic">Wholesale Energy Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" value="0.06" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail Energy Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" value="0.10" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Spring Demand Charge ($/kW)<span class="classic">Spring Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" value="5" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Summer Demand Charge ($/kW)<span class="classic">Summer Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" value="10" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fall Demand Charge ($/kW)<span class="classic">Fall Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" value="6" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Winter Demand Charge ($/kW)<span class="classic">Winter Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" value="8" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation start date (YYYY-MM-DD)<span class="classic">Simulation start date</span></label>
-				<input type="text" id="simStart" name="simStart" data-validRegex="\d\d\d\d-\d\d-\d\d"/></td>
+				<input type="text" id="simStart" name="simStart" value="2012-01-01" pattern="^\d\d\d\d-\d\d-\d\d$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation length (HOURS)<span class="classic">Simulation length</span></label>
-				<input type="text" id="simLengthHours" name="simLengthHours" data-validRegex="\d+"/></td>
+				<input type="text" id="simLengthHours" name="simLengthHours" value="100" pattern="^\d+$" required="required"/></td>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -196,6 +199,8 @@
 	</div>
 	<div id ="stopIndicator" class="content stopped">
 		Model cancelled or encountered an error. Please change inputs and re-run.
+		<pre id='errorText'></pre>
+		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>		
 	</div>
 	<script type="text/javascript">
 		/* 

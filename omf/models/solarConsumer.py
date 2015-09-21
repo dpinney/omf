@@ -95,16 +95,14 @@ def run(modelDir, inputDict):
 			json.dump(inputDict, inFile, indent=4)
 	except:
 		# If input range wasn't valid delete output, write error to disk.
+		cancel(modelDir)	
 		thisErr = traceback.format_exc()
+		print 'ERROR IN MODEL', modelDir, thisErr
 		inputDict['stderr'] = thisErr
 		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
 			errorFile.write(thisErr)
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
-		try:
-			os.remove(pJoin(modelDir,"allOutputData.json"))
-		except Exception, e:
-			pass
 
 def cancel(modelDir):
 	''' solarConsumer runs so fast it's pointless to cancel a run. '''
