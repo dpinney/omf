@@ -80,8 +80,9 @@ def prism(prismDRDict):
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['hrsOnPeakPerMonthWOCPP'] = float(prismDRDict['hrsOnPeakWOCPP']) / float(prismDRDict['numMonths'])
 		prismDRDict['hrsOffPeakPerMonthWOCPP'] = float(prismDRDict['hrsOffPeakWOCPP']) / float(prismDRDict['numMonths'])
-	# Do 2tierCPP. Finds largest load days and designates them CPP days.
+	# Do 2tierCPP. Finds largest load days and designate them CPP days.
 	if prismDRDict['rateStructure'] == '2tierCPP' or prismDRDict['rateStructure'] == 'PTR':
+		prismDRDict['cppHours'] = []
 		prismDRDict['cppDayIdx'] = []
 		maxCount = 0
 		tempLoad = list(prismDRDict['origLoad'])
@@ -90,6 +91,8 @@ def prism(prismDRDict):
 			maxIndex = (maxIndex // 24) * 24 #First hour of day.
 			tempLoad[maxIndex:maxIndex + 24] = list([0] * 24) #Zero-ing out so that we don't consider this day again
 			if maxIndex >= prismDRDict['startIndex'] and maxIndex <= prismDRDict['stopIndex']: #max day was in DR season
+								#max day was in DR season
+				prismDRDict['cppHours'].append([maxIndex+prismDRDict['startHour'], maxIndex+prismDRDict['stopHour']])
 				for idx in range(0,24):
 					prismDRDict['cppDayIdx'].append(maxIndex + idx)
 				maxCount+=1
@@ -98,7 +101,6 @@ def prism(prismDRDict):
 	prismDRDict['offPeakWCPPEnergy'] = 0.0
 	prismDRDict['offPeakWOCPPEnergy'] = 0.0
 	prismDRDict['impactFactorOnPeakWOCPP'] = 0.0
-	prismDRDict['impactFactorOn3TeirPeak'] = 0.0
 	prismDRDict['impactFactorOffPeakWOCPP'] = 0.0
 	prismDRDict['onPeakWCPPEnergy'] = 0.0
 	hourlyEnergy = list([0] * 24)
@@ -279,7 +281,7 @@ def _tests(DRType):
 			'elasticitySubWCPP': -0.09698, # Substitution elasticty during CPP days. Only required for 2tierCPP
 			'elasticityDailyWCPP': -0.01607, # Daily elasticity during non-CPP days. Only reuquired for 2tierCPP
 			'startMonth': 1, # 1-12. Beginning month of the cooling season when the DR program will run.
-			'stopMonth': 3, # 1-12. Ending month of the cooling season when the DR program will run.
+			'stopMonth': 6, # 1-12. Ending month of the cooling season when the DR program will run.
 			'startHour': 14, # 0-23. Beginning hour for on-peak and CPP rates.
 			'stopHour': 18, # 0-23. Ending hour for on-peak and CPP rates.
 			'rateFlat': 0.15, # pre-DR Time-independent rate paid by residential consumers.
