@@ -276,7 +276,7 @@ def _tests():
 		'valueOfSolarRate':.07,
 		'monthlyDemand':'3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000',
 		'rateIncrease':2.5,
-		'roofUpfrontCosts':30000,
+		'roofUpfrontCosts':17500,
 		'roofMonthlyCharge':0,
 		'3rdPartyRate':0.09,
 		'3rdPartyRateIncrease':3.5,
