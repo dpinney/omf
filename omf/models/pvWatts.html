@@ -26,7 +26,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"{% endif %} method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-pvWatts" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-pvWatts" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="pvWatts" readonly/>
 			</div>
 			{% if quickRender %}
@@ -144,6 +144,8 @@
 	</div>
 	<div id ="stopIndicator" class="content stopped">
 		Model cancelled or encountered an error. Please change inputs and re-run.
+		<pre id='errorText'></pre>
+		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>
 	</div>
 	<div id="output">
 		<script type="text/javascript">

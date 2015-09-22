@@ -1,6 +1,6 @@
 ''' Calculate CVR impacts using a targetted set of static loadflows. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, traceback
 import math, re
 import multiprocessing
 from copy import copy
@@ -38,13 +38,10 @@ def run(modelDir, inputDict):
 	This function will return fast, but results take a while to hit the file system.'''
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
-		inputDict["created"] = str(datetime.datetime.now())
+		inputDict["created"] = str(datetime.datetime.now())	
 	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent=4)
-	feederDir, feederName = inputDict["feederName"].split("___")
-	shutil.copy(pJoin(__metaModel__._omfDir,"data","Feeder",feederDir,feederName+".json"),
-		pJoin(modelDir,"feeder.json"))
 	# If we are re-running, remove output:
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))
@@ -63,7 +60,11 @@ def runForeground(modelDir, inputDict):
 	print "STARTING TO RUN", modelDir
 	try:
 		startTime = datetime.datetime.now()
-		feederJson = json.load(open(pJoin(modelDir,"feeder.json")))
+		if not os.path.isdir(modelDir):
+			os.makedirs(modelDir)
+			inputDict["created"] = str(startTime)
+		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", inputDict["feederName"].split("___")[0], inputDict["feederName"].split("___")[1]+'.json')		
+		feederJson = json.load(open(feederPath))
 		tree = feederJson.get("tree",{})
 		attachments = feederJson.get("attachments",{})
 		allOutput = {}
@@ -137,6 +138,7 @@ def runForeground(modelDir, inputDict):
 			if tree[key].get('object','') == 'regulator' and tree[key].get('from','') == swingName:
 				regIndex = key
 				regConfName = tree[key]['configuration']
+		if not regConfName: regConfName = False
 		for key in tree:
 			if tree[key].get('name','') == regConfName:
 				regConfIndex = key
@@ -421,9 +423,15 @@ def runForeground(modelDir, inputDict):
 			pass
 		print "DONE RUNNING", modelDir
 	except Exception as e:
-		print "Oops, Model Crashed!!!" 
-		# cancel(modelDir)
-		print e
+		# If input range wasn't valid delete output, write error to disk.
+		cancel(modelDir)				
+		thisErr = traceback.format_exc()
+		print 'ERROR IN MODEL', modelDir, thisErr
+		inputDict['stderr'] = thisErr
+		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
+			errorFile.write(thisErr)
+		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
+			json.dump(inputDict, inFile, indent=4)
 
 def _tests():
 	# Variables
@@ -477,9 +485,9 @@ def _tests():
 	try: shutil.rmtree(modelLoc)
 	except: pass
 	# No-input template.
-	renderAndShow(template)
+	# renderAndShow(template)
 	# Run the model.
-	run(modelLoc, inData)
+	runForeground(modelLoc, inData)
 	# # Show the output.
 	renderAndShow(template, modelDir=modelLoc)
 	# # # Delete the model.

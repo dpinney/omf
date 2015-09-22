@@ -29,7 +29,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarFinancial" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarFinancial" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="solarFinancial" readonly/>
 			</div>
 			<div class="shortInput">
@@ -370,7 +370,7 @@
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
-					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","lineColor":"gray"},
+					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","lineColor":"gray","tickInterval":1,"minorTickColor":"gray", "minorTickInterval":5},
 					"title":{"text":"ROI:" + allOutputData.ROI.toFixed(3) + ", NPV:$" + delimitNumbers(allOutputData.NPV.toFixed(0)) + ", IRR:" + allOutputData.IRR, "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[{"name":"Energy Sales", "data":allOutputData.lifeGenerationDollars},
 						{"name":"Op. and Maint. Costs", "data":allOutputData.lifeOmCosts},

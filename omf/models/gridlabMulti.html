@@ -111,7 +111,7 @@
 	<div id="input" class="content">
 		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-gridlabMulti" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-gridlabMulti" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="gridlabMulti" title="This is Model Type" readonly/>
 			</div>
 			<div class="shortInput">
@@ -212,6 +212,8 @@
 	</div>
 	<div id ="stopIndicator" class="content stopped">
 		Model cancelled or encountered an error. Please change inputs and re-run.
+		<pre id='errorText'></pre>
+		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>
 	</div>
 
 	<div id="output">
@@ -409,7 +411,7 @@
 							"zIndex": 0
 						}],
 						"title":{
-							"text":"Volts",
+							"text":"Volts (V)",
 							"style":{
 								"color":"gray"
 							}
@@ -477,7 +479,7 @@
 					localHighChart["chart"]["marginBottom"] = 45
 					localHighChart["chart"]["renderTo"] = "costGrowthContainer"
 					localHighChart["yAxis"]["title"]["text"] = "Cumulative Savings ($)"
-					localHighChart["xAxis"] = {"labels": {enabled: true}, "type": "linear", "tickColor": "gray", "lineColor": "gray", "title": {"text": "Years After Install"}}
+					localHighChart["xAxis"] = {"labels": {enabled: true}, "type": "linear", "tickColor": "gray", "lineColor": "gray", "title": {"text": "Years After Install"}, "tickInterval":1, "minorTickColor":"gray", "minorTickInterval":5}
 					localHighChart["xAxis"]["plotLines"] = [{"color": "silver", "width": 1, "value": yearPercentage}]
 					localHighChart["plotOptions"]["series"]["pointInterval"] = 1
 					localHighChart["plotOptions"]["series"]["pointStart"] = 0

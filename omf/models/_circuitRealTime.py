@@ -12,26 +12,10 @@ from __metaModel__ import *
 sys.path.append(__metaModel__._omfDir)
 
 # Our HTML template for the interface:
-'''in scratch'''
-# with open(pJoin(os.getcwd(), "_circuitRealTime.html"),"r") as tempFile:
-	# template = Template(tempFile.read())
-'''if in models dir'''
 with open(pJoin(__metaModel__._myDir,"_circuitRealTime.html"),"r") as tempFile:
 	template = Template(tempFile.read())
-#TODO: I think this is where its breaking. Reading hte html file and template.render seeing the include throws it off.
-# Maybe find a way to pass it to .html some other way. 
-# In meta model, add an inputtype, if inputtype = circuitmodel then do a unique templaterender that doesn't fail. it can have the html added and then inserted 
-# using a variable and a safe argument. 
-# first is the path of the file the problem? determine this first.
-# if it isnt, pass the iframe or javascript render the above way. 
-
-# with open(pJoin(__metaModel__._myDir,"circuitRealTime.html"),"r") as tempFile:
-# 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	# print "\n   template=", str(template)
-	# print "\n   dataStoreNames=", datastoreNames
-	# print "\n   modelDir=", modelDir
 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
 
@@ -49,7 +33,6 @@ def run(modelDir, inputDict):
 			os.makedirs(modelDir)
 			inputDict["created"] = str(datetime.datetime.now())
 		startTime = datetime.datetime.now()
-
 		# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 		# Update the runTime in the input file.
 		endTime = datetime.datetime.now()
@@ -92,9 +75,6 @@ def _tests():
 	run(modelLoc, inData)
 	# Show the output.
 	renderAndShow(template, modelDir = modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

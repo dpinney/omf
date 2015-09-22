@@ -45,6 +45,12 @@
 				}
 			}
 		}
+		function editFeeder(e) {
+			studyUser = $(e).siblings("select").val().split(/[_]+/)[0]
+			studyName = $(e).siblings("select").val().split(/[_]+/)[1]
+			$(e).attr("href", "/feeder/" + studyUser +"/"+ studyName)
+				.attr("target", "_blank");
+		}		
 	</script>
 </head>
 <body onload="init()">
@@ -56,16 +62,16 @@
 	<div id="input" class="content">
 		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post" onsubmit="return validateForm()">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-cvrDynamic" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="_cvrDynamic" readonly/>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-~-cvrDynamic" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="cvrDynamic" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" data-validRegex="[\w\s]+"/></td>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"/></td>
 			</div>
-			<div class="shortInput">
+			<div class="shortInput" style="max-width:60%">
 				<label>Feeder</label>
-				<select id="feederName" name="feederName"/>
+				<select id="feederName" name="feederName" style="width:90%"/>
 					<option disabled><strong>Personal Feeders</strong></option>
 					{% for feeder in datastoreNames['feeders'] %}
 						<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
@@ -75,10 +81,55 @@
 						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 					{% endfor %}
 				</select>
+				<a class="edit-feeder postRunInline preRunInline runningInline stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>				
 			</div>
-			<div class="shortInput">
-				<label>Scada File Name</label>
-				<input type="text" id="scadaFile" name="scadaFile" data-validRegex="[\w\s]+"/></td>
+			<div class="shortInput preRun runningInline postRunInline stoppedInline">
+				<label class="tooltip">Scada File Name (.tsv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var fileName=true;</script>
+				<input type="file" id="scadaFileLabel" name="scadaFileLabel" accept=".tsv" onchange="handle_files(this.files)">
+				<input id="scadaFile" name="scadaFile" type="hidden">
+				{% if allOutputData.fileName|string() is defined %}
+					<input type="hidden" id="fileName" name="fileName" readonly="readonly">				
+					<div id="fileExists"><label for="scadaFileLabel" id="scadaFileLabelName"></label></div>	
+					<script>
+						var FileName = allOutputData.fileName;
+						document.getElementById('scadaFileLabelName').innerHTML = FileName;
+					</script>	
+					<style type="text/css">
+					 #fileExists {
+					   width:175px;
+					   height:25px;
+					   display:fixed;
+					   margin-top:-28px;
+					   margin-left:110px;
+					   background-color:#d3d3d3;
+					   font-size:0.8em;
+					 }	 		 				   
+					input[type='file'] {
+					  color: transparent;
+					}				
+					</style>		
+				{% endif %}
+				<script>
+					// Make sure the file is required on prerun.
+					if (modelStatus == "preRun" || modelStatus == "stopped") {gebi('scadaFileLabel').setAttribute('required', 'required')}
+					else {}
+					// File handler function.
+					function handle_files(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("scadaFile").value = reader.result
+							var FileName = gebi("scadaFileLabel").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('scadaFileLabelName').innerHTML = FileName;
+							gebi("fileName").value = FileName;
+						}
+					}
+				</script>
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -95,43 +146,43 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Capital Cost<span class="classic">Capital Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="capitalCost" name="capitalCost" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="capitalCost" name="capitalCost" value="30000" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">OM Cost<span class="classic">OM Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="omCost" name="omCost" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="omCost" name="omCost" value="1000" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Wholesale Energy Cost ($/kWh)<span class="classic">Wholesale Energy Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="wholesaleEnergyCostPerKwh" name="wholesaleEnergyCostPerKwh" value="0.06" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail Energy Cost<br><em>Type: float</em></span></label>
-				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="retailEnergyCostPerKwh" name="retailEnergyCostPerKwh" value="0.10" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Spring Demand Charge ($/kW)<span class="classic">Spring Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="peakDemandCostSpringPerKw" name="peakDemandCostSpringPerKw" value="5" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Summer Demand Charge ($/kW)<span class="classic">Summer Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="peakDemandCostSummerPerKw" name="peakDemandCostSummerPerKw" value="10" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Fall Demand Charge ($/kW)<span class="classic">Fall Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="peakDemandCostFallPerKw" name="peakDemandCostFallPerKw" value="6" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Winter Demand Charge ($/kW)<span class="classic">Winter Demand Charge<br><em>Type: float</em></span></label>
-				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" data-validRegex="[-+]?[0-9]*\.?[0-9]+"/></td>
+				<input type="text" id="peakDemandCostWinterPerKw" name="peakDemandCostWinterPerKw" value="8" pattern="^\d+\.?\d*$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation start date (YYYY-MM-DD)<span class="classic">Simulation start date</span></label>
-				<input type="text" id="simStart" name="simStart" data-validRegex="\d\d\d\d-\d\d-\d\d"/></td>
+				<input type="text" id="simStart" name="simStart" value="2012-01-01" pattern="^\d\d\d\d-\d\d-\d\d$" required="required"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation length (HOURS)<span class="classic">Simulation length</span></label>
-				<input type="text" id="simLengthHours" name="simLengthHours" data-validRegex="\d+"/></td>
+				<input type="text" id="simLengthHours" name="simLengthHours" value="100" pattern="^\d+$" required="required"/></td>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -148,6 +199,8 @@
 	</div>
 	<div id ="stopIndicator" class="content stopped">
 		Model cancelled or encountered an error. Please change inputs and re-run.
+		<pre id='errorText'></pre>
+		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>		
 	</div>
 	<script type="text/javascript">
 		/* 
@@ -163,7 +216,7 @@
 		pointStart = dateOb(allOutputData.timeStamps[0])
 		pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
 		highChartsTemplate = {
-			"chart":{"renderTo":"", "marginRight":20, "marginBottom":20, "zoomType":"x"},
+			"chart":{"renderTo":"", "marginRight":20, "marginBottom":30, "zoomType":"x"},
 			"title":{"text":null},
 			"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
 			"credits":{"enabled":false},
@@ -208,7 +261,7 @@
 					},
 					"yAxis": {
 						"title": {
-							"text": "Total Load and Losses (MWh)",
+							"text": "Energy (MWh)",
 							"style":{
 								"color":"gray"
 							}
@@ -231,7 +284,7 @@
 			</script>
 		</div>
 		
-		<p class="reportTitle postRun">Real Powerflow Substation</p>
+		<p class="reportTitle postRun">Powerflow at Substation</p>
 		<div id="realPowerflow" class="tightContent postRun">
 			<script type="text/javascript">
 				powerData = [{
@@ -240,14 +293,14 @@
 					},
 					"color":"Blue",
 					"data":allOutputData["withCVRPower"],
-					"name":"With IVVC"
+					"name":"With CVR"
 				},{
 					"marker":{
 						"enabled": false
 					},
 					"color":"Green",
 					"data":allOutputData["noCVRPower"],
-					"name":"No IVVC"
+					"name":"No CVR"
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "realPowerflow"
@@ -256,7 +309,7 @@
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = powerData
 				localHighChart["yAxis"] = {"title":{
-							"text":"substation real power (W)",
+							"text":"Real Power (W)",
 							"style":{
 								"color":"gray"
 							}
@@ -264,31 +317,44 @@
 				new Highcharts.Chart(localHighChart);		
 			</script>
 		</div>
-		<p class="reportTitle postRun">Min and Max voltages on the Feeder</p>
+		<p class="reportTitle postRun">Voltages at All Meters</p>
 		<div id="minMaxVoltRecord" class="tightContent postRun">
-			<div id="withIVVCVoltagesOnTheFeeder" class="studyContainer" style="height: 200px">
-				<script type="text/javascript">
+			<script type="text/javascript">
+				// Chart #1
+				studyList = []
+				studyList.push("With CVR")
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#minMaxVoltRecord")
+						.attr("class", "studyContainer")
+						.attr("style", "height: 200px")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(0)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#minMaxVoltRecord .studyContainer:last")
+						.attr("id", "withIVVCVoltagesOnTheFeeder")
+					// voltage series data
 					voltsData = [{
-						"marker":{
-							"enabled": false
-						},
-						"color":"Blue",
-						"data":allOutputData["withCVRMeanVolt"],
-						"name":"With IVVC Mean Volts"
-					},{
 						"marker":{
 							"enabled": false
 						},
 						"color":"DarkBlue",
 						"data":allOutputData["withCVRHighVolt"],
-						"name":"With IVVC High Volts",
+						"name":"Max",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"color":"Blue",
+						"data":allOutputData["withCVRMeanVolt"],
+						"name":"Mean"
 					},{
 						"marker":{
 							"enabled": false
 						},
 						"color":"LightBlue",
 						"data":allOutputData["withCVRLowVolt"],
-						"name":"With IVVC Low Volts",
+						"name":"Min",
 					}]
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "withIVVCVoltagesOnTheFeeder"
@@ -297,37 +363,48 @@
 					localHighChart["chart"]["type"] = "line"
 					localHighChart["series"] = voltsData
 					localHighChart["yAxis"] = {"title":{
-								"text":"Voltages",
+								"text":"Meter Voltages (V)",
 								"style":{
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);
-				</script>
-			</div>
-			<div id="withoutIVVCVoltagesOnTheFeeder" class="studyContainer" style="height: 200px">
-				<script type="text/javascript">
+					new Highcharts.Chart(localHighChart);					
+				}
+				// Chart #2
+				studyList = []
+				studyList.push("No CVR")
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#minMaxVoltRecord")
+						.attr("class", "studyContainer")
+						.attr("style", "height: 200px")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(0)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#minMaxVoltRecord .studyContainer:last")
+						.attr("id", "withoutIVVCVoltagesOnTheFeeder")
+					// voltage series data
 					voltsData = [{
-						"marker":{
-							"enabled": false
-						},
-						"color":"Blue",
-						"data":allOutputData["noCVRMeanVolt"],
-						"name":"With IVVC Mean Volts"
-					},{
 						"marker":{
 							"enabled": false
 						},
 						"color":"DarkBlue",
 						"data":allOutputData["noCVRHighVolt"],
-						"name":"With IVVC High Volts",
+						"name":"Max",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"color":"Blue",
+						"data":allOutputData["noCVRMeanVolt"],
+						"name":"Mean"
 					},{
 						"marker":{
 							"enabled": false
 						},
 						"color":"LightBlue",
 						"data":allOutputData["noCVRLowVolt"],
-						"name":"With IVVC Low Volts",
+						"name":"Min",
 					}]
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "withoutIVVCVoltagesOnTheFeeder"
@@ -336,14 +413,14 @@
 					localHighChart["chart"]["type"] = "line"
 					localHighChart["series"] = voltsData
 					localHighChart["yAxis"] = {"title":{
-								"text":"Voltages",
+								"text":"Meter Voltages (V)",
 								"style":{
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);
-				</script>
-			</div>			
+					new Highcharts.Chart(localHighChart);				
+				}
+			</script>					
 		</div>
 		<p class="reportTitle postRun">Regulator Tap Positions</p>
 		<div id="tapStatus" class="tightContent postRun">
@@ -354,21 +431,21 @@
 					},
 					"color":"Blue",
 					"data":allOutputData["withCVRTaps"]["A"],
-					"name":"With IVVC A"
+					"name":"With CVR A"
 				},{
 					"marker":{
 						"enabled": false
 					},
 					"color":"DarkBlue",
 					"data":allOutputData["withCVRTaps"]["B"],
-					"name":"With IVVC B",
+					"name":"With CVR B",
 				},{
 					"marker":{
 						"enabled": false
 					},
 					"color":"LightBlue",
 					"data":allOutputData["withCVRTaps"]["C"],
-					"name":"With IVVC C",
+					"name":"With CVR C",
 				},{
 					"marker":{
 						"enabled": false
@@ -376,7 +453,7 @@
 					"dashStyle": "ShortDash",
 					"color":"Green",
 					"data":allOutputData["noCVRTaps"]["A"],
-					"name":"No IVVC A"
+					"name":"No CVR A"
 				},{
 					"marker":{
 						"enabled": false
@@ -384,7 +461,7 @@
 					"dashStyle": "ShortDash",
 					"color":"DarkGreen",
 					"data":allOutputData["noCVRTaps"]["B"],
-					"name":"No IVVC B",
+					"name":"No CVR B",
 				},{
 					"marker":{
 						"enabled": false
@@ -392,7 +469,7 @@
 					"dashStyle": "ShortDash",
 					"color":"LightGreen",
 					"data":allOutputData["noCVRTaps"]["C"],
-					"name":"No IVVC C",
+					"name":"No CVR C",
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "tapStatus"
@@ -409,7 +486,7 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<p class="reportTitle postRun">Capacitor Switch</p>
+		<p class="reportTitle postRun">Capacitor Switch Positions</p>
 		<div id="CapSwitchStat" class="tightContent postRun">
 			<script type="text/javascript">
 				capSwitchData = [{
@@ -418,21 +495,21 @@
 					},
 					"color":"Blue",
 					"data":allOutputData["withCVRCapSwitch"]["A"],
-					"name":"With IVVC A"
+					"name":"With CVR A"
 				},{
 					"marker":{
 						"enabled": false
 					},
 					"color":"DarkBlue",
 					"data":allOutputData["withCVRCapSwitch"]["B"],
-					"name":"With IVVC B",
+					"name":"With CVR B",
 				},{
 					"marker":{
 						"enabled": false
 					},
 					"color":"LightBlue",
 					"data":allOutputData["withCVRCapSwitch"]["C"],
-					"name":"With IVVC C",
+					"name":"With CVR C",
 				},{
 					"marker":{
 						"enabled": false
@@ -440,7 +517,7 @@
 					"dashStyle": "ShortDash",
 					"color":"Green",
 					"data":allOutputData["noCVRCapSwitch"]["A"],
-					"name":"No IVVC A"
+					"name":"No CVR A"
 				},{
 					"marker":{
 						"enabled": false
@@ -448,7 +525,7 @@
 					"dashStyle": "ShortDash",
 					"color":"DarkGreen",
 					"data":allOutputData["noCVRCapSwitch"]["B"],
-					"name":"No IVVC B",
+					"name":"No CVR B",
 				},{
 					"marker":{
 						"enabled": false
@@ -456,7 +533,7 @@
 					"dashStyle": "ShortDash",
 					"color":"LightGreen",
 					"data":allOutputData["noCVRCapSwitch"]["C"],
-					"name":"No IVVC C",
+					"name":"No CVR C",
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "CapSwitchStat"
@@ -483,21 +560,21 @@
 					},
 					"color":"Blue",
 					"data":allOutputData["withCVRSubVolts"]["A"],
-					"name":"With IVVC A"
+					"name":"With CVR A"
 				},{
 					"marker":{
 						"enabled": false
 					},
 					"color":"DarkBlue",
 					"data":allOutputData["withCVRSubVolts"]["B"],
-					"name":"With IVVC B",
+					"name":"With CVR B",
 				},{
 					"marker":{
 						"enabled": false
 					},
 					"color":"LightBlue",
 					"data":allOutputData["withCVRSubVolts"]["C"],
-					"name":"With IVVC C",
+					"name":"With CVR C",
 				},{
 					"marker":{
 						"enabled": false
@@ -505,7 +582,7 @@
 					"dashStyle": "ShortDash",
 					"color":"Green",
 					"data":allOutputData["noCVRSubVolts"]["A"],
-					"name":"No IVVC A"
+					"name":"No CVR A"
 				},{
 					"marker":{
 						"enabled": false
@@ -513,7 +590,7 @@
 					"dashStyle": "ShortDash",
 					"color":"DarkGreen",
 					"data":allOutputData["noCVRSubVolts"]["B"],
-					"name":"No IVVC B",
+					"name":"No CVR B",
 				},{
 					"marker":{
 						"enabled": false
@@ -521,7 +598,7 @@
 					"dashStyle": "ShortDash",
 					"color":"LightGreen",
 					"data":allOutputData["noCVRSubVolts"]["C"],
-					"name":"No IVVC C",
+					"name":"No CVR C",
 				}]
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "voltagePlots"
@@ -530,7 +607,7 @@
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["series"] = subVoltsData
 				localHighChart["yAxis"] = {"title":{
-							"text":"Voltages",
+							"text":"Voltages (V)",
 							"style":{
 								"color":"gray"
 							}
@@ -538,7 +615,7 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<p class="reportTitle postRun">Projected Savings by Month</p>
+		<p class="reportTitle postRun">Projected Savings From CVR by Month</p>
 		<div id="spendReport" class="tightContent postRun">
 			<table style="margin:5px;text-align:center">
 				<style>td, th {padding:5 0 5 20;}</style>
@@ -559,7 +636,7 @@
 				</tr>
 			</table>		
 		</div>
-		<p class="reportTitle postRun">Projected Avoided Cost</p>
+		<p class="reportTitle postRun">Projected Savings From CVR Over System Lifetime</p>
 		<div id="savingsReport" class="tightContent postRun">
  			<script type="text/javascript">
  				new Highcharts.Chart({
@@ -587,10 +664,13 @@
 						"valueDecimals":1
 					},
 					"xAxis": {
+						"tickInterval":1,
+						"minorTickColor":"gray", 
+						"minorTickInterval":5
 					},
 					"yAxis": {
 						"title": {
-							"text": "Cumulative Savings($)",
+							"text": "Cumulative Savings ($)",
 							"style":{
 								"color":"gray"
 							}

@@ -29,7 +29,7 @@
 	<div id="input" class="content">		
 		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-solarConsumer" target="blank">Help?</a></label>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarConsumer" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="solarConsumer" readonly/>
 			</div>
 			<div class="shortInput">
@@ -87,13 +87,17 @@
 				<input type="text" id="valueOfSolarRate" name="valueOfSolarRate" pattern="^\d+\.?\d*$" required="required" value="0.07">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Monthly Demand (kWh CSV)<span class="classic">12 comma-separated demand values for each month of a typical year.</span></label>
-				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^\d+\.?\d*(,\d+\.?\d*)*$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
-			</div>
-			<div class="shortInput">
 				<label>Rate Increase (%)</label>
 				<input type="text" id="rateIncrease" name="rateIncrease" pattern="^\d+\.?\d*$" required="required" value="2.5">
+			</div>			
+			<div class="shortInput" style="width:66.5%">
+				<label class="tooltip">Monthly Demand (kWh CSV)<span class="classic">12 comma-separated demand values for each month of a typical year.</span></label>
+				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){11}$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
 			</div>
+			<div class="shortInput">
+				<label>Renewables in G&amp;T Fuel Mix (%)</label>
+				<input type="text" id="greenFuelMix" name="greenFuelMix" pattern="^\d+\.?\d*$" required="required" value="12">
+			</div>			
 			<div class="shortInput">
 				<label>Rooftop Upfront Costs ($)</label>
 				<input type="text" id="roofUpfrontCosts" name="roofUpfrontCosts" pattern="^\d+\.?\d*$" required="required" value="30000">
@@ -125,10 +129,6 @@
 			<div class="shortInput">
 				<label>Community Solar Rate Increase (%)</label>
 				<input type="text" id="comRateIncrease" name="comRateIncrease" pattern="^\d+\.?\d*$" required="required" value="0">
-			</div>
-			<div class="shortInput">
-				<label>Renewables in G&amp;T Fuel Mix (%)</label>
-				<input type="text" id="greenFuelMix" name="greenFuelMix" pattern="^\d+\.?\d*$" required="required" value="12">
 			</div>
 			<div class="wideInput" style="text-align:right">
 					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -165,7 +165,7 @@
 					['3rd Party PPA', allOutputData.totalCost3rdParty],
 					['Rooftop Solar', allOutputData.totalCostRoof]]
 				levelizedCostChart = new Highcharts.Chart({
-					plotOptions:{column:{stacking:'normal',dataLabels:{enabled:true, format: '{point.y:,.0f}'}, pointPadding:0.2, borderWidth:0}},
+					plotOptions:{column:{dataLabels:{enabled:true, format: '{point.y:,.0f}'}, pointPadding:0.2, borderWidth:0}},
 					xAxis:{type:'category',tickColor:'gray',lineColor:'gray',crosshair:true},
 					yAxis:{title:{text:'Cost ($)'}},
 					title:false,
@@ -219,14 +219,20 @@
 					newRow = table.insertRow()
 					newRow.insertCell().innerHTML = name
 					for (i=0; i<vector.length; i++) {
-						cell = newRow.insertCell()
-						cell.innerHTML = delimitNumbers(vector[i].toFixed(2))
+						if (vector[i] == -1) {
+							cell = newRow.insertCell()
+							cell.innerHTML = "None"							
+						}
+						else{
+							cell = newRow.insertCell()
+							cell.innerHTML = delimitNumbers(vector[i].toFixed(2))
+						}
 					}
 				}
 				insertMetric("detailedCostsTable","Base Case",[allOutputData["totalCostBaseCase"],0, allOutputData["avgMonthlyBillBaseCase"],allOutputData["kWhCostBaseCase"], -1,allInputData["greenFuelMix"]])
-				insertMetric("detailedCostsTable","Community Solar",[allOutputData["totalCostComS"],allOutputData["totalSavedByComS"], allOutputData["avgMonthlyBillComS"],allOutputData["kWhCostComS"], allOutputData["breakEvenComS"], allOutputData["greenElectrons"]])
-				insertMetric("detailedCostsTable","Rooftop Solar",[allOutputData["totalCostRoof"],allOutputData["totalSavedByRoof"], allOutputData["avgMonthlyBillRoof"],allOutputData["kWhCostRoof"], allOutputData["breakEvenRoof"], allOutputData["greenElectrons"]])
-				insertMetric("detailedCostsTable","3rd Party Solar",[allOutputData["totalCost3rdParty"],allOutputData["totalSavedBy3rdParty"], allOutputData["avgMonthlyBill3rdParty"],allOutputData["kWhCost3rdParty"], allOutputData["breakEven3rdParty"], allOutputData["greenElectrons"]])
+				insertMetric("detailedCostsTable","Community Solar",[allOutputData["totalCostComS"],allOutputData["totalSavedByComS"], allOutputData["avgMonthlyBillComS"],allOutputData["kWhCostComS"], allOutputData["sppComS"], allOutputData["greenElectrons"]])
+				insertMetric("detailedCostsTable","Rooftop Solar",[allOutputData["totalCostRoof"],allOutputData["totalSavedByRoof"], allOutputData["avgMonthlyBillRoof"],allOutputData["kWhCostRoof"], allOutputData["sppRoof"], allOutputData["greenElectrons"]])
+				insertMetric("detailedCostsTable","3rd Party Solar",[allOutputData["totalCost3rdParty"],allOutputData["totalSavedBy3rdParty"], allOutputData["avgMonthlyBill3rdParty"],allOutputData["kWhCost3rdParty"], allOutputData["spp3rdParty"], allOutputData["greenElectrons"]])
 			</script>
 		</div>
 		<p class="reportTitle postRun">Hourly Solar Generation</p>
