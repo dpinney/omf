@@ -180,30 +180,6 @@ def tjCode(inputs, outData):
 	# Add upfront costs to the first month.
 	monthlyBillsComS[0]+= inputs["comUpfrontCosts"]
 	monthlyBillsRoof[0]+= inputs["roofUpfrontCosts"]
-	# Store month costs for first year.
-	months = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]	
-	outData["firstYearMonthlyBillsBaseCase"] = [[a, b] for (a,b) in zip(months, monthlyBillsBaseCase[:12])]
-	outData["firstYearMonthlyBillsComS"] = [[a, b] for (a,b) in zip(months, monthlyBillsComS[:12])]
-	outData["firstYearMonthlyBillsRoof"] = [[a, b] for (a,b) in zip(months, monthlyBillsRoof[:12])]
-	outData["firstYearMonthlyBills3rdParty"] = [[a, b] for (a,b) in zip(months, monthlyBills3rdParty[:12])]
-	# Store month costs for each year.
-	x, years = 0, []
-	for i in range (0, inputs["years"]): years.append(i+1)
-	allYearsBaseCase, allYearsComS, allYearsRoof, allYears3rdParty = [], [], [], []
-	for i in range(0, inputs["years"]):
-		allYearsBaseCase.append(sum(monthlyBillsBaseCase[x:x+12]))
-		allYearsComS.append(sum(monthlyBillsComS[x:x+12]))
-		allYearsRoof.append(sum(monthlyBillsRoof[x:x+12]))
-		allYears3rdParty.append(sum(monthlyBills3rdParty[x:x+12]))
-		x+=12
-	# outData["allYearsMonthlyBillsBaseCase"] = (allYearsBaseCase)
-	# outData["allYearsMonthlyBillsComS"] = (allYearsComS)
-	# outData["allYearsMonthlyBillsRoof"] = (allYearsRoof)
-	# outData["allYearsMonthlyBills3rdParty"] = (allYears3rdParty)		
-	outData["allYearsMonthlyBillsBaseCase"] = [[a, b] for (a,b) in zip(years, allYearsBaseCase)]
-	outData["allYearsMonthlyBillsComS"] = [[a, b] for (a,b) in zip(years, allYearsComS)]
-	outData["allYearsMonthlyBillsRoof"] = [[a, b] for (a,b) in zip(years, allYearsRoof)]
-	outData["allYearsMonthlyBills3rdParty"] = [[a, b] for (a,b) in zip(years, allYears3rdParty)]
 	# Average monthly bill calculation:
 	outData["avgMonthlyBillBaseCase"] = sum(monthlyBillsBaseCase)/len(monthlyBillsBaseCase)
 	outData["avgMonthlyBillComS"] = sum(monthlyBillsComS)/len(monthlyBillsComS)

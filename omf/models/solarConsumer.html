@@ -155,46 +155,6 @@
 			pointStart = dateOb(allOutputData.timeStamps[0])
 			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
 		</script>
-		<!-- Add first-year monthly bar graph here. -->
-		<p class="reportTitle postRun">First-Year Monthly Energy Costs</p>
-		<div id="monthlyPerformanceReport" class="tightContent postRun">
-			<div id="monthlyPerformanceDiv"></div>
-			<script>
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"stacking":"normal","animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
-					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
-					"title":{"text":null},
-					"series":[{"name":"Base Case", "color":"black", "data":allOutputData.firstYearMonthlyBillsBaseCase, "dataLabels":{"enabled":false}},
-					{"name":"Community Solar", "color":"red", "data":allOutputData.firstYearMonthlyBillsComS, "dataLabels":{"enabled":false}},
-					{"name":"3rd Party", "color":"blue", "data":allOutputData.firstYearMonthlyBills3rdParty, "dataLabels":{"enabled":false}},
-					{"name":"Rooftop Solar", "color":"orange", "data":allOutputData.firstYearMonthlyBillsRoof, "dataLabels":{"enabled":false}}],
-					"yAxis":{"title":{"text":"Cost ($)","style":{"color":"gray"}}},
-					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"monthlyPerformanceDiv","type":"column","marginRight":20,"height":250,"width":1000},
-					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>	
-		<!-- End first-year monthly bar graph here.  -->
-		<!-- Yearly -->
-		<p class="reportTitle postRun">All-Year Monthly Energy Costs</p>
-		<div id="monthlyPerformanceReport" class="tightContent postRun">
-			<div id="yearlyPerformanceDiv"></div>
-			<script>
-				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"stacking":"normal","animation":false,"shadow":false},"line":{"marker":{"enabled":false}}},
-					"xAxis":{"type":"category","tickColor":"gray","lineColor":"gray"},
-					"title":{"text":null},
-					"series":[{"name":"Base Case", "color":"black", "data":allOutputData.allYearsMonthlyBillsBaseCase, "dataLabels":{"enabled":false}},
-					{"name":"Community Solar", "color":"red", "data":allOutputData.allYearsMonthlyBillsComS, "dataLabels":{"enabled":false}},
-					{"name":"3rd Party", "color":"blue", "data":allOutputData.allYearsMonthlyBills3rdParty, "dataLabels":{"enabled":false}},
-					{"name":"Rooftop Solar", "color":"orange", "data":allOutputData.allYearsMonthlyBillsRoof, "dataLabels":{"enabled":false}}],
-					"yAxis":{"title":{"text":"Cost ($)","style":{"color":"gray"}}},
-					"chart":{"marginBottom":40,"zoomType":"disabled","renderTo":"yearlyPerformanceDiv","type":"column","marginRight":20,"height":250,"width":1000},
-					"tooltip":{"valueDecimals":1},
-					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
-			</script>
-		</div>			
-		<!-- End Yearly -->
 		<p class="reportTitle postRun">Lifetime Energy Costs</p>
 		<div id="lifetimeCostsReport" class="tightContent postRun">
 			<div id="lifetimeCostsChartDiv"></div>
