@@ -49,37 +49,29 @@
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">System and Financial Variables</p>
+				<p class="inputSectionHeader">Solar System Parameters</p>
 			</div>
 			<hr>
-			<div class="shortInput">
-				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
-				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
-			</div>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
 				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
 			</div>			
 			<div class="shortInput">
-				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Inverter system size in kW-AC. This is used for a calculation in determining about of power lost due to inverter clipping as shown in the Hourly System Average Power Output graph.</span></label>
+				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
+				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. Used to determine energy clipping in the Hourly System Average Power Output graph.</span></label>
 				<input type="text" id="inverterSize" name="inverterSize" required="required" pattern="^\d+\.?\d*?$">
-			</div>					
-			<div class="shortInput">
-				<label class="tooltip">Installation Cost ($)<span class="classic">Full cost of the system.</span></label>
-				<input type="text" id="installCost" name="installCost" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Op. and Maint. Cost ($)<span class="classic">Annual cost to operate and maintain the system.</span></label>
-				<input type="text" id="omCost" name="omCost" pattern="^\d+\.?\d*$" required="required">
+				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. The Inverter efficiency can be obtained from the Weighted Efficiency (CEC) Method.</span></label>
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" value="92" required="required" >
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Projected Life of System (Years)<span class="classic">Typical industry standard is 30 years.</span></label>
-				<input type="text" id="lifeSpan" name="lifeSpan" pattern="^\d+$" value="30" required="required"/>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Financial Variables</p>
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Annual Array Degradation (%)<span class="classic">Typical industry standard is 0.5% degradation per year.</span></label>
-				<input type="text" id="degradation" name="degradation" pattern="^(100|\d\d|\d)(\.\d+)?$" value="0.5" required="required"/>
-			</div>
+			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Residential rate.</span></label>
 				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" value="0.10" required="required"/>
@@ -92,10 +84,30 @@
 				<label class="tooltip">SREC Cashflow<span class="classic">Annual income expcted from Solar Renewable Energy Credits. Input a value for each year separated by commas. For example, income of 100 dollars for 3 years and then 50 dollars on the 4th year would be entered as <em>100,100,100,50.</em></label>
 				<input type="text" id="srecCashFlow" name="srecCashFlow" pattern="^(\d,)*\d$" value="0" required="required"/>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Installation Cost ($)<span class="classic">Full cost of the system.</span></label>
+				<input type="text" id="installCost" name="installCost" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Op. and Maint. Cost ($)<span class="classic">Annual cost to operate and maintain the system.</span></label>
+				<input type="text" id="omCost" name="omCost" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Projected Life of System (Years)<span class="classic">Typical industry standard is 30 years.</span></label>
+				<input type="text" id="lifeSpan" name="lifeSpan" pattern="^\d+$" value="30" required="required"/>
+			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">Advanced System Specifications</p>
+				<p class="inputSectionHeader">Advanced Options</p>
 			</div>
 			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Max Power Temperature Coefficient (%/&deg;C)<span class="classic">Percentage decrease  of the solar module's output power for every degree over 25 degrees centigrade.</span></label>
+				<input type="text" id="gamma" name="gamma" value="-0.45" required="required" />
+			</div>						
+			<div class="shortInput">
+				<label class="tooltip">Tracker Rotation Limit (degrees)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker, measured from the horizontal.</span></label>
+				<input type="text" id="rotlim" name="rotlim" value="45.0" pattern="^\d+\.?\d*$" required="required" />
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tracking Mode<span class="classic">Type of tracking system the PV array will use if any.</span></label>
 				<select id="trackingMode" name="trackingMode"/>
@@ -104,11 +116,7 @@
 					<option value="2">2 Axis</option>
 					<option value="3">Azimuth Axis</option>
 				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Tracker rotation limit (degrees)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker.</span></label>
-				<input type="text" id="rotlim" name="rotlim" value="45.0" pattern="^\d+\.?\d*$" required="required" />
-			</div>			
+			</div>		
 			<div class="shortInput">
 				<label class="tooltip">Tilt (degrees)<span class="classic">The tilt of the solar panels measured as an angle in degrees between panels and ground. If '-' is entered, the latitude of the zipcode will be used.</span></label>
 				<input type="text" id="tilt" name="tilt" value="-" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
@@ -116,15 +124,15 @@
 			<div class="shortInput">
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
 				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required" />
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Max power temperature coefficient (%/C)<span class="classic">Percentage decrease  of the solar array's output power for every degree over 25 degrees centigrade.</span></label>
-				<input type="text" id="gamma" name="gamma" value="-0.45" required="required" />
-			</div>
+			</div>			
 			<div class="shortInput">
 				<label class="tooltip">PV Module Derate (%)<span class="classic">Derate factor accounting for DC to AC conversion losses.</span></label>
 				<input type="text" id="pvModuleDerate" name="pvModuleDerate" value="100" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Annual Array Degradation (%)<span class="classic">Typical industry standard is 0.5% degradation per year.</span></label>
+				<input type="text" id="degradation" name="degradation" pattern="^(100|\d\d|\d)(\.\d+)?$" value="0.5" required="required"/>
+			</div>			
 			<div class="shortInput">
 				<label class="tooltip">Mismatch Derate (%)<span class="classic">The derate factor for PV module mismatch accounts for manufacturing tolerances that yield PV modules with slightly different current-voltage characteristics. Consequently, when connected together electrically they do not operate at their respective peak efficiencies.</span></label>
 				<input type="text" id="mismatch" name="mismatch" value="98" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
@@ -156,11 +164,11 @@
 			<div class="shortInput">
 				<label class="tooltip">Age Derate<span class="classic">The derate factor for age accounts for losses in performance over time due primarily to weathering of the PV modules. The loss in performance is typically 0.5% per year.</span></label>
 				<input type="text" id="age" name="age" value="100" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
-			</div>	
+			</div>
 			<div class="shortInput">
-				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. The Inverter efficiency is obtained from the Weighted Efficiency (CEC) Method.</span></label>
-				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" value="92" required="required" >
-			</div>		
+				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Currently we only support a yearlong analysis starting on 1 Jan; the year has no effect on the results.</span></label>
+				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" value="2014-01-01" readonly/>
+			</div>								
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Currently we only support a yearlong analysis, i.e. 8760 hours.</span></label>
 				<input type="text" id="simLength" name="simLength" pattern="^\d+$" value="8760" readonly />
@@ -172,10 +180,6 @@
 					<option value="hours" selected>Hours</option>
 					<option value="days">Days</option>
 				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Simulation Start Date (YYYY-MM-DD)<span class="classic">Currently we only support a yearlong analysis starting on 1 Jan; the year has no effect on the results.</span></label>
-				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" value="2014-01-01" readonly/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<a id="downloadLink" type="button" class="stoppedInline postRunInline" href="#" download>Download Excel</a>
@@ -216,7 +220,7 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun">Solar Financial Model Summary of Analysis</p>
+		<p class="reportTitle postRun">Summary of Analysis</p>
 		<div id="analysisSummary" class="content postRun">
 			<div class="shortInput">
 				<strong>Project Name</strong>
@@ -306,7 +310,7 @@
 				gebi("IRR").innerHTML = parseFloat(allOutputData.IRR)
 			</script>
 		</div>		
-		<p class="reportTitle postRun">Hourly System Average Power Output</p>
+		<p class="reportTitle postRun">Hourly Solar Generation</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
 			<div id="powerTimeSeries"></div>
 			<script>
@@ -314,7 +318,7 @@
 					"plotOptions":{"series":{"animation":false,"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"enableMouseTracking":false, "marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
 					"title":{"text":null},
-					"series": [{"marker":{"enabled":false},"color":"red","data":allOutputData.powerOutputAc,"name":"Power Generated"},{"marker":{"enabled":false},"color":"purple","data":allOutputData.InvClipped,"name":"Power After Inverter Clipping", "visible":true}],
+					"series": [{"marker":{"enabled":false},"color":"pink","data":allOutputData.powerOutputAc,"name":"Generated in DC"},{"marker":{"enabled":false},"color":"red","data":allOutputData.InvClipped,"name":"After DC-AC Conversion", "visible":true}],
 					"yAxis":{"title":{"text":"Power (W-AC)","style":{"color":"gray"}},"plotLines":[{"color": "orange",
 						"dashStyle": "ShortDash",
 						"width": 2,
@@ -329,7 +333,7 @@
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Monthly System Energy Output</p>
+		<p class="reportTitle postRun">Monthly Energy Output</p>
 		<div id="monthlyPerformanceReport" class="tightContent postRun">
 			<div id="monthlyPerformanceDiv"></div>
 			<script>
@@ -344,7 +348,7 @@
 					"legend":false})
 			</script>
 		</div>
-		<p class="reportTitle postRun">Average Seasonal System Performance</p>
+		<p class="reportTitle postRun">Seasonal System Performance</p>
 		<div id="seasonalPerformanceChart" class="tightContent postRun">
 			<div id="seasonalPerformanceDiv"></div>
 			<script>
@@ -369,7 +373,7 @@
 			<div id="cashFlowChartDiv"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
-					"plotOptions":{"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
+					"plotOptions":{"column":{"stacking":"normal"},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","lineColor":"gray","tickInterval":1,"minorTickColor":"gray", "minorTickInterval":5},
 					"title":{"text":"ROI:" + allOutputData.ROI.toFixed(3) + ", NPV:$" + delimitNumbers(allOutputData.NPV.toFixed(0)) + ", IRR:" + allOutputData.IRR, "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[{"name":"Energy Sales", "data":allOutputData.lifeGenerationDollars},

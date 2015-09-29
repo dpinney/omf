@@ -46,20 +46,16 @@ def prism(prismDRDict):
 	start_date = datetime.date(2009,prismDRDict['startMonth'],1)
 	last_day = calendar.monthrange(2009, prismDRDict['stopMonth'])
 	stop_date = datetime.date(2009,prismDRDict['stopMonth'],last_day[1])
+	day_count = stop_date - start_date
+	start_index = start_date - datetime.date(2009,1,1)
+	stop_index = stop_date  - datetime.date(2009,1,1)
+	prismDRDict['startIndex'] = (start_index.days * 24)
 	if (start_date <= stop_date):
-		day_count = stop_date - start_date
-		prismDRDict['dayCount']= day_count.days + 1
-		start_index = start_date - datetime.date(2009,1,1)
-		stop_index = stop_date  - datetime.date(2009,1,1)
-		prismDRDict['startIndex'] = (start_index.days * 24)
+		prismDRDict['dayCount'] = day_count.days + 1
 		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
 		prismDRDict['numMonths'] = prismDRDict['stopMonth'] - prismDRDict['startMonth'] + 1
 	else:
-		day_count = start_date - stop_date
 		prismDRDict['dayCount']= 365 - day_count.days + 1
-		start_index = start_date - datetime.date(2009,1,1)
-		stop_index = stop_date  - datetime.date(2009,1,1)
-		prismDRDict['startIndex'] = (start_index.days * 24)
 		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
 		prismDRDict['numMonths'] = (12 - prismDRDict['startMonth'] + 1) + prismDRDict['stopMonth']
 	if prismDRDict['rateStructure'] != '24hourly':
@@ -270,9 +266,6 @@ def DLC(DLCDict):
 		if idx in DLCDict['hvacControlHours']:
 			DLCDict['modLoad'][idx] = load - DLCDict['hvacTotalPower']
 	return DLCDict
-
-
-
 
 def _tests(DRType):
 	if DRType == 'DLC':
