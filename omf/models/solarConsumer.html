@@ -53,22 +53,12 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">System Size (kWp-DC)<span class="classic">How many kilowatts of output for the given system in DC kilowatts.</span></label>
-				<input type="text" id="SystemSize" name="SystemSize" pattern="^\d+\.?\d*$" required="required" value="5">
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
 				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
-			</div>
+			</div>			
 			<div class="shortInput">
-				<label class="tooltip">Metering Type<span class="classic">netEnergyMetering: total cost reduced by total solar gen * retail rate.<br><br>
-				production: total cost reduced by total solar gen * wholesale rate.<br><br>
-				excessEnergyMetering: total cost reduced by total solar gen * retail rate; but, if generation exceeds demand (over the life of the system), only get paid wholesale rate for the excess.</span></label>
-				<select id="meteringType" name="meteringType" required="required"/>
-					<option value="netEnergyMetering">Net Energy Metering</option>
-					<option value="production">Production</option>
-					<option value="excessEnergyMetering">Excess Energy Metering</option>
-				</select>
+				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
+				<input type="text" id="SystemSize" name="SystemSize" pattern="^\d+\.?\d*$" required="required" value="5">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Projected System Life (years)<span class="classic">How many years you expect the system to last.</span></label>
@@ -83,17 +73,23 @@
 				<input type="text" id="retailRate" name="retailRate" pattern="^\d+\.?\d*$" required="required" value="0.10">
 			</div>
 			<div class="shortInput">
+				<label>Rate Increase (%)</label>
+				<input type="text" id="rateIncrease" name="rateIncrease" pattern="^\d+\.?\d*$" required="required" value="2.5">
+			</div>				
+			<div class="shortInput">
 				<label>Value of Solar Monthly Rate ($)</label>
 				<input type="text" id="valueOfSolarRate" name="valueOfSolarRate" pattern="^\d+\.?\d*$" required="required" value="0.07">
 			</div>
 			<div class="shortInput">
-				<label>Rate Increase (%)</label>
-				<input type="text" id="rateIncrease" name="rateIncrease" pattern="^\d+\.?\d*$" required="required" value="2.5">
-			</div>			
-			<div class="shortInput" style="width:66.5%">
-				<label class="tooltip">Monthly Demand (kWh CSV)<span class="classic">12 comma-separated demand values for each month of a typical year.</span></label>
-				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){11}$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
-			</div>
+				<label class="tooltip">Metering Type<span class="classic">netEnergyMetering: total cost reduced by total solar gen * retail rate.<br><br>
+				production: total cost reduced by total solar gen * wholesale rate.<br><br>
+				excessEnergyMetering: total cost reduced by total solar gen * retail rate; but, if generation exceeds demand (over the life of the system), only get paid wholesale rate for the excess.</span></label>
+				<select id="meteringType" name="meteringType" required="required"/>
+					<option value="netEnergyMetering">Net Energy Metering</option>
+					<option value="production">Production</option>
+					<option value="excessEnergyMetering">Excess Energy Metering</option>
+				</select>
+			</div>					
 			<div class="shortInput">
 				<label>Renewables in G&amp;T Fuel Mix (%)</label>
 				<input type="text" id="greenFuelMix" name="greenFuelMix" pattern="^\d+\.?\d*$" required="required" value="12">
@@ -130,6 +126,10 @@
 				<label>Community Solar Rate Increase (%)</label>
 				<input type="text" id="comRateIncrease" name="comRateIncrease" pattern="^\d+\.?\d*$" required="required" value="0">
 			</div>
+			<div class="shortInput" style="width:66.5%">
+				<label class="tooltip">Monthly Demand (kWh CSV)<span class="classic">12 comma-separated demand values for each month of a typical year.</span></label>
+				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){11}$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
+			</div>			
 			<div class="wideInput" style="text-align:right">
 					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 					<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>

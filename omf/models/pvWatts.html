@@ -59,17 +59,58 @@
 			</div>
 			<hr>
 			<div class="shortInput">
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+			</div>			
+			<div class="shortInput">
 				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
 				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. If zero, it will be set to the system size.</span></label>
+				<input type="text" id="inverterSize" name="inverterSize" value="0" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Derate (%)<span class="classic">Percentage of energy that is not lost due to panel soiling, DC-AC conversion, wire losses, etc.</span></label>
+				<label class="tooltip">Inverter Efficiency (%)<span class="classic">Inverter Efficiency in converting DC power to AC power. It can be obtained from the Weighted Efficiency (CEC) Method.</span></label>
+				<input type="text" id="inv_eff" name="inv_eff" value="92" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes in to account losses from soiling, shading, wiring and diode losses, etc.</span></label>
 				<input value="77" type="text" id="derate" name="derate" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>			
+			<div class="wideInput">
+				<p class="inputSectionHeader">Advanced Options</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Max Power Temperature Coefficient (%/&deg;C)<span class="classic">Percentage decrease  of the solar module's output power for every degree over 25 degrees centigrade.</span></label>
+				<input type="text" id="gamma" name="gamma" value="0.45" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tracker Rotation Limit (degrees)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker, measured from the horizontal.</span></label>
+				<input type="text" id="rotlim" name="rotlim" value="45.0" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Tracking Mode<span class="classic">Type of tracking system the PV array will use if any.</span></label>
+				<select id="trackingMode" name="trackingMode" />
+					<option value="0">Fixed</option>
+					<option value="1">1 Axis</option>
+					<option value="2">2 Axis</option>
+					<option value="3">Azimuth Axis</option>
+				</select>
+			</div>		
+			<div class="shortInput">
+				<label class="tooltip">Tilt (degrees)<span class="classic">The tilt of the solar panels measured as an angle in degrees between panels and ground. If '-' is entered, the latitude of the zipcode will be used.</span></label>
+				<input type="text" id="tilt" name="tilt" value="-" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northenr hemisphere is due South.</span></label>
+				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required"/>
+			</div>				
+			<div class="shortInput">
+				<label class="tooltip">Wind stow speed (m/s)<span class="classic">When the wind velocity from the weather file for the current hour is greater than or equal to this value, the concentrator moves into stow position to prevent wind damage. The solar power intercepted by the receiver is zero during this hour.</span></label>
+				<input type="text" id="w_stow" name="w_stow" value="0" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
 			<div class="shortInput">
 				<label>Simulation Start Date (YYYY-MM-DD)</label>
 				<input type="text" id="simStartDate" name="simStartDate" pattern="^\d\d\d\d-\d\d-\d\d$" required="required" value="2012-01-01">
@@ -85,48 +126,7 @@
 					<option value="hours">Hours</option>
 					<option value="days">Days</option>
 				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Tracking Mode<span class="classic">Type of tracking system the PV array will use if any.</span></label>
-				<select id="trackingMode" name="trackingMode" />
-					<option value="0">Fixed</option>
-					<option value="1">1 Axis</option>
-					<option value="2">2 Axis</option>
-					<option value="3">Azimuth Axis</option>
-				</select>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northenr hemisphere is due South.</span></label>
-				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required"/>
-			</div>
-			<div class="wideInput">
-				<p class="inputSectionHeader">Advanced Options</p>
-			</div>
-			<hr>
-			<div class="shortInput">
-				<label class="tooltip">Max Power Temperature Coefficient (% per degree C or degree K)<span class="classic">Percentage decrease  of the solar module's output power for every degree over 25 degrees centigrade.</span></label>
-				<input type="text" id="gamma" name="gamma" value="0.45" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Inverter Efficiency at Rated Power (%)</label>
-				<input type="text" id="inv_eff" name="inv_eff" value="92" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">If zero, it will be set to the system size.</span></label>
-				<input type="text" id="inverterSize" name="inverterSize" value="0" pattern="^\d+\.?\d*$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Tracker Rotation Limit (Degrees from Horizontal)<span class="classic">How far each module in a tracking system is able to rotate if on a tracker.</span></label>
-				<input type="text" id="rotlim" name="rotlim" value="45.0" pattern="^\d+\.?\d*$" required="required"/>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Tilt (degrees)<span class="classic">The tilt of the solar panels measured as an angle in degrees between panels and ground. If '-' is entered, the latitude of the zipcode will be used.</span></label>
-				<input type="text" id="tilt" name="tilt" value="-" pattern="^(90|[1-8]\d|\d)?$|-" required="required"/>
-			</div>	
-			<div class="shortInput">
-				<label class="tooltip">Wind stow speed (m/s)<span class="classic">When the wind velocity from the weather file for the current hour is greater than or equal to this value, the concentrator moves into stow position to prevent wind damage. The solar power intercepted by the receiver is zero during this hour.</span></label>
-				<input type="text" id="w_stow" name="w_stow" value="0" pattern="^\d+\.?\d*$" required="required"/>
-			</div>
+			</div>			
 			<div class="wideInput" style="text-align:right">
 				{% if not quickRender %}
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -156,7 +156,7 @@
 			pointStart = dateOb(allOutputData.timeStamps[0])
 			pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
 		</script>
-		<p class="reportTitle postRun">System Output</p>
+		<p class="reportTitle postRun">Hourly Solar Generation</p>
 		<div id="powerGenerationReport" class="tightContent postRun">
 			<div id="powerTimeSeries"></div>
 			<div id="energyBalance"></div>
