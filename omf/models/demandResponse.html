@@ -78,8 +78,7 @@
 					<input type="hidden" id="fileName" name="fileName" readonly="readonly">		
 					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>	
 					<script>
-						var FileName = allOutputData.fileName;
-						document.getElementById('demandCurveFileName').innerHTML = FileName;
+						document.getElementById('demandCurveFileName').innerHTML = allOutputData.fileName;
 					</script>
 					<style type="text/css">
 					 #fileExists {
@@ -93,7 +92,7 @@
 					 }	   
 					input[type='file'] {
 					  color: transparent;
-					}	
+					}
 					</style>
 				{% endif %}
 				<script>
@@ -117,9 +116,17 @@
 				</script>
 			</div>
 			<div class="wideInput">
-				<p class="inputSectionHeader">Time of Use Pricing</p>
+				<p class="inputSectionHeader">Demand Response Program Variables</p>
 			</div>
 			<hr>
+			<div class="shortInput">
+				<label>Program Type</label>
+				<select id="rateStruct" name="rateStruct"/>
+					<option value="PTR">PTR</option>
+					<option value="2tierCPP">2tierCPP</option>
+					<option value="24hourly">24hourly</option>
+				</select>
+			</div>
 			<div class="shortInput">
 				<label>Program Startup Cost ($)</label>
 				<input type="text" id="DrPurchInstallCost" name="DrPurchInstallCost" value="100000" required="required" pattern="^\d+\.?\d*?$"/>
@@ -129,9 +136,16 @@
 				<input type="text" id="AnnualDROperationCost" name="AnnualDROperationCost" value="1000" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
-				<label> Load Managed by the Program (%)</label>
+				<label>Load Managed by the Program (%)</label>
 				<input type="text" id="LoadunderManagement" name="LoadunderManagement" value="100" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Off Peak Revenue Neutral<span class="classic">If true, the model attempts to calculate an off-peak rate that keeps revenue equal to what it would be in the single rate base case. If false, the model uses the user-entered off-peak rate.</span></label>
+				<select id="offPeakRevenueNeutral" name="offPeakRevenueNeutral"/>
+					<option value="1">True</option>
+					<option value="0">False</option>
+				</select>
+			</div>			
 			<div class="shortInput">
 				<label>CPP Rate ($)</label>
 				<input type="text" id="rateCPP" name="rateCPP" value="1.80" required="required" pattern="^\d+\.?\d*?$"/>
@@ -145,21 +159,11 @@
 				<input type="text" id="ratePTR" name="ratePTR" value="2.65" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
-				<label>Rate Structure</label>
-				<select id="rateStruct" name="rateStruct"/>
-					<option value="PTR">PTR</option>
-					<!-- <option value="2tier">2tier</option> -->
-					<option value="2tierCPP">2tierCPP</option>
-					<!-- <option value="3tier">3tier</option> -->
-					<option value="24hourly">24hourly</option>
-				</select>
-			</div>									
-			<div class="shortInput">
-				<label>Peak Rate ($)</label>
+				<label>2TierCPP Peak Rate ($)</label>
 				<input type="text" id="PeakRate" name="PeakRate" value="0.20" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
-				<label>Off-Peak Rate ($)</label>
+				<label>2TierCPP Off-Peak Rate ($)</label>
 				<input type="text" id="OffPeakRate" name="OffPeakRate" value="0.083" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class= "shortInput">
@@ -188,7 +192,7 @@
 			</div>
 			<div class="shortInput" style="width:100%">
 				<label>24 Hourly Rate (% CSV)</label>
-				<input type="text" id="rate24hourly" name="rate24hourly" value=".074, .041, .020, .035, .100, .230, .391, .550, .688, .788, .859, .904, .941, .962, .980, 1.000, .999, .948, .904, .880, .772, .552, .341, .169" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){23}$" required="required" />
+				<input type="text" id="rate24hourly" name="rate24hourly" value=".074,.041,.020,.035,.100,.230,.391,.550,.688,.788,.859,.904,.941,.962,.980,1.000,.999,.948,.904,.880,.772,.552,.341,.169" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){23}$" required="required" />
 			</div>			
 			<div class="wideInput" style="text-align:right">
 				{% if not quickRender %}
