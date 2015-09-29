@@ -38,7 +38,7 @@ def prism(prismDRDict):
 	else:
 		prismDRDict['dayCount']= 365 - day_count.days + 1
 		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
-		prismDRDict['numMonths'] = 12 - prismDRDict['startMonth'] - prismDRDict['stopMonth'] + 1
+		prismDRDict['numMonths'] = (12 - prismDRDict['startMonth'] + 1) + prismDRDict['startMonth']
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1
 		prismDRDict['numHoursOff'] = (24 - prismDRDict['numHoursOn'])
