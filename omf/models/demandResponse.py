@@ -353,6 +353,7 @@ def run(modelDir, inputDict):
 			'startHour': starthour, # 0-23. Beginning hour for on-peak and CPP rates.
 			'stopHour': stophour, # 0-23. Ending hour for on-peak and CPP rates.
 			'rateFlat': retailCost, # pre-DR Time-independent rate paid by residential consumers.
+			'rateOffPeak': OffPeakRate,
 			'rateOnPeak': PeakRate, # Peak hour rate on non-CPP days.
 			'rateCPP': rateCPP, # Peak hour rate on CPP days. Only required for 2tierCPP
 			'rate24hourly': rate24hourly, #Hourly energy price, only needed for 24hourly
