@@ -285,7 +285,7 @@
 					"title":{"text":"NPV:$" + delimitNumbers(allOutputData.npv.toFixed(0)) + ";  Payback:" + parseFloat(allOutputData.SimplePaybackPeriod).toFixed(2) + " years;  Benefit/Cost:" + parseFloat(allOutputData.BenefittoCostRatio).toFixed(2), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[{"name":"Op. and Maint. Costs", "data":allOutputData.AnnualOpCost},
 						{"name":"Purchase Costs", "data":allOutputData.lifePurchaseCosts},
-						{"name":"Energy Sale change Benefit", "type":"column", "data":allOutputData.EnergySaleChangeBenefit},
+						{"name":"Energy Sale Change Benefit", "type":"column", "data":allOutputData.EnergySaleChangeBenefit},
 						{"name":"Peak Demand Reduction Benefit", "type":"column", "data":allOutputData.PeakDemandReduction},
 						{"name":"Cumulative", "type":"spline", "data":allOutputData.cumulativeNetBenefit}],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
