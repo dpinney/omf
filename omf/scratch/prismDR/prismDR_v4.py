@@ -57,7 +57,7 @@ def prism(prismDRDict):
 	else:
 		prismDRDict['dayCount']= 365 - day_count.days + 1
 		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
-		prismDRDict['numMonths'] = 12 - prismDRDict['startMonth'] - prismDRDict['stopMonth'] + 1
+		prismDRDict['numMonths'] = (12 - prismDRDict['startMonth'] + 1) + prismDRDict['stopMonth']
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1
 		prismDRDict['numHoursOff'] = (24 - prismDRDict['numHoursOn'])
@@ -289,7 +289,7 @@ def _tests(DRType):
 			'elasticitySubWCPP': -0.09698, # Substitution elasticty during CPP days. Only required for 2tierCPP
 			'elasticityDailyWCPP': -0.01607, # Daily elasticity during non-CPP days. Only reuquired for 2tierCPP
 			'startMonth': 9, # 1-12. Beginning month of the cooling season when the DR program will run.
-			'stopMonth': 3, # 1-12. Ending month of the cooling season when the DR program will run.
+			'stopMonth': 4, # 1-12. Ending month of the cooling season when the DR program will run.
 			'startHour': 14, # 0-23. Beginning hour for on-peak and CPP rates.
 			'stopHour': 18, # 0-23. Ending hour for on-peak and CPP rates.
 			'rateFlat': 0.10, # pre-DR Time-independent rate paid by residential consumers.
