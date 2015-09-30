@@ -84,9 +84,9 @@
 				<a class="edit-feeder postRunInline preRunInline runningInline stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>				
 			</div>
 			<div class="shortInput preRun runningInline postRunInline stoppedInline">
-				<label class="tooltip">Scada File Name (.tsv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<label class="tooltip">Scada File Name (.csv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<script>var fileName=true;</script>
-				<input type="file" id="scadaFileLabel" name="scadaFileLabel" accept=".tsv" onchange="handle_files(this.files)">
+				<input type="file" id="scadaFileLabel" name="scadaFileLabel" accept=".csv" onchange="handle_files(this.files)">
 				<input id="scadaFile" name="scadaFile" type="hidden">
 				{% if allOutputData.fileName|string() is defined %}
 					<input type="hidden" id="fileName" name="fileName" readonly="readonly">				
