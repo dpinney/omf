@@ -20,6 +20,7 @@ with open(pJoin(__metaModel__._myDir,"demandResponse.html"),"r") as tempFile:
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
+
 def prism(prismDRDict):
 	''' Calculate demand changes based on Brattle's PRISM. '''
 	# Calculate times.
@@ -27,11 +28,17 @@ def prism(prismDRDict):
 	last_day = calendar.monthrange(2009, prismDRDict['stopMonth'])
 	stop_date = datetime.date(2009,prismDRDict['stopMonth'],last_day[1])
 	day_count = stop_date - start_date
-	prismDRDict['dayCount']= day_count.days
 	start_index = start_date - datetime.date(2009,1,1)
+	stop_index = stop_date  - datetime.date(2009,1,1)
 	prismDRDict['startIndex'] = (start_index.days * 24)
-	prismDRDict['stopIndex'] = prismDRDict['startIndex'] + ((prismDRDict['dayCount']+1) * 24) - 1
-	prismDRDict['numMonths'] = prismDRDict['stopMonth'] - prismDRDict['startMonth'] + 1
+	if (start_date <= stop_date):
+		prismDRDict['dayCount'] = day_count.days + 1
+		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
+		prismDRDict['numMonths'] = prismDRDict['stopMonth'] - prismDRDict['startMonth'] + 1
+	else:
+		prismDRDict['dayCount']= 365 - day_count.days + 1
+		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
+		prismDRDict['numMonths'] = (12 - prismDRDict['startMonth'] + 1) + prismDRDict['startMonth']
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1
 		prismDRDict['numHoursOff'] = (24 - prismDRDict['numHoursOn'])
@@ -42,16 +49,6 @@ def prism(prismDRDict):
 		prismDRDict['hrsOffPeakWOCPP'] = ((prismDRDict['dayCount'] * 24) - prismDRDict['hrsOnPeakWOCPP']) - prismDRDict['hrsOffPeakWCPP']
 		prismDRDict['hrsOnPeakPerMonthWCPP'] = float(prismDRDict['hrsOnPeakWCPP']) / float(prismDRDict['numMonths'])
 		prismDRDict['hrsOffPeakPerMonthWCPP'] = float(prismDRDict['hrsOffPeakWCPP']) / float(prismDRDict['numMonths'])
-	elif prismDRDict['rateStructure'] == '3tier':
-		prismDRDict['numHours3Tier'] = prismDRDict['stop3TierHour'] - prismDRDict['start3TierHour'] + 1
-		prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1 - prismDRDict['numHours3Tier']
-		prismDRDict['numHoursOff'] = (24 - prismDRDict['numHoursOn'] - prismDRDict['numHours3Tier'])
-		prismDRDict['hrsOn3TierPeak'] = ((prismDRDict['stop3TierHour'] - prismDRDict['start3TierHour'] + 1) * prismDRDict['dayCount'])
-		prismDRDict['hrsOnPeakWOCPP'] = ((prismDRDict['stopHour'] - prismDRDict['startHour']) * prismDRDict['dayCount']) - prismDRDict['hrsOn3TierPeak']
-		prismDRDict['hrsOffPeakWOCPP'] = ((prismDRDict['dayCount'] * 24) - prismDRDict['hrsOnPeakWOCPP']) - prismDRDict['hrsOn3TierPeak']
-	elif prismDRDict['rateStructure'] == '2tier':
-		prismDRDict['hrsOnPeakWOCPP'] = ((prismDRDict['stopHour'] - prismDRDict['startHour']) * prismDRDict['dayCount'])
-		prismDRDict['hrsOffPeakWOCPP'] = ((prismDRDict['dayCount'] * 24) - prismDRDict['hrsOnPeakWOCPP'])
 	elif prismDRDict['rateStructure'] == '24hourly':
 		prismDRDict['hrsOn'] = 1 * prismDRDict['dayCount'] #Only one hour per day at a given price
 		prismDRDict['hrsOff'] = 23 * prismDRDict['dayCount']
@@ -60,8 +57,9 @@ def prism(prismDRDict):
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['hrsOnPeakPerMonthWOCPP'] = float(prismDRDict['hrsOnPeakWOCPP']) / float(prismDRDict['numMonths'])
 		prismDRDict['hrsOffPeakPerMonthWOCPP'] = float(prismDRDict['hrsOffPeakWOCPP']) / float(prismDRDict['numMonths'])
-	# Do 2tierCPP. Finds largest load days and designates them CPP days.
+	# Do 2tierCPP. Finds largest load days and designate them CPP days.
 	if prismDRDict['rateStructure'] == '2tierCPP' or prismDRDict['rateStructure'] == 'PTR':
+		prismDRDict['cppHours'] = []
 		prismDRDict['cppDayIdx'] = []
 		maxCount = 0
 		tempLoad = list(prismDRDict['origLoad'])
@@ -69,22 +67,38 @@ def prism(prismDRDict):
 			maxIndex, maxLoad = max(enumerate(tempLoad), key=operator.itemgetter(1))
 			maxIndex = (maxIndex // 24) * 24 #First hour of day.
 			tempLoad[maxIndex:maxIndex + 24] = list([0] * 24) #Zero-ing out so that we don't consider this day again
-			if maxIndex >= prismDRDict['startIndex'] and maxIndex <= prismDRDict['stopIndex']: #max day was in DR season
-				for idx in range(0,24):
-					prismDRDict['cppDayIdx'].append(maxIndex + idx)
-				maxCount+=1
+			if prismDRDict['startIndex'] <= prismDRDict['stopIndex']:
+				if maxIndex >= prismDRDict['startIndex'] and maxIndex <= prismDRDict['stopIndex']: #max day was in DR season
+					prismDRDict['cppHours'].append([maxIndex+prismDRDict['startHour'], maxIndex+prismDRDict['stopHour']])
+					for idx in range(0,24):
+						prismDRDict['cppDayIdx'].append(maxIndex + idx)
+					maxCount+=1
+			else:
+				if maxIndex >= prismDRDict['startIndex'] or maxIndex <= prismDRDict['stopIndex']: #max day was in DR season
+					prismDRDict['cppHours'].append([maxIndex+prismDRDict['startHour'], maxIndex+prismDRDict['stopHour']])
+					for idx in range(0,24):
+						prismDRDict['cppDayIdx'].append(maxIndex + idx)
+					maxCount+=1
 	# Calculate energy.
 	prismDRDict['onPeakWOCPPEnergy'] = 0.0
-	prismDRDict['on3TierPeakEnergy'] = 0.0
 	prismDRDict['offPeakWCPPEnergy'] = 0.0
 	prismDRDict['offPeakWOCPPEnergy'] = 0.0
 	prismDRDict['impactFactorOnPeakWOCPP'] = 0.0
-	prismDRDict['impactFactorOn3TeirPeak'] = 0.0
 	prismDRDict['impactFactorOffPeakWOCPP'] = 0.0
 	prismDRDict['onPeakWCPPEnergy'] = 0.0
 	hourlyEnergy = list([0] * 24)
 	for idx, load in enumerate(prismDRDict['origLoad']):
-		if idx >= prismDRDict['startIndex'] and idx <= prismDRDict['stopIndex']: #is hour of year in the cooling season?
+		if prismDRDict['startIndex'] <= prismDRDict['stopIndex']:
+			if idx >= prismDRDict['startIndex'] and idx <= prismDRDict['stopIndex']: #is hour of year in the DR season?
+				inDRSeason = 1
+			else:
+				inDRSeason = 0
+		else:
+			if idx >= prismDRDict['startIndex'] or idx <= prismDRDict['stopIndex']: #is hour of year in the DR season?
+				inDRSeason = 1
+			else:
+				inDRSeason = 0
+		if inDRSeason == 1:
 			hourOfDay = idx % 24
 			if prismDRDict['rateStructure'] == '2tierCPP' or prismDRDict['rateStructure'] == 'PTR':
 				if idx in prismDRDict['cppDayIdx']:
@@ -97,13 +111,6 @@ def prism(prismDRDict):
 						prismDRDict['onPeakWOCPPEnergy'] += load
 					else:
 						prismDRDict['offPeakWOCPPEnergy'] += load
-			elif prismDRDict['rateStructure'] == '3tier':
-				if (hourOfDay >=  prismDRDict['start3TierHour']) and (hourOfDay <= prismDRDict['stop3TierHour']):
-					prismDRDict['on3TierPeakEnergy'] += load
-				elif (hourOfDay >= prismDRDict['startHour']) and (hourOfDay <= prismDRDict['stopHour']):
-					prismDRDict['onPeakWOCPPEnergy'] += load
-				else:
-					prismDRDict['offPeakWOCPPEnergy'] += load
 			elif prismDRDict['rateStructure'] == '24hourly':
 				hourlyEnergy[hourOfDay] += load
 			else:
@@ -116,9 +123,6 @@ def prism(prismDRDict):
 		prismDRDict['totalEnergy'] = prismDRDict['offPeakWOCPPEnergy'] + prismDRDict['onPeakWOCPPEnergy'] + prismDRDict['offPeakWCPPEnergy'] + prismDRDict['onPeakWCPPEnergy']
 		prismDRDict['onPeakWCPPMonAvgkWh'] = prismDRDict['onPeakWCPPEnergy']/prismDRDict['numMonths']
 		prismDRDict['offPeakWCPPMonAvgkWh'] = prismDRDict['offPeakWCPPEnergy']/prismDRDict['numMonths']
-	elif prismDRDict['rateStructure'] == '3tier':
-		prismDRDict['totalEnergy'] = prismDRDict['offPeakWOCPPEnergy'] + prismDRDict['onPeakWOCPPEnergy'] + prismDRDict['on3TierPeakEnergy']
-		prismDRDict['on3TierPeakMonAvgkWh'] = prismDRDict['on3TierPeakEnergy']/prismDRDict['numMonths']
 	elif prismDRDict['rateStructure'] == '24hourly':
 		prismDRDict['totalEnergy'] = sum(hourlyEnergy)
 		prismDRDict['hourlyMonAvgkWh'] = list([0]*24)
@@ -131,18 +135,24 @@ def prism(prismDRDict):
 	prismDRDict['offPeakWOCPPMonAvgkWh'] = prismDRDict['offPeakWOCPPEnergy']/prismDRDict['numMonths']
 	prismDRDict['totalMonAvgkWh'] = prismDRDict['totalEnergy']/prismDRDict['numMonths']
 	# Calculate off-peak.
-	original_bill = prismDRDict['rateFlat'] * prismDRDict['totalMonAvgkWh']
-	if prismDRDict['rateStructure'] == '2tierCPP':
-		prismDRDict['rateOffPeak'] = (original_bill - (prismDRDict['rateCPP']*prismDRDict['onPeakWCPPMonAvgkWh'] + prismDRDict['rateOnPeak']*prismDRDict['onPeakWOCPPMonAvgkWh']))/(prismDRDict['offPeakWCPPMonAvgkWh'] + prismDRDict['offPeakWOCPPMonAvgkWh'])
-	elif prismDRDict['rateStructure'] == 'PTR':
-		prismDRDict['rateOffPeak'] = prismDRDict['rateFlat']
-	elif prismDRDict['rateStructure'] == '3tier':
-		prismDRDict['rateOffPeak'] = (original_bill - (prismDRDict['rate3Tier']*prismDRDict['on3TierPeakMonAvgkWh'] + prismDRDict['rateOnPeak']*prismDRDict['onPeakWOCPPMonAvgkWh']))/(prismDRDict['offPeakWOCPPMonAvgkWh'])
-	elif prismDRDict['rateStructure'] == '2tier':
-		prismDRDict['rateOffPeak'] = (original_bill - (prismDRDict['rateOnPeak']*prismDRDict['onPeakWOCPPMonAvgkWh']))/(prismDRDict['offPeakWOCPPMonAvgkWh'])
-	if prismDRDict['rateStructure'] != '24hourly':
-		if prismDRDict['rateOffPeak'] < 0:
-			print 'ERROR: Off-peak rate is negative :', prismDRDict['rateOffPeak']
+	if prismDRDict['offPeakRevenueNeutral'] == 1:
+		prismDRDict['rateOffPeak'] = -1 #Dummy initial value to get us into the loop
+		attempt_count = 0
+		max_attempt = 1000
+		while (prismDRDict['rateOffPeak'] < 0) and (attempt_count < max_attempt):
+			original_bill = prismDRDict['rateFlat'] * prismDRDict['totalMonAvgkWh']
+			if prismDRDict['rateStructure'] == '2tierCPP':
+				prismDRDict['rateOffPeak'] = (original_bill - (prismDRDict['rateCPP']*prismDRDict['onPeakWCPPMonAvgkWh'] + prismDRDict['rateOnPeak']*prismDRDict['onPeakWOCPPMonAvgkWh']))/(prismDRDict['offPeakWCPPMonAvgkWh'] + prismDRDict['offPeakWOCPPMonAvgkWh'])
+			elif prismDRDict['rateStructure'] == 'PTR':
+				prismDRDict['rateOffPeak'] = prismDRDict['rateFlat']
+			#Checking price to see if it is negative and we need to adjust the rates
+			if prismDRDict['rateStructure'] != '24hourly':
+				if prismDRDict['rateOffPeak'] < 0:
+					attempt_count = attempt_count + 1
+					prismDRDict['rateOnPeak'] = prismDRDict['rateOnPeak'] * 0.99
+			else:
+				#For 24-hourly price, we don't worry about price-neutrality so we exit the loop
+				attempt_count = max_attempt + 1
 	#Calculate impact factors for Non-CPP days.
 	if prismDRDict['rateStructure'] != '24hourly':
 		kWhPerHrOldOnPeakWOCPP = prismDRDict['onPeakWOCPPMonAvgkWh']/prismDRDict['hrsOnPeakPerMonthWOCPP'] # B30
@@ -158,15 +168,7 @@ def prism(prismDRDict):
 		kWhDeltaOffPeakWOCPP = kWhPerHrNewOffPeakWOCPP - kWhPerHrOldOffPeakWOCPP #C32
 		prismDRDict['impactFactorOnPeakWOCPP'] = kWhDeltaOnPeakWOCPP/kWhPerHrOldOnPeakWOCPP #B33
 		prismDRDict['impactFactorOffPeakWOCPP'] = kWhDeltaOffPeakWOCPP/kWhPerHrOldOffPeakWOCPP #C33
-	if prismDRDict['rateStructure'] == '3tier':
-		kWhPerHrOld3TierPeak = prismDRDict['on3TierPeakMonAvgkWh']/prismDRDict['hrsOn3TierPeak'] # B30
-		logFactor3Tier = math.log(kWhPerHrOld3TierPeak/kWhPerHrOldOffPeakWOCPP) + prismDRDict['elasticitySubWOCPP'] * (math.log(prismDRDict['rate3Tier']/prismDRDict['rateOffPeak'] - math.log(prismDRDict['rateFlat']/prismDRDict['rateFlat']))) #B28
-		kWhPerHr3TierOldDaily = ((kWhPerHrOld3TierPeak * prismDRDict['numHours3Tier']) + (kWhPerHrOldOffPeakWOCPP * prismDRDict['numHoursOff']))/24 #D30
-		dailyOld3TierPeak = ((prismDRDict['rateFlat'] * prismDRDict['numHours3Tier'] * kWhPerHrOld3TierPeak) + (prismDRDict['rateFlat'] * prismDRDict['numHoursOff'] * kWhPerHrOldOffPeakWOCPP)) / ((prismDRDict['numHours3Tier'] * kWhPerHrOld3TierPeak)+(prismDRDict['numHoursOff'] * kWhPerHrOldOffPeakWOCPP)) #D23
-		kWhPerHrNew3TierPeak  = kWhPerHrNewOffPeakWOCPP * math.exp(logFactor3Tier) #B31
-		kWhDelta3TierPeak = kWhPerHrNew3TierPeak - kWhPerHrOld3TierPeak #B32
-		prismDRDict['impactFactor3TierPeak'] = kWhDelta3TierPeak/kWhPerHrOld3TierPeak #B33
-	elif prismDRDict['rateStructure'] == '24hourly':
+	if prismDRDict['rateStructure'] == '24hourly':
 		prismDRDict['impactFactor24hourly'] = list([0] * 24)
 		prismDRDict['rateOffPeak'] = sum(prismDRDict['rate24hourly'])/24
 		kWhPerHrOldOffPeak = prismDRDict['offPeakMonAvgkWh']/prismDRDict['hrsOff']
@@ -202,9 +204,18 @@ def prism(prismDRDict):
 	# Make the modified load curve.
 	prismDRDict['modLoad'] = list(prismDRDict['origLoad'])
 	for idx, load in enumerate(prismDRDict['origLoad']):
-		if idx >= prismDRDict['startIndex'] and idx <= prismDRDict['stopIndex']: #is hour of year in the cooling season?
+		if prismDRDict['startIndex'] <= prismDRDict['stopIndex']:
+			if idx >= prismDRDict['startIndex'] and idx <= prismDRDict['stopIndex']: #is hour of year in the DR season?
+				inDRSeason = 1
+			else:
+				inDRSeason = 0
+		else:
+			if idx >= prismDRDict['startIndex'] or idx <= prismDRDict['stopIndex']: #is hour of year in the DR season?
+				inDRSeason = 1
+			else:
+				inDRSeason = 0
+		if inDRSeason == 1:
 			hourOfDay  = idx % 24
-			
 			if prismDRDict['rateStructure'] == '2tierCPP' or prismDRDict['rateStructure'] == 'PTR':
 				if idx in prismDRDict['cppDayIdx']:
 					if (hourOfDay >= prismDRDict['startHour']) and (hourOfDay <= prismDRDict['stopHour']):
@@ -216,13 +227,6 @@ def prism(prismDRDict):
 						prismDRDict['modLoad'][idx] = prismDRDict['origLoad'][idx] * (1 + prismDRDict['impactFactorOnPeakWOCPP'])
 					else:
 						prismDRDict['modLoad'][idx] = prismDRDict['origLoad'][idx] * (1 + prismDRDict['impactFactorOffPeakWOCPP'])
-			elif prismDRDict['rateStructure'] == '3tier':
-				if (hourOfDay >=  prismDRDict['start3TierHour']) and (hourOfDay <= prismDRDict['stop3TierHour']):
-					prismDRDict['modLoad'][idx] = prismDRDict['origLoad'][idx] * (1 + prismDRDict['impactFactor3TierPeak'])
-				elif (hourOfDay >= prismDRDict['startHour']) and (hourOfDay <= prismDRDict['stopHour']):
-					prismDRDict['modLoad'][idx] = prismDRDict['origLoad'][idx] * (1 + prismDRDict['impactFactorOnPeakWOCPP'])
-				else:
-					prismDRDict['modLoad'][idx] = prismDRDict['origLoad'][idx] * (1 + prismDRDict['impactFactorOffPeakWOCPP'])
 			elif prismDRDict['rateStructure'] == '24hourly':
 				prismDRDict['modLoad'][idx] = prismDRDict['origLoad'][idx] * (1 + prismDRDict['impactFactor24hourly'][hourOfDay])
 			else:
@@ -233,32 +237,53 @@ def prism(prismDRDict):
 		#else: #Load outside of cooling season not modified
 	return prismDRDict
 
+def DLC(DLCDict):
+	# Estimate load reduction from direct load control.
+	DLCDict['modLoad'] = list(DLCDict['origLoad'])
+	DLCDict['whTotalPower'] = DLCDict['residenceCount'] * DLCDict['whPercentage'] * DLCDict['whRatingkW'] * DLCDict['whDutyCycle']
+	DLCDict['hvacTotalPower'] = DLCDict['residenceCount'] * DLCDict['hvacPercentage'] * DLCDict['hvacRatingkW'] * DLCDict['hvacDutyCycle']
+	for idx, load in enumerate(DLCDict['origLoad']):
+		if idx in DLCDict['whControlHours']:
+			DLCDict['modLoad'][idx] = load - DLCDict['whTotalPower']
+		if idx in DLCDict['hvacControlHours']:
+			DLCDict['modLoad'][idx] = load - DLCDict['hvacTotalPower']
+	return DLCDict
+
 def _prismTests():
+	# Run Direct Load Control sim.
+	outputs = DLC({
+		'residenceCount': 2000,
+		'whPercentage': 0.30,
+		'hvacPercentage': 0.20,
+		'whRatingkW': 9,
+		'hvacRatingkW': 4,
+		'whDutyCycle': 0.1,
+		'hvacDutyCycle': 0.3,
+		'whControlHours': [0, 1, 2, 3, 4],
+		'hvacControlHours': [6, 7, 8, 9,10],
+		'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
 	# Run PRISM.
-	outputs = prism({
-		'rateStructure': '24hourly', # options: 2tier, 2tierCPP, PTR, 3tier, 24hourly
+	outputs2 = prism({
+		'rateStructure': '2tierCPP', # options: 2tierCPP, PTR, 24hourly
 		'elasticitySubWOCPP': -0.09522, # Substitution elasticty during non-CPP days.
 		'elasticityDailyWOCPP': -0.02302, # Daily elasticity during non-CPP days.
 		'elasticitySubWCPP': -0.09698, # Substitution elasticty during CPP days. Only required for 2tierCPP
 		'elasticityDailyWCPP': -0.01607, # Daily elasticity during non-CPP days. Only reuquired for 2tierCPP
-		'startMonth': 5, # 1-12. Beginning month of the cooling season when the DR program will run.
-		'stopMonth': 9, # 1-12. Ending month of the cooling season when the DR program will run.
+		'startMonth': 9, # 1-12. Beginning month of the cooling season when the DR program will run.
+		'stopMonth': 3, # 1-12. Ending month of the cooling season when the DR program will run.
 		'startHour': 14, # 0-23. Beginning hour for on-peak and CPP rates.
 		'stopHour': 18, # 0-23. Ending hour for on-peak and CPP rates.
-		'start3TierHour' : 16, # 0-23 Only required for 3tier. Must be greater than 'startHour' and less than 'stop3TierHour'
-		'stop3TierHour' : 16, # 0-23, Only required for 3tier. Must be greater than 'start3TierHour' and less than 'stopHour'
-		'rateFlat': 0.15, # pre-DR Time-independent rate paid by residential consumers.
-		'rateOnPeak': 0.20, # Peak hour rate on non-CPP days.
-		'rate3Tier': 0.90, # Only required for 3tier. Super on-peak rate.
+		'rateFlat': 0.10, # pre-DR Time-independent rate paid by residential consumers.
+		'rateOnPeak': 0.60, # Peak hour rate on non-CPP days.
+		'rateOffPeak':0.01, #If offPeakRevenueNeutral ==1, calculated by PRISM internally (revenue-neutral).
 		'rateCPP': 1.80, # Peak hour rate on CPP days. Only required for 2tierCPP
 		'rate24hourly': [0.074, 0.041, 0.020, 0.035, 0.100, 0.230, 0.391, 0.550, 0.688, 0.788, 0.859, 0.904, 0.941, 0.962, 0.980, 1.000, 0.999, 0.948, 0.904, 0.880, 0.772, 0.552, 0.341, 0.169], #Hourly energy price, only needed for 24hourly
 		#'rate24hourly': [0.12, 0.054, 0.01, 0.04, 0.172, 0.436, 0.764, 1.086, 1.367, 1.569, 1.714, 1.805, 1.880, 1.923, 1.960, 2, 1.998, 1.895, 1.806, 1.757, 1.538, 1.089, 0.662, 0.313],
 		'ratePTR': 2.65, # Only required for PTR. $/kWh payment to customers for demand reduction on PTR days. Value is entered as a positive value, just like the other rate values, even though it is a rebate.
+		'offPeakRevenueNeutral':1, #Set to 1 to have PRISM calculate the off-peak rate to generate revenue neutral price for average consumer. 0 for accepting externally defined off-peak rate.
 		'numCPPDays': 10, # Number of CPP days in a cooling season. Only required for 2tierCPP
-		# 'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
-		'origLoad': [float(row['power']) for row in csv.DictReader(open(__metaModel__._omfDir+"/uploads/OlinBeckenhamScada.csv"))] }) # 8760 load values
-	print outputs
-
+		'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
+		
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	# Delete output file every run if it exists
@@ -277,25 +302,25 @@ def run(modelDir, inputDict):
 		startTime = datetime.datetime.now()
 		outData = {}
 		# Get variables.
-		lifeSpan = int(inputDict.get("lifeSpan",25))
+		lifeSpan = int(inputDict.get('lifeSpan',25))
 		lifeYears = range(1, 1 + lifeSpan)
 		hours = range(0, 24) 
 		DrTechCost = float(inputDict.get('DrPurchInstallCost'))
 		demandCharge = float(inputDict.get('DemandChargeCost'))
 		retailCost = float(inputDict.get('RetailEnergyCost'))
 		AnnDROM = float(inputDict.get('AnnualDROperationCost'))
-		SubElas = float(inputDict.get("SubstitutionPriceElasticity")) 
-		DayElas= float(inputDict.get("DailyPriceElasticity"))
+		SubElas = float(inputDict.get('SubstitutionPriceElasticity')) 
+		DayElas = float(inputDict.get('DailyPriceElasticity'))
 		wholesaleCost = float(inputDict.get('WholesaleEnergyCost'))
 		ManagLoad = float(inputDict.get('LoadunderManagement')) / 100.0
-		DiscountRate = float(inputDict.get("DiscountRate")) / 100
-		ScalingAnnual = float(inputDict.get("ScalingAnnual"))/ 100
-		PeakRate = float(inputDict.get("PeakRate"))
-		OffPeakRate = float(inputDict.get("OffPeakRate"))
-		startmonth= int(inputDict.get("startMonth"))
-		stopmonth = int(inputDict.get("stopMonth"))
-		starthour = int(inputDict.get("startHour"))
-		stophour = int(inputDict.get("stopHour"))
+		DiscountRate = float(inputDict.get('DiscountRate')) / 100
+		ScalingAnnual = float(inputDict.get('ScalingAnnual'))/ 100
+		PeakRate = float(inputDict.get('PeakRate'))
+		OffPeakRate = float(inputDict.get('OffPeakRate'))
+		startmonth= int(inputDict.get('startMonth'))
+		stopmonth = int(inputDict.get('stopMonth'))
+		starthour = int(inputDict.get('startHour'))
+		stophour = int(inputDict.get('stopHour'))
 		rateCPP = float(inputDict.get('rateCPP'))
 		rate24hourly = [float(x) for x in inputDict.get('rate24hourly').split(',')]
 		ratePTR = float(inputDict.get('ratePTR'))
@@ -327,15 +352,14 @@ def run(modelDir, inputDict):
 			'stopMonth': stopmonth, # 1-12. Ending month of the cooling season when the DR program will run.
 			'startHour': starthour, # 0-23. Beginning hour for on-peak and CPP rates.
 			'stopHour': stophour, # 0-23. Ending hour for on-peak and CPP rates.
-			'start3TierHour' : 16, # 0-23 Only required for 3tier. Must be greater than 'startHour' and less than 'stop3TierHour'
-			'stop3TierHour' : 16, # 0-23, Only required for 3tier. Must be greater than 'start3TierHour' and less than 'stopHour'
-			'rateFlat': OffPeakRate, # pre-DR Time-independent rate paid by residential consumers.
+			'rateFlat': retailCost, # pre-DR Time-independent rate paid by residential consumers.
+			'rateOffPeak': OffPeakRate,
 			'rateOnPeak': PeakRate, # Peak hour rate on non-CPP days.
-			'rate3Tier': 0.90, # Only required for 3tier. Super on-peak rate.
 			'rateCPP': rateCPP, # Peak hour rate on CPP days. Only required for 2tierCPP
 			'rate24hourly': rate24hourly, #Hourly energy price, only needed for 24hourly
 			'ratePTR': ratePTR, # Only required for PTR. $/kWh payment to customers for demand reduction on PTR days. Value is entered as a positive value, just like the other rate values, even though it is a rebate.
 			'numCPPDays': numCPPDays, # Number of CPP days in a cooling season. Only required for 2tierCPP
+			'offPeakRevenueNeutral': int(inputDict['offPeakRevenueNeutral']),
 			'origLoad': demandCurve }) # 8760 load values
 		fullParticipationModLoad = allPrismOutput['modLoad']
 		modifiedLoad = [x*ManagLoad+y*(1-ManagLoad) for x,y in zip(fullParticipationModLoad,demandCurve)]
@@ -410,7 +434,7 @@ def run(modelDir, inputDict):
 		LifetimeOperationCost = (sum(outData["AnnualOpCost"]))
 		outData["LifetimeOperationCost"] = abs(LifetimeOperationCost)
 		outData["lifePurchaseCosts"] = [-1.0 * DrTechCost] + [0 for x in lifeYears[1:]]
-		outData['TotalCost'] = abs(outData["LifetimeOperationCost"] + DrTechCost)
+		outData["TotalCost"] = abs(outData["LifetimeOperationCost"] + DrTechCost)
 		# Outputs of the Program Lifetime Cash Flow figure
 		outData["EnergySaleChangeBenefit"] = [energySaleChange * ScalingAnnual ** x for x in range(lifeSpan)]
 		outData["PeakDemandReduction"] = [peakDemandRed * ScalingAnnual ** x for x in range(lifeSpan)]
@@ -474,6 +498,7 @@ def _tests():
 		"rateCPP":"1.80",
 		"numCPPDays":"10",
 		"ratePTR":"2.65",
+		"offPeakRevenueNeutral":"1",
 		"rate24hourly": "0.074, 0.041, 0.020, 0.035, 0.100, 0.230, 0.391, 0.550, 0.688, 0.788, 0.859, 0.904, 0.941, 0.962, 0.980, 1.000, 0.999, 0.948, 0.904, 0.880, 0.772, 0.552, 0.341, 0.169"}
 	modelLoc = pJoin(workDir,"admin","Automated Demand Response Testing")
 	# Blow away old test results if necessary.
