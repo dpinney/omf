@@ -4,6 +4,7 @@ from os.path import join as pJoin
 # OMF imports
 import feeder
 from solvers import gridlabd
+import random
 
 def omfCalibrate(workDir, feederPath, scadaPath):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
@@ -124,13 +125,81 @@ def _processScadaData(workDir,scadaPath):
 			playFile.write(line)
 	return scadaSubPower, firstDateTime
 
+def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC):
+	'''read voltage vectors of 3 different phases, run gridlabd, and attach output to the feeder.'''
+	try:
+		timeStamp = [dt.datetime.strptime('01/01/2011 00:00:00', "%m/%d/%Y %H:%M:%S")]
+		for x in range (1, 8760):
+			timeStamp.append(timeStamp[x-1] + dt.timedelta(hours=1))
+		firstDateTime = timeStamp[1]
+		with open(pJoin(workDir,"phaseAVoltage.player"),"w") as voltFile:
+			for x in range(0, 8760):
+				timestamp = timeStamp[x]
+				voltage = str("%0.2f"%float(voltVectorA[x]))+"+0j"
+				line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(voltage) + "\n"
+				voltFile.write(line)
+		with open(pJoin(workDir,"phaseBVoltage.player"),"w") as voltFile:
+			for x in range(0, 8760):
+				timestamp = timeStamp[x]
+				voltage = str("%0.2f"%float(voltVectorB[x]))+"-"+str("%0.4f"%float(random.uniform(6449,6460)))+"j"
+				line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(voltage) + "\n"
+				voltFile.write(line)
+		with open(pJoin(workDir,"phaseCVoltage.player"),"w") as voltFile:
+			for x in range(0, 8760):
+				timestamp = timeStamp[x]
+				voltage = str("%0.2f"%float(voltVectorC[x]))+"+"+str("%0.4f"%float(random.uniform(6449,6460)))+"j"
+				line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(voltage) + "\n"
+				voltFile.write(line)
+		with open(feederPath, "r") as jsonIn:
+			feederJson = json.load(jsonIn)
+			tree = feederJson.get("tree", {})
+		# Find swingNode name.
+		for key in tree:
+			if tree[key].get('bustype','').lower() == 'swing':
+				swingName = tree[key].get('name')
+		# Attach player.
+		classOb = {'omftype':'class player','argument':'{double value;}'}
+		voltageObA = {"object":"player", "property":"voltage_A", "file":"phaseAVoltage.player", "loop":"0", "parent":swingName}
+		voltageObB = {"object":"player", "property":"voltage_B", "file":"phaseBVoltage.player", "loop":"0", "parent":swingName}
+		voltageObC = {"object":"player", "property":"voltage_C", "file":"phaseCVoltage.player", "loop":"0", "parent":swingName}
+		maxKey = feeder.getMaxKey(tree)
+		voltplayerKeyA = maxKey + 2
+		voltplayerKeyB = maxKey + 3
+		voltplayerKeyC = maxKey + 4
+		tree[maxKey+1] = classOb
+		tree[voltplayerKeyA] = voltageObA
+		tree[voltplayerKeyB] = voltageObB
+		tree[voltplayerKeyC] = voltageObC
+		# Adjust time and run output.
+		HOURS = 100
+		feeder.adjustTime(tree, HOURS, "hours", firstDateTime.strftime("%Y-%m-%d"))
+		output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=workDir)
+		# Write the output.
+		with open(pJoin(workDir,"calibratedFeeder.json"),"w") as outJson:
+			playerStringA = open(pJoin(workDir,"phaseAVoltage.player")).read()
+			playerStringB = open(pJoin(workDir,"phaseBVoltage.player")).read()
+			playerStringC = open(pJoin(workDir,"phaseCVoltage.player")).read()
+			feederJson["attachments"]["phaseAVoltage.player"] = playerStringA
+			feederJson["attachments"]["phaseBVoltage.player"] = playerStringB
+			feederJson["attachments"]["phaseCVoltage.player"] = playerStringC
+			feederJson["tree"] = tree
+			json.dump(feederJson, outJson, indent=4)
+		return pJoin(workDir,"calibratedFeeder.json"), True
+	except:
+		return feederPath, False
+
 def _tests():
 	print "Beginning to test calibrate.py"
 	workDir = tempfile.mkdtemp()
 	print "Currently working in: ", workDir
-	scadaPath = pJoin("uploads", "FrankScada.tsv")
+	scadaPath = pJoin("uploads", "FrankScada.csv")
 	feederPath = pJoin("data", "Feeder", "public","ABEC Frank pre calib.json")
-	assert None == omfCalibrate(workDir, feederPath, scadaPath), "feeder calibration failed"
+	voltVectorA = [random.uniform(7380,7620) for x in range(0,8760)]
+	voltVectorC = [-random.uniform(3699,3780) for x in range(0, 8760)]
+	voltVectorB = [-random.uniform(3699,3795) for x in range(0, 8760)]
+	calibFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC)
+	if outcome == False: print "\n   attachVolts failed."
+	assert None == omfCalibrate(workDir, calibFeederPath, scadaPath), "feeder calibration failed"
 
 if __name__ == '__main__':
 	_tests()
