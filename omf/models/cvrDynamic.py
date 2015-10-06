@@ -1,7 +1,7 @@
 ''' Calculate CVR impacts using a targetted set of dynamic loadflows. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
-import math, re, traceback, csv, calendar
+import math, re, traceback, csv, calendar, random
 import multiprocessing
 from copy import deepcopy
 from os.path import join as pJoin
@@ -30,7 +30,7 @@ def returnMag(complexStr):
 	handles negative or positive, real and imaginary parts'''
 	if complexStr[0] == '+' or complexStr[0] == '-':
 		complexStr1 = complexStr[1:len(complexStr)+1]
-		sign = complexStr[0] + '1' 
+		sign = complexStr[0] + '1'
 	else:
 		complexStr1 = complexStr
 		sign = 1
@@ -73,7 +73,7 @@ def run(modelDir, inData):
 
 def runForeground(modelDir,inData):
 	'''This reads a glm file, changes the method of powerflow and reruns'''
-	print "STARTING TO RUN", modelDir	
+	print "STARTING TO RUN", modelDir
 	try:
 		startTime = datetime.now()
 		if not os.path.isdir(modelDir):
@@ -81,9 +81,15 @@ def runForeground(modelDir,inData):
 			inData["created"] = str(startTime)
 		#calibrate and run cvrdynamic
 		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", inData["feederName"].split("___")[0], inData["feederName"].split("___")[1]+'.json')
-		with open(pJoin(modelDir,"scadaFile.tsv"),"w") as scadaFile:
+		with open(pJoin(modelDir,"scadaFile.csv"),"w") as scadaFile:
 			scadaFile.write(inData['scadaFile'])
-		scadaPath = pJoin(modelDir, "scadaFile.tsv")
+		scadaPath = pJoin(modelDir, "scadaFile.csv")
+		# attach voltages.
+		voltVectorA = [random.uniform(7380,7620) for x in range(0,8760)]
+		voltVectorC = [random.uniform(-3699,-3780) for x in range(0, 8760)]
+		voltVectorB = [random.uniform(-3699,-3795) for x in range(0, 8760)]
+		calibFeederPath = calibrate.attachVolts(modelDir, feederPath, voltVectorA, voltVectorB, voltVectorC)
+		# calibrate powers.
 		calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 		allOutput = {}
 		allOutput['fileName'] = inData.get("fileName", 0)
@@ -92,7 +98,7 @@ def runForeground(modelDir,inData):
 			localTree = feederJson.get("tree", {})
 		for key in localTree:
 			if "solver_method" in localTree[key].keys():
-				# print "current solver method", localTree[key]["solver_method"] 
+				# print "current solver method", localTree[key]["solver_method"]
 				localTree[key]["solver_method"] = 'FBS'
 		#find the swing bus and recorder attached to substation
 		try:
@@ -176,7 +182,7 @@ def runForeground(modelDir,inData):
 		#run a reference load flow
 		HOURS = float(inData['simLengthHours'])
 		simStartDate = inData['simStart']
-		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)	
+		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)
 		output = gridlabd.runInFilesystem(localTree,keepFiles=False,workDir=modelDir)
 		os.remove(pJoin(modelDir,"PID.txt"))
 		p = output['Zregulator.csv']['power_in.real']
@@ -184,7 +190,7 @@ def runForeground(modelDir,inData):
 		#calculating length of simulation because it migth be different from the simulation input HOURS
 		simRealLength = int(len(p))
 		#time delays from configuration files
-		time_delay_reg = '30.0'  
+		time_delay_reg = '30.0'
 		time_delay_cap = '300.0'
 		for key in localTree:
 			if localTree[key].get('object','') == "regulator_configuration":
@@ -211,9 +217,9 @@ def runForeground(modelDir,inData):
 		'd_min' : '0.1',
 		'substation_link' : str(localTree[regIndex]['name']),
 		'regulator_list' : regstr,
-		'capacitor_list': capstr} 
+		'capacitor_list': capstr}
 		#running powerflow analysis via gridalab after attaching a regulator
-		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)	
+		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)
 		output1 = gridlabd.runInFilesystem(localTree,keepFiles=True,workDir=modelDir)
 		os.remove(pJoin(modelDir,"PID.txt"))
 		pnew = output1['NewZregulator.csv']['power_in.real']
@@ -428,7 +434,7 @@ def runForeground(modelDir,inData):
 		peakSaveDollars = {}
 		energyLostDollars = {}
 		lossRedDollars = {}
-		simMonthList = monthNames[monthNames.index(simstartMonth):(monthNames.index(simEndMonth)+1)] 
+		simMonthList = monthNames[monthNames.index(simstartMonth):(monthNames.index(simEndMonth)+1)]
 		# print simMonthList
 		for monthElement in simMonthList:
 			# print monthElement
@@ -439,7 +445,7 @@ def runForeground(modelDir,inData):
 			monthPeakNew[monthElement] = max(pnew[index1:index2])/1000.0
 			peakSaveDollars[monthElement] = (monthPeak[monthElement]-monthPeakNew[monthElement])*float(inData['peakDemandCost'+str(monthToSeason[monthElement])+'PerKw'])
 			lossRedDollars[monthElement] = (sum(realLoss[index1:index2])/1000.0 - sum(realLossnew[index1:index2])/1000.0)*(float(inData['wholesaleEnergyCostPerKwh']))
-			energyLostDollars[monthElement] = (sum(p[index1:index2])/1000.0  - sum(pnew[index1:index2])/1000.0  - sum(realLoss[index1:index2])/1000.0  
+			energyLostDollars[monthElement] = (sum(p[index1:index2])/1000.0  - sum(pnew[index1:index2])/1000.0  - sum(realLoss[index1:index2])/1000.0
 				+ sum(realLossnew[index1:index2])/1000.0 )*(float(inData['wholesaleEnergyCostPerKwh']) - float(inData['retailEnergyCostPerKwh']))
 			previndex = index2
 		#money charts
@@ -451,7 +457,7 @@ def runForeground(modelDir,inData):
 		eld = [energyLostDollars[month] for month in simMonthList]
 		lrd = [lossRedDollars[month] for month in simMonthList]
 		psd = [peakSaveDollars[month] for month in simMonthList]
-		bar_eld = plt.bar(ticks,eld,0.15,color='red') 
+		bar_eld = plt.bar(ticks,eld,0.15,color='red')
 		bar_psd = plt.bar(ticks1,psd,0.15,color='blue')
 		bar_lrd = plt.bar(ticks2,lrd,0.15,color='green')
 		plt.legend([bar_eld[0], bar_psd[0], bar_lrd[0]], ['energyLostDollars','peakReductionDollars','lossReductionDollars'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
@@ -516,7 +522,7 @@ def runForeground(modelDir,inData):
 		print "DONE RUNNING", modelDir
 	except:
 		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)				
+		cancel(modelDir)
 		thisErr = traceback.format_exc()
 		print 'ERROR IN MODEL', modelDir, thisErr
 		inData['stderr'] = thisErr
@@ -532,8 +538,8 @@ def _tests():
 		"modelType": "cvrDynamic",
 		"user": "admin",
 		"feederName": "public___ABEC Frank pre calib",
-		"scadaFile": open(pJoin(__metaModel__._omfDir,"uploads","FrankScada.tsv")).read(),
-		"fileName":"FrankScada.tsv",
+		"scadaFile": open(pJoin(__metaModel__._omfDir,"uploads","FrankScada.csv")).read(),
+		"fileName":"FrankScada.csv",
 		"runTime": "",
 		"capitalCost": 30000,
 		"omCost": 1000,
