@@ -20,42 +20,12 @@ import feeder
 with open(pJoin(__metaModel__._myDir,"energyStorage.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-# def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-# 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
 # def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 # 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
 # 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	''' Render the model template to an HTML string.
-	By default render a blank one for new input.
-	If modelDir is valid, render results post-model-run.
-	If absolutePaths, the HTML can be opened without a server. '''
-	try:
-		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
-		modelPath, modelName = pSplit(modelDir)
-		deepPath, user = pSplit(modelPath)
-		inJson["modelName"] = modelName
-		inJson["user"] = user
-		allInputData = json.dumps(inJson)
-	except IOError:
-		allInputData = None
-	try:
-		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
-	except IOError:
-		allOutputData = None
-	if absolutePaths:
-		# Parent of current folder.
-		pathPrefix = __metaModel__._omfDir
-	else:
-		pathPrefix = ""
-	try:
-		inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))
-	except IOError:
-		pass
-	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames)
 
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
@@ -114,9 +84,9 @@ def heavyProcessing(modelDir, inputDict):
 			[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellQuantity', 'demandCharge', 'cellCost')]
 		battEff	= float(inputDict.get("batteryEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0
 		discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
-		elecCost = float(inputDict.get('elecCost', 0.07)) 		
+		elecCost = float(inputDict.get('elecCost', 0.07))
 		# CHANGE: dodFactor, DEMANDCHARGEMONTHLY
-		dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0	
+		dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
 		projYears = int(inputDict.get('projYears',10))
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
@@ -140,7 +110,7 @@ def heavyProcessing(modelDir, inputDict):
 		capacityLimited = True
 		while capacityLimited:
 			battSoC = battCapacity # Battery state of charge; begins full.
-			battDoD = [battCapacity for x in range(12)]  # Depth-of-discharge every month, depends on dodFactor.	
+			battDoD = [battCapacity for x in range(12)]  # Depth-of-discharge every month, depends on dodFactor.
 			for row in dc:
 				month = int(row['datetime'].month)-1
 				powerUnderPeak  = monthlyPeakDemand[month] - row['power'] - ps[month]
@@ -172,7 +142,7 @@ def heavyProcessing(modelDir, inputDict):
 		outData['netCashflow'] = cashFlowCurve
 		outData['cumulativeCashflow'] = [sum(cashFlowCurve[0:i+1]) for i,d in enumerate(cashFlowCurve)]
 		outData['NPV'] = npv(discountRate, cashFlowCurve)
-		outData['demand'] = [t['power']*1000.0 for t in dc]	
+		outData['demand'] = [t['power']*1000.0 for t in dc]
 		outData['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc]
 		# outData['batterySoc'] = [t['battSoC']/battCapacity*100.0 for t in dc]
 		outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
@@ -187,15 +157,15 @@ def heavyProcessing(modelDir, inputDict):
 		  plt.axvline(hoursThroughTheMonth[month])
 		plt.savefig(pJoin(modelDir,"plot.png"))
 		# DRDAN: Summary of results
-		outData['months'] = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]	
+		outData['months'] = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 		totMonNum = []
-		monthlyDemand = []		
+		monthlyDemand = []
 		for x in range (0, len(dcGroupByMonth)):
 			totMonNum.append(sum(dcGroupByMonth[x])/1000)
-			monthlyDemand.append([outData['months'][x], totMonNum[x]])	
+			monthlyDemand.append([outData['months'][x], totMonNum[x]])
 		outData['monthlyDemand'] = totMonNum
 		outData['ps'] = ps		# TODO: [Battery Capacity Left]
-		outData['monthlyDemandRed'] = [totMonNum - ps for totMonNum, ps in zip(totMonNum, ps)]		
+		outData['monthlyDemandRed'] = [totMonNum - ps for totMonNum, ps in zip(totMonNum, ps)]
 		outData['benefitMonthly'] = [x * demandCharge for x in outData['ps']]
 		outData['kWhtoRecharge'] = [battCapacity - x for x in outData['ps']]
 		outData['costtoRecharge'] = [elecCost * x for x in outData['kWhtoRecharge']]
@@ -206,7 +176,7 @@ def heavyProcessing(modelDir, inputDict):
 		demandAfterBattery = outData['demandAfterBattery']
 		demand = outData['demand']
 		outData['batteryDischargekW'] = [demand - demandAfterBattery for demand, demandAfterBattery in zip(demand, demandAfterBattery)]
-		outData['batteryDischargekWMax'] = max(outData['batteryDischargekW'])		
+		outData['batteryDischargekWMax'] = max(outData['batteryDischargekW'])
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		outData["stderr"] = ""
@@ -221,10 +191,10 @@ def heavyProcessing(modelDir, inputDict):
 		try:
 			os.remove(pJoin(modelDir,"PPID.txt"))
 		except:
-			pass		
+			pass
 	except:
 		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)				
+		cancel(modelDir)
 		thisErr = traceback.format_exc()
 		print 'ERROR IN MODEL', modelDir, thisErr
 		inputDict['stderr'] = thisErr
@@ -241,19 +211,19 @@ def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {
-		"batteryEfficiency": "92", 
-		"cellCapacity": "100", 
-		"discountRate": "2.5", 
-		"created": "2015-06-12 17:20:39.308239", 
-		"dischargeRate": "50", 
-		"modelType": "energyStorage", 
-		"chargeRate": "50", 
-		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","OlinBeckenhamScada.csv")).read(), 
+		"batteryEfficiency": "92",
+		"cellCapacity": "100",
+		"discountRate": "2.5",
+		"created": "2015-06-12 17:20:39.308239",
+		"dischargeRate": "50",
+		"modelType": "energyStorage",
+		"chargeRate": "50",
+		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","OlinBeckenhamScada.csv")).read(),
 		"fileName": "OlinBeckenhamScada.csv",
-		"cellCost": "25000", 
-		"cellQuantity": "3", 
-		"runTime": "0:00:03", 
-		"projYears": "10", 
+		"cellCost": "25000",
+		"cellQuantity": "3",
+		"runTime": "0:00:03",
+		"projYears": "10",
 		"demandCharge": "50" }
 	modelLoc = pJoin(workDir,"admin","Automated energyStorage Testing")
 	# Blow away old test results if necessary.
