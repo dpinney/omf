@@ -68,6 +68,10 @@
 				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. The Inverter efficiency can be obtained from the Weighted Efficiency (CEC) Method.</span></label>
 				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" value="92" required="required" >
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Projected Life of System (Years)<span class="classic">Typical industry standard is 30 years.</span></label>
+				<input type="text" id="lifeSpan" name="lifeSpan" pattern="^\d+$" value="30" required="required"/>
+			</div>			
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
 			</div>
@@ -91,10 +95,6 @@
 			<div class="shortInput">
 				<label class="tooltip">Op. and Maint. Cost ($)<span class="classic">Annual cost to operate and maintain the system.</span></label>
 				<input type="text" id="omCost" name="omCost" pattern="^\d+\.?\d*$" required="required">
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Projected Life of System (Years)<span class="classic">Typical industry standard is 30 years.</span></label>
-				<input type="text" id="lifeSpan" name="lifeSpan" pattern="^\d+$" value="30" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Advanced Options</p>
