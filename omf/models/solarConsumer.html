@@ -26,20 +26,29 @@
 		<p id="titleText">New Solar Consumer Model</p>
 	</div>
 	<p class="reportTitle">Model Input</p>
-	<div id="input" class="content">		
-		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
+	<div id="input" class="content">
+		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" {% endif %} method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarConsumer" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="solarConsumer" readonly/>
 			</div>
+			{% if quickRender %}
+			<div class="shorterInput">
+				<label>Email Address</label>
+				<input type="email" id="quickRunEmail" name="quickRunEmail" required="required">
+			</div>
+			{% else %}
 			<div class="shortInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"> 
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
+			{% endif %}
+			{% if not quickRender %}
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/>
 			</div>
+			{% endif %}
 			<div class="shortInput runningInline postRunInline">
 				<label>Created</label>
 				<input type="text" id="created" name="created" readonly/>
@@ -55,7 +64,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
 				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
-			</div>			
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
 				<input type="text" id="SystemSize" name="SystemSize" pattern="^\d+\.?\d*$" required="required" value="5">
@@ -63,7 +72,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Projected System Life (years)<span class="classic">How many years you expect the system to last.</span></label>
 				<input type="text" id="years" name="years" pattern="^\d+\.?\d*$" required="required" value="25">
-			</div>			
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
 			</div>
@@ -75,7 +84,7 @@
 			<div class="shortInput">
 				<label>Rate Increase (%)</label>
 				<input type="text" id="rateIncrease" name="rateIncrease" pattern="^\d+\.?\d*$" required="required" value="2.5">
-			</div>				
+			</div>
 			<div class="shortInput">
 				<label>Value of Solar Monthly Rate ($)</label>
 				<input type="text" id="valueOfSolarRate" name="valueOfSolarRate" pattern="^\d+\.?\d*$" required="required" value="0.07">
@@ -89,11 +98,11 @@
 					<option value="production">Production</option>
 					<option value="excessEnergyMetering">Excess Energy Metering</option>
 				</select>
-			</div>					
+			</div>
 			<div class="shortInput">
 				<label>Renewables in G&amp;T Fuel Mix (%)</label>
 				<input type="text" id="greenFuelMix" name="greenFuelMix" pattern="^\d+\.?\d*$" required="required" value="12">
-			</div>			
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Rooftop Upfront Costs ($)<span class="classic">Cost of a residential rooftop system varies from $2.75/Wdc to $4.15/Wdc.</span></label>
 				<input type="text" id="roofUpfrontCosts" name="roofUpfrontCosts" pattern="^\d+\.?\d*$" required="required" value="17500">
@@ -129,13 +138,15 @@
 			<div class="shortInput" style="width:66.5%">
 				<label class="tooltip">Monthly Demand (kWh CSV)<span class="classic">12 comma-separated demand values for each month of a typical year.</span></label>
 				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){11}$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
-			</div>			
+			</div>
 			<div class="wideInput" style="text-align:right">
-					<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-					<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
-					<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-					<button id="runButton" type="submit" class="preRun">Run Model</button>
-					<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
+				{% if not quickRender %}
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				{% endif %}
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
+				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
 		</form>
 	</div>
@@ -223,7 +234,7 @@
 					for (i=0; i<vector.length; i++) {
 						if (vector[i] == -1) {
 							cell = newRow.insertCell()
-							cell.innerHTML = "None"							
+							cell.innerHTML = "None"
 						}
 						else{
 							cell = newRow.insertCell()
@@ -293,6 +304,6 @@
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
-		</div>		
+		</div>
 	</div>
 </body>

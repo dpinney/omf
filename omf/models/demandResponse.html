@@ -24,19 +24,28 @@
 	</div>
 	<p class="reportTitle">Model Inputs</p>
 	<div id="input" class="content">
-		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
+		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" {% endif %} method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-demandResponse" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="demandResponse" readonly/>
 			</div>
+			{% if quickRender %}
+			<div class="shorterInput">
+				<label>Email Address</label>
+				<input type="email" id="quickRunEmail" name="quickRunEmail" required="required">
+			</div>
+			{% else %}			
 			<div class="shortInput">
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"></td>
 			</div>
+			{% endif %}
+			{% if not quickRender %}			
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/>
 			</div>
+			{% endif %}
 			<div class="shortInput runningInline postRunInline ">
 				<label>Created</label>
 				<input type="text" id="created" name="created" readonly/>
@@ -236,11 +245,16 @@
 						"lineColor":"gray"},
 					"yAxis":{
 						"title":{"text":"Power (kW)","style":{"color":"gray"}},
-						"min":-300},
+						"min":-500,
+						"plotLines":[{"color": "blue",
+						"dashStyle": "ShortDash",
+						"width": 2,
+						"label":{"text":"Max Difference:" + allOutputData.differenceMax + "kW", "align":"right","y":-5,"x":-730, "style":{"color":"blue", "fontsize":"12px"}},
+						"value": allOutputData.differenceMax,"zIndex": 10}],"min":0},
 					"title":{"text":null},
 					"series":[
-						{"name":"Modified Demand","marker":{"enabled":false},"color":"purple","data":allOutputData.modifiedLoad},
-						{"name":"Historical Demand","marker":{"enabled":false},"color":"red","data":allOutputData.demandLoad},
+						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.demandLoad},
+						{"name":"After Program","marker":{"enabled":false},"color":"purple","data":allOutputData.modifiedLoad},
 						{"name":"Difference","marker":{"enabled":false},"color":"blue","data":allOutputData.difference}],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"demandBattChart","type":"line","marginRight":20, "height":750,"width":1000},
 					"tooltip":false,

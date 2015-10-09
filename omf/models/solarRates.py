@@ -21,6 +21,10 @@ with open(pJoin(__metaModel__._myDir,"solarRates.html"),"r") as tempFile:
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
+def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
+	''' Presence of this function indicates we can run the model quickly via a public interface. '''
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
+
 def run(modelDir, inputDict):
 	try:
 		''' Run the model in its directory. '''
@@ -32,8 +36,8 @@ def run(modelDir, inputDict):
 		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 			json.dump(inputDict, inputFile, indent = 4)
 		# Copy spcific climate data into model directory
-		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])		
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
+		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 			pJoin(modelDir, "climate.tmy2"))
 		# Ready to run
 		startTime = dt.datetime.now()
@@ -57,7 +61,7 @@ def run(modelDir, inputDict):
 		# Timestamp output.
 		outData = {}
 		outData["timeStamps"] = [dt.datetime.strftime(
-			dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
+			dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") +
 			dt.timedelta(**{"hours":x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(8760))]
 		# Geodata output.
 		outData["city"] = ssc.ssc_data_get_string(dat, "city")
@@ -111,7 +115,7 @@ def run(modelDir, inputDict):
 		# E23 = E11
 		outData["BAU"]["totalKWhPurchased"] = float(inputDict.get("totalKWhPurchased", 1))
 		# E24 = SUM(E19:P19)
-		outData["BAU"]["totalKWhSales"] = sum([x[1] for x in totalKWhSold]) 
+		outData["BAU"]["totalKWhSales"] = sum([x[1] for x in totalKWhSold])
 		# E25 = E23-E24
 		outData["BAU"]["losses"] = float(inputDict.get("totalKWhPurchased", 0)) - sum([totalKWhSold[i][1] for i in range(12)])
 		# E26 = E25/E23
@@ -137,7 +141,7 @@ def run(modelDir, inputDict):
 		# E36 = E30*E34
 		outData["BAU"]["solarResRev"] = 0
 		# E37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71), update after Form 7 model
-		outData["BAU"]["nonPowerCosts"] = 0 
+		outData["BAU"]["nonPowerCosts"] = 0
 		# E38 = E23-E25-E28-E30-E31
 		outData["BAU"]["energyAllBal"] = 0
 		# E39 = E36+E33+E35-E47-E72-E37
@@ -153,13 +157,13 @@ def run(modelDir, inputDict):
 		outData["Solar"] = {}
 		# F27 = SUM(E15:P15)
 		outData["Solar"]["annualSolarGen"] = sum([outData["totalGeneration"][i][1] for i in range(12)])
-		# F24 = E24-F27	    	
-		outData["Solar"]["totalKWhSales"] = sum([totalKWhSold[i][1] for i in range(12)]) - outData["Solar"]["annualSolarGen"]	
+		# F24 = E24-F27
+		outData["Solar"]["totalKWhSales"] = sum([totalKWhSold[i][1] for i in range(12)]) - outData["Solar"]["annualSolarGen"]
 		# F23 =F24/(1-E26)
 		outData["Solar"]["totalKWhPurchased"] = outData["Solar"]["totalKWhSales"]/ (1-outData["BAU"]["effectiveLossRate"])
 		outData["totalsolarmonthly"] = [[sorted(months.items(), key=lambda x:x[1])[i][0], outData["totalSolarSold"][i][1] / (1-outData["BAU"]["effectiveLossRate"])] for i in range(12)]
 		# F25 = F23-F24
-		outData["Solar"]["losses"] = (outData["Solar"]["totalKWhPurchased"] - outData["Solar"]["totalKWhSales"])	
+		outData["Solar"]["losses"] = (outData["Solar"]["totalKWhPurchased"] - outData["Solar"]["totalKWhSales"])
 		# F26 = E26
 		outData["Solar"]["effectiveLossRate"] = outData["BAU"]["effectiveLossRate"]
 		# F28 = (1-E5)*E28
@@ -197,12 +201,12 @@ def run(modelDir, inputDict):
 			outData["Solar"]["avgMonthlyBillSolarCus"] = outData["Solar"]["solarResSold"] * outData["BAU"]["effectiveResRate"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)]) * float(inputDict.get("resPenetration", 0.05))/100) + float(inputDict.get("customServiceCharge", 0))+float(inputDict.get("solarServiceCharge", 0))
 			# F43 = (F27/(SUM(E16:P16)*E5))*E9
 			outData["Solar"]["avgMonthlyBillSolarSolarCus"] = (outData["Solar"]["annualSolarGen"] / (sum([monthlyNoConsumerServedSales[i][1] for i in range(12)]) * float(inputDict.get("resPenetration", 0.05))/100)) * float(inputDict.get("solarLCoE", 0.07))
-		else: 
-			outData["Solar"]["avgMonthlyBillNonSolarCus"] = 0	
+		else:
+			outData["Solar"]["avgMonthlyBillNonSolarCus"] = 0
 			outData["Solar"]["avgMonthlyBillSolarCus"] = 0
-			outData["Solar"]["avgMonthlyBillSolarSolarCus"] = 0	
+			outData["Solar"]["avgMonthlyBillSolarSolarCus"] = 0
 		# Net Average Monthly Bill
-		avgMonthlyBillSolarNet = outData["Solar"]["avgMonthlyBillSolarCus"] + outData["Solar"]["avgMonthlyBillSolarSolarCus"]	
+		avgMonthlyBillSolarNet = outData["Solar"]["avgMonthlyBillSolarCus"] + outData["Solar"]["avgMonthlyBillSolarSolarCus"]
 		outData["Solar"]["avgMonthlyBillSolarCus"] = avgMonthlyBillSolarNet
 		# F45 = F63/F24, update after Form 7 model
 		outData["Solar"]["costofService"] = 0
@@ -274,7 +278,7 @@ def run(modelDir, inputDict):
 			+ float(inputDict.get("interestLongTerm"))\
 			+ float(inputDict.get("interestExpense"))\
 			+ float(inputDict.get("interestConstruction"))\
-			+ outData["BAU"]["otherDeductions"]		
+			+ outData["BAU"]["otherDeductions"]
 		# E64 = E45-E63
 		outData["BAU"]["patCapOperMargins"] = outData["BAU"]["operRevPatroCap"] - outData["BAU"]["totalCostElecService"]
 		# E72 = SUM(E64:E71)
@@ -287,11 +291,11 @@ def run(modelDir, inputDict):
 			+ float(inputDict.get("otherCapCreditsPatroDivident"))\
 			+ float(inputDict.get("extraItems"))
 		# F48 = E48-F27*E34+SUM(E16:P16)*E5*E7
-		outData["Solar"]["operRevPatroCap"] = outData["BAU"]["operRevPatroCap"] - outData["BAU"]["effectiveResRate"]*outData["Solar"]["annualSolarGen"] + sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("resPenetration", 0.05))/100*float(inputDict.get("solarServiceCharge", 0))	
+		outData["Solar"]["operRevPatroCap"] = outData["BAU"]["operRevPatroCap"] - outData["BAU"]["effectiveResRate"]*outData["Solar"]["annualSolarGen"] + sum([monthlyNoConsumerServedSales[i][1] for i in range(12)])*float(inputDict.get("resPenetration", 0.05))/100*float(inputDict.get("solarServiceCharge", 0))
 		# F47 = (F23)*E8
-		inputDict["costofPower"] = float(inputDict.get("costPurchasedPower", 0)) /  float(inputDict.get("totalKWhPurchased", 0))		
+		inputDict["costofPower"] = float(inputDict.get("costPurchasedPower", 0)) /  float(inputDict.get("totalKWhPurchased", 0))
 		outData["Solar"]["costPurchasedPower"] = outData["Solar"]["totalKWhPurchased"] * float(inputDict.get("costofPower", 0))
-		inputDict["costofPower"] = round(inputDict["costofPower"],3)	
+		inputDict["costofPower"] = round(inputDict["costofPower"],3)
 		# F55 = SUM(F46:F54)
 		outData["Solar"]["totalOMExpense"] = outData["Solar"]["powerProExpense"]\
 			+ outData["Solar"]["costPurchasedPower"]\
@@ -345,11 +349,11 @@ def run(modelDir, inputDict):
 			+ outData["BAU"]["otherCapCreditsPatroDivident"] \
 			+ outData["BAU"]["extraItems"])
 		# E42 = E63/E24, update after Form 7 model
-		outData["BAU"]["costofService"] = outData["BAU"]["totalCostElecService"] / outData["BAU"]["totalKWhSales"] 
+		outData["BAU"]["costofService"] = outData["BAU"]["totalCostElecService"] / outData["BAU"]["totalKWhSales"]
 		# F37 = SUM(E48:E54)+SUM(E56:E62)-SUM(E65:E71) = E37, update after Form 7 model
 		outData["Solar"]["nonPowerCosts"] = outData["BAU"]["nonPowerCosts"]
 		# F42 = F63/F24, update after Form 7 model
-		outData["Solar"]["costofService"] = outData["Solar"]["totalCostElecService"] / outData["Solar"]["totalKWhSales"]  
+		outData["Solar"]["costofService"] = outData["Solar"]["totalCostElecService"] / outData["Solar"]["totalKWhSales"]
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		outData["stderr"] = ""
@@ -363,7 +367,7 @@ def run(modelDir, inputDict):
 			json.dump(inputDict, inFile, indent=4)
 	except:
 		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)	
+		cancel(modelDir)
 		thisErr = traceback.format_exc()
 		print 'ERROR IN MODEL', modelDir, thisErr
 		inputDict['stderr'] = thisErr
@@ -381,17 +385,17 @@ def _tests():
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	# TODO: Fix inData because it's out of date.
 	monthlyData = {
-	"janSale": "46668", "janKWh": "64467874", "janRev": "8093137", "janKWhT": "85628959", "janRevT": "10464278", 
-	"febSale": "46724", "febKWh": "66646882", "febRev": "8812203", "febKWhT": "89818661", "febRevT": "11508047", 
-	"marSale": "46876", "marKWh": "62467031", "marRev": "8277498", "marKWhT": "84780954", "marRevT": "10874720", 
-	"aprSale": "46858", "aprKWh": "49781827", "aprRev": "6664021", "aprKWhT": "70552865", "aprRevT": "9122130", 
-	"maySale": "46919", "mayKWh": "41078029", "mayRev": "5567683", "mayKWhT": "63397699", "mayRevT": "8214078", 
-	"junSale": "46977", "junKWh": "40835343", "junRev": "5528717", "junKWhT": "64781785", "junRevT": "8332117", 
-	"julSale": "47013", "julKWh": "58018686", "julRev": "7585330", "julKWhT": "86140915", "julRevT": "10793395", 
-	"augSale": "47114", "augKWh": "67825037", "augRev": "8836269", "augKWhT": "98032727", "augRevT": "12219454", 
-	"sepSale": "47140", "sepKWh": "59707578", "sepRev": "7809767", "sepKWhT": "88193645", "sepRevT": "11052318", 
-	"octSale": "47088", "octKWh": "46451858", "octRev": "6146975", "octKWhT": "70425336", "octRevT": "8936767", 
-	"novSale": "47173", "novKWh": "41668828", "novRev": "5551288", "novKWhT": "65008851", "novRevT": "8228072", 
+	"janSale": "46668", "janKWh": "64467874", "janRev": "8093137", "janKWhT": "85628959", "janRevT": "10464278",
+	"febSale": "46724", "febKWh": "66646882", "febRev": "8812203", "febKWhT": "89818661", "febRevT": "11508047",
+	"marSale": "46876", "marKWh": "62467031", "marRev": "8277498", "marKWhT": "84780954", "marRevT": "10874720",
+	"aprSale": "46858", "aprKWh": "49781827", "aprRev": "6664021", "aprKWhT": "70552865", "aprRevT": "9122130",
+	"maySale": "46919", "mayKWh": "41078029", "mayRev": "5567683", "mayKWhT": "63397699", "mayRevT": "8214078",
+	"junSale": "46977", "junKWh": "40835343", "junRev": "5528717", "junKWhT": "64781785", "junRevT": "8332117",
+	"julSale": "47013", "julKWh": "58018686", "julRev": "7585330", "julKWhT": "86140915", "julRevT": "10793395",
+	"augSale": "47114", "augKWh": "67825037", "augRev": "8836269", "augKWhT": "98032727", "augRevT": "12219454",
+	"sepSale": "47140", "sepKWh": "59707578", "sepRev": "7809767", "sepKWhT": "88193645", "sepRevT": "11052318",
+	"octSale": "47088", "octKWh": "46451858", "octRev": "6146975", "octKWhT": "70425336", "octRevT": "8936767",
+	"novSale": "47173", "novKWh": "41668828", "novRev": "5551288", "novKWhT": "65008851", "novRevT": "8228072",
 	"decSale": "47081", "decKWh": "53354283", "decRev": "7014717", "decKWhT": "73335526", "decRevT": "9385203" }
 	inData = {
 		"modelType": "solarRates",
@@ -401,7 +405,7 @@ def _tests():
 		"avgSystemSize": "5",
 		"resPenetration": "5",
 		"customServiceCharge": "20",
-		"solarServiceCharge": "0",		
+		"solarServiceCharge": "0",
 		"solarLCoE": "0.09",
 		"otherElecRevenue": "1544165",
 		"totalKWhPurchased": "999330657",

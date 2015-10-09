@@ -22,6 +22,10 @@ with open(pJoin(__metaModel__._myDir,"solarConsumer.html"),"r") as tempFile:
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
 
+def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
+	''' Presence of this function indicates we can run the model quickly via a public interface. '''
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
+
 def run(modelDir, inputDict):
 	try:
 		''' Run the model in its directory. '''
@@ -33,8 +37,8 @@ def run(modelDir, inputDict):
 		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 			json.dump(inputDict, inputFile, indent = 4)
 		# Copy spcific climate data into model directory
-		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])		
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
+		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 			pJoin(modelDir, "climate.tmy2"))
 		# Ready to run
 		startTime = dt.now()
@@ -57,7 +61,7 @@ def run(modelDir, inputDict):
 		# Timestamp output.
 		outData = {}
 		outData["timeStamps"] = [dt.strftime(
-			dt.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
+			dt.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") +
 			td(**{"hours":x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(8760))]
 		# HACK: makes it easier to calculate some things later.
 		outData["pythonTimeStamps"] = [dt(2012,1,1,0) + x*td(hours=1) for x in range(8760)]
@@ -95,7 +99,7 @@ def run(modelDir, inputDict):
 			json.dump(inputDict, inFile, indent=4)
 	except:
 		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)	
+		cancel(modelDir)
 		thisErr = traceback.format_exc()
 		print 'ERROR IN MODEL', modelDir, thisErr
 		inputDict['stderr'] = thisErr
@@ -111,7 +115,7 @@ def cancel(modelDir):
 def tjCode(inputs, outData):
 	# Make inputs the right types.
 	for k in inputs.keys():
-		if k not in ['modelType','meteringType','modelName', 'monthlyDemand','user','created','runTime','climateName']:
+		if k not in ['quickRunEmail','modelType','meteringType','modelName', 'monthlyDemand','user','created','runTime','climateName']:
 			inputs[k] = float(inputs[k])
 	inputs['years'] = int(inputs['years'])
 	inputs['monthlyDemand'] = [float(x) for x in inputs['monthlyDemand'].split(',')]
@@ -251,8 +255,8 @@ def tjCode(inputs, outData):
 	plt.axis('off')
 	plt.table(
 		loc='center',
-		rowLabels=["Base Case", "Community Solar", "Rooftop Solar", "3rd Party Solar"], 
-		colLabels=["Total Cost","Total Saved", "Average Monthly Cost", "$/kWh", "Simple Payback Period", "Green Electrons"], 
+		rowLabels=["Base Case", "Community Solar", "Rooftop Solar", "3rd Party Solar"],
+		colLabels=["Total Cost","Total Saved", "Average Monthly Cost", "$/kWh", "Simple Payback Period", "Green Electrons"],
 		cellText=[
 			[outData["totalCostBaseCase"],"Not Available", outData["avgMonthlyBillBaseCase"],outData["kWhCostBaseCase"], "Not Available",inputs["greenFuelMix"]],
 			[outData["totalCostComS"],outData["totalSavedByComS"], outData["avgMonthlyBillComS"],outData["kWhCostComS"], outData["sppComS"], outData["greenElectrons"]],

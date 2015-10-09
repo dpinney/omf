@@ -24,7 +24,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"{% endif %} method="post">
+		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"{% endif %} method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-energyStorage" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="energyStorage" readonly/>
@@ -282,16 +282,16 @@
 						"title":{"text":"Power (W)","style":{"color":"gray"}},
 						"min":0,
 						"minorTickColor":"gray", "minorTickInterval":"auto",
-						"plotLines":[{"color": "orange",
+						"plotLines":[{"color": "blue",
 						"dashStyle": "ShortDash",
 						"width": 2,
-						"label":{"text":"Max Power:" + allOutputData.batteryDischargekWMax/1000 + "kW", "align":"right","y":-5,"x":-790, "style":{"color":"orange", "fontsize":"12px"}},
+						"label":{"text":"Max Power:" + allOutputData.batteryDischargekWMax/1000 + "kW", "align":"right","y":-5,"x":-790, "style":{"color":"blue", "fontsize":"12px"}},
 						"value": allOutputData.batteryDischargekWMax,"zIndex": 10}],"min":0},
 					"title":{"text":null},
 					"series":[
-						{"name":"Demand","marker":{"enabled":false},"color":"red","data":allOutputData.demand,"enableMouseTracking":false},
-						{"name":"Demand After Battery","marker":{"enabled":false},"color":"purple","data":allOutputData.demandAfterBattery,"enableMouseTracking":false},
-						{"name":"Battery Discharge","marker":{"enabled":false},"color":"orange","data":allOutputData.batteryDischargekW}],
+						{"name":"Historial","marker":{"enabled":false},"color":"red","data":allOutputData.demand,"enableMouseTracking":false},
+						{"name":"After Storage","marker":{"enabled":false},"color":"purple","data":allOutputData.demandAfterBattery,"enableMouseTracking":false},
+						{"name":"Storage Discharge","marker":{"enabled":false},"color":"blue","data":allOutputData.batteryDischargekW}],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"demandBattChart","type":"line","marginRight":20, "height":750,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})

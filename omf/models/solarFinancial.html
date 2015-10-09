@@ -27,19 +27,28 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
+		<form name="inputForm" {% if quickRender %} action="/quickRun/"{% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" {% endif %} method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarFinancial" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="solarFinancial" readonly/>
 			</div>
+			{% if quickRender %}
+			<div class="shorterInput">
+				<label>Email Address</label>
+				<input type="email" id="quickRunEmail" name="quickRunEmail" required="required">
+			</div>
+			{% else %}			
 			<div class="shortInput">
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
+			{% endif %}
+			{% if not quickRender %}			
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/>
 			</div>
+			{% endif %}			
 			<div class="shortInput runningInline postRunInline">
 				<label>Created</label>
 				<input type="text" id="created" name="created" readonly/>
@@ -186,9 +195,11 @@
 				<script type="text/javascript">
 					$("#downloadLink").attr("href", "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/"+allOutputData.excel)
 				</script>
+				{% if not quickRender %}				
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				{% endif %}
 				<button id="runButton" type="submit" class="preRun">Run Model</button>
 				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
