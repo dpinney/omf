@@ -246,16 +246,16 @@
 					"yAxis":{
 						"title":{"text":"Power (kW)","style":{"color":"gray"}},
 						"min":-500,
-						"plotLines":[{"color": "blue",
+						"plotLines":[{"color": "lightgray",
 						"dashStyle": "ShortDash",
 						"width": 2,
-						"label":{"text":"Max Difference:" + allOutputData.differenceMax + "kW", "align":"right","y":-5,"x":-730, "style":{"color":"blue", "fontsize":"12px"}},
+						"label":{"text":"Max Difference:" + allOutputData.differenceMax + "kW", "align":"right","y":-5,"x":-730, "style":{"color":"lightgray", "fontsize":"12px"}},
 						"value": allOutputData.differenceMax,"zIndex": 10}],"min":0},
 					"title":{"text":null},
 					"series":[
 						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.demandLoad},
 						{"name":"After Program","marker":{"enabled":false},"color":"purple","data":allOutputData.modifiedLoad},
-						{"name":"Difference","marker":{"enabled":false},"color":"blue","data":allOutputData.difference}],
+						{"name":"Difference","marker":{"enabled":false},"color":"lightgray","data":allOutputData.difference}],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"demandBattChart","type":"line","marginRight":20, "height":750,"width":1000},
 					"tooltip":false,
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
