@@ -47,7 +47,7 @@ def run(modelDir, inputDict):
 		# Required user inputs.
 		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
 		# TODO: FIX THIS!!!! IT SHOULD BE AVGSYS*PEN*RESCUSTOMERS
-		ssc.ssc_data_set_number(dat, "system_size", float(inputDict["avgSystemSize"]))
+		ssc.ssc_data_set_number(dat, "system_size", float(inputDict["systemSize"]))
 		# SAM options where we take defaults.
 		ssc.ssc_data_set_number(dat, "derate", 0.97)
 		ssc.ssc_data_set_number(dat, "track_mode", 0)
@@ -402,7 +402,7 @@ def _tests():
 		"zipCode": "64735",
 		"runTime": "",
 		# Single data point
-		"avgSystemSize": "5",
+		"systemSize": "5",
 		"resPenetration": "5",
 		"customServiceCharge": "20",
 		"solarServiceCharge": "0",

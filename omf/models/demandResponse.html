@@ -63,8 +63,8 @@
 				<input type="text" id="DemandChargeCost" name="DemandChargeCost" value="10" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput">
-				<label>Retail Energy Cost ($/kWh)</label>
-				<input type="text" id="RetailEnergyCost" name="RetailEnergyCost" value="0.10" required="required" pattern="^\d+\.?\d*?$"/>
+				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail rate for residential consumers.</span></label>
+				<input type="text" id="retailCost" name="retailCost" value="0.10" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Wholesale Energy Cost($/kWh)</label>
@@ -249,7 +249,7 @@
 						"plotLines":[{"color": "lightgray",
 						"dashStyle": "ShortDash",
 						"width": 2,
-						"label":{"text":"Max Difference:" + allOutputData.differenceMax + "kW", "align":"right","y":-5,"x":-730, "style":{"color":"lightgray", "fontsize":"12px"}},
+						"label":{"text":"Max Difference:" + allOutputData.differenceMax + "kW", "align":"right","y":-5,"x":-730, "style":{"color":"gray", "fontsize":"12px"}},
 						"value": allOutputData.differenceMax,"zIndex": 10}],"min":0},
 					"title":{"text":null},
 					"series":[

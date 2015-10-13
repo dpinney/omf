@@ -309,8 +309,8 @@ def run(modelDir, inputDict):
 		lifeYears = range(1, 1 + lifeSpan)
 		hours = range(0, 24)
 		DrTechCost = float(inputDict.get('DrPurchInstallCost'))
-		demandCharge = float(inputDict.get('DemandChargeCost'))
-		retailCost = float(inputDict.get('RetailEnergyCost'))
+		demandCharge = float(inputDict.get('demandCharge'))
+		retailCost = float(inputDict.get('retailCost'))
 		AnnDROM = float(inputDict.get('AnnualDROperationCost'))
 		SubElas = float(inputDict.get('SubstitutionPriceElasticity'))
 		DayElas = float(inputDict.get('DailyPriceElasticity'))
@@ -483,14 +483,14 @@ def _tests():
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {
 		"modelType":"demandResponse",
-		"RetailEnergyCost": "0.1",
+		"retailCost": "0.1",
 		"WholesaleEnergyCost": "0.07",
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","OlinBeckenhamScada.csv")).read(),
 		"DrPurchInstallCost": "100000",
 		"runTime": "0:00:03",
 		"SubstitutionPriceElasticity": "-0.09522",
 		"DailyPriceElasticity": "-0.02302",
-		"DemandChargeCost": "10",
+		"demandCharge": "10",
 		"DiscountRate":"3",
 		"ScalingAnnual":"102",
 		"LoadunderManagement":"100",

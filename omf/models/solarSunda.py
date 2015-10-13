@@ -50,11 +50,11 @@ def run(modelDir, inputDict):
 		simLengthUnits = "hours"
 		# Associate zipcode to climate data
 		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
-		inverterSizeAC = float(inputDict.get("systemSize",0))
-		if (inputDict.get("systemDcSize",0) == "-"):
+		inverterSizeAC = float(inputDict.get("inverterSize",0))
+		if (inputDict.get("systemSize",0) == "-"):
 			arraySizeDC = 1.3908 * inverterSizeAC
 		else:
-			arraySizeDC = float(inputDict.get("systemDcSize",0))
+			arraySizeDC = float(inputDict.get("systemSize",0))
 		numberPanels = (arraySizeDC * 1000/305)
 		# Set constants
 		panelSize = 305		
@@ -627,8 +627,8 @@ def _tests():
 	inData = {"modelType": "solarSunda",
 		#Cooperative
 		"zipCode": "64735",
-		"systemSize":"1000",
-		"systemDcSize":"1390.8",
+		"inverterSize":"1000",
+		"systemSize":"1390.8",
 		"landOwnership": "Owned", #Leased, Purchased, or Owned
 		"landAmount": "6",
 		"costAcre": "10000",

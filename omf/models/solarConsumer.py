@@ -142,7 +142,7 @@ def tjCode(inputs, outData):
 	monthlyBillsSolar3rdParty = []
 	monthlyBills3rdParty = []
 	# Variables for goal seeking on.
-	retailRate = inputs["retailRate"]
+	retailRate = inputs["retailCost"]
 	PartyRate = inputs["3rdPartyRate"]
 	#Calculate Net Energy Metering Scenario:
 	if inputs["meteringType"]=='netEnergyMetering':
@@ -276,7 +276,7 @@ def _tests():
 			#'production', # Total cost reduced by total solar gen * wholesale rate.
 			#'excessEnergyMetering', # Total cost reduced by total solar gen * retail rate; but, if generation exceeds demand (over the life of the system), only get paid wholesale rate for the excess.
 		'years':25,
-		'retailRate':0.11,
+		'retailCost':0.11,
 		'valueOfSolarRate':.07,
 		'monthlyDemand':'3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000',
 		'rateIncrease':2.5,

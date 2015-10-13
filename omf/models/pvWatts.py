@@ -50,7 +50,7 @@ def run(modelDir, inputDict):
 		# Required user inputs.
 		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
 		ssc.ssc_data_set_number(dat, "system_size", float(inputDict["systemSize"]))
-		ssc.ssc_data_set_number(dat, "derate", 0.01 * float(inputDict["derate"]))
+		ssc.ssc_data_set_number(dat, "derate", 0.01 * float(inputDict["nonInverterEfficiency"]))
 		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict["trackingMode"]))
 		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict["azimuth"]))
 		# Advanced inputs with defaults.
@@ -64,7 +64,7 @@ def run(modelDir, inputDict):
 		ssc.ssc_data_set_number(dat, "tilt", manualTilt)
 		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict["rotlim"]))
 		ssc.ssc_data_set_number(dat, "gamma", -1 * float(inputDict["gamma"]))
-		ssc.ssc_data_set_number(dat, "inv_eff", 0.01 * float(inputDict["inv_eff"]))
+		ssc.ssc_data_set_number(dat, "inv_eff", 0.01 * float(inputDict["inverterEfficiency"]))
 		ssc.ssc_data_set_number(dat, "w_stow", float(inputDict["w_stow"]))
 		# Complicated optional inputs that we could enable later.
 		# ssc.ssc_data_set_array(dat, 'shading_hourly', ...) 	# Hourly beam shading factors
@@ -173,13 +173,13 @@ def _tests():
 		"zipCode": "64735",
 		"simLength": "100",
 		"systemSize":"10",
-		"derate":"77",
+		"nonInverterEfficiency":"77",
 		"trackingMode":"0",
 		"azimuth":"180",
 		"runTime": "",
 		"rotlim":"45.0",
 		"gamma":"0.45",
-		"inv_eff":"92",
+		"inverterEfficiency":"92",
 		"tilt":"45.0",
 		"w_stow":"0",
 		"inverterSize":"8"}

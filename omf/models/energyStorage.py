@@ -84,7 +84,7 @@ def heavyProcessing(modelDir, inputDict):
 			[float(inputDict[x]) for x in ('cellCapacity', 'dischargeRate', 'chargeRate', 'cellQuantity', 'demandCharge', 'cellCost')]
 		battEff	= float(inputDict.get("batteryEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0
 		discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
-		elecCost = float(inputDict.get('elecCost', 0.07))
+		retailCost = float(inputDict.get('retailCost', 0.07))
 		# CHANGE: dodFactor, DEMANDCHARGEMONTHLY
 		dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
 		projYears = int(inputDict.get('projYears',10))
@@ -168,7 +168,7 @@ def heavyProcessing(modelDir, inputDict):
 		outData['monthlyDemandRed'] = [totMonNum - ps for totMonNum, ps in zip(totMonNum, ps)]
 		outData['benefitMonthly'] = [x * demandCharge for x in outData['ps']]
 		outData['kWhtoRecharge'] = [battCapacity - x for x in outData['ps']]
-		outData['costtoRecharge'] = [elecCost * x for x in outData['kWhtoRecharge']]
+		outData['costtoRecharge'] = [retailCost * x for x in outData['kWhtoRecharge']]
 		benefitMonthly = outData['benefitMonthly']
 		costtoRecharge = outData['costtoRecharge']
 		outData['benefitNet'] = [benefitMonthly - costtoRecharge for benefitMonthly, costtoRecharge in zip(benefitMonthly, costtoRecharge)]
@@ -224,7 +224,8 @@ def _tests():
 		"cellQuantity": "3",
 		"runTime": "0:00:03",
 		"projYears": "10",
-		"demandCharge": "50" }
+		"demandCharge": "50",
+		"retailCost": "0.07"}
 	modelLoc = pJoin(workDir,"admin","Automated energyStorage Testing")
 	# Blow away old test results if necessary.
 	try:
