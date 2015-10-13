@@ -81,7 +81,7 @@
 						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 					{% endfor %}
 				</select>
-				<a class="edit-feeder postRunInline preRunInline runningInline stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>				
+				<a class="edit-feeder" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>				
 			</div>
 			<div class="shortInput preRun runningInline postRunInline stoppedInline">
 				<label class="tooltip">Scada File Name (.csv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
@@ -131,6 +131,10 @@
 					}
 				</script>
 			</div>
+			<div class="shortInput">
+				<label class="tooltip">Voltage Node Name<span class="classic">The name of end-node obtained from the feeder, where the Integrated Volt Var Controller will be connected.<br><br>The IVVC measures voltage across multiple nodes in an attempt to properly scale the voltage down from the substation to the end-node.</span></label>
+				<input type="text" id="voltageNodes" name="voltageNodes"  required="required"/></td>
+			</div>			
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/></td>
@@ -425,194 +429,335 @@
 		<p class="reportTitle postRun">Regulator Tap Positions</p>
 		<div id="tapStatus" class="tightContent postRun">
 			<script type="text/javascript">
-				tapsData = [{
-					"marker":{
-						"enabled": false
-					},
-					"color":"Blue",
-					"data":allOutputData["withCVRTaps"]["A"],
-					"name":"With CVR A"
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"color":"DarkBlue",
-					"data":allOutputData["withCVRTaps"]["B"],
-					"name":"With CVR B",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"color":"LightBlue",
-					"data":allOutputData["withCVRTaps"]["C"],
-					"name":"With CVR C",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"Green",
-					"data":allOutputData["noCVRTaps"]["A"],
-					"name":"No CVR A"
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"DarkGreen",
-					"data":allOutputData["noCVRTaps"]["B"],
-					"name":"No CVR B",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"LightGreen",
-					"data":allOutputData["noCVRTaps"]["C"],
-					"name":"No CVR C",
-				}]
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "tapStatus"
-				localHighChart["chart"]["width"] = 1000
-				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["series"] = tapsData
-				localHighChart["yAxis"] = {"title":{
-							"text":"Tap Positions",
-							"style":{
-								"color":"gray"
-							}
-						}}
-				new Highcharts.Chart(localHighChart);
+				// Chart #1
+				studyList = []
+				studyList.push("With CVR")
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#tapStatus")
+						.attr("class", "studyContainer")
+						.attr("style", "height: 200px")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(0)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#tapStatus .studyContainer:last")
+						.attr("id", "regTapPositionsCVR")
+					// voltage series data
+					tapsData = [{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Blue",
+						"data":allOutputData["withCVRTaps"]["A"],
+						"name":"A",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Green",
+						"data":allOutputData["withCVRTaps"]["B"],
+						"name":"B"
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"LightGreen",
+						"data":allOutputData["withCVRTaps"]["C"],
+						"name":"C",
+					}]
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "regTapPositionsCVR"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["series"] = tapsData
+					localHighChart["yAxis"] = {"title":{
+								"text":"Tap Positions",
+								"style":{
+									"color":"gray"
+								}
+							}}
+					new Highcharts.Chart(localHighChart);					
+				}
+				// Chart #2
+				studyList = []
+				studyList.push("No CVR")
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#tapStatus")
+						.attr("class", "studyContainer")
+						.attr("style", "height: 200px")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(0)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#tapStatus .studyContainer:last")
+						.attr("id", "regTapPositionsNoCVR")
+					// voltage series data
+					tapsData = [{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Blue",
+						"data":allOutputData["noCVRTaps"]["A"],
+						"name":"A",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Green",
+						"data":allOutputData["noCVRTaps"]["B"],
+						"name":"B"
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"LightGreen",
+						"data":allOutputData["noCVRTaps"]["C"],
+						"name":"C",
+					}]
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "regTapPositionsNoCVR"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["series"] = tapsData
+					localHighChart["yAxis"] = {"title":{
+								"text":"Tap Positions",
+								"style":{
+									"color":"gray"
+								}
+							}}
+					new Highcharts.Chart(localHighChart);					
+				}				
 			</script>
 		</div>
 		<p class="reportTitle postRun">Capacitor Switch Positions</p>
 		<div id="CapSwitchStat" class="tightContent postRun">
 			<script type="text/javascript">
-				capSwitchData = [{
-					"marker":{
-						"enabled": false
-					},
-					"color":"Blue",
-					"data":allOutputData["withCVRCapSwitch"]["A"],
-					"name":"With CVR A"
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"color":"DarkBlue",
-					"data":allOutputData["withCVRCapSwitch"]["B"],
-					"name":"With CVR B",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"color":"LightBlue",
-					"data":allOutputData["withCVRCapSwitch"]["C"],
-					"name":"With CVR C",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"Green",
-					"data":allOutputData["noCVRCapSwitch"]["A"],
-					"name":"No CVR A"
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"DarkGreen",
-					"data":allOutputData["noCVRCapSwitch"]["B"],
-					"name":"No CVR B",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"LightGreen",
-					"data":allOutputData["noCVRCapSwitch"]["C"],
-					"name":"No CVR C",
-				}]
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "CapSwitchStat"
-				localHighChart["chart"]["width"] = 1000
-				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["series"] = capSwitchData
-				localHighChart["yAxis"] = {"title":{
-							"text":"Switch Status",
-							"style":{
-								"color":"gray"
-							}
-						}}
-				new Highcharts.Chart(localHighChart);
+				// Chart #1
+				studyList = []
+				studyList.push("With CVR")
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#CapSwitchStat")
+						.attr("class", "studyContainer")
+						.attr("style", "height: 200px")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(0)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#CapSwitchStat .studyContainer:last")
+						.attr("id", "capSwitchPositionsCVR")
+					// voltage series data
+					switchData = [{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Blue",
+						"data":allOutputData["withCVRCapSwitch"]["A"],
+						"name":"A",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Green",
+						"data":allOutputData["withCVRCapSwitch"]["B"],
+						"name":"B"
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"LightGreen",
+						"data":allOutputData["withCVRCapSwitch"]["C"],
+						"name":"C",
+					}]
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "capSwitchPositionsCVR"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["series"] = switchData
+					localHighChart["yAxis"] = {"title":{
+								"text":"Capacitor Switch Positions",
+								"style":{
+									"color":"gray"
+								}
+							}}
+					new Highcharts.Chart(localHighChart);					
+				}
+				// Chart #2
+				studyList = []
+				studyList.push("No CVR")
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#CapSwitchStat")
+						.attr("class", "studyContainer")
+						.attr("style", "height: 200px")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(0)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#CapSwitchStat .studyContainer:last")
+						.attr("id", "capSwitchPositionsNoCVR")
+					// voltage series data
+					switchData = [{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Blue",
+						"data":allOutputData["noCVRCapSwitch"]["A"],
+						"name":"A",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Green",
+						"data":allOutputData["noCVRCapSwitch"]["B"],
+						"name":"B"
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"LightGreen",
+						"data":allOutputData["noCVRCapSwitch"]["C"],
+						"name":"C",
+					}]
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "capSwitchPositionsNoCVR"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["series"] = switchData
+					localHighChart["yAxis"] = {"title":{
+								"text":"Capacitor Switch Positions",
+								"style":{
+									"color":"gray"
+								}
+							}}
+					new Highcharts.Chart(localHighChart);					
+				}				
 			</script>
 		</div>
 
 		<p class="reportTitle postRun">Substation Voltages</p>
 		<div id="voltagePlots" class="tightContent postRun">
 			<script type="text/javascript">
-				subVoltsData = [{
-					"marker":{
-						"enabled": false
-					},
-					"color":"Blue",
-					"data":allOutputData["withCVRSubVolts"]["A"],
-					"name":"With CVR A"
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"color":"DarkBlue",
-					"data":allOutputData["withCVRSubVolts"]["B"],
-					"name":"With CVR B",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"color":"LightBlue",
-					"data":allOutputData["withCVRSubVolts"]["C"],
-					"name":"With CVR C",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"Green",
-					"data":allOutputData["noCVRSubVolts"]["A"],
-					"name":"No CVR A"
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"DarkGreen",
-					"data":allOutputData["noCVRSubVolts"]["B"],
-					"name":"No CVR B",
-				},{
-					"marker":{
-						"enabled": false
-					},
-					"dashStyle": "ShortDash",
-					"color":"LightGreen",
-					"data":allOutputData["noCVRSubVolts"]["C"],
-					"name":"No CVR C",
-				}]
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "voltagePlots"
-				localHighChart["chart"]["width"] = 1000
-				localHighChart["chart"]["height"] = 200
-				localHighChart["chart"]["type"] = "line"
-				localHighChart["series"] = subVoltsData
-				localHighChart["yAxis"] = {"title":{
-							"text":"Voltages (V)",
-							"style":{
-								"color":"gray"
-							}
-						}}
-				new Highcharts.Chart(localHighChart);
+				// Chart #1
+				studyList = []
+				studyList.push("With CVR")
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#voltagePlots")
+						.attr("class", "studyContainer")
+						.attr("style", "height: 200px")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(0)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#voltagePlots .studyContainer:last")
+						.attr("id", "substationVoltsCVR")
+					// voltage series data
+					voltsData = [{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Blue",
+						"data":allOutputData["withCVRSubVolts"]["A"],
+						"name":"A",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Green",
+						"data":allOutputData["withCVRSubVolts"]["B"],
+						"name":"B"
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"LightGreen",
+						"data":allOutputData["withCVRSubVolts"]["C"],
+						"name":"C",
+					}]
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "substationVoltsCVR"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["series"] = voltsData
+					localHighChart["yAxis"] = {"title":{
+								"text":"Substation Voltages",
+								"style":{
+									"color":"gray"
+								}
+							}}
+					new Highcharts.Chart(localHighChart);					
+				}
+				// Chart #1
+				studyList = []
+				studyList.push("No CVR")
+				for (index in studyList) {
+					study = studyList[index]
+					$("<div/>").appendTo("#voltagePlots")
+						.attr("class", "studyContainer")
+						.attr("style", "height: 200px")
+						.attr("id", study)
+						.append("<div class='studyTitleBox'><p class='studyTitle'>"+study.substring(0)+"</p></div>")
+					// Create div of power timeseries appending to powerConsumption
+					$("<div/>").appendTo("#voltagePlots .studyContainer:last")
+						.attr("id", "substationVoltsNoCVR")
+					// voltage series data
+					voltsData = [{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Blue",
+						"data":allOutputData["noCVRSubVolts"]["A"],
+						"name":"A",
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"Green",
+						"data":allOutputData["noCVRSubVolts"]["B"],
+						"name":"B"
+					},{
+						"marker":{
+							"enabled": false
+						},
+						"dashStyle": "ShortDash",
+						"color":"LightGreen",
+						"data":allOutputData["noCVRSubVolts"]["C"],
+						"name":"C",
+					}]
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "substationVoltsNoCVR"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["series"] = voltsData
+					localHighChart["yAxis"] = {"title":{
+								"text":"Substation Voltages",
+								"style":{
+									"color":"gray"
+								}
+							}}
+					new Highcharts.Chart(localHighChart);					
+				}				
 			</script>
 		</div>
 		<p class="reportTitle postRun">Projected Savings From CVR by Month</p>

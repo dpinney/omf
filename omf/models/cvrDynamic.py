@@ -88,9 +88,12 @@ def runForeground(modelDir,inData):
 		voltVectorA = [random.uniform(7380,7620) for x in range(0,8760)]
 		voltVectorC = [random.uniform(-3699,-3780) for x in range(0, 8760)]
 		voltVectorB = [random.uniform(-3699,-3795) for x in range(0, 8760)]
-		calibFeederPath = calibrate.attachVolts(modelDir, feederPath, voltVectorA, voltVectorB, voltVectorC)
+		calibFeederPath, outcome = calibrate.attachVolts(modelDir, feederPath, voltVectorA, voltVectorB, voltVectorC)
 		# calibrate powers.
-		calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
+		if outcome == True: calibrate.omfCalibrate(modelDir,calibFeederPath,scadaPath)
+		else:
+			print "Attach volts failed."
+			calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 		allOutput = {}
 		allOutput['fileName'] = inData.get("fileName", 0)
 		with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
@@ -217,7 +220,9 @@ def runForeground(modelDir,inData):
 		'd_min' : '0.1',
 		'substation_link' : str(localTree[regIndex]['name']),
 		'regulator_list' : regstr,
-		'capacitor_list': capstr}
+		'capacitor_list': capstr,
+		'voltage_measurements': str(inData.get("voltageNodes", 0)),
+		}
 		#running powerflow analysis via gridalab after attaching a regulator
 		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)
 		output1 = gridlabd.runInFilesystem(localTree,keepFiles=True,workDir=modelDir)
