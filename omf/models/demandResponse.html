@@ -83,11 +83,11 @@
 				<script>var fileName=true;</script>
 				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
 				<input id="demandCurve" name="demandCurve" type="hidden">
-				{% if allOutputData.fileName|string() is defined %}
+				{% if allInputData.fileName|string() is defined %}
 					<input type="hidden" id="fileName" name="fileName" readonly="readonly">		
 					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>	
 					<script>
-						document.getElementById('demandCurveFileName').innerHTML = allOutputData.fileName;
+						document.getElementById('demandCurveFileName').innerHTML = allInputData.fileName;
 					</script>
 					<style type="text/css">
 					 #fileExists {
@@ -106,7 +106,7 @@
 				{% endif %}
 				<script>
 					// Make sure the file is required on prerun.
-					if (modelStatus == "preRun" || modelStatus == "stopped") {gebi('demandCurveFile').setAttribute('required', 'required')}
+					if (modelStatus == "preRun") {gebi('demandCurveFile').setAttribute('required', 'required')}
 					// File handler function.
 					function handle_files(files) {
 						// read file to a hidden input field
