@@ -154,7 +154,7 @@ def prism(prismDRDict):
 		prismDRDict['impactFactorOffPeakWOCPP'] = kWhDeltaOffPeakWOCPP/kWhPerHrOldOffPeakWOCPP #C33
 	if prismDRDict['rateStructure'] == '24hourly':
 		prismDRDict['impactFactor24hourly'] = list([0] * 24)
-		prismDRDict['rateOffPeak'] = sum(prismDRDict['rate24hourly'])/24
+		prismDRDict['rateOffPeak'] = prismDRDict['rateFlat']
 		kWhPerHrOldOffPeak = prismDRDict['offPeakMonAvgkWh']/prismDRDict['hrsOff']
 		for hour,energy in enumerate(hourlyEnergy):
 			kWhPerHrOldOnPeak = prismDRDict['hourlyMonAvgkWh'][hour]/prismDRDict['hrsOn']
