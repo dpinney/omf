@@ -91,7 +91,6 @@ def heavyProcessing(modelDir, inputDict):
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
-		outData['fileName'] = inputDict.get("fileName", 0)
 		# Start running battery simulation.
 		# CHANGE
 		# battCapacity = cellQuantity * cellCapacity

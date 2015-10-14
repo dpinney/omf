@@ -95,7 +95,6 @@ def runForeground(modelDir,inData):
 			print "Attach volts failed."
 			calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
 		allOutput = {}
-		allOutput['fileName'] = inData.get("fileName", 0)
 		with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
 			feederJson = json.load(jsonIn)
 			localTree = feederJson.get("tree", {})

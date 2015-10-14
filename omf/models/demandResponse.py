@@ -320,7 +320,6 @@ def run(modelDir, inputDict):
 		# Setting up the demand curve.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
-		outData['fileName'] = inputDict.get("fileName", 0)
 		demandList = [{'datetime': parse(row['timestamp']), 'power': float(row['power'])} for row in csv.DictReader(open(pJoin(modelDir,"demand.csv")))]
 		demandCurve = [x['power'] for x in demandList]
 		outData['startDate'] = demandList[0]['datetime'].isoformat()
