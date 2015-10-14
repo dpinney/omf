@@ -186,6 +186,7 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC):
 			json.dump(feederJson, outJson, indent=4)
 		return pJoin(workDir,"calibratedFeeder.json"), True
 	except:
+		print "\n   attachVolts failed."
 		return feederPath, False
 
 def _tests():
@@ -198,8 +199,11 @@ def _tests():
 	voltVectorC = [-random.uniform(3699,3780) for x in range(0, 8760)]
 	voltVectorB = [-random.uniform(3699,3795) for x in range(0, 8760)]
 	calibFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC)
-	if outcome == False: print "\n   attachVolts failed."
-	assert None == omfCalibrate(workDir, calibFeederPath, scadaPath), "feeder calibration failed"
-
+	try: 
+		assert None == omfCalibrate(workDir, calibFeederPath, scadaPath), "feeder calibration failed"	
+	except: 
+		print "\n   attach volt failed."
+		assert None == omfCalibrate(workDir, feederPath, scadaPath), "feeder calibration failed"
+	print "\n  Success!"
 if __name__ == '__main__':
 	_tests()

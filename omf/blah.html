@@ -1,0 +1,59 @@
+				tapsData = [{
+					"marker":{
+						"enabled": false
+					},
+					"color":"Blue",
+					"data":allOutputData["withCVRTaps"]["A"],
+					"name":"With CVR A"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"color":"DarkBlue",
+					"data":allOutputData["withCVRTaps"]["B"],
+					"name":"With CVR B",
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"color":"LightBlue",
+					"data":allOutputData["withCVRTaps"]["C"],
+					"name":"With CVR C",
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"Green",
+					"data":allOutputData["noCVRTaps"]["A"],
+					"name":"No CVR A"
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"DarkGreen",
+					"data":allOutputData["noCVRTaps"]["B"],
+					"name":"No CVR B",
+				},{
+					"marker":{
+						"enabled": false
+					},
+					"dashStyle": "ShortDash",
+					"color":"LightGreen",
+					"data":allOutputData["noCVRTaps"]["C"],
+					"name":"No CVR C",
+				}]
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "tapStatus"
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["height"] = 200
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["series"] = tapsData
+				localHighChart["yAxis"] = {"title":{
+							"text":"Tap Positions",
+							"style":{
+								"color":"gray"
+							}
+						}}
+				new Highcharts.Chart(localHighChart);
