@@ -149,13 +149,6 @@
 				<input type="text" id="LoadunderManagement" name="LoadunderManagement" value="100" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Off Peak Revenue Neutral<span class="classic">If true, the model attempts to calculate an off-peak rate that keeps revenue equal to what it would be in the single rate base case. If false, the model uses the user-entered off-peak rate.</span></label>
-				<select id="offPeakRevenueNeutral" name="offPeakRevenueNeutral"/>
-					<option value="1">True</option>
-					<option value="0">False</option>
-				</select>
-			</div>			
-			<div class="shortInput">
 				<label>CPP Rate ($)</label>
 				<input type="text" id="rateCPP" name="rateCPP" value="1.80" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
@@ -245,12 +238,12 @@
 						"lineColor":"gray"},
 					"yAxis":{
 						"title":{"text":"Power (kW)","style":{"color":"gray"}},
-						"min":-500,
+						"min":0,
 						"plotLines":[{"color": "lightgray",
-						"dashStyle": "ShortDash",
-						"width": 2,
-						"label":{"text":"Max Difference:" + allOutputData.differenceMax + "kW", "align":"right","y":-5,"x":-730, "style":{"color":"gray", "fontsize":"12px"}},
-						"value": allOutputData.differenceMax,"zIndex": 10}],"min":0},
+							"dashStyle": "ShortDash",
+							"width": 2,
+							"label":{"text":"Max Difference:" + allOutputData.differenceMax + "kW", "align":"right","y":-5,"x":-730, "style":{"color":"gray", "fontsize":"12px"}},
+							"value": allOutputData.differenceMax,"zIndex": 10}],"min":0},
 					"title":{"text":null},
 					"series":[
 						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.demandLoad},
