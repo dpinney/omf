@@ -79,25 +79,17 @@ def runForeground(modelDir,inData):
 		if not os.path.isdir(modelDir):
 			os.makedirs(modelDir)
 			inData["created"] = str(startTime)
-		#calibrate and run cvrdynamic
+		#read pre-calibrated feeder and run cvrdynamic
 		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", inData["feederName"].split("___")[0], inData["feederName"].split("___")[1]+'.json')
 		with open(pJoin(modelDir,"scadaFile.csv"),"w") as scadaFile:
 			scadaFile.write(inData['scadaFile'])
 		scadaPath = pJoin(modelDir, "scadaFile.csv")
-		# attach voltages.
-		voltVectorA = [random.uniform(7380,7620) for x in range(0,8760)]
-		voltVectorC = [random.uniform(-3699,-3780) for x in range(0, 8760)]
-		voltVectorB = [random.uniform(-3699,-3795) for x in range(0, 8760)]
-		calibFeederPath, outcome = calibrate.attachVolts(modelDir, feederPath, voltVectorA, voltVectorB, voltVectorC)
-		# calibrate powers.
-		if outcome == True: calibrate.omfCalibrate(modelDir,calibFeederPath,scadaPath)
-		else:
-			print "Attach volts failed."
-			calibrate.omfCalibrate(modelDir,feederPath,scadaPath)
+		# Reads a pre-calibrated feeder.
 		allOutput = {}
-		with open(pJoin(modelDir,"calibratedFeeder.json"), "r") as jsonIn:
+		with open(feederPath, "r") as jsonIn:
 			feederJson = json.load(jsonIn)
 			localTree = feederJson.get("tree", {})
+			attachments = feederJson.get("attachments", {})
 		for key in localTree:
 			if "solver_method" in localTree[key].keys():
 				# print "current solver method", localTree[key]["solver_method"]
@@ -185,7 +177,7 @@ def runForeground(modelDir,inData):
 		HOURS = float(inData['simLengthHours'])
 		simStartDate = inData['simStart']
 		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)
-		output = gridlabd.runInFilesystem(localTree,keepFiles=False,workDir=modelDir)
+		output = gridlabd.runInFilesystem(localTree, attachments, keepFiles=False,workDir=modelDir)
 		os.remove(pJoin(modelDir,"PID.txt"))
 		p = output['Zregulator.csv']['power_in.real']
 		q = output['Zregulator.csv']['power_in.imag']
@@ -224,7 +216,7 @@ def runForeground(modelDir,inData):
 		}
 		#running powerflow analysis via gridalab after attaching a regulator
 		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)
-		output1 = gridlabd.runInFilesystem(localTree,keepFiles=True,workDir=modelDir)
+		output1 = gridlabd.runInFilesystem(localTree,attachments,keepFiles=True,workDir=modelDir)
 		os.remove(pJoin(modelDir,"PID.txt"))
 		pnew = output1['NewZregulator.csv']['power_in.real']
 		qnew = output1['NewZregulator.csv']['power_in.imag']
