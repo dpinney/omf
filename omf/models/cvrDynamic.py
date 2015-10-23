@@ -531,8 +531,6 @@ def _tests():
 		"modelType": "cvrDynamic",
 		"user": "admin",
 		"feederName": "public___ABEC Frank pre calib",
-		"scadaFile": open(pJoin(__metaModel__._omfDir,"uploads","FrankScada.csv")).read(),
-		"fileName":"FrankScada.csv",
 		"runTime": "",
 		"capitalCost": 30000,
 		"omCost": 1000,
