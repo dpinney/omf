@@ -82,58 +82,6 @@
 					{% endfor %}
 				</select>
 				<a class="edit-feeder" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>				
-			</div>
-			<div class="shortInput preRun runningInline postRunInline stoppedInline">
-				<label class="tooltip">Scada File Name (.csv file)<span class="classic">Please see the documentation for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
-				<script>var fileName=true;</script>
-				<input type="file" id="scadaFileLabel" name="scadaFileLabel" accept=".csv" onchange="handle_files(this.files)">
-				<input id="scadaFile" name="scadaFile" type="hidden">
-				{% if allInputData.fileName|string() is defined %}
-					<input type="hidden" id="fileName" name="fileName" readonly="readonly">				
-					<div id="fileExists"><label for="scadaFileLabel" id="scadaFileLabelName"></label></div>	
-					<script>
-						var FileName = allInputData.fileName;
-						document.getElementById('scadaFileLabelName').innerHTML = FileName;
-					</script>	
-					<style type="text/css">
-					 #fileExists {
-					   width:175px;
-					   height:25px;
-					   display:fixed;
-					   margin-top:-28px;
-					   margin-left:110px;
-					   background-color:#d3d3d3;
-					   font-size:0.8em;
-					 }	 		 				   
-					input[type='file'] {
-					  color: transparent;
-					}				
-					</style>		
-				{% endif %}
-				<script>
-					// Make sure the file is required on prerun.
-					if (modelStatus == "preRun") {gebi('scadaFileLabel').setAttribute('required', 'required')}
-					else {}
-					// File handler function.
-					function handle_files(files) {
-						// read file to a hidden input field
-						reader = new FileReader()
-						reader.readAsText(files[0])
-						reader.onload = loaded
-						function loaded(evt) {
-							evt.target.result
-							gebi("scadaFile").value = reader.result
-							var FileName = gebi("scadaFileLabel").value.split("\\");
-							var FileName = FileName[FileName.length-1];
-							document.getElementById('scadaFileLabelName').innerHTML = FileName;
-							gebi("fileName").value = FileName;
-						}
-					}
-				</script>
-			</div>
-			<div class="shortInput">
-				<label class="tooltip">Voltage Node Name<span class="classic">The name of end-node obtained from the feeder, where the Integrated Volt Var Controller will be connected.<br><br>The IVVC measures voltage across multiple nodes in an attempt to properly scale the voltage down from the substation to the end-node.</span></label>
-				<input type="text" id="voltageNodes" name="voltageNodes"  required="required"/></td>
 			</div>			
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -148,6 +96,10 @@
 				<input type="text" id="runTime" name="runTime" readonly/></td>
 			</div>
 			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Voltage Node Name<span class="classic">The name of end-node obtained from the feeder, where the Integrated Volt Var Controller will be connected.<br><br>The IVVC measures voltage across multiple nodes in an attempt to properly scale the voltage down from the substation to the end-node.</span></label>
+				<input type="text" id="voltageNodes" name="voltageNodes"  required="required"/></td>
+			</div>			
 			<div class="shortInput">
 				<label class="tooltip">Capital Cost<span class="classic">Capital Cost<br><em>Type: float</em></span></label>
 				<input type="text" id="capitalCost" name="capitalCost" value="30000" pattern="^\d+\.?\d*$" required="required"/></td>

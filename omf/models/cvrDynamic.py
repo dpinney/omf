@@ -81,9 +81,6 @@ def runForeground(modelDir,inData):
 			inData["created"] = str(startTime)
 		#read pre-calibrated feeder and run cvrdynamic
 		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", inData["feederName"].split("___")[0], inData["feederName"].split("___")[1]+'.json')
-		with open(pJoin(modelDir,"scadaFile.csv"),"w") as scadaFile:
-			scadaFile.write(inData['scadaFile'])
-		scadaPath = pJoin(modelDir, "scadaFile.csv")
 		# Reads a pre-calibrated feeder.
 		allOutput = {}
 		with open(feederPath, "r") as jsonIn:
