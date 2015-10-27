@@ -500,6 +500,35 @@ def runForeground(modelDir,inData):
 		allOutput["lossRedDollars"] = lossRedDollars
 		allOutput["peakSaveDollars"] = peakSaveDollars
 		allOutput["annualSave"] = [annualSave(x) for x in range(31)]
+		# Generate warnings
+		#TODO: Timezone adjustment
+		try:
+			# Check if times for simulation and scada match.
+			scadaDates = []
+			with open(pJoin(modelDir,"subScadaCalibrated1.player"),"r") as scadaFile:
+				for line in scadaFile:
+					(date,val) = line.split(',')
+					scadaDates.append(str(date))
+			simFormattedEndDate = simFormattedDate + timedelta(hours=HOURS)
+			scadaStartDate = datetime.strptime(scadaDates[0].split(' PST')[0],"%Y-%m-%d %H:%M:%S")
+			scadaEndDate = datetime.strptime(scadaDates[len(scadaDates)-1].split(' PST')[0],"%Y-%m-%d %H:%M:%S")
+			beginRange = (scadaStartDate - simFormattedDate).total_seconds()
+			endRange = (scadaEndDate - simFormattedEndDate).total_seconds()
+			# Check if houses exist.
+			housesExist, voltageNodeExists = False, False
+			for key in localTree:
+				if localTree[key].get('object','') == 'house': housesExist = True
+				if localTree[key].get('name','') == str(inData.get("voltageNodes", 0)): voltageNodeExists = True
+			if (beginRange > 0.0 or endRange < 0.0) and not housesExist: 
+				allOutput["warnings"] = "<strong>WARNING:</strong> The simulation dates entered are not compatible with the scada curve in the feeder."
+			# Check if voltage node exists.
+			if not voltageNodeExists: 
+				if allOutput.get('warnings','') != "": 
+					previousWarning = allOutput["warnings"]
+					allOutput["warnings"] = previousWarning + " The voltage node: " + str(inData.get("voltageNodes", 0)) + " does not exist in the feeder."
+				else: allOutput["warnings"] = "<strong>WARNING:</strong> The voltage node <i>" + str(inData.get("voltageNodes", 0)) + "</i> does not exist in the feeder."
+		except:
+			pass
 		# Update the runTime in the input file.
 		endTime = datetime.now()
 		inData["runTime"] = str(timedelta(seconds=int((endTime - startTime).total_seconds())))

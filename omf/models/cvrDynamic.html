@@ -50,7 +50,7 @@
 			studyName = $(e).siblings("select").val().split(/[_]+/)[1]
 			$(e).attr("href", "/feeder/" + studyUser +"/"+ studyName)
 				.attr("target", "_blank");
-		}		
+		}
 	</script>
 </head>
 <body onload="init()">
@@ -81,8 +81,8 @@
 						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 					{% endfor %}
 				</select>
-				<a class="edit-feeder" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>				
-			</div>			
+				<a class="edit-feeder" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>
+			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/></td>
@@ -99,7 +99,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Voltage Node Name<span class="classic">The name of end-node obtained from the feeder, where the Integrated Volt Var Controller will be connected.<br><br>The IVVC measures voltage across multiple nodes in an attempt to properly scale the voltage down from the substation to the end-node.</span></label>
 				<input type="text" id="voltageNodes" name="voltageNodes"  required="required"/></td>
-			</div>			
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Capital Cost<span class="classic">Capital Cost<br><em>Type: float</em></span></label>
 				<input type="text" id="capitalCost" name="capitalCost" value="30000" pattern="^\d+\.?\d*$" required="required"/></td>
@@ -156,15 +156,15 @@
 	<div id ="stopIndicator" class="content stopped">
 		Model cancelled or encountered an error. Please change inputs and re-run.
 		<pre id='errorText'></pre>
-		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>		
+		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>
 	</div>
 	<script type="text/javascript">
-		/* 
+		/*
 		 * Global setting of Highcharts
 		 */
 		Highcharts.setOptions({
-			global: { 
-				useUTC: false 
+			global: {
+				useUTC: false
 			}
 		});
 		// Clean up the non-ISO date strings we get.
@@ -184,6 +184,14 @@
 		}
 	</script>
 	<div id="output">
+		<div id="warnings" class="tightContent" style="display:none">
+			<pre id='warningText' style="text-size:22pt;margin-top:10px;margin-bottom:10px;margin-left:20px;white-space:pre-wrap;white-space:-moz-pre-wrap;white-space:-pre-wrap;white-space:-o-pre-wrap;word-wrap:break-word;"></pre>
+			<script type="text/javascript">
+			if (typeof(allOutputData.warnings) !== 'undefined') {
+				document.getElementById("warnings").style.display = "inherit";
+				gebi('warningText').innerHTML = allOutputData.warnings
+			}</script>
+		</div>
 		<p class="reportTitle postRun">Total loads and Losses</p>
 		<div id="totalEnergyReport" class="tightContent postRun">
 			<script type="text/javascript">
@@ -199,11 +207,11 @@
 						"text":null
 					},
 					"legend":{
-						"layout":"horizontal", 
-						"align":"top", 
-						"verticalAlign":"top", 
-						"x":50, 
-						"y":-10, 
+						"layout":"horizontal",
+						"align":"top",
+						"verticalAlign":"top",
+						"x":50,
+						"y":-10,
 						"borderWidth":0
 					},
 					"credits":{
@@ -239,7 +247,7 @@
 				})
 			</script>
 		</div>
-		
+
 		<p class="reportTitle postRun">Powerflow at Substation</p>
 		<div id="realPowerflow" class="tightContent postRun">
 			<script type="text/javascript">
@@ -270,7 +278,7 @@
 								"color":"gray"
 							}
 						}}
-				new Highcharts.Chart(localHighChart);		
+				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
 		<p class="reportTitle postRun">Voltages at All Meters</p>
@@ -324,7 +332,7 @@
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);					
+					new Highcharts.Chart(localHighChart);
 				}
 				// Chart #2
 				studyList = []
@@ -374,9 +382,9 @@
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);				
+					new Highcharts.Chart(localHighChart);
 				}
-			</script>					
+			</script>
 		</div>
 		<p class="reportTitle postRun">Regulator Tap Positions</p>
 		<div id="tapStatus" class="tightContent postRun">
@@ -432,7 +440,7 @@
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);					
+					new Highcharts.Chart(localHighChart);
 				}
 				// Chart #2
 				studyList = []
@@ -485,8 +493,8 @@
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);					
-				}				
+					new Highcharts.Chart(localHighChart);
+				}
 			</script>
 		</div>
 		<p class="reportTitle postRun">Capacitor Switch Positions</p>
@@ -543,7 +551,7 @@
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);					
+					new Highcharts.Chart(localHighChart);
 				}
 				// Chart #2
 				studyList = []
@@ -596,8 +604,8 @@
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);					
-				}				
+					new Highcharts.Chart(localHighChart);
+				}
 			</script>
 		</div>
 
@@ -655,7 +663,7 @@
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);					
+					new Highcharts.Chart(localHighChart);
 				}
 				// Chart #1
 				studyList = []
@@ -708,8 +716,8 @@
 									"color":"gray"
 								}
 							}}
-					new Highcharts.Chart(localHighChart);					
-				}				
+					new Highcharts.Chart(localHighChart);
+				}
 			</script>
 		</div>
 		<p class="reportTitle postRun">Projected Savings From CVR by Month</p>
@@ -731,7 +739,7 @@
 					<td id="energyLossDollars" style="text-align:center"></td>
 					<script>gebi("energyLossDollars").innerHTML = "$" + delimitNumbers(parseFloat(allOutputData.energyLostDollars.January).toFixed(2))</script>
 				</tr>
-			</table>		
+			</table>
 		</div>
 		<p class="reportTitle postRun">Projected Savings From CVR Over System Lifetime</p>
 		<div id="savingsReport" class="tightContent postRun">
@@ -747,11 +755,11 @@
 						"text":null
 					},
 					"legend":{
-						"layout":"horizontal", 
-						"align":"top", 
-						"verticalAlign":"top", 
-						"x":50, 
-						"y":-10, 
+						"layout":"horizontal",
+						"align":"top",
+						"verticalAlign":"top",
+						"x":50,
+						"y":-10,
 						"borderWidth":0
 					},
 					"credits":{
@@ -762,7 +770,7 @@
 					},
 					"xAxis": {
 						"tickInterval":1,
-						"minorTickColor":"gray", 
+						"minorTickColor":"gray",
 						"minorTickInterval":5
 					},
 					"yAxis": {
@@ -781,7 +789,7 @@
 						"name": "Annual Savings"
 					}]
 				})
- 				
+
  			</script>
 		</div>
 	</div>
