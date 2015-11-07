@@ -41,29 +41,7 @@
 		ul.menu {display:block; color:black; padding:4px;}
 		ul.menu ul.menu:hover, ul.menu:visited:hover {color:white;}
 		li.modelListTitle, li.modelListTitle:hover{background-color:transparent;color:black;font-size:18pt;}
-		li.modelList {font-size:16pt;}
-		div#toolLeft {
-			position:absolute;
-			font-size: 22pt;
-			text-shadow: 0px 1px 1px gray;
-			text-align:left;
-			margin-top:-100px;
-			z-index: 1000;
-			color:white;
-			width:70%;
-		}
-		div#toolRight {
-			position:absolute;
-			font-size: 22pt;
-			text-shadow: 0px 1px 1px gray;
-			text-align:right;
-			margin-top:-100px; margin-left:475px;
-			z-index: 1000;
-			color:white;
-			width:30%;
-		}
-		div#toolLeft ul.menu, ul.menu:visited {color:black;}
-		div#toolRight ul.menu, ul.menu:visited {color:black;}			
+		li.modelList {font-size:16pt;}		
 		/*End New Header*/		
 	</style>
 	<script type='text/javascript' src='/static/omf.js'></script>
@@ -128,37 +106,6 @@
 	</script>
 </head>
 <body>
-<!-- 	<div id="toolLeft">
-		<a style="color:white" href="/">OMF</a> &#187;
-		<div class='buttonGroup'>
-			<button name="tabSelector" id="tabSelector" class='pill' onclick='dropPill(this, tabName, "tabSelector")' style="color:white;font-size:22pt;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;">Models <div class="arrow">&#9660;</div></button>
-			<ul class='menu right'>
-				<li><a href='javascript:var tabName="Models";javascript:clickCloseEvent();' onclick='javascript:analysesClick();'>Models</a></li>
-				<li><a href='javascript:var tabName="Feeders";javascript:clickCloseEvent();' onclick='javascript:feedersClick();'>Feeders</a></li>
-			</ul>
-		</div>
-	</div>
-	<div id="toolRight">
-		<div class="buttonGroup">
-			<button name="newSelector" id="newSelector" class='pill' onclick='dropPill(this, "New", "newSelector")' style="color:white;font-size:22pt;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;">New <div class="arrow">&#9660;</div></button>
-			<ul class='menu right'>
-				{% for name in modelNames if not name.startswith('_') %}
-				<li><a href="/newModel/{{name}}" style="font-size:16pt;color:black">{{ name }}</a></li>
-				{% endfor %}
-			</ul>
-		</div>
-		&nbsp;
-		<div class='buttonGroup'>
-			<button name="accountOps" id="accountOps" class='pill' onclick='dropPill(this, "Account", "accountOps")' style="color:white;font-size:22pt;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;">Account <div class="arrow">&#9660;</div></button>
-			<ul class='menu right'>
-				<li><a href="logout" style="font-size:16pt;color:black">Logout</a></li>
-				<li><a href="myaccount" style="font-size:16pt;color:black">My Account</a></li>
-				{% if is_admin %}
-				<li><a href="adminControls" style="font-size:16pt;color:black">Admin Controls</a></li>
-				{% endif %}
-			</ul>
-		</div>
-	</div> -->	
 	<div id="header" style="width:100%;min-width:1000px;height:40px;background:black;padding:0.3em">
 		<div id="headInnerBlock" style="width:1000px;margin-left:auto;margin-right:auto;height:40px">
 			<div style="height:40px;float:left;font-size:22pt;color:white">
@@ -171,7 +118,6 @@
 					</ul>
 				</div>
 			</div>
-			<!-- <div style="width:200px;height:40px;float:left;background:darkorange">another left menu here</div> -->
 			<div style="height:40px;float:right;font-size:22pt;color:white">
 				<div class='buttonGroup'>
 					<button name="accountOps" id="accountOps" class='pill' onclick='dropPill(this, "Account", "accountOps")' style="color:white;font-size:22pt;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;">Account <div class="arrow">&#9660;</div></button>
