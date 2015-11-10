@@ -1,0 +1,294 @@
+<!-- TODO: DELETE -->
+<!-- left align
+no gap start of menu -->
+<!-- model of type: dark or gray -->
+<!-- Separate css styles, unique stlyes go into that html -->
+<!-- Also merge models and omf.css -->
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset='utf-8'>
+	<meta name='Description' content='The Open Modeling Framework for smart grid cost-benefit analysis.'>
+	<link rel='stylesheet' href='/static/omf.css'/> 
+	<link rel='shortcut icon' href='/static/favicon.ico'>
+	<style>
+		div#toolbar {padding: 0px; height:40px;	line-height:40px; position:fixed; top:65px;	z-index:1;} /*over-riding some toolbar defaults so tabs look good.*/
+		div#placeholder{height:5px;} /*Crazy float behavior for titlebar means we need this. */
+		div#title{position:fixed; top:0; z-index:1;}
+		#account_links{position:fixed; z-index:2; font-size:10px; margin-bottom:2; top:5; right:5;}
+		#account_links a {color:white;}
+		p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
+		p.tabSelected {background:gray; color:white;}
+		div#feeders {display:none;}
+		select, button {width:initial;}
+		table {width:100%; text-align:left;}
+		table tr td:last-child {text-align:right;}
+		table tr th:last-child {text-align:right;}
+		table thead {cursor:pointer; user-select:none;}
+		td {padding:5px;}
+		td.running {color:red;}
+		td.converting {color:red;}
+		td.finished {color:black;}
+		td.stopped {color:purple;}
+		td {border-bottom:1px dashed gray;}
+		tr:last-child td {border-bottom:none;}
+		table.importOptions {width:70%; text-align:left; margin-left:auto;}
+		table.importOptions tr td:first-child {width:40%;}
+		table.importOptions td {border-bottom: none}
+		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
+		/*New Header*/
+		div.buttonGroup { display: inline-block; position:relative; }
+		div.arrow {font-size:8pt;position:absolute;margin-top:2px;margin-left:4px;display:inline;}
+		ul.menu {background-color:#F8F8F8;padding:0;}	
+		ul.menu.right,ul.tabs.right {right: -14%; left: auto; padding:0 0 0 0;}
+		ul.menu.left,ul.tabs.left {right: auto; left:auto; padding:0 0 0 0;}
+		ul.menu.center,ul.tabs.center {right: auto; left:-45%;}
+		ul.menu li {padding:0px;}
+		ul.menu li:hover {background:green;color:white;}
+		ul.menu {display:block; color:black; padding:4px;}
+		ul.menu ul.menu:hover, ul.menu:visited:hover {color:white;}
+		li.modelListTitle, li.modelListTitle:hover{background-color:transparent;color:black;font-size:medium;}		
+		/*End New Header*/		
+	</style>
+	<script type='text/javascript' src='/static/omf.js'></script>
+	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
+	<script src="/static/sorttable.js"></script>
+	<script type="text/javascript">var tabName = "Models";</script>	
+	<script>
+	function feedersClick() {
+		// window.location.hash = 'feeders'
+		window.location.hash = ''
+		gebi('analyses').style.display = 'none'
+		gebi('feeders').style.display = 'inline'
+		gebi('analysesTab').className = 'tab'
+		gebi('feedersTab').className = 'tab tabSelected'
+	}
+	function analysesClick() {
+		window.location.hash = ''
+		gebi('analyses').style.display = 'inline'
+		gebi('feeders').style.display = 'none'
+		gebi('analysesTab').className = 'tab tabSelected'
+		gebi('feedersTab').className = 'tab'
+	}
+	function selectTab(tab){
+       // var dropdown = document.getElementById("tab");
+       // var tab = dropdown.options[dropdown.selectedIndex].value;
+		if (tab == "models"){analysesClick();}
+		else if (tab == "feeders"){feedersClick();}
+	}
+	function dropPill(thisButton, name, menuButton) {
+		// Change colors
+		gebi(menuButton).style.width = '115%'
+		gebi(menuButton).style.color= 'black'
+		gebi(menuButton).style.background= '#F8F8F8'
+		gebi(menuButton).style.textAlign = 'left'
+		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
+		thisButton.innerHTML = name + ' <div class="arrow">&#9650;</div>'
+		function clickCloseEvent() {
+			// Close the menu:
+			thisButton.nextSibling.nextSibling.style.display = 'none'
+			thisButton.innerHTML = name + ' <div class="arrow">&#9660;</div>'
+			// Remove the event when it's fired once:
+			this.removeEventListener('click', arguments.callee, true)
+			// If we're hitting the current button, stop propagation so we don't re-open it again instantly.
+			if (window.event.toElement==thisButton) {event.stopPropagation()}
+			// Change colors back
+			gebi(menuButton).style.color= 'white'
+			gebi(menuButton).style.background= 'transparent'
+		}
+		// Add that function as a listener to take care of closing:
+		document.body.addEventListener('click', clickCloseEvent, true)
+	}
+	function clickCloseEvent(labelName, buttonName) {
+		// Close the menu:
+		var thisButton = document.getElementById(buttonName);
+		thisButton.nextSibling.nextSibling.style.display = 'none'
+		thisButton.innerHTML = labelName + ' <div class="arrow">&#9660;</div>'
+		// Remove the event when it's fired once:
+		this.removeEventListener('click', arguments.callee, true)
+		// If we're hitting the current button, stop propagation so we don't re-open it again instantly.
+		if (window.event.toElement==thisButton) {event.stopPropagation()}
+	}	
+	</script>
+</head>
+<body>
+	<div id="header" style="width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0">
+		<div id="headInnerBlock" style="width:1000px;margin-left:auto;margin-right:auto;height:40px">
+			<div style="height:40px;float:left;font-size:medium;color:white">
+				<a style="color:white" href="/">OMF</a> &#187;
+				<div class='buttonGroup'>
+					<button name="tabSelector" id="tabSelector" class='pill' onclick='dropPill(this, tabName, "tabSelector")' style="color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;">Models <div class="arrow">&#9660;</div></button>
+					<ul class='menu left'>
+						<li><a href='javascript:var tabName="Models";javascript:clickCloseEvent(tabName, "tabSelector");' onclick='javascript:analysesClick();'>Models</a></li>
+						<li><a href='javascript:var tabName="Feeders";javascript:clickCloseEvent(tabName, "tabSelector");' onclick='javascript:feedersClick();'>Feeders</a></li>
+					</ul>
+				</div>
+			</div>
+			<div style="height:40px;float:right;padding:0 0.75em 0 0;font-size:medium;color:white">
+				<div class='buttonGroup'>
+					<button name="accountOps" id="accountOps" class='pill' onclick='dropPill(this, "Account", "accountOps")' style="color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;">Account <div class="arrow">&#9660;</div></button>
+					<ul class='menu right'>
+						<li style="width:120px;"><a href="logout">Logout</a></li>
+						<li style="width:120px;"><a href="myaccount">My Account</a></li>
+						{% if is_admin %}
+						<li style="width:120px;"><a href="adminControls">Admin Controls</a></li>
+						{% endif %}
+					</ul>
+				</div>
+			</div>				
+			<div style="width:65px;height:40px;float:right;font-size:medium;color:white">
+				<div class="buttonGroup">
+					<button name="newSelector" id="newSelector" class='pill' onclick='dropPill(this, "New", "newSelector")' style="color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;">New <div class="arrow">&#9660;</div></button>
+					<ul class='menu right'>
+						<font style="color:darkgray;margin-left:5px;">Model of Type</font>
+						{% for name in modelNames if not name.startswith('_') %}
+						<li><a href="/newModel/{{name}}">{{ name }}</a></li>
+						{% endfor %}
+					</ul>			
+				</div>				
+			</div>		
+		</div>
+	</div>
+	<script>clickCloseEvent(tabName, "tabSelector");</script>
+	<script>clickCloseEvent("New","newSelector");</script>
+	<script>clickCloseEvent("Account","accountOps");</script>
+	<div id="placeholder"></div>
+	<div id='analyses'>
+		<div class='content'style="margin-top:15px;">
+			<table class="sortable">
+				<thead>
+					<tr>
+						<th>Owner</th>
+						<th>Model Name</th>
+						<th>Type</th>
+						<th>Runtime (H:M:S)</th>
+						<th>Status</th>
+						<th>Last Edit</th>
+					</tr>
+				</thead>
+				<tbody>
+					{% for model in models %}
+					<tr>
+						<td>{{ model.owner }}</td>
+						<td><a href = "{{'./model/' + model.owner + '/' + model.name}}">{{ model.name }}</a></td>
+						<td>{{ model.modelType }}</td>
+						<td>{{ model.runTime }}</td>
+						<td class="{{ model.status }}">{{ model.status }}</td>
+						<td>{{ model.editDate }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+	</div>
+	<div id='feeders'>
+		<div class='content'style="margin-top:15px;">
+			<table class="sortable">
+				<thead>
+					<tr>
+						<th>Owner</th>
+						<th>Feeder Name</th>
+						<th>Status</th>
+						<th>Last Edit</th>
+					</tr>
+				</thead>
+				<tbody class="Feeders">
+					{% for feeder in feeders %}
+					<tr>
+						<td>{{ feeder.owner }}</td>
+						<td>{% if feeder.status == "Ready" %}<a href = "{{'./feeder/' + feeder.owner + '/' + feeder.name}}">{{ feeder.name }}</a>{% else %}{{ feeder.name }}{% endif %}</td>
+						<td class="{{ feeder.status }}">{{ feeder.status }}</td>
+						<td>{{ feeder.editDate }}</td>
+					</tr>
+					{% endfor %}
+				</tbody>
+			</table>
+		</div>
+		<div class='content'>
+			<form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+				<p style='font-weight:bold;float:left'>Milsoft Feeder Import</p>
+				<table class='importOptions'>
+					<tr>
+						<td>Feeder Name</td>
+						<td><input type='text' name='feederName'/></td>
+					</tr>
+					<tr>
+						<td>Feeder Data File (.std)</td>
+						<td><input type='file' name='stdFile' accept = '.std'/></td>
+					</tr>
+					<tr>
+						<td>Equipment Database File (.seq)</td>
+						<td><input type='file' name='seqFile' accept = '.seq'/></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><input type='submit' value='Begin Import'/></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<div class='content'>
+			<form action='/gridlabdImport/' enctype='multipart/form-data' method='post'>
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+				<p style='font-weight:bold;float:left'>GridLAB-D Feeder Import</p>
+				<table class='importOptions'>
+					<tr>
+						<td>Feeder Name</td>
+						<td><input type='text' name='feederName'/></td>
+					</tr>
+					<tr>
+						<td>Feeder Data File (.glm)</td>
+						<td><input type='file' name='glmFile' accept = '.glm'/></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><input type='submit' value='Begin Import'/></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+		<div class='content'>
+			<form action='/cymeImport/' enctype='multipart/form-data' method='post'>
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+				<p style='font-weight:bold;float:left'>Cyme Feeder Import</p>
+				<table class='importOptions'>
+					<tr>
+						<td>Feeder Name</td>
+						<td><input type='text' name='feederName'/></td>
+					</tr>
+					<tr>
+						<td>Feeder Network File (.mdb)</td>
+						<td><input type='file' name='mdbNetFile' accept = '.mdb'/></td>
+					</tr>
+					<tr>
+						<td>Feeder Equipment File (.mdb)</td>
+						<td><input type='file' name='mdbEqFile' accept = '.mdb'/></td>
+					</tr>					
+					<tr>
+						<td></td>
+						<td><input type='submit' value='Begin Import'/></td>
+					</tr>
+				</table>
+			</form>
+		</div>	
+		<div class='content'>
+			<form action='/newBlankFeeder/' enctype='multipart/form-data' method='post'>
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+				<p style='font-weight:bold;float:left'>New Blank Feeder Creation</p>
+				<table class='importOptions'>
+					<tr>
+						<td>Feeder Name</td>
+						<td><input type='text' name='feederName'/></td>
+					</tr>
+					<tr>
+						<td></td>
+						<td><input type='submit' value='Create Feeder'/></td>
+					</tr>
+				</table>
+			</form>
+		</div>				
+	</div>
+<script>
+	if (window.location.hash=='#feeders') {gebi('feedersTab').click()}
+</script>
+</body>
