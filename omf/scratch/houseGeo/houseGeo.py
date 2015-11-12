@@ -1,6 +1,6 @@
 import json, urllib, xml.etree.ElementTree as ET, omf, random
 
-def house(lat, lon, addressOverride=None):
+def houseSpecs(lat, lon, addressOverride=None):
 	''' Get square footage, year built and a few more stats for a house at lat, lon or addressOverride. '''
 	# Geo lookup via https://developers.google.com/maps/documentation/geocoding/#ReverseGeocoding
 	googleAPI_KEY = ''  # Optional.
@@ -56,15 +56,34 @@ def gldHouse(lat, lon, addressOverride=None, pureRandom=False):
 		newHouse['name'] = 'REPLACE_ME'
 		newHouse['parent'] = 'REPLACE_ME'
 		newHouse['schedule_skew'] = str(random.gauss(2000,100))
-		newHouse['floor_area'] = str(random.gauss(6000,1000))
-	elif addressOverride:
-		houseStats = house(0, 0, addressOverride=addressOverride)
-		newHouse = {'name':addressOverride, 'parent':'REPLACE_ME'}
-		#TODO: finish implementation.
+		# NOTE: average size of US house used below is from http://money.cnn.com/2014/06/04/real_estate/american-home-size/
+		newHouse['floor_area'] = str(random.gauss(2600,500))
 	else:
-		houseStats = house(lat, lon)
-		newHouse = {'name':addressOverride, 'parent':'REPLACE_ME'}
-		#TODO: finish implementation.	
+		newHouse = {}
+		newSpecs = houseSpecs(lat, lon, addressOverride=addressOverride)
+		newAge = newSpecs.get('yearBuilt','1980')
+		try: intNewAge = int(newAge)
+		except: intNewAge = 1980
+		def houseMaker(name):
+			''' New dict by name from the houseArchetypes. '''
+			return dict(houseArchetypes[getByKeyVal(houseArchetypes, 'name', name)])
+		if newSpecs['lotSize'] == '': # Make an apartment.
+			if intNewAge < 1960: newHouse = houseMaker('R1_Apartment_Pre-1960')
+			elif 1960 <= intNewAge < 1990: newHouse = houseMaker('R1_Apartment_1960-1989')
+			elif intNewAge >= 1990: newHouse = houseMaker('R1_Apartment_1990-2005')
+		else: # Make a house.
+			if intNewAge < 1940: newHouse = houseMaker('R1_SingleFamilyHome_Pre-1940')
+			elif 1940 <= intNewAge < 1950: newHouse = houseMaker('R1_SingleFamilyHome_1940-1949')
+			elif 1950 <= intNewAge < 1960: newHouse = houseMaker('R1_SingleFamilyHome_1950-1959')
+			elif 1960 <= intNewAge < 1970: newHouse = houseMaker('R1_SingleFamilyHome_1960-1969')
+			elif 1970 <= intNewAge < 1980: newHouse = houseMaker('R1_SingleFamilyHome_1970-1979')
+			elif 1980 <= intNewAge < 1990: newHouse = houseMaker('R1_SingleFamilyHome_1980-1989')
+			elif intNewAge >= 1990: newHouse = houseMaker('R1_SingleFamilyHome_1990-2005')
+		newHouse['name'] = addressOverride
+		newHouse['parent'] = 'REPLACE_ME'
+		newHouse['schedule_skew'] = str(random.gauss(2000,100))
+		newHouse['floor_area'] = newSpecs.get('sqft', '2700')
+		# TODO: add houseChildren accoutrements here.
 	return newHouse
 
 def getByKeyVal(tree, key, value, getAll=False):
@@ -77,15 +96,14 @@ def getByKeyVal(tree, key, value, getAll=False):
 	else:
 		return None
 
-def addScaledHouses(inFeed):
+def addScaledRandomHouses(inFeed):
 	''' Take a feeder, translate each triplex_node under a meter in to a scaled, semi-randomized house object. '''
 	houseArchetypes = omf.feeder.parse('houseArchetypes.glm')
 	tripNodeKeys = getByKeyVal(inFeed, 'object', 'triplex_node', getAll=True)
 	tripLoadKeys = [k for k in tripNodeKeys if 'parent' in inFeed[k]]
 	maxKey = omf.feeder.getMaxKey(inFeed) + 1
-	inFeed[maxKey] = {"omftype": "module", "argument": "residential"}
+	inFeed[maxKey] = {'omftype': 'module', 'argument': 'residential'}
 	maxKey += 1
-	# from pprint import pprint as pp; pp(houseArchetypes)
 	for i, tripKey in enumerate(tripLoadKeys):
 		tMeter = inFeed[getByKeyVal(inFeed, 'name', inFeed[tripKey]['parent'])]
 		tPower = float(inFeed[tripKey]['power_1'].replace('j','').split('+')[0])
@@ -95,14 +113,18 @@ def addScaledHouses(inFeed):
 		newHouse['schedule_skew'] = str(random.gauss(2000,100))
 		newHouse['floor_area'] = str(0.50*float(tPower))
 		inFeed[maxKey + i] = newHouse
+		# TODO: add houseChildren.glm accoutrements here.
 
 def _gldTests():
 	testFeed = omf.feeder.parse('inTest_R4-25.00-1_CLEAN.glm')
-	addScaledHouses(testFeed)
+	addScaledRandomHouses(testFeed)
 	with open('inTest_R4_modified.glm','w+') as outFile:
 		outFile.write(omf.feeder.sortedWrite(testFeed))
 
 if __name__ == '__main__':
-	print 'Brooklyn test:', house(40.71418, -73.96125)
-	print 'Arlington test:', house(38.88358, -77.10193)
-	print 'Override test:', house(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA')
+	print 'Brooklyn test:', houseSpecs(40.71418, -73.96125), '\n'
+	print 'Arlington test:', houseSpecs(38.88358, -77.10193), '\n'
+	print 'Override apartment test:', houseSpecs(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA'), '\n'
+	print 'Override house test:', houseSpecs(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
+	print 'Full gldHouse test:', gldHouse(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
+	print 'Apt test:', gldHouse(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA')

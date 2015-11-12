@@ -9,4 +9,4 @@ XXX Harden XML parser.
 XXX Support explicit address lookup? Yep.
 XXX File locations? Use urllib the normal way and it uses a tempfile. Thanks urllib.
 OOO Finish gldHouse.
-OOO Add waterheaters and plug loads.
+OOO Add waterheaters and plug loads in addScaledRandomHouses.
