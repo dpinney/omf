@@ -83,7 +83,6 @@ def gldHouse(lat, lon, addressOverride=None, pureRandom=False):
 		newHouse['parent'] = 'REPLACE_ME'
 		newHouse['schedule_skew'] = str(random.gauss(2000,100))
 		newHouse['floor_area'] = newSpecs.get('sqft', '2700')
-		# TODO: add houseChildren accoutrements here.
 	return newHouse
 
 def getByKeyVal(tree, key, value, getAll=False):
@@ -99,21 +98,30 @@ def getByKeyVal(tree, key, value, getAll=False):
 def addScaledRandomHouses(inFeed):
 	''' Take a feeder, translate each triplex_node under a meter in to a scaled, semi-randomized house object. '''
 	houseArchetypes = omf.feeder.parse('houseArchetypes.glm')
+	childrenArchetypes = omf.feeder.parse('houseChildren.glm')
 	tripNodeKeys = getByKeyVal(inFeed, 'object', 'triplex_node', getAll=True)
 	tripLoadKeys = [k for k in tripNodeKeys if 'parent' in inFeed[k]]
 	maxKey = omf.feeder.getMaxKey(inFeed) + 1
 	inFeed[maxKey] = {'omftype': 'module', 'argument': 'residential'}
 	maxKey += 1
-	for i, tripKey in enumerate(tripLoadKeys):
+	inFeed[maxKey] = {'omftype': '#include','argument': '\"schedules.glm\"'}
+	maxKey += 1
+	for tripKey in tripLoadKeys:
 		tMeter = inFeed[getByKeyVal(inFeed, 'name', inFeed[tripKey]['parent'])]
 		tPower = float(inFeed[tripKey]['power_1'].replace('j','').split('+')[0])
 		newHouse = dict(random.choice(houseArchetypes.values()))
-		newHouse['name'] += '_' + str(i)
+		newHouse['name'] += '_' + str(tripKey)
 		newHouse['parent'] = tMeter['name']
 		newHouse['schedule_skew'] = str(random.gauss(2000,100))
 		newHouse['floor_area'] = str(0.50*float(tPower))
-		inFeed[maxKey + i] = newHouse
-		# TODO: add houseChildren.glm accoutrements here.
+		inFeed[maxKey] = newHouse
+		maxKey += 1
+		for childKey in childrenArchetypes:
+			newChild = dict(childrenArchetypes[childKey])
+			newChild['name'] += '_' + str(tripKey) + '_' + str(childKey)
+			newChild['parent'] = newHouse['name']
+			inFeed[maxKey] = newChild
+			maxKey += 1
 
 def _gldTests():
 	testFeed = omf.feeder.parse('inTest_R4-25.00-1_CLEAN.glm')
@@ -121,10 +129,13 @@ def _gldTests():
 	with open('inTest_R4_modified.glm','w+') as outFile:
 		outFile.write(omf.feeder.sortedWrite(testFeed))
 
-if __name__ == '__main__':
+def _geoLookupTests():
 	print 'Brooklyn test:', houseSpecs(40.71418, -73.96125), '\n'
 	print 'Arlington test:', houseSpecs(38.88358, -77.10193), '\n'
 	print 'Override apartment test:', houseSpecs(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA'), '\n'
 	print 'Override house test:', houseSpecs(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
 	print 'Full gldHouse test:', gldHouse(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
 	print 'Apt test:', gldHouse(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA')
+
+if __name__ == '__main__':
+	_gldTests()

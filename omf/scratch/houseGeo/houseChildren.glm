@@ -1,5 +1,5 @@
 object ZIPload {
-	name REPLACE_ME_unresponsiveLoad;
+	name unresponsiveLoad;
 	parent REPLACE_ME;
 	base_power unresponsive_loads*1.19;
 	schedule_skew 1083;
@@ -13,7 +13,7 @@ object ZIPload {
 };
 
 object ZIPload {
-	name REPLACE_ME_responsiveLoad;
+	name responsiveLoad;
 	parent REPLACE_ME;
 	base_power responsive_loads*1.30;
 	schedule_skew 1083;
@@ -27,7 +27,7 @@ object ZIPload {
 };
 
 object waterheater {
-	name REPLACE_ME_waterHeater;
+	name waterHeater;
 	parent REPLACE_ME;
 	demand large_6*0.99;
 	schedule_skew 4326;
