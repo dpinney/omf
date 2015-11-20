@@ -1,7 +1,7 @@
 ﻿<head>
 	<script type="text/javascript">
 		var unsavedChanges = false;
-	</script>	
+	</script>
 	<script type="text/javascript" src="/static/d3.v3.js"></script>
 	<script type="text/javascript" src="/static/omf.js"></script>
 	<script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
@@ -33,20 +33,27 @@
 		table.importOptions tr td:first-child {width:40%;}
 		table.importOptions td {border-bottom: none}
 		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
-		/*New Header*/
 		div.buttonGroup { display: inline-block; position:relative; }
 		div.arrow {font-size:8pt;position:absolute;margin-top:2px;margin-left:4px;display:inline;}
-		ul.menu {background-color:#F8F8F8;padding:0;}	
-		ul.menu.right,ul.tabs.right {right: -30%; left: auto; padding:0 0 0 0;}
-		ul.menu.left,ul.tabs.left {right: auto; left:auto; padding:0 0 0 0;}
-		ul.menu.center,ul.tabs.center {right: auto; left:-45%;}
+		div#header{width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0.3em;}
+		ul.menu {background-color:#F8F8F8;padding:0;}
+		ul.menu.right {right: -30%; left: auto; padding:0 0 0 0;}
+		ul.menu.left {right: auto; left:auto; padding:0 0 0 0;}
+		ul.menu.center {right: auto; left:-45%;}
 		ul.menu li {padding:0px;}
 		ul.menu li:hover {background:green;color:white;}
 		ul.menu {display:block; color:black; padding:4px;}
 		ul.menu ul.menu:hover, ul.menu:visited:hover {color:white;}
-		li.modelListTitle, li.modelListTitle:hover{background-color:transparent;color:black;font-size:medium;}		
-		/*End New Header*/		
-	</style>	
+		div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-top:4px;}
+		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
+		div#fileDiv{width:55px;padding:0 0.9em 0 0.9em;float:right;}
+		div#layoutDiv{width:50px;padding:0 0.9em 0 0.9em;float:right;}
+		div#findDiv{width:35px;padding:0 0.9em 0 0.9em;float:right;}
+		div#foldDiv{width:60px;padding:0 0.9em 0 0.9em;float:right;}				
+		div#pinDiv{width:60px;padding:0 0.9em 0 0.9em;float:right} 
+		div#editDiv{width:35px;padding:0 0.9em 0 0.9em;float:right} 
+		div#addDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
+	</style>
 	<script>
 	function feedersClick() {
 		// window.location.hash = 'feeders'
@@ -106,7 +113,7 @@
 		thisButton.style.width = '105%'
 		thisButton.style.color= 'black'
 		thisButton.style.background= '#F8F8F8'
-		thisButton.style.textAlign = 'left'		
+		thisButton.style.textAlign = 'left'
 		if (typeof this.currentState == 'undefined' || this.currentState == 'raised') {
 			thisButton.nextSibling.nextSibling.style.display = 'inline-block'
 			thisButton.innerHTML = name + ' &times;'
@@ -116,157 +123,159 @@
 			thisButton.innerHTML = name + ' <div class="arrow">&#9660;</div>'
 			this.currentState = 'raised'
 			thisButton.style.color= 'white'
-			thisButton.style.background= 'transparent'			
+			thisButton.style.background= 'transparent'
 		}
-	}		
+	}
 	</script>
 </head>
 <body onkeypress='hotkeys()' onload="showProgressDialog('Loading Feeder')">
-<div id="header" style="width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0.3em;">
-	<div style="height:40px;float:left;font-size:medium;color:white;margin-top:4px;">
-		&nbsp;&nbsp;<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Feeder 
-		&#8220;{{feederName}}&#8221;		
+<div id="header">
+	<div id="menuLeft">
+		&nbsp;&nbsp;<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Feeder
+		&#8220;{{feederName}}&#8221;
 	</div>
-	<div style="width:55px;height:40px;float:right;padding:0 0.9em 0 0.9em;font-size:medium;color:white;">
-		<div class='buttonGroup'>
-			<button id="fileOps" class='pill' onclick='dropPill(this, "File", "fileOps")' style="color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;">File <div class="arrow">&#9660;</div></button>
-			<ul class='menu right'>
-				{% if public %}
-				<li><a href="javascript:savePrivateFeeder();">Save Private Copy</a></li>
-				{% endif %}
-				{% if not public %}
-				<li><a href="javascript:publishFeeder()">Make Public </a></li>
-				{% endif %}
-				{% if is_admin or not public %}
-				<li><a href='javascript:deleteFeeder()'>Delete</a></li>
-				<li><a href='javascript:duplicateFeeder()'>Duplicate</a></li>
-				<li><a href='javascript:saveFeeder()'>Save</a></li>
-				{% endif %}
-			</ul>
-		</div>	
-	</div>				
-	<div style="width:50px;height:40px;;padding:0 0.9em 0 0.9em;float:right;font-size:medium;color:white">
-		<div class="buttonGroup">
-			<button id="layoutSelector" class='pill' onclick='dropPillAndStay(this, "Layout");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Layout <div class="arrow">&#9660;</div></button>
-			<ul class='menu right' style="right:-7%;">
-			<table style='padding:4px;word-wrap:break-word'>
-				<tr>
-					<td>GraphNodes</td>
-					<td id='nodesBox'></td>
-				</tr>
-				<tr>
-					<td colspan=2 style='padding:0px 0px 10px 0px'>
-					<div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
-					</td>
+	<div id="menuRight">
+		<div id="fileDiv">
+			<div class='buttonGroup'>
+				<button id="fileOps" class='pill' onclick='dropPill(this, "File", "fileOps")' style="color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;">File <div class="arrow">&#9660;</div></button>
+				<ul class='menu right'>
+					{% if not public %}
+					<li><a href="javascript:publishFeeder()">Make Public </a></li>
+					{% endif %}
+					{% if is_admin or not public %}
+					<li><a href='javascript:deleteFeeder()'>Delete</a></li>
+					<li><a href='javascript:duplicateFeeder()'>Duplicate</a></li>
+					<li><a href='javascript:saveFeeder()'>Save</a></li>
+					{% endif %}
+					{% if public %}
+					<li><a href="javascript:savePrivateFeeder();">Save Private Copy</a></li>
+					{% endif %}
+				</ul>
+			</div>
+		</div>
+		<div id="layoutDiv">
+			<div class="buttonGroup">
+				<button id="layoutSelector" class='pill' onclick='dropPillAndStay(this, "Layout");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Layout <div class="arrow">&#9660;</div></button>
+				<ul class='menu right' style="right:-7%;">
+				<table style='padding:4px;word-wrap:break-word'>
 					<tr>
-					<tr>
-				<td>Gravity</td>
-				<td><input id='gravityBox' type='text'></td>
+						<td>GraphNodes</td>
+						<td id='nodesBox'></td>
 					</tr>
 					<tr>
-				<td>Theta</td>
-				<td><input id='thetaBox' type='text'></td>
+						<td colspan=2 style='padding:0px 0px 10px 0px'>
+						<div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
+						</td>
+						<tr>
+						<tr>
+					<td>Gravity</td>
+					<td><input id='gravityBox' type='text'></td>
+						</tr>
+						<tr>
+					<td>Theta</td>
+					<td><input id='thetaBox' type='text'></td>
+						</tr>
+						<tr>
+					<td>Friction</td>
+					<td><input id='frictionBox' type='text'></td>
+						</tr>
+						<tr>
+					<td>Link Strength</td>
+					<td><input id='linkStrengthBox' type='text'></td>
+						</tr>
+						<tr>
+					<td>Link Distance</td>
+					<td><input id='linkDistanceBox' type='text'></td>
+						</tr>
+						<tr>
+					<td>Charge</td>
+					<td><input id='chargeBox' type='text'></td>
+						</tr>
+						<tr>
+					<td></td>
+					<td style='padding-top:10px'><button onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
+						</tr>
+					</table>
+				</ul>
+			</div>
+		</div>
+		<div id="findDiv">
+			<div class="buttonGroup">
+				<button id="findOps" class='pill' onclick='dropPillAndStay(this, "Find");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Find <div class="arrow">&#9660;</div></button>
+				<ul class='menu right' style="right:-7%">
+				<table style='padding:4px;word-wrap:break-word'>
+					<tr>
+						<td>Term</td>
+						<td><input id='searchTerm' type='text'></td>
 					</tr>
 					<tr>
-				<td>Friction</td>
-				<td><input id='frictionBox' type='text'></td>
+						<td><button onclick='backButton()'>Back</button></td>
+						<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
 					</tr>
 					<tr>
-				<td>Link Strength</td>
-				<td><input id='linkStrengthBox' type='text'></td>
-					</tr>
-					<tr>
-				<td>Link Distance</td>
-				<td><input id='linkDistanceBox' type='text'></td>
-					</tr>
-					<tr>
-				<td>Charge</td>
-				<td><input id='chargeBox' type='text'></td>
-					</tr>
-					<tr>
-				<td></td>
-				<td style='padding-top:10px'><button onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
+						<td style='padding-top:10px'><button onclick='findPrevious()'>Previous</button></td>
+						<td style='padding-top:10px'><button onclick='findNext()'>Next</button></td>
 					</tr>
 				</table>
-			</ul>		
-		</div>					
-	</div>
-	<div style="width:35px;height:40px;padding:0 0.9em 0 0.9em;float:right;font-size:medium;color:white">
-		<div class="buttonGroup">
-			<button id="findOps" class='pill' onclick='dropPillAndStay(this, "Find");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Find <div class="arrow">&#9660;</div></button>
-			<ul class='menu right' style="right:-7%">
-			<table style='padding:4px;word-wrap:break-word'>
-				<tr>
-					<td>Term</td>
-					<td><input id='searchTerm' type='text'></td>
-				</tr>
-				<tr>
-					<td><button onclick='backButton()'>Back</button></td>
-					<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
-				</tr>
-				<tr>
-					<td style='padding-top:10px'><button onclick='findPrevious()'>Previous</button></td>
-					<td style='padding-top:10px'><button onclick='findNext()'>Next</button></td>
-				</tr>
-			</table>
-			</ul>
+				</ul>
+			</div>
+		</div>
+		<div id="foldDiv">
+			<div class="buttonGroup">
+				<button id="foldingOps" class='pill' onclick='dropPill(this, "Folding");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Folding <div class="arrow">&#9660;</div></button>
+				<ul class='menu right'>
+				<li><a href='javascript:foldOneLevel();unsavedChanges=true'>One Level Fold</a></li>
+				<li><a href='javascript:unfoldOneLevel();unsavedChanges=true'>One Level Unfold</a></li>
+				<li><a href='javascript:unfoldAll();unsavedChanges=true'>Unfold All</a></li>
+				<li><a href='javascript:foldAtSelected();unsavedChanges=true'>Fold at Selected (f)</a></li>
+				<li><a href='javascript:unfoldAtSelected();unsavedChanges=true'>Unfold at Selected (u)</a></li>
+				</ul>
+			</div>
+		</div>
+		<div id="pinDiv">
+			<div class="buttonGroup">
+				<button id="pinningOps" class='pill' onclick='dropPill(this, "Pinning");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Pinning <div class="arrow">&#9660;</div></button>
+				<ul class='menu right'>
+				<li><a href='javascript:pinAll();unsavedChanges=true' id='pinUnpinAll'>Pin All</a></li>
+				<li><a href='javascript:unPinAll();unsavedChanges=true'>Unpin All</a></li>
+				<li><a href='javascript:toggleSelectedPin();unsavedChanges=true'>Toggle Selected Pin (p)</a></li>
+				</ul>
+			</div>
+		</div>
+		<div id="editDiv">
+			<div class="buttonGroup">
+				<button id="editOps" class='pill' onclick='dropPillAndStay(this, "Edit");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Edit <div class="arrow">&#9660;</div></button>
+				<ul class='menu right' style="right:-7%">
+				<table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
+					<tr>
+						<td>Zoom Reset</td>
+						<td><button onclick='javascript:zoomReset()'>Go</button></td>
+					</tr>
+					<tr>
+						<td>Zoom To Fit</td>
+						<td><button onclick='javascript:zoomToFit()'>Go</button></td>
+					</tr>
+					<tr>
+						<td>Static Loads to Houses</td>
+						<td><button onclick='javascript:staticLoadsToHouses();unsavedChanges=true'>Go</button></td>
+					</tr>
+					<tr>
+						<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
+						<td><button onclick='javascript:solarAdding();unsavedChanges=true'>Go</button></td>
+					</tr>
+
+				</table>
+				</ul>
+			</div>
+		</div>
+		<div id="addDiv">
+			<div class="buttonGroup">
+				<button id="addOps" class='pill' onclick='dropPill(this, "Add");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Add <div class="arrow">&#9660;</div></button>
+				<ul id='newObjectMenu' class='menu right'>
+			</div>
 		</div>
 	</div>
-	<div style="width:60px;height:40px;padding:0 0.9em 0 0.9em;float:right;font-size:medium;color:white">
-		<div class="buttonGroup">
-			<button id="foldingOps" class='pill' onclick='dropPill(this, "Folding");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Folding <div class="arrow">&#9660;</div></button>
-			<ul class='menu right'>
-			<li><a href='javascript:foldOneLevel();unsavedChanges=true'>One Level Fold</a></li>
-			<li><a href='javascript:unfoldOneLevel();unsavedChanges=true'>One Level Unfold</a></li>
-			<li><a href='javascript:unfoldAll();unsavedChanges=true'>Unfold All</a></li>
-			<li><a href='javascript:foldAtSelected();unsavedChanges=true'>Fold at Selected (f)</a></li>
-			<li><a href='javascript:unfoldAtSelected();unsavedChanges=true'>Unfold at Selected (u)</a></li>
-			</ul>
-		</div>
-	</div>
-	<div style="width:60px;height:40px;padding:0 0.9em 0 0.9em;float:right;font-size:medium;color:white">
-		<div class="buttonGroup">
-			<button id="pinningOps" class='pill' onclick='dropPill(this, "Pinning");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Pinning <div class="arrow">&#9660;</div></button>
-			<ul class='menu right'>
-			<li><a href='javascript:pinAll();unsavedChanges=true' id='pinUnpinAll'>Pin All</a></li>
-			<li><a href='javascript:unPinAll();unsavedChanges=true'>Unpin All</a></li>
-			<li><a href='javascript:toggleSelectedPin();unsavedChanges=true'>Toggle Selected Pin (p)</a></li>
-			</ul>
-		</div>
-	</div>
-	<div style="width:35px;height:40px;padding:0 0.9em 0 0.9em;float:right;font-size:medium;color:white">
-		<div class="buttonGroup">
-			<button id="editOps" class='pill' onclick='dropPillAndStay(this, "Edit");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Edit <div class="arrow">&#9660;</div></button>
-			<ul class='menu right' style="right:-7%">
-			<table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
-				<tr>
-					<td>Zoom Reset</td>
-					<td><button onclick='javascript:zoomReset()'>Go</button></td>
-				</tr>
-				<tr>
-					<td>Zoom To Fit</td>
-					<td><button onclick='javascript:zoomToFit()'>Go</button></td>
-				</tr>
-				<tr>
-					<td>Static Loads to Houses</td>
-					<td><button onclick='javascript:staticLoadsToHouses();unsavedChanges=true'>Go</button></td>
-				</tr>
-				<tr>
-					<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
-					<td><button onclick='javascript:solarAdding();unsavedChanges=true'>Go</button></td>
-				</tr>
-				  
-			</table>
-			</ul>
-		</div>
-	</div>
-	<div style="width:35px;height:40px;padding:0 0.9em 0 0.9em;float:right;font-size:medium;color:white">
-		<div class="buttonGroup">
-			<button id="addOps" class='pill' onclick='dropPill(this, "Add");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Add <div class="arrow">&#9660;</div></button>
-			<ul id='newObjectMenu' class='menu right'>				
-		</div>
-	</div>			
-	<div id="selected" style="margin: -4.8% 0 0 77.8%">
+	<div id="selected" style="position:absolute;margin: -60px 0 0 800px;">
 		<table id="selHead">
 			<tr>
 			<td id="objmod" colspan="2"></td>
@@ -288,16 +297,26 @@
 			<table id="body">
 			</table>
 		</div>
-	</div>									
+	</div>
 </div>
-<!-- Manually close each menu due to a bug where it starts open. -->
-<script>clickCloseEvent("Add","addOps");</script>	
-<script>clickCloseEvent("Edit","editOps");</script>	
-<script>clickCloseEvent("Pinning","pinningOps");</script>	
-<script>clickCloseEvent("Folding","foldingOps");</script>	
-<script>clickCloseEvent("Find","findOps");</script>	
-<script>clickCloseEvent("Layout","layoutSelector");</script>	
-<script>clickCloseEvent("File","fileOps");</script>	
+<!-- Menus initially start open due to a bug. Close them once.-->
+<script>clickCloseEvent("Add","addOps");</script>
+<script>clickCloseEvent("Edit","editOps");</script>
+<script>clickCloseEvent("Pinning","pinningOps");</script>
+<script>clickCloseEvent("Folding","foldingOps");</script>
+<script>clickCloseEvent("Find","findOps");</script>
+<script>clickCloseEvent("Layout","layoutSelector");</script>
+<script>clickCloseEvent("File","fileOps");</script>
+<!-- Reposition the editor table based on window size. 
+Run it once then on all windoe resize events. -->
+<script>
+var width = $(window).innerWidth();
+$("#selected").css("marginLeft", width-370+"px");
+window.onresize = function() {
+var width = $(window).innerWidth();
+if (width > 1000 ){$("#selected").css("marginLeft", width-370+"px");}
+}
+</script>
 
 <script type="text/javascript">
 // GLOBAL VARIABLES:
@@ -311,7 +330,7 @@ var zoomer = d3.behavior.zoom()
 zoomer.scaleExtent([0.1, 30])
 
 // Graph size global variable
-var NODE_STROKE_WIDTH = 0.4 
+var NODE_STROKE_WIDTH = 0.4
 var LINE_LINK_STROKE_WIDTH = 3 /5
 var LINE_PARENTCHILD_STROKE_WIDTH = 3/5
 var LINE_SELECTED_STROKE_WIDTH = 3/5
@@ -364,7 +383,7 @@ vis.selectAll('marker')
 	.attr('x',4)
 	.attr('y',8)
 	.text(function (d) {return d[0].toUpperCase()});
-// add a layer to force the links to the bottom. 
+// add a layer to force the links to the bottom.
 vis.append('svg:g').attr('id','linkLayer');
 var force = d3.layout.force()
 	.linkDistance(30)
@@ -375,7 +394,7 @@ var nodes = force.nodes();
 var links = force.links();
 var hiddenNodes = [];
 var hiddenLinks = [];
-// Public variables for global functions 
+// Public variables for global functions
 var prevObjName;
 // Public variable to hold the current search state. TODO: put in a closure.
 var searchCursor;
@@ -391,12 +410,12 @@ d3.json(apiAddress, function (json) {
 	nodepop = json['nodes']
 	while (nodepop.length != 0) {nodes.push(nodepop.pop())}
 	linkpop = json['links']
-	while (linkpop.length != 0) {links.push(linkpop.pop())}  
+	while (linkpop.length != 0) {links.push(linkpop.pop())}
 	hiddenNodePop = json['hiddenNodes']
 	while (hiddenNodePop.length != 0) {hiddenNodes.push(hiddenNodePop.pop())}
 	hiddenLinkPop = json['hiddenLinks']
-	while (hiddenLinkPop .length != 0) {hiddenLinks.push(hiddenLinkPop.pop())}  
-	//Gotta go through and make the links connect to their actual source and target objects. BAD DESIGN, D3!  
+	while (hiddenLinkPop .length != 0) {hiddenLinks.push(hiddenLinkPop.pop())}
+	//Gotta go through and make the links connect to their actual source and target objects. BAD DESIGN, D3!
 	for (li=0;li<links.length;li++) {
 		sourceName = links[li].source.name
 		targetName = links[li].target.name
@@ -411,7 +430,7 @@ d3.json(apiAddress, function (json) {
 		realTarget = nodes[findIndex(nodes,'name',targetName)]
 		realTargetHidden = hiddenNodes[findIndex(hiddenNodes,'name',targetName)]
 		if (undefined == realSource) {hiddenLinks[li2].source = realSourceHidden} else {hiddenLinks[li2].source = realSource}
-		if (undefined == realTarget) {hiddenLinks[li2].target = realTargetHidden} else {hiddenLinks[li2].target = realTarget} 
+		if (undefined == realTarget) {hiddenLinks[li2].target = realTargetHidden} else {hiddenLinks[li2].target = realTarget}
 	}
 	// Regenerate the layout variables:
 	// TODO: make this whole layout variables code much less hackish. We get/set like 5 different ways and times in this file.
@@ -632,7 +651,7 @@ function draw() {
 			clearInterval(interval)
 		} else {
 			// Run the layout in the background until performance is acceptable.
-			for (i = 0; i < 10; ++i) force.tick()		
+			for (i = 0; i < 10; ++i) force.tick()
 		}
 	}, 1000)
 
@@ -745,13 +764,13 @@ function redraw() {
 			return d.chargeMultiple * NODE_CIRCLE_RADIUS
 		})
 
-	// Show scalegrid. 
-	force.start() 
+	// Show scalegrid.
+	force.start()
 }
 
 /**
  * Redraw font text size when move over nodes.
- * @param {number} scale 
+ * @param {number} scale
  */
 function fontSizeRedraw(scale) {
 	d3.selectAll('.nodetext')
@@ -764,7 +783,7 @@ function fontSizeRedraw(scale) {
 				return d.objectType
 			}
 		});
-	
+
 }
 
 /**
@@ -783,9 +802,9 @@ function zoomRedraw() {
 
 /**
  * Using zoomer to translate position(x, y) and set scale s
- * @param {number} x  
- * @param {number} y 
- * @param {number} s  
+ * @param {number} x
+ * @param {number} y
+ * @param {number} s
  */
 function zoom(x, y, s) {
 	vis.transition().duration(1000).attr('transform', 'translate(' + x + ',' + y + ') scale(' + s + ')')
@@ -798,7 +817,7 @@ function zoom(x, y, s) {
 	} else {
 		d3.selectAll("line.link").style("stroke-width", LINE_LINK_STROKE_WIDTH);
 	}
-	
+
 	// console.log(zoomer.scale(), s)
 	// redraw font-size
 	fontSizeRedraw(s)
@@ -948,7 +967,7 @@ function getCenterCoordinates() {
 /**
  * Node or link click event handler function, also used in components search.
  * @param {Object} d
- * @param {number} i  
+ * @param {number} i
  */
 function onCompClick(d, i) {
 	function classify(d, c) {
@@ -1038,7 +1057,7 @@ function getSelectedNode() {
 
 /**
  * Return a node object, if multinodes selected.
- * @return {Object} node 
+ * @return {Object} node
  */
 function getAltSelectedNode() {
 	try {
@@ -1210,7 +1229,7 @@ function newChildAtSelected(componentName) {
 }
 
 /**
- * Append a node to its parent's 
+ * Append a node to its parent's
  * @param  {Object} component
  * @param  {number} treeIndex
  * @return {Object} nodeToAdd
@@ -1368,7 +1387,7 @@ function staticLoadsToHouses() {
 					parentIndex = findIndex(tree, 'name', tree[index]['parent'])
 					// delete the triplex_node
 					deleteObject(index)
-					// create a new node which parent is 
+					// create a new node which parent is
 					newHouse = randomHouse()
 					newLights = randomLights()
 					newHeater = randomWaterHeater()
@@ -1539,7 +1558,7 @@ function solarAdding() {
 	} else {
 		showProgressBar('Please wait. Solar is being generated.')
 		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-		// setTimeout(walkAndAddSolar, 1000);	
+		// setTimeout(walkAndAddSolar, 1000);
 		inter2 = setInterval(walkAndAddSolar, 10)
 	}
 
@@ -1626,9 +1645,9 @@ function backButton() {
 }
 
 /**
- * Handler function of "Next" button in "Find" toolbox. 
+ * Handler function of "Next" button in "Find" toolbox.
  * If objects are found, zoom to the first object in the list.
- * 
+ *
  */
 function findNext() {
 	if ($(".selected").length && treeData.object.indexOf("configuration") < 0) {
@@ -1735,8 +1754,8 @@ function nextTreeKey() {
 	keyList = Object.keys(tree)
 	max = 0
 	for (x in keyList) {
-		intKey = parseInt(keyList[x]); 
-		if (intKey > max) 
+		intKey = parseInt(keyList[x]);
+		if (intKey > max)
 			max = intKey
 	}
 	return max + 1
@@ -2003,7 +2022,7 @@ function foldSecSys() {
 			return true
 		} else return false;
 	})
-	// remove secLinks from links and its nodes from nodes 
+	// remove secLinks from links and its nodes from nodes
 	// TODO: bugs with handling secLinks
 	for (var i = links.length - 1; i >= 0; i--) {
 		if (links[i].objectType == 'parentChild') {
@@ -2042,8 +2061,8 @@ function foldSecSys() {
 }
 
 //**************************************************
-// TABLE EDITTING FUNCTIONS TODO: huge improvement, rename functions 
-//************************************************** 
+// TABLE EDITTING FUNCTIONS TODO: huge improvement, rename functions
+//**************************************************
 /**
  * Fit table according to window size.
  */
@@ -2097,6 +2116,10 @@ function selectNode() {
 	create_table();
 	$("#selected").show();
 	$("#selected table").show()
+	$("#selected").css("display", "inline-block");
+	$("#selected").css("max-width", "150px");
+	$("#table").css("display", "inline-block");
+	$("#table").css("max-width", "150px");
 	fit_table();
 }
 
@@ -2114,7 +2137,7 @@ function deselect() {
 }
 
 /**
- * Validate about edit fields. Check validation on selected components, and its function. 
+ * Validate about edit fields. Check validation on selected components, and its function.
  * 		If not valid, return true.
  * @param  {string} selector
  * @param  {function} testfunc
@@ -2140,7 +2163,7 @@ function validation(selector, testfunc, error_msg) {
 /**
  * Validate blanks, if invalid return true
  * @param  {string} selector
- * @return {boolean} 
+ * @return {boolean}
  */
 function validate_blanks(selector) {
 	return validation(selector, function (e) {
@@ -2296,7 +2319,7 @@ $(function () {
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 window.onbeforeunload = function(e) {
     var confirmationMessage = 'It looks like you have been editing something. ';
-    confirmationMessage += 'If you leave before saving, your changes will be lost.';	
+    confirmationMessage += 'If you leave before saving, your changes will be lost.';
     if (unsavedChanges) return confirmationMessage;
 };
 
