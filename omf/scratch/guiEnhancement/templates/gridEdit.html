@@ -9,33 +9,9 @@
 	<link rel="shortcut icon" href="/static/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="/static/gridEdit.css"/>
 	<style>
-		div#toolbar {padding: 0px; height:40px;	line-height:40px; position:fixed; top:65px;	z-index:1;} /*over-riding some toolbar defaults so tabs look good.*/
-		div#placeholder{height:5px;} /*Crazy float behavior for titlebar means we need this. */
-		div#title{position:fixed; top:0; z-index:1;}
-		#account_links{position:fixed; z-index:2; font-size:10px; margin-bottom:2; top:5; right:5;}
-		#account_links a {color:white;}
-		p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
-		p.tabSelected {background:gray; color:white;}
-		div#feeders {display:none;}
-		select, button {width:initial;}
-		table {width:100%; text-align:left;}
-		table tr td:last-child {text-align:right;}
-		table tr th:last-child {text-align:right;}
-		table thead {cursor:pointer; user-select:none;}
-		td {padding:5px;}
-		td.running {color:red;}
-		td.converting {color:red;}
-		td.finished {color:black;}
-		td.stopped {color:purple;}
-		td {border-bottom:1px dashed gray;}
-		tr:last-child td {border-bottom:none;}
-		table.importOptions {width:70%; text-align:left; margin-left:auto;}
-		table.importOptions tr td:first-child {width:40%;}
-		table.importOptions td {border-bottom: none}
-		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
+		div#header{width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0.3em;}
 		div.buttonGroup { display: inline-block; position:relative; }
 		div.arrow {font-size:8pt;position:absolute;margin-top:2px;margin-left:4px;display:inline;}
-		div#header{width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0.3em;}
 		ul.menu {background-color:#F8F8F8;padding:0;}
 		ul.menu.right {right: -30%; left: auto; padding:0 0 0 0;}
 		ul.menu.left {right: auto; left:auto; padding:0 0 0 0;}
@@ -53,31 +29,27 @@
 		div#pinDiv{width:60px;padding:0 0.9em 0 0.9em;float:right} 
 		div#editDiv{width:35px;padding:0 0.9em 0 0.9em;float:right} 
 		div#addDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
+		div#toolbar {padding: 0px; height:40px;	line-height:40px; position:fixed; top:65px;	z-index:1;} /*over-riding some toolbar defaults so tabs look good.*/
+		div#title{position:fixed; top:0; z-index:1;}
+		select, button {width:initial;}
+		table {width:100%; text-align:left;}
+		table tr td:last-child {text-align:right;}
+		table tr th:last-child {text-align:right;}
+		table thead {cursor:pointer; user-select:none;}
+		td {padding:5px;}
+		td.running {color:red;}
+		td.converting {color:red;}
+		td.finished {color:black;}
+		td.stopped {color:purple;}
+		td {border-bottom:1px dashed gray;}
+		tr:last-child td {border-bottom:none;}
+		table.importOptions {width:70%; text-align:left; margin-left:auto;}
+		table.importOptions tr td:first-child {width:40%;}
+		table.importOptions td {border-bottom: none}
+		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
 	</style>
 	<script>
-	function feedersClick() {
-		// window.location.hash = 'feeders'
-		window.location.hash = ''
-		gebi('analyses').style.display = 'none'
-		gebi('feeders').style.display = 'inline'
-		gebi('analysesTab').className = 'tab'
-		gebi('feedersTab').className = 'tab tabSelected'
-	}
-	function analysesClick() {
-		window.location.hash = ''
-		gebi('analyses').style.display = 'inline'
-		gebi('feeders').style.display = 'none'
-		gebi('analysesTab').className = 'tab tabSelected'
-		gebi('feedersTab').className = 'tab'
-	}
-	function selectTab(tab){
-       // var dropdown = document.getElementById("tab");
-       // var tab = dropdown.options[dropdown.selectedIndex].value;
-		if (tab == "models"){analysesClick();}
-		else if (tab == "feeders"){feedersClick();}
-	}
 	function dropPill(thisButton, name) {
-		// Change colors
 		thisButton.style.width = '130%'
 		thisButton.style.color= 'black'
 		thisButton.style.background= '#F8F8F8'
@@ -85,28 +57,20 @@
 		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
 		thisButton.innerHTML = name + ' <div class="arrow">&#9650;</div>'
 		function clickCloseEvent() {
-			// Close the menu:
 			thisButton.nextSibling.nextSibling.style.display = 'none'
 			thisButton.innerHTML = name + ' <div class="arrow">&#9660;</div>'
-			// Remove the event when it's fired once:
 			this.removeEventListener('click', arguments.callee, true)
-			// If we're hitting the current button, stop propagation so we don't re-open it again instantly.
 			if (window.event.toElement==thisButton) {event.stopPropagation()}
-			// Change colors back
 			thisButton.style.color= 'white'
 			thisButton.style.background= 'transparent'
 		}
-		// Add that function as a listener to take care of closing:
 		document.body.addEventListener('click', clickCloseEvent, true)
 	}
 	function clickCloseEvent(labelName, buttonName) {
-		// Close the menu:
 		var thisButton = document.getElementById(buttonName);
 		thisButton.nextSibling.nextSibling.style.display = 'none'
 		thisButton.innerHTML = labelName + ' <div class="arrow">&#9660;</div>'
-		// Remove the event when it's fired once:
 		this.removeEventListener('click', arguments.callee, true)
-		// If we're hitting the current button, stop propagation so we don't re-open it again instantly.
 		if (window.event.toElement==thisButton) {event.stopPropagation()}
 	}
 	function dropPillAndStay(thisButton, name) {
@@ -299,7 +263,6 @@
 		</div>
 	</div>
 </div>
-<!-- Menus initially start open due to a bug. Close them once.-->
 <script>clickCloseEvent("Add","addOps");</script>
 <script>clickCloseEvent("Edit","editOps");</script>
 <script>clickCloseEvent("Pinning","pinningOps");</script>
