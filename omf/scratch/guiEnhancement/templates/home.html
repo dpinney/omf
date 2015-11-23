@@ -8,33 +8,67 @@
 	<link rel='stylesheet' href='/static/omf.css'/>
 	<link rel='shortcut icon' href='/static/favicon.ico'>
 	<style>
-		/*New Header*/
-		div#header{width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0}
 		div#headInnerBlock{width:1000px;height:40px;font-size:medium;color:white;margin: 0 auto 0 auto;}
-		div.buttonGroup { display: inline-block; position:relative; }
-		div.arrow {font-size:8pt;position:absolute;margin-top:2px;margin-left:4px;display:inline;}
-		ul.menu {background-color:#F8F8F8;padding:0;}
+		ul.menu {
+			position:absolute;
+			top: 100%;
+			left: 0;
+			z-index: 1000;
+			min-width: 100px;
+			padding: 5px 0px 5px 0px;
+			margin: 1px 0 0;
+			list-style: none;
+			display: none;
+			text-align:left;
+			background-color:#F8F8F8;
+			padding:0;
+			border: 1px solid #CCC;
+			-webkit-border-radius: 5px;
+			-moz-border-radius: 5px;
+			border-radius: 5px;
+			-webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+			-moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+			box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+			-webkit-background-clip: padding-box; }
 		ul.menu.right {right: -14%; left: auto; padding:0 0 0 0;}
-		ul.menu.rightFeeder {width:350px;right:0%; left: auto;padding:1em;}
 		ul.menu.left {right: auto; left:auto; padding:0 0 0 0;}
 		ul.menu.center {right: auto; left:-45%;}
 		ul.menu li {padding:0px;}
 		ul.menu li:hover {background:green;color:white;}
 		ul.menu {display:block; color:black; padding:4px;}
 		ul.menu ul.menu:hover, ul.menu:visited:hover {color:white;}
-		div#homeMenu{height:40px;float:left;}
-		div#accountMenu{height:40px;float:right;padding:0 0.75em 0 0;}
-		div#newModelMenu{width:110px;height:40px;float:right;;display:inline-block}
-		div#newFeederMenu{width:110px;height:40px;float:right;;display:none;}
-		div#feederImport{width:400px;height:200px;background-color:#F8F8F8;border:1px black;margin:100px 0 0 -100px;display:none;}
-		button.pill{color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;}
-		div#newFeederDiv{margin:-1em;padding:1em;}
-		div#milsoftDiv{margin:-1em;padding:1em;}
-		div#gridLABDDiv{margin:-1em;padding:1em;}
-		div#cymeDiv{margin:-1em;padding:1em;}
-		/*End New Header*/
+		ul.menu.rightFeeder {width:350px;right:0%; left: auto;padding:1em;}
+		div.buttonGroup { display: inline-block; position:relative; }		
+		button.pill{
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			color:white;
+			font-size:medium;			
+			width: auto;
+			height:35px;
+			margin: 0px;
+			margin-top:-5px;
+			padding:0.3em;
+			background-color:#E0E0E0;
+			display:inline-block;
+			border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
+			white-space: nowrap;
+			display:inline-block;}
+		div#menuLeft{height:40px;float:left;font-size:medium;color:white;}
+		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
+		div#accountDiv{float:right;padding:0 0.75em 0 0;}
+		div#newModelDiv{width:110px;float:right;display:inline-block;}
+		div#menuText{color:darkgray;margin-left:5px;}
+		div#newFeederDiv{width:110px;float:right;;display:none;}
+		div#newFeederSel{margin:-1em;padding:1em;}
+		div#milsoftImport{margin:-1em;padding:1em;}
+		div#gridLABDImport{margin:-1em;padding:1em;}
+		div#cymeImport{margin:-1em;padding:1em;}
 		div#placeholder{height:5px;} /*Crazy float behavior for titlebar means we need this. */
-		p.tab {width:90px;height:100%;display:inline-block; color:#303030; cursor:pointer; user-select:none; -webkit-touch-callout: none; -webkit-user-select: none; -khtml-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;}
 		div#feeders {display:none;}
 		select, button {width:initial;}
 		table {width:100%; text-align:left;}
@@ -51,7 +85,6 @@
 		table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:auto;}
 		table.importOptions tr td:first-child {width:40%;}
 		table.importOptions td {border-bottom: none}
-		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
 	</style>
 	<script type="text/javascript">var tabName = "Models";</script>
 	<script type='text/javascript' src='/static/omf.js'></script>
@@ -62,9 +95,9 @@
 		window.location.hash = 'feeders'
 		gebi('analyses').style.display = 'none'
 		gebi('feeders').style.display = 'inline'
-		gebi('newModelMenu').style.display = 'none'
-		gebi('newFeederMenu').style.display = 'inline-block'
-		gebi('newFeederMenu').style.paddingRight = '7px'
+		gebi('newModelDiv').style.display = 'none'
+		gebi('newFeederDiv').style.display = 'inline-block'
+		gebi('newFeederDiv').style.paddingRight = '7px'
 		tabName="Feeders";
 		clickCloseEvent(tabName, "tabSelector");
 	}
@@ -72,8 +105,8 @@
 		window.location.hash = ''
 		gebi('analyses').style.display = 'inline'
 		gebi('feeders').style.display = 'none'
-		gebi('newModelMenu').style.display = 'inline-block'
-		gebi('newFeederMenu').style.display = 'none'
+		gebi('newModelDiv').style.display = 'inline-block'
+		gebi('newFeederDiv').style.display = 'none'
 		tabName="Models";
 		clickCloseEvent(tabName, "tabSelector");		
 	}
@@ -84,11 +117,11 @@
 		gebi(menuButton).style.background= '#F8F8F8'
 		gebi(menuButton).style.textAlign = 'left'
 		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-		thisButton.innerHTML = name + ' <div class="arrow">&#9650;</div>'
+		thisButton.innerHTML = name + ' <div id="arrow">&#9650;</div>'
 		function clickCloseEvent() {
 			// Close the menu:
 			thisButton.nextSibling.nextSibling.style.display = 'none'
-			thisButton.innerHTML = name + ' <div class="arrow">&#9660;</div>'
+			thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
 			// Remove the event when it's fired once:
 			this.removeEventListener('click', arguments.callee, true)
 			// If we're hitting the current button, stop propagation so we don't re-open it again instantly.
@@ -111,7 +144,7 @@
 			this.currentState = 'dropped'
 		} else {
 			thisButton.nextSibling.nextSibling.style.display = 'none'
-			thisButton.innerHTML = name + ' <div class="arrow">&#9660;</div>'
+			thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
 			this.currentState = 'raised'
 			thisButton.style.color= 'white'
 			thisButton.style.background= 'transparent'
@@ -121,7 +154,7 @@
 	function clickCloseEvent(labelName, buttonName) {
 		var thisButton = document.getElementById(buttonName);
 		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = labelName + ' <div class="arrow">&#9660;</div>'
+		thisButton.innerHTML = labelName + ' <div id="arrow">&#9660;</div>'
 		this.removeEventListener('click', arguments.callee, true)
 		if (window.event.toElement==thisButton) {event.stopPropagation()}
 	}
@@ -130,142 +163,144 @@
 <body>
 	<div id="header">
 		<div id="headInnerBlock">
-			<div id="homeMenu">
+			<div id="menuLeft">
 				<a style="color:white" href="/">OMF</a> &#187;
 				<div class='buttonGroup'>
-					<button name="tabSelector" id="tabSelector" class='pill' onclick='dropPill(this, tabName, "tabSelector")'>Models <div class="arrow">&#9660;</div></button>
+					<button name="tabSelector" id="tabSelector" class='pill' onclick='dropPill(this, tabName, "tabSelector")'>Models <div id="arrow">&#9660;</div></button>
 					<ul class='menu left'>
 						<li><a href="#" onclick='analysesClick();'>Models</a></li>
 						<li><a href="#" onclick='feedersClick();'>Feeders</a></li>
 					</ul>
 				</div>
 			</div>
-			<div id="accountMenu">
-				<div class='buttonGroup'>
-					<button name="accountOps" id="accountOps" class='pill' onclick='dropPill(this, "Account", "accountOps")'>Account <div class="arrow">&#9660;</div></button>
-					<ul class='menu right'>
-						<li style="width:120px;"><a href="logout">Logout</a></li>
-						<li style="width:120px;"><a href="myaccount">My Account</a></li>
-						{% if is_admin %}
-						<li style="width:120px;"><a href="adminControls">Admin Controls</a></li>
-						{% endif %}
-					</ul>
+			<div id="menuRight">
+				<div id="accountDiv">
+					<div class='buttonGroup'>
+						<button name="accountOps" id="accountOps" class='pill' onclick='dropPill(this, "Account", "accountOps")'>Account <div id="arrow">&#9660;</div></button>
+						<ul class='menu right'>
+							<li style="width:120px;"><a href="logout">Logout</a></li>
+							<li style="width:120px;"><a href="myaccount">My Account</a></li>
+							{% if is_admin %}
+							<li style="width:120px;"><a href="adminControls">Admin Controls</a></li>
+							{% endif %}
+						</ul>
+					</div>
 				</div>
-			</div>
-			<div id="newModelMenu">
-				<div class="buttonGroup">
-					<button name="newModelButton" id="newModelButton" class='pill' onclick='dropPill(this, "New Model", "newModelButton")'>New Model<div class="arrow">&#9660;</div></button>
-					<ul class='menu right' style="width:150%">
-						<font style="color:darkgray;margin-left:5px;">Solar Models</font>
-						{% for name in modelNames if not name.startswith('_') %}
-							{% if "solar" in name %}
-							<li><a href="/newModel/{{name}}">{{ name }}</a></li>
-							{% endif %}
-						{% endfor %}
-						<font style="color:darkgray;margin-left:5px;">Energy &amp; Demand</font>
-						{% for name in modelNames if not name.startswith('_') %}
-							{% if "energy" in name or "demand" in name %}
-							<li><a href="/newModel/{{name}}">{{ name }}</a></li>
-							{% endif %}
-						{% endfor %}
-						<font style="color:darkgray;margin-left:5px;">More Models</font>
-						{% for name in modelNames if not name.startswith('_') %}
-							{% if "solar" not in name and "energy" not in name and "demand" not in name %}
-							<li><a href="/newModel/{{name}}">{{ name }}</a></li>
-							{% endif %}
-						{% endfor %}
-					</ul>
+				<div id="newModelDiv">
+					<div class="buttonGroup">
+						<button name="newModelButton" id="newModelButton" class='pill' onclick='dropPill(this, "New Model", "newModelButton")'>New Model<div id="arrow">&#9660;</div></button>
+						<ul class='menu right' style="width:150%">
+							<div id="menuText">Solar Models</div>
+							{% for name in modelNames if not name.startswith('_') %}
+								{% if "solar" in name %}
+								<li><a href="/newModel/{{name}}">{{ name }}</a></li>
+								{% endif %}
+							{% endfor %}
+							<div id="menuText">Energy &amp; Demand</div>
+							{% for name in modelNames if not name.startswith('_') %}
+								{% if "energy" in name or "demand" in name %}
+								<li><a href="/newModel/{{name}}">{{ name }}</a></li>
+								{% endif %}
+							{% endfor %}
+							<div id="menuText">More Models</div>
+							{% for name in modelNames if not name.startswith('_') %}
+								{% if "solar" not in name and "energy" not in name and "demand" not in name %}
+								<li><a href="/newModel/{{name}}">{{ name }}</a></li>
+								{% endif %}
+							{% endfor %}
+						</ul>
+					</div>
 				</div>
-			</div>
-			<div id="newFeederMenu">
-				<div class="buttonGroup">
-					<button name="newFeederButton" id="newFeederButton" class='pill' onclick='dropPillAndStay(this, "New Feeder", "newFeederButton")'>New Feeder<div class="arrow">&#9660;</div></button>
-					<ul class='menu rightFeeder'>
-					<div id="newFeederDiv">
-						<form action='/newBlankFeeder/' enctype='multipart/form-data' method='post'>
-							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-							<p style='font-weight:bold;float:left'>Blank Feeder</p>
-							<table class='importOptions'>
-								<tr>
-									<td>Name</td>
-									<td><input type='text' name='feederName' style="margin: -2px 0 -2px 0;" required/></td>
-								</tr>
-								<tr>
-									<td></td>
-									<td><input type='submit' value='Create'/></td>
-								</tr>
-							</table>
-						</form>
+				<div id="newFeederDiv">
+					<div class="buttonGroup">
+						<button name="newFeederButton" id="newFeederButton" class='pill' onclick='dropPillAndStay(this, "New Feeder", "newFeederButton")'>New Feeder<div id="arrow">&#9660;</div></button>
+						<ul class='menu rightFeeder'>
+						<div id="newFeederSel">
+							<form action='/newBlankFeeder/' enctype='multipart/form-data' method='post'>
+								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+								<p style='font-weight:bold;float:left'>Blank Feeder</p>
+								<table class='importOptions'>
+									<tr>
+										<td>Name</td>
+										<td><input type='text' name='feederName' required/></td>
+									</tr>
+									<tr>
+										<td></td>
+										<td><input type='submit' value='Create'/></td>
+									</tr>
+								</table>
+							</form>
+						</div>
+						<div id="milsoftImport">
+							<form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
+								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+								<p style='font-weight:bold;float:left'>Milsoft</p>
+								<table class='importOptions'>
+									<tr>
+										<td>Name</td>
+										<td><input type='text' name='feederName' required/></td>
+									</tr>
+									<tr>
+										<td>Data File (.std)</td>
+										<td><input type='file' name='stdFile' accept = '.std' required/></td>
+									</tr>
+									<tr>
+										<td>Equipment File (.seq)</td>
+										<td><input type='file' name='seqFile' accept = '.seq' required/></td>
+									</tr>
+									<tr>
+										<td></td>
+										<td><input type='submit' value='Import'/></td>
+									</tr>
+								</table>
+							</form>
+						</div>
+						<div id="gridLABDImport">
+							<form action='/gridlabdImport/' enctype='multipart/form-data' method='post'>
+								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+								<p style='font-weight:bold;float:left'>GridLAB-D</p>
+								<table class='importOptions'>
+									<tr>
+										<td>Name</td>
+										<td><input type='text' name='feederName' required/></td>
+									</tr>
+									<tr>
+										<td>Data File (.glm)</td>
+										<td><input type='file' name='glmFile' accept = '.glm' required/></td>
+									</tr>
+									<tr>
+										<td></td>
+										<td><input type='submit' value='Import'/></td>
+									</tr>
+								</table>
+							</form>
+						</div>
+						<div id="cymeImport">
+							<form action='/cymeImport/' enctype='multipart/form-data' method='post'>
+								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+								<p style='font-weight:bold;float:left'>Cyme</p>
+								<table class='importOptions'>
+									<tr>
+										<td>Name</td>
+										<td><input type='text' name='feederName' required/></td>
+									</tr>
+									<tr>
+										<td>Network File (.mdb)</td>
+										<td><input type='file' name='mdbNetFile' accept = '.mdb' required/></td>
+									</tr>
+									<tr>
+										<td>Equipment File (.mdb)</td>
+										<td><input type='file' name='mdbEqFile' accept = '.mdb' required/></td>
+									</tr>
+									<tr>
+										<td></td>
+										<td><input type='submit' value='Import'/></td>
+									</tr>
+								</table>
+							</form>
+						<li>
+						</ul>
 					</div>
-					<div id="milsoftDiv">
-						<form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
-							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-							<p style='font-weight:bold;float:left'>Milsoft</p>
-							<table class='importOptions'>
-								<tr>
-									<td>Name</td>
-									<td><input type='text' name='feederName' style="margin: -2px 0 -2px 0;" required/></td>
-								</tr>
-								<tr>
-									<td>Data File (.std)</td>
-									<td><input type='file' name='stdFile' style="margin: -2px 0 -2px 0;" accept = '.std' required/></td>
-								</tr>
-								<tr>
-									<td>Equipment File (.seq)</td>
-									<td><input type='file' name='seqFile' style="margin: -2px 0 -2px 0;" accept = '.seq' required/></td>
-								</tr>
-								<tr>
-									<td></td>
-									<td><input type='submit' value='Import'/></td>
-								</tr>
-							</table>
-						</form>
-					</div>
-					<div id="gridLABDDiv">
-						<form action='/gridlabdImport/' enctype='multipart/form-data' method='post'>
-							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-							<p style='font-weight:bold;float:left'>GridLAB-D</p>
-							<table class='importOptions'>
-								<tr>
-									<td>Name</td>
-									<td><input type='text' name='feederName' style="margin: -2px 0 -2px 0;" required/></td>
-								</tr>
-								<tr>
-									<td>Data File (.glm)</td>
-									<td><input type='file' name='glmFile' accept = '.glm' style="margin: -2px 0 -2px 0;" required/></td>
-								</tr>
-								<tr>
-									<td></td>
-									<td><input type='submit' value='Import'/></td>
-								</tr>
-							</table>
-						</form>
-					</div>
-					<div id="cymeDiv">
-						<form action='/cymeImport/' enctype='multipart/form-data' method='post'>
-							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-							<p style='font-weight:bold;float:left'>Cyme</p>
-							<table class='importOptions'>
-								<tr>
-									<td>Name</td>
-									<td><input type='text' name='feederName' style="margin: -2px 0 -2px 0;" required/></td>
-								</tr>
-								<tr>
-									<td>Network File (.mdb)</td>
-									<td><input type='file' name='mdbNetFile' accept = '.mdb' style="margin: -2px 0 -2px 0;" required/></td>
-								</tr>
-								<tr>
-									<td>Equipment File (.mdb)</td>
-									<td><input type='file' name='mdbEqFile' accept = '.mdb' style="margin: -2px 0 -2px 0;" required/></td>
-								</tr>
-								<tr>
-									<td></td>
-									<td><input type='submit' value='Import'/></td>
-								</tr>
-							</table>
-						</form>
-					<li>
-					</ul>
 				</div>
 			</div>
 		</div>
@@ -278,7 +313,7 @@
 	<script>clickCloseEvent("New Feeder","newFeederButton");</script>		
 	<div id="placeholder"></div>
 	<div id='analyses'>
-		<div class='content'style="margin-top:15px;">
+		<div class='content' style="margin-top:15px;">
 			<table class="sortable">
 				<thead>
 					<tr>
@@ -306,7 +341,7 @@
 		</div>
 	</div>
 	<div id='feeders'>
-		<div class='content'style="margin-top:15px;">
+		<div class='content' style="margin-top:15px;">
 			<table class="sortable">
 				<thead>
 					<tr>

@@ -9,17 +9,54 @@
 	<link rel="shortcut icon" href="/static/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="/static/gridEdit.css"/>
 	<style>
-		div#header{width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0.3em;}
-		div.buttonGroup { display: inline-block; position:relative; }
-		div.arrow {font-size:8pt;position:absolute;margin-top:2px;margin-left:4px;display:inline;}
-		ul.menu {background-color:#F8F8F8;padding:0;}
-		ul.menu.right {right: -30%; left: auto; padding:0 0 0 0;}
+		ul.menu {
+			position:absolute;
+			top: 100%;
+			left: 0;
+			z-index: 1000;
+			min-width: 100px;
+			padding: 5px 0px 5px 0px;
+			margin: 1px 0 0;
+			list-style: none;
+			display: none;
+			text-align:left;
+			background-color:#F8F8F8;
+			padding:0;
+			border: 1px solid #CCC;
+			-webkit-border-radius: 5px;
+			-moz-border-radius: 5px;
+			border-radius: 5px;
+			-webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+			-moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+			box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
+			-webkit-background-clip: padding-box; }
+		ul.menu.right {right: -7%; left: auto; padding:0 0 0 0;}
 		ul.menu.left {right: auto; left:auto; padding:0 0 0 0;}
 		ul.menu.center {right: auto; left:-45%;}
 		ul.menu li {padding:0px;}
 		ul.menu li:hover {background:green;color:white;}
 		ul.menu {display:block; color:black; padding:4px;}
 		ul.menu ul.menu:hover, ul.menu:visited:hover {color:white;}
+		div.buttonGroup { display: inline-block; position:relative; }
+		button.pill{
+			-webkit-touch-callout: none;
+			-webkit-user-select: none;
+			-khtml-user-select: none;
+			-moz-user-select: none;
+			-ms-user-select: none;
+			user-select: none;
+			color:white;
+			font-size:medium;			
+			width: auto;
+			height:35px;
+			margin: 0px;
+			margin-top:-5px;
+			padding:0.3em;
+			background-color:#E0E0E0;
+			display:inline-block;
+			border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
+			white-space: nowrap;
+			display:inline-block;}		
 		div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-top:4px;}
 		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
 		div#fileDiv{width:55px;padding:0 0.9em 0 0.9em;float:right;}
@@ -29,8 +66,8 @@
 		div#pinDiv{width:60px;padding:0 0.9em 0 0.9em;float:right} 
 		div#editDiv{width:35px;padding:0 0.9em 0 0.9em;float:right} 
 		div#addDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
-		div#toolbar {padding: 0px; height:40px;	line-height:40px; position:fixed; top:65px;	z-index:1;} /*over-riding some toolbar defaults so tabs look good.*/
-		div#title{position:fixed; top:0; z-index:1;}
+		input[type='text'], input[type='file']{margin: -2px 0 -2px 0;}		
+		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
 		select, button {width:initial;}
 		table {width:100%; text-align:left;}
 		table tr td:last-child {text-align:right;}
@@ -46,7 +83,6 @@
 		table.importOptions {width:70%; text-align:left; margin-left:auto;}
 		table.importOptions tr td:first-child {width:40%;}
 		table.importOptions td {border-bottom: none}
-		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
 	</style>
 	<script>
 	function dropPill(thisButton, name) {
@@ -55,10 +91,10 @@
 		thisButton.style.background= '#F8F8F8'
 		thisButton.style.textAlign = 'left'
 		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-		thisButton.innerHTML = name + ' <div class="arrow">&#9650;</div>'
+		thisButton.innerHTML = name + ' <div id="arrow">&#9650;</div>'
 		function clickCloseEvent() {
 			thisButton.nextSibling.nextSibling.style.display = 'none'
-			thisButton.innerHTML = name + ' <div class="arrow">&#9660;</div>'
+			thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
 			this.removeEventListener('click', arguments.callee, true)
 			if (window.event.toElement==thisButton) {event.stopPropagation()}
 			thisButton.style.color= 'white'
@@ -69,7 +105,7 @@
 	function clickCloseEvent(labelName, buttonName) {
 		var thisButton = document.getElementById(buttonName);
 		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = labelName + ' <div class="arrow">&#9660;</div>'
+		thisButton.innerHTML = labelName + ' <div id="arrow">&#9660;</div>'
 		this.removeEventListener('click', arguments.callee, true)
 		if (window.event.toElement==thisButton) {event.stopPropagation()}
 	}
@@ -84,7 +120,7 @@
 			this.currentState = 'dropped'
 		} else {
 			thisButton.nextSibling.nextSibling.style.display = 'none'
-			thisButton.innerHTML = name + ' <div class="arrow">&#9660;</div>'
+			thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
 			this.currentState = 'raised'
 			thisButton.style.color= 'white'
 			thisButton.style.background= 'transparent'
@@ -101,8 +137,8 @@
 	<div id="menuRight">
 		<div id="fileDiv">
 			<div class='buttonGroup'>
-				<button id="fileOps" class='pill' onclick='dropPill(this, "File", "fileOps")' style="color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;">File <div class="arrow">&#9660;</div></button>
-				<ul class='menu right'>
+				<button id="fileOps" class='pill' onclick='dropPill(this, "File", "fileOps")'>File <div id="arrow">&#9660;</div></button>
+				<ul class='menu right' style="right:-30%">
 					{% if not public %}
 					<li><a href="javascript:publishFeeder()">Make Public </a></li>
 					{% endif %}
@@ -119,8 +155,8 @@
 		</div>
 		<div id="layoutDiv">
 			<div class="buttonGroup">
-				<button id="layoutSelector" class='pill' onclick='dropPillAndStay(this, "Layout");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Layout <div class="arrow">&#9660;</div></button>
-				<ul class='menu right' style="right:-7%;">
+				<button id="layoutSelector" class='pill' onclick='dropPillAndStay(this, "Layout");'>Layout <div id="arrow">&#9660;</div></button>
+				<ul class='menu right'>
 				<table style='padding:4px;word-wrap:break-word'>
 					<tr>
 						<td>GraphNodes</td>
@@ -165,8 +201,8 @@
 		</div>
 		<div id="findDiv">
 			<div class="buttonGroup">
-				<button id="findOps" class='pill' onclick='dropPillAndStay(this, "Find");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Find <div class="arrow">&#9660;</div></button>
-				<ul class='menu right' style="right:-7%">
+				<button id="findOps" class='pill' onclick='dropPillAndStay(this, "Find");'>Find <div id="arrow">&#9660;</div></button>
+				<ul class='menu right'>
 				<table style='padding:4px;word-wrap:break-word'>
 					<tr>
 						<td>Term</td>
@@ -186,8 +222,8 @@
 		</div>
 		<div id="foldDiv">
 			<div class="buttonGroup">
-				<button id="foldingOps" class='pill' onclick='dropPill(this, "Folding");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Folding <div class="arrow">&#9660;</div></button>
-				<ul class='menu right'>
+				<button id="foldingOps" class='pill' onclick='dropPill(this, "Folding");'>Folding <div id="arrow">&#9660;</div></button>
+				<ul class='menu right' style="right:-30%">
 				<li><a href='javascript:foldOneLevel();unsavedChanges=true'>One Level Fold</a></li>
 				<li><a href='javascript:unfoldOneLevel();unsavedChanges=true'>One Level Unfold</a></li>
 				<li><a href='javascript:unfoldAll();unsavedChanges=true'>Unfold All</a></li>
@@ -198,8 +234,8 @@
 		</div>
 		<div id="pinDiv">
 			<div class="buttonGroup">
-				<button id="pinningOps" class='pill' onclick='dropPill(this, "Pinning");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Pinning <div class="arrow">&#9660;</div></button>
-				<ul class='menu right'>
+				<button id="pinningOps" class='pill' onclick='dropPill(this, "Pinning");'>Pinning <div id="arrow">&#9660;</div></button>
+				<ul class='menu right' style="right:-30%">
 				<li><a href='javascript:pinAll();unsavedChanges=true' id='pinUnpinAll'>Pin All</a></li>
 				<li><a href='javascript:unPinAll();unsavedChanges=true'>Unpin All</a></li>
 				<li><a href='javascript:toggleSelectedPin();unsavedChanges=true'>Toggle Selected Pin (p)</a></li>
@@ -208,8 +244,8 @@
 		</div>
 		<div id="editDiv">
 			<div class="buttonGroup">
-				<button id="editOps" class='pill' onclick='dropPillAndStay(this, "Edit");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Edit <div class="arrow">&#9660;</div></button>
-				<ul class='menu right' style="right:-7%">
+				<button id="editOps" class='pill' onclick='dropPillAndStay(this, "Edit");'>Edit <div id="arrow">&#9660;</div></button>
+				<ul class='menu right'>
 				<table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
 					<tr>
 						<td>Zoom Reset</td>
@@ -234,8 +270,8 @@
 		</div>
 		<div id="addDiv">
 			<div class="buttonGroup">
-				<button id="addOps" class='pill' onclick='dropPill(this, "Add");' style="height:35px;padding:0.3em;color:white;font-size:medium;border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;margin-top:-5px">Add <div class="arrow">&#9660;</div></button>
-				<ul id='newObjectMenu' class='menu right'>
+				<button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add <div id="arrow">&#9660;</div></button>
+				<ul id='newObjectMenu' class='menu right' style="right:-30%">
 			</div>
 		</div>
 	</div>
@@ -829,7 +865,7 @@ function zoomToFit() {
 	}
 
 	function window_vert_center() {
-		var extra = $("#title").outerHeight() + $("#toolbar").outerHeight()
+		var extra = 66 + $("#header").outerHeight()
 		var win_height = $(window).height() - extra
 		return (win_height / 2 + extra) / ($(window).height() / 1000);
 	}
@@ -864,7 +900,7 @@ function zoomToFit() {
 	}
 
 	function win_h() {
-		var extra = $("#title").outerHeight() + $("#toolbar").outerHeight()
+		var extra = 66 + $("#header").outerHeight()
 		var win_h = $(window).height() - extra
 		return win_h / ($(window).height() / 1000)
 	}
