@@ -211,20 +211,22 @@ def _tests():
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {
 		"batteryEfficiency": "92",
-		"cellCapacity": "100",
+		"inverterEfficiency": "97.5",
+		"cellCapacity": "7",
 		"discountRate": "2.5",
 		"created": "2015-06-12 17:20:39.308239",
-		"dischargeRate": "50",
+		"dischargeRate": "5",
 		"modelType": "energyStorage",
-		"chargeRate": "50",
+		"chargeRate": "5",
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","OlinBeckenhamScada.csv")).read(),
 		"fileName": "OlinBeckenhamScada.csv",
-		"cellCost": "25000",
-		"cellQuantity": "3",
+		"cellCost": "7140",
+		"cellQuantity": "10",
 		"runTime": "0:00:03",
-		"projYears": "10",
-		"demandCharge": "50",
-		"retailCost": "0.07"}
+		"projYears": "15",
+		"demandCharge": "20",
+		"dodFactor":"100",
+		"retailCost": "0.06"}
 	modelLoc = pJoin(workDir,"admin","Automated energyStorage Testing")
 	# Blow away old test results if necessary.
 	try:
