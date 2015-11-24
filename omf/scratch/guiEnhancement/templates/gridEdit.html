@@ -9,54 +9,7 @@
 	<link rel="shortcut icon" href="/static/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="/static/gridEdit.css"/>
 	<style>
-		ul.menu {
-			position:absolute;
-			top: 100%;
-			left: 0;
-			z-index: 1000;
-			min-width: 100px;
-			padding: 5px 0px 5px 0px;
-			margin: 1px 0 0;
-			list-style: none;
-			display: none;
-			text-align:left;
-			background-color:#F8F8F8;
-			padding:0;
-			border: 1px solid #CCC;
-			-webkit-border-radius: 5px;
-			-moz-border-radius: 5px;
-			border-radius: 5px;
-			-webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-			-moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-			box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
-			-webkit-background-clip: padding-box; }
-		ul.menu.right {right: -7%; left: auto; padding:0 0 0 0;}
-		ul.menu.left {right: auto; left:auto; padding:0 0 0 0;}
-		ul.menu.center {right: auto; left:-45%;}
-		ul.menu li {padding:0px;}
-		ul.menu li:hover {background:green;color:white;}
-		ul.menu {display:block; color:black; padding:4px;}
-		ul.menu ul.menu:hover, ul.menu:visited:hover {color:white;}
-		div.buttonGroup { display: inline-block; position:relative; }
-		button.pill{
-			-webkit-touch-callout: none;
-			-webkit-user-select: none;
-			-khtml-user-select: none;
-			-moz-user-select: none;
-			-ms-user-select: none;
-			user-select: none;
-			color:white;
-			font-size:medium;			
-			width: auto;
-			height:35px;
-			margin: 0px;
-			margin-top:-5px;
-			padding:0.3em;
-			background-color:#E0E0E0;
-			display:inline-block;
-			border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
-			white-space: nowrap;
-			display:inline-block;}		
+		ul.menu.right {right: -7%;}
 		div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-top:4px;}
 		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
 		div#fileDiv{width:55px;padding:0 0.9em 0 0.9em;float:right;}
@@ -69,6 +22,182 @@
 		input[type='text'], input[type='file']{margin: -2px 0 -2px 0;}		
 		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
 		select, button {width:initial;}
+		td, th {padding:3px;text-align: left;}
+		body {
+			overflow: hidden;
+			height: 100%;
+			background: white;
+		}
+		/*other styles*/  
+		input#gridNameEdit {
+			font-size: 28pt;
+			line-height: 28pt;
+			text-shadow: 0px 1px 1px #4d4d4d;
+			height: 50px;
+			color: gray;
+			padding: 3px;
+			margin-bottom: 5px;
+			width: 85%;
+		}
+		button.smallButton {
+			height: 20px;
+			width: 20px;
+			display: inline-block;
+			float: right;
+			padding: 2px;
+			margin-left: 5px;
+		}
+		/* Edit object table style */
+		button.deleteButton {
+			width: 100%;
+			float: right;
+			background-color: #CC0000;
+			color: white;
+		}
+		button.deleteButton:hover {
+			background: #FF0000;
+		}
+		#selected {
+			min-width: 350px;
+			position: absolute;
+			top: 90pt;
+			left: 4pt;
+			margin: -60px 0 0 800px;
+		}
+		#selected table{
+			border: 1px solid black;
+			border-bottom: 0px;
+			display: none;
+			width: 100%;
+		}
+		#selected button{
+			width: 100%;
+		}
+		#selected #otherButtons{
+			display: none;
+		}
+		#selHead tr td {
+			background: black;
+			color: white;
+		}
+		#selBody{
+			max-height: 100%;
+			max-width: 100%;
+			overflow-y: auto;
+		}
+		#selected #selBody td {
+			padding: 5px;
+			border-bottom: 1px solid black;
+		}
+		#selected button{
+			width: 100%;
+		}
+		#selBody td{
+			word-break: break-all;
+			max-width: 100px;
+		}
+		#selBody td, #daButtons td{
+			background: white;
+			color: black;
+		}
+		input {
+			min-width: 100px;
+		}	
+		/* Start graph elements. */
+		.nodetext {
+			pointer-events: none;
+			z-index: 10;
+			text-anchor: start;
+			fill: #DDDDDD;
+			stroke: #000000;
+		}
+		g.node {
+			fill: gray;
+			stroke: #fff;
+		}
+		line.link {
+			stroke: black;
+			stroke-opacity: 1;
+			stroke-width: 6px;
+		}
+		line.parentChild {
+			stroke-dasharray: 0.4,0.4;
+		}
+		line.selected {
+			stroke: lime;
+			stroke-width: 8px;
+			stroke-opacity: 1.0;
+		}
+		g.selected {
+			stroke: lime;
+			stroke-width: 2px;
+			stroke-opacity: 1.0;
+		}
+		g.multiselected {
+			stroke: lime;
+			stroke-width: 4px;
+			stroke-opacity: 1.0;
+			stroke-dasharray: 1,1;
+		}
+		g.house {
+			fill: #3366FF;
+		}
+		g.load {
+			fill: #3366FF;
+		}
+		g.ZIPload, g.waterheater {
+			fill: #66CCFF;
+		}
+		g.triplex_meter {
+			fill: #FF6600;
+		}
+		g.triplex_node {
+			fill: #FFCC00;
+		}
+		g.gridNode {
+			fill: #CC0000;
+		}
+		g.swingNode {
+			fill: hotpink;
+		}
+		g text {
+			fill: black;
+			stroke: black;
+			stroke-width: 0px;
+			stroke-opacity: 1;
+			font-size: 15;
+			pointer-events: none;
+		}
+		circle.nodeIsPinned {
+			fill: none;
+			stroke: black;
+			pointer-events: none;
+		}
+		circle.nodeNotPinned {
+			fill: none;
+			pointer-events: none;
+		}
+		.node:not(:hover) .nodetext{
+			display: none;
+		}
+		.axis path,.axis line {
+			fill: none;
+			stroke: #ddd;
+			stroke-width: 1px;
+			shape-rendering: crispEdges
+		}
+		.axis text {
+			font-family: sans-serif;
+			font-size: 11px;
+			text-anchor: middle;
+		}
+		text.markerText {
+			fill: gray;
+			font-size: 6px;
+		}
+		rect {
+			fill: #fff;
+		}		
 	</style>
 	<script>
 	function dropPill(thisButton, name) {
@@ -179,7 +308,7 @@
 						</tr>
 						<tr>
 					<td></td>
-					<td style='padding-top:10px'><button onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
+					<td style='padding-top:10px'><button style="width:100%;" onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
 						</tr>
 					</table>
 				</ul>
@@ -195,12 +324,12 @@
 						<td><input id='searchTerm' type='text'></td>
 					</tr>
 					<tr>
-						<td><button onclick='backButton()'>Back</button></td>
+						<td><button style="width:100%;" onclick='backButton()'>Back</button></td>
 						<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
 					</tr>
 					<tr>
-						<td style='padding-top:10px'><button onclick='findPrevious()'>Previous</button></td>
-						<td style='padding-top:10px'><button onclick='findNext()'>Next</button></td>
+						<td><button style="width:100%;" onclick='findPrevious()'>Previous</button></td>
+						<td><button style="width:100%;" onclick='findNext()'>Next</button></td>
 					</tr>
 				</table>
 				</ul>
@@ -235,19 +364,19 @@
 				<table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
 					<tr>
 						<td>Zoom Reset</td>
-						<td><button onclick='javascript:zoomReset()'>Go</button></td>
+						<td><button style="width:30px;" onclick='javascript:zoomReset()'>Go</button></td>
 					</tr>
 					<tr>
 						<td>Zoom To Fit</td>
-						<td><button onclick='javascript:zoomToFit()'>Go</button></td>
+						<td><button style="width:30px;" onclick='javascript:zoomToFit()'>Go</button></td>
 					</tr>
 					<tr>
 						<td>Static Loads to Houses</td>
-						<td><button onclick='javascript:staticLoadsToHouses();unsavedChanges=true'>Go</button></td>
+						<td><button style="width:30px;" onclick='javascript:staticLoadsToHouses();unsavedChanges=true'>Go</button></td>
 					</tr>
 					<tr>
 						<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
-						<td><button onclick='javascript:solarAdding();unsavedChanges=true'>Go</button></td>
+						<td><button style="width:30px;" onclick='javascript:solarAdding();unsavedChanges=true'>Go</button></td>
 					</tr>
 
 				</table>
@@ -261,7 +390,7 @@
 			</div>
 		</div>
 	</div>
-	<div id="selected" style="position:absolute;margin: -60px 0 0 800px;">
+	<div id="selected">
 		<table id="selHead">
 			<tr>
 			<td id="objmod" colspan="2"></td>
