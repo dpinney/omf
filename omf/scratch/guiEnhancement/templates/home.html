@@ -8,7 +8,6 @@
 	<link rel='stylesheet' href='/static/omf.css'/>
 	<link rel='shortcut icon' href='/static/favicon.ico'>
 	<style>
-		div#headInnerBlock{width:1000px;height:40px;font-size:medium;color:white;margin: 0 auto 0 auto;}
 		ul.menu {
 			position:absolute;
 			top: 100%;
@@ -58,8 +57,6 @@
 			border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
 			white-space: nowrap;
 			display:inline-block;}
-		div#menuLeft{height:40px;float:left;font-size:medium;color:white;}
-		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
 		div#accountDiv{float:right;padding:0 0.75em 0 0;}
 		div#newModelDiv{width:110px;float:right;display:inline-block;}
 		div#menuText{color:darkgray;margin-left:5px;}
@@ -69,22 +66,28 @@
 		div#gridLABDImport{margin:-1em;padding:1em;}
 		div#cymeImport{margin:-1em;padding:1em;}
 		div#placeholder{height:5px;} /*Crazy float behavior for titlebar means we need this. */
+		div.content {width:980px}		
 		div#feeders {display:none;}
+		select, input[type='text'], input[type='email'], input[type='file'], button {
+			margin: -2px 0 -2px 0;font-size:small;}		
+		input[type='text'], input[type='file']{margin: -2px 0 -2px 0;}		
+		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
 		select, button {width:initial;}
 		table {width:100%; text-align:left;}
 		table tr td:last-child {text-align:right;}
 		table tr th:last-child {text-align:right;}
 		table thead {cursor:pointer; user-select:none;}
-		td {padding:5px;}
+		td {padding:5px;border-bottom:1px dashed gray;}
+		td,th {text-align: left;}
 		td.running {color:red;}
 		td.converting {color:red;}
 		td.finished {color:black;}
 		td.stopped {color:purple;}
-		td {border-bottom:1px dashed gray;}
 		tr:last-child td {border-bottom:none;}
 		table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:auto;}
 		table.importOptions tr td:first-child {width:40%;}
 		table.importOptions td {border-bottom: none}
+		.running, .runningInline, .postRunInline, .stoppedInline, .stopped{display: inline;}		
 	</style>
 	<script type="text/javascript">var tabName = "Models";</script>
 	<script type='text/javascript' src='/static/omf.js'></script>
@@ -100,6 +103,7 @@
 		gebi('newFeederDiv').style.paddingRight = '7px'
 		tabName="Feeders";
 		clickCloseEvent(tabName, "tabSelector");
+		// Feeder seems to offset 3px to left, maybe add margin-left+3px.
 	}
 	function analysesClick() {
 		window.location.hash = ''
@@ -162,7 +166,7 @@
 </head>
 <body>
 	<div id="header">
-		<div id="headInnerBlock">
+		<div id="headInnerBlock" style="margin-top:0px;">
 			<div id="menuLeft">
 				<a style="color:white" href="/">OMF</a> &#187;
 				<div class='buttonGroup'>
