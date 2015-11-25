@@ -210,6 +210,47 @@ function indexFind(arr, fun) {
 	}
 	return -1
 }
+function dropPill(thisButton, name, width) {
+	thisButton.style.width = width
+	thisButton.style.color= 'black'
+	thisButton.style.background= '#F8F8F8'
+	thisButton.style.textAlign = 'left'
+	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
+	thisButton.innerHTML = name + ' <div id="arrow">&#9650;</div>'
+	function clickCloseEvent() {
+		thisButton.nextSibling.nextSibling.style.display = 'none'
+		thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
+		this.removeEventListener('click', arguments.callee, true)
+		thisButton.style.color= 'white'
+		thisButton.style.background= 'transparent'
+		if (window.event.toElement==thisButton) {event.stopPropagation()}
+	}
+	document.body.addEventListener('click', clickCloseEvent, true)
+}
+function clickCloseEvent(labelName, buttonName) {
+	var thisButton = document.getElementById(buttonName);
+	thisButton.nextSibling.nextSibling.style.display = 'none'
+	thisButton.innerHTML = labelName + ' <div id="arrow">&#9660;</div>'
+	this.removeEventListener('click', arguments.callee, true)
+	if (window.event.toElement==thisButton) {event.stopPropagation()}
+}
+function dropPillAndStay(thisButton, name, width) {
+	thisButton.style.width = width
+	thisButton.style.color= 'black'
+	thisButton.style.background= '#F8F8F8'
+	thisButton.style.textAlign = 'left'
+	if (typeof this.currentState == 'undefined' || this.currentState == 'raised') {
+		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
+		thisButton.innerHTML = name + ' &times;'
+		this.currentState = 'dropped'
+	} else {
+		thisButton.nextSibling.nextSibling.style.display = 'none'
+		thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
+		this.currentState = 'raised'
+		thisButton.style.color= 'white'
+		thisButton.style.background= 'transparent'
+	}
+}
 
 ///////////////////////////////////////////
 // ORIGINAL MODELS.JS

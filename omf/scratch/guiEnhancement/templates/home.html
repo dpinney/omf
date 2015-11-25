@@ -5,6 +5,8 @@
 	<link rel='stylesheet' href='/static/omf.css'/>
 	<link rel='shortcut icon' href='/static/favicon.ico'>
 	<style>
+		ul.menu.left {right: auto; left:-3.5%; padding:0 0 0 0;}
+		ul.menu.right {right: -21%; left: auto; padding:0 0 0 0;}
 		ul.menu.rightFeeder {width:350px;right:0%; left: auto;padding:1em;}
 		button.pill:hover{background:transparent;}
 		div#accountDiv{float:right;padding:0 0.75em 0 0;}
@@ -16,11 +18,11 @@
 		div#gridLABDImport{margin:-1em;padding:1em;}
 		div#cymeImport{margin:-1em;padding:1em;}
 		div#placeholder{height:5px;} /*Crazy float behavior for titlebar means we need this. */
-		div.content {width:980px}		
+		div.content {width:980px}
 		div#feeders {display:none;}
 		select, input[type='text'], input[type='email'], input[type='file'], button {
-			margin: -2px 0 -2px 0;font-size:small;}		
-		input[type='text'], input[type='file']{margin: -2px 0 -2px 0;}		
+			margin: -2px 0 -2px 0;font-size:small;}
+		input[type='text'], input[type='file']{margin: -2px auto -2px auto;text-align:left;}
 		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
 		select, button {width:initial;}
 		table {width:100%; text-align:left;}
@@ -34,10 +36,10 @@
 		td.finished {color:black;}
 		td.stopped {color:purple;}
 		tr:last-child td {border-bottom:none;}
-		table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:auto;}
+		table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:auto;display:inline;}
 		table.importOptions tr td:first-child {width:40%;}
 		table.importOptions td {border-bottom: none}
-		.running, .runningInline, .postRunInline, .stoppedInline, .stopped{display: inline;}		
+		.running, .runningInline, .postRunInline, .stoppedInline, .stopped{display: inline;}
 	</style>
 	<script type="text/javascript">var tabName = "Models";</script>
 	<script type='text/javascript' src='/static/omf.js'></script>
@@ -62,55 +64,7 @@
 		gebi('newModelDiv').style.display = 'inline-block'
 		gebi('newFeederDiv').style.display = 'none'
 		tabName="Models";
-		clickCloseEvent(tabName, "tabSelector");		
-	}
-	function dropPill(thisButton, name, menuButton) {
-		// Change link colors
-		gebi(menuButton).style.width = '115%'
-		gebi(menuButton).style.color= 'black'
-		gebi(menuButton).style.background= '#F8F8F8'
-		gebi(menuButton).style.textAlign = 'left'
-		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-		thisButton.innerHTML = name + ' <div id="arrow">&#9650;</div>'
-		function clickCloseEvent() {
-			// Close the menu:
-			thisButton.nextSibling.nextSibling.style.display = 'none'
-			thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
-			// Remove the event when it's fired once:
-			this.removeEventListener('click', arguments.callee, true)
-			// If we're hitting the current button, stop propagation so we don't re-open it again instantly.
-			if (window.event.toElement==thisButton) {event.stopPropagation()}
-			// Set link colors back
-			gebi(menuButton).style.color= 'white'
-			gebi(menuButton).style.background= 'transparent'
-		}
-		// Add that function as a listener to take care of closing:
-		document.body.addEventListener('click', clickCloseEvent, true)
-	}
-	function dropPillAndStay(thisButton, name) {
-		thisButton.style.width = '100%'
-		thisButton.style.color= 'black'
-		thisButton.style.background= '#F8F8F8'
-		thisButton.style.textAlign = 'left'
-		if (typeof this.currentState == 'undefined' || this.currentState == 'raised') {
-			thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-			thisButton.innerHTML = name + ' &times;'
-			this.currentState = 'dropped'
-		} else {
-			thisButton.nextSibling.nextSibling.style.display = 'none'
-			thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
-			this.currentState = 'raised'
-			thisButton.style.color= 'white'
-			thisButton.style.background= 'transparent'
-		}
-	}	
-	// Used for closing the menus after initial load.
-	function clickCloseEvent(labelName, buttonName) {
-		var thisButton = document.getElementById(buttonName);
-		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = labelName + ' <div id="arrow">&#9660;</div>'
-		this.removeEventListener('click', arguments.callee, true)
-		if (window.event.toElement==thisButton) {event.stopPropagation()}
+		clickCloseEvent(tabName, "tabSelector");
 	}
 	</script>
 </head>
@@ -120,7 +74,7 @@
 			<div id="menuLeft">
 				<a style="color:white" href="/">OMF</a> &#187;
 				<div class='buttonGroup'>
-					<button name="tabSelector" id="tabSelector" class='pill' onclick='dropPill(this, tabName, "tabSelector")'>Models <div id="arrow">&#9660;</div></button>
+					<button name="tabSelector" id="tabSelector" class='pill' onclick='dropPill(this, tabName, "tabSelector", "120%")'>Models<div id="arrow">&#9660;</div></button>
 					<ul class='menu left'>
 						<li><a href="#" onclick='analysesClick();'>Models</a></li>
 						<li><a href="#" onclick='feedersClick();'>Feeders</a></li>
@@ -130,7 +84,7 @@
 			<div id="menuRight">
 				<div id="accountDiv">
 					<div class='buttonGroup'>
-						<button name="accountOps" id="accountOps" class='pill' onclick='dropPill(this, "Account", "accountOps")'>Account <div id="arrow">&#9660;</div></button>
+						<button name="accountOps" id="accountOps" class='pill' onclick='dropPill(this, "Account", "accountOps", "120%")'>Account <div id="arrow">&#9660;</div></button>
 						<ul class='menu right'>
 							<li style="width:120px;"><a href="logout">Logout</a></li>
 							<li style="width:120px;"><a href="myaccount">My Account</a></li>
@@ -142,7 +96,7 @@
 				</div>
 				<div id="newModelDiv">
 					<div class="buttonGroup">
-						<button name="newModelButton" id="newModelButton" class='pill' onclick='dropPill(this, "New Model", "newModelButton")'>New Model<div id="arrow">&#9660;</div></button>
+						<button name="newModelButton" id="newModelButton" class='pill' onclick='dropPill(this, "New Model", "newModelButton", "120%")'>New Model<div id="arrow">&#9660;</div></button>
 						<ul class='menu right' style="width:150%">
 							<div id="menuText">Solar Models</div>
 							{% for name in modelNames if not name.startswith('_') %}
@@ -167,16 +121,16 @@
 				</div>
 				<div id="newFeederDiv">
 					<div class="buttonGroup">
-						<button name="newFeederButton" id="newFeederButton" class='pill' onclick='dropPillAndStay(this, "New Feeder", "newFeederButton")'>New Feeder<div id="arrow">&#9660;</div></button>
+						<button name="newFeederButton" id="newFeederButton" class='pill' onclick='dropPillAndStay(this, "New Feeder", "newFeederButton", "100%")'>New Feeder<div id="arrow">&#9660;</div></button>
 						<ul class='menu rightFeeder'>
 						<div id="newFeederSel">
 							<form action='/newBlankFeeder/' enctype='multipart/form-data' method='post'>
 								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-								<p style='font-weight:bold;float:left'>Blank Feeder</p>
+								<p style='font-weight:bold;'>Blank Feeder</p>
 								<table class='importOptions'>
 									<tr>
 										<td>Name</td>
-										<td><input type='text' name='feederName' required/></td>
+										<td><input type='text' name='feederName' style="width:100%"required/></td>
 									</tr>
 									<tr>
 										<td></td>
@@ -188,7 +142,7 @@
 						<div id="milsoftImport">
 							<form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
 								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-								<p style='font-weight:bold;float:left'>Milsoft</p>
+								<p style='font-weight:bold;'>Milsoft</p>
 								<table class='importOptions'>
 									<tr>
 										<td>Name</td>
@@ -212,7 +166,7 @@
 						<div id="gridLABDImport">
 							<form action='/gridlabdImport/' enctype='multipart/form-data' method='post'>
 								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-								<p style='font-weight:bold;float:left'>GridLAB-D</p>
+								<p style='font-weight:bold;'>GridLAB-D</p>
 								<table class='importOptions'>
 									<tr>
 										<td>Name</td>
@@ -232,7 +186,7 @@
 						<div id="cymeImport">
 							<form action='/cymeImport/' enctype='multipart/form-data' method='post'>
 								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-								<p style='font-weight:bold;float:left'>Cyme</p>
+								<p style='font-weight:bold;'>Cyme</p>
 								<table class='importOptions'>
 									<tr>
 										<td>Name</td>
@@ -262,9 +216,9 @@
 	<!-- Close each menu due to a bug. -->
 	<script>clickCloseEvent(tabName, "tabSelector");</script>
 	<script>clickCloseEvent("New","newSelector");</script>
-	<script>clickCloseEvent("Account","accountOps");</script>	
-	<script>clickCloseEvent("New Model","newModelButton");</script>	
-	<script>clickCloseEvent("New Feeder","newFeederButton");</script>		
+	<script>clickCloseEvent("Account","accountOps");</script>
+	<script>clickCloseEvent("New Model","newModelButton");</script>
+	<script>clickCloseEvent("New Feeder","newFeederButton");</script>
 	<div id="placeholder"></div>
 	<div id='analyses'>
 		<div class='content' style="margin-top:15px;">

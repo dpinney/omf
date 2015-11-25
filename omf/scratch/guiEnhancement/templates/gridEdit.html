@@ -199,49 +199,6 @@
 			fill: #fff;
 		}		
 	</style>
-	<script>
-	function dropPill(thisButton, name) {
-		thisButton.style.width = '130%'
-		thisButton.style.color= 'black'
-		thisButton.style.background= '#F8F8F8'
-		thisButton.style.textAlign = 'left'
-		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-		thisButton.innerHTML = name + ' <div id="arrow">&#9650;</div>'
-		function clickCloseEvent() {
-			thisButton.nextSibling.nextSibling.style.display = 'none'
-			thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
-			this.removeEventListener('click', arguments.callee, true)
-			if (window.event.toElement==thisButton) {event.stopPropagation()}
-			thisButton.style.color= 'white'
-			thisButton.style.background= 'transparent'
-		}
-		document.body.addEventListener('click', clickCloseEvent, true)
-	}
-	function clickCloseEvent(labelName, buttonName) {
-		var thisButton = document.getElementById(buttonName);
-		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = labelName + ' <div id="arrow">&#9660;</div>'
-		this.removeEventListener('click', arguments.callee, true)
-		if (window.event.toElement==thisButton) {event.stopPropagation()}
-	}
-	function dropPillAndStay(thisButton, name) {
-		thisButton.style.width = '105%'
-		thisButton.style.color= 'black'
-		thisButton.style.background= '#F8F8F8'
-		thisButton.style.textAlign = 'left'
-		if (typeof this.currentState == 'undefined' || this.currentState == 'raised') {
-			thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-			thisButton.innerHTML = name + ' &times;'
-			this.currentState = 'dropped'
-		} else {
-			thisButton.nextSibling.nextSibling.style.display = 'none'
-			thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
-			this.currentState = 'raised'
-			thisButton.style.color= 'white'
-			thisButton.style.background= 'transparent'
-		}
-	}
-	</script>
 </head>
 <body onkeypress='hotkeys()' onload="showProgressDialog('Loading Feeder')">
 <div id="header">
@@ -252,7 +209,7 @@
 	<div id="menuRight">
 		<div id="fileDiv">
 			<div class='buttonGroup'>
-				<button id="fileOps" class='pill' onclick='dropPill(this, "File", "fileOps")'>File <div id="arrow">&#9660;</div></button>
+				<button id="fileOps" class='pill' onclick='dropPill(this, "File", "130%")'>File <div id="arrow">&#9660;</div></button>
 				<ul class='menu right' style="right:-30%">
 					{% if not public %}
 					<li><a href="javascript:publishFeeder()">Make Public </a></li>
@@ -270,7 +227,7 @@
 		</div>
 		<div id="layoutDiv">
 			<div class="buttonGroup">
-				<button id="layoutSelector" class='pill' onclick='dropPillAndStay(this, "Layout");'>Layout <div id="arrow">&#9660;</div></button>
+				<button id="layoutSelector" class='pill' onclick='dropPillAndStay(this, "Layout", "105%");'>Layout <div id="arrow">&#9660;</div></button>
 				<ul class='menu right'>
 				<table style='padding:4px;word-wrap:break-word'>
 					<tr>
@@ -316,7 +273,7 @@
 		</div>
 		<div id="findDiv">
 			<div class="buttonGroup">
-				<button id="findOps" class='pill' onclick='dropPillAndStay(this, "Find");'>Find <div id="arrow">&#9660;</div></button>
+				<button id="findOps" class='pill' onclick='dropPillAndStay(this, "Find", "105%");'>Find <div id="arrow">&#9660;</div></button>
 				<ul class='menu right'>
 				<table style='padding:4px;word-wrap:break-word'>
 					<tr>
@@ -337,7 +294,7 @@
 		</div>
 		<div id="foldDiv">
 			<div class="buttonGroup">
-				<button id="foldingOps" class='pill' onclick='dropPill(this, "Folding");'>Folding <div id="arrow">&#9660;</div></button>
+				<button id="foldingOps" class='pill' onclick='dropPill(this, "Folding", "130%");'>Folding <div id="arrow">&#9660;</div></button>
 				<ul class='menu right' style="right:-30%">
 				<li><a href='javascript:foldOneLevel();unsavedChanges=true'>One Level Fold</a></li>
 				<li><a href='javascript:unfoldOneLevel();unsavedChanges=true'>One Level Unfold</a></li>
@@ -349,7 +306,7 @@
 		</div>
 		<div id="pinDiv">
 			<div class="buttonGroup">
-				<button id="pinningOps" class='pill' onclick='dropPill(this, "Pinning");'>Pinning <div id="arrow">&#9660;</div></button>
+				<button id="pinningOps" class='pill' onclick='dropPill(this, "Pinning", "130%");'>Pinning <div id="arrow">&#9660;</div></button>
 				<ul class='menu right' style="right:-30%">
 				<li><a href='javascript:pinAll();unsavedChanges=true' id='pinUnpinAll'>Pin All</a></li>
 				<li><a href='javascript:unPinAll();unsavedChanges=true'>Unpin All</a></li>
@@ -359,7 +316,7 @@
 		</div>
 		<div id="editDiv">
 			<div class="buttonGroup">
-				<button id="editOps" class='pill' onclick='dropPillAndStay(this, "Edit");'>Edit <div id="arrow">&#9660;</div></button>
+				<button id="editOps" class='pill' onclick='dropPillAndStay(this, "Edit", "105%");'>Edit <div id="arrow">&#9660;</div></button>
 				<ul class='menu right'>
 				<table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
 					<tr>
@@ -385,7 +342,7 @@
 		</div>
 		<div id="addDiv">
 			<div class="buttonGroup">
-				<button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add <div id="arrow">&#9660;</div></button>
+				<button id="addOps" class='pill' onclick='dropPill(this, "Add", "130%");'>Add <div id="arrow">&#9660;</div></button>
 				<ul id='newObjectMenu' class='menu right' style="right:-30%">
 			</div>
 		</div>
