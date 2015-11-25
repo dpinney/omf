@@ -3,43 +3,41 @@
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
+	<style>
+	/*Styles will go here*/
+	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<!-- Global Funcs Import -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<!-- Global Functions -->	
+	<!-- Global Functions -->
 	<script type="text/javascript">
 		function editFeeder(e) {
 			studyUser = $(e).siblings("select").val().split(/[_]+/)[0]
 			studyName = $(e).siblings("select").val().split(/[_]+/)[1]
 			$(e).attr("href", "/feeder/" + studyUser +"/"+ studyName)
 				.attr("target", "_blank");
-		}		
-	</script>	
+		}
+	</script>
 </head>
-<style type="text/css">
-</style>
 <body onload="init()">
-	<div id="header" style="width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0;">
-		<div id="headInnerBlock" style="width:1000px;margin-left:auto;margin-right:auto;height:40px;margin-top:4px;">
-			<div style="height:40px;float:left;font-size:medium;color:white;">
-				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model 
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model
 				&#8220;{% if modelStatus == "preRun"%}New Static CVR Model
-				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;		
+				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;
 			</div>
-		</div>						
+		</div>
 	</div>
 	<p class="reportTitle">Model Input</p>
-	<div id="input" class="content">	
+	<div id="input" class="content">
 		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-cvrStatic" target="blank">Help?</a></label>
@@ -61,7 +59,7 @@
 						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
 					{% endfor %}
 				</select>
-				<a class="edit-feeder postRunInline preRunInline runningInline stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>				
+				<a class="edit-feeder postRunInline preRunInline runningInline stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -81,7 +79,7 @@
 				<input type="text" id="capitalCost" name="capitalCost" pattern="^\d+\.?\d*$" value="30000" required="required"></td>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">OM Cost<span class="classic">Operating and maintain cost<br> Type: <em>float</em></span></label>	
+				<label class="tooltip">OM Cost<span class="classic">Operating and maintain cost<br> Type: <em>float</em></span></label>
 				<input type="text" id="omCost" name="omCost" pattern="^\d+\.?\d*$" value="1000" required="required"></td>
 			</div>
 			<div class="shortInput">
@@ -145,7 +143,7 @@
 						<th>October</th>
 						<th>November</th>
 						<th>December</th>
-					</tr>						
+					</tr>
 					<tr>
 						<th>Avg Load</th>
 						<td><input type="text" id="janAvg" name="janAvg" pattern="^\d+\.?\d*$" required="required"></td>
@@ -223,11 +221,11 @@
 						"text":null
 					},
 					"legend":{
-						"layout":"horizontal", 
-						"align":"top", 
-						"verticalAlign":"top", 
-						"x":50, 
-						"y":-10, 
+						"layout":"horizontal",
+						"align":"top",
+						"verticalAlign":"top",
+						"x":50,
+						"y":-10,
 						"borderWidth":0
 					},
 					"credits":{
@@ -286,11 +284,11 @@
 						"text":null
 					},
 					"legend":{
-						"layout":"horizontal", 
-						"align":"top", 
-						"verticalAlign":"top", 
-						"x":50, 
-						"y":-10, 
+						"layout":"horizontal",
+						"align":"top",
+						"verticalAlign":"top",
+						"x":50,
+						"y":-10,
 						"borderWidth":0
 					},
 					"credits":{
@@ -348,7 +346,7 @@
 					paybackLine = [{
 						"color": "green", // Color value
 						"value": paybackYear, // Value of where the line will appear
-						"width": 1, // Width of the line    
+						"width": 1, // Width of the line
 						"label": {"text": "Simple Payback"}
 					}]
 				}
@@ -375,7 +373,7 @@
 						"plotLines": paybackLine,
 						"tickInterval":1,
 						"minorTickColor":"gray",
-						"minorTickInterval":5					
+						"minorTickInterval":5
 					},
 					"yAxis": {
 						"title": {
@@ -402,7 +400,7 @@
 				for (row in allOutputData["monthDataMat"]){
 					insertMetric("powerflowReportTable","", allOutputData["monthDataMat"][row])
 				}
-			</script>	
+			</script>
 		</div>
 		<p class="reportTitle postRun">Savings at Various Loads</p>
 		<div id="moneyReport" class="tightContent postRun tableReport">

@@ -3,14 +3,35 @@
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
+	<style>
+		 #fileExists {
+		   width:175px;
+		   height:25px;
+		   display:fixed;
+		   margin-top:-28px;
+		   margin-left:110px;
+		   background-color:#d3d3d3;
+		   font-size:0.8em;
+		 }
+		input[type='file'] {
+		  color: transparent;
+		}
+		 #Metric {
+		   font-weight:bold;
+		   width:175px;
+		 }
+		 #SPP {
+		   font-weight:bold;
+		 }
+		 #tableHead {
+		   margin-top:20px;
+		 }
+	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<!-- Global Funcs Import -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
@@ -18,13 +39,13 @@
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
 <body onload="init()">
-	<div id="header" style="width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0;">
-		<div id="headInnerBlock" style="width:1000px;margin-left:auto;margin-right:auto;height:40px;margin-top:4px;">
-			<div style="height:40px;float:left;font-size:medium;color:white;">
-				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model 
-				&#8220;{% if modelStatus == "preRun"%}Time of Use Demand Response Program
-				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;		
-			</div>						
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model
+				&#8220;{% if modelStatus == "preRun"%}New Energy Storage Model
+				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;
+			</div>
 		</div>
 	</div>
 	<p class="reportTitle">Model Input</p>
@@ -38,7 +59,7 @@
 			<div class="shortInput">
 				<label>Email Address</label>
 				<input type="email" id="quickRunEmail" name="quickRunEmail" required="required">
-			</div>			
+			</div>
 			{% else %}
 			<div class="shortInput">
 				<label>Model Name</label>
@@ -74,11 +95,11 @@
 			<div class="shortInput">
 				<label>Discharge Rating (kW)</label>
 				<input type="text" id="dischargeRate" name="dischargeRate" value="50" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>			
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Depth of Discharge (%)<span class="classic">The maximum safe discharge capacity of the battery system, typically between 80% - 90%.</span></label>
 				<input type="text" id="dodFactor" name="dodFactor" value="85" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>						
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery Round Trip Efficiency (%)<span class="classic">The efficiency of the DC battery system, to be used with the Inverter efficiency to get Battery System AC Round Trip Efficiency equal to this value times <i>Inverter Efficiency &amp; Transformer Efficiency</i> &#178;</span></label>
 				<input type="text" id="batteryEfficiency" name="batteryEfficiency" value="92" required="required" pattern="^\d+\.?\d*?$">
@@ -86,33 +107,19 @@
 			<div class="shortInput">
 				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. Used in the Battery System AC Round Trip Efficiency calculation. The Inverter efficiency is obtained from the Weighted Efficiency (CEC) Method.</span></label>
 				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" value="92" required="required" >
-			</div>							
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example demand file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<script>var fileName=true;</script>
 				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
 				<input id="demandCurve" name="demandCurve" type="hidden">
 				{% if allInputData.fileName|string() is defined %}
-					<input type="hidden" id="fileName" name="fileName" readonly="readonly">				
-					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>	
+					<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>
 					<script>
 						var FileName = allInputData.fileName;
 						document.getElementById('demandCurveFileName').innerHTML = FileName;
-					</script>	
-					<style type="text/css">
-					 #fileExists {
-					   width:175px;
-					   height:25px;
-					   display:fixed;
-					   margin-top:-28px;
-					   margin-left:110px;
-					   background-color:#d3d3d3;
-					   font-size:0.8em;
-					 }	 		 				   
-					input[type='file'] {
-					  color: transparent;
-					}				
-					</style>		
+					</script>
 				{% endif %}
 				<script>
 					// Make sure the file is required on prerun.
@@ -147,7 +154,7 @@
 			<div class="shortInput">
 				<label>Unit Cost (installed)</label>
 				<input type="text" id="cellCost" name="cellCost" value="25000" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>						
+			</div>
 			<div class="shortInput">
 				<label>Discount Rate (%)</label>
 				<input type="text" id="discountRate" name="discountRate" value="2.5" required="required" pattern="^\d+\.?\d*?$"/>
@@ -188,34 +195,22 @@
 					cell.innerHTML = delimitNumbers(vector[i].toFixed(0))
 				}
 			}
-		</script>	
+		</script>
 		<script id="globalOutputScripting">
 			function insertDollarMetric(tableId, name, vector) {
 				// Add a vector to a table as a row.
 				table = gebi(tableId)
 				newRow = table.insertRow()
-				newRow.insertCell().innerHTML = "<div id=\"metric\">" + name + "</div>"		
+				newRow.insertCell().innerHTML = "<div id=\"metric\">" + name + "</div>"
 				for (i=0; i<vector.length; i++) {
 					cell = newRow.insertCell()
 					cell.innerHTML = "$" + delimitNumbers(vector[i].toFixed(0))
 				}
 			}
-		</script>		
-		<p class="reportTitle postRun">Monthly Cost Comparison</p> 
+		</script>
+		<p class="reportTitle postRun">Monthly Cost Comparison</p>
 		<div id="levelizedCostReport" class="tightContent postRun">
 			<div id="levelizedCostTableDiv" style="display:inline-block; width:1000px; height:280px; overflow-y:hidden; overflow-x:auto;">
-				<style type="text/css">
-				 #Metric {
-				   font-weight:bold;
-				   width:175px;
-				 }	
-				 #SPP {
-				   font-weight:bold;
-				 }
-				 #tableHead {
-				   margin-top:20px;
-				 }  				   
-				</style>				
 				<table id="monthlySummaryTable" style="margin:5px;">
 					<style>td, th {padding:7 0 5 20;text-align: left;font-size:0.7em;}</style>
 					<div id="tableHead">
@@ -236,32 +231,32 @@
 						</thead>
 					</div>
 				</table>
-				<script>			
+				<script>
 					insertMetric("monthlySummaryTable","Existing Demand (kW)", allOutputData.monthlyDemand)
 					insertMetric("monthlySummaryTable","Demand with Battery (kW)", allOutputData.monthlyDemandRed)
 					insertMetric("monthlySummaryTable","Reduction Amount (kW)", allOutputData.ps)
 					insertMetric("monthlySummaryTable","kWh to Full-Battery (kW)", allOutputData.kWhtoRecharge)
 					insertDollarMetric("monthlySummaryTable","Value of Reduction ($)", allOutputData.benefitMonthly)
 					insertDollarMetric("monthlySummaryTable","Cost to Recharge Battery ($)", allOutputData.costtoRecharge)
-					insertDollarMetric("monthlySummaryTable","Net Benefit ($)", allOutputData.benefitNet)								
-				</script>		
+					insertDollarMetric("monthlySummaryTable","Net Benefit ($)", allOutputData.benefitNet)
+				</script>
 				<script>
 					table = gebi("monthlySummaryTable")
 					newRow = table.insertRow()
-					newRow.insertCell().innerHTML = ""								
+					newRow.insertCell().innerHTML = ""
 					newRow = table.insertRow()
-					newRow.insertCell().innerHTML = "<div id=\"SPP\">Financial Calculations:</div>"								
-					newRow.insertCell().innerHTML = "<div id=\"SPP\">NPV:</div>"	
+					newRow.insertCell().innerHTML = "<div id=\"SPP\">Financial Calculations:</div>"
+					newRow.insertCell().innerHTML = "<div id=\"SPP\">NPV:</div>"
 					cell = newRow.insertCell()
-					cell.innerHTML = "$" + delimitNumbers(allOutputData.NPV.toFixed(0))	
+					cell.innerHTML = "$" + delimitNumbers(allOutputData.NPV.toFixed(0))
 					cell = newRow.insertCell()
-					cell.innerHTML + ""			
-					newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"	
+					cell.innerHTML + ""
+					newRow.insertCell().innerHTML = "<div id=\"SPP\">SPP:</div>"
 					cell = newRow.insertCell()
-					cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))						
-				</script>				
+					cell.innerHTML = delimitNumbers(allOutputData.SPP.toFixed(3))
+				</script>
 			</div>
-		</div>		
+		</div>
 		<script type="text/javascript">
 			// Global Highcharts settings.
 			Highcharts.setOptions({global:{useUTC:true}})
@@ -317,7 +312,7 @@
 						"line":{"marker":{"enabled":false}}},
 					"xAxis":{"maxZoom":108000000,
 						"tickColor":"#D3D3D3",
-						"tickLength":-205,						
+						"tickLength":-205,
 						"type":"datetime",
 						"lineColor":"gray"},
 					"yAxis":
@@ -326,7 +321,7 @@
 						"plotLines":[{"color": "gray",
 						"dashStyle": "ShortDash",
 						"width": 2,
-						"label":{"text":"Max specified DOD:" + (100 - allInputData.dodFactor) + "%","align":"right","y":-5,"x":-775, "style":{"color":"gray", "fontsize":"12px"}},					
+						"label":{"text":"Max specified DOD:" + (100 - allInputData.dodFactor) + "%","align":"right","y":-5,"x":-775, "style":{"color":"gray", "fontsize":"12px"}},
 						"value": dodFactor,"zIndex": 10}],"min":0},
 					"title":{"text":"Cycle Equivalents:" + delimitNumbers(allOutputData.cycleEquivalents.toFixed(1)), "verticalAlign":"bottom", "align":"right", "y":-28-dodFactor*2, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[
@@ -335,7 +330,7 @@
 					"tooltip":false,
 					"legend":false})
 			</script>
-		</div>	
+		</div>
 		<!-- TODO: Make into preview graph: http://jsfiddle.net/gh/get/jquery/1.7.2/highslide-software/highcharts.com/tree/master/samples/stock/xaxis/minorticks/	 -->
 		<p class="reportTitle postRun">Cash Flow</p>
 		<div id="cashFlowReport" class="tightContent postRun">

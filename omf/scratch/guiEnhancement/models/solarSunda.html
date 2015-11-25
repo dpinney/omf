@@ -3,15 +3,15 @@
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
+	<style>
+	/*Styles will go here*/
+	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-	<!-- Global Funcs Import -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
@@ -19,13 +19,13 @@
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
 <body onload="init()">
-	<div id="header" style="width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0;">
-		<div id="headInnerBlock" style="width:1000px;margin-left:auto;margin-right:auto;height:40px;margin-top:4px;">
-			<div style="height:40px;float:left;font-size:medium;color:white;">
-				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model 
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model
 				&#8220;{% if modelStatus == "preRun"%}New Solar SUNDA Financial Model
-				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;		
-			</div>						
+				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;
+			</div>
 		</div>
 	</div>
 	<p class="reportTitle">Model Description</p>
@@ -96,7 +96,7 @@
 			<div class="shorterInput">
 				<label class="tooltip">Azimuth (degrees)<span class="classic">Cardinal direction the PV system will face. 180 in the northern hemisphere is due South.</span></label>
 				<input type="text" id="azimuth" name="azimuth" value="180" pattern="^\d+\.?\d*$" required="required" />
-			</div>			
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Construction Costs</p>
 			</div>
@@ -180,7 +180,7 @@
 			<div class="shorterInput">
 				<label class="tooltip">Distribution Adder ($/kWH)<span class="classic">An adder for the real costs of distributing the electricity from the PV array to the end customers.  Used to provide comparison of PV rate to existing retail rate. </span></label>
 				<input type="text" id="distAdder" name="distAdder" value="0" pattern="^\d+\.?\d*$" required="required">
-			</div>						
+			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">PPA Information</p>
 			</div>
@@ -232,7 +232,7 @@
 				}
 			}
 		</script>
-		<p class="reportTitle postRun">Levelized Cost Comparison <font size="2">(based on a 25yr system life)</font></p> 
+		<p class="reportTitle postRun">Levelized Cost Comparison <font size="2">(based on a 25yr system life)</font></p>
 		<div id="levelizedCostReport" class="tightContent postRun">
 			<div id="levelizedCostDiv" style="display:inline-block"></div>
 			<script>
@@ -300,7 +300,7 @@
 			</div>
 		</div>
 		<!-- TODO: Add units to costs and percentages -->
-		<p class="reportTitle postRun">Cost Breakdown</p> 
+		<p class="reportTitle postRun">Cost Breakdown</p>
 		<div id="levelizedCostReport" class="tightContent postRun">
 			<div id="breakdownPieChart" style="display:inline-block"></div>
 			<script>

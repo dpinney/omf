@@ -3,6 +3,9 @@
 	<meta charset="utf-8">
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<style>
+	/*Styles will go here*/
+	</style>
 	<link type="text/css" href="{{pathPrefix}}/static/models.css" rel="stylesheet"/>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -10,8 +13,6 @@
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
 	<script src="{{pathPrefix}}/static/d3.v3.js"></script>
-	<!-- Global Funcs Import -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
@@ -46,17 +47,17 @@
 			$(".toggle").click(function(){
 					$(this).parent().next().toggle(500)
 			})
-		})			
-	</script>	
+		})
+	</script>
 </head>
 <body onload="init()">
-	<div id="header" style="width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0;">
-		<div id="headInnerBlock" style="width:1000px;margin-left:auto;margin-right:auto;height:40px;margin-top:4px;">
-			<div style="height:40px;float:left;font-size:medium;color:white;">
-				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model 
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model
 				&#8220;{% if modelStatus == "preRun"%}New Solar Engineering Model
-				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;		
-			</div>						
+				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;
+			</div>
 		</div>
 	</div>
 	<p class="reportTitle">Model Input</p>
@@ -125,7 +126,7 @@
 				<button id="rerunButton" type="submit" class="postRunInline stoppedInline">Re-Run Model</button>
 			</div>
 		</form>
-	</div>	
+	</div>
 	<div id ="runIndicator" class="content running">
 		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
 	</div>
@@ -218,18 +219,18 @@
 					}
 				localHighChart["yAxis"] = {"title": {"text": 'Energy (Wh)',"style":{"color":"gray"},"offset":20}},
 				localHighChart["plotOptions"] = {
-					"bar":{"stacking":"normal"}, 
+					"bar":{"stacking":"normal"},
 				}
-				
+
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
 		<p class="reportTitle postRun">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newRegulatorReport" class="tightContent postRun">
 			<script type="text/javascript">
-				
+
 				var regNamesArray=[]
-				for (var key in allOutputData) 
+				for (var key in allOutputData)
 				{
   					if (key.indexOf('Regulator') === 0)
   					{
@@ -239,22 +240,22 @@
 				}
 				for (var i in regNamesArray)
 				{
-					
+
 					reg = regNamesArray[i]
 					$("<div/>").appendTo("#newRegulatorReport")
 						.attr("class", "regContainer")
 						.attr("id", reg)
 					$("<div/>").appendTo("#newRegulatorReport")
 						.attr("id", "regulatorSeries_" + reg)
-					
+
 					var reg1ATSeries = {
-						"pointWidth": 40, 
+						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
 						"color":"RoyalBlue",
 						"data":eval(regNamesArray[i].concat(".RegTapA")),
 						"name":"A",
 					}
-				
+
 					var reg1BTSeries = {
 						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
@@ -291,29 +292,29 @@
 						}
 					}
 					localHighChart["plotOptions"] = {
-						//"bar":{"stacking":"normal", "shadow":false}, 
+						//"bar":{"stacking":"normal", "shadow":false},
 					}
 					chart = new Highcharts.Chart(localHighChart);
-					if(phaseValue.indexOf('A') != -1)   
+					if(phaseValue.indexOf('A') != -1)
 					{
   						chart.addSeries(reg1ATSeries)
   					}
   					if(phaseValue.indexOf('B') != -1)
 					{
   						chart.addSeries(reg1BTSeries)
-					}	
+					}
 					if(phaseValue.indexOf('C') != -1)
 					{
   						chart.addSeries(reg1CTSeries)
   					}
 				}
 			</script>
-		</div>	
+		</div>
 		<p class="reportTitle postRun">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newCapbankReport" class="tightContent postRun">
 			<script type="text/javascript">
 				var capNamesArray=[]
-				for (var key in allOutputData) 
+				for (var key in allOutputData)
 				{
 	  				if (key.indexOf('Capacitor') === 0)
 	  				{
@@ -329,7 +330,7 @@
 					$("<div/>").appendTo("#newCapbankReport")
 						.attr("class", "capContainer")
 						.attr("id", cap)
-						
+
 					$("<div/>").appendTo("#newCapbankReport")
 						.attr("id", "capacitorSeries_" + cap)
 					var cap1BSeries = {
@@ -340,14 +341,14 @@
 						"name":"B"
 					}
 					var cap1ASeries = {
-						"pointWidth": 40, 
+						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
 						"color":"RoyalBlue",
 						"data":eval(capNamesArray[i].concat(".Cap1A")),
 						"name":"A"
 					}
 					var cap1CSeries = {
-						"pointWidth": 40, 
+						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
 						"color":"Green",
 						"data":eval(capNamesArray[i].concat(".Cap1C")),
@@ -377,7 +378,7 @@
 						}
 					}
 					localHighChart["plotOptions"] = {
-						"column":{"stacking":"normal", "shadow":false}, 
+						"column":{"stacking":"normal", "shadow":false},
 					}
 					localHighChart["chart"]["title"] = {"align":"center","text":"CapCHART",}
 					chart = new Highcharts.Chart(localHighChart);
@@ -388,12 +389,12 @@
   					if(phaseValue.indexOf('B') != -1)
 					{
   						chart.addSeries(cap1BSeries)
-					}	
+					}
 					if(phaseValue.indexOf('C') != -1)
 					{
   						chart.addSeries(cap1CSeries)
   					}
-				}	
+				}
 			</script>
 		</div>
 		<p class="reportTitle postRun">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
@@ -403,7 +404,7 @@
 					triplexSeriesData = [
 						{"marker": {"enabled":false}, "color":"LightBlue", "data":allOutputData.allMeterVoltages.Min, "name":"Min"},
 						{"marker":{"enabled":false}, "color":"blue", "data":allOutputData.allMeterVoltages.Mean, "name":"Mean"},
-						{"marker":{"enabled":false}, "color":"LightBlue", "data":allOutputData.allMeterVoltages.Max, "name":"Max"}]	
+						{"marker":{"enabled":false}, "color":"LightBlue", "data":allOutputData.allMeterVoltages.Max, "name":"Max"}]
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "triplexMeterVoltageChart"
 					localHighChart["chart"]["width"] = 1000
@@ -427,7 +428,7 @@
 				{% if pathPrefix == "" %}
 				<script>gebi("timeTravelMovie").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart.mp4"</script>
 				{% else %}
-				<script>gebi("timeTravelMovie").src = "{{pathPrefix}}/data/Model/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart.mp4"</script>				
+				<script>gebi("timeTravelMovie").src = "{{pathPrefix}}/data/Model/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart.mp4"</script>
 				{% endif %}
 			</video>
 		</div>
