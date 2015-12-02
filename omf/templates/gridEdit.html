@@ -1,146 +1,350 @@
 ﻿<head>
 	<script type="text/javascript">
 		var unsavedChanges = false;
-	</script>	
+	</script>
 	<script type="text/javascript" src="/static/d3.v3.js"></script>
 	<script type="text/javascript" src="/static/omf.js"></script>
 	<script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
 	<link rel="stylesheet" href="/static/omf.css" />
 	<link rel="shortcut icon" href="/static/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="/static/gridEdit.css"/>
-
+	<style>
+		ul.menu.right {right: -7%;}
+		div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-top:4px;}
+		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
+		div#fileDiv{width:55px;padding:0 0.9em 0 0.9em;float:right;}
+		div#layoutDiv{width:50px;padding:0 0.9em 0 0.9em;float:right;}
+		div#findDiv{width:35px;padding:0 0.9em 0 0.9em;float:right;}
+		div#foldDiv{width:60px;padding:0 0.9em 0 0.9em;float:right;}				
+		div#pinDiv{width:60px;padding:0 0.9em 0 0.9em;float:right} 
+		div#editDiv{width:35px;padding:0 0.9em 0 0.9em;float:right} 
+		div#addDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
+		input[type='text'], input[type='file']{margin: -2px 0 -2px 0;}		
+		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
+		select, button {width:initial;}
+		td, th {padding:3px;text-align: left;}
+		body {
+			overflow: hidden;
+			height: 100%;
+			background: white;
+		}
+		/*other styles*/  
+		input#gridNameEdit {
+			font-size: 28pt;
+			line-height: 28pt;
+			text-shadow: 0px 1px 1px #4d4d4d;
+			height: 50px;
+			color: gray;
+			padding: 3px;
+			margin-bottom: 5px;
+			width: 85%;
+		}
+		button.smallButton {
+			height: 20px;
+			width: 20px;
+			display: inline-block;
+			float: right;
+			padding: 2px;
+			margin-left: 5px;
+		}
+		/* Edit object table style */
+		button.deleteButton {
+			width: 100%;
+			float: right;
+			background-color: #CC0000;
+			color: white;
+		}
+		button.deleteButton:hover {
+			background: #FF0000;
+		}
+		#selected {
+			min-width: 350px;
+			position: absolute;
+			top: 90pt;
+			left: 4pt;
+			margin: -60px 0 0 800px;
+		}
+		#selected table{
+			border: 1px solid black;
+			border-bottom: 0px;
+			display: none;
+			width: 100%;
+		}
+		#selected button{
+			width: 100%;
+		}
+		#selected #otherButtons{
+			display: none;
+		}
+		#selHead tr td {
+			background: black;
+			color: white;
+		}
+		#selBody{
+			max-height: 100%;
+			max-width: 100%;
+			overflow-y: auto;
+		}
+		#selected #selBody td {
+			padding: 5px;
+			border-bottom: 1px solid black;
+		}
+		#selected button{
+			width: 100%;
+		}
+		#selBody td{
+			word-break: break-all;
+			max-width: 100px;
+		}
+		#selBody td, #daButtons td{
+			background: white;
+			color: black;
+		}
+		input {
+			min-width: 100px;
+		}	
+		/* Start graph elements. */
+		.nodetext {
+			pointer-events: none;
+			z-index: 10;
+			text-anchor: start;
+			fill: #DDDDDD;
+			stroke: #000000;
+		}
+		g.node {
+			fill: gray;
+			stroke: #fff;
+		}
+		line.link {
+			stroke: black;
+			stroke-opacity: 1;
+			stroke-width: 6px;
+		}
+		line.parentChild {
+			stroke-dasharray: 0.4,0.4;
+		}
+		line.selected {
+			stroke: lime;
+			stroke-width: 8px;
+			stroke-opacity: 1.0;
+		}
+		g.selected {
+			stroke: lime;
+			stroke-width: 2px;
+			stroke-opacity: 1.0;
+		}
+		g.multiselected {
+			stroke: lime;
+			stroke-width: 4px;
+			stroke-opacity: 1.0;
+			stroke-dasharray: 1,1;
+		}
+		g.house {
+			fill: #3366FF;
+		}
+		g.load {
+			fill: #3366FF;
+		}
+		g.ZIPload, g.waterheater {
+			fill: #66CCFF;
+		}
+		g.triplex_meter {
+			fill: #FF6600;
+		}
+		g.triplex_node {
+			fill: #FFCC00;
+		}
+		g.gridNode {
+			fill: #CC0000;
+		}
+		g.swingNode {
+			fill: hotpink;
+		}
+		g text {
+			fill: black;
+			stroke: black;
+			stroke-width: 0px;
+			stroke-opacity: 1;
+			font-size: 15;
+			pointer-events: none;
+		}
+		circle.nodeIsPinned {
+			fill: none;
+			stroke: black;
+			pointer-events: none;
+		}
+		circle.nodeNotPinned {
+			fill: none;
+			pointer-events: none;
+		}
+		.node:not(:hover) .nodetext{
+			display: none;
+		}
+		.axis path,.axis line {
+			fill: none;
+			stroke: #ddd;
+			stroke-width: 1px;
+			shape-rendering: crispEdges
+		}
+		.axis text {
+			font-family: sans-serif;
+			font-size: 11px;
+			text-anchor: middle;
+		}
+		text.markerText {
+			fill: gray;
+			font-size: 6px;
+		}
+		rect {
+			fill: #fff;
+		}		
+	</style>
 </head>
 <body onkeypress='hotkeys()' onload="showProgressDialog('Loading Feeder')">
-<div id='title'>
-	<div id='logoBox'><a href='/'>&#10059;</a></div>
-	<p>Grid Editor: </p>
-	<p id='gridName'>{{feederName}}</p>
-</div>
-<div id='toolbar'>
-	<div class='buttonGroup leftToolbar'>
-		<button class='pill' onclick='dropPill(this, "Add")'>Add ▾</button>
-		<ul id='newObjectMenu' class='menu'></ul>
+<div id="header">
+	<div id="menuLeft">
+		&nbsp;&nbsp;<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Feeder
+		&#8220;{{feederName}}&#8221;
 	</div>
-	<div class='buttonGroup leftToolbar'>
-		<button class='pill' onclick='dropPillAndStay(this, "Edit")'>Edit ▾</button>
-		<ul class='menu'>
-		<table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
-			<tr>
-				<td>Zoom Reset</td>
-				<td><button onclick='javascript:zoomReset()'>Go</button></td>
-			</tr>
-			<tr>
-				<td>Zoom To Fit</td>
-				<td><button onclick='javascript:zoomToFit()'>Go</button></td>
-			</tr>
-			<tr>
-				<td>Static Loads to Houses</td>
-				<td><button onclick='javascript:staticLoadsToHouses();unsavedChanges=true'>Go</button></td>
-			</tr>
-			<tr>
-				<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
-				<td><button onclick='javascript:solarAdding();unsavedChanges=true'>Go</button></td>
-			</tr>
-			  
-		</table>
-		</ul>
-	</div>
-	<div class='buttonGroup leftToolbar'>
-		<button class='pill' onclick='dropPill(this, "Pinning")'>Pinning ▾</button>
-		<ul class='menu'>
-		<li><a href='javascript:pinAll();unsavedChanges=true' id='pinUnpinAll'>Pin All</a></li>
-		<li><a href='javascript:unPinAll();unsavedChanges=true'>Unpin All</a></li>
-		<li><a href='javascript:toggleSelectedPin();unsavedChanges=true'>Toggle Selected Pin (p)</a></li>
-		</ul>
-	</div>
-	<div class='buttonGroup leftToolbar'>
-		<button class='pill' onclick='dropPill(this, "Folding")'>Folding ▾</button>
-		<ul class='menu'>
-		<li><a href='javascript:foldOneLevel();unsavedChanges=true'>One Level Fold</a></li>
-		<li><a href='javascript:unfoldOneLevel();unsavedChanges=true'>One Level Unfold</a></li>
-		<li><a href='javascript:unfoldAll();unsavedChanges=true'>Unfold All</a></li>
-		<li><a href='javascript:foldAtSelected();unsavedChanges=true'>Fold at Selected (f)</a></li>
-		<li><a href='javascript:unfoldAtSelected();unsavedChanges=true'>Unfold at Selected (u)</a></li>
-		</ul>
-	</div>
-	<div class='buttonGroup leftToolbar'>
-		<button class='pill' onclick='dropPillAndStay(this, "Find")'>Find ▾</button>
-		<ul class='menu'>
-		<table style='padding:4px;word-wrap:break-word'>
-			<tr>
-				<td>Term</td>
-				<td><input id='searchTerm' type='text'></td>
-			</tr>
-			<tr>
-				<td><button onclick='backButton()'>Back</button></td>
-				<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
-			</tr>
-			<tr>
-				<td style='padding-top:10px'><button onclick='findPrevious()'>Previous</button></td>
-				<td style='padding-top:10px'><button onclick='findNext()'>Next</button></td>
-			</tr>
-		</table>
-		</ul>
-	</div>
-	<div class='buttonGroup rightToolbar'>
-		<button class='pill' onclick='dropPill(this, "Grid")'>Grid ▾</button>
-		<ul class='menu right'>
-			{% if public %}
-			<li><a href="javascript:savePrivateFeeder()">Save Private Copy</a></li>
-			{% endif %}
-			{% if not public %}
-			<li><a href="javascript:publishFeeder()">Make Public </a></li>
-			{% endif %}
-			{% if is_admin or not public %}
-			<li><a href='javascript:deleteFeeder()'>Delete</a></li>
-			<li><a href='javascript:duplicateFeeder()'>Duplicate</a></li>
-			<li><a href='javascript:saveFeeder()'>Save</a></li>
-			{% endif %}
-		</ul>
-	</div>
-	<div class='buttonGroup rightToolbar'>
-		<button class='pill' onclick='dropPillAndStay(this, "Layout")'>Layout ▾</button>
-		<ul class='menu right'>
-		<table style='padding:4px;word-wrap:break-word'>
-			<tr>
-				<td>GraphNodes</td>
-				<td id='nodesBox'></td>
-			</tr>
-			<tr>
-				<td colspan=2 style='padding:0px 0px 10px 0px'>
-				<div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
-				</td>
-				<tr>
-				<tr>
-			<td>Gravity</td>
-			<td><input id='gravityBox' type='text'></td>
-				</tr>
-				<tr>
-			<td>Theta</td>
-			<td><input id='thetaBox' type='text'></td>
-				</tr>
-				<tr>
-			<td>Friction</td>
-			<td><input id='frictionBox' type='text'></td>
-				</tr>
-				<tr>
-			<td>Link Strength</td>
-			<td><input id='linkStrengthBox' type='text'></td>
-				</tr>
-				<tr>
-			<td>Link Distance</td>
-			<td><input id='linkDistanceBox' type='text'></td>
-				</tr>
-				<tr>
-			<td>Charge</td>
-			<td><input id='chargeBox' type='text'></td>
-				</tr>
-				<tr>
-			<td></td>
-			<td style='padding-top:10px'><button onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
-				</tr>
-			</table>
-		</ul>
+	<div id="menuRight">
+		<div id="fileDiv">
+			<div class='buttonGroup'>
+				<button id="fileOps" class='pill' onclick='dropPill(this, "File", "130%")'>File <div id="arrow">&#9660;</div></button>
+				<ul class='menu right' style="right:-30%">
+					{% if not public %}
+					<li><a href="javascript:publishFeeder()">Make Public </a></li>
+					{% endif %}
+					{% if is_admin or not public %}
+					<li><a href='javascript:deleteFeeder()'>Delete</a></li>
+					<li><a href='javascript:duplicateFeeder()'>Duplicate</a></li>
+					<li><a href='javascript:saveFeeder()'>Save</a></li>
+					{% endif %}
+					{% if public %}
+					<li><a href="javascript:savePrivateFeeder();">Save Private Copy</a></li>
+					{% endif %}
+				</ul>
+			</div>
+		</div>
+		<div id="layoutDiv">
+			<div class="buttonGroup">
+				<button id="layoutSelector" class='pill' onclick='dropPillAndStay(this, "Layout", "105%");'>Layout <div id="arrow">&#9660;</div></button>
+				<ul class='menu right'>
+				<table style='padding:4px;word-wrap:break-word'>
+					<tr>
+						<td>GraphNodes</td>
+						<td id='nodesBox'></td>
+					</tr>
+					<tr>
+						<td colspan=2 style='padding:0px 0px 10px 0px'>
+						<div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
+						</td>
+						<tr>
+						<tr>
+					<td>Gravity</td>
+					<td><input id='gravityBox' type='text'></td>
+						</tr>
+						<tr>
+					<td>Theta</td>
+					<td><input id='thetaBox' type='text'></td>
+						</tr>
+						<tr>
+					<td>Friction</td>
+					<td><input id='frictionBox' type='text'></td>
+						</tr>
+						<tr>
+					<td>Link Strength</td>
+					<td><input id='linkStrengthBox' type='text'></td>
+						</tr>
+						<tr>
+					<td>Link Distance</td>
+					<td><input id='linkDistanceBox' type='text'></td>
+						</tr>
+						<tr>
+					<td>Charge</td>
+					<td><input id='chargeBox' type='text'></td>
+						</tr>
+						<tr>
+					<td></td>
+					<td style='padding-top:10px'><button style="width:100%;" onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
+						</tr>
+					</table>
+				</ul>
+			</div>
+		</div>
+		<div id="findDiv">
+			<div class="buttonGroup">
+				<button id="findOps" class='pill' onclick='dropPillAndStay(this, "Find", "105%");'>Find <div id="arrow">&#9660;</div></button>
+				<ul class='menu right'>
+				<table style='padding:4px;word-wrap:break-word'>
+					<tr>
+						<td>Term</td>
+						<td><input id='searchTerm' type='text'></td>
+					</tr>
+					<tr>
+						<td><button style="width:100%;" onclick='backButton()'>Back</button></td>
+						<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
+					</tr>
+					<tr>
+						<td><button style="width:100%;" onclick='findPrevious()'>Previous</button></td>
+						<td><button style="width:100%;" onclick='findNext()'>Next</button></td>
+					</tr>
+				</table>
+				</ul>
+			</div>
+		</div>
+		<div id="foldDiv">
+			<div class="buttonGroup">
+				<button id="foldingOps" class='pill' onclick='dropPill(this, "Folding", "130%");'>Folding <div id="arrow">&#9660;</div></button>
+				<ul class='menu right' style="right:-30%">
+				<li><a href='javascript:foldOneLevel();unsavedChanges=true'>One Level Fold</a></li>
+				<li><a href='javascript:unfoldOneLevel();unsavedChanges=true'>One Level Unfold</a></li>
+				<li><a href='javascript:unfoldAll();unsavedChanges=true'>Unfold All</a></li>
+				<li><a href='javascript:foldAtSelected();unsavedChanges=true'>Fold at Selected (f)</a></li>
+				<li><a href='javascript:unfoldAtSelected();unsavedChanges=true'>Unfold at Selected (u)</a></li>
+				</ul>
+			</div>
+		</div>
+		<div id="pinDiv">
+			<div class="buttonGroup">
+				<button id="pinningOps" class='pill' onclick='dropPill(this, "Pinning", "130%");'>Pinning <div id="arrow">&#9660;</div></button>
+				<ul class='menu right' style="right:-30%">
+				<li><a href='javascript:pinAll();unsavedChanges=true' id='pinUnpinAll'>Pin All</a></li>
+				<li><a href='javascript:unPinAll();unsavedChanges=true'>Unpin All</a></li>
+				<li><a href='javascript:toggleSelectedPin();unsavedChanges=true'>Toggle Selected Pin (p)</a></li>
+				</ul>
+			</div>
+		</div>
+		<div id="editDiv">
+			<div class="buttonGroup">
+				<button id="editOps" class='pill' onclick='dropPillAndStay(this, "Edit", "105%");'>Edit <div id="arrow">&#9660;</div></button>
+				<ul class='menu right'>
+				<table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
+					<tr>
+						<td>Zoom Reset</td>
+						<td><button style="width:30px;" onclick='javascript:zoomReset()'>Go</button></td>
+					</tr>
+					<tr>
+						<td>Zoom To Fit</td>
+						<td><button style="width:30px;" onclick='javascript:zoomToFit()'>Go</button></td>
+					</tr>
+					<tr>
+						<td>Static Loads to Houses</td>
+						<td><button style="width:30px;" onclick='javascript:staticLoadsToHouses();unsavedChanges=true'>Go</button></td>
+					</tr>
+					<tr>
+						<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
+						<td><button style="width:30px;" onclick='javascript:solarAdding();unsavedChanges=true'>Go</button></td>
+					</tr>
+
+				</table>
+				</ul>
+			</div>
+		</div>
+		<div id="addDiv">
+			<div class="buttonGroup">
+				<button id="addOps" class='pill' onclick='dropPill(this, "Add", "130%");'>Add <div id="arrow">&#9660;</div></button>
+				<ul id='newObjectMenu' class='menu right' style="right:-30%">
+			</div>
 		</div>
 	</div>
 	<div id="selected">
@@ -167,7 +371,23 @@
 		</div>
 	</div>
 </div>
-
+<script>clickCloseEvent("Add","addOps");</script>
+<script>clickCloseEvent("Edit","editOps");</script>
+<script>clickCloseEvent("Pinning","pinningOps");</script>
+<script>clickCloseEvent("Folding","foldingOps");</script>
+<script>clickCloseEvent("Find","findOps");</script>
+<script>clickCloseEvent("Layout","layoutSelector");</script>
+<script>clickCloseEvent("File","fileOps");</script>
+<!-- Reposition the editor table based on window size. 
+Run it once then on all windoe resize events. -->
+<script>
+var width = $(window).innerWidth();
+$("#selected").css("marginLeft", width-370+"px");
+window.onresize = function() {
+var width = $(window).innerWidth();
+if (width > 1000 ){$("#selected").css("marginLeft", width-370+"px");}
+}
+</script>
 
 <script type="text/javascript">
 // GLOBAL VARIABLES:
@@ -181,7 +401,7 @@ var zoomer = d3.behavior.zoom()
 zoomer.scaleExtent([0.1, 30])
 
 // Graph size global variable
-var NODE_STROKE_WIDTH = 0.4 
+var NODE_STROKE_WIDTH = 0.4
 var LINE_LINK_STROKE_WIDTH = 3 /5
 var LINE_PARENTCHILD_STROKE_WIDTH = 3/5
 var LINE_SELECTED_STROKE_WIDTH = 3/5
@@ -234,7 +454,7 @@ vis.selectAll('marker')
 	.attr('x',4)
 	.attr('y',8)
 	.text(function (d) {return d[0].toUpperCase()});
-// add a layer to force the links to the bottom. 
+// add a layer to force the links to the bottom.
 vis.append('svg:g').attr('id','linkLayer');
 var force = d3.layout.force()
 	.linkDistance(30)
@@ -245,7 +465,7 @@ var nodes = force.nodes();
 var links = force.links();
 var hiddenNodes = [];
 var hiddenLinks = [];
-// Public variables for global functions 
+// Public variables for global functions
 var prevObjName;
 // Public variable to hold the current search state. TODO: put in a closure.
 var searchCursor;
@@ -261,12 +481,12 @@ d3.json(apiAddress, function (json) {
 	nodepop = json['nodes']
 	while (nodepop.length != 0) {nodes.push(nodepop.pop())}
 	linkpop = json['links']
-	while (linkpop.length != 0) {links.push(linkpop.pop())}  
+	while (linkpop.length != 0) {links.push(linkpop.pop())}
 	hiddenNodePop = json['hiddenNodes']
 	while (hiddenNodePop.length != 0) {hiddenNodes.push(hiddenNodePop.pop())}
 	hiddenLinkPop = json['hiddenLinks']
-	while (hiddenLinkPop .length != 0) {hiddenLinks.push(hiddenLinkPop.pop())}  
-	//Gotta go through and make the links connect to their actual source and target objects. BAD DESIGN, D3!  
+	while (hiddenLinkPop .length != 0) {hiddenLinks.push(hiddenLinkPop.pop())}
+	//Gotta go through and make the links connect to their actual source and target objects. BAD DESIGN, D3!
 	for (li=0;li<links.length;li++) {
 		sourceName = links[li].source.name
 		targetName = links[li].target.name
@@ -281,7 +501,7 @@ d3.json(apiAddress, function (json) {
 		realTarget = nodes[findIndex(nodes,'name',targetName)]
 		realTargetHidden = hiddenNodes[findIndex(hiddenNodes,'name',targetName)]
 		if (undefined == realSource) {hiddenLinks[li2].source = realSourceHidden} else {hiddenLinks[li2].source = realSource}
-		if (undefined == realTarget) {hiddenLinks[li2].target = realTargetHidden} else {hiddenLinks[li2].target = realTarget} 
+		if (undefined == realTarget) {hiddenLinks[li2].target = realTargetHidden} else {hiddenLinks[li2].target = realTarget}
 	}
 	// Regenerate the layout variables:
 	// TODO: make this whole layout variables code much less hackish. We get/set like 5 different ways and times in this file.
@@ -502,7 +722,7 @@ function draw() {
 			clearInterval(interval)
 		} else {
 			// Run the layout in the background until performance is acceptable.
-			for (i = 0; i < 10; ++i) force.tick()		
+			for (i = 0; i < 10; ++i) force.tick()
 		}
 	}, 1000)
 
@@ -615,13 +835,13 @@ function redraw() {
 			return d.chargeMultiple * NODE_CIRCLE_RADIUS
 		})
 
-	// Show scalegrid. 
-	force.start() 
+	// Show scalegrid.
+	force.start()
 }
 
 /**
  * Redraw font text size when move over nodes.
- * @param {number} scale 
+ * @param {number} scale
  */
 function fontSizeRedraw(scale) {
 	d3.selectAll('.nodetext')
@@ -634,7 +854,7 @@ function fontSizeRedraw(scale) {
 				return d.objectType
 			}
 		});
-	
+
 }
 
 /**
@@ -653,9 +873,9 @@ function zoomRedraw() {
 
 /**
  * Using zoomer to translate position(x, y) and set scale s
- * @param {number} x  
- * @param {number} y 
- * @param {number} s  
+ * @param {number} x
+ * @param {number} y
+ * @param {number} s
  */
 function zoom(x, y, s) {
 	vis.transition().duration(1000).attr('transform', 'translate(' + x + ',' + y + ') scale(' + s + ')')
@@ -668,7 +888,7 @@ function zoom(x, y, s) {
 	} else {
 		d3.selectAll("line.link").style("stroke-width", LINE_LINK_STROKE_WIDTH);
 	}
-	
+
 	// console.log(zoomer.scale(), s)
 	// redraw font-size
 	fontSizeRedraw(s)
@@ -717,7 +937,7 @@ function zoomToFit() {
 	}
 
 	function window_vert_center() {
-		var extra = $("#title").outerHeight() + $("#toolbar").outerHeight()
+		var extra = 66 + $("#header").outerHeight()
 		var win_height = $(window).height() - extra
 		return (win_height / 2 + extra) / ($(window).height() / 1000);
 	}
@@ -752,7 +972,7 @@ function zoomToFit() {
 	}
 
 	function win_h() {
-		var extra = $("#title").outerHeight() + $("#toolbar").outerHeight()
+		var extra = 66 + $("#header").outerHeight()
 		var win_h = $(window).height() - extra
 		return win_h / ($(window).height() / 1000)
 	}
@@ -818,7 +1038,7 @@ function getCenterCoordinates() {
 /**
  * Node or link click event handler function, also used in components search.
  * @param {Object} d
- * @param {number} i  
+ * @param {number} i
  */
 function onCompClick(d, i) {
 	function classify(d, c) {
@@ -908,7 +1128,7 @@ function getSelectedNode() {
 
 /**
  * Return a node object, if multinodes selected.
- * @return {Object} node 
+ * @return {Object} node
  */
 function getAltSelectedNode() {
 	try {
@@ -1080,7 +1300,7 @@ function newChildAtSelected(componentName) {
 }
 
 /**
- * Append a node to its parent's 
+ * Append a node to its parent's
  * @param  {Object} component
  * @param  {number} treeIndex
  * @return {Object} nodeToAdd
@@ -1238,7 +1458,7 @@ function staticLoadsToHouses() {
 					parentIndex = findIndex(tree, 'name', tree[index]['parent'])
 					// delete the triplex_node
 					deleteObject(index)
-					// create a new node which parent is 
+					// create a new node which parent is
 					newHouse = randomHouse()
 					newLights = randomLights()
 					newHeater = randomWaterHeater()
@@ -1409,7 +1629,7 @@ function solarAdding() {
 	} else {
 		showProgressBar('Please wait. Solar is being generated.')
 		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-		// setTimeout(walkAndAddSolar, 1000);	
+		// setTimeout(walkAndAddSolar, 1000);
 		inter2 = setInterval(walkAndAddSolar, 10)
 	}
 
@@ -1496,9 +1716,9 @@ function backButton() {
 }
 
 /**
- * Handler function of "Next" button in "Find" toolbox. 
+ * Handler function of "Next" button in "Find" toolbox.
  * If objects are found, zoom to the first object in the list.
- * 
+ *
  */
 function findNext() {
 	if ($(".selected").length && treeData.object.indexOf("configuration") < 0) {
@@ -1605,8 +1825,8 @@ function nextTreeKey() {
 	keyList = Object.keys(tree)
 	max = 0
 	for (x in keyList) {
-		intKey = parseInt(keyList[x]); 
-		if (intKey > max) 
+		intKey = parseInt(keyList[x]);
+		if (intKey > max)
 			max = intKey
 	}
 	return max + 1
@@ -1873,7 +2093,7 @@ function foldSecSys() {
 			return true
 		} else return false;
 	})
-	// remove secLinks from links and its nodes from nodes 
+	// remove secLinks from links and its nodes from nodes
 	// TODO: bugs with handling secLinks
 	for (var i = links.length - 1; i >= 0; i--) {
 		if (links[i].objectType == 'parentChild') {
@@ -1912,8 +2132,8 @@ function foldSecSys() {
 }
 
 //**************************************************
-// TABLE EDITTING FUNCTIONS TODO: huge improvement, rename functions 
-//************************************************** 
+// TABLE EDITTING FUNCTIONS TODO: huge improvement, rename functions
+//**************************************************
 /**
  * Fit table according to window size.
  */
@@ -1967,6 +2187,10 @@ function selectNode() {
 	create_table();
 	$("#selected").show();
 	$("#selected table").show()
+	$("#selected").css("display", "inline-block");
+	$("#selected").css("max-width", "150px");
+	$("#table").css("display", "inline-block");
+	$("#table").css("max-width", "150px");
 	fit_table();
 }
 
@@ -1984,7 +2208,7 @@ function deselect() {
 }
 
 /**
- * Validate about edit fields. Check validation on selected components, and its function. 
+ * Validate about edit fields. Check validation on selected components, and its function.
  * 		If not valid, return true.
  * @param  {string} selector
  * @param  {function} testfunc
@@ -2010,7 +2234,7 @@ function validation(selector, testfunc, error_msg) {
 /**
  * Validate blanks, if invalid return true
  * @param  {string} selector
- * @return {boolean} 
+ * @return {boolean}
  */
 function validate_blanks(selector) {
 	return validation(selector, function (e) {
@@ -2166,7 +2390,7 @@ $(function () {
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 window.onbeforeunload = function(e) {
     var confirmationMessage = 'It looks like you have been editing something. ';
-    confirmationMessage += 'If you leave before saving, your changes will be lost.';	
+    confirmationMessage += 'If you leave before saving, your changes will be lost.';
     if (unsavedChanges) return confirmationMessage;
 };
 

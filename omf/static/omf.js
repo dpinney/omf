@@ -1,3 +1,6 @@
+///////////////////////////////////////////
+// ORIGINAL OMF.JS
+///////////////////////////////////////////
 function post_to_url(path, params, method) {
 	method = method || 'post' // Set method to post by default, if not specified.
 	var form = document.createElement('form')
@@ -27,34 +30,6 @@ function ajaxReq(requestType, URL, asynch) {
 	xmlhttp.open(requestType, URL, asynch)
 	xmlhttp.send()
 	return xmlhttp.responseText
-}
-
-function dropPill(thisButton, name) {
-	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-	thisButton.innerHTML = name + ' ▴'
-	function clickCloseEvent() {
-		// Close the menu:
-		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = name + ' ▾'
-		// Remove the event when it's fired once:
-		this.removeEventListener('click', arguments.callee, true)
-		// If we're hitting the current button, stop propagation so we don't re-open it again instantly.
-		if (window.event.toElement==thisButton) {event.stopPropagation()}
-	}
-	// Add that function as a listener to take care of closing:
-	document.body.addEventListener('click', clickCloseEvent, true)
-}
-
-function dropPillAndStay(thisButton, name) {
-	if (typeof this.currentState == 'undefined' || this.currentState == 'raised') {
-		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-		thisButton.innerHTML = name + ' &times;'
-		this.currentState = 'dropped'
-	} else {
-		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = name + ' ▾'
-		this.currentState = 'raised'
-	}
 }
 
 function gebi(id) {
@@ -133,7 +108,7 @@ function showProgressBar(dialogMessage) {
 	progContent.id = 'progressContent'
 	progContent.style.zIndex = '9999'
 	progBar = document.createElement('div')
-	progBar.id = 'progBar' 
+	progBar.id = 'progBar'
 	progColor = document.createElement('div')
 	progColor.id = 'progColor'
 	progressText = document.createElement('h2')
@@ -164,7 +139,7 @@ function randomGaussian() {
     x1 = 2 * Math.random() - 1
     x2 = 2 * Math.random() - 1
     rad = x1 * x1 + x2 * x2
-  } while (rad >= 1 || rad == 0)   
+  } while (rad >= 1 || rad == 0)
   c = Math.sqrt(-2 * Math.log(rad) / rad);
   return x1 * c
 }
@@ -234,4 +209,169 @@ function indexFind(arr, fun) {
 		if (fun(arr[i])) {return i}
 	}
 	return -1
+}
+function dropPill(thisButton, name, width) {
+	thisButton.style.width = width
+	thisButton.style.color= 'black'
+	thisButton.style.background= '#F8F8F8'
+	thisButton.style.textAlign = 'left'
+	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
+	thisButton.innerHTML = name + ' <div id="arrow">&#9650;</div>'
+	function clickCloseEvent() {
+		thisButton.nextSibling.nextSibling.style.display = 'none'
+		thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
+		this.removeEventListener('click', arguments.callee, true)
+		thisButton.style.color= 'white'
+		thisButton.style.background= 'transparent'
+		if (window.event.toElement==thisButton) {event.stopPropagation()}
+	}
+	document.body.addEventListener('click', clickCloseEvent, true)
+}
+function clickCloseEvent(labelName, buttonName) {
+	var thisButton = document.getElementById(buttonName);
+	thisButton.nextSibling.nextSibling.style.display = 'none'
+	thisButton.innerHTML = labelName + ' <div id="arrow">&#9660;</div>'
+	this.removeEventListener('click', arguments.callee, true)
+	if (window.event.toElement==thisButton) {event.stopPropagation()}
+}
+function dropPillAndStay(thisButton, name, width) {
+	thisButton.style.width = width
+	thisButton.style.color= 'black'
+	thisButton.style.background= '#F8F8F8'
+	thisButton.style.textAlign = 'left'
+	if (typeof this.currentState == 'undefined' || this.currentState == 'raised') {
+		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
+		thisButton.innerHTML = name + ' &times;'
+		this.currentState = 'dropped'
+	} else {
+		thisButton.nextSibling.nextSibling.style.display = 'none'
+		thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
+		this.currentState = 'raised'
+		thisButton.style.color= 'white'
+		thisButton.style.background= 'transparent'
+	}
+}
+
+///////////////////////////////////////////
+// ORIGINAL MODELS.JS
+///////////////////////////////////////////
+
+function init() {
+	// If we have input, put it back.
+	if (allInputData != null) {
+		restoreInputs()
+		$("#modelName").prop("readonly", true)
+	}
+	// Depending on status, show different things.
+	if (modelStatus == "finished") {
+		console.log("FINISHED")
+		$(".postRun").css('display', 'block')
+		$(".postRunInline").css('display', 'inline-block')
+	} else if (modelStatus == "running") {
+		console.log("RUNNING")
+		$(".running").css('display', 'block')
+		$(".runningInline").css('display', 'inline-block')
+		$("input").prop("readonly", true)
+		$("select").prop("disabled", true)
+	} else /* Stopped */ {
+		if (allInputData != null) {
+			$(".stopped").show()
+			$(".stoppedInline").show()
+		} else {
+			console.log("PRERUN")
+			$(".preRun").css('display', 'inline-block')
+		}
+	}
+	// Hide buttons we don't use:
+	modelUser = allInputData["user"]
+	if (modelUser == "public" && currentUser != "admin") {
+		$("button#deleteButton").hide();
+		$("button#publishButton").hide();
+		$("button#rerunButton").hide();
+	}
+}
+
+function restoreInputs() {
+	// Restore all the input values that were used and stored in allInputData.json
+	gebi("titleText").innerHTML = allInputData.modelName
+	for (index in allInputData) {
+		try {document.querySelector("#" + index).value = allInputData[index]}
+		catch(err){}
+	}
+}
+
+function delimitNumbers(nStr) {
+	// Add commas to numbers and round to a decent length.
+	nStr += ''
+	x = nStr.split('.')
+	x1 = x[0]
+	x2 = x.length > 1 ? '.' + x[1] : ''
+	rgx = /(\d+)(\d{3})/
+	while (rgx.test(x1)) {
+		x1 = x1.replace(rgx, '$1' + ',' + '$2')
+	}
+	return x1 + x2
+}
+
+function cancelModel() {
+	params = {user:allInputData.user,
+		modelName:allInputData.modelName,
+		modelType:allInputData.modelType}
+	post_to_url("/cancelModel/", params, "POST")
+}
+
+function deleteModel() {
+	if (confirm("Deleting this model cannot be undone. Continue?")){
+		post_to_url("/delete/Model/"+allInputData.user+"/"+allInputData.modelName, {}, "POST")
+	} else {
+		return false
+	}
+}
+
+function publishModel() {
+	newName = prompt("Publish a copy with name", allInputData.modelName)
+	while (! /^[\w\s]+$/.test(newName)){
+		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
+	}
+	if (newName) {
+		$.ajax({url:"/uniqObjName/Model/public/" + newName}).done(function(data) {
+			if (data.exists) {
+				alert("There is already a public Model named " + newName)
+				publishModel()
+			} else {
+				post_to_url("/publishModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
+			}
+		})
+	}
+}
+
+function duplicateModel() {
+	newName = prompt("Create a duplicate with name", allInputData.modelName)
+	while (! /^[\w\s]+$/.test(newName)){
+		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
+	}
+	if (newName) {
+		$.ajax({url:"/uniqObjName/Model/" + allInputData.user + "/" + newName}).done(function(data) {
+			if (data.exists) {
+				alert("There is already a model named " + newName)
+				duplicateModel()
+			} else {
+				post_to_url("/duplicateModel/" + allInputData.user + "/" + allInputData.modelName+"/", {"newName":newName})
+			}
+		})
+	}
+}
+
+function checkModelName() {
+	var newName = document.getElementById('modelName').value
+	$.ajax({
+		url: "/uniqObjName/Model/" + currentUser + "/" + newName
+	}).done(function (data) {
+		if (data.exists) {
+			alert("You already have a Model named '" + newName + "', please choose a different name.")
+		}
+		else{
+			inputForm.submit()
+		}
+	})
 }

@@ -3,21 +3,18 @@
 	<meta charset="utf-8">
 	<style type='text/css'>
 		label#remember {margin-left:75px; color:gray}
-		#emailSelection {   
-			position:inline;                    
+		#emailSelection {
+			position:inline;
 			margin-right:5px;
-		}  		
-	</style>	
+		}
+	</style>
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
-	<link type="text/css" href="{{pathPrefix}}/static/models.css" rel="stylesheet"/>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
 	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
 	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
 	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
-	<!-- Global Funcs Import -->
-	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
 	<!-- Data  Imports -->
 	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
@@ -67,12 +64,12 @@
 		})
 	</script>
 	<script type="text/javascript">
-		/* 
+		/*
 		 * Global setting of Highcharts
 		 */
 		Highcharts.setOptions({
-			global: { 
-				useUTC: false 
+			global: {
+				useUTC: false
 			}
 		});
 		// Clean up the non-ISO date strings we get.
@@ -100,12 +97,17 @@
 			}
 		}
 	</script>
-	
+
 </head>
 <body onload="init()">
-	<div id="title">
-		<div id="logoBox"><a href="/" title="Back to home">&#10059;</a></div>
-		<p id="titleText">New Multiple GridlabD Model</p>
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model
+				&#8220;{% if modelStatus == "preRun"%}New Multiple GridlabD Model
+				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;
+			</div>
+		</div>
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
@@ -175,11 +177,11 @@
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
 				<input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
-			</div>	
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Simulation Length<span class="classic">Simulation Length</span></label>
-				<input type="text" id="simLength" name="simLength" pattern="^\d+$" required="required">	
-			</div>		
+				<input type="text" id="simLength" name="simLength" pattern="^\d+$" required="required">
+			</div>
 			<div class="shortInput">
 				<label class="tooltip">Length Units<span class="classic">Length Units</span></label>
 				<select id="simLengthUnits" name="simLengthUnits">
@@ -196,16 +198,16 @@
 				<div id="emailSelection" class="preRun stoppedInline postRunInline">
 					<input name="emailStatus" id="emailStatus" type="checkbox">
 					<label class="tooltip">&nbsp;Enable Email Update<span class="classic">Receive an email update on the final status of the model and if it has errored, along with its total runtime.</span></label>
-				</div>	
+				</div>
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="runButton" type="submit" class="preRun">Run Model</button>
-				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>		
+				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
 			</div>
 		</form>
-	</div>	
+	</div>
 
 	<div id ="runIndicator" class="content running">
 		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
@@ -278,7 +280,7 @@
 				 * This is a HighChart display for energy balance
 				 */
 				var tLossesSeries = {
-					"pointWidth": 40, 
+					"pointWidth": 40,
 					"color":"orangered",
 					"data":[],
 					"type":"column",
@@ -330,7 +332,7 @@
 						}
 					}
 					localHighChart["plotOptions"] = {
-						"column":{"stacking":"normal", "shadow":false}, 
+						"column":{"stacking":"normal", "shadow":false},
 						"spline":{"marker":{"radius":8}, "shadow":false, "lineWidth":0 }
 						}
 					new Highcharts.Chart(localHighChart);
@@ -387,7 +389,7 @@
 						"color":"LightBlue",
 						"data":allOutputData[study].allMeterVoltages.Max,
 						"name":"Max"
-					}]	
+					}]
 					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 					localHighChart["chart"]["renderTo"] = "triplexMeterVoltageChart_" + study
 					localHighChart["chart"]["width"] = 1000
@@ -402,7 +404,7 @@
 							"width": 2,
 							"value": 114, // voltage lower bound
 							"zIndex": 0,
-							"label":{"text":"Number of Meters:" + allOutputData[study].allMeterVoltages.triplexMeterCount, "align":"right","y":-115,"x":-10, "style":{"color":"gray", "fontsize":"12px"}}								
+							"label":{"text":"Number of Meters:" + allOutputData[study].allMeterVoltages.triplexMeterCount, "align":"right","y":-115,"x":-10, "style":{"color":"gray", "fontsize":"12px"}}
 						}, {
 							"color": 'gray',
 							"dashStyle": 'ShortDash',
@@ -421,7 +423,7 @@
 				}
 			</script>
 		</div>
-		
+
 		<p class="reportTitle postRun">Cost Benefit Analysis <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="monetizationReport" class="tightContent postRun">
 			<div class="studyContainer" style="position:relative; height: 200px">
@@ -493,8 +495,8 @@
 			</div>
 			<div id="additionalMetrics" class="studyContainer">
 				<div style="width: 1000px; padding: 5px 5px 5px 5px">
-					Co-op Energy Rate ($/kWh) <input id="distrEnergyRate" value> 
-					Capacity Rate ($/kW) <input id="distrCapacityRate" value> 
+					Co-op Energy Rate ($/kWh) <input id="distrEnergyRate" value>
+					Capacity Rate ($/kW) <input id="distrCapacityRate" value>
 					<button style="width: 100px" onclick="recalculateCostBenefit()">Recalculate</button>
 				</div>
 				<table style="width:980px;padding-bottom:10px">
@@ -524,14 +526,14 @@
 									newRow = table.insertRow()
 									newRow.id = 'row' + study
 									if (firstTime) {
-										checked = 'checked'; 
-										cap = '0'; 
-										om = '0'; 
+										checked = 'checked';
+										cap = '0';
+										om = '0';
 										firstTime = false
 									} else {
-										checked = ''; 
-										cap = (allInputData['equipAndInstallCost'] || 30000); 
-										om = (allInputData['opAndMaintCost'] || 1000) 
+										checked = '';
+										cap = (allInputData['equipAndInstallCost'] || 30000);
+										om = (allInputData['opAndMaintCost'] || 1000)
 									}
 									newRow.innerHTML = '<td class="studyName">' + study + '</td>' +
 									'<td><input type="radio" name="baseline" class="baseline" ' + checked + '/></td>' +
@@ -556,7 +558,7 @@
 					 * Calculate the cost of power and energy
 					 */
 					energyRate = (parseFloat(gebi('distrEnergyRate').value) || 0.08)
-					capRate = (parseFloat(gebi('distrCapacityRate').value) || 15) 
+					capRate = (parseFloat(gebi('distrCapacityRate').value) || 15)
 					// Update everything not depending on baseline diff.
 					for (index in studyList) {
 						study = studyList[index]
@@ -615,13 +617,13 @@
 					noStamps = grouped.map(dropStamp)
 					applied = noStamps.map(func)
 					return flatten1(applied)
-				} 
+				}
 			</script>
 		</div>
 
 		<p class="reportTitle postRun">Study Details <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="studyDetails" class="tightContent postRun detailsContainer" style="position: relative">
-			
+
 			<script src="{{pathPrefix}}/static/d3.v3.js"></script>
 			<table id="detailsTable">
 				<tr>
@@ -706,7 +708,7 @@
 				</tr>
 			</table>
 		</div>
-		
+
 		<p class="reportTitle postRun">Climate <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="climateReport" class="tightContent postRun">
 			<script type="text/javascript">
@@ -726,7 +728,7 @@
 				}
 			</script>
 		</div>
-		
+
 		<p class="reportTitle postRun">Model Runtime Statistics <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="runtimeStatsReport" class="tightContent stdouts postRun" style="height:630px">
 			<script type="text/javascript">
@@ -749,7 +751,7 @@
 		/* Highlight failed feeders */
 		$(window).bind("load", function(){
 			if (allOutputData != null) {
-				$("select[id*='feederName']").each(function() { 
+				$("select[id*='feederName']").each(function() {
 					study = $(this).val().split("___")[1]
 					name = "feeder_" + study
 					if (allOutputData[name] == undefined) {
