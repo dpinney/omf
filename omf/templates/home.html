@@ -6,7 +6,6 @@
 	<link rel='shortcut icon' href='/static/favicon.ico'>
 	<style>
 		ul.menu.left {right: auto; left:-3.5%; padding:0 0 0 0;}
-		ul.menu.right {right: -21%; left: auto; padding:0 0 0 0;}
 		ul.menu.rightFeeder {width:350px;right:0%; left: auto;padding:1em;}
 		button.pill:hover{background:transparent;}
 		div#accountDiv{float:right;padding:0 0.75em 0 0;}
@@ -74,7 +73,7 @@
 			<div id="menuLeft">
 				<a style="color:white" href="/">OMF</a> &#187;
 				<div class='buttonGroup'>
-					<button name="tabSelector" id="tabSelector" class='pill' onclick='dropPill(this, tabName, "120%")'>Models<div id="arrow">&#9660;</div></button>
+					<button name="tabSelector" id="tabSelector" class='pill' onclick='dropPill(this, tabName)'>Models ▾</button>
 					<ul class='menu left'>
 						<li><a href="#" onclick='analysesClick();'>Models</a></li>
 						<li><a href="#" onclick='feedersClick();'>Feeders</a></li>
@@ -84,7 +83,7 @@
 			<div id="menuRight">
 				<div id="accountDiv">
 					<div class='buttonGroup'>
-						<button name="accountOps" id="accountOps" class='pill' onclick='dropPill(this, "Account", "120%")'>Account <div id="arrow">&#9660;</div></button>
+						<button name="accountOps" id="accountOps" class='pill' onclick='dropPill(this, "Account")'>Account ▾</button>
 						<ul class='menu right'>
 							<li style="width:120px;"><a href="logout">Logout</a></li>
 							<li style="width:120px;"><a href="myaccount">My Account</a></li>
@@ -96,7 +95,7 @@
 				</div>
 				<div id="newModelDiv">
 					<div class="buttonGroup">
-						<button name="newModelButton" id="newModelButton" class='pill' onclick='dropPill(this, "New Model", "120%")'>New Model<div id="arrow">&#9660;</div></button>
+						<button name="newModelButton" id="newModelButton" class='pill' onclick='dropPill(this, "New Model")'>New Model ▾</button>
 						<ul class='menu right' style="width:150%">
 							<div id="menuText">Solar Models</div>
 							{% for name in modelNames if not name.startswith('_') %}
@@ -121,7 +120,7 @@
 				</div>
 				<div id="newFeederDiv">
 					<div class="buttonGroup">
-						<button name="newFeederButton" id="newFeederButton" class='pill' onclick='dropPillAndStay(this, "New Feeder", "100%")'>New Feeder<div id="arrow">&#9660;</div></button>
+						<button name="newFeederButton" id="newFeederButton" class='pill' onclick='dropPillAndStay(this, "New Feeder")'>New Feeder ▾</button>
 						<ul class='menu rightFeeder'>
 						<div id="newFeederSel">
 							<form action='/newBlankFeeder/' enctype='multipart/form-data' method='post'>

@@ -210,16 +210,15 @@ function indexFind(arr, fun) {
 	}
 	return -1
 }
-function dropPill(thisButton, name, width) {
-	thisButton.style.width = width
+function dropPill(thisButton, name) {
 	thisButton.style.color= 'black'
 	thisButton.style.background= '#F8F8F8'
 	thisButton.style.textAlign = 'left'
 	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-	thisButton.innerHTML = name + ' <div id="arrow">&#9650;</div>'
+	thisButton.innerHTML = name + ' ▴'
 	function clickCloseEvent() {
 		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
+		thisButton.innerHTML = name + ' ▾'
 		this.removeEventListener('click', arguments.callee, true)
 		thisButton.style.color= 'white'
 		thisButton.style.background= 'transparent'
@@ -230,12 +229,11 @@ function dropPill(thisButton, name, width) {
 function clickCloseEvent(labelName, buttonName) {
 	var thisButton = document.getElementById(buttonName);
 	thisButton.nextSibling.nextSibling.style.display = 'none'
-	thisButton.innerHTML = labelName + ' <div id="arrow">&#9660;</div>'
+	thisButton.innerHTML = labelName + ' ▾'
 	this.removeEventListener('click', arguments.callee, true)
 	if (window.event.toElement==thisButton) {event.stopPropagation()}
 }
-function dropPillAndStay(thisButton, name, width) {
-	thisButton.style.width = width
+function dropPillAndStay(thisButton, name) {
 	thisButton.style.color= 'black'
 	thisButton.style.background= '#F8F8F8'
 	thisButton.style.textAlign = 'left'
@@ -245,7 +243,7 @@ function dropPillAndStay(thisButton, name, width) {
 		this.currentState = 'dropped'
 	} else {
 		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = name + ' <div id="arrow">&#9660;</div>'
+		thisButton.innerHTML = name + ' ▾'
 		this.currentState = 'raised'
 		thisButton.style.color= 'white'
 		thisButton.style.background= 'transparent'
