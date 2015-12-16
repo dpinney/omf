@@ -4,18 +4,6 @@
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
-		 #fileExists {
-		   width:175px;
-		   height:25px;
-		   display:fixed;
-		   margin-top:-28px;
-		   margin-left:110px;
-		   background-color:#d3d3d3;
-		   font-size:0.8em;
-		 }
-		input[type='file'] {
-		  color: transparent;
-		}
 		 #Metric {
 		   font-weight:bold;
 		   width:175px;
@@ -26,6 +14,33 @@
 		 #tableHead {
 		   margin-top:20px;
 		 }
+		/*File Styles*/
+		 #fileBackground{position:absolute;width:205px;max-width:205px;height:31px;margin: -32px 0 0 116px;background-color:gainsboro;}
+		 #fileExists {
+		   background-color:transparent;
+		   max-width:185px;
+		   overflow-x:auto;
+		   overflow-y:hidden;
+		   height:35px;
+		   margin:-32px 0 0 116px;
+		   position:absolute;
+		   font-size:0.8em;
+		   z-index:1;
+		 }
+		input[type='file'] {
+		  color: transparent;
+		}
+		/*IE Hacks*/
+		@media screen\0 {
+			#fileBackground{margin-left:0px;width:222px;max-width:222px;height:29px;}
+			#fileExists{margin: -27px 0 0 10px;height:42px;}
+		}
+		/*Firefox Hacks*/
+		@-moz-document url-prefix() {
+			#fileBackground{margin-left:125px;width:195px;max-width:195px;}
+			#fileExists{max-width:175px;margin:-32px 0 0 135px;height:47px;}
+		  }
+		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -115,6 +130,7 @@
 				<input id="demandCurve" name="demandCurve" type="hidden">
 				{% if allInputData.fileName|string() is defined %}
 					<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+					<div id="fileBackground"></div>
 					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>
 					<script>
 						var FileName = allInputData.fileName;
