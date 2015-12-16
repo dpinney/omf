@@ -4,6 +4,18 @@
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
+		 #fileExists {
+		   width:175px;
+		   height:25px;
+		   display:fixed;
+		   margin-top:-28px;
+		   margin-left:110px;
+		   background-color:#d3d3d3;
+		   font-size:0.8em;
+		 }
+		input[type='file'] {
+		  color: transparent;
+		}
 		 #Metric {
 		   font-weight:bold;
 		   width:175px;
@@ -99,27 +111,15 @@
 			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example demand file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<script>var fileName=true;</script>
-				<div id="fileDiv">
-					<div style="float:left;">
-						<input id="demandCurve" name="demandCurve" type="hidden">
-						<input type="hidden" id="fileName" name="fileName" readonly="readonly">
-						<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>
-					</div>
-					<div style="float:right;">								
-						<input type="file" class="fileUpload" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
-						<img class="chooseFile" src="/static/chooseFile.png" alt="Upload a file">
-					</div>
-				</div>
+				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
+				<input id="demandCurve" name="demandCurve" type="hidden">
 				{% if allInputData.fileName|string() is defined %}
+					<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>
 					<script>
 						var FileName = allInputData.fileName;
 						document.getElementById('demandCurveFileName').innerHTML = FileName;
 					</script>
-				{% else %}
-					<script>
-						var FileName = "No file chosen.";
-						document.getElementById('demandCurveFileName').innerHTML = FileName;
-					</script>				
 				{% endif %}
 				<script>
 					// Make sure the file is required on prerun.
