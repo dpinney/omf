@@ -240,7 +240,7 @@
 			Highcharts.setOptions({global:{useUTC:true}})
 		</script>
 		<p class="reportTitle postRun">Demand Before and After Program</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<div id="demandChangeReport" class="tightContent postRun">
 			<div id="demandBattChart"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -257,12 +257,14 @@
 						"lineColor":"gray"},
 					"yAxis":{
 						"title":{"text":"Power (kW)","style":{"color":"gray"}},
-						"min":0,
-						"plotLines":[{"color": "lightgray",
+						"min":allOutputData.differenceMin,
+						"plotLines":[
+							{"color": "lightgray",
 							"dashStyle": "ShortDash",
 							"width": 2,
 							"label":{"text":"Max Difference:" + allOutputData.differenceMax + "kW", "align":"right","y":-5,"x":-730, "style":{"color":"gray", "fontsize":"12px"}},
-							"value": allOutputData.differenceMax,"zIndex": 10}],"min":0},
+							"value": allOutputData.differenceMax,"zIndex": 10}
+							]},
 					"title":{"text":null},
 					"series":[
 						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.demandLoad},
