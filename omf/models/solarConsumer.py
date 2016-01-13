@@ -144,25 +144,28 @@ def tjCode(inputs, outData):
 	# Variables for goal seeking on.
 	retailRate = inputs["retailCost"]
 	PartyRate = inputs["3rdPartyRate"]
+	comRate = inputs["comRate"]
 	#Calculate Net Energy Metering Scenario:
 	if inputs["meteringType"]=='netEnergyMetering':
 		for x in range(inputs['years']):
 			for y in range(1,13):
 				monthlyBillsBaseCase.append(retailRate * inputs['monthlyDemand'][y-1])
-				monthlyBillsComS.append(retailRate * totalEnergyUse[x*12+y-1]+inputs["comMonthlyCharge"])
+				monthlyBillsComS.append(comRate * totalEnergyUse[x*12+y-1]+inputs["comMonthlyCharge"])
 				monthlyBillsRoof.append(retailRate * totalEnergyUse[x*12+y-1]+inputs["utilitySolarMonthlyCharge"])
 				monthlyBills3rdParty.append(retailRate * totalEnergyUse[x*12+y-1]+PartyRate * totalSolarGen[x*12+y-1]+inputs["utilitySolarMonthlyCharge"])
 			retailRate = retailRate*(1+inputs["rateIncrease"]/100)
+			comRate = comRate*(1+inputs["comRateIncrease"]/100)
 			PartyRate = PartyRate*(1+inputs["3rdPartyRateIncrease"]/100)
 	#Calculate Production Metering Scenario
 	elif inputs["meteringType"]=='production':
 		for x in range(inputs['years']):
 			for y in range(1,13):
 				monthlyBillsBaseCase.append(retailRate * inputs['monthlyDemand'][y-1])
-				monthlyBillsComS.append(retailRate * inputs['monthlyDemand'][y-1]+inputs["comMonthlyCharge"] - inputs['valueOfSolarRate']*totalSolarGen[x*12+y-1])
+				monthlyBillsComS.append(comRate * inputs['monthlyDemand'][y-1]+inputs["comMonthlyCharge"] - inputs['valueOfSolarRate']*totalSolarGen[x*12+y-1])
 				monthlyBillsRoof.append(retailRate * inputs['monthlyDemand'][y-1]+inputs["utilitySolarMonthlyCharge"] - inputs['valueOfSolarRate']*totalSolarGen[x*12+y-1])
 				monthlyBills3rdParty.append(retailRate * totalEnergyUse[x*12+y-1]+PartyRate * totalSolarGen[x*12+y-1]+inputs["utilitySolarMonthlyCharge"])
 			retailRate = retailRate*(1+inputs["rateIncrease"]/100)
+			comRate = comRate*(1+inputs["comRateIncrease"]/100)
 			PartyRate = PartyRate*(1+inputs["3rdPartyRateIncrease"]/100)
 	#Calculate Excess Metering Scenario
 	elif inputs["meteringType"]=='excessEnergyMetering':
@@ -170,16 +173,17 @@ def tjCode(inputs, outData):
 			for y in range(1,13):
 				if totalEnergyUse[x*12+y-1]>0:
 					monthlyBillsBaseCase.append(retailRate * inputs['monthlyDemand'][y-1])
-					monthlyBillsComS.append(retailRate * inputs['monthlyDemand'][y-1]+inputs["comMonthlyCharge"] - inputs['valueOfSolarRate']*totalSolarGen[x*12+y-1])
+					monthlyBillsComS.append(comRate * inputs['monthlyDemand'][y-1]+inputs["comMonthlyCharge"] - inputs['valueOfSolarRate']*totalSolarGen[x*12+y-1])
 					monthlyBillsRoof.append(retailRate * inputs['monthlyDemand'][y-1]+inputs["utilitySolarMonthlyCharge"] - inputs['valueOfSolarRate']*totalSolarGen[x*12+y-1])
 					monthlyBills3rdParty.append(retailRate * totalEnergyUse[x*12+y-1]+PartyRate * totalSolarGen[x*12+y-1]+inputs["utilitySolarMonthlyCharge"])
 				else:
 					excessSolar=abs(totalEnergyUse[x*12+y-1])
 					monthlyBillsBaseCase.append(retailRate * inputs['monthlyDemand'][y-1])
-					monthlyBillsComS.append(retailRate * inputs['monthlyDemand'][y-1]+inputs["comMonthlyCharge"] - inputs['valueOfSolarRate']*excessSolar)
+					monthlyBillsComS.append(comRate * inputs['monthlyDemand'][y-1]+inputs["comMonthlyCharge"] - inputs['valueOfSolarRate']*excessSolar)
 					monthlyBillsRoof.append(retailRate * inputs['monthlyDemand'][y-1]+inputs["utilitySolarMonthlyCharge"] - inputs['valueOfSolarRate']*excessSolar)
 					monthlyBills3rdParty.append(retailRate * totalEnergyUse[x*12+y-1]+PartyRate * totalSolarGen[x*12+y-1]+inputs["utilitySolarMonthlyCharge"])
 			retailRate = retailRate*(1+inputs["rateIncrease"]/100)
+			comRate = comRate*(1+inputs["comRateIncrease"]/100)
 			PartyRate = PartyRate*(1+inputs["3rdPartyRateIncrease"]/100)
 	# Add upfront costs to the first month.
 	monthlyBillsComS[0]+= inputs["comUpfrontCosts"]
