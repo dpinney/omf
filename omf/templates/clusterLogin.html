@@ -15,15 +15,22 @@
 		div#subLinks {display:inline-block;position:absolute;bottom:-60px;left:-30px;line-height:50px}
 		a.menuEntry {display:inline-block; font-size:18pt; color:gray; margin:0px; padding:7px 10px 7px 10px; text-decoration:none;}
 		a.menuEntry:hover {color:black;}
-		a.forgotPWD {display:inline-block; font-size:16pt;margin-left:25px; margin-top:0px; padding:7px 10px 7px 10px; text-decoration:none;}
+		a.forgotPWD {display:inline-block; font-size:14pt; margin-top:-10px; padding:7px 10px 7px 10px; text-decoration:none;}
 		a.forgotPWD:hover {color:black;}
-		a.quickNew {display:inline-block; font-size:16pt;margin-left:25px; margin-top:0px; padding:7px 10px 7px 10px; text-decoration:none;}
-		a.quickNew:hover {color:black;}		
+		a.quickNew {display:inline-block; font-size:14pt;margin-left:-5px; margin-top:-10px; padding:7px 10px 7px 10px; text-decoration:none;}
+		a.quickNew:hover {color:black;}
 		a {text-decoration:none;}
-		.Success{color:green;display:none;}
-		.Error{color:red;display:none;}
+		.Success,.Success2{color:green;display:none;}
+		.Error,.Error2,.Error3{color:red;display:none;}
 		.fdiv{display:none;margin-top:0px;margin-left:75px;width:70%;}
-		.quickNewSelector{display:none;}
+		.requestAccessSelector{display:none;margin-top:0px;margin-left:75px;width:70%;}
+		div#newUser{width:320px;height:35px;margin-left:25px;}
+		div#quickRun{width:320px;height:35px;margin-left:25px;}
+		div#newUserText{float:left;width:160px;display:inline-block;}
+		div#quickRunText{float:left;width:200px;height:10px;display:inline-block;}
+		div#quickRunSelector{float:right;width:124px;display:inline-block;margin-top:5px;}
+		input.newUserSubmit{float:right;margin-top:10px;font-size:10pt;padding:2px 15px 2px 15px;}
+		select.quickSelector{font-size:10pt;width:125px;padding:2px 0 2px 0;}
 	</style>
 	<link rel='shortcut icon' href='/static/favicon.ico'>
 	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
@@ -32,18 +39,18 @@
 		// Show/hide forgot password field.
 		$("#forgotpwd").click(function(e){
 			$(this).hide();
-			$("#quickNewShow").hide();
-			$(".Success, .Error").hide();
+			$("#requestAccess").hide();
+			$(".Success, .Error, .Success2, .Error2, .Error3").hide();
 			$(".fdiv").fadeIn();
 			$("input[name=email]").focus();
 		});
 		$("#cancel").click(function(e){
 			$(".fdiv").fadeOut();
+			$("#requestAccess").fadeIn();
 			$("#forgotpwd").fadeIn();
-			$("#quickNewShow").fadeIn();
 			$("input[name=email]").val("");
 			$("input[name=username]").focus();
-		})	
+		})
 		$(".forgot_pwd").submit(function(e){
 		$.ajax({
 			url:"/forgotpwd",
@@ -57,24 +64,58 @@
 			$(".fdiv").fadeOut()
 			setTimeout(function(){
 			if (data == "Success")
-				$(".Success").fadeIn();
+				$(".Success, #forgotpwd, #requestAccess").fadeIn();
 			else
-				$(".Error, #forgotpwd").fadeIn();
+				$(".Error, #forgotpwd, #requestAccess").fadeIn();
 			}, 500)
 			e.preventDefault();
 			return false;
 		})
 		})
-		$("#quickNewShow").click(function(e){
+		// Show/hide request access field.
+		$("#requestAccess").click(function(e){
 			$(this).hide();
-			$(".Success, .Error").hide();
-			$(".quickNewSelector").fadeIn();
+			$("#forgotpwd").hide();
+			$(".Success, .Error, .Success2, .Error2, .Error3").hide();
+			$(".requestAccessSelector").fadeIn();
 		});
-		$("#quickNewcancel").click(function(e){
-			$(".quickNewSelector").fadeOut();
-			$("#quickNewShow").fadeIn();
-		})					
+		$("#requestAccessCancel").click(function(e){
+			$(".requestAccessSelector").fadeOut();
+			$("#requestAccess").fadeIn();
+			$("#forgotpwd").fadeIn();
+		})
+		$(".newUserSignup").submit(function(e){
+		$.ajax({
+			url:"/new_user",
+			data:{
+			email:$("input[name=username]").val()
+			},
+			method:"post",
+			async:false
+		}).done(function(data){
+			$(".requestAccessSelector").fadeOut()
+			setTimeout(function(){
+			if (data == "Success")
+				$(".Success2, #forgotpwd, #requestAccess").fadeIn();
+			else if (data == "EMPTY"){
+				$(".requestAccessSelector").show();		
+			}
+			else if (data == "Failed"){
+				$(".Error3, #forgotpwd, #requestAccess").fadeIn();
+			}			
+			else
+				$(".Error2, #forgotpwd, #requestAccess").fadeIn();
+			}, 500)
+			e.preventDefault();
+			return false;
+		})
+		})
 	})
+	function checkEmailField() {
+		var $myForm = $('#loginForm')
+		if (!$myForm[0].checkValidity()) {
+		  $myForm.find(':submit').click()}
+	}
 	</script>
 </head>
 <body>
@@ -89,15 +130,16 @@
 		</div>
 		<div class='subContainer' id='login'>
 			<p id='loginTitle'>Open Modeling Framework</p>
-			<form id='loginForm' method='POST' action='login'>
-			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-			<input type="hidden" name="next" value="{{ next }}" />
-			<input type='text' placeholder='Username' name='username' autofocus><br/>
-			<input type='password' placeholder='Password' name='password'><br/>
-			<button type='submit'>Login</button>
-			<label id='remember'>Remember Me <input name="remember" type='checkbox'></label>
+			<form id='loginForm' name='loginForm' method='POST' action='login'>
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+				<input type="hidden" name="next" value="{{ next }}" />
+				<input type='text' placeholder='Username' name='username' id='username' required><br/>
+				<input type='password' placeholder='Password' name='password' id='password'><br/>
+				<button type='submit'>Login</button>
+				<label id='remember'>Remember Me <input name="remember" type='checkbox'></label>
 			</form>
 			<a class='forgotPWD' href="#" id="forgotpwd">Forgot Password?</a>
+			<a class='quickNew' href="#" id="requestAccess">Request Access?</a>
 			<div class="fdiv">
 				<p>Enter your email and a password reset link will be sent to you.</p>
 				<form class="forgot_pwd">
@@ -106,22 +148,38 @@
 				</form>
 				<a href="#" id="cancel">Cancel</a>
 			</div>
+			<div class="requestAccessSelector">
+				<div id="quickRun">
+					<form name="requestAccessOptions" class="new_user">
+						<div id="quickRunText">
+							<p style="text-align:left">Guest access:</p>
+						</div>
+						<div id="quickRunSelector">
+							<select name="model" class="quickSelector" onChange="document.location.href=document.requestAccessOptions.model.options[document.requestAccessOptions.model.selectedIndex].value">
+								<option value="">Choose a Model</option>
+								{% for modelName in modelNames %}
+									<option value="/quickNew/{{ modelName }}">{{ modelName }}</option>
+								{% endfor %}
+							</select>
+						</div>
+					</form>
+				</div>
+				<div id="newUser">
+					<form class="newUserSignup" onsubmit="event.preventDefault(); return checkEmailField();" method="POST">
+						<div id="newUserText">
+							<p style="text-align:left;">Or fill email above and:</p>
+						</div>
+						<input type="submit" value="Create Account" class="newUserSubmit">
+					</form>
+				</div>
+				<br>
+				<a href="#" id="requestAccessCancel">Cancel</a>
+			</div>
 			<p class="Error">That email is not associated with any account</p>
 			<p class="Success">Email successfully sent! The reset link will expire in 24 hours</p>
-			<a class='quickNew' href="#" id="quickNewShow">Want Guest Access?</a>	
-			<div class="quickNewSelector">
-				<form name="quickNewOptions">
-					<p>Select a model to explore
-				    <select name="model" onChange="document.location.href=document.quickNewOptions.model.options[document.quickNewOptions.model.selectedIndex].value">
-				    	<option value="">Please select a model:</option> 
-				    	{% for modelName in modelNames %}
-				    		<option value="/quickNew/{{ modelName }}">{{ modelName }}</option>
-				    	{% endfor %}
-			    	</select>
-			    	</p>
-				</form>     	
-				<a href="#" id="quickNewcancel">Cancel</a>	
-			</div>
+			<p class="Success2">Account registration email successfully sent! It will expire in 24 hours</p>
+			<p class="Error2">Someone's already using that email, please enter a different one</p>
+			<p class="Error3">Account registration failed, our email servers might be down</p>
 		</div>
 	</div>
 </body>
