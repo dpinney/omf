@@ -77,10 +77,7 @@ app.secret_key = cryptoRandomString()
 def send_link(email, message, u={}):
 	''' Send message to email using Amazon SES. '''
 	try:
-		try:
-			key = open("emailCredentials.key").read()
-		except:
-			key = "NO_WAY_JOSE"
+		key = open("emailCredentials.key").read()
 		c = boto.ses.connect_to_region("us-east-1",
 			aws_access_key_id="AKIAJLART4NXGCNFEJIQ",
 			aws_secret_access_key=key)
