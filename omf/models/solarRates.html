@@ -380,7 +380,7 @@
 			</script>
 		</div>
 		<p class="reportTitle  postRun">Annual Cash and Power Flows</p>
-		<div id="graphicChart" class="tightContent postRun tableReport" style="overflow-x:hidden">
+		<div id="graphicChart" class="tightContent postRun tableReport" style="overflow-x:hidden;overflow-y:hidden;">
 			<svg width="1000px" height="520px" viewBox="0.00 0.00 1000.00 500.00">
 				<g id="graph0" class="graph">
 					<defs>
@@ -439,24 +439,24 @@
 							xint = parseInt(x1) / (Math.pow(10, places))
 							return xint
 						}
-						gebi("patronageCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.patCapital.toFixed(0))
-						gebi("lossesEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.losses, 3).toFixed(0)) +" MWh"
-						gebi("vendorCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.BAU.nonPowerCosts.toFixed(0))
-						gebi("gtEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.totalKWhPurchased, 3).toFixed(0)) + " MWh"
-						gebi("gtCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.costPurchasedPower.toFixed(0))
-						gebi("vendorCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.BAU.nonPowerCosts.toFixed(0))
-						gebi("solarConEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.solarResSold, 3).toFixed(0)) + " MWh"
-						gebi("solarConCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.solarResRev.toFixed(0))
-						gebi("nonSolarConEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.resNonSolarKWhSold, 3).toFixed(0)) + " MWh"
-						gebi("nonSolarConCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.resNonSolarRev.toFixed(0))
-						gebi("commConEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.BAU.nonResKWhSold, 3).toFixed(0)) + " MWh"
-						gebi("commConCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.nonResRev.toFixed(0))
-						gebi("panelsEnergyLabel").innerHTML = delimitNumbers(convertunits(allOutputData.Solar.annualSolarGen, 3).toFixed(0)) + " MWh"
-						gebi("panelsCashLabel").innerHTML = "$" + delimitNumbers(allOutputData.Solar.costSolarGen.toFixed(0))
-						gebi("avgNonSolarBill").innerHTML = "Avg Bill " + delimitNumbers(allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(0)) + " $/Month"
-						gebi("avgSolarBill").innerHTML = "Avg Bill " + delimitNumbers(allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(0)) + " $/Month"
-						gebi("currentRate").innerHTML = "BAU Costs " + delimitNumbers(allOutputData.BAU.costofService.toFixed(3)) + " $/kWh"
-						gebi("costofService").innerHTML = "Solar Costs " + delimitNumbers(allOutputData.Solar.costofService.toFixed(3)) + " $/kWh"
+						gebi("patronageCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.patCapital.toFixed(0))
+						gebi("lossesEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.losses, 3).toFixed(0)) +" MWh"
+						gebi("vendorCashLabel").textContent = "$" + delimitNumbers(allOutputData.BAU.nonPowerCosts.toFixed(0))
+						gebi("gtEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.totalKWhPurchased, 3).toFixed(0)) + " MWh"
+						gebi("gtCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.costPurchasedPower.toFixed(0))
+						gebi("vendorCashLabel").textContent = "$" + delimitNumbers(allOutputData.BAU.nonPowerCosts.toFixed(0))
+						gebi("solarConEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.solarResSold, 3).toFixed(0)) + " MWh"
+						gebi("solarConCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.solarResRev.toFixed(0))
+						gebi("nonSolarConEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.resNonSolarKWhSold, 3).toFixed(0)) + " MWh"
+						gebi("nonSolarConCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.resNonSolarRev.toFixed(0))
+						gebi("commConEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.BAU.nonResKWhSold, 3).toFixed(0)) + " MWh"
+						gebi("commConCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.nonResRev.toFixed(0))
+						gebi("panelsEnergyLabel").textContent = delimitNumbers(convertunits(allOutputData.Solar.annualSolarGen, 3).toFixed(0)) + " MWh"
+						gebi("panelsCashLabel").textContent = "$" + delimitNumbers(allOutputData.Solar.costSolarGen.toFixed(0))
+						gebi("avgNonSolarBill").textContent = "Avg Bill " + delimitNumbers(allOutputData.Solar.avgMonthlyBillNonSolarCus.toFixed(0)) + " $/Month"
+						gebi("avgSolarBill").textContent = "Avg Bill " + delimitNumbers(allOutputData.Solar.avgMonthlyBillSolarCus.toFixed(0)) + " $/Month"
+						gebi("currentRate").textContent = "BAU Costs " + delimitNumbers(allOutputData.BAU.costofService.toFixed(3)) + " $/kWh"
+						gebi("costofService").textContent = "Solar Costs " + delimitNumbers(allOutputData.Solar.costofService.toFixed(3)) + " $/kWh"
 					</script>
 				</g>
 			</svg>

@@ -1,6 +1,8 @@
 ﻿<head>
 	<script type="text/javascript">
 		var unsavedChanges = false;
+		var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+		if(!isChrome){alert("This editing interface is only supported in the Chrome browser. Proceed at your own risk.")}
 	</script>
 	<script type="text/javascript" src="/static/d3.v3.js"></script>
 	<script type="text/javascript" src="/static/omf.js"></script>
