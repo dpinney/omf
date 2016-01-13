@@ -75,20 +75,20 @@ def send_link(email, message, u={}):
 	''' Send message to email using Amazon SES. '''
 	try:
 		key = open("emailCredentials.key").read()
+		c = boto.ses.connect_to_region("us-east-1",
+			aws_access_key_id="AKIAJLART4NXGCNFEJIQ",
+			aws_secret_access_key=key)
+		reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
+		u["reg_key"] = reg_key
+		u["timestamp"] = dt.datetime.strftime(dt.datetime.now(), format="%c")
+		u["registered"] = False
+		u["email"] = email
+		outDict = c.send_email("admin@omf.coop", "OMF Registration Link",
+			message.replace("reg_link", URL+"/register/"+email+"/"+reg_key), [email])
+		json.dump(u, open("data/User/"+email+".json", "w"), indent=4)
+		return "Success"
 	except:
-		key = "NO_WAY_JOSE"
-	c = boto.ses.connect_to_region("us-east-1",
-		aws_access_key_id="AKIAJLART4NXGCNFEJIQ",
-		aws_secret_access_key=key)
-	reg_key = hashlib.md5(str(time.time())+str(random.random())).hexdigest()
-	u["reg_key"] = reg_key
-	u["timestamp"] = dt.datetime.strftime(dt.datetime.now(), format="%c")
-	u["registered"] = False
-	u["email"] = email
-	json.dump(u, open("data/User/"+email+".json", "w"), indent=4)
-	outDict = c.send_email("admin@omf.coop", "OMF Registration Link",
-		message.replace("reg_link", URL+"/register/"+email+"/"+reg_key), [email])
-	return "Success"
+		return "Failed"
 
 @login_manager.user_loader
 def load_user(username):
@@ -156,11 +156,10 @@ def deleteUser():
 	return "Success"
 
 @app.route("/new_user", methods=["POST"])
-@flask_login.login_required
+# @flask_login.login_required #TODO: REVIEW
 def new_user():
-	if User.cu() != "admin":
-		return redirect("/")
 	email = request.form.get("email")
+	if email == "": return "EMPTY"
 	if email in [f[0:-5] for f in os.listdir("data/User")]:
 		u = json.load(open("data/User/" + email + ".json"))
 		if u.get("password_digest") or not request.form.get("resend"):

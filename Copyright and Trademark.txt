@@ -1,4 +1,5 @@
 Open Modeling Framework® is a software development designed to model power systems behavior.
+
 Copyright (C) 2014  National Rural Electric Cooperative Association
 
 This program is free software; you can redistribute it and/or modify it under the terms of version 2 of the GNU General Public Licenses published by the Free Software Foundation (http://www.gnu.org/licenses/gpl-2.0.html).

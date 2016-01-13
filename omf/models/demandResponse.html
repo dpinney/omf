@@ -5,6 +5,33 @@
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
 		#firstYearSummaryTable td, th {padding:7 0 5 0; text-align:left; font-size:0.8em;}
+		/*File Styles*/
+		 #fileBackground{position:absolute;width:205px;max-width:205px;height:31px;margin: -32px 0 0 116px;background-color:gainsboro;}
+		 #fileExists {
+		   background-color:transparent;
+		   max-width:185px;
+		   overflow-x:auto;
+		   overflow-y:hidden;
+		   height:35px;
+		   margin:-32px 0 0 116px;
+		   position:absolute;
+		   font-size:0.8em;
+		   z-index:1;
+		 }
+		input[type='file'] {
+		  color: transparent;
+		}
+		/*IE Hacks*/
+		@media screen\0 {
+			#fileBackground{margin-left:0px;width:222px;max-width:222px;height:29px;}
+			#fileExists{margin: -27px 0 0 10px;height:42px;}
+		}
+		/*Firefox Hacks*/
+		@-moz-document url-prefix() {
+			#fileBackground{margin-left:125px;width:195px;max-width:195px;}
+			#fileExists{max-width:175px;margin:-32px 0 0 135px;height:47px;}
+		  }
+		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -86,32 +113,19 @@
 			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<script>var fileName=true;</script>
-				<div id="fileDiv">
-					<div style="float:left;">
-						<input id="demandCurve" name="demandCurve" type="hidden">
-						<input type="hidden" id="fileName" name="fileName" readonly="readonly">
-						<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName"></label></div>
-					</div>
-					<div style="float:right;">								
-						<input type="file" class="fileUpload" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
-						<img class="chooseFile" src="/static/chooseFile.png" alt="Upload a file">
-					</div>
-				</div>
+				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
+				<input id="demandCurve" name="demandCurve" type="hidden">
 				{% if allInputData.fileName|string() is defined %}
+					<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+					<div id="fileBackground"></div>
+					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName" name="demandCurveFileName"></label></div>
 					<script>
-						var FileName = allInputData.fileName;
-						document.getElementById('demandCurveFileName').innerHTML = FileName;
+						document.getElementById('demandCurveFileName').innerHTML = allInputData.fileName;
 					</script>
-				{% else %}
-					<script>
-						var FileName = "No file chosen.";
-						document.getElementById('demandCurveFileName').innerHTML = FileName;
-					</script>				
 				{% endif %}
 				<script>
 					// Make sure the file is required on prerun.
 					if (modelStatus == "preRun") {gebi('demandCurveFile').setAttribute('required', 'required')}
-					else {}
 					// File handler function.
 					function handle_files(files) {
 						// read file to a hidden input field
@@ -136,9 +150,9 @@
 			<div class="shortInput">
 				<label>Program Type</label>
 				<select id="rateStruct" name="rateStruct"/>
-					<option value="PTR">PTR</option>
-					<option value="2tierCPP">2tierCPP</option>
-					<option value="24hourly">24hourly</option>
+					<option value="PTR">Peak Time Rebate (PTR)</option>
+					<option value="2tierCPP">Critical Peak Pricing (CPP)</option>
+					<option value="24hourly">Time of Use Hourly Pricing (TOU)</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -154,7 +168,7 @@
 				<input type="text" id="LoadunderManagement" name="LoadunderManagement" value="100" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
-				<label>CPP Rate ($)</label>
+				<label>CPP Critical Peak Rate ($)</label>
 				<input type="text" id="rateCPP" name="rateCPP" value="1.80" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
@@ -162,16 +176,16 @@
 				<input type="text" id="numCPPDays" name="numCPPDays" value="10" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
-				<label>PTR Rate ($)</label>
-				<input type="text" id="ratePTR" name="ratePTR" value="2.65" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>
-			<div class="shortInput">
-				<label>2TierCPP Peak Rate ($)</label>
+				<label>CPP Non-Critical Peak Rate ($)</label>
 				<input type="text" id="PeakRate" name="PeakRate" value="0.20" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
-				<label>2TierCPP Off-Peak Rate ($)</label>
+				<label>CPP Off-Peak Rate ($)</label>
 				<input type="text" id="OffPeakRate" name="OffPeakRate" value="0.083" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>PTR Rate ($)</label>
+				<input type="text" id="ratePTR" name="ratePTR" value="2.65" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class= "shortInput">
 					<label>Daily Price Elasticity of Demand</label>
@@ -198,7 +212,7 @@
 				<input type="text" id="stopHour" name="stopHour" value="9" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput" style="width:100%">
-				<label>24 Hourly Rate (% CSV)</label>
+				<label>TOU 24 Hourly Rates (% CSV)</label>
 				<input type="text" id="rate24hourly" name="rate24hourly" value=".074,.041,.020,.035,.100,.230,.391,.550,.688,.788,.859,.904,.941,.962,.980,1.000,.999,.948,.904,.880,.772,.552,.341,.169" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){23}$" required="required" />
 			</div>
 			<div class="wideInput" style="text-align:right">
@@ -226,7 +240,7 @@
 			Highcharts.setOptions({global:{useUTC:true}})
 		</script>
 		<p class="reportTitle postRun">Demand Before and After Program</p>
-		<div id="irradianceReport" class="tightContent postRun">
+		<div id="demandChangeReport" class="tightContent postRun">
 			<div id="demandBattChart"></div>
 			<script>
 				new Highcharts.Chart({"credits":{"enabled":false},
@@ -243,12 +257,14 @@
 						"lineColor":"gray"},
 					"yAxis":{
 						"title":{"text":"Power (kW)","style":{"color":"gray"}},
-						"min":0,
-						"plotLines":[{"color": "lightgray",
+						"min":allOutputData.differenceMin,
+						"plotLines":[
+							{"color": "lightgray",
 							"dashStyle": "ShortDash",
 							"width": 2,
 							"label":{"text":"Max Difference:" + allOutputData.differenceMax + "kW", "align":"right","y":-5,"x":-730, "style":{"color":"gray", "fontsize":"12px"}},
-							"value": allOutputData.differenceMax,"zIndex": 10}],"min":0},
+							"value": allOutputData.differenceMax,"zIndex": 10}
+							]},
 					"title":{"text":null},
 					"series":[
 						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.demandLoad},

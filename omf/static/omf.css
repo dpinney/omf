@@ -110,22 +110,6 @@ select, input[type='text'], input[type='email'], input[type='file'], button {
 	border-width:1px;
 	border-color:white;
 	border-style:solid; }
-div#fileDiv{display:inline-block;width:323px;max-width:323px;}
- #fileExists {
-   display:inline-block;
-   position:relative;
-   background-color:#d3d3d3;
-   font-size:0.8em;
-   padding: 0.5em;
-   width:310px;
-   height:13px;}
-input[type='file'].fileUpload {
-	position:absolute;
-		margin:-5px 0 0 -120px;
-		width:110px;
-		opacity:0;
-		z-index:1;}
-img.chooseFile{position:absolute;margin:5px 0 0 -95px;}	
 button, input[type='submit'] {
 	width:auto;
 	margin-right:3px;
