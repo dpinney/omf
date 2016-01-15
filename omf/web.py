@@ -190,16 +190,18 @@ def register(email, reg_key):
 			reg_key == user.get("reg_key") and
 			user.get("timestamp") and
 			dt.timedelta(1) > dt.datetime.now() - dt.datetime.strptime(user.get("timestamp"), "%c")):
-		return "This page either expired, or you are not supposed to access it.  It might not even exist"
+		return "This page either expired, or you are not supposed to access it. It might not even exist"
 	if request.method == "GET":
 		return render_template("register.html", email=email)
 	password, confirm_password = map(request.form.get, ["password", "confirm_password"])
-	if password == confirm_password:
+	if password == confirm_password and request.form.get("legalAccepted","") == "on":
 		user["username"] = email
 		user["password_digest"] = pbkdf2_sha512.encrypt(password)
 		flask_login.login_user(User(user))
 		with open("data/User/"+user["username"]+".json","w") as outFile:
 			json.dump(user, outFile, indent=4)
+	else:
+		return "Passwords must both match and you must accept the Terms of Use and Privacy Policy. Please go back and try again."
 	return redirect("/")
 
 @app.route("/changepwd", methods=["POST"])
