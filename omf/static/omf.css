@@ -131,7 +131,7 @@ input[readonly="out"], input[out], textarea[out] {
 button:hover, input[type='submit']:hover {background:mediumseagreen;}
 div#input {margin-top: 0px;}
 div.shortInput {
-	width: 323px; 
+	width: 313px; 
 	display: inline-block; 
 	margin-bottom: 10px;}
 div.shorterInput {
@@ -139,7 +139,7 @@ div.shorterInput {
 	display: inline-block; 
 	margin-bottom: 10px;}
 div.wideInput {
-	width: 980px; 
+	width: 950px; 
 	margin-bottom: 10px;}
 button#cancelButton {background: crimson;}
 button#cancelButton:hover {background: red;}
