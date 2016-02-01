@@ -78,7 +78,6 @@ div.content {
 	width: 980px;
 	max-width:980px;
 	min-width: 640px;
-	width: 95%;
 	margin-left: auto;
 	margin-right: auto;
 	margin-top: 20px;
@@ -131,7 +130,7 @@ input[readonly="out"], input[out], textarea[out] {
 button:hover, input[type='submit']:hover {background:mediumseagreen;}
 div#input {margin-top: 0px;}
 div.shortInput {
-	width: 313px; 
+	width: 323px;
 	display: inline-block; 
 	margin-bottom: 10px;}
 div.shorterInput {
@@ -139,7 +138,7 @@ div.shorterInput {
 	display: inline-block; 
 	margin-bottom: 10px;}
 div.wideInput {
-	width: 950px; 
+	width: 980px; 
 	margin-bottom: 10px;}
 button#cancelButton {background: crimson;}
 button#cancelButton:hover {background: red;}
@@ -190,7 +189,7 @@ div.tableReport {
 	overflow-x: scroll;}
 p.reportTitle {
 	padding: 10px; 
-	width: 1000px; 
+	width: 980px; 
 	margin: 20px auto 0px auto; 
 	font-size: 16pt;
 	display: block;}
