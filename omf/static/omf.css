@@ -3,7 +3,7 @@ HEADER and MENU LINKS
 **********************************************/
 div#header{width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0;}
 div#headInnerBlock{width:1000px;height:40px;font-size:medium;color:white;margin: 4px auto 0 auto;}
-div#menuLeft{height:40px;float:left;font-size:medium;color:white;}
+div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-left:5px;}
 div#menuRight{height:40px;font-size:medium;color:white;float:right;}
 div#arrow {font-size:8pt;position:absolute;margin-top:2px;margin-left:4px;display:inline;}
 ul.menu {
