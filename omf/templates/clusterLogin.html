@@ -133,10 +133,10 @@
 			<form id='loginForm' name='loginForm' method='POST' action='login'>
 				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 				<input type="hidden" name="next" value="{{ next }}" />
-				<input type='text' placeholder='Username' name='username' id='username' required><br/>
+				<input type='text' placeholder='Email' name='username' id='username' required><br/>
 				<input type='password' placeholder='Password' name='password' id='password'><br/>
 				<button type='submit'>Login</button>
-				<label id='remember'>Remember Me <input name="remember" type='checkbox'></label>
+				<label id='remember'>Remember Me <input name="remember" type='checkbox' checked></label>
 			</form>
 			<a class='forgotPWD' href="#" id="forgotpwd">Forgot Password?</a>
 			<a class='quickNew' href="#" id="requestAccess">Request Access?</a>
