@@ -1,5 +1,5 @@
 Flask>=0.9
-Flask-Login>=0.2.9
+Flask-Login==0.2.11
 Jinja2>=2.7.2
 MarkupSafe>=0.18
 Werkzeug>=0.9.4

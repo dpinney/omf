@@ -40,11 +40,6 @@
 			#fileBackground{margin-left:125px;width:195px;max-width:195px;}
 			#fileExists{max-width:175px;margin:-32px 0 0 135px;height:47px;}
 		 }
-		@media print {
-			body {background:white}
-			#labelDemandChart, #labelCashChart {page-break-before:always}
-			button {display:none !important}
-		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -281,7 +276,7 @@
 			// Global Highcharts settings.
 			Highcharts.setOptions({global:{useUTC:true}})
 		</script>
-		<p class="reportTitle postRun" id="labelDemandChart">Demand Before and After Storage</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Demand Before and After Storage</p>
 		<div id="irradianceReport" class="tightContent postRun">
 			<div id="demandBattChart"></div>
 			<script>
@@ -352,7 +347,7 @@
 			</script>
 		</div>
 		<!-- TODO: Make into preview graph: http://jsfiddle.net/gh/get/jquery/1.7.2/highslide-software/highcharts.com/tree/master/samples/stock/xaxis/minorticks/	 -->
-		<p class="reportTitle postRun" id="labelCashChart">Cash Flow</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Cash Flow</p>
 		<div id="cashFlowReport" class="tightContent postRun">
 			<div id="cashFlowChartDiv"></div>
 			<script>

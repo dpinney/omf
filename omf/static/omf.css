@@ -82,6 +82,9 @@ div.content {
 	margin-right: auto;
 	margin-top: 20px;
 	margin-bottom: 30px; }
+@media print {
+	body {background:white}
+	button {display:none !important} }
 
 /**********************************************
 FORMS, LABELS, BUTTONS AND INPUT FIELDS
