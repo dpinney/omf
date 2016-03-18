@@ -88,7 +88,7 @@
 	</div>
 	<div id="input">
 		<div id="circuit">
-			<iframe src="{{pathPrefix}}/static/circuitjs/circuitjs.html"></iframe>
+			<iframe id= "circFrame" src="{{pathPrefix}}/static/circuitjs1/circuitjs.html"></iframe>
 		</div>
 		<div id="circuitInputs">
 			<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"method="post">
