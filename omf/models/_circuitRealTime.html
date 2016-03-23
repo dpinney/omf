@@ -4,67 +4,9 @@
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
-		iframe{position: fixed; height:87%; width:100%; margin-top:-2.5%; border: none}
-		div#copyrightNotice{width:1000px; margin:-20px auto 10px auto; padding-left:400px; color:gray}
-		div#circuitInputs{
-			position:absolute;
-			width:150px;
-			margin-left:1415px;
-			margin-top:-450px;
-			z-index:1;
-		}
-		div#circuit{
-		  height:700px;
-		  width:1000px;
-		  margin-top:35px;
-		  z-index:-1;
-		}
-		input[type="text"], input[type="email"], input[type="file"], select {
-			font-size: 8pt;
-			display: inline;
-			margin:0px;
-			width:125px;
-		}
-		div.iFrameInput {
-			display: inline-block;
-			margin-bottom: 10px;
-			margin-left:40px;
-			font-size:8pt;
-			text-align:center;
-			width:120px;
-		}
-		div.iFrameButtons {
-			display: inline-block;
-			margin-top: 50px;
-			margin-left:50px;
-			font-size:10pt;
-			text-align:center;
-			width:100px;
-		}
-		button#cancelButton {
-			background: crimson;
-		}
-		button#cancelButton:hover {
-			background: red;
-		}
-		button {
-			width:100px;
-			background:gainsboro;
-			padding:4px;
-			margin:2px;
-			border-width:1px;
-			border-color:white;
-			border-style:solid; }
-
-		button, input[type='submit'] {
-			background:seagreen;
-			-webkit-border-radius: 5px;
-			-moz-border-radius: 5px;
-			border-radius: 5px;
-			border: none;
-			color: white;
-			cursor:pointer; }
-		button:hover, input[type='submit']:hover {background:mediumseagreen;}
+		iframe {display:block; height:calc(100% - 50px); width:100%; border:none; margin:none;}
+		.circModelButtons {display:block; margin:5px;}
+		.circModelBox {margin-top:10px;}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -77,7 +19,6 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<!-- TODO: Javascript to automatically save and load circuit simulations.  -->
 <body onload="init()">
 	<div id="header">
 		<div id="menuLeft">
@@ -86,36 +27,38 @@
 			{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;
 		</div>
 	</div>
-	<div id="input">
-		<div id="circuit">
-			<iframe id= "circFrame" src="{{pathPrefix}}/static/circuitjs1/circuitjs.html"></iframe>
-		</div>
-		<div id="circuitInputs">
-			<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"method="post">
-				<div class="iFrameInput">
-					<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-circuitRealTime" target="blank">Help?</a></label>
-					<input type="text" id="modelType" name="modelType" value="_circuitRealTime" readonly/>
-				</div>
-				<div class="iFrameInput">
-					<label>Model Name</label><br>
-					<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"></td>
-				</div>
-				<div class="iFrameInput runningInline postRunInline">
-					<label>User</label><br>
-					<input type="text" id="user" name="user" readonly/>
-				</div>
-				<div class="iFrameInput runningInline postRunInline ">
-					<label>Created</label><br>
-					<input type="text" id="created" name="created" readonly/>
-				</div>
-				<div class="iFrameButtons">
-					<button id="deleteButton" type="button" class="preRun stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-					<button id="publishButton" type="button" class="preRun stoppedInline postRunInline" onclick="publishModel()">Publish</button>
-					<button id="duplicateButton" type="button" class="preRun stoppedInline postRunInline" onclick="duplicateModel()">Duplicate</button>
-					<button id="runButton" type="submit" class="preRun stoppedInline postRunInline">Save</button>
-				</div>
-			</form>
-		</div>
+	<iframe id="circFrame" src="{{pathPrefix}}/static/circuitjs1/circuitjs.html"></iframe>
+	<!-- <button id='exportButton' style='position:absolute;bottom:5px;right:5px' onclick='exportString()'>clickSave</button> -->
+	<div id="circuitInputs" style='position:absolute;bottom:10px;right:5px;width:150px;margin-top:10px'>
+		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"method="post">
+			<div class="circModelBox">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-circuitRealTime" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="_circuitRealTime" readonly/>
+			</div>
+			<div class="circModelBox">
+				<label>Model Name</label><br>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"></td>
+			</div>
+			<div class="runningInline postRunInline circModelBox">
+				<label>User</label><br>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="runningInline postRunInline circModelBox">
+				<label>Created</label><br>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="circModelBox">
+				<button id="deleteButton" type="button" class="circModelButtons preRun stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="circModelButtons preRun stoppedInline postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="circModelButtons preRun stoppedInline postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="runButton" type="submit" class="circModelButtons preRun stoppedInline postRunInline">Save</button>
+			</div>
+			<div id="copyrightNotice" style="color:gray;line-height:14pt;margin-top:20px">Circuit Simulator Applet was developed by <a href="http://www.falstad.com/" target="_blank">Paul Falstad</a></div>
+		</form>
 	</div>
-	<div id="copyrightNotice">Circuit Simulator Applet was developed by <a href="http://www.falstad.com/" target="_blank">Paul Falstad</a></div>
 </body>
+<script type="text/javascript">
+	function exportString() {
+		alert(document.getElementById('circFrame').contentWindow.$circuitjs('EXPORT_AS_TEXT'))
+	}
+</script>
