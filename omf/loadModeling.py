@@ -134,7 +134,7 @@ def _tests():
 	print 'Override apartment test:', houseSpecs(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA'), '\n'
 	print 'Override house test:', houseSpecs(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
 	print 'Full gldHouse test:', gldHouse(0,0,addressOverride='1629 North Stafford Street, Arlington, VA 22207, USA'), '\n'
-	print 'Apt test:', gldHouse(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA')
+	# print 'Apt test:', gldHouse(0,0,addressOverride='3444 N Fairfax Dr, Arlington, VA 22201, USA')
 	os.remove(outFilePath)
 
 if __name__ == '__main__':
