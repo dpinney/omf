@@ -3,16 +3,13 @@
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime
 from os.path import join as pJoin
 from jinja2 import Template
-#_circuitRealTime.py
-# from omf.models import __metaModel__
-# circuitRealtime.py
 import __metaModel__
 from __metaModel__ import *
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"_circuitRealTime.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"circuitRealTime.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):

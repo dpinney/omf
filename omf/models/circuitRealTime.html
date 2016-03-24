@@ -33,7 +33,7 @@
 		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"method="post">
 			<div class="circModelBox">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-circuitRealTime" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="_circuitRealTime" readonly/>
+				<input type="text" id="modelType" name="modelType" value="circuitRealTime" readonly/>
 			</div>
 			<div class="circModelBox">
 				<label>Model Name</label><br>
@@ -66,6 +66,7 @@
 	}
 	function circInit() {
 		circData = document.getElementById('circString').value
-		document.getElementById('circFrame').contentWindow.$circuitjs('IMPOORT_AS_TEXT', {'text': circData})
+		// document.getElementById('circFrame').contentWindow.$circuitjs('IMPOORT_AS_TEXT', {'text': circData})
+		document.getElementById('circFrame').src = encodeURI('{{pathPrefix}}/static/circuitjs1/circuitjs.html?cct=' + circData)
 	}
 </script>
