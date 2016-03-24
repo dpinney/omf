@@ -19,7 +19,7 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="init()">
+<body onload="init();circInit()">
 	<div id="header">
 		<div id="menuLeft">
 			<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model
@@ -51,14 +51,21 @@
 				<button id="deleteButton" type="button" class="circModelButtons preRun stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="circModelButtons preRun stoppedInline postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="circModelButtons preRun stoppedInline postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="runButton" type="submit" class="circModelButtons preRun stoppedInline postRunInline">Save</button>
+				<button id="runButton" type="submit" class="circModelButtons preRun stoppedInline postRunInline" onclick="circSave()">Save</button>
 			</div>
+			<input type="hidden" id="circString" name="circString" readonly/>
 			<div id="copyrightNotice" style="color:gray;line-height:14pt;margin-top:20px">Circuit Simulator Applet was developed by <a href="http://www.falstad.com/" target="_blank">Paul Falstad</a></div>
 		</form>
 	</div>
 </body>
 <script type="text/javascript">
-	function exportString() {
-		alert(document.getElementById('circFrame').contentWindow.$circuitjs('EXPORT_AS_TEXT'))
+	function circSave() {
+		circData = document.getElementById('circFrame').contentWindow.$circuitjs('EXPORT_AS_TEXT')
+		document.getElementById('circString').value = circData
+		return
+	}
+	function circInit() {
+		circData = document.getElementById('circString').value
+		document.getElementById('circFrame').contentWindow.$circuitjs('IMPOORT_AS_TEXT', {'text': circData})
 	}
 </script>
