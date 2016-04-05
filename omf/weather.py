@@ -72,6 +72,7 @@ def _airportCodeToLatLon(airport):
 	''' Airport three letter code -> lat/lon of that location. '''
 	try:
 		url2 = urllib2.urlopen('http://www.airport-data.com/airport/'+airport+'/#location')
+		# print 'http://www.airport-data.com/airport/'+airport+'/#location'
 		soup = BeautifulSoup(url2, "html.parser")
 		latlon_str = str(soup.find('td', class_='tc0', text='Longitude/Latitude:').next_sibling.contents[1])
 		p = re.compile('([0-9\.\-\/])+')
@@ -775,6 +776,27 @@ def zipCodeToClimateName(zipCode):
 						pass
 	climateName = zipState + "-" + climateCity[found]
 	return climateName, latforpvwatts
+
+def getWeather(tree, maxKey, weatherStart, weatherEnd, airport, workDir):
+	'''Get and save weather data to a directory.'''
+	try:
+		# Read wunderground.com weather data.
+		weatherFile = "weather"+airport+".csv"
+		assert None==makeClimateCsv(weatherStart, weatherEnd, airport, pJoin(workDir,"gridlabD",weatherFile), cleanup=True)
+		for key in tree:
+			if tree[key].get('object','').lower() == 'climate':
+				tree[key]['tmyfile'] = str("\"weather"+airport+".csv\"")
+				tree[key]['reader'] = "weatherReader"
+				tree[key].pop('quadratic',None)
+		tree[maxKey+1] = {"object": "csv_reader",
+			"name":"\"weatherReader\"",
+			"filename": str("\"weather"+airport+".csv\"")
+		}
+		return True
+	except:
+		# Server errored, use climate .tmy2 instead.
+		print "ERROR: Using .tmy2 data because I couldn't connect to one of the weather servers."
+		return False
 
 def _tests():
 	print "Beginning to test weather.py"
