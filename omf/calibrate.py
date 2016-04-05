@@ -1,17 +1,24 @@
 import csv, datetime as dt, json, tempfile
 from matplotlib import pyplot as plt
+import os
 from os.path import join as pJoin
 # OMF imports
 import feeder
 from solvers import gridlabd
 import random
+# Plotting
+import numpy as np
+import matplotlib
+from matplotlib import pyplot as plt
 
-def omfCalibrate(workDir, feederPath, scadaPath):
+def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
 	with open(feederPath, "r") as jsonIn:
 		feederJson = json.load(jsonIn)
 		tree = feederJson.get("tree", {})
-	scadaSubPower, firstDateTime = _processScadaData(workDir,scadaPath)
+	# Process scada data.
+	gridlabdDir = pJoin(workDir,"gridlabD")
+	scadaSubPower = _processScadaData(gridlabdDir,scadaPath, simStartDate)
 	# Force FBS powerflow, because NR fails a lot.
 	for key in tree:
 		if tree[key].get("module","").lower() == "powerflow":
@@ -30,9 +37,23 @@ def omfCalibrate(workDir, feederPath, scadaPath):
 		"power_pf_12": "0.90",
 		"impedance_fraction_12": "0.7",
 		"power_fraction_12": "0.3"}
+	loadTemplateR = {"object": "load",
+		"impedance_pf_A": "0.98",
+		"impedance_pf_B": "0.98",
+		"impedance_pf_C": "0.98",
+		"power_pf_A": "0.90",
+		"power_pf_B": "0.90",
+		"power_pf_C": "0.90",
+		"impedance_fraction_A": "0.7",
+		"impedance_fraction_B": "0.7",
+		"impedance_fraction_C": "0.7",
+		"power_fraction_A": "0.3",
+		"power_fraction_B": "0.3",
+		"power_fraction_C": "0.3"}		
 	for key in tree:
 		ob = tree[key]
 		if ob.get("object","") == "triplex_node" and ob.get("power_12","") != "":
+			# Add to triplex_nodes.
 			newOb = dict(loadTemplate)
 			newOb["name"] = ob.get("name", "")
 			newOb["parent"] = ob.get("parent", "")
@@ -44,71 +65,102 @@ def omfCalibrate(workDir, feederPath, scadaPath):
 			pythagPower = gridlabd._strClean(oldPow)
 			newOb["base_power_12"] = "scadaLoads.value*" + str(pythagPower)
 			tree[key] = newOb
-	# Search for the substation regulator and attach a recorder there.
+		elif ob.get("object","") == "load":
+			# Add to residential_loads too.
+			newOb = dict(loadTemplateR)
+			newOb["name"] = ob.get("name", "")
+			newOb["parent"] = ob.get("parent", "")
+			newOb["phases"] = ob.get("phases", "")
+			newOb["load_class"] = ob.get("load_class", "")
+			newOb["nominal_voltage"] = ob.get("nominal_voltage","")
+			newOb["latitude"] = ob.get("latitude","0")
+			newOb["longitude"] = ob.get("longitude","0")
+			try:
+				oldPow = ob.get("constant_power_A","").replace("j","d")
+				pythagPower = gridlabd._strClean(oldPow)
+				newOb["base_power_A"] = "scadaLoads.value*" + str(pythagPower)
+			except:
+				pass
+			try:
+				oldPow = ob.get("constant_power_B","").replace("j","d")
+				pythagPower = gridlabd._strClean(oldPow)
+				newOb["base_power_B"] = "scadaLoads.value*" + str(pythagPower)
+			except:
+				pass
+			try:
+				oldPow = ob.get("constant_power_C","").replace("j","d")
+				pythagPower = gridlabd._strClean(oldPow)
+				newOb["base_power_C"] = "scadaLoads.value*" + str(pythagPower)
+			except:
+				pass
+			tree[key] = newOb
+	# Convert swing bus to a meter.
+	for key in tree:
+		if tree[key].get('bustype','').lower() == 'swing' and tree[key].get('object','') != 'meter':
+			swingName = tree[key].get('name')
+			regIndex = key
+			tree[key]['object'] = 'meter'	
+	# Search for the substation meter and attach a recorder there.
 	for key in tree:
 		if tree[key].get('bustype','').lower() == 'swing':
 			swingName = tree[key].get('name')
-	for key in tree:
-		if tree[key].get('object','') in ['regulator', 'overhead_line', 'underground_line', 'transformer', 'fuse'] and tree[key].get('from','') == swingName:
-			regIndex = key
-			SUB_REG_NAME = tree[key]['name']
 	recOb = {"object": "recorder",
-		"parent": SUB_REG_NAME,
-		"property": "power_in.real,power_in.imag",
+		"parent": swingName,
+		"property": "measured_real_power,measured_reactive_power,measured_power",
 		"file": "caliSub.csv",
 		"interval": "900"}
 	outputRecorderKey = maxKey + 3
 	tree[outputRecorderKey] = recOb
-	HOURS = 100
-	feeder.adjustTime(tree, HOURS, "hours", firstDateTime.strftime("%Y-%m-%d"))
+	feeder.adjustTime(tree, simLength, "hours", simStartDate['Date'].strftime("%Y-%m-%d %H:%M:%S"))
 	# Run Gridlabd, calculate scaling constant.
-	output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=workDir)
-	outRealPow = output["caliSub.csv"]["power_in.real"]
-	outImagPower = output["caliSub.csv"]["power_in.imag"]
-	outAppPowerKw = [(x[0]**2 + x[1]**2)**0.5/1000 for x in zip(outRealPow, outImagPower)]
-	previousFile = "subScada.player"
-	nextFile = "subScadaCalibrated.player"
-	nextPower = outAppPowerKw[1:HOURS]
-	iterationTimes = 2
-	for i in range(1, iterationTimes+1):
-		# HACK: ignore first time step in output and input because GLD sometimes breaks the first step.
-		SCAL_CONST = sum(scadaSubPower[1:HOURS])/sum(nextPower)
-		# Rewrite the subScada.player file so all the power values are multiplied by the SCAL_CONSTANT.
-		newPlayData = []
-		with open(pJoin(workDir, previousFile), "r") as playerFile:
-			for line in playerFile:
-				(key,val) = line.split(',')
-				newPlayData.append(str(key) + ',' + str(float(val)*SCAL_CONST) + "\n")
-		with open(pJoin(workDir, nextFile), "w") as playerFile:
-			for row in newPlayData:
-				playerFile.write(row)
-		# Test by running a glm with subScadaCalibrated.player and caliSub.csv2.
-		tree[playerKey]["file"] = nextFile
-		tree[outputRecorderKey]["file"] = "caliSubCheck.csv" #Note: this caliSubCheck.csv will be overwritten each iteration.
-		nextOutput = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=workDir)
-		outRealPow2nd = nextOutput["caliSubCheck.csv"]["power_in.real"]
-		outImagPower2nd = nextOutput["caliSubCheck.csv"]["power_in.imag"]
-		nextAppKw = [(x[0]**2 + x[1]**2)**0.5/1000
-			for x in zip(outRealPow2nd, outImagPower2nd)]
-		# Set the in and out playerFiles and out power for the next iteration.
-		previousFile = nextFile
-		nextFile = "subScadaCalibrated"+str(i)+".player"
-		nextPower = nextAppKw[1:HOURS]
-	plt.figure()
-	plt.plot(outAppPowerKw[1:HOURS], label="initialGuess")
-	plt.plot(scadaSubPower[1:HOURS], label="scadaSubPower")
-	plt.plot(nextAppKw[1:HOURS], label="finalGuess")
-	plt.legend(loc=3)
-	plt.savefig(pJoin(workDir,"caliCheckPlot.png"))
+	def runPowerflowIter(tree,scadaSubPower, iterationTimes):
+		'''Runs powerflow once, then iterates.'''
+		print "Running calibration powerflow #1."
+		output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=gridlabdDir)
+		outRealPow = output["caliSub.csv"]["measured_real_power"]
+		outImagPower = output["caliSub.csv"]["measured_reactive_power"]
+		outAppPowerKw = [(x[0]**2 + x[1]**2)**0.5/1000 for x in zip(outRealPow, outImagPower)]
+		lastFile = "subScada.player"
+		nextFile = "subScadaCalibrated.player"
+		nextPower = outAppPowerKw
+		for i in range(1, iterationTimes+1):
+			SCAL_CONST = sum(scadaSubPower[1:simLength])/sum(nextPower[1:simLength])
+			print "Running calibration powerflow (iteration", str(i+1), "of", iterationTimes+1,") (SCAL_CONST: ", SCAL_CONST,")"
+			newPlayData = []
+			with open(pJoin(gridlabdDir, lastFile), "r") as playerFile:
+				for line in playerFile:
+					(key,val) = line.split(',')
+					newPlayData.append(str(key) + ',' + str(float(val)*SCAL_CONST) + "\n")
+			with open(pJoin(gridlabdDir, nextFile), "w") as playerFile:
+				for row in newPlayData:
+					playerFile.write(row)
+			tree[playerKey]["file"] = nextFile
+			tree[outputRecorderKey]["file"] = "caliSubCheck.csv"
+			nextOutput = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=gridlabdDir)
+			outRealPow2nd = nextOutput["caliSubCheck.csv"]["measured_real_power"]
+			outImagPower2nd = nextOutput["caliSubCheck.csv"]["measured_reactive_power"]
+			nextAppKw = [(x[0]**2 + x[1]**2)**0.5/1000
+				for x in zip(outRealPow2nd, outImagPower2nd)]
+			lastFile = nextFile
+			nextFile = "subScadaCalibrated"+str(i)+".player"
+			nextPower = outAppPowerKw
+		return outRealPow, outRealPow2nd, lastFile
+	iterationTimes = 1
+	outRealPow, outRealPow2nd, lastFile = runPowerflowIter(tree,scadaSubPower,iterationTimes)
+	caliPowVectors = [[float(element) for element in scadaSubPower[1:simLength]], [float(element)/1000 for element in outRealPow[1:simLength]], [float(element)/1000 for element in outRealPow2nd[1:simLength]]]
+	labels = ["scadaSubPower","initialGuess","finalGuess"]
+	colors = ['red','lightblue','blue']
+	chartData = {"Title":"Substation Calibration Check (Iterated "+str(iterationTimes+1)+"X)", "fileName":"caliCheckPlot", "colors":colors,"labels":labels, "timeZone":simStartDate['timeZone']}
+	plotLine(workDir, caliPowVectors, chartData, simStartDate['Date']+dt.timedelta(hours=1), 'hours')
 	# Write the final output.
 	with open(pJoin(workDir,"calibratedFeeder.json"),"w") as outJson:
-		playerString = open(pJoin(workDir,previousFile)).read()
-		feederJson["attachments"][previousFile] = playerString
+		playerString = open(pJoin(gridlabdDir,lastFile)).read()
+		feederJson["attachments"][lastFile] = playerString
 		feederJson["tree"] = tree
 		json.dump(feederJson, outJson, indent=4)
 	return
 
-def _processScadaData(workDir,scadaPath):
+def _processScadaData(workDir,scadaPath, simStartDate):
 	'''generate a SCADA player file from raw SCADA data'''
 	with open(scadaPath,"r") as scadaFile:
 		scadaReader = csv.DictReader(scadaFile, delimiter='\t')
@@ -117,38 +169,42 @@ def _processScadaData(workDir,scadaPath):
 	firstDateTime = dt.datetime.strptime(allData[1]["timestamp"], "%m/%d/%Y %H:%M:%S")
 	# Write the player.
 	maxPower = max(scadaSubPower)
+	positionFound = 0
 	with open(pJoin(workDir,"subScada.player"),"w") as playFile:
-		for row in allData:
+		for i,row in enumerate(allData):
 			timestamp = dt.datetime.strptime(row["timestamp"], "%m/%d/%Y %H:%M:%S")
-			power = float(row["power"]) / maxPower
-			line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(power) + "\n"
-			playFile.write(line)
-	return scadaSubPower, firstDateTime
+			if timestamp >= simStartDate['Date']:
+				if positionFound == 0: positionFound = i
+				power = float(row["power"]) / maxPower
+				line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " " + simStartDate['timeZone'] + "," + str(power) + "\n"
+				playFile.write(line)
+	return scadaSubPower[positionFound:]
 
-def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC):
+def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength):
 	'''read voltage vectors of 3 different phases, run gridlabd, and attach output to the feeder.'''
+	gridlabdDir = pJoin(workDir,"gridlabD")
 	try:
-		timeStamp = [dt.datetime.strptime('01/01/2011 00:00:00', "%m/%d/%Y %H:%M:%S")]
+		timeStamp = [simStartDate['Date']]
 		for x in range (1, 8760):
 			timeStamp.append(timeStamp[x-1] + dt.timedelta(hours=1))
 		firstDateTime = timeStamp[1]
-		with open(pJoin(workDir,"phaseAVoltage.player"),"w") as voltFile:
+		with open(pJoin(gridlabdDir,"phaseAVoltage.player"),"w") as voltFile:
 			for x in range(0, 8760):
 				timestamp = timeStamp[x]
 				voltage = str("%0.2f"%float(voltVectorA[x]))+"+0j"
-				line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(voltage) + "\n"
+				line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " " + simStartDate['timeZone'] + "," + str(voltage) + "\n"
 				voltFile.write(line)
-		with open(pJoin(workDir,"phaseBVoltage.player"),"w") as voltFile:
+		with open(pJoin(gridlabdDir,"phaseBVoltage.player"),"w") as voltFile:
 			for x in range(0, 8760):
 				timestamp = timeStamp[x]
 				voltage = str("%0.2f"%float(voltVectorB[x]))+"-"+str("%0.4f"%float(random.uniform(6449,6460)))+"j"
-				line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(voltage) + "\n"
+				line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " " + simStartDate['timeZone'] + "," + str(voltage) + "\n"
 				voltFile.write(line)
-		with open(pJoin(workDir,"phaseCVoltage.player"),"w") as voltFile:
+		with open(pJoin(gridlabdDir,"phaseCVoltage.player"),"w") as voltFile:
 			for x in range(0, 8760):
 				timestamp = timeStamp[x]
 				voltage = str("%0.2f"%float(voltVectorC[x]))+"+"+str("%0.4f"%float(random.uniform(6449,6460)))+"j"
-				line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " PST," + str(voltage) + "\n"
+				line = timestamp.strftime("%Y-%m-%d %H:%M:%S") + " " + simStartDate['timeZone'] + "," + str(voltage) + "\n"
 				voltFile.write(line)
 		with open(feederPath, "r") as jsonIn:
 			feederJson = json.load(jsonIn)
@@ -171,14 +227,13 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC):
 		tree[voltplayerKeyB] = voltageObB
 		tree[voltplayerKeyC] = voltageObC
 		# Adjust time and run output.
-		HOURS = 100
-		feeder.adjustTime(tree, HOURS, "hours", firstDateTime.strftime("%Y-%m-%d"))
-		output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=workDir)
+		feeder.adjustTime(tree, simLength, "hours", firstDateTime.strftime("%Y-%m-%d %H:%M:%S"))
+		output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=gridlabdDir)
 		# Write the output.
 		with open(pJoin(workDir,"calibratedFeeder.json"),"w") as outJson:
-			playerStringA = open(pJoin(workDir,"phaseAVoltage.player")).read()
-			playerStringB = open(pJoin(workDir,"phaseBVoltage.player")).read()
-			playerStringC = open(pJoin(workDir,"phaseCVoltage.player")).read()
+			playerStringA = open(pJoin(gridlabdDir,"phaseAVoltage.player")).read()
+			playerStringB = open(pJoin(gridlabdDir,"phaseBVoltage.player")).read()
+			playerStringC = open(pJoin(gridlabdDir,"phaseCVoltage.player")).read()
 			feederJson["attachments"]["phaseAVoltage.player"] = playerStringA
 			feederJson["attachments"]["phaseBVoltage.player"] = playerStringB
 			feederJson["attachments"]["phaseCVoltage.player"] = playerStringC
@@ -186,24 +241,71 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC):
 			json.dump(feederJson, outJson, indent=4)
 		return pJoin(workDir,"calibratedFeeder.json"), True
 	except:
-		print "\n   attachVolts failed."
-		return feederPath, False
+		print "Failed to run gridlabD with voltage players."
+		return "", False
+
+def plotLine(workDir, powerVec, chartData, startTime, simLengthUnits):
+	''' Plots vector data with given plotname to filename.png.
+		Chartdata accepts: title, timezone, y label, legend labels&colors.'''
+	plt.style.use('fivethirtyeight')
+	plt.figure("Power")
+	plt.title(chartData['Title'], fontsize=12)
+	plt.xlabel("Time "+"("+chartData.get('timeZone','')+")")
+	plt.ylabel(chartData.get('yAxis','Real Power (kW)'))
+	if str(type(chartData['labels'])) == "<type \'list\'>": timeLength = len(powerVec[0])
+	else: timeLength = len(powerVec)
+	if simLengthUnits == 'hours': x = np.array([(startTime+dt.timedelta(hours=i)) for i in range(timeLength)])
+	elif simLengthUnits == 'minutes': x = np.array([(startTime+dt.timedelta(minutes=i)) for i in range(timeLength)])
+	elif simLengthUnits == 'days': x = np.array([(startTime+dt.timedelta(days=i)) for i in range(timeLength)])
+	if str(type(chartData['labels'])) == "<type \'list\'>":
+		for i in range(len(powerVec)):
+			colors = chartData.get("colors","['red','black','green']")
+			pws = plt.plot(x, powerVec[i], colors[i], label=str(chartData["labels"][i]))
+		plt.legend(loc=1,prop={'size':6})
+	else:
+		if chartData.get('labels','') != "":
+			pws = plt.plot(x, powerVec, label=str(chartData["labels"]))
+			plt.legend(loc=1,prop={'size':6})
+		else: pws = plt.plot(x, powerVec)
+	# Add boundaries.
+	if chartData.get('boundaries','') != "":
+		for i in range(len(chartData['boundaries'])):
+			boundary = np.array([float(chartData['boundaries'][i]) for times in range(timeLength)])
+			pws = plt.plot(x, boundary,'r--')
+	# Set axis text sizes.
+	plt.tick_params(axis='both', which='major', labelsize=8)
+	plt.tick_params(axis='x', which='minor', labelsize=5)
+	plt.gcf().autofmt_xdate()
+	plt.tight_layout()
+	plt.margins(x=0.1,y=0.2)
+	# Save and close plot.
+	plt.savefig(pJoin(workDir,chartData['fileName']+".png"))
+	plt.close()
 
 def _tests():
 	print "Beginning to test calibrate.py"
 	workDir = tempfile.mkdtemp()
+	try: os.mkdir(pJoin(workDir,"gridlabD"))
+	except: pass	
 	print "Currently working in: ", workDir
 	scadaPath = pJoin("uploads", "FrankScada.csv")
 	feederPath = pJoin("data", "Feeder", "public","ABEC Frank pre calib.json")
+	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
+	simStartDate = {"Date":simDate,"timeZone":"PST"}
+	simLength = 100
+	print "Simulation Date:", simStartDate['Date'], "for", str(simLength), "hours."
 	voltVectorA = [random.uniform(7380,7620) for x in range(0,8760)]
 	voltVectorC = [-random.uniform(3699,3780) for x in range(0, 8760)]
 	voltVectorB = [-random.uniform(3699,3795) for x in range(0, 8760)]
-	calibFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC)
+	print "Running gridlabD with voltage players."
+	voltFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength)
 	try: 
-		assert None == omfCalibrate(workDir, calibFeederPath, scadaPath), "feeder calibration failed"	
+		assert None == omfCalibrate(workDir, voltFeederPath, scadaPath, simStartDate, simLength), "feeder calibration failed"
+		print "\n  Success! Ran calibrate with voltage players!"
 	except: 
-		print "\n   attach volt failed."
-		assert None == omfCalibrate(workDir, feederPath, scadaPath), "feeder calibration failed"
-	print "\n  Success!"
+		print "Failed to run calibrate with voltage players. Running only calibrate now."
+		assert None == omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength), "feeder calibration failed"
+		print "\n  Success! Ran calibrate!"
+
 if __name__ == '__main__':
 	_tests()
