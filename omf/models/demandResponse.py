@@ -27,20 +27,20 @@ def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 def prism(prismDRDict):
 	''' Calculate demand changes based on Brattle's PRISM. '''
 	# Calculate times.
-	start_date = datetime.date(2009,prismDRDict['startMonth'],1)
-	last_day = calendar.monthrange(2009, prismDRDict['stopMonth'])
-	stop_date = datetime.date(2009,prismDRDict['stopMonth'],last_day[1])
-	day_count = stop_date - start_date
-	start_index = start_date - datetime.date(2009,1,1)
-	stop_index = stop_date  - datetime.date(2009,1,1)
-	prismDRDict['startIndex'] = (start_index.days * 24)
-	if (start_date <= stop_date):
-		prismDRDict['dayCount'] = day_count.days + 1
-		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
+	startDate = datetime.date(2009,prismDRDict['startMonth'],1)
+	lastDay = calendar.monthrange(2009, prismDRDict['stopMonth'])
+	stopDate = datetime.date(2009,prismDRDict['stopMonth'],lastDay[1])
+	dayCount = stopDate - startDate
+	startIndex = startDate - datetime.date(2009,1,1)
+	stopIndex = stopDate  - datetime.date(2009,1,1)
+	prismDRDict['startIndex'] = (startIndex.days * 24)
+	if (startDate <= stopDate):
+		prismDRDict['dayCount'] = dayCount.days + 1
+		prismDRDict['stopIndex'] = (stopIndex.days * 24) + 23
 		prismDRDict['numMonths'] = prismDRDict['stopMonth'] - prismDRDict['startMonth'] + 1
 	else:
-		prismDRDict['dayCount']= 365 - day_count.days + 1
-		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
+		prismDRDict['dayCount']= 365 - dayCount.days + 1
+		prismDRDict['stopIndex'] = (stopIndex.days * 24) + 23
 		prismDRDict['numMonths'] = (12 - prismDRDict['startMonth'] + 1) + prismDRDict['startMonth']
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1
