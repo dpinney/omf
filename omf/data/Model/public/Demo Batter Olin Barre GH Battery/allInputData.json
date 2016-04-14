@@ -3,9 +3,11 @@
     "simLengthUnits": "hours", 
     "feederName": "public___Olin Barre GH", 
     "created": "2014-07-30 11:04:17.994000", 
+    "zipCode": "64735", 
     "modelType": "gridlabMulti", 
-    "climateName": "PA-ERIE", 
+    "climateName": "MO-KANSAS_CITY", 
     "simLength": "100", 
+    "stderr": "Traceback (most recent call last):\n  File \"/Users/mhx/omf/omf/models/gridlabMulti.py\", line 284, in runForeground\n    output[\"timeStamps\"] = feederOutput.get(\"timeStamps\", [])\nUnboundLocalError: local variable 'feederOutput' referenced before assignment\n", 
     "feederName2": "public___Olin Barre GH Battery", 
-    "runTime": "0:00:33"
+    "runTime": "0:00:01"
 }
