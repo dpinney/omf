@@ -362,6 +362,14 @@ function duplicateModel() {
 
 function checkModelName() {
 	var newName = document.getElementById('modelName').value
+
+	// Safari Form Validation workaround, manual check
+	if (newName == '') {
+		document.getElementById('errorMessage').innerHTML = "Model name cannot be blank";
+		document.getElementById('modelName').focus();
+		return false;
+	}
+
 	$.ajax({
 		url: "/uniqObjName/Model/" + currentUser + "/" + newName
 	}).done(function (data) {
@@ -373,35 +381,3 @@ function checkModelName() {
 		}
 	})
 }
-
-///////////////////////////////////////////
-// Safari Form Validation Workaround
-///////////////////////////////////////////
-
-function checkFormValidation() {
-	var inputVal = document.getElementsByTagName('input');
-	for (var i=0; i<inputVal.length; i++) {
-		var valid = true;
-		if (inputVal[i].value == '') {
-			valid = false;
-			alert("inputVal[i]");
-		} 
-		else {
-			return checkModelName();
-		}
-	}
-}
-
-// function checkFormValidation() {
-// 	var form = document.getElementById('solarSundaFormID')
-// 	for (var i=0; i<form.length; i++) {
-// 		form[i].noValidate = true;
-// 		form[i].addEventListener('submit', function(event) {
-// 			if (!event.target.checkValidity()) {
-// 				event.preventDefault();
-// 				alert('Something is not right!');
-// 			}
-// 		}, false);
-// 	}
-// 	return checkModelName();
-// }

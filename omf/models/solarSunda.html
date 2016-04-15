@@ -30,7 +30,7 @@
 	</div>
 	<p class="reportTitle">Model Description</p>
 	<div id="input" class="content" style="page-break-after:always">
-		<form id="solarSundaFormID" name="inputForm" {% if quickRender %} action="/quickRun/"{% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkFormValidation();" {% endif %} action="/runModel/"{% endif %} method="post">
+		<form name="inputForm" {% if quickRender %} action="/quickRun/"{% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"{% endif %} method="post">
 			<div class="shorterInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarSunda" target="blank">Help?</a> </label>
 				<input type="text" id="modelType" name="modelType" value="solarSunda" readonly/>
@@ -44,6 +44,7 @@
 			<div class="shorterInput">
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<span id="errorMessage" style="color:red"></span> <!-- added for manual validation w/ JS -->
 			</div>
 			{% endif %}
 			{% if not quickRender %}
