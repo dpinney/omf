@@ -368,8 +368,40 @@ function checkModelName() {
 		if (data.exists) {
 			alert("You already have a Model named '" + newName + "', please choose a different name.")
 		}
-		else{
+		else {
 			inputForm.submit()
 		}
 	})
 }
+
+///////////////////////////////////////////
+// Safari Form Validation Workaround
+///////////////////////////////////////////
+
+function checkFormValidation() {
+	var inputVal = document.getElementsByTagName('input');
+	for (var i=0; i<inputVal.length; i++) {
+		var valid = true;
+		if (inputVal[i].value == '') {
+			valid = false;
+			alert("inputVal[i]");
+		} 
+		else {
+			return checkModelName();
+		}
+	}
+}
+
+// function checkFormValidation() {
+// 	var form = document.getElementById('solarSundaFormID')
+// 	for (var i=0; i<form.length; i++) {
+// 		form[i].noValidate = true;
+// 		form[i].addEventListener('submit', function(event) {
+// 			if (!event.target.checkValidity()) {
+// 				event.preventDefault();
+// 				alert('Something is not right!');
+// 			}
+// 		}, false);
+// 	}
+// 	return checkModelName();
+// }
