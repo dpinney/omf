@@ -1,11 +1,11 @@
 {
-    "simStartDate": "2014-07-30", 
+    "created": "2014-07-25 11:40:47.373000", 
     "simLengthUnits": "hours", 
     "feederName": "public___Olin Barre GH", 
-    "created": "2014-07-30 11:04:17.994000", 
+    "simStartDate": "2014-07-30", 
     "modelType": "gridlabMulti", 
     "climateName": "PA-ERIE", 
     "simLength": "100", 
     "feederName2": "public___Olin Barre GH Battery", 
-    "runTime": "0:00:33"
+    "runTime": "0:00:16"
 }
