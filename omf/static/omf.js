@@ -364,11 +364,12 @@ function checkModelName() {
 	var newName = document.getElementById('modelName').value
 
 	// Safari Form Validation workaround, manual check
-	if (newName == '') {
-		document.getElementById('errorMessage').innerHTML = "Model name cannot be blank";
-		document.getElementById('modelName').focus();
-		return false;
-	}
+	// if (newName == '') {
+	// 	document.getElementById('errorMessage').innerHTML = "Model name cannot be blank"
+	// 	document.getElementById('modelName').focus()
+	// 	return false
+	// }
+	checkSafariInputs()
 
 	$.ajax({
 		url: "/uniqObjName/Model/" + currentUser + "/" + newName
@@ -380,4 +381,21 @@ function checkModelName() {
 			inputForm.submit()
 		}
 	})
+}
+
+///////////////////////////////////////////
+// Safari Form Validation Check
+///////////////////////////////////////////
+
+function checkSafariInputs() {
+	var inputs = document.getElementsByTagName('input')
+	for (var i = 0;i < inputs.length;i++) {
+		if (inputs[i].value == '') {
+			alert("Something is not right")
+			inputs[i].focus()
+			return false;
+		}
+
+	}
+
 }
