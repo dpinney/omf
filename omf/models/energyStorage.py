@@ -202,10 +202,6 @@ def heavyProcessing(modelDir, inputDict):
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 
-def cancel(modelDir):
-	''' This model runs so fast it's pointless to cancel a run. '''
-	pass
-
 def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
