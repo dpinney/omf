@@ -98,6 +98,7 @@ def heavyProcessing(modelDir, inputDict):
 		try:
 			dc = []
 			with open(pJoin(modelDir,"demand.csv")) as inFile:
+				reader = csv.DictReader(inFile)
 				for row in reader:
 					dc.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
 				if len(dc)<8760: raise Exception

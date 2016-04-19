@@ -320,7 +320,20 @@ def run(modelDir, inputDict):
 		# Setting up the demand curve.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
-		demandList = [{'datetime': parse(row['timestamp']), 'power': float(row['power'])} for row in csv.DictReader(open(pJoin(modelDir,"demand.csv")))]
+		try:
+			demandList = []
+			with open(pJoin(modelDir,"demand.csv")) as inFile:
+				reader = csv.DictReader(inFile)
+				for row in reader:
+					demandList.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
+				print len(demandList)
+
+				if len(demandList)<8760: raise Exception
+		except:
+			errorMessage = "CSV file is incorrect format. Please see valid format definition at\n https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough"
+			raise Exception(errorMessage)
+
+
 		demandCurve = [x['power'] for x in demandList]
 		outData['startDate'] = demandList[0]['datetime'].isoformat()
 		# Run the PRISM model.
