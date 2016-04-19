@@ -330,7 +330,7 @@ def run(modelDir, inputDict):
 
 				if len(demandList)<8760: raise Exception
 		except:
-			errorMessage = "CSV file is incorrect format. Please see valid format definition at\n https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough"
+			errorMessage = "CSV file is incorrect format. Please see valid format definition at\n <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
 			raise Exception(errorMessage)
 
 

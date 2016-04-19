@@ -103,7 +103,7 @@ def heavyProcessing(modelDir, inputDict):
 					dc.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
 				if len(dc)<8760: raise Exception
 		except:
-			errorMessage = "CSV file is incorrect format. Please see valid format definition at\n https://github.com/dpinney/omf/wiki/Models-~-energyStorage#demand-file-csv-format"
+			errorMessage = "CSV file is incorrect format. Please see valid format definition at\n <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-energyStorage#demand-file-csv-format'>OMF Wiki energyStorage</a>"
 			raise Exception(errorMessage)
 		for row in dc:
 			row['month'] = row['datetime'].month-1
