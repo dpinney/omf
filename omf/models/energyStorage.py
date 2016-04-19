@@ -9,8 +9,8 @@ from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
 
-# TODO remove this later.
-import matplotlib.pyplot as plt
+# # NOTE: used for debugging don't delete.
+# import matplotlib.pyplot as plt
 
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
@@ -85,26 +85,28 @@ def heavyProcessing(modelDir, inputDict):
 		battEff	= float(inputDict.get("batteryEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0 * float(inputDict.get("inverterEfficiency", 92)) / 100.0
 		discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
 		retailCost = float(inputDict.get('retailCost', 0.07))
-		# CHANGE: dodFactor, DEMANDCHARGEMONTHLY
 		dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
 		projYears = int(inputDict.get('projYears',10))
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
 		# Start running battery simulation.
-		# CHANGE
-		# battCapacity = cellQuantity * cellCapacity
 		battCapacity = cellQuantity * cellCapacity * dodFactor
 		battDischarge = cellQuantity * dischargeRate
 		battCharge = cellQuantity * chargeRate
 		# Most of our data goes inside the dc "table"
-		# dc = [{'datetime': parse(row['timestamp']), 'power': int(row['power'])} for row in csv.DictReader(open(pJoin(modelDir,"demand.csv")))]
-		dc = []
-		with open(pJoin(modelDir,"demand.csv")) as inFile:
-			reader = csv.DictReader(inFile)
-			for row in reader:
-				dc.append({'datetime': parse(row['timestamp']), 'power': int(row['power'])})
-		# print dc
+		try:
+			dc = []
+			with open(pJoin(modelDir,"demand.csv")) as inFile:
+				reader = csv.DictReader(inFile)
+				first_line = reader.next()
+				print first_line
+				for row in reader:
+					dc.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
+				if len(dc)<8760: raise Exception
+		except:
+			errorMessage = "CSV file is incorrect format. Please see valid format definition at\n https://github.com/dpinney/omf/wiki/Models-~-energyStorage#demand-file-csv-format"
+			raise Exception(errorMessage)
 		for row in dc:
 			row['month'] = row['datetime'].month-1
 			row['weekday'] = row['datetime'].weekday
@@ -149,19 +151,18 @@ def heavyProcessing(modelDir, inputDict):
 		outData['NPV'] = npv(discountRate, cashFlowCurve)
 		outData['demand'] = [t['power']*1000.0 for t in dc]
 		outData['demandAfterBattery'] = [t['netpower']*1000.0 for t in dc]
-		# outData['batterySoc'] = [t['battSoC']/battCapacity*100.0 for t in dc]
 		outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
 		# Estimate number of cyles the battery went through.
 		SoC = outData['batterySoc']
 		outData['cycleEquivalents'] = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
-		# Output some matplotlib results as well.
-		plt.plot([t['power'] for t in dc])
-		plt.plot([t['netpower'] for t in dc])
-		plt.plot([t['battSoC'] for t in dc])
-		for month in range(12):
-		  plt.axvline(hoursThroughTheMonth[month])
-		plt.savefig(pJoin(modelDir,"plot.png"))
-		# DRDAN: Summary of results
+		# # Output some matplotlib results as well.
+		# plt.plot([t['power'] for t in dc])
+		# plt.plot([t['netpower'] for t in dc])
+		# plt.plot([t['battSoC'] for t in dc])
+		# for month in range(12):
+		#   plt.axvline(hoursThroughTheMonth[month])
+		# plt.savefig(pJoin(modelDir,"plot.png"))
+		# Summary of results
 		outData['months'] = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 		totMonNum = []
 		monthlyDemand = []
@@ -169,7 +170,7 @@ def heavyProcessing(modelDir, inputDict):
 			totMonNum.append(sum(dcGroupByMonth[x])/1000)
 			monthlyDemand.append([outData['months'][x], totMonNum[x]])
 		outData['monthlyDemand'] = totMonNum
-		outData['ps'] = ps		# TODO: [Battery Capacity Left]
+		outData['ps'] = ps
 		outData['monthlyDemandRed'] = [totMonNum - ps for totMonNum, ps in zip(totMonNum, ps)]
 		outData['benefitMonthly'] = [x * demandCharge for x in outData['ps']]
 		outData['kWhtoRecharge'] = [battCapacity - x for x in outData['ps']]
