@@ -98,7 +98,13 @@ def heavyProcessing(modelDir, inputDict):
 		battDischarge = cellQuantity * dischargeRate
 		battCharge = cellQuantity * chargeRate
 		# Most of our data goes inside the dc "table"
-		dc = [{'datetime': parse(row['timestamp']), 'power': int(row['power'])} for row in csv.DictReader(open(pJoin(modelDir,"demand.csv")))]
+		# dc = [{'datetime': parse(row['timestamp']), 'power': int(row['power'])} for row in csv.DictReader(open(pJoin(modelDir,"demand.csv")))]
+		dc = []
+		with open(pJoin(modelDir,"demand.csv")) as inFile:
+			reader = csv.DictReader(inFile)
+			for row in reader:
+				dc.append({'datetime': parse(row['timestamp']), 'power': int(row['power'])})
+		# print dc
 		for row in dc:
 			row['month'] = row['datetime'].month-1
 			row['weekday'] = row['datetime'].weekday
