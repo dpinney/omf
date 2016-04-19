@@ -361,16 +361,11 @@ function duplicateModel() {
 }
 
 function checkModelName() {
-	var newName = document.getElementById('modelName').value
 
-	// Safari Form Validation workaround, manual check
-	// if (newName == '') {
-	// 	document.getElementById('errorMessage').innerHTML = "Model name cannot be blank"
-	// 	document.getElementById('modelName').focus()
-	// 	return false
-	// }
+	// Additional check for Safari browsers
 	checkSafariInputs()
 
+	var newName = document.getElementById('modelName').value
 	$.ajax({
 		url: "/uniqObjName/Model/" + currentUser + "/" + newName
 	}).done(function (data) {
@@ -389,13 +384,14 @@ function checkModelName() {
 
 function checkSafariInputs() {
 	var inputs = document.getElementsByTagName('input')
-	for (var i = 0;i < inputs.length;i++) {
-		if (inputs[i].value == '') {
-			alert("Something is not right")
+	for (var i = 0; i < inputs.length; i++) {
+		var patt = new RegExp(inputs[i].pattern)
+		if (!patt.test(inputs[i].value)) {
+			alert('Please fill out ' + inputs[i].name + ' field')
 			inputs[i].focus()
-			return false;
+			return false
+			break
+			// inputs[i].insertAdjacentHTML()
 		}
-
 	}
-
 }
