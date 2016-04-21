@@ -361,6 +361,10 @@ function duplicateModel() {
 }
 
 function checkModelName() {
+
+	// Additional check for Safari browsers
+	checkSafariInputs()
+
 	var newName = document.getElementById('modelName').value
 	$.ajax({
 		url: "/uniqObjName/Model/" + currentUser + "/" + newName
@@ -368,8 +372,26 @@ function checkModelName() {
 		if (data.exists) {
 			alert("You already have a Model named '" + newName + "', please choose a different name.")
 		}
-		else{
+		else {
 			inputForm.submit()
 		}
 	})
+}
+
+///////////////////////////////////////////
+// Safari Form Validation Check
+///////////////////////////////////////////
+
+function checkSafariInputs() {
+	var inputs = document.getElementsByTagName('input')
+	for (var i = 0; i < inputs.length; i++) {
+		var patt = new RegExp(inputs[i].pattern)
+		if (!patt.test(inputs[i].value)) {
+			alert('Please fill out ' + inputs[i].name + ' field')
+			inputs[i].focus()
+			return false
+			break
+			// inputs[i].insertAdjacentHTML()
+		}
+	}
 }
