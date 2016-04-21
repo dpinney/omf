@@ -361,38 +361,38 @@ function duplicateModel() {
 }
 
 function checkModelName() {
-
-	// Additional check for Safari browsers
-	checkSafariInputs()
-
-	var newName = document.getElementById('modelName').value
-	$.ajax({
-		url: "/uniqObjName/Model/" + currentUser + "/" + newName
-	}).done(function (data) {
-		if (data.exists) {
-			alert("You already have a Model named '" + newName + "', please choose a different name.")
-		}
-		else {
-			inputForm.submit()
-		}
-	})
+	// Additional check, required for Safari browsers
+	if (isFormValid()) {
+		var newName = document.getElementById('modelName').value
+		$.ajax({
+			url: "/uniqObjName/Model/" + currentUser + "/" + newName
+		}).done(function (data) {
+			if (data.exists) {
+				alert("You already have a Model named '" + newName + "', please choose a different name.")
+			}
+			else {
+				inputForm.submit()
+			}
+		})
+	}
 }
 
-///////////////////////////////////////////
-// Safari Form Validation Check
-///////////////////////////////////////////
-
-function checkSafariInputs() {
+// Form Validation for Safari browsers //
+function isFormValid() {
 	var inputs = document.getElementsByTagName('input')
 	var errors = 0
 	for (var i = 0; i < inputs.length; i++) {
 		var patt = new RegExp(inputs[i].pattern)
 		if (!patt.test(inputs[i].value)) {
 			inputs[i].style.background = 'red'
+			inputs[i].focus()
 			errors++
 		}
 	}
-	if (errors > 0) {
-		alert('Please fix inputs in red')
+	if (errors) {
+		alert("Found [" + errors + "] errors, Please fix inputs in red.")
+	}
+	else {
+		return true
 	}
 }
