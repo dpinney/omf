@@ -384,14 +384,15 @@ function checkModelName() {
 
 function checkSafariInputs() {
 	var inputs = document.getElementsByTagName('input')
+	var errors = 0
 	for (var i = 0; i < inputs.length; i++) {
 		var patt = new RegExp(inputs[i].pattern)
 		if (!patt.test(inputs[i].value)) {
-			alert('Please fill out ' + inputs[i].name + ' field')
-			inputs[i].focus()
-			return false
-			break
-			// inputs[i].insertAdjacentHTML()
+			inputs[i].style.background = 'red'
+			errors++
 		}
+	}
+	if (errors > 0) {
+		alert('Please fix inputs in red')
 	}
 }
