@@ -1,7 +1,8 @@
 ''' Calculate the costs and benefits of energy storage from a distribution utility perspective. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, traceback, csv
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, traceback, csv, copy
 import multiprocessing
+import numpy as np
 from os.path import join as pJoin
 from  dateutil.parser import parse
 from numpy import npv
@@ -87,6 +88,9 @@ def heavyProcessing(modelDir, inputDict):
 		retailCost = float(inputDict.get('retailCost', 0.07))
 		dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
 		projYears = int(inputDict.get('projYears',10))
+		startPeakHour = int(inputDict.get('startPeakHour',8))
+		endPeakHour = int(inputDict.get('endPeakHour',10))
+		dispatchStrategy = str(inputDict.get('dispatchStrategy'))
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
@@ -101,13 +105,19 @@ def heavyProcessing(modelDir, inputDict):
 				reader = csv.DictReader(inFile)
 				for row in reader:
 					dc.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
-				if len(dc)<8760: raise Exception
+				if len(dc)!=8760: raise Exception
 		except:
-			errorMessage = "CSV file is incorrect format. Please see valid format definition at\n <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-energyStorage#demand-file-csv-format'>OMF Wiki energyStorage</a>"
-			raise Exception(errorMessage)
+				e = sys.exc_info()[0]
+				if str(e) == "<type 'exceptions.SystemExit'>":
+					pass
+				else:
+					errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-energyStorage#demand-file-csv-format'>OMF Wiki energyStorage</a>"
+					raise Exception(errorMessage)
 		for row in dc:
 			row['month'] = row['datetime'].month-1
-			row['weekday'] = row['datetime'].weekday
+			row['hour'] = row['datetime'].hour
+			# row['weekday'] = row['datetime'].weekday() # TODO: figure out why we care about this.
+		simpleDC = copy.deepcopy(dc)
 		outData['startDate'] = dc[0]['datetime'].isoformat()
 		ps = [battDischarge for x in range(12)]
 		dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
@@ -138,6 +148,32 @@ def heavyProcessing(modelDir, inputDict):
 				row['battSoC'] = battSoC
 			capacityLimited = min(battDoD) < 0
 			ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
+		# TODO: simple dispatch for loop.
+		simpleBattCapacity = cellQuantity * cellCapacity * dodFactor 
+		simpleBattDischarge = cellQuantity * dischargeRate
+		simpleBattCharge = cellQuantity * chargeRate
+		simpleBattSOC = battCapacity
+		for row in simpleDC:
+			simpleMonth = int(row['datetime'].month)-1
+			simpleDischarge = min(simpleBattDischarge,simpleBattSOC)
+			simpleCharge = min(simpleBattCharge, simpleBattCapacity-simpleBattSOC)
+			if row['hour'] >= startPeakHour and row['hour'] <= endPeakHour and simpleBattSOC >= 0:
+				row['simpleNetPower'] = row['power'] - simpleDischarge
+				simpleBattSOC -= simpleDischarge
+			else:
+				if simpleBattSOC < battCapacity:
+					simpleBattSOC += simpleCharge
+					row['simpleNetPower'] = row['power'] + simpleCharge
+				else:
+					row['simpleNetPower'] = row['power']
+			row['simpleBattSOC'] = simpleBattSOC
+		simpleDCGroupByMonth = [[t for t in simpleDC if t['datetime'].month-1==x] for x in range(12)]
+		simpleMonthlyPeakDemand =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+		simplePeakShave = []
+		for row in simpleMonthlyPeakDemand:
+			simplePeakShave.append(row['power']-row['simpleNetPower'])
+		simplePeakShaveSum = sum(simplePeakShave)
+		#Calculations
 		dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
 		hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
 		peakShaveSum = sum(ps)
@@ -153,6 +189,18 @@ def heavyProcessing(modelDir, inputDict):
 		# Estimate number of cyles the battery went through.
 		SoC = outData['batterySoc']
 		outData['cycleEquivalents'] = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
+		#Calculations for Simple Dispatch Scenario
+		simpleCashFlowCurve = [simplePeakShaveSum *demandCharge for year in range(projYears)]
+		simpleCashFlowCurve[0]-= (cellCost * cellQuantity)
+		outData['SSPP'] = (cellCost*cellQuantity)/(simplePeakShaveSum*demandCharge)
+		outData['simpleNetCashFlow'] = simpleCashFlowCurve
+		outData['simpleCumulativeCashflow'] = [sum(simpleCashFlowCurve[0:i+1]) for i,d in enumerate(simpleCashFlowCurve)]
+		outData['SNPV'] = npv(discountRate, simpleCashFlowCurve)
+		outData['simpleDemand'] = [t['power']*1000.0 for t in simpleDC]
+		outData['simpleDemandAfterBattery'] = [t['simpleNetPower']*1000.0 for t in simpleDC]
+		outData['simpleBatterySOC'] = [t['simpleBattSOC']/simpleBattCapacity*100.0*dodFactor + (100-100*dodFactor) for t in simpleDC]
+		SSoC = outData['simpleBatterySOC']
+		outData['simpleCycleEquivalents'] = sum([SSoC[i]-SSoC[i+1] for i,x in enumerate(SSoC[0:-1]) if SSoC[i+1] < SSoC[i]]) / 100.0
 		# # Output some matplotlib results as well.
 		# plt.plot([t['power'] for t in dc])
 		# plt.plot([t['netpower'] for t in dc])
@@ -178,8 +226,12 @@ def heavyProcessing(modelDir, inputDict):
 		outData['benefitNet'] = [benefitMonthly - costtoRecharge for benefitMonthly, costtoRecharge in zip(benefitMonthly, costtoRecharge)]
 		# Battery KW
 		demandAfterBattery = outData['demandAfterBattery']
+		simpleDemandAfterBattery = outData['simpleDemandAfterBattery']
 		demand = outData['demand']
+		simpleDemand = outData['simpleDemand']
+		batteryDispatch = list(np.array(simpleDemand) - np.array(simpleDemandAfterBattery))
 		outData['batteryDischargekW'] = [demand - demandAfterBattery for demand, demandAfterBattery in zip(demand, demandAfterBattery)]
+		outData['simpleBatteryDischargekW'] = [simpleDemand - simpleDemandAfterBattery for simpleDemand, simpleDemandAfterBattery in zip(simpleDemand, simpleDemandAfterBattery)]
 		outData['batteryDischargekWMax'] = max(outData['batteryDischargekW'])
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
