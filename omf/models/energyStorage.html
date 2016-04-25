@@ -96,11 +96,31 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Dispatch Strategy<span class="classic">Optimal, Daily, ???</span></label>
-				<select id="dispatchStrategy" name="dispatchStrategy" />
+				<select id="dispatchStrategy" name="dispatchStrategy" onchange = "togglePeakHours()" />
 					<option value="optimal">Optimal</option>
 					<option value="daily">Daily</option>
 					<option value="???">???</option>
 				</select>
+			</div>
+			<script type="text/javascript">
+				function togglePeakHours(){
+					if(gebi("dispatchStrategy").value=="daily"){
+						gebi("startPeakHour").style.display = 'inline-block'
+						gebi("endPeakHour").style.display = 'inline-block'
+					}
+					else{
+						gebi("startPeakHour").style.display = 'none'
+						gebi("endPeakHour").style.display = 'none'
+					}
+				}
+			</script>
+			<div style = "display: none" class="shortInput" id="startPeakHour">
+				<label>Starting Peak Hour</label>
+				<input type="text"  name="startPeakHour" value="18" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div style = "display: none" class="shortInput" id="endPeakHour">
+				<label>Ending Peak Hour</label>
+				<input type="text"  name="endPeakHour" value="22" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Unit Capacity (kWh-AC)</label>
@@ -117,14 +137,6 @@
 			<div class="shortInput">
 				<label>Discharge Rating (kW)</label>
 				<input type="text" id="dischargeRate" name="dischargeRate" value="5" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>
-			<div class="shortInput">
-				<label>Starting Peak Hour</label>
-				<input type="text" id="startPeakHour" name="startPeakHour" value="18" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>
-			<div class="shortInput">
-				<label>Ending Peak Hour</label>
-				<input type="text" id="endPeakHour" name="endPeakHour" value="22" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Depth of Discharge (%)<span class="classic">The maximum safe discharge capacity of the battery system, typically between 80% - 90%.</span></label>
