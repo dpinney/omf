@@ -369,8 +369,7 @@ function checkModelName() {
 		}).done(function (data) {
 			if (data.exists) {
 				alert("You already have a Model named '" + newName + "', please choose a different name.")
-			}
-			else {
+			} else {
 				inputForm.submit()
 			}
 		})
@@ -384,15 +383,16 @@ function isFormValid() {
 	for (var i = 0; i < inputs.length; i++) {
 		var patt = new RegExp(inputs[i].pattern)
 		if (!patt.test(inputs[i].value)) {
-			inputs[i].style.background = 'red'
+			inputs[i].style.backgroundColor = 'red'
 			inputs[i].focus()
 			errors++
+		} else {
+			inputs[i].style.backgroundColor = 'gainsboro'
 		}
 	}
 	if (errors) {
 		alert("Found [" + errors + "] errors, Please fix inputs in red.")
-	}
-	else {
+	} else {
 		return true
 	}
 }
