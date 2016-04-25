@@ -27,20 +27,20 @@ def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 def prism(prismDRDict):
 	''' Calculate demand changes based on Brattle's PRISM. '''
 	# Calculate times.
-	start_date = datetime.date(2009,prismDRDict['startMonth'],1)
-	last_day = calendar.monthrange(2009, prismDRDict['stopMonth'])
-	stop_date = datetime.date(2009,prismDRDict['stopMonth'],last_day[1])
-	day_count = stop_date - start_date
-	start_index = start_date - datetime.date(2009,1,1)
-	stop_index = stop_date  - datetime.date(2009,1,1)
-	prismDRDict['startIndex'] = (start_index.days * 24)
-	if (start_date <= stop_date):
-		prismDRDict['dayCount'] = day_count.days + 1
-		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
+	startDate = datetime.date(2009,prismDRDict['startMonth'],1)
+	lastDay = calendar.monthrange(2009, prismDRDict['stopMonth'])
+	stopDate = datetime.date(2009,prismDRDict['stopMonth'],lastDay[1])
+	dayCount = stopDate - startDate
+	startIndex = startDate - datetime.date(2009,1,1)
+	stopIndex = stopDate  - datetime.date(2009,1,1)
+	prismDRDict['startIndex'] = (startIndex.days * 24)
+	if (startDate <= stopDate):
+		prismDRDict['dayCount'] = dayCount.days + 1
+		prismDRDict['stopIndex'] = (stopIndex.days * 24) + 23
 		prismDRDict['numMonths'] = prismDRDict['stopMonth'] - prismDRDict['startMonth'] + 1
 	else:
-		prismDRDict['dayCount']= 365 - day_count.days + 1
-		prismDRDict['stopIndex'] = (stop_index.days * 24) + 23
+		prismDRDict['dayCount']= 365 - dayCount.days + 1
+		prismDRDict['stopIndex'] = (stopIndex.days * 24) + 23
 		prismDRDict['numMonths'] = (12 - prismDRDict['startMonth'] + 1) + prismDRDict['startMonth']
 	if prismDRDict['rateStructure'] != '24hourly':
 		prismDRDict['numHoursOn'] = prismDRDict['stopHour'] - prismDRDict['startHour'] + 1
@@ -320,7 +320,20 @@ def run(modelDir, inputDict):
 		# Setting up the demand curve.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
-		demandList = [{'datetime': parse(row['timestamp']), 'power': float(row['power'])} for row in csv.DictReader(open(pJoin(modelDir,"demand.csv")))]
+		try:
+			demandList = []
+			with open(pJoin(modelDir,"demand.csv")) as inFile:
+				reader = csv.DictReader(inFile)
+				for row in reader:
+					demandList.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
+				print len(demandList)
+
+				if len(demandList)<8760: raise Exception
+		except:
+			errorMessage = "CSV file is incorrect format. Please see valid format definition at\n <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+			raise Exception(errorMessage)
+
+
 		demandCurve = [x['power'] for x in demandList]
 		outData['startDate'] = demandList[0]['datetime'].isoformat()
 		# Run the PRISM model.

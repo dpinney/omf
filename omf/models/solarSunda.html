@@ -66,7 +66,7 @@
 			</div>
 			<!-- TODO: Use bigger tooltip size -->
 			<div class="shorterInput">
-				<label class="tooltip">System Array Size (kW-DC)<span class="classic">Nameplate generation of array solar panels in kW-dc. If '-' is entered, a panel size of 1.4 times the System Output Size (kW-AC) will be used. <br><br> The SUNDA project recommends a panel size of 1.4 times larger than the desired System Output Size kW-AC (inverter size). E.g. the SUNDA 1 mW-AC template system has panels sized at 1.4 mW-DC nameplate capacity.</span></label>
+				<label class="tooltip">System Array Size (kW-DC)<span class="classic">Nameplate generation of array solar panels in kW-DC. If '-' is entered, a panel size of 1.4 times the System Output Size (kW-AC) will be used. <br><br> The SUNDA project recommends a panel size of 1.4 times larger than the desired System Output Size kW-AC (inverter size). E.g. the SUNDA 1 mW-AC template system has panels sized at 1.4 mW-DC nameplate capacity.</span></label>
 				<input type="text" id="systemSize" name="systemSize" value="1390.8" required="required" pattern="^\d+\.?\d*?$|-">
 			</div>
 			<div class="shorterInput">
@@ -86,7 +86,7 @@
 				<input type="text" id="inverterEfficiency" name="inverterEfficiency" value="96" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
 			</div>
 			<div class="shorterInput">
-				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes in to account losses from soiling, shading, wiring and diode losses, etc.</span></label>
+				<label class="tooltip">Non-Inverter Efficiency (%)<span class="classic">This takes into account losses from soiling, shading, wiring, diode losses, etc.</span></label>
 				<input type="text" id="nonInverterEfficiency" name="nonInverterEfficiency" value="87" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" />
 			</div>
 			<div class="shorterInput">
@@ -106,7 +106,7 @@
 				<input type="text" id="landAmount" name="landAmount" value="6" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
-				<label>Land Acquisition</label>
+				<label class="tooltip">Land Acquisition<span class="classic">If this is equal to owned, land cost will be zero. Otherwise it will be calculated based on the 'Land Cost' input.</span></label>
 				<select id="landOwnership" name="landOwnership">
 					<option value="Owned">Owned</option>
 					<option value="Purchased">Purchased</option>
@@ -126,7 +126,7 @@
 				<input type="text" id="rackCost" name="rackCost" value="0.137" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
-				<label class="tooltip">Inverter Unit Cost ($)<span class="classic">For each 500 kW-AC inverter, the SUNDA template cost is $107,000. For smaller systems, a 250kW-AC inverter is available at $61,963.</span></label>
+				<label class="tooltip">Inverter Unit Cost ($)<span class="classic">For each 500 kW-AC inverter, the SUNDA template cost is $107,000. For smaller systems, a 250 kW-AC inverter is available at $61,963.</span></label>
 				<input type="text" id="inverterCost" name="inverterCost" value="107000" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shorterInput">
@@ -178,7 +178,7 @@
 				<input type="text" id="taxEquityReturn" name="taxEquityReturn" value="8.50" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required"/>
 			</div>
 			<div class="shorterInput">
-				<label class="tooltip">Distribution Adder ($/kWH)<span class="classic">An adder for the real costs of distributing the electricity from the PV array to the end customers.  Used to provide comparison of PV rate to existing retail rate. </span></label>
+				<label class="tooltip">Distribution Adder ($/kWH)<span class="classic">An adder for the real costs of distributing the electricity from the PV array to the end customers. Used to provide comparison of PV rate to existing retail rate. </span></label>
 				<input type="text" id="distAdder" name="distAdder" value="0" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="wideInput">
@@ -186,7 +186,7 @@
 			</div>
 			<hr>
 			<div class="shorterInput">
-				<label class="tooltip">First year energy cost ($/MWh)<span class="classic">Used to compare Utility-owned facilities to 3rd party PPA offerings.  Set to 0 if unneeded.</span></label>
+				<label class="tooltip">First year energy cost ($/MWh)<span class="classic">Used to compare Utility-owned facilities to 3rd party PPA offerings. Set to 0 if unneeded.</span></label>
 				<input type="text" id="firstYearEnergyCostPPA" name="firstYearEnergyCostPPA" value="57.5" pattern="^\d+\.?\d*?$" required="required"/>
 			</div>
 			<div class="shorterInput">

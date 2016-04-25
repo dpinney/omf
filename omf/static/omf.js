@@ -361,15 +361,38 @@ function duplicateModel() {
 }
 
 function checkModelName() {
-	var newName = document.getElementById('modelName').value
-	$.ajax({
-		url: "/uniqObjName/Model/" + currentUser + "/" + newName
-	}).done(function (data) {
-		if (data.exists) {
-			alert("You already have a Model named '" + newName + "', please choose a different name.")
+	// Additional check, required for Safari browsers
+	if (isFormValid()) {
+		var newName = document.getElementById('modelName').value
+		$.ajax({
+			url: "/uniqObjName/Model/" + currentUser + "/" + newName
+		}).done(function (data) {
+			if (data.exists) {
+				alert("You already have a Model named '" + newName + "', please choose a different name.")
+			} else {
+				inputForm.submit()
+			}
+		})
+	}
+}
+
+// Form Validation for Safari browsers //
+function isFormValid() {
+	var inputs = document.getElementsByTagName('input')
+	var errors = 0
+	for (var i = 0; i < inputs.length; i++) {
+		var patt = new RegExp(inputs[i].pattern)
+		if (!patt.test(inputs[i].value)) {
+			inputs[i].style.backgroundColor = 'red'
+			inputs[i].focus()
+			errors++
+		} else {
+			inputs[i].style.backgroundColor = 'gainsboro'
 		}
-		else{
-			inputForm.submit()
-		}
-	})
+	}
+	if (errors) {
+		alert("Found [" + errors + "] errors, Please fix inputs in red.")
+	} else {
+		return true
+	}
 }
