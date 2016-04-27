@@ -94,41 +94,13 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
-			<div class="shortInput">
-				<label class="tooltip">Dispatch Strategy<span class="classic">Optimal, Daily, ???</span></label>
-				<select id="dispatchStrategy" name="dispatchStrategy" onchange = "togglePeakHours()" />
-					<option value="optimal">Optimal</option>
-					<option value="daily">Daily</option>
-					<option value="???">???</option>
-				</select>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Economic Variables</p>
 			</div>
-			<script type="text/javascript">
-				function togglePeakHours(){
-					if(gebi("dispatchStrategy").value=="daily"){
-						gebi("startPeakHour").style.display = 'inline-block'
-						gebi("endPeakHour").style.display = 'inline-block'
-					}
-					else{
-						gebi("startPeakHour").style.display = 'none'
-						gebi("endPeakHour").style.display = 'none'
-					}
-				}
-			</script>
-			<div style = "display: none" class="shortInput" id="startPeakHour">
-				<label>Starting Peak Hour</label>
-				<input type="text"  name="startPeakHour" value="18" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>
-			<div style = "display: none" class="shortInput" id="endPeakHour">
-				<label>Ending Peak Hour</label>
-				<input type="text"  name="endPeakHour" value="22" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>
+			<hr>
 			<div class="shortInput">
 				<label>Unit Capacity (kWh-AC)</label>
 				<input type="text" id="cellCapacity" name="cellCapacity" value="7" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>
-			<div class="shortInput">
-				<label>Unit Quantity</label>
-				<input type="text" id="cellQuantity" name="cellQuantity" value="10" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput">
 				<label>Charge Rating (kW)</label>
@@ -137,6 +109,10 @@
 			<div class="shortInput">
 				<label>Discharge Rating (kW)</label>
 				<input type="text" id="dischargeRate" name="dischargeRate" value="5" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Unit Quantity</label>
+				<input type="text" id="cellQuantity" name="cellQuantity" value="10" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Depth of Discharge (%)<span class="classic">The maximum safe discharge capacity of the battery system, typically between 80% - 90%.</span></label>
@@ -149,6 +125,26 @@
 			<div class="shortInput">
 				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. Used in the Battery System AC Round Trip Efficiency calculation. The Inverter efficiency is obtained from the Weighted Efficiency (CEC) Method.</span></label>
 				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" value="97.5" required="required" >
+			</div>
+			<div class="shortInput">
+				<label>Unit Cost (installed)</label>
+				<input type="text" id="cellCost" name="cellCost" value="7140" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Demand Charge Cost ($/kW)</label>
+				<input type="text" id="demandCharge" name="demandCharge" value="20" required="required" pattern="^\d+$"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Electricity Cost ($/kW)<span class="classic">The cost of the electricity used to recharge the battery system.</span></label>
+				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" value="0.06" required="required">
+			</div>
+			<div class="shortInput">
+				<label>Financial Projection Length (years)</label>
+				<input type="text" id="projYears" name="projYears" value="10" required="required" pattern="^\d+$"/>
+			</div>
+			<div class="shortInput">
+				<label>Discount Rate (%)</label>
+				<input type="text" id="discountRate" name="discountRate" value="2.5" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example demand file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
@@ -186,25 +182,25 @@
 
 				</script>
 			</div>
-			<div class="shortInput">
-				<label>Demand Charge Cost ($/kW)</label>
-				<input type="text" id="demandCharge" name="demandCharge" value="20" required="required" pattern="^\d+$"/>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Dispatch Strategy</p>
 			</div>
+			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Electricity Cost ($/kW)<span class="classic">The cost of the electricity used to recharge the battery system.</span></label>
-				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" value="0.06" required="required">
+				<label class="tooltip">Dispatch Strategy<span class="classic">Optimal, Daily, ???</span></label>
+				<select id="dispatchStrategy" name="dispatchStrategy" />
+					<option value="optimal">Optimal</option>
+					<option value="daily">Daily</option>
+					<option value="???">???</option>
+				</select>
 			</div>
-			<div class="shortInput">
-				<label>Unit Cost (installed)</label>
-				<input type="text" id="cellCost" name="cellCost" value="7140" required="required" pattern="^\d+\.?\d*?$"/>
+			<div class="shortInput" >
+				<label>Daily Dispatch - Starting Peak Hour</label>
+				<input type="text"  id="startPeakHour" name="startPeakHour" value="18" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
-			<div class="shortInput">
-				<label>Discount Rate (%)</label>
-				<input type="text" id="discountRate" name="discountRate" value="2.5" required="required" pattern="^\d+\.?\d*?$"/>
-			</div>
-			<div class="shortInput">
-				<label>Financial Projection Length (years)</label>
-				<input type="text" id="projYears" name="projYears" value="10" required="required" pattern="^\d+$"/>
+			<div class="shortInput" >
+				<label>Daily Dispatch - Ending Peak Hour</label>
+				<input type="text"  id="endPeakHour" name="endPeakHour" value="22" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				{% if not quickRender %}
@@ -328,15 +324,13 @@
 						"plotLines":[{"color": "lightgray",
 						"dashStyle": "ShortDash",
 						"width": 2,
-						"label":{"text":"Max Power:" + allOutputData.batteryDischargekWMax/1000 + "kW", "align":"right","y":-5,"x":-790, "style":{"color":"gray", "fontsize":"12px"}},
+						"label":{"text":"Max Power:" + delimitNumbers(allOutputData.batteryDischargekWMax.toFixed(3)/1000) + "kW", "align":"right","y":-5,"x":-790, "style":{"color":"gray", "fontsize":"12px"}},
 						"value": allOutputData.batteryDischargekWMax,"zIndex": 10}],"min":0},
 					"title":{"text":null},
 					"series":[
 						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.demand,"enableMouseTracking":false},
 						{"name":"After Storage","marker":{"enabled":false},"color":"purple","data":allOutputData.demandAfterBattery,"enableMouseTracking":false},
-						{"name":"After Simple Dispatch","marker":{"enabled":false},"color":"green","data":allOutputData.simpleDemandAfterBattery,"enableMouseTracking":false},
-						{"name":"Storage Discharge","marker":{"enabled":false},"color":"lightgray","data":allOutputData.batteryDischargekW},
-						{"name":"Simple Storage Discharge","marker":{"enabled":false},"color":"black","data":allOutputData.simpleBatteryDischargekW}],
+						{"name":"Storage Discharge","marker":{"enabled":false},"color":"lightgray","data":allOutputData.batteryDischargekW}],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"demandBattChart","type":"line","marginRight":20, "height":750,"width":1000},
 					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
@@ -368,13 +362,12 @@
 						"width": 2,
 						"label":{"text":"Max specified DOD:" + (100 - allInputData.dodFactor) + "%","align":"right","y":-5,"x":-775, "style":{"color":"gray", "fontsize":"12px"}},
 						"value": dodFactor,"zIndex": 10}],"min":0},
-					"title":{"text":"Cycle Equivalents:" + delimitNumbers(allOutputData.cycleEquivalents.toFixed(1)) + "; Simple Dispatch Cycles: " + delimitNumbers(allOutputData.simpleCycleEquivalents.toFixed(1)), "verticalAlign":"bottom", "align":"right", "y":-28-dodFactor*2, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"title":{"text":"Cycle Equivalents:" + delimitNumbers(allOutputData.cycleEquivalents.toFixed(1)), "verticalAlign":"bottom", "align":"right", "y":-28-dodFactor*2, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[
-						{"name":"Battery SoC","marker":{"enabled":false},"color":"gray","data":allOutputData.batterySoc}, 
-						{"name":"Simple Dispatch Battery SOC","marker":{"enabled":false} ,"color":"lightblue","data":allOutputData.simpleBatterySOC, "visible":"false"}
+						{"name":"Battery SoC","marker":{"enabled":false},"color":"gray","data":allOutputData.batterySoc}
 						],
 					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"batterySocChart","type":"line","marginRight":20, "height":250,"width":1000},
-					"tooltip":false,
+					"tooltip":{"valueDecimals":1},
 					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
 			</script>
 		</div>
@@ -386,11 +379,10 @@
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
-					"title":{"text":"NPV:$" + delimitNumbers(allOutputData.NPV.toFixed(0)) + "; SPP:" + allOutputData.SPP.toFixed(3) + "; Simple NPV:$" + delimitNumbers(allOutputData.SNPV.toFixed(0)) + "; Simple SPP:" + allOutputData.SSPP.toFixed(3), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"title":{"text":"NPV:$" + delimitNumbers(allOutputData.NPV.toFixed(0)) + "; SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[{"name":"Net Benefits", "data":allOutputData.netCashflow},
-						{"name":"Cumulative Return", "type":"spline", "data":allOutputData.cumulativeCashflow},
-					{"name":"Simple Net Benefits", "data":allOutputData.simpleNetCashFlow},
-						{"name":"Simple Cumulative Return", "type":"spline", "data":allOutputData.simpleCumulativeCashflow}],
+						{"name":"Cumulative Return", "type":"spline", "data":allOutputData.cumulativeCashflow}
+					],
 					"yAxis":{"title":{"text":"Income ($)","style":{"color":"gray"}}},
 					"chart":{"marginBottom":55,"zoomType":"x","renderTo":"cashFlowChartDiv","type":"column","marginRight":20, "height":250,"width":1000},
 					"tooltip":{"valueDecimals":1},

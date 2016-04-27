@@ -88,8 +88,8 @@ def heavyProcessing(modelDir, inputDict):
 		retailCost = float(inputDict.get('retailCost', 0.07))
 		dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
 		projYears = int(inputDict.get('projYears',10))
-		startPeakHour = int(inputDict.get('startPeakHour',8))
-		endPeakHour = int(inputDict.get('endPeakHour',10))
+		startPeakHour = int(inputDict.get('startPeakHour',18))
+		endPeakHour = int(inputDict.get('endPeakHour',24))
 		dispatchStrategy = str(inputDict.get('dispatchStrategy'))
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
@@ -117,68 +117,76 @@ def heavyProcessing(modelDir, inputDict):
 			row['month'] = row['datetime'].month-1
 			row['hour'] = row['datetime'].hour
 			# row['weekday'] = row['datetime'].weekday() # TODO: figure out why we care about this.
-		simpleDC = copy.deepcopy(dc)
-		outData['startDate'] = dc[0]['datetime'].isoformat()
-		ps = [battDischarge for x in range(12)]
-		dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
-		monthlyPeakDemand = [max(dcGroupByMonth[x]) for x in range(12)]
-		capacityLimited = True
-		while capacityLimited:
-			battSoC = battCapacity # Battery state of charge; begins full.
-			battDoD = [battCapacity for x in range(12)]  # Depth-of-discharge every month, depends on dodFactor.
+		if dispatchStrategy == "optimal":
+			outData['startDate'] = dc[0]['datetime'].isoformat()
+			ps = [battDischarge for x in range(12)]
+			dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
+			monthlyPeakDemand = [max(dcGroupByMonth[x]) for x in range(12)]
+			capacityLimited = True
+			while capacityLimited:
+				battSoC = battCapacity # Battery state of charge; begins full.
+				battDoD = [battCapacity for x in range(12)]  # Depth-of-discharge every month, depends on dodFactor.
+				for row in dc:
+					month = int(row['datetime'].month)-1
+					powerUnderPeak  = monthlyPeakDemand[month] - row['power'] - ps[month]
+					isCharging = powerUnderPeak > 0
+					isDischarging = powerUnderPeak <= 0
+					charge = isCharging * min(
+						powerUnderPeak * battEff, # Charge rate <= new monthly peak - row['power']
+						battCharge, # Charge rate <= battery maximum charging rate.
+						battCapacity - battSoC) # Charge rage <= capacity remaining in battery.
+					discharge = isDischarging * min(
+						abs(powerUnderPeak), # Discharge rate <= new monthly peak - row['power']
+						abs(battDischarge), # Discharge rate <= battery maximum charging rate.
+						abs(battSoC+.001)) # Discharge rate <= capacity remaining in battery.
+					# (Dis)charge battery
+					battSoC += charge
+					battSoC -= discharge
+					# Update minimum state-of-charge for this month.
+					battDoD[month] = min(battSoC,battDoD[month])
+					row['netpower'] = row['power'] + charge/battEff - discharge
+					row['battSoC'] = battSoC
+				capacityLimited = min(battDoD) < 0
+				ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
+			peakShaveSum = sum(ps)
+		# TODO: simple dispatch for loop.
+		elif dispatchStrategy == "daily":
+			outData['startDate'] = dc[0]['datetime'].isoformat()
+			battSoC = battCapacity
 			for row in dc:
 				month = int(row['datetime'].month)-1
-				powerUnderPeak  = monthlyPeakDemand[month] - row['power'] - ps[month]
-				isCharging = powerUnderPeak > 0
-				isDischarging = powerUnderPeak <= 0
-				charge = isCharging * min(
-					powerUnderPeak * battEff, # Charge rate <= new monthly peak - row['power']
-					battCharge, # Charge rate <= battery maximum charging rate.
-					battCapacity - battSoC) # Charge rage <= capacity remaining in battery.
-				discharge = isDischarging * min(
-					abs(powerUnderPeak), # Discharge rate <= new monthly peak - row['power']
-					abs(battDischarge), # Discharge rate <= battery maximum charging rate.
-					abs(battSoC+.001)) # Discharge rate <= capacity remaining in battery.
-				# (Dis)charge battery
-				battSoC += charge
-				battSoC -= discharge
-				# Update minimum state-of-charge for this month.
-				battDoD[month] = min(battSoC,battDoD[month])
-				row['netpower'] = row['power'] + charge/battEff - discharge
-				row['battSoC'] = battSoC
-			capacityLimited = min(battDoD) < 0
-			ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
-		# TODO: simple dispatch for loop.
-		simpleBattCapacity = cellQuantity * cellCapacity * dodFactor 
-		simpleBattDischarge = cellQuantity * dischargeRate
-		simpleBattCharge = cellQuantity * chargeRate
-		simpleBattSOC = battCapacity
-		for row in simpleDC:
-			simpleMonth = int(row['datetime'].month)-1
-			simpleDischarge = min(simpleBattDischarge,simpleBattSOC)
-			simpleCharge = min(simpleBattCharge, simpleBattCapacity-simpleBattSOC)
-			if row['hour'] >= startPeakHour and row['hour'] <= endPeakHour and simpleBattSOC >= 0:
-				row['simpleNetPower'] = row['power'] - simpleDischarge
-				simpleBattSOC -= simpleDischarge
-			else:
-				if simpleBattSOC < battCapacity:
-					simpleBattSOC += simpleCharge
-					row['simpleNetPower'] = row['power'] + simpleCharge
+				discharge = min(battDischarge,battSoC)
+				charge = min(battCharge, battCapacity-battSoC)
+				if row['hour'] >= startPeakHour and row['hour'] <= endPeakHour and battSoC >= 0:
+					row['netpower'] = row['power'] - discharge
+					battSoC -= discharge
 				else:
-					row['simpleNetPower'] = row['power']
-			row['simpleBattSOC'] = simpleBattSOC
-		simpleDCGroupByMonth = [[t for t in simpleDC if t['datetime'].month-1==x] for x in range(12)]
-		simpleMonthlyPeakDemand =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
-		simplePeakShave = []
-		for row in simpleMonthlyPeakDemand:
-			simplePeakShave.append(row['power']-row['simpleNetPower'])
-		simplePeakShaveSum = sum(simplePeakShave)
+					if battSoC < battCapacity:
+						battSoC += charge
+						row['netpower'] = row['power'] + charge/battEff
+					else:
+						row['netpower'] = row['power']
+				row['battSoC'] = battSoC
+			dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
+			simpleDCGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
+			monthlyPeakDemand =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+			ps = []
+			for row in monthlyPeakDemand:
+				ps.append(row['power']-row['netpower'])
+			peakShaveSum = sum(ps)
+			
 		#Calculations
 		dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
 		hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
-		peakShaveSum = sum(ps)
-		outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandCharge)
-		cashFlowCurve = [peakShaveSum * demandCharge for year in range(projYears)]
+		if peakShaveSum == 0:
+				peakShaveSum = -1
+				#peakShave of 0 means no benefits, so make it -1
+		if dispatchStrategy == 'optimal':
+			cashFlowCurve = [peakShaveSum * demandCharge for year in range(projYears)]
+			outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandCharge)
+		elif dispatchStrategy == 'daily':
+			cashFlowCurve = [(peakShaveSum * demandCharge)-(battCapacity*365*retailCost) for year in range(projYears)]
+			outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(battCapacity*365*retailCost))
 		cashFlowCurve[0]-= (cellCost * cellQuantity)
 		outData['netCashflow'] = cashFlowCurve
 		outData['cumulativeCashflow'] = [sum(cashFlowCurve[0:i+1]) for i,d in enumerate(cashFlowCurve)]
@@ -189,18 +197,7 @@ def heavyProcessing(modelDir, inputDict):
 		# Estimate number of cyles the battery went through.
 		SoC = outData['batterySoc']
 		outData['cycleEquivalents'] = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
-		#Calculations for Simple Dispatch Scenario
-		simpleCashFlowCurve = [simplePeakShaveSum *demandCharge for year in range(projYears)]
-		simpleCashFlowCurve[0]-= (cellCost * cellQuantity)
-		outData['SSPP'] = (cellCost*cellQuantity)/(simplePeakShaveSum*demandCharge)
-		outData['simpleNetCashFlow'] = simpleCashFlowCurve
-		outData['simpleCumulativeCashflow'] = [sum(simpleCashFlowCurve[0:i+1]) for i,d in enumerate(simpleCashFlowCurve)]
-		outData['SNPV'] = npv(discountRate, simpleCashFlowCurve)
-		outData['simpleDemand'] = [t['power']*1000.0 for t in simpleDC]
-		outData['simpleDemandAfterBattery'] = [t['simpleNetPower']*1000.0 for t in simpleDC]
-		outData['simpleBatterySOC'] = [t['simpleBattSOC']/simpleBattCapacity*100.0*dodFactor + (100-100*dodFactor) for t in simpleDC]
-		SSoC = outData['simpleBatterySOC']
-		outData['simpleCycleEquivalents'] = sum([SSoC[i]-SSoC[i+1] for i,x in enumerate(SSoC[0:-1]) if SSoC[i+1] < SSoC[i]]) / 100.0
+
 		# # Output some matplotlib results as well.
 		# plt.plot([t['power'] for t in dc])
 		# plt.plot([t['netpower'] for t in dc])
@@ -208,6 +205,7 @@ def heavyProcessing(modelDir, inputDict):
 		# for month in range(12):
 		#   plt.axvline(hoursThroughTheMonth[month])
 		# plt.savefig(pJoin(modelDir,"plot.png"))
+		
 		# Summary of results
 		outData['months'] = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"]
 		totMonNum = []
@@ -219,19 +217,19 @@ def heavyProcessing(modelDir, inputDict):
 		outData['ps'] = ps
 		outData['monthlyDemandRed'] = [totMonNum - ps for totMonNum, ps in zip(totMonNum, ps)]
 		outData['benefitMonthly'] = [x * demandCharge for x in outData['ps']]
-		outData['kWhtoRecharge'] = [battCapacity - x for x in outData['ps']]
+		if dispatchStrategy == 'optimal':
+			outData['kWhtoRecharge'] = [battCapacity - x for x in outData['ps']]
+		elif dispatchStrategy == 'daily':
+			kWhtoRecharge = [battCapacity * 30 -x for x in range(12)]
+			outData['kWhtoRecharge'] = kWhtoRecharge
 		outData['costtoRecharge'] = [retailCost * x for x in outData['kWhtoRecharge']]
 		benefitMonthly = outData['benefitMonthly']
 		costtoRecharge = outData['costtoRecharge']
 		outData['benefitNet'] = [benefitMonthly - costtoRecharge for benefitMonthly, costtoRecharge in zip(benefitMonthly, costtoRecharge)]
 		# Battery KW
 		demandAfterBattery = outData['demandAfterBattery']
-		simpleDemandAfterBattery = outData['simpleDemandAfterBattery']
 		demand = outData['demand']
-		simpleDemand = outData['simpleDemand']
-		batteryDispatch = list(np.array(simpleDemand) - np.array(simpleDemandAfterBattery))
 		outData['batteryDischargekW'] = [demand - demandAfterBattery for demand, demandAfterBattery in zip(demand, demandAfterBattery)]
-		outData['simpleBatteryDischargekW'] = [simpleDemand - simpleDemandAfterBattery for simpleDemand, simpleDemandAfterBattery in zip(simpleDemand, simpleDemandAfterBattery)]
 		outData['batteryDischargekWMax'] = max(outData['batteryDischargekW'])
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
@@ -279,7 +277,9 @@ def _tests():
 		"projYears": "15",
 		"demandCharge": "20",
 		"dodFactor":"100",
-		"retailCost": "0.06"}
+		"retailCost": "0.06",
+		"startPeakHour": "18",
+		"endPeakHour": "22"}
 	modelLoc = pJoin(workDir,"admin","Automated energyStorage Testing")
 	# Blow away old test results if necessary.
 	try:
