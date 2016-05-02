@@ -187,20 +187,56 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label class="tooltip">Dispatch Strategy<span class="classic">Optimal, Daily, ???</span></label>
+				<label class="tooltip">Dispatch Strategy<span class="classic">Please see the documentation at the help link for an explanation of dispatch strategy.</span></label>
 				<select id="dispatchStrategy" name="dispatchStrategy" />
 					<option value="optimal">Optimal</option>
 					<option value="daily">Daily</option>
-					<option value="???">???</option>
+					<option value="customDispatch">Custom Dispatch</option>
 				</select>
 			</div>
 			<div class="shortInput" >
 				<label>Daily Dispatch - Starting Peak Hour</label>
-				<input type="text"  id="startPeakHour" name="startPeakHour" value="18" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text"  id="startPeakHour" name="startPeakHour" value="21" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput" >
 				<label>Daily Dispatch - Ending Peak Hour</label>
-				<input type="text"  id="endPeakHour" name="endPeakHour" value="22" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text"  id="endPeakHour" name="endPeakHour" value="24" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Custom Dispatch Strategy (.csv file)<span class="classic">Please see the documentation at the help link for the required format.</span></label>
+				<script>var fileNameOther=true;</script>
+				<input type="file" id="customDispatchStrategyFile" name="customDispatchStrategyFile" accept=".csv" onchange="handle_morefiles(this.files)">
+				<input id="customDispatchStrategy" name="customDispatchStrategy" type="hidden">
+				{% if allInputData.fileNameOther|string() is defined %}
+					<input type="hidden" id="fileNameOther" name="fileNameOther" readonly="readonly">
+					<div id="fileBackground"></div>
+					<div id="fileExists"><label for="customDispatchStrategyFile" id="customDispatchStrategyFileName"></label></div>
+					<script>
+						var FileName = allInputData.fileNameOther;
+						document.getElementById('customDispatchStrategyFileName').innerHTML = FileName;
+					</script>
+				{% endif %}
+				<script>
+					// Make sure the file is required on prerun.
+					// if (modelStatus == "preRun") {gebi('customDispatchStrategyFile').setAttribute('required', 'required')}
+					// else {}
+					// File handler function.
+					function handle_morefiles(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded2
+						function loaded2(evt) {
+							evt.target.result
+							gebi("customDispatchStrategy").value = reader.result
+							var FileName = gebi("customDispatchStrategyFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('customDispatchStrategyFileName').innerHTML = FileName;
+							gebi("fileNameOther").value = FileName;
+						}
+					}
+
+				</script>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				{% if not quickRender %}

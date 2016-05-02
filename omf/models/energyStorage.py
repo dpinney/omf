@@ -1,6 +1,6 @@
 ''' Calculate the costs and benefits of energy storage from a distribution utility perspective. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, traceback, csv, copy
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, traceback, csv
 import multiprocessing
 import numpy as np
 from os.path import join as pJoin
@@ -94,6 +94,10 @@ def heavyProcessing(modelDir, inputDict):
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
+		# If dispatch is custom, write the strategy to a file in the model directory
+		if dispatchStrategy == 'customDispatch':
+			with open(pJoin(modelDir,"dispatchStrategy.csv"),"w") as customDispatchFile:
+				customDispatchFile.write(inputDict['customDispatchStrategy'])
 		# Start running battery simulation.
 		battCapacity = cellQuantity * cellCapacity * dodFactor
 		battDischarge = cellQuantity * dischargeRate
@@ -111,7 +115,7 @@ def heavyProcessing(modelDir, inputDict):
 				if str(e) == "<type 'exceptions.SystemExit'>":
 					pass
 				else:
-					errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-energyStorage#demand-file-csv-format'>OMF Wiki energyStorage</a>"
+					errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-energyStorage#demand-file-csv-format'>\nOMF Wiki energyStorage - Demand File CSV Format</a>"
 					raise Exception(errorMessage)
 		for row in dc:
 			row['month'] = row['datetime'].month-1
@@ -149,7 +153,6 @@ def heavyProcessing(modelDir, inputDict):
 				capacityLimited = min(battDoD) < 0
 				ps = [ps[month]-(battDoD[month] < 0) for month in range(12)]
 			peakShaveSum = sum(ps)
-		# TODO: simple dispatch for loop.
 		elif dispatchStrategy == "daily":
 			outData['startDate'] = dc[0]['datetime'].isoformat()
 			battSoC = battCapacity
@@ -157,7 +160,51 @@ def heavyProcessing(modelDir, inputDict):
 				month = int(row['datetime'].month)-1
 				discharge = min(battDischarge,battSoC)
 				charge = min(battCharge, battCapacity-battSoC)
+				#If hour is within peak hours and the battery has charge
 				if row['hour'] >= startPeakHour and row['hour'] <= endPeakHour and battSoC >= 0:
+					row['netpower'] = row['power'] - discharge
+					battSoC -= discharge
+				else:
+				#If hour is outside peak hours and the battery isnt fully charged, charge it
+					if battSoC < battCapacity:
+						battSoC += charge
+						row['netpower'] = row['power'] + charge/battEff
+					else:
+						row['netpower'] = row['power']
+				row['battSoC'] = battSoC
+			dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
+			simpleDCGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
+			#Finding rows with max power
+			monthlyPeakDemand =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
+			ps = []
+			#Determining monthly peak shave
+			for row in monthlyPeakDemand:
+				ps.append(row['power']-row['netpower'])
+			peakShaveSum = sum(ps)
+		else:
+			try:
+				with open(pJoin(modelDir,'dispatchStrategy.csv')) as strategyFile:
+					reader = csv.DictReader(strategyFile)
+					rowCount = 0
+		 			for i, row in enumerate(reader):
+		 				dc[i]['dispatch'] = int(row['dispatch'])
+		 				rowCount+=1
+		 			if rowCount!= 8760: raise Exception
+		 	except:
+				e = sys.exc_info()[0]
+				if str(e) == "<type 'exceptions.SystemExit'>":
+					pass
+				else:
+					errorMessage = "Dispatch Strategy file is in an incorrect format. Please see valid format definition at <a target = '_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-energyStorage#custom-dispatch-strategy-file-csv-format'>\nOMF Wiki energyStorage - Custom Dispatch Strategy File Format</a>"
+					raise Exception(errorMessage)	 		
+		 	outData['startDate'] = dc[0]['datetime'].isoformat()
+			battSoC = battCapacity
+			for row in dc:
+				month = int(row['datetime'].month)-1
+				discharge = min(battDischarge,battSoC)
+				charge = min(battCharge, battCapacity-battSoC)
+				#If there is a 1 in the dispatch strategy csv, the battery discharges
+				if row['dispatch']==1:
 					row['netpower'] = row['power'] - discharge
 					battSoC -= discharge
 				else:
@@ -168,13 +215,23 @@ def heavyProcessing(modelDir, inputDict):
 						row['netpower'] = row['power']
 				row['battSoC'] = battSoC
 			dcGroupByMonth = [[t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
+			#Calculating how much the battery discharges each month
+			dischargeGroupByMonth = [[t['netpower']-t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 			simpleDCGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
 			monthlyPeakDemand =  [max(dVals, key=lambda x: x['power']) for dVals in simpleDCGroupByMonth]
 			ps = []
 			for row in monthlyPeakDemand:
 				ps.append(row['power']-row['netpower'])
 			peakShaveSum = sum(ps)
-			
+			chargePerMonth = []
+			#Calculate how much the battery charges per year for cashFlowCurve, SPP calculation, kWhToRecharge
+			for row in dischargeGroupByMonth:
+				total = 0
+				for num in row:
+					if num > 0:
+						total += num
+				chargePerMonth.append(total)
+			totalYearlyCharge = sum(chargePerMonth)
 		#Calculations
 		dcThroughTheMonth = [[t for t in iter(dc) if t['datetime'].month-1<=x] for x in range(12)]
 		hoursThroughTheMonth = [len(dcThroughTheMonth[month]) for month in range(12)]
@@ -185,8 +242,13 @@ def heavyProcessing(modelDir, inputDict):
 			cashFlowCurve = [peakShaveSum * demandCharge for year in range(projYears)]
 			outData['SPP'] = (cellCost*cellQuantity)/(peakShaveSum*demandCharge)
 		elif dispatchStrategy == 'daily':
+			#cashFlowCurve is $ in from peak shaving minus the cost to recharge the battery every day of the year
 			cashFlowCurve = [(peakShaveSum * demandCharge)-(battCapacity*365*retailCost) for year in range(projYears)]
+			#simplePayback is also affected by the cost to recharge the battery every day of the year
 			outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(battCapacity*365*retailCost))
+		else:
+			cashFlowCurve = [(peakShaveSum * demandCharge)-(totalYearlyCharge*retailCost) for year in range(projYears)]
+			outData['SPP'] = (cellCost*cellQuantity)/((peakShaveSum*demandCharge)-(totalYearlyCharge*retailCost))		
 		cashFlowCurve[0]-= (cellCost * cellQuantity)
 		outData['netCashflow'] = cashFlowCurve
 		outData['cumulativeCashflow'] = [sum(cashFlowCurve[0:i+1]) for i,d in enumerate(cashFlowCurve)]
@@ -220,7 +282,14 @@ def heavyProcessing(modelDir, inputDict):
 		if dispatchStrategy == 'optimal':
 			outData['kWhtoRecharge'] = [battCapacity - x for x in outData['ps']]
 		elif dispatchStrategy == 'daily':
+			#Battery is dispatched and charged everyday, ~30 days per month
 			kWhtoRecharge = [battCapacity * 30 -x for x in range(12)]
+			outData['kWhtoRecharge'] = kWhtoRecharge
+		else:
+			#
+			kWhtoRecharge = []
+			for num in chargePerMonth:
+				kWhtoRecharge.append(num)
 			outData['kWhtoRecharge'] = kWhtoRecharge
 		outData['costtoRecharge'] = [retailCost * x for x in outData['kWhtoRecharge']]
 		benefitMonthly = outData['benefitMonthly']
@@ -269,8 +338,9 @@ def _tests():
 		"dischargeRate": "5",
 		"modelType": "energyStorage",
 		"chargeRate": "5",
-		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","OlinBeckenhamScada.csv")).read(),
-		"fileName": "OlinBeckenhamScada.csv",
+		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","FrankScadaValidCSV.csv")).read(),
+		"fileName": "FrankScadaValidCSV.csv",
+		"dispatchStrategy": "optimal",
 		"cellCost": "7140",
 		"cellQuantity": "10",
 		"runTime": "0:00:03",
