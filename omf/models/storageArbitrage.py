@@ -244,16 +244,16 @@ def _tests():
 		"chargeRate": "5",
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","FrankScadaValidCSV.csv")).read(),
 		"fileName": "FrankScadaValidCSV.csv",
-		"dispatchStrategy": "optimal",
+		"priceCurve": open(pJoin(__metaModel__._omfDir,"uploads","priceCurve.csv")).read(),
+		"fileNamed":"priceCurve.csv",
 		"cellCost": "7140",
 		"cellQuantity": "10",
 		"runTime": "0:00:03",
 		"projYears": "15",
-		"demandCharge": "20",
-		"dodFactor":"100",
-		"retailCost": "0.06",
-		"startPeakHour": "18",
-		"endPeakHour": "22"}
+		"chargePriceThreshold": "0.07",
+		"dischargePriceThreshold":"0.15",
+		"dodFactor":"100"
+		}
 	modelLoc = pJoin(workDir,"admin","Automated storageArbitrage Testing")
 	# Blow away old test results if necessary.
 	try:
