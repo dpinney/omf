@@ -153,7 +153,6 @@ def heavyProcessing(modelDir, inputDict):
 			else:
 				row['netpower'] = row['power']
 			row['battSoC'] = battSoC
-			print row
 		dischargeGroupByMonth = [[t['netpower']-t['power'] for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		dcGroupByMonth = [[t for t in dc if t['datetime'].month-1==x] for x in range(12)]
 		monthlyCharge = []
