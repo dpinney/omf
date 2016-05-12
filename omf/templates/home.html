@@ -105,13 +105,13 @@
 							{% endfor %}
 							<div id="menuText">Energy &amp; Demand</div>
 							{% for name in modelNames if not name.startswith('_') %}
-								{% if "energy" in name or "demand" in name or "storage" in name %}
+								{% if "energy" in name or "demand" in name or "storage" in name or "sub" in name %}
 								<li><a href="/newModel/{{name}}">{{ name }}</a></li>
 								{% endif %}
 							{% endfor %}
 							<div id="menuText">More Models</div>
 							{% for name in modelNames if not name.startswith('_') %}
-								{% if "solar" not in name and "energy" not in name and "demand" not in name and "storage" not in name%}
+								{% if "solar" not in name and "energy" not in name and "demand" not in name and "storage" not in name and "sub" not in name%}
 								<li><a href="/newModel/{{name}}">{{ name }}</a></li>
 								{% endif %}
 							{% endfor %}
