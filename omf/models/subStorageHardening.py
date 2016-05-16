@@ -131,7 +131,6 @@ def heavyProcessing(modelDir, inputDict):
 				excessDemand = 0
 		finalDC = copy.deepcopy(dc)
 		excessDemandMax = max(excessDemandArray)
-		print excessDemandMax
 		#Calculate the number of units needed to cover the max demand/energy
 		numOfUnits = math.ceil(excessDemandMax/(cellCapacity))
 		totalCost = numOfUnits * cellCost
@@ -140,7 +139,6 @@ def heavyProcessing(modelDir, inputDict):
 		newBattCharge = numOfUnits * chargeRate
 		run = True
 		counter = 0
-		print "before whileloop",numOfUnits
 		#Iterate through the demand curve, if the battery runs out of charge and there is still excess demand: add more batteries
 		while run == True:
 			newBattCapacity = numOfUnits *cellCapacity * dodFactor
@@ -164,7 +162,6 @@ def heavyProcessing(modelDir, inputDict):
 						break
 					else:
 						counter += 1
-		print "after loop",numOfUnits
 		afterBattCapacity = numOfUnits *cellCapacity * dodFactor
 		afterBattDischarge = numOfUnits * dischargeRate
 		afterBattCharge = numOfUnits * chargeRate
@@ -244,7 +241,8 @@ def _tests():
 		"cellQuantity": "10",
 		"dodFactor":"100",
 		"avoidedCost":"2000000",
-		"transformerThreshold":"6500"
+		"transformerThreshold":"6500",
+		"batteryCycleLife": "5000"
 		}
 	modelLoc = pJoin(workDir,"admin","Automated subStorageHardening Testing")
 	# Blow away old test results if necessary.
