@@ -194,8 +194,8 @@
 				{% endif %}
 				<script>
 					// Make sure the file is required on prerun.
-					// if (modelStatus == "preRun") {gebi('priceCurveFile').setAttribute('required', 'required')}
-					// else {}
+					if (modelStatus == "preRun") {gebi('priceCurveFile').setAttribute('required', 'required')}
+					else {}
 					// File handler function.
 					function handle_thesefiles(files) {
 						// read file to a hidden input field
