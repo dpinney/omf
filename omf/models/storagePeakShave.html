@@ -66,8 +66,8 @@
 	<div id="input" class="content">
 		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"{% endif %} method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-energyStorage" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="energyStorage" readonly/>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="storagePeakShave" readonly/>
 			</div>
 			{% if quickRender %}
 			<div class="shortInput">
@@ -129,6 +129,10 @@
 			<div class="shortInput">
 				<label>Unit Cost (installed)</label>
 				<input type="text" id="cellCost" name="cellCost" value="7140" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Battery Cycles in Lifetime</label>
+				<input type="text" id="batteryCycleLife" name="batteryCycleLife" value="5000" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Demand Charge Cost ($/kW)</label>
@@ -398,7 +402,7 @@
 						"width": 2,
 						"label":{"text":"Max specified DOD:" + (100 - allInputData.dodFactor) + "%","align":"right","y":-5,"x":-775, "style":{"color":"gray", "fontsize":"12px"}},
 						"value": dodFactor,"zIndex": 10}],"min":0},
-					"title":{"text":"Cycle Equivalents:" + delimitNumbers(allOutputData.cycleEquivalents.toFixed(1)), "verticalAlign":"bottom", "align":"right", "y":-28-dodFactor*2, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"title":{"text":"Cycle Equivalents:" + delimitNumbers(allOutputData.cycleEquivalents.toFixed(1))+ "  Battery Life:" + delimitNumbers(allOutputData.batteryLife.toFixed(1)) + " yrs", "verticalAlign":"bottom", "align":"right", "y":-28-dodFactor*2, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[
 						{"name":"Battery SoC","marker":{"enabled":false},"color":"gray","data":allOutputData.batterySoc}
 						],

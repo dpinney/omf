@@ -18,7 +18,7 @@ sys.path.append(__metaModel__._omfDir)
 import feeder
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"energyStorage.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"storagePeakShave.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -91,6 +91,7 @@ def heavyProcessing(modelDir, inputDict):
 		startPeakHour = int(inputDict.get('startPeakHour',18))
 		endPeakHour = int(inputDict.get('endPeakHour',24))
 		dispatchStrategy = str(inputDict.get('dispatchStrategy'))
+		batteryCycleLife = int(inputDict.get('batteryCycleLife',5000))
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
@@ -115,7 +116,7 @@ def heavyProcessing(modelDir, inputDict):
 				if str(e) == "<type 'exceptions.SystemExit'>":
 					pass
 				else:
-					errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-energyStorage#demand-file-csv-format'>\nOMF Wiki energyStorage - Demand File CSV Format</a>"
+					errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#demand-file-csv-format'>\nOMF Wiki storagePeakShave - Demand File CSV Format</a>"
 					raise Exception(errorMessage)
 		for row in dc:
 			row['month'] = row['datetime'].month-1
@@ -195,7 +196,7 @@ def heavyProcessing(modelDir, inputDict):
 				if str(e) == "<type 'exceptions.SystemExit'>":
 					pass
 				else:
-					errorMessage = "Dispatch Strategy file is in an incorrect format. Please see valid format definition at <a target = '_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-energyStorage#custom-dispatch-strategy-file-csv-format'>\nOMF Wiki energyStorage - Custom Dispatch Strategy File Format</a>"
+					errorMessage = "Dispatch Strategy file is in an incorrect format. Please see valid format definition at <a target = '_blank' href = 'https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave#custom-dispatch-strategy-file-csv-format'>\nOMF Wiki storagePeakShave - Custom Dispatch Strategy File Format</a>"
 					raise Exception(errorMessage)	 		
 		 	outData['startDate'] = dc[0]['datetime'].isoformat()
 			battSoC = battCapacity
@@ -258,8 +259,9 @@ def heavyProcessing(modelDir, inputDict):
 		outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
 		# Estimate number of cyles the battery went through.
 		SoC = outData['batterySoc']
-		outData['cycleEquivalents'] = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
-
+		cycleEquivalents = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
+		outData['cycleEquivalents'] = cycleEquivalents
+		outData['batteryLife'] = batteryCycleLife/cycleEquivalents
 		# # Output some matplotlib results as well.
 		# plt.plot([t['power'] for t in dc])
 		# plt.plot([t['netpower'] for t in dc])
@@ -336,7 +338,7 @@ def _tests():
 		"discountRate": "2.5",
 		"created": "2015-06-12 17:20:39.308239",
 		"dischargeRate": "5",
-		"modelType": "energyStorage",
+		"modelType": "storagePeakShave",
 		"chargeRate": "5",
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","FrankScadaValidCSV.csv")).read(),
 		"fileName": "FrankScadaValidCSV.csv",
@@ -349,8 +351,10 @@ def _tests():
 		"dodFactor":"100",
 		"retailCost": "0.06",
 		"startPeakHour": "18",
-		"endPeakHour": "22"}
-	modelLoc = pJoin(workDir,"admin","Automated energyStorage Testing")
+		"endPeakHour": "22",
+		"batteryCycleLife": "5000"
+		}
+	modelLoc = pJoin(workDir,"admin","Automated storagePeakShave Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)

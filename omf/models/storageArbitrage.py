@@ -89,6 +89,7 @@ def heavyProcessing(modelDir, inputDict):
 		projYears = int(inputDict.get('projYears',10))
 		dischargePriceThreshold	= float(inputDict.get('dischargePriceThreshold',0.15))
 		chargePriceThreshold = float(inputDict.get('chargePriceThreshold',0.07))
+		batteryCycleLife = int(inputDict.get('batteryCycleLife',5000))
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
@@ -197,7 +198,9 @@ def heavyProcessing(modelDir, inputDict):
 		outData['benefitNet'] = [monthlyDischargeSavings - monthlyChargeCost for monthlyChargeCost, monthlyDischargeSavings in zip(monthlyChargeCost, monthlyDischargeSavings)]
 		outData['batterySoc'] = [t['battSoC']/battCapacity*100.0*dodFactor + (100-100*dodFactor) for t in dc]
 		SoC = outData['batterySoc']
-		outData['cycleEquivalents'] = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
+		cycleEquivalents = sum([SoC[i]-SoC[i+1] for i,x in enumerate(SoC[0:-1]) if SoC[i+1] < SoC[i]]) / 100.0
+		outData['cycleEquivalents'] = cycleEquivalents
+		outData['batteryLife'] = batteryCycleLife/cycleEquivalents
 		cashFlowCurve[0]-= (cellCost * cellQuantity)
 		outData['netCashflow'] = cashFlowCurve
 		outData['cumulativeCashflow'] = [sum(cashFlowCurve[0:i+1]) for i,d in enumerate(cashFlowCurve)]

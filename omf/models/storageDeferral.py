@@ -18,7 +18,7 @@ sys.path.append(__metaModel__._omfDir)
 import feeder
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"subStorageHardening.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"storageDeferral.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -87,9 +87,9 @@ def heavyProcessing(modelDir, inputDict):
 		discountRate = float(inputDict.get('discountRate', 2.5)) / 100.0
 		dodFactor = float(inputDict.get('dodFactor', 85)) / 100.0
 		projYears = int(inputDict.get('projYears',10))
-		transformerThreshold = int(inputDict.get('transformerThreshold',6500))
+		transformerThreshold = float(inputDict.get('transformerThreshold',6.5)) * 1000
 		avoidedCost = int(inputDict.get('avoidedCost',2000000))
-		batteryCycleLife = int(inputDict.get('batteryCycleLife', 500))
+		batteryCycleLife = int(inputDict.get('batteryCycleLife', 5000))
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
@@ -182,6 +182,7 @@ def heavyProcessing(modelDir, inputDict):
 				row['netpower'] = row['power']
 			row['battSoC'] = battSoC
 		#Calculations
+		outData['numOfBatteries'] = numOfUnits
 		outData['batteryCost'] = numOfUnits * cellCost
 		outData['avoidedCost'] = avoidedCost
 		outData['netAvoidedCost'] = avoidedCost - (numOfUnits * cellCost)
@@ -233,7 +234,7 @@ def _tests():
 		"discountRate": "2.5",
 		"created": "2015-06-12 17:20:39.308239",
 		"dischargeRate": "5",
-		"modelType": "subStorageHardening",
+		"modelType": "storageDeferral",
 		"chargeRate": "5",
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","FrankScadaValidCSV.csv")).read(),
 		"fileName": "FrankScadaValidCSV.csv",
@@ -244,7 +245,7 @@ def _tests():
 		"transformerThreshold":"6500",
 		"batteryCycleLife": "5000"
 		}
-	modelLoc = pJoin(workDir,"admin","Automated subStorageHardening Testing")
+	modelLoc = pJoin(workDir,"admin","Automated storageDeferral Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
