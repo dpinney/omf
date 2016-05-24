@@ -131,6 +131,10 @@
 				<input type="text" id="batteryCycleLife" name="batteryCycleLife" value="5000" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Electricity Cost ($/kW)<span class="classic">The cost of the electricity used to recharge the battery system.</span></label>
+				<input type="text" id="retailCost" name="retailCost" pattern="^\d+\.?\d*$" value="0.06" required="required">
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example demand file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<script>var fileName=true;</script>
 				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
@@ -171,7 +175,14 @@
 			</div>
 			<hr>
 			<div class="shortInput">
-				<label>Transformer Capacity Threshold (MVA)</label>
+				<label class="tooltip">Deferral Type<span class="classic">Please see the documentation at the help link for an explanation.</span></label>
+				<select id="deferralType" name="deferralType" />
+					<option value="subTransformer">Substation Transformer</option>
+					<option value="line">Transmission Line</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label>Capacity Threshold (MVA)</label>
 				<input type="text" id="transformerThreshold" name="transformerThreshold" value="6.5" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
@@ -246,14 +257,13 @@
 						"lineColor":"gray"},
 					"yAxis":{
 						"title":{"text":"Power (W)","style":{"color":"gray"}},
-						"min":0,
 						"minorTickColor":"gray", "minorTickInterval":"auto",
-						"plotLines":[ {color: 'blue', width: 2, value: allOutputData.transformerThreshold, dashStyle: 'longdashdot'},
+						"plotLines":[ {color: 'blue', width: 2, value: allOutputData.transformerThreshold, dashStyle: 'longdashdot'},{color: 'green', width: 2, value: -1 * allOutputData.transformerThreshold, dashStyle: 'longdashdot'},
 						{"color": "lightgray",
 						"dashStyle": "ShortDash",
 						"width": 2,
 						"label":{"text":"Max Power:" + delimitNumbers(allOutputData.batteryDischargekWMax.toFixed(3)/1000) + "kW", "align":"right","y":-5,"x":-790, "style":{"color":"gray", "fontsize":"12px"}},
-						"value": allOutputData.batteryDischargekWMax,"zIndex": 10}],"min":0},
+						"value": allOutputData.batteryDischargekWMax,"zIndex": 10}]},
 					"title":{"text":null},
 					"series":[
 						{"name":"Historical","marker":{"enabled":false},"color":"red","data":allOutputData.demand,"enableMouseTracking":false},
@@ -300,7 +310,7 @@
 			</script>
 		</div>
 		<!-- TODO: Make into preview graph: http://jsfiddle.net/gh/get/jquery/1.7.2/highslide-software/highcharts.com/tree/master/samples/stock/xaxis/minorticks/	 -->
-		<p class="reportTitle postRun" style="page-break-before:always">Cash Flow</p>
+		<p class="reportTitle postRun" style="page-break-before:always">Avoided Cost</p>
 		<div id="cashFlowReport" class="tightContent postRun">
 			<div id="cashFlowChartDiv"></div>
 			<script>
@@ -312,7 +322,9 @@
 						width: 1000
 						},
 						title: {
-						    text: 'Avoided Cost'
+						    text:  "LCOE: " + allOutputData.LCOE.toFixed(2) +"$/kWh",
+						    verticalAlign:"bottom", "align":"right",
+						    style:{"color":"#333333", "fontSize":"12px"}
 						},
 						xAxis: {
 						    categories: ['Avoided Cost', 'Cost of ' + allOutputData.numOfBatteries + ' batteries', 'Net Avoided Cost']
@@ -322,7 +334,11 @@
 						       	text: 'USD($)'
 						    }
 						},
+						 credits: {
+      						enabled: false
+  						},
 						series: [{
+							showInLegend: false,
 						    name: 'Avoided Cost',
 						    data: [allOutputData.avoidedCost , allOutputData.batteryCost, allOutputData.netAvoidedCost]
 						}]
