@@ -359,11 +359,11 @@
 						"lineColor":"gray"},
 					"yAxis":{
 						"title":{"text":"Power (W)","style":{"color":"gray"}},
-						"min":0,
 						"minorTickColor":"gray", "minorTickInterval":"auto",
 						"plotLines":[{"color": "lightgray",
 						"dashStyle": "ShortDash",
 						"width": 2,
+						"min": 0,
 						"label":{"text":"Max Power:" + delimitNumbers(allOutputData.batteryDischargekWMax.toFixed(3)/1000) + "kW", "align":"right","y":-5,"x":-790, "style":{"color":"gray", "fontsize":"12px"}},
 						"value": allOutputData.batteryDischargekWMax,"zIndex": 10}],"min":0},
 					"title":{"text":null},
@@ -419,7 +419,7 @@
 				new Highcharts.Chart({"credits":{"enabled":false},
 					"plotOptions":{"column":{"stacking":'normal'},"series":{"animation":false,"shadow":false},"spline":{"animation":false,"shadow":false}},
 					"xAxis":{"title":{"text":"Year After Installation","style":{"color":"gray"}},"type":"linear","tickColor":"gray","tickInterval":1,"lineColor":"gray","minorTickColor":"gray", "minorTickInterval":5},
-					"title":{"text":"NPV:$" + delimitNumbers(allOutputData.NPV.toFixed(0)) + "; SPP:" + allOutputData.SPP.toFixed(3), "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
+					"title":{"text":"NPV:$" + delimitNumbers(allOutputData.NPV.toFixed(0)) + "; SPP:" + allOutputData.SPP.toFixed(3) + ": LCOE: " + allOutputData.LCOE.toFixed(2) +"$/kWh", "verticalAlign":"bottom", "align":"right", "y":-50, "x":-10, "style":{"color":"#333333", "fontSize":"12px"}},
 					"series":[{"name":"Net Benefits", "data":allOutputData.netCashflow},
 						{"name":"Cumulative Return", "type":"spline", "data":allOutputData.cumulativeCashflow}
 					],

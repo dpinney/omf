@@ -302,6 +302,11 @@ def heavyProcessing(modelDir, inputDict):
 		demand = outData['demand']
 		outData['batteryDischargekW'] = [demand - demandAfterBattery for demand, demandAfterBattery in zip(demand, demandAfterBattery)]
 		outData['batteryDischargekWMax'] = max(outData['batteryDischargekW'])
+		battCostPerCycle =  cellQuantity * cellCapacity * cellCost / batteryCycleLife
+		lcoeTotCost = (cycleEquivalents *  cellQuantity * cellCapacity * retailCost) + (battCostPerCycle * cycleEquivalents)
+		loceTotEnergy = cycleEquivalents * cellQuantity * cellCapacity
+		LCOE = lcoeTotCost / loceTotEnergy
+		outData['LCOE'] = LCOE
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		outData["stderr"] = ""

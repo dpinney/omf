@@ -190,7 +190,8 @@ def heavyProcessing(modelDir, inputDict):
 		demandAfterBattery = outData['demandAfterBattery']
 		demand = outData['demand']
 		outData['batteryDischargekW'] = [demand - demandAfterBattery for demand, demandAfterBattery in zip(demand, demandAfterBattery)]
-		outData['batteryDischargekWMax'] = max(outData['batteryDischargekW'])
+		batteryDischargekWMax = max(outData['batteryDischargekW'])
+		outData['batteryDischargekWMax'] = batteryDischargekWMax
 		outData['energyOffset'] = monthlyDischarge
 		outData['kWhtoRecharge'] = monthlyCharge
 		outData['costToRecharge'] = monthlyChargeCost
@@ -206,6 +207,11 @@ def heavyProcessing(modelDir, inputDict):
 		outData['cumulativeCashflow'] = [sum(cashFlowCurve[0:i+1]) for i,d in enumerate(cashFlowCurve)]
 		outData['NPV'] = npv(discountRate, cashFlowCurve)
 		outData['SPP'] = (cellCost*cellQuantity)/(yearlyDischargeSavings - yearlyChargeCost)
+		battCostPerCycle =  cellQuantity * cellCapacity  * cellCost / batteryCycleLife
+		lcoeTotCost = (cycleEquivalents * cellQuantity * cellCapacity * chargePriceThreshold) + (battCostPerCycle * cycleEquivalents)
+		loceTotEnergy = cycleEquivalents * cellCapacity * cellQuantity
+		LCOE = lcoeTotCost / loceTotEnergy
+		outData['LCOE'] = LCOE
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		outData["stderr"] = ""
@@ -254,7 +260,8 @@ def _tests():
 		"projYears": "15",
 		"chargePriceThreshold": "0.07",
 		"dischargePriceThreshold":"0.15",
-		"dodFactor":"100"
+		"dodFactor":"100",
+		"batteryCycleLife": "5000"
 		}
 	modelLoc = pJoin(workDir,"admin","Automated storageArbitrage Testing")
 	# Blow away old test results if necessary.
