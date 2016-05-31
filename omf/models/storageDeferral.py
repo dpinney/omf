@@ -93,6 +93,8 @@ def heavyProcessing(modelDir, inputDict):
 		batteryCycleLife = int(inputDict.get('batteryCycleLife', 5000))
 		deferralType = inputDict.get('deferralType')
 		retailCost = float(inputDict.get('retailCost', 0.06))
+		yearsToReplace = int(inputDict.get('yearsToReplace', 2))
+		carryingCost = float(inputDict.get('carryingCost', 10))/100
 		# Put demand data in to a file for safe keeping.
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
@@ -134,7 +136,11 @@ def heavyProcessing(modelDir, inputDict):
 						excessDemandArray.append(excessDemand)
 					excessDemand = 0
 			finalDC = copy.deepcopy(dc)
-			excessDemandMax = max(excessDemandArray)
+			try:
+				excessDemandMax = max(excessDemandArray)
+			except:
+				errorMessage = "Demand Curve does not exceed Threshold Capacity. Lower Threshold Capacity and run again."
+				raise Exception(errorMessage)
 			#Calculate the number of units needed to cover the max demand/energy
 			numOfUnits = math.ceil(excessDemandMax/(cellCapacity))
 			newBattCapacity = numOfUnits *cellCapacity * dodFactor
@@ -208,7 +214,11 @@ def heavyProcessing(modelDir, inputDict):
 						excessDemandArray.append(rechargePotential)
 					rechargePotential = 0
 					excessDemand += abs(row['excessDemand'])
-			excessDemandMax = max(excessDemandArray)
+			try:
+				excessDemandMax = max(excessDemandArray)
+			except:
+				errorMessage = "Demand Curve does not exceed Threshold Capacity. Lower Threshold Capacity and run again."
+				raise Exception(errorMessage)
 			numOfUnits = math.ceil(excessDemandMax/(cellCapacity))
 			finalDC = copy.deepcopy(dc)
 			newBattCapacity = numOfUnits *cellCapacity * dodFactor
@@ -227,7 +237,6 @@ def heavyProcessing(modelDir, inputDict):
 					elif row['sign'] == 'negative':
 						discharge = min(numOfUnits * dischargeRate,battSoC, abs(row['power']) - transformerThreshold)
 						charge = min(numOfUnits * chargeRate, newBattCapacity-battSoC, (transformerThreshold - abs(row['power']))*battEff)
-					
 					if counter == 8760:
 						run = False
 					else:
@@ -269,10 +278,12 @@ def heavyProcessing(modelDir, inputDict):
 					row['netpower'] = row['power']
 				row['battSoC'] = battSoC
 		#Calculations
+		yearlyCarryCost = carryingCost * avoidedCost
+		carryCost = yearlyCarryCost * yearsToReplace
 		outData['numOfBatteries'] = numOfUnits
 		outData['batteryCost'] = numOfUnits * cellCost
-		outData['avoidedCost'] = avoidedCost
-		outData['netAvoidedCost'] = avoidedCost - (numOfUnits * cellCost)
+		outData['avoidedCost'] = carryCost
+		outData['netAvoidedCost'] = carryCost - (numOfUnits * cellCost)
 		outData['demand'] = [t['power']*1000.0 for t in finalDC]
 		outData['demandAfterBattery'] = [t['netpower']*1000.0 for t in finalDC]
 		demandAfterBattery = outData['demandAfterBattery']
