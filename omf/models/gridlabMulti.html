@@ -721,7 +721,7 @@
 						.attr("id", "climateChartDiv")
 					climateSeriesData = [
 						{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
-						{"name":"Direct Insolation (W/m^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Insolation (W/m^2)"]},
+						{"name":"Direct Insolation (W/ft^2)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Direct Insolation (W/m^2)"]},
 						{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Temperature (F)"]},
 						{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Snow Depth (in)"]}]
 					new Highcharts.Chart({"credits":{"enabled":false},"plotOptions":{"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},"line":{"marker":{"enabled":false}}},"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},"title":{"text":null},"series":climateSeriesData,"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},"chart":{"marginBottom":35,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},"tooltip":{"valueDecimals":1},"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
