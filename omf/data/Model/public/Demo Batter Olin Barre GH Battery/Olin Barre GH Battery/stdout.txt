@@ -1,19 +1,19 @@
-                                                                                                                  
+                                                                                                                  
 Core profiler results
 ======================
 
 Total objects               2279 objects
 Parallelism                    1 thread
 Total time                   5.0 seconds
-  Core time                  1.2 seconds (23.3%)
-    Compiler                11.5 seconds (229.6%)
+  Core time                  0.5 seconds (10.5%)
+    Compiler                 4.1 seconds (81.3%)
     Instances                0.0 seconds (0.0%)
     Random variables         0.0 seconds (0.0%)
-    Schedules                0.0 seconds (0.1%)
-    Loadshapes               0.0 seconds (0.2%)
-    Enduses                  0.0 seconds (0.3%)
+    Schedules                0.0 seconds (0.0%)
+    Loadshapes               0.0 seconds (0.1%)
+    Enduses                  0.0 seconds (0.1%)
     Transforms               0.0 seconds (0.5%)
-  Model time                 3.8 seconds/thread (76.7%)
+  Model time                 4.5 seconds/thread (89.5%)
 Simulation time                4 days
 Simulation speed              46k object.hours/second
 Passes completed             102 passes
@@ -30,18 +30,21 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-node               3.217     83.9%      6.6
-collector          0.178      4.6%     35.6
-house              0.137      3.6%      0.4
-climate            0.116      3.0%    116.0
-triplex_meter      0.054      1.4%      0.3
-overhead_line      0.042      1.1%      0.1
-waterheater        0.034      0.9%      0.1
-transformer        0.019      0.5%      0.1
-ZIPload            0.014      0.4%      0.0
-recorder           0.009      0.2%      4.5
-fuse               0.007      0.2%      0.2
-underground_line   0.007      0.2%      0.1
+node               3.633     81.2%      7.5
+climate            0.206      4.6%    206.0
+house              0.159      3.6%      0.5
+collector          0.139      3.1%     27.8
+triplex_meter      0.077      1.7%      0.4
+overhead_line      0.071      1.6%      0.2
+waterheater        0.069      1.5%      0.3
+transformer        0.037      0.8%      0.2
+ZIPload            0.035      0.8%      0.1
+underground_line   0.032      0.7%      0.3
+fuse               0.010      0.2%      0.2
+switch             0.003      0.1%      0.2
+recorder           0.002      0.0%      1.0
+battery            0.001      0.0%      1.0
+capacitor          0.001      0.0%      1.0
 ================ ======== ======== ========
-Total              3.834    100.0%      1.7
+Total              4.475    100.0%      2.0
 

@@ -1,19 +1,19 @@
-
+
 Core profiler results
 ======================
 
 Total objects               3030 objects
 Parallelism                    1 thread
-Total time                   2.0 seconds
-  Core time                  1.9 seconds (92.5%)
-    Compiler                 0.5 seconds (24.9%)
+Total time                   1.0 seconds
+  Core time                  0.9 seconds (88.0%)
+    Compiler                 0.2 seconds (22.0%)
     Instances                0.0 seconds (0.0%)
     Random variables         0.0 seconds (0.0%)
     Schedules                0.0 seconds (0.0%)
     Loadshapes               0.0 seconds (0.0%)
     Enduses                  0.0 seconds (0.0%)
     Transforms               0.0 seconds (0.0%)
-  Model time                 0.1 seconds/thread (7.5%)
+  Model time                 0.1 seconds/thread (12.0%)
 Simulation time                0 days
 Simulation speed               0 object.hours/second
 Passes completed               4 passes
@@ -30,12 +30,13 @@ Model profiler results
 
 Class            Time (s) Time (%) msec/obj
 ---------------- -------- -------- --------
-node               0.117     78.0%      0.1
-voltdump           0.021     14.0%     21.0
-underground_line   0.004      2.7%      0.0
-triplex_node       0.004      2.7%      0.0
-transformer        0.003      2.0%      0.0
-triplex_meter      0.001      0.7%      0.0
+node               0.095     79.2%      0.1
+triplex_node       0.006      5.0%      0.0
+underground_line   0.005      4.2%      0.0
+triplex_meter      0.005      4.2%      0.0
+voltdump           0.005      4.2%      5.0
+overhead_line      0.002      1.7%      0.0
+transformer        0.002      1.7%      0.0
 ================ ======== ======== ========
-Total              0.150    100.0%      0.0
+Total              0.120    100.0%      0.0
 

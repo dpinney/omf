@@ -57,6 +57,9 @@ def run(modelDir, inData):
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 		inData["created"] = str(datetime.now())
+	with open(pJoin(modelDir,'allInputData.json')) as inputFile:
+		feederName = json.load(inputFile).get('feederName1','feeder1')
+	inData["feederName1"] = feederName
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inData, inputFile, indent=4)
 	# If we are re-running, remove output:
@@ -80,7 +83,8 @@ def runForeground(modelDir,inData):
 			os.makedirs(modelDir)
 			inData["created"] = str(startTime)
 		#read pre-calibrated feeder and run cvrdynamic
-		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", inData["feederName"].split("___")[0], inData["feederName"].split("___")[1]+'.json')
+		feederName = inData.get('feederName1','feeder1')
+		feederPath = pJoin(modelDir,feederName+'.omd')
 		# Reads a pre-calibrated feeder.
 		allOutput = {}
 		with open(feederPath, "r") as jsonIn:
@@ -100,7 +104,7 @@ def runForeground(modelDir,inData):
 				if localTree[key].get('object','') == 'regulator' and localTree[key].get('from','') == swingName:
 					regIndex = key
 					regConfName = localTree[key]['configuration']
-		except: raise ValueError('Invalid feeder selected:', str(inData["feederName"].split("___")[1]))
+		except: raise ValueError('Invalid feeder selected:', str(inData["feederName1"]))
 		#find the regulator and capacitor names and combine to form a string for volt-var control object
 		regKeys = []
 		accum_reg = ""
@@ -175,7 +179,8 @@ def runForeground(modelDir,inData):
 		simStartDate = inData['simStart']
 		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)
 		output = gridlabd.runInFilesystem(localTree, attachments, keepFiles=False,workDir=modelDir)
-		os.remove(pJoin(modelDir,"PID.txt"))
+		try: os.remove(pJoin(modelDir,"PID.txt"))
+		except: pass
 		p = output['Zregulator.csv']['power_in.real']
 		q = output['Zregulator.csv']['power_in.imag']
 		#calculating length of simulation because it migth be different from the simulation input HOURS
@@ -285,7 +290,7 @@ def runForeground(modelDir,inData):
 			bar_loss = plt.bar(element, whLosses[element], 0.15, color= 'red')
 			bar_load = plt.bar(element+0.15, whLoads[element], 0.15, color= 'orange')
 		plt.legend([bar_load[0],bar_loss[0]],['total load', 'total losses'],bbox_to_anchor=(0., 0.915, 1., .102), loc=3,
-			       ncol=2, mode="expand", borderaxespad=0.1)
+				   ncol=2, mode="expand", borderaxespad=0.1)
 		plt.xticks([t+0.15 for t in ticks],indices)
 		plt.savefig(pJoin(modelDir,"totalEnergy.png"))
 		#real and imaginary power
@@ -519,11 +524,11 @@ def runForeground(modelDir,inData):
 			for key in localTree:
 				if localTree[key].get('object','') == 'house': housesExist = True
 				if localTree[key].get('name','') == str(inData.get("voltageNodes", 0)): voltageNodeExists = True
-			if (beginRange > 0.0 or endRange < 0.0) and not housesExist: 
+			if (beginRange > 0.0 or endRange < 0.0) and not housesExist:
 				allOutput["warnings"] = "<strong>WARNING:</strong> The simulation dates entered are not compatible with the scada curve in the feeder."
 			# Check if voltage node exists.
-			if not voltageNodeExists: 
-				if allOutput.get('warnings','') != "": 
+			if not voltageNodeExists:
+				if allOutput.get('warnings','') != "":
 					previousWarning = allOutput["warnings"]
 					allOutput["warnings"] = previousWarning + " The voltage node: " + str(inData.get("voltageNodes", 0)) + " does not exist in the feeder."
 				else: allOutput["warnings"] = "<strong>WARNING:</strong> The voltage node <i>" + str(inData.get("voltageNodes", 0)) + "</i> does not exist in the feeder."
@@ -559,7 +564,7 @@ def _tests():
 	inData = { "modelName": "Automated DynamicCVR Testing",
 		"modelType": "cvrDynamic",
 		"user": "admin",
-		"feederName": "public___ABEC Frank pre calib",
+		"feederName1": "ABEC Frank pre calib",
 		"runTime": "",
 		"capitalCost": 30000,
 		"omCost": 1000,
@@ -578,6 +583,10 @@ def _tests():
 		shutil.rmtree(modelDir)
 	except:
 		pass
+	try:
+		os.makedirs(modelDir)
+	except: pass
+	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelDir,inData["feederName1"]+'.omd'))
 	runForeground(modelDir, inData)
 	renderAndShow(template, modelDir=modelDir)
 

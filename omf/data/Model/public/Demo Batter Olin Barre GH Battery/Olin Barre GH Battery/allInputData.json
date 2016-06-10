@@ -1,11 +1,12 @@
 {
-    "created": "2014-07-25 11:40:47.373000", 
-    "simLengthUnits": "hours", 
-    "feederName": "public___Olin Barre GH", 
     "simStartDate": "2014-07-30", 
+    "simLengthUnits": "hours", 
+    "created": "2014-07-30 11:04:17.994000", 
+    "zipCode": "64735", 
     "modelType": "gridlabMulti", 
-    "climateName": "PA-ERIE", 
+    "climateName": "MO-KANSAS_CITY", 
     "simLength": "100", 
-    "feederName2": "public___Olin Barre GH Battery", 
-    "runTime": "0:00:16"
+    "feederName2": "Olin Barre GH Battery", 
+    "feederName1": "Olin Barre GH", 
+    "runTime": "0:00:09"
 }

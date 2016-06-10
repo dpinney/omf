@@ -72,7 +72,7 @@ function time(func) {
 	return end - start
 }
 
-function showProgressDialog(dialogMessage) {
+function showProgressDialog(dialogMessage, cancel) {
 	// Make the elements.
 	background = document.createElement('div')
 	background.id = 'progressBackground'
@@ -90,13 +90,37 @@ function showProgressDialog(dialogMessage) {
 	document.body.appendChild(progContent)
 	progContent.appendChild(spinner)
 	progContent.appendChild(progressText)
+	// add cancel button.
+	cancel = (typeof cancel === 'undefined') ? 'no' : cancel;
+	if (cancel == 'cancel') {
+	    var cancelBtn = document.createElement("BUTTON");
+	    var t = document.createTextNode("cancel");
+	    cancelBtn.style.marginTop = '5px';
+		cancelBtn.style.background= 'crimson'
+	    cancelBtn.appendChild(t);
+	    cancelBtn.onclick = function() {
+			if (confirm('Are you sure you want to cancel the conversion?')) {
+				console.log('Conversion cancelled.')
+				document.cookie = "converting=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+				newfeeder.submit();
+				// params = {user:{{ user }},
+				// 	modelName:{{ modelName }},
+				// 	feederName:{{ feedername }}}
+				// post_to_url("/newBlankFeeder/", params, "POST");
+			}
+    	};
+	    progContent.appendChild(cancelBtn);
+	}
 }
-
 function removeProgressDialog() {
 	if (gebi('progressBackground')!=null)
 		document.body.removeChild(gebi('progressBackground'))
 	if (gebi('progressContent')!=null)
 		document.body.removeChild(gebi('progressContent'))
+	if (document.cookie.indexOf("converted")>=0){
+		alert("Conversion complete.")
+		document.cookie = "converted=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+	}
 }
 
 function showProgressBar(dialogMessage) {
@@ -136,9 +160,9 @@ function round(number,precision) {
 function randomGaussian() {
   // Get a Gaussian from a uniform(0,1) via the Box-Muller transform.
   do {
-    x1 = 2 * Math.random() - 1
-    x2 = 2 * Math.random() - 1
-    rad = x1 * x1 + x2 * x2
+	x1 = 2 * Math.random() - 1
+	x2 = 2 * Math.random() - 1
+	rad = x1 * x1 + x2 * x2
   } while (rad >= 1 || rad == 0)
   c = Math.sqrt(-2 * Math.log(rad) / rad);
   return x1 * c
@@ -275,9 +299,6 @@ function init() {
 		if (allInputData != null) {
 			$(".stopped").show()
 			$(".stoppedInline").show()
-		} else {
-			console.log("PRERUN")
-			$(".preRun").css('display', 'inline-block')
 		}
 	}
 	// Hide buttons we don't use:
@@ -394,5 +415,23 @@ function isFormValid() {
 		alert("Found [" + errors + "] errors, Please fix inputs in red.")
 	} else {
 		return true
+	}
+}
+
+function createModelName(modelType, modelName) {
+	if (typeof(modelName)==='undefined') modelName = '';
+	modelName = prompt("Create a model with name", modelName)
+	while (! /^[\w\s]+$/.test(modelName)){
+		modelName = prompt("Only letters, digits and underscore are allowed in the model name.\nPlease rename your new model")
+	}
+	if (modelName) {
+		$.ajax({url:"/uniqObjName/Model/" + modelName}).done(function(data) {
+			if (data.exists) {
+				alert("There is already a model named " + modelName)
+				createModelName(modelType, modelName)
+			} else {
+				post_to_url("/newModel" + "/"+ modelType + "/" + modelName)
+			}
+		})
 	}
 }

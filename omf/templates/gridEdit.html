@@ -1,6 +1,8 @@
 ﻿<head>
+	<title>Feeder #{{ feederNum }} from {{ modelName }}</title>
 	<script type="text/javascript">
 		var unsavedChanges = false;
+		var lastFeederName = "{{ feederName }}";
 		var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
 		if(!isChrome){alert("This editing interface is only supported in the Chrome browser. Proceed at your own risk.")}
 	</script>
@@ -11,17 +13,24 @@
 	<link rel="shortcut icon" href="/static/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="/static/gridEdit.css"/>
 	<style>
+		ul.menu.rightFeeder {width:350px;right:0%; left: auto;padding:1em;}
 		div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-top:4px;}
 		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
 		div#fileDiv{width:55px;padding:0 0.9em 0 0.9em;float:right;}
+		div#importDiv{margin:-12px;padding:1em;}
+		table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:auto;display:inline;}
+		table.importOptions tr td:first-child {width:40%;}
+		table.importOptions td {border-bottom: none}
+		select, input[type='text'], input[type='email'], input[type='file'], button {
+			margin: -2px 0 -2px 0;font-size:small;}
+		input[type='text'], input[type='file']{margin: -2px auto -2px auto;text-align:left;}
+		input[type='submit'] {padding:4px 6px 4px; float:right;}
 		div#layoutDiv{width:50px;padding:0 0.9em 0 0.9em;float:right;}
 		div#findDiv{width:35px;padding:0 0.9em 0 0.9em;float:right;}
-		div#foldDiv{width:60px;padding:0 0.9em 0 0.9em;float:right;}				
-		div#pinDiv{width:60px;padding:0 0.9em 0 0.9em;float:right} 
-		div#editDiv{width:35px;padding:0 0.9em 0 0.9em;float:right} 
+		div#foldDiv{width:60px;padding:0 0.9em 0 0.9em;float:right;}
+		div#pinDiv{width:60px;padding:0 0.9em 0 0.9em;float:right}
+		div#editDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
 		div#addDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
-		input[type='text'], input[type='file']{margin: -2px 0 -2px 0;}		
-		input[type='submit'] {width:auto; padding:4px 6px 4px; float:right;}
 		select, button {width:initial;}
 		td, th {padding:3px;text-align: left;}
 		body {
@@ -29,7 +38,7 @@
 			height: 100%;
 			background: white;
 		}
-		/*other styles*/  
+		/*other styles*/
 		input#gridNameEdit {
 			font-size: 28pt;
 			line-height: 28pt;
@@ -103,7 +112,7 @@
 		}
 		input {
 			min-width: 100px;
-		}	
+		}
 		/* Start graph elements. */
 		.nodetext {
 			pointer-events: none;
@@ -198,30 +207,200 @@
 		}
 		rect {
 			fill: #fff;
-		}		
+		}
 	</style>
+	<script>
+		var conversion = '';
+		function getCookie(cname) {
+			var name = cname + "=";
+			var ca = document.cookie.split(';');
+			for(var i = 0; i <ca.length; i++) {
+				var c = ca[i];
+				while (c.charAt(0)==' ') {
+					c = c.substring(1);
+				}
+				if (c.indexOf(name) == 0) {
+					return c.substring(name.length,c.length);
+				}
+			}
+			return "";
+		}
+		function showProgress(){
+			var feederNum = getCookie("converting").split("/")[0];
+			if ((document.cookie.indexOf("converting") > -1) && (feederNum == "{{ feederNum }}")){
+				showProgressDialog('Loading Feeder');
+				showProgressDialog('Converting feeder','cancel');
+				setTimeout(checkConversion,2000);
+			}
+			else{
+				showProgressDialog('Loading Feeder');				
+			}
+		}	
+	</script>	
 </head>
-<body onkeypress='hotkeys()' onload="showProgressDialog('Loading Feeder')">
+<body onkeypress='hotkeys()' onload="showProgress();">
 <div id="header">
 	<div id="menuLeft">
-		&nbsp;&nbsp;<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Feeder
-		&#8220;{{feederName}}&#8221;
+		&nbsp;Feeder
+		<span contenteditable="false" id='feederName' name='feederName' style="font-weight:bold;">{{ feederName }}</span>
+		&nbsp;from Model&nbsp;&nbsp;&#8220;{{ modelName }}&#8221;
 	</div>
+	<script>
+		function checkConversion() {
+			var feederNum = getCookie("converting").split("/")[0];
+			var feederName = getCookie("converting").split("/")[1];
+			console.log('feederNum from cookie', feederNum)
+			console.log('feederNum from jinja2', "{{feederNum}}")
+			if (feederNum == "{{ feederNum }}"){
+				console.log('cookie match.')
+				var conversionStatus = 'converting';
+				console.log('feederName:', feederName)
+				// Check every 5 seconds for a feeder & refresh.
+				window.setInterval(function pingAPI(){
+					$.ajax({
+						url: "/checkConversion/" + feederName
+					}).done(function (data) {
+						if (data.exists) {
+							conversionStatus = 'converting';
+						} 
+						else {
+							conversionStatus = 'done';
+						}
+					})
+					if (conversionStatus == "done"){
+						console.log('conversion done')
+						document.cookie = "converted="+feederName;
+						document.cookie = "converting=; expires=Thu, 02 Jan 1970 00:00:00 UTC";
+						window.location.reload();
+						// throw new Error("Broke execution!");					
+					}
+					console.log("Converting...")
+					return pingAPI;
+				}(), 5000);
+			}
+		}	
+		function importFiles(convMethod, feederNameID){
+			gebi(convMethod).submit();
+			document.cookie = "converting={{ feederNum }}/"+document.getElementById(feederNameID).value;
+			showProgressDialog('Converting feeder','cancel');
+			setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
+		}
+	</script>
 	<div id="menuRight">
 		<div id="fileDiv">
 			<div class='buttonGroup'>
-				<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
-				<ul class='menu right'>
-					{% if not public %}
-					<li><a href="javascript:publishFeeder()">Make Public </a></li>
-					{% endif %}
+				<button id="fileOps" class='pill' onclick='dropPillAndStay(this, "File")'>File ▾</button>
+				<ul class='menu rightFeeder'>
 					{% if is_admin or not public %}
-					<li><a href='javascript:deleteFeeder()'>Delete</a></li>
-					<li><a href='javascript:duplicateFeeder()'>Duplicate</a></li>
-					<li><a href='javascript:saveFeeder()'>Save</a></li>
-					{% endif %}
-					{% if public %}
-					<li><a href="javascript:savePrivateFeeder();">Save Private Copy</a></li>
+					<li><a href='javascript:saveFeeder();'>Save</a></li>
+					<li><a href='javascript:renameFeeder();'>Rename</a></li>
+					<li><a href='javascript:showLoadDiv();'>Load from Model</a></li>
+					<div id='loadDiv' style="visibility:hidden;font-size:10pt;height:0;margin-bottom:10px;">
+						<li><a href="#" onclick="closeLoadDiv()">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cancel</a></li>
+						<div style="overflow-y:auto;overflow-x:auto;height:125px;">
+							{% for feeder in feeders %}
+								<li><a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}")'>
+								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+								{{ feeder.name }} from model {{ feeder.model }}
+								</a></li>
+							{% endfor %}
+							</a></li>
+						</div>
+					</div>					
+					<br>
+					<div id="importDiv">
+						<form onsubmit='event.preventDefault(); return startConversion("feederNameNew",1);' action='/newBlankFeeder/' id='newfeeder' enctype='multipart/form-data' method='post'>
+							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+							<p style='font-weight:bold;'>Blank Feeder</p>
+							<table class='importOptions'>
+								<tr>
+									<td>Name</td>
+									<td><input type='text' id='feederNameNew' name='feederNameNew' required/></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><input type='submit' value='Create' style='min-width:45px;'/></td>
+								</tr>
+							</table>
+						</form>
+						<form onsubmit='event.preventDefault(); return startConversion("feederNameM",2);' action="/milsoftImport/" id='milsoft' enctype='multipart/form-data' method='post'>
+							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+							<p style='font-weight:bold;'>Milsoft</p>
+							<table class='importOptions'>
+								<tr>
+									<td>Name</td>
+									<td><input type='text' id='feederNameM' name='feederNameM' required/></td>
+								</tr>
+								<tr>
+									<td>Data File (.std)</td>
+									<td><input type='file' name='stdFile' accept = '.std' required/></td>
+								</tr>
+								<tr>
+									<td>Equipment File (.seq)</td>
+									<td><input type='file' name='seqFile' accept = '.seq' required/></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+								</tr>
+							</table>
+						</form>
+						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+					</div>
+					<div id="importDiv">
+						<form onsubmit='event.preventDefault(); return startConversion("feederNameG",3);' action='/gridlabdImport/' id='gridlabd' enctype='multipart/form-data' method='post'>
+							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+							<p style='font-weight:bold;'>GridLAB-D</p>
+							<table class='importOptions'>
+								<tr>
+									<td>Name</td>
+									<td><input type='text' id='feederNameG' name='feederNameG' required/></td>
+								</tr>
+								<tr>
+									<td>Data File (.glm)</td>
+									<td><input type='file' id='glmFile' name='glmFile' accept = '.glm' required/></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+								</tr>
+							</table>
+						</form>
+						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+					</div>
+					<div id="importDiv">
+						<form onsubmit='event.preventDefault(); return startConversion("feederNameC",4);' action='/cymeImport/' id='cyme' enctype='multipart/form-data' method='post'>
+							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+							<p style='font-weight:bold;'>Cyme</p>
+							<table class='importOptions'>
+								<tr>
+									<td>Name</td>
+									<td><input type='text' id='feederNameC' name='feederNameC' required/></td>
+								</tr>
+								<tr>
+									<td>Network File (.mdb)</td>
+									<td><input type='file' name='mdbNetFile' accept = '.mdb' required/></td>
+								</tr>
+								<tr>
+									<td>Equipment File (.mdb)</td>
+									<td><input type='file' name='mdbEqFile' accept = '.mdb' required/></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+								</tr>
+							</table>
+						</form>
+						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+					</div>
 					{% endif %}
 				</ul>
 			</div>
@@ -379,7 +558,7 @@
 <script>clickCloseEvent("Find","findOps");</script>
 <script>clickCloseEvent("Layout","layoutSelector");</script>
 <script>clickCloseEvent("File","fileOps");</script>
-<!-- Reposition the editor table based on window size. 
+<!-- Reposition the editor table based on window size.
 Run it once then on all windoe resize events. -->
 <script>
 var width = $(window).innerWidth();
@@ -474,7 +653,7 @@ var oldSearchTerm;
 
 // INIT FUNCTIONS FOLLOW:
 d3.json('/getComponents/', function (json){components=json;fillComponentMenu()})
-var apiAddress = "/feederData/{{ owner }}/{{ feederName }}/{{ modelFeeder }}"
+var apiAddress = "/feederData/{{ owner }}/{{ modelName }}/{{ feederName }}/{{ modelFeeder }}"
 d3.json(apiAddress, function (json) {
 	tree = json['tree']
 	attachments = json['attachments']
@@ -539,7 +718,7 @@ d3.json(apiAddress, function (json) {
  * @param  {string} name feeder name
  * @param  {string} user username
  */
-function savePoster(name, user) {
+function savePoster(name, modelName, user) {
 	feederObject = {
 		tree: tree,
 		nodes: nodes,
@@ -563,72 +742,89 @@ function savePoster(name, user) {
 		ref: "{{ ref }}"
 	}
 	unsavedChanges=false
-	post_to_url("/saveFeeder/" + user + "/" + name, payload)
+	post_to_url("/saveFeeder/" + user + "/" + modelName + "/" + name, payload)
+	alert("Data saved.")
 }
 
 /**
  * Save the modified feeder data, and cover the one already in filesystems.
  */
 function saveFeeder() {
-	savePoster("{{ feederName }}", "{{ owner }}")
+	savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}")
 }
 
 /**
- * Duplicate a feeder to current user.
+ * Rename the feeder.
  */
-function duplicateFeeder() {
-	newName = prompt("Save copy as", $("#gridName").html())
-	if (newName) {
+function renameFeeder() {
+	if (unsavedChanges){
+		alert('You have unsaved changes. Please save the feeder before proceeding.')
+	}
+	else{
+		var newName = prompt("Rename the feeder to",lastFeederName)
+		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)){
+			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", "{{ feederName }}")
+		}		
+		if (newName){
+			checkFeederName(newName)
+		}
+	}
+}
+
+function checkFeederName(newName) {
+	// Additional check, required for Safari browsers
+	if (true) {
+		var modelName = "{{ modelName }}"
 		$.ajax({
-			url: "/uniqObjName/Feeder/{{ currUser }}/" + newName
+			url: "/uniqObjName/Feeder/" + newName + "/" + modelName
 		}).done(function (data) {
 			if (data.exists) {
-				alert("You already have a feeder named " + newName)
-				duplicateFeeder()
-			} else {
-				savePoster(newName, "{{ currUser }}")
+				alert("You already have a Feeder named '" + newName + "', please choose a different name.")
+				renameFeeder()
+			}
+			else{
+				post_to_url("/renameFeeder/" + "{{ owner }}" + "/" + "{{ modelName }}" + "/" + lastFeederName + "/" + newName + "/" + "{{ feederNum }}")
+				document.getElementById('feederName').innerHTML = newName;
+				lastFeederName = newName; //permits multiple name changes without forcing page refresh.				
 			}
 		})
 	}
 }
 
-/**
- * Saving a private feeder is the same as duplicating a public feeder.
- */
-function savePrivateFeeder() {
-	duplicateFeeder()
-}
 
-/**
- * Handler function of deleting a feeder
- */
-function deleteFeeder() {
-	confirmation = confirm("Are you sure you want to delete?")
-	if (confirmation) {
-		unsavedChanges = false
-		post_to_url("/delete/Feeder/{{ owner }}/{{ feederName }}")
-	}
-}
-
-/**
- * Publish a private feeder to public.
- */
-function publishFeeder() {
-	newName = prompt("Publish a copy with name", $("#gridName").html())
-	if (newName) {
+function startConversion(elementName, nextAction) {
+	// Additional check, required for Safari browsers
+	var newName = document.getElementById(elementName).value;
+	if (true) {
+		var modelName = "{{ modelName }}"
 		$.ajax({
-			url: "/uniqObjName/Feeder/public/" + newName
+			url: "/uniqObjName/Feeder/" + newName + "/" + modelName
 		}).done(function (data) {
 			if (data.exists) {
-				alert("There is already a public feeder named " + newName)
-				publishFeeder()
-			} else {
-				savePoster(newName, "public")
+				alert("You already have a Feeder named '" + newName + "', please choose a different name.")
+			}
+			else{
+				if (nextAction == 1){newfeeder.submit()}
+				else if (nextAction == 2){importFiles('milsoft','feederNameM')}
+				else if (nextAction == 3){importFiles('gridlabd','feederNameG')}
+				else if (nextAction == 4){importFiles('cyme','feederNameC')}
 			}
 		})
 	}
 }
 
+function showLoadDiv(){
+	gebi('loadDiv').style.visibility = 'visible';
+	gebi('loadDiv').style.height = '100%';
+	gebi('loadDiv').style.maxHeight = '125px';
+}
+function closeLoadDiv(){
+	gebi('loadDiv').style.visibility = 'hidden';
+	gebi('loadDiv').style.height = '0';
+}
+function loadFeeder(targetfeederName, targetmodelName, feederNum){
+	post_to_url("/loadFeeder/" + targetfeederName + "/" + targetmodelName + "/" + "{{ modelName }}" + "/" + "{{ feederNum }}")
+}
 //*********************************************
 // FUNCTIONS FOR DRAWING:
 //*********************************************
@@ -720,7 +916,7 @@ function draw() {
 			clearInterval(interval)
 		} else if (nodes[parseInt(Math.random() * nodes.length)].fixed) {
 			removeProgressDialog()
-			clearInterval(interval)
+			clearInterval(interval)			
 		} else {
 			// Run the layout in the background until performance is acceptable.
 			for (i = 0; i < 10; ++i) force.tick()
@@ -2390,9 +2586,9 @@ $(function () {
 
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
 window.onbeforeunload = function(e) {
-    var confirmationMessage = 'It looks like you have been editing something. ';
-    confirmationMessage += 'If you leave before saving, your changes will be lost.';
-    if (unsavedChanges) return confirmationMessage;
+	var confirmationMessage = 'It looks like you have been editing something. ';
+	confirmationMessage += 'If you leave before saving, your changes will be lost.';
+	if (unsavedChanges) return confirmationMessage;
 };
 
 </script>
