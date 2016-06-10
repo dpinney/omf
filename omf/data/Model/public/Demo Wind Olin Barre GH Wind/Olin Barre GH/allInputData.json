@@ -1,0 +1,12 @@
+{
+    "simStartDate": "2014-07-30", 
+    "simLengthUnits": "hours", 
+    "created": "2014-07-30 11:23:46.929000", 
+    "zipCode": "64735", 
+    "modelType": "gridlabMulti", 
+    "climateName": "MO-KANSAS_CITY", 
+    "simLength": "300", 
+    "feederName2": "Olin Barre GH Wind", 
+    "feederName1": "Olin Barre GH", 
+    "runTime": "0:00:18"
+}
