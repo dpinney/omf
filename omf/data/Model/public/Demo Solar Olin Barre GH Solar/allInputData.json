@@ -1,14 +1,15 @@
 {
     "simStartDate": "2014-07-30", 
     "simLengthUnits": "hours", 
-    "feederName": "public___Olin Barre GH", 
     "created": "2014-07-30 11:50:34.263000", 
+    "zipCode": "64735", 
     "modelType": "gridlabMulti", 
-    "climateName": "AZ-PRESCOTT", 
+    "climateName": "MO-KANSAS_CITY", 
     "simLength": "240", 
-    "feederName3": "public___Olin Barre GH 05Perc Solar", 
-    "feederName2": "public___Olin Barre GH 20Perc Solar", 
-    "runTime": "0:02:13", 
-    "feederName5": "public___Olin Barre GH 50Perc Solar", 
-    "feederName4": "public___Olin Barre GH 90Perc Solar"
+    "feederName3": "Olin Barre GH 05Perc Solar", 
+    "feederName2": "Olin Barre GH 20Perc Solar", 
+    "feederName1": "Olin Barre GH", 
+    "runTime": "0:01:12", 
+    "feederName5": "Olin Barre GH 50Perc Solar", 
+    "feederName4": "Olin Barre GH 90Perc Solar"
 }

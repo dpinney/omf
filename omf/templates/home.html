@@ -5,20 +5,13 @@
 	<link rel='stylesheet' href='/static/omf.css'/>
 	<link rel='shortcut icon' href='/static/favicon.ico'>
 	<style>
-		ul.menu.left {right: auto; left:-3.5%; padding:0 0 0 0;}
-		ul.menu.rightFeeder {width:350px;right:0%; left: auto;padding:1em;}
+		ul.menu.left {right: auto; left:-3.5%;padding:0 0 0 0;}
 		button.pill:hover{background:transparent;}
 		div#accountDiv{float:right;padding:0 0.75em 0 0;}
 		div#newModelDiv{width:110px;float:right;display:inline-block;}
 		div#menuText{color:darkgray;margin-left:5px;}
-		div#newFeederDiv{width:110px;float:right;;display:none;}
-		div#newFeederSel{margin:-1em;padding:1em;}
-		div#milsoftImport{margin:-1em;padding:1em;}
-		div#gridLABDImport{margin:-1em;padding:1em;}
-		div#cymeImport{margin:-1em;padding:1em;}
 		div#placeholder{height:5px;} /*Crazy float behavior for titlebar means we need this. */
 		div.content {width:980px}
-		div#feeders {display:none;}
 		select, input[type='text'], input[type='email'], input[type='file'], button {
 			margin: -2px 0 -2px 0;font-size:small;}
 		input[type='text'], input[type='file']{margin: -2px auto -2px auto;text-align:left;}
@@ -35,50 +28,18 @@
 		td.finished {color:black;}
 		td.stopped {color:purple;}
 		tr:last-child td {border-bottom:none;}
-		table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:auto;display:inline;}
-		table.importOptions tr td:first-child {width:40%;}
-		table.importOptions td {border-bottom: none}
 		.running, .runningInline, .postRunInline, .stoppedInline, .stopped{display: inline;}
 	</style>
 	<script type="text/javascript">var tabName = "Models";</script>
 	<script type='text/javascript' src='/static/omf.js'></script>
 	<script type='text/javascript' src='/static/jquery-1.9.1.js'></script>
 	<script src="/static/sorttable.js"></script>
-	<script>
-	function feedersClick() {
-		window.location.hash = 'feeders'
-		gebi('analyses').style.display = 'none'
-		gebi('feeders').style.display = 'inline'
-		gebi('newModelDiv').style.display = 'none'
-		gebi('newFeederDiv').style.display = 'inline-block'
-		gebi('newFeederDiv').style.paddingRight = '7px'
-		tabName="Feeders";
-		clickCloseEvent(tabName, "tabSelector");
-		// Feeder seems to offset 3px to left, maybe add margin-left+3px.
-	}
-	function analysesClick() {
-		window.location.hash = ''
-		gebi('analyses').style.display = 'inline'
-		gebi('feeders').style.display = 'none'
-		gebi('newModelDiv').style.display = 'inline-block'
-		gebi('newFeederDiv').style.display = 'none'
-		tabName="Models";
-		clickCloseEvent(tabName, "tabSelector");
-	}
-	</script>
 </head>
 <body>
 	<div id="header">
 		<div id="headInnerBlock" style="margin-top:0px;">
-			<div id="menuLeft">
-				<a style="color:white" href="/">OMF</a> &#187;
-				<div class='buttonGroup'>
-					<button name="tabSelector" id="tabSelector" class='pill' onclick='dropPill(this, tabName)'>Models ▾</button>
-					<ul class='menu left'>
-						<li><a href="#" onclick='analysesClick();'>Models</a></li>
-						<li><a href="#" onclick='feedersClick();'>Feeders</a></li>
-					</ul>
-				</div>
+			<div id="menuLeft" style="margin-top:5px;">
+				<a style="color:white;margin-top:2px;" href="/">Open Modeling Framework</a>
 			</div>
 			<div id="menuRight">
 				<div id="accountDiv">
@@ -100,112 +61,21 @@
 							<div id="menuText">Solar Models</div>
 							{% for name in modelNames if not name.startswith('_') %}
 								{% if "solar" in name %}
-								<li><a href="/newModel/{{name}}">{{ name }}</a></li>
+								<li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li>
 								{% endif %}
 							{% endfor %}
 							<div id="menuText">Energy &amp; Demand</div>
 							{% for name in modelNames if not name.startswith('_') %}
 								{% if "energy" in name or "demand" in name or "storage" in name or "sub" in name %}
-								<li><a href="/newModel/{{name}}">{{ name }}</a></li>
+								<li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li>
 								{% endif %}
 							{% endfor %}
 							<div id="menuText">More Models</div>
 							{% for name in modelNames if not name.startswith('_') %}
 								{% if "solar" not in name and "energy" not in name and "demand" not in name and "storage" not in name and "sub" not in name%}
-								<li><a href="/newModel/{{name}}">{{ name }}</a></li>
+								<li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li>`
 								{% endif %}
 							{% endfor %}
-						</ul>
-					</div>
-				</div>
-				<div id="newFeederDiv">
-					<div class="buttonGroup">
-						<button name="newFeederButton" id="newFeederButton" class='pill' onclick='dropPillAndStay(this, "New Feeder")'>New Feeder ▾</button>
-						<ul class='menu rightFeeder'>
-						<div id="newFeederSel">
-							<form action='/newBlankFeeder/' enctype='multipart/form-data' method='post'>
-								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-								<p style='font-weight:bold;'>Blank Feeder</p>
-								<table class='importOptions'>
-									<tr>
-										<td>Name</td>
-										<td><input type='text' name='feederName' style="width:100%"required/></td>
-									</tr>
-									<tr>
-										<td></td>
-										<td><input type='submit' value='Create'/></td>
-									</tr>
-								</table>
-							</form>
-						</div>
-						<div id="milsoftImport">
-							<form action='/milsoftImport/' enctype='multipart/form-data' method='post'>
-								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-								<p style='font-weight:bold;'>Milsoft</p>
-								<table class='importOptions'>
-									<tr>
-										<td>Name</td>
-										<td><input type='text' name='feederName' required/></td>
-									</tr>
-									<tr>
-										<td>Data File (.std)</td>
-										<td><input type='file' name='stdFile' accept = '.std' required/></td>
-									</tr>
-									<tr>
-										<td>Equipment File (.seq)</td>
-										<td><input type='file' name='seqFile' accept = '.seq' required/></td>
-									</tr>
-									<tr>
-										<td></td>
-										<td><input type='submit' value='Import'/></td>
-									</tr>
-								</table>
-							</form>
-						</div>
-						<div id="gridLABDImport">
-							<form action='/gridlabdImport/' enctype='multipart/form-data' method='post'>
-								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-								<p style='font-weight:bold;'>GridLAB-D</p>
-								<table class='importOptions'>
-									<tr>
-										<td>Name</td>
-										<td><input type='text' name='feederName' required/></td>
-									</tr>
-									<tr>
-										<td>Data File (.glm)</td>
-										<td><input type='file' name='glmFile' accept = '.glm' required/></td>
-									</tr>
-									<tr>
-										<td></td>
-										<td><input type='submit' value='Import'/></td>
-									</tr>
-								</table>
-							</form>
-						</div>
-						<div id="cymeImport">
-							<form action='/cymeImport/' enctype='multipart/form-data' method='post'>
-								<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-								<p style='font-weight:bold;'>Cyme</p>
-								<table class='importOptions'>
-									<tr>
-										<td>Name</td>
-										<td><input type='text' name='feederName' required/></td>
-									</tr>
-									<tr>
-										<td>Network File (.mdb)</td>
-										<td><input type='file' name='mdbNetFile' accept = '.mdb' required/></td>
-									</tr>
-									<tr>
-										<td>Equipment File (.mdb)</td>
-										<td><input type='file' name='mdbEqFile' accept = '.mdb' required/></td>
-									</tr>
-									<tr>
-										<td></td>
-										<td><input type='submit' value='Import'/></td>
-									</tr>
-								</table>
-							</form>
-						<li>
 						</ul>
 					</div>
 				</div>
@@ -213,11 +83,9 @@
 		</div>
 	</div>
 	<!-- Close each menu due to a bug. -->
-	<script>clickCloseEvent(tabName, "tabSelector");</script>
 	<script>clickCloseEvent("New","newSelector");</script>
 	<script>clickCloseEvent("Account","accountOps");</script>
 	<script>clickCloseEvent("New Model","newModelButton");</script>
-	<script>clickCloseEvent("New Feeder","newFeederButton");</script>
 	<div id="placeholder"></div>
 	<div id='analyses'>
 		<div class='content' style="margin-top:15px;">
@@ -247,31 +115,4 @@
 			</table>
 		</div>
 	</div>
-	<div id='feeders'>
-		<div class='content' style="margin-top:15px;">
-			<table class="sortable">
-				<thead>
-					<tr>
-						<th>Owner</th>
-						<th>Feeder Name</th>
-						<th>Status</th>
-						<th>Last Edit</th>
-					</tr>
-				</thead>
-				<tbody class="Feeders">
-					{% for feeder in feeders %}
-					<tr>
-						<td>{{ feeder.owner }}</td>
-						<td>{% if feeder.status == "Ready" %}<a href = "{{'./feeder/' + feeder.owner + '/' + feeder.name}}">{{ feeder.name }}</a>{% else %}{{ feeder.name }}{% endif %}</td>
-						<td class="{{ feeder.status }}">{{ feeder.status }}</td>
-						<td>{{ feeder.editDate }}</td>
-					</tr>
-					{% endfor %}
-				</tbody>
-			</table>
-		</div>
-	</div>
-<script>
-	if (window.location.hash=='#feeders') {feedersClick();}
-</script>
 </body>

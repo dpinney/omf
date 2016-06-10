@@ -1,10 +1,10 @@
 # file...... Zregulator.csv
-# date...... Fri Aug 08 11:26:09 2014
-# user...... jxh10
+# date...... Mon Jun  6 12:43:08 2016
+# user...... samsung
 # host...... (null)
 # target.... regulator 2
 # trigger... (none)
 # interval.. -1
 # limit..... 0
 # timestamp,tap_A,tap_B,tap_C,power_in.real,power_in.imag
-2013-01-01 00:00:00 PST,3,3,3,+5.83666e+006,+3.07309e+006
+2013-01-01 00:00:00 PST,3,3,3,+5.83666e+06,+3.07309e+06

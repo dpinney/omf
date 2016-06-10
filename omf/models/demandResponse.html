@@ -49,15 +49,14 @@
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
-				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model
-				&#8220;{% if modelStatus == "preRun"%}Time of Use Demand Response Program
-				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
 			</div>
 		</div>
 	</div>
 	<p class="reportTitle">Model Inputs</p>
 	<div id="input" class="content">
-		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" {% endif %} method="post">
+		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} action="/runModel/" {% endif %}  method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-demandResponse" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="demandResponse" readonly/>
@@ -116,17 +115,18 @@
 				<script>var fileName=true;</script>
 				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
 				<input id="demandCurve" name="demandCurve" type="hidden">
-				{% if allInputData.fileName|string() is defined %}
-					<input type="hidden" id="fileName" name="fileName" readonly="readonly">
-					<div id="fileBackground"></div>
-					<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName" name="demandCurveFileName"></label></div>
-					<script>
-						document.getElementById('demandCurveFileName').innerHTML = allInputData.fileName;
-					</script>
-				{% endif %}
+				<!-- Format the file input and populate it with a saved file. -->
+				<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+				<div id="fileBackground"></div>
+				<div id="fileExists"><label for="demandCurveFile" id="demandCurveFileName" name="demandCurveFileName"></label></div>
 				<script>
-					// Make sure the file is required on prerun.
-					if (modelStatus == "preRun") {gebi('demandCurveFile').setAttribute('required', 'required')}
+					if (typeof allInputData.fileName !== 'undefined') {					
+						document.getElementById('demandCurveFileName').innerHTML = allInputData.fileName;
+					}
+					else {
+						document.getElementById('demandCurveFileName').innerHTML = 'Please select a file'
+						gebi('demandCurveFile').setAttribute('required', 'required')
+					}
 					// File handler function.
 					function handle_files(files) {
 						// read file to a hidden input field
@@ -222,18 +222,21 @@
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				{% endif %}
-				<button id="runButton" type="submit" class="preRun">Run Model</button>
-				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
+				<button id="runButton" type="submit">Run Model</button>
+				<!-- <button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button> -->
 			</div>
 		</form>
 	</div>
 	<div id ="runIndicator" class="content running">
 		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
 	</div>
-	<div id ="stopIndicator" class="content stopped">
-		<p>Model cancelled or encountered an error. Please change inputs and re-run.</p>
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
 		<pre id='errorText'></pre>
-		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {	
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
 	</div>
 	<div id="output">
 		<script type="text/javascript">

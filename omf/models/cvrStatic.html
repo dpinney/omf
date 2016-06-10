@@ -18,11 +18,10 @@
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
-		function editFeeder(e) {
-			studyUser = $(e).siblings("select").val().split(/[_]+/)[0]
-			studyName = $(e).siblings("select").val().split(/[_]+/)[1]
-			$(e).attr("href", "/feeder/" + studyUser +"/"+ studyName)
-				.attr("target", "_blank");
+		function editFeeder(modelName, feederNum) {
+			console.log("modelName:",modelName)
+			studyUser = allInputData.user
+			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
 		}
 	</script>
 </head>
@@ -30,15 +29,14 @@
 	<div id="header">
 		<div id="headInnerBlock">
 			<div id="menuLeft">
-				<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model
-				&#8220;{% if modelStatus == "preRun"%}New Static CVR Model
-				{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
 			</div>
 		</div>
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/" method="post">
+		<form name="inputForm" action="/runModel/" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-cvrStatic" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="cvrStatic" readonly/>
@@ -47,19 +45,9 @@
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required"></td>
 			</div>
-			<div class="shortInput" style="max-width:60%">
+			<div class="shortInput">
 				<label>Feeder</label>
-				<select id="feederName" name="feederName" style="width:90%"/>
-					<option disabled><strong>Personal Feeders</strong></option>
-					{% for feeder in datastoreNames['feeders'] %}
-						<option value="{{ datastoreNames.get('currentUser','test') + '___' + feeder }}">{{ feeder }}</option>
-					{% endfor %}
-					<option disabled><strong>Public Feeders</strong></option>
-					{% for pFeeder in datastoreNames['publicFeeders'] %}
-						<option value="{{ 'public___' + pFeeder }}">{{ pFeeder }}</option>
-					{% endfor %}
-				</select>
-				<a class="edit-feeder postRunInline preRunInline runningInline stoppedInline" target="_blank" onclick="javascript:editFeeder(this);" title="Edit feeder">&#9997;</a>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -180,19 +168,21 @@
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="runButton" type="submit" class="preRun">Run Model</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="rerunButton" type="submit" class="postRunInline stoppedInline">Re-Run Model</button>
+				<button id="runButton" class="postRunInline stoppedInline" type="submit">Run Model</button>
 			</div>
 		</form>
 	</div>
 	<div id ="runIndicator" class="content running">
 		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
 	</div>
-	<div id ="stopIndicator" class="content stopped">
-		Model cancelled or encountered an error. Please change inputs and re-run.
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
 		<pre id='errorText'></pre>
-		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
 	</div>
 	<div id="output">
 		<script type="text/javascript">

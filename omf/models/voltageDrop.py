@@ -24,19 +24,19 @@ def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	startTime = dt.datetime.now()
 	allOutput = {}
+	with open(pJoin(modelDir,'allInputData.json')) as inputFile:    
+	    feederName = json.load(inputFile).get('feederName1','feeder')
+	inputDict["feederName1"] = feederName
 	# Check whether model exist or not
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 		inputDict["created"] = str(dt.datetime.now())
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
-	# Copy feeder data into the model directory.
-	feederDir, feederName = inputDict["feederName"].split("___")
-	shutil.copy(pJoin(__metaModel__._omfDir,"data","Feeder",feederDir,feederName+".json"),
-		pJoin(modelDir,"feeder.json"))
 	try:
 		# Create voltage drop plot.
-		tree = json.load(open(pJoin(modelDir,"feeder.json"))).get("tree",{})
+		print "*DEBUG: feederName:", feederName
+		tree = json.load(open(pJoin(modelDir,feederName+'.omd'))).get("tree",{})
 		if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 			neato = False
 		else:
@@ -155,7 +155,7 @@ def _tests():
 	# plt.show()
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = {"feederName": "public___Olin Barre Geo",
+	inData = {"feederName1": "Olin Barre Geo",
 		"modelType": "voltageDrop",
 		"runTime": "",
 		"layoutAlgorithm": "geospatial"}
@@ -166,6 +166,10 @@ def _tests():
 	except:
 		# No previous test results.
 		pass
+	try:
+		os.makedirs(modelLoc)
+	except: pass
+	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
 	# No-input template.
 	renderAndShow(template)
 	# Run the model.

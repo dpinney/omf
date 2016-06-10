@@ -20,7 +20,7 @@ import web
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"gridlabMulti.html"),"r") as tempFile:
 	template = Template(tempFile.read())
-	
+
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
 	By default render a blank one for new input.
@@ -50,7 +50,7 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 		inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))
 		for key in inputDict:
 			if key.startswith("feederName"):
-				feederIDs.append(key) 
+				feederIDs.append(key)
 				feederList.append(inputDict[key])
 	except IOError:
 		pass
@@ -61,6 +61,14 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
+	with open(pJoin(modelDir,'allInputData.json')) as inputFile:
+		inJson = json.load(inputFile)
+	feederList = []
+	for key in inJson.keys():
+		if 'feederName' in key: 
+			inputDict[key] = inJson[key]
+			feederList.append(inJson[key])
+	print "feeders read:",feederList
 	# Check whether model exist or not
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
@@ -84,7 +92,7 @@ def runForeground(modelDir, inputDict):
 	# Check whether model exist or not
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
-		inputDict["created"] = str(datetime.datetime.now())	
+		inputDict["created"] = str(datetime.datetime.now())
 	print "STARTING TO RUN", modelDir
 	beginTime = datetime.datetime.now()
 	feederList = []
@@ -95,7 +103,7 @@ def runForeground(modelDir, inputDict):
 	# Get each feeder, prepare data in separate folders, and run there.
 	for key in sorted(inputDict, key=inputDict.get):
 		if key.startswith("feederName"):
-			feederDir, feederName = inputDict[key].split("___")
+			feederName = inputDict[key]
 			feederList.append(feederName)
 			try:
 				os.remove(pJoin(modelDir, feederName, "allOutputData.json"))
@@ -103,14 +111,14 @@ def runForeground(modelDir, inputDict):
 				pass
 			if not os.path.isdir(pJoin(modelDir, feederName)):
 				os.makedirs(pJoin(modelDir, feederName)) # create subfolders for feeders
-			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Feeder", feederDir, feederName + ".json"),
-				pJoin(modelDir, feederName, "feeder.json"))
-			inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])			
+			shutil.copy(pJoin(modelDir, feederName + ".omd"),
+				pJoin(modelDir, feederName, "feeder.omd"))
+			inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
 			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 				pJoin(modelDir, feederName, "climate.tmy2"))
 			try:
 				startTime = datetime.datetime.now()
-				feederJson = json.load(open(pJoin(modelDir, feederName, "feeder.json")))
+				feederJson = json.load(open(pJoin(modelDir, feederName, "feeder.omd")))
 				tree = feederJson["tree"]
 				# Set up GLM with correct time and recorders:
 				feeder.attachRecorders(tree, "Regulator", "object", "regulator")
@@ -127,7 +135,7 @@ def runForeground(modelDir, inputDict):
 				feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
 					simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 				# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
-				rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
+				rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"],
 					keepFiles=True, workDir=pJoin(modelDir, feederName))
 				cleanOut = {}
 				# Std Err and Std Out
@@ -165,7 +173,7 @@ def runForeground(modelDir, inputDict):
 				cleanOut['allMeterVoltages']['stdDevNeg'] = [(x-y/2) for x,y in zip(cleanOut['allMeterVoltages']['Mean'], cleanOut['allMeterVoltages']['StdDev'])]
 				# Total # of meters
 				count = 0
-				with open(pJoin(modelDir, feederName, "feeder.json")) as f:
+				with open(pJoin(modelDir, feederName, "feeder.omd")) as f:
 					for line in f:
 						if "\"objectType\": \"triplex_meter\"" in line:
 							count+=1
@@ -255,7 +263,7 @@ def runForeground(modelDir, inputDict):
 	inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
 		json.dump(inputDict, inFile, indent = 4)
-	# Integrate data into allOutputData.json, if error happens, cancel it 
+	# Integrate data into allOutputData.json, if error happens, cancel it
 	try:
 		output = {}
 		output["failures"] = {}
@@ -283,6 +291,10 @@ def runForeground(modelDir, inputDict):
 		output["numOfFeeders"] = numOfFeeders
 		output["timeStamps"] = feederOutput.get("timeStamps", [])
 		output["climate"] = feederOutput.get("climate", [])
+		# Add feederNames to output so allInputData feederName changes don't cause output rendering to disappear.
+		for key, feederName in inputDict.iteritems():
+			if 'feederName' in key:
+				output[key] = feederName
 		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
 			json.dump(output, outFile, indent=4)
 		try:
@@ -290,7 +302,7 @@ def runForeground(modelDir, inputDict):
 		except:
 			pass
 		# Send email to user on model success.
-		emailStatus = inputDict.get('emailStatus', 0)		
+		emailStatus = inputDict.get('emailStatus', 0)
 		if (emailStatus == "on"):
 			print "\n    EMAIL ALERT ON"
 			email = session['user_id']
@@ -304,7 +316,7 @@ def runForeground(modelDir, inputDict):
 
 	except Exception, e:
 		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)	
+		cancel(modelDir)
 		thisErr = traceback.format_exc()
 		print 'ERROR IN MODEL', modelDir, thisErr
 		inputDict['stderr'] = thisErr
@@ -395,43 +407,43 @@ def _tests():
 	# Variables
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		# "feederName": "admin___Simple Market System",
-		# "feederName2": "admin___Simple Market System BROKEN", 		# configure error
-		# "feederName3": "public___13 Node Embedded DO NOT SAVE",		# feeder error
-		# "feederName4": "public___13 Node Ref Feeder Flat",
-		# "feederName5": "public___13 Node Ref Feeder Laid Out ZERO CVR",
-		# "feederName6": "public___13 Node Ref Feeder Laid Out",
-		# "feederName7": "public___ABEC Columbia",
-		# "feederName8": "public___ABEC Frank LO Houses",				# feeder error
-		# "feederName9": "public___ABEC Frank LO",
-		# "feederName10": "public___ACEC Geo",
-		# "feederName11": "public___Battery 13 Node Centralized",
-		# "feederName12": "public___Battery 13 Node Distributed",
-		# "feederName13": "public___DEC Red Base",
-		# "feederName14": "public___DEC Red Battery",
-		# "feederName15": "public___DEC Red CVR",
-		# "feederName16": "public___DEC Red DG",
-		# "feederName17": "public___INEC Renoir",
-		# "feederName18": "public___Olin Barre CVR Base",
-		# "feederName19": "public___Olin Barre Geo",
-		# "feederName20": "public___Olin Barre Housed 05Perc Solar",
-		# "feederName21": "public___Olin Barre Housed 20Perc Solar",
-		# "feederName22": "public___Olin Barre Housed 50Perc Solar",
-		# "feederName23": "public___Olin Barre Housed 90Perc Solar",
-		# "feederName24": "public___Olin Barre Housed Battery",
-		# "feederName25": "public___Olin Barre Housed Wind",
-		# "feederName26": "public___Olin Barre Housed",
-		# "feederName27": "public___Olin Barre", 						# feeder error
-		# "feederName28": "public___PNNL Taxonomy Feeder 1",
-		# "feederName29": "public___Simple Market System Comm Solar",
-		# "feederName30": "public___Simple Market System Indy Solar",
-		"feederName31": "public___Simple Market System",
-		# "feederName": "public___Battery 13 Node Distributed",		
+		# "feederName1": "Simple Market System",
+		# "feederName2": "Simple Market System BROKEN", 		# configure error
+		# "feederName3": "13 Node Embedded DO NOT SAVE",		# feeder error
+		# "feederName4": "13 Node Ref Feeder Flat",
+		# "feederName5": "13 Node Ref Feeder Laid Out ZERO CVR",
+		# "feederName6": "13 Node Ref Feeder Laid Out",
+		# "feederName7": "ABEC Columbia",
+		# "feederName8": "ABEC Frank LO Houses",				# feeder error
+		# "feederName9": "ABEC Frank LO",
+		# # "feederName10": "ACEC Geo",
+		# "feederName11": "Battery 13 Node Centralized",
+		# "feederName12": "Battery 13 Node Distributed",
+		# "feederName13": "DEC Red Base",
+		# "feederName14": "DEC Red Battery",
+		# "feederName15": "DEC Red CVR",
+		# "feederName16": "DEC Red DG",
+		# "feederName17": "INEC Renoir",
+		# "feederName18": "Olin Barre CVR Base",
+		# "feederName19": "Olin Barre Geo",
+		# "feederName20": "Olin Barre GH 05Perc Solar",
+		# "feederName21": "Olin Barre GH 20Perc Solar",
+		# "feederName22": "Olin Barre GH 50Perc Solar",
+		# "feederName23": "Olin Barre GH 90Perc Solar",
+		# "feederName24": "Olin Barre GH Battery",
+		# "feederName25": "Olin Barre GH Wind",
+		# "feederName26": "Olin Barre GH",
+		# "feederName27": "Olin Barre", 						# feeder error
+		"feederName28": "PNNL Taxonomy Feeder 1",
+		"feederName29": "Simple Market System Comm Solar",
+		"feederName30": "Simple Market System Indy Solar",
+		"feederName31": "Simple Market System",
+		# "feederName": "Battery 13 Node Distributed",
 		"modelType": "gridlabMulti",
-		"zipCode": "64735",		
+		"zipCode": "64735",
 		"simLength": "24",
 		"runTime": ""}
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")		
+	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated gridlabMulti Testing")
 	# Blow away old test results if necessary.
 	try:
@@ -439,8 +451,17 @@ def _tests():
 	except:
 		# No previous test results.
 		pass
+	try:
+		os.makedirs(modelLoc)
+	except: pass
+	for key in inData:
+		if 'feederName' in key:
+			try: 
+				shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData[key]+'.omd'),pJoin(modelLoc,inData[key]+'.omd'))
+			except: 
+				shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","adminFeeders", inData[key]+'.omd'),pJoin(modelLoc,inData[key]+'.omd'))
 	# No-input template.
-	# renderAndShow(template)
+	renderAndShow(template)
 	# Run the model.
 	# run(modelLoc, inData)
 	runForeground(modelLoc, inData)

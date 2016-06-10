@@ -22,15 +22,14 @@
 <body onload="init();circInit()">
 	<div id="header">
 		<div id="menuLeft">
-			<a style="color:white" href="/">OMF</a> &#187;&nbsp;&nbsp;Model
-			&#8220;{% if modelStatus == "preRun"%}Real Time Circuit Simulator
-			{% else %}<p id="titleText" style="display:inline"></p>{% endif %}&#8221;
+			<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+			&#8220;<p id="titleText" style="display:inline"></p>&#8221;
 		</div>
 	</div>
 	<iframe id="circFrame" src="{{pathPrefix}}/static/circuitjs1/circuitjs.html"></iframe>
 	<!-- <button id='exportButton' style='position:absolute;bottom:5px;right:5px' onclick='exportString()'>clickSave</button> -->
 	<div id="circuitInputs" style='position:absolute;bottom:10px;right:5px;width:150px;margin-top:10px'>
-		<form name="inputForm" {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"method="post">
+		<form name="inputForm" action="/runModel/"method="post">
 			<div class="circModelBox">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-circuitRealTime" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="circuitRealTime" readonly/>
@@ -48,10 +47,10 @@
 				<input type="text" id="created" name="created" readonly/>
 			</div>
 			<div class="circModelBox">
-				<button id="deleteButton" type="button" class="circModelButtons preRun stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
-				<button id="publishButton" type="button" class="circModelButtons preRun stoppedInline postRunInline" onclick="publishModel()">Publish</button>
-				<button id="duplicateButton" type="button" class="circModelButtons preRun stoppedInline postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="runButton" type="submit" class="circModelButtons preRun stoppedInline postRunInline" onclick="circSave()">Save</button>
+				<button id="deleteButton" type="button" class="circModelButtons stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="circModelButtons stoppedInline postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="circModelButtons stoppedInline postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="runButton" type="submit" class="circModelButtons stoppedInline postRunInline" onclick="circSave()">Save</button>
 			</div>
 			<input type="hidden" id="circString" name="circString" readonly/>
 			<div id="copyrightNotice" style="color:gray;line-height:14pt;margin-top:20px">Circuit Simulator Applet was developed by <a href="http://www.falstad.com/" target="_blank">Paul Falstad</a></div>

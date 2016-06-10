@@ -1,11 +1,12 @@
 {
-    "created": "2014-07-30 11:35:33.705000", 
-    "simLengthUnits": "hours", 
-    "feederName": "public___DEC Red Base", 
     "simStartDate": "2014-07-30", 
+    "simLengthUnits": "hours", 
+    "created": "2014-07-30 11:35:33.705000", 
+    "zipCode": "64735", 
     "modelType": "gridlabMulti", 
-    "climateName": "DE-WILMINGTON", 
+    "climateName": "MO-KANSAS_CITY", 
     "simLength": "720", 
-    "feederName2": "public___DEC Red CVR", 
-    "runTime": "0:20:24"
+    "feederName2": "DEC Red CVR", 
+    "feederName1": "DEC Red Base", 
+    "runTime": "0:03:09"
 }
