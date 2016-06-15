@@ -38,7 +38,10 @@ def run(modelDir, inputDict):
 	This function will return fast, but results take a while to hit the file system.'''
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
-		inputDict["created"] = str(datetime.datetime.now())	
+		inputDict["created"] = str(datetime.datetime.now())
+	with open(pJoin(modelDir,'allInputData.json')) as inputFile:
+		feederName = json.load(inputFile).get('feederName1','feeder1')
+	inputDict["feederName1"] = feederName
 	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 	with open(pJoin(modelDir,"allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent=4)
@@ -63,7 +66,8 @@ def runForeground(modelDir, inputDict):
 		if not os.path.isdir(modelDir):
 			os.makedirs(modelDir)
 			inputDict["created"] = str(startTime)
-		feederPath = pJoin(__metaModel__._omfDir,"data", "Feeder", inputDict["feederName"].split("___")[0], inputDict["feederName"].split("___")[1]+'.json')		
+		feederName = inputDict.get('feederName1','feeder1')
+		feederPath = pJoin(modelDir,feederName+'.omd')
 		feederJson = json.load(open(feederPath))
 		tree = feederJson.get("tree",{})
 		attachments = feederJson.get("attachments",{})
@@ -98,7 +102,7 @@ def runForeground(modelDir, inputDict):
 		bar_peak = plt.bar(ticks,d1,color='gray')
 		bar_avg = plt.bar(ticks,d2,color='dimgray')
 		plt.legend([bar_peak[0],bar_avg[0]],['histPeak','histAverage'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
-	       ncol=2, mode="expand", borderaxespad=0.1)
+		   ncol=2, mode="expand", borderaxespad=0.1)
 		plt.xticks([t+0.5 for t in ticks],indices)
 		plt.ylabel('Mean and peak historical power consumptions (kW)')
 		fig.autofmt_xdate()
@@ -203,7 +207,7 @@ def runForeground(modelDir, inputDict):
 		blankZipModel = {'object':'triplex_load',
 			'name':'NAMEVARIABLE',
 			'base_power_12':'POWERVARIABLE',
-			'power_fraction_12': str(inputDict.get("p_percent")),  
+			'power_fraction_12': str(inputDict.get("p_percent")),
 			'impedance_fraction_12': str(inputDict.get("z_percent")),
 			'current_fraction_12': str(inputDict.get("i_percent")),
 			'power_pf_12': str(inputDict.get("power_factor")), #MAYBEFIX: we can probably get this PF data from the Milsoft loads.
@@ -288,8 +292,8 @@ def runForeground(modelDir, inputDict):
 					'powerFactor':p/s,
 					'losses':lossTotal,
 					'subVoltage': (
-						output['ZsubstationBottom.csv']['voltage_A'][0] + 
-						output['ZsubstationBottom.csv']['voltage_B'][0] + 
+						output['ZsubstationBottom.csv']['voltage_A'][0] +
+						output['ZsubstationBottom.csv']['voltage_B'][0] +
 						output['ZsubstationBottom.csv']['voltage_C'][0] )/3/60,
 					'lowVoltage':output['ZvoltageJiggle.csv']['min(voltage_12.mag)'][0]/2,
 					'highVoltage':output['ZvoltageJiggle.csv']['max(voltage_12.mag)'][0]/2 })
@@ -346,7 +350,7 @@ def runForeground(modelDir, inputDict):
 			fig = plt.figure(figsize=(10,5))
 			plt.axis('off')
 			plt.tight_layout()
-			plt.table(cellText=[row for row in inData[1:]], 
+			plt.table(cellText=[row for row in inData[1:]],
 				loc = 'center',
 				rowLabels = range(len(inData)-1),
 				colLabels = inData[0])
@@ -386,7 +390,7 @@ def runForeground(modelDir, inputDict):
 		bar_lrd = plt.bar(ticks,d2,color='green')
 		bar_prd = plt.bar(ticks,d3,color='blue',yerr=d2)
 		plt.legend([bar_prd[0], bar_lrd[0], bar_erd[0]], ['peakReductionDollars','lossReductionDollars','energyReductionDollars'],bbox_to_anchor=(0., 1.015, 1., .102), loc=3,
-	       ncol=2, mode="expand", borderaxespad=0.1)
+		   ncol=2, mode="expand", borderaxespad=0.1)
 		plt.xticks([t+0.5 for t in ticks],indices)
 		plt.ylabel('Utility Savings ($)')
 		plt.tight_layout(5.5,1.3,1.2)
@@ -424,7 +428,7 @@ def runForeground(modelDir, inputDict):
 		print "DONE RUNNING", modelDir
 	except Exception as e:
 		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)				
+		cancel(modelDir)
 		thisErr = traceback.format_exc()
 		print 'ERROR IN MODEL', modelDir, thisErr
 		inputDict['stderr'] = thisErr
@@ -436,8 +440,8 @@ def runForeground(modelDir, inputDict):
 def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	friendshipTree = json.load(open(pJoin(__metaModel__._omfDir, "data", "Feeder", "public", "ABEC Frank LO.json")))["tree"]
-	colomaTree = json.load(open(pJoin(__metaModel__._omfDir, "data", "Feeder", "public", "ABEC Columbia.json")))["tree"]
+	friendshipTree = json.load(open(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", "ABEC Frank LO.omd")))["tree"]
+	colomaTree = json.load(open(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", "ABEC Columbia.omd")))["tree"]
 	colomaMonths = {"janAvg": 914000.0, "janPeak": 1290000.0,
 		"febAvg": 897000.00, "febPeak": 1110000.0,
 		"marAvg": 731000.00, "marPeak": 1030000.0,
@@ -463,7 +467,7 @@ def _tests():
 	# 	"novAvg": 2210000.0, "novPeak": 3550000.0,
 	# 	"decAvg": 2480000.0, "decPeak": 3370000.0}
 	inData = {"modelType": "cvrStatic",
-		"feederName": "public___ABEC Columbia",
+		"feederName1": "ABEC Columbia",
 		"runTime": "",
 		"capitalCost": 30000,
 		"omCost": 1000,
@@ -484,15 +488,16 @@ def _tests():
 	# Blow away old test results if necessary.
 	try: shutil.rmtree(modelLoc)
 	except: pass
+	try:
+		os.makedirs(modelLoc)
+	except: pass
+	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
 	# No-input template.
-	# renderAndShow(template)
+	renderAndShow(template)
 	# Run the model.
 	runForeground(modelLoc, inData)
-	# # Show the output.
+	# Show the output.
 	renderAndShow(template, modelDir=modelLoc)
-	# # # Delete the model.
-	# # time.sleep(2)
-	# # shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

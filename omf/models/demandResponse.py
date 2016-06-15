@@ -503,7 +503,7 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	# renderAndShow(template)
+	renderAndShow(template)
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.

@@ -44,7 +44,6 @@ def renderAndShow(template, modelDir="", datastoreNames={}):
 
 def getStatus(modelDir):
 	''' Is the model stopped, running or finished? '''
-	if not os.path.isdir(modelDir): return "preRun"
 	try:
 		modFiles = os.listdir(modelDir)
 	except:

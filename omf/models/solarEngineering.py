@@ -59,6 +59,9 @@ def run(modelDir, inputDict):
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 		inputDict["created"] = str(datetime.datetime.now())
+	with open(pJoin(modelDir,'allInputData.json')) as inputFile:
+		feederName = json.load(inputFile).get('feederName1','feeder1')
+	inputDict["feederName1"] = feederName
 	# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
@@ -102,14 +105,12 @@ def heavyProcessing(modelDir, inputDict):
 	try: os.mkdir(pJoin(modelDir,'gldContainer'))
 	except: pass
 	try:	
-		feederDir, feederName = inputDict["feederName"].split("___")
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Feeder", feederDir, feederName + ".json"),
-			pJoin(modelDir, "feeder.json"))
+		feederName = inputDict["feederName1"]
 		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
 		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 			pJoin(modelDir, "gldContainer", "climate.tmy2"))
 		startTime = datetime.datetime.now()
-		feederJson = json.load(open(pJoin(modelDir, "feeder.json")))
+		feederJson = json.load(open(pJoin(modelDir, feederName+'.omd')))
 		tree = feederJson["tree"]
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
@@ -448,7 +449,7 @@ def _tests():
 	# Variables
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName": "public___Olin Barre GH EOL Solar",
+		"feederName1": "Olin Barre GH EOL Solar",
 		"modelType": "solarEngineering",
 		"zipCode": "64735",
 		"simLength": "24",
@@ -460,8 +461,12 @@ def _tests():
 	except:
 		# No previous test results.
 		pass
+	try:
+		os.makedirs(modelLoc)
+	except: pass
+	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
 	# No-input template.
-	# renderAndShow(template)
+	renderAndShow(template)
 	# Run the model.
 	runForeground(modelLoc, inData)
 	## Cancel the model.
