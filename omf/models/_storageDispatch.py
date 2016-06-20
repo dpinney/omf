@@ -21,7 +21,7 @@ import feeder
 from weather import _downloadWeather
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"storageDispatch.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"_storageDispatch.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -312,7 +312,7 @@ def _tests():
 		"discountRate": "2.5",
 		"created": "2015-06-12 17:20:39.308239",
 		"dischargeRate": "5",
-		"modelType": "storageDispatch",
+		"modelType": "_storageDispatch",
 		"chargeRate": "5",
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","FrankScadaValidCSV.csv")).read(),
 		"fileName": "FrankScadaValidCSV.csv",
