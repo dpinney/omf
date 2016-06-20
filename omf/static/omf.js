@@ -1,6 +1,3 @@
-///////////////////////////////////////////
-// ORIGINAL OMF.JS
-///////////////////////////////////////////
 function post_to_url(path, params, method) {
 	method = method || 'post' // Set method to post by default, if not specified.
 	var form = document.createElement('form')
@@ -273,10 +270,6 @@ function dropPillAndStay(thisButton, name) {
 		thisButton.style.background= 'transparent'
 	}
 }
-
-///////////////////////////////////////////
-// ORIGINAL MODELS.JS
-///////////////////////////////////////////
 
 function init() {
 	// If we have input, put it back.
