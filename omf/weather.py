@@ -52,6 +52,8 @@ def _downloadWeather(start, end, airport, workDir):
 	# Calculate the number of days to fetch.
 	num_days = (end_dt - start_dt).days
 	work_day = start_dt
+	# HACK: urllib proxy auto-detection crashes hard in Mac OS X, so force a dummy proxy that will then cause fallback to direct request.
+	os.environ["dummy_proxy"] = "NONE"
 	# Generate URLs and get data.
 	for i in range(num_days):
 		year = work_day.year
