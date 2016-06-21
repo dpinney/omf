@@ -244,7 +244,7 @@ def _tests():
 		assert _strClean(string) == result, "A _strClean operation failed on: " + string
 	# Get a test feeder and test climate.
 	print "Testing GridlabD solver."
-	with open(pJoin(_omfDir,"data","Feeder","public","Simple Market System.json"),"r") as feederFile:
+	with open(pJoin(_omfDir,"scratch","publicFeeders","Simple Market System.omd"),"r") as feederFile:
 		feederJson = json.load(feederFile)
 	with open(pJoin(_omfDir,"data","Climate","AL-HUNTSVILLE.tmy2"),"r") as climateFile:
 		tmyStr = climateFile.read()

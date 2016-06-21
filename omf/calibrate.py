@@ -160,7 +160,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, calibr
 	chartData = {"Title":"Substation Calibration Check (Iterated "+str(iteration+1)+"X)", "fileName":"caliCheckPlot", "colors":colors,"labels":labels, "timeZone":simStartDate['timeZone']}
 	plotLine(workDir, caliPowVectors, chartData, simStartDate['Date']+dt.timedelta(hours=1), 'hours')
 	# Write the final output.
-	with open(pJoin(workDir,"calibratedFeeder.json"),"w") as outJson:
+	with open(pJoin(workDir,"calibratedFeeder.omd"),"w") as outJson:
 		playerString = open(pJoin(gridlabdDir,lastFile)).read()
 		feederJson["attachments"][lastFile] = playerString
 		feederJson["tree"] = tree
@@ -237,7 +237,7 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simS
 		feeder.adjustTime(tree, simLength, "hours", firstDateTime.strftime("%Y-%m-%d %H:%M:%S"))
 		output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=gridlabdDir)
 		# Write the output.
-		with open(pJoin(workDir,"calibratedFeeder.json"),"w") as outJson:
+		with open(pJoin(workDir,"calibratedFeeder.omd"),"w") as outJson:
 			playerStringA = open(pJoin(gridlabdDir,"phaseAVoltage.player")).read()
 			playerStringB = open(pJoin(gridlabdDir,"phaseBVoltage.player")).read()
 			playerStringC = open(pJoin(gridlabdDir,"phaseCVoltage.player")).read()
@@ -246,7 +246,7 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simS
 			feederJson["attachments"]["phaseCVoltage.player"] = playerStringC
 			feederJson["tree"] = tree
 			json.dump(feederJson, outJson, indent=4)
-		return pJoin(workDir,"calibratedFeeder.json"), True
+		return pJoin(workDir,"calibratedFeeder.omd"), True
 	except:
 		print "Failed to run gridlabD with voltage players."
 		return "", False
@@ -296,7 +296,7 @@ def _tests():
 	except: pass	
 	print "Currently working in: ", workDir
 	scadaPath = pJoin("uploads", "FrankScada.csv")
-	feederPath = pJoin("data", "Feeder", "public","ABEC Frank pre calib.json")
+	feederPath = pJoin("scratch", "publicFeeders","ABEC Frank pre calib.omd")
 	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
 	simStartDate = {"Date":simDate,"timeZone":"PST"}
 	simLength = 24*7

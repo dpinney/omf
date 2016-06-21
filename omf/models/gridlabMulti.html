@@ -23,13 +23,17 @@
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		function makeFeeder(modelName, feederNum) {
-			console.log("making a new feeder:",modelName)
-			post_to_url("/newSimpleFeeder/" + modelName + "/" + feederNum + "/" + true)
-		}	
+			post_to_url("/newSimpleFeeder/" + allInputData.user + "/" + modelName + "/" + feederNum + "/" + true)
+		}
 		function editFeeder(modelName, feederNum) {
-			console.log("modelName:",modelName)
 			studyUser = allInputData.user
 			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+		}
+		function removeFeeder(feederNo){
+			post_to_url("/removeFeeder/" + allInputData.user + "/" + allInputData.modelName + "/" + feederNo)
+		}
+		function cleanUpFeeders(){
+			post_to_url("/cleanUpFeeders/" + allInputData.user + "/" + allInputData.modelName)
 		}
 		$(document).ready(function(){
 			$('.content .add-feeder').click(function(){
@@ -51,7 +55,6 @@
 					$(this).remove();
 					$('.feeder-number').each(function(index){
 						$(this).text( index + 1 + " ");
-						post_to_url("/removeFeeder/" + allInputData.modelName + "/" + (index+2))
 					});
 				});
 				return false;
@@ -111,7 +114,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-gridlabMulti" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="gridlabMulti" title="This is Model Type" readonly/>
@@ -144,14 +147,15 @@
 			<div class="feederList shortInput">
 				<label for="feeder1">Feeder <span class="feeder-number">{{feederIDs.index(feederID) + 1}}</span></label>
 					{% if feederIDs.index(feederID)+1 == 1 %}
-						<a class='add-feeder postRunInline stoppedInline' href='#' title="Add  feeder">&#8853;</a>
+						<a class='add-feeder postRunInline stoppedInline' href='#' title="Addfeeder" id="addFeeder">&#8853;</a>
 					{% else %}
-						<a class='remove-feeder postRunInline stoppedInline' href='#' title="Remove  feeder">&#8854;</a>
+						<a class='remove-feeder postRunInline stoppedInline' href='#' onclick='removeFeeder("{{feederID}}".split("feederName")[1])' title="Removefeeder">&#8854;</a>
 					{% endif %}
-				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,{{feederIDs.index(feederID) + 1}});" style="display:block;width:125px;">Open Editor</button>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,'{{feederID}}'.split('feederName')[1]);" style="display:block;width:125px;">Open Editor</button>
 			</div>
 			{% endfor %}
 			{% endif %}
+			<!-- <a class='stoppedInline postRunInline' onclick='cleanUpFeeders();' href='#'>Fix Feeders?</a> -->
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
@@ -193,7 +197,7 @@
 	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
 		<pre id='errorText'></pre>
 		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
+		if (typeof(allInputData.stderr) !== 'undefined') {
 			gebi('stopIndicator').style.visibility = 'visible'
 			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
 		</script>

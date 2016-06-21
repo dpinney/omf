@@ -169,6 +169,8 @@ def _tests():
 	try:
 		os.makedirs(modelLoc)
 	except: pass
+	with open(pJoin(modelLoc, "allInputData.json"),"w") as inputFile:
+		json.dump(inData, inputFile, indent = 4)
 	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
 	# No-input template.
 	renderAndShow(template)

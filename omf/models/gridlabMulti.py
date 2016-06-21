@@ -48,10 +48,11 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 	feederIDs = []
 	try:
 		inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))
-		for key in inputDict:
-			if key.startswith("feederName"):
+		for key in ["feederName1", "feederName2", "feederName3", "feederName4", "feederName5"]:
+			feederName = inputDict.get(key,'')
+			if feederName != '':
 				feederIDs.append(key)
-				feederList.append(inputDict[key])
+				feederList.append(feederName)
 	except IOError:
 		pass
 	return template.render(allInputData=allInputData,

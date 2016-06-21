@@ -64,7 +64,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} action="/runModel/"{% endif %} method="post">
+		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} action="/runModel/"{% endif %} onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-storagePeakShave" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="storagePeakShave" readonly/>
@@ -72,7 +72,7 @@
 			{% if quickRender %}
 			<div class="shortInput">
 				<label>Email Address</label>
-				<input type="email" id="quickRunEmail" name="quickRunEmail" required="required">
+				<input type="email" id="quickRunEmail" name="quickRunEmail" pattern="^[\w\s\d\.-@]+$" required="required">
 			</div>
 			{% else %}
 			<div class="shortInput">
@@ -245,10 +245,10 @@
 				{% if not quickRender %}
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
-				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				{% endif %}
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" class="stoppedInline postRunInline" type="submit">Run Model</button>
+				<button id="runButton" type="submit">Run Model</button>
 			</div>
 		</form>
 	</div>

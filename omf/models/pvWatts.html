@@ -28,7 +28,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %} action="/runModel/"{% endif %} method="post">
+		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %} action="/runModel/"{% endif %} onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-pvWatts" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="pvWatts" readonly/>
@@ -36,7 +36,7 @@
 			{% if quickRender %}
 			<div class="shortInput">
 				<label>Email Address</label>
-				<input type="email" id="quickRunEmail" name="quickRunEmail" required="required">
+				<input type="email" id="quickRunEmail" name="quickRunEmail" pattern="^[\w\s\d\.-@]+$" required="required">
 			</div>
 			{% else %}
 			<div class="shortInput">
@@ -68,7 +68,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">System Size (kWp-DC)<span class="classic">DC output rating of the solar panels in kilowatts.</span></label>
-				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="systemSize" name="systemSize" value="5" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Inverter Size (kW-AC)<span class="classic">Size of the total inverters in kW-AC for the system. If zero, it will be set to the system size.</span></label>

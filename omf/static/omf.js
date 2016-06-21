@@ -1,6 +1,3 @@
-///////////////////////////////////////////
-// ORIGINAL OMF.JS
-///////////////////////////////////////////
 function post_to_url(path, params, method) {
 	method = method || 'post' // Set method to post by default, if not specified.
 	var form = document.createElement('form')
@@ -103,10 +100,6 @@ function showProgressDialog(dialogMessage, cancel) {
 				console.log('Conversion cancelled.')
 				document.cookie = "converting=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
 				newfeeder.submit();
-				// params = {user:{{ user }},
-				// 	modelName:{{ modelName }},
-				// 	feederName:{{ feedername }}}
-				// post_to_url("/newBlankFeeder/", params, "POST");
 			}
     	};
 	    progContent.appendChild(cancelBtn);
@@ -274,10 +267,6 @@ function dropPillAndStay(thisButton, name) {
 	}
 }
 
-///////////////////////////////////////////
-// ORIGINAL MODELS.JS
-///////////////////////////////////////////
-
 function init() {
 	// If we have input, put it back.
 	if (allInputData != null) {
@@ -306,8 +295,9 @@ function init() {
 	if (modelUser == "public" && currentUser != "admin") {
 		$("button#deleteButton").hide();
 		$("button#publishButton").hide();
-		$("button#rerunButton").hide();
-	}
+		$("button#duplicateButton").show();
+		$("button#runButton").hide();
+	}	
 }
 
 function restoreInputs() {
@@ -370,7 +360,7 @@ function duplicateModel() {
 		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
 	}
 	if (newName) {
-		$.ajax({url:"/uniqObjName/Model/" + allInputData.user + "/" + newName}).done(function(data) {
+		$.ajax({url:"/uniqObjName/Model/" + currentUser + "/" + newName}).done(function(data) {
 			if (data.exists) {
 				alert("There is already a model named " + newName)
 				duplicateModel()
@@ -381,24 +371,9 @@ function duplicateModel() {
 	}
 }
 
-function checkModelName() {
-	// Additional check, required for Safari browsers
-	if (isFormValid()) {
-		var newName = document.getElementById('modelName').value
-		$.ajax({
-			url: "/uniqObjName/Model/" + currentUser + "/" + newName
-		}).done(function (data) {
-			if (data.exists) {
-				alert("You already have a Model named '" + newName + "', please choose a different name.")
-			} else {
-				inputForm.submit()
-			}
-		})
-	}
-}
-
-// Form Validation for Safari browsers //
 function isFormValid() {
+	// Form Validation for Safari browsers
+	var inputForm = document.getElementsByTagName('form')[0]
 	var inputs = document.getElementsByTagName('input')
 	var errors = 0
 	for (var i = 0; i < inputs.length; i++) {
@@ -411,21 +386,24 @@ function isFormValid() {
 			inputs[i].style.backgroundColor = 'gainsboro'
 		}
 	}
+	console.log(errors)
 	if (errors) {
 		alert("Found [" + errors + "] errors, Please fix inputs in red.")
 	} else {
-		return true
+		inputForm.submit()
 	}
 }
 
 function createModelName(modelType, modelName) {
+	var username = sessionStorage.getItem('user');
+	console.log(username)
 	if (typeof(modelName)==='undefined') modelName = '';
 	modelName = prompt("Create a model with name", modelName)
 	while (! /^[\w\s]+$/.test(modelName)){
 		modelName = prompt("Only letters, digits and underscore are allowed in the model name.\nPlease rename your new model")
 	}
 	if (modelName) {
-		$.ajax({url:"/uniqObjName/Model/" + modelName}).done(function(data) {
+		$.ajax({url:"/uniqObjName/Model/" + username + "/" + modelName}).done(function(data) {
 			if (data.exists) {
 				alert("There is already a model named " + modelName)
 				createModelName(modelType, modelName)

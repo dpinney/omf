@@ -28,7 +28,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<!-- Required Inputs -->
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-modelSkeleton" target="blank">Help?</a></label>
@@ -75,7 +75,7 @@
 	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
 		<pre id='errorText'></pre>
 		<script type="text/javascript">
-		if (typeof(allInputData.stderr) !== 'undefined') {	
+		if (typeof(allInputData.stderr) !== 'undefined') {
 			gebi('stopIndicator').style.visibility = 'visible'
 			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
 		</script>
