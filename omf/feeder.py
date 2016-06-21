@@ -460,7 +460,7 @@ def _tests():
 	attachRecorders(tree, 'Voltage', 'object', 'node')
 	print 'All the objects after recorder attach: ', set([ob.get('object','') for ob in tree.values()])
 	# Testing The De-Embedding
-	with open('scratch/adminFeeders/13 Node Embedded DO NOT SAVE.omd') as inFile:
+	with open('scratch/publicFeeders/13 Node Embedded DO NOT SAVE.omd') as inFile:
 		tree = json.load(inFile)['tree']
 	fullyDeEmbed(tree)
 	embeddedDicts = 0
