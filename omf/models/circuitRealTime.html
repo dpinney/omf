@@ -29,7 +29,7 @@
 	<iframe id="circFrame" src="{{pathPrefix}}/static/circuitjs1/circuitjs.html"></iframe>
 	<!-- <button id='exportButton' style='position:absolute;bottom:5px;right:5px' onclick='exportString()'>clickSave</button> -->
 	<div id="circuitInputs" style='position:absolute;bottom:10px;right:5px;width:150px;margin-top:10px'>
-		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return checkModelName();" method="post">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="circModelBox">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-circuitRealTime" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="circuitRealTime" readonly/>

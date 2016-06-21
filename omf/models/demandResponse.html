@@ -56,7 +56,7 @@
 	</div>
 	<p class="reportTitle">Model Inputs</p>
 	<div id="input" class="content">
-		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} action="/runModel/" {% endif %} onsubmit="event.preventDefault(); return checkModelName();" method="post">
+		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} action="/runModel/" {% endif %} onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-demandResponse" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="demandResponse" readonly/>
@@ -64,7 +64,7 @@
 			{% if quickRender %}
 			<div class="shorterInput">
 				<label>Email Address</label>
-				<input type="email" id="quickRunEmail" name="quickRunEmail" required="required">
+				<input type="email" id="quickRunEmail" name="quickRunEmail" pattern="^[\w\s\d\.-@]+$" required="required">
 			</div>
 			{% else %}
 			<div class="shortInput">

@@ -371,15 +371,9 @@ function duplicateModel() {
 	}
 }
 
-function checkModelName() {
-	// Additional check, required for Safari browsers
-	if (isFormValid()) {
-		inputForm.submit()
-	}
-}
-
-// Form Validation for Safari browsers //
 function isFormValid() {
+	// Form Validation for Safari browsers
+	var inputForm = document.getElementsByTagName('form')[0]
 	var inputs = document.getElementsByTagName('input')
 	var errors = 0
 	for (var i = 0; i < inputs.length; i++) {
@@ -392,10 +386,11 @@ function isFormValid() {
 			inputs[i].style.backgroundColor = 'gainsboro'
 		}
 	}
+	console.log(errors)
 	if (errors) {
 		alert("Found [" + errors + "] errors, Please fix inputs in red.")
 	} else {
-		return true
+		inputForm.submit()
 	}
 }
 
