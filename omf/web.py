@@ -136,7 +136,7 @@ def login_page():
 	modelNames = []
 	for modelName in models.__all__:
 		thisModel = getattr(models, modelName)
-		if hasattr(thisModel, 'quickRender'):
+		if hasattr(thisModel, 'quickRender') and not modelName.startswith('_'):
 			modelNames.append(modelName)
 	if not modelNames:
 		modelNames.append("No Models Available")
