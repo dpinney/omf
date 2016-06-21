@@ -186,8 +186,16 @@
 				<input type="text" id="transformerThreshold" name="transformerThreshold" value="6.5" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
-				<label>Transformer Upgrade Avoided Cost ($)</label>
+				<label>Hardware Replacement Cost ($)</label>
 				<input type="text" id="avoidedCost" name="avoidedCost" value="2000000" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Time to Replacement (yrs)</label>
+				<input type="text" id="yearsToReplace" name="yearsToReplace" value="2" required="required" pattern="^\d+\.?\d*?$"/>
+			</div>
+			<div class="shortInput">
+				<label>Carrying Cost Per Year (%)</label>
+				<input type="text" id="carryingCost" name="carryingCost" value="7" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				{% if not quickRender %}
@@ -329,7 +337,7 @@
 						    style:{"color":"#333333", "fontSize":"12px"}
 						},
 						xAxis: {
-						    categories: ['Avoided Cost', 'Cost of ' + allOutputData.numOfBatteries + ' batteries', 'Net Avoided Cost']
+						    categories: ['Carrying Cost over ' + allInputData.yearsToReplace + ' years' ,  'Cost of ' + allOutputData.numOfBatteries + ' batteries', 'Net Avoided Cost']
 						},
 						yAxis: {
 						    title: {
