@@ -334,8 +334,6 @@ def _tests():
 	# renderAndShow(template)
 	# Run the model.
 	runForeground(modelLoc, inData)
-	# run(modelLoc, inData)
-	# sleep(10000)
 	# Show the output.
 	renderAndShow(template, modelDir = modelLoc)
 	# # Delete the model.
