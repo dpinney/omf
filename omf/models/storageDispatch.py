@@ -4,7 +4,6 @@ import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, 
 import multiprocessing
 import collections
 import numpy as np
-import pandas as pd
 from os.path import join as pJoin
 from dateutil.parser import parse
 from numpy import npv
@@ -92,11 +91,11 @@ def run(modelDir, inputDict):
 	with open(pJoin(modelDir,"weather.csv")) as inFile:
 		reader = csv.DictReader(inFile)
 	 	for row in reader:
-	 		if row.get('TimeEST','none')=='none':
-	 			wd.append({'date': row['DateUTC<br />'], 'time': row['TimeEDT'] ,'temperature': float(row['TemperatureF'])})
-	 		else:
-	 			wd.append({'date': row['DateUTC<br />'], 'time': row['TimeEST'] ,'temperature': float(row['TemperatureF'])})
-
+	 		keyList = row.keys()
+	 		for item in keyList:
+	 			if item.startswith('Time'):
+	 				time = item
+	 		wd.append({'date': row['DateUTC<br />'], 'time': row[time] ,'temperature': float(row['TemperatureF'])})
 	wdf = []
 	for row in wd:
 		time = row['date'][0:10] + ' ' + row['time'][0:11]
@@ -176,24 +175,35 @@ def heavyProcessing(modelDir, inputDict, tempScatterArray, tempsGroupedByDay):
 		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 			demandFile.write(inputDict['demandCurve'])
 		# Most of our data goes inside the dc "table"
-
-		df = pd.read_csv(pJoin(modelDir,"demand.csv"))
-		df = df.set_index(pd.DatetimeIndex(df['timestamp']))
-		startDate = df.iloc[0]['timestamp'][0:10]
-		endDate = df.tail(1)['timestamp'][0][0:10]
-		startDate = datetime.datetime.strptime(startDate, '%m/%d/%Y').strftime("%Y-%m-%d")
-		endDate = datetime.datetime.strptime(endDate, '%m/%d/%Y').strftime("%Y-%m-%d")
-		# makeClimateCsv(startDate, endDate, 'IAD', modelDir)
-		# df = df.drop('timestamp', 1)
-		#grouped = df.groupby(pd.TimeGrouper('D'))['power'].idxmax()
-		grouped = df.loc[df.groupby(pd.TimeGrouper('D')).idxmax().iloc[:, 0]]
+		dc = []
+		with open(pJoin(modelDir,"demand.csv")) as inFile:
+			reader = csv.DictReader(inFile)
+			for row in reader:
+				dc.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
 		winterData = []
 		summerData = []
 		fallData = []
 		springData = []
-		for row in grouped.iterrows():
-			month = int(row[1][0][0:2])
-			hour = int(row[1][0][11:13])
+		dcbyDay = []
+		dayDay = []
+		day = {}
+		for row in dc:
+			hour = row['datetime'].hour
+			day['power']=row['power']
+			day['hour'] = hour
+			day['month'] = row['datetime'].month
+			dayDay.append(day)
+			day = {}
+			if hour == 23:
+				dcbyDay.append(dayDay)
+				dayDay = []
+				day = {}
+		maxPowers = []
+		for dVals in dcbyDay:
+			maxPowers.append(max(dVals, key=lambda x:x['power']))
+		for row in maxPowers:
+			month = row['month']
+			hour = row['hour']
 			if month >= 2 and month <= 4:
 				springData.append(hour)
 			elif month >= 5 and month <= 7:
@@ -306,26 +316,11 @@ def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {
-		"batteryEfficiency": "92",
-		"inverterEfficiency": "97.5",
-		"cellCapacity": "7",
-		"discountRate": "2.5",
+		"airport": 'IAD',
 		"created": "2015-06-12 17:20:39.308239",
-		"dischargeRate": "5",
 		"modelType": "storageDispatch",
-		"chargeRate": "5",
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","FrankScadaValidCSV.csv")).read(),
-		"fileName": "FrankScadaValidCSV.csv",
-		"priceCurve": open(pJoin(__metaModel__._omfDir,"uploads","priceCurve.csv")).read(),
-		"fileNamed":"priceCurve.csv",
-		"cellCost": "7140",
-		"cellQuantity": "10",
-		"runTime": "0:00:03",
-		"projYears": "15",
-		"chargePriceThreshold": "0.07",
-		"dischargePriceThreshold":"0.15",
-		"dodFactor":"100",
-		"batteryCycleLife": "5000"
+		"fileName": "FrankScadaValidCSV.csv"
 		}
 	modelLoc = pJoin(workDir,"admin","Automated storageDispatch Testing")
 	# Blow away old test results if necessary.
