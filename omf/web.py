@@ -32,8 +32,14 @@ def getDataNames():
 	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "data","Model", currUser)):
 		for file in filenames:
 			if '.omd' in file and file != 'feeder.omd':
-				feeders.append({'name': file.strip('.omd'), 'model': dirpath.split('/')[-1]})	
-	return {"climates":sorted(climates), "feeders":feeders, "currentUser":currUser}
+				feeders.append({'name': file.strip('.omd'), 'model': dirpath.split('/')[-1]})
+	# Public feeders too.
+	publicFeeders = []
+	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "data","Model", "public")):
+		for file in filenames:
+			if '.omd' in file and file != 'feeder.omd':
+				publicFeeders.append({'name': file.strip('.omd'), 'model': dirpath.split('/')[-1]})
+	return {"climates":sorted(climates), "feeders":feeders, "publicFeeders":publicFeeders, "currentUser":currUser}
 
 @app.before_request
 def csrf_protect():
@@ -275,7 +281,7 @@ def newModel(modelType, modelName):
 	os.makedirs(modelDir)
 	inputDict = {"modelName" : modelName, "modelType" : modelType, "user":User.cu(), "created" : str(dt.datetime.now())}
 	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering']:
-		newSimpleFeeder(modelName, 1, False, 'feeder1')
+		newSimpleFeeder(User.cu(), modelName, 1, False, 'feeder1')
 		inputDict['feederName1'] = 'feeder1'
 	with open(os.path.join(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
@@ -386,11 +392,13 @@ def writeToInput(workDir, entry, key):
 @flask_login.login_required
 def feederGet(owner, modelName, feederNum):
 	''' Editing interface for feeders. '''
-	allFeeders = getDataNames()["feeders"]
+	allData = getDataNames()
+	yourFeeders = allData["feeders"]
+	publicFeeders = allData["publicFeeders"]
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
 	feederName = json.load(open(modelDir + "/allInputData.json")).get('feederName'+str(feederNum))
 	# MAYBEFIX: fix modelFeeder
-	return render_template("gridEdit.html", feeders=allFeeders, modelName=modelName, feederName=feederName, feederNum=feederNum, ref=request.referrer, is_admin=User.cu()=="admin", modelFeeder=False, public=owner=="public",
+	return render_template("gridEdit.html", feeders=yourFeeders, publicFeeders=publicFeeders, modelName=modelName, feederName=feederName, feederNum=feederNum, ref=request.referrer, is_admin=User.cu()=="admin", modelFeeder=False, public=owner=="public",
 		currUser = User.cu(), owner = owner)
 
 @app.route("/getComponents/")
@@ -407,19 +415,19 @@ def checkConversion(feederName):
 	print "Check conversion status:", os.path.exists(path), "for path", path
 	return jsonify(exists=os.path.exists(path))
 
-@app.route("/milsoftImport/", methods=["POST"])
+@app.route("/milsoftImport/<owner>", methods=["POST"])
 @flask_login.login_required
-def milsoftImport():
+def milsoftImport(owner):
 	''' API for importing a milsoft feeder. '''
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameM","feeder"))
 	feederNum = request.form.get("feederNum",1)
 	stdString, seqString = map(lambda x: request.files[x].stream.read(), ["stdFile", "seqFile"])
-	if not os.path.isdir("data/Conversion/" + User.cu()):
-		os.makedirs("data/Conversion/" + User.cu())
-	with open("data/Conversion/" + User.cu() + "/" + feederName + ".json", "w+") as conFile:
+	if not os.path.isdir("data/Conversion/" + owner):
+		os.makedirs("data/Conversion/" + owner)
+	with open("data/Conversion/" + owner + "/" + feederName + ".json", "w+") as conFile:
 		conFile.write("WORKING")
-	importProc = Process(target=milImportBackground, args=[User.cu(), modelName, feederName, feederNum, stdString, seqString])
+	importProc = Process(target=milImportBackground, args=[owner, modelName, feederName, feederNum, stdString, seqString])
 	importProc.start()
 	return ('',204)
 
@@ -438,22 +446,22 @@ def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqS
 	with open(feederDir, "w") as outFile:
 		json.dump(newFeeder, outFile, indent=4)
 	os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
-	removeFeeder(modelName, feederNum)
+	removeFeeder(owner, modelName, feederNum)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 
-@app.route("/gridlabdImport/", methods=["POST"])
+@app.route("/gridlabdImport/<owner>", methods=["POST"])
 @flask_login.login_required
-def gridlabdImport():
+def gridlabdImport(owner):
 	'''This function is used for gridlabdImporting'''
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameG",""))
 	feederNum = request.form.get("feederNum",1)
 	glmString = request.files["glmFile"].stream.read()
-	if not os.path.isdir("data/Conversion/" + User.cu()):
-		os.makedirs("data/Conversion/" + User.cu())
-	with open("data/Conversion/" + User.cu() + "/" + feederName + ".json", "w+") as conFile:
+	if not os.path.isdir("data/Conversion/" + owner):
+		os.makedirs("data/Conversion/" + owner)
+	with open("data/Conversion/" + owner + "/" + feederName + ".json", "w+") as conFile:
 		conFile.write("WORKING")
-	importProc = Process(target=gridlabImportBackground, args=[User.cu(), modelName, feederName, feederNum, glmString])
+	importProc = Process(target=gridlabImportBackground, args=[owner, modelName, feederName, feederNum, glmString])
 	importProc.start()
 	return ('',204)
 
@@ -472,23 +480,23 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 	with open(feederDir, "w") as outFile:
 		json.dump(newFeeder, outFile, indent=4)
 	os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
-	removeFeeder(modelName, feederNum)
+	removeFeeder(owner, modelName, feederNum)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 
 # TODO: Check if rename mdb files worked
-@app.route("/cymeImport/", methods=["POST"])
+@app.route("/cymeImport/<owner>", methods=["POST"])
 @flask_login.login_required
-def cymeImport():
+def cymeImport(owner):
 	''' API for importing a cyme feeder. '''
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameC",""))
 	feederNum = request.form.get("feederNum",1)
 	mdbNetString, mdbEqString = map(lambda x: request.files[x], ["mdbNetFile", "mdbEqFile"])
-	if not os.path.isdir("data/Conversion/" + User.cu()):
-		os.makedirs("data/Conversion/" + User.cu())
-	with open("data/Conversion/" + User.cu() + "/" + feederName + ".json", "w+") as conFile:
+	if not os.path.isdir("data/Conversion/" + owner):
+		os.makedirs("data/Conversion/" + owner)
+	with open("data/Conversion/" + owner + "/" + feederName + ".json", "w+") as conFile:
 		conFile.write("WORKING")
-	importProc = Process(target=cymeImportBackground, args=[User.cu(), modelName, feederName, feederNum, mdbNetString.filename, mdbEqString.filename])
+	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederName, feederNum, mdbNetString.filename, mdbEqString.filename])
 	importProc.start()
 	return ('',204)
 
@@ -507,34 +515,35 @@ def cymeImportBackground(owner, modelName, feederName, feederNum, mdbNetString, 
 	with open(feederDir, "w") as outFile:
 		json.dump(newFeeder, outFile, indent=4)
 	os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
-	removeFeeder(modelName, feederNum)
+	removeFeeder(owner, modelName, feederNum)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 
-@app.route("/newSimpleFeeder/<modelName>/<feederNum>/<writeInput>", methods=["POST", "GET"])
-def newSimpleFeeder(modelName, feederNum=1, writeInput=False, feederName='feeder1'):
-	workDir = os.path.join(_omfDir, "data", "Model", User.cu(), modelName)
-	for i in range(2,6):
-		if not os.path.isfile(os.path.join(workDir,feederName+'.omd')):
-			with open("./static/SimpleFeeder.json", "r") as simpleFeederFile:
-				with open(os.path.join(workDir, feederName+".omd"), "w") as outFile:
-					outFile.write(simpleFeederFile.read())
-			break
-		else: feederName = 'feeder'+str(i)
-	if writeInput: writeToInput(workDir, feederName, 'feederName'+str(feederNum))
-	return ('Success',204)
+@app.route("/newSimpleFeeder/<owner>/<modelName>/<feederNum>/<writeInput>", methods=["POST", "GET"])
+def newSimpleFeeder(owner, modelName, feederNum=1, writeInput=False, feederName='feeder1'):
+	if User.cu() == "admin" or owner == User.cu():
+		workDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
+		for i in range(2,6):
+			if not os.path.isfile(os.path.join(workDir,feederName+'.omd')):
+				with open("./static/SimpleFeeder.json", "r") as simpleFeederFile:
+					with open(os.path.join(workDir, feederName+".omd"), "w") as outFile:
+						outFile.write(simpleFeederFile.read())
+				break
+			else: feederName = 'feeder'+str(i)
+		if writeInput: writeToInput(workDir, feederName, 'feederName'+str(feederNum))
+		return ('Success',204)
+	else: return ('Invalid Login', 204)
 
-@app.route("/newBlankFeeder/", methods=["POST"])
+@app.route("/newBlankFeeder/<owner>", methods=["POST"])
 @flask_login.login_required
-def newBlankFeeder():
+def newBlankFeeder(owner):
 	'''This function is used for creating a new blank feeder.'''
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameNew"))
 	feederNum = request.form.get("feederNum",1)
 	if feederName == '': feederName = 'feeder'
-	modelDir = os.path.join(_omfDir, "data","Model", User.cu(), modelName)
-	owner = User.cu()
-	removeFeeder(modelName, feederNum)
-	newSimpleFeeder(modelName, feederNum, False, feederName)
+	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+	removeFeeder(owner, modelName, feederNum)
+	newSimpleFeeder(owner, modelName, feederNum, False, feederName)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
 
@@ -551,17 +560,18 @@ def feederData(owner, modelName, feederName, modelFeeder=False):
 @flask_login.login_required
 def saveFeeder(owner, modelName, feederName):
 	''' Save feeder data. '''
+	print "Saving feeder for:%s, with model: %s, and feeder: %s"%(owner, modelName, feederName)
 	if owner == User.cu() or "admin" == User.cu() or owner=="public":
 		with open("data/Model/" + owner + "/" + modelName + "/" + feederName + ".omd", "w") as outFile:
 			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
 			json.dump(payload, outFile, indent=4)
 	return ('Success',204)
 
-@app.route("/renameFeeder/<user>/<modelName>/<oldName>/<feederName>/<feederNum>", methods=["POST"])
+@app.route("/renameFeeder/<owner>/<modelName>/<oldName>/<feederName>/<feederNum>", methods=["POST"])
 @flask_login.login_required
-def renameFeeder(user, modelName, oldName, feederName, feederNum):
+def renameFeeder(owner, modelName, oldName, feederName, feederNum):
 	''' rename a feeder. '''
-	modelDir = os.path.join(_omfDir, "data","Model", user, modelName)
+	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
 	feederDir = os.path.join(modelDir, feederName+'.omd')
 	oldfeederDir = os.path.join(modelDir, oldName+'.omd')
 	if not os.path.isfile(feederDir) and os.path.isfile(oldfeederDir):
@@ -574,40 +584,66 @@ def renameFeeder(user, modelName, oldName, feederName, feederNum):
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	return ('Success',204)
 
-@app.route("/removeFeeder/<modelName>/<feederNum>", methods=["GET","POST"])
-@app.route("/removeFeeder/<modelName>/<feederNum>/<feederName>", methods=["GET","POST"])
+@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>", methods=["GET","POST"])
+@app.route("/removeFeeder/<owner>/<modelName>/<feederNum>/<feederName>", methods=["GET","POST"])
 @flask_login.login_required
-def removeFeeder(modelName, feederNum, feederName=None):
+def removeFeeder(owner, modelName, feederNum, feederName=None):
 	'''Remove a feeder from input data.'''
-	try:
-		modelDir = os.path.join(_omfDir, "data","Model", User.cu(), modelName)
-		with open(modelDir + "/allInputData.json") as inJson:
-			allInput = json.load(inJson)
+	if User.cu() == "admin" or owner == User.cu():
 		try:
-			feederName = str(allInput.get('feederName'+str(feederNum)))
-			os.remove(os.path.join(modelDir, feederName +'.omd'))
-		except: print "Couldn't remove feeder file in web.removeFeeder()."
-		allInput.pop("feederName"+str(feederNum))
-		with open(modelDir+"/allInputData.json","w") as inputFile:
-			json.dump(allInput, inputFile, indent = 4)
-		return ('Success',204)
-	except:
-		return ('Failed',204)
+			modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+			with open(modelDir + "/allInputData.json") as inJson:
+				allInput = json.load(inJson)
+			try:
+				feederName = str(allInput.get('feederName'+str(feederNum)))
+				os.remove(os.path.join(modelDir, feederName +'.omd'))
+			except: print "Couldn't remove feeder file in web.removeFeeder()."
+			allInput.pop("feederName"+str(feederNum))
+			with open(modelDir+"/allInputData.json","w") as inputFile:
+				json.dump(allInput, inputFile, indent = 4)
+			return ('Success',204)
+		except:
+			return ('Failed',204)
+	else: 
+		return ('Invalid Login', 204)
 
-@app.route("/loadFeeder/<tfeederName>/<tmodelName>/<modelName>/<feederNum>", methods=["GET","POST"])
+@app.route("/loadFeeder/<frfeederName>/<frmodelName>/<modelName>/<feederNum>/<frUser>/<owner>", methods=["GET","POST"])
 @flask_login.login_required
-def loadFeeder(tfeederName, tmodelName, modelName, feederNum):
+def loadFeeder(frfeederName, frmodelName, modelName, feederNum, frUser, owner):
 	'''Load a feeder from one model to another.'''
-	print "Entered loadFeeder with info: tfeederName %s, tmodelName: %s, modelname: %s, feederNum: %s"%(tfeederName, tmodelName, str(modelName), str(feederNum))
-	tmodelDir = "./data/Model/" + User.cu() + "/" + tmodelName
-	modelDir = "./data/Model/" + User.cu() + "/" + modelName	
+	if frUser != "public": frUser = User.cu()
+	print "Entered loadFeeder with info: frfeederName %s, frmodelName: %s, modelName: %s, feederNum: %s"%(frfeederName, frmodelName, str(modelName), str(feederNum))
+	frmodelDir = "./data/Model/" + frUser + "/" + frmodelName
+	modelDir = "./data/Model/" + owner + "/" + modelName
 	with open(modelDir + "/allInputData.json") as inJson:
-		feederName = allInput = json.load(inJson).get('feederName'+str(feederNum))
-	with open(os.path.join(tmodelDir, tfeederName+'.omd'), "r") as inFeeder:
+		feederName = json.load(inJson).get('feederName'+str(feederNum))
+	with open(os.path.join(frmodelDir, frfeederName+'.omd'), "r") as inFeeder:
 		with open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
 			outFile.write(inFeeder.read())
-	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
-	return redirect(url_for('feederGet', owner=User.cu(), modelName=modelName, feederNum=feederNum))
+	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
+
+@app.route("/cleanUpFeeders/<owner>/<modelName>", methods=["GET", "POST"])
+@flask_login.login_required
+def cleanUpFeeders(owner, modelName):
+	'''Go through allInputData and fix feeder Name keys'''
+	modelDir = "./data/Model/" + owner + "/" + modelName
+	with open(modelDir + "/allInputData.json") as inJson:
+		allInput = json.load(inJson)
+	feeders = {}
+	feederKeys = ['feederName1', 'feederName2', 'feederName3', 'feederName4', 'feederName5']
+	import pprint as pprint
+	pprint.pprint(allInput)
+	for key in feederKeys:
+		feederName = allInput.get(key,'')
+		if feederName != '':
+			feeders[key] = feederName
+		allInput.pop(key,None)
+	for i,key in enumerate(sorted(feeders)):
+		allInput['feederName'+str(i+1)] = feeders[key]
+	pprint.pprint(allInput)
+	with open(modelDir+"/allInputData.json","w") as inputFile:
+		json.dump(allInput, inputFile, indent = 4)
+	return redirect("/model/" + owner + "/" + modelName)
 
 ###################################################
 # OTHER FUNCTIONS
@@ -659,12 +695,12 @@ def downloadModelData(owner, modelName, fullPath):
 	pathPieces = fullPath.split('/')
 	return send_from_directory("data/Model/"+owner+"/"+modelName+"/"+"/".join(pathPieces[0:-1]), pathPieces[-1])
 
-@app.route("/uniqObjName/<objtype>/<name>")
-@app.route("/uniqObjName/<objtype>/<name>/<modelName>")
+@app.route("/uniqObjName/<objtype>/<owner>/<name>")
+@app.route("/uniqObjName/<objtype>/<owner>/<name>/<modelName>")
 @flask_login.login_required
-def uniqObjName(objtype, name, modelName=False):
+def uniqObjName(objtype, owner, name, modelName=False):
 	''' Checks if a given object type/owner/name is unique. '''
-	owner = User.cu()
+	print "Entered uniqobjname", owner, name, modelName
 	if objtype == "Model":
 		path = "data/Model/" + owner + "/" + name
 	elif objtype == "Feeder":

@@ -103,10 +103,6 @@ function showProgressDialog(dialogMessage, cancel) {
 				console.log('Conversion cancelled.')
 				document.cookie = "converting=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
 				newfeeder.submit();
-				// params = {user:{{ user }},
-				// 	modelName:{{ modelName }},
-				// 	feederName:{{ feedername }}}
-				// post_to_url("/newBlankFeeder/", params, "POST");
 			}
     	};
 	    progContent.appendChild(cancelBtn);
@@ -306,8 +302,9 @@ function init() {
 	if (modelUser == "public" && currentUser != "admin") {
 		$("button#deleteButton").hide();
 		$("button#publishButton").hide();
-		$("button#rerunButton").hide();
-	}
+		$("button#duplicateButton").show();
+		$("button#runButton").hide();
+	}	
 }
 
 function restoreInputs() {
@@ -370,7 +367,7 @@ function duplicateModel() {
 		newName = prompt("Public a copy with new name, only letters, digits and underscore are allowed in the model name.\nPlease rename your new model", allInputData.modelName)
 	}
 	if (newName) {
-		$.ajax({url:"/uniqObjName/Model/" + allInputData.user + "/" + newName}).done(function(data) {
+		$.ajax({url:"/uniqObjName/Model/" + currentUser + "/" + newName}).done(function(data) {
 			if (data.exists) {
 				alert("There is already a model named " + newName)
 				duplicateModel()
@@ -419,13 +416,15 @@ function isFormValid() {
 }
 
 function createModelName(modelType, modelName) {
+	var username = sessionStorage.getItem('user');
+	console.log(username)
 	if (typeof(modelName)==='undefined') modelName = '';
 	modelName = prompt("Create a model with name", modelName)
 	while (! /^[\w\s]+$/.test(modelName)){
 		modelName = prompt("Only letters, digits and underscore are allowed in the model name.\nPlease rename your new model")
 	}
 	if (modelName) {
-		$.ajax({url:"/uniqObjName/Model/" + modelName}).done(function(data) {
+		$.ajax({url:"/uniqObjName/Model/" + username + "/" + modelName}).done(function(data) {
 			if (data.exists) {
 				alert("There is already a model named " + modelName)
 				createModelName(modelType, modelName)
