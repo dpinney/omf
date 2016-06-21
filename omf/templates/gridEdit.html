@@ -13,19 +13,18 @@
 	<link rel="shortcut icon" href="/static/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="/static/gridEdit.css"/>
 	<style>
-		ul.menu.rightFeeder {width:350px;right:0%; left: auto;padding:1em;}
-		div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-top:4px;}
+		ul.menu.rightFeeder {width:350px;right:0%; left: auto;}
+		div#menuLeft{max-height:40px;float:left;font-size:medium;color:white;margin:-5px 0 0 15px;max-width:430px;}
 		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
 		div#fileDiv{width:55px;padding:0 0.9em 0 0.9em;float:right;}
-		div#importDiv{margin:-12px;padding:1em;}
-		table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:auto;display:inline;}
+		table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:5px;display:inline;}
 		table.importOptions tr td:first-child {width:40%;}
 		table.importOptions td {border-bottom: none}
 		select, input[type='text'], input[type='email'], input[type='file'], button {
 			margin: -2px 0 -2px 0;font-size:small;}
 		input[type='text'], input[type='file']{margin: -2px auto -2px auto;text-align:left;}
 		input[type='submit'] {padding:4px 6px 4px; float:right;}
-		div#layoutDiv{width:50px;padding:0 0.9em 0 0.9em;float:right;}
+		div#layoutDiv{width:50px;padding:0 0.9em 0 0.9em;float:right;margin-right:5px;}
 		div#findDiv{width:35px;padding:0 0.9em 0 0.9em;float:right;}
 		div#foldDiv{width:60px;padding:0 0.9em 0 0.9em;float:right;}
 		div#pinDiv{width:60px;padding:0 0.9em 0 0.9em;float:right}
@@ -233,17 +232,17 @@
 				setTimeout(checkConversion,2000);
 			}
 			else{
-				showProgressDialog('Loading Feeder');				
+				showProgressDialog('Loading Feeder');
 			}
-		}	
-	</script>	
+		}
+	</script>
 </head>
 <body onkeypress='hotkeys()' onload="showProgress();">
 <div id="header">
 	<div id="menuLeft">
-		&nbsp;Feeder
-		<span contenteditable="false" id='feederName' name='feederName' style="font-weight:bold;">{{ feederName }}</span>
-		&nbsp;from Model&nbsp;&nbsp;&#8220;{{ modelName }}&#8221;
+		&nbsp;<span contenteditable="false" id='feederName' name='feederName' style="font-weight:bold;">{{ feederName }}</span>
+		<br>
+		&nbsp;from&#8220;{{ modelName }}&#8221;
 	</div>
 	<script>
 		function checkConversion() {
@@ -262,7 +261,7 @@
 					}).done(function (data) {
 						if (data.exists) {
 							conversionStatus = 'converting';
-						} 
+						}
 						else {
 							conversionStatus = 'done';
 						}
@@ -271,14 +270,16 @@
 						console.log('conversion done')
 						document.cookie = "converted="+feederName;
 						document.cookie = "converting=; expires=Thu, 02 Jan 1970 00:00:00 UTC";
+						// Pin it and refresh page.
+						pinAll();
+						savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}");
 						window.location.reload();
-						// throw new Error("Broke execution!");					
 					}
 					console.log("Converting...")
 					return pingAPI;
 				}(), 5000);
 			}
-		}	
+		}
 		function importFiles(convMethod, feederNameID){
 			gebi(convMethod).submit();
 			document.cookie = "converting={{ feederNum }}/"+document.getElementById(feederNameID).value;
@@ -289,31 +290,58 @@
 	<div id="menuRight">
 		<div id="fileDiv">
 			<div class='buttonGroup'>
+				{% if is_admin or not public %}
 				<button id="fileOps" class='pill' onclick='dropPillAndStay(this, "File")'>File ▾</button>
 				<ul class='menu rightFeeder'>
-					{% if is_admin or not public %}
 					<li><a href='javascript:saveFeeder();'>Save</a></li>
 					<li><a href='javascript:renameFeeder();'>Rename</a></li>
-					<li><a href='javascript:showLoadDiv();'>Load from Model</a></li>
-					<div id='loadDiv' style="visibility:hidden;font-size:10pt;height:0;margin-bottom:10px;">
-						<li><a href="#" onclick="closeLoadDiv()">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Cancel</a></li>
-						<div style="overflow-y:auto;overflow-x:auto;height:125px;">
-							{% for feeder in feeders %}
-								<li><a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}")'>
-								&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-								{{ feeder.name }} from model {{ feeder.model }}
-								</a></li>
-							{% endfor %}
-							</a></li>
+					<li><a href='javascript:showDiv("loadDiv","500px", "0px");'>Load from Model</a></li>
+					<div id='loadDiv' style="visibility:hidden;font-size:10pt;height:0;">
+						<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","250px", "0px");'>Public Feeders</a></p></li>
+						<div id="pubFeeders" style="visibility:hidden;height:0px;">
+							<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
+								{% for feeder in publicFeeders %}
+									{% if feeder.name != feederName %}
+										<li>
+										<a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}", "public")'>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										<strong>{{ feeder.name }}</strong> from
+										<br>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&#8220;{{ feeder.model }}&#8221;
+										</a>
+										</li>
+									{% endif %}
+								{% endfor %}
+							</div>
 						</div>
-					</div>					
-					<br>
-					<div id="importDiv">
-						<form onsubmit='event.preventDefault(); return startConversion("feederNameNew",1);' action='/newBlankFeeder/' id='newfeeder' enctype='multipart/form-data' method='post'>
+						<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("myFeeders","250px", "0px");'>My Feeders</a></p></li>
+						<div id="myFeeders" style="visibility:hidden;height:0;">
+							<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
+								{% for feeder in feeders %}
+									{% if feeder.name != feederName %}
+										<li>
+										<a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}", "{{ owner }}")'>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										Model &nbsp; &#8220;{{ feeder.model }}&#8221;
+										<br>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										Feeder <strong>{{ feeder.name }}</strong>
+										</a>
+										</li>
+									{% endif %}
+								{% endfor %}
+							</div>
+						</div>
+						<li><a href="#" onclick='closeDiv("loadDiv");closeDiv("pubFeeders");closeDiv("myFeeders");' style="text-align:center;font-size:12pt;">Cancel</a></li>
+					</div>
+					<p style='font-weight:bold;margin: 10px 0 0 4px;'>New Feeder</p>
+					<li><a href='javascript:showDiv("newFeederDiv","50px;", "0px;");'>Blank Feeder</a></li>
+					<div id="newFeederDiv" style="visibility:hidden;height:0;">
+						<form onsubmit='event.preventDefault(); return startConversion("feederNameNew",1);' action='/newBlankFeeder/{{ owner }}' id='newfeeder' enctype='multipart/form-data' method='post'>
 							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
 							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-							<p style='font-weight:bold;'>Blank Feeder</p>
 							<table class='importOptions'>
 								<tr>
 									<td>Name</td>
@@ -325,11 +353,14 @@
 								</tr>
 							</table>
 						</form>
-						<form onsubmit='event.preventDefault(); return startConversion("feederNameM",2);' action="/milsoftImport/" id='milsoft' enctype='multipart/form-data' method='post'>
+						<li><a href="#" onclick='closeDiv("newFeederDiv")' style="text-align:center;font-size:10pt;">Cancel</a></li>
+					</div>
+					<li><a href='javascript:showDiv("milSoftDiv","50px;", "0px;");'>Milsoft Conversion</a></li>
+					<div id="milSoftDiv" style="visibility:hidden;height:0;">
+						<form onsubmit='event.preventDefault(); return startConversion("feederNameM",2);' action="/milsoftImport/{{ owner }}" id='milsoft' enctype='multipart/form-data' method='post'>
 							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
 							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-							<p style='font-weight:bold;'>Milsoft</p>
 							<table class='importOptions'>
 								<tr>
 									<td>Name</td>
@@ -350,13 +381,14 @@
 							</table>
 						</form>
 						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+						<li><a href="#" onclick='closeDiv("milSoftDiv")' style="text-align:center;font-size:10pt;">Cancel</a></li>
 					</div>
-					<div id="importDiv">
-						<form onsubmit='event.preventDefault(); return startConversion("feederNameG",3);' action='/gridlabdImport/' id='gridlabd' enctype='multipart/form-data' method='post'>
+					<li><a href='javascript:showDiv("gridlabDiv","50px;", "0px;");'>GridLAB-D Conversion</a></li>
+					<div id="gridlabDiv" style="visibility:hidden;height:0;">
+						<form onsubmit='event.preventDefault(); return startConversion("feederNameG",3);' action='/gridlabdImport/{{ owner }}' id='gridlabd' enctype='multipart/form-data' method='post'>
 							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
 							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-							<p style='font-weight:bold;'>GridLAB-D</p>
 							<table class='importOptions'>
 								<tr>
 									<td>Name</td>
@@ -373,13 +405,14 @@
 							</table>
 						</form>
 						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+						<li><a href="#" onclick='closeDiv("gridlabDiv")' style="text-align:center;font-size:10pt;">Cancel</a></li>
 					</div>
-					<div id="importDiv">
-						<form onsubmit='event.preventDefault(); return startConversion("feederNameC",4);' action='/cymeImport/' id='cyme' enctype='multipart/form-data' method='post'>
+					<li><a href='javascript:showDiv("cymeDiv","20px;", "0px;");'>Cyme Conversion</a></li>
+					<div id="cymeDiv" style="visibility:hidden;height:0;">
+						<form onsubmit='event.preventDefault(); return startConversion("feederNameC",4);' action='/cymeImport/{{ owner }}' id='cyme' enctype='multipart/form-data' method='post'>
 							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
 							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-							<p style='font-weight:bold;'>Cyme</p>
 							<table class='importOptions'>
 								<tr>
 									<td>Name</td>
@@ -400,9 +433,10 @@
 							</table>
 						</form>
 						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+						<li><a href="#" onclick='closeDiv("cymeDiv")' style="text-align:center;font-size:10pt;">Cancel</a></li>
 					</div>
-					{% endif %}
 				</ul>
+				{% endif %}
 			</div>
 		</div>
 		<div id="layoutDiv">
@@ -750,6 +784,7 @@ function savePoster(name, modelName, user) {
  * Save the modified feeder data, and cover the one already in filesystems.
  */
 function saveFeeder() {
+	gebi("fileOps").click();
 	savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}")
 }
 
@@ -764,7 +799,7 @@ function renameFeeder() {
 		var newName = prompt("Rename the feeder to",lastFeederName)
 		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)){
 			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", "{{ feederName }}")
-		}		
+		}
 		if (newName){
 			checkFeederName(newName)
 		}
@@ -776,16 +811,17 @@ function checkFeederName(newName) {
 	if (true) {
 		var modelName = "{{ modelName }}"
 		$.ajax({
-			url: "/uniqObjName/Feeder/" + newName + "/" + modelName
+			url: "/uniqObjName/Feeder/" + "{{ owner }}" + "/" + newName + "/" + modelName
 		}).done(function (data) {
 			if (data.exists) {
 				alert("You already have a Feeder named '" + newName + "', please choose a different name.")
 				renameFeeder()
 			}
 			else{
+				gebi("fileOps").click();
 				post_to_url("/renameFeeder/" + "{{ owner }}" + "/" + "{{ modelName }}" + "/" + lastFeederName + "/" + newName + "/" + "{{ feederNum }}")
 				document.getElementById('feederName').innerHTML = newName;
-				lastFeederName = newName; //permits multiple name changes without forcing page refresh.				
+				lastFeederName = newName; //permits multiple name changes without forcing page refresh.
 			}
 		})
 	}
@@ -798,7 +834,7 @@ function startConversion(elementName, nextAction) {
 	if (true) {
 		var modelName = "{{ modelName }}"
 		$.ajax({
-			url: "/uniqObjName/Feeder/" + newName + "/" + modelName
+			url: "/uniqObjName/Feeder/" + "{{ owner }}" + "/" + newName + "/" + modelName
 		}).done(function (data) {
 			if (data.exists) {
 				alert("You already have a Feeder named '" + newName + "', please choose a different name.")
@@ -813,17 +849,30 @@ function startConversion(elementName, nextAction) {
 	}
 }
 
-function showLoadDiv(){
-	gebi('loadDiv').style.visibility = 'visible';
-	gebi('loadDiv').style.height = '100%';
-	gebi('loadDiv').style.maxHeight = '125px';
+function showDiv(element,maxHeight, marginBot){
+	gebi(element).style.visibility = 'visible';
+	gebi(element).style.height = '100%';
+	gebi(element).style.maxHeight = maxHeight;
+	gebi(element).style.marginBottom = marginBot;
 }
-function closeLoadDiv(){
-	gebi('loadDiv').style.visibility = 'hidden';
-	gebi('loadDiv').style.height = '0';
+function closeDiv(element){
+	gebi(element).style.visibility = 'hidden';
+	gebi(element).style.height = '0';
+	gebi(element).style.marginBottom = '0px';
 }
-function loadFeeder(targetfeederName, targetmodelName, feederNum){
-	post_to_url("/loadFeeder/" + targetfeederName + "/" + targetmodelName + "/" + "{{ modelName }}" + "/" + "{{ feederNum }}")
+function loadFeeder(fromfeederName, frommodelName, fromuser){
+	var modelName = "{{ modelName }}"
+	$.ajax({
+		url: "/uniqObjName/Feeder/" + fromuser + "/" + fromfeederName + "/" + frommodelName
+	}).done(function (data) {
+		if (data.exists) {
+			post_to_url("/loadFeeder/" + fromfeederName + "/" + frommodelName + "/" + "{{ modelName }}" + "/" + "{{ feederNum }}" + "/" + fromuser + "/" + "{{ owner }}")
+		}
+		else{
+			alert('This feeder no longer exists. Please refresh the page, or select another one.')
+		}
+	})
+
 }
 //*********************************************
 // FUNCTIONS FOR DRAWING:
@@ -916,7 +965,7 @@ function draw() {
 			clearInterval(interval)
 		} else if (nodes[parseInt(Math.random() * nodes.length)].fixed) {
 			removeProgressDialog()
-			clearInterval(interval)			
+			clearInterval(interval)
 		} else {
 			// Run the layout in the background until performance is acceptable.
 			for (i = 0; i < 10; ++i) force.tick()
@@ -2585,11 +2634,12 @@ $(function () {
 })
 
 //ADD PROMPT TO SAVE CHANGES BEFORE EXIT
-window.onbeforeunload = function(e) {
-	var confirmationMessage = 'It looks like you have been editing something. ';
-	confirmationMessage += 'If you leave before saving, your changes will be lost.';
-	if (unsavedChanges) return confirmationMessage;
-};
-
+{% if is_admin or not public %}
+	window.onbeforeunload = function(e) {
+		var confirmationMessage = 'It looks like you have been editing something. ';
+		confirmationMessage += 'If you leave before saving, your changes will be lost.';
+		if (unsavedChanges) return confirmationMessage;
+	};
+{% endif %}
 </script>
 </body>
