@@ -50,12 +50,6 @@ def run(modelDir, inputDict):
 
 	airport = str(inputDict.get('airport', 'IAD'))
 	dc = []
-	df = pd.read_csv(pJoin(modelDir,"demand.csv"))
-	df = df.set_index(pd.DatetimeIndex(df['timestamp']))
-	startDate = df.iloc[0]['timestamp'][0:10]
-	endDate = df.tail(1)['timestamp'][0][0:10]
-	startDate = datetime.datetime.strptime(startDate, '%m/%d/%Y').strftime("%Y-%m-%d")
-	endDate = datetime.datetime.strptime(endDate, '%m/%d/%Y').strftime("%Y-%m-%d")
 	weatherFilePath = modelDir + "/weather.csv"
 	try:
 		if not os.path.isfile(weatherFilePath):
@@ -69,17 +63,17 @@ def run(modelDir, inputDict):
 			with open(modelDir + "/" + matchedFiles[0]) as file:
 				file.next()
 				for line in file:
-				 	fout.write(line)
-	     	for num in range(1,len(matchedFiles)):
-	     	 	f = open(modelDir + "/" + matchedFiles[num])
-	      	 	f.next() # skip the header
-	      	 	f.next()
-	      		for line in f:
-	       	   		fout.write(line)
-	      	fout.close()
-      	#Delete excess csv files
-	    	for file in matchedFiles:
-	      		os.remove(modelDir + "/" + file)
+					fout.write(line)
+			for num in range(1,len(matchedFiles)):
+				f = open(modelDir + "/" + matchedFiles[num])
+				f.next() # skip the header
+				f.next()
+				for line in f:
+					fout.write(line)
+			fout.close()
+			#Delete excess csv files
+			for file in matchedFiles:
+				os.remove(modelDir + "/" + file)
 	except:
 		pass
 
@@ -90,12 +84,12 @@ def run(modelDir, inputDict):
 	wd = []
 	with open(pJoin(modelDir,"weather.csv")) as inFile:
 		reader = csv.DictReader(inFile)
-	 	for row in reader:
-	 		keyList = row.keys()
-	 		for item in keyList:
-	 			if item.startswith('Time'):
-	 				time = item
-	 		wd.append({'date': row['DateUTC<br />'], 'time': row[time] ,'temperature': float(row['TemperatureF'])})
+		for row in reader:
+			keyList = row.keys()
+			for item in keyList:
+				if item.startswith('Time'):
+					time = item
+			wd.append({'date': row['DateUTC<br />'], 'time': row[time] ,'temperature': float(row['TemperatureF'])})
 	wdf = []
 	for row in wd:
 		time = row['date'][0:10] + ' ' + row['time'][0:11]
