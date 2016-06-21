@@ -47,9 +47,16 @@ def run(modelDir, inputDict):
 		pass
 	with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
 		demandFile.write(inputDict['demandCurve'])
-
+	dateArray = []
+	with open(pJoin(modelDir,"demand.csv")) as inFile:
+			reader = csv.DictReader(inFile)
+			for row in reader:
+				dateArray.append({'datetime': parse(row['timestamp'])})
+	startDate = str(dateArray[0]['datetime'])[0:10]
+	endDate = str(dateArray[len(dateArray)-1]['datetime'])[0:10]
+	print startDate, endDate
 	airport = str(inputDict.get('airport', 'IAD'))
-	dc = []
+	
 	weatherFilePath = modelDir + "/weather.csv"
 
 	if not os.path.isfile(weatherFilePath):
