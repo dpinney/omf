@@ -114,7 +114,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return checkModelName();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-gridlabMulti" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="gridlabMulti" title="This is Model Type" readonly/>

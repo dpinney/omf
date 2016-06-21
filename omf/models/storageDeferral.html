@@ -64,7 +64,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} action="/runModel/"{% endif %} method="post">
+		<form name="inputForm" {% if quickRender %} action="/quickRun/" {% else %} action="/runModel/"{% endif %} onsubmit="event.preventDefault(); return checkModelName();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-storageDeferral" target="blank">Help?</a></label>
 				<input type="text" id="modelType" name="modelType" value="storageDeferral" readonly/>

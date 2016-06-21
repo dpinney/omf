@@ -28,7 +28,7 @@
 	</div>
 	<p class="reportTitle">Model Input</p>
 	<div id="input" class="content">
-		<form name="inputForm" action="/runModel/" method="post">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return checkModelName();" method="post">
 			<!-- Required Inputs -->
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-modelSkeleton" target="blank">Help?</a></label>
