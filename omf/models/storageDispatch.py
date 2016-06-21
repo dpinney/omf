@@ -199,6 +199,7 @@ def heavyProcessing(modelDir, inputDict, tempScatterArray, tempsGroupedByDay):
 				dayDay = []
 				day = {}
 		maxPowers = []
+		#Without pandas
 		for dVals in dcbyDay:
 			maxPowers.append(max(dVals, key=lambda x:x['power']))
 		for row in maxPowers:
