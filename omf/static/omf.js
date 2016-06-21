@@ -374,16 +374,7 @@ function duplicateModel() {
 function checkModelName() {
 	// Additional check, required for Safari browsers
 	if (isFormValid()) {
-		var newName = document.getElementById('modelName').value
-		$.ajax({
-			url: "/uniqObjName/Model/" + currentUser + "/" + newName
-		}).done(function (data) {
-			if (data.exists) {
-				alert("You already have a Model named '" + newName + "', please choose a different name.")
-			} else {
-				inputForm.submit()
-			}
-		})
+		inputForm.submit()
 	}
 }
 
