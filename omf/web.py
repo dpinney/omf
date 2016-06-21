@@ -669,9 +669,13 @@ def root():
 			allInput = json.load(open(modPath + "/allInputData.json"))
 			mod["runTime"] = allInput.get("runTime","")
 			mod["modelType"] = allInput.get("modelType","")
-			mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
-			# mod["created"] = allInput.get("created","")
-			mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime))
+			try:
+				mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
+				# mod["created"] = allInput.get("created","")
+				mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime))
+			except: # the model type was deprecated, so the getattr will fail.
+				mod["status"] = "stopped"
+				mod["editDate"] = "N/A"
 		except:
 			continue
 	return render_template("home.html", models = allModels, current_user = User.cu(), is_admin = isAdmin, modelNames = models.__all__)
