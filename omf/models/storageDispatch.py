@@ -51,31 +51,29 @@ def run(modelDir, inputDict):
 	airport = str(inputDict.get('airport', 'IAD'))
 	dc = []
 	weatherFilePath = modelDir + "/weather.csv"
-	try:
-		if not os.path.isfile(weatherFilePath):
-			#build weather csv
-			_downloadWeather(startDate, endDate, airport, modelDir)
-			fileList = os.listdir(modelDir)
-			filePtrn = re.compile("weather_(?P<loc>[A-Za-z0-9]+)_(?P<raw_date>[0-9]+_[0-9]+_[0-9]+).csv")
-			matchedFiles = list(filter(filePtrn.match, fileList))
-			matchedList = [filePtrn.match(x) for x in matchedFiles]
-			fout=open(modelDir + "/" +"weather.csv","a")
-			with open(modelDir + "/" + matchedFiles[0]) as file:
-				file.next()
-				for line in file:
-					fout.write(line)
-			for num in range(1,len(matchedFiles)):
-				f = open(modelDir + "/" + matchedFiles[num])
-				f.next() # skip the header
-				f.next()
-				for line in f:
-					fout.write(line)
-			fout.close()
-			#Delete excess csv files
-			for file in matchedFiles:
-				os.remove(modelDir + "/" + file)
-	except:
-		pass
+
+	if not os.path.isfile(weatherFilePath):
+		#build weather csv
+		_downloadWeather(startDate, endDate, airport, modelDir)
+		fileList = os.listdir(modelDir)
+		filePtrn = re.compile("weather_(?P<loc>[A-Za-z0-9]+)_(?P<raw_date>[0-9]+_[0-9]+_[0-9]+).csv")
+		matchedFiles = list(filter(filePtrn.match, fileList))
+		matchedList = [filePtrn.match(x) for x in matchedFiles]
+		fout = open(modelDir + "/" +"weather.csv","a")
+		with open(modelDir + "/" + matchedFiles[0]) as file:
+			file.next()
+			for line in file:
+				fout.write(line)
+		for num in range(1,len(matchedFiles)):
+			f = open(modelDir + "/" + matchedFiles[num])
+			f.next() # skip the header
+			f.next()
+			for line in f:
+				fout.write(line)
+		fout.close()
+		#Delete excess csv files
+		for file in matchedFiles:
+			os.remove(modelDir + "/" + file)
 
 	with open(pJoin(modelDir,"demand.csv")) as inFile:
 		reader = csv.DictReader(inFile)
