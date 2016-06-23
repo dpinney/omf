@@ -20,6 +20,7 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<script>var childWindow;</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		function makeFeeder(modelName, feederNum) {
@@ -27,14 +28,35 @@
 		}
 		function editFeeder(modelName, feederNum) {
 			studyUser = allInputData.user
-			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+			childWindow = window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
 		}
-		function removeFeeder(feederNo){
-			post_to_url("/removeFeeder/" + allInputData.user + "/" + allInputData.modelName + "/" + feederNo)
+		function toggleRemove(add){
+			var len = $('.feederList').length
+			var n = 2;
+			$('.remove-feeder').each(function() {
+				if (add==false){
+					if (n<len){
+						$(this).hide()
+						n++}
+				}
+				else{
+					if (n==(len-1)){
+						$(this).show()}
+					n++
+				}
+			});
 		}
-		function cleanUpFeeders(){
-			post_to_url("/cleanUpFeeders/" + allInputData.user + "/" + allInputData.modelName)
-		}
+		setTimeout(function() { toggleRemove(false); }, 1000);
+		$(document).ready(function(){
+			$(document).bind('mainWindow', function(e, message){
+				var modelName = message.split(";")[0]
+				var feederNum = message.split(";")[1]
+				var feederName = message.split(";")[2]
+				if (allInputData.modelName == modelName){
+					gebi(feederNum).innerHTML = feederName;
+				}
+			});
+		});
 		$(document).ready(function(){
 			$('.content .add-feeder').click(function(){
 				var n = $('.feederList').length + 1;
@@ -42,11 +64,12 @@
 					alert('Please do not add more than 5 feeders.');
 					return false;
 				}
-				var feeder_html = $('<div class="feederList shortInput"><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a class="remove-feeder postRun stopped" href="#" style="display:inline" title="Remove feeder">&#8854;</a><button type="button" onclick="javascript:editFeeder(allInputData.modelName,' + n +');" style="display:block;width:125px;">Open Editor</button></div>');
+				var feeder_html = $('<div class="feederList shortInput"><label for="feeder' + n + '">Feeder <span class="feeder-number" >'+n+' </span></label><a id="feederNum'+n+'" class="remove-feeder postRun stopped" href="#" style="display:inline" title="Remove feeder">&#8854;</a><button type="button" onclick="javascript:editFeeder(allInputData.modelName,' + n +');" style="display:block;width:125px;">Open Editor</button></div>');
 				feeder_html.hide();
 				$('.content .feederList:last').after(feeder_html);
 				feeder_html.fadeIn('slow');
 				makeFeeder(allInputData.modelName, n);
+				toggleRemove(false)
 				return false;
 			});
 			$('.content').on('click', '.remove-feeder', function(){
@@ -55,8 +78,10 @@
 					$(this).remove();
 					$('.feeder-number').each(function(index){
 						$(this).text( index + 1 + " ");
+						post_to_url("/removeFeeder/" + allInputData.user + "/" + allInputData.modelName + "/" + (index+2))
 					});
 				});
+				toggleRemove(true)
 				return false;
 			});
 		});
@@ -101,7 +126,6 @@
 			}
 		}
 	</script>
-
 </head>
 <body onload="init()">
 	<div id="header">
@@ -144,18 +168,34 @@
 			</div>
 			{% else %}
 			{% for feederID in feederIDs %}
-			<div class="feederList shortInput">
+			<div id="feederID" class="feederList shortInput">
 				<label for="feeder1">Feeder <span class="feeder-number">{{feederIDs.index(feederID) + 1}}</span></label>
 					{% if feederIDs.index(feederID)+1 == 1 %}
-						<a class='add-feeder postRunInline stoppedInline' href='#' title="Addfeeder" id="addFeeder">&#8853;</a>
+						<a class='add-feeder postRunInline stoppedInline' href='#' title="Add  feeder">&#8853;</a>
 					{% else %}
-						<a class='remove-feeder postRunInline stoppedInline' href='#' onclick='removeFeeder("{{feederID}}".split("feederName")[1])' title="Removefeeder">&#8854;</a>
+						<a class='remove-feeder postRunInline stoppedInline' href='#' title="Remove  feeder">&#8854;</a>
 					{% endif %}
-				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,'{{feederID}}'.split('feederName')[1]);" style="display:block;width:125px;">Open Editor</button>
+				<br>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,{{feederIDs.index(feederID) + 1}});" style="display:inline;width:125px;">Open Editor</button>
+				{% if feederID|string() == "feederName1" %}
+					<label id="feederName1" style="display:inline;font-size:12pt;overflow-x:auto;"></label>
+					<script>gebi('feederName1').innerHTML = allInputData.feederName1;</script>
+				{% elif feederID|string() == "feederName2" %}
+					<label id="feederName2" style="display:inline;font-size:12pt;overflow-x:auto;"></label>
+					<script>gebi('feederName2').innerHTML = allInputData.feederName2;</script>
+				{% elif feederID|string() == "feederName3" %}
+					<label id="feederName3" style="display:inline;font-size:12pt;overflow-x:auto;"></label>
+					<script>gebi('feederName3').innerHTML = allInputData.feederName3;</script>
+				{% elif feederID|string() == "feederName4" %}
+					<label id="feederName4" style="display:inline;font-size:12pt;overflow-x:auto;"></label>
+					<script>gebi('feederName4').innerHTML = allInputData.feederName4;</script>
+				{% elif feederID|string() == "feederName5" %}
+					<label id="feederName5" style="display:inline;font-size:12pt;overflow-x:auto;"></label>
+					<script>gebi('feederName5').innerHTML = allInputData.feederName5;</script>				
+				{% endif %}
 			</div>
 			{% endfor %}
-			{% endif %}
-			<!-- <a class='stoppedInline postRunInline' onclick='cleanUpFeeders();' href='#'>Fix Feeders?</a> -->
+			{% endif %}		
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>

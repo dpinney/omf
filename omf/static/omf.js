@@ -69,7 +69,7 @@ function time(func) {
 	return end - start
 }
 
-function showProgressDialog(dialogMessage, cancel) {
+function showProgressDialog(dialogMessage, cancelType) {
 	// Make the elements.
 	background = document.createElement('div')
 	background.id = 'progressBackground'
@@ -87,33 +87,34 @@ function showProgressDialog(dialogMessage, cancel) {
 	document.body.appendChild(progContent)
 	progContent.appendChild(spinner)
 	progContent.appendChild(progressText)
-	// add cancel button.
-	cancel = (typeof cancel === 'undefined') ? 'no' : cancel;
-	if (cancel == 'cancel') {
-	    var cancelBtn = document.createElement("BUTTON");
-	    var t = document.createTextNode("cancel");
-	    cancelBtn.style.marginTop = '5px';
-		cancelBtn.style.background= 'crimson'
-	    cancelBtn.appendChild(t);
-	    cancelBtn.onclick = function() {
+	var cancelBtn = document.createElement("BUTTON");
+	var t = document.createTextNode("cancel");
+	cancelBtn.style.marginTop = '5px';
+	cancelBtn.style.background= 'crimson'
+	cancelBtn.appendChild(t);
+	cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
+	cancelBtn.onclick = function() {
+		if (cancelType == 'conversion'){
 			if (confirm('Are you sure you want to cancel the conversion?')) {
 				console.log('Conversion cancelled.')
 				document.cookie = "converting=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
 				newfeeder.submit();
 			}
-    	};
-	    progContent.appendChild(cancelBtn);
-	}
+		}
+		else
+		{
+			console.log("Loading cancel button.")
+			// stop rendering feeder, show file menu, etc.y
+			removeProgressDialog()
+		}
+	};
+	progContent.appendChild(cancelBtn);
 }
 function removeProgressDialog() {
 	if (gebi('progressBackground')!=null)
 		document.body.removeChild(gebi('progressBackground'))
 	if (gebi('progressContent')!=null)
 		document.body.removeChild(gebi('progressContent'))
-	if (document.cookie.indexOf("converted")>=0){
-		alert("Conversion complete.")
-		document.cookie = "converted=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
-	}
 }
 
 function showProgressBar(dialogMessage) {
@@ -297,7 +298,7 @@ function init() {
 		$("button#publishButton").hide();
 		$("button#duplicateButton").show();
 		$("button#runButton").hide();
-	}	
+	}
 }
 
 function restoreInputs() {

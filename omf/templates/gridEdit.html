@@ -227,12 +227,12 @@
 		function showProgress(){
 			var feederNum = getCookie("converting").split("/")[0];
 			if ((document.cookie.indexOf("converting") > -1) && (feederNum == "{{ feederNum }}")){
-				showProgressDialog('Loading Feeder');
-				showProgressDialog('Converting feeder','cancel');
+				showProgressDialog('Loading Feeder', 'loading');
+				showProgressDialog('Converting feeder','conversion');
 				setTimeout(checkConversion,2000);
 			}
 			else{
-				showProgressDialog('Loading Feeder');
+				showProgressDialog('Loading Feeder','loading');
 			}
 		}
 	</script>
@@ -270,9 +270,6 @@
 						console.log('conversion done')
 						document.cookie = "converted="+feederName;
 						document.cookie = "converting=; expires=Thu, 02 Jan 1970 00:00:00 UTC";
-						// Pin it and refresh page.
-						pinAll();
-						savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}");
 						window.location.reload();
 					}
 					console.log("Converting...")
@@ -283,8 +280,16 @@
 		function importFiles(convMethod, feederNameID){
 			gebi(convMethod).submit();
 			document.cookie = "converting={{ feederNum }}/"+document.getElementById(feederNameID).value;
-			showProgressDialog('Converting feeder','cancel');
+			showProgressDialog('Converting feeder','conversion');
 			setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
+		}
+		function finalizeConversion(){
+			if (document.cookie.indexOf("converted")>=0){
+				document.cookie = "converted=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+				pinAll();
+				savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}");
+				alert("Conversion complete.")
+			}
 		}
 	</script>
 	<div id="menuRight">
@@ -292,7 +297,7 @@
 			<div class='buttonGroup'>
 				{% if is_admin or not public %}
 				<button id="fileOps" class='pill' onclick='dropPillAndStay(this, "File")'>File ▾</button>
-				<ul class='menu rightFeeder'>
+				<ul class='menu rightFeeder'>						
 					<li><a href='javascript:saveFeeder();'>Save</a></li>
 					<li><a href='javascript:renameFeeder();'>Rename</a></li>
 					<li><a href='javascript:showDiv("loadDiv","500px", "0px");'>Load from Model</a></li>
@@ -777,7 +782,6 @@ function savePoster(name, modelName, user) {
 	}
 	unsavedChanges=false
 	post_to_url("/saveFeeder/" + user + "/" + modelName + "/" + name, payload)
-	alert("Data saved.")
 }
 
 /**
@@ -786,6 +790,7 @@ function savePoster(name, modelName, user) {
 function saveFeeder() {
 	gebi("fileOps").click();
 	savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}")
+	alert("Data saved.")
 }
 
 /**
@@ -822,6 +827,8 @@ function checkFeederName(newName) {
 				post_to_url("/renameFeeder/" + "{{ owner }}" + "/" + "{{ modelName }}" + "/" + lastFeederName + "/" + newName + "/" + "{{ feederNum }}")
 				document.getElementById('feederName').innerHTML = newName;
 				lastFeederName = newName; //permits multiple name changes without forcing page refresh.
+				// Send updated name to model.
+				window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"feederName{{feederNum}};"+lastFeederName);			
 			}
 		})
 	}
@@ -961,9 +968,11 @@ function draw() {
 	// Feeder loading
 	var interval = setInterval(function () {
 		if (force.alpha() < 0.05) {
+			setTimeout(finalizeConversion,2000)
 			removeProgressDialog()
 			clearInterval(interval)
 		} else if (nodes[parseInt(Math.random() * nodes.length)].fixed) {
+			setTimeout(finalizeConversion,2000)
 			removeProgressDialog()
 			clearInterval(interval)
 		} else {
