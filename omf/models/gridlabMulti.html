@@ -20,7 +20,6 @@
 	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
-	<script>var childWindow;</script>
 	<!-- Global Functions -->
 	<script type="text/javascript">
 		function makeFeeder(modelName, feederNum) {
@@ -28,7 +27,7 @@
 		}
 		function editFeeder(modelName, feederNum) {
 			studyUser = allInputData.user
-			childWindow = window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
 		}
 		function toggleRemove(add){
 			var len = $('.feederList').length
