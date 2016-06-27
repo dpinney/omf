@@ -11,7 +11,7 @@ import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
 
-def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, calibrateError=0.05):
+def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, calibrateError=0.05):
 	'''calibrates a feeder and saves the calibrated tree at a location'''
 	with open(feederPath, "r") as jsonIn:
 		feederJson = json.load(jsonIn)
@@ -111,7 +111,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, calibr
 		"interval": "900"}
 	outputRecorderKey = maxKey + 3
 	tree[outputRecorderKey] = recOb
-	feeder.adjustTime(tree, simLength, "hours", simStartDate['Date'].strftime("%Y-%m-%d %H:%M:%S"))
+	feeder.adjustTime(tree, simLength, simLengthUnits, simStartDate['Date'].strftime("%Y-%m-%d %H:%M:%S"))
 	# Run Gridlabd, calculate scaling constant.
 	def runPowerflowIter(tree,scadaSubPower):
 		'''Runs powerflow once, then iterates.'''
@@ -158,7 +158,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, calibr
 	labels = ["scadaSubPower","initialGuess","finalGuess"]
 	colors = ['red','lightblue','blue']
 	chartData = {"Title":"Substation Calibration Check (Iterated "+str(iteration+1)+"X)", "fileName":"caliCheckPlot", "colors":colors,"labels":labels, "timeZone":simStartDate['timeZone']}
-	plotLine(workDir, caliPowVectors, chartData, simStartDate['Date']+dt.timedelta(hours=1), 'hours')
+	plotLine(workDir, caliPowVectors, chartData, simStartDate['Date']+dt.timedelta(hours=1), simLengthUnits)
 	# Write the final output.
 	with open(pJoin(workDir,"calibratedFeeder.omd"),"w") as outJson:
 		playerString = open(pJoin(gridlabdDir,lastFile)).read()
@@ -187,7 +187,7 @@ def _processScadaData(workDir,scadaPath, simStartDate):
 				playFile.write(line)
 	return scadaSubPower[positionFound:]
 
-def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength):
+def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength, simLengthUnits):
 	'''read voltage vectors of 3 different phases, run gridlabd, and attach output to the feeder.'''
 	gridlabdDir = pJoin(workDir,"gridlabD")
 	try:
@@ -234,7 +234,7 @@ def attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simS
 		tree[voltplayerKeyB] = voltageObB
 		tree[voltplayerKeyC] = voltageObC
 		# Adjust time and run output.
-		feeder.adjustTime(tree, simLength, "hours", firstDateTime.strftime("%Y-%m-%d %H:%M:%S"))
+		feeder.adjustTime(tree, simLength, simLengthUnits, firstDateTime.strftime("%Y-%m-%d %H:%M:%S"))
 		output = gridlabd.runInFilesystem(tree, keepFiles=True, workDir=gridlabdDir)
 		# Write the output.
 		with open(pJoin(workDir,"calibratedFeeder.omd"),"w") as outJson:
@@ -300,18 +300,19 @@ def _tests():
 	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
 	simStartDate = {"Date":simDate,"timeZone":"PST"}
 	simLength = 24*7
+	simLengthUnits = 'hours'
 	print "Simulation Date:", simStartDate['Date'], "for", str(simLength), "hours."
 	voltVectorA = [random.uniform(7380,7620) for x in range(0,8760)]
 	voltVectorC = [-random.uniform(3699,3780) for x in range(0, 8760)]
 	voltVectorB = [-random.uniform(3699,3795) for x in range(0, 8760)]
 	print "Running gridlabD with voltage players."
-	voltFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength)
+	voltFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength, simLengthUnits)
 	try: 
-		assert None == omfCalibrate(workDir, voltFeederPath, scadaPath, simStartDate, simLength), "feeder calibration failed"
+		assert None == omfCalibrate(workDir, voltFeederPath, scadaPath, simStartDate, simLength, simLengthUnits), "feeder calibration failed"
 		print "\n  Success! Ran calibrate with voltage players!"
 	except: 
 		print "Failed to run calibrate with voltage players. Running only calibrate now."
-		assert None == omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength), "feeder calibration failed"
+		assert None == omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits), "feeder calibration failed"
 		print "\n  Success! Ran calibrate!"
 
 if __name__ == '__main__':
