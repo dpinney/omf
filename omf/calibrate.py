@@ -12,7 +12,9 @@ import matplotlib
 from matplotlib import pyplot as plt
 
 def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, calibrateError=0.05):
-	'''calibrates a feeder and saves the calibrated tree at a location'''
+	'''calibrates a feeder and saves the calibrated tree at a location.
+	Note: feeders with cap banks should be calibrated with cab banks OPEN.
+	We have seen cap banks throw off calibration.'''
 	with open(feederPath, "r") as jsonIn:
 		feederJson = json.load(jsonIn)
 		tree = feederJson.get("tree", {})
