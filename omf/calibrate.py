@@ -11,15 +11,10 @@ import numpy as np
 import matplotlib
 from matplotlib import pyplot as plt
 
-<<<<<<< HEAD
 def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver="FBS", calibrateError=(0.05,5), trim=5):
-	'''calibrates a feeder and saves the calibrated tree at a location'''
-=======
-def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, calibrateError=0.05):
 	'''calibrates a feeder and saves the calibrated tree at a location.
 	Note: feeders with cap banks should be calibrated with cab banks OPEN.
 	We have seen cap banks throw off calibration.'''
->>>>>>> d0eb59fff1202044a1ea6c3da1785ca676e545f4
 	with open(feederPath, "r") as jsonIn:
 		feederJson = json.load(jsonIn)
 		tree = feederJson.get("tree", {})
@@ -318,8 +313,8 @@ def _tests():
 	voltVectorA = [random.uniform(7380,7620) for x in range(0,8760)]
 	voltVectorC = [-random.uniform(3699,3780) for x in range(0, 8760)]
 	voltVectorB = [-random.uniform(3699,3795) for x in range(0, 8760)]
-	# print "Running gridlabD with voltage players."
-	# voltFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength, simLengthUnits)
+	print "Running gridlabD with voltage players."
+	voltFeederPath, outcome = attachVolts(workDir, feederPath, voltVectorA, voltVectorB, voltVectorC, simStartDate, simLength, simLengthUnits)
 	try: 
 		assert None == omfCalibrate(workDir, voltFeederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", error, trim), "feeder calibration failed"
 		print "\n  Success! Ran calibrate with voltage players!"
