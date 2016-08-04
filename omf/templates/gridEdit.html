@@ -300,9 +300,9 @@
 				<ul class='menu rightFeeder'>						
 					<li><a href='javascript:saveFeeder();'>Save</a></li>
 					<li><a href='javascript:renameFeeder();'>Rename</a></li>
-					<li><a href='javascript:showDiv("loadDiv","500px", "0px");'>Load from Model</a></li>
+					<li><a href='javascript:showDiv("loadDiv","550px", "0px");'>Load from Model</a></li>
 					<div id='loadDiv' style="visibility:hidden;font-size:10pt;height:0;">
-						<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","250px", "0px");'>Public Feeders</a></p></li>
+						<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","225px", "20px");'>Public Feeders</a></p></li>
 						<div id="pubFeeders" style="visibility:hidden;height:0px;">
 							<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
 								{% for feeder in publicFeeders %}
@@ -320,7 +320,7 @@
 								{% endfor %}
 							</div>
 						</div>
-						<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("myFeeders","250px", "0px");'>My Feeders</a></p></li>
+						<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("myFeeders","225px", "20px");'>My Feeders</a></p></li>
 						<div id="myFeeders" style="visibility:hidden;height:0;">
 							<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
 								{% for feeder in feeders %}
