@@ -193,7 +193,7 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 		cleanG = nx.Graph(inGraph.edges())
 		# HACK2: might miss nodes without edges without the following.
 		cleanG.add_nodes_from(inGraph)
-		pos = nx.graphviz_layout(cleanG, prog='neato')
+		pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 	else:
 		pos = {n:inGraph.node[n].get('pos',(0,0)) for n in inGraph}
 	# Draw all the edges.
