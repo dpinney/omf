@@ -2,10 +2,9 @@
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, csv, warnings, calendar, math, operator
 from os.path import join as pJoin
-from  dateutil.parser import parse
+from dateutil.parser import parse
 from numpy import npv
 from jinja2 import Template
-import omf
 from omf.models import __metaModel__
 from __metaModel__ import *
 
