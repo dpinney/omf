@@ -13,8 +13,9 @@ import traceback
 
 #temporary scrath folder fixes specific to my laptop
 # sys.path.append(__metaModel__._omfDir)
-sys.path.append('/Users/brendanlewis/NRECA/omf/omf/models')
-import __metaModel__
+sys.path.append('../../models/')
+# sys.path.append('/Users/brendanlewis/NRECA/omf/omf/models')
+import omf.models.__metaModel__
 from __metaModel__ import *
 
 # OMF imports
@@ -25,7 +26,7 @@ from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
 #temporary scrath folder fixes specific to my laptop
-with open(pJoin('/Users/brendanlewis/NRECA/omf/omf/scratch/dsoSimSuite',"dsoSimSuite.html"),"r") as tempFile:
+with open(pJoin('./',"dsoSimSuite.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 	
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -65,7 +66,7 @@ def run(modelDir, inputDict):
 	# Check whether model exist or not
 
 	# Hardcode modelDir/path so I can debug on my laptop
-	modelDir = '/Users/brendanlewis/NRECA/omf/omf/scratch/dsoSimSuite/Output'
+	modelDir = './Output'
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 		inputDict["created"] = str(datetime.datetime.now())
@@ -475,7 +476,7 @@ def _tests():
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
-		pass
+		print 'Failed to delete old model during tests.'
 	try:
 		os.makedirs(modelLoc)
 	except: pass

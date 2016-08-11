@@ -9,10 +9,6 @@ import omf
 from omf.models import __metaModel__
 from __metaModel__ import *
 
-# OMF imports
-sys.path.append(__metaModel__._omfDir)
-import feeder
-
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"demandResponse.html"),"r") as tempFile:
 	template = Template(tempFile.read())
@@ -326,8 +322,6 @@ def run(modelDir, inputDict):
 				reader = csv.DictReader(inFile)
 				for row in reader:
 					demandList.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
-				print len(demandList)
-
 				if len(demandList)!=8760: raise Exception
 		except:
 			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
@@ -474,7 +468,7 @@ def _tests():
 		"modelType":"demandResponse",
 		"retailCost": "0.1",
 		"WholesaleEnergyCost": "0.07",
-		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","OlinBeckenhamScada.csv")).read(),
+		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","FrankScadaValidCSV.csv")).read(),
 		"DrPurchInstallCost": "100000",
 		"runTime": "0:00:03",
 		"SubstitutionPriceElasticity": "-0.09522",
