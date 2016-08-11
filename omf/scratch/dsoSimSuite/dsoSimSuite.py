@@ -10,23 +10,16 @@ from os.path import join as pJoin
 from os.path import split as pSplit
 from jinja2 import Template
 import traceback
-
-#temporary scrath folder fixes specific to my laptop
-# sys.path.append(__metaModel__._omfDir)
-sys.path.append('../../models/')
-# sys.path.append('/Users/brendanlewis/NRECA/omf/omf/models')
-import omf.models.__metaModel__
+from omf.models import __metaModel__
 from __metaModel__ import *
+import omf.feeder as feeder
+from omf.solvers import gridlabd
+from omf.weather import zipCodeToClimateName
 
-# OMF imports
-sys.path.append(__metaModel__._omfDir)
-import feeder
-from solvers import gridlabd
-from weather import zipCodeToClimateName
+_myDir = os.path.dirname(os.path.abspath(__file__))
 
 # Our HTML template for the interface:
-#temporary scrath folder fixes specific to my laptop
-with open(pJoin('./',"dsoSimSuite.html"),"r") as tempFile:
+with open(pJoin(_myDir,"dsoSimSuite.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 	
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -64,9 +57,6 @@ def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
 	# Check whether model exist or not
-
-	# Hardcode modelDir/path so I can debug on my laptop
-	modelDir = './Output'
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 		inputDict["created"] = str(datetime.datetime.now())
