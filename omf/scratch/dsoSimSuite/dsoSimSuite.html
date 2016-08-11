@@ -62,8 +62,8 @@
 	<div id="input" class="content">
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarEngineering" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="solarEngineering" readonly/>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-dsoSimSuite" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="dsoSimSuite" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>
@@ -99,6 +99,13 @@
 				<select id="simLengthUnits" name="simLengthUnits">
 					<option value="hours">Hours</option>
 					<option value="minutes">Minutes</option>
+				</select>
+			</div>
+			<div class = "shortInput">
+				<label>Weather</label>
+				<select id = "weatherType" name = "weatherType">
+					<option values = "typical">Typical</option>
+					<option value = "historical">Historical</option>
 				</select>
 			</div>
 			<div class="shortInput">
@@ -215,194 +222,177 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<div id = 'regTapChanges' style="display:none">
-			<p class="reportTitle postRun" style="page-break-before:always">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
-			<div id="newRegulatorReport" class="tightContent postRun">
-				<script type="text/javascript">
+		<p class="reportTitle postRun" style="page-break-before:always">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="newRegulatorReport" class="tightContent postRun">
+			<script type="text/javascript">
 
-					var regNamesArray=[]
-					var keysArray = []
-					for (var key in allOutputData)
-					{
-						keysArray.push(key)
-	  					if (key.indexOf('Regulator') === 0)
-	  					{
-	  						regName = "allOutputData.".concat(key);
-	  						regNamesArray.push(regName)
-						}
-
+				var regNamesArray=[]
+				for (var key in allOutputData)
+				{
+  					if (key.indexOf('Regulator') === 0)
+  					{
+  						regName = "allOutputData.".concat(key);
+  						regNamesArray.push(regName)
 					}
-					if (key.indexOf('Regulator') === 0)
-					{
-						gebi("regTapChanges").style.display = "block"
+				}
+				for (var i in regNamesArray)
+				{
+
+					reg = regNamesArray[i]
+					$("<div/>").appendTo("#newRegulatorReport")
+						.attr("class", "regContainer")
+						.attr("id", reg)
+					$("<div/>").appendTo("#newRegulatorReport")
+						.attr("id", "regulatorSeries_" + reg)
+
+					var reg1ATSeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"RoyalBlue",
+						"data":eval(regNamesArray[i].concat(".RegTapA")),
+						"name":"A",
 					}
 
-						reg = regNamesArray[i]
-						$("<div/>").appendTo("#newRegulatorReport")
-							.attr("class", "regContainer")
-							.attr("id", reg)
-						$("<div/>").appendTo("#newRegulatorReport")
-							.attr("id", "regulatorSeries_" + reg)
-
-						var reg1ATSeries = {
-							"pointWidth": 40,
-							"pointInterval": 3 * 3600 * 100,
-							"color":"RoyalBlue",
-							"data":eval(regNamesArray[i].concat(".RegTapA")),
-							"name":"A",
+					var reg1BTSeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"Red",
+						"data":eval(regNamesArray[i].concat(".RegTapB")),
+						"name":"B",
+					}
+					var reg1CTSeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"Green",
+						"data":eval(regNamesArray[i].concat(".RegTapC")),
+						"name":"C",
+					}
+					phaseValue= eval(reg.concat(".RegPhases"))
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "regulatorSeries_" + reg
+					localHighChart["chart"]["inverted"] = false
+					localHighChart["chart"]["height"] = 150
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["title"]["text"] = reg.substr(14)
+					localHighChart["series"] = []
+					localHighChart["xAxis"] = { "type":"datetime",
+						"tickColor":"gray",
+						"lineColor":"gray",
 						}
-
-						var reg1BTSeries = {
-							"pointWidth": 40,
-							"pointInterval": 3 * 3600 * 100,
-							"color":"Red",
-							"data":eval(regNamesArray[i].concat(".RegTapB")),
-							"name":"B",
-						}
-						var reg1CTSeries = {
-							"pointWidth": 40,
-							"pointInterval": 3 * 3600 * 100,
-							"color":"Green",
-							"data":eval(regNamesArray[i].concat(".RegTapC")),
-							"name":"C",
-						}
-						phaseValue= eval(reg.concat(".RegPhases"))
-						var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-						localHighChart["chart"]["renderTo"] = "regulatorSeries_" + reg
-						localHighChart["chart"]["inverted"] = false
-						localHighChart["chart"]["height"] = 150
-						localHighChart["chart"]["width"] = 1000
-						localHighChart["chart"]["type"] = "line"
-						localHighChart["title"]["text"] = reg.substr(14)
-						localHighChart["series"] = []
-						localHighChart["xAxis"] = { "type":"datetime",
-							"tickColor":"gray",
-							"lineColor":"gray",
-							}
-						localHighChart["yAxis"] = {"min": -17, "max" : 17,
-							//"startOnTick": "false",
-							"title":{ "text": "Tap position",
-								"style":{
-									"color":"gray"
-								}
+					localHighChart["yAxis"] = {"min": -17, "max" : 17,
+						//"startOnTick": "false",
+						"title":{ "text": "Tap position",
+							"style":{
+								"color":"gray"
 							}
 						}
-						localHighChart["plotOptions"] = {
-							//"bar":{"stacking":"normal", "shadow":false},
-						}
-						chart = new Highcharts.Chart(localHighChart);
-						if(phaseValue.indexOf('A') != -1)
-						{
-	  						chart.addSeries(reg1ATSeries)
-	  					}
-	  					if(phaseValue.indexOf('B') != -1)
-						{
-	  						chart.addSeries(reg1BTSeries)
-						}
-						if(phaseValue.indexOf('C') != -1)
-						{
-	  						chart.addSeries(reg1CTSeries)
-	  					}
 					}
-				</script>
-			</div>
+					localHighChart["plotOptions"] = {
+						//"bar":{"stacking":"normal", "shadow":false},
+					}
+					chart = new Highcharts.Chart(localHighChart);
+					if(phaseValue.indexOf('A') != -1)
+					{
+  						chart.addSeries(reg1ATSeries)
+  					}
+  					if(phaseValue.indexOf('B') != -1)
+					{
+  						chart.addSeries(reg1BTSeries)
+					}
+					if(phaseValue.indexOf('C') != -1)
+					{
+  						chart.addSeries(reg1CTSeries)
+  					}
+				}
+			</script>
 		</div>
-		<div id = 'capBankActivation' style="display:none">
-			<p class="reportTitle postRun">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
-			<div id="newCapbankReport" class="tightContent postRun">
-				<script type="text/javascript">
-					var capNamesArray=[]
-					var capKeysArray = []
-					for (var key in allOutputData)
-					{
-						console.log(key)
-						capKeysArray.push(key)
-						console.log(key.indexOf('Capacitor'))
-		  				if (key.indexOf('Capacitor') === 0)
-		  				{
-		  					capName = "allOutputData.".concat(key);
-		  					capNamesArray.push(capName)
-						}
+		<p class="reportTitle postRun">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="newCapbankReport" class="tightContent postRun">
+			<script type="text/javascript">
+				var capNamesArray=[]
+				for (var key in allOutputData)
+				{
+	  				if (key.indexOf('Capacitor') === 0)
+	  				{
+	  					capName = "allOutputData.".concat(key);
+	  					capNamesArray.push(capName)
 					}
-					if (key.indexOf('Capacitor') === 0)
-					{
-						gebi("capBankActivation").style.display = "block"
-					} 					
-					for (var i in capNamesArray)
-					{
-						cap= capNamesArray[i]
-						//$("<div/>").appendTo("#newCapbankReport")
-						//	.attr("id", "capacitorSeries")
-						$("<div/>").appendTo("#newCapbankReport")
-							.attr("class", "capContainer")
-							.attr("id", cap)
+				}
+				for (var i in capNamesArray)
+				{
+					cap= capNamesArray[i]
+					//$("<div/>").appendTo("#newCapbankReport")
+					//	.attr("id", "capacitorSeries")
+					$("<div/>").appendTo("#newCapbankReport")
+						.attr("class", "capContainer")
+						.attr("id", cap)
 
-						$("<div/>").appendTo("#newCapbankReport")
-							.attr("id", "capacitorSeries_" + cap)
-						var cap1BSeries = {
-							"pointWidth": 40,
-							"pointInterval": 3 * 3600 * 100,
-							"color":"Red",
-							"data":eval(capNamesArray[i].concat(".Cap1B")),
-							"name":"B"
-						}
-						var cap1ASeries = {
-							"pointWidth": 40,
-							"pointInterval": 3 * 3600 * 100,
-							"color":"RoyalBlue",
-							"data":eval(capNamesArray[i].concat(".Cap1A")),
-							"name":"A"
-						}
-						var cap1CSeries = {
-							"pointWidth": 40,
-							"pointInterval": 3 * 3600 * 100,
-							"color":"Green",
-							"data":eval(capNamesArray[i].concat(".Cap1C")),
-							"name":"C"
-						}
-						phaseValue= eval(cap.concat(".CapPhases"))
-						var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-						localHighChart["chart"]["renderTo"] = "capacitorSeries_" + cap
-						localHighChart["chart"]["inverted"] = false
-						localHighChart["chart"]["height"] = 150
-						localHighChart["chart"]["width"] = 1000
-						localHighChart["chart"]["type"] = "column"
-						localHighChart["title"]["text"] = cap.substr(14)
-						localHighChart["series"] = []
-						localHighChart["xAxis"] = {
-							"type":"datetime",
-							"tickColor":"gray",
-							"lineColor":"gray",
-							}
-						localHighChart["yAxis"] = {"min": 0, "max" : 3,
-							"startOnTick": "false",
-							"tickInterval":1,
-							"title":{ "text": "1 = Active",
-								"style":{
-									"color":"gray"
-								}
-							}
-						}
-						localHighChart["plotOptions"] = {
-							"column":{"stacking":"normal", "shadow":false},
-						}
-						localHighChart["chart"]["title"] = {"align":"center","text":"CapCHART",}
-						chart = new Highcharts.Chart(localHighChart);
-						if(phaseValue.indexOf('A') != -1)
-						{
-	  						chart.addSeries(cap1ASeries)
-	  					}
-	  					if(phaseValue.indexOf('B') != -1)
-						{
-	  						chart.addSeries(cap1BSeries)
-						}
-						if(phaseValue.indexOf('C') != -1)
-						{
-	  						chart.addSeries(cap1CSeries)
-	  					}
+					$("<div/>").appendTo("#newCapbankReport")
+						.attr("id", "capacitorSeries_" + cap)
+					var cap1BSeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"Red",
+						"data":eval(capNamesArray[i].concat(".Cap1B")),
+						"name":"B"
 					}
-				</script>
-			</div>
+					var cap1ASeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"RoyalBlue",
+						"data":eval(capNamesArray[i].concat(".Cap1A")),
+						"name":"A"
+					}
+					var cap1CSeries = {
+						"pointWidth": 40,
+						"pointInterval": 3 * 3600 * 100,
+						"color":"Green",
+						"data":eval(capNamesArray[i].concat(".Cap1C")),
+						"name":"C"
+					}
+					phaseValue= eval(cap.concat(".CapPhases"))
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "capacitorSeries_" + cap
+					localHighChart["chart"]["inverted"] = false
+					localHighChart["chart"]["height"] = 150
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["type"] = "column"
+					localHighChart["title"]["text"] = cap.substr(14)
+					localHighChart["series"] = []
+					localHighChart["xAxis"] = {
+						"type":"datetime",
+						"tickColor":"gray",
+						"lineColor":"gray",
+						}
+					localHighChart["yAxis"] = {"min": 0, "max" : 3,
+						"startOnTick": "false",
+						"tickInterval":1,
+						"title":{ "text": "1 = Active",
+							"style":{
+								"color":"gray"
+							}
+						}
+					}
+					localHighChart["plotOptions"] = {
+						"column":{"stacking":"normal", "shadow":false},
+					}
+					localHighChart["chart"]["title"] = {"align":"center","text":"CapCHART",}
+					chart = new Highcharts.Chart(localHighChart);
+					if(phaseValue.indexOf('A') != -1)
+					{
+  						chart.addSeries(cap1ASeries)
+  					}
+  					if(phaseValue.indexOf('B') != -1)
+					{
+  						chart.addSeries(cap1BSeries)
+					}
+					if(phaseValue.indexOf('C') != -1)
+					{
+  						chart.addSeries(cap1CSeries)
+  					}
+				}
+			</script>
 		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="triplexMeterVoltageReport" class="tightContent postRun">
@@ -431,12 +421,7 @@
 		<div id="systemVoltageMap" class="tightContent postRun" style="height:1030px">
 			<video width="1000" height="1000" controls preload="auto">
 				<source id="timeTravelMovie" src="" type="video/mp4" codecs="h264">
-				Your browser does not support the video tag.
-				{% if pathPrefix == "" %}
-				<script>gebi("timeTravelMovie").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart.mp4"</script>
-				{% else %}
-				<script>gebi("timeTravelMovie").src = "{{pathPrefix}}/data/Model/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart.mp4"</script>
-				{% endif %}
+				<script>gebi("timeTravelMovie").src = "/Users/brendanlewis/NRECA/omf/omf/scratch/dsoSimSuite/Output/"+allInputData.modelName+"/voltageChart.mp4"</script>
 			</video>
 		</div>
 		<p class="reportTitle postRun">Solar Data<a target="_self" class="toggle">Hide / Show</a></p>

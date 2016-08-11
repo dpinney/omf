@@ -1,16 +1,19 @@
 ''' Powerflow results for one Gridlab instance. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx,  numpy as np
+import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx, matplotlib, numpy as np
 from networkx.drawing.nx_agraph import graphviz_layout
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
-import matplotlib
 matplotlib.pyplot.switch_backend('Agg')
 import multiprocessing
 from os.path import join as pJoin
 from os.path import split as pSplit
 from jinja2 import Template
 import traceback
+
+#temporary scrath folder fixes specific to my laptop
+# sys.path.append(__metaModel__._omfDir)
+sys.path.append('/Users/brendanlewis/NRECA/omf/omf/models')
 import __metaModel__
 from __metaModel__ import *
 
@@ -21,7 +24,8 @@ from solvers import gridlabd
 from weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"solarEngineering.html"),"r") as tempFile:
+#temporary scrath folder fixes specific to my laptop
+with open(pJoin('/Users/brendanlewis/NRECA/omf/omf/scratch/dsoSimSuite',"dsoSimSuite.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 	
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -59,6 +63,9 @@ def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
 	# Check whether model exist or not
+
+	# Hardcode modelDir/path so I can debug on my laptop
+	modelDir = '/Users/brendanlewis/NRECA/omf/omf/scratch/dsoSimSuite/Output'
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 		inputDict["created"] = str(datetime.datetime.now())
@@ -109,9 +116,13 @@ def heavyProcessing(modelDir, inputDict):
 	except: pass
 	try:	
 		feederName = inputDict["feederName1"]
-		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
-			pJoin(modelDir, "gldContainer", "climate.tmy2"))
+		weather = inputDict["weather"]
+		if weather == "typical":
+			inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
+				pJoin(modelDir, "gldContainer", "climate.tmy2"))
+		else:
+			print "historical weather selected"
 		startTime = datetime.datetime.now()
 		feederJson = json.load(open(pJoin(modelDir, feederName+'.omd')))
 		tree = feederJson["tree"]
@@ -317,7 +328,6 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(fGraph.edges())
 		cleanG.add_nodes_from(fGraph)
-		# was formerly : positions = nx.graphviz_layout(cleanG, prog='neato') but this threw an error
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
 		rawPositions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
@@ -454,11 +464,12 @@ def _tests():
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"feederName1": "Olin Barre GH EOL Solar",
-		"modelType": "solarEngineering",
+		"modelType": "dsoSimSuite",
+		"weather": "typical",
 		"zipCode": "64735",
 		"simLength": "24",
 		"runTime": ""}
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated solarEngineering Test")
+	modelLoc = pJoin(__metaModel__._omfDir,"scratch","dsoSimSuite","Output","Automated dsoSimSuite Test")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)

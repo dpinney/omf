@@ -1,0 +1,11 @@
+{
+    "weather": "typical", 
+    "simLength": "24", 
+    "simStartDate": "2012-04-01", 
+    "simLengthUnits": "hours", 
+    "feederName1": "Olin Barre GH EOL Solar", 
+    "runTime": "0:00:09", 
+    "zipCode": "64735", 
+    "modelType": "dsoSimSuite", 
+    "climateName": "MO-KANSAS_CITY"
+}

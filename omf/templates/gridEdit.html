@@ -30,6 +30,8 @@
 		div#pinDiv{width:60px;padding:0 0.9em 0 0.9em;float:right}
 		div#editDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
 		div#addDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
+		div#helpDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
+		#helpButton{color: white;}
 		select, button {width:initial;}
 		td, th {padding:3px;text-align: left;}
 		body {
@@ -563,6 +565,11 @@
 			<div class="buttonGroup">
 				<button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add ▾</button>
 				<ul id='newObjectMenu' class='menu right' style="">
+			</div>
+		</div>
+		<div id="helpDiv">
+			<div class="buttonGroup">
+				<button id="addOps" class='pill' type = 'submit'><a id= 'helpButton' href = 'https://github.com/dpinney/omf/wiki/Tools-~-gridEdit' target = '_blank'>Help</a></button>
 			</div>
 		</div>
 	</div>
