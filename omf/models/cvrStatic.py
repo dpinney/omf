@@ -7,13 +7,13 @@ from copy import copy
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
-import __metaModel__
+from omf.models import __metaModel__
 from __metaModel__ import *
 
 # OMF imports
-sys.path.append(__metaModel__._omfDir)
-import feeder
-from solvers import gridlabd
+# sys.path.append(__metaModel__._omfDir)
+import omf.feeder as feeder
+from omf.solvers import gridlabd
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"cvrStatic.html"),"r") as tempFile:
@@ -484,7 +484,7 @@ def _tests():
 		"power_factor": 0.9}
 	for key in colomaMonths:
 		inData[key] = colomaMonths[key]
-	modelLoc = pJoin(workDir, "admin", "Automated staticCVR Testing")
+	modelLoc = pJoin(workDir, "admin", "Automated static CVR Testing")
 	# Blow away old test results if necessary.
 	try: shutil.rmtree(modelLoc)
 	except: pass

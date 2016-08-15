@@ -8,7 +8,7 @@ from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
 from datetime import datetime, date, time, timedelta
-import __metaModel__
+from omf.models import __metaModel__
 from __metaModel__ import *
 
 # OMF imports

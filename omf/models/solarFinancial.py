@@ -3,16 +3,16 @@
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, math, datetime as dt
 from os.path import join as pJoin
 from jinja2 import Template
-import __metaModel__
-from __metaModel__ import *
 from random import random
 from numpy import irr, npv
 import xlwt, traceback
+from omf.models import __metaModel__
+from __metaModel__ import *
+
 # OMF imports
-sys.path.append(__metaModel__._omfDir)
-import feeder
-from solvers import nrelsam2013
-from weather import zipCodeToClimateName
+import omf.feeder as feeder
+from omf.solvers import nrelsam2013
+from omf.weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarFinancial.html"),"r") as tempFile:

@@ -215,26 +215,19 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
-		<div id = 'regTapChanges' style="display:none">
 			<p class="reportTitle postRun" style="page-break-before:always">Regulator Tap Changes <a target="_self" class="toggle">Hide / Show</a></p>
 			<div id="newRegulatorReport" class="tightContent postRun">
 				<script type="text/javascript">
 
 					var regNamesArray=[]
-					var keysArray = []
 					for (var key in allOutputData)
 					{
-						keysArray.push(key)
 	  					if (key.indexOf('Regulator') === 0)
 	  					{
 	  						regName = "allOutputData.".concat(key);
 	  						regNamesArray.push(regName)
 						}
 
-					}
-					if (key.indexOf('Regulator') === 0)
-					{
-						gebi("regTapChanges").style.display = "block"
 					}
 
 						reg = regNamesArray[i]
@@ -306,28 +299,20 @@
 					}
 				</script>
 			</div>
-		</div>
-		<div id = 'capBankActivation' style="display:none">
 			<p class="reportTitle postRun">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
 			<div id="newCapbankReport" class="tightContent postRun">
 				<script type="text/javascript">
 					var capNamesArray=[]
-					var capKeysArray = []
 					for (var key in allOutputData)
 					{
-						console.log(key)
-						capKeysArray.push(key)
-						console.log(key.indexOf('Capacitor'))
+
 		  				if (key.indexOf('Capacitor') === 0)
 		  				{
 		  					capName = "allOutputData.".concat(key);
 		  					capNamesArray.push(capName)
 						}
 					}
-					if (key.indexOf('Capacitor') === 0)
-					{
-						gebi("capBankActivation").style.display = "block"
-					} 					
+					
 					for (var i in capNamesArray)
 					{
 						cap= capNamesArray[i]
@@ -403,7 +388,6 @@
 					}
 				</script>
 			</div>
-		</div>
 		<p class="reportTitle postRun" style="page-break-before:always">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="triplexMeterVoltageReport" class="tightContent postRun">
 			<div id="triplexMeterVoltageChart"></div>

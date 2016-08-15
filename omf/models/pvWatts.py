@@ -3,14 +3,14 @@
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback
 from os.path import join as pJoin
 from jinja2 import Template
-import __metaModel__
+from omf.models import __metaModel__
 from __metaModel__ import *
 
 # OMF imports
-sys.path.append(__metaModel__._omfDir)
-import feeder
-from solvers import nrelsam2013
-from weather import zipCodeToClimateName
+# sys.path.append(__metaModel__._omfDir)
+import omf.feeder as feeder
+from omf.solvers import nrelsam2013
+from omf.weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"pvWatts.html"),"r") as tempFile:

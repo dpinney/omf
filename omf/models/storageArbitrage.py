@@ -7,15 +7,11 @@ from os.path import join as pJoin
 from  dateutil.parser import parse
 from numpy import npv
 from jinja2 import Template
-import __metaModel__
+from omf.models import __metaModel__
 from __metaModel__ import *
 
 # # NOTE: used for debugging don't delete.
 # import matplotlib.pyplot as plt
-
-# OMF imports
-sys.path.append(__metaModel__._omfDir)
-import feeder
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"storageArbitrage.html"),"r") as tempFile:

@@ -7,15 +7,11 @@ from os.path import join as pJoin
 from  dateutil.parser import parse
 from numpy import npv
 from jinja2 import Template
-import __metaModel__
+from omf.models import __metaModel__
 from __metaModel__ import *
 
 # # NOTE: used for debugging don't delete.
 # import matplotlib.pyplot as plt
-
-# OMF imports
-sys.path.append(__metaModel__._omfDir)
-import feeder
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"storageDeferral.html"),"r") as tempFile:
@@ -345,7 +341,7 @@ def _tests():
 		"cellQuantity": "10",
 		"dodFactor":"100",
 		"avoidedCost":"2000000",
-		"transformerThreshold":"6500",
+		"transformerThreshold":"6.6",
 		"batteryCycleLife": "5000"
 		}
 	modelLoc = pJoin(workDir,"admin","Automated storageDeferral Testing")

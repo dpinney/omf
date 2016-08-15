@@ -6,14 +6,13 @@ from os.path import join as pJoin
 from os.path import split as pSplit
 from jinja2 import Template
 import traceback
-import __metaModel__
+from omf.models import __metaModel__
 from __metaModel__ import *
 
 # OMF imports
-sys.path.append(__metaModel__._omfDir)
-import feeder
-from solvers import gridlabd
-from weather import zipCodeToClimateName
+import omf.feeder as feeder
+from omf.solvers import gridlabd
+from omf.weather import zipCodeToClimateName
 from flask import session
 import web
 

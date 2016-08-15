@@ -6,12 +6,12 @@ from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
 import networkx as nx
-import __metaModel__
+from omf.models import __metaModel__
 from __metaModel__ import *
+
 # OMF imports
-sys.path.append(__metaModel__._omfDir)
-import feeder
-from solvers import gridlabd
+import omf.feeder as feeder
+from omf.solvers import gridlabd
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"voltageDrop.html"),"r") as tempFile:
