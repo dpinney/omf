@@ -16,8 +16,8 @@ Others can follow the [developer installation instructions](https://github.com/d
 
 WYSIWYG Circuit Editor
 
-![Screenshot 1](https://raw.githubusercontent.com/wiki/dpinney/omf/images/screenshot1.jpg)
+![Screenshot 1](https://raw.githubusercontent.com/wiki/dpinney/omf/images/home_screenshot1.jpg)
 
 Output Example From a Solar Distributed Generation Model
 
-![Screenshot 2](https://raw.githubusercontent.com/wiki/dpinney/omf/images/screenshot2.JPG)
+![Screenshot 2](https://raw.githubusercontent.com/wiki/dpinney/omf/images/home_screenshot2.JPG)
