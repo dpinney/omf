@@ -348,10 +348,11 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 			# HACK: Take average of all phases to collapse dimensionality.
 			nodeVolts[step][nodeName] = avg(allVolts)
 	# Draw animation.
-	voltChart = plt.figure(figsize=(10,10))
+	voltChart = plt.figure(figsize=(15,15))
 	plt.axes(frameon = 0)
 	plt.axis('off')
-	voltChart.subplots_adjust(left=-0.09, bottom=0.1, right=1.09, top=0.90, wspace=None, hspace=None)
+	#set axes step equal
+	voltChart.gca().set_aspect('equal')
 	custom_cm = matplotlib.colors.LinearSegmentedColormap.from_list('custColMap',[(0.0,'blue'),(0.25,'darkgray'),(0.75,'darkgray'),(1.0,'yellow')])
 	edgeIm = nx.draw_networkx_edges(fGraph, positions)
 	nodeIm = nx.draw_networkx_nodes(fGraph,
@@ -454,7 +455,7 @@ def _tests():
 	# Variables
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName1": "Olin Barre GH EOL Solar",
+		"feederName1": "superModel Tomorrow",
 		"modelType": "dsoSimSuite",
 		"weather": "typical",
 		"zipCode": "64735",
@@ -470,8 +471,7 @@ def _tests():
 	try:
 		os.makedirs(modelLoc)
 	except: pass
-	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
-	# No-input template.
+	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","dsoSimSuite", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))	# No-input template.
 	renderAndShow(template)
 	# Run the model.
 	runForeground(modelLoc, inData)

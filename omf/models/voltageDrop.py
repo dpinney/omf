@@ -121,9 +121,11 @@ def voltPlot(tree, workDir=None, neatoLayout=False):
 		nodeVolts[row.get('node_name','')] = avg(allVolts)
 	# Color nodes by VOLTAGE.
 	fGraph = feeder.treeToNxGraph(tree)
-	voltChart = plt.figure(figsize=(10,10))
+	voltChart = plt.figure(figsize=(15,15))
 	plt.axes(frameon = 0)
 	plt.axis('off')
+	#set axes step equal
+	voltChart.gca().set_aspect('equal')
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(fGraph.edges())
