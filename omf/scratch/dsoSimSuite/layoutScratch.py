@@ -1,3 +1,12 @@
+import omf.feeder as feeder, json
+
+IN_PATH_OMD = 'insert_path_here'
+OUT_PATH_OMD = '2nd_path_here'
+
+with open(IN_PATH_OMD,'r') as jsonFile:
+	omd = json.load(jsonFile)
+	tree = omd['tree']
+
 if DO_FORCE_LAYOUT:
 	# Use graphviz to lay out the graph.
 	inGraph = feeder.treeToNxGraph(tree)
@@ -16,3 +25,5 @@ if DO_FORCE_LAYOUT:
 			tree[key]['longitude'] = thisPos[0]
 			tree[key]['latitude'] = thisPos[1]
 
+with open(OUT_PATH_OMD,'w') as outFile:
+	json.dump(omd, outFile)
