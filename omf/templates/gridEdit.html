@@ -304,6 +304,7 @@
 					<li><a href='javascript:renameFeeder();'>Rename</a></li>
 					<li><a href='javascript:showDiv("loadDiv","550px", "0px");'>Load from Model</a></li>
 					<div id='loadDiv' style="visibility:hidden;font-size:10pt;height:0;">
+					<li><a href="#" onclick='closeDiv("loadDiv");closeDiv("pubFeeders");closeDiv("myFeeders");' style="text-align:center;font-size:12pt;">Cancel</a></li>
 						<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","225px", "20px");'>Public Feeders</a></p></li>
 						<div id="pubFeeders" style="visibility:hidden;height:0px;">
 							<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
@@ -340,7 +341,6 @@
 								{% endfor %}
 							</div>
 						</div>
-						<li><a href="#" onclick='closeDiv("loadDiv");closeDiv("pubFeeders");closeDiv("myFeeders");' style="text-align:center;font-size:12pt;">Cancel</a></li>
 					</div>
 					<p style='font-weight:bold;margin: 10px 0 0 4px;'>New Feeder</p>
 					<li><a href='javascript:showDiv("newFeederDiv","50px;", "0px;");'>Blank Feeder</a></li>
@@ -2042,6 +2042,7 @@ function deleteObject(treeIndex) {
 	var isNode = true
 	for (prop in tree[treeIndex])
 		if (prop == 'from') isNode = false
+	if(confirm("Are you sure you want to delete this node?")){
 	if (isNode) {
 		// Check for connections and abort if we have them.
 		nodeName = tree[treeIndex].name
@@ -2077,6 +2078,7 @@ function deleteObject(treeIndex) {
 	delete tree[treeIndex]
 	clearSelection()
 	redraw()
+	}
 }
 
 /**
