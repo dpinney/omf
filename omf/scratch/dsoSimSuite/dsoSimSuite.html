@@ -235,6 +235,10 @@
   						regNamesArray.push(regName)
 					}
 				}
+				// if no regulators are found, display message
+	  			if (regNamesArray.length == 0){
+					$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No Regulators were found on the feeder.</p>")
+				}
 				for (var i in regNamesArray)
 				{
 
@@ -245,6 +249,8 @@
 					$("<div/>").appendTo("#newRegulatorReport")
 						.attr("id", "regulatorSeries_" + reg)
 
+					
+						
 					var reg1ATSeries = {
 						"pointWidth": 40,
 						"pointInterval": 3 * 3600 * 100,
