@@ -31,6 +31,7 @@
 		div#editDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
 		div#addDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
 		div#helpDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
+		#scadaLoad{padding: 0px}
 		#helpButton{color: white;}
 		select, button {width:initial;}
 		td, th {padding:3px;text-align: left;}
@@ -403,7 +404,7 @@
 								</tr>
 								<tr>
 									<td>Data File (.glm)</td>
-									<td><input type='file' id='glmFile' name='glmFile' accept = '.glm' required/></td>
+									<td><input type='file' id='csvFile' name='glmFile' accept = '.glm' required/></td>
 								</tr>
 								<tr>
 									<td></td>
@@ -551,6 +552,34 @@
 					<tr>
 						<td>Static Loads to Houses</td>
 						<td><button style="width:30px;" onclick='javascript:staticLoadsToHouses();unsavedChanges=true'>Go</button></td>
+					</tr>
+					<tr>
+						<td><li><a id='scadaLoad' href='javascript:showDiv("scadaLoadshapes","50px;", "0px;");'>Scada Loadshapes</a></li>
+					<div id="scadaLoadshapes" style="visibility:hidden;height:0;">
+						<form onsubmit=' return getScadaLoadshapes();' action='/scadaLoadshape/{{ owner }}/{{feederName}}' id='scadaLoadshape' enctype='multipart/form-data' method='post'>
+							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+							<table class='importOptions'>
+								<tr>
+									<td>Name</td>
+									<td><input type='text' id='loadName' name='loadName' required/></td>
+								</tr>
+								<tr>
+									<td>Scada Loadshape (.csv)</td>
+									<td><input type='file' id='scadaFile' name='scadaFile' accept = '.csv' required/></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+								</tr>
+							</table>
+						</form>
+						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+						<li><a href="#" onclick='closeDiv("scadaLoadshapes")' style="text-align:center;font-size:10pt;">Cancel</a></li>
+					</div>
+					</td>
+
 					</tr>
 					<tr>
 						<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
@@ -1629,6 +1658,9 @@ function newChildAtLocation(component, treeIndex) {
 /**
  * Handler function of adding static load to houses.
  */
+function getScadaLoadshapes(){
+ 	closeDiv("scadaLoadshapes")
+	}
 function staticLoadsToHouses() {
 	function randomHouse() {
 		newHouse = {}

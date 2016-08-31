@@ -126,7 +126,8 @@ def heavyProcessing(modelDir, inputDict):
 			 	if feederJson['tree'][key]['object'] == 'climate':
 			 		del feederJson['tree'][key]
 		oldMax = feeder.getMaxKey(tree)
-		tree[oldMax + 1] ={'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
+		tree[oldMax + 1] = {'omftype':'module', 'argument':'climate'}
+		tree[oldMax + 2] ={'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
 		feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")

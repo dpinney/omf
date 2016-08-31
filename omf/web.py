@@ -7,6 +7,7 @@ from passlib.hash import pbkdf2_sha512
 import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses
 import models, feeder, milToGridlab
 import cymeToGridlab
+from omf.calibrate import omfCalibrate
 
 app = Flask("web")
 URL = "http://www.omf.coop"
@@ -421,8 +422,16 @@ def milsoftImport(owner):
 	''' API for importing a milsoft feeder. '''
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameM","feeder"))
+	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
 	feederNum = request.form.get("feederNum",1)
-	stdString, seqString = map(lambda x: request.files[x].stream.read(), ["stdFile", "seqFile"])
+	stdFile, seqFile = map(lambda x: request.files[x], ["stdFile", "seqFile"])
+	# stdFile, seqFile= request.files['stdFile','seqFile']
+	stdFile.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.std'))
+	seqFile.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.seq'))
+	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.std') as stdInput:
+		stdString = stdInput.read()
+	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.seq') as seqInput:
+		seqString = seqInput.read()
 	if not os.path.isdir("data/Conversion/" + owner):
 		os.makedirs("data/Conversion/" + owner)
 	with open("data/Conversion/" + owner + "/" + feederName + ".json", "w+") as conFile:
@@ -456,7 +465,12 @@ def gridlabdImport(owner):
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameG",""))
 	feederNum = request.form.get("feederNum",1)
-	glmString = request.files["glmFile"].stream.read()
+	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
+	glm = request.files['glmFile']
+	# Save .glm file to model folder
+	glm.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.glm'))
+	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.glm') as glmFile:
+		glmString = glmFile.read()
 	if not os.path.isdir("data/Conversion/" + owner):
 		os.makedirs("data/Conversion/" + owner)
 	with open("data/Conversion/" + owner + "/" + feederName + ".json", "w+") as conFile:
@@ -483,15 +497,43 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 	removeFeeder(owner, modelName, feederNum)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 
+@app.route("/scadaLoadshape/<owner>/<feederName>", methods=["POST"])
+@flask_login.login_required
+def scadaLoadshape(owner,feederName):
+	loadName = request.form.get("loadName","")
+	feederNum = request.form.get("feederNum",1)
+	modelName = request.form.get("modelName","")
+	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
+	file = request.files['scadaFile']
+	file.save(os.path.join(app.config['UPLOAD_FOLDER'],loadName+".csv"))
+	modelDir = "data/Model/"+owner+"/"+modelName
+	if not os.path.isdir(modelDir+'/calibration/gridlabD'):
+		os.makedirs(modelDir+'/calibration/gridlabD')
+	workDir = modelDir + '/calibration'
+	feederPath = modelDir+"/"+feederName+".omd"
+	scadaPath = modelDir+"/"+loadName+".csv"
+	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
+	simStartDate = {"Date":simDate,"timeZone":"PST"}
+	simLength = 24
+	simLengthUnits = 'hours'
+	# Run omf calibrate in background
+	importProc = Process(target =omfCalibrate, args =[workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", (0.05,5), 5])
+	importProc.start()
+	return ('',204)
+
 # TODO: Check if rename mdb files worked
 @app.route("/cymeImport/<owner>", methods=["POST"])
 @flask_login.login_required
-def cymeImport(owner):
+def cymeImport(owner):   
 	''' API for importing a cyme feeder. '''
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameC",""))
 	feederNum = request.form.get("feederNum",1)
+	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
 	mdbNetString, mdbEqString = map(lambda x: request.files[x], ["mdbNetFile", "mdbEqFile"])
+	# Saves .mdb files to model folder
+	mdbNetString.save(os.path.join(app.config['UPLOAD_FOLDER'],'mdbNetFile.mdb'))
+	mdbEqString.save(os.path.join(app.config['UPLOAD_FOLDER'],'mdbEqString.mdb'))
 	if not os.path.isdir("data/Conversion/" + owner):
 		os.makedirs("data/Conversion/" + owner)
 	with open("data/Conversion/" + owner + "/" + feederName + ".json", "w+") as conFile:
