@@ -318,7 +318,7 @@ def _tests():
 		"airport": 'IAD',
 		"created": "2015-06-12 17:20:39.308239",
 		"modelType": "storageDispatch",
-		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","FrankScadaShort.csv")).read(),
+		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","uploads","FrankScadaShort.csv")).read(),
 		"fileName": "FrankScadaShort.csv"
 		}
 	modelLoc = pJoin(workDir,"admin","Automated storageDispatch Testing")

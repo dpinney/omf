@@ -335,7 +335,7 @@ def _tests():
 		"dischargeRate": "5",
 		"modelType": "storageDeferral",
 		"chargeRate": "5",
-		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","FrankScadaValidCSV.csv")).read(),
+		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","uploads","FrankScadaValidCSV.csv")).read(),
 		"fileName": "FrankScadaValidCSV.csv",
 		"cellCost": "7140",
 		"cellQuantity": "10",

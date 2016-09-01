@@ -302,7 +302,7 @@ def _tests():
 	try: os.mkdir(pJoin(workDir,"gridlabD"))
 	except: pass	
 	print "Currently working in: ", workDir
-	scadaPath = pJoin("uploads", "FrankScada.csv")
+	scadaPath = pJoin("scratch","uploads", "FrankScada.csv")
 	feederPath = pJoin("scratch", "publicFeeders","ABEC Frank pre calib.omd")
 	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
 	simStartDate = {"Date":simDate,"timeZone":"PST"}

@@ -467,7 +467,7 @@ def _tests():
 		"modelType":"demandResponse",
 		"retailCost": "0.1",
 		"WholesaleEnergyCost": "0.07",
-		"demandCurve": open(pJoin(__metaModel__._omfDir,"uploads","FrankScadaValidCSV.csv")).read(),
+		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","uploads","FrankScadaValidCSV.csv")).read(),
 		"DrPurchInstallCost": "100000",
 		"runTime": "0:00:03",
 		"SubstitutionPriceElasticity": "-0.09522",

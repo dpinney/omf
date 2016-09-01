@@ -1267,11 +1267,11 @@ def _latCount(name):
     print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
 def _tests(keepFiles=True):
-    ''' Test convert every windmil feeder we have (in uploads). Return number of exceptions we hit. '''
+    ''' Test convert every windmil feeder we have (in scratch/uploads). Return number of exceptions we hit. '''
     import os, json, traceback, shutil
     from solvers import gridlabd
     from matplotlib import pyplot as plt
-    openPrefix = './uploads/'
+    openPrefix = './scratch/uploads/'
     outPrefix = './scratch/milToGridlabTests/'
     try:
         os.mkdir(outPrefix)
