@@ -143,7 +143,7 @@ def tjCode(inputs, outData):
 	monthlyBills3rdParty = []
 	# Variables for goal seeking on.
 	retailRate = inputs["retailCost"]
-	PartyRate = inputs["3rdPartyRate"]
+	PartyRate = inputs["ThirdPartyRate"]
 	comRate = inputs["comRate"]
 	#Calculate Net Energy Metering Scenario:
 	if inputs["meteringType"]=='netEnergyMetering':
@@ -155,7 +155,7 @@ def tjCode(inputs, outData):
 				monthlyBills3rdParty.append(retailRate * totalEnergyUse[x*12+y-1]+PartyRate * totalSolarGen[x*12+y-1]+inputs["utilitySolarMonthlyCharge"])
 			retailRate = retailRate*(1+inputs["rateIncrease"]/100)
 			comRate = comRate*(1+inputs["comRateIncrease"]/100)
-			PartyRate = PartyRate*(1+inputs["3rdPartyRateIncrease"]/100)
+			PartyRate = PartyRate*(1+inputs["ThirdPartyRateIncrease"]/100)
 	#Calculate Production Metering Scenario
 	elif inputs["meteringType"]=='production':
 		for x in range(inputs['years']):
@@ -166,7 +166,7 @@ def tjCode(inputs, outData):
 				monthlyBills3rdParty.append(retailRate * totalEnergyUse[x*12+y-1]+PartyRate * totalSolarGen[x*12+y-1]+inputs["utilitySolarMonthlyCharge"])
 			retailRate = retailRate*(1+inputs["rateIncrease"]/100)
 			comRate = comRate*(1+inputs["comRateIncrease"]/100)
-			PartyRate = PartyRate*(1+inputs["3rdPartyRateIncrease"]/100)
+			PartyRate = PartyRate*(1+inputs["ThirdPartyRateIncrease"]/100)
 	#Calculate Excess Metering Scenario
 	elif inputs["meteringType"]=='excessEnergyMetering':
 		for x in range(inputs['years']):
@@ -184,7 +184,7 @@ def tjCode(inputs, outData):
 					monthlyBills3rdParty.append(retailRate * totalEnergyUse[x*12+y-1]+PartyRate * totalSolarGen[x*12+y-1]+inputs["utilitySolarMonthlyCharge"])
 			retailRate = retailRate*(1+inputs["rateIncrease"]/100)
 			comRate = comRate*(1+inputs["comRateIncrease"]/100)
-			PartyRate = PartyRate*(1+inputs["3rdPartyRateIncrease"]/100)
+			PartyRate = PartyRate*(1+inputs["ThirdPartyRateIncrease"]/100)
 	# Add upfront costs to the first month.
 	monthlyBillsComS[0]+= inputs["comUpfrontCosts"]
 	monthlyBillsRoof[0]+= inputs["roofUpfrontCosts"]
@@ -286,8 +286,8 @@ def _tests():
 		'rateIncrease':2.5,
 		'roofUpfrontCosts':17500,
 		'utilitySolarMonthlyCharge':0,
-		'3rdPartyRate':0.09,
-		'3rdPartyRateIncrease':3.5,
+		'ThirdPartyRate':0.09,
+		'ThirdPartyRateIncrease':3.5,
 		'comUpfrontCosts':10000,
 		'comMonthlyCharge':10,
 		'comRate':0,
