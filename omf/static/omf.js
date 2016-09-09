@@ -101,6 +101,18 @@ function showProgressDialog(dialogMessage, cancelType) {
 				newfeeder.submit();
 			}
 		}
+		else if(cancelType == 'calibrating'){
+			if (confirm('Are you sure you want to cancel the calibration?')){
+				console.log('calibration canceled')
+				var modelName = gebi("modelNameHeader").innerHTML
+				$.ajax({
+						url: "/cancelScadaCalibration/" + modelName
+					}).done(function (data) {
+						console.log(data)
+					})
+				removeProgressDialog()
+			}
+		}
 		else
 		{
 			console.log("Loading cancel button.")

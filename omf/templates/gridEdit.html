@@ -212,6 +212,20 @@
 		}
 	</style>
 	<script>
+		function checkScadaCal(){
+			var modelName = '{{modelName}}'
+					$.ajax({
+						url: "/checkScadaCalibration/" + modelName
+					}).done(function (data) {
+						if (data.exists == true) {
+							getScadaLoadshapes()
+						}
+						else {
+							console.log('calibration is complete')
+						}
+					})
+				}
+
 		var conversion = '';
 		function getCookie(cname) {
 			var name = cname + "=";
@@ -228,6 +242,7 @@
 			return "";
 		}
 		function showProgress(){
+			checkScadaCal()
 			var feederNum = getCookie("converting").split("/")[0];
 			if ((document.cookie.indexOf("converting") > -1) && (feederNum == "{{ feederNum }}")){
 				showProgressDialog('Loading Feeder', 'loading');
@@ -237,6 +252,8 @@
 			else{
 				showProgressDialog('Loading Feeder','loading');
 			}
+			
+
 		}
 	</script>
 </head>
@@ -245,7 +262,7 @@
 	<div id="menuLeft">
 		&nbsp;<span contenteditable="false" id='feederName' name='feederName' style="font-weight:bold;">{{ feederName }}</span>
 		<br>
-		&nbsp;from&#8220;{{ modelName }}&#8221;
+		&nbsp;from&#8220;<span id = 'modelNameHeader'>{{ modelName }}</span>&#8221;
 	</div>
 	<script>
 		function checkConversion() {
@@ -561,10 +578,10 @@
 							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
 							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
 							<table class='importOptions'>
-								<tr>
+								<!-- <tr>
 									<td>Name</td>
 									<td><input type='text' id='loadName' name='loadName' required/></td>
-								</tr>
+								</tr> -->
 								<tr>
 									<td>Scada Loadshape (.csv)</td>
 									<td><input type='file' id='scadaFile' name='scadaFile' accept = '.csv' required/></td>
@@ -1659,8 +1676,22 @@ function newChildAtLocation(component, treeIndex) {
  * Handler function of adding static load to houses.
  */
 function getScadaLoadshapes(){
+	showProgressDialog('Calibrating Feeder', 'calibrating')
  	closeDiv("scadaLoadshapes")
-	}
+ 	var modelName = '{{modelName}}'
+ 	window.setInterval(function checkAPI(){
+					$.ajax({
+						url: "/checkScadaCalibration/" + modelName
+					}).done(function (data) {
+						if (data.exists == true) {
+						}
+						else {
+							removeProgressDialog()
+							window.location.reload();
+						}
+					})
+				}, 5000)
+}
 function staticLoadsToHouses() {
 	function randomHouse() {
 		newHouse = {}
