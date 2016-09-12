@@ -36,8 +36,8 @@
 	<div id="input" class="content">
 		<form name="inputForm" {% if quickRender %} action="/quickRun/"{% else %} action="/runModel/" {% endif %} onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
-				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarRates" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="solarRates" readonly/>
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarCashflow" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="solarCashflow" readonly/>
 			</div>
 			{% if quickRender %}
 			<div class="shorterInput">
