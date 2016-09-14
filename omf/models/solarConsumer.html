@@ -73,8 +73,8 @@
 				<input type="text" id="SystemSize" name="SystemSize" pattern="^\d+\.?\d*$" required="required" value="5">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Projected System Life (years)<span class="classic">How many years you expect the system to last.</span></label>
-				<input type="text" id="years" name="years" pattern="^\d+\.?\d*$" required="required" value="25">
+				<label class="tooltip">Projected System Life (years)<span class="classic">How many years you expect the system to last. Up to 100 years.</span></label>
+				<input type="text" id="years" name="years" pattern="^(100|\d{1,2})(\.\d+)?$" required="required" value="25">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
@@ -140,7 +140,7 @@
 			</div>
 			<div class="shortInput" style="width:66.5%">
 				<label class="tooltip">Monthly Demand (kWh CSV)<span class="classic">12 comma-separated demand values for each month of a typical year.</span></label>
-				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){11}$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
+				<input type="text" id="monthlyDemand" name="monthlyDemand" pattern="^(\d*)(,\d*){11}$" required="required" value="3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000,3000">
 			</div>
 			<div class="wideInput" style="text-align:right">
 				{% if not quickRender %}
