@@ -229,13 +229,16 @@
 						}
 
 					}
-
 						reg = regNamesArray[i]
 						$("<div/>").appendTo("#newRegulatorReport")
 							.attr("class", "regContainer")
 							.attr("id", reg)
 						$("<div/>").appendTo("#newRegulatorReport")
 							.attr("id", "regulatorSeries_" + reg)
+						// if no regulators are found, display message
+	  					if (regNamesArray.length == 0){
+							$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No Regulators were found on the feeder.</p>")
+						}
 
 						var reg1ATSeries = {
 							"pointWidth": 40,
@@ -296,7 +299,8 @@
 						{
 	  						chart.addSeries(reg1CTSeries)
 	  					}
-					}
+
+
 				</script>
 			</div>
 			<p class="reportTitle postRun">Cap Bank Activation <a target="_self" class="toggle">Hide / Show</a></p>
@@ -321,7 +325,10 @@
 						$("<div/>").appendTo("#newCapbankReport")
 							.attr("class", "capContainer")
 							.attr("id", cap)
-
+						// if no regulators are found, display message
+	  					if (capNamesArray.length == 0){
+							$("#newCapbankReport").html("<p>&#160;&#160;&#160;No Capacitors were found on the feeder.</p>")
+						}
 						$("<div/>").appendTo("#newCapbankReport")
 							.attr("id", "capacitorSeries_" + cap)
 						var cap1BSeries = {

@@ -50,7 +50,7 @@ def houseSpecs(lat, lon, addressOverride=None):
 def gldHouse(lat, lon, addressOverride=None, pureRandom=False):
 	''' Given a lat/lon, address, return a GLD house object modeling that location.
 	Or just return a totally random GLD house. '''
-	houseArchetypes = omf.feeder.parse('./uploads/houseArchetypes.glm')
+	houseArchetypes = omf.feeder.parse('./scratch/uploads/houseArchetypes.glm')
 	if pureRandom:
 		newHouse = dict(random.choice(houseArchetypes.values()))
 		newHouse['name'] = 'REPLACE_ME'
@@ -97,8 +97,8 @@ def getByKeyVal(tree, key, value, getAll=False):
 
 def addScaledRandomHouses(inFeed):
 	''' Take a feeder, translate each triplex_node under a meter in to a scaled, semi-randomized house object. '''
-	houseArchetypes = omf.feeder.parse('./uploads/houseArchetypes.glm')
-	childrenArchetypes = omf.feeder.parse('./uploads/houseChildren.glm')
+	houseArchetypes = omf.feeder.parse('./scratch/uploads/houseArchetypes.glm')
+	childrenArchetypes = omf.feeder.parse('./scratch/uploads/houseChildren.glm')
 	tripNodeKeys = getByKeyVal(inFeed, 'object', 'triplex_node', getAll=True)
 	tripLoadKeys = [k for k in tripNodeKeys if 'parent' in inFeed[k]]
 	maxKey = omf.feeder.getMaxKey(inFeed) + 1
@@ -124,7 +124,7 @@ def addScaledRandomHouses(inFeed):
 			maxKey += 1
 
 def _tests():
-	testFeed = omf.feeder.parse('./uploads/inTest_R4-25.00-1_CLEAN.glm')
+	testFeed = omf.feeder.parse('./scratch/uploads/inTest_R4-25.00-1_CLEAN.glm')
 	addScaledRandomHouses(testFeed)
 	outFilePath = './scratch/inTest_R4_modified.glm'
 	with open(outFilePath,'w+') as outFile:

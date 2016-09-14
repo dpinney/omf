@@ -12,10 +12,9 @@ from omf.models import __metaModel__
 from __metaModel__ import *
 
 # OMF imports
-sys.path.append(__metaModel__._omfDir)
-import feeder
-import calibrate
-from solvers import gridlabd
+import omf.feeder as feeder
+import omf.calibrate as calibrate
+from omf.solvers import gridlabd
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"cvrDynamic.html"),"r") as tempFile:

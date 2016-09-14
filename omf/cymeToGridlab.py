@@ -1065,8 +1065,8 @@ def _find_SPCT_rating(load_str):
     
 def convertCymeModel(network_db, equipment_db, test=False, type=1, feeder_id=None):
     if (test==False):
-        network_db_path = "./uploads/" + network_db 
-        equipment_db_path = "./uploads/" + equipment_db   
+        network_db_path = "./scratch/uploads/" + network_db 
+        equipment_db_path = "./scratch/uploads/" + equipment_db   
         network_db = Path(network_db_path).resolve()     
         equipment_db = Path(equipment_db_path).resolve()    
     else:
@@ -1997,16 +1997,16 @@ def _tests(keepFiles=True):
     import feeder
     exceptionCount = 0       
     try:
-        #db_network = os.path.abspath('./uploads/IEEE13.mdb')
-        #db_equipment = os.path.abspath('./uploads/IEEE13.mdb')
+        #db_network = os.path.abspath('./scratch/uploads/IEEE13.mdb')
+        #db_equipment = os.path.abspath('./scratch/uploads/IEEE13.mdb')
         db_network = "IEEE13.mdb"
         db_equipment = "IEEE13.mdb"
         id_feeder = '650'
-        conductors = os.path.abspath('./uploads/conductor_data.csv')
+        conductors = os.path.abspath('./scratch/uploads/conductor_data.csv')
         #cyme_base, x, y = convertCymeModel(db_network, db_equipment, id_feeder, conductors)
         cyme_base, x, y = convertCymeModel(db_network, db_equipment, test=False, type=1, feeder_id='650')    
         glmString = feeder.sortedWrite(cyme_base)
-        gfile = open("./uploads/IEEE13.glm", 'w')
+        gfile = open("./scratch/uploads/IEEE13.glm", 'w')
         gfile.write(glmString)
         gfile.close()
         print 'WROTE GLM FOR'

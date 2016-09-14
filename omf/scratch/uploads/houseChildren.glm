@@ -1,0 +1,41 @@
+object ZIPload {
+	name unresponsiveLoad;
+	parent REPLACE_ME;
+	base_power unresponsive_loads*1.19;
+	schedule_skew 1083;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	impedance_pf 1.000;
+	current_pf 1.000;
+	power_pf 1.000;
+	impedance_fraction 0.200000;
+	heatgain_fraction 0.900;
+};
+
+object ZIPload {
+	name responsiveLoad;
+	parent REPLACE_ME;
+	base_power responsive_loads*1.30;
+	schedule_skew 1083;
+	power_fraction 0.400000;
+	current_fraction 0.400000;
+	impedance_pf 1.000;
+	current_pf 1.000;
+	power_pf 1.000;
+	impedance_fraction 0.200000;
+	heatgain_fraction 0.900;
+};
+
+object waterheater {
+	name waterHeater;
+	parent REPLACE_ME;
+	demand large_6*0.99;
+	schedule_skew 4326;
+	heating_element_capacity 4.5 kW;
+	thermostat_deadband 7.8;
+	location INSIDE;
+	tank_volume 50;
+	tank_setpoint 132.7;
+	tank_UA 3.7;
+	temperature 132;
+};

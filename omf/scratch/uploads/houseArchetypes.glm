@@ -1,0 +1,361 @@
+//Region 1 house archetypes,
+
+object house {
+	name R1_SingleFamilyHome_Pre-1940;
+	floor_area 2209;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 16.0;
+	Rwall 10.0;
+	Rfloor 10.0;
+	glazing_layers 1;// do not vary
+	glass_type 1;// do not vary
+	glazing_treatment 1;// do not vary
+	window_frame 1;// do not vary
+	Rdoors 3;
+	airchange_per_hour 0.75;
+	cooling_COP 2.8;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 2.4;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_SingleFamilyHome_1940-1949;
+	floor_area 2209;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 19.0;
+	Rwall 11.0;
+	Rfloor 12.0;
+	glazing_layers 2;// do not vary
+	glass_type 1;// do not vary
+	glazing_treatment 1;// do not vary
+	window_frame 1;// do not vary
+	Rdoors 3;
+	airchange_per_hour 0.75;
+	cooling_COP 3.0;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 2.5;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_SingleFamilyHome_1950-1959;
+	floor_area 2209;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 19.0;
+	Rwall 14.0;
+	Rfloor 16.0;
+	glazing_layers 2;// do not vary
+	glass_type 1;// do not vary
+	glazing_treatment 1;// do not vary
+	window_frame 1;// do not vary
+	Rdoors 3;
+	airchange_per_hour 0.5;
+	cooling_COP 3.2;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 2.6;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_SingleFamilyHome_1960-1969;
+	floor_area 2209;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 30.0;
+	Rwall 17.0;
+	Rfloor 19.0;
+	glazing_layers 2;// do not vary
+	glass_type 1;// do not vary
+	glazing_treatment 1;// do not vary
+	window_frame 2;// do not vary
+	Rdoors 3;
+	airchange_per_hour 0.5;
+	cooling_COP 3.4;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 2.8;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_SingleFamilyHome_1970-1979;
+	floor_area 2209;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 34.0;
+	Rwall 19.0;
+	Rfloor 20.0;
+	glazing_layers 2;// do not vary
+	glass_type 1;// do not vary
+	glazing_treatment 1;// do not vary
+	window_frame 2;// do not vary
+	Rdoors 3;
+	airchange_per_hour 0.5;
+	cooling_COP 3.6;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 3.0;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_SingleFamilyHome_1980-1989;
+	floor_area 2209;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 36.0;
+	Rwall 22.0;
+	Rfloor 22.0;
+	glazing_layers 2;// do not vary
+	glass_type 2;// do not vary
+	glazing_treatment 1;// do not vary
+	window_frame 2;// do not vary
+	Rdoors 5;
+	airchange_per_hour 0.25;
+	cooling_COP 3.8;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 3.0;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_SingleFamilyHome_1990-2005;
+	floor_area 2209;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 48.0;
+	Rwall 28.0;
+	Rfloor 30.0;
+	glazing_layers 3;// do not vary
+	glass_type 2;// do not vary
+	glazing_treatment 2;// do not vary
+	window_frame 4;// do not vary
+	Rdoors 11;
+	airchange_per_hour 0.25;
+	cooling_COP 4.0;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 3.0;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_Apartment_Pre-1960;
+	floor_area 820;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 13.4;
+	Rwall 11.7;
+	Rfloor 9.4;
+	glazing_layers 1;// do not vary
+	glass_type 1;// do not vary
+	glazing_treatment 1;// do not vary
+	window_frame 1;// do not vary
+	Rdoors 2.2;
+	airchange_per_hour 0.75;
+	cooling_COP 2.8;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 1.9;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_Apartment_1960-1989;
+	floor_area 820;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 20.3;
+	Rwall 11.7;
+	Rfloor 12.7;
+	glazing_layers 2;// do not vary
+	glass_type 1;// do not vary
+	glazing_treatment 2;// do not vary
+	window_frame 2;// do not vary
+	Rdoors 2.7;
+	airchange_per_hour 0.25;
+	cooling_COP 3.0;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 2.0;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_Apartment_1990-2005;
+	floor_area 820;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 28.7;
+	Rwall 14.3;
+	Rfloor 12.7;
+	glazing_layers 2;// do not vary
+	glass_type 2;// do not vary
+	glazing_treatment 3;// do not vary
+	window_frame 4;// do not vary
+	Rdoors 6.3;
+	airchange_per_hour 0.125;
+	cooling_COP 3.2;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 2.1;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_MobileHome_1960-1989;
+	floor_area 1054;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 13.4;
+	Rwall 9.2;
+	Rfloor 11.7;
+	glazing_layers 1;// do not vary
+	glass_type 1;// do not vary
+	glazing_treatment 1;// do not vary
+	window_frame 1;// do not vary
+	Rdoors 2.2;
+	airchange_per_hour 0.75;
+	cooling_COP 2.8;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 1.9;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};
+
+object house {
+	name R1_MobileHome_1990-2005;
+	floor_area 1054;
+	number_of_stories 1;
+	ceiling_height 8.0;
+	over_sizing_factor 0.1;
+	Rroof 24.1;
+	Rwall 11.7;
+	Rfloor 18.1;
+	glazing_layers 2;// do not vary
+	glass_type 2;// do not vary
+	glazing_treatment 1;// do not vary
+	window_frame 2;// do not vary
+	Rdoors 3;
+	airchange_per_hour 0.75;
+	cooling_COP 3.5;
+	air_temperature 68;
+	mass_temperature 68;
+	total_thermal_mass_per_floor_area 2.5;
+	heating_system_type HEAT_PUMP;
+	heating_COP 2.2;
+	cooling_system_type ELECTRIC;
+	auxiliary_strategy DEADBAND;
+	auxiliary_system_type ELECTRIC;
+	motor_model BASIC;
+	motor_efficiency AVERAGE;
+	breaker_amps 1000;// do not vary
+	hvac_breaker_rating 1000;// do not vary
+};

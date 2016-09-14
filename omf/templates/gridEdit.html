@@ -31,6 +31,7 @@
 		div#editDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
 		div#addDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
 		div#helpDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
+		#scadaLoad{padding: 0px}
 		#helpButton{color: white;}
 		select, button {width:initial;}
 		td, th {padding:3px;text-align: left;}
@@ -211,6 +212,20 @@
 		}
 	</style>
 	<script>
+		function checkScadaCal(){
+			var modelName = '{{modelName}}'
+					$.ajax({
+						url: "/checkScadaCalibration/" + modelName
+					}).done(function (data) {
+						if (data.exists == true) {
+							getScadaLoadshapes()
+						}
+						else {
+							console.log('calibration is complete')
+						}
+					})
+				}
+
 		var conversion = '';
 		function getCookie(cname) {
 			var name = cname + "=";
@@ -227,6 +242,7 @@
 			return "";
 		}
 		function showProgress(){
+			checkScadaCal()
 			var feederNum = getCookie("converting").split("/")[0];
 			if ((document.cookie.indexOf("converting") > -1) && (feederNum == "{{ feederNum }}")){
 				showProgressDialog('Loading Feeder', 'loading');
@@ -236,6 +252,8 @@
 			else{
 				showProgressDialog('Loading Feeder','loading');
 			}
+			
+
 		}
 	</script>
 </head>
@@ -244,7 +262,7 @@
 	<div id="menuLeft">
 		&nbsp;<span contenteditable="false" id='feederName' name='feederName' style="font-weight:bold;">{{ feederName }}</span>
 		<br>
-		&nbsp;from&#8220;{{ modelName }}&#8221;
+		&nbsp;from&#8220;<span id = 'modelNameHeader'>{{ modelName }}</span>&#8221;
 	</div>
 	<script>
 		function checkConversion() {
@@ -304,6 +322,7 @@
 					<li><a href='javascript:renameFeeder();'>Rename</a></li>
 					<li><a href='javascript:showDiv("loadDiv","550px", "0px");'>Load from Model</a></li>
 					<div id='loadDiv' style="visibility:hidden;font-size:10pt;height:0;">
+					<li><a href="#" onclick='closeDiv("loadDiv");closeDiv("pubFeeders");closeDiv("myFeeders");' style="text-align:center;font-size:12pt;">Cancel</a></li>
 						<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","225px", "20px");'>Public Feeders</a></p></li>
 						<div id="pubFeeders" style="visibility:hidden;height:0px;">
 							<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
@@ -340,7 +359,6 @@
 								{% endfor %}
 							</div>
 						</div>
-						<li><a href="#" onclick='closeDiv("loadDiv");closeDiv("pubFeeders");closeDiv("myFeeders");' style="text-align:center;font-size:12pt;">Cancel</a></li>
 					</div>
 					<p style='font-weight:bold;margin: 10px 0 0 4px;'>New Feeder</p>
 					<li><a href='javascript:showDiv("newFeederDiv","50px;", "0px;");'>Blank Feeder</a></li>
@@ -403,7 +421,7 @@
 								</tr>
 								<tr>
 									<td>Data File (.glm)</td>
-									<td><input type='file' id='glmFile' name='glmFile' accept = '.glm' required/></td>
+									<td><input type='file' id='csvFile' name='glmFile' accept = '.glm' required/></td>
 								</tr>
 								<tr>
 									<td></td>
@@ -551,6 +569,34 @@
 					<tr>
 						<td>Static Loads to Houses</td>
 						<td><button style="width:30px;" onclick='javascript:staticLoadsToHouses();unsavedChanges=true'>Go</button></td>
+					</tr>
+					<tr>
+						<td><li><a id='scadaLoad' href='javascript:showDiv("scadaLoadshapes","50px;", "0px;");'>Scada Loadshapes</a></li>
+					<div id="scadaLoadshapes" style="visibility:hidden;height:0;">
+						<form onsubmit=' return getScadaLoadshapes();' action='/scadaLoadshape/{{ owner }}/{{feederName}}' id='scadaLoadshape' enctype='multipart/form-data' method='post'>
+							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+							<table class='importOptions'>
+								<!-- <tr>
+									<td>Name</td>
+									<td><input type='text' id='loadName' name='loadName' required/></td>
+								</tr> -->
+								<tr>
+									<td>Scada Loadshape (.csv)</td>
+									<td><input type='file' id='scadaFile' name='scadaFile' accept = '.csv' required/></td>
+								</tr>
+								<tr>
+									<td></td>
+									<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+								</tr>
+							</table>
+						</form>
+						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+						<li><a href="#" onclick='closeDiv("scadaLoadshapes")' style="text-align:center;font-size:10pt;">Cancel</a></li>
+					</div>
+					</td>
+
 					</tr>
 					<tr>
 						<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
@@ -1629,6 +1675,23 @@ function newChildAtLocation(component, treeIndex) {
 /**
  * Handler function of adding static load to houses.
  */
+function getScadaLoadshapes(){
+	showProgressDialog('Calibrating Feeder', 'calibrating')
+ 	closeDiv("scadaLoadshapes")
+ 	var modelName = '{{modelName}}'
+ 	window.setInterval(function checkAPI(){
+					$.ajax({
+						url: "/checkScadaCalibration/" + modelName
+					}).done(function (data) {
+						if (data.exists == true) {
+						}
+						else {
+							removeProgressDialog()
+							window.location.reload();
+						}
+					})
+				}, 5000)
+}
 function staticLoadsToHouses() {
 	function randomHouse() {
 		newHouse = {}
@@ -2042,6 +2105,7 @@ function deleteObject(treeIndex) {
 	var isNode = true
 	for (prop in tree[treeIndex])
 		if (prop == 'from') isNode = false
+	if(confirm("Are you sure you want to delete this node?")){
 	if (isNode) {
 		// Check for connections and abort if we have them.
 		nodeName = tree[treeIndex].name
@@ -2077,6 +2141,7 @@ function deleteObject(treeIndex) {
 	delete tree[treeIndex]
 	clearSelection()
 	redraw()
+	}
 }
 
 /**

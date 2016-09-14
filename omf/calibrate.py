@@ -13,7 +13,7 @@ from matplotlib import pyplot as plt
 
 def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver="FBS", calibrateError=(0.05,5), trim=5):
 	'''calibrates a feeder and saves the calibrated tree at a location.
-	Note: feeders with cap banks should be calibrated with cab banks OPEN.
+	Note: feeders with cap banks should be calibrated with cap banks OPEN.
 	We have seen cap banks throw off calibration.'''
 	with open(feederPath, "r") as jsonIn:
 		feederJson = json.load(jsonIn)
@@ -302,7 +302,7 @@ def _tests():
 	try: os.mkdir(pJoin(workDir,"gridlabD"))
 	except: pass	
 	print "Currently working in: ", workDir
-	scadaPath = pJoin("uploads", "FrankScada.csv")
+	scadaPath = pJoin("scratch","uploads", "FrankScada.csv")
 	feederPath = pJoin("scratch", "publicFeeders","ABEC Frank pre calib.omd")
 	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
 	simStartDate = {"Date":simDate,"timeZone":"PST"}

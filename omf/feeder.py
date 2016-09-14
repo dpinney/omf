@@ -187,6 +187,8 @@ def latLonNxGraph(inGraph, labels=False, neatoLayout=False, showPlot=False):
 	''' Draw a networkx graph representing a feeder.'''
 	plt.axis('off')
 	plt.tight_layout()
+	plt.gca().invert_yaxis()
+	plt.gca().set_aspect('equal')
 	# Layout the graph via GraphViz neato. Handy if there's no lat/lon data.
 	if neatoLayout:
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.

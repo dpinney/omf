@@ -114,6 +114,20 @@ def heavyProcessing(modelDir, inputDict):
 		startTime = datetime.datetime.now()
 		feederJson = json.load(open(pJoin(modelDir, feederName+'.omd')))
 		tree = feederJson["tree"]
+		#add a check to see if there is already a climate object in the omd file
+		#if there is delete the climate from attachments and the climate object
+		attachKeys = feederJson["attachments"].keys()
+		for key in attachKeys:
+			if key.endswith('.tmy2'):
+				del feederJson['attachments'][key]	
+		treeKeys = feederJson["tree"].keys()
+		for key in treeKeys:
+			if 'object' in feederJson['tree'][key]:
+			 	if feederJson['tree'][key]['object'] == 'climate':
+			 		del feederJson['tree'][key]
+		oldMax = feeder.getMaxKey(tree)
+		tree[oldMax + 1] = {'omftype':'module', 'argument':'climate'}
+		tree[oldMax + 2] ={'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
 		feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
@@ -453,10 +467,10 @@ def _tests():
 	# Variables
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName1": "Olin Barre GH EOL Solar",
+		"feederName1": "superModel Tomorrow",
 		"modelType": "solarEngineering",
-		"zipCode": "64735",
-		"simLength": "24",
+		"zipCode": "59001",
+		"simLength": "10",
 		"runTime": ""}
 	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated solarEngineering Test")
 	# Blow away old test results if necessary.

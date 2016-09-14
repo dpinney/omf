@@ -10,9 +10,9 @@ def _tests(Network, Equipment, keepFiles=True):
     import feeder
     exceptionCount = 0       
     try:
-        #db_network = os.path.abspath('./uploads/IEEE13.mdb')
-        #db_equipment = os.path.abspath('./uploads/IEEE13.mdb')
-        prefix = str(Path("testPEC.py").resolve()).strip('scratch\cymeToGridlabTests\testPEC.py') + "\uploads\\"      
+        #db_network = os.path.abspath('./scratch/uploads/IEEE13.mdb')
+        #db_equipment = os.path.abspath('./scratch/uploads/IEEE13.mdb')
+        prefix = str(Path("testPEC.py").resolve()).strip('scratch\cymeToGridlabTests\testPEC.py') + "scratch\uploads\\"      
         db_network = "C" + prefix + Network
         db_equipment = "C" + prefix + Equipment
         id_feeder = '650'
@@ -25,7 +25,7 @@ def _tests(Network, Equipment, keepFiles=True):
         feeder.attachRecorders(cyme_base, "TriplexLosses", None, None)
         feeder.attachRecorders(cyme_base, "TransformerLosses", None, None)
         glmString = feeder.sortedWrite(cyme_base)
-        feederglm = "C:\Users\Asus\Documents\GitHub\omf\omf\uploads\PEC.glm"
+        feederglm = "C:\Users\Asus\Documents\GitHub\omf\omf\scratch\uploads\PEC.glm"
         #print "feeederglm", feederglm
         gfile = open(feederglm, 'w')
         gfile.write(glmString)
@@ -64,13 +64,13 @@ def _tests(Network, Equipment, keepFiles=True):
     if not keepFiles:
         shutil.rmtree(outPrefix)
     return exceptionCount    
-    '''db_network = os.path.abspath('./uploads/PasoRobles11cymsectiondevice[device]['phases']08.mdb')
-    db_equipment = os.path.abspath('./uploads/PasoRobles1108.mdb')
+    '''db_network = os.path.abspath('./scratch/uploads/PasoRobles11cymsectiondevice[device]['phases']08.mdb')
+    db_equipment = os.path.abspath('./scratch/uploads/PasoRobles1108.mdb')
     id_feeder = '182611108'
-    conductors = os.path.abspath('./uploads/conductor_data.csv')
+    conductors = os.path.abspath('./scratch/uploads/conductor_data.csv')
     cyme_base, x, y = convertCymeModel(db_network, db_equipment, id_feeder, conductors)
     glmString = feeder.sortedWrite(cyme_base)
-    gfile = open("./uploads/PR1108Conversion.glm", 'w')
+    gfile = open("./scratch/uploads/PR1108Conversion.glm", 'w')
     gfile.write(glmString)
     gfile.close()'''
 if __name__ == '__main__':

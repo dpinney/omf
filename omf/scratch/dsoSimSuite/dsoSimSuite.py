@@ -13,8 +13,10 @@ import traceback
 from omf.models import __metaModel__
 from __metaModel__ import *
 import omf.feeder as feeder
+from omf.weather import makeClimateCsv
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
+
 
 _myDir = os.path.dirname(os.path.abspath(__file__))
 
@@ -112,11 +114,35 @@ def heavyProcessing(modelDir, inputDict):
 			inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
 			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 				pJoin(modelDir, "gldContainer", "climate.tmy2"))
+			startTime = datetime.datetime.now()
 		else:
-			print "historical weather selected"
+			#hack for testing
+			makeClimateCsv('2010-07-01', '2010-08-01', 'DFW', 'Output/Automated dsoSimSuite Test/gldContainer/weather.csv')
+			startTime = datetime.datetime.now()
 		startTime = datetime.datetime.now()
 		feederJson = json.load(open(pJoin(modelDir, feederName+'.omd')))
 		tree = feederJson["tree"]
+		#add a check to see if there is already a climate object in the omd file
+		#if there is delete the climate from attachments and the climate object
+		attachKeys = feederJson["attachments"].keys()
+		for key in attachKeys:
+			if key.endswith('.tmy2'):
+				del feederJson['attachments'][key]	
+		treeKeys = feederJson["tree"].keys()
+		for key in treeKeys:
+			if 'object' in feederJson['tree'][key]:
+			 	if feederJson['tree'][key]['object'] == 'climate':
+			 		del feederJson['tree'][key]	
+		#add weather objects and modules to .glm if there is no climate file in the omd file
+		if weather == "historical":
+			oldMax = feeder.getMaxKey(tree)
+			tree[oldMax + 1] = {'omftype':'module', 'argument':'tape'}
+			tree[oldMax + 2] = {'omftype':'module', 'argument':'climate'}
+			tree[oldMax + 3] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weather.csv'}
+			tree[oldMax + 4] = {'object':'climate', 'name':'exampleClimate', 'tmyfile':'weather.csv', 'reader':'weatherReader'}
+		else:
+			oldMax = feeder.getMaxKey(tree)
+			tree[oldMax + 1] ={'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
 		feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
@@ -453,13 +479,13 @@ def _groupBy(inL, func):
 
 def _tests():
 	# Variables
-	inData = {"simStartDate": "2012-04-01",
+	inData = {"simStartDate": "2010-07-01",
 		"simLengthUnits": "hours",
 		"feederName1": "superModel Tomorrow",
 		"modelType": "dsoSimSuite",
-		"weather": "typical",
-		"zipCode": "64735",
-		"simLength": "24",
+		"weather": "historical",
+		"zipCode": "90001",
+		"simLength": "10",
 		"runTime": ""}
 	modelLoc = pJoin(__metaModel__._omfDir,"scratch","dsoSimSuite","Output","Automated dsoSimSuite Test")
 	# Blow away old test results if necessary.
