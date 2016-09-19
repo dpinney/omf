@@ -275,12 +275,19 @@
 				var conversionStatus = 'converting';
 				console.log('feederName:', feederName)
 				// Check every 5 seconds for a feeder & refresh.
-				window.setInterval(function pingAPI(){
+				var setInterval = window.setInterval(function pingAPI(){
 					$.ajax({
 						url: "/checkConversion/" + feederName
 					}).done(function (data) {
 						if (data.exists) {
 							conversionStatus = 'converting';
+						}
+						else if(data == 'gridError'){
+							alert('The glm file used is incorrectly formatted.')
+							removeProgressDialog()
+							conversionStatus = 'error'
+							window.clearInterval(setInterval)
+							return false;
 						}
 						else {
 							conversionStatus = 'done';
@@ -1685,7 +1692,12 @@ function getScadaLoadshapes(){
 					}).done(function (data) {
 						if (data.exists == true) {
 						}
-						else {
+						else if(data.exists == false){
+							removeProgressDialog()
+							window.location.reload();
+						}
+						else{
+							alert(data)
 							removeProgressDialog()
 							window.location.reload();
 						}
