@@ -15,7 +15,7 @@ import random
 from omf.weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"solarRates.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"solarCashflow.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -377,7 +377,7 @@ def run(modelDir, inputDict):
 			json.dump(inputDict, inFile, indent=4)
 
 def cancel(modelDir):
-	''' solarRates runs so fast it's pointless to cancel a run. '''
+	''' solarCashflow runs so fast it's pointless to cancel a run. '''
 	pass
 
 def _tests():
@@ -398,7 +398,7 @@ def _tests():
 	"novSale": "47173", "novKWh": "41668828", "novRev": "5551288", "novKWhT": "65008851", "novRevT": "8228072",
 	"decSale": "47081", "decKWh": "53354283", "decRev": "7014717", "decKWhT": "73335526", "decRevT": "9385203" }
 	inData = {
-		"modelType": "solarRates",
+		"modelType": "solarCashflow",
 		"zipCode": "64735",
 		"runTime": "",
 		# Single data point
@@ -435,7 +435,7 @@ def _tests():
 		"extraItems":"0" }
 	for key in monthlyData:
 		inData[key] = monthlyData[key]
-	modelLoc = pJoin(workDir,"admin","Automated solarRates Testing")
+	modelLoc = pJoin(workDir,"admin","Automated solarCashflow Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)

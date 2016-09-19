@@ -776,7 +776,7 @@ def root():
 		try:
 			modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
 			allInput = json.load(open(modPath + "/allInputData.json"))
-			mod["runTime"] = allInput.get("runTime","")
+			mod["runTime"] = allInput.get("runTime","0:00:00")
 			mod["modelType"] = allInput.get("modelType","")
 			try:
 				mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
