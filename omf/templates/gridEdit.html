@@ -282,11 +282,22 @@
 						if (data.exists) {
 							conversionStatus = 'converting';
 						}
-						else if(data == 'gridError'){
+						else if(data == 'glmError'){
 							alert('The glm file used is incorrectly formatted.')
 							removeProgressDialog()
-							conversionStatus = 'error'
+							conversionStatus = 'done'
 							window.clearInterval(setInterval)
+							// HACK: Getting around cookie issue where browser thinks feeder is still converting after error
+							document.cookie ="converting = -3;"
+							return false;
+						}
+						else if (data == 'milError'){
+							alert('The .std and .seq files used are incorrectly formatted.')
+							removeProgressDialog()
+							conversionStatus = 'done'
+							window.clearInterval(setInterval)
+							// HACK: Getting around cookie issue where browser thinks feeder is still converting after error
+							document.cookie ="converting = -3;"
 							return false;
 						}
 						else {

@@ -417,8 +417,10 @@ def checkConversion(feederName):
 	errorPath = "data/Conversion/"+owner+"/gridError.txt"
 	print "Check conversion status:", os.path.exists(path), "for path", path
 	if os.path.isfile(errorPath):
-		return 'gridError'
-		os.remove(errorPath)
+		with open(errorPath) as errorFile:
+			errorString = errorFile.read()
+			os.remove(errorPath)
+		return errorString
 	else:
 		return jsonify(exists=os.path.exists(path))
 
@@ -426,6 +428,8 @@ def checkConversion(feederName):
 @flask_login.login_required
 def milsoftImport(owner):
 	''' API for importing a milsoft feeder. '''
+	if os.path.isfile("data/Conversion/"+owner+"/gridError.txt"):
+		os.remove("data/Conversion/"+owner+"/gridError.txt")
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameM","feeder"))
 	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
@@ -448,24 +452,29 @@ def milsoftImport(owner):
 
 def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqString):
 	''' Function to run in the background for Milsoft import. '''
-	try:
-		modelDir = "data/Model/"+owner+"/"+modelName
-		feederDir = modelDir+"/"+feederName+".omd"
-		newFeeder = dict(**feeder.newFeederWireframe)
-		[newFeeder["tree"], xScale, yScale] = milToGridlab.convert(stdString, seqString)
-		newFeeder["layoutVars"]["xScale"] = xScale
-		newFeeder["layoutVars"]["yScale"] = yScale
-		with open("./schedules.glm","r") as schedFile:
-			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
-		try: os.remove(feederDir)
-		except: pass
-		with open(feederDir, "w") as outFile:
-			json.dump(newFeeder, outFile, indent=4)
-		os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
-		removeFeeder(owner, modelName, feederNum)
-		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
-	except:
-		print 'error'
+	modelDir = "data/Model/"+owner+"/"+modelName
+	feederDir = modelDir+"/"+feederName+".omd"
+	newFeeder = dict(**feeder.newFeederWireframe)
+	[newFeeder["tree"], xScale, yScale] = milToGridlab.convert(stdString, seqString)
+	newFeeder["layoutVars"]["xScale"] = xScale
+	newFeeder["layoutVars"]["yScale"] = yScale
+	with open("./schedules.glm","r") as schedFile:
+		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
+	try: os.remove(feederDir)
+	except: pass
+	with open(feederDir, "w") as outFile:
+		json.dump(newFeeder, outFile, indent=4)
+	with open(feederDir) as feederFile:
+		feederTree =  json.load(feederFile)
+	print len(feederTree)
+	if len(feederTree['tree']) < 12:
+		if not os.path.isdir("data/Conversion/" + owner):
+			os.makedirs("data/Conversion/" + owner)
+		with open("data/Conversion/"+owner+"/gridError.txt", "w+") as errorFile:
+			errorFile.write('milError')
+	os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
+	removeFeeder(owner, modelName, feederNum)
+	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 
 @app.route("/gridlabdImport/<owner>", methods=["POST"])
 @flask_login.login_required
@@ -510,7 +519,7 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	except Exception as error:
 		with open("data/Conversion/"+owner+"/gridError.txt", "w+") as errorFile:
-			errorFile.write('The glm file used is incorrectly formatted.')
+			errorFile.write('glmError')
 @app.route("/scadaLoadshape/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
 def scadaLoadshape(owner,feederName):
@@ -542,7 +551,6 @@ def scadaLoadshape(owner,feederName):
 	pid = str(importProc.pid)
 	with open(modelDir+"/PID.txt", "w+") as outFile:
 		outFile.write(pid)
-
 	return ('',204)
 def backgroundScadaCalibration(owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim):
 	# heavy lifting background process/omfCalibrate and then deletes PID file
@@ -550,18 +558,16 @@ def backgroundScadaCalibration(owner, modelName, workDir, feederPath, scadaPath,
 		omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
 		modelDirec="data/Model/" + owner + "/" +  modelName
 		# move calibrated file to model folder, old omd files are backedup
-		for filename in os.listdir(modelDirec):
-			if filename.endswith('.omd'):
-				feederFileName = str(filename)
-				os.rename(modelDirec+"/"+filename, modelDirec+"/"+filename+".backup")
-		os.rename(workDir+'/calibratedFeeder.omd',workDir+"/"+feederFileName)
-		shutil.move(workDir+"/"+feederFileName, modelDirec)
+		if feederPath.endswith('.omd'):
+			os.rename(feederPath, feederPath+".backup")
+		os.rename(workDir+'/calibratedFeeder.omd',feederPath)
+		# shutil.move(workDir+"/"+feederFileName, modelDirec)
 		os.remove("data/Model/" + owner + "/" +  modelName + "/PID.txt")
 	except Exception as error:
 		modelDirec="data/Model/" + owner + "/" +  modelName
 		errorString = ''.join(error)
 		with open(modelDirec+'/error.txt',"w+") as errorFile:
-		 	errorFile.write('CSV is missing at least the following columns: '+ errorString + ". Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
+		 	errorFile.write("The CSV used is incorrectly formatted. Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
 @app.route("/checkScadaCalibration/<modelName>", methods=["POST","GET"])
 def checkScadaCalibration(modelName):
 	owner = User.cu()
@@ -776,7 +782,7 @@ def root():
 		try:
 			modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
 			allInput = json.load(open(modPath + "/allInputData.json"))
-			mod["runTime"] = allInput.get("runTime","0:00:00")
+			mod["runTime"] = allInput.get("runTime","")
 			mod["modelType"] = allInput.get("modelType","")
 			try:
 				mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
