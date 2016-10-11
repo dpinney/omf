@@ -1,0 +1,191 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<style>
+	/*Styles go here.*/
+	</style>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+</head>
+
+<body onload="init()">
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			</div>
+		</div>
+	</div>
+
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+		
+			<!-- Required Inputs -->
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-solarInterconnection" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="solarInterconnection" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="shortInput runningInline postRunInline ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+
+			<!-- Model Specific Inputs -->
+			<div class="wideInput">
+				<p class="inputSectionHeader">System Parameters</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
+				<input type="text" id="zipCode" name="zipCode" required="required" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. Due to large data volumes, the current limit is 9999.</span></label>
+				<input type="text" id="simLength" name="simLength" required="required" pattern="^(\d{1,4})$"/>
+			</div>
+			<div class="shortInput">
+				<label>Length Units</label>
+				<select id="simLengthUnits" name="simLengthUnits">
+					<option value="hours">Hours</option>
+					<option value="minutes">Minutes</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label>Simulation Start Date (YYYY-MM-DD)</label>
+				<input type="text" id="simStartDate" name="simStartDate" required="required" pattern="^\d\d\d\d-\d\d-\d\d$"/>
+			</div>
+
+			<div class="shortInput">
+				<label>Add Solar</label>
+				<select id="simLengthUnits" name="simLengthUnits">
+					<option value="solar">Add Solar</option>
+					<option value="noSolar">No Solar</option>
+				</select>
+			</div>
+			<div class="shortInput">
+				<label>Season</label>
+				<select id="simLengthUnits" name="simLengthUnits">
+					<option value="fall">Fall</option>
+					<option value="winter">Winter</option>
+					<option value="spring">Spring</option>
+					<option value="summer">Summer</option>
+				</select>
+				</div>
+
+	<!-- 		<div class="shortInput">
+				<label class="tooltip">Input 1<span class="classic">Enter an input of any kind.</span></label>
+				<input type="text" id="input1" name="input1" required="required" placeholder="abc1 Easy as..."/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Input 2<span class="classic">Enter an input of another kind.</span></label>
+				<input type="text" id="input2" name="input2" required="required" placeholder="123 Or Simple as.."/>
+			</div> -->
+
+			<!-- Required Buttons -->
+			<div class="wideInput" style="text-align:right">
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				<button id="runButton" type="submit">Run Model</button>
+			</div>
+		</form>
+	</div>
+
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
+
+	<!-- Output tables, graphs, etc -->
+	<div id="output">
+		<div>
+			<p style="font-size:10pt;">Violations Key</p>
+			<TABLE style="font-size:8pt;margin-top:-10px;">
+			   <TR>
+				  <TD>Violation1</TD>
+				  <TD>Thermal Limit Exceeded</TD>
+			   </TR>
+			   <TR>
+				  <TD>Violation2</TD>
+				  <TD>Dangerous instantaneous voltage</TD>
+			   </TR>
+			   <TR>
+				  <TD>Violation3</TD>
+				  <TD>ANSI limit exceeded at meter</TD>
+			   </TR>
+			   <TR>
+				  <TD>Violation4/5</TD>
+				  <TD>Reverse power flow exceeds limit</TD>
+			   </TR>
+			   <TR>
+				  <TD>Violation6</TD>
+				  <TD>Unsafe voltage flicker</TD>
+			   </TR>
+			   <TR>
+				  <TD>Violation7</TD>
+				  <TD>Voltage drop/rise exceeds limit</TD>
+			   </TR>
+			   <TR>
+				  <TD>Violation8</TD>
+				  <TD>Circuit power factor too low</TD>
+			   </TR>
+			   <TR>
+				  <TD>Violation10</TD>
+				  <TD>Total short circuit contribution exceeds circuit breaker rating</TD>
+			   </TR>
+			</TABLE>
+		</div>
+
+		<!-- Integer Sum Table -->
+		<p class="reportTitle postRun">Model Skeleton Integer Sum</p>
+		<div id="analysisSummary" class="content postRun">
+			<div class="shortInput">
+				<strong>Input 1</strong>
+				<p id="input1Out"></p>
+			</div>
+			<div class="shortInput">
+				<strong>Input 2</strong>
+				<p id="input2Out"></p>
+			</div>
+			<div class="shortInput">
+				<strong>Output</strong>
+				<p id="sumOut"></p>
+			</div>
+			<script type="text/javascript">
+				// Set values for this section.
+				gebi("input1Out").innerHTML = allInputData.input1
+				gebi("input2Out").innerHTML = allInputData.input2
+				gebi("sumOut").innerHTML = allOutputData.output
+			</script>
+		</div>
+
+	</div>
+</body>
