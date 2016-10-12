@@ -549,7 +549,7 @@ def scadaLoadshape(owner,feederName):
 	# write PID to txt file in model folder here
 	importProc.start()
 	pid = str(importProc.pid)
-	with open(modelDir+"/PID.txt", "w+") as outFile:
+	with open(modelDir+"/CPID.txt", "w+") as outFile:
 		outFile.write(pid)
 	return ('',204)
 def backgroundScadaCalibration(owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim):
@@ -562,7 +562,7 @@ def backgroundScadaCalibration(owner, modelName, workDir, feederPath, scadaPath,
 			os.rename(feederPath, feederPath+".backup")
 		os.rename(workDir+'/calibratedFeeder.omd',feederPath)
 		# shutil.move(workDir+"/"+feederFileName, modelDirec)
-		os.remove("data/Model/" + owner + "/" +  modelName + "/PID.txt")
+		os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
 	except Exception as error:
 		modelDirec="data/Model/" + owner + "/" +  modelName
 		errorString = ''.join(error)
@@ -570,10 +570,13 @@ def backgroundScadaCalibration(owner, modelName, workDir, feederPath, scadaPath,
 		 	errorFile.write("The CSV used is incorrectly formatted. Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
 @app.route("/checkScadaCalibration/<modelName>", methods=["POST","GET"])
 def checkScadaCalibration(modelName):
-	owner = User.cu()
-	pidPath = ("data/Model/" + owner + "/" + modelName + "/PID.txt")
-	errorPath = ("data/Model/" + owner + "/" + modelName + "/error.txt")
-	print "Check conversion status:", os.path.exists(pidPath), "for path", pidPath
+	try:
+		owner = User.cu()
+	except:
+		return 'Server crashed during calibration. Please attempt calibration again.'
+	pidPath = ('data/Model/' + owner + '/' + modelName + '/CPID.txt')
+	errorPath = ('data/Model/' + owner + '/' + modelName + '/error.txt')
+	print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
 	# return error message if one exists
 	if os.path.exists(errorPath):
 		with open(errorPath) as errorFile:
@@ -588,10 +591,10 @@ def cancelScadaCalibration(modelName):
 	owner = User.cu()
 	path = "data/Model/" + owner + "/" + modelName
 	#Read PID file, kill process with that PID number, delete calibration file, delete PID.txt
-	with open(path+"/PID.txt") as pidFile:
+	with open(path+"/CPID.txt") as pidFile:
 		pidNum = int(pidFile.read())
 	os.kill(pidNum, signal.SIGTERM)
-	os.remove("data/Model/" + owner + "/" +  modelName + "/PID.txt")
+	os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
 	shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
 	return ('',204)
 # TODO: Check if rename mdb files worked
