@@ -7,22 +7,23 @@ div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-left:5px
 div#menuRight{height:40px;font-size:medium;color:white;float:right;}
 div#arrow {font-size:8pt;position:absolute;margin-top:2px;margin-left:4px;display:inline;}
 ul.menu {
+	z-index: -1;
 	position:absolute;
 	top: 100%;
 	left: 0;
 	z-index: 1000;
 	min-width: 100px;
 	padding: 5px 0px 5px 0px;
-	margin: 1px 0 0;
+	/*margin: 1px 0 0;*/
 	list-style: none;
 	display: none;
 	text-align:left;
 	background-color:#F8F8F8;
 	padding:0;
-	border: 1px solid #CCC;
-	-webkit-border-radius: 5px;
-	-moz-border-radius: 5px;
-	border-radius: 5px;
+	/*border: 1px solid #CCC;*/
+	-webkit-border-radius: 5px 0px 5px 5px;
+	-moz-border-radius: 5px 0px 5px 5px;
+	border-radius: 5px 0px 5px 5px;
 	-webkit-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 	-moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 	box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
@@ -40,6 +41,7 @@ ul.menu ul.menu:hover, ul.menu:visited:hover {color:white;}
 * {margin:0px; padding:0px; border:0px;}
 div.buttonGroup { display: inline-block; position:relative; }		
 button.pill{
+	outline: none;
 	-webkit-touch-callout: none;
 	-webkit-user-select: none;
 	-khtml-user-select: none;
