@@ -520,6 +520,7 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 	except Exception as error:
 		with open("data/Conversion/"+owner+"/gridError.txt", "w+") as errorFile:
 			errorFile.write('glmError')
+
 @app.route("/scadaLoadshape/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
 def scadaLoadshape(owner,feederName):
@@ -552,6 +553,7 @@ def scadaLoadshape(owner,feederName):
 	with open(modelDir+"/CPID.txt", "w+") as outFile:
 		outFile.write(pid)
 	return ('',204)
+
 def backgroundScadaCalibration(owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim):
 	# heavy lifting background process/omfCalibrate and then deletes PID file
 	try:
@@ -568,6 +570,7 @@ def backgroundScadaCalibration(owner, modelName, workDir, feederPath, scadaPath,
 		errorString = ''.join(error)
 		with open(modelDirec+'/error.txt',"w+") as errorFile:
 		 	errorFile.write("The CSV used is incorrectly formatted. Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
+
 @app.route("/checkScadaCalibration/<modelName>", methods=["POST","GET"])
 def checkScadaCalibration(modelName):
 	try:
@@ -597,6 +600,7 @@ def cancelScadaCalibration(modelName):
 	os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
 	shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
 	return ('',204)
+
 # TODO: Check if rename mdb files worked
 @app.route("/cymeImport/<owner>", methods=["POST"])
 @flask_login.login_required

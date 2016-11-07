@@ -1,11 +1,5 @@
 ﻿<head>
 	<title>Feeder #{{ feederNum }} from {{ modelName }}</title>
-	<script type="text/javascript">
-		var unsavedChanges = false;
-		var lastFeederName = "{{ feederName }}";
-		var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
-		if(!isChrome){alert("This editing interface is only supported in the Chrome browser. Proceed at your own risk.")}
-	</script>
 	<script type="text/javascript" src="/static/d3.v3.js"></script>
 	<script type="text/javascript" src="/static/omf.js"></script>
 	<script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
@@ -209,102 +203,7 @@
 		rect {
 			fill: #fff;
 		}
-		.modal{
-			display: none; /* Hidden by default */
-			position: fixed; /* Stay in place */
-			z-index: 1; /* Sit on top */
-			left: 0;
-			top: 0;
-			width: 100%; /* Full width */
-			height: 100%; /* Full height */
-			overflow: auto; /* Enable scroll if needed */
-			background-color: rgb(0,0,0); /* Fallback color */
-			background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
-		}
-		.modalContent{
-		    background-color: #fefefe;
-		    margin: 15% auto; /* 15% from the top and centered */
-		    padding: 20px;
-		    border: 1px solid #888;
-		    width: 50%; /* Could be more or less, depending on screen size */
-		    border-radius: 5px;
-		    text-align: center;
-		}
-		
-		#modalCancel{
-			width:45px;
-			margin-right:3px;
-			font-size:small;
-			background:seagreen;
-			-webkit-border-radius: 5px;
-			-moz-border-radius: 5px;
-			border-radius: 5px;
-			border: none;
-			color: white;
-			cursor:pointer; 
-			padding:4px 6px 4px;
-		}
-		.pill{
-			width:auto;
-			margin-right:3px;
-			font-size:small;
-			background:seagreen;
-			-webkit-border-radius: 5px 5px 0 0;
-			-moz-border-radius: 5px 5px 0 0;
-			border-radius: 5px 5px 0 0;
-			border: none;
-			color: white;
-			cursor:pointer; 
-		}
-		#blankModal{
-			width: 30%;
-		}
 	</style>
-	<script>
-		function checkScadaCal(){
-			var modelName = '{{modelName}}'
-					$.ajax({
-						url: "/checkScadaCalibration/" + modelName
-					}).done(function (data) {
-						if (data.exists == true) {
-							getScadaLoadshapes()
-						}
-						else {
-							console.log('calibration is complete')
-						}
-					})
-				}
-
-		var conversion = '';
-		function getCookie(cname) {
-			var name = cname + "=";
-			var ca = document.cookie.split(';');
-			for(var i = 0; i <ca.length; i++) {
-				var c = ca[i];
-				while (c.charAt(0)==' ') {
-					c = c.substring(1);
-				}
-				if (c.indexOf(name) == 0) {
-					return c.substring(name.length,c.length);
-				}
-			}
-			return "";
-		}
-		function showProgress(){
-			checkScadaCal()
-			var feederNum = getCookie("converting").split("/")[0];
-			if ((document.cookie.indexOf("converting") > -1) && (feederNum == "{{ feederNum }}")){
-				showProgressDialog('Loading Feeder', 'loading');
-				showProgressDialog('Converting feeder','conversion');
-				setTimeout(checkConversion,2000);
-			}
-			else{
-				showProgressDialog('Loading Feeder','loading');
-			}
-			
-
-		}
-	</script>
 </head>
 <body onkeypress='hotkeys()' onload="showProgress();">
 <div id="header">
@@ -313,72 +212,6 @@
 		<br>
 		&nbsp;from&#8220;<span id = 'modelNameHeader'>{{ modelName }}</span>&#8221;
 	</div>
-	<script>
-		function checkConversion() {
-			var feederNum = getCookie("converting").split("/")[0];
-			var feederName = getCookie("converting").split("/")[1];
-			console.log('feederNum from cookie', feederNum)
-			console.log('feederNum from jinja2', "{{feederNum}}")
-			if (feederNum == "{{ feederNum }}"){
-				console.log('cookie match.')
-				var conversionStatus = 'converting';
-				console.log('feederName:', feederName)
-				// Check every 5 seconds for a feeder & refresh.
-				var setInterval = window.setInterval(function pingAPI(){
-					$.ajax({
-						url: "/checkConversion/" + feederName
-					}).done(function (data) {
-						if (data.exists) {
-							conversionStatus = 'converting';
-						}
-						else if(data == 'glmError'){
-							alert('The glm file used is incorrectly formatted.')
-							removeProgressDialog()
-							conversionStatus = 'done'
-							window.clearInterval(setInterval)
-							// HACK: Getting around cookie issue where browser thinks feeder is still converting after error
-							document.cookie ="converting = -3;"
-							return false;
-						}
-						else if (data == 'milError'){
-							alert('The .std and .seq files used are incorrectly formatted.')
-							removeProgressDialog()
-							conversionStatus = 'done'
-							window.clearInterval(setInterval)
-							// HACK: Getting around cookie issue where browser thinks feeder is still converting after error
-							document.cookie ="converting = -3;"
-							return false;
-						}
-						else {
-							conversionStatus = 'done';
-						}
-					})
-					if (conversionStatus == "done"){
-						console.log('conversion done')
-						document.cookie = "converted="+feederName;
-						document.cookie = "converting=; expires=Thu, 02 Jan 1970 00:00:00 UTC";
-						window.location.reload();
-					}
-					console.log("Converting...")
-					return pingAPI;
-				}(), 5000);
-			}
-		}
-		function importFiles(convMethod, feederNameID){
-			gebi(convMethod).submit();
-			document.cookie = "converting={{ feederNum }}/"+document.getElementById(feederNameID).value;
-			showProgressDialog('Converting feeder','conversion');
-			setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
-		}
-		function finalizeConversion(){
-			if (document.cookie.indexOf("converted")>=0){
-				document.cookie = "converted=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
-				pinAll();
-				savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}");
-				alert("Conversion complete.")
-			}
-		}
-	</script>
 	<div id="menuRight">
 		<div id="fileDiv">
 			<div class='buttonGroup'>
@@ -395,73 +228,6 @@
 					<li><a href='javascript:showModal("cymeModal");'>Cyme Conversion...</a></li>
 				</ul>
 				{% endif %}
-			</div>
-		</div>
-		<div id="layoutDiv">
-			<div class="buttonGroup">
-				<button id="layoutSelector" class='pill' onclick='dropPill(this, "Layout");'>Layout ▾</button>
-				<ul class='menu right'>
-				<table style='padding:4px;word-wrap:break-word'>
-					<tr>
-						<td>GraphNodes</td>
-						<td id='nodesBox'></td>
-					</tr>
-					<tr>
-						<td colspan=2 style='padding:0px 0px 10px 0px'>
-						<div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
-						</td>
-						<tr>
-						<tr>
-					<td>Gravity</td>
-					<td><input id='gravityBox' type='text'></td>
-						</tr>
-						<tr>
-					<td>Theta</td>
-					<td><input id='thetaBox' type='text'></td>
-						</tr>
-						<tr>
-					<td>Friction</td>
-					<td><input id='frictionBox' type='text'></td>
-						</tr>
-						<tr>
-					<td>Link Strength</td>
-					<td><input id='linkStrengthBox' type='text'></td>
-						</tr>
-						<tr>
-					<td>Link Distance</td>
-					<td><input id='linkDistanceBox' type='text'></td>
-						</tr>
-						<tr>
-					<td>Charge</td>
-					<td><input id='chargeBox' type='text'></td>
-						</tr>
-						<tr>
-					<td></td>
-					<td style='padding-top:10px'><button style="width:100%;" onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
-						</tr>
-					</table>
-				</ul>
-			</div>
-		</div>
-		<div id="findDiv">
-			<div class="buttonGroup">
-				<button id="findOps" class='pill' onclick='dropPill(this, "Find");'>Find ▾</button>
-				<ul class='menu right'>
-				<table style='padding:4px;word-wrap:break-word'>
-					<tr>
-						<td>Term</td>
-						<td><input id='searchTerm' type='text'></td>
-					</tr>
-					<tr>
-						<td><button style="width:100%;" onclick='backButton()'>Back</button></td>
-						<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
-					</tr>
-					<tr>
-						<td><button style="width:100%;" onclick='findPrevious()'>Previous</button></td>
-						<td><button style="width:100%;" onclick='findNext()'>Next</button></td>
-					</tr>
-				</table>
-				</ul>
 			</div>
 		</div>
 		<div id="foldDiv">
@@ -495,6 +261,8 @@
 				<li><a href="javascript:staticLoadsToHouses();unsavedChanges=true;">Static Loads to Houses</a></li>
 				<li><a href="javascript:solarAdding();unsavedChanges=true;">Solar at Meters</a></li>
 				<li><a id='scadaLoad' href='javascript:showModal("scadaLoadshapes");'>Scada Loadshapes...</a></li>
+				<li><a href='javascript:showModal("findModal");'>Find...</a></li>
+				<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
 				</ul>
 			</div>
 		</div>
@@ -702,6 +470,73 @@
 		</ul>
 	</div>
 </div>
+<div id= 'findModal' class= 'modal'>
+	<div class="modalContent" id='findModalContent' style="width:35%;">
+	<table class= 'importOptions' style='padding:4px;word-wrap:break-word;'>
+		<tr>
+			<td>Term</td>
+			<td><input id='searchTerm' type='text'></td>
+		</tr>
+		<tr>
+			<td><button style="width:100%;" onclick='backButton()'>Back</button></td>
+			<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
+		</tr>
+		<tr>
+			<td><button style="width:100%;" onclick='findPrevious()'>Previous</button></td>
+			<td><button style="width:100%;" onclick='findNext()'>Next</button></td>
+		</tr>
+		<tr>
+			<td><button style="width:100%; "onclick='closeModal("findModal")' ">Cancel</button></td>
+		</tr>
+	</table>
+	</div>
+</div>
+<div id = "layoutModal" class = 'modal'>
+	<div class = "modalContent" id = 'layoutModalContent'>
+			<table class= 'importOptions' style='padding:4px;word-wrap:break-word'>
+			<tr>
+				<td>GraphNodes</td>
+				<td id='nodesBox'></td>
+			</tr>
+			<tr>
+				<td colspan=2 style='padding:0px 0px 10px 0px'>
+				<div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
+				</td>
+				<tr>
+				<tr>
+			<td>Gravity</td>
+			<td><input id='gravityBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Theta</td>
+			<td><input id='thetaBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Friction</td>
+			<td><input id='frictionBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Link Strength</td>
+			<td><input id='linkStrengthBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Link Distance</td>
+			<td><input id='linkDistanceBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Charge</td>
+			<td><input id='chargeBox' type='text'></td>
+				</tr>
+				<tr>
+			<td style='padding-top:10px'><button style="width:100%;"onclick='closeModal("layoutModal")' ">Cancel</button></td>
+			<td style='padding-top:10px'><button style="width:100%;" onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
+				</tr>
+		</table>
+	</div>
+</div>
+
+<!-- ******** Javascript ******** -->
+
 <script>clickCloseEvent("Add","addOps");</script>
 <script>clickCloseEvent("Edit","editOps");</script>
 <script>clickCloseEvent("Pinning","pinningOps");</script>
@@ -711,16 +546,20 @@
 <script>clickCloseEvent("File","fileOps");</script>
 <!-- Reposition the editor table based on window size.
 Run it once then on all windoe resize events. -->
-<script>
+<script type="text/javascript">
 var width = $(window).innerWidth();
 $("#selected").css("marginLeft", width-370+"px");
 window.onresize = function() {
 var width = $(window).innerWidth();
 if (width > 1000 ){$("#selected").css("marginLeft", width-370+"px");}
 }
-</script>
 
-<script type="text/javascript">
+var unsavedChanges = false;
+var lastFeederName = "{{ feederName }}";
+var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+if(!isChrome){alert("This editing interface is only supported in the Chrome browser. Proceed at your own risk.")}
+
+
 // GLOBAL VARIABLES:
 
 feeder = '{{ feederName }}'
@@ -860,6 +699,206 @@ d3.json(apiAddress, function (json) {
 	unsavedChanges = draw()
 	layoutMenuInit()
 })
+// ******** ONLOAD CONVERSION/CALIBRATION CHECKING ***********
+function checkScadaCal(){
+	var modelName = '{{modelName}}'
+	$.ajax({
+		url: "/checkScadaCalibration/" + modelName
+	}).done(function (data) {
+		if (data.exists == true) {
+			getScadaLoadshapes()
+		}
+		else {
+			console.log('calibration is complete')
+		}
+	})
+}
+
+var conversion = '';
+function getCookie(cname) {
+	var name = cname + "=";
+	var ca = document.cookie.split(';');
+	for(var i = 0; i <ca.length; i++) {
+		var c = ca[i];
+		while (c.charAt(0)==' ') {
+			c = c.substring(1);
+		}
+		if (c.indexOf(name) == 0) {
+			return c.substring(name.length,c.length);
+		}
+	}
+	return "";
+}
+function showProgress(){
+	checkScadaCal()
+	var feederNum = getCookie("converting").split("/")[0];
+	if ((document.cookie.indexOf("converting") > -1) && (feederNum == "{{ feederNum }}")){
+		showProgressDialog('Loading Feeder', 'loading');
+		showProgressDialog('Converting feeder','conversion');
+		setTimeout(checkConversion,2000);
+	}
+	else{
+		showProgressDialog('Loading Feeder','loading');
+	}
+	
+
+}
+function checkConversion() {
+	var feederNum = getCookie("converting").split("/")[0];
+	var feederName = getCookie("converting").split("/")[1];
+	console.log('feederNum from cookie', feederNum)
+	console.log('feederNum from jinja2', "{{feederNum}}")
+	if (feederNum == "{{ feederNum }}"){
+		console.log('cookie match.')
+		var conversionStatus = 'converting';
+		console.log('feederName:', feederName)
+		// Check every 5 seconds for a feeder & refresh.
+		var setInterval = window.setInterval(function pingAPI(){
+			$.ajax({
+				url: "/checkConversion/" + feederName
+			}).done(function (data) {
+				if (data.exists) {
+					conversionStatus = 'converting';
+				}
+				else if(data == 'glmError'){
+					alert('The glm file used is incorrectly formatted.')
+					removeProgressDialog()
+					conversionStatus = 'done'
+					window.clearInterval(setInterval)
+					// HACK: Getting around cookie issue where browser thinks feeder is still converting after error
+					document.cookie ="converting = -3;"
+					return false;
+				}
+				else if (data == 'milError'){
+					alert('The .std and .seq files used are incorrectly formatted.')
+					removeProgressDialog()
+					conversionStatus = 'done'
+					window.clearInterval(setInterval)
+					// HACK: Getting around cookie issue where browser thinks feeder is still converting after error
+					document.cookie ="converting = -3;"
+					return false;
+				}
+				else {
+					conversionStatus = 'done';
+				}
+			})
+			if (conversionStatus == "done"){
+				console.log('conversion done')
+				document.cookie = "converted="+feederName;
+				document.cookie = "converting=; expires=Thu, 02 Jan 1970 00:00:00 UTC";
+				window.location.reload();
+			}
+			console.log("Converting...")
+			return pingAPI;
+		}(), 5000);
+	}
+}
+
+function showProgressDialog(dialogMessage, cancelType) {
+	// Make the elements.
+	background = document.createElement('div')
+	background.id = 'progressBackground'
+	background.style.zIndex = '9998'
+	progContent = document.createElement('div')
+	progContent.id = 'progressContent'
+	progContent.style.zIndex = '9999'
+	spinner = document.createElement('img')
+	spinner.src = '/static/spinner.gif'
+	progressText = document.createElement('h2')
+	progressText.id = 'progressText'
+	progressText.textContent = dialogMessage
+	// Insert the elements.
+	document.body.appendChild(background)
+	document.body.appendChild(progContent)
+	progContent.appendChild(spinner)
+	progContent.appendChild(progressText)
+	var cancelBtn = document.createElement("BUTTON");
+	var t = document.createTextNode("cancel");
+	cancelBtn.style.marginTop = '5px';
+	cancelBtn.style.background= 'crimson'
+	cancelBtn.appendChild(t);
+	cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
+	cancelBtn.onclick = function() {
+		if (cancelType == 'conversion'){
+			if (confirm('Are you sure you want to cancel the conversion?')) {
+				console.log('Conversion cancelled.')
+				document.cookie = "converting=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+				newfeeder.submit();
+			}
+		}
+		else if(cancelType == 'calibrating'){
+			if (confirm('Are you sure you want to cancel the calibration?')){
+				console.log('calibration canceled')
+				var modelName = gebi("modelNameHeader").innerHTML
+				$.ajax({
+						url: "/cancelScadaCalibration/" + modelName
+					}).done(function (data) {
+						console.log(data)
+					})
+				removeProgressDialog()
+			}
+		}
+		else
+		{
+			console.log("Loading cancel button.")
+			// stop rendering feeder, show file menu, etc.y
+			removeProgressDialog()
+		}
+	};
+	progContent.appendChild(cancelBtn);
+}
+
+function removeProgressDialog() {
+	if (gebi('progressBackground')!=null)
+		document.body.removeChild(gebi('progressBackground'))
+	if (gebi('progressContent')!=null)
+		document.body.removeChild(gebi('progressContent'))
+}
+
+function showProgressBar(dialogMessage) {
+	// Make the elements.
+	background = document.createElement('div')
+	background.id = 'progressBackground'
+	background.style.zIndex = '9998'
+	progContent = document.createElement('div')
+	progContent.id = 'progressContent'
+	progContent.style.zIndex = '9999'
+	progBar = document.createElement('div')
+	progBar.id = 'progBar'
+	progColor = document.createElement('div')
+	progColor.id = 'progColor'
+	progressText = document.createElement('h2')
+	progressText.id = 'progressText'
+	progressText.textContent = dialogMessage
+	// Insert the elements.
+	document.body.appendChild(background)
+	document.body.appendChild(progContent)
+	progBar.appendChild(progColor)
+	progContent.appendChild(progBar)
+	progContent.appendChild(progressText)
+}
+
+function removeProgressBar() {
+	if (gebi('progressBackground')!=null)
+		document.body.removeChild(gebi('progressBackground'))
+	if (gebi('progressContent')!=null)
+		document.body.removeChild(gebi('progressContent'))
+}
+
+function importFiles(convMethod, feederNameID){
+	gebi(convMethod).submit();
+	document.cookie = "converting={{ feederNum }}/"+document.getElementById(feederNameID).value;
+	showProgressDialog('Converting feeder','conversion');
+	setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
+}
+function finalizeConversion(){
+	if (document.cookie.indexOf("converted")>=0){
+		document.cookie = "converted=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
+		pinAll();
+		savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}");
+		alert("Conversion complete.")
+	}
+}
 
 //*********************************************
 // MODEL SAVING, LEFT TOOLBOX HANDLER FUNCTIONS
