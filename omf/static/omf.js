@@ -69,96 +69,6 @@ function time(func) {
 	return end - start
 }
 
-function showProgressDialog(dialogMessage, cancelType) {
-	// Make the elements.
-	background = document.createElement('div')
-	background.id = 'progressBackground'
-	background.style.zIndex = '9998'
-	progContent = document.createElement('div')
-	progContent.id = 'progressContent'
-	progContent.style.zIndex = '9999'
-	spinner = document.createElement('img')
-	spinner.src = '/static/spinner.gif'
-	progressText = document.createElement('h2')
-	progressText.id = 'progressText'
-	progressText.textContent = dialogMessage
-	// Insert the elements.
-	document.body.appendChild(background)
-	document.body.appendChild(progContent)
-	progContent.appendChild(spinner)
-	progContent.appendChild(progressText)
-	var cancelBtn = document.createElement("BUTTON");
-	var t = document.createTextNode("cancel");
-	cancelBtn.style.marginTop = '5px';
-	cancelBtn.style.background= 'crimson'
-	cancelBtn.appendChild(t);
-	cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
-	cancelBtn.onclick = function() {
-		if (cancelType == 'conversion'){
-			if (confirm('Are you sure you want to cancel the conversion?')) {
-				console.log('Conversion cancelled.')
-				document.cookie = "converting=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
-				newfeeder.submit();
-			}
-		}
-		else if(cancelType == 'calibrating'){
-			if (confirm('Are you sure you want to cancel the calibration?')){
-				console.log('calibration canceled')
-				var modelName = gebi("modelNameHeader").innerHTML
-				$.ajax({
-						url: "/cancelScadaCalibration/" + modelName
-					}).done(function (data) {
-						console.log(data)
-					})
-				removeProgressDialog()
-			}
-		}
-		else
-		{
-			console.log("Loading cancel button.")
-			// stop rendering feeder, show file menu, etc.y
-			removeProgressDialog()
-		}
-	};
-	progContent.appendChild(cancelBtn);
-}
-function removeProgressDialog() {
-	if (gebi('progressBackground')!=null)
-		document.body.removeChild(gebi('progressBackground'))
-	if (gebi('progressContent')!=null)
-		document.body.removeChild(gebi('progressContent'))
-}
-
-function showProgressBar(dialogMessage) {
-	// Make the elements.
-	background = document.createElement('div')
-	background.id = 'progressBackground'
-	background.style.zIndex = '9998'
-	progContent = document.createElement('div')
-	progContent.id = 'progressContent'
-	progContent.style.zIndex = '9999'
-	progBar = document.createElement('div')
-	progBar.id = 'progBar'
-	progColor = document.createElement('div')
-	progColor.id = 'progColor'
-	progressText = document.createElement('h2')
-	progressText.id = 'progressText'
-	progressText.textContent = dialogMessage
-	// Insert the elements.
-	document.body.appendChild(background)
-	document.body.appendChild(progContent)
-	progBar.appendChild(progColor)
-	progContent.appendChild(progBar)
-	progContent.appendChild(progressText)
-}
-
-function removeProgressBar() {
-	if (gebi('progressBackground')!=null)
-		document.body.removeChild(gebi('progressBackground'))
-	if (gebi('progressContent')!=null)
-		document.body.removeChild(gebi('progressContent'))
-}
-
 function round(number,precision) {
 	return parseFloat(number.toPrecision(precision))
 }
@@ -263,23 +173,6 @@ function clickCloseEvent(labelName, buttonName) {
 	this.removeEventListener('click', arguments.callee, true)
 	if (window.event.toElement==thisButton) {event.stopPropagation()}
 }
-function dropPillAndStay(thisButton, name) {
-	thisButton.style.color= 'black'
-	thisButton.style.background= '#F8F8F8'
-	thisButton.style.textAlign = 'left'
-	if (typeof this.currentState == 'undefined' || this.currentState == 'raised') {
-		thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-		thisButton.innerHTML = name + ' &times;'
-		this.currentState = 'dropped'
-	} else {
-		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = name + ' ▾'
-		this.currentState = 'raised'
-		thisButton.style.color= 'white'
-		thisButton.style.background= 'transparent'
-	}
-}
-
 function init() {
 	// If we have input, put it back.
 	if (allInputData != null) {

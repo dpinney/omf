@@ -38,12 +38,13 @@ def _openDatabase(database_file):
         connect_string = 'DRIVER={Microsoft Access Driver (*.mdb)};DBQ=' + str(database_file) + ';'  
     elif sys.platform == 'darwin':
         # Mac
-        connect_string = 'DRIVER={MDBTools};DBQ=' + str(database_file) + ';'    
+        connect_string = 'DRIVER={FreeTDS};Database='+ str(database_file) + ';TDS_Version=7.0;SERVER=127.0.0.1;PORT=1433;'   
     elif sys.platform == 'linux2':
         #Linux Driver: {MDBTools}           
         connect_string = 'DRIVER={MDBTools};DBQ=' + str(database_file) + ';'    
     print"connect string =",(connect_string)
     database_connection = pyodbc.connect(connect_string)
+    print 'connected'
     database = database_connection.cursor()
     return database
 
