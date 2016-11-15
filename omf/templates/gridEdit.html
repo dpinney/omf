@@ -699,6 +699,7 @@ d3.json(apiAddress, function (json) {
 	unsavedChanges = draw()
 	layoutMenuInit()
 })
+
 // ******** ONLOAD CONVERSION/CALIBRATION CHECKING ***********
 function checkScadaCal(){
 	var modelName = '{{modelName}}'
@@ -715,58 +716,45 @@ function checkScadaCal(){
 }
 
 var conversion = '';
-function getCookie(cname) {
-	var name = cname + "=";
-	var ca = document.cookie.split(';');
-	for(var i = 0; i <ca.length; i++) {
-		var c = ca[i];
-		while (c.charAt(0)==' ') {
-			c = c.substring(1);
-		}
-		if (c.indexOf(name) == 0) {
-			return c.substring(name.length,c.length);
-		}
-	}
-	return "";
-}
-function showProgress(){
-	checkScadaCal()
-	var feederNum = getCookie("converting").split("/")[0];
-	if ((document.cookie.indexOf("converting") > -1) && (feederNum == "{{ feederNum }}")){
-		showProgressDialog('Loading Feeder', 'loading');
-		showProgressDialog('Converting feeder','conversion');
-		setTimeout(checkConversion,2000);
-	}
-	else{
-		showProgressDialog('Loading Feeder','loading');
-	}
-	
 
+function showProgress(){
+	pinAll()
+	showProgressDialog('Loading Feeder', 'loading');
+	checkScadaCal()
+	checkConv()
+	
+}
+function checkConv(){
+	var modelName = '{{modelName}}'
+	$.ajax({
+		url: "/checkConversion/" + modelName
+	}).done(function (data) {
+		if (data.exists == true) {
+			showProgressDialog('Converting feeder','conversion');
+			checkConversion()
+		}
+		else {
+			console.log('conversion is complete')
+		}
+	})
 }
 function checkConversion() {
-	var feederNum = getCookie("converting").split("/")[0];
-	var feederName = getCookie("converting").split("/")[1];
-	console.log('feederNum from cookie', feederNum)
-	console.log('feederNum from jinja2', "{{feederNum}}")
-	if (feederNum == "{{ feederNum }}"){
-		console.log('cookie match.')
-		var conversionStatus = 'converting';
-		console.log('feederName:', feederName)
+	var conversionStatus = 'converting';
 		// Check every 5 seconds for a feeder & refresh.
 		var setInterval = window.setInterval(function pingAPI(){
+			var modelName = '{{modelName}}'
 			$.ajax({
-				url: "/checkConversion/" + feederName
+				url: "/checkConversion/" + modelName
 			}).done(function (data) {
+				console.log(data)
 				if (data.exists) {
-					conversionStatus = 'converting';
+					conversionStatus = 'converting'
 				}
 				else if(data == 'glmError'){
 					alert('The glm file used is incorrectly formatted.')
 					removeProgressDialog()
 					conversionStatus = 'done'
 					window.clearInterval(setInterval)
-					// HACK: Getting around cookie issue where browser thinks feeder is still converting after error
-					document.cookie ="converting = -3;"
 					return false;
 				}
 				else if (data == 'milError'){
@@ -774,8 +762,6 @@ function checkConversion() {
 					removeProgressDialog()
 					conversionStatus = 'done'
 					window.clearInterval(setInterval)
-					// HACK: Getting around cookie issue where browser thinks feeder is still converting after error
-					document.cookie ="converting = -3;"
 					return false;
 				}
 				else {
@@ -784,14 +770,13 @@ function checkConversion() {
 			})
 			if (conversionStatus == "done"){
 				console.log('conversion done')
-				document.cookie = "converted="+feederName;
-				document.cookie = "converting=; expires=Thu, 02 Jan 1970 00:00:00 UTC";
+				savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}");
+				alert("Conversion complete.")
 				window.location.reload();
 			}
 			console.log("Converting...")
 			return pingAPI;
 		}(), 5000);
-	}
 }
 
 function showProgressDialog(dialogMessage, cancelType) {
@@ -822,7 +807,6 @@ function showProgressDialog(dialogMessage, cancelType) {
 		if (cancelType == 'conversion'){
 			if (confirm('Are you sure you want to cancel the conversion?')) {
 				console.log('Conversion cancelled.')
-				document.cookie = "converting=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
 				newfeeder.submit();
 			}
 		}
@@ -887,17 +871,8 @@ function removeProgressBar() {
 
 function importFiles(convMethod, feederNameID){
 	gebi(convMethod).submit();
-	document.cookie = "converting={{ feederNum }}/"+document.getElementById(feederNameID).value;
 	showProgressDialog('Converting feeder','conversion');
 	setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
-}
-function finalizeConversion(){
-	if (document.cookie.indexOf("converted")>=0){
-		document.cookie = "converted=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
-		pinAll();
-		savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}");
-		alert("Conversion complete.")
-	}
 }
 
 //*********************************************
@@ -1126,11 +1101,11 @@ function draw() {
 	// Feeder loading
 	var interval = setInterval(function () {
 		if (force.alpha() < 0.05) {
-			setTimeout(finalizeConversion,2000)
+			setTimeout(pinAll,2000)
 			removeProgressDialog()
 			clearInterval(interval)
 		} else if (nodes[parseInt(Math.random() * nodes.length)].fixed) {
-			setTimeout(finalizeConversion,2000)
+			setTimeout(pinAll,2000)
 			removeProgressDialog()
 			clearInterval(interval)
 		} else {

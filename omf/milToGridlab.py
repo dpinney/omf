@@ -29,11 +29,11 @@ def convert(stdString,seqString):
         y_list = []
         x_pixel_range = 1200
         y_pixel_range = 800
-        for component in components:
-            x_list.append(float(component[5]))
-            y_list.append(float(component[6]))
-        # according to convert function  f(x) = a * x + b
         try:
+            for component in components:
+                x_list.append(float(component[5]))
+                y_list.append(float(component[6]))
+            # according to convert function  f(x) = a * x + b
             x_a = x_pixel_range / (max(x_list) - min(x_list))
             x_b = -x_a * min(x_list)
             y_a = y_pixel_range / (max(y_list) - min(y_list))
