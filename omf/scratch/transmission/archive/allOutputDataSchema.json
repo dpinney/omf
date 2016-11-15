@@ -1,0 +1,33 @@
+{
+	"stdout": {
+		"description": "Output text from matpower.",
+		"type": "string"
+	},	
+	"stderr": {
+		"description": "Error text from matpower.",
+		"type": "string"
+	},
+	"success": {
+		"description": "Whether powerflow succeeded.",
+		"type": "boolean"
+	},
+	"genTime": {
+		"description": "Time solver took to run.",
+		"type": "boolean"
+	},	
+	"powerReal": {
+		"description": "The real power flow.",
+		"type": "float dict, MW",
+		"example": {"node123" : 500, "node124" : 100}
+	},
+	"powerReact": {
+		"description": "The reactive power flow.",
+		"type": "float dict, MVAr",
+		"example": {"node123" : 100, "node124" : 50}
+	},
+	"volts": {
+		"description": "The voltages.",
+		"type": "float dict, V",
+		"example": {"node123" : 120000, "node124" : 100000}
+	}	
+}
