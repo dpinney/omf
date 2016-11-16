@@ -23,12 +23,12 @@
 		table thead {cursor:pointer; user-select:none;}
 		td {padding:5px;border-bottom:1px dashed gray;}
 		td,th {text-align: left;}
-		td.running {color:red;}
-		td.converting {color:red;}
-		td.finished {color:black;}
-		td.stopped {color:purple;}
+		td.runningStatus {color:red;}
+		td.convertingStatus {color:red;}
+		td.finishedStatus {color:black;}
+		td.stoppedStatus {color:purple;}
 		tr:last-child td {border-bottom:none;}
-		.running, .runningInline, .postRunInline, .stoppedInline, .stopped{display: inline;}
+		.running, .runningInline, .postRunInline, .stoppedInline, .stopped {display: inline;}
 	</style>
 	<script type="text/javascript">var tabName = "Models";</script>
 	<script type="text/javascript">sessionStorage.setItem("user", "{{ current_user }}");</script>
@@ -108,7 +108,7 @@
 						<td><a href = "{{'./model/' + model.owner + '/' + model.name}}">{{ model.name }}</a></td>
 						<td>{{ model.modelType }}</td>
 						<td>{{ model.runTime }}</td>
-						<td class="{{ model.status }}">{{ model.status }}</td>
+						<td class="{{ model.status }}Status">{{ model.status }}</td>
 						<td>{{ model.editDate }}</td>
 					</tr>
 					{% endfor %}
