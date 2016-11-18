@@ -1,0 +1,12 @@
+{
+    "simStartDate": "2011-04-13", 
+    "simLengthUnits": "hours", 
+    "created": "2016-10-12 09:35:20.579097", 
+    "zipCode": "64735", 
+    "modelType": "gridlabMulti", 
+    "climateName": "MO-KANSAS_CITY", 
+    "simLength": "336", 
+    "feederName2": "Calibrated Feeder", 
+    "feederName1": "Uncalibrated Feeder", 
+    "runTime": "0:02:39"
+}

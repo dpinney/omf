@@ -1,11 +1,5 @@
 ﻿<head>
 	<title>Feeder #{{ feederNum }} from {{ modelName }}</title>
-	<script type="text/javascript">
-		var unsavedChanges = false;
-		var lastFeederName = "{{ feederName }}";
-		var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
-		if(!isChrome){alert("This editing interface is only supported in the Chrome browser. Proceed at your own risk.")}
-	</script>
 	<script type="text/javascript" src="/static/d3.v3.js"></script>
 	<script type="text/javascript" src="/static/omf.js"></script>
 	<script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
@@ -31,7 +25,6 @@
 		div#editDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
 		div#addDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
 		div#helpDiv{width:35px;padding:0 0.9em 0 0.9em;float:right}
-		#scadaLoad{padding: 0px}
 		#helpButton{color: white;}
 		select, button {width:initial;}
 		td, th {padding:3px;text-align: left;}
@@ -211,51 +204,6 @@
 			fill: #fff;
 		}
 	</style>
-	<script>
-		function checkScadaCal(){
-			var modelName = '{{modelName}}'
-					$.ajax({
-						url: "/checkScadaCalibration/" + modelName
-					}).done(function (data) {
-						if (data.exists == true) {
-							getScadaLoadshapes()
-						}
-						else {
-							console.log('calibration is complete')
-						}
-					})
-				}
-
-		var conversion = '';
-		function getCookie(cname) {
-			var name = cname + "=";
-			var ca = document.cookie.split(';');
-			for(var i = 0; i <ca.length; i++) {
-				var c = ca[i];
-				while (c.charAt(0)==' ') {
-					c = c.substring(1);
-				}
-				if (c.indexOf(name) == 0) {
-					return c.substring(name.length,c.length);
-				}
-			}
-			return "";
-		}
-		function showProgress(){
-			checkScadaCal()
-			var feederNum = getCookie("converting").split("/")[0];
-			if ((document.cookie.indexOf("converting") > -1) && (feederNum == "{{ feederNum }}")){
-				showProgressDialog('Loading Feeder', 'loading');
-				showProgressDialog('Converting feeder','conversion');
-				setTimeout(checkConversion,2000);
-			}
-			else{
-				showProgressDialog('Loading Feeder','loading');
-			}
-			
-
-		}
-	</script>
 </head>
 <body onkeypress='hotkeys()' onload="showProgress();">
 <div id="header">
@@ -264,278 +212,22 @@
 		<br>
 		&nbsp;from&#8220;<span id = 'modelNameHeader'>{{ modelName }}</span>&#8221;
 	</div>
-	<script>
-		function checkConversion() {
-			var feederNum = getCookie("converting").split("/")[0];
-			var feederName = getCookie("converting").split("/")[1];
-			console.log('feederNum from cookie', feederNum)
-			console.log('feederNum from jinja2', "{{feederNum}}")
-			if (feederNum == "{{ feederNum }}"){
-				console.log('cookie match.')
-				var conversionStatus = 'converting';
-				console.log('feederName:', feederName)
-				// Check every 5 seconds for a feeder & refresh.
-				var setInterval = window.setInterval(function pingAPI(){
-					$.ajax({
-						url: "/checkConversion/" + feederName
-					}).done(function (data) {
-						if (data.exists) {
-							conversionStatus = 'converting';
-						}
-						else if(data == 'gridError'){
-							alert('The glm file used is incorrectly formatted.')
-							removeProgressDialog()
-							conversionStatus = 'error'
-							window.clearInterval(setInterval)
-							return false;
-						}
-						else {
-							conversionStatus = 'done';
-						}
-					})
-					if (conversionStatus == "done"){
-						console.log('conversion done')
-						document.cookie = "converted="+feederName;
-						document.cookie = "converting=; expires=Thu, 02 Jan 1970 00:00:00 UTC";
-						window.location.reload();
-					}
-					console.log("Converting...")
-					return pingAPI;
-				}(), 5000);
-			}
-		}
-		function importFiles(convMethod, feederNameID){
-			gebi(convMethod).submit();
-			document.cookie = "converting={{ feederNum }}/"+document.getElementById(feederNameID).value;
-			showProgressDialog('Converting feeder','conversion');
-			setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
-		}
-		function finalizeConversion(){
-			if (document.cookie.indexOf("converted")>=0){
-				document.cookie = "converted=; expires=Thu, 01 Jan 1970 00:00:00 UTC";
-				pinAll();
-				savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}");
-				alert("Conversion complete.")
-			}
-		}
-	</script>
 	<div id="menuRight">
 		<div id="fileDiv">
 			<div class='buttonGroup'>
 				{% if is_admin or not public %}
-				<button id="fileOps" class='pill' onclick='dropPillAndStay(this, "File")'>File ▾</button>
+				<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
 				<ul class='menu rightFeeder'>						
 					<li><a href='javascript:saveFeeder();'>Save</a></li>
 					<li><a href='javascript:renameFeeder();'>Rename</a></li>
-					<li><a href='javascript:showDiv("loadDiv","550px", "0px");'>Load from Model</a></li>
-					<div id='loadDiv' style="visibility:hidden;font-size:10pt;height:0;">
-					<li><a href="#" onclick='closeDiv("loadDiv");closeDiv("pubFeeders");closeDiv("myFeeders");' style="text-align:center;font-size:12pt;">Cancel</a></li>
-						<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","225px", "20px");'>Public Feeders</a></p></li>
-						<div id="pubFeeders" style="visibility:hidden;height:0px;">
-							<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
-								{% for feeder in publicFeeders %}
-									{% if feeder.name != feederName %}
-										<li>
-										<a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}", "public")'>
-										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										<strong>{{ feeder.name }}</strong> from
-										<br>
-										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										&#8220;{{ feeder.model }}&#8221;
-										</a>
-										</li>
-									{% endif %}
-								{% endfor %}
-							</div>
-						</div>
-						<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("myFeeders","225px", "20px");'>My Feeders</a></p></li>
-						<div id="myFeeders" style="visibility:hidden;height:0;">
-							<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
-								{% for feeder in feeders %}
-									{% if feeder.name != feederName %}
-										<li>
-										<a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}", "{{ owner }}")'>
-										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										Model &nbsp; &#8220;{{ feeder.model }}&#8221;
-										<br>
-										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-										Feeder <strong>{{ feeder.name }}</strong>
-										</a>
-										</li>
-									{% endif %}
-								{% endfor %}
-							</div>
-						</div>
-					</div>
+					<li><a href='javascript:showModal("loadModal");'>Load from Model...</a></li>
 					<p style='font-weight:bold;margin: 10px 0 0 4px;'>New Feeder</p>
-					<li><a href='javascript:showDiv("newFeederDiv","50px;", "0px;");'>Blank Feeder</a></li>
-					<div id="newFeederDiv" style="visibility:hidden;height:0;">
-						<form onsubmit='event.preventDefault(); return startConversion("feederNameNew",1);' action='/newBlankFeeder/{{ owner }}' id='newfeeder' enctype='multipart/form-data' method='post'>
-							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
-							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-							<table class='importOptions'>
-								<tr>
-									<td>Name</td>
-									<td><input type='text' id='feederNameNew' name='feederNameNew' required/></td>
-								</tr>
-								<tr>
-									<td></td>
-									<td><input type='submit' value='Create' style='min-width:45px;'/></td>
-								</tr>
-							</table>
-						</form>
-						<li><a href="#" onclick='closeDiv("newFeederDiv")' style="text-align:center;font-size:10pt;">Cancel</a></li>
-					</div>
-					<li><a href='javascript:showDiv("milSoftDiv","50px;", "0px;");'>Milsoft Conversion</a></li>
-					<div id="milSoftDiv" style="visibility:hidden;height:0;">
-						<form onsubmit='event.preventDefault(); return startConversion("feederNameM",2);' action="/milsoftImport/{{ owner }}" id='milsoft' enctype='multipart/form-data' method='post'>
-							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
-							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-							<table class='importOptions'>
-								<tr>
-									<td>Name</td>
-									<td><input type='text' id='feederNameM' name='feederNameM' required/></td>
-								</tr>
-								<tr>
-									<td>Data File (.std)</td>
-									<td><input type='file' name='stdFile' accept = '.std' required/></td>
-								</tr>
-								<tr>
-									<td>Equipment File (.seq)</td>
-									<td><input type='file' name='seqFile' accept = '.seq' required/></td>
-								</tr>
-								<tr>
-									<td></td>
-									<td><input type='submit' value='Import' style='min-width:45px;'/></td>
-								</tr>
-							</table>
-						</form>
-						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
-						<li><a href="#" onclick='closeDiv("milSoftDiv")' style="text-align:center;font-size:10pt;">Cancel</a></li>
-					</div>
-					<li><a href='javascript:showDiv("gridlabDiv","50px;", "0px;");'>GridLAB-D Conversion</a></li>
-					<div id="gridlabDiv" style="visibility:hidden;height:0;">
-						<form onsubmit='event.preventDefault(); return startConversion("feederNameG",3);' action='/gridlabdImport/{{ owner }}' id='gridlabd' enctype='multipart/form-data' method='post'>
-							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
-							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-							<table class='importOptions'>
-								<tr>
-									<td>Name</td>
-									<td><input type='text' id='feederNameG' name='feederNameG' required/></td>
-								</tr>
-								<tr>
-									<td>Data File (.glm)</td>
-									<td><input type='file' id='csvFile' name='glmFile' accept = '.glm' required/></td>
-								</tr>
-								<tr>
-									<td></td>
-									<td><input type='submit' value='Import' style='min-width:45px;'/></td>
-								</tr>
-							</table>
-						</form>
-						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
-						<li><a href="#" onclick='closeDiv("gridlabDiv")' style="text-align:center;font-size:10pt;">Cancel</a></li>
-					</div>
-					<li><a href='javascript:showDiv("cymeDiv","20px;", "0px;");'>Cyme Conversion</a></li>
-					<div id="cymeDiv" style="visibility:hidden;height:0;">
-						<form onsubmit='event.preventDefault(); return startConversion("feederNameC",4);' action='/cymeImport/{{ owner }}' id='cyme' enctype='multipart/form-data' method='post'>
-							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
-							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-							<table class='importOptions'>
-								<tr>
-									<td>Name</td>
-									<td><input type='text' id='feederNameC' name='feederNameC' required/></td>
-								</tr>
-								<tr>
-									<td>Network File (.mdb)</td>
-									<td><input type='file' name='mdbNetFile' accept = '.mdb' required/></td>
-								</tr>
-								<tr>
-									<td>Equipment File (.mdb)</td>
-									<td><input type='file' name='mdbEqFile' accept = '.mdb' required/></td>
-								</tr>
-								<tr>
-									<td></td>
-									<td><input type='submit' value='Import' style='min-width:45px;'/></td>
-								</tr>
-							</table>
-						</form>
-						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
-						<li><a href="#" onclick='closeDiv("cymeDiv")' style="text-align:center;font-size:10pt;">Cancel</a></li>
-					</div>
+					<li><a href='javascript:showModal("blankFeederModal");'>Blank Feeder...</a></li>
+					<li><a href='javascript:showModal("milSoftModal");'>Milsoft Conversion...</a></li>
+					<li><a href='javascript:showModal("gridlabModal");'>GridLAB-D Conversion...</a></li>
+					<li><a href='javascript:showModal("cymeModal");'>Cyme Conversion...</a></li>
 				</ul>
 				{% endif %}
-			</div>
-		</div>
-		<div id="layoutDiv">
-			<div class="buttonGroup">
-				<button id="layoutSelector" class='pill' onclick='dropPillAndStay(this, "Layout");'>Layout ▾</button>
-				<ul class='menu right'>
-				<table style='padding:4px;word-wrap:break-word'>
-					<tr>
-						<td>GraphNodes</td>
-						<td id='nodesBox'></td>
-					</tr>
-					<tr>
-						<td colspan=2 style='padding:0px 0px 10px 0px'>
-						<div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
-						</td>
-						<tr>
-						<tr>
-					<td>Gravity</td>
-					<td><input id='gravityBox' type='text'></td>
-						</tr>
-						<tr>
-					<td>Theta</td>
-					<td><input id='thetaBox' type='text'></td>
-						</tr>
-						<tr>
-					<td>Friction</td>
-					<td><input id='frictionBox' type='text'></td>
-						</tr>
-						<tr>
-					<td>Link Strength</td>
-					<td><input id='linkStrengthBox' type='text'></td>
-						</tr>
-						<tr>
-					<td>Link Distance</td>
-					<td><input id='linkDistanceBox' type='text'></td>
-						</tr>
-						<tr>
-					<td>Charge</td>
-					<td><input id='chargeBox' type='text'></td>
-						</tr>
-						<tr>
-					<td></td>
-					<td style='padding-top:10px'><button style="width:100%;" onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
-						</tr>
-					</table>
-				</ul>
-			</div>
-		</div>
-		<div id="findDiv">
-			<div class="buttonGroup">
-				<button id="findOps" class='pill' onclick='dropPillAndStay(this, "Find");'>Find ▾</button>
-				<ul class='menu right'>
-				<table style='padding:4px;word-wrap:break-word'>
-					<tr>
-						<td>Term</td>
-						<td><input id='searchTerm' type='text'></td>
-					</tr>
-					<tr>
-						<td><button style="width:100%;" onclick='backButton()'>Back</button></td>
-						<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
-					</tr>
-					<tr>
-						<td><button style="width:100%;" onclick='findPrevious()'>Previous</button></td>
-						<td><button style="width:100%;" onclick='findNext()'>Next</button></td>
-					</tr>
-				</table>
-				</ul>
 			</div>
 		</div>
 		<div id="foldDiv">
@@ -562,55 +254,15 @@
 		</div>
 		<div id="editDiv">
 			<div class="buttonGroup">
-				<button id="editOps" class='pill' onclick='dropPillAndStay(this, "Edit");'>Edit ▾</button>
+				<button id="editOps" class='pill' onclick='dropPill(this, "Edit");'>Edit ▾</button>
 				<ul class='menu right'>
-				<table style='padding:4px;word-wrap:break-word;white-space:nowrap;width:200px'>
-					<tr>
-						<td>Zoom Reset</td>
-						<td><button style="width:30px;" onclick='javascript:zoomReset()'>Go</button></td>
-					</tr>
-					<tr>
-						<td>Zoom To Fit</td>
-						<td><button style="width:30px;" onclick='javascript:zoomToFit()'>Go</button></td>
-					</tr>
-					<tr>
-						<td>Static Loads to Houses</td>
-						<td><button style="width:30px;" onclick='javascript:staticLoadsToHouses();unsavedChanges=true'>Go</button></td>
-					</tr>
-					<tr>
-						<td><li><a id='scadaLoad' href='javascript:showDiv("scadaLoadshapes","50px;", "0px;");'>Scada Loadshapes</a></li>
-					<div id="scadaLoadshapes" style="visibility:hidden;height:0;">
-						<form onsubmit=' return getScadaLoadshapes();' action='/scadaLoadshape/{{ owner }}/{{feederName}}' id='scadaLoadshape' enctype='multipart/form-data' method='post'>
-							<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
-							<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
-							<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
-							<table class='importOptions'>
-								<!-- <tr>
-									<td>Name</td>
-									<td><input type='text' id='loadName' name='loadName' required/></td>
-								</tr> -->
-								<tr>
-									<td>Scada Loadshape (.csv)</td>
-									<td><input type='file' id='scadaFile' name='scadaFile' accept = '.csv' required/></td>
-								</tr>
-								<tr>
-									<td></td>
-									<td><input type='submit' value='Import' style='min-width:45px;'/></td>
-								</tr>
-							</table>
-						</form>
-						<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
-						<li><a href="#" onclick='closeDiv("scadaLoadshapes")' style="text-align:center;font-size:10pt;">Cancel</a></li>
-					</div>
-					</td>
-
-					</tr>
-					<tr>
-						<td>Solar at Meters <input type='text' style='width:20px' id='solarAddingPercentage'>%</td>
-						<td><button style="width:30px;" onclick='javascript:solarAdding();unsavedChanges=true'>Go</button></td>
-					</tr>
-
-				</table>
+				<li><a href="javascript:zoomToFit();">Zoom To Fit</a></li>
+				<li><a href="javascript:zoomReset();">Zoom Reset</a></li>
+				<li><a href="javascript:staticLoadsToHouses();unsavedChanges=true;">Static Loads to Houses</a></li>
+				<li><a href="javascript:solarAdding();unsavedChanges=true;">Solar at Meters</a></li>
+				<li><a id='scadaLoad' href='javascript:showModal("scadaLoadshapes");'>Scada Loadshapes...</a></li>
+				<li><a href='javascript:showModal("findModal");'>Find...</a></li>
+				<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
 				</ul>
 			</div>
 		</div>
@@ -650,6 +302,241 @@
 		</div>
 	</div>
 </div>
+<div id="scadaLoadshapes" class= 'modal'>
+<!-- Turn below into a modal -->
+	<div class = "modalContent">
+		<form onsubmit=' return getScadaLoadshapes();' action='/scadaLoadshape/{{ owner }}/{{feederName}}' id='scadaLoadshape' enctype='multipart/form-data' method='post'>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+			<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+			<table class='importOptions'>
+			<th>Scada Loadshapes</th>
+				<tr>
+					<td>Scada Loadshape (.csv)</td>
+					<td><input type='file' id='scadaFile' name='scadaFile' accept = '.csv' required/></td>
+				</tr>
+				<tr>
+					<td><a id='modalCancel' href="#" onclick='closeModal("scadaLoadshapes")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+					<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+				</tr>
+			</table>
+		</form>
+		<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+	</div>
+</div>
+<div id='blankFeederModal' class= 'modal'>
+	<div class="modalContent" id='blankModal'>
+		<form onsubmit='event.preventDefault(); return startConversion("feederNameNew",1);' action='/newBlankFeeder/{{ owner }}' id='newfeeder' enctype='multipart/form-data' method='post'>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+			<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+			<table class='importOptions'>
+			<th>Blank Feeder</th>
+				<tr>
+					<td>Name</td>
+					<td><input type='text' id='feederNameNew' name='feederNameNew' required/></td>
+				</tr>
+				<tr>
+					<td><a id='modalCancel' href="#" onclick='closeModal("blankFeederModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+					<td><input type='submit' value='Create' style='min-width:45px;'/></td>
+				</tr>
+			</table>
+		</form>
+	</div>
+</div>
+<div id="milSoftModal" class= 'modal'>
+	<div class="modalContent" id='milModal'>
+		<form onsubmit='event.preventDefault(); return startConversion("feederNameM",2);' action="/milsoftImport/{{ owner }}" id='milsoft' enctype='multipart/form-data' method='post'>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+			<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+			<table class='importOptions'>
+			<th>Milsoft Conversion</th>
+				<tr>
+					<td>Name</td>
+					<td><input type='text' id='feederNameM' name='feederNameM' required/></td>
+				</tr>
+				<tr>
+					<td>Data File (.std)</td>
+					<td><input type='file' name='stdFile' accept = '.std' required/></td>
+				</tr>
+				<tr>
+					<td>Equipment File (.seq)</td>
+					<td><input type='file' name='seqFile' accept = '.seq' required/></td>
+				</tr>
+				<tr>
+					<td><a id='modalCancel' href="#" onclick='closeModal("milSoftModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+					<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+				</tr>
+			</table>
+		</form>
+		<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+	</div>
+</div>
+<div id="gridlabModal" class= 'modal'>
+	<div class= "modalContent" id = 'gridlabModal'>
+		<form onsubmit='event.preventDefault(); return startConversion("feederNameG",3);' action='/gridlabdImport/{{ owner }}' id='gridlabd' enctype='multipart/form-data' method='post'>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+			<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+			<table class='importOptions'>
+			<th>GridLab-D Conversion</th>
+				<tr>
+					<td>Name</td>
+					<td><input type='text' id='feederNameG' name='feederNameG' required/></td>
+				</tr>
+				<tr>
+					<td>Data File (.glm)</td>
+					<td><input type='file' id='csvFile' name='glmFile' accept = '.glm' required/></td>
+				</tr>
+				<tr>
+					<td><a id='modalCancel' href="#" onclick='closeModal("gridlabModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+					<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+				</tr>
+			</table>
+		</form>
+		<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+	</div>
+</div>
+<div id="cymeModal" class='modal'>
+	<div class= "modalContent" id = 'cymeModalContent'>
+		<form onsubmit='event.preventDefault(); return startConversion("feederNameC",4);' action='/cymeImport/{{ owner }}' id='cyme' enctype='multipart/form-data' method='post'>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+			<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+			<table class='importOptions'>
+			<th>Cyme Conversion</th>
+				<tr>
+					<td>Name</td>
+					<td><input type='text' id='feederNameC' name='feederNameC' required/></td>
+				</tr>
+				<tr>
+					<td>Network File (.mdb)</td>
+					<td><input type='file' name='mdbNetFile' accept = '.mdb' required/></td>
+				</tr>
+				<tr>
+					<td>Equipment File (.mdb)</td>
+					<td><input type='file' name='mdbEqFile' accept = '.mdb' required/></td>
+				</tr>
+				<tr>
+					<td><a id='modalCancel' href="#" onclick='closeModal("cymeModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+					<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+				</tr>
+			</table>
+		</form>
+		<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+	</div>
+</div>
+<div id='loadModal' class="modal">
+	<div class= "modalContent" id = 'loadModalContent'>
+		<ul class= 'menu' style= "visibility:visible;position: relative;background-color: #fefefe;border: 0px;box-shadow: 0 0 0; -web-kit-box-shadow: 0 0 0;">	
+			<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","225px", "20px");'>Public Feeders</a></p></li>
+			<div id="pubFeeders" style="visibility:hidden;height:0px;">
+				<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
+					{% for feeder in publicFeeders %}
+						{% if feeder.name != feederName %}
+							<li>
+							<a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}", "public")'>
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							<strong>{{ feeder.name }}</strong> from
+							<br>
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							&#8220;{{ feeder.model }}&#8221;
+							</a>
+							</li>
+						{% endif %}
+					{% endfor %}
+				</div>
+			</div>
+			<li><p style='font-weight:bold;margin:4px 0 0 20px;padding: 0px'><a href='javascript:showDiv("myFeeders","225px", "20px");'>My Feeders</a></p></li>
+			<div id="myFeeders" style="visibility:hidden;height:0;">
+				<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
+					{% for feeder in feeders %}
+						{% if feeder.name != feederName %}
+							<li>
+							<a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}", "{{ owner }}")'>
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							Model &nbsp; &#8220;{{ feeder.model }}&#8221;
+							<br>
+							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+							Feeder <strong>{{ feeder.name }}</strong>
+							</a>
+							</li>
+						{% endif %}
+					{% endfor %}
+				</div>
+			</div>
+			<li><a href="#" onclick='closeModal("loadModal");closeDiv("pubFeeders");closeDiv("myFeeders");' style="text-align:center;font-size:12pt;">Cancel</a></li>
+		</ul>
+	</div>
+</div>
+<div id= 'findModal' class= 'modal'>
+	<div class="modalContent" id='findModalContent' style="width:35%;">
+	<table class= 'importOptions' style='padding:4px;word-wrap:break-word;'>
+		<tr>
+			<td>Term</td>
+			<td><input id='searchTerm' type='text'></td>
+		</tr>
+		<tr>
+			<td><button style="width:100%;" onclick='backButton()'>Back</button></td>
+			<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
+		</tr>
+		<tr>
+			<td><button style="width:100%;" onclick='findPrevious()'>Previous</button></td>
+			<td><button style="width:100%;" onclick='findNext()'>Next</button></td>
+		</tr>
+		<tr>
+			<td><button style="width:100%; "onclick='closeModal("findModal")' ">Cancel</button></td>
+		</tr>
+	</table>
+	</div>
+</div>
+<div id = "layoutModal" class = 'modal'>
+	<div class = "modalContent" id = 'layoutModalContent'>
+			<table class= 'importOptions' style='padding:4px;word-wrap:break-word'>
+			<tr>
+				<td>GraphNodes</td>
+				<td id='nodesBox'></td>
+			</tr>
+			<tr>
+				<td colspan=2 style='padding:0px 0px 10px 0px'>
+				<div id='nodesPercShown' style='background:black;width:30%;height:3px;display:inline-block'></div><div id='nodesPercHidden' style='background:gray;width:70%;height:3px;display:inline-block'></div>
+				</td>
+				<tr>
+				<tr>
+			<td>Gravity</td>
+			<td><input id='gravityBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Theta</td>
+			<td><input id='thetaBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Friction</td>
+			<td><input id='frictionBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Link Strength</td>
+			<td><input id='linkStrengthBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Link Distance</td>
+			<td><input id='linkDistanceBox' type='text'></td>
+				</tr>
+				<tr>
+			<td>Charge</td>
+			<td><input id='chargeBox' type='text'></td>
+				</tr>
+				<tr>
+			<td style='padding-top:10px'><button style="width:100%;"onclick='closeModal("layoutModal")' ">Cancel</button></td>
+			<td style='padding-top:10px'><button style="width:100%;" onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
+				</tr>
+		</table>
+	</div>
+</div>
+
+<!-- ******** Javascript ******** -->
+
 <script>clickCloseEvent("Add","addOps");</script>
 <script>clickCloseEvent("Edit","editOps");</script>
 <script>clickCloseEvent("Pinning","pinningOps");</script>
@@ -659,16 +546,20 @@
 <script>clickCloseEvent("File","fileOps");</script>
 <!-- Reposition the editor table based on window size.
 Run it once then on all windoe resize events. -->
-<script>
+<script type="text/javascript">
 var width = $(window).innerWidth();
 $("#selected").css("marginLeft", width-370+"px");
 window.onresize = function() {
 var width = $(window).innerWidth();
 if (width > 1000 ){$("#selected").css("marginLeft", width-370+"px");}
 }
-</script>
 
-<script type="text/javascript">
+var unsavedChanges = false;
+var lastFeederName = "{{ feederName }}";
+var isChrome = navigator.userAgent.toLowerCase().indexOf('chrome') > -1;
+if(!isChrome){alert("This editing interface is only supported in the Chrome browser. Proceed at your own risk.")}
+
+
 // GLOBAL VARIABLES:
 
 feeder = '{{ feederName }}'
@@ -809,6 +700,181 @@ d3.json(apiAddress, function (json) {
 	layoutMenuInit()
 })
 
+// ******** ONLOAD CONVERSION/CALIBRATION CHECKING ***********
+function checkScadaCal(){
+	var modelName = '{{modelName}}'
+	$.ajax({
+		url: "/checkScadaCalibration/" + modelName
+	}).done(function (data) {
+		if (data.exists == true) {
+			getScadaLoadshapes()
+		}
+		else {
+			console.log('calibration is complete')
+		}
+	})
+}
+
+var conversion = '';
+
+function showProgress(){
+	pinAll()
+	showProgressDialog('Loading Feeder', 'loading');
+	checkScadaCal()
+	checkConv()
+	
+}
+function checkConv(){
+	var modelName = '{{modelName}}'
+	$.ajax({
+		url: "/checkConversion/" + modelName
+	}).done(function (data) {
+		if (data.exists == true) {
+			showProgressDialog('Converting feeder','conversion');
+			checkConversion()
+		}
+		else {
+			console.log('conversion is complete')
+		}
+	})
+}
+function checkConversion() {
+	var conversionStatus = 'converting';
+		// Check every 5 seconds for a feeder & refresh.
+		var setInterval = window.setInterval(function pingAPI(){
+			var modelName = '{{modelName}}'
+			$.ajax({
+				url: "/checkConversion/" + modelName
+			}).done(function (data) {
+				console.log(data)
+				if (data.exists) {
+					conversionStatus = 'converting'
+				}
+				else if(data == 'glmError'){
+					alert('The glm file used is incorrectly formatted.')
+					removeProgressDialog()
+					conversionStatus = 'done'
+					window.clearInterval(setInterval)
+					return false;
+				}
+				else if (data == 'milError'){
+					alert('The .std and .seq files used are incorrectly formatted.')
+					removeProgressDialog()
+					conversionStatus = 'done'
+					window.clearInterval(setInterval)
+					return false;
+				}
+				else {
+					conversionStatus = 'done';
+				}
+			})
+			if (conversionStatus == "done"){
+				console.log('conversion done')
+				savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}");
+				alert("Conversion complete.")
+				window.location.reload();
+			}
+			console.log("Converting...")
+			return pingAPI;
+		}(), 5000);
+}
+
+function showProgressDialog(dialogMessage, cancelType) {
+	// Make the elements.
+	background = document.createElement('div')
+	background.id = 'progressBackground'
+	background.style.zIndex = '9998'
+	progContent = document.createElement('div')
+	progContent.id = 'progressContent'
+	progContent.style.zIndex = '9999'
+	spinner = document.createElement('img')
+	spinner.src = '/static/spinner.gif'
+	progressText = document.createElement('h2')
+	progressText.id = 'progressText'
+	progressText.textContent = dialogMessage
+	// Insert the elements.
+	document.body.appendChild(background)
+	document.body.appendChild(progContent)
+	progContent.appendChild(spinner)
+	progContent.appendChild(progressText)
+	var cancelBtn = document.createElement("BUTTON");
+	var t = document.createTextNode("cancel");
+	cancelBtn.style.marginTop = '5px';
+	cancelBtn.style.background= 'crimson'
+	cancelBtn.appendChild(t);
+	cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
+	cancelBtn.onclick = function() {
+		if (cancelType == 'conversion'){
+			if (confirm('Are you sure you want to cancel the conversion?')) {
+				console.log('Conversion cancelled.')
+				newfeeder.submit();
+			}
+		}
+		else if(cancelType == 'calibrating'){
+			if (confirm('Are you sure you want to cancel the calibration?')){
+				console.log('calibration canceled')
+				var modelName = gebi("modelNameHeader").innerHTML
+				$.ajax({
+						url: "/cancelScadaCalibration/" + modelName
+					}).done(function (data) {
+						console.log(data)
+					})
+				removeProgressDialog()
+			}
+		}
+		else
+		{
+			console.log("Loading cancel button.")
+			// stop rendering feeder, show file menu, etc.y
+			removeProgressDialog()
+		}
+	};
+	progContent.appendChild(cancelBtn);
+}
+
+function removeProgressDialog() {
+	if (gebi('progressBackground')!=null)
+		document.body.removeChild(gebi('progressBackground'))
+	if (gebi('progressContent')!=null)
+		document.body.removeChild(gebi('progressContent'))
+}
+
+function showProgressBar(dialogMessage) {
+	// Make the elements.
+	background = document.createElement('div')
+	background.id = 'progressBackground'
+	background.style.zIndex = '9998'
+	progContent = document.createElement('div')
+	progContent.id = 'progressContent'
+	progContent.style.zIndex = '9999'
+	progBar = document.createElement('div')
+	progBar.id = 'progBar'
+	progColor = document.createElement('div')
+	progColor.id = 'progColor'
+	progressText = document.createElement('h2')
+	progressText.id = 'progressText'
+	progressText.textContent = dialogMessage
+	// Insert the elements.
+	document.body.appendChild(background)
+	document.body.appendChild(progContent)
+	progBar.appendChild(progColor)
+	progContent.appendChild(progBar)
+	progContent.appendChild(progressText)
+}
+
+function removeProgressBar() {
+	if (gebi('progressBackground')!=null)
+		document.body.removeChild(gebi('progressBackground'))
+	if (gebi('progressContent')!=null)
+		document.body.removeChild(gebi('progressContent'))
+}
+
+function importFiles(convMethod, feederNameID){
+	gebi(convMethod).submit();
+	showProgressDialog('Converting feeder','conversion');
+	setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
+}
+
 //*********************************************
 // MODEL SAVING, LEFT TOOLBOX HANDLER FUNCTIONS
 //*********************************************
@@ -915,7 +981,14 @@ function startConversion(elementName, nextAction) {
 		})
 	}
 }
-
+function showModal(element){
+	console.log('show')
+	gebi(element).style.display = 'block'
+}
+function closeModal(element){
+	console.log('close')
+	gebi(element).style.display = 'none'
+}
 function showDiv(element,maxHeight, marginBot){
 	gebi(element).style.visibility = 'visible';
 	gebi(element).style.height = '100%';
@@ -1028,11 +1101,11 @@ function draw() {
 	// Feeder loading
 	var interval = setInterval(function () {
 		if (force.alpha() < 0.05) {
-			setTimeout(finalizeConversion,2000)
+			setTimeout(pinAll,2000)
 			removeProgressDialog()
 			clearInterval(interval)
 		} else if (nodes[parseInt(Math.random() * nodes.length)].fixed) {
-			setTimeout(finalizeConversion,2000)
+			setTimeout(pinAll,2000)
 			removeProgressDialog()
 			clearInterval(interval)
 		} else {
@@ -2505,7 +2578,7 @@ function create_table() {
 					})[0]
 					var dispStatus = theButton.nextSibling.nextSibling.style.display
 					if (dispStatus == "" || dispStatus == "none")
-						dropPillAndStay(theButton, "Find")
+						dropPill(theButton, "Find")
 					e.preventDefault()
 					return false
 				})

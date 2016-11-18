@@ -410,15 +410,18 @@ def getComponents():
 	components = {name[0:-5]:json.load(open(path + name)) for name in os.listdir(path)}
 	return json.dumps(components)
 
-@app.route("/checkConversion/<feederName>", methods=["POST","GET"]) 
-def checkConversion(feederName):
+@app.route("/checkConversion/<modelName>", methods=["POST","GET"]) 
+def checkConversion(modelName):
+	print modelName
 	owner = User.cu()
-	path = ("data/Conversion/" + owner + "/" + feederName + ".json")
-	errorPath = "data/Conversion/"+owner+"/gridError.txt"
+	path = ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+	errorPath = "data/Model/"+owner+"/"+modelName+"/gridError.txt"
 	print "Check conversion status:", os.path.exists(path), "for path", path
 	if os.path.isfile(errorPath):
-		return 'gridError'
-		os.remove(errorPath)
+		with open(errorPath) as errorFile:
+			errorString = errorFile.read()
+			os.remove(errorPath)
+		return errorString
 	else:
 		return jsonify(exists=os.path.exists(path))
 
@@ -426,6 +429,8 @@ def checkConversion(feederName):
 @flask_login.login_required
 def milsoftImport(owner):
 	''' API for importing a milsoft feeder. '''
+	if os.path.isfile("data/Conversion/"+owner+"/gridError.txt"):
+		os.remove("data/Conversion/"+owner+"/gridError.txt")
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameM","feeder"))
 	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
@@ -438,9 +443,7 @@ def milsoftImport(owner):
 		stdString = stdInput.read()
 	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.seq') as seqInput:
 		seqString = seqInput.read()
-	if not os.path.isdir("data/Conversion/" + owner):
-		os.makedirs("data/Conversion/" + owner)
-	with open("data/Conversion/" + owner + "/" + feederName + ".json", "w+") as conFile:
+	with open("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt", "w+") as conFile:
 		conFile.write("WORKING")
 	importProc = Process(target=milImportBackground, args=[owner, modelName, feederName, feederNum, stdString, seqString])
 	importProc.start()
@@ -448,24 +451,26 @@ def milsoftImport(owner):
 
 def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqString):
 	''' Function to run in the background for Milsoft import. '''
-	try:
-		modelDir = "data/Model/"+owner+"/"+modelName
-		feederDir = modelDir+"/"+feederName+".omd"
-		newFeeder = dict(**feeder.newFeederWireframe)
-		[newFeeder["tree"], xScale, yScale] = milToGridlab.convert(stdString, seqString)
-		newFeeder["layoutVars"]["xScale"] = xScale
-		newFeeder["layoutVars"]["yScale"] = yScale
-		with open("./schedules.glm","r") as schedFile:
-			newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
-		try: os.remove(feederDir)
-		except: pass
-		with open(feederDir, "w") as outFile:
-			json.dump(newFeeder, outFile, indent=4)
-		os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
-		removeFeeder(owner, modelName, feederNum)
-		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
-	except:
-		print 'error'
+	modelDir = "data/Model/"+owner+"/"+modelName
+	feederDir = modelDir+"/"+feederName+".omd"
+	newFeeder = dict(**feeder.newFeederWireframe)
+	[newFeeder["tree"], xScale, yScale] = milToGridlab.convert(stdString, seqString)
+	newFeeder["layoutVars"]["xScale"] = xScale
+	newFeeder["layoutVars"]["yScale"] = yScale
+	with open("./schedules.glm","r") as schedFile:
+		newFeeder["attachments"] = {"schedules.glm":schedFile.read()}
+	try: os.remove(feederDir)
+	except: pass
+	with open(feederDir, "w") as outFile:
+		json.dump(newFeeder, outFile, indent=4)
+	with open(feederDir) as feederFile:
+		feederTree =  json.load(feederFile)
+	if len(feederTree['tree']) < 12:
+		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w+") as errorFile:
+			errorFile.write('milError')
+	os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+	removeFeeder(owner, modelName, feederNum)
+	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 
 @app.route("/gridlabdImport/<owner>", methods=["POST"])
 @flask_login.login_required
@@ -480,11 +485,11 @@ def gridlabdImport(owner):
 	glm.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.glm'))
 	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.glm') as glmFile:
 		glmString = glmFile.read()
-	if not os.path.isdir("data/Conversion/" + owner):
-		os.makedirs("data/Conversion/" + owner)
-	if os.path.isfile("data/Conversion/"+owner+"/gridError.txt"):
-		os.remove("data/Conversion/"+owner+"/gridError.txt")
-	with open("data/Conversion/" + owner + "/" + feederName + ".json", "w+") as conFile:
+	# if not os.path.isdir("data/Conversion/" + owner):
+	# 	os.makedirs("data/Conversion/" + owner)
+	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
+		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
+	with open("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt", "w+") as conFile:
 		conFile.write("WORKING")
 	importProc = Process(target=gridlabImportBackground, args=[owner, modelName, feederName, feederNum, glmString])
 	importProc.start()
@@ -505,12 +510,13 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 		except: pass
 		with open(feederDir, "w") as outFile:
 			json.dump(newFeeder, outFile, indent=4)
-		os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
+		os.remove("data/Model/"+owner+"/"+modelName+"/ZPID.txt")
 		removeFeeder(owner, modelName, feederNum)
 		writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	except Exception as error:
-		with open("data/Conversion/"+owner+"/gridError.txt", "w+") as errorFile:
-			errorFile.write('The glm file used is incorrectly formatted.')
+		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w+") as errorFile:
+			errorFile.write('glmError')
+
 @app.route("/scadaLoadshape/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
 def scadaLoadshape(owner,feederName):
@@ -540,34 +546,36 @@ def scadaLoadshape(owner,feederName):
 	# write PID to txt file in model folder here
 	importProc.start()
 	pid = str(importProc.pid)
-	with open(modelDir+"/PID.txt", "w+") as outFile:
+	with open(modelDir+"/CPID.txt", "w+") as outFile:
 		outFile.write(pid)
-
 	return ('',204)
+
 def backgroundScadaCalibration(owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim):
 	# heavy lifting background process/omfCalibrate and then deletes PID file
 	try:
 		omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
 		modelDirec="data/Model/" + owner + "/" +  modelName
 		# move calibrated file to model folder, old omd files are backedup
-		for filename in os.listdir(modelDirec):
-			if filename.endswith('.omd'):
-				feederFileName = str(filename)
-				os.rename(modelDirec+"/"+filename, modelDirec+"/"+filename+".backup")
-		os.rename(workDir+'/calibratedFeeder.omd',workDir+"/"+feederFileName)
-		shutil.move(workDir+"/"+feederFileName, modelDirec)
-		os.remove("data/Model/" + owner + "/" +  modelName + "/PID.txt")
+		if feederPath.endswith('.omd'):
+			os.rename(feederPath, feederPath+".backup")
+		os.rename(workDir+'/calibratedFeeder.omd',feederPath)
+		# shutil.move(workDir+"/"+feederFileName, modelDirec)
+		os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
 	except Exception as error:
 		modelDirec="data/Model/" + owner + "/" +  modelName
 		errorString = ''.join(error)
 		with open(modelDirec+'/error.txt',"w+") as errorFile:
-		 	errorFile.write('CSV is missing at least the following columns: '+ errorString + ". Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
+		 	errorFile.write("The CSV used is incorrectly formatted. Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
+
 @app.route("/checkScadaCalibration/<modelName>", methods=["POST","GET"])
 def checkScadaCalibration(modelName):
-	owner = User.cu()
-	pidPath = ("data/Model/" + owner + "/" + modelName + "/PID.txt")
-	errorPath = ("data/Model/" + owner + "/" + modelName + "/error.txt")
-	print "Check conversion status:", os.path.exists(pidPath), "for path", pidPath
+	try:
+		owner = User.cu()
+	except:
+		return 'Server crashed during calibration. Please attempt calibration again.'
+	pidPath = ('data/Model/' + owner + '/' + modelName + '/CPID.txt')
+	errorPath = ('data/Model/' + owner + '/' + modelName + '/error.txt')
+	print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
 	# return error message if one exists
 	if os.path.exists(errorPath):
 		with open(errorPath) as errorFile:
@@ -582,12 +590,13 @@ def cancelScadaCalibration(modelName):
 	owner = User.cu()
 	path = "data/Model/" + owner + "/" + modelName
 	#Read PID file, kill process with that PID number, delete calibration file, delete PID.txt
-	with open(path+"/PID.txt") as pidFile:
+	with open(path+"/CPID.txt") as pidFile:
 		pidNum = int(pidFile.read())
 	os.kill(pidNum, signal.SIGTERM)
-	os.remove("data/Model/" + owner + "/" +  modelName + "/PID.txt")
+	os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
 	shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
 	return ('',204)
+
 # TODO: Check if rename mdb files worked
 @app.route("/cymeImport/<owner>", methods=["POST"])
 @flask_login.login_required
@@ -776,7 +785,7 @@ def root():
 		try:
 			modPath = "data/Model/" + mod["owner"] + "/" + mod["name"]
 			allInput = json.load(open(modPath + "/allInputData.json"))
-			mod["runTime"] = allInput.get("runTime","0:00:00")
+			mod["runTime"] = allInput.get("runTime","")
 			mod["modelType"] = allInput.get("modelType","")
 			try:
 				mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
