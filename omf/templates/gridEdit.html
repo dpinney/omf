@@ -569,6 +569,7 @@ var tree
 var components
 var zoomer = d3.behavior.zoom()
 zoomer.scaleExtent([0.1, 30])
+var conversion = '';
 
 // Graph size global variable
 var NODE_STROKE_WIDTH = 0.4
@@ -700,7 +701,18 @@ d3.json(apiAddress, function (json) {
 	layoutMenuInit()
 })
 
-// ******** ONLOAD CONVERSION/CALIBRATION CHECKING ***********
+//**********************************************************
+//******** ONLOAD CONVERSION/CALIBRATION CHECKING **********
+//**********************************************************
+
+function showProgress(){
+	pinAll()
+	showProgressDialog('Loading Feeder', 'loading');
+	checkScadaCal()
+	checkConv()
+	
+}
+
 function checkScadaCal(){
 	var modelName = '{{modelName}}'
 	$.ajax({
@@ -715,15 +727,6 @@ function checkScadaCal(){
 	})
 }
 
-var conversion = '';
-
-function showProgress(){
-	pinAll()
-	showProgressDialog('Loading Feeder', 'loading');
-	checkScadaCal()
-	checkConv()
-	
-}
 function checkConv(){
 	var modelName = '{{modelName}}'
 	$.ajax({
@@ -781,6 +784,8 @@ function checkConversion() {
 
 function showProgressDialog(dialogMessage, cancelType) {
 	// Make the elements.
+	// If cancel type is none show the spinner
+	if (cancelType != 'none'){
 	background = document.createElement('div')
 	background.id = 'progressBackground'
 	background.style.zIndex = '9998'
@@ -822,6 +827,9 @@ function showProgressDialog(dialogMessage, cancelType) {
 				removeProgressDialog()
 			}
 		}
+		else if(cancelType == 'none'){
+			cancelBtn.style.display = 'none'
+		}
 		else
 		{
 			console.log("Loading cancel button.")
@@ -829,40 +837,33 @@ function showProgressDialog(dialogMessage, cancelType) {
 			removeProgressDialog()
 		}
 	};
-	progContent.appendChild(cancelBtn);
+		progContent.appendChild(cancelBtn);
+	}
+	else{
+		// Else show progress loading bar, for solar and static loads to houses
+		background = document.createElement('div')
+		background.id = 'progressBackground'
+		background.style.zIndex = '9998'
+		progContent = document.createElement('div')
+		progContent.id = 'progressContent'
+		progContent.style.zIndex = '9999'
+		progBar = document.createElement('div')
+		progBar.id = 'progBar'
+		progColor = document.createElement('div')
+		progColor.id = 'progColor'
+		progressText = document.createElement('h2')
+		progressText.id = 'progressText'
+		progressText.textContent = dialogMessage
+		// Insert the elements.
+		document.body.appendChild(background)
+		document.body.appendChild(progContent)
+		progBar.appendChild(progColor)
+		progContent.appendChild(progBar)
+		progContent.appendChild(progressText)
+	}
 }
 
 function removeProgressDialog() {
-	if (gebi('progressBackground')!=null)
-		document.body.removeChild(gebi('progressBackground'))
-	if (gebi('progressContent')!=null)
-		document.body.removeChild(gebi('progressContent'))
-}
-
-function showProgressBar(dialogMessage) {
-	// Make the elements.
-	background = document.createElement('div')
-	background.id = 'progressBackground'
-	background.style.zIndex = '9998'
-	progContent = document.createElement('div')
-	progContent.id = 'progressContent'
-	progContent.style.zIndex = '9999'
-	progBar = document.createElement('div')
-	progBar.id = 'progBar'
-	progColor = document.createElement('div')
-	progColor.id = 'progColor'
-	progressText = document.createElement('h2')
-	progressText.id = 'progressText'
-	progressText.textContent = dialogMessage
-	// Insert the elements.
-	document.body.appendChild(background)
-	document.body.appendChild(progContent)
-	progBar.appendChild(progColor)
-	progContent.appendChild(progBar)
-	progContent.appendChild(progressText)
-}
-
-function removeProgressBar() {
 	if (gebi('progressBackground')!=null)
 		document.body.removeChild(gebi('progressBackground'))
 	if (gebi('progressContent')!=null)
@@ -1884,7 +1885,7 @@ function staticLoadsToHouses() {
 			in_use = false
 		} else {
 			redraw()
-			removeProgressBar()
+			removeProgressDialog()
 			in_use = false;
 			clearInterval(inter)
 		}
@@ -1911,7 +1912,7 @@ function staticLoadsToHouses() {
 	if (noTriplexNode()) {
 		alert('TRIPLEX NODES have been hidden by the layout, please unfold them first.')
 	} else {
-		showProgressBar('Please wait. Houses are being generated.')
+		showProgressDialog('Please wait. Houses are being generated.','none')
 		// set interval function to run replaceAllHouses every 10 ms, if it is running, will put one request in the queue.
 		inter = setInterval(replaceAllHouses, 10)
 	}
@@ -2012,7 +2013,7 @@ function solarAdding() {
 			in_use = false
 		} else {
 			redraw()
-			removeProgressBar()
+			removeProgressDialog()
 			is_use = false
 			clearInterval(inter2)
 		}
@@ -2037,7 +2038,7 @@ function solarAdding() {
 	if (noMeter()) {
 		alert('Meters have been hidden in the layout. Please unfold everything before adding solar.')
 	} else {
-		showProgressBar('Please wait. Solar is being generated.')
+		showProgressDialog('Please wait. Solar is being generated.','none')
 		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
 		// setTimeout(walkAndAddSolar, 1000);
 		inter2 = setInterval(walkAndAddSolar, 10)
@@ -2190,7 +2191,6 @@ function deleteObject(treeIndex) {
 	var isNode = true
 	for (prop in tree[treeIndex])
 		if (prop == 'from') isNode = false
-	if(confirm("Are you sure you want to delete this node?")){
 	if (isNode) {
 		// Check for connections and abort if we have them.
 		nodeName = tree[treeIndex].name
@@ -2226,7 +2226,7 @@ function deleteObject(treeIndex) {
 	delete tree[treeIndex]
 	clearSelection()
 	redraw()
-	}
+	
 }
 
 /**
