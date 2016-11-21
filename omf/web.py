@@ -433,11 +433,11 @@ def milsoftImport(owner):
 	feederName = str(request.form.get("feederNameM","feeder"))
 	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
 	feederNum = request.form.get("feederNum",1)
-	# Delete exisitng .std and .seq files to not clutter model file
+	# Delete exisitng .std and .seq, .glm files to not clutter model file
 	path = "data/Model/"+owner+"/"+modelName
 	fileList = os.listdir(path)
 	for file in fileList:
-		if file.endswith(".std") or file.endswith(".seq"):
+		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
 			os.remove(path+"/"+file)
 	stdFile, seqFile = map(lambda x: request.files[x], ["stdFile", "seqFile"])
 	# stdFile, seqFile= request.files['stdFile','seqFile']
@@ -487,9 +487,11 @@ def gridlabdImport(owner):
 	feederNum = request.form.get("feederNum",1)
 	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
 	glm = request.files['glmFile']
-	# Delete .glm files so model file isnt cluttered
+	# Delete exisitng .std and .seq, .glm files to not clutter model file
+	path = "data/Model/"+owner+"/"+modelName
+	fileList = os.listdir(path)
 	for file in fileList:
-		if file.endswith(".glm")
+		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
 			os.remove(path+"/"+file)
 	# Save .glm file to model folder
 	glm.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.glm'))
