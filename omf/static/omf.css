@@ -199,14 +199,13 @@ p.reportTitle {
 	font-size: 16pt;
 	display: block;}
 p.studyTitle {
-	writing-mode: tb-rl;
 	filter: flipv fliph;
 	-webkit-transform: rotate(90deg);
 	-moz-transform: rotate(90deg);
 	-o-transform: rotate(90deg);
 	white-space: nowrap;
 	display: block;
-	padding: 10px;}
+	padding: 10px; }
 pre.stdoutBlock {
 	word-wrap: break-word;
 	display: inline-block; 

@@ -429,16 +429,22 @@ def checkConversion(modelName):
 @flask_login.login_required
 def milsoftImport(owner):
 	''' API for importing a milsoft feeder. '''
-	if os.path.isfile("data/Conversion/"+owner+"/gridError.txt"):
-		os.remove("data/Conversion/"+owner+"/gridError.txt")
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameM","feeder"))
 	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
 	feederNum = request.form.get("feederNum",1)
+	# Delete exisitng .std and .seq, .glm files to not clutter model file
+	path = "data/Model/"+owner+"/"+modelName
+	fileList = os.listdir(path)
+	for file in fileList:
+		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
+			os.remove(path+"/"+file)
 	stdFile, seqFile = map(lambda x: request.files[x], ["stdFile", "seqFile"])
 	# stdFile, seqFile= request.files['stdFile','seqFile']
 	stdFile.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.std'))
 	seqFile.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.seq'))
+	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
+		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
 	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.std') as stdInput:
 		stdString = stdInput.read()
 	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.seq') as seqInput:
@@ -481,12 +487,16 @@ def gridlabdImport(owner):
 	feederNum = request.form.get("feederNum",1)
 	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
 	glm = request.files['glmFile']
+	# Delete exisitng .std and .seq, .glm files to not clutter model file
+	path = "data/Model/"+owner+"/"+modelName
+	fileList = os.listdir(path)
+	for file in fileList:
+		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
+			os.remove(path+"/"+file)
 	# Save .glm file to model folder
 	glm.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.glm'))
 	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.glm') as glmFile:
 		glmString = glmFile.read()
-	# if not os.path.isdir("data/Conversion/" + owner):
-	# 	os.makedirs("data/Conversion/" + owner)
 	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
 		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
 	with open("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt", "w+") as conFile:
