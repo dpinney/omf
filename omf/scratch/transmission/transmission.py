@@ -7,16 +7,22 @@ Reqs:
 	*ONLY TESTED ON LINUX
 
 TODO:
-	XXX Add MATPOWER functionality.
-	XXX Add functionality to specify solvers, model, tolerance, iteration, genlimits.
-	XXX Parse results to outputDict.
-	XXX Render to transmission.html. Fix bug thats only rendering first two table rows.
-	XXX Update test case. Add other .m tests.
-	OOO Add cancel functionality. Did so by removing cancel from transmission.py. metamodel has a cancel.
-	OOO Create network editor.
-	OOO Link network editor to model.
-	OOO Create MATPOWER wrapper. Remove CD function.
-	OOO Explore docker/non-vm functionality to speed up test process.
+XXX create skeleton for transmission.py and transmission.html (in /omf/omf/scratch/transmission/).
+XXX Add MATPOWER functionality.
+XXX Add functionality to specify solvers, model, tolerance, iteration, genlimits.
+XXX Parse results to outputDict.
+XXX Render to transmission.html. Fix bug thats only rendering first two table rows.
+XXX Update test case. Add other .m tests.
+XXX Add cancel functionality. Did so by removing cancel from transmission.py. metamodel has a cancel.
+XXX Does matpower support coordinates? No according to documentation. Also based on IEEE CDF and PTI formats, which don’t have it.
+XXX Create code to convert .m network file to omt.json format.
+OOO Create code to convert omt.json to .mat.
+OOO Interface omt.json with network editor. Add to transmission.py.
+OOO Add code to transmission.py to use network.py to convert omt.json to .mat.
+OOO Create voltage chart. Add to transmission.html.
+OOO Create clean interface to MATPOWER in omf/solvers.
+OOO Explore docker/non-vm functionality to speed up test process.
+OOO How to handle matpower file versioning: There are two versions: 1 and 2. 2 is newer and will be officially supported in this model. version 1 can be converted  by the loadcase and savecase built-in matpower functions later if enough users seem to use it.  
 '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, math
@@ -29,7 +35,7 @@ import pprint as pprint
 
 # OMF imports
 sys.path.append(__metaModel__._omfDir) # for images in test.
-import feeder
+import network
 from solvers import nrelsam2013
 from weather import zipCodeToClimateName
 
@@ -98,8 +104,13 @@ def runForeground(modelDir, inputDict):
 		startTime = datetime.datetime.now()
 		outData = {
 			'tableData' : {'volts': [[],[]], 'powerReal' : [[],[]], 'powerReact' : [[],[]]},
-			}		
+			# 'charts' : {'volts' : '', 'powerReact' : '', 'powerReal' : ''},
+			'voltsChart' : '', 'powerReactChart' : '', 'powerRealChart' : '',
+			'stdout' : '', 'stderr' : ''
+			}
 		# Model operations goes here.
+		# Read feeder and convert to .mat.
+
 		# Configure and run MATPOWER.
 		matDir =  pJoin(__metaModel__._omfDir,'scratch','transmission','inData', 'matpower6.0b1')
 		networkName = inputDict.get('networkName','case9')
@@ -123,7 +134,7 @@ def runForeground(modelDir, inputDict):
 		shutil.copy("/home/dev/Desktop/matout.txt", pJoin(modelDir,'matout.txt'))
 		os.remove("/home/dev/Desktop/matout.txt")
 		# SKELETON code.
-		imgSrc = pJoin(__metaModel__._omfDir,'scratch','transmission','inData')	
+		imgSrc = pJoin(__metaModel__._omfDir,'scratch','transmission','inData')
 		# shutil.copyfile(pJoin(imgSrc,'bg1.jpg'),pJoin(modelDir,'powerReal.jpg'))
 		# shutil.copyfile(pJoin(imgSrc,'bg2.jpg'),pJoin(modelDir,'powerReact.jpg'))
 		# shutil.copyfile(pJoin(imgSrc,'bg3.jpg'),pJoin(modelDir,'volts.jpg'))
@@ -146,7 +157,7 @@ def runForeground(modelDir, inputDict):
 					lineNo = i
 				# Parse lines.
 				line = line.split(' ')
-				line = filter(lambda a: a!= '', line)		
+				line = filter(lambda a: a!= '', line)
 				if todo=="count":
 					if "Buses" in line:
 						busCount = int(line[1])
@@ -160,13 +171,13 @@ def runForeground(modelDir, inputDict):
 						transfCount = int(line[1])
 						todo = None
 				elif todo=="gen":
-					if i>(lineNo+4) and i<(lineNo+4+genCount+1): 
+					if i>(lineNo+4) and i<(lineNo+4+genCount+1):
 						# gen bus numbers.
 						gennums.append(line[1])
 					elif i>(lineNo+4+genCount+1):
 						todo = None
 				elif todo=="node":
-					if i>(lineNo+4) and i<(lineNo+4+busCount+1): 
+					if i>(lineNo+4) and i<(lineNo+4+busCount+1):
 						# voltage
 						if line[0] in gennums: comp="gen"
 						else: comp="node"
@@ -179,7 +190,7 @@ def runForeground(modelDir, inputDict):
 					elif i>(lineNo+4+busCount+1):
 						todo = None
 				elif todo=="line":
-					if i>(lineNo+4) and i<(lineNo+4+branchCount+1): 
+					if i>(lineNo+4) and i<(lineNo+4+branchCount+1):
 						# power
 						outData['tableData']['powerReal'][0].append("line"+str(line[0]))
 						outData['tableData']['powerReact'][0].append("line"+str(line[0]))
@@ -194,11 +205,11 @@ def runForeground(modelDir, inputDict):
 					outData['tableData'][powerOrVolt][1][i]=float(outData['tableData'][powerOrVolt][1][i])
 		pprint.pprint(outData)
 		with open(pJoin(imgSrc,'bg1.jpg'),"rb") as inFile:
-			outData["powerReal"] = inFile.read().encode("base64")
+			outData["powerRealChart"] = inFile.read().encode("base64")
 		with open(pJoin(imgSrc,'bg2.jpg'),"rb") as inFile:
-			outData["powerReact"] = inFile.read().encode("base64")
+			outData["powerReactChart"] = inFile.read().encode("base64")
 		with open(pJoin(imgSrc,'bg3.jpg'),"rb") as inFile:
-			outData["volts"] = inFile.read().encode("base64")		
+			outData["voltsChart"] = inFile.read().encode("base64")
 		# Model operations typically ends here.
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
@@ -229,9 +240,37 @@ def runForeground(modelDir, inputDict):
 		try:
 			os.remove(pJoin(modelDir, "PPID.txt"))
 		except:
-			pass			
+			pass
 
-# directory switching for matpower binaries.
+def genDiagram(modelDir, feederJson):
+	print "Generating Feeder plot..."
+	print "************************************"
+	links = feederJson.get("links",{})
+	tree = feederJson.get("tree", {})
+	toRemove = []
+	for link in links:
+		for typeLink in link.keys():
+			if typeLink in ['source', 'target']:
+				for key in link[typeLink].keys():
+					if key in ['x', 'y']:
+						objName = link[typeLink]['name']
+						for x in tree:
+							leaf = tree[x]
+							if leaf.get('name','')==objName:
+								if key=='x': leaf['latitude'] = link[typeLink][key]
+								else: leaf['longitude'] = link[typeLink][key]
+							elif 'config' in leaf.get('object','') or 'climate' in leaf.get('object','') or 'conductor' in leaf.get('object','') or 'solver_method' in leaf or 'omftype' in leaf or 'clock' in leaf or 'module' in leaf:
+								if x not in toRemove: 
+									toRemove.append(x)
+	for rem in toRemove: 
+		tree.pop(rem)
+	nxG = feeder.treeToNxGraph(tree)
+	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
+	plt.savefig(pJoin(modelDir,"feederChart.png"))
+	if debug:
+		print "Plot saved to:                 %s"%(pJoin(modelDir,"feederChart.png"))
+		print "************************************\n\n"
+
 class cd:
 	"""Context manager for changing the current working directory"""
 	def __init__(self, newPath):

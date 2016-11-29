@@ -15,11 +15,11 @@ def parse(inputStr, filePath=True):
 	matDict = _dictConversion(inputStr, filePath)
 	return matDict
 
-def write(inTree):
+def write(inNet):
 	''' Turn an omf.network json object into a MAT-formatted string. '''
 	output = ''
-	for key in inTree:
-		output += _dictToString(inTree[key]) + '\n'
+	for key in inNet:
+		output += _dictToString(inNet[key]) + '\n'
 	return output
 
 def _dictConversion(inputStr, filePath=True):
@@ -43,19 +43,19 @@ def _dictConversion(inputStr, filePath=True):
 	# Parse data.
 	todo = None
 	for i,line in enumerate(data):
-		# Parse lines.
 		if todo!=None:
+			# Parse lines.
 			line = line.strip('\n').strip(';').strip('\'')
 			if "]" in line:
 				todo = None
 			if todo in ['bus','gen','bus','branch']:
 				line = line.split('\t')
 			else:
-				line = line.split(' ')				
-			line = filter(lambda a: a!= '', line)	
+				line = line.split(' ')
+			line = filter(lambda a: a!= '', line)
 			if todo=="version":
 				version = float(line[-1][1])
-				if version<2: 
+				if version<2:
 					print "MATPOWER VERSION MUST BE 2: %s"%(version)
 					break
 				todo = None
@@ -64,16 +64,16 @@ def _dictConversion(inputStr, filePath=True):
 				newNetworkWireframe['baseMVA'] = float(mva)
 				todo = None
 			elif todo=="bus":
-				bus = {"bus_i": int(float(line[0])),"type": int(float(line[1])),"Pd": float(line[2]),"Qd": float(line[3]),"Gs": float(line[4]),"Bs": float(line[5]),"area": float(line[6]),"Vm": float(line[7]),"Va": float(line[8]),"baseKV": float(line[9]),"zone": float(line[10]),"Vmax": float(line[11]),"Vmin": float(line[12])}
 				maxKey = len(newNetworkWireframe['bus'])+1
+				bus = {"bus_i": int(float(line[0])),"type": int(float(line[1])),"Pd": float(line[2]),"Qd": float(line[3]),"Gs": float(line[4]),"Bs": float(line[5]),"area": float(line[6]),"Vm": float(line[7]),"Va": float(line[8]),"baseKV": float(line[9]),"zone": float(line[10]),"Vmax": float(line[11]),"Vmin": float(line[12])}
 				newNetworkWireframe['bus'].append({maxKey : bus})
 			elif todo=="gen":
-				gen = {"bus_i": float(line[0]),"Pg": float(line[1]),"Qg": float(line[2]),"Qmax": float(line[3]),"Qmin": float(line[4]),"Vg": float(line[5]),"mBase": float(line[6]),"status": float(line[7]),"Pmax": float(line[8]),"Pmin": float(line[9]),"Pc1": float(line[10]),"Pc2": float(line[11]),"QC1min": float(line[12]),"QC1max": float(line[13]),"QC2min": float(line[14]),"Q21max": float(line[15]),"ramp_agc": float(line[16]),"ramp_10": float(line[17]),"ramp_30": float(line[18]),"ramp_q": float(line[19]),"apf": float(line[20])}
 				maxKey = len(newNetworkWireframe['gen'])+1
+				gen = {"bus_i": float(line[0]),"Pg": float(line[1]),"Qg": float(line[2]),"Qmax": float(line[3]),"Qmin": float(line[4]),"Vg": float(line[5]),"mBase": float(line[6]),"status": float(line[7]),"Pmax": float(line[8]),"Pmin": float(line[9]),"Pc1": float(line[10]),"Pc2": float(line[11]),"QC1min": float(line[12]),"QC1max": float(line[13]),"QC2min": float(line[14]),"Q21max": float(line[15]),"ramp_agc": float(line[16]),"ramp_10": float(line[17]),"ramp_30": float(line[18]),"ramp_q": float(line[19]),"apf": float(line[20])}
 				newNetworkWireframe['gen'].append({maxKey : gen})
 			elif todo=='branch':
-				branch =  {"fbus": float(line[0]),"tbus": float(line[1]),"r": float(line[2]),"x": float(line[3]),"b": float(line[4]),"rateA": float(line[5]),"rateB": float(line[6]),"rateC": float(line[7]),"ratio": float(line[8]),"angle": float(line[9]),"status": float(line[10]),"angmin": float(line[11]),"angmax": float(line[12])}
 				maxKey = len(newNetworkWireframe['branch'])+1
+				branch =  {"fbus": int(float(line[0])),"tbus": int(float(line[1])),"r": float(line[2]),"x": float(line[3]),"b": float(line[4]),"rateA": float(line[5]),"rateB": float(line[6]),"rateC": float(line[7]),"ratio": float(line[8]),"angle": float(line[9]),"status": float(line[10]),"angmin": float(line[11]),"angmax": float(line[12])}
 				newNetworkWireframe['branch'].append({maxKey : branch})
 		else:
 			# Determine what type of data is coming up.
@@ -86,12 +86,32 @@ def _dictConversion(inputStr, filePath=True):
 			elif "mpc.gen = [" in line.lower():
 				todo = "gen"
 			elif "mpc.branch = [" in line.lower():
-				todo = "branch"								
+				todo = "branch"
 	return newNetworkWireframe
 
 def _dictToString(inDict):
 	''' Helper function: given a single dict representing a NETWORK, concatenate it into a string. '''
 	return ''
+
+def netToNxGraph(inNet):
+	''' Convert network.omt to networkx graph. '''
+	outGraph = nx.Graph()
+	for compType in inNet:
+		if compType in ['bus','gen','branch']:
+			comp = inNet[compType]
+			for compVal in comp:
+				for idnum,item in compVal.iteritems():
+					if 'fbus' in item.keys():
+						outGraph.add_edge(item['fbus'],item['tbus'],attr_dict={'type':'branch'})
+					elif compType=='bus':
+						if item.get('bus_i',0) in outGraph:
+							# Edge already led to node's addition, so just set the attributes:
+							outGraph.node[item['bus_i']]['type']='bus'
+						else:
+							outGraph.add_node(item['bus_i'])
+					elif compType=='gen':
+						pass
+	return outGraph
 
 def _tests():
 	# MAT parsing test.
@@ -99,10 +119,12 @@ def _tests():
 	networkJson = parse(pJoin(os.getcwd(),'inData','matpower6.0b1',networkName+'.m'), filePath=True)
 	keyLen = len(networkJson.keys())
 	print 'Parsed a test MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch']))
-	# Write to omt.json.
-	with open(pJoin(os.getcwd(),"outData",networkName+".omt.json"),"w") as inFile:
+	# Write to .omt.json.
+	with open(pJoin(os.getcwd(),"outData",networkName+".omt"),"w") as inFile:
 		json.dump(networkJson, inFile, indent=4)
-	print 'Wrote to: %s'%(pJoin(os.getcwd(),"outData",networkName+".omt.json"))
+	print 'Wrote to: %s'%(pJoin(os.getcwd(),"outData",networkName+".omt"))
+	# Write nxgraph.
+	nxG = netToNxGraph(networkJson)
 
 if __name__ == '__main__':
 	_tests()
