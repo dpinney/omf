@@ -1,7 +1,7 @@
-*Introduction
+** Introduction
 Anomaly detection model aims to detect the unusual energy consumption of an AMI data set. The unusual consumption of a particular meter can be due to bad data set, missing data, vacancy, or energy theft. The model takes AMI data set, minimum allowed energy consumption deviation from the average (%), and minimum duration (hour). If the consumption drops to reach this percentage and lasts for the defined time, the anomaly is reported. 
 
-**Walkthrough
+** Walkthrough
 
 1. Fill the input values or use the default values. These include the energy deviation from the average (%) and deviation length (hours). 
 2. AMI data must be a .csv file that follows the following format:
@@ -15,7 +15,5 @@ The data must be an hourly, 30 minutes, or 15 minutes data and the time step is 
 A. Consumption Anomalies Table: This includes the meters that have the anomalies, the starting date and time, the duration of the anomaly, and maximum energy deviation. 
 B. Time series charts of anomalies. This shows the energy consumption curve of the anomaly meters with respect to the average consumption. The dropdown list allows the user of the model to choose which meter to show. 
 
-***FAQs
-
-
+*** FAQs
 

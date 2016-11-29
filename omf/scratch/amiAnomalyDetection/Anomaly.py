@@ -206,7 +206,7 @@ def _tests():
 		"runTime": "",
 		"MinDetectionRunTime":"4",
 		"MinDeviationFromAverage":"95",
-		"fileName": "Xample SMALLER Input - synthetic AMI measurements.csv"}
+		"fileName": "Input - synthetic AMI measurements.csv"}
 	modelLoc = pJoin(workDir,"admin","Anomaly Detection")
 	# Blow away old test results if necessary.
 	try:
