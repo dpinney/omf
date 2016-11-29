@@ -304,7 +304,7 @@
 </div>
 <div id="scadaLoadshapes" class= 'modal'>
 <!-- Turn below into a modal -->
-	<div class = "modalContent">
+	<div class = "modalContent" style='width:350px;'>
 		<form onsubmit=' return getScadaLoadshapes();' action='/scadaLoadshape/{{ owner }}/{{feederName}}' id='scadaLoadshape' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
@@ -312,7 +312,7 @@
 			<table class='importOptions'>
 			<th>Scada Loadshapes</th>
 				<tr>
-					<td>Scada Loadshape (.csv)</td>
+					<td>File containing Scada load data (.csv)</td>
 					<td><input type='file' id='scadaFile' name='scadaFile' accept = '.csv' required/></td>
 				</tr>
 				<tr>
@@ -345,7 +345,7 @@
 	</div>
 </div>
 <div id="milSoftModal" class= 'modal'>
-	<div class="modalContent" id='milModal'>
+	<div class="modalContent" id='milModal' style='width:350px;'>
 		<form onsubmit='event.preventDefault(); return startConversion("feederNameM",2);' action="/milsoftImport/{{ owner }}" id='milsoft' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
@@ -374,7 +374,7 @@
 	</div>
 </div>
 <div id="gridlabModal" class= 'modal'>
-	<div class= "modalContent" id = 'gridlabModal'>
+	<div class= "modalContent" id = 'gridlabModal' style='width:350px;'>
 		<form onsubmit='event.preventDefault(); return startConversion("feederNameG",3);' action='/gridlabdImport/{{ owner }}' id='gridlabd' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
@@ -399,7 +399,7 @@
 	</div>
 </div>
 <div id="cymeModal" class='modal'>
-	<div class= "modalContent" id = 'cymeModalContent'>
+	<div class= "modalContent" id = 'cymeModalContent' style='width:350px;'>
 		<form onsubmit='event.preventDefault(); return startConversion("feederNameC",4);' action='/cymeImport/{{ owner }}' id='cyme' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
@@ -428,71 +428,84 @@
 	</div>
 </div>
 <div id='loadModal' class="modal">
-	<div class= "modalContent" id = 'loadModalContent'>
-		<ul class= 'menu' style= "visibility:visible;position: relative;background-color: #fefefe;border: 0px;box-shadow: 0 0 0; -web-kit-box-shadow: 0 0 0;">	
-			<li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","225px", "20px");'>Public Feeders</a></p></li>
-			<div id="pubFeeders" style="visibility:hidden;height:0px;">
-				<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
-					{% for feeder in publicFeeders %}
-						{% if feeder.name != feederName %}
-							<li>
-							<a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}", "public")'>
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							<strong>{{ feeder.name }}</strong> from
-							<br>
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							&#8220;{{ feeder.model }}&#8221;
-							</a>
-							</li>
-						{% endif %}
-					{% endfor %}
-				</div>
-			</div>
-			<li><p style='font-weight:bold;margin:4px 0 0 20px;padding: 0px'><a href='javascript:showDiv("myFeeders","225px", "20px");'>My Feeders</a></p></li>
-			<div id="myFeeders" style="visibility:hidden;height:0;">
-				<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
-					{% for feeder in feeders %}
-						{% if feeder.name != feederName %}
-							<li>
-							<a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}", "{{ owner }}")'>
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							Model &nbsp; &#8220;{{ feeder.model }}&#8221;
-							<br>
-							&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-							Feeder <strong>{{ feeder.name }}</strong>
-							</a>
-							</li>
-						{% endif %}
-					{% endfor %}
-				</div>
-			</div>
-			<li><a href="#" onclick='closeModal("loadModal");closeDiv("pubFeeders");closeDiv("myFeeders");' style="text-align:center;font-size:12pt;">Cancel</a></li>
-		</ul>
+	<div class= "modalContent" id = 'loadModalContent' style="width:850px;">
+		<table>
+			<tr>
+				<th>Public Feeders</th>
+				<th>My Feeders</th>
+			</tr>	
+			<tr>
+				<td style="width:425px;">
+					<ul class= 'menu' style= "position: relative;background-color: #fefefe;border: 0px;box-shadow: 0 0 0; -web-kit-box-shadow: 0 0 0;">	
+						<!-- <li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","225px", "20px");'>Public Feeders</a></p></li> -->
+						<div id="pubFeeders">
+							<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
+								{% for feeder in publicFeeders %}
+									{% if feeder.name != feederName %}
+										<li>
+										<a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}", "public")'>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										<strong>{{ feeder.name }}</strong> from
+										<br>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										&#8220;{{ feeder.model }}&#8221;
+										</a>
+										</li>
+									{% endif %}
+								{% endfor %}
+							</div>
+						</div>
+					</ul>
+				</td>
+				<td style="width:425px;">
+					<ul class= 'menu' style= "position: relative;background-color: #fefefe;border: 0px;box-shadow: 0 0 0; -web-kit-box-shadow: 0 0 0;">	
+						<div id="myFeeders">
+							<div style="overflow-y:auto;overflow-x:auto;max-height:250px;">
+								{% for feeder in feeders %}
+									{% if feeder.name != feederName %}
+										<li>
+										<a href='#' onclick='loadFeeder("{{ feeder.name }}", "{{ feeder.model }}", "{{ owner }}")'>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										Model &nbsp; &#8220;{{ feeder.model }}&#8221;
+										<br>
+										&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+										Feeder <strong>{{ feeder.name }}</strong>
+										</a>
+										</li>
+									{% endif %}
+								{% endfor %}
+							</div>
+						</div>
+					</ul>
+				</td>
+			</tr>
+		</table>
+		<a href="#" onclick='closeModal("loadModal");' style="text-align:center;font-size:12pt;display: block;color:black;">Cancel</a>
 	</div>
 </div>
 <div id= 'findModal' class= 'modal'>
-	<div class="modalContent" id='findModalContent' style="width:35%;">
+	<div class="modalContent" id='findModalContent' style='width:200px;'>
 	<table class= 'importOptions' style='padding:4px;word-wrap:break-word;'>
 		<tr>
 			<td>Term</td>
 			<td><input id='searchTerm' type='text'></td>
 		</tr>
 		<tr>
-			<td><button style="width:100%;" onclick='backButton()'>Back</button></td>
+			<td><button style="width:75px;" onclick='backButton()'>Back</button></td>
 			<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
 		</tr>
 		<tr>
-			<td><button style="width:100%;" onclick='findPrevious()'>Previous</button></td>
-			<td><button style="width:100%;" onclick='findNext()'>Next</button></td>
+			<td><button style="width:75px;" onclick='findPrevious()'>Previous</button></td>
+			<td><button style="width:75px;" onclick='findNext()'>Next</button></td>
 		</tr>
 		<tr>
-			<td><button style="width:100%; "onclick='closeModal("findModal")' ">Cancel</button></td>
+			<td><button style="width:75px; "onclick='closeModal("findModal")' ">Cancel</button></td>
 		</tr>
 	</table>
 	</div>
 </div>
 <div id = "layoutModal" class = 'modal'>
-	<div class = "modalContent" id = 'layoutModalContent'>
+	<div class = "modalContent" id = 'layoutModalContent' style='width:200px;'>
 			<table class= 'importOptions' style='padding:4px;word-wrap:break-word'>
 			<tr>
 				<td>GraphNodes</td>
@@ -528,8 +541,8 @@
 			<td><input id='chargeBox' type='text'></td>
 				</tr>
 				<tr>
-			<td style='padding-top:10px'><button style="width:100%;"onclick='closeModal("layoutModal")' ">Cancel</button></td>
-			<td style='padding-top:10px'><button style="width:100%;" onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
+			<td style='padding-top:10px'><button onclick='closeModal("layoutModal")' ">Cancel</button></td>
+			<td style='padding-top:10px'><button onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
 				</tr>
 		</table>
 	</div>
@@ -707,7 +720,7 @@ d3.json(apiAddress, function (json) {
 
 function showProgress(){
 	pinAll()
-	showProgressDialog('Loading Feeder', 'loading');
+	showProgressDialog('spinner','Loading Feeder', 'loading');
 	checkScadaCal()
 	checkConv()
 	
@@ -721,9 +734,6 @@ function checkScadaCal(){
 		if (data.exists == true) {
 			getScadaLoadshapes()
 		}
-		else {
-			console.log('calibration is complete')
-		}
 	})
 }
 
@@ -733,11 +743,8 @@ function checkConv(){
 		url: "/checkConversion/" + modelName
 	}).done(function (data) {
 		if (data.exists == true) {
-			showProgressDialog('Converting feeder','conversion');
+			showProgressDialog('spinner','Converting feeder','conversion');
 			checkConversion()
-		}
-		else {
-			console.log('conversion is complete')
 		}
 	})
 }
@@ -749,7 +756,6 @@ function checkConversion() {
 			$.ajax({
 				url: "/checkConversion/" + modelName
 			}).done(function (data) {
-				console.log(data)
 				if (data.exists) {
 					conversionStatus = 'converting'
 				}
@@ -772,7 +778,6 @@ function checkConversion() {
 				}
 			})
 			if (conversionStatus == "done"){
-				console.log('conversion done')
 				savePoster("{{ feederName }}", "{{ modelName }}", "{{ owner }}");
 				alert("Conversion complete.")
 				window.location.reload();
@@ -782,85 +787,72 @@ function checkConversion() {
 		}(), 5000);
 }
 
-function showProgressDialog(dialogMessage, cancelType) {
+function showProgressDialog(progressType, dialogMessage, cancelType) {
 	// Make the elements.
-	// If cancel type is none show the spinner
-	if (cancelType != 'none'){
 	background = document.createElement('div')
 	background.id = 'progressBackground'
 	background.style.zIndex = '9998'
 	progContent = document.createElement('div')
 	progContent.id = 'progressContent'
 	progContent.style.zIndex = '9999'
-	spinner = document.createElement('img')
-	spinner.src = '/static/spinner.gif'
 	progressText = document.createElement('h2')
 	progressText.id = 'progressText'
 	progressText.textContent = dialogMessage
-	// Insert the elements.
 	document.body.appendChild(background)
 	document.body.appendChild(progContent)
-	progContent.appendChild(spinner)
-	progContent.appendChild(progressText)
-	var cancelBtn = document.createElement("BUTTON");
-	var t = document.createTextNode("cancel");
-	cancelBtn.style.marginTop = '5px';
-	cancelBtn.style.background= 'crimson'
-	cancelBtn.appendChild(t);
-	cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
-	cancelBtn.onclick = function() {
-		if (cancelType == 'conversion'){
-			if (confirm('Are you sure you want to cancel the conversion?')) {
-				console.log('Conversion cancelled.')
-				newfeeder.submit();
-			}
-		}
-		else if(cancelType == 'calibrating'){
-			if (confirm('Are you sure you want to cancel the calibration?')){
-				console.log('calibration canceled')
-				var modelName = gebi("modelNameHeader").innerHTML
-				$.ajax({
-						url: "/cancelScadaCalibration/" + modelName
-					}).done(function (data) {
-						console.log(data)
-					})
-				removeProgressDialog()
-			}
-		}
-		else if(cancelType == 'none'){
-			cancelBtn.style.display = 'none'
-		}
-		else
-		{
-			console.log("Loading cancel button.")
-			// stop rendering feeder, show file menu, etc.y
-			removeProgressDialog()
-		}
-	};
+	// If progressType type is spinner create and show the spinner
+	if (progressType == 'spinner'){
+		spinner = document.createElement('img')
+		spinner.src = '/static/spinner.gif'
+		progContent.appendChild(spinner)
+		progContent.appendChild(progressText)
+		var cancelBtn = document.createElement("BUTTON");
+		var t = document.createTextNode("cancel");
+		cancelBtn.style.marginTop = '5px';
+		cancelBtn.style.background= 'crimson'
+		cancelBtn.appendChild(t);
 		progContent.appendChild(cancelBtn);
 	}
-	else{
-		// Else show progress loading bar, for solar and static loads to houses
-		background = document.createElement('div')
-		background.id = 'progressBackground'
-		background.style.zIndex = '9998'
-		progContent = document.createElement('div')
-		progContent.id = 'progressContent'
-		progContent.style.zIndex = '9999'
+	// If progressType type is bar create and show the bar
+	else if (progressType == 'bar'){
 		progBar = document.createElement('div')
 		progBar.id = 'progBar'
 		progColor = document.createElement('div')
 		progColor.id = 'progColor'
-		progressText = document.createElement('h2')
-		progressText.id = 'progressText'
-		progressText.textContent = dialogMessage
-		// Insert the elements.
-		document.body.appendChild(background)
-		document.body.appendChild(progContent)
 		progBar.appendChild(progColor)
 		progContent.appendChild(progBar)
 		progContent.appendChild(progressText)
 	}
+	// If cancelType is not none, add an onclick even to the cancel button to cancel the calibration or conversion
+	if (cancelType != 'none'){
+		cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
+		cancelBtn.onclick = function() {
+			if (cancelType == 'conversion'){
+				if (confirm('Are you sure you want to cancel the conversion?')) {
+					newfeeder.submit();
+				}
+			}
+			else if(cancelType == 'calibrating'){
+				if (confirm('Are you sure you want to cancel the calibration?')){
+					var modelName = gebi("modelNameHeader").innerHTML
+					$.ajax({
+							url: "/cancelScadaCalibration/" + modelName
+						}).done(function (data) {
+							
+						})
+					removeProgressDialog()
+				}
+			}
+			else if(cancelType == 'none'){
+				cancelBtn.style.display = 'none'
+			}
+			else
+			{
+				// stop rendering feeder, show file menu, etc.y
+				removeProgressDialog()
+			}
+		};
+	}	
 }
 
 function removeProgressDialog() {
@@ -872,7 +864,7 @@ function removeProgressDialog() {
 
 function importFiles(convMethod, feederNameID){
 	gebi(convMethod).submit();
-	showProgressDialog('Converting feeder','conversion');
+	showProgressDialog('spinner','Converting feeder','conversion');
 	setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
 }
 
@@ -983,11 +975,9 @@ function startConversion(elementName, nextAction) {
 	}
 }
 function showModal(element){
-	console.log('show')
 	gebi(element).style.display = 'block'
 }
 function closeModal(element){
-	console.log('close')
 	gebi(element).style.display = 'none'
 }
 function showDiv(element,maxHeight, marginBot){
@@ -1757,13 +1747,14 @@ function newChildAtLocation(component, treeIndex) {
  * Handler function of adding static load to houses.
  */
 function getScadaLoadshapes(){
-	showProgressDialog('Calibrating Feeder', 'calibrating')
+	showProgressDialog('spinner','Calibrating Feeder', 'calibrating')
  	closeDiv("scadaLoadshapes")
  	var modelName = '{{modelName}}'
  	window.setInterval(function checkAPI(){
 					$.ajax({
 						url: "/checkScadaCalibration/" + modelName
 					}).done(function (data) {
+						console.log(data)
 						if (data.exists == true) {
 						}
 						else if(data.exists == false){
@@ -1912,7 +1903,7 @@ function staticLoadsToHouses() {
 	if (noTriplexNode()) {
 		alert('TRIPLEX NODES have been hidden by the layout, please unfold them first.')
 	} else {
-		showProgressDialog('Please wait. Houses are being generated.','none')
+		showProgressDialog('bar','Please wait. Houses are being generated.','none')
 		// set interval function to run replaceAllHouses every 10 ms, if it is running, will put one request in the queue.
 		inter = setInterval(replaceAllHouses, 10)
 	}
@@ -2038,7 +2029,7 @@ function solarAdding() {
 	if (noMeter()) {
 		alert('Meters have been hidden in the layout. Please unfold everything before adding solar.')
 	} else {
-		showProgressDialog('Please wait. Solar is being generated.','none')
+		showProgressDialog('bar','Please wait. Solar is being generated.','none')
 		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
 		// setTimeout(walkAndAddSolar, 1000);
 		inter2 = setInterval(walkAndAddSolar, 10)

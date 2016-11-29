@@ -599,13 +599,17 @@ def checkScadaCalibration(modelName):
 def cancelScadaCalibration(modelName):
 	owner = User.cu()
 	path = "data/Model/" + owner + "/" + modelName
+	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/error.txt"):
+		os.remove("data/Model/" + owner + "/" +  modelName + "/error.txt")
+	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/calibration.csv"):
+		os.remove("data/Model/" + owner + "/" +  modelName + "/calibration.csv")
 	#Read PID file, kill process with that PID number, delete calibration file, delete PID.txt
 	with open(path+"/CPID.txt") as pidFile:
 		pidNum = int(pidFile.read())
 	os.kill(pidNum, signal.SIGTERM)
 	os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
 	shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
-	return ('',204)
+	return ('cancel',204)
 
 # TODO: Check if rename mdb files worked
 @app.route("/cymeImport/<owner>", methods=["POST"])
