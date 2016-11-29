@@ -1,0 +1,246 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<link href="{{pathPrefix}}/static/models.css" type="text/css" rel="stylesheet"/>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<!-- Global Funcs Import -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/models.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<script type="text/javascript">
+		var meterIDS = [];
+		for (meterID in allOutputData.anomalyMeters){
+			meterIDS.push(String(meterID));
+		}
+	</script>
+</head>
+<body onload="init()">
+	<div id="title">
+		<div id="logoBox"><a href='/'>&#10059;</a></div>
+		<p id="titleText">Anomaly Detection Model</p>
+	</div>
+	<p class="reportTitle">Model Inputs</p>
+	<div id="input" class="content">
+		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %} {% if modelStatus == "preRun" %} onsubmit="event.preventDefault(); return checkModelName();" {% endif %} action="/runModel/"{% endif %} method="post">
+			<div class="shortInput">
+				<label>Model Type <a href='https://github.com/dpinney/omf/wiki/Models-~-pvWatts' target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="Anomaly Detection" readonly/>
+			</div>
+			{% if quickRender %}
+			<div class="shortInput">
+				<label>Email Address</label>
+				<input type="email" id="quickRunEmail" name="quickRunEmail" required="required">
+			</div>
+			{% else %}
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			{% endif %}
+			{% if not quickRender %}
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			{% endif %}
+			<div class="shortInput runningInline postRunInline ">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="shortInput postRunInline">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<div class="wideInput">
+				<p class="inputSectionHeader">Trend Inputs</p>
+			</div>
+			<hr>
+			<div class="shortInput">
+				<label class="tooltip">Deviation Length (hours)<span class="classic"</span></label>
+				<input type="text" id="MinDetectionRunTime" name="MinDetectionRunTime" pattern="^\d+\.?\d*$" required="required">
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Min Energy Deviation (%)<span class="classic">Detect deviations of at least this percentage from the average. For example, if this is 95, the software will detect time intervals where meter reads are 1.95 * the average consumption (or more).</span></label>
+				<input type="text" id="MinDeviationFromAverage" name="MinDeviationFromAverage" value="95" pattern="^\d+\.?\d*$" required="required"/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">AMI Data (.csv file)<span class="classic">Please see the documentation at the help link for the required format</span></label>
+				<script>var fileName=true;</script>
+				<input type="file" id="demandCurveFile" name="demandCurveFile" accept=".csv" onchange="handle_files(this.files)">
+				<input id="demandCurve" name="demandCurve" type="hidden">
+				{% if allInputData.fileName|string() is defined %}
+					<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+					<div id="fileExists" style="overflow-x:hidden"><label for="demandCurveFile" id="demandCurveFileName"></label></div>
+					<script>
+						var FileName = allInputData.fileName;
+						document.getElementById('demandCurveFileName').innerHTML = FileName;
+					</script>
+					<style type="text/css">
+					 #fileExists {
+					   width:175px;
+					   height:25px;
+					   display:fixed;
+					   margin-top:-28px;
+					   margin-left:110px;
+					   background-color:#d3d3d3;
+					   font-size:0.8em;
+					 }
+					input[type='file'] {
+					  color: transparent;
+					}
+					</style>
+				{% endif %}
+				<script>
+					// Make sure the file is required on prerun.
+					if (modelStatus == "preRun") {gebi('demandCurveFile').setAttribute('required', 'required')}
+					else {}
+					// File handler function.
+					function handle_files(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("demandCurve").value = reader.result
+							var FileName = gebi("demandCurveFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('demandCurveFileName').innerHTML = FileName;
+							gebi("fileName").value = FileName;
+						}
+					}
+
+				</script>
+			</div>
+			<div class="wideInput" style="text-align:right">
+				{% if not quickRender %}
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				{% endif %}
+				<button id="runButton" type="submit" class="preRun">Run Model</button>
+				<button id="rerunButton" type="submit" class="stoppedInline postRunInline">Re-Run Model</button>
+			</div>
+		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+	<div id ="stopIndicator" class="content stopped">
+		Model cancelled or encountered an error. Please change inputs and re-run.
+		<pre id='errorText'></pre>
+		<script type="text/javascript">if (typeof(allInputData.stderr) !== 'undefined') {gebi('errorText').innerHTML = '\nFULL ERROR TEXT FOLLOWS\n' + allInputData.stderr}</script>
+	</div>
+	<div id="output">
+		<script type="text/javascript">
+			// Global Highcharts settings.
+			Highcharts.setOptions({global:{useUTC:true}})
+		</script>
+		<p class="reportTitle postRun">Consumption Anomalies</p>
+		<div id="anamoliesreport" class="tightContent postRun" style="max-height:300px;overflow-y:auto;margin-bottom:5px;">
+			<style>
+				table{width:980px; font-size:16; padding:5px;}
+				td {padding:2px;}
+			</style>
+			<table id="anamoliesTable">
+				<thead>
+					<th>Meter ID #</th>
+					<th>Anomaly Start Date-Time</th>
+					<th>Duration (hours)</th>
+					<th>Max Deviation from Avg (%)</th>
+				</thead>
+			</table>
+			<script>
+				function insertMetric(tableId, name, vector, type) {
+					// Add a vector to a table as a row.
+					table = gebi(tableId)
+					newRow = table.insertRow()
+					newRow.insertCell().innerHTML = name
+					for (i=0; i<vector.length; i++) {
+						if (vector[i] == -1) {
+							cell = newRow.insertCell()
+							cell.innerHTML = "None"
+						}
+						else{
+							cell = newRow.insertCell()
+							if (type=='numbers'){cell.innerHTML = delimitNumbers(vector[i].toFixed(2))}
+							else {cell.innerHTML = vector[i]}
+						}
+					}
+				}
+				for (row = 0; row < allOutputData.outputDeviateds.length; row++) {
+					var meterID = allOutputData['outputDeviateds'][row][0];
+					insertMetric("anamoliesTable", allOutputData['outputDeviateds'][row][0], [allOutputData['outputDeviateds'][row][1],allOutputData['outputDeviateds'][row][2],allOutputData['outputDeviateds'][row][3]],'string')
+				}
+			</script>
+		</div>
+		<p class="reportTitle postRun">Time Series Charts of Anomalies</p>
+		<div id="irradianceReport" class="tightContent postRun">
+			<div id="meterIDSelector" style="width:100px;display:inline-block;">
+				<select onchange="makeMeterChart();" name="meter" id="meter" style="width:100px;font-size:10pt;">			
+					<script type="text/javascript">
+						for (var i=0; i < meterIDS.length; i++){$('#meter').append("<option style='font-size:10pt;'>"+meterIDS[i]+"</option>")}
+					</script>
+				</select>
+			</div>
+			<div id="meterChart"></div>
+			<script type="text/javascript">
+				makeMeterChart(allOutputData.anomalyMeters[0]);
+				function makeMeterChart(){
+					// Get data from output.
+					var sel = document.getElementById('meter').value;
+					var data = [];
+					for (i = 0; i < allOutputData.anomalyMeters[sel]['time'].length; i++) {
+						var datetime = Date.parse(allOutputData.anomalyMeters[sel]['time'][i]);
+						var energy = allOutputData.anomalyMeters[sel]['energy'][i];
+						data.push([datetime,energy]);
+					}			
+					// Generate chart.
+					var chart = new Highcharts.Chart({
+						"credits":{"enabled":false},
+						"plotOptions":{
+							"series":{
+								"animation":false,
+								"shadow":false},
+							"line":{"marker":{"enabled":true}}},
+						"xAxis":{"text":"Time", "maxZoom":108000000,
+							"tickColor":"gray",
+							"type":"datetime",
+							"lineColor":"gray"},
+						"yAxis":{
+							"title":{"text":"Energy Consumption (kWh)","style":{"color":"gray"}},
+							"plotLines":[
+								{"color": "green",
+								"dashStyle": "ShortDash",
+								"width": 2,
+								"label":{"text":"Average: " + allOutputData.anomalyMeters[sel]['avg'] + " kWh", "align":"right","y":-5,"x":-775, "style":{"color":"green", "fontsize":"12px"}},
+								"value": allOutputData.anomalyMeters[sel]['avg'],"zIndex": 10}
+								]
+						},
+						"title":{"text":null},
+						"series":[
+							{"name":"Energy Consumption","color":"blue","data":data}],
+						"chart":{"marginBottom":35,"zoomType":"x","renderTo":"meterChart","type":"line","marginRight":20, "height":500,"width":1000},
+						"tooltip":{
+							'backgroundColor': 'white',
+							'borderColor': 'gray',
+							'borderRadius': 10,
+							'borderWidth': 3
+						},
+						"legend":false})
+					// Reset window location.
+					document.getElementById("meterChart").scrollIntoView()
+				}
+			</script>
+		</div>
+	</div>
+</body>
