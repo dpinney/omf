@@ -1,6 +1,15 @@
 <!-- TODO:
-Pick up at delObj.
-Remove name references to tree.
+	OOO svgClick() Check what selection.push does on each new click.
+	OOO tableSave() test the fbus/tbus code functionality.
+	OOO deleteObj() Should remove a node. Check with David if this is normal behavior.
+	OOO selectionTable() Alt-Multi selection doesn't work.
+	OOO newNode(): Lat/Lon conversion from mouse clicks.
+	OOO newNode(): Bug with variable scope. HELP!			
+	OOO newNode(): Better defaults.
+	OOO newLink() Fix newLink() multi selector and lat/lon.			
+	OOO dragLocate() How does this work.
+	OOO Remove name references to tree and feeder.
+	OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated too.
 -->
 
 <!DOCTYPE html>
@@ -249,12 +258,12 @@ Remove name references to tree.
 				tNum = testFeeder.branch[num][String(parseInt(num)+1)]['tbus']
 				fromOb = testFeeder.bus[parseInt(fNum)-1][fNum]
 				toOb = testFeeder.bus[parseInt(tNum)-1][tNum]
-				addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+num,"branch" + ' p' + phaseCount(anOb))
+				addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+String(parseInt(num)+1),"branch" + ' p' + phaseCount(anOb))
 			}
 			// Add circles after all lines
 			for (num in testFeeder.bus) {
 				anOb = testFeeder.bus[num][String(parseInt(num)+1)]
-				addCircle(anOb['longitude'],anOb['latitude'],2,"bus_"+num,"bus")
+				addCircle(anOb['longitude'],anOb['latitude'],2,"bus_"+String(parseInt(num)+1),"bus")
 			}
 		}
 		var previousTarget = {} // Global to keep track of previous selection target
@@ -269,6 +278,8 @@ Remove name references to tree.
 			upY = event.pageY
 		}
 		function svgClick(event) {
+			console.log("debug: screen ", event.screenX, event.screenY, "page ", event.pageX, event.pageY)
+			var yloc = event.screenY			
 			if ( (downX!==upX) || (downY!==upY) ) {
 				return
 			}
@@ -282,10 +293,11 @@ Remove name references to tree.
 			if ( event.target.id != 'svgContainer') {
 			 var clickType = event.target.id.split("_")[0]
 			 var clickID = event.target.id.split("_")[1]
-				if (selection.indexOf(testFeeder[clickType][parseInt(clickID)]) === -1){
+			 console.log('clicked ', clickType, ' with id', clickID)
+				if (selection.indexOf(testFeeder[clickType][parseInt(clickID)-1]) === -1){
 					tableDestroy()
-					tableCreate(testFeeder[clickType][parseInt(clickID)][String(parseInt(clickID)+1)])
-					selection.push(event.target) //TODO: Check this code.
+					tableCreate(testFeeder[clickType][parseInt(clickID)-1][clickID])
+					selection.push(event.target)
 				}
 			}
 			else {
@@ -293,12 +305,13 @@ Remove name references to tree.
 			}
 			// ALT-SELECTION
 			if (selection.length >= 2) {
+				console.log('selected more than one element')
 				tableDestroy()
 				selectionTable()
 			}
 			previousTarget = event.target
 		}
-		function phaseCount(p) { //TODO: Add this to newly created branches.
+		function phaseCount(p) {
 			total = 0
 			if ("rateA" in p){
 				if (parseInt(p["rateA"]) > 0){total++}
@@ -374,12 +387,12 @@ Remove name references to tree.
 			var clickType = previousTarget.id.split("_")[0]
 			var clickID = previousTarget.id.split("_")[1]
 			for (key in toJson) {
-				testFeeder[clickType][parseInt(clickID)][String(parseInt(clickID)+1)][key] = toJson[key]
+				testFeeder[clickType][parseInt(clickID)-1][clickID][key] = toJson[key]
 			}
 			// Delete properties from tree
-			for (key in testFeeder[clickType][parseInt(clickID)][String(parseInt(clickID)+1)]) {
+			for (key in testFeeder[clickType][parseInt(clickID)-1][clickID]) {
 				if (!toJson.hasOwnProperty(key)) {
-					delete testFeeder[clickType][parseInt(clickID)][String(parseInt(clickID)+1)][key]
+					delete testFeeder[clickType][parseInt(clickID)-1][clickID][key]
 				}
 			}
 			// Update Feeder
@@ -388,14 +401,14 @@ Remove name references to tree.
 				previousTarget.setAttribute('cx', toJson['longitude'])
 				previousTarget.setAttribute('cy', toJson['latitude'])
 				// Update Line
-				for (i = 0, limit = Object.keys(testFeeder.branch).length; i < limit; i++) { //TODO: Test this fbus/tbus code functionality.
+				for (i = 0, limit = (testFeeder.branch).length; i < limit; i++) {
 					if (parseInt(testFeeder.branch[i][String(i+1)]['fbus']) === parseInt(clickID)) {
-						document.getElementById(i).setAttribute('x1', toJson['longitude'])
-						document.getElementById(i).setAttribute('y1', toJson['latitude'])
+						document.getElementById('branch_'+String(i+1)).setAttribute('x1', toJson['longitude'])
+						document.getElementById('branch_'+String(i+1)).setAttribute('y1', toJson['latitude'])
 					}
 					else if (parseInt(testFeeder.branch[i][String(i+1)]['tbus']) === parseInt(clickID)) {
-						document.getElementById(i).setAttribute('x2', toJson['longitude'])
-						document.getElementById(i).setAttribute('y2', toJson['latitude'])
+						document.getElementById('branch_'+String(i+1)).setAttribute('x2', toJson['longitude'])
+						document.getElementById('branch_'+String(i+1)).setAttribute('y2', toJson['latitude'])
 					}
 				}
 			}
@@ -414,24 +427,23 @@ Remove name references to tree.
 			// Delete Lines
 			if (clickType === 'branch') {
 				previousTarget.remove()
-				testFeeder[clickType][parseInt(clickID)][String(parseInt(clickID)+1)] = {}
+				testFeeder[clickType][parseInt(clickID)-1][clickID] = {}
 			}
 			// Delete Circles
 			if (clickType === 'bus') {
 				// Check for connected lines
 				lines = 0
-				for (i = 0, limit = Object.keys(testFeeder.branch).length; i < limit; i++) {
+				for (i = 0, limit = (testFeeder.branch).length; i < limit; i++) {
 					if ( (parseInt(testFeeder.branch[i][String(i+1)]['fbus']) === parseInt(clickID))
 						|| (parseInt(testFeeder.branch[i][String(i+1)]['tbus']) === parseInt(clickID)) ) {
 						lines++
 					}
 				}
 				if (lines > 0) {
-					alert('Cannot delete circles with lines still connected') //TODO: This is bugged.
+					alert('Cannot delete circles with lines still connected')
 				}
 				else {
 					previousTarget.remove()
-					// TODO: Check with David if this is normal behavior.
 				}
 			}
 			tableDestroy()
@@ -496,65 +508,89 @@ Remove name references to tree.
 			// Put the object in.
 			for (i = 0; i < selection.length; i++) {
 				row = document.createElement('tr')
-				row.innerHTML = '<td>' + testFeeder.tree[selection[i].id].name + '</td>'
+				row.innerHTML = '<td>' + selection[i].id + '</td>'
 				tbl.appendChild(row)
 			}
 			tabScroll.appendChild(tbl)
 		}
+		var newTreeId = '';
+		var clickTarget = '';		
 		function newNode() {
-			var newTreeId = Object.keys(testFeeder.tree).length
-			var newNode = {
+			console.log((testFeeder.bus).length)
+			newTreeId = (testFeeder.bus).length
+			// var newTreeId = (testFeeder.bus).length+1
+			var newNode = {}
+			newNode[newTreeId] = {
 				longitude: 0,
 				latitude: 0,
-				name: 'newNode' + String(newTreeId),
-				nominal_voltage: 1000,
-				object: 'node',
-				phases: 'A'
+				bus_i: newTreeId,
+				type: 1,
+				Pd: 10.6,
+				Qd: 1.9,
+				Gs: 0.0,
+				Bs: 0.0,
+				area: 3.0,
+				Vm: 1.0,
+				Va: 0.0,
+				baseKV: 135.0,
+				zone: 1.0,
+				Vmax: 1.05,
+				Vmin: 0.95				
 			}
 			// Save to tree
-			testFeeder.tree[newTreeId] = newNode
-			console.log('newNode:', newTreeId, testFeeder.tree[newTreeId])
+			testFeeder.bus[newTreeId-1] = newNode;
+			// testFeeder.tree[newTreeId] = newNode
+			// console.log('newNode:', newTreeId, testFeeder.tree[newTreeId])
 			// Click location to add
-			var clickTarget = document.getElementById('svgContainer')
+			// var clickTarget = document.getElementById('svgContainer')
+			clickTarget = document.getElementById('svgContainer')
 			clickTarget.addEventListener('click', clickLocate, false)
 		}
 		function clickLocate() {
 			var xloc = event.pageX
-			var yloc = event.pageY
-			testFeeder.tree[newTreeId].longitude = xloc
-			testFeeder.tree[newTreeId].latitude = yloc
+			var yloc = event.pageY	
+			// var newTreeId = (testFeeder.bus).length
+			testFeeder.bus[newTreeId-1][newTreeId].longitude = xloc
+			testFeeder.bus[newTreeId-1][newTreeId].latitude = yloc
 			// Draw on svg
-			x = testFeeder.tree[newTreeId].longitude
-			y = testFeeder.tree[newTreeId].latitude
+			x = testFeeder.bus[newTreeId-1][newTreeId].longitude
+			y = testFeeder.bus[newTreeId-1][newTreeId].latitude
 			r = 2
-			id = newTreeId
-			myClass = testFeeder.tree[newTreeId].object
-			addCircle(x,y,r,id,myClass)
+			console.log('adding circle', x,y,r,newTreeId)
+			addCircle(x,y,r,"bus_"+String(newTreeId),"bus")
 			clickTarget.removeEventListener('click', clickLocate, false)
-			console.log('clicked')
+			console.log('added and clicked')
 		}
 		function newLink() {
 			if (selection.length === 2) {
-				var newTreeId = Object.keys(testFeeder.tree).length
-				var newLink = {
-					name: 'newLink' + String(newTreeId),
-					object: 'overhead_line',
-					phases: 'A',
-					configuration: 'configuration',
-					from: testFeeder.tree[selection[0].id].name,
-					to: testFeeder.tree[selection[1].id].name
+				var newTreeId = (testFeeder.branch).length
+				var fBus = parseInt(selection[0].id.split("_")[1])
+				var tBus = parseInt(selection[1].id.split("_")[1])
+				var newLink = {}
+				newLink[newTreeId] = {
+					r: 0.02,
+					x: 0.06,
+					b: 0.01,
+					rateA: 32.0,
+					rateB: 32.0,
+					rateC: 32.0,
+					ratio: 0.0,
+					angle: 0.0,
+					status: 1.0,
+					angmin: -360.0,
+					angmax: 360.0
 				}
+				newLink[newTreeId]['fBus'] = fBus;
+				newLink[newTreeId]['tBus'] = tBus;
 				// Save to tree
-				testFeeder.tree[newTreeId] = newLink
-				console.log('newLink:', newTreeId, testFeeder.tree[newTreeId])
+				testFeeder.branch[newTreeId-1] = newLink;
+				console.log('newLink:', newTreeId, testFeeder.branch[newTreeId-1])
 				// Draw on svg
-				x1 = testFeeder.tree[selection[0].id].longitude
-				y1 = testFeeder.tree[selection[0].id].latitude
-				x2 = testFeeder.tree[selection[1].id].longitude
-				y2 = testFeeder.tree[selection[1].id].latitude
-				id = newTreeId
-				myClass = testFeeder.tree[newTreeId].object
-				addLine(x1,y1,x2,y2,id,myClass)
+				x1 = testFeeder.bus[fbus-1][String(fBus)].longitude
+				y1 = testFeeder.bus[fbus-1][String(fBus)].latitude
+				x2 = testFeeder.bus[tbus-1][String(tBus)].longitude
+				y2 = testFeeder.bus[tbus-1][String(tBus)].latitude
+				addLine(x1,y1,x2,y2,newTreeId,"branch")
 			}
 		}
 		function dragMode() {
@@ -565,8 +601,10 @@ Remove name references to tree.
 		function dragLocate() {
 			var xloc = event.pageX
 			var yloc = event.pageY
-			testFeeder.tree[previousTarget.id].longitude = xloc
-			testFeeder.tree[previousTarget.id].latitude = yloc
+			var clickType = previousTarget.id.split("_")[0]
+			var clickID = previousTarget.id.split("_")[1]			
+			testFeeder.[clickType][parseInt(clickID)-1][clickID].longitude = xloc
+			testFeeder.[clickType][parseInt(clickID)-1][clickID].latitude = yloc
 			previousTarget.setAttribute('cx', xloc)
 			previousTarget.setAttribute('cy', yloc)
 		}

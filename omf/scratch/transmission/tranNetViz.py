@@ -49,7 +49,6 @@ def main():
 					obName = item.get('bus_i')
 					thisPos = pos.get(obName, None)
 					if thisPos != None:
-						print "path: %s %s"%(compType,idnum)
 						thisNet[compType][int(float(idnum))-1][idnum]['longitude'] = thisPos[0]
 						thisNet[compType][int(float(idnum))-1][idnum]['latitude'] = thisPos[1]
 
