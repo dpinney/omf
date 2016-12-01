@@ -1,15 +1,15 @@
 <!-- TODO:
-	OOO svgClick() Check what selection.push does on each new click.
-	OOO tableSave() test the fbus/tbus code functionality.
-	OOO deleteObj() Should remove a node. Check with David if this is normal behavior.
-	OOO selectionTable() Alt-Multi selection doesn't work.
-	OOO newNode(): Lat/Lon conversion from mouse clicks.
-	OOO newNode(): Bug with variable scope. HELP!			
-	OOO newNode(): Better defaults.
-	OOO newLink() Fix newLink() multi selector and lat/lon.			
-	OOO dragLocate() How does this work.
-	OOO Remove name references to tree and feeder.
-	OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated too.
+OOO svgClick() Check what selection.push does on each new click.
+OOO tableSave() test the fbus/tbus code functionality.
+OOO deleteObj() Should remove a node. Check with David if this is normal behavior.
+OOO selectionTable() Alt-Multi selection doesn't work.
+OOO newNode(): Lat/Lon conversion from mouse clicks.
+OOO newNode(): Bug with variable scope. HELP!			
+OOO newNode(): Better defaults.
+OOO newLink() Fix newLink() multi selector and lat/lon.			
+OOO dragLocate() How does this work. It's code hangs editor.
+OOO Remove name references to tree and feeder.
+OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated too.
 -->
 
 <!DOCTYPE html>
@@ -264,7 +264,7 @@
 			for (num in testFeeder.bus) {
 				anOb = testFeeder.bus[num][String(parseInt(num)+1)]
 				addCircle(anOb['longitude'],anOb['latitude'],2,"bus_"+String(parseInt(num)+1),"bus")
-			}
+ 			}
 		}
 		var previousTarget = {} // Global to keep track of previous selection target
 		var selection = [] // Global to keep track of multiple alt-selections
@@ -278,8 +278,7 @@
 			upY = event.pageY
 		}
 		function svgClick(event) {
-			console.log("debug: screen ", event.screenX, event.screenY, "page ", event.pageX, event.pageY)
-			var yloc = event.screenY			
+			console.log("debug: screen ", event.screenX, event.screenY, "page ", event.pageX, event.pageY)				
 			if ( (downX!==upX) || (downY!==upY) ) {
 				return
 			}
@@ -405,11 +404,11 @@
 					if (parseInt(testFeeder.branch[i][String(i+1)]['fbus']) === parseInt(clickID)) {
 						document.getElementById('branch_'+String(i+1)).setAttribute('x1', toJson['longitude'])
 						document.getElementById('branch_'+String(i+1)).setAttribute('y1', toJson['latitude'])
-					}
+ 					}
 					else if (parseInt(testFeeder.branch[i][String(i+1)]['tbus']) === parseInt(clickID)) {
 						document.getElementById('branch_'+String(i+1)).setAttribute('x2', toJson['longitude'])
 						document.getElementById('branch_'+String(i+1)).setAttribute('y2', toJson['latitude'])
-					}
+ 					}
 				}
 			}
 			tableDestroy()
@@ -514,11 +513,10 @@
 			tabScroll.appendChild(tbl)
 		}
 		var newTreeId = '';
-		var clickTarget = '';		
+		var clickTarget = '';			
 		function newNode() {
 			console.log((testFeeder.bus).length)
 			newTreeId = (testFeeder.bus).length
-			// var newTreeId = (testFeeder.bus).length+1
 			var newNode = {}
 			newNode[newTreeId] = {
 				longitude: 0,
@@ -536,20 +534,16 @@
 				zone: 1.0,
 				Vmax: 1.05,
 				Vmin: 0.95				
-			}
+ 			}
 			// Save to tree
 			testFeeder.bus[newTreeId-1] = newNode;
-			// testFeeder.tree[newTreeId] = newNode
-			// console.log('newNode:', newTreeId, testFeeder.tree[newTreeId])
 			// Click location to add
-			// var clickTarget = document.getElementById('svgContainer')
 			clickTarget = document.getElementById('svgContainer')
 			clickTarget.addEventListener('click', clickLocate, false)
 		}
 		function clickLocate() {
 			var xloc = event.pageX
-			var yloc = event.pageY	
-			// var newTreeId = (testFeeder.bus).length
+			var yloc = event.pageY
 			testFeeder.bus[newTreeId-1][newTreeId].longitude = xloc
 			testFeeder.bus[newTreeId-1][newTreeId].latitude = yloc
 			// Draw on svg
@@ -602,11 +596,14 @@
 			var xloc = event.pageX
 			var yloc = event.pageY
 			var clickType = previousTarget.id.split("_")[0]
-			var clickID = previousTarget.id.split("_")[1]			
-			testFeeder.[clickType][parseInt(clickID)-1][clickID].longitude = xloc
-			testFeeder.[clickType][parseInt(clickID)-1][clickID].latitude = yloc
+			var clickID = previousTarget.id.split("_")[1]
+			if (clickType === 'bus'){
+				console.log('dragLocate() disabled due to bug.')
+				// testFeeder.[clickType][parseInt(clickID)-1][clickID].longitude = xloc
+				// testFeeder.[clickType][parseInt(clickID)-1][clickID].latitude = yloc
+			}			
 			previousTarget.setAttribute('cx', xloc)
-			previousTarget.setAttribute('cy', yloc)
+			previousTarget.setAttribute('cy', yloc)	
 		}
 	</script>
 </head>
