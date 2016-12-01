@@ -4,9 +4,9 @@ OOO tableSave() test the fbus/tbus code functionality.
 OOO deleteObj() Should remove a node. Check with David if this is normal behavior.
 OOO selectionTable() Alt-Multi selection doesn't work.
 OOO newNode(): Lat/Lon conversion from mouse clicks.
-OOO newNode(): Bug with variable scope. HELP!			
+OOO newNode(): Bug with variable scope. HELP!
 OOO newNode(): Better defaults.
-OOO newLink() Fix newLink() multi selector and lat/lon.			
+OOO newLink() Fix newLink() multi selector and lat/lon.
 OOO dragLocate() How does this work. It's code hangs editor.
 OOO Remove name references to tree and feeder.
 OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated too.
@@ -176,24 +176,20 @@ OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated to
 			display:inline-block;}
 		button.pill:hover{background:transparent;}
 	</style>
-	<script type='text/javascript' src='svg-pan-zoom.js'></script>
-	<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder.js'></script> -->
-	<script id='feederLoadScript' type='text/javascript' src='./inData/omfMapping/Data for Testing/testFeeder Largest.js'></script>
-	<!-- <script id='feederLoadScript' type='text/javascript' src='./Data for Testing/testFeeder Norfork.js'></script> -->
 	<script type='text/javascript'>
+		// Globals
+		var previousTarget = {} // Global to keep track of previous selection target
+		var selection = [] // Global to keep track of multiple alt-selections
+		var downX, downY, upX, upY // Globals to keep track of mouse coordinates
+		var newTreeId = '';
+		var clickTarget = '';
+		// Functions
 		function saveSvg() {
 			// Add some critical information
 			alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
 			svg = document.getElementById('svgContainer').outerHTML
 			b64 = btoa(svg)
 			window.location = 'data:image/svg+xml;base64,\n' + b64
-		}
-		function saveJson() {
-			// WARNING! Performance is very bad because the JSON is enormous! This can hang your browser!
-			alert('We are redirecting you to a static version of the JSON that you can save as a .json file.')
-			modJson = JSON.stringify(testFeeder)
-			b64 = btoa(modJson)
-			window.location = 'data:text/json;base64,\n' + b64
 		}
 		function addCircle(x,y,r,id,myClass) {
 			svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
@@ -264,11 +260,8 @@ OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated to
 			for (num in testFeeder.bus) {
 				anOb = testFeeder.bus[num][String(parseInt(num)+1)]
 				addCircle(anOb['longitude'],anOb['latitude'],2,"bus_"+String(parseInt(num)+1),"bus")
- 			}
+			}
 		}
-		var previousTarget = {} // Global to keep track of previous selection target
-		var selection = [] // Global to keep track of multiple alt-selections
-		var downX, downY, upX, upY // Globals to keep track of mouse coordinates
 		function mouseDown(event) {
 			downX = event.pageX
 			downY = event.pageY
@@ -278,7 +271,7 @@ OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated to
 			upY = event.pageY
 		}
 		function svgClick(event) {
-			console.log("debug: screen ", event.screenX, event.screenY, "page ", event.pageX, event.pageY)				
+			console.log("debug: screen ", event.screenX, event.screenY, "page ", event.pageX, event.pageY)
 			if ( (downX!==upX) || (downY!==upY) ) {
 				return
 			}
@@ -404,11 +397,11 @@ OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated to
 					if (parseInt(testFeeder.branch[i][String(i+1)]['fbus']) === parseInt(clickID)) {
 						document.getElementById('branch_'+String(i+1)).setAttribute('x1', toJson['longitude'])
 						document.getElementById('branch_'+String(i+1)).setAttribute('y1', toJson['latitude'])
- 					}
+					}
 					else if (parseInt(testFeeder.branch[i][String(i+1)]['tbus']) === parseInt(clickID)) {
 						document.getElementById('branch_'+String(i+1)).setAttribute('x2', toJson['longitude'])
 						document.getElementById('branch_'+String(i+1)).setAttribute('y2', toJson['latitude'])
- 					}
+					}
 				}
 			}
 			tableDestroy()
@@ -512,8 +505,6 @@ OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated to
 			}
 			tabScroll.appendChild(tbl)
 		}
-		var newTreeId = '';
-		var clickTarget = '';			
 		function newNode() {
 			console.log((testFeeder.bus).length)
 			newTreeId = (testFeeder.bus).length
@@ -533,8 +524,8 @@ OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated to
 				baseKV: 135.0,
 				zone: 1.0,
 				Vmax: 1.05,
-				Vmin: 0.95				
- 			}
+				Vmin: 0.95
+			}
 			// Save to tree
 			testFeeder.bus[newTreeId-1] = newNode;
 			// Click location to add
@@ -601,9 +592,9 @@ OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated to
 				console.log('dragLocate() disabled due to bug.')
 				// testFeeder.[clickType][parseInt(clickID)-1][clickID].longitude = xloc
 				// testFeeder.[clickType][parseInt(clickID)-1][clickID].latitude = yloc
-			}			
+			}
 			previousTarget.setAttribute('cx', xloc)
-			previousTarget.setAttribute('cy', yloc)	
+			previousTarget.setAttribute('cy', yloc)
 		}
 	</script>
 </head>
