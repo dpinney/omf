@@ -321,6 +321,7 @@ OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated to
 	}
 	function svgClick(event) {
 		console.log("debug: screen ", event.screenX, event.screenY, "page ", event.pageX, event.pageY)
+		console.log('testFeeder', testFeeder)	
 		if ( (downX!==upX) || (downY!==upY) ) {
 			return
 		}
