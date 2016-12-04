@@ -29,42 +29,14 @@ def main():
 		if NETWORK_PATH.endswith('.omt'):
 			thisNet = json.load(netFile)
 
-	# Force layout of network since it came from matpower which has no lat/lon information.
-	print "Force laying out the graph..."
-	# Use graphviz to lay out the graph.
-	inGraph = network.netToNxGraph(thisNet)
-	# HACK: work on a new graph without attributes because graphViz tries to read attrs.
-	cleanG = nx.Graph(inGraph.edges())
-	# HACK2: might miss nodes without edges without the following.
-	cleanG.add_nodes_from(inGraph)
-	pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
-	# # Charting the feeder in matplotlib:
-	# feeder.latLonNxGraph(inGraph, labels=False, neatoLayout=True, showPlot=True)
-	# Insert the latlons.
-	for compType in thisNet:
-		if compType in ['bus']:
-			comp = thisNet[compType]
-			for compVal in comp:
-				for idnum,item in compVal.iteritems():
-					obName = item.get('bus_i')
-					thisPos = pos.get(obName, None)
-					if thisPos != None:
-						thisNet[compType][int(float(idnum))-1][idnum]['longitude'] = thisPos[0]
-						thisNet[compType][int(float(idnum))-1][idnum]['latitude'] = thisPos[1]
-
 	# Set up temp directory and copy the feeder and viewer in to it.
 	tempDir = tempfile.mkdtemp()
 	shutil.copy(SOURCE_DIR + '/tranNetViz.html', tempDir + '/viewer.html')
-
-	# Print the lat/lon.
-	# import pprint as pprint
-	# pprint.pprint(thisNet)
 
 	# Grab the library we need.
 	with open(pJoin(SOURCE_DIR,'inData','svg-pan-zoom.js'),'r') as pzFile:
 		pzData = pzFile.read()
 
-	# Rewrite the load lines in viewer.html
 	# Note: you can't juse open the file in r+ mode because, based on the way the file is mapped to memory, you can only overwrite a line with another of exactly the same length.
 	for line in fileinput.input(tempDir + '/viewer.html', inplace=1):
 		if line.lstrip().startswith("<script id='feederLoadScript''>"):

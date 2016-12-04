@@ -1,8 +1,9 @@
 ''' Functions for manipulating electrical transmission network models. '''
 
-import datetime, copy, os, re, warnings, networkx as nx, json
+import datetime, copy, os, re, warnings, networkx as nx, json, math
 from os.path import join as pJoin
 from matplotlib import pyplot as plt
+import matpower
 
 # Wireframe for new netork objects:
 newNetworkWireframe = {"baseMVA":"100.0","mpcVersion":"2.0","bus":[],"gen":[],
@@ -45,7 +46,7 @@ def _dictConversion(inputStr, filePath=True):
 	for i,line in enumerate(data):
 		if todo!=None:
 			# Parse lines.
-			line = line.strip('\n').strip(';').strip('\'')
+			line = line.translate(None,'\r;\n')
 			if "]" in line:
 				todo = None
 			if todo in ['bus','gen','bus','branch']:
@@ -54,26 +55,26 @@ def _dictConversion(inputStr, filePath=True):
 				line = line.split(' ')
 			line = filter(lambda a: a!= '', line)
 			if todo=="version":
-				version = float(line[-1][1])
+				version = line[-1][1]
 				if version<2:
 					print "MATPOWER VERSION MUST BE 2: %s"%(version)
 					break
 				todo = None
 			elif todo=="mva":
-				mva = float(line[-1])
-				newNetworkWireframe['baseMVA'] = float(mva)
+				mva =line[-1]
+				newNetworkWireframe['baseMVA'] = mva
 				todo = None
 			elif todo=="bus":
 				maxKey = len(newNetworkWireframe['bus'])+1
-				bus = {"bus_i": int(float(line[0])),"type": int(float(line[1])),"Pd": float(line[2]),"Qd": float(line[3]),"Gs": float(line[4]),"Bs": float(line[5]),"area": float(line[6]),"Vm": float(line[7]),"Va": float(line[8]),"baseKV": float(line[9]),"zone": float(line[10]),"Vmax": float(line[11]),"Vmin": float(line[12])}
+				bus = {"bus_i":line[0],"type":line[1],"Pd": line[2],"Qd": line[3],"Gs": line[4],"Bs": line[5],"area": line[6],"Vm": line[7],"Va": line[8],"baseKV": line[9],"zone": line[10],"Vmax": line[11],"Vmin": line[12]}
 				newNetworkWireframe['bus'].append({maxKey : bus})
 			elif todo=="gen":
 				maxKey = len(newNetworkWireframe['gen'])+1
-				gen = {"bus_i": float(line[0]),"Pg": float(line[1]),"Qg": float(line[2]),"Qmax": float(line[3]),"Qmin": float(line[4]),"Vg": float(line[5]),"mBase": float(line[6]),"status": float(line[7]),"Pmax": float(line[8]),"Pmin": float(line[9]),"Pc1": float(line[10]),"Pc2": float(line[11]),"QC1min": float(line[12]),"QC1max": float(line[13]),"QC2min": float(line[14]),"Q21max": float(line[15]),"ramp_agc": float(line[16]),"ramp_10": float(line[17]),"ramp_30": float(line[18]),"ramp_q": float(line[19]),"apf": float(line[20])}
+				gen = {"bus": line[0],"Pg": line[1],"Qg": line[2],"Qmax": line[3],"Qmin": line[4],"Vg": line[5],"mBase": line[6],"status": line[7],"Pmax": line[8],"Pmin": line[9],"Pc1": line[10],"Pc2": line[11],"Qc1min": line[12],"Qc1max": line[13],"Qc2min": line[14],"Qc2max": line[15],"ramp_agc": line[16],"ramp_10": line[17],"ramp_30": line[18],"ramp_q": line[19],"apf": line[20]}
 				newNetworkWireframe['gen'].append({maxKey : gen})
 			elif todo=='branch':
 				maxKey = len(newNetworkWireframe['branch'])+1
-				branch =  {"fbus": int(float(line[0])),"tbus": int(float(line[1])),"r": float(line[2]),"x": float(line[3]),"b": float(line[4]),"rateA": float(line[5]),"rateB": float(line[6]),"rateC": float(line[7]),"ratio": float(line[8]),"angle": float(line[9]),"status": float(line[10]),"angmin": float(line[11]),"angmax": float(line[12])}
+				branch =  {"fbus":line[0],"tbus":line[1],"r": line[2],"x": line[3],"b": line[4],"rateA": line[5],"rateB": line[6],"rateC": line[7],"ratio": line[8],"angle": line[9],"status": line[10],"angmin": line[11],"angmax": line[12]}
 				newNetworkWireframe['branch'].append({maxKey : branch})
 		else:
 			# Determine what type of data is coming up.
@@ -113,18 +114,80 @@ def netToNxGraph(inNet):
 						pass
 	return outGraph
 
+def latlonToNet(inGraph, inNet):
+	''' Add lat/lon information to network json. '''
+	cleanG = nx.Graph(inGraph.edges())
+	cleanG.add_nodes_from(inGraph)
+	pos = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
+	for compType in inNet:
+		if compType in ['bus']:
+			comp = inNet[compType]
+			for compVal in comp:
+				for idnum,item in compVal.iteritems():
+					obName = item.get('bus_i')
+					thisPos = pos.get(obName, None)
+					if thisPos != None:
+						inNet[compType][int(float(idnum))-1][idnum]['longitude'] = thisPos[0]
+						inNet[compType][int(float(idnum))-1][idnum]['latitude'] = thisPos[1]
+	return inNet
+
+def netToMat(inNet, networkName):
+	'''Convert a network dict to .m string. '''
+	# Write header.
+	matStr = []
+	matStr.append('function mpc = '+networkName+'\n')
+	matStr.append('%'+networkName+'\tThis is an OMF.network() generated .m file created from the transmission network saved in '+networkName+'.omt'+'\n')
+	matStr.append('\n')
+	matStr.append('%% MATPOWER Case Format : Version '+inNet.get('mpcVersion','2')+'\n')
+	matStr.append('mpc.version = \''+inNet.get('mpcVersion','2')+'\';\n')
+	matStr.append('\n')
+	matStr.append('%%-----  Power Flow Data  -----%%\n')
+	# Write bus voltage.
+	matStr.append('%% system MVA base\n')
+	matStr.append('mpc.baseMVA = '+inNet.get('baseMVA','100')+';\n')
+	matStr.append('\n')
+	# Write bus/gen/branch data.
+	electricalKey = [
+		['bus_i', 'type', 'Pd', 'Qd', 'Gs', 'Bs', 'area', 'Vm', 'Va', 'baseKV', 'zone', 'Vmax', 'Vmin'],
+		['bus', 'Pg', 'Qg', 'Qmax', 'Qmin', 'Vg', 'mBase', 'status', 'Pmax', 'Pmin', 'Pc1', 'Pc2', 'Qc1min', 'Qc1max', 'Qc2min', 'Qc2max', 'ramp_agc', 'ramp_10', 'ramp_30', 'ramp_q', 'apf'],
+		['fbus', 'tbus', 'r', 'x', 'b', 'rateA', 'rateB', 'rateC', 'ratio', 'angle', 'status', 'angmin', 'angmax']]
+	for i,electrical in enumerate(['bus','gen','branch']):
+		matStr.append('%% '+electrical+' data\n')
+		matStr.append('%\t'+'\t'.join(str(x) for x in electricalKey[i])+'\n')
+		matStr.append('mpc.'+electrical+' = [\n')
+		for j,electricalDict in enumerate(inNet[electrical]):
+			electricalValues = '\t'.join(electricalDict[j+1][val] for val in electricalKey[i])
+			matStr.append('\t'+electricalValues+';\n')
+		matStr.append('];\n')
+		matStr.append('\n')
+	return matStr
+
 def _tests():
-	# MAT parsing test.
+	# Parse mat to dictionary.
 	networkName = 'case30'
 	networkJson = parse(pJoin(os.getcwd(),'inData','matpower6.0b1',networkName+'.m'), filePath=True)
 	keyLen = len(networkJson.keys())
-	print 'Parsed a test MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch']))
-	# Write to .omt.json.
+	print 'Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch']))
+	# Use python nxgraph to add lat/lon to .omt.json.
+	nxG = netToNxGraph(networkJson)
+	networkJson = latlonToNet(nxG, networkJson)
 	with open(pJoin(os.getcwd(),"outData",networkName+".omt"),"w") as inFile:
 		json.dump(networkJson, inFile, indent=4)
-	print 'Wrote to: %s'%(pJoin(os.getcwd(),"outData",networkName+".omt"))
-	# Write nxgraph.
-	nxG = netToNxGraph(networkJson)
+	print 'Wrote network to: %s'%(pJoin(os.getcwd(),"outData",networkName+".omt"))
+	# Convert back to .mat and run matpower.
+	matStr = netToMat(networkJson, networkName)
+	with open(pJoin(os.getcwd(),"outData",networkName+".m"),"w") as outMat:
+		for row in matStr: outMat.write(row)
+	print 'Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),"outData",networkName+".m"))
+	inputDict = {
+		"algorithm" : "FDBX",
+		"model" : "DC",
+		"iteration" : 10,
+		"tolerance" : math.pow(10,-8),
+		"genLimits" : 0,
+		}
+	matpower.runSim(pJoin(os.getcwd(),"outData",networkName), inputDict, debug=False)
+
 
 if __name__ == '__main__':
 	_tests()
