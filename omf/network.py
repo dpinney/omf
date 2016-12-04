@@ -61,8 +61,8 @@ def _dictConversion(inputStr, filePath=True):
 					break
 				todo = None
 			elif todo=="mva":
-				mva =line[-1]
-				newNetworkWireframe['baseMVA'] = mva
+				mva = line[-1]
+				newNetworkWireframe['baseMVA'] = str(mva)
 				todo = None
 			elif todo=="bus":
 				maxKey = len(newNetworkWireframe['bus'])+1
@@ -156,7 +156,9 @@ def netToMat(inNet, networkName):
 		matStr.append('%\t'+'\t'.join(str(x) for x in electricalKey[i])+'\n')
 		matStr.append('mpc.'+electrical+' = [\n')
 		for j,electricalDict in enumerate(inNet[electrical]):
-			electricalValues = '\t'.join(electricalDict[j+1][val] for val in electricalKey[i])
+			print "Dict is : %s"%(electricalDict)
+			print "i: %s, j: %s"%(i, j)
+			electricalValues = '\t'.join(electricalDict[str(j+1)][val] for val in electricalKey[i])
 			matStr.append('\t'+electricalValues+';\n')
 		matStr.append('];\n')
 		matStr.append('\n')
@@ -164,7 +166,7 @@ def netToMat(inNet, networkName):
 
 def _tests():
 	# Parse mat to dictionary.
-	networkName = 'case30'
+	networkName = 'case9'
 	networkJson = parse(pJoin(os.getcwd(),'inData','matpower6.0b1',networkName+'.m'), filePath=True)
 	keyLen = len(networkJson.keys())
 	print 'Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch']))

@@ -1,23 +1,3 @@
-Editor
-============================
-OOO Bug: scroll doesn't work.
-OOO svgClick() Check what selection.push does on each new click.
-OOO tableSave() test the fbus/tbus code functionality.
-OOO deleteObj() Should remove a node. Check with David if this is normal behavior.
-OOO selectionTable() Alt-Multi selection doesn't work.
-OOO newNode(): Lat/Lon conversion from mouse clicks.
-OOO newNode(): Bug with variable scope. HELP!
-OOO newNode(): Better defaults.
-OOO newLink() Fix newLink() multi selector and lat/lon.
-OOO dragLocate() How does this work. It's code hangs editor.
-OOO Remove name references to tree and feeder.
-OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated too.
-
-HTML Interface
-============================
-OOO Remove '_'.
-OOO Update regular expressions.
-
 Python Module
 ============================
 XXX create skeleton for transmission.py and transmission.html (in /omf/omf/scratch/transmission/).
@@ -36,11 +16,16 @@ OOO Interface omt.json with network editor. Add to transmission.py.
 	XXX Create web.network. Add editor to transmission.html.
 	XXX Debug why it's not rendering. Updated write out method in web.networkGet.
 	OOO Debug why scroll is broken.
-	OOO Add import functionality. 
-	OOO Link it with transmission.py.
-OOO Add code to web.py to use network.py to add lat/lon info during conversion.
-OOO Write code in network.py to convert omf.json to .mat.
-OOO Add code to transmission.py to use network.py to add convert omt.json to .mat.
+XXX Add import functionality. 
+XXX Add code to web.py to use network.py to add lat/lon info during conversion.
+XXX Write code in network.py to convert omf.json to .mat.
+XXX Add code to transmission.py to use network.py to add convert omt.json to .mat.
+XXX Add save, rename and new network functionality to transEdit.
+OOO Debug the rename functionality not sending data back to model.
+
+
+
+
 
 LATERBASE
 OOO Iterate on Editor or model with David's feedback.
@@ -48,4 +33,21 @@ OOO Test other cases.
 OOO Create clean interface to MATPOWER in omf/solvers.
 OOO Explore docker/non-vm functionality to speed up test process.
 OOO How to handle matpower file versioning: There are two versions: 1 and 2. 2 is newer and will be officially supported in this model. version 1 can be converted  by the loadcase and savecase built-in matpower functions later if enough users seem to use it. 
-
+Editor
+============================
+OOO Bug: scroll doesn't work.
+OOO svgClick() Check what selection.push does on each new click.
+OOO tableSave() test the fbus/tbus code functionality.
+OOO deleteObj() Should remove a node. Check with David if this is normal behavior.
+OOO selectionTable() Alt-Multi selection doesn't work.
+OOO newNode(): Lat/Lon conversion from mouse clicks.
+OOO newNode(): Bug with variable scope. HELP!
+OOO newNode(): Better defaults.
+OOO newLink() Fix newLink() multi selector and lat/lon.
+OOO dragLocate() How does this work. It's code hangs editor.
+OOO Remove name references to tree and feeder.
+OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated too.
+HTML Interface
+============================
+OOO Remove '_'.
+OOO Update regular expressions.

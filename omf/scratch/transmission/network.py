@@ -164,7 +164,7 @@ def netToMat(inNet, networkName):
 
 def _tests():
 	# Parse mat to dictionary.
-	networkName = 'case30'
+	networkName = 'case9'
 	networkJson = parse(pJoin(os.getcwd(),'inData','matpower6.0b1',networkName+'.m'), filePath=True)
 	keyLen = len(networkJson.keys())
 	print 'Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch']))
@@ -186,7 +186,7 @@ def _tests():
 		"tolerance" : math.pow(10,-8),
 		"genLimits" : 0,
 		}
-	matpower.runSim(pJoin(os.getcwd(),"outData",networkName), inputDict, debug=False)
+	matpower.runSim(pJoin(os.getcwd(),"outData",networkName), inputDict, debug=True)
 
 
 if __name__ == '__main__':

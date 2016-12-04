@@ -96,7 +96,7 @@ def runForeground(modelDir, inputDict):
 			}
 		# Model operations goes here.
 		# Read feeder and convert to .mat.
-		networkName = inputDict.get('networkName','case9')
+		networkName = inputDict.get('networkName1','case9')
 		networkJson = json.load(open(pJoin(modelDir,networkName+".omt")))
 		matStr = network.netToMat(networkJson, networkName)
 		with open(pJoin(modelDir,networkName+".m"),"w") as outMat:
@@ -112,7 +112,7 @@ def runForeground(modelDir, inputDict):
 		pfEnflArg = "\'pf.enforce_q_lims\', "+str(inputDict.get("genLimits",0))
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
 		with cd(matDir):
-			command = "octave --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,'network.m')+"\', mpopt)\" > "+"/home/dev/Desktop/matout.txt"
+			command = "octave --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > "+"/home/dev/Desktop/matout.txt"
 			print "command:", command
 			proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
 			(out, err) = proc.communicate()
@@ -188,7 +188,6 @@ def runForeground(modelDir, inputDict):
 			for i in range(len(outData['tableData'][powerOrVolt][1])):
 				if outData['tableData'][powerOrVolt][1][i]!='-':
 					outData['tableData'][powerOrVolt][1][i]=float(outData['tableData'][powerOrVolt][1][i])
-		pprint.pprint(outData)
 		with open(pJoin(imgSrc,'bg1.jpg'),"rb") as inFile:
 			outData["powerRealChart"] = inFile.read().encode("base64")
 		with open(pJoin(imgSrc,'bg2.jpg'),"rb") as inFile:
