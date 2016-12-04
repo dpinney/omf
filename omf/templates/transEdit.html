@@ -111,6 +111,7 @@
 		div#headInnerBlock{width:1000px;height:40px;font-size:medium;color:white;margin: 4px auto 0 auto;}
 		div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-left:5px;}
 		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
+		div#fileDiv{width:55px;padding:0 0.9em 0 0.9em;float:right;}
 		div#arrow {font-size:8pt;position:absolute;margin-top:2px;margin-left:4px;display:inline;}
 		ul.menu {
 			position:absolute;
@@ -169,7 +170,7 @@
 	<!-- <script>networkData="{{networkData}}"</script> -->
 	<!-- <script>console.log(networkData)</script> -->
 </head>
-<body onkeypress='hotkeys()' style='width:100%;height:100%'>
+<body onkeypress='hotkeys()' onload="finishPastActions();" style='width:100%;height:100%'>
 	<!-- Start Controls -->
 	<div style='background:orange; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
 	<div style='background:green; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
@@ -192,7 +193,12 @@
 	</svg>
 	<!-- Menu Bar: ADD -->
 	<div id="header">
-		<div id="menuRight">
+		<div id="menuLeft">
+			&nbsp;<span contenteditable="false" id='networkName' name='networkName' style="font-weight:bold;">{{ networkName }}</span>
+			<br>
+			&nbsp;from&#8220;<span id = 'modelNameHeader'>{{ modelName }}</span>&#8221;
+		</div>	
+		<div id="menuRight">	
 			<div id="addDiv">
 				<div class="buttonGroup">
 					<button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add ▾</button>
@@ -203,13 +209,72 @@
 				</div>
 			</div>
 		</div>
+		<div id="fileDiv">
+			<div class='buttonGroup'>
+				{% if is_admin or not public %}
+				<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
+				<ul id='newObjectMenu' class='menu right'>
+					<li><a href='javascript:saveNetwork();'>Save</a></li>
+					<li><a href='javascript:renameNetwork();'>Rename</a></li>
+					<p style='font-weight:bold;margin: 10px 0 0 4px;'>New Network</p>
+					<li><a href='javascript:showModal("blankNetworkModal");'>Blank Network...</a></li>					
+					<li><a href='javascript:showModal("matpowerModal");'>MATPOWER Conversion...</a></li>
+				</ul>
+				{% endif %}
+			</div>
+		</div>			
 	</div>
+	<div id='blankNetworkModal' class= 'modal'>
+		<div class="modalContent" id='blankModal'>
+			<form onsubmit='event.preventDefault(); return startConversion("networkNameNew",1);' action='/newBlankNetwork/{{ owner }}' id='newnetwork' enctype='multipart/form-data' method='post'>
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
+				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+				<table class='importOptions'>
+				<th>Blank Network</th>
+					<tr>
+						<td>Name</td>
+						<td><input type='text' id='networkNameNew' name='networkNameNew' required/></td>
+					</tr>
+					<tr>
+						<td><a id='modalCancel' href="#" onclick='closeModal("blankNetworkModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+						<td><input type='submit' value='Create' style='min-width:45px;'/></td>
+					</tr>
+				</table>
+			</form>
+		</div>
+	</div>	
+	<div id="matpowerModal" class= 'modal'>
+		<div class="modalContent" id='milModal' style='width:350px;'>
+			<form onsubmit='event.preventDefault(); return startConversion("networkNameM", 2);' action="/matpowerImport/{{ owner }}" id='matpower' enctype='multipart/form-data' method='post'>
+				<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
+				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+				<table class='importOptions'>
+				<th>MATPOWER Conversion</th>
+					<tr>
+						<td>Name</td>
+						<td><input type='text' id='networkNameM' name='networkNameM' required/></td>
+					</tr>
+					<tr>
+						<td>Data File (.m)</td>
+						<td><input type='file' name='matFile' accept = '.m' required/></td>
+					</tr>
+					<tr>
+						<td><a id='modalCancel' href="#" onclick='closeModal("matpowerModal")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+						<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+					</tr>
+				</table>
+			</form>
+			<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+		</div>
+	</div>	
 	<div id='tableScroller'></div>
 	<p id="loadingMessage" style="font-size:60pt; text-align:center; width:100%; display:inline-block">Feeder Loading...</p>
 	</body>
 	<script type='text/javascript'>
 		function loadingStuff() {
-			buildFeeder();
+			buildNetwork();
 			document.getElementById('loadingMessage').style.display = 'none'
 		}
 		setTimeout(loadingStuff,100)
@@ -220,6 +285,8 @@
 
 <script type='text/javascript'>
 // Globals
+var unsavedChanges = false;
+var lastNetworkName = "{{ networkName }}";
 var previousTarget = {} // Global to keep track of previous selection target
 var selection = [] // Global to keep track of multiple alt-selections
 var downX, downY, upX, upY // Globals to keep track of mouse coordinates
@@ -268,7 +335,7 @@ function addLine(x1,y1,x2,y2,id,myClass) {
 	aLine.setAttribute('stroke-width', w)
 	svgOb.appendChild(aLine)
 }
-function buildFeeder() {
+function buildNetwork() {
 	// Find the size we need for the full chart.
 	maxLon = 100, maxLat = 100
 	for (num in networkData.bus) {
@@ -508,29 +575,6 @@ function scaleTo(x) {
 		}
 	}
 }
-function dropPill(thisButton, name) {
-	thisButton.style.color= 'black'
-	thisButton.style.background= '#F8F8F8'
-	thisButton.style.textAlign = 'left'
-	thisButton.nextSibling.nextSibling.style.display = 'inline-block'
-	thisButton.innerHTML = name + ' ▴'
-	function clickCloseEvent() {
-		thisButton.nextSibling.nextSibling.style.display = 'none'
-		thisButton.innerHTML = name + ' ▾'
-		this.removeEventListener('click', arguments.callee, true)
-		thisButton.style.color= 'white'
-		thisButton.style.background= 'transparent'
-		if (window.event.toElement==thisButton) {event.stopPropagation()}
-	}
-	document.body.addEventListener('click', clickCloseEvent, true)
-}
-function clickCloseEvent(labelName, buttonName) {
-	var thisButton = document.getElementById(buttonName);
-	thisButton.nextSibling.nextSibling.style.display = 'none'
-	thisButton.innerHTML = labelName + ' ▾'
-	this.removeEventListener('click', arguments.callee, true)
-	if (window.event.toElement==thisButton) {event.stopPropagation()}
-}
 function selectionTable() {
 	tabScroll = document.getElementById('tableScroller')
 	tbl = document.createElement('table')
@@ -637,9 +681,185 @@ function dragLocate() {
 	previousTarget.setAttribute('cx', xloc)
 	previousTarget.setAttribute('cy', yloc)
 }
+// Modal and conversion functions.
+function showModal(element){
+	gebi(element).style.display = 'block'
+}
+function closeModal(element){
+	gebi(element).style.display = 'none'
+}
+function startConversion(elementName, nextAction) {
+	// Additional check, required for Safari browsers
+	var newName = document.getElementById(elementName).value;
+	if (true) {
+		var modelName = "{{ modelName }}"
+		$.ajax({
+			url: "/uniqObjName/Network/" + "{{ owner }}" + "/" + newName + "/" + modelName
+		}).done(function (data) {
+			if (data.exists) {
+				alert("You already have a Network named '" + newName + "', please choose a different name.")
+			}
+			else{
+				if (nextAction == 1){
+					newnetwork.submit()
+				}
+				else{
+					gebi('matpower').submit();
+					showProgressDialog('spinner','Converting network','conversion');
+					setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.					
+				}
+			}
+		})
+	}
+}
+function showProgressDialog(progressType, dialogMessage, cancelType) {
+	// Make the elements.
+	background = document.createElement('div')
+	background.id = 'progressBackground'
+	background.style.zIndex = '9998'
+	progContent = document.createElement('div')
+	progContent.id = 'progressContent'
+	progContent.style.zIndex = '9999'
+	progressText = document.createElement('h2')
+	progressText.id = 'progressText'
+	progressText.textContent = dialogMessage
+	document.body.appendChild(background)
+	document.body.appendChild(progContent)
+	// If progressType type is spinner create and show the spinner
+	if (progressType == 'spinner'){
+		spinner = document.createElement('img')
+		spinner.src = '/static/spinner.gif'
+		progContent.appendChild(spinner)
+		progContent.appendChild(progressText)
+		var cancelBtn = document.createElement("BUTTON");
+		var t = document.createTextNode("cancel");
+		cancelBtn.style.marginTop = '5px';
+		cancelBtn.style.background= 'crimson'
+		cancelBtn.appendChild(t);
+		progContent.appendChild(cancelBtn);
+	}
+	// If cancelType is not none, add an onclick even to the cancel button to cancel the conversion
+	if (cancelType != 'none'){
+		cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
+		cancelBtn.onclick = function() {
+			if (cancelType == 'conversion'){
+				if (confirm('Are you sure you want to cancel the conversion?')) {
+					newnetwork.submit();
+				}
+			}
+			else if(cancelType == 'none'){
+				cancelBtn.style.display = 'none'
+			}
+			else
+			{
+				// stop rendering feeder, show file menu, etc.y
+				removeProgressDialog()
+			}
+		};
+	}	
+}function removeProgressDialog() {
+	if (gebi('progressBackground')!=null)
+		document.body.removeChild(gebi('progressBackground'))
+	if (gebi('progressContent')!=null)
+		document.body.removeChild(gebi('progressContent'))
+}
+function finishPastActions(){
+	showProgressDialog('spinner','Loading Network', 'loading');
+	var modelName = '{{modelName}}'
+	// Check conversion.
+	$.ajax({
+		url: "/checkConversion/" + modelName
+	}).done(function (data) {
+		if (data.exists == true) {
+			showProgressDialog('spinner','Converting network','conversion');
+			checkConversion()
+		}
+	})
+	setTimeout(removeProgressDialog,500) // hard cap.
+}
+function checkConversion() {
+	var conversionStatus = 'converting';
+		// Check every 5 seconds for a feeder & refresh.
+		var setInterval = window.setInterval(function pingAPI(){
+			var modelName = '{{modelName}}'
+			$.ajax({
+				url: "/checkConversion/" + modelName
+			}).done(function (data) {
+				if (data.exists) {
+					conversionStatus = 'converting'
+				}
+				else {
+					conversionStatus = 'done';
+				}
+			})
+			if (conversionStatus == "done"){
+				savePoster("{{ networkName }}", "{{ modelName }}", "{{ owner }}");
+				alert("Conversion complete.")
+				window.location.reload();
+			}
+			console.log("Converting...")
+			return pingAPI;
+		}(), 5000);
+}
+function saveNetwork() {
+	gebi("fileOps").click();
+	savePoster("{{ networkName }}", "{{ modelName }}", "{{ owner }}")
+	alert("Data saved.")
+}
+function savePoster(name, modelName, user) {
+	networkObject = {
+		mpcVersion: networkData.mpcVersion,
+		baseMVA: networkData.baseMVA,
+		bus: networkData.bus,
+		gen: networkData.gen,
+		branch: networkData.branch,
+	}
+	payload = {
+		'name': name,
+		'networkObjectJson': JSON.stringify(networkObject),
+		"_csrf_token": "{{ csrf_token() }}",
+		ref: "{{ ref }}"
+	}
+	unsavedChanges=false
+	post_to_url("/saveNetwork/" + user + "/" + modelName + "/" + name, payload)
+}
+function renameNetwork() {
+	if (unsavedChanges){
+		alert('You have unsaved changes. Please save the network before proceeding.')
+	}
+	else{
+		var newName = prompt("Rename the network to",lastNetworkName)
+		while (! /^[\w\s]+$/.test(newName) || /^\s+$/.test(newName)){
+			newName = prompt("Only letters, digits and underscore are allowed.\nPlease enter a different name", "{{ networkName }}")
+		}
+		if (newName){
+			checkNetworkName(newName)
+		}
+	}
+}
+function checkNetworkName(newName) {
+	// Additional check, required for Safari browsers
+	if (true) {
+		var modelName = "{{ modelName }}"
+		$.ajax({
+			url: "/uniqObjName/Network/" + "{{ owner }}" + "/" + newName + "/" + modelName
+		}).done(function (data) {
+			if (data.exists) {
+				alert("You already have a Network named '" + newName + "', please choose a different name.")
+				renameNetwork()
+			}
+			else{
+				gebi("fileOps").click();
+				post_to_url("/renameNetwork/" + "{{ owner }}" + "/" + "{{ modelName }}" + "/" + lastNetworkName + "/" + newName + "/" + "{{ networkNum }}")
+				document.getElementById('networkName').innerHTML = newName;
+				lastNetworkName = newName; //permits multiple name changes without forcing page refresh.
+				// Send updated name to model.
+				window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
+				clickCloseEvent("File","fileOps")
+			}
+		})
+	}
+}
 </script>
-<!-- <script id='feederInsert'>
-</script> -->
-<!-- <script id='panZoomInsert'>
-</script> -->
+<script type='text/javascript'>clickCloseEvent("File","fileOps")</script>
 <script type='text/javascript'>clickCloseEvent("Add","addOps")</script>
