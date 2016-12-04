@@ -17,7 +17,7 @@ import pprint as pprint
 
 # OMF imports
 sys.path.append(__metaModel__._omfDir) # for images in test.
-# import network
+import network
 from solvers import nrelsam2013
 from weather import zipCodeToClimateName
 
@@ -63,6 +63,10 @@ def run(modelDir, inputDict):
 	except Exception, e:
 		pass
 	try:
+		os.remove(pJoin(modelDir,inputDict.get("networkName1","network1")+".m"))
+	except Exception, e:
+		pass		
+	try:
 		os.remove(pJoin(modelDir,"matout.txt"))
 	except Exception, e:
 		pass
@@ -92,13 +96,13 @@ def runForeground(modelDir, inputDict):
 			}
 		# Model operations goes here.
 		# Read feeder and convert to .mat.
-
+		networkName = inputDict.get('networkName','case9')
+		networkJson = json.load(open(pJoin(modelDir,networkName+".omt")))
+		matStr = network.netToMat(networkJson, networkName)
+		with open(pJoin(modelDir,networkName+".m"),"w") as outMat:
+			for row in matStr: outMat.write(row)		
 		# Configure and run MATPOWER.
 		matDir =  pJoin(__metaModel__._omfDir,'scratch','transmission','inData', 'matpower6.0b1')
-		networkName = inputDict.get('networkName','case9')
-		with cd(matDir):
-			shutil.copyfile(pJoin(networkName+'.m'),pJoin(modelDir,'network.m'))
-			print "Copied network from: %s to: %s"%(pJoin(matDir, networkName+'.m'),pJoin(modelDir,'.network.m'))
 		algorithm = inputDict.get("algorithm","NR")
 		pfArg = "\'pf.alg\', \'"+algorithm+"\'"
 		modelArg = "\'model\', \'"+inputDict.get("model","AC")+"\'"
@@ -108,8 +112,7 @@ def runForeground(modelDir, inputDict):
 		pfEnflArg = "\'pf.enforce_q_lims\', "+str(inputDict.get("genLimits",0))
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
 		with cd(matDir):
-			# results = octave --no-gui ...
-			command = "octave --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,'network.m')+"\', mpopt)\" > "+"/home/dev/Desktop/matout.txt" # Can't save in scratch due to windows file sharing.
+			command = "octave --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,'network.m')+"\', mpopt)\" > "+"/home/dev/Desktop/matout.txt"
 			print "command:", command
 			proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
 			(out, err) = proc.communicate()

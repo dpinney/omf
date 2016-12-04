@@ -290,7 +290,7 @@ def newModel(modelType, modelName):
 	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering']:
 		newSimpleFeeder(User.cu(), modelName, 1, False, 'feeder1')
 		inputDict['feederName1'] = 'feeder1'
-	elif modelType in ['transmission']:
+	elif modelType in ['_transmission']:
 		newSimpleNetwork(User.cu(), modelName, 1, False, 'network1')
 		inputDict['networkName1'] = 'network1'
 	with open(os.path.join(modelDir, "allInputData.json"),"w") as inputFile:
