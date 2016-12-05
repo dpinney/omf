@@ -65,15 +65,15 @@ def _dictConversion(inputStr, filePath=True):
 				newNetworkWireframe['baseMVA'] = str(mva)
 				todo = None
 			elif todo=="bus":
-				maxKey = len(newNetworkWireframe['bus'])+1
+				maxKey = str(len(newNetworkWireframe['bus'])+1)
 				bus = {"bus_i":line[0],"type":line[1],"Pd": line[2],"Qd": line[3],"Gs": line[4],"Bs": line[5],"area": line[6],"Vm": line[7],"Va": line[8],"baseKV": line[9],"zone": line[10],"Vmax": line[11],"Vmin": line[12]}
 				newNetworkWireframe['bus'].append({maxKey : bus})
 			elif todo=="gen":
-				maxKey = len(newNetworkWireframe['gen'])+1
+				maxKey = str(len(newNetworkWireframe['gen'])+1)
 				gen = {"bus": line[0],"Pg": line[1],"Qg": line[2],"Qmax": line[3],"Qmin": line[4],"Vg": line[5],"mBase": line[6],"status": line[7],"Pmax": line[8],"Pmin": line[9],"Pc1": line[10],"Pc2": line[11],"Qc1min": line[12],"Qc1max": line[13],"Qc2min": line[14],"Qc2max": line[15],"ramp_agc": line[16],"ramp_10": line[17],"ramp_30": line[18],"ramp_q": line[19],"apf": line[20]}
 				newNetworkWireframe['gen'].append({maxKey : gen})
 			elif todo=='branch':
-				maxKey = len(newNetworkWireframe['branch'])+1
+				maxKey = str(len(newNetworkWireframe['branch'])+1)
 				branch =  {"fbus":line[0],"tbus":line[1],"r": line[2],"x": line[3],"b": line[4],"rateA": line[5],"rateB": line[6],"rateC": line[7],"ratio": line[8],"angle": line[9],"status": line[10],"angmin": line[11],"angmax": line[12]}
 				newNetworkWireframe['branch'].append({maxKey : branch})
 		else:
@@ -156,8 +156,6 @@ def netToMat(inNet, networkName):
 		matStr.append('%\t'+'\t'.join(str(x) for x in electricalKey[i])+'\n')
 		matStr.append('mpc.'+electrical+' = [\n')
 		for j,electricalDict in enumerate(inNet[electrical]):
-			print "Dict is : %s"%(electricalDict)
-			print "i: %s, j: %s"%(i, j)
 			electricalValues = '\t'.join(electricalDict[str(j+1)][val] for val in electricalKey[i])
 			matStr.append('\t'+electricalValues+';\n')
 		matStr.append('];\n')
@@ -167,20 +165,20 @@ def netToMat(inNet, networkName):
 def _tests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
-	networkJson = parse(pJoin(os.getcwd(),'inData','matpower6.0b1',networkName+'.m'), filePath=True)
+	networkJson = parse(pJoin(os.getcwd(),'scratch','transmission','inData','matpower6.0b1',networkName+'.m'), filePath=True)
 	keyLen = len(networkJson.keys())
 	print 'Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch']))
 	# Use python nxgraph to add lat/lon to .omt.json.
 	nxG = netToNxGraph(networkJson)
 	networkJson = latlonToNet(nxG, networkJson)
-	with open(pJoin(os.getcwd(),"outData",networkName+".omt"),"w") as inFile:
+	with open(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".omt"),"w") as inFile:
 		json.dump(networkJson, inFile, indent=4)
-	print 'Wrote network to: %s'%(pJoin(os.getcwd(),"outData",networkName+".omt"))
+	print 'Wrote network to: %s'%(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".omt"))
 	# Convert back to .mat and run matpower.
 	matStr = netToMat(networkJson, networkName)
-	with open(pJoin(os.getcwd(),"outData",networkName+".m"),"w") as outMat:
+	with open(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".m"),"w") as outMat:
 		for row in matStr: outMat.write(row)
-	print 'Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),"outData",networkName+".m"))
+	print 'Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".m"))
 	# inputDict = {
 	# 	"algorithm" : "FDBX",
 	# 	"model" : "DC",
@@ -188,7 +186,7 @@ def _tests():
 	# 	"tolerance" : math.pow(10,-8),
 	# 	"genLimits" : 0,
 	# 	}
-	# matpower.runSim(pJoin(os.getcwd(),"outData",networkName), inputDict, debug=False)
+	# matpower.runSim(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName), inputDict, debug=False)
 
 
 if __name__ == '__main__':
