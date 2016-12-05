@@ -9,7 +9,6 @@ XXX Update test case. Add other .m tests.
 XXX Add cancel functionality. Did so by removing cancel from transmission.py. metamodel has a cancel.
 XXX Does matpower support coordinates? No according to documentation. Also based on IEEE CDF and PTI formats, which don't have it.
 XXX Create code to convert .m network file to omt.json format.
-OOO Create voltage chart. Add to transmission.html.
 OOO Interface omt.json with network editor. Add to transmission.py.
 	XXX Create web.newSimpleNetwork and add as default network in web.newModel for transmission model.
 	XXX Create transEdit.html v1.
@@ -18,14 +17,15 @@ OOO Interface omt.json with network editor. Add to transmission.py.
 	OOO Debug why scroll is broken.
 XXX Add import functionality. 
 XXX Add code to web.py to use network.py to add lat/lon info during conversion.
-XXX Write code in network.py to convert omf.json to .mat.
-XXX Add code to transmission.py to use network.py to add convert omt.json to .mat.
+XXX Write code in network.py to convert omf.json to .mat. Add code to transmission.py.
 XXX Add save, rename and new network functionality to transEdit.
-OOO Debug the rename functionality not sending data back to model.
-
-
-
-
+XXX Add the rename functionality to send network name back to model.
+XXX Fix travis network.py pathing error.
+OOO Send network name data back to model on a network refresh (to send data after new conversion/network creation).
+OOO Debug editor scroll freezing.
+OOO Render generator data in editor.
+OOO Debug add node x/y positions translating to lat/lon.
+OOO Create voltage chart. Add to transmission.html.
 
 LATERBASE
 OOO Iterate on Editor or model with David's feedback.

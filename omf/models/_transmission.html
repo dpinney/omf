@@ -57,7 +57,19 @@
 			}
 			document.getElementById("windowLoc").scrollIntoView()
 		}
-		gebi('networkName1').innerHTML = allInputData.networkName1;
+		// // Update network name from editor.
+		$(document).ready(function(){
+			$(document).bind('mainWindow', function(e, message){
+				var modelName = message.split(";")[0]
+				var networkNum = message.split(";")[1]
+				var networkName = message.split(";")[2]
+				if (allInputData.modelName == modelName){
+					gebi('networkName1').value = networkName;
+					gebi('networkName1Label').innerHTML = networkName;
+					console.log('got network name', networkName)
+				}
+			});
+		});		
 	</script>
 </head>
 <body onload="init()">
@@ -83,9 +95,13 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Network<span class="classic">A link to the transmission editor, which offers features such as interactive component editing, search, creation, MATPOWER (.mat) file import, and more.</span></label>
-				<button id="networkButton" type="button" onclick="javascript:editNetwork(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-				<input type="hidden" id="networkName1" name="networkName1"/>
-
+				<br>
+				<input type="hidden" id="networkName1" name="networkName1"/>				
+				<button id="networkButton" type="button" onclick="javascript:editNetwork(allInputData.modelName,1);" style="display:inline;width:125px;">Open Editor</button>
+				<label id="networkName1Label" style="display:inline;font-size:12pt;overflow-x:auto;"></label>
+				<script>
+					gebi('networkName1').value = allInputData.networkName1;
+					gebi('networkName1Label').innerHTML = allInputData.networkName1;</script>
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -125,7 +141,7 @@
 				<input type="text" id="tolerance" name="tolerance" value="0.00000001" required="required">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Iteration<span class="classic">The maximum number of iterations for the NR, FDXB, FDBX or GS solver method.</span></label>
+				<label class="tooltip">Iteration<span class="classic">The maximum number of iterations for the solver algorithm specified above.</span></label>
 				<input type="text" id="iteration" name="iteration" value="1000" required="required" pattern="^(\d{2,}|[1-9])(\.\d+)?$">
 			</div>
 			<div class="shortInput">
@@ -182,7 +198,7 @@
 				<img id="img1" src="" style="width:600px;height:600px;">
 				<script>gebi("img1").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/volts.jpg"</script>
 				-->
-				<div style="max-height10800px;overflow-y:scroll;">
+				<div style="max-height:600px;overflow-y:scroll;">
 					<table id="voltsTable">
 						<thead>
 							<th>Component Name</th>
@@ -200,7 +216,7 @@
 				<img id="img2" src="" style="width:600px;height:600px;">
 				<script>gebi("img2").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/powerReal.jpg"</script>
 				-->
-				<div style="max-height:1000px;overflow-y:scroll;">
+				<div style="max-height:600px;overflow-y:scroll;">
 					<table id="powerRealTable">
 						<thead>
 							<th>Component Name</th>
@@ -218,7 +234,7 @@
 				<img id="img3" src="" style="width:600px;height:600px;">
 				<script>gebi("img3").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/powerReact.jpg"</script>
 				-->
-				<div style="max-height:1000px;overflow-y:scroll;">
+				<div style="max-height:600px;overflow-y:scroll;">
 					<table id="powerReactTable">
 						<thead>
 							<th>Component Name</th>

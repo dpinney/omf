@@ -775,6 +775,8 @@ function finishPastActions(){
 			checkConversion()
 		}
 	})
+	// Send network name to model and remove loading dialog.
+	window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);	
 	setTimeout(removeProgressDialog,500) // hard cap.
 }
 function checkConversion() {
