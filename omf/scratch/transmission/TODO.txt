@@ -25,7 +25,9 @@ XXX Send network name data back to model on a network refresh (to send data afte
 XXX Fix conversion cancel code.
 XXX Debug editors broken scrolol. The issue was the lack of HTML tag in the OMF implementation.
 OOO Add generator nodes to editor.
-OOO Debug add node x/y positions translating to lat/lon.
+XXX Add unsavedChanges code.
+OOO Add multiple selection/alt-clicking code.
+OOO Code new node coordinates to be absolute in svg and translate to lat/lon. http://stackoverflow.com/questions/10298658/mouse-position-inside-autoscaled-svg
 OOO Create voltage chart. Add to transmission.html.
 OOO Update network name regex: Matpower fails if network name consists of only numbers.
 

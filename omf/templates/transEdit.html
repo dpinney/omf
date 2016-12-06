@@ -206,8 +206,8 @@
 				<div class="buttonGroup">
 					<button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add ▾</button>
 					<ul id='newObjectMenu' class='menu right'>
-						<li><a href="javascript:newNode()">node</a></li>
-						<li><a href="javascript:newLink()">link</a></li>
+						<li><a href="javascript:newNode();unsavedChanges=true">node</a></li>
+						<li><a href="javascript:newLink();unsavedChanges=true">link</a></li>
 					</ul>
 				</div>
 			</div>
@@ -454,7 +454,8 @@ function tableCreate(inputObject) {
 	// Show what type of thing you clicked/
 	whatClicked = document.createElement('tr')
 	var clickType = event.target.id.split("_")[0]
-	whatClicked.innerHTML = '<th>'+clickType.charAt(0).toUpperCase() + clickType.slice(1);+'</th>'
+	var clickID = event.target.id.split("_")[1]
+	whatClicked.innerHTML = '<th>'+clickType.charAt(0).toUpperCase()+clickType.slice(1);+String(clickID)+'</th>'
 	whatClicked.innerHTML += '<th></th>'
 	tbl.appendChild(whatClicked)	
 	// Put in the header.
@@ -521,9 +522,11 @@ function tableSave(me) {
 			}
 		}
 	}
+	unsavedChanges = true;
 	tableDestroy()
 	tableCreate(toJson)
 	alert('Updated object: ' + previousTarget.id)
+
 }
 function tableDestroy() {
 	tabScroll = document.getElementById('tableScroller')
@@ -555,6 +558,7 @@ function deleteOb() {
 			previousTarget.remove()
 		}
 	}
+	unsavedChanges=true
 	tableDestroy()
 }
 function scaleTo(x) {
@@ -815,7 +819,7 @@ function checkConversion() {
 function saveNetwork() {
 	gebi("fileOps").click();
 	savePoster("{{ networkName }}", "{{ modelName }}", "{{ owner }}")
-	alert("Data saved.")
+	alert("Network saved to disk.")
 }
 function savePoster(name, modelName, user) {
 	networkObject = {
@@ -871,6 +875,14 @@ function checkNetworkName(newName) {
 		})
 	}
 }
+//ADD PROMPT TO SAVE CHANGES BEFORE EXIT
+{% if is_admin or not public %}
+	window.onbeforeunload = function(e) {
+		var confirmationMessage = 'It looks like you have been editing something. ';
+		confirmationMessage += 'If you leave before saving, your changes will be lost.';
+		if (unsavedChanges) return confirmationMessage;
+	};
+{% endif %}
 </script>
 <script type='text/javascript'>clickCloseEvent("File","fileOps")</script>
 <script type='text/javascript'>clickCloseEvent("Add","addOps")</script>
