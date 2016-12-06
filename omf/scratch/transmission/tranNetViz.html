@@ -390,6 +390,12 @@ OOO Lock out bus_i as it could throw off matpower sim if lines aren't updated to
 	function tableCreate(inputObject) {
 		tabScroll = document.getElementById('tableScroller')
 		tbl = document.createElement('table')
+		// Show what type of thing you clicked/
+		whatClicked = document.createElement('tr')
+		var clickType = event.target.id.split("_")[0]
+		whatClicked.innerHTML = '<th>'+clickType.charAt(0).toUpperCase() + clickType.slice(1);+'</th>'
+		whatClicked.innerHTML += '<th></th>'
+		tbl.appendChild(whatClicked)
 		// Put in the header.
 		headRow = document.createElement('tr')
 		headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="dragMode()">Drag</button></th>'

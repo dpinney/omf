@@ -23,10 +23,11 @@ XXX Add the rename functionality to send network name back to model.
 XXX Fix travis network.py pathing error.
 XXX Send network name data back to model on a network refresh (to send data after new conversion/network creation).
 XXX Fix conversion cancel code.
-OOO Debug editor scroll freezing.
+OOO Debug editors broken scrolol. 
 OOO Render generator data in editor.
 OOO Debug add node x/y positions translating to lat/lon.
 OOO Create voltage chart. Add to transmission.html.
+OOO Update network name regex: Matpower fails if network name consists of only numbers.
 
 LATERBASE
 OOO Iterate on Editor or model with David's feedback.
