@@ -24,10 +24,15 @@ XXX Fix travis network.py pathing error.
 XXX Send network name data back to model on a network refresh (to send data after new conversion/network creation).
 XXX Fix conversion cancel code.
 XXX Debug editors broken scrolol. The issue was the lack of HTML tag in the OMF implementation.
-OOO Add generator nodes to editor.
+XXX Render generators in editor.
+OOO Add new generators to 'add' menu (it must also create or use a specified a bus).
+OOO Update new link code.
+OOO Bug with clicking new gen/bus, not clicking on map, and clicking new gen/bus again should only create one new gen/bus.
 XXX Add unsavedChanges code.
 OOO Add multiple selection/alt-clicking code.
 OOO Code new node coordinates to be absolute in svg and translate to lat/lon. http://stackoverflow.com/questions/10298658/mouse-position-inside-autoscaled-svg
+OOO Delete object doesn't remove it from network.
+OOO Disable editing of bus_i or bus attribute.
 OOO Create voltage chart. Add to transmission.html.
 OOO Update network name regex: Matpower fails if network name consists of only numbers.
 

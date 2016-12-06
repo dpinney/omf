@@ -206,8 +206,9 @@
 				<div class="buttonGroup">
 					<button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add ▾</button>
 					<ul id='newObjectMenu' class='menu right'>
-						<li><a href="javascript:newNode();unsavedChanges=true">node</a></li>
-						<li><a href="javascript:newLink();unsavedChanges=true">link</a></li>
+						<li><a href="javascript:newNode('bus');unsavedChanges=true">Bus</a></li>
+						<li><a href="javascript:newNode('gen');unsavedChanges=true">Generator</a></li>
+						<li><a href="javascript:newLink();unsavedChanges=true">Branch</a></li>
 					</ul>
 				</div>
 			</div>
@@ -293,8 +294,10 @@ var lastNetworkName = "{{ networkName }}";
 var previousTarget = {} // Global to keep track of previous selection target
 var selection = [] // Global to keep track of multiple alt-selections
 var downX, downY, upX, upY // Globals to keep track of mouse coordinates
-var newTreeId = '';
 var clickTarget = '';
+var newID = '';
+var newType = '';
+var newBusGenObj = {};
 // Functions
 function saveSvg() {
 	// Add some critical information
@@ -373,6 +376,13 @@ function buildNetwork() {
 		anOb = networkData.bus[num][String(parseInt(num)+1)]
 		addCircle(anOb['longitude'],anOb['latitude'],2,"bus_"+String(parseInt(num)+1),"bus")
 	}
+	// Draw generators over busses
+	for (num in networkData.gen) {
+		anOb = networkData.gen[num][String(parseInt(num)+1)]
+		var longitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['longitude']
+		var latitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['latitude']
+		addCircle(longitude, latitude,2,"gen_"+String(parseInt(num)+1),"gen")
+	}	
 }
 function mouseDown(event) {
 	downX = event.pageX
@@ -455,8 +465,8 @@ function tableCreate(inputObject) {
 	whatClicked = document.createElement('tr')
 	var clickType = event.target.id.split("_")[0]
 	var clickID = event.target.id.split("_")[1]
-	whatClicked.innerHTML = '<th>'+clickType.charAt(0).toUpperCase()+clickType.slice(1);+String(clickID)+'</th>'
-	whatClicked.innerHTML += '<th></th>'
+	whatClicked.innerHTML = '<th>'+clickType.charAt(0).toUpperCase()+clickType.slice(1);+'</th>'
+	whatClicked.innerHTML += '<th>'+String(clickID)+'</th>'
 	tbl.appendChild(whatClicked)	
 	// Put in the header.
 	headRow = document.createElement('tr')
@@ -603,29 +613,59 @@ function selectionTable() {
 	}
 	tabScroll.appendChild(tbl)
 }
-function newNode() {
-	console.log((networkData.bus).length)
-	newTreeId = (networkData.bus).length
-	var newNode = {}
-	newNode[newTreeId] = {
-		longitude: 0,
-		latitude: 0,
-		bus_i: newTreeId,
-		type: 1,
-		Pd: 10.6,
-		Qd: 1.9,
-		Gs: 0.0,
-		Bs: 0.0,
-		area: 3.0,
-		Vm: 1.0,
-		Va: 0.0,
-		baseKV: 135.0,
-		zone: 1.0,
-		Vmax: 1.05,
-		Vmin: 0.95
+function newNode(typeOfNode) {
+	console.log('new bus length',(networkData.bus).length+1)
+	newID = (networkData[typeOfNode].length)+1
+	newType = typeOfNode
+	newBusGenObj = {}
+	// If gen was clicked, create that too.
+	if (newType==='gen'){
+		console.log('new gen length',(networkData.gen).length+1)
+		newBusGenObj[String(newID)] = {
+			longitude: "0",
+			latitude: "0",
+			bus: "100",
+			Pg: "23.54",
+			Qg: "0",
+			Qmax: "150",
+			Qmin: "-20",
+			Vg: "1",
+			mBase: "100",
+			status: "1",
+			Pmax: "80",
+			Pmin: "0",
+			Pc1: "0",
+			Pc2: "0",
+			Qc1min: "0",
+			Qc1max: "0",
+			Qc2min: "0",
+			Qc2max: "0",
+			ramp_agc: "0",
+			ramp_10: "0",
+			ramp_30: "0",
+			ramp_q: "0",
+			apf: "0"
+		}
+	}else{
+		console.log('new bus length',(networkData.bus).length+1)
+		newBusGenObj[String(newID)] = {
+			longitude: "0",
+			latitude: "0",
+			bus_i: String(newID),
+			type: "3",
+			Pd: "0",
+			Qd: "0",
+			Gs: "0",
+			Bs: "0",
+			area: "1",
+			Vm: "1",
+			Va: "0",
+			baseKV: "135",
+			zone: "1",
+			Vmax: "1.05",
+			Vmin: "0.95"
+		}
 	}
-	// Save to tree
-	networkData.bus[newTreeId-1] = newNode;
 	// Click location to add
 	clickTarget = document.getElementById('svgContainer')
 	clickTarget.addEventListener('click', clickLocate, false)
@@ -633,47 +673,48 @@ function newNode() {
 function clickLocate() {
 	var xloc = event.pageX
 	var yloc = event.pageY
-	networkData.bus[newTreeId-1][newTreeId].longitude = xloc
-	networkData.bus[newTreeId-1][newTreeId].latitude = yloc
+	// Save to tree
+	networkData[newType][newID-1] = newBusGenObj
+	networkData[newType][newID-1][String(newID)].longitude = xloc
+	networkData[newType][newID-1][String(newID)].latitude = yloc
 	// Draw on svg
-	x = networkData.bus[newTreeId-1][newTreeId].longitude
-	y = networkData.bus[newTreeId-1][newTreeId].latitude
+	x = networkData[newType][newID-1][String(newID)].longitude
+	y = networkData[newType][newID-1][String(newID)].latitude
 	r = 2
-	console.log('adding circle', x,y,r,newTreeId)
-	addCircle(x,y,r,"bus_"+String(newTreeId),"bus")
+	addCircle(x,y,r,newType+"_"+String(newID),newType)
 	clickTarget.removeEventListener('click', clickLocate, false)
-	console.log('added and clicked')
+	console.log('added circle of type,'+newType+' with attributes',x,y,r,newID)
 }
 function newLink() {
 	if (selection.length === 2) {
-		var newTreeId = (networkData.branch).length
+		var newCompID = (networkData.branch).length
 		var fBus = parseInt(selection[0].id.split("_")[1])
 		var tBus = parseInt(selection[1].id.split("_")[1])
 		var newLink = {}
-		newLink[newTreeId] = {
-			r: 0.02,
-			x: 0.06,
-			b: 0.01,
-			rateA: 32.0,
-			rateB: 32.0,
-			rateC: 32.0,
-			ratio: 0.0,
-			angle: 0.0,
-			status: 1.0,
-			angmin: -360.0,
-			angmax: 360.0
+		newLink[String(newCompID)] = {
+			r: "0.02",
+			x: "0.06",
+			b: "0.03",
+			rateA: "130",
+			rateB: "130",
+			rateC: "130",
+			ratio: "0",
+			angle: "0",
+			status: "1",
+			angmin: "-360.0",
+			angmax: "360.0"
 		}
-		newLink[newTreeId]['fBus'] = fBus;
-		newLink[newTreeId]['tBus'] = tBus;
+		newLink[newCompID]['fBus'] = fBus;
+		newLink[newCompID]['tBus'] = tBus;
 		// Save to tree
-		networkData.branch[newTreeId-1] = newLink;
-		console.log('newLink:', newTreeId, networkData.branch[newTreeId-1])
+		networkData.branch[newCompID-1] = newLink;
+		console.log('newLink:', newCompID, networkData.branch[newCompID-1])
 		// Draw on svg
 		x1 = networkData.bus[fbus-1][String(fBus)].longitude
 		y1 = networkData.bus[fbus-1][String(fBus)].latitude
 		x2 = networkData.bus[tbus-1][String(tBus)].longitude
 		y2 = networkData.bus[tbus-1][String(tBus)].latitude
-		addLine(x1,y1,x2,y2,newTreeId,"branch")
+		addLine(x1,y1,x2,y2,newCompID,"branch")
 	}
 }
 function dragMode() {
