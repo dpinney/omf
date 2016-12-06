@@ -280,7 +280,7 @@ def showModel(owner, modelName):
 	else:
 		return redirect("/")
 
-@app.route("/newModel/<modelType>/<modelName>", methods=["POST"])
+@app.route("/newModel/<modelType>/<modelName>", methods=["POST","GET"])
 @flask_login.login_required
 def newModel(modelType, modelName):
 	''' Display the module template for creating a new model. '''
@@ -750,6 +750,10 @@ def newBlankFeeder(owner):
 	feederNum = request.form.get("feederNum",1)
 	if feederName == '': feederName = 'feeder'
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+	try: 
+		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")	
+	except: pass
 	removeFeeder(owner, modelName, feederNum)
 	newSimpleFeeder(owner, modelName, feederNum, False, feederName)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
