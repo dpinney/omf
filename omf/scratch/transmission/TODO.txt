@@ -25,14 +25,15 @@ XXX Send network name data back to model on a network refresh (to send data afte
 XXX Fix conversion cancel code.
 XXX Debug editors broken scrolol. The issue was the lack of HTML tag in the OMF implementation.
 XXX Render generators in editor.
-OOO Add new generators to 'add' menu (it must also create or use a specified a bus).
-OOO Update new link code.
-OOO Bug with clicking new gen/bus, not clicking on map, and clicking new gen/bus again should only create one new gen/bus.
+XXX Add new generators to 'add' menu. Should it also create a new or make a link to a specified bus? No, user specified.
 XXX Add unsavedChanges code.
+
+OOO Test/update new link code.
+OOO Test/update object doesn't remove it from network.
 OOO Add multiple selection/alt-clicking code.
 OOO Code new node coordinates to be absolute in svg and translate to lat/lon. http://stackoverflow.com/questions/10298658/mouse-position-inside-autoscaled-svg
-OOO Delete object doesn't remove it from network.
-OOO Disable editing of bus_i or bus attribute.
+OOO Editing bus_i or bus number requires changing branches and generators too. Disable changing this instead.
+OOO When creating new bus/gen, use the highest buses's bus_i attribute to assign a new id.
 OOO Create voltage chart. Add to transmission.html.
 OOO Update network name regex: Matpower fails if network name consists of only numbers.
 
@@ -42,6 +43,7 @@ OOO Test other cases.
 OOO Create clean interface to MATPOWER in omf/solvers.
 OOO Explore docker/non-vm functionality to speed up test process.
 OOO How to handle matpower file versioning: There are two versions: 1 and 2. 2 is newer and will be officially supported in this model. version 1 can be converted  by the loadcase and savecase built-in matpower functions later if enough users seem to use it. 
+
 Editor
 ============================
 OOO Bug: scroll doesn't work.
