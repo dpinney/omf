@@ -290,7 +290,7 @@ def newModel(modelType, modelName):
 	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering']:
 		newSimpleFeeder(User.cu(), modelName, 1, False, 'feeder1')
 		inputDict['feederName1'] = 'feeder1'
-	elif modelType in ['transmission']:
+	elif modelType in ['transmission', '_transmission']:
 		newSimpleNetwork(User.cu(), modelName, 1, False, 'network1')
 		inputDict['networkName1'] = 'network1'
 	with open(os.path.join(modelDir, "allInputData.json"),"w") as inputFile:
@@ -764,6 +764,10 @@ def newBlankNetwork(owner):
 	networkNum = request.form.get("networkNum",1)
 	if networkName == '': networkName = 'network1'
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+	try: 
+		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")	
+	except: pass
 	removeNetwork(owner, modelName, networkNum)
 	newSimpleNetwork(owner, modelName, networkNum, False, networkName)
 	writeToInput(modelDir, networkName, 'networkName'+str(networkNum))

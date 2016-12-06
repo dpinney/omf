@@ -21,7 +21,8 @@ XXX Write code in network.py to convert omf.json to .mat. Add code to transmissi
 XXX Add save, rename and new network functionality to transEdit.
 XXX Add the rename functionality to send network name back to model.
 XXX Fix travis network.py pathing error.
-OOO Send network name data back to model on a network refresh (to send data after new conversion/network creation).
+XXX Send network name data back to model on a network refresh (to send data after new conversion/network creation).
+XXX Fix conversion cancel code.
 OOO Debug editor scroll freezing.
 OOO Render generator data in editor.
 OOO Debug add node x/y positions translating to lat/lon.
