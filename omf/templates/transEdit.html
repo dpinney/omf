@@ -1,4 +1,7 @@
+<!DOCTYPE html>
+<html>
 <head>
+	<meta charset="UTF-8">
 	<title>Network #{{ networkNum }} from {{ modelName }}</title>
 	<script type='text/javascript' src='/static/svg-pan-zoom.js'></script>
 	<script type="text/javascript" src="/static/omf.js"></script>
@@ -178,7 +181,7 @@
 	<div style='background:navy; top:175px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div>
 	<div style='background:tomato; top:215px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Zoom level as a float?")))' title='Zoom To'>Z</div>
 	<!-- End Controls -->
-	<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
+	<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%;background-color:white;' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
 		<style type="text/css">
 			<![CDATA[
 			.house {fill:blue;}
