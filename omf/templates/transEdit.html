@@ -64,6 +64,7 @@
 		#saveButton {
 			float:right;
 		}
+		input[type='submit'] {padding:4px 6px 4px; float:right;}
 		input {
 			width:140px;
 		}
@@ -111,7 +112,6 @@
 		}
 		/* HEADER and MENU LINKS */
 		div#header{width:100%;min-width:1000px;height:25px;background:black;padding:0.6em 0 0.6em 0;}
-		div#headInnerBlock{width:1000px;height:40px;font-size:medium;color:white;margin: 4px auto 0 auto;}
 		div#menuLeft{height:40px;float:left;font-size:medium;color:white;margin-left:5px;}
 		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
 		div#fileDiv{width:55px;padding:0 0.9em 0 0.9em;float:right;}
@@ -137,9 +137,7 @@
 			-moz-box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 			box-shadow: 0 5px 10px rgba(0, 0, 0, 0.2);
 			-webkit-background-clip: padding-box; }
-		ul.menu.right {right: 0; left: auto; padding:0 0 0 0; overflow-y:scroll; overflow-x:hidden; height:550px;}
-		ul.menu.left {right: auto; left:auto; padding:0 0 0 0;}
-		ul.menu.center {right: auto; left:-45%;}
+		ul.menu.right {width:350px;right:0%; left: auto;}
 		ul.menu li {padding:0px;}
 		ul.menu li:hover {background:green;color:white;}
 		ul.menu li:hover a {color:white;}
@@ -168,6 +166,8 @@
 			white-space: nowrap;
 			display:inline-block;}
 		button.pill:hover{background:transparent;}
+		table.importOptions {font-size:10pt;width:100%; text-align:left; margin-left:5px;display:inline;border:none;background:transparent;color:black;}
+		table.importOptions tr td th {text-align:left;width:40%;border:none;background:transparent;color:black;}
 	</style>
 	<script>networkData={% if networkData %}{{networkData | safe}}{% else %}null{% endif %}</script>
 	<!-- <script>networkData="{{networkData}}"</script> -->
@@ -223,7 +223,7 @@
 				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
 				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
 				<table class='importOptions'>
-				<th>Blank Network</th>
+				<th style="background:transparent;color:black;">Blank Network</th>
 					<tr>
 						<td>Name</td>
 						<td><input type='text' id='networkNameNew' name='networkNameNew' required/></td>
@@ -243,7 +243,7 @@
 				<input type="hidden" id="networkNum" name="networkNum" value="{{ networkNum }}" />
 				<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
 				<table class='importOptions'>
-				<th>MATPOWER Conversion</th>
+				<th style="background:transparent;color:black;">MATPOWER Conversion</th>
 					<tr>
 						<td>Name</td>
 						<td><input type='text' id='networkNameM' name='networkNameM' required/></td>
