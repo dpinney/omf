@@ -184,13 +184,11 @@
 	<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%;background-color:white;' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
 		<style type="text/css">
 			<![CDATA[
-			.house {fill:blue;}
-			.triplex_meter {fill:orange;}
-			.underground_line {stroke:gray;}
 			line {stroke:black;}
 			line.parentChild {stroke:LightGrey;}
-			circle {stroke:white; fill:gray;}
-			line.selected, circle.selected {stroke:lime;}
+			circle {stroke:white; fill:blue;}
+			rect {stroke:white; fill:gray;}
+			line.selected, circle.selected, rect.selected {stroke:lime;}
 			]]>
 		</style>
 	</svg>
@@ -306,6 +304,18 @@ function saveSvg() {
 	b64 = btoa(svg)
 	window.location = 'data:image/svg+xml;base64,\n' + b64
 }
+function addRectangle(x,y,width, height, id,myClass) {
+	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
+	aRect = document.createElementNS('http://www.w3.org/2000/svg', 'rect')
+	aRect.setAttribute('x',x)
+	aRect.setAttribute('y',y)
+	aRect.setAttribute('width', width)
+	aRect.setAttribute('height', height)
+	aRect.setAttribute('id', id)
+	aRect.setAttribute('class', myClass)
+	aRect.setAttribute('stroke-width', 0.75)
+	svgOb.appendChild(aRect)
+}
 function addCircle(x,y,r,id,myClass) {
 	svgOb = document.getElementsByClassName('svg-pan-zoom_viewport')[0]
 	aCirc = document.createElementNS('http://www.w3.org/2000/svg', 'circle')
@@ -374,7 +384,8 @@ function buildNetwork() {
 	// Add circles after all lines
 	for (num in networkData.bus) {
 		anOb = networkData.bus[num][String(parseInt(num)+1)]
-		addCircle(anOb['longitude'],anOb['latitude'],2,"bus_"+String(parseInt(num)+1),"bus")
+		var width = 8
+		addRectangle(anOb['longitude']-width/2,anOb['latitude']-width/2,width,width,"bus_"+String(parseInt(num)+1),"bus")
 	}
 	// Draw generators over busses
 	for (num in networkData.gen) {
