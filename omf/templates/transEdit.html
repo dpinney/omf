@@ -475,11 +475,14 @@ function tableCreate(inputObject) {
 	headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
 	tbl.appendChild(headRow)
 	// Put the object in.
+	var notAllowed = ['bus_i', 'bus', 'fbus', 'tbus', 'latitude', 'longitude'] //disabled because doesn't render in real time, and on-change causes lines to sometimes render improperly.
 	for (key in inputObject) {
-		row = document.createElement('tr')
-		row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
-		row.innerHTML += '<td><input value="' + inputObject[key] + '"></input></td>'
-		tbl.appendChild(row)
+		if (!(notAllowed.indexOf(key) > -1)) {
+			row = document.createElement('tr')
+			row.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px" value=' + key + '></input></td>'
+			row.innerHTML += '<td><input value="' + inputObject[key] + '"></input></td>'
+			tbl.appendChild(row)
+		}
 	}
 	tabScroll.appendChild(tbl)
 }
