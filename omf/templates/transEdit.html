@@ -198,33 +198,23 @@
 			&nbsp;<span contenteditable="false" id='networkName' name='networkName' style="font-weight:bold;">{{ networkName }}</span>
 			<br>
 			&nbsp;from&#8220;<span id = 'modelNameHeader'>{{ modelName }}</span>&#8221;
-		</div>	
-		<div id="menuRight">	
-			<div id="addDiv">
-				<div class="buttonGroup">
-					<button id="addOps" class='pill' onclick='dropPill(this, "Add");'>Add ▾</button>
+		</div>
+		<div id="menuRight">
+			<div id="fileDiv">
+				<div class='buttonGroup'>
+					{% if is_admin or not public %}
+					<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
 					<ul id='newObjectMenu' class='menu right'>
-						<li><a href="javascript:newNode('bus');unsavedChanges=true">Bus</a></li>
-						<li><a href="javascript:newNode('gen');unsavedChanges=true">Generator</a></li>
-						<li><a href="javascript:newLink();unsavedChanges=true">Branch</a></li>
+						<li><a href='javascript:saveNetwork();'>Save</a></li>
+						<li><a href='javascript:renameNetwork();'>Rename</a></li>
+						<p style='font-weight:bold;margin: 10px 0 0 4px;'>New Network</p>
+						<li><a href='javascript:showModal("blankNetworkModal");'>Blank Network...</a></li>
+						<li><a href='javascript:showModal("matpowerModal");'>MATPOWER Conversion...</a></li>
 					</ul>
+					{% endif %}
 				</div>
 			</div>
 		</div>
-		<div id="fileDiv">
-			<div class='buttonGroup'>
-				{% if is_admin or not public %}
-				<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
-				<ul id='newObjectMenu' class='menu right'>
-					<li><a href='javascript:saveNetwork();'>Save</a></li>
-					<li><a href='javascript:renameNetwork();'>Rename</a></li>
-					<p style='font-weight:bold;margin: 10px 0 0 4px;'>New Network</p>
-					<li><a href='javascript:showModal("blankNetworkModal");'>Blank Network...</a></li>					
-					<li><a href='javascript:showModal("matpowerModal");'>MATPOWER Conversion...</a></li>
-				</ul>
-				{% endif %}
-			</div>
-		</div>			
 	</div>
 	<div id='blankNetworkModal' class= 'modal'>
 		<div class="modalContent" id='blankModal'>
@@ -245,7 +235,7 @@
 				</table>
 			</form>
 		</div>
-	</div>	
+	</div>
 	<div id="matpowerModal" class= 'modal'>
 		<div class="modalContent" id='milModal' style='width:350px;'>
 			<form onsubmit='event.preventDefault(); return startConversion("networkNameM", 2);' action="/matpowerImport/{{ owner }}" id='matpower' enctype='multipart/form-data' method='post'>
@@ -270,7 +260,7 @@
 			</form>
 			<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
 		</div>
-	</div>	
+	</div>
 	<div id='tableScroller'></div>
 	<p id="loadingMessage" style="font-size:60pt; text-align:center; width:100%; display:inline-block">Feeder Loading...</p>
 	</body>
@@ -393,7 +383,7 @@ function buildNetwork() {
 		var longitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['longitude']
 		var latitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['latitude']
 		addCircle(longitude, latitude,2,"gen_"+String(parseInt(num)+1),"gen")
-	}	
+	}
 }
 function mouseDown(event) {
 	downX = event.pageX
@@ -478,11 +468,11 @@ function tableCreate(inputObject) {
 	var clickID = event.target.id.split("_")[1]
 	whatClicked.innerHTML = '<th>'+clickType.charAt(0).toUpperCase()+clickType.slice(1);+'</th>'
 	whatClicked.innerHTML += '<th>'+String(clickID)+'</th>'
-	tbl.appendChild(whatClicked)	
+	tbl.appendChild(whatClicked)
 	// Put in the header.
 	headRow = document.createElement('tr')
-	headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button><button onclick="dragMode()">Drag</button></th>'
-	headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button><button onclick="deleteOb()">Delete Object</button></th>'
+	headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button></th>'
+	headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
 	tbl.appendChild(headRow)
 	// Put the object in.
 	for (key in inputObject) {
@@ -694,7 +684,6 @@ function clickLocate() {
 	r = 2
 	addCircle(x,y,r,newType+"_"+String(newID),newType)
 	clickTarget.removeEventListener('click', clickLocate, false)
-	console.log('added circle of type,'+newType+' with attributes',x,y,r,newID)
 }
 function newLink() {
 	if (selection.length === 2) {
@@ -719,7 +708,6 @@ function newLink() {
 		newLink[newCompID]['tBus'] = tBus;
 		// Save to tree
 		networkData.branch[newCompID-1] = newLink;
-		console.log('newLink:', newCompID, networkData.branch[newCompID-1])
 		// Draw on svg
 		x1 = networkData.bus[fbus-1][String(fBus)].longitude
 		y1 = networkData.bus[fbus-1][String(fBus)].latitude
@@ -727,24 +715,6 @@ function newLink() {
 		y2 = networkData.bus[tbus-1][String(tBus)].latitude
 		addLine(x1,y1,x2,y2,newCompID,"branch")
 	}
-}
-function dragMode() {
-	var clickTarget = document.getElementById('svgContainer')
-	clickTarget.addEventListener('click', dragLocate, false)
-	clickTarget.removeEventListener('click', dragLocate, false)
-}
-function dragLocate() {
-	var xloc = event.pageX
-	var yloc = event.pageY
-	var clickType = previousTarget.id.split("_")[0]
-	var clickID = previousTarget.id.split("_")[1]
-	if (clickType === 'bus'){
-		console.log('dragLocate() disabled due to bug.')
-		// networkData.[clickType][parseInt(clickID)-1][clickID].longitude = xloc
-		// networkData.[clickType][parseInt(clickID)-1][clickID].latitude = yloc
-	}
-	previousTarget.setAttribute('cx', xloc)
-	previousTarget.setAttribute('cy', yloc)
 }
 // Modal and conversion functions.
 function showModal(element){
@@ -771,7 +741,7 @@ function startConversion(elementName, nextAction) {
 				else{
 					gebi('matpower').submit();
 					showProgressDialog('spinner','Converting network','conversion');
-					setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.					
+					setTimeout(checkConversion,5000); // Set an initial delay because it takes time to create conversion files.
 				}
 			}
 		})
@@ -821,7 +791,7 @@ function showProgressDialog(progressType, dialogMessage, cancelType) {
 				removeProgressDialog()
 			}
 		};
-	}	
+	}
 }function removeProgressDialog() {
 	if (gebi('progressBackground')!=null)
 		document.body.removeChild(gebi('progressBackground'))
@@ -841,7 +811,7 @@ function finishPastActions(){
 		}
 	})
 	// Send network name to model and remove loading dialog.
-	window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);	
+	window.opener.$(window.opener.document).trigger('mainWindow', "{{ modelName }};"+"networkName{{networkNum}};"+lastNetworkName);
 	setTimeout(removeProgressDialog,500) // hard cap.
 }
 function checkConversion() {
