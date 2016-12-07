@@ -12,10 +12,10 @@ If you'd like to host your own copy of the OMF, please follow the [developer ins
 
 ### Example Screenshots
 
-WYSIWYG Circuit Editor
+WYSIWYG circuit editor:
 
-![Screenshot 1](https://raw.githubusercontent.com/wiki/dpinney/omf/images/home_screenshot1.jpg)
+![Screenshot 1](https://raw.githubusercontent.com/wiki/dpinney/omf/images/readme_DistributionFeeder.png)
 
-Output Example From a Solar Distributed Generation Model
+Output example From a solar distributed generation model:
 
-![Screenshot 2](https://raw.githubusercontent.com/wiki/dpinney/omf/images/home_screenshot2.JPG)
+![Screenshot 2](https://raw.githubusercontent.com/wiki/dpinney/omf/images/readme_energyBalance.png)
