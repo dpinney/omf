@@ -1,10 +1,10 @@
-### What is the OMF?
+### Overview
 
 The Open Modeling Framework (OMF) is a set of Python libraries for simulating power systems behavior with an emphasis on cost-benefit analysis of emerging technologies: distributed generation, storage, networked controls, etc.
 
 Full documentation is available on our [OMF wiki](https://github.com/dpinney/omf/wiki).
 
-### How to install?
+### Installation
 
 Anyone can sign up for a free account on our hosted production site http://www.omf.coop/.
 
