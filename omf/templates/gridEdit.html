@@ -435,7 +435,7 @@
 				<th>My Feeders</th>
 			</tr>	
 			<tr>
-				<td style="width:425px;">
+				<td style="width:425px;padding-bottom: 10px;">
 					<ul class= 'menu' style= "position: relative;background-color: #fefefe;border: 0px;box-shadow: 0 0 0; -web-kit-box-shadow: 0 0 0;">	
 						<!-- <li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","225px", "20px");'>Public Feeders</a></p></li> -->
 						<div id="pubFeeders">
@@ -480,7 +480,7 @@
 				</td>
 			</tr>
 		</table>
-		<a href="#" onclick='closeModal("loadModal");' style="text-align:center;font-size:12pt;display: block;color:black;">Cancel</a>
+		<a id='modalCancel' href="#" onclick='closeModal("loadModal")' style="text-align:center;font-size:10pt;">Cancel</a>
 	</div>
 </div>
 <div id= 'findModal' class= 'modal'>
@@ -824,7 +824,7 @@ function showProgressDialog(progressType, dialogMessage, cancelType) {
 		progContent.appendChild(progressText)
 	}
 	// If cancelType is not none, add an onclick even to the cancel button to cancel the calibration or conversion
-	if (cancelType != 'none'){
+	if (cancelType != 'none') {
 		cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
 		cancelBtn.onclick = function() {
 			if (cancelType == 'conversion'){
