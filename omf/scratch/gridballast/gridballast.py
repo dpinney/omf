@@ -5,7 +5,7 @@ from networkx.drawing.nx_agraph import graphviz_layout
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 import matplotlib
-matplotlib.pyplot.switch_backend('Agg')
+matplotlib.pyplot.switch_backend("Agg")
 import multiprocessing
 from os.path import join as pJoin
 from os.path import split as pSplit
@@ -19,10 +19,14 @@ import omf.feeder as feeder
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
 
-# Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"gridBallast.html"),"r") as tempFile:
+# # Our HTML template for the interface:
+# with open(pJoin(__metaModel__._myDir,"gridBallastDevice.html"),"r") as tempFile:
+# 	template = Template(tempFile.read())
+
+# HACK to get this working in scratch.
+with open(pJoin(__metaModel__._omfDir,"scratch","gridballast","gridballast.html"),"r") as tempFile:
 	template = Template(tempFile.read())
-	
+		
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
 	By default render a blank one for new input.
