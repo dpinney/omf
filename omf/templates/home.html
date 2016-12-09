@@ -59,29 +59,8 @@
 					<div class="buttonGroup">
 						<button name="newModelButton" id="newModelButton" class='pill' onclick='dropPill(this, "New Model")'>New Model ▾</button>
 						<ul class='menu right' style="width:150%">
-							<div id="menuText">Solar Models</div>
-							{% set count = 0 %}
 							{% for name in modelNames if not name.startswith('_') %}
-								{% if "solar" in name %}
-									<label class="tooltip"><li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li><span class="classic">{{ solarModelTips[count] }}</span></label>
-									{% set count = count + 1 %}
-								{% endif %}
-							{% endfor %}
-							<div id="menuText">Energy &amp; Demand</div>
-							{% set count = 0 %}
-							{% for name in modelNames if not name.startswith('_') %}
-								{% if "energy" in name or "demand" in name or "storage" in name or "sub" in name %}
-									<label class="tooltip"><li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li><span class="classic">{{ storageModelTips[count] }}</span></label>
-									{% set count = count + 1 %}
-								{% endif %}
-							{% endfor %}
-							<div id="menuText">More Models</div>
-							{% set count = 0 %}
-							{% for name in modelNames if not name.startswith('_') %}
-								{% if "solar" not in name and "energy" not in name and "demand" not in name and "storage" not in name and "sub" not in name%}
-									<label class="tooltip"><li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li><span class="classic">{{ miscModelTips[count] }}</span></label>
-									{% set count = count + 1 %}
-								{% endif %}
+								<li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li>
 							{% endfor %}
 						</ul>
 					</div>
