@@ -10,6 +10,8 @@ import signal
 import cymeToGridlab
 from omf.calibrate import omfCalibrate
 
+import omf
+
 app = Flask("web")
 URL = "http://www.omf.coop"
 _omfDir = os.path.dirname(os.path.abspath(__file__))
@@ -281,7 +283,7 @@ def newModel(modelType, modelName):
 	''' Display the module template for creating a new model. '''
 	modelDir = os.path.join(_omfDir, "data", "Model", User.cu(), modelName)
 	os.makedirs(modelDir)
-	inputDict = {"modelName" : modelName, "modelType" : modelType, "user":User.cu(), "created" : str(dt.datetime.now())}
+	inputDict = {"modelName" : modelName, "modelType" : modelType, "user":User.cu(), "created" : dt.datetime.now()}
 	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering']:
 		newSimpleFeeder(User.cu(), modelName, 1, False, 'feeder1')
 		inputDict['feederName1'] = 'feeder1'
@@ -609,7 +611,7 @@ def cancelScadaCalibration(modelName):
 	os.kill(pidNum, signal.SIGTERM)
 	os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
 	shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
-	return ('cancel',204)
+	return ('',204)
 
 # TODO: Check if rename mdb files worked
 @app.route("/cymeImport/<owner>", methods=["POST"])
@@ -803,14 +805,40 @@ def root():
 			mod["modelType"] = allInput.get("modelType","")
 			try:
 				mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
-				# mod["created"] = allInput.get("created","")
-				mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime))
+				print 'print',allInput.get("created","").timetuple()
+				mod["created"] = time.strftime("%Y-%m-%d %H:%M:%S",allInput.get("created","").timetuple())
+				# mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime))
 			except: # the model type was deprecated, so the getattr will fail.
 				mod["status"] = "stopped"
 				mod["editDate"] = "N/A"
 		except:
 			continue
-	return render_template("home.html", models = allModels, current_user = User.cu(), is_admin = isAdmin, modelNames = models.__all__)
+	# solar model tooltips
+	solarCashflow = omf.models.solarCashflow.tooltip
+	solarConsumer = omf.models.solarConsumer.tooltip
+	solarEngineering = omf.models.solarEngineering.tooltip
+	solarFinancial = omf.models.solarFinancial.tooltip
+	solarSunda = omf.models.solarSunda.tooltip
+	solarModelTips = [solarCashflow, solarConsumer, solarEngineering, solarFinancial, solarSunda]
+
+	#storage and demand model tooltips
+	demandResponse = omf.models.demandResponse.tooltip
+	storageArbitrage = omf.models.storageArbitrage.tooltip
+	storageDeferral = omf.models.storageDeferral.tooltip
+	storageDispatch = omf.models.storageDispatch.tooltip
+	storagePeakShave = omf.models.storagePeakShave.tooltip
+	storageModelTips = [demandResponse, storageArbitrage, storageDeferral, storageDispatch, storagePeakShave]
+
+	#misc model tooltips
+	circuitRealTime = omf.models.circuitRealTime.tooltip
+	cvrDynamic = omf.models.cvrDynamic.tooltip
+	cvrStatic = omf.models.cvrStatic.tooltip
+	gridlabMulti = omf.models.gridlabMulti.tooltip
+	pvWatts = omf.models.pvWatts.tooltip
+	voltageDrop = omf.models.voltageDrop.tooltip
+	miscModelTips = [circuitRealTime, cvrDynamic, cvrStatic, gridlabMulti, pvWatts, voltageDrop]
+
+	return render_template("home.html", models = allModels, current_user = User.cu(), is_admin = isAdmin, modelNames = models.__all__, solarModelTips = solarModelTips, storageModelTips = storageModelTips, miscModelTips = miscModelTips)
 
 @app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
 @flask_login.login_required
