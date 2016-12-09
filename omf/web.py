@@ -812,32 +812,14 @@ def root():
 				mod["editDate"] = "N/A"
 		except:
 			continue
-	# solar model tooltips
-	solarCashflow = omf.models.solarCashflow.tooltip
-	solarConsumer = omf.models.solarConsumer.tooltip
-	solarEngineering = omf.models.solarEngineering.tooltip
-	solarFinancial = omf.models.solarFinancial.tooltip
-	solarSunda = omf.models.solarSunda.tooltip
-	solarModelTips = [solarCashflow, solarConsumer, solarEngineering, solarFinancial, solarSunda]
-
-	#storage and demand model tooltips
-	demandResponse = omf.models.demandResponse.tooltip
-	storageArbitrage = omf.models.storageArbitrage.tooltip
-	storageDeferral = omf.models.storageDeferral.tooltip
-	storageDispatch = omf.models.storageDispatch.tooltip
-	storagePeakShave = omf.models.storagePeakShave.tooltip
-	storageModelTips = [demandResponse, storageArbitrage, storageDeferral, storageDispatch, storagePeakShave]
-
-	#misc model tooltips
-	circuitRealTime = omf.models.circuitRealTime.tooltip
-	cvrDynamic = omf.models.cvrDynamic.tooltip
-	cvrStatic = omf.models.cvrStatic.tooltip
-	gridlabMulti = omf.models.gridlabMulti.tooltip
-	pvWatts = omf.models.pvWatts.tooltip
-	voltageDrop = omf.models.voltageDrop.tooltip
-	miscModelTips = [circuitRealTime, cvrDynamic, cvrStatic, gridlabMulti, pvWatts, voltageDrop]
-
-	return render_template("home.html", models = allModels, current_user = User.cu(), is_admin = isAdmin, modelNames = models.__all__, solarModelTips = solarModelTips, storageModelTips = storageModelTips, miscModelTips = miscModelTips)
+	# model tooltips
+	modelTips = {}
+	for name in models.__all__:
+		try:
+			modelTips[name] = getattr(omf.models,name).tooltip
+		except:
+			pass
+	return render_template("home.html", models=allModels, current_user=User.cu(), is_admin=isAdmin, modelNames=models.__all__, modelTips=modelTips)
 
 @app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
 @flask_login.login_required
