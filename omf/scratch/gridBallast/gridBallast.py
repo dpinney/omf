@@ -25,7 +25,7 @@ from omf.weather import zipCodeToClimateName
 
 
 # HACK to get this working in scratch.
-with open(pJoin(__metaModel__._omfDir,"scratch","gridballast","gridballast.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._omfDir,"scratch","gridBallast","gridBallast.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 		
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
