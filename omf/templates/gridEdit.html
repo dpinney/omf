@@ -7,7 +7,6 @@
 	<link rel="shortcut icon" href="/static/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="/static/gridEdit.css"/>
 	<style>
-		ul.menu.rightFeeder {width:350px;right:0%; left: auto;}
 		div#menuLeft{max-height:40px;float:left;font-size:medium;color:white;margin:-5px 0 0 15px;max-width:430px;}
 		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
 		div#fileDiv{width:55px;padding:0 0.9em 0 0.9em;float:right;}
@@ -217,15 +216,14 @@
 			<div class='buttonGroup'>
 				{% if is_admin or not public %}
 				<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
-				<ul class='menu rightFeeder'>						
+				<ul class='menu right'>						
 					<li><a href='javascript:saveFeeder();'>Save</a></li>
 					<li><a href='javascript:renameFeeder();'>Rename</a></li>
 					<li><a href='javascript:showModal("loadModal");'>Load from Model...</a></li>
-					<p style='font-weight:bold;margin: 10px 0 0 4px;'>New Feeder</p>
-					<li><a href='javascript:showModal("blankFeederModal");'>Blank Feeder...</a></li>
-					<li><a href='javascript:showModal("milSoftModal");'>Milsoft Conversion...</a></li>
+					<li><a href='javascript:showModal("blankFeederModal");'>New Blank Feeder...</a></li>
+					<li><a href='javascript:showModal("milSoftModal");'>Windmil Conversion...</a></li>
 					<li><a href='javascript:showModal("gridlabModal");'>GridLAB-D Conversion...</a></li>
-					<li><a href='javascript:showModal("cymeModal");'>Cyme Conversion...</a></li>
+					<li><a href='javascript:showModal("cymeModal");'>CYMDIST Conversion...</a></li>
 				</ul>
 				{% endif %}
 			</div>
