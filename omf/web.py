@@ -5,12 +5,10 @@ from jinja2 import Template
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv
-import models, feeder, milToGridlab
+import models, feeder, network, milToGridlab
 import signal
 import cymeToGridlab
 from omf.calibrate import omfCalibrate
-
-import omf
 
 app = Flask("web")
 URL = "http://www.omf.coop"
@@ -37,13 +35,18 @@ def getDataNames():
 		for file in filenames:
 			if '.omd' in file and file != 'feeder.omd':
 				feeders.append({'name': file.strip('.omd'), 'model': dirpath.split('/')[-1]})
+	networks = []
+	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "scratch","transmission", "outData")):
+		for file in filenames:
+			if '.omt' in file and file != 'feeder.omt':
+				networks.append({'name': file.strip('.omt'), 'model': 'DRPOWER'})
 	# Public feeders too.
 	publicFeeders = []
 	for (dirpath, dirnames, filenames) in os.walk(os.path.join(_omfDir, "data","Model", "public")):
 		for file in filenames:
 			if '.omd' in file and file != 'feeder.omd':
-				publicFeeders.append({'name': file.strip('.omd'), 'model': dirpath.split('/')[-1]})
-	return {"climates":sorted(climates), "feeders":feeders, "publicFeeders":publicFeeders, "currentUser":currUser}
+				publicFeeders.append({'name': file.strip('.omd'), 'model': dirpath.split('/')[-1]})		
+	return {"climates":sorted(climates), "feeders":feeders, "networks":networks, "publicFeeders":publicFeeders, "currentUser":currUser}
 
 @app.before_request
 def csrf_protect():
@@ -277,16 +280,19 @@ def showModel(owner, modelName):
 	else:
 		return redirect("/")
 
-@app.route("/newModel/<modelType>/<modelName>", methods=["POST"])
+@app.route("/newModel/<modelType>/<modelName>", methods=["POST","GET"])
 @flask_login.login_required
 def newModel(modelType, modelName):
 	''' Display the module template for creating a new model. '''
 	modelDir = os.path.join(_omfDir, "data", "Model", User.cu(), modelName)
 	os.makedirs(modelDir)
-	inputDict = {"modelName" : modelName, "modelType" : modelType, "user":User.cu(), "created" : time.strftime("%Y-%m-%d %H:%M:%S",dt.datetime.now().timetuple())}
-	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering', 'gridBallast']:
+	inputDict = {"modelName" : modelName, "modelType" : modelType, "user":User.cu(), "created" : str(dt.datetime.now())}
+	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering']:
 		newSimpleFeeder(User.cu(), modelName, 1, False, 'feeder1')
 		inputDict['feederName1'] = 'feeder1'
+	elif modelType in ['transmission', '_transmission']:
+		newSimpleNetwork(User.cu(), modelName, 1, False, 'network1')
+		inputDict['networkName1'] = 'network1'
 	with open(os.path.join(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
 	thisModel = getattr(models, modelType)
@@ -405,6 +411,21 @@ def feederGet(owner, modelName, feederNum):
 	return render_template("gridEdit.html", feeders=yourFeeders, publicFeeders=publicFeeders, modelName=modelName, feederName=feederName, feederNum=feederNum, ref=request.referrer, is_admin=User.cu()=="admin", modelFeeder=False, public=owner=="public",
 		currUser = User.cu(), owner = owner)
 
+@app.route("/network/<owner>/<modelName>/<networkNum>")
+@flask_login.login_required
+def networkGet(owner, modelName, networkNum):
+	''' Editing interface for networks. '''
+	allData = getDataNames()
+	yourNetworks = allData["networks"]
+	publicNetworks = allData["networks"]
+	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+	networkName = json.load(open(modelDir + "/allInputData.json")).get('networkName'+str(networkNum))
+	networkPath = modelDir + "/" + networkName + ".omt"
+	with open(modelDir + "/" + networkName + ".omt", "r") as netFile:
+		networkData = json.dumps(json.load(netFile), indent=4)
+	return render_template("transEdit.html", networks=yourNetworks, publicNetworks=publicNetworks, modelName=modelName, networkData=networkData, networkName=networkName, networkNum=networkNum, ref=request.referrer, is_admin=User.cu()=="admin", public=owner=="public",
+		currUser = User.cu(), owner = owner)
+
 @app.route("/getComponents/")
 @flask_login.login_required
 def getComponents():
@@ -412,7 +433,7 @@ def getComponents():
 	components = {name[0:-5]:json.load(open(path + name)) for name in os.listdir(path)}
 	return json.dumps(components)
 
-@app.route("/checkConversion/<modelName>", methods=["POST","GET"]) 
+@app.route("/checkConversion/<modelName>", methods=["POST","GET"])
 def checkConversion(modelName):
 	print modelName
 	owner = User.cu()
@@ -479,6 +500,44 @@ def milImportBackground(owner, modelName, feederName, feederNum, stdString, seqS
 	os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
 	removeFeeder(owner, modelName, feederNum)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
+
+@app.route("/matpowerImport/<owner>", methods=["POST"])
+@flask_login.login_required
+def matpowerImport(owner):
+	''' API for importing a milsoft feeder. '''
+	modelName = request.form.get("modelName","")
+	networkName = str(request.form.get("networkNameM","network1"))
+	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
+	networkNum = request.form.get("networkNum",1)
+	# Delete existing .m files to not clutter model
+	path = "data/Model/"+owner+"/"+modelName
+	fileList = os.listdir(path)
+	for file in fileList:
+		if file.endswith(".m"): os.remove(path+"/"+file)
+	matFile = request.files["matFile"]
+	matFile.save(os.path.join(app.config['UPLOAD_FOLDER'],networkName+'.m'))
+	# TODO: Remove error files.
+	with open("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt", "w+") as conFile:
+		conFile.write("WORKING")
+	importProc = Process(target=matImportBackground, args=[owner, modelName, networkName, networkNum])
+	importProc.start()
+	return ('',204)
+
+def matImportBackground(owner, modelName, networkName, networkNum):
+	''' Function to run in the background for Milsoft import. '''
+	# TODO: Layout vars x/y scale left over from d3?
+	modelDir = "data/Model/"+owner+"/"+modelName
+	networkDir = modelDir+"/"+networkName+".m"
+	newFeeder = network.parse(networkDir, filePath=True)
+	nxG = network.netToNxGraph(newFeeder)
+	newFeeder = network.latlonToNet(nxG, newFeeder)
+	try: os.remove(networkDir)
+	except: pass
+	with open(networkDir.replace('.m','.omt'), "w") as outFile:
+		json.dump(newFeeder, outFile, indent=4)
+	os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+	removeNetwork(owner, modelName, networkNum)
+	writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
 
 @app.route("/gridlabdImport/<owner>", methods=["POST"])
 @flask_login.login_required
@@ -611,7 +670,7 @@ def cancelScadaCalibration(modelName):
 	os.kill(pidNum, signal.SIGTERM)
 	os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
 	shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
-	return ('',204)
+	return ('cancel',204)
 
 # TODO: Check if rename mdb files worked
 @app.route("/cymeImport/<owner>", methods=["POST"])
@@ -655,15 +714,30 @@ def cymeImportBackground(owner, modelName, feederName, feederNum, mdbNetString, 
 @app.route("/newSimpleFeeder/<owner>/<modelName>/<feederNum>/<writeInput>", methods=["POST", "GET"])
 def newSimpleFeeder(owner, modelName, feederNum=1, writeInput=False, feederName='feeder1'):
 	if User.cu() == "admin" or owner == User.cu():
-		workDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
+		modelDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
 		for i in range(2,6):
-			if not os.path.isfile(os.path.join(workDir,feederName+'.omd')):
+			if not os.path.isfile(os.path.join(modelDir,feederName+'.omd')):
 				with open("./static/SimpleFeeder.json", "r") as simpleFeederFile:
-					with open(os.path.join(workDir, feederName+".omd"), "w") as outFile:
+					with open(os.path.join(modelDir, feederName+".omd"), "w") as outFile:
 						outFile.write(simpleFeederFile.read())
 				break
 			else: feederName = 'feeder'+str(i)
-		if writeInput: writeToInput(workDir, feederName, 'feederName'+str(feederNum))
+		if writeInput: writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
+		return ('Success',204)
+	else: return ('Invalid Login', 204)
+
+@app.route("/newSimpleNetwork/<owner>/<modelName>/<networkNum>/<writeInput>", methods=["POST", "GET"])
+def newSimpleNetwork(owner, modelName, networkNum=1, writeInput=False, networkName='network1'):
+	if User.cu() == "admin" or owner == User.cu():
+		modelDir = os.path.join(_omfDir, "data", "Model", owner, modelName)
+		for i in range(2,6):
+			if not os.path.isfile(os.path.join(modelDir,networkName+'.omt')):
+				with open("./static/SimpleNetwork.json", "r") as simpleNetworkFile:
+					with open(os.path.join(modelDir, networkName+".omt"), "w") as outFile:
+						outFile.write(simpleNetworkFile.read())
+				break
+			else: networkName = 'network'+str(i)
+		if writeInput: writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
 		return ('Success',204)
 	else: return ('Invalid Login', 204)
 
@@ -676,10 +750,32 @@ def newBlankFeeder(owner):
 	feederNum = request.form.get("feederNum",1)
 	if feederName == '': feederName = 'feeder'
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+	try: 
+		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")	
+	except: pass
 	removeFeeder(owner, modelName, feederNum)
 	newSimpleFeeder(owner, modelName, feederNum, False, feederName)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 	return redirect(url_for('feederGet', owner=owner, modelName=modelName, feederNum=feederNum))
+
+@app.route("/newBlankNetwork/<owner>", methods=["POST"])
+@flask_login.login_required
+def newBlankNetwork(owner):
+	'''This function is used for creating a new blank network.'''
+	modelName = request.form.get("modelName","")
+	networkName = str(request.form.get("networkNameNew"))
+	networkNum = request.form.get("networkNum",1)
+	if networkName == '': networkName = 'network1'
+	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+	try: 
+		os.remove("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")
+		print "removed, ", ("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt")	
+	except: pass
+	removeNetwork(owner, modelName, networkNum)
+	newSimpleNetwork(owner, modelName, networkNum, False, networkName)
+	writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
+	return redirect(url_for('networkGet', owner=owner, modelName=modelName, networkNum=networkNum))
 
 @app.route("/feederData/<owner>/<modelName>/<feederName>/")
 @app.route("/feederData/<owner>/<modelName>/<feederName>/<modelFeeder>")
@@ -690,6 +786,15 @@ def feederData(owner, modelName, feederName, modelFeeder=False):
 		with open("data/Model/" + owner + "/" + modelName + "/" + feederName + ".omd", "r") as feedFile:
 			return feedFile.read()
 
+@app.route("/networkData/<owner>/<modelName>/<networkName>/")
+@flask_login.login_required
+def networkData(owner, modelName, networkName):
+	if User.cu()=="admin" or owner==User.cu() or owner=="public":
+		with open("data/Model/" + owner + "/" + modelName + "/" + networkName + ".omt", "r") as netFile:
+			thisNet = json.load(netFile)
+		return json.dumps(thisNet, indent=4)
+		# return jsonify(netFile.read())
+
 @app.route("/saveFeeder/<owner>/<modelName>/<feederName>", methods=["POST"])
 @flask_login.login_required
 def saveFeeder(owner, modelName, feederName):
@@ -698,6 +803,17 @@ def saveFeeder(owner, modelName, feederName):
 	if owner == User.cu() or "admin" == User.cu() or owner=="public":
 		with open("data/Model/" + owner + "/" + modelName + "/" + feederName + ".omd", "w") as outFile:
 			payload = json.loads(request.form.to_dict().get("feederObjectJson","{}"))
+			json.dump(payload, outFile, indent=4)
+	return ('Success',204)
+
+@app.route("/saveNetwork/<owner>/<modelName>/<networkName>", methods=["POST"])
+@flask_login.login_required
+def saveNetwork(owner, modelName, networkName):
+	''' Save network data. '''
+	print "Saving network for:%s, with model: %s, and network: %s"%(owner, modelName, networkName)
+	if owner == User.cu() or "admin" == User.cu() or owner=="public":
+		with open("data/Model/" + owner + "/" + modelName + "/" + networkName + ".omt", "w") as outFile:
+			payload = json.loads(request.form.to_dict().get("networkObjectJson","{}"))
 			json.dump(payload, outFile, indent=4)
 	return ('Success',204)
 
@@ -716,6 +832,23 @@ def renameFeeder(owner, modelName, oldName, feederName, feederNum):
 	elif not os.path.isfile(oldfeederDir): return ('Failure', 204)
 	os.remove(oldfeederDir)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
+	return ('Success',204)
+
+@app.route("/renameNetwork/<owner>/<modelName>/<oldName>/<networkName>/<networkNum>", methods=["POST"])
+@flask_login.login_required
+def renameNetwork(owner, modelName, oldName, networkName, networkNum):
+	''' rename a feeder. '''
+	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+	networkDir = os.path.join(modelDir, networkName+'.omt')
+	oldnetworkDir = os.path.join(modelDir, oldName+'.omt')
+	if not os.path.isfile(networkDir) and os.path.isfile(oldnetworkDir):
+		with open(oldnetworkDir, "r") as networkIn:
+			with open(networkDir, "w") as outFile:
+				outFile.write(networkIn.read())
+	elif os.path.isfile(networkDir): return ('Failure', 204)
+	elif not os.path.isfile(oldnetworkDir): return ('Failure', 204)
+	os.remove(oldnetworkDir)
+	writeToInput(modelDir, networkName, 'networkName'+str(networkNum))
 	return ('Success',204)
 
 @app.route("/removeFeeder/<owner>/<modelName>/<feederNum>", methods=["GET","POST"])
@@ -779,6 +912,29 @@ def cleanUpFeeders(owner, modelName):
 		json.dump(allInput, inputFile, indent = 4)
 	return redirect("/model/" + owner + "/" + modelName)
 
+@app.route("/removeNetwork/<owner>/<modelName>/<networkNum>", methods=["GET","POST"])
+@app.route("/removeNetwork/<owner>/<modelName>/<networkNum>/<networkName>", methods=["GET","POST"])
+@flask_login.login_required
+def removeNetwork(owner, modelName, networkNum, networkName=None):
+	'''Remove a network from input data.'''
+	if User.cu() == "admin" or owner == User.cu():
+		try:
+			modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
+			with open(modelDir + "/allInputData.json") as inJson:
+				allInput = json.load(inJson)
+			try:
+				networkName = str(allInput.get('networkName'+str(networkNum)))
+				os.remove(os.path.join(modelDir, networkName +'.omt'))
+			except: print "Couldn't remove network file in web.removeNetwork()."
+			allInput.pop("networkName"+str(networkNum))
+			with open(modelDir+"/allInputData.json","w") as inputFile:
+				json.dump(allInput, inputFile, indent = 4)
+			return ('Success',204)
+		except:
+			return ('Failed',204)
+	else: 
+		return ('Invalid Login', 204)
+
 ###################################################
 # OTHER FUNCTIONS
 ###################################################
@@ -805,21 +961,14 @@ def root():
 			mod["modelType"] = allInput.get("modelType","")
 			try:
 				mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
-				mod["created"] = allInput.get("created","")
-				# mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime))
+				# mod["created"] = allInput.get("created","")
+				mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime))
 			except: # the model type was deprecated, so the getattr will fail.
 				mod["status"] = "stopped"
 				mod["editDate"] = "N/A"
 		except:
 			continue
-	# model tooltips
-	modelTips = {}
-	for name in models.__all__:
-		try:
-			modelTips[name] = getattr(omf.models,name).tooltip
-		except:
-			pass
-	return render_template("home.html", models=allModels, current_user=User.cu(), is_admin=isAdmin, modelNames=models.__all__, modelTips=modelTips)
+	return render_template("home.html", models = allModels, current_user = User.cu(), is_admin = isAdmin, modelNames = models.__all__)
 
 @app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
 @flask_login.login_required
@@ -851,10 +1000,13 @@ def uniqObjName(objtype, owner, name, modelName=False):
 	elif objtype == "Feeder":
 		path = "data/Model/" + owner + "/" + modelName + "/" + name + ".omd"
 		if name == 'feeder': return jsonify(exists=True)
+	elif objtype == "Network":
+		path = "data/Model/" + owner + "/" + modelName + "/" + name + ".omt"
+		if name == 'feeder': return jsonify(exists=True)
 	return jsonify(exists=os.path.exists(path))
 
 if __name__ == "__main__":
 	URL = "http://localhost:5000"
 	template_files = ["templates/"+ x  for x in os.listdir("templates")]
 	model_files = ["models/" + x for x in os.listdir("models")]
-	app.run(debug=True, host='0.0.0.0', extra_files=template_files + model_files)
+	app.run(debug=True, extra_files=template_files + model_files)
