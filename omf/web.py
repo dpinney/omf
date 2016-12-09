@@ -287,7 +287,7 @@ def newModel(modelType, modelName):
 	modelDir = os.path.join(_omfDir, "data", "Model", User.cu(), modelName)
 	os.makedirs(modelDir)
 	inputDict = {"modelName" : modelName, "modelType" : modelType, "user":User.cu(), "created" : str(dt.datetime.now())}
-	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering']:
+	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering', 'gridBallast']:
 		newSimpleFeeder(User.cu(), modelName, 1, False, 'feeder1')
 		inputDict['feederName1'] = 'feeder1'
 	elif modelType in ['transmission', '_transmission']:
