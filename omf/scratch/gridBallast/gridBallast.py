@@ -19,9 +19,10 @@ import omf.feeder as feeder
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
 
-# # Our HTML template for the interface:
+# Our HTML template for the interface:
 # with open(pJoin(__metaModel__._myDir,"gridBallastDevice.html"),"r") as tempFile:
 # 	template = Template(tempFile.read())
+
 
 # HACK to get this working in scratch.
 with open(pJoin(__metaModel__._omfDir,"scratch","gridballast","gridballast.html"),"r") as tempFile:
