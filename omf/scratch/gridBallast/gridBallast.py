@@ -5,7 +5,7 @@ from networkx.drawing.nx_agraph import graphviz_layout
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 import matplotlib
-matplotlib.pyplot.switch_backend("Agg")
+matplotlib.pyplot.switch_backend('Agg')
 import multiprocessing
 from os.path import join as pJoin
 from os.path import split as pSplit
