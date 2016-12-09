@@ -16,9 +16,16 @@ from omf.weather import zipCodeToClimateName
 from flask import session
 import web
 
+tooltip = "The gridlabMulti model allows you to run multiple instances of GridLAB-D and compare their output visually."
+
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"gridlabMulti.html"),"r") as tempFile:
 	template = Template(tempFile.read())
+
+def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
+	''' Presence of this function indicates we can run the model quickly via a public interface. '''
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.

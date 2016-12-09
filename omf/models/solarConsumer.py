@@ -15,6 +15,9 @@ import omf.feeder as feeder
 from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
+tooltip = "The solarConsumer model calculates the expected costs for a consumer who buys solar in one of 3 different ways: through a PPA with a 3rd party, a community solar project, or buying a rooftop system."
+
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarConsumer.html"),"r") as tempFile:
 	template = Template(tempFile.read())

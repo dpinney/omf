@@ -7,7 +7,6 @@
 	<link rel="shortcut icon" href="/static/favicon.ico" />
 	<link rel="stylesheet" type="text/css" href="/static/gridEdit.css"/>
 	<style>
-		ul.menu.rightFeeder {width:350px;right:0%; left: auto;}
 		div#menuLeft{max-height:40px;float:left;font-size:medium;color:white;margin:-5px 0 0 15px;max-width:430px;}
 		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
 		div#fileDiv{width:55px;padding:0 0.9em 0 0.9em;float:right;}
@@ -217,15 +216,14 @@
 			<div class='buttonGroup'>
 				{% if is_admin or not public %}
 				<button id="fileOps" class='pill' onclick='dropPill(this, "File")'>File ▾</button>
-				<ul class='menu rightFeeder'>						
+				<ul class='menu right'>						
 					<li><a href='javascript:saveFeeder();'>Save</a></li>
 					<li><a href='javascript:renameFeeder();'>Rename</a></li>
 					<li><a href='javascript:showModal("loadModal");'>Load from Model...</a></li>
-					<p style='font-weight:bold;margin: 10px 0 0 4px;'>New Feeder</p>
-					<li><a href='javascript:showModal("blankFeederModal");'>Blank Feeder...</a></li>
-					<li><a href='javascript:showModal("milSoftModal");'>Milsoft Conversion...</a></li>
+					<li><a href='javascript:showModal("blankFeederModal");'>New Blank Feeder...</a></li>
+					<li><a href='javascript:showModal("milSoftModal");'>Windmil Conversion...</a></li>
 					<li><a href='javascript:showModal("gridlabModal");'>GridLAB-D Conversion...</a></li>
-					<li><a href='javascript:showModal("cymeModal");'>Cyme Conversion...</a></li>
+					<li><a href='javascript:showModal("cymeModal");'>CYMDIST Conversion...</a></li>
 				</ul>
 				{% endif %}
 			</div>
@@ -435,7 +433,7 @@
 				<th>My Feeders</th>
 			</tr>	
 			<tr>
-				<td style="width:425px;">
+				<td style="width:425px;padding-bottom: 10px;">
 					<ul class= 'menu' style= "position: relative;background-color: #fefefe;border: 0px;box-shadow: 0 0 0; -web-kit-box-shadow: 0 0 0;">	
 						<!-- <li><p style='font-weight:bold;margin: 4px 0 0 20px;'><a href='javascript:showDiv("pubFeeders","225px", "20px");'>Public Feeders</a></p></li> -->
 						<div id="pubFeeders">
@@ -480,7 +478,7 @@
 				</td>
 			</tr>
 		</table>
-		<a href="#" onclick='closeModal("loadModal");' style="text-align:center;font-size:12pt;display: block;color:black;">Cancel</a>
+		<a id='modalCancel' href="#" onclick='closeModal("loadModal")' style="text-align:center;font-size:10pt;">Cancel</a>
 	</div>
 </div>
 <div id= 'findModal' class= 'modal'>
@@ -824,7 +822,7 @@ function showProgressDialog(progressType, dialogMessage, cancelType) {
 		progContent.appendChild(progressText)
 	}
 	// If cancelType is not none, add an onclick even to the cancel button to cancel the calibration or conversion
-	if (cancelType != 'none'){
+	if (cancelType != 'none') {
 		cancelType = (typeof cancelType === 'undefined') ? 'no' : cancelType;
 		cancelBtn.onclick = function() {
 			if (cancelType == 'conversion'){

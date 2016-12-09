@@ -59,23 +59,8 @@
 					<div class="buttonGroup">
 						<button name="newModelButton" id="newModelButton" class='pill' onclick='dropPill(this, "New Model")'>New Model ▾</button>
 						<ul class='menu right' style="width:150%">
-							<div id="menuText">Solar Models</div>
 							{% for name in modelNames if not name.startswith('_') %}
-								{% if "solar" in name %}
 								<li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li>
-								{% endif %}
-							{% endfor %}
-							<div id="menuText">Energy &amp; Demand</div>
-							{% for name in modelNames if not name.startswith('_') %}
-								{% if "energy" in name or "demand" in name or "storage" in name or "sub" in name %}
-								<li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li>
-								{% endif %}
-							{% endfor %}
-							<div id="menuText">More Models</div>
-							{% for name in modelNames if not name.startswith('_') %}
-								{% if "solar" not in name and "energy" not in name and "demand" not in name and "storage" not in name and "sub" not in name%}
-								<li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li>
-								{% endif %}
 							{% endfor %}
 						</ul>
 					</div>
@@ -98,7 +83,7 @@
 						<th>Type</th>
 						<th>Runtime (H:M:S)</th>
 						<th>Status</th>
-						<th>Last Edit</th>
+						<th>Created</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -109,7 +94,7 @@
 						<td>{{ model.modelType }}</td>
 						<td>{{ model.runTime }}</td>
 						<td class="{{ model.status }}Status">{{ model.status }}</td>
-						<td>{{ model.editDate }}</td>
+						<td >{{ model.created }}</td>
 					</tr>
 					{% endfor %}
 				</tbody>

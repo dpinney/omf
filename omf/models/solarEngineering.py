@@ -19,6 +19,9 @@ import omf.feeder as feeder
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
 
+tooltip = "The solarEngineering model shows users the technical system impacts of solar on a feeder including DG power generated, regulator tap changes, capacitor activation, and meter voltages. "
+
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarEngineering.html"),"r") as tempFile:
 	template = Template(tempFile.read())

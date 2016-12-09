@@ -11,6 +11,7 @@ from jinja2 import Template
 from omf.models import __metaModel__
 from __metaModel__ import *
 
+tooltip = 'Write tooltip for storageDispatch'
 # # NOTE: used for debugging don't delete.
 # import matplotlib.pyplot as plt
 

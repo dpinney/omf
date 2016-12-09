@@ -8,6 +8,9 @@ from jinja2 import Template
 from omf.models import __metaModel__
 from __metaModel__ import *
 
+tooltip = "The demandResponse model takes in historical demand data (hourly for a year) and calculates what demand changes in residential customers could be expected due to demand response programs. "
+
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"demandResponse.html"),"r") as tempFile:
 	template = Template(tempFile.read())
