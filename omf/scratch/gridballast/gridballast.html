@@ -62,8 +62,8 @@
   <div id="input" class="content">
     <form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
       <div class="shortInput">
-        <label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-gridballast" target="blank">Help?</a></label>
-        <input type="text" id="modelType" name="modelType" value="gridballast" readonly/>
+        <label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-gridBallast" target="blank">Help?</a></label>
+        <input type="text" id="modelType" name="modelType" value="gridBallast" readonly/>
       </div>
       <div class="shortInput">
         <label>Model Name</label>
@@ -105,6 +105,54 @@
         <label>Simulation Start Date (YYYY-MM-DD)</label>
         <input type="text" id="simStartDate" name="simStartDate" required="required" pattern="^\d\d\d\d-\d\d-\d\d$"/>
       </div>
+      <!-- NEW GRIDBALLAST INPUTS -->
+      <div class="shortInput">
+        <label>Solar Penetration (%)</label>
+        <input type="text" id="solarPenetration" name="solarPenetration" required="required" pattern="^$"/>
+      </div>
+      <div>
+        <label>Upload additional weather data (.csv):</label>
+        <input type="file" accept=".csv" id="csvWeather" name="csvWeather">
+      </div>
+      <hr>
+      <div class="shortInput">
+        <label>Water Heater GridBallast Penetration (%)</label>
+        <input type="text" id="gridBallastPenetration" name="gridBallastPenetration" required="required" pattern="^$"/>
+      </div>
+      <div class="shortInput">
+        <label>Water Heater Circuit Penetration (%)</label>
+        <input type="text" id="circuitPenetration" name="circuitPenetration" required="required" pattern="^$"/>
+      </div>
+      <div class="shortInput">
+        <label>Frequency Drop Band</label>
+        <input type="text" id="frequencyDropBand" name="frequencyDropBand" required="required" pattern="^$"/>
+      </div>
+      <div class="shortInput">
+        <label>Ramp Start Time</label>
+        <input type="text" id="rampStart" name="rampStart" required="required" pattern="^$"/>
+      </div>
+      <div class="shortInput">
+        <label>Ramp End Time</label>
+        <input type="text" id="rampEnd" name="rampEnd" required="required" pattern="^$"/>
+      </div>
+      <hr>
+      <div class="shortInput">
+        <label>Event Type</label>
+        <select id="eventType" name="eventType">
+          <option value="ramping">Ramping</option>
+          <option value="unramping">Un-Ramping</option>
+          <option value="overfreq">Over-Frequency</option>
+          <option value="underfreq">Under-Frequency</option>
+        </select>
+      </div>
+      <div class="shortInput">
+        <label>Event Time</label>
+        <input type="text" id="eventTime" name="eventTime" required="required" pattern="^$"/>
+      </div>
+      <div class="shortInput">
+        <label>Event Length</label>
+        <input type="text" id="eventLength" name="eventLength" required="required" pattern="^$"/>
+      </div>
       <div class="wideInput" style="text-align:right">
         <button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
         <button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
@@ -120,11 +168,14 @@
   <div id ="stopIndicator" class="content stopped" style="visibility: hidden">
     <pre id='errorText'></pre>
     <script type="text/javascript">
-    if (typeof(allInputData.stderr) !== 'undefined') {  
-      gebi('stopIndicator').style.visibility = 'visible'
-      gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+      if (typeof(allInputData.stderr) !== 'undefined') {
+        gebi('stopIndicator').style.visibility = 'visible'
+        gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
     </script>
   </div>
+
+  <!-- Outputs -->
+
   <div id="output">
     <p class="reportTitle postRun">Power Consumption From Transmission System <a target="_self" class="toggle">Hide / Show</a></p>
     <div id="powerConsumptionReport" class="tightContent postRun">

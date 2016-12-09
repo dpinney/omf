@@ -20,7 +20,7 @@ from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"gridballast.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"gridBallast.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 	
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -468,11 +468,11 @@ def _tests():
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"feederName1": "superModel Tomorrow",
-		"modelType": "gridballast",
+		"modelType": "gridBallast",
 		"zipCode": "59001",
 		"simLength": "10",
 		"runTime": ""}
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated gridballast Test")
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated gridBallast Test")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
