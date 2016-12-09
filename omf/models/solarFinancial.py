@@ -14,6 +14,9 @@ import omf.feeder as feeder
 from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
+
+tooltip = "The solarFinancial model gives users the expected financial output of a PV system based on its costs and the amount energy it will likely produce."
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarFinancial.html"),"r") as tempFile:
 	template = Template(tempFile.read())

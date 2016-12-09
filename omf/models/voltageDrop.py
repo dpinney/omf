@@ -9,9 +9,12 @@ import networkx as nx
 from omf.models import __metaModel__
 from __metaModel__ import *
 
-# OMF imports
+# OMF imports 
 import omf.feeder as feeder
 from omf.solvers import gridlabd
+
+tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
+
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"voltageDrop.html"),"r") as tempFile:
@@ -19,6 +22,10 @@ with open(pJoin(__metaModel__._myDir,"voltageDrop.html"),"r") as tempFile:
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+
+def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
+	''' Presence of this function indicates we can run the model quickly via a public interface. '''
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''

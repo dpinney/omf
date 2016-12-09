@@ -8,6 +8,8 @@ from __metaModel__ import *
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 
+tooltip = 'Write tooltip for circuitRealTime'
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"circuitRealTime.html"),"r") as tempFile:
 	template = Template(tempFile.read())

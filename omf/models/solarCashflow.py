@@ -14,6 +14,9 @@ from omf.solvers import nrelsam2013
 import random
 from omf.weather import zipCodeToClimateName
 
+tooltip = "The solarCashflow model allows a utility to calculate what impact member owned solar systems will have on their costs."
+
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarCashflow.html"),"r") as tempFile:
 	template = Template(tempFile.read())

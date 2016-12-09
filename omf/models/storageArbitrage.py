@@ -10,6 +10,8 @@ from jinja2 import Template
 from omf.models import __metaModel__
 from __metaModel__ import *
 
+tooltip = "The storageArbitrage model calculates the costs and benefits of using energy storage to buy energy in times of low prices and sell that energy at times of high prices."
+
 # # NOTE: used for debugging don't delete.
 # import matplotlib.pyplot as plt
 

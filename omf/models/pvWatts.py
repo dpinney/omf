@@ -12,6 +12,9 @@ import omf.feeder as feeder
 from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
+tooltip = "The pvWatts model runs the NREL pvWatts tool for quick estimation of solar panel output."
+
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"pvWatts.html"),"r") as tempFile:
 	template = Template(tempFile.read())

@@ -319,3 +319,7 @@ function createModelName(modelType, modelName) {
 		})
 	}
 }
+
+function showSaveAlert(url){
+	alert("To return to this model in the future, save this url: " + url)
+}

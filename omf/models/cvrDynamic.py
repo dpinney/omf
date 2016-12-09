@@ -16,6 +16,9 @@ import omf.feeder as feeder
 import omf.calibrate as calibrate
 from omf.solvers import gridlabd
 
+tooltip = "The cvrDynamic model calculates the expected costs and benefits for implementing conservation voltage reduction on a given feeder circuit."
+
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"cvrDynamic.html"),"r") as tempFile:
 	template = Template(tempFile.read())

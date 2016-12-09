@@ -15,6 +15,9 @@ from __metaModel__ import *
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 
+tooltip = "The cvrStatic model calculates the expected costs and benefits (including energy, loss, and peak reductions) for implementing conservation voltage reduction on a given feeder circuit."
+
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"cvrStatic.html"),"r") as tempFile:
 	template = Template(tempFile.read())

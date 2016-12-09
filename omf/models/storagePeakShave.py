@@ -10,6 +10,8 @@ from jinja2 import Template
 from omf.models import __metaModel__
 from __metaModel__ import *
 
+tooltip = "The storagePeakShave model calculates the value of a distribution utility deploying energy storage based on three possible battery dispatch strategies."
+
 # # NOTE: used for debugging don't delete.
 # import matplotlib.pyplot as plt
 

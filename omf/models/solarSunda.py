@@ -15,6 +15,9 @@ import omf.feeder as feeder
 from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
+tooltip = "The solarSunda model allows you to run multiple instances of the SUNDA Solar Costing Financing Screening Tool and compare their output visually."
+
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,"solarSunda.html"),"r") as tempFile:
 	template = Template(tempFile.read())

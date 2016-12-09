@@ -10,6 +10,8 @@ from jinja2 import Template
 from omf.models import __metaModel__
 from __metaModel__ import *
 
+tooltip = "The storageDeferral model calculates the amount of energy storage capacity needed to reduce the load on a substation transformer or line below a user-defined limi"
+
 # # NOTE: used for debugging don't delete.
 # import matplotlib.pyplot as plt
 
