@@ -162,7 +162,7 @@ def netToMat(inNet, networkName):
 		matStr.append('\n')
 	return matStr
 
-def _tests():
+def _secretTests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
 	networkJson = parse(pJoin(os.getcwd(),'scratch','transmission','inData','matpower6.0b1',networkName+'.m'), filePath=True)
@@ -190,4 +190,4 @@ def _tests():
 
 
 if __name__ == '__main__':
-	_tests()
+	_secretTests()
