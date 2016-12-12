@@ -8,6 +8,7 @@ import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, bot
 import models, feeder, network, milToGridlab
 import signal
 import cymeToGridlab
+import omf
 from omf.calibrate import omfCalibrate
 
 app = Flask("web")
@@ -961,14 +962,21 @@ def root():
 			mod["modelType"] = allInput.get("modelType","")
 			try:
 				mod["status"] = getattr(models, mod["modelType"]).getStatus(modPath)
-				# mod["created"] = allInput.get("created","")
-				mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime))
+				creation = allInput.get("created","")
+				mod["created"] = creation[0:creation.rfind('.')]
+				# mod["editDate"] = time.strftime("%Y-%m-%d %H:%M:%S", time.gmtime(os.stat(modPath).st_ctime))
 			except: # the model type was deprecated, so the getattr will fail.
 				mod["status"] = "stopped"
 				mod["editDate"] = "N/A"
 		except:
 			continue
-	return render_template("home.html", models = allModels, current_user = User.cu(), is_admin = isAdmin, modelNames = models.__all__)
+	modelTips = {}
+ 	for name in models.__all__:
+ 		try:
+ 			modelTips[name] = getattr(omf.models,name).tooltip
+ 		except:
+ 			pass
+  	return render_template("home.html", models=allModels, current_user=User.cu(), is_admin=isAdmin, modelNames=models.__all__, modelTips=modelTips)
 
 @app.route("/delete/<objectType>/<owner>/<objectName>", methods=["POST"])
 @flask_login.login_required

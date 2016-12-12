@@ -60,7 +60,7 @@
 						<button name="newModelButton" id="newModelButton" class='pill' onclick='dropPill(this, "New Model")'>New Model ▾</button>
 						<ul class='menu right' style="width:150%">
 							{% for name in modelNames if not name.startswith('_') %}
-								<li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li>
+										<label class="tooltip"><li><a href="javascript:createModelName('{{name}}');">{{ name }}</a></li><span class="classic">{{ modelTips[name] }}</span></label>
 							{% endfor %}
 						</ul>
 					</div>
