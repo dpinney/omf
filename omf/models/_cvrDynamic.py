@@ -16,15 +16,17 @@ import omf.feeder as feeder
 import omf.calibrate as calibrate
 from omf.solvers import gridlabd
 
+# Model metadata:
 tooltip = "The cvrDynamic model calculates the expected costs and benefits for implementing conservation voltage reduction on a given feeder circuit."
-
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"cvrDynamic.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,"_cvrDynamic.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, modelName=modelName)
 
 def returnMag(complexStr):
 	''' real and imaginary parts of a complex number and returns magnitude
@@ -564,7 +566,7 @@ def _tests():
 	"runs local tests for dynamic CVR model"
 	#creating a work directory and initializing data
 	inData = { "modelName": "Automated DynamicCVR Testing",
-		"modelType": "cvrDynamic",
+		"modelType": modelName,
 		"user": "admin",
 		"feederName1": "ABEC Frank pre calib",
 		"runTime": "",

@@ -165,11 +165,15 @@
 				</table>
 			</div>
 			<div class="wideInput" style="text-align:right">
+				{% if not quickRender %}
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				{% endif %}
+				{% if quickRender %}
 				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
 				<button id="saveButton" class="postRunInline" style = "background-color: orange;"onclick="event.preventDefault(); return showSaveAlert(window.location.href)">Save</button>
+				{% endif %}
 				<button id="runButton" class="postRunInline stoppedInline" type="submit">Run Model</button>
 			</div>
 		</form>

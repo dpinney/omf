@@ -23,9 +23,9 @@ tooltip = "The gridlabMulti model allows you to run multiple instances of GridLA
 with open(pJoin(__metaModel__._myDir,"gridlabMulti.html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	''' Presence of this function indicates we can run the model quickly via a public interface. '''
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
+# def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
+# 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
+# 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
