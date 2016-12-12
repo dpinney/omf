@@ -268,7 +268,8 @@ class cd:
 		os.chdir(self.savedPath)
 
 
-def _tests():
+def _secretTests():
+	# TODO: change name back to tests.
 	for networkName in ['case5', 'case9', 'case30', 'case57', 'case300']:
 		# Variables
 		inData = {"user" : "admin", "modelName" : "Automated Transmission Model Testing",
@@ -295,4 +296,4 @@ def _tests():
 		renderAndShow(template, modelDir = modelDir)
 
 if __name__ == '__main__':
-	_tests()
+	_secretTests()
