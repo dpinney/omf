@@ -7,7 +7,7 @@ from os.path import split as pSplit
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
 
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}, quickRender=False):
+def renderTemplate(template, modelName, modelDir="", absolutePaths=False, datastoreNames={}, quickRender=False):
 	''' Render the model template to an HTML string.
 	By default render a blank one for new input.
 	If modelDir is valid, render results post-model-run.
@@ -35,10 +35,10 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames, quickRender=quickRender)
 
-def renderAndShow(template, modelDir="", datastoreNames={}):
+def renderAndShow(template, modelName, modelDir="", datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
 	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
-		temp.write(renderTemplate(template, modelDir=modelDir, absolutePaths=True))
+		temp.write(renderTemplate(template, modelName, modelDir=modelDir, absolutePaths=True))
 		temp.flush()
 		webbrowser.open("file://" + temp.name)
 

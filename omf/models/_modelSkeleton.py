@@ -21,7 +21,7 @@ with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames,modelName=modelName)
+	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -87,11 +87,11 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	renderAndShow(template)
+	renderAndShow(template, modelName)
 	# Run the model.
 	run(modelDir, inData)
 	# Show the output.
-	renderAndShow(template, modelDir = modelDir)
+	renderAndShow(template, modelName, modelDir = modelDir)
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelDir)

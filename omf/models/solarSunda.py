@@ -27,7 +27,7 @@ with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	#only has A,  and V
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames,modelName=modelName)
+	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
 def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
@@ -678,7 +678,7 @@ def _tests():
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
-	renderAndShow(template, modelDir = modelLoc)
+	renderAndShow(template, modelName, modelDir = modelLoc)
 	# # Delete the model.
 	# time.sleep(2)
 	# shutil.rmtree(modelLoc)

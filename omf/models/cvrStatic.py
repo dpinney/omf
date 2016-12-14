@@ -25,8 +25,8 @@ tooltip = "The cvrStatic model calculates the expected costs and benefits (inclu
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, modelName=modelName)
+def renderTemplate(template, modelName, modelDir="", absolutePaths=False, datastoreNames={}):
+	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
 def _roundOne(x,direc):
 	''' Round x in direc (up/down) to 1 sig fig. '''
@@ -499,11 +499,11 @@ def _tests():
 	except: pass
 	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
 	# No-input template.
-	renderAndShow(template)
+	renderAndShow(template, modelName)
 	# Run the model.
 	runForeground(modelLoc, inData)
 	# Show the output.
-	renderAndShow(template, modelDir=modelLoc)
+	renderAndShow(template,modelName, modelDir=modelLoc)
 
 if __name__ == '__main__':
 	_tests()

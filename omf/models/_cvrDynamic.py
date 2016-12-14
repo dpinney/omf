@@ -26,7 +26,7 @@ with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, modelName=modelName)
+	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
 def returnMag(complexStr):
 	''' real and imaginary parts of a complex number and returns magnitude
@@ -592,7 +592,7 @@ def _tests():
 	except: pass
 	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelDir,inData["feederName1"]+'.omd'))
 	runForeground(modelDir, inData)
-	renderAndShow(template, modelDir=modelDir)
+	renderAndShow(template, modelName, modelDir=modelDir)
 
 if __name__ == '__main__':
 	_tests()

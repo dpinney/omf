@@ -57,8 +57,8 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 	except IOError:
 		pass
 	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames, modelName=modelName)
+		allOutputData=allOutputData, modelStatus=getStatus(modelDir),modelName=modelName, pathPrefix=pathPrefix,
+		datastoreNames=datastoreNames)
 
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
@@ -490,14 +490,14 @@ def _tests():
 	except: pass
 	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
 	# No-input template.
-	renderAndShow(template)
+	renderAndShow(template, modelName)
 	# Run the model.
 	runForeground(modelLoc, inData)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)
 	# Show the output.
-	renderAndShow(template, modelDir=modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 	# Delete the model.
 	# shutil.rmtree(modelLoc)
 

@@ -11,14 +11,14 @@ sys.path.append(__metaModel__._omfDir)
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
-tooltip = 'Write tooltip for circuitRealTime'
+tooltip = 'Real time circuit simulator'
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,modelName + ".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, modelName=modelName)
+	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
 
 def run(modelDir, inputDict):
@@ -72,11 +72,11 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	renderAndShow(template)
+	renderAndShow(template,modelName)
 	# Run the model.
 	run(modelLoc, inData)
 	# Show the output.
-	renderAndShow(template, modelDir = modelLoc)
+	renderAndShow(template, modelName, modelDir = modelLoc)
 
 if __name__ == '__main__':
 	_tests()
