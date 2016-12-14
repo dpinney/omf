@@ -19,11 +19,14 @@ import omf.feeder as feeder
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The solarEngineering model shows users the technical system impacts of solar on a feeder including DG power generated, regulator tap changes, capacitor activation, and meter voltages. "
 
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"solarEngineering.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 	
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -55,7 +58,7 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 		pass
 	return template.render(allInputData=allInputData,
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames)
+		datastoreNames=datastoreNames, modelName=modelName)
 
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
@@ -471,7 +474,7 @@ def _tests():
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"feederName1": "superModel Tomorrow",
-		"modelType": "solarEngineering",
+		"modelType": modelName,
 		"zipCode": "59001",
 		"simLength": "10",
 		"runTime": ""}

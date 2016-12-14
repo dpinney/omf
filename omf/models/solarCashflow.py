@@ -14,15 +14,18 @@ from omf.solvers import nrelsam2013
 import random
 from omf.weather import zipCodeToClimateName
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The solarCashflow model allows a utility to calculate what impact member owned solar systems will have on their costs."
 
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"solarCashflow.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, modelName=modelName)
 
 def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
@@ -401,7 +404,7 @@ def _tests():
 	"novSale": "47173", "novKWh": "41668828", "novRev": "5551288", "novKWhT": "65008851", "novRevT": "8228072",
 	"decSale": "47081", "decKWh": "53354283", "decRev": "7014717", "decKWhT": "73335526", "decRevT": "9385203" }
 	inData = {
-		"modelType": "solarCashflow",
+		"modelType": modelName,
 		"zipCode": "64735",
 		"runTime": "",
 		# Single data point

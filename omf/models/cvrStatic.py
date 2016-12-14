@@ -15,15 +15,18 @@ from __metaModel__ import *
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The cvrStatic model calculates the expected costs and benefits (including energy, loss, and peak reductions) for implementing conservation voltage reduction on a given feeder circuit."
 
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"cvrStatic.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, modelName=modelName)
 
 def _roundOne(x,direc):
 	''' Round x in direc (up/down) to 1 sig fig. '''
@@ -469,7 +472,7 @@ def _tests():
 	# 	"octAvg": 1750000.0, "octPeak": 2340000.0,
 	# 	"novAvg": 2210000.0, "novPeak": 3550000.0,
 	# 	"decAvg": 2480000.0, "decPeak": 3370000.0}
-	inData = {"modelType": "cvrStatic",
+	inData = {"modelType": modelName,
 		"feederName1": "ABEC Columbia",
 		"runTime": "",
 		"capitalCost": 30000,

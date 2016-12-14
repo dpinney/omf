@@ -15,16 +15,19 @@ import omf.feeder as feeder
 from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The solarSunda model allows you to run multiple instances of the SUNDA Solar Costing Financing Screening Tool and compare their output visually."
 
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"solarSunda.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 	#only has A,  and V
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames,modelName=modelName)
 
 def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
@@ -627,7 +630,7 @@ def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	# TODO: Fix inData because it's out of date.
-	inData = {"modelType": "solarSunda",
+	inData = {"modelType": modelName,
 		#Cooperative
 		"zipCode": "64735",
 		"inverterSize":"1000",

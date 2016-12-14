@@ -13,15 +13,18 @@ from __metaModel__ import *
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
 
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"voltageDrop.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames,modelName=modelName)
 
 # def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 # 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
@@ -165,7 +168,7 @@ def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {"feederName1": "Olin Barre Geo",
-		"modelType": "voltageDrop",
+		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial"}
 	modelLoc = pJoin(workDir,"admin","Automated voltageDrop Testing")

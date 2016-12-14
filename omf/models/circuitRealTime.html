@@ -32,7 +32,7 @@
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="circModelBox">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models:-circuitRealTime" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="circuitRealTime" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="circModelBox">
 				<label>Model Name</label><br>

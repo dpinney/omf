@@ -10,17 +10,20 @@ from jinja2 import Template
 from omf.models import __metaModel__
 from __metaModel__ import *
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The storageDeferral model calculates the amount of energy storage capacity needed to reduce the load on a substation transformer or line below a user-defined limi"
 
 # # NOTE: used for debugging don't delete.
 # import matplotlib.pyplot as plt
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"storageDeferral.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames,modelName=modelName)
 
 def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
@@ -335,7 +338,7 @@ def _tests():
 		"discountRate": "2.5",
 		"created": "2015-06-12 17:20:39.308239",
 		"dischargeRate": "5",
-		"modelType": "storageDeferral",
+		"modelType": modelName,
 		"chargeRate": "5",
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","uploads","FrankScadaValidCSV.csv")).read(),
 		"fileName": "FrankScadaValidCSV.csv",

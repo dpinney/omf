@@ -12,12 +12,16 @@ import feeder
 from solvers import nrelsam2013
 from weather import zipCodeToClimateName
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
+
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"_modelSkeleton.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames,modelName=modelName)
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''

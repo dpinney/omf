@@ -22,7 +22,7 @@ fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"_cvrDynamic.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):

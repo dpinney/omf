@@ -39,7 +39,7 @@
 		<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-cvrStatic" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="cvrStatic" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			<div class="shortInput">
 				<label>Model Name</label>

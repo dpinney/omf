@@ -16,11 +16,14 @@ from omf.weather import zipCodeToClimateName
 from flask import session
 import web
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The gridlabMulti model allows you to run multiple instances of GridLAB-D and compare their output visually."
 
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"gridlabMulti.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 # def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -63,7 +66,7 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 		pass
 	return template.render(allInputData=allInputData,
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames, feederIDs = feederIDs, feederList = feederList)
+		datastoreNames=datastoreNames, feederIDs = feederIDs, feederList = feederList, modelName=modelName)
 
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
@@ -446,7 +449,7 @@ def _tests():
 		"feederName30": "Simple Market System Indy Solar",
 		"feederName31": "Simple Market System",
 		# "feederName": "Battery 13 Node Distributed",
-		"modelType": "gridlabMulti",
+		"modelType": modelName,
 		"zipCode": "64735",
 		"simLength": "24",
 		"runTime": ""}

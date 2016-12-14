@@ -15,15 +15,18 @@ import omf.feeder as feeder
 from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The solarConsumer model calculates the expected costs for a consumer who buys solar in one of 3 different ways: through a PPA with a 3rd party, a community solar project, or buying a rooftop system."
 
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"solarConsumer.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames,modelName=modelName)
 
 def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
@@ -275,7 +278,7 @@ def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {
-		'modelType':'solarConsumer',
+		'modelType':modelName,
 		'zipCode':64735,
 		'SystemSize':9,
 		'meteringType':

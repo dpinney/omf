@@ -12,15 +12,18 @@ import omf.feeder as feeder
 from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The pvWatts model runs the NREL pvWatts tool for quick estimation of solar panel output."
 
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"pvWatts.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, modelName=modelName)
 
 def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
@@ -172,7 +175,7 @@ def _tests():
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"modelType": "pvWatts",
+		"modelType": modelName,
 		"zipCode": "64735",
 		"simLength": "100",
 		"systemSize":"10",

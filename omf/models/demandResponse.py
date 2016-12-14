@@ -8,15 +8,18 @@ from jinja2 import Template
 from omf.models import __metaModel__
 from __metaModel__ import *
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The demandResponse model takes in historical demand data (hourly for a year) and calculates what demand changes in residential customers could be expected due to demand response programs. "
 
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"demandResponse.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, modelName=modelName)
 
 def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
@@ -467,7 +470,7 @@ def _tests():
 	# Variables Those have been change based on the input in the .html
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {
-		"modelType":"demandResponse",
+		"modelType":modelName,
 		"retailCost": "0.1",
 		"WholesaleEnergyCost": "0.07",
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","uploads","FrankScadaValidCSV.csv")).read(),

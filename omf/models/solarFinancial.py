@@ -14,15 +14,17 @@ import omf.feeder as feeder
 from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
 
-
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The solarFinancial model gives users the expected financial output of a PV system based on its costs and the amount energy it will likely produce."
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"solarFinancial.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir, modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, modelName=modelName)
 
 def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
@@ -272,7 +274,7 @@ def _tests():
 	# TODO: Fix inData because it's out of date.
 	inData = {"simStartDate": "2013-01-01",
 		"simLengthUnits": "hours",
-		"modelType": "solarFinancial",
+		"modelType": modelName,
 		"zipCode": "64735",
 		"simLength": "8760",
 		"systemSize":"100",

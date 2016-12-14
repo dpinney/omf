@@ -31,7 +31,7 @@
 		<form name="inputForm" {% if quickRender %}action="/quickRun/"{% else %} action="/runModel/"{% endif %} onsubmit="event.preventDefault(); return isFormValid();" method="post">
 			<div class="shortInput">
 				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-pvWatts" target="blank">Help?</a></label>
-				<input type="text" id="modelType" name="modelType" value="pvWatts" readonly/>
+				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			{% if quickRender %}
 			<div class="shortInput">

@@ -8,14 +8,17 @@ from __metaModel__ import *
 # OMF imports
 sys.path.append(__metaModel__._omfDir)
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = 'Write tooltip for circuitRealTime'
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"circuitRealTime.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName + ".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
+	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, modelName=modelName)
 
 
 def run(modelDir, inputDict):
@@ -60,7 +63,7 @@ def cancel(modelDir):
 def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = {"modelType": "circuitRealTime","circuitFile" : "zenerreffollow.txt"}
+	inData = {"modelType": modelName,"circuitFile" : "zenerreffollow.txt"}
 	modelLoc = pJoin(workDir,"admin","Automated realTimeCircuit Testing")
 	# Blow away old test results if necessary.
 	try:

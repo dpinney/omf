@@ -21,8 +21,12 @@ import network
 from solvers import nrelsam2013
 from weather import zipCodeToClimateName
 
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
+
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"_transmission.html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName + ".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 # def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
@@ -52,7 +56,7 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 	else:
 		pathPrefix = ""
 	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix, datastoreNames=datastoreNames)
+		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix, datastoreNames=datastoreNames, modelName=modelName)
 
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
