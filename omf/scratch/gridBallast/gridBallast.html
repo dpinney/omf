@@ -107,14 +107,9 @@
       </div>
 
       <!-- NEW GRIDBALLAST INPUTS -->
-
       <div class="shortInput">
         <label>Solar Penetration (%)</label>
         <input type="text" id="solarPenetration" name="solarPenetration"/>
-      </div>
-      <div>
-        <label>Upload additional weather data (.csv):</label>
-        <input type="file" accept=".csv" id="csvWeather" name="csvWeather">
       </div>
       <hr>
       <div class="shortInput">
@@ -128,14 +123,6 @@
       <div class="shortInput">
         <label>Frequency Drop Band</label>
         <input type="text" id="frequencyDropBand" name="frequencyDropBand"/>
-      </div>
-      <div class="shortInput">
-        <label>Ramp Start Time</label>
-        <input type="text" id="rampStart" name="rampStart"/>
-      </div>
-      <div class="shortInput">
-        <label>Ramp End Time</label>
-        <input type="text" id="rampEnd" name="rampEnd"/>
       </div>
       <hr>
       <div class="shortInput">
@@ -155,7 +142,6 @@
         <label>Event Length</label>
         <input type="text" id="eventLength" name="eventLength"/>
       </div>
-
 
       <div class="wideInput" style="text-align:right">
         <button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
@@ -558,7 +544,6 @@
     </div>
 
     <!-- NEW OUTPUTS -->
-
     <p class="reportTitle postRun">Distribution Quality of Service <a target="_self" class="toggle">Hide / Show</a></p>
     <div id="serviceQualityReport" class="tightContent postRun">
       <div id="serviceQualityChart"></div>
@@ -591,7 +576,7 @@
             "enabled":false
           },
           "color":"red",
-          "data":allOutputData.Consumption.Power,
+          "data": allOutputData.Consumption.Power,
           "name":"Total Network Load"
         }
         var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
@@ -601,18 +586,88 @@
         localHighChart["chart"]["height"] = 150
         localHighChart["series"] = [networkLoad]
         localHighChart["yAxis"]["title"] = {"text": "Total Load", "style": {"color": "gray"}}
+        // localHighChart["xAxis"]["plotLines"] = {"color": "red", "value": "2016-10-10 06:00", "width": 2}
+        // localHighChart["yAxis"]["plotLines"] = {"color": "red", "value": 507.6, "width": 1}
         new Highcharts.Chart(localHighChart);
+
+        // xAxis: {
+        //   plotBands: [{
+        //     color: 'orange', // Color value
+        //     from: 3, // Start of the plot band
+        //     to: 4 // End of the plot band
+        //   }],
+        //   plotLines: [{
+        //     color: 'red', // Color value
+        //     dashStyle: 'longdashdot', // Style of the plot line. Default to solid
+        //     value: 3, // Value of where the line will appear
+        //     width: 2 // Width of the line    
+        //   }]
+        // }
+
       </script>
     </div>
 
     <p class="reportTitle postRun">Performance Details <a target="_self" class="toggle">Hide / Show</a></p>
     <div id="performanceReport" class="tightContent postRun detailsContainer">
-      <div id="performanceChart" style="width:495px; height:340px; margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
-        <pre id="performanceStats" style="font-size:13px; text-align:left"></pre>
+      <div id="performanceTable">
+        <table>
+          <thead>
+            <tr>
+              <th>Frequency/Ramping Performance Metric</th>
+              <th>GridBallast Target Value</th>
+              <th>Calculated Value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Initial Response Time</td>
+              <td>< 1 second</td>
+              <td>[placeholder]</td>
+            </tr>
+            <tr>
+              <td>Reserve Magnitude Target (RMT, % of load)</td>
+              <td>5%</td>
+              <td>[placeholder]</td>
+            </tr>
+            <tr>
+              <td>Reserve Magnitude Variability Tolerance (RMVT)</td>
+              <td>2%</td>
+              <td>[placeholder]</td>
+            </tr>
+            <tr>
+              <td>Ramp Time</td>
+              <td>< 2 seconds</td>
+              <td>[placeholder]</td>
+            </tr>
+            <tr>
+              <td>Duration</td>
+              <td>> 10 minutes</td>
+              <td>[placeholder]</td>
+            </tr>
+            <tr>
+              <td>Availability</td>
+              <td>95%</td>
+              <td>[placeholder]</td>
+            </tr>
+            <tr>
+              <td>Cascaded Contingency Support</td>
+              <td>2</td>
+              <td>[placeholder]</td>
+            </tr>
+            <tr>
+              <td>Recovery Time</td>
+              <td>1 hour</td>
+              <td>[placeholder]</td>
+            </tr>
+            <tr>
+              <td>Availability Magnitude</td>
+              <td>[placeholder]</td>
+              <td>[placeholder]</td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-      <script>gebi("performanceStats").innerHTML = allOutputData.stdout</script>
     </div>
     
-
   </div>
 </body>
