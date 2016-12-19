@@ -175,11 +175,10 @@
 </head>
 <body onkeypress='hotkeys()' onload="finishPastActions();" style='width:100%;height:100%'>
 	<!-- Start Controls -->
-	<div style='background:orange; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
-	<div style='background:green; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
-	<div style='background:plum; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
-	<div style='background:navy; top:175px; left:5px' id='saveLink' class='divButton' onclick='saveSvg()' title='Save File' download>S</div>
-	<div style='background:tomato; top:215px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Zoom level as a float?")))' title='Zoom To'>Z</div>
+	<div style='background:dimgray; top:55px; left:5px' class='divButton' onclick='window.panZoom.zoomIn()' title='Zoom In'>+</div>
+	<div style='background:dimgray; top:95px; left:5px' class='divButton' onclick='window.panZoom.zoomOut()' title='Zoom Out'>-</div>
+	<div style='background:dimgray; top:135px; left:5px' class='divButton' onclick='window.panZoom.reset()' title='Reset Zoom'>R</div>
+	<div style='background:dimgray; top:175px; left:5px;' class='divButton' onclick='scaleTo(parseFloat(prompt("Scale line thickness by this multiple:","1.0")))' title='Zoom To'>S</div>
 	<!-- End Controls -->
 	<svg id='svgContainer' xmlns='http://www.w3.org/2000/svg' style='width:100%;height:100%;background-color:white;' onclick='svgClick(event)' onmousedown='mouseDown(event)' onmouseup='mouseUp(event)'>
 		<style type="text/css">
@@ -207,9 +206,8 @@
 					<ul id='newObjectMenu' class='menu right'>
 						<li><a href='javascript:saveNetwork();'>Save</a></li>
 						<li><a href='javascript:renameNetwork();'>Rename</a></li>
-						<p style='font-weight:bold;margin: 10px 0 0 4px;'>New Network</p>
-						<li><a href='javascript:showModal("blankNetworkModal");'>Blank Network...</a></li>
-						<li><a href='javascript:showModal("matpowerModal");'>MATPOWER Conversion...</a></li>
+						<li><a href='javascript:showModal("blankNetworkModal");'>New Blank Network...</a></li>
+						<li><a href='javascript:showModal("matpowerModal");'>MATPOWER Import...</a></li>
 					</ul>
 					{% endif %}
 				</div>
@@ -262,7 +260,6 @@
 		</div>
 	</div>
 	<div id='tableScroller'></div>
-	<p id="loadingMessage" style="font-size:60pt; text-align:center; width:100%; display:inline-block">Feeder Loading...</p>
 	</body>
 	<script type='text/javascript'>
 		function loadingStuff() {
@@ -288,7 +285,7 @@ var newType = '';
 var newBusGenObj = {};
 // Functions
 function saveSvg() {
-	// Add some critical information
+	// Redirect to an .svg file that the user can save.
 	alert('We are redirecting you to a static version of the SVG that you can save as a .svg file.')
 	svg = document.getElementById('svgContainer').outerHTML
 	b64 = btoa(svg)
