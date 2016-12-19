@@ -25,7 +25,7 @@ tooltip = "The cvrStatic model calculates the expected costs and benefits (inclu
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def renderTemplate(template, modelName, modelDir="", absolutePaths=False, datastoreNames={}):
+def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
 def _roundOne(x,direc):
