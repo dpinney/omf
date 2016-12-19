@@ -24,9 +24,9 @@ ul.menu {
 	-webkit-border-radius: 5px 0px 5px 5px;
 	-moz-border-radius: 5px 0px 5px 5px;
 	border-radius: 5px 0px 5px 5px;
-	-webkit-box-shadow: 0 5px 11px rgba(0, 0, 0, 0.2);
-	-moz-box-shadow: 0 5px 11px rgba(0, 0, 0, 0.2);
-	box-shadow: 0 5px 11px rgba(0, 0, 0, 0.2);
+	-webkit-box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
+	-moz-box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
+	box-shadow: 0 11px 10px rgba(0, 0, 0, 0.2);
 	-webkit-background-clip: padding-box; }
 ul.menu.right {right: 0; left: auto; padding:0 0 0 0;}
 ul.menu.left {right: auto; left:auto; padding:0 0 0 0;}
