@@ -55,6 +55,9 @@ button.pill{
 	margin: 0px;
 	margin-top:-5px;
 	padding:0.3em;
+	-webkit-border-radius: 5px 5px 0 0;
+	-moz-border-radius: 5px 5px 0 0;
+	border-radius: 5px 5px 0 0;
 	background-color:#E0E0E0;
 	display:inline-block;
 	border:none;background:transparent;-webkit-appearance:none;-moz-appearance:none;appearance:none;
@@ -307,8 +310,9 @@ a {text-decoration:none; color:mediumseagreen;cursor: hand;}
 a:visited {color:seagreen;}
 
 /**********************************************
-MODALS
+MODAL DIALOGS
 **********************************************/
+
 .modal{
 	display: none; /* Hidden by default */
 	position: fixed; /* Stay in place */
@@ -321,6 +325,7 @@ MODALS
 	background-color: rgb(0,0,0); /* Fallback color */
 	background-color: rgba(0,0,0,0.4); /* Black w/ opacity */
 }
+
 .modalContent{
     background-color: #fefefe;
     margin: 15% auto; /* 15% from the top and centered */
@@ -343,18 +348,7 @@ MODALS
 	cursor:pointer; 
 	padding:4px 6px 4px;
 }
-.pill{
-	width:auto;
-	margin-right:3px;
-	font-size:small;
-	background:seagreen;
-	-webkit-border-radius: 5px 5px 0 0;
-	-moz-border-radius: 5px 5px 0 0;
-	border-radius: 5px 5px 0 0;
-	border: none;
-	color: white;
-	cursor:pointer; 
-}
+
 #blankModal{
 	width: 300px;
 }
