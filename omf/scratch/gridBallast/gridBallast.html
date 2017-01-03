@@ -109,16 +109,16 @@
       <!-- NEW GRIDBALLAST INPUTS -->
       <div class="shortInput">
         <label>Solar Penetration (%)</label>
-        <input type="text" id="solarPenetration" name="solarPenetration"/>
+        <input type="text" id="solarPenetration" name="solarPenetration" required="required" pattern="^\d+\.?\d*?$"/>
       </div>
       <hr>
       <div class="shortInput">
         <label>Water Heater GridBallast Penetration (%)</label>
-        <input type="text" id="gridBallastPenetration" name="gridBallastPenetration"/>
+        <input type="text" id="gridBallastPenetration" name="gridBallastPenetration" required="required" pattern="^\d+\.?\d*?$"/>
       </div>
       <div class="shortInput">
         <label>Water Heater Circuit Penetration (%)</label>
-        <input type="text" id="circuitPenetration" name="circuitPenetration"/>
+        <input type="text" id="circuitPenetration" name="circuitPenetration" required="required" pattern="^\d+\.?\d*?$"/>
       </div>
       <div class="shortInput">
         <label>Frequency Drop Band</label>
@@ -135,12 +135,12 @@
         </select>
       </div>
       <div class="shortInput">
-        <label>Event Time</label>
-        <input type="text" id="eventTime" name="eventTime"/>
+        <label>Event Time (YYYY-MM-DD HH:MM)</label>
+        <input type="text" id="eventTime" name="eventTime" required="required" pattern="^\d\d\d\d-\d\d-\d\d\s\d\d:\d\d$"/>
       </div>
       <div class="shortInput">
-        <label>Event Length</label>
-        <input type="text" id="eventLength" name="eventLength"/>
+        <label>Event Length (HH:MM)</label>
+        <input type="text" id="eventLength" name="eventLength" required="required" pattern="^\d\d:\d\d$"/>
       </div>
 
       <div class="wideInput" style="text-align:right">
@@ -564,6 +564,13 @@
         // localHighChart["series"] = [serviceRequests]
         // localHighChart["yAxis"]["title"] = {"text": "Missed Service Requests", "style": {"color": "gray"}}
         // new Highcharts.Chart(localHighChart);
+  
+        var eventStart = new Date(allInputData.eventTime);
+        var eL = allInputData.eventLength.split(':');
+        var ms = (eL[0] * 3600 + eL[1] * 60) * 1000;
+        var end = eventStart.getTime() + ms
+        var eventEnd = new Date(end);
+
         new Highcharts.Chart({
           chart: {
             renderTo: 'serviceQualityChart',
@@ -583,7 +590,7 @@
               value: 3.5, // Value of where the line will appear
               width: 2, // Width of the line
               label: { 
-                text: 'Event Start', // Content of the label. 
+                text: 'Event Start = ' + eventStart // Content of the label. 
               }
             },
             {
@@ -592,7 +599,7 @@
               value: 4.5, // Value of where the line will appear
               width: 2, // Width of the line
               label: { 
-                text: 'Event End', // Content of the label. 
+                text: 'Event End = ' + eventEnd // Content of the label. 
               } 
             }]
           },
@@ -630,6 +637,7 @@
         // localHighChart["series"] = [networkLoad]
         // localHighChart["yAxis"]["title"] = {"text": "Total Load", "style": {"color": "gray"}}
         // new Highcharts.Chart(localHighChart);
+        
         new Highcharts.Chart({
           chart: {
             renderTo: 'availabilityChart',
@@ -649,7 +657,7 @@
               value: 4, // Value of where the line will appear
               width: 2, // Width of the line
               label: { 
-                text: 'Event Start', // Content of the label. 
+                text: 'Event Start = ' + eventStart // Content of the label. 
               }
             },
             {
@@ -658,7 +666,7 @@
               value: 6, // Value of where the line will appear
               width: 2, // Width of the line
               label: { 
-                text: 'Event End', // Content of the label. 
+                text: 'Event End = ' + eventEnd // Content of the label. 
               } 
             },
             {
