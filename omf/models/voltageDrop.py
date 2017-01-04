@@ -46,12 +46,12 @@ def run(modelDir, inputDict):
 	try:
 		# Create voltage drop plot.
 		print "*DEBUG: feederName:", feederName
-		tree = json.load(open(pJoin(modelDir,feederName+'.omd'))).get("tree",{})
+		omd = json.load(open(pJoin(modelDir,feederName+'.omd')))
 		if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
 			neato = False
 		else:
 			neato = True 
-		chart = voltPlot(tree, workDir=modelDir, neatoLayout=neato)
+		chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
 		chart.savefig(pJoin(modelDir,"output.png"))
 		with open(pJoin(modelDir,"output.png"),"rb") as inFile:
 			allOutput["voltageDrop"] = inFile.read().encode("base64")
@@ -73,13 +73,14 @@ def run(modelDir, inputDict):
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 		
-def voltPlot(tree, workDir=None, neatoLayout=False):
+def voltPlot(omd, workDir=None, neatoLayout=False):
 	''' Draw a color-coded map of the voltage drop on a feeder.
 	Returns a matplotlib object. '''
-	# Get rid of schedules and climate:
-	for key in tree.keys():
-		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
-			del tree[key]
+	tree = omd.get('tree',{})
+	# # Get rid of schedules and climate:
+	# for key in tree.keys():
+	# 	if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
+	# 		del tree[key]
 	# Make sure we have a voltDump:
 	def safeInt(x):
 		try: return int(x)
@@ -90,7 +91,7 @@ def voltPlot(tree, workDir=None, neatoLayout=False):
 	if not workDir:
 		workDir = tempfile.mkdtemp()
 		print "gridlabD runInFilesystem with no specified workDir. Working in", workDir
-	gridlabOut = gridlabd.runInFilesystem(tree, attachments=[], workDir=workDir)
+	gridlabOut = gridlabd.runInFilesystem(tree, attachments=omd.get('attachments',{}), workDir=workDir)
 	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
 		reader = csv.reader(dumpFile)
 		reader.next() # Burn the header.
