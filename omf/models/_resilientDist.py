@@ -166,12 +166,11 @@ def _tests():
 	# chart.savefig("/Users/dwp0/Desktop/testChart.png")
 	# plt.show()
 	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated resilientDist Testing")
 	inData = {"feederName1": "Olin Barre Geo",
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial"}
-	modelLoc = pJoin(workDir,"admin","Automated voltageDrop Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
