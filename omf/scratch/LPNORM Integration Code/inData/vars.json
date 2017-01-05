@@ -1,0 +1,6 @@
+{
+	"phase_variation" : 0.15, 
+	"chance_constraint" : 1.0,
+	"critical_load_met" : 0.98,
+	"total_load_met" : 0.5
+}

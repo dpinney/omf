@@ -1,0 +1,164 @@
+{
+    "scenario_solution": [
+        {
+            "generators": [
+                {
+                    "id": "6", 
+                    "real_phase": [
+                        10.0, 
+                        10.0, 
+                        0.0
+                    ], 
+                    "reactive_phase": [
+                        0.0, 
+                        0.0, 
+                        0.0
+                    ]
+                }
+            ], 
+            "loads": [
+                {
+                    "id": "7", 
+                    "real_phase": [
+                        0.0, 
+                        0.0, 
+                        0.0
+                    ], 
+                    "reactive_phase": [
+                        0.0, 
+                        0.0, 
+                        0.0
+                    ]
+                }, 
+                {
+                    "id": "8", 
+                    "real_phase": [
+                        10.0, 
+                        0.0, 
+                        0.0
+                    ], 
+                    "reactive_phase": [
+                        0.0, 
+                        0.0, 
+                        0.0
+                    ]
+                }, 
+                {
+                    "id": "9", 
+                    "real_phase": [
+                        0.0, 
+                        10.0, 
+                        0.0
+                    ], 
+                    "reactive_phase": [
+                        0.0, 
+                        0.0, 
+                        0.0
+                    ]
+                }
+            ], 
+            "lines": [
+                {
+                    "id": "10", 
+                    "in_use": true
+                }, 
+                {
+                    "id": "11", 
+                    "in_use": true
+                }, 
+                {
+                    "id": "13", 
+                    "in_use": true
+                }, 
+                {
+                    "id": "12", 
+                    "in_use": true
+                }, 
+                {
+                    "id": "14", 
+                    "in_use": true
+                }
+            ], 
+            "id": 1, 
+            "buses": [
+                {
+                    "id": "0", 
+                    "voltage": [
+                        1.0, 
+                        1.0, 
+                        1.0
+                    ]
+                }, 
+                {
+                    "id": "1", 
+                    "voltage": [
+                        1.0, 
+                        1.0, 
+                        1.0
+                    ]
+                }, 
+                {
+                    "id": "2", 
+                    "voltage": [
+                        1.0, 
+                        1.0, 
+                        1.0
+                    ]
+                }, 
+                {
+                    "id": "3", 
+                    "voltage": [
+                        1.0, 
+                        1.0, 
+                        1.0
+                    ]
+                }, 
+                {
+                    "id": "4", 
+                    "voltage": [
+                        1.0, 
+                        1.0, 
+                        1.0
+                    ]
+                }, 
+                {
+                    "id": "5", 
+                    "voltage": [
+                        1.0, 
+                        1.0, 
+                        1.0
+                    ]
+                }
+            ]
+        }
+    ], 
+    "design_solution": {
+        "generators": [
+            {
+                "id": "6"
+            }
+        ], 
+        "lines": [
+            {
+                "hardened": false, 
+                "id": "10"
+            }, 
+            {
+                "hardened": false, 
+                "id": "11"
+            }, 
+            {
+                "hardened": false, 
+                "id": "13"
+            }, 
+            {
+                "id": "12"
+            }, 
+            {
+                "id": "14"
+            }
+        ], 
+        "design_cost": 0.0, 
+        "is_feasible": true
+    }
+}
