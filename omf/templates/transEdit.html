@@ -305,25 +305,31 @@ function buildNetwork() {
 	})
 	// Go through and add all lines first
 	for (num in networkData.branch) {
-		anOb = networkData.branch[num][String(parseInt(num)+1)]
-		fNum = networkData.branch[num][String(parseInt(num)+1)]['fbus']
-		tNum = networkData.branch[num][String(parseInt(num)+1)]['tbus']
-		fromOb = networkData.bus[parseInt(fNum)-1][fNum]
-		toOb = networkData.bus[parseInt(tNum)-1][tNum]
-		addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+String(parseInt(num)+1),"branch" + ' p' + phaseCount(anOb))
+		try {
+			anOb = networkData.branch[num][String(parseInt(num)+1)]
+			fNum = networkData.branch[num][String(parseInt(num)+1)]['fbus']
+			tNum = networkData.branch[num][String(parseInt(num)+1)]['tbus']
+			fromOb = networkData.bus[parseInt(fNum)-1][fNum]
+			toOb = networkData.bus[parseInt(tNum)-1][tNum]
+			addLine(fromOb['longitude'],fromOb['latitude'],toOb['longitude'],toOb['latitude'],"branch_"+String(parseInt(num)+1),"branch" + ' p' + phaseCount(anOb))
+		} catch(e) {}
 	}
-	// Add circles after all lines
+	// Add buses after all lines
 	for (num in networkData.bus) {
-		anOb = networkData.bus[num][String(parseInt(num)+1)]
-		var width = 8
-		addRectangle(anOb['longitude']-width/2,anOb['latitude']-width/2,width,width,"bus_"+String(parseInt(num)+1),"bus")
+		try {
+			anOb = networkData.bus[num][String(parseInt(num)+1)]
+			var width = 8
+			addRectangle(anOb['longitude']-width/2,anOb['latitude']-width/2,width,width,"bus_"+String(parseInt(num)+1),"bus")			
+		} catch(e) {}
 	}
 	// Draw generators over busses
 	for (num in networkData.gen) {
-		anOb = networkData.gen[num][String(parseInt(num)+1)]
-		var longitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['longitude']
-		var latitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['latitude']
-		addCircle(longitude, latitude,2,"gen_"+String(parseInt(num)+1),"gen")
+		try {
+			anOb = networkData.gen[num][String(parseInt(num)+1)]
+			var longitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['longitude']
+			var latitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['latitude']
+			addCircle(longitude, latitude,2,"gen_"+String(parseInt(num)+1),"gen")			
+		} catch(e) {}
 	}
 }
 function mouseDown(event) {
