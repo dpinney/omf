@@ -74,11 +74,11 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">System Size (kWp-DC)<span class="classic">Average residential PV system size in your service territory, in kilowatts-DC.</span></label>
-				<input type="text" id="systemSize" name="systemSize" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="systemSize" name="systemSize" value="5" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Residential Customers With Solar (%)<span class="classic">Percentage of residential customers who own PV systems. A value of five percent is entered as a "5".</span></label>
-				<input type="text" id="resPenetration" name="resPenetration" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
+				<input type="text" id="resPenetration" name="resPenetration" value="5" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required">
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Financial Variables</p>
@@ -90,27 +90,27 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Average Cost of Purchased Power ($/kWh)<span class="classic">Automatically calculated from other inputs as: Form 7 R.17.m/R.15.m.</span></label>
-				<input type="text" id="costofPower" name="costofPower" value = "N/A" readonly/>
+				<input type="text" id="costofPower" name="costofPower" value = "0.081" readonly/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar Service Charge ($/month)<span class="classic">Monthly charge for residential customers with solar installed.</span></label>
-				<input type="text" id="solarServiceCharge" name="solarServiceCharge" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="solarServiceCharge" name="solarServiceCharge" value="10" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Solar Levelized Cost of Energy ($/kWh)<span class="classic">Estimated levelized costs for the energy provided from solar. This estimate effects average bill size for solar residential customers but it doesn't impact rate change assessments.</span></label>
-				<input type="text" id="solarLCoE" name="solarLCoE" pattern="^\d+\.?\d*$" required="required">
+				<input type="text" id="solarLCoE" name="solarLCoE" value="0.07" pattern="^\d+\.?\d*$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Customer Service Charge ($)<span class="classic">Monthly service charge for residential customers if any.</span></label>
-				<input type="text" id="customServiceCharge" name="customServiceCharge" pattern="^\d+\.?\d*$" value="15" required="required"/>
+				<input type="text" id="customServiceCharge" name="customServiceCharge" value="100" pattern="^\d+\.?\d*$" value="15" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Form 7.R.13.TOTAL Other Electric Revenue.<span class="classic">Additional revenue from Form 7 Table R.</span></label>
-				<input type="text" id="otherElecRevenue" name="otherElecRevenue" pattern="^\d+\.?\d*$" required="required"/>
+				<input type="text" id="otherElecRevenue" name="otherElecRevenue" value="1544165" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Form 7.L.5.c TOTAL kWh Purchased<span class="classic">Total energy purchased from Form 7 Table R.</span></label>
-				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" pattern="^\d+\.?\d*$" required="required"/>
+				<input type="text" id="totalKWhPurchased" name="totalKWhPurchased" value="999330657" pattern="^\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader">Form 7 Financial Variables</p>
@@ -118,95 +118,95 @@
 			<hr>
 			<div class="shortInput">
 				<label>A.2.b Power Production Expense</label>
-				<input type="text" id="powerProExpense" name="powerProExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="powerProExpense" name="powerProExpense" value="0" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.3.b Cost of Purchased Power</label>
-				<input type="text" id="costPurchasedPower" name="costPurchasedPower" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="costPurchasedPower" name="costPurchasedPower" value="80466749" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.4.b Transmission Expense</label>
-				<input type="text" id="transExpense" name="transExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="transExpense" name="transExpense" value="15027" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.5.b Distribution Expense - Operation</label>
-				<input type="text" id="distriExpenseO" name="distriExpenseO" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="distriExpenseO" name="distriExpenseO" value="5294026" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.6.b Distribution Expense - Maintenance</label>
-				<input type="text" id="distriExpenseM" name="distriExpenseM" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="distriExpenseM" name="distriExpenseM" value="5535844" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.7.b Customer Accounts Expense</label>
-				<input type="text" id="customerAccountExpense" name="customerAccountExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="customerAccountExpense" name="customerAccountExpense" value="4426441" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.8.b Customer Service and Informational Expense</label>
-				<input type="text" id="customerServiceExpense" name="customerServiceExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="customerServiceExpense" name="customerServiceExpense" value="643418" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.9.b Sales Expense</label>
-				<input type="text" id="salesExpense" name="salesExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="salesExpense" name="salesExpense" value="127084" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.10.b Administrative and General Expense</label>
-				<input type="text" id="adminGeneralExpense" name="adminGeneralExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="adminGeneralExpense" name="adminGeneralExpense" value="8264362" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.12.b Depreciation and Amortization Expense</label>
-				<input type="text" id="depreAmortiExpense" name="depreAmortiExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="depreAmortiExpense" name="depreAmortiExpense" value="8975862" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.13.b Tax Expense - Property &amp; Gross Receipts</label>
-				<input type="text" id="taxExpensePG" name="taxExpensePG" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="taxExpensePG" name="taxExpensePG" value="0" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.14.b Tax Expense - Other</label>
-				<input type="text" id="taxExpense" name="taxExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="taxExpense" name="taxExpense" value="197924" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.15.b Interest on Long-Term Debt</label>
-				<input type="text" id="interestLongTerm" name="interestLongTerm" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="interestLongTerm" name="interestLongTerm" value="10195988" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.16.b Interest Charged to Construction - Credit</label>
-				<input type="text" id="interestConstruction" name="interestConstruction" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="interestConstruction" name="interestConstruction" value="0" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.17.b Interest Expense - Other</label>
-				<input type="text" id="interestExpense" name="interestExpense" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="interestExpense" name="interestExpense" value="209969" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.18.b Other Deductions</label>
-				<input type="text" id="otherDeductions" name="otherDeductions" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="otherDeductions" name="otherDeductions" value="126640" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.21.b Non Operating Margins - Interest</label>
-				<input type="text" id="nonOpMarginInterest" name="nonOpMarginInterest" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="nonOpMarginInterest" name="nonOpMarginInterest" value="123401" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.22.b Allowance for Funds Used During Construction</label>
-				<input type="text" id="fundsUsedConstruc" name="fundsUsedConstruc" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="fundsUsedConstruc" name="fundsUsedConstruc" value="0" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.23.b Income (Loss) from Equity Investments</label>
-				<input type="text" id="incomeEquityInvest" name="incomeEquityInvest" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="incomeEquityInvest" name="incomeEquityInvest" value="0" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.24.b Non Operating Margins - Other</label>
-				<input type="text" id="nonOpMarginOther" name="nonOpMarginOther" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="nonOpMarginOther" name="nonOpMarginOther" value="811043" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.25.b Generation and Transmission Capital Credits</label>
-				<input type="text" id="genTransCapCredits" name="genTransCapCredits" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="genTransCapCredits" name="genTransCapCredits" value="1015764" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.26.b Other Capital Credits and Patronage Dividends</label>
-				<input type="text" id="otherCapCreditsPatroDivident" name="otherCapCreditsPatroDivident" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="otherCapCreditsPatroDivident" name="otherCapCreditsPatroDivident" value="1135379" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="shortInput">
 				<label>A.27.b Extraordinary Items</label>
-				<input type="text" id="extraItems" name="extraItems" pattern="^-?\d+\.?\d*$" required="required"/>
+				<input type="text" id="extraItems" name="extraItems" value="0" pattern="^-?\d+\.?\d*$" required="required"/>
 			</div>
 			<div class="wideInput">
 				<p class="inputSectionHeader" style="page-break-before:always">Form 7 Table O (a.k.a. R) Variables</p>
@@ -231,78 +231,78 @@
 					</tr>
 					<tr>
 						<th>Residential Consumers Served</th>
-						<td><input type="text" id="janSale" name="janSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febSale" name="febSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marSale" name="marSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprSale" name="aprSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="maySale" name="maySale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junSale" name="junSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julSale" name="julSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augSale" name="augSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepSale" name="sepSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octSale" name="octSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novSale" name="novSale" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decSale" name="decSale" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janSale" name="janSale" value="46668" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febSale" name="febSale" value="46724" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marSale" name="marSale" value="46876" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprSale" name="aprSale" value="46858" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="maySale" name="maySale" value="46919" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junSale" name="junSale" value="46977" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julSale" name="julSale" value="47013" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augSale" name="augSale" value="47114" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepSale" name="sepSale" value="47140" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octSale" name="octSale" value="47088" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novSale" name="novSale" value="47173" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decSale" name="decSale" value="47081" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Residential KWh Sold</th>
-						<td><input type="text" id="janKWh" name="janKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febKWh" name="febKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marKWh" name="marKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprKWh" name="aprKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="mayKWh" name="mayKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junKWh" name="junKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julKWh" name="julKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augKWh" name="augKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepKWh" name="sepKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octKWh" name="octKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novKWh" name="novKWh" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decKWh" name="decKWh" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janKWh" name="janKWh" value="64467874" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febKWh" name="febKWh" value="66646882" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marKWh" name="marKWh" value="62467031" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprKWh" name="aprKWh" value="49781827" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayKWh" name="mayKWh" value="41078029" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junKWh" name="junKWh" value="40835343" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julKWh" name="julKWh" value="58018686" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augKWh" name="augKWh" value="67825037" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepKWh" name="sepKWh" value="59707578" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octKWh" name="octKWh" value="46451858" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novKWh" name="novKWh" value="41668828" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decKWh" name="decKWh" value="53354283" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Residential Revenue</th>
-						<td><input type="text" id="janRev" name="janRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febRev" name="febRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marRev" name="marRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprRev" name="aprRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="mayRev" name="mayRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junRev" name="junRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julRev" name="julRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augRev" name="augRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepRev" name="sepRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octRev" name="octRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novRev" name="novRev" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decRev" name="decRev" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janRev" name="janRev" value="8093137" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febRev" name="febRev" value="8812203" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marRev" name="marRev" value="8277498" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprRev" name="aprRev" value="6664021" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayRev" name="mayRev" value="5567683" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junRev" name="junRev" value="5528717" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julRev" name="julRev" value="7585000" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augRev" name="augRev" value="8836269" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepRev" name="sepRev" value="7809767" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octRev" name="octRev" value="6146975" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novRev" name="novRev" value="5551288" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decRev" name="decRev" value="7014717" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Total KWh Sold</th>
-						<td><input type="text" id="janKWhT" name="janKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febKWhT" name="febKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marKWhT" name="marKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprKWhT" name="aprKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="mayKWhT" name="mayKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junKWhT" name="junKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julKWhT" name="julKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augKWhT" name="augKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepKWhT" name="sepKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octKWhT" name="octKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novKWhT" name="novKWhT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decKWhT" name="decKWhT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janKWhT" name="janKWhT" value="85628959" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febKWhT" name="febKWhT" value="89818661" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marKWhT" name="marKWhT" value="84780954" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprKWhT" name="aprKWhT" value="70552865" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayKWhT" name="mayKWhT" value="63397699" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junKWhT" name="junKWhT" value="64781785" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julKWhT" name="julKWhT" value="86140915" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augKWhT" name="augKWhT" value="98032727" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepKWhT" name="sepKWhT" value="88193645" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octKWhT" name="octKWhT" value="70425336" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novKWhT" name="novKWhT" value="65008851" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decKWhT" name="decKWhT" value="73335526" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 					<tr>
 						<th>Total Revenue</th>
-						<td><input type="text" id="janRevT" name="janRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="febRevT" name="febRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="marRevT" name="marRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="aprRevT" name="aprRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="mayRevT" name="mayRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="junRevT" name="junRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="julRevT" name="julRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="augRevT" name="augRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="sepRevT" name="sepRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="octRevT" name="octRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="novRevT" name="novRevT" pattern="^\d+\.?\d*$" required="required"></td>
-						<td><input type="text" id="decRevT" name="decRevT" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="janRevT" name="janRevT" value="10464278" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="febRevT" name="febRevT" value="11508047" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="marRevT" name="marRevT" value="10874720" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="aprRevT" name="aprRevT" value="9122130" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="mayRevT" name="mayRevT" value="8214078" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="junRevT" name="junRevT" value="8332117" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="julRevT" name="julRevT" value="10793395" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="augRevT" name="augRevT" value="12219454" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="sepRevT" name="sepRevT" value="11052318" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="octRevT" name="octRevT" value="8936767" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="novRevT" name="novRevT" value="8228072" pattern="^\d+\.?\d*$" required="required"></td>
+						<td><input type="text" id="decRevT" name="decRevT" value="9385203" pattern="^\d+\.?\d*$" required="required"></td>
 					</tr>
 				</table>
 			</div>
