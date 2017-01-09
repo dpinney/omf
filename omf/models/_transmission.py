@@ -24,6 +24,7 @@ from weather import zipCodeToClimateName
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
+tooltip = "The transmission model imports, runs and visualizes MATPOWER transmission and generation simulations."
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,modelName + ".html"),"r") as tempFile:
@@ -98,7 +99,7 @@ def runForeground(modelDir, inputDict):
 			'voltsChart' : '', 'powerReactChart' : '', 'powerRealChart' : '',
 			'stdout' : '', 'stderr' : ''
 			}
-		# Model operations goes here.
+		# Model operations go here.
 		# Read feeder and convert to .mat.
 		networkName = inputDict.get('networkName1','case9')
 		networkJson = json.load(open(pJoin(modelDir,networkName+".omt")))
@@ -116,12 +117,12 @@ def runForeground(modelDir, inputDict):
 		pfEnflArg = "\'pf.enforce_q_lims\', "+str(inputDict.get("genLimits",0))
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
 		with cd(matDir):
-			command = "octave --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > "+"/home/dev/Desktop/matout.txt"
+			command = "octave --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > "+"~/matout.txt"
 			print "command:", command
 			proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
 			(out, err) = proc.communicate()
-		shutil.copy("/home/dev/Desktop/matout.txt", pJoin(modelDir,'matout.txt'))
-		os.remove("/home/dev/Desktop/matout.txt")
+		shutil.copy("~/matout.txt", pJoin(modelDir,'matout.txt'))
+		os.remove("~/matout.txt")
 		# SKELETON code.
 		imgSrc = pJoin(__metaModel__._omfDir,'scratch','transmission','inData')
 		# shutil.copyfile(pJoin(imgSrc,'bg1.jpg'),pJoin(modelDir,'powerReal.jpg'))
@@ -271,6 +272,30 @@ class cd:
 	def __exit__(self, etype, value, traceback):
 		os.chdir(self.savedPath)
 
+def _simpleTest():
+	# TODO: delete and use other tests.
+	inData = {"user" : "admin", "modelName" : "Automated Transmission Model Testing",
+		"networkName" : "case9",
+		"algorithm" : "NR",
+		"model" : "AC",
+		"tolerance" : math.pow(10,-8),
+		"iteration" : 10,
+		"genLimits" : 0}
+	modelDir = pJoin(__metaModel__._omfDir,"data","Model", inData["user"], inData["modelName"])
+	# Blow away old test results if necessary.
+	try:
+		shutil.rmtree(modelDir)
+	except:
+		# No previous test results.
+		pass
+	try:
+		os.makedirs(modelDir)
+	except: pass
+	# Bring in network.
+	shutil.copy(pJoin(__metaModel__._omfDir,"static","SimpleNetwork.json"),pJoin(modelDir,"case9.omt"))
+	 # Run the model & show the output.
+	runForeground(modelDir, inData)
+	renderAndShow(template, modelName, modelDir = modelDir)
 
 def _secretTests():
 	# TODO: change name back to tests.
@@ -297,7 +322,7 @@ def _secretTests():
 		except: pass
 		 # Run the model & show the output.
 		runForeground(modelDir, inData)
-		renderAndShow(template, modelDir = modelDir)
+		renderAndShow(template, modelName, modelDir = modelDir)
 
 if __name__ == '__main__':
-	_secretTests()
+	_simpleTest	()
