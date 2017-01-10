@@ -6,6 +6,7 @@ omf/data/Model/*
 omf/data/Feeder/*
 omf/data/User/*
 omf/S3KEY.*
+omf/scratch/conversionTesting/*
 build
 omf.egg-info
 omf/emailCredentials.key

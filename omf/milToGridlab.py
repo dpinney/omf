@@ -80,20 +80,24 @@ def convert(stdString,seqString):
 
         def convertGenericObject(objectList):
             ''' this converts attributes that are in every milsoft object regardless of hardware type '''
+
             newOb = {}
-            # Need to replace invalid characters in names:
-            newOb['name'] = objectList[0].replace('.','x')
-            newOb['object'] = gridlabFields[int(objectList[1])]
-            # Convert lat-lon if we have them.
-            # convert to the relative pixel position f(x) = a * x + b
-            newOb['latitude'] = str(x_scale * float(objectList[5]) + x_b)
-            newOb['longitude'] = str(800 - (y_scale * float(objectList[6]) + y_b))
-            # Some non-Gridlab elements:
-            newOb['guid'] = objectList[49].replace('{','').replace('}','')
-            newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
-            # Make sure names are unique:
-            if allNames.count(newOb['name']) > 1:
-                newOb['name'] = newOb['guid']
+            try:
+                # Need to replace invalid characters in names:
+                newOb['name'] = objectList[0].replace('.','x')
+                newOb['object'] = gridlabFields[int(objectList[1])]
+                # Convert lat-lon if we have them.
+                # convert to the relative pixel position f(x) = a * x + b
+                newOb['latitude'] = str(x_scale * float(objectList[5]) + x_b)
+                newOb['longitude'] = str(800 - (y_scale * float(objectList[6]) + y_b))
+                # Some non-Gridlab elements:
+                newOb['guid'] = objectList[49].replace('{','').replace('}','')
+                newOb['parentGuid'] = objectList[50].replace('{','').replace('}','')
+                # Make sure names are unique:
+                if allNames.count(newOb['name']) > 1:
+                    newOb['name'] = newOb['guid']
+            except:
+                pass
             return newOb
 
         # -----------------------------------------------

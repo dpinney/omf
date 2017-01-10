@@ -1,3 +1,10 @@
+import os, sys
+from os.path import join as pJoin
+
+_myDir = os.path.dirname(os.path.abspath(__file__))
+_cryptoPath = pJoin(_myDir,"crypto")
+sys.path.insert(0,_cryptoPath)
+import crypto
 #  # CYME TO GRIDLAB TESTS
 # def cymeToGridlabTests(keepFiles=True):
 # 	import os, json, traceback, shutil
@@ -50,10 +57,10 @@
 # 		traceback.print_exc()
 # 	if not keepFiles:
 # 		shutil.rmtree(outPrefix)
-	# return exceptionCount   
+# return exceptionCount   
 # MILSOFT WINDMIL TO GRIDLAB TESTS
-def milsoftToGridlabTests(keepFiles=False):
-	openPrefix = '../uploads/'
+def milsoftToGridlabTests(files,keepFiles=False):
+	openPrefix = './crypto/decryptedDataFiles'
 	outPrefix = './milToGridlabTests/'
 	import os, json, traceback, shutil
 	from omf.solvers import gridlabd
@@ -65,16 +72,17 @@ def milsoftToGridlabTests(keepFiles=False):
 	except:
 		pass # Directory already there.
 	exceptionCount = 0
-	# testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
+	# 	testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
 	#   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
-	#   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq')]
-	testFiles = [('Olin-Brown.std', 'Olin.seq')]
+	#  	('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq')]
+	testFiles = files
+	# print testFiles
 	testAttachments = {'schedules.glm':''}
 	# testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
 	for stdString, seqString in testFiles:
 		try:
 			# Convert the std+seq.
-			with open(openPrefix + stdString,'r') as stdFile, open(openPrefix + seqString,'r') as seqFile:
+			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
 				outGlm,x,y = convert(stdFile.read(),seqFile.read())
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.write(feeder.sortedWrite(outGlm))
@@ -104,7 +112,82 @@ def milsoftToGridlabTests(keepFiles=False):
 	if not keepFiles:
 		shutil.rmtree(outPrefix)
 	return exceptionCount
-milsoftToGridlabTests()
+
+user = 'UCS'
+key = crypto.getKey(_cryptoPath,user)
+# inFilesFolder = pJoin(_cryptoPath,"inFiles")
+encryptedFilesFolder = pJoin(_cryptoPath,"encryptedFiles")
+if not (os.path.isdir(pJoin(_cryptoPath,"decryptedDataFiles"))):
+	os.makedirs(pJoin(_cryptoPath,"decryptedDataFiles"))
+
+decryptedDataFolder = pJoin(_cryptoPath,"decryptedDataFiles")
+
+# for file in os.listdir(decryptedDataFolder):
+# 	with open(pJoin(decryptedDataFolder,str(file)),'r') as inFile:
+# 		readFile = inFile.read()
+# 	fileName = "Encrypted_"+str(file)
+# 	encryptedData = crypto.encryptData(readFile,key)
+# 	with open(pJoin(encryptedFilesFolder,fileName),"w+") as f:
+# 		f.write(encryptedData)
+
+# Decrypts encrypted Files and writes to decrypted data folder
+import shutil
+if(os.path.isdir(decryptedDataFolder)):
+	shutil.rmtree(decryptedDataFolder)
+if not(os.path.isdir(decryptedDataFolder)):
+	os.makedirs(decryptedDataFolder)
+
+for file in os.listdir(encryptedFilesFolder):
+	with open(pJoin(encryptedFilesFolder,str(file)),'r') as r:
+		r = r.read()
+	fileName = str(file)[10:]
+	decryptedData = crypto.decryptData(r,key)
+	with open(pJoin(decryptedDataFolder,fileName),"w+") as f:
+		f.write(decryptedData)
+
+# Creating [[.std,.seq],[.std,.seq],[.stq,.seq],...] structure for testing functions
+seqFilenames = []
+groupedFiles = []
+for file in os.listdir(decryptedDataFolder):
+	if str(file).endswith('.seq'):
+		filename = file[:-4]
+		seqFilenames.append(filename)
+for file in seqFilenames:
+	group = []
+	for f in os.listdir(decryptedDataFolder):
+		if str(f).startswith(file):
+			group.append(f)
+	groupedFiles.append(group)
+arrays = []
+for group in groupedFiles:
+	if len(group)>2:
+		for item in group:
+			array = []
+			if item.endswith('.std'):
+				array.append(item)
+				for item in group:
+					if item.endswith('.seq'):	
+						array.append(item)
+						arrays.append(array)
+	else:
+		arrays.append(group)
+
+# If we need paths..
+# pathArray = []
+# for array in arrays:
+# 	paths = []
+# 	for item in array:
+# 		paths.append(pJoin(decryptedDataFolder,item))
+# 	pathArray.append(paths)
+
+print arrays
+milsoftToGridlabTests(arrays)
+if(os.path.isdir('./milToGridlabTests/')):
+	shutil.rmtree('./milToGridlabTests/')
+if(os.path.isdir(decryptedDataFolder)):
+	shutil.rmtree(decryptedDataFolder)
+print "finished"
+
 # cymeToGridlabTests()
 # MORE CYME TO GRIDLAB TESTS, FROM testPEC.py
 # import sys, os
