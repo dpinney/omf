@@ -107,22 +107,23 @@
       </div>
 
       <!-- NEW GRIDBALLAST INPUTS -->
+      <!-- (%) pattern="^\d+\.?\d*?$" -->
       <div class="shortInput">
         <label>Solar Penetration (%)</label>
-        <input type="text" id="solarPenetration" name="solarPenetration" required="required" pattern="^\d+\.?\d*?$"/>
+        <input type="text" id="solarPenetration" name="solarPenetration" placeholder="N/A" disabled/>
       </div>
       <hr>
       <div class="shortInput">
         <label>Water Heater GridBallast Penetration (%)</label>
-        <input type="text" id="gridBallastPenetration" name="gridBallastPenetration" required="required" pattern="^\d+\.?\d*?$"/>
+        <input type="text" id="gridBallastPenetration" name="gridBallastPenetration" placeholder="N/A" disabled/>
       </div>
       <div class="shortInput">
         <label>Water Heater Circuit Penetration (%)</label>
-        <input type="text" id="circuitPenetration" name="circuitPenetration" required="required" pattern="^\d+\.?\d*?$"/>
+        <input type="text" id="circuitPenetration" name="circuitPenetration" placeholder="N/A" disabled/>
       </div>
       <div class="shortInput">
         <label>Frequency Drop Band</label>
-        <input type="text" id="frequencyDropBand" name="frequencyDropBand"/>
+        <input type="text" id="frequencyDropBand" name="frequencyDropBand" placeholder="N/A" disabled/>
       </div>
       <hr>
       <div class="shortInput">
@@ -568,8 +569,8 @@
         var eventStart = new Date(allInputData.eventTime);
         var eL = allInputData.eventLength.split(':');
         var ms = (eL[0] * 3600 + eL[1] * 60) * 1000;
-        var end = eventStart.getTime() + ms
-        var eventEnd = new Date(end);
+        var endTime = eventStart.getTime() + ms
+        var eventEnd = new Date(endTime);
 
         new Highcharts.Chart({
           chart: {
@@ -580,34 +581,33 @@
             text: 'Distribution Quality of Service'
           },
           xAxis: {
+            type: 'datetime',
             title: {
               text: 'Time'
             },
-            tickInterval: 1,
             plotLines: [{
-              color: 'red', // Color value
-              dashStyle: 'dash', // Style of the plot line. Default to solid
-              value: 3.5, // Value of where the line will appear
-              width: 2, // Width of the line
-              label: { 
-                text: 'Event Start = ' + eventStart // Content of the label. 
+              color: 'red',
+              dashStyle: 'dash',
+              value: 3.5,
+              width: 2,
+              label: {
+                text: 'Event Start = ' + eventStart
               }
             },
             {
-              color: 'red', // Color value
-              dashStyle: 'dash', // Style of the plot line. Default to solid
-              value: 4.5, // Value of where the line will appear
-              width: 2, // Width of the line
-              label: { 
-                text: 'Event End = ' + eventEnd // Content of the label. 
-              } 
+              color: 'red',
+              dashStyle: 'dash',
+              value: 4.5,
+              width: 2,
+              label: {
+                text: 'Event End = ' + eventEnd
+              }
             }]
           },
           yAxis: {
             title: {
               text: 'Quality'
-            },
-            tickInterval: 1
+            }
           },
           series: [{
             name: 'Unfulfilled service requests',
@@ -621,23 +621,6 @@
     <div id="availabilityReport" class="tightContent postRun">
       <div id="availabilityChart"></div>
       <script type="text/javascript">
-        // var networkLoad = {
-        //   "marker":{
-        //     "enabled":false
-        //   },
-        //   "color":"red",
-        //   "data": allOutputData.Consumption.Power,
-        //   "name":"Total Network Load"
-        // }
-        // var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-        // localHighChart["chart"]["renderTo"] = "availabilityChart"
-        // localHighChart["chart"]["type"] = "line"
-        // localHighChart["chart"]["width"] = 1000
-        // localHighChart["chart"]["height"] = 150
-        // localHighChart["series"] = [networkLoad]
-        // localHighChart["yAxis"]["title"] = {"text": "Total Load", "style": {"color": "gray"}}
-        // new Highcharts.Chart(localHighChart);
-        
         new Highcharts.Chart({
           chart: {
             renderTo: 'availabilityChart',
@@ -647,43 +630,42 @@
             text: 'Availability Details'
           },
           xAxis: {
+            type: 'datetime',
             title: {
               text: 'Time'
             },
-            tickInterval: 1,
             plotLines: [{
-              color: 'red', // Color value
-              dashStyle: 'dash', // Style of the plot line. Default to solid
-              value: 4, // Value of where the line will appear
-              width: 2, // Width of the line
-              label: { 
-                text: 'Event Start = ' + eventStart // Content of the label. 
+              color: 'red',
+              dashStyle: 'dash',
+              value: 4,
+              width: 2,
+              label: {
+                text: 'Event Start = ' + eventStart
               }
             },
             {
-              color: 'red', // Color value
-              dashStyle: 'dash', // Style of the plot line. Default to solid
-              value: 6, // Value of where the line will appear
-              width: 2, // Width of the line
-              label: { 
-                text: 'Event End = ' + eventEnd // Content of the label. 
-              } 
+              color: 'red',
+              dashStyle: 'dash',
+              value: 6,
+              width: 2,
+              label: {
+                text: 'Event End = ' + eventEnd
+              }
             },
             {
-              color: 'red', // Color value
-              dashStyle: 'dash', // Style of the plot line. Default to solid
-              value: 7, // Value of where the line will appear
-              width: 2, // Width of the line
-              label: { 
-                text: 't_recovery = all water heaters off', // Content of the label. 
-              } 
+              color: 'red',
+              dashStyle: 'dash',
+              value: 7,
+              width: 2,
+              label: {
+                text: 't_recovery = all water heaters off',
+              }
             }]
           },
           yAxis: {
             title: {
               text: 'Total Load'
-            },
-            tickInterval: 1
+            }
           },
           series: [{
             name: 'Aggregate Load',
