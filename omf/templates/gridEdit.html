@@ -1985,10 +1985,11 @@ function solarAdding() {
 		if (i < tkeys.length && !in_use && percentage != 100) {
 			in_use = true
 			var limit = i + 100
+			var solarAddingPercentage = prompt("Enter percentage of meters to add solar at:")
 			for (; i < tkeys.length && i < limit; i++) {
 				index = tkeys[i]
 				if (tree[index].hasOwnProperty('object') && tree[index]['object'] == 'triplex_meter') {
-					if (Math.random() < (gebi('solarAddingPercentage').value / 100.0)) {
+					if (Math.random() < (solarAddingPercentage / 100.0)) {
 						newInverter = makeNewInverter(tree[index]['phases'])
 						newPanels = newRandomPanels()
 						newChildAtLocation(newInverter, index)
