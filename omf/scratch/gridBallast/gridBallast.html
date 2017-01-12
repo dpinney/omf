@@ -573,6 +573,9 @@
         var eventEnd = new Date(endTime);
 
         new Highcharts.Chart({
+          credits: {
+            enabled: false
+          },
           chart: {
             renderTo: 'serviceQualityChart',
             type: 'line'
@@ -591,7 +594,7 @@
               value: 3.5,
               width: 2,
               label: {
-                text: 'Event Start = ' + eventStart
+                text: 'Event Start = ' + eventStart.toDateString()
               }
             },
             {
@@ -600,7 +603,7 @@
               value: 4.5,
               width: 2,
               label: {
-                text: 'Event End = ' + eventEnd
+                text: 'Event End = ' + eventEnd.toDateString()
               }
             }]
           },
@@ -610,7 +613,7 @@
             }
           },
           series: [{
-            name: 'Unfulfilled service requests',
+            showInLegend: false,
             data: [1, 1, 2, 1, 1, 1, 2, 1, 1]
           }]
         });
@@ -622,6 +625,9 @@
       <div id="availabilityChart"></div>
       <script type="text/javascript">
         new Highcharts.Chart({
+          credits: {
+            enabled: false
+          },
           chart: {
             renderTo: 'availabilityChart',
             type: 'line'
@@ -640,7 +646,7 @@
               value: 4,
               width: 2,
               label: {
-                text: 'Event Start = ' + eventStart
+                text: 'Event Start = ' + eventStart.toDateString()
               }
             },
             {
@@ -649,7 +655,7 @@
               value: 6,
               width: 2,
               label: {
-                text: 'Event End = ' + eventEnd
+                text: 'Event End = ' + eventEnd.toDateString()
               }
             },
             {
@@ -668,7 +674,7 @@
             }
           },
           series: [{
-            name: 'Aggregate Load',
+            showInLegend: false,
             data: [3, 3, 4, 3, 3, 2, 3, 3, 3]
           }]
         });
