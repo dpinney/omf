@@ -1,10 +1,10 @@
-import os, sys
+import os, sys, crypto, shutil
 from os.path import join as pJoin
 
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _cryptoPath = pJoin(_myDir,"crypto")
 sys.path.insert(0,_cryptoPath)
-import crypto
+
 #  # CYME TO GRIDLAB TESTS
 # def cymeToGridlabTests(keepFiles=True):
 # 	import os, json, traceback, shutil
@@ -58,6 +58,7 @@ import crypto
 # 	if not keepFiles:
 # 		shutil.rmtree(outPrefix)
 # return exceptionCount   
+
 # MILSOFT WINDMIL TO GRIDLAB TESTS
 def milsoftToGridlabTests(files,keepFiles=False):
 	openPrefix = './crypto/decryptedDataFiles'
@@ -113,15 +114,16 @@ def milsoftToGridlabTests(files,keepFiles=False):
 		shutil.rmtree(outPrefix)
 	return exceptionCount
 
+
 user = 'UCS'
 key = crypto.getKey(_cryptoPath,user)
 # inFilesFolder = pJoin(_cryptoPath,"inFiles")
 encryptedFilesFolder = pJoin(_cryptoPath,"encryptedFiles")
 if not (os.path.isdir(pJoin(_cryptoPath,"decryptedDataFiles"))):
 	os.makedirs(pJoin(_cryptoPath,"decryptedDataFiles"))
-
 decryptedDataFolder = pJoin(_cryptoPath,"decryptedDataFiles")
 
+# For Encryption
 # for file in os.listdir(decryptedDataFolder):
 # 	with open(pJoin(decryptedDataFolder,str(file)),'r') as inFile:
 # 		readFile = inFile.read()
@@ -130,20 +132,21 @@ decryptedDataFolder = pJoin(_cryptoPath,"decryptedDataFiles")
 # 	with open(pJoin(encryptedFilesFolder,fileName),"w+") as f:
 # 		f.write(encryptedData)
 
-# Decrypts encrypted Files and writes to decrypted data folder
-import shutil
 if(os.path.isdir(decryptedDataFolder)):
 	shutil.rmtree(decryptedDataFolder)
 if not(os.path.isdir(decryptedDataFolder)):
 	os.makedirs(decryptedDataFolder)
 
+# Decrypts encrypted Files and writes to decrypted data folder
 for file in os.listdir(encryptedFilesFolder):
-	with open(pJoin(encryptedFilesFolder,str(file)),'r') as r:
-		r = r.read()
-	fileName = str(file)[10:]
-	decryptedData = crypto.decryptData(r,key)
-	with open(pJoin(decryptedDataFolder,fileName),"w+") as f:
-		f.write(decryptedData)
+	# HACK: Was running into issues with a .DS_Store file in my directories
+	if not file.startswith('.'):
+		with open(pJoin(encryptedFilesFolder,str(file)),'r') as r:
+			r = r.read()
+		fileName = str(file)[10:]
+		decryptedData = crypto.decryptData(r,key)
+		with open(pJoin(decryptedDataFolder,fileName),"w+") as f:
+			f.write(decryptedData)
 
 # Creating [[.std,.seq],[.std,.seq],[.stq,.seq],...] structure for testing functions
 seqFilenames = []
@@ -180,7 +183,8 @@ for group in groupedFiles:
 # 		paths.append(pJoin(decryptedDataFolder,item))
 # 	pathArray.append(paths)
 
-print arrays
+# Runs milsoft tests on seq std files and then deletes results and decrypted files
+# Make some kind of output saying which files pass and which fail
 milsoftToGridlabTests(arrays)
 if(os.path.isdir('./milToGridlabTests/')):
 	shutil.rmtree('./milToGridlabTests/')
