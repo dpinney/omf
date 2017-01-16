@@ -289,7 +289,7 @@ def newModel(modelType, modelName):
 	os.makedirs(modelDir)
 	inputDict = {"modelName" : modelName, "modelType" : modelType, "user":User.cu(), "created" : str(dt.datetime.now())}
 	#HACK: new network and feeder creation code.
-	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering']:
+	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering', 'gridBallast', '_gridBallast']:
 		newSimpleFeeder(User.cu(), modelName, 1, False, 'feeder1')
 		inputDict['feederName1'] = 'feeder1'
 	elif modelType in ['transmission', '_transmission']:

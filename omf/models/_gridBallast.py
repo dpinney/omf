@@ -19,13 +19,14 @@ import omf.feeder as feeder
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
 
-# Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,"gridBallast.html"),"r") as tempFile:
-	template = Template(tempFile.read())
+# Model metadata:
+fileName = os.path.basename(__file__)
+modelName = fileName[0:fileName.rfind('.')]
+tooltip = 'gridBallast simulator'
 
-# HACK to get this working in scratch.
-# with open(pJoin(__metaModel__._omfDir,"scratch","gridBallast","gridBallast.html"),"r") as tempFile:
-# 	template = Template(tempFile.read())
+# Our HTML template for the interface:
+with open(pJoin(__metaModel__._myDir, modelName + '.html'),'r') as tempFile:
+	template = Template(tempFile.read())
 		
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
