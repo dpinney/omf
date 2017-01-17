@@ -279,31 +279,36 @@
             "pointWidth": 40,
             "pointInterval": 3 * 3600 * 100,
             "color":"RoyalBlue",
-            "data":eval(regNamesArray[i].concat(".RegTapA")),
+            // "data":eval(regNamesArray[i].concat(".RegTapA")),
+            "data": allOutputData.Regulator_Reg1.RegTapA,
             "name":"A",
           }
           var reg1BTSeries = {
             "pointWidth": 40,
             "pointInterval": 3 * 3600 * 100,
             "color":"Red",
-            "data":eval(regNamesArray[i].concat(".RegTapB")),
+            // "data":eval(regNamesArray[i].concat(".RegTapB")),
+            "data": allOutputData.Regulator_Reg1.RegTapB,
             "name":"B",
           }
           var reg1CTSeries = {
             "pointWidth": 40,
             "pointInterval": 3 * 3600 * 100,
             "color":"Green",
-            "data":eval(regNamesArray[i].concat(".RegTapC")),
+            // "data":eval(regNamesArray[i].concat(".RegTapC")),
+            "data": allOutputData.Regulator_Reg1.RegTapC,
             "name":"C",
           }
-          phaseValue= eval(reg.concat(".RegPhases"))
+          // phaseValue = eval(reg.concat(".RegPhases"))
+          phaseValue = allOutputData.Regulator_Reg1.RegPhases
           var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
           localHighChart["chart"]["renderTo"] = "regulatorSeries_" + reg
           localHighChart["chart"]["inverted"] = false
           localHighChart["chart"]["height"] = 150
           localHighChart["chart"]["width"] = 1000
           localHighChart["chart"]["type"] = "line"
-          localHighChart["title"]["text"] = reg.substr(14)
+          // localHighChart["title"]["text"] = reg.substr(14)
+          localHighChart["title"]["text"] = regName
           localHighChart["series"] = []
           localHighChart["xAxis"] = { "type":"datetime",
             "tickColor":"gray",
