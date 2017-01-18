@@ -489,14 +489,14 @@ def _tests():
 	except: pass
 	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
 	# No-input template.
-	renderAndShow(template)
+	renderAndShow(template, modelName)
 	# Run the model.
 	runForeground(modelLoc, inData)
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)
 	# Show the output.
-	renderAndShow(template, modelDir=modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 	# Delete the model.
 	# shutil.rmtree(modelLoc)
 
