@@ -1,0 +1,2177 @@
+%!PS-Adobe-3.0
+%%Creator: graphviz version 2.40.1 (20161225.0304)
+%%Title: dependencies
+%%Pages: (atend)
+%%BoundingBox: (atend)
+%%EndComments
+save
+%%BeginProlog
+/DotDict 200 dict def
+DotDict begin
+
+/setupLatin1 {
+mark
+/EncodingVector 256 array def
+ EncodingVector 0
+
+ISOLatin1Encoding 0 255 getinterval putinterval
+EncodingVector 45 /hyphen put
+
+% Set up ISO Latin 1 character encoding
+/starnetISO {
+        dup dup findfont dup length dict begin
+        { 1 index /FID ne { def }{ pop pop } ifelse
+        } forall
+        /Encoding EncodingVector def
+        currentdict end definefont
+} def
+/Times-Roman starnetISO def
+/Times-Italic starnetISO def
+/Times-Bold starnetISO def
+/Times-BoldItalic starnetISO def
+/Helvetica starnetISO def
+/Helvetica-Oblique starnetISO def
+/Helvetica-Bold starnetISO def
+/Helvetica-BoldOblique starnetISO def
+/Courier starnetISO def
+/Courier-Oblique starnetISO def
+/Courier-Bold starnetISO def
+/Courier-BoldOblique starnetISO def
+cleartomark
+} bind def
+
+%%BeginResource: procset graphviz 0 0
+/coord-font-family /Times-Roman def
+/default-font-family /Times-Roman def
+/coordfont coord-font-family findfont 8 scalefont def
+
+/InvScaleFactor 1.0 def
+/set_scale {
+       dup 1 exch div /InvScaleFactor exch def
+       scale
+} bind def
+
+% styles
+/solid { [] 0 setdash } bind def
+/dashed { [9 InvScaleFactor mul dup ] 0 setdash } bind def
+/dotted { [1 InvScaleFactor mul 6 InvScaleFactor mul] 0 setdash } bind def
+/invis {/fill {newpath} def /stroke {newpath} def /show {pop newpath} def} bind def
+/bold { 2 setlinewidth } bind def
+/filled { } bind def
+/unfilled { } bind def
+/rounded { } bind def
+/diagonals { } bind def
+/tapered { } bind def
+
+% hooks for setting color 
+/nodecolor { sethsbcolor } bind def
+/edgecolor { sethsbcolor } bind def
+/graphcolor { sethsbcolor } bind def
+/nopcolor {pop pop pop} bind def
+
+/beginpage {	% i j npages
+	/npages exch def
+	/j exch def
+	/i exch def
+	/str 10 string def
+	npages 1 gt {
+		gsave
+			coordfont setfont
+			0 0 moveto
+			(\() show i str cvs show (,) show j str cvs show (\)) show
+		grestore
+	} if
+} bind def
+
+/set_font {
+	findfont exch
+	scalefont setfont
+} def
+
+% draw text fitted to its expected width
+/alignedtext {			% width text
+	/text exch def
+	/width exch def
+	gsave
+		width 0 gt {
+			[] 0 setdash
+			text stringwidth pop width exch sub text length div 0 text ashow
+		} if
+	grestore
+} def
+
+/boxprim {				% xcorner ycorner xsize ysize
+		4 2 roll
+		moveto
+		2 copy
+		exch 0 rlineto
+		0 exch rlineto
+		pop neg 0 rlineto
+		closepath
+} bind def
+
+/ellipse_path {
+	/ry exch def
+	/rx exch def
+	/y exch def
+	/x exch def
+	matrix currentmatrix
+	newpath
+	x y translate
+	rx ry scale
+	0 0 1 0 360 arc
+	setmatrix
+} bind def
+
+/endpage { showpage } bind def
+/showpage { } def
+
+/layercolorseq
+	[	% layer color sequence - darkest to lightest
+		[0 0 0]
+		[.2 .8 .8]
+		[.4 .8 .8]
+		[.6 .8 .8]
+		[.8 .8 .8]
+	]
+def
+
+/layerlen layercolorseq length def
+
+/setlayer {/maxlayer exch def /curlayer exch def
+	layercolorseq curlayer 1 sub layerlen mod get
+	aload pop sethsbcolor
+	/nodecolor {nopcolor} def
+	/edgecolor {nopcolor} def
+	/graphcolor {nopcolor} def
+} bind def
+
+/onlayer { curlayer ne {invis} if } def
+
+/onlayers {
+	/myupper exch def
+	/mylower exch def
+	curlayer mylower lt
+	curlayer myupper gt
+	or
+	{invis} if
+} def
+
+/curlayer 0 def
+
+%%EndResource
+%%EndProlog
+%%BeginSetup
+14 default-font-family set_font
+% /arrowlength 10 def
+% /arrowwidth 5 def
+
+% make sure pdfmark is harmless for PS-interpreters other than Distiller
+/pdfmark where {pop} {userdict /pdfmark /cleartomark load put} ifelse
+% make '<<' and '>>' safe on PS Level 1 devices
+/languagelevel where {pop languagelevel}{1} ifelse
+2 lt {
+    userdict (<<) cvn ([) cvn load put
+    userdict (>>) cvn ([) cvn load put
+} if
+
+%%EndSetup
+setupLatin1
+%%Page: 1 1
+%%PageBoundingBox: 36 36 604 756
+%%PageOrientation: Portrait
+0 0 1 beginpage
+gsave
+36 36 568 720 boxprim clip newpath
+0.479368 0.479368 set_scale 0 rotate 79.0989 79.0989 translate
+% omf
+gsave
+0 0 0.82745 nodecolor
+396.9586 1027 27 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+396.9586 1027 27 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+391.3206 1024.9 moveto 11.2759 (omf) alignedtext
+grestore
+% omf/feeder.py
+gsave
+0 0 0.82745 nodecolor
+1050.9586 1004 30.0814 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+1050.9586 1004 30.0814 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+1031.4232 1001.9 moveto 39.0708 (omf/feeder.py) alignedtext
+grestore
+% omf->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 424.2275 1026.041 moveto
+526.6442 1022.4392 888.6743 1009.7072 1010.5644 1005.4206 curveto
+stroke
+0 0 0 edgecolor
+newpath 1010.727 1008.9171 moveto
+1020.5978 1005.0677 lineto
+1010.4809 1001.9215 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1010.727 1008.9171 moveto
+1020.5978 1005.0677 lineto
+1010.4809 1001.9215 lineto
+closepath stroke
+grestore
+% omf/milToGridlab.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 1304 41.5766 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 1304 41.5766 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+689.971 1301.9 moveto 59.9751 (omf/milToGridlab.py) alignedtext
+grestore
+% omf->omf/milToGridlab.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 410.1815 1043.0244 moveto
+446.2124 1085.8658 550.6874 1204.6976 658.8713 1277 curveto
+664.9688 1281.0752 671.7823 1284.7848 678.5858 1288.0608 curveto
+stroke
+0 0 0 edgecolor
+newpath 677.2375 1291.2926 moveto
+687.7888 1292.2528 lineto
+680.1393 1284.9223 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 677.2375 1291.2926 moveto
+687.7888 1292.2528 lineto
+680.1393 1284.9223 lineto
+closepath stroke
+grestore
+% omf/models
+gsave
+0 0 0.82745 nodecolor
+719.9586 1050 27.3888 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 1050 27.3888 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+703.2379 1047.9 moveto 33.4414 (omf/models) alignedtext
+grestore
+% omf->omf/models
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 423.9418 1028.9214 moveto
+481.5354 1033.0225 616.6044 1042.6404 682.49 1047.332 curveto
+stroke
+0 0 0 edgecolor
+newpath 682.6016 1050.8487 moveto
+692.825 1048.0679 lineto
+683.0989 1043.8664 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 682.6016 1050.8487 moveto
+692.825 1048.0679 lineto
+683.0989 1043.8664 lineto
+closepath stroke
+grestore
+% omf/solvers
+gsave
+0 0 0.82745 nodecolor
+719.9586 958 27 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 958 27 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+703.4327 955.9 moveto 33.0518 (omf/solvers) alignedtext
+grestore
+% omf->omf/solvers
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 422.845 1021.4701 moveto
+480.2529 1009.2065 618.3424 979.7075 684.0484 965.6712 curveto
+stroke
+0 0 0 edgecolor
+newpath 684.9007 969.0682 moveto
+693.9489 963.5563 lineto
+683.4383 962.2226 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 684.9007 969.0682 moveto
+693.9489 963.5563 lineto
+683.4383 962.2226 lineto
+closepath stroke
+grestore
+% omf/weather.py
+gsave
+0 0 0.82745 nodecolor
+1050.9586 704 32.7166 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+1050.9586 704 32.7166 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+1029.0887 701.9 moveto 43.7397 (omf/weather.py) alignedtext
+grestore
+% omf->omf/weather.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 408.1816 1010.2263 moveto
+440.6543 963.1925 540.0025 829.5427 658.8713 769 curveto
+719.5663 738.0866 919.8497 716.1944 1008.3138 707.7956 curveto
+stroke
+0 0 0 edgecolor
+newpath 1008.6504 711.2795 moveto
+1018.2802 706.8617 lineto
+1007.9973 704.31 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1008.6504 711.2795 moveto
+1018.2802 706.8617 lineto
+1007.9973 704.31 lineto
+closepath stroke
+grestore
+% omf/milToGridlab.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 752.2352 1292.4101 moveto
+761.904 1288.2454 772.2635 1283.0553 781.0459 1277 curveto
+889.42 1202.2785 991.2289 1080.3584 1032.0966 1028.543 curveto
+stroke
+0 0 0 edgecolor
+newpath 1034.9369 1030.5928 moveto
+1038.3459 1020.5613 lineto
+1029.4253 1026.2774 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1034.9369 1030.5928 moveto
+1038.3459 1020.5613 lineto
+1029.4253 1026.2774 lineto
+closepath stroke
+grestore
+% omf/solvers/gridlabd
+gsave
+0 0 0.82745 nodecolor
+1050.9586 1158 40.7598 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+1050.9586 1158 40.7598 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+1021.7965 1155.9 moveto 58.3242 (omf/solvers/gridlabd) alignedtext
+grestore
+% omf/milToGridlab.py->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 749.3326 1291.0435 moveto
+809.2012 1264.6362 945.3227 1204.5947 1012.2892 1175.0566 curveto
+stroke
+0 0 0 edgecolor
+newpath 1013.9134 1178.1656 moveto
+1021.6504 1170.9275 lineto
+1011.0884 1171.7609 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1013.9134 1178.1656 moveto
+1021.6504 1170.9275 lineto
+1011.0884 1171.7609 lineto
+closepath stroke
+grestore
+% omf/solvers->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 740.1659 970.2098 moveto
+795.5099 1003.6503 949.934 1096.9579 1018.0099 1138.0914 curveto
+stroke
+0 0 0 edgecolor
+newpath 1016.2713 1141.1302 moveto
+1026.6403 1143.3062 lineto
+1019.8915 1135.139 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1016.2713 1141.1302 moveto
+1026.6403 1143.3062 lineto
+1019.8915 1135.139 lineto
+closepath stroke
+grestore
+% omf/solvers/nrelsam2013
+gsave
+0 0 0.82745 nodecolor
+1050.9586 623 47.8742 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+1050.9586 623 47.8742 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+1015.3809 620.9 moveto 71.1553 (omf/solvers/nrelsam2013) alignedtext
+grestore
+% omf/solvers->omf/solvers/nrelsam2013
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 744.5514 950.1035 moveto
+756.2899 945.619 770.1222 939.2388 781.0459 931 curveto
+898.3524 842.5262 891.5127 783.5837 992.648 677 curveto
+1002.5621 666.5517 1014.0868 655.6454 1024.2599 646.3919 curveto
+stroke
+0 0 0 edgecolor
+newpath 1026.6344 648.9636 moveto
+1031.7268 639.6728 lineto
+1021.9521 643.7601 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1026.6344 648.9636 moveto
+1031.7268 639.6728 lineto
+1021.9521 643.7601 lineto
+closepath stroke
+grestore
+% omf/calibrate.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 1396 34.2733 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 1396 34.2733 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+696.9266 1393.9 moveto 46.064 (omf/calibrate.py) alignedtext
+grestore
+% omf/calibrate.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 747.1154 1384.9748 moveto
+758.3265 1379.6427 771.0156 1372.5343 781.0459 1364 curveto
+901.864 1261.2005 1000.8479 1094.9594 1036.6114 1030.6166 curveto
+stroke
+0 0 0 edgecolor
+newpath 1039.8545 1031.9833 moveto
+1041.6138 1021.5355 lineto
+1033.7231 1028.6058 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1039.8545 1031.9833 moveto
+1041.6138 1021.5355 lineto
+1033.7231 1028.6058 lineto
+closepath stroke
+grestore
+% omf/calibrate.py->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 745.4644 1383.8544 moveto
+756.6305 1378.2302 769.7366 1371.2046 781.0459 1364 curveto
+874.8476 1304.2433 976.9937 1220.6753 1024.2345 1180.8517 curveto
+stroke
+0 0 0 edgecolor
+newpath 1026.7627 1183.2973 moveto
+1032.1362 1174.1662 lineto
+1022.2413 1177.9534 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1026.7627 1183.2973 moveto
+1032.1362 1174.1662 lineto
+1022.2413 1177.9534 lineto
+closepath stroke
+grestore
+% omf/cymeToGridlab.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 1450 44.9824 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 1450 44.9824 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+687.0589 1447.9 moveto 65.7993 (omf/cymeToGridlab.py) alignedtext
+grestore
+% omf/cymeToGridlab.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 754.9687 1438.6664 moveto
+764.0854 1434.6532 773.4664 1429.4799 781.0459 1423 curveto
+851.0411 1363.1592 991.2301 1113.1772 1036.5029 1030.6016 curveto
+stroke
+0 0 0 edgecolor
+newpath 1039.8156 1031.8385 moveto
+1041.5423 1021.3853 lineto
+1033.6738 1028.4801 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1039.8156 1031.8385 moveto
+1041.5423 1021.3853 lineto
+1033.6738 1028.4801 lineto
+closepath stroke
+grestore
+% omf/cymeToGridlab.py->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 753.4447 1437.7802 moveto
+762.7456 1433.7102 772.6025 1428.7294 781.0459 1423 curveto
+887.5982 1350.6975 989.2758 1233.6844 1031.0338 1182.8718 curveto
+stroke
+0 0 0 edgecolor
+newpath 1033.8303 1184.9808 moveto
+1037.4412 1175.0202 lineto
+1028.407 1180.5549 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1033.8303 1184.9808 moveto
+1037.4412 1175.0202 lineto
+1028.407 1180.5549 lineto
+closepath stroke
+grestore
+% omf/loadModeling.py
+gsave
+0 0 0.82745 nodecolor
+101.9586 1027 42.4704 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+101.9586 1027 42.4704 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+71.337 1024.9 moveto 61.2432 (omf/loadModeling.py) alignedtext
+grestore
+% omf/loadModeling.py->omf
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 144.5391 1027 moveto
+202.2797 1027 304.4953 1027 359.473 1027 curveto
+stroke
+0 0 0 edgecolor
+newpath 359.8116 1030.5001 moveto
+369.8116 1027 lineto
+359.8115 1023.5001 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 359.8116 1030.5001 moveto
+369.8116 1027 lineto
+359.8115 1023.5001 lineto
+closepath stroke
+grestore
+% omf/models/__metaModel__.py
+gsave
+0 0 0.82745 nodecolor
+1050.9586 515 58.1219 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+1050.9586 515 58.1219 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+1005.9508 512.9 moveto 90.0156 (omf/models/__metaModel__.py) alignedtext
+grestore
+% omf/models/_circuitRealTime.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 288 59.7647 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 288 59.7647 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+673.5221 285.9 moveto 92.873 (omf/models/_circuitRealTime.py) alignedtext
+grestore
+% omf/models/_circuitRealTime.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 756.1505 302.4111 moveto
+764.5038 306.1686 773.2285 310.4518 781.0459 315 curveto
+875.4008 369.8968 976.0685 451.4323 1023.379 491.3072 curveto
+stroke
+0 0 0 edgecolor
+newpath 1021.1492 494.0053 moveto
+1031.0427 497.7962 lineto
+1025.6726 488.6631 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1021.1492 494.0053 moveto
+1031.0427 497.7962 lineto
+1025.6726 488.6631 lineto
+closepath stroke
+grestore
+% omf/models/_cvrDynamic.py
+gsave
+0 0 0.82745 nodecolor
+396.9586 1350 54.06 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+396.9586 1350 54.06 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+355.8421 1347.9 moveto 82.2329 (omf/models/_cvrDynamic.py) alignedtext
+grestore
+% omf/models/_cvrDynamic.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 443.7283 1359.2092 moveto
+519.2295 1371.6495 670.6528 1386.3953 781.0459 1331 curveto
+915.2818 1263.6404 1006.9931 1095.9472 1038.699 1030.6328 curveto
+stroke
+0 0 0 edgecolor
+newpath 1041.952 1031.9428 moveto
+1043.1051 1021.4109 lineto
+1035.6359 1028.925 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1041.952 1031.9428 moveto
+1043.1051 1021.4109 lineto
+1035.6359 1028.925 lineto
+closepath stroke
+grestore
+% omf/models/_cvrDynamic.py->omf/calibrate.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 446.7195 1357.0867 moveto
+509.6551 1366.0497 616.9956 1381.3365 676.6853 1389.8372 curveto
+stroke
+0 0 0 edgecolor
+newpath 676.508 1393.3472 moveto
+686.9016 1391.2922 lineto
+677.495 1386.4172 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 676.508 1393.3472 moveto
+686.9016 1391.2922 lineto
+677.495 1386.4172 lineto
+closepath stroke
+grestore
+% omf/models/_cvrDynamic.py->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 416.7457 1366.8389 moveto
+474.5052 1413.8417 647.2484 1539.0567 781.0459 1477 curveto
+915.0074 1414.8672 1006.5811 1249.8635 1038.4811 1184.8598 curveto
+stroke
+0 0 0 edgecolor
+newpath 1041.7235 1186.194 moveto
+1042.9198 1175.6669 lineto
+1035.4198 1183.1504 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1041.7235 1186.194 moveto
+1042.9198 1175.6669 lineto
+1035.4198 1183.1504 lineto
+closepath stroke
+grestore
+% omf/models/_cvrDynamic.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 401.8678 1331.742 moveto
+436.9881 1201.197 648.9479 414.5429 658.8713 407 curveto
+772.8808 320.3402 952.3539 438.7925 1021.9931 491.7399 curveto
+stroke
+0 0 0 edgecolor
+newpath 1020.2553 494.8194 moveto
+1030.312 498.1529 lineto
+1024.5291 489.2755 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1020.2553 494.8194 moveto
+1030.312 498.1529 lineto
+1024.5291 489.2755 lineto
+closepath stroke
+grestore
+% omf/models/_gridBallast.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 850 51.7927 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 850 51.7927 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+680.7818 847.9 moveto 78.3535 (omf/models/_gridBallast.py) alignedtext
+grestore
+% omf/models/_gridBallast.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 752.3594 864.1507 moveto
+761.6431 868.2513 771.7625 872.7651 781.0459 877 curveto
+866.9183 916.1732 967.324 963.9384 1018.0458 988.2072 curveto
+stroke
+0 0 0 edgecolor
+newpath 1016.6854 991.4363 moveto
+1027.2164 992.5981 lineto
+1019.7084 985.1227 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1016.6854 991.4363 moveto
+1027.2164 992.5981 lineto
+1019.7084 985.1227 lineto
+closepath stroke
+grestore
+% omf/models/_gridBallast.py->omf/weather.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 752.2989 835.7351 moveto
+814.6548 808.2307 951.0455 748.0704 1015.6633 719.5683 curveto
+stroke
+0 0 0 edgecolor
+newpath 1017.2906 722.6759 moveto
+1025.0276 715.4378 lineto
+1014.4656 716.2713 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1017.2906 722.6759 moveto
+1025.0276 715.4378 lineto
+1014.4656 716.2713 lineto
+closepath stroke
+grestore
+% omf/models/_gridBallast.py->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 755.7833 863.0494 moveto
+764.4116 866.932 773.3522 871.6131 781.0459 877 curveto
+890.2247 953.4449 991.231 1078.6726 1031.971 1132.308 curveto
+stroke
+0 0 0 edgecolor
+newpath 1029.3914 1134.7005 moveto
+1038.2056 1140.5793 lineto
+1034.9813 1130.487 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1029.3914 1134.7005 moveto
+1038.2056 1140.5793 lineto
+1034.9813 1130.487 lineto
+closepath stroke
+grestore
+% omf/models/_gridBallast.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 756.2782 837.0506 moveto
+764.802 833.1891 773.5707 828.4926 781.0459 823 curveto
+839.9918 779.6876 978.5517 607.0248 1030.6645 540.925 curveto
+stroke
+0 0 0 edgecolor
+newpath 1033.7129 542.7108 moveto
+1037.1459 532.6876 lineto
+1028.2116 538.3822 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1033.7129 542.7108 moveto
+1037.1459 532.6876 lineto
+1028.2116 538.3822 lineto
+closepath stroke
+grestore
+% omf/models/_modelSkeleton.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 234 58.1965 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 234 58.1965 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+675.1439 231.9 moveto 89.6294 (omf/models/_modelSkeleton.py) alignedtext
+grestore
+% omf/models/_modelSkeleton.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 756.8775 247.9036 moveto
+765.1141 251.6565 773.6053 256.0653 781.0459 261 curveto
+885.1792 330.062 986.6396 440.5018 1029.5637 489.8065 curveto
+stroke
+0 0 0 edgecolor
+newpath 1026.9897 492.1808 moveto
+1036.1786 497.4548 lineto
+1032.2842 487.6016 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1026.9897 492.1808 moveto
+1036.1786 497.4548 lineto
+1032.2842 487.6016 lineto
+closepath stroke
+grestore
+% omf/models/_resilientDist.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 1104 53.6432 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 1104 53.6432 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+679.0318 1101.9 moveto 81.8535 (omf/models/_resilientDist.py) alignedtext
+grestore
+% omf/models/_resilientDist.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 760.2148 1091.838 moveto
+825.0066 1072.2634 951.473 1034.0561 1014.0592 1015.1479 curveto
+stroke
+0 0 0 edgecolor
+newpath 1015.3357 1018.4185 moveto
+1023.8962 1012.176 lineto
+1013.3112 1011.7176 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1015.3357 1018.4185 moveto
+1023.8962 1012.176 lineto
+1013.3112 1011.7176 lineto
+closepath stroke
+grestore
+% omf/models/_resilientDist.py->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 768.4433 1111.9099 moveto
+831.0393 1122.1219 939.3595 1139.7935 1002.1249 1150.0332 curveto
+stroke
+0 0 0 edgecolor
+newpath 1001.735 1153.5158 moveto
+1012.1681 1151.6716 lineto
+1002.8621 1146.6071 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1001.735 1153.5158 moveto
+1012.1681 1151.6716 lineto
+1002.8621 1146.6071 lineto
+closepath stroke
+grestore
+% omf/models/_resilientDist.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 759.4921 1091.6716 moveto
+767.3222 1087.8904 774.9839 1083.0725 781.0459 1077 curveto
+946.0474 911.7124 876.7652 798.7724 992.648 596 curveto
+1003.7468 576.5792 1018.4798 556.1476 1030.3594 540.6632 curveto
+stroke
+0 0 0 edgecolor
+newpath 1033.2481 542.65 moveto
+1036.6245 532.6075 lineto
+1027.7225 538.3526 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1033.2481 542.65 moveto
+1036.6245 532.6075 lineto
+1027.7225 538.3526 lineto
+closepath stroke
+grestore
+% omf/models/_storageDispatch.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 434 59.611 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 434 59.611 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+673.5921 431.9 moveto 92.7329 (omf/models/_storageDispatch.py) alignedtext
+grestore
+% omf/models/_storageDispatch.py->omf/weather.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 757.1195 448.1707 moveto
+765.2596 451.8854 773.6486 456.2107 781.0459 461 curveto
+794.7185 469.8522 962.2142 622.7716 1026.2692 681.3871 curveto
+stroke
+0 0 0 edgecolor
+newpath 1024.1605 684.2018 moveto
+1033.9003 688.3719 lineto
+1028.8868 679.0382 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1024.1605 684.2018 moveto
+1033.9003 688.3719 lineto
+1028.8868 679.0382 lineto
+closepath stroke
+grestore
+% omf/models/_storageDispatch.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 766.6808 445.4335 moveto
+826.7306 460.1285 930.8749 485.614 995.061 501.3211 curveto
+stroke
+0 0 0 edgecolor
+newpath 994.4611 504.7775 moveto
+1005.0065 503.7549 lineto
+996.1251 497.9782 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 994.4611 504.7775 moveto
+1005.0065 503.7549 lineto
+996.1251 497.9782 lineto
+closepath stroke
+grestore
+% omf/models/_transmission.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 180 54.4323 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 180 54.4323 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+678.4456 177.9 moveto 83.0259 (omf/models/_transmission.py) alignedtext
+grestore
+% omf/models/_transmission.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 756.9179 193.2406 moveto
+765.2396 197.0463 773.7576 201.6447 781.0459 207 curveto
+895.256 290.9196 995.2548 430.8922 1033.9275 488.7449 curveto
+stroke
+0 0 0 edgecolor
+newpath 1031.1583 490.9021 moveto
+1039.6005 497.3036 lineto
+1036.993 487.0347 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1031.1583 490.9021 moveto
+1039.6005 497.3036 lineto
+1036.993 487.0347 lineto
+closepath stroke
+grestore
+% omf/models/cvrStatic.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 1158 46.5217 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 1158 46.5217 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+685.4508 1155.9 moveto 69.0156 (omf/models/cvrStatic.py) alignedtext
+grestore
+% omf/models/cvrStatic.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 751.0988 1144.4059 moveto
+760.7214 1140.1597 771.3405 1135.4274 781.0459 1131 curveto
+866.9183 1091.8268 967.324 1044.0616 1018.0458 1019.7928 curveto
+stroke
+0 0 0 edgecolor
+newpath 1019.7084 1022.8773 moveto
+1027.2164 1015.4019 lineto
+1016.6854 1016.5637 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1019.7084 1022.8773 moveto
+1027.2164 1015.4019 lineto
+1016.6854 1016.5637 lineto
+closepath stroke
+grestore
+% omf/models/cvrStatic.py->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 767.0313 1158 moveto
+828.6576 1158 936.2895 1158 999.851 1158 curveto
+stroke
+0 0 0 edgecolor
+newpath 1000.0412 1161.5001 moveto
+1010.0411 1158 lineto
+1000.0411 1154.5001 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1000.0412 1161.5001 moveto
+1010.0411 1158 lineto
+1000.0411 1154.5001 lineto
+closepath stroke
+grestore
+% omf/models/cvrStatic.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 757.1265 1147.0362 moveto
+765.8214 1143.0884 774.4569 1137.8548 781.0459 1131 curveto
+958.2442 946.6537 869.9931 820.3626 992.648 596 curveto
+1003.3777 576.3729 1018.1139 555.9431 1030.0873 540.5111 curveto
+stroke
+0 0 0 edgecolor
+newpath 1032.9694 542.5087 moveto
+1036.412 532.4888 lineto
+1027.4723 538.1748 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1032.9694 542.5087 moveto
+1036.412 532.4888 lineto
+1027.4723 538.1748 lineto
+closepath stroke
+grestore
+% omf/models/demandResponse.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 126 60.0428 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 126 60.0428 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+673.3956 123.9 moveto 93.126 (omf/models/demandResponse.py) alignedtext
+grestore
+% omf/models/demandResponse.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 759.1514 139.7276 moveto
+766.8306 143.3823 774.5184 147.7952 781.0459 153 curveto
+905.7738 252.4554 1002.7564 422.5288 1037.2931 488.1119 curveto
+stroke
+0 0 0 edgecolor
+newpath 1034.205 489.7597 moveto
+1041.9314 497.009 lineto
+1040.4121 486.5237 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1034.205 489.7597 moveto
+1041.9314 497.009 lineto
+1040.4121 486.5237 lineto
+closepath stroke
+grestore
+% omf/models/gridlabMulti.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 796 52.5784 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 796 52.5784 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+680.1974 793.9 moveto 79.5225 (omf/models/gridlabMulti.py) alignedtext
+grestore
+% omf/models/gridlabMulti.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 754.0772 809.8232 moveto
+763.0047 813.7788 772.5144 818.301 781.0459 823 curveto
+874.0951 874.2498 976.2754 948.0206 1023.8231 983.4631 curveto
+stroke
+0 0 0 edgecolor
+newpath 1021.9477 986.4312 moveto
+1032.051 989.6209 lineto
+1026.142 980.8269 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1021.9477 986.4312 moveto
+1032.051 989.6209 lineto
+1026.142 980.8269 lineto
+closepath stroke
+grestore
+% omf/models/gridlabMulti.py->omf/weather.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 760.8777 784.6267 moveto
+824.9415 766.8205 948.1193 732.5837 1011.3599 715.0063 curveto
+stroke
+0 0 0 edgecolor
+newpath 1012.6465 718.2814 moveto
+1021.344 712.2313 lineto
+1010.7719 711.5371 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1012.6465 718.2814 moveto
+1021.344 712.2313 lineto
+1010.7719 711.5371 lineto
+closepath stroke
+grestore
+% omf/models/gridlabMulti.py->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 756.7611 808.8773 moveto
+765.1784 812.7189 773.778 817.4245 781.0459 823 curveto
+900.5427 914.6703 999.2553 1069.7774 1035.7844 1131.5071 curveto
+stroke
+0 0 0 edgecolor
+newpath 1032.8357 1133.3978 moveto
+1040.9128 1140.2543 lineto
+1038.8743 1129.8574 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1032.8357 1133.3978 moveto
+1040.9128 1140.2543 lineto
+1038.8743 1129.8574 lineto
+closepath stroke
+grestore
+% omf/models/gridlabMulti.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 739.6729 779.2637 moveto
+795.9963 731.4484 957.7587 594.1213 1023.0913 538.6577 curveto
+stroke
+0 0 0 edgecolor
+newpath 1025.5708 541.1439 moveto
+1030.9291 532.0039 lineto
+1021.0406 535.8075 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1025.5708 541.1439 moveto
+1030.9291 532.0039 lineto
+1021.0406 535.8075 lineto
+closepath stroke
+grestore
+% omf/models/pvWatts.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 596 45.7008 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 596 45.7008 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+686.5052 593.9 moveto 66.9067 (omf/models/pvWatts.py) alignedtext
+grestore
+% omf/models/pvWatts.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 755.1003 607.6971 moveto
+764.1172 611.69 773.4152 616.7621 781.0459 623 curveto
+909.6563 728.1353 1005.3174 909.0843 1038.3708 977.1062 curveto
+stroke
+0 0 0 edgecolor
+newpath 1035.3032 978.8035 moveto
+1042.7897 986.3004 lineto
+1041.6123 975.7711 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1035.3032 978.8035 moveto
+1042.7897 986.3004 lineto
+1041.6123 975.7711 lineto
+closepath stroke
+grestore
+% omf/models/pvWatts.py->omf/weather.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 755.3814 607.5579 moveto
+818.0707 628.0124 948.0259 670.4147 1012.6898 691.5135 curveto
+stroke
+0 0 0 edgecolor
+newpath 1011.8947 694.9356 moveto
+1022.4871 694.7102 lineto
+1014.066 688.2809 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1011.8947 694.9356 moveto
+1022.4871 694.7102 lineto
+1014.066 688.2809 lineto
+closepath stroke
+grestore
+% omf/models/pvWatts.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 758.9018 586.4701 moveto
+817.338 572.17 927.989 545.0923 995.045 528.6828 curveto
+stroke
+0 0 0 edgecolor
+newpath 996.1329 532.0199 moveto
+1005.0143 526.2432 lineto
+994.4689 525.2205 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 996.1329 532.0199 moveto
+1005.0143 526.2432 lineto
+994.4689 525.2205 lineto
+closepath stroke
+grestore
+% omf/models/pvWatts.py->omf/solvers/nrelsam2013
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 764.9432 599.6694 moveto
+824.339 604.5144 928.9661 613.049 993.8711 618.3433 curveto
+stroke
+0 0 0 edgecolor
+newpath 993.6824 621.8395 moveto
+1003.9339 619.1641 lineto
+994.2515 614.8626 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 993.6824 621.8395 moveto
+1003.9339 619.1641 lineto
+994.2515 614.8626 lineto
+closepath stroke
+grestore
+% omf/models/solarCashflow.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 542 54.7147 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 542 54.7147 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+678.0902 539.9 moveto 83.7368 (omf/models/solarCashflow.py) alignedtext
+grestore
+% omf/models/solarCashflow.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 758.5477 554.8472 moveto
+766.5237 558.6128 774.4839 563.2932 781.0459 569 curveto
+920.357 690.1564 1011.3033 901.1112 1040.6474 976.3575 curveto
+stroke
+0 0 0 edgecolor
+newpath 1037.5197 977.9753 moveto
+1044.3778 986.051 lineto
+1044.0526 975.4611 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1037.5197 977.9753 moveto
+1044.3778 986.051 lineto
+1044.0526 975.4611 lineto
+closepath stroke
+grestore
+% omf/models/solarCashflow.py->omf/weather.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 753.3782 556.4279 moveto
+762.3985 560.4154 772.1286 564.8022 781.0459 569 curveto
+867.2195 609.5663 967.1095 660.5924 1017.7844 686.7685 curveto
+stroke
+0 0 0 edgecolor
+newpath 1016.4619 690.0249 moveto
+1026.9521 691.5104 lineto
+1019.6779 683.8074 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1016.4619 690.0249 moveto
+1026.9521 691.5104 lineto
+1019.6779 683.8074 lineto
+closepath stroke
+grestore
+% omf/models/solarCashflow.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 773.5073 537.632 moveto
+830.963 532.9453 922.3072 525.4942 984.3585 520.4326 curveto
+stroke
+0 0 0 edgecolor
+newpath 984.7562 523.9119 moveto
+994.4385 519.6104 lineto
+984.187 516.9351 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 984.7562 523.9119 moveto
+994.4385 519.6104 lineto
+984.187 516.9351 lineto
+closepath stroke
+grestore
+% omf/models/solarCashflow.py->omf/solvers/nrelsam2013
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 764.2553 552.84 moveto
+825.6233 567.8575 936.2086 594.9192 1000.6268 610.6832 curveto
+stroke
+0 0 0 edgecolor
+newpath 1000.0092 614.1352 moveto
+1010.5545 613.1126 lineto
+1001.6731 607.3358 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1000.0092 614.1352 moveto
+1010.5545 613.1126 lineto
+1001.6731 607.3358 lineto
+closepath stroke
+grestore
+% omf/models/solarConsumer.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 488 56.3543 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 488 56.3543 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+676.8905 485.9 moveto 86.1362 (omf/models/solarConsumer.py) alignedtext
+grestore
+% omf/models/solarConsumer.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 759.406 500.9035 moveto
+767.1527 504.6329 774.8026 509.2843 781.0459 515 curveto
+931.6366 652.8644 1017.0959 894.7263 1042.6954 976.266 curveto
+stroke
+0 0 0 edgecolor
+newpath 1039.4858 977.7344 moveto
+1045.782 986.2554 lineto
+1046.1738 975.6678 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1039.4858 977.7344 moveto
+1045.782 986.2554 lineto
+1046.1738 975.6678 lineto
+closepath stroke
+grestore
+% omf/models/solarConsumer.py->omf/weather.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 755.1006 502.1332 moveto
+763.7457 505.9889 772.8652 510.3861 781.0459 515 curveto
+875.056 568.0214 977.1033 645.5481 1024.2777 682.6598 curveto
+stroke
+0 0 0 edgecolor
+newpath 1022.1515 685.4405 moveto
+1032.1679 688.8934 lineto
+1026.4909 679.9478 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1022.1515 685.4405 moveto
+1032.1679 688.8934 lineto
+1026.4909 679.9478 lineto
+closepath stroke
+grestore
+% omf/models/solarConsumer.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 774.6165 492.4585 moveto
+832.1895 497.1548 922.883 504.5527 984.5403 509.5822 curveto
+stroke
+0 0 0 edgecolor
+newpath 984.3055 513.0746 moveto
+994.557 510.3993 lineto
+984.8747 506.0977 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 984.3055 513.0746 moveto
+994.557 510.3993 lineto
+984.8747 506.0977 lineto
+closepath stroke
+grestore
+% omf/models/solarConsumer.py->omf/solvers/nrelsam2013
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 754.7558 502.1922 moveto
+815.9799 527.1628 942.7232 578.8557 1008.8055 605.8077 curveto
+stroke
+0 0 0 edgecolor
+newpath 1007.5189 609.0628 moveto
+1018.1002 609.5985 lineto
+1010.1625 602.5811 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1007.5189 609.0628 moveto
+1018.1002 609.5985 lineto
+1010.1625 602.5811 lineto
+closepath stroke
+grestore
+% omf/models/solarEngineering.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 904 59.2534 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 904 59.2534 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+673.9818 901.9 moveto 91.9536 (omf/models/solarEngineering.py) alignedtext
+grestore
+% omf/models/solarEngineering.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 762.2162 916.7666 moveto
+827.5932 936.518 952.1635 974.1525 1014.0982 992.8639 curveto
+stroke
+0 0 0 edgecolor
+newpath 1013.2536 996.265 moveto
+1023.8385 995.8066 lineto
+1015.2781 989.5641 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1013.2536 996.265 moveto
+1023.8385 995.8066 lineto
+1015.2781 989.5641 lineto
+closepath stroke
+grestore
+% omf/models/solarEngineering.py->omf/weather.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 755.2912 889.4882 moveto
+763.845 885.674 772.8747 881.3908 781.0459 877 curveto
+872.6658 827.768 974.3482 758.2296 1022.5841 724.263 curveto
+stroke
+0 0 0 edgecolor
+newpath 1024.8079 726.9773 moveto
+1030.9543 718.3476 lineto
+1020.7679 721.2608 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1024.8079 726.9773 moveto
+1030.9543 718.3476 lineto
+1020.7679 721.2608 lineto
+closepath stroke
+grestore
+% omf/models/solarEngineering.py->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 756.6799 918.2108 moveto
+764.9257 921.9493 773.4705 926.2747 781.0459 931 curveto
+880.7384 993.1851 982.6366 1089.6943 1027.4159 1134.1266 curveto
+stroke
+0 0 0 edgecolor
+newpath 1025.0518 1136.7121 moveto
+1034.6026 1141.2984 lineto
+1029.9965 1131.7572 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1025.0518 1136.7121 moveto
+1034.6026 1141.2984 lineto
+1029.9965 1131.7572 lineto
+closepath stroke
+grestore
+% omf/models/solarEngineering.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 759.1514 890.2724 moveto
+766.8306 886.6177 774.5184 882.2048 781.0459 877 curveto
+797.383 863.9731 973.7634 621.5007 1032.2426 540.8453 curveto
+stroke
+0 0 0 edgecolor
+newpath 1035.1172 542.8431 moveto
+1038.152 532.6922 lineto
+1029.4494 538.735 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1035.1172 542.8431 moveto
+1038.152 532.6922 lineto
+1029.4494 538.735 lineto
+closepath stroke
+grestore
+% omf/models/solarFinancial.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 704 54.7747 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 704 54.7747 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+678.0628 701.9 moveto 83.7915 (omf/models/solarFinancial.py) alignedtext
+grestore
+% omf/models/solarFinancial.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 738.703 720.9889 moveto
+795.0976 772.1019 963.2012 924.4616 1026.4924 981.8252 curveto
+stroke
+0 0 0 edgecolor
+newpath 1024.2612 984.5266 moveto
+1034.0212 988.6489 lineto
+1028.9621 979.3399 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1024.2612 984.5266 moveto
+1034.0212 988.6489 lineto
+1028.9621 979.3399 lineto
+closepath stroke
+grestore
+% omf/models/solarFinancial.py->omf/weather.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 774.9881 704 moveto
+840.3667 704 948.0742 704 1007.7602 704 curveto
+stroke
+0 0 0 edgecolor
+newpath 1007.9723 707.5001 moveto
+1017.9722 704 lineto
+1007.9722 700.5001 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1007.9723 707.5001 moveto
+1017.9722 704 lineto
+1007.9722 700.5001 lineto
+closepath stroke
+grestore
+% omf/models/solarFinancial.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 754.2405 689.7437 moveto
+763.0772 685.8259 772.5022 681.4302 781.0459 677 curveto
+868.6941 631.5511 967.0508 569.5739 1017.3554 537.0284 curveto
+stroke
+0 0 0 edgecolor
+newpath 1019.4005 539.8737 moveto
+1025.8841 531.4944 lineto
+1015.5902 534.0015 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1019.4005 539.8737 moveto
+1025.8841 531.4944 lineto
+1015.5902 534.0015 lineto
+closepath stroke
+grestore
+% omf/models/solarFinancial.py->omf/solvers/nrelsam2013
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 764.2553 693.16 moveto
+825.6233 678.1425 936.2086 651.0808 1000.6268 635.3168 curveto
+stroke
+0 0 0 edgecolor
+newpath 1001.6731 638.6642 moveto
+1010.5545 632.8874 lineto
+1000.0092 631.8648 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1001.6731 638.6642 moveto
+1010.5545 632.8874 lineto
+1000.0092 631.8648 lineto
+closepath stroke
+grestore
+% omf/models/solarSunda.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 650 50.3717 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 650 50.3717 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+682.337 647.9 moveto 75.2432 (omf/models/solarSunda.py) alignedtext
+grestore
+% omf/models/solarSunda.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 756.0749 662.6492 moveto
+764.696 666.5417 773.5603 671.3276 781.0459 677 curveto
+899.1104 766.4665 998.342 917.335 1035.3956 977.7906 curveto
+stroke
+0 0 0 edgecolor
+newpath 1032.6199 979.9629 moveto
+1040.802 986.6938 lineto
+1038.6032 976.3296 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1032.6199 979.9629 moveto
+1040.802 986.6938 lineto
+1038.6032 976.3296 lineto
+closepath stroke
+grestore
+% omf/models/solarSunda.py->omf/weather.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 765.9827 657.5085 moveto
+830.4647 668.0282 946.7589 687.0007 1008.9847 697.1523 curveto
+stroke
+0 0 0 edgecolor
+newpath 1008.7878 700.6664 moveto
+1019.2209 698.8223 lineto
+1009.915 693.7577 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1008.7878 700.6664 moveto
+1019.2209 698.8223 lineto
+1009.915 693.7577 lineto
+closepath stroke
+grestore
+% omf/models/solarSunda.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 753.2116 636.4376 moveto
+813.0573 612.0292 938.9229 560.6943 1006.2442 533.237 curveto
+stroke
+0 0 0 edgecolor
+newpath 1007.7996 536.3826 moveto
+1015.7373 529.3652 lineto
+1005.156 529.901 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1007.7996 536.3826 moveto
+1015.7373 529.3652 lineto
+1005.156 529.901 lineto
+closepath stroke
+grestore
+% omf/models/solarSunda.py->omf/solvers/nrelsam2013
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 769.1552 645.987 moveto
+829.1189 641.0957 930.2706 632.8446 993.6799 627.6723 curveto
+stroke
+0 0 0 edgecolor
+newpath 994.2231 631.1397 moveto
+1003.9054 626.8382 lineto
+993.6539 624.1629 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 994.2231 631.1397 moveto
+1003.9054 626.8382 lineto
+993.6539 624.1629 lineto
+closepath stroke
+grestore
+% omf/models/storageArbitrage.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 72 58.8921 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 72 58.8921 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+674.3731 69.9 moveto 91.1709 (omf/models/storageArbitrage.py) alignedtext
+grestore
+% omf/models/storageArbitrage.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 759.4194 85.4025 moveto
+767.0792 89.0807 774.6914 93.5854 781.0459 99 curveto
+916.5438 214.4571 1009.2459 414.8001 1039.8869 487.5781 curveto
+stroke
+0 0 0 edgecolor
+newpath 1036.7247 489.0894 moveto
+1043.7965 496.9786 lineto
+1043.188 486.4013 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1036.7247 489.0894 moveto
+1043.7965 496.9786 lineto
+1043.188 486.4013 lineto
+closepath stroke
+grestore
+% omf/models/storageDeferral.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 18 57.0344 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 18 57.0344 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+676.1266 15.9 moveto 87.6641 (omf/models/storageDeferral.py) alignedtext
+grestore
+% omf/models/storageDeferral.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 759.6507 31.1385 moveto
+767.2937 34.8358 774.8406 39.415 781.0459 45 curveto
+927.6313 176.9328 1015.1136 407.8708 1042.0152 487.2681 curveto
+stroke
+0 0 0 edgecolor
+newpath 1038.7854 488.6464 moveto
+1045.2722 497.0233 lineto
+1045.4251 486.4295 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1038.7854 488.6464 moveto
+1045.2722 497.0233 lineto
+1045.4251 486.4295 lineto
+closepath stroke
+grestore
+% omf/models/storagePeakShave.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 342 61.1747 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 342 61.1747 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+672.4266 339.9 moveto 95.064 (omf/models/storagePeakShave.py) alignedtext
+grestore
+% omf/models/storagePeakShave.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 750.2101 357.8112 moveto
+810.4172 389.279 945.1807 459.7143 1011.9428 494.6081 curveto
+stroke
+0 0 0 edgecolor
+newpath 1010.4133 497.7579 moveto
+1020.8971 499.2881 lineto
+1013.6558 491.5541 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1010.4133 497.7579 moveto
+1020.8971 499.2881 lineto
+1013.6558 491.5541 lineto
+closepath stroke
+grestore
+% omf/models/voltageDrop.py
+gsave
+0 0 0.82745 nodecolor
+719.9586 1250 52.1428 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+719.9586 1250 52.1428 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+680.3956 1247.9 moveto 79.126 (omf/models/voltageDrop.py) alignedtext
+grestore
+% omf/models/voltageDrop.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 750.7374 1235.3055 moveto
+760.6392 1230.2043 771.5101 1224.1993 781.0459 1218 curveto
+877.06 1155.5804 980.4658 1066.796 1026.4764 1026.0206 curveto
+stroke
+0 0 0 edgecolor
+newpath 1028.985 1028.4734 moveto
+1034.1292 1019.2112 lineto
+1024.3318 1023.2438 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1028.985 1028.4734 moveto
+1034.1292 1019.2112 lineto
+1024.3318 1023.2438 lineto
+closepath stroke
+grestore
+% omf/models/voltageDrop.py->omf/solvers/gridlabd
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 760.8777 1238.6267 moveto
+823.2675 1221.2857 941.7226 1188.3617 1006.282 1170.4177 curveto
+stroke
+0 0 0 edgecolor
+newpath 1007.4664 1173.7212 moveto
+1016.1638 1167.6711 lineto
+1005.5918 1166.9769 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1007.4664 1173.7212 moveto
+1016.1638 1167.6711 lineto
+1005.5918 1166.9769 lineto
+closepath stroke
+grestore
+% omf/models/voltageDrop.py->omf/models/__metaModel__.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 739.5285 1233.1812 moveto
+752.7582 1220.9409 769.8013 1203.3553 781.0459 1185 curveto
+926.3496 947.8103 863.1104 842.1547 992.648 596 curveto
+1002.9968 576.3345 1017.6113 556.0437 1029.62 540.6898 curveto
+stroke
+0 0 0 edgecolor
+newpath 1032.4886 542.7061 moveto
+1035.9799 532.703 lineto
+1027.0126 538.3456 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1032.4886 542.7061 moveto
+1035.9799 532.703 lineto
+1027.0126 538.3456 lineto
+closepath stroke
+grestore
+% omf/network.py
+gsave
+0 0 0.82745 nodecolor
+396.9586 1120 33.5019 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+396.9586 1120 33.5019 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+374.5042 1117.9 moveto 44.9087 (omf/network.py) alignedtext
+grestore
+% omf/runAllTests.py
+gsave
+0 0 0.82745 nodecolor
+101.9586 1258 38.5908 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+101.9586 1258 38.5908 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+74.6917 1255.9 moveto 54.5337 (omf/runAllTests.py) alignedtext
+grestore
+% omf/solvers/nrelsam2015
+gsave
+0 0 0.82745 nodecolor
+101.9586 1312 47.8742 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+101.9586 1312 47.8742 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+66.3809 1309.9 moveto 71.1553 (omf/solvers/nrelsam2015) alignedtext
+grestore
+% omf/web.py
+gsave
+0 0 0.82745 nodecolor
+101.9586 1204 27.0995 18 ellipse_path fill
+1 setlinewidth
+filled
+0 0 0 nodecolor
+101.9586 1204 27.0995 18 ellipse_path stroke
+0 0 0 nodecolor
+7 /Times-Roman set_font
+85.1422 1201.9 moveto 33.6328 (omf/web.py) alignedtext
+grestore
+% omf/web.py->omf
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 122.2351 1191.8341 moveto
+173.3903 1161.141 307.8602 1080.459 367.6155 1044.6059 curveto
+stroke
+0 0 0 edgecolor
+newpath 369.766 1047.3973 moveto
+376.5402 1039.2511 lineto
+366.1645 1041.3948 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 369.766 1047.3973 moveto
+376.5402 1039.2511 lineto
+366.1645 1041.3948 lineto
+closepath stroke
+grestore
+% omf/web.py->omf/feeder.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 128.7421 1208.4337 moveto
+221.7612 1222.7627 538.3808 1262.5562 781.0459 1185 curveto
+883.7509 1152.1753 983.5306 1067.4922 1027.518 1026.6682 curveto
+stroke
+0 0 0 edgecolor
+newpath 1030.1751 1028.9744 moveto
+1035.0703 1019.5782 lineto
+1025.384 1023.8709 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 1030.1751 1028.9744 moveto
+1035.0703 1019.5782 lineto
+1025.384 1023.8709 lineto
+closepath stroke
+grestore
+% omf/web.py->omf/milToGridlab.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 128.5133 1208.2969 moveto
+223.3434 1223.6416 546.2443 1275.8909 670.5891 1296.0114 curveto
+stroke
+0 0 0 edgecolor
+newpath 670.165 1299.4882 moveto
+680.5957 1297.6306 lineto
+671.2832 1292.5781 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 670.165 1299.4882 moveto
+680.5957 1297.6306 lineto
+671.2832 1292.5781 lineto
+closepath stroke
+grestore
+% omf/web.py->omf/models
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 129.0198 1201.2999 moveto
+188.1489 1195.0272 333.0235 1177.6245 450.9886 1147 curveto
+538.5998 1124.2556 637.8636 1084.6997 687.7313 1063.8205 curveto
+stroke
+0 0 0 edgecolor
+newpath 689.1712 1067.0119 moveto
+697.0281 1059.9042 lineto
+686.4536 1060.5609 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 689.1712 1067.0119 moveto
+697.0281 1059.9042 lineto
+686.4536 1060.5609 lineto
+closepath stroke
+grestore
+% omf/web.py->omf/calibrate.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 123.3243 1215.2291 moveto
+131.7539 1219.8661 141.428 1225.4492 149.8957 1231 curveto
+239.8576 1289.9725 241.8434 1340.2211 342.9286 1377 curveto
+457.6924 1418.7557 605.1399 1409.7918 676.8899 1401.8211 curveto
+stroke
+0 0 0 edgecolor
+newpath 677.3836 1405.2874 moveto
+686.9138 1400.6584 lineto
+676.5771 1398.334 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 677.3836 1405.2874 moveto
+686.9138 1400.6584 lineto
+676.5771 1398.334 lineto
+closepath stroke
+grestore
+% omf/web.py->omf/cymeToGridlab.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 124.041 1215.1446 moveto
+132.3861 1219.686 141.8131 1225.2249 149.8957 1231 curveto
+243.3912 1297.8033 238.2861 1355.5232 342.9286 1403 curveto
+449.3523 1451.285 589.0498 1455.2483 664.9951 1453.1105 curveto
+stroke
+0 0 0 edgecolor
+newpath 665.3986 1456.5992 moveto
+675.2781 1452.7723 lineto
+665.1685 1449.603 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 665.3986 1456.5992 moveto
+675.2781 1452.7723 lineto
+665.1685 1449.603 lineto
+closepath stroke
+grestore
+% omf/web.py->omf/network.py
+gsave
+1 setlinewidth
+0 0 0 edgecolor
+newpath 127.1101 1196.8382 moveto
+178.453 1182.2185 295.6658 1148.8427 357.3414 1131.2808 curveto
+stroke
+0 0 0 edgecolor
+newpath 358.4454 1134.6057 moveto
+367.1046 1128.5008 lineto
+356.5283 1127.8733 lineto
+closepath fill
+1 setlinewidth
+solid
+0 0 0 edgecolor
+newpath 358.4454 1134.6057 moveto
+367.1046 1128.5008 lineto
+356.5283 1127.8733 lineto
+closepath stroke
+grestore
+endpage
+showpage
+grestore
+%%PageTrailer
+%%EndPage: 1
+%%Trailer
+%%Pages: 1
+%%BoundingBox: 36 36 604 756
+end
+restore
+%%EOF
