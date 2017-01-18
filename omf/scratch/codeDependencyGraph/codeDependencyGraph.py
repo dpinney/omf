@@ -6,17 +6,18 @@ Pre-requisite: snakefood (pip install snakefood), and graphviz (apt-get install 
 
 import os
 
-# Grab the paths to the directories:
+# Paths to the directories.
 pDir = os.path.dirname
 thisDir = pDir(__file__)
 omfDir = pDir(pDir(thisDir))
 
-# Filenames:
+# Filenames.
 graphName = thisDir + '/omfDepGraph.dot'
 psName = thisDir + '/omfDepGraph.ps'
 
-# Create a graphviz dotfile representation of the dependency graph:
-os.system('sfood {} | sfood-graph > {}'.format(omfDir, graphName))
+# Create a graphviz dotfile representation of the dependency graph.
+# If you want to see 3rd party dependencies, remove the "--internal" flag.
+os.system('sfood --internal {} | sfood-graph > {}'.format(omfDir, graphName))
 
-# Make a postscript drawing of the graph:
+# Make a postscript drawing of the graph.
 os.system('dot -Tps {} -o {}'.format(graphName, psName))
