@@ -1,9 +1,6 @@
-''' The transmission model pre-alpha release. '''
-
-'''
-Reqs:
-	octave (sudo apt-get install octave)
-	*ONLY TESTED ON LINUX
+''' The transmission model pre-alpha release.
+Requirements: GNU octave
+Tested on Linux and macOS.
 '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, math
@@ -104,12 +101,9 @@ def runForeground(modelDir, inputDict):
 		matStr = network.netToMat(networkJson, networkName)
 		with open(pJoin(modelDir,networkName+".m"),"w") as outMat:
 			for row in matStr: outMat.write(row)		
-		# HACK:Make sure MATPOWER is in the Octave path. Better to just path this path to the octave command and not savepath anywhere.
-		matDir =  pJoin(__metaModel__._omfDir,'solvers','matpower6.0')
-		matPath = '"' + ":".join([matDir,pJoin(matDir,'t'),pJoin(matDir,'most'),pJoin(matDir,'most','t'),pJoin(matDir,'extras')]) + '"'
-		pathCommand = "octave --no-gui --eval 'addpath(" + matPath + ");savepath()'"
-		pathProc = subprocess.Popen([pathCommand], stdout=subprocess.PIPE, shell=True)
-		(out, err) = pathProc.communicate()		
+		# Get MATPOWER directories for the Octave path.
+		matDir =  pJoin(__metaModel__._omfDir,'solvers','matpower5.1')
+		matPath = '"' + ":".join([matDir,pJoin(matDir,'t'),pJoin(matDir,'extras')]) + '"'
 		# Configure and run MATPOWER.
 		algorithm = inputDict.get("algorithm","NR")
 		pfArg = "\'pf.alg\', \'"+algorithm+"\'"
@@ -119,15 +113,12 @@ def runForeground(modelDir, inputDict):
 		pfTolArg = "\'pf.tol\', "+str(inputDict.get("tolerance",math.pow(10,-8)))
 		pfEnflArg = "\'pf.enforce_q_lims\', "+str(inputDict.get("genLimits",0))
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
-		command = "octave --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
+		command = "octave -p" + matPath + "--no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
 		print "command:", command
 		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
 		(out, err) = proc.communicate()
 		# SKELETON code.
 		imgSrc = pJoin(__metaModel__._omfDir,'scratch','transmission','inData')
-		# shutil.copyfile(pJoin(imgSrc,'bg1.jpg'),pJoin(modelDir,'powerReal.jpg'))
-		# shutil.copyfile(pJoin(imgSrc,'bg2.jpg'),pJoin(modelDir,'powerReact.jpg'))
-		# shutil.copyfile(pJoin(imgSrc,'bg3.jpg'),pJoin(modelDir,'volts.jpg'))
 		# Read matout.txt and parse into outData.
 		gennums=[]
 		todo = None
@@ -193,13 +184,6 @@ def runForeground(modelDir, inputDict):
 			for i in range(len(outData['tableData'][powerOrVolt][1])):
 				if outData['tableData'][powerOrVolt][1][i]!='-':
 					outData['tableData'][powerOrVolt][1][i]=float(outData['tableData'][powerOrVolt][1][i])
-		with open(pJoin(imgSrc,'bg1.jpg'),"rb") as inFile:
-			outData["powerRealChart"] = inFile.read().encode("base64")
-		with open(pJoin(imgSrc,'bg2.jpg'),"rb") as inFile:
-			outData["powerReactChart"] = inFile.read().encode("base64")
-		with open(pJoin(imgSrc,'bg3.jpg'),"rb") as inFile:
-			outData["voltsChart"] = inFile.read().encode("base64")
-		# Model operations typically ends here.
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		outData["stderr"] = ""
