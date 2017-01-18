@@ -3,7 +3,6 @@
 '''
 Reqs:
 	octave (sudo apt-get install octave)
-	matpower6.0b1 source (copy in scratch\transmission\inData)
 	*ONLY TESTED ON LINUX
 '''
 
@@ -89,8 +88,7 @@ def run(modelDir, inputDict):
 		pPidFile.write(str(backProc.pid))
 
 def runForeground(modelDir, inputDict):
-	''' Run the model in its directory.
-	'''
+	''' Run the model in its directory.'''
 	try:
 		startTime = datetime.datetime.now()
 		outData = {
@@ -106,8 +104,13 @@ def runForeground(modelDir, inputDict):
 		matStr = network.netToMat(networkJson, networkName)
 		with open(pJoin(modelDir,networkName+".m"),"w") as outMat:
 			for row in matStr: outMat.write(row)		
+		# HACK:Make sure MATPOWER is in the Octave path. Better to just path this path to the octave command and not savepath anywhere.
+		matDir =  pJoin(__metaModel__._omfDir,'solvers','matpower6.0')
+		matPath = '"' + ":".join([matDir,pJoin(matDir,'t'),pJoin(matDir,'most'),pJoin(matDir,'most','t'),pJoin(matDir,'extras')]) + '"'
+		pathCommand = "octave --no-gui --eval 'addpath(" + matPath + ");savepath()'"
+		pathProc = subprocess.Popen([pathCommand], stdout=subprocess.PIPE, shell=True)
+		(out, err) = pathProc.communicate()		
 		# Configure and run MATPOWER.
-		matDir =  pJoin(__metaModel__._omfDir,'scratch','transmission','inData', 'matpower6.0b1')
 		algorithm = inputDict.get("algorithm","NR")
 		pfArg = "\'pf.alg\', \'"+algorithm+"\'"
 		modelArg = "\'model\', \'"+inputDict.get("model","AC")+"\'"
@@ -116,13 +119,10 @@ def runForeground(modelDir, inputDict):
 		pfTolArg = "\'pf.tol\', "+str(inputDict.get("tolerance",math.pow(10,-8)))
 		pfEnflArg = "\'pf.enforce_q_lims\', "+str(inputDict.get("genLimits",0))
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
-		with cd(matDir):
-			command = "octave --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > "+"~/matout.txt"
-			print "command:", command
-			proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
-			(out, err) = proc.communicate()
-		shutil.copy("~/matout.txt", pJoin(modelDir,'matout.txt'))
-		os.remove("~/matout.txt")
+		command = "octave --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > "+"~/matout.txt"
+		print "command:", command
+		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+		(out, err) = proc.communicate()
 		# SKELETON code.
 		imgSrc = pJoin(__metaModel__._omfDir,'scratch','transmission','inData')
 		# shutil.copyfile(pJoin(imgSrc,'bg1.jpg'),pJoin(modelDir,'powerReal.jpg'))
@@ -259,18 +259,6 @@ def genDiagram(modelDir, feederJson):
 	if debug:
 		print "Plot saved to:                 %s"%(pJoin(modelDir,"feederChart.png"))
 		print "************************************\n\n"
-
-class cd:
-	"""Context manager for changing the current working directory"""
-	def __init__(self, newPath):
-		self.newPath = os.path.expanduser(newPath)
-
-	def __enter__(self):
-		self.savedPath = os.getcwd()
-		os.chdir(self.newPath)
-
-	def __exit__(self, etype, value, traceback):
-		os.chdir(self.savedPath)
 
 def _simpleTest():
 	# TODO: delete and use other tests.
