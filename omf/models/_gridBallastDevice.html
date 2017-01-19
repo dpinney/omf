@@ -1,0 +1,181 @@
+<head>
+	<title>Open Modeling Framework</title>
+	<meta charset="utf-8">
+	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
+	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
+	<style>
+	/*Styles here*/
+	</style>
+	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
+	<!-- Library Imports -->
+	<script type="text/javascript" src="{{pathPrefix}}/static/omf.js"></script>
+	<script type="text/javascript" src="{{pathPrefix}}/static/jquery-1.9.1.js"></script>
+	<script src="{{pathPrefix}}/static/highcharts4.src.js"></script>
+	<!-- Data  Imports -->
+	<script>allInputData={% if allInputData %}{{allInputData | safe}}{% else %}null{% endif %}</script>
+	<script>allOutputData={% if allOutputData %}{{allOutputData | safe}}{% else %}null{% endif %}</script>
+	<script>modelStatus="{{modelStatus}}"</script>
+	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
+	<!-- Global Functions -->
+	<script type="text/javascript">
+		// Global setting of Highcharts
+		Highcharts.setOptions({global: {useUTC: false}})
+		// Clean up the non-ISO date strings we get.
+		function dateOb(inStr) {return Date.parse(inStr.replace(/-/g,"/"))}
+		pointStart = dateOb(allOutputData.timeStamps[0])
+		pointInterval = dateOb(allOutputData.timeStamps[1]) - pointStart
+		highChartsTemplate = {
+			"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
+			"title":{"text":null},
+			"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+			"credits":{"enabled":false},
+			"xAxis":{"type":"datetime","maxZoom":108000000, "tickColor":"gray","lineColor":"gray"},
+			"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+			"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":pointInterval, "pointStart":pointStart}},
+			"tooltip":{"valueDecimals":1},
+			"series":[]}
+		function editFeeder(modelName, feederNum) {
+			console.log("modelName:",modelName)
+			studyUser = allInputData.user
+			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
+		}
+		// Code to make the toggles work:
+		$(document).ready(function(){
+			$(".toggle").click(function(){
+					$(this).parent().next().toggle(500)
+			})
+		})
+	</script>
+</head>
+<body onload="init()">
+	<div id="header">
+		<div id="headInnerBlock">
+			<div id="menuLeft">
+				<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
+				&#8220;<p id="titleText" style="display:inline"></p>&#8221;
+			</div>
+		</div>
+	</div>
+	<p class="reportTitle">Model Input</p>
+	<div id="input" class="content">
+			<form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
+			<div class="shortInput">
+				<label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-{{modelType}}" target="blank">Help?</a></label>
+				<input type="text" id="modelType" name="modelType" value="{{modelType}}" readonly/>
+			</div>
+			<div class="shortInput">
+				<label>Model Name</label>
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+			</div>
+			<div class="shortInput runningInline postRunInline">
+				<label>User</label>
+				<input type="text" id="user" name="user" readonly/>
+			</div>
+			<div class="runningInline postRunInline shortInput">
+				<label>Created</label>
+				<input type="text" id="created" name="created" readonly/>
+			</div>
+			<div class="postRunInline shortInput">
+				<label>Run Time</label>
+				<input type="text" id="runTime" name="runTime" readonly/>
+			</div>
+			<div class="shortInput">
+				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
+				<select id="layoutAlgorithm" name="layoutAlgorithm">
+					<option value="geospatial">Geospatial</option>
+					<option value="forceDirected">Force Directed</option>
+				</select>
+			</div>
+			<div class="wideInput" style="text-align:right">
+				{% if not quickRender %}
+				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
+				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
+				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
+				{% endif %}
+				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
+				{% if quickRender %}
+				<button id="saveButton" class="postRunInline" style = "background-color: orange;"onclick="event.preventDefault(); return showSaveAlert(window.location.href)">Save</button>
+				{% endif %}
+				<button id="runButton" type="submit">Run Model</button>
+			</div>
+		</form>
+	</div>
+	<div id ="runIndicator" class="content running">
+		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
+	</div>
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
+	<div id="output">
+		<p class="reportTitle postRun" style="page-break-before:always">Triplex Meter Voltages <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="triplexMeterVoltageReport" class="tightContent postRun">
+			<div id="triplexMeterVoltageChart"></div>
+			<script type="text/javascript">
+					triplexSeriesData = [
+						{"marker": {"enabled":false}, "color":"LightBlue", "data":allOutputData.allMeterVoltages.Min, "name":"Min"},
+						{"marker":{"enabled":false}, "color":"blue", "data":allOutputData.allMeterVoltages.Mean, "name":"Mean"},
+						{"marker":{"enabled":false}, "color":"LightBlue", "data":allOutputData.allMeterVoltages.Max, "name":"Max"}]
+					var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+					localHighChart["chart"]["renderTo"] = "triplexMeterVoltageChart"
+					localHighChart["chart"]["width"] = 1000
+					localHighChart["chart"]["height"] = 200
+					localHighChart["chart"]["type"] = "line"
+					localHighChart["series"] = triplexSeriesData
+					localHighChart["yAxis"] = {
+						"maxRange":20,
+						"plotLines": [
+							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": 114, "zIndex": 0},
+							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": 126, "zIndex": 0}],
+						"title":{"text":"Volts (V)", "style":{"color":"gray"}}}
+					new Highcharts.Chart(localHighChart)
+			</script>
+		</div>
+		<p class="reportTitle postRun">Solar Data <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="irradianceReport" class="tightContent postRun">
+			<div id="irradianceChartDiv"></div>
+			<script>
+				irradianceSeriesData = [
+					{"name":'Global Horizontal',"marker":{"enabled":false},"color":"gold","data":allOutputData.climate['Global Horizontal (W/sm)'],"visible":true}]
+				new Highcharts.Chart({
+					"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{"animation": false, "pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},
+						"line":{"marker":{"enabled":true}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":irradianceSeriesData,
+					"yAxis":{"title":{"text":"Irradiance ( W / m^2 )","style":{"color":"gray"}}, "min":0},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"irradianceChartDiv","type":"line","marginRight":20, "height":300,"width":1000},
+					"tooltip":false,
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+		<p class="reportTitle postRun">Other Climate Variables <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="climateReport" class="tightContent postRun">
+			<div id="climateChartDiv"></div>
+			<script type="text/javascript">
+				climateSeriesData = [
+					{"name":"Wind Speed (m/s)","marker":{"enabled":false},"color":"darkgray","data":allOutputData.climate["Wind Speed (m/s)"]},
+					{"name":"Temperature (F)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Temperature (F)"]},
+					{"name":"Snow Depth (in)","marker":{"enabled":false},"color":"gainsboro","data":allOutputData.climate["Snow Depth (in)"]}]
+				new Highcharts.Chart({
+					"credits":{"enabled":false},
+					"plotOptions":{
+						"series":{"pointStart":pointStart,"shadow":false,"pointInterval":pointInterval},
+						"line":{"marker":{"enabled":false}}},
+					"xAxis":{"maxZoom":108000000,"tickColor":"gray","type":"datetime","lineColor":"gray"},
+					"title":{"text":null},
+					"series":climateSeriesData,
+					"yAxis":{"title":{"text":"Climate Units","style":{"color":"gray"}}},
+					"chart":{"marginBottom":35,"zoomType":"x","renderTo":"climateChartDiv","type":"line","marginRight":20, "height":250,"width":1000},
+					"tooltip":{"valueDecimals":1},
+					"legend":{"verticalAlign":"top","align":"top","borderWidth":0,"x":50,"y":-10,"layout":"horizontal"}})
+			</script>
+		</div>
+	</div>
+</body>
