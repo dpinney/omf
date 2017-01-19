@@ -805,16 +805,16 @@ def _tests():
 	workDir = tempfile.mkdtemp()
 	print "IAD lat/lon =", _airportCodeToLatLon("IAD")
 	assert (38.947444, -77.459944)==_airportCodeToLatLon("IAD"), "airportCode lookup failed."
-	print "Weather downloading to", workDir
-	assert None==_downloadWeather("2010-03-01", "2010-04-01", "PDX", workDir)
-	print "Peak solar extraction in", workDir
-	assert None==_getPeakSolar("PDX", workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0)
-	print "Pull weather and solar data together in", workDir
-	assert None==_processWeather("2010-03-01", "2010-04-01", "PDX", workDir)
-	print "Testing the full process together."
-	assert None==makeClimateCsv("2010-07-01", "2010-08-01", "IAD", pJoin(tempfile.mkdtemp(),"weatherDCA.csv"), cleanup=True)
-	print "Testing the zip code to climate name conversion"
-	assert ('MO-KANSAS_CITY',30)==zipCodeToClimateName(64735)
+	# print "Weather downloading to", workDir
+	# assert None==_downloadWeather("2010-03-01", "2010-04-01", "PDX", workDir)
+	# print "Peak solar extraction in", workDir
+	# assert None==_getPeakSolar("PDX", workDir, dniScale=1.0, dhiScale=1.0, ghiScale=1.0)
+	# print "Pull weather and solar data together in", workDir
+	# assert None==_processWeather("2010-03-01", "2010-04-01", "PDX", workDir)
+	# print "Testing the full process together."
+	# assert None==makeClimateCsv("2010-07-01", "2010-08-01", "IAD", pJoin(tempfile.mkdtemp(),"weatherDCA.csv"), cleanup=True)
+	# print "Testing the zip code to climate name conversion"
+	# assert ('MO-KANSAS_CITY',30)==zipCodeToClimateName(64735)
 
 if __name__ == "__main__":
 	_tests()
