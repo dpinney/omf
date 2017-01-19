@@ -350,7 +350,7 @@
         if (capNamesArray.length == 0) {
           $("#newCapbankReport").html("<p>&#160;&#160;&#160;No Capacitors were found on the feeder.</p>")
         }
-        for (var i = 0; i < capNamesArray.lenght; i++) {
+        for (var i = 0; i < capNamesArray.length; i++) {
           cap = capNamesArray[i]
           $("<div/>").appendTo("#newCapbankReport")
             .attr("class", "capContainer")
@@ -406,7 +406,7 @@
           }
         }
         localHighChart["plotOptions"] = {
-          "column": {"stacking":"normal", "shadow":false},
+          "column": {"stacking":"normal", "shadow":false}
         }
         localHighChart["chart"]["title"] = {"align":"center","text":"CapCHART"}
         chart = new Highcharts.Chart(localHighChart);
