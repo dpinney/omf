@@ -40,18 +40,18 @@
 				<input type="text" id="modelType" name="modelType" value="{{modelName}}" readonly/>
 			</div>
 			{% if quickRender %}
-			<div class="shorterInput">
+			<div class="shortInput">
 				<label>Email Address</label>
 				<input type="email" id="quickRunEmail" name="quickRunEmail" pattern="^[\w\s\d\.-@]+$" required="required">
 			</div>
 			{% else %}
-			<div class="shorterInput">
+			<div class="shortInput">
 				<label>Model Name</label>
 				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
 			</div>
 			{% endif %}
 			{% if not quickRender %}
-			<div class="shorterInput runningInline postRunInline">
+			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
 				<input type="text" id="user" name="user" readonly/>
 			</div>
