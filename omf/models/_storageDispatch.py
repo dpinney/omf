@@ -313,7 +313,7 @@ def heavyProcessing(modelDir, inputDict):
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 
-def _tests():
+def _debugging():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
 	inData = {
@@ -341,4 +341,4 @@ def _tests():
 	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
-	_tests()
+	_debugging()
