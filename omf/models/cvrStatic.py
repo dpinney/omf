@@ -257,7 +257,7 @@ def runForeground(modelDir, inputDict):
 				loadList = []
 				for key in tree:
 					if tree[key].get('object','') == 'triplex_load':
-						print type(tree[key].get('base_power_12',''))
+						# print type(tree[key].get('base_power_12',''))
 						loadList.append(tree[key].get('base_power_12',''))
 				totalLoad = sum([float(x) for x in loadList])
 				# Rescale each triplex load:
