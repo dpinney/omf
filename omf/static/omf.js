@@ -197,7 +197,11 @@ function init() {
 		}
 	}
 	// Hide buttons we don't use:
-	modelUser = allInputData["user"]
+	if (allInputData != null) {
+		modelUser = allInputData["user"]
+	} else {
+		modelUser = "none"
+	}
 	if (modelUser == "public" && currentUser != "admin") {
 		$("button#deleteButton").hide();
 		$("button#publishButton").hide();

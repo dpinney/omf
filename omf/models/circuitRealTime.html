@@ -19,7 +19,7 @@
 	<script>modelStatus="{{modelStatus}}"</script>
 	<script>currentUser="{{datastoreNames.get('currentUser','test')}}"</script>
 </head>
-<body onload="init();circInit()">
+<body onload="init()">
 	<div id="header">
 		<div id="menuLeft">
 			<a style="color:white" href="/">Open Modeling Framework</a> &#187;&nbsp;&nbsp;Model
@@ -52,7 +52,7 @@
 				<button id="duplicateButton" type="button" class="circModelButtons stoppedInline postRunInline" onclick="duplicateModel()">Duplicate</button>
 				<button id="runButton" type="submit" class="circModelButtons stoppedInline postRunInline" onclick="circSave()">Save</button>
 			</div>
-			<input type="hidden" id="circString" name="circString" readonly/>
+			<input type="hidden" id="circString" name="circString" value="" readonly/>
 			<div id="copyrightNotice" style="color:gray;line-height:14pt;margin-top:20px">Circuit Simulator Applet was developed by <a href="http://www.falstad.com/" target="_blank">Paul Falstad</a></div>
 		</form>
 	</div>
@@ -64,8 +64,16 @@
 		return
 	}
 	function circInit() {
-		circData = document.getElementById('circString').value
+		var defaultCircString = '$ 1 0.000005 10.20027730826997 50 5 43\nr 176 64 384 64 0 10\ns 384 64 448 64 0 1 false\nw 176 64 176 336 0\nc 384 336 176 336 0 0.000014999999999999999 2.2688085065409958\nl 384 64 384 336 0 1 0.035738623044691664\nv 448 336 448 64 0 0 40 5 0 0 0.5\nr 384 336 448 336 0 100\no 4 64 0 2083 20 0.05 0 -1 0\no 3 64 0 2083 20 0.05 1 -1 0\no 0 64 0 2083 0.625 0.05 2 -1 0\nh 1 4 3'
+		if (allInputData == null) {
+			var circData = defaultCircString
+		} else if (allInputData['circString'] == undefined) {
+			var circData = defaultCircString
+		} else {
+			var circData = allInputData['circString']
+		}
 		// document.getElementById('circFrame').contentWindow.$circuitjs('IMPOORT_AS_TEXT', {'text': circData})
 		document.getElementById('circFrame').src = encodeURI('{{pathPrefix}}/static/circuitjs1/circuitjs.html?cct=' + circData)
 	}
+	circInit()
 </script>

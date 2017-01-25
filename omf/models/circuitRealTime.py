@@ -20,10 +20,8 @@ with open(pJoin(__metaModel__._myDir,modelName + ".html"),"r") as tempFile:
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
-
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
-	print os.getcwd()
 	# Delete output file every run if it exists
 	try:
 		os.remove(pJoin(modelDir,"allOutputData.json"))	
@@ -39,7 +37,6 @@ def run(modelDir, inputDict):
 		# Update the runTime in the input file.
 		endTime = datetime.datetime.now()
 		inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
-		print "\n   inputDict[runTime]", inputDict["runTime"]
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 		# Stdout/stderr.
@@ -63,8 +60,8 @@ def cancel(modelDir):
 def _tests():
 	# Variables
 	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = {"modelType": modelName,"circuitFile" : "zenerreffollow.txt"}
-	modelLoc = pJoin(workDir,"admin","Automated realTimeCircuit Testing")
+	inData = {"modelType": modelName,"modelName":"Automated Testing " + modelName, "circString":"$ 1 0.000005 10.20027730826997 50 5 43\nr 176 64 384 64 0 10\ns 384 64 448 64 0 1 false\nw 176 64 176 336 0\nc 384 336 176 336 0 0.000014999999999999999 2.2688085065409958\nl 384 64 384 336 0 1 0.035738623044691664\nv 448 336 448 64 0 0 40 5 0 0 0.5\nr 384 336 448 336 0 100\no 4 64 0 2083 20 0.05 0 -1 0", "user":"admin"}
+	modelLoc = pJoin(workDir,"admin",inData["modelName"])
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
@@ -72,10 +69,10 @@ def _tests():
 		# No previous test results.
 		pass
 	# No-input template.
-	renderAndShow(template,modelName)
+	# renderAndShow(template, modelName)
 	# Run the model.
 	run(modelLoc, inData)
-	# Show the output.
+	# # Show the output.
 	renderAndShow(template, modelName, modelDir = modelLoc)
 
 if __name__ == '__main__':
