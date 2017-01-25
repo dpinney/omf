@@ -208,17 +208,17 @@ def runForeground(modelDir,inData):
 		max_key = max([int(key) for key in localTree.keys()])
 		# print max_key
 		localTree[max_key+1] = {'object' : 'volt_var_control',
-		'name' : 'IVVC1',
-		'control_method' : 'ACTIVE',
-		'capacitor_delay' : str(time_delay_cap),
-		'regulator_delay' : str(time_delay_reg),
-		'desired_pf' : '0.99',
-		'd_max' : '0.6',
-		'd_min' : '0.1',
-		'substation_link' : str(localTree[regIndex]['name']),
-		'regulator_list' : regstr,
-		'capacitor_list': capstr,
-		'voltage_measurements': str(inData.get("voltageNodes", 0)),
+			'name' : 'IVVC1',
+			'control_method' : 'ACTIVE',
+			'capacitor_delay' : str(time_delay_cap),
+			'regulator_delay' : str(time_delay_reg),
+			'desired_pf' : '0.99',
+			'd_max' : '0.6',
+			'd_min' : '0.1',
+			'substation_link' : str(localTree[regIndex]['name']),
+			'regulator_list' : regstr,
+			'capacitor_list': capstr,
+			'voltage_measurements': str(inData.get("voltageNodes", "IVVC1")),
 		}
 		#running powerflow analysis via gridalab after attaching a regulator
 		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)
