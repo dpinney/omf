@@ -449,10 +449,13 @@ def new(modelDir):
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"feederName1": "superModel Tomorrow",
-		"modelType": "gridBallast",
+		"modelType": modelName,
 		"zipCode": "59001",
-		"simLength": "10",
-		"runTime": ""}
+		"simLength": "24",
+		"eventType":"ramping", #unramping, overfreq, underfreq
+		"eventTime":"2012-04-01 14:00",
+		"eventLength":"02:00"
+	}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
@@ -472,7 +475,7 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(template, modelName)
+	# renderAndShow(template, modelName)
 	# Run the model.
 	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
