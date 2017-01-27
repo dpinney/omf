@@ -7,7 +7,7 @@ from os.path import split as pSplit
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
 
-def renderTemplate(template, modelName, modelDir="", absolutePaths=False, datastoreNames={}, quickRender=False):
+def renderTemplate(template, modelType, modelDir="", absolutePaths=False, datastoreNames={}, quickRender=False):
 	''' Render the model template to an HTML string.
 	By default render a blank one for new input.
 	If modelDir is valid, render results post-model-run.
@@ -33,7 +33,7 @@ def renderTemplate(template, modelName, modelDir="", absolutePaths=False, datast
 		pathPrefix = ""
 	return template.render(allInputData=allInputData,
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames, quickRender=quickRender, modelName=modelName)
+		datastoreNames=datastoreNames, quickRender=quickRender, modelName=modelType)
 
 def renderAndShow(template, modelName, modelDir="", datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
