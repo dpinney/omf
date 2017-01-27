@@ -33,7 +33,7 @@ def renderTemplate(template, modelName, modelDir="", absolutePaths=False, datast
 		pathPrefix = ""
 	return template.render(allInputData=allInputData,
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames, quickRender=quickRender)
+		datastoreNames=datastoreNames, quickRender=quickRender, modelName=modelName)
 
 def renderAndShow(template, modelName, modelDir="", datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''

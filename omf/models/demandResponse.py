@@ -22,7 +22,7 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 
 def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
-	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
+	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames, quickRender=True)
 
 def prism(prismDRDict):
 	''' Calculate demand changes based on Brattle's PRISM. '''
