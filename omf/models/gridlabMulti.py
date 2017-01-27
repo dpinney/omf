@@ -413,10 +413,10 @@ def new(modelDir):
 	defaultInputs = {
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName1": "superModel Tomorrow",
-		"modelType": "gridBallast",
-		"zipCode": "59001",
-		"simLength": "10",
+		"feederName1": "Olin Barre GH 50Perc Solar",
+		"modelType": modelName,
+		"zipCode": "64735",
+		"simLength": "24",
 		"runTime": ""}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:
