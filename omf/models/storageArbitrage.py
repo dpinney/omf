@@ -239,10 +239,9 @@ def heavyProcessing(modelDir, inputDict):
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 
-def _tests():
-	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = {
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
 		"batteryEfficiency": "92",
 		"inverterEfficiency": "97.5",
 		"cellCapacity": "7",
@@ -263,23 +262,26 @@ def _tests():
 		"dischargePriceThreshold":"0.15",
 		"dodFactor":"100",
 		"batteryCycleLife": "5000"
-		}
-	modelLoc = pJoin(workDir,"admin","Automated storageArbitrage Testing")
+	}
+	return __metaModel__.new(modelDir, defaultInputs)
+
+def _tests():
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	# No-input template.
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
 	renderAndShow(template, modelName)
 	# Run the model.
-	runForeground(modelLoc, inData)
+	runForeground(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template,modelName, modelDir = modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 
 if __name__ == '__main__':
 	_tests()

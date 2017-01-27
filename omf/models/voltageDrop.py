@@ -160,40 +160,38 @@ def cancel(modelDir):
 	''' Voltage drop runs so fast it's pointless to cancel a run. '''
 	pass
 
-def _tests():
-	# # First just test the charting.
-	# tree = json.load(open("../data/Feeder/public/Olin Barre Geo.json")).get("tree",{})
-	# chart = voltPlot(tree)
-	# chart.savefig("/Users/dwp0/Desktop/testChart.png")
-	# plt.show()
-	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = {"feederName1": "Olin Barre Geo",
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"feederName1": "Olin Barre Geo",
 		"modelType": modelName,
 		"runTime": "",
-		"layoutAlgorithm": "geospatial"}
-	modelLoc = pJoin(workDir,"admin","Automated voltageDrop Testing")
+		"layoutAlgorithm": "geospatial"
+	}
+	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+	except:
+		return False
+	return creationCode
+
+def _debugging():
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
-		pass
-	try:
-		os.makedirs(modelLoc)
-	except: pass
-	with open(pJoin(modelLoc, "allInputData.json"),"w") as inputFile:
-		json.dump(inData, inputFile, indent = 4)
-	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
-	# No-input template.
+		pass 
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
 	renderAndShow(template, modelName)
 	# Run the model.
-	run(modelLoc, inData)
+	run(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template,modelName, modelDir=modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 
 if __name__ == '__main__':
-	_tests()
+	_debugging()

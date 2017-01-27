@@ -61,6 +61,19 @@ def getStatus(modelDir):
 		# Broken! Make the safest choice:
 		return "stopped"
 
+def new(modelDir, defaultInputs):
+	''' Create a new instance of a model. Returns true on success, false on failure. '''
+	alreadyThere = os.path.isdir(modelDir) or os.path.isfile(modelDir)
+	try:
+		if not alreadyThere:
+			os.makedirs(modelDir)
+		else:
+			return False
+		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
+			json.dump(defaultInputs, inputFile, indent = 4)
+		return True
+	except:
+		return False
 
 def cancel(modelDir):
 	''' Try to cancel a currently running model. '''

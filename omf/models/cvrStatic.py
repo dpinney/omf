@@ -444,11 +444,8 @@ def runForeground(modelDir, inputDict):
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 
-def _tests():
-	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	friendshipTree = json.load(open(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", "ABEC Frank LO.omd")))["tree"]
-	colomaTree = json.load(open(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", "ABEC Columbia.omd")))["tree"]
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	colomaMonths = {"janAvg": 914000.0, "janPeak": 1290000.0,
 		"febAvg": 897000.00, "febPeak": 1110000.0,
 		"marAvg": 731000.00, "marPeak": 1030000.0,
@@ -473,7 +470,7 @@ def _tests():
 	# 	"octAvg": 1750000.0, "octPeak": 2340000.0,
 	# 	"novAvg": 2210000.0, "novPeak": 3550000.0,
 	# 	"decAvg": 2480000.0, "decPeak": 3370000.0}
-	inData = {"modelType": modelName,
+	defaultInputs = {"modelType": modelName,
 		"feederName1": "ABEC Columbia",
 		"runTime": "",
 		"capitalCost": 30000,
@@ -490,21 +487,31 @@ def _tests():
 		"p_percent": 0.5,
 		"power_factor": 0.9}
 	for key in colomaMonths:
-		inData[key] = colomaMonths[key]
-	modelLoc = pJoin(workDir, "admin", "Automated staticCVR Testing")
-	# Blow away old test results if necessary.
-	try: shutil.rmtree(modelLoc)
-	except: pass
+		defaultInputs[key] = colomaMonths[key]
+	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:
-		os.makedirs(modelLoc)
-	except: pass
-	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
-	# No-input template.
+		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+	except:
+		return False
+	return creationCode
+
+def _tests():
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	# Blow away old test results if necessary.
+	try:
+		shutil.rmtree(modelLoc)
+	except:
+		# No previous test results.
+		pass
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
 	renderAndShow(template, modelName)
 	# Run the model.
-	runForeground(modelLoc, inData)
+	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template,modelName, modelDir=modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 
 if __name__ == '__main__':
 	_tests()

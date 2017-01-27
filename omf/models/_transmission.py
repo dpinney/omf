@@ -14,8 +14,6 @@ import pprint as pprint
 # OMF imports
 sys.path.append(__metaModel__._omfDir) # for images in test.
 import network
-from solvers import nrelsam2013
-from weather import zipCodeToClimateName
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -244,57 +242,41 @@ def genDiagram(modelDir, feederJson):
 		print "Plot saved to:                 %s"%(pJoin(modelDir,"feederChart.png"))
 		print "************************************\n\n"
 
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"user": "admin",
+		"modelName": "Automated Testing of " + modelName,
+		"networkName": "case9",
+		"algorithm": "NR",
+		"model": "AC",
+		"tolerance": math.pow(10,-8),
+		"iteration": 10,
+		"genLimits": 0}
+	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copy(pJoin(__metaModel__._omfDir,"static","SimpleNetwork.json"),pJoin(modelDir,"case9.omt"))
+	except:
+		return False
+	return creationCode
+
 def _simpleTest():
-	# TODO: delete and use other tests.
-	inData = {"user" : "admin", "modelName" : "Automated Transmission Model Testing",
-		"networkName" : "case9",
-		"algorithm" : "NR",
-		"model" : "AC",
-		"tolerance" : math.pow(10,-8),
-		"iteration" : 10,
-		"genLimits" : 0}
-	modelDir = pJoin(__metaModel__._omfDir,"data","Model", inData["user"], inData["modelName"])
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
-		shutil.rmtree(modelDir)
+		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	try:
-		os.makedirs(modelDir)
-	except: pass
-	# Bring in network.
-	shutil.copy(pJoin(__metaModel__._omfDir,"static","SimpleNetwork.json"),pJoin(modelDir,"case9.omt"))
-	 # Run the model & show the output.
-	runForeground(modelDir, inData)
-	renderAndShow(template, modelName, modelDir = modelDir)
-
-def _secretTests():
-	# TODO: change name back to tests.
-	for networkName in ['case5', 'case9', 'case30', 'case57', 'case300']:
-		# Variables
-		inData = {"user" : "admin", "modelName" : "Automated Transmission Model Testing",
-			# "networkName" : "9-Bus System",
-			"networkName" : networkName, # case file name copied from matpower folder.
-			"algorithm" : "NR",
-			"model" : "AC",
-			"tolerance" : math.pow(10,-8),
-			"iteration" : 10,
-			"genLimits" : 0}
-		workDir = pJoin(__metaModel__._omfDir,"data","Model")
-		modelDir = pJoin(workDir, inData["user"], inData["modelName"])
-		# Blow away old test results if necessary.
-		try:
-			shutil.rmtree(modelDir)
-		except:
-			# No previous test results.
-			pass
-		try:
-			os.makedirs(modelDir)
-		except: pass
-		 # Run the model & show the output.
-		runForeground(modelDir, inData)
-		renderAndShow(template, modelName, modelDir = modelDir)
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
+	renderAndShow(template, modelName)
+	# Run the model.
+	runForeground(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
+	# Show the output.
+	renderAndShow(template, modelName, modelDir=modelLoc)
 
 if __name__ == '__main__':
 	_simpleTest	()

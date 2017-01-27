@@ -30,6 +30,20 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 # 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
 # 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
 
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"feederName1": "Olin Barre Geo",
+		"modelType": modelName,
+		"runTime": "",
+		"layoutAlgorithm": "geospatial"}
+	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+	except:
+		return False
+	return creationCode
+
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	startTime = dt.datetime.now()
@@ -160,38 +174,25 @@ def cancel(modelDir):
 	pass
 
 def _tests():
-	# # First just test the charting.
-	# tree = json.load(open("../data/Feeder/public/Olin Barre Geo.json")).get("tree",{})
-	# chart = voltPlot(tree)
-	# chart.savefig("/Users/dwp0/Desktop/testChart.png")
-	# plt.show()
-	# Variables
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated resilientDist Testing")
-	inData = {"feederName1": "Olin Barre Geo",
-		"modelType": modelName,
-		"runTime": "",
-		"layoutAlgorithm": "geospatial"}
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	try:
-		os.makedirs(modelLoc)
-	except: pass
-	with open(pJoin(modelLoc, "allInputData.json"),"w") as inputFile:
-		json.dump(inData, inputFile, indent = 4)
-	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
-	# No-input template.
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
 	renderAndShow(template, modelName)
 	# Run the model.
-	run(modelLoc, inData)
+	run(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template,modelName, modelDir=modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
+ 	# # Delete the model.
+ 	# time.sleep(2)
+ 	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

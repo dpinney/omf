@@ -29,35 +29,7 @@ with open(pJoin(__metaModel__._myDir, modelName + '.html'),'r') as tempFile:
 	template = Template(tempFile.read())
 		
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	''' Render the model template to an HTML string.
-	By default render a blank one for new input.
-	If modelDir is valid, render results post-model-run.
-	If absolutePaths, the HTML can be opened without a server. '''
-	try:
-		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
-		modelPath, modelName = pSplit(modelDir)
-		deepPath, user = pSplit(modelPath)
-		inJson["modelName"] = modelName
-		inJson["user"] = user
-		allInputData = json.dumps(inJson)
-	except IOError:
-		allInputData = None
-	try:
-		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
-	except IOError:
-		allOutputData = None
-	if absolutePaths:
-		# Parent of current folder.
-		pathPrefix = __metaModel__._omfDir
-	else:
-		pathPrefix = ""
-	try:
-		inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))
-	except IOError:
-		pass
-	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames)
+	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
@@ -471,37 +443,40 @@ def _groupBy(inL, func):
 			newL.append([item])
 	return newL
 
-def _tests():
-	# Variables
-	inData = {"simStartDate": "2012-04-01",
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"feederName1": "superModel Tomorrow",
 		"modelType": "gridBallast",
 		"zipCode": "59001",
 		"simLength": "10",
 		"runTime": ""}
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated gridBallast Test")
+	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+	except:
+		return False
+	return creationCode
+
+def _tests():
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	try:
-		os.makedirs(modelLoc)
-	except: pass
-	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
-	# No-input template.
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
 	renderAndShow(template, modelName)
 	# Run the model.
-	runForeground(modelLoc, inData)
-	## Cancel the model.
-	# time.sleep(2)
-	# cancel(modelLoc)
+	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
 	renderAndShow(template, modelName, modelDir=modelLoc)
-	# Delete the model.
-	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

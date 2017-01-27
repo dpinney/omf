@@ -284,21 +284,11 @@ def showModel(owner, modelName):
 @app.route("/newModel/<modelType>/<modelName>", methods=["POST","GET"])
 @flask_login.login_required
 def newModel(modelType, modelName):
-	''' Display the module template for creating a new model. '''
+	''' Create a new model with given name. '''
 	modelDir = os.path.join(_omfDir, "data", "Model", User.cu(), modelName)
-	os.makedirs(modelDir)
-	inputDict = {"modelName" : modelName, "modelType" : modelType, "user":User.cu(), "created" : str(dt.datetime.now())}
-	#HACK: new network and feeder creation code.
-	if modelType in ['voltageDrop', 'gridlabMulti', 'cvrDynamic', 'cvrStatic', 'solarEngineering', 'gridBallast', '_gridBallast']:
-		newSimpleFeeder(User.cu(), modelName, 1, False, 'feeder1')
-		inputDict['feederName1'] = 'feeder1'
-	elif modelType in ['transmission', '_transmission']:
-		newSimpleNetwork(User.cu(), modelName, 1, False, 'network1')
-		inputDict['networkName1'] = 'network1'
-	with open(os.path.join(modelDir, "allInputData.json"),"w") as inputFile:
-		json.dump(inputDict, inputFile, indent = 4)
 	thisModel = getattr(models, modelType)
-	return thisModel.renderTemplate(thisModel.template, modelDir, False, getDataNames())
+	thisModel.new(modelDir)
+	return redirect("/model/" + User.cu() + "/" + modelName)
 
 @app.route("/runModel/", methods=["POST"])
 @flask_login.login_required

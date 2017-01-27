@@ -28,6 +28,31 @@ with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"modelName": "Automated DynamicCVR Testing",
+		"modelType": modelName,
+		"user": "admin",
+		"feederName1": "ABEC Frank pre calib",
+		"runTime": "",
+		"capitalCost": 30000,
+		"omCost": 1000,
+		"wholesaleEnergyCostPerKwh": 0.06,
+		"retailEnergyCostPerKwh": 0.10,
+		"peakDemandCostSpringPerKw": 5.0,
+		"peakDemandCostSummerPerKw": 10.0,
+		"peakDemandCostFallPerKw": 6.0,
+		"peakDemandCostWinterPerKw": 8.0,
+		"simStart": "2011-01-01",
+		"simLengthHours": 100}
+	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+	except:
+		return False
+	return creationCode
+
 def returnMag(complexStr):
 	''' real and imaginary parts of a complex number and returns magnitude
 	handles string if the string starts with a '+' or a '-'
@@ -208,17 +233,17 @@ def runForeground(modelDir,inData):
 		max_key = max([int(key) for key in localTree.keys()])
 		# print max_key
 		localTree[max_key+1] = {'object' : 'volt_var_control',
-		'name' : 'IVVC1',
-		'control_method' : 'ACTIVE',
-		'capacitor_delay' : str(time_delay_cap),
-		'regulator_delay' : str(time_delay_reg),
-		'desired_pf' : '0.99',
-		'd_max' : '0.6',
-		'd_min' : '0.1',
-		'substation_link' : str(localTree[regIndex]['name']),
-		'regulator_list' : regstr,
-		'capacitor_list': capstr,
-		'voltage_measurements': str(inData.get("voltageNodes", 0)),
+			'name' : 'IVVC1',
+			'control_method' : 'ACTIVE',
+			'capacitor_delay' : str(time_delay_cap),
+			'regulator_delay' : str(time_delay_reg),
+			'desired_pf' : '0.99',
+			'd_max' : '0.6',
+			'd_min' : '0.1',
+			'substation_link' : str(localTree[regIndex]['name']),
+			'regulator_list' : regstr,
+			'capacitor_list': capstr,
+			'voltage_measurements': str(inData.get("voltageNodes", "IVVC1")),
 		}
 		#running powerflow analysis via gridalab after attaching a regulator
 		feeder.adjustTime(localTree,HOURS,"hours",simStartDate)
@@ -563,36 +588,25 @@ def runForeground(modelDir,inData):
 			json.dump(inData, inFile, indent=4)
 
 def _tests():
-	"runs local tests for dynamic CVR model"
-	#creating a work directory and initializing data
-	inData = { "modelName": "Automated DynamicCVR Testing",
-		"modelType": modelName,
-		"user": "admin",
-		"feederName1": "ABEC Frank pre calib",
-		"runTime": "",
-		"capitalCost": 30000,
-		"omCost": 1000,
-		"wholesaleEnergyCostPerKwh": 0.06,
-		"retailEnergyCostPerKwh": 0.10,
-		"peakDemandCostSpringPerKw": 5.0,
-		"peakDemandCostSummerPerKw": 10.0,
-		"peakDemandCostFallPerKw": 6.0,
-		"peakDemandCostWinterPerKw": 8.0,
-		"simStart": "2011-01-01",
-		"simLengthHours": 100}
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
-	# Clean up previous run.
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	# Blow away old test results if necessary.
 	try:
-		shutil.rmtree(modelDir)
+		shutil.rmtree(modelLoc)
 	except:
+		# No previous test results.
 		pass
-	try:
-		os.makedirs(modelDir)
-	except: pass
-	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelDir,inData["feederName1"]+'.omd'))
-	runForeground(modelDir, inData)
-	renderAndShow(template, modelName, modelDir=modelDir)
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
+	renderAndShow(template, modelName)
+	# Run the model.
+	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
+	# Show the output.
+	renderAndShow(template, modelName, modelDir=modelLoc)
+ 	# # Delete the model.
+ 	# time.sleep(2)
+ 	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
