@@ -1,6 +1,6 @@
 """ Common functions for all models """
 
-import json, os, sys, tempfile, webbrowser, math, shutil
+import json, os, sys, tempfile, webbrowser, math, shutil, datetime
 from os.path import join as pJoin
 from os.path import split as pSplit
 # Locational variables so we don't have to rely on OMF being in the system path.
@@ -69,6 +69,7 @@ def new(modelDir, defaultInputs):
 			os.makedirs(modelDir)
 		else:
 			return False
+		defaultInputs["created"] = str(datetime.datetime.now())
 		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 			json.dump(defaultInputs, inputFile, indent = 4)
 		return True

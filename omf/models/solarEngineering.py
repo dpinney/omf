@@ -477,7 +477,7 @@ def new(modelDir):
 		"modelType": modelName,
 		"zipCode": "59001",
 		"simLength": "10",
-		"runTime": ""}
+	}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))

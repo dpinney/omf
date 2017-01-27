@@ -188,8 +188,6 @@ def new(modelDir):
 		"tilt":"45",
 		"w_stow":"0",
 		"inverterSize":"8",
-		"user":"admin",
-		"created":str(datetime.datetime.now())
 	}
 	return __metaModel__.new(modelDir, defaultInputs)
 
