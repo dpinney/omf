@@ -23,6 +23,18 @@ with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"user" : "admin", "modelName" : "Automated Model Skeleton Testing",
+		"modelType": modelName,
+		"input1": "abc1 Easy as...",
+		"input2": "123 Or Simple as...",
+		"created":str(datetime.datetime.now())
+	}
+	return __metaModel__.new(modelDir, defaultInputs)
+
+
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	# Delete output file every run if it exists
@@ -72,29 +84,26 @@ def cancel(modelDir):
 	''' PV Watts runs so fast it's pointless to cancel a run. '''
 	pass
 
-
 def _tests():
-	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = {"user" : "admin", "modelName" : "Automated Model Skeleton Testing",
-		"input1" : "abc1 Easy as...",
-		"input2" : "123 Or Simple as..."}
-	modelDir = pJoin(workDir, inData["user"], inData["modelName"])
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated pvWatts Testing")
 	# Blow away old test results if necessary.
 	try:
-		shutil.rmtree(modelDir)
+		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	# No-input template.
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
 	renderAndShow(template, modelName)
 	# Run the model.
-	run(modelDir, inData)
+	run(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template, modelName, modelDir = modelDir)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelDir)
+	renderAndShow(template, modelName, modelDir=modelLoc)
+ 	# # Delete the model.
+ 	# time.sleep(2)
+ 	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()			

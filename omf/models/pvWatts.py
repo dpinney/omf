@@ -17,7 +17,6 @@ fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The pvWatts model runs the NREL pvWatts tool for quick estimation of solar panel output."
 
-
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
@@ -170,10 +169,11 @@ def cancel(modelDir):
 	''' PV Watts runs so fast it's pointless to cancel a run. '''
 	pass
 
-def _tests():
-	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = {"simStartDate": "2012-04-01",
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"simStartDate": "2012-04-01",
+		"modelName":"Automated pvWatts Testing",
 		"simLengthUnits": "hours",
 		"modelType": modelName,
 		"zipCode": "64735",
@@ -186,25 +186,31 @@ def _tests():
 		"rotlim":"45.0",
 		"gamma":"0.45",
 		"inverterEfficiency":"92",
-		"tilt":"45.0",
+		"tilt":"45",
 		"w_stow":"0",
-		"inverterSize":"8"}
-	modelLoc = pJoin(workDir,"admin","Automated pvWatts Testing")
+		"inverterSize":"8",
+		"user":"admin",
+		"created":str(datetime.datetime.now())
+	}
+	return __metaModel__.new(modelDir, defaultInputs)
+
+def _tests():
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	# No-input template.
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
 	renderAndShow(template, modelName)
 	# Run the model.
-	run(modelLoc, inData)
+	run(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template, modelName, modelDir = modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 
 if __name__ == '__main__':
 	_tests()

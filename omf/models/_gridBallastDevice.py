@@ -298,18 +298,23 @@ circuitModel = {
 	}
 }
 
-def new(inputDict):
-	''' New model creation code goes here. '''
-	modelDir = __metaModel__._omfDir + "/data/Model/{}/{}".format(inputDict["user"], inputDict["modelName"])
-	# Create the Dir.
-	os.makedirs(modelDir)
-	# Write the input File.
-	inputDict["created"] = str(dt.datetime.now())
-	with open(modelDir + "/allInputData.json","w") as inputFile:
-		json.dump(inputDict, inputFile, indent=4)
-	# Write the feeder.
-	with open(modelDir + "/feeder.omd","w") as feederFile:
-		json.dump(circuitModel, feederFile, indent=4)
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"modelName": "Automated {} Testing".format(modelType),
+		"modelType": modelType,
+		"user": "admin",
+		"layoutAlgorithm": "geospatial",
+		"simLength":120,
+		"simLengthUnits":"hours"
+	}
+	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	try:
+		with open(modelDir + "/feeder.omd","w") as feederFile:
+			json.dump(circuitModel, feederFile, indent=4)
+	except:
+		return False
+	return creationCode
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -388,32 +393,25 @@ def cancel(modelDir):
 	pass
 
 def _tests():
-	# Variables
-	inData = {
-		"modelName": "Automated {} Testing".format(modelType),
-		"modelType": modelType,
-		"user": "admin",
-		"layoutAlgorithm": "geospatial",
-		"simLength":120,
-		"simLengthUnits":"hours"
-	}
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model",inData["user"],inData["modelName"])
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelType)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
-		pass # No previous test results.
-	# Create the model.
-	new(inData)
-	# # No-input template.
-	# renderAndShow(template, modelType, modelDir=modelLoc)
+		# No previous test results.
+		pass
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
+	renderAndShow(template, modelType)
 	# Run the model.
-	run(modelLoc, inData)
+	run(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template,modelType, modelDir=modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
+	renderAndShow(template, modelType, modelDir=modelLoc)
+ 	# # Delete the model.
+ 	# time.sleep(2)
+ 	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

@@ -19,7 +19,6 @@ fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The solarCashflow model allows a utility to calculate what impact member owned solar systems will have on their costs."
 
-
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
@@ -386,10 +385,8 @@ def cancel(modelDir):
 	''' solarCashflow runs so fast it's pointless to cancel a run. '''
 	pass
 
-def _tests():
-	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	# TODO: Fix inData because it's out of date.
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	monthlyData = {
 	"janSale": "46668", "janKWh": "64467874", "janRev": "8093137", "janKWhT": "85628959", "janRevT": "10464278",
 	"febSale": "46724", "febKWh": "66646882", "febRev": "8812203", "febKWhT": "89818661", "febRevT": "11508047",
@@ -403,7 +400,7 @@ def _tests():
 	"octSale": "47088", "octKWh": "46451858", "octRev": "6146975", "octKWhT": "70425336", "octRevT": "8936767",
 	"novSale": "47173", "novKWh": "41668828", "novRev": "5551288", "novKWhT": "65008851", "novRevT": "8228072",
 	"decSale": "47081", "decKWh": "53354283", "decRev": "7014717", "decKWhT": "73335526", "decRevT": "9385203" }
-	inData = {
+	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "64735",
 		"runTime": "",
@@ -440,23 +437,26 @@ def _tests():
 		"otherCapCreditsPatroDivident": "1135379",
 		"extraItems":"0" }
 	for key in monthlyData:
-		inData[key] = monthlyData[key]
-	modelLoc = pJoin(workDir,"admin","Automated solarCashflow Testing")
+		defaultInputs[key] = monthlyData[key]
+	return __metaModel__.new(modelDir, defaultInputs)
+
+def _tests():
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	# No-input template.
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
 	renderAndShow(template, modelName)
 	# Run the model.
-	run(modelLoc, inData)
+	run(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template,modelName, modelDir = modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 
 if __name__ == '__main__':
 	_tests()

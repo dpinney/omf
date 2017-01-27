@@ -24,7 +24,6 @@ fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The solarEngineering model shows users the technical system impacts of solar on a feeder including DG power generated, regulator tap changes, capacitor activation, and meter voltages. "
 
-
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
@@ -469,37 +468,39 @@ def _groupBy(inL, func):
 			newL.append([item])
 	return newL
 
-def _tests():
-	# Variables
-	inData = {"simStartDate": "2012-04-01",
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"feederName1": "superModel Tomorrow",
 		"modelType": modelName,
 		"zipCode": "59001",
 		"simLength": "10",
 		"runTime": ""}
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated solarEngineering Test")
+	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	try:
+		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+	except:
+		return False
+	return creationCode
+
+def _tests():
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	try:
-		os.makedirs(modelLoc)
-	except: pass
-	shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData["feederName1"]+'.omd'),pJoin(modelLoc,inData["feederName1"]+'.omd'))
-	# No-input template.
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
 	renderAndShow(template, modelName)
 	# Run the model.
-	runForeground(modelLoc, inData)
-	## Cancel the model.
-	# time.sleep(2)
-	# cancel(modelLoc)
+	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
 	renderAndShow(template, modelName, modelDir=modelLoc)
-	# Delete the model.
-	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()

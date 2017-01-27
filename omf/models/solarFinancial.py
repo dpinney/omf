@@ -268,11 +268,10 @@ def cancel(modelDir):
 	''' solarFinancial runs so fast it's pointless to cancel a run. '''
 	pass
 
-def _tests():
-	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	# TODO: Fix inData because it's out of date.
-	inData = {"simStartDate": "2013-01-01",
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"simStartDate": "2013-01-01",
 		"simLengthUnits": "hours",
 		"modelType": modelName,
 		"zipCode": "64735",
@@ -301,23 +300,27 @@ def _tests():
 		"runTime": "",
 		"rotlim":"45.0",
 		"gamma":"-0.45",
-		"omCost": "1000"}
-	modelLoc = pJoin(workDir,"admin","Automated solarFinancial Testing")	
+		"omCost": "1000"
+	}
+	return __metaModel__.new(modelDir, defaultInputs)
+
+def _tests():
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	# No-input template.
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
 	renderAndShow(template, modelName)
 	# Run the model.
-	run(modelLoc, inData)
+	run(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template,modelName, modelDir = modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 
 if __name__ == '__main__':
 	_tests()

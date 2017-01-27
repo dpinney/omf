@@ -20,7 +20,6 @@ fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The solarSunda model allows you to run multiple instances of the SUNDA Solar Costing Financing Screening Tool and compare their output visually."
 
-
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
@@ -626,11 +625,9 @@ def cancel(modelDir):
 	''' solarSunda runs so fast it's pointless to cancel a run. '''
 	pass
 
-def _tests():	
-	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	# TODO: Fix inData because it's out of date.
-	inData = {"modelType": modelName,
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {"modelType": modelName,
 		#Cooperative
 		"zipCode": "64735",
 		"inverterSize":"1000",
@@ -665,23 +662,27 @@ def _tests():
 		"tilt": "-",
 		"trackingMode":"0",
 		"module_type":"1", #PVWatts v5 feature: 1 = premium
-		"azimuth":"180"}
-	modelLoc = pJoin(workDir,"admin","Automated solarSunda Testing")
+		"azimuth":"180"
+	}
+	return __metaModel__.new(modelDir, defaultInputs)
+
+def _tests():
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	# No-input template.
-	# renderAndShow(template)
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
+	renderAndShow(template, modelName)
 	# Run the model.
-	run(modelLoc, inData)
+	run(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template, modelName, modelDir = modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 
 if __name__ == '__main__':
 	_tests()

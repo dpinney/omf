@@ -313,32 +313,37 @@ def heavyProcessing(modelDir, inputDict):
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inputDict, inFile, indent=4)
 
-def _debugging():
-	# Variables
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	inData = {
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
 		"airport": 'IAD',
 		"created": "2015-06-12 17:20:39.308239",
 		"modelType": modelName,
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","uploads","FrankScadaShort.csv")).read(),
 		"fileName": "FrankScadaShort.csv"
-		}
-	modelLoc = pJoin(workDir,"admin","Automated storageDispatch Testing")
+	}
+	return __metaModel__.new(modelDir, defaultInputs)
+
+def _debugging():
+	# Location
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated pvWatts Testing")
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
 		# No previous test results.
 		pass
-	# No-input template.
-	# renderAndShow(template)
+	# Create New.
+	new(modelLoc)
+	# Pre-run.
+	renderAndShow(template, modelName)
 	# Run the model.
-	runForeground(modelLoc, inData)
+	runForeground(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template, modelName, modelDir = modelLoc)
-	# # Delete the model.
-	# time.sleep(2)
-	# shutil.rmtree(modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
+ 	# # Delete the model.
+ 	# time.sleep(2)
+ 	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()
