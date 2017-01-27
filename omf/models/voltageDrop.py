@@ -78,9 +78,9 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 	Returns a matplotlib object. '''
 	tree = omd.get('tree',{})
 	# # Get rid of schedules and climate:
-	# for key in tree.keys():
-	# 	if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
-	# 		del tree[key]
+	for key in tree.keys():
+		if tree[key].get("argument","") == "\"schedules.glm\"" or tree[key].get("tmyfile","") != "":
+			del tree[key]
 	# Make sure we have a voltDump:
 	def safeInt(x):
 		try: return int(x)
