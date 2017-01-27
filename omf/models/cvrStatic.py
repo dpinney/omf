@@ -470,7 +470,8 @@ def new(modelDir):
 	# 	"octAvg": 1750000.0, "octPeak": 2340000.0,
 	# 	"novAvg": 2210000.0, "novPeak": 3550000.0,
 	# 	"decAvg": 2480000.0, "decPeak": 3370000.0}
-	defaultInputs = {"modelType": modelName,
+	defaultInputs = {
+		"modelType": modelName,
 		"feederName1": "ABEC Columbia",
 		"runTime": "",
 		"capitalCost": 30000,

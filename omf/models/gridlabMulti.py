@@ -427,7 +427,8 @@ def new(modelDir):
 
 def _tests():
 	# Variables
-	inData = {"simStartDate": "2012-04-01",
+	inData = {
+		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		# "feederName1": "Simple Market System",
 		# "feederName2": "Simple Market System BROKEN", 		# configure error

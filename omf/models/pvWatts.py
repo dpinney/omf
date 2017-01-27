@@ -173,7 +173,6 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"simStartDate": "2012-04-01",
-		"modelName":"Automated pvWatts Testing",
 		"simLengthUnits": "hours",
 		"modelType": modelName,
 		"zipCode": "64735",

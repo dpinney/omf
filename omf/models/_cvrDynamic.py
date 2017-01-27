@@ -31,7 +31,6 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"modelName": "Automated DynamicCVR Testing",
 		"modelType": modelName,
 		"user": "admin",
 		"feederName1": "ABEC Frank pre calib",

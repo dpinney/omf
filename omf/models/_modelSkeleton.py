@@ -26,7 +26,7 @@ def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"user" : "admin", "modelName" : "Automated Model Skeleton Testing",
+		"user" : "admin",
 		"modelType": modelName,
 		"input1": "abc1 Easy as...",
 		"input2": "123 Or Simple as...",

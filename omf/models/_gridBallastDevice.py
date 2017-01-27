@@ -298,24 +298,6 @@ circuitModel = {
 	}
 }
 
-def new(modelDir):
-	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	defaultInputs = {
-		"modelName": "Automated {} Testing".format(modelType),
-		"modelType": modelType,
-		"user": "admin",
-		"layoutAlgorithm": "geospatial",
-		"simLength":120,
-		"simLengthUnits":"hours"
-	}
-	creationCode = __metaModel__.new(modelDir, defaultInputs)
-	try:
-		with open(modelDir + "/feeder.omd","w") as feederFile:
-			json.dump(circuitModel, feederFile, indent=4)
-	except:
-		return False
-	return creationCode
-
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	try:
@@ -391,6 +373,23 @@ def run(modelDir, inputDict):
 def cancel(modelDir):
 	''' Voltage drop runs so fast it's pointless to cancel a run. '''
 	pass
+
+def new(modelDir):
+	''' Create a new instance of this model. Returns true on success, false on failure. '''
+	defaultInputs = {
+		"modelType": modelType,
+		"user": "admin",
+		"layoutAlgorithm": "geospatial",
+		"simLength":120,
+		"simLengthUnits":"hours"
+	}
+	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	try:
+		with open(modelDir + "/feeder.omd","w") as feederFile:
+			json.dump(circuitModel, feederFile, indent=4)
+	except:
+		return False
+	return creationCode
 
 def _tests():
 	# Location

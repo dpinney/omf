@@ -470,7 +470,8 @@ def _groupBy(inL, func):
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
-	defaultInputs = {"simStartDate": "2012-04-01",
+	defaultInputs = {
+		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
 		"feederName1": "superModel Tomorrow",
 		"modelType": modelName,

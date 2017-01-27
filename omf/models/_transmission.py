@@ -246,7 +246,6 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"modelName": "Automated Testing of " + modelName,
 		"networkName": "case9",
 		"algorithm": "NR",
 		"model": "AC",
