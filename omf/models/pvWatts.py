@@ -7,7 +7,6 @@ from omf.models import __metaModel__
 from __metaModel__ import *
 
 # OMF imports
-# sys.path.append(__metaModel__._omfDir)
 import omf.feeder as feeder
 from omf.solvers import nrelsam2013
 from omf.weather import zipCodeToClimateName
@@ -16,10 +15,7 @@ from omf.weather import zipCodeToClimateName
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The pvWatts model runs the NREL pvWatts tool for quick estimation of solar panel output."
-
-# Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
-	template = Template(tempFile.read())
+template = Template(open(pJoin(__metaModel__._myDir,modelName+".html"),"r").read()) #HTML Template for showing output.
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''

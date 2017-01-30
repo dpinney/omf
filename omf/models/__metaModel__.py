@@ -7,12 +7,11 @@ from os.path import split as pSplit
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
 
-def renderTemplate(template, modelType, modelDir="", absolutePaths=False, datastoreNames={}, quickRender=False):
+def renderTemplate(template, modelType, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
 	By default render a blank one for new input.
 	If modelDir is valid, render results post-model-run.
-	If absolutePaths, the HTML can be opened without a server. 
-	If quickRender, pass this to template so we can render for non-logged-in users. '''
+	If absolutePaths, the HTML can be opened without a server. '''
 	try:
 		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
 		modelPath, modelName = pSplit(modelDir)
@@ -33,7 +32,7 @@ def renderTemplate(template, modelType, modelDir="", absolutePaths=False, datast
 		pathPrefix = ""
 	return template.render(allInputData=allInputData,
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames, quickRender=quickRender, modelName=modelType)
+		datastoreNames=datastoreNames, modelName=modelType)
 
 def renderAndShow(template, modelName, modelDir="", datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
