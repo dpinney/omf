@@ -15,11 +15,11 @@ from omf.solvers import gridlabd
 
 # Model metadata:
 fileName = os.path.basename(__file__)
-modelType = fileName[0:fileName.rfind('.')]
+modelName = fileName[0:fileName.rfind('.')]
 tooltip = "Simulate a GridBallast device at a single service point."
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,modelType+".html"),"r") as tempFile:
+with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 # We just hardcode the GridLAB-D model here since it is the same for every model instance:
@@ -374,7 +374,7 @@ def cancel(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"modelType": modelType,
+		"modelType": modelName,
 		"user": "admin",
 		"layoutAlgorithm": "geospatial",
 		"simLength":120,
@@ -390,7 +390,7 @@ def new(modelDir):
 
 def _tests():
 	# Location
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelType)
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
@@ -400,11 +400,11 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(template, modelType)
+	renderAndShow(template, modelName)
 	# Run the model.
 	run(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template, modelType, modelDir=modelLoc)
+	renderAndShow(template, modelName, modelDir=modelLoc)
  	# # Delete the model.
  	# time.sleep(2)
  	# shutil.rmtree(modelLoc)
