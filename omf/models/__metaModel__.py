@@ -3,6 +3,7 @@
 import json, os, sys, tempfile, webbrowser, math, shutil, datetime
 from os.path import join as pJoin
 from os.path import split as pSplit
+
 # Locational variables so we don't have to rely on OMF being in the system path.
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)

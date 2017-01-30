@@ -322,7 +322,7 @@ def fastRun(modelType, email):
 		key = open("emailCredentials.key").read()
 		c = boto.ses.connect_to_region("us-east-1", aws_access_key_id="AKIAJLART4NXGCNFEJIQ", aws_secret_access_key=key)
 		mailResult = c.send_email("admin@omf.coop", "OMF.coop User Account", message, [email])
-		return redirect("/newModel/" + modelType + "/FASTRUN-" + modelType)
+		return redirect("/newModel/" + modelType + "/FASTRUN" + modelType)
 
 @app.route("/cancelModel/", methods=["POST"])
 @flask_login.login_required
