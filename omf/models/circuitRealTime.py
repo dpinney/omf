@@ -17,9 +17,6 @@ tooltip = 'Real time circuit simulator'
 with open(pJoin(__metaModel__._myDir,modelName + ".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
-
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	# Delete output file every run if it exists

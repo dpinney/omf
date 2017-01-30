@@ -11,7 +11,6 @@ from omf.models import __metaModel__
 from __metaModel__ import *
 
 # OMF imports
-# sys.path.append(__metaModel__._omfDir)
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 
@@ -20,13 +19,9 @@ fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The cvrStatic model calculates the expected costs and benefits (including energy, loss, and peak reductions) for implementing conservation voltage reduction on a given feeder circuit."
 
-
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
-
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
 def _roundOne(x,direc):
 	''' Round x in direc (up/down) to 1 sig fig. '''

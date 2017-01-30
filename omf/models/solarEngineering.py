@@ -27,37 +27,6 @@ tooltip = "The solarEngineering model shows users the technical system impacts o
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
-	
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	''' Render the model template to an HTML string.
-	By default render a blank one for new input.
-	If modelDir is valid, render results post-model-run.
-	If absolutePaths, the HTML can be opened without a server. '''
-	try:
-		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
-		modelPath, modelName = pSplit(modelDir)
-		deepPath, user = pSplit(modelPath)
-		inJson["modelName"] = modelName
-		inJson["user"] = user
-		allInputData = json.dumps(inJson)
-	except IOError:
-		allInputData = None
-	try:
-		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
-	except IOError:
-		allOutputData = None
-	if absolutePaths:
-		# Parent of current folder.
-		pathPrefix = __metaModel__._omfDir
-	else:
-		pathPrefix = ""
-	try:
-		inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))
-	except IOError:
-		pass
-	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, modelStatus=getStatus(modelDir),modelName=modelName, pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames)
 
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.

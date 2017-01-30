@@ -23,9 +23,6 @@ tooltip = "The solarCashflow model allows a utility to calculate what impact mem
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
-
 def run(modelDir, inputDict):
 	try:
 		''' Run the model in its directory. '''

@@ -17,9 +17,6 @@ tooltip = "The demandResponse model takes in historical demand data (hourly for 
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
-
 def prism(prismDRDict):
 	''' Calculate demand changes based on Brattle's PRISM. '''
 	# Calculate times.

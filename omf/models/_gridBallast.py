@@ -27,9 +27,6 @@ tooltip = 'gridBallast simulator'
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir, modelName + '.html'),'r') as tempFile:
 	template = Template(tempFile.read())
-		
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames)
 
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.

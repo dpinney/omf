@@ -24,9 +24,6 @@ tooltip = "The transmission model imports, runs and visualizes MATPOWER transmis
 with open(pJoin(__metaModel__._myDir,modelName + ".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-# def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-# 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames)
-
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
 	By default render a blank one for new input.

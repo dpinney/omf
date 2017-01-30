@@ -22,9 +22,6 @@ tooltip = "Simulate a GridBallast device at a single service point."
 with open(pJoin(__metaModel__._myDir,modelType+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	return __metaModel__.renderTemplate(template, modelType, modelDir, absolutePaths, datastoreNames)
-
 # We just hardcode the GridLAB-D model here since it is the same for every model instance:
 circuitModel = {
 	"tree": {
