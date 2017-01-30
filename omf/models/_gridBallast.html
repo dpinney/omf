@@ -577,7 +577,7 @@
             type: 'line'
           },
           title: {
-            text: 'Distribution Quality of Service'
+            text: ''
           },
           xAxis: {
             type: 'datetime',
@@ -587,7 +587,7 @@
             plotLines: [{
               color: 'red',
               dashStyle: 'dash',
-              value: 3.5,
+              value: eventStart.toISOString(),
               width: 2,
               label: {
                 text: 'Event Start = ' + eventStart.toDateString()
@@ -596,7 +596,7 @@
             {
               color: 'red',
               dashStyle: 'dash',
-              value: 4.5,
+              value: eventEnd.toISOString(),
               width: 2,
               label: {
                 text: 'Event End = ' + eventEnd.toDateString()
@@ -610,7 +610,8 @@
           },
           series: [{
             showInLegend: false,
-            data: [1, 1, 2, 1, 1, 1, 2, 1, 1]
+            // data: [1, 1, 2, 1, 1, 1, 2, 1, 1]
+            type: line
           }]
         });
       </script>
@@ -629,7 +630,7 @@
             type: 'line'
           },
           title: {
-            text: 'Availability Details'
+            text: ''
           },
           xAxis: {
             type: 'datetime',
