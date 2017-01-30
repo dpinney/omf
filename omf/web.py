@@ -140,14 +140,12 @@ def login_page():
 	nextUrl = str(request.args.get("next","/"))
 	if flask_login.current_user.is_authenticated():
 		return redirect(urlTarget)
-	# Generate list of models with quickRun
+	# Generate list of models:
 	modelNames = []
 	for modelName in models.__all__:
 		thisModel = getattr(models, modelName)
-		if hasattr(thisModel, 'quickRender') and not modelName.startswith('_'):
+		if not modelName.startswith('_'):
 			modelNames.append(modelName)
-	if not modelNames:
-		modelNames.append("No Models Available")
 	return render_template("clusterLogin.html", next=nextUrl, modelNames=modelNames)
 
 @app.route("/logout")
@@ -171,7 +169,6 @@ def deleteUser():
 	return "Success"
 
 @app.route("/new_user", methods=["POST"])
-# @flask_login.login_required #TODO: REVIEW
 def new_user():
 	email = request.form.get("email")
 	if email == "": return "EMPTY"
@@ -310,31 +307,22 @@ def runModel():
 	modelModule.run(os.path.join(_omfDir, "data", "Model", user, modelName), pData)
 	return redirect("/model/" + user + "/" + modelName)
 
-@app.route("/quickNew/<modelType>")
-def quickNew(modelType):
-	thisModel = getattr(models, modelType)
-	if hasattr(thisModel, 'quickRender'):
-		return thisModel.quickRender(thisModel.template, datastoreNames=getDataNames())
+@app.route("/fastRun/<modelType>/<email>")
+def fastRun(modelType, email):
+	''' Create a new user, email them their password, and immediately create a new model for them.'''
+	if email in [f[0:-5] for f in safeListdir("data/User")]:
+		return "User with email {} already exists. Please log in or go back and use the 'Forgot Password' link. Or try the fast model creation feature with a different email address.".format(email)
 	else:
-		return redirect("/")
-
-@app.route("/quickRun/", methods=["POST"])
-def quickRun():
-	pData = request.form.to_dict()
-	modelModule = getattr(models, pData["modelType"])
-	user = pData["quickRunEmail"]
-	modelName = "QUICKRUN-" + pData["modelType"]
-	modelModule.run(os.path.join(_omfDir, "data", "Model", user, modelName), pData)
-	return redirect("/quickModel/" + user + "/" + modelName)
-
-@app.route("/quickModel/<owner>/<modelName>")
-def quickModel(owner, modelName):
-	''' Render a quickrun model template with saved data. '''
-	modelDir = "./data/Model/" + owner + "/" + modelName
-	with open(modelDir + "/allInputData.json") as inJson:
-		modelType = json.load(inJson).get("modelType","")
-	thisModel = getattr(models, modelType)
-	return thisModel.quickRender(thisModel.template, modelDir, False, getDataNames())
+		randomPass = ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for x in range(15)])
+		user = {"username":email, "password_digest":pbkdf2_sha512.encrypt(randomPass)}
+		flask_login.login_user(User(user))
+		with open("data/User/"+user["username"]+".json","w") as outFile:
+			json.dump(user, outFile, indent=4)
+		message = "Thanks for registering for OMF.coop. Your password is: " + randomPass
+		key = open("emailCredentials.key").read()
+		c = boto.ses.connect_to_region("us-east-1", aws_access_key_id="AKIAJLART4NXGCNFEJIQ", aws_secret_access_key=key)
+		mailResult = c.send_email("admin@omf.coop", "OMF.coop User Account", message, [email])
+		return redirect("/newModel/" + modelType + "/FASTRUN-" + modelType)
 
 @app.route("/cancelModel/", methods=["POST"])
 @flask_login.login_required

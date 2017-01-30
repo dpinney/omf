@@ -155,10 +155,27 @@
 							<p style="text-align:left">Guest access:</p>
 						</div>
 						<div id="quickRunSelector">
-							<select name="model" class="quickSelector" onChange="document.location.href=document.requestAccessOptions.model.options[document.requestAccessOptions.model.selectedIndex].value">
+							<script type="text/javascript">
+								function validateEmail(email) {
+ 									var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+									return re.test(email);
+								}
+								function fastRun(modelType) {
+									email = prompt("Please enter a valid email address. We just use it to send you a password.")
+									if (email == null) {
+										return
+									}
+									else if (validateEmail(email)) {
+										document.location.href = "/fastRun/" + modelType + "/" + email
+									} else {
+										fastRun(modelType)
+									}
+								}
+							</script>
+							<select name="model" class="quickSelector" onChange="fastRun(document.requestAccessOptions.model.options[document.requestAccessOptions.model.selectedIndex].value)">
 								<option value="">Choose a Model</option>
 								{% for modelName in modelNames %}
-									<option value="/quickNew/{{ modelName }}">{{ modelName }}</option>
+									<option value="{{ modelName }}">{{ modelName }}</option>
 								{% endfor %}
 							</select>
 						</div>

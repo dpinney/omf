@@ -25,10 +25,6 @@ with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template,modelName, modelDir, absolutePaths, datastoreNames)
 
-def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	''' Presence of this function indicates we can run the model quickly via a public interface. '''
-	return __metaModel__.renderTemplate(template, modelName, modelDir, absolutePaths, datastoreNames, quickRender=True)
-
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''

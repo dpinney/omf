@@ -26,10 +26,6 @@ with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
 	return __metaModel__.renderTemplate(template,modelName, modelDir, absolutePaths, datastoreNames)
 
-# def quickRender(template, modelDir="", absolutePaths=False, datastoreNames={}):
-# 	''' Presence of this function indicates we can run the model quickly via a public interface. '''
-# 	return __metaModel__.renderTemplate(template, modelDir, absolutePaths, datastoreNames, quickRender=True)
-
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
