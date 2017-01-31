@@ -443,15 +443,15 @@ def _groupBy(inL, func):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"simStartDate": "2012-04-01",
-		"simLengthUnits": "hours",
-		"feederName1": "Simple Market System",
 		"modelType": modelName,
 		"zipCode": "59001",
+		"feederName1": "Simple Market System",
+		"simStartDate": "2012-04-01",
 		"simLength": "24",
-		"eventType":"ramping", #unramping, overfreq, underfreq
-		"eventTime":"2012-04-01 14:00",
-		"eventLength":"02:00"
+		"simLengthUnits": "hours", #minutes
+		"eventType": "ramping", #unramping, overfrequency, underfrequency
+		"eventTime": "2012-04-01 14:00",
+		"eventLength": "02:00"
 	}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:

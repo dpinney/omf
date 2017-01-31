@@ -63,7 +63,7 @@
     <form name="inputForm" action="/runModel/" onsubmit="event.preventDefault(); return isFormValid();" method="post">
       <div class="shortInput">
         <label>Model Type <a href="https://github.com/dpinney/omf/wiki/Models-~-gridBallast" target="blank">Help?</a></label>
-        <input type="text" id="modelType" name="modelType" value="gridBallast" readonly/>
+        <input type="text" id="modelType" name="modelType" readonly/>
       </div>
       <div class="shortInput">
         <label>Model Name</label>
@@ -88,7 +88,7 @@
       <hr>
       <div class="shortInput">
         <label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-        <input type="text" id="zipCode" name="zipCode" value="64735" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
+        <input type="text" id="zipCode" name="zipCode" pattern="^\d{5}(?:[-\s]\d{4})?$" required="required">
       </div>
       <div class="shortInput">
         <label class="tooltip">Simulation Length<span class="classic">Number of time steps in the installation. Due to large data volumes, the current limit is 9999.</span></label>
