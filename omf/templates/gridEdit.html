@@ -1965,7 +1965,6 @@ function solarAdding() {
 		newInverter['name'] = 'synInverter' + treeNewIndex
 		return newInverter
 	}
-
 	function newRandomPanels() {
 		newPanels = {}
 		newPanels['object'] = 'solar'
@@ -1978,18 +1977,21 @@ function solarAdding() {
 		newInverter['name'] = 'synSolar' + treeNewIndex
 		return newPanels
 	}
-
 	function walkAndAddSolar() {
 		progressBarUpdate(percentage)
 		// for (index in tree) {
 		if (i < tkeys.length && !in_use && percentage != 100) {
 			in_use = true
 			var limit = i + 100
-			var solarAddingPercentage = prompt("Enter percentage of meters to add solar at:")
+			var solarAddingPercentage = prompt('Enter percentage of meters to add solar to (decimal between 0 and 1):', 0.5)
+			if (solarAddingPercentage < 0 || solarAddingPercentage > 1) {
+				alert('INPUT ERROR: Must enter decimal value between 0 and 1')
+				solarAddingPercentage = 0
+			}
 			for (; i < tkeys.length && i < limit; i++) {
 				index = tkeys[i]
 				if (tree[index].hasOwnProperty('object') && tree[index]['object'] == 'triplex_meter') {
-					if (Math.random() < (solarAddingPercentage / 100.0)) {
+					if (Math.random() < (solarAddingPercentage)) {
 						newInverter = makeNewInverter(tree[index]['phases'])
 						newPanels = newRandomPanels()
 						newChildAtLocation(newInverter, index)
@@ -2001,19 +2003,18 @@ function solarAdding() {
 			}
 			percentage = Math.round(i / tkeys.length * 100).toFixed(2)
 			in_use = false
-		} else {
+		} 
+		else {
 			redraw()
 			removeProgressDialog()
 			is_use = false
 			clearInterval(inter2)
 		}
 	}
-
 	function progressBarUpdate(percentage) {
 		if (document.getElementById('progBar') != undefined)
 			document.getElementById('progColor').style.width = percentage + '%'
 	}
-
 	function noMeter() {
 		for (x in hiddenNodes) {
 			if (hiddenNodes[x].objectType != undefined && hiddenNodes[x].objectType == 'triplex_meter')
@@ -2033,7 +2034,6 @@ function solarAdding() {
 		// setTimeout(walkAndAddSolar, 1000);
 		inter2 = setInterval(walkAndAddSolar, 10)
 	}
-
 }
 
 //*********************************************
