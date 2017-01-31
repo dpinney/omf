@@ -445,7 +445,7 @@ def new(modelDir):
 	defaultInputs = {
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName1": "superModel Tomorrow",
+		"feederName1": "Simple Market System",
 		"modelType": modelName,
 		"zipCode": "59001",
 		"simLength": "24",

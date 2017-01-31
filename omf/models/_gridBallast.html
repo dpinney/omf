@@ -545,75 +545,43 @@
     <div id="serviceQualityReport" class="tightContent postRun">
       <div id="serviceQualityChart"></div>
       <script type="text/javascript">
-        // var serviceRequests = {
-        //   "marker":{
-        //     "enabled":false
-        //   },
-        //   "color":"red",
-        //   "data":allOutputData.Consumption.Power,
-        //   "name":"Unfulfilled Service Requests"
-        // }
-        // var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-        // localHighChart["chart"]["renderTo"] = "serviceQualityChart"
-        // localHighChart["chart"]["type"] = "line"
-        // localHighChart["chart"]["width"] = 1000
-        // localHighChart["chart"]["height"] = 150
-        // localHighChart["series"] = [serviceRequests]
-        // localHighChart["yAxis"]["title"] = {"text": "Missed Service Requests", "style": {"color": "gray"}}
-        // new Highcharts.Chart(localHighChart);
-  
-        var eventStart = new Date(allInputData.eventTime);
-        var eL = allInputData.eventLength.split(':');
-        var ms = (eL[0] * 3600 + eL[1] * 60) * 1000;
-        var endTime = eventStart.getTime() + ms
-        var eventEnd = new Date(endTime);
+        var eventStart = new Date(allInputData.eventTime)
+        var eventLength = allInputData.eventLength.split(':')
+        var eventEnd = new Date(eventStart.getTime() + (3600*eventLength[0] + 60*eventLength[1]) * 1000)
+        var tRecovery = new Date(eventEnd.getTime() + 3600000)
 
-        new Highcharts.Chart({
-          credits: {
-            enabled: false
+        var simStart = new Date(allInputData.simStartDate)
+
+        var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+        localHighChart['chart']['renderTo'] = 'serviceQualityChart'
+        localHighChart['chart']['type'] = 'line'
+        localHighChart['chart']['width'] = 1000
+        localHighChart['chart']['height'] = 150
+        localHighChart['series'] = [
+          {
+            'showInLegend': false,
+            'data': [(simStart, 1)]
+          }
+        ]
+        localHighChart['xAxis']['title'] = {'text': ''}
+        localHighChart['xAxis']['plotLines'] = [
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': eventStart,
+            'width': 2,
+            'label': {'text':'Event Start'}
           },
-          chart: {
-            renderTo: 'serviceQualityChart',
-            type: 'line'
-          },
-          title: {
-            text: ''
-          },
-          xAxis: {
-            type: 'datetime',
-            title: {
-              text: 'Time'
-            },
-            plotLines: [{
-              color: 'red',
-              dashStyle: 'dash',
-              value: eventStart.toISOString(),
-              width: 2,
-              label: {
-                text: 'Event Start = ' + eventStart.toDateString()
-              }
-            },
-            {
-              color: 'red',
-              dashStyle: 'dash',
-              value: eventEnd.toISOString(),
-              width: 2,
-              label: {
-                text: 'Event End = ' + eventEnd.toDateString()
-              }
-            }]
-          },
-          yAxis: {
-            title: {
-              text: 'Quality'
-            }
-          },
-          series: [{
-            showInLegend: false,
-            // data: [1, 1, 2, 1, 1, 1, 2, 1, 1]
-            type: line
-          }]
-        });
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': eventEnd,
+            'width': 2,
+            'label': {'text':'Event End'}
+          }
+        ]
+        localHighChart['yAxis']['title'] = {'text': 'Quality'}
+        new Highcharts.Chart(localHighChart);
       </script>
     </div>
 
@@ -621,60 +589,43 @@
     <div id="availabilityReport" class="tightContent postRun">
       <div id="availabilityChart"></div>
       <script type="text/javascript">
-        new Highcharts.Chart({
-          credits: {
-            enabled: false
+        var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+        localHighChart['chart']['renderTo'] = 'availabilityChart'
+        localHighChart['chart']['type'] = 'line'
+        localHighChart['chart']['width'] = 1000
+        localHighChart['chart']['height'] = 150
+        localHighChart['series'] = [
+          {
+            'showInLegend': false,
+            'data': [(simStart, 1)]
+          }
+        ]
+        localHighChart['xAxis']['title'] = {'text': ''}
+        localHighChart['xAxis']['plotLines'] = [
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': eventStart,
+            'width': 2,
+            'label': {'text':'Event Start'}
           },
-          chart: {
-            renderTo: 'availabilityChart',
-            type: 'line'
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': eventEnd,
+            'width': 2,
+            'label': {'text':'Event End'}
           },
-          title: {
-            text: ''
-          },
-          xAxis: {
-            type: 'datetime',
-            title: {
-              text: 'Time'
-            },
-            plotLines: [{
-              color: 'red',
-              dashStyle: 'dash',
-              value: 4,
-              width: 2,
-              label: {
-                text: 'Event Start = ' + eventStart.toDateString()
-              }
-            },
-            {
-              color: 'red',
-              dashStyle: 'dash',
-              value: 6,
-              width: 2,
-              label: {
-                text: 'Event End = ' + eventEnd.toDateString()
-              }
-            },
-            {
-              color: 'red',
-              dashStyle: 'dash',
-              value: 7,
-              width: 2,
-              label: {
-                text: 't_recovery = all water heaters off',
-              }
-            }]
-          },
-          yAxis: {
-            title: {
-              text: 'Total Load'
-            }
-          },
-          series: [{
-            showInLegend: false,
-            data: [3, 3, 4, 3, 3, 2, 3, 3, 3]
-          }]
-        });
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': tRecovery,
+            'width': 2,
+            'label': {'text': 'tRecovery'}
+          }
+        ]
+        localHighChart['yAxis']['title'] = {'text': 'Total Load'}
+        new Highcharts.Chart(localHighChart);
       </script>
     </div>
 
