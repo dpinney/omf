@@ -484,7 +484,7 @@ def _tests():
 			except: 
 				shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","adminFeeders", inData[key]+'.omd'),pJoin(modelLoc,inData[key]+'.omd'))
 	# No-input template.
-	renderAndShow(template, modelName)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 	# Run the model.
 	# run(modelLoc, inData)
 	runForeground(modelLoc, inData)

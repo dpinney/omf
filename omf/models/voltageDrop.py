@@ -179,7 +179,7 @@ def _debugging():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(template, modelName)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 	# Run the model.
 	run(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.

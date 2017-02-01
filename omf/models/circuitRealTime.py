@@ -75,7 +75,7 @@ def _tests():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(template, modelName)
+	renderAndShow(template, modelName, modelDir=modelLoc)
 
 if __name__ == '__main__':
 	_tests()
