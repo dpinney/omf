@@ -1984,7 +1984,7 @@ function solarAdding() {
 		if (i < tkeys.length && !in_use && percentage != 100) {
 			in_use = true
 			var limit = i + 100
-			var solarAddingPercentage = prompt('Enter percentage of meters to add solar to (decimal between 0 and 1):', 0.5)
+			var solarAddingPercentage = prompt('Enter propability of solar being added to each meter (decimal between 0 and 1):', 0.5)
 			if (solarAddingPercentage < 0 || solarAddingPercentage > 1) {
 				alert('INPUT ERROR: Must enter decimal value between 0 and 1')
 				solarAddingPercentage = 0
@@ -2040,47 +2040,7 @@ function solarAdding() {
 /*
  * General Function to Add Components
  */
-// function xAty(objX,objY,floatPercentage) {
-// 	// objX = 'solar'
-// 	// objY = 'triplex_meter'
-// 	// floatPercentage = 1
-// 	for (var i = 0, tkeys = Object.keys(tree), limit = i + 100; i < tkeys.length && i < limit; i++) {
-// 		index = tkeys[i]
-// 		if (tree[index].hasOwnProperty('object') && tree[index]['object'] == objY) {
-// 			if (Math.random() < (floatPercentage)) {
-// 				newInverter = makeNewInverter(tree[index]['phases'])
-// 				newPanels = newRandomPanels()
-// 				newChildAtLocation(newInverter, index)
-// 				inverterIndex = findIndex(tree, 'name', newInverter['name'])
-// 				newChildAtLocation(newPanels, inverterIndex)
-// 				redraw()
-// 			}
-// 		}
-// 	}
-// 	function makeNewInverter(phases) {
-// 		newInverter = {}
-// 		newInverter['object'] = 'inverter'
-// 		newInverter['phases'] = phases
-// 		newInverter['generator_status'] = 'ONLINE'
-// 		newInverter['inverter_type'] = 'PWM'
-// 		newInverter['generator_mode'] = 'CONSTANT_PF'
-// 		treeNewIndex = nextTreeKey()
-// 		newInverter['name'] = 'synInverter' + treeNewIndex
-// 		return newInverter
-// 	}
-// 	function newRandomPanels() {
-// 		newPanels = {}
-// 		newPanels['object'] = objX
-// 		newPanels['generator_mode'] = 'SUPPLY_DRIVEN'
-// 		newPanels['generator_status'] = 'ONLINE'
-// 		newPanels['panel_type'] = 'SINGLE_CRYSTAL_SILICON'
-// 		newPanels['efficiency'] = '0.1' + randomInt(0, 5)
-// 		newPanels['area'] = randomInt(2, 8) + '00 sf'
-// 		treeNewIndex = nextTreeKey()
-// 		newInverter['name'] = 'synSolar' + treeNewIndex
-// 		return newPanels
-// 	}
-// }
+function addXatY(componentName, attachType, perc) {}
 
 //*********************************************
 // PINNING FUNCTIONS
