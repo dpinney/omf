@@ -579,15 +579,15 @@ def scadaLoadshape(owner,feederName):
 		os.remove("data/Model/" + owner + "/" +  modelName + "/error.txt")
 	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/calibration.csv"):
 		os.remove("data/Model/" + owner + "/" +  modelName + "/calibration.csv")
-	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
 	file = request.files['scadaFile']
-	file.save(os.path.join(app.config['UPLOAD_FOLDER'],loadName+".csv"))	
+	file.save(os.path.join("data/Model/"+owner+"/"+modelName,loadName+".csv"))	
 	modelDir = "data/Model/"+owner+"/"+modelName
 	if not os.path.isdir(modelDir+'/calibration/gridlabD'):
 		os.makedirs(modelDir+'/calibration/gridlabD')
 	workDir = modelDir + '/calibration'
 	feederPath = modelDir+"/"+feederName+".omd"
 	scadaPath = modelDir+"/"+loadName+".csv"
+	#TODO: parse the csv using .csv library, set simStartDate to earliest timeStamp, length to number of rows, units to difference between first 2 timestamps (which is a function in datetime library). We'll need a link to the docs in the import dialog and a short blurb saying how the CSV should be built.
 	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
 	simStartDate = {"Date":simDate,"timeZone":"PST"}
 	simLength = 24
