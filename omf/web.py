@@ -410,7 +410,7 @@ def networkGet(owner, modelName, networkNum):
 @flask_login.login_required
 def getComponents():
 	path = "data/Component/"
-	components = {name[0:-5]:json.load(open(path + name)) for name in os.listdir(path)}
+	components = {name[0:-5]:json.load(open(path + name)) for name in safeListdir(path)}
 	return json.dumps(components)
 
 @app.route("/checkConversion/<modelName>", methods=["POST","GET"])
