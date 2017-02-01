@@ -124,7 +124,7 @@ def login():
 	username, password, remember = map(request.form.get, ["username",
 		"password", "remember"])
 	userJson = None
-	for u in os.listdir("./data/User/"):
+	for u in safeListdir("./data/User/"):
 		if u.lower() == username.lower() + ".json":
 			userJson = json.load(open("./data/User/" + u))
 			break
@@ -172,7 +172,7 @@ def deleteUser():
 def new_user():
 	email = request.form.get("email")
 	if email == "": return "EMPTY"
-	if email in [f[0:-5] for f in os.listdir("data/User")]:
+	if email in [f[0:-5] for f in safeListdir("data/User")]:
 		u = json.load(open("data/User/" + email + ".json"))
 		if u.get("password_digest") or not request.form.get("resend"):
 			return "Already Exists"
@@ -438,7 +438,7 @@ def milsoftImport(owner):
 	feederNum = request.form.get("feederNum",1)
 	# Delete exisitng .std and .seq, .glm files to not clutter model file
 	path = "data/Model/"+owner+"/"+modelName
-	fileList = os.listdir(path)
+	fileList = safeListdir(path)
 	for file in fileList:
 		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
 			os.remove(path+"/"+file)
@@ -491,7 +491,7 @@ def matpowerImport(owner):
 	networkNum = request.form.get("networkNum",1)
 	# Delete existing .m files to not clutter model
 	path = "data/Model/"+owner+"/"+modelName
-	fileList = os.listdir(path)
+	fileList = safeListdir(path)
 	for file in fileList:
 		if file.endswith(".m"): os.remove(path+"/"+file)
 	matFile = request.files["matFile"]
@@ -530,7 +530,7 @@ def gridlabdImport(owner):
 	glm = request.files['glmFile']
 	# Delete exisitng .std and .seq, .glm files to not clutter model file
 	path = "data/Model/"+owner+"/"+modelName
-	fileList = os.listdir(path)
+	fileList = safeListdir(path)
 	for file in fileList:
 		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
 			os.remove(path+"/"+file)
@@ -994,6 +994,6 @@ def uniqObjName(objtype, owner, name, modelName=False):
 
 if __name__ == "__main__":
 	URL = "http://localhost:5000"
-	template_files = ["templates/"+ x  for x in os.listdir("templates")]
-	model_files = ["models/" + x for x in os.listdir("models")]
+	template_files = ["templates/"+ x  for x in safeListdir("templates")]
+	model_files = ["models/" + x for x in safeListdir("models")]
 	app.run(debug=True, extra_files=template_files + model_files)
