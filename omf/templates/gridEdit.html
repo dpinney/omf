@@ -2040,7 +2040,23 @@ function solarAdding() {
 /*
  * General Function to Add Components
  */
-function addXatY(componentName, attachType, perc) {}
+function addXatY(componentName, attachType, perc) {
+	
+	if ( compDict.hasOwnProperty(componentName) ) {
+		newComp = {}
+		newComp = compDict[componentName]
+		treeNewIndex = nextTreeKey()
+		newComp['name'] = componentName + treeNewIndex
+	}
+	for (var i = 0, tkeys = Object.keys(tree), limit = i + 100; i < tkeys.length && i < limit; i++) {
+		index = tkeys[i]
+		if ( tree[index].hasOwnProperty('object') && tree[index]['object'] == attachType ) {
+			newChildAtLocation(newComp, index)
+			redraw()
+		}
+	}
+
+}
 
 //*********************************************
 // PINNING FUNCTIONS
