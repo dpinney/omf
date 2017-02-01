@@ -434,7 +434,7 @@ def milsoftImport(owner):
 	''' API for importing a milsoft feeder. '''
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameM","feeder"))
-	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
+	modelFolder = "data/Model/"+owner+"/"+modelName
 	feederNum = request.form.get("feederNum",1)
 	# Delete exisitng .std and .seq, .glm files to not clutter model file
 	path = "data/Model/"+owner+"/"+modelName
@@ -444,8 +444,8 @@ def milsoftImport(owner):
 			os.remove(path+"/"+file)
 	stdFile, seqFile = map(lambda x: request.files[x], ["stdFile", "seqFile"])
 	# stdFile, seqFile= request.files['stdFile','seqFile']
-	stdFile.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.std'))
-	seqFile.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.seq'))
+	stdFile.save(os.path.join(modelFolder,feederName+'.std'))
+	seqFile.save(os.path.join(modelFolder,feederName+'.seq'))
 	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
 		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
 	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.std') as stdInput:
@@ -487,7 +487,6 @@ def matpowerImport(owner):
 	''' API for importing a milsoft feeder. '''
 	modelName = request.form.get("modelName","")
 	networkName = str(request.form.get("networkNameM","network1"))
-	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
 	networkNum = request.form.get("networkNum",1)
 	# Delete existing .m files to not clutter model
 	path = "data/Model/"+owner+"/"+modelName
@@ -495,7 +494,7 @@ def matpowerImport(owner):
 	for file in fileList:
 		if file.endswith(".m"): os.remove(path+"/"+file)
 	matFile = request.files["matFile"]
-	matFile.save(os.path.join(app.config['UPLOAD_FOLDER'],networkName+'.m'))
+	matFile.save(os.path.join("data/Model/"+owner+"/"+modelName,networkName+'.m'))
 	# TODO: Remove error files.
 	with open("data/Model/"+owner+"/"+modelName+'/' + "ZPID.txt", "w+") as conFile:
 		conFile.write("WORKING")
@@ -526,7 +525,6 @@ def gridlabdImport(owner):
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameG",""))
 	feederNum = request.form.get("feederNum",1)
-	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
 	glm = request.files['glmFile']
 	# Delete exisitng .std and .seq, .glm files to not clutter model file
 	path = "data/Model/"+owner+"/"+modelName
@@ -535,7 +533,7 @@ def gridlabdImport(owner):
 		if file.endswith(".glm") or file.endswith(".std") or file.endswith(".seq"):
 			os.remove(path+"/"+file)
 	# Save .glm file to model folder
-	glm.save(os.path.join(app.config['UPLOAD_FOLDER'],feederName+'.glm'))
+	glm.save(os.path.join("data/Model/"+owner+"/"+modelName,feederName+'.glm'))
 	with open("data/Model/"+owner+"/"+modelName+'/'+feederName+'.glm') as glmFile:
 		glmString = glmFile.read()
 	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
@@ -660,11 +658,11 @@ def cymeImport(owner):
 	modelName = request.form.get("modelName","")
 	feederName = str(request.form.get("feederNameC",""))
 	feederNum = request.form.get("feederNum",1)
-	app.config['UPLOAD_FOLDER'] = "data/Model/"+owner+"/"+modelName
+	modelFolder = "data/Model/"+owner+"/"+modelName
 	mdbNetString, mdbEqString = map(lambda x: request.files[x], ["mdbNetFile", "mdbEqFile"])
 	# Saves .mdb files to model folder
-	mdbNetString.save(os.path.join(app.config['UPLOAD_FOLDER'],'mdbNetFile.mdb'))
-	mdbEqString.save(os.path.join(app.config['UPLOAD_FOLDER'],'mdbEqString.mdb'))
+	mdbNetString.save(os.path.join(modelFolder,'mdbNetFile.mdb'))
+	mdbEqString.save(os.path.join(modelFolder,'mdbEqString.mdb'))
 	if not os.path.isdir("data/Conversion/" + owner):
 		os.makedirs("data/Conversion/" + owner)
 	with open("data/Conversion/" + owner + "/" + feederName + ".json", "w+") as conFile:

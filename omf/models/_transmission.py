@@ -24,32 +24,6 @@ tooltip = "The transmission model imports, runs and visualizes MATPOWER transmis
 with open(pJoin(__metaModel__._myDir,modelName + ".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def renderTemplate(template, modelDir="", absolutePaths=False, datastoreNames={}):
-	''' Render the model template to an HTML string.
-	By default render a blank one for new input.
-	If modelDir is valid, render results post-model-run.
-	If absolutePaths, the HTML can be opened without a server. '''
-	try:
-		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
-		modelPath, modelName = pSplit(modelDir)
-		deepPath, user = pSplit(modelPath)
-		inJson["modelName"] = modelName
-		inJson["user"] = user
-		allInputData = json.dumps(inJson)
-	except IOError:
-		allInputData = None
-	try:
-		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
-	except IOError:
-		allOutputData = None
-	if absolutePaths:
-		# Parent of current folder.
-		pathPrefix = __metaModel__._omfDir
-	else:
-		pathPrefix = ""
-	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix, datastoreNames=datastoreNames, modelName=modelName)
-
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
@@ -248,7 +222,8 @@ def new(modelDir):
 		"model": "AC",
 		"tolerance": math.pow(10,-8),
 		"iteration": 10,
-		"genLimits": 0}
+		"genLimits": 0,
+		"modelType":modelName}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copy(pJoin(__metaModel__._omfDir,"static","SimpleNetwork.json"),pJoin(modelDir,"case9.omt"))
