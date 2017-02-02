@@ -103,7 +103,6 @@ def heavyProcessing(modelDir, inputDict):
 		tree[oldMax + 1] = {'omftype':'module','argument':'climate'}
 		tree[oldMax + 2] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC','tmyfile':'climate.tmy2'}
 		# tree[oldMax + 3] = {'object':'capacitor','control':'VOLT','phases':'ABCN','name':'CAPTEST','parent':'tm_1','capacitor_A':'0.10 MVAr','capacitor_B':'0.10 MVAr','capacitor_C':'0.10 MVAr','time_delay':'300.0','nominal_voltage':'2401.7771','voltage_set_high':'2350.0','voltage_set_low':'2340.0','switchA':'CLOSED','switchB':'CLOSED','switchC':'CLOSED','control_level':'INDIVIDUAL','phases_connected':'ABCN','dwell_time':'0.0','pt_phases':'ABCN'}
-		# print(tree)
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
 		feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
@@ -116,6 +115,13 @@ def heavyProcessing(modelDir, inputDict):
 		feeder.attachRecorders(tree, "TriplexLosses", None, None)
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
+
+		# Attach recorders and collectors for waterheaters
+		whRec = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'all_waterheaters_on.csv'}
+		whCol = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_power.mag)', 'interval':3600, 'file':'allWaterheatersPower.csv'}
+		tree[feeder.getMaxKey(tree)+1] = dict(whRec)
+		tree[feeder.getMaxKey(tree)+1] = dict(whCol)
+
 		# Attach recorders for system voltage map:
 		stub = {'object':'group_recorder', 'group':'"class=node"', 'property':'voltage_A', 'interval':3600, 'file':'aVoltDump.csv'}
 		for phase in ['A','B','C']:
