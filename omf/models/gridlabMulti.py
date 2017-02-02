@@ -73,7 +73,7 @@ def run(modelDir, inputDict):
 		if 'feederName' in key: 
 			inputDict[key] = inJson[key]
 			feederList.append(inJson[key])
-	print "feeders read:",feederList
+	# print "feeders read:", feederList
 	# Check whether model exist or not
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
@@ -182,7 +182,7 @@ def runForeground(modelDir, inputDict):
 					for line in f:
 						if "\"objectType\": \"triplex_meter\"" in line:
 							count+=1
-				print "count=", count
+				# print "count=", count
 				cleanOut['allMeterVoltages']['triplexMeterCount'] = float(count)
 				# Power Consumption
 				cleanOut['Consumption'] = {}
@@ -413,88 +413,40 @@ def new(modelDir):
 	defaultInputs = {
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName1": "Olin Barre GH 50Perc Solar",
+		"feederName1": "Simple Market System",
+		"feederName2": "Simple Market System Indy Solar",
 		"modelType": modelName,
 		"zipCode": "64735",
 		"simLength": "24",
 		"runTime": ""}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
-	try:
-		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
-	except:
-		return False
+	feederKeys = [key for key in defaultInputs if key.startswith("feederName")]
+	for key in feederKeys:
+		try:
+			shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs[key]+'.omd'), pJoin(modelDir, defaultInputs[key] + '.omd'))
+		except:
+			return False
 	return creationCode
 
 def _tests():
 	# Variables
-	inData = {
-		"simStartDate": "2012-04-01",
-		"simLengthUnits": "hours",
-		# "feederName1": "Simple Market System",
-		# "feederName2": "Simple Market System BROKEN", 		# configure error
-		# "feederName3": "13 Node Embedded DO NOT SAVE",		# feeder error
-		# "feederName4": "13 Node Ref Feeder Flat",
-		# "feederName5": "13 Node Ref Feeder Laid Out ZERO CVR",
-		# "feederName6": "13 Node Ref Feeder Laid Out",
-		# "feederName7": "ABEC Columbia",
-		# "feederName8": "ABEC Frank LO Houses",				# feeder error
-		# "feederName9": "ABEC Frank LO",
-		# # "feederName10": "ACEC Geo",
-		# "feederName11": "Battery 13 Node Centralized",
-		# "feederName12": "Battery 13 Node Distributed",
-		# "feederName13": "DEC Red Base",
-		# "feederName14": "DEC Red Battery",
-		# "feederName15": "DEC Red CVR",
-		# "feederName16": "DEC Red DG",
-		# "feederName17": "INEC Renoir",
-		# "feederName18": "Olin Barre CVR Base",
-		# "feederName19": "Olin Barre Geo",
-		# "feederName20": "Olin Barre GH 05Perc Solar",
-		# "feederName21": "Olin Barre GH 20Perc Solar",
-		# "feederName22": "Olin Barre GH 50Perc Solar",
-		# "feederName23": "Olin Barre GH 90Perc Solar",
-		# "feederName24": "Olin Barre GH Battery",
-		# "feederName25": "Olin Barre GH Wind",
-		# "feederName26": "Olin Barre GH",
-		# "feederName27": "Olin Barre", 						# feeder error
-		"feederName28": "PNNL Taxonomy Feeder 1",
-		"feederName29": "Simple Market System Comm Solar",
-		"feederName30": "Simple Market System Indy Solar",
-		"feederName31": "Simple Market System",
-		# "feederName": "Battery 13 Node Distributed",
-		"modelType": modelName,
-		"zipCode": "64735",
-		"simLength": "24",
-		"runTime": ""}
-	workDir = pJoin(__metaModel__._omfDir,"data","Model")
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated gridlabMulti Testing")
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
 	except:
-		# No previous test results.
-		pass
-	try:
-		os.makedirs(modelLoc)
-	except: pass
-	for key in inData:
-		if 'feederName' in key:
-			try: 
-				shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","publicFeeders", inData[key]+'.omd'),pJoin(modelLoc,inData[key]+'.omd'))
-			except: 
-				shutil.copyfile(pJoin(__metaModel__._omfDir,"scratch","adminFeeders", inData[key]+'.omd'),pJoin(modelLoc,inData[key]+'.omd'))
+		pass # No previous test results.
+	# Create new model.
+	new(modelLoc)
 	# No-input template.
 	renderAndShow(template, modelName, modelDir=modelLoc)
 	# Run the model.
-	# run(modelLoc, inData)
-	runForeground(modelLoc, inData)
+	runForeground(modelLoc, json.load(open(pJoin(modelLoc,"allInputData.json"))))
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)
 	# Show the output.
 	renderAndShow(template, modelName, modelDir=modelLoc)
-	# Delete the model.
-	# shutil.rmtree(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
