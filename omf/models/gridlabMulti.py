@@ -25,44 +25,6 @@ tooltip = "The gridlabMulti model allows you to run multiple instances of GridLA
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def renderTemplate(template, modelType, modelDir="", absolutePaths=False, datastoreNames={}):
-	''' Render the model template to an HTML string.
-	By default render a blank one for new input.
-	If modelDir is valid, render results post-model-run.
-	If absolutePaths, the HTML can be opened without a server. '''
-	try:
-		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
-		modelPath, modelName = pSplit(modelDir)
-		deepPath, user = pSplit(modelPath)
-		inJson["modelName"] = modelName
-		inJson["user"] = user
-		allInputData = json.dumps(inJson)
-	except IOError:
-		allInputData = None
-	try:
-		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
-	except IOError:
-		allOutputData = None
-	if absolutePaths:
-		# Parent of current folder.
-		pathPrefix = __metaModel__._omfDir
-	else:
-		pathPrefix = ""
-	feederList = []
-	feederIDs = []
-	try:
-		inputDict = json.load(open(pJoin(modelDir, "allInputData.json")))
-		for key in ["feederName1", "feederName2", "feederName3", "feederName4", "feederName5"]:
-			feederName = inputDict.get(key,'')
-			if feederName != '':
-				feederIDs.append(key)
-				feederList.append(feederName)
-	except IOError:
-		pass
-	return template.render(allInputData=allInputData,
-		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
-		datastoreNames=datastoreNames, feederIDs = feederIDs, feederList = feederList, modelName=modelName)
-
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
 	This function will return fast, but results take a while to hit the file system.'''
