@@ -1,8 +1,10 @@
+# Note: While trying to debug, I re-encrypted most of the files. The files in the doNotConvert... folder 
+# are now encrypted a different way than the ones in the encryptedFiles folder. Because of this they will not decrypt
 import os, sys, crypto, shutil
 from os.path import join as pJoin
 
 _myDir = os.path.dirname(os.path.abspath(__file__))
-_cryptoPath = pJoin(_myDir,"crypto")
+_cryptoPath = _myDir
 sys.path.insert(0,_cryptoPath)
 
 #  # CYME TO GRIDLAB TESTS
@@ -61,7 +63,7 @@ sys.path.insert(0,_cryptoPath)
 
 # MILSOFT WINDMIL TO GRIDLAB TESTS
 def milsoftToGridlabTests(files,keepFiles=False):
-	openPrefix = './crypto/decryptedDataFiles'
+	openPrefix = './decryptedDataFiles'
 	outPrefix = './milToGridlabTests/'
 	import os, json, traceback, shutil
 	from omf.solvers import gridlabd
@@ -88,26 +90,38 @@ def milsoftToGridlabTests(files,keepFiles=False):
 			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
 				outFile.write(feeder.sortedWrite(outGlm))
 			print 'WROTE GLM FOR', stdString
+			with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
+				resultsFile.write('WROTE GLM FOR ' + stdString + "\n")
 			try:
 				# Draw the GLM.
 				myGraph = feeder.treeToNxGraph(outGlm)
 				feeder.latLonNxGraph(myGraph, neatoLayout=False)
 				plt.savefig(outPrefix + stdString.replace('.std','.png'))
 				print 'DREW GLM OF', stdString
+				with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
+					resultsFile.write('DREW GLM FOR ' + stdString + "\n")
 			except:
 				exceptionCount += 1
 				print 'FAILED DRAWING', stdString
+				with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
+					resultsFile.write('FAILED DRAWING ' + stdString + "\n")
 			try:
 				# Run powerflow on the GLM. HACK:blank attachments for now.
 				output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
-				with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
+				with open(outPrefix + stdString.replace('.std','.json'),'a') as outFile:
 					json.dump(output, outFile, indent=4)
 				print 'RAN GRIDLAB ON', stdString
+				with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
+					resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
 			except:
 				exceptionCount += 1
 				print 'POWERFLOW FAILED', stdString
+				with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
+					resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
 		except:
 			print 'FAILED CONVERTING', stdString
+			with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
+					resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
 			exceptionCount += 1
 			traceback.print_exc()
 	if not keepFiles:
@@ -115,7 +129,7 @@ def milsoftToGridlabTests(files,keepFiles=False):
 	return exceptionCount
 
 
-user = 'UCS'
+user = 'convTest'
 key = crypto.getKey(_cryptoPath,user)
 # inFilesFolder = pJoin(_cryptoPath,"inFiles")
 encryptedFilesFolder = pJoin(_cryptoPath,"encryptedFiles")
@@ -169,7 +183,7 @@ for group in groupedFiles:
 			if item.endswith('.std'):
 				array.append(item)
 				for item in group:
-					if item.endswith('.seq'):	
+					if item.endswith('.seq'):
 						array.append(item)
 						arrays.append(array)
 	else:
