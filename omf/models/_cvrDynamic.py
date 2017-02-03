@@ -1,13 +1,13 @@
 ''' Calculate CVR impacts using a targetted set of dynamic loadflows. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess
+import json, os, sys, tempfile, webbrowser, time, shutil, subprocess
 import math, re, traceback, csv, calendar, random
 import multiprocessing
 from copy import deepcopy
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
-from datetime import datetime, date, time, timedelta
+from datetime import datetime as dt, timedelta
 from omf.models import __metaModel__
 from __metaModel__ import *
 
@@ -81,7 +81,7 @@ def run(modelDir, inData):
 	This function will return fast, but results take a while to hit the file system.'''
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
-		inData["created"] = str(datetime.datetime.now())
+		inData["created"] = str(dt.now())
 	with open(pJoin(modelDir,'allInputData.json')) as inputFile:
 		feederName = json.load(inputFile).get('feederName1','feeder1')
 	inData["feederName1"] = feederName
@@ -103,7 +103,7 @@ def runForeground(modelDir,inData):
 	'''This reads a glm file, changes the method of powerflow and reruns'''
 	print "STARTING TO RUN", modelDir
 	try:
-		startTime = datetime.datetime.now()
+		startTime = dt.now()
 		if not os.path.isdir(modelDir):
 			os.makedirs(modelDir)
 			inData["created"] = str(startTime)
@@ -430,7 +430,7 @@ def runForeground(modelDir,inData):
 			'September':'Fall','October':'Fall','November':'Fall','December':'Winter'}
 		#calculate the month and hour of simulation start and month and hour of simulation end
 		simStartTimestamp = simStartDate + " 00:00:00"
-		simFormattedDate = datetime.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S")
+		simFormattedDate = dt.strptime(simStartTimestamp,"%Y-%m-%d %H:%M:%S")
 		simStartMonthNum = int(simFormattedDate.strftime('%m'))
 		simstartMonth = monthNames[simStartMonthNum-1]
 		simStartDay = int(simFormattedDate.strftime('%d'))
@@ -540,8 +540,8 @@ def runForeground(modelDir,inData):
 					(date,val) = line.split(',')
 					scadaDates.append(str(date))
 			simFormattedEndDate = simFormattedDate + timedelta(hours=HOURS)
-			scadaStartDate = datetime.strptime(scadaDates[0].split(' PST')[0],"%Y-%m-%d %H:%M:%S")
-			scadaEndDate = datetime.strptime(scadaDates[len(scadaDates)-1].split(' PST')[0],"%Y-%m-%d %H:%M:%S")
+			scadaStartDate = dt.strptime(scadaDates[0].split(' PST')[0],"%Y-%m-%d %H:%M:%S")
+			scadaEndDate = dt.strptime(scadaDates[len(scadaDates)-1].split(' PST')[0],"%Y-%m-%d %H:%M:%S")
 			beginRange = (scadaStartDate - simFormattedDate).total_seconds()
 			endRange = (scadaEndDate - simFormattedEndDate).total_seconds()
 			# Check if houses exist.
@@ -560,7 +560,7 @@ def runForeground(modelDir,inData):
 		except:
 			pass
 		# Update the runTime in the input file.
-		endTime = datetime.now()
+		endTime = dt.now()
 		inData["runTime"] = str(timedelta(seconds=int((endTime - startTime).total_seconds())))
 		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
 			json.dump(inData, inFile, indent=4)
