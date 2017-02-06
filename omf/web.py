@@ -274,7 +274,7 @@ def showModel(owner, modelName):
 		with open(modelDir + "/allInputData.json") as inJson:
 			modelType = json.load(inJson).get("modelType","")
 		thisModel = getattr(models, modelType)
-		return thisModel.renderTemplate(thisModel.template, thisModel.modelName, modelDir=modelDir, absolutePaths=False, datastoreNames=getDataNames())
+		return thisModel.renderTemplate(modelDir, absolutePaths=False, datastoreNames=getDataNames())
 	else:
 		return redirect("/")
 

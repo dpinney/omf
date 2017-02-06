@@ -319,7 +319,7 @@ def new(modelDir):
 
 def _debugging():
 	# Location
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated pvWatts Testing")
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
@@ -329,14 +329,11 @@ def _debugging():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(template, modelName, modelDir=modelLoc)
+	renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template, modelName, modelDir=modelLoc)
- 	# # Delete the model.
- 	# time.sleep(2)
- 	# shutil.rmtree(modelLoc)
+	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_debugging()

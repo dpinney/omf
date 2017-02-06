@@ -1,6 +1,6 @@
 """ Common functions for all models """
 
-import json, os, sys, tempfile, webbrowser, math, shutil, datetime
+import json, os, sys, tempfile, webbrowser, math, shutil, datetime, omf
 from os.path import join as pJoin
 from os.path import split as pSplit
 
@@ -8,7 +8,7 @@ from os.path import split as pSplit
 _myDir = os.path.dirname(os.path.abspath(__file__))
 _omfDir = os.path.dirname(_myDir)
 
-def renderTemplate(template, modelType, modelDir="", absolutePaths=False, datastoreNames={}):
+def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
 	''' Render the model template to an HTML string.
 	By default render a blank one for new input.
 	If modelDir is valid, render results post-model-run.
@@ -19,6 +19,8 @@ def renderTemplate(template, modelType, modelDir="", absolutePaths=False, datast
 		deepPath, user = pSplit(modelPath)
 		inJson["modelName"] = modelName
 		inJson["user"] = user
+		modelType = inJson["modelType"]
+		template = getattr(omf.models, modelType).template
 		allInputData = json.dumps(inJson)
 	except IOError:
 		allInputData = None
@@ -35,10 +37,10 @@ def renderTemplate(template, modelType, modelDir="", absolutePaths=False, datast
 		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
 		datastoreNames=datastoreNames, modelName=modelType)
 
-def renderAndShow(template, modelName, modelDir="", datastoreNames={}):
+def renderAndShow(modelDir, datastoreNames={}):
 	''' Render and open a template (blank or with output) in a local browser. '''
 	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
-		temp.write(renderTemplate(template, modelName, modelDir=modelDir, absolutePaths=True))
+		temp.write(renderTemplate(modelDir, absolutePaths=True))
 		temp.flush()
 		webbrowser.open("file://" + temp.name)
 

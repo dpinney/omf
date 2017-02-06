@@ -243,11 +243,11 @@ def _simpleTest():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(template, modelName, modelDir=modelLoc)
+	renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template, modelName, modelDir=modelLoc)
+	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_simpleTest	()

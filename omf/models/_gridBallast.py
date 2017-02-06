@@ -488,7 +488,7 @@ def _tests():
 	# Run the model.
 	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(template, modelName, modelDir=modelLoc)
+	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
