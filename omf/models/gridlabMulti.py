@@ -401,14 +401,14 @@ def _tests():
 	# Create new model.
 	new(modelLoc)
 	# No-input template.
-	renderAndShow(template, modelName, modelDir=modelLoc)
+	renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc, json.load(open(pJoin(modelLoc,"allInputData.json"))))
 	## Cancel the model.
 	# time.sleep(2)
 	# cancel(modelLoc)
 	# Show the output.
-	renderAndShow(template, modelName, modelDir=modelLoc)
+	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
