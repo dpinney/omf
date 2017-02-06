@@ -121,11 +121,25 @@ def heavyProcessing(modelDir, inputDict):
 		tree[feeder.getMaxKey(tree)+1] = dict(whRec)
 		tree[feeder.getMaxKey(tree)+1] = dict(whCol)
 		# Attach recorders for system voltage map:
-		stub = {'object':'group_recorder', 'group':'"class=node"', 'property':'voltage_A', 'interval':3600, 'file':'aVoltDump.csv'}
+		stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':3600}
 		for phase in ['A','B','C']:
 			copyStub = dict(stub)
 			copyStub['property'] = 'voltage_' + phase
 			copyStub['file'] = phase.lower() + 'VoltDump.csv'
+			tree[feeder.getMaxKey(tree) + 1] = copyStub
+		# Attach recorders for system voltage map, triplex:
+		stub = {'object':'group_recorder', 'group':'"class=triplex_node"', 'interval':3600}
+		for phase in ['1','2']:
+			copyStub = dict(stub)
+			copyStub['property'] = 'voltage_' + phase
+			copyStub['file'] = phase.lower() + 'nVoltDump.csv'
+			tree[feeder.getMaxKey(tree) + 1] = copyStub
+		# And get meters for system voltage map:
+		stub = {'object':'group_recorder', 'group':'"class=triplex_meter"', 'interval':3600}
+		for phase in ['1','2']:
+			copyStub = dict(stub)
+			copyStub['property'] = 'voltage_' + phase
+			copyStub['file'] = phase.lower() + 'mVoltDump.csv'
 			tree[feeder.getMaxKey(tree) + 1] = copyStub
 		feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
 			simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
@@ -332,10 +346,13 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 	for step, stamp in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
 		# Build voltage map.
 		nodeVolts[step] = {}
-		for nodeName in [x for x in rawOut['aVoltDump.csv'].keys() if x != '# timestamp']:
+		for nodeName in [x for x in rawOut['aVoltDump.csv'].keys() + rawOut['1nVoltDump.csv'].keys() + rawOut['1mVoltDump.csv'].keys() if x != '# timestamp']:
 			allVolts = []
-			for phase in ['a','b','c']:
-				voltStep = rawOut[phase + 'VoltDump.csv'][nodeName][step]
+			for phase in ['a','b','c','1n','2n','1m','2m']:
+				try:
+					voltStep = rawOut[phase + 'VoltDump.csv'][nodeName][step]
+				except:
+					continue # the nodeName doesn't have the phase we're looking for.
 				# HACK: Gridlab complex number format sometimes uses i, sometimes j, sometimes d. WTF?
 				if type(voltStep) is str: voltStep = voltStep.replace('i','j')
 				v = complex(voltStep)
