@@ -115,13 +115,11 @@ def heavyProcessing(modelDir, inputDict):
 		feeder.attachRecorders(tree, "TriplexLosses", None, None)
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
-
 		# Attach recorders and collectors for waterheaters
-		whRec = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'all_waterheaters_on.csv'}
+		whRec = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheatersOn.csv'}
 		whCol = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_power.mag)', 'interval':3600, 'file':'allWaterheatersPower.csv'}
 		tree[feeder.getMaxKey(tree)+1] = dict(whRec)
 		tree[feeder.getMaxKey(tree)+1] = dict(whCol)
-
 		# Attach recorders for system voltage map:
 		stub = {'object':'group_recorder', 'group':'"class=node"', 'property':'voltage_A', 'interval':3600, 'file':'aVoltDump.csv'}
 		for phase in ['A','B','C']:
@@ -254,6 +252,14 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['Cap1B'] = rawOut[key]['switchB']
 				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
 				cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
+
+		if 'allWaterheatersOn.csv' in rawOut:
+			cleanOut['allWaterheatersOn'] = {}
+			# cleanOut['allWaterheatersOn'] = rawOut['allWaterheatersOn.csv']
+			for key in rawOut['allWaterheatersOn.csv']:
+				if key.startswith('waterheater'):
+					cleanOut['allWaterheatersOn'][key] = rawOut['allWaterheatersOn.csv'][key]
+
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 		latPerc = 1.0*len(latKeys)/len(tree)

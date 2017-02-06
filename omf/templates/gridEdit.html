@@ -5,7 +5,6 @@
 	<script type="text/javascript" src="/static/jquery-1.9.1.js"></script>
 	<link rel="stylesheet" href="/static/omf.css" />
 	<link rel="shortcut icon" href="/static/favicon.ico" />
-	<link rel="stylesheet" type="text/css" href="/static/gridEdit.css"/>
 	<style>
 		div#menuLeft{max-height:40px;float:left;font-size:medium;color:white;margin:-5px 0 0 15px;max-width:430px;}
 		div#menuRight{height:40px;font-size:medium;color:white;float:right;}
@@ -258,7 +257,6 @@
 				<li><a href="javascript:zoomReset();">Zoom Reset</a></li>
 				<li><a href="javascript:staticLoadsToHouses();unsavedChanges=true;">Static Loads to Houses</a></li>
 				<li><a href="javascript:solarAdding();unsavedChanges=true;">Solar at Meters</a></li>
-				<!-- <li><a href="javascript:xAty('solar','triplex_meter',1);unsavedChanges=true;">Solar at Meters</a></li> -->
 				<li><a id='scadaLoad' href='javascript:showModal("scadaLoadshapes");'>Scada Loadshapes...</a></li>
 				<li><a href='javascript:showModal("findModal");'>Find...</a></li>
 				<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
@@ -1992,7 +1990,7 @@ function solarAdding() {
 			for (; i < tkeys.length && i < limit; i++) {
 				index = tkeys[i]
 				if (tree[index].hasOwnProperty('object') && tree[index]['object'] == 'triplex_meter') {
-					if (Math.random() < (solarAddingPercentage)) {
+					if (Math.random() < solarAddingPercentage) {
 						newInverter = makeNewInverter(tree[index]['phases'])
 						newPanels = newRandomPanels()
 						newChildAtLocation(newInverter, index)
@@ -2041,20 +2039,23 @@ function solarAdding() {
  * General Function to Add Components
  */
 function addXatY(componentName, attachType, perc) {
-	
-	if ( compDict.hasOwnProperty(componentName) ) {
-		newComp = {}
-		newComp = compDict[componentName]
-		treeNewIndex = nextTreeKey()
-		newComp['name'] = componentName + treeNewIndex
-	}
-	for (var i = 0, tkeys = Object.keys(tree), limit = i + 100; i < tkeys.length && i < limit; i++) {
-		index = tkeys[i]
-		if ( tree[index].hasOwnProperty('object') && tree[index]['object'] == attachType ) {
-			newChildAtLocation(newComp, index)
-			redraw()
+
+	if ( components.hasOwnProperty(componentName) ) {
+		// treeNewIndex = nextTreeKey()
+		// newComp['name'] = componentName + treeNewIndex
+
+		for (var key in tree) {
+			if (tree[key].hasOwnProperty('object') && tree[key]['object'] == attachType) {
+				if (Math.random() < perc) {
+					var newComp = {}
+					newComp = components[componentName]
+					newChildAtLocation(newComp, key)
+					redraw()
+				}
+			}
 		}
-	}
+
+	} else {return}
 
 }
 
