@@ -116,12 +116,17 @@ def heavyProcessing(modelDir, inputDict):
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
 
+
 		# Attach recorder for waterheaters on/off
-		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheatersOn.csv'}
+		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheaterOn.csv'}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
-		# Attach collector for total waterheaters load
-		stub = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_load)', 'interval':3600, 'file':'allWaterheaterLoads.csv'}
+		# Attach recorder for waterheater tank temperatures
+		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'temperature', 'interval':3600, 'file':'allWaterheaterTemp.csv'}
+		copyStub = dict(stub)
+		tree[feeder.getMaxKey(tree)+1] = copyStub
+		# Attach collector for total waterheater loads
+		stub = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_load)', 'interval':3600, 'file':'allWaterheaterLoad.csv'}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 		# Attach collector for total network load
@@ -129,6 +134,7 @@ def heavyProcessing(modelDir, inputDict):
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 		
+
 		# Attach recorders for system voltage map:
 		stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':3600}
 		for phase in ['A','B','C']:
@@ -278,14 +284,19 @@ def heavyProcessing(modelDir, inputDict):
 
 
 		# Copy waterheater measurements to allOutputData.json
-		if 'allWaterheatersOn.csv' in rawOut:
-			cleanOut['allWaterheatersOn'] = {}
-			for key in rawOut['allWaterheatersOn.csv']:
+		if 'allWaterheaterOn.csv' in rawOut:
+			cleanOut['allWaterheaterOn'] = {}
+			for key in rawOut['allWaterheaterOn.csv']:
 				if key.startswith('waterheater'):
-					cleanOut['allWaterheatersOn'][key] = rawOut['allWaterheatersOn.csv'][key]
-		# if 'allWaterheaterLoads.csv' in rawOut:
-			cleanOut['allWaterheaterLoads'] = {}
-			cleanOut['allWaterheaterLoads'] = rawOut['allWaterheaterLoads.csv']['sum(actual_load)']
+					cleanOut['allWaterheaterOn'][key] = rawOut['allWaterheaterOn.csv'][key]
+		if 'allWaterheaterTemp.csv' in rawOut:
+			cleanOut['allWaterheaterTemp'] = {}
+			for key in rawOut['allWaterheaterTemp.csv']:
+				if key.startswith('waterheater'):
+					cleanOut['allWaterheaterTemp'][key] = rawOut['allWaterheaterTemp.csv'][key]
+		if 'allWaterheaterLoad.csv' in rawOut:
+			cleanOut['allWaterheaterLoad'] = {}
+			cleanOut['allWaterheaterLoad'] = rawOut['allWaterheaterLoad.csv']['sum(actual_load)']
 		# Copy SUM(allMeterPower) to allOutputData.json
 		if 'allMeterPower.csv' in rawOut:
 			cleanOut['allMeterPower'] = {}
@@ -304,7 +315,7 @@ def heavyProcessing(modelDir, inputDict):
 		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in newTimeStamps]
 		eventEndIndex =  dateTimeStamps.index(eventEnd)
 		# Waterheaters On/Off calculations
-		whOn = cleanOut['allWaterheatersOn']
+		whOn = cleanOut['allWaterheaterOn']
 		whOnList = whOn.values()
 		whOnZip = zip(*whOnList)
 		whOnSum = [sum(x) for x in whOnZip]
@@ -320,7 +331,7 @@ def heavyProcessing(modelDir, inputDict):
 		except:
 			pass
 		# Availability Magnitude
-		availMag = cleanOut['allWaterheaterLoads']
+		availMag = cleanOut['allWaterheaterLoad']
 		# Reserve Magnitude Target
 		totalNetLoad = cleanOut['allMeterPower']
 		loadZip = zip(availMag,totalNetLoad)
@@ -328,7 +339,6 @@ def heavyProcessing(modelDir, inputDict):
 		# Availability
 		notAvail = availMag.count(0) / (len(timeStamps)-2)
 		avail = (1-notAvail)*100
-		
 
 
 		# What percentage of our keys have lat lon data?

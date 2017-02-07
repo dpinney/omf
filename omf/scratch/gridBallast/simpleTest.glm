@@ -425,12 +425,19 @@ object group_recorder {
 	file allWaterheatersOn.csv;
 };
 
+object group_recorder {
+	group "class=waterheater";
+	interval 3600;
+	property temperature;
+	file allTankTemp.csv;
+};
+
 object collector {
 	interval 3600;
 	limit 0;
 	group class=waterheater;
 	property sum(actual_load);
-	file allWaterheaterLoad.csv;
+	file allWaterheaterLoads.csv;
 };
 
 object collector {
