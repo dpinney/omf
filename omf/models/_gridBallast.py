@@ -413,7 +413,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 	for step, stamp in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
 		# Build voltage map.
 		nodeVolts[step] = {}
-		for nodeName in [x for x in rawOut['aVoltDump.csv'].keys() + rawOut['1nVoltDump.csv'].keys() + rawOut['1mVoltDump.csv'].keys() if x != '# timestamp']:
+		for nodeName in [x for x in rawOut.get('aVoltDump.csv',{}).keys() + rawOut.get('1nVoltDump.csv',{}).keys() + rawOut.get('1mVoltDump.csv',{}).keys() if x != '# timestamp']:
 			allVolts = []
 			for phase in ['a','b','c','1n','2n','1m','2m']:
 				try:
@@ -541,7 +541,7 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		"feederName1": "Simple Market System",
+		"feederName1": "Olin Barre GH", #Geo
 		"simStartDate": "2012-04-01",
 		"simLength": "24",
 		"simLengthUnits": "hours", #minutes
@@ -572,7 +572,7 @@ def _tests():
 	# Run the model.
 	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	# renderAndShow(modelLoc)
+	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
