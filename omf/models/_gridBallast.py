@@ -115,11 +115,16 @@ def heavyProcessing(modelDir, inputDict):
 		feeder.attachRecorders(tree, "TriplexLosses", None, None)
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
-		# Attach recorders and collectors for waterheaters
-		whRec = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheatersOn.csv'}
-		whCol = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_power.mag)', 'interval':3600, 'file':'allWaterheatersPower.csv'}
-		tree[feeder.getMaxKey(tree)+1] = dict(whRec)
-		tree[feeder.getMaxKey(tree)+1] = dict(whCol)
+
+		# Attach recorder for waterheaters on/off
+		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheatersOn.csv'}
+		copyStub = dict(stub)
+		tree[feeder.getMaxKey(tree)+1] = copyStub
+		#Attach collector for total waterheaters load
+		stub = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_power.mag)', 'interval':3600, 'file':'allWaterheatersPower.csv'}
+		copyStub = dict(stub)
+		tree[feeder.getMaxKey(tree)+1] = copyStub
+		
 		# Attach recorders for system voltage map:
 		stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':3600}
 		for phase in ['A','B','C']:
@@ -267,12 +272,38 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
 				cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
 
+		# Copy waterheater measurements to allOutputData.json
 		if 'allWaterheatersOn.csv' in rawOut:
 			cleanOut['allWaterheatersOn'] = {}
-			# cleanOut['allWaterheatersOn'] = rawOut['allWaterheatersOn.csv']
 			for key in rawOut['allWaterheatersOn.csv']:
 				if key.startswith('waterheater'):
 					cleanOut['allWaterheatersOn'][key] = rawOut['allWaterheatersOn.csv'][key]
+		
+		# Event calculations
+		eventTime = inputDict['eventTime']
+		eventLength = inputDict['eventLength']
+		eventLength = eventLength.split(':')
+		eventDuration = datetime.timedelta(hours=int(eventLength[0]), minutes=int(eventLength[1]))
+		eventStart = datetime.datetime.strptime(eventTime, '%Y-%m-%d %H:%M')
+		eventEnd = eventStart + eventDuration
+		# Drop seconds and timezone from timeStamps
+		timeStamps = cleanOut['timeStamps'] 
+		newTimeStamps = [x[:16] for x in timeStamps]
+		# Convert timeStamps string to date
+		dateTimeStamps = [ datetime.datetime.strptime(x, '%Y-%m-%d %H:%M') for x in newTimeStamps ]
+		eventEndIndex =  dateTimeStamps.index(eventEnd)
+
+		# Waterheater calculations
+		whOn = cleanOut['allWaterheatersOn']
+		whOnList = whOn.values()
+		whOnZip = zip(*whOnList)
+		whOnSum = [sum(x) for x in whOnZip]
+		anyOn = [x > 0 for x in whOnSum]
+		try:
+			tRecoveryIndex = anyOn.index(True, eventEndIndex)
+			tRecovery = timeStamps[tRecoveryIndex]
+		except:
+			pass
 
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
@@ -505,7 +536,7 @@ def _tests():
 	# Run the model.
 	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(modelLoc)
+	# renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_tests()
