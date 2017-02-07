@@ -278,7 +278,6 @@ def heavyProcessing(modelDir, inputDict):
 			for key in rawOut['allWaterheatersOn.csv']:
 				if key.startswith('waterheater'):
 					cleanOut['allWaterheatersOn'][key] = rawOut['allWaterheatersOn.csv'][key]
-		
 		# Event calculations
 		eventTime = inputDict['eventTime']
 		eventLength = inputDict['eventLength']
@@ -286,14 +285,14 @@ def heavyProcessing(modelDir, inputDict):
 		eventDuration = datetime.timedelta(hours=int(eventLength[0]), minutes=int(eventLength[1]))
 		eventStart = datetime.datetime.strptime(eventTime, '%Y-%m-%d %H:%M')
 		eventEnd = eventStart + eventDuration
-		# Drop seconds and timezone from timeStamps
+		# Drop timezone from timeStamps
 		timeStamps = cleanOut['timeStamps'] 
-		newTimeStamps = [x[:16] for x in timeStamps]
+		newTimeStamps = [x[:19] for x in timeStamps]
 		# Convert timeStamps string to date
-		dateTimeStamps = [ datetime.datetime.strptime(x, '%Y-%m-%d %H:%M') for x in newTimeStamps ]
+		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in newTimeStamps]
+		print dateTimeStamps
 		eventEndIndex =  dateTimeStamps.index(eventEnd)
-
-		# Waterheater calculations
+		# Waterheaters on/off calculations
 		whOn = cleanOut['allWaterheatersOn']
 		whOnList = whOn.values()
 		whOnZip = zip(*whOnList)
@@ -301,9 +300,15 @@ def heavyProcessing(modelDir, inputDict):
 		anyOn = [x > 0 for x in whOnSum]
 		try:
 			tRecoveryIndex = anyOn.index(True, eventEndIndex)
-			tRecovery = timeStamps[tRecoveryIndex]
+			tRecovery = dateTimeStamps[tRecoveryIndex]
 		except:
 			pass
+		# Waterheaters off duration
+		try:
+			offDuration = tRecovery - eventStart
+		except:
+			pass
+
 
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
