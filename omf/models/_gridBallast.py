@@ -120,8 +120,12 @@ def heavyProcessing(modelDir, inputDict):
 		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheatersOn.csv'}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
-		#Attach collector for total waterheaters load
-		stub = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_power.mag)', 'interval':3600, 'file':'allWaterheatersPower.csv'}
+		# Attach collector for total waterheaters load
+		stub = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_load)', 'interval':3600, 'file':'allWaterheaterLoads.csv'}
+		copyStub = dict(stub)
+		tree[feeder.getMaxKey(tree)+1] = copyStub
+		# Attach collector for total network load
+		stub = {'object':'collector', 'group':'"class=triplex_meter"', 'property':'sum(measured_real_power)', 'interval':3600, 'file':'allMeterPower.csv'}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 		
@@ -272,12 +276,20 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
 				cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
 
+
 		# Copy waterheater measurements to allOutputData.json
 		if 'allWaterheatersOn.csv' in rawOut:
 			cleanOut['allWaterheatersOn'] = {}
 			for key in rawOut['allWaterheatersOn.csv']:
 				if key.startswith('waterheater'):
 					cleanOut['allWaterheatersOn'][key] = rawOut['allWaterheatersOn.csv'][key]
+		# if 'allWaterheaterLoads.csv' in rawOut:
+			cleanOut['allWaterheaterLoads'] = {}
+			cleanOut['allWaterheaterLoads'] = rawOut['allWaterheaterLoads.csv']['sum(actual_load)']
+		# Copy SUM(allMeterPower) to allOutputData.json
+		if 'allMeterPower.csv' in rawOut:
+			cleanOut['allMeterPower'] = {}
+			cleanOut['allMeterPower'] = rawOut['allMeterPower.csv']['sum(measured_real_power)']
 		# Event calculations
 		eventTime = inputDict['eventTime']
 		eventLength = inputDict['eventLength']
@@ -290,9 +302,8 @@ def heavyProcessing(modelDir, inputDict):
 		newTimeStamps = [x[:19] for x in timeStamps]
 		# Convert timeStamps string to date
 		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in newTimeStamps]
-		print dateTimeStamps
 		eventEndIndex =  dateTimeStamps.index(eventEnd)
-		# Waterheaters on/off calculations
+		# Waterheaters On/Off calculations
 		whOn = cleanOut['allWaterheatersOn']
 		whOnList = whOn.values()
 		whOnZip = zip(*whOnList)
@@ -303,11 +314,12 @@ def heavyProcessing(modelDir, inputDict):
 			tRecovery = dateTimeStamps[tRecoveryIndex]
 		except:
 			pass
-		# Waterheaters off duration
+		# Waterheaters Off-Duration
 		try:
 			offDuration = tRecovery - eventStart
 		except:
 			pass
+		# Availability Magnitude
 
 
 		# What percentage of our keys have lat lon data?
