@@ -418,33 +418,25 @@ object group_recorder {
 	file cVoltDump.csv;
 };
 
-object recorder {
-	interval 3600;
-	limit 0;
-	parent waterheater1;
-	property is_waterheater_on;
-	file waterheater1_on.csv;
-};
-
 object group_recorder {
 	group "class=waterheater";
 	interval 3600;
 	property is_waterheater_on;
-	file all_waterheaters_on.csv;
+	file allWaterheatersOn.csv;
 };
 
 object collector {
 	interval 3600;
 	limit 0;
 	group class=waterheater;
-	property sum(actual_power.mag);
-	file waterheaterActualPower.csv;
+	property sum(actual_load);
+	file allWaterheaterLoad.csv;
 };
 
 object collector {
 	interval 3600;
 	limit 0;
 	group class=triplex_meter;
-	property sum(measured_power.mag);
+	property sum(measured_real_power);
 	file allMeterPower.csv;
 };
