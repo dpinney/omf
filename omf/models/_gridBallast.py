@@ -320,6 +320,15 @@ def heavyProcessing(modelDir, inputDict):
 		except:
 			pass
 		# Availability Magnitude
+		availMag = cleanOut['allWaterheaterLoads']
+		# Reserve Magnitude Target
+		totalNetLoad = cleanOut['allMeterPower']
+		loadZip = zip(availMag,totalNetLoad)
+		resMagTargets = [x[0]/x[1] for x in loadZip]
+		# Availability
+		notAvail = availMag.count(0) / (len(timeStamps)-2)
+		avail = (1-notAvail)*100
+		
 
 
 		# What percentage of our keys have lat lon data?
