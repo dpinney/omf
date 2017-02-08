@@ -126,7 +126,7 @@ def heavyProcessing(modelDir, inputDict):
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 		# Attach collector for total waterheater loads
-		stub = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_load)', 'interval':3600, 'file':'allWaterheaterLoad.csv'}
+		stub = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_power.real)', 'interval':3600, 'file':'allWaterheaterPower.csv'}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 		# Attach collector for total network load
@@ -294,9 +294,9 @@ def heavyProcessing(modelDir, inputDict):
 			for key in rawOut['allWaterheaterTemp.csv']:
 				if key.startswith('waterheater'):
 					cleanOut['allWaterheaterTemp'][key] = rawOut['allWaterheaterTemp.csv'][key]
-		if 'allWaterheaterLoad.csv' in rawOut:
-			cleanOut['allWaterheaterLoad'] = {}
-			cleanOut['allWaterheaterLoad'] = rawOut['allWaterheaterLoad.csv']['sum(actual_load)']
+		if 'allWaterheaterPower.csv' in rawOut:
+			cleanOut['allWaterheaterPower'] = {}
+			cleanOut['allWaterheaterPower'] = rawOut['allWaterheaterPower.csv']['sum(actual_power.real)']
 		# Copy SUM(allMeterPower) to allOutputData.json
 		if 'allMeterPower.csv' in rawOut:
 			cleanOut['allMeterPower'] = {}
@@ -339,6 +339,15 @@ def heavyProcessing(modelDir, inputDict):
 		# Availability
 		notAvail = availMag.count(0) / (len(timeStamps)-2)
 		avail = (1-notAvail)*100
+		# Waterheater Temperature Drop calculations
+		whTemp = cleanOut['allWaterheaterTemp']
+		whTempList = whTemp.values()
+		whTempZip = zip(*whTempList)
+		for tank in whTempList:
+			QoS = 0
+			for i in tank:
+				if i < 170:
+					QoS += 1
 
 
 		# What percentage of our keys have lat lon data?
@@ -541,7 +550,8 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		"feederName1": "Simple Market System",
+		# "feederName1": "Simple Market System",
+		"feederName1": "superModel Tomorrow",
 		"simStartDate": "2012-04-01",
 		"simLength": "24",
 		"simLengthUnits": "hours", #minutes

@@ -2039,10 +2039,7 @@ function solarAdding() {
  * General Function to Add Components
  */
 function addXatY(componentName, attachType, perc) {
-
 	if ( components.hasOwnProperty(componentName) ) {
-		// treeNewIndex = nextTreeKey()
-		// newComp['name'] = componentName + treeNewIndex
 
 		for (var key in tree) {
 			if (tree[key].hasOwnProperty('object') && tree[key]['object'] == attachType) {
@@ -2055,8 +2052,10 @@ function addXatY(componentName, attachType, perc) {
 			}
 		}
 
-	} else {return}
-
+	} 
+	else {
+		return
+	}
 }
 
 //*********************************************
