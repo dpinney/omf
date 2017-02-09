@@ -283,22 +283,27 @@ def heavyProcessing(modelDir, inputDict):
 		# Print gridBallast outputs to allOutputData.json
 		cleanOut['gridBallast'] = {}
 		if 'allWaterheaterOn.csv' in rawOut:
-			cleanOut['allWaterheaterOn'] = {}
+			# cleanOut['allWaterheaterOn'] = {}
+			cleanOut['gridBallast']['waterheaterOn'] = {}
 			for key in rawOut['allWaterheaterOn.csv']:
 				if key.startswith('waterheater'):
-					cleanOut['allWaterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
+					# cleanOut['allWaterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
+					cleanOut['gridBallast']['waterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
 		if 'allWaterheaterTemp.csv' in rawOut:
-			cleanOut['allWaterheaterTemp'] = {}
+			# cleanOut['allWaterheaterTemp'] = {}
+			cleanOut['gridBallast']['waterheaterTemp'] = {}
 			for key in rawOut['allWaterheaterTemp.csv']:
 				if key.startswith('waterheater'):
-					cleanOut['allWaterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
+					# cleanOut['allWaterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
+					cleanOut['gridBallast']['waterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
 		if 'allWaterheaterLoad.csv' in rawOut:
-			cleanOut['allWaterheaterLoad'] = {}
-			cleanOut['allWaterheaterLoad'] = rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)']
-		# Copy SUM(allMeterPower) to allOutputData.json
+			# cleanOut['allWaterheaterLoad'] = {}
+			# cleanOut['allWaterheaterLoad'] = rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)']
+			cleanOut['gridBallast']['availabilityMagnitude'] = rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)']
 		if 'allMeterPower.csv' in rawOut:
-			cleanOut['allMeterPower'] = {}
-			cleanOut['allMeterPower'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
+			# cleanOut['allMeterPower'] = {}
+			# cleanOut['allMeterPower'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
+			cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
 		# Event calculations
 		eventTime = inputDict['eventTime']
 		eventLength = inputDict['eventLength']
@@ -306,29 +311,35 @@ def heavyProcessing(modelDir, inputDict):
 		eventDuration = datetime.timedelta(hours=int(eventLength[0]), minutes=int(eventLength[1]))
 		eventStart = datetime.datetime.strptime(eventTime, '%Y-%m-%d %H:%M')
 		eventEnd = eventStart + eventDuration
+		cleanOut['gridBallast']['eventStart'] = str(eventStart)
+		cleanOut['gridBallast']['eventEnd'] = str(eventEnd)
 		# Drop timezone from timeStamps
-		timeStamps = cleanOut['timeStamps'] 
-		newTimeStamps = [x[:19] for x in timeStamps]
+		# timeStamps = cleanOut['timeStamps'] 
+		# newTimeStamps = [x[:19] for x in timeStamps]
+		timeStamps = [x[:19] for x in cleanOut['timeStamps']]
 		# Convert timeStamps string to date
-		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in newTimeStamps]
-		eventEndIndex =  dateTimeStamps.index(eventEnd)
+		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in timeStamps]
+		eventEndIdx =  dateTimeStamps.index(eventEnd)
 		# Waterheaters On/Off calculations
-		whOn = cleanOut['allWaterheaterOn']
+		# whOn = cleanOut['allWaterheaterOn']
+		whOn = cleanOut['gridBallast']['waterheaterOn']
 		whOnList = whOn.values()
 		whOnZip = zip(*whOnList)
 		whOnSum = [sum(x) for x in whOnZip]
 		anyOn = [x > 0 for x in whOnSum]
 		# Recovery Time
-		tRecIndex = anyOn.index(True, eventEndIndex+1)
-		tRec = dateTimeStamps[tRecIndex]
+		tRecIdx = anyOn.index(True, eventEndIdx+1)
+		tRec = dateTimeStamps[tRecIdx]
 		cleanOut['gridBallast']['recoveryTime'] = str(tRec)
 		# Waterheaters Off-Duration
 		offDuration = tRec - eventStart
 		cleanOut['gridBallast']['offDuration'] = str(offDuration)
 		# Availability Magnitude
-		availMag = cleanOut['allWaterheaterLoad']
+		# availMag = cleanOut['allWaterheaterLoad']
+		availMag = cleanOut['gridBallast']['availabilityMagnitude']
 		# Reserve Magnitude Target (RMT)
-		totNetLoad = cleanOut['allMeterPower']
+		# totNetLoad = cleanOut['allMeterPower']
+		totNetLoad = cleanOut['gridBallast']['totalNetworkLoad']
 		# loadZip = zip(availMag,totNetLoad)
 		# rmt = [x[0]/x[1] for x in loadZip]
 		rmt = (1000*sum(availMag))/sum(totNetLoad)
@@ -345,15 +356,14 @@ def heavyProcessing(modelDir, inputDict):
 		avail = (1-notAvail)*100
 		cleanOut['gridBallast']['availability'] = avail
 		# Waterheater Temperature Drop calculations
-		whTemp = cleanOut['allWaterheaterTemp']
+		whTemp = cleanOut['gridBallast']['waterheaterTemp']
 		whTempList = whTemp.values()
 		whTempZip = zip(*whTempList)
-		for tank in whTempList:
-			QoS = 0
-			for i in tank:
-				if i < 170:
-					QoS += 1
-
+		whTempDrops = []
+		for time in whTempZip:
+			tempDrop = sum([t < 150 for t in time])
+			whTempDrops.append(tempDrop)
+		cleanOut['gridBallast']['waterheaterTempDrops'] = whTempDrops
 
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
