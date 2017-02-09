@@ -104,13 +104,10 @@
         <label>Simulation Start Date (YYYY-MM-DD)</label>
         <input type="text" id="simStartDate" name="simStartDate" required="required" pattern="^\d\d\d\d-\d\d-\d\d$"/>
       </div>
-
-      <!-- NEW GRIDBALLAST INPUTS -->
-      <!-- (%) pattern="^\d+\.?\d*?$" -->
-      <div class="shortInput">
+<!--       <div class="shortInput">
         <label>Solar Penetration (%)</label>
-        <input type="text" id="solarPenetration" name="solarPenetration" placeholder="N/A" disabled/>
-      </div>
+        <input type="text" id="solarPenetration" name="solarPenetration" pattern="^\d+\.?\d*?$" placeholder="N/A" disabled/>
+      </div> -->
       <hr>
       <div class="shortInput">
         <label>Water Heater GridBallast Penetration (%)</label>
@@ -142,7 +139,6 @@
         <label>Event Length (HH:MM)</label>
         <input type="text" id="eventLength" name="eventLength" required="required" pattern="^\d\d:\d\d$"/>
       </div>
-
       <div class="wideInput" style="text-align:right">
         <button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
         <button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
@@ -539,7 +535,6 @@
       <script>gebi("stdout").innerHTML = allOutputData.stdout</script>
     </div>
 
-    <!-- NEW OUTPUTS -->
     <p class="reportTitle postRun">Distribution Quality of Service <a target="_self" class="toggle">Hide / Show</a></p>
     <div id="serviceQualityReport" class="tightContent postRun">
       <div id="serviceQualityChart"></div>
@@ -547,7 +542,6 @@
         var eventStart = new Date(allInputData.eventTime)
         var eventLength = allInputData.eventLength.split(':')
         var eventEnd = new Date(eventStart.getTime() + (3600*eventLength[0] + 60*eventLength[1]) * 1000)
-        var tRecovery = new Date(eventEnd.getTime() + 3600000)
 
         var simStart = new Date(allInputData.simStartDate)
 
@@ -588,6 +582,10 @@
     <div id="availabilityReport" class="tightContent postRun">
       <div id="availabilityChart"></div>
       <script type="text/javascript">
+        var eventStart = new Date(allInputData.eventTime)
+        var eventLength = allInputData.eventLength.split(':')
+        var eventEnd = new Date(eventStart.getTime() + (3600*eventLength[0] + 60*eventLength[1]) * 1000)
+        var tRecovery = new Date(allOutputData.gridBallast.recoveryTime)
         var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
         localHighChart['chart']['renderTo'] = 'availabilityChart'
         localHighChart['chart']['type'] = 'line'
@@ -596,7 +594,7 @@
         localHighChart['series'] = [
           {
             'showInLegend': false,
-            'data': [(simStart, 1)]
+            'data': allOutputData.allWaterheaterLoad
           }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
@@ -623,7 +621,23 @@
             'label': {'text': 'tRecovery'}
           }
         ]
-        localHighChart['yAxis']['title'] = {'text': 'Total Load'}
+        localHighChart['yAxis']['title'] = {'text': 'Total Load (kW)'}
+        localHighChart['yAxis']['plotLines'] = [
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': Math.max(...allOutputData.allWaterheaterLoad),
+            'width': 2,
+            'label': {'text':'MAX'}
+          },
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': Math.min(...allOutputData.allWaterheaterLoad),
+            'width': 2,
+            'label': {'text':'MIN'}
+          }
+        ]
         new Highcharts.Chart(localHighChart);
       </script>
     </div>
@@ -643,51 +657,62 @@
             <tr>
               <td>Initial Response Time</td>
               <td>< 1 second</td>
-              <td>[placeholder]</td>
+              <td id="responseTime"></td>
             </tr>
             <tr>
               <td>Reserve Magnitude Target (RMT, % of load)</td>
               <td>5%</td>
-              <td>[placeholder]</td>
+              <td id="rmt"></td>
             </tr>
             <tr>
               <td>Reserve Magnitude Variability Tolerance (RMVT)</td>
               <td>2%</td>
-              <td>[placeholder]</td>
+              <td id="rmvt"></td>
             </tr>
             <tr>
               <td>Ramp Time</td>
               <td>< 2 seconds</td>
-              <td>[placeholder]</td>
+              <td id="rampTime"></td>
             </tr>
             <tr>
-              <td>Duration</td>
+              <td>Off Duration</td>
               <td>> 10 minutes</td>
-              <td>[placeholder]</td>
+              <td id="offDuration"></td>
             </tr>
             <tr>
               <td>Availability</td>
               <td>95%</td>
-              <td>[placeholder]</td>
+              <td id="availability"></td>
             </tr>
             <tr>
               <td>Cascaded Contingency Support</td>
               <td>2</td>
-              <td>[placeholder]</td>
+              <td id="contSupport"></td>
             </tr>
             <tr>
               <td>Recovery Time</td>
               <td>1 hour</td>
-              <td>[placeholder]</td>
+              <td id="recoveryTime"></td>
             </tr>
             <tr>
               <td>Availability Magnitude</td>
-              <td>[placeholder]</td>
-              <td>[placeholder]</td>
+              <td></td>
+              <td id="availMag"></td>
             </tr>
           </tbody>
         </table>
       </div>
+      <script type="text/javascript">
+        // document.getElementById('responseTime').innerHTML = allOutputData.gridBallast.responseTime
+        document.getElementById('rmt').innerHTML = allOutputData.gridBallast.rmt + '%'
+        document.getElementById('rmvt').innerHTML = 'Max: ' + allOutputData.gridBallast.rmvtMax + ', Min: ' + allOutputData.gridBallast.rmvtMin
+        // document.getElementById('rampTime').innerHTML = allOutputData.gridBallast.rampTime
+        document.getElementById('offDuration').innerHTML = allOutputData.gridBallast.offDuration
+        document.getElementById('availability').innerHTML = allOutputData.gridBallast.availability + '%'
+        // document.getElementById('contSupport').innerHTML = allOutputData.gridBallast.contSupport
+        document.getElementById('recoveryTime').innerHTML = allOutputData.gridBallast.recoveryTime
+        document.getElementById('availMag').innerHTML = 'Max: ' + Math.max(...allOutputData.allWaterheaterLoad) + ', Min: ' + Math.min(...allOutputData.allWaterheaterLoad)
+      </script>
     </div>
     
   </div>
