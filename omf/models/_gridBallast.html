@@ -534,7 +534,6 @@
       </div>
       <script>gebi("stdout").innerHTML = allOutputData.stdout</script>
     </div>
-
     <p class="reportTitle postRun">Distribution Quality of Service <a target="_self" class="toggle">Hide / Show</a></p>
     <div id="serviceQualityReport" class="tightContent postRun">
       <div id="serviceQualityChart"></div>
@@ -556,14 +555,14 @@
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventStart),
-            'width': 2,
+            'width': 1,
             'label': {'text':'Event Start'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventEnd),
-            'width': 2,
+            'width': 1,
             'label': {'text':'Event End'}
           }
         ]
@@ -571,7 +570,6 @@
         new Highcharts.Chart(localHighChart);
       </script>
     </div>
-
     <p class="reportTitle postRun">Availability Details <a target="_self" class="toggle">Hide / Show</a></p>
     <div id="availabilityReport" class="tightContent postRun">
       <div id="availabilityChart"></div>
@@ -593,21 +591,21 @@
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventStart),
-            'width': 2,
+            'width': 1,
             'label': {'text':'Event Start'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventEnd),
-            'width': 2,
+            'width': 1,
             'label': {'text':'Event End'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.recoveryTime),
-            'width': 2,
+            'width': 1,
             'label': {'text': 'tRecovery'}
           }
         ]
@@ -617,21 +615,20 @@
             'color': 'red',
             'dashStyle': 'dash',
             'value': Math.max(...allOutputData.gridBallast.availabilityMagnitude),
-            'width': 2,
+            'width': 1,
             'label': {'text':'MAX'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': Math.min(...allOutputData.gridBallast.availabilityMagnitude),
-            'width': 2,
+            'width': 1,
             'label': {'text':'MIN'}
           }
         ]
         new Highcharts.Chart(localHighChart);
       </script>
     </div>
-
     <p class="reportTitle postRun">Performance Details <a target="_self" class="toggle">Hide / Show</a></p>
     <div id="performanceReport" class="tightContent postRun detailsContainer">
       <div id="performanceTable">
@@ -704,6 +701,5 @@
         document.getElementById('availMag').innerHTML = 'Max: ' + Math.max(...allOutputData.gridBallast.availabilityMagnitude) + ', Min: ' + Math.min(...allOutputData.gridBallast.availabilityMagnitude)
       </script>
     </div>
-    
   </div>
 </body>

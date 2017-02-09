@@ -280,31 +280,23 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
 				cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
 
-		# Print gridBallast outputs to allOutputData.json
+		# Print gridBallast Outputs to allOutputData.json
 		cleanOut['gridBallast'] = {}
 		if 'allWaterheaterOn.csv' in rawOut:
-			# cleanOut['allWaterheaterOn'] = {}
 			cleanOut['gridBallast']['waterheaterOn'] = {}
 			for key in rawOut['allWaterheaterOn.csv']:
 				if key.startswith('waterheater'):
-					# cleanOut['allWaterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
 					cleanOut['gridBallast']['waterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
 		if 'allWaterheaterTemp.csv' in rawOut:
-			# cleanOut['allWaterheaterTemp'] = {}
 			cleanOut['gridBallast']['waterheaterTemp'] = {}
 			for key in rawOut['allWaterheaterTemp.csv']:
 				if key.startswith('waterheater'):
-					# cleanOut['allWaterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
 					cleanOut['gridBallast']['waterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
 		if 'allWaterheaterLoad.csv' in rawOut:
-			# cleanOut['allWaterheaterLoad'] = {}
-			# cleanOut['allWaterheaterLoad'] = rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)']
 			cleanOut['gridBallast']['availabilityMagnitude'] = rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)']
 		if 'allMeterPower.csv' in rawOut:
-			# cleanOut['allMeterPower'] = {}
-			# cleanOut['allMeterPower'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
 			cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
-		# Event calculations
+		# EventTime calculations
 		eventTime = inputDict['eventTime']
 		eventLength = inputDict['eventLength']
 		eventLength = eventLength.split(':')
@@ -313,32 +305,24 @@ def heavyProcessing(modelDir, inputDict):
 		eventEnd = eventStart + eventDuration
 		cleanOut['gridBallast']['eventStart'] = str(eventStart)
 		cleanOut['gridBallast']['eventEnd'] = str(eventEnd)
-		# Drop timezone from timeStamps
-		# timeStamps = cleanOut['timeStamps'] 
-		# newTimeStamps = [x[:19] for x in timeStamps]
+		# Drop timezone from timeStamp, Convert string to date
 		timeStamps = [x[:19] for x in cleanOut['timeStamps']]
-		# Convert timeStamps string to date
 		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in timeStamps]
 		eventEndIdx =  dateTimeStamps.index(eventEnd)
-		# Waterheaters On/Off calculations
-		# whOn = cleanOut['allWaterheaterOn']
+		# Recovery Time
 		whOn = cleanOut['gridBallast']['waterheaterOn']
 		whOnList = whOn.values()
 		whOnZip = zip(*whOnList)
 		whOnSum = [sum(x) for x in whOnZip]
 		anyOn = [x > 0 for x in whOnSum]
-		# Recovery Time
 		tRecIdx = anyOn.index(True, eventEndIdx+1)
 		tRec = dateTimeStamps[tRecIdx]
 		cleanOut['gridBallast']['recoveryTime'] = str(tRec)
 		# Waterheaters Off-Duration
 		offDuration = tRec - eventStart
 		cleanOut['gridBallast']['offDuration'] = str(offDuration)
-		# Availability Magnitude
-		# availMag = cleanOut['allWaterheaterLoad']
-		availMag = cleanOut['gridBallast']['availabilityMagnitude']
 		# Reserve Magnitude Target (RMT)
-		# totNetLoad = cleanOut['allMeterPower']
+		availMag = cleanOut['gridBallast']['availabilityMagnitude']
 		totNetLoad = cleanOut['gridBallast']['totalNetworkLoad']
 		# loadZip = zip(availMag,totNetLoad)
 		# rmt = [x[0]/x[1] for x in loadZip]
@@ -351,7 +335,6 @@ def heavyProcessing(modelDir, inputDict):
 		cleanOut['gridBallast']['rmvtMax'] = rmvtMax
 		cleanOut['gridBallast']['rmvtMin'] = rmvtMin
 		# Availability
-		# notAvail = availMag.count(0)/(len(timeStamps)-2)
 		notAvail = availMag.count(0)/len(timeStamps)
 		avail = (1-notAvail)*100
 		cleanOut['gridBallast']['availability'] = avail
@@ -565,8 +548,6 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		# "feederName1": "Simple Market System",
-		# "feederName1": "superModel Tomorrow",
 		"feederName1": "Olin Barre GH", #Geo
 		"simStartDate": "2012-04-01",
 		"simLength": "24",
