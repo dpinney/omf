@@ -464,6 +464,7 @@ def new(modelDir):
 		"modelType":modelName,
 		"retailCost": "0.1",
 		"WholesaleEnergyCost": "0.07",
+		"fileName":"FrankScadaValidCSV.csv",
 		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","uploads","FrankScadaValidCSV.csv")).read(),
 		"DrPurchInstallCost": "100000",
 		"runTime": "0:00:03",
