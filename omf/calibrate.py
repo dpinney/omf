@@ -54,7 +54,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 		"power_fraction_C": "0.3"}		
 	for key in tree:
 		ob = tree[key]
-		if ob.get("object","") == "triplex_node" and ob.get("power_12","") != "":
+		if ob.get("object","") in ("triplex_node", "triplex_load") and (ob.get("power_12") or ob.get("base_power_12")):
 			# Add to triplex_nodes.
 			newOb = dict(loadTemplate)
 			newOb["name"] = ob.get("name", "")
@@ -64,6 +64,10 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 			newOb["latitude"] = ob.get("latitude","0")
 			newOb["longitude"] = ob.get("longitude","0")
 			oldPow = ob.get("power_12","").replace("j","d")
+			if not oldPow:
+				oldPow = ob.get("base_power_12")
+				if "scadaloads.value*" in oldPow:
+					oldPow = oldPow[17:]
 			pythagPower = gridlabd._strClean(oldPow)
 			newOb["base_power_12"] = "scadaLoads.value*" + str(pythagPower)
 			tree[key] = newOb
@@ -110,7 +114,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 		"parent": swingName,
 		"property": "measured_real_power,measured_reactive_power,measured_power",
 		"file": "caliSub.csv",
-		"interval": "900"}
+		"interval": "3600"}
 	outputRecorderKey = maxKey + 3
 	tree[outputRecorderKey] = recOb
 	feeder.adjustTime(tree, simLength, simLengthUnits, simStartDate['Date'].strftime("%Y-%m-%d %H:%M:%S"))
@@ -133,7 +137,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 		while abs(error)>calibrateError[0] and iteration<calibrateError[1]:
 			# Run calibration and iterate up to 5 times.
 			SCAL_CONST = sum(scadaSubPower)/sum(nextPower)
-			print "Calibrating & running again... Error: %s, Iteration: %s, SCAL_CONST: %s"%(str(round(abs(error*100),2)), str(iteration), round(SCAL_CONST,2))
+			print "Calibrating & running again... Error: %s, Iteration: %s, SCAL_CONST: %s"%(str(round(abs(error*100),6)), str(iteration), round(SCAL_CONST,6))
 			newPlayData = []
 			with open(pJoin(pJoin(workDir,"gridlabD"), lastFile), "r") as playerFile:
 				for line in playerFile:
@@ -157,6 +161,7 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 			iteration+=1
 		else:
 			if iteration==1: outRealPowIter = outRealPow
+			SCAL_CONST = 1.0
 		print "Calibration done: Error: %s, Iteration: %s, SCAL_CONST: %s"%(str(round(abs(error*100),2)), str(iteration), round(SCAL_CONST,2))		
 		return outRealPow, outRealPowIter, lastFile, iteration
 	outRealPow, outRealPowIter, lastFile, iteration = runPowerflowIter(tree,scadaSubPower[trim:simLength])
@@ -185,7 +190,7 @@ def _processScadaData(workDir,scadaPath, simStartDate, simLengthUnits):
 		scadaReader = csv.DictReader(scadaFile, delimiter='\t')
 		allData = [row for row in scadaReader]
 	scadaSubPower = [float(row["power"]) for row in allData]
-	firstDateTime = dt.datetime.strptime(allData[1]["timestamp"], "%m/%d/%Y %H:%M:%S")
+	firstDateTime = dt.datetime.strptime(allData[0]["timestamp"], "%m/%d/%Y %H:%M:%S")
 	# Write the player.
 	maxPower = max(scadaSubPower)
 	start = 0

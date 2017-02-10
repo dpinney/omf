@@ -116,7 +116,6 @@ def heavyProcessing(modelDir, inputDict):
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
 
-
 		# Attach recorder for waterheaters on/off
 		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheaterOn.csv'}
 		copyStub = dict(stub)
@@ -125,7 +124,7 @@ def heavyProcessing(modelDir, inputDict):
 		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'temperature', 'interval':3600, 'file':'allWaterheaterTemp.csv'}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
-		# Attach collector for total waterheater loads
+		# Attach collector for total waterheater load
 		stub = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_load)', 'interval':3600, 'file':'allWaterheaterLoad.csv'}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
@@ -134,7 +133,6 @@ def heavyProcessing(modelDir, inputDict):
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 		
-
 		# Attach recorders for system voltage map:
 		stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':3600}
 		for phase in ['A','B','C']:
@@ -282,65 +280,74 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
 				cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
 
-
-		# Copy waterheater measurements to allOutputData.json
+		# Print gridBallast Outputs to allOutputData.json
+		cleanOut['gridBallast'] = {}
 		if 'allWaterheaterOn.csv' in rawOut:
-			cleanOut['allWaterheaterOn'] = {}
+			cleanOut['gridBallast']['waterheaterOn'] = {}
 			for key in rawOut['allWaterheaterOn.csv']:
 				if key.startswith('waterheater'):
-					cleanOut['allWaterheaterOn'][key] = rawOut['allWaterheaterOn.csv'][key]
+					cleanOut['gridBallast']['waterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
 		if 'allWaterheaterTemp.csv' in rawOut:
-			cleanOut['allWaterheaterTemp'] = {}
+			cleanOut['gridBallast']['waterheaterTemp'] = {}
 			for key in rawOut['allWaterheaterTemp.csv']:
 				if key.startswith('waterheater'):
-					cleanOut['allWaterheaterTemp'][key] = rawOut['allWaterheaterTemp.csv'][key]
+					cleanOut['gridBallast']['waterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
 		if 'allWaterheaterLoad.csv' in rawOut:
-			cleanOut['allWaterheaterLoad'] = {}
-			cleanOut['allWaterheaterLoad'] = rawOut['allWaterheaterLoad.csv']['sum(actual_load)']
-		# Copy SUM(allMeterPower) to allOutputData.json
+			cleanOut['gridBallast']['availabilityMagnitude'] = rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)']
 		if 'allMeterPower.csv' in rawOut:
-			cleanOut['allMeterPower'] = {}
-			cleanOut['allMeterPower'] = rawOut['allMeterPower.csv']['sum(measured_real_power)']
-		# Event calculations
+			cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
+		# EventTime calculations
 		eventTime = inputDict['eventTime']
 		eventLength = inputDict['eventLength']
 		eventLength = eventLength.split(':')
 		eventDuration = datetime.timedelta(hours=int(eventLength[0]), minutes=int(eventLength[1]))
 		eventStart = datetime.datetime.strptime(eventTime, '%Y-%m-%d %H:%M')
 		eventEnd = eventStart + eventDuration
-		# Drop timezone from timeStamps
-		timeStamps = cleanOut['timeStamps'] 
-		newTimeStamps = [x[:19] for x in timeStamps]
-		# Convert timeStamps string to date
-		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in newTimeStamps]
-		eventEndIndex =  dateTimeStamps.index(eventEnd)
-		# Waterheaters On/Off calculations
-		whOn = cleanOut['allWaterheaterOn']
+		cleanOut['gridBallast']['eventStart'] = str(eventStart)
+		cleanOut['gridBallast']['eventEnd'] = str(eventEnd)
+		# Drop timezone from timeStamp, Convert string to date
+		timeStamps = [x[:19] for x in cleanOut['timeStamps']]
+		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in timeStamps]
+		eventEndIdx =  dateTimeStamps.index(eventEnd)
+		# Recovery Time
+		whOn = cleanOut['gridBallast']['waterheaterOn']
 		whOnList = whOn.values()
 		whOnZip = zip(*whOnList)
 		whOnSum = [sum(x) for x in whOnZip]
 		anyOn = [x > 0 for x in whOnSum]
-		try:
-			tRecoveryIndex = anyOn.index(True, eventEndIndex)
-			tRecovery = dateTimeStamps[tRecoveryIndex]
-		except:
-			pass
+		tRecIdx = anyOn.index(True, eventEndIdx+1)
+		tRec = dateTimeStamps[tRecIdx]
+		cleanOut['gridBallast']['recoveryTime'] = str(tRec)
 		# Waterheaters Off-Duration
-		try:
-			offDuration = tRecovery - eventStart
-		except:
-			pass
-		# Availability Magnitude
-		availMag = cleanOut['allWaterheaterLoad']
-		# Reserve Magnitude Target
-		totalNetLoad = cleanOut['allMeterPower']
-		loadZip = zip(availMag,totalNetLoad)
-		resMagTargets = [x[0]/x[1] for x in loadZip]
+		offDuration = tRec - eventStart
+		cleanOut['gridBallast']['offDuration'] = str(offDuration)
+		# Reserve Magnitude Target (RMT)
+		availMag = cleanOut['gridBallast']['availabilityMagnitude']
+		totNetLoad = cleanOut['gridBallast']['totalNetworkLoad']
+		# loadZip = zip(availMag,totNetLoad)
+		# rmt = [x[0]/x[1] for x in loadZip]
+		rmt = (1000*sum(availMag))/sum(totNetLoad)
+		cleanOut['gridBallast']['rmt'] = rmt
+		# Reserve Magnitude Variability Tolerance (RMVT)
+		avgAvailMag = sum(availMag)/len(availMag)
+		rmvtMax = max(availMag)/avgAvailMag
+		rmvtMin = min(availMag)/avgAvailMag
+		cleanOut['gridBallast']['rmvtMax'] = rmvtMax
+		cleanOut['gridBallast']['rmvtMin'] = rmvtMin
 		# Availability
-		notAvail = availMag.count(0) / (len(timeStamps)-2)
+		notAvail = availMag.count(0)/len(timeStamps)
 		avail = (1-notAvail)*100
-
-
+		cleanOut['gridBallast']['availability'] = avail
+		# Waterheater Temperature Drop calculations
+		whTemp = cleanOut['gridBallast']['waterheaterTemp']
+		whTempList = whTemp.values()
+		whTempZip = zip(*whTempList)
+		whTempDrops = []
+		LOWER_LIMIT_TEMP = 125 # Used for calculating quality of service.
+		for time in whTempZip:
+			tempDrop = sum([t < LOWER_LIMIT_TEMP for t in time])
+			whTempDrops.append(tempDrop)
+		cleanOut['gridBallast']['waterheaterTempDrops'] = whTempDrops
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 		latPerc = 1.0*len(latKeys)/len(tree)
@@ -541,12 +548,12 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		"feederName1": "Olin Barre GH", #Geo
+		"feederName1": "Olin Barre GH EOL Solar",
 		"simStartDate": "2012-04-01",
-		"simLength": "24",
+		"simLength": "72",
 		"simLengthUnits": "hours", #minutes
 		"eventType": "ramping", #unramping, overfrequency, underfrequency
-		"eventTime": "2012-04-01 14:00",
+		"eventTime": "2012-04-02 14:00",
 		"eventLength": "02:00"
 	}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
