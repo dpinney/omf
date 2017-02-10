@@ -585,11 +585,19 @@ def scadaLoadshape(owner,feederName):
 	workDir = modelDir + '/calibration'
 	feederPath = modelDir+"/"+feederName+".omd"
 	scadaPath = modelDir+"/"+loadName+".csv"
-	#TODO: parse the csv using .csv library, set simStartDate to earliest timeStamp, length to number of rows, units to difference between first 2 timestamps (which is a function in datetime library). We'll need a link to the docs in the import dialog and a short blurb saying how the CSV should be built.
-	simDate = dt.datetime.strptime("4/13/2011 09:00:00", "%m/%d/%Y %H:%M:%S") # Spring peak.
+	# TODO: parse the csv using .csv library, set simStartDate to earliest timeStamp, length to number of rows, units to difference between first 2 timestamps (which is a function in datetime library). We'll need a link to the docs in the import dialog and a short blurb saying how the CSV should be built.
+	with open(scadaPath) as csvFile:
+		scadaReader = csv.DictReader(csvFile, delimiter='\t')
+		allData = [row for row in scadaReader]
+	firstDateTime = dt.datetime.strptime(allData[1]["timestamp"], "%m/%d/%Y %H:%M:%S")
+	secondDateTime = dt.datetime.strptime(allData[2]["timestamp"], "%m/%d/%Y %H:%M:%S")
+	csvLength = len(allData)
+	units =  (secondDateTime - firstDateTime).total_seconds()
+	if abs(units/3600) == 1.0:
+		simLengthUnits = 'hours'
+	simDate = firstDateTime
 	simStartDate = {"Date":simDate,"timeZone":"PST"}
-	simLength = 24
-	simLengthUnits = 'hours'
+	simLength = csvLength
 	# Run omf calibrate in background
 	importProc = Process(target=backgroundScadaCalibration, args =[owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", (0.05,5), 5])
 	# write PID to txt file in model folder here

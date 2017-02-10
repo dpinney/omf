@@ -164,6 +164,11 @@ def omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLen
 	labels = ["scadaSubPower","initialGuess","finalGuess"]
 	colors = ['red','lightblue','blue']
 	chartData = {"Title":"Substation Calibration Check (Iterated "+str(iteration+1)+"X)", "fileName":"caliCheckPlot", "colors":colors,"labels":labels, "timeZone":simStartDate['timeZone']}
+	# Trimming vectors to make them all the same length as the smallest vector
+	minCaliPowVecLen = min(len(caliPowVectors[0]), len(caliPowVectors[1]), len(caliPowVectors[2]))
+	caliPowVectors[0] = caliPowVectors[0][:minCaliPowVecLen]
+	caliPowVectors[1] = caliPowVectors[1][:minCaliPowVecLen]
+	caliPowVectors[2] = caliPowVectors[2][:minCaliPowVecLen]
 	print "Len:", len(caliPowVectors[0]), len(caliPowVectors[1]), len(caliPowVectors[2])
 	plotLine(workDir, caliPowVectors, chartData, simStartDate['Date']+dt.timedelta(hours=trim), simLengthUnits)
 	# Write the final output.
