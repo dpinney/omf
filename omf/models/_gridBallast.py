@@ -332,8 +332,8 @@ def heavyProcessing(modelDir, inputDict):
 		avgAvailMag = sum(availMag)/len(availMag)
 		rmvtMax = max(availMag)/avgAvailMag
 		rmvtMin = min(availMag)/avgAvailMag
-		cleanOut['gridBallast']['rmvtMax'] = rmvtMax
-		cleanOut['gridBallast']['rmvtMin'] = rmvtMin
+		rmvt = rmvtMax - rmvtMin
+		cleanOut['gridBallast']['rmvt'] = rmvt
 		# Availability
 		notAvail = availMag.count(0)/len(timeStamps)
 		avail = (1-notAvail)*100
@@ -549,6 +549,7 @@ def new(modelDir):
 		"modelType": modelName,
 		"zipCode": "59001",
 		"feederName1": "Olin Barre GH", #Geo
+		# "feederName1": "Simple Market System",
 		"simStartDate": "2012-04-01",
 		"simLength": "24",
 		"simLengthUnits": "hours", #minutes

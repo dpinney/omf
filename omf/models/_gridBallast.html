@@ -219,8 +219,9 @@
           if (curVal < 0) {dgExported.push(curVal)} else {fromGrid.push(curVal)}
         }
         tDGExported = arrSum(dgExported)
-        tFromGrid = arrSum(fromGrid)
+        tFromGrid = arrSum(fromGrid) - tDGDirect
         tDGDirect = tLoads + tLosses - tFromGrid
+        // tDGDirect = tFromGrid - tLoads - tLosses
         // Series formatting.
         tLossesSeries = {"pointWidth": 40,  "color":"orangered", "data":[0,tLosses], "type":"bar", "name":"Losses"}
         tLoadsSeries = {"pointWidth": 40, "color":"darkorange", "data":[0,tLoads], "type":"bar", "name":"Loads"}
@@ -538,6 +539,13 @@
     <div id="serviceQualityReport" class="tightContent postRun">
       <div id="serviceQualityChart"></div>
       <script type="text/javascript">
+        var eventStart = new Date(allInputData.eventTime)
+        var eventLength = allInputData.eventLength.split(':')
+        var eventEnd = new Date(eventStart.getTime() + (3600*eventLength[0] + 60*eventLength[1]) * 1000)
+        
+        // var xMin = new Date()
+
+
         var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
         localHighChart['chart']['renderTo'] = 'serviceQualityChart'
         localHighChart['chart']['type'] = 'line'
@@ -550,6 +558,7 @@
           }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
+        localHighChart['xAxis']['tickInterval'] = 1
         localHighChart['xAxis']['plotLines'] = [
           {
             'color': 'red',
@@ -566,7 +575,7 @@
             'label': {'text':'Event End'}
           }
         ]
-        localHighChart['yAxis']['title'] = {'text': 'Waterheaters with Temperature Drops below 150'}
+        localHighChart['yAxis']['title'] = {'text': 'Total Temperature Drops'}
         new Highcharts.Chart(localHighChart);
       </script>
     </div>
@@ -586,6 +595,7 @@
           }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
+        localHighChart['xAxis']['tickInterval'] = 1
         localHighChart['xAxis']['plotLines'] = [
           {
             'color': 'red',
@@ -682,7 +692,7 @@
               <td id="recoveryTime"></td>
             </tr>
             <tr>
-              <td>Availability Magnitude</td>
+              <td>Availability Magnitude (kW)</td>
               <td></td>
               <td id="availMag"></td>
             </tr>
@@ -690,9 +700,14 @@
         </table>
       </div>
       <script type="text/javascript">
+        var tRec = new Date (allOutputData.gridBallast.recoveryTime)
+        tRecH = tRec.getHours()
+        tRecM = tRec.getMinutes()
+        console.log(tRecH)
+        console.log(tRecM)
         // document.getElementById('responseTime').innerHTML = allOutputData.gridBallast.responseTime
         document.getElementById('rmt').innerHTML = allOutputData.gridBallast.rmt + '%'
-        document.getElementById('rmvt').innerHTML = 'Max: ' + allOutputData.gridBallast.rmvtMax + ', Min: ' + allOutputData.gridBallast.rmvtMin
+        document.getElementById('rmvt').innerHTML = allOutputData.gridBallast.rmvt + '%'
         // document.getElementById('rampTime').innerHTML = allOutputData.gridBallast.rampTime
         document.getElementById('offDuration').innerHTML = allOutputData.gridBallast.offDuration
         document.getElementById('availability').innerHTML = allOutputData.gridBallast.availability + '%'
