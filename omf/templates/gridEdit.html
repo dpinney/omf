@@ -307,10 +307,13 @@
 			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
 			<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
 			<table class='importOptions'>
-			<th>Scada Loadshapes</th>
+			<th>Scada Loadshapes</th><th style="float: right;"><a href = 'https://github.com/dpinney/omf/wiki/Tools-~-gridEdit#scada-loadshapes' target = '_blank'>Format Help</a></th>
 				<tr>
 					<td>File containing Scada load data (.csv)</td>
 					<td><input type='file' id='scadaFile' name='scadaFile' accept = '.csv' required/></td>
+				</tr>
+				<tr>
+					<td colspan="100%">Note: Model "Simulation Start Date" should lie within the Scada load's dates</td>
 				</tr>
 				<tr>
 					<td><a id='modalCancel' href="#" onclick='closeModal("scadaLoadshapes")' style="text-align:center;font-size:10pt;">Cancel</a></td>
