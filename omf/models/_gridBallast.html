@@ -701,10 +701,7 @@
       </div>
       <script type="text/javascript">
         var tRec = new Date (allOutputData.gridBallast.recoveryTime)
-        tRecH = tRec.getHours()
-        tRecM = tRec.getMinutes()
-        console.log(tRecH)
-        console.log(tRecM)
+
         // document.getElementById('responseTime').innerHTML = allOutputData.gridBallast.responseTime
         document.getElementById('rmt').innerHTML = allOutputData.gridBallast.rmt + '%'
         document.getElementById('rmvt').innerHTML = allOutputData.gridBallast.rmvt + '%'
@@ -712,7 +709,7 @@
         document.getElementById('offDuration').innerHTML = allOutputData.gridBallast.offDuration
         document.getElementById('availability').innerHTML = allOutputData.gridBallast.availability + '%'
         // document.getElementById('contSupport').innerHTML = allOutputData.gridBallast.contSupport
-        document.getElementById('recoveryTime').innerHTML = allOutputData.gridBallast.recoveryTime
+        document.getElementById('recoveryTime').innerHTML = tRec.toTimeString().substr(0,8)
         document.getElementById('availMag').innerHTML = 'Max: ' + Math.max(...allOutputData.gridBallast.availabilityMagnitude) + ', Min: ' + Math.min(...allOutputData.gridBallast.availabilityMagnitude)
       </script>
     </div>

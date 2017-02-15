@@ -343,11 +343,11 @@ def heavyProcessing(modelDir, inputDict):
 		whTempList = whTemp.values()
 		whTempZip = zip(*whTempList)
 		whTempDrops = []
+		LOWER_LIMIT_TEMP = 125 # Used for calculating quality of service.
 		for time in whTempZip:
-			tempDrop = sum([t < 150 for t in time])
+			tempDrop = sum([t < LOWER_LIMIT_TEMP for t in time])
 			whTempDrops.append(tempDrop)
 		cleanOut['gridBallast']['waterheaterTempDrops'] = whTempDrops
-
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 		latPerc = 1.0*len(latKeys)/len(tree)
@@ -548,13 +548,14 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		"feederName1": "Olin Barre GH", #Geo
+		# "feederName1": "Olin Barre GH", #Geo
 		# "feederName1": "Simple Market System",
+		"feederName1": "Olin Barre GH EOL Solar",
 		"simStartDate": "2012-04-01",
-		"simLength": "24",
+		"simLength": "72",
 		"simLengthUnits": "hours", #minutes
 		"eventType": "ramping", #unramping, overfrequency, underfrequency
-		"eventTime": "2012-04-01 14:00",
+		"eventTime": "2012-04-02 14:00",
 		"eventLength": "02:00"
 	}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
