@@ -83,23 +83,23 @@
 			<hr>
 			<div class="shortInput">
 				<label>Demand Charge Cost ($/kW)</label>
-				<input type="text" id="demandCharge" name="demandCharge" value="10" required="required" pattern="^\d+$"/>
+				<input type="text" id="demandCharge" name="demandCharge" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Retail Energy Cost ($/kWh)<span class="classic">Retail rate for residential consumers.</span></label>
-				<input type="text" id="retailCost" name="retailCost" value="0.10" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="retailCost" name="retailCost" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Wholesale Energy Cost($/kWh)</label>
-				<input type="text" id="WholesaleEnergyCost" name="WholesaleEnergyCost" value="0.07" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="WholesaleEnergyCost" name="WholesaleEnergyCost" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Annual Load Growth (%)<span class="classic">Expected annual load growth. Used to project costs and benefits out 25 years to estimate lifetime value of the demand response program.</span></label>
-				<input type="text" id="ScalingAnnual" name="ScalingAnnual" value="102" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="ScalingAnnual" name="ScalingAnnual" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Discount Rate (%)</label>
-				<input type="text" id="DiscountRate" name="DiscountRate" value="3" required="required" pattern="^\d+\.?\d*?$">
+				<input type="text" id="DiscountRate" name="DiscountRate" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
@@ -149,63 +149,63 @@
 			</div>
 			<div class="shortInput">
 				<label>Program Startup Cost ($)</label>
-				<input type="text" id="DrPurchInstallCost" name="DrPurchInstallCost" value="100000" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="DrPurchInstallCost" name="DrPurchInstallCost" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Annual DR operation Cost ($/year)</label>
-				<input type="text" id="AnnualDROperationCost" name="AnnualDROperationCost" value="1000" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="AnnualDROperationCost" name="AnnualDROperationCost" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Load Managed by the Program (%)</label>
-				<input type="text" id="LoadunderManagement" name="LoadunderManagement" value="100" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="LoadunderManagement" name="LoadunderManagement" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>CPP Critical Peak Rate ($)</label>
-				<input type="text" id="rateCPP" name="rateCPP" value="1.80" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="rateCPP" name="rateCPP" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Number of CPP Days</label>
-				<input type="text" id="numCPPDays" name="numCPPDays" value="10" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="numCPPDays" name="numCPPDays" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>CPP Non-Critical Peak Rate ($)</label>
-				<input type="text" id="PeakRate" name="PeakRate" value="0.20" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="PeakRate" name="PeakRate" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>CPP Off-Peak Rate ($)</label>
-				<input type="text" id="OffPeakRate" name="OffPeakRate" value="0.083" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="OffPeakRate" name="OffPeakRate" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>PTR Rate ($)</label>
-				<input type="text" id="ratePTR" name="ratePTR" value="2.65" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="ratePTR" name="ratePTR" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class= "shortInput">
 					<label>Daily Price Elasticity of Demand</label>
-					<input type="text" id="DailyPriceElasticity" name="DailyPriceElasticity" value="-0.02302" required="required" pattern="^-?\d+\.?\d*?$">
+					<input type="text" id="DailyPriceElasticity" name="DailyPriceElasticity" required="required" pattern="^-?\d+\.?\d*?$">
 			</div>
 			<div class= "shortInput">
 					<label> Substitution Price Elasticity of Demand</label>
-					<input type="text" id="SubstitutionPriceElasticity" name="SubstitutionPriceElasticity" value="-0.09522" required="required" pattern="^-?\d+\.?\d*?$">
+					<input type="text" id="SubstitutionPriceElasticity" name="SubstitutionPriceElasticity" required="required" pattern="^-?\d+\.?\d*?$">
 			</div>
 			<div class="shortInput">
 				<label>Starting Month</label>
-				<input type="text" id="startMonth" name="startMonth" value="2" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="startMonth" name="startMonth" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Ending Month</label>
-				<input type="text" id="stopMonth" name="stopMonth" value="4" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="stopMonth" name="stopMonth" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Starting Peak Hour</label>
-				<input type="text" id="startHour" name="startHour" value="6" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="startHour" name="startHour" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Ending Peak Hour</label>
-				<input type="text" id="stopHour" name="stopHour" value="9" required="required" pattern="^\d+$"/>
+				<input type="text" id="stopHour" name="stopHour" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput" style="width:100%">
 				<label>TOU 24 Hourly Rates ($ CSV)</label>
-				<input type="text" id="rate24hourly" name="rate24hourly" value=".074,.041,.020,.035,.100,.230,.391,.550,.688,.788,.859,.904,.941,.962,.980,1.000,.999,.948,.904,.880,.772,.552,.341,.169" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){23}$" required="required" />
+				<input type="text" id="rate24hourly" name="rate24hourly" pattern="^(\d*\.?\d*)(,\s*\d*\.?\d*){23}$" required="required" />
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
