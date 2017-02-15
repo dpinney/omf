@@ -338,7 +338,10 @@ def new(modelDir):
 		"dodFactor":"100",
 		"avoidedCost":"2000000",
 		"transformerThreshold":"6.6",
-		"batteryCycleLife": "5000"
+		"batteryCycleLife": "5000",
+		"carryingCost":"7",
+		"yearsToReplace":"2"
+
 	}
 	return __metaModel__.new(modelDir, defaultInputs)
 
