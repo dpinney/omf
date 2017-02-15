@@ -542,7 +542,7 @@
         localHighChart['chart']['renderTo'] = 'serviceQualityChart'
         localHighChart['chart']['type'] = 'line'
         localHighChart['chart']['width'] = 1000
-        localHighChart['chart']['height'] = 150
+        localHighChart['chart']['height'] = 250
         localHighChart['series'] = [
           {
             'showInLegend': false,
@@ -558,18 +558,18 @@
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventStart),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'Event Start'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventEnd),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'Event End'}
           }
         ]
-        localHighChart['yAxis']['title'] = {'text': 'Total Temperature Drops'}
+        localHighChart['yAxis']['title'] = {'text': 'Tank Temp. Drops'}
         new Highcharts.Chart(localHighChart);
       </script>
     </div>
@@ -581,7 +581,7 @@
         localHighChart['chart']['renderTo'] = 'availabilityChart'
         localHighChart['chart']['type'] = 'line'
         localHighChart['chart']['width'] = 1000
-        localHighChart['chart']['height'] = 150
+        localHighChart['chart']['height'] = 250
         localHighChart['series'] = [
           {
             'showInLegend': false,
@@ -596,21 +596,21 @@
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventStart),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'Event Start'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventEnd),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'Event End'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.recoveryTime),
-            'width': 1,
+            'width': 1.5,
             'label': {'text': 'tRecovery'}
           }
         ]
@@ -620,14 +620,14 @@
             'color': 'red',
             'dashStyle': 'dash',
             'value': Math.max(...allOutputData.gridBallast.availabilityMagnitude),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'MAX'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': Math.min(...allOutputData.gridBallast.availabilityMagnitude),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'MIN'}
           }
         ]
