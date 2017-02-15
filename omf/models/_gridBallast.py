@@ -314,8 +314,8 @@ def heavyProcessing(modelDir, inputDict):
 		whOnList = whOn.values()
 		whOnZip = zip(*whOnList)
 		whOnSum = [sum(x) for x in whOnZip]
-		anyOn = [x > 0 for x in whOnSum]
-		tRecIdx = anyOn.index(True, eventEndIdx+1)
+		anyOn = [x > 0 for x in whOnSum] 
+		tRecIdx = anyOn.index(True, eventEndIdx)
 		tRec = dateTimeStamps[tRecIdx]
 		cleanOut['gridBallast']['recoveryTime'] = str(tRec)
 		# Waterheaters Off-Duration
@@ -548,9 +548,8 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		# "feederName1": "Olin Barre GH", #Geo
-		# "feederName1": "Simple Market System",
-		"feederName1": "Olin Barre GH EOL Solar",
+		"feederName1": "Olin Barre GH", #Geo
+		# "feederName1": "Olin Barre GH EOL Solar",
 		"simStartDate": "2012-04-01",
 		"simLength": "72",
 		"simLengthUnits": "hours", #minutes

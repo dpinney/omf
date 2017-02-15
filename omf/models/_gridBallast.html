@@ -219,14 +219,14 @@
           if (curVal < 0) {dgExported.push(curVal)} else {fromGrid.push(curVal)}
         }
         tDGExported = arrSum(dgExported)
-        tFromGrid = arrSum(fromGrid) - tDGDirect
-        tDGDirect = tLoads + tLosses - tFromGrid
-        // tDGDirect = tFromGrid - tLoads - tLosses
+        tFromGrid = arrSum(fromGrid)
+        // tDGDirect = tLoads + tLosses - tFromGrid
+        tDGDirect = tFromGrid - tLoads - tLosses
         // Series formatting.
         tLossesSeries = {"pointWidth": 40,  "color":"orangered", "data":[0,tLosses], "type":"bar", "name":"Losses"}
         tLoadsSeries = {"pointWidth": 40, "color":"darkorange", "data":[0,tLoads], "type":"bar", "name":"Loads"}
         tDGSeries = {"pointWidth": 40, "color":"seagreen", "data":[], "type":"bar", "name":"DG"}
-        tFromGridSeries = {"pointWidth": 40,  "color":"Red", "data":[tFromGrid,0], "type":"bar", "name":"FromGrid"}
+        tFromGridSeries = {"pointWidth": 40,  "color":"Red", "data":[tFromGrid-tDGDirect,0], "type":"bar", "name":"FromGrid"}
         tDGDirectSeries = {"pointWidth": 40, "color":"RoyalBlue", "data":[tDGDirect,0], "type":"bar", "name":"DGDirect"}
         tDGExportedSeries = {"pointWidth": 40, "color":"LightSeaGreen", "data":[tDGExported,0], "type":"bar", "name":"DG Exported"}
         tDGSeries["data"].push(tDG)
@@ -539,13 +539,6 @@
     <div id="serviceQualityReport" class="tightContent postRun">
       <div id="serviceQualityChart"></div>
       <script type="text/javascript">
-        var eventStart = new Date(allInputData.eventTime)
-        var eventLength = allInputData.eventLength.split(':')
-        var eventEnd = new Date(eventStart.getTime() + (3600*eventLength[0] + 60*eventLength[1]) * 1000)
-        
-        // var xMin = new Date()
-
-
         var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
         localHighChart['chart']['renderTo'] = 'serviceQualityChart'
         localHighChart['chart']['type'] = 'line'
@@ -558,7 +551,9 @@
           }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
-        localHighChart['xAxis']['tickInterval'] = 1
+        localHighChart['xAxis']['min'] = new Date(allOutputData.timeStamps[0]).getTime()
+        localHighChart['xAxis']['max'] = new Date(allOutputData.timeStamps[allOutputData.timeStamps.length-1]).getTime()
+
         localHighChart['xAxis']['plotLines'] = [
           {
             'color': 'red',
@@ -595,7 +590,8 @@
           }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
-        localHighChart['xAxis']['tickInterval'] = 1
+        localHighChart['xAxis']['min'] = new Date(allOutputData.timeStamps[0]).getTime()
+        localHighChart['xAxis']['max'] = new Date(allOutputData.timeStamps[allOutputData.timeStamps.length-1]).getTime()
         localHighChart['xAxis']['plotLines'] = [
           {
             'color': 'red',

@@ -1682,6 +1682,9 @@ function newChildAtSelected(componentName) {
  * @return {Object} nodeToAdd
  */
 function newChildAtLocation(component, treeIndex) {
+	console.log(treeIndex)
+	console.log(tree[treeIndex]['name'])
+	
 	treeNewIndex = nextTreeKey()
 	newName = component['object'] + String(treeNewIndex)
 	// Make sure component's parent is set.
@@ -2036,22 +2039,20 @@ function solarAdding() {
 }
 
 /*
- * General Function to Add Components
+ * General Function to Add Components 'inverter', 'triplex_meter', PERC
  */
 function addXatY(componentName, attachType, perc) {
 	if ( components.hasOwnProperty(componentName) ) {
-
 		for (var key in tree) {
 			if (tree[key].hasOwnProperty('object') && tree[key]['object'] == attachType) {
 				if (Math.random() < perc) {
 					var newComp = {}
 					newComp = components[componentName]
 					newChildAtLocation(newComp, key)
-					redraw()
 				}
 			}
 		}
-
+		redraw()
 	} 
 	else {
 		return
