@@ -1,0 +1,46 @@
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              
+Core profiler results
+======================
+
+Total objects               7278 objects
+Parallelism                    1 thread
+Total time                  79.0 seconds
+  Core time                  6.9 seconds (8.7%)
+    Compiler                 1.2 seconds (1.5%)
+    Instances                0.0 seconds (0.0%)
+    Random variables         0.0 seconds (0.0%)
+    Schedules                0.0 seconds (0.0%)
+    Loadshapes               0.0 seconds (0.0%)
+    Enduses                  0.0 seconds (0.0%)
+    Transforms               0.0 seconds (0.0%)
+  Model time                72.1 seconds/thread (91.3%)
+Simulation time               21 days
+Simulation speed              46k object.hours/second
+Passes completed            1002 passes
+Time steps completed         501 timesteps
+Convergence efficiency      2.00 passes/timestep
+Read lock contention        0.0%
+Write lock contention       0.0%
+Average timestep           3593 seconds/timestep
+Simulation rate           22785 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+node              35.260     48.9%     17.2
+collector         14.899     20.7%   2979.8
+triplex_node       5.175      7.2%      4.1
+triplex_meter      5.030      7.0%      5.6
+overhead_line      3.873      5.4%      4.0
+underground_line   3.565      4.9%      4.0
+transformer        3.564      4.9%      3.9
+fuse               0.707      1.0%      4.0
+recorder           0.017      0.0%      8.5
+capacitor          0.008      0.0%      8.0
+regulator          0.007      0.0%      7.0
+================ ======== ======== ========
+Total             72.105    100.0%      9.9
+

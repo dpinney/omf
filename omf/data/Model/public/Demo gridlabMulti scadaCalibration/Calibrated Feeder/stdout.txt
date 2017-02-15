@@ -1,0 +1,48 @@
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            
+Core profiler results
+======================
+
+Total objects               7280 objects
+Parallelism                    1 thread
+Total time                 132.0 seconds
+  Core time                 17.3 seconds (13.1%)
+    Compiler                 1.3 seconds (1.0%)
+    Instances                0.0 seconds (0.0%)
+    Random variables         0.0 seconds (0.0%)
+    Schedules                0.0 seconds (0.0%)
+    Loadshapes               0.0 seconds (0.0%)
+    Enduses                  0.0 seconds (0.0%)
+    Transforms               0.9 seconds (0.7%)
+  Model time               114.7 seconds/thread (86.9%)
+Simulation time               21 days
+Simulation speed              28k object.hours/second
+Passes completed            2281 passes
+Time steps completed         501 timesteps
+Convergence efficiency      4.55 passes/timestep
+Read lock contention        0.0%
+Write lock contention       0.0%
+Average timestep           3593 seconds/timestep
+Simulation rate           13636 x realtime
+
+
+Model profiler results
+======================
+
+Class            Time (s) Time (%) msec/obj
+---------------- -------- -------- --------
+collector         36.545     31.9%   7309.0
+node              20.526     17.9%     10.0
+triplex_load      14.783     12.9%     11.6
+overhead_line     10.517      9.2%     10.8
+triplex_meter     10.148      8.9%     11.2
+transformer       10.100      8.8%     11.2
+underground_line   9.686      8.4%     10.9
+fuse               2.178      1.9%     12.3
+recorder           0.078      0.1%     26.0
+capacitor          0.025      0.0%     25.0
+player             0.024      0.0%     24.0
+meter              0.024      0.0%     24.0
+regulator          0.023      0.0%     23.0
+================ ======== ======== ========
+Total            114.657    100.0%     15.7
+
