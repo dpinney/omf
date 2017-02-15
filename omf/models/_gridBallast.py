@@ -314,8 +314,8 @@ def heavyProcessing(modelDir, inputDict):
 		whOnList = whOn.values()
 		whOnZip = zip(*whOnList)
 		whOnSum = [sum(x) for x in whOnZip]
-		anyOn = [x > 0 for x in whOnSum]
-		tRecIdx = anyOn.index(True, eventEndIdx+1)
+		anyOn = [x > 0 for x in whOnSum] 
+		tRecIdx = anyOn.index(True, eventEndIdx)
 		tRec = dateTimeStamps[tRecIdx]
 		cleanOut['gridBallast']['recoveryTime'] = str(tRec)
 		# Waterheaters Off-Duration
@@ -332,8 +332,8 @@ def heavyProcessing(modelDir, inputDict):
 		avgAvailMag = sum(availMag)/len(availMag)
 		rmvtMax = max(availMag)/avgAvailMag
 		rmvtMin = min(availMag)/avgAvailMag
-		cleanOut['gridBallast']['rmvtMax'] = rmvtMax
-		cleanOut['gridBallast']['rmvtMin'] = rmvtMin
+		rmvt = rmvtMax - rmvtMin
+		cleanOut['gridBallast']['rmvt'] = rmvt
 		# Availability
 		notAvail = availMag.count(0)/len(timeStamps)
 		avail = (1-notAvail)*100

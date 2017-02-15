@@ -542,7 +542,7 @@
         localHighChart['chart']['renderTo'] = 'serviceQualityChart'
         localHighChart['chart']['type'] = 'line'
         localHighChart['chart']['width'] = 1000
-        localHighChart['chart']['height'] = 150
+        localHighChart['chart']['height'] = 250
         localHighChart['series'] = [
           {
             'showInLegend': false,
@@ -550,23 +550,26 @@
           }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
+        localHighChart['xAxis']['min'] = new Date(allOutputData.timeStamps[0]).getTime()
+        localHighChart['xAxis']['max'] = new Date(allOutputData.timeStamps[allOutputData.timeStamps.length-1]).getTime()
+
         localHighChart['xAxis']['plotLines'] = [
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventStart),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'Event Start'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventEnd),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'Event End'}
           }
         ]
-        localHighChart['yAxis']['title'] = {'text': 'Waterheaters with Temperature Drops below 150'}
+        localHighChart['yAxis']['title'] = {'text': 'Tank Temp. Drops'}
         new Highcharts.Chart(localHighChart);
       </script>
     </div>
@@ -578,7 +581,7 @@
         localHighChart['chart']['renderTo'] = 'availabilityChart'
         localHighChart['chart']['type'] = 'line'
         localHighChart['chart']['width'] = 1000
-        localHighChart['chart']['height'] = 150
+        localHighChart['chart']['height'] = 250
         localHighChart['series'] = [
           {
             'showInLegend': false,
@@ -586,26 +589,28 @@
           }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
+        localHighChart['xAxis']['min'] = new Date(allOutputData.timeStamps[0]).getTime()
+        localHighChart['xAxis']['max'] = new Date(allOutputData.timeStamps[allOutputData.timeStamps.length-1]).getTime()
         localHighChart['xAxis']['plotLines'] = [
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventStart),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'Event Start'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.eventEnd),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'Event End'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': new Date(allOutputData.gridBallast.recoveryTime),
-            'width': 1,
+            'width': 1.5,
             'label': {'text': 'tRecovery'}
           }
         ]
@@ -615,14 +620,14 @@
             'color': 'red',
             'dashStyle': 'dash',
             'value': Math.max(...allOutputData.gridBallast.availabilityMagnitude),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'MAX'}
           },
           {
             'color': 'red',
             'dashStyle': 'dash',
             'value': Math.min(...allOutputData.gridBallast.availabilityMagnitude),
-            'width': 1,
+            'width': 1.5,
             'label': {'text':'MIN'}
           }
         ]
@@ -682,7 +687,7 @@
               <td id="recoveryTime"></td>
             </tr>
             <tr>
-              <td>Availability Magnitude</td>
+              <td>Availability Magnitude (kW)</td>
               <td></td>
               <td id="availMag"></td>
             </tr>
@@ -690,14 +695,16 @@
         </table>
       </div>
       <script type="text/javascript">
+        var tRec = new Date (allOutputData.gridBallast.recoveryTime)
+
         // document.getElementById('responseTime').innerHTML = allOutputData.gridBallast.responseTime
         document.getElementById('rmt').innerHTML = allOutputData.gridBallast.rmt + '%'
-        document.getElementById('rmvt').innerHTML = 'Max: ' + allOutputData.gridBallast.rmvtMax + ', Min: ' + allOutputData.gridBallast.rmvtMin
+        document.getElementById('rmvt').innerHTML = allOutputData.gridBallast.rmvt + '%'
         // document.getElementById('rampTime').innerHTML = allOutputData.gridBallast.rampTime
         document.getElementById('offDuration').innerHTML = allOutputData.gridBallast.offDuration
         document.getElementById('availability').innerHTML = allOutputData.gridBallast.availability + '%'
         // document.getElementById('contSupport').innerHTML = allOutputData.gridBallast.contSupport
-        document.getElementById('recoveryTime').innerHTML = allOutputData.gridBallast.recoveryTime
+        document.getElementById('recoveryTime').innerHTML = tRec.toTimeString().substr(0,8)
         document.getElementById('availMag').innerHTML = 'Max: ' + Math.max(...allOutputData.gridBallast.availabilityMagnitude) + ', Min: ' + Math.min(...allOutputData.gridBallast.availabilityMagnitude)
       </script>
     </div>
