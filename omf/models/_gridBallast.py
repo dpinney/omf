@@ -548,8 +548,7 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		"feederName1": "Olin Barre GH", #Geo
-		# "feederName1": "Olin Barre GH EOL Solar",
+		"feederName1": "Olin Barre GH EOL Solar",
 		"simStartDate": "2012-04-01",
 		"simLength": "72",
 		"simLengthUnits": "hours", #minutes

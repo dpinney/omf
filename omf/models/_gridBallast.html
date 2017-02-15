@@ -220,13 +220,12 @@
         }
         tDGExported = arrSum(dgExported)
         tFromGrid = arrSum(fromGrid)
-        // tDGDirect = tLoads + tLosses - tFromGrid
-        tDGDirect = tFromGrid - tLoads - tLosses
+        tDGDirect = tLoads + tLosses - tFromGrid
         // Series formatting.
         tLossesSeries = {"pointWidth": 40,  "color":"orangered", "data":[0,tLosses], "type":"bar", "name":"Losses"}
         tLoadsSeries = {"pointWidth": 40, "color":"darkorange", "data":[0,tLoads], "type":"bar", "name":"Loads"}
         tDGSeries = {"pointWidth": 40, "color":"seagreen", "data":[], "type":"bar", "name":"DG"}
-        tFromGridSeries = {"pointWidth": 40,  "color":"Red", "data":[tFromGrid-tDGDirect,0], "type":"bar", "name":"FromGrid"}
+        tFromGridSeries = {"pointWidth": 40,  "color":"Red", "data":[tFromGrid,0], "type":"bar", "name":"FromGrid"}
         tDGDirectSeries = {"pointWidth": 40, "color":"RoyalBlue", "data":[tDGDirect,0], "type":"bar", "name":"DGDirect"}
         tDGExportedSeries = {"pointWidth": 40, "color":"LightSeaGreen", "data":[tDGExported,0], "type":"bar", "name":"DG Exported"}
         tDGSeries["data"].push(tDG)
