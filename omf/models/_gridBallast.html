@@ -211,7 +211,7 @@
         tPower = eval(allOutputData.Consumption.Power.join("+"))
         tLosses = eval(allOutputData.Consumption.Losses.join("+"))
         tDG = eval(allOutputData.Consumption.DG.join("+"))
-        tLoads = tPower + tDG - tLosses
+        tLoads = tDG + tPower + tLosses
         dgExported = []
         fromGrid = []
         for (i = 0; i < allOutputData.Consumption.Power.length; i++) {
