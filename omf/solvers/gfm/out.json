@@ -1,0 +1,655 @@
+[ {
+  "assetID" : "2822",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1854",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2820",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1852",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1850",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2828",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2826",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1858",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2824",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1856",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1852r",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "852r",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2834",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2832",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1864",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2830",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1862",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1860",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "800",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "888",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "802",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2838",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2836",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "806",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "808",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "sourcebus",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "890",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2844",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2842",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2840",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "810",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "812",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "814",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2848",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "816",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2846",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "818",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1890",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "814r",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2856",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1800",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1888",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2854",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2814r",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2852",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2850",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "820",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1808",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "822",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1806",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "824",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "826",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2858",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1802",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "828",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1810",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2864",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2862",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "830",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2860",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "832",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1818",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "834",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1816",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "836",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1814",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "838",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1812",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1822",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1820",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "840",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2852r",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "842",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "844",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1828",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "846",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1826",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "848",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1824",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2890",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2800",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2888",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1832",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1830",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "850",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "852",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "854",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2808",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "856",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2806",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1838",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "858",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1836",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2802",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1834",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1814r",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2812",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1844",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2810",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1842",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "860",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1840",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "862",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "864",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2818",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2816",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1848",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "2814",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+}, {
+  "assetID" : "1846",
+  "assetClass" : "PowerDistributionPole",
+  "hazardQuantityType" : "Windspeed",
+  "responseQuantityType" : "DamageProbability",
+  "value" : 0.03526698025935826
+} ]
