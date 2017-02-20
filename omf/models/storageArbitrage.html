@@ -91,47 +91,47 @@
 			<hr>
 			<div class="shortInput">
 				<label>Unit Capacity (kWh-AC)</label>
-				<input type="text" id="cellCapacity" name="cellCapacity" value="7" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="cellCapacity" name="cellCapacity" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Charge Rating (kW)</label>
-				<input type="text" id="chargeRate" name="chargeRate" value="5" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="chargeRate" name="chargeRate" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Discharge Rating (kW)</label>
-				<input type="text" id="dischargeRate" name="dischargeRate" value="5" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="dischargeRate" name="dischargeRate" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Unit Quantity</label>
-				<input type="text" id="cellQuantity" name="cellQuantity" value="10" required="required" pattern="^\d+$"/>
+				<input type="text" id="cellQuantity" name="cellQuantity" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Maximum Depth of Discharge (%)<span class="classic">The maximum safe discharge capacity of the battery system, typically between 80% - 90%.</span></label>
-				<input type="text" id="dodFactor" name="dodFactor" value="100" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="dodFactor" name="dodFactor" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Battery Round Trip Efficiency (%)<span class="classic">The efficiency of the DC battery system, to be used with the Inverter efficiency to get Battery System AC Round Trip Efficiency equal to this value times <i>Inverter Efficiency &amp; Transformer Efficiency</i> &#178;</span></label>
-				<input type="text" id="batteryEfficiency" name="batteryEfficiency" value="92" required="required" pattern="^\d+\.?\d*?$">
+				<input type="text" id="batteryEfficiency" name="batteryEfficiency" required="required" pattern="^\d+\.?\d*?$">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Inverter &amp; Transformer Efficiency (%)<span class="classic">Combined Inverter and Transformer Efficiency in converting DC power to AC power. Used in the Battery System AC Round Trip Efficiency calculation. The Inverter efficiency is obtained from the Weighted Efficiency (CEC) Method.</span></label>
-				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" value="97.5" required="required" >
+				<input type="text" id="inverterEfficiency" name="inverterEfficiency" pattern="^(100|\d\d|\d)(\.\d+)?$" required="required" >
 			</div>
 			<div class="shortInput">
 				<label>Unit Cost (installed)</label>
-				<input type="text" id="cellCost" name="cellCost" value="7140" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="cellCost" name="cellCost" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Battery Cycles in Lifetime</label>
-				<input type="text" id="batteryCycleLife" name="batteryCycleLife" value="5000" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="batteryCycleLife" name="batteryCycleLife" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Financial Projection Length (years)</label>
-				<input type="text" id="projYears" name="projYears" value="10" required="required" pattern="^\d+$"/>
+				<input type="text" id="projYears" name="projYears" required="required" pattern="^\d+$"/>
 			</div>
 			<div class="shortInput">
 				<label>Discount Rate (%)</label>
-				<input type="text" id="discountRate" name="discountRate" value="2.5" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="discountRate" name="discountRate" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Demand Curve (.csv file)<span class="classic">Please see the documentation at the help link for the required format and an example demand file. If this field is blank the OMF will re-use the file from the previous run.</span></label>
@@ -211,11 +211,11 @@
 			</div>
 			<div class="shortInput">
 				<label>Price Threshold for Discharge($)</label>
-				<input type="text" id="dischargePriceThreshold" name="dischargePriceThreshold" value="0.15" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="dischargePriceThreshold" name="dischargePriceThreshold" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="shortInput">
 				<label>Price Threshold for Charge($)</label>
-				<input type="text" id="chargePriceThreshold" name="chargePriceThreshold" value="0.07" required="required" pattern="^\d+\.?\d*?$"/>
+				<input type="text" id="chargePriceThreshold" name="chargePriceThreshold" required="required" pattern="^\d+\.?\d*?$"/>
 			</div>
 			<div class="wideInput" style="text-align:right">
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
