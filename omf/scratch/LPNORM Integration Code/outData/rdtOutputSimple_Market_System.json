@@ -1,19 +1,26 @@
 {
     "scenario_solution": [
         {
-            "generators": [
+            "lines": [
                 {
-                    "id": "6", 
-                    "real_phase": [
-                        10.0, 
-                        10.0, 
-                        0.0
-                    ], 
-                    "reactive_phase": [
-                        0.0, 
-                        0.0, 
-                        0.0
-                    ]
+                    "id": "10", 
+                    "in_use": true
+                }, 
+                {
+                    "id": "11", 
+                    "in_use": true
+                }, 
+                {
+                    "id": "13", 
+                    "in_use": true
+                }, 
+                {
+                    "id": "12", 
+                    "in_use": true
+                }, 
+                {
+                    "id": "14", 
+                    "in_use": true
                 }
             ], 
             "loads": [
@@ -57,26 +64,19 @@
                     ]
                 }
             ], 
-            "lines": [
+            "generators": [
                 {
-                    "id": "10", 
-                    "in_use": true
-                }, 
-                {
-                    "id": "11", 
-                    "in_use": true
-                }, 
-                {
-                    "id": "13", 
-                    "in_use": true
-                }, 
-                {
-                    "id": "12", 
-                    "in_use": true
-                }, 
-                {
-                    "id": "14", 
-                    "in_use": true
+                    "id": "6", 
+                    "real_phase": [
+                        10.0, 
+                        10.0, 
+                        0.0
+                    ], 
+                    "reactive_phase": [
+                        0.0, 
+                        0.0, 
+                        0.0
+                    ]
                 }
             ], 
             "id": 1, 
@@ -133,11 +133,6 @@
         }
     ], 
     "design_solution": {
-        "generators": [
-            {
-                "id": "6"
-            }
-        ], 
         "lines": [
             {
                 "hardened": false, 
@@ -156,6 +151,11 @@
             }, 
             {
                 "id": "14"
+            }
+        ], 
+        "generators": [
+            {
+                "id": "6"
             }
         ], 
         "design_cost": 0.0, 
