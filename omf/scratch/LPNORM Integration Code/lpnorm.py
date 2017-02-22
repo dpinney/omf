@@ -425,8 +425,10 @@ def runFragRDT(workDir, inDir, outDir, rdtInFile, disasterFiles, fragInFile, fra
 	if debug:
 		print "Running RDT..."
 		print "************************************"
-	os.chdir("bin/micot-application-rdt")
-	command = 'java -classpath ,:micot-rdt.jar:../micot-libraries/jars/jna-4.1.0.jar:../micot-libraries/jars/jung-visualization-2.0.jar:../micot-libraries/jars/jung-samples-2.0.jar:../micot-libraries/jars/jung-jai-samples-2.0.jar:../micot-libraries/jars/jung-jai-2.0.jar:../micot-libraries/jars/jung-io-2.0.jar:../micot-libraries/jars/jung-graph-impl-2.0.jar:../micot-libraries/jars/jung-api-2.0.jar:../micot-libraries/jars/jung-api-2.0-tests.jar:../micot-libraries/jars/jung-algorithms-2.0.jar:../micot-libraries/jars/jung-3d-demos-2.0.jar:../micot-libraries/jars/javax.json-1.0.4.jar:../micot-libraries/jars/javax.json-api-1.0.jar:../micot-libraries/jars/jung-3d-2.0.jar gov.lanl.micot.rdt.exec.RunLPNorm -c ../../inData/'+rdtInFile+' -e ../../outData/'+rdtOutFile
+	os.chdir("bin/micot-application-rdt/rdt")
+	#command = 'java -classpath ,:micot-rdt.jar:../micot-libraries/jars/jna-4.1.0.jar:../micot-libraries/jars/jung-visualization-2.0.jar:../micot-libraries/jars/jung-samples-2.0.jar:../micot-libraries/jars/jung-jai-samples-2.0.jar:../micot-libraries/jars/jung-jai-2.0.jar:../micot-libraries/jars/jung-io-2.0.jar:../micot-libraries/jars/jung-graph-impl-2.0.jar:../micot-libraries/jars/jung-api-2.0.jar:../micot-libraries/jars/jung-api-2.0-tests.jar:../micot-libraries/jars/jung-algorithms-2.0.jar:../micot-libraries/jars/jung-3d-demos-2.0.jar:../micot-libraries/jars/javax.json-1.0.4.jar:../micot-libraries/jars/javax.json-api-1.0.jar:../micot-libraries/jars/jung-3d-2.0.jar gov.lanl.micot.rdt.exec.RunLPNorm -c ../../inData/'+rdtInFile+' -e ../../outData/'+rdtOutFile
+	command = 'java -jar micot-rdt.jar -c example.json -e out.json'
+
 	proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
 	(out, err) = proc.communicate()
 	# Format output feeder.
