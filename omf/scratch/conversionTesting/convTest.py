@@ -35,6 +35,7 @@ def encryptData(data, key):
 	cipher_suite = Fernet(key)
 	encryptedData = cipher_suite.encrypt(str(data))
 	return encryptedData
+
 def decryptData(data, key):
 	'''Decrypt and return plaintext data.'''
 	cipher_suite = Fernet(key)
@@ -172,7 +173,6 @@ def _tests():
 			arrays.append(group)
 
 	# Runs milsoft tests on seq std files and then deletes results and decrypted files
-
 	milsoftToGridlabTests(arrays)
 	if(os.path.isdir('./milToGridlabTests/')):
 		shutil.rmtree('./milToGridlabTests/')
@@ -181,3 +181,14 @@ def _tests():
 	print "finished"
 if __name__ == "__main__":
 	_tests()
+# user = 'convTest'
+# key = getKey(_cryptoPath,user)
+# encryptedFilesFolder = pJoin(_cryptoPath,"encryptedFiles")
+# for file in os.listdir("./needEncryption/"):
+# 	fileName = "Encrypted_"+str(file)
+# 	with open(pJoin("./needEncryption/",str(file)),'r') as r:
+# 				r = r.read()
+# 	encryptedData = encryptData(r,key)
+# 	with open(pJoin(encryptedFilesFolder,fileName),"w+") as f:
+# 		f.write(encryptedData)
+
