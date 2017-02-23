@@ -660,6 +660,11 @@ def run(modelDir, inputDict):
 		inputDict["created"] = str(dt.datetime.now())
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
+	# DO WORK HERE!
+	allOutput['test'] = 4
+	# DONE DOING WORK
+	with open(pJoin(modelDir, "allOutputData.json"),"w") as outputFile:
+		json.dump(allOutput, outputFile, indent = 4)
 	
 
 def cancel(modelDir):
