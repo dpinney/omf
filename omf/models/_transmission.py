@@ -33,7 +33,7 @@ def run(modelDir, inputDict):
 	except Exception, e:
 		pass
 	try:
-		os.remove(pJoin(modelDir,inputDict.get("networkName1","network1")+".m"))
+		os.remove(pJoin(modelDir,inputDict.get("networkName1","default")+".m"))
 	except Exception, e:
 		pass		
 	try:
@@ -217,7 +217,7 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"user": "admin",
-		"networkName": "case9",
+		"networkName1": "case9",
 		"algorithm": "NR",
 		"model": "AC",
 		"tolerance": math.pow(10,-8),

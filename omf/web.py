@@ -399,7 +399,7 @@ def networkGet(owner, modelName, networkNum):
 	yourNetworks = allData["networks"]
 	publicNetworks = allData["networks"]
 	modelDir = os.path.join(_omfDir, "data","Model", owner, modelName)
-	networkName = json.load(open(modelDir + "/allInputData.json")).get('networkName')
+	networkName = json.load(open(modelDir + "/allInputData.json")).get('networkName1')
 	networkPath = modelDir + "/" + networkName + ".omt"
 	with open(modelDir + "/" + networkName + ".omt", "r") as netFile:
 		networkData = json.dumps(json.load(netFile), indent=4)
