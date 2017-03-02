@@ -671,12 +671,13 @@ def cymeImport(owner):
 	# Saves .mdb files to model folder
 	mdbNetString.save(os.path.join(modelFolder,'mdbNetFile.mdb'))
 	mdbEqString.save(os.path.join(modelFolder,'mdbEqString.mdb'))
-	if not os.path.isdir("data/Conversion/" + owner):
-		os.makedirs("data/Conversion/" + owner)
-	with open("data/Conversion/" + owner + "/" + feederName + ".json", "w+") as conFile:
-		conFile.write("WORKING")
+	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
+		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
 	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederName, feederNum, mdbNetString.filename, mdbEqString.filename])
 	importProc.start()
+	pid = str(importProc.pid)
+	with open(modelFolder+"/ZPID.txt", "w+") as outFile:
+		outFile.write(pid)
 	return ('',204)
 
 def cymeImportBackground(owner, modelName, feederName, feederNum, mdbNetString, mdbEqString):
@@ -684,7 +685,7 @@ def cymeImportBackground(owner, modelName, feederName, feederNum, mdbNetString, 
 	modelDir = "data/Model/"+owner+"/"+modelName
 	feederDir = modelDir+"/"+feederName+".omd"
 	newFeeder = dict(**feeder.newFeederWireframe)
-	[newFeeder["tree"], xScale, yScale] = cymeToGridlab.convertCymeModel(mdbNetString, mdbEqString)
+	[newFeeder["tree"], xScale, yScale] = cymeToGridlab.convertCymeModel(mdbNetString, mdbEqString, modelDir)
 	newFeeder["layoutVars"]["xScale"] = xScale
 	newFeeder["layoutVars"]["yScale"] = yScale
 	with open("./schedules.glm","r") as schedFile:
@@ -693,7 +694,7 @@ def cymeImportBackground(owner, modelName, feederName, feederNum, mdbNetString, 
 	except: pass
 	with open(feederDir, "w") as outFile:
 		json.dump(newFeeder, outFile, indent=4)
-	os.remove("data/Conversion/" + owner + "/" + feederName + ".json")
+	os.remove("data/Model/" + owner + "/" +  modelName + "/ZPID.txt")
 	removeFeeder(owner, modelName, feederNum)
 	writeToInput(modelDir, feederName, 'feederName'+str(feederNum))
 

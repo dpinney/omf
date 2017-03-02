@@ -146,6 +146,7 @@ def _tests():
 
 	# Creating [[.std,.seq],[.std,.seq],[.stq,.seq],...] structure for testing functions
 	# This is a HACK, could use some help here, flatten/zip functions?
+	# This also depends on the ordering of the std, seq files
 	seqFilenames = []
 	groupedFiles = []
 	for file in os.listdir(decryptedDataFolder):
@@ -174,10 +175,10 @@ def _tests():
 
 	# Runs milsoft tests on seq std files and then deletes results and decrypted files
 	milsoftToGridlabTests(arrays)
-	if(os.path.isdir('./milToGridlabTests/')):
-		shutil.rmtree('./milToGridlabTests/')
-	if(os.path.isdir(decryptedDataFolder)):
-		shutil.rmtree(decryptedDataFolder)
+	# if(os.path.isdir('./milToGridlabTests/')):
+	# 	shutil.rmtree('./milToGridlabTests/')
+	# if(os.path.isdir(decryptedDataFolder)):
+	# 	shutil.rmtree(decryptedDataFolder)
 	print "finished"
 if __name__ == "__main__":
 	_tests()
