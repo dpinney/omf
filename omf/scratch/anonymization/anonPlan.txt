@@ -1,12 +1,32 @@
-OOO What is the test data set?
-	OOO Put simpleMarket system into this scratch folder.
-	OOO 
-OOO Implement def psuedomizeNames():
-OOO Implement def randomizeNames():
-OOO Implement def translateLocations(translation,rotation):
-OOO Implement def randomizeLocation():
-OOO Implement def combineLoads():
-OOO Implement def modifyConductorLengths():
-OOO Implement def smoothLoads():
-OOO Implement def shuffleLoads(percent):
-OOO Implement def addNoise(percent):
+XXX What is the initial test data set?
+	XXX Put simpleMarket system into this scratch folder.
+	XXX Transmission test system case9. 
+	XXX What's the test function? Stub created.
+OOO Implement def psuedomizeNames()
+	XXX Add code to implement. We know basically what it should do.
+	OOO Debug the pseudomizeNames.
+OOO Implement def randomizeNames()
+	OOO Create tests.
+	OOO Implement.
+	OOO Make sure it passes the tests.
+	OOO Is there a refactoring that will reduce duplication of similar code?
+OOO Implement def randomizeLocation()
+	OOO Create tests like ones for names.
+	OOO Add latitude and longitude attributes to all simple market test objects in the tree.
+	OOO Replace the links, hiddenLinks, nodes, hiddenNodes each with empty lists.
+	OOO Walk the tree, replace each lat and lon with a random one uniformly distributed between 0 and 1000.
+OOO Implement def translateLocations(translation,rotation)
+	OOO Create tests like the ones for names.
+	OOO Replace the links, hiddenLinks, nodes, hiddenNodes each with empty lists.
+	OOO Walk the tree, replace each lat and lon with a translated and rotated version.
+OOO Implement def addNoise(noisePerc)
+	OOO Create tests like the ones for names.
+	OOO Walk the tree, try to convert each value to a float and a complex number, if it succeeds add noise, if it fails ignore it.
+	OOO What do we mean by noise? Add a uniform distributed random value between [value - noisePerc*value, value + noisePerc*value].
+OOO How do we open these .omd files in gridEdit? We need a visualizeFeeder function.
+OOO Implement def smoothLoads()
+OOO Implement def shuffleLoads(percent)
+OOO Implement def combineLoads()
+OOO Implement def modifyConductorLengths()
+OOO How do we do all of the above for transmission? have pairs of functions, e.g. tranPseudomizeNames and distPseudomizeNames. Next step?
+OOO Is our test dataset good enough?
