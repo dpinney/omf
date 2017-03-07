@@ -1,0 +1,12 @@
+OOO What is the test data set?
+	OOO Put simpleMarket system into this scratch folder.
+	OOO 
+OOO Implement def psuedomizeNames():
+OOO Implement def randomizeNames():
+OOO Implement def translateLocations(translation,rotation):
+OOO Implement def randomizeLocation():
+OOO Implement def combineLoads():
+OOO Implement def modifyConductorLengths():
+OOO Implement def smoothLoads():
+OOO Implement def shuffleLoads(percent):
+OOO Implement def addNoise(percent):
