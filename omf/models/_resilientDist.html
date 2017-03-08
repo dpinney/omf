@@ -91,7 +91,7 @@
 			
 			<div class="shorterInput">
 				<label>Model Name</label>
-				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$" required="required">
+				<input type="text" id="modelName" name="modelName" pattern="^[\w\s\d\.-]+$">
 			</div>
 			
 			
@@ -121,47 +121,47 @@
 
 			<div class="shortInput">
 				<label class="tooltip">Line Fixed Cost ($)</label>
-				<input type="text" id="lineFixedCost" name="lineFixedCost" value="1000" >
+				<input type="text" id="lineFixedCost" name="lineFixedCost">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Line Unit Cost ($/ft)</label>
-				<input type="text" id="lineUnitCost" name="lineUnitCost" value="-" >
+				<input type="text" id="lineUnitCost" name="lineUnitCost">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Switch Cost ($)</label>
-				<input type="text" id="switchCost" name="switchCost" value="500" >
+				<input type="text" id="switchCost" name="switchCost">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Hardening Unit Cost ($/ft)</label>
-				<input type="text" id="hardeningUnitCost" name="hardeningUnitCost" value="1000"  >
+				<input type="text" id="hardeningUnitCost" name="hardeningUnitCost">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">DG Fixed Cost ($)</label>
-				<input type="text" id="dgFixedCost" name="dgFixedCost" value="10000" >
+				<input type="text" id="dgFixedCost" name="dgFixedCost">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">DG Unit Cost ($/MW)</label>
-				<input type="text" id="dgUnitCost" name="dgUnitCost" value="-" >
+				<input type="text" id="dgUnitCost" name="dgUnitCost">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Hardening Fixed Cost ($)</label>
-				<input type="text" id="hardeningFixedCost" name="hardeningFixedCost" value="-"  >
+				<input type="text" id="hardeningFixedCost" name="hardeningFixedCost">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Max DG Per Generator (MW)</label>
-				<input type="text" id="maxDG" name="maxDG" value="10" >
+				<input type="text" id="maxDG" name="maxDG">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Hardening Candidates</label>
-				<input type="text" id="hardeningCandidates" name="hardeningCandidates" value="Line_id1, lineid_2">
+				<input type="text" id="hardeningCandidates" name="hardeningCandidates">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">New Line Candidates</label>
-				<input type="text" id="newLineCandidates" name="newLineCandidates" value="(node1,node2)(node3,node4)">
+				<input type="text" id="newLineCandidates" name="newLineCandidates">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generator Candidates</label>
-				<input type="text" id="generatorCandidates" name="generatorCandidates" value="node1">
+				<input type="text" id="generatorCandidates" name="generatorCandidates">
 			</div>
 
 			<div class="wideInput">
@@ -171,35 +171,95 @@
 
 			<div class="shortInput">
 				<label class="tooltip">Critical Load Met (%)</label>
-				<input type="text" id="criticalLoadMet" name="criticalLoadMet" value="75" >
+				<input type="text" id="criticalLoadMet" name="criticalLoadMet">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Non-Critical Load Met (%)</label>
-				<input type="text" id="nonCriticalLoadMet" name="nonCriticalLoadMet" value="25" >
+				<input type="text" id="nonCriticalLoadMet" name="nonCriticalLoadMet">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Chance Constraint (%)</label>
-				<input type="text" id="chanceConstraint" name="chanceConstraint" value="50" >
+				<input type="text" id="chanceConstraint" name="chanceConstraint">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Phase Variation</label>
-				<input type="text" id="phaseVariation" name="phaseVariation" value="25.0" >
+				<input type="text" id="phaseVariation" name="phaseVariation">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Weather Impacts (.asc)<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="file" name="weatherUpload" value="weatherUpload" id="weatherUpload">
+				<label class="tooltip">Weather Impacts (.asc file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var fileName=true;</script>
+				<input type="file" id="weatherImpactsFile" name="weatherImpactsFile" accept=".asc" onchange="handle_files(this.files)">
+				<input id="weatherImpacts" name="weatherImpacts" type="hidden">
+				<!-- Format the file input and populate it with a saved file. -->
+				<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+				<div id="fileBackground"></div>
+				<div id="fileExists"><label for="weatherImpactsFile" id="weatherImpactsFileName" name="weatherImpactsFileName"></label></div>
+				<script>
+					if (typeof allInputData.weatherImpactsFileName !== 'undefined') {					
+						document.getElementById('weatherImpactsFileName').innerHTML = allInputData.weatherImpactsFileName;
+					}
+					else {
+						document.getElementById('weatherImpactsFileName').innerHTML = 'Please select a file'
+						gebi('weatherImpactsFile').setAttribute('required', 'required')
+					}
+					// File handler function.
+					function handle_files(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("weatherImpacts").value = reader.result
+							var FileName = gebi("weatherImpactsFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('weatherImpactsFileName').innerHTML = FileName;
+							gebi("fileName").value = FileName;
+						}
+					}
+				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Pole Data (.json)<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="file" name="poleUpload" value="poleUpload" id="poleUpload">
+				<label class="tooltip">Pole Data (.json file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var fileName=true;</script>
+				<input type="file" id="poleDataFile" name="poleDataFile" accept=".asc" onchange="handle_pole_files(this.files)">
+				<input id="poleData" name="poleData" type="hidden">
+				<!-- Format the file input and populate it with a saved file. -->
+				<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+				<div id="fileBackground"></div>
+				<div id="fileExists"><label for="poleDataFile" id="poleDataFileName" name="poleDataFileName"></label></div>
+				<script>
+					if (typeof allInputData.poleDataFileName !== 'undefined') {					
+						document.getElementById('poleDataFileName').innerHTML = allInputData.poleDataFileName;
+					}
+					else {
+						document.getElementById('poleDataFileName').innerHTML = 'Please select a file'
+						gebi('poleDataFile').setAttribute('required', 'required')
+					}
+					// File handler function.
+					function handle_pole_files(files) {
+						// read file to a hidden input field
+						reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("poleData").value = reader.result
+							var FileName = gebi("poleDataFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('poleDataFileName').innerHTML = FileName;
+							gebi("fileName").value = FileName;
+						}
+					}
+				</script>
 			</div>
 			<div class="shortInput">
 				<label>Simulation Date</label>
-				<input type="text" id="simDate" name="simDate" value ="2016-01-01">
+				<input type="text" id="simDate" name="simDate">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode" value="64735" required="required">
+				<input type="text" id="zipCode" name="zipCode">
 			</div>
 
 			<div class="wideInput" style="text-align:right">

@@ -28,7 +28,7 @@ from omf.solvers import gridlabd
 def GFMPrep():
 	fragIn = {}
 
-	with open(pJoin(os.getcwd(), 'bin','gfm', "_fragility_input_example.json"), "r") as fragInBase:
+	with open(pJoin("../../", 'solvers','gfm', "_fragility_input_example.json"), "r") as fragInBase:
 		fragInputBase = json.load(fragInBase)
 
 	fragIn['assets'] = []
@@ -42,22 +42,27 @@ def GFMPrep():
 
 	for key in feederModel['tree'].keys():
 		asset = copy.deepcopy(baseAsset)
-		asset['poleID'] = key
-		if "longitude" in feederModel['tree'][key]:
-			asset['longitude'] = feederModel['tree'][key]['longitude']
-		else:
-			asset['longitude'] = "0.0"
-		if "latitude" in feederModel['tree'][key]:
-			asset['latitude'] = feederModel['tree'][key]['latitude']
-		else:
-			asset['latitude'] = "0.0"
+		asset['id'] = key
+		if "longitude" in feederModel['tree'][key] and "latitude" in feederModel['tree'][key]:
+			asset['assetGeometry']['coordinates'] = [feederModel['tree'][key]['longitude'], feederModel['tree'][key]['latitude']]
 		fragIn['assets'].append(asset)
 
 	with open("data.json", "w") as outFile:
 		json.dump(fragIn, outFile, indent=4)	
 
+def checkInput():
+	with open(pJoin("../../data/Model/admin/Automated Testing of _resilientDist/allInputData.json"), "r") as fragOutBase:
+		fragOutBase = json.load(fragOutBase)
+
+	test = json.loads(fragOutBase["poleData"])
+	print test["assets"]
+
+	with open(pJoin("../../", 'solvers','gfm', "_fragility_input_example.json"), "r") as fragInBase:
+		fragInputBase = json.load(fragInBase)
+	#print fragInputBase["assets"]
+
+
 def runGFM(inputFileName):
-	#spits out 'out.json' in the directory below, this is 'scenarios.json' as mentioned in the specs
 	os.chdir("../../solvers/GFM")
 	proc = subprocess.Popen(['java','-jar','Fragility.jar', inputFileName, 'out.json'])
 
@@ -97,8 +102,9 @@ def runExample(toRun):
 
 	elif(toRun == "gfm"):
 		os.chdir("../../solvers/GFM")
-		proc = subprocess.Popen(['java','-jar','Fragility.jar', '_fragility_input_example.json', 'out.json'])
+		proc = subprocess.Popen(['java','-jar','Fragility.jar', '../../scratch/LPNORM Integration Code/data.json', 'out.json'])
 
 if __name__=='__main__':
-	runExample("gfm")
+	#runExample("gfm")
 	#GFMPrep();
+	checkInput()

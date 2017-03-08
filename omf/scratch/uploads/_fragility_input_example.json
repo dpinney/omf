@@ -1,0 +1,3195 @@
+{
+ "assets": [
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.65442951699998, 
+     41.75009340600008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "sourcebus", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.65474390999998, 
+     41.74961275700008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2800", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.65509313499997, 
+     41.74908349800006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2802", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.66174011099997, 
+     41.747438301000045
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2806", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.68348472699995, 
+     41.73798052600006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2808", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.68614505099998, 
+     41.74131020300007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2810", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.71263187999993, 
+     41.725293417000046
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2812", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.73573224999996, 
+     41.71523051400004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2814", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.73573224999996, 
+     41.71523051400004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2814r", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.73574001499996, 
+     41.71522712700005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2850", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.73598085299993, 
+     41.71512217900005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2816", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.73519662599993, 
+     41.71414151000005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2818", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74391252599997, 
+     41.71166538700004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2824", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.71312342699997, 
+     41.68652638400005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2820", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.70682784399997, 
+     41.67864563400008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2822", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74626623899997, 
+     41.71063943200005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2826", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74429780299995, 
+     41.71214709600008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2828", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76017440599996, 
+     41.70522526100007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2830", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76057826899995, 
+     41.705049142000064
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2854", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.77869573599997, 
+     41.69714625100005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2856", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74368743799995, 
+     41.68393009900007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2852", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74368743799995, 
+     41.68393009900007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2852r", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74368285199995, 
+     41.683924365000045
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2832", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74143639999994, 
+     41.68111447500007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2858", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74596320199998, 
+     41.67914055400007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2834", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74753160499995, 
+     41.678456590000046
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2860", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74583482999998, 
+     41.67897999500008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2842", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74521591399997, 
+     41.67820585900006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2844", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74354719299998, 
+     41.67611855200005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2846", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74330422599996, 
+     41.67581462700008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2848", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74961241099999, 
+     41.67754912000004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2836", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74974078799994, 
+     41.67770967500008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2862", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.75196912199993, 
+     41.68049647200007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2838", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.75028011999996, 
+     41.67725790900005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2840", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74069373399993, 
+     41.68018548400005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2864", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74373534499995, 
+     41.68390147500003
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2888", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.75074378099998, 
+     41.68085914900007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "2890", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.65510333299994, 
+     41.75025630800008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1800", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.65586124099998, 
+     41.75044012600006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1802", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.65949315599994, 
+     41.75481702900004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1806", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.67460835399999, 
+     41.769699640000056
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1808", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.67049473399999, 
+     41.77209429300007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1810", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.69558936399994, 
+     41.78930312600005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1812", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.71223144799995, 
+     41.80484264300002
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1814", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.71223144799995, 
+     41.80484264300002
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1814r", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.71223704899995, 
+     41.80484786900007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1850", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.712410617, 
+     41.80500989200005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1816", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.71362276899998, 
+     41.80430396200006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1818", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.71812764299993, 
+     41.81034609500006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1824", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74774433999994, 
+     41.78442200600006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1820", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.75747766399996, 
+     41.77874694800005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1822", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.719824438, 
+     41.811929666000026
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1826", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.71753217199995, 
+     41.81069289300007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1828", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.72898000599997, 
+     41.82137514100003
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1830", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.72927128699997, 
+     41.821646890000075
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1854", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.74234208899996, 
+     41.83383838300006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1856", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.75537572799993, 
+     41.806436467000026
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1852", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.75537572799993, 
+     41.806436467000026
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1852r", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.75538281499996, 
+     41.80643233700005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1832", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.75885499099996, 
+     41.80440830800006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1858", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76212134799994, 
+     41.80745417500003
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1834", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76325315099996, 
+     41.80850950300004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1860", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76231975499996, 
+     41.80733850900003
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1842", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76327635399997, 
+     41.80678082400004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1844", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76585554599995, 
+     41.80527710800004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1846", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76623107899997, 
+     41.80505815600003
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1848", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76475480799996, 
+     41.809909624000056
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1836", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76455639799998, 
+     41.81002529500006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1862", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.761112455, 
+     41.81203296800004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1838", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76523669499994, 
+     41.810358915000045
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1840", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.760002892, 
+     41.803739118000074
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1864", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.75542068699998, 
+     41.80646765700004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1888", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.76045901399993, 
+     41.81118524100003
+    ], 
+    "type": "Point"
+   }, 
+   "id": "1890", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.65401264699993, 
+     41.750528385000045
+    ], 
+    "type": "Point"
+   }, 
+   "id": "800", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.65355202099995, 
+     41.75100901300005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "802", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.64663157899997, 
+     41.751839096000026
+    ], 
+    "type": "Point"
+   }, 
+   "id": "806", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.62309290599995, 
+     41.75857117600003
+    ], 
+    "type": "Point"
+   }, 
+   "id": "808", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.62119990499998, 
+     41.754966895000045
+    ], 
+    "type": "Point"
+   }, 
+   "id": "810", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.59152388499996, 
+     41.76759124000006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "812", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.56649019399998, 
+     41.77473690900007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "814", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.56649019399998, 
+     41.77473690900007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "814r", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.56648177299996, 
+     41.774739313000055
+    ], 
+    "type": "Point"
+   }, 
+   "id": "850", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.56622071499999, 
+     41.774813796000046
+    ], 
+    "type": "Point"
+   }, 
+   "id": "816", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.56677774499998, 
+     41.77587596800004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "818", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55762234599997, 
+     41.77726666500007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "824", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.58246943999995, 
+     41.805784008000046
+    ], 
+    "type": "Point"
+   }, 
+   "id": "820", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.58694965099994, 
+     41.81431834400007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "822", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55507050999995, 
+     41.77799448800005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "826", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55734877699997, 
+     41.77674487500008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "828", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.54013349499996, 
+     41.78165367500003
+    ], 
+    "type": "Point"
+   }, 
+   "id": "830", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.53969550199997, 
+     41.78177852600004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "854", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.52004314399994, 
+     41.78737853100006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "856", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55168906499995, 
+     41.80465798000006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "852", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55168906499995, 
+     41.80465798000006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "852r", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55169232199995, 
+     41.80466419200008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "832", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55328858099993, 
+     41.80770811800005
+    ], 
+    "type": "Point"
+   }, 
+   "id": "858", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.54837634499995, 
+     41.80910835600002
+    ], 
+    "type": "Point"
+   }, 
+   "id": "834", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.54667428999994, 
+     41.80959347000004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "860", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.54846755399996, 
+     41.80928229700004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "842", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.54890731599994, 
+     41.81012094800008
+    ], 
+    "type": "Point"
+   }, 
+   "id": "844", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55009309799993, 
+     41.81238218900006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "846", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55026575999993, 
+     41.81271143600002
+    ], 
+    "type": "Point"
+   }, 
+   "id": "848", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.54441608199994, 
+     41.81023705600006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "836", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.54432488199996, 
+     41.810063111000034
+    ], 
+    "type": "Point"
+   }, 
+   "id": "862", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.54274198599995, 
+     41.80704391500007
+    ], 
+    "type": "Point"
+   }, 
+   "id": "838", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.54369142299998, 
+     41.810443571000064
+    ], 
+    "type": "Point"
+   }, 
+   "id": "840", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55381635499998, 
+     41.808714476000034
+    ], 
+    "type": "Point"
+   }, 
+   "id": "864", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.55163536499998, 
+     41.80468042800004
+    ], 
+    "type": "Point"
+   }, 
+   "id": "888", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }, 
+  {
+   "assetClass": "PowerDistributionPole", 
+   "assetGeometry": {
+    "coordinates": [
+     -72.54403355599999, 
+     41.80683438500006
+    ], 
+    "type": "Point"
+   }, 
+   "id": "890", 
+   "properties": {
+    "baseDiameter": 0.22225, 
+    "cableSpan": 25.4669, 
+    "commAttachmentHeight": 4.7244, 
+    "commCableDiameter": 0.04, 
+    "commCableNumber": 2, 
+    "commCableWireDensity": 1500.0, 
+    "height": 9.144, 
+    "meanPoleStrength": 37600000.0, 
+    "powerAttachmentHeight": 5.6388, 
+    "powerCableDiameter": 0.0094742, 
+    "powerCableNumber": 2, 
+    "powerCableWireDensity": 2700.0, 
+    "powerCircuitName": "NAME", 
+    "stdDevPoleStrength": 7700000.0, 
+    "topDiameter": 0.15361635107, 
+    "woodDensity": 500.0
+   }
+  }
+ ], 
+ "hazardFields": 
+	[
+		{
+			"id": "hawaiiArcTestGrid",
+			"hazardQuantityType": "Windspeed",
+			"rasterFieldData": 
+			{
+				"uri": "file:///C:/WindGrid_lpnorm_example.asc",
+				"gridFormat": "ArcGrid",
+				"crsCode": "EPSG:4326",
+				"nBands": 1,
+				"rasterBand": 1,
+				"valueType": "double"
+			}
+		}
+	],
+	"responseEstimators": 
+	[
+		{
+			"id": "PowerPoleWindStressEstimator",
+			"responseEstimatorClass": "PowerPoleWindStressEstimator",
+			"assetClass": "PowerDistributionPole",
+			"hazardQuantityTypes": ["Windspeed"],
+			"responseQuantityType": "DamageProbability",
+			"properties": 
+			{
+
+			}
+		}
+	]
+}
