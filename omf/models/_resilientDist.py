@@ -185,14 +185,14 @@ def makeLines(rdtJson, jsonTree, debug):
 				for a,val in elem.iteritems():
 					print "      %s: %s"%(str(a), str(val))				
 	return lineCount
-def makeLineCodes(rdtJson, jsonTree, lineCount, inDir, debug):
+def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
 	'''line_codes: create one for each line.
 	For now, use values from rdtInputTrevor.json.
 	TODO*: keep track of which matrices have 0 for which phases, and use appropriate ones.
 	TODO: Give special x/r matrices for transformers.
 	TODO: Read x/r matrices from gridlabD csv recorder file.
 	'''
-	xMatrices, rMatrices = readXRMatrices(inDir, 'rdtInSimple_Market_System.json', 100)
+	xMatrices, rMatrices = readXRMatrices(dataDir, 'rdtInSimple_Market_System.json', 100)
 	for lineCode in range(0,lineCount):
 		newLineCode = createObj('line_code')
 		newLineCode['line_code'] = lineCode
@@ -315,7 +315,7 @@ def makeGens(rdtJson, jsonTree, debug):
 				print "   Generator:"
 				for a,val in elem.iteritems():
 					print "      %s: %s"%(str(a), str(val))				
-def convertToRDT(inData, inDir, feederName, debug=False):
+def convertToRDT(inData, dataDir, feederName, debug=False):
 	'''Read a omd.json feeder and convert it to fragility/RDT format.
 	'''
 	# Create RDT dict.
@@ -335,52 +335,46 @@ def convertToRDT(inData, inDir, feederName, debug=False):
 		'generators' : []	
 	}
 	# Read and put omd.json into rdt.json.
-	with open(pJoin(inDir,feederName), "r") as jsonIn:
+	with open(pJoin(dataDir,feederName), "r") as jsonIn:
 		jsonTree = json.load(jsonIn).get('tree','')
 	makeScenarios(rdtJson, jsonTree, debug)
 	lineCount = makeLines(rdtJson, jsonTree, debug)
-	makeLineCodes(rdtJson, jsonTree, lineCount, inDir, debug)
+	makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug)
 	makeBuses(rdtJson, jsonTree, debug)
 	makeLoads(rdtJson, jsonTree, debug)
 	makeGens(rdtJson, jsonTree, debug)
 	# Write to file.
 	rdtInFile = 'rdtIn'+feederName.strip('omd')+'json'
-	with open(pJoin(inDir,rdtInFile), "w") as outFile:
+	with open(pJoin(dataDir,rdtInFile), "w") as outFile:
 		json.dump(rdtJson, outFile, indent=4)
 	if debug:		
-		print "Done... RDT input saved to:            %s"%(pJoin(inDir,rdtInFile))
+		print "Done... RDT input saved to:            %s"%(pJoin(dataDir,rdtInFile))
 		print "************************************\n\n"
 	return rdtInFile
 
-def convertToFrag(inData, inDir, feederName, debug=False):
-	# Read and put rdtJson into frag.json.
-	if debug:
-		print "Generating fragility input..."
-		print "************************************"
-	rdtInFile = 'rdtIn'+feederName.strip('omd')+'json'
-	with open(pJoin(inDir,rdtInFile), "r") as jsonIn:
-		fragJson = json.load(jsonIn).get('scenarios','')
-	fragInFile = 'fragIn'+feederName.strip('omd')+'json'
-	with open(pJoin(inDir,fragInFile), "w") as outFile:
-		json.dump(fragJson, outFile, indent=4)	
-	if debug:	
-		print "Done... Fragility input saved to:      %s"%(pJoin(inDir,fragInFile))
-		print "************************************\n\n"
-	return fragInFile
+def readXRMatrices(dataDir, rdtFile, length):
+	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
+	'''
+	xMatrix, rMatrix = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
+	with open(pJoin(dataDir,rdtFile), "r") as jsonIn:
+		lineCodes = json.load(jsonIn)['line_codes']
+	for i,code in enumerate(lineCodes):
+		if i > length: break
+		xMatrix[int(code['num_phases'])].append(code['xmatrix'])
+		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
+	return xMatrix, rMatrix
 
 def GFMPrep():
 	fragIn = {}
 
 	with open(pJoin("../data/Model/admin/Automated Testing of _resilientDist/allInputData.json"), "r") as fragInBase:
 		fragInBase = json.load(fragInBase)
-
 	fragInputBase = json.loads(fragInBase["poleData"])
+	baseAsset = fragInputBase['assets'][1]
 
 	fragIn['assets'] = []
 	fragIn['hazardFields'] = fragInputBase['hazardFields']
 	fragIn['responseEstimators'] = fragInputBase['responseEstimators']
-
-	baseAsset = fragInputBase['assets'][1]
 
 	with open(pJoin('../', 'data', 'model', 'admin', 'Automated Testing of _resilientDist', "Olin Barre Geo.omd"), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
@@ -395,99 +389,40 @@ def GFMPrep():
 	with open(pJoin("../", "scratch", "uploads", "data.json"), "w") as outFile:
 		json.dump(fragIn, outFile, indent=4)
 
-
-def readXRMatrices(inDir, rdtFile, length):
-	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
-	'''
-	xMatrix, rMatrix = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
-	with open(pJoin(inDir,rdtFile), "r") as jsonIn:
-		lineCodes = json.load(jsonIn)['line_codes']
-	for i,code in enumerate(lineCodes):
-		if i > length: break
-		xMatrix[int(code['num_phases'])].append(code['xmatrix'])
-		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
-	return xMatrix, rMatrix
-
-def setFragInputFiles(inDir, fragInFile, disasterFiles):
-	'''Read input json, correct weather data file paths.
-	'''
-	with open(pJoin(inDir,fragInFile), "r") as jsonIn:
-		fragContents = json.load(jsonIn)
-	for key in fragContents.keys():
-		if key == 'hazardFields':
-			for hazardDict in fragContents[key]:
-				for hazkey in hazardDict.keys():
-					if hazkey == 'rasterFieldData':
-						if hazardDict[hazkey].get('uri','') != '':
-							if hazardDict.get('hazardQuantityType','') in disasterFiles.keys():
-								fileName = disasterFiles[hazardDict.get('hazardQuantityType','')]
-								hazardDict[hazkey]['uri'] = 'file:///'+pJoin(inDir,fileName)
-	with open(pJoin(inDir,fragInFile), "w") as outFile:
-		json.dump(fragContents, outFile, indent=4)	
-
-def runFragRDT(workDir, inDir, outDir, rdtInFile, disasterFiles, fragInFile, fragOut, rdtOutFile, toSkip, debug=False):
-	''' Run fragility and RDT.
-	'''
+def runFragility(debug=False):
 	GFMPrep()
-	if 'fragility' not in toSkip:
-		# Run micot-fragility.
-		setFragInputFiles(inDir, fragInFile, disasterFiles)
-		proc = subprocess.Popen(['java','-jar', pJoin('../../solvers/gfm/Fragility.jar'), pJoin('inData',fragInFile), pJoin(outDir,fragOut)])
-		print "Running Fragility:\n", out
+	# Run micot-fragility.
+	origWorkDir = os.getcwd()
+	os.chdir("../solvers/gfm")
+	proc = subprocess.Popen(['java','-jar', pJoin('Fragility.jar'), pJoin('../','../','scratch','uploads', 'data.json'), 'out.json'])
+	print "Running Fragility\n"
+	os.chdir(origWorkDir)
 
-		# Place results into RDT input.
-		# Read files.
-		with open(pJoin(outDir,fragOut), "r") as jsonIn:
-			fragContents = json.load(jsonIn)
-		with open(pJoin(inDir,rdtInFile), "r") as jsonIn:
-			rdtContents = json.load(jsonIn)
-		# Get damaged lines.
-		line_list = []
-		for damage in fragContents:
-			# Find line/nodes to disable based on presence in to be damages file.
-			if float(damage['value']) > random.random():
-				for key, values in rdtContents.items():
-					if key == "lines":
-						for item in values:
-							if item["node1_id"] == damage['assetID'] or \
-							   item["node2_id"] == damage['assetID']:
-								if item["id"] not in line_list:
-									line_list.append(item["id"])
-		for key, values in rdtContents.items():
-			if key == "scenarios":
-				values[0]["disable_lines"] = line_list
-		# Write to rdt file.
-		with open(pJoin(inDir,rdtInFile), "w") as outFile:
-			json.dump(rdtContents, outFile, indent=4)	
-		print "Sent damage scenarios to RDT file."
-
-	# Run micot-rdt.
-	if debug:
-		print "Running RDT..."
-		print "************************************"
-
+def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
+	''' Run RDT.
+	'''
+	print "Running RDT..."
+	print "************************************"
 	origWorkDir = os.getcwd()
 	os.chdir("../solvers/rdt")
 	proc = subprocess.Popen(['java','-jar','micot-rdt.jar', '-c', rdtInFile, '-e', rdtOutFile])
 	# Format output feeder.
-	print os.getcwd()
 	with open(pJoin(rdtOutFile), "r") as jsonIn:
 		rdtOut = json.load(jsonIn)
 	with open(pJoin(rdtOutFile),"w") as outFile:
 		json.dump(rdtOut, outFile, indent = 4)
-	if debug: 
-		print "\nOutput saved to:               %s"%(pJoin(outDir, rdtOutFile))
-		print "************************************\n\n"
+	print "\nOutput saved to:               %s"%(pJoin(dataDir, rdtOutFile))
+	print "************************************\n\n"
 	os.chdir(origWorkDir)
 
-def dogridlabD(workDir, inDir, feederName, debug):
+def dogridlabD(workDir, dataDir, feederName, debug):
 	# ... Steps here.
 	# Run gridlabd.
 	if debug:
 		print "Running gridlabD..."
 		print "************************************"
 	# 1. Run gridlabD on circuit.
-	feederJson = json.load(open(pJoin(inDir,feederName)))
+	feederJson = json.load(open(pJoin(dataDir,feederName)))
 	tree = feederJson.get("tree",{})
 	attachments = feederJson.get("attachments",{})
 	# 2. Read output.
@@ -496,7 +431,7 @@ def dogridlabD(workDir, inDir, feederName, debug):
 		print "************************************\n\n"
 	return feederJson
 
-def genDiagram(outDir, feederJson, debug):
+def genDiagram(dataDir, feederJson, debug):
 	if debug:
 		print "Generating Feeder plot..."
 		print "************************************"
@@ -519,139 +454,14 @@ def genDiagram(outDir, feederJson, debug):
 	for rem in toRemove: tree.pop(rem)
 	nxG = feeder.treeToNxGraph(tree)
 	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	plt.savefig(pJoin(outDir,"feederChart.png"))
+	plt.savefig(pJoin(dataDir,"feederChart.png"))
 	if debug:
-		print "Plot saved to:                 %s"%(pJoin(outDir,"feederChart.png"))
+		print "Plot saved to:                 %s"%(pJoin(dataDir,"feederChart.png"))
 		print "************************************\n\n"
 
-def writeHTMLTemplate(workDir, fragOut, rdtOut, displayWeb=True, debug=False):
-	if debug:
-		print "Generating HTML output..."
-		print "************************************"
-	workDir = os.getcwd()
-	f = open(pJoin(workDir, 'lpnorm_output.html'),'w')
-	message = """<html>
-		<head>
-			<style type="text/css">
-				.wrapper{
-					float: left;
-					width: 50%;
-					height: 90%;
-					position: relative;
-				}
-				#feederDiagram{ 
-					width: 100%;
-					height: 75%;
-				}
-				#damageSummary{
-					width: 100%;
-					height: 25%;
-				}
-				#rdtSummary{
-					width: 100%;
-					height: 100%;
-				}
-				#powerflowCheck{
-					position: absolute;
-					z-index: 10;
-					bottom: 0;
-					right: 0;
-					background-color: red;
-				}
-			</style>
-		</head>
-		<body>
-			<p style="font-size:40pt;text-align:center;margin:10 10 10 10;">RDT-Fragility OMF Integration</p>
-			<div class ='wrapper'>
-				<div id = "feederDiagram">
-					<p style="text-align:center;margin:0 0 -12 0;">Feeder Diagram</p>
-					<br>
-					<img src="outData/feederChart.png" alt="Feeder Diagram">
-				</div>
-				<div id = "damageSummary">
-					<p style="text-align:center;margin:0 0 -12 0;">Fragility Input JSON</p>
-					<br>
-					<iframe style="width:95%;" src="inData/fragOutString"></iframe>
-				</div>
-			</div>
-			<div class="wrapper">
-				<div id = "rdtSummary">
-					<p style="text-align:center;margin:0 0 -12 0;">RDT Output JSON</p>
-					<br>
-					<iframe style="width:95%;height:94%;" src="outData/rdtOutputString"></iframe>
-				</div>
-				<!--<div id = "powerflowCheck">
-					Power Check Failed
-				</div>-->
-			</div>
-		</body>
-	</html>"""
-	message = message.replace('fragOutString',fragOut)
-	message = message.replace('rdtOutputString',rdtOut)
-	f.write(message)
-	f.close()
-	if displayWeb: 
-		webbrowser.open_new_tab("file://" + pJoin(workDir,"lpnorm_output.html"))
-		print "\nSaved to:               %s"%(pJoin(workDir, 'lpnorm_output.html'))
-		print "************************************\n\n"	
-
 # Tests.
-def _tests(feederName=None, otherVars={}, testCase=0, debug=False, displayWeb=False):
-	# Setup environment and paths. 
-	workDir = os.getcwd()
+#def _tests(feederName=None, otherVars={}, testCase=0, debug=False, displayWeb=False):
 	
-	#CHANGING WORK DIRECTORY FOR TEMPORARY PURPOSES ONLY, CHANGE BACK
-	#os.chdir('../scratch/LPNORM Integration Code/')
-	#workDir = os.getcwd()
-
-	inDir = pJoin('../','scratch', 'LPNORM Integration Code', 'inData')
-	outDir = pJoin('../','scratch', 'LPNORM Integration Code', 'outData')
-	if not os.path.exists(outDir):
-		os.makedirs(outDir)
-	
-	inData = {
-		'phase_variation' : 0.15, 
-		'chance_constraint' : 1.0,
-		'critical_load_met' : 0.98,
-		'total_load_met' : 0.5
-	}
-	
-	# Case 2: Simple market system.
-	print "Running simple market system example."
-	disable = ['fragility']
-	feederName = 'Simple_Market_System.omd'
-	rdtInFile = convertToRDT(inData, inDir, feederName, debug)
-	fragInFile = convertToFrag(inData, inDir, feederName, debug)
-	disasterFiles = {'Windspeed' : 'WindArcTestGridTrevor.asc'}
-	fragOut = 'fragOutput'+feederName.strip('omd')+'json'
-	rdtOutFile = 'rdtOutput'+feederName.strip('omd')+'json'
-
-	# Run Fragility & RDT.
-	runFragRDT(workDir, inDir, outDir, rdtInFile, disasterFiles, fragInFile, fragOut, rdtOutFile, disable, debug)
-
-	# Create GLM and run gridlabD.
-	feederJson = dogridlabD(workDir, inDir, feederName, debug)
-
-	# Graph feeder.
-	genDiagram(outDir, feederJson, debug)
-
-	# Create HTML page of results.
-	origWorkDir = workDir
-	workDir = os.chdir(pJoin('../','scratch','LPNORM Integration Code'))
-	writeHTMLTemplate(workDir, fragInFile, rdtOutFile)
-	print "Wrote file %s"%('lpnorm_output.html')
-	workDir= os.chdir(origWorkDir)
-
-	#TEMPORARY CHANGE
-	#os.chdir(origWorkDir)
-
-
-#-----------------------------------------------------------------------------------------------------
-#former voltageDrop
-
-
-
-
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	startTime = dt.datetime.now()
@@ -665,12 +475,34 @@ def run(modelDir, inputDict):
 		inputDict["created"] = str(dt.datetime.now())
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
-	# DO WORK HERE!
 	allOutput['test'] = 4
-	# DONE DOING WORK
 	with open(pJoin(modelDir, "allOutputData.json"),"w") as outputFile:
 		json.dump(allOutput, outputFile, indent = 4)
-	_tests(testCase=2, debug=True)
+	
+	# Set up environment and paths
+	workDir = os.getcwd()
+	dataDir = pJoin('../','scratch', 'LPNORM Integration Code', 'Data')
+	if not os.path.exists(dataDir):
+		os.makedirs(dataDir)
+	inData = {
+		'phase_variation' : 0.15, 
+		'chance_constraint' : 1.0,
+		'critical_load_met' : 0.98,
+		'total_load_met' : 0.5
+	}
+	print "Running simple market system example."
+	feederName = 'Simple_Market_System.omd'
+	debug = False
+	rdtInFile = convertToRDT(inData, dataDir, feederName, debug)
+	rdtOutFile = 'rdtOutput'+feederName.strip('omd')+'json'
+
+	# Run Fragility & RDT.
+	runFragility(debug)
+	runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug)
+	# Create GLM and run gridlabD.
+	feederJson = dogridlabD(workDir, dataDir, feederName, debug)
+	# Graph feeder.
+	genDiagram(dataDir, feederJson, debug)
 
 def cancel(modelDir):
 	''' Voltage drop runs so fast it's pointless to cancel a run. '''
@@ -716,7 +548,7 @@ def new(modelDir):
 		return False
 	return creationCode
 
-def _debugging():
+def _runModel():
 	# Location
 	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
@@ -735,4 +567,4 @@ def _debugging():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_debugging()
+	_runModel()
