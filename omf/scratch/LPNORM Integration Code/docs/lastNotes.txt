@@ -1,3 +1,0 @@
-Was looking at distribution feeders here https://ewh.ieee.org/soc/pes/dsacom/testfeeders/
-
-and trying to understand all the values of rdtIn.json by looking at them and the schema.
