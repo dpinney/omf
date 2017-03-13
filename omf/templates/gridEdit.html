@@ -1685,9 +1685,8 @@ function newChildAtSelected(componentName) {
 function newChildAtLocation(component, treeIndex) {
 	console.log(treeIndex)
 	console.log(tree[treeIndex]['name'])
-	
-	treeNewIndex = nextTreeKey()
-	newName = component['object'] + String(treeNewIndex)
+	var treeNewIndex = nextTreeKey()
+	var newName = component['object'] + String(treeNewIndex)
 	// Make sure component's parent is set.
 	component['parent'] = tree[treeIndex]['name']
 	// decide which attribute should be put into node and tree
@@ -1722,7 +1721,7 @@ function newChildAtLocation(component, treeIndex) {
 		}
 		tree[treeNewIndex] = component
 		tree[treeNewIndex].name = newName
-		nodeToAdd = {
+		var nodeToAdd = {
 			name: component.name,
 			objectType: component.object,
 			treeIndex: treeNewIndex,
@@ -1732,7 +1731,7 @@ function newChildAtLocation(component, treeIndex) {
 		nodes.push(nodeToAdd)
 	}
 	// Add to the links.
-	linkToAdd = {
+	var linkToAdd = {
 		source: nodes[findIndex(nodes, 'name', newName)],
 		target: nodes[findIndex(nodes, 'name', tree[treeIndex]['name'])],
 		objectType: 'parentChild'
@@ -2047,8 +2046,7 @@ function addXatY(componentName, attachType, perc) {
 		for (var key in tree) {
 			if (tree[key].hasOwnProperty('object') && tree[key]['object'] == attachType) {
 				if (Math.random() < perc) {
-					var newComp = {}
-					newComp = components[componentName]
+					var newComp = JSON.parse(JSON.stringify(components[componentName]))
 					newChildAtLocation(newComp, key)
 				}
 			}
