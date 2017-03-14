@@ -59,14 +59,14 @@ def translateLocation(inputFeeder, translation, rotation):
 			inputFeeder['tree'][key]['latitude'] += translation*math.sin(rotation)
 	return inputFeeder['tree']
 
-def addNoise(inputFeeder, percent):
+def addNoise(inputFeeder, noisePerc):
 	for key in inputFeeder['tree']:
 		for prop in inputFeeder['tree'][key]:
 			value = inputFeeder['tree'][key][prop]
 			try: 
 				complex(value)
 				value = float(value)
-				randNoise = random.randint( value - percent*value, value + percent*value )
+				randNoise = random.randint(value - noisePerc*value, value + noisePerc*value)
 				inputFeeder['tree'][key][prop] += str(randNoise)
 			except ValueError:
 				continue
@@ -125,8 +125,8 @@ def _tests():
 		json.dump(inputFeeder, outFile, indent=4)
 
 	# Testing addNoise
-	percent = 0.2
-	noises = addNoise(inputFeeder, percent)
+	noisePerc = 0.2
+	noises = addNoise(inputFeeder, noisePerc)
 	# print noises
 	FNAMEOUT = "simpleNoise.omd"
 	with open(FNAMEOUT, "w") as outFile:
