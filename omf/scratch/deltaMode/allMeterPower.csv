@@ -1,0 +1,10 @@
+# file...... allMeterPower.csv
+# date...... Tue Mar 14 08:51:13 2017
+# user...... mhx
+# host...... (null)
+# group..... class=triplex_meter
+# trigger... (none)
+# interval.. -1
+# limit..... 0
+# property.. timestamp,sum(measured_real_power)
+2012-04-01 00:00:00 PDT,+219367

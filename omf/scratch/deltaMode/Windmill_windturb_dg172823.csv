@@ -1,0 +1,9 @@
+# file...... Windmill_windturb_dg172823.csv
+# date...... Tue Mar 14 08:51:13 2017
+# user...... mhx
+# host...... (null)
+# target.... windturb_dg 2272
+# trigger... (none)
+# interval.. 3600
+# limit..... 0
+# timestamp,voltage_A.real,voltage_A.imag,voltage_B.real,voltage_B.imag,voltage_C.real,voltage_C.imag,current_A.real,current_A.imag,current_B.real,current_B.imag,current_C.real,current_C.imag

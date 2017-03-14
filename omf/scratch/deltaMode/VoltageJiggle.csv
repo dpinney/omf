@@ -1,0 +1,9 @@
+# file...... VoltageJiggle.csv
+# date...... Tue Mar 14 08:51:13 2017
+# user...... mhx
+# host...... (null)
+# group..... class=triplex_meter
+# trigger... (none)
+# interval.. 3600
+# limit..... 0
+# property.. timestamp,min(voltage_12.mag),mean(voltage_12.mag),max(voltage_12.mag),std(voltage_12.mag)
