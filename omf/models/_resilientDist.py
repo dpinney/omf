@@ -394,7 +394,7 @@ def runFragility(debug=False):
 	# Run micot-fragility.
 	origWorkDir = os.getcwd()
 	os.chdir("../solvers/gfm")
-	proc = subprocess.Popen(['java','-jar', pJoin('Fragility.jar'), pJoin('../','../','scratch','uploads', 'data.json'), 'out.json'])
+	proc = subprocess.Popen(['java','-jar', pJoin('Fragility.jar'), pJoin('../','../','scratch','uploads', 'data.json'), pJoin(__metaModel__._omfDir, 'scratch','LPNORM Integration Code', 'Data', 'out.json')])
 	print "Running Fragility\n"
 	os.chdir(origWorkDir)
 
@@ -481,7 +481,7 @@ def run(modelDir, inputDict):
 	
 	# Set up environment and paths
 	workDir = os.getcwd()
-	dataDir = pJoin('../','scratch', 'LPNORM Integration Code', 'Data')
+	dataDir = pJoin(__metaModel__._omfDir,'scratch', 'LPNORM Integration Code', 'Data')
 	if not os.path.exists(dataDir):
 		os.makedirs(dataDir)
 	inData = {
@@ -493,8 +493,8 @@ def run(modelDir, inputDict):
 	print "Running simple market system example."
 	feederName = 'Simple_Market_System.omd'
 	debug = False
-	rdtInFile = convertToRDT(inData, dataDir, feederName, debug)
-	rdtOutFile = 'rdtOutput'+feederName.strip('omd')+'json'
+	rdtInFile = dataDir + '/' + convertToRDT(inData, dataDir, feederName, debug)
+	rdtOutFile = dataDir + '/rdtOutput'+feederName.strip('omd')+'json'
 
 	# Run Fragility & RDT.
 	runFragility(debug)
