@@ -64,13 +64,13 @@ def addNoise(inputFeeder, percent):
 		for prop in inputFeeder['tree'][key]:
 			value = inputFeeder['tree'][key][prop]
 			try: 
-				if float(value):
-					randNoise = random.randint(value - percent * value, value + percent * value)
-					print randNoise
-					inputFeeder['tree'][key][prop] += randNoise
+				complex(value)
+				value = float(value)
+				randNoise = random.randint( value - percent*value, value + percent*value )
+				inputFeeder['tree'][key][prop] += str(randNoise)
 			except ValueError:
-				pass
-	return
+				continue
+	return inputFeeder['tree']
 
 
 def combineLoads():
@@ -87,7 +87,6 @@ def shuffleLoads(percent):
 	# 	if randint(0,100) <= percent:
 	# 		feeder.tree[key]
 	pass
-
 
 
 def _tests():
@@ -128,7 +127,7 @@ def _tests():
 	# Testing addNoise
 	percent = 0.2
 	noises = addNoise(inputFeeder, percent)
-	print noises
+	# print noises
 	FNAMEOUT = "simpleNoise.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputFeeder, outFile, indent=4)

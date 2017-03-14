@@ -19,10 +19,10 @@ XXX Implement def translateLocation(translation,rotation)
 	XXX Create tests like the ones for names.
 	XXX Replace the links, hiddenLinks, nodes, hiddenNodes each with empty lists.
 	XXX Walk the tree, replace each lat and lon with a translated and rotated version.
-OOO Implement def addNoise(noisePerc)
+XXX Implement def addNoise(noisePerc)
 	XXX Create tests like the ones for names.
-	OOO Walk the tree, try to convert each value to a float and a complex number, if it succeeds add noise, if it fails ignore it.
-	OOO What do we mean by noise? Add a uniform distributed random value between [value - noisePerc*value, value + noisePerc*value].
+	XXX Walk the tree, try to convert each value to a float and a complex number, if it succeeds add noise, if it fails ignore it.
+	XXX What do we mean by noise? Add a uniform distributed random value between [value - noisePerc*value, value + noisePerc*value].
 OOO How do we open these .omd files in gridEdit? We need a visualizeFeeder function.
 OOO Implement def smoothLoads()
 OOO Implement def shuffleLoads(percent)
