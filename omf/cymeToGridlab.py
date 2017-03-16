@@ -34,24 +34,6 @@ matplotlib.pyplot.switch_backend('Agg')
 
 
 m2ft = 1.0/0.3048             # Conversion factor for meters to feet
-
-# def _openDatabase(database_file):
-#     '''Function that creates a connection to a .mdb database file'''
-#     if sys.platform == 'win32' or sys.platform == 'cygwin':
-#         #Windows Driver: {Microsoft Access Driver (*.mdb)}        
-#         connect_string = 'DRIVER={Microsoft Access Driver (*.mdb)};DBQ=' + str(database_file) + ';'  
-#     elif sys.platform == 'darwin':
-#         # Mac
-#         connect_string = 'DRIVER={FreeTDS};Database='+ str(database_file) + ';TDS_Version=7.0;SERVER=127.0.0.1;PORT=1433;'   
-#     elif sys.platform == 'linux2':
-#         #Linux Driver: {MDBTools}           
-#         connect_string = 'DRIVER={MDBTools};DBQ=' + str(database_file) + ';'    
-#     print"connect string =",(connect_string)
-#     database_connection = pyodbc.connect(connect_string)
-#     print 'connected'
-#     database = database_connection.cursor()
-#     return database
-
 class Map(dict):
     """
     Example:
@@ -86,6 +68,7 @@ class Map(dict):
 
 def _csvDump(database_file, modelDir):
     # Get the list of table names with "mdb-tables"
+    print "database", database_file
     table_names = subprocess.Popen(["mdb-tables", "-1", database_file], 
                                    stdout=subprocess.PIPE).communicate()[0]
     tables = table_names.split('\n')
@@ -948,6 +931,7 @@ def _readEqConductor(feederId, modelDir):
                        'resistance' : None}
     # cymeqconductor_db = equipmentDatabase.execute("SELECT EquipmentId, FirstRating, GMR, R50 FROM CYMEQCONDUCTOR").fetchall()
     cymeqconductor_db =_csvToDictList(pJoin(modelDir,'cymeEquipCsvDump',"CYMEQCONDUCTOR.csv"),columns=['EquipmentId','FirstRating','GMR','R50'])
+    # print cymeqconductor_db
     if len(cymeqconductor_db) == 0:
         warnings.warn("No conductor objects were found in CYMEQCONDUCTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
     else:
@@ -959,6 +943,7 @@ def _readEqConductor(feederId, modelDir):
                 cymeqconductor[row.EquipmentId]['rating.summer_continuous'] = row.FirstRating
                 cymeqconductor[row.EquipmentId]['geometric_mean_radius'] = float(row.GMR)*m2ft/100 #GMR is stored in cm. Must convert to ft.
                 cymeqconductor[row.EquipmentId]['resistance'] = float(row.R50)*5280/(m2ft*1000) # R50 is stored in Ohm/km. Must convert to Ohm/mile
+    print '*****CONDUCTORS RETURNED*****',cymeqconductor
     return cymeqconductor
 
 def _readEqOverheadLineUnbalanced(feederId, modelDir):
@@ -1190,13 +1175,13 @@ def _find_SPCT_rating(load_str):
     
 def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, feeder_id=None):
     if (test==False):
-        network_db_path = "./scratch/uploads/" + network_db 
-        equipment_db_path = "./scratch/uploads/" + equipment_db   
+        network_db_path = modelDir + network_db 
+        equipment_db_path = modelDir + equipment_db   
         network_db = Path(network_db_path).resolve()     
         equipment_db = Path(equipment_db_path).resolve()    
     else:
         network_db = Path(network_db).resolve()     
-        equipment_db = Path(equipment_db).resolve()                  
+        equipment_db = Path(equipment_db).resolve()                 
     conductor_data_csv = None
     dbflag = 0 
     if 'Duke' in str(network_db):
@@ -1380,7 +1365,7 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
         cymeqgeometricalarrangement = _readEqGeometricalArrangement(feeder_id, modelDir) 
     elif dbflag == 1:
         cymeqgeometricalarrangement = _readEqAvgGeometricalArrangement(feeder_id, modelDir)
-    # -18-CYME Read XLSX Sheet**********************************************************************************************************************************************************************
+    # -18-CYME convertCymeModelXLSX Sheet**********************************************************************************************************************************************************************
     cymcsvundergroundcable = _readUgConfiguration(conductor_data_csv, feeder_id)
     # -19-CYME CYMEQREGULATOR**********************************************************************************************************************************************************************
     cymeqregulator = _readEqRegulator(feeder_id, modelDir)
@@ -1471,6 +1456,8 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
                     nodes[cymsectiondevice[device]['parent']]['longitude'] = cymsectiondevice[device]['fromLongitude']
     # Create overhead line conductor dictionaries
     ohl_conds = {}
+    print OH_conductors
+    print "******KEYS******", cymeqconductor.keys()
     for olc in OH_conductors:
         if olc in cymeqconductor.keys():
             if olc not in ohl_conds.keys():
@@ -1585,6 +1572,8 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
     # Create underground line conductor, and spacing dictionaries
     ugl_conds = {}
     ugl_sps = {}
+    print 'ug conductors', UG_conductors
+    print 'cymcsvundergroundcable', cymcsvundergroundcable
     for ulc in UG_conductors:
         if ulc in cymcsvundergroundcable.keys():
             if ulc + 'cond' not in ugl_conds.keys():
@@ -1605,7 +1594,7 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
                                                             'distance_AC' : cymcsvundergroundcable[ulc]['distance_AC'],
                                                             'distance_BC' : cymcsvundergroundcable[ulc]['distance_BC']}
         else:
-            print "Runtimerror: No configuratino spec for {:s} in the underground csv file provided.", ulc
+            print "Runtimerror: No configuration spec for {:s} in the underground csv file provided.", ulc
     # Creat Underground line configuration, and link objects.
     ugl_cfgs = {}
     ugls = {}
@@ -2121,39 +2110,45 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
                 pass
     return glmTree, x_scale, y_scale
     
-def _tests(keepFiles=True):
+def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
     import os, json, traceback, shutil
     from solvers import gridlabd
     from matplotlib import pyplot as plt
     import feeder
-    exceptionCount = 0       
+    exceptionCount = 0
     try:
         #db_network = os.path.abspath('./scratch/uploads/IEEE13.mdb')
         #db_equipment = os.path.abspath('./scratch/uploads/IEEE13.mdb')
-        db_network = "IEEE13.mdb"
-        db_equipment = "IEEE13.mdb"
-        modelDir = './scratch/uploads/'
-        id_feeder = '650'
+        # id_feeder = '650'
+        db_network = testFile
+        db_equipment = testFile
+        # HACK: converting the 1 length .mdb file array to a string to force it into the conversion
+        # function. Will need a loop when more .mdb files are added.
+        if isinstance(db_network,list) == True:
+            db_network = ' '.join(db_network)
+            db_equipment = ' '.join(db_equipment)
         conductors = os.path.abspath('./scratch/uploads/conductor_data.csv')
         #cyme_base, x, y = convertCymeModel(db_network, db_equipment, id_feeder, conductors)
-        cyme_base, x, y = convertCymeModel(db_network, db_equipment, modelDir, test=False, type=1, feeder_id='650')    
+        cyme_base, x, y = convertCymeModel(db_network, db_equipment, modelDir)    
         glmString = feeder.sortedWrite(cyme_base)
-        gfile = open("./scratch/cymeToGridlabTests/IEEE13.glm", 'w')
+        if isinstance(db_network, list):
+            db_network = " ".join(db_network)
+        testFilename = db_network[:-4]
+        gfile = open(modelDir+testFilename+".glm", 'w')
         gfile.write(glmString)
         gfile.close()
-        treeObj = feeder.parse("./scratch/cymeToGridlabTests/IEEE13.glm")
+        treeObj = feeder.parse(modelDir+testFilename+".glm")
         print 'WROTE GLM FOR'
-        outPrefix = './scratch/cymeToGridlabTests/'          
         try:
             os.mkdir(outPrefix)
         except:
             pass # Directory already there.     
-        '''Attempt to graph'''      
+        '''Attempt to graph'''
         try:
             # Draw the GLM.
             myGraph = feeder.treeToNxGraph(cyme_base)
             feeder.latLonNxGraph(myGraph, neatoLayout=False)
-            plt.savefig(outPrefix + "IEEE13.png")
+            plt.savefig(outPrefix + testFilename+".png")
             print 'DREW GLM OF'
         except:
             exceptionCount += 1
@@ -2161,7 +2156,7 @@ def _tests(keepFiles=True):
         try:
             # Run powerflow on the GLM.
             output = gridlabd.runInFilesystem(treeObj, keepFiles=True, workDir=outPrefix)
-            with open(outPrefix + "IEEE.JSON",'w') as outFile:
+            with open(outPrefix + testFilename +".JSON",'w') as outFile:
                 json.dump(output, outFile, indent=4)
             print 'RAN GRIDLAB ON\n'                 
         except:
@@ -2175,4 +2170,7 @@ def _tests(keepFiles=True):
         shutil.rmtree(outPrefix)
     return exceptionCount    
 if __name__ == '__main__':
-    _tests()
+    testFile = "Titanium.mdb"
+    modelDir = './scratch/uploads/'
+    outPrefix = './scratch/cymeToGridlabTests/' 
+    _tests(testFile, modelDir, outPrefix)

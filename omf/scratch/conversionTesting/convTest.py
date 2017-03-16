@@ -7,6 +7,8 @@ from matplotlib import pyplot as plt
 from cryptography.fernet import Fernet
 # OMF Functions
 import omf
+import cymeToGridlab
+import milToGridlab
 from solvers import gridlabd
 
 # Paths
@@ -54,71 +56,6 @@ def gridlabImport(workDir, feederName, glmString):
 		json.dump(newFeeder, outFile, indent=4)
 	return newFeeder
 
-# MILSOFT WINDMIL TO GRIDLAB TESTS
-def milsoftToGridlabTests(files,keepFiles=False):
-	openPrefix = './decryptedDataFiles'
-	outPrefix = './milToGridlabTests/'
-	import os, json, traceback, shutil
-	from omf.solvers import gridlabd
-	from matplotlib import pyplot as plt
-	from milToGridlab import convert
-	import omf.feeder as feeder
-	try:
-		os.mkdir(outPrefix)
-	except:
-		pass # Directory already there.
-	exceptionCount = 0
-	# 	testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
-	#   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
-	#  	('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq')]
-	testFiles = files
-	testAttachments = {'schedules.glm':open(pJoin(openPrefix,'schedules.glm'),'r').read(), 'climate.tmy2':open(pJoin(openPrefix,'AK-ANCHORAGE.tmy2'),'r').read()}
-	for stdString, seqString in testFiles:
-		try:
-			# Convert the std+seq.
-			with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
-				outGlm,x,y = convert(stdFile.read(),seqFile.read())
-			with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
-				outFile.write(feeder.sortedWrite(outGlm))
-			print 'WROTE GLM FOR', stdString
-			with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
-				resultsFile.write('WROTE GLM FOR ' + stdString + "\n")
-			try:
-				# Draw the GLM.
-				myGraph = feeder.treeToNxGraph(outGlm)
-				feeder.latLonNxGraph(myGraph, neatoLayout=False)
-				plt.savefig(outPrefix + stdString.replace('.std','.png'))
-				print 'DREW GLM OF', stdString
-				with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
-					resultsFile.write('DREW GLM FOR ' + stdString + "\n")
-			except:
-				exceptionCount += 1
-				print 'FAILED DRAWING', stdString
-				with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
-					resultsFile.write('FAILED DRAWING ' + stdString + "\n")
-			try:
-				# Run powerflow on the GLM. HACK:blank attachments for now.
-				output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
-				with open(outPrefix + stdString.replace('.std','.json'),'a') as outFile:
-					json.dump(output, outFile, indent=4)
-				print 'RAN GRIDLAB ON', stdString
-				with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
-					resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
-			except:
-				exceptionCount += 1
-				print 'POWERFLOW FAILED', stdString
-				with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
-					resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
-		except:
-			print 'FAILED CONVERTING', stdString
-			with open(pJoin(_myDir,'convResults.txt'),'a') as resultsFile:
-					resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
-			exceptionCount += 1
-			traceback.print_exc()
-	if not keepFiles:
-		shutil.rmtree(outPrefix)
-	return exceptionCount
-
 def _tests():
 	user = 'convTest'
 	key = getKey(_cryptoPath,user)
@@ -149,7 +86,10 @@ def _tests():
 	# This also depends on the ordering of the std, seq files
 	seqFilenames = []
 	groupedFiles = []
+	cymeArray = []
 	for file in os.listdir(decryptedDataFolder):
+		if str(file).endswith('.mdb'):
+			cymeArray.append(file)
 		if str(file).endswith('.seq'):
 			filename = file[:-4]
 			seqFilenames.append(filename)
@@ -172,24 +112,33 @@ def _tests():
 							arrays.append(array)
 		else:
 			arrays.append(group)
-
 	# Runs milsoft tests on seq std files and then deletes results and decrypted files
-	milsoftToGridlabTests(arrays)
-	# if(os.path.isdir('./milToGridlabTests/')):
-	# 	shutil.rmtree('./milToGridlabTests/')
-	# if(os.path.isdir(decryptedDataFolder)):
-	# 	shutil.rmtree(decryptedDataFolder)
+	openPrefix = './decryptedDataFiles/'
+	outPrefix = './milToGridlabTests/'
+	cymeOutPre = './cymeToGridlabTests/'
+	# milToGridlab._tests(arrays, openPrefix, outPrefix)
+	# Runs cyme tests on .mdb file
+	cymeToGridlab._tests(cymeArray, openPrefix, cymeOutPre)
+
+
+	if(os.path.isdir('./milToGridlabTests/')):
+		shutil.rmtree('./milToGridlabTests/')
+	if(os.path.isdir('./cymeToGridlabTests/')):
+		shutil.rmtree('./cymeToGridlabTests/')	
+	# Delete decrypted files after tests
+	if(os.path.isdir(decryptedDataFolder)):
+		shutil.rmtree(decryptedDataFolder)
 	print "finished"
 if __name__ == "__main__":
 	_tests()
-# user = 'convTest'
-# key = getKey(_cryptoPath,user)
-# encryptedFilesFolder = pJoin(_cryptoPath,"encryptedFiles")
-# for file in os.listdir("./needEncryption/"):
-# 	fileName = "Encrypted_"+str(file)
-# 	with open(pJoin("./needEncryption/",str(file)),'r') as r:
-# 				r = r.read()
-# 	encryptedData = encryptData(r,key)
-# 	with open(pJoin(encryptedFilesFolder,fileName),"w+") as f:
-# 		f.write(encryptedData)
+	# user = 'convTest'
+	# key = getKey(_cryptoPath,user)
+	# encryptedFilesFolder = pJoin(_cryptoPath,"encryptedFiles")
+	# for file in os.listdir("./needEncryption/"):
+	# 	fileName = "Encrypted_"+str(file)
+	# 	with open(pJoin("./needEncryption/",str(file)),'r') as r:
+	# 				r = r.read()
+	# 	encryptedData = encryptData(r,key)
+	# 	with open(pJoin(encryptedFilesFolder,fileName),"w+") as f:
+	# 		f.write(encryptedData)
 

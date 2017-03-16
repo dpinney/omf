@@ -2,6 +2,7 @@
 
 import feeder, csv, random, math, copy
 from StringIO import StringIO
+from os.path import join as pJoin
 
 def convert(stdString,seqString):
     ''' Take in a .std and .seq strings from Milsoft and spit out a (json dict, int, int).'''
@@ -1270,13 +1271,11 @@ def _latCount(name):
                 myLatCount += 1
     print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
-def _tests(keepFiles=True):
+def _tests(testFiles, openPrefix, outPrefix, keepFiles=True):
     ''' Test convert every windmil feeder we have (in scratch/uploads). Return number of exceptions we hit. '''
     import os, json, traceback, shutil
     from solvers import gridlabd
     from matplotlib import pyplot as plt
-    openPrefix = './scratch/uploads/'
-    outPrefix = './scratch/milToGridlabTests/'
     try:
         os.mkdir(outPrefix)
     except:
@@ -1285,37 +1284,48 @@ def _tests(keepFiles=True):
     # testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
     #   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
     #   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq')]
-    testFiles = [('OMF_Norfork1.std', 'OMF_Norfork1.seq')]
     testAttachments = {'schedules.glm':''}
     # testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
     for stdString, seqString in testFiles:
         try:
             # Convert the std+seq.
-            with open(openPrefix + stdString,'r') as stdFile, open(openPrefix + seqString,'r') as seqFile:
+            with open(pJoin(openPrefix,stdString),'r') as stdFile, open(pJoin(openPrefix,seqString),'r') as seqFile:
                 outGlm,x,y = convert(stdFile.read(),seqFile.read())
             with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
                 outFile.write(feeder.sortedWrite(outGlm))
             print 'WROTE GLM FOR', stdString
+            with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                resultsFile.write('WROTE GLM FOR ' + stdString + "\n")
             try:
                 # Draw the GLM.
                 myGraph = feeder.treeToNxGraph(outGlm)
                 feeder.latLonNxGraph(myGraph, neatoLayout=False)
                 plt.savefig(outPrefix + stdString.replace('.std','.png'))
                 print 'DREW GLM OF', stdString
+                with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                    resultsFile.write('DREW GLM FOR ' + stdString + "\n")
             except:
                 exceptionCount += 1
                 print 'FAILED DRAWING', stdString
+                with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                    resultsFile.write('FAILED DRAWING ' + stdString + "\n")
             try:
                 # Run powerflow on the GLM. HACK:blank attachments for now.
                 output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
-                with open(outPrefix + stdString.replace('.std','.json'),'w') as outFile:
+                with open(outPrefix + stdString.replace('.std','.json'),'a') as outFile:
                     json.dump(output, outFile, indent=4)
                 print 'RAN GRIDLAB ON', stdString
+                with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                    resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
             except:
                 exceptionCount += 1
                 print 'POWERFLOW FAILED', stdString
+                with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                    resultsFile.write('POWERFLOW FAILED ' + stdString + "\n")
         except:
             print 'FAILED CONVERTING', stdString
+            with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                    resultsFile.write('FAILED CONVERTING ' + stdString + "\n")
             exceptionCount += 1
             traceback.print_exc()
     if not keepFiles:
@@ -1323,4 +1333,7 @@ def _tests(keepFiles=True):
     return exceptionCount
 
 if __name__ == "__main__":
-    _tests()
+    openPrefix = './scratch/uploads/'
+    outPrefix = './scratch/milToGridlabTests/'
+    testFiles = [('ABEC-FRANK.std','ABEC.seq')]
+    _tests(testFiles, openPrefix, outPrefix)
