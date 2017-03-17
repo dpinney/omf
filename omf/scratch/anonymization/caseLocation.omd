@@ -9,13 +9,13 @@
                 "Vmin": "0.9", 
                 "area": "1", 
                 "Vm": "1", 
-                "longitude": 200, 
+                "longitude": -158, 
                 "bus_i": "bus0", 
                 "Vmax": "1.1", 
                 "Qd": "0", 
                 "Pd": "0", 
                 "Bs": "0", 
-                "latitude": -62, 
+                "latitude": 33, 
                 "baseKV": "345", 
                 "type": "3"
             }
