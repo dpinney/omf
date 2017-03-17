@@ -2,31 +2,41 @@ XXX What is the initial test data set?
 	XXX Put simpleMarket system into this scratch folder.
 	XXX Transmission test system case9. 
 	XXX What's the test function? Stub created.
-XXX Implement def psuedomizeNames()
+XXX Implement def distPsuedomizeNames()
 	XXX Add code to implement. We know basically what it should do.
 	XXX Debug the pseudomizeNames.
-XXX Implement def randomizeNames()
+XXX Implement def distRandomizeNames()
 	XXX Create tests.
 	XXX Implement.
 	XXX Make sure it passes the tests.
 	XXX Is there a refactoring that will reduce duplication of similar code?
-XXX Implement def randomizeLocation()
+XXX Implement def distRandomizeLocation()
 	XXX Create tests like ones for names.
 	XXX Add latitude and longitude attributes to all simple market test objects in the tree.
 	XXX Replace the links, hiddenLinks, nodes, hiddenNodes each with empty lists.
 	XXX Walk the tree, replace each lat and lon with a random one uniformly distributed between 0 and 1000.
-XXX Implement def translateLocation(translation,rotation)
+XXX Implement def distTranslateLocation(translation,rotation)
 	XXX Create tests like the ones for names.
 	XXX Replace the links, hiddenLinks, nodes, hiddenNodes each with empty lists.
 	XXX Walk the tree, replace each lat and lon with a translated and rotated version.
-XXX Implement def addNoise(noisePerc)
+XXX Implement def distAddNoise(noisePerc)
 	XXX Create tests like the ones for names.
 	XXX Walk the tree, try to convert each value to a float and a complex number, if it succeeds add noise, if it fails ignore it.
 	XXX What do we mean by noise? Add a uniform distributed random value between [value - noisePerc*value, value + noisePerc*value].
+XXX How do we do all of the above for transmission? have pairs of functions, e.g. tranPseudomizeNames and distPseudomizeNames. Next step?
+XXX Implement def tranPsuedomizeNames()
+XXX Implement def tranRandomizeNames()
+XXX Implement def tranRandomizeLocation()
+XXX Implement def tranTranslateLocation(translation,rotation)
+XXX Implement def tranAddNoise(noisePerc)
+
+OOO Implement def distSmoothLoads()
+OOO Implement def distShuffleLoads(shufPerc)
+OOO Implement def distCombineLoads()
+OOO Implement def distModifyConductorLengths()
+OOO Implement def tranSmoothLoads()
+OOO Implement def tranShuffleLoads(shufPerc)
+OOO Implement def tranCombineLoads()
+OOO Implement def tranModifyConductorLengths()
 OOO How do we open these .omd files in gridEdit? We need a visualizeFeeder function.
-OOO Implement def smoothLoads()
-OOO Implement def shuffleLoads(percent)
-OOO Implement def combineLoads()
-OOO Implement def modifyConductorLengths()
-OOO How do we do all of the above for transmission? have pairs of functions, e.g. tranPseudomizeNames and distPseudomizeNames. Next step?
 OOO Is our test dataset good enough?

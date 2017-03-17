@@ -73,19 +73,16 @@ def distAddNoise(inputFeeder, noisePerc):
 				continue
 	return inputFeeder['tree']
 
-def combineLoads():
+def distCombineLoads():
 	pass
 
-def modifyConductorLengths():
+def distModifyConductorLengths():
 	pass
 
-def smoothLoads():
+def distSmoothLoads():
 	pass
 
-def shuffleLoads(percent):
-	# for key in feeder.tree:
-	# 	if randint(0,100) <= percent:
-	# 		feeder.tree[key]
+def distShuffleLoads(shufPerc):
 	pass
 
 
@@ -195,6 +192,18 @@ def tranAddNoise(inputNetwork, noisePerc):
 	# 			except ValueError:
 	# 				continue
 	return inputNetwork
+
+def tranCombineLoads():
+	pass
+
+def tranModifyConductorLengths():
+	pass
+
+def tranSmoothLoads():
+	pass
+
+def tranShuffleLoads(shufPerc):
+	pass
 
 
 def _tests():
