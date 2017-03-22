@@ -56,6 +56,17 @@ def gridlabImport(workDir, feederName, glmString):
 		json.dump(newFeeder, outFile, indent=4)
 	return newFeeder
 
+# Convert files
+def convertFiles(user, inFolder, outFolder):
+	key = getKey(_cryptoPath,user)
+	for file in os.listdir(inFolder):
+		fileName = "Encrypted_"+str(file)
+		with open(pJoin(inFolder,str(file)),'r') as r:
+					r = r.read()
+		encryptedData = encryptData(r,key)
+		with open(pJoin(outFolder,fileName),"w+") as f:
+			f.write(encryptedData)
+
 def _tests():
 	user = 'convTest'
 	key = getKey(_cryptoPath,user)
@@ -116,15 +127,16 @@ def _tests():
 	openPrefix = './decryptedDataFiles/'
 	outPrefix = './milToGridlabTests/'
 	cymeOutPre = './cymeToGridlabTests/'
-	# milToGridlab._tests(arrays, openPrefix, outPrefix)
+	testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./decryptedDataFiles/AK-ANCHORAGE.tmy2','r').read()}
+	milToGridlab._tests(arrays, openPrefix, outPrefix, testAttachments)
+
 	# Runs cyme tests on .mdb file
-	cymeToGridlab._tests(cymeArray, openPrefix, cymeOutPre)
+	# cymeToGridlab._tests(cymeArray, openPrefix, cymeOutPre)
 
-
-	if(os.path.isdir('./milToGridlabTests/')):
-		shutil.rmtree('./milToGridlabTests/')
-	if(os.path.isdir('./cymeToGridlabTests/')):
-		shutil.rmtree('./cymeToGridlabTests/')	
+	# if(os.path.isdir('./milToGridlabTests/')):
+	# 	shutil.rmtree('./milToGridlabTests/')
+	# if(os.path.isdir('./cymeToGridlabTests/')):
+	# 	shutil.rmtree('./cymeToGridlabTests/')	
 	# Delete decrypted files after tests
 	if(os.path.isdir(decryptedDataFolder)):
 		shutil.rmtree(decryptedDataFolder)
@@ -132,13 +144,7 @@ def _tests():
 if __name__ == "__main__":
 	_tests()
 	# user = 'convTest'
-	# key = getKey(_cryptoPath,user)
 	# encryptedFilesFolder = pJoin(_cryptoPath,"encryptedFiles")
-	# for file in os.listdir("./needEncryption/"):
-	# 	fileName = "Encrypted_"+str(file)
-	# 	with open(pJoin("./needEncryption/",str(file)),'r') as r:
-	# 				r = r.read()
-	# 	encryptedData = encryptData(r,key)
-	# 	with open(pJoin(encryptedFilesFolder,fileName),"w+") as f:
-	# 		f.write(encryptedData)
+	# inFolder = "./needEncryption/"
+	# convertFiles(user, inFolder, encryptedFilesFolder)
 

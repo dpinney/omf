@@ -943,7 +943,6 @@ def _readEqConductor(feederId, modelDir):
                 cymeqconductor[row.EquipmentId]['rating.summer_continuous'] = row.FirstRating
                 cymeqconductor[row.EquipmentId]['geometric_mean_radius'] = float(row.GMR)*m2ft/100 #GMR is stored in cm. Must convert to ft.
                 cymeqconductor[row.EquipmentId]['resistance'] = float(row.R50)*5280/(m2ft*1000) # R50 is stored in Ohm/km. Must convert to Ohm/mile
-    print '*****CONDUCTORS RETURNED*****',cymeqconductor
     return cymeqconductor
 
 def _readEqOverheadLineUnbalanced(feederId, modelDir):
@@ -1008,48 +1007,54 @@ def _readEqGeometricalArrangement(feederId, modelDir):
                 cymeqgeometricalarrangement[row.EquipmentId]['distance_CN'] = math.sqrt((float(row.ConductorC_Horizontal)-float(row.NeutralConductor_Horizontal))**2 + (float(row.ConductorC_Vertical)-float(row.NeutralConductor_Vertical))**2)*m2ft # information is stored in meters. must convert to feet.
     return cymeqgeometricalarrangement
 
-def _readUgConfiguration(conductorDataCsv, feederId):
+def _readUgConfiguration(feederId, modelDir):
     cymcsvundergroundcable = {}
+    # Defaults
     CYMCSVUNDERGROUNDCABLE = { 'name' : None,
                                'rating.summer_continuous' : None,
                                'outer_diameter' : None,
                                'conductor_resistance' : None,
                                'conductor_gmr' : None,
                                'conductor_diameter' : None,
-                               'neutral_resistance' : None,
-                               'neutral_gmr' : None,
-                               'neutral_diameter' : None,
-                               'neutral_strands' : None,
-                               'distance_AB' : None,
-                               'distance_AC' : None,
-                               'distance_AN' : None,
-                               'distance_BC' : None,
-                               'distance_BN' : None,
-                               'distance_CN' : None}
-    
-    if conductorDataCsv != None:
-        underground_cable_array = _csvToArray(conductorDataCsv)[1:]# skip the first row as it is header information
-        for row in underground_cable_array:
-            if _fixName(row[0]) not in cymcsvundergroundcable.keys():
-                cymcsvundergroundcable[_fixName(row[0])] = copy.deepcopy(CYMCSVUNDERGROUNDCABLE)
-                cymcsvundergroundcable[_fixName(row[0])]['name'] = _fixName(row[0])
-                cymcsvundergroundcable[_fixName(row[0])]['conductor_resistance'] = row[2]
-                cymcsvundergroundcable[_fixName(row[0])]['conductor_gmr'] = row[11]
-                cymcsvundergroundcable[_fixName(row[0])]['rating.summer_continuous'] = row[16]
-                cymcsvundergroundcable[_fixName(row[0])]['conductor_diameter'] = row[17]
-                cymcsvundergroundcable[_fixName(row[0])]['neutral_resistance'] = row[19]
-                cymcsvundergroundcable[_fixName(row[0])]['neutral_gmr'] = row[21]
-                cymcsvundergroundcable[_fixName(row[0])]['neutral_diameter'] = row[18]
-                cymcsvundergroundcable[_fixName(row[0])]['neutral_strands'] = row[20]
-                cymcsvundergroundcable[_fixName(row[0])]['outer_diameter'] = row[19]
-                cymcsvundergroundcable[_fixName(row[0])]['distance_AB'] = row[24]
-                cymcsvundergroundcable[_fixName(row[0])]['distance_AC'] = row[26]
-                cymcsvundergroundcable[_fixName(row[0])]['distance_AN'] = row[27]
-                cymcsvundergroundcable[_fixName(row[0])]['distance_BC'] = row[25]
-                cymcsvundergroundcable[_fixName(row[0])]['distance_BN'] = row[28]
-                cymcsvundergroundcable[_fixName(row[0])]['distance_CN'] = row[29]
+                               'neutral_resistance' : 14.87200,
+                               'neutral_gmr' : 0.020800,
+                               'neutral_diameter' : 0.0640837,
+                               'neutral_strands' : 10,
+                               'distance_AB' : 0.05,
+                               'distance_AC' : 1.0,
+                               'distance_AN' : 0.0,
+                               'distance_BC' : 0.5,
+                               'distance_BN' : 0.0,
+                               'distance_CN' : 0.0}
+    undergroundcable = _csvToDictList(pJoin(modelDir,'cymeCsvDump','CYMEQCABLE.csv'),columns = ['EquipmentId','FirstRating','OverallDiameter','PositiveSequenceResistance','ZeroSequenceResistance','ArmorOuterDiameter'])
+    undergroundcableconductor = _csvToDictList(pJoin(modelDir,'cymeCsvDump','CYMEQCABLECONDUCTOR.csv'),columns = ['EquipmentId','Diameter','NumberOfStrands'])
+    if len(undergroundcable) == 0:
+        warnings.warn("No underground_line configuration objects were found in CYMEQCABLE for feeder_id: {:s}.".format(feederId), RuntimeWarning)
     else:
-        warnings.warn("No conductor data spreadsheet is provided for feeder_id {:s}.".format(feederId), RuntimeWarning)
+        for row in undergroundcable:
+            row.EquipmentId = _fixName(row.EquipmentId)
+            if row.EquipmentId not in cymcsvundergroundcable.keys():
+                cymcsvundergroundcable[row.EquipmentId] = copy.deepcopy(CYMCSVUNDERGROUNDCABLE)
+                cymcsvundergroundcable[row.EquipmentId]['name'] = _fixName(row.EquipmentId)
+                cymcsvundergroundcable[row.EquipmentId]['rating.summer_continuous'] = row.FirstRating 
+                cymcsvundergroundcable[row.EquipmentId]['outer_diameter'] = row.OverallDiameter
+                cymcsvundergroundcable[row.EquipmentId]['conductor_resistance'] = row.PositiveSequenceResistance
+                if row.ArmorOuterDiameter is not None:
+                    cymcsvundergroundcable[row.EquipmentId]['conductor_diameter'] = row.ArmorOuterDiameter
+                    cymcsvundergroundcable[row.EquipmentId]['conductor_gmr'] = row.ArmorOuterDiameter/3
+                # Still missing these properties, will have default values for all objects
+                # cymcsvundergroundcable[row.EquipmentId]['neutral_resistance'] = row.ZeroSequenceResistance 
+                # cymcsvundergroundcable[row.EquipmentId]['distance_AB'] = row.OverallDiameter
+                # cymcsvundergroundcable[row.EquipmentId]['distance_AC'] = row.OverallDiameter
+                # cymcsvundergroundcable[row.EquipmentId]['distance_AN'] = row.OverallDiameter
+                # cymcsvundergroundcable[row.EquipmentId]['distance_BC'] = row.OverallDiameter
+                # cymcsvundergroundcable[row.EquipmentId]['distance_BC'] = row.OverallDiameter
+                # cymcsvundergroundcable[row.EquipmentId]['distance_CN'] = row.OverallDiameter
+    for row in undergroundcableconductor:
+        if row.EquipmentId in cymcsvundergroundcable.keys():
+            cymcsvundergroundcable[row.EquipmentId]['neutral_diameter'] = row.Diameter
+            cymcsvundergroundcable[row.EquipmentId]['neutral_strands'] = row.NumberOfStrands
+            cymcsvundergroundcable[row.EquipmentId]['neutral_gmr'] = row.Diameter/3
     return cymcsvundergroundcable
 
 def _readEqAvgGeometricalArrangement(feederId, modelDir):
@@ -1174,11 +1179,12 @@ def _find_SPCT_rating(load_str):
         return str(past_rating)
     
 def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, feeder_id=None):
+    print 'network_db',network_db
     if (test==False):
         network_db_path = modelDir + network_db 
         equipment_db_path = modelDir + equipment_db   
-        network_db = Path(network_db_path).resolve()     
-        equipment_db = Path(equipment_db_path).resolve()    
+        network_db = network_db_path     
+        equipment_db = equipment_db_path    
     else:
         network_db = Path(network_db).resolve()     
         equipment_db = Path(equipment_db).resolve()                 
@@ -1262,7 +1268,7 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
                 link_exists = 1
         if link_exists == 0:
             cymsection[link]['connector'] = ''
-            warnings.warn("There is no device associated with section:{:s} in network database:{:s}. This will be modeled as a switch.".format(link, net_db), RuntimeWarning)
+            warnings.warn("There is no device associated with section:{:s} in network database:{:s}. This will be modeled as a switch.".format(link, network_db), RuntimeWarning)
     for link in cymsection.keys():
         if 'connector' in cymsection[link].keys():
             cymsectiondevice[link] = { 'name' : link,
@@ -1366,7 +1372,7 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
     elif dbflag == 1:
         cymeqgeometricalarrangement = _readEqAvgGeometricalArrangement(feeder_id, modelDir)
     # -18-CYME convertCymeModelXLSX Sheet**********************************************************************************************************************************************************************
-    cymcsvundergroundcable = _readUgConfiguration(conductor_data_csv, feeder_id)
+    cymcsvundergroundcable = _readUgConfiguration(feeder_id, modelDir)
     # -19-CYME CYMEQREGULATOR**********************************************************************************************************************************************************************
     cymeqregulator = _readEqRegulator(feeder_id, modelDir)
     # -20-CYME CYMEQTHREEWINDAUTOTRANSFORMER**********************************************************************************************************************************************************************
@@ -1456,8 +1462,6 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
                     nodes[cymsectiondevice[device]['parent']]['longitude'] = cymsectiondevice[device]['fromLongitude']
     # Create overhead line conductor dictionaries
     ohl_conds = {}
-    print OH_conductors
-    print "******KEYS******", cymeqconductor.keys()
     for olc in OH_conductors:
         if olc in cymeqconductor.keys():
             if olc not in ohl_conds.keys():
@@ -1572,8 +1576,6 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
     # Create underground line conductor, and spacing dictionaries
     ugl_conds = {}
     ugl_sps = {}
-    print 'ug conductors', UG_conductors
-    print 'cymcsvundergroundcable', cymcsvundergroundcable
     for ulc in UG_conductors:
         if ulc in cymcsvundergroundcable.keys():
             if ulc + 'cond' not in ugl_conds.keys():

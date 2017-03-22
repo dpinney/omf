@@ -1271,7 +1271,7 @@ def _latCount(name):
                 myLatCount += 1
     print name, 'COUNT', nameCount, 'LAT COUNT', latCount, 'SUCCESS RATE', 1.0*latCount/nameCount
 
-def _tests(testFiles, openPrefix, outPrefix, keepFiles=True):
+def _tests(testFiles, openPrefix, outPrefix, testAttachments, keepFiles=True):
     ''' Test convert every windmil feeder we have (in scratch/uploads). Return number of exceptions we hit. '''
     import os, json, traceback, shutil
     from solvers import gridlabd
@@ -1284,8 +1284,7 @@ def _tests(testFiles, openPrefix, outPrefix, keepFiles=True):
     # testFiles = [('INEC-RENOIR.std','INEC.seq'), ('INEC-GRAHAM.std','INEC.seq'),
     #   ('Olin-Barre.std','Olin.seq'), ('Olin-Brown.std','Olin.seq'),
     #   ('ABEC-FRANK.std','ABEC.seq'), ('ABEC-COLUMBIA.std','ABEC.seq'),('OMF_Norfork1.std', 'OMF_Norfork1.seq')]
-    testAttachments = {'schedules.glm':''}
-    # testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
+    # testAttachments = {'schedules.glm':''}
     for stdString, seqString in testFiles:
         try:
             # Convert the std+seq.
@@ -1293,9 +1292,15 @@ def _tests(testFiles, openPrefix, outPrefix, keepFiles=True):
                 outGlm,x,y = convert(stdFile.read(),seqFile.read())
             with open(outPrefix + stdString.replace('.std','.glm'),'w') as outFile:
                 outFile.write(feeder.sortedWrite(outGlm))
+                outFileStats = os.stat(outPrefix + stdString.replace('.std','.glm') )
+            inFileStats = os.stat(pJoin(openPrefix,stdString))
             print 'WROTE GLM FOR', stdString
+            inFileSize = inFileStats.st_size
+            outFileSize = outFileStats.st_size
             with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
                 resultsFile.write('WROTE GLM FOR ' + stdString + "\n")
+                resultsFile.write('Input .std File Size: ' + str(inFileSize) + "\n")
+                resultsFile.write('Output .glm File Size: '+ str(outFileSize) + "\n")
             try:
                 # Draw the GLM.
                 myGraph = feeder.treeToNxGraph(outGlm)
@@ -1312,11 +1317,13 @@ def _tests(testFiles, openPrefix, outPrefix, keepFiles=True):
             try:
                 # Run powerflow on the GLM. HACK:blank attachments for now.
                 output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
+                gridlabdStderr =  output['stderr']
                 with open(outPrefix + stdString.replace('.std','.json'),'a') as outFile:
                     json.dump(output, outFile, indent=4)
                 print 'RAN GRIDLAB ON', stdString
                 with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
                     resultsFile.write('RAN GRIDLAB ON ' + stdString + "\n")
+                    resultsFile.write('STDERR: ' + gridlabdStderr + "\n\n")
             except:
                 exceptionCount += 1
                 print 'POWERFLOW FAILED', stdString
@@ -1335,5 +1342,6 @@ def _tests(testFiles, openPrefix, outPrefix, keepFiles=True):
 if __name__ == "__main__":
     openPrefix = './scratch/uploads/'
     outPrefix = './scratch/milToGridlabTests/'
+    testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
     testFiles = [('ABEC-FRANK.std','ABEC.seq')]
-    _tests(testFiles, openPrefix, outPrefix)
+    _tests(testFiles, openPrefix, outPrefix, testAttachments)

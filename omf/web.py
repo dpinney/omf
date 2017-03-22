@@ -669,8 +669,8 @@ def cymeImport(owner):
 	modelFolder = "data/Model/"+owner+"/"+modelName
 	mdbNetString, mdbEqString = map(lambda x: request.files[x], ["mdbNetFile", "mdbEqFile"])
 	# Saves .mdb files to model folder
-	mdbNetString.save(os.path.join(modelFolder,'mdbNetFile.mdb'))
-	mdbEqString.save(os.path.join(modelFolder,'mdbEqString.mdb'))
+	mdbNetString.save(os.path.join(modelFolder,mdbNetString.filename))
+	mdbEqString.save(os.path.join(modelFolder,mdbNetString.filename))
 	if os.path.isfile("data/Model/"+owner+"/"+modelName+"/gridError.txt"):
 		os.remove("data/Model/"+owner+"/"+modelName+"/gridError.txt")
 	importProc = Process(target=cymeImportBackground, args=[owner, modelName, feederName, feederNum, mdbNetString.filename, mdbEqString.filename])
@@ -682,9 +682,10 @@ def cymeImport(owner):
 
 def cymeImportBackground(owner, modelName, feederName, feederNum, mdbNetString, mdbEqString):
 	''' Function to run in the background for Milsoft import. '''
-	modelDir = "data/Model/"+owner+"/"+modelName
+	modelDir = "data/Model/"+owner+"/"+modelName+"/"
 	feederDir = modelDir+"/"+feederName+".omd"
 	newFeeder = dict(**feeder.newFeederWireframe)
+	print mdbNetString
 	[newFeeder["tree"], xScale, yScale] = cymeToGridlab.convertCymeModel(mdbNetString, mdbEqString, modelDir)
 	newFeeder["layoutVars"]["xScale"] = xScale
 	newFeeder["layoutVars"]["yScale"] = yScale
