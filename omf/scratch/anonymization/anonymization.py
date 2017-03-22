@@ -79,14 +79,14 @@ def distShuffleLoads(inputFeeder, shufPerc):
 	houseParents = []
 	zipParents = []
 	for key in inputFeeder['tree']:
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_line'):
-			tlParents.append(inputFeeder['tree'][key]['parent'])
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_node'):
-			tnParents.append(inputFeeder['tree'][key]['parent'])
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'house'):
-			houseParents.append(inputFeeder['tree'][key]['parent'])
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'ZIPload'):
-			zipParents.append(inputFeeder['tree'][key]['parent'])
+			if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_line'):
+				tlParents.append(inputFeeder['tree'][key]['parent'])
+			if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_node'):
+				tnParents.append(inputFeeder['tree'][key]['parent'])
+			if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'house'):
+				houseParents.append(inputFeeder['tree'][key]['parent'])
+			if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'ZIPload'):
+				zipParents.append(inputFeeder['tree'][key]['parent'])
 	tlIdx = 0
 	tnIdx = 0
 	houseIdx = 0
@@ -396,21 +396,21 @@ def _tests():
 	# Testing tranPseudomizeNames
 	busKeyDict = tranPseudomizeNames(inputNetwork)
 	# print busKeyDict
-	FNAMEOUT = "casePseudo.omd"
+	FNAMEOUT = "casePseudo.omt"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputNetwork, outFile, indent=4)
 
 	# Testing tranRandomizeNames
 	randBusArray = tranRandomizeNames(inputNetwork)
 	# print randBusArray
-	FNAMEOUT = "caseName.omd"
+	FNAMEOUT = "caseName.omt"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputNetwork, outFile, indent=4)
 
 	# Testing tranRandomizeLocation
 	newLocation = tranRandomizeLocation(inputNetwork)
 	# print newLocation
-	FNAMEOUT = "caseLocation.omd"
+	FNAMEOUT = "caseLocation.omt"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputNetwork, outFile, indent=4)
 
@@ -419,7 +419,7 @@ def _tests():
 	rotation = 20
 	transLocation = tranTranslateLocation(inputNetwork, translation, rotation)
 	# print transLocation
-	FNAMEOUT = "caseTranslation.omd"
+	FNAMEOUT = "caseTranslation.omt"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputNetwork, outFile, indent=4)
 
@@ -427,7 +427,7 @@ def _tests():
 	noisePerc = 0.2
 	noises = tranAddNoise(inputNetwork, noisePerc)
 	# print noises
-	FNAMEOUT = "caseNoise.omd"
+	FNAMEOUT = "caseNoise.omt"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputNetwork, outFile, indent=4)
 
