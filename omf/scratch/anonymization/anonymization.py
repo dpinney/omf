@@ -73,8 +73,6 @@ def distAddNoise(inputFeeder, noisePerc):
 				continue
 	return inputFeeder['tree']
 
-def distCombineLoads():
-	pass
 
 def distModifyConductorLengths():
 	pass
@@ -91,73 +89,166 @@ def refactorNames(inputNetwork):
 	newBusKey = {}
 	newBusArray = []
 	newKeyID = 0
-	for key in inputNetwork['bus'][0]:
-		if 'bus_i' in inputNetwork['bus'][0][key]:
-			oldBus = inputNetwork['bus'][0][key]['bus_i']
-			newBus = 'bus' + str(newKeyID)
-			newKeyID += 1
-			inputNetwork['bus'][0][key]['bus_i'] = newBus
-			newBusKey.update({oldBus:newBus})
-			newBusArray.append(newBus)
+	for dic in inputNetwork['bus']:
+		for each in dic:
+			idx = int(each) - 1
+			for key in inputNetwork['bus'][idx]:
+				for prop in inputNetwork['bus'][idx][key]:
+					if 'bus_i' in prop:
+						oldBus = inputNetwork['bus'][idx][key]['bus_i']
+						newBus = 'bus' + str(newKeyID)
+						newKeyID += 1
+						inputNetwork['bus'][idx][key]['bus_i'] = newBus
+						newBusKey.update({oldBus:newBus})
+						newBusArray.append(newBus)
+	# for dic in inputNetwork['bus']:
+	# 	for key in dic:
+	# 		key = int(key) - 1
+	# 		for bus in inputNetwork['bus'][key]:
+	# 			if 'bus_i' in inputNetwork['bus'][key][bus]:
+	# 				oldBus = inputNetwork['bus'][key][bus]['bus_i']
+	# 				newBus = 'bus' + str(newKeyID)
+	# 				newKeyID += 1
+	# 				inputNetwork['bus'][key][bus]['bus_i'] = newBus
+	# 				newBusKey.update({oldBus:newBus})
+	# 				newBusArray.append(newBus)
+	# for key in inputNetwork['bus'][0]:
+	# 	if 'bus_i' in inputNetwork['bus'][0][key]:
+	# 		oldBus = inputNetwork['bus'][0][key]['bus_i']
+	# 		newBus = 'bus' + str(newKeyID)
+	# 		newKeyID += 1
+	# 		inputNetwork['bus'][0][key]['bus_i'] = newBus
+	# 		newBusKey.update({oldBus:newBus})
+			# newBusArray.append(newBus)
 	return newBusKey, newBusArray
 
 def tranPseudomizeNames(inputNetwork):
 	newBusKey = {}
 	newKeyID = 0
-	for key in inputNetwork['bus'][0]:
-		if 'bus_i' in inputNetwork['bus'][0][key]:
-			oldBus = inputNetwork['bus'][0][key]['bus_i']
-			newBus = 'bus' + str(newKeyID)
-			newKeyID += 1
-			inputNetwork['bus'][0][key]['bus_i'] = newBus
-			newBusKey.update({oldBus:newBus})
+	for dic in inputNetwork['bus']:
+		for each in dic:
+			idx = int(each) - 1
+			for key in inputNetwork['bus'][idx]:
+				for prop in inputNetwork['bus'][idx][key]:
+					if 'bus_i' in prop:
+						oldBus = inputNetwork['bus'][idx][key]['bus_i']
+						newBus = 'bus' + str(newKeyID)
+						newKeyID += 1
+						inputNetwork['bus'][idx][key]['bus_i'] = newBus
+						newBusKey.update({oldBus:newBus})
+	# for dic in inputNetwork['bus']:
+	# 	for key in dic:
+	# 		key = int(key) - 1
+	# 		for bus in inputNetwork['bus'][key]:
+	# 			if 'bus_i' in inputNetwork['bus'][key][bus]:
+	# 				oldBus = inputNetwork['bus'][key][bus]['bus_i']
+	# 				newBus = 'bus' + str(newKeyID)
+	# 				newKeyID += 1
+	# 				inputNetwork['bus'][key][bus]['bus_i'] = newBus
+	# 				newBusKey.update({oldBus:newBus})
 	return newBusKey
 
 def tranRandomizeNames(inputNetwork):
 	newBusArray = []
 	newKeyID = 0
-	for key in inputNetwork['bus'][0]:
-		if 'bus_i' in inputNetwork['bus'][0][key]:
-			newBus = 'bus' + str(newKeyID)
-			newKeyID += 1
-			inputNetwork['bus'][0][key]['bus_i'] = newBus
-			newBusArray.append(newBus)
+	for dic in inputNetwork['bus']:
+		for each in dic:
+			idx = int(each) - 1
+			for key in inputNetwork['bus'][idx]:
+				for prop in inputNetwork['bus'][idx][key]:
+					if 'bus_i' in prop:
+						newBus = 'bus' + str(newKeyID)
+						newKeyID += 1
+						inputNetwork['bus'][idx][key]['bus_i'] = newBus
+						newBusArray.append(newBus)
+	# for key in inputNetwork['bus'][0]:
+	# 	if 'bus_i' in inputNetwork['bus'][0][key]:
+	# 		newBus = 'bus' + str(newKeyID)
+	# 		newKeyID += 1
+	# 		inputNetwork['bus'][0][key]['bus_i'] = newBus
+	# 		newBusArray.append(newBus)
 	return newBusArray
 
 def tranRandomizeLocation(inputNetwork):
 	# inputNetwork['bus'] = []
 	# inputNetwork['gen'] = []
 	# inputNetwork['branch'] = []
-	for key in inputNetwork['bus'][0]:
-		if ('longitude' in inputNetwork['bus'][0][key]) or ('latitude' in inputNetwork['bus'][0][key]):
-			inputNetwork['bus'][0][key]['longitude'] = random.randint(-200,200)
-			inputNetwork['bus'][0][key]['latitude'] = random.randint(-200,200)
-	return inputNetwork['bus'][0]
+	for dic in inputNetwork['bus']:
+		for each in dic:
+			idx = int(each) - 1
+			for key in inputNetwork['bus'][idx]:
+				for prop in inputNetwork['bus'][idx][key]:
+					if 'longitude' in prop:
+						inputNetwork['bus'][idx][key]['longitude'] = random.randint(-200,200)
+						inputNetwork['bus'][idx][key]['latitude'] = random.randint(-200,200)
+	# for dic in inputNetwork['bus']:
+	# 	for key in dic:
+	# 		key = int(key) - 1
+	# 		for bus in inputNetwork['bus'][key]:
+	# 			if 'longitude' in inputNetwork['bus'][key][bus]:
+	# 				inputNetwork['bus'][key][bus]['longitude'] = random.randint(-200,200)
+	# 				inputNetwork['bus'][key][bus]['latitude'] = random.randint(-200,200)
+	# for key in inputNetwork['bus'][0]:
+	# 	if ('longitude' in inputNetwork['bus'][0][key]) or ('latitude' in inputNetwork['bus'][0][key]):
+	# 		inputNetwork['bus'][0][key]['longitude'] = random.randint(-200,200)
+	# 		inputNetwork['bus'][0][key]['latitude'] = random.randint(-200,200)
+	return inputNetwork['bus']
 
 def tranTranslateLocation(inputNetwork, translation, rotation):
 	# inputNetwork['bus'] = []
 	# inputNetwork['gen'] = []
 	# inputNetwork['branch'] = []
-	for key in inputNetwork['bus'][0]:
-		if ('longitude' in inputNetwork['bus'][0][key]) or ('latitude' in inputNetwork['bus'][0][key]):
-			inputNetwork['bus'][0][key]['longitude'] = translation*math.cos(rotation)
-			inputNetwork['bus'][0][key]['latitude'] = translation*math.sin(rotation)
-	return inputNetwork['bus'][0]
+	for dic in inputNetwork['bus']:
+		for each in dic:
+			idx = int(each) - 1
+			for key in inputNetwork['bus'][idx]:
+				for prop in inputNetwork['bus'][idx][key]:
+					if 'longitude' in prop:
+						inputNetwork['bus'][idx][key]['longitude'] = translation*math.cos(rotation)
+						inputNetwork['bus'][idx][key]['latitude'] = translation*math.sin(rotation)
+	# for dic in inputNetwork['bus']:
+	# 	for key in dic:
+	# 		key = int(key) - 1
+	# 		for bus in inputNetwork['bus'][key]:
+	# 			if 'longitude' in inputNetwork['bus'][key][bus]:
+	# 				inputNetwork['bus'][key][bus]['longitude'] = translation*math.cos(rotation)
+	# 				inputNetwork['bus'][key][bus]['latitude'] = translation*math.sin(rotation)
+	# for key in inputNetwork['bus'][0]:
+	# 	if ('longitude' in inputNetwork['bus'][0][key]) or ('latitude' in inputNetwork['bus'][0][key]):
+	# 		inputNetwork['bus'][0][key]['longitude'] = translation*math.cos(rotation)
+	# 		inputNetwork['bus'][0][key]['latitude'] = translation*math.sin(rotation)
+	return inputNetwork['bus']
 
 def tranAddNoise(inputNetwork, noisePerc):
-	for each in inputNetwork:
-		if (each == 'bus') or (each == 'gen') or (each == 'branch'):
-			for key in inputNetwork[each][0]:
-				for prop in inputNetwork[each][0][key]:
-					if ('_bus_' not in prop) and ('status' not in prop):
-						value = inputNetwork[each][0][key][prop]
-						try: 
-							complex(value)
-							value = float(value)
-							randNoise = random.randint(value - noisePerc*value, value + noisePerc*value)
-							inputNetwork[each][0][key][prop] += str(randNoise)
-						except ValueError:
-							continue
+	for array in inputNetwork:
+		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
+			for dic in inputNetwork[array]:
+				for each in dic:
+					idx = int(each) - 1
+					for key in inputNetwork[array][idx]:
+						for prop in inputNetwork[array][idx][key]:
+							if ('_bus_' not in prop) and ('status' not in prop):
+								value = inputNetwork[array][idx][key][prop]
+								try: 
+									complex(value)
+									value = float(value)
+									randNoise = random.randint(value - noisePerc*value, value + noisePerc*value)
+									inputNetwork[array][idx][key][prop] += str(randNoise)
+								except ValueError:
+									continue
+	# for each in inputNetwork:
+	# 	if (each == 'bus') or (each == 'gen') or (each == 'branch'):
+	# 		for key in inputNetwork[each][0]:
+	# 			for prop in inputNetwork[each][0][key]:
+	# 				if ('_bus_' not in prop) and ('status' not in prop):
+	# 					value = inputNetwork[each][0][key][prop]
+	# 					try: 
+	# 						complex(value)
+	# 						value = float(value)
+	# 						randNoise = random.randint(value - noisePerc*value, value + noisePerc*value)
+	# 						inputNetwork[each][0][key][prop] += str(randNoise)
+	# 					except ValueError:
+	# 						continue
 	# for key in inputNetwork['bus'][0]:
 	# 	for prop in inputNetwork['bus'][0][key]:
 	# 		if ('_bus_' not in prop) and ('status' not in prop):
@@ -193,13 +284,8 @@ def tranAddNoise(inputNetwork, noisePerc):
 	# 				continue
 	return inputNetwork
 
-def tranCombineLoads():
-	pass
 
 def tranModifyConductorLengths():
-	pass
-
-def tranSmoothLoads():
 	pass
 
 def tranShuffleLoads(shufPerc):

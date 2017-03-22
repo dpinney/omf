@@ -29,9 +29,9 @@ XXX Implement def tranRandomizeNames()
 XXX Implement def tranRandomizeLocation()
 XXX Implement def tranTranslateLocation(translation,rotation)
 XXX Implement def tranAddNoise(noisePerc)
-OOO Remove feature for distCombineLoads() and tranCombineLoads(). We don't have any models with multiple loads connected to the same meter. So we don't believe there will be any users for this feature. Need to update spec with this note.
-OOO Remove feature def tranSmoothLoads(). There is not timeseries data in these models. Need to update spec with this note.
-OOO Debug transmission dictionary access.
+XXX Remove feature for distCombineLoads() and tranCombineLoads(). We don't have any models with multiple loads connected to the same meter. So we don't believe there will be any users for this feature. Need to update spec with this note.
+XXX Remove feature def tranSmoothLoads(). There is not timeseries data in these models. Need to update spec with this note.
+XXX Debug transmission dictionary access.
 OOO Implement def distShuffleLoads(shufPerc). See spec image.
 OOO Implement def tranShuffleLoadsAndGens(shufPerc). See spec image.
 OOO Implement def distSmoothLoads()
