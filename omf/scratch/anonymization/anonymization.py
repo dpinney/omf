@@ -73,6 +73,47 @@ def distAddNoise(inputFeeder, noisePerc):
 				continue
 	return inputFeeder['tree']
 
+def distShuffleLoads(inputFeeder, shufPerc):
+	tlParents = []
+	tnParents = []
+	houseParents = []
+	zipParents = []
+	for key in inputFeeder['tree']:
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_line'):
+			tlParents.append(inputFeeder['tree'][key]['parent'])
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_node'):
+			tnParents.append(inputFeeder['tree'][key]['parent'])
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'house'):
+			houseParents.append(inputFeeder['tree'][key]['parent'])
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'ZIPload'):
+			zipParents.append(inputFeeder['tree'][key]['parent'])
+	tlIdx = 0
+	tnIdx = 0
+	houseIdx = 0
+	zipIdx = 0
+	for key in inputFeeder['tree']:
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_line'):
+			if random.randint(0,100)/100.0 < shufPerc:
+				random.shuffle(tkParents)
+				inputFeeder['tree'][key]['parent'] = tlParents[tlIdx]
+				tlIdx += 1
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_node'):
+			if random.randint(0,100)/100.0 < shufPerc:
+				random.shuffle(tnParents)
+				inputFeeder['tree'][key]['parent'] = tnParents[tnIdx]
+				tnIdx += 1
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'house'):
+			if random.randint(0,100)/100.0 < shufPerc:
+				random.shuffle(houseParents)
+				inputFeeder['tree'][key]['parent'] = houseParents[houseIdx]
+				houseIdx += 1
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'ZIPload'):
+			if random.randint(0,100)/100.0 < shufPerc:
+				random.shuffle(zipParents)
+				inputFeeder['tree'][key]['parent'] = zipParents[zipIdx]
+				zipIdx += 1
+	return inputFeeder['tree']
+
 
 def distModifyConductorLengths():
 	pass
@@ -80,8 +121,6 @@ def distModifyConductorLengths():
 def distSmoothLoads():
 	pass
 
-def distShuffleLoads(shufPerc):
-	pass
 
 
 # TRANSMISSION NETWORK FUNCTIONS
@@ -292,11 +331,13 @@ def tranShuffleLoads(shufPerc):
 	pass
 
 
+
 def _tests():
 	# DISTRIBUTION FEEDER TESTS
 	FNAME = "simpleMarketMod.omd"
 	with open(FNAME, "r") as inFile:
 		inputFeeder = json.load(inFile)
+
 
 	# Testing distPseudomizeNames
 	nameKeyDict = distPseudomizeNames(inputFeeder)
@@ -336,11 +377,21 @@ def _tests():
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputFeeder, outFile, indent=4)
 
+	# Testing distShuffleLoads
+	shufPerc = 0.5
+	shuffle = distShuffleLoads(inputFeeder, shufPerc)
+	# print shuffle
+	FNAMEOUT = "simpleShuffle.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inputFeeder, outFile, indent=4)
+
+
 
 	# TRANSMISSION NETWORK TESTS
 	FNAME = "case9.omt"
 	with open(FNAME, "r") as inFile:
 		inputNetwork = json.load(inFile)
+
 
 	# Testing tranPseudomizeNames
 	busKeyDict = tranPseudomizeNames(inputNetwork)
@@ -379,6 +430,7 @@ def _tests():
 	FNAMEOUT = "caseNoise.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputNetwork, outFile, indent=4)
+
 
 
 if __name__ == '__main__':

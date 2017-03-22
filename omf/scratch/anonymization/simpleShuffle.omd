@@ -95,7 +95,7 @@
             "auxiliary_system_type": "ELECTRIC", 
             "longitude": 904.1616412362679, 
             "name": "house9", 
-            "parent": "tm_1", 
+            "parent": "tm_2", 
             "floor_area": "1838", 
             "cooling_COP": "3.2", 
             "object": "house", 

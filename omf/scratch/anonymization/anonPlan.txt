@@ -32,7 +32,8 @@ XXX Implement def tranAddNoise(noisePerc)
 XXX Remove feature for distCombineLoads() and tranCombineLoads(). We don't have any models with multiple loads connected to the same meter. So we don't believe there will be any users for this feature. Need to update spec with this note.
 XXX Remove feature def tranSmoothLoads(). There is not timeseries data in these models. Need to update spec with this note.
 XXX Debug transmission dictionary access.
-OOO Implement def distShuffleLoads(shufPerc). See spec image.
+	OOO Refactor - less for...in loops
+XXX Implement def distShuffleLoads(shufPerc). See spec image.
 OOO Implement def tranShuffleLoadsAndGens(shufPerc). See spec image.
 OOO Implement def distSmoothLoads()
 	#PseudoCode
@@ -47,7 +48,6 @@ OOO Implement def distSmoothLoads()
 			if pair[0].getHourFromTimestamp() == aggHour:
 				aggAmount += pair[1]
 		outList.append([aggHour, aggAmount])
-
 OOO Implement def distModifyConductorLengths()
 OOO Implement def tranModifyConductorLengths()
 OOO How do we open these .omd files in gridEdit? We need a visualizeFeeder function.
