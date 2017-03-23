@@ -219,7 +219,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Pole Data (.json file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<script>var fileName=true;</script>
-				<input type="file" id="poleDataFile" name="poleDataFile" accept=".asc" onchange="handle_pole_files(this.files)">
+				<input type="file" id="poleDataFile" name="poleDataFile" accept=".json" onchange="handle_pole_files(this.files)">
 				<input id="poleData" name="poleData" type="hidden">
 				<!-- Format the file input and populate it with a saved file. -->
 				<input type="hidden" id="fileName" name="fileName" readonly="readonly">
