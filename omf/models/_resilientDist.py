@@ -232,7 +232,8 @@ def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
 								rMatrix[0][i] = val
 								break
 			newLineCode['xmatrix'] = xMatrix
-			newLineCode['rmatrix'] = rMatrix									
+			newLineCode['rmatrix'] = rMatrix	
+		#SET THE newLineCode to the output of GRIDLABD								
 		rdtJson['line_codes'].append(newLineCode)
 	if debug==True:
 		print "Created %s line_codes"%(str(len(rdtJson['line_codes'])))
@@ -367,7 +368,7 @@ def readXRMatrices(dataDir, rdtFile, length):
 def GFMPrep():
 	fragIn = {}
 
-	with open(pJoin("../data/Model/admin/Automated Testing of _resilientDist/allInputData.json"), "r") as fragInBase:
+	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of _resilientDist', "allInputData.json"), "r") as fragInBase:
 		fragInBase = json.load(fragInBase)
 	fragInputBase = json.loads(fragInBase["poleData"])
 	baseAsset = fragInputBase['assets'][1]
@@ -376,7 +377,7 @@ def GFMPrep():
 	fragIn['hazardFields'] = fragInputBase['hazardFields']
 	fragIn['responseEstimators'] = fragInputBase['responseEstimators']
 
-	with open(pJoin('../', 'data', 'model', 'admin', 'Automated Testing of _resilientDist', "Olin Barre Geo.omd"), "r") as jsonIn:
+	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of _resilientDist', "Olin Barre Geo.omd"), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 
 	for key in feederModel['tree'].keys():
@@ -386,17 +387,42 @@ def GFMPrep():
 			asset['assetGeometry']['coordinates'] = [feederModel['tree'][key]['longitude'], feederModel['tree'][key]['latitude']]
 		fragIn['assets'].append(asset)
 
-	with open(pJoin("../", "scratch", "uploads", "data.json"), "w") as outFile:
+	with open(pJoin(__metaModel__._omfDir, "scratch", "uploads", "data.json"), "w") as outFile:
 		json.dump(fragIn, outFile, indent=4)
 
-def runFragility(debug=False):
+def runFragility():
 	GFMPrep()
 	# Run micot-fragility.
-	origWorkDir = os.getcwd()
-	os.chdir("../solvers/gfm")
-	proc = subprocess.Popen(['java','-jar', pJoin('Fragility.jar'), pJoin('../','../','scratch','uploads', 'data.json'), pJoin(__metaModel__._omfDir, 'scratch','LPNORM Integration Code', 'Data', 'out.json')])
+	proc = subprocess.Popen(['java','-jar', pJoin(__metaModel__._omfDir,'solvers','gfm', 'Fragility.jar'), pJoin(__metaModel__._omfDir,'scratch','uploads', 'data.json'), pJoin(__metaModel__._omfDir, 'scratch','LPNORM Integration Code', 'Data', 'out.json')])
 	print "Running Fragility\n"
-	os.chdir(origWorkDir)
+
+def runGridLabD():
+	
+	#load json
+	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of _resilientDist', "Olin Barre Geo.omd"), "r") as omd:
+		omd = json.load(omd)
+		#print omd['attachments']
+
+	#load an existing blank glm file and use it to write to it
+	with open(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm', 'feeder.glm'), 'w') as glmFile:
+		toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {filename test_JSON_dump.json;};" #+ "object jsonreader {filename RDTInputfile.json;};"
+		#DONE? DOES THIS WORK?:  Write the jsonreader/dump objects from franks email into here before writing to glmFile
+		#JSON READER DOES NOT WORK
+		glmFile.write(toWrite)
+
+	#write attachments from omd, if no file, one will be created
+	for fileName in omd['attachments']:
+		with open(os.path.join(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm', fileName),'w') as file:
+			file.write(omd['attachments'][fileName])
+
+	#HACK: copy a climate file until we wire in the file the user specifies via zipcode.
+	shutil.copy(pJoin(__metaModel__._omfDir, 'data','Climate','VA-RICHMOND.tmy2'),pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm'))
+	
+	os.chdir(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm'))
+	print os.getcwd()
+	subprocess.Popen('gridlabd ')
+	#codes = json.load('linecodes.json')
+
 
 def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 	''' Run RDT.
@@ -405,7 +431,10 @@ def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 	print "************************************"
 	origWorkDir = os.getcwd()
 	os.chdir("../solvers/rdt")
-	proc = subprocess.Popen(['java','-jar','micot-rdt.jar', '-c', rdtInFile, '-e', rdtOutFile])
+	#print "HIHIHIHIHIHIH"
+	#command = pJoin('java','-jar', '-classpath', pJoin(__metaModel__._omfDir, 'solvers', 'rdt','ScipLibrary.dll'), pJoin(__metaModel__._omfDir, 'solvers', 'rdt', 'micot-rdt.jar'), '-c',)
+	#print 'command= ' + command
+	proc = subprocess.Popen(['java','-jar', '-classpath', pJoin(__metaModel__._omfDir, 'solvers', 'rdt', 'micot-rdt.jar'), '-c', rdtInFile, '-e', rdtOutFile])
 	# Format output feeder.
 	with open(pJoin(rdtOutFile), "r") as jsonIn:
 		rdtOut = json.load(jsonIn)
@@ -415,7 +444,7 @@ def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 	print "************************************\n\n"
 	os.chdir(origWorkDir)
 
-def dogridlabD(workDir, dataDir, feederName, debug):
+def diagramPrep(workDir, dataDir, feederName, debug):
 	# ... Steps here.
 	# Run gridlabd.
 	if debug:
@@ -462,6 +491,76 @@ def genDiagram(dataDir, feederJson, debug):
 # Tests.
 #def _tests(feederName=None, otherVars={}, testCase=0, debug=False, displayWeb=False):
 	
+def rdtOutputToHTML():
+	with open(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'rdtOutputSimple_Market_System.json'), "r") as rdtOut:
+		rdtOut = json.load(rdtOut)
+
+	htmlCollector= """
+		<p class="reportTitle" style="page-break-before:always">Voltage Drop Diagram</p>
+
+		<div class="content" style="overflow: auto">
+			<div id="diagram" style="width: 40%; float: left;">	
+				<h4 style="text-align: center;">One Line Diagram</h4>
+				<img style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;" src="{{pathPrefix}}/scratch/LPNORM Integration Code/Data/feederChart.png" alt="Feeder Diagram">
+			</div>
+			
+			<div id="tables" style="width: 60%; float: right;">
+				<h4 style="float: left">Resilience Solution</h4>
+				<h4 style="float: right; color: #54c465;">Validated by GRIDLAB-D: is_feasiblePlaceHolder</h4>
+				<br><br>
+				<table>
+					<tr>
+						<th>Total Cost</th>
+					</tr>
+					<tr>
+						<td>design_costPlaceHolder</td>
+					</tr>
+				</table>
+				<br>
+				<table>
+					<tr>
+						<th>Device ID</th>
+						<th>Type</th>
+						<th>Action</th>
+						<th>Cost</th>
+					</tr>
+					tableHTMLPlaceHolder
+				</table>
+			</div>
+		</div>	
+	"""
+
+	tableHTML = ""
+
+	for line in rdtOut['design_solution']['lines']:
+		tableHTML = tableHTML + """
+			<tr>
+				<td>""" + line['id'] + """</td>
+				<td>Line</td>
+				<td>""" + str(line['hardened']) + """</td>
+				<td>$15,000</td>
+			</tr>
+		"""
+
+	for generator in rdtOut['design_solution']['generators']:
+		tableHTML = tableHTML + """
+			<tr>
+				<td>""" + generator['id'] + """</td>
+				<td>Generator</td>
+				<td>Built with 5 MW of capacity</td>
+				<td>$15,000</td>
+			</tr>
+		"""
+
+	design_cost = str(rdtOut["design_solution"]['design_cost'])
+	is_feasible = str(rdtOut["design_solution"]['is_feasible'])
+
+	htmlCollector = htmlCollector.replace('design_costPlaceHolder',design_cost)
+	htmlCollector = htmlCollector.replace('is_feasiblePlaceHolder',is_feasible)
+	htmlCollector = htmlCollector.replace('tableHTMLPlaceHolder',tableHTML)
+		
+	print htmlCollector
+
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	startTime = dt.datetime.now()
@@ -497,10 +596,10 @@ def run(modelDir, inputDict):
 	rdtOutFile = dataDir + '/rdtOutput'+feederName.strip('omd')+'json'
 
 	# Run Fragility & RDT.
-	runFragility(debug)
+	runFragility()
 	runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug)
 	# Create GLM and run gridlabD.
-	feederJson = dogridlabD(workDir, dataDir, feederName, debug)
+	feederJson = diagramPrep(workDir, dataDir, feederName, debug)
 	# Graph feeder.
 	genDiagram(dataDir, feederJson, debug)
 
@@ -567,4 +666,6 @@ def _runModel():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
+	#rdtOutputToHTML()
 	_runModel()
+	#runGridLabD()
