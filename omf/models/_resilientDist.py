@@ -430,7 +430,7 @@ def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 	print "Running RDT..."
 	print "************************************"
 	origWorkDir = os.getcwd()
-	os.chdir("../solvers/rdt")
+	os.chdir(pJoin(__metaModel__._omfDir,'solvers','rdt'))
 	#print "HIHIHIHIHIHIH"
 	#command = pJoin('java','-jar', '-classpath', pJoin(__metaModel__._omfDir, 'solvers', 'rdt','ScipLibrary.dll'), pJoin(__metaModel__._omfDir, 'solvers', 'rdt', 'micot-rdt.jar'), '-c',)
 	#print 'command= ' + command
