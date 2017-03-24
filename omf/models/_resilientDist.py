@@ -368,7 +368,7 @@ def readXRMatrices(dataDir, rdtFile, length):
 def GFMPrep():
 	fragIn = {}
 
-	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of _resilientDist', "allInputData.json"), "r") as fragInBase:
+	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of ' + modelName, "allInputData.json"), "r") as fragInBase:
 		fragInBase = json.load(fragInBase)
 	fragInputBase = json.loads(fragInBase["poleData"])
 	baseAsset = fragInputBase['assets'][1]
@@ -377,7 +377,7 @@ def GFMPrep():
 	fragIn['hazardFields'] = fragInputBase['hazardFields']
 	fragIn['responseEstimators'] = fragInputBase['responseEstimators']
 
-	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of _resilientDist', "Olin Barre Geo.omd"), "r") as jsonIn:
+	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of ' + modelName, "Olin Barre Geo.omd"), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 
 	for key in feederModel['tree'].keys():
@@ -399,7 +399,7 @@ def runFragility():
 def runGridLabD():
 	
 	#load json
-	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of _resilientDist', "Olin Barre Geo.omd"), "r") as omd:
+	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of ' + modelName, "Olin Barre Geo.omd"), "r") as omd:
 		omd = json.load(omd)
 		#print omd['attachments']
 
