@@ -16,12 +16,12 @@ _myDir = os.path.dirname(os.path.abspath(__file__))
 _cryptoPath = _myDir
 sys.path.insert(0,_cryptoPath)
 
-# Key functions.
 def genKey(workDir, currUser):
 	'''Generate and save encryption key to .key file.'''
 	key = Fernet.generate_key()
 	with open(pJoin(workDir,currUser+".key"),"w+") as tempFile:
 		tempFile.write(key)
+
 def getKey(workDir, currUser):
 	'''Read and return a given user's encryption key from path.'''
 	try:
@@ -31,7 +31,6 @@ def getKey(workDir, currUser):
 	except:
 		return "Couldn't find a key for target:", currUser
 
-# Encryption/Decryption
 def encryptData(data, key):
 	'''Encrypt and return encrypted data.'''
 	cipher_suite = Fernet(key)
@@ -44,7 +43,6 @@ def decryptData(data, key):
 	plainText = cipher_suite.decrypt(str(data))
 	return plainText
 
-# Convert glm to json.
 def gridlabImport(workDir, feederName, glmString):
 	''' Function to convert a glm to json. '''
 	newFeeder = dict(**omf.feeder.newFeederWireframe)
@@ -56,8 +54,8 @@ def gridlabImport(workDir, feederName, glmString):
 		json.dump(newFeeder, outFile, indent=4)
 	return newFeeder
 
-# Convert files
 def convertFiles(user, inFolder, outFolder):
+	''' Encrypt files in inFolder to outFolder. '''
 	key = getKey(_cryptoPath,user)
 	for file in os.listdir(inFolder):
 		fileName = "Encrypted_"+str(file)
@@ -67,20 +65,24 @@ def convertFiles(user, inFolder, outFolder):
 		with open(pJoin(outFolder,fileName),"w+") as f:
 			f.write(encryptedData)
 
+def addEncryptedFiles(inFilesFolder="needEncryption"):
+	''' Encrypt files in inFilesFolder as addition to test set.'''
+	user = "convTest"
+	newFilesFolderPath = pJoin(_cryptoPath,"encryptedFiles")
+	inFolderPath = pJoin(_cryptoPath,inFilesFolder)
+	convertFiles(user, inFolderPath, newFilesFolderPath)
+
 def _tests():
 	user = 'convTest'
 	key = getKey(_cryptoPath,user)
 	encryptedFilesFolder = pJoin(_cryptoPath,"encryptedFiles")
-
 	# Delete decrypted folder if it exists
 	if(os.path.isdir(pJoin(_cryptoPath,"decryptedDataFiles"))):
 		shutil.rmtree(pJoin(_cryptoPath,"decryptedDataFiles"))
-
 	# Remake decrypted folder
 	if not (os.path.isdir(pJoin(_cryptoPath,"decryptedDataFiles"))):
 		os.makedirs(pJoin(_cryptoPath,"decryptedDataFiles"))
 	decryptedDataFolder = pJoin(_cryptoPath,"decryptedDataFiles")
-
 	# Decrypts encrypted Files and writes to decrypted data folder
 	for file in os.listdir(encryptedFilesFolder):
 		# HACK: Was running into issues with a hidded .DS_Store file in my directories
@@ -91,7 +93,6 @@ def _tests():
 			decryptedData = decryptData(r,key)
 			with open(pJoin(decryptedDataFolder,fileName),"w+") as f:
 				f.write(decryptedData)
-
 	# Creating [[.std,.seq],[.std,.seq],[.stq,.seq],...] structure for testing functions
 	# This is a HACK, could use some help here, flatten/zip functions?
 	# This also depends on the ordering of the std, seq files
@@ -129,10 +130,8 @@ def _tests():
 	cymeOutPre = './cymeToGridlabTests/'
 	testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./decryptedDataFiles/AK-ANCHORAGE.tmy2','r').read()}
 	milToGridlab._tests(arrays, openPrefix, outPrefix, testAttachments)
-
 	# Runs cyme tests on .mdb file
 	# cymeToGridlab._tests(cymeArray, openPrefix, cymeOutPre)
-
 	# if(os.path.isdir('./milToGridlabTests/')):
 	# 	shutil.rmtree('./milToGridlabTests/')
 	# if(os.path.isdir('./cymeToGridlabTests/')):
@@ -141,10 +140,7 @@ def _tests():
 	if(os.path.isdir(decryptedDataFolder)):
 		shutil.rmtree(decryptedDataFolder)
 	print "finished"
+
 if __name__ == "__main__":
 	_tests()
-	# user = 'convTest'
-	# encryptedFilesFolder = pJoin(_cryptoPath,"encryptedFiles")
-	# inFolder = "./needEncryption/"
-	# convertFiles(user, inFolder, encryptedFilesFolder)
-
+	#addEncryptedFiles()
