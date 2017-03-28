@@ -3,7 +3,6 @@
 import feeder, csv, random, math, copy, locale
 from StringIO import StringIO
 from os.path import join as pJoin
-locale.setlocale(locale.LC_ALL, 'en_US')
 def convert(stdString,seqString):
     ''' Take in a .std and .seq strings from Milsoft and spit out a (json dict, int, int).'''
     def csvToArray(csvString):
@@ -1276,6 +1275,8 @@ def _tests(testFiles, openPrefix, outPrefix, testAttachments, keepFiles=True):
     import os, json, traceback, shutil
     from solvers import gridlabd
     from matplotlib import pyplot as plt
+    # setlocale lives here to avoid changing it globally 
+    locale.setlocale(locale.LC_ALL, 'en_US')
     try:
         os.mkdir(outPrefix)
     except:
