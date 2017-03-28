@@ -427,6 +427,51 @@ def _readCymeOverheadLineUnbalanced(feederId, modelDir):
                     OhUbConductors.append(_fixName(row.LineId))
     return cymoverheadlineunbalanced, OhUbConductors
 
+def _readCymeOverheadLine(feederId, modelDir):
+    cymoverheadline = {}
+    CYMOVERHEADLINE = { 'name' : None,
+                    'length': None,
+                    'configuration': None}
+    lineIds = []
+    overhead_line_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMOVERHEADLINE.csv"),columns=['DeviceNumber','LineId','Length'])
+    if len(overhead_line_db) == 0:
+        warnings.warn("No overhead_line objects were found in CYMOVERHEADLINE for feeder_id: {:s}.".format(feederId), RuntimeWarning)
+    else:
+        for row in overhead_line_db:
+            row.DeviceNumber = _fixName(row.DeviceNumber)
+            if _fixName(row.LineId) not in lineIds:
+                lineIds.append(_fixName(row.LineId))
+            if row.DeviceNumber not in cymoverheadline.keys():
+                cymoverheadline[row.DeviceNumber] = copy.deepcopy(CYMOVERHEADLINE)
+                cymoverheadline[row.DeviceNumber]['name'] = _fixName(row.DeviceNumber)  
+                cymoverheadline[row.DeviceNumber]['configuration'] = _fixName(row.LineId)
+                cymoverheadline[row.DeviceNumber]['length'] = float(row.Length)*m2ft
+                if cymoverheadline[row.DeviceNumber]['length'] == 0.0:
+                    cymoverheadline[row.DeviceNumber]['length'] = 1.0
+    return cymoverheadline, lineIds
+
+def _readCymeQOverheadLine(feederId, modelDir):
+    cymeqoverheadline = {}
+    CYMEQOVERHEADLINE = { 'name' : None,       # Information structure for each object found in CYMOVERHEADBYPHASE
+                          'configuration' : None}
+    spacingIds = []
+    # cymeqconductor_db = equipmentDatabase.execute("SELECT EquipmentId, FirstRating, GMR, R50 FROM CYMEQCONDUCTOR").fetchall()
+    cymeqoverheadline_db =_csvToDictList(pJoin(modelDir,'cymeEquipCsvDump',"CYMEQOVERHEADLINE.csv"),columns=['EquipmentId','PhaseConductorId','NeutralConductorId','ConductorSpacingId'])
+    # print cymeqconductor_db
+    if len(cymeqoverheadline_db) == 0:
+        warnings.warn("No conductor objects were found in CYMEQCONDUCTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
+    else:
+        for row in cymeqoverheadline_db:
+            row.EquipmentId = _fixName(row.EquipmentId)
+            spacingIds.append(_fixName(row.ConductorSpacingId))
+            if row.EquipmentId not in cymeqoverheadline.keys():
+                cymeqoverheadline[row.EquipmentId] = copy.deepcopy(CYMEQOVERHEADLINE)
+                cymeqoverheadline[row.EquipmentId]['name'] = row.EquipmentId               
+                cymeqoverheadline[row.EquipmentId]['configuration'] = _fixName(row.PhaseConductorId)
+                cymeqoverheadline[row.EquipmentId]['spacing'] = _fixName(row.ConductorSpacingId)
+                cymeqoverheadline[row.EquipmentId]['conductor_N'] = _fixName(row.NeutralConductorId)
+    return cymeqoverheadline, spacingIds
+
 def _readCymeSection(feederId, modelDir):
     '''store information from CYMSECTION'''
     cymsection = {}                         # Stores information found in CYMSECTION in the network database
@@ -1009,13 +1054,13 @@ def _readEqGeometricalArrangement(feederId, modelDir):
 
 def _readUgConfiguration(feederId, modelDir):
     cymcsvundergroundcable = {}
-    # Defaults
+    # Defaults, need defaults for all values
     CYMCSVUNDERGROUNDCABLE = { 'name' : None,
                                'rating.summer_continuous' : None,
-                               'outer_diameter' : None,
-                               'conductor_resistance' : None,
-                               'conductor_gmr' : None,
-                               'conductor_diameter' : None,
+                               'outer_diameter' : 0.0640837,
+                               'conductor_resistance' : 14.87200,
+                               'conductor_gmr' : 0.020800,
+                               'conductor_diameter' : 0.0640837,
                                'neutral_resistance' : 14.87200,
                                'neutral_gmr' : 0.020800,
                                'neutral_diameter' : 0.0640837,
@@ -1036,8 +1081,9 @@ def _readUgConfiguration(feederId, modelDir):
             if row.EquipmentId not in cymcsvundergroundcable.keys():
                 cymcsvundergroundcable[row.EquipmentId] = copy.deepcopy(CYMCSVUNDERGROUNDCABLE)
                 cymcsvundergroundcable[row.EquipmentId]['name'] = _fixName(row.EquipmentId)
-                cymcsvundergroundcable[row.EquipmentId]['rating.summer_continuous'] = row.FirstRating 
-                cymcsvundergroundcable[row.EquipmentId]['outer_diameter'] = row.OverallDiameter
+                cymcsvundergroundcable[row.EquipmentId]['rating.summer_continuous'] = row.FirstRating
+                if row.OverallDiameter is not None:
+                    cymcsvundergroundcable[row.EquipmentId]['outer_diameter'] = row.OverallDiameter
                 cymcsvundergroundcable[row.EquipmentId]['conductor_resistance'] = row.PositiveSequenceResistance
                 if row.ArmorOuterDiameter is not None:
                     cymcsvundergroundcable[row.EquipmentId]['conductor_diameter'] = row.ArmorOuterDiameter
@@ -1192,7 +1238,7 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
     dbflag = 0 
     if 'Duke' in str(network_db):
         dbflag = 0
-    elif 'Paso' in str(network_db):
+    elif 'OakPass' in str(network_db):
         dbflag= 1
     glmTree = {}    # Dictionary that will hold the feeder model for conversion to .glm format 
     regulator_sections = {}
@@ -1260,6 +1306,10 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
             cymsection[section]['toY'] = '800'
     # -13-CYME CYMSECTIONDEVICE ****************************************************************************************************************************************************************
     cymsectiondevice = _readCymeSectionDevice(feeder_id, modelDir) 
+    # OVERHEAD LINES
+    cymoverheadline, lineIds = _readCymeOverheadLine(feeder_id, modelDir)
+    # OVERHEAD LINE CONFIGS
+    cymeqoverheadline, spacingIds = _readCymeQOverheadLine(feeder_id, modelDir)
     # Check that the section actually is a device
     for link in cymsection.keys():
         link_exists = 0
@@ -1314,8 +1364,8 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
     # Group each type of device.
     for device in cymsectiondevice.keys():
         if cymsectiondevice[device]['device_type'] == 1:
-            undergroundline_sections[cymsectiondevice[device]['section_name']] = device 
-        elif cymsectiondevice[device]['device_type'] == 3:
+            undergroundline_sections[cymsectiondevice[device]['section_name']] = device
+        elif cymsectiondevice[device]['device_type'] == 3 or cymsectiondevice[device]['device_type'] == 2:
             overheadline_sections[cymsectiondevice[device]['section_name']] = device
         elif cymsectiondevice[device]['device_type'] == 4:
             regulator_sections[cymsectiondevice[device]['section_name']] = device
@@ -1470,9 +1520,31 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
                                                 'resistance' : '{:0.6f}'.format(cymeqconductor[olc]['resistance']),
                                                 'geometric_mean_radius' : '{:0.6f}'.format(cymeqconductor[olc]['geometric_mean_radius'])}
         else:
-            print "There is no conductor spec for ", olc, " in the equipment database provided.\n"              
-    # Create overhead line spacing dictionaries
+            print "There is no conductor spec for ", olc, " in the equipment database provided.\n" 
+
+    for olc in cymeqconductor:
+        if olc in cymeqconductor.keys():
+            if olc not in ohl_conds.keys():
+                ohl_conds[olc] = {'object' : 'overhead_line_conductor',
+                                                'name' : olc,
+                                                'resistance' : '{:0.6f}'.format(cymeqconductor[olc]['resistance']),
+                                                'geometric_mean_radius' : '{:0.6f}'.format(cymeqconductor[olc]['geometric_mean_radius'])}
+        else:
+            print "There is no conductor spec for ", olc, " in the equipment database provided.\n" 
+
+    ohl_configs = {}
+    for ohlc in cymeqoverheadline:
+        if ohlc in lineIds:
+            if ohlc not in ohl_configs.keys():
+                ohl_configs[ohlc] = {'object' : 'line_configuration',
+                                    'name': ohlc+'conf',
+                                    'spacing': cymeqoverheadline[ohlc]['spacing']+'ohsps',
+                                    'conductor_A': cymeqoverheadline[ohlc]['configuration'],
+                                    'conductor_B': cymeqoverheadline[ohlc]['configuration'],
+                                    'conductor_C': cymeqoverheadline[ohlc]['configuration'],
+                                    'conductor_N': cymeqoverheadline[ohlc]['conductor_N']}
     ohl_spcs = {}
+    # Create overhead line spacing dictionaries
     for ols in uniqueOhSpacing:
         if ols in cymeqgeometricalarrangement.keys():
             if ols not in ohl_spcs.keys():
@@ -1485,7 +1557,19 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
                                                 'distance_BN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_BN']),
                                                 'distance_CN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_CN'])}
         else:
-            print "There is no line spacing spec for ", ols, "in the equipment database provided.\n"             
+            print "There is no line spacing spec for ", ols, "in the equipment database provided.\n" 
+    
+    for ols in spacingIds:
+        if ols in cymeqgeometricalarrangement.keys():
+            if ols not in ohl_spcs.keys():
+                ohl_spcs[ols] = {'object' : 'line_spacing',
+                                'name' : ols+'ohsps',
+                                'distance_AB' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_AB']),
+                                'distance_AC' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_AC']),
+                                'distance_AN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_AN']),
+                                'distance_BC' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_BC']),
+                                'distance_BN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_BN']),
+                                'distance_CN' : '{:0.6f}'.format(cymeqgeometricalarrangement[ols]['distance_CN'])}
     # Create overhead line configuration dictionaries
     ohl_cfgs = {}
     ohl_neutral = []
@@ -1508,7 +1592,7 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
     for ohl in cymsectiondevice.keys():
         if cymsectiondevice[ohl]['device_type'] == 3:
             if ohl not in cymoverheadbyphase.keys():
-                print "There is no line spec for ", oh1, " in the network database provided.\n"                  
+                print "There is no line spec for ", ohl, " in the network database provided.\n"                  
             elif ohl not in ohls.keys():
                 if ohl not in parallelLinks:
                     ohls[ohl] = {'object' : 'overhead_line',
@@ -1539,6 +1623,18 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
                                                                     'nominal_voltage' : str(feeder_VLN),
                                                                     'latitude' : str((float(cymsectiondevice[ohl]['fromLatitude']) + float(cymsectiondevice[ohl]['toLatitude']))/2.0),
                                                                     'longitude' : str((float(cymsectiondevice[ohl]['fromLongitude']) + float(cymsectiondevice[ohl]['toLongitude']))/2.0)}
+        if cymsectiondevice[ohl]['device_type'] == 2:
+            if ohl not in cymoverheadline.keys():
+                print "There is no line spec for ", oh1, " in the network database provided.\n"
+            elif ohl not in ohls.keys():
+                if ohl not in parallelLinks:
+                       ohls[ohl] = {'object' : 'overhead_line',
+                                            'name' : ohl,
+                                            'phases' : cymsectiondevice[ohl]['phases'],
+                                            'from' :  cymsectiondevice[ohl]['from'],
+                                            'to' :  cymsectiondevice[ohl]['to'],
+                                            'length' :  '{:0.6f}'.format(cymoverheadline[ohl]['length']),
+                                            'configuration' : cymoverheadline[ohl]['configuration']+'conf'}
         elif cymsectiondevice[ohl]['device_type'] == 23:
             if ohl not in cymUnbalancedOverheadLine.keys():
                 print "There is no line spec for ", oh1, " in the network database provided.\n"  
@@ -1955,7 +2051,7 @@ def convertCymeModel(network_db, equipment_db, modelDir, test=False, type=1, fee
     for headId in xrange(len(genericHeaders)):
         glmTree[headId] = genericHeaders[headId]
     key = len(glmTree)
-    objectList = [ohl_conds, ugl_conds, ohl_spcs, ugl_sps, ohl_cfgs, ugl_cfgs, xfmr_cfgs, spct_cfgs, reg_cfgs, meters, nodes, loads, tpms, tpns, ohls, ugls, xfmrs, spcts, regs, swObjs, rcls, sxnlrs, fuses, caps]
+    objectList = [ohl_conds, ugl_conds, ohl_spcs, ohl_configs , ugl_sps, ohl_cfgs, ugl_cfgs, xfmr_cfgs, spct_cfgs, reg_cfgs, meters, nodes, loads, tpms, tpns, ohls, ugls, xfmrs, spcts, regs, swObjs, rcls, sxnlrs, fuses, caps]
     for objDict in objectList:
         if len(objDict) > 0:
             for obj in objDict.keys():

@@ -1,9 +1,9 @@
 ''' Convert a Milsoft Windmil feeder model into an OMF-compatible version. '''
 
-import feeder, csv, random, math, copy
+import feeder, csv, random, math, copy, locale
 from StringIO import StringIO
 from os.path import join as pJoin
-
+locale.setlocale(locale.LC_ALL, 'en_US')
 def convert(stdString,seqString):
     ''' Take in a .std and .seq strings from Milsoft and spit out a (json dict, int, int).'''
     def csvToArray(csvString):
@@ -1299,8 +1299,8 @@ def _tests(testFiles, openPrefix, outPrefix, testAttachments, keepFiles=True):
             outFileSize = outFileStats.st_size
             with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
                 resultsFile.write('WROTE GLM FOR ' + stdString + "\n")
-                resultsFile.write('Input .std File Size: ' + str(inFileSize) + "\n")
-                resultsFile.write('Output .glm File Size: '+ str(outFileSize) + "\n")
+                resultsFile.write('Input .std File Size: ' + str(locale.format("%d", inFileSize, grouping=True))+'\n')
+                resultsFile.write('Output .glm File Size: '+ str(locale.format("%d", outFileSize, grouping=True))+'\n')
             try:
                 # Draw the GLM.
                 myGraph = feeder.treeToNxGraph(outGlm)
@@ -1317,7 +1317,10 @@ def _tests(testFiles, openPrefix, outPrefix, testAttachments, keepFiles=True):
             try:
                 # Run powerflow on the GLM. HACK:blank attachments for now.
                 output = gridlabd.runInFilesystem(outGlm, attachments=testAttachments, keepFiles=False)
-                gridlabdStderr =  output['stderr']
+                if output['stderr'] == "":
+                    gridlabdStderr = "GridLabD ran successfully without error."
+                else:
+                    gridlabdStderr =  output['stderr']
                 with open(outPrefix + stdString.replace('.std','.json'),'a') as outFile:
                     json.dump(output, outFile, indent=4)
                 print 'RAN GRIDLAB ON', stdString
