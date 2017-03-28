@@ -2268,7 +2268,7 @@ def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
         shutil.rmtree(outPrefix)
     return exceptionCount    
 if __name__ == '__main__':
-    testFile = "Titanium.mdb"
+    testFile = "IEEE13.mdb"
     modelDir = './scratch/uploads/'
     outPrefix = './scratch/cymeToGridlabTests/' 
     _tests(testFile, modelDir, outPrefix)
