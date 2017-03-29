@@ -1,166 +1,167 @@
+
 {
-    "scenario_solution": [
+    "design_solution":{
+        "design_cost":0.0,
+        "is_feasible":true,
+        "lines":[
+            {
+                "id":"tl_1",
+                "hardened":false
+            },
+            {
+                "id":"t2",
+                "hardened":false
+            },
+            {
+                "id":"Reg1",
+                "hardened":false
+            },
+            {
+                "id":"T2",
+                "hardened":false
+            },
+            {
+                "id":"T1",
+                "hardened":false
+            }
+        ],
+        "generators":[
+            {
+                "id":"n650_gen"
+            }
+        ]
+    },
+    "scenario_solution":[
         {
-            "generators": [
+            "id":1,
+            "lines":[
                 {
-                    "id": "n650_gen", 
-                    "real_phase": [
-                        10.0, 
-                        20.0, 
+                    "id":"tl_1",
+                    "in_use":true
+                },
+                {
+                    "id":"t2",
+                    "in_use":true
+                },
+                {
+                    "id":"Reg1",
+                    "in_use":true
+                },
+                {
+                    "id":"T2",
+                    "in_use":true
+                },
+                {
+                    "id":"T1",
+                    "in_use":true
+                }
+            ],
+            "buses":[
+                {
+                    "id":"tn_2_bus",
+                    "voltage":[
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "id":"tm_1_bus",
+                    "voltage":[
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "id":"tn_1_bus",
+                    "voltage":[
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "id":"tm_2_bus",
+                    "voltage":[
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "id":"n650_bus",
+                    "voltage":[
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                },
+                {
+                    "id":"n630_bus",
+                    "voltage":[
+                        1.0,
+                        1.0,
+                        1.0
+                    ]
+                }
+            ],
+            "generators":[
+                {
+                    "id":"n650_gen",
+                    "real_phase":[
+                        10.0,
+                        20.0,
                         0.0
-                    ], 
-                    "reactive_phase": [
-                        10.0, 
-                        20.0, 
+                    ],
+                    "reactive_phase":[
+                        10.0,
+                        20.0,
                         0.0
                     ]
                 }
-            ], 
-            "loads": [
+            ],
+            "loads":[
                 {
-                    "id": "tn_2_lod", 
-                    "real_phase": [
-                        0.0, 
-                        10.0, 
+                    "id":"tn_2_lod",
+                    "real_phase":[
+                        0.0,
+                        10.0,
                         0.0
-                    ], 
-                    "reactive_phase": [
-                        0.0, 
-                        10.0, 
-                        0.0
-                    ]
-                }, 
-                {
-                    "id": "tm_1_lod", 
-                    "real_phase": [
-                        10.0, 
-                        0.0, 
-                        0.0
-                    ], 
-                    "reactive_phase": [
-                        10.0, 
-                        0.0, 
+                    ],
+                    "reactive_phase":[
+                        0.0,
+                        10.0,
                         0.0
                     ]
-                }, 
+                },
                 {
-                    "id": "tm_2_lod", 
-                    "real_phase": [
-                        0.0, 
-                        10.0, 
+                    "id":"tm_1_lod",
+                    "real_phase":[
+                        10.0,
+                        0.0,
                         0.0
-                    ], 
-                    "reactive_phase": [
-                        0.0, 
-                        10.0, 
+                    ],
+                    "reactive_phase":[
+                        10.0,
+                        0.0,
                         0.0
                     ]
-                }
-            ], 
-            "lines": [
+                },
                 {
-                    "id": "tl_1", 
-                    "in_use": true
-                }, 
-                {
-                    "id": "t2", 
-                    "in_use": true
-                }, 
-                {
-                    "id": "Reg1", 
-                    "in_use": true
-                }, 
-                {
-                    "id": "T2", 
-                    "in_use": true
-                }, 
-                {
-                    "id": "T1", 
-                    "in_use": true
-                }
-            ], 
-            "id": 1, 
-            "buses": [
-                {
-                    "id": "tn_2_bus", 
-                    "voltage": [
-                        1.0, 
-                        1.0, 
-                        1.0
-                    ]
-                }, 
-                {
-                    "id": "tm_1_bus", 
-                    "voltage": [
-                        1.0, 
-                        1.0, 
-                        1.0
-                    ]
-                }, 
-                {
-                    "id": "tn_1_bus", 
-                    "voltage": [
-                        1.0, 
-                        1.0, 
-                        1.0
-                    ]
-                }, 
-                {
-                    "id": "tm_2_bus", 
-                    "voltage": [
-                        1.0, 
-                        1.0, 
-                        1.0
-                    ]
-                }, 
-                {
-                    "id": "n650_bus", 
-                    "voltage": [
-                        1.0, 
-                        1.0, 
-                        1.0
-                    ]
-                }, 
-                {
-                    "id": "n630_bus", 
-                    "voltage": [
-                        1.0, 
-                        1.0, 
-                        1.0
+                    "id":"tm_2_lod",
+                    "real_phase":[
+                        0.0,
+                        10.0,
+                        0.0
+                    ],
+                    "reactive_phase":[
+                        0.0,
+                        10.0,
+                        0.0
                     ]
                 }
             ]
         }
-    ], 
-    "design_solution": {
-        "generators": [
-            {
-                "id": "n650_gen"
-            }
-        ], 
-        "lines": [
-            {
-                "hardened": false, 
-                "id": "tl_1"
-            }, 
-            {
-                "hardened": false, 
-                "id": "t2"
-            }, 
-            {
-                "hardened": false, 
-                "id": "Reg1"
-            }, 
-            {
-                "hardened": false, 
-                "id": "T2"
-            }, 
-            {
-                "hardened": false, 
-                "id": "T1"
-            }
-        ], 
-        "design_cost": 0.0, 
-        "is_feasible": true
-    }
+    ]
 }

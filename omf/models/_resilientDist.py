@@ -405,7 +405,7 @@ def runGridLabD():
 
 	#load an existing blank glm file and use it to write to it
 	with open(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm', 'feeder.glm'), 'w') as glmFile:
-		toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {filename test_JSON_dump.json;};" #+ "object jsonreader {filename RDTInputfile.json;};"
+		toWrite =  omf.feeder.sortedWrite(omd['tree'])# + "object jsondump {filename test_JSON_dump.json;};" + "object jsonreader {filename RDTInputfile.json;};"
 		#DONE? DOES THIS WORK?:  Write the jsonreader/dump objects from franks email into here before writing to glmFile
 		#JSON READER DOES NOT WORK
 		glmFile.write(toWrite)
@@ -420,7 +420,7 @@ def runGridLabD():
 	
 	os.chdir(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm'))
 	print os.getcwd()
-	subprocess.Popen('gridlabd ')
+	subprocess.Popen('gridlabd feeder.glm')
 	#codes = json.load('linecodes.json')
 
 
@@ -429,12 +429,10 @@ def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 	'''
 	print "Running RDT..."
 	print "************************************"
-	origWorkDir = os.getcwd()
-	os.chdir(pJoin(__metaModel__._omfDir,'solvers','rdt'))
-	#print "HIHIHIHIHIHIH"
-	#command = pJoin('java','-jar', '-classpath', pJoin(__metaModel__._omfDir, 'solvers', 'rdt','ScipLibrary.dll'), pJoin(__metaModel__._omfDir, 'solvers', 'rdt', 'micot-rdt.jar'), '-c',)
-	#print 'command= ' + command
-	proc = subprocess.Popen(['java','-jar', '-classpath', pJoin(__metaModel__._omfDir, 'solvers', 'rdt', 'micot-rdt.jar'), '-c', rdtInFile, '-e', rdtOutFile])
+	#origWorkDir = os.getcwd()
+	#os.chdir(pJoin(__metaModel__._omfDir,'solvers','rdt'))
+	#proc = subprocess.Popen(['java', pJoin('-Djna.library.path=', __metaModel__._omfDir, 'solvers', 'rdt'), '-jar', pJoin(__metaModel__._omfDir, 'solvers', 'rdt', 'micot-rdt.jar'), '-c', rdtInFile, '-e', rdtOutFile])
+	proc = subprocess.Popen(['java', "-Djna.library.path=" + __metaModel__._omfDir + "\solvers/rdt", '-jar', __metaModel__._omfDir + "\solvers/rdt\micot-rdt.jar", '-c', rdtInFile, '-e', rdtOutFile])
 	# Format output feeder.
 	with open(pJoin(rdtOutFile), "r") as jsonIn:
 		rdtOut = json.load(jsonIn)
@@ -442,7 +440,7 @@ def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 		json.dump(rdtOut, outFile, indent = 4)
 	print "\nOutput saved to:               %s"%(pJoin(dataDir, rdtOutFile))
 	print "************************************\n\n"
-	os.chdir(origWorkDir)
+	#os.chdir(origWorkDir)
 
 def diagramPrep(workDir, dataDir, feederName, debug):
 	# ... Steps here.

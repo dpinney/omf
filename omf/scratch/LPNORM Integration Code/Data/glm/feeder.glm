@@ -16125,4 +16125,3 @@ object triplex_meter {
 	latitude 1083.61741973;
 };
 
-object jsondump {filename test_JSON_dump.json;};
