@@ -381,7 +381,8 @@
 			</div>
 			<div class="content" style="overflow: auto">
 				<p>GFM Output:</p>
-				<iframe style="width:95%;height:94%;" src="{{pathPrefix}}/scratch/uploads/data.json"></iframe>
+				<pre id="gfmOutputFrame"></pre>
+				<script>gebi("gfmOutputFrame").innerHTML = allOutputData.gfmRawOut</script>
 			</div>
 			<div class="content" style="overflow: auto">
 				<p>RDT Output:</p>

@@ -155,6 +155,7 @@ def makeScenarios(rdtJson, jsonTree, debug):
 				print "   Scenario:"
 				for a,val in elem.iteritems():
 					print "      %s: %s"%(str(a), str(val))	
+
 def makeLines(rdtJson, jsonTree, debug):
 	''' lines.
 	TODO: Put in accurate num_poles, ask if has_phase corresponds to a,b,c.
@@ -183,6 +184,7 @@ def makeLines(rdtJson, jsonTree, debug):
 				for a,val in elem.iteritems():
 					print "      %s: %s"%(str(a), str(val))				
 	return lineCount
+
 def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
 	'''line_codes: create one for each line.
 	For now, use values from rdtInputTrevor.json.
@@ -240,6 +242,7 @@ def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
 				print "   Line_Code:"
 				for a,val in elem.iteritems():
 					print "      %s: %s"%(str(a), str(val))				 
+
 def makeBuses(rdtJson, jsonTree, debug):
 	'''buses.
 	Ziploads? house? regulator? Waterheater?
@@ -267,6 +270,7 @@ def makeBuses(rdtJson, jsonTree, debug):
 				print "   Bus:"
 				for a,val in elem.iteritems():
 					print "      %s: %s"%(str(a), str(val))					
+
 def makeLoads(rdtJson, jsonTree, debug):
 	'''loads.
 	TODO*: How do I calculate real_phase and reactive_phase?
@@ -292,6 +296,7 @@ def makeLoads(rdtJson, jsonTree, debug):
 				print "   Load:"
 				for a,val in elem.iteritems():
 					print "      %s: %s"%(str(a), str(val))				
+
 def makeGens(rdtJson, jsonTree, debug):
 	'''generators.
 	'''
@@ -314,6 +319,7 @@ def makeGens(rdtJson, jsonTree, debug):
 				print "   Generator:"
 				for a,val in elem.iteritems():
 					print "      %s: %s"%(str(a), str(val))				
+
 def convertToRDT(inData, dataDir, feederName, debug=False):
 	'''Read a omd.json feeder and convert it to fragility/RDT format.
 	'''
@@ -363,74 +369,81 @@ def readXRMatrices(dataDir, rdtFile, length):
 		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
 	return xMatrix, rMatrix
 
-def GFMPrep():
+def runGFM(modelDir):
+	'''Generate the input file for GFM and run it.'''
+	# Pull in data from allInputData:
 	fragIn = {}
-
-	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of ' + modelName, "allInputData.json"), "r") as fragInBase:
-		fragInBase = json.load(fragInBase)
-	fragInputBase = json.loads(fragInBase["poleData"])
+	with open(pJoin(modelDir, 'allInputData.json'), 'r') as allInputData:
+		allInputData = json.load(allInputData)
+	fragInputBase = json.loads(allInputData['poleData'])
 	baseAsset = fragInputBase['assets'][1]
-
 	fragIn['assets'] = []
 	fragIn['hazardFields'] = fragInputBase['hazardFields']
 	fragIn['responseEstimators'] = fragInputBase['responseEstimators']
-
-	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of ' + modelName, "Olin Barre Geo.omd"), "r") as jsonIn:
+	# Write the asc file.
+	with open(pJoin(__metaModel__._omfDir,modelDir,allInputData['weatherImpactsFileName']),'w') as hazardFile:
+		hazardFile.write(allInputData['weatherImpacts'])
+	# HACK: do the world's worst URLENCODE:
+	hazardAscPath = 'file://' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
+	# HACK: just consider one hazard field and:
+	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath
+	# Pull in data from the OMD:
+	with open(pJoin(modelDir, "Olin Barre Geo.omd"), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
-
+	# Pull pole lat/lon data from OMD and add to pole system.
 	for key in feederModel['tree'].keys():
 		asset = copy.deepcopy(baseAsset)
 		asset['id'] = key
-		if "longitude" in feederModel['tree'][key] and "latitude" in feederModel['tree'][key]:
+		if "longitude" in feederModel['tree'][key] and 'latitude' in feederModel['tree'][key]:
 			asset['assetGeometry']['coordinates'] = [feederModel['tree'][key]['longitude'], feederModel['tree'][key]['latitude']]
 		fragIn['assets'].append(asset)
-
-	with open(pJoin(__metaModel__._omfDir, "scratch", "uploads", "data.json"), "w") as outFile:
+	with open(pJoin(modelDir, "gfmInput.json"), "w") as outFile:
 		json.dump(fragIn, outFile, indent=4)
-
-def runFragility():
-	GFMPrep()
-	# Run micot-fragility.
-	proc = subprocess.Popen(['java','-jar', pJoin(__metaModel__._omfDir,'solvers','gfm', 'Fragility.jar'), pJoin(__metaModel__._omfDir,'scratch','uploads', 'data.json'), pJoin(__metaModel__._omfDir, 'scratch','LPNORM Integration Code', 'Data', 'out.json')])
-	print "Running Fragility\n"
+	# Run GFM.
+	gfmBinaryPath = pJoin(__metaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
+	inputFilePath = pJoin(modelDir, 'gfmInput.json')
+	gfmOutFileName = 'gfmOutput.json'
+	outFilePath = pJoin(modelDir, gfmOutFileName)
+	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
+	proc.wait()
+	# Add to allOutputData
+	outData = json.load(open(pJoin(modelDir,'allOutputData.json')))
+	gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
+	outData['gfmRawOut'] = gfmRawOut
+	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
+		json.dump(outData, outFile, indent=4)
+	print 'Running Fragility\n'
 
 def runGridLabD():
-	
 	#load json
 	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of ' + modelName, "Olin Barre Geo.omd"), "r") as omd:
 		omd = json.load(omd)
 		#print omd['attachments']
-
 	#load an existing blank glm file and use it to write to it
 	with open(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm', 'feeder.glm'), 'w') as glmFile:
 		toWrite =  omf.feeder.sortedWrite(omd['tree'])# + "object jsondump {filename test_JSON_dump.json;};" + "object jsonreader {filename RDTInputfile.json;};"
 		#DONE? DOES THIS WORK?:  Write the jsonreader/dump objects from franks email into here before writing to glmFile
 		#JSON READER DOES NOT WORK
 		glmFile.write(toWrite)
-
 	#write attachments from omd, if no file, one will be created
 	for fileName in omd['attachments']:
 		with open(os.path.join(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm', fileName),'w') as file:
 			file.write(omd['attachments'][fileName])
-
 	#HACK: copy a climate file until we wire in the file the user specifies via zipcode.
 	shutil.copy(pJoin(__metaModel__._omfDir, 'data','Climate','VA-RICHMOND.tmy2'),pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm'))
-	
 	os.chdir(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm'))
 	print os.getcwd()
 	subprocess.Popen('gridlabd feeder.glm')
 	#codes = json.load('linecodes.json')
 
-
 def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
-	''' Run RDT.
-	'''
+	''' Run RDT.'''
 	print "Running RDT..."
 	print "************************************"
 	#origWorkDir = os.getcwd()
 	#os.chdir(pJoin(__metaModel__._omfDir,'solvers','rdt'))
 	#proc = subprocess.Popen(['java', pJoin('-Djna.library.path=', __metaModel__._omfDir, 'solvers', 'rdt'), '-jar', pJoin(__metaModel__._omfDir, 'solvers', 'rdt', 'micot-rdt.jar'), '-c', rdtInFile, '-e', rdtOutFile])
-	proc = subprocess.Popen(['java', "-Djna.library.path=" + __metaModel__._omfDir + "\solvers/rdt", '-jar', __metaModel__._omfDir + "\solvers/rdt\micot-rdt.jar", '-c', rdtInFile, '-e', rdtOutFile])
+	proc = subprocess.Popen(['java', "-Djna.library.path=" + __metaModel__._omfDir + "/solvers/rdt", '-jar', __metaModel__._omfDir + "/solvers/rdt/micot-rdt.jar", '-c', rdtInFile, '-e', rdtOutFile])
 	# Format output feeder.
 	with open(pJoin(rdtOutFile), "r") as jsonIn:
 		rdtOut = json.load(jsonIn)
@@ -503,7 +516,6 @@ def run(modelDir, inputDict):
 	allOutput['test'] = 4
 	with open(pJoin(modelDir, "allOutputData.json"),"w") as outputFile:
 		json.dump(allOutput, outputFile, indent = 4)
-	
 	# Set up environment and paths
 	workDir = os.getcwd()
 	dataDir = pJoin(__metaModel__._omfDir,'scratch', 'LPNORM Integration Code', 'Data')
@@ -520,9 +532,8 @@ def run(modelDir, inputDict):
 	debug = False
 	rdtInFile = dataDir + '/' + convertToRDT(inData, dataDir, feederName, debug)
 	rdtOutFile = dataDir + '/rdtOutput'+feederName.strip('omd')+'json'
-
 	# Run Fragility & RDT.
-	runFragility()
+	runGFM(modelDir)
 	runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug)
 	# Create GLM and run gridlabD.
 	feederJson = diagramPrep(workDir, dataDir, feederName, debug)
@@ -567,7 +578,7 @@ def new(modelDir):
 	#print defaultInputs
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:
-		#copy the feeder from one place to another
+		# Copy the feeder from one place to another
 		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
 	except:
 		return False
