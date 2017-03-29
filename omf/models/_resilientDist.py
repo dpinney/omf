@@ -443,7 +443,10 @@ def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 	#origWorkDir = os.getcwd()
 	#os.chdir(pJoin(__metaModel__._omfDir,'solvers','rdt'))
 	#proc = subprocess.Popen(['java', pJoin('-Djna.library.path=', __metaModel__._omfDir, 'solvers', 'rdt'), '-jar', pJoin(__metaModel__._omfDir, 'solvers', 'rdt', 'micot-rdt.jar'), '-c', rdtInFile, '-e', rdtOutFile])
-	proc = subprocess.Popen(['java', "-Djna.library.path=" + __metaModel__._omfDir + "/solvers/rdt", '-jar', __metaModel__._omfDir + "/solvers/rdt/micot-rdt.jar", '-c', rdtInFile, '-e', rdtOutFile])
+	rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
+	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
+	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
+	proc.wait()
 	# Format output feeder.
 	with open(pJoin(rdtOutFile), "r") as jsonIn:
 		rdtOut = json.load(jsonIn)
@@ -527,7 +530,7 @@ def run(modelDir, inputDict):
 		'critical_load_met' : 0.98,
 		'total_load_met' : 0.5
 	}
-	print "Running simple market system example."
+	print 'Running simple market system example.'
 	feederName = 'Simple_Market_System.omd'
 	debug = False
 	rdtInFile = dataDir + '/' + convertToRDT(inData, dataDir, feederName, debug)
@@ -551,7 +554,7 @@ def new(modelDir):
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
-		"modelName": "resilientDist",
+		"modelName": modelDir,
 		"user": "admin",
 		"created": "",
 		"lineFixedCost": "0.0",
