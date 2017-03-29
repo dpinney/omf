@@ -388,7 +388,7 @@ def runGFM(modelDir):
 	# HACK: just consider one hazard field and:
 	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath
 	# Pull in data from the OMD:
-	with open(pJoin(modelDir, "Olin Barre Geo.omd"), "r") as jsonIn:
+	with open(pJoin(modelDir, allInputData['feederName1'] + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 	# Pull pole lat/lon data from OMD and add to pole system.
 	for key in feederModel['tree'].keys():
@@ -530,7 +530,7 @@ def run(modelDir, inputDict):
 		'critical_load_met' : 0.98,
 		'total_load_met' : 0.5
 	}
-	print 'Running simple market system example.'
+	# RDT and GFM setup and execution.
 	feederName = 'Simple_Market_System.omd'
 	debug = False
 	rdtInFile = dataDir + '/' + convertToRDT(inData, dataDir, feederName, debug)
@@ -550,7 +550,7 @@ def cancel(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "Olin Barre Geo",
+		"feederName1": "Simple Market System",
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
