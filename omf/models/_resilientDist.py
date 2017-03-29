@@ -24,11 +24,9 @@ tooltip = "The voltageDrop model runs loadflow to show system voltages at all no
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-
 # Functions.
 def createObj(objToRet):
-	'''Creates rdt input file objects.
-	'''
+	'''Creates rdt input file objects.'''
 	if objToRet=='scenario':
 		# scenario: an rdt input has multiple unique scenarios.
 		# required: id.		
@@ -488,76 +486,6 @@ def genDiagram(dataDir, feederJson, debug):
 
 # Tests.
 #def _tests(feederName=None, otherVars={}, testCase=0, debug=False, displayWeb=False):
-	
-def rdtOutputToHTML():
-	with open(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'rdtOutputSimple_Market_System.json'), "r") as rdtOut:
-		rdtOut = json.load(rdtOut)
-
-	htmlCollector= """
-		<p class="reportTitle" style="page-break-before:always">Voltage Drop Diagram</p>
-
-		<div class="content" style="overflow: auto">
-			<div id="diagram" style="width: 40%; float: left;">	
-				<h4 style="text-align: center;">One Line Diagram</h4>
-				<img style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;" src="{{pathPrefix}}/scratch/LPNORM Integration Code/Data/feederChart.png" alt="Feeder Diagram">
-			</div>
-			
-			<div id="tables" style="width: 60%; float: right;">
-				<h4 style="float: left">Resilience Solution</h4>
-				<h4 style="float: right; color: #54c465;">Validated by GRIDLAB-D: is_feasiblePlaceHolder</h4>
-				<br><br>
-				<table>
-					<tr>
-						<th>Total Cost</th>
-					</tr>
-					<tr>
-						<td>design_costPlaceHolder</td>
-					</tr>
-				</table>
-				<br>
-				<table>
-					<tr>
-						<th>Device ID</th>
-						<th>Type</th>
-						<th>Action</th>
-						<th>Cost</th>
-					</tr>
-					tableHTMLPlaceHolder
-				</table>
-			</div>
-		</div>	
-	"""
-
-	tableHTML = ""
-
-	for line in rdtOut['design_solution']['lines']:
-		tableHTML = tableHTML + """
-			<tr>
-				<td>""" + line['id'] + """</td>
-				<td>Line</td>
-				<td>""" + str(line['hardened']) + """</td>
-				<td>$15,000</td>
-			</tr>
-		"""
-
-	for generator in rdtOut['design_solution']['generators']:
-		tableHTML = tableHTML + """
-			<tr>
-				<td>""" + generator['id'] + """</td>
-				<td>Generator</td>
-				<td>Built with 5 MW of capacity</td>
-				<td>$15,000</td>
-			</tr>
-		"""
-
-	design_cost = str(rdtOut["design_solution"]['design_cost'])
-	is_feasible = str(rdtOut["design_solution"]['is_feasible'])
-
-	htmlCollector = htmlCollector.replace('design_costPlaceHolder',design_cost)
-	htmlCollector = htmlCollector.replace('is_feasiblePlaceHolder',is_feasible)
-	htmlCollector = htmlCollector.replace('tableHTMLPlaceHolder',tableHTML)
-		
-	print htmlCollector
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
