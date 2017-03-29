@@ -192,7 +192,7 @@ def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
 	TODO: Give special x/r matrices for transformers.
 	TODO: Read x/r matrices from gridlabD csv recorder file.
 	'''
-	xMatrices, rMatrices = readXRMatrices(dataDir, 'rdtInSimple_Market_System.json', 100)
+	xMatrices, rMatrices = readXRMatrices(dataDir, 'xrMatrices.json', 100)
 	for lineCode in range(0,lineCount):
 		newLineCode = createObj('line_code')
 		newLineCode['line_code'] = lineCode
@@ -381,7 +381,7 @@ def runGFM(modelDir):
 	fragIn['hazardFields'] = fragInputBase['hazardFields']
 	fragIn['responseEstimators'] = fragInputBase['responseEstimators']
 	# Write the asc file.
-	with open(pJoin(__metaModel__._omfDir,modelDir,allInputData['weatherImpactsFileName']),'w') as hazardFile:
+	with open(pJoin(modelDir,allInputData['weatherImpactsFileName']),'w') as hazardFile:
 		hazardFile.write(allInputData['weatherImpacts'])
 	# HACK: do the world's worst URLENCODE:
 	hazardAscPath = 'file://' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
@@ -508,7 +508,8 @@ def run(modelDir, inputDict):
 	startTime = dt.datetime.now()
 	allOutput = {}
 	with open(pJoin(modelDir,'allInputData.json')) as inputFile:    
-	    feederName = json.load(inputFile).get('feederName1','feeder')
+	    allInputData = json.load(inputFile)
+	    feederName = allInputData.get('feederName1','feeder')
 	inputDict["feederName1"] = feederName
 	# Check whether model exist or not
 	if not os.path.isdir(modelDir):
@@ -520,21 +521,18 @@ def run(modelDir, inputDict):
 	with open(pJoin(modelDir, "allOutputData.json"),"w") as outputFile:
 		json.dump(allOutput, outputFile, indent = 4)
 	# Set up environment and paths
-	workDir = os.getcwd()
-	dataDir = pJoin(__metaModel__._omfDir,'scratch', 'LPNORM Integration Code', 'Data')
-	if not os.path.exists(dataDir):
-		os.makedirs(dataDir)
-	inData = {
-		'phase_variation' : 0.15, 
-		'chance_constraint' : 1.0,
-		'critical_load_met' : 0.98,
-		'total_load_met' : 0.5
-	}
-	# RDT and GFM setup and execution.
-	feederName = 'Simple_Market_System.omd'
+	# TODO: single work and dataDir for RDT.
+	workDir = modelDir
+	dataDir = modelDir
+	rdtInData = {'phase_variation' : 0.15, 'chance_constraint' : 1.0, 'critical_load_met' : 0.98, 'total_load_met' : 0.5}
+	feederName = allInputData['feederName1'] + '.omd'
+	# TODO: investiage debug flag uses.
 	debug = False
-	rdtInFile = dataDir + '/' + convertToRDT(inData, dataDir, feederName, debug)
-	rdtOutFile = dataDir + '/rdtOutput'+feederName.strip('omd')+'json'
+	with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
+		json.dump(json.loads(allInputData['xrMatrices']),xrMatrixFile, indent=4)
+	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
+	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
+	rdtOutFile = dataDir + '/rdtOutput' + feederName.strip('omd') + 'json'
 	# Run Fragility & RDT.
 	runGFM(modelDir)
 	runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug)
@@ -575,6 +573,8 @@ def new(modelDir):
 		"weatherImpactsFileName": "WindGrid_lpnorm_example.asc",
 		"poleData": open(pJoin(__metaModel__._omfDir,"scratch","uploads","_fragility_input_example.json")).read(),
 		"poleDataFileName": "_fragility_input_example.json",
+		"xrMatrices":open(pJoin(__metaModel__._omfDir,"scratch","uploads","rdtInSimple_Market_System.json")).read(),
+		"xrMatricesFileName":"rdtInSimple_Market_System.json",
 		"simulationDate": "",
 		"simulationZipCode": "12345"
 	}
