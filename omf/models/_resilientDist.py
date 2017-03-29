@@ -1,7 +1,7 @@
 ''' Graph the voltage drop on a feeder. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
-import traceback, copy
+import traceback, copy, platform
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
@@ -384,7 +384,11 @@ def runGFM(modelDir):
 	with open(pJoin(modelDir,allInputData['weatherImpactsFileName']),'w') as hazardFile:
 		hazardFile.write(allInputData['weatherImpacts'])
 	# HACK: do the world's worst URLENCODE:
-	hazardAscPath = 'file://' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
+	if(platform.system() == "Windows"):
+		hazardAscPath = 'file:///' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
+		hazardAscPath = hazardAscPath.replace('\\', '/')
+	else: #for david's machine
+		hazardAscPath = 'file://' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
 	# HACK: just consider one hazard field and:
 	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath
 	# Pull in data from the OMD:
@@ -414,26 +418,27 @@ def runGFM(modelDir):
 		json.dump(outData, outFile, indent=4)
 	print 'Ran Fragility\n'
 
-def runGridLabD():
-	#load json
-	with open(pJoin(__metaModel__._omfDir, 'data', 'model', 'admin', 'Automated Testing of ' + modelName, "Olin Barre Geo.omd"), "r") as omd:
+def runGridLabD(modelDir, feederName):
+	'''Loads OMD file, creates GLM input, places climate file from user inputted zip code (TODO), runs Gridlab-D  (TODO)'''
+	#Load json
+	omdPath = pJoin(modelDir, feederName)
+	with open(omdPath, "r") as omd:
 		omd = json.load(omd)
-		#print omd['attachments']
-	#load an existing blank glm file and use it to write to it
-	with open(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm', 'feeder.glm'), 'w') as glmFile:
+	#Load an blank glm file and use it to write to it, JSON READER DOES NOT WORK
+	feederPath = pJoin(modelDir, 'feeder.glm')
+	with open(feederPath, 'w') as glmFile:
 		toWrite =  omf.feeder.sortedWrite(omd['tree'])# + "object jsondump {filename test_JSON_dump.json;};" + "object jsonreader {filename RDTInputfile.json;};"
-		#DONE? DOES THIS WORK?:  Write the jsonreader/dump objects from franks email into here before writing to glmFile
-		#JSON READER DOES NOT WORK
 		glmFile.write(toWrite)
-	#write attachments from omd, if no file, one will be created
+	#Write attachments from omd, if no file, one will be created
 	for fileName in omd['attachments']:
-		with open(os.path.join(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm', fileName),'w') as file:
+		with open(os.path.join(modelDir, fileName),'w') as file:
 			file.write(omd['attachments'][fileName])
 	#HACK: copy a climate file until we wire in the file the user specifies via zipcode.
-	shutil.copy(pJoin(__metaModel__._omfDir, 'data','Climate','VA-RICHMOND.tmy2'),pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm'))
-	os.chdir(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm'))
-	print os.getcwd()
-	subprocess.Popen('gridlabd feeder.glm')
+	climateFile = pJoin(__metaModel__._omfDir, 'data','Climate','VA-RICHMOND.tmy2')
+	shutil.copy(climateFile, modelDir)
+	#os.chdir(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm'))
+	#print os.getcwd()
+	#subprocess.Popen('gridlabd feeder.glm')
 	#codes = json.load('linecodes.json')
 
 def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
@@ -549,6 +554,8 @@ def run(modelDir, inputDict):
 	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 		json.dump(outData, outFile, indent=4)
 
+	runGridLabD(modelDir, feederName)
+
 def cancel(modelDir):
 	''' Voltage drop runs so fast it's pointless to cancel a run. '''
 	pass
@@ -616,4 +623,4 @@ def _runModel():
 if __name__ == '__main__':
 	#rdtOutputToHTML()
 	_runModel()
-	#runGridLabD()
+	
