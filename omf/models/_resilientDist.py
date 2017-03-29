@@ -583,7 +583,7 @@ def new(modelDir):
 		"poleDataFileName": "_fragility_input_example.json",
 		"xrMatrices":open(pJoin(__metaModel__._omfDir,"scratch","uploads","rdtInSimple_Market_System.json")).read(),
 		"xrMatricesFileName":"rdtInSimple_Market_System.json",
-		"simulationDate": "",
+		"simulationDate": "2012-01-01",
 		"simulationZipCode": "12345"
 	}
 	#print defaultInputs

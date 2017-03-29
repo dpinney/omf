@@ -188,21 +188,21 @@
 				<input type="file" id="weatherImpactsFile" name="weatherImpactsFile" accept=".asc" onchange="handle_files(this.files)">
 				<input id="weatherImpacts" name="weatherImpacts" type="hidden">
 				<!-- Format the file input and populate it with a saved file. -->
-				<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+				<input type="hidden" id="weatherImpactsFileName" name="weatherImpactsFileName" readonly="readonly">
 				<div id="fileBackground"></div>
-				<div id="fileExists"><label for="weatherImpactsFile" id="weatherImpactsFileName" name="weatherImpactsFileName"></label></div>
+				<div id="fileExists"><label for="weatherImpactsFile" id="weatherImpactsFileNameLabel"></label></div>
 				<script>
 					if (typeof allInputData.weatherImpactsFileName !== 'undefined') {					
-						document.getElementById('weatherImpactsFileName').innerHTML = allInputData.weatherImpactsFileName;
+						document.getElementById('weatherImpactsFileNameLabel').innerHTML = allInputData.weatherImpactsFileName;
 					}
 					else {
-						document.getElementById('weatherImpactsFileName').innerHTML = 'Please select a file'
+						document.getElementById('weatherImpactsFileNameLabel').innerHTML = 'Please select a file'
 						gebi('weatherImpactsFile').setAttribute('required', 'required')
 					}
 					// File handler function.
 					function handle_files(files) {
 						// read file to a hidden input field
-						reader = new FileReader()
+						var reader = new FileReader()
 						reader.readAsText(files[0])
 						reader.onload = loaded
 						function loaded(evt) {
@@ -210,8 +210,8 @@
 							gebi("weatherImpacts").value = reader.result
 							var FileName = gebi("weatherImpactsFile").value.split("\\");
 							var FileName = FileName[FileName.length-1];
-							document.getElementById('weatherImpactsFileName').innerHTML = FileName;
-							gebi("fileName").value = FileName;
+							document.getElementById('weatherImpactsFileNameLabel').innerHTML = FileName;
+							gebi("weatherImpactsFileName").value = FileName;
 						}
 					}
 				</script>
@@ -222,21 +222,21 @@
 				<input type="file" id="poleDataFile" name="poleDataFile" accept=".json" onchange="handle_pole_files(this.files)">
 				<input id="poleData" name="poleData" type="hidden">
 				<!-- Format the file input and populate it with a saved file. -->
-				<input type="hidden" id="fileName" name="fileName" readonly="readonly">
+				<input type="hidden" id="poleDataFileName" name="poleDataFileName" readonly="readonly">
 				<div id="fileBackground"></div>
-				<div id="fileExists"><label for="poleDataFile" id="poleDataFileName" name="poleDataFileName"></label></div>
+				<div id="fileExists"><label for="poleDataFile" id="poleDataFileNameLabel" name="poleDataFileName"></label></div>
 				<script>
 					if (typeof allInputData.poleDataFileName !== 'undefined') {					
-						document.getElementById('poleDataFileName').innerHTML = allInputData.poleDataFileName;
+						document.getElementById('poleDataFileNameLabel').innerHTML = allInputData.poleDataFileName;
 					}
 					else {
-						document.getElementById('poleDataFileName').innerHTML = 'Please select a file'
+						document.getElementById('poleDataFileNameLabel').innerHTML = 'Please select a file'
 						gebi('poleDataFile').setAttribute('required', 'required')
 					}
 					// File handler function.
 					function handle_pole_files(files) {
 						// read file to a hidden input field
-						reader = new FileReader()
+						var reader = new FileReader()
 						reader.readAsText(files[0])
 						reader.onload = loaded
 						function loaded(evt) {
@@ -244,19 +244,53 @@
 							gebi("poleData").value = reader.result
 							var FileName = gebi("poleDataFile").value.split("\\");
 							var FileName = FileName[FileName.length-1];
-							document.getElementById('poleDataFileName').innerHTML = FileName;
-							gebi("fileName").value = FileName;
+							document.getElementById('poleDataFileNameLabel').innerHTML = FileName;
+							gebi("poleDataFileName").value = FileName;
 						}
 					}
 				</script>
 			</div>
 			<div class="shortInput">
-				<label>Simulation Date</label>
-				<input type="text" id="simDate" name="simDate">
+				<label class="tooltip">XR Matrices (.json file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
+				<script>var fileName=true;</script>
+				<input type="file" id="xrMatricesDataFile" name="xrMatricesDataFile" accept=".json" onchange="handle_pole_files(this.files)">
+				<input id="xrMatrices" name="xrMatrices" type="hidden">
+				<!-- Format the file input and populate it with a saved file. -->
+				<input type="hidden" id="xrMatricesFileName" name="xrMatricesFileName" readonly="readonly">
+				<div id="fileBackground"></div>
+				<div id="fileExists"><label for="xrMatricesDataFile" id="xrMatricesFileNameLabel" name="xrMatricesFileName"></label></div>
+				<script>
+					if (typeof allInputData.xrMatricesFileName !== 'undefined') {					
+						document.getElementById('xrMatricesFileNameLabel').innerHTML = allInputData.xrMatricesFileName;
+					}
+					else {
+						document.getElementById('xrMatricesFileNameLabel').innerHTML = 'Please select a file'
+						gebi('xrMatricesDataFile').setAttribute('required', 'required')
+					}
+					// File handler function.
+					function handle_pole_files(files) {
+						// read file to a hidden input field
+						var reader = new FileReader()
+						reader.readAsText(files[0])
+						reader.onload = loaded
+						function loaded(evt) {
+							evt.target.result
+							gebi("xrMatrices").value = reader.result
+							var FileName = gebi("poleDataFile").value.split("\\");
+							var FileName = FileName[FileName.length-1];
+							document.getElementById('xrMatricesFileNameLabel').innerHTML = FileName;
+							gebi("xrMatricesFileName").value = FileName;
+						}
+					}
+				</script>
+			</div>
+			<div class="shortInput">
+				<label>Simulation Date (YYYY-MM-DD)</label>
+				<input type="text" id="simulationDate" name="simulationDate">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Zip Code<span class="classic">Zip code of the planned array's geographical location.</span></label>
-				<input type="text" id="zipCode" name="zipCode">
+				<input type="text" id="simulationZipCode" name="simulationZipCode">
 			</div>
 
 			<div class="wideInput" style="text-align:right">
