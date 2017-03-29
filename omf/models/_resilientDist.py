@@ -412,7 +412,7 @@ def runGFM(modelDir):
 	outData['gfmRawOut'] = gfmRawOut
 	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 		json.dump(outData, outFile, indent=4)
-	print 'Running Fragility\n'
+	print 'Ran Fragility\n'
 
 def runGridLabD():
 	#load json
@@ -532,14 +532,22 @@ def run(modelDir, inputDict):
 		json.dump(json.loads(allInputData['xrMatrices']),xrMatrixFile, indent=4)
 	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
 	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
-	rdtOutFile = dataDir + '/rdtOutput' + feederName.strip('omd') + 'json'
+	rdtOutFile = dataDir + '/rdtOutput.json'
 	# Run Fragility & RDT.
 	runGFM(modelDir)
 	runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug)
-	# Create GLM and run gridlabD.
+	# Create GLM and run gridlab-D.
 	feederJson = diagramPrep(workDir, dataDir, feederName, debug)
 	# Graph feeder.
 	genDiagram(dataDir, feederJson, debug)
+	# Write some output.
+	outData = json.load(open(pJoin(modelDir,'allOutputData.json')))
+	rdtRawOut = open(rdtOutFile).read()
+	outData['rdtRawOut'] = rdtRawOut
+	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
+		outData["oneLineDiagram"] = inFile.read().encode("base64")
+	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
+		json.dump(outData, outFile, indent=4)
 
 def cancel(modelDir):
 	''' Voltage drop runs so fast it's pointless to cancel a run. '''
