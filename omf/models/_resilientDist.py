@@ -528,7 +528,7 @@ def run(modelDir, inputDict):
 	# Run Fragility & RDT.
 	runGFM(modelDir)
 	runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug)
-	gridlabRawOut = runGridLabD(modelDir, feederName, allInputData["simulationZipCode"])
+	gridlabdRawOut = runGridLabD(modelDir, feederName, allInputData["simulationZipCode"])
 	# Create GLM and run gridlab-D.
 	feederJson = diagramPrep(workDir, dataDir, feederName, debug)
 	# Graph feeder.
@@ -537,7 +537,7 @@ def run(modelDir, inputDict):
 	outData = json.load(open(pJoin(modelDir,'allOutputData.json')))
 	rdtRawOut = open(rdtOutFile).read()
 	outData['rdtRawOut'] = rdtRawOut
-	outData['gridlabdRawOut'] = gridlabRawOut
+	outData['gridlabdRawOut'] = gridlabdRawOut
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:

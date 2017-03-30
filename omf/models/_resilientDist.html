@@ -6,54 +6,42 @@
 	
 	<style type="text/css">
 	/*Styles here*/
-				.wrapper{
-					float: left;
-					width: 50%;
-					height: 90%;
-					position: relative;
-				}
-				#feederDiagram{ 
-					width: 100%;
-					height: 75%;
-				}
-				#damageSummary{
-					width: 100%;
-					height: 25%;
-				}
-				#rdtSummary{
-					width: 100%;
-					height: 100%;
-				}
-				#powerflowCheck{
-					position: absolute;
-					z-index: 10;
-					bottom: 0;
-					right: 0;
-					background-color: red;
-				}
-				/*article {
-					position: relative;
-					text-align: center;
-					transform: translate(-50%, -50%);
-				}*/
-				table {
-					border-collapse: collapse;
-					width: 100%;
-				}
-				table, th, td {
-					border: 1px solid grey;
-					font-size: 0.8em;
-
-				}
-				td, th {
-					text-align: left;
-					padding: 10px;
-				}
-				th {
-					background-color: #44474C;
-					color: #BFC4CC;
-				}
-				
+		.wrapper{float: left; width: 50%; height: 90%; position: relative;}
+		#feederDiagram{width: 100%;height: 75%;}
+		#damageSummary{width: 100%;height: 25%;}
+		#rdtSummary{width: 100%;height: 100%;}
+		#powerflowCheck{position: absolute;z-index: 10;bottom: 0;right: 0;background-color: red;}
+		table {border-collapse: collapse;width: 100%;}
+		table, th, td {border: 1px solid grey;font-size: 0.8em;}
+		td, th {text-align: left;padding: 10px;}
+		th {background-color: #44474C;color: #BFC4CC;}
+		#fileBackground {position:absolute;width:205px;max-width:205px;height:29px;margin: -30px 0 0 116px;background-color:gainsboro;}
+		#fileExists {
+			background-color:transparent;
+			max-width:185px;
+			overflow:hidden;
+			height:35px;
+			margin:-32px 0 0 116px;
+			position:absolute;
+			font-size:0.8em;
+			z-index:1;
+		}
+		@fileName {line-height:35px;}
+		input[type='file'] {
+			color: transparent;
+			overflow:hidden;
+		}
+		/*IE Hacks*/
+		@media screen\0 {
+			#fileBackground{margin-left:0px;width:222px;max-width:222px;height:29px;}
+			#fileExists{margin: -27px 0 0 10px;height:42px;}
+		}
+		/*Firefox Hacks*/
+		@-moz-document url-prefix() {
+			#fileBackground{margin-left:125px;width:195px;max-width:195px;}
+			#fileExists{max-width:175px;margin:-32px 0 0 135px;height:47px;}
+			}
+		}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -190,7 +178,7 @@
 				<!-- Format the file input and populate it with a saved file. -->
 				<input type="hidden" id="weatherImpactsFileName" name="weatherImpactsFileName" readonly="readonly">
 				<div id="fileBackground"></div>
-				<div id="fileExists"><label for="weatherImpactsFile" id="weatherImpactsFileNameLabel"></label></div>
+				<div id="fileExists"><label class="fileName" for="weatherImpactsFile" id="weatherImpactsFileNameLabel"></label></div>
 				<script>
 					if (typeof allInputData.weatherImpactsFileName !== 'undefined') {					
 						document.getElementById('weatherImpactsFileNameLabel').innerHTML = allInputData.weatherImpactsFileName;
@@ -224,7 +212,7 @@
 				<!-- Format the file input and populate it with a saved file. -->
 				<input type="hidden" id="poleDataFileName" name="poleDataFileName" readonly="readonly">
 				<div id="fileBackground"></div>
-				<div id="fileExists"><label for="poleDataFile" id="poleDataFileNameLabel" name="poleDataFileName"></label></div>
+				<div id="fileExists"><label class="fileName" for="poleDataFile" id="poleDataFileNameLabel" name="poleDataFileName"></label></div>
 				<script>
 					if (typeof allInputData.poleDataFileName !== 'undefined') {					
 						document.getElementById('poleDataFileNameLabel').innerHTML = allInputData.poleDataFileName;
@@ -258,7 +246,7 @@
 				<!-- Format the file input and populate it with a saved file. -->
 				<input type="hidden" id="xrMatricesFileName" name="xrMatricesFileName" readonly="readonly">
 				<div id="fileBackground"></div>
-				<div id="fileExists"><label for="xrMatricesDataFile" id="xrMatricesFileNameLabel" name="xrMatricesFileName"></label></div>
+				<div id="fileExists"><label class="fileName" for="xrMatricesDataFile" id="xrMatricesFileNameLabel" name="xrMatricesFileName"></label></div>
 				<script>
 					if (typeof allInputData.xrMatricesFileName !== 'undefined') {					
 						document.getElementById('xrMatricesFileNameLabel').innerHTML = allInputData.xrMatricesFileName;
@@ -303,127 +291,127 @@
 		</form>
 	</div>
 	<div id="output" class="postRun">
-		<p class="reportTitle" style="page-break-before:always">Voltage Drop Diagram</p>
-
+		<p class="reportTitle" style="page-break-before:always">Resilience Solution</p>
 		<div class="content" style="overflow: auto">
-				<div id="diagram" style="width: 40%; float: left;">	
-					<h4 style="text-align: center;">One Line Diagram</h4>
-					<img id="oneLineDiagram" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
-					<script>gebi("oneLineDiagram").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
-				</div>
-				
-				<div id="tables" style="width: 60%; float: right;">
-					<h4 style="float: left">Resilience Solution</h4>
-					<h4 style="float: right; color: #54c465;">Validated by GRIDLAB-D</h4>
-					<br><br>
-					<table>
-						<tr>
-							<th>Total Cost</th>
-						</tr>
-						<tr>
-							<td>$125,000</td>
-						</tr>
-					</table>
-					<br>
-					<table>
-						<tr>
-							<th>Device ID</th>
-							<th>Type</th>
-							<th>Action</th>
-							<th>Cost</th>
-						</tr>
-						<tr>
-							<td>1</td>
-							<td>Line</td>
-							<td>Built, Switch Built</td>
-							<td>$15,000</td>
-						</tr>
-						<tr>
-							<td>2</td>
-							<td>Line</td>
-							<td>Hardened</td>
-							<td>$2,000</td>
-						</tr>
-						<tr>
-							<td>3</td>
-							<td>Generator</td>
-							<td>Built with 5 MW of capacity</td>
-							<td>$50,000</td>
-						</tr>
-						<tr>
-							<td>...</td>
-							<td>...</td>
-							<td>...</td>
-							<td>...</td>
-						</tr>
-					</table>
-				</div>
-			</div>	
-
-
-			<div class="content" style="overflow: auto">
-				<div id="diagram" style="width: 40%; float: left;">	
-					<h4 style="text-align: center;">Damage Scenario Result</h4>
-					<h4 style="text-align: center;">Weather Type: Wind</h4>
-					<img id="oneLineDiagram2" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
-					<script>gebi("oneLineDiagram2").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
-				</div>
-				
-				<div id="tables" style="width: 60%; float: right;">
-					<div style="float: left">
-						<h4 style="padding: 3px; float: left; border: 1px solid black; background-color: #AAD0FF">Load lost: 14%</h4>
-						<h4 style="padding: 3px; float: right; border: 1px solid black; background-color: #AAD0FF">Critical load lost: 0%</h4>
-					</div>
-					<select style="width: 50%;float: right;">
-							<option value="Scenario 1">Scenario 1</option>
-							<option value="Scenario 2">Scenario 2</option>
-							<option value="Scenario 3">Scenario 3</option>
-					</select>
-					<br>
-					<br>
-					<table>
-						<tr>
-							<th>Device ID</th>
-							<th>Type</th>
-							<th>Result</th>
-						</tr>
-						<tr>
-							<td>1</td>
-							<td>Line</td>
-							<td>Disabled</td>
-						</tr>
-						<tr>
-							<td>3</td>
-							<td>Bus</td>
-							<td>Load lost</td>
-						</tr>
-						<tr>
-							<td>7</td>
-							<td>Generator</td>
-							<td>Power output [1000,0,0]</td>
-						</tr>
-						<tr>
-							<td>...</td>
-							<td>...</td>
-							<td>...</td>
-						</tr>
-						<tr>
-							<td>...</td>
-							<td>...</td>
-							<td>...</td>
-						</tr>
-					</table>
-				</div>
+			<div id="diagram" style="width: 40%; float: left;">	
+				<h4 style="text-align: center;">One Line Diagram</h4>
+				<img id="oneLineDiagram" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
+				<script>gebi("oneLineDiagram").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
 			</div>
-			<div class="content" style="overflow: auto">
-				<p>GFM Output:</p>
-				<pre id="gfmOutputFrame"></pre>
-				<script>gebi("gfmOutputFrame").innerHTML = allOutputData.gfmRawOut</script>
+			<div id="tables" style="width: 60%; float: right;">
+				<h4 style="float: left">Hardware Changes</h4>
+				<h4 style="float: right; color: #54c465;">Validated by GRIDLAB-D</h4>
+				<br><br>
+				<table>
+					<tr>
+						<th>Total Cost</th>
+					</tr>
+					<tr>
+						<td>$125,000</td>
+					</tr>
+				</table>
+				<br>
+				<table>
+					<tr>
+						<th>Device ID</th>
+						<th>Type</th>
+						<th>Action</th>
+						<th>Cost</th>
+					</tr>
+					<tr>
+						<td>1</td>
+						<td>Line</td>
+						<td>Built, Switch Built</td>
+						<td>$15,000</td>
+					</tr>
+					<tr>
+						<td>2</td>
+						<td>Line</td>
+						<td>Hardened</td>
+						<td>$2,000</td>
+					</tr>
+					<tr>
+						<td>3</td>
+						<td>Generator</td>
+						<td>Built with 5 MW of capacity</td>
+						<td>$50,000</td>
+					</tr>
+					<tr>
+						<td>...</td>
+						<td>...</td>
+						<td>...</td>
+						<td>...</td>
+					</tr>
+				</table>
 			</div>
-			<div class="content" style="overflow: auto">
-				<p>RDT Output:</p>
-				<pre id="rdtOutputFrame"></pre>
-				<script>gebi("rdtOutputFrame").innerHTML = allOutputData.rdtRawOut</script>
+		</div>
+		<p class="reportTitle" style="page-break-before:always">Damage Scenario Result</p>
+		<div class="content" style="overflow: auto">
+			<div id="diagram" style="width: 40%; float: left;">	
+				<h4 style="text-align: center;">Weather Type: Wind</h4>
+				<img id="oneLineDiagram2" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
+				<script>gebi("oneLineDiagram2").src = "data:image/png;base64," + allOutputData.oneLineDiagram</script>
 			</div>
+			<div id="tables" style="width: 60%; float: right;">
+				<div style="float: left">
+					<h4 style="padding: 3px; float: left; border: 1px solid black; background-color: #AAD0FF">Load lost: 14%</h4>
+					<h4 style="padding: 3px; float: right; border: 1px solid black; background-color: #AAD0FF">Critical load lost: 0%</h4>
+				</div>
+				<select style="width: 50%;float: right;">
+						<option value="Scenario 1">Scenario 1</option>
+						<option value="Scenario 2">Scenario 2</option>
+						<option value="Scenario 3">Scenario 3</option>
+				</select>
+				<br>
+				<br>
+				<table>
+					<tr>
+						<th>Device ID</th>
+						<th>Type</th>
+						<th>Result</th>
+					</tr>
+					<tr>
+						<td>1</td>
+						<td>Line</td>
+						<td>Disabled</td>
+					</tr>
+					<tr>
+						<td>3</td>
+						<td>Bus</td>
+						<td>Load lost</td>
+					</tr>
+					<tr>
+						<td>7</td>
+						<td>Generator</td>
+						<td>Power output [1000,0,0]</td>
+					</tr>
+					<tr>
+						<td>...</td>
+						<td>...</td>
+						<td>...</td>
+					</tr>
+					<tr>
+						<td>...</td>
+						<td>...</td>
+						<td>...</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+		<p class="reportTitle">GFM Output</p>
+		<div class="content" style="overflow: auto">
+			<pre id="gfmOutputFrame"></pre>
+			<script>gebi("gfmOutputFrame").innerHTML = allOutputData.gfmRawOut</script>
+		</div>
+		<p class="reportTitle">RDT Output</p>
+		<div class="content" style="overflow: auto">
+			<pre id="rdtOutputFrame"></pre>
+			<script>gebi("rdtOutputFrame").innerHTML = allOutputData.rdtRawOut</script>
+		</div>
+		<p class="reportTitle">GridLAB-D Output</p>
+		<div class="content" style="overflow: auto">
+			<pre id="gridlabOutputFrame"></pre>
+			<script>gebi("gridlabOutputFrame").innerHTML = allOutputData.gridlabdRawOut.stdout</script>
+		</div>
 	</div>
 </body>
