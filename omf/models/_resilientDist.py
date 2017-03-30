@@ -422,25 +422,15 @@ def runGFM(modelDir):
 def runGridLabD(modelDir, feederName, zipCode):
 	'''Loads OMD file from feeder name, creates GLM input, places climate file from user inputted zip code into model directory (TODO), runs Gridlab-D  (TODO)'''
 	#Load json
-	omdPath = pJoin(modelDir, feederName)
-	with open(omdPath, "r") as omd:
-		omd = json.load(omd)
-	#Load an blank glm file and use it to write to it, JSON READER DOES NOT WORK
-	feederPath = pJoin(modelDir, 'feeder.glm')
-	with open(feederPath, 'w') as glmFile:
-		toWrite =  omf.feeder.sortedWrite(omd['tree'])# + "object jsondump {filename test_JSON_dump.json;};" + "object jsonreader {filename RDTInputfile.json;};"
-		glmFile.write(toWrite)
-	#Write attachments from omd, if no file, one will be created
-	for fileName in omd['attachments']:
-		with open(os.path.join(modelDir, fileName),'w') as file:
-			file.write(omd['attachments'][fileName])
+	feederJson = json.load(open(pJoin(modelDir,feederName)))
+	tree = feederJson.get("tree",{})
+	attachments = feederJson.get("attachments",{})
 	#Wire in the file the user specifies via zipcode.
 	#zipCodeToClimateName() returns a (climateFileName, latforpvwatts) tuple.  What does the number do?
 	climateFileName, latforpvwatts = zipCodeToClimateName(zipCode)
-	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), modelDir)
-	#proc = subprocess.Popen(pJoin('gridlabd.exe', pJoin(modelDir, 'feeder.glm')))
-	proc = subprocess.call(pJoin('gridlabd.exe', pJoin(modelDir, 'feeder.glm')))
-	proc.wait()
+	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+	gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
+	return gridlabOut
 
 def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 	''' Run RDT.'''
@@ -538,6 +528,7 @@ def run(modelDir, inputDict):
 	# Run Fragility & RDT.
 	runGFM(modelDir)
 	runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug)
+	gridlabRawOut = runGridLabD(modelDir, feederName, allInputData["simulationZipCode"])
 	# Create GLM and run gridlab-D.
 	feederJson = diagramPrep(workDir, dataDir, feederName, debug)
 	# Graph feeder.
@@ -546,12 +537,12 @@ def run(modelDir, inputDict):
 	outData = json.load(open(pJoin(modelDir,'allOutputData.json')))
 	rdtRawOut = open(rdtOutFile).read()
 	outData['rdtRawOut'] = rdtRawOut
+	outData['gridlabdRawOut'] = gridlabRawOut
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 		json.dump(outData, outFile, indent=4)
 	print allInputData["simulationZipCode"]
-	runGridLabD(modelDir, feederName, allInputData["simulationZipCode"])
 
 def cancel(modelDir):
 	''' Voltage drop runs so fast it's pointless to cancel a run. '''
