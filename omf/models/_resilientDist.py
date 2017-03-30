@@ -14,6 +14,7 @@ import pprint as pprint
 # OMF imports
 import omf.feeder as feeder
 from omf.solvers import gridlabd
+from omf.weather import zipCodeToClimateName
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -418,8 +419,8 @@ def runGFM(modelDir):
 		json.dump(outData, outFile, indent=4)
 	print 'Ran Fragility\n'
 
-def runGridLabD(modelDir, feederName):
-	'''Loads OMD file, creates GLM input, places climate file from user inputted zip code (TODO), runs Gridlab-D  (TODO)'''
+def runGridLabD(modelDir, feederName, zipCode):
+	'''Loads OMD file from feeder name, creates GLM input, places climate file from user inputted zip code into model directory (TODO), runs Gridlab-D  (TODO)'''
 	#Load json
 	omdPath = pJoin(modelDir, feederName)
 	with open(omdPath, "r") as omd:
@@ -433,21 +434,18 @@ def runGridLabD(modelDir, feederName):
 	for fileName in omd['attachments']:
 		with open(os.path.join(modelDir, fileName),'w') as file:
 			file.write(omd['attachments'][fileName])
-	#HACK: copy a climate file until we wire in the file the user specifies via zipcode.
-	climateFile = pJoin(__metaModel__._omfDir, 'data','Climate','VA-RICHMOND.tmy2')
-	shutil.copy(climateFile, modelDir)
-	#os.chdir(pJoin(__metaModel__._omfDir, 'scratch', 'LPNORM Integration Code', 'Data', 'glm'))
-	#print os.getcwd()
-	#subprocess.Popen('gridlabd feeder.glm')
-	#codes = json.load('linecodes.json')
+	#Wire in the file the user specifies via zipcode.
+	#zipCodeToClimateName() returns a (climateFileName, latforpvwatts) tuple.  What does the number do?
+	climateFileName, latforpvwatts = zipCodeToClimateName(zipCode)
+	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), modelDir)
+	#proc = subprocess.Popen(pJoin('gridlabd.exe', pJoin(modelDir, 'feeder.glm')))
+	proc = subprocess.call(pJoin('gridlabd.exe', pJoin(modelDir, 'feeder.glm')))
+	proc.wait()
 
 def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 	''' Run RDT.'''
 	print "Running RDT..."
 	print "************************************"
-	#origWorkDir = os.getcwd()
-	#os.chdir(pJoin(__metaModel__._omfDir,'solvers','rdt'))
-	#proc = subprocess.Popen(['java', pJoin('-Djna.library.path=', __metaModel__._omfDir, 'solvers', 'rdt'), '-jar', pJoin(__metaModel__._omfDir, 'solvers', 'rdt', 'micot-rdt.jar'), '-c', rdtInFile, '-e', rdtOutFile])
 	rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
 	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
@@ -459,7 +457,6 @@ def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 		json.dump(rdtOut, outFile, indent = 4)
 	print "\nOutput saved to:               %s"%(pJoin(dataDir, rdtOutFile))
 	print "************************************\n\n"
-	#os.chdir(origWorkDir)
 
 def diagramPrep(workDir, dataDir, feederName, debug):
 	# ... Steps here.
@@ -553,8 +550,8 @@ def run(modelDir, inputDict):
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 		json.dump(outData, outFile, indent=4)
-
-	runGridLabD(modelDir, feederName)
+	print allInputData["simulationZipCode"]
+	runGridLabD(modelDir, feederName, allInputData["simulationZipCode"])
 
 def cancel(modelDir):
 	''' Voltage drop runs so fast it's pointless to cancel a run. '''
@@ -591,7 +588,7 @@ def new(modelDir):
 		"xrMatrices":open(pJoin(__metaModel__._omfDir,"scratch","uploads","rdtInSimple_Market_System.json")).read(),
 		"xrMatricesFileName":"rdtInSimple_Market_System.json",
 		"simulationDate": "2012-01-01",
-		"simulationZipCode": "12345"
+		"simulationZipCode": "64735"
 	}
 	#print defaultInputs
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
