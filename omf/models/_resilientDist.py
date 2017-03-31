@@ -562,6 +562,7 @@ def new(modelDir):
 		"lineUnitCost": "0.0",
 		"switchCost": "0.0",
 		"dgFixedCost": "0.0",
+		"dgUnitCost": "0.0",
 		"hardeningFixedCost": "0.0",
 		"hardeningUnitCost": "0.0",
 		"maxDGPerGenerator": "0.0",
