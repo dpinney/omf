@@ -1,4 +1,4 @@
-''' Graph the voltage drop on a feeder. '''
+''' Run micot-GFM, micot-RDT, and GridLAB-D to determine an optimal distribution resiliency investment. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime as dt, csv, math
 import traceback, copy, platform
@@ -19,13 +19,12 @@ from omf.weather import zipCodeToClimateName
 # Model metadata:
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
-tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
+tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
 
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-# Functions.
 def createObj(objToRet):
 	'''Creates rdt input file objects.'''
 	if objToRet=='scenario':
@@ -491,9 +490,6 @@ def genDiagram(dataDir, feederJson, debug):
 	if debug:
 		print "Plot saved to:                 %s"%(pJoin(dataDir,"feederChart.png"))
 		print "************************************\n\n"
-
-# Tests.
-#def _tests(feederName=None, otherVars={}, testCase=0, debug=False, displayWeb=False):
 
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
