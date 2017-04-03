@@ -34,7 +34,7 @@ XXX Remove feature def tranSmoothLoads(). There is not timeseries data in these 
 XXX Debug transmission dictionary access.
 	OOO Refactor - less for...in loops
 XXX Implement def distShuffleLoads(shufPerc). See spec image.
-OOO Implement def tranShuffleLoadsAndGens(shufPerc). See spec image.
+XXX Implement def tranShuffleLoadsAndGens(shufPerc). See spec image.
 OOO Implement def distSmoothLoads()
 	#PseudoCode
 	scadaFile = omd['attachments']['subScadaCalibrated1.player']

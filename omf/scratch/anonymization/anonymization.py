@@ -323,11 +323,55 @@ def tranAddNoise(inputNetwork, noisePerc):
 	# 				continue
 	return inputNetwork
 
+def tranShuffleLoadsAndGens(inputNetwork, shufPerc):
+	qParents = []
+	pParents = []
+	genParents = []
+	for dic in inputNetwork['bus']:
+		for each in dic:
+			idx = int(each) - 1
+			for key in inputNetwork['bus'][idx]:
+				for prop in inputNetwork['bus'][idx][key]:
+					if ('Qd' in prop) and ('Pd' in prop):
+						qParents.append(inputNetwork['bus'][idx][key]['Qd'])
+						pParents.append(inputNetwork['bus'][idx][key]['Pd'])
+	for dic in inputNetwork['gen']:
+		for each in dic:
+			idx = int(each) - 1
+			for key in inputNetwork['gen'][idx]:
+				for prop in inputNetwork['gen'][idx][key]:
+					if 'bus' in prop:
+						genParents.append(inputNetwork['gen'][idx][key]['bus'])
+	qIdx = 0
+	pIdx = 0
+	genIdx = 0
+	for dic in inputNetwork['bus']:
+		for each in dic:
+			idx = int(each) - 1
+			for key in inputNetwork['bus'][idx]:
+				for prop in inputNetwork['bus'][idx][key]:
+					if ('Qd' in prop) and ('Pd' in prop):
+						if random.randint(0,100)/100.0 < shufPerc:
+							random.shuffle(qParents)
+							random.shuffle(pParents)
+							inputNetwork['bus'][idx][key]['Qd'] = pParents[pIdx]
+							inputNetwork['bus'][idx][key]['Pd'] = qParents[qIdx]
+							pIdx += 1
+							qIdx += 1
+	for dic in inputNetwork['gen']:
+		for each in dic:
+			idx = int(each) - 1
+			for key in inputNetwork['gen'][idx]:
+				for prop in inputNetwork['gen'][idx][key]:
+					if 'bus' in prop:
+						if random.randint(0,100)/100.0 < shufPerc:
+							random.shuffle(genParents)
+							inputNetwork['gen'][idx][key]['bus'] = genParents[genIdx]
+							genIdx += 1
+	return inputNetwork['bus'], inputNetwork['gen']
+
 
 def tranModifyConductorLengths():
-	pass
-
-def tranShuffleLoads(shufPerc):
 	pass
 
 
@@ -428,6 +472,14 @@ def _tests():
 	noises = tranAddNoise(inputNetwork, noisePerc)
 	# print noises
 	FNAMEOUT = "caseNoise.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inputNetwork, outFile, indent=4)
+
+	# Testing tranShuffleLoadsAndGens
+	shufPerc = 0.5
+	shuffle = tranShuffleLoadsAndGens(inputNetwork, shufPerc)
+	# print shuffle
+	FNAMEOUT = "caseShuffle.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputNetwork, outFile, indent=4)
 
