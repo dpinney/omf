@@ -538,8 +538,7 @@ def run(modelDir, inputDict):
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 		json.dump(outData, outFile, indent=4)
-	print allInputData["simulationZipCode"]
-
+	
 def cancel(modelDir):
 	''' Voltage drop runs so fast it's pointless to cancel a run. '''
 	pass

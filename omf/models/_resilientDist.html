@@ -300,49 +300,42 @@
 			</div>
 			<div id="tables" style="width: 60%; float: right;">
 				<h4 style="float: left">Hardware Changes</h4>
-				<h4 style="float: right; color: #54c465;">Powerflow Validated</h4>
+				<h4 style="float: right; color: #54c465;" id="validation"></h4>
 				<br><br>
-				<table>
-					<tr>
-						<th>Total Cost</th>
-					</tr>
-					<tr>
-						<td>$125,000</td>
-					</tr>
+				<table id="totalCostTable">
 				</table>
 				<br>
-				<table>
-					<tr>
-						<th>Device ID</th>
-						<th>Type</th>
-						<th>Action</th>
-						<th>Cost</th>
-					</tr>
-					<tr>
-						<td>1</td>
-						<td>Line</td>
-						<td>Built, Switch Built</td>
-						<td>$15,000</td>
-					</tr>
-					<tr>
-						<td>2</td>
-						<td>Line</td>
-						<td>Hardened</td>
-						<td>$2,000</td>
-					</tr>
-					<tr>
-						<td>3</td>
-						<td>Generator</td>
-						<td>Built with 5 MW of capacity</td>
-						<td>$50,000</td>
-					</tr>
-					<tr>
-						<td>...</td>
-						<td>...</td>
-						<td>...</td>
-						<td>...</td>
-					</tr>
+				<table id="solutionComponents">
 				</table>
+				<script>
+					var rdtOutput = allOutputData.rdtRawOut;
+					rdtOutput = JSON.parse(rdtOutput);
+					console.log(rdtOutput);
+					var htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
+					
+					for(var i = 0; i < rdtOutput.design_solution.generators.length; i++) {
+						generator = rdtOutput.design_solution.generators[i];
+						htmlCollector = htmlCollector + "<tr><td>" + generator.id + "</td><td>Generator</td><td>Built with 5 MW of capacity</td><td>$50,000</td></tr>";
+					}
+
+					for(var j = 0; j < rdtOutput.design_solution.lines.length; j++) {
+						line = rdtOutput.design_solution.lines[j];
+						var hardened = "Hardened";
+						if(line.hardened == false) {
+							hardened = "Unhardened";
+						}
+						htmlCollector = htmlCollector + "<tr><td>" + line.id + "</td><td>Line</td><td>" + hardened + "</td><td>$2000</td></tr>";
+					}
+
+					if(rdtOutput.design_solution.is_feasible == true) {
+						gebi("validation").innerHTML = "Powerflow Validated";
+					}
+					else {
+						gebi("validation").innerHTML = "Powerflow Not Validated";
+					}
+					gebi("totalCostTable").innerHTML = '<tr><th>Total Cost</th></tr><tr><td>$' + rdtOutput.design_solution.design_cost + '</td></tr>';
+					gebi("solutionComponents").innerHTML = htmlCollector;
+				</script>
 			</div>
 		</div>
 		<p class="reportTitle" style="page-break-before:always">Damage Scenario Result</p>
@@ -364,38 +357,32 @@
 				</select>
 				<br>
 				<br>
-				<table>
-					<tr>
-						<th>Device ID</th>
-						<th>Type</th>
-						<th>Result</th>
-					</tr>
-					<tr>
-						<td>1</td>
-						<td>Line</td>
-						<td>Disabled</td>
-					</tr>
-					<tr>
-						<td>3</td>
-						<td>Bus</td>
-						<td>Load lost</td>
-					</tr>
-					<tr>
-						<td>7</td>
-						<td>Generator</td>
-						<td>Power output [1000,0,0]</td>
-					</tr>
-					<tr>
-						<td>...</td>
-						<td>...</td>
-						<td>...</td>
-					</tr>
-					<tr>
-						<td>...</td>
-						<td>...</td>
-						<td>...</td>
-					</tr>
+				<table id="scenarioTable">
 				</table>
+				<script>
+					htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Result</th></tr>";
+
+					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
+						scenario = rdtOutput.scenario_solution[j]; 
+						for(var k = 0; k < scenario.buses.length; k++) {
+							bus = scenario.buses[k];
+							htmlCollector = htmlCollector + "<tr><td>" + bus.id + "</td><td>Bus</td><td></td></tr>";
+						}
+						for(k = 0; k < scenario.generators.length; k++) {
+							generator = scenario.generators[k];
+							htmlCollector = htmlCollector + "<tr><td>" + generator.id + "</td><td>Generator</td><td></td></tr>";
+						}
+						for(k = 0; k < scenario.loads.length; k++) {
+							load = scenario.loads[k];
+							htmlCollector = htmlCollector + "<tr><td>" + load.id + "</td><td>Loads</td><td></td></tr>";
+						}
+						for(k = 0; k < scenario.lines.length; k++) {
+							line = scenario.lines[k];
+							htmlCollector = htmlCollector + "<tr><td>" + line.id + "</td><td>Lines</td><td></td></tr>";
+						}
+					}
+					gebi("scenarioTable").innerHTML = htmlCollector;
+				</script>
 			</div>
 		</div>
 		<p class="reportTitle">GFM Output</p>
