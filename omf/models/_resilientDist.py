@@ -357,19 +357,6 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 		print "Done... RDT input saved to:            %s"%(pJoin(dataDir,rdtInFile))
 		print "************************************\n\n"
 	return rdtInFile
-	
-def runGridLabD(modelDir, feederName, zipCode):
-	'''Loads OMD file from feeder name, creates GLM input, places climate file from user inputted zip code into model directory (TODO), runs Gridlab-D  (TODO)'''
-	#Load json
-	feederJson = json.load(open(pJoin(modelDir,feederName)))
-	tree = feederJson.get("tree",{})
-	attachments = feederJson.get("attachments",{})
-	#Wire in the file the user specifies via zipcode.
-	#zipCodeToClimateName() returns a (climateFileName, latforpvwatts) tuple.  What does the number do?
-	climateFileName, latforpvwatts = zipCodeToClimateName(zipCode)
-	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-	gridlabOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
-	return gridlabOut
 
 def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
 	''' Run RDT.'''
@@ -510,10 +497,16 @@ def run(modelDir, inputDict):
 		json.dump(outData, outFile, indent=4)
 	print 'Ran Fragility\n'
 	runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug)
-	gridlabdRawOut = runGridLabD(modelDir, feederName, allInputData["simulationZipCode"])
-	# Create GLM and run gridlab-D.
+	# Run GridLAB-D 
+	feederJson = json.load(open(pJoin(modelDir,feederName)))
+	tree = feederJson.get("tree",{})
+	attachments = feederJson.get("attachments",{})
+	#Wire in the file the user specifies via zipcode.
+	climateFileName, latforpvwatts = zipCodeToClimateName(allInputData["simulationZipCode"])
+	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+	gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
+	# Draw the feeder.
 	feederJson = diagramPrep(workDir, dataDir, feederName, debug)
-	# Graph feeder.
 	genDiagram(dataDir, feederJson, debug)
 	# Write some output.
 	outData = json.load(open(pJoin(modelDir,'allOutputData.json')))
