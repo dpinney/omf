@@ -358,22 +358,6 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 		print "************************************\n\n"
 	return rdtInFile
 
-def runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug=False):
-	''' Run RDT.'''
-	print "Running RDT..."
-	print "************************************"
-	rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
-	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
-	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
-	proc.wait()
-	# Format output feeder.
-	with open(pJoin(rdtOutFile), "r") as jsonIn:
-		rdtOut = json.load(jsonIn)
-	with open(pJoin(rdtOutFile),"w") as outFile:
-		json.dump(rdtOut, outFile, indent = 4)
-	print "\nOutput saved to:               %s"%(pJoin(dataDir, rdtOutFile))
-	print "************************************\n\n"
-
 def diagramPrep(workDir, dataDir, feederName, debug):
 	# ... Steps here.
 	# Run gridlabd.
@@ -448,9 +432,7 @@ def run(modelDir, inputDict):
 	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
 	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
 	rdtOutFile = dataDir + '/rdtOutput.json'
-	# Run Fragility & RDT.
-	'''Generate the input file for GFM and run it.'''
-	# Pull in data from allInputData:
+	# Generate the input file for GFM and run it.
 	fragIn = {}
 	with open(pJoin(modelDir, 'allInputData.json'), 'r') as allInputData:
 		allInputData = json.load(allInputData)
@@ -466,7 +448,7 @@ def run(modelDir, inputDict):
 	if(platform.system() == "Windows"):
 		hazardAscPath = 'file:///' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
 		hazardAscPath = hazardAscPath.replace('\\', '/')
-	else: #for david's machine
+	else: #for UNIX
 		hazardAscPath = 'file://' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
 	# HACK: just consider one hazard field and:
 	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath
@@ -489,19 +471,31 @@ def run(modelDir, inputDict):
 	outFilePath = pJoin(modelDir, gfmOutFileName)
 	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
 	proc.wait()
-	# Add to allOutputData
 	outData = json.load(open(pJoin(modelDir,'allOutputData.json')))
 	gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
 	outData['gfmRawOut'] = gfmRawOut
 	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 		json.dump(outData, outFile, indent=4)
 	print 'Ran Fragility\n'
-	runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug)
-	# Run GridLAB-D 
+	# Run RDT.
+	debug = False #TODO: remove.
+	print "Running RDT..."
+	print "************************************"
+	rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
+	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
+	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
+	proc.wait()
+	# Format output feeder.
+	with open(pJoin(rdtOutFile), "r") as jsonIn:
+		rdtOut = json.load(jsonIn)
+	with open(pJoin(rdtOutFile),"w") as outFile:
+		json.dump(rdtOut, outFile, indent = 4)
+	print "\nOutput saved to:               %s"%(pJoin(dataDir, rdtOutFile))
+	print "************************************\n\n"
+	# Run GridLAB-D first time to generate xrMatrices. #TODO: integrate GLD990.
 	feederJson = json.load(open(pJoin(modelDir,feederName)))
 	tree = feederJson.get("tree",{})
 	attachments = feederJson.get("attachments",{})
-	#Wire in the file the user specifies via zipcode.
 	climateFileName, latforpvwatts = zipCodeToClimateName(allInputData["simulationZipCode"])
 	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 	gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
