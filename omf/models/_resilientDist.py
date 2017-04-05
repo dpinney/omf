@@ -358,28 +358,14 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 		print "************************************\n\n"
 	return rdtInFile
 
-def diagramPrep(workDir, dataDir, feederName, debug):
-	# ... Steps here.
-	# Run gridlabd.
-	if debug:
-		print "Running gridlabD..."
-		print "************************************"
-	# 1. Run gridlabD on circuit.
+def genDiagram(dataDir, feederName, feederJson, debug):
+	# Generate feeder diagram.
 	feederJson = json.load(open(pJoin(dataDir,feederName)))
 	tree = feederJson.get("tree",{})
-	attachments = feederJson.get("attachments",{})
-	# 2. Read output.
-	if debug:
-		print "DID NOT RUN gridlabD. Results saved to:                 %s"%("N/A")
-		print "************************************\n\n"
-	return feederJson
-
-def genDiagram(dataDir, feederJson, debug):
 	if debug:
 		print "Generating Feeder plot..."
 		print "************************************"
 	links = feederJson.get("links",{})
-	tree = feederJson.get("tree", {})
 	toRemove = []
 	for link in links:
 		for typeLink in link.keys():
@@ -480,8 +466,7 @@ def run(modelDir, inputDict):
 	gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
 	outData['gridlabdRawOut'] = gridlabdRawOut
 	# Draw the feeder.
-	feederJson = diagramPrep(modelDir, modelDir, feederName, debug=False)
-	genDiagram(modelDir, feederJson, debug=False)
+	genDiagram(modelDir, feederName, feederModel, debug=False)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	# Save the output to disk.
