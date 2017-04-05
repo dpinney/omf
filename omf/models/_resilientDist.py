@@ -405,7 +405,7 @@ def genDiagram(dataDir, feederJson, debug):
 def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	startTime = dt.datetime.now()
-	allOutput = {}
+	outData = {}
 	with open(pJoin(modelDir,'allInputData.json')) as inputFile:    
 	    allInputData = json.load(inputFile)
 	    feederName = allInputData.get('feederName1','feeder')
@@ -416,9 +416,6 @@ def run(modelDir, inputDict):
 		inputDict["created"] = str(dt.datetime.now())
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
-	allOutput['test'] = 4
-	with open(pJoin(modelDir, "allOutputData.json"),"w") as outputFile:
-		json.dump(allOutput, outputFile, indent = 4)
 	# Set up environment and paths
 	# TODO: single work and dataDir for RDT.
 	workDir = modelDir
@@ -432,7 +429,7 @@ def run(modelDir, inputDict):
 	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
 	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
 	rdtOutFile = dataDir + '/rdtOutput.json'
-	# Generate the input file for GFM and run it.
+	# Generate the input file for GFM:
 	fragIn = {}
 	with open(pJoin(modelDir, 'allInputData.json'), 'r') as allInputData:
 		allInputData = json.load(allInputData)
@@ -441,18 +438,14 @@ def run(modelDir, inputDict):
 	fragIn['assets'] = []
 	fragIn['hazardFields'] = fragInputBase['hazardFields']
 	fragIn['responseEstimators'] = fragInputBase['responseEstimators']
-	# Write the asc file.
 	with open(pJoin(modelDir,allInputData['weatherImpactsFileName']),'w') as hazardFile:
 		hazardFile.write(allInputData['weatherImpacts'])
-	# HACK: do the world's worst URLENCODE:
-	if(platform.system() == "Windows"):
+	if(platform.system() == "Windows"):  # HACK: do the world's worst URLENCODE:
 		hazardAscPath = 'file:///' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
 		hazardAscPath = hazardAscPath.replace('\\', '/')
 	else: #for UNIX
 		hazardAscPath = 'file://' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
-	# HACK: just consider one hazard field and:
-	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath
-	# Pull in data from the OMD:
+	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath # HACK: just consider one hazard field.
 	with open(pJoin(modelDir, allInputData['feederName1'] + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 	# Pull pole lat/lon data from OMD and add to pole system.
@@ -471,11 +464,8 @@ def run(modelDir, inputDict):
 	outFilePath = pJoin(modelDir, gfmOutFileName)
 	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
 	proc.wait()
-	outData = json.load(open(pJoin(modelDir,'allOutputData.json')))
 	gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
 	outData['gfmRawOut'] = gfmRawOut
-	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
-		json.dump(outData, outFile, indent=4)
 	print 'Ran Fragility\n'
 	# Run RDT.
 	debug = False #TODO: remove.
@@ -485,6 +475,8 @@ def run(modelDir, inputDict):
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
 	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
 	proc.wait()
+	rdtRawOut = open(rdtOutFile).read()
+	outData['rdtRawOut'] = rdtRawOut
 	# Format output feeder.
 	with open(pJoin(rdtOutFile), "r") as jsonIn:
 		rdtOut = json.load(jsonIn)
@@ -499,16 +491,13 @@ def run(modelDir, inputDict):
 	climateFileName, latforpvwatts = zipCodeToClimateName(allInputData["simulationZipCode"])
 	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 	gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
+	outData['gridlabdRawOut'] = gridlabdRawOut
 	# Draw the feeder.
 	feederJson = diagramPrep(workDir, dataDir, feederName, debug)
 	genDiagram(dataDir, feederJson, debug)
-	# Write some output.
-	outData = json.load(open(pJoin(modelDir,'allOutputData.json')))
-	rdtRawOut = open(rdtOutFile).read()
-	outData['rdtRawOut'] = rdtRawOut
-	outData['gridlabdRawOut'] = gridlabdRawOut
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
+	# Save the output to disk.
 	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 		json.dump(outData, outFile, indent=4)
 	
