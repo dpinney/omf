@@ -410,7 +410,9 @@ def heavyProcessing(modelDir, inputDict):
 		except: pass
 		beginTime = dt.datetime.now()
 		outData = {}
-		feederName = inputDict['feederName1'] + '.omd'
+		# HACK: read feeder name.
+		files = os.listdir(modelDir)
+		feederName = [x for x in files if x.endswith('.omd')][0]
 		# Generate the input file for GFM:
 		fragIn = {}
 		fragInputBase = json.loads(inputDict['poleData'])
