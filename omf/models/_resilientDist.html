@@ -290,6 +290,14 @@
 			</div>
 		</form>
 	</div>
+	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
+		<pre id='errorText'></pre>
+		<script type="text/javascript">
+		if (typeof(allInputData.stderr) !== 'undefined') {	
+			gebi('stopIndicator').style.visibility = 'visible'
+			gebi('errorText').innerHTML = 'MODEL ENCOUNTERED AN ERROR AS FOLLOWS: \n\n' + allInputData.stderr}
+		</script>
+	</div>
 	<div id="output" class="postRun">
 		<p class="reportTitle" style="page-break-before:always">Resilience Solution</p>
 		<div class="content" style="overflow: auto">
