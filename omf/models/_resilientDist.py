@@ -406,47 +406,30 @@ def run(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	startTime = dt.datetime.now()
 	outData = {}
-	with open(pJoin(modelDir,'allInputData.json')) as inputFile:    
-	    allInputData = json.load(inputFile)
-	    feederName = allInputData.get('feederName1','feeder')
-	inputDict["feederName1"] = feederName
 	# Check whether model exist or not
 	if not os.path.isdir(modelDir):
 		os.makedirs(modelDir)
 		inputDict["created"] = str(dt.datetime.now())
 	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
 		json.dump(inputDict, inputFile, indent = 4)
-	# Set up environment and paths
-	# TODO: single work and dataDir for RDT.
-	workDir = modelDir
-	dataDir = modelDir
-	rdtInData = {'phase_variation' : 0.15, 'chance_constraint' : 1.0, 'critical_load_met' : 0.98, 'total_load_met' : 0.5}
-	feederName = allInputData['feederName1'] + '.omd'
-	# TODO: investigate debug flag uses.
-	debug = False
-	with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
-		json.dump(json.loads(allInputData['xrMatrices']),xrMatrixFile, indent=4)
-	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
-	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
-	rdtOutFile = dataDir + '/rdtOutput.json'
+	# Variables for later?
+	feederName = inputDict['feederName1'] + '.omd'
 	# Generate the input file for GFM:
 	fragIn = {}
-	with open(pJoin(modelDir, 'allInputData.json'), 'r') as allInputData:
-		allInputData = json.load(allInputData)
-	fragInputBase = json.loads(allInputData['poleData'])
+	fragInputBase = json.loads(inputDict['poleData'])
 	baseAsset = fragInputBase['assets'][1]
 	fragIn['assets'] = []
 	fragIn['hazardFields'] = fragInputBase['hazardFields']
 	fragIn['responseEstimators'] = fragInputBase['responseEstimators']
-	with open(pJoin(modelDir,allInputData['weatherImpactsFileName']),'w') as hazardFile:
-		hazardFile.write(allInputData['weatherImpacts'])
+	with open(pJoin(modelDir,inputDict['weatherImpactsFileName']),'w') as hazardFile:
+		hazardFile.write(inputDict['weatherImpacts'])
 	if(platform.system() == "Windows"):  # HACK: do the world's worst URLENCODE:
-		hazardAscPath = 'file:///' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
+		hazardAscPath = 'file:///' + pJoin(modelDir, inputDict['weatherImpactsFileName']).replace(' ','%20')
 		hazardAscPath = hazardAscPath.replace('\\', '/')
 	else: #for UNIX
-		hazardAscPath = 'file://' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
+		hazardAscPath = 'file://' + pJoin(modelDir, inputDict['weatherImpactsFileName']).replace(' ','%20')
 	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath # HACK: just consider one hazard field.
-	with open(pJoin(modelDir, allInputData['feederName1'] + '.omd'), "r") as jsonIn:
+	with open(pJoin(modelDir, feederName), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 	# Pull pole lat/lon data from OMD and add to pole system.
 	for key in feederModel['tree'].keys():
@@ -468,9 +451,14 @@ def run(modelDir, inputDict):
 	outData['gfmRawOut'] = gfmRawOut
 	print 'Ran Fragility\n'
 	# Run RDT.
-	debug = False #TODO: remove.
 	print "Running RDT..."
 	print "************************************"
+	rdtInData = {'phase_variation' : 0.15, 'chance_constraint' : 1.0, 'critical_load_met' : 0.98, 'total_load_met' : 0.5}
+	with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
+		json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
+	rdtInFile = modelDir + '/' + convertToRDT(rdtInData, modelDir, feederName, debug=False)
+	rdtInFile = modelDir + '/' + convertToRDT(rdtInData, modelDir, feederName, debug=False)
+	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
 	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
@@ -482,25 +470,24 @@ def run(modelDir, inputDict):
 		rdtOut = json.load(jsonIn)
 	with open(pJoin(rdtOutFile),"w") as outFile:
 		json.dump(rdtOut, outFile, indent = 4)
-	print "\nOutput saved to:               %s"%(pJoin(dataDir, rdtOutFile))
+	print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
 	print "************************************\n\n"
 	# Run GridLAB-D first time to generate xrMatrices. #TODO: integrate GLD990.
-	feederJson = json.load(open(pJoin(modelDir,feederName)))
-	tree = feederJson.get("tree",{})
-	attachments = feederJson.get("attachments",{})
-	climateFileName, latforpvwatts = zipCodeToClimateName(allInputData["simulationZipCode"])
+	tree = feederModel.get("tree",{})
+	attachments = feederModel.get("attachments",{})
+	climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
 	shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 	gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
 	outData['gridlabdRawOut'] = gridlabdRawOut
 	# Draw the feeder.
-	feederJson = diagramPrep(workDir, dataDir, feederName, debug)
-	genDiagram(dataDir, feederJson, debug)
+	feederJson = diagramPrep(modelDir, modelDir, feederName, debug=False)
+	genDiagram(modelDir, feederJson, debug=False)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	# Save the output to disk.
 	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 		json.dump(outData, outFile, indent=4)
-	
+
 def cancel(modelDir):
 	''' Voltage drop runs so fast it's pointless to cancel a run. '''
 	pass
