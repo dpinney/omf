@@ -145,17 +145,6 @@ def getNodePhases(obj, defReal=1.7976931348623e+308, defReact=1.7976931348623e+3
 		print "NO PHASES FOUND FOR OBJ:", obj	
 	return numPhases, [hasphaseA, hasphaseB, hasphaseC], [maxRealPhaseA, maxRealPhaseB, maxRealPhaseC], [maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC]
 
-def makeScenarios(rdtJson, jsonTree, debug):
-	'''puts in damage scenario from fragility.  
-	'''
-	if debug: 
-		print "Created %s scenarios"%(str(len(rdtJson['scenarios'])))
-		if debug==2:
-			for elem in rdtJson['scenarios']: 
-				print "   Scenario:"
-				for a,val in elem.iteritems():
-					print "      %s: %s"%(str(a), str(val))	
-
 def makeLines(rdtJson, jsonTree, debug):
 	''' lines.
 	TODO: Put in accurate num_poles, ask if has_phase corresponds to a,b,c.
@@ -241,7 +230,7 @@ def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
 			for elem in rdtJson['line_codes']: 
 				print "   Line_Code:"
 				for a,val in elem.iteritems():
-					print "      %s: %s"%(str(a), str(val))				 
+					print "      %s: %s"%(str(a), str(val))
 
 def makeBuses(rdtJson, jsonTree, debug):
 	'''buses.
@@ -269,7 +258,7 @@ def makeBuses(rdtJson, jsonTree, debug):
 			for elem in rdtJson['buses']: 
 				print "   Bus:"
 				for a,val in elem.iteritems():
-					print "      %s: %s"%(str(a), str(val))					
+					print "      %s: %s"%(str(a), str(val))
 
 def makeLoads(rdtJson, jsonTree, debug):
 	'''loads.
@@ -318,7 +307,19 @@ def makeGens(rdtJson, jsonTree, debug):
 			for elem in rdtJson['generators']: 
 				print "   Generator:"
 				for a,val in elem.iteritems():
-					print "      %s: %s"%(str(a), str(val))				
+					print "      %s: %s"%(str(a), str(val))
+
+def readXRMatrices(dataDir, rdtFile, length):
+	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
+	'''
+	xMatrix, rMatrix = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
+	with open(pJoin(dataDir,rdtFile), "r") as jsonIn:
+		lineCodes = json.load(jsonIn)['line_codes']
+	for i,code in enumerate(lineCodes):
+		if i > length: break
+		xMatrix[int(code['num_phases'])].append(code['xmatrix'])
+		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
+	return xMatrix, rMatrix
 
 def convertToRDT(inData, dataDir, feederName, debug=False):
 	'''Read a omd.json feeder and convert it to fragility/RDT format.
@@ -342,7 +343,7 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 	# Read and put omd.json into rdt.json.
 	with open(pJoin(dataDir,feederName), "r") as jsonIn:
 		jsonTree = json.load(jsonIn).get('tree','')
-	makeScenarios(rdtJson, jsonTree, debug)
+	#TODO: get GFM scenarios in to RDT
 	lineCount = makeLines(rdtJson, jsonTree, debug)
 	makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug)
 	makeBuses(rdtJson, jsonTree, debug)
@@ -356,18 +357,6 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 		print "Done... RDT input saved to:            %s"%(pJoin(dataDir,rdtInFile))
 		print "************************************\n\n"
 	return rdtInFile
-
-def readXRMatrices(dataDir, rdtFile, length):
-	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
-	'''
-	xMatrix, rMatrix = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
-	with open(pJoin(dataDir,rdtFile), "r") as jsonIn:
-		lineCodes = json.load(jsonIn)['line_codes']
-	for i,code in enumerate(lineCodes):
-		if i > length: break
-		xMatrix[int(code['num_phases'])].append(code['xmatrix'])
-		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
-	return xMatrix, rMatrix
 	
 def runGridLabD(modelDir, feederName, zipCode):
 	'''Loads OMD file from feeder name, creates GLM input, places climate file from user inputted zip code into model directory (TODO), runs Gridlab-D  (TODO)'''
@@ -465,7 +454,7 @@ def run(modelDir, inputDict):
 	dataDir = modelDir
 	rdtInData = {'phase_variation' : 0.15, 'chance_constraint' : 1.0, 'critical_load_met' : 0.98, 'total_load_met' : 0.5}
 	feederName = allInputData['feederName1'] + '.omd'
-	# TODO: investiage debug flag uses.
+	# TODO: investigate debug flag uses.
 	debug = False
 	with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
 		json.dump(json.loads(allInputData['xrMatrices']),xrMatrixFile, indent=4)
