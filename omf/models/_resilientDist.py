@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 import networkx as nx
 from omf.models import __metaModel__
 from __metaModel__ import *
-import subprocess, random, webbrowser
+import subprocess, random, webbrowser, multiprocessing
 import pprint as pprint
 
 # OMF imports
@@ -389,15 +389,31 @@ def genDiagram(dataDir, feederName, feederJson, debug):
 		print "************************************\n\n"
 
 def run(modelDir, inputDict):
+	''' Run the model in a separate process. web.py calls this to run the model.
+	This function will return fast, but results take a while to hit the file system.'''
+	try: os.remove(pJoin(modelDir,"allOutputData.json"))
+	except: pass
+	# Start background process.
+	backProc = multiprocessing.Process(target = heavyProcessing, args = (modelDir, inputDict,))
+	backProc.start()
+	print "SENT TO BACKGROUND", modelDir
+	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
+		pPidFile.write(str(backProc.pid))
+
+def runForeground(modelDir, inputDict):
+	''' Run the model in the current process. WARNING: LONG RUN TIME. '''
+	# If we are re-running, remove output and old GLD run:
+	try: os.remove(pJoin(modelDir,"allOutputData.json"))
+	except: pass
+	# Start process.
+	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
+		pPidFile.write('-999')
+	heavyProcessing(modelDir, inputDict)
+
+def heavyProcessing(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	startTime = dt.datetime.now()
 	outData = {}
-	# Check whether model exist or not
-	if not os.path.isdir(modelDir):
-		os.makedirs(modelDir)
-		inputDict["created"] = str(dt.datetime.now())
-	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
-		json.dump(inputDict, inputFile, indent = 4)
 	# Variables for later?
 	feederName = inputDict['feederName1'] + '.omd'
 	# Generate the input file for GFM:
@@ -472,9 +488,11 @@ def run(modelDir, inputDict):
 	# Save the output to disk.
 	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 		json.dump(outData, outFile, indent=4)
+	# DELETE THE PIDFILES
+	os.remove(pJoin(modelDir,'PPID.txt'))
 
 def cancel(modelDir):
-	''' Voltage drop runs so fast it's pointless to cancel a run. '''
+	''' The model runs so fast it's pointless to cancel a run. '''
 	pass
 
 def new(modelDir):
@@ -486,7 +504,7 @@ def new(modelDir):
 		"layoutAlgorithm": "geospatial",
 		"modelName": modelDir,
 		"user": "admin",
-		"created": "",
+		"created": str(dt.datetime.now()),
 		"lineFixedCost": "0.0",
 		"lineUnitCost": "0.0",
 		"switchCost": "0.0",
@@ -534,7 +552,7 @@ def _runModel():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	run(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
 	renderAndShow(modelLoc)
 
