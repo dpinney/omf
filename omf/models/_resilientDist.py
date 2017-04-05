@@ -368,56 +368,7 @@ def readXRMatrices(dataDir, rdtFile, length):
 		xMatrix[int(code['num_phases'])].append(code['xmatrix'])
 		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
 	return xMatrix, rMatrix
-
-def runGFM(modelDir):
-	'''Generate the input file for GFM and run it.'''
-	# Pull in data from allInputData:
-	fragIn = {}
-	with open(pJoin(modelDir, 'allInputData.json'), 'r') as allInputData:
-		allInputData = json.load(allInputData)
-	fragInputBase = json.loads(allInputData['poleData'])
-	baseAsset = fragInputBase['assets'][1]
-	fragIn['assets'] = []
-	fragIn['hazardFields'] = fragInputBase['hazardFields']
-	fragIn['responseEstimators'] = fragInputBase['responseEstimators']
-	# Write the asc file.
-	with open(pJoin(modelDir,allInputData['weatherImpactsFileName']),'w') as hazardFile:
-		hazardFile.write(allInputData['weatherImpacts'])
-	# HACK: do the world's worst URLENCODE:
-	if(platform.system() == "Windows"):
-		hazardAscPath = 'file:///' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
-		hazardAscPath = hazardAscPath.replace('\\', '/')
-	else: #for david's machine
-		hazardAscPath = 'file://' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
-	# HACK: just consider one hazard field and:
-	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath
-	# Pull in data from the OMD:
-	with open(pJoin(modelDir, allInputData['feederName1'] + '.omd'), "r") as jsonIn:
-		feederModel = json.load(jsonIn)
-	# Pull pole lat/lon data from OMD and add to pole system.
-	for key in feederModel['tree'].keys():
-		asset = copy.deepcopy(baseAsset)
-		asset['id'] = key
-		if "longitude" in feederModel['tree'][key] and 'latitude' in feederModel['tree'][key]:
-			asset['assetGeometry']['coordinates'] = [feederModel['tree'][key]['longitude'], feederModel['tree'][key]['latitude']]
-		fragIn['assets'].append(asset)
-	with open(pJoin(modelDir, "gfmInput.json"), "w") as outFile:
-		json.dump(fragIn, outFile, indent=4)
-	# Run GFM.
-	gfmBinaryPath = pJoin(__metaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-	inputFilePath = pJoin(modelDir, 'gfmInput.json')
-	gfmOutFileName = 'gfmOutput.json'
-	outFilePath = pJoin(modelDir, gfmOutFileName)
-	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
-	proc.wait()
-	# Add to allOutputData
-	outData = json.load(open(pJoin(modelDir,'allOutputData.json')))
-	gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
-	outData['gfmRawOut'] = gfmRawOut
-	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
-		json.dump(outData, outFile, indent=4)
-	print 'Ran Fragility\n'
-
+	
 def runGridLabD(modelDir, feederName, zipCode):
 	'''Loads OMD file from feeder name, creates GLM input, places climate file from user inputted zip code into model directory (TODO), runs Gridlab-D  (TODO)'''
 	#Load json
@@ -522,7 +473,53 @@ def run(modelDir, inputDict):
 	rdtInFile = dataDir + '/' + convertToRDT(rdtInData, dataDir, feederName, debug)
 	rdtOutFile = dataDir + '/rdtOutput.json'
 	# Run Fragility & RDT.
-	runGFM(modelDir)
+	'''Generate the input file for GFM and run it.'''
+	# Pull in data from allInputData:
+	fragIn = {}
+	with open(pJoin(modelDir, 'allInputData.json'), 'r') as allInputData:
+		allInputData = json.load(allInputData)
+	fragInputBase = json.loads(allInputData['poleData'])
+	baseAsset = fragInputBase['assets'][1]
+	fragIn['assets'] = []
+	fragIn['hazardFields'] = fragInputBase['hazardFields']
+	fragIn['responseEstimators'] = fragInputBase['responseEstimators']
+	# Write the asc file.
+	with open(pJoin(modelDir,allInputData['weatherImpactsFileName']),'w') as hazardFile:
+		hazardFile.write(allInputData['weatherImpacts'])
+	# HACK: do the world's worst URLENCODE:
+	if(platform.system() == "Windows"):
+		hazardAscPath = 'file:///' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
+		hazardAscPath = hazardAscPath.replace('\\', '/')
+	else: #for david's machine
+		hazardAscPath = 'file://' + pJoin(modelDir, allInputData['weatherImpactsFileName']).replace(' ','%20')
+	# HACK: just consider one hazard field and:
+	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath
+	# Pull in data from the OMD:
+	with open(pJoin(modelDir, allInputData['feederName1'] + '.omd'), "r") as jsonIn:
+		feederModel = json.load(jsonIn)
+	# Pull pole lat/lon data from OMD and add to pole system.
+	for key in feederModel['tree'].keys():
+		asset = copy.deepcopy(baseAsset)
+		asset['id'] = key
+		if "longitude" in feederModel['tree'][key] and 'latitude' in feederModel['tree'][key]:
+			asset['assetGeometry']['coordinates'] = [feederModel['tree'][key]['longitude'], feederModel['tree'][key]['latitude']]
+		fragIn['assets'].append(asset)
+	with open(pJoin(modelDir, "gfmInput.json"), "w") as outFile:
+		json.dump(fragIn, outFile, indent=4)
+	# Run GFM.
+	gfmBinaryPath = pJoin(__metaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
+	inputFilePath = pJoin(modelDir, 'gfmInput.json')
+	gfmOutFileName = 'gfmOutput.json'
+	outFilePath = pJoin(modelDir, gfmOutFileName)
+	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
+	proc.wait()
+	# Add to allOutputData
+	outData = json.load(open(pJoin(modelDir,'allOutputData.json')))
+	gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
+	outData['gfmRawOut'] = gfmRawOut
+	with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
+		json.dump(outData, outFile, indent=4)
+	print 'Ran Fragility\n'
 	runRDT(workDir, dataDir, rdtInFile, rdtOutFile, debug)
 	gridlabdRawOut = runGridLabD(modelDir, feederName, allInputData["simulationZipCode"])
 	# Create GLM and run gridlab-D.
@@ -605,6 +602,5 @@ def _runModel():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	#rdtOutputToHTML()
 	_runModel()
 	
