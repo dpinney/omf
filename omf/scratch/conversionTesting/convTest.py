@@ -93,49 +93,43 @@ def _tests():
 			decryptedData = decryptData(r,key)
 			with open(pJoin(decryptedDataFolder,fileName),"w+") as f:
 				f.write(decryptedData)
-	# Creating [[.std,.seq],[.std,.seq],[.stq,.seq],...] structure for testing functions
-	# This is a HACK, could use some help here, flatten/zip functions?
-	# This also depends on the ordering of the std, seq files
 	seqFilenames = []
-	groupedFiles = []
-	cymeArray = []
+	stdFilenames = []
+	mdbFilenames = []
+	milTestArray = []
 	for file in os.listdir(decryptedDataFolder):
 		if str(file).endswith('.mdb'):
-			cymeArray.append(file)
+			mdbFilenames.append(file)
 		if str(file).endswith('.seq'):
 			filename = file[:-4]
-			seqFilenames.append(filename)
-	for file in seqFilenames:
-		group = []
-		for f in os.listdir(decryptedDataFolder):
-			if str(f).startswith(file):
-				group.append(f)
-		groupedFiles.append(group)
-	arrays = []
-	for group in groupedFiles:
-		if len(group)>2:
-			for item in group:
-				array = []
-				if item.endswith('.std'):
-					array.append(item)
-					for item in group:
-						if item.endswith('.seq'):
-							array.append(item)
-							arrays.append(array)
-		else:
-			arrays.append(group)
+			seqFilenames.append(file)
+		if str(file).endswith('.std'):
+			filename = file[:-4]
+			stdFilenames.append(file)
+	seqFilenames.sort()
+	stdFilenames.sort()
+	milTestArray = zip(stdFilenames, seqFilenames)
 	# Runs milsoft tests on seq std files and then deletes results and decrypted files
 	openPrefix = './decryptedDataFiles/'
 	outPrefix = './milToGridlabTests/'
 	cymeOutPre = './cymeToGridlabTests/'
 	testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./decryptedDataFiles/AK-ANCHORAGE.tmy2','r').read()}
-	milToGridlab._tests(arrays, openPrefix, outPrefix, testAttachments)
-	# Runs cyme tests on .mdb file
-	# cymeToGridlab._tests(cymeArray, openPrefix, cymeOutPre)
-	# if(os.path.isdir('./milToGridlabTests/')):
-	# 	shutil.rmtree('./milToGridlabTests/')
-	# if(os.path.isdir('./cymeToGridlabTests/')):
-	# 	shutil.rmtree('./cymeToGridlabTests/')	
+	milToGridlab._tests(milTestArray, openPrefix, outPrefix, testAttachments)
+	# Runs cyme tests on .mdb files
+	cymeToGridlab._tests(mdbFilenames, openPrefix, cymeOutPre)
+	# Combine the two results files
+	filenames = [pJoin(outPrefix,'convResults.txt'), pJoin(cymeOutPre,'convResults.txt')]
+	# Creating results file
+	with open('conversionResults.txt', 'w') as outfile:
+		for fname in filenames:
+			with open(fname) as infile:
+				for line in infile:
+					outfile.write(line)
+	# Delete Test folders
+	if(os.path.isdir('./milToGridlabTests/')):
+		shutil.rmtree('./milToGridlabTests/')
+	if(os.path.isdir('./cymeToGridlabTests/')):
+		shutil.rmtree('./cymeToGridlabTests/')	
 	# Delete decrypted files after tests
 	if(os.path.isdir(decryptedDataFolder)):
 		shutil.rmtree(decryptedDataFolder)
@@ -143,4 +137,4 @@ def _tests():
 
 if __name__ == "__main__":
 	_tests()
-	#addEncryptedFiles()
+	# addEncryptedFiles()

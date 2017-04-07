@@ -21,7 +21,7 @@ conductors is the full path to a .csv file containing conductor information for 
 Note that db_network and db_equipment can be the same file is both network and equipment databases were exported to one .mdb file from CYME.
 '''
 import pyodbc
-import feeder, csv, random, math, copy, subprocess
+import feeder, csv, random, math, copy, subprocess, locale
 from os.path import join as pJoin
 import warnings
 from StringIO import StringIO
@@ -1071,8 +1071,12 @@ def _readUgConfiguration(feederId, modelDir):
                                'distance_BC' : 0.5,
                                'distance_BN' : 0.0,
                                'distance_CN' : 0.0}
-    undergroundcable = _csvToDictList(pJoin(modelDir,'cymeCsvDump','CYMEQCABLE.csv'),columns = ['EquipmentId','FirstRating','OverallDiameter','PositiveSequenceResistance','ZeroSequenceResistance','ArmorOuterDiameter'])
-    undergroundcableconductor = _csvToDictList(pJoin(modelDir,'cymeCsvDump','CYMEQCABLECONDUCTOR.csv'),columns = ['EquipmentId','Diameter','NumberOfStrands'])
+    try:
+        undergroundcable = _csvToDictList(pJoin(modelDir,'cymeCsvDump','CYMEQCABLE.csv'),columns = ['EquipmentId','FirstRating','OverallDiameter','PositiveSequenceResistance','ZeroSequenceResistance','ArmorOuterDiameter'])
+        undergroundcableconductor = _csvToDictList(pJoin(modelDir,'cymeCsvDump','CYMEQCABLECONDUCTOR.csv'),columns = ['EquipmentId','Diameter','NumberOfStrands'])
+    except:
+        undergroundcableconductor = {}
+        warnings.warn("No underground_line configuration objects were found in CYMEQCABLE for feeder_id: {:s}.".format(feederId), RuntimeWarning)
     if len(undergroundcable) == 0:
         warnings.warn("No underground_line configuration objects were found in CYMEQCABLE for feeder_id: {:s}.".format(feederId), RuntimeWarning)
     else:
@@ -2214,61 +2218,89 @@ def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
     from matplotlib import pyplot as plt
     import feeder
     exceptionCount = 0
+    locale.setlocale(locale.LC_ALL, 'en_US')
+    try:
+        os.mkdir(outPrefix)
+    except:
+        pass # Directory already there.
     try:
         #db_network = os.path.abspath('./scratch/uploads/IEEE13.mdb')
         #db_equipment = os.path.abspath('./scratch/uploads/IEEE13.mdb')
         # id_feeder = '650'
-        db_network = testFile
-        db_equipment = testFile
-        # HACK: converting the 1 length .mdb file array to a string to force it into the conversion
-        # function. Will need a loop when more .mdb files are added.
-        if isinstance(db_network,list) == True:
-            db_network = ' '.join(db_network)
-            db_equipment = ' '.join(db_equipment)
-        conductors = os.path.abspath('./scratch/uploads/conductor_data.csv')
-        #cyme_base, x, y = convertCymeModel(db_network, db_equipment, id_feeder, conductors)
-        cyme_base, x, y = convertCymeModel(db_network, db_equipment, modelDir)    
-        glmString = feeder.sortedWrite(cyme_base)
-        if isinstance(db_network, list):
-            db_network = " ".join(db_network)
-        testFilename = db_network[:-4]
-        gfile = open(modelDir+testFilename+".glm", 'w')
-        gfile.write(glmString)
-        gfile.close()
-        treeObj = feeder.parse(modelDir+testFilename+".glm")
-        print 'WROTE GLM FOR'
-        try:
-            os.mkdir(outPrefix)
-        except:
-            pass # Directory already there.     
-        '''Attempt to graph'''
-        try:
-            # Draw the GLM.
-            myGraph = feeder.treeToNxGraph(cyme_base)
-            feeder.latLonNxGraph(myGraph, neatoLayout=False)
-            plt.savefig(outPrefix + testFilename+".png")
-            print 'DREW GLM OF'
-        except:
-            exceptionCount += 1
-            print 'FAILED DRAWING'
-        try:
-            # Run powerflow on the GLM.
-            output = gridlabd.runInFilesystem(treeObj, keepFiles=True, workDir=outPrefix)
-            with open(outPrefix + testFilename +".JSON",'w') as outFile:
-                json.dump(output, outFile, indent=4)
-            print 'RAN GRIDLAB ON\n'                 
-        except:
-            exceptionCount += 1
-            print 'POWERFLOW FAILED'
+        print testFile
+        for file in testFile:
+            db_network = file
+            db_equipment = file
+            # HACK: converting the 1 length .mdb file array to a string to force it into the conversion
+            # function. Will need a loop when more .mdb files are added.
+            if isinstance(db_network,list) == True:
+                db_network = ' '.join(db_network)
+                db_equipment = ' '.join(db_equipment)
+            cyme_base, x, y = convertCymeModel(db_network, db_equipment, modelDir)    
+            glmString = feeder.sortedWrite(cyme_base)
+            if isinstance(db_network, list):
+                db_network = " ".join(db_network)
+            testFilename = db_network[:-4]
+            gfile = open(modelDir+testFilename+".glm", 'w')
+            gfile.write(glmString)
+            gfile.close()
+            inFileStats = os.stat(pJoin(modelDir,db_network))
+            outFileStats = os.stat(pJoin(modelDir,testFilename+".glm"))
+            inFileSize = inFileStats.st_size
+            outFileSize = outFileStats.st_size
+            treeObj = feeder.parse(modelDir+testFilename+".glm")
+            print 'WROTE GLM FOR'
+            with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                    resultsFile.write('WROTE GLM FOR ' + testFilename + "\n")
+                    resultsFile.write('Input .mdb File Size: ' + str(locale.format("%d", inFileSize, grouping=True))+'\n')
+                    resultsFile.write('Output .glm File Size: '+ str(locale.format("%d", outFileSize, grouping=True))+'\n')
+            try:
+                os.mkdir(outPrefix)
+            except:
+                pass # Directory already there.     
+            '''Attempt to graph'''
+            try:
+                # Draw the GLM.
+                myGraph = feeder.treeToNxGraph(cyme_base)
+                feeder.latLonNxGraph(myGraph, neatoLayout=False)
+                plt.savefig(outPrefix + testFilename+".png")
+                with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                    resultsFile.write('DREW GLM FOR ' + testFilename + "\n")
+                print 'DREW GLM OF'
+            except:
+                exceptionCount += 1
+                with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                    resultsFile.write('FAILED DRAWING' + testFilename + "\n")
+                print 'FAILED DRAWING'
+            try:
+                # Run powerflow on the GLM.
+                output = gridlabd.runInFilesystem(treeObj, keepFiles=True, workDir=outPrefix)
+                if output['stderr'] == "":
+                    gridlabdStderr = "GridLabD ran successfully without error."
+                else:
+                    gridlabdStderr =  output['stderr']
+                with open(outPrefix + testFilename +".JSON",'w') as outFile:
+                    json.dump(output, outFile, indent=4)
+                with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                    resultsFile.write('RAN GRIDLAB ON ' + testFilename + "\n")
+                    resultsFile.write('STDERR: ' + gridlabdStderr + "\n\n")
+                print 'RAN GRIDLAB ON\n'                 
+            except:
+                exceptionCount += 1
+                with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+                    resultsFile.write('POWERFLOW FAILED FOR ' + testFilename + "\n")
+                print 'POWERFLOW FAILED'
     except:
         print 'FAILED CONVERTING'
+        with open(pJoin(outPrefix,'convResults.txt'),'a') as resultsFile:
+            resultsFile.write('FAILED CONVERTING ' + testFilename + "\n")
         exceptionCount += 1
         traceback.print_exc()
     if not keepFiles:
         shutil.rmtree(outPrefix)
     return exceptionCount    
 if __name__ == '__main__':
-    testFile = "IEEE13.mdb"
+    testFile = ["Titanium.mdb"]
     modelDir = './scratch/uploads/'
     outPrefix = './scratch/cymeToGridlabTests/' 
     _tests(testFile, modelDir, outPrefix)
