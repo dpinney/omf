@@ -49,6 +49,9 @@ OOO Implement def distSmoothLoads()
 				aggAmount += pair[1]
 		outList.append([aggHour, aggAmount])
 OOO Implement def distModifyConductorLengths()
+	XXX triplex_line
+	OOO no overhead_lines in Simple Market System
+	OOO no underground_lines in Simple Market System
 OOO Implement def tranModifyConductorLengths()
 OOO How do we open these .omd files in gridEdit? We need a visualizeFeeder function.
 OOO Is our test dataset good enough? How do we enhance it.

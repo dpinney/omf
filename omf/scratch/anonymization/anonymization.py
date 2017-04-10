@@ -79,14 +79,14 @@ def distShuffleLoads(inputFeeder, shufPerc):
 	houseParents = []
 	zipParents = []
 	for key in inputFeeder['tree']:
-			if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_line'):
-				tlParents.append(inputFeeder['tree'][key]['parent'])
-			if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_node'):
-				tnParents.append(inputFeeder['tree'][key]['parent'])
-			if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'house'):
-				houseParents.append(inputFeeder['tree'][key]['parent'])
-			if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'ZIPload'):
-				zipParents.append(inputFeeder['tree'][key]['parent'])
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_line'):
+			tlParents.append(inputFeeder['tree'][key]['parent'])
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_node'):
+			tnParents.append(inputFeeder['tree'][key]['parent'])
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'house'):
+			houseParents.append(inputFeeder['tree'][key]['parent'])
+		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'ZIPload'):
+			zipParents.append(inputFeeder['tree'][key]['parent'])
 	tlIdx = 0
 	tnIdx = 0
 	houseIdx = 0
@@ -115,8 +115,49 @@ def distShuffleLoads(inputFeeder, shufPerc):
 	return inputFeeder['tree']
 
 
-def distModifyConductorLengths():
-	pass
+def distModifyConductorLengths(inputFeeder):
+	lookup = {}
+	for key in inputFeeder['tree']:
+		newDict = {}
+		if inputFeeder['tree'][key].get('object') == 'triplex_line':
+			newDict = {
+				inputFeeder['tree'][key].get('name'): {
+					'length': inputFeeder['tree'][key].get('length'), 
+					'configuration': inputFeeder['tree'][key].get('configuration')
+				}	
+			}
+			lookup.update(newDict)
+		if inputFeeder['tree'][key].get('object') == 'triplex_line_configuration':
+			for line in lookup:
+				# print inputFeeder['tree'][key].get('name')
+				# print lookup[line].get('configuration')
+				# if inputFeeder['tree'][key].get('name') == lookup[line].get('configuration'):
+				# if lookup[line].get('configuration') == inputFeeder['tree'][key].get('name'):
+				lookup[line].update(diameter=inputFeeder['tree'][key].get('diameter'))
+				lookup[line].update(conductor_1=inputFeeder['tree'][key].get('conductor_1'))
+		if inputFeeder['tree'][key].get('object') == 'triplex_line_conductor':
+			for line in lookup:
+				lookup[line].update(resistance=inputFeeder['tree'][key].get('resistance'))
+	for line in lookup:
+		resistivity = ( float(lookup[line].get('resistance')) * math.pi * (float(lookup[line].get('diameter'))/2.0)**2 ) / float(lookup[line].get('length'))
+		lookup[line]['length'] = random.randint( float(lookup[line].get('length'))-float(lookup[line].get('length')), float(lookup[line].get('length'))+float(lookup[line].get('length')) )
+		lookup[line]['diameter'] = random.randint( (float(lookup[line].get('diameter'))-float(lookup[line].get('diameter')))*1000, (float(lookup[line].get('diameter'))+float(lookup[line].get('diameter')))*1000 ) / 1000.0
+		lookup[line]['resistance'] = (resistivity*float(lookup[line].get('length'))) / (math.pi*(float(lookup[line].get('diameter'))/2.0)**2)
+		# print lookup[line]
+		# print lookup
+		for key in inputFeeder['tree']:
+			if inputFeeder['tree'][key].get('name') == line:
+				inputFeeder['tree'][key]['length'] == lookup[line].get('length')
+				print "yes"
+			if inputFeeder['tree'][key].get('name') == lookup[line].get('configuration'):
+				inputFeeder['tree'][key]['diameter'] == lookup[line].get('diameter')
+				print "yes2"
+			if inputFeeder['tree'][key].get('name') == lookup[line].get('conductor_1'):
+				inputFeeder['tree'][key]['resistance'] == lookup[line].get('diameter')
+				print "yes3"
+
+	return inputFeeder['tree']
+
 
 def distSmoothLoads():
 	pass
@@ -426,6 +467,13 @@ def _tests():
 	shuffle = distShuffleLoads(inputFeeder, shufPerc)
 	# print shuffle
 	FNAMEOUT = "simpleShuffle.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inputFeeder, outFile, indent=4)
+
+	# Testing distModifyConductorLenghts
+	condLengths = distModifyConductorLengths(inputFeeder)
+	# print shuffle
+	FNAMEOUT = "simpleConductor.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputFeeder, outFile, indent=4)
 
