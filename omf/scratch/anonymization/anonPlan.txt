@@ -38,6 +38,7 @@ XXX Implement def tranShuffleLoadsAndGens(shufPerc). See spec image.
 XXX Implement def tranModifyConductorLengths(). Deprecated because models don't include cable length or radius parameters. Spec updated to drop support for this.
 OOO Implement def distModifyConductorLengths()
 	XXX triplex_line
+	OOO debug disappearing trip_line_config.
 	OOO no overhead_lines in Simple Market System
 	OOO no underground_lines in Simple Market System
 OOO Implement def distSmoothLoads()
