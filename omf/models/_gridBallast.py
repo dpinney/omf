@@ -135,9 +135,12 @@ def heavyProcessing(modelDir, inputDict):
 
 
 
-
 		# Attach collector for total overall ZIPload power/load
 		stub = {'object':'collector', 'group':'"class=ZIPload"', 'property':'sum(base_power)', 'interval':3600, 'file':'allZIPloadPower.csv'}
+		copyStub = dict(stub)
+		tree[feeder.getMaxKey(tree)+1] = copyStub
+		# Attach recorder for each ZIPload power/load
+		stub = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'base_power', 'interval':3600, 'file':'eachZIPloadPower.csv'}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 		# Attach recorder for all ZIPloads demand_rate
@@ -154,6 +157,53 @@ def heavyProcessing(modelDir, inputDict):
 		# copyStub = dict(stub)
 		# tree[feeder.getMaxKey(tree)+1] = copyStub
 
+		# Attach passive_controller
+		# stub = {
+		# 	'object':'passive_controller',
+		# 	'name':'waterheater_controller_waterheater17193',
+		# 	'parent':'waterheater17193',
+		# 	'period':900,
+		# 	'comfort_level':0.82,
+		# 	'distribution_type':'NORMAL',
+		# 	'expectation_object':'MARKET_1',
+		# 	'observation_object':'MARKET_1',
+		# 	'state_property':'override',
+		# 	'control_mode':'RAMP',
+		# 	'expectation_property':'my_avg',
+		# 	'observation_property':'past_market.clearing_price',
+		# 	'stdev_observation_property':'my_std'
+		# }
+		# copyStub = dict(stub)
+		# tree[feeder.getMaxKey(tree)+1] = copyStub
+
+		# stub = {
+		# 	'object':'passive_controller',
+	 #     	'period':900,
+		#     'old_first_tier_price':0.124300,
+		#     'second_tier_price':0.139973,
+		#     'sub_elasticity_first_third':-0.0145,
+		#     'parent':'responsiveLoad_house0',
+		#     'third_tier_hours':6,
+		#     'critical_day':'cppDays.value',
+		#     'third_tier_price':0.699867,
+		#     'second_tier_hours':12,
+		#     'sub_elasticity_first_second':-0.0099,
+		#     'linearize_elasticity':'true',
+		#     'old_second_tier_price':0.124300,
+		#     'daily_elasticity':'daily_elasticity_wotech*0.1305',
+		#     'state_property':'multiplier',
+		#     'first_tier_hours': 12,
+		#     'observation_property':'past_market.clearing_price',
+		#     'first_tier_price':0.069987,
+		#     'name': 'responsiveLoad_controller_house0',
+		#     'price_offset': 0.01,
+		#     'two_tier_cpp':'true',
+		#     'observation_object':'Market_1',
+		#     'control_mode':'ELASTICITY_MODEL',
+		#     'old_third_tier_price':0.124300
+		# }
+		# copyStub = dict(stub)
+		# tree[feeder.getMaxKey(tree)+1] = copyStub
 
 
 
@@ -323,11 +373,15 @@ def heavyProcessing(modelDir, inputDict):
 
 
 
-
 		if ('allWaterheaterLoad.csv' in rawOut) and ('allZIPloadPower.csv' in rawOut):
 			cleanOut['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
 		# if 'allZIPloadPower.csv' in rawOut:
 		# 	cleanOut['gridBallast']['ZIPloadPower'] = rawOut.get('allZIPloadPower.csv')['sum(base_power)']
+		if 'eachZIPloadPower.csv' in rawOut:
+			cleanOut['gridBallast']['ZIPloadPower'] = {}
+			for key in rawOut['eachZIPloadPower.csv']:
+				if key.startswith('ZIPload'):
+					cleanOut['gridBallast']['ZIPloadPower'][key] = rawOut.get('eachZIPloadPower.csv')[key]
 		if 'allZIPloadDemand.csv' in rawOut:
 			cleanOut['gridBallast']['ZIPloadDemand'] = {}
 			for key in rawOut['allZIPloadDemand.csv']:
@@ -344,7 +398,6 @@ def heavyProcessing(modelDir, inputDict):
 		# 	for key in rawOut['allZIPloadOff.csv']:
 		# 		if key.startswith('ZIPload'):
 		# 			cleanOut['gridBallast']['ZIPloadOff'][key] = rawOut.get('allZIPloadOff.csv')[key]
-
 
 
 
@@ -403,23 +456,39 @@ def heavyProcessing(modelDir, inputDict):
 
 
 
-
-		# zPower = cleanOut['gridBallast']['ZIPloadPower']
-		zPower = rawOut.get('allZIPloadPower.csv')['sum(base_power)']
+		# zPower = rawOut.get('eachZIPloadPower.csv')
+		zPower = cleanOut['gridBallast']['ZIPloadPower']
+		zPowerList = zPower.values()
+		zPowerZip = zip(*zPowerList)
+		zPowerSum = [sum(x) for x in zPowerZip]
 		zPowerIdx = 0
 		zDemand = cleanOut['gridBallast']['ZIPloadDemand']
 		zDemandList  = zDemand.values()
 		zDemandZip = zip(*zDemandList)
 		zDrops = []
 		for time in zDemandZip:
-			if zPower[zPowerIdx] == 0:
+			if zPowerSum[zPowerIdx] == 0:
 				zPowerIdx += 1
-				zDrop = sum([t >= 0 for t in time])
+				zDrop = sum([t > 0 for t in time])
 				zDrops.append(zDrop)
 			else:
 				zDrops.append(0)
 		cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
 
+		# zPower = rawOut.get('allZIPloadPower.csv')['sum(base_power)']
+		# zPowerIdx = 0
+		# zDemand = cleanOut['gridBallast']['ZIPloadDemand']
+		# zDemandList  = zDemand.values()
+		# zDemandZip = zip(*zDemandList)
+		# zDrops = []
+		# for time in zDemandZip:
+		# 	if zPower[zPowerIdx] == 0:
+		# 		zPowerIdx += 1
+		# 		zDrop = sum([t >= 0 for t in time])
+		# 		zDrops.append(zDrop)
+		# 	else:
+		# 		zDrops.append(0)
+		# cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
 
 
 
