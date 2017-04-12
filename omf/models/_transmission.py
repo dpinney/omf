@@ -82,7 +82,7 @@ def runForeground(modelDir, inputDict):
 		pfTolArg = "\'pf.tol\', "+str(inputDict.get("tolerance",math.pow(10,-8)))
 		pfEnflArg = "\'pf.enforce_q_lims\', "+str(inputDict.get("genLimits",0))
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
-		command = "octave -p" + matPath + "--no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
+		command = "octave -p " + matPath + " --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
 		print "command:", command
 		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
 		(out, err) = proc.communicate()
