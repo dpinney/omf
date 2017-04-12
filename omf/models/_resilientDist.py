@@ -452,7 +452,7 @@ def heavyProcessing(modelDir, inputDict):
 		# Run RDT.
 		print "Running RDT..."
 		print "************************************"
-		rdtInData = {'phase_variation' : 0.15, 'chance_constraint' : 1.0, 'critical_load_met' : 0.98, 'total_load_met' : 0.5}
+		rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
 		with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
 			json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
 		rdtInFile = modelDir + '/' + convertToRDT(rdtInData, modelDir, feederName, debug=False)
