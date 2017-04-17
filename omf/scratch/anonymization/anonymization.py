@@ -1,4 +1,4 @@
-import json, math, random
+import json, math, random, datetime, dateutil.parser
 
 # DISTRIBUTION FEEDER FUNCTIONS
 def refactorNames(inputFeeder):
@@ -117,6 +117,8 @@ def distShuffleLoads(inputFeeder, shufPerc):
 
 def distModifyConductorLengths(inputFeeder):
 	lookup = {}
+	# from pprint import pprint
+	# pprint(inputFeeder['tree'])
 	for key in inputFeeder['tree']:
 		newDict = {}
 		if inputFeeder['tree'][key].get('object') == 'triplex_line':
@@ -129,39 +131,52 @@ def distModifyConductorLengths(inputFeeder):
 			lookup.update(newDict)
 		if inputFeeder['tree'][key].get('object') == 'triplex_line_configuration':
 			for line in lookup:
-				# print inputFeeder['tree'][key].get('name')
-				# print lookup[line].get('configuration')
-				# if inputFeeder['tree'][key].get('name') == lookup[line].get('configuration'):
-				# if lookup[line].get('configuration') == inputFeeder['tree'][key].get('name'):
-				lookup[line].update(diameter=inputFeeder['tree'][key].get('diameter'))
-				lookup[line].update(conductor_1=inputFeeder['tree'][key].get('conductor_1'))
+				print line
+				print lookup[line]
+				if lookup[line].get('configuration') == inputFeeder['tree'][key].get('name'):
+					lookup[line].update(diameter=inputFeeder['tree'][key].get('diameter'))
+					lookup[line].update(conductor_1=inputFeeder['tree'][key].get('conductor_1'))
 		if inputFeeder['tree'][key].get('object') == 'triplex_line_conductor':
 			for line in lookup:
-				lookup[line].update(resistance=inputFeeder['tree'][key].get('resistance'))
+					lookup[line].update(resistance=inputFeeder['tree'][key].get('resistance'))
 	for line in lookup:
 		resistivity = ( float(lookup[line].get('resistance')) * math.pi * (float(lookup[line].get('diameter'))/2.0)**2 ) / float(lookup[line].get('length'))
 		lookup[line]['length'] = random.randint( float(lookup[line].get('length'))-float(lookup[line].get('length')), float(lookup[line].get('length'))+float(lookup[line].get('length')) )
 		lookup[line]['diameter'] = random.randint( (float(lookup[line].get('diameter'))-float(lookup[line].get('diameter')))*1000, (float(lookup[line].get('diameter'))+float(lookup[line].get('diameter')))*1000 ) / 1000.0
 		lookup[line]['resistance'] = (resistivity*float(lookup[line].get('length'))) / (math.pi*(float(lookup[line].get('diameter'))/2.0)**2)
-		# print lookup[line]
-		# print lookup
 		for key in inputFeeder['tree']:
 			if inputFeeder['tree'][key].get('name') == line:
 				inputFeeder['tree'][key]['length'] == lookup[line].get('length')
-				print "yes"
 			if inputFeeder['tree'][key].get('name') == lookup[line].get('configuration'):
 				inputFeeder['tree'][key]['diameter'] == lookup[line].get('diameter')
-				print "yes2"
 			if inputFeeder['tree'][key].get('name') == lookup[line].get('conductor_1'):
 				inputFeeder['tree'][key]['resistance'] == lookup[line].get('diameter')
-				print "yes3"
-
+		from pprint import pprint
+		pprint(inputFeeder['tree'])
 	return inputFeeder['tree']
 
 
-def distSmoothLoads():
-	pass
+def distSmoothLoads(inputFeeder):
+	scadaFile = inputFeeder['attachments']['subScadaCalibrated1.player']
+	scadaLines = scadaFile.split('\n')
+	scadaPairs = [x.split(',') for x in scadaLines] # [[ts,val],[ts,val],[ts,val],...]
+	outList = []
+	for pair in scadaPairs:
+		s = pair[0]
+		s = s[:19]
 
+		# siso = s.isoformat()
+		# timestamp = dateutil.parser.parse(s)
+		
+		timestamp = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
+		print timestamp
+
+		aggAmount = 0
+		aggHour = timestamp.hour
+		if timestamp == aggHour:
+			aggAmount += float(pair[1])
+		outList.append([aggHour, aggAmount])
+	pass
 
 
 # TRANSMISSION NETWORK FUNCTIONS
@@ -412,11 +427,6 @@ def tranShuffleLoadsAndGens(inputNetwork, shufPerc):
 	return inputNetwork['bus'], inputNetwork['gen']
 
 
-def tranModifyConductorLengths():
-	pass
-
-
-
 def _tests():
 	# DISTRIBUTION FEEDER TESTS
 	FNAME = "simpleMarketMod.omd"
@@ -424,113 +434,121 @@ def _tests():
 		inputFeeder = json.load(inFile)
 
 
-	# Testing distPseudomizeNames
-	nameKeyDict = distPseudomizeNames(inputFeeder)
-	# print nameKeyDict
-	FNAMEOUT = "simplePseudo.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputFeeder, outFile, indent=4)
+	# # Testing distPseudomizeNames
+	# nameKeyDict = distPseudomizeNames(inputFeeder)
+	# # print nameKeyDict
+	# FNAMEOUT = "simplePseudo.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# Testing distRandomizeNames
-	randNameArray = distRandomizeNames(inputFeeder)
-	# print randNameArray
-	FNAMEOUT = "simpleName.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputFeeder, outFile, indent=4)
+	# # Testing distRandomizeNames
+	# randNameArray = distRandomizeNames(inputFeeder)
+	# # print randNameArray
+	# FNAMEOUT = "simpleName.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# Testing distRandomizeLocation
-	newLocation = distRandomizeLocation(inputFeeder)
-	# print newLocation
-	FNAMEOUT = "simpleLocation.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputFeeder, outFile, indent=4)
+	# # Testing distRandomizeLocation
+	# newLocation = distRandomizeLocation(inputFeeder)
+	# # print newLocation
+	# FNAMEOUT = "simpleLocation.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# Testing distTranslateLocation
-	translation = 20
-	rotation = 20
-	transLocation = distTranslateLocation(inputFeeder, translation, rotation)
-	# print transLocation
-	FNAMEOUT = "simpleTranslation.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputFeeder, outFile, indent=4)
+	# # Testing distTranslateLocation
+	# translation = 20
+	# rotation = 20
+	# transLocation = distTranslateLocation(inputFeeder, translation, rotation)
+	# # print transLocation
+	# FNAMEOUT = "simpleTranslation.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# Testing distAddNoise
-	noisePerc = 0.2
-	noises = distAddNoise(inputFeeder, noisePerc)
-	# print noises
-	FNAMEOUT = "simpleNoise.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputFeeder, outFile, indent=4)
+	# # Testing distAddNoise
+	# noisePerc = 0.2
+	# noises = distAddNoise(inputFeeder, noisePerc)
+	# # print noises
+	# FNAMEOUT = "simpleNoise.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# Testing distShuffleLoads
-	shufPerc = 0.5
-	shuffle = distShuffleLoads(inputFeeder, shufPerc)
-	# print shuffle
-	FNAMEOUT = "simpleShuffle.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputFeeder, outFile, indent=4)
+	# # Testing distShuffleLoads
+	# shufPerc = 0.5
+	# shuffle = distShuffleLoads(inputFeeder, shufPerc)
+	# # print shuffle
+	# FNAMEOUT = "simpleShuffle.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# Testing distModifyConductorLenghts
-	condLengths = distModifyConductorLengths(inputFeeder)
-	# print shuffle
-	FNAMEOUT = "simpleConductor.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputFeeder, outFile, indent=4)
+	# # Testing distModifyConductorLenghts
+	# condLengths = distModifyConductorLengths(inputFeeder)
+	# # print shuffle
+	# FNAMEOUT = "simpleConductor.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputFeeder, outFile, indent=4)
 
-
-
-	# TRANSMISSION NETWORK TESTS
-	FNAME = "case9.omt"
+	# Testing distSmoothLoads
+	FNAME = "Calibrated Feeder.omd"
 	with open(FNAME, "r") as inFile:
-		inputNetwork = json.load(inFile)
+		inputFeeder = json.load(inFile)
 
-
-	# Testing tranPseudomizeNames
-	busKeyDict = tranPseudomizeNames(inputNetwork)
-	# print busKeyDict
-	FNAMEOUT = "casePseudo.omt"
+	smoothing = distSmoothLoads(inputFeeder)
+	FNAMEOUT = "simpleSmooth.omd"
 	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputNetwork, outFile, indent=4)
+		json.dump(inputFeeder, outFile, indent=4)
 
-	# Testing tranRandomizeNames
-	randBusArray = tranRandomizeNames(inputNetwork)
-	# print randBusArray
-	FNAMEOUT = "caseName.omt"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputNetwork, outFile, indent=4)
 
-	# Testing tranRandomizeLocation
-	newLocation = tranRandomizeLocation(inputNetwork)
-	# print newLocation
-	FNAMEOUT = "caseLocation.omt"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputNetwork, outFile, indent=4)
+	# # TRANSMISSION NETWORK TESTS
+	# FNAME = "case9.omt"
+	# with open(FNAME, "r") as inFile:
+	# 	inputNetwork = json.load(inFile)
 
-	# Testing tranTranslateLocation
-	translation = 20
-	rotation = 20
-	transLocation = tranTranslateLocation(inputNetwork, translation, rotation)
-	# print transLocation
-	FNAMEOUT = "caseTranslation.omt"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputNetwork, outFile, indent=4)
 
-	# Testing tranAddNoise
-	noisePerc = 0.2
-	noises = tranAddNoise(inputNetwork, noisePerc)
-	# print noises
-	FNAMEOUT = "caseNoise.omt"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputNetwork, outFile, indent=4)
+	# # Testing tranPseudomizeNames
+	# busKeyDict = tranPseudomizeNames(inputNetwork)
+	# # print busKeyDict
+	# FNAMEOUT = "casePseudo.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputNetwork, outFile, indent=4)
 
-	# Testing tranShuffleLoadsAndGens
-	shufPerc = 0.5
-	shuffle = tranShuffleLoadsAndGens(inputNetwork, shufPerc)
-	# print shuffle
-	FNAMEOUT = "caseShuffle.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputNetwork, outFile, indent=4)
+	# # Testing tranRandomizeNames
+	# randBusArray = tranRandomizeNames(inputNetwork)
+	# # print randBusArray
+	# FNAMEOUT = "caseName.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputNetwork, outFile, indent=4)
 
+	# # Testing tranRandomizeLocation
+	# newLocation = tranRandomizeLocation(inputNetwork)
+	# # print newLocation
+	# FNAMEOUT = "caseLocation.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputNetwork, outFile, indent=4)
+
+	# # Testing tranTranslateLocation
+	# translation = 20
+	# rotation = 20
+	# transLocation = tranTranslateLocation(inputNetwork, translation, rotation)
+	# # print transLocation
+	# FNAMEOUT = "caseTranslation.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputNetwork, outFile, indent=4)
+
+	# # Testing tranAddNoise
+	# noisePerc = 0.2
+	# noises = tranAddNoise(inputNetwork, noisePerc)
+	# # print noises
+	# FNAMEOUT = "caseNoise.omt"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputNetwork, outFile, indent=4)
+
+	# # Testing tranShuffleLoadsAndGens
+	# shufPerc = 0.5
+	# shuffle = tranShuffleLoadsAndGens(inputNetwork, shufPerc)
+	# # print shuffle
+	# FNAMEOUT = "caseShuffle.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputNetwork, outFile, indent=4)
 
 
 if __name__ == '__main__':
