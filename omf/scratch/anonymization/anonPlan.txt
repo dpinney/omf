@@ -1,3 +1,4 @@
+MILESTONE
 XXX What is the initial test data set?
 	XXX Put simpleMarket system into this scratch folder.
 	XXX Transmission test system case9. 
@@ -39,6 +40,7 @@ XXX Implement def tranModifyConductorLengths(). Deprecated because models don't 
 OOO Implement def distModifyConductorLengths()
 	XXX triplex_line
 	XXX debug disappearing trip_line_config.
+	OOO Use new test circuit /scratch/publicFeeders/Olin Barre GH.omd
 	OOO no overhead_lines in Simple Market System
 	OOO no underground_lines in Simple Market System
 OOO Implement def distSmoothLoads()
@@ -54,5 +56,7 @@ OOO Implement def distSmoothLoads()
 			if pair[0].getHourFromTimestamp() == aggHour:
 				aggAmount += pair[1]
 		outList.append([aggHour, aggAmount])
+
+LATERBASE
 OOO How do we open these .omd files in gridEdit? We need a visualizeFeeder function.
 OOO Is our test dataset good enough? How do we enhance it.

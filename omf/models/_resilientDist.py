@@ -448,6 +448,13 @@ def heavyProcessing(modelDir, inputDict):
 		gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
 		outData['gfmRawOut'] = gfmRawOut
 		print 'Ran Fragility\n'
+		# Run GridLAB-D first time to generate xrMatrices. #TODO: integrate GLD990.
+		tree = feederModel.get("tree",{})
+		attachments = feederModel.get("attachments",{})
+		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+		gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
+		outData['gridlabdRawOut'] = gridlabdRawOut
 		# Run RDT.
 		print "Running RDT..."
 		print "************************************"
@@ -470,13 +477,7 @@ def heavyProcessing(modelDir, inputDict):
 			json.dump(rdtOut, outFile, indent = 4)
 		print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
 		print "************************************\n\n"
-		# Run GridLAB-D first time to generate xrMatrices. #TODO: integrate GLD990.
-		tree = feederModel.get("tree",{})
-		attachments = feederModel.get("attachments",{})
-		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
-		outData['gridlabdRawOut'] = gridlabdRawOut
+		# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
 		# Draw the feeder.
 		genDiagram(modelDir, feederName, feederModel, debug=False)
 		with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
