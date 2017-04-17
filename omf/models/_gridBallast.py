@@ -134,7 +134,6 @@ def heavyProcessing(modelDir, inputDict):
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 
 
-
 		# Attach collector for total overall ZIPload power/load
 		stub = {'object':'collector', 'group':'"class=ZIPload"', 'property':'sum(base_power)', 'interval':3600, 'file':'allZIPloadPower.csv'}
 		copyStub = dict(stub)
@@ -147,15 +146,10 @@ def heavyProcessing(modelDir, inputDict):
 		stub = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'demand_rate', 'interval':3600, 'file':'allZIPloadDemand.csv'}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
-
-		# # Attach recorder for all ZIPloads on
-		# stub = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'number_of_devices_on', 'interval':3600, 'file':'allZIPloadOn.csv'}
-		# copyStub = dict(stub)
-		# tree[feeder.getMaxKey(tree)+1] = copyStub
-		# # Attach recorder for all ZIPloads off
-		# stub = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'number_of_devices_off', 'interval':3600, 'file':'allZIPloadOff.csv'}
-		# copyStub = dict(stub)
-		# tree[feeder.getMaxKey(tree)+1] = copyStub
+		# Attach recorder for all ZIPloads on
+		stub = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'number_of_devices_on', 'interval':3600, 'file':'allZIPloadOn.csv'}
+		copyStub = dict(stub)
+		tree[feeder.getMaxKey(tree)+1] = copyStub
 
 		# Attach passive_controller
 		# stub = {
@@ -178,7 +172,7 @@ def heavyProcessing(modelDir, inputDict):
 
 		# stub = {
 		# 	'object':'passive_controller',
-	 #     	'period':900,
+		# 	'period':900,
 		#     'old_first_tier_price':0.124300,
 		#     'second_tier_price':0.139973,
 		#     'sub_elasticity_first_third':-0.0145,
@@ -204,7 +198,6 @@ def heavyProcessing(modelDir, inputDict):
 		# }
 		# copyStub = dict(stub)
 		# tree[feeder.getMaxKey(tree)+1] = copyStub
-
 
 
 		# Attach recorders for system voltage map:
@@ -366,17 +359,12 @@ def heavyProcessing(modelDir, inputDict):
 			for key in rawOut['allWaterheaterTemp.csv']:
 				if key.startswith('waterheater'):
 					cleanOut['gridBallast']['waterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
-		# if 'allWaterheaterLoad.csv' in rawOut:
-		# 	cleanOut['gridBallast']['availabilityMagnitude'] = rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)']
 		if 'allMeterPower.csv' in rawOut:
 			cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
 
 
-
 		if ('allWaterheaterLoad.csv' in rawOut) and ('allZIPloadPower.csv' in rawOut):
 			cleanOut['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
-		# if 'allZIPloadPower.csv' in rawOut:
-		# 	cleanOut['gridBallast']['ZIPloadPower'] = rawOut.get('allZIPloadPower.csv')['sum(base_power)']
 		if 'eachZIPloadPower.csv' in rawOut:
 			cleanOut['gridBallast']['ZIPloadPower'] = {}
 			for key in rawOut['eachZIPloadPower.csv']:
@@ -387,18 +375,11 @@ def heavyProcessing(modelDir, inputDict):
 			for key in rawOut['allZIPloadDemand.csv']:
 				if key.startswith('ZIPload'):
 					cleanOut['gridBallast']['ZIPloadDemand'][key] = rawOut.get('allZIPloadDemand.csv')[key]
-		
-		# if 'allZIPloadOn.csv' in rawOut:
-		# 	cleanOut['gridBallast']['ZIPloadOn'] = {}
-		# 	for key in rawOut['allZIPloadOn.csv']:
-		# 		if key.startswith('ZIPload'):
-		# 			cleanOut['gridBallast']['ZIPloadOn'][key] = rawOut.get('allZIPloadOn.csv')[key]
-		# if 'allZIPloadOff.csv' in rawOut:
-		# 	cleanOut['gridBallast']['ZIPloadOff'] = {}
-		# 	for key in rawOut['allZIPloadOff.csv']:
-		# 		if key.startswith('ZIPload'):
-		# 			cleanOut['gridBallast']['ZIPloadOff'][key] = rawOut.get('allZIPloadOff.csv')[key]
-
+		if 'allZIPloadOn.csv' in rawOut:
+			cleanOut['gridBallast']['ZIPloadOn'] = {}
+			for key in rawOut['allZIPloadOn.csv']:
+				if key.startswith('ZIPload'):
+					cleanOut['gridBallast']['ZIPloadOn'][key] = rawOut.get('allZIPloadOn.csv')[key]
 
 
 		# EventTime calculations
@@ -455,41 +436,34 @@ def heavyProcessing(modelDir, inputDict):
 		cleanOut['gridBallast']['waterheaterTempDrops'] = whTempDrops
 
 
-
-		# zPower = rawOut.get('eachZIPloadPower.csv')
+		# ZIPload calculations for Availability and QoS
 		zPower = cleanOut['gridBallast']['ZIPloadPower']
 		zPowerList = zPower.values()
 		zPowerZip = zip(*zPowerList)
 		zPowerSum = [sum(x) for x in zPowerZip]
-		zPowerIdx = 0
 		zDemand = cleanOut['gridBallast']['ZIPloadDemand']
 		zDemandList  = zDemand.values()
 		zDemandZip = zip(*zDemandList)
 		zDrops = []
 		for time in zDemandZip:
-			if zPowerSum[zPowerIdx] == 0:
-				zPowerIdx += 1
-				zDrop = sum([t > 0 for t in time])
-				zDrops.append(zDrop)
-			else:
-				zDrops.append(0)
-		cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
-
-		# zPower = rawOut.get('allZIPloadPower.csv')['sum(base_power)']
-		# zPowerIdx = 0
-		# zDemand = cleanOut['gridBallast']['ZIPloadDemand']
-		# zDemandList  = zDemand.values()
-		# zDemandZip = zip(*zDemandList)
-		# zDrops = []
+			for each in zPowerZip:
+				zIdx = 0
+				if each[zIdx] == 0:
+					zPowerIdx += 1
+					zDrop = sum([t > 0 for t in time])
+					zDrops.append(zDrop)
+				else:
+					zDrops.append(0)
+		# zOn = cleanOut['gridBallast']['ZIPloadOn'][key] = rawOut.get('allZIPloadOn.csv')[key]
 		# for time in zDemandZip:
-		# 	if zPower[zPowerIdx] == 0:
-		# 		zPowerIdx += 1
-		# 		zDrop = sum([t >= 0 for t in time])
+		# 	zIdx = 0
+		# 	if zOn[zIdx] == 0:
+		# 		zDrop = sum([t > 0 for t in time])
 		# 		zDrops.append(zDrop)
 		# 	else:
 		# 		zDrops.append(0)
-		# cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
-
+		print zDrops #all 0's
+		cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
 
 
 		# What percentage of our keys have lat lon data?
