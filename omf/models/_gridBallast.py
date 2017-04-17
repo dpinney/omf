@@ -134,7 +134,6 @@ def heavyProcessing(modelDir, inputDict):
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 
 
-
 		# Attach collector for total overall ZIPload power/load
 		stub = {'object':'collector', 'group':'"class=ZIPload"', 'property':'sum(base_power)', 'interval':3600, 'file':'allZIPloadPower.csv'}
 		copyStub = dict(stub)
@@ -178,7 +177,7 @@ def heavyProcessing(modelDir, inputDict):
 
 		# stub = {
 		# 	'object':'passive_controller',
-	 #     	'period':900,
+		# 	'period':900,
 		#     'old_first_tier_price':0.124300,
 		#     'second_tier_price':0.139973,
 		#     'sub_elasticity_first_third':-0.0145,
@@ -204,7 +203,6 @@ def heavyProcessing(modelDir, inputDict):
 		# }
 		# copyStub = dict(stub)
 		# tree[feeder.getMaxKey(tree)+1] = copyStub
-
 
 
 		# Attach recorders for system voltage map:
@@ -372,7 +370,6 @@ def heavyProcessing(modelDir, inputDict):
 			cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
 
 
-
 		if ('allWaterheaterLoad.csv' in rawOut) and ('allZIPloadPower.csv' in rawOut):
 			cleanOut['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
 		# if 'allZIPloadPower.csv' in rawOut:
@@ -398,7 +395,6 @@ def heavyProcessing(modelDir, inputDict):
 		# 	for key in rawOut['allZIPloadOff.csv']:
 		# 		if key.startswith('ZIPload'):
 		# 			cleanOut['gridBallast']['ZIPloadOff'][key] = rawOut.get('allZIPloadOff.csv')[key]
-
 
 
 		# EventTime calculations
@@ -455,41 +451,26 @@ def heavyProcessing(modelDir, inputDict):
 		cleanOut['gridBallast']['waterheaterTempDrops'] = whTempDrops
 
 
-
-		# zPower = rawOut.get('eachZIPloadPower.csv')
+		# ZIPload calculations for Availability and QoS
 		zPower = cleanOut['gridBallast']['ZIPloadPower']
 		zPowerList = zPower.values()
 		zPowerZip = zip(*zPowerList)
 		zPowerSum = [sum(x) for x in zPowerZip]
-		zPowerIdx = 0
 		zDemand = cleanOut['gridBallast']['ZIPloadDemand']
 		zDemandList  = zDemand.values()
 		zDemandZip = zip(*zDemandList)
 		zDrops = []
 		for time in zDemandZip:
-			if zPowerSum[zPowerIdx] == 0:
-				zPowerIdx += 1
-				zDrop = sum([t > 0 for t in time])
-				zDrops.append(zDrop)
-			else:
-				zDrops.append(0)
+			for each in zPowerZip:
+				zIdx = 0
+				if each[zIdx] == 0:
+					zPowerIdx += 1
+					zDrop = sum([t > 0 for t in time])
+					zDrops.append(zDrop)
+				else:
+					zDrops.append(0)
+		# print zDrops #all 0's
 		cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
-
-		# zPower = rawOut.get('allZIPloadPower.csv')['sum(base_power)']
-		# zPowerIdx = 0
-		# zDemand = cleanOut['gridBallast']['ZIPloadDemand']
-		# zDemandList  = zDemand.values()
-		# zDemandZip = zip(*zDemandList)
-		# zDrops = []
-		# for time in zDemandZip:
-		# 	if zPower[zPowerIdx] == 0:
-		# 		zPowerIdx += 1
-		# 		zDrop = sum([t >= 0 for t in time])
-		# 		zDrops.append(zDrop)
-		# 	else:
-		# 		zDrops.append(0)
-		# cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
-
 
 
 		# What percentage of our keys have lat lon data?
