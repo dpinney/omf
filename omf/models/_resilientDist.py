@@ -431,11 +431,10 @@ def heavyProcessing(modelDir, inputDict):
 		with open(pJoin(modelDir, feederName), "r") as jsonIn:
 			feederModel = json.load(jsonIn)
 		# Pull pole lat/lon data from OMD and add to pole system.
-		for key in feederModel['tree'].keys():
+		for node in feederModel['nodes']:
 			asset = copy.deepcopy(baseAsset)
-			asset['id'] = key
-			if "longitude" in feederModel['tree'][key] and 'latitude' in feederModel['tree'][key]:
-				asset['assetGeometry']['coordinates'] = [feederModel['tree'][key]['longitude'], feederModel['tree'][key]['latitude']]
+			asset['id'] = node['index']
+			asset['assetGeometry']['coordinates'] = [node['x'], node['y']]
 			fragIn['assets'].append(asset)
 		with open(pJoin(modelDir, "gfmInput.json"), "w") as outFile:
 			json.dump(fragIn, outFile, indent=4)

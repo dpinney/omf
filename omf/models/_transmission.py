@@ -4,7 +4,7 @@ Tested on Linux and macOS.
 '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, math
-import multiprocessing
+import multiprocessing, platform
 from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
@@ -73,6 +73,9 @@ def runForeground(modelDir, inputDict):
 		# Get MATPOWER directories for the Octave path.
 		matDir =  pJoin(__metaModel__._omfDir,'solvers','matpower5.1')
 		matPath = '"' + ":".join([matDir,pJoin(matDir,'t'),pJoin(matDir,'extras')]) + '"'
+		if(platform.system() == "Windows"):  # HACK: do the world's worst URLENCODE:
+			matDir = matDir.replace('\\', '/')
+			matPath = matPath.replace('\\', '/')
 		# Configure and run MATPOWER.
 		algorithm = inputDict.get("algorithm","NR")
 		pfArg = "\'pf.alg\', \'"+algorithm+"\'"
@@ -83,6 +86,9 @@ def runForeground(modelDir, inputDict):
 		pfEnflArg = "\'pf.enforce_q_lims\', "+str(inputDict.get("genLimits",0))
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
 		command = "octave -p" + matPath + "--no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
+		if(platform.system() == "Windows"):
+			print "SUP"
+			command = command.replace('/', '\\')
 		print "command:", command
 		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
 		(out, err) = proc.communicate()

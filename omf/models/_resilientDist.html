@@ -60,7 +60,7 @@
 		}
 
 		function blankOutConnectedElement(connectedElementName) {
-			gebi(connectedElementName).value = '-';
+			//gebi(connectedElementName).value = '-';
 		}
 	</script>
 </head>
@@ -107,11 +107,11 @@
 				<p class="inputSectionHeader">Financial Specs</p>
 			</div>
 			<hr>
-
+			<!--
 			<div class="shortInput">
 				<label class="tooltip">Line Fixed Cost ($)<span class="classic">The cost of making a new line in units $.  Insert an integer or decimal value.</span></label>
 				<input type="text" id="lineFixedCost" name="lineFixedCost" pattern="^\d+\.?\d*?$" onkeypress="blankOutConnectedElement('lineUnitCost')">
-			</div>
+			</div>-->
 			<div class="shortInput">
 				<label class="tooltip">Line Unit Cost ($/ft)<span class="classic">The cost of making a new line in units $/ft.  Insert an integer or decimal value.</span></label>
 				<input type="text" id="lineUnitCost" name="lineUnitCost" pattern="^\d+\.?\d*?$" onkeypress="blankOutConnectedElement('lineFixedCost')">
@@ -124,18 +124,20 @@
 				<label class="tooltip">Hardening Unit Cost ($/ft)<span class="classic">The cost of hardening a line in $.  Insert an integer or decimal value.</span></label>
 				<input type="text" id="hardeningUnitCost" name="hardeningUnitCost" pattern="^\d+\.?\d*?$" onkeypress="blankOutConnectedElement('hardeningFixedCost')">
 			</div>
+			<!--
 			<div class="shortInput">
 				<label class="tooltip">DG Fixed Cost ($)<span class="classic">The cost of adding distributed generation to a generator in $.  Insert an integer or decimal value.</span></label>
 				<input type="text" id="dgFixedCost" name="dgFixedCost" pattern="^\d+\.?\d*?$" onkeypress="blankOutConnectedElement('dgUnitCost')">
-			</div>
+			</div>-->
 			<div class="shortInput">
 				<label class="tooltip">DG Unit Cost ($/MW)<span class="classic">The cost of adding distributed generation to a generator in $/ft.  Insert an integer or decimal value.</span></label>
 				<input type="text" id="dgUnitCost" name="dgUnitCost" pattern="^\d+\.?\d*?$" onkeypress="blankOutConnectedElement('dgFixedCost')">
 			</div>
+			<!--
 			<div class="shortInput">
 				<label class="tooltip">Hardening Fixed Cost ($)<span class="classic">The cost of hardening a line in $/ft.  Insert a integer or decimal value.</span></label>
 				<input type="text" id="hardeningFixedCost" name="hardeningFixedCost" pattern="^\d+\.?\d*?$" onkeypress="blankOutConnectedElement('hardeningUnitCost')">
-			</div>
+			</div>-->
 			<div class="shortInput">
 				<label class="tooltip">Max DG Per Generator (MW)<span class="classic">The maximum DG capacity that a generator supports in MW.  Insert an integer or decimal value.</span></label>
 				<input type="text" id="maxDGPerGenerator" name="maxDGPerGenerator" pattern="^\d+\.?\d*?$">
