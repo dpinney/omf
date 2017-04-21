@@ -109,12 +109,12 @@ def _tests():
 	seqFilenames.sort()
 	stdFilenames.sort()
 	milTestArray = zip(stdFilenames, seqFilenames)
-	# Runs milsoft tests on seq std files and then deletes results and decrypted files
 	openPrefix = './decryptedDataFiles/'
 	outPrefix = './milToGridlabTests/'
 	cymeOutPre = './cymeToGridlabTests/'
 	testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./decryptedDataFiles/AK-ANCHORAGE.tmy2','r').read()}
-	milToGridlab._tests(milTestArray, openPrefix, outPrefix, testAttachments)
+	# Runs milsoft tests on seq std files and then deletes results and decrypted files
+	# milToGridlab._tests(milTestArray, openPrefix, outPrefix, testAttachments)
 	# Runs cyme tests on .mdb files
 	cymeToGridlab._tests(mdbFilenames, openPrefix, cymeOutPre)
 	# Combine the two results files
@@ -126,10 +126,10 @@ def _tests():
 				for line in infile:
 					outfile.write(line)
 	# Delete Test folders
-	if(os.path.isdir('./milToGridlabTests/')):
-		shutil.rmtree('./milToGridlabTests/')
-	if(os.path.isdir('./cymeToGridlabTests/')):
-		shutil.rmtree('./cymeToGridlabTests/')	
+	# if(os.path.isdir('./milToGridlabTests/')):
+	# 	shutil.rmtree('./milToGridlabTests/')
+	# if(os.path.isdir('./cymeToGridlabTests/')):
+	# 	shutil.rmtree('./cymeToGridlabTests/')	
 	# Delete decrypted files after tests
 	if(os.path.isdir(decryptedDataFolder)):
 		shutil.rmtree(decryptedDataFolder)
