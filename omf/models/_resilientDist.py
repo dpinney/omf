@@ -350,7 +350,7 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 	makeLoads(rdtJson, jsonTree, debug)
 	makeGens(rdtJson, jsonTree, debug)
 	# Write to file.
-	rdtInFile = 'rdtIn'+feederName.strip('omd')+'json'
+	rdtInFile = 'rdtInput'+'.json'
 	with open(pJoin(dataDir,rdtInFile), "w") as outFile:
 		json.dump(rdtJson, outFile, indent=4)
 	if debug:		
