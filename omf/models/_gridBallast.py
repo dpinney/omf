@@ -134,6 +134,7 @@ def heavyProcessing(modelDir, inputDict):
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 
 
+
 		# Attach collector for total overall ZIPload power/load
 		stub = {'object':'collector', 'group':'"class=ZIPload"', 'property':'sum(base_power)', 'interval':3600, 'file':'allZIPloadPower.csv'}
 		copyStub = dict(stub)
@@ -151,53 +152,62 @@ def heavyProcessing(modelDir, inputDict):
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 
-		# Attach passive_controller
-		# stub = {
-		# 	'object':'passive_controller',
-		# 	'name':'waterheater_controller_waterheater17193',
-		# 	'parent':'waterheater17193',
-		# 	'period':900,
-		# 	'comfort_level':0.82,
-		# 	'distribution_type':'NORMAL',
-		# 	'expectation_object':'MARKET_1',
-		# 	'observation_object':'MARKET_1',
-		# 	'state_property':'override',
-		# 	'control_mode':'RAMP',
-		# 	'expectation_property':'my_avg',
-		# 	'observation_property':'past_market.clearing_price',
-		# 	'stdev_observation_property':'my_std'
-		# }
-		# copyStub = dict(stub)
-		# tree[feeder.getMaxKey(tree)+1] = copyStub
 
-		# stub = {
-		# 	'object':'passive_controller',
-		# 	'period':900,
-		#     'old_first_tier_price':0.124300,
-		#     'second_tier_price':0.139973,
-		#     'sub_elasticity_first_third':-0.0145,
-		#     'parent':'responsiveLoad_house0',
-		#     'third_tier_hours':6,
-		#     'critical_day':'cppDays.value',
-		#     'third_tier_price':0.699867,
-		#     'second_tier_hours':12,
-		#     'sub_elasticity_first_second':-0.0099,
-		#     'linearize_elasticity':'true',
-		#     'old_second_tier_price':0.124300,
-		#     'daily_elasticity':'daily_elasticity_wotech*0.1305',
-		#     'state_property':'multiplier',
-		#     'first_tier_hours': 12,
-		#     'observation_property':'past_market.clearing_price',
-		#     'first_tier_price':0.069987,
-		#     'name': 'responsiveLoad_controller_house0',
-		#     'price_offset': 0.01,
-		#     'two_tier_cpp':'true',
-		#     'observation_object':'Market_1',
-		#     'control_mode':'ELASTICITY_MODEL',
-		#     'old_third_tier_price':0.124300
-		# }
-		# copyStub = dict(stub)
-		# tree[feeder.getMaxKey(tree)+1] = copyStub
+
+		# Attach passive_controller	
+		tree[feeder.getMaxKey(tree)+1] = {'omftype':'module','argument':'market'}
+		tree[feeder.getMaxKey(tree)+1] = {'omftype':'class auction','argument':'{\n\tdouble my_avg ; double my_std;\n}'}
+		tree[feeder.getMaxKey(tree)+1] = {'omftype':'class player','argument':'{\n\tdouble value;\n}'}
+
+		stub = {
+			'object':'player',
+			'name':'cppDays',
+			'file':'superCpp.player'
+		}
+		copyStub = dict(stub)
+		tree[feeder.getMaxKey(tree)+1] = copyStub
+
+		stub = {
+			'object':'player',
+			'name':'superClearing',
+			'file':'superClearingPrice.player',
+			'loop':10
+		}
+		copyStub = dict(stub)
+		tree[feeder.getMaxKey(tree)+1] = copyStub
+
+		stub = {
+			'object':'auction',
+			'name':'MARKET_1',
+			'my_std':0.037953,
+			'period':900,
+			'my_avg':0.110000,
+			'current_market.clearing_price':'superClearing.value',
+			'special_mode':'BUYERS_ONLY',
+			'unit': 'kW'
+		}
+		copyStub = dict(stub)
+		tree[feeder.getMaxKey(tree)+1] = copyStub
+
+		stub = {
+			'object':'passive_controller',
+			'name':'waterheater_controller_waterheater171923',
+			'parent':'waterheater171923',
+			'period':900,
+			'comfort_level':0.82,
+			'distribution_type':'NORMAL',
+			'expectation_object':'MARKET_1',
+			'observation_object':'MARKET_1',
+			'state_property':'override',
+			'control_mode':'PROBABILITY_OFF',
+			# 'control_mode':'RAMP',
+			'expectation_property':'my_avg',
+			'observation_property':'past_market.clearing_price',
+			'stdev_observation_property':'my_std'
+		}
+		copyStub = dict(stub)
+		tree[feeder.getMaxKey(tree)+1] = copyStub
+
 
 
 		# Attach recorders for system voltage map:
@@ -232,6 +242,7 @@ def heavyProcessing(modelDir, inputDict):
 		cleanOut['stdout'] = rawOut['stdout']
 		# Time Stamps
 		for key in rawOut:
+			print key
 			if '# timestamp' in rawOut[key]:
 				cleanOut['timeStamps'] = rawOut[key]['# timestamp']
 				break
@@ -363,6 +374,7 @@ def heavyProcessing(modelDir, inputDict):
 			cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
 
 
+
 		if ('allWaterheaterLoad.csv' in rawOut) and ('allZIPloadPower.csv' in rawOut):
 			cleanOut['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
 		if 'eachZIPloadPower.csv' in rawOut:
@@ -382,6 +394,7 @@ def heavyProcessing(modelDir, inputDict):
 					cleanOut['gridBallast']['ZIPloadOn'][key] = rawOut.get('allZIPloadOn.csv')[key]
 
 
+
 		# EventTime calculations
 		eventTime = inputDict['eventTime']
 		eventLength = inputDict['eventLength']
@@ -393,7 +406,7 @@ def heavyProcessing(modelDir, inputDict):
 		cleanOut['gridBallast']['eventEnd'] = str(eventEnd)
 		# Drop timezone from timeStamp, Convert string to date
 		timeStamps = [x[:19] for x in cleanOut['timeStamps']]
-		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in timeStamps]
+		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in timeStamps]	
 		eventEndIdx =  dateTimeStamps.index(eventEnd)
 		# Recovery Time
 		whOn = cleanOut['gridBallast']['waterheaterOn']
@@ -436,6 +449,7 @@ def heavyProcessing(modelDir, inputDict):
 		cleanOut['gridBallast']['waterheaterTempDrops'] = whTempDrops
 
 
+
 		# ZIPload calculations for Availability and QoS
 		zPower = cleanOut['gridBallast']['ZIPloadPower']
 		zPowerList = zPower.values()
@@ -460,10 +474,11 @@ def heavyProcessing(modelDir, inputDict):
 		# 	if zOn[zIdx] == 0:
 		# 		zDrop = sum([t > 0 for t in time])
 		# 		zDrops.append(zDrop)
-		# 	else:
+		# 	else:	
 		# 		zDrops.append(0)
-		print zDrops #all 0's
+		# print zDrops #all 0's
 		cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
+
 
 
 		# What percentage of our keys have lat lon data?

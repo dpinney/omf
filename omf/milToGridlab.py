@@ -370,15 +370,19 @@ def convert(stdString,seqString):
                                                             'geometric_mean_radius': geoRad,
                                                             'diameter' : diameter}
             # Check to see if there is distributed load on the line
-            if 'A' in overhead['phases'] and (ohLineList[19] != '0' or ohLineList[22] != '0'):
-                overhead['distributed_load_A'] = float(ohLineList[19])*1000 + float(ohLineList[22])*1000j
-            if 'B' in overhead['phases'] and (ohLineList[20] != '0' or ohLineList[23] != '0'):
-                overhead['distributed_load_B'] = float(ohLineList[20])*1000 + float(ohLineList[23])*1000j
-            if 'C' in overhead['phases'] and (ohLineList[21] != '0' or ohLineList[24] != '0'):
-                overhead['distributed_load_C'] = float(ohLineList[21])*1000 + float(ohLineList[24])*1000j
+            # WARNING: distributed load broken in GridLAB-D. Disabled for now.
+            # if 'A' in overhead['phases'] and (ohLineList[19] != '0' or ohLineList[22] != '0'):
+            #     overhead['distributed_load_A'] = float(ohLineList[19])*1000 + float(ohLineList[22])*1000j
+            # if 'B' in overhead['phases'] and (ohLineList[20] != '0' or ohLineList[23] != '0'):
+            #     overhead['distributed_load_B'] = float(ohLineList[20])*1000 + float(ohLineList[23])*1000j
+            # if 'C' in overhead['phases'] and (ohLineList[21] != '0' or ohLineList[24] != '0'):
+            #     overhead['distributed_load_C'] = float(ohLineList[21])*1000 + float(ohLineList[24])*1000j
             return overhead
 
         def convertUgLine(ugLineList):
+            for i in range(len(ugLineList)):
+                if ugLineList[i] == '':
+                    ugLineList[i] = '0'
             myIndex = components.index(objectList)*subObCount
             underground = convertGenericObject(ugLineList)
             # MAYBEFIX: be smarter about multiple neutrals.
@@ -513,12 +517,12 @@ def convert(stdString,seqString):
                                                                             'conductor_gmr' : conductor_gmr,
                                                                             'insulation_relative_permitivitty' : insulation_relative_permitivity}
             # Check to see if there is distributed load on the line
-            if 'A' in underground['phases'] and (ugLineList[19] != '0' or ugLineList[22] != '0'):
-                underground['distributed_load_A'] = float(ugLineList[19])*1000 + ('+' if float(ugLineList[22]) >= 0.0 else '-') + abs(float(ugLineList[22]))*1000j
-            if 'B' in underground['phases'] and (ugLineList[20] != '0' or ugLineList[23] != '0'):
-                underground['distributed_load_B'] = float(ugLineList[20])*1000 + ('+' if float(ugLineList[23]) >= 0.0 else '-') + abs(float(ugLineList[23]))*1000j
-            if 'C' in underground['phases'] and (ugLineList[21] != '0' or ugLineList[24] != '0'):
-                underground['distributed_load_C'] = float(ugLineList[21])*1000 + ('+' if float(ugLineList[24]) >= 0.0 else '-') + abs(float(ugLineList[24]))*1000j
+            # if 'A' in underground['phases'] and (ugLineList[19] != '0' or ugLineList[22] != '0'):
+            #     underground['distributed_load_A'] = float(ugLineList[19])*1000 + (float(ugLineList[22]))*1000j
+            # if 'B' in underground['phases'] and (ugLineList[20] != '0' or ugLineList[23] != '0'):
+            #     underground['distributed_load_B'] = float(ugLineList[20])*1000 + (float(ugLineList[23]))*1000j
+            # if 'C' in underground['phases'] and (ugLineList[21] != '0' or ugLineList[24] != '0'):
+            #     underground['distributed_load_C'] = float(ugLineList[21])*1000 + (float(ugLineList[24]))*1000j
             return underground
 
         def convertRegulator(regList):
@@ -863,42 +867,38 @@ def convert(stdString,seqString):
         last_key = len(glm_dict)
         # Grab all the keys of overhead or underground lines that have distributed loads
         dl_line_keys = [x for x in glm_dict if 'distributed_load_A' in glm_dict[x] or 'distributed_load_B' in glm_dict[x] or 'distributed_load_C' in glm_dict[x]]
-
         for y in dl_line_keys:
             # create an intermedate node and two loads
             # first find from node object and to node
             node12 = None
             load1 = None
             load2 = None
-            for x in glm_dict:
-                if 'name' in glm_dict[x] and glm_dict[x]['name'] == glm_dict[y]['from']:
-                    node12 = copy.deepcopy(glm_dict[x])
-                    load1 = copy.deepcopy(glm_dict[x])
-                    if 'bustype' in glm_dict[x]:
-                        del node12['bustype']
-                        del load1['bustype']
-                if 'name' in glm_dict[x] and glm_dict[x]['name'] == glm_dict[y]['to']:
-                    load2 = copy.deepcopy(glm_dict[x])
-
-
+            for x in glm_dict.keys():
+                try:
+                    if 'name' in glm_dict[x] and glm_dict[x].get('name','') == glm_dict[y].get('from',''):
+                        node12 = copy.deepcopy(glm_dict[x])
+                        load1 = copy.deepcopy(glm_dict[x])
+                        if 'bustype' in glm_dict[x]:
+                            del node12['bustype']
+                            del load1['bustype']
+                    if 'name' in glm_dict[x] and glm_dict[x]['name'] == glm_dict[y]['to']:
+                        load2 = copy.deepcopy(glm_dict[x])
+                except:
+                    pass
             if node12 != None and load1 != None and load2 != None:
                 node12['name'] = 'node_' + glm_dict[y]['name'] + '_1'
                 node12['phases'] = glm_dict[y]['phases']
-
                 load1['name'] = glm_dict[y]['name'] + '_distributed_load_1'
                 load1['parent'] = node12['name']
                 load1['phases'] = node12['phases']
                 load1['object'] = 'load'
                 load1['load_class'] = 'C'
-
                 load2['name'] = glm_dict[y]['name'] + '_distributed_load_2'
                 load2['parent'] = glm_dict[y]['to']
                 load2['phases'] = node12['phases']
                 load2['object'] = 'load'
                 load2['load_class'] = 'C'
-
                 # split the load by 2/3 and 1/3
-
                 if 'distributed_load_A' in glm_dict[y]:
                     load1['constant_power_A'] = str(glm_dict[y]['distributed_load_A'].real*2/3) + ('+' if glm_dict[y]['distributed_load_A'].imag >= 0.0 else '-') + str(abs(glm_dict[y]['distributed_load_A'].imag*2/3)) + 'j'
                     load2['constant_power_A'] = str(glm_dict[y]['distributed_load_A'].real/3) + ('+' if glm_dict[y]['distributed_load_A'].imag >= 0.0 else '-') + str(abs(glm_dict[y]['distributed_load_A'].imag/3)) + 'j'
@@ -911,61 +911,60 @@ def convert(stdString,seqString):
                     load1['constant_power_C'] = str(glm_dict[y]['distributed_load_C'].real*2/3) + ('+' if glm_dict[y]['distributed_load_C'].imag >= 0.0 else '-') + str(abs(glm_dict[y]['distributed_load_C'].imag*2/3)) + 'j'
                     load2['constant_power_C'] = str(glm_dict[y]['distributed_load_C'].real/3) + ('+' if glm_dict[y]['distributed_load_C'].imag >= 0.0 else '-') + str(abs(glm_dict[y]['distributed_load_C'].imag/3)) + 'j'
                     del glm_dict[y]['distributed_load_C']
-
-            #Split line into two line segments, 1/4 long and 3/4 long
-            line_segment1 = copy.deepcopy(glm_dict[y])
-            line_segment2 = copy.deepcopy(glm_dict[y])
-            line_segment1['name'] = glm_dict[y]['name'] + '_LINESEG1'
-            line_segment1['length'] = str(float(glm_dict[y]['length'])/4)
-            line_segment1['to'] = node12['name']
-            line_segment2['name'] = glm_dict[y]['name'] + '_LINESG2'
-            line_segment2['length'] = str(float(glm_dict[y]['length'])*3/4)
-            line_segment2['from'] = node12['name']
-
-            #Rename all embedded objects
-            for a in line_segment1.keys():
-                if type(line_segment1[a]) is dict:
-                    line_segment1[a]['name'] = line_segment1['name'] + '-LINECONFIG'
-                    for b in line_segment1[a].keys():
-                        if type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and line_segment1[a][b]['omfEmbeddedConfigObject'] == 'spacing object line_spacing':
-                            line_segment1[a][b]['name'] = line_segment1['name'] + '-LINESPACING'
-                        elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_A' in line_segment1[a][b]['omfEmbeddedConfigObject']:
-                            line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_A'
-                        elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_B' in line_segment1[a][b]['omfEmbeddedConfigObject']:
-                            line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_B'
-                        elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_C' in line_segment1[a][b]['omfEmbeddedConfigObject']:
-                            line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_C'
-                        elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_N' in line_segment1[a][b]['omfEmbeddedConfigObject']:
-                            line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_N'
-
-            for a in line_segment2.keys():
-                if type(line_segment2[a]) is dict:
-                    line_segment2[a]['name'] = line_segment2['name'] + '-LINECONFIG'
-                    for b in line_segment2[a].keys():
-                        if type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and line_segment2[a][b]['omfEmbeddedConfigObject'] == 'spacing object line_spacing':
-                            line_segment2[a][b]['name'] = line_segment2['name'] + '-LINESPACING'
-                        elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_A' in line_segment2[a][b]['omfEmbeddedConfigObject']:
-                            line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_A'
-                        elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_B' in line_segment2[a][b]['omfEmbeddedConfigObject']:
-                            line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_B'
-                        elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_C' in line_segment2[a][b]['omfEmbeddedConfigObject']:
-                            line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_C'
-                        elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_N' in line_segment2[a][b]['omfEmbeddedConfigObject']:
-                            line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_N'
-
-            glm_dict[y] = line_segment1
-            glm_dict[last_key*subObCount] = node12
-            last_key += 1
-            glm_dict[last_key*subObCount] = load1
-            last_key += 1
-            glm_dict[last_key*subObCount] = line_segment2
-            last_key += 1
-            glm_dict[last_key*subObCount] = load2
-            last_key += 1
-
+                #Split line into two line segments, 1/4 long and 3/4 long
+                line_segment1 = copy.deepcopy(glm_dict[y])
+                line_segment2 = copy.deepcopy(glm_dict[y])
+                line_segment1['name'] = glm_dict[y]['name'] + '_LINESEG1'
+                line_segment1['length'] = str(float(glm_dict[y]['length'])/4)
+                try:
+                    line_segment1['to'] = node12['name']
+                except:
+                    print 'ERRRRRR', node12
+                line_segment2['name'] = glm_dict[y]['name'] + '_LINESG2'
+                line_segment2['length'] = str(float(glm_dict[y]['length'])*3/4)
+                line_segment2['from'] = node12['name']
+                #Rename all embedded objects
+                for a in line_segment1.keys():
+                    if type(line_segment1[a]) is dict:
+                        line_segment1[a]['name'] = line_segment1['name'] + '-LINECONFIG'
+                        for b in line_segment1[a].keys():
+                            if type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and line_segment1[a][b]['omfEmbeddedConfigObject'] == 'spacing object line_spacing':
+                                line_segment1[a][b]['name'] = line_segment1['name'] + '-LINESPACING'
+                            elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_A' in line_segment1[a][b]['omfEmbeddedConfigObject']:
+                                line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_A'
+                            elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_B' in line_segment1[a][b]['omfEmbeddedConfigObject']:
+                                line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_B'
+                            elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_C' in line_segment1[a][b]['omfEmbeddedConfigObject']:
+                                line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_C'
+                            elif type(line_segment1[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment1[a][b] and 'conductor_N' in line_segment1[a][b]['omfEmbeddedConfigObject']:
+                                line_segment1[a][b]['name'] = line_segment1['name'] + '-CONDUCTOR_N'
+                for a in line_segment2.keys():
+                    if type(line_segment2[a]) is dict:
+                        line_segment2[a]['name'] = line_segment2['name'] + '-LINECONFIG'
+                        for b in line_segment2[a].keys():
+                            if type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and line_segment2[a][b]['omfEmbeddedConfigObject'] == 'spacing object line_spacing':
+                                line_segment2[a][b]['name'] = line_segment2['name'] + '-LINESPACING'
+                            elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_A' in line_segment2[a][b]['omfEmbeddedConfigObject']:
+                                line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_A'
+                            elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_B' in line_segment2[a][b]['omfEmbeddedConfigObject']:
+                                line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_B'
+                            elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_C' in line_segment2[a][b]['omfEmbeddedConfigObject']:
+                                line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_C'
+                            elif type(line_segment2[a][b]) is dict and 'omfEmbeddedConfigObject' in line_segment2[a][b] and 'conductor_N' in line_segment2[a][b]['omfEmbeddedConfigObject']:
+                                line_segment2[a][b]['name'] = line_segment2['name'] + '-CONDUCTOR_N'
+                glm_dict[y] = line_segment1
+                glm_dict[last_key*subObCount] = node12
+                last_key += 1
+                glm_dict[last_key*subObCount] = load1
+                last_key += 1
+                glm_dict[last_key*subObCount] = line_segment2
+                last_key += 1
+                glm_dict[last_key*subObCount] = load2
+                last_key += 1
         return glm_dict
 
-    glmTree = convDistLoadLines(glmTree)
+    # WARNING: this code creates broken GLMs. Disabled by default.
+    # glmTree = convDistLoadLines(glmTree)
     # Fix nominal voltage
     def fix_nominal_voltage(glm_dict, volt_dict):
         for x in glm_dict:
@@ -1347,5 +1346,5 @@ if __name__ == "__main__":
     openPrefix = './scratch/uploads/'
     outPrefix = './scratch/milToGridlabTests/'
     testAttachments = {'schedules.glm':'', 'climate.tmy2':open('./data/Climate/KY-LEXINGTON.tmy2','r').read()}
-    testFiles = [('ABEC-FRANK.std','ABEC.seq')]
+    testFiles = [('UE yadkin tabernacle.std','UE yadkin tabernacle.seq')]
     _tests(testFiles, openPrefix, outPrefix, testAttachments)
