@@ -116,44 +116,135 @@ def distShuffleLoads(inputFeeder, shufPerc):
 
 
 def distModifyConductorLengths(inputFeeder):
-	lookup = {}
+	# lookup = {}
 	# from pprint import pprint
 	# pprint(inputFeeder['tree'])
+	# for key in inputFeeder['tree']:
+	# 	newDict = {}
+	# 	if inputFeeder['tree'][key].get('object') == 'triplex_line':
+	# 		newDict = {
+	# 			inputFeeder['tree'][key].get('name'): {
+	# 				'length': inputFeeder['tree'][key].get('length'), 
+	# 				'configuration': inputFeeder['tree'][key].get('configuration')
+	# 			}	
+	# 		}
+	# 		lookup.update(newDict)
+	# 	if inputFeeder['tree'][key].get('object') == 'triplex_line_configuration':
+	# 		for line in lookup:
+	# 			print line
+	# 			print lookup[line]
+	# 			if lookup[line].get('configuration') == inputFeeder['tree'][key].get('name'):
+	# 				lookup[line].update(diameter=inputFeeder['tree'][key].get('diameter'))
+	# 				lookup[line].update(conductor_1=inputFeeder['tree'][key].get('conductor_1'))
+	# 	if inputFeeder['tree'][key].get('object') == 'triplex_line_conductor':
+	# 		for line in lookup:
+	# 				lookup[line].update(resistance=inputFeeder['tree'][key].get('resistance'))
+	# for line in lookup:
+	# 	resistivity = ( float(lookup[line].get('resistance')) * math.pi * (float(lookup[line].get('diameter'))/2.0)**2 ) / float(lookup[line].get('length'))
+	# 	lookup[line]['length'] = random.randint( float(lookup[line].get('length'))-float(lookup[line].get('length')), float(lookup[line].get('length'))+float(lookup[line].get('length')) )
+	# 	lookup[line]['diameter'] = random.randint( (float(lookup[line].get('diameter'))-float(lookup[line].get('diameter')))*1000, (float(lookup[line].get('diameter'))+float(lookup[line].get('diameter')))*1000 ) / 1000.0
+	# 	lookup[line]['resistance'] = (resistivity*float(lookup[line].get('length'))) / (math.pi*(float(lookup[line].get('diameter'))/2.0)**2)
+	# 	for key in inputFeeder['tree']:
+	# 		if inputFeeder['tree'][key].get('name') == line:
+	# 			inputFeeder['tree'][key]['length'] == lookup[line].get('length')
+	# 		if inputFeeder['tree'][key].get('name') == lookup[line].get('configuration'):
+	# 			inputFeeder['tree'][key]['diameter'] == lookup[line].get('diameter')
+	# 		if inputFeeder['tree'][key].get('name') == lookup[line].get('conductor_1'):
+	# 			inputFeeder['tree'][key]['resistance'] == lookup[line].get('resistance')
+	# 	from pprint import pprint
+	# 	pprint(inputFeeder['tree'])
+
+	# lookup = {}
+	# for key in inputFeeder['tree']:
+	# 	newDict = {}
+	# 	if inputFeeder['tree'][key].get('object') == 'overhead_line':
+	# 		newDict = {
+	# 			inputFeeder['tree'][key].get('name'): {
+	# 				'length': inputFeeder['tree'][key].get('length'), 
+	# 				'configuration': inputFeeder['tree'][key].get('configuration')
+	# 			}	
+	# 		}
+	# 		lookup.update(newDict)
+	# 	if inputFeeder['tree'][key].get('object') == 'line_configuration':
+	# 		for line in lookup:
+	# 			if lookup[line].get('configuration') == inputFeeder['tree'][key].get('name'):
+	# 				lookup[line].update(conductor_N=inputFeeder['tree'][key].get('conductor_N'))
+	# 	if inputFeeder['tree'][key].get('object') == 'overhead_line_conductor':
+	# 		for line in lookup:
+	# 			if lookup[line].get('conductor_N') == inputFeeder['tree'][key].get('name'):
+	# 				lookup[line].update(resistance=inputFeeder['tree'][key].get('resistance'))
+	# 				lookup[line].update(geometric_mean_radius=inputFeeder['tree'][key].get('geometric_mean_radius'))
+	# # print lookup
+	# for line in lookup:
+	# 	print lookup
+	# 	resistivity = ( float(lookup[line].get('resistance')) * math.pi * float(lookup[line].get('geometric_mean_radius'))**2 ) / float(lookup[line].get('length'))
+	# 	lookup[line]['length'] = random.uniform( float(lookup[line].get('length'))-float(lookup[line].get('length')), float(lookup[line].get('length'))+float(lookup[line].get('length')) )
+	# 	lookup[line]['geometric_mean_radius'] = random.uniform( (float(lookup[line].get('geometric_mean_radius'))-float(lookup[line].get('geometric_mean_radius')))*1000, (float(lookup[line].get('geometric_mean_radius'))+float(lookup[line].get('geometric_mean_radius')))*1000 ) / 1000.0
+	# 	lookup[line]['resistance'] = (resistivity*float(lookup[line].get('length'))) / (math.pi*float(lookup[line].get('geometric_mean_radius'))**2)
+	# 	for key in inputFeeder['tree']:
+	# 		if inputFeeder['tree'][key].get('name') == line:
+	# 			inputFeeder['tree'][key]['length'] == lookup[line].get('length')
+	# 		if inputFeeder['tree'][key].get('name') == lookup[line].get('configuration'):
+	# 			# print inputFeeder['tree'][key]
+	# 			conductorN = inputFeeder['tree'][key].get('conductor_N')
+	# 			return conductorN
+	# 		if inputFeeder['tree'][key].get('name') == conudctorN:
+	# 			inputFeeder['tree'][key]['resistance'] == lookup[line].get('resistance')
+	# 			inputFeeder['tree'][key]['geometric_mean_radius'] == lookup[line].get('geometric_mean_radius')
+	# 		# if inputFeeder['tree'][key].get('name') == lookup[line].get('conductor_N'):
+	# 		# 	# print inputFeeder['tree'][key]
+	# 		# 	inputFeeder['tree'][key]['resistance'] == lookup[line].get('resistance')
+	# 		# 	inputFeeder['tree'][key]['geometric_mean_radius'] == lookup[line].get('geometric_mean_radius')
+	# 	# from pprint import pprint
+	# 	# pprint(inputFeeder['tree'])
+	# return inputFeeder['tree']
+
+	lookup = {}
 	for key in inputFeeder['tree']:
 		newDict = {}
-		if inputFeeder['tree'][key].get('object') == 'triplex_line':
+		if inputFeeder['tree'][key].get('object') == 'underground_line':
 			newDict = {
 				inputFeeder['tree'][key].get('name'): {
-					'length': inputFeeder['tree'][key].get('length'), 
+					'length': inputFeeder['tree'][key].get('length'),
 					'configuration': inputFeeder['tree'][key].get('configuration')
 				}	
 			}
 			lookup.update(newDict)
-		if inputFeeder['tree'][key].get('object') == 'triplex_line_configuration':
+		if inputFeeder['tree'][key].get('object') == 'line_configuration':
 			for line in lookup:
-				print line
-				print lookup[line]
 				if lookup[line].get('configuration') == inputFeeder['tree'][key].get('name'):
-					lookup[line].update(diameter=inputFeeder['tree'][key].get('diameter'))
-					lookup[line].update(conductor_1=inputFeeder['tree'][key].get('conductor_1'))
-		if inputFeeder['tree'][key].get('object') == 'triplex_line_conductor':
+					lookup[line].update(conductor_N=inputFeeder['tree'][key].get('conductor_N'))
+		if inputFeeder['tree'][key].get('object') == 'underground_line_conductor':
 			for line in lookup:
-					lookup[line].update(resistance=inputFeeder['tree'][key].get('resistance'))
+				if lookup[line].get('conductor_N') == inputFeeder['tree'][key].get('name'):
+					lookup[line].update(conductor_resistance=inputFeeder['tree'][key].get('conductor_resistance'))
+					lookup[line].update(conductor_diameter=inputFeeder['tree'][key].get('conductor_diameter'))
+					# print lookup[line]
 	for line in lookup:
-		resistivity = ( float(lookup[line].get('resistance')) * math.pi * (float(lookup[line].get('diameter'))/2.0)**2 ) / float(lookup[line].get('length'))
-		lookup[line]['length'] = random.randint( float(lookup[line].get('length'))-float(lookup[line].get('length')), float(lookup[line].get('length'))+float(lookup[line].get('length')) )
-		lookup[line]['diameter'] = random.randint( (float(lookup[line].get('diameter'))-float(lookup[line].get('diameter')))*1000, (float(lookup[line].get('diameter'))+float(lookup[line].get('diameter')))*1000 ) / 1000.0
-		lookup[line]['resistance'] = (resistivity*float(lookup[line].get('length'))) / (math.pi*(float(lookup[line].get('diameter'))/2.0)**2)
+		print lookup[line]
+
+		try:
+			resistivity = ( float(lookup[line].get('conductor_resistance')) * math.pi * (float(lookup[line].get('conductor_diameter'))/2.0)**2 ) / float(lookup[line].get('length'))
+			lookup[line]['length'] = random.uniform( float(lookup[line].get('length'))-float(lookup[line].get('length')), float(lookup[line].get('length'))+float(lookup[line].get('length')) )
+			lookup[line]['conductor_diameter'] = random.randint( (float(lookup[line].get('conductor_diameter'))-float(lookup[line].get('conductor_diameter')))*1000, (float(lookup[line].get('conductor_diameter'))+float(lookup[line].get('conductor_diameter')))*1000 ) / 1000.0
+			lookup[line]['conductor_resistance'] = (resistivity*float(lookup[line].get('length'))) / (math.pi*(float(lookup[line].get('conductor_diameter'))/2.0)**2)
+		except:
+			pass
+			
 		for key in inputFeeder['tree']:
 			if inputFeeder['tree'][key].get('name') == line:
 				inputFeeder['tree'][key]['length'] == lookup[line].get('length')
-			if inputFeeder['tree'][key].get('name') == lookup[line].get('configuration'):
-				inputFeeder['tree'][key]['diameter'] == lookup[line].get('diameter')
-			if inputFeeder['tree'][key].get('name') == lookup[line].get('conductor_1'):
-				inputFeeder['tree'][key]['resistance'] == lookup[line].get('diameter')
-		from pprint import pprint
-		pprint(inputFeeder['tree'])
+			# if inputFeeder['tree'][key].get('name') == lookup[line].get('configuration'):
+			# 	inputFeeder['tree'][key]['resistance'] == lookup[line].get('resistance')
+			# 	inputFeeder['tree'][key]['geometric_mean_radius'] == lookup[line].get('geometric_mean_radius')
+			if inputFeeder['tree'][key].get('name') == lookup[line].get('conductor_N'):
+				# print inputFeeder['tree'][key]
+				inputFeeder['tree'][key]['conductor_resistance'] == lookup[line].get('conductor_resistance')
+				inputFeeder['tree'][key]['conductor_diameter'] == lookup[line].get('conductor_diameter')
+		# from pprint import pprint
+		# pprint(inputFeeder['tree'])
 	return inputFeeder['tree']
+
 
 
 def distSmoothLoads(inputFeeder):
@@ -429,9 +520,9 @@ def tranShuffleLoadsAndGens(inputNetwork, shufPerc):
 
 def _tests():
 	# DISTRIBUTION FEEDER TESTS
-	FNAME = "simpleMarketMod.omd"
-	with open(FNAME, "r") as inFile:
-		inputFeeder = json.load(inFile)
+	# FNAME = "simpleMarketMod.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inputFeeder = json.load(inFile)
 
 
 	# # Testing distPseudomizeNames
@@ -480,22 +571,35 @@ def _tests():
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# # Testing distModifyConductorLenghts
+	# Testing distModifyConductorLenghts
+	# FNAME = "simpleMarketMod.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inputFeeder = json.load(inFile)
+
 	# condLengths = distModifyConductorLengths(inputFeeder)
 	# # print shuffle
 	# FNAMEOUT = "simpleConductor.omd"
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# Testing distSmoothLoads
-	FNAME = "Calibrated Feeder.omd"
+	FNAME = "Olin Barre GH.omd"
 	with open(FNAME, "r") as inFile:
 		inputFeeder = json.load(inFile)
 
-	smoothing = distSmoothLoads(inputFeeder)
-	FNAMEOUT = "simpleSmooth.omd"
+	condLengths = distModifyConductorLengths(inputFeeder)
+	FNAMEOUT = "olinConductor.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inputFeeder, outFile, indent=4)
+
+	# Testing distSmoothLoads
+	# FNAME = "Calibrated Feeder.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inputFeeder = json.load(inFile)
+
+	# smoothing = distSmoothLoads(inputFeeder)
+	# FNAMEOUT = "simpleSmooth.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inputFeeder, outFile, indent=4)
 
 
 	# # TRANSMISSION NETWORK TESTS
