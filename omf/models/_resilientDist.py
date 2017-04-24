@@ -481,6 +481,10 @@ def heavyProcessing(modelDir, inputDict):
 		genDiagram(modelDir, feederName, feederModel, debug=False)
 		with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 			outData["oneLineDiagram"] = inFile.read().encode("base64")
+		outData["lineUnitCost"] = inputDict["lineUnitCost"]
+		outData["switchCost"] = inputDict["switchCost"]
+		outData["dgUnitCost"] = inputDict["dgUnitCost"]
+		outData["hardeningUnitCost"] = inputDict["hardeningUnitCost"]
 		# Save the output to disk.
 		with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 			json.dump(outData, outFile, indent=4)
@@ -488,7 +492,7 @@ def heavyProcessing(modelDir, inputDict):
 		finishTime = datetime.datetime.now()
 		inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
 		with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent = 4)
+			json.dump(inputDict, inFile, indent = 4)	
 	except Exception as e:
 		# If input range wasn't valid delete output, write error to disk.
 		cancel(modelDir)
