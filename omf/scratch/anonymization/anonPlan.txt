@@ -56,7 +56,9 @@ OOO Implement def distModifyConductorLengths()
 	XXX Use new test circuit /scratch/publicFeeders/Olin Barre GH.omd
 	XXX no overhead_lines in Simple Market System
 	XXX no underground_lines in Simple Market System
-	OOO debug for overhead and underground
+	XXX debug for overhead and underground
+	OOO Refactor triplex/overhead/underground into single function
+OOO Debug/Rewrite Test cases
 
 LATERBASE
 OOO How do we open these .omd files in gridEdit? We need a visualizeFeeder function.
