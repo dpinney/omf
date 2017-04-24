@@ -341,7 +341,7 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 		'generators' : []	
 	}
 	# Read and put omd.json into rdt.json.
-	with open(pJoin(dataDir,feederName), "r") as jsonIn:
+	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
 		jsonTree = json.load(jsonIn).get('tree','')
 	#TODO: get GFM scenarios in to RDT
 	lineCount = makeLines(rdtJson, jsonTree, debug)
@@ -350,7 +350,7 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 	makeLoads(rdtJson, jsonTree, debug)
 	makeGens(rdtJson, jsonTree, debug)
 	# Write to file.
-	rdtInFile = 'rdtIn'+feederName.strip('omd')+'json'
+	rdtInFile = 'rdtIn.json'
 	with open(pJoin(dataDir,rdtInFile), "w") as outFile:
 		json.dump(rdtJson, outFile, indent=4)
 	if debug:		
@@ -360,7 +360,7 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 
 def genDiagram(dataDir, feederName, feederJson, debug):
 	# Generate feeder diagram.
-	feederJson = json.load(open(pJoin(dataDir,feederName)))
+	feederJson = json.load(open(pJoin(dataDir,feederName + '.omd')))
 	tree = feederJson.get("tree",{})
 	if debug:
 		print "Generating Feeder plot..."
@@ -411,8 +411,12 @@ def heavyProcessing(modelDir, inputDict):
 		beginTime = dt.datetime.now()
 		outData = {}
 		# HACK: read feeder name.
-		files = os.listdir(modelDir)
-		feederName = [x for x in files if x.endswith('.omd')][0]
+		# files = os.listdir(modelDir)
+		# feederName = [x for x in files if x.endswith('.omd')][0]
+		# inputDict["feederName1"] = feederName
+		with open(pJoin(modelDir,'allInputData.json')) as inputFile:    
+			feederName = json.load(inputFile).get('feederName1','feeder')
+		inputDict["feederName1"] = feederName
 		# Generate the input file for GFM:
 		fragIn = {}
 		fragInputBase = json.loads(inputDict['poleData'])
@@ -428,7 +432,7 @@ def heavyProcessing(modelDir, inputDict):
 		else: #for UNIX
 			hazardAscPath = 'file://' + pJoin(modelDir, inputDict['weatherImpactsFileName']).replace(' ','%20')
 		fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath # HACK: just consider one hazard field.
-		with open(pJoin(modelDir, feederName), "r") as jsonIn:
+		with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
 			feederModel = json.load(jsonIn)
 		# Pull pole lat/lon data from OMD and add to pole system.
 		for node in feederModel['nodes']:
