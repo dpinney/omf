@@ -1,4 +1,4 @@
-import json, math, random, datetime, dateutil.parser
+import json, math, random, datetime
 
 # DISTRIBUTION FEEDER FUNCTIONS
 def refactorNames(inputFeeder):
@@ -164,19 +164,19 @@ def distSmoothLoads(inputFeeder):
 	for pair in scadaPairs:
 		s = pair[0]
 		s = s[:19]
-
-		# siso = s.isoformat()
-		# timestamp = dateutil.parser.parse(s)
-		
-		timestamp = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
-		print timestamp
-
+		try:
+			timestamp = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
+		except:
+			pass # print 'BAD DATAPOINT:', s
 		aggAmount = 0
 		aggHour = timestamp.hour
-		if timestamp == aggHour:
-			aggAmount += float(pair[1])
-		outList.append([aggHour, aggAmount])
-	pass
+		if (timestamp.minute == 0) and (timestamp.second == 0) and (timestamp.hour == aggHour):
+			try:
+				aggAmount += float(pair[1])
+				outList.append([aggHour, aggAmount])
+			except:
+				pass
+	return outList
 
 
 # TRANSMISSION NETWORK FUNCTIONS

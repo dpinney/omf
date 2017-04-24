@@ -43,7 +43,7 @@ OOO Implement def distModifyConductorLengths()
 	OOO Use new test circuit /scratch/publicFeeders/Olin Barre GH.omd
 	OOO no overhead_lines in Simple Market System
 	OOO no underground_lines in Simple Market System
-OOO Implement def distSmoothLoads()
+XXX Implement def distSmoothLoads()
 	#PseudoCode
 	scadaFile = omd['attachments']['subScadaCalibrated1.player']
 	scadaLines = scadaFile.split('\n')
