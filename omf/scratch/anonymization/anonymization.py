@@ -249,7 +249,6 @@ def distSmoothLoads(inFeeder):
 				pass
 	return outList
 
-
 # TRANSMISSION NETWORK FUNCTIONS
 def tranAnonymizeNames(inNetwork):
 	newBusKey = {}
@@ -394,10 +393,8 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 							genIdx += 1
 	return inNetwork
 
-
 def _tests():
 	# DISTRIBUTION FEEDER TESTS
-
 	# Test distPseudomizeNames
 	FNAME = "Simple Market System Modified.omd"
 	with open(FNAME, "r") as inFile:
@@ -488,13 +485,12 @@ def _tests():
 	with open(FNAME, "r") as inFile:
 		inFeeder = json.load(inFile)
 	smoothing = distSmoothLoads(inFeeder)
-	FNAMEOUT = "simpleMarket_distSmoothLoads.omd"
+	FNAMEOUT = "calibrated_distSmoothLoads.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inFeeder, outFile, indent=4)
 
 
 	# TRANSMISSION NETWORK TESTS
-	
 	# Test tranPseudomizeNames
 	FNAME = "case9.omt"
 	with open(FNAME, "r") as inFile:

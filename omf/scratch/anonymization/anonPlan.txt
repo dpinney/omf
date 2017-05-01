@@ -35,10 +35,10 @@ XXX Implement def tranAddNoise(noisePerc)
 XXX Remove feature for distCombineLoads() and tranCombineLoads(). We don't have any models with multiple loads connected to the same meter. So we don't believe there will be any users for this feature. Need to update spec with this note.
 XXX Remove feature def tranSmoothLoads(). There is not timeseries data in these models. Need to update spec with this note.
 XXX Debug transmission dictionary access.
-	OOO Refactor - less for...in loops
+	bus[i].values()[0] # HACK: support for bad data structure
 XXX Implement def distShuffleLoads(shufPerc). See spec image.
 XXX Implement def tranShuffleLoadsAndGens(shufPerc). See spec image.
-XXX Implement def tranModifyConductorLengths(). Deprecated because models don't include cable length or radius parameters. Spec updated to drop support for this.
+XXX Remove feature def tranModifyConductorLengths(). Deprecated because models don't include cable length or radius parameters. Spec updated to drop support for this.
 XXX Implement def distSmoothLoads()
 XXX Implement def distModifyTriplexLengths()	
 	XXX triplex_line
@@ -49,7 +49,7 @@ XXX Implement def distModifyConductorLengths()
 	XXX Use new test circuit /scratch/publicFeeders/Olin Barre GH.omd
 	XXX debug for overhead and underground
 	XXX Refactor triplex and overhead/underground into two separate functions
-OOO Debug/Rewrite Test cases
+XXX Debug/Rewrite Test cases
 
 LATERBASE
 OOO How do we open these .omd files in gridEdit? We need a visualizeFeeder function.

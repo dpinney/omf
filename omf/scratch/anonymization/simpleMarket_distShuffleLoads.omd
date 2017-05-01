@@ -594,7 +594,7 @@
             "auxiliary_system_type": "ELECTRIC", 
             "longitude": 493.2496934887359, 
             "name": "house1", 
-            "parent": "tm_2", 
+            "parent": "tm_1", 
             "floor_area": "1838", 
             "cooling_COP": "3.2", 
             "object": "house", 
@@ -716,7 +716,7 @@
             "tmyfile": "\"climate.tmy2\""
         }, 
         "39": {
-            "parent": "house2", 
+            "parent": "house1", 
             "name": "television2", 
             "power_fraction": "0.998700", 
             "object": "ZIPload", 
@@ -731,7 +731,7 @@
             "groupid": "TV"
         }, 
         "38": {
-            "parent": "house1", 
+            "parent": "house2", 
             "name": "lights2", 
             "power_fraction": "0.003200", 
             "object": "ZIPload", 
@@ -900,7 +900,7 @@
             "motor_model": "BASIC"
         }, 
         "34": {
-            "parent": "house1", 
+            "parent": "house2", 
             "name": "fan1", 
             "power_fraction": "0.013500", 
             "object": "ZIPload", 
@@ -915,7 +915,7 @@
             "groupid": "fan"
         }, 
         "33": {
-            "parent": "house2", 
+            "parent": "house1", 
             "name": "television1", 
             "power_fraction": "0.998700", 
             "object": "ZIPload", 
@@ -930,7 +930,7 @@
             "groupid": "TV"
         }, 
         "32": {
-            "parent": "house2", 
+            "parent": "house1", 
             "name": "lights1", 
             "power_fraction": "0.003200", 
             "object": "ZIPload", 
