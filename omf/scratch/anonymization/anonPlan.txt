@@ -38,27 +38,15 @@ XXX Implement def distShuffleLoads(shufPerc). See spec image.
 XXX Implement def tranShuffleLoadsAndGens(shufPerc). See spec image.
 XXX Implement def tranModifyConductorLengths(). Deprecated because models don't include cable length or radius parameters. Spec updated to drop support for this.
 XXX Implement def distSmoothLoads()
-	#PseudoCode
-	scadaFile = omd['attachments']['subScadaCalibrated1.player']
-	scadaLines = scadaFile.split('\n')
-	scadaPairs = [x.split(',') for x in scadaLines] # [[ts,val],[ts,val],[ts,val],...]
-	outList = []
-	for pair in scadaPairs:
-		aggAmount = 0
-		aggHour = pair[0].getHourFromTimestamp()
-		for pair in scadaPairs:
-			if pair[0].getHourFromTimestamp() == aggHour:
-				aggAmount += pair[1]
-		outList.append([aggHour, aggAmount])
-XXX Implement def distModifyConductorLengths()
-	XXX Use new test circuit /scratch/publicFeeders/Olin Barre GH.omd
-	XXX no overhead_lines in Simple Market System
-	XXX no underground_lines in Simple Market System
-	XXX debug for overhead and underground
-	XXX Refactor triplex and overhead/underground into two separate functions
 XXX Implement def distModifyTriplexLengths()	
 	XXX triplex_line
 	XXX debug disappearing trip_line_config.
+XXX Implement def distModifyConductorLengths()
+	XXX no overhead_lines in Simple Market System
+	XXX no underground_lines in Simple Market System
+	XXX Use new test circuit /scratch/publicFeeders/Olin Barre GH.omd
+	XXX debug for overhead and underground
+	XXX Refactor triplex and overhead/underground into two separate functions
 OOO Debug/Rewrite Test cases
 
 LATERBASE

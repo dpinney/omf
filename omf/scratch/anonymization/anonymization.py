@@ -227,13 +227,11 @@ def distModifyConductorLengths(inFeeder):
 					pass
 	return inFeeder['tree']
 
-
-
-def distSmoothLoads(inputFeeder):
-	scadaFile = inputFeeder['attachments']['subScadaCalibrated1.player']
+def distSmoothLoads(inFeeder):
+	outList = []
+	scadaFile = inFeeder['attachments']['subScadaCalibrated1.player']
 	scadaLines = scadaFile.split('\n')
 	scadaPairs = [x.split(',') for x in scadaLines] # [[ts,val],[ts,val],[ts,val],...]
-	outList = []
 	for pair in scadaPairs:
 		s = pair[0]
 		s = s[:19]
@@ -558,7 +556,7 @@ def _tests():
 	with open(FNAME, "r") as inFile:
 		inFeeder = json.load(inFile)
 	triplexLengths = distModifyTriplexLengths(inFeeder)
-	FNAMEOUT = "simpleTriplex.omd"
+	FNAMEOUT = "simpleMarket_distModifyTriplexLengths.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inFeeder, outFile, indent=4)
 
@@ -567,19 +565,18 @@ def _tests():
 	with open(FNAME, "r") as inFile:
 		inFeeder = json.load(inFile)
 	conductorLengths = distModifyConductorLengths(inFeeder)
-	FNAMEOUT = "olinConductor.omd"
+	FNAMEOUT = "olinBarreGH_distModifyConductorLengths.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inFeeder, outFile, indent=4)
 
 	# Testing distSmoothLoads
-	# FNAME = "Calibrated Feeder.omd"
-	# with open(FNAME, "r") as inFile:
-	# 	inputFeeder = json.load(inFile)
-
-	# smoothing = distSmoothLoads(inputFeeder)
-	# FNAMEOUT = "simpleSmooth.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inputFeeder, outFile, indent=4)
+	FNAME = "Calibrated Feeder.omd"
+	with open(FNAME, "r") as inFile:
+		inputFeeder = json.load(inFile)
+	smoothing = distSmoothLoads(inputFeeder)
+	FNAMEOUT = "simpleMarket_distSmoothLoads.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inputFeeder, outFile, indent=4)
 
 
 	# # TRANSMISSION NETWORK TESTS
