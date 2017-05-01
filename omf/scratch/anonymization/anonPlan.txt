@@ -11,12 +11,13 @@ XXX Implement def distRandomizeNames()
 	XXX Implement.
 	XXX Make sure it passes the tests.
 	XXX Is there a refactoring that will reduce duplication of similar code?
-XXX Implement def distRandomizeLocation()
+XXX Implement distAnonymizeNames()
+XXX Implement def distRandomizeLocations()
 	XXX Create tests like ones for names.
 	XXX Add latitude and longitude attributes to all simple market test objects in the tree.
 	XXX Replace the links, hiddenLinks, nodes, hiddenNodes each with empty lists.
 	XXX Walk the tree, replace each lat and lon with a random one uniformly distributed between 0 and 1000.
-XXX Implement def distTranslateLocation(translation,rotation)
+XXX Implement def distTranslateLocations(translation,rotation)
 	XXX Create tests like the ones for names.
 	XXX Replace the links, hiddenLinks, nodes, hiddenNodes each with empty lists.
 	XXX Walk the tree, replace each lat and lon with a translated and rotated version.

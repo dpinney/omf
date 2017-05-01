@@ -1,55 +1,55 @@
 import json, math, random, datetime
 
 # DISTRIBUTION FEEDER FUNCTIONS
-def refactorNames(inputFeeder):
+def distAnonymizeNames(inFeeder):
 	newNameKey = {}
 	newNameArray = []
 	newKeyID = 0
-	for key in inputFeeder['tree']:
-		if 'name' in inputFeeder['tree'][key]:
-			oldName = inputFeeder['tree'][key]['name']
-			newName = inputFeeder['tree'][key]['object'] + str(newKeyID)
+	for key in inFeeder['tree']:
+		if 'name' in inFeeder['tree'][key]:
+			oldName = inFeeder['tree'][key]['name']
+			newName = inFeeder['tree'][key]['object'] + str(newKeyID)
 			newKeyID += 1
-			inputFeeder['tree'][key]['name'] = newName
+			inFeeder['tree'][key]['name'] = newName
 			newNameKey.update({oldName:newName})
 			newNameArray.append(newName)
 	return newNameKey, newNameArray
 
-def distPseudomizeNames(inputFeeder):
+def distPseudomizeNames(inFeeder):
 	newNameKey = {}
 	newKeyID = 0
-	for key in inputFeeder['tree']:
-		if 'name' in inputFeeder['tree'][key]:
-			oldName = inputFeeder['tree'][key]['name']
-			newName = inputFeeder['tree'][key]['object'] + str(newKeyID)
+	for key in inFeeder['tree']:
+		if 'name' in inFeeder['tree'][key]:
+			oldName = inFeeder['tree'][key]['name']
+			newName = inFeeder['tree'][key]['object'] + str(newKeyID)
 			newKeyID += 1
-			inputFeeder['tree'][key]['name'] = newName
+			inFeeder['tree'][key]['name'] = newName
 			newNameKey.update({oldName:newName})
 	return newNameKey
 
-def distRandomizeNames(inputFeeder):
+def distRandomizeNames(inFeeder):
 	newNameArray = []
 	newKeyID = 0
-	for key in inputFeeder['tree']:
-		if 'name' in inputFeeder['tree'][key]:
-			newName = inputFeeder['tree'][key]['object'] + str(newKeyID)
+	for key in inFeeder['tree']:
+		if 'name' in inFeeder['tree'][key]:
+			newName = inFeeder['tree'][key]['object'] + str(newKeyID)
 			newKeyID += 1
-			inputFeeder['tree'][key]['name'] = newName
+			inFeeder['tree'][key]['name'] = newName
 			newNameArray.append(newName)
 	return newNameArray
 
-def distRandomizeLocation(inputFeeder):
-	inputFeeder['nodes'] = []
-	inputFeeder['links'] = []
-	inputFeeder['hiddenNodes'] = []
-	inputFeeder['hiddenLinks'] = []
-	for key in inputFeeder['tree']:
-		if ('longitude' in inputFeeder['tree'][key]) or ('latitude' in inputFeeder['tree'][key]):
-			inputFeeder['tree'][key]['longitude'] = random.randint(0,1000)
-			inputFeeder['tree'][key]['latitude'] = random.randint(0,1000)
-	return inputFeeder['tree']
+def distRandomizeLocations(inFeeder):
+	inFeeder['nodes'] = []
+	inFeeder['links'] = []
+	inFeeder['hiddenNodes'] = []
+	inFeeder['hiddenLinks'] = []
+	for key in inFeeder['tree']:
+		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
+			inFeeder['tree'][key]['longitude'] = random.randint(0,1000)
+			inFeeder['tree'][key]['latitude'] = random.randint(0,1000)
+	return inFeeder['tree']
 
-def distTranslateLocation(inFeeder, translation, rotation):
+def distTranslateLocations(inFeeder, translation, rotation):
 	inFeeder['nodes'] = []
 	inFeeder['links'] = []
 	inFeeder['hiddenNodes'] = []
@@ -500,44 +500,55 @@ def tranShuffleLoadsAndGens(inputNetwork, shufPerc):
 
 def _tests():
 	# DISTRIBUTION FEEDER TESTS
-	# FNAME = "simpleMarketMod.omd"
-	# with open(FNAME, "r") as inFile:
-	# 	inputFeeder = json.load(inFile)
 
-
-	# # Testing distPseudomizeNames
-	# nameKeyDict = distPseudomizeNames(inputFeeder)
-	# # print nameKeyDict
-	# FNAMEOUT = "simplePseudo.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inputFeeder, outFile, indent=4)
-
-	# # Testing distRandomizeNames
-	# randNameArray = distRandomizeNames(inputFeeder)
-	# # print randNameArray
-	# FNAMEOUT = "simpleName.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inputFeeder, outFile, indent=4)
-
-	# # Testing distRandomizeLocation
-	# newLocation = distRandomizeLocation(inputFeeder)
-	# # print newLocation
-	# FNAMEOUT = "simpleLocation.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inputFeeder, outFile, indent=4)
-
-	# Testing distTranslateLocation
+	# Test distAnonymizeNames
 	FNAME = "simpleMarketMod.omd"
 	with open(FNAME, "r") as inFile:
 		inFeeder = json.load(inFile)
-	translation = 20
-	rotation = 20
-	translate = distTranslateLocation(inFeeder, translation, rotation)
-	FNAMEOUT = "simpleMarket_distTranslateLocation.omd"
+	names = distAnonymizeNames(inFeeder)
+	FNAMEOUT = "simpleMarket_distAnonymizeNames.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inFeeder, outFile, indent=4)
 
-	# # Testing distAddNoise
+	# Test distPseudomizeNames
+	FNAME = "simpleMarketMod.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+	nameKeyDict = distPseudomizeNames(inFeeder)
+	FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
+
+	# Test distRandomizeNames
+	FNAME = "simpleMarketMod.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+	randNameArray = distRandomizeNames(inFeeder)
+	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
+
+	# # Test distRandomizeLocations
+	# FNAME = "simpleMarketMod.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# randomLocation = distRandomizeLocations(inFeeder)
+	# FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
+
+	# # Test distTranslateLocations
+	# FNAME = "simpleMarketMod.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# translation = 20
+	# rotation = 20
+	# translate = distTranslateLocations(inFeeder, translation, rotation)
+	# FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
+
+	# # Test distAddNoise
 	# FNAME = "simpleMarketMod.omd"
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
@@ -547,7 +558,7 @@ def _tests():
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inFeeder, outFile, indent=4)
 
-	# # Testing distShuffleLoads
+	# # Test distShuffleLoads
 	# FNAME = "simpleMarketMod.omd"
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
@@ -557,7 +568,7 @@ def _tests():
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inFeeder, outFile, indent=4)
 
-	# # Testing distModifyTriplexLengths
+	# # Test distModifyTriplexLengths
 	# FNAME = "simpleMarketMod.omd"
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
@@ -566,7 +577,7 @@ def _tests():
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inFeeder, outFile, indent=4)
 
-	# # Testing distModifyConductorLengths
+	# # Test distModifyConductorLengths
 	# FNAME = "Olin Barre GH.omd"
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
@@ -575,7 +586,7 @@ def _tests():
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inFeeder, outFile, indent=4)
 
-	# # Testing distSmoothLoads
+	# # Test distSmoothLoads
 	# FNAME = "Calibrated Feeder.omd"
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
