@@ -11,12 +11,13 @@ XXX Implement def distRandomizeNames()
 	XXX Implement.
 	XXX Make sure it passes the tests.
 	XXX Is there a refactoring that will reduce duplication of similar code?
-XXX Implement def distRandomizeLocation()
+XXX Implement distAnonymizeNames()
+XXX Implement def distRandomizeLocations()
 	XXX Create tests like ones for names.
 	XXX Add latitude and longitude attributes to all simple market test objects in the tree.
 	XXX Replace the links, hiddenLinks, nodes, hiddenNodes each with empty lists.
 	XXX Walk the tree, replace each lat and lon with a random one uniformly distributed between 0 and 1000.
-XXX Implement def distTranslateLocation(translation,rotation)
+XXX Implement def distTranslateLocations(translation,rotation)
 	XXX Create tests like the ones for names.
 	XXX Replace the links, hiddenLinks, nodes, hiddenNodes each with empty lists.
 	XXX Walk the tree, replace each lat and lon with a translated and rotated version.
@@ -27,39 +28,27 @@ XXX Implement def distAddNoise(noisePerc)
 XXX How do we do all of the above for transmission? have pairs of functions, e.g. tranPseudomizeNames and distPseudomizeNames. Next step?
 XXX Implement def tranPsuedomizeNames()
 XXX Implement def tranRandomizeNames()
-XXX Implement def tranRandomizeLocation()
-XXX Implement def tranTranslateLocation(translation,rotation)
+XXX Implement def tranAnonymizeNames()
+XXX Implement def tranRandomizeLocations()
+XXX Implement def tranTranslateLocations(translation,rotation)
 XXX Implement def tranAddNoise(noisePerc)
 XXX Remove feature for distCombineLoads() and tranCombineLoads(). We don't have any models with multiple loads connected to the same meter. So we don't believe there will be any users for this feature. Need to update spec with this note.
 XXX Remove feature def tranSmoothLoads(). There is not timeseries data in these models. Need to update spec with this note.
 XXX Debug transmission dictionary access.
-	OOO Refactor - less for...in loops
+	bus[i].values()[0] # HACK: support for bad data structure
 XXX Implement def distShuffleLoads(shufPerc). See spec image.
 XXX Implement def tranShuffleLoadsAndGens(shufPerc). See spec image.
-XXX Implement def tranModifyConductorLengths(). Deprecated because models don't include cable length or radius parameters. Spec updated to drop support for this.
+XXX Remove feature def tranModifyConductorLengths(). Deprecated because models don't include cable length or radius parameters. Spec updated to drop support for this.
 XXX Implement def distSmoothLoads()
-	#PseudoCode
-	scadaFile = omd['attachments']['subScadaCalibrated1.player']
-	scadaLines = scadaFile.split('\n')
-	scadaPairs = [x.split(',') for x in scadaLines] # [[ts,val],[ts,val],[ts,val],...]
-	outList = []
-	for pair in scadaPairs:
-		aggAmount = 0
-		aggHour = pair[0].getHourFromTimestamp()
-		for pair in scadaPairs:
-			if pair[0].getHourFromTimestamp() == aggHour:
-				aggAmount += pair[1]
-		outList.append([aggHour, aggAmount])
-OOO Implement def distModifyConductorLengths()
+XXX Implement def distModifyTriplexLengths()	
 	XXX triplex_line
 	XXX debug disappearing trip_line_config.
-	XXX Use new test circuit /scratch/publicFeeders/Olin Barre GH.omd
+XXX Implement def distModifyConductorLengths()
 	XXX no overhead_lines in Simple Market System
 	XXX no underground_lines in Simple Market System
+	XXX Use new test circuit /scratch/publicFeeders/Olin Barre GH.omd
 	XXX debug for overhead and underground
-	OOO Refactor triplex/overhead/underground into single function
-OOO Debug/Rewrite Test cases
-
-LATERBASE
-OOO How do we open these .omd files in gridEdit? We need a visualizeFeeder function.
-OOO Is our test dataset good enough? How do we enhance it.
+	XXX Refactor triplex and overhead/underground into two separate functions
+XXX Debug/Rewrite Test cases
+XXX Figure out the correct architecture for anonymization/pseudonymization.
+OOO docStrings for each function.

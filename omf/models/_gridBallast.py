@@ -133,8 +133,6 @@ def heavyProcessing(modelDir, inputDict):
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 
-
-
 		# Attach collector for total overall ZIPload power/load
 		stub = {'object':'collector', 'group':'"class=ZIPload"', 'property':'sum(base_power)', 'interval':3600, 'file':'allZIPloadPower.csv'}
 		copyStub = dict(stub)
@@ -152,11 +150,9 @@ def heavyProcessing(modelDir, inputDict):
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 
-
-
 		# Attach passive_controller	
 		tree[feeder.getMaxKey(tree)+1] = {'omftype':'module','argument':'market'}
-		tree[feeder.getMaxKey(tree)+1] = {'omftype':'class auction','argument':'{\n\tdouble my_avg ; double my_std;\n}'}
+		tree[feeder.getMaxKey(tree)+1] = {'omftype':'class auction','argument':'{\n\tdouble my_avg; double my_std;\n}'}
 		tree[feeder.getMaxKey(tree)+1] = {'omftype':'class player','argument':'{\n\tdouble value;\n}'}
 
 		stub = {
@@ -193,22 +189,45 @@ def heavyProcessing(modelDir, inputDict):
 			'object':'passive_controller',
 			'name':'waterheater_controller_waterheater171923',
 			'parent':'waterheater171923',
+			'control_mode':'RAMP',
+			'range_high':5,
+			'range_low':-5,
+			'ramp_high':1,
+			'ramp_low':-1,
 			'period':900,
-			'comfort_level':0.82,
-			'distribution_type':'NORMAL',
+			'setpoint':'is_waterheater_on',
+			'base_setpoint':1,
 			'expectation_object':'MARKET_1',
-			'observation_object':'MARKET_1',
-			'state_property':'override',
-			'control_mode':'PROBABILITY_OFF',
-			# 'control_mode':'RAMP',
 			'expectation_property':'my_avg',
+			'observation_object':'MARKET_1',
 			'observation_property':'past_market.clearing_price',
-			'stdev_observation_property':'my_std'
+			'stdev_observation_property':'my_std',
+			'state_property':'override'
 		}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 
-
+		# stub = {
+		# 	'object':'passive_controller',
+		# 	'name':'ZIPload_controller_ZIPload171922',
+		# 	'parent':'ZIPload171922',
+		# 	'control_mode':'RAMP',
+		# 	'range_high':5,
+		# 	'range_low':-5,
+		# 	'ramp_high':1,
+		# 	'ramp_low':-1,
+		# 	'period':900,
+		# 	'setpoint':'base_power'
+		# 	'base_setpoint':1,
+		# 	'expectation_object':'MARKET_1',
+		# 	'expectation_property':'my_avg',
+		# 	'observation_object':'MARKET_1',
+		# 	'observation_property':'past_market.clearing_price',
+		# 	'stdev_observation_property':'my_std'
+		# 	'state_property':'override'
+		# }
+		# copyStub = dict(stub)
+		# tree[feeder.getMaxKey(tree)+1] = copyStub
 
 		# Attach recorders for system voltage map:
 		stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':3600}
@@ -373,8 +392,6 @@ def heavyProcessing(modelDir, inputDict):
 		if 'allMeterPower.csv' in rawOut:
 			cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
 
-
-
 		if ('allWaterheaterLoad.csv' in rawOut) and ('allZIPloadPower.csv' in rawOut):
 			cleanOut['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
 		if 'eachZIPloadPower.csv' in rawOut:
@@ -392,8 +409,6 @@ def heavyProcessing(modelDir, inputDict):
 			for key in rawOut['allZIPloadOn.csv']:
 				if key.startswith('ZIPload'):
 					cleanOut['gridBallast']['ZIPloadOn'][key] = rawOut.get('allZIPloadOn.csv')[key]
-
-
 
 		# EventTime calculations
 		eventTime = inputDict['eventTime']
@@ -448,8 +463,6 @@ def heavyProcessing(modelDir, inputDict):
 			whTempDrops.append(tempDrop)
 		cleanOut['gridBallast']['waterheaterTempDrops'] = whTempDrops
 
-
-
 		# ZIPload calculations for Availability and QoS
 		zPower = cleanOut['gridBallast']['ZIPloadPower']
 		zPowerList = zPower.values()
@@ -468,18 +481,7 @@ def heavyProcessing(modelDir, inputDict):
 					zDrops.append(zDrop)
 				else:
 					zDrops.append(0)
-		# zOn = cleanOut['gridBallast']['ZIPloadOn'][key] = rawOut.get('allZIPloadOn.csv')[key]
-		# for time in zDemandZip:
-		# 	zIdx = 0
-		# 	if zOn[zIdx] == 0:
-		# 		zDrop = sum([t > 0 for t in time])
-		# 		zDrops.append(zDrop)
-		# 	else:	
-		# 		zDrops.append(0)
-		# print zDrops #all 0's
 		cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
-
-
 
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]

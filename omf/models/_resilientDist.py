@@ -418,12 +418,64 @@ def heavyProcessing(modelDir, inputDict):
 			feederName = json.load(inputFile).get('feederName1','feeder')
 		inputDict["feederName1"] = feederName
 		# Generate the input file for GFM:
-		fragIn = {}
-		fragInputBase = json.loads(inputDict['poleData'])
-		baseAsset = fragInputBase['assets'][1]
-		fragIn['assets'] = []
-		fragIn['hazardFields'] = fragInputBase['hazardFields']
-		fragIn['responseEstimators'] = fragInputBase['responseEstimators']
+		fragIn = {
+		    "hazardFields": [
+		        {
+		            "rasterFieldData": {
+		                "rasterBand": 1, 
+		                "valueType": "double", 
+		                "uri": "", 
+		                "crsCode": "EPSG:4326", 
+		                "nBands": 1, 
+		                "gridFormat": "ArcGrid"
+		            }, 
+		            "id": "hawaiiArcTestGrid", 
+		            "hazardQuantityType": "Windspeed"
+		        }
+		    ], 
+		    "assets": [], 
+		    "responseEstimators": [
+		        {
+		            "assetClass": "PowerDistributionPole", 
+		            "hazardQuantityTypes": [
+		                "Windspeed"
+		            ], 
+		            "responseEstimatorClass": "PowerPoleWindStressEstimator", 
+		            "responseQuantityType": "DamageProbability", 
+		            "id": "PowerPoleWindStressEstimator", 
+		            "properties": {}
+		        }
+		    ]
+		}
+		baseAsset = {
+            "id": 0, 
+            "assetClass": "PowerDistributionPole", 
+            "properties": {
+                "stdDevPoleStrength": 7700000.0, 
+                "powerCableNumber": 2, 
+                "meanPoleStrength": 37600000.0, 
+                "powerCableDiameter": 0.0094742, 
+                "commAttachmentHeight": 4.7244, 
+                "baseDiameter": 0.22225, 
+                "height": 9.144, 
+                "powerAttachmentHeight": 5.6388, 
+                "powerCircuitName": "NAME", 
+                "woodDensity": 500.0, 
+                "commCableDiameter": 0.04, 
+                "cableSpan": 25.4669, 
+                "topDiameter": 0.15361635107, 
+                "commCableWireDensity": 1500.0, 
+                "powerCableWireDensity": 2700.0, 
+                "commCableNumber": 2
+            }, 
+            "assetGeometry": {
+                "type": "Point", 
+                "coordinates": [
+                    530.4008195466031, 
+                    493.0561704740412
+                ]
+            }
+        }
 		with open(pJoin(modelDir,inputDict['weatherImpactsFileName']),'w') as hazardFile:
 			hazardFile.write(inputDict['weatherImpacts'])
 		if(platform.system() == "Windows"):  # HACK: do the world's worst URLENCODE:
@@ -453,12 +505,40 @@ def heavyProcessing(modelDir, inputDict):
 		outData['gfmRawOut'] = gfmRawOut
 		print 'Ran Fragility\n'
 		# Run GridLAB-D first time to generate xrMatrices. #TODO: integrate GLD990.
+		'''
 		tree = feederModel.get("tree",{})
 		attachments = feederModel.get("attachments",{})
 		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
 		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 		gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
+		print gridlabdRawOut
 		outData['gridlabdRawOut'] = gridlabdRawOut
+		'''
+		'''Loads OMD file from feeder name, creates GLM input, places climate file from user inputted zip code into model directory (TODO), runs Gridlab-D  (TODO)'''
+		#Load json
+		'''
+		omdPath = pJoin(modelDir, feederName + ".omd")
+		with open(omdPath, "r") as omd:
+			omd = json.load(omd)
+		#Load an blank glm file and use it to write to it, JSON READER DOES NOT WORK
+		feederPath = pJoin(modelDir, 'feeder.glm')
+		with open(feederPath, 'w') as glmFile:
+			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {filename test_JSON_dump.json;};" + "object jsonreader {filename RDTInputfile.json;};"
+			glmFile.write(toWrite)
+		#Write attachments from omd, if no file, one will be created
+		for fileName in omd['attachments']:
+			with open(os.path.join(modelDir, fileName),'w') as file:
+				file.write(omd['attachments'][fileName])
+		#Wire in the file the user specifies via zipcode.
+		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+		print os.getcwd()
+		os.chdir(modelDir)
+		proc = subprocess.Popen(['gridlabd', 'feeder.glm'])
+		#proc = subprocess.Popen(['gridlabd', pJoin(modelDir, 'feeder.glm')]) 
+		#proc = subprocess.call(['gridlabd', pJoin(modelDir, 'feeder.glm')])
+		proc.wait()
+		'''
 		# Run RDT.
 		print "Running RDT..."
 		print "************************************"
@@ -482,14 +562,26 @@ def heavyProcessing(modelDir, inputDict):
 		print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
 		print "************************************\n\n"
 		# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
+		#Deriving line names from RDT Input and line lengths from feeder omd file
+		#Building hashmap of source and target nodes, used to represent lines.
+		sources = {}
+		targets = {}
+		for link in feederModel["links"]:
+			sources[link["source"]["name"]] = link["source"]
+			targets[link["target"]["name"]] = link["target"]
+		with open(rdtInFile, "r") as rdtInFileData:
+			rdtInFileData = json.load(rdtInFileData)
+		lineData = []
+		# [:-4] is to remove last 4 characters in string, or " to remove "_bus"
+		for line in rdtInFileData["lines"]:
+			dist = math.sqrt((targets[line["node2_id"][:-4]]["x"] - sources[line["node1_id"][:-4]]["x"])**2 + (targets[line["node2_id"][:-4]]["y"] - sources[line["node1_id"][:-4]]["y"])**2)
+			lineData.append((line["id"], '{:,.2f}'.format(dist*float(inputDict["lineUnitCost"]))))
+		outData["lineData"] = lineData
+		outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 		# Draw the feeder.
 		genDiagram(modelDir, feederName, feederModel, debug=False)
 		with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 			outData["oneLineDiagram"] = inFile.read().encode("base64")
-		outData["lineUnitCost"] = inputDict["lineUnitCost"]
-		outData["switchCost"] = inputDict["switchCost"]
-		outData["dgUnitCost"] = inputDict["dgUnitCost"]
-		outData["hardeningUnitCost"] = inputDict["hardeningUnitCost"]
 		# Save the output to disk.
 		with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
 			json.dump(outData, outFile, indent=4)
