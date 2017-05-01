@@ -509,7 +509,7 @@
             "name": "tn_2", 
             "object": "triplex_meter", 
             "longitude": 514.891103513098, 
-            "nominal_voltage": "120142", 
+            "nominal_voltage": "120102", 
             "latitude": 498.25829919972614
         }, 
         "25": {
@@ -518,7 +518,7 @@
             "name": "tl_1", 
             "object": "triplex_line", 
             "to": "tm_1", 
-            "length": "10085", 
+            "length": "100110", 
             "configuration": "trip_line_config"
         }, 
         "26": {
@@ -527,7 +527,7 @@
             "name": "t2", 
             "object": "triplex_line", 
             "to": "tm_2", 
-            "length": "100100", 
+            "length": "10088", 
             "configuration": "trip_line_config"
         }, 
         "27": {
@@ -535,7 +535,7 @@
             "name": "tm_1", 
             "object": "triplex_meter", 
             "longitude": 501.1888162189529, 
-            "nominal_voltage": "120127", 
+            "nominal_voltage": "120119", 
             "latitude": 513.4004121124268
         }, 
         "20": {
@@ -543,7 +543,7 @@
             "primary_voltage": "2401.777", 
             "install_type": "POLETOP", 
             "object": "transformer_configuration", 
-            "secondary_voltage": "120129", 
+            "secondary_voltage": "120134", 
             "connect_type": "SINGLE_PHASE_CENTER_TAPPED", 
             "longitude": 472.7457495897203, 
             "shunt_impedance": "10000+10000j", 
@@ -556,7 +556,7 @@
             "primary_voltage": "2401.777", 
             "install_type": "POLETOP", 
             "object": "transformer_configuration", 
-            "secondary_voltage": "120129", 
+            "secondary_voltage": "12096", 
             "connect_type": "SINGLE_PHASE_CENTER_TAPPED", 
             "longitude": 494.23999354768324, 
             "shunt_impedance": "10000+10000j", 
@@ -578,7 +578,7 @@
             "name": "tn_1", 
             "object": "triplex_node", 
             "longitude": 509.61450605689737, 
-            "nominal_voltage": "12097", 
+            "nominal_voltage": "120116", 
             "latitude": 511.73425866525673
         }, 
         "28": {
@@ -586,7 +586,7 @@
             "name": "tm_2", 
             "object": "triplex_meter", 
             "longitude": 509.4601035264832, 
-            "nominal_voltage": "12099", 
+            "nominal_voltage": "120138", 
             "latitude": 491.62664392031525
         }, 
         "29": {
@@ -603,12 +603,12 @@
             "heating_setpoint": "heating1*1", 
             "auxiliary_strategy": "LOCKOUT", 
             "heating_system_type": "HEAT_PUMP", 
-            "air_temperature": "7071", 
-            "thermal_integrity_level": "55", 
+            "air_temperature": "7076", 
+            "thermal_integrity_level": "54", 
             "heating_COP": "3.1", 
             "latitude": 513.365293670907, 
             "cooling_setpoint": "cooling7*1", 
-            "mass_temperature": "7067", 
+            "mass_temperature": "7078", 
             "motor_efficiency": "GOOD", 
             "motor_model": "BASIC"
         }, 
@@ -698,7 +698,7 @@
             "tap_pos_A": "1", 
             "tap_pos_B": "1", 
             "object": "regulator_configuration", 
-            "time_delay": "30.026", 
+            "time_delay": "30.028", 
             "longitude": 477.3709293056039, 
             "connect_type": "1", 
             "regulation": "0.10", 
@@ -746,11 +746,11 @@
             "groupid": "lights"
         }, 
         "15": {
-            "power_rating": "500573", 
-            "primary_voltage": "41604444", 
+            "power_rating": "500584", 
+            "primary_voltage": "41603378", 
             "install_type": "PADMOUNT", 
             "object": "transformer_configuration", 
-            "secondary_voltage": "480470", 
+            "secondary_voltage": "480524", 
             "connect_type": "WYE_WYE", 
             "longitude": 523.3417375311699, 
             "resistance": "0.011", 
@@ -771,7 +771,7 @@
             "impedance2": "0.012000+0.006800j", 
             "latitude": 479.44738171541985, 
             "impedance": "0.006000+0.013600j", 
-            "power_rating": "500401"
+            "power_rating": "500575"
         }, 
         "17": {
             "phases": "ABC", 
@@ -840,11 +840,11 @@
             "heating_element_capacity": "4.8 kW", 
             "thermostat_deadband": "2.9", 
             "location": "INSIDE", 
-            "tank_volume": "5053", 
+            "tank_volume": "5056", 
             "latitude": 509.01794882629986, 
             "tank_setpoint": "136.8", 
             "tank_UA": "2.4", 
-            "temperature": "135133"
+            "temperature": "135162"
         }, 
         "37": {
             "parent": "house2", 
@@ -871,11 +871,11 @@
             "heating_element_capacity": "4.8 kW", 
             "thermostat_deadband": "2.9", 
             "location": "INSIDE", 
-            "tank_volume": "5059", 
+            "tank_volume": "5052", 
             "latitude": 481.13036844228026, 
             "tank_setpoint": "136.8", 
             "tank_UA": "2.4", 
-            "temperature": "135135"
+            "temperature": "135147"
         }, 
         "35": {
             "auxiliary_system_type": "ELECTRIC", 
@@ -890,12 +890,12 @@
             "heating_setpoint": "heating1*1", 
             "auxiliary_strategy": "LOCKOUT", 
             "heating_system_type": "HEAT_PUMP", 
-            "air_temperature": "7083", 
+            "air_temperature": "7056", 
             "thermal_integrity_level": "54", 
             "heating_COP": "3.1", 
             "latitude": 477.71105696038774, 
             "cooling_setpoint": "cooling7*1", 
-            "mass_temperature": "7059", 
+            "mass_temperature": "7056", 
             "motor_efficiency": "GOOD", 
             "motor_model": "BASIC"
         }, 

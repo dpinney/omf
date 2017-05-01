@@ -28,8 +28,9 @@ XXX Implement def distAddNoise(noisePerc)
 XXX How do we do all of the above for transmission? have pairs of functions, e.g. tranPseudomizeNames and distPseudomizeNames. Next step?
 XXX Implement def tranPsuedomizeNames()
 XXX Implement def tranRandomizeNames()
-XXX Implement def tranRandomizeLocation()
-XXX Implement def tranTranslateLocation(translation,rotation)
+XXX Implement def tranAnonymizeNames()
+XXX Implement def tranRandomizeLocations()
+XXX Implement def tranTranslateLocations(translation,rotation)
 XXX Implement def tranAddNoise(noisePerc)
 XXX Remove feature for distCombineLoads() and tranCombineLoads(). We don't have any models with multiple loads connected to the same meter. So we don't believe there will be any users for this feature. Need to update spec with this note.
 XXX Remove feature def tranSmoothLoads(). There is not timeseries data in these models. Need to update spec with this note.
