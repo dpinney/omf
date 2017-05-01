@@ -220,40 +220,6 @@
 				</script>
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">Pole Data (.json file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
-				<script>var fileName=true;</script>
-				<input type="file" id="poleDataFile" name="poleDataFile" accept=".json" onchange="handle_pole_files(this.files)">
-				<input id="poleData" name="poleData" type="hidden">
-				<!-- Format the file input and populate it with a saved file. -->
-				<input type="hidden" id="poleDataFileName" name="poleDataFileName" readonly="readonly">
-				<div id="fileBackground"></div>
-				<div id="fileExists"><label class="fileName" for="poleDataFile" id="poleDataFileNameLabel" name="poleDataFileName"></label></div>
-				<script>
-					if (typeof allInputData.poleDataFileName !== 'undefined') {					
-						document.getElementById('poleDataFileNameLabel').innerHTML = allInputData.poleDataFileName;
-					}
-					else {
-						document.getElementById('poleDataFileNameLabel').innerHTML = 'Please select a file'
-						gebi('poleDataFile').setAttribute('required', 'required')
-					}
-					// File handler function.
-					function handle_pole_files(files) {
-						// read file to a hidden input field
-						var reader = new FileReader()
-						reader.readAsText(files[0])
-						reader.onload = loaded
-						function loaded(evt) {
-							evt.target.result
-							gebi("poleData").value = reader.result
-							var FileName = gebi("poleDataFile").value.split("\\");
-							var FileName = FileName[FileName.length-1];
-							document.getElementById('poleDataFileNameLabel').innerHTML = FileName;
-							gebi("poleDataFileName").value = FileName;
-						}
-					}
-				</script>
-			</div>
-			<div class="shortInput">
 				<label class="tooltip">XR Matrices (.json file)<span class="classic">Please see the documentation at the help link for the required format. If this field is blank the OMF will re-use the file from the previous run.</span></label>
 				<script>var fileName=true;</script>
 				<input type="file" id="xrMatricesDataFile" name="xrMatricesDataFile" accept=".json" onchange="handle_pole_files(this.files)">
@@ -338,11 +304,15 @@
 					var rdtOutput = allOutputData.rdtRawOut;
 					rdtOutput = JSON.parse(rdtOutput);
 					var scenarioDict = [];
+					var lineData = allOutputData.lineData;
+					console.log(lineData);
 					var htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
-					
+					var totalCost = 0;
+
 					for(var i = 0; i < rdtOutput.design_solution.generators.length; i++) {
 						generator = rdtOutput.design_solution.generators[i];
-						htmlCollector = htmlCollector + "<tr><td>" + generator.id + "</td><td>Generator</td><td>Built with 5 MW of capacity</td><td>$" + String(50000*Number(allOutputData.dgUnitCost)) + "</td></tr>";
+						htmlCollector = htmlCollector + "<tr><td>" + generator.id + "</td><td>Generator</td><td>Built with 5 MW of capacity</td><td>$" + allOutputData["generatorData"] + "</td></tr>";
+						totalCost = totalCost + allOutputData["generatorData"];
 					}
 
 					for(var j = 0; j < rdtOutput.design_solution.lines.length; j++) {
@@ -351,7 +321,10 @@
 						if(line.hardened == false) {
 							hardened = "Unhardened";
 						}
-						htmlCollector = htmlCollector + "<tr><td>" + line.id + "</td><td>Line</td><td>" + hardened + "</td><td>$" +  String(50000*Number(allOutputData.lineUnitCost)) + "</td></tr>";
+						lineID = lineData[j][0];
+						lineCost = lineData[j][1];
+						htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + "</td><td>$" +  lineCost + "</td></tr>";
+						totalCost = lineCost + totalCost;
 					}
 
 					if(rdtOutput.design_solution.is_feasible == true) {
@@ -360,7 +333,9 @@
 					else {
 						gebi("validation").innerHTML = "Powerflow Not Validated";
 					}
-					gebi("totalCostTable").innerHTML = '<tr><th>Total Cost</th></tr><tr><td>$' + rdtOutput.design_solution.design_cost + '</td></tr>';
+					//Total cost is currently being determined by summing all component costs of the design solution.  However, there is a section in RDTOUTPUT that gives total cost, though it is not implemented
+					//gebi("totalCostTable").innerHTML = '<tr><th>Total Cost</th></tr><tr><td>$' + rdtOutput.design_solution.design_cost + '</td></tr>';
+					gebi("totalCostTable").innerHTML = '<tr><th>Total Cost</th></tr><tr><td>$' + totalCost + '</td></tr>';
 					gebi("solutionComponents").innerHTML = htmlCollector;
 
 					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
