@@ -60,18 +60,18 @@ def distTranslateLocation(inputFeeder, translation, rotation):
 			inputFeeder['tree'][key]['latitude'] += translation*math.sin(rotation)
 	return inputFeeder['tree']
 
-def distAddNoise(inputFeeder, noisePerc):
-	for key in inputFeeder['tree']:
-		for prop in inputFeeder['tree'][key]:
-			value = inputFeeder['tree'][key][prop]
+def distAddNoise(inFeeder, noisePerc):
+	for key in inFeeder['tree']:
+		for prop in inFeeder['tree'][key]:
+			value = inFeeder['tree'][key][prop]
 			try: 
 				complex(value)
 				value = float(value)
 				randNoise = random.randint(value - noisePerc*value, value + noisePerc*value)
-				inputFeeder['tree'][key][prop] += str(randNoise)
+				inFeeder['tree'][key][prop] += str(randNoise)
 			except ValueError:
 				continue
-	return inputFeeder['tree']
+	return inFeeder['tree']
 
 def distShuffleLoads(inFeeder, shufPerc):
 	tlParents = []
@@ -535,23 +535,25 @@ def _tests():
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# # Testing distAddNoise
-	# noisePerc = 0.2
-	# noises = distAddNoise(inputFeeder, noisePerc)
-	# # print noises
-	# FNAMEOUT = "simpleNoise.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inputFeeder, outFile, indent=4)
-
-	# Testing distShuffleLoads
+	# Testing distAddNoise
 	FNAME = "simpleMarketMod.omd"
 	with open(FNAME, "r") as inFile:
 		inFeeder = json.load(inFile)
-	shufPerc = 0.5
-	shuffle = distShuffleLoads(inFeeder, shufPerc)
-	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
+	noisePerc = 0.2
+	noises = distAddNoise(inFeeder, noisePerc)
+	FNAMEOUT = "simpleMarket_distAddNoise.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inFeeder, outFile, indent=4)
+
+	# # Testing distShuffleLoads
+	# FNAME = "simpleMarketMod.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# shufPerc = 0.5
+	# shuffle = distShuffleLoads(inFeeder, shufPerc)
+	# FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 	# # Testing distModifyTriplexLengths
 	# FNAME = "simpleMarketMod.omd"
