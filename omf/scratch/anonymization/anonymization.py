@@ -251,88 +251,53 @@ def distSmoothLoads(inFeeder):
 
 
 # TRANSMISSION NETWORK FUNCTIONS
-def refactorNames(inputNetwork):
+def tranAnonymizeNames(inNetwork):
 	newBusKey = {}
 	newBusArray = []
 	newKeyID = 0
-	for dic in inputNetwork['bus']:
+	for dic in inNetwork['bus']:
 		for each in dic:
 			idx = int(each) - 1
-			for key in inputNetwork['bus'][idx]:
-				for prop in inputNetwork['bus'][idx][key]:
+			for key in inNetwork['bus'][idx]:
+				for prop in inNetwork['bus'][idx][key]:
 					if 'bus_i' in prop:
-						oldBus = inputNetwork['bus'][idx][key]['bus_i']
+						oldBus = inNetwork['bus'][idx][key]['bus_i']
 						newBus = 'bus' + str(newKeyID)
 						newKeyID += 1
-						inputNetwork['bus'][idx][key]['bus_i'] = newBus
+						inNetwork['bus'][idx][key]['bus_i'] = newBus
 						newBusKey.update({oldBus:newBus})
 						newBusArray.append(newBus)
-	# for dic in inputNetwork['bus']:
-	# 	for key in dic:
-	# 		key = int(key) - 1
-	# 		for bus in inputNetwork['bus'][key]:
-	# 			if 'bus_i' in inputNetwork['bus'][key][bus]:
-	# 				oldBus = inputNetwork['bus'][key][bus]['bus_i']
-	# 				newBus = 'bus' + str(newKeyID)
-	# 				newKeyID += 1
-	# 				inputNetwork['bus'][key][bus]['bus_i'] = newBus
-	# 				newBusKey.update({oldBus:newBus})
-	# 				newBusArray.append(newBus)
-	# for key in inputNetwork['bus'][0]:
-	# 	if 'bus_i' in inputNetwork['bus'][0][key]:
-	# 		oldBus = inputNetwork['bus'][0][key]['bus_i']
-	# 		newBus = 'bus' + str(newKeyID)
-	# 		newKeyID += 1
-	# 		inputNetwork['bus'][0][key]['bus_i'] = newBus
-	# 		newBusKey.update({oldBus:newBus})
-			# newBusArray.append(newBus)
 	return newBusKey, newBusArray
 
-def tranPseudomizeNames(inputNetwork):
+def tranPseudomizeNames(inNetwork):
 	newBusKey = {}
 	newKeyID = 0
-	for dic in inputNetwork['bus']:
+	for dic in inNetwork['bus']:
 		for each in dic:
 			idx = int(each) - 1
-			for key in inputNetwork['bus'][idx]:
-				for prop in inputNetwork['bus'][idx][key]:
+			for key in inNetwork['bus'][idx]:
+				for prop in inNetwork['bus'][idx][key]:
 					if 'bus_i' in prop:
-						oldBus = inputNetwork['bus'][idx][key]['bus_i']
+						oldBus = inNetwork['bus'][idx][key]['bus_i']
 						newBus = 'bus' + str(newKeyID)
 						newKeyID += 1
-						inputNetwork['bus'][idx][key]['bus_i'] = newBus
+						inNetwork['bus'][idx][key]['bus_i'] = newBus
 						newBusKey.update({oldBus:newBus})
-	# for dic in inputNetwork['bus']:
-	# 	for key in dic:
-	# 		key = int(key) - 1
-	# 		for bus in inputNetwork['bus'][key]:
-	# 			if 'bus_i' in inputNetwork['bus'][key][bus]:
-	# 				oldBus = inputNetwork['bus'][key][bus]['bus_i']
-	# 				newBus = 'bus' + str(newKeyID)
-	# 				newKeyID += 1
-	# 				inputNetwork['bus'][key][bus]['bus_i'] = newBus
-	# 				newBusKey.update({oldBus:newBus})
 	return newBusKey
 
-def tranRandomizeNames(inputNetwork):
+def tranRandomizeNames(inNetwork):
 	newBusArray = []
 	newKeyID = 0
-	for dic in inputNetwork['bus']:
+	for dic in inNetwork['bus']:
 		for each in dic:
 			idx = int(each) - 1
-			for key in inputNetwork['bus'][idx]:
-				for prop in inputNetwork['bus'][idx][key]:
+			for key in inNetwork['bus'][idx]:
+				for prop in inNetwork['bus'][idx][key]:
 					if 'bus_i' in prop:
 						newBus = 'bus' + str(newKeyID)
 						newKeyID += 1
-						inputNetwork['bus'][idx][key]['bus_i'] = newBus
+						inNetwork['bus'][idx][key]['bus_i'] = newBus
 						newBusArray.append(newBus)
-	# for key in inputNetwork['bus'][0]:
-	# 	if 'bus_i' in inputNetwork['bus'][0][key]:
-	# 		newBus = 'bus' + str(newKeyID)
-	# 		newKeyID += 1
-	# 		inputNetwork['bus'][0][key]['bus_i'] = newBus
-	# 		newBusArray.append(newBus)
 	return newBusArray
 
 def tranRandomizeLocation(inputNetwork):
@@ -501,35 +466,35 @@ def tranShuffleLoadsAndGens(inputNetwork, shufPerc):
 def _tests():
 	# DISTRIBUTION FEEDER TESTS
 
-	# Test distAnonymizeNames
-	FNAME = "simpleMarketMod.omd"
-	with open(FNAME, "r") as inFile:
-		inFeeder = json.load(inFile)
-	names = distAnonymizeNames(inFeeder)
-	FNAMEOUT = "simpleMarket_distAnonymizeNames.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inFeeder, outFile, indent=4)
+	# # Test distPseudomizeNames
+	# FNAME = "Simple Market System Modified.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# nameKeyDict = distPseudomizeNames(inFeeder)
+	# FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
-	# Test distPseudomizeNames
-	FNAME = "simpleMarketMod.omd"
-	with open(FNAME, "r") as inFile:
-		inFeeder = json.load(inFile)
-	nameKeyDict = distPseudomizeNames(inFeeder)
-	FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inFeeder, outFile, indent=4)
+	# # Test distRandomizeNames
+	# FNAME = "Simple Market System Modified.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# randNameArray = distRandomizeNames(inFeeder)
+	# FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
-	# Test distRandomizeNames
-	FNAME = "simpleMarketMod.omd"
-	with open(FNAME, "r") as inFile:
-		inFeeder = json.load(inFile)
-	randNameArray = distRandomizeNames(inFeeder)
-	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inFeeder, outFile, indent=4)
+	# # Test distAnonymizeNames
+	# FNAME = "Simple Market System Modified.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# names = distAnonymizeNames(inFeeder)
+	# FNAMEOUT = "simpleMarket_distAnonymizeNames.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 	# # Test distRandomizeLocations
-	# FNAME = "simpleMarketMod.omd"
+	# FNAME = "Simple Market System Modified.omd"
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
 	# randomLocation = distRandomizeLocations(inFeeder)
@@ -538,7 +503,7 @@ def _tests():
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 	# # Test distTranslateLocations
-	# FNAME = "simpleMarketMod.omd"
+	# FNAME = "Simple Market System Modified.omd"
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
 	# translation = 20
@@ -549,7 +514,7 @@ def _tests():
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 	# # Test distAddNoise
-	# FNAME = "simpleMarketMod.omd"
+	# FNAME = "Simple Market System Modified.omd"
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
 	# noisePerc = 0.2
@@ -559,7 +524,7 @@ def _tests():
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 	# # Test distShuffleLoads
-	# FNAME = "simpleMarketMod.omd"
+	# FNAME = "Simple Market System Modified.omd"
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
 	# shufPerc = 0.5
@@ -569,7 +534,7 @@ def _tests():
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 	# # Test distModifyTriplexLengths
-	# FNAME = "simpleMarketMod.omd"
+	# FNAME = "Simple Market System Modified.omd"
 	# with open(FNAME, "r") as inFile:
 	# 	inFeeder = json.load(inFile)
 	# triplexLengths = distModifyTriplexLengths(inFeeder)
@@ -596,25 +561,34 @@ def _tests():
 	# 	json.dump(inFeeder, outFile, indent=4)
 
 
-	# # TRANSMISSION NETWORK TESTS
-	# FNAME = "case9.omt"
-	# with open(FNAME, "r") as inFile:
-	# 	inputNetwork = json.load(inFile)
+	# TRANSMISSION NETWORK TESTS
 
+	# Test tranPseudomizeNames
+	FNAME = "case9.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+	busKeyDict = tranPseudomizeNames(inNetwork)
+	FNAMEOUT = "case_tranPseudomizeNames.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-	# # Testing tranPseudomizeNames
-	# busKeyDict = tranPseudomizeNames(inputNetwork)
-	# # print busKeyDict
-	# FNAMEOUT = "casePseudo.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inputNetwork, outFile, indent=4)
+	# Test tranRandomizeNames
+	FNAME = "case9.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+	randBusArray = tranRandomizeNames(inNetwork)
+	FNAMEOUT = "case_tranRandomizeNames.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-	# # Testing tranRandomizeNames
-	# randBusArray = tranRandomizeNames(inputNetwork)
-	# # print randBusArray
-	# FNAMEOUT = "caseName.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inputNetwork, outFile, indent=4)
+	# Test tranAnonymizeNames
+	FNAME = "case9.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+	buses = tranAnonymizeNames(inNetwork)
+	FNAMEOUT = "case_tranAnonymizeNames.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
 	# # Testing tranRandomizeLocation
 	# newLocation = tranRandomizeLocation(inputNetwork)
