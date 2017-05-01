@@ -5,6 +5,7 @@ import traceback
 from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
+from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
 from omf.models import __metaModel__
 from __metaModel__ import *
@@ -133,7 +134,7 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 		# HACK: work on a new graph without attributes because graphViz tries to read attrs.
 		cleanG = nx.Graph(fGraph.edges())
 		cleanG.add_nodes_from(fGraph)
-		positions = nx.graphviz_layout(cleanG, prog='neato')
+		positions = graphviz_layout(cleanG, prog='neato')
 	else:
 		positions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 	edgeIm = nx.draw_networkx_edges(fGraph, positions)
