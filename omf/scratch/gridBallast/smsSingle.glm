@@ -1,0 +1,715 @@
+clock {
+	timezone PST+8PDT;
+	starttime '2000-01-01 00:00:00';
+	stoptime '2000-01-10 00:00:00';
+};
+
+#set minimum_timestep=60;
+#set profiler=1;
+#set relax_naming_rules=1;
+module generators;
+module tape;
+module climate;
+module residential {
+	implicit_enduses NONE;
+};
+
+schedule water14 {
+	0-9 0 * * * 0.00;
+	10-19 0 * * * 0.00;
+	20-29 0 * * * 0.00;
+	30-39 0 * * * 0.00;
+	40-49 0 * * * 0.00;
+	50-59 0 * * * 0.00;
+	0-9 1 * * * 0.00;
+	10-19 1 * * * 0.00;
+	20-29 1 * * * 0.00;
+	30-39 1 * * * 0.00;
+	40-49 1 * * * 0.00;
+	50-59 1 * * * 0.00;
+	0-9 2 * * * 0.00;
+	10-19 2 * * * 0.00;
+	20-29 2 * * * 0.00;
+	30-39 2 * * * 0.00;
+	40-49 2 * * * 0.00;
+	50-59 2 * * * 0.00;
+	0-9 3 * * * 0.00;
+	10-19 3 * * * 0.54;
+	20-29 3 * * * 0.00;
+	30-39 3 * * * 0.00;
+	40-49 3 * * * 0.00;
+	50-59 3 * * * 0.00;
+	0-9 4 * * * 0.00;
+	10-19 4 * * * 0.00;
+	20-29 4 * * * 0.00;
+	30-39 4 * * * 0.00;
+	40-49 4 * * * 0.00;
+	50-59 4 * * * 0.00;
+	0-9 5 * * * 0.78;
+	10-19 5 * * * 0.00;
+	20-29 5 * * * 0.00;
+	30-39 5 * * * 0.00;
+	40-49 5 * * * 0.00;
+	50-59 5 * * * 0.00;
+	0-9 6 * * * 0.00;
+	10-19 6 * * * 0.00;
+	20-29 6 * * * 0.00;
+	30-39 6 * * * 0.00;
+	40-49 6 * * * 0.00;
+	50-59 6 * * * 0.00;
+	0-9 7 * * * 0.00;
+	10-19 7 * * * 0.00;
+	20-29 7 * * * 0.00;
+	30-39 7 * * * 0.00;
+	40-49 7 * * * 0.00;
+	50-59 7 * * * 0.00;
+	0-9 8 * * * 0.00;
+	10-19 8 * * * 0.00;
+	20-29 8 * * * 1.53;
+	30-39 8 * * * 0.00;
+	40-49 8 * * * 0.00;
+	50-59 8 * * * 0.00;
+	0-9 9 * * * 0.00;
+	10-19 9 * * * 0.00;
+	20-29 9 * * * 0.00;
+	30-39 9 * * * 0.00;
+	40-49 9 * * * 0.00;
+	50-59 9 * * * 0.00;
+	0-9 10 * * * 0.00;
+	10-19 10 * * * 0.00;
+	20-29 10 * * * 0.00;
+	30-39 10 * * * 0.00;
+	40-49 10 * * * 0.00;
+	50-59 10 * * * 0.00;
+	0-9 11 * * * 0.00;
+	10-19 11 * * * 0.00;
+	20-29 11 * * * 0.00;
+	30-39 11 * * * 0.00;
+	40-49 11 * * * 0.00;
+	50-59 11 * * * 0.00;
+	0-9 12 * * * 0.00;
+	10-19 12 * * * 0.00;
+	20-29 12 * * * 0.00;
+	30-39 12 * * * 0.00;
+	40-49 12 * * * 0.00;
+	50-59 12 * * * 0.00;
+	0-9 13 * * * 0.00;
+	10-19 13 * * * 0.00;
+	20-29 13 * * * 0.00;
+	30-39 13 * * * 0.00;
+	40-49 13 * * * 0.00;
+	50-59 13 * * * 0.00;
+	0-9 14 * * * 0.00;
+	10-19 14 * * * 0.00;
+	20-29 14 * * * 0.00;
+	30-39 14 * * * 0.00;
+	40-49 14 * * * 0.00;
+	50-59 14 * * * 0.00;
+	0-9 15 * * * 0.00;
+	10-19 15 * * * 0.00;
+	20-29 15 * * * 0.00;
+	30-39 15 * * * 0.00;
+	40-49 15 * * * 0.00;
+	50-59 15 * * * 0.00;
+	0-9 16 * * * 0.00;
+	10-19 16 * * * 0.00;
+	20-29 16 * * * 0.00;
+	30-39 16 * * * 0.00;
+	40-49 16 * * * 0.00;
+	50-59 16 * * * 0.00;
+	0-9 17 * * * 0.00;
+	10-19 17 * * * 0.00;
+	20-29 17 * * * 0.00;
+	30-39 17 * * * 0.00;
+	40-49 17 * * * 0.00;
+	50-59 17 * * * 0.00;
+	0-9 18 * * * 0.00;
+	10-19 18 * * * 1.31;
+	20-29 18 * * * 0.00;
+	30-39 18 * * * 0.00;
+	40-49 18 * * * 0.00;
+	50-59 18 * * * 0.00;
+	0-9 19 * * * 0.00;
+	10-19 19 * * * 0.00;
+	20-29 19 * * * 0.00;
+	30-39 19 * * * 0.00;
+	40-49 19 * * * 0.00;
+	50-59 19 * * * 0.00;
+	0-9 20 * * * 0.00;
+	10-19 20 * * * 0.00;
+	20-29 20 * * * 0.00;
+	30-39 20 * * * 0.00;
+	40-49 20 * * * 0.00;
+	50-59 20 * * * 0.00;
+	0-9 21 * * * 0.00;
+	10-19 21 * * * 0.00;
+	20-29 21 * * * 0.00;
+	30-39 21 * * * 0.00;
+	40-49 21 * * * 0.00;
+	50-59 21 * * * 0.00;
+	0-9 22 * * * 0.00;
+	10-19 22 * * * 0.00;
+	20-29 22 * * * 0.00;
+	30-39 22 * * * 0.00;
+	40-49 22 * * * 0.00;
+	50-59 22 * * * 0.00;
+	0-9 23 * * * 0.00;
+	10-19 23 * * * 0.00;
+	20-29 23 * * * 0.00;
+	30-39 23 * * * 0.00;
+	40-49 23 * * * 0.00;
+	50-59 23 * * * 0.00;
+};
+
+schedule lights1 {
+     0-30 0 * * * 0.1235;
+     31-59 0 * * * 0.0966;
+     0-36 1 * * * 0.0982;
+     37-59 1 * * * 0.0869;
+     0-25 2 * * * 0.0896;
+     26-59 2 * * * 0.0949;
+     0-22 3 * * * 0.0989;
+     23-59 3 * * * 0.0934;
+     0-14 4 * * * 0.0891;
+     15-44 4 * * * 0.0942;
+     45-59 4 * * * 0.1282;
+     0-14 5 * * * 0.1595;
+     15-35 5 * * * 0.1726;
+     36-59 5 * * * 0.1881;
+     0-10 6 * * * 0.1987;
+     11-16 6 * * * 0.2110;
+     17-59 6 * * * 0.2368;
+     0-35 7 * * * 0.2521;
+     36-59 7 * * * 0.2783;
+     0-21 8 * * * 0.2916;
+     22-44 8 * * * 0.2837;
+     45-59 8 * * * 0.2833;
+     0-14 9 * * * 0.2525;
+     15-33 9 * * * 0.2456;
+     34-59 9 * * * 0.2343;
+     0-19 10 * * * 0.2243;
+     20-41 10 * * * 0.2076;
+     42-59 10 * * * 0.1932;
+     0-27 11 * * * 0.1857;
+     28-44 11 * * * 0.1791;
+     45-59 11 * * * 0.1509;
+     0-14 12 * * * 0.1622;
+     15-59 12 * * * 0.1787;
+     0-47 13 * * * 0.1686;
+     48-59 13 * * * 0.1885;
+     0-19 14 * * * 0.1740;
+     20-59 14 * * * 0.1528;
+     0-12 15 * * * 0.1591;
+     13-34 15 * * * 0.1676;
+     35-59 15 * * * 0.1597;
+     0-21 16 * * * 0.1609;
+     22-34 16 * * * 0.1970;
+     35-59 16 * * * 0.2005;
+     0-26 17 * * * 0.2174;
+     27-51 17 * * * 0.2397;
+     52-59 17 * * * 0.2441;
+     0-29 18 * * * 0.2514;
+     30-44 18 * * * 0.2584;
+     45-59 18 * * * 0.2556;
+     0-5 19 * * * 0.2783;
+     6-35 19 * * * 0.2962;
+     36-59 19 * * * 0.3146;
+     0-17 20 * * * 0.3413;
+     18-38 20 * * * 0.3308;
+     39-59 20 * * * 0.3295;
+     0-14 21 * * * 0.3264;
+     15-29 21 * * * 0.3353;
+     30-59 21 * * * 0.3119;
+     0-16 22 * * * 0.3122;
+     17-59 22 * * * 0.2539;
+     0-14 23 * * * 0.2100;
+     15-59 23 * * * 0.1951;
+};
+
+schedule heating1 {
+	//Weekday Winter
+	* 0-5 * 1-5,11-12 1-5 65;
+	0-14 6 * 1-5,11-12 1-5 65;
+	15-59 6 * 1-5,11-12 1-5 67;
+	* 7-8 * 1-5,11-12 1-5 67;
+	0-14 9 * 1-5,11-12 1-5 67;
+	15-59 9 * 1-5,11-12 1-5 64;
+	* 10-15 * 1-5,11-12 1-5 64;
+	0-14 16 * 1-5,11-12 1-5 64;
+	15-59 16 * 1-5,11-12 1-5 66;
+	* 17-19 * 1-5,11-12 1-5 68;
+	0-14 20 * 1-5,11-12 1-5 68;
+	15-59 20 * 1-5,11-12 1-5 65;
+	* 21-23 * 1-5,11-12 1-5 65;
+
+	//Weekend Winter
+	* 0-5 * 1-5,11-12 0,6 68;
+	0-14 6 * 1-5,11-12 0,6 68;
+	15-59 6 * 1-5,11-12 0,6 68;
+	* 7-8 * 1-5,11-12 0,6 68;
+	* 9-16 * 1-5,11-12 0,6 68;
+	* 17-20 * 1-5,11-12 0,6 68;
+	* 21-23 * 1-5,11-12 0,6 68;
+
+	//Summer
+	* * * 6-10 * 60;
+};
+
+schedule cooling7 {
+	* * * 6-10 * 72;
+	* * * 1-5,11-12 * 85;
+};
+
+schedule plug1 {
+     0-23 0 * * * 0.1605;
+     24-59 0 * * * 0.1381;
+     0-30 1 * * * 0.1297;
+     31-59 1 * * * 0.1289;
+     0-34 2 * * * 0.1254;
+     35-59 2 * * * 0.1301;
+     0-29 3 * * * 0.1255;
+     30-59 3 * * * 0.1276;
+     0-18 4 * * * 0.1292;
+     19-44 4 * * * 0.1399;
+     45-59 4 * * * 0.1422;
+     0-14 5 * * * 0.1438;
+     15-35 5 * * * 0.1621;
+     36-59 5 * * * 0.1806;
+     0-14 6 * * * 0.1981;
+     15-29 6 * * * 0.2247;
+     30-59 6 * * * 0.2346;
+     0-8 7 * * * 0.2525;
+     9-44 7 * * * 0.2632;
+     45-59 7 * * * 0.2903;
+     0-29 8 * * * 0.2871;
+     30-44 8 * * * 0.2977;
+     45-59 8 * * * 0.3134;
+     0-14 9 * * * 0.2996;
+     15-21 9 * * * 0.2927;
+     22-59 9 * * * 0.3017;
+     0-14 10 * * * 0.2908;
+     15-59 10 * * * 0.2753;
+     0-26 11 * * * 0.2501;
+     27-59 11 * * * 0.2192;
+     0-14 12 * * * 0.1915;
+     15-33 12 * * * 0.1764;
+     34-59 12 * * * 0.1593;
+     0-14 13 * * * 0.1636;
+     15-59 13 * * * 0.1548;
+     0-14 14 * * * 0.1448;
+     15-29 14 * * * 0.1211;
+     30-59 14 * * * 0.1564;
+     0-19 15 * * * 0.1741;
+     20-59 15 * * * 0.1888;
+     0-9 16 * * * 0.1980;
+     10-44 16 * * * 0.2242;
+     45-59 16 * * * 0.2336;
+     0-25 17 * * * 0.2553;
+     26-44 17 * * * 0.2783;
+     45-59 17 * * * 0.2961;
+     0-14 18 * * * 0.3482;
+     15-29 18 * * * 0.3526;
+     30-59 18 * * * 0.3659;
+     0-14 19 * * * 0.3610;
+     15-29 19 * * * 0.3663;
+     30-59 19 * * * 0.3625;
+     0-12 20 * * * 0.3566;
+     13-24 20 * * * 0.3483;
+     25-59 20 * * * 0.3571;
+     0-19 21 * * * 0.3487;
+     20-51 21 * * * 0.3440;
+     52-59 21 * * * 0.3293;
+     0-14 22 * * * 0.2983;
+     15-59 22 * * * 0.2756;
+     0-31 23 * * * 0.2582;
+     32-59 23 * * * 0.2231;
+};
+
+schedule television5 {
+     * 0-6 * * * 0;
+     0-26 7 * * * 0;
+     27-59 7 * * * 1;
+     0-21 8 * * * 1;
+     22-59 8 * * * 0;
+     * 9-14 * * * 0;
+     0-2 15 * * * 0;
+     3-59 15 * * * 1;
+     * 16-19 * * * 1;
+     0-36 20 * * * 0;
+     37-59 20 * * * 1;
+     0-12 21 * * * 0;
+     13-59 21 * * * 1;
+     * 22-23 * * * 0;
+};
+
+schedule fan1 {
+     * 0-3 * * * 1;
+     0-35 4 * * * 0;
+     36-59 4 * * * 1;
+     * 5-7 * * * 0;
+     0-18 8 * * * 1;
+     19-59 8 * * * 0;
+     * 9-10 * * * 0;
+     0-8 11 * * * 0;
+     7-59 11 * * * 1;
+     0-8 12 * * * 1;
+     9-59 12 * * * 0;
+     * 13-16 * * * 0;
+     0-14 17 * * * 0;
+     15-59 17 * * * 1;
+     * 18-20 * * * 1;
+     0-42 21 * * * 1;
+     43-59 21 * * * 0;
+     * 22-23 * * * 0;
+};
+
+module powerflow {
+	solver_method NR;
+	NR_iteration_limit 50;
+};
+
+object climate {
+	name "climate";
+	interpolate QUADRATIC;
+	//tmyfile "climate.tmy2";
+};
+
+object regulator_configuration {
+	Control MANUAL;
+	Type A;
+	raise_taps 16;
+	name regulator_configuration_6506321;
+	band_center 2401;
+	tap_pos_A 1;
+	tap_pos_B 1;
+	time_delay 30.0;
+	connect_type 1;
+	regulation 0.10;
+	CT_phase ABC;
+	lower_taps 16;
+	tap_pos_C 1;
+	PT_phase ABC;
+	band_width 50;
+};
+
+object triplex_line_configuration {
+	diameter 0.368;
+	name trip_line_config;
+	conductor_1 tlc;
+	conductor_2 tlc;
+	conductor_N tlc;
+	insulation_thickness 0.08;
+};
+
+object triplex_line_conductor {
+	geometric_mean_radius 0.01111;
+	resistance 0.97;
+	name tlc;
+};
+
+object transformer_configuration {
+	impedance1 0.012000+0.006800j;
+	name fifteen_fifteen_A;
+	primary_voltage 4160.0V;
+	install_type POLETOP;
+	secondary_voltage 120.0V;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	shunt_impedance 1728000+691200j;
+	impedance2 0.012000+0.006800j;
+	impedance 0.006000+0.013600j;
+	power_rating 500;
+};
+
+object transformer_configuration {
+	power_rating 500;
+	primary_voltage 4160;
+	install_type PADMOUNT;
+	secondary_voltage 480;
+	connect_type WYE_WYE;
+	resistance 0.011;
+	reactance 0.02;
+	name transformer_configuration_400;
+};
+
+object node {
+	phases ABCN;
+	name n650;
+	bustype SWING;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+};
+
+object regulator {
+	phases ABC;
+	from n650;
+	name Reg1;
+	to n630;
+	configuration regulator_configuration_6506321;
+};
+
+object node {
+	phases ABCN;
+	name n630;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+};
+
+object transformer {
+	phases AS;
+	from n630;
+	name T1;
+	to tn_1;
+	configuration tconf;
+	groupid Distribution_Trans;
+};
+
+object transformer_configuration {
+	name tconf;
+	primary_voltage 2401.777;
+	install_type POLETOP;
+	secondary_voltage 120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	shunt_impedance 10000+10000j;
+	impedance 0.00033+0.0022j;
+	powerA_rating 110 kVA;
+};
+
+object transformer_configuration {
+	name tconf2;
+	primary_voltage 2401.777;
+	install_type POLETOP;
+	secondary_voltage 120;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	shunt_impedance 10000+10000j;
+	impedance 0.00033+0.0022j;
+	powerB_rating 110 kVA;
+};
+
+object transformer {
+	phases BS;
+	from n630;
+	name T2;
+	to tn_2;
+	configuration tconf2;
+	groupid Distribution_Trans;
+};
+
+object triplex_node {
+	phases AS;
+	nominal_voltage 120;
+	name tn_1;
+};
+
+object triplex_meter {
+	phases BS;
+	nominal_voltage 120;
+	name tn_2;
+};
+
+object triplex_line {
+	phases AS;
+	from tn_1;
+	name tl_1;
+	to tm_1;
+	length 100;
+	configuration trip_line_config;
+};
+
+object triplex_line {
+	phases BS;
+	from tn_2;
+	name t2;
+	to tm_2;
+	length 100;
+	configuration trip_line_config;
+};
+
+object triplex_meter {
+	phases AS;
+	nominal_voltage 120;
+	name tm_1;
+};
+
+object triplex_meter {
+	phases BS;
+	nominal_voltage 120;
+	name tm_2;
+};
+
+object house {
+	schedule_skew -810;
+	auxiliary_system_type ELECTRIC;
+	name house1;
+	parent tm_1;
+	floor_area 1838;
+	cooling_COP 3.2;
+	cooling_system_type ELECTRIC;
+	aux_heat_temperature_lockout 2.270706e+001;
+	heating_setpoint heating1*1;
+	auxiliary_strategy LOCKOUT;
+	heating_system_type HEAT_PUMP;
+	air_temperature 70;
+	thermal_integrity_level 5;
+	heating_COP 3.1;
+	cooling_setpoint cooling7*1;
+	mass_temperature 70;
+	motor_efficiency GOOD;
+	motor_model BASIC;
+};
+
+object waterheater {
+	schedule_skew -810;
+	demand water14*1;
+	name waterheater1;
+	parent house1;
+	heating_element_capacity 4.8 kW;
+	thermostat_deadband 2.9;
+	location INSIDE;
+	tank_volume 50;
+	tank_setpoint 136.8;
+	tank_UA 2.4;
+	temperature 135;
+};
+
+object ZIPload {
+	parent house1;
+	name convenienceLoads1;
+	power_fraction 0.100000;
+	current_fraction 0.100000;
+	base_power plug1*2.477490;
+	impedance_pf 0.950000;
+	current_pf 0.950000;
+	power_pf 0.950000;
+	impedance_fraction 0.800000;
+	groupid plugload;
+};
+
+object ZIPload {
+	parent house1;
+	name lights1;
+	power_fraction 0.003200;
+	current_fraction 0.425700;
+	base_power lights1*1.616013;
+	impedance_pf 1.000000;
+	current_pf -1.000000;
+	power_pf 1.000000;
+	impedance_fraction 0.571100;
+	groupid lights;
+};
+
+object ZIPload {
+	parent house1;
+	name television1;
+	power_fraction 0.998700;
+	current_fraction 0.039600;
+	base_power television5*0.200598;
+	impedance_pf 0.610000;
+	current_pf -0.540000;
+	power_pf -1.000000;
+	impedance_fraction -0.038300;
+	groupid TV;
+};
+
+object ZIPload {
+	parent house1;
+	name fan1;
+	power_fraction 0.013500;
+	current_fraction 0.253400;
+	base_power fan1*0.106899;
+	impedance_pf 0.970000;
+	current_pf 0.950000;
+	power_pf -1.000000;
+	impedance_fraction 0.733200;
+	groupid fan;
+};
+
+object house {
+	auxiliary_system_type ELECTRIC;
+	name house2;
+	parent tm_2;
+	floor_area 1838;
+	cooling_COP 3.2;
+	cooling_system_type ELECTRIC;
+	aux_heat_temperature_lockout 2.270706e+001;
+	heating_setpoint heating1*1;
+	auxiliary_strategy LOCKOUT;
+	heating_system_type HEAT_PUMP;
+	air_temperature 70;
+	thermal_integrity_level 5;
+	heating_COP 3.1;
+	cooling_setpoint cooling7*1;
+	mass_temperature 70;
+	motor_efficiency GOOD;
+	motor_model BASIC;
+};
+
+object waterheater {
+	schedule_skew -810;
+	demand water14*1;
+	name waterheater2;
+	parent house2;
+	heating_element_capacity 4.8 kW;
+	thermostat_deadband 2.9;
+	location INSIDE;
+	tank_volume 50;
+	tank_setpoint 136.8;
+	tank_UA 2.4;
+	temperature 135;
+};
+
+object ZIPload {
+	parent house2;
+	name convenienceLoads2;
+	power_fraction 0.100000;
+	current_fraction 0.100000;
+	base_power plug1*2.477490;
+	impedance_pf 0.950000;
+	current_pf 0.950000;
+	power_pf 0.950000;
+	impedance_fraction 0.800000;
+	groupid plugload;
+};
+
+object ZIPload {
+	parent house2;
+	name lights2;
+	power_fraction 0.003200;
+	current_fraction 0.425700;
+	base_power lights1*1.616013;
+	impedance_pf 1.000000;
+	current_pf -1.000000;
+	power_pf 1.000000;
+	impedance_fraction 0.571100;
+	groupid lights;
+};
+
+object ZIPload {
+	parent house2;
+	name television2;
+	power_fraction 0.998700;
+	current_fraction 0.039600;
+	base_power television5*0.200598;
+	impedance_pf 0.610000;
+	current_pf -0.540000;
+	power_pf -1.000000;
+	impedance_fraction -0.038300;
+	groupid TV;
+};
+
+object ZIPload {
+	parent house2;
+	name fan2;
+	power_fraction 0.013500;
+	current_fraction 0.253400;
+	base_power fan1*0.106899;
+	impedance_pf 0.970000;
+	current_pf 0.950000;
+	power_pf -1.000000;
+	impedance_fraction 0.733200;
+	groupid fan;
+};
+
