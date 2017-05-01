@@ -49,16 +49,16 @@ def distRandomizeLocation(inputFeeder):
 			inputFeeder['tree'][key]['latitude'] = random.randint(0,1000)
 	return inputFeeder['tree']
 
-def distTranslateLocation(inputFeeder, translation, rotation):
-	inputFeeder['nodes'] = []
-	inputFeeder['links'] = []
-	inputFeeder['hiddenNodes'] = []
-	inputFeeder['hiddenLinks'] = []
-	for key in inputFeeder['tree']:
-		if ('longitude' in inputFeeder['tree'][key]) or ('latitude' in inputFeeder['tree'][key]):
-			inputFeeder['tree'][key]['longitude'] += translation*math.cos(rotation)
-			inputFeeder['tree'][key]['latitude'] += translation*math.sin(rotation)
-	return inputFeeder['tree']
+def distTranslateLocation(inFeeder, translation, rotation):
+	inFeeder['nodes'] = []
+	inFeeder['links'] = []
+	inFeeder['hiddenNodes'] = []
+	inFeeder['hiddenLinks'] = []
+	for key in inFeeder['tree']:
+		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
+			inFeeder['tree'][key]['longitude'] += translation*math.cos(rotation)
+			inFeeder['tree'][key]['latitude'] += translation*math.sin(rotation)
+	return inFeeder['tree']
 
 def distAddNoise(inFeeder, noisePerc):
 	for key in inFeeder['tree']:
@@ -526,24 +526,26 @@ def _tests():
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# # Testing distTranslateLocation
-	# translation = 20
-	# rotation = 20
-	# transLocation = distTranslateLocation(inputFeeder, translation, rotation)
-	# # print transLocation
-	# FNAMEOUT = "simpleTranslation.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inputFeeder, outFile, indent=4)
-
-	# Testing distAddNoise
+	# Testing distTranslateLocation
 	FNAME = "simpleMarketMod.omd"
 	with open(FNAME, "r") as inFile:
 		inFeeder = json.load(inFile)
-	noisePerc = 0.2
-	noises = distAddNoise(inFeeder, noisePerc)
-	FNAMEOUT = "simpleMarket_distAddNoise.omd"
+	translation = 20
+	rotation = 20
+	translate = distTranslateLocation(inFeeder, translation, rotation)
+	FNAMEOUT = "simpleMarket_distTranslateLocation.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inFeeder, outFile, indent=4)
+
+	# # Testing distAddNoise
+	# FNAME = "simpleMarketMod.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# noisePerc = 0.2
+	# noises = distAddNoise(inFeeder, noisePerc)
+	# FNAMEOUT = "simpleMarket_distAddNoise.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 	# # Testing distShuffleLoads
 	# FNAME = "simpleMarketMod.omd"
