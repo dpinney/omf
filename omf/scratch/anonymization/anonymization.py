@@ -73,46 +73,46 @@ def distAddNoise(inputFeeder, noisePerc):
 				continue
 	return inputFeeder['tree']
 
-def distShuffleLoads(inputFeeder, shufPerc):
+def distShuffleLoads(inFeeder, shufPerc):
 	tlParents = []
 	tnParents = []
 	houseParents = []
 	zipParents = []
-	for key in inputFeeder['tree']:
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_line'):
-			tlParents.append(inputFeeder['tree'][key]['parent'])
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_node'):
-			tnParents.append(inputFeeder['tree'][key]['parent'])
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'house'):
-			houseParents.append(inputFeeder['tree'][key]['parent'])
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'ZIPload'):
-			zipParents.append(inputFeeder['tree'][key]['parent'])
+	for key in inFeeder['tree']:
+		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'triplex_line'):
+			tlParents.append(inFeeder['tree'][key]['parent'])
+		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'triplex_node'):
+			tnParents.append(inFeeder['tree'][key]['parent'])
+		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'house'):
+			houseParents.append(inFeeder['tree'][key]['parent'])
+		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'ZIPload'):
+			zipParents.append(inFeeder['tree'][key]['parent'])
 	tlIdx = 0
 	tnIdx = 0
 	houseIdx = 0
 	zipIdx = 0
-	for key in inputFeeder['tree']:
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_line'):
+	for key in inFeeder['tree']:
+		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'triplex_line'):
 			if random.randint(0,100)/100.0 < shufPerc:
 				random.shuffle(tkParents)
 				inputFeeder['tree'][key]['parent'] = tlParents[tlIdx]
 				tlIdx += 1
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'triplex_node'):
+		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'triplex_node'):
 			if random.randint(0,100)/100.0 < shufPerc:
 				random.shuffle(tnParents)
-				inputFeeder['tree'][key]['parent'] = tnParents[tnIdx]
+				inFeeder['tree'][key]['parent'] = tnParents[tnIdx]
 				tnIdx += 1
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'house'):
+		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'house'):
 			if random.randint(0,100)/100.0 < shufPerc:
 				random.shuffle(houseParents)
-				inputFeeder['tree'][key]['parent'] = houseParents[houseIdx]
+				inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
 				houseIdx += 1
-		if ('parent' in inputFeeder['tree'][key]) and (inputFeeder['tree'][key]['object'] == 'ZIPload'):
+		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'ZIPload'):
 			if random.randint(0,100)/100.0 < shufPerc:
 				random.shuffle(zipParents)
-				inputFeeder['tree'][key]['parent'] = zipParents[zipIdx]
+				inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
 				zipIdx += 1
-	return inputFeeder['tree']
+	return inFeeder['tree']
 
 def distModifyTriplexLengths(inFeeder):
 	tLookup = {}
@@ -543,40 +543,42 @@ def _tests():
 	# with open(FNAMEOUT, "w") as outFile:
 	# 	json.dump(inputFeeder, outFile, indent=4)
 
-	# # Testing distShuffleLoads
-	# shufPerc = 0.5
-	# shuffle = distShuffleLoads(inputFeeder, shufPerc)
-	# # print shuffle
-	# FNAMEOUT = "simpleShuffle.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inputFeeder, outFile, indent=4)
-
-	# Testing distModifyTriplexLengths
+	# Testing distShuffleLoads
 	FNAME = "simpleMarketMod.omd"
 	with open(FNAME, "r") as inFile:
 		inFeeder = json.load(inFile)
-	triplexLengths = distModifyTriplexLengths(inFeeder)
-	FNAMEOUT = "simpleMarket_distModifyTriplexLengths.omd"
+	shufPerc = 0.5
+	shuffle = distShuffleLoads(inFeeder, shufPerc)
+	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inFeeder, outFile, indent=4)
 
-	# Testing distModifyConductorLengths
-	FNAME = "Olin Barre GH.omd"
-	with open(FNAME, "r") as inFile:
-		inFeeder = json.load(inFile)
-	conductorLengths = distModifyConductorLengths(inFeeder)
-	FNAMEOUT = "olinBarreGH_distModifyConductorLengths.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inFeeder, outFile, indent=4)
+	# # Testing distModifyTriplexLengths
+	# FNAME = "simpleMarketMod.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# triplexLengths = distModifyTriplexLengths(inFeeder)
+	# FNAMEOUT = "simpleMarket_distModifyTriplexLengths.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
-	# Testing distSmoothLoads
-	FNAME = "Calibrated Feeder.omd"
-	with open(FNAME, "r") as inFile:
-		inputFeeder = json.load(inFile)
-	smoothing = distSmoothLoads(inputFeeder)
-	FNAMEOUT = "simpleMarket_distSmoothLoads.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inputFeeder, outFile, indent=4)
+	# # Testing distModifyConductorLengths
+	# FNAME = "Olin Barre GH.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# conductorLengths = distModifyConductorLengths(inFeeder)
+	# FNAMEOUT = "olinBarreGH_distModifyConductorLengths.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
+
+	# # Testing distSmoothLoads
+	# FNAME = "Calibrated Feeder.omd"
+	# with open(FNAME, "r") as inFile:
+	# 	inFeeder = json.load(inFile)
+	# smoothing = distSmoothLoads(inFeeder)
+	# FNAMEOUT = "simpleMarket_distSmoothLoads.omd"
+	# with open(FNAMEOUT, "w") as outFile:
+	# 	json.dump(inFeeder, outFile, indent=4)
 
 
 	# # TRANSMISSION NETWORK TESTS
