@@ -50,14 +50,15 @@ XXX Implement def distSmoothLoads()
 			if pair[0].getHourFromTimestamp() == aggHour:
 				aggAmount += pair[1]
 		outList.append([aggHour, aggAmount])
-OOO Implement def distModifyConductorLengths()
-	XXX triplex_line
-	XXX debug disappearing trip_line_config.
+XXX Implement def distModifyConductorLengths()
 	XXX Use new test circuit /scratch/publicFeeders/Olin Barre GH.omd
 	XXX no overhead_lines in Simple Market System
 	XXX no underground_lines in Simple Market System
 	XXX debug for overhead and underground
-	OOO Refactor triplex/overhead/underground into single function
+	XXX Refactor triplex and overhead/underground into two separate functions
+XXX Implement def distModifyTriplexLengths()	
+	XXX triplex_line
+	XXX debug disappearing trip_line_config.
 OOO Debug/Rewrite Test cases
 
 LATERBASE
