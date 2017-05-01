@@ -50,7 +50,5 @@ XXX Implement def distModifyConductorLengths()
 	XXX debug for overhead and underground
 	XXX Refactor triplex and overhead/underground into two separate functions
 XXX Debug/Rewrite Test cases
-
-LATERBASE
-OOO How do we open these .omd files in gridEdit? We need a visualizeFeeder function.
-OOO Is our test dataset good enough? How do we enhance it.
+XXX Figure out the correct architecture for anonymization/pseudonymization.
+OOO docStrings for each function.

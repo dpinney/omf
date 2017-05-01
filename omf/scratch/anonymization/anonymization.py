@@ -1,19 +1,8 @@
+''' Functions for anonymizing data in OMF distribution and transmission systems.'''
+
 import json, math, random, datetime
 
 # DISTRIBUTION FEEDER FUNCTIONS
-def distAnonymizeNames(inFeeder):
-	newNameKey = {}
-	newNameArray = []
-	newKeyID = 0
-	for key in inFeeder['tree']:
-		if 'name' in inFeeder['tree'][key]:
-			oldName = inFeeder['tree'][key]['name']
-			newName = inFeeder['tree'][key]['object'] + str(newKeyID)
-			newKeyID += 1
-			inFeeder['tree'][key]['name'] = newName
-			newNameKey.update({oldName:newName})
-			newNameArray.append(newName)
-	return newNameKey, newNameArray
 
 def distPseudomizeNames(inFeeder):
 	newNameKey = {}
@@ -28,6 +17,7 @@ def distPseudomizeNames(inFeeder):
 	return newNameKey
 
 def distRandomizeNames(inFeeder):
+	''' Replace all names in the inFeeder distribution system with sequential IDs. Return a list of the new IDs. '''
 	newNameArray = []
 	newKeyID = 0
 	for key in inFeeder['tree']:
