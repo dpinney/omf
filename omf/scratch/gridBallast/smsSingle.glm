@@ -14,6 +14,28 @@ module residential {
 	implicit_enduses NONE;
 };
 
+module market;
+class auction {
+	double my_avg; double my_std;
+};
+class player {
+	double value;
+};
+object player {
+	name superClearing;
+	file superClearingPrice.player;
+	loop 10;
+};
+object auction {
+	my_std 0.037953;
+	name MARKET_1;
+	period 900;
+	my_avg 0.11;
+	current_market.clearing_price superClearing.value;
+	special_mode BUYERS_ONLY;
+	unit kW;
+};
+
 schedule water14 {
 	0-9 0 * * * 0.00;
 	10-19 0 * * * 0.00;
@@ -563,7 +585,7 @@ object house {
 
 object waterheater {
 	schedule_skew -810;
-	demand water14*1;
+	water_demand water14*1;
 	name waterheater1;
 	parent house1;
 	heating_element_capacity 4.8 kW;
@@ -649,7 +671,7 @@ object house {
 
 object waterheater {
 	schedule_skew -810;
-	demand water14*1;
+	water_demand water14*1;
 	name waterheater2;
 	parent house2;
 	heating_element_capacity 4.8 kW;
@@ -713,3 +735,35 @@ object ZIPload {
 	groupid fan;
 };
 
+object passive_controller {
+	name ZIPload_controller_fan2;
+	parent fan2;
+	control_mode RAMP;
+	range_high 0;
+	range_low 0;
+	ramp_high 0;
+	ramp_low 0;
+	period 3600;
+	setpoint base_power;
+	base_setpoint 1;
+	expectation_object MARKET_1;
+	expectation_property my_avg;
+	observation_object MARKET_1;
+	observation_property past_market.clearing_price;
+	stdev_observation_property my_std;
+	state_property override;
+};
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file fan1.csv;
+	parent fan1;
+};
+
+object recorder {
+	interval 3600;
+	property base_power;
+	file fan2.csv;
+	parent fan2;
+};
