@@ -736,8 +736,8 @@ object ZIPload {
 };
 
 object passive_controller {
-	name ZIPload_controller_fan2;
-	parent fan2;
+	name ZIPload_controller_fan1;
+	parent fan1;
 	control_mode RAMP;
 	range_high 0;
 	range_low 0;
@@ -745,7 +745,22 @@ object passive_controller {
 	ramp_low 0;
 	period 3600;
 	setpoint base_power;
-	base_setpoint 1;
+	base_setpoint 0;
+	expectation_object MARKET_1;
+	expectation_property my_avg;
+	observation_object MARKET_1;
+	observation_property past_market.clearing_price;
+	stdev_observation_property my_std;
+	state_property override;
+};
+
+object passive_controller {
+	name ZIPload_controller_fan2;
+	parent fan2;
+	control_mode PROBABILITY_OFF;
+	distribution_type NORMAL;
+	comfort_level 0.82;
+	period 3600;
 	expectation_object MARKET_1;
 	expectation_property my_avg;
 	observation_object MARKET_1;
