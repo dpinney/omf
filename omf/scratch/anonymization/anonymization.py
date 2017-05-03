@@ -3,7 +3,6 @@
 import json, math, random, datetime
 
 # DISTRIBUTION FEEDER FUNCTIONS
-
 def distPseudomizeNames(inFeeder):
 	newNameKey = {}
 	newKeyID = 0
@@ -240,24 +239,6 @@ def distSmoothLoads(inFeeder):
 	return outList
 
 # TRANSMISSION NETWORK FUNCTIONS
-def tranAnonymizeNames(inNetwork):
-	newBusKey = {}
-	newBusArray = []
-	newKeyID = 0
-	for dic in inNetwork['bus']:
-		for each in dic:
-			idx = int(each) - 1
-			for key in inNetwork['bus'][idx]:
-				for prop in inNetwork['bus'][idx][key]:
-					if 'bus_i' in prop:
-						oldBus = inNetwork['bus'][idx][key]['bus_i']
-						newBus = 'bus' + str(newKeyID)
-						newKeyID += 1
-						inNetwork['bus'][idx][key]['bus_i'] = newBus
-						newBusKey.update({oldBus:newBus})
-						newBusArray.append(newBus)
-	return newBusKey, newBusArray
-
 def tranPseudomizeNames(inNetwork):
 	newBusKey = {}
 	newKeyID = 0
@@ -403,15 +384,6 @@ def _tests():
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inFeeder, outFile, indent=4)
 
-	# Test distAnonymizeNames
-	FNAME = "Simple Market System Modified.omd"
-	with open(FNAME, "r") as inFile:
-		inFeeder = json.load(inFile)
-	names = distAnonymizeNames(inFeeder)
-	FNAMEOUT = "simpleMarket_distAnonymizeNames.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inFeeder, outFile, indent=4)
-
 	# Test distRandomizeLocations
 	FNAME = "Simple Market System Modified.omd"
 	with open(FNAME, "r") as inFile:
@@ -496,15 +468,6 @@ def _tests():
 		inNetwork = json.load(inFile)
 	randBusArray = tranRandomizeNames(inNetwork)
 	FNAMEOUT = "case_tranRandomizeNames.omt"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inNetwork, outFile, indent=4)
-
-	# Test tranAnonymizeNames
-	FNAME = "case9.omt"
-	with open(FNAME, "r") as inFile:
-		inNetwork = json.load(inFile)
-	buses = tranAnonymizeNames(inNetwork)
-	FNAMEOUT = "case_tranAnonymizeNames.omt"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inNetwork, outFile, indent=4)
 
