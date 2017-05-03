@@ -15,23 +15,26 @@ module residential {
 };
 
 module market;
+
 class auction {
 	double my_avg; double my_std;
 };
+
 class player {
 	double value;
 };
-object player {
-	name superClearing;
-	file superClearingPrice.player;
-	loop 10;
+
+schedule price_schedule {
+	* 0-11 * * * 9.0;
+	* 12-23 * * * 10.0;
 };
+
 object auction {
 	my_std 0.037953;
 	name MARKET_1;
 	period 900;
 	my_avg 0.11;
-	current_market.clearing_price superClearing.value;
+	current_market.clearing_price price_schedule;
 	special_mode BUYERS_ONLY;
 	unit kW;
 };
@@ -636,19 +639,6 @@ object ZIPload {
 	groupid TV;
 };
 
-object ZIPload {
-	parent house1;
-	name fan1;
-	power_fraction 0.013500;
-	current_fraction 0.253400;
-	base_power fan1*0.106899;
-	impedance_pf 0.970000;
-	current_pf 0.950000;
-	power_pf -1.000000;
-	impedance_fraction 0.733200;
-	groupid fan;
-};
-
 object house {
 	auxiliary_system_type ELECTRIC;
 	name house2;
@@ -723,8 +713,44 @@ object ZIPload {
 };
 
 object ZIPload {
+	name fan1;
+	base_power fan1*0.106899;
+	parent house1;
+	power_fraction 0.013500;
+	current_fraction 0.253400;
+	impedance_pf 0.970000;
+	current_pf 0.950000;
+	power_pf -1.000000;
+	impedance_fraction 0.733200;
+	groupid fan;
+};
+
+schedule rcs {
+     * 0-18 * * * 1;
+};
+
+object passive_controller {
+	name ZIPload_controller_fan1;
+	parent fan1;
+	control_mode RAMP;
+	range_high rcs;
+	range_low 0;
+	ramp_high 0;
+	ramp_low 0;
+	period 3600;
+	setpoint base_power;
+	//base_setpoint rcs;
+	expectation_object MARKET_1;
+	expectation_property my_avg;
+	observation_object MARKET_1;
+	observation_property past_market.clearing_price;
+	stdev_observation_property my_std;
+	state_property override;
+};
+
+object ZIPload {
+	name fan_prob_control;
 	parent house2;
-	name fan2;
 	power_fraction 0.013500;
 	current_fraction 0.253400;
 	base_power fan1*0.106899;
@@ -735,39 +761,20 @@ object ZIPload {
 	groupid fan;
 };
 
-object passive_controller {
-	name ZIPload_controller_fan1;
-	parent fan1;
-	control_mode RAMP;
-	range_high 0;
-	range_low 0;
-	ramp_high 0;
-	ramp_low 0;
-	period 3600;
-	setpoint base_power;
-	base_setpoint 0;
-	expectation_object MARKET_1;
-	expectation_property my_avg;
-	observation_object MARKET_1;
-	observation_property past_market.clearing_price;
-	stdev_observation_property my_std;
-	state_property override;
-};
-
-object passive_controller {
-	name ZIPload_controller_fan2;
-	parent fan2;
-	control_mode PROBABILITY_OFF;
-	distribution_type NORMAL;
-	comfort_level 0.82;
-	period 3600;
-	expectation_object MARKET_1;
-	expectation_property my_avg;
-	observation_object MARKET_1;
-	observation_property past_market.clearing_price;
-	stdev_observation_property my_std;
-	state_property override;
-};
+//object passive_controller {
+//	name ZIPload_controller_fan2;
+//	parent fan_prob_control;
+//	control_mode PROBABILITY_OFF;
+//	distribution_type NORMAL;
+//	comfort_level 0.82;
+//	period 3600;
+//	expectation_object MARKET_1;
+//	expectation_property my_avg;
+//	observation_object MARKET_1;
+//	observation_property past_market.clearing_price;
+//	stdev_observation_property my_std;
+//	state_property override;
+//};
 
 object recorder {
 	interval 3600;
@@ -779,6 +786,6 @@ object recorder {
 object recorder {
 	interval 3600;
 	property base_power;
-	file fan2.csv;
-	parent fan2;
+	file fan_prob_control.csv;
+	parent fan_prob_control;
 };
