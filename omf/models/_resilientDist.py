@@ -21,6 +21,62 @@ fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
 
+class Line:
+	lineCount = 0
+	def __init__(self, id, node1, node2, length=1.0, lineCode=0, hardenCost=100000, numPhases=3, hasPhase=[True,True,True], isTransformer=None):
+		self.id = id
+		self.node1 = node1
+		self.node2 = node2
+		self.lineCode = Line.lineCount
+		self.length = length
+		self.hardenCost = hardenCost
+		self.numPhases = numPhases
+		self.hasPhase = hasPhase
+		self.isTransformer = isTransformer
+		self.is_new = False
+		self.can_harden = False
+		Line.lineCount += 1
+
+	def checkNone(var):
+		if var != None:
+			return var
+
+	def toOutput(line):
+		lineOut = {}
+		lineOut["id"] = line.id
+		lineOut["node1_id"] = line.node1
+		lineOut["node2_id"] = line.node2
+		lineOut["line_code"] = line.lineCode
+		lineOut["length"] = line.length
+		lineOut["harden_cost"] = line.hardenCost
+		lineOut["num_phases"] = line.numPhases
+		lineOut["has_phase"] = line.hasPhase
+		if line.isTransformer != None:
+			lineOut["is_transformer"] = line.isTransformer
+		lineOut["is_new"] = line.is_new
+		lineOut["can_harden"] = line.can_harden
+		return lineOut
+
+
+class Gen:
+	genCount = 0
+	def __init__(self, id, node_id, has_phase=[True, True, True], max_reactive_phase=[1.7976931348623e+308, 1.7976931348623e+308, 1.7976931348623e+308], max_real_phase=[1.7976931348623e+308, 1.7976931348623e+308, 1.7976931348623e+308]):
+		self.id = id
+		self.node_id = node_id
+		self.has_phase = has_phase
+		self.max_reactive_phase = max_reactive_phase
+		self.max_real_phase = max_real_phase
+		Gen.genCount += 1
+
+	def toOutput(gen):
+		genOut = {}
+		genOut["id"] = gen.id
+		genOut["node_id"] = gen.node_id
+		genOut["has_phase"] = gen.has_phase
+		genOut["max_reactive_phase"] = gen.max_reactive_phase
+		genOut["max_real_phase"] = gen.max_real_phase
+		return genOut
+
 # Our HTML template for the interface:
 with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
@@ -117,62 +173,72 @@ def createObj(objToRet):
 		print "The object: %s doesn't exist."%(str(objToRet))
 		return {}
 
-def getNodePhases(obj, defReal=1.7976931348623e+308, defReact=1.7976931348623e+308):
+def getNodePhases(obj, maxRealPhase):
 	'''read omd., 10json obj's phases and convert to rdt format.
 	'''
 	numPhases = 0
 	hasphaseA, hasphaseB, hasphaseC = False, False, False
-	maxRealPhaseA, maxRealPhaseB, maxRealPhaseC = 0, 0, 0
-	maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC = 0, 0, 0
+	maxRealPhaseA, maxRealPhaseB, maxRealPhaseC = 0.0, 0.0, 0.0
+	maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC = 0.0, 0.0, 0.0
 	phases = obj.get('phases','').strip('S').strip('N')
 	if phases != '': 
 		if 'A' in phases: 
 			hasphaseA = True
-			maxRealPhaseA = defReal
-			maxReactivePhaseA = defReact
+			maxRealPhaseA = float(maxRealPhase)
+			maxReactivePhaseA = float(maxRealPhase)*0.1
 			numPhases+=1
 		if 'B' in phases: 
 			hasphaseB = True
-			maxRealPhaseB = defReal
-			maxReactivePhaseB = defReact
+			maxRealPhaseB = float(maxRealPhase)
+			maxReactivePhaseB = float(maxRealPhase)*0.1
 			numPhases+=1
 		if 'C' in phases: 
 			hasphaseC = True
-			maxRealPhaseC = defReal
-			maxReactivePhaseC = defReact
+			maxRealPhaseC = float(maxRealPhase)
+			maxReactivePhaseC = float(maxRealPhase)*0.1
 			numPhases+=1
 	else:
 		print "NO PHASES FOUND FOR OBJ:", obj	
 	return numPhases, [hasphaseA, hasphaseB, hasphaseC], [maxRealPhaseA, maxRealPhaseB, maxRealPhaseC], [maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC]
 
-def makeLines(rdtJson, jsonTree, debug):
+def makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug):
 	''' lines.
 	TODO: Put in accurate num_poles, ask if has_phase corresponds to a,b,c.
 	TODO: Insert harden_cost calc.
 	'''
+	lineCosts = []
+	hardCands = hardCand.strip().replace(' ', '').split(',')
 	objToFind, lineCount = ['triplex_line','transformer', 'regulator'], 0
 	for key, line in jsonTree.iteritems():
 		if line.get('object','') in objToFind:
-			newLine = createObj('line')
-			newLine['id'], newLine['node1_id'], newLine['node2_id'], newLine['length'], newLine['line_code'] = \
-				line.get('name',''), line.get('from','')+'_bus', line.get('to','')+'_bus', float(line.get('length',100))/100, lineCount
-			newLine['num_phases'], newLine['has_phase'], maxRealPhase, maxReactivePhase = getNodePhases(line)
+			#newLine = createObj('line')
+			#newLine['id'], newLine['node1_id'], newLine['node2_id'], newLine['length'], newLine['line_code'] = line.get('name',''), line.get('from','')+'_bus', line.get('to','')+'_bus', float(line.get('length',100))/100, lineCount
+			#newLine['num_phases'], newLine['has_phase'], maxRealPhase, maxReactivePhase = getNodePhases(line, maxDG)
+			newLine = Line(line.get('name',''), line.get('from','')+'_bus', line.get('to','')+'_bus', float(line.get('length',100)))
 			# Calculate harden_cost, 10.
 			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
+			if line.get('name','') in hardCands:
+				newLine.can_harden = True
 			if line.get('object','') == 'transformer': 
-				newLine['is_transformer'] = True
-				newLine.pop('harden_cost',None)
- 			rdtJson['lines'].append(newLine)
+				#newLine['is_transformer'] = True
+				newLine.isTransformer = True
+				#newLine.pop('harden_cost',None)
+ 			rdtJson['lines'].append(newLine.toOutput())
 			# print "Added newLine: %s (TOTAL: %s)\n"%(newLine, str(lineCount+1))
 			lineCount+=1
-	if debug: 
-		print "Created %s lines"%(str(len(rdtJson['lines'])))
-		if debug==2:
-			for elem in rdtJson['lines']: 
-				print "   Line:"
-				for a,val in elem.iteritems():
-					print "      %s: %s"%(str(a), str(val))				
-	return lineCount
+			lineCosts.append((line.get('name',''), float(lineUnitCost)*float(line.get('length',100))))
+	#Code successfully adds user specified lines to RDT Input. However, since user specified lines might not be correct, RDT may crash during runtime
+	'''newLines = newLines.strip().split(';')
+	for lineTupleString in newLines:
+		linePair = lineTupleString.replace('(','').replace(')','').split(',')
+		#print linePair[0], linePair[1]
+		newLine = Line("newLine_" + str(lineCount), linePair[0], linePair[1]).toOutput()
+		newLine["is_new"] = True
+		if ("newLine_" + str(lineCount)) in hardCands:
+				newLine.can_harden = True
+		rdtJson['lines'].append(newLine)
+		lineCount+=1'''		
+	return lineCount, lineCosts
 
 def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
 	'''line_codes: create one for each line.
@@ -244,7 +310,7 @@ def makeBuses(rdtJson, jsonTree, debug):
 			newBus['id'] = bus.get('name','')+'_bus'
 			if bus.get('bustype','').lower() == 'swing':
 				newBus['has_generator'] = True
-			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus)
+			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus, 0.0)
 			# Remove entries I couldn't find, 10.
 			# newBus.pop('y',None)
 			# newBus.pop('x',None)
@@ -275,7 +341,7 @@ def makeLoads(rdtJson, jsonTree, debug):
 					if debug==2: 
 						print "      **Found load: %s bus as: %s**"%(newLoad['id'], busID)
 			newLoad['node_id'] = busID
-			numPhases, newLoad['has_phase'], newLoad['max_real_phase'], newLoad['max_reactive_phase'] = getNodePhases(loads, 10, 10)
+			numPhases, newLoad['has_phase'], newLoad['max_real_phase'], newLoad['max_reactive_phase'] = getNodePhases(loads, 10)
 			# newLoad.pop('is_critical',None)
 			rdtJson['loads'].append(newLoad)
 	if debug: 
@@ -286,28 +352,29 @@ def makeLoads(rdtJson, jsonTree, debug):
 				for a,val in elem.iteritems():
 					print "      %s: %s"%(str(a), str(val))				
 
-def makeGens(rdtJson, jsonTree, debug):
+def makeGens(rdtJson, jsonTree, maxRealPhase, newGens, debug):
 	'''generators.
 	'''
 	for key, gens in jsonTree.iteritems():
 		if gens.get('bustype','').lower() == 'swing':
-			newGen = createObj('gen')
-			newGen['id'] = gens.get('name','')+'_gen'
+			#newGen = createObj('gen')
+			#newGen['id'] = gens.get('name','')+'_gen'
+			#for elem in rdtJson['buses']:
+			#	if elem['id'][0:-4] == genID['id'][0:-4]:
+			#		busID = elem['id']
+
+			genID = gens.get('name','')+'_gen'
 			for elem in rdtJson['buses']:
-				if elem['id'][0:-4] == newGen['id'][0:-4]:
+				if elem['id'][0:-4] == genID[0:-4]:
 					busID = elem['id']
-					if debug: 
-						print "   **Found Generator: %s\n With bus  %s**"%(newGen['id'], busID)
-			newGen['node_id'] = busID	
-			numPhases, newGen['has_phase'], newGen['max_real_phase'], newGen['max_reactive_phase'] = getNodePhases(gens)
-			rdtJson['generators'].append(newGen)
-	if debug: 
-		print "Created %s generators"%(str(len(rdtJson['generators'])))
-		if debug==2:
-			for elem in rdtJson['generators']: 
-				print "   Generator:"
-				for a,val in elem.iteritems():
-					print "      %s: %s"%(str(a), str(val))
+			#newGen['node_id'] = busID	
+			#numPhases, newGen['has_phase'], newGen['max_real_phase'], newGen['max_reactive_phase'] = getNodePhases(gens, maxRealPhase)
+			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, maxRealPhase)
+			newGen = Gen(gens.get('name','')+'_gen', busID, has_phase, max_reactive_phase, max_real_phase)
+			rdtJson['generators'].append(newGen.toOutput())
+	newGens = newGens.strip().split(',')
+	#for newGenName in newGens:
+	#	rdtJson['generators'].append(Gen(newGenName, Gen.genCount).toOutput())
 
 def readXRMatrices(dataDir, rdtFile, length):
 	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
@@ -321,7 +388,7 @@ def readXRMatrices(dataDir, rdtFile, length):
 		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
 	return xMatrix, rMatrix
 
-def convertToRDT(inData, dataDir, feederName, debug=False):
+def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
 	'''Read a omd.json feeder and convert it to fragility/RDT format.
 	'''
 	# Create RDT dict.
@@ -344,11 +411,12 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
 		jsonTree = json.load(jsonIn).get('tree','')
 	#TODO: get GFM scenarios in to RDT
-	lineCount = makeLines(rdtJson, jsonTree, debug)
+	lineCount, lineCosts = makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
+	print lineCosts
 	makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug)
 	makeBuses(rdtJson, jsonTree, debug)
 	makeLoads(rdtJson, jsonTree, debug)
-	makeGens(rdtJson, jsonTree, debug)
+	makeGens(rdtJson, jsonTree, maxDG, newGens, debug)
 	# Write to file.
 	rdtInFile = 'rdtIn.json'
 	with open(pJoin(dataDir,rdtInFile), "w") as outFile:
@@ -356,7 +424,7 @@ def convertToRDT(inData, dataDir, feederName, debug=False):
 	if debug:		
 		print "Done... RDT input saved to:            %s"%(pJoin(dataDir,rdtInFile))
 		print "************************************\n\n"
-	return rdtInFile
+	return rdtInFile, lineCosts
 
 def genDiagram(dataDir, feederName, feederJson, debug):
 	# Generate feeder diagram.
@@ -542,11 +610,12 @@ def heavyProcessing(modelDir, inputDict):
 		# Run RDT.
 		print "Running RDT..."
 		print "************************************"
+
 		rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
 		with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
 			json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
-		rdtInFile = modelDir + '/' + convertToRDT(rdtInData, modelDir, feederName, debug=False)
-		rdtInFile = modelDir + '/' + convertToRDT(rdtInData, modelDir, feederName, debug=False)
+		rdtFileName, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
+		rdtInFile = modelDir + '/' + rdtFileName
 		rdtOutFile = modelDir + '/rdtOutput.json'
 		rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
 		rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
@@ -576,7 +645,7 @@ def heavyProcessing(modelDir, inputDict):
 		for line in rdtInFileData["lines"]:
 			dist = math.sqrt((targets[line["node2_id"][:-4]]["x"] - sources[line["node1_id"][:-4]]["x"])**2 + (targets[line["node2_id"][:-4]]["y"] - sources[line["node1_id"][:-4]]["y"])**2)
 			lineData.append((line["id"], '{:,.2f}'.format(dist*float(inputDict["lineUnitCost"]))))
-		outData["lineData"] = lineData
+		outData["lineData"] = lineCosts
 		outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 		# Draw the feeder.
 		genDiagram(modelDir, feederName, feederModel, debug=False)
@@ -624,8 +693,8 @@ def new(modelDir):
 		"dgUnitCost": "200.0",
 		"hardeningUnitCost": "1000.0",
 		"maxDGPerGenerator": "5000.0",
-		"hardeningCandidates": "Line_id1, line_id2",
-		"newLineCandidates": "(node1,node2),(node3,node4)",
+		"hardeningCandidates": "Line_id1, line_id2, t2",
+		"newLineCandidates": "(node1,node2);(node3,node4)",
 		"generatorCandidates": "node1",
 		"criticalLoadMet": "0.0",
 		"nonCriticalLoadMet": "0.0",

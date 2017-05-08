@@ -157,7 +157,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">New Line Candidates<span class="classic">Pairs of node IDs that indicate where the user wants to consider adding lines. At least one pair is required.</span></label>
-				<input type="text" id="newLineCandidates" name="newLineCandidates" pattern="^(\(\w+\,\s*\w+\)){1}(\s*\,\s*(\(\w+\,\s*\w+\)){1})*$">
+				<input type="text" id="newLineCandidates" name="newLineCandidates" pattern="^(\(\w+\,\s*\w+\)){1}(\s*\;\s*(\(\w+\,\s*\w+\)){1})*$">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generator Candidates<span class="classic">The IDs of nodes on the system where the user wants to consider adding distributed generation. At least one node is required.</span></label>
@@ -305,14 +305,14 @@
 					rdtOutput = JSON.parse(rdtOutput);
 					var scenarioDict = [];
 					var lineData = allOutputData.lineData;
-					console.log(lineData);
 					var htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
-					var totalCost = 0;
+					var totalCost = 0.0;
 
 					for(var i = 0; i < rdtOutput.design_solution.generators.length; i++) {
 						generator = rdtOutput.design_solution.generators[i];
-						htmlCollector = htmlCollector + "<tr><td>" + generator.id + "</td><td>Generator</td><td>Built with 5 MW of capacity</td><td>$" + allOutputData["generatorData"] + "</td></tr>";
-						totalCost = totalCost + allOutputData["generatorData"];
+						genCost = parseFloat(allOutputData["generatorData"].replace(/\,/g,''));
+						htmlCollector = htmlCollector + "<tr><td>" + generator.id + "</td><td>Generator</td><td>Built with 5 MW of capacity</td><td>$" + genCost + "</td></tr>";
+						totalCost = totalCost + genCost;
 					}
 
 					for(var j = 0; j < rdtOutput.design_solution.lines.length; j++) {
@@ -326,7 +326,7 @@
 						htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + "</td><td>$" +  lineCost + "</td></tr>";
 						totalCost = lineCost + totalCost;
 					}
-
+					console.log(totalCost);
 					if(rdtOutput.design_solution.is_feasible == true) {
 						gebi("validation").innerHTML = "Powerflow Validated";
 					}
