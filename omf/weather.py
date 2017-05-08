@@ -801,10 +801,11 @@ def getWeather(tree, maxKey, weatherStart, weatherEnd, airport, workDir):
 		return False
 
 def _tests():
-	print "Beginning to test weather.py"
-	workDir = tempfile.mkdtemp()
-	print "IAD lat/lon =", _airportCodeToLatLon("IAD")
-	assert (38.947444, -77.459944)==_airportCodeToLatLon("IAD"), "airportCode lookup failed."
+	print "weather.py tests disabled to stop sending too many API requests to airport-data.com, nrel.gov, etc."
+	# print "Beginning to test weather.py"
+	# workDir = tempfile.mkdtemp()
+	# print "IAD lat/lon =", _airportCodeToLatLon("IAD")
+	# assert (38.947444, -77.459944)==_airportCodeToLatLon("IAD"), "airportCode lookup failed."
 	# print "Weather downloading to", workDir
 	# assert None==_downloadWeather("2010-03-01", "2010-04-01", "PDX", workDir)
 	# print "Peak solar extraction in", workDir
