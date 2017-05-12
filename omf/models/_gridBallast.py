@@ -116,6 +116,25 @@ def heavyProcessing(modelDir, inputDict):
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
 
+
+		# Set up GridBallast Controls
+		for key in feederJson["tree"].keys():
+			if ('name' in feederJson['tree'][key]) and (feederJson['tree'][key].get('object') == 'waterheater'):
+		 		parent = feederJson['tree'][key]['name']
+		 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
+		 		copyStub = dict(stub)
+		 		tree[feeder.getMaxKey(tree)+1] = copyStub
+		 		if 'demand' in feederJson['tree'][key]:
+		 			feederJson['tree'][key]['water_demand'] = feederJson['tree'][key]['demand']
+		 			del feederJson['tree'][key]['demand']
+		 			feederJson['tree'][key]['enable_freq_control'] = 'true'
+		 			feederJson['tree'][key]['freq_lowlimit'] = 59.97
+		 			feederJson['tree'][key]['freq_uplimit'] = 60.03
+		 			feederJson['tree'][key]['heat_mode'] = 'ELECTRIC'
+		 			feederJson['tree'][key]['enable_jitter'] = 'true'
+		 			feederJson['tree'][key]['average_delay_time'] = 600
+
+		 			
 		# Attach recorder for waterheaters on/off
 		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheaterOn.csv'}
 		copyStub = dict(stub)
@@ -151,79 +170,57 @@ def heavyProcessing(modelDir, inputDict):
 		tree[feeder.getMaxKey(tree)+1] = copyStub
 
 		# Attach passive_controller	
-		tree[feeder.getMaxKey(tree)+1] = {'omftype':'module','argument':'market'}
-		tree[feeder.getMaxKey(tree)+1] = {'omftype':'class auction','argument':'{\n\tdouble my_avg; double my_std;\n}'}
-		tree[feeder.getMaxKey(tree)+1] = {'omftype':'class player','argument':'{\n\tdouble value;\n}'}
+		# tree[feeder.getMaxKey(tree)+1] = {'omftype':'module','argument':'market'}
+		# tree[feeder.getMaxKey(tree)+1] = {'omftype':'class auction','argument':'{\n\tdouble my_avg; double my_std;\n}'}
+		# tree[feeder.getMaxKey(tree)+1] = {'omftype':'class player','argument':'{\n\tdouble value;\n}'}
 
-		stub = {
-			'object':'player',
-			'name':'cppDays',
-			'file':'superCpp.player'
-		}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
+		# stub = {
+		# 	'object':'player',
+		# 	'name':'cppDays',
+		# 	'file':'superCpp.player'
+		# }
+		# copyStub = dict(stub)
+		# tree[feeder.getMaxKey(tree)+1] = copyStub
 
-		stub = {
-			'object':'player',
-			'name':'superClearing',
-			'file':'superClearingPrice.player',
-			'loop':10
-		}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
+		# stub = {
+		# 	'object':'player',
+		# 	'name':'superClearing',
+		# 	'file':'superClearingPrice.player',
+		# 	'loop':10
+		# }
+		# copyStub = dict(stub)
+		# tree[feeder.getMaxKey(tree)+1] = copyStub
 
-		stub = {
-			'object':'auction',
-			'name':'MARKET_1',
-			'my_std':0.037953,
-			'period':900,
-			'my_avg':0.110000,
-			'current_market.clearing_price':'superClearing.value',
-			'special_mode':'BUYERS_ONLY',
-			'unit': 'kW'
-		}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
-
-		stub = {
-			'object':'passive_controller',
-			'name':'waterheater_controller_waterheater171923',
-			'parent':'waterheater171923',
-			'control_mode':'RAMP',
-			'range_high':5,
-			'range_low':-5,
-			'ramp_high':1,
-			'ramp_low':-1,
-			'period':900,
-			'setpoint':'is_waterheater_on',
-			'base_setpoint':1,
-			'expectation_object':'MARKET_1',
-			'expectation_property':'my_avg',
-			'observation_object':'MARKET_1',
-			'observation_property':'past_market.clearing_price',
-			'stdev_observation_property':'my_std',
-			'state_property':'override'
-		}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
+		# stub = {
+		# 	'object':'auction',
+		# 	'name':'MARKET_1',
+		# 	'my_std':0.037953,
+		# 	'period':900,
+		# 	'my_avg':0.110000,
+		# 	'current_market.clearing_price':'superClearing.value',
+		# 	'special_mode':'BUYERS_ONLY',
+		# 	'unit': 'kW'
+		# }
+		# copyStub = dict(stub)
+		# tree[feeder.getMaxKey(tree)+1] = copyStub
 
 		# stub = {
 		# 	'object':'passive_controller',
-		# 	'name':'ZIPload_controller_ZIPload171922',
-		# 	'parent':'ZIPload171922',
+		# 	'name':'waterheater_controller_waterheater171923',
+		# 	'parent':'waterheater171923',
 		# 	'control_mode':'RAMP',
 		# 	'range_high':5,
 		# 	'range_low':-5,
 		# 	'ramp_high':1,
 		# 	'ramp_low':-1,
 		# 	'period':900,
-		# 	'setpoint':'base_power'
+		# 	'setpoint':'is_waterheater_on',
 		# 	'base_setpoint':1,
 		# 	'expectation_object':'MARKET_1',
 		# 	'expectation_property':'my_avg',
 		# 	'observation_object':'MARKET_1',
 		# 	'observation_property':'past_market.clearing_price',
-		# 	'stdev_observation_property':'my_std'
+		# 	'stdev_observation_property':'my_std',
 		# 	'state_property':'override'
 		# }
 		# copyStub = dict(stub)
@@ -429,7 +426,10 @@ def heavyProcessing(modelDir, inputDict):
 		whOnZip = zip(*whOnList)
 		whOnSum = [sum(x) for x in whOnZip]
 		anyOn = [x > 0 for x in whOnSum] 
-		tRecIdx = anyOn.index(True, eventEndIdx)
+
+		# tRecIdx = anyOn.index(True, eventEndIdx)
+		tRecIdx = anyOn.index(True)
+
 		tRec = dateTimeStamps[tRecIdx]
 		cleanOut['gridBallast']['recoveryTime'] = str(tRec)
 		# Waterheaters Off-Duration
@@ -684,11 +684,11 @@ def new(modelDir):
 		"modelType": modelName,
 		"zipCode": "59001",
 		"feederName1": "Olin Barre GH EOL Solar",
-		"simStartDate": "2012-04-01",
+		"simStartDate": "2012-01-01",
 		"simLength": "72",
 		"simLengthUnits": "hours", #minutes
 		"eventType": "ramping", #unramping, overfrequency, underfrequency
-		"eventTime": "2012-04-02 14:00",
+		"eventTime": "2012-01-02 14:00",
 		"eventLength": "02:00"
 	}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
