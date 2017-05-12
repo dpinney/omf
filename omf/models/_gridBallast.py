@@ -16,7 +16,8 @@ from __metaModel__ import *
 
 # OMF imports
 import omf.feeder as feeder
-from omf.solvers import gridlabd_gridballast as gridlabd
+# from omf.solvers import gridlabd_gridballast as gridlabd
+from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
 
 # Model metadata:
