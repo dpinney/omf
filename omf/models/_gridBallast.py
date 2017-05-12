@@ -118,6 +118,7 @@ def heavyProcessing(modelDir, inputDict):
 
 
 		# Set up GridBallast Controls
+		tree[1] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
 		for key in feederJson["tree"].keys():
 			if ('name' in feederJson['tree'][key]) and (feederJson['tree'][key].get('object') == 'waterheater'):
 		 		parent = feederJson['tree'][key]['name']
@@ -125,7 +126,8 @@ def heavyProcessing(modelDir, inputDict):
 		 		copyStub = dict(stub)
 		 		tree[feeder.getMaxKey(tree)+1] = copyStub
 		 		if 'demand' in feederJson['tree'][key]:
-		 			feederJson['tree'][key]['water_demand'] = feederJson['tree'][key]['demand']
+		 			# feederJson['tree'][key]['water_demand'] = feederJson['tree'][key]['demand']
+		 			feederJson['tree'][key]['water_demand'] = 'weekday_hotwater*1'
 		 			del feederJson['tree'][key]['demand']
 		 			feederJson['tree'][key]['enable_freq_control'] = 'true'
 		 			feederJson['tree'][key]['freq_lowlimit'] = 59.97
@@ -134,7 +136,7 @@ def heavyProcessing(modelDir, inputDict):
 		 			feederJson['tree'][key]['enable_jitter'] = 'true'
 		 			feederJson['tree'][key]['average_delay_time'] = 600
 
-		 			
+
 		# Attach recorder for waterheaters on/off
 		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheaterOn.csv'}
 		copyStub = dict(stub)
