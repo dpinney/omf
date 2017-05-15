@@ -4,7 +4,7 @@ Tested on Linux and macOS.
 '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, math
-import multiprocessing, platform
+import multiprocessing, platform, shlex
 from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
@@ -85,12 +85,14 @@ def runForeground(modelDir, inputDict):
 		pfTolArg = "\'pf.tol\', "+str(inputDict.get("tolerance",math.pow(10,-8)))
 		pfEnflArg = "\'pf.enforce_q_lims\', "+str(inputDict.get("genLimits",0))
 		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
-		command = "octave -p" + matPath + "--no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
-		if(platform.system() == "Windows"):
-			print "SUP"
+		command = "octave -p " + matPath + " --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
+		#"octave -p " + matPath + "--no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
+		print command
+		if platform.system() == "Windows":
 			command = command.replace('/', '\\')
-		print "command:", command
-		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+		#proc = subprocess.Popen(['C:\Octave\Octave-4.2.0\octave','--no-gui','-p',matPath, "--eval", mpoptArg], stdout=subprocess.PIPE, shell=True)
+		proc = subprocess.Popen(['C:\Octave\Octave-4.2.0\octave','--no-gui','-p',matPath, "--eval", "\"" + mpoptArg + "runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\""], stdout=subprocess.PIPE, shell=True)
+		#
 		(out, err) = proc.communicate()
 		# SKELETON code.
 		imgSrc = pJoin(__metaModel__._omfDir,'scratch','transmission','inData')
@@ -249,11 +251,11 @@ def _simpleTest():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	# renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	renderAndShow(modelLoc)
+	# renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_simpleTest	()

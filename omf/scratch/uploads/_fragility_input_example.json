@@ -3169,7 +3169,7 @@
 			"hazardQuantityType": "Windspeed",
 			"rasterFieldData": 
 			{
-				"uri": "file:///C:/WindGrid_lpnorm_example.asc",
+				"uri": "file:///C:/Users/301338/Desktop/PROJECTS/lpnorm/WindGrid_lpnorm_example.asc",
 				"gridFormat": "ArcGrid",
 				"crsCode": "EPSG:4326",
 				"nBands": 1,
