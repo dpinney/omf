@@ -4,7 +4,7 @@ Tested on Linux and macOS.
 '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, subprocess, datetime, traceback, math
-import multiprocessing, platform, shlex
+import multiprocessing, platform
 from os.path import join as pJoin
 from jinja2 import Template
 import __metaModel__
@@ -260,7 +260,7 @@ def _simpleTest():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	# renderAndShow(modelLoc)
+	renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
