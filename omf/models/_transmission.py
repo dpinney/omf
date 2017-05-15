@@ -72,10 +72,11 @@ def runForeground(modelDir, inputDict):
 			for row in matStr: outMat.write(row)		
 		# Get MATPOWER directories for the Octave path.
 		matDir =  pJoin(__metaModel__._omfDir,'solvers','matpower5.1')
-		matPath = '"' + ":".join([matDir,pJoin(matDir,'t'),pJoin(matDir,'extras')]) + '"'
-		if(platform.system() == "Windows"):  # HACK: do the world's worst URLENCODE:
-			matDir = matDir.replace('\\', '/')
-			matPath = matPath.replace('\\', '/')
+		if platform.system() == "Windows":
+			pathSep = ";"
+		else:
+			pathSep = ":"
+		matPath = '"' + pathSep.join([matDir,pJoin(matDir,'t'),pJoin(matDir,'extras')]) + '"'
 		# Configure and run MATPOWER.
 		algorithm = inputDict.get("algorithm","NR")
 		pfArg = "\'pf.alg\', \'"+algorithm+"\'"
@@ -84,16 +85,24 @@ def runForeground(modelDir, inputDict):
 		pfItArg = "\'"+iterCode+"\', "+str(inputDict.get("iteration",10))
 		pfTolArg = "\'pf.tol\', "+str(inputDict.get("tolerance",math.pow(10,-8)))
 		pfEnflArg = "\'pf.enforce_q_lims\', "+str(inputDict.get("genLimits",0))
-		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
-		command = "octave -p " + matPath + " --no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
-		#"octave -p " + matPath + "--no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
-		print command
 		if platform.system() == "Windows":
-			command = command.replace('/', '\\')
-		#proc = subprocess.Popen(['C:\Octave\Octave-4.2.0\octave','--no-gui','-p',matPath, "--eval", mpoptArg], stdout=subprocess.PIPE, shell=True)
-		proc = subprocess.Popen(['C:\Octave\Octave-4.2.0\octave','--no-gui','-p',matPath, "--eval", "\"" + mpoptArg + "runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\""], stdout=subprocess.PIPE, shell=True)
-		#
-		(out, err) = proc.communicate()
+			envVars = os.environ["PATH"].split(';')
+			octavePath = "C:\\Octave\\Octave-4.2.0"
+			for pathVar in envVars:
+				if "octave" in pathVar.lower():
+					octavePath = pathVar
+			mpoptArg = "mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+") "
+			cmd = "runpf(\'"+pJoin(modelDir,networkName+'.m')+"\'," + mpoptArg +")"
+			args = [octavePath + '\\bin\\octave-cli','-p',matPath, "--eval",  cmd]
+			#print " ".join(args)
+			myOut = subprocess.check_output(args, shell=True)
+			with open(pJoin(modelDir, "matout.txt"), "w") as matOut:
+				matOut.write(myOut)
+		else:
+			mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
+			command = "octave -p " + matPath + "--no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
+			proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+			(out, err) = proc.communicate()
 		# SKELETON code.
 		imgSrc = pJoin(__metaModel__._omfDir,'scratch','transmission','inData')
 		# Read matout.txt and parse into outData.
@@ -255,7 +264,7 @@ def _simpleTest():
 	# Run the model.
 	runForeground(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
-	# renderAndShow(modelLoc)
+	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
 	_simpleTest	()
