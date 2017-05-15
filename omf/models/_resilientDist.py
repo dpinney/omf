@@ -575,9 +575,9 @@ def heavyProcessing(modelDir, inputDict):
 		outFilePath = pJoin(modelDir, gfmOutFileName)
 		topologyPath = pJoin(__metaModel__._omfDir,'solvers','gfm', 'fragility_topology.json')
 		shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'RDT_template.json'), pJoin(modelDir, 'RDT_template.json'))
-		#proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
+		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
 
-		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath, '--lpnorm', topologyPath], cwd=modelDir)
+		#proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath, '--lpnorm', topologyPath], cwd=modelDir)
 		proc.wait()
 		gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
 		outData['gfmRawOut'] = gfmRawOut
@@ -605,7 +605,7 @@ def heavyProcessing(modelDir, inputDict):
 		rdtFileName, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 		rdtInFile = modelDir + '/' + rdtFileName
 		
-		rdtInFile = modelDir + '/' + 'gfmOutput.json'
+		#rdtInFile = modelDir + '/' + 'gfmOutput.json'
 		rdtOutFile = modelDir + '/rdtOutput.json'
 		rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
 		rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
