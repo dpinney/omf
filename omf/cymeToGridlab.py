@@ -177,26 +177,6 @@ def _csvToDictList(csvFileName,feederId):
     mapped  = []
     deleteRows = []
     content = []
-    # Look at csv DictReader to make this better
-    # with open(csvFileName,'r') as csvFile:
-    #     csvReader = csv.reader(csvFile)
-    #     for row in csvReader:
-    #         for columnName in row:
-    #             header.append(columnName)
-    #             if columnName in columns:
-    #                 included_columns.append(row.index(columnName))
-    #         for i in included_columns:
-    #             if header[i] not in ['NodeId','NetworkId','ConductorSpacingId','DeviceNumber','SectionId','FromNodeId','ToNodeId','EquipmentId']:
-    #                 try:
-    #                     content[header[i]] = float(row[i])
-    #                 except:
-    #                     content[header[i]] = row[i]
-    #             else:
-    #                 content[header[i]] = row[i]
-    #         mapped.append(Map(content))
-    # mapped.pop(0)
-
-    # Testing new shorter refactored code before deleting old stuff above 
     sourceFile = csv.reader(open(csvFileName))
     header = sourceFile.next()
     csvDict = csv.DictReader(open(csvFileName,'r'))
@@ -465,9 +445,7 @@ def _readCymeQOverheadLine(feederId, modelDir):
     CYMEQOVERHEADLINE = { 'name' : None,       # Information structure for each object found in CYMOVERHEADBYPHASE
                           'configuration' : None}
     spacingIds = []
-    # cymeqconductor_db = equipmentDatabase.execute("SELECT EquipmentId, FirstRating, GMR, R50 FROM CYMEQCONDUCTOR").fetchall()
     cymeqoverheadline_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQOVERHEADLINE.csv"),feederId)
-    # print cymeqconductor_db
     if len(cymeqoverheadline_db) == 0:
         warnings.warn("No conductor objects were found in CYMEQCONDUCTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
     else:
@@ -681,138 +659,113 @@ def _readCymeRegulator(feederId, modelDir):
                 cymregulator[row.DeviceNumber]['tap_pos_C'] = row.TapPositionC
     return cymregulator
 
-def _readCymeShuntCapacitor(feederId, type, modelDir):
+def _readCymeShuntCapacitor(feederId, modelDir):
     cymshuntcapacitor = {}                           # Stores information found in CYMSHUNTCAPACITOR in the network database
-    if (type==1):
-        CYMSHUNTCAPACITOR = { 'name' : None,             # Information structure for each object found in CYMSHUNTCAPACITOR
-                              'equipment_name' : None,
-                              'status' : None,
-                              'phases' : None,
-                              'capacitor_A' : None,
-                              'capacitor_B' : None,
-                              'capacitor_C' : None,
-                              'capacitor_ABC' : None,
-                              'kv_line_neutral' : None,
-                              'control' : None,
-                              'voltage_set_high' : None,
-                              'voltage_set_low' : None,
-                              'VAr_set_high' : None,
-                              'VAr_set_low' : None,
-                              'current_set_high' : None,
-                              'current_set_low' : None,
-                              'pt_phase' : None}
-                              
-        # shuntcapacitor_db = networkDatabase.execute("SELECT DeviceNumber, EquipmentId, Status, Phase, KVARA, KVARB, KVARC, KVLN, CapacitorControlType, OnValue, OffValue, KVARABC FROM CYMSHUNTCAPACITOR WHERE NetworkId = '{:s}'".format(feederId)).fetchall()
-        shuntcapacitor_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSHUNTCAPACITOR.csv"),feederId)
-    elif (type==2):
-        CYMSHUNTCAPACITOR = { 'name' : None,             # Information structure for each object found in CYMSHUNTCAPACITOR
-                              'equipment_name' : None,
-                              'status' : None,
-                              'phases' : None,
-                              'capacitor_A' : None,
-                              'capacitor_B' : None,
-                              'capacitor_C' : None,
-                              'capacitor_ABC' : None,
-                              'kv_line_neutral' : None,
-                              'control' : None,
-                              'voltage_set_high' : None,
-                              'voltage_set_low' : None,
-                              'VAr_set_high' : None,
-                              'VAr_set_low' : None,
-                              'current_set_high' : None,
-                              'current_set_low' : None,
-                              'pt_phase' : None}
-                              
-        # shuntcapacitor_db = networkDatabase.execute("SELECT DeviceNumber, NetworkId, EquipmentId, Status, KVARA, KVARB, KVARC, KVLN, CapacitorControlType, OnValueA, OffValueA FROM CYMSHUNTCAPACITOR WHERE NetworkId = '{:s}'".format(feederId)).fetchall()        
-        shuntcapacitor_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSHUNTCAPACITOR.csv"),feederId)
+    CYMSHUNTCAPACITOR = { 'name' : None,             # Information structure for each object found in CYMSHUNTCAPACITOR
+                          'equipment_name' : None,
+                          'status' : None,
+                          'phases' : None,
+                          'capacitor_A' : None,
+                          'capacitor_B' : None,
+                          'capacitor_C' : None,
+                          'capacitor_ABC' : None,
+                          'kv_line_neutral' : None,
+                          'control' : None,
+                          'voltage_set_high' : None,
+                          'voltage_set_low' : None,
+                          'VAr_set_high' : None,
+                          'VAr_set_low' : None,
+                          'current_set_high' : None,
+                          'current_set_low' : None,
+                          'pt_phase' : None}
+                          
+    shuntcapacitor_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMSHUNTCAPACITOR.csv"),feederId)                    
     if len(shuntcapacitor_db) == 0:
         warnings.warn("No capacitor objects were found in CYMSHUNTCAPACITOR for feeder_id: {:s}".format(feederId), RuntimeWarning)
     else:
-        if (feederId=='650'):
-            for row in shuntcapacitor_db:
-                row.DeviceNumber = _fixName(row.DeviceNumber)
-                if row.EquipmentId is None:
-                    row.EquipmentId = 'DEFAULT'
-                row.EquipmentId = _fixName(row.EquipmentId)
-                if row.DeviceNumber not in cymshuntcapacitor.keys():
-                    cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(CYMSHUNTCAPACITOR)
-                    cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber          
-                    cymshuntcapacitor[row.DeviceNumber]['equipment_name'] = row.EquipmentId
-                    cymshuntcapacitor[row.DeviceNumber]['phases'] = _convertPhase(int(row.Phase))
-                    cymshuntcapacitor[row.DeviceNumber]['status'] = row.Status
-                    if float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARABC) > 0.0:                
-                        cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.KVARABC)*1000/3
-                        cymshuntcapacitor[row.DeviceNumber]['capacitor_B'] = float(row.KVARABC)*1000/3
-                        cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.KVARABC)*1000/3
-                    else:
-                        if float(row.KVARA) > 0.0:
-                            cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.KVARA)*1000
-                        if float(row.KVARB) > 0.0:
-                            cymshuntcapacitor[row.DeviceNumber]['capacitor_B'] = float(row.KVARB)*1000
-                        if float(row.KVARC) > 0.0:
-                            cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.KVARC)*1000
-                    if float(row.KVLN) > 0.0:
-                        cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000    
-                    if int(row.CapacitorControlType) == 2:
-                        cymshuntcapacitor[row.DeviceNumber]['control'] = 'VAR'
-                        cymshuntcapacitor[row.DeviceNumber]['VAr_set_high'] = float(row.OnValue)*1000
-                        cymshuntcapacitor[row.DeviceNumber]['VAr_set_low'] = float(row.OffValue)*1000
-                        cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))      
-                    elif int(row.CapacitorControlType) == 3:
-                        cymshuntcapacitor[row.DeviceNumber]['control'] = 'CURRENT'
-                        cymshuntcapacitor[row.DeviceNumber]['current_set_high'] = row.OnValue
-                        cymshuntcapacitor[row.DeviceNumber]['current_set_low'] = row.OffValue
-                        cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))   
-                    elif int(row.CapacitorControlType) == 7:
-                        cymshuntcapacitor[row.DeviceNumber]['control'] = 'VOLT'
-                        cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = row.OnValue
-                        cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = row.OffValue
-                        cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))   
-                    else:
-                        cymshuntcapacitor[row.DeviceNumber]['control'] = 'MANUAL'
-                        cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))
-                        cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000 
-                        cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000 
-        elif (feederId=='BN160'):
-            for row in shuntcapacitor_db:
-                row.DeviceNumber = _fixName(row.DeviceNumber)
-                if row.EquipmentId is None:
-                    row.EquipmentId = 'DEFAULT'
-                row.EquipmentId = _fixName(row.EquipmentId)
-                if row.DeviceNumber not in cymshuntcapacitor.keys():
-                    cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(CYMSHUNTCAPACITOR)
-                    cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber          
-                    cymshuntcapacitor[row.DeviceNumber]['equipment_name'] = row.EquipmentId
-                    cymshuntcapacitor[row.DeviceNumber]['phases'] = "ABCN"
-                    cymshuntcapacitor[row.DeviceNumber]['status'] = row.Status
-                    if float(row.KVARA) > 0.0:
-                        cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.KVARA)*1000
-                    if float(row.KVARB) > 0.0:
-                        cymshuntcapacitor[row.DeviceNumber]['capacitor_B'] = float(row.KVARB)*1000
-                    if float(row.KVARC) > 0.0:
-                        cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.KVARC)*1000
-                    if float(row.KVLN) > 0.0:
-                        cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000    
-                    if int(row.CapacitorControlType) == 2:
-                        cymshuntcapacitor[row.DeviceNumber]['control'] = 'VAR'
-                        cymshuntcapacitor[row.DeviceNumber]['VAr_set_high'] = float(row.OnValueA)*1000
-                        cymshuntcapacitor[row.DeviceNumber]['VAr_set_low'] = float(row.OffValueA)*1000
-                        cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"            
-                    elif int(row.CapacitorControlType) == 3:
-                        cymshuntcapacitor[row.DeviceNumber]['control'] = 'CURRENT'
-                        cymshuntcapacitor[row.DeviceNumber]['current_set_high'] = row.OnValueA
-                        cymshuntcapacitor[row.DeviceNumber]['current_set_low'] = row.OffValueA
-                        cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN" 
-                    elif int(row.CapacitorControlType) == 7:
-                        cymshuntcapacitor[row.DeviceNumber]['control'] = 'VOLT'
-                        cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = row.OnValueA
-                        cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = row.OffValueA
-                        cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"              
-                    else:
-                        cymshuntcapacitor[row.DeviceNumber]['control'] = 'MANUAL'
-                        cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
-                        cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000 
-                        cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000                 
+        # for row in shuntcapacitor_db:
+        #     row.DeviceNumber = _fixName(row.DeviceNumber)
+        #     if row.EquipmentId is None:
+        #         row.EquipmentId = 'DEFAULT'
+        #     row.EquipmentId = _fixName(row.EquipmentId)
+        #     if row.DeviceNumber not in cymshuntcapacitor.keys():
+        #         cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(CYMSHUNTCAPACITOR)
+        #         cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber          
+        #         cymshuntcapacitor[row.DeviceNumber]['equipment_name'] = row.EquipmentId
+        #         cymshuntcapacitor[row.DeviceNumber]['phases'] = _convertPhase(int(row.Phase))
+        #         cymshuntcapacitor[row.DeviceNumber]['status'] = row.Status
+        #         if float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARA) == 0.0 and float(row.KVARABC) > 0.0:                
+        #             cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.KVARABC)*1000/3
+        #             cymshuntcapacitor[row.DeviceNumber]['capacitor_B'] = float(row.KVARABC)*1000/3
+        #             cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.KVARABC)*1000/3
+        #         else:
+        #             if float(row.KVARA) > 0.0:
+        #                 cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.KVARA)*1000
+        #             if float(row.KVARB) > 0.0:
+        #                 cymshuntcapacitor[row.DeviceNumber]['capacitor_B'] = float(row.KVARB)*1000
+        #             if float(row.KVARC) > 0.0:
+        #                 cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.KVARC)*1000
+        #         if float(row.KVLN) > 0.0:
+        #             cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000    
+        #         if int(row.CapacitorControlType) == 2:
+        #             cymshuntcapacitor[row.DeviceNumber]['control'] = 'VAR'
+        #             cymshuntcapacitor[row.DeviceNumber]['VAr_set_high'] = float(row.OnValue)*1000
+        #             cymshuntcapacitor[row.DeviceNumber]['VAr_set_low'] = float(row.OffValue)*1000
+        #             cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))      
+        #         elif int(row.CapacitorControlType) == 3:
+        #             cymshuntcapacitor[row.DeviceNumber]['control'] = 'CURRENT'
+        #             cymshuntcapacitor[row.DeviceNumber]['current_set_high'] = row.OnValue
+        #             cymshuntcapacitor[row.DeviceNumber]['current_set_low'] = row.OffValue
+        #             cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))   
+        #         elif int(row.CapacitorControlType) == 7:
+        #             cymshuntcapacitor[row.DeviceNumber]['control'] = 'VOLT'
+        #             cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = row.OnValue
+        #             cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = row.OffValue
+        #             cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))   
+        #         else:
+        #             cymshuntcapacitor[row.DeviceNumber]['control'] = 'MANUAL'
+        #             cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = _convertPhase(int(row.Phase))
+        #             cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000 
+        #             cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000 
+        for row in shuntcapacitor_db:
+            row.DeviceNumber = _fixName(row.DeviceNumber)
+            if row.EquipmentId is None:
+                row.EquipmentId = 'DEFAULT'
+            row.EquipmentId = _fixName(row.EquipmentId)
+            if row.DeviceNumber not in cymshuntcapacitor.keys():
+                cymshuntcapacitor[row.DeviceNumber] = copy.deepcopy(CYMSHUNTCAPACITOR)
+                cymshuntcapacitor[row.DeviceNumber]['name'] = row.DeviceNumber          
+                cymshuntcapacitor[row.DeviceNumber]['equipment_name'] = row.EquipmentId
+                cymshuntcapacitor[row.DeviceNumber]['phases'] = "ABCN"
+                cymshuntcapacitor[row.DeviceNumber]['status'] = row.Status
+                if float(row.SwitchedKVARA) > 0.0:
+                    cymshuntcapacitor[row.DeviceNumber]['capacitor_A'] = float(row.SwitchedKVARA)*1000
+                if float(row.SwitchedKVARB) > 0.0:
+                    cymshuntcapacitor[row.DeviceNumber]['capacitor_B'] = float(row.SwitchedKVARB)*1000
+                if float(row.SwitchedKVARC) > 0.0:
+                    cymshuntcapacitor[row.DeviceNumber]['capacitor_C'] = float(row.SwitchedKVARC)*1000
+                if float(row.KVLN) > 0.0:
+                    cymshuntcapacitor[row.DeviceNumber]['kV_line_neutral'] = float(row.KVLN)*1000    
+                if int(row.CapacitorControlType) == 2:
+                    cymshuntcapacitor[row.DeviceNumber]['control'] = 'VAR'
+                    cymshuntcapacitor[row.DeviceNumber]['VAr_set_high'] = float(row.OnValueA)*1000
+                    cymshuntcapacitor[row.DeviceNumber]['VAr_set_low'] = float(row.OffValueA)*1000
+                    cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"            
+                elif int(row.CapacitorControlType) == 3:
+                    cymshuntcapacitor[row.DeviceNumber]['control'] = 'CURRENT'
+                    cymshuntcapacitor[row.DeviceNumber]['current_set_high'] = row.OnValueA
+                    cymshuntcapacitor[row.DeviceNumber]['current_set_low'] = row.OffValueA
+                    cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN" 
+                elif int(row.CapacitorControlType) == 7:
+                    cymshuntcapacitor[row.DeviceNumber]['control'] = 'VOLT'
+                    cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = row.OnValueA
+                    cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = row.OffValueA
+                    cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"              
+                else:
+                    cymshuntcapacitor[row.DeviceNumber]['control'] = 'MANUAL'
+                    cymshuntcapacitor[row.DeviceNumber]['pt_phase'] = "ABCN"
+                    cymshuntcapacitor[row.DeviceNumber]['voltage_set_high'] = float(row.KVLN)*1000 
+                    cymshuntcapacitor[row.DeviceNumber]['voltage_set_low'] = float(row.KVLN)*1000                 
     return cymshuntcapacitor
 
 def _determineLoad( l_type, l_v1, l_v2, conKVA):
@@ -985,9 +938,7 @@ def _readEqConductor(feederId, modelDir):
                        'rating.summer_continuous' : None,
                        'geometric_mean_radius' : None,
                        'resistance' : None}
-    # cymeqconductor_db = equipmentDatabase.execute("SELECT EquipmentId, FirstRating, GMR, R50 FROM CYMEQCONDUCTOR").fetchall()
     cymeqconductor_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMEQCONDUCTOR.csv"),feederId)
-    # print cymeqconductor_db
     if len(cymeqconductor_db) == 0:
         warnings.warn("No conductor objects were found in CYMEQCONDUCTOR for feeder_id: {:s}.".format(feederId), RuntimeWarning)
     else:
@@ -1306,6 +1257,25 @@ def _readCymeBattery(feederId, modelDir):
                 cymeBattery[row.DeviceNumber]['phase'] = row.Phase
     return cymeBattery
 
+def _readCymeGenerator(feederId, modelDir):
+    cymeGenerator = {}
+    CYMEGENERATOR = {'name':None,
+                    'generation':None,
+                    'power_factor':None}
+    cymgenerator_db = _csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMDGGENERATIONMODEL.csv"),feederId)
+    if len(cymgenerator_db) == 0:
+        warnings.warn("No generator information was found in CYMDGGENERATIONMODEL for feeder id: {:s}.".format(feederId), RuntimeWarning)
+    else:
+        for row in cymgenerator_db:
+            row.DeviceNumber = _fixName(row.DeviceNumber)
+            if row.DeviceType == '37':
+                if row.DeviceNumber not in cymeGenerator.keys():
+                    cymeGenerator[row.DeviceNumber] = copy.deepcopy(CYMEGENERATOR)
+                    cymeGenerator[row.DeviceNumber]['name'] = row.DeviceNumber
+                    cymeGenerator[row.DeviceNumber]['generation'] = row.ActiveGeneration
+                    cymeGenerator[row.DeviceNumber]['power_factor'] = row.PowerFactor
+    return cymeGenerator
+
 def _find_SPCT_rating(load_str):
         spot_load = abs(complex(load_str))                           
         spct_rating = [5,10,15,25,30,37.5,50,75,87.5,100,112.5,125,137.5,150,162.5,175,187.5,200,225,250,262.5,300,337.5,400,412.5,450,500,750,1000,1250,1500,2000,2500,3000,4000,5000]
@@ -1373,7 +1343,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
     # -9-CYME CYMREGULATOR**********************************************************************************************************************************************************************
     cymregulator = _readCymeRegulator(feeder_id, modelDir)
     # -10-CYME CYMSHUNTCAPACITOR**********************************************************************************************************************************************************************
-    cymshuntcapacitor = _readCymeShuntCapacitor(feeder_id, type, modelDir)
+    cymshuntcapacitor = _readCymeShuntCapacitor(feeder_id, modelDir)
     # -11-CYME CYMCUSTOMERLOAD**********************************************************************************************************************************************************************
     cymcustomerload = _readCymeCustomerLoad(feeder_id, modelDir)
     # -12-CYME CYMSECTION ****************************************************************************************************************************************************************
@@ -1407,6 +1377,8 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
     cymbattery = _readCymeBattery(feeder_id, modelDir)
     # BATTERY CONFIGS
     cymeqbattery = _readEqBattery(feeder_id,modelDir)
+    # GENERATOR 
+    cymgenerator = _readCymeGenerator(feeder_id, modelDir)
     # Check that the section actually is a device
     for link in cymsection.keys():
         link_exists = 0
@@ -1453,11 +1425,11 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
         for link in cymsection.keys():
             if (node == cymsection[link]['from'] or node == cymsection[link]['to']) and link not in deleteSections:
                 deleteSections.append(link)
-    for section in deleteSections:
-        del cymsection[section]
-    for device in cymsectiondevice.keys():
-        if cymsectiondevice[device]['section_name'] in deleteSections:
-            del cymsectiondevice[device]
+    # for section in deleteSections:
+    #     del cymsection[section]
+    # for device in cymsectiondevice.keys():
+    #     if cymsectiondevice[device]['section_name'] in deleteSections:
+    #         del cymsectiondevice[device]
     # Group each type of device.
     for device in cymsectiondevice.keys():
         if cymsectiondevice[device]['device_type'] == 1:
@@ -1493,8 +1465,9 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
                 threewxfmr_sections[cymsectiondevice[device]['section_name']] = device
         elif cymsectiondevice[device]['device_type'] == 80:
             battery_sections[cymsectiondevice[device]['section_name']] = device
+    print load_sections
     # find the parent of capacitors, loads, and pv
-    for x in [capacitor_sections, load_sections, pv_sections, battery_sections, syncgen_sections]:
+    for x in [capacitor_sections, load_sections, pv_sections, syncgen_sections, battery_sections]:
         if len(x) > 0:
             _findParents(cymsection, cymsectiondevice, x)
     # split out fuses, regulators, transformers, switches, reclosers, and sectionalizers from the lines.
@@ -1552,13 +1525,13 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
                 fromNodes.append(cymsection[link]['from'])
             if cymsection[link]['to'] not in toNodes:
                 toNodes.append(cymsection[link]['to'])
-    islandNodes = []
-    for node in fromNodes:
-        if node not in toNodes and node != swingBus and node not in islandNodes:
-            islandNodes.append(node)
-    for node in islandNodes:
-        if node != swingBus:
-            print "Feeder islanded\n"            
+    # islandNodes = []
+    # for node in fromNodes:
+    #     if node not in toNodes and node != swingBus and node not in islandNodes:
+    #         islandNodes.append(node)
+    # for node in islandNodes:
+    #     if node != swingBus:
+    #         print "Feeder islanded\n"            
     # Pass from, to, and phase information from cymsection to cymsectiondevice
     nodes = {}
     for device in cymsectiondevice.keys():
@@ -1855,6 +1828,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
     swObjs = {}
     for swObj in cymsectiondevice.keys():
         if cymsectiondevice[swObj]['device_type'] == 13:
+            # print swObj
             if swObj not in cymswitch.keys():
                 print "There is no switch spec for  ", swObj, " in the network database provided.\n"  
             elif swObj not in swObjs.keys():
@@ -2088,13 +2062,14 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
             if bat not in cymbattery.keys():
                 print "There is no battery spec for ", bat, " in the network database provided.\n"
             else:
-                bat_sec[bat+'met'] = {'object':'meter',
-                                    'name': bat+'met',
-                                    'parent':cymsectiondevice[bat]['parent']}
+                bat_sec[cymsectiondevice[bat]['section_name']] = {'object':'meter',
+                                    'name': cymsectiondevice[bat]['section_name'],
+                                    'parent':cymsectiondevice[bat]['parent']
+                                    }
                 bat_sec[bat+'inv'] = {'object':'inverter',
                                     'name':'n'+bat+'inv',
                                     'generator_mode':'CONSTANT_PQ',
-                                    'parent':bat+'met',
+                                    'parent':cymsectiondevice[bat]['section_name'],
                                     'phases':'BS',
                                     'four_quadrant_control_mode': 'LOAD_FOLLOWING',
                                     'generator_status': 'ONLINE',
@@ -2120,6 +2095,20 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
                                 'battery_capacity':cymeqbattery[cymbattery[bat]['configuration']]['rated_storage_energy'],
                                 'battery_type':'LI_ION',
                                 'use_internal_battery_model':'TRUE'}
+    # Create generator dictionaries
+    gen_secs = {}
+    for gen in cymsectiondevice.keys():
+        if cymsectiondevice[gen]['device_type'] == 37:
+            if gen not in cymgenerator.keys():
+                print "There is no generator spec for ", gen, " in the network database provided.\n"
+            else:
+                gen_secs[gen] = {'object':'diesel_dg',
+                                'name':gen,
+                                'parent': cymsectiondevice[gen]['parent'],
+                                'Gen_type':2,
+                                'Gen_mode':1,
+                                'TotalRealPow':cymgenerator[gen]['generation'],
+                                'pf': cymgenerator[gen]['power_factor']}
     # Create transformer and transformer configuration dictionaries
     xfmr_cfgs = {}
     xfmrs = {}
@@ -2212,7 +2201,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
     for headId in xrange(len(genericHeaders)):
         glmTree[headId] = genericHeaders[headId]
     key = len(glmTree)
-    objectList = [ohl_conds, ugl_conds, ohl_spcs, ohl_configs , ugl_sps, ohl_cfgs, ugl_cfgs, xfmr_cfgs, spct_cfgs, reg_cfgs, meters, nodes, loads, tpms, tpns, ohls, ugls, xfmrs, spcts, regs, swObjs, rcls, sxnlrs, fuses, caps, pv_sec, bat_sec]
+    objectList = [ohl_conds, ugl_conds, ohl_spcs, ohl_configs , ugl_sps, ohl_cfgs, ugl_cfgs, xfmr_cfgs, spct_cfgs, reg_cfgs, meters, nodes, loads, tpms, tpns, ohls, ugls, xfmrs, spcts, regs, swObjs, rcls, sxnlrs, fuses, caps, pv_sec, bat_sec, gen_secs]
     for objDict in objectList:
         if len(objDict) > 0:
             for obj in objDict.keys():
