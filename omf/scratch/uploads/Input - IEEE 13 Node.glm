@@ -1,0 +1,589 @@
+// Hacked to include a single secondary system.
+
+clock {
+	timezone EST+5EDT;
+	starttime '2001-01-01 00:00:00';
+	stoptime '2001-01-02 00:00:00';
+};
+
+#set relax_naming_rules=1;
+#set profiler=1;
+module generators;
+module tape;
+module climate;
+module powerflow {
+	solver_method NR;
+};
+
+object overhead_line_conductor:6010 {
+	resistance 0.185900;
+	geometric_mean_radius 0.031300;
+};
+
+object overhead_line_conductor:6020 {
+	resistance 0.592000;
+	geometric_mean_radius 0.00814;
+};
+
+object overhead_line_conductor:6030 {
+	resistance 1.120000;
+	geometric_mean_radius 0.004460;
+};
+
+object underground_line_conductor:6060 {
+	conductor_gmr 0.017100;
+	conductor_resistance 0.410000;
+	shield_resistance 0.000000;
+	neutral_gmr 0.0020800;
+	outer_diameter 1.290000;
+	neutral_strands 13.000000;
+	neutral_resistance 14.87200;
+	neutral_diameter 0.0640837;
+	conductor_diameter 0.567000;
+	shield_gmr 0.000000;
+};
+
+object underground_line_conductor:6070 {
+	conductor_gmr 0.011100;
+	conductor_resistance 0.970000;
+	shield_resistance 0.000000;
+	neutral_gmr 0.011100;
+	outer_diameter 1.060000;
+	neutral_strands 6.000000;
+	neutral_resistance 0.970000;
+	neutral_diameter 0.0640837;
+	conductor_diameter 0.368000;
+	shield_gmr 0.000000;
+};
+
+object line_spacing:500601 {
+	distance_BC 7.0;
+	distance_CN 5.0;
+	distance_AN 4.272002;
+	distance_AB 2.5;
+	distance_BN 5.656854;
+	distance_AC 4.5;
+};
+
+object line_spacing:500602 {
+	distance_BC 7.0;
+	distance_CN 5.656854;
+	distance_AN 4.272002;
+	distance_AB 4.5;
+	distance_AC 2.5;
+	distance_BN 5.0;
+};
+
+object line_spacing:505603 {
+	distance_BC 7.0;
+	distance_CN 5.656854;
+	distance_AN 0.0;
+	distance_AB 0.0;
+	distance_AC 0.0;
+	distance_BN 5.0;
+};
+
+object line_spacing:505604 {
+	distance_BC 0.0;
+	distance_CN 5.0;
+	distance_AN 5.656854;
+	distance_AB 0.0;
+	distance_AC 7.0;
+	distance_BN 0.0;
+};
+
+object line_spacing:510 {
+	distance_BC 0.0;
+	distance_CN 5.0;
+	distance_AN 0.0;
+	distance_AB 0.0;
+	distance_AC 0.0;
+	distance_BN 0.0;
+};
+
+object line_configuration:601 {
+	spacing line_spacing:500601;
+	conductor_N overhead_line_conductor:6020;
+	conductor_A overhead_line_conductor:6010;
+	conductor_C overhead_line_conductor:6010;
+	conductor_B overhead_line_conductor:6010;
+};
+
+object line_configuration:602 {
+	spacing line_spacing:500602;
+	conductor_N overhead_line_conductor:6020;
+	conductor_A overhead_line_conductor:6020;
+	conductor_C overhead_line_conductor:6020;
+	conductor_B overhead_line_conductor:6020;
+};
+
+object line_configuration:603 {
+	conductor_N overhead_line_conductor:6030;
+	spacing line_spacing:505603;
+	conductor_C overhead_line_conductor:6030;
+	conductor_B overhead_line_conductor:6030;
+};
+
+object line_configuration:604 {
+	conductor_N overhead_line_conductor:6030;
+	spacing line_spacing:505604;
+	conductor_A overhead_line_conductor:6030;
+	conductor_C overhead_line_conductor:6030;
+};
+
+object line_configuration:605 {
+	conductor_N overhead_line_conductor:6030;
+	spacing line_spacing:510;
+	conductor_C overhead_line_conductor:6030;
+};
+
+object line_spacing:515 {
+	distance_BC 0.500000;
+	distance_CN 0.000000;
+	distance_AN 0.000000;
+	distance_AB 0.500000;
+	distance_BN 0.000000;
+	distance_AC 1.000000;
+};
+
+object line_spacing:520 {
+	distance_BC 0.000000;
+	distance_CN 0.000000;
+	distance_AN 0.083333;
+	distance_AB 0.000000;
+	distance_BN 0.000000;
+	distance_AC 0.000000;
+};
+
+object line_configuration:606 {
+	spacing line_spacing:515;
+	conductor_A underground_line_conductor:6060;
+	conductor_C underground_line_conductor:6060;
+	conductor_B underground_line_conductor:6060;
+};
+
+object line_configuration:607 {
+	conductor_N underground_line_conductor:6070;
+	spacing line_spacing:520;
+	conductor_A underground_line_conductor:6070;
+};
+
+object overhead_line:632645 {
+	phases BCN;
+	from 632;
+	name 632-645;
+	to 645;
+	length 500;
+	configuration line_configuration:603;
+};
+
+object overhead_line:645646 {
+	phases BCN;
+	from 645;
+	name 645-646;
+	to 646;
+	length 300;
+	configuration line_configuration:603;
+};
+
+object overhead_line:630632 {
+	phases ABCN;
+	from 630;
+	name 630-632;
+	to 632;
+	length 2000;
+	configuration line_configuration:601;
+};
+
+object overhead_line:6326321 {
+	phases ABCN;
+	from 632;
+	name 632-6321;
+	to 6321;
+	length 500;
+	configuration line_configuration:601;
+};
+
+object overhead_line:6321671 {
+	phases ABCN;
+	from 6321;
+	name 6321-671;
+	to 671;
+	length 1500;
+	configuration line_configuration:601;
+};
+
+object overhead_line:671680 {
+	phases ABCN;
+	from 671;
+	name 671-680;
+	to 680;
+	length 1000;
+	configuration line_configuration:601;
+};
+
+object overhead_line:671684 {
+	phases ACN;
+	from 671;
+	name 671-684;
+	to 684;
+	length 300;
+	configuration line_configuration:604;
+};
+
+object overhead_line:684611 {
+	phases CN;
+	from 684;
+	name 684-611;
+	to 611;
+	length 300;
+	configuration line_configuration:605;
+};
+
+object underground_line:684652 {
+	phases AN;
+	from 684;
+	name 684-652;
+	to 652;
+	length 800;
+	configuration line_configuration:607;
+};
+
+object underground_line:692675 {
+	phases ABC;
+	from 692;
+	name 692-675;
+	to 675;
+	length 2500;
+	configuration line_configuration:606;
+};
+
+object overhead_line:632633 {
+	phases ABCN;
+	from 632;
+	name 632-633;
+	to 633;
+	length 500;
+	configuration line_configuration:602;
+};
+
+object node {
+	phases ABCN;
+	name 633;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+};
+
+object node {
+	phases ABCN;
+	name 630;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771+0j;
+	nominal_voltage 2401.7771;
+};
+
+object node {
+	phases ABCN;
+	name 632;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+};
+
+object meter {
+	phases ABCN;
+	name 650;
+	bustype SWING;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+};
+
+object recorder {
+	interval 3600;
+	parent 650;
+	limit 8808;
+	file recordedPowerSubstation.csv;
+	property voltage_A, measured_power_A;
+};
+
+object node {
+	phases ABCN;
+	name 680;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+};
+
+object node {
+	phases ACN;
+	name 684;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+};
+
+object node {
+	phases ABCN;
+	name 634;
+	voltage_B -240.000-415.6922j;
+	voltage_C -240.000+415.6922j;
+	voltage_A 480.000+0j;
+	nominal_voltage 480.000;
+};
+
+object load {
+	phases BCN;
+	name 645;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+	constant_power_B 170000+125000j;
+};
+
+object load {
+	phases BC;
+	name 646;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+	constant_power_B 150000+115000j;
+};
+
+object load {
+	phases AN;
+	name 652;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	nominal_voltage 2401.7771;
+	constant_power_A 650000+500000j;
+};
+
+object load {
+	phases ABC;
+	name 671;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	constant_power_C 455000+480000j;
+	constant_power_B 425000+360000j;
+	constant_power_A 325000+520000j;
+	nominal_voltage 2401.7771;
+};
+
+object load {
+	phases ABC;
+	name 675;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	constant_power_C 450000+547200j;
+	constant_power_B 770000+820000j;
+	constant_power_A 565000+470000j;
+	nominal_voltage 2401.7771;
+};
+
+object load {
+	phases ABC;
+	name 692;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	constant_power_C 24000+35200j;
+	constant_power_B 58000+80000j;
+	constant_power_A 385000+350000j;
+	nominal_voltage 2401.7771;
+};
+
+object load {
+	phases CN;
+	name 611;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	constant_power_C 49000+38200j;
+	nominal_voltage 2401.7771;
+};
+
+object load {
+	phases ABC;
+	name 6711;
+	parent 671;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	constant_power_C 36000+28666.6667j;
+	constant_power_B 25000+22666.6667j;
+	constant_power_A 5666.6667+4333.3333j;
+	nominal_voltage 2401.7771;
+};
+
+object load {
+	phases ABCN;
+	name 6321;
+	voltage_B -1200.8886-2080.000j;
+	voltage_C -1200.8886+2080.000j;
+	voltage_A 2401.7771;
+	constant_power_C 78000.0+55333.3333j;
+	constant_power_B 44000+35333.3333j;
+	constant_power_A 11333.333+6666.6667j;
+	nominal_voltage 2401.7771;
+};
+
+object transformer {
+	phases AS;
+	name trip_trans;
+	configuration trip_trans_conf;
+	from 684;
+	to trip_meter;
+};
+
+object transformer_configuration {
+	powerA_rating 50 kVA;
+	name trip_trans_conf;
+	shunt_impedance 10000+10000j;
+	secondary_voltage 120.0;
+	connect_type SINGLE_PHASE_CENTER_TAPPED;
+	impedance 0.00033+0.0022j;
+	primary_voltage 2401.0;
+};
+
+object triplex_meter {
+	name trip_meter;
+	phases AS;
+	nominal_voltage 120;
+};
+
+object triplex_node {
+	phases AS;
+	nominal_voltage 120;
+	name trip;
+	power_12 1000;
+	parent trip_meter;
+};
+
+object switch:671692 {
+	status CLOSED;
+	phases ABCN;
+	from 671;
+	name 671-692;
+	to 692;
+};
+
+object transformer_configuration:400 {
+	power_rating 500;
+	primary_voltage 4160;
+	install_type PADMOUNT;
+	secondary_voltage 480;
+	connect_type WYE_WYE;
+	resistance 0.011;
+	reactance 0.02;
+};
+
+object transformer:633634 {
+	phases ABCN;
+	from 633;
+	name 633-634;
+	to 634;
+	configuration transformer_configuration:400;
+};
+
+object regulator_configuration:6506321 {
+	power_transducer_ratio 20;
+	connect_type 1;
+	Type A;
+	band_width 40;
+	compensator_x_setting_A 9.0;
+	time_delay 30.0;
+	compensator_x_setting_C 9.0;
+	compensator_x_setting_B 9.0;
+	regulation 0.10;
+	compensator_r_setting_C 3.0;
+	compensator_r_setting_B 3.0;
+	compensator_r_setting_A 3.0;
+	band_center 2401;
+	PT_phase ABC;
+	lower_taps 16;
+	Control OUTPUT_VOLTAGE;
+	raise_taps 16;
+	current_transducer_ratio 700;
+	tap_pos_B 1;
+	tap_pos_C 1;
+	CT_phase ABC;
+	tap_pos_A 1;
+};
+
+object regulator:650630 {
+	phases ABC;
+	from 650;
+	name Reg1;
+	to 630;
+	configuration regulator_configuration:6506321;
+};
+
+object capacitor {
+	control VOLT;
+	phases ABCN;
+	capacitor_A 0.10 MVAr;
+	name CAP1;
+	parent 675;
+	capacitor_C 0.10 MVAr;
+	capacitor_B 0.10 MVAr;
+	pt_phase ABCN;
+	time_delay 300.0;
+	nominal_voltage 2401.7771;
+	voltage_set_low 2250.0;
+	switchC CLOSED;
+	control_level INDIVIDUAL;
+	switchA CLOSED;
+	switchB CLOSED;
+	phases_connected ABCN;
+	dwell_time 0.0;
+	voltage_set_high 2700.0;
+};
+
+object capacitor {
+	control VOLT;
+	phases ABCN;
+	capacitor_A 0.05 MVAr;
+	name CAP2;
+	parent 675;
+	capacitor_C 0.05 MVAr;
+	capacitor_B 0.05 MVAr;
+	pt_phase ABCN;
+	time_delay 300.0;
+	nominal_voltage 2401.7771;
+	voltage_set_low 2150.0;
+	switchC CLOSED;
+	control_level INDIVIDUAL;
+	switchA CLOSED;
+	switchB CLOSED;
+	phases_connected ABCN;
+	dwell_time 0.0;
+	voltage_set_high 2600.0;
+};
+
+object meter {
+	phases A;
+	nominal_voltage 2401.7771;
+	name meter1;
+	parent 675;
+};
+
+object recorder {
+	interval 3600;
+	parent meter1;
+	limit 8808;
+	file recordedPower675.csv;
+	property voltage_A, measured_power_A, measured_power_B, measured_power_C;
+};
