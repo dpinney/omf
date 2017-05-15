@@ -22,11 +22,12 @@ def createPlayerFile(amiData, meterName, phase, outFileName):
 	with open(outFileName,'w') as outFile:
 		outFile.write('\n'.join(lines))
 
-
-def writeNewGlmAndPlayers(glmPath, amiPath, outputDir):
+def writeNewGlmAndPlayers(omdPath, amiPath, outputDir):
 	''' Take a glm and an AMI data set, and create a new GLM and set of players that combine them. '''
 	# Pull in the main data objects.
-	feederObj = omf.feeder.parse(glmPath)
+	with open(omdPath,'r') as jsonFile:
+		omdObj = json.load(jsonFile)
+	feederObj = omdObj['tree']
 	amiData = amiImport(amiPath)
 	# Make the output directory.
 	os.mkdir(outputDir)
@@ -60,6 +61,7 @@ def writeNewGlmAndPlayers(glmPath, amiPath, outputDir):
 	with open(outputDir + '/out.glm', 'w') as outGlmFile:
 		outString = omf.feeder.sortedWrite(feederObj)
 		outGlmFile.write(outString)
+	#TODO: update omdObj tree object to match feederObj, and insert all .csv files in to the attachments, then write new .omd to outputDir.
 
 def _tests():
 	outFolder = omf.omfDir + '/scratch/loadModelingAmiOutput/'
@@ -70,8 +72,9 @@ def _tests():
 		pass # no output there.
 	# Generate new output:
 	glmPath = omf.omfDir + '/scratch/uploads/Input - IEEE 13 Node.glm'
+	omdPath = omf.omfDir + '/scratch/uploads/Input - IEEE 13 Node.omd'
 	amiPath = omf.omfDir + '/scratch/uploads/Input - AMI measurements 13 node.csv'
-	writeNewGlmAndPlayers(glmPath, amiPath, outFolder)
+	writeNewGlmAndPlayers(omdPath, amiPath, outFolder)
 
 if __name__ == '__main__':
 	_tests()
