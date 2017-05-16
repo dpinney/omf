@@ -226,9 +226,14 @@ def makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
  			rdtJson['lines'].append(newLine.toOutput())
 			# print "Added newLine: %s (TOTAL: %s)\n"%(newLine, str(lineCount+1))
 			lineCount+=1
-			lineCosts.append((line.get('name',''), float(lineUnitCost)*float(line.get('length',100))))
+			if newLine.can_harden == True:
+				cost = 0
+			else:
+				cost = float(lineUnitCost)*float(line.get('length',100))
+			lineCosts.append((line.get('name',''), cost))
 	#Code successfully adds user specified lines to RDT Input. However, since user specified lines might not be correct, RDT may crash during runtime
-	'''newLines = newLines.strip().split(';')
+	'''
+	newLines = newLines.strip().split(';')
 	for lineTupleString in newLines:
 		linePair = lineTupleString.replace('(','').replace(')','').split(',')
 		#print linePair[0], linePair[1]
@@ -237,7 +242,8 @@ def makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
 		if ("newLine_" + str(lineCount)) in hardCands:
 				newLine.can_harden = True
 		rdtJson['lines'].append(newLine)
-		lineCount+=1'''		
+		lineCount+=1		
+		'''
 	return lineCount, lineCosts
 
 def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
@@ -372,10 +378,11 @@ def makeGens(rdtJson, jsonTree, maxRealPhase, newGens, debug):
 			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, maxRealPhase)
 			newGen = Gen(gens.get('name','')+'_gen', busID, has_phase, max_reactive_phase, max_real_phase)
 			rdtJson['generators'].append(newGen.toOutput())
+	'''
 	newGens = newGens.strip().split(',')
-	#for newGenName in newGens:
-	#	rdtJson['generators'].append(Gen(newGenName, Gen.genCount).toOutput())
-
+	for newGenName in newGens:
+		rdtJson['generators'].append(Gen(newGenName, Gen.genCount).toOutput())
+	'''
 def readXRMatrices(dataDir, rdtFile, length):
 	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
 	'''
@@ -412,7 +419,6 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 		jsonTree = json.load(jsonIn).get('tree','')
 	#TODO: get GFM scenarios in to RDT
 	lineCount, lineCosts = makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
-	print lineCosts
 	makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug)
 	makeBuses(rdtJson, jsonTree, debug)
 	makeLoads(rdtJson, jsonTree, debug)
@@ -567,7 +573,11 @@ def heavyProcessing(modelDir, inputDict):
 		inputFilePath = pJoin(modelDir, 'gfmInput.json')
 		gfmOutFileName = 'gfmOutput.json'
 		outFilePath = pJoin(modelDir, gfmOutFileName)
+		topologyPath = pJoin(__metaModel__._omfDir,'solvers','gfm', 'fragility_topology.json')
+		shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'RDT_template.json'), pJoin(modelDir, 'RDT_template.json'))
 		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
+
+		#proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath, '--lpnorm', topologyPath], cwd=modelDir)
 		proc.wait()
 		gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
 		outData['gfmRawOut'] = gfmRawOut
@@ -584,38 +594,18 @@ def heavyProcessing(modelDir, inputDict):
 		'''
 		'''Loads OMD file from feeder name, creates GLM input, places climate file from user inputted zip code into model directory (TODO), runs Gridlab-D  (TODO)'''
 		#Load json
-		'''
-		omdPath = pJoin(modelDir, feederName + ".omd")
-		with open(omdPath, "r") as omd:
-			omd = json.load(omd)
-		#Load an blank glm file and use it to write to it, JSON READER DOES NOT WORK
-		feederPath = pJoin(modelDir, 'feeder.glm')
-		with open(feederPath, 'w') as glmFile:
-			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {filename test_JSON_dump.json;};" + "object jsonreader {filename RDTInputfile.json;};"
-			glmFile.write(toWrite)
-		#Write attachments from omd, if no file, one will be created
-		for fileName in omd['attachments']:
-			with open(os.path.join(modelDir, fileName),'w') as file:
-				file.write(omd['attachments'][fileName])
-		#Wire in the file the user specifies via zipcode.
-		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		print os.getcwd()
-		os.chdir(modelDir)
-		proc = subprocess.Popen(['gridlabd', 'feeder.glm'])
-		#proc = subprocess.Popen(['gridlabd', pJoin(modelDir, 'feeder.glm')]) 
-		#proc = subprocess.call(['gridlabd', pJoin(modelDir, 'feeder.glm')])
-		proc.wait()
-		'''
+		
 		# Run RDT.
 		print "Running RDT..."
 		print "************************************"
-
+		
 		rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
 		with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
 			json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
 		rdtFileName, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 		rdtInFile = modelDir + '/' + rdtFileName
+		
+		#rdtInFile = modelDir + '/' + 'gfmOutput.json'
 		rdtOutFile = modelDir + '/rdtOutput.json'
 		rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
 		rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
@@ -630,6 +620,28 @@ def heavyProcessing(modelDir, inputDict):
 			json.dump(rdtOut, outFile, indent = 4)
 		print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
 		print "************************************\n\n"
+
+		#GridlabD
+		omdPath = pJoin(modelDir, feederName + ".omd")
+		with open(omdPath, "r") as omd:
+			omd = json.load(omd)
+		#Load an blank glm file and use it to write to it, JSON READER DOES NOT WORK
+		feederPath = pJoin(modelDir, 'feeder.glm')
+		with open(feederPath, 'w') as glmFile:
+			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename test_JSON_dump.json;\n};\n" + "object jsonreader {\n\tfilename rdtIn.json;\n};"
+			glmFile.write(toWrite)
+		#Write attachments from omd, if no file, one will be created
+		for fileName in omd['attachments']:
+			with open(os.path.join(modelDir, fileName),'w') as file:
+				file.write(omd['attachments'][fileName])
+		#Wire in the file the user specifies via zipcode.
+		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+		#print os.getcwd()
+		##os.chdir(modelDir)
+		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], cwd=modelDir)
+		proc.wait()
+		
 		# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
 		#Deriving line names from RDT Input and line lengths from feeder omd file
 		#Building hashmap of source and target nodes, used to represent lines.
@@ -647,6 +659,9 @@ def heavyProcessing(modelDir, inputDict):
 			lineData.append((line["id"], '{:,.2f}'.format(dist*float(inputDict["lineUnitCost"]))))
 		outData["lineData"] = lineCosts
 		outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
+
+
+
 		# Draw the feeder.
 		genDiagram(modelDir, feederName, feederModel, debug=False)
 		with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:

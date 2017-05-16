@@ -63,36 +63,46 @@ def runForeground(modelDir, inputDict):
 			'voltsChart' : '', 'powerReactChart' : '', 'powerRealChart' : '',
 			'stdout' : '', 'stderr' : ''
 			}
-		# Model operations go here.
 		# Read feeder and convert to .mat.
 		networkName = inputDict.get('networkName1','case9')
 		networkJson = json.load(open(pJoin(modelDir,networkName+".omt")))
 		matStr = network.netToMat(networkJson, networkName)
 		with open(pJoin(modelDir,networkName+".m"),"w") as outMat:
 			for row in matStr: outMat.write(row)		
-		# Get MATPOWER directories for the Octave path.
+		# Build the MATPOWER command.
 		matDir =  pJoin(__metaModel__._omfDir,'solvers','matpower5.1')
-		matPath = '"' + ":".join([matDir,pJoin(matDir,'t'),pJoin(matDir,'extras')]) + '"'
-		if(platform.system() == "Windows"):  # HACK: do the world's worst URLENCODE:
-			matDir = matDir.replace('\\', '/')
-			matPath = matPath.replace('\\', '/')
-		# Configure and run MATPOWER.
+		if platform.system() == "Windows":
+			pathSep = ";"
+		else:
+			pathSep = ":"
+		matPath = '"' + pathSep.join([matDir,pJoin(matDir,'t'),pJoin(matDir,'extras')]) + '"'
 		algorithm = inputDict.get("algorithm","NR")
-		pfArg = "\'pf.alg\', \'"+algorithm+"\'"
-		modelArg = "\'model\', \'"+inputDict.get("model","AC")+"\'"
-		iterCode = "pf."+algorithm[:2].lower()+".max_it"
-		pfItArg = "\'"+iterCode+"\', "+str(inputDict.get("iteration",10))
-		pfTolArg = "\'pf.tol\', "+str(inputDict.get("tolerance",math.pow(10,-8)))
-		pfEnflArg = "\'pf.enforce_q_lims\', "+str(inputDict.get("genLimits",0))
-		mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
-		command = "octave -p" + matPath + "--no-gui --eval \""+mpoptArg+"runpf(\'"+pJoin(modelDir,networkName+'.m')+"\', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
-		if(platform.system() == "Windows"):
-			print "SUP"
-			command = command.replace('/', '\\')
-		print "command:", command
-		proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
-		(out, err) = proc.communicate()
-		# SKELETON code.
+		pfArg = "'pf.alg', '" + algorithm + "'"
+		modelArg = "'model', '" + inputDict.get("model","AC") + "'"
+		iterCode = "pf." + algorithm[:2].lower() + ".max_it"
+		pfItArg = "'" + iterCode + "', " + str(inputDict.get("iteration",10))
+		pfTolArg = "'pf.tol', " + str(inputDict.get("tolerance",math.pow(10,-8)))
+		pfEnflArg = "'pf.enforce_q_lims', " + str(inputDict.get("genLimits",0))
+		if platform.system() == "Windows":
+			# Find the location of octave-cli tool.
+			envVars = os.environ["PATH"].split(';')
+			octavePath = "C:\\Octave\\Octave-4.2.0"
+			for pathVar in envVars:
+				if "octave" in pathVar.lower():
+					octavePath = pathVar
+			# Run Windows-specific Octave command.
+			mpoptArg = "mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+") "
+			cmd = "runpf('"+pJoin(modelDir,networkName+'.m')+"'," + mpoptArg +")"
+			args = [octavePath + '\\bin\\octave-cli','-p',matPath, "--eval",  cmd]
+			myOut = subprocess.check_output(args, shell=True)
+			with open(pJoin(modelDir, "matout.txt"), "w") as matOut:
+				matOut.write(myOut)
+		else:
+			# Run UNIX Octave command.
+			mpoptArg = "mpopt = mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+"); "
+			command = "octave -p " + matPath + "--no-gui --eval \""+mpoptArg+"runpf('"+pJoin(modelDir,networkName+'.m')+"', mpopt)\" > \"" + pJoin(modelDir,"matout.txt") + "\""
+			proc = subprocess.Popen([command], stdout=subprocess.PIPE, shell=True)
+			(out, err) = proc.communicate()
 		imgSrc = pJoin(__metaModel__._omfDir,'scratch','transmission','inData')
 		# Read matout.txt and parse into outData.
 		gennums=[]
@@ -249,7 +259,7 @@ def _simpleTest():
 	# Create New.
 	new(modelLoc)
 	# Pre-run.
-	renderAndShow(modelLoc)
+	# renderAndShow(modelLoc)
 	# Run the model.
 	runForeground(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
