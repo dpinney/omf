@@ -4,6 +4,7 @@ import json, math, random, datetime
 
 # DISTRIBUTION FEEDER FUNCTIONS
 def distPseudomizeNames(inFeeder):
+	''' Replace all names in the inFeeder distribution system with sequential IDs. Return a key with name and ID pairs. '''
 	newNameKey = {}
 	newKeyID = 0
 	for key in inFeeder['tree']:
@@ -28,6 +29,7 @@ def distRandomizeNames(inFeeder):
 	return newNameArray
 
 def distRandomizeLocations(inFeeder):
+	''' Replace all objects' longitude and latitude positions in the inFeeder distribution system with random values. '''
 	inFeeder['nodes'] = []
 	inFeeder['links'] = []
 	inFeeder['hiddenNodes'] = []
@@ -39,6 +41,7 @@ def distRandomizeLocations(inFeeder):
 	return inFeeder['tree']
 
 def distTranslateLocations(inFeeder, translation, rotation):
+	''' Move the position of all objects in the inFeeder distribution system by a horizontal translation and counter-clockwise rotation. '''
 	inFeeder['nodes'] = []
 	inFeeder['links'] = []
 	inFeeder['hiddenNodes'] = []
@@ -50,6 +53,7 @@ def distTranslateLocations(inFeeder, translation, rotation):
 	return inFeeder['tree']
 
 def distAddNoise(inFeeder, noisePerc):
+	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc probability. '''
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
 			value = inFeeder['tree'][key][prop]
@@ -63,6 +67,7 @@ def distAddNoise(inFeeder, noisePerc):
 	return inFeeder['tree']
 
 def distShuffleLoads(inFeeder, shufPerc):
+	''' Shuffle the parent properties between all load objects in the inFeeder distribution system. '''
 	tlParents = []
 	tnParents = []
 	houseParents = []
@@ -104,6 +109,7 @@ def distShuffleLoads(inFeeder, shufPerc):
 	return inFeeder['tree']
 
 def distModifyTriplexLengths(inFeeder):
+	''' Modifies triplex line length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
 	tLookup = {}
 	for key in inFeeder['tree']:
 		tDict = {}
@@ -142,6 +148,7 @@ def distModifyTriplexLengths(inFeeder):
 	return inFeeder['tree']
 
 def distModifyConductorLengths(inFeeder):
+	''' Modifies conductor length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
 	uLookup = {}
 	oLookup = {}
 	for key in inFeeder['tree']:
@@ -217,6 +224,7 @@ def distModifyConductorLengths(inFeeder):
 	return inFeeder['tree']
 
 def distSmoothLoads(inFeeder):
+	''' Reduce the resolution of load shapes by taking all sub-hourly load dispatch data in the inFeeder distribution system and aggregating to the hour level. ''' 
 	outList = []
 	scadaFile = inFeeder['attachments']['subScadaCalibrated1.player']
 	scadaLines = scadaFile.split('\n')
@@ -240,6 +248,7 @@ def distSmoothLoads(inFeeder):
 
 # TRANSMISSION NETWORK FUNCTIONS
 def tranPseudomizeNames(inNetwork):
+	''' Replace all names in the inNetwork transmission system with sequential IDs. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	newKeyID = 0
 	for dic in inNetwork['bus']:
@@ -256,6 +265,7 @@ def tranPseudomizeNames(inNetwork):
 	return newBusKey
 
 def tranRandomizeNames(inNetwork):
+	''' Replace all names in the inNetwork transmission system with sequential IDs. Return a list of the new IDs. '''
 	newBusArray = []
 	newKeyID = 0
 	for dic in inNetwork['bus']:
@@ -271,6 +281,7 @@ def tranRandomizeNames(inNetwork):
 	return newBusArray
 
 def tranRandomizeLocations(inNetwork):
+	''' Replace all objects' longitude and latitude positions in the inNetwork transmission system with random values. '''
 	# inNetwork['bus'] = []
 	# inNetwork['gen'] = []
 	# inNetwork['branch'] = []
@@ -285,6 +296,7 @@ def tranRandomizeLocations(inNetwork):
 	return inNetwork['bus']
 
 def tranTranslateLocations(inNetwork, translation, rotation):
+	''' Move the position of all objects in the inNetwork transmission system by a horizontal translation and counter-clockwise rotation. '''
 	# inNetwork['bus'] = []
 	# inNetwork['gen'] = []
 	# inNetwork['branch'] = []
@@ -299,6 +311,7 @@ def tranTranslateLocations(inNetwork, translation, rotation):
 	return inNetwork['bus']
 
 def tranAddNoise(inNetwork, noisePerc):
+	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc probability. '''
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			for dic in inNetwork[array]:
@@ -318,6 +331,7 @@ def tranAddNoise(inNetwork, noisePerc):
 	return inNetwork
 
 def tranShuffleLoadsAndGens(inNetwork, shufPerc):
+	''' Shuffle the parent properties between all load and gen objects in the inNetwork transmission system. '''
 	qParents = []
 	pParents = []
 	genParents = []
