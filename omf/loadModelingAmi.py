@@ -1,6 +1,8 @@
 ''' Attach loadshapes from an AMI data file to a OMF distribution model. '''
 
 import omf, csv, json, os, shutil, datetime
+from os.path import join as pJoin
+from os.path import basename
 
 def amiImport(filepath):
 	'''Take in a CSV, return a [{...},{...},...] database of the data.'''
@@ -27,10 +29,12 @@ def writeNewGlmAndPlayers(omdPath, amiPath, outputDir):
 	# Pull in the main data objects.
 	with open(omdPath,'r') as jsonFile:
 		omdObj = json.load(jsonFile)
+	omdName = basename(omdPath)
 	feederObj = omdObj['tree']
 	amiData = amiImport(amiPath)
 	# Make the output directory.
-	os.mkdir(outputDir)
+	if not os.path.isdir(outputDir):
+		os.mkdir(outputDir)
 	# Attach the player class to feeder if needed.
 	omfTypes = set([feederObj[k].get('omftype','') for k in feederObj])
 	if 'class player' not in omfTypes:
@@ -62,6 +66,16 @@ def writeNewGlmAndPlayers(omdPath, amiPath, outputDir):
 		outString = omf.feeder.sortedWrite(feederObj)
 		outGlmFile.write(outString)
 	#TODO: update omdObj tree object to match feederObj, and insert all .csv files in to the attachments, then write new .omd to outputDir.
+	# omd = json.load(open('feederName.omd'))
+	for player in os.listdir(outputDir):
+		if player.startswith('player'):
+			name = basename(player)
+			with open(pJoin(outputDir,player),'r') as inFile:
+				playerContents = inFile.read()
+				omdObj['attachments'][name+'.player'] = playerContents
+	oneUp = pJoin(outputDir,'..')
+	with open(pJoin(oneUp,omdName),'w') as outFile:
+		json.dump(omdObj, outFile)
 
 def _tests():
 	outFolder = omf.omfDir + '/scratch/loadModelingAmiOutput/'

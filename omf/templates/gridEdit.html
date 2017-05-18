@@ -258,6 +258,7 @@
 				<li><a href="javascript:staticLoadsToHouses();unsavedChanges=true;">Static Loads to Houses</a></li>
 				<li><a href="javascript:solarAdding();unsavedChanges=true;">Solar at Meters</a></li>
 				<li><a id='scadaLoad' href='javascript:showModal("scadaLoadshapes");'>Scada Loadshapes...</a></li>
+				<li><a id='amiLoad' href='javascript:showModal("amiLoadshapes");'>Add AMI Profiles...</a></li>
 				<li><a href='javascript:showModal("findModal");'>Find...</a></li>
 				<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
 				</ul>
@@ -302,7 +303,7 @@
 <div id="scadaLoadshapes" class= 'modal'>
 <!-- Turn below into a modal -->
 	<div class = "modalContent" style='width:350px;'>
-		<form onsubmit=' return getScadaLoadshapes();' action='/scadaLoadshape/{{ owner }}/{{feederName}}' id='scadaLoadshape' enctype='multipart/form-data' method='post'>
+		<form onsubmit=' return getScadaAmi("Scada");' action='/scadaLoadshape/{{ owner }}/{{feederName}}' id='scadaLoadshape' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
 			<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
@@ -317,6 +318,31 @@
 				</tr>
 				<tr>
 					<td><a id='modalCancel' href="#" onclick='closeModal("scadaLoadshapes")' style="text-align:center;font-size:10pt;">Cancel</a></td>
+					<td><input type='submit' value='Import' style='min-width:45px;'/></td>
+				</tr>
+			</table>
+		</form>
+		<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
+	</div>
+</div>
+<div id="amiLoadshapes" class= 'modal'>
+<!-- Turn below into a modal -->
+	<div class = "modalContent" style='width:350px;'>
+		<form onsubmit=' return getScadaAmi("Ami");' action='/loadModelingAmi/{{ owner }}/{{feederName}}' id='amiLoadshape' enctype='multipart/form-data' method='post'>
+			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
+			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
+			<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
+			<table class='importOptions'>
+			<th>AMI Loadshapes</th><th style="float: right;"><a href = '' target = '_blank'>Format Help</a></th>
+				<tr>
+					<td>File containing AMI load data (.csv)</td>
+					<td><input type='file' id='amiFile' name='amiFile' accept = '.csv' required/></td>
+				</tr>
+				<tr>
+					<td colspan="100%">Note: Model "Simulation Start Date" should lie within the AMI profiles's dates</td>
+				</tr>
+				<tr>
+					<td><a id='modalCancel' href="#" onclick='closeModal("amiLoadshapes")' style="text-align:center;font-size:10pt;">Cancel</a></td>
 					<td><input type='submit' value='Import' style='min-width:45px;'/></td>
 				</tr>
 			</table>
@@ -716,8 +742,19 @@ function showProgress(){
 	pinAll()
 	showProgressDialog('spinner','Loading Feeder', 'loading');
 	checkScadaCal()
+	checkLoadModelingAmi()
 	checkConv()
-	
+}
+
+function checkLoadModelingAmi(){
+	var modelName = '{{modelName}}'
+	$.ajax({
+		url: "/checkLoadModelingAmi/" + modelName
+	}).done(function (data) {
+		if (data.exists == true) {
+			getScadaAmi('Ami')
+		}
+	})
 }
 
 function checkScadaCal(){
@@ -726,7 +763,7 @@ function checkScadaCal(){
 		url: "/checkScadaCalibration/" + modelName
 	}).done(function (data) {
 		if (data.exists == true) {
-			getScadaLoadshapes()
+			getScadaAmi('Scada')
 		}
 	})
 }
@@ -1742,9 +1779,9 @@ function newChildAtLocation(component, treeIndex) {
 /**
  * Handler function of adding static load to houses.
  */
-function getScadaLoadshapes(){
+function getScadaAmi(type){
+	if(type=='Scada'){
 	showProgressDialog('spinner','Calibrating Feeder', 'calibrating')
- 	closeDiv("scadaLoadshapes")
  	var modelName = '{{modelName}}'
  	window.setInterval(function checkAPI(){
 					$.ajax({
@@ -1764,6 +1801,29 @@ function getScadaLoadshapes(){
 						}
 					})
 				}, 5000)
+ }
+ else{
+ 	showProgressDialog('spinner','Loading Ami Data', 'calibrating')
+ 	var modelName = '{{modelName}}'
+ 	window.setInterval(function checkAPI(){
+					$.ajax({
+						url: "/checkLoadModelingAmi/" + modelName
+					}).done(function (data) {
+						console.log(data)
+						if (data.exists == true) {
+						}
+						else if(data.exists == false){
+							removeProgressDialog()
+							window.location.reload();
+						}
+						else{
+							alert(data)
+							removeProgressDialog()
+							window.location.reload();
+						}
+					})
+				}, 5000)
+ }
 }
 function staticLoadsToHouses() {
 	function randomHouse() {

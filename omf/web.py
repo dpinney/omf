@@ -10,6 +10,7 @@ import signal
 import cymeToGridlab
 import omf
 from omf.calibrate import omfCalibrate
+from omf.loadModelingAmi import writeNewGlmAndPlayers
 
 app = Flask("web")
 URL = "http://www.omf.coop"
@@ -657,6 +658,51 @@ def cancelScadaCalibration(modelName):
 	os.remove("data/Model/" + owner + "/" +  modelName + "/CPID.txt")
 	shutil.rmtree("data/Model/" + owner + "/" +  modelName + "/calibration")
 	return ('cancel',204)
+
+@app.route("/loadModelingAmi/<owner>/<feederName>", methods=["POST"])
+def loadModelingAmi(owner,feederName):
+	loadName = 'ami'
+	feederNum = request.form.get("feederNum",1)
+	modelName = request.form.get("modelName","")
+	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/amiError.txt"):
+		os.remove("data/Model/" + owner + "/" +  modelName + "/amiError.txt")
+	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/amiLoad.csv"):
+		os.remove("data/Model/" + owner + "/" +  modelName + "/amiLoad.csv")
+	file = request.files['amiFile']
+	file.save(os.path.join("data/Model/"+owner+"/"+modelName,loadName+".csv"))	
+	modelDir = "data/Model/"+owner+"/"+modelName
+	omdPath = modelDir+"/"+feederName+".omd"
+	amiPath = modelDir+"/"+loadName+".csv"
+	importProc = Process(target=backgroundloadModelingAmi, args =[owner, modelName, modelDir, omdPath, amiPath])
+	importProc.start()
+	pid = str(importProc.pid)
+	with open(modelDir+"/APID.txt", "w+") as outFile:
+		outFile.write(pid)
+	return ('',204)
+
+def backgroundloadModelingAmi(owner, modelName, workDir, omdPath, amiPath):
+	outDir = workDir + '/amiOutput/'
+	writeNewGlmAndPlayers(omdPath, amiPath, outDir)
+	modelDirec="data/Model/" + owner + "/" +  modelName
+	os.remove("data/Model/" + owner + "/" +  modelName + "/APID.txt")
+
+@app.route("/checkLoadModelingAmi/<modelName>", methods=["POST","GET"])
+def checkLoadModelingAmi(modelName):
+	try:
+		owner = User.cu()
+	except:
+		return 'Server crashed during calibration. Please attempt calibration again.'
+	pidPath = ('data/Model/' + owner + '/' + modelName + '/APID.txt')
+	# errorPath = ('data/Model/' + owner + '/' + modelName + '/error.txt')
+	print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
+	# return error message if one exists
+	# if os.path.exists(errorPath):
+	# 	with open(errorPath) as errorFile:
+	# 		errorMsg = errorFile.read()
+	# 	return errorMsg
+	# else:
+	# checks to see if PID file exists, if theres no PID file process is done.
+	return jsonify(exists=os.path.exists(pidPath))
 
 # TODO: Check if rename mdb files worked
 @app.route("/cymeImport/<owner>", methods=["POST"])
