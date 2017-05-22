@@ -75,7 +75,7 @@ def writeNewGlmAndPlayers(omdPath, amiPath, outputDir):
 				omdObj['attachments'][name+'.player'] = playerContents
 	oneUp = pJoin(outputDir,'..')
 	with open(pJoin(oneUp,omdName),'w') as outFile:
-		json.dump(omdObj, outFile)
+		json.dump(omdObj, outFile, indent=4)
 
 def _tests():
 	outFolder = omf.omfDir + '/scratch/loadModelingAmiOutput/'
