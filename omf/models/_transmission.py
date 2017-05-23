@@ -218,13 +218,13 @@ def plotChart():
 	for gen in case9["gen"]:
 		for genName, genInfo in gen.items():
 			x,y =  busLocations[genInfo["bus"]]
-			plt.plot([x], [y], 's', zorder=10)
+			plt.plot([x], [y], 's', color='gray', zorder=10)
 
 	for branch in case9["branch"]:
 		for branchName, branchInfo in branch.items():
 			x1, y1 = busLocations[branchInfo["fbus"]]
 			x2, y2 = busLocations[branchInfo["tbus"]]
-			plt.plot([x1, x2], [y1,y2], marker = '', zorder=0)
+			plt.plot([x1, x2], [y1,y2], color='black', marker = '', zorder=0)
 	plt.savefig(modelLoc + '/output.png')
 
 def genDiagram(modelDir, feederJson):
