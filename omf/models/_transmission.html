@@ -5,7 +5,7 @@
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
 	/*Styles go here.*/
-		table {width: 75%;margin-left:auto; margin-right:auto;}
+		table {width: 80%;margin-left:auto; margin-right:auto;}
 		table, th, td {border: 1px solid grey;}
 		td, th {padding:2px; text-align: center;}
 	</style>
@@ -58,15 +58,17 @@
 			}
 			document.getElementById("windowLoc").scrollIntoView()
 		}
-		function parseEqualDict(dict) {
+		function parseEqualDict(volt, real, react) {
 			htmlCollector = ""
-			for(var i = 0; i < dict[0].length; i++) {
-				leftColumn = dict[0][i];
-				rightColumn = dict[1][i];
-				htmlCollector = htmlCollector + "<tr><td>" + leftColumn + "</td><td>" + rightColumn + "</td></tr>";
+			var i = 0
+			for(i = 0; i < real[0].length; i++) {
+				if (i < volt[0].length) {
+				htmlCollector = htmlCollector + "<tr><td>" + real[0][i]+ "</td><td>" + volt[1][i] + "</td><td>" + real[1][i] + "</td><td>" + react[1][i] + "</td></tr>";
+				}
+				else {
+					htmlCollector = htmlCollector + "<tr><td>" + real[0][i]+ "</td><td>-</td><td>" + real[1][i] + "</td><td>" + react[1][i] + "</td></tr>";
+				}
 			}
-
-			console.log(htmlCollector)
 			return htmlCollector;
 		}
 		// // Update network name from editor.
@@ -190,18 +192,10 @@
 		<div class="content" style="overflow: auto">
 			<div id="tables">
 				<p class="reportTitle postRun" style="text-align: center">Transmission Output</p>
-				<h4 style="text-align: center;">Voltage</h4>
+				<h4 style="text-align: center;">Component Results</h4>
 				<br>
-				<table id="voltageTable"></table>
-				<br><br>
-				<h4 style="text-align: center;">Real Power</h4>
-				<br>
-				<table id="powerRealTable"></table>
-				<br><br>
-				<h4 style="text-align: center;">Reactive Power</h4>
-				<br>
-				<table id="powerReactTable"></table>
-				<script>
+				<table id="resultsTable"></table>
+				<script>/*
 					var htmlCollector = "<tr><th>Component Name</th><th>Voltage Power Unit (PU)</th></tr>";
 					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['volts'])
 					gebi("voltageTable").innerHTML = htmlCollector; 
@@ -212,11 +206,11 @@
 
 					htmlCollector = "<tr><th>Component Name</th><th>Reactive Power (MVARS)</th></tr>";
 					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['powerReact'])
-					gebi("powerReactTable").innerHTML = htmlCollector; 
-					/*
+					gebi("powerReactTable").innerHTML = htmlCollector; */
+					
 					var htmlCollector = "<tr><th>Component Name</th><th>Voltage Power Unit (PU)</th><th>Real Power (MW)</th><th>Reactive Power (MVARS)</th></tr>";
-					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['volts'])
-					gebi("voltageTable").innerHTML = htmlCollector; */
+					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['volts'], allOutputData.tableData['powerReal'], allOutputData.tableData['powerReact'])
+					gebi("resultsTable").innerHTML = htmlCollector; 
 
 				</script>
 			</div>
