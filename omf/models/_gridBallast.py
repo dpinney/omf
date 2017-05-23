@@ -16,8 +16,8 @@ from __metaModel__ import *
 
 # OMF imports
 import omf.feeder as feeder
-# from omf.solvers import gridlabd_gridballast as gridlabd
-from omf.solvers import gridlabd
+from omf.solvers import gridlabd_gridballast as gridlabd
+# from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
 
 # Model metadata:
@@ -120,7 +120,7 @@ def heavyProcessing(modelDir, inputDict):
 
 		# Set up GridBallast Controls
 		tree[1] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
-		for key in feederJson["tree"].keys():
+		for key in feederJson['tree'].keys():
 			if ('name' in feederJson['tree'][key]) and (feederJson['tree'][key].get('object') == 'waterheater'):
 		 		parent = feederJson['tree'][key]['name']
 		 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
@@ -171,63 +171,6 @@ def heavyProcessing(modelDir, inputDict):
 		stub = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'number_of_devices_on', 'interval':3600, 'file':'allZIPloadOn.csv'}
 		copyStub = dict(stub)
 		tree[feeder.getMaxKey(tree)+1] = copyStub
-
-		# Attach passive_controller	
-		# tree[feeder.getMaxKey(tree)+1] = {'omftype':'module','argument':'market'}
-		# tree[feeder.getMaxKey(tree)+1] = {'omftype':'class auction','argument':'{\n\tdouble my_avg; double my_std;\n}'}
-		# tree[feeder.getMaxKey(tree)+1] = {'omftype':'class player','argument':'{\n\tdouble value;\n}'}
-
-		# stub = {
-		# 	'object':'player',
-		# 	'name':'cppDays',
-		# 	'file':'superCpp.player'
-		# }
-		# copyStub = dict(stub)
-		# tree[feeder.getMaxKey(tree)+1] = copyStub
-
-		# stub = {
-		# 	'object':'player',
-		# 	'name':'superClearing',
-		# 	'file':'superClearingPrice.player',
-		# 	'loop':10
-		# }
-		# copyStub = dict(stub)
-		# tree[feeder.getMaxKey(tree)+1] = copyStub
-
-		# stub = {
-		# 	'object':'auction',
-		# 	'name':'MARKET_1',
-		# 	'my_std':0.037953,
-		# 	'period':900,
-		# 	'my_avg':0.110000,
-		# 	'current_market.clearing_price':'superClearing.value',
-		# 	'special_mode':'BUYERS_ONLY',
-		# 	'unit': 'kW'
-		# }
-		# copyStub = dict(stub)
-		# tree[feeder.getMaxKey(tree)+1] = copyStub
-
-		# stub = {
-		# 	'object':'passive_controller',
-		# 	'name':'waterheater_controller_waterheater171923',
-		# 	'parent':'waterheater171923',
-		# 	'control_mode':'RAMP',
-		# 	'range_high':5,
-		# 	'range_low':-5,
-		# 	'ramp_high':1,
-		# 	'ramp_low':-1,
-		# 	'period':900,
-		# 	'setpoint':'is_waterheater_on',
-		# 	'base_setpoint':1,
-		# 	'expectation_object':'MARKET_1',
-		# 	'expectation_property':'my_avg',
-		# 	'observation_object':'MARKET_1',
-		# 	'observation_property':'past_market.clearing_price',
-		# 	'stdev_observation_property':'my_std',
-		# 	'state_property':'override'
-		# }
-		# copyStub = dict(stub)
-		# tree[feeder.getMaxKey(tree)+1] = copyStub
 
 		# Attach recorders for system voltage map:
 		stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':3600}
@@ -686,7 +629,7 @@ def new(modelDir):
 	defaultInputs = {
 		"modelType": modelName,
 		"zipCode": "59001",
-		"feederName1": "Olin Barre GH EOL Solar",
+		"feederName1": "Olin Barre GH EOL Solar GridBallast",
 		"simStartDate": "2012-01-01",
 		"simLength": "72",
 		"simLengthUnits": "hours", #minutes
