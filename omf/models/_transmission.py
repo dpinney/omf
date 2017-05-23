@@ -10,6 +10,7 @@ from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
 import pprint as pprint
+from matplotlib import pyplot as plt
 
 # OMF imports
 sys.path.append(__metaModel__._omfDir) # for images in test.
@@ -91,7 +92,7 @@ def runForeground(modelDir, inputDict):
 				if "octave" in pathVar.lower():
 					octavePath = pathVar
 			# Run Windows-specific Octave command.
-			mpoptArg = "mpoption("+pfArg+", "+modelArg+", "+pfItArg+", "+pfTolArg+", "+pfEnflArg+") "
+			mpoptArg = "mpoption(" + pfArg + ", " + modelArg + ", " + pfItArg + ", " + pfTolArg+", " + pfEnflArg + ") "
 			cmd = "runpf('"+pJoin(modelDir,networkName+'.m')+"'," + mpoptArg +")"
 			args = [octavePath + '\\bin\\octave-cli','-p',matPath, "--eval",  cmd]
 			myOut = subprocess.check_output(args, shell=True)
@@ -200,6 +201,32 @@ def runForeground(modelDir, inputDict):
 		except:
 			pass
 
+def plotChart():
+
+	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	with open(pJoin(modelLoc,'case9.omt')) as inputFile:    
+			case9 = json.load(inputFile)
+	
+	busLocations = {}
+	for bus in case9["bus"]:
+		for busName, busInfo in bus.items():
+			x = float(busInfo["latitude"])
+			y = float(busInfo["longitude"])
+			plt.plot([x], [y], marker='o', markersize=12.0, zorder=5)  #MAKE THESE CIRCLES BIGGER
+			busLocations[busName] = [x, y]
+
+	for gen in case9["gen"]:
+		for genName, genInfo in gen.items():
+			x,y =  busLocations[genInfo["bus"]]
+			plt.plot([x], [y], 's', zorder=10)
+
+	for branch in case9["branch"]:
+		for branchName, branchInfo in branch.items():
+			x1, y1 = busLocations[branchInfo["fbus"]]
+			x2, y2 = busLocations[branchInfo["tbus"]]
+			plt.plot([x1, x2], [y1,y2], marker = '', zorder=0)
+	plt.savefig(modelLoc + '/output.png')
+
 def genDiagram(modelDir, feederJson):
 	print "Generating Feeder plot..."
 	print "************************************"
@@ -266,4 +293,6 @@ def _simpleTest():
 	renderAndShow(modelLoc)
 
 if __name__ == '__main__':
-	_simpleTest	()
+	_simpleTest ()
+
+	plotChart()
