@@ -117,68 +117,43 @@ def heavyProcessing(modelDir, inputDict):
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
 
-		# Debug tree insertion
-		# for key in feederJson['tree']:
-		# 	if key == '0':
-		# 		print key
-		# 	elif key == '1':
-		# 		print key
-		# 	elif key == '2':
-		# 		print key
-		# 	elif key == '3':
-		# 		print key
-		# 	elif key == '4':
-		# 		print key
-		# 	elif key == '5':
-		# 		print key
-		# 	elif key == '6':
-		# 		print key
-		# 	elif key == '7':
-		# 		print key
-		# 	elif key == '8':
-		# 		print key
-		# 	elif key == '9':
-		# 		print key
-		# 	elif key == '10':
-		# 		print key
-		# 	elif key == '11':
-		# 		print key
-		# 	elif key == '12':
-		# 		print key
-		# 	elif key == '13':
-		# 		print key
-		# 	elif key == '14':
-		# 		print key
-		# 	elif key == '15':
-		# 		print key
-		# 	elif key == '16':
-		# 		print key
-		# 	elif key == '18':
-		# 		print key
-		# 	elif key == '19':
-		# 		print key
-		# 	elif key == '20':
-		# 		print key
-
 		# Set up GridBallast Controls
 		# HACK: tree[10:19] is empty
 		tree[10] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
-		for key in feederJson['tree'].keys():
-			if ('name' in feederJson['tree'][key]) and (feederJson['tree'][key].get('object') == 'waterheater'):
-		 		parent = feederJson['tree'][key]['name']
+		# Waterheater controller properties
+		for key in tree.keys():
+			if ('name' in tree[key]) and (tree[key].get('object') == 'waterheater'):
+		 		parent = tree[key]['name']
 		 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
 		 		copyStub = dict(stub)
 		 		tree[feeder.getMaxKey(tree)+1] = copyStub
-		 		if 'demand' in feederJson['tree'][key]:
-		 			# feederJson['tree'][key]['water_demand'] = feederJson['tree'][key]['demand']
-		 			feederJson['tree'][key]['water_demand'] = 'weekday_hotwater*1'
-		 			del feederJson['tree'][key]['demand']
-		 			feederJson['tree'][key]['enable_freq_control'] = 'true'
-		 			feederJson['tree'][key]['freq_lowlimit'] = 59.97
-		 			feederJson['tree'][key]['freq_uplimit'] = 60.03
-		 			feederJson['tree'][key]['heat_mode'] = 'ELECTRIC'
-		 			feederJson['tree'][key]['enable_jitter'] = 'true'
-		 			feederJson['tree'][key]['average_delay_time'] = 600
+		 		if 'demand' in tree[key]:
+		 			# tree[key]['water_demand'] = tree[key]['demand']
+		 			tree[key]['water_demand'] = 'weekday_hotwater*1'
+		 			del tree[key]['demand']
+		 			tree[key]['enable_freq_control'] = 'true'
+		 			tree[key]['freq_lowlimit'] = 59.97
+		 			tree[key]['freq_uplimit'] = 60.03
+		 			tree[key]['heat_mode'] = 'ELECTRIC'
+		 			tree[key]['enable_jitter'] = 'true'
+		 			tree[key]['average_delay_time'] = 600
+		# ZIPload controller properties
+		for key in tree.keys():
+			if ('name' in tree[key]) and (tree[key].get('object') == 'ZIPload'):
+		 		parent = tree[key]['name']
+		 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
+		 		copyStub = dict(stub)
+		 		tree[feeder.getMaxKey(tree)+1] = copyStub
+	 			tree[key]['enable_freq_control'] = 'true'
+	 			tree[key]['freq_lowlimit'] = 59.97
+	 			tree[key]['freq_uplimit'] = 60.03
+	 			tree[key]['enable_jitter'] = 'true'
+	 			tree[key]['average_delay_time'] = 600
+	 			tree[key]['groupid'] = 'fan'
+
+		# stub = {'object':'recorder', 'parent':'"module=powerflow"', 'property':'current_frequency', 'file':'systemFrequency.csv'}
+		# copyStub = dict(stub)
+		# tree[feeder.getMaxKey(tree)+1] = copyStub
 
 		# Attach recorder for waterheaters on/off
 		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheaterOn.csv'}
