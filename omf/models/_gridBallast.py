@@ -117,9 +117,52 @@ def heavyProcessing(modelDir, inputDict):
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
 
+		# Debug tree insertion
+		# for key in feederJson['tree']:
+		# 	if key == '0':
+		# 		print key
+		# 	elif key == '1':
+		# 		print key
+		# 	elif key == '2':
+		# 		print key
+		# 	elif key == '3':
+		# 		print key
+		# 	elif key == '4':
+		# 		print key
+		# 	elif key == '5':
+		# 		print key
+		# 	elif key == '6':
+		# 		print key
+		# 	elif key == '7':
+		# 		print key
+		# 	elif key == '8':
+		# 		print key
+		# 	elif key == '9':
+		# 		print key
+		# 	elif key == '10':
+		# 		print key
+		# 	elif key == '11':
+		# 		print key
+		# 	elif key == '12':
+		# 		print key
+		# 	elif key == '13':
+		# 		print key
+		# 	elif key == '14':
+		# 		print key
+		# 	elif key == '15':
+		# 		print key
+		# 	elif key == '16':
+		# 		print key
+		# 	elif key == '18':
+		# 		print key
+		# 	elif key == '19':
+		# 		print key
+		# 	elif key == '20':
+		# 		print key
 
 		# Set up GridBallast Controls
-		tree[1] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
+		# HACK: tree[10:19] is empty
+		tree[10] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
 		for key in feederJson['tree'].keys():
 			if ('name' in feederJson['tree'][key]) and (feederJson['tree'][key].get('object') == 'waterheater'):
 		 		parent = feederJson['tree'][key]['name']
@@ -136,7 +179,6 @@ def heavyProcessing(modelDir, inputDict):
 		 			feederJson['tree'][key]['heat_mode'] = 'ELECTRIC'
 		 			feederJson['tree'][key]['enable_jitter'] = 'true'
 		 			feederJson['tree'][key]['average_delay_time'] = 600
-
 
 		# Attach recorder for waterheaters on/off
 		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheaterOn.csv'}
@@ -491,7 +533,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		positions = graphviz_layout(cleanG, prog='neato')
 	else:
 		rawPositions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
-		#HACK: the import code reverses the y coords.
+		# HACK: the import code reverses the y coords.
 		def yFlip(pair):
 			try: return (pair[0], -1.0*pair[1])
 			except: return (0,0)
