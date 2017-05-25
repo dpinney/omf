@@ -90,36 +90,29 @@ def checkStatus(modelDir):
 def _addGldToPath():
 	''' Figure out what platform we're on and choose a suitable Gridlab binary.
 	Returns full path to binary as result. '''
-	# Do we have a version of GridlabD available?
-	if 0 == subprocess.call(["gridlabd"], shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE):
-		# There's a system-level install of Gridlab, so use it:
-		return "gridlabd"
-	else:
-		# No system-level version of Gridlab available, so add ours to the path.
-		enviro = os.environ
-		if sys.platform == 'win32' or sys.platform == 'cygwin':
-			if platform.machine().endswith('64'):
-				binary = _myDir + "\\win64\\gridlabd.exe"
-				enviro['GRIDLABD'] = _myDir + "\\win64"
-				enviro['GLPATH'] = _myDir + "\\win64\\"
-			else:
-				binary = _myDir + "\\win32\\gridlabd.exe"
-				enviro['GRIDLABD'] = _myDir + "\\win32"
-				enviro['GLPATH'] = _myDir + "\\win32\\"
-			return binary
-		elif sys.platform == 'darwin':
-			# Implement me, maybe.
-			pass
-		elif sys.platform == 'linux2':
-			binary = _myDir + "/linx64/gridlabd.bin"
-			enviro['GRIDLABD'] = _myDir + "/linx64"
-			enviro['GLPATH'] = _myDir + "/linx64"
-			# Uncomment the following line if we ever get all the linux libraries bundled. Hard!
-			# enviro['LD_LIBRARY_PATH'] = enviro['LD_LIBRARY_PATH'] + ':' + solverRoot + "/linx64"
-			return binary
+	enviro = os.environ
+	if sys.platform == 'win32' or sys.platform == 'cygwin':
+		if platform.machine().endswith('64'):
+			binary = _myDir + "\\win64\\gridlabd.exe"
+			enviro['GRIDLABD'] = _myDir + "\\win64"
+			enviro['GLPATH'] = _myDir + "\\win64\\"
 		else:
-			# Platform not supported, so just return the standard binary and pray it works:
-			return "gridlabd"
+			binary = _myDir + "\\win32\\gridlabd.exe"
+			enviro['GRIDLABD'] = _myDir + "\\win32"
+			enviro['GLPATH'] = _myDir + "\\win32\\"
+		return binary
+	elif sys.platform == 'darwin':
+		return _myDir + "/local_gd/bin/gridlabd"
+	elif sys.platform == 'linux2':
+		binary = _myDir + "/linx64/gridlabd.bin"
+		enviro['GRIDLABD'] = _myDir + "/linx64"
+		enviro['GLPATH'] = _myDir + "/linx64"
+		# Uncomment the following line if we ever get all the linux libraries bundled. Hard!
+		# enviro['LD_LIBRARY_PATH'] = enviro['LD_LIBRARY_PATH'] + ':' + solverRoot + "/linx64"
+		return binary
+	else:
+		# Platform not supported, so just return the standard binary and pray it works:
+		return "gridlabd"
 
 def runInFilesystem(feederTree, attachments=[], keepFiles=False, workDir=None, glmName=None):
 	''' Execute gridlab in the local filesystem. Return a nice dictionary of results. '''

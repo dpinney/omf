@@ -5,8 +5,9 @@
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
 	/*Styles go here.*/
-		table{width:50%; font-size:16; padding:5px; border:1px;}
-		td {padding:2px;}
+		table {width: 80%;margin-left:auto; margin-right:auto;}
+		table, th, td {border: 1px solid grey;}
+		td, th {padding:2px; text-align: center;}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -56,6 +57,19 @@
 				}
 			}
 			document.getElementById("windowLoc").scrollIntoView()
+		}
+		function parseEqualDict(volt, real, react) {
+			htmlCollector = ""
+			var i = 0
+			for(i = 0; i < real[0].length; i++) {
+				if (i < volt[0].length) {
+				htmlCollector = htmlCollector + "<tr><td>" + real[0][i]+ "</td><td>" + volt[1][i] + "</td><td>" + real[1][i] + "</td><td>" + react[1][i] + "</td></tr>";
+				}
+				else {
+					htmlCollector = htmlCollector + "<tr><td>" + real[0][i]+ "</td><td>-</td><td>" + real[1][i] + "</td><td>" + react[1][i] + "</td></tr>";
+				}
+			}
+			return htmlCollector;
 		}
 		// // Update network name from editor.
 		$(document).ready(function(){
@@ -174,93 +188,32 @@
 		</script>
 	</div>
 	<!-- Output tables, graphs, etc. -->
-	<div id="output">
-		<p class="reportTitle postRun">Transmission Output</p>
-		<div id="anamoliesreport" class="tightContent postRun" style="max-height:1000px;margin-bottom:5px;">
-			<!-- Network Voltage, Powerflow, etc. -->
-			<div align="right">
-				<select onchange="showOutput();" name="outputSel" id="outputSel" style="width:350px;font-size:14pt;">
-					<script type="text/javascript">
-						for (var i=0; i < outputIDs.length; i++){
-							if (outputIDs[i] == 'volts'){var name = 'Voltage';}
-							else if (outputIDs[i] == 'powerReal'){var name = 'Real Power';}
-							else if (outputIDs[i] == 'powerReact'){var name = 'Reactive Power';}
-							$('#outputSel').append("<option value='"+outputIDs[i]+"' style='font-size:10pt;'>"+name+"</option>")}
-					</script>
-				</select>
+	<div id="output" class="postRun">
+		<div class="content" style="overflow: auto">
+			<div id="tables">
+				<p class="reportTitle postRun" style="text-align: center">Transmission Output</p>
+				<h4 style="text-align: center;">Component Results</h4>
+				<br>
+				<table id="resultsTable"></table>
+				<script>/*
+					var htmlCollector = "<tr><th>Component Name</th><th>Voltage Power Unit (PU)</th></tr>";
+					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['volts'])
+					gebi("voltageTable").innerHTML = htmlCollector; 
+
+					htmlCollector = "<tr><th>Component Name</th><th>Real Power (MW)</th></tr>";
+					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['powerReal'])
+					gebi("powerRealTable").innerHTML = htmlCollector; 
+
+					htmlCollector = "<tr><th>Component Name</th><th>Reactive Power (MVARS)</th></tr>";
+					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['powerReact'])
+					gebi("powerReactTable").innerHTML = htmlCollector; */
+					
+					var htmlCollector = "<tr><th>Component Name</th><th>Voltage Power Unit (PU)</th><th>Real Power (MW)</th><th>Reactive Power (MVARS)</th></tr>";
+					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['volts'], allOutputData.tableData['powerReal'], allOutputData.tableData['powerReact'])
+					gebi("resultsTable").innerHTML = htmlCollector; 
+
+				</script>
 			</div>
-			<div id="windowLoc"></div>
-			<div id="volts">
-				<center>
-				<!-- <img id="voltageDropChart" style="width:600px;height:600px;" />
-				<script type="text/javascript">gebi("voltageDropChart").src = "data:image/png;base64," + allOutputData.voltsChart</script> -->
-				<!--
-				<img id="img1" src="" style="width:600px;height:600px;">
-				<script>gebi("img1").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/volts.jpg"</script>
-				-->
-				<div style="max-height:600px;overflow-y:scroll;">
-					<table id="voltsTable">
-						<thead>
-							<th>Component Name</th>
-							<th>Voltage Per Unit</th>
-						</thead>
-					</table>
-				</div>
-				</center>
-			</div>
-			<div id="powerReal" style="display:none;">
-				<center>
-				<!-- <img id="powerRealDrop" style="width:600px;height:600px;" />
-				<script type="text/javascript">gebi("powerRealDrop").src = "data:image/png;base64," + allOutputData.powerRealChart</script> -->
-				<!--
-				<img id="img2" src="" style="width:600px;height:600px;">
-				<script>gebi("img2").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/powerReal.jpg"</script>
-				-->
-				<div style="max-height:600px;overflow-y:scroll;">
-					<table id="powerRealTable">
-						<thead>
-							<th>Component Name</th>
-							<th>Real Power (MW)</th>
-						</thead>
-					</table>
-				</div>
-				</center>
-			</div>
-			<div id="powerReact" style="display:none;">
-				<center>
-				<!-- <img id="powerReactDrop" style="width:600px;height:600px;" />
-				<script type="text/javascript">gebi("powerReactDrop").src = "data:image/png;base64," + allOutputData.powerReactChart</script> -->
-				<!--
-				<img id="img3" src="" style="width:600px;height:600px;">
-				<script>gebi("img3").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/powerReact.jpg"</script>
-				-->
-				<div style="max-height:600px;overflow-y:scroll;">
-					<table id="powerReactTable">
-						<thead>
-							<th>Component Name</th>
-							<th>Reactive Power (MVAR)</th>
-						</thead>
-					</table>
-				</div>
-				</center>
-			</div>
-			<script>
-				var comp = 0;
-				var val = 1;
-				console.log("data", allOutputData)
-				for (row = 0; row < allOutputData.tableData['volts'][0].length; row++)
-				{
-					insertMetric("voltsTable", [allOutputData.tableData["volts"][comp][row], allOutputData.tableData["volts"][val][row]])
-				}
-				for (row = 0; row < allOutputData.tableData['powerReal'][0].length; row++)
-				{
-					insertMetric("powerRealTable", [allOutputData.tableData["powerReal"][comp][row], allOutputData.tableData["powerReal"][val][row]])
-				}
-				for (row = 0; row < allOutputData.tableData['powerReact'][0].length; row++)
-				{
-					insertMetric("powerReactTable", [allOutputData.tableData["powerReact"][comp][row], allOutputData.tableData["powerReact"][val][row]])
-				}
-			</script>
 		</div>
 	</div>
 </body>
