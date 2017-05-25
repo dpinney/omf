@@ -188,6 +188,88 @@ def _csvToDictList(csvFileName,feederId):
 			mapped.append(Map(row))
 	return mapped
 
+def checkMissingNodes(nodes, sectionDevices, objectList, feederId, modelDir, cymsection):
+	dbNodes = []
+	MISSINGNO = {'name': None}
+	nodesNotMake = {}
+	missingNodes = []
+	glmObjs = []
+	objNotMiss =[]
+	toNodesMissing = []
+	sectionObjects = []
+	otherObjects = []
+	nonMissNodes = []
+	nodesLen = len(nodes)
+	# Make missingNodesReport.txt
+	missingNodesReport = pJoin(modelDir,'missingNodesReport.txt')
+	with open(missingNodesReport,'w') as inFile:
+		inFile.write('Missing nodes report for ' +  feederId  + '\nList of missing nodes:\n')
+	node_db =_csvToDictList(pJoin(modelDir,'cymeCsvDump',"CYMNODE.csv"),feederId)
+	# Nodes in mdb are compared with nodes in glm and missing nodes is populated with those missing
+	for row in node_db:
+		dbNodes.append(_fixName(row['NodeId']))
+		if _fixName(row['NodeId']) not in nodes:
+			nodesNotMake[_fixName(row['NodeId'])] = copy.deepcopy(MISSINGNO)
+			nodesNotMake[_fixName(row['NodeId'])]['name'] =  _fixName(row['NodeId'])
+			missingNodes.append(_fixName(row['NodeId']))
+			with open(missingNodesReport,'a') as inFile:
+				inFile.write(_fixName(row['NodeId'])+'\n')
+	# All objects in glm are put in a list
+	for row in objectList:
+		for key in row.keys():
+			glmObjs.append(key)
+	# Comparing missing nodes names to names of other glm objects to see if they are not nodes but other objects
+	# For Titanium these are batteries, diesel dg
+	with open(missingNodesReport,'a') as inFile:
+		inFile.write('Comparing the names of the missing nodes to the names of other objects in the .glm:\n')
+	for row in missingNodes:
+		if row in glmObjs:
+			with open(missingNodesReport,'a') as inFile:
+				inFile.write(row+' was found as an existing object in the .glm. Removing it from the list of missing nodes...\n')
+			objNotMiss.append(row)
+	# remove above objects from missing nodes list
+	for row in objNotMiss:
+		missingNodes.remove(row)
+	with open(missingNodesReport,'a') as inFile:
+				inFile.write('Updated list of missing nodes:\n')
+	for row in missingNodes:
+		with open(missingNodesReport,'a') as inFile:
+			inFile.write(row+'\n')
+	# check cymsection for the missing device and its corresponding device
+	with open(missingNodesReport,'a') as inFile:
+		inFile.write('Some nodes get absorbed into the objects that they lead to, checking for this situation now...\n')
+	for row in cymsection:
+		for missNode in missingNodes:
+			if cymsection[row]['to'] == missNode:
+				sectionId = cymsection[row]['name']
+				with open(missingNodesReport,'a') as inFile:
+					inFile.write('The missing node '+missNode+ ' is a part of the section '+sectionId+'\n')
+				for dev in sectionDevices:
+					if sectionDevices[dev]['section_name'] == sectionId:
+						sectionObjects.append(sectionDevices[dev]['name'])
+						with open(missingNodesReport,'a') as inFile:
+							inFile.write('This section corresponds to the device '+ sectionDevices[dev]['name']+ '\n')
+	# check to see if that device is in the glm
+	with open(missingNodesReport,'a') as inFile:
+		inFile.write('Comparing those devices to objects that already exist in the .glm:\n')
+	for row in sectionObjects:
+		for obj in glmObjs:
+			if row in obj:
+				if row not in otherObjects:
+					otherObjects.append(row)
+					with open(missingNodesReport,'a') as inFile:
+						inFile.write(row+' was found as the existing object ' +obj+' in the .glm. Removing its parent node from the list of missing nodes...\n')
+	# Removing nodes with devices in the glm from this missing nodes list
+	for row in otherObjects:
+		nonMissNodes.append(cymsection[sectionDevices[row]['section_name']]['to'])
+	for row in nonMissNodes:
+		missingNodes.remove(row)
+	with open(missingNodesReport,'a') as inFile:
+				inFile.write('Updated list of missing nodes:\n')
+	for row in missingNodes:
+		with open(missingNodesReport,'a') as inFile:
+			inFile.write(row+'\n')
+
 def _readCymeSource(feederId, type, modelDir):
 	'''store information for the swing bus'''
 	cymsource = {}                          # Stores information found in CYMSOURCE or CYMEQUIVALENTSOURCE in the network database    
@@ -1403,12 +1485,14 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	# Remove islands from the network database
 	fromNodes = []
 	toNodes = []
+	cleanToNodes = []
 	for link in cymsection.keys():
 		if 'from' in cymsection[link].keys():
 			if cymsection[link]['from'] not in fromNodes:
 				fromNodes.append(cymsection[link]['from'])
 			if cymsection[link]['to'] not in toNodes:
 				toNodes.append(cymsection[link]['to'])
+				cleanToNodes.append(cymsection[link]['to'])
 	islandNodes = []
 	for node in fromNodes:
 		if node not in toNodes and node != swingBus and node not in islandNodes:
@@ -1467,7 +1551,6 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 				threewxfmr_sections[cymsectiondevice[device]['section_name']] = device
 		elif cymsectiondevice[device]['device_type'] == 80:
 			battery_sections[cymsectiondevice[device]['section_name']] = device
-	print load_sections
 	# find the parent of capacitors, loads, and pv
 	for x in [capacitor_sections, load_sections, pv_sections, syncgen_sections, battery_sections]:
 		if len(x) > 0:
@@ -2203,7 +2286,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 	for headId in xrange(len(genericHeaders)):
 		glmTree[headId] = genericHeaders[headId]
 	key = len(glmTree)
-	objectList = [ohl_conds, ugl_conds, ohl_spcs, ohl_configs , ugl_sps, ohl_cfgs, ugl_cfgs, xfmr_cfgs, spct_cfgs, reg_cfgs, meters, nodes, loads, tpms, tpns, ohls, ugls, xfmrs, spcts, regs, swObjs, rcls, sxnlrs, fuses, caps, pv_sec, bat_sec, gen_secs]
+	objectList = [ohl_conds, ugl_conds, ohl_spcs, ohl_configs , ugl_sps, ohl_cfgs, ugl_cfgs, xfmr_cfgs, spct_cfgs, reg_cfgs, meters, nodes, loads, tpms, tpns, ohls, ugls, xfmrs, spcts, regs, swObjs, rcls, sxnlrs, fuses, caps, bat_sec, pv_sec, gen_secs]
 	for objDict in objectList:
 		if len(objDict) > 0:
 			for obj in objDict.keys():
@@ -2358,6 +2441,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 					glmTree[x]['phases'] = glmTree[x]['phases'] + 'N'
 			except:
 				pass
+	checkMissingNodes(nodes, cymsectiondevice, objectList, feeder_id, modelDir, cymsection)
 	return glmTree, x_scale, y_scale
 	
 def _tests(testFile, modelDir, outPrefix, keepFiles=True ):
