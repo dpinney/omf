@@ -91,7 +91,7 @@ def heavyProcessing(modelDir, inputDict):
 		tree = feederJson["tree"]
 		#add a check to see if there is already a climate object in the omd file
 		#if there is delete the climate from attachments and the climate object
-		attachKeys = feederJson["attachments"].keys()
+		attachKeys = feederJson['attachments'].keys()
 		for key in attachKeys:
 			if key.endswith('.tmy2'):
 				del feederJson['attachments'][key]	
@@ -150,10 +150,6 @@ def heavyProcessing(modelDir, inputDict):
 	 			tree[key]['enable_jitter'] = 'true'
 	 			tree[key]['average_delay_time'] = 600
 	 			tree[key]['groupid'] = 'fan'
-
-		# stub = {'object':'recorder', 'parent':'"module=powerflow"', 'property':'current_frequency', 'file':'systemFrequency.csv'}
-		# copyStub = dict(stub)
-		# tree[feeder.getMaxKey(tree)+1] = copyStub
 
 		# Attach recorder for waterheaters on/off
 		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheaterOn.csv'}
@@ -336,6 +332,17 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['Cap1B'] = rawOut[key]['switchB']
 				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
 				cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
+
+		# Frequency Player
+		inArray = feederJson['attachments']['frequency.PLAYER'][1:-3].split('; ')
+		tempArray = []
+		for each in inArray:
+			x = each.split(',')
+			y = float(x[1])
+			tempArray.append(y)
+		# newArray = zip(*tempArray)
+		# cleanOut['frequencyPlayer'] = {}
+		cleanOut['frequencyPlayer'] = tempArray
 
 		# Print gridBallast Outputs to allOutputData.json
 		cleanOut['gridBallast'] = {}

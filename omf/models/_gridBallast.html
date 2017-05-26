@@ -635,6 +635,67 @@
         new Highcharts.Chart(localHighChart);
       </script>
     </div>
+    <p class="reportTitle postRun">Frequency Player <a target="_self" class="toggle">Hide / Show</a></p>
+    <div id="frequencyReport" class="tightContent postRun">
+      <div id="frequencyChart"></div>
+      <script type="text/javascript">
+        var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+        localHighChart['chart']['renderTo'] = 'frequencyChart'
+        localHighChart['chart']['type'] = 'line'
+        localHighChart['chart']['width'] = 1000
+        localHighChart['chart']['height'] = 250
+        localHighChart['series'] = [
+          {
+            'showInLegend': false,
+            'data': allOutputData.frequencyPlayer
+          }
+        ]
+        localHighChart['xAxis']['title'] = {'text': ''}
+        localHighChart['xAxis']['min'] = new Date(allOutputData.timeStamps[0]).getTime()
+        localHighChart['xAxis']['max'] = new Date(allOutputData.timeStamps[allOutputData.timeStamps.length-1]).getTime()
+        localHighChart['xAxis']['plotLines'] = [
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': new Date(allOutputData.gridBallast.eventStart),
+            'width': 1.5,
+            'label': {'text':'Event Start'}
+          },
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': new Date(allOutputData.gridBallast.eventEnd),
+            'width': 1.5,
+            'label': {'text':'Event End'}
+          },
+          {
+            'color': 'red',
+            'dashStyle': 'dash',
+            'value': new Date(allOutputData.gridBallast.recoveryTime),
+            'width': 1.5,
+            'label': {'text': 'tRecovery'}
+          }
+        ]
+        localHighChart['yAxis']['title'] = {'text': 'System Frequency (Hz)'}
+        // localHighChart['yAxis']['plotLines'] = [
+        //   {
+        //     'color': 'red',
+        //     'dashStyle': 'dash',
+        //     'value': Math.max(...allOutputData.frequencyPlayer),
+        //     'width': 1.5,
+        //     'label': {'text':'MAX'}
+        //   },
+        //   {
+        //     'color': 'red',
+        //     'dashStyle': 'dash',
+        //     'value': Math.min(...allOutputData.frequencyPlayer),
+        //     'width': 1.5,
+        //     'label': {'text':'MIN'}
+        //   }
+        // ]
+        new Highcharts.Chart(localHighChart);
+      </script>
+    </div>
     <p class="reportTitle postRun">Performance Details <a target="_self" class="toggle">Hide / Show</a></p>
     <div id="performanceReport" class="tightContent postRun detailsContainer">
       <div id="performanceTable">
