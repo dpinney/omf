@@ -405,6 +405,7 @@ def new(modelDir):
 		"solarLCoE": "0.09",
 		"otherElecRevenue": "1544165",
 		"totalKWhPurchased": "999330657",
+		"retailCost": "0.10",
 		# Form 7 data
 		"powerProExpense": "0",
 		"costPurchasedPower": "80466749",
