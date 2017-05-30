@@ -189,29 +189,14 @@
 	</div>
 	<!-- Output tables, graphs, etc. -->
 	<div id="output" class="postRun">
-		<div class="content" style="overflow: auto">
+		<p class="reportTitle">Powerflow Results</p>
+		<div class="tightContent" style="overflow: auto">
 			<div id="tables">
-				<p class="reportTitle postRun" style="text-align: center">Transmission Output</p>
-				<h4 style="text-align: center;">Component Results</h4>
-				<br>
-				<table id="resultsTable"></table>
-				<script>/*
-					var htmlCollector = "<tr><th>Component Name</th><th>Voltage Power Unit (PU)</th></tr>";
-					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['volts'])
-					gebi("voltageTable").innerHTML = htmlCollector; 
-
-					htmlCollector = "<tr><th>Component Name</th><th>Real Power (MW)</th></tr>";
-					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['powerReal'])
-					gebi("powerRealTable").innerHTML = htmlCollector; 
-
-					htmlCollector = "<tr><th>Component Name</th><th>Reactive Power (MVARS)</th></tr>";
-					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['powerReact'])
-					gebi("powerReactTable").innerHTML = htmlCollector; */
-					
+				<table id="resultsTable" style="width:100%"></table>
+				<script>
 					var htmlCollector = "<tr><th>Component Name</th><th>Voltage Power Unit (PU)</th><th>Real Power (MW)</th><th>Reactive Power (MVARS)</th></tr>";
 					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['volts'], allOutputData.tableData['powerReal'], allOutputData.tableData['powerReact'])
 					gebi("resultsTable").innerHTML = htmlCollector; 
-
 				</script>
 			</div>
 		</div>
