@@ -3,6 +3,7 @@
 import datetime, copy, os, re, warnings, networkx as nx, json, math
 from os.path import join as pJoin
 from matplotlib import pyplot as plt
+import omf
 # import matpower
 
 # Wireframe for new netork objects:
@@ -165,20 +166,20 @@ def netToMat(inNet, networkName):
 def _secretTests():
 	# Parse mat to dictionary.
 	networkName = 'case9'
-	networkJson = parse(pJoin(os.getcwd(),'scratch','transmission','inData','matpower6.0b1',networkName+'.m'), filePath=True)
+	networkJson = parse(pJoin(omf.omfDir,'solvers','matpower5.1',networkName+'.m'), filePath=True)
 	keyLen = len(networkJson.keys())
 	print 'Parsed MAT file with %s buses, %s generators, and %s branches.'%(len(networkJson['bus']),len(networkJson['gen']),len(networkJson['branch']))
 	# Use python nxgraph to add lat/lon to .omt.json.
 	nxG = netToNxGraph(networkJson)
 	networkJson = latlonToNet(nxG, networkJson)
-	with open(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".omt"),"w") as inFile:
-		json.dump(networkJson, inFile, indent=4)
-	print 'Wrote network to: %s'%(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".omt"))
+	# with open(pJoin(os.getcwd(),'scratch','transmission','outData',networkName+'.omt'),'w') as inFile:
+	# 	json.dump(networkJson, inFile, indent=4)
+	# print 'Wrote network to: %s'%(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".omt"))
 	# Convert back to .mat and run matpower.
 	matStr = netToMat(networkJson, networkName)
-	with open(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".m"),"w") as outMat:
-		for row in matStr: outMat.write(row)
-	print 'Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".m"))
+	# with open(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".m"),"w") as outMat:
+	# 	for row in matStr: outMat.write(row)
+	# print 'Converted .omt back to .m at: %s'%(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName+".m"))
 	# inputDict = {
 	# 	"algorithm" : "FDBX",
 	# 	"model" : "DC",
@@ -187,7 +188,6 @@ def _secretTests():
 	# 	"genLimits" : 0,
 	# 	}
 	# matpower.runSim(pJoin(os.getcwd(),'scratch','transmission',"outData",networkName), inputDict, debug=False)
-
 
 if __name__ == '__main__':
 	_secretTests()
