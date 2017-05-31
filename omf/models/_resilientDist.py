@@ -211,9 +211,6 @@ def makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
 	objToFind, lineCount = ['triplex_line','transformer', 'regulator'], 0
 	for key, line in jsonTree.iteritems():
 		if line.get('object','') in objToFind:
-			#newLine = createObj('line')
-			#newLine['id'], newLine['node1_id'], newLine['node2_id'], newLine['length'], newLine['line_code'] = line.get('name',''), line.get('from','')+'_bus', line.get('to','')+'_bus', float(line.get('length',100))/100, lineCount
-			#newLine['num_phases'], newLine['has_phase'], maxRealPhase, maxReactivePhase = getNodePhases(line, maxDG)
 			newLine = Line(line.get('name',''), line.get('from','')+'_bus', line.get('to','')+'_bus', float(line.get('length',100)))
 			# Calculate harden_cost, 10.
 			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
@@ -231,19 +228,6 @@ def makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
 			else:
 				cost = float(lineUnitCost)*float(line.get('length',100))
 			lineCosts.append((line.get('name',''), cost))
-	#Code successfully adds user specified lines to RDT Input. However, since user specified lines might not be correct, RDT may crash during runtime
-	'''
-	newLines = newLines.strip().split(';')
-	for lineTupleString in newLines:
-		linePair = lineTupleString.replace('(','').replace(')','').split(',')
-		#print linePair[0], linePair[1]
-		newLine = Line("newLine_" + str(lineCount), linePair[0], linePair[1]).toOutput()
-		newLine["is_new"] = True
-		if ("newLine_" + str(lineCount)) in hardCands:
-				newLine.can_harden = True
-		rdtJson['lines'].append(newLine)
-		lineCount+=1		
-		'''
 	return lineCount, lineCosts
 
 def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
@@ -363,26 +347,13 @@ def makeGens(rdtJson, jsonTree, maxRealPhase, newGens, debug):
 	'''
 	for key, gens in jsonTree.iteritems():
 		if gens.get('bustype','').lower() == 'swing':
-			#newGen = createObj('gen')
-			#newGen['id'] = gens.get('name','')+'_gen'
-			#for elem in rdtJson['buses']:
-			#	if elem['id'][0:-4] == genID['id'][0:-4]:
-			#		busID = elem['id']
-
 			genID = gens.get('name','')+'_gen'
 			for elem in rdtJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
 					busID = elem['id']
-			#newGen['node_id'] = busID	
-			#numPhases, newGen['has_phase'], newGen['max_real_phase'], newGen['max_reactive_phase'] = getNodePhases(gens, maxRealPhase)
 			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, maxRealPhase)
 			newGen = Gen(gens.get('name','')+'_gen', busID, has_phase, max_reactive_phase, max_real_phase)
 			rdtJson['generators'].append(newGen.toOutput())
-	'''
-	newGens = newGens.strip().split(',')
-	for newGenName in newGens:
-		rdtJson['generators'].append(Gen(newGenName, Gen.genCount).toOutput())
-	'''
 def readXRMatrices(dataDir, rdtFile, length):
 	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
 	'''
@@ -575,9 +546,9 @@ def heavyProcessing(modelDir, inputDict):
 		outFilePath = pJoin(modelDir, gfmOutFileName)
 		topologyPath = pJoin(__metaModel__._omfDir,'solvers','gfm', 'fragility_topology.json')
 		shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'RDT_template.json'), pJoin(modelDir, 'RDT_template.json'))
-		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
+		#proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
 
-		#proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath, '--lpnorm', topologyPath], cwd=modelDir)
+		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath, '--lpnorm', topologyPath], cwd=modelDir)
 		proc.wait()
 		gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
 		outData['gfmRawOut'] = gfmRawOut
@@ -599,13 +570,7 @@ def heavyProcessing(modelDir, inputDict):
 		print "Running RDT..."
 		print "************************************"
 		
-		rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
-		with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
-			json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
-		rdtFileName, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
-		rdtInFile = modelDir + '/' + rdtFileName
-		
-		#rdtInFile = modelDir + '/' + 'gfmOutput.json'
+		rdtInFile = modelDir + '/' + 'gfmOutput.json'
 		rdtOutFile = modelDir + '/rdtOutput.json'
 		rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
 		rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
@@ -620,16 +585,17 @@ def heavyProcessing(modelDir, inputDict):
 			json.dump(rdtOut, outFile, indent = 4)
 		print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
 		print "************************************\n\n"
-
+		
 		#GridlabD
 		omdPath = pJoin(modelDir, feederName + ".omd")
 		with open(omdPath, "r") as omd:
 			omd = json.load(omd)
-		#Load an blank glm file and use it to write to it, JSON READER DOES NOT WORK
+		#Load an blank glm file and use it to write to it
 		feederPath = pJoin(modelDir, 'feeder.glm')
 		with open(feederPath, 'w') as glmFile:
-			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename test_JSON_dump.json;\n};\n" + "object jsonreader {\n\tfilename rdtIn.json;\n};"
+			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true; };\n"# + "object jsonreader {\n\tfilename rdtIn.json;\n};"
 			glmFile.write(toWrite)
+			
 		#Write attachments from omd, if no file, one will be created
 		for fileName in omd['attachments']:
 			with open(os.path.join(modelDir, fileName),'w') as file:
@@ -637,27 +603,28 @@ def heavyProcessing(modelDir, inputDict):
 		#Wire in the file the user specifies via zipcode.
 		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
 		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		#print os.getcwd()
-		##os.chdir(modelDir)
+		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
+		(out, err) = proc.communicate()
+		accumulator = ""
+		with open(pJoin(modelDir, "test_JSON_dump1.json"), "r") as gldOut:
+			accumulator = json.load(gldOut)
+		with open(pJoin(modelDir, "test_JSON_dump2.json"), "r") as gldOut:
+			accumulator = json.load(gldOut)
+		outData['gridlabdRawOut'] = accumulator
+		'''
 		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], cwd=modelDir)
 		proc.wait()
-		
+		'''
 		# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
 		#Deriving line names from RDT Input and line lengths from feeder omd file
 		#Building hashmap of source and target nodes, used to represent lines.
-		sources = {}
-		targets = {}
-		for link in feederModel["links"]:
-			sources[link["source"]["name"]] = link["source"]
-			targets[link["target"]["name"]] = link["target"]
 		with open(rdtInFile, "r") as rdtInFileData:
 			rdtInFileData = json.load(rdtInFileData)
 		lineData = []
-		# [:-4] is to remove last 4 characters in string, or " to remove "_bus"
+
 		for line in rdtInFileData["lines"]:
-			dist = math.sqrt((targets[line["node2_id"][:-4]]["x"] - sources[line["node1_id"][:-4]]["x"])**2 + (targets[line["node2_id"][:-4]]["y"] - sources[line["node1_id"][:-4]]["y"])**2)
-			lineData.append((line["id"], '{:,.2f}'.format(dist*float(inputDict["lineUnitCost"]))))
-		outData["lineData"] = lineCosts
+			lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
+		outData["lineData"] = lineData
 		outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 
 

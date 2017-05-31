@@ -324,9 +324,8 @@
 						lineID = lineData[j][0];
 						lineCost = lineData[j][1];
 						htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + "</td><td>$" +  lineCost + "</td></tr>";
-						totalCost = lineCost + totalCost;
+						totalCost = parseFloat(lineCost) + totalCost;
 					}
-					console.log(totalCost);
 					if(rdtOutput.design_solution.is_feasible == true) {
 						gebi("validation").innerHTML = "Powerflow Validated";
 					}
@@ -335,7 +334,7 @@
 					}
 					//Total cost is currently being determined by summing all component costs of the design solution.  However, there is a section in RDTOUTPUT that gives total cost, though it is not implemented
 					//gebi("totalCostTable").innerHTML = '<tr><th>Total Cost</th></tr><tr><td>$' + rdtOutput.design_solution.design_cost + '</td></tr>';
-					gebi("totalCostTable").innerHTML = '<tr><th>Total Cost</th></tr><tr><td>$' + totalCost + '</td></tr>';
+					gebi("totalCostTable").innerHTML = '<tr><th>Total Cost</th></tr><tr><td>$' + totalCost.toFixed(2) + '</td></tr>';
 					gebi("solutionComponents").innerHTML = htmlCollector;
 
 					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
@@ -403,7 +402,7 @@
 		<p class="reportTitle">GridLAB-D Output</p>
 		<div class="content" style="overflow: auto">
 			<pre id="gridlabOutputFrame"></pre>
-			<script>gebi("gridlabOutputFrame").innerHTML = allOutputData.gridlabdRawOut.stdout</script>
+			<script>gebi("gridlabOutputFrame").innerHTML = JSON.stringify(allOutputData.gridlabdRawOut, null, '\t')</script>
 		</div>
 	</div>
 </body>
