@@ -254,7 +254,7 @@ def checkMissingNodes(nodes, sectionDevices, objectList, feederId, modelDir, cym
 		inFile.write('Comparing those devices to objects that already exist in the .glm:\n')
 	for row in sectionObjects:
 		for obj in glmObjs:
-			if row in obj:
+			if row in obj and 'config' not in obj and '_' not in obj:
 				if row not in otherObjects:
 					otherObjects.append(row)
 					with open(missingNodesReport,'a') as inFile:
