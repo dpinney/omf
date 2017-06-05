@@ -261,6 +261,7 @@
 				<li><a id='amiLoad' href='javascript:showModal("amiLoadshapes");'>Add AMI Profiles...</a></li>
 				<li><a href='javascript:showModal("findModal");'>Find...</a></li>
 				<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
+				<li><a href='javascript:showModal("massAddModal");'>Mass Add</a></li>
 				</ul>
 			</div>
 		</div>
@@ -507,28 +508,28 @@
 </div>
 <div id= 'findModal' class= 'modal'>
 	<div class="modalContent" id='findModalContent' style='width:200px;'>
-	<table class= 'importOptions' style='padding:4px;word-wrap:break-word;'>
-		<tr>
-			<td>Term</td>
-			<td><input id='searchTerm' type='text'></td>
-		</tr>
-		<tr>
-			<td><button style="width:75px;" onclick='backButton()'>Back</button></td>
-			<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
-		</tr>
-		<tr>
-			<td><button style="width:75px;" onclick='findPrevious()'>Previous</button></td>
-			<td><button style="width:75px;" onclick='findNext()'>Next</button></td>
-		</tr>
-		<tr>
-			<td><button style="width:75px; "onclick='closeModal("findModal")' ">Cancel</button></td>
-		</tr>
-	</table>
+		<table class= 'importOptions' style='padding:4px;word-wrap:break-word;'>
+			<tr>
+				<td>Term</td>
+				<td><input id='searchTerm' type='text'></td>
+			</tr>
+			<tr>
+				<td><button style="width:75px;" onclick='backButton()'>Back</button></td>
+				<td id='searchHitCount' style='font-size:8pt;text-align:center'></td>
+			</tr>
+			<tr>
+				<td><button style="width:75px;" onclick='findPrevious()'>Previous</button></td>
+				<td><button style="width:75px;" onclick='findNext()'>Next</button></td>
+			</tr>
+			<tr>
+				<td><button style="width:75px; "onclick='closeModal("findModal")' ">Cancel</button></td>
+			</tr>
+		</table>
 	</div>
 </div>
 <div id = "layoutModal" class = 'modal'>
 	<div class = "modalContent" id = 'layoutModalContent' style='width:200px;'>
-			<table class= 'importOptions' style='padding:4px;word-wrap:break-word'>
+		<table class= 'importOptions' style='padding:4px;word-wrap:break-word'>
 			<tr>
 				<td>GraphNodes</td>
 				<td id='nodesBox'></td>
@@ -566,6 +567,29 @@
 			<td style='padding-top:10px'><button onclick='closeModal("layoutModal")' ">Cancel</button></td>
 			<td style='padding-top:10px'><button onclick='layoutMenuApply();unsavedChanges=true'>Apply</button></td>
 				</tr>
+		</table>
+	</div>
+</div>
+<div id='massAddModal' class= 'modal'>
+	<div class="modalContent" id='massAddModalContent'>
+		<table class='importOptions'>
+			<th>addXatY(componentName, attachType, perc)</th>
+			<tr>
+				<td>componentName</td>
+				<td><input type='text' id='componentNameNew' name='componentNameNew' required/></td>
+			</tr>
+			<tr>
+				<td>attachType</td>
+				<td><input type='text' id='attachTypeNew' name='attachTypeNew' required/></td>
+			</tr>
+			<tr>
+				<td>percent</td>
+				<td><input type='text' id='percNew' name='percNew' required/></td>
+			</tr>
+			<tr>
+				<td style='padding-top:10px'><button onclick='closeModal("massAddModal")' ">Cancel</button></td>
+				<td style='padding-top:10px'><button onclick='addXatY();unsavedChanges=true'>Apply</button></td>
+			</tr>
 		</table>
 	</div>
 </div>
@@ -2098,6 +2122,14 @@ function solarAdding() {
  * General Function to Add Components 'inverter', 'triplex_meter', PERC
  */
 function addXatY(componentName, attachType, perc) {
+	// componentName = prompt('Enter componentName:')
+	// attachType = prompt('Enter attachType:')
+	// perc = prompt ('Enter propability of component being added to each attachment (decimal between 0 and 1):', 0.5)
+	console.log('initiate')
+	componentName = document.getElementById('componentNameNew').value
+	attachType = document.getElementById('attachTypeNew').value
+	perc = document.getElementById('percNew').value
+	console.log(componentName, attachType, perc)
 	if ( components.hasOwnProperty(componentName) ) {
 		for (var key in tree) {
 			if (tree[key].hasOwnProperty('object') && tree[key]['object'] == attachType) {
@@ -2108,6 +2140,7 @@ function addXatY(componentName, attachType, perc) {
 			}
 		}
 		redraw()
+		console.log('success')
 	} 
 	else {
 		return
