@@ -109,7 +109,7 @@
         <input type="text" id="solarPenetration" name="solarPenetration" pattern="^\d+\.?\d*?$" placeholder="N/A" disabled/>
       </div> -->
       <hr>
-      <div class="shortInput">
+<!--       <div class="shortInput">
         <label>Water Heater GridBallast Penetration (%)</label>
         <input type="text" id="gridBallastPenetration" name="gridBallastPenetration" placeholder="N/A" disabled/>
       </div>
@@ -120,7 +120,7 @@
       <div class="shortInput">
         <label>Frequency Drop Band</label>
         <input type="text" id="frequencyDropBand" name="frequencyDropBand" placeholder="N/A" disabled/>
-      </div>
+      </div> -->
       <hr>
       <div class="shortInput">
         <label>Event Type</label>
@@ -753,6 +753,16 @@
               <td></td>
               <td id="availMag"></td>
             </tr>
+            <tr>
+              <td>Renewable Energy per Demand (%)</td>
+              <td></td>
+              <td id="renEnergyDemand"></td>
+            </tr>
+            <tr>
+              <td>GridBallast Penetration Level (%)</td>
+              <td></td>
+              <td id="gbPenetration"></td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -768,6 +778,8 @@
         // document.getElementById('contSupport').innerHTML = allOutputData.gridBallast.contSupport
         document.getElementById('recoveryTime').innerHTML = tRec.toTimeString().substr(0,8)
         document.getElementById('availMag').innerHTML = 'Max: ' + Math.max(...allOutputData.gridBallast.availabilityMagnitude) + ', Min: ' + Math.min(...allOutputData.gridBallast.availabilityMagnitude)
+        document.getElementById('renEnergyDemand').innerHTML = 100*(tDGDirect+tDGExported)/(tLosses+tLoads) + '%'
+        document.getElementById('gbPenetration').innerHTML = allOutputData.gridBallast.penetrationLevel + '%'
       </script>
     </div>
   </div>

@@ -118,11 +118,16 @@ def heavyProcessing(modelDir, inputDict):
 		feeder.groupSwingKids(tree)
 
 		# Set up GridBallast Controls
+		totalWH = 0
+		totalZIP = 0
+		gbWH = 0
+		gbZIP = 0
 		# HACK: tree[10:19] is empty
 		tree[10] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
 		# Waterheater controller properties
 		for key in tree.keys():
 			if ('name' in tree[key]) and (tree[key].get('object') == 'waterheater'):
+		 		totalWH += 1
 		 		parent = tree[key]['name']
 		 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
 		 		copyStub = dict(stub)
@@ -137,9 +142,11 @@ def heavyProcessing(modelDir, inputDict):
 		 			tree[key]['heat_mode'] = 'ELECTRIC'
 		 			tree[key]['enable_jitter'] = 'true'
 		 			tree[key]['average_delay_time'] = 600
+		 			gbWH += 1
 		# ZIPload controller properties
 		for key in tree.keys():
 			if ('name' in tree[key]) and (tree[key].get('object') == 'ZIPload'):
+		 		totalZIP += 1
 		 		parent = tree[key]['name']
 		 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
 		 		copyStub = dict(stub)
@@ -150,6 +157,7 @@ def heavyProcessing(modelDir, inputDict):
 	 			tree[key]['enable_jitter'] = 'true'
 	 			tree[key]['average_delay_time'] = 600
 	 			tree[key]['groupid'] = 'fan'
+	 			gbZIP += 1
 
 		# Attach recorder for waterheaters on/off
 		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheaterOn.csv'}
@@ -346,6 +354,7 @@ def heavyProcessing(modelDir, inputDict):
 
 		# Print gridBallast Outputs to allOutputData.json
 		cleanOut['gridBallast'] = {}
+		cleanOut['gridBallast']['penetrationLevel'] = 100*(gbWH+gbZIP)/(totalWH+totalZIP)
 		if 'allWaterheaterOn.csv' in rawOut:
 			cleanOut['gridBallast']['waterheaterOn'] = {}
 			for key in rawOut['allWaterheaterOn.csv']:
