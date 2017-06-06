@@ -553,19 +553,7 @@ def heavyProcessing(modelDir, inputDict):
 		gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
 		outData['gfmRawOut'] = gfmRawOut
 		print 'Ran Fragility\n'
-		# Run GridLAB-D first time to generate xrMatrices. #TODO: integrate GLD990.
-		'''
-		tree = feederModel.get("tree",{})
-		attachments = feederModel.get("attachments",{})
-		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
-		print gridlabdRawOut
-		outData['gridlabdRawOut'] = gridlabdRawOut
-		'''
-		'''Loads OMD file from feeder name, creates GLM input, places climate file from user inputted zip code into model directory (TODO), runs Gridlab-D  (TODO)'''
-		#Load json
-		
+				
 		# Run RDT.
 		print "Running RDT..."
 		print "************************************"
@@ -585,32 +573,40 @@ def heavyProcessing(modelDir, inputDict):
 			json.dump(rdtOut, outFile, indent = 4)
 		print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
 		print "************************************\n\n"
-		
-		#GridlabD
-		omdPath = pJoin(modelDir, feederName + ".omd")
-		with open(omdPath, "r") as omd:
-			omd = json.load(omd)
-		#Load an blank glm file and use it to write to it
-		feederPath = pJoin(modelDir, 'feeder.glm')
-		with open(feederPath, 'w') as glmFile:
-			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true; };\n"# + "object jsonreader {\n\tfilename rdtIn.json;\n};"
-			glmFile.write(toWrite)
-			
-		#Write attachments from omd, if no file, one will be created
-		for fileName in omd['attachments']:
-			with open(os.path.join(modelDir, fileName),'w') as file:
-				file.write(omd['attachments'][fileName])
-		#Wire in the file the user specifies via zipcode.
-		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
-		(out, err) = proc.communicate()
-		accumulator = ""
-		with open(pJoin(modelDir, "test_JSON_dump1.json"), "r") as gldOut:
-			accumulator = json.load(gldOut)
-		with open(pJoin(modelDir, "test_JSON_dump2.json"), "r") as gldOut:
-			accumulator = json.load(gldOut)
-		outData['gridlabdRawOut'] = accumulator
+
+		# Run GridLAB-D first time to generate xrMatrices.
+		if platform.system() == "Windows":
+			#GridlabD
+			omdPath = pJoin(modelDir, feederName + ".omd")
+			with open(omdPath, "r") as omd:
+				omd = json.load(omd)
+			#Load an blank glm file and use it to write to it
+			feederPath = pJoin(modelDir, 'feeder.glm')
+			with open(feederPath, 'w') as glmFile:
+				toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true; };\n"# + "object jsonreader {\n\tfilename rdtIn.json;\n};"
+				glmFile.write(toWrite)		
+			#Write attachments from omd, if no file, one will be created
+			for fileName in omd['attachments']:
+				with open(os.path.join(modelDir, fileName),'w') as file:
+					file.write(omd['attachments'][fileName])
+			#Wire in the file the user specifies via zipcode.
+			climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+			proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
+			(out, err) = proc.communicate()
+			accumulator = ""
+			with open(pJoin(modelDir, "test_JSON_dump1.json"), "r") as gldOut:
+				accumulator = json.load(gldOut)
+			with open(pJoin(modelDir, "test_JSON_dump2.json"), "r") as gldOut:
+				accumulator = json.load(gldOut)
+			outData['gridlabdRawOut'] = accumulator
+		else:
+			tree = feederModel.get("tree",{})
+			attachments = feederModel.get("attachments",{})
+			climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+			gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
+			outData['gridlabdRawOut'] = gridlabdRawOut
 		'''
 		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], cwd=modelDir)
 		proc.wait()
