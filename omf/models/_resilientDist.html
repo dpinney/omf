@@ -156,8 +156,8 @@
 				<input type="text" id="hardeningCandidates" name="hardeningCandidates" pattern="^(\w+){1}(\s*\,\s*\w+)*$">
 			</div>
 			<div class="shortInput">
-				<label class="tooltip">New Line Candidates<span class="classic">Pairs of node IDs that indicate where the user wants to consider adding lines. At least one pair is required.</span></label>
-				<input type="text" id="newLineCandidates" name="newLineCandidates" pattern="^(\(\w+\,\s*\w+\)){1}(\s*\;\s*(\(\w+\,\s*\w+\)){1})*$">
+				<label class="tooltip">New Line Candidates<span class="classic">Line IDs that indicate which lines the user added within the feeder editor. At least one line is required.</span></label>
+				<input type="text" id="newLineCandidates" name="newLineCandidates" pattern="^(\w+){1}(\s*\,\s*\w+)*$">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generator Candidates<span class="classic">The IDs of nodes on the system where the user wants to consider adding distributed generation. At least one node is required.</span></label>
@@ -284,7 +284,7 @@
 	</div>
 	<div id="output" class="postRun">
 		<p class="reportTitle" style="page-break-before:always">Resilience Solution</p>
-		<div class="content" style="overflow: auto">
+		<div class="content" style="overflow: scroll; height: 600px">
 			<div id="diagram" style="width: 40%; float: left;">	
 				<h4 style="text-align: center;">One Line Diagram</h4>
 				<img id="oneLineDiagram" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
@@ -362,7 +362,7 @@
 			</div>
 		</div>
 		<p class="reportTitle" style="page-break-before:always">Damage Scenario Result</p>
-		<div class="content" style="overflow: auto">
+		<div class="content" style="overflow: scroll; height: 600px">
 			<div id="diagram" style="width: 40%; float: left;">	
 				<h4 style="text-align: center;">Weather Type: Wind</h4>
 				<img id="oneLineDiagram2" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>

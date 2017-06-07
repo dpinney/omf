@@ -672,7 +672,7 @@ def new(modelDir):
 		"hardeningUnitCost": "1000.0",
 		"maxDGPerGenerator": "5000.0",
 		"hardeningCandidates": "Line_id1, line_id2, t2",
-		"newLineCandidates": "(node1,node2);(node3,node4)",
+		"newLineCandidates": "Line_id1",
 		"generatorCandidates": "node1",
 		"criticalLoadMet": "0.0",
 		"nonCriticalLoadMet": "0.0",
