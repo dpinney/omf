@@ -1072,8 +1072,8 @@ function getComponentsList(){
 		document.getElementById('componentNameNew').innerHTML += '<option value="'+component+'">'+component+'</option>'
 	}
 	for (var key in tree) {
-		if ( tree[key].hasOwnProperty('object') && (tree[key]['object'] in components) ) {
-			if ( !attachList.includes(tree[key]['object']) ) {	
+		if ( (tree[key].hasOwnProperty('object')) && (tree[key]['object'] in components) ) {
+			if ( !attachList.includes(tree[key]['object']) ) {
 				attachList.push(tree[key]['object'])
 				document.getElementById('attachTypeNew').innerHTML += '<option value="'+tree[key]['object']+'">'+tree[key]['object']+'</option>'
 			}
