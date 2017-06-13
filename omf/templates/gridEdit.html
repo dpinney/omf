@@ -262,6 +262,7 @@
 				<li><a href='javascript:showModal("findModal");'>Find...</a></li>
 				<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
 				<li><a href='javascript:showModal("massAddModal");getComponentsList();'>Mass Add...</a></li>
+				<li><a href='javascript:showModal("attachmentsModal");getAttachmentsList();'>Attachments...</a></li>
 				</ul>
 			</div>
 		</div>
@@ -570,7 +571,7 @@
 		</table>
 	</div>
 </div>
-<div id='massAddModal' class= 'modal'>
+<div id='massAddModal' class='modal'>
 	<div class="modalContent" id='massAddModalContent'>
 		<table class='importOptions'>
 			<th>Mass Add</th>
@@ -597,6 +598,33 @@
 			<tr>
 				<td style='padding-top:10px'><button onclick='closeModal("massAddModal")'>Cancel</button></td>
 				<td style='padding-top:10px'><button onclick='addXatY();unsavedChanges=true;closeModal("massAddModal")'>Apply</button></td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+
+<div id='attachmentsModal' class='modal'>
+	<div class="modalContent" id='attachmentsModalContent'>
+		<table class='importOptions' id='attachmentsList'>
+			<tr>
+				<td style='padding-top:10px'><button onclick='closeModal("attachmentsModal")'>Cancel</button></td>
+			</tr>
+		</table>
+	</div>
+</div>
+
+<div id='editAttachmentModal' class='modal'>
+	<div class="modalContent" id='editAttachmentModalContent'>
+		<table class='importOptions'>
+			<tr>
+				<td>
+					<textarea id='editAttachment' name='editAttachment'></textarea>
+				</td>
+			</tr>
+			<tr>
+				<td style='padding-top:10px'><button onclick='closeModal("editAttachmentModal")'>Cancel</button></td>
+				<td style='padding-top:10px'><button onclick='closeModal("editAttachmentModal")'>Apply</button></td>
 			</tr>
 		</table>
 	</div>
@@ -1066,7 +1094,7 @@ function loadFeeder(fromfeederName, frommodelName, fromuser){
 		}
 	})
 }
-function getComponentsList(){
+function getComponentsList() {
 	var attachList = []
 	for (var component in components) {
 		document.getElementById('componentNameNew').innerHTML += '<option value="'+component+'">'+component+'</option>'
@@ -1079,6 +1107,15 @@ function getComponentsList(){
 			}
 		}
 	}
+}
+function getAttachmentsList() {
+	for (var attachment in attachments) {
+		document.getElementById('attachmentsList').innerHTML += '<tr><td><a href="' + 'javascript:closeModal("attachmentsModal");showModal("editAttachmentModal");">' + attachment + '</a></td></tr>'
+	}
+}
+function editAttachment() {
+	document.getElementById('editAttachment').innerHTML = 
+
 }
 //*********************************************
 // FUNCTIONS FOR DRAWING:
