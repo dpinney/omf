@@ -261,7 +261,7 @@
 				<li><a id='amiLoad' href='javascript:showModal("amiLoadshapes");'>Add AMI Profiles...</a></li>
 				<li><a href='javascript:showModal("findModal");'>Find...</a></li>
 				<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
-				<li><a href='javascript:showModal("massAddModal");'>Mass Add...</a></li>
+				<li><a href='javascript:showModal("massAddModal");getComponentsList();'>Mass Add...</a></li>
 				</ul>
 			</div>
 		</div>
@@ -576,44 +576,27 @@
 			<th>Mass Add</th>
 			<tr>
 				<td>Add component:</td>
-				<td><input list='componentNames' type='text' id='componentNameNew' name='componentNameNew' required/></td>
+				<td>
+					<form method='post'>
+						<select name='componentNameNew' id='componentNameNew'></select>
+					</form>
+				</td>
 			</tr>
 			<tr>
 				<td>To each:</td>
-				<td><input list='componentNames' type='text' id='attachTypeNew' name='attachTypeNew' required/></td>
-				<datalist id='componentNames'>
-					<option value='load'>
-					<option value='overhead_line'>
-					<option value='volt_var_control'>
-					<option value='battery'>
-					<option value='house'>
-					<option value='transformer_configuration'>
-					<option value='evcharger_det'>
-					<option value='inverter'>
-					<option value='triplex_line_conductor'>
-					<option value='transformer'>
-					<option value='regulator_configuration'>
-					<option value='windturb_dg'>
-					<option value='node'>
-					<option value='meter_recorder'>
-					<option value='triplex_line'>
-					<option value='triplex_node'>
-					<option value='triplex_line_configuration'>
-					<option value='capacitor'>
-					<option value='solar'>
-					<option value='ZIPload'>
-					<option value='triplex_meter'>
-					<option value='regulator'>
-					<option value='meter'>
-				</datalist>
+				<td>
+					<form method='post'>
+						<select name='attachTypeNew' id='attachTypeNew'></select>
+					</form>
+				</td>
 			</tr>
 			<tr>
 				<td>With probability for each attachment (float between 0.0 and 1.0):</td>
-				<td><input type='text' id='percNew' name='percNew' required/></td>
+				<td><input type='text' id='percNew' name='percNew' pattern='^0\.\d+|1(\.0+)?$' required/></td>
 			</tr>
 			<tr>
-				<td style='padding-top:10px'><button onclick='closeModal("massAddModal")' ">Cancel</button></td>
-				<td style='padding-top:10px'><button onclick='addXatY();unsavedChanges=true'>Apply</button></td>
+				<td style='padding-top:10px'><button onclick='closeModal("massAddModal")'>Cancel</button></td>
+				<td style='padding-top:10px'><button onclick='addXatY();unsavedChanges=true;closeModal("massAddModal")'>Apply</button></td>
 			</tr>
 		</table>
 	</div>
@@ -1033,7 +1016,6 @@ function checkFeederName(newName) {
 	}
 }
 
-
 function startConversion(elementName, nextAction) {
 	// Additional check, required for Safari browsers
 	var newName = document.getElementById(elementName).value;
@@ -1083,7 +1065,20 @@ function loadFeeder(fromfeederName, frommodelName, fromuser){
 			alert('This feeder no longer exists. Please refresh the page, or select another one.')
 		}
 	})
-
+}
+function getComponentsList(){
+	var attachList = []
+	for (var component in components) {
+		document.getElementById('componentNameNew').innerHTML += '<option value="'+component+'">'+component+'</option>'
+	}
+	for (var key in tree) {
+		if ( tree[key].hasOwnProperty('object') && (tree[key]['object'] in components) ) {
+			if ( !attachList.includes(tree[key]['object']) ) {	
+				attachList.push(tree[key]['object'])
+				document.getElementById('attachTypeNew').innerHTML += '<option value="'+tree[key]['object']+'">'+tree[key]['object']+'</option>'
+			}
+		}
+	}
 }
 //*********************************************
 // FUNCTIONS FOR DRAWING:
@@ -2150,16 +2145,19 @@ function addXatY(componentName, attachType, perc) {
 	componentName = document.getElementById('componentNameNew').value
 	attachType = document.getElementById('attachTypeNew').value
 	perc = document.getElementById('percNew').value
+	var objectsAdded = 0
 	if ( components.hasOwnProperty(componentName) ) {
 		for (var key in tree) {
 			if (tree[key].hasOwnProperty('object') && tree[key]['object'] == attachType) {
 				if (Math.random() < perc) {
 					var newComp = JSON.parse(JSON.stringify(components[componentName]))
 					newChildAtLocation(newComp, key)
+					objectsAdded += 1
 				}
 			}
 		}
 		redraw()
+		alert(objectsAdded + ' ' + componentName + ' objects added to the feeder')
 	} 
 	else {
 		return
