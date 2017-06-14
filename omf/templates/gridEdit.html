@@ -596,35 +596,53 @@
 				<td><input type='text' id='percNew' name='percNew' pattern='^0\.\d+|1(\.0+)?$' required/></td>
 			</tr>
 			<tr>
-				<td style='padding-top:10px'><button onclick='closeModal("massAddModal")'>Cancel</button></td>
-				<td style='padding-top:10px'><button onclick='addXatY();unsavedChanges=true;closeModal("massAddModal")'>Apply</button></td>
+				<td style='padding-top:10px'>
+					<button onclick='closeModal("massAddModal")'>Cancel</button>
+				</td>
+				<td style='padding-top:10px'>
+					<button onclick='addXatY();unsavedChanges=true;closeModal("massAddModal")'>Apply</button>
+				</td>
 			</tr>
 		</table>
 	</div>
 </div>
-
-
 <div id='attachmentsModal' class='modal'>
 	<div class="modalContent" id='attachmentsModalContent'>
-		<table class='importOptions' id='attachmentsList'>
+		<table class='importOptions'>
 			<tr>
-				<td style='padding-top:10px'><button onclick='closeModal("attachmentsModal")'>Cancel</button></td>
+				<td>
+					<form method='post'>
+						<select name='attachmentsList' id='attachmentsList'></select>
+					</form>
+				</td>
+			</tr>
+			<tr>
+				<td style='padding-top:10px'>
+					<button onclick='closeModal("attachmentsModal")'>Cancel</button>
+				</td>
+				<td style='padding-top:10px'>
+					<button onclick='editAttachment();unsavedChanges=true;closeModal("attachmentsModal")'>Select</button>
+				</td>
 			</tr>
 		</table>
 	</div>
 </div>
-
 <div id='editAttachmentModal' class='modal'>
 	<div class="modalContent" id='editAttachmentModalContent'>
 		<table class='importOptions'>
 			<tr>
+				<td id='attachmentSelect'></td>
 				<td>
-					<textarea id='editAttachment' name='editAttachment'></textarea>
+					<textarea rows='25' cols='50' id='editAttachmentBox' name='editAttachmentBox'></textarea>
 				</td>
 			</tr>
 			<tr>
-				<td style='padding-top:10px'><button onclick='closeModal("editAttachmentModal")'>Cancel</button></td>
-				<td style='padding-top:10px'><button onclick='closeModal("editAttachmentModal")'>Apply</button></td>
+				<td style='padding-top:10px'>
+					<button onclick='closeModal("editAttachmentModal")'>Cancel</button>
+				</td>
+				<td style='padding-top:10px'>
+					<button onclick='saveAttachment();unsavedChanges=true;closeModal("editAttachmentModal")'>Apply</button>
+				</td>
 			</tr>
 		</table>
 	</div>
@@ -1110,12 +1128,18 @@ function getComponentsList() {
 }
 function getAttachmentsList() {
 	for (var attachment in attachments) {
-		document.getElementById('attachmentsList').innerHTML += '<tr><td><a href="' + 'javascript:closeModal("attachmentsModal");showModal("editAttachmentModal");">' + attachment + '</a></td></tr>'
+		document.getElementById('attachmentsList').innerHTML += '<option value="'+attachment+'">'+attachment+'</option>'
 	}
 }
-function editAttachment() {
-	document.getElementById('editAttachment').innerHTML = 
-
+function editAttachment(attachment) {
+	showModal("editAttachmentModal")
+	var attachment = document.getElementById('attachmentsList').value
+	document.getElementById('attachmentSelect').innerHTML = attachment 
+	document.getElementById('editAttachmentBox').innerHTML = attachments[attachment]
+}
+function saveAttachment(attachment) {
+	var attachment = document.getElementById('attachmentSelect').innerHTML
+	attachments[attachment] = document.getElementById('editAttachmentBox').innerHTML
 }
 //*********************************************
 // FUNCTIONS FOR DRAWING:
@@ -2179,9 +2203,9 @@ function solarAdding() {
  * General Function to Add Components 'inverter', 'triplex_meter', PERC
  */
 function addXatY(componentName, attachType, perc) {
-	componentName = document.getElementById('componentNameNew').value
-	attachType = document.getElementById('attachTypeNew').value
-	perc = document.getElementById('percNew').value
+	var componentName = document.getElementById('componentNameNew').value
+	var attachType = document.getElementById('attachTypeNew').value
+	var perc = document.getElementById('percNew').value
 	var objectsAdded = 0
 	if ( components.hasOwnProperty(componentName) ) {
 		for (var key in tree) {
