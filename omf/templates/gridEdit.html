@@ -607,40 +607,38 @@
 	</div>
 </div>
 <div id='attachmentsModal' class='modal'>
-	<div class="modalContent" id='attachmentsModalContent'>
+	<div class='modalContent' id='attachmentsModalContent' style='width:250px'>
 		<table class='importOptions'>
 			<tr>
 				<td>
 					<form method='post'>
-						<select name='attachmentsList' id='attachmentsList'></select>
+						<select name='attachmentsList' id='attachmentsList' style='width:230px'></select>
 					</form>
 				</td>
 			</tr>
 			<tr>
 				<td style='padding-top:10px'>
 					<button onclick='closeModal("attachmentsModal")'>Cancel</button>
-				</td>
-				<td style='padding-top:10px'>
-					<button onclick='editAttachment();unsavedChanges=true;closeModal("attachmentsModal")'>Select</button>
+					<button onclick='editAttachment();closeModal("attachmentsModal")'>Select</button>
 				</td>
 			</tr>
 		</table>
 	</div>
 </div>
 <div id='editAttachmentModal' class='modal'>
-	<div class="modalContent" id='editAttachmentModalContent'>
+	<div class="modalContent" id='editAttachmentModalContent' style='width:500px'>
 		<table class='importOptions'>
 			<tr>
-				<td id='attachmentSelect'></td>
+				<td style='font-weight:bold; font-size:14pt' id='attachmentSelect'></td>
+			</tr>
+			<tr>
 				<td>
-					<textarea rows='25' cols='50' id='editAttachmentBox' name='editAttachmentBox'></textarea>
+					<textarea rows='25' cols='80' id='editAttachmentBox' name='editAttachmentBox'></textarea>
 				</td>
 			</tr>
 			<tr>
 				<td style='padding-top:10px'>
 					<button onclick='closeModal("editAttachmentModal")'>Cancel</button>
-				</td>
-				<td style='padding-top:10px'>
 					<button onclick='saveAttachment();unsavedChanges=true;closeModal("editAttachmentModal")'>Save</button>
 				</td>
 			</tr>
@@ -1082,23 +1080,28 @@ function startConversion(elementName, nextAction) {
 		})
 	}
 }
+
 function showModal(element){
 	gebi(element).style.display = 'block'
 }
+
 function closeModal(element){
 	gebi(element).style.display = 'none'
 }
+
 function showDiv(element,maxHeight, marginBot){
 	gebi(element).style.visibility = 'visible';
 	gebi(element).style.height = '100%';
 	gebi(element).style.maxHeight = maxHeight;
 	gebi(element).style.marginBottom = marginBot;
 }
+
 function closeDiv(element){
 	gebi(element).style.visibility = 'hidden';
 	gebi(element).style.height = '0';
 	gebi(element).style.marginBottom = '0px';
 }
+
 function loadFeeder(fromfeederName, frommodelName, fromuser){
 	var modelName = "{{ modelName }}"
 	$.ajax({
@@ -1112,6 +1115,7 @@ function loadFeeder(fromfeederName, frommodelName, fromuser){
 		}
 	})
 }
+
 function getComponentsList() {
 	var attachList = []
 	for (var component in components) {
@@ -1126,22 +1130,30 @@ function getComponentsList() {
 		}
 	}
 }
+
 function getAttachmentsList() {
 	document.getElementById('attachmentsList').innerHTML = ''
 	for (var attachment in attachments) {
 		document.getElementById('attachmentsList').innerHTML += '<option value="'+attachment+'">'+attachment+'</option>'
 	}
 }
+
 function editAttachment(attachment) {
-	showModal("editAttachmentModal")
-	var attachment = document.getElementById('attachmentsList').value
-	document.getElementById('attachmentSelect').innerHTML = attachment 
-	document.getElementById('editAttachmentBox').innerHTML = attachments[attachment]
+	document.body.style.cursor = 'wait'
+	setTimeout(function(){
+		showModal('editAttachmentModal')
+		var attachment = document.getElementById('attachmentsList').value
+		document.getElementById('attachmentSelect').innerHTML = attachment 
+		document.getElementById('editAttachmentBox').innerHTML = attachments[attachment]
+		document.body.style.cursor = 'auto'
+	}, 100);
 }
+
 function saveAttachment(attachment) {
 	var attachment = document.getElementById('attachmentSelect').innerHTML
 	attachments[attachment] = document.getElementById('editAttachmentBox').innerHTML
 }
+
 //*********************************************
 // FUNCTIONS FOR DRAWING:
 //*********************************************
