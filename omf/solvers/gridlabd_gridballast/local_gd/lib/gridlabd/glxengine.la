@@ -37,5 +37,5 @@ shouldnotlink=yes
 dlopen=''
 dlpreopen=''
 
-# Directory that this library needs to be installed in:
-libdir='/Users/mhx/dev/gridlab-d/GridBallastTest/controller_example/local_gd/lib/gridlabd'
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+libdir=`dirname $DIR`

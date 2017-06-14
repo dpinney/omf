@@ -251,10 +251,8 @@ as_unset=as_fn_unset
 ## -------------------- ##
 
 
-# BUG-FIX: removing hard-coded path.
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 prefix=`dirname $DIR`
-#prefix="/Users/mhx/dev/gridlab-d/GridBallastTest/controller_example/local_gd"
 exec_prefix="${prefix}"
 bindir="${exec_prefix}/bin"
 datarootdir="${prefix}/share"
