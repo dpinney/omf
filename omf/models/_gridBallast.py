@@ -124,38 +124,51 @@ def heavyProcessing(modelDir, inputDict):
 		gbZIP = 0
 		# HACK: tree[10:19] is empty
 		tree[10] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
-		# Waterheater controller properties
+		tree[11] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
+		# Waterheater Controller properties
 		for key in tree.keys():
 			if ('name' in tree[key]) and (tree[key].get('object') == 'waterheater'):
 		 		totalWH += 1
+		 		# Attach frequency player
 		 		parent = tree[key]['name']
 		 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
 		 		copyStub = dict(stub)
 		 		tree[feeder.getMaxKey(tree)+1] = copyStub
+	 			# Frequency control parameters
+	 			tree[key]['enable_freq_control'] = 'true'
+	 			tree[key]['freq_lowlimit'] = 59.97
+	 			tree[key]['freq_uplimit'] = 60.03
+	 			tree[key]['heat_mode'] = 'ELECTRIC'
+	 			tree[key]['enable_jitter'] = 'true'
+	 			tree[key]['average_delay_time'] = 600
+	 			# Lock Mode parameters
+	 			tree[key]['enable_lock_mode'] = 'temp_lock_enable'
+	 			tree[key]['lock_STATUS'] = 'temp_lock_status'
+	 			tree[key]['lock_OVERRIDE_TS'] = 'false'
+	 			gbWH += 1
+		 		# fix waterheater property demand to water_demand for newer GridLAB-D versions
 		 		if 'demand' in tree[key]:
 		 			# tree[key]['water_demand'] = tree[key]['demand']
 		 			tree[key]['water_demand'] = 'weekday_hotwater*1'
 		 			del tree[key]['demand']
-		 			tree[key]['enable_freq_control'] = 'true'
-		 			tree[key]['freq_lowlimit'] = 59.97
-		 			tree[key]['freq_uplimit'] = 60.03
-		 			tree[key]['heat_mode'] = 'ELECTRIC'
-		 			tree[key]['enable_jitter'] = 'true'
-		 			tree[key]['average_delay_time'] = 600
-		 			gbWH += 1
-		# ZIPload controller properties
+		# ZIPload Controller properties
 		for key in tree.keys():
 			if ('name' in tree[key]) and (tree[key].get('object') == 'ZIPload'):
 		 		totalZIP += 1
+		 		# Attach frequency player
 		 		parent = tree[key]['name']
 		 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
 		 		copyStub = dict(stub)
 		 		tree[feeder.getMaxKey(tree)+1] = copyStub
+		 		# Frequency control parameters
 	 			tree[key]['enable_freq_control'] = 'true'
 	 			tree[key]['freq_lowlimit'] = 59.97
 	 			tree[key]['freq_uplimit'] = 60.03
 	 			tree[key]['enable_jitter'] = 'true'
 	 			tree[key]['average_delay_time'] = 600
+	 			# Lock Mode parameters
+	 			tree[key]['enable_lock_mode'] = 'temp_lock_enable'
+	 			tree[key]['lock_STATUS'] = 'temp_lock_status'
 	 			tree[key]['groupid'] = 'fan'
 	 			gbZIP += 1
 
@@ -455,7 +468,7 @@ def heavyProcessing(modelDir, inputDict):
 			for each in zPowerZip:
 				zIdx = 0
 				if each[zIdx] == 0:
-					zPowerIdx += 1
+					zIdx += 1
 					zDrop = sum([t > 0 for t in time])
 					zDrops.append(zDrop)
 				else:
