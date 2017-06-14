@@ -1127,6 +1127,7 @@ function getComponentsList() {
 	}
 }
 function getAttachmentsList() {
+	document.getElementById('attachmentsList').innerHTML = ''
 	for (var attachment in attachments) {
 		document.getElementById('attachmentsList').innerHTML += '<option value="'+attachment+'">'+attachment+'</option>'
 	}
