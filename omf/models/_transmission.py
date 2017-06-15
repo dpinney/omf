@@ -188,7 +188,7 @@ def runForeground(modelDir, inputDict):
 		plt.colorbar(mapper)
 		plt.axis('off')
 		plt.tight_layout()
-		plt.gca().invert_yaxis() # To make latitudes show up right.
+		plt.gca().invert_yaxis() # HACK: to make latitudes show up right. TODO: y-flip the transEdit.html and remove this.
 		plt.gca().set_aspect('equal')
 		busLocations = {}
 		i = 0
