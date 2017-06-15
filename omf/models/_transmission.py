@@ -186,6 +186,10 @@ def runForeground(modelDir, inputDict):
 		mapper._A = []
 		plt.figure(figsize=(10,10))
 		plt.colorbar(mapper)
+		plt.axis('off')
+		plt.tight_layout()
+		# plt.gca().invert_yaxis()
+		plt.gca().set_aspect('equal')
 		busLocations = {}
 		i = 0
 		for bus in case9["bus"]:
@@ -238,35 +242,6 @@ def runForeground(modelDir, inputDict):
 			os.remove(pJoin(modelDir, "PPID.txt"))
 		except:
 			pass
-
-def genDiagram(modelDir, feederJson):
-	print "Generating Feeder plot..."
-	print "************************************"
-	links = feederJson.get("links",{})
-	tree = feederJson.get("tree", {})
-	toRemove = []
-	for link in links:
-		for typeLink in link.keys():
-			if typeLink in ['source', 'target']:
-				for key in link[typeLink].keys():
-					if key in ['x', 'y']:
-						objName = link[typeLink]['name']
-						for x in tree:
-							leaf = tree[x]
-							if leaf.get('name','')==objName:
-								if key=='x': leaf['latitude'] = link[typeLink][key]
-								else: leaf['longitude'] = link[typeLink][key]
-							elif 'config' in leaf.get('object','') or 'climate' in leaf.get('object','') or 'conductor' in leaf.get('object','') or 'solver_method' in leaf or 'omftype' in leaf or 'clock' in leaf or 'module' in leaf:
-								if x not in toRemove: 
-									toRemove.append(x)
-	for rem in toRemove: 
-		tree.pop(rem)
-	nxG = feeder.treeToNxGraph(tree)
-	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	plt.savefig(pJoin(modelDir,"feederChart.png"))
-	if debug:
-		print "Plot saved to:                 %s"%(pJoin(modelDir,"feederChart.png"))
-		print "************************************\n\n"
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''

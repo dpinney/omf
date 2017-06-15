@@ -4,10 +4,9 @@
 	<link href="{{pathPrefix}}/static/omf.css" type="text/css" rel="stylesheet"/>
 	<link rel="shortcut icon" href="{{pathPrefix}}/static/favicon.ico">
 	<style>
-	/*Styles go here.*/
 		table {width: 80%;margin-left:auto; margin-right:auto;}
-		table {border: 1px solid grey;}
-		td, th {padding:2px; text-align: center;border-bottom: 1px solid #ccc;}
+		td {padding:2px; text-align: center;border-top: 1px solid #ccc;}
+		th {padding:2px; text-align: center}
 	</style>
 	{% if modelStatus == "running" %}<meta http-equiv="refresh" content="5"/>{% endif %}
 	<!-- Library Imports -->
@@ -189,11 +188,12 @@
 	</div>
 	<!-- Output tables, graphs, etc. -->
 	<div id="output" class="postRun">
+		<p class="reportTitle">Powerflow Voltage (P.U.) Map</p>
 		<div class="tightContent" style="overflow: auto">
 			<img id="transmissionChart" style="display: block; margin-left: auto; margin-right: auto; max-width: 100%; max-height: 100%;"/>
 			<script>gebi("transmissionChart").src = "data:image/png;base64," + allOutputData.chart</script>
 		</div>
-		<p class="reportTitle">Powerflow Results</p>
+		<p class="reportTitle">Detailed Powerflow Results</p>
 		<div class="tightContent" style="overflow: auto">
 			<div id="tables">
 				<table id="resultsTable" style="width:100%"></table>
