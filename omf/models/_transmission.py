@@ -10,6 +10,8 @@ from jinja2 import Template
 import __metaModel__
 from __metaModel__ import *
 import pprint as pprint
+import matplotlib
+import matplotlib.cm as cm
 from matplotlib import pyplot as plt
 
 # OMF imports
@@ -170,6 +172,42 @@ def runForeground(modelDir, inputDict):
 			for i in range(len(outData['tableData'][powerOrVolt][1])):
 				if outData['tableData'][powerOrVolt][1][i]!='-':
 					outData['tableData'][powerOrVolt][1][i]=float(outData['tableData'][powerOrVolt][1][i])
+
+		#Create chart
+		with open(pJoin(modelDir,'case9.omt')) as inputFile:    
+				case9 = json.load(inputFile)
+		nodeVolts = outData["tableData"]["volts"][1]
+		
+		minNum = min(nodeVolts)
+		maxNum = max(nodeVolts)
+		norm = matplotlib.colors.Normalize(vmin=minNum, vmax=maxNum, clip=True)
+		cmViridis = plt.get_cmap('viridis')
+		mapper = cm.ScalarMappable(norm=norm, cmap=cmViridis)
+		mapper._A = []
+		plt.figure(figsize=(10,10))
+		plt.colorbar(mapper)
+		busLocations = {}
+		i = 0
+		for bus in case9["bus"]:
+			for busName, busInfo in bus.items():
+				x = float(busInfo["latitude"])
+				y = float(busInfo["longitude"])
+				plt.plot([x], [y], marker='o', markersize=12.0, color=mapper.to_rgba(nodeVolts[i]), zorder=5)  
+				busLocations[busName] = [x, y]
+			i = i + 1
+		for gen in case9["gen"]:
+			for genName, genInfo in gen.items():
+				x,y =  busLocations[genInfo["bus"]]
+				plt.plot([x], [y], 's', color='gray', zorder=10)
+
+		for branch in case9["branch"]:
+			for branchName, branchInfo in branch.items():
+				x1, y1 = busLocations[branchInfo["fbus"]]
+				x2, y2 = busLocations[branchInfo["tbus"]]
+				plt.plot([x1, x2], [y1,y2], color='black', marker = '', zorder=0)
+		plt.savefig(modelDir + '/output.png')
+		with open(pJoin(modelDir,"output.png"),"rb") as inFile:
+			outData["chart"] = inFile.read().encode("base64")
 		# Stdout/stderr.
 		outData["stdout"] = "Success"
 		outData["stderr"] = ""
@@ -200,32 +238,6 @@ def runForeground(modelDir, inputDict):
 			os.remove(pJoin(modelDir, "PPID.txt"))
 		except:
 			pass
-
-def plotChart():
-
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
-	with open(pJoin(modelLoc,'case9.omt')) as inputFile:    
-			case9 = json.load(inputFile)
-	
-	busLocations = {}
-	for bus in case9["bus"]:
-		for busName, busInfo in bus.items():
-			x = float(busInfo["latitude"])
-			y = float(busInfo["longitude"])
-			plt.plot([x], [y], marker='o', markersize=12.0, zorder=5)  #MAKE THESE CIRCLES BIGGER
-			busLocations[busName] = [x, y]
-
-	for gen in case9["gen"]:
-		for genName, genInfo in gen.items():
-			x,y =  busLocations[genInfo["bus"]]
-			plt.plot([x], [y], 's', color='gray', zorder=10)
-
-	for branch in case9["branch"]:
-		for branchName, branchInfo in branch.items():
-			x1, y1 = busLocations[branchInfo["fbus"]]
-			x2, y2 = busLocations[branchInfo["tbus"]]
-			plt.plot([x1, x2], [y1,y2], color='black', marker = '', zorder=0)
-	plt.savefig(modelLoc + '/output.png')
 
 def genDiagram(modelDir, feederJson):
 	print "Generating Feeder plot..."
@@ -294,5 +306,3 @@ def _simpleTest():
 
 if __name__ == '__main__':
 	_simpleTest ()
-
-	plotChart()
