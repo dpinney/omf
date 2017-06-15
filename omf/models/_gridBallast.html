@@ -546,7 +546,8 @@
           {
             'showInLegend': false,
             // 'data': allOutputData.gridBallast.waterheaterTempDrops
-            'data': allOutputData.gridBallast.qualityDrops
+            'data': allOutputData.gridBallast.qualityDrops,
+            'color': 'gray'
           }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
@@ -585,7 +586,8 @@
         localHighChart['series'] = [
           {
             'showInLegend': false,
-            'data': allOutputData.gridBallast.availabilityMagnitude
+            'data': allOutputData.gridBallast.availabilityMagnitude,
+            'color': 'gray'
           }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
@@ -646,7 +648,8 @@
         localHighChart['series'] = [
           {
             'showInLegend': false,
-            'data': allOutputData.frequencyPlayer
+            'data': allOutputData.frequencyPlayer,
+            'color': 'gray'
           }
         ]
         localHighChart['xAxis']['title'] = {'text': ''}
@@ -676,22 +679,6 @@
           }
         ]
         localHighChart['yAxis']['title'] = {'text': 'System Frequency (Hz)'}
-        // localHighChart['yAxis']['plotLines'] = [
-        //   {
-        //     'color': 'red',
-        //     'dashStyle': 'dash',
-        //     'value': Math.max(...allOutputData.frequencyPlayer),
-        //     'width': 1.5,
-        //     'label': {'text':'MAX'}
-        //   },
-        //   {
-        //     'color': 'red',
-        //     'dashStyle': 'dash',
-        //     'value': Math.min(...allOutputData.frequencyPlayer),
-        //     'width': 1.5,
-        //     'label': {'text':'MIN'}
-        //   }
-        // ]
         new Highcharts.Chart(localHighChart);
       </script>
     </div>
@@ -710,7 +697,7 @@
             <tr>
               <td>Initial Response Time</td>
               <td>< 1 second</td>
-              <td id="responseTime"></td>
+              <td id="responseTime">---</td>
             </tr>
             <tr>
               <td>Reserve Magnitude Target (RMT, % of load)</td>
@@ -725,7 +712,7 @@
             <tr>
               <td>Ramp Time</td>
               <td>< 2 seconds</td>
-              <td id="rampTime"></td>
+              <td id="rampTime">---</td>
             </tr>
             <tr>
               <td>Off Duration</td>
@@ -740,7 +727,7 @@
             <tr>
               <td>Cascaded Contingency Support</td>
               <td>2</td>
-              <td id="contSupport"></td>
+              <td id="contSupport">---</td>
             </tr>
             <tr>
               <td>Recovery Time</td>
@@ -748,36 +735,39 @@
               <td id="recoveryTime"></td>
             </tr>
             <tr>
-              <td>Availability Magnitude (kW)</td>
-              <td></td>
-              <td id="availMag"></td>
+              <td>Max. Availability Magnitude (kW)</td>
+              <td>---</td>
+              <td id="maxAvail"></td>
+            </tr>
+            <tr>
+              <td>Min. Availability Magnitude (kW)</td>
+              <td>---</td>
+              <td id="minAvail"></td>
             </tr>
             <tr>
               <td>Renewable Energy per Demand (%)</td>
-              <td></td>
+              <td>---</td>
               <td id="renEnergyDemand"></td>
             </tr>
             <tr>
               <td>GridBallast Penetration Level (%)</td>
-              <td></td>
+              <td>---</td>
               <td id="gbPenetration"></td>
             </tr>
           </tbody>
         </table>
       </div>
       <script type="text/javascript">
-        var tRec = new Date (allOutputData.gridBallast.recoveryTime)
+        var tRec = new Date(allOutputData.gridBallast.recoveryTime)
 
-        // document.getElementById('responseTime').innerHTML = allOutputData.gridBallast.responseTime
-        document.getElementById('rmt').innerHTML = allOutputData.gridBallast.rmt + '%'
-        document.getElementById('rmvt').innerHTML = allOutputData.gridBallast.rmvt + '%'
-        // document.getElementById('rampTime').innerHTML = allOutputData.gridBallast.rampTime
+        document.getElementById('rmt').innerHTML = allOutputData.gridBallast.rmt.toFixed(3) + '%'
+        document.getElementById('rmvt').innerHTML = allOutputData.gridBallast.rmvt.toFixed(3) + '%'
         document.getElementById('offDuration').innerHTML = allOutputData.gridBallast.offDuration
         document.getElementById('availability').innerHTML = allOutputData.gridBallast.availability + '%'
-        // document.getElementById('contSupport').innerHTML = allOutputData.gridBallast.contSupport
         document.getElementById('recoveryTime').innerHTML = tRec.toTimeString().substr(0,8)
-        document.getElementById('availMag').innerHTML = 'Max: ' + Math.max(...allOutputData.gridBallast.availabilityMagnitude) + ', Min: ' + Math.min(...allOutputData.gridBallast.availabilityMagnitude)
-        document.getElementById('renEnergyDemand').innerHTML = 100*(tDGDirect+tDGExported)/(tLosses+tLoads) + '%'
+        document.getElementById('maxAvail').innerHTML = Math.max(...allOutputData.gridBallast.availabilityMagnitude).toFixed(3)
+        document.getElementById('minAvail').innerHTML = Math.min(...allOutputData.gridBallast.availabilityMagnitude).toFixed(3)
+        document.getElementById('renEnergyDemand').innerHTML = ( 100*(tDGDirect+Math.abs(tDGExported))/(tLosses+tLoads) ).toFixed(3) + '%'
         document.getElementById('gbPenetration').innerHTML = allOutputData.gridBallast.penetrationLevel + '%'
       </script>
     </div>
