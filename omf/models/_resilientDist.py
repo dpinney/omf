@@ -550,7 +550,18 @@ def heavyProcessing(modelDir, inputDict):
 
 		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath, '--lpnorm', topologyPath], cwd=modelDir)
 		proc.wait()
+		#Denote new lines
+		newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
+		with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
+			gfmOut = json.load(gfmOut)
+		for line in gfmOut['lines']:
+			for newLine in newLineCands:
+				if(newLine == line['id']):
+					line["is_new"] = True
+		with open(pJoin(modelDir,gfmOutFileName),"w") as outFile:
+			json.dump(gfmOut, outFile, indent = 4)
 		gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
+		#extra step here, just set equal to gfmOut from above
 		outData['gfmRawOut'] = gfmRawOut
 		print 'Ran Fragility\n'
 				
@@ -672,7 +683,7 @@ def new(modelDir):
 		"hardeningUnitCost": "1000.0",
 		"maxDGPerGenerator": "5000.0",
 		"hardeningCandidates": "Line_id1, line_id2, t2",
-		"newLineCandidates": "Line_id1",
+		"newLineCandidates": "Line_id1, l2020",
 		"generatorCandidates": "node1",
 		"criticalLoadMet": "0.0",
 		"nonCriticalLoadMet": "0.0",
