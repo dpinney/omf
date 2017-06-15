@@ -188,14 +188,14 @@ def runForeground(modelDir, inputDict):
 		plt.colorbar(mapper)
 		plt.axis('off')
 		plt.tight_layout()
-		# plt.gca().invert_yaxis()
+		plt.gca().invert_yaxis() # To make latitudes show up right.
 		plt.gca().set_aspect('equal')
 		busLocations = {}
 		i = 0
 		for bus in case9["bus"]:
 			for busName, busInfo in bus.items():
-				x = float(busInfo["latitude"])
-				y = float(busInfo["longitude"])
+				y = float(busInfo["latitude"])
+				x = float(busInfo["longitude"])
 				plt.plot([x], [y], marker='o', markersize=12.0, color=mapper.to_rgba(nodeVolts[i]), zorder=5)  
 				busLocations[busName] = [x, y]
 			i = i + 1
@@ -203,7 +203,6 @@ def runForeground(modelDir, inputDict):
 			for genName, genInfo in gen.items():
 				x,y =  busLocations[genInfo["bus"]]
 				plt.plot([x], [y], 's', color='gray', zorder=10)
-
 		for branch in case9["branch"]:
 			for branchName, branchInfo in branch.items():
 				x1, y1 = busLocations[branchInfo["fbus"]]
