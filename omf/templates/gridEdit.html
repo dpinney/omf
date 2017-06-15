@@ -1150,8 +1150,8 @@ function editAttachment(attachment) {
 }
 
 function saveAttachment(attachment) {
-	var attachment = document.getElementById('attachmentSelect').innerHTML
-	attachments[attachment] = document.getElementById('editAttachmentBox').innerHTML
+	var attachName = document.getElementById('attachmentSelect').innerHTML
+	attachments[attachName] = document.getElementById('editAttachmentBox').value
 }
 
 //*********************************************
