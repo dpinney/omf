@@ -16,9 +16,12 @@ from __metaModel__ import *
 
 # OMF imports
 import omf.feeder as feeder
-from omf.solvers import gridlabd_gridballast as gridlabd
-# from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
+# System check - linux doesn't support newer GridLAB-D versions
+if sys.platform == 'linux2':
+	from omf.solvers import gridlabd
+else:
+	from omf.solvers import gridlabd_gridballast as gridlabd
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -117,60 +120,64 @@ def heavyProcessing(modelDir, inputDict):
 		feeder.attachRecorders(tree, "TransformerLosses", None, None)
 		feeder.groupSwingKids(tree)
 
-		# Set up GridBallast Controls
-		totalWH = 0
-		totalZIP = 0
-		gbWH = 0
-		gbZIP = 0
-		# HACK: tree[10:19] is empty
-		tree[10] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
-		tree[11] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
-		# Waterheater Controller properties
-		for key in tree.keys():
-			if ('name' in tree[key]) and (tree[key].get('object') == 'waterheater'):
-		 		totalWH += 1
-		 		# Attach frequency player
-		 		parent = tree[key]['name']
-		 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
-		 		copyStub = dict(stub)
-		 		tree[feeder.getMaxKey(tree)+1] = copyStub
-	 			# Frequency control parameters
-	 			tree[key]['enable_freq_control'] = 'true'
-	 			tree[key]['freq_lowlimit'] = 59.97
-	 			tree[key]['freq_uplimit'] = 60.03
-	 			tree[key]['heat_mode'] = 'ELECTRIC'
-	 			tree[key]['enable_jitter'] = 'true'
-	 			tree[key]['average_delay_time'] = 600
-	 			# Lock Mode parameters
-	 			tree[key]['enable_lock_mode'] = 'temp_lock_enable'
-	 			tree[key]['lock_STATUS'] = 'temp_lock_status'
-	 			tree[key]['lock_OVERRIDE_TS'] = 'false'
-	 			gbWH += 1
-		 		# fix waterheater property demand to water_demand for newer GridLAB-D versions
-		 		if 'demand' in tree[key]:
-		 			# tree[key]['water_demand'] = tree[key]['demand']
-		 			tree[key]['water_demand'] = 'weekday_hotwater*1'
-		 			del tree[key]['demand']
-		# ZIPload Controller properties
-		for key in tree.keys():
-			if ('name' in tree[key]) and (tree[key].get('object') == 'ZIPload'):
-		 		totalZIP += 1
-		 		# Attach frequency player
-		 		parent = tree[key]['name']
-		 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
-		 		copyStub = dict(stub)
-		 		tree[feeder.getMaxKey(tree)+1] = copyStub
-		 		# Frequency control parameters
-	 			tree[key]['enable_freq_control'] = 'true'
-	 			tree[key]['freq_lowlimit'] = 59.97
-	 			tree[key]['freq_uplimit'] = 60.03
-	 			tree[key]['enable_jitter'] = 'true'
-	 			tree[key]['average_delay_time'] = 600
-	 			# Lock Mode parameters
-	 			tree[key]['enable_lock_mode'] = 'temp_lock_enable'
-	 			tree[key]['lock_STATUS'] = 'temp_lock_status'
-	 			tree[key]['groupid'] = 'fan'
-	 			gbZIP += 1
+		# System check - linux doesn't support newer GridLAB-D versions
+		if sys.platform == 'linux2':
+			pass
+		else:
+			# Set up GridBallast Controls
+			totalWH = 0
+			totalZIP = 0
+			gbWH = 0
+			gbZIP = 0
+			# HACK: tree[10:19] is empty
+			tree[10] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
+			tree[11] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
+			# Waterheater Controller properties
+			for key in tree.keys():
+				if ('name' in tree[key]) and (tree[key].get('object') == 'waterheater'):
+			 		totalWH += 1
+			 		# Attach frequency player
+			 		parent = tree[key]['name']
+			 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
+			 		copyStub = dict(stub)
+			 		tree[feeder.getMaxKey(tree)+1] = copyStub
+		 			# Frequency control parameters
+		 			tree[key]['enable_freq_control'] = 'true'
+		 			tree[key]['freq_lowlimit'] = 59.97
+		 			tree[key]['freq_uplimit'] = 60.03
+		 			tree[key]['heat_mode'] = 'ELECTRIC'
+		 			tree[key]['enable_jitter'] = 'true'
+		 			tree[key]['average_delay_time'] = 600
+		 			# Lock Mode parameters
+		 			tree[key]['enable_lock_mode'] = 'temp_lock_enable'
+		 			tree[key]['lock_STATUS'] = 'temp_lock_status'
+		 			tree[key]['lock_OVERRIDE_TS'] = 'false'
+		 			gbWH += 1
+			 		# fix waterheater property demand to water_demand for newer GridLAB-D versions
+			 		if 'demand' in tree[key]:
+			 			# tree[key]['water_demand'] = tree[key]['demand']
+			 			tree[key]['water_demand'] = 'weekday_hotwater*1'
+			 			del tree[key]['demand']
+			# ZIPload Controller properties
+			for key in tree.keys():
+				if ('name' in tree[key]) and (tree[key].get('object') == 'ZIPload'):
+			 		totalZIP += 1
+			 		# Attach frequency player
+			 		parent = tree[key]['name']
+			 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
+			 		copyStub = dict(stub)
+			 		tree[feeder.getMaxKey(tree)+1] = copyStub
+			 		# Frequency control parameters
+		 			tree[key]['enable_freq_control'] = 'true'
+		 			tree[key]['freq_lowlimit'] = 59.97
+		 			tree[key]['freq_uplimit'] = 60.03
+		 			tree[key]['enable_jitter'] = 'true'
+		 			tree[key]['average_delay_time'] = 600
+		 			# Lock Mode parameters
+		 			tree[key]['enable_lock_mode'] = 'temp_lock_enable'
+		 			tree[key]['lock_STATUS'] = 'temp_lock_status'
+		 			tree[key]['groupid'] = 'fan'
+		 			gbZIP += 1
 
 		# Attach recorder for waterheaters on/off
 		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheaterOn.csv'}
@@ -354,20 +361,28 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
 				cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
 
-		# Frequency Player
-		inArray = feederJson['attachments']['frequency.PLAYER'][1:-3].split('; ')
-		tempArray = []
-		for each in inArray:
-			x = each.split(',')
-			y = float(x[1])
-			tempArray.append(y)
-		# newArray = zip(*tempArray)
-		# cleanOut['frequencyPlayer'] = {}
-		cleanOut['frequencyPlayer'] = tempArray
+		# System check - linux doesn't support newer GridLAB-D versions
+		if sys.platform == 'linux2':
+			pass
+		else:
+			# Frequency Player
+			inArray = feederJson['attachments']['frequency.PLAYER'][1:-3].split('; ')
+			tempArray = []
+			for each in inArray:
+				x = each.split(',')
+				y = float(x[1])
+				tempArray.append(y)
+			# newArray = zip(*tempArray)
+			# cleanOut['frequencyPlayer'] = {}
+			cleanOut['frequencyPlayer'] = tempArray
 
 		# Print gridBallast Outputs to allOutputData.json
 		cleanOut['gridBallast'] = {}
-		cleanOut['gridBallast']['penetrationLevel'] = 100*(gbWH+gbZIP)/(totalWH+totalZIP)
+		# System check - linux doesn't support newer GridLAB-D versions
+		if sys.platform == 'linux2':
+			pass
+		else:
+			cleanOut['gridBallast']['penetrationLevel'] = 100*(gbWH+gbZIP)/(totalWH+totalZIP)
 		if 'allWaterheaterOn.csv' in rawOut:
 			cleanOut['gridBallast']['waterheaterOn'] = {}
 			for key in rawOut['allWaterheaterOn.csv']:
