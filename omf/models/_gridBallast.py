@@ -447,7 +447,7 @@ def heavyProcessing(modelDir, inputDict):
 		totNetLoad = cleanOut['gridBallast']['totalNetworkLoad']
 		# loadZip = zip(availMag,totNetLoad)
 		# rmt = [x[0]/x[1] for x in loadZip]
-		rmt = 1000*sum(availMag)/sum(totNetLoad)
+		rmt = 100*1000*sum(availMag)/sum(totNetLoad)
 		cleanOut['gridBallast']['rmt'] = rmt
 		# Reserve Magnitude Variability Tolerance (RMVT)
 		avgAvailMag = sum(availMag)/len(availMag)
