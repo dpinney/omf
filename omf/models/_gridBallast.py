@@ -143,8 +143,8 @@ def heavyProcessing(modelDir, inputDict):
 			 		tree[feeder.getMaxKey(tree)+1] = copyStub
 		 			# Frequency control parameters
 		 			tree[key]['enable_freq_control'] = 'true'
-		 			tree[key]['freq_lowlimit'] = 59.97
-		 			tree[key]['freq_uplimit'] = 60.03
+		 			tree[key]['freq_lowlimit'] = 59.9
+		 			tree[key]['freq_uplimit'] = 60.1
 		 			tree[key]['heat_mode'] = 'ELECTRIC'
 		 			tree[key]['enable_jitter'] = 'true'
 		 			tree[key]['average_delay_time'] = 600
@@ -169,8 +169,8 @@ def heavyProcessing(modelDir, inputDict):
 			 		tree[feeder.getMaxKey(tree)+1] = copyStub
 			 		# Frequency control parameters
 		 			tree[key]['enable_freq_control'] = 'true'
-		 			tree[key]['freq_lowlimit'] = 59.97
-		 			tree[key]['freq_uplimit'] = 60.03
+		 			tree[key]['freq_lowlimit'] = 59.9
+		 			tree[key]['freq_uplimit'] = 60.1
 		 			tree[key]['enable_jitter'] = 'true'
 		 			tree[key]['average_delay_time'] = 600
 		 			# Lock Mode parameters
