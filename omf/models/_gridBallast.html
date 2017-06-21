@@ -762,7 +762,7 @@
         document.getElementById('rmt').innerHTML = allOutputData.gridBallast.rmt.toFixed(3) + '%'
         document.getElementById('rmvt').innerHTML = allOutputData.gridBallast.rmvt.toFixed(3) + '%'
         document.getElementById('offDuration').innerHTML = allOutputData.gridBallast.offDuration
-        document.getElementById('availability').innerHTML = allOutputData.gridBallast.availability + '%'
+        document.getElementById('availability').innerHTML = allOutputData.gridBallast.availability.toFixed(3) + '%'
         document.getElementById('recoveryTime').innerHTML = tRec.toTimeString().substr(0,8)
         document.getElementById('maxAvail').innerHTML = Math.max(...allOutputData.gridBallast.availabilityMagnitude).toFixed(3)
         document.getElementById('minAvail').innerHTML = Math.min(...allOutputData.gridBallast.availabilityMagnitude).toFixed(3)

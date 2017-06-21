@@ -447,7 +447,7 @@ def heavyProcessing(modelDir, inputDict):
 		totNetLoad = cleanOut['gridBallast']['totalNetworkLoad']
 		# loadZip = zip(availMag,totNetLoad)
 		# rmt = [x[0]/x[1] for x in loadZip]
-		rmt = (1000*sum(availMag))/sum(totNetLoad)
+		rmt = 1000*sum(availMag)/sum(totNetLoad)
 		cleanOut['gridBallast']['rmt'] = rmt
 		# Reserve Magnitude Variability Tolerance (RMVT)
 		avgAvailMag = sum(availMag)/len(availMag)
@@ -456,7 +456,7 @@ def heavyProcessing(modelDir, inputDict):
 		rmvt = rmvtMax - rmvtMin
 		cleanOut['gridBallast']['rmvt'] = rmvt
 		# Availability
-		notAvail = availMag.count(0)/len(timeStamps)
+		notAvail = float(availMag.count(0))/len(timeStamps)
 		avail = (1-notAvail)*100
 		cleanOut['gridBallast']['availability'] = avail
 		# Waterheater Temperature Drop calculations
