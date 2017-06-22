@@ -180,16 +180,37 @@ def new_user():
 	message = "Click the link below to register your account for the OMF.  This link will expire in 24 hours:\n\nreg_link"
 	return send_link(email, message)
 
-@app.route("/forgotpwd", methods=["POST"])
-def forgotpwd():
-	email = request.form.get("email")
+@app.route("/forgotPassword/<email>", methods=["GET"])
+def forgotpwd(email):
 	try:
 		user = json.load(open("data/User/" + email + ".json"))
 		message = "Click the link below to reset your password for the OMF.  This link will expire in 24 hours.\n\nreg_link"
-		return send_link(email, message, user)
+		code = send_link(email, message, user)
+		if code is "Success":
+			return "We have sent a password reset link to " + email
+		else:
+			raise Exception
 	except Exception, e:
 		print "ERROR: failed to password reset user", email, "with exception", e
-		return "Error"
+		return "We do not have a record of a user with that email address. Please click back and create an account."
+
+@app.route("/fastNewUser/<email>")
+def fastNewUser(email):
+	''' Create a new user, email them their password, and immediately create a new model for them.'''
+	if email in [f[0:-5] for f in safeListdir("data/User")]:
+		return "User with email {} already exists. Please log in or go back and use the 'Forgot Password' link. Or use a different email address.".format(email)
+	else:
+		randomPass = ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for x in range(15)])
+		user = {"username":email, "password_digest":pbkdf2_sha512.encrypt(randomPass)}
+		flask_login.login_user(User(user))
+		with open("data/User/"+user["username"]+".json","w") as outFile:
+			json.dump(user, outFile, indent=4)
+		message = "Thank you for registering an account on OMF.coop.\n\nYour password is: " + randomPass + "\n\n You can change this password after logging in."
+		key = open("emailCredentials.key").read()
+		c = boto.ses.connect_to_region("us-east-1", aws_access_key_id="AKIAJLART4NXGCNFEJIQ", aws_secret_access_key=key)
+		mailResult = c.send_email("admin@omf.coop", "OMF.coop User Account", message, [email])
+		nextUrl = str(request.args.get("next","/"))
+		return redirect(nextUrl)
 
 @app.route("/register/<email>/<reg_key>", methods=["GET", "POST"])
 def register(email, reg_key):
@@ -307,23 +328,6 @@ def runModel():
 	del pData["modelName"]
 	modelModule.run(os.path.join(_omfDir, "data", "Model", user, modelName), pData)
 	return redirect("/model/" + user + "/" + modelName)
-
-@app.route("/fastRun/<modelType>/<email>")
-def fastRun(modelType, email):
-	''' Create a new user, email them their password, and immediately create a new model for them.'''
-	if email in [f[0:-5] for f in safeListdir("data/User")]:
-		return "User with email {} already exists. Please log in or go back and use the 'Forgot Password' link. Or try the fast model creation feature with a different email address.".format(email)
-	else:
-		randomPass = ''.join([random.choice('abcdefghijklmnopqrstuvwxyz') for x in range(15)])
-		user = {"username":email, "password_digest":pbkdf2_sha512.encrypt(randomPass)}
-		flask_login.login_user(User(user))
-		with open("data/User/"+user["username"]+".json","w") as outFile:
-			json.dump(user, outFile, indent=4)
-		message = "Thanks for registering for OMF.coop. Your password is: " + randomPass
-		key = open("emailCredentials.key").read()
-		c = boto.ses.connect_to_region("us-east-1", aws_access_key_id="AKIAJLART4NXGCNFEJIQ", aws_secret_access_key=key)
-		mailResult = c.send_email("admin@omf.coop", "OMF.coop User Account", message, [email])
-		return redirect("/newModel/" + modelType + "/FASTRUN" + modelType)
 
 @app.route("/cancelModel/", methods=["POST"])
 @flask_login.login_required
