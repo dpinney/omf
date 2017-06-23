@@ -1,7 +1,7 @@
 ''' Powerflow results for one Gridlab instance. '''
 
 import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx,  numpy as np
-from networkx.drawing.nx_agraph import graphviz_layout
+import networkx as nx
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
 import matplotlib
@@ -320,7 +320,7 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		cleanG = nx.Graph(fGraph.edges())
 		cleanG.add_nodes_from(fGraph)
 		# was formerly : positions = nx.graphviz_layout(cleanG, prog='neato') but this threw an error
-		positions = graphviz_layout(cleanG, prog='neato')
+		positions = nx.nx_agraph.graphviz_layout(cleanG, prog='neato')
 	else:
 		rawPositions = {n:fGraph.node[n].get('pos',(0,0)) for n in fGraph}
 		#HACK: the import code reverses the y coords.
