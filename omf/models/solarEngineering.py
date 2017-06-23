@@ -266,8 +266,9 @@ def heavyProcessing(modelDir, inputDict):
 		if latPerc < 0.25: doNeato = True
 		else: doNeato = False
 		# Generate the frames for the system voltage map time traveling chart.
-		genTime = generateVoltChart(tree, rawOut, modelDir, neatoLayout=doNeato)
+		genTime, mapTimestamp = generateVoltChart(tree, rawOut, modelDir, neatoLayout=doNeato)
 		cleanOut['genTime'] = genTime
+		cleanOut['mapTimestamp'] = mapTimestamp
 		# Aggregate up the timestamps:
 		if level=='days':
 			cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
@@ -374,14 +375,15 @@ def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 		plt.title(rawOut['aVoltDump.csv']['# timestamp'][step])
 		nodeIm.set_array(nodeColors)
 		return nodeColors,
+	mapTimestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 	anim = FuncAnimation(voltChart, update, frames=len(rawOut['aVoltDump.csv']['# timestamp']), interval=200, blit=False)
-	anim.save(pJoin(modelDir,'voltageChart.mp4'), codec='h264', extra_args=['-pix_fmt', 'yuv420p'])
+	anim.save(pJoin(modelDir,'voltageChart_'+ mapTimestamp +'.mp4'), codec='h264', extra_args=['-pix_fmt', 'yuv420p'])
 	# Reclaim memory by closing, deleting and garbage collecting the last chart.
 	voltChart.clf()
 	plt.close()
 	del voltChart
 	gc.collect()
-	return genTime
+	return genTime, mapTimestamp
 
 def avg(inList):
 	''' Average a list. Really wish this was built-in. '''

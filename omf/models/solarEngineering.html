@@ -423,9 +423,9 @@
 				<source id="timeTravelMovie" src="" type="video/mp4" codecs="h264">
 				Your browser does not support the video tag.
 				{% if pathPrefix == "" %}
-				<script>gebi("timeTravelMovie").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart.mp4"</script>
+				<script>gebi("timeTravelMovie").src = "/downloadModelData/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart_"+allOutputData.mapTimestamp+".mp4"</script>
 				{% else %}
-				<script>gebi("timeTravelMovie").src = "{{pathPrefix}}/data/Model/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart.mp4"</script>
+				<script>gebi("timeTravelMovie").src = "{{pathPrefix}}/data/Model/"+allInputData.user+"/"+allInputData.modelName+"/voltageChart_"+ allOutputData.mapTimestamp +".mp4"</script>
 				{% endif %}
 			</video>
 		</div>
