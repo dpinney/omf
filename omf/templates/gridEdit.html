@@ -263,6 +263,7 @@
 				<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
 				<li><a href='javascript:showModal("massAddModal");getComponentsList();'>Mass Add...</a></li>
 				<li><a href='javascript:showModal("attachmentsModal");getAttachmentsList();'>Attachments...</a></li>
+				<li><a href='javascript:showModal("climateModal");'>Climate...</a></li>
 				</ul>
 			</div>
 		</div>
@@ -302,7 +303,7 @@
 		</div>
 	</div>
 </div>
-<div id="scadaLoadshapes" class= 'modal'>
+<div id='scadaLoadshapes' class='modal'>
 <!-- Turn below into a modal -->
 	<div class = "modalContent" style='width:350px;'>
 		<form onsubmit=' return getScadaAmi("Scada");' action='/scadaLoadshape/{{ owner }}/{{feederName}}' id='scadaLoadshape' enctype='multipart/form-data' method='post'>
@@ -327,7 +328,7 @@
 		<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
 	</div>
 </div>
-<div id="amiLoadshapes" class= 'modal'>
+<div id='amiLoadshapes' class='modal'>
 <!-- Turn below into a modal -->
 	<div class = "modalContent" style='width:350px;'>
 		<form onsubmit=' return getScadaAmi("Ami");' action='/loadModelingAmi/{{ owner }}/{{feederName}}' id='amiLoadshape' enctype='multipart/form-data' method='post'>
@@ -352,7 +353,7 @@
 		<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
 	</div>
 </div>
-<div id='blankFeederModal' class= 'modal'>
+<div id='blankFeederModal' class='modal'>
 	<div class="modalContent" id='blankModal'>
 		<form onsubmit='event.preventDefault(); return startConversion("feederNameNew",1);' action='/newBlankFeeder/{{ owner }}' id='newfeeder' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
@@ -372,7 +373,7 @@
 		</form>
 	</div>
 </div>
-<div id="milSoftModal" class= 'modal'>
+<div id='milSoftModal' class='modal'>
 	<div class="modalContent" id='milModal' style='width:350px;'>
 		<form onsubmit='event.preventDefault(); return startConversion("feederNameM",2);' action="/milsoftImport/{{ owner }}" id='milsoft' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
@@ -401,7 +402,7 @@
 		<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
 	</div>
 </div>
-<div id="gridlabModal" class= 'modal'>
+<div id='gridlabModal' class='modal'>
 	<div class= "modalContent" id = 'gridlabModal' style='width:350px;'>
 		<form onsubmit='event.preventDefault(); return startConversion("feederNameG",3);' action='/gridlabdImport/{{ owner }}' id='gridlabd' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
@@ -426,7 +427,7 @@
 		<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
 	</div>
 </div>
-<div id="cymeModal" class='modal'>
+<div id='cymeModal' class='modal'>
 	<div class= "modalContent" id = 'cymeModalContent' style='width:350px;'>
 		<form onsubmit='event.preventDefault(); return startConversion("feederNameC",4);' action='/cymeImport/{{ owner }}' id='cyme' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
@@ -451,7 +452,7 @@
 		<iframe class="hide_me" id="take_the_reload" name="take_the_reload" style="width:0px;height:0px;"></iframe>
 	</div>
 </div>
-<div id='loadModal' class="modal">
+<div id='loadModal' class='modal'>
 	<div class= "modalContent" id = 'loadModalContent' style="width:850px;">
 		<table>
 			<tr>
@@ -507,7 +508,7 @@
 		<a id='modalCancel' href="#" onclick='closeModal("loadModal")' style="text-align:center;font-size:10pt;">Cancel</a>
 	</div>
 </div>
-<div id= 'findModal' class= 'modal'>
+<div id='findModal' class='modal'>
 	<div class="modalContent" id='findModalContent' style='width:200px;'>
 		<table class= 'importOptions' style='padding:4px;word-wrap:break-word;'>
 			<tr>
@@ -528,7 +529,7 @@
 		</table>
 	</div>
 </div>
-<div id = "layoutModal" class = 'modal'>
+<div id='layoutModal' class ='modal'>
 	<div class = "modalContent" id = 'layoutModalContent' style='width:200px;'>
 		<table class= 'importOptions' style='padding:4px;word-wrap:break-word'>
 			<tr>
@@ -593,7 +594,7 @@
 			</tr>
 			<tr>
 				<td>With probability for each attachment (float between 0.0 and 1.0):</td>
-				<td><input type='text' id='percNew' name='percNew' pattern='^0\.\d+|1(\.0+)?$' required/></td>
+				<td><input type='text' id='percNew' name='percNew' pattern='^0\.\d+|1(\.0+)?$' value='1.0' required/></td>
 			</tr>
 			<tr>
 				<td style='padding-top:10px'>
@@ -643,6 +644,27 @@
 				</td>
 			</tr>
 		</table>
+	</div>
+</div>
+<div id='climateModal' class='modal'>
+	<div class='modalContent' id='climateModalContent' style='width:250px'>
+		<div style='font-weight:bold; font-size:14pt'>Climate Change</div>
+		<br>
+		<div id='climateInputs' align='left'>
+			<label for='zipcode'>Zipcode:</label>
+			<input style='width:10px' type='text' id='zipcode' name='zipcode' pattern='^\d{5}(?:[-\s]\d{4})?$' required/>
+			<br>
+			<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport' checked>
+			<label for="tmyImport">tmy Import</label>
+			<br>
+			<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport'>
+			<label for="historicalImport">Historical Weather</label>
+		</div>
+		<br>
+		<div style='padding-top:10px'>
+			<button onclick='closeModal("climateModal")'>Cancel</button>
+			<button onclick='editClimate();closeModal("climateModal")'>Apply</button>
+		</div>
 	</div>
 </div>
 
@@ -1152,6 +1174,16 @@ function editAttachment(attachment) {
 function saveAttachment(attachment) {
 	var attachName = document.getElementById('attachmentSelect').innerHTML
 	attachments[attachName] = document.getElementById('editAttachmentBox').value
+}
+
+function editClimate() {
+	var zipcode = document.getElementById('zipcode').value
+	if (document.getElementById('tmyOption').checked) {
+		console.log(zipcode, document.getElementById('tmyOption').value)
+	}
+	if (document.getElementById('historicalOption').checked) {
+		console.log(zipcode, document.getElementById('historicalOption').value)
+	}
 }
 
 //*********************************************
