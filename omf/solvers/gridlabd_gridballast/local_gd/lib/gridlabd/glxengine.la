@@ -37,5 +37,6 @@ shouldnotlink=yes
 dlopen=''
 dlpreopen=''
 
+# Directory that this library needs to be installed in:
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 libdir=`dirname $DIR`
