@@ -146,10 +146,15 @@ def heavyProcessing(modelDir, inputDict):
 		 			tree[key]['freq_lowlimit'] = 59.9
 		 			tree[key]['freq_uplimit'] = 60.1
 		 			tree[key]['heat_mode'] = 'ELECTRIC'
+		 			# Voltage control parameters
+		 			# tree[key]['enable_volt_control'] = 'true'
+		 			# tree[key]['volt_lowlimit'] = 240.4
+		 			# tree[key]['volt_uplimit'] = 241.4
 		 			tree[key]['average_delay_time'] = 120
 		 			# Lock Mode parameters
 		 			tree[key]['enable_lock'] = 'temp_lock_enable'
 		 			tree[key]['lock_STATUS'] = 'temp_lock_status'
+		 			# tree[key]['controller_priority'] = 3214
 		 			gbWH += 1
 			 		# fix waterheater property demand to water_demand for newer GridLAB-D versions
 			 		if 'demand' in tree[key]:
@@ -169,10 +174,15 @@ def heavyProcessing(modelDir, inputDict):
 		 			tree[key]['enable_freq_control'] = 'true'
 		 			tree[key]['freq_lowlimit'] = 59.9
 		 			tree[key]['freq_uplimit'] = 60.1
+		 			# Voltage control parameters
+		 			# tree[key]['enable_volt_control'] = 'true'
+		 			# tree[key]['volt_lowlimit'] = 240.4
+		 			# tree[key]['volt_uplimit'] = 241.4
 		 			tree[key]['average_delay_time'] = 120
 		 			# Lock Mode parameters
 		 			tree[key]['enable_lock'] = 'temp_lock_enable'
 		 			tree[key]['lock_STATUS'] = 'temp_lock_status'
+		 			# tree[key]['controller_priority'] = 3214
 		 			tree[key]['groupid'] = 'fan'
 		 			gbZIP += 1
 
