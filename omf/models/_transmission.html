@@ -198,7 +198,7 @@
 			<div id="tables">
 				<table id="resultsTable" style="width:100%"></table>
 				<script>
-					var htmlCollector = "<tr><th>Component Name</th><th>Voltage Power Unit (PU)</th><th>Real Power (MW)</th><th>Reactive Power (MVARS)</th></tr>";
+					var htmlCollector = "<tr><th>Component Name</th><th>Voltage (PU)</th><th>Real Power (MW)</th><th>Reactive Power (MVARS)</th></tr>";
 					htmlCollector = htmlCollector + parseEqualDict(allOutputData.tableData['volts'], allOutputData.tableData['powerReal'], allOutputData.tableData['powerReact'])
 					gebi("resultsTable").innerHTML = htmlCollector; 
 				</script>
