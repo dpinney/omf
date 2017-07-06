@@ -146,12 +146,10 @@ def heavyProcessing(modelDir, inputDict):
 		 			tree[key]['freq_lowlimit'] = 59.9
 		 			tree[key]['freq_uplimit'] = 60.1
 		 			tree[key]['heat_mode'] = 'ELECTRIC'
-		 			tree[key]['enable_jitter'] = 'true'
-		 			tree[key]['average_delay_time'] = 600
+		 			tree[key]['average_delay_time'] = 120
 		 			# Lock Mode parameters
-		 			tree[key]['enable_lock_mode'] = 'temp_lock_enable'
+		 			tree[key]['enable_lock'] = 'temp_lock_enable'
 		 			tree[key]['lock_STATUS'] = 'temp_lock_status'
-		 			tree[key]['lock_OVERRIDE_TS'] = 'false'
 		 			gbWH += 1
 			 		# fix waterheater property demand to water_demand for newer GridLAB-D versions
 			 		if 'demand' in tree[key]:
@@ -171,10 +169,9 @@ def heavyProcessing(modelDir, inputDict):
 		 			tree[key]['enable_freq_control'] = 'true'
 		 			tree[key]['freq_lowlimit'] = 59.9
 		 			tree[key]['freq_uplimit'] = 60.1
-		 			tree[key]['enable_jitter'] = 'true'
-		 			tree[key]['average_delay_time'] = 600
+		 			tree[key]['average_delay_time'] = 120
 		 			# Lock Mode parameters
-		 			tree[key]['enable_lock_mode'] = 'temp_lock_enable'
+		 			tree[key]['enable_lock'] = 'temp_lock_enable'
 		 			tree[key]['lock_STATUS'] = 'temp_lock_status'
 		 			tree[key]['groupid'] = 'fan'
 		 			gbZIP += 1
@@ -372,8 +369,6 @@ def heavyProcessing(modelDir, inputDict):
 				x = each.split(',')
 				y = float(x[1])
 				tempArray.append(y)
-			# newArray = zip(*tempArray)
-			# cleanOut['frequencyPlayer'] = {}
 			cleanOut['frequencyPlayer'] = tempArray
 
 		# Print gridBallast Outputs to allOutputData.json
@@ -433,12 +428,10 @@ def heavyProcessing(modelDir, inputDict):
 		whOnZip = zip(*whOnList)
 		whOnSum = [sum(x) for x in whOnZip]
 		anyOn = [x > 0 for x in whOnSum] 
-
-		# tRecIdx = anyOn.index(True, eventEndIdx)
-		tRecIdx = anyOn.index(True)
-
+		tRecIdx = anyOn.index(True, eventEndIdx)
 		tRec = dateTimeStamps[tRecIdx]
-		cleanOut['gridBallast']['recoveryTime'] = str(tRec)
+		recoveryTime = tRec - eventEnd
+		cleanOut['gridBallast']['recoveryTime'] = str(recoveryTime)
 		# Waterheaters Off-Duration
 		offDuration = tRec - eventStart
 		cleanOut['gridBallast']['offDuration'] = str(offDuration)
@@ -696,7 +689,7 @@ def new(modelDir):
 		"simLengthUnits": "hours", #minutes
 		"eventType": "ramping", #unramping, overfrequency, underfrequency
 		"eventTime": "2012-01-02 14:00",
-		"eventLength": "02:00"
+		"eventLength": "03:00"
 	}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:
