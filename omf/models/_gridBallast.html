@@ -700,12 +700,12 @@
             </tr>
             <tr>
               <td>Reserve Magnitude Target (RMT, % of load)</td>
-              <td>5 %</td>
+              <td>> 5 %</td>
               <td id="rmt"></td>
             </tr>
             <tr>
               <td>Reserve Magnitude Variability Tolerance (RMVT)</td>
-              <td>2 %</td>
+              <td>> 2 %</td>
               <td id="rmvt"></td>
             </tr>
             <tr>
@@ -720,7 +720,7 @@
             </tr>
             <tr>
               <td>Availability</td>
-              <td>95 %</td>
+              <td>> 95 %</td>
               <td id="availability"></td>
             </tr>
             <tr>
@@ -730,7 +730,7 @@
             </tr>
             <tr>
               <td>Recovery Time</td>
-              <td>1 hour</td>
+              <td>< 1 hour</td>
               <td id="recoveryTime"></td>
             </tr>
             <tr>
@@ -759,10 +759,10 @@
       <script type="text/javascript">
         // var tRec = new Date(allOutputData.gridBallast.recoveryTime)
         // document.getElementById('recoveryTime').innerHTML = tRec.toTimeString().substr(0,8)
-        document.getElementById('rmt').innerHTML = '> ' + allOutputData.gridBallast.rmt.toFixed(3) + ' %'
-        document.getElementById('rmvt').innerHTML = '< ' + allOutputData.gridBallast.rmvt.toFixed(3) + ' %'
+        document.getElementById('rmt').innerHTML = allOutputData.gridBallast.rmt.toFixed(3) + ' %'
+        document.getElementById('rmvt').innerHTML = allOutputData.gridBallast.rmvt.toFixed(3) + ' %'
         document.getElementById('offDuration').innerHTML = allOutputData.gridBallast.offDuration
-        document.getElementById('availability').innerHTML = '> ' + allOutputData.gridBallast.availability.toFixed(3) + ' %'
+        document.getElementById('availability').innerHTML = allOutputData.gridBallast.availability.toFixed(3) + ' %'
         document.getElementById('recoveryTime').innerHTML = allOutputData.gridBallast.recoveryTime
         document.getElementById('maxAvail').innerHTML = Math.max(...allOutputData.gridBallast.availabilityMagnitude).toFixed(3)
         document.getElementById('minAvail').innerHTML = Math.min(...allOutputData.gridBallast.availabilityMagnitude).toFixed(3)
