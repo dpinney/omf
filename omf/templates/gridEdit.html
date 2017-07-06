@@ -651,8 +651,11 @@
 		<div style='font-weight:bold; font-size:14pt'>Climate Change</div>
 		<br>
 		<div id='climateInputs' align='left'>
-			<label for='zipcode'>Zipcode:</label>
+	<!-- 		<label for='zipcode'>Zipcode:</label>
 			<input style='width:10px' type='text' id='zipcode' name='zipcode' pattern='^\d{5}(?:[-\s]\d{4})?$' required/>
+			<br> -->
+			<label for='airport'>Airport Code:</label>
+			<input style='width:10px' type='text' id='airport' name='airport' pattern='^[a-z]{3}$' required/>
 			<br>
 			<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport' checked>
 			<label for="tmyImport">tmy Import</label>
@@ -1177,12 +1180,13 @@ function saveAttachment(attachment) {
 }
 
 function editClimate() {
-	var zipcode = document.getElementById('zipcode').value
+	// var zipcode = document.getElementById('zipcode').value
+	var airport = document.getElementById('airport').value
 	if (document.getElementById('tmyOption').checked) {
-		console.log(zipcode, document.getElementById('tmyOption').value)
+		console.log(airport, document.getElementById('tmyOption').value)
 	}
 	if (document.getElementById('historicalOption').checked) {
-		console.log(zipcode, document.getElementById('historicalOption').value)
+		console.log(airport, document.getElementById('historicalOption').value)
 	}
 }
 
