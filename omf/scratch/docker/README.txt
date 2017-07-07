@@ -1,20 +1,21 @@
 DETAILS
 ================
-	Docker Version 1.12.3 (8488) 
-	Channel: Stable
+Docker Version 1.12.3 (8488) 
+Channel: Stable
 
 INSTRUCTIONS
 ================
 Navigate to this directory
-Build image with command 'docker -t <give it a local name> build .'
-Run image in background with 'docker run -d -p 5000:5000 <local name given above>'
+Build image with command `docker -t <chooseAnImageName> build .`
+Run image in background with `docker run -d -p 5000:5000 --name <chooseContainerName> <imageNameFromAbove>`
 View at http://127.0.0.1:5000
-Close it with 'docker stop $(docker ps -a -q)' and 'docker rm $(docker ps -a -q)'
+Stop it with `docker stop <containerNameFromAbove` and remove it with `docker rm <containerNameFromAbove>`. Delete the images with `docker rmi <imageNameFromAbove>`
 
 HELP
 ================
 Can't load the page http://127.0.0.1:5000
 	Add the argument host='0.0.0.0' to web.py in app.run so that it becomes app.run(debug=True, host='0.0.0.0', extra_files=template_files + model_files)
+	(This enables external communication to the web server on the container. A sed command has been added to the Dockerfile to hopefully do this automatically.)
 
 Command won't run (containers are open)
 	docker stop <id>
@@ -28,7 +29,6 @@ Command won't run (containers are open)
 The image failed to build
 	remove old images with:
 	docker rmi <image id from 'docker images' command>
-
 
 FEATURE IDEAS
 ================
