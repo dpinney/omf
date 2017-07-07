@@ -7,7 +7,7 @@ INSTRUCTIONS
 ================
 Navigate to this directory
 Build image with command 'docker -t <give it a local name> build .'
-Run image in backgroudn with 'docker run -d -p 5000:5000 <local name given above>'
+Run image in background with 'docker run -d -p 5000:5000 <local name given above>'
 View at http://127.0.0.1:5000
 Close it with 'docker stop $(docker ps -a -q)' and 'docker rm $(docker ps -a -q)'
 
