@@ -13,10 +13,7 @@ import pprint as pprint
 import matplotlib
 import matplotlib.cm as cm
 from matplotlib import pyplot as plt
-
-# OMF imports
-sys.path.append(__metaModel__._omfDir) # for images in test.
-import network
+import omf.network as network
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -67,7 +64,10 @@ def runForeground(modelDir, inputDict):
 			'stdout' : '', 'stderr' : ''
 			}
 		# Read feeder and convert to .mat.
-		networkName = inputDict.get('networkName1','case9')
+		try:
+			networkName = [x for x in os.listdir(modelDir) if x.endswith('.omt')][0][0:-4]
+		except:
+			networkName = 'case9'
 		networkJson = json.load(open(pJoin(modelDir,networkName+".omt")))
 		matStr = network.netToMat(networkJson, networkName)
 		with open(pJoin(modelDir,networkName+".m"),"w") as outMat:
@@ -172,12 +172,8 @@ def runForeground(modelDir, inputDict):
 			for i in range(len(outData['tableData'][powerOrVolt][1])):
 				if outData['tableData'][powerOrVolt][1][i]!='-':
 					outData['tableData'][powerOrVolt][1][i]=float(outData['tableData'][powerOrVolt][1][i])
-
 		#Create chart
-		with open(pJoin(modelDir,'case9.omt')) as inputFile:    
-				case9 = json.load(inputFile)
 		nodeVolts = outData["tableData"]["volts"][1]
-		
 		minNum = min(nodeVolts)
 		maxNum = max(nodeVolts)
 		norm = matplotlib.colors.Normalize(vmin=minNum, vmax=maxNum, clip=True)
@@ -192,18 +188,18 @@ def runForeground(modelDir, inputDict):
 		plt.gca().set_aspect('equal')
 		busLocations = {}
 		i = 0
-		for bus in case9["bus"]:
+		for bus in networkJson["bus"]:
 			for busName, busInfo in bus.items():
 				y = float(busInfo["latitude"])
 				x = float(busInfo["longitude"])
 				plt.plot([x], [y], marker='o', markersize=12.0, color=mapper.to_rgba(nodeVolts[i]), zorder=5)  
 				busLocations[busName] = [x, y]
 			i = i + 1
-		for gen in case9["gen"]:
+		for gen in networkJson["gen"]:
 			for genName, genInfo in gen.items():
 				x,y =  busLocations[genInfo["bus"]]
 				plt.plot([x], [y], 's', color='gray', zorder=10)
-		for branch in case9["branch"]:
+		for branch in networkJson["branch"]:
 			for branchName, branchInfo in branch.items():
 				x1, y1 = busLocations[branchInfo["fbus"]]
 				x2, y2 = busLocations[branchInfo["tbus"]]
