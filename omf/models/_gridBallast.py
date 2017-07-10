@@ -152,8 +152,8 @@ def heavyProcessing(modelDir, inputDict):
 		 			# tree[key]['volt_uplimit'] = 241.4
 		 			tree[key]['average_delay_time'] = 120
 		 			# Lock Mode parameters
-		 			tree[key]['enable_lock'] = 'temp_lock_enable'
-		 			tree[key]['lock_STATUS'] = 'temp_lock_status'
+		 			# tree[key]['enable_lock'] = 'temp_lock_enable'
+		 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
 		 			# tree[key]['controller_priority'] = 3214
 		 			gbWH += 1
 			 		# fix waterheater property demand to water_demand for newer GridLAB-D versions
@@ -180,8 +180,8 @@ def heavyProcessing(modelDir, inputDict):
 		 			# tree[key]['volt_uplimit'] = 241.4
 		 			tree[key]['average_delay_time'] = 120
 		 			# Lock Mode parameters
-		 			tree[key]['enable_lock'] = 'temp_lock_enable'
-		 			tree[key]['lock_STATUS'] = 'temp_lock_status'
+		 			# tree[key]['enable_lock'] = 'temp_lock_enable'
+		 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
 		 			# tree[key]['controller_priority'] = 3214
 		 			tree[key]['groupid'] = 'fan'
 		 			gbZIP += 1
@@ -373,7 +373,7 @@ def heavyProcessing(modelDir, inputDict):
 			pass
 		else:
 			# Frequency Player
-			inArray = feederJson['attachments']['frequency.PLAYER'][1:-3].split('; ')
+			inArray = feederJson['attachments']['frequency.PLAYER'].split('\n')
 			tempArray = []
 			for each in inArray:
 				x = each.split(',')
