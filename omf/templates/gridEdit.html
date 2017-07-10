@@ -649,25 +649,28 @@
 <div id='climateModal' class='modal'>
 	<div class='modalContent' id='climateModalContent' style='width:250px'>
 		<div style='font-weight:bold; font-size:14pt'>Climate Change</div>
-		<br>
-		<div id='climateInputs' align='left'>
-	<!-- 		<label for='zipcode'>Zipcode:</label>
-			<input style='width:10px' type='text' id='zipcode' name='zipcode' pattern='^\d{5}(?:[-\s]\d{4})?$' required/>
-			<br> -->
-			<label for='airport'>Airport Code:</label>
-			<input style='width:10px' type='text' id='airport' name='airport' pattern='^[a-z]{3}$' required/>
+		<form onsubmit='editClimate();closeModal("climateModal")' action='/climateChange/{{ owner }}/{{feederName}}' id='climateChange' enctype='multipart/form-data' method='post'>
 			<br>
-			<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport' checked>
-			<label for="tmyImport">tmy Import</label>
+			<div id='climateInputs' align='left'>
+		<!-- 		<label for='zipcode'>Zipcode:</label>
+				<input style='width:10px' type='text' id='zipcode' name='zipcode' pattern='^\d{5}(?:[-\s]\d{4})?$' required/>
+				<br> -->
+				<label for='airport'>Airport Code:</label>
+				<input style='width:10px' type='text' id='airport' name='airport' pattern='^[a-z]{3}$' required/>
+				<br>
+				<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport' checked>
+				<label for="tmyImport">tmy Import</label>
+				<br>
+				<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport'>
+				<label for="historicalImport">Historical Weather</label>
+			</div>
 			<br>
-			<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport'>
-			<label for="historicalImport">Historical Weather</label>
-		</div>
-		<br>
-		<div style='padding-top:10px'>
-			<button onclick='closeModal("climateModal")'>Cancel</button>
-			<button onclick='editClimate();closeModal("climateModal")'>Apply</button>
-		</div>
+			<div style='padding-top:10px'>
+				<button onclick='closeModal("climateModal")'>Cancel</button>
+				<!-- <button onclick='editClimate();closeModal("climateModal")'>Apply</button> -->
+				<input type='submit' value='Apply' style='min-width:45px'/>				
+			</div>
+		</form>
 	</div>
 </div>
 

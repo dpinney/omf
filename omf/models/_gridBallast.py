@@ -103,10 +103,18 @@ def heavyProcessing(modelDir, inputDict):
 			if 'object' in feederJson['tree'][key]:
 			 	if feederJson['tree'][key]['object'] == 'climate':
 			 		del feederJson['tree'][key]
-		oldMax = feeder.getMaxKey(tree)
-		tree[oldMax + 1] = {'omftype':'module','argument':'climate'}
-		tree[oldMax + 2] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC','tmyfile':'climate.tmy2'}
-		# tree[oldMax + 3] = {'object':'capacitor','control':'VOLT','phases':'ABCN','name':'CAPTEST','parent':'tm_1','capacitor_A':'0.10 MVAr','capacitor_B':'0.10 MVAr','capacitor_C':'0.10 MVAr','time_delay':'300.0','nominal_voltage':'2401.7771','voltage_set_high':'2350.0','voltage_set_low':'2340.0','switchA':'CLOSED','switchB':'CLOSED','switchC':'CLOSED','control_level':'INDIVIDUAL','phases_connected':'ABCN','dwell_time':'0.0','pt_phases':'ABCN'}
+		tree[feeder.getMaxKey(tree)+1] = {'omftype':'module','argument':'climate'}
+		# Attach weather data
+		if :
+			stub = {'object':'csv_reader', 'name':'weatherReader', 'file':'weatherDCA.csv'}
+			copyStub = dict(stub)
+			tree[feeder.getMaxKey(tree)+1] = copyStub
+			stub = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherDCA.csv', 'reader':'weatherReader'}
+			copyStub = dict(stub)
+			tree[feeder.getMaxKey(tree)+1] = copyStub
+		else:
+			tree[feeder.getMaxKey(tree)+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC','tmyfile':'climate.tmy2'}
+		# tree[feeder.getMaxKey(tree)+1] = {'object':'capacitor','control':'VOLT','phases':'ABCN','name':'CAPTEST','parent':'tm_1','capacitor_A':'0.10 MVAr','capacitor_B':'0.10 MVAr','capacitor_C':'0.10 MVAr','time_delay':'300.0','nominal_voltage':'2401.7771','voltage_set_high':'2350.0','voltage_set_low':'2340.0','switchA':'CLOSED','switchB':'CLOSED','switchC':'CLOSED','control_level':'INDIVIDUAL','phases_connected':'ABCN','dwell_time':'0.0','pt_phases':'ABCN'}
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
 		feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
@@ -134,7 +142,7 @@ def heavyProcessing(modelDir, inputDict):
 			tree[11] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
 			# Attach frequency player
 			tree[12] = {'omftype':'class player', 'argument':'{double value;}'}
-			stub = {'object':'player', 'file':'frequency.PLAYER', 'property':'value', 'name':'frequency'}
+			stub = {'object':'player', 'file':'frequency.PLAYER', 'property':'value', 'name':'frequency', 'loop':0}
 			copyStub = dict(stub)
 			tree[feeder.getMaxKey(tree)+1] = copyStub
 			# Waterheater Controller properties
