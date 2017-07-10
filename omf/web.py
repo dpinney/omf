@@ -571,15 +571,21 @@ def gridlabImportBackground(owner, modelName, feederName, feederNum, glmString):
 		with open("data/Model/"+owner+"/"+modelName+"/gridError.txt", "w+") as errorFile:
 			errorFile.write('glmError')
 
-import weather
-@app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
-@flask_login.login_required
-def climateChange():
-	start = request.form.get("")
-	end = request.form.get("")
-	airport = request.form.get("airport")
-	outFilePath = './weather' + airport + '.csv'
-	return weather.makeClimateCsv(start, end, airport, outFilePath)
+# import weather
+# @app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
+# @flask_login.login_required
+# def climateChange():
+# 	start = request.form.get("")
+# 	end = request.form.get("")
+# 	airport = request.form.get("airport")
+# 	outFilePath = './weather' + airport + '.csv'
+# 	return weather.makeClimateCsv(start, end, airport, outFilePath)
+
+# import anonymization
+# @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
+# @flask_login.login_required
+# def anonymize():
+# 	pass
 
 @app.route("/scadaLoadshape/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required

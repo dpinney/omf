@@ -253,17 +253,18 @@
 			<div class="buttonGroup">
 				<button id="editOps" class='pill' onclick='dropPill(this, "Edit");'>Edit ▾</button>
 				<ul class='menu right'>
-				<li><a href="javascript:zoomToFit();">Zoom To Fit</a></li>
-				<li><a href="javascript:zoomReset();">Zoom Reset</a></li>
-				<li><a href="javascript:staticLoadsToHouses();unsavedChanges=true;">Static Loads to Houses</a></li>
-				<li><a href="javascript:solarAdding();unsavedChanges=true;">Solar at Meters</a></li>
-				<li><a id='scadaLoad' href='javascript:showModal("scadaLoadshapes");'>Scada Loadshapes...</a></li>
-				<li><a id='amiLoad' href='javascript:showModal("amiLoadshapes");'>Add AMI Profiles...</a></li>
-				<li><a href='javascript:showModal("findModal");'>Find...</a></li>
-				<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
-				<li><a href='javascript:showModal("massAddModal");getComponentsList();'>Mass Add...</a></li>
-				<li><a href='javascript:showModal("attachmentsModal");getAttachmentsList();'>Attachments...</a></li>
-				<li><a href='javascript:showModal("climateModal");'>Climate...</a></li>
+					<li><a href="javascript:zoomToFit();">Zoom To Fit</a></li>
+					<li><a href="javascript:zoomReset();">Zoom Reset</a></li>
+					<li><a href="javascript:staticLoadsToHouses();unsavedChanges=true;">Static Loads to Houses</a></li>
+					<li><a href="javascript:solarAdding();unsavedChanges=true;">Solar at Meters</a></li>
+					<li><a id='scadaLoad' href='javascript:showModal("scadaLoadshapes");'>Scada Loadshapes...</a></li>
+					<li><a id='amiLoad' href='javascript:showModal("amiLoadshapes");'>Add AMI Profiles...</a></li>
+					<li><a href='javascript:showModal("findModal");'>Find...</a></li>
+					<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
+					<li><a href='javascript:showModal("massAddModal");getComponentsList();'>Mass Add...</a></li>
+					<li><a href='javascript:showModal("attachmentsModal");getAttachmentsList();'>Attachments...</a></li>
+					<li><a href='javascript:showModal("climateModal");'>Climate...</a></li>
+					<li><a href='javascript:showModal("anonymizeModal");'>Anonymization...</a></li>
 				</ul>
 			</div>
 		</div>
@@ -646,10 +647,11 @@
 		</table>
 	</div>
 </div>
+
 <div id='climateModal' class='modal'>
 	<div class='modalContent' id='climateModalContent' style='width:250px'>
 		<div style='font-weight:bold; font-size:14pt'>Climate Change</div>
-		<form onsubmit='editClimate();closeModal("climateModal")' action='/climateChange/{{ owner }}/{{feederName}}' id='climateChange' enctype='multipart/form-data' method='post'>
+		<form onsubmit='event.preventDefault();editClimate();closeModal("climateModal")' action='/climateChange/{{ owner }}/{{feederName}}' id='climateChange' enctype='multipart/form-data' method='post'>
 			<br>
 			<div id='climateInputs' align='left'>
 		<!-- 		<label for='zipcode'>Zipcode:</label>
@@ -659,16 +661,68 @@
 				<input style='width:10px' type='text' id='airport' name='airport' pattern='^[a-z]{3}$' required/>
 				<br>
 				<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport' checked>
-				<label for="tmyImport">tmy Import</label>
+				<label for='tmyImport'>tmy Import</label>
 				<br>
 				<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport'>
-				<label for="historicalImport">Historical Weather</label>
+				<label for='historicalImport'>Historical Weather</label>
 			</div>
 			<br>
 			<div style='padding-top:10px'>
 				<button onclick='closeModal("climateModal")'>Cancel</button>
 				<!-- <button onclick='editClimate();closeModal("climateModal")'>Apply</button> -->
 				<input type='submit' value='Apply' style='min-width:45px'/>				
+			</div>
+		</form>
+	</div>
+</div>
+
+<div id='anonymizeModal' class='modal'>
+	<div class='modalContent' id='anonymizeModalContent' style='width:475px'>
+		<div style='font-weight:bold; font-size:14pt'>Anonymization</div>
+		<br>
+		<form onsubmit='event.preventDefault();closeModal("anonymizeModal")' action='/anonymize/{{ owner }}/{{feederName}}' id='anonymize' enctype='multipart/form-data' method='post'>
+			<div id='anonymizeInputs' align='left'>
+				<div style='font-weight:bold; font-size:12pt'>Names and Labels:</div>
+				<input type='radio' id='noChange' name='anonymizeNameOption' value='noChange' checked>
+				<label for='noChange'>No Change</label>
+				<br>
+				<input type='radio' id='pseudonymize' name='anonymizeNameOption' value='pseudonymize'>
+				<label for='pseudonymize'>Pseudonymize</label>
+				<br>
+				<input type='radio' id='randomize' name='anonymizeNameOption' value='randomize'>
+				<label for='randomize'>Randomize</label>
+				<br>
+				<br>
+				<div style='font-weight:bold; font-size:12pt'>Locations:</div>
+				<input type='radio' id='noChange' name='anonymizeLocationOption' value='noChange' checked>
+				<label for='noChange'>No Change</label>
+				<br>
+				<input type='radio' id='translation' name='anonymizeLocationOption' value='translation'>
+				<label for='translation'>Translate <input style='width:1px' type='text' id='translate' name='translate'>[ft] and Rotate <input style='width:1px' type='text' id='rotate' name='rotate'>[degrees]</label>
+				<br>
+				<input type='radio' id='randomize' name='anonymizeLocationOption' value='randomize'>
+				<label for='randomize'>Random (Force Layout)</label>
+				<br>
+				<br>
+				<div style='font-weight:bold; font-size:12pt'>Electrical Properties:</div>
+				<input type='checkbox' id='combineSplit' name='electricProperty' value='combineSplit'>
+				<label for='combineSplit'>Combine/Split Loads</label>
+				<br>
+				<input type='checkbox' id='modifyLengthSize' name='electricProperty' value='modifyLengthSize'>
+				<label for='modifyLengthSize'>Modify conductor length and cable size</label>
+				<br>
+				<input type='checkbox' id='smoothLoadGen' name='electricProperty' value='smoothLoadGen'>
+				<label for='smoothLoadGen'>Smooth loads and generators</label>
+				<br>
+				<input type='checkbox' id='shuffleLoadGen' name='electricProperty' value='shuffleLoadGen'>
+				<label for='shuffleLoadGen'>Shuffle loads and generators <input style='width:1px' type='text' id='shufflePerc' name='shufflePerc'>[%]</label>
+				<br>
+				<input type='checkbox' id='addNoise' name='electricProperty' value='addNoise'>
+				<label for='addNoise'>Add Noise <input style='width:1px' type='text' id='noisePerc' name='noisePerc'>[%]</label>
+				<br>
+				<br>
+				<button onclick='closeModal("anonymizeModal")'>Cancel</button>
+				<input type='submit' value='Apply' style='min-width:45px'/>
 			</div>
 		</form>
 	</div>
