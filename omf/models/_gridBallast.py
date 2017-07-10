@@ -132,17 +132,18 @@ def heavyProcessing(modelDir, inputDict):
 			# HACK: tree[10:19] is empty
 			tree[10] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
 			tree[11] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
+			# Attach frequency player
+			tree[12] = {'omftype':'class player', 'argument':'{double value;}'}
+			stub = {'object':'player', 'file':'frequency.PLAYER', 'property':'value', 'name':'frequency'}
+			copyStub = dict(stub)
+			tree[feeder.getMaxKey(tree)+1] = copyStub
 			# Waterheater Controller properties
 			for key in tree.keys():
 				if ('name' in tree[key]) and (tree[key].get('object') == 'waterheater'):
 			 		totalWH += 1
-			 		# Attach frequency player
-			 		parent = tree[key]['name']
-			 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
-			 		copyStub = dict(stub)
-			 		tree[feeder.getMaxKey(tree)+1] = copyStub
 		 			# Frequency control parameters
 		 			tree[key]['enable_freq_control'] = 'true'
+		 			tree[key]['measured_frequency'] = 'frequency.value'
 		 			tree[key]['freq_lowlimit'] = 59.9
 		 			tree[key]['freq_uplimit'] = 60.1
 		 			tree[key]['heat_mode'] = 'ELECTRIC'
@@ -165,13 +166,9 @@ def heavyProcessing(modelDir, inputDict):
 			for key in tree.keys():
 				if ('name' in tree[key]) and (tree[key].get('object') == 'ZIPload'):
 			 		totalZIP += 1
-			 		# Attach frequency player
-			 		parent = tree[key]['name']
-			 		stub = {'object':'player', 'parent':parent, 'property':'measured_frequency', 'file':'frequency.PLAYER'}
-			 		copyStub = dict(stub)
-			 		tree[feeder.getMaxKey(tree)+1] = copyStub
 			 		# Frequency control parameters
 		 			tree[key]['enable_freq_control'] = 'true'
+		 			tree[key]['measured_frequency'] = 'frequency.value'
 		 			tree[key]['freq_lowlimit'] = 59.9
 		 			tree[key]['freq_uplimit'] = 60.1
 		 			# Voltage control parameters
