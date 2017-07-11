@@ -1064,8 +1064,28 @@ import anonymization
 @flask_login.login_required
 def anonymize(owner,feederName):
 	nameOption = request.form.get('anonymizeNameOption')
+	if nameOption == 'pseudonomize':
+		anonymization.distPseudomizeNames(inFeeder)
+	elif nameOption == 'randomize':
+		anonymization.distRandomizeNames(inFeeder)
 	locOption = request.form.get('anonymizeLocationOption')
+	if locOption == 'translation':
+		anonymization.distTranslateLocations(inFeeder, translation, rotation)
+	elif locOption == 'randomize':
+		anonymization.distRandomizeLocations(inFeeder)
 	elecProp = request.form.get('electricProperty')
+	if elecProp == 'modifyLengthSize':
+		distModifyTriplexLengths(inFeeder)
+		distModifyConductorLengths(inFeeder)
+	elif elecProp == 'smoothLoadGen':
+		anonymization.distSmoothLoads(inFeeder)
+	elif elecProp == 'shuffleLoadGen':
+		distShuffleLoads(inFeeder, shufPerc)
+	elif elecProp == 'addNoise':
+		distAddNoise(inFeeder, noisePerc)
+	FNAME = feederName + '.omd'
+	print FNAME
+	return FNAME
 
 if __name__ == "__main__":
 	URL = "http://localhost:5000"
