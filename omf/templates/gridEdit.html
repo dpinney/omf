@@ -685,7 +685,7 @@
 	<div class='modalContent' id='anonymizeModalContent' style='width:475px'>
 		<div style='font-weight:bold; font-size:14pt'>Anonymization</div>
 		<br>
-		<form onsubmit='event.preventDefault();closeModal("anonymizeModal")' action='/anonymize/{{ owner }}/{{feederName}}' id='anonymize' enctype='multipart/form-data' method='post'>
+		<form onsubmit='closeModal("anonymizeModal")' action='/anonymize/{{ owner }}/{{feederName}}' id='anonymize' enctype='multipart/form-data' method='post'>
 			<div id='anonymizeInputs' align='left'>
 				<div style='font-weight:bold; font-size:12pt'>Names and Labels:</div>
 				<input type='radio' id='noChange' name='anonymizeNameOption' value='noChange' checked>
