@@ -105,16 +105,6 @@ def heavyProcessing(modelDir, inputDict):
 			 		del feederJson['tree'][key]
 		tree[feeder.getMaxKey(tree)+1] = {'omftype':'module','argument':'climate'}
 		tree[feeder.getMaxKey(tree)+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC','tmyfile':'climate.tmy2'}
-		
-		# Attach weather data
-		# if :
-		# 	stub = {'object':'csv_reader', 'name':'weatherReader', 'file':'weatherDCA.csv'}
-		# 	copyStub = dict(stub)
-		# 	tree[feeder.getMaxKey(tree)+1] = copyStub
-		# 	stub = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherDCA.csv', 'reader':'weatherReader'}
-		# 	copyStub = dict(stub)
-		# 	tree[feeder.getMaxKey(tree)+1] = copyStub
-		
 		# tree[feeder.getMaxKey(tree)+1] = {'object':'capacitor','control':'VOLT','phases':'ABCN','name':'CAPTEST','parent':'tm_1','capacitor_A':'0.10 MVAr','capacitor_B':'0.10 MVAr','capacitor_C':'0.10 MVAr','time_delay':'300.0','nominal_voltage':'2401.7771','voltage_set_high':'2350.0','voltage_set_low':'2340.0','switchA':'CLOSED','switchB':'CLOSED','switchC':'CLOSED','control_level':'INDIVIDUAL','phases_connected':'ABCN','dwell_time':'0.0','pt_phases':'ABCN'}
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
