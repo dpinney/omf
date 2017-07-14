@@ -649,10 +649,12 @@
 </div>
 
 <div id='climateModal' class='modal'>
-	<div class='modalContent' id='climateModalContent' style='width:250px'>
+	<div class='modalContent' id='climateModalContent' style='width:300px'>
 		<div style='font-weight:bold; font-size:14pt'>Climate Change</div>
+		<br>
 		<form onsubmit='closeModal("climateModal")' action='/climateChange/{{ owner }}/{{feederName}}' id='climateChange' enctype='multipart/form-data' method='post'>
-			<br>
+			<input type='hidden' name='_csrf_token' value='{{ csrf_token() }}'/>
+			<input type='hidden' id='modelName' name='modelName' value='{{ modelName }}'/>
 			<div id='climateInputs' align='left'>
 		<!-- 		<label for='zipcode'>Zipcode:</label>
 				<input style='width:10px' type='text' id='zipcode' name='zipcode' pattern='^\d{5}(?:[-\s]\d{4})?$' required/>
