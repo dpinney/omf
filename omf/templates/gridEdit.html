@@ -668,11 +668,11 @@
 				<label for='airport'>Airport Code:</label>
 				<input style='width:5px' type='text' id='airport' name='airport' pattern='^[A-Z]{3}$' required/>
 				<br>
-				<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport' checked>
-				<label for='tmyImport'>tmy Import</label>
-				<br>
-				<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport'>
+				<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport' checked/>
 				<label for='historicalImport'>Historical Weather</label>
+				<br>
+				<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport'/>
+				<label for='tmyImport'>tmy Import</label>
 			</div>
 			<br>
 			<div style='padding-top:10px'>
@@ -1238,17 +1238,6 @@ function editAttachment(attachment) {
 function saveAttachment(attachment) {
 	var attachName = document.getElementById('attachmentSelect').innerHTML
 	attachments[attachName] = document.getElementById('editAttachmentBox').value
-}
-
-function editClimate() {
-	// var zipcode = document.getElementById('zipcode').value
-	var airport = document.getElementById('airport').value
-	if (document.getElementById('tmyOption').checked) {
-		console.log(airport, document.getElementById('tmyOption').value)
-	}
-	if (document.getElementById('historicalOption').checked) {
-		console.log(airport, document.getElementById('historicalOption').value)
-	}
 }
 
 //*********************************************

@@ -1050,33 +1050,32 @@ def uniqObjName(objtype, owner, name, modelName=False):
 	return jsonify(exists=os.path.exists(path))
 
 
-# import weather
-# @app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
-# @flask_login.login_required
-# def climateChange(owner,feederName):
-# 	modelName = request.form.get('modelName','')
-# 	start = request.form.get('startDate')
-# 	end = request.form.get('endDate')
-# 	airport = request.form.get('airport')
-# 	# keep constant weather filename so always rewrites
-# 	fileName = 'weather' + airport + '.csv'
-# 	modelDir = 'data/Model/' + owner + '/' + modelName
-# 	outFilePath = modelDir + '/' + fileName
-# 	if os.path.isfile(outFilePath):
-# 		os.remove(outFilePath)
-# 	weather.makeClimateCsv(start, end, airport, outFilePath)
-# 	# file = request.files['csvFile']
-# 	# file.save(os.path.join(modelDir '/' + omdPath))	
-# 	omdPath = modelDir + '/' + feederName + '.omd'	
-# 	with open(omdPath, 'r') as inFile:
-# 		feederJson = json.load(inFile)
-# 		tree = feederJson['tree']
-# 		tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'file':fileName}
-# 		tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':fileName, 'reader':'weatherReader'}
-# 		# with open(CSVPATHHERE) as csvFile:
-# 		# 	attachments[fileName] = csvFile.read()
-# 	with open(omdPath, 'w') as outFile:
-# 		json.dump(feederJson, outFile, indent=4)
+import weather
+@app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
+@flask_login.login_required
+def climateChange(owner,feederName):
+	modelName = request.form.get('modelName','')
+	start = request.form.get('startDate')
+	end = request.form.get('endDate')
+	airport = request.form.get('airport')
+	fileName = 'weatherAirport.csv'
+	modelDir = 'data/Model/' + owner + '/' + modelName
+	outFilePath = modelDir + '/' + fileName
+	if os.path.isfile(outFilePath):
+		os.remove(outFilePath)
+	weather.makeClimateCsv(start, end, airport, outFilePath)
+	omdPath = modelDir + '/' + feederName + '.omd'	
+	with open(omdPath, 'r') as inFile:
+		feederJson = json.load(inFile)
+		tree = feederJson['tree']
+		tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':fileName}
+		tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'airportClimate', 'tmyfile':fileName, 'reader':'weatherReader'}
+		with open(outFilePath) as csvFile:
+			attachments = feederJson['attachments']
+			attachments[fileName] = csvFile.read()
+	with open(omdPath, 'w') as outFile:
+		json.dump(feederJson, outFile, indent=4)
+	return ('Success',204)
 
 
 # import anonymization
