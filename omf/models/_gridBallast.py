@@ -133,24 +133,22 @@ def heavyProcessing(modelDir, inputDict):
 			tree[11] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
 			# Attach frequency player
 			tree[12] = {'omftype':'class player', 'argument':'{double value;}'}
-			stub = {'object':'player', 'file':'frequency.PLAYER', 'property':'value', 'name':'frequency', 'loop':0}
-			copyStub = dict(stub)
-			tree[feeder.getMaxKey(tree)+1] = copyStub
+			tree[feeder.getMaxKey(tree)+1] = {'object':'player', 'file':'frequency.PLAYER', 'property':'value', 'name':'frequency', 'loop':0}
 			# Waterheater Controller properties
 			for key in tree.keys():
 				if ('name' in tree[key]) and (tree[key].get('object') == 'waterheater'):
 			 		totalWH += 1
 		 			# Frequency control parameters
-		 			tree[key]['enable_freq_control'] = 'true'
-		 			tree[key]['measured_frequency'] = 'frequency.value'
-		 			tree[key]['freq_lowlimit'] = 59.9
-		 			tree[key]['freq_uplimit'] = 60.1
-		 			tree[key]['heat_mode'] = 'ELECTRIC'
+		 			# tree[key]['enable_freq_control'] = 'true'
+		 			# tree[key]['measured_frequency'] = 'frequency.value'
+		 			# tree[key]['freq_lowlimit'] = 59.9
+		 			# tree[key]['freq_uplimit'] = 60.1
+		 			# tree[key]['heat_mode'] = 'ELECTRIC'
 		 			# Voltage control parameters
 		 			# tree[key]['enable_volt_control'] = 'true'
 		 			# tree[key]['volt_lowlimit'] = 240.4
 		 			# tree[key]['volt_uplimit'] = 241.4
-		 			tree[key]['average_delay_time'] = 120
+		 			# tree[key]['average_delay_time'] = 120
 		 			# Lock Mode parameters
 		 			# tree[key]['enable_lock'] = 'temp_lock_enable'
 		 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
@@ -166,72 +164,54 @@ def heavyProcessing(modelDir, inputDict):
 				if ('name' in tree[key]) and (tree[key].get('object') == 'ZIPload'):
 			 		totalZIP += 1
 			 		# Frequency control parameters
-		 			tree[key]['enable_freq_control'] = 'true'
-		 			tree[key]['measured_frequency'] = 'frequency.value'
-		 			tree[key]['freq_lowlimit'] = 59.9
-		 			tree[key]['freq_uplimit'] = 60.1
+		 			# tree[key]['enable_freq_control'] = 'true'
+		 			# tree[key]['measured_frequency'] = 'frequency.value'
+		 			# tree[key]['freq_lowlimit'] = 59.9
+		 			# tree[key]['freq_uplimit'] = 60.1
 		 			# Voltage control parameters
 		 			# tree[key]['enable_volt_control'] = 'true'
 		 			# tree[key]['volt_lowlimit'] = 240.4
 		 			# tree[key]['volt_uplimit'] = 241.4
-		 			tree[key]['average_delay_time'] = 120
+		 			# tree[key]['average_delay_time'] = 120
 		 			# Lock Mode parameters
 		 			# tree[key]['enable_lock'] = 'temp_lock_enable'
 		 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
 		 			# tree[key]['controller_priority'] = 3214
-		 			tree[key]['groupid'] = 'fan'
+		 			# tree[key]['groupid'] = 'fan'
 		 			gbZIP += 1
 
 		# Attach recorder for waterheaters on/off
-		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':3600, 'file':'allWaterheaterOn.csv'}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
+		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':60, 'file':'allWaterheaterOn.csv'}
 		# Attach recorder for waterheater tank temperatures
-		stub = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'temperature', 'interval':3600, 'file':'allWaterheaterTemp.csv'}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
+		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'temperature', 'interval':60, 'file':'allWaterheaterTemp.csv'}
 		# Attach collector for total waterheater load
-		stub = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_load)', 'interval':3600, 'file':'allWaterheaterLoad.csv'}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
+		tree[feeder.getMaxKey(tree)+1] = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_load)', 'interval':60, 'file':'allWaterheaterLoad.csv'}
 		# Attach collector for total network load
-		stub = {'object':'collector', 'group':'"class=triplex_meter"', 'property':'sum(measured_real_power)', 'interval':3600, 'file':'allMeterPower.csv'}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
-
+		tree[feeder.getMaxKey(tree)+1] = {'object':'collector', 'group':'"class=triplex_meter"', 'property':'sum(measured_real_power)', 'interval':60, 'file':'allMeterPower.csv'}
 		# Attach collector for total overall ZIPload power/load
-		stub = {'object':'collector', 'group':'"class=ZIPload"', 'property':'sum(base_power)', 'interval':3600, 'file':'allZIPloadPower.csv'}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
+		tree[feeder.getMaxKey(tree)+1] = {'object':'collector', 'group':'"class=ZIPload"', 'property':'sum(base_power)', 'interval':60, 'file':'allZIPloadPower.csv'}
 		# Attach recorder for each ZIPload power/load
-		stub = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'base_power', 'interval':3600, 'file':'eachZIPloadPower.csv'}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
+		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'base_power', 'interval':60, 'file':'eachZIPloadPower.csv'}
 		# Attach recorder for all ZIPloads demand_rate
-		stub = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'demand_rate', 'interval':3600, 'file':'allZIPloadDemand.csv'}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
+		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'demand_rate', 'interval':60, 'file':'allZIPloadDemand.csv'}
 		# Attach recorder for all ZIPloads on
-		stub = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'number_of_devices_on', 'interval':3600, 'file':'allZIPloadOn.csv'}
-		copyStub = dict(stub)
-		tree[feeder.getMaxKey(tree)+1] = copyStub
-
+		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'number_of_devices_on', 'interval':60, 'file':'allZIPloadOn.csv'}
 		# Attach recorders for system voltage map:
-		stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':3600}
+		stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':60}
 		for phase in ['A','B','C']:
 			copyStub = dict(stub)
 			copyStub['property'] = 'voltage_' + phase
 			copyStub['file'] = phase.lower() + 'VoltDump.csv'
 			tree[feeder.getMaxKey(tree) + 1] = copyStub
 		# Attach recorders for system voltage map, triplex:
-		stub = {'object':'group_recorder', 'group':'"class=triplex_node"', 'interval':3600}
+		stub = {'object':'group_recorder', 'group':'"class=triplex_node"', 'interval':60}
 		for phase in ['1','2']:
 			copyStub = dict(stub)
 			copyStub['property'] = 'voltage_' + phase
 			copyStub['file'] = phase.lower() + 'nVoltDump.csv'
 			tree[feeder.getMaxKey(tree) + 1] = copyStub
 		# And get meters for system voltage map:
-		stub = {'object':'group_recorder', 'group':'"class=triplex_meter"', 'interval':3600}
+		stub = {'object':'group_recorder', 'group':'"class=triplex_meter"', 'interval':60}
 		for phase in ['1','2']:
 			copyStub = dict(stub)
 			copyStub['property'] = 'voltage_' + phase
@@ -248,7 +228,6 @@ def heavyProcessing(modelDir, inputDict):
 		cleanOut['stdout'] = rawOut['stdout']
 		# Time Stamps
 		for key in rawOut:
-			print key
 			if '# timestamp' in rawOut[key]:
 				cleanOut['timeStamps'] = rawOut[key]['# timestamp']
 				break
@@ -364,10 +343,13 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
 				cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
 
+		# Print gridBallast Outputs to allOutputData.json
+		cleanOut['gridBallast'] = {}
 		# System check - linux doesn't support newer GridLAB-D versions
 		if sys.platform == 'linux2':
 			pass
 		else:
+			cleanOut['gridBallast']['penetrationLevel'] = 100*(gbWH+gbZIP)/(totalWH+totalZIP)
 			# Frequency Player
 			inArray = feederJson['attachments']['frequency.PLAYER'].split('\n')
 			tempArray = []
@@ -376,14 +358,6 @@ def heavyProcessing(modelDir, inputDict):
 				y = float(x[1])
 				tempArray.append(y)
 			cleanOut['frequencyPlayer'] = tempArray
-
-		# Print gridBallast Outputs to allOutputData.json
-		cleanOut['gridBallast'] = {}
-		# System check - linux doesn't support newer GridLAB-D versions
-		if sys.platform == 'linux2':
-			pass
-		else:
-			cleanOut['gridBallast']['penetrationLevel'] = 100*(gbWH+gbZIP)/(totalWH+totalZIP)
 		if 'allWaterheaterOn.csv' in rawOut:
 			cleanOut['gridBallast']['waterheaterOn'] = {}
 			for key in rawOut['allWaterheaterOn.csv']:
@@ -396,7 +370,6 @@ def heavyProcessing(modelDir, inputDict):
 					cleanOut['gridBallast']['waterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
 		if 'allMeterPower.csv' in rawOut:
 			cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
-
 		if ('allWaterheaterLoad.csv' in rawOut) and ('allZIPloadPower.csv' in rawOut):
 			cleanOut['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
 		if 'eachZIPloadPower.csv' in rawOut:
@@ -414,26 +387,23 @@ def heavyProcessing(modelDir, inputDict):
 			for key in rawOut['allZIPloadOn.csv']:
 				if key.startswith('ZIPload'):
 					cleanOut['gridBallast']['ZIPloadOn'][key] = rawOut.get('allZIPloadOn.csv')[key]
-
 		# EventTime calculations
 		eventTime = inputDict['eventTime']
-		eventLength = inputDict['eventLength']
-		eventLength = eventLength.split(':')
+		eventLength = inputDict['eventLength'].split(':')
 		eventDuration = datetime.timedelta(hours=int(eventLength[0]), minutes=int(eventLength[1]))
 		eventStart = datetime.datetime.strptime(eventTime, '%Y-%m-%d %H:%M')
 		eventEnd = eventStart + eventDuration
 		cleanOut['gridBallast']['eventStart'] = str(eventStart)
 		cleanOut['gridBallast']['eventEnd'] = str(eventEnd)
-		# Drop timezone from timeStamp, Convert string to date
-		timeStamps = [x[:19] for x in cleanOut['timeStamps']]
-		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S') for x in timeStamps]	
+		# Convert string to date
+		dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S %Z') for x in cleanOut['timeStamps']]	
 		eventEndIdx =  dateTimeStamps.index(eventEnd)
 		# Recovery Time
 		whOn = cleanOut['gridBallast']['waterheaterOn']
 		whOnList = whOn.values()
 		whOnZip = zip(*whOnList)
 		whOnSum = [sum(x) for x in whOnZip]
-		anyOn = [x > 0 for x in whOnSum] 
+		anyOn = [x > 0 for x in whOnSum]
 		tRecIdx = anyOn.index(True, eventEndIdx)
 		tRec = dateTimeStamps[tRecIdx]
 		recoveryTime = tRec - eventEnd
@@ -444,8 +414,6 @@ def heavyProcessing(modelDir, inputDict):
 		# Reserve Magnitude Target (RMT)
 		availMag = cleanOut['gridBallast']['availabilityMagnitude']
 		totNetLoad = cleanOut['gridBallast']['totalNetworkLoad']
-		# loadZip = zip(availMag,totNetLoad)
-		# rmt = [x[0]/x[1] for x in loadZip]
 		rmt = 100*1000*sum(availMag)/sum(totNetLoad)
 		cleanOut['gridBallast']['rmt'] = rmt
 		# Reserve Magnitude Variability Tolerance (RMVT)
@@ -455,7 +423,7 @@ def heavyProcessing(modelDir, inputDict):
 		rmvt = rmvtMax - rmvtMin
 		cleanOut['gridBallast']['rmvt'] = rmvt
 		# Availability
-		notAvail = float(availMag.count(0))/len(timeStamps)
+		notAvail = float(availMag.count(0))/len(cleanOut['timeStamps'])
 		avail = (1-notAvail)*100
 		cleanOut['gridBallast']['availability'] = avail
 		# Waterheater Temperature Drop calculations
@@ -468,7 +436,6 @@ def heavyProcessing(modelDir, inputDict):
 			tempDrop = sum([t < LOWER_LIMIT_TEMP for t in time])
 			whTempDrops.append(tempDrop)
 		cleanOut['gridBallast']['waterheaterTempDrops'] = whTempDrops
-
 		# ZIPload calculations for Availability and QoS
 		zPower = cleanOut['gridBallast']['ZIPloadPower']
 		zPowerList = zPower.values()
@@ -478,15 +445,15 @@ def heavyProcessing(modelDir, inputDict):
 		zDemandList  = zDemand.values()
 		zDemandZip = zip(*zDemandList)
 		zDrops = []
-		for time in zDemandZip:
-			for each in zPowerZip:
-				zIdx = 0
-				if each[zIdx] == 0:
-					zIdx += 1
-					zDrop = sum([t > 0 for t in time])
+		zIdx = 0
+		for time in zPowerZip:
+			for each in time:
+				if each == 0:
+					zDrop = sum([demand > 0 for demand in zDemandZip[zIdx]])
 					zDrops.append(zDrop)
 				else:
 					zDrops.append(0)
+			zIdx += 1
 		cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
 
 		# What percentage of our keys have lat lon data?
@@ -690,12 +657,12 @@ def new(modelDir):
 		"modelType": modelName,
 		"zipCode": "59001",
 		"feederName1": "Olin Barre GH EOL Solar GridBallast",
-		"simStartDate": "2012-01-01",
-		"simLength": "72",
-		"simLengthUnits": "hours", #minutes
+		"simStartDate": "2012-01-01 12:00:00",
+		"simLength": "180",
+		"simLengthUnits": "minutes", #hours
 		"eventType": "ramping", #unramping, overfrequency, underfrequency
-		"eventTime": "2012-01-02 14:00",
-		"eventLength": "03:00"
+		"eventTime": "2012-01-01 14:00",
+		"eventLength": "00:05"
 	}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:

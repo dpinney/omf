@@ -1049,43 +1049,72 @@ def uniqObjName(objtype, owner, name, modelName=False):
 		if name == 'feeder': return jsonify(exists=True)
 	return jsonify(exists=os.path.exists(path))
 
-import weather
-@app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
-@flask_login.login_required
-def climateChange(owner,feederName):
-	start = request.form.get('startDate')
-	end = request.form.get('endDate')
-	airport = request.form.get('airport')
-	outFilePath = './weather' + airport + '.csv'
-	return weather.makeClimateCsv(start, end, airport, outFilePath)
 
-import anonymization
-@app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
-@flask_login.login_required
-def anonymize(owner,feederName):
-	nameOption = request.form.get('anonymizeNameOption')
-	if nameOption == 'pseudonomize':
-		anonymization.distPseudomizeNames(inFeeder)
-	elif nameOption == 'randomize':
-		anonymization.distRandomizeNames(inFeeder)
-	locOption = request.form.get('anonymizeLocationOption')
-	if locOption == 'translation':
-		anonymization.distTranslateLocations(inFeeder, translation, rotation)
-	elif locOption == 'randomize':
-		anonymization.distRandomizeLocations(inFeeder)
-	elecProp = request.form.get('electricProperty')
-	if elecProp == 'modifyLengthSize':
-		distModifyTriplexLengths(inFeeder)
-		distModifyConductorLengths(inFeeder)
-	elif elecProp == 'smoothLoadGen':
-		anonymization.distSmoothLoads(inFeeder)
-	elif elecProp == 'shuffleLoadGen':
-		distShuffleLoads(inFeeder, shufPerc)
-	elif elecProp == 'addNoise':
-		distAddNoise(inFeeder, noisePerc)
-	FNAME = feederName + '.omd'
-	print FNAME
-	return FNAME
+# import weather
+# @app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
+# @flask_login.login_required
+# def climateChange(owner,feederName):
+# 	modelName = request.form.get('modelName','')
+# 	start = request.form.get('startDate')
+# 	end = request.form.get('endDate')
+# 	airport = request.form.get('airport')
+# 	# keep constant weather filename so always rewrites
+# 	fileName = 'weather' + airport + '.csv'
+# 	modelDir = 'data/Model/' + owner + '/' + modelName
+# 	outFilePath = modelDir + '/' + fileName
+# 	if os.path.isfile(outFilePath):
+# 		os.remove(outFilePath)
+# 	weather.makeClimateCsv(start, end, airport, outFilePath)
+# 	# file = request.files['csvFile']
+# 	# file.save(os.path.join(modelDir '/' + omdPath))	
+# 	omdPath = modelDir + '/' + feederName + '.omd'	
+# 	with open(omdPath, 'r') as inFile:
+# 		feederJson = json.load(inFile)
+# 		tree = feederJson['tree']
+# 		tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'file':fileName}
+# 		tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':fileName, 'reader':'weatherReader'}
+# 		# with open(CSVPATHHERE) as csvFile:
+# 		# 	attachments[fileName] = csvFile.read()
+# 	with open(omdPath, 'w') as outFile:
+# 		json.dump(feederJson, outFile, indent=4)
+
+
+# import anonymization
+# @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
+# @flask_login.login_required
+# def anonymize(owner,feederName):
+# 	omdPath = modelDir + '/' + feederName + '.omd'	
+# 	with open(omdPath, 'r') as inFile:
+# 		inFeeder = json.load(inFile)
+
+# 	nameOption = request.form.get('anonymizeNameOption')
+# 	if nameOption == 'pseudonomize':
+# 		anonymization.distPseudomizeNames(inFeeder)
+# 	elif nameOption == 'randomize':
+# 		anonymization.distRandomizeNames(inFeeder)
+# 	locOption = request.form.get('anonymizeLocationOption')
+# 	if locOption == 'translation':
+# 		translation = request.form.get('translate')
+# 		rotation = request.form.get('rotate')
+# 		anonymization.distTranslateLocations(inFeeder, translation, rotation)
+# 	elif locOption == 'randomize':
+# 		anonymization.distRandomizeLocations(inFeeder)
+# 	elecProp = request.form.get('electricProperty')
+# 	if elecProp == 'modifyLengthSize':
+# 		distModifyTriplexLengths(inFeeder)
+# 		distModifyConductorLengths(inFeeder)
+# 	elif elecProp == 'smoothLoadGen':
+# 		anonymization.distSmoothLoads(inFeeder)
+# 	elif elecProp == 'shuffleLoadGen':
+# 		shufPerc = request.form.get('shufflePerc')
+# 		distShuffleLoads(inFeeder, shufPerc)
+# 	elif elecProp == 'addNoise':
+# 		request.form.get('noisePerc')
+# 		distAddNoise(inFeeder, noisePerc)
+
+# 	with open(omdPath, 'w') as outFile:
+# 		json.dump(inFeeder, outFile, indent=4)
+
 
 if __name__ == "__main__":
 	URL = "http://localhost:5000"
