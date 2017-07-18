@@ -1054,7 +1054,7 @@ import weather
 @app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
 def climateChange(owner,feederName):
-	modelName = request.form.get('modelName','')
+	modelName = request.form.get('modelName')
 	start = request.form.get('startDate')
 	end = request.form.get('endDate')
 	airport = request.form.get('airport')
@@ -1077,42 +1077,42 @@ def climateChange(owner,feederName):
 		json.dump(feederJson, outFile, indent=4)
 	return ('Success',204)
 
-
-# import anonymization
-# @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
-# @flask_login.login_required
-# def anonymize(owner,feederName):
-# 	omdPath = modelDir + '/' + feederName + '.omd'	
-# 	with open(omdPath, 'r') as inFile:
-# 		inFeeder = json.load(inFile)
-
-# 	nameOption = request.form.get('anonymizeNameOption')
-# 	if nameOption == 'pseudonomize':
-# 		anonymization.distPseudomizeNames(inFeeder)
-# 	elif nameOption == 'randomize':
-# 		anonymization.distRandomizeNames(inFeeder)
-# 	locOption = request.form.get('anonymizeLocationOption')
-# 	if locOption == 'translation':
-# 		translation = request.form.get('translate')
-# 		rotation = request.form.get('rotate')
-# 		anonymization.distTranslateLocations(inFeeder, translation, rotation)
-# 	elif locOption == 'randomize':
-# 		anonymization.distRandomizeLocations(inFeeder)
-# 	elecProp = request.form.get('electricProperty')
-# 	if elecProp == 'modifyLengthSize':
-# 		distModifyTriplexLengths(inFeeder)
-# 		distModifyConductorLengths(inFeeder)
-# 	elif elecProp == 'smoothLoadGen':
-# 		anonymization.distSmoothLoads(inFeeder)
-# 	elif elecProp == 'shuffleLoadGen':
-# 		shufPerc = request.form.get('shufflePerc')
-# 		distShuffleLoads(inFeeder, shufPerc)
-# 	elif elecProp == 'addNoise':
-# 		request.form.get('noisePerc')
-# 		distAddNoise(inFeeder, noisePerc)
-
-# 	with open(omdPath, 'w') as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+import anonymization
+@app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
+@flask_login.login_required
+def anonymize(owner,feederName):
+	modelName = request.form.get('modelName')
+	modelDir = 'data/Model/' + owner + '/' + modelName
+	omdPath = modelDir + '/' + feederName + '.omd'	
+	with open(omdPath, 'r') as inFile:
+		inFeeder = json.load(inFile)
+	nameOption = request.form.get('anonymizeNameOption')
+	if nameOption == 'pseudonomize':
+		anonymization.distPseudomizeNames(inFeeder)
+	elif nameOption == 'randomize':
+		anonymization.distRandomizeNames(inFeeder)
+	locOption = request.form.get('anonymizeLocationOption')
+	if locOption == 'translation':
+		translation = request.form.get('translate')
+		rotation = request.form.get('rotate')
+		anonymization.distTranslateLocations(inFeeder, translation, rotation)
+	elif locOption == 'randomize':
+		anonymization.distRandomizeLocations(inFeeder)
+	elecProp = request.form.get('electricProperty')
+	if elecProp == 'modifyLengthSize':
+		distModifyTriplexLengths(inFeeder)
+		distModifyConductorLengths(inFeeder)
+	elif elecProp == 'smoothLoadGen':
+		anonymization.distSmoothLoads(inFeeder)
+	elif elecProp == 'shuffleLoadGen':
+		shufPerc = request.form.get('shufflePerc')
+		distShuffleLoads(inFeeder, shufPerc)
+	elif elecProp == 'addNoise':
+		request.form.get('noisePerc')
+		distAddNoise(inFeeder, noisePerc)
+	with open(omdPath, 'w') as outFile:
+		json.dump(inFeeder, outFile, indent=4)
+	return ('Success',204)
 
 
 if __name__ == "__main__":

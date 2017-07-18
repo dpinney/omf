@@ -662,11 +662,14 @@
 				<label for='startDate'>Start Date (YYYY-MM-DD):</label>
 				<input style='width:5px' type='text' id='startDate' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$' required/>
 				<br>
+				<br>
 				<label for='endDate'>End Date (YYYY-MM-DD):</label>
 				<input style='width:5px' type='text' id='endDate' name='endDate' pattern='^\d{4}-\d{2}-\d{2}$' required/>
 				<br>
+				<br>
 				<label for='airport'>Airport Code:</label>
 				<input style='width:5px' type='text' id='airport' name='airport' pattern='^[A-Z]{3}$' required/>
+				<br>
 				<br>
 				<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport' checked/>
 				<label for='historicalImport'>Historical Weather</label>
@@ -688,6 +691,8 @@
 		<div style='font-weight:bold; font-size:14pt'>Anonymization</div>
 		<br>
 		<form onsubmit='closeModal("anonymizeModal")' action='/anonymize/{{ owner }}/{{feederName}}' id='anonymize' enctype='multipart/form-data' method='post'>
+			<input type='hidden' name='_csrf_token' value='{{ csrf_token() }}'/>
+			<input type='hidden' id='modelName' name='modelName' value='{{ modelName }}'/>
 			<div id='anonymizeInputs' align='left'>
 				<div style='font-weight:bold; font-size:12pt'>Names and Labels:</div>
 				<input type='radio' id='noChange' name='anonymizeNameOption' value='noChange' checked>
