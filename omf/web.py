@@ -1068,6 +1068,11 @@ def climateChange(owner,feederName):
 	with open(omdPath, 'r') as inFile:
 		feederJson = json.load(inFile)
 		tree = feederJson['tree']
+		for key in tree.keys():
+			if tree[key].get('object') == 'csv_reader':
+				del tree[key]
+			elif tree[key].get('object') == 'climate':
+				del tree[key]
 		tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':fileName}
 		tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'airportClimate', 'tmyfile':fileName, 'reader':'weatherReader'}
 		with open(outFilePath) as csvFile:
