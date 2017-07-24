@@ -5,7 +5,7 @@ MarkupSafe>=0.18
 Werkzeug>=0.9.4
 argparse>=1.2.1
 backports.ssl-match-hostname>=3.4.0.2
-boto>=2.24.0
+boto==2.24.0
 networkx>=1.8.1
 passlib>=1.6.2
 pyparsing>=2.0.1
