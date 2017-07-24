@@ -911,6 +911,7 @@ function showProgress(){
 	checkScadaCal()
 	checkLoadModelingAmi()
 	checkConv()
+	checkClimateChange()
 }
 
 function checkLoadModelingAmi(){
@@ -983,6 +984,17 @@ function checkConversion() {
 			console.log("Converting...")
 			return pingAPI;
 		}(), 5000);
+}
+
+function checkClimateChange() {
+	var modelName = '{{modelName}}'
+	$.ajax({
+		url: "/checkClimateChange/" + modelName
+	}).done(function (data) {
+		if (data.exists == true) {
+			showProgressDialog('spinner', 'Changing Climate')
+		}
+	})
 }
 
 function showProgressDialog(progressType, dialogMessage, cancelType) {

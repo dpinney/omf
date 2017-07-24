@@ -677,14 +677,14 @@ def loadModelingAmi(owner,feederName):
 	modelDir = "data/Model/"+owner+"/"+modelName
 	omdPath = modelDir+"/"+feederName+".omd"
 	amiPath = modelDir+"/"+loadName+".csv"
-	importProc = Process(target=backgroundloadModelingAmi, args =[owner, modelName, modelDir, omdPath, amiPath])
+	importProc = Process(target=backgroundLoadModelingAmi, args =[owner, modelName, modelDir, omdPath, amiPath])
 	importProc.start()
 	pid = str(importProc.pid)
 	with open(modelDir+"/APID.txt", "w+") as outFile:
 		outFile.write(pid)
 	return ('',204)
 
-def backgroundloadModelingAmi(owner, modelName, workDir, omdPath, amiPath):
+def backgroundLoadModelingAmi(owner, modelName, workDir, omdPath, amiPath):
 	outDir = workDir + '/amiOutput/'
 	writeNewGlmAndPlayers(omdPath, amiPath, outDir)
 	modelDirec="data/Model/" + owner + "/" +  modelName
@@ -1058,29 +1058,53 @@ def climateChange(owner,feederName):
 	start = request.form.get('startDate')
 	end = request.form.get('endDate')
 	airport = request.form.get('airport')
-	fileName = 'weatherAirport.csv'
 	modelDir = 'data/Model/' + owner + '/' + modelName
-	outFilePath = modelDir + '/' + fileName
+	outFilePath = modelDir + '/weatherAirport.csv'
 	if os.path.isfile(outFilePath):
 		os.remove(outFilePath)
+	omdPath = modelDir + '/' + feederName + '.omd'
+	importProc = Process(target=backgroundClimateChange, args =[start, end, airport, outFilePath, omdPath, modelDir])
+	importProc.start()
+	pid = str(importProc.pid)
+	with open(modelDir + '/APID.txt', 'w+') as outFile:
+		outFile.write(pid)
+	return ('',204)
+
+def backgroundClimateChange(start, end, airport, outFilePath, omdPath, modelDir):
 	weather.makeClimateCsv(start, end, airport, outFilePath)
-	omdPath = modelDir + '/' + feederName + '.omd'	
 	with open(omdPath, 'r') as inFile:
 		feederJson = json.load(inFile)
 		tree = feederJson['tree']
 		for key in tree.keys():
-			if tree[key].get('object') == 'csv_reader':
+			if (tree[key].get('object') == 'csv_reader') or (tree[key].get('object') == 'climate'):
 				del tree[key]
-			elif tree[key].get('object') == 'climate':
-				del tree[key]
-		tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':fileName}
-		tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'airportClimate', 'tmyfile':fileName, 'reader':'weatherReader'}
+		tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
+		tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
 		with open(outFilePath) as csvFile:
 			attachments = feederJson['attachments']
-			attachments[fileName] = csvFile.read()
+			attachments['weatherAirport.csv'] = csvFile.read()
 	with open(omdPath, 'w') as outFile:
 		json.dump(feederJson, outFile, indent=4)
-	return ('Success',204)
+	os.remove(modelDir + '/APID.txt')
+
+@app.route("/checkClimateChange/<modelName>", methods=["POST","GET"])
+def checkClimateChange(modelName):
+	try:
+		owner = User.cu()
+	except:
+		return 'Server crashed during calibration. Please attempt calibration again.'
+	pidPath = ('data/Model/' + owner + '/' + modelName + '/APID.txt')
+	# errorPath = ('data/Model/' + owner + '/' + modelName + '/error.txt')
+	print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
+	# return error message if one exists
+	# if os.path.exists(errorPath):
+	# 	with open(errorPath) as errorFile:
+	# 		errorMsg = errorFile.read()
+	# 	return errorMsg
+	# else:
+	# checks to see if PID file exists, if theres no PID file process is done.
+	return jsonify(exists=os.path.exists(pidPath))
+
 
 import anonymization
 @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
