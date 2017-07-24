@@ -906,6 +906,7 @@ d3.json(apiAddress, function (json) {
 //**********************************************************
 
 function showProgress(){
+	// Show loading progress.
 	pinAll()
 	showProgressDialog('spinner','Loading Feeder', 'loading');
 	checkScadaCal()
@@ -988,13 +989,31 @@ function checkConversion() {
 
 function checkClimateChange() {
 	var modelName = '{{modelName}}'
-	$.ajax({
-		url: "/checkClimateChange/" + modelName
-	}).done(function (data) {
-		if (data.exists == true) {
-			showProgressDialog('spinner', 'Changing Climate')
-		}
-	})
+ 	window.setInterval(function checkAPI(){
+		$.ajax({
+			url: "/checkClimateChange/" + modelName
+		}).done(function (data) {
+			console.log(data)
+			if (data.exists == true) {
+				// Still converting.
+			} else if(data.exists == false){
+				// Success converting.
+				removeProgressDialog()
+				window.location.reload();
+			} else {
+				// Error converting.
+				alert(data)
+				removeProgressDialog()
+				window.location.reload();
+			}
+		})
+	}, 5000)
+}
+
+function climateChange() {
+	// TODO: complete by hitting API here.
+	showProgress('spinner', 'Adding climate data to model.', 'none')
+	checkClimateChange()
 }
 
 function showProgressDialog(progressType, dialogMessage, cancelType) {

@@ -1066,7 +1066,7 @@ def climateChange(owner,feederName):
 	importProc = Process(target=backgroundClimateChange, args =[start, end, airport, outFilePath, omdPath, modelDir])
 	importProc.start()
 	pid = str(importProc.pid)
-	with open(modelDir + '/APID.txt', 'w+') as outFile:
+	with open(modelDir + '/WPID.txt', 'w+') as outFile:
 		outFile.write(pid)
 	return ('',204)
 
@@ -1085,23 +1085,12 @@ def backgroundClimateChange(start, end, airport, outFilePath, omdPath, modelDir)
 			attachments['weatherAirport.csv'] = csvFile.read()
 	with open(omdPath, 'w') as outFile:
 		json.dump(feederJson, outFile, indent=4)
-	os.remove(modelDir + '/APID.txt')
+	os.remove(modelDir + '/WPID.txt')
 
 @app.route("/checkClimateChange/<modelName>", methods=["POST","GET"])
 def checkClimateChange(modelName):
-	try:
-		owner = User.cu()
-	except:
-		return 'Server crashed during calibration. Please attempt calibration again.'
-	pidPath = ('data/Model/' + owner + '/' + modelName + '/APID.txt')
-	# errorPath = ('data/Model/' + owner + '/' + modelName + '/error.txt')
-	print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
-	# return error message if one exists
-	# if os.path.exists(errorPath):
-	# 	with open(errorPath) as errorFile:
-	# 		errorMsg = errorFile.read()
-	# 	return errorMsg
-	# else:
+	pidPath = ('data/Model/' + owner + '/' + modelName + '/WPID.txt')
+	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
 	# checks to see if PID file exists, if theres no PID file process is done.
 	return jsonify(exists=os.path.exists(pidPath))
 
