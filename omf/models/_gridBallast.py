@@ -123,37 +123,37 @@ def heavyProcessing(modelDir, inputDict):
 		if sys.platform == 'linux2':
 			pass
 		else:
-			# Set up GridBallast Controls
-			totalWH = 0
-			totalZIP = 0
-			gbWH = 0
-			gbZIP = 0
 			# HACK: tree[10:19] is empty
 			tree[10] = {'omftype':'#include', 'argument':'\"hot_water_demand.glm\"'}
 			tree[11] = {'omftype':'#include', 'argument':'\"lock_mode_schedule.glm\"'}
 			# Attach frequency player
 			tree[12] = {'omftype':'class player', 'argument':'{double value;}'}
 			tree[feeder.getMaxKey(tree)+1] = {'object':'player', 'file':'frequency.PLAYER', 'property':'value', 'name':'frequency', 'loop':0}
+			# Set up GridBallast Controls
+			totalWH = 0
+			totalZIP = 0
+			gbWH = 0
+			gbZIP = 0
 			# Waterheater Controller properties
 			for key in tree.keys():
 				if ('name' in tree[key]) and (tree[key].get('object') == 'waterheater'):
 			 		totalWH += 1
+		 			gbWH += 1
 		 			# Frequency control parameters
-		 			# tree[key]['enable_freq_control'] = 'true'
-		 			# tree[key]['measured_frequency'] = 'frequency.value'
-		 			# tree[key]['freq_lowlimit'] = 59.9
-		 			# tree[key]['freq_uplimit'] = 60.1
-		 			# tree[key]['heat_mode'] = 'ELECTRIC'
+		 			tree[key]['enable_freq_control'] = 'true'
+		 			tree[key]['measured_frequency'] = 'frequency.value'
+		 			tree[key]['freq_lowlimit'] = 59.9
+		 			tree[key]['freq_uplimit'] = 60.1
+		 			tree[key]['heat_mode'] = 'ELECTRIC'
+		 			# tree[key]['average_delay_time'] = 120
 		 			# Voltage control parameters
 		 			# tree[key]['enable_volt_control'] = 'true'
 		 			# tree[key]['volt_lowlimit'] = 240.4
 		 			# tree[key]['volt_uplimit'] = 241.4
-		 			# tree[key]['average_delay_time'] = 120
 		 			# Lock Mode parameters
 		 			# tree[key]['enable_lock'] = 'temp_lock_enable'
 		 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
 		 			# tree[key]['controller_priority'] = 3214
-		 			gbWH += 1
 			 		# fix waterheater property demand to water_demand for newer GridLAB-D versions
 			 		if 'demand' in tree[key]:
 			 			# tree[key]['water_demand'] = tree[key]['demand']
@@ -163,39 +163,38 @@ def heavyProcessing(modelDir, inputDict):
 			for key in tree.keys():
 				if ('name' in tree[key]) and (tree[key].get('object') == 'ZIPload'):
 			 		totalZIP += 1
+		 			gbZIP += 1
 			 		# Frequency control parameters
-		 			# tree[key]['enable_freq_control'] = 'true'
-		 			# tree[key]['measured_frequency'] = 'frequency.value'
-		 			# tree[key]['freq_lowlimit'] = 59.9
-		 			# tree[key]['freq_uplimit'] = 60.1
+		 			tree[key]['enable_freq_control'] = 'true'
+		 			tree[key]['measured_frequency'] = 'frequency.value'
+		 			tree[key]['freq_lowlimit'] = 59.9
+		 			tree[key]['freq_uplimit'] = 60.1
+		 			# tree[key]['average_delay_time'] = 120
 		 			# Voltage control parameters
 		 			# tree[key]['enable_volt_control'] = 'true'
 		 			# tree[key]['volt_lowlimit'] = 240.4
 		 			# tree[key]['volt_uplimit'] = 241.4
-		 			# tree[key]['average_delay_time'] = 120
 		 			# Lock Mode parameters
 		 			# tree[key]['enable_lock'] = 'temp_lock_enable'
 		 			# tree[key]['lock_STATUS'] = 'temp_lock_status'
 		 			# tree[key]['controller_priority'] = 3214
 		 			# tree[key]['groupid'] = 'fan'
-		 			gbZIP += 1
 
-		# Attach recorder for waterheaters on/off
-		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':60, 'file':'allWaterheaterOn.csv'}
-		# Attach recorder for waterheater tank temperatures
-		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'temperature', 'interval':60, 'file':'allWaterheaterTemp.csv'}
-		# Attach collector for total waterheater load
-		tree[feeder.getMaxKey(tree)+1] = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_load)', 'interval':60, 'file':'allWaterheaterLoad.csv'}
 		# Attach collector for total network load
 		tree[feeder.getMaxKey(tree)+1] = {'object':'collector', 'group':'"class=triplex_meter"', 'property':'sum(measured_real_power)', 'interval':60, 'file':'allMeterPower.csv'}
-		# Attach collector for total overall ZIPload power/load
+		# Attach collector for total waterheater load
+		tree[feeder.getMaxKey(tree)+1] = {'object':'collector', 'group':'"class=waterheater"', 'property':'sum(actual_load)', 'interval':60, 'file':'allWaterheaterLoad.csv'}
+		# Attach collector for total ZIPload power/load
 		tree[feeder.getMaxKey(tree)+1] = {'object':'collector', 'group':'"class=ZIPload"', 'property':'sum(base_power)', 'interval':60, 'file':'allZIPloadPower.csv'}
 		# Attach recorder for each ZIPload power/load
 		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'base_power', 'interval':60, 'file':'eachZIPloadPower.csv'}
 		# Attach recorder for all ZIPloads demand_rate
 		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'demand_rate', 'interval':60, 'file':'allZIPloadDemand.csv'}
-		# Attach recorder for all ZIPloads on
-		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=ZIPload"', 'property':'number_of_devices_on', 'interval':60, 'file':'allZIPloadOn.csv'}
+		# Attach recorder for waterheaters on/off
+		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':60, 'file':'allWaterheaterOn.csv'}
+		# Attach recorder for waterheater tank temperatures
+		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'temperature', 'interval':60, 'file':'allWaterheaterTemp.csv'}
+
 		# Attach recorders for system voltage map:
 		stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':60}
 		for phase in ['A','B','C']:
@@ -345,6 +344,30 @@ def heavyProcessing(modelDir, inputDict):
 
 		# Print gridBallast Outputs to allOutputData.json
 		cleanOut['gridBallast'] = {}
+		if 'allMeterPower.csv' in rawOut:
+			cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
+		if ('allZIPloadPower.csv' in rawOut) and ('allWaterheaterLoad.csv' in rawOut):
+			cleanOut['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
+		if 'allZIPloadDemand.csv' in rawOut:
+			cleanOut['gridBallast']['ZIPloadDemand'] = {}
+			for key in rawOut['allZIPloadDemand.csv']:
+				if key.startswith('ZIPload'):
+					cleanOut['gridBallast']['ZIPloadDemand'][key] = rawOut.get('allZIPloadDemand.csv')[key]
+		if 'eachZIPloadPower.csv' in rawOut:
+					cleanOut['gridBallast']['ZIPloadPower'] = {}
+					for key in rawOut['eachZIPloadPower.csv']:
+						if key.startswith('ZIPload'):
+							cleanOut['gridBallast']['ZIPloadPower'][key] = rawOut.get('eachZIPloadPower.csv')[key]
+		if 'allWaterheaterOn.csv' in rawOut:
+			cleanOut['gridBallast']['waterheaterOn'] = {}
+			for key in rawOut['allWaterheaterOn.csv']:
+				if key.startswith('waterheater'):
+					cleanOut['gridBallast']['waterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
+		if 'allWaterheaterTemp.csv' in rawOut:
+			cleanOut['gridBallast']['waterheaterTemp'] = {}
+			for key in rawOut['allWaterheaterTemp.csv']:
+				if key.startswith('waterheater'):
+					cleanOut['gridBallast']['waterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
 		# System check - linux doesn't support newer GridLAB-D versions
 		if sys.platform == 'linux2':
 			pass
@@ -358,35 +381,6 @@ def heavyProcessing(modelDir, inputDict):
 				y = float(x[1])
 				tempArray.append(y)
 			cleanOut['frequencyPlayer'] = tempArray
-		if 'allWaterheaterOn.csv' in rawOut:
-			cleanOut['gridBallast']['waterheaterOn'] = {}
-			for key in rawOut['allWaterheaterOn.csv']:
-				if key.startswith('waterheater'):
-					cleanOut['gridBallast']['waterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
-		if 'allWaterheaterTemp.csv' in rawOut:
-			cleanOut['gridBallast']['waterheaterTemp'] = {}
-			for key in rawOut['allWaterheaterTemp.csv']:
-				if key.startswith('waterheater'):
-					cleanOut['gridBallast']['waterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
-		if 'allMeterPower.csv' in rawOut:
-			cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
-		if ('allWaterheaterLoad.csv' in rawOut) and ('allZIPloadPower.csv' in rawOut):
-			cleanOut['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
-		if 'eachZIPloadPower.csv' in rawOut:
-			cleanOut['gridBallast']['ZIPloadPower'] = {}
-			for key in rawOut['eachZIPloadPower.csv']:
-				if key.startswith('ZIPload'):
-					cleanOut['gridBallast']['ZIPloadPower'][key] = rawOut.get('eachZIPloadPower.csv')[key]
-		if 'allZIPloadDemand.csv' in rawOut:
-			cleanOut['gridBallast']['ZIPloadDemand'] = {}
-			for key in rawOut['allZIPloadDemand.csv']:
-				if key.startswith('ZIPload'):
-					cleanOut['gridBallast']['ZIPloadDemand'][key] = rawOut.get('allZIPloadDemand.csv')[key]
-		if 'allZIPloadOn.csv' in rawOut:
-			cleanOut['gridBallast']['ZIPloadOn'] = {}
-			for key in rawOut['allZIPloadOn.csv']:
-				if key.startswith('ZIPload'):
-					cleanOut['gridBallast']['ZIPloadOn'][key] = rawOut.get('allZIPloadOn.csv')[key]
 		# EventTime calculations
 		eventTime = inputDict['eventTime']
 		eventLength = inputDict['eventLength'].split(':')
@@ -431,7 +425,7 @@ def heavyProcessing(modelDir, inputDict):
 		whTempList = whTemp.values()
 		whTempZip = zip(*whTempList)
 		whTempDrops = []
-		LOWER_LIMIT_TEMP = 125 # Used for calculating quality of service.
+		LOWER_LIMIT_TEMP = 132 # Used for calculating quality of service.
 		for time in whTempZip:
 			tempDrop = sum([t < LOWER_LIMIT_TEMP for t in time])
 			whTempDrops.append(tempDrop)
@@ -440,21 +434,17 @@ def heavyProcessing(modelDir, inputDict):
 		zPower = cleanOut['gridBallast']['ZIPloadPower']
 		zPowerList = zPower.values()
 		zPowerZip = zip(*zPowerList)
-		zPowerSum = [sum(x) for x in zPowerZip]
 		zDemand = cleanOut['gridBallast']['ZIPloadDemand']
 		zDemandList  = zDemand.values()
 		zDemandZip = zip(*zDemandList)
 		zDrops = []
-		zIdx = 0
-		for time in zPowerZip:
-			for each in time:
-				if each == 0:
-					zDrop = sum([demand > 0 for demand in zDemandZip[zIdx]])
-					zDrops.append(zDrop)
-				else:
-					zDrops.append(0)
-			zIdx += 1
-		cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(whTempDrops, zDrops)]
+		for x, y in zip(zPowerZip,zDemandZip):
+			zDrop = 0
+			for i in range(len(x)):
+				if (x[i] == 0) and (y[i] > 0):
+					zDrop += 1
+			zDrops.append(zDrop)
+		cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(zDrops, whTempDrops)]
 
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
