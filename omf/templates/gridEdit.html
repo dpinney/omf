@@ -917,6 +917,7 @@ function checkConv(){
 		}
 	})
 }
+
 function checkConversion() {
 	var conversionStatus = 'converting'
 	// Check every 5 seconds for a feeder & refresh.
@@ -946,7 +947,6 @@ function checkConversion() {
 			}
 		})
 		if (conversionStatus == 'done') {
-			savePoster('{{feederName}}', '{{modelName}}', '{{owner}}');
 			alert('Conversion complete.')
 			window.location.reload();
 		}
@@ -956,6 +956,7 @@ function checkConversion() {
 }
 
 function startProcess(startUrl) {
+	// Start a long running process using startUrl.
 	$.ajax({
 		url: startUrl
 	}).done(function (data) {
@@ -963,19 +964,20 @@ function startProcess(startUrl) {
 	})
 }
 function startCheck(checkUrl) {
+	// Do get requests to checkUrl for long running process monitoring.
 	window.setInterval(function checkAPI() {
 		$.ajax({
 			url: checkUrl
 		}).done(function (data) {
 			console.log(data)
 			if (data.exists == true) {
-				// Still converting.
+				// Still processing.
 			} else if (data.exists == false) {
-				// Success converting.
+				// Success processing.
 				removeProgressDialog()
 				window.location.reload();
 			} else {
-				// Error converting.
+				// Error processing.
 				alert(data)
 				removeProgressDialog()
 				window.location.reload();
@@ -1007,130 +1009,6 @@ function anonymize() {
 	startProcess('/anonymize/{{owner}}/{{feederName}}')
 	startCheck('/checkAnonymize/{{owner}}/{{modelName}}')
 }
-
-// function checkScadaLoadshape() {
-//  	window.setInterval(function checkAPI(){
-// 		$.ajax({
-// 			url: '/checkScadaLoadshape/{{modelName}}'
-// 		}).done(function (data) {
-// 			console.log(data)
-// 			if (data.exists == true) {
-// 				// Still converting.
-// 			} else if (data.exists == false){
-// 				// Success converting.
-// 				removeProgressDialog()
-// 				window.location.reload();
-// 			} else {
-// 				// Error converting.
-// 				alert(data)
-// 				removeProgressDialog()
-// 				window.location.reload();
-// 			}
-// 		})
-// 	}, 5000)
-// }
-// function scadaLoadshape() {
-// 	showProgressDialog('spinner', 'Calibrating Feeder', 'calibrating')
-// 	$.ajax({
-// 		url: '/scadaLoadshape/{{owner}}/{{feederName}}'
-// 	}).done(function (data) {
-// 		console.log(data)
-// 	})
-// 	checkScadaLoadshape()
-// }
-
-// function checkLoadModelingAmi() {
-//  	window.setInterval(function checkAPI(){
-// 		$.ajax({
-// 			url: '/checkLoadModelingAmi/{{modelName}}'
-// 		}).done(function (data) {
-// 			console.log(data)
-// 			if (data.exists == true) {
-// 				// Still converting.
-// 			} else if (data.exists == false){
-// 				// Success converting.
-// 				removeProgressDialog()
-// 				window.location.reload();
-// 			} else {
-// 				// Error converting.
-// 				alert(data)
-// 				removeProgressDialog()
-// 				window.location.reload();
-// 			}
-// 		})
-// 	}, 5000)	
-// }
-// function loadModelingAmi() {
-// 	showProgressDialog('spinner', 'Loading Ami Data', 'calibrating')
-// 	$.ajax({
-// 		url: '/loadModelingAmi/{{owner}}/{{feederName}}'
-// 	}).done(function (data) {
-// 		console.log(data)
-// 	})
-// 	checkLoadModelingAmi()
-// }
-
-// function checkClimateChange() {
-//  	window.setInterval(function checkAPI(){
-// 		$.ajax({
-// 			url: '/checkClimateChange/{{owner}}/{{modelName}}'
-// 		}).done(function (data) {
-// 			console.log(data)
-// 			if (data.exists == true) {
-// 				// Still converting.
-// 			} else if (data.exists == false){
-// 				// Success converting.
-// 				removeProgressDialog()
-// 				window.location.reload();
-// 			} else {
-// 				// Error converting.
-// 				alert(data)
-// 				removeProgressDialog()
-// 				window.location.reload();
-// 			}
-// 		})
-// 	}, 5000)
-// }
-// function climateChange() {
-// 	showProgressDialog('spinner', 'Adding climate data to model', 'none')
-// 	$.ajax({
-// 		url: '/climateChange/{{owner}}/{{feederName}}'
-// 	}).done(function (data) {
-// 		console.log(data)
-// 	})
-// 	checkClimateChange()
-// }
-
-// function checkAnonymize() {
-//  	window.setInterval(function checkAPI(){
-// 		$.ajax({
-// 			url: '/checkAnonymize/{{owner}}/{{modelName}}'
-// 		}).done(function (data) {
-// 			console.log(data)
-// 			if (data.exists == true) {
-// 				// Still converting.
-// 			} else if (data.exists == false){
-// 				// Success converting.
-// 				removeProgressDialog()
-// 				window.location.reload();
-// 			} else {
-// 				// Error converting.
-// 				alert(data)
-// 				removeProgressDialog()
-// 				window.location.reload();
-// 			}
-// 		})
-// 	}, 5000)
-// }
-// function anonymize() {
-// 	showProgressDialog('spinner', 'Anonymizing Feeder', 'none')
-// 	$.ajax({
-// 		url: '/anonymize/{{owner}}/{{feederName}}'
-// 	}).done(function (data) {
-// 		console.log(data)
-// 	})
-// 	checkAnonymize()
-// }
 
 function showProgressDialog(progressType, dialogMessage, cancelType) {
 	// Make the elements.
