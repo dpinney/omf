@@ -983,6 +983,38 @@ function checkConversion() {
 		}(), 5000);
 }
 
+// function startCheck(checkUrl) {
+// 	window.setInterval(function checkAPI() {
+// 		$.ajax({
+// 			url: checkUrl
+// 		}).done(function (data) {
+// 			console.log(data)
+// 			if (data.exists == true) {
+// 				// Still converting.
+// 			} else if (data.exists == false) {
+// 				// Success converting.
+// 				removeProgressDialog()
+// 				window.location.reload();
+// 			} else {
+// 				// Error converting.
+// 				alert(data)
+// 				removeProgressDialog()
+// 				window.location.reload();
+// 			}
+// 		})
+// 	}, 5000)
+// }
+
+// function startProcess(startUrl, checkUrl) {
+// 	showProgressDialog(progressType, dialogMessage, cancelType)
+// 	$.ajax({
+// 		url: startUrl
+// 	}).done(function (data) {
+// 		console.log(data)
+// 	})
+// 	startCheck(checkUrl)
+// }
+
 function checkClimateChange() {
  	window.setInterval(function checkAPI(){
 		$.ajax({
@@ -991,7 +1023,7 @@ function checkClimateChange() {
 			console.log(data)
 			if (data.exists == true) {
 				// Still converting.
-			} else if(data.exists == false){
+			} else if (data.exists == false){
 				// Success converting.
 				removeProgressDialog()
 				window.location.reload();
@@ -1008,8 +1040,8 @@ function checkClimateChange() {
 function climateChange() {
 	showProgressDialog('spinner', 'Adding climate data to model.', 'none')
 	$.ajax({
-		url:'/climateChange/{{owner}}/{{feederName}}'
-	}).done(function(data){
+		url: '/climateChange/{{owner}}/{{feederName}}'
+	}).done(function (data) {
 		console.log(data)
 	})
 	checkClimateChange()
@@ -1023,7 +1055,7 @@ function checkAnonymize() {
 			console.log(data)
 			if (data.exists == true) {
 				// Still converting.
-			} else if(data.exists == false){
+			} else if (data.exists == false){
 				// Success converting.
 				removeProgressDialog()
 				window.location.reload();
@@ -1040,8 +1072,8 @@ function checkAnonymize() {
 function anonymize() {
 	showProgressDialog('spinner', 'Anonymizing feeder.', 'none')
 	$.ajax({
-		url:'/anonymize/{{owner}}/{{feederName}}'
-	}).done(function(data){
+		url: '/anonymize/{{owner}}/{{feederName}}'
+	}).done(function (data) {
 		console.log(data)
 	})
 	checkAnonymize()
