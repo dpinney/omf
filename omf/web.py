@@ -602,7 +602,7 @@ def scadaLoadshape(owner,feederName):
 	simStartDate = {"Date":simDate,"timeZone":"PST"}
 	simLength = csvLength
 	# Run omf calibrate in background
-	importProc = Process(target=backgroundScadaCalibration, args =[owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", (0.05,5), 5])
+	importProc = Process(target=backgroundScadaLoadshape, args =[owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, "FBS", (0.05,5), 5])
 	# write PID to txt file in model folder here
 	importProc.start()
 	pid = str(importProc.pid)
@@ -610,7 +610,7 @@ def scadaLoadshape(owner,feederName):
 		outFile.write(pid)
 	return ('',204)
 
-def backgroundScadaCalibration(owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim):
+def backgroundScadaLoadshape(owner, modelName, workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim):
 	# heavy lifting background process/omfCalibrate and then deletes PID file
 	try:
 		omfCalibrate(workDir, feederPath, scadaPath, simStartDate, simLength, simLengthUnits, solver, calibrateError, trim)
@@ -627,8 +627,8 @@ def backgroundScadaCalibration(owner, modelName, workDir, feederPath, scadaPath,
 		with open(modelDirec+'/error.txt',"w+") as errorFile:
 		 	errorFile.write("The CSV used is incorrectly formatted. Please refer to the OMF Wiki for CSV formatting information. The Wiki can be access by clicking the Help button on the toolbar.")
 
-@app.route("/checkScadaCalibration/<modelName>", methods=["POST","GET"])
-def checkScadaCalibration(modelName):
+@app.route("/checkScadaLoadshape/<modelName>", methods=["POST","GET"])
+def checkScadaLoadshape(modelName):
 	try:
 		owner = User.cu()
 	except:
@@ -645,8 +645,8 @@ def checkScadaCalibration(modelName):
 	# checks to see if PID file exists, if theres no PID file process is done.
 		return jsonify(exists=os.path.exists(pidPath))
 
-@app.route("/cancelScadaCalibration/<modelName>", methods = ["POST","GET"])
-def cancelScadaCalibration(modelName):
+@app.route("/cancelScadaLoadshape/<modelName>", methods = ["POST","GET"])
+def cancelScadaLoadshape(modelName):
 	owner = User.cu()
 	path = "data/Model/" + owner + "/" + modelName
 	if os.path.isfile("data/Model/" + owner + "/" +  modelName + "/error.txt"):
@@ -972,7 +972,7 @@ def removeNetwork(owner, modelName, networkNum, networkName=None):
 
 @app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
-def climateChange(owner,feederName):
+def climateChange(owner, feederName):
 	modelName = request.form.get('modelName')
 	start = request.form.get('startDate')
 	end = request.form.get('endDate')
@@ -1007,7 +1007,7 @@ def backgroundClimateChange(start, end, airport, outFilePath, omdPath, modelDir)
 	os.remove(modelDir + '/WPID.txt')
 
 @app.route("/checkClimateChange/<owner>/<modelName>", methods=["POST","GET"])
-def checkClimateChange(owner,modelName):
+def checkClimateChange(owner, modelName):
 	pidPath = ('data/Model/' + owner + '/' + modelName + '/WPID.txt')
 	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
 	# checks to see if PID file exists, if theres no PID file process is done.
@@ -1015,7 +1015,7 @@ def checkClimateChange(owner,modelName):
 
 @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required
-def anonymize(owner,feederName):
+def anonymize(owner, feederName):
 	modelName = request.form.get('modelName')
 	modelDir = 'data/Model/' + owner + '/' + modelName
 	omdPath = modelDir + '/' + feederName + '.omd'	
@@ -1058,7 +1058,7 @@ def backgroundAnonymize(omdPath, modelDir):
 	os.remove(modelDir + '/PPID.txt')
 
 @app.route("/checkAnonymize/<owner>/<modelName>", methods=["POST","GET"])
-def checkAnonymize(owner,modelName):
+def checkAnonymize(owner, modelName):
 	pidPath = ('data/Model/' + owner + '/' + modelName + '/PPID.txt')
 	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
 	# checks to see if PID file exists, if theres no PID file process is done.
