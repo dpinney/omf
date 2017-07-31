@@ -98,10 +98,18 @@ def heavyProcessing(modelDir, inputDict):
 		for key in treeKeys:
 			if 'object' in feederJson['tree'][key]:
 			 	if feederJson['tree'][key]['object'] == 'climate':
-			 		del feederJson['tree'][key]
-		oldMax = feeder.getMaxKey(tree)
-		tree[oldMax + 1] = {'omftype':'module', 'argument':'climate'}
-		tree[oldMax + 2] ={'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
+			 		del feederJson['tree'][key]	
+
+		tree[feeder.getMaxKey(tree)+1] = {'omftype':'module', 'argument':'climate'}
+		if 'weatherAirport.csv' in feederJson['attachments']:
+			for key in feederJson['tree'].keys():
+				if (tree[key].get('object') == 'csv_reader') or (tree[key].get('object') == 'climate'):
+					del tree[key]
+			tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
+			tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
+		else:
+			tree[feeder.getMaxKey(tree)+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
+			
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
 		feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
