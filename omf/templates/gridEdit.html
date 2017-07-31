@@ -307,7 +307,7 @@
 <div id='scadaLoadshapes' class='modal'>
 <!-- Turn below into a modal -->
 	<div class = "modalContent" style='width:350px;'>
-		<form onsubmit=' return getScadaAmi("Scada");' action='/scadaLoadshape/{{ owner }}/{{feederName}}' id='scadaLoadshape' enctype='multipart/form-data' method='post'>
+		<form onsubmit='return getScadaAmi("Scada");' action='/scadaLoadshape/{{ owner }}/{{feederName}}' id='scadaLoadshape' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
 			<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
@@ -332,7 +332,7 @@
 <div id='amiLoadshapes' class='modal'>
 <!-- Turn below into a modal -->
 	<div class = "modalContent" style='width:350px;'>
-		<form onsubmit=' return getScadaAmi("Ami");' action='/loadModelingAmi/{{ owner }}/{{feederName}}' id='amiLoadshape' enctype='multipart/form-data' method='post'>
+		<form onsubmit='return getScadaAmi("Ami");' action='/loadModelingAmi/{{ owner }}/{{feederName}}' id='amiLoadshape' enctype='multipart/form-data' method='post'>
 			<input type="hidden" name="_csrf_token" value="{{ csrf_token() }}" />
 			<input type="hidden" id="feederNum" name="feederNum" value="{{ feederNum }}" />
 			<input type="hidden" id="modelName" name="modelName" value="{{ modelName }}" />
@@ -652,13 +652,10 @@
 	<div class='modalContent' id='climateModalContent' style='width:300px'>
 		<div style='font-weight:bold; font-size:14pt'>Climate Change</div>
 		<br>
-		<form onsubmit='closeModal("climateModal")' action='/climateChange/{{ owner }}/{{feederName}}' id='climateChange' enctype='multipart/form-data' method='post'>
-			<input type='hidden' name='_csrf_token' value='{{ csrf_token() }}'/>
-			<input type='hidden' id='modelName' name='modelName' value='{{ modelName }}'/>
+		<form onsubmit='climateChange();' action='/climateChange/{{owner}}/{{feederName}}' id='climateChange' enctype='multipart/form-data' method='post'>
+			<input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+			<input type='hidden' id='modelName' name='modelName' value='{{modelName}}'/>
 			<div id='climateInputs' align='left'>
-		<!-- 		<label for='zipcode'>Zipcode:</label>
-				<input style='width:10px' type='text' id='zipcode' name='zipcode' pattern='^\d{5}(?:[-\s]\d{4})?$' required/>
-				<br> -->
 				<label for='startDate'>Start Date (YYYY-MM-DD):</label>
 				<input style='width:5px' type='text' id='startDate' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$' required/>
 				<br>
@@ -912,7 +909,6 @@ function showProgress(){
 	checkScadaCal()
 	checkLoadModelingAmi()
 	checkConv()
-	checkClimateChange()
 }
 
 function checkLoadModelingAmi(){
@@ -988,10 +984,9 @@ function checkConversion() {
 }
 
 function checkClimateChange() {
-	var modelName = '{{modelName}}'
  	window.setInterval(function checkAPI(){
 		$.ajax({
-			url: "/checkClimateChange/" + modelName
+			url: '/checkClimateChange/{{owner}}/{{modelName}}'
 		}).done(function (data) {
 			console.log(data)
 			if (data.exists == true) {
@@ -1011,8 +1006,12 @@ function checkClimateChange() {
 }
 
 function climateChange() {
-	// TODO: complete by hitting API here.
-	showProgress('spinner', 'Adding climate data to model.', 'none')
+	showProgressDialog('spinner', 'Adding climate data to model.', 'none')
+	$.ajax({
+		url:'/climateChange/{{owner}}/{{feederName}}'
+	}).done(function(data){
+		console.log(data)
+	})
 	checkClimateChange()
 }
 

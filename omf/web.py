@@ -1087,8 +1087,8 @@ def backgroundClimateChange(start, end, airport, outFilePath, omdPath, modelDir)
 		json.dump(feederJson, outFile, indent=4)
 	os.remove(modelDir + '/WPID.txt')
 
-@app.route("/checkClimateChange/<modelName>", methods=["POST","GET"])
-def checkClimateChange(modelName):
+@app.route("/checkClimateChange/<owner>/<modelName>", methods=["POST","GET"])
+def checkClimateChange(owner,modelName):
 	pidPath = ('data/Model/' + owner + '/' + modelName + '/WPID.txt')
 	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
 	# checks to see if PID file exists, if theres no PID file process is done.
