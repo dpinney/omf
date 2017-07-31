@@ -687,9 +687,9 @@
 	<div class='modalContent' id='anonymizeModalContent' style='width:475px'>
 		<div style='font-weight:bold; font-size:14pt'>Anonymization</div>
 		<br>
-		<form onsubmit='closeModal("anonymizeModal")' action='/anonymize/{{ owner }}/{{feederName}}' id='anonymize' enctype='multipart/form-data' method='post'>
-			<input type='hidden' name='_csrf_token' value='{{ csrf_token() }}'/>
-			<input type='hidden' id='modelName' name='modelName' value='{{ modelName }}'/>
+		<form onsubmit='anonymize();' action='/anonymize/{{owner}}/{{feederName}}' id='anonymize' enctype='multipart/form-data' method='post'>
+			<input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+			<input type='hidden' id='modelName' name='modelName' value='{{modelName}}'/>
 			<div id='anonymizeInputs' align='left'>
 				<div style='font-weight:bold; font-size:12pt'>Names and Labels:</div>
 				<input type='radio' id='noChange' name='anonymizeNameOption' value='noChange' checked>
@@ -1013,6 +1013,38 @@ function climateChange() {
 		console.log(data)
 	})
 	checkClimateChange()
+}
+
+function checkAnonymize() {
+ 	window.setInterval(function checkAPI(){
+		$.ajax({
+			url: '/checkAnonymize/{{owner}}/{{modelName}}'
+		}).done(function (data) {
+			console.log(data)
+			if (data.exists == true) {
+				// Still converting.
+			} else if(data.exists == false){
+				// Success converting.
+				removeProgressDialog()
+				window.location.reload();
+			} else {
+				// Error converting.
+				alert(data)
+				removeProgressDialog()
+				window.location.reload();
+			}
+		})
+	}, 5000)
+}
+
+function anonymize() {
+	showProgressDialog('spinner', 'Anonymizing feeder.', 'none')
+	$.ajax({
+		url:'/anonymize/{{owner}}/{{feederName}}'
+	}).done(function(data){
+		console.log(data)
+	})
+	checkAnonymize()
 }
 
 function showProgressDialog(progressType, dialogMessage, cancelType) {

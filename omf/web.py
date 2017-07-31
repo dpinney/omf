@@ -5,9 +5,7 @@ from jinja2 import Template
 from multiprocessing import Process
 from passlib.hash import pbkdf2_sha512
 import json, os, flask_login, hashlib, random, time, datetime as dt, shutil, boto.ses, csv
-import models, feeder, network, milToGridlab
-import signal
-import cymeToGridlab
+import models, feeder, network, milToGridlab, cymeToGridlab, signal, weather, anonymization
 import omf
 from omf.calibrate import omfCalibrate
 from omf.loadModelingAmi import writeNewGlmAndPlayers
@@ -972,6 +970,100 @@ def removeNetwork(owner, modelName, networkNum, networkName=None):
 	else: 
 		return ('Invalid Login', 204)
 
+@app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
+@flask_login.login_required
+def climateChange(owner,feederName):
+	modelName = request.form.get('modelName')
+	start = request.form.get('startDate')
+	end = request.form.get('endDate')
+	airport = request.form.get('airport')
+	modelDir = 'data/Model/' + owner + '/' + modelName
+	outFilePath = modelDir + '/weatherAirport.csv'
+	if os.path.isfile(outFilePath):
+		os.remove(outFilePath)
+	omdPath = modelDir + '/' + feederName + '.omd'
+	importProc = Process(target=backgroundClimateChange, args =[start, end, airport, outFilePath, omdPath, modelDir])
+	importProc.start()
+	pid = str(importProc.pid)
+	with open(modelDir + '/WPID.txt', 'w+') as outFile:
+		outFile.write(pid)
+	return ('',204)
+
+def backgroundClimateChange(start, end, airport, outFilePath, omdPath, modelDir):
+	weather.makeClimateCsv(start, end, airport, outFilePath)
+	with open(omdPath, 'r') as inFile:
+		feederJson = json.load(inFile)
+		tree = feederJson['tree']
+		for key in tree.keys():
+			if (tree[key].get('object') == 'csv_reader') or (tree[key].get('object') == 'climate'):
+				del tree[key]
+		tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
+		tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
+		with open(outFilePath) as csvFile:
+			attachments = feederJson['attachments']
+			attachments['weatherAirport.csv'] = csvFile.read()
+	with open(omdPath, 'w') as outFile:
+		json.dump(feederJson, outFile, indent=4)
+	os.remove(modelDir + '/WPID.txt')
+
+@app.route("/checkClimateChange/<owner>/<modelName>", methods=["POST","GET"])
+def checkClimateChange(owner,modelName):
+	pidPath = ('data/Model/' + owner + '/' + modelName + '/WPID.txt')
+	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
+	# checks to see if PID file exists, if theres no PID file process is done.
+	return jsonify(exists=os.path.exists(pidPath))
+
+@app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
+@flask_login.login_required
+def anonymize(owner,feederName):
+	modelName = request.form.get('modelName')
+	modelDir = 'data/Model/' + owner + '/' + modelName
+	omdPath = modelDir + '/' + feederName + '.omd'	
+	importProc = Process(target=backgroundAnonymize, args =[omdPath, modelDir])
+	importProc.start()
+	pid = str(importProc.pid)
+	with open(modelDir + '/PPID.txt', 'w+') as outFile:
+		outFile.write(pid)
+	return ('Success',204)
+
+def backgroundAnonymize(omdPath, modelDir):
+	with open(omdPath, 'r') as inFile:
+		inFeeder = json.load(inFile)
+	nameOption = request.form.get('anonymizeNameOption')
+	if nameOption == 'pseudonomize':
+		anonymization.distPseudomizeNames(inFeeder)
+	elif nameOption == 'randomize':
+		anonymization.distRandomizeNames(inFeeder)
+	locOption = request.form.get('anonymizeLocationOption')
+	if locOption == 'translation':
+		translation = request.form.get('translate')
+		rotation = request.form.get('rotate')
+		anonymization.distTranslateLocations(inFeeder, translation, rotation)
+	elif locOption == 'randomize':
+		anonymization.distRandomizeLocations(inFeeder)
+	elecProp = request.form.get('electricProperty')
+	if elecProp == 'modifyLengthSize':
+		anonymization.distModifyTriplexLengths(inFeeder)
+		anonymization.distModifyConductorLengths(inFeeder)
+	elif elecProp == 'smoothLoadGen':
+		anonymization.distSmoothLoads(inFeeder)
+	elif elecProp == 'shuffleLoadGen':
+		shufPerc = request.form.get('shufflePerc')
+		anonymization.distShuffleLoads(inFeeder, shufPerc)
+	elif elecProp == 'addNoise':
+		noisePerc = request.form.get('noisePerc')
+		anonymization.distAddNoise(inFeeder, noisePerc)
+	with open(omdPath, 'w') as outFile:
+		json.dump(inFeeder, outFile, indent=4)
+	os.remove(modelDir + '/PPID.txt')
+
+@app.route("/checkAnonymize/<owner>/<modelName>", methods=["POST","GET"])
+def checkAnonymize(owner,modelName):
+	pidPath = ('data/Model/' + owner + '/' + modelName + '/PPID.txt')
+	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
+	# checks to see if PID file exists, if theres no PID file process is done.
+	return jsonify(exists=os.path.exists(pidPath))
+
 ###################################################
 # OTHER FUNCTIONS
 ###################################################
@@ -1048,90 +1140,6 @@ def uniqObjName(objtype, owner, name, modelName=False):
 		path = "data/Model/" + owner + "/" + modelName + "/" + name + ".omt"
 		if name == 'feeder': return jsonify(exists=True)
 	return jsonify(exists=os.path.exists(path))
-
-
-import weather
-@app.route("/climateChange/<owner>/<feederName>", methods=["POST"])
-@flask_login.login_required
-def climateChange(owner,feederName):
-	modelName = request.form.get('modelName')
-	start = request.form.get('startDate')
-	end = request.form.get('endDate')
-	airport = request.form.get('airport')
-	modelDir = 'data/Model/' + owner + '/' + modelName
-	outFilePath = modelDir + '/weatherAirport.csv'
-	if os.path.isfile(outFilePath):
-		os.remove(outFilePath)
-	omdPath = modelDir + '/' + feederName + '.omd'
-	importProc = Process(target=backgroundClimateChange, args =[start, end, airport, outFilePath, omdPath, modelDir])
-	importProc.start()
-	pid = str(importProc.pid)
-	with open(modelDir + '/WPID.txt', 'w+') as outFile:
-		outFile.write(pid)
-	return ('',204)
-
-def backgroundClimateChange(start, end, airport, outFilePath, omdPath, modelDir):
-	weather.makeClimateCsv(start, end, airport, outFilePath)
-	with open(omdPath, 'r') as inFile:
-		feederJson = json.load(inFile)
-		tree = feederJson['tree']
-		for key in tree.keys():
-			if (tree[key].get('object') == 'csv_reader') or (tree[key].get('object') == 'climate'):
-				del tree[key]
-		tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
-		tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
-		with open(outFilePath) as csvFile:
-			attachments = feederJson['attachments']
-			attachments['weatherAirport.csv'] = csvFile.read()
-	with open(omdPath, 'w') as outFile:
-		json.dump(feederJson, outFile, indent=4)
-	os.remove(modelDir + '/WPID.txt')
-
-@app.route("/checkClimateChange/<owner>/<modelName>", methods=["POST","GET"])
-def checkClimateChange(owner,modelName):
-	pidPath = ('data/Model/' + owner + '/' + modelName + '/WPID.txt')
-	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
-	# checks to see if PID file exists, if theres no PID file process is done.
-	return jsonify(exists=os.path.exists(pidPath))
-
-
-import anonymization
-@app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
-@flask_login.login_required
-def anonymize(owner,feederName):
-	modelName = request.form.get('modelName')
-	modelDir = 'data/Model/' + owner + '/' + modelName
-	omdPath = modelDir + '/' + feederName + '.omd'	
-	with open(omdPath, 'r') as inFile:
-		inFeeder = json.load(inFile)
-	nameOption = request.form.get('anonymizeNameOption')
-	if nameOption == 'pseudonomize':
-		anonymization.distPseudomizeNames(inFeeder)
-	elif nameOption == 'randomize':
-		anonymization.distRandomizeNames(inFeeder)
-	locOption = request.form.get('anonymizeLocationOption')
-	if locOption == 'translation':
-		translation = request.form.get('translate')
-		rotation = request.form.get('rotate')
-		anonymization.distTranslateLocations(inFeeder, translation, rotation)
-	elif locOption == 'randomize':
-		anonymization.distRandomizeLocations(inFeeder)
-	elecProp = request.form.get('electricProperty')
-	if elecProp == 'modifyLengthSize':
-		distModifyTriplexLengths(inFeeder)
-		distModifyConductorLengths(inFeeder)
-	elif elecProp == 'smoothLoadGen':
-		anonymization.distSmoothLoads(inFeeder)
-	elif elecProp == 'shuffleLoadGen':
-		shufPerc = request.form.get('shufflePerc')
-		distShuffleLoads(inFeeder, shufPerc)
-	elif elecProp == 'addNoise':
-		request.form.get('noisePerc')
-		distAddNoise(inFeeder, noisePerc)
-	with open(omdPath, 'w') as outFile:
-		json.dump(inFeeder, outFile, indent=4)
-	return ('Success',204)
-
 
 if __name__ == "__main__":
 	URL = "http://localhost:5000"
