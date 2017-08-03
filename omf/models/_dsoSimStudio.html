@@ -21,6 +21,11 @@
 			studyUser = allInputData.user
 			window.open("/feeder/" + studyUser + "/" + modelName + "/" + feederNum,  "_blank")
 		}
+		function editNetwork(modelName, networkNum) {
+			console.log("modelName:",modelName)
+			studyUser = allInputData.user
+			window.open("/network/" + studyUser + "/" + modelName + "/" + networkNum,  "_blank")
+		}
 	</script>
 </head>
 <body onload="init()">
@@ -56,8 +61,22 @@
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
 			<div class="shortInput">
-				<label>Feeder</label>
+				<label class="tooltip">Transmission Network<span class="classic">A link to the transmission editor, which offers features such as interactive component editing, search, creation, MATPOWER (.mat) file import, and more.</span></label>
+				<br>
+				<input type="hidden" id="networkName1" name="networkName1"/>				
+				<button id="networkButton" type="button" onclick="javascript:editNetwork(allInputData.modelName,1);" style="display:inline;width:125px;">Open Editor</button>
+				<label id="networkName1Label" style="display:inline;font-size:12pt;overflow-x:auto;"></label>
+				<script>
+					gebi('networkName1').value = allInputData.networkName1;
+					gebi('networkName1Label').innerHTML = allInputData.networkName1;</script>
+			</div>
+			<div class="shortInput">
+				<label>Distribution Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+			</div>
+			<div class="shortInput">
+				<label>Distribution Feeder</label>
+				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,2);" style="display:block;width:125px;">Open Editor</button>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>

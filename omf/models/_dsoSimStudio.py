@@ -157,6 +157,8 @@ def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
 		"feederName1": "Olin Barre Geo",
+		"feederName2": "Olin Barre GH EOL Solar",
+		"networkName1": "case9",
 		"modelType": modelName,
 		"runTime": "",
 		"layoutAlgorithm": "geospatial"
@@ -164,9 +166,12 @@ def new(modelDir):
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:
 		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName2"]+'.omd'), pJoin(modelDir, defaultInputs["feederName2"]+'.omd'))
+		shutil.copy(pJoin(__metaModel__._omfDir,"static","SimpleNetwork.json"),pJoin(modelDir,"case9.omt"))
 	except:
 		return False
 	return creationCode
+
 
 def _debugging():
 	# Location
