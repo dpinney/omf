@@ -228,6 +228,10 @@
 						}
 
 					}
+					if (regNamesArray.length == 0){
+							$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No Regulators were found on the feeder.</p>")
+						}
+					for (var i in regNamesArray){
 						reg = regNamesArray[i]
 						$("<div/>").appendTo("#newRegulatorReport")
 							.attr("class", "regContainer")
@@ -235,10 +239,8 @@
 						$("<div/>").appendTo("#newRegulatorReport")
 							.attr("id", "regulatorSeries_" + reg)
 						// if no regulators are found, display message
-	  					if (regNamesArray.length == 0){
-							$("#newRegulatorReport").html("<p>&#160;&#160;&#160;No Regulators were found on the feeder.</p>")
-						}
-
+	  					
+						
 						var reg1ATSeries = {
 							"pointWidth": 40,
 							"pointInterval": 3 * 3600 * 100,
@@ -261,6 +263,7 @@
 							"data":eval(regNamesArray[i].concat(".RegTapC")),
 							"name":"C",
 						}
+					}
 						phaseValue= eval(reg.concat(".RegPhases"))
 						var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 						localHighChart["chart"]["renderTo"] = "regulatorSeries_" + reg
@@ -315,7 +318,9 @@
 		  					capNamesArray.push(capName)
 						}
 					}
-					
+					if (capNamesArray.length == 0){
+							$("#newCapbankReport").html("<p>&#160;&#160;&#160;No Capacitors were found on the feeder.</p>")
+						}
 					for (var i in capNamesArray)
 					{
 						cap= capNamesArray[i]
@@ -325,9 +330,7 @@
 							.attr("class", "capContainer")
 							.attr("id", cap)
 						// if no regulators are found, display message
-	  					if (capNamesArray.length == 0){
-							$("#newCapbankReport").html("<p>&#160;&#160;&#160;No Capacitors were found on the feeder.</p>")
-						}
+	  					
 						$("<div/>").appendTo("#newCapbankReport")
 							.attr("id", "capacitorSeries_" + cap)
 						var cap1BSeries = {
