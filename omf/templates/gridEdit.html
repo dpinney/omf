@@ -261,7 +261,8 @@
 					<li><a id='amiLoad' href='javascript:showModal("amiLoadshapes");'>Add AMI Profiles...</a></li>
 					<li><a href='javascript:showModal("findModal");'>Find...</a></li>
 					<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
-					<li><a href='javascript:showModal("massAddModal");getComponentsList();'>Mass Add...</a></li>
+					<li><a href='javascript:showModal("massAddModal");getComponentsList("add");'>Mass Add...</a></li>
+					<li><a href='javascript:showModal("massEditModal");getComponentsList("edit");'>Mass Edit...</a></li>
 					<li><a href='javascript:showModal("attachmentsModal");getAttachmentsList();'>Attachments...</a></li>
 					<li><a href='javascript:showModal("climateModal");'>Climate...</a></li>
 					<li><a href='javascript:showModal("anonymizeModal");'>Anonymization...</a></li>
@@ -603,6 +604,57 @@
 				</td>
 				<td style='padding-top:10px'>
 					<button onclick='addXatY();unsavedChanges=true;closeModal("massAddModal")'>Apply</button>
+				</td>
+			</tr>
+		</table>
+	</div>
+</div>
+<div id='massEditModal' class='modal'>
+	<div class='modalContent' id='massEditModalContent'>
+		<table class='importOptions'>
+			<th>Mass Edit</th>
+			<tr>
+				<td>For each object of type:</td>
+				<td>
+					<form method='post'>
+						<select name='attachTypeNewEdit' id='attachTypeNewEdit'></select>
+					</form>
+				</td>
+			</tr>
+			<tr>
+				<td>and attribute:</td>
+				<td><input type='text' id='attributeEdit' name='attributeEdit' required></td>
+			</tr>
+			<tr>
+				<form id='radioForm' action="">
+					<td><input type="radio" name="attrEdit" value="addVal"> Add to value </td><td><input type='text' id='addValue' name='addValue' pattern='^0\.\d+|1(\.0+)?$' required/></td>
+			</tr>
+			<tr>
+					<td><input type="radio" name="attrEdit" value="deleteAttr"> Delete Attribute </td>
+			</tr>
+					<td><input type="radio" name="attrEdit" value="changeTo"> Change To </td><td><input type='text' id='changeValue' name='changeValue' pattern='^0\.\d+|1(\.0+)?$' required/></td>
+			<tr>		
+					<td><input type="radio" name="attrEdit" value="multBy"> Multiply By </td><td><input type='text' id='multValue' name='multValue' pattern='^0\.\d+|1(\.0+)?$' required/></td><td>and add</td><td><input type='text' id='addedVal' name='addedVal' pattern='^0\.\d+|1(\.0+)?$' required/></td>
+			</tr>
+			<tr>
+					<td>Or</td>
+			</tr>
+			<tr>
+				<td><input type="radio" name="attrEdit" value="addAttr"> Add attribute:</td>
+				<td><input type='text' id='newAttr' name='newAttr' required></td>
+			</tr>
+			<tr>
+				<td>With value:</td>
+				<td><input type='text' id='newAttrVal' name='newAttrVal' pattern='^0\.\d+|1(\.0+)?$' required/></td>
+			</tr>
+				</form>
+			
+			<tr>
+				<td style='padding-top:10px'>
+					<button onclick='closeModal("massEditModal")'>Cancel</button>
+				</td>
+				<td style='padding-top:10px'>
+					<button onclick='editObjects();unsavedChanges=true;closeModal("massEditModal")'>Apply</button>
 				</td>
 			</tr>
 		</table>
@@ -1232,8 +1284,12 @@ function loadFeeder(fromfeederName, frommodelName, fromuser){
 	})
 }
 
-function getComponentsList() {
+function getComponentsList(type) {
 	var attachList = []
+	// Clearing each list so we dont get duplicates in the list
+	document.getElementById('componentNameNew').innerHTML = "";
+	document.getElementById('attachTypeNew').innerHTML = "";
+	document.getElementById('attachTypeNewEdit').innerHTML = "";
 	for (var component in components) {
 		document.getElementById('componentNameNew').innerHTML += '<option value="'+component+'">'+component+'</option>'
 	}
@@ -1241,7 +1297,12 @@ function getComponentsList() {
 		if ( (tree[key].hasOwnProperty('object')) && (tree[key]['object'] in components) ) {
 			if ( !attachList.includes(tree[key]['object']) ) {
 				attachList.push(tree[key]['object'])
+				if (type == 'add'){
 				document.getElementById('attachTypeNew').innerHTML += '<option value="'+tree[key]['object']+'">'+tree[key]['object']+'</option>'
+				}
+				else{
+					document.getElementById('attachTypeNewEdit').innerHTML += '<option value="'+tree[key]['object']+'">'+tree[key]['object']+'</option>'
+				}
 			}
 		}
 	}
@@ -1268,6 +1329,71 @@ function editAttachment(attachment) {
 function saveAttachment(attachment) {
 	var attachName = document.getElementById('attachmentSelect').innerHTML
 	attachments[attachName] = document.getElementById('editAttachmentBox').value
+}
+// Mass Edit function
+function editObjects(){
+	var objectType = document.getElementById('attachTypeNewEdit').value
+	var attributeEdit = document.getElementById('attributeEdit').value
+	var radios = document.getElementsByName('attrEdit');
+	var objectsToEdit = []
+	// Find all objects of selected type
+	for (key in tree){
+		if ((tree[key]['object']) === objectType && !objectsToEdit.includes(key)){
+			objectsToEdit.push(key)
+		}
+	}
+	// Determine selected radio button
+	for (var i = 0, length = radios.length; i < length; i++) {
+    if (radios[i].checked) {
+        // do whatever you want with the checked radio
+        radioVal = radios[i].value;
+
+        // only one radio can be logically checked, don't check the rest
+        break;
+    	}
+	}
+	// Edit accoring to the radio button selected
+	// Adding to attribute
+	if(radioVal == 'addVal'){
+		var addingVal = parseInt(document.getElementById('addValue').value)
+		for (var obj in objectsToEdit){
+			sum = parseInt(tree[objectsToEdit[obj]][attributeEdit]) +addingVal
+			tree[objectsToEdit[obj]][attributeEdit] = sum.toString()
+		}
+	}
+	// Deleting attribute
+	else if (radioVal == 'deleteAttr'){
+		for (var obj in objectsToEdit){
+			delete tree[objectsToEdit[obj]][attributeEdit]
+		}
+	}
+	// Setting value to attribute
+	else if (radioVal == 'changeTo'){
+		for (var obj in objectsToEdit){
+			var newVal = document.getElementById('changeValue').value
+			if (tree[objectsToEdit[obj]].hasOwnProperty(attributeEdit)){
+				tree[objectsToEdit[obj]][attributeEdit] = newVal
+			}
+		}
+	}
+	// Adding new attribute
+	else if (radioVal == 'addAttr'){
+		for (var obj in objectsToEdit){
+			var newAttr = document.getElementById('newAttr').value
+			var newAttrVal = document.getElementById('newAttrVal').value
+			tree[objectsToEdit[obj]][newAttr] = newAttrVal
+		}	
+	}
+	// Scaling and adding to attribute
+	else{
+		var multValue = parseInt(document.getElementById('multValue').value)
+		var addedVal = parseInt(document.getElementById('addedVal').value)
+		for (var obj in objectsToEdit){
+			var product = parseInt(tree[objectsToEdit[obj]][attributeEdit]) * multValue
+			var sumIt = product + addedVal
+			tree[objectsToEdit[obj]][attributeEdit] = sumIt.toString()
+		}
+	}
 }
 
 //*********************************************
