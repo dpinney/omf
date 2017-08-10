@@ -94,26 +94,17 @@ def heavyProcessing(modelDir, inputDict):
 		tree = feederJson["tree"]
 		# add a check to see if there is already a climate object in the omd file
 		# if there is delete the climate from attachments and the climate object
-		attachKeys = feederJson['attachments'].keys()
-		for key in attachKeys:
-			if key.endswith('.tmy2'):
+		for key in feederJson['attachments'].keys():
+			if (key.endswith('.tmy2')):
 				del feederJson['attachments'][key]	
-		treeKeys = feederJson["tree"].keys()
-		for key in treeKeys:
-			if 'object' in feederJson['tree'][key]:
-			 	if feederJson['tree'][key]['object'] == 'climate':
-			 		del feederJson['tree'][key]
-
-		tree[feeder.getMaxKey(tree)+1] = {'omftype':'module', 'argument':'climate'}
+		for key in tree.keys():
+			if  (tree[key].get('object') == 'climate') or (tree[key].get('object') == 'csv_reader'):
+				del tree[key]
 		if 'weatherAirport.csv' in feederJson['attachments']:
-			for key in feederJson['tree'].keys():
-				if (tree[key].get('object') == 'csv_reader') or (tree[key].get('object') == 'climate'):
-					del tree[key]
 			tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
 			tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
 		else:
 			tree[feeder.getMaxKey(tree)+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
-		
 		# tree[feeder.getMaxKey(tree)+1] = {'object':'capacitor','control':'VOLT','phases':'ABCN','name':'CAPTEST','parent':'tm_1','capacitor_A':'0.10 MVAr','capacitor_B':'0.10 MVAr','capacitor_C':'0.10 MVAr','time_delay':'300.0','nominal_voltage':'2401.7771','voltage_set_high':'2350.0','voltage_set_low':'2340.0','switchA':'CLOSED','switchB':'CLOSED','switchC':'CLOSED','control_level':'INDIVIDUAL','phases_connected':'ABCN','dwell_time':'0.0','pt_phases':'ABCN'}
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
@@ -205,7 +196,6 @@ def heavyProcessing(modelDir, inputDict):
 		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'is_waterheater_on', 'interval':60, 'file':'allWaterheaterOn.csv'}
 		# Attach recorder for waterheater tank temperatures
 		tree[feeder.getMaxKey(tree)+1] = {'object':'group_recorder', 'group':'"class=waterheater"', 'property':'temperature', 'interval':60, 'file':'allWaterheaterTemp.csv'}
-
 		# Attach recorders for system voltage map:
 		stub = {'object':'group_recorder', 'group':'"class=node"', 'interval':60}
 		for phase in ['A','B','C']:

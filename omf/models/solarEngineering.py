@@ -90,26 +90,17 @@ def heavyProcessing(modelDir, inputDict):
 		tree = feederJson["tree"]
 		#add a check to see if there is already a climate object in the omd file
 		#if there is delete the climate from attachments and the climate object
-		attachKeys = feederJson["attachments"].keys()
-		for key in attachKeys:
-			if key.endswith('.tmy2'):
+		for key in feederJson['attachments'].keys():
+			if (key.endswith('.tmy2')):
 				del feederJson['attachments'][key]	
-		treeKeys = feederJson["tree"].keys()
-		for key in treeKeys:
-			if 'object' in feederJson['tree'][key]:
-			 	if feederJson['tree'][key]['object'] == 'climate':
-			 		del feederJson['tree'][key]	
-
-		tree[feeder.getMaxKey(tree)+1] = {'omftype':'module', 'argument':'climate'}
+		for key in tree.keys():
+			if  (tree[key].get('object') == 'climate') or (tree[key].get('object') == 'csv_reader'):
+				del tree[key]
 		if 'weatherAirport.csv' in feederJson['attachments']:
-			for key in feederJson['tree'].keys():
-				if (tree[key].get('object') == 'csv_reader') or (tree[key].get('object') == 'climate'):
-					del tree[key]
 			tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
 			tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
 		else:
 			tree[feeder.getMaxKey(tree)+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
-			
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
 		feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")

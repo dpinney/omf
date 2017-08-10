@@ -977,31 +977,43 @@ def climateChange(owner, feederName):
 	start = request.form.get('startDate')
 	end = request.form.get('endDate')
 	airport = request.form.get('airport')
+	importOption = request.form.get('climateImportOption')
 	modelDir = 'data/Model/' + owner + '/' + modelName
+	omdPath = modelDir + '/' + feederName + '.omd'
 	outFilePath = modelDir + '/weatherAirport.csv'
 	if os.path.isfile(outFilePath):
 		os.remove(outFilePath)
-	omdPath = modelDir + '/' + feederName + '.omd'
-	importProc = Process(target=backgroundClimateChange, args =[start, end, airport, outFilePath, omdPath, modelDir])
-	importProc.start()
-	pid = str(importProc.pid)
-	with open(modelDir + '/WPID.txt', 'w+') as outFile:
-		outFile.write(pid)
+	if importOption == 'historicalImport':
+		importProc = Process(target=backgroundClimateChange, args =[start, end, airport, outFilePath, omdPath, modelDir])
+		importProc.start()
+		pid = str(importProc.pid)
+		with open(modelDir + '/WPID.txt', 'w+') as outFile:
+			outFile.write(pid)
+	elif importOption == 'tmyImport':
+		with open(omdPath, 'r') as inFile:
+			feederJson = json.load(inFile)
+			for key in feederJson['tree'].keys():
+				if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('object') == 'csv_reader'):
+					del feederJson['tree'][key]
+			for key in feederJson['attachments'].keys():
+				if (key == 'weatherAirport.csv'):
+					del feederJson['attachments'][key]
+			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
+		with open(omdPath, 'w') as outFile:
+			json.dump(feederJson, outFile, indent=4)
 	return ('',204)
 
 def backgroundClimateChange(start, end, airport, outFilePath, omdPath, modelDir):
 	weather.makeClimateCsv(start, end, airport, outFilePath)
 	with open(omdPath, 'r') as inFile:
 		feederJson = json.load(inFile)
-		tree = feederJson['tree']
-		for key in tree.keys():
-			if (tree[key].get('object') == 'csv_reader') or (tree[key].get('object') == 'climate'):
-				del tree[key]
-		tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
-		tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
+		for key in feederJson['tree'].keys():
+			if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('object') == 'csv_reader'):
+				del feederJson['tree'][key]
+		feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
+		feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
 		with open(outFilePath) as csvFile:
-			attachments = feederJson['attachments']
-			attachments['weatherAirport.csv'] = csvFile.read()
+			feederJson['attachments']['weatherAirport.csv'] = csvFile.read()
 	with open(omdPath, 'w') as outFile:
 		json.dump(feederJson, outFile, indent=4)
 	os.remove(modelDir + '/WPID.txt')
