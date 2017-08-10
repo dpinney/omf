@@ -133,8 +133,8 @@ def createObj(objToRet):
 			'id': '', #*
 			# 'min_voltage': 0.8, # in p.u.
 			# 'max_voltage': 1.2, # in p.u.
-			# 'y': '', # not in schema.
-			# 'x': '', # not in schema.
+			'y': '', # not in schema.
+			'x': '', # not in schema.
 			# 'has_generator': False,
 			# 'has_phase': [True, True, True],
 			# 'ref_voltage': [1.0, 1.0, 1.0]
@@ -288,7 +288,7 @@ def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
 				for a,val in elem.iteritems():
 					print "      %s: %s"%(str(a), str(val))
 
-def makeBuses(rdtJson, jsonTree, debug):
+def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
 	'''buses.
 	Ziploads? house? regulator? Waterheater?
 	'''
@@ -308,6 +308,9 @@ def makeBuses(rdtJson, jsonTree, debug):
 			# newBus.pop('ref_voltage', None)
 			# newBus.pop('min_voltage', None)
 			# newBus.pop('max_voltage', None)
+			for busNode in jsonNodes:
+				newBus['y'] = busNode.get('y','')
+				newBus['x'] = busNode.get('x','')
 	if debug: 
 		print "Created %s buses"%(str(len(rdtJson['buses'])))
 		if debug==2:
@@ -374,24 +377,26 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 		print "Generating RDT input..."
 		print "************************************"
 	rdtJson = {
-		'phase_variation' : inData.get('phase_variation', 0.15), 
-		'chance_constraint' : inData.get('chance_constraint', 1.0),
-		'critical_load_met' : inData.get('critical_load_met',0.98),
-		'total_load_met' : inData.get('total_load_met',0.5),
-		'scenarios' : [createObj('scenario')], # Made up fragility damage scenario.
-		'line_codes' : [],
-		'lines' : [],
 		'buses' : [],
 		'loads' : [],
-		'generators' : []	
+		'generators' : [],
+		'line_codes' : [],
+		'lines' : [],
+		'critical_load_met' : inData.get('critical_load_met',0.98),
+		'total_load_met' : inData.get('total_load_met',0.5),
+		'chance_constraint' : inData.get('chance_constraint', 1.0),
+		'phase_variation' : inData.get('phase_variation', 0.15),
+		'scenarios' : [] # Made up fragility damage scenario.		
 	}
 	# Read and put omd.json into rdt.json.
 	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
 		jsonTree = json.load(jsonIn).get('tree','')
+	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
+		jsonNodes = json.load(jsonIn).get('nodes','')
 	#TODO: get GFM scenarios in to RDT
 	lineCount, lineCosts = makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
 	makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug)
-	makeBuses(rdtJson, jsonTree, debug)
+	makeBuses(rdtJson, jsonTree, jsonNodes, debug)
 	makeLoads(rdtJson, jsonTree, debug)
 	makeGens(rdtJson, jsonTree, maxDG, newGens, debug)
 	# Write to file.
@@ -540,50 +545,35 @@ def heavyProcessing(modelDir, inputDict):
 		with open(pJoin(modelDir, "gfmInput.json"), "w") as outFile:
 			json.dump(fragIn, outFile, indent=4)
 		# Run GFM.
+		rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
+		with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
+			json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
+		rdtFileName, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 		gfmBinaryPath = pJoin(__metaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-		inputFilePath = pJoin(modelDir, 'gfmInput.json')
-		gfmOutFileName = 'gfmOutput.json'
-		outFilePath = pJoin(modelDir, gfmOutFileName)
-		topologyPath = pJoin(__metaModel__._omfDir,'solvers','gfm', 'fragility_topology.json')
-		shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'RDT_template.json'), pJoin(modelDir, 'RDT_template.json'))
-		#proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath])
-
-		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, inputFilePath, outFilePath, '--lpnorm', topologyPath], cwd=modelDir)
+		shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
+		shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))
+		rdtFilePath = rdtFileName#pJoin(modelDir, 'rdt.json')
+		windFilePath = pJoin(modelDir, 'wfclip.asc')
+		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', rdtFilePath, '-wf', 'WindGrid_lpnorm_example.asc'], cwd=modelDir)
 		proc.wait()
 		#Denote new lines
 		newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
-		with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
+		'''with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
 			gfmOut = json.load(gfmOut)
 		for line in gfmOut['lines']:
+			#set can_harden to false for transformers and regulators NO EXPLICIT IDENTIFIER FOR REGULATORS, ID ONLY
+			if(line["is_transformer"] == True):
+				line["can_harden"] = False
 			for newLine in newLineCands:
 				if(newLine == line['id']):
 					line["is_new"] = True
 		with open(pJoin(modelDir,gfmOutFileName),"w") as outFile:
 			json.dump(gfmOut, outFile, indent = 4)
-		gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()
+		gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()		
 		#extra step here, just set equal to gfmOut from above
 		outData['gfmRawOut'] = gfmRawOut
+		'''
 		print 'Ran Fragility\n'
-				
-		# Run RDT.
-		print "Running RDT..."
-		print "************************************"
-		
-		rdtInFile = modelDir + '/' + 'gfmOutput.json'
-		rdtOutFile = modelDir + '/rdtOutput.json'
-		rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
-		rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
-		proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
-		proc.wait()
-		rdtRawOut = open(rdtOutFile).read()
-		outData['rdtRawOut'] = rdtRawOut
-		# Format output feeder.
-		with open(pJoin(rdtOutFile), "r") as jsonIn:
-			rdtOut = json.load(jsonIn)
-		with open(pJoin(rdtOutFile),"w") as outFile:
-			json.dump(rdtOut, outFile, indent = 4)
-		print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
-		print "************************************\n\n"
 
 		# Run GridLAB-D first time to generate xrMatrices.
 		if platform.system() == "Windows":
@@ -591,6 +581,18 @@ def heavyProcessing(modelDir, inputDict):
 			omdPath = pJoin(modelDir, feederName + ".omd")
 			with open(omdPath, "r") as omd:
 				omd = json.load(omd)
+			#REMOVE NEWLINECANDIDATES
+			'''deleteList = []
+			newLines = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
+			for newLine in newLines:
+				for omdObj in omd["tree"]:
+					if ("name" in omd["tree"][omdObj]):
+						if (newLine == omd["tree"][omdObj]["name"]):
+							deleteList.append(omdObj)
+			for delItem in deleteList:
+				print delItem
+				del omd["tree"][delItem]
+			'''
 			#Load an blank glm file and use it to write to it
 			feederPath = pJoin(modelDir, 'feeder.glm')
 			with open(feederPath, 'w') as glmFile:
@@ -618,11 +620,30 @@ def heavyProcessing(modelDir, inputDict):
 			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 			gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
 			outData['gridlabdRawOut'] = gridlabdRawOut
-		'''
-		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], cwd=modelDir)
+		
+				
+		# Run RDT.
+		print "Running RDT..."
+		print "************************************"
+		rdtInFile = modelDir + '/' + 'rdt_OUTPUT.json'
+		rdtOutFile = modelDir + '/rdtOutput.json'
+		rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
+		rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
+		proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
 		proc.wait()
-		'''
+		rdtRawOut = open(rdtOutFile).read()
+		outData['rdtRawOut'] = rdtRawOut
+		# Format output feeder.
+		with open(pJoin(rdtOutFile), "r") as jsonIn:
+			rdtOut = json.load(jsonIn)
+		with open(pJoin(rdtOutFile),"w") as outFile:
+			json.dump(rdtOut, outFile, indent = 4)
+		print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
+		print "************************************\n\n"
+
 		# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
+		#newFeederModel = copy.deepcopy(feederModel)
+
 		#Deriving line names from RDT Input and line lengths from feeder omd file
 		#Building hashmap of source and target nodes, used to represent lines.
 		with open(rdtInFile, "r") as rdtInFileData:
@@ -633,9 +654,6 @@ def heavyProcessing(modelDir, inputDict):
 			lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
 		outData["lineData"] = lineData
 		outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
-
-
-
 		# Draw the feeder.
 		genDiagram(modelDir, feederName, feederModel, debug=False)
 		with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
@@ -683,12 +701,12 @@ def new(modelDir):
 		"hardeningUnitCost": "1000.0",
 		"maxDGPerGenerator": "5000.0",
 		"hardeningCandidates": "Line_id1, line_id2, t2",
-		"newLineCandidates": "Line_id1, l2020",
+		"newLineCandidates": "Line_id1, l2020, tl_1",
 		"generatorCandidates": "node1",
-		"criticalLoadMet": "0.0",
+		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.0",
-		"chanceConstraint": "0.0",
-		"phaseVariation": "0.0",
+		"chanceConstraint": "1.0",
+		"phaseVariation": "0.15",
 		"weatherImpacts": open(pJoin(__metaModel__._omfDir,"scratch","uploads","WindGrid_lpnorm_example.asc")).read(),
 		"weatherImpactsFileName": "WindGrid_lpnorm_example.asc",
 		"poleData": open(pJoin(__metaModel__._omfDir,"scratch","uploads","_fragility_input_example.json")).read(),
