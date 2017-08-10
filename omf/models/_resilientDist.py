@@ -569,10 +569,11 @@ def heavyProcessing(modelDir, inputDict):
 					line["is_new"] = True
 		with open(pJoin(modelDir,gfmOutFileName),"w") as outFile:
 			json.dump(gfmOut, outFile, indent = 4)
-		gfmRawOut = open(pJoin(modelDir,gfmOutFileName)).read()		
+		'''
+		gfmRawOut = open(pJoin(modelDir,"rdtIn.json")).read()		
 		#extra step here, just set equal to gfmOut from above
 		outData['gfmRawOut'] = gfmRawOut
-		'''
+		
 		print 'Ran Fragility\n'
 
 		# Run GridLAB-D first time to generate xrMatrices.
