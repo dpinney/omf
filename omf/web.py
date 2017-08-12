@@ -1041,30 +1041,30 @@ def anonymize(owner, feederName):
 def backgroundAnonymize(omdPath, modelDir):
 	with open(omdPath, 'r') as inFile:
 		inFeeder = json.load(inFile)
-	nameOption = request.form.get('anonymizeNameOption')
-	if nameOption == 'pseudonomize':
-		anonymization.distPseudomizeNames(inFeeder)
-	elif nameOption == 'randomize':
-		anonymization.distRandomizeNames(inFeeder)
-	locOption = request.form.get('anonymizeLocationOption')
-	if locOption == 'translation':
-		translation = request.form.get('translate')
-		rotation = request.form.get('rotate')
-		anonymization.distTranslateLocations(inFeeder, translation, rotation)
-	elif locOption == 'randomize':
-		anonymization.distRandomizeLocations(inFeeder)
-	elecProp = request.form.get('electricProperty')
-	if elecProp == 'modifyLengthSize':
-		anonymization.distModifyTriplexLengths(inFeeder)
-		anonymization.distModifyConductorLengths(inFeeder)
-	elif elecProp == 'smoothLoadGen':
-		anonymization.distSmoothLoads(inFeeder)
-	elif elecProp == 'shuffleLoadGen':
-		shufPerc = request.form.get('shufflePerc')
-		anonymization.distShuffleLoads(inFeeder, shufPerc)
-	elif elecProp == 'addNoise':
-		noisePerc = request.form.get('noisePerc')
-		anonymization.distAddNoise(inFeeder, noisePerc)
+		nameOption = request.form.get('anonymizeNameOption')
+		if nameOption == 'pseudonomize':
+			anonymization.distPseudomizeNames(inFeeder)
+		elif nameOption == 'randomize':
+			anonymization.distRandomizeNames(inFeeder)
+		locOption = request.form.get('anonymizeLocationOption')
+		if locOption == 'translation':
+			translation = request.form.get('translate')
+			rotation = request.form.get('rotate')
+			anonymization.distTranslateLocations(inFeeder, translation, rotation)
+		elif locOption == 'randomize':
+			anonymization.distRandomizeLocations(inFeeder)
+		elecProp = request.form.get('electricProperty')
+		if elecProp == 'modifyLengthSize':
+			anonymization.distModifyTriplexLengths(inFeeder)
+			anonymization.distModifyConductorLengths(inFeeder)
+		elif elecProp == 'smoothLoadGen':
+			anonymization.distSmoothLoads(inFeeder)
+		elif elecProp == 'shuffleLoadGen':
+			shufPerc = request.form.get('shufflePerc')
+			anonymization.distShuffleLoads(inFeeder, shufPerc)
+		elif elecProp == 'addNoise':
+			noisePerc = request.form.get('noisePerc')
+			anonymization.distAddNoise(inFeeder, noisePerc)
 	with open(omdPath, 'w') as outFile:
 		json.dump(inFeeder, outFile, indent=4)
 	os.remove(modelDir + '/PPID.txt')
