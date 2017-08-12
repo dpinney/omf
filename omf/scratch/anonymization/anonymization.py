@@ -4,7 +4,7 @@ import json, math, random, datetime
 
 # DISTRIBUTION FEEDER FUNCTIONS
 def distPseudomizeNames(inFeeder):
-	''' Replace all names in the inFeeder distribution system with sequential IDs. Return a key with name and ID pairs. '''
+	''' Replace all names in the inFeeder distribution system with pseudonames made up of the object type and a random ID. Return a key with name and ID pairs. '''
 	newNameKey = {}
 	# newKeyID = 0
 	newKeyID = random.randint(0,100)
@@ -38,10 +38,10 @@ def distPseudomizeNames(inFeeder):
 			if key == 'name':
 				oldNode = inFeeder['nodes'][i][key]
 				inFeeder['nodes'][i][key] = newNameKey[oldNode]
-	return
+	return newNameKey
 
 def distRandomizeNames(inFeeder):
-	''' Replace all names in the inFeeder distribution system with sequential IDs. Return a list of the new IDs. '''
+	''' Replace all names in the inFeeder distribution system with pseudonames made up of the object type and a random ID.. Return a list of the new IDs. '''
 	newNameKey = {}
 	newNameArray = []
 	# newKeyID = 0
@@ -89,7 +89,7 @@ def distRandomizeLocations(inFeeder):
 		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
 			inFeeder['tree'][key]['longitude'] = random.randint(0,1000)
 			inFeeder['tree'][key]['latitude'] = random.randint(0,1000)
-	return inFeeder
+	return
 
 def distTranslateLocations(inFeeder, translation, rotation):
 	''' Move the position of all objects in the inFeeder distribution system by a horizontal translation and counter-clockwise rotation. '''
@@ -101,7 +101,7 @@ def distTranslateLocations(inFeeder, translation, rotation):
 		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
 			inFeeder['tree'][key]['longitude'] += translation*math.cos(rotation)
 			inFeeder['tree'][key]['latitude'] += translation*math.sin(rotation)
-	return inFeeder
+	return
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc probability. '''
@@ -115,7 +115,7 @@ def distAddNoise(inFeeder, noisePerc):
 				inFeeder['tree'][key][prop] += str(randNoise)
 			except ValueError:
 				continue
-	return inFeeder
+	return
 
 def distShuffleLoads(inFeeder, shufPerc):
 	''' Shuffle the parent properties between all load objects in the inFeeder distribution system. '''
@@ -157,7 +157,7 @@ def distShuffleLoads(inFeeder, shufPerc):
 				random.shuffle(zipParents)
 				inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
 				zipIdx += 1
-	return inFeeder
+	return
 
 def distModifyTriplexLengths(inFeeder):
 	''' Modifies triplex line length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
@@ -196,7 +196,7 @@ def distModifyTriplexLengths(inFeeder):
 				inFeeder['tree'][key]['diameter'] == tLookup[tLine].get('diameter')
 			if inFeeder['tree'][key].get('name') == tLookup[tLine].get('conductor_N'):
 				inFeeder['tree'][key]['resistance'] == tLookup[tLine].get('resistance')
-	return inFeeder
+	return
 
 def distModifyConductorLengths(inFeeder):
 	''' Modifies conductor length and diameter properties while preserving original impedance in the inFeeder distribution system. '''
@@ -272,7 +272,7 @@ def distModifyConductorLengths(inFeeder):
 					inFeeder['tree'][key]['geometric_mean_radius'] == oLookup[oLine].get('geometric_mean_radius')
 				except:
 					pass
-	return inFeeder
+	return
 
 def distSmoothLoads(inFeeder):
 	''' Reduce the resolution of load shapes by taking all sub-hourly load dispatch data in the inFeeder distribution system and aggregating to the hour level. ''' 
@@ -299,7 +299,7 @@ def distSmoothLoads(inFeeder):
 
 # TRANSMISSION NETWORK FUNCTIONS
 def tranPseudomizeNames(inNetwork):
-	''' Replace all names in the inNetwork transmission system with sequential IDs. Return a key with name and ID pairs. '''
+	''' Replace all names in the inNetwork transmission system with pseudonames made up of the object type and a random ID.. Return a key with name and ID pairs. '''
 	newBusKey = {}
 	# newKeyID = 0
 	newKeyID = random.randint(0,100)
@@ -314,10 +314,10 @@ def tranPseudomizeNames(inNetwork):
 						newKeyID += 1
 						inNetwork['bus'][idx][key]['bus_i'] = newBus
 						newBusKey.update({oldBus:newBus})
-	return inNetwork
+	return newBusKey
 
 def tranRandomizeNames(inNetwork):
-	''' Replace all names in the inNetwork transmission system with sequential IDs. Return a list of the new IDs. '''
+	''' Replace all names in the inNetwork transmission system with pseudonames made up of the object type and a random ID. Return a list of the new IDs. '''
 	newBusArray = []
 	# newKeyID = 0
 	newKeyID = random.randint(0,100)
@@ -346,7 +346,7 @@ def tranRandomizeLocations(inNetwork):
 					if 'longitude' in prop:
 						inNetwork['bus'][idx][key]['longitude'] = random.randint(-200,200)
 						inNetwork['bus'][idx][key]['latitude'] = random.randint(-200,200)
-	return inNetwork
+	return
 
 def tranTranslateLocations(inNetwork, translation, rotation):
 	''' Move the position of all objects in the inNetwork transmission system by a horizontal translation and counter-clockwise rotation. '''
@@ -361,7 +361,7 @@ def tranTranslateLocations(inNetwork, translation, rotation):
 					if 'longitude' in prop:
 						inNetwork['bus'][idx][key]['longitude'] = translation*math.cos(rotation)
 						inNetwork['bus'][idx][key]['latitude'] = translation*math.sin(rotation)
-	return inNetwork
+	return
 
 def tranAddNoise(inNetwork, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc probability. '''
@@ -381,7 +381,7 @@ def tranAddNoise(inNetwork, noisePerc):
 									inNetwork[array][idx][key][prop] += str(randNoise)
 								except ValueError:
 									continue
-	return inNetwork
+	return
 
 def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 	''' Shuffle the parent properties between all load and gen objects in the inNetwork transmission system. '''
@@ -429,7 +429,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 							random.shuffle(genParents)
 							inNetwork['gen'][idx][key]['bus'] = genParents[genIdx]
 							genIdx += 1
-	return inNetwork
+	return
 
 def _tests():
 	# DISTRIBUTION FEEDER TESTS
@@ -437,146 +437,151 @@ def _tests():
 	FNAME = "Simple Market System Modified.omd"
 	with open(FNAME, "r") as inFile:
 		inFeeder = json.load(inFile)
-		distPseudomizeNames(inFeeder)
+		nameKey = distPseudomizeNames(inFeeder)
+		print nameKey
 	FNAMEOUT = "simpleMarket_distPseudomizeNames.omd"
 	with open(FNAMEOUT, "w") as outFile:
 		json.dump(inFeeder, outFile, indent=4)
 
-	# # Test distRandomizeNames
-	# FNAME = "Simple Market System Modified.omd"
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# randNameArray = distRandomizeNames(inFeeder)
-	# FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+	# Test distRandomizeNames
+	FNAME = "Simple Market System Modified.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		nameArray = distRandomizeNames(inFeeder)
+		print nameArray
+	FNAMEOUT = "simpleMarket_distRandomizeNames.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-	# # Test distRandomizeLocations
-	# FNAME = "Simple Market System Modified.omd"
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# randomLocation = distRandomizeLocations(inFeeder)
-	# FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+	# Test distRandomizeLocations
+	FNAME = "Simple Market System Modified.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		distRandomizeLocations(inFeeder)
+	FNAMEOUT = "simpleMarket_distRandomizeLocations.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-	# # Test distTranslateLocations
-	# FNAME = "Simple Market System Modified.omd"
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# translation = 20
-	# rotation = 20
-	# translate = distTranslateLocations(inFeeder, translation, rotation)
-	# FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+	# Test distTranslateLocations
+	FNAME = "Simple Market System Modified.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		translation = 20
+		rotation = 20
+		distTranslateLocations(inFeeder, translation, rotation)
+	FNAMEOUT = "simpleMarket_distTranslateLocations.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-	# # Test distAddNoise
-	# FNAME = "Simple Market System Modified.omd"
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# noisePerc = 0.2
-	# noises = distAddNoise(inFeeder, noisePerc)
-	# FNAMEOUT = "simpleMarket_distAddNoise.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+	# Test distAddNoise
+	FNAME = "Simple Market System Modified.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		noisePerc = 0.2
+		distAddNoise(inFeeder, noisePerc)
+	FNAMEOUT = "simpleMarket_distAddNoise.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-	# # Test distShuffleLoads
-	# FNAME = "Simple Market System Modified.omd"
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# shufPerc = 0.5
-	# shuffle = distShuffleLoads(inFeeder, shufPerc)
-	# FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+	# Test distShuffleLoads
+	FNAME = "Simple Market System Modified.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		shufPerc = 0.5
+		distShuffleLoads(inFeeder, shufPerc)
+	FNAMEOUT = "simpleMarket_distShuffleLoads.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-	# # Test distModifyTriplexLengths
-	# FNAME = "Simple Market System Modified.omd"
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# triplexLengths = distModifyTriplexLengths(inFeeder)
-	# FNAMEOUT = "simpleMarket_distModifyTriplexLengths.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+	# Test distModifyTriplexLengths
+	FNAME = "Simple Market System Modified.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		distModifyTriplexLengths(inFeeder)
+	FNAMEOUT = "simpleMarket_distModifyTriplexLengths.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-	# # Test distModifyConductorLengths
-	# FNAME = "Olin Barre GH.omd"
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# conductorLengths = distModifyConductorLengths(inFeeder)
-	# FNAMEOUT = "olinBarreGH_distModifyConductorLengths.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+	# Test distModifyConductorLengths
+	FNAME = "Olin Barre GH.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		distModifyConductorLengths(inFeeder)
+	FNAMEOUT = "olinBarreGH_distModifyConductorLengths.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
-	# # Test distSmoothLoads
-	# FNAME = "Calibrated Feeder.omd"
-	# with open(FNAME, "r") as inFile:
-	# 	inFeeder = json.load(inFile)
-	# smoothing = distSmoothLoads(inFeeder)
-	# FNAMEOUT = "calibrated_distSmoothLoads.omd"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inFeeder, outFile, indent=4)
+	# Test distSmoothLoads
+	FNAME = "Calibrated Feeder.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		calibrate = distSmoothLoads(inFeeder)
+		print calibrate
+	FNAMEOUT = "calibrated_distSmoothLoads.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
 
-	# # TRANSMISSION NETWORK TESTS
-	# # Test tranPseudomizeNames
-	# FNAME = "case9.omt"
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# busKeyDict = tranPseudomizeNames(inNetwork)
-	# FNAMEOUT = "case_tranPseudomizeNames.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
+	# TRANSMISSION NETWORK TESTS
+	# Test tranPseudomizeNames
+	FNAME = "case9.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		busKey = tranPseudomizeNames(inNetwork)
+		print busKey
+	FNAMEOUT = "case_tranPseudomizeNames.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-	# # Test tranRandomizeNames
-	# FNAME = "case9.omt"
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# randBusArray = tranRandomizeNames(inNetwork)
-	# FNAMEOUT = "case_tranRandomizeNames.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
+	# Test tranRandomizeNames
+	FNAME = "case9.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		busArray = tranRandomizeNames(inNetwork)
+		print busArray
+	FNAMEOUT = "case_tranRandomizeNames.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-	# # Test tranRandomizeLocations
-	# FNAME = "case9.omt"
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# randomLocation = tranRandomizeLocations(inNetwork)
-	# FNAMEOUT = "case_tranRandomizeLocations.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
+	# Test tranRandomizeLocations
+	FNAME = "case9.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		tranRandomizeLocations(inNetwork)
+	FNAMEOUT = "case_tranRandomizeLocations.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-	# # Test tranTranslateLocation
-	# FNAME = "case9.omt"
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# translation = 20
-	# rotation = 20
-	# translate = tranTranslateLocations(inNetwork, translation, rotation)
-	# FNAMEOUT = "case_tranTranslateLocations.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
+	# Test tranTranslateLocation
+	FNAME = "case9.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		translation = 20
+		rotation = 20
+		tranTranslateLocations(inNetwork, translation, rotation)
+	FNAMEOUT = "case_tranTranslateLocations.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-	# # Testing tranAddNoise
-	# FNAME = "case9.omt"
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# noisePerc = 0.2
-	# noises = tranAddNoise(inNetwork, noisePerc)
-	# FNAMEOUT = "case_tranAddNoise.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
+	# Testing tranAddNoise
+	FNAME = "case9.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		noisePerc = 0.2
+		tranAddNoise(inNetwork, noisePerc)
+	FNAMEOUT = "case_tranAddNoise.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
-	# # Testing tranShuffleLoadsAndGens
-	# FNAME = "case9.omt"
-	# with open(FNAME, "r") as inFile:
-	# 	inNetwork = json.load(inFile)
-	# shufPerc = 0.5
-	# shuffle = tranShuffleLoadsAndGens(inNetwork, shufPerc)
-	# FNAMEOUT = "case_tranShuffleLoadsAndGens.omt"
-	# with open(FNAMEOUT, "w") as outFile:
-	# 	json.dump(inNetwork, outFile, indent=4)
+	# Testing tranShuffleLoadsAndGens
+	FNAME = "case9.omt"
+	with open(FNAME, "r") as inFile:
+		inNetwork = json.load(inFile)
+		shufPerc = 0.5
+		tranShuffleLoadsAndGens(inNetwork, shufPerc)
+	FNAMEOUT = "case_tranShuffleLoadsAndGens.omt"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inNetwork, outFile, indent=4)
 
 if __name__ == '__main__':
 	_tests()
