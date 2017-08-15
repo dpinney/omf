@@ -1042,7 +1042,7 @@ def backgroundAnonymize(omdPath, modelDir):
 	with open(omdPath, 'r') as inFile:
 		inFeeder = json.load(inFile)
 		nameOption = request.form.get('anonymizeNameOption')
-		if nameOption == 'pseudonomize':
+		if nameOption == 'pseudonymize':
 			anonymization.distPseudomizeNames(inFeeder)
 		elif nameOption == 'randomize':
 			anonymization.distRandomizeNames(inFeeder)
