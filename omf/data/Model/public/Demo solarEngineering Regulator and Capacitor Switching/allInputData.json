@@ -1,0 +1,11 @@
+{
+    "simStartDate": "2012-04-01", 
+    "simLengthUnits": "hours", 
+    "created": "2017-08-14 14:24:05.414936", 
+    "zipCode": "59001", 
+    "modelType": "solarEngineering", 
+    "climateName": "MT-BILLINGS", 
+    "simLength": "744", 
+    "feederName1": "Olin Barre GH EOL Solar AVolts CapReg", 
+    "runTime": "0:03:13"
+}
