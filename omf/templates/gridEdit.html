@@ -256,13 +256,12 @@
 					<li><a href="javascript:zoomToFit();">Zoom To Fit</a></li>
 					<li><a href="javascript:zoomReset();">Zoom Reset</a></li>
 					<li><a href="javascript:staticLoadsToHouses();unsavedChanges=true;">Static Loads to Houses</a></li>
-					<li><a href="javascript:solarAdding();unsavedChanges=true;">Solar at Meters</a></li>
 					<li><a id='scadaLoad' href='javascript:showModal("scadaLoadshapes");'>Scada Loadshapes...</a></li>
 					<li><a id='amiLoad' href='javascript:showModal("amiLoadshapes");'>Add AMI Profiles...</a></li>
 					<li><a href='javascript:showModal("findModal");'>Find...</a></li>
 					<li><a href='javascript:showModal("layoutModal");'>Layout...</a></li>
 					<li><a href='javascript:showModal("massAddModal");getComponentsList("add");'>Mass Add...</a></li>
-					<li><a href='javascript:showModal("massEditModal");getComponentsList("edit");'>Mass Edit...</a></li>
+					<li><a href='javascript:clearTextBoxes();showModal("massEditModal");getComponentsList("edit");'>Mass Edit...</a></li>
 					<li><a href='javascript:showModal("attachmentsModal");getAttachmentsList();'>Attachments...</a></li>
 					<li><a href='javascript:showModal("climateModal");'>Climate...</a></li>
 					<li><a href='javascript:showModal("anonymizeModal");'>Anonymization...</a></li>
@@ -634,7 +633,10 @@
 			</tr>
 					<td><input type="radio" name="attrEdit" value="changeTo"> Change To </td><td><input type='text' id='changeValue' name='changeValue' pattern='^0\.\d+|1(\.0+)?$' required/></td>
 			<tr>		
-					<td><input type="radio" name="attrEdit" value="multBy"> Multiply By </td><td><input type='text' id='multValue' name='multValue' pattern='^0\.\d+|1(\.0+)?$' required/></td><td>and add</td><td><input type='text' id='addedVal' name='addedVal' pattern='^0\.\d+|1(\.0+)?$' required/></td>
+					<td><input type="radio" name="attrEdit" value="multBy"> Multiply By </td><td><input type='text' id='multValue' name='multValue' pattern='^0\.\d+|1(\.0+)?$' required/></td>
+			</tr>
+			<tr>
+					<td>and add</td><td><input type='text' id='addedVal' name='addedVal' pattern='^0\.\d+|1(\.0+)?$' required/></td>
 			</tr>
 			<tr>
 					<td>Or</td>
@@ -1330,7 +1332,17 @@ function saveAttachment(attachment) {
 	var attachName = document.getElementById('attachmentSelect').innerHTML
 	attachments[attachName] = document.getElementById('editAttachmentBox').value
 }
-// Mass Edit function
+// Mass Edit functions
+function clearTextBoxes(){
+	document.getElementById('attachTypeNewEdit').value = ''
+	document.getElementById('attributeEdit').value = ''
+	document.getElementById('addValue').value = ''
+	document.getElementById('changeValue').value = ''
+	document.getElementById('newAttr').value = ''
+	document.getElementById('newAttrVal').value = ''
+	document.getElementById('multValue').value = ''
+	document.getElementById('addedVal').value = ''
+}
 function editObjects(){
 	var objectType = document.getElementById('attachTypeNewEdit').value
 	var attributeEdit = document.getElementById('attributeEdit').value
@@ -1388,6 +1400,9 @@ function editObjects(){
 	else{
 		var multValue = parseInt(document.getElementById('multValue').value)
 		var addedVal = parseInt(document.getElementById('addedVal').value)
+		if (isNaN(addedVal)){
+			addedVal = 0
+		}
 		for (var obj in objectsToEdit){
 			var product = parseInt(tree[objectsToEdit[obj]][attributeEdit]) * multValue
 			var sumIt = product + addedVal
@@ -2321,93 +2336,6 @@ function replaceLoadWithTriplex() {
 		}
 	}
 }
-
-/*
- * Handler function of adding solar based on percentage it wants to add.
- */
-function solarAdding() {
-	function makeNewInverter(phases) {
-		newInverter = {}
-		newInverter['object'] = 'inverter'
-		newInverter['phases'] = phases
-		newInverter['generator_status'] = 'ONLINE'
-		newInverter['inverter_type'] = 'PWM'
-		newInverter['generator_mode'] = 'CONSTANT_PF'
-		treeNewIndex = nextTreeKey()
-		newInverter['name'] = 'synInverter' + treeNewIndex
-		return newInverter
-	}
-	function newRandomPanels() {
-		newPanels = {}
-		newPanels['object'] = 'solar'
-		newPanels['generator_mode'] = 'SUPPLY_DRIVEN'
-		newPanels['generator_status'] = 'ONLINE'
-		newPanels['panel_type'] = 'SINGLE_CRYSTAL_SILICON'
-		newPanels['efficiency'] = '0.1' + randomInt(0, 5)
-		newPanels['area'] = randomInt(2, 8) + '00 sf'
-		treeNewIndex = nextTreeKey()
-		newInverter['name'] = 'synSolar' + treeNewIndex
-		return newPanels
-	}
-	function walkAndAddSolar() {
-		progressBarUpdate(percentage)
-		// for (index in tree) {
-		if (i < tkeys.length && !in_use && percentage != 100) {
-			in_use = true
-			var limit = i + 100
-			var solarAddingPercentage = prompt('Enter propability of solar being added to each meter (decimal between 0 and 1):', 0.5)
-			if (solarAddingPercentage < 0 || solarAddingPercentage > 1) {
-				alert('INPUT ERROR: Must enter decimal value between 0 and 1')
-				solarAddingPercentage = 0
-			}
-			for (; i < tkeys.length && i < limit; i++) {
-				index = tkeys[i]
-				if (tree[index].hasOwnProperty('object') && tree[index]['object'] == 'triplex_meter') {
-					if (Math.random() < solarAddingPercentage) {
-						newInverter = makeNewInverter(tree[index]['phases'])
-						newPanels = newRandomPanels()
-						newChildAtLocation(newInverter, index)
-						inverterIndex = findIndex(tree, 'name', newInverter['name'])
-						newChildAtLocation(newPanels, inverterIndex)
-						redraw()
-					}
-				}
-			}
-			percentage = Math.round(i / tkeys.length * 100).toFixed(2)
-			in_use = false
-		} 
-		else {
-			redraw()
-			removeProgressDialog()
-			is_use = false
-			clearInterval(inter2)
-		}
-	}
-	function progressBarUpdate(percentage) {
-		if (document.getElementById('progBar') != undefined)
-			document.getElementById('progColor').style.width = percentage + '%'
-	}
-	function noMeter() {
-		for (x in hiddenNodes) {
-			if (hiddenNodes[x].objectType != undefined && hiddenNodes[x].objectType == 'triplex_meter')
-				return true
-		}
-		return false
-	}
-	i = 0;
-	percentage = 0;
-	in_use = false;
-	tkeys = Object.keys(tree)
-	if (noMeter()) {
-		alert('Meters have been hidden in the layout. Please unfold everything before adding solar.')
-	} else {
-		showProgressDialog('bar','Please wait. Solar is being generated.','none')
-		// HACK: we do this extra timeout so the DOM gets execution priority and redraws the page.
-		// setTimeout(walkAndAddSolar, 1000);
-		inter2 = setInterval(walkAndAddSolar, 10)
-	}
-}
-
 /*
  * General Function to Add Components 'inverter', 'triplex_meter', PERC
  */
