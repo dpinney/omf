@@ -92,19 +92,6 @@ def heavyProcessing(modelDir, inputDict):
 		startTime = datetime.datetime.now()
 		feederJson = json.load(open(pJoin(modelDir, feederName+'.omd')))
 		tree = feederJson["tree"]
-		# add a check to see if there is already a climate object in the omd file
-		# if there is delete the climate from attachments and the climate object
-		for key in feederJson['attachments'].keys():
-			if (key.endswith('.tmy2')):
-				del feederJson['attachments'][key]	
-		for key in tree.keys():
-			if  (tree[key].get('object') == 'climate') or (tree[key].get('object') == 'csv_reader'):
-				del tree[key]
-		if 'weatherAirport.csv' in feederJson['attachments']:
-			tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
-			tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
-		else:
-			tree[feeder.getMaxKey(tree)+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
 		# tree[feeder.getMaxKey(tree)+1] = {'object':'capacitor','control':'VOLT','phases':'ABCN','name':'CAPTEST','parent':'tm_1','capacitor_A':'0.10 MVAr','capacitor_B':'0.10 MVAr','capacitor_C':'0.10 MVAr','time_delay':'300.0','nominal_voltage':'2401.7771','voltage_set_high':'2350.0','voltage_set_low':'2340.0','switchA':'CLOSED','switchB':'CLOSED','switchC':'CLOSED','control_level':'INDIVIDUAL','phases_connected':'ABCN','dwell_time':'0.0','pt_phases':'ABCN'}
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
