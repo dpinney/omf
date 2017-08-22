@@ -709,7 +709,7 @@
 			<input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
 			<input type='hidden' id='modelName' name='modelName' value='{{modelName}}'/>
 			<div id='climateInputs' align='left'>
-				<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport' checked/>
+				<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport'>
 				<label for='historicalImport'>Historical Weather</label>
 				<br>
 				<label for='startDate'>Start Date (YYYY-MM-DD):</label>
@@ -722,7 +722,7 @@
 				<input style='width:5px' type='text' id='airport' name='airport' pattern='^[A-Z]{3}$'>
 				<br>
 				<br>
-				<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport'/>
+				<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport'>
 				<label for='tmyImport'>tmy Import</label>
 				<br>
 				<label for='zipcode'>Zip Code:</label>
@@ -781,7 +781,7 @@
 				<br>
 				<br>
 				<button onclick='closeModal("anonymizeModal")'>Cancel</button>
-				<input type='submit' value='Apply' style='min-width:45px'/>
+				<input type='submit' value='Apply' style='min-width:45px'>
 			</div>
 		</form>
 	</div>
