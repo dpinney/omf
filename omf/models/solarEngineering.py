@@ -88,19 +88,6 @@ def heavyProcessing(modelDir, inputDict):
 		startTime = datetime.datetime.now()
 		feederJson = json.load(open(pJoin(modelDir, feederName+'.omd')))
 		tree = feederJson["tree"]
-		#add a check to see if there is already a climate object in the omd file
-		#if there is delete the climate from attachments and the climate object
-		for key in feederJson['attachments'].keys():
-			if (key.endswith('.tmy2')):
-				del feederJson['attachments'][key]	
-		for key in tree.keys():
-			if  (tree[key].get('object') == 'climate') or (tree[key].get('object') == 'csv_reader'):
-				del tree[key]
-		if 'weatherAirport.csv' in feederJson['attachments']:
-			tree[feeder.getMaxKey(tree)+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
-			tree[feeder.getMaxKey(tree)+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
-		else:
-			tree[feeder.getMaxKey(tree)+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
 		# Set up GLM with correct time and recorders:
 		feeder.attachRecorders(tree, "Regulator", "object", "regulator")
 		feeder.attachRecorders(tree, "Capacitor", "object", "capacitor")
@@ -474,7 +461,7 @@ def new(modelDir):
 	defaultInputs = {
 		"simStartDate": "2012-04-01",
 		"simLengthUnits": "hours",
-		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg", 
+		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
 		"modelType": modelName,
 		"zipCode": "59001",
 		"simLength": "72",

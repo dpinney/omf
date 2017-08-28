@@ -974,46 +974,44 @@ def removeNetwork(owner, modelName, networkNum, networkName=None):
 @flask_login.login_required
 def climateChange(owner, feederName):
 	modelName = request.form.get('modelName')
-	start = request.form.get('startDate')
-	end = request.form.get('endDate')
-	airport = request.form.get('airport')
-	importOption = request.form.get('climateImportOption')
 	modelDir = 'data/Model/' + owner + '/' + modelName
 	omdPath = modelDir + '/' + feederName + '.omd'
 	outFilePath = modelDir + '/weatherAirport.csv'
 	if os.path.isfile(outFilePath):
 		os.remove(outFilePath)
-	if importOption == 'historicalImport':
-		importProc = Process(target=backgroundClimateChange, args =[start, end, airport, outFilePath, omdPath, modelDir])
-		importProc.start()
-		pid = str(importProc.pid)
-		with open(modelDir + '/WPID.txt', 'w+') as outFile:
-			outFile.write(pid)
-	elif importOption == 'tmyImport':
-		with open(omdPath, 'r') as inFile:
-			feederJson = json.load(inFile)
-			for key in feederJson['tree'].keys():
-				if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('object') == 'csv_reader'):
-					del feederJson['tree'][key]
-			for key in feederJson['attachments'].keys():
-				if (key == 'weatherAirport.csv'):
-					del feederJson['attachments'][key]
-			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
-		with open(omdPath, 'w') as outFile:
-			json.dump(feederJson, outFile, indent=4)
+	importProc = Process(target=backgroundClimateChange, args =[modelDir, omdPath, outFilePath])
+	importProc.start()
+	pid = str(importProc.pid)
+	with open(modelDir + '/WPID.txt', 'w+') as outFile:
+		outFile.write(pid)
 	return ('',204)
 
-def backgroundClimateChange(start, end, airport, outFilePath, omdPath, modelDir):
-	weather.makeClimateCsv(start, end, airport, outFilePath)
+def backgroundClimateChange(modelDir, omdPath, outFilePath):
 	with open(omdPath, 'r') as inFile:
 		feederJson = json.load(inFile)
 		for key in feederJson['tree'].keys():
-			if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('object') == 'csv_reader'):
+			if (feederJson['tree'][key].get('object') == 'climate') or (feederJson['tree'][key].get('name') == 'weatherReader'):
 				del feederJson['tree'][key]
-		feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
-		feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
-		with open(outFilePath) as csvFile:
-			feederJson['attachments']['weatherAirport.csv'] = csvFile.read()
+		for key in feederJson['attachments'].keys():
+			if (key.endswith('.tmy2')) or (key == 'weatherAirport.csv'):
+				del feederJson['attachments'][key]
+		importOption = request.form.get('climateImportOption')
+		if importOption == 'historicalImport':
+			start = request.form.get('startDate')
+			end = request.form.get('endDate')
+			airport = request.form.get('airport')
+			weather.makeClimateCsv(start, end, airport, outFilePath)
+			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
+			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
+			with open(outFilePath) as csvFile:
+				feederJson['attachments']['weatherAirport.csv'] = csvFile.read()
+		elif importOption == 'tmyImport':
+			zipCode = request.form.get('zipCode')
+			climateName, latforpvwatts = weather.zipCodeToClimateName(zipCode)
+			tmyFilePath = 'data/Climate/' + climateName + '.tmy2'
+			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate','name':'Climate','interpolate':'QUADRATIC', 'tmyfile':'climate.tmy2'}
+			with open(tmyFilePath) as tmyFile:
+				feederJson['attachments']['climate.tmy2'] = tmyFile.read()
 	with open(omdPath, 'w') as outFile:
 		json.dump(feederJson, outFile, indent=4)
 	os.remove(modelDir + '/WPID.txt')
@@ -1031,14 +1029,14 @@ def anonymize(owner, feederName):
 	modelName = request.form.get('modelName')
 	modelDir = 'data/Model/' + owner + '/' + modelName
 	omdPath = modelDir + '/' + feederName + '.omd'	
-	importProc = Process(target=backgroundAnonymize, args =[omdPath, modelDir])
+	importProc = Process(target=backgroundAnonymize, args =[modelDir, omdPath])
 	importProc.start()
 	pid = str(importProc.pid)
 	with open(modelDir + '/PPID.txt', 'w+') as outFile:
 		outFile.write(pid)
 	return ('Success',204)
 
-def backgroundAnonymize(omdPath, modelDir):
+def backgroundAnonymize(modelDir, omdPath):
 	with open(omdPath, 'r') as inFile:
 		inFeeder = json.load(inFile)
 		nameOption = request.form.get('anonymizeNameOption')
