@@ -730,7 +730,7 @@
 			</div>
 			<br>
 			<div style='padding-top:10px'>
-				<button onclick='closeModal("climateModal")'>Cancel</button>
+				<button onclick='event.preventDefault();closeModal("climateModal")'>Cancel</button>
 				<input type='submit' value='Apply' style='min-width:45px'/>				
 			</div>
 		</form>
@@ -780,7 +780,7 @@
 				<label for='addNoise'>Add Noise <input style='width:1px' type='text' id='noisePerc' name='noisePerc'>[%]</label>
 				<br>
 				<br>
-				<button onclick='closeModal("anonymizeModal")'>Cancel</button>
+				<button onclick='event.preventDefault();closeModal("anonymizeModal")'>Cancel</button>
 				<input type='submit' value='Apply' style='min-width:45px'>
 			</div>
 		</form>
