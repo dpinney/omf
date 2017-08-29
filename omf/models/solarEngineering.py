@@ -246,6 +246,19 @@ def heavyProcessing(modelDir, inputDict):
 				cleanOut[newkey]['Cap1B'] = rawOut[key]['switchB']
 				cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
 				cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
+		# Capture voltages at the swingbus
+		# First find the swingbus
+		for key in tree:
+				ob = tree[key]
+				if type(ob)==dict and ob.get('bustype','')=='SWING':
+					feederN = ob['name']
+		# Loop through voltDump for swingbus voltages
+		swingVolts = []
+		for step, stamp in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
+			for nodeName in [x for x in rawOut.get('aVoltDump.csv',{}).keys() if x != '# timestamp']:		
+				if nodeName == feederN:
+					swingVolts.append(rawOut['aVoltDump.csv'][nodeName][step])
+		cleanOut['swingVoltage'] = swingVolts
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 		latPerc = 1.0*len(latKeys)/len(tree)
@@ -451,7 +464,7 @@ def new(modelDir):
 		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
 		"modelType": modelName,
 		"zipCode": "59001",
-		"simLength": "24",
+		"simLength": "72",
 	}
 	creationCode = __metaModel__.new(modelDir, defaultInputs)
 	try:

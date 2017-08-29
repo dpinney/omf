@@ -156,13 +156,22 @@
 					"name":"DG Power",
 					"visible": false
 				}
+				var swingVoltage = {
+					"marker":{
+						"enabled":false
+					},
+					"color":"blue",
+					"data":allOutputData.swingVoltage,
+					"name":"Swing Voltage",
+					"visible":false
+				}
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
 				localHighChart["chart"]["renderTo"] = "powerTimeSeries"
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["chart"]["width"] = 1000
 				localHighChart["chart"]["height"] = 150
-				localHighChart["series"] = [powerSeries, lossesSeries, DGSeries]
-				localHighChart["yAxis"]["title"] = {"text": "Power (W)", "style": {"color": "gray"}}
+				localHighChart["series"] = [powerSeries, lossesSeries, DGSeries, swingVoltage]
+				localHighChart["yAxis"]= [{"title":{"text": "Power (W)", "style": {"color": "gray"}}},{"title":{"text":"Voltage (V)","style":{"color":"black"}},"opposite":"true"}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
