@@ -4,18 +4,17 @@ import json, math, random, datetime
 
 # DISTRIBUTION FEEDER FUNCTIONS
 def distPseudomizeNames(inFeeder):
-	''' Replace all names in the inFeeder distribution system with pseudonames made up of the object type and a random ID. Return a key with name and ID pairs. '''
+	''' Replace all names in the inFeeder distribution system with pseudonames composed from the object type and a random ID. Return a key with name and ID pairs. '''
 	newNameKey = {}
-	# newKeyID = 0
-	newKeyID = random.randint(0,100)
+	randomID = random.randint(0,100)
 	# Create nameKey dictionary
 	for key in inFeeder['tree']:
 		if 'name' in inFeeder['tree'][key]:
 			oldName = inFeeder['tree'][key]['name']
-			newName = inFeeder['tree'][key]['object'] + str(newKeyID)
+			newName = inFeeder['tree'][key]['object'] + str(randomID)
 			newNameKey.update({oldName:newName})
 			inFeeder['tree'][key]['name'] = newName
-			newKeyID += 1
+			randomID += 1
 	# Replace names in tree
 	for key in inFeeder['tree']:
 		if 'parent' in inFeeder['tree'][key]:
@@ -41,20 +40,18 @@ def distPseudomizeNames(inFeeder):
 	return newNameKey
 
 def distRandomizeNames(inFeeder):
-	''' Replace all names in the inFeeder distribution system with pseudonames made up of the object type and a random ID.. Return a list of the new IDs. '''
+	''' Replace all names in the inFeeder distribution system with a random ID number. '''
 	newNameKey = {}
-	newNameArray = []
-	# newKeyID = 0
-	newKeyID = random.randint(0,100)
+	randomID = random.randint(0,100)
 	# Create nameKey dictionary
 	for key in inFeeder['tree']:
 		if 'name' in inFeeder['tree'][key]:
 			oldName = inFeeder['tree'][key]['name']
-			newName = inFeeder['tree'][key]['object'] + str(newKeyID)
+			newName = str(randomID)
 			newNameKey.update({oldName:newName})
 			newNameArray.append(newName)
 			inFeeder['tree'][key]['name'] = newName
-			newKeyID += 1
+			randomID += 1
 	# Replace names in tree
 	for key in inFeeder['tree']:
 		if 'parent' in inFeeder['tree'][key]:
@@ -77,7 +74,7 @@ def distRandomizeNames(inFeeder):
 			if key == 'name':
 				oldNode = inFeeder['nodes'][i][key]
 				inFeeder['nodes'][i][key] = newNameKey[oldNode]
-	return newNameArray
+	return
 
 def distRandomizeLocations(inFeeder):
 	''' Replace all objects' longitude and latitude positions in the inFeeder distribution system with random values. '''
@@ -104,7 +101,7 @@ def distTranslateLocations(inFeeder, translation, rotation):
 	return
 
 def distAddNoise(inFeeder, noisePerc):
-	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc probability. '''
+	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
 			value = inFeeder['tree'][key][prop]
@@ -299,10 +296,9 @@ def distSmoothLoads(inFeeder):
 
 # TRANSMISSION NETWORK FUNCTIONS
 def tranPseudomizeNames(inNetwork):
-	''' Replace all names in the inNetwork transmission system with pseudonames made up of the object type and a random ID.. Return a key with name and ID pairs. '''
+	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. Return a key with name and ID pairs. '''
 	newBusKey = {}
-	# newKeyID = 0
-	newKeyID = random.randint(0,100)
+	randomID = random.randint(0,100)
 	for dic in inNetwork['bus']:
 		for each in dic:
 			idx = int(each) - 1
@@ -310,28 +306,25 @@ def tranPseudomizeNames(inNetwork):
 				for prop in inNetwork['bus'][idx][key]:
 					if 'bus_i' in prop:
 						oldBus = inNetwork['bus'][idx][key]['bus_i']
-						newBus = 'bus' + str(newKeyID)
-						newKeyID += 1
+						newBus = 'bus' + str(randomID)
+						randomID += 1
 						inNetwork['bus'][idx][key]['bus_i'] = newBus
 						newBusKey.update({oldBus:newBus})
 	return newBusKey
 
 def tranRandomizeNames(inNetwork):
-	''' Replace all names in the inNetwork transmission system with pseudonames made up of the object type and a random ID. Return a list of the new IDs. '''
-	newBusArray = []
-	# newKeyID = 0
-	newKeyID = random.randint(0,100)
+	''' Replace all names in the inNetwork transmission system with pseudonames composed of the object type and a random ID. '''
+	randomID = random.randint(0,100)
 	for dic in inNetwork['bus']:
 		for each in dic:
 			idx = int(each) - 1
 			for key in inNetwork['bus'][idx]:
 				for prop in inNetwork['bus'][idx][key]:
 					if 'bus_i' in prop:
-						newBus = 'bus' + str(newKeyID)
-						newKeyID += 1
+						newBus = 'bus' + str(randomID)
+						randomID += 1
 						inNetwork['bus'][idx][key]['bus_i'] = newBus
-						newBusArray.append(newBus)
-	return newBusArray
+	return
 
 def tranRandomizeLocations(inNetwork):
 	''' Replace all objects' longitude and latitude positions in the inNetwork transmission system with random values. '''
@@ -364,7 +357,7 @@ def tranTranslateLocations(inNetwork, translation, rotation):
 	return
 
 def tranAddNoise(inNetwork, noisePerc):
-	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc probability. '''
+	''' Add random noise to properties with numeric values for all objects in the inNetwork transmission system based on a noisePerc magnitude. '''
 	for array in inNetwork:
 		if (array == 'bus') or (array == 'gen') or (array == 'branch'):
 			for dic in inNetwork[array]:
