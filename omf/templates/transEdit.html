@@ -446,15 +446,16 @@ function tablePlus(me) {
 	newRow.innerHTML += '<td><input></input></td>'
 }
 function tableSave(me) {
-	tbl = me.parentElement.parentElement.parentElement
+	var tbl = me.parentElement.parentElement.parentElement
 	var toJson = {}
 	// convert HTML table to JSON
-	for (i = 1; i < tbl.rows.length; i++) {
-		key = tbl.rows[i].cells[0].lastElementChild.value
+	for (var i = 1; i < tbl.rows.length; i++) {
+		var key = tbl.rows[i].cells[0].lastElementChild.value
 		if (key !== '') {
 			toJson[key] = tbl.rows[i].cells[1].lastElementChild.value
 		}
 	}
+	console.log(toJson)
 	// Update tree with new values
 	var clickType = previousTarget.id.split("_")[0]
 	var clickID = previousTarget.id.split("_")[1]
@@ -467,28 +468,10 @@ function tableSave(me) {
 			delete networkData[clickType][parseInt(clickID)-1][clickID][key]
 		}
 	}
-	// Update Feeder
-	/*if (previousTarget.tagName === 'circle') {
-		// Update Circle
-		previousTarget.setAttribute('cx', toJson['longitude'])
-		previousTarget.setAttribute('cy', toJson['latitude'])
-		// Update Line
-		for (i = 0, limit = (networkData.branch).length; i < limit; i++) {
-			if (parseInt(networkData.branch[i][String(i+1)]['fbus']) === parseInt(clickID)) {
-				document.getElementById('branch_'+String(i+1)).setAttribute('x1', toJson['longitude'])
-				document.getElementById('branch_'+String(i+1)).setAttribute('y1', toJson['latitude'])
-			}
-			else if (parseInt(networkData.branch[i][String(i+1)]['tbus']) === parseInt(clickID)) {
-				document.getElementById('branch_'+String(i+1)).setAttribute('x2', toJson['longitude'])
-				document.getElementById('branch_'+String(i+1)).setAttribute('y2', toJson['latitude'])
-			}
-		}
-	}*/
 	unsavedChanges = true;
 	//tableDestroy()
 	//tableCreate(toJson)
 	alert('Updated object: ' + previousTarget.id)
-
 }
 function tableDestroy() {
 	tabScroll = document.getElementById('tableScroller')
