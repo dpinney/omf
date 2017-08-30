@@ -419,12 +419,9 @@ function tableCreate(inputObject) {
 	tbl.appendChild(whatClicked)
 	// Put in the header.
 	headRow = document.createElement('tr')
-	headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button></th>'
-	headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
+	headRow.innerHTML = '<th style="text-align: left;padding: 0px 0px 0px 11px;"><button onclick="tablePlus(this)">+</button></th>'
+	headRow.innerHTML += '<th><button id="deleteButton" onclick="deleteOb()">Delete</button><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
 	tbl.appendChild(headRow)
-	secondRow = document.createElement('tr')
-	secondRow.innerHTML += '<th><button id="deleteButton" onclick="deleteOb()">Delete</button></th>'
-	tbl.appendChild(secondRow)
 	// Put the object in.
 	var notAllowed = ['bus_i', 'bus', 'fbus', 'tbus', 'latitude', 'longitude'] //disabled because doesn't render in real time, and on-change causes lines to sometimes render improperly.
 	for (key in inputObject) {
