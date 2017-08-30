@@ -572,8 +572,10 @@ function selectionTable() {
 	headRow.innerHTML = '<th>Selected Elements</th>'
 	tbl.appendChild(headRow)
 	currentSel = selection[selection.length - 1].id
+	// If user was alt+clicking a selected thing, deselect it.
 	for (i = 0; i < selection.length; i++) {
 		if(selection[i].id == currentSel  && i != selection.length-1) {
+			selection[i].classList.remove('selected')
 			selection.splice(i, 1)
 			selection.splice(selection.length - 1, 1)
 			console.log(selection)
@@ -587,6 +589,10 @@ function selectionTable() {
 		tbl.appendChild(row)
 	}
 	tabScroll.appendChild(tbl)
+	// Remove header if we have deselected the last item.
+	if (selection.length == 0) {
+		tableDestroy()
+	}
 }
 function newNode(typeOfNode) {
 	console.log('new bus length',(networkData.bus).length+1)

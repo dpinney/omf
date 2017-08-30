@@ -245,7 +245,7 @@ def new(modelDir):
 		"networkName1": "case9",
 		"algorithm": "NR",
 		"model": "AC",
-		"tolerance": math.pow(10,-8),
+		"tolerance": "0.00000001",
 		"iteration": 10,
 		"genLimits": 0,
 		"modelType":modelName}
