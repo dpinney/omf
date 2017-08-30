@@ -340,7 +340,29 @@ function mouseUp(event) {
 	upX = event.pageX
 	upY = event.pageY
 }
+
+function clickLatLon(event) {
+	// Return real lat/lon location of current click.
+	var pan = window.panZoom.getPan();
+	//var zoom = panZoom.getZoom();
+	var sizes = window.panZoom.getSizes();
+	var zoom = sizes.realZoom;
+	var x, y, pt;
+	var svg = document.getElementById('svgContainer');
+	var pt = svg.createSVGPoint();
+	pt.x = event.clientX;
+	pt.y = event.clientY;
+	pt = pt.matrixTransform(svg.getScreenCTM().inverse());
+	x = pt.x;
+	y = pt.y;
+	x = (x - pan.x) / zoom;
+	y = (y - pan.y) / zoom;
+	return [x,y];
+}
+
 function svgClick(event) {
+	latLon = clickLatLon(event);
+	// console.log('CLICKLOC',latLon[0],latLon[1]);
 	//console.log("debug: screen ", event.screenX, event.screenY, "page ", event.pageX, event.pageY)
 	if ( (downX!==upX) || (downY!==upY) ) {
 		return
