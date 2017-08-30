@@ -455,7 +455,6 @@ function tableSave(me) {
 			toJson[key] = tbl.rows[i].cells[1].lastElementChild.value
 		}
 	}
-	console.log(toJson)
 	// Update tree with new values
 	var clickType = previousTarget.id.split("_")[0]
 	var clickID = previousTarget.id.split("_")[1]
@@ -464,14 +463,14 @@ function tableSave(me) {
 	}
 	// Delete properties from tree
 	for (key in networkData[clickType][parseInt(clickID)-1][clickID]) {
-		if (!toJson.hasOwnProperty(key)) {
+		// HACK: DON'T DELETE DATA THAT OBJECTS MUST CONTAIN VIA CHECKING THE NAMES.
+		if (!toJson.hasOwnProperty(key) && key!='latitude' && key!='longitude' && key!='bus_i' && key!='fbus' && key!='tbus' && key!='bus') {
 			delete networkData[clickType][parseInt(clickID)-1][clickID][key]
 		}
 	}
 	unsavedChanges = true;
-	//tableDestroy()
-	//tableCreate(toJson)
 	alert('Updated object: ' + previousTarget.id)
+	tableDestroy()
 }
 function tableDestroy() {
 	tabScroll = document.getElementById('tableScroller')
