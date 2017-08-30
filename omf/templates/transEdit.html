@@ -129,8 +129,8 @@
 			<![CDATA[
 			line {stroke:black;}
 			line.parentChild {stroke:LightGrey;}
-			circle {stroke:white; fill:blue;}
-			rect {stroke:white; fill:gray;}
+			circle {stroke:white; fill:gray;}
+			rect {stroke:white; fill:DarkGrey;}
 			line.selected, circle.selected, rect.selected {stroke:lime;}
 			]]>
 		</style>
@@ -318,8 +318,7 @@ function buildNetwork() {
 	for (num in networkData.bus) {
 		try {
 			anOb = networkData.bus[num][String(parseInt(num)+1)]
-			var width = 8
-			addRectangle(anOb['longitude']-width/2,anOb['latitude']-width/2,width,width,"bus_"+String(parseInt(num)+1),"bus")			
+			addCircle(anOb['longitude'], anOb['latitude'],5,"bus_"+String(parseInt(num)+1),"bus")
 		} catch(e) {}
 	}
 	// Draw generators over busses
@@ -328,7 +327,8 @@ function buildNetwork() {
 			anOb = networkData.gen[num][String(parseInt(num)+1)]
 			var longitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['longitude']
 			var latitude = networkData.bus[String(parseInt(anOb['bus'])-1)][anOb['bus']]['latitude']
-			addCircle(longitude, latitude,2,"gen_"+String(parseInt(num)+1),"gen")			
+			var width = 4
+			addRectangle(longitude-width/2,latitude-width/2,width,width,"gen_"+String(parseInt(num)+1),"gen")	
 		} catch(e) {}
 	}
 }
@@ -357,6 +357,7 @@ function svgClick(event) {
 	 var clickID = event.target.id.split("_")[1]
 	 console.log('clicked ', clickType, ' with id', clickID)
 		if (selection.indexOf(networkData[clickType][parseInt(clickID)-1]) === -1){
+			//this is where you have to t\determine selection and delete from array and stuff
 			tableDestroy()
 			tableCreate(networkData[clickType][parseInt(clickID)-1][clickID])
 			selection.push(event.target)
@@ -421,6 +422,9 @@ function tableCreate(inputObject) {
 	headRow.innerHTML = '<th><button onclick="tablePlus(this)">+</button></th>'
 	headRow.innerHTML += '<th><button id="saveButton" onclick="tableSave(this)">Save</button></th>'
 	tbl.appendChild(headRow)
+	secondRow = document.createElement('tr')
+	secondRow.innerHTML += '<th><button id="deleteButton" onclick="deleteOb()">Delete</button></th>'
+	tbl.appendChild(secondRow)
 	// Put the object in.
 	var notAllowed = ['bus_i', 'bus', 'fbus', 'tbus', 'latitude', 'longitude'] //disabled because doesn't render in real time, and on-change causes lines to sometimes render improperly.
 	for (key in inputObject) {
@@ -440,7 +444,7 @@ function tableDel(me) {
 }
 function tablePlus(me) {
 	myTable = me.parentElement.parentElement.parentElement
-	newRow = myTable.insertRow(1)
+	newRow = myTable.insertRow(2)
 	newRow.innerHTML = '<td><button onclick="tableDel(this)">&#215;</button><input style="width:112px"></input></td>'
 	newRow.innerHTML += '<td><input></input></td>'
 }
@@ -467,7 +471,7 @@ function tableSave(me) {
 		}
 	}
 	// Update Feeder
-	if (previousTarget.tagName === 'circle') {
+	/*if (previousTarget.tagName === 'circle') {
 		// Update Circle
 		previousTarget.setAttribute('cx', toJson['longitude'])
 		previousTarget.setAttribute('cy', toJson['latitude'])
@@ -482,10 +486,10 @@ function tableSave(me) {
 				document.getElementById('branch_'+String(i+1)).setAttribute('y2', toJson['latitude'])
 			}
 		}
-	}
+	}*/
 	unsavedChanges = true;
-	tableDestroy()
-	tableCreate(toJson)
+	//tableDestroy()
+	//tableCreate(toJson)
 	alert('Updated object: ' + previousTarget.id)
 
 }
@@ -502,8 +506,19 @@ function deleteOb() {
 		previousTarget.remove()
 		networkData[clickType][parseInt(clickID)-1][clickID] = {}
 	}
+	//Delete Squares
+	if (clickType === 'gen') {
+		previousTarget.remove()
+		networkData[clickType][parseInt(clickID)-1][clickID] = {}
+	}
 	// Delete Circles
 	if (clickType === 'bus') {
+		gens = 0
+		for (i = 0, limit = (networkData.gen).length; i < limit; i++) {
+			if (parseInt(networkData.gen[i][String(i+1)]['bus']) === parseInt(clickID)) {
+				gens++
+			}
+		}
 		// Check for connected lines
 		lines = 0
 		for (i = 0, limit = (networkData.branch).length; i < limit; i++) {
@@ -512,8 +527,8 @@ function deleteOb() {
 				lines++
 			}
 		}
-		if (lines > 0) {
-			alert('Cannot delete circles with lines still connected')
+		if (lines > 0 || gens > 0) {
+			alert('Cannot delete circles with components still connected')
 		}
 		else {
 			previousTarget.remove()
@@ -556,6 +571,15 @@ function selectionTable() {
 	headRow = document.createElement('tr')
 	headRow.innerHTML = '<th>Selected Elements</th>'
 	tbl.appendChild(headRow)
+	currentSel = selection[selection.length - 1].id
+	for (i = 0; i < selection.length; i++) {
+		if(selection[i].id == currentSel  && i != selection.length-1) {
+			selection.splice(i, 1)
+			selection.splice(selection.length - 1, 1)
+			console.log(selection)
+			continue
+		}
+	}
 	// Put the object in.
 	for (i = 0; i < selection.length; i++) {
 		row = document.createElement('tr')

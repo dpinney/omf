@@ -151,7 +151,7 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Tolerance<span class="classic">The termination tolerance for powerflow, in units P and Q dispatch per unit.</span></label>
-				<input type="text" id="tolerance" name="tolerance" value="0.00000001" required="required">
+				<input type="text" id="tolerance" name="tolerance" value="0.00000001" pattern="^\d+\.?\d*?$" required="required">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Iteration<span class="classic">The maximum number of iterations for the solver algorithm specified above.</span></label>
