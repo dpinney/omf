@@ -1054,13 +1054,13 @@ function loadModelingAmi() {
 }
 
 function climateChange() {
-	showProgressDialog('spinner', 'Adding climate data to model', 'none')
+	showProgressDialog('spinner', 'Adding climate data to model')
 	startProcess('/climateChange/{{owner}}/{{feederName}}')
 	startCheck('/checkClimateChange/{{owner}}/{{modelName}}')
 }
 
 function anonymize() {
-	showProgressDialog('spinner', 'Anonymizing Feeder', 'none')
+	showProgressDialog('spinner', 'Anonymizing Feeder')
 	startProcess('/anonymize/{{owner}}/{{feederName}}')
 	startCheck('/checkAnonymize/{{owner}}/{{modelName}}')
 }
