@@ -136,7 +136,7 @@
 					},
 					"color":"red",
 					"data":allOutputData.Consumption.Power,
-					"name":"Substation Powerflow"
+					"name":"Substation Powerflow (W)"
 				}
 				var lossesSeries = {
 					"marker":{
@@ -144,7 +144,7 @@
 					},
 					"color":"orangered",
 					"data":allOutputData.Consumption.Losses,
-					"name":"Technical Losses",
+					"name":"Technical Losses (W)",
 					"visible": false
 				}
 				var DGSeries = {
@@ -153,7 +153,7 @@
 					},
 					"color":"seagreen",
 					"data":allOutputData.Consumption.DG,
-					"name":"DG Power",
+					"name":"DG Power (W)",
 					"visible": false
 				}
 				var swingVoltage = {
@@ -162,7 +162,7 @@
 					},
 					"color":"blue",
 					"data":allOutputData.swingVoltage,
-					"name":"Swing Voltage",
+					"name":"Swing Voltage (V)",
 					"visible":false
 				}
 				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
@@ -171,7 +171,7 @@
 				localHighChart["chart"]["width"] = 1000
 				localHighChart["chart"]["height"] = 150
 				localHighChart["series"] = [powerSeries, lossesSeries, DGSeries, swingVoltage]
-				localHighChart["yAxis"]= [{"title":{"text": "Power (W)", "style": {"color": "gray"}}},{"title":{"text":"Voltage (V)","style":{"color":"black"}},"opposite":"true"}]
+				localHighChart["yAxis"]= [{"title":{"text": "Units", "style": {"color": "gray"}}},{"title":{"text":"Voltage (V)","style":{"color":"black"}},"opposite":"true"}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
