@@ -1000,7 +1000,12 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath):
 			start = request.form.get('startDate')
 			end = request.form.get('endDate')
 			airport = request.form.get('airport')
-			weather.makeClimateCsv(start, end, airport, outFilePath)
+			try:
+				weather.makeClimateCsv(start, end, airport, outFilePath)
+			except:
+				os.remove(modelDir + '/WPID.txt')
+				print 'Climate data does not exist for given parameters. Choose different parameters.'
+				return
 			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
 			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
 			with open(outFilePath) as csvFile:
