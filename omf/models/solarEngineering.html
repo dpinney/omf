@@ -524,5 +524,12 @@
 			</div>
 			<script>gebi("stdout").innerHTML = allOutputData.stdout</script>
 		</div>
+		<p class="reportTitle postRun">Gridlab-D Warnings <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="gridlabDWarningsBlock" class="tightContent postRun detailsContainer" style="position: relative;">
+			<div id="gridlabDWarnings" style="margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
+				<pre id="stderr" style="font-size:13px; text-align:right; padding-left: 10px;"></pre>
+			</div>
+			<script>gebi("stderr").innerHTML = allOutputData.stderr</script>
+		</div>
 	</div>
 </body>
