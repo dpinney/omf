@@ -702,38 +702,63 @@
 	</div>
 </div>
 <div id='climateModal' class='modal'>
-	<div class='modalContent' id='climateModalContent' style='width:300px'>
+	<div class='modalContent' id='climateModalContent'>
 		<div style='font-weight:bold; font-size:14pt'>Climate Change</div>
-		<br>
-		<form onsubmit='climateChange();' action='/climateChange/{{owner}}/{{feederName}}' id='climateChange' enctype='multipart/form-data' method='post'>
-			<input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
-			<input type='hidden' id='modelName' name='modelName' value='{{modelName}}'/>
-			<div id='climateInputs' align='left'>
-				<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport'>
-				<label for='historicalImport'>Historical Weather</label>
-				<br>
-				<label for='startDate'>Start Date (YYYY-MM-DD):</label>
-				<input style='width:5px' type='text' id='startDate' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$'>
-				<br>
-				<label for='endDate'>End Date (YYYY-MM-DD):</label>
-				<input style='width:5px' type='text' id='endDate' name='endDate' pattern='^\d{4}-\d{2}-\d{2}$'>
-				<br>
-				<label for='airport'>Airport Code:</label>
-				<input style='width:5px' type='text' id='airport' name='airport' pattern='^[A-Z]{3}$'>
-				<br>
-				<br>
-				<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport'>
-				<label for='tmyImport'>tmy Import</label>
-				<br>
-				<label for='zipcode'>Zip Code:</label>
-				<input style='width:5px' type="text" id="zipCode" name="zipCode" pattern='^\d{5}$'>
-			</div>
-			<br>
-			<div style='padding-top:10px'>
-				<button onclick='event.preventDefault();closeModal("climateModal")'>Cancel</button>
-				<input type='submit' value='Apply' style='min-width:45px'/>				
-			</div>
-		</form>
+			<form onsubmit='climateChange();' action='/climateChange/{{owner}}/{{feederName}}' id='climateChange' enctype='multipart/form-data' method='post'>
+				<input type='hidden' name='_csrf_token' value='{{csrf_token()}}'/>
+				<input type='hidden' id='modelName' name='modelName' value='{{modelName}}'/>
+				<table class='importOptions'>
+					<th>
+						<input type='radio' id='historicalOption' name='climateImportOption' value='historicalImport'>
+						<label for='historicalImport'>Historical Weather</label>
+					</th>
+					<tr>
+						<td style='width:175px'>
+							<label for='startDate'>Start Date (YYYY-MM-DD):</label>	
+						</td>
+						<td>
+							<input style='width:5px' type='text' id='startDate' name='startDate' pattern='^\d{4}-\d{2}-\d{2}$'>
+						</td>
+					</tr>
+					<tr>
+						<td style='width:175px'>
+							<label for='endDate'>End Date (YYYY-MM-DD):</label>
+						</td>
+						<td>
+							<input style='width:5px' type='text' id='endDate' name='endDate' pattern='^\d{4}-\d{2}-\d{2}$'>
+						</td>
+					</tr>
+					<tr>
+						<td style='width:175px'>
+							<label for='airport'>Airport Code:</label>
+						</td>
+						<td>
+							<input style='width:5px' type='text' id='airport' name='airport' pattern='^[A-Z]{3}$'>
+						</td>
+					</tr>
+					<th>
+						<input type='radio' id='tmyOption' name='climateImportOption' value='tmyImport'>
+						<label for='tmyImport'>tmy Import</label>
+					</th>
+					<tr>
+						<td style='width:175px'>
+							<label for='zipcode'>Zip Code:</label>
+						</td>
+						<td>
+							<input style='width:5px' type="text" id="zipCode" name="zipCode" pattern='^\d{5}$'>
+						</td>
+					</tr>
+					<tr>
+						<td style='width:175px'>
+							<button onclick='event.preventDefault();closeModal("climateModal")'>Cancel</button>
+						</td>
+						<td>
+							<input type='submit' value='Apply' style='min-width:45px'/>	
+						</td>
+					</tr>
+				</table>
+			</form>
+		</div>
 	</div>
 </div>
 <div id='anonymizeModal' class='modal'>
