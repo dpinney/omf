@@ -126,6 +126,11 @@ def heavyProcessing(modelDir, inputDict):
 		# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 		rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
 			keepFiles=True, workDir=pJoin(modelDir,'gldContainer'))
+		# voltDumps have no values when gridlabD fails.
+		if len(rawOut['aVoltDump.csv']['# timestamp']) == 0:
+			stdErrText = rawOut['stderr']
+			message = 'GridLAB-D crashed. Error log:\n' + stdErrText
+			raise Exception(message)
 		cleanOut = {}
 		# Std Err and Std Out
 		cleanOut['stderr'] = rawOut['stderr']
@@ -251,14 +256,26 @@ def heavyProcessing(modelDir, inputDict):
 		for key in tree:
 				ob = tree[key]
 				if type(ob)==dict and ob.get('bustype','')=='SWING':
-					feederN = ob['name']
+					swingN = ob['name']
 		# Loop through voltDump for swingbus voltages
 		swingVolts = []
 		for step, stamp in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
 			for nodeName in [x for x in rawOut.get('aVoltDump.csv',{}).keys() if x != '# timestamp']:		
-				if nodeName == feederN:
+				if nodeName == swingN:
 					swingVolts.append(rawOut['aVoltDump.csv'][nodeName][step])
 		cleanOut['swingVoltage'] = swingVolts
+		# Use swing to find first downline node
+		for key in tree:
+			ky = tree[key]
+			if type(ky)==dict and ky.get('object','')=="regulator":
+				downlineNode = tree[key]['to']
+		# Loop through voltDump for downlineNode voltages
+		downlineNodeVolts = []
+		for steps, stamps in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
+			for nodeNam in [x for x in rawOut.get('aVoltDump.csv',{}).keys() if x != '# timestamp']:		
+				if nodeNam == downlineNode:
+					downlineNodeVolts.append(rawOut['aVoltDump.csv'][nodeNam][steps])
+		cleanOut['downlineNodeVolts'] = downlineNodeVolts
 		# What percentage of our keys have lat lon data?
 		latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 		latPerc = 1.0*len(latKeys)/len(tree)
