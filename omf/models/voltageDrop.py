@@ -7,8 +7,8 @@ from jinja2 import Template
 from matplotlib import pyplot as plt
 from networkx.drawing.nx_agraph import graphviz_layout
 import networkx as nx
-from omf.models import __metaModel__
-from __metaModel__ import *
+from omf.models import __neoMetaModel__
+from __neoMetaModel__ import *
 
 # OMF imports 
 import omf.feeder as feeder
@@ -20,51 +20,27 @@ modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The voltageDrop model runs loadflow to show system voltages at all nodes."
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
+with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def run(modelDir, inputDict):
+def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
-	startTime = dt.datetime.now()
-	allOutput = {}
+	outData = {}
 	with open(pJoin(modelDir,'allInputData.json')) as inputFile:    
 	    feederName = json.load(inputFile).get('feederName1','feeder')
 	inputDict["feederName1"] = feederName
-	# Check whether model exist or not
-	if not os.path.isdir(modelDir):
-		os.makedirs(modelDir)
-		inputDict["created"] = str(dt.datetime.now())
-	with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
-		json.dump(inputDict, inputFile, indent = 4)
-	try:
-		# Create voltage drop plot.
-		# print "*DEBUG: feederName:", feederName
-		omd = json.load(open(pJoin(modelDir,feederName+'.omd')))
-		if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
-			neato = False
-		else:
-			neato = True 
-		chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
-		chart.savefig(pJoin(modelDir,"output.png"))
-		with open(pJoin(modelDir,"output.png"),"rb") as inFile:
-			allOutput["voltageDrop"] = inFile.read().encode("base64")
-		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-			json.dump(allOutput, outFile, indent=4)
-		# Update the runTime in the input file.
-		endTime = dt.datetime.now()
-		inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
-		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent=4)
-	except:
-		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)	
-		thisErr = traceback.format_exc()
-		print 'ERROR IN MODEL', modelDir, thisErr
-		inputDict['stderr'] = thisErr
-		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
-			errorFile.write(thisErr)
-		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent=4)
+	# Create voltage drop plot.
+	# print "*DEBUG: feederName:", feederName
+	omd = json.load(open(pJoin(modelDir,feederName+'.omd')))
+	if inputDict.get("layoutAlgorithm", "geospatial") == "geospatial":
+		neato = False
+	else:
+		neato = True 
+	chart = voltPlot(omd, workDir=modelDir, neatoLayout=neato)
+	chart.savefig(pJoin(modelDir,"output.png"))
+	with open(pJoin(modelDir,"output.png"),"rb") as inFile:
+		outData["voltageDrop"] = inFile.read().encode("base64")
+	return outData
 		
 def voltPlot(omd, workDir=None, neatoLayout=False):
 	''' Draw a color-coded map of the voltage drop on a feeder.
@@ -83,7 +59,6 @@ def voltPlot(omd, workDir=None, neatoLayout=False):
 	# Run Gridlab.
 	if not workDir:
 		workDir = tempfile.mkdtemp()
-		print "gridlabD runInFilesystem with no specified workDir. Working in", workDir
 	gridlabOut = gridlabd.runInFilesystem(tree, attachments=omd.get('attachments',{}), workDir=workDir)
 	with open(pJoin(workDir,'voltDump.csv'),'r') as dumpFile:
 		reader = csv.reader(dumpFile)
@@ -161,16 +136,16 @@ def new(modelDir):
 		"runTime": "",
 		"layoutAlgorithm": "geospatial"
 	}
-	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
-		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
 	except:
 		return False
 	return creationCode
 
 def _debugging():
 	# Location
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
@@ -182,7 +157,7 @@ def _debugging():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	run(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
 	renderAndShow(modelLoc)
 

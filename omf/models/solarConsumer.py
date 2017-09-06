@@ -6,8 +6,8 @@ from datetime import datetime as dt
 from datetime import timedelta as td
 from os.path import join as pJoin
 from jinja2 import Template
-from omf.models import __metaModel__
-from __metaModel__ import *
+from omf.models import __neoMetaModel__
+from __neoMetaModel__ import *
 import traceback
 
 # OMF imports
@@ -21,90 +21,63 @@ modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The solarConsumer model calculates the expected costs for a consumer who buys solar in one of 3 different ways: through a PPA with a 3rd party, a community solar project, or buying a rooftop system."
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
+with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def run(modelDir, inputDict):
-	try:
-		''' Run the model in its directory. '''
-		# Check whether model exist or not
-		if not os.path.isdir(modelDir):
-			os.makedirs(modelDir)
-			inputDict["created"] = str(dt.now())
-		# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
-		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
-			json.dump(inputDict, inputFile, indent = 4)
-		# Copy spcific climate data into model directory
-		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
-			pJoin(modelDir, "climate.tmy2"))
-		# Ready to run
-		startTime = dt.now()
-		# Set up SAM data structures.
-		ssc = nrelsam2013.SSCAPI()
-		dat = ssc.ssc_data_create()
-		# Required user inputs.
-		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
-		ssc.ssc_data_set_number(dat, "system_size", float(inputDict["SystemSize"]))
-		# SAM options where we take defaults.
-		ssc.ssc_data_set_number(dat, "derate", 0.97)
-		ssc.ssc_data_set_number(dat, "track_mode", 0)
-		ssc.ssc_data_set_number(dat, "azimuth", 180)
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
-		# Run PV system simulation.
-		mod = ssc.ssc_module_create("pvwattsv1")
-		ssc.ssc_module_exec(mod, dat)
-		# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html
-		startDateTime = "2013-01-01 00:00:00 UTC"
-		# Timestamp output.
-		outData = {}
-		outData["timeStamps"] = [dt.strftime(
-			dt.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") +
-			td(**{"hours":x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(8760))]
-		# HACK: makes it easier to calculate some things later.
-		outData["pythonTimeStamps"] = [dt(2012,1,1,0) + x*td(hours=1) for x in range(8760)]
-		# Geodata output.
-		outData["city"] = ssc.ssc_data_get_string(dat, "city")
-		outData["state"] = ssc.ssc_data_get_string(dat, "state")
-		outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
-		outData["lon"] = ssc.ssc_data_get_number(dat, "lon")
-		outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
-		# Weather output.
-		outData["climate"] = {}
-		outData["climate"]["Global Horizontal Radiation (W/m^2)"] = ssc.ssc_data_get_array(dat, "gh")
-		outData["climate"]["Plane of Array Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "poa")
-		outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
-		outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
-		outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
-		# Power generation.
-		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
+def work(modelDir, inputDict):
+	''' Run the model in its directory. '''
+	# Copy spcific climate data into model directory
+	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
+		pJoin(modelDir, "climate.tmy2"))
+	# Set up SAM data structures.
+	ssc = nrelsam2013.SSCAPI()
+	dat = ssc.ssc_data_create()
+	# Required user inputs.
+	ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
+	ssc.ssc_data_set_number(dat, "system_size", float(inputDict["SystemSize"]))
+	# SAM options where we take defaults.
+	ssc.ssc_data_set_number(dat, "derate", 0.97)
+	ssc.ssc_data_set_number(dat, "track_mode", 0)
+	ssc.ssc_data_set_number(dat, "azimuth", 180)
+	ssc.ssc_data_set_number(dat, "tilt_eq_lat", 1)
+	# Run PV system simulation.
+	mod = ssc.ssc_module_create("pvwattsv1")
+	ssc.ssc_module_exec(mod, dat)
+	# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html
+	startDateTime = "2013-01-01 00:00:00 UTC"
+	# Timestamp output.
+	outData = {}
+	outData["timeStamps"] = [dt.strftime(
+		dt.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") +
+		td(**{"hours":x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(8760))]
+	# HACK: makes it easier to calculate some things later.
+	outData["pythonTimeStamps"] = [dt(2012,1,1,0) + x*td(hours=1) for x in range(8760)]
+	# Geodata output.
+	outData["city"] = ssc.ssc_data_get_string(dat, "city")
+	outData["state"] = ssc.ssc_data_get_string(dat, "state")
+	outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
+	outData["lon"] = ssc.ssc_data_get_number(dat, "lon")
+	outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
+	# Weather output.
+	outData["climate"] = {}
+	outData["climate"]["Global Horizontal Radiation (W/m^2)"] = ssc.ssc_data_get_array(dat, "gh")
+	outData["climate"]["Plane of Array Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "poa")
+	outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
+	outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
+	outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
+	# Power generation.
+	outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
 
-		# TODO: INSERT TJ CODE BELOW
-		tjCode(inputDict, outData)
-		del outData["pythonTimeStamps"]
-		# TODO: INSERT TJ CODE ABOVE
+	# TODO: INSERT TJ CODE BELOW
+	tjCode(inputDict, outData)
+	del outData["pythonTimeStamps"]
+	# TODO: INSERT TJ CODE ABOVE
 
-		# Stdout/stderr.
-		outData["stdout"] = "Success"
-		outData["stderr"] = ""
-		# Write the output.
-		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-			json.dump(outData, outFile, indent=4)
-		# Update the runTime in the input file.
-		endTime = dt.now()
-		inputDict["runTime"] = str(td(seconds=int((endTime - startTime).total_seconds())))
-		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent=4)
-	except:
-		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)
-		thisErr = traceback.format_exc()
-		print 'ERROR IN MODEL', modelDir, thisErr
-		inputDict['stderr'] = thisErr
-		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
-			errorFile.write(thisErr)
-		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent=4)
+	# Stdout/stderr.
+	outData["stdout"] = "Success"
+	outData["stderr"] = ""
+	return outData
 
 def cancel(modelDir):
 	''' solarConsumer runs so fast it's pointless to cancel a run. '''
@@ -291,11 +264,11 @@ def new(modelDir):
 		'comRateIncrease':0,
 		'greenFuelMix':12
 	}
-	return __metaModel__.new(modelDir, defaultInputs)
+	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _tests():
 	# Location
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
@@ -307,7 +280,7 @@ def _tests():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	run(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
 	renderAndShow(modelLoc)
 

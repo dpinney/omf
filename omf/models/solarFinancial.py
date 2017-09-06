@@ -6,8 +6,8 @@ from jinja2 import Template
 from random import random
 from numpy import irr, npv
 import xlwt, traceback
-from omf.models import __metaModel__
-from __metaModel__ import *
+from omf.models import __neoMetaModel__
+from __neoMetaModel__ import *
 
 # OMF imports
 import omf.feeder as feeder
@@ -20,153 +20,120 @@ modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The solarFinancial model gives users the expected financial output of a PV system based on its costs and the amount energy it will likely produce."
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir, modelName+".html"),"r") as tempFile:
+with open(pJoin(__neoMetaModel__._myDir, modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-def run(modelDir, inputDict):
+def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
-	# Delete output file every run if it exists
+	# Copy spcific climate data into model directory
+	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
+	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
+		pJoin(modelDir, "climate.tmy2"))
+	# Set up SAM data structures.
+	ssc = nrelsam2013.SSCAPI()
+	dat = ssc.ssc_data_create()
+	# Required user inputs.
+	ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
+	ssc.ssc_data_set_number(dat, "system_size", float(inputDict.get("systemSize", 100)))
+	derate = float(inputDict.get("pvModuleDerate", 99.5))/100 \
+		* float(inputDict.get("mismatch", 99.5))/100 \
+		* float(inputDict.get("diodes", 99.5))/100 \
+		* float(inputDict.get("dcWiring", 99.5))/100 \
+		* float(inputDict.get("acWiring", 99.5))/100 \
+		* float(inputDict.get("soiling", 99.5))/100 \
+		* float(inputDict.get("shading", 99.5))/100 \
+		* float(inputDict.get("sysAvail", 99.5))/100 \
+		* float(inputDict.get("age", 99.5))/100 \
+		* float(inputDict.get("inverterEfficiency", 92))/100
+	ssc.ssc_data_set_number(dat, "derate", derate)
+	# TODO: Should we move inverter efficiency to 'inv_eff' below (as done in PVWatts?) 
+	# Doesn't seem to affect output very much
+	# ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict.get("inverterEfficiency", 92))/100)			
+	ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
+	ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
+	# Advanced inputs with defaults.
+	ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
+	ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)
+	# Complicated optional inputs.
+	if (inputDict.get("tilt",0) == "-"):
+		tilt_eq_lat = 1.0
+		manualTilt = 0.0
+	else:
+		tilt_eq_lat = 0.0
+		manualTilt = float(inputDict.get("tilt",0))		
+	ssc.ssc_data_set_number(dat, "tilt", manualTilt)
+	ssc.ssc_data_set_number(dat, "tilt_eq_lat", tilt_eq_lat)
+	# Run PV system simulation.
+	mod = ssc.ssc_module_create("pvwattsv1")
+	ssc.ssc_module_exec(mod, dat)
+	# Setting options for start time.
+	simLengthUnits = inputDict.get("simLengthUnits","hours")
+	simStartDate = inputDict.get("simStartDate", "2014-01-01")
+	# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html 
+	startDateTime = simStartDate + " 00:00:00 UTC"
+	# Timestamp output.
+	outData = {}
+	outData["timeStamps"] = [dt.datetime.strftime(
+		dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
+		dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict.get("simLength", 8760)))]
+	# Geodata output.
+	outData["city"] = ssc.ssc_data_get_string(dat, "city")
+	outData["state"] = ssc.ssc_data_get_string(dat, "state")
+	outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
+	outData["lon"] = ssc.ssc_data_get_number(dat, "lon")
+	outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
+	# Weather output.
+	outData["climate"] = {}
+	outData["climate"]["Global Horizontal Radiation (W/m^2)"] = ssc.ssc_data_get_array(dat, "gh")
+	outData["climate"]["Plane of Array Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "poa")
+	outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
+	outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
+	outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
+	# Power generation and clipping.
+	outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
+	invSizeWatts = float(inputDict.get("inverterSize", 0)) * 1000
+	outData["InvClipped"] = [x if x < invSizeWatts else invSizeWatts for x in outData["powerOutputAc"]]
 	try:
-		os.remove(pJoin(modelDir,"allOutputData.json"))	
-	except Exception, e:
-		pass
+		outData["percentClipped"] = 100 * (1.0 - sum(outData["InvClipped"]) / sum(outData["powerOutputAc"]))
+	except ZeroDivisionError:
+		outData["percentClipped"] = 0.0
+	# Cashflow outputs.
+	lifeSpan = int(inputDict.get("lifeSpan",30))
+	lifeYears = range(1, 1 + lifeSpan)
+	retailCost = float(inputDict.get("retailCost",0.0))
+	degradation = float(inputDict.get("degradation",0.5))/100
+	installCost = float(inputDict.get("installCost",0.0))
+	discountRate = float(inputDict.get("discountRate", 7))/100
+	outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
+	outData["lifeGenerationDollars"] = [retailCost*(1.0/1000)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)) for x in lifeYears]
+	outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
+	outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
+	srec = inputDict.get("srecCashFlow", "").split(",")
+	outData["srecCashFlow"] = map(float,srec) + [0 for x in lifeYears[len(srec):]]
+	outData["netCashFlow"] = [x+y+z+a for (x,y,z,a) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"], outData["srecCashFlow"])]
+	outData["cumCashFlow"] = map(lambda x:x, _runningSum(outData["netCashFlow"]))
+	outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 3) / (-1*roundSig(sum(outData["lifeOmCosts"]), 3) + -1*roundSig(sum(outData["lifePurchaseCosts"], 3)))
+	outData["NPV"] = roundSig(npv(discountRate, outData["netCashFlow"]), 3) 
+	outData["lifeGenerationWh"] = sum(outData["powerOutputAc"])*lifeSpan	
+	outData["lifeEnergySales"] = sum(outData["lifeGenerationDollars"])
 	try:
-		# Check whether model exist or not
-		if not os.path.isdir(modelDir):
-			os.makedirs(modelDir)
-			inputDict["created"] = str(dt.datetime.now())
-		# MAYBEFIX: remove this data dump. Check showModel in web.py and renderTemplate()
-		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
-			json.dump(inputDict, inputFile, indent = 4)
-		# Copy spcific climate data into model directory
-		inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
-		shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"), 
-			pJoin(modelDir, "climate.tmy2"))
-		# Ready to run
-		startTime = dt.datetime.now()
-		# Set up SAM data structures.
-		ssc = nrelsam2013.SSCAPI()
-		dat = ssc.ssc_data_create()
-		# Required user inputs.
-		ssc.ssc_data_set_string(dat, "file_name", modelDir + "/climate.tmy2")
-		ssc.ssc_data_set_number(dat, "system_size", float(inputDict.get("systemSize", 100)))
-		derate = float(inputDict.get("pvModuleDerate", 99.5))/100 \
-			* float(inputDict.get("mismatch", 99.5))/100 \
-			* float(inputDict.get("diodes", 99.5))/100 \
-			* float(inputDict.get("dcWiring", 99.5))/100 \
-			* float(inputDict.get("acWiring", 99.5))/100 \
-			* float(inputDict.get("soiling", 99.5))/100 \
-			* float(inputDict.get("shading", 99.5))/100 \
-			* float(inputDict.get("sysAvail", 99.5))/100 \
-			* float(inputDict.get("age", 99.5))/100 \
-			* float(inputDict.get("inverterEfficiency", 92))/100
-		ssc.ssc_data_set_number(dat, "derate", derate)
-		# TODO: Should we move inverter efficiency to 'inv_eff' below (as done in PVWatts?) 
-		# Doesn't seem to affect output very much
-		# ssc.ssc_data_set_number(dat, "inv_eff", float(inputDict.get("inverterEfficiency", 92))/100)			
-		ssc.ssc_data_set_number(dat, "track_mode", float(inputDict.get("trackingMode", 0)))
-		ssc.ssc_data_set_number(dat, "azimuth", float(inputDict.get("azimuth", 180)))
-		# Advanced inputs with defaults.
-		ssc.ssc_data_set_number(dat, "rotlim", float(inputDict.get("rotlim", 45)))
-		ssc.ssc_data_set_number(dat, "gamma", float(inputDict.get("gamma", 0.5))/100)
-		# Complicated optional inputs.
-		if (inputDict.get("tilt",0) == "-"):
-			tilt_eq_lat = 1.0
-			manualTilt = 0.0
-		else:
-			tilt_eq_lat = 0.0
-			manualTilt = float(inputDict.get("tilt",0))		
-		ssc.ssc_data_set_number(dat, "tilt", manualTilt)
-		ssc.ssc_data_set_number(dat, "tilt_eq_lat", tilt_eq_lat)
-		# Run PV system simulation.
-		mod = ssc.ssc_module_create("pvwattsv1")
-		ssc.ssc_module_exec(mod, dat)
-		# Setting options for start time.
-		simLengthUnits = inputDict.get("simLengthUnits","hours")
-		simStartDate = inputDict.get("simStartDate", "2014-01-01")
-		# Set the timezone to be UTC, it won't affect calculation and display, relative offset handled in pvWatts.html 
-		startDateTime = simStartDate + " 00:00:00 UTC"
-		# Timestamp output.
-		outData = {}
-		outData["timeStamps"] = [dt.datetime.strftime(
-			dt.datetime.strptime(startDateTime[0:19],"%Y-%m-%d %H:%M:%S") + 
-			dt.timedelta(**{simLengthUnits:x}),"%Y-%m-%d %H:%M:%S") + " UTC" for x in range(int(inputDict.get("simLength", 8760)))]
-		# Geodata output.
-		outData["city"] = ssc.ssc_data_get_string(dat, "city")
-		outData["state"] = ssc.ssc_data_get_string(dat, "state")
-		outData["lat"] = ssc.ssc_data_get_number(dat, "lat")
-		outData["lon"] = ssc.ssc_data_get_number(dat, "lon")
-		outData["elev"] = ssc.ssc_data_get_number(dat, "elev")
-		# Weather output.
-		outData["climate"] = {}
-		outData["climate"]["Global Horizontal Radiation (W/m^2)"] = ssc.ssc_data_get_array(dat, "gh")
-		outData["climate"]["Plane of Array Irradiance (W/m^2)"] = ssc.ssc_data_get_array(dat, "poa")
-		outData["climate"]["Ambient Temperature (F)"] = ssc.ssc_data_get_array(dat, "tamb")
-		outData["climate"]["Cell Temperature (F)"] = ssc.ssc_data_get_array(dat, "tcell")
-		outData["climate"]["Wind Speed (m/s)"] = ssc.ssc_data_get_array(dat, "wspd")
-		# Power generation and clipping.
-		outData["powerOutputAc"] = ssc.ssc_data_get_array(dat, "ac")
-		invSizeWatts = float(inputDict.get("inverterSize", 0)) * 1000
-		outData["InvClipped"] = [x if x < invSizeWatts else invSizeWatts for x in outData["powerOutputAc"]]
-		try:
-			outData["percentClipped"] = 100 * (1.0 - sum(outData["InvClipped"]) / sum(outData["powerOutputAc"]))
-		except ZeroDivisionError:
-			outData["percentClipped"] = 0.0
-		# Cashflow outputs.
-		lifeSpan = int(inputDict.get("lifeSpan",30))
-		lifeYears = range(1, 1 + lifeSpan)
-		retailCost = float(inputDict.get("retailCost",0.0))
-		degradation = float(inputDict.get("degradation",0.5))/100
-		installCost = float(inputDict.get("installCost",0.0))
-		discountRate = float(inputDict.get("discountRate", 7))/100
-		outData["oneYearGenerationWh"] = sum(outData["powerOutputAc"])
-		outData["lifeGenerationDollars"] = [retailCost*(1.0/1000)*outData["oneYearGenerationWh"]*(1.0-(x*degradation)) for x in lifeYears]
-		outData["lifeOmCosts"] = [-1.0*float(inputDict["omCost"]) for x in lifeYears]
-		outData["lifePurchaseCosts"] = [-1.0 * installCost] + [0 for x in lifeYears[1:]]
-		srec = inputDict.get("srecCashFlow", "").split(",")
-		outData["srecCashFlow"] = map(float,srec) + [0 for x in lifeYears[len(srec):]]
-		outData["netCashFlow"] = [x+y+z+a for (x,y,z,a) in zip(outData["lifeGenerationDollars"], outData["lifeOmCosts"], outData["lifePurchaseCosts"], outData["srecCashFlow"])]
-		outData["cumCashFlow"] = map(lambda x:x, _runningSum(outData["netCashFlow"]))
-		outData["ROI"] = roundSig(sum(outData["netCashFlow"]), 3) / (-1*roundSig(sum(outData["lifeOmCosts"]), 3) + -1*roundSig(sum(outData["lifePurchaseCosts"], 3)))
-		outData["NPV"] = roundSig(npv(discountRate, outData["netCashFlow"]), 3) 
-		outData["lifeGenerationWh"] = sum(outData["powerOutputAc"])*lifeSpan	
-		outData["lifeEnergySales"] = sum(outData["lifeGenerationDollars"])
-		try:
-			# The IRR function is very bad.
-			outData["IRR"] = roundSig(irr(outData["netCashFlow"]), 3)
-		except:
-			outData["IRR"] = "Undefined"
-		# Monthly aggregation outputs.
-		months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
-		totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
-		outData["monthlyGeneration"] = [[a, totMonNum(b)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
-		# Heatmaped hour+month outputs.
-		hours = range(24)
-		from calendar import monthrange
-		totHourMon = lambda h,m:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y[5:7]=="{0:02d}".format(m+1) and y[11:13]=="{0:02d}".format(h+1)])
-		outData["seasonalPerformance"] = [[x,y,totHourMon(x,y) / monthrange(int(simStartDate[:4]), y+1)[1]] for x in hours for y in months.values()]
-		# Stdout/stderr.
-		outData["stdout"] = "Success"
-		outData["stderr"] = ""
-		# Write the output.
-		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-			json.dump(outData, outFile, indent=4)
-		# Update the runTime in the input file.
-		endTime = dt.datetime.now()
-		inputDict["runTime"] = str(dt.timedelta(seconds=int((endTime - startTime).total_seconds())))
-		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent=4)
-		_dumpDataToExcel(modelDir)
+		# The IRR function is very bad.
+		outData["IRR"] = roundSig(irr(outData["netCashFlow"]), 3)
 	except:
-		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)	
-		thisErr = traceback.format_exc()
-		print 'ERROR IN MODEL', modelDir, thisErr
-		inputDict['stderr'] = thisErr
-		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
-			errorFile.write(thisErr)
-		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent=4)
+		outData["IRR"] = "Undefined"
+	# Monthly aggregation outputs.
+	months = {"Jan":0,"Feb":1,"Mar":2,"Apr":3,"May":4,"Jun":5,"Jul":6,"Aug":7,"Sep":8,"Oct":9,"Nov":10,"Dec":11}
+	totMonNum = lambda x:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y.startswith(simStartDate[0:4] + "-{0:02d}".format(x+1))])
+	outData["monthlyGeneration"] = [[a, totMonNum(b)] for (a,b) in sorted(months.items(), key=lambda x:x[1])]
+	# Heatmaped hour+month outputs.
+	hours = range(24)
+	from calendar import monthrange
+	totHourMon = lambda h,m:sum([z for (y,z) in zip(outData["timeStamps"], outData["powerOutputAc"]) if y[5:7]=="{0:02d}".format(m+1) and y[11:13]=="{0:02d}".format(h+1)])
+	outData["seasonalPerformance"] = [[x,y,totHourMon(x,y) / monthrange(int(simStartDate[:4]), y+1)[1]] for x in hours for y in months.values()]
+	# Stdout/stderr.
+	outData["stdout"] = "Success"
+	outData["stderr"] = ""
+	return outData
 
 def _dumpDataToExcel(modelDir):
 	""" Dump data into .xls file in model workspace """
@@ -295,11 +262,11 @@ def new(modelDir):
 		"gamma":"-0.45",
 		"omCost": "1000"
 	}
-	return __metaModel__.new(modelDir, defaultInputs)
+	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _tests():
 	# Location
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
@@ -311,7 +278,7 @@ def _tests():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	run(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
 	renderAndShow(modelLoc)
 

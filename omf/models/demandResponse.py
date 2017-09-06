@@ -5,8 +5,8 @@ from os.path import join as pJoin
 from dateutil.parser import parse
 from numpy import npv
 from jinja2 import Template
-from omf.models import __metaModel__
-from __metaModel__ import *
+from omf.models import __neoMetaModel__
+from __neoMetaModel__ import *
 
 # Model metadata:
 fileName = os.path.basename(__file__)
@@ -14,8 +14,170 @@ modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The demandResponse model takes in historical demand data (hourly for a year) and calculates what demand changes in residential customers could be expected due to demand response programs. "
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
+with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
+
+def work(modelDir, inputDict):
+	''' Run the model in its directory. '''
+	outData = {}
+	# Get variables.
+	lifeSpan = int(inputDict.get('lifeSpan',25))
+	lifeYears = range(1, 1 + lifeSpan)
+	hours = range(0, 24)
+	DrTechCost = float(inputDict.get('DrPurchInstallCost'))
+	demandCharge = float(inputDict.get('demandCharge'))
+	retailCost = float(inputDict.get('retailCost'))
+	AnnDROM = float(inputDict.get('AnnualDROperationCost'))
+	SubElas = float(inputDict.get('SubstitutionPriceElasticity'))
+	DayElas = float(inputDict.get('DailyPriceElasticity'))
+	wholesaleCost = float(inputDict.get('WholesaleEnergyCost'))
+	ManagLoad = float(inputDict.get('LoadunderManagement')) / 100.0
+	DiscountRate = float(inputDict.get('DiscountRate')) / 100
+	ScalingAnnual = float(inputDict.get('ScalingAnnual'))/ 100
+	PeakRate = float(inputDict.get('PeakRate'))
+	OffPeakRate = float(inputDict.get('OffPeakRate'))
+	startmonth= int(inputDict.get('startMonth'))
+	stopmonth = int(inputDict.get('stopMonth'))
+	starthour = int(inputDict.get('startHour'))
+	stophour = int(inputDict.get('stopHour'))
+	rateCPP = float(inputDict.get('rateCPP'))
+	rate24hourly = [float(x) for x in inputDict.get('rate24hourly').split(',')]
+	ratePTR = float(inputDict.get('ratePTR'))
+	numCPPDays = int(inputDict.get('numCPPDays'))
+	rateStruct = inputDict.get('rateStruct')
+	# Price vector creation.
+	OffPeakDailyPrice1 = [OffPeakRate for x in hours[0:starthour]]
+	PeakDailyPrice = [PeakRate for x in hours[starthour-1:stophour]]
+	OffPeakDailyPrice2 = [OffPeakRate for x in hours[stophour+1:24]]
+	ProgramPrices =[]
+	ProgramPrices.extend(OffPeakDailyPrice1)
+	ProgramPrices.extend(PeakDailyPrice)
+	ProgramPrices.extend(OffPeakDailyPrice2)
+	# Setting up the demand curve.
+	with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
+		demandFile.write(inputDict['demandCurve'])
+	try:
+		demandList = []
+		with open(pJoin(modelDir,"demand.csv")) as inFile:
+			reader = csv.DictReader(inFile)
+			for row in reader:
+				demandList.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
+			if len(demandList)!=8760: raise Exception
+	except:
+		errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
+		raise Exception(errorMessage)
+
+	demandCurve = [x['power'] for x in demandList]
+	outData['startDate'] = demandList[0]['datetime'].isoformat()
+	# Run the PRISM model.
+	allPrismOutput = prism({
+		'rateStructure': rateStruct, # options: 2tier, 2tierCPP, PTR, 3tier, 24hourly
+		'elasticitySubWOCPP': SubElas, # Substitution elasticty during non-CPP days.
+		'elasticityDailyWOCPP': DayElas, # Daily elasticity during non-CPP days.
+		'elasticitySubWCPP': SubElas, # Substitution elasticty during CPP days. Only required for 2tierCPP
+		'elasticityDailyWCPP': DayElas, # Daily elasticity during non-CPP days. Only reuquired for 2tierCPP
+		'startMonth': startmonth, # 1-12. Beginning month of the cooling season when the DR program will run.
+		'stopMonth': stopmonth, # 1-12. Ending month of the cooling season when the DR program will run.
+		'startHour': starthour, # 0-23. Beginning hour for on-peak and CPP rates.
+		'stopHour': stophour, # 0-23. Ending hour for on-peak and CPP rates.
+		'rateFlat': retailCost, # pre-DR Time-independent rate paid by residential consumers.
+		'rateOffPeak': OffPeakRate,
+		'rateOnPeak': PeakRate, # Peak hour rate on non-CPP days.
+		'rateCPP': rateCPP, # Peak hour rate on CPP days. Only required for 2tierCPP
+		'rate24hourly': rate24hourly, #Hourly energy price, only needed for 24hourly
+		'ratePTR': ratePTR, # Only required for PTR. $/kWh payment to customers for demand reduction on PTR days. Value is entered as a positive value, just like the other rate values, even though it is a rebate.
+		'numCPPDays': numCPPDays, # Number of CPP days in a cooling season. Only required for 2tierCPP
+		'origLoad': demandCurve }) # 8760 load values
+	fullParticipationModLoad = allPrismOutput['modLoad']
+	modifiedLoad = [x*ManagLoad+y*(1-ManagLoad) for x,y in zip(fullParticipationModLoad,demandCurve)]
+	# with open('modifiedLoad.csv', 'wb') as outFile:
+	# 	for row in modifiedLoad:
+	# 		outfile.write(str(row) + '\n')
+	diff = [y-x for x,y in zip(modifiedLoad,demandCurve)]
+	# Demand Before and After Program Plot
+	outData['modifiedLoad'] = modifiedLoad
+	outData['demandLoad'] = demandCurve
+	outData['difference'] = diff
+	outData['differenceMax'] = round(max(diff),0)
+	outData['differenceMin'] = round(min(diff),0)
+	# Getting the hourly prices for the whole year (8760 prices)
+	ProgPricesArrayYear = ProgramPrices*365
+	OneYearwholesaleCost = [wholesaleCost for x in range(8760)]
+	AnnualEnergy = sum(demandCurve)
+	demandCurveJanuary = max(demandCurve[0:744])
+	demandCurveFebruary = max(demandCurve[745:1416])
+	demandCurveMarch = max(demandCurve[1417:2160])
+	demandCurveApril = max(demandCurve[2161:2880])
+	demandCurveMay = max(demandCurve[2881:3624])
+	demandCurveJune = max(demandCurve[3625:4344])
+	demandCurveJuly = max(demandCurve[4345:5088])
+	demandCurveAugust = max(demandCurve[5089:5832])
+	demandCurveSeptember = max(demandCurve[5833:6552])
+	demandCurveOctober = max(demandCurve[6553:7296])
+	demandCurveNovmber = max(demandCurve[6553:7296])
+	demandCurveDecember = max(demandCurve[7297:8760])
+	maxMontlyDemand = [demandCurveJanuary,demandCurveFebruary,demandCurveMarch,
+		demandCurveApril,demandCurveMay,demandCurveJune,demandCurveJuly,
+		demandCurveAugust,demandCurveSeptember,demandCurveOctober,
+		demandCurveNovmber,demandCurveDecember]
+	annualDemandCost = demandCharge * sum(maxMontlyDemand)
+	PowerCost = - (AnnualEnergy * wholesaleCost + annualDemandCost)
+	# Calculating the maximum montly peaks after applying DR
+	modifiedLoadJanuary = max(modifiedLoad[0:744])
+	modifiedLoadFebruary = max(modifiedLoad[745:1416])
+	modifiedLoadMarch = max(modifiedLoad[1417:2160])
+	modifiedLoadApril = max(modifiedLoad[2161:2880])
+	modifiedLoadMay = max(modifiedLoad[2881:3624])
+	modifiedLoadJune = max(modifiedLoad[3625:4344])
+	modifiedLoadJuly = max(modifiedLoad[4345:5088])
+	modifiedLoadAugust = max(modifiedLoad[5089:5832])
+	modifiedLoadSeptember = max(modifiedLoad[5833:6552])
+	modifiedLoadOctober = max(modifiedLoad[6553:7296])
+	modifiedLoadNovmber = max(modifiedLoad[6553:7296])
+	modifiedLoadDecember = max(modifiedLoad[7297:8760])
+	maxMontlyDemandDR = [modifiedLoadJanuary,modifiedLoadFebruary,modifiedLoadMarch,
+		modifiedLoadApril,modifiedLoadMay,modifiedLoadJune,modifiedLoadJuly,
+		modifiedLoadAugust,modifiedLoadSeptember,modifiedLoadOctober,
+		modifiedLoadNovmber,modifiedLoadDecember]
+	# Calculating the Base Case Profit
+	EnergySale = sum(demandCurve) * retailCost
+	EnergyCost = sum(demandCurve) * wholesaleCost
+	PeakDemandCharge = sum([x*demandCharge for x in maxMontlyDemand])
+	BaseCaseProfit = EnergySale - EnergyCost - PeakDemandCharge
+	# Calculating the DR Case Profit
+	EnergySaleDR = sum([z[0]*z[1] for z in zip(modifiedLoad,ProgPricesArrayYear)])
+	PeakDemandChargeDR = sum([x*demandCharge for x in maxMontlyDemandDR])
+	energyCostDR = sum(modifiedLoad) * wholesaleCost
+	DRCaseProfit = EnergySaleDR - PeakDemandChargeDR
+	# Outputs of First Year Financial Impact table.
+	outData["BaseCase"] = [AnnualEnergy, EnergySale, abs(EnergyCost), PeakDemandCharge, 0]
+	outData["DRCase"] = [sum(modifiedLoad),EnergySaleDR, abs(energyCostDR), PeakDemandChargeDR, DrTechCost]
+	# Calculating the Benefit Cashflow and Total benefit
+	energySaleDRyear = [x*y for x,y in zip(ProgPricesArrayYear, demandCurve)]
+	oneYearRetail = [retailCost for x in range(8760)]
+	energySaleArray = [x*y for x,y in zip(oneYearRetail, demandCurve)]
+	energySaleChange = sum(energySaleDRyear) - sum(energySaleArray)
+	peakDemandRed = PeakDemandCharge - PeakDemandChargeDR
+	# Calculating the Purchase Cost, Operation and Maint. Cost and Total Cost
+	outData["AnnualOpCost"] = [- AnnDROM for x in lifeYears[0:]]
+	LifetimeOperationCost = (sum(outData["AnnualOpCost"]))
+	outData["LifetimeOperationCost"] = abs(LifetimeOperationCost)
+	outData["lifePurchaseCosts"] = [-1.0 * DrTechCost] + [0 for x in lifeYears[1:]]
+	outData["TotalCost"] = abs(outData["LifetimeOperationCost"] + DrTechCost)
+	# Outputs of the Program Lifetime Cash Flow figure
+	outData["EnergySaleChangeBenefit"] = [energySaleChange * ScalingAnnual ** x for x in range(lifeSpan)]
+	outData["PeakDemandReduction"] = [peakDemandRed * ScalingAnnual ** x for x in range(lifeSpan)]
+	BenefitCurve = [x+y for x,y in zip(outData["EnergySaleChangeBenefit"], outData["PeakDemandReduction"])]
+	outData["TotalBenefit"] = sum(BenefitCurve)
+	outData["BenefittoCostRatio"] = float(outData["TotalBenefit"] / outData["TotalCost"])
+	netBenefit = [x+y+z for x,y,z in zip(outData["AnnualOpCost"],outData["lifePurchaseCosts"],BenefitCurve)]
+	outData["npv"] = npv(DiscountRate, netBenefit)
+	outData["cumulativeNetBenefit"] = [sum(netBenefit[0:i+1]) for i,d in enumerate(netBenefit)]
+	outData["SimplePaybackPeriod"] = DrTechCost / (outData["TotalBenefit"] / lifeSpan)
+	# Stdout/stderr.
+	outData["stdout"] = "Success"
+	outData["stderr"] = ""
+	return outData
 
 def prism(prismDRDict):
 	''' Calculate demand changes based on Brattle's PRISM. '''
@@ -260,200 +422,6 @@ def _prismTests():
 		'numCPPDays': 10, # Number of CPP days in a cooling season. Only required for 2tierCPP
 		'origLoad': [float(x) for x in open('./test_load.csv').readlines()] }) # 8760 load values
 
-def run(modelDir, inputDict):
-	''' Run the model in its directory. '''
-	# Delete output file every run if it exists
-	try:
-		os.remove(pJoin(modelDir,"allOutputData.json"))
-	except Exception, e:
-		pass
-	# Check whether model exist or not
-	try:
-		if not os.path.isdir(modelDir):
-			os.makedirs(modelDir)
-			inputDict["created"] = str(datetime.datetime.now())
-		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
-			json.dump(inputDict, inputFile, indent = 4)
-		# Ready to run.
-		startTime = datetime.datetime.now()
-		outData = {}
-		# Get variables.
-		lifeSpan = int(inputDict.get('lifeSpan',25))
-		lifeYears = range(1, 1 + lifeSpan)
-		hours = range(0, 24)
-		DrTechCost = float(inputDict.get('DrPurchInstallCost'))
-		demandCharge = float(inputDict.get('demandCharge'))
-		retailCost = float(inputDict.get('retailCost'))
-		AnnDROM = float(inputDict.get('AnnualDROperationCost'))
-		SubElas = float(inputDict.get('SubstitutionPriceElasticity'))
-		DayElas = float(inputDict.get('DailyPriceElasticity'))
-		wholesaleCost = float(inputDict.get('WholesaleEnergyCost'))
-		ManagLoad = float(inputDict.get('LoadunderManagement')) / 100.0
-		DiscountRate = float(inputDict.get('DiscountRate')) / 100
-		ScalingAnnual = float(inputDict.get('ScalingAnnual'))/ 100
-		PeakRate = float(inputDict.get('PeakRate'))
-		OffPeakRate = float(inputDict.get('OffPeakRate'))
-		startmonth= int(inputDict.get('startMonth'))
-		stopmonth = int(inputDict.get('stopMonth'))
-		starthour = int(inputDict.get('startHour'))
-		stophour = int(inputDict.get('stopHour'))
-		rateCPP = float(inputDict.get('rateCPP'))
-		rate24hourly = [float(x) for x in inputDict.get('rate24hourly').split(',')]
-		ratePTR = float(inputDict.get('ratePTR'))
-		numCPPDays = int(inputDict.get('numCPPDays'))
-		rateStruct = inputDict.get('rateStruct')
-		# Price vector creation.
-		OffPeakDailyPrice1 = [OffPeakRate for x in hours[0:starthour]]
-		PeakDailyPrice = [PeakRate for x in hours[starthour-1:stophour]]
-		OffPeakDailyPrice2 = [OffPeakRate for x in hours[stophour+1:24]]
-		ProgramPrices =[]
-		ProgramPrices.extend(OffPeakDailyPrice1)
-		ProgramPrices.extend(PeakDailyPrice)
-		ProgramPrices.extend(OffPeakDailyPrice2)
-		# Setting up the demand curve.
-		with open(pJoin(modelDir,"demand.csv"),"w") as demandFile:
-			demandFile.write(inputDict['demandCurve'])
-		try:
-			demandList = []
-			with open(pJoin(modelDir,"demand.csv")) as inFile:
-				reader = csv.DictReader(inFile)
-				for row in reader:
-					demandList.append({'datetime': parse(row['timestamp']), 'power': float(row['power'])})
-				if len(demandList)!=8760: raise Exception
-		except:
-			errorMessage = "CSV file is incorrect format. Please see valid format definition at <a target='_blank' href='https://github.com/dpinney/omf/wiki/Models-~-demandResponse#walkthrough'>OMF Wiki demandResponse</a>"
-			raise Exception(errorMessage)
-
-
-		demandCurve = [x['power'] for x in demandList]
-		outData['startDate'] = demandList[0]['datetime'].isoformat()
-		# Run the PRISM model.
-		allPrismOutput = prism({
-			'rateStructure': rateStruct, # options: 2tier, 2tierCPP, PTR, 3tier, 24hourly
-			'elasticitySubWOCPP': SubElas, # Substitution elasticty during non-CPP days.
-			'elasticityDailyWOCPP': DayElas, # Daily elasticity during non-CPP days.
-			'elasticitySubWCPP': SubElas, # Substitution elasticty during CPP days. Only required for 2tierCPP
-			'elasticityDailyWCPP': DayElas, # Daily elasticity during non-CPP days. Only reuquired for 2tierCPP
-			'startMonth': startmonth, # 1-12. Beginning month of the cooling season when the DR program will run.
-			'stopMonth': stopmonth, # 1-12. Ending month of the cooling season when the DR program will run.
-			'startHour': starthour, # 0-23. Beginning hour for on-peak and CPP rates.
-			'stopHour': stophour, # 0-23. Ending hour for on-peak and CPP rates.
-			'rateFlat': retailCost, # pre-DR Time-independent rate paid by residential consumers.
-			'rateOffPeak': OffPeakRate,
-			'rateOnPeak': PeakRate, # Peak hour rate on non-CPP days.
-			'rateCPP': rateCPP, # Peak hour rate on CPP days. Only required for 2tierCPP
-			'rate24hourly': rate24hourly, #Hourly energy price, only needed for 24hourly
-			'ratePTR': ratePTR, # Only required for PTR. $/kWh payment to customers for demand reduction on PTR days. Value is entered as a positive value, just like the other rate values, even though it is a rebate.
-			'numCPPDays': numCPPDays, # Number of CPP days in a cooling season. Only required for 2tierCPP
-			'origLoad': demandCurve }) # 8760 load values
-		fullParticipationModLoad = allPrismOutput['modLoad']
-		modifiedLoad = [x*ManagLoad+y*(1-ManagLoad) for x,y in zip(fullParticipationModLoad,demandCurve)]
-		# with open('modifiedLoad.csv', 'wb') as outFile:
-		# 	for row in modifiedLoad:
-		# 		outfile.write(str(row) + '\n')
-		diff = [y-x for x,y in zip(modifiedLoad,demandCurve)]
-		# Demand Before and After Program Plot
-		outData['modifiedLoad'] = modifiedLoad
-		outData['demandLoad'] = demandCurve
-		outData['difference'] = diff
-		outData['differenceMax'] = round(max(diff),0)
-		outData['differenceMin'] = round(min(diff),0)
-		# Getting the hourly prices for the whole year (8760 prices)
-		ProgPricesArrayYear = ProgramPrices*365
-		OneYearwholesaleCost = [wholesaleCost for x in range(8760)]
-		AnnualEnergy = sum(demandCurve)
-		demandCurveJanuary = max(demandCurve[0:744])
-		demandCurveFebruary = max(demandCurve[745:1416])
-		demandCurveMarch = max(demandCurve[1417:2160])
-		demandCurveApril = max(demandCurve[2161:2880])
-		demandCurveMay = max(demandCurve[2881:3624])
-		demandCurveJune = max(demandCurve[3625:4344])
-		demandCurveJuly = max(demandCurve[4345:5088])
-		demandCurveAugust = max(demandCurve[5089:5832])
-		demandCurveSeptember = max(demandCurve[5833:6552])
-		demandCurveOctober = max(demandCurve[6553:7296])
-		demandCurveNovmber = max(demandCurve[6553:7296])
-		demandCurveDecember = max(demandCurve[7297:8760])
-		maxMontlyDemand = [demandCurveJanuary,demandCurveFebruary,demandCurveMarch,
-			demandCurveApril,demandCurveMay,demandCurveJune,demandCurveJuly,
-			demandCurveAugust,demandCurveSeptember,demandCurveOctober,
-			demandCurveNovmber,demandCurveDecember]
-		annualDemandCost = demandCharge * sum(maxMontlyDemand)
-		PowerCost = - (AnnualEnergy * wholesaleCost + annualDemandCost)
-		# Calculating the maximum montly peaks after applying DR
-		modifiedLoadJanuary = max(modifiedLoad[0:744])
-		modifiedLoadFebruary = max(modifiedLoad[745:1416])
-		modifiedLoadMarch = max(modifiedLoad[1417:2160])
-		modifiedLoadApril = max(modifiedLoad[2161:2880])
-		modifiedLoadMay = max(modifiedLoad[2881:3624])
-		modifiedLoadJune = max(modifiedLoad[3625:4344])
-		modifiedLoadJuly = max(modifiedLoad[4345:5088])
-		modifiedLoadAugust = max(modifiedLoad[5089:5832])
-		modifiedLoadSeptember = max(modifiedLoad[5833:6552])
-		modifiedLoadOctober = max(modifiedLoad[6553:7296])
-		modifiedLoadNovmber = max(modifiedLoad[6553:7296])
-		modifiedLoadDecember = max(modifiedLoad[7297:8760])
-		maxMontlyDemandDR = [modifiedLoadJanuary,modifiedLoadFebruary,modifiedLoadMarch,
-			modifiedLoadApril,modifiedLoadMay,modifiedLoadJune,modifiedLoadJuly,
-			modifiedLoadAugust,modifiedLoadSeptember,modifiedLoadOctober,
-			modifiedLoadNovmber,modifiedLoadDecember]
-		# Calculating the Base Case Profit
-		EnergySale = sum(demandCurve) * retailCost
-		EnergyCost = sum(demandCurve) * wholesaleCost
-		PeakDemandCharge = sum([x*demandCharge for x in maxMontlyDemand])
-		BaseCaseProfit = EnergySale - EnergyCost - PeakDemandCharge
-		# Calculating the DR Case Profit
-		EnergySaleDR = sum([z[0]*z[1] for z in zip(modifiedLoad,ProgPricesArrayYear)])
-		PeakDemandChargeDR = sum([x*demandCharge for x in maxMontlyDemandDR])
-		energyCostDR = sum(modifiedLoad) * wholesaleCost
-		DRCaseProfit = EnergySaleDR - PeakDemandChargeDR
-		# Outputs of First Year Financial Impact table.
-		outData["BaseCase"] = [AnnualEnergy, EnergySale, abs(EnergyCost), PeakDemandCharge, 0]
-		outData["DRCase"] = [sum(modifiedLoad),EnergySaleDR, abs(energyCostDR), PeakDemandChargeDR, DrTechCost]
-		# Calculating the Benefit Cashflow and Total benefit
-		energySaleDRyear = [x*y for x,y in zip(ProgPricesArrayYear, demandCurve)]
-		oneYearRetail = [retailCost for x in range(8760)]
-		energySaleArray = [x*y for x,y in zip(oneYearRetail, demandCurve)]
-		energySaleChange = sum(energySaleDRyear) - sum(energySaleArray)
-		peakDemandRed = PeakDemandCharge - PeakDemandChargeDR
-		# Calculating the Purchase Cost, Operation and Maint. Cost and Total Cost
-		outData["AnnualOpCost"] = [- AnnDROM for x in lifeYears[0:]]
-		LifetimeOperationCost = (sum(outData["AnnualOpCost"]))
-		outData["LifetimeOperationCost"] = abs(LifetimeOperationCost)
-		outData["lifePurchaseCosts"] = [-1.0 * DrTechCost] + [0 for x in lifeYears[1:]]
-		outData["TotalCost"] = abs(outData["LifetimeOperationCost"] + DrTechCost)
-		# Outputs of the Program Lifetime Cash Flow figure
-		outData["EnergySaleChangeBenefit"] = [energySaleChange * ScalingAnnual ** x for x in range(lifeSpan)]
-		outData["PeakDemandReduction"] = [peakDemandRed * ScalingAnnual ** x for x in range(lifeSpan)]
-		BenefitCurve = [x+y for x,y in zip(outData["EnergySaleChangeBenefit"], outData["PeakDemandReduction"])]
-		outData["TotalBenefit"] = sum(BenefitCurve)
-		outData["BenefittoCostRatio"] = float(outData["TotalBenefit"] / outData["TotalCost"])
-		netBenefit = [x+y+z for x,y,z in zip(outData["AnnualOpCost"],outData["lifePurchaseCosts"],BenefitCurve)]
-		outData["npv"] = npv(DiscountRate, netBenefit)
-		outData["cumulativeNetBenefit"] = [sum(netBenefit[0:i+1]) for i,d in enumerate(netBenefit)]
-		outData["SimplePaybackPeriod"] = DrTechCost / (outData["TotalBenefit"] / lifeSpan)
-		# Stdout/stderr.
-		outData["stdout"] = "Success"
-		outData["stderr"] = ""
-		# Write the output.
-		with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
-			json.dump(outData, outFile, indent=4)
-		# Update the runTime in the input file.
-		endTime = datetime.datetime.now()
-		inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
-		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent=4)
-	except:
-		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)
-		thisErr = traceback.format_exc()
-		print 'ERROR IN MODEL', modelDir, thisErr
-		inputDict['stderr'] = thisErr
-		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
-			errorFile.write(thisErr)
-		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent=4)
-
 def cancel(modelDir):
 	''' This model runs so fast it's pointless to cancel a run. '''
 	pass
@@ -461,11 +429,11 @@ def cancel(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"modelType":modelName,
+		"modelType": modelName,
 		"retailCost": "0.1",
 		"WholesaleEnergyCost": "0.07",
 		"fileName":"FrankScadaValidCSV.csv",
-		"demandCurve": open(pJoin(__metaModel__._omfDir,"scratch","uploads","FrankScadaValidCSV.csv")).read(),
+		"demandCurve": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","FrankScadaValidCSV.csv")).read(),
 		"DrPurchInstallCost": "100000",
 		"runTime": "0:00:03",
 		"SubstitutionPriceElasticity": "-0.09522",
@@ -487,11 +455,11 @@ def new(modelDir):
 		"ratePTR":"2.65",
 		"rate24hourly": "0.074, 0.041, 0.020, 0.035, 0.100, 0.230, 0.391, 0.550, 0.688, 0.788, 0.859, 0.904, 0.941, 0.962, 0.980, 1.000, 0.999, 0.948, 0.904, 0.880, 0.772, 0.552, 0.341, 0.169"
 	}
-	return __metaModel__.new(modelDir, defaultInputs)
+	return __neoMetaModel__.new(modelDir, defaultInputs)
 
 def _tests():
 	# Location
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
@@ -503,7 +471,7 @@ def _tests():
 	# Pre-run.
 	renderAndShow(modelLoc)
 	# Run the model.
-	run(modelLoc, inputDict=json.load(open(modelLoc + "/allInputData.json")))
+	runForeground(modelLoc, json.load(open(modelLoc + "/allInputData.json")))
 	# Show the output.
 	renderAndShow(modelLoc)
 
