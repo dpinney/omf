@@ -42,7 +42,6 @@ def work(modelDir,inputDict):
 		attachments = feederJson.get("attachments", {})
 	for key in localTree:
 		if "solver_method" in localTree[key].keys():
-			# print "current solver method", localTree[key]["solver_method"]
 			localTree[key]["solver_method"] = 'FBS'
 	#find the swing bus and recorder attached to substation
 	try:
@@ -62,7 +61,6 @@ def work(modelDir,inputDict):
 			accum_reg += localTree[key].get("name","ERROR") + ","
 			regKeys.append(key)
 	regstr = accum_reg[:-1]
-	# print regKeys
 	capKeys = []
 	accum_cap = ""
 	for key in localTree:
@@ -71,9 +69,7 @@ def work(modelDir,inputDict):
 			capKeys.append(key)
 			if localTree[key].get("control","").lower() == "manual":
 				localTree[key]['control'] = "VOLT"
-				# print "changing capacitor control from manual to volt"
 	capstr = accum_cap[:-1]
-	# print capKeys
 	# Attach recorders relevant to CVR.
 	recorders = [
 			{'object': 'collector',
@@ -140,10 +136,8 @@ def work(modelDir,inputDict):
 	for key in localTree:
 		if localTree[key].get('object','') == "regulator_configuration":
 			time_delay_reg = localTree[key]['time_delay']
-			# print "time_delay_reg",time_delay_reg
 		# if localTree[key].get('object','') == "capacitor":
 		# 	time_delay_cap = localTree[key]['time_delay']
-		# 	print "time_delay_cap",time_delay_cap
 	#change the recorder names
 	for key in localTree:
 		if localTree[key].get('object','') == "collector" or localTree[key].get('object','') == "recorder":
@@ -151,7 +145,6 @@ def work(modelDir,inputDict):
 				localTree[key]['file'] = localTree[key].get('file','').replace('Z','NewZ')
 	#create volt-var control object
 	max_key = max([int(key) for key in localTree.keys()])
-	# print max_key
 	localTree[max_key+1] = {'object' : 'volt_var_control',
 		'name' : 'IVVC1',
 		'control_method' : 'ACTIVE',
@@ -228,7 +221,6 @@ def work(modelDir,inputDict):
 	indices = ['No IVVC', 'With IVVC']
 	# energySalesRed = (whLoads[1]-whLoads[0])*(inputDict['wholesaleEnergyCostPerKwh'])*1000
 	# lossSav = (whLosses[0]-whLosses[1])*inputDict['wholesaleEnergyCostPerKwh']*1000
-	# print energySalesRed, lossSav
 	#plots
 	ticks = []
 	plt.clf()
@@ -373,7 +365,6 @@ def work(modelDir,inputDict):
 		if int(simStartIndex+simRealLength)<=cumulHours[i] and int(simStartIndex+simRealLength)>cumulHours[i-1]:
 			simEndMonthNum = i-1
 			simEndMonth = monthNames[simEndMonthNum]
-	# print simstartMonth,simEndMonth
 	#calculate peaks for the number of months in simulation
 	previndex = 0
 	monthPeak = {}
@@ -382,9 +373,7 @@ def work(modelDir,inputDict):
 	energyLostDollars = {}
 	lossRedDollars = {}
 	simMonthList = monthNames[monthNames.index(simstartMonth):(monthNames.index(simEndMonth)+1)]
-	# print simMonthList
 	for monthElement in simMonthList:
-		# print monthElement
 		month = monthNames.index(monthElement)
 		index1 = int(previndex)
 		index2 = int(min((index1 + int(monthHours[month])), simRealLength))
@@ -400,7 +389,6 @@ def work(modelDir,inputDict):
 	ticks = range(len(simMonthList))
 	ticks1 = [element+0.15 for element in ticks]
 	ticks2 = [element+0.30 for element in ticks]
-	# print ticks
 	eld = [energyLostDollars[month] for month in simMonthList]
 	lrd = [lossRedDollars[month] for month in simMonthList]
 	psd = [peakSaveDollars[month] for month in simMonthList]
@@ -494,7 +482,7 @@ def work(modelDir,inputDict):
 	# 	os.remove(pJoin(modelDir, "PPID.txt"))
 	# except Exception, e:
 	# 	pass
-	print "DONE RUNNING", modelDir
+	return outData
 
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
