@@ -19,7 +19,6 @@ with open(pJoin(__neoMetaModel__._myDir,modelName + ".html"),"r") as tempFile:
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
-	inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
 	# Stdout/stderr.
 	outData = {}		
 	outData["stdout"] = "Success"
