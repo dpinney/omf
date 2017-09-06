@@ -36,8 +36,7 @@ def work(modelDir, inputDict):
 	feederName = inputDict["feederName1"]
 	inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
 	shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
-		pJoin(modelDir, "gldContainer", "climate.tmy2"))
-	startTime = datetime.datetime.now()
+		pJoin(modelDir, "climate.tmy2"))
 	feederJson = json.load(open(pJoin(modelDir, feederName+'.omd')))
 	tree = feederJson["tree"]
 	# tree[feeder.getMaxKey(tree)+1] = {'object':'capacitor','control':'VOLT','phases':'ABCN','name':'CAPTEST','parent':'tm_1','capacitor_A':'0.10 MVAr','capacitor_B':'0.10 MVAr','capacitor_C':'0.10 MVAr','time_delay':'300.0','nominal_voltage':'2401.7771','voltage_set_high':'2350.0','voltage_set_low':'2340.0','switchA':'CLOSED','switchB':'CLOSED','switchC':'CLOSED','control_level':'INDIVIDUAL','phases_connected':'ABCN','dwell_time':'0.0','pt_phases':'ABCN'}
@@ -156,57 +155,57 @@ def work(modelDir, inputDict):
 		simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 	rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
-		keepFiles=True, workDir=pJoin(modelDir,'gldContainer'))
-	cleanOut = {}
+		keepFiles=True, workDir=pJoin(modelDir))
+	outData = {}
 	# Std Err and Std Out
-	cleanOut['stderr'] = rawOut['stderr']
-	cleanOut['stdout'] = rawOut['stdout']
+	outData['stderr'] = rawOut['stderr']
+	outData['stdout'] = rawOut['stdout']
 	# Time Stamps
 	for key in rawOut:
 		if '# timestamp' in rawOut[key]:
-			cleanOut['timeStamps'] = rawOut[key]['# timestamp']
+			outData['timeStamps'] = rawOut[key]['# timestamp']
 			break
 		elif '# property.. timestamp' in rawOut[key]:
-			cleanOut['timeStamps'] = rawOut[key]['# property.. timestamp']
+			outData['timeStamps'] = rawOut[key]['# property.. timestamp']
 		else:
-			cleanOut['timeStamps'] = []
+			outData['timeStamps'] = []
 	# Day/Month Aggregation Setup:
-	stamps = cleanOut.get('timeStamps',[])
+	stamps = outData.get('timeStamps',[])
 	level = inputDict.get('simLengthUnits','hours')
 	# Climate
 	for key in rawOut:
 		if key.startswith('Climate_') and key.endswith('.csv'):
-			cleanOut['climate'] = {}
-			cleanOut['climate']['Rain Fall (in/h)'] = hdmAgg(rawOut[key].get('rainfall'), sum, level)
-			cleanOut['climate']['Wind Speed (m/s)'] = hdmAgg(rawOut[key].get('wind_speed'), avg, level)
-			cleanOut['climate']['Temperature (F)'] = hdmAgg(rawOut[key].get('temperature'), max, level)
-			cleanOut['climate']['Snow Depth (in)'] = hdmAgg(rawOut[key].get('snowdepth'), max, level)
-			cleanOut['climate']['Direct Normal (W/sf)'] = hdmAgg(rawOut[key].get('solar_direct'), sum, level)
-			#cleanOut['climate']['Global Horizontal (W/sf)'] = hdmAgg(rawOut[key].get('solar_global'), sum, level)	
+			outData['climate'] = {}
+			outData['climate']['Rain Fall (in/h)'] = hdmAgg(rawOut[key].get('rainfall'), sum, level)
+			outData['climate']['Wind Speed (m/s)'] = hdmAgg(rawOut[key].get('wind_speed'), avg, level)
+			outData['climate']['Temperature (F)'] = hdmAgg(rawOut[key].get('temperature'), max, level)
+			outData['climate']['Snow Depth (in)'] = hdmAgg(rawOut[key].get('snowdepth'), max, level)
+			outData['climate']['Direct Normal (W/sf)'] = hdmAgg(rawOut[key].get('solar_direct'), sum, level)
+			#outData['climate']['Global Horizontal (W/sf)'] = hdmAgg(rawOut[key].get('solar_global'), sum, level)	
 			climateWbySFList= hdmAgg(rawOut[key].get('solar_global'), sum, level)
 			#converting W/sf to W/sm
 			climateWbySMList= [x*10.76392 for x in climateWbySFList]
-			cleanOut['climate']['Global Horizontal (W/sm)']=climateWbySMList			
+			outData['climate']['Global Horizontal (W/sm)']=climateWbySMList			
 	# Voltage Band
 	if 'VoltageJiggle.csv' in rawOut:
-		cleanOut['allMeterVoltages'] = {}
-		cleanOut['allMeterVoltages']['Min'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
-		cleanOut['allMeterVoltages']['Mean'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], avg, level)
-		cleanOut['allMeterVoltages']['StdDev'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], avg, level)
-		cleanOut['allMeterVoltages']['Max'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
+		outData['allMeterVoltages'] = {}
+		outData['allMeterVoltages']['Min'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
+		outData['allMeterVoltages']['Mean'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], avg, level)
+		outData['allMeterVoltages']['StdDev'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], avg, level)
+		outData['allMeterVoltages']['Max'] = hdmAgg([float(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
 	# Power Consumption
-	cleanOut['Consumption'] = {}
+	outData['Consumption'] = {}
 	# Set default value to be 0, avoiding missing value when computing Loads
-	cleanOut['Consumption']['Power'] = [0] * int(inputDict["simLength"])
-	cleanOut['Consumption']['Losses'] = [0] * int(inputDict["simLength"])
-	cleanOut['Consumption']['DG'] = [0] * int(inputDict["simLength"])
+	outData['Consumption']['Power'] = [0] * int(inputDict["simLength"])
+	outData['Consumption']['Losses'] = [0] * int(inputDict["simLength"])
+	outData['Consumption']['DG'] = [0] * int(inputDict["simLength"])
 	for key in rawOut:
 		if key.startswith('SwingKids_') and key.endswith('.csv'):
 			oneSwingPower = hdmAgg(vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), avg, level)
-			if 'Power' not in cleanOut['Consumption']:
-				cleanOut['Consumption']['Power'] = oneSwingPower
+			if 'Power' not in outData['Consumption']:
+				outData['Consumption']['Power'] = oneSwingPower
 			else:
-				cleanOut['Consumption']['Power'] = vecSum(oneSwingPower,cleanOut['Consumption']['Power'])
+				outData['Consumption']['Power'] = vecSum(oneSwingPower,outData['Consumption']['Power'])
 		elif key.startswith('Inverter_') and key.endswith('.csv'): 	
 			realA = rawOut[key]['power_A.real']
 			realB = rawOut[key]['power_B.real']
@@ -215,10 +214,10 @@ def work(modelDir, inputDict):
 			imagB = rawOut[key]['power_B.imag']
 			imagC = rawOut[key]['power_C.imag']
 			oneDgPower = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
-			if 'DG' not in cleanOut['Consumption']:
-				cleanOut['Consumption']['DG'] = oneDgPower
+			if 'DG' not in outData['Consumption']:
+				outData['Consumption']['DG'] = oneDgPower
 			else:
-				cleanOut['Consumption']['DG'] = vecSum(oneDgPower,cleanOut['Consumption']['DG'])
+				outData['Consumption']['DG'] = vecSum(oneDgPower,outData['Consumption']['DG'])
 		elif key.startswith('Windmill_') and key.endswith('.csv'):
 			vrA = rawOut[key]['voltage_A.real']
 			vrB = rawOut[key]['voltage_B.real']
@@ -236,10 +235,10 @@ def work(modelDir, inputDict):
 			powerB = vecProd(vecPyth(vrB,viB),vecPyth(crB,ciB))
 			powerC = vecProd(vecPyth(vrC,viC),vecPyth(crC,ciC))
 			oneDgPower = hdmAgg(vecSum(powerA,powerB,powerC), avg, level)
-			if 'DG' not in cleanOut['Consumption']:
-				cleanOut['Consumption']['DG'] = oneDgPower
+			if 'DG' not in outData['Consumption']:
+				outData['Consumption']['DG'] = oneDgPower
 			else:
-				cleanOut['Consumption']['DG'] = vecSum(oneDgPower,cleanOut['Consumption']['DG'])
+				outData['Consumption']['DG'] = vecSum(oneDgPower,outData['Consumption']['DG'])
 		elif key in ['OverheadLosses.csv', 'UndergroundLosses.csv', 'TriplexLosses.csv', 'TransformerLosses.csv']:
 			realA = rawOut[key]['sum(power_losses_A.real)']
 			imagA = rawOut[key]['sum(power_losses_A.imag)']
@@ -248,67 +247,67 @@ def work(modelDir, inputDict):
 			realC = rawOut[key]['sum(power_losses_C.real)']
 			imagC = rawOut[key]['sum(power_losses_C.imag)']
 			oneLoss = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
-			if 'Losses' not in cleanOut['Consumption']:
-				cleanOut['Consumption']['Losses'] = oneLoss
+			if 'Losses' not in outData['Consumption']:
+				outData['Consumption']['Losses'] = oneLoss
 			else:
-				cleanOut['Consumption']['Losses'] = vecSum(oneLoss,cleanOut['Consumption']['Losses'])
+				outData['Consumption']['Losses'] = vecSum(oneLoss,outData['Consumption']['Losses'])
 		elif key.startswith('Regulator_') and key.endswith('.csv'):
 			#split function to strip off .csv from filename and user rest of the file name as key. for example- Regulator_VR10.csv -> key would be Regulator_VR10
 			regName=""
 			regName = key
 			newkey=regName.split(".")[0]
-			cleanOut[newkey] ={}
-			cleanOut[newkey]['RegTapA'] = [0] * int(inputDict["simLength"])
-			cleanOut[newkey]['RegTapB'] = [0] * int(inputDict["simLength"])
-			cleanOut[newkey]['RegTapC'] = [0] * int(inputDict["simLength"])
-			cleanOut[newkey]['RegTapA'] = rawOut[key]['tap_A']
-			cleanOut[newkey]['RegTapB'] = rawOut[key]['tap_B']
-			cleanOut[newkey]['RegTapC'] = rawOut[key]['tap_C']
-			cleanOut[newkey]['RegPhases'] = rawOut[key]['phases'][0]
+			outData[newkey] ={}
+			outData[newkey]['RegTapA'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['RegTapB'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['RegTapC'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['RegTapA'] = rawOut[key]['tap_A']
+			outData[newkey]['RegTapB'] = rawOut[key]['tap_B']
+			outData[newkey]['RegTapC'] = rawOut[key]['tap_C']
+			outData[newkey]['RegPhases'] = rawOut[key]['phases'][0]
 		elif key.startswith('Capacitor_') and key.endswith('.csv'):
 			capName=""
 			capName = key
 			newkey=capName.split(".")[0]
-			cleanOut[newkey] ={}
-			cleanOut[newkey]['Cap1A'] = [0] * int(inputDict["simLength"])
-			cleanOut[newkey]['Cap1B'] = [0] * int(inputDict["simLength"])
-			cleanOut[newkey]['Cap1C'] = [0] * int(inputDict["simLength"])
-			cleanOut[newkey]['Cap1A'] = rawOut[key]['switchA']
-			cleanOut[newkey]['Cap1B'] = rawOut[key]['switchB']
-			cleanOut[newkey]['Cap1C'] = rawOut[key]['switchC']
-			cleanOut[newkey]['CapPhases'] = rawOut[key]['phases'][0]
+			outData[newkey] ={}
+			outData[newkey]['Cap1A'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Cap1B'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Cap1C'] = [0] * int(inputDict["simLength"])
+			outData[newkey]['Cap1A'] = rawOut[key]['switchA']
+			outData[newkey]['Cap1B'] = rawOut[key]['switchB']
+			outData[newkey]['Cap1C'] = rawOut[key]['switchC']
+			outData[newkey]['CapPhases'] = rawOut[key]['phases'][0]
 
 	# Print gridBallast Outputs to allOutputData.json
-	cleanOut['gridBallast'] = {}
+	outData['gridBallast'] = {}
 	if 'allMeterPower.csv' in rawOut:
-		cleanOut['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
+		outData['gridBallast']['totalNetworkLoad'] = rawOut.get('allMeterPower.csv')['sum(measured_real_power)']
 	if ('allZIPloadPower.csv' in rawOut) and ('allWaterheaterLoad.csv' in rawOut):
-		cleanOut['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
+		outData['gridBallast']['availabilityMagnitude'] = [x + y for x, y in zip(rawOut.get('allWaterheaterLoad.csv')['sum(actual_load)'], rawOut.get('allZIPloadPower.csv')['sum(base_power)'])]
 	if 'allZIPloadDemand.csv' in rawOut:
-		cleanOut['gridBallast']['ZIPloadDemand'] = {}
+		outData['gridBallast']['ZIPloadDemand'] = {}
 		for key in rawOut['allZIPloadDemand.csv']:
 			if key.startswith('ZIPload'):
-				cleanOut['gridBallast']['ZIPloadDemand'][key] = rawOut.get('allZIPloadDemand.csv')[key]
+				outData['gridBallast']['ZIPloadDemand'][key] = rawOut.get('allZIPloadDemand.csv')[key]
 	if 'eachZIPloadPower.csv' in rawOut:
-				cleanOut['gridBallast']['ZIPloadPower'] = {}
+				outData['gridBallast']['ZIPloadPower'] = {}
 				for key in rawOut['eachZIPloadPower.csv']:
 					if key.startswith('ZIPload'):
-						cleanOut['gridBallast']['ZIPloadPower'][key] = rawOut.get('eachZIPloadPower.csv')[key]
+						outData['gridBallast']['ZIPloadPower'][key] = rawOut.get('eachZIPloadPower.csv')[key]
 	if 'allWaterheaterOn.csv' in rawOut:
-		cleanOut['gridBallast']['waterheaterOn'] = {}
+		outData['gridBallast']['waterheaterOn'] = {}
 		for key in rawOut['allWaterheaterOn.csv']:
 			if key.startswith('waterheater'):
-				cleanOut['gridBallast']['waterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
+				outData['gridBallast']['waterheaterOn'][key] = rawOut.get('allWaterheaterOn.csv')[key]
 	if 'allWaterheaterTemp.csv' in rawOut:
-		cleanOut['gridBallast']['waterheaterTemp'] = {}
+		outData['gridBallast']['waterheaterTemp'] = {}
 		for key in rawOut['allWaterheaterTemp.csv']:
 			if key.startswith('waterheater'):
-				cleanOut['gridBallast']['waterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
+				outData['gridBallast']['waterheaterTemp'][key] = rawOut.get('allWaterheaterTemp.csv')[key]
 	# System check - linux doesn't support newer GridLAB-D versions
 	if sys.platform == 'linux2':
 		pass
 	else:
-		cleanOut['gridBallast']['penetrationLevel'] = 100*(gbWH+gbZIP)/(totalWH+totalZIP)
+		outData['gridBallast']['penetrationLevel'] = 100*(gbWH+gbZIP)/(totalWH+totalZIP)
 		# Frequency Player
 		inArray = feederJson['attachments']['frequency.PLAYER'].split('\n')
 		tempArray = []
@@ -316,20 +315,20 @@ def work(modelDir, inputDict):
 			x = each.split(',')
 			y = float(x[1])
 			tempArray.append(y)
-		cleanOut['frequencyPlayer'] = tempArray
+		outData['frequencyPlayer'] = tempArray
 	# EventTime calculations
 	eventTime = inputDict['eventTime']
 	eventLength = inputDict['eventLength'].split(':')
 	eventDuration = datetime.timedelta(hours=int(eventLength[0]), minutes=int(eventLength[1]))
 	eventStart = datetime.datetime.strptime(eventTime, '%Y-%m-%d %H:%M')
 	eventEnd = eventStart + eventDuration
-	cleanOut['gridBallast']['eventStart'] = str(eventStart)
-	cleanOut['gridBallast']['eventEnd'] = str(eventEnd)
+	outData['gridBallast']['eventStart'] = str(eventStart)
+	outData['gridBallast']['eventEnd'] = str(eventEnd)
 	# Convert string to date
-	dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S %Z') for x in cleanOut['timeStamps']]	
+	dateTimeStamps = [datetime.datetime.strptime(x, '%Y-%m-%d %H:%M:%S %Z') for x in outData['timeStamps']]	
 	eventEndIdx =  dateTimeStamps.index(eventEnd)
 	# Recovery Time
-	whOn = cleanOut['gridBallast']['waterheaterOn']
+	whOn = outData['gridBallast']['waterheaterOn']
 	whOnList = whOn.values()
 	whOnZip = zip(*whOnList)
 	whOnSum = [sum(x) for x in whOnZip]
@@ -337,27 +336,27 @@ def work(modelDir, inputDict):
 	tRecIdx = anyOn.index(True, eventEndIdx)
 	tRec = dateTimeStamps[tRecIdx]
 	recoveryTime = tRec - eventEnd
-	cleanOut['gridBallast']['recoveryTime'] = str(recoveryTime)
+	outData['gridBallast']['recoveryTime'] = str(recoveryTime)
 	# Waterheaters Off-Duration
 	offDuration = tRec - eventStart
-	cleanOut['gridBallast']['offDuration'] = str(offDuration)
+	outData['gridBallast']['offDuration'] = str(offDuration)
 	# Reserve Magnitude Target (RMT)
-	availMag = cleanOut['gridBallast']['availabilityMagnitude']
-	totNetLoad = cleanOut['gridBallast']['totalNetworkLoad']
+	availMag = outData['gridBallast']['availabilityMagnitude']
+	totNetLoad = outData['gridBallast']['totalNetworkLoad']
 	rmt = 100*1000*sum(availMag)/sum(totNetLoad)
-	cleanOut['gridBallast']['rmt'] = rmt
+	outData['gridBallast']['rmt'] = rmt
 	# Reserve Magnitude Variability Tolerance (RMVT)
 	avgAvailMag = sum(availMag)/len(availMag)
 	rmvtMax = max(availMag)/avgAvailMag
 	rmvtMin = min(availMag)/avgAvailMag
 	rmvt = rmvtMax - rmvtMin
-	cleanOut['gridBallast']['rmvt'] = rmvt
+	outData['gridBallast']['rmvt'] = rmvt
 	# Availability
-	notAvail = float(availMag.count(0))/len(cleanOut['timeStamps'])
+	notAvail = float(availMag.count(0))/len(outData['timeStamps'])
 	avail = (1-notAvail)*100
-	cleanOut['gridBallast']['availability'] = avail
+	outData['gridBallast']['availability'] = avail
 	# Waterheater Temperature Drop calculations
-	whTemp = cleanOut['gridBallast']['waterheaterTemp']
+	whTemp = outData['gridBallast']['waterheaterTemp']
 	whTempList = whTemp.values()
 	whTempZip = zip(*whTempList)
 	whTempDrops = []
@@ -365,12 +364,12 @@ def work(modelDir, inputDict):
 	for time in whTempZip:
 		tempDrop = sum([t < LOWER_LIMIT_TEMP for t in time])
 		whTempDrops.append(tempDrop)
-	cleanOut['gridBallast']['waterheaterTempDrops'] = whTempDrops
+	outData['gridBallast']['waterheaterTempDrops'] = whTempDrops
 	# ZIPload calculations for Availability and QoS
-	zPower = cleanOut['gridBallast']['ZIPloadPower']
+	zPower = outData['gridBallast']['ZIPloadPower']
 	zPowerList = zPower.values()
 	zPowerZip = zip(*zPowerList)
-	zDemand = cleanOut['gridBallast']['ZIPloadDemand']
+	zDemand = outData['gridBallast']['ZIPloadDemand']
 	zDemandList  = zDemand.values()
 	zDemandZip = zip(*zDemandList)
 	zDrops = []
@@ -380,51 +379,24 @@ def work(modelDir, inputDict):
 			if (x[i] == 0) and (y[i] > 0):
 				zDrop += 1
 		zDrops.append(zDrop)
-	cleanOut['gridBallast']['qualityDrops'] = [x + y for x, y in zip(zDrops, whTempDrops)]
+	outData['gridBallast']['qualityDrops'] = [x + y for x, y in zip(zDrops, whTempDrops)]
 
 	# What percentage of our keys have lat lon data?
 	latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 	latPerc = 1.0*len(latKeys)/len(tree)
-	if latPerc < 0.25: doNeato = True
-	else: doNeato = False
+	if latPerc < 0.25:
+		doNeato = True
+	else:
+		doNeato = False
 	# Generate the frames for the system voltage map time traveling chart.
 	genTime = generateVoltChart(tree, rawOut, modelDir, neatoLayout=doNeato)
-	cleanOut['genTime'] = genTime
+	outData['genTime'] = genTime
 	# Aggregate up the timestamps:
 	if level=='days':
-		cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
+		outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
 	elif level=='months':
-		cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
-	# Write the output.
-	with open(pJoin(modelDir, "allOutputData.json"),"w") as outFile:
-		json.dump(cleanOut, outFile, indent=4)
-	# Update the runTime in the input file.
-	endTime = datetime.datetime.now()
-	inputDict["runTime"] = str(datetime.timedelta(seconds=int((endTime - startTime).total_seconds())))
-	with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
-		json.dump(inputDict, inFile, indent=4)
-	# Clean up the PID file.
-	os.remove(pJoin(modelDir, "gldContainer", "PID.txt"))
-	print "DONE RUNNING", modelDir
-
-# except Exception as e:
-# 	# If input range wasn't valid delete output, write error to disk.
-# 	cancel(modelDir)	
-# 	thisErr = traceback.format_exc()
-# 	print 'ERROR IN MODEL', modelDir, thisErr
-# 	inputDict['stderr'] = thisErr
-# 	with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
-# 		errorFile.write(thisErr)
-# 	with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-# 		json.dump(inputDict, inFile, indent=4)
-# finishTime = datetime.datetime.now()
-# inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
-# with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
-# 	json.dump(inputDict, inFile, indent = 4)
-# try:
-# 	os.remove(pJoin(modelDir,"PPID.txt"))
-# except:
-# 	pass
+		outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
+	return outData
 
 def generateVoltChart(tree, rawOut, modelDir, neatoLayout=True):
 	''' Map the voltages on a feeder over time using a movie.'''
@@ -520,8 +492,10 @@ def hdmAgg(series, func, level):
 def aggSeries(timeStamps, timeSeries, func, level):
 	''' Aggregate a list + timeStamps up to the required time level. '''
 	# Different substring depending on what level we aggregate to:
-	if level=='months': endPos = 7
-	elif level=='days': endPos = 10
+	if level=='months':
+		endPos = 7
+	elif level=='days':
+		endPos = 10
 	combo = zip(timeStamps, timeSeries)
 	# Group by level:
 	groupedCombo = _groupBy(combo, lambda x1,x2: x1[0][0:endPos]==x2[0][0:endPos])
@@ -568,8 +542,10 @@ def roundSeries(ser):
 
 def _groupBy(inL, func):
 	''' Take a list and func, and group items in place comparing with func. Make sure the func is an equivalence relation, or your brain will hurt. '''
-	if inL == []: return inL
-	if len(inL) == 1: return [inL]
+	if inL == []:
+		return inL
+	if len(inL) == 1:
+		return [inL]
 	newL = [[inL[0]]]
 	for item in inL[1:]:
 		if func(item, newL[-1][0]):
