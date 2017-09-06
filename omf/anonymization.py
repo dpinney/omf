@@ -42,6 +42,7 @@ def distPseudomizeNames(inFeeder):
 def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
 	newNameKey = {}
+	newNameArray = []
 	randomID = random.randint(0,100)
 	# Create nameKey dictionary
 	for key in inFeeder['tree']:
@@ -74,7 +75,7 @@ def distRandomizeNames(inFeeder):
 			if key == 'name':
 				oldNode = inFeeder['nodes'][i][key]
 				inFeeder['nodes'][i][key] = newNameKey[oldNode]
-	return
+	return newNameArray
 
 def distRandomizeLocations(inFeeder):
 	''' Replace all objects' longitude and latitude positions in the inFeeder distribution system with random values. '''
@@ -102,6 +103,7 @@ def distTranslateLocations(inFeeder, translation, rotation):
 
 def distAddNoise(inFeeder, noisePerc):
 	''' Add random noise to properties with numeric values for all objects in the inFeeder distribution system based on a noisePerc magnitude. '''
+	noisePerc = float(noisePerc)/100
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
 			value = inFeeder['tree'][key][prop]
@@ -135,22 +137,22 @@ def distShuffleLoads(inFeeder, shufPerc):
 	zipIdx = 0
 	for key in inFeeder['tree']:
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'triplex_line'):
-			if random.randint(0,100)/100.0 < shufPerc:
+			if random.randint(0,100) < shufPerc:
 				random.shuffle(tlParents)
 				inputFeeder['tree'][key]['parent'] = tlParents[tlIdx]
 				tlIdx += 1
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'triplex_node'):
-			if random.randint(0,100)/100.0 < shufPerc:
+			if random.randint(0,100) < shufPerc:
 				random.shuffle(tnParents)
 				inFeeder['tree'][key]['parent'] = tnParents[tnIdx]
 				tnIdx += 1
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'house'):
-			if random.randint(0,100)/100.0 < shufPerc:
+			if random.randint(0,100) < shufPerc:
 				random.shuffle(houseParents)
 				inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
 				houseIdx += 1
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key]['object'] == 'ZIPload'):
-			if random.randint(0,100)/100.0 < shufPerc:
+			if random.randint(0,100) < shufPerc:
 				random.shuffle(zipParents)
 				inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
 				zipIdx += 1
