@@ -121,7 +121,7 @@
 		Model running on server. Refresh the page to check for results, or wait for automatic refresh every 5 seconds.
 	</div>
 	<div id ="stopIndicator" class="content stopped" style="visibility: hidden">
-		<pre id='errorText'></pre>
+		<pre style='overflow-x: scroll;' id='errorText'></pre>
 		<script type="text/javascript">
 		if (typeof(allInputData.stderr) !== 'undefined') {	
 			gebi('stopIndicator').style.visibility = 'visible'
@@ -530,9 +530,7 @@
 		</div>
 		<p class="reportTitle postRun">Gridlab-D Warnings <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="gridlabDWarningsBlock" class="tightContent postRun detailsContainer" style="position: relative;">
-			<div id="gridlabDWarnings" style="margin:5 0 0 0; overflow-y:scroll; overflow-x:hidden; display:inline-block; vertical-align:top">
-				<pre id="stderr" style="font-size:13px; text-align:right; padding-left: 10px;"></pre>
-			</div>
+				<pre id="stderr" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; width: 100%"></pre>
 			<script>gebi("stderr").innerHTML = allOutputData.stderr</script>
 		</div>
 	</div>

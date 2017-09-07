@@ -74,9 +74,15 @@ def work(modelDir, inputDict):
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 	rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"], 
 		keepFiles=True, workDir=pJoin(modelDir))
-	# voltDumps have no values when gridlabD fails.
-	if len(rawOut['aVoltDump.csv']['# timestamp']) == 0:
-		stdErrText = rawOut['stderr']
+		# voltDumps have no values when gridlabD fails or the files dont exist
+	if not os.path.isfile(pJoin(modelDir,'aVoltDump.csv')):
+		with open (pJoin(modelDir,'stderr.txt')) as inFile:
+			stdErrText = inFile.read()
+		message = 'GridLAB-D crashed. Error log:\n' + stdErrText
+		raise Exception(message)
+	elif len(rawOut['aVoltDump.csv']['# timestamp']) == 0:
+		with open (pJoin(modelDir,'stderr.txt')) as inFile:
+			stdErrText = inFile.read()
 		message = 'GridLAB-D crashed. Error log:\n' + stdErrText
 		raise Exception(message)
 	outData = {}

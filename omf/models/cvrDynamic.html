@@ -75,6 +75,7 @@
 			<div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+				<input type="text" id="feederName1" name="feederName1" style="display:none">
 			</div>
 			<div class="shortInput runningInline postRunInline">
 				<label>User</label>
@@ -91,7 +92,7 @@
 			<hr>
 			<div class="shortInput">
 				<label class="tooltip">Voltage Node Name<span class="classic">The name of end-node obtained from the feeder, where the Integrated Volt Var Controller will be connected.<br><br>The IVVC measures voltage across multiple nodes in an attempt to properly scale the voltage down from the substation to the end-node.</span></label>
-				<input type="text" id="voltageNodes" name="voltageNodes"  required="required"/></td>
+				<input type="text" id="voltageNodes" name="voltageNodes"/></td>
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Capital Cost<span class="classic">Capital Cost<br><em>Type: float</em></span></label>
