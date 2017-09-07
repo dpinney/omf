@@ -441,13 +441,7 @@ def genDiagram(dataDir, feederName, feederJson, debug):
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
-	# HACK: read feeder name.
-	# files = os.listdir(modelDir)
-	# feederName = [x for x in files if x.endswith('.omd')][0]
-	# inputDict["feederName1"] = feederName
-	with open(pJoin(modelDir,'allInputData.json')) as inputFile:    
-		feederName = json.load(inputFile).get('feederName1','feeder')
-	inputDict["feederName1"] = feederName
+	feederName = inputDict["feederName1"]
 	# Generate the input file for GFM:
 	fragIn = {
 	    "hazardFields": [
