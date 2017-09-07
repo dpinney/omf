@@ -556,6 +556,7 @@ def heavyProcessing(modelDir, inputDict):
 		windFilePath = pJoin(modelDir, 'wfclip.asc')
 		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', rdtFilePath, '-wf', 'WindGrid_lpnorm_example.asc'], cwd=modelDir)
 		proc.wait()
+		#test change
 		#Denote new lines
 		newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
 		'''with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
