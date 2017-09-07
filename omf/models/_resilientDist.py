@@ -550,12 +550,13 @@ def heavyProcessing(modelDir, inputDict):
 			json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
 		rdtFileName, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 		gfmBinaryPath = pJoin(__metaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-		shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
+		#shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
 		shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))
 		rdtFilePath = rdtFileName#pJoin(modelDir, 'rdt.json')
 		windFilePath = pJoin(modelDir, 'wfclip.asc')
 		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', rdtFilePath, '-wf', 'WindGrid_lpnorm_example.asc'], cwd=modelDir)
 		proc.wait()
+		#test change
 		#Denote new lines
 		newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
 		'''with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
@@ -701,9 +702,9 @@ def new(modelDir):
 		"dgUnitCost": "200.0",
 		"hardeningUnitCost": "1000.0",
 		"maxDGPerGenerator": "5000.0",
-		"hardeningCandidates": "Line_id1, line_id2, t2",
-		"newLineCandidates": "Line_id1, l2020, tl_1",
-		"generatorCandidates": "node1",
+		"hardeningCandidates": "A_node705-742, A_node705-712, A_node706-725",
+		"newLineCandidates": "TIE_A_to_C, TIE_C_to_B, TIE_B_to_A",
+		"generatorCandidates": "A_node706, A_node707, A_node708, B_node704, B_node705, B_node703",
 		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.0",
 		"chanceConstraint": "1.0",
