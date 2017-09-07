@@ -26,9 +26,7 @@ with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
-	with open(pJoin(modelDir,'allInputData.json')) as inputFile:    
-	    feederName = json.load(inputFile).get('feederName1','feeder')
-	inputDict["feederName1"] = feederName
+	feederName = inputDict["feederName1"]
 	# Create voltage drop plot.
 	# print "*DEBUG: feederName:", feederName
 	omd = json.load(open(pJoin(modelDir,feederName+'.omd')))
