@@ -6,8 +6,8 @@ from os.path import join as pJoin
 from jinja2 import Template
 from matplotlib import pyplot as plt
 import networkx as nx
-from omf.models import __metaModel__
-from __metaModel__ import *
+from omf.models import __neoMetaModel__
+from __neoMetaModel__ import *
 import subprocess, random, webbrowser, multiprocessing
 import pprint as pprint
 
@@ -78,7 +78,7 @@ class Gen:
 		return genOut
 
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
+with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def createObj(objToRet):
@@ -438,250 +438,210 @@ def genDiagram(dataDir, feederName, feederJson, debug):
 		print "Plot saved to:                 %s"%(pJoin(dataDir,"feederChart.png"))
 		print "************************************\n\n"
 
-def run(modelDir, inputDict):
-	''' Run the model in a separate process. web.py calls this to run the model.
-	This function will return fast, but results take a while to hit the file system.'''
-	backProc = multiprocessing.Process(target = heavyProcessing, args = (modelDir, inputDict,))
-	backProc.start()
-	print "SENT TO BACKGROUND", modelDir
-	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
-		pPidFile.write(str(backProc.pid))
-
-def runForeground(modelDir, inputDict):
-	''' Run the model in the current process. WARNING: LONG RUN TIME. '''
-	with open(pJoin(modelDir, "PPID.txt"),"w+") as pPidFile:
-		pPidFile.write('-999')
-	heavyProcessing(modelDir, inputDict)
-
-def heavyProcessing(modelDir, inputDict):
+def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
-	try:
-		try: os.remove(pJoin(modelDir,"allOutputData.json"))
-		except: pass
-		beginTime = dt.datetime.now()
-		outData = {}
-		# HACK: read feeder name.
-		# files = os.listdir(modelDir)
-		# feederName = [x for x in files if x.endswith('.omd')][0]
-		# inputDict["feederName1"] = feederName
-		with open(pJoin(modelDir,'allInputData.json')) as inputFile:    
-			feederName = json.load(inputFile).get('feederName1','feeder')
-		inputDict["feederName1"] = feederName
-		# Generate the input file for GFM:
-		fragIn = {
-		    "hazardFields": [
-		        {
-		            "rasterFieldData": {
-		                "rasterBand": 1, 
-		                "valueType": "double", 
-		                "uri": "", 
-		                "crsCode": "EPSG:4326", 
-		                "nBands": 1, 
-		                "gridFormat": "ArcGrid"
-		            }, 
-		            "id": "hawaiiArcTestGrid", 
-		            "hazardQuantityType": "Windspeed"
-		        }
-		    ], 
-		    "assets": [], 
-		    "responseEstimators": [
-		        {
-		            "assetClass": "PowerDistributionPole", 
-		            "hazardQuantityTypes": [
-		                "Windspeed"
-		            ], 
-		            "responseEstimatorClass": "PowerPoleWindStressEstimator", 
-		            "responseQuantityType": "DamageProbability", 
-		            "id": "PowerPoleWindStressEstimator", 
-		            "properties": {}
-		        }
-		    ]
-		}
-		baseAsset = {
-            "id": 0, 
-            "assetClass": "PowerDistributionPole", 
-            "properties": {
-                "stdDevPoleStrength": 7700000.0, 
-                "powerCableNumber": 2, 
-                "meanPoleStrength": 37600000.0, 
-                "powerCableDiameter": 0.0094742, 
-                "commAttachmentHeight": 4.7244, 
-                "baseDiameter": 0.22225, 
-                "height": 9.144, 
-                "powerAttachmentHeight": 5.6388, 
-                "powerCircuitName": "NAME", 
-                "woodDensity": 500.0, 
-                "commCableDiameter": 0.04, 
-                "cableSpan": 25.4669, 
-                "topDiameter": 0.15361635107, 
-                "commCableWireDensity": 1500.0, 
-                "powerCableWireDensity": 2700.0, 
-                "commCableNumber": 2
-            }, 
-            "assetGeometry": {
-                "type": "Point", 
-                "coordinates": [
-                    530.4008195466031, 
-                    493.0561704740412
-                ]
-            }
+	outData = {}
+	# HACK: read feeder name.
+	# files = os.listdir(modelDir)
+	# feederName = [x for x in files if x.endswith('.omd')][0]
+	# inputDict["feederName1"] = feederName
+	with open(pJoin(modelDir,'allInputData.json')) as inputFile:    
+		feederName = json.load(inputFile).get('feederName1','feeder')
+	inputDict["feederName1"] = feederName
+	# Generate the input file for GFM:
+	fragIn = {
+	    "hazardFields": [
+	        {
+	            "rasterFieldData": {
+	                "rasterBand": 1, 
+	                "valueType": "double", 
+	                "uri": "", 
+	                "crsCode": "EPSG:4326", 
+	                "nBands": 1, 
+	                "gridFormat": "ArcGrid"
+	            }, 
+	            "id": "hawaiiArcTestGrid", 
+	            "hazardQuantityType": "Windspeed"
+	        }
+	    ], 
+	    "assets": [], 
+	    "responseEstimators": [
+	        {
+	            "assetClass": "PowerDistributionPole", 
+	            "hazardQuantityTypes": [
+	                "Windspeed"
+	            ], 
+	            "responseEstimatorClass": "PowerPoleWindStressEstimator", 
+	            "responseQuantityType": "DamageProbability", 
+	            "id": "PowerPoleWindStressEstimator", 
+	            "properties": {}
+	        }
+	    ]
+	}
+	baseAsset = {
+        "id": 0, 
+        "assetClass": "PowerDistributionPole", 
+        "properties": {
+            "stdDevPoleStrength": 7700000.0, 
+            "powerCableNumber": 2, 
+            "meanPoleStrength": 37600000.0, 
+            "powerCableDiameter": 0.0094742, 
+            "commAttachmentHeight": 4.7244, 
+            "baseDiameter": 0.22225, 
+            "height": 9.144, 
+            "powerAttachmentHeight": 5.6388, 
+            "powerCircuitName": "NAME", 
+            "woodDensity": 500.0, 
+            "commCableDiameter": 0.04, 
+            "cableSpan": 25.4669, 
+            "topDiameter": 0.15361635107, 
+            "commCableWireDensity": 1500.0, 
+            "powerCableWireDensity": 2700.0, 
+            "commCableNumber": 2
+        }, 
+        "assetGeometry": {
+            "type": "Point", 
+            "coordinates": [
+                530.4008195466031, 
+                493.0561704740412
+            ]
         }
-		with open(pJoin(modelDir,inputDict['weatherImpactsFileName']),'w') as hazardFile:
-			hazardFile.write(inputDict['weatherImpacts'])
-		if(platform.system() == "Windows"):  # HACK: do the world's worst URLENCODE:
-			hazardAscPath = 'file:///' + pJoin(modelDir, inputDict['weatherImpactsFileName']).replace(' ','%20')
-			hazardAscPath = hazardAscPath.replace('\\', '/')
-		else: #for UNIX
-			hazardAscPath = 'file://' + pJoin(modelDir, inputDict['weatherImpactsFileName']).replace(' ','%20')
-		fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath # HACK: just consider one hazard field.
-		with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
-			feederModel = json.load(jsonIn)
-		# Pull pole lat/lon data from OMD and add to pole system.
-		for node in feederModel['nodes']:
-			asset = copy.deepcopy(baseAsset)
-			asset['id'] = node['index']
-			asset['assetGeometry']['coordinates'] = [node['x'], node['y']]
-			fragIn['assets'].append(asset)
-		with open(pJoin(modelDir, "gfmInput.json"), "w") as outFile:
-			json.dump(fragIn, outFile, indent=4)
-		# Run GFM.
-		rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
-		with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
-			json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
-		rdtFileName, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
-		gfmBinaryPath = pJoin(__metaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-		#shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
-		shutil.copyfile(pJoin(__metaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))
-		rdtFilePath = rdtFileName#pJoin(modelDir, 'rdt.json')
-		windFilePath = pJoin(modelDir, 'wfclip.asc')
-		proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', rdtFilePath, '-wf', 'WindGrid_lpnorm_example.asc'], cwd=modelDir)
-		proc.wait()
-		#test change
-		#Denote new lines
-		newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
-		'''with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
-			gfmOut = json.load(gfmOut)
-		for line in gfmOut['lines']:
-			#set can_harden to false for transformers and regulators NO EXPLICIT IDENTIFIER FOR REGULATORS, ID ONLY
-			if(line["is_transformer"] == True):
-				line["can_harden"] = False
-			for newLine in newLineCands:
-				if(newLine == line['id']):
-					line["is_new"] = True
-		with open(pJoin(modelDir,gfmOutFileName),"w") as outFile:
-			json.dump(gfmOut, outFile, indent = 4)
+    }
+	with open(pJoin(modelDir,inputDict['weatherImpactsFileName']),'w') as hazardFile:
+		hazardFile.write(inputDict['weatherImpacts'])
+	if(platform.system() == "Windows"):  # HACK: do the world's worst URLENCODE:
+		hazardAscPath = 'file:///' + pJoin(modelDir, inputDict['weatherImpactsFileName']).replace(' ','%20')
+		hazardAscPath = hazardAscPath.replace('\\', '/')
+	else: #for UNIX
+		hazardAscPath = 'file://' + pJoin(modelDir, inputDict['weatherImpactsFileName']).replace(' ','%20')
+	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath # HACK: just consider one hazard field.
+	with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
+		feederModel = json.load(jsonIn)
+	# Pull pole lat/lon data from OMD and add to pole system.
+	for node in feederModel['nodes']:
+		asset = copy.deepcopy(baseAsset)
+		asset['id'] = node['index']
+		asset['assetGeometry']['coordinates'] = [node['x'], node['y']]
+		fragIn['assets'].append(asset)
+	with open(pJoin(modelDir, "gfmInput.json"), "w") as outFile:
+		json.dump(fragIn, outFile, indent=4)
+	# Run GFM.
+	rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
+	with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
+		json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
+	rdtFileName, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
+	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
+	#shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
+	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))
+	rdtFilePath = rdtFileName#pJoin(modelDir, 'rdt.json')
+	windFilePath = pJoin(modelDir, 'wfclip.asc')
+	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', rdtFilePath, '-wf', 'WindGrid_lpnorm_example.asc'], cwd=modelDir)
+	proc.wait()
+	#test change
+	#Denote new lines
+	newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
+	'''with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
+		gfmOut = json.load(gfmOut)
+	for line in gfmOut['lines']:
+		#set can_harden to false for transformers and regulators NO EXPLICIT IDENTIFIER FOR REGULATORS, ID ONLY
+		if(line["is_transformer"] == True):
+			line["can_harden"] = False
+		for newLine in newLineCands:
+			if(newLine == line['id']):
+				line["is_new"] = True
+	with open(pJoin(modelDir,gfmOutFileName),"w") as outFile:
+		json.dump(gfmOut, outFile, indent = 4)
+	'''
+	gfmRawOut = open(pJoin(modelDir,"rdtIn.json")).read()		
+	#extra step here, just set equal to gfmOut from above
+	outData['gfmRawOut'] = gfmRawOut
+	
+	print 'Ran Fragility\n'
+
+	# Run GridLAB-D first time to generate xrMatrices.
+	if platform.system() == "Windows":
+		#GridlabD
+		omdPath = pJoin(modelDir, feederName + ".omd")
+		with open(omdPath, "r") as omd:
+			omd = json.load(omd)
+		#REMOVE NEWLINECANDIDATES
+		'''deleteList = []
+		newLines = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
+		for newLine in newLines:
+			for omdObj in omd["tree"]:
+				if ("name" in omd["tree"][omdObj]):
+					if (newLine == omd["tree"][omdObj]["name"]):
+						deleteList.append(omdObj)
+		for delItem in deleteList:
+			print delItem
+			del omd["tree"][delItem]
 		'''
-		gfmRawOut = open(pJoin(modelDir,"rdtIn.json")).read()		
-		#extra step here, just set equal to gfmOut from above
-		outData['gfmRawOut'] = gfmRawOut
-		
-		print 'Ran Fragility\n'
+		#Load an blank glm file and use it to write to it
+		feederPath = pJoin(modelDir, 'feeder.glm')
+		with open(feederPath, 'w') as glmFile:
+			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true; };\n"# + "object jsonreader {\n\tfilename rdtIn.json;\n};"
+			glmFile.write(toWrite)		
+		#Write attachments from omd, if no file, one will be created
+		for fileName in omd['attachments']:
+			with open(os.path.join(modelDir, fileName),'w') as file:
+				file.write(omd['attachments'][fileName])
+		#Wire in the file the user specifies via zipcode.
+		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+		shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
+		(out, err) = proc.communicate()
+		accumulator = ""
+		with open(pJoin(modelDir, "test_JSON_dump1.json"), "r") as gldOut:
+			accumulator = json.load(gldOut)
+		with open(pJoin(modelDir, "test_JSON_dump2.json"), "r") as gldOut:
+			accumulator = json.load(gldOut)
+		outData['gridlabdRawOut'] = accumulator
+	else:
+		tree = feederModel.get("tree",{})
+		attachments = feederModel.get("attachments",{})
+		climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
+		shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
+		gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
+		outData['gridlabdRawOut'] = gridlabdRawOut
+	
+			
+	# Run RDT.
+	print "Running RDT..."
+	print "************************************"
+	rdtInFile = modelDir + '/' + 'rdt_OUTPUT.json'
+	rdtOutFile = modelDir + '/rdtOutput.json'
+	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
+	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
+	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
+	proc.wait()
+	rdtRawOut = open(rdtOutFile).read()
+	outData['rdtRawOut'] = rdtRawOut
+	# Format output feeder.
+	with open(pJoin(rdtOutFile), "r") as jsonIn:
+		rdtOut = json.load(jsonIn)
+	with open(pJoin(rdtOutFile),"w") as outFile:
+		json.dump(rdtOut, outFile, indent = 4)
+	print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
+	print "************************************\n\n"
 
-		# Run GridLAB-D first time to generate xrMatrices.
-		if platform.system() == "Windows":
-			#GridlabD
-			omdPath = pJoin(modelDir, feederName + ".omd")
-			with open(omdPath, "r") as omd:
-				omd = json.load(omd)
-			#REMOVE NEWLINECANDIDATES
-			'''deleteList = []
-			newLines = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
-			for newLine in newLines:
-				for omdObj in omd["tree"]:
-					if ("name" in omd["tree"][omdObj]):
-						if (newLine == omd["tree"][omdObj]["name"]):
-							deleteList.append(omdObj)
-			for delItem in deleteList:
-				print delItem
-				del omd["tree"][delItem]
-			'''
-			#Load an blank glm file and use it to write to it
-			feederPath = pJoin(modelDir, 'feeder.glm')
-			with open(feederPath, 'w') as glmFile:
-				toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true; };\n"# + "object jsonreader {\n\tfilename rdtIn.json;\n};"
-				glmFile.write(toWrite)		
-			#Write attachments from omd, if no file, one will be created
-			for fileName in omd['attachments']:
-				with open(os.path.join(modelDir, fileName),'w') as file:
-					file.write(omd['attachments'][fileName])
-			#Wire in the file the user specifies via zipcode.
-			climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
-			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-			proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
-			(out, err) = proc.communicate()
-			accumulator = ""
-			with open(pJoin(modelDir, "test_JSON_dump1.json"), "r") as gldOut:
-				accumulator = json.load(gldOut)
-			with open(pJoin(modelDir, "test_JSON_dump2.json"), "r") as gldOut:
-				accumulator = json.load(gldOut)
-			outData['gridlabdRawOut'] = accumulator
-		else:
-			tree = feederModel.get("tree",{})
-			attachments = feederModel.get("attachments",{})
-			climateFileName, latforpvwatts = zipCodeToClimateName(inputDict["simulationZipCode"])
-			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
-			gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
-			outData['gridlabdRawOut'] = gridlabdRawOut
-		
-				
-		# Run RDT.
-		print "Running RDT..."
-		print "************************************"
-		rdtInFile = modelDir + '/' + 'rdt_OUTPUT.json'
-		rdtOutFile = modelDir + '/rdtOutput.json'
-		rdtSolverFolder = pJoin(__metaModel__._omfDir,'solvers','rdt')
-		rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
-		proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
-		proc.wait()
-		rdtRawOut = open(rdtOutFile).read()
-		outData['rdtRawOut'] = rdtRawOut
-		# Format output feeder.
-		with open(pJoin(rdtOutFile), "r") as jsonIn:
-			rdtOut = json.load(jsonIn)
-		with open(pJoin(rdtOutFile),"w") as outFile:
-			json.dump(rdtOut, outFile, indent = 4)
-		print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
-		print "************************************\n\n"
+	# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
+	#newFeederModel = copy.deepcopy(feederModel)
 
-		# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
-		#newFeederModel = copy.deepcopy(feederModel)
+	#Deriving line names from RDT Input and line lengths from feeder omd file
+	#Building hashmap of source and target nodes, used to represent lines.
+	with open(rdtInFile, "r") as rdtInFileData:
+		rdtInFileData = json.load(rdtInFileData)
+	lineData = []
 
-		#Deriving line names from RDT Input and line lengths from feeder omd file
-		#Building hashmap of source and target nodes, used to represent lines.
-		with open(rdtInFile, "r") as rdtInFileData:
-			rdtInFileData = json.load(rdtInFileData)
-		lineData = []
-
-		for line in rdtInFileData["lines"]:
-			lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
-		outData["lineData"] = lineData
-		outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
-		# Draw the feeder.
-		genDiagram(modelDir, feederName, feederModel, debug=False)
-		with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
-			outData["oneLineDiagram"] = inFile.read().encode("base64")
-		# Save the output to disk.
-		with open(pJoin(modelDir,'allOutputData.json'),'w') as outFile:
-			json.dump(outData, outFile, indent=4)
-		# Handle runtime.
-		finishTime = datetime.datetime.now()
-		inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
-		with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent = 4)	
-	except Exception as e:
-		# If input range wasn't valid delete output, write error to disk.
-		cancel(modelDir)
-		thisErr = traceback.format_exc()
-		print 'ERROR IN MODEL', modelDir, thisErr
-		inputDict['stderr'] = thisErr
-		with open(os.path.join(modelDir,'stderr.txt'),'w') as errorFile:
-			errorFile.write(thisErr)
-		with open(pJoin(modelDir,"allInputData.json"),"w") as inFile:
-			json.dump(inputDict, inFile, indent=4)
-	try:
-		os.remove(pJoin(modelDir,"PPID.txt"))
-	except:
-		pass
+	for line in rdtInFileData["lines"]:
+		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
+	outData["lineData"] = lineData
+	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
+	# Draw the feeder.
+	genDiagram(modelDir, feederName, feederModel, debug=False)
+	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
+		outData["oneLineDiagram"] = inFile.read().encode("base64")
+	return outData
 
 def cancel(modelDir):
 	''' The model runs so fast it's pointless to cancel a run. '''
@@ -709,27 +669,27 @@ def new(modelDir):
 		"nonCriticalLoadMet": "0.0",
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
-		"weatherImpacts": open(pJoin(__metaModel__._omfDir,"scratch","uploads","WindGrid_lpnorm_example.asc")).read(),
+		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","WindGrid_lpnorm_example.asc")).read(),
 		"weatherImpactsFileName": "WindGrid_lpnorm_example.asc",
-		"poleData": open(pJoin(__metaModel__._omfDir,"scratch","uploads","_fragility_input_example.json")).read(),
+		"poleData": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","_fragility_input_example.json")).read(),
 		"poleDataFileName": "_fragility_input_example.json",
-		"xrMatrices":open(pJoin(__metaModel__._omfDir,"scratch","uploads","rdtInSimple_Market_System.json")).read(),
+		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","rdtInSimple_Market_System.json")).read(),
 		"xrMatricesFileName":"rdtInSimple_Market_System.json",
 		"simulationDate": "2012-01-01",
 		"simulationZipCode": "64735"
 	}
 	#print defaultInputs
-	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		# Copy the feeder from one place to another
-		shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
+		shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "scratch", "publicFeeders", defaultInputs["feederName1"]+'.omd'), pJoin(modelDir, defaultInputs["feederName1"]+'.omd'))
 	except:
 		return False
 	return creationCode
 
 def _runModel():
 	# Location
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = pJoin(__neoMetaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
