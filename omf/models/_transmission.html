@@ -109,7 +109,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Network<span class="classic">A link to the transmission editor, which offers features such as interactive component editing, search, creation, MATPOWER (.mat) file import, and more.</span></label>
 				<br>
-				<input type="hidden" id="networkName1" name="networkName1"/>				
+				<input type="hidden" id="networkName1" name="networkName1">	<!--HACK:pass feeder name back and forth to backend.-->				
 				<button id="networkButton" type="button" onclick="javascript:editNetwork(allInputData.modelName,1);" style="display:inline;width:125px;">Open Editor</button>
 				<label id="networkName1Label" style="display:inline;font-size:12pt;overflow-x:auto;"></label>
 				<script>

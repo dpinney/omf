@@ -63,7 +63,7 @@
 			<div class="shortInput">
 				<label class="tooltip">Transmission Network<span class="classic">A link to the transmission editor, which offers features such as interactive component editing, search, creation, MATPOWER (.mat) file import, and more.</span></label>
 				<br>
-				<input type="hidden" id="networkName1" name="networkName1"/>				
+				<input type="hidden" id="networkName1" name="networkName1">	<!--HACK:pass feeder name back and forth to backend.-->			
 				<button id="networkButton" type="button" onclick="javascript:editNetwork(allInputData.modelName,1);" style="display:inline;width:125px;">Open Editor</button>
 				<label id="networkName1Label" style="display:inline;font-size:12pt;overflow-x:auto;"></label>
 				<script>
@@ -73,10 +73,12 @@
 			<div class="shortInput">
 				<label>Distribution Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
+				<input type="hidden" id="feederName1" name="feederName1"> <!--HACK:pass feeder name back and forth to backend.-->
 			</div>
 			<div class="shortInput">
 				<label>Distribution Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,2);" style="display:block;width:125px;">Open Editor</button>
+				 <input type="hidden" id="feederName2" name="feederName2"> <!--HACK:pass feeder name back and forth to backend. -->
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
@@ -89,8 +91,8 @@
 				<button id="deleteButton" type="button" class="stoppedInline postRunInline" onclick="deleteModel()">Delete</button>
 				<button id="publishButton" type="button" class="postRunInline" onclick="publishModel()">Publish</button>
 				<button id="duplicateButton" type="button" class="postRunInline" onclick="duplicateModel()">Duplicate</button>
-				<button id="cancelButton" class="runningInline" type="button" onclick="cancelModel()">Cancel Run</button>
-				<button id="runButton" type="submit">Run Model</button>
+				<button id="cancelButton" type="button" class="runningInline" onclick="cancelModel()">Cancel Run</button>
+				<button id="runButton" type="submit" class="postRunInline">Run Model</button>
 			</div>
 		</form>
 	</div>

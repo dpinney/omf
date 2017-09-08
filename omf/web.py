@@ -1002,10 +1002,10 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath):
 			airport = request.form.get('airport')
 			try:
 				weather.makeClimateCsv(start, end, airport, outFilePath)
-			except:
-				os.remove(modelDir + '/WPID.txt')
-				print 'Climate data does not exist for given parameters. Choose different parameters.'
-				return
+			except Exception as error:
+				errorString = ''.join(error)
+				with open(modelDir + '/weatherError.txt', 'w+') as errorFile:
+				 	errorFile.write('Climate data does not exist for given parameters. Choose different parameters.')
 			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'csv_reader', 'name':'weatherReader', 'filename':'weatherAirport.csv'}
 			feederJson['tree'][feeder.getMaxKey(feederJson['tree'])+1] = {'object':'climate', 'name':'Climate', 'tmyfile':'weatherAirport.csv', 'reader':'weatherReader'}
 			with open(outFilePath) as csvFile:
@@ -1024,9 +1024,16 @@ def backgroundClimateChange(modelDir, omdPath, outFilePath):
 @app.route("/checkClimateChange/<owner>/<modelName>", methods=["POST","GET"])
 def checkClimateChange(owner, modelName):
 	pidPath = ('data/Model/' + owner + '/' + modelName + '/WPID.txt')
+	errorPath = ('data/Model/' + owner + '/' + modelName + '/weatherError.txt')
 	# print 'Check conversion status:', os.path.exists(pidPath), 'for path', pidPath
-	# checks to see if PID file exists, if theres no PID file process is done.
-	return jsonify(exists=os.path.exists(pidPath))
+	if os.path.isfile(errorPath):
+		with open(errorPath) as errorFile:
+			errorString = errorFile.read()
+			os.remove(errorPath)
+		return errorString
+	else:
+		# checks to see if PID file exists, if theres no PID file process is done.
+		return jsonify(exists=os.path.exists(pidPath))
 
 @app.route("/anonymize/<owner>/<feederName>", methods=["POST"])
 @flask_login.login_required

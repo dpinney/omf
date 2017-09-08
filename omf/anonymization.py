@@ -91,14 +91,18 @@ def distRandomizeLocations(inFeeder):
 
 def distTranslateLocations(inFeeder, translation, rotation):
 	''' Move the position of all objects in the inFeeder distribution system by a horizontal translation and counter-clockwise rotation. '''
+	translation = float(translation)
+	rotation = float(rotation)
 	inFeeder['nodes'] = []
 	inFeeder['links'] = []
 	inFeeder['hiddenNodes'] = []
 	inFeeder['hiddenLinks'] = []
 	for key in inFeeder['tree']:
 		if ('longitude' in inFeeder['tree'][key]) or ('latitude' in inFeeder['tree'][key]):
-			inFeeder['tree'][key]['longitude'] += translation*math.cos(rotation)
-			inFeeder['tree'][key]['latitude'] += translation*math.sin(rotation)
+			longitude = float(inFeeder['tree'][key]['longitude'])
+			latitude = float(inFeeder['tree'][key]['latitude'])
+			inFeeder['tree'][key]['longitude'] = longitude + translation*math.cos(rotation)
+			inFeeder['tree'][key]['latitude'] = latitude + translation*math.sin(rotation)
 	return
 
 def distAddNoise(inFeeder, noisePerc):
