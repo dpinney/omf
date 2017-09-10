@@ -26,30 +26,26 @@ with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
 def work(modelDir, inputDict):
-	''' Run the model in a separate process. web.py calls this to run the model.
-	This function will return fast, but results take a while to hit the file system.'''
-	with open(pJoin(modelDir,'allInputData.json')) as inputFile:
-		inJson = json.load(inputFile)
-	feederList = []
-	for key in inJson.keys():
-		if 'feederName' in key: 
-			inputDict[key] = inJson[key]
-			feederList.append(inJson[key])
-
-def work(modelDir, inputDict):
 	''' Run the model in its directory. WARNING: GRIDLAB CAN TAKE HOURS TO COMPLETE. '''
+	beginTime = datetime.datetime.now()
 	feederList = []
 	# Get each feeder, prepare data in separate folders, and run there.
 	for key in sorted(inputDict, key=inputDict.get):
 		if key.startswith("feederName"):
 			feederName = inputDict[key]
 			feederList.append(feederName)
+			try:
+				os.remove(pJoin(modelDir, feederName, "allOutputData.json"))
+			except Exception, e:
+				pass
+			if not os.path.isdir(pJoin(modelDir, feederName)):
+				os.makedirs(pJoin(modelDir, feederName)) # create subfolders for feeders
 			shutil.copy(pJoin(modelDir, feederName + ".omd"),
-				pJoin(modelDir, "feeder.omd"))
+				pJoin(modelDir, feederName, "feeder.omd"))
 			inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
 			shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
-				pJoin(modelDir, "climate.tmy2"))
-			feederJson = json.load(open(pJoin(modelDir, "feeder.omd")))
+				pJoin(modelDir, feederName, "climate.tmy2"))
+			feederJson = json.load(open(pJoin(modelDir, feederName, "feeder.omd")))
 			tree = feederJson["tree"]
 			# Set up GLM with correct time and recorders:
 			feeder.attachRecorders(tree, "Regulator", "object", "regulator")
@@ -67,62 +63,61 @@ def work(modelDir, inputDict):
 				simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 			# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
 			rawOut = gridlabd.runInFilesystem(tree, attachments=feederJson["attachments"],
-				keepFiles=True, workDir=pJoin(modelDir))
-			outData = {}
+				keepFiles=True, workDir=pJoin(modelDir, feederName))
+			cleanOut = {}
 			# Std Err and Std Out
-			outData['stderr'] = rawOut['stderr']
-			outData['stdout'] = rawOut['stdout']
+			cleanOut['stderr'] = rawOut['stderr']
+			cleanOut['stdout'] = rawOut['stdout']
 			# Time Stamps
 			for key in rawOut:
 				if '# timestamp' in rawOut[key]:
-					outData['timeStamps'] = rawOut[key]['# timestamp']
+					cleanOut['timeStamps'] = rawOut[key]['# timestamp']
 					break
 				elif '# property.. timestamp' in rawOut[key]:
-					outData['timeStamps'] = rawOut[key]['# property.. timestamp']
+					cleanOut['timeStamps'] = rawOut[key]['# property.. timestamp']
 				else:
-					outData['timeStamps'] = []
+					cleanOut['timeStamps'] = []
 			# Day/Month Aggregation Setup:
-			stamps = outData.get('timeStamps',[])
+			stamps = cleanOut.get('timeStamps',[])
 			level = inputDict.get('simLengthUnits','hours')
 			# Climate
 			for key in rawOut:
 				if key.startswith('Climate_') and key.endswith('.csv'):
-					outData['climate'] = {}
-					outData['climate']['Rain Fall (in/h)'] = hdmAgg(rawOut[key].get('rainfall'), sum, level)
-					outData['climate']['Wind Speed (m/s)'] = hdmAgg(rawOut[key].get('wind_speed'), avg, level)
-					outData['climate']['Temperature (F)'] = hdmAgg(rawOut[key].get('temperature'), max, level)
-					outData['climate']['Snow Depth (in)'] = hdmAgg(rawOut[key].get('snowdepth'), max, level)
-					outData['climate']['Direct Insolation (W/m^2)'] = hdmAgg(rawOut[key].get('solar_direct'), sum, level)
+					cleanOut['climate'] = {}
+					cleanOut['climate']['Rain Fall (in/h)'] = hdmAgg(rawOut[key].get('rainfall'), sum, level)
+					cleanOut['climate']['Wind Speed (m/s)'] = hdmAgg(rawOut[key].get('wind_speed'), avg, level)
+					cleanOut['climate']['Temperature (F)'] = hdmAgg(rawOut[key].get('temperature'), max, level)
+					cleanOut['climate']['Snow Depth (in)'] = hdmAgg(rawOut[key].get('snowdepth'), max, level)
+					cleanOut['climate']['Direct Insolation (W/m^2)'] = hdmAgg(rawOut[key].get('solar_direct'), sum, level)
 			# Voltage Band
 			if 'VoltageJiggle.csv' in rawOut:
-				outData['allMeterVoltages'] = {}
-				outData['allMeterVoltages']['Min'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
-				outData['allMeterVoltages']['Mean'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], avg, level)
-				outData['allMeterVoltages']['StdDev'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], avg, level)
-				outData['allMeterVoltages']['Max'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
-			outData['allMeterVoltages']['stdDevPos'] = [(x+y/2) for x,y in zip(outData['allMeterVoltages']['Mean'], outData['allMeterVoltages']['StdDev'])]
-			outData['allMeterVoltages']['stdDevNeg'] = [(x-y/2) for x,y in zip(outData['allMeterVoltages']['Mean'], outData['allMeterVoltages']['StdDev'])]
+				cleanOut['allMeterVoltages'] = {}
+				cleanOut['allMeterVoltages']['Min'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['min(voltage_12.mag)']], min, level)
+				cleanOut['allMeterVoltages']['Mean'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['mean(voltage_12.mag)']], avg, level)
+				cleanOut['allMeterVoltages']['StdDev'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['std(voltage_12.mag)']], avg, level)
+				cleanOut['allMeterVoltages']['Max'] = hdmAgg([(i / 2) for i in rawOut['VoltageJiggle.csv']['max(voltage_12.mag)']], max, level)
+			cleanOut['allMeterVoltages']['stdDevPos'] = [(x+y/2) for x,y in zip(cleanOut['allMeterVoltages']['Mean'], cleanOut['allMeterVoltages']['StdDev'])]
+			cleanOut['allMeterVoltages']['stdDevNeg'] = [(x-y/2) for x,y in zip(cleanOut['allMeterVoltages']['Mean'], cleanOut['allMeterVoltages']['StdDev'])]
 			# Total # of meters
 			count = 0
-			with open(pJoin(modelDir, "feeder.omd")) as f:
+			with open(pJoin(modelDir, feederName, "feeder.omd")) as f:
 				for line in f:
 					if "\"objectType\": \"triplex_meter\"" in line:
 						count+=1
-			# print "count=", count
-			outData['allMeterVoltages']['triplexMeterCount'] = float(count)
+			cleanOut['allMeterVoltages']['triplexMeterCount'] = float(count)
 			# Power Consumption
-			outData['Consumption'] = {}
+			cleanOut['Consumption'] = {}
 			# Set default value to be 0, avoiding missing value when computing Loads
-			outData['Consumption']['Power'] = [0] * int(inputDict["simLength"])
-			outData['Consumption']['Losses'] = [0] * int(inputDict["simLength"])
-			outData['Consumption']['DG'] = [0] * int(inputDict["simLength"])
+			cleanOut['Consumption']['Power'] = [0] * int(inputDict["simLength"])
+			cleanOut['Consumption']['Losses'] = [0] * int(inputDict["simLength"])
+			cleanOut['Consumption']['DG'] = [0] * int(inputDict["simLength"])
 			for key in rawOut:
 				if key.startswith('SwingKids_') and key.endswith('.csv'):
 					oneSwingPower = hdmAgg(vecPyth(rawOut[key]['sum(power_in.real)'],rawOut[key]['sum(power_in.imag)']), avg, level)
-					if 'Power' not in outData['Consumption']:
-						outData['Consumption']['Power'] = oneSwingPower
+					if 'Power' not in cleanOut['Consumption']:
+						cleanOut['Consumption']['Power'] = oneSwingPower
 					else:
-						outData['Consumption']['Power'] = vecSum(oneSwingPower,outData['Consumption']['Power'])
+						cleanOut['Consumption']['Power'] = vecSum(oneSwingPower,cleanOut['Consumption']['Power'])
 				elif key.startswith('Inverter_') and key.endswith('.csv'):
 					realA = rawOut[key]['power_A.real']
 					realB = rawOut[key]['power_B.real']
@@ -131,10 +126,10 @@ def work(modelDir, inputDict):
 					imagB = rawOut[key]['power_B.imag']
 					imagC = rawOut[key]['power_C.imag']
 					oneDgPower = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
-					if 'DG' not in outData['Consumption']:
-						outData['Consumption']['DG'] = oneDgPower
+					if 'DG' not in cleanOut['Consumption']:
+						cleanOut['Consumption']['DG'] = oneDgPower
 					else:
-						outData['Consumption']['DG'] = vecSum(oneDgPower,outData['Consumption']['DG'])
+						cleanOut['Consumption']['DG'] = vecSum(oneDgPower,cleanOut['Consumption']['DG'])
 				elif key.startswith('Windmill_') and key.endswith('.csv'):
 					vrA = rawOut[key]['voltage_A.real']
 					vrB = rawOut[key]['voltage_B.real']
@@ -153,10 +148,10 @@ def work(modelDir, inputDict):
 					powerC = vecProd(vecPyth(vrC,viC),vecPyth(crC,ciC))
 					# HACK: multiply by negative one because turbine power sign is opposite all other DG:
 					oneDgPower = [-1.0 * x for x in hdmAgg(vecSum(powerA,powerB,powerC), avg, level)]
-					if 'DG' not in outData['Consumption']:
-						outData['Consumption']['DG'] = oneDgPower
+					if 'DG' not in cleanOut['Consumption']:
+						cleanOut['Consumption']['DG'] = oneDgPower
 					else:
-						outData['Consumption']['DG'] = vecSum(oneDgPower,outData['Consumption']['DG'])
+						cleanOut['Consumption']['DG'] = vecSum(oneDgPower,cleanOut['Consumption']['DG'])
 				elif key in ['OverheadLosses.csv', 'UndergroundLosses.csv', 'TriplexLosses.csv', 'TransformerLosses.csv']:
 					realA = rawOut[key]['sum(power_losses_A.real)']
 					imagA = rawOut[key]['sum(power_losses_A.imag)']
@@ -165,18 +160,27 @@ def work(modelDir, inputDict):
 					realC = rawOut[key]['sum(power_losses_C.real)']
 					imagC = rawOut[key]['sum(power_losses_C.imag)']
 					oneLoss = hdmAgg(vecSum(vecPyth(realA,imagA),vecPyth(realB,imagB),vecPyth(realC,imagC)), avg, level)
-					if 'Losses' not in outData['Consumption']:
-						outData['Consumption']['Losses'] = oneLoss
+					if 'Losses' not in cleanOut['Consumption']:
+						cleanOut['Consumption']['Losses'] = oneLoss
 					else:
-						outData['Consumption']['Losses'] = vecSum(oneLoss,outData['Consumption']['Losses'])
+						cleanOut['Consumption']['Losses'] = vecSum(oneLoss,cleanOut['Consumption']['Losses'])
 			# Aggregate up the timestamps:
 			if level=='days':
-				outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
+				cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:10], 'days')
 			elif level=='months':
-				outData['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
+				cleanOut['timeStamps'] = aggSeries(stamps, stamps, lambda x:x[0][0:7], 'months')
+			# Write the output.
+			with open(pJoin(modelDir, feederName, "allOutputData.json"),"w") as outFile:
+				json.dump(cleanOut, outFile, indent=4)
+			# Clean up the PID file.
+			os.remove(pJoin(modelDir, feederName,"PID.txt"))
+	finishTime = datetime.datetime.now()
+	inputDict["runTime"] = str(datetime.timedelta(seconds = int((finishTime - beginTime).total_seconds())))
+	with open(pJoin(modelDir, "allInputData.json"),"w") as inFile:
+		json.dump(inputDict, inFile, indent = 4)
 	# Integrate data into allOutputData.json, if error happens, cancel it
-	output = {}
-	output["failures"] = {}
+	outData = {}
+	outData["failures"] = {}
 	numOfFeeders = 0
 	for root, dirs, files in os.walk(modelDir):
 		# dump error info into dict
@@ -184,7 +188,7 @@ def work(modelDir, inputDict):
 			with open(pJoin(modelDir, root, "stderr.txt"), "r") as stderrFile:
 				tempString = stderrFile.read()
 				if "ERROR" in tempString or "FATAL" in tempString or "Traceback" in tempString:
-					output["failures"]["feeder_" + str(os.path.split(root)[-1])] = {"stderr": tempString}
+					outData["failures"]["feeder_" + str(os.path.split(root)[-1])] = {"stderr": tempString}
 					continue
 		# dump simulated data into dict
 		if "allOutputData.json" in files:
@@ -192,19 +196,42 @@ def work(modelDir, inputDict):
 				numOfFeeders += 1
 				feederOutput = json.load(feederOutputData)
 				# TODO: a better feeder name
-				output["feeder_"+str(os.path.split(root)[-1])] = {}
-				output["feeder_"+str(os.path.split(root)[-1])]["Consumption"] = feederOutput["Consumption"]
-				output["feeder_"+str(os.path.split(root)[-1])]["allMeterVoltages"] = feederOutput["allMeterVoltages"]
-				output["feeder_"+str(os.path.split(root)[-1])]["stderr"] = feederOutput["stderr"]
-				output["feeder_"+str(os.path.split(root)[-1])]["stdout"] = feederOutput["stdout"]
-				# output[root] = {feederOutput["Consumption"], feederOutput["allMeterVoltages"], feederOutput["stdout"], feederOutput["stderr"]}
-	output["numOfFeeders"] = numOfFeeders
-	output["timeStamps"] = feederOutput.get("timeStamps", [])
-	output["climate"] = feederOutput.get("climate", [])
+				outData["feeder_"+str(os.path.split(root)[-1])] = {}
+				outData["feeder_"+str(os.path.split(root)[-1])]["Consumption"] = feederOutput["Consumption"]
+				outData["feeder_"+str(os.path.split(root)[-1])]["allMeterVoltages"] = feederOutput["allMeterVoltages"]
+				outData["feeder_"+str(os.path.split(root)[-1])]["stderr"] = feederOutput["stderr"]
+				outData["feeder_"+str(os.path.split(root)[-1])]["stdout"] = feederOutput["stdout"]
+				# outData[root] = {feederOutput["Consumption"], feederOutput["allMeterVoltages"], feederOutput["stdout"], feederOutput["stderr"]}
+	outData["numOfFeeders"] = numOfFeeders
+	outData["timeStamps"] = feederOutput.get("timeStamps", [])
+	outData["climate"] = feederOutput.get("climate", [])
 	# Add feederNames to output so allInputData feederName changes don't cause output rendering to disappear.
 	for key, feederName in inputDict.iteritems():
 		if 'feederName' in key:
-			output[key] = feederName
+			outData[key] = feederName
+	with open(pJoin(modelDir,"allOutputData.json"),"w") as outFile:
+		json.dump(outData, outFile, indent=4)
+	# # Send email to user on model success.
+	# emailStatus = inputDict.get('emailStatus', 0)
+	# if (emailStatus == "on"):
+	# 	print "\n    EMAIL ALERT ON"
+	# 	email = session['user_id']
+	# 	try:
+	# 		user = json.load(open("data/User/" + email + ".json"))
+	# 		modelPath, modelName = pSplit(modelDir)
+	# 		message = "The model " + "<i>" + str(modelName) + "</i>" + " has successfully completed running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
+	# 		return web.send_link(email, message, user)
+	# 	except Exception, e:
+	# 		print "ERROR: Failed sending model status email to user: ", email, ", with exception: \n", e
+	# # Send email to user on model failure.
+	# email = session['user_id']
+	# try:
+	# 	user = json.load(open("data/User/" + email + ".json"))
+	# 	modelPath, modelName = pSplit(modelDir)
+	# 	message = "The model " + "<i>" + str(modelName) + "</i>" + " has failed to complete running. It ran for a total of " + str(inputDict["runTime"]) + " seconds from " + str(beginTime) + ", to " + str(finishTime) + "."
+	# 	return web.send_link(email, message, user)
+	# except Exception, e:
+	# 	print "ERROR: Failed sending model status email to user: ", email, ", with exception: \n", e
 	return outData
 
 
