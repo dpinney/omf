@@ -124,7 +124,6 @@ def distShuffleLoads(inFeeder, shufPerc):
 	''' Shuffle the parent properties between all load objects in the inFeeder distribution system. '''
 	houseParents = []
 	zipParents = []
-	whParents = []
 	tlParents = []
 	# tnParents = []
 	for key in inFeeder['tree']:
@@ -132,20 +131,16 @@ def distShuffleLoads(inFeeder, shufPerc):
 			houseParents.append(inFeeder['tree'][key]['parent'])
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'ZIPload'):
 			zipParents.append(inFeeder['tree'][key]['parent'])
-		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'waterheater'):
-			whParents.append(inFeeder['tree'][key]['parent'])
-		if ('from' in inFeeder['tree'][key]) and  (inFeeder['tree'][key].get('object') == 'triplex_line'):
+		if ('from' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_line'):
 			tlParents.append(inFeeder['tree'][key].get('from'))
 		# if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_node'):
 		# 	tnParents.append(inFeeder['tree'][key]['parent'])
 	random.shuffle(houseParents)
 	random.shuffle(zipParents)
-	random.shuffle(whParents)
 	random.shuffle(tlParents)
 	# random.shuffle(tnParents)
 	houseIdx = 0
 	zipIdx = 0
-	whIdx = 0
 	tlIdx = 0
 	# tnIdx = 0
 	for key in inFeeder['tree']:
@@ -157,13 +152,9 @@ def distShuffleLoads(inFeeder, shufPerc):
 			if random.randint(0,100) < shufPerc:
 				inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
 				zipIdx += 1
-		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'waterheater'):
-			if random.randint(0,100) < shufPerc:
-				inFeeder['tree'][key]['parent'] = whParents[whIdx]
-				whIdx += 1
 		if ('from' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_line'):
 			if random.randint(0,100) < shufPerc:
-				inFeeder['tree'][key]['parent'] = tlParents[tlIdx]
+				inFeeder['tree'][key]['from'] = tlParents[tlIdx]
 				tlIdx += 1
 		# if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_node'):
 		# 	if random.randint(0,100) < shufPerc:
