@@ -55,13 +55,10 @@
 				<label>Run Time</label>
 				<input type="text" id="runTime" name="runTime" readonly/>
 			</div>
-			<div class="shortInput postRunInline">
+			<div class="shortInput">
 				<label>Feeder</label>
 				<button id="feederButton" type="button" onclick="javascript:editFeeder(allInputData.modelName,1);" style="display:block;width:125px;">Open Editor</button>
-			</div>
-			<div class="shortInput" style="display:none"><!--HACK:pass feeder name back and forth to backend.-->
-				<label>feederName1</label>
-				<input type="text" id="feederName1" name="feederName1">
+				<input type="text" id="feederName1" name="feederName1" style="display:none">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Layout Algorithm<span class="classic">Geospatial shows the circuit the same way it was defined in the feeder editor. Force Directed uses an algorithm to show the circuit elements evenly spaced (useful for circuits without location data).</span></label>
