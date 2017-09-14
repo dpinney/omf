@@ -127,7 +127,7 @@ def function():
 				newNode = copy.deepcopy(nodeTemplate)
 				newNode["treeIndex"] = key
 				newNode["index"] = nodeIndexCounter
-				newX = random.uniform(-72.8,-72.86) 
+				newX = random.uniform(-72.8,-72.74) 
 				newY = random.uniform(41.6, 41.65)
 				newNode["px"] = newX
 				newNode["py"] = newY
