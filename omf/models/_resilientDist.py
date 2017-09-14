@@ -468,7 +468,7 @@ def work(modelDir, inputDict):
 	outData['gfmRawOut'] = gfmRawOut
 	print 'Ran Fragility\n'
 	# Run GridLAB-D first time to generate xrMatrices.
-	if platform.system() == "Windows":
+	if platform.system() == "Windoze":
 		#GridlabD
 		omdPath = pJoin(modelDir, feederName + ".omd")
 		with open(omdPath, "r") as omd:
