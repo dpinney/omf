@@ -390,7 +390,7 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 	makeLoads(rdtJson, jsonTree, debug)
 	makeGens(rdtJson, jsonTree, maxDG, newGens, debug)
 	# Write to file.
-	rdtInFile = 'gmfInput.json'
+	rdtInFile = 'gfmInput.json'
 	with open(pJoin(dataDir,rdtInFile), "w") as outFile:
 		json.dump(rdtJson, outFile, indent=4)
 	if debug:		
