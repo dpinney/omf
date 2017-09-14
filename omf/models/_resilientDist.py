@@ -301,23 +301,12 @@ def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
 			if bus.get('bustype','').lower() == 'swing':
 				newBus['has_generator'] = True
 			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus, 0.0)
-			# Remove entries I couldn't find, 10.
-			# newBus.pop('y',None)
-			# newBus.pop('x',None)
 			rdtJson['buses'].append(newBus)
-			# newBus.pop('ref_voltage', None)
-			# newBus.pop('min_voltage', None)
-			# newBus.pop('max_voltage', None)
 			for busNode in jsonNodes:
-				newBus['y'] = busNode.get('y','')
-				newBus['x'] = busNode.get('x','')
-	if debug: 
-		print "Created %s buses"%(str(len(rdtJson['buses'])))
-		if debug==2:
-			for elem in rdtJson['buses']: 
-				print "   Bus:"
-				for a,val in elem.iteritems():
-					print "      %s: %s"%(str(a), str(val))
+				if key==busNode.get('treeIndex'):
+					newBus['y'] = busNode.get('y','')
+					newBus['x'] = busNode.get('x','')
+			# TODO: what to do about objects without x,y in nodes?
 
 def makeLoads(rdtJson, jsonTree, debug):
 	'''loads.
@@ -357,6 +346,7 @@ def makeGens(rdtJson, jsonTree, maxRealPhase, newGens, debug):
 			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, maxRealPhase)
 			newGen = Gen(gens.get('name','')+'_gen', busID, has_phase, max_reactive_phase, max_real_phase)
 			rdtJson['generators'].append(newGen.toOutput())
+
 def readXRMatrices(dataDir, rdtFile, length):
 	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
 	'''
