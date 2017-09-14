@@ -208,7 +208,7 @@ def makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
 	'''
 	lineCosts = []
 	hardCands = hardCand.strip().replace(' ', '').split(',')
-	objToFind, lineCount = ['triplex_line','transformer', 'regulator'], 0
+	objToFind, lineCount = ['triplex_line','transformer', 'regulator', 'underground_line'], 0
 	for key, line in jsonTree.iteritems():
 		if line.get('object','') in objToFind:
 			newLine = Line(line.get('name',''), line.get('from','')+'_bus', line.get('to','')+'_bus', float(line.get('length',100)))
@@ -292,7 +292,7 @@ def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
 	'''buses.
 	Ziploads? house? regulator? Waterheater?
 	'''
-	objToFind = ['node', 'triplex_node', 'triplex_meter']
+	objToFind = ['node', 'triplex_node', 'triplex_meter', 'load']
 	for key, bus in jsonTree.iteritems():
 		# if bus.get('object','') in objToFind and bus.get('bustype','').lower() != 'swing':
 		if bus.get('object','').lower() in objToFind:
@@ -644,7 +644,7 @@ def cancel(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "Simple Market System",
+		"feederName1": "trip37_new",
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
