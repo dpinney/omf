@@ -160,22 +160,59 @@
 					"name":"DG Power (W)",
 					"visible": false
 				}
+				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "powerTimeSeries"
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["height"] = 150
+				localHighChart["series"] = [powerSeries, lossesSeries, DGSeries]
+				localHighChart["yAxis"]= [{"title":{"text": "Power (W)", "style": {"color": "gray"}}}]
+				new Highcharts.Chart(localHighChart);
+			</script>s
+		</div>
+		<p class="reportTitle postRun">Transmission Voltage <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="swingVoltageReport" class="tightContent postRun">
+			<div id="voltageTimeSeries"></div>
+			<script type="text/javascript">
+				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
+				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart
+				swingHighChartsTemplate = {
+				"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
+				"title":{"text":null},
+				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+				"credits":{"enabled":false},
+				"xAxis":{"type":"datetime","maxZoom":108000000, "tickColor":"gray","lineColor":"gray"},
+				"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":swingPointInterval, "pointStart":swingPointStart}},
+				"tooltip":{"valueDecimals":1},
+				"series":[]}
 				var swingVoltage = {
 					"marker":{
 						"enabled":false
 					},
 					"color":"blue",
 					"data":allOutputData.swingVoltage,
-					"name":"Swing Voltage (V)",
-					"visible":false
+					"name":"Transmission Voltage (V)",
+					"visible":true
 				}
-				var localHighChart = JSON.parse(JSON.stringify(highChartsTemplate))
-				localHighChart["chart"]["renderTo"] = "powerTimeSeries"
+				var downlineNodeVolts = {
+					"marker":{
+						"enabled":false
+					},
+					"color":"orange",
+					"data":allOutputData.downlineNodeVolts,
+					"name":"First Node after Regulator (V)",
+					"visible":true
+				}
+				var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "voltageTimeSeries"
 				localHighChart["chart"]["type"] = "line"
 				localHighChart["chart"]["width"] = 1000
 				localHighChart["chart"]["height"] = 150
-				localHighChart["series"] = [powerSeries, lossesSeries, DGSeries, swingVoltage]
-				localHighChart["yAxis"]= [{"title":{"text": "Units", "style": {"color": "gray"}}},{"title":{"text":"Voltage (V)","style":{"color":"black"}},"opposite":"true"}]
+				localHighChart["series"] = [swingVoltage, downlineNodeVolts]
+				localHighChart["yAxis"]= [{"title":{"text":"Voltage (V)","style":{"color":"black"}},"plotLines": [
+							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": allOutputData.minVoltBand, "zIndex": 0},
+							{"color": 'gray', "dashStyle": 'ShortDash', "width": 2, "value": allOutputData.maxVoltBand, "zIndex": 0}]}]
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
@@ -530,7 +567,7 @@
 		</div>
 		<p class="reportTitle postRun">Gridlab-D Warnings <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="gridlabDWarningsBlock" class="tightContent postRun detailsContainer" style="position: relative;">
-				<pre id="stderr" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; width: 100%"></pre>
+				<pre id="stderr" style="font-size:13px; text-align:left; padding-left: 10px;overflow-x: scroll; overflow-y: scroll; width: 100%"></pre>
 			<script>gebi("stderr").innerHTML = allOutputData.stderr</script>
 		</div>
 	</div>

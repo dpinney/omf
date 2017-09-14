@@ -1,6 +1,6 @@
 ''' Powerflow results for one Gridlab instance. '''
 
-import json, os, sys, tempfile, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx,  numpy as np
+import json, os, sys, tempfile, csv, webbrowser, time, shutil, datetime, subprocess, math, gc, networkx as nx,  numpy as np
 import networkx as nx
 from matplotlib import pyplot as plt
 from matplotlib.animation import FuncAnimation
@@ -69,6 +69,25 @@ def work(modelDir, inputDict):
 		copyStub['property'] = 'voltage_' + phase
 		copyStub['file'] = phase.lower() + 'mVoltDump.csv'
 		tree[feeder.getMaxKey(tree) + 1] = copyStub
+
+	for key in tree:
+		if 'bustype' in tree[key].keys():
+			if tree[key]['bustype'] == 'SWING':
+				swingN = tree[key]['name']
+	swingRecord = {'object':'recorder', 'property':'voltage_A','file':'subVoltsA.csv','parent':swingN, 'interval':60}
+	tree[feeder.getMaxKey(tree) + 1] = swingRecord
+	for key in tree:
+		if 'omftype' in tree[key].keys() and tree[key]['argument']=='minimum_timestep=3600':
+			tree[key]['argument'] = 'minimum_timestep=60'
+	# If there is a varvolt object in the tree, add recorder to swingbus and node from voltage_measurements property
+	# Find var_volt object
+	downLineNode = 'None'
+	for key in tree:
+		if 'object' in tree[key].keys() and tree[key]['object']=='volt_var_control':
+			downLineNode = tree[key]['voltage_measurements']
+	if downLineNode != 'None':
+		downNodeRecord = {'object':'recorder', 'property':'voltage_A','file':'firstDownlineVoltsA.csv','parent':downLineNode, 'interval':60}
+		tree[feeder.getMaxKey(tree) + 1] = downNodeRecord
 	feeder.adjustTime(tree=tree, simLength=float(inputDict["simLength"]),
 		simLengthUnits=inputDict["simLengthUnits"], simStartDate=inputDict["simStartDate"])
 	# RUN GRIDLABD IN FILESYSTEM (EXPENSIVE!)
@@ -206,30 +225,35 @@ def work(modelDir, inputDict):
 			outData[newkey]['Cap1C'] = rawOut[key]['switchC']
 			outData[newkey]['CapPhases'] = rawOut[key]['phases'][0]
 	# Capture voltages at the swingbus
-	# First find the swingbus
-	for key in tree:
-			ob = tree[key]
-			if type(ob)==dict and ob.get('bustype','')=='SWING':
-				swingN = ob['name']
 	# Loop through voltDump for swingbus voltages
-	swingVolts = []
-	for step, stamp in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
-		for nodeName in [x for x in rawOut.get('aVoltDump.csv',{}).keys() if x != '# timestamp']:		
-			if nodeName == swingN:
-				swingVolts.append(rawOut['aVoltDump.csv'][nodeName][step])
-	outData['swingVoltage'] = swingVolts
-	# Use swing to find first downline node
+	subData = []
+	downData = []
+	with open(pJoin(modelDir,"subVoltsA.csv")) as subFile:
+		reader = csv.reader(subFile)
+		subData = [x for x in reader]
+	if downLineNode != 'None':
+		with open(pJoin(modelDir,"firstDownlineVoltsA.csv")) as downFile:
+			reader = csv.reader(downFile)
+			downData = [x for x in reader]
+	FIRST_DATA_ROW = 9
+	stringToMag = lambda s:abs(complex(s.replace('d','j')))
+	cleanDown = [stringToMag(x[1]) for x in downData[FIRST_DATA_ROW:-1]]
+	swingTimestamps = [x[0] for x in downData[FIRST_DATA_ROW:-1]]
+	cleanSub = [stringToMag(x[1]) for x in subData[FIRST_DATA_ROW:-1]]
+	outData['swingVoltage'] = cleanSub
+	outData['downlineNodeVolts'] = cleanDown
+	outData['swingTimestamps'] = swingTimestamps
+	# If there is a var volt system, find the min and max voltage for a band
+	minVoltBand = []
+	maxVoltBand = []
 	for key in tree:
-		ky = tree[key]
-		if type(ky)==dict and ky.get('object','')=="regulator":
-			downlineNode = tree[key]['to']
-	# Loop through voltDump for downlineNode voltages
-	downlineNodeVolts = []
-	for steps, stamps in enumerate(rawOut['aVoltDump.csv']['# timestamp']):
-		for nodeNam in [x for x in rawOut.get('aVoltDump.csv',{}).keys() if x != '# timestamp']:		
-			if nodeNam == downlineNode:
-				downlineNodeVolts.append(rawOut['aVoltDump.csv'][nodeNam][steps])
-	outData['downlineNodeVolts'] = downlineNodeVolts
+		objKeys = tree[key].keys()
+		if 'object' in objKeys:
+			if tree[key]['object']=='volt_var_control':
+				minVoltBand.append(float(tree[key]['minimum_voltages']))
+				maxVoltBand.append(float(tree[key]['maximum_voltages']))
+	outData['minVoltBand'] = minVoltBand
+	outData['maxVoltBand'] = maxVoltBand
 	# What percentage of our keys have lat lon data?
 	latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 	latPerc = 1.0*len(latKeys)/len(tree)
@@ -402,12 +426,12 @@ def _groupBy(inL, func):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"simStartDate": "2012-04-01",
+		"simStartDate": "2012-04-02",
 		"simLengthUnits": "hours",
 		"feederName1": "Olin Barre GH EOL Solar AVolts CapReg",
 		"modelType": modelName,
 		"zipCode": "59001",
-		"simLength": "72",
+		"simLength": "24",
 	}
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
