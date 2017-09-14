@@ -321,7 +321,9 @@
 						var hardened = "Hardened";
 						if(line.hardened == false) {
 							hardened = "Unhardened";
-						}
+						} else if (line.hardened == undefined) {
+							hardened = "Not a Hardening Candidate";
+						};
 						lineID = lineData[j][0];
 						lineCost = lineData[j][1];
 						htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + "</td><td>$" +  lineCost + "</td></tr>";
