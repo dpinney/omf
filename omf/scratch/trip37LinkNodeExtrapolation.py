@@ -127,8 +127,8 @@ def function():
 				newNode = copy.deepcopy(nodeTemplate)
 				newNode["treeIndex"] = key
 				newNode["index"] = nodeIndexCounter
-				newX = random.uniform(469.936288113, 530.45917292) 
-				newY = random.uniform(466.39255347, 533.329506352)
+				newX = random.uniform(-73.0, -70.6) 
+				newY = random.uniform(40.5, 42.3)
 				newNode["px"] = newX
 				newNode["py"] = newY
 				newNode["x"] = newNode["px"]
@@ -168,7 +168,6 @@ def function():
 	modelName = "resilientDist"
 	with open(pJoin(__neoMetaModel__._omfDir, "scratch", "publicFeeders", feederName + '_new.omd'), 'w') as outfile:
 		json.dump(feederModel, outfile, indent = 4)
-
 
 
 if __name__ == '__main__':
