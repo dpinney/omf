@@ -444,7 +444,7 @@ def work(modelDir, inputDict):
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
 	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))	
-	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName']], cwd=modelDir)
+	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], cwd=modelDir)
 	proc.wait()
 	#test change
 	#Denote new lines
@@ -574,8 +574,8 @@ def new(modelDir):
 		"nonCriticalLoadMet": "0.0",
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
-		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","WindGrid_lpnorm_example.asc")).read(),
-		"weatherImpactsFileName": "WindGrid_lpnorm_example.asc",
+		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"solvers","gfm","wf_clip.asc")).read(),
+		"weatherImpactsFileName": "wf_clip.asc",
 		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","rdtInSimple_Market_System.json")).read(),
 		"xrMatricesFileName":"rdtInSimple_Market_System.json",
 		"simulationDate": "2012-01-01",
