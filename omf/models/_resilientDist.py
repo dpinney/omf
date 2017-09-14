@@ -432,83 +432,10 @@ def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
 	outData = {}
 	feederName = inputDict["feederName1"]
-	# Generate the input file for GFM:
-	fragIn = {
-	    "hazardFields": [
-	        {
-	            "rasterFieldData": {
-	                "rasterBand": 1, 
-	                "valueType": "double", 
-	                "uri": "", 
-	                "crsCode": "EPSG:4326", 
-	                "nBands": 1, 
-	                "gridFormat": "ArcGrid"
-	            }, 
-	            "id": "hawaiiArcTestGrid", 
-	            "hazardQuantityType": "Windspeed"
-	        }
-	    ], 
-	    "assets": [], 
-	    "responseEstimators": [
-	        {
-	            "assetClass": "PowerDistributionPole", 
-	            "hazardQuantityTypes": [
-	                "Windspeed"
-	            ], 
-	            "responseEstimatorClass": "PowerPoleWindStressEstimator", 
-	            "responseQuantityType": "DamageProbability", 
-	            "id": "PowerPoleWindStressEstimator", 
-	            "properties": {}
-	        }
-	    ]
-	}
-	baseAsset = {
-        "id": 0, 
-        "assetClass": "PowerDistributionPole", 
-        "properties": {
-            "stdDevPoleStrength": 7700000.0, 
-            "powerCableNumber": 2, 
-            "meanPoleStrength": 37600000.0, 
-            "powerCableDiameter": 0.0094742, 
-            "commAttachmentHeight": 4.7244, 
-            "baseDiameter": 0.22225, 
-            "height": 9.144, 
-            "powerAttachmentHeight": 5.6388, 
-            "powerCircuitName": "NAME", 
-            "woodDensity": 500.0, 
-            "commCableDiameter": 0.04, 
-            "cableSpan": 25.4669, 
-            "topDiameter": 0.15361635107, 
-            "commCableWireDensity": 1500.0, 
-            "powerCableWireDensity": 2700.0, 
-            "commCableNumber": 2
-        }, 
-        "assetGeometry": {
-            "type": "Point", 
-            "coordinates": [
-                530.4008195466031, 
-                493.0561704740412
-            ]
-        }
-    }
 	with open(pJoin(modelDir,inputDict['weatherImpactsFileName']),'w') as hazardFile:
 		hazardFile.write(inputDict['weatherImpacts'])
-	if(platform.system() == "Windows"):  # HACK: do the world's worst URLENCODE:
-		hazardAscPath = 'file:///' + pJoin(modelDir, inputDict['weatherImpactsFileName']).replace(' ','%20')
-		hazardAscPath = hazardAscPath.replace('\\', '/')
-	else: #for UNIX
-		hazardAscPath = 'file://' + pJoin(modelDir, inputDict['weatherImpactsFileName']).replace(' ','%20')
-	fragIn['hazardFields'][0]['rasterFieldData']['uri'] = hazardAscPath # HACK: just consider one hazard field.
 	with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
-	# Pull pole lat/lon data from OMD and add to pole system.
-	for node in feederModel['nodes']:
-		asset = copy.deepcopy(baseAsset)
-		asset['id'] = node['index']
-		asset['assetGeometry']['coordinates'] = [node['x'], node['y']]
-		fragIn['assets'].append(asset)
-	with open(pJoin(modelDir, "gfmInput.json"), "w") as outFile:
-		json.dump(fragIn, outFile, indent=4)
 	# Run GFM.
 	rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
 	with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
@@ -516,9 +443,8 @@ def work(modelDir, inputDict):
 	rdtFileName, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
-	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))
-	# windFilePath = pJoin(modelDir, 'wfclip.asc')
-	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', rdtFileName, '-wf', 'WindGrid_lpnorm_example.asc'], cwd=modelDir)
+	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))	
+	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', rdtFileName, '-wf', inputDict['weatherImpactsFileName']], cwd=modelDir)
 	proc.wait()
 	#test change
 	#Denote new lines
@@ -538,9 +464,7 @@ def work(modelDir, inputDict):
 	gfmRawOut = open(pJoin(modelDir,"rdtIn.json")).read()		
 	#extra step here, just set equal to gfmOut from above
 	outData['gfmRawOut'] = gfmRawOut
-	
 	print 'Ran Fragility\n'
-
 	# Run GridLAB-D first time to generate xrMatrices.
 	if platform.system() == "Windows":
 		#GridlabD
