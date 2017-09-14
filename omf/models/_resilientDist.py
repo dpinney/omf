@@ -445,7 +445,9 @@ def work(modelDir, inputDict):
 	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
 	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))	
 	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], cwd=modelDir)
+	# HACK: rename the hardcoded gfm output
 	proc.wait()
+	os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),pJoin(modelDir,'rdtInput.json'))
 	#test change
 	#Denote new lines
 	newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
@@ -513,7 +515,7 @@ def work(modelDir, inputDict):
 	# Run RDT.
 	print "Running RDT..."
 	print "************************************"
-	rdtInFile = modelDir + '/' + 'rdt_OUTPUT.json'
+	rdtInFile = modelDir + '/' + 'rdtInput.json'
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
