@@ -515,11 +515,10 @@ def work(modelDir, inputDict):
 		json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
 	rdtFileName, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-	#shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
-	shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))
-	rdtFilePath = rdtFileName#pJoin(modelDir, 'rdt.json')
-	windFilePath = pJoin(modelDir, 'wfclip.asc')
-	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', rdtFilePath, '-wf', 'WindGrid_lpnorm_example.asc'], cwd=modelDir)
+	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
+	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))
+	# windFilePath = pJoin(modelDir, 'wfclip.asc')
+	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', rdtFileName, '-wf', 'WindGrid_lpnorm_example.asc'], cwd=modelDir)
 	proc.wait()
 	#test change
 	#Denote new lines
@@ -587,8 +586,6 @@ def work(modelDir, inputDict):
 		shutil.copy(pJoin(__neoMetaModel__._omfDir, "data", "Climate", climateFileName + ".tmy2"), pJoin(modelDir, 'climate.tmy2'))
 		gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
 		outData['gridlabdRawOut'] = gridlabdRawOut
-	
-			
 	# Run RDT.
 	print "Running RDT..."
 	print "************************************"
@@ -655,8 +652,6 @@ def new(modelDir):
 		"phaseVariation": "0.15",
 		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","WindGrid_lpnorm_example.asc")).read(),
 		"weatherImpactsFileName": "WindGrid_lpnorm_example.asc",
-		"poleData": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","_fragility_input_example.json")).read(),
-		"poleDataFileName": "_fragility_input_example.json",
 		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","rdtInSimple_Market_System.json")).read(),
 		"xrMatricesFileName":"rdtInSimple_Market_System.json",
 		"simulationDate": "2012-01-01",
