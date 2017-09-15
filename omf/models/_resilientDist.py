@@ -292,7 +292,7 @@ def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
 	'''buses.
 	Ziploads? house? regulator? Waterheater?
 	'''
-	objToFind = ['node', 'triplex_node', 'triplex_meter', 'load']
+	objToFind = ['node', 'triplex_node', 'triplex_meter', "load"]
 	for key, bus in jsonTree.iteritems():
 		# if bus.get('object','') in objToFind and bus.get('bustype','').lower() != 'swing':
 		if bus.get('object','').lower() in objToFind:
@@ -303,16 +303,15 @@ def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
 			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus, 0.0)
 			rdtJson['buses'].append(newBus)
 			for busNode in jsonNodes:
-				if key==busNode.get('treeIndex'):
-					newBus['y'] = busNode.get('y','')
-					newBus['x'] = busNode.get('x','')
-			# TODO: what to do about objects without x,y in nodes?
+				if int(key)== busNode.get('treeIndex'):
+					newBus['y'] = busNode.get('y')/100
+					newBus['x'] = busNode.get('x')/100
 
 def makeLoads(rdtJson, jsonTree, debug):
 	'''loads.
 	TODO*: How do I calculate real_phase and reactive_phase?
 	'''
-	objToFind = ['triplex_meter']
+	objToFind = ['triplex_meter', 'load']
 	for key, loads in jsonTree.iteritems():
 		if loads.get('object','') in objToFind:
 			newLoad = createObj('load')
@@ -320,19 +319,10 @@ def makeLoads(rdtJson, jsonTree, debug):
 			for elem in rdtJson['buses']:
 				if elem['id'][0:-4] == newLoad['id'][0:-4]:
 					busID = elem['id']
-					if debug==2: 
-						print "      **Found load: %s bus as: %s**"%(newLoad['id'], busID)
 			newLoad['node_id'] = busID
 			numPhases, newLoad['has_phase'], newLoad['max_real_phase'], newLoad['max_reactive_phase'] = getNodePhases(loads, 10)
 			# newLoad.pop('is_critical',None)
-			rdtJson['loads'].append(newLoad)
-	if debug: 
-		print "Created %s loads"%(str(len(rdtJson['loads'])))
-		if debug==2:
-			for elem in rdtJson['loads']: 
-				print "   Load:"
-				for a,val in elem.iteritems():
-					print "      %s: %s"%(str(a), str(val))				
+			rdtJson['loads'].append(newLoad)		
 
 def makeGens(rdtJson, jsonTree, maxRealPhase, newGens, debug):
 	'''generators.
@@ -544,6 +534,8 @@ def work(modelDir, inputDict):
 		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
+	outData["criticalLoadMet"] = inputDict["criticalLoadMet"]
+	outData["nonCriticalLoadMet"] = inputDict["nonCriticalLoadMet"]
 	# Draw the feeder.
 	genDiagram(modelDir, feederName, feederModel, debug=False)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
@@ -557,7 +549,7 @@ def cancel(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "trip37_new",
+		"feederName1": "trip37",
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",

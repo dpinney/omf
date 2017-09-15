@@ -373,8 +373,12 @@
 			</div>
 			<div id="tables" style="width: 60%; float: right;">
 				<div style="float: left">
-					<h5 style="padding: 3px; float: left; border: 1px solid black; background-color: #AAD0FF">Non-Critical Load lost: X%</h4>
-					<h5 style="padding: 3px; float: right; border: 1px solid black; background-color: #AAD0FF">Critical load lost: Y%</h4>
+					<h5 style="padding: 3px; float: left; border: 1px solid black; background-color: #AAD0FF" id="nonCriticalLoadMetDisplay"></h5>
+					<h5 style="padding: 3px; float: right; border: 1px solid black; background-color: #AAD0FF" id="criticalLoadMetDisplay"></h5>
+					<script>
+						gebi("nonCriticalLoadMetDisplay").innerHTML = "Non-Critical Load lost: " + allOutputData.nonCriticalLoadMet;
+						gebi("criticalLoadMetDisplay").innerHTML = "Critical Load lost: " + allOutputData.criticalLoadMet;
+					</script>
 				</div>
 				<select id="scenarioSelect" style="width: 40%;float: right;" onchange="swapScenarios(scenarioDict, 'scenarioTable')"">
 					<script>
