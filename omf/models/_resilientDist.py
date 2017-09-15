@@ -451,7 +451,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,gfmOutFileName),"w") as outFile:
 		json.dump(gfmOut, outFile, indent = 4)
 	'''
-	gfmRawOut = open(pJoin(modelDir,gfmInputFilename)).read()		
+	gfmRawOut = open(pJoin(modelDir,'rdtInput.json')).read()		
 	#extra step here, just set equal to gfmOut from above
 	outData['gfmRawOut'] = gfmRawOut
 	print 'Ran Fragility\n'
