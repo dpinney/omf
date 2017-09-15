@@ -534,8 +534,7 @@ def work(modelDir, inputDict):
 		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
-	outData["criticalLoadMet"] = inputDict["criticalLoadMet"]
-	outData["nonCriticalLoadMet"] = inputDict["nonCriticalLoadMet"]
+
 	# Draw the feeder.
 	genDiagram(modelDir, feederName, feederModel, debug=False)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
