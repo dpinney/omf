@@ -391,12 +391,12 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 	return rdtInFile, lineCosts
 
 def genDiagram(dataDir, feederName, feederJson, debug):
-	# Generate feeder diagram.
+	# Load required data.
 	feederJson = json.load(open(pJoin(dataDir,feederName + '.omd')))
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
 	toRemove = []
-	# Generate synthetic lat/lons from nodes and links structures.
+	# Generate lat/lons from nodes and links structures.
 	for link in links:
 		for typeLink in link.keys():
 			if typeLink in ['source', 'target']:
@@ -412,6 +412,14 @@ def genDiagram(dataDir, feederName, feederJson, debug):
 								if x not in toRemove: toRemove.append(x)
 	# Remove some things that don't render well.
 	for rem in toRemove: tree.pop(rem)
+	# Remove even more things (no lat, lon or from = node without a position).
+	for key in tree.keys():
+		aLat = tree[key].get('latitude')
+		aLon = tree[key].get('longitude')
+		aFrom = tree[key].get('from')
+		if aLat is None and aLon is None and aFrom is None:
+			 tree.pop(key)
+	# Create and save the graphic.
 	nxG = feeder.treeToNxGraph(tree)
 	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
 	plt.savefig(pJoin(dataDir,"feederChart.png"))
@@ -430,8 +438,6 @@ def work(modelDir, inputDict):
 		json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
 	gfmInputFilename, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
-	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))	
 	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], cwd=modelDir)
 	# HACK: rename the hardcoded gfm output
 	proc.wait()
@@ -564,7 +570,7 @@ def new(modelDir):
 		"nonCriticalLoadMet": "0.0",
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
-		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"solvers","gfm","wf_clip.asc")).read(),
+		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","wf_clip.asc")).read(),
 		"weatherImpactsFileName": "wf_clip.asc",
 		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","rdtInSimple_Market_System.json")).read(),
 		"xrMatricesFileName":"rdtInSimple_Market_System.json",
