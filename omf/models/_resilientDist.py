@@ -303,9 +303,9 @@ def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
 			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus, 0.0)
 			rdtJson['buses'].append(newBus)
 			for busNode in jsonNodes:
-				if int(key)== busNode.get('treeIndex'):
-					newBus['y'] = busNode.get('y')/1000
-					newBus['x'] = busNode.get('x')/1000
+				if key == busNode.get('treeIndex'):
+					newBus['y'] = busNode.get('y')#/1000.0
+					newBus['x'] = busNode.get('x')#/1000.0
 
 def makeLoads(rdtJson, jsonTree, debug):
 	'''loads.
@@ -549,7 +549,7 @@ def cancel(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "trip37",
+		"feederName1": "trip37_worksRdt",
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
