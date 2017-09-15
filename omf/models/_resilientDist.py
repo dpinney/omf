@@ -391,12 +391,12 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 	return rdtInFile, lineCosts
 
 def genDiagram(dataDir, feederName, feederJson, debug):
-	# Generate feeder diagram.
+	# Load required data.
 	feederJson = json.load(open(pJoin(dataDir,feederName + '.omd')))
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
 	toRemove = []
-	# Generate synthetic lat/lons from nodes and links structures.
+	# Generate lat/lons from nodes and links structures.
 	for link in links:
 		for typeLink in link.keys():
 			if typeLink in ['source', 'target']:
@@ -412,6 +412,14 @@ def genDiagram(dataDir, feederName, feederJson, debug):
 								if x not in toRemove: toRemove.append(x)
 	# Remove some things that don't render well.
 	for rem in toRemove: tree.pop(rem)
+	# Remove even more things (no lat, lon or from = node without a position).
+	for key in tree.keys():
+		aLat = tree[key].get('latitude')
+		aLon = tree[key].get('longitude')
+		aFrom = tree[key].get('from')
+		if aLat is None and aLon is None and aFrom is None:
+			 tree.pop(key)
+	# Create and save the graphic.
 	nxG = feeder.treeToNxGraph(tree)
 	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
 	plt.savefig(pJoin(dataDir,"feederChart.png"))
