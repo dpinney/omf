@@ -343,6 +343,7 @@
 					}
 					else {
 						gebi("validation").innerHTML = "Powerflow Not Validated";
+						gebi("validation").style.color = "red";
 					}
 					//Total cost is currently being determined by summing all component costs of the design solution.  However, there is a section in RDTOUTPUT that gives total cost, though it is not implemented
 					//gebi("totalCostTable").innerHTML = '<tr><th>Total Cost</th></tr><tr><td>$' + rdtOutput.design_solution.design_cost + '</td></tr>';
