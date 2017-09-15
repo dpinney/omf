@@ -154,15 +154,15 @@
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Hardening Candidates<span class="classic">The IDs of the lines on the system that the user wants to consider hardening. At least one line is required.</span></label>
-				<input type="text" id="hardeningCandidates" name="hardeningCandidates" pattern="^(\w+){1}(\s*\,\s*\w+)*$">
+				<input type="text" id="hardeningCandidates" name="hardeningCandidates" pattern="^([\w\d_-]+)(,[\w\d_-]+)*$">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">New Line Candidates<span class="classic">Line IDs that indicate which lines the user added within the feeder editor. At least one line is required.</span></label>
-				<input type="text" id="newLineCandidates" name="newLineCandidates" pattern="^(\w+){1}(\s*\,\s*\w+)*$">
+				<input type="text" id="newLineCandidates" name="newLineCandidates" pattern="^([\w\d_-]+)(,[\w\d_-]+)*$">
 			</div>
 			<div class="shortInput">
 				<label class="tooltip">Generator Candidates<span class="classic">The IDs of nodes on the system where the user wants to consider adding distributed generation. At least one node is required.</span></label>
-				<input type="text" id="generatorCandidates" name="generatorCandidates" pattern="^(\w+){1}(\s*\,\s*\w+)*$">
+				<input type="text" id="generatorCandidates" name="generatorCandidates" pattern="^([\w\d_-]+)(,[\w\d_-]+)*$">
 			</div>
 
 			<div class="wideInput">
@@ -321,11 +321,13 @@
 						var hardened = "Hardened";
 						if(line.hardened == false) {
 							hardened = "Unhardened";
-						}
+						} else if (line.hardened == undefined) {
+							hardened = "Not a Hardening Candidate";
+						};
 						lineID = lineData[j][0];
 						lineCost = lineData[j][1];
 						htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + "</td><td>$" +  lineCost + "</td></tr>";
-						totalCost = parseFloat(lineCost) + totalCost;
+						totalCost = parseFloat(lineCost.replace(/\,/g,'')) + totalCost;
 					}
 					if(rdtOutput.design_solution.is_feasible == true) {
 						gebi("validation").innerHTML = "Powerflow Validated";

@@ -6,10 +6,9 @@ from os.path import join as pJoin
 from os.path import split as pSplit
 from jinja2 import Template
 import traceback
-from omf.models import __metaModel__
-from __metaModel__ import *
 
 # OMF imports
+import omf
 import omf.feeder as feeder
 from omf.solvers import gridlabd
 from omf.weather import zipCodeToClimateName
@@ -21,9 +20,103 @@ fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "The gridlabMulti model allows you to run multiple instances of GridLAB-D and compare their output visually."
 
+# Locational variables so we don't have to rely on OMF being in the system path.
+_myDir = os.path.dirname(os.path.abspath(__file__))
+_omfDir = os.path.dirname(_myDir)
+
 # Our HTML template for the interface:
-with open(pJoin(__metaModel__._myDir,modelName+".html"),"r") as tempFile:
+with open(pJoin(_myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
+
+def renderTemplate(modelDir, absolutePaths=False, datastoreNames={}):
+	''' Render the model template to an HTML string.
+	By default render a blank one for new input.
+	If modelDir is valid, render results post-model-run.
+	If absolutePaths, the HTML can be opened without a server. '''
+	try:
+		inJson = json.load(open(pJoin(modelDir,"allInputData.json")))
+		modelPath, modelName = pSplit(modelDir)
+		deepPath, user = pSplit(modelPath)
+		inJson["modelName"] = modelName
+		inJson["user"] = user
+		modelType = inJson["modelType"]
+		template = getattr(omf.models, modelType).template
+		allInputData = json.dumps(inJson)
+	except IOError:
+		allInputData = None
+	try:
+		allOutputData = open(pJoin(modelDir,"allOutputData.json")).read()
+	except IOError:
+		allOutputData = None
+	if absolutePaths:
+		# Parent of current folder.
+		pathPrefix = _omfDir
+	else:
+		pathPrefix = ""
+	return template.render(allInputData=allInputData,
+		allOutputData=allOutputData, modelStatus=getStatus(modelDir), pathPrefix=pathPrefix,
+		datastoreNames=datastoreNames, modelName=modelType)
+
+def renderAndShow(modelDir, datastoreNames={}):
+	''' Render and open a template (blank or with output) in a local browser. '''
+	with tempfile.NamedTemporaryFile(suffix=".html", delete=False) as temp:
+		temp.write(renderTemplate(modelDir, absolutePaths=True))
+		temp.flush()
+		webbrowser.open("file://" + temp.name)
+
+def getStatus(modelDir):
+	''' Is the model stopped, running or finished? '''
+	try:
+		modFiles = os.listdir(modelDir)
+	except:
+		modFiles = []
+	hasInput = "allInputData.json" in modFiles
+	hasPID = "PPID.txt" in modFiles
+	hasOutput = "allOutputData.json" in modFiles
+	if hasInput and not hasOutput and not hasPID:
+		return "stopped"
+	elif hasInput and not hasOutput and hasPID:
+		return "running"
+	elif hasInput and hasOutput and not hasPID:
+		return "finished"
+	else:
+		# Broken! Make the safest choice:
+		return "stopped"
+
+def cancel(modelDir):
+	''' Try to cancel a currently running model. '''
+	# Kill GLD process if already been created
+	try:
+		with open(pJoin(modelDir,"PID.txt"),"r") as pidFile:
+			pid = int(pidFile.read())
+			# print "pid " + str(pid)
+			os.kill(pid, 15)
+			print "PID KILLED"
+	except:
+		pass
+	# Kill runForeground process
+	try:
+		with open(pJoin(modelDir, "PPID.txt"), "r") as pPidFile:
+			pPid = int(pPidFile.read())
+			os.kill(pPid, 15)
+			print "PPID KILLED"
+	except:
+		pass
+	# Remove PID, PPID, and allOutputData file if existed
+	for fName in ["PID.txt","PPID.txt","allOutputData.json"]:
+		try: 
+			os.remove(pJoin(modelDir,fName))
+		except:
+			pass
+	print "CANCELED", modelDir
+
+def roundSig(x, sig=3):
+	''' Round to a given number of sig figs. '''
+	roundPosSig = lambda y,sig: round(y, sig-int(math.floor(math.log10(y)))-1)
+	if x == 0: return 0
+	elif x!=x: return 0 # This is handling float's NaN.
+	elif x < 0: return -1*roundPosSig(-1*x, sig)
+	else: return roundPosSig(x, sig)
 
 def run(modelDir, inputDict):
 	''' Run the model in a separate process. web.py calls this to run the model.
@@ -81,7 +174,7 @@ def runForeground(modelDir, inputDict):
 			shutil.copy(pJoin(modelDir, feederName + ".omd"),
 				pJoin(modelDir, feederName, "feeder.omd"))
 			inputDict["climateName"], latforpvwatts = zipCodeToClimateName(inputDict["zipCode"])
-			shutil.copy(pJoin(__metaModel__._omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
+			shutil.copy(pJoin(_omfDir, "data", "Climate", inputDict["climateName"] + ".tmy2"),
 				pJoin(modelDir, feederName, "climate.tmy2"))
 			try:
 				startTime = datetime.datetime.now()
@@ -370,6 +463,21 @@ def _groupBy(inL, func):
 			newL.append([item])
 	return newL
 
+def preNew(modelDir, defaultInputs):
+	''' Create a new instance of a model. Returns true on success, false on failure. '''
+	alreadyThere = os.path.isdir(modelDir) or os.path.isfile(modelDir)
+	try:
+		if not alreadyThere:
+			os.makedirs(modelDir)
+		else:
+			return False
+		defaultInputs["created"] = str(datetime.datetime.now())
+		with open(pJoin(modelDir, "allInputData.json"),"w") as inputFile:
+			json.dump(defaultInputs, inputFile, indent = 4)
+		return True
+	except:
+		return False
+
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
@@ -381,18 +489,18 @@ def new(modelDir):
 		"zipCode": "64735",
 		"simLength": "24",
 		"runTime": ""}
-	creationCode = __metaModel__.new(modelDir, defaultInputs)
+	creationCode = preNew(modelDir, defaultInputs)
 	feederKeys = [key for key in defaultInputs if key.startswith("feederName")]
 	for key in feederKeys:
 		try:
-			shutil.copyfile(pJoin(__metaModel__._omfDir, "scratch", "publicFeeders", defaultInputs[key]+'.omd'), pJoin(modelDir, defaultInputs[key] + '.omd'))
+			shutil.copyfile(pJoin(_omfDir, "scratch", "publicFeeders", defaultInputs[key]+'.omd'), pJoin(modelDir, defaultInputs[key] + '.omd'))
 		except:
 			return False
 	return creationCode
 
 def _tests():
 	# Variables
-	modelLoc = pJoin(__metaModel__._omfDir,"data","Model","admin","Automated Testing of " + modelName)
+	modelLoc = pJoin(_omfDir,"data","Model","admin","Automated Testing of " + modelName)
 	# Blow away old test results if necessary.
 	try:
 		shutil.rmtree(modelLoc)
