@@ -305,7 +305,9 @@
 				<script>
 					//Displays RDT outputs into HTML tables
 					var rdtOutput = allOutputData.rdtRawOut;
+					var gfmOutput = allOutputData.gfmRawOut;
 					rdtOutput = JSON.parse(rdtOutput);
+					gfmOutput = JSON.parse(gfmOutput);
 					var scenarioDict = [];
 					var lineData = allOutputData.lineData;
 					var htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
@@ -348,27 +350,22 @@
 					gebi("solutionComponents").innerHTML = htmlCollector;
 
 					for(var j = 0; j < rdtOutput.scenario_solution.length; j++) {
-						htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Result</th></tr>";
 						scenario = rdtOutput.scenario_solution[j]; 
-						for(var k = 0; k < scenario.buses.length; k++) {
-							bus = scenario.buses[k];
-							htmlCollector = htmlCollector + "<tr><td>" + bus.id + "</td><td>Bus</td><td></td></tr>";
-						}
-						for(k = 0; k < scenario.generators.length; k++) {
-							generator = scenario.generators[k];
-							htmlCollector = htmlCollector + "<tr><td>" + generator.id + "</td><td>Generator</td><td></td></tr>";
-						}
-						for(k = 0; k < scenario.loads.length; k++) {
-							load = scenario.loads[k];
-							htmlCollector = htmlCollector + "<tr><td>" + load.id + "</td><td>Loads</td><td></td></tr>";
-						}
-						for(k = 0; k < scenario.lines.length; k++) {
-							line = scenario.lines[k];
-							htmlCollector = htmlCollector + "<tr><td>" + line.id + "</td><td>Lines</td><td></td></tr>";
-						}
 						critLoadMetDict[scenario.id] = scenario.critical_load_met;
 						nonCritLoadMetDict[scenario.id] = scenario.non_critical_load_met;
-						scenarioDict[scenario.id] = htmlCollector;
+					}
+					for(var j = 0; j < gfmOutput.scenarios.length; j++) {
+						htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Result</th></tr>";
+						scenario = gfmOutput.scenarios[j]; 
+						for(var k = 0; k < scenario.hardened_disabled_lines.length; k++) {
+							hdLine = scenario.hardened_disabled_lines[k];
+							htmlCollector = htmlCollector + "<tr><td>" + hdLine + "</td><td>Hardened Line</td><td>Disabled</td></tr>";
+						}
+						for(k = 0; k < scenario.disable_lines.length; k++) {
+							dLine = scenario.disable_lines[k];
+							htmlCollector = htmlCollector + "<tr><td>" + dLine + "</td><td>Line</td><td>Disabled</td></tr>";
+						}
+						scenarioDict[parseFloat(scenario.id) + 1] = htmlCollector;
 					}
 				</script>
 			</div>
