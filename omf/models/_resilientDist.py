@@ -306,8 +306,8 @@ def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
 				# HACK: sometimes keys are strings. Sometimes not.
 				if int(key) == busNode.get('treeIndex',0):
 					# HACK: nice coords for GFM which wants lat/lon.
-					newBus['y'] = busNode.get('y')/5000.0 + 41.6
-					newBus['x'] = busNode.get('x')/5000.0 - 72.8
+					newBus['y'] = busNode.get('y')/5000.0
+					newBus['x'] = busNode.get('x')/5000.0
 
 def makeLoads(rdtJson, jsonTree, debug):
 	'''loads.
