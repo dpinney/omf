@@ -327,7 +327,7 @@
 						lineID = lineData[j][0];
 						lineCost = lineData[j][1];
 						htmlCollector = htmlCollector + "<tr><td>" + lineID + "</td><td>Line</td><td>" + hardened + "</td><td>$" +  lineCost + "</td></tr>";
-						totalCost = parseFloat(lineCost) + totalCost;
+						totalCost = parseFloat(lineCost.replace(/\,/g,'')) + totalCost;
 					}
 					if(rdtOutput.design_solution.is_feasible == true) {
 						gebi("validation").innerHTML = "Powerflow Validated";
