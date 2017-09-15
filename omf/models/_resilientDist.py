@@ -379,7 +379,7 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 	lineCount, lineCosts = makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
 	makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug)
 	makeBuses(rdtJson, jsonTree, jsonNodes, debug)
-	# makeLoads(rdtJson, jsonTree, debug)
+	makeLoads(rdtJson, jsonTree, debug)
 	makeGens(rdtJson, jsonTree, maxDG, newGens, debug)
 	# Write to file.
 	rdtInFile = 'gfmInput.json'
@@ -394,11 +394,9 @@ def genDiagram(dataDir, feederName, feederJson, debug):
 	# Generate feeder diagram.
 	feederJson = json.load(open(pJoin(dataDir,feederName + '.omd')))
 	tree = feederJson.get("tree",{})
-	if debug:
-		print "Generating Feeder plot..."
-		print "************************************"
 	links = feederJson.get("links",{})
 	toRemove = []
+	# Generate synthetic lat/lons from nodes and links structures.
 	for link in links:
 		for typeLink in link.keys():
 			if typeLink in ['source', 'target']:
@@ -412,13 +410,11 @@ def genDiagram(dataDir, feederName, feederJson, debug):
 								else: leaf['longitude'] = link[typeLink][key]
 							elif 'config' in leaf.get('object','') or 'climate' in leaf.get('object','') or 'conductor' in leaf.get('object','') or 'solver_method' in leaf or 'omftype' in leaf or 'clock' in leaf or 'module' in leaf:
 								if x not in toRemove: toRemove.append(x)
+	# Remove some things that don't render well.
 	for rem in toRemove: tree.pop(rem)
 	nxG = feeder.treeToNxGraph(tree)
 	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
 	plt.savefig(pJoin(dataDir,"feederChart.png"))
-	if debug:
-		print "Plot saved to:                 %s"%(pJoin(dataDir,"feederChart.png"))
-		print "************************************\n\n"
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -575,7 +571,6 @@ def new(modelDir):
 		"simulationDate": "2012-01-01",
 		"simulationZipCode": "64735"
 	}
-	#print defaultInputs
 	creationCode = __neoMetaModel__.new(modelDir, defaultInputs)
 	try:
 		# Copy the feeder from one place to another
