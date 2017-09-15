@@ -303,9 +303,11 @@ def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
 			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus, 0.0)
 			rdtJson['buses'].append(newBus)
 			for busNode in jsonNodes:
-				if key == busNode.get('treeIndex'):
-					newBus['y'] = busNode.get('y')#/1000.0
-					newBus['x'] = busNode.get('x')#/1000.0
+				# HACK: sometimes keys are strings. Sometimes not.
+				if int(key) == busNode.get('treeIndex',0):
+					# HACK: nice coords for GFM which wants lat/lon.
+					newBus['y'] = busNode.get('y')/5000.0 + 41.6
+					newBus['x'] = busNode.get('x')/5000.0 - 72.8
 
 def makeLoads(rdtJson, jsonTree, debug):
 	'''loads.
@@ -377,7 +379,7 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 	lineCount, lineCosts = makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
 	makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug)
 	makeBuses(rdtJson, jsonTree, jsonNodes, debug)
-	makeLoads(rdtJson, jsonTree, debug)
+	# makeLoads(rdtJson, jsonTree, debug)
 	makeGens(rdtJson, jsonTree, maxDG, newGens, debug)
 	# Write to file.
 	rdtInFile = 'gfmInput.json'
@@ -534,8 +536,8 @@ def work(modelDir, inputDict):
 		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
-	outData["criticalLoadMet"] = inputDict["criticalLoadMet"]
-	outData["nonCriticalLoadMet"] = inputDict["nonCriticalLoadMet"]
+	# outData["criticalLoadMet"] = inputDict["criticalLoadMet"]
+	# outData["nonCriticalLoadMet"] = inputDict["nonCriticalLoadMet"]
 	# Draw the feeder.
 	genDiagram(modelDir, feederName, feederModel, debug=False)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
@@ -549,7 +551,7 @@ def cancel(modelDir):
 def new(modelDir):
 	''' Create a new instance of this model. Returns true on success, false on failure. '''
 	defaultInputs = {
-		"feederName1": "trip37_worksRdt",
+		"feederName1": "trip37",
 		"modelType": modelName,
 		"runTime": "0:00:30",
 		"layoutAlgorithm": "geospatial",
