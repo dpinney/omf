@@ -304,8 +304,8 @@ def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
 			rdtJson['buses'].append(newBus)
 			for busNode in jsonNodes:
 				if int(key)== busNode.get('treeIndex'):
-					newBus['y'] = busNode.get('y')/100
-					newBus['x'] = busNode.get('x')/100
+					newBus['y'] = busNode.get('y')/1000
+					newBus['x'] = busNode.get('x')/1000
 
 def makeLoads(rdtJson, jsonTree, debug):
 	'''loads.
