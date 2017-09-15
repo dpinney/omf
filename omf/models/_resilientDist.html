@@ -63,9 +63,11 @@
 			//gebi(connectedElementName).value = '-';
 		}
 
-		function swapScenarios(scenarioDict, gebiID) {
+		function swapScenarios(scenarioDict, critLoadMetDict, nonCritLoadMetDict, gebiScenarioID) {
 			var scenarioID = gebi("scenarioSelect").value;
-			gebi(gebiID).innerHTML = scenarioDict[scenarioID];
+			gebi(gebiScenarioID).innerHTML = scenarioDict[scenarioID];
+			gebi("nonCriticalLoadMetDisplay").innerHTML = "Non-critical Load lost: " + nonCritLoadMetDict[scenarioID];
+			gebi("criticalLoadMetDisplay").innerHTML = "Critical Load lost: " + critLoadMetDict[scenarioID];
 		}
 
 		function storeScenario(scenarioDict, id, table){
@@ -308,6 +310,9 @@
 					var lineData = allOutputData.lineData;
 					var htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Action</th><th>Cost</th></tr>";
 					var totalCost = 0.0;
+					var critLoadMetDict = [];
+					var nonCritLoadMetDict = [];
+
 
 					for(var i = 0; i < rdtOutput.design_solution.generators.length; i++) {
 						generator = rdtOutput.design_solution.generators[i];
@@ -359,6 +364,8 @@
 							line = scenario.lines[k];
 							htmlCollector = htmlCollector + "<tr><td>" + line.id + "</td><td>Lines</td><td></td></tr>";
 						}
+						critLoadMetDict[scenario.id] = scenario.critical_load_met;
+						nonCritLoadMetDict[scenario.id] = scenario.non_critical_load_met;
 						scenarioDict[scenario.id] = htmlCollector;
 					}
 				</script>
@@ -375,12 +382,8 @@
 				<div style="float: left">
 					<h5 style="padding: 3px; float: left; border: 1px solid black; background-color: #AAD0FF" id="nonCriticalLoadMetDisplay"></h5>
 					<h5 style="padding: 3px; float: right; border: 1px solid black; background-color: #AAD0FF" id="criticalLoadMetDisplay"></h5>
-					<script>
-						gebi("nonCriticalLoadMetDisplay").innerHTML = "Non-Critical Load lost: " + allOutputData.nonCriticalLoadMet;
-						gebi("criticalLoadMetDisplay").innerHTML = "Critical Load lost: " + allOutputData.criticalLoadMet;
-					</script>
 				</div>
-				<select id="scenarioSelect" style="width: 40%;float: right;" onchange="swapScenarios(scenarioDict, 'scenarioTable')"">
+				<select id="scenarioSelect" style="width: 40%;float: right;" onchange="swapScenarios(scenarioDict, critLoadMetDict, nonCritLoadMetDict, 'scenarioTable')"">
 					<script>
 						htmlCollector = ""
 						for (var scenarioID in scenarioDict) {
@@ -392,7 +395,7 @@
 				<br>
 				<br>
 				<table id="scenarioTable">
-				<script>swapScenarios(scenarioDict, "scenarioTable")</script>
+				<script>swapScenarios(scenarioDict, critLoadMetDict, nonCritLoadMetDict, "scenarioTable")</script>
 				</table>
 			</div>
 		</div>
