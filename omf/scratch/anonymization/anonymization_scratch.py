@@ -295,6 +295,7 @@ def distSmoothLoads(inFeeder):
 				outList.append([aggHour, aggAmount])
 			except:
 				pass
+		print outList
 	return outList
 
 # TRANSMISSION NETWORK FUNCTIONS
@@ -507,15 +508,15 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distSmoothLoads
-# 	FNAME = "Calibrated Feeder.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		calibrate = distSmoothLoads(inFeeder)
-# 		print calibrate
-# 	FNAMEOUT = "calibrated_distSmoothLoads.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distSmoothLoads
+	FNAME = "Calibrated Feeder.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		calibrate = distSmoothLoads(inFeeder)
+		print calibrate
+	FNAMEOUT = "calibrated_distSmoothLoads.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
 
 # 	# TRANSMISSION NETWORK TESTS
