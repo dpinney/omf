@@ -438,8 +438,6 @@ def work(modelDir, inputDict):
 		json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
 	gfmInputFilename, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
-	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'rdt.json'), pJoin(modelDir, 'rdt.json'))
-	# shutil.copyfile(pJoin(__neoMetaModel__._omfDir, "solvers","gfm", 'wf_clip.asc'), pJoin(modelDir, 'wfclip.asc'))	
 	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], cwd=modelDir)
 	# HACK: rename the hardcoded gfm output
 	proc.wait()
@@ -572,7 +570,7 @@ def new(modelDir):
 		"nonCriticalLoadMet": "0.0",
 		"chanceConstraint": "1.0",
 		"phaseVariation": "0.15",
-		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"solvers","gfm","wf_clip.asc")).read(),
+		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","wf_clip.asc")).read(),
 		"weatherImpactsFileName": "wf_clip.asc",
 		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","rdtInSimple_Market_System.json")).read(),
 		"xrMatricesFileName":"rdtInSimple_Market_System.json",
