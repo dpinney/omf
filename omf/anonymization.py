@@ -110,26 +110,23 @@ def distAddNoise(inFeeder, noisePerc):
 	noisePerc = float(noisePerc)/100
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
-			propValue = inFeeder['tree'][key][prop]
+			val = inFeeder['tree'][key][prop]
 			try:
-				parseValue = float(propValue)
-				randNoise = random.randint(parseValue - noisePerc*parseValue, parseValue + noisePerc*parseValue)
+				parseVal = float(val)
+				randNoise = random.randint(parseVal - noisePerc*parseVal, parseVal + noisePerc*parseVal)
 				inFeeder['tree'][key][prop] = str(randNoise)
 			except ValueError:
-				if type(propValue) is complex:
-					realValue = float(propValue.real)
-					imagValue = float(propValue.imag)
-					# randNoise = random.randint(parseValue - noisePerc*parseValue, parseValue + noisePerc*parseValue)
-					randReal = random.randrange()
-					inFeeder['tree'][key][prop] = complex(randNoise)
+				try:
+					compVal = complex(val)
+					realVal = float(compVal.real)
+					imagVal = float(compVal.imag)
+					randReal = random.randint(realVal - noisePerc*realVal, realVal + noisePerc*realVal)
+					randImag = random.randint(imagVal - noisePerc*imagVal, imagVal + noisePerc*imagVal)
+					randNoise = complex(randReal, randImag)
+					inFeeder['tree'][key][prop] = str(randNoise)
+				except ValueError:
+					continue
 				continue
-			# try: 
-			# 	complex(str(propValue))
-			# 	parseValue = float(propValue)
-			# 	randNoise = random.randint(parseValue - noisePerc*parseValue, parseValue + noisePerc*parseValue)
-			# 	inFeeder['tree'][key][prop] = randNoise
-			# except ValueError:
-			# 	continue
 	return
 
 def distShuffleLoads(inFeeder, shufPerc):
@@ -485,7 +482,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	FNAME = "Simple Market System AnonTest.omd"
 # 	with open(FNAME, "r") as inFile:
 # 		inFeeder = json.load(inFile)
-# 		noisePerc = 0.2
+# 		noisePerc = 50
 # 		distAddNoise(inFeeder, noisePerc)
 # 	FNAMEOUT = "simpleMarket_distAddNoise.omd"
 # 	with open(FNAMEOUT, "w") as outFile:

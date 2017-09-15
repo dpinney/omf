@@ -110,13 +110,26 @@ def distAddNoise(inFeeder, noisePerc):
 	noisePerc = float(noisePerc)/100
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
-			propValue = inFeeder['tree'][key][prop]
-			try: 
-				complex(str(propValue))
-				parseValue = float(propValue)
-				randNoise = random.randint(parseValue - noisePerc*parseValue, parseValue + noisePerc*parseValue)
-				inFeeder['tree'][key][prop] = randNoise
+			val = inFeeder['tree'][key][prop]
+			try:
+				parseVal = float(val)
+				# print parseVal
+				randNoise = random.randint(parseVal - noisePerc*parseVal, parseVal + noisePerc*parseVal)
+				# print parseVal, randNoise
+				inFeeder['tree'][key][prop] = str(randNoise)
+				# print prop, val, randNoise
 			except ValueError:
+				try:
+					compVal = complex(val)
+					realVal = float(compVal.real)
+					imagVal = float(compVal.imag)
+					randReal = random.randint(realVal - noisePerc*realVal, realVal + noisePerc*realVal)
+					randImag = random.randint(imagVal - noisePerc*imagVal, imagVal + noisePerc*imagVal)
+					randNoise = complex(randReal, randImag)
+					inFeeder['tree'][key][prop] = str(randNoise)
+					# print prop, val, randNoise
+				except ValueError:
+					continue
 				continue
 	return
 
@@ -145,15 +158,15 @@ def distShuffleLoads(inFeeder, shufPerc):
 	# tnIdx = 0
 	for key in inFeeder['tree']:
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'house'):
-			if random.randint(0,100) < shufPerc:
+			if random.randint(0,100) <= shufPerc:
 				inFeeder['tree'][key]['parent'] = houseParents[houseIdx]
 				houseIdx += 1
 		if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'ZIPload'):
-			if random.randint(0,100) < shufPerc:
+			if random.randint(0,100) <= shufPerc:
 				inFeeder['tree'][key]['parent'] = zipParents[zipIdx]
 				zipIdx += 1
 		if ('from' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_line'):
-			if random.randint(0,100) < shufPerc:
+			if random.randint(0,100) <= shufPerc:
 				inFeeder['tree'][key]['from'] = tlParents[tlIdx]
 				tlIdx += 1
 		# if ('parent' in inFeeder['tree'][key]) and (inFeeder['tree'][key].get('object') == 'triplex_node'):
@@ -295,7 +308,6 @@ def distSmoothLoads(inFeeder):
 				outList.append([aggHour, aggAmount])
 			except:
 				pass
-		print outList
 	return outList
 
 # TRANSMISSION NETWORK FUNCTIONS
@@ -428,7 +440,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 							genIdx += 1
 	return
 
-# def _tests():
+def _tests():
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
 # 	FNAME = "Simple Market System AnonTest.omd"
@@ -470,15 +482,15 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distAddNoise
-# 	FNAME = "Simple Market System AnonTest.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		noisePerc = 0.2
-# 		distAddNoise(inFeeder, noisePerc)
-# 	FNAMEOUT = "simpleMarket_distAddNoise.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distAddNoise
+	FNAME = "Simple Market System AnonTest.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		noisePerc = 50
+		distAddNoise(inFeeder, noisePerc)
+	FNAMEOUT = "simpleMarket_distAddNoise.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distShuffleLoads
 # 	FNAME = "Simple Market System AnonTest.omd"
@@ -508,15 +520,15 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inFeeder, outFile, indent=4)
 
-	# Test distSmoothLoads
-	FNAME = "Calibrated Feeder.omd"
-	with open(FNAME, "r") as inFile:
-		inFeeder = json.load(inFile)
-		calibrate = distSmoothLoads(inFeeder)
-		print calibrate
-	FNAMEOUT = "calibrated_distSmoothLoads.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inFeeder, outFile, indent=4)
+# 	# Test distSmoothLoads
+# 	FNAME = "Calibrated Feeder.omd"
+# 	with open(FNAME, "r") as inFile:
+# 		inFeeder = json.load(inFile)
+# 		calibrate = distSmoothLoads(inFeeder)
+# 		print calibrate
+# 	FNAMEOUT = "calibrated_distSmoothLoads.omd"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inFeeder, outFile, indent=4)
 
 
 # 	# TRANSMISSION NETWORK TESTS
@@ -580,5 +592,5 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-# if __name__ == '__main__':
-# 	_tests()
+if __name__ == '__main__':
+	_tests()
