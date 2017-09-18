@@ -459,7 +459,7 @@ def tranShuffleLoadsAndGens(inNetwork, shufPerc):
 							genIdx += 1
 	return
 
-def _tests():
+# def _tests():
 # 	# DISTRIBUTION FEEDER TESTS
 # 	# Test distPseudomizeNames
 # 	FNAME = "Simple Market System AnonTest.omd"
@@ -501,15 +501,15 @@ def _tests():
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inFeeder, outFile, indent=4)
 
-	# Test distAddNoise
-	FNAME = "Simple Market System AnonTest.omd"
-	with open(FNAME, "r") as inFile:
-		inFeeder = json.load(inFile)
-		noisePerc = 50
-		distAddNoise(inFeeder, noisePerc)
-	FNAMEOUT = "simpleMarket_distAddNoise.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inFeeder, outFile, indent=4)
+# 	# Test distAddNoise
+# 	FNAME = "Simple Market System AnonTest.omd"
+# 	with open(FNAME, "r") as inFile:
+# 		inFeeder = json.load(inFile)
+# 		noisePerc = 50
+# 		distAddNoise(inFeeder, noisePerc)
+# 	FNAMEOUT = "simpleMarket_distAddNoise.omd"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inFeeder, outFile, indent=4)
 
 # 	# Test distShuffleLoads
 # 	FNAME = "Simple Market System AnonTest.omd"
@@ -539,14 +539,14 @@ def _tests():
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inFeeder, outFile, indent=4)
 
-	# Test distSmoothLoads
-	FNAME = "Calibrated Feeder1.omd"
-	with open(FNAME, "r") as inFile:
-		inFeeder = json.load(inFile)
-		distSmoothLoads(inFeeder)
-	FNAMEOUT = "calibrated_distSmoothLoads.omd"
-	with open(FNAMEOUT, "w") as outFile:
-		json.dump(inFeeder, outFile, indent=4)
+# 	# Test distSmoothLoads
+# 	FNAME = "Calibrated Feeder1.omd"
+# 	with open(FNAME, "r") as inFile:
+# 		inFeeder = json.load(inFile)
+# 		distSmoothLoads(inFeeder)
+# 	FNAMEOUT = "calibrated_distSmoothLoads.omd"
+# 	with open(FNAMEOUT, "w") as outFile:
+# 		json.dump(inFeeder, outFile, indent=4)
 
 
 # 	# TRANSMISSION NETWORK TESTS
@@ -610,5 +610,5 @@ def _tests():
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inNetwork, outFile, indent=4)
 
-if __name__ == '__main__':
-	_tests()
+# if __name__ == '__main__':
+# 	_tests()
