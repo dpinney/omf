@@ -42,7 +42,6 @@ def distPseudomizeNames(inFeeder):
 def distRandomizeNames(inFeeder):
 	''' Replace all names in the inFeeder distribution system with a random ID number. '''
 	newNameKey = {}
-	newNameArray = []
 	randomID = random.randint(0,100)
 	# Create nameKey dictionary
 	for key in inFeeder['tree']:
@@ -50,7 +49,6 @@ def distRandomizeNames(inFeeder):
 			oldName = inFeeder['tree'][key]['name']
 			newName = str(randomID)
 			newNameKey.update({oldName:newName})
-			newNameArray.append(newName)
 			inFeeder['tree'][key]['name'] = newName
 			randomID += 1
 	# Replace names in tree
@@ -75,7 +73,7 @@ def distRandomizeNames(inFeeder):
 			if key == 'name':
 				oldNode = inFeeder['nodes'][i][key]
 				inFeeder['nodes'][i][key] = newNameKey[oldNode]
-	return newNameArray
+	return
 
 def distRandomizeLocations(inFeeder):
 	''' Replace all objects' longitude and latitude positions in the inFeeder distribution system with random values. '''
@@ -111,6 +109,7 @@ def distAddNoise(inFeeder, noisePerc):
 	for key in inFeeder['tree']:
 		for prop in inFeeder['tree'][key]:
 			val = inFeeder['tree'][key][prop]
+			# print key, prop, val
 			try:
 				parseVal = float(val)
 				# print parseVal
@@ -289,6 +288,7 @@ def distModifyConductorLengths(inFeeder):
 
 def distSmoothLoads(inFeeder):
 	''' Reduce the resolution of load shapes by taking all sub-hourly load dispatch data in the inFeeder distribution system and aggregating to the hour level. ''' 
+	agList = []
 	outList = []
 	scadaFile = inFeeder['attachments']['subScadaCalibrated1.player']
 	scadaLines = scadaFile.split('\n')
@@ -300,15 +300,34 @@ def distSmoothLoads(inFeeder):
 			timestamp = datetime.datetime.strptime(s, '%Y-%m-%d %H:%M:%S')
 		except:
 			pass # print 'BAD DATAPOINT:', s
-		aggAmount = 0
-		aggHour = timestamp.hour
-		if (timestamp.minute == 0) and (timestamp.second == 0) and (timestamp.hour == aggHour):
+		agAmount = 0
+		agHour = timestamp.hour
+		if (timestamp.minute == 0) and (timestamp.second == 0) and (timestamp.hour == agHour):
+			year = str(timestamp.year)
+			month = str(timestamp.month)
+			day = str(timestamp.day)
+			if len(month) == 1:
+				month = '0' + month
+			if len(day) == 1:
+				day = '0' + day
+			agDate = year + '-' + month + '-' + day
 			try:
-				aggAmount += float(pair[1])
-				outList.append([aggHour, aggAmount])
+				agAmount = float(pair[1])
 			except:
-				pass
-	return outList
+				continue
+			agList.append([agDate, agHour, agAmount])
+	agZip = zip(*agList)
+	for i in range(len(agZip[0])):
+		date = str(agZip[0][i])
+		hr = str(agZip[1][i])
+		val = str(agZip[2][i])
+		if len(hr) == 1:
+			hr = '0' + hr
+		scadaPoint = date + ' ' + hr + ':00:00 PST,' + val
+		outList.append(scadaPoint)
+	scadaAttach = '\n'.join(outList)
+	inFeeder['attachments']['subScadaCalibrated1.player'] = scadaAttach
+	return
 
 # TRANSMISSION NETWORK FUNCTIONS
 def tranPseudomizeNames(inNetwork):
@@ -520,15 +539,14 @@ def _tests():
 # 	with open(FNAMEOUT, "w") as outFile:
 # 		json.dump(inFeeder, outFile, indent=4)
 
-# 	# Test distSmoothLoads
-# 	FNAME = "Calibrated Feeder.omd"
-# 	with open(FNAME, "r") as inFile:
-# 		inFeeder = json.load(inFile)
-# 		calibrate = distSmoothLoads(inFeeder)
-# 		print calibrate
-# 	FNAMEOUT = "calibrated_distSmoothLoads.omd"
-# 	with open(FNAMEOUT, "w") as outFile:
-# 		json.dump(inFeeder, outFile, indent=4)
+	# Test distSmoothLoads
+	FNAME = "Calibrated Feeder1.omd"
+	with open(FNAME, "r") as inFile:
+		inFeeder = json.load(inFile)
+		distSmoothLoads(inFeeder)
+	FNAMEOUT = "calibrated_distSmoothLoads.omd"
+	with open(FNAMEOUT, "w") as outFile:
+		json.dump(inFeeder, outFile, indent=4)
 
 
 # 	# TRANSMISSION NETWORK TESTS
