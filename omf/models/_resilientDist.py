@@ -201,14 +201,48 @@ def getNodePhases(obj, maxRealPhase):
 		print "NO PHASES FOUND FOR OBJ:", obj	
 	return numPhases, [hasphaseA, hasphaseB, hasphaseC], [maxRealPhaseA, maxRealPhaseB, maxRealPhaseC], [maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC]
 
-def makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug):
-	''' lines.
-	TODO: Put in accurate num_poles, ask if has_phase corresponds to a,b,c.
-	TODO: Insert harden_cost calc.
+def readXRMatrices(dataDir, rdtFile, length):
+	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
 	'''
+	xMatrix, rMatrix = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
+	with open(pJoin(dataDir,rdtFile), "r") as jsonIn:
+		lineCodes = json.load(jsonIn)['line_codes']
+	for i,code in enumerate(lineCodes):
+		if i > length: break
+		xMatrix[int(code['num_phases'])].append(code['xmatrix'])
+		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
+	return xMatrix, rMatrix
+
+def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
+	'''Read a omd.json feeder and convert it to fragility/RDT format.
+	'''
+	# Create RDT dict.
+	if debug:
+		print "Generating RDT input..."
+		print "************************************"
+	rdtJson = {
+		'buses' : [],
+		'loads' : [],
+		'generators' : [],
+		'line_codes' : [],
+		'lines' : [],
+		'critical_load_met' : inData.get('critical_load_met',0.98),
+		'total_load_met' : inData.get('total_load_met',0.5),
+		'chance_constraint' : inData.get('chance_constraint', 1.0),
+		'phase_variation' : inData.get('phase_variation', 0.15),
+		'scenarios' : [] # Made up fragility damage scenario.		
+	}
+	# Read and put omd.json into rdt.json.
+	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
+		jsonTree = json.load(jsonIn).get('tree','')
+	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
+		jsonNodes = json.load(jsonIn).get('nodes','')
+	#TODO: get GFM scenarios in to RDT
+	#Line Creation
 	lineCosts = []
 	hardCands = hardCand.strip().replace(' ', '').split(',')
-	objToFind, lineCount = ['triplex_line','transformer', 'regulator', 'underground_line'], 0
+	objToFind = ['triplex_line','transformer', 'regulator', 'underground_line']
+	lineCount = 0
 	for key, line in jsonTree.iteritems():
 		if line.get('object','') in objToFind:
 			newLine = Line(line.get('name',''), line.get('from','')+'_bus', line.get('to','')+'_bus', float(line.get('length',100)))
@@ -228,15 +262,8 @@ def makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
 			else:
 				cost = float(lineUnitCost)*float(line.get('length',100))
 			lineCosts.append((line.get('name',''), cost))
-	return lineCount, lineCosts
 
-def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
-	'''line_codes: create one for each line.
-	For now, use values from rdtInputTrevor.json.
-	TODO*: keep track of which matrices have 0 for which phases, and use appropriate ones.
-	TODO: Give special x/r matrices for transformers.
-	TODO: Read x/r matrices from gridlabD csv recorder file.
-	'''
+	#Line Code Creation
 	xMatrices, rMatrices = readXRMatrices(dataDir, 'xrMatrices.json', 100)
 	for lineCode in range(0,lineCount):
 		newLineCode = createObj('line_code')
@@ -280,18 +307,8 @@ def makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug):
 			newLineCode['rmatrix'] = rMatrix	
 		#SET THE newLineCode to the output of GRIDLABD								
 		rdtJson['line_codes'].append(newLineCode)
-	if debug==True:
-		print "Created %s line_codes"%(str(len(rdtJson['line_codes'])))
-		if debug==2:
-			for elem in rdtJson['line_codes']: 
-				print "   Line_Code:"
-				for a,val in elem.iteritems():
-					print "      %s: %s"%(str(a), str(val))
 
-def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
-	'''buses.
-	Ziploads? house? regulator? Waterheater?
-	'''
+	#Bus Creation
 	objToFind = ['node', 'triplex_node', 'triplex_meter', "load"]
 	for key, bus in jsonTree.iteritems():
 		# if bus.get('object','') in objToFind and bus.get('bustype','').lower() != 'swing':
@@ -309,10 +326,7 @@ def makeBuses(rdtJson, jsonTree, jsonNodes, debug):
 					newBus['y'] = busNode.get('y')/5000.0
 					newBus['x'] = busNode.get('x')/5000.0
 
-def makeLoads(rdtJson, jsonTree, debug):
-	'''loads.
-	TODO*: How do I calculate real_phase and reactive_phase?
-	'''
+	#Make loads
 	objToFind = ['triplex_meter', 'load']
 	for key, loads in jsonTree.iteritems():
 		if loads.get('object','') in objToFind:
@@ -324,63 +338,19 @@ def makeLoads(rdtJson, jsonTree, debug):
 			newLoad['node_id'] = busID
 			numPhases, newLoad['has_phase'], newLoad['max_real_phase'], newLoad['max_reactive_phase'] = getNodePhases(loads, 10)
 			# newLoad.pop('is_critical',None)
-			rdtJson['loads'].append(newLoad)		
+			rdtJson['loads'].append(newLoad)
 
-def makeGens(rdtJson, jsonTree, maxRealPhase, newGens, debug):
-	'''generators.
-	'''
+	#Make Gens
 	for key, gens in jsonTree.iteritems():
 		if gens.get('bustype','').lower() == 'swing':
 			genID = gens.get('name','')+'_gen'
 			for elem in rdtJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
 					busID = elem['id']
-			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, maxRealPhase)
+			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, maxDG)
 			newGen = Gen(gens.get('name','')+'_gen', busID, has_phase, max_reactive_phase, max_real_phase)
 			rdtJson['generators'].append(newGen.toOutput())
 
-def readXRMatrices(dataDir, rdtFile, length):
-	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
-	'''
-	xMatrix, rMatrix = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
-	with open(pJoin(dataDir,rdtFile), "r") as jsonIn:
-		lineCodes = json.load(jsonIn)['line_codes']
-	for i,code in enumerate(lineCodes):
-		if i > length: break
-		xMatrix[int(code['num_phases'])].append(code['xmatrix'])
-		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
-	return xMatrix, rMatrix
-
-def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
-	'''Read a omd.json feeder and convert it to fragility/RDT format.
-	'''
-	# Create RDT dict.
-	if debug:
-		print "Generating RDT input..."
-		print "************************************"
-	rdtJson = {
-		'buses' : [],
-		'loads' : [],
-		'generators' : [],
-		'line_codes' : [],
-		'lines' : [],
-		'critical_load_met' : inData.get('critical_load_met',0.98),
-		'total_load_met' : inData.get('total_load_met',0.5),
-		'chance_constraint' : inData.get('chance_constraint', 1.0),
-		'phase_variation' : inData.get('phase_variation', 0.15),
-		'scenarios' : [] # Made up fragility damage scenario.		
-	}
-	# Read and put omd.json into rdt.json.
-	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
-		jsonTree = json.load(jsonIn).get('tree','')
-	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
-		jsonNodes = json.load(jsonIn).get('nodes','')
-	#TODO: get GFM scenarios in to RDT
-	lineCount, lineCosts = makeLines(rdtJson, jsonTree, maxDG, newLines, hardCand, lineUnitCost, debug)
-	makeLineCodes(rdtJson, jsonTree, lineCount, dataDir, debug)
-	makeBuses(rdtJson, jsonTree, jsonNodes, debug)
-	makeLoads(rdtJson, jsonTree, debug)
-	makeGens(rdtJson, jsonTree, maxDG, newGens, debug)
 	# Write to file.
 	rdtInFile = 'gfmInput.json'
 	with open(pJoin(dataDir,rdtInFile), "w") as outFile:
@@ -389,40 +359,6 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 		print "Done... RDT input saved to:            %s"%(pJoin(dataDir,rdtInFile))
 		print "************************************\n\n"
 	return rdtInFile, lineCosts
-
-def genDiagram(dataDir, feederName, feederJson, debug):
-	# Load required data.
-	feederJson = json.load(open(pJoin(dataDir,feederName + '.omd')))
-	tree = feederJson.get("tree",{})
-	links = feederJson.get("links",{})
-	toRemove = []
-	# Generate lat/lons from nodes and links structures.
-	for link in links:
-		for typeLink in link.keys():
-			if typeLink in ['source', 'target']:
-				for key in link[typeLink].keys():
-					if key in ['x', 'y']:
-						objName = link[typeLink]['name']
-						for x in tree:
-							leaf = tree[x]
-							if leaf.get('name','')==objName:
-								if key=='x': leaf['latitude'] = link[typeLink][key]
-								else: leaf['longitude'] = link[typeLink][key]
-							elif 'config' in leaf.get('object','') or 'climate' in leaf.get('object','') or 'conductor' in leaf.get('object','') or 'solver_method' in leaf or 'omftype' in leaf or 'clock' in leaf or 'module' in leaf:
-								if x not in toRemove: toRemove.append(x)
-	# Remove some things that don't render well.
-	for rem in toRemove: tree.pop(rem)
-	# Remove even more things (no lat, lon or from = node without a position).
-	for key in tree.keys():
-		aLat = tree[key].get('latitude')
-		aLon = tree[key].get('longitude')
-		aFrom = tree[key].get('from')
-		if aLat is None and aLon is None and aFrom is None:
-			 tree.pop(key)
-	# Create and save the graphic.
-	nxG = feeder.treeToNxGraph(tree)
-	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	plt.savefig(pJoin(dataDir,"feederChart.png"))
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -442,10 +378,10 @@ def work(modelDir, inputDict):
 	# HACK: rename the hardcoded gfm output
 	proc.wait()
 	os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),pJoin(modelDir,'rdtInput.json'))
-	#test change
+
 	#Denote new lines
-	newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
-	'''with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
+	'''newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
+	with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
 		gfmOut = json.load(gfmOut)
 	for line in gfmOut['lines']:
 		#set can_harden to false for transformers and regulators NO EXPLICIT IDENTIFIER FOR REGULATORS, ID ONLY
@@ -457,13 +393,12 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,gfmOutFileName),"w") as outFile:
 		json.dump(gfmOut, outFile, indent = 4)
 	'''
-	gfmRawOut = open(pJoin(modelDir,'rdtInput.json')).read()		
-	#extra step here, just set equal to gfmOut from above
+	gfmRawOut = open(pJoin(modelDir,'rdtInput.json')).read()
 	outData['gfmRawOut'] = gfmRawOut
 	print 'Ran Fragility\n'
+
 	# Run GridLAB-D first time to generate xrMatrices.
 	if platform.system() == "Windoze":
-		#GridlabD
 		omdPath = pJoin(modelDir, feederName + ".omd")
 		with open(omdPath, "r") as omd:
 			omd = json.load(omd)
@@ -526,20 +461,49 @@ def work(modelDir, inputDict):
 	print "************************************\n\n"
 
 	# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
-	#newFeederModel = copy.deepcopy(feederModel)
 
-	#Deriving line names from RDT Input and line lengths from feeder omd file
-	#Building hashmap of source and target nodes, used to represent lines.
 	with open(rdtInFile, "r") as rdtInFileData:
 		rdtInFileData = json.load(rdtInFileData)
 	lineData = []
-
 	for line in rdtInFileData["lines"]:
 		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
+
 	# Draw the feeder.
-	genDiagram(modelDir, feederName, feederModel, debug=False)
+	# Load required data.
+	feederJson = json.load(open(pJoin(modelDir,feederName + '.omd')))
+	tree = feederJson.get("tree",{})
+	links = feederJson.get("links",{})
+	toRemove = []
+	# Generate lat/lons from nodes and links structures.
+	for link in links:
+		for typeLink in link.keys():
+			if typeLink in ['source', 'target']:
+				for key in link[typeLink].keys():
+					if key in ['x', 'y']:
+						objName = link[typeLink]['name']
+						for x in tree:
+							leaf = tree[x]
+							if leaf.get('name','')==objName:
+								if key=='x': leaf['latitude'] = link[typeLink][key]
+								else: leaf['longitude'] = link[typeLink][key]
+							elif 'config' in leaf.get('object','') or 'climate' in leaf.get('object','') or 'conductor' in leaf.get('object','') or 'solver_method' in leaf or 'omftype' in leaf or 'clock' in leaf or 'module' in leaf:
+								if x not in toRemove: toRemove.append(x)
+	# Remove some things that don't render well.
+	for rem in toRemove: tree.pop(rem)
+	# Remove even more things (no lat, lon or from = node without a position).
+	for key in tree.keys():
+		aLat = tree[key].get('latitude')
+		aLon = tree[key].get('longitude')
+		aFrom = tree[key].get('from')
+		if aLat is None and aLon is None and aFrom is None:
+			 tree.pop(key)
+	# Create and save the graphic.
+	nxG = feeder.treeToNxGraph(tree)
+	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
+	plt.savefig(pJoin(modelDir,"feederChart.png"))
+
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 	return outData
