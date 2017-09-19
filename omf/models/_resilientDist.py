@@ -200,18 +200,6 @@ def getNodePhases(obj, maxRealPhase):
 		print "NO PHASES FOUND FOR OBJ:", obj	
 	return numPhases, [hasphaseA, hasphaseB, hasphaseC], [maxRealPhaseA, maxRealPhaseB, maxRealPhaseC], [maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC]
 
-def readXRMatrices(dataDir, rdtFile, length):
-	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
-	'''
-	xMatrix, rMatrix = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
-	with open(pJoin(dataDir,rdtFile), "r") as jsonIn:
-		lineCodes = json.load(jsonIn)['line_codes']
-	for i,code in enumerate(lineCodes):
-		if i > length: break
-		xMatrix[int(code['num_phases'])].append(code['xmatrix'])
-		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
-	return xMatrix, rMatrix
-
 def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
 	'''Read a omd.json feeder and convert it to fragility/RDT format.
 	'''
