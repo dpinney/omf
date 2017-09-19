@@ -299,16 +299,25 @@ def work(modelDir, inputDict):
 		hazardFile.write(inputDict['weatherImpacts'])
 	with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
-	# Run GFM.
-	rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
-	gfmInputFilename, lineCosts = convertToGFM(rdtInData, modelDir, feederName, inputDict["xrMatrices"], inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
+	# Create GFM input file.
+	gfmInputTemplate = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
+	gfmInputFilename, lineCosts = convertToGFM(gfmInputTemplate, modelDir, feederName, inputDict["xrMatrices"], inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
+	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], cwd=modelDir)
-	# HACK: rename the hardcoded gfm output
 	proc.wait()
-	os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),pJoin(modelDir,'rdtInput.json'))
-
-	#Denote new lines
+	# HACK: rename the hardcoded gfm output
+	rdtInputFilePath = pJoin(modelDir,'rdtInput.json')
+	os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),rdtInputFilePath)
+	# Pull GFM input data on lines and generators for HTML presentation.
+	with open(rdtInputFilePath, "r") as gfmInFileData:
+		gfmInFileData = json.load(gfmInFileData)
+	lineData = []
+	for line in gfmInFileData["lines"]:
+		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
+	outData["lineData"] = lineData
+	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
+	# Denote new lines
 	'''newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
 	with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
 		gfmOut = json.load(gfmOut)
@@ -322,10 +331,9 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,gfmOutFileName),"w") as outFile:
 		json.dump(gfmOut, outFile, indent = 4)
 	'''
-	gfmRawOut = open(pJoin(modelDir,'rdtInput.json')).read()
+	gfmRawOut = open(rdtInputFilePath).read()
 	outData['gfmRawOut'] = gfmRawOut
 	print 'Ran Fragility\n'
-
 	# Run GridLAB-D first time to generate xrMatrices.
 	if platform.system() == "Windoze":
 		omdPath = pJoin(modelDir, feederName + ".omd")
@@ -343,7 +351,7 @@ def work(modelDir, inputDict):
 			print delItem
 			del omd["tree"][delItem]
 		'''
-		#Load an blank glm file and use it to write to it
+		#Load a blank glm file and use it to write to it
 		feederPath = pJoin(modelDir, 'feeder.glm')
 		with open(feederPath, 'w') as glmFile:
 			toWrite =  omf.feeder.sortedWrite(omd['tree']) + "object jsondump {\n\tfilename_dump_reliability test_JSON_dump1.json;\n\twrite_reliability true;\n\tfilename_dump_line test_JSON_dump2.json;\n\twrite_line true; };\n"# + "object jsonreader {\n\tfilename " + insertRealRdtOutputNameHere + ";\n};"
@@ -373,37 +381,22 @@ def work(modelDir, inputDict):
 	# Run RDT.
 	print "Running RDT..."
 	print "************************************"
-	gfmInFile = modelDir + '/' + 'rdtInput.json'
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
-	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', gfmInFile, '-e', rdtOutFile])
+	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInputFilePath, '-e', rdtOutFile])
 	proc.wait()
 	rdtRawOut = open(rdtOutFile).read()
 	outData['rdtRawOut'] = rdtRawOut
-	# Format output feeder.
-	with open(pJoin(rdtOutFile), "r") as jsonIn:
-		rdtOut = json.load(jsonIn)
+	# Indent the RDT output nicely.
 	with open(pJoin(rdtOutFile),"w") as outFile:
+		rdtOut = json.loads(rdtRawOut)
 		json.dump(rdtOut, outFile, indent = 4)
-	print "\nOutput saved to: %s"%(pJoin(modelDir, rdtOutFile))
-	print "************************************\n\n"
-
 	# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
-
-	with open(gfmInFile, "r") as gfmInFileData:
-		gfmInFileData = json.load(gfmInFileData)
-	lineData = []
-	for line in gfmInFileData["lines"]:
-		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
-	outData["lineData"] = lineData
-	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
-
 	# Draw the feeder.
 	genDiagram(modelDir, feederModel)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
-
 	return outData
 
 def cancel(modelDir):
