@@ -39,11 +39,9 @@ class Line:
 		self.is_new = False
 		self.can_harden = False
 		Line.lineCount += 1
-
 	def checkNone(var):
 		if var != None:
 			return var
-
 	def toOutput(line):
 		lineOut = {}
 		lineOut["id"] = line.id
@@ -60,7 +58,6 @@ class Line:
 		lineOut["can_harden"] = line.can_harden
 		return lineOut
 
-
 class Gen:
 	genCount = 0
 	def __init__(self, id, node_id, has_phase=[True, True, True], max_reactive_phase=[1.7976931348623e+308, 1.7976931348623e+308, 1.7976931348623e+308], max_real_phase=[1.7976931348623e+308, 1.7976931348623e+308, 1.7976931348623e+308]):
@@ -70,7 +67,6 @@ class Gen:
 		self.max_reactive_phase = max_reactive_phase
 		self.max_real_phase = max_real_phase
 		Gen.genCount += 1
-
 	def toOutput(gen):
 		genOut = {}
 		genOut["id"] = gen.id
@@ -80,101 +76,8 @@ class Gen:
 		genOut["max_real_phase"] = gen.max_real_phase
 		return genOut
 
-def createObj(objToRet):
-	'''Creates rdt input file objects.'''
-	if objToRet=='scenario':
-		# scenario: an rdt input has multiple unique scenarios.
-		# required: id.		
-		scenarioObj = {
-			'id' : "1", #*
-			'disable_line' : [],
-			'hardened_disabled_lines' : []
-		}
-		return scenarioObj
-	elif objToRet=='line_code':	
-		# line_code: impedenance and resistance values of lines, may be unique for each line.
-		# required: all.
-		# TODO: read and give transformer specific line codes to transformer lines.
-		line_codeObj = {
-			'line_code': '', #*
-			'num_phases': '', #*
-			'xmatrix': [[],[],[]], #* reactance terms: phaseA, phaseB, and phaseC.
-			'rmatrix': [[],[],[]] #* resistance terms: phaseA/B/C.
-		}
-		return line_codeObj
-	elif objToRet=='line':
-		# lines: a line in the model. 
-		# required: id, node1, node2, length, line_code, num_phases, has_phase, harden_cost: 1.
-		lineObj = {
-			'id' : '', #*
-			'node1_id' : '', #*
-			'node2_id' : '', #*
-			'line_code' : '', #*
-			'length' : 1.0, #* Units match line code entries.
-			# 'has_switch' : False,
-			# 'construction_cost': 100,
-			'harden_cost': 100000, # Russel: this exists unless its a trans.
-			# 'switch_cost': 15, # taken from rdtInTrevor.json.
-			# 'can_harden': False, # Not seen in rdtInTrevor.json.
-			# 'can_add_switch': False, # Not seen in rdtInTrevor.json.
-			# 'num_poles' : 2,
-			# 'capacity' : 5780, # MVA capacity.
-			# 'is_transformer' : False,
-			'num_phases' : 3, #*
-			# 'is_new' : False,
-			'has_phase' : [True, True, True] #*
-		}
-		return lineObj
-	elif objToRet=='bus':
-		# bus: node data.
-		# req: id.
-		busObj = {
-			'id': '', #*
-			# 'min_voltage': 0.8, # in p.u.
-			# 'max_voltage': 1.2, # in p.u.
-			'y': '', # not in schema.
-			'x': '', # not in schema.
-			# 'has_generator': False,
-			# 'has_phase': [True, True, True],
-			# 'ref_voltage': [1.0, 1.0, 1.0]
-			# 'ref_voltage': 1.0 # From github.
-		}
-		return busObj
-	elif objToRet=='load':
-		# load: load data.
-		# req: id, node_id, max_real_phase, max_reac_phase, has_phase.
-		loadObj = {
-			'id': '', #*
-			'node_id': '', #*
-			'is_critical': False, 
-			'max_real_phase': [], #*
-			'max_reactive_phase': [], #*
-			'has_phase': [] #*
-		}
-		return loadObj
-	elif objToRet=='gen':
-		# generator: generator data.
-		# req: id, node_id, has_phase, max_reac_phase, max_real_phase.
-		genObj = {
-			'id': '', #*
-			'node_id': '', #*
-			# 'is_new': False, # Whether or not new generation can be built.
-			# 'microgrid_cost': 1.5, # Per MW capacity of building DG.
-			# 'max_microgrid': 0, # Max additional capacity for this gen.
-			# 'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
-			'has_phase': [True, True, True], #*
-			'max_reactive_phase': [1.7976931348623e+308, 1.7976931348623e+308, 1.7976931348623e+308], #*
-			'max_real_phase': [1.7976931348623e+308, 1.7976931348623e+308, 1.7976931348623e+308] #*
-		}		
-		return genObj
-	else:
-		# Incorrectly entered object.
-		print "The object: %s doesn't exist."%(str(objToRet))
-		return {}
-
 def getNodePhases(obj, maxRealPhase):
-	'''read omd., 10json obj's phases and convert to rdt format.
-	'''
+	''' Convert phase info in GridLAB-D obj (e.g. ABC) to GFM phase format (e.g. [True,True,True].'''
 	numPhases = 0
 	hasphaseA, hasphaseB, hasphaseC = False, False, False
 	maxRealPhaseA, maxRealPhaseB, maxRealPhaseC = 0.0, 0.0, 0.0
@@ -201,12 +104,8 @@ def getNodePhases(obj, maxRealPhase):
 	return numPhases, [hasphaseA, hasphaseB, hasphaseC], [maxRealPhaseA, maxRealPhaseB, maxRealPhaseC], [maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC]
 
 def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
-	'''Read a omd.json feeder and convert it to fragility/RDT format.
-	'''
-	# Create RDT dict.
-	if debug:
-		print "Generating RDT input..."
-		print "************************************"
+	'''Read a omd.json feeder and convert it to GFM format.'''
+	# Create GFM dict.
 	gfmJson = {
 		'buses' : [],
 		'loads' : [],
@@ -219,12 +118,11 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 		'phase_variation' : inData.get('phase_variation', 0.15),
 		'scenarios' : [] # Made up fragility damage scenario.		
 	}
-	# Read and put omd.json into rdt.json.
+	# Get necessary data from .omd.
 	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
 		jsonTree = json.load(jsonIn).get('tree','')
 	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
 		jsonNodes = json.load(jsonIn).get('nodes','')
-	#TODO: get GFM scenarios in to RDT
 	#Line Creation
 	lineCosts = []
 	hardCands = hardCand.strip().replace(' ', '').split(',')
@@ -248,20 +146,20 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 			else:
 				cost = float(lineUnitCost)*float(line.get('length',100))
 			lineCosts.append((line.get('name',''), cost))
-
-	#Line Code Creation
-	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
-	'''
+	# Line Code Creation
 	xMatrices, rMatrices = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
-	
 	lineCodes = json.loads(xrMatrices)['line_codes']
 	for i,code in enumerate(lineCodes):
 		if i > 100: break
 		xMatrices[int(code['num_phases'])].append(code['xmatrix'])
 		rMatrices[int(code['num_phases'])].append(code['rmatrix'])
-
 	for lineCode in range(0,lineCount):
-		newLineCode = createObj('line_code')
+		newLineCode = dict({
+			'line_code': '', #*
+			'num_phases': '', #*
+			'xmatrix': [[],[],[]], #* reactance terms: phaseA, phaseB, and phaseC.
+			'rmatrix': [[],[],[]] #* resistance terms: phaseA/B/C.
+		})
 		newLineCode['line_code'] = lineCode
 		# Get phases and which phase a/b/c exists.
 		newLineCode['num_phases'] = gfmJson['lines'][lineCode]['num_phases']
@@ -302,13 +200,22 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 			newLineCode['rmatrix'] = rMatrix	
 		#SET THE newLineCode to the output of GRIDLABD								
 		gfmJson['line_codes'].append(newLineCode)
-
-	#Bus Creation
+	# Bus creation:
 	objToFind = ['node', 'triplex_node', 'triplex_meter', "load"]
 	for key, bus in jsonTree.iteritems():
 		# if bus.get('object','') in objToFind and bus.get('bustype','').lower() != 'swing':
 		if bus.get('object','').lower() in objToFind:
-			newBus = createObj('bus')
+			newBus = dict({
+				'id': '', #*
+				# 'min_voltage': 0.8, # in p.u.
+				# 'max_voltage': 1.2, # in p.u.
+				'y': '', # not in schema.
+				'x': '', # not in schema.
+				# 'has_generator': False,
+				# 'has_phase': [True, True, True],
+				# 'ref_voltage': [1.0, 1.0, 1.0]
+				# 'ref_voltage': 1.0 # From github.
+			})
 			newBus['id'] = bus.get('name','')+'_bus'
 			if bus.get('bustype','').lower() == 'swing':
 				newBus['has_generator'] = True
@@ -320,12 +227,18 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 					# HACK: nice coords for GFM which wants lat/lon.
 					newBus['y'] = busNode.get('y')/5000.0
 					newBus['x'] = busNode.get('x')/5000.0
-
-	#Make loads
+	# Load creation:
 	objToFind = ['triplex_meter', 'load']
 	for key, loads in jsonTree.iteritems():
 		if loads.get('object','') in objToFind:
-			newLoad = createObj('load')
+			newLoad = dict({
+				'id': '', #*
+				'node_id': '', #*
+				'is_critical': False, 
+				'max_real_phase': [], #*
+				'max_reactive_phase': [], #*
+				'has_phase': [] #*
+			})
 			newLoad['id'] = loads.get('name','')+'_lod'
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == newLoad['id'][0:-4]:
@@ -334,8 +247,7 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 			numPhases, newLoad['has_phase'], newLoad['max_real_phase'], newLoad['max_reactive_phase'] = getNodePhases(loads, 10)
 			# newLoad.pop('is_critical',None)
 			gfmJson['loads'].append(newLoad)
-
-	#Make Gens
+	# Generator creation:
 	for key, gens in jsonTree.iteritems():
 		if gens.get('bustype','').lower() == 'swing':
 			genID = gens.get('name','')+'_gen'
@@ -345,14 +257,10 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, maxDG)
 			newGen = Gen(gens.get('name','')+'_gen', busID, has_phase, max_reactive_phase, max_real_phase)
 			gfmJson['generators'].append(newGen.toOutput())
-
 	# Write to file.
 	gfmInFile = 'gfmInput.json'
 	with open(pJoin(dataDir,gfmInFile), "w") as outFile:
 		json.dump(gfmJson, outFile, indent=4)
-	if debug:		
-		print "Done... RDT input saved to:            %s"%(pJoin(dataDir,gfmInFile))
-		print "************************************\n\n"
 	return gfmInFile, lineCosts
 
 def genDiagram(outputDir, feederJson):
