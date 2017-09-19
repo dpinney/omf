@@ -252,15 +252,13 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 	#Line Code Creation
 	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
 	'''
-	xMatrix, rMatrix = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
-	xMatrices, rMatrices = readXRMatrices(dataDir, 'xrMatrices.json', 100)
-	#with open(pJoin(dataDir,xrMatrices), "r") as jsonIn:
-	print xrMatrices
+	xMatrices, rMatrices = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
+	
 	lineCodes = json.loads(xrMatrices)['line_codes']
 	for i,code in enumerate(lineCodes):
 		if i > 100: break
-		xMatrix[int(code['num_phases'])].append(code['xmatrix'])
-		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
+		xMatrices[int(code['num_phases'])].append(code['xmatrix'])
+		rMatrices[int(code['num_phases'])].append(code['rmatrix'])
 
 	for lineCode in range(0,lineCount):
 		newLineCode = createObj('line_code')
