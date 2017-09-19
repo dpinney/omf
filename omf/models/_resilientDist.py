@@ -20,6 +20,9 @@ from omf.weather import zipCodeToClimateName
 fileName = os.path.basename(__file__)
 modelName = fileName[0:fileName.rfind('.')]
 tooltip = "Model extreme weather and determine optimal investment for distribution resiliency."
+# Our HTML template for the interface:
+with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
+	template = Template(tempFile.read())
 
 class Line:
 	lineCount = 0
@@ -76,10 +79,6 @@ class Gen:
 		genOut["max_reactive_phase"] = gen.max_reactive_phase
 		genOut["max_real_phase"] = gen.max_real_phase
 		return genOut
-
-# Our HTML template for the interface:
-with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
-	template = Template(tempFile.read())
 
 def createObj(objToRet):
 	'''Creates rdt input file objects.'''
@@ -536,8 +535,8 @@ def new(modelDir):
 		"phaseVariation": "0.15",
 		"weatherImpacts": open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","wf_clip.asc")).read(),
 		"weatherImpactsFileName": "wf_clip.asc",
-		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","rdtInSimple_Market_System.json")).read(),
-		"xrMatricesFileName":"rdtInSimple_Market_System.json",
+		"xrMatrices":open(pJoin(__neoMetaModel__._omfDir,"scratch","uploads","lineCodesTrip37.json")).read(),
+		"xrMatricesFileName":"lineCodesTrip37.json",
 		"simulationDate": "2012-01-01",
 		"simulationZipCode": "64735"
 	}
