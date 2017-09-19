@@ -254,7 +254,6 @@ def convertToGFM(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 				newLine.isTransformer = True
 				#newLine.pop('harden_cost',None)
  			gfmJson['lines'].append(newLine.toOutput())
-			# print "Added newLine: %s (TOTAL: %s)\n"%(newLine, str(lineCount+1))
 			lineCount+=1
 			if newLine.can_harden == True:
 				cost = 0
@@ -358,6 +357,40 @@ def convertToGFM(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 		print "Done... RDT input saved to:            %s"%(pJoin(dataDir,gfmInFile))
 		print "************************************\n\n"
 	return gfmInFile, lineCosts
+
+def genDiagram(dataDir, feederName, feederJson, debug):
+	# Load required data.
+	feederJson = json.load(open(pJoin(dataDir,feederName + '.omd')))
+	tree = feederJson.get("tree",{})
+	links = feederJson.get("links",{})
+	toRemove = []
+	# Generate lat/lons from nodes and links structures.
+	for link in links:
+		for typeLink in link.keys():
+			if typeLink in ['source', 'target']:
+				for key in link[typeLink].keys():
+					if key in ['x', 'y']:
+						objName = link[typeLink]['name']
+						for x in tree:
+							leaf = tree[x]
+							if leaf.get('name','')==objName:
+								if key=='x': leaf['latitude'] = link[typeLink][key]
+								else: leaf['longitude'] = link[typeLink][key]
+							elif 'config' in leaf.get('object','') or 'climate' in leaf.get('object','') or 'conductor' in leaf.get('object','') or 'solver_method' in leaf or 'omftype' in leaf or 'clock' in leaf or 'module' in leaf:
+								if x not in toRemove: toRemove.append(x)
+	# Remove some things that don't render well.
+	for rem in toRemove: tree.pop(rem)
+	# Remove even more things (no lat, lon or from = node without a position).
+	for key in tree.keys():
+		aLat = tree[key].get('latitude')
+		aLon = tree[key].get('longitude')
+		aFrom = tree[key].get('from')
+		if aLat is None and aLon is None and aFrom is None:
+			 tree.pop(key)
+	# Create and save the graphic.
+	nxG = feeder.treeToNxGraph(tree)
+	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
+	plt.savefig(pJoin(dataDir,"feederChart.png"))	
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -470,41 +503,10 @@ def work(modelDir, inputDict):
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 
 	# Draw the feeder.
-	# Load required data.
-	feederJson = json.load(open(pJoin(modelDir,feederName + '.omd')))
-	tree = feederJson.get("tree",{})
-	links = feederJson.get("links",{})
-	toRemove = []
-	# Generate lat/lons from nodes and links structures.
-	for link in links:
-		for typeLink in link.keys():
-			if typeLink in ['source', 'target']:
-				for key in link[typeLink].keys():
-					if key in ['x', 'y']:
-						objName = link[typeLink]['name']
-						for x in tree:
-							leaf = tree[x]
-							if leaf.get('name','')==objName:
-								if key=='x': leaf['latitude'] = link[typeLink][key]
-								else: leaf['longitude'] = link[typeLink][key]
-							elif 'config' in leaf.get('object','') or 'climate' in leaf.get('object','') or 'conductor' in leaf.get('object','') or 'solver_method' in leaf or 'omftype' in leaf or 'clock' in leaf or 'module' in leaf:
-								if x not in toRemove: toRemove.append(x)
-	# Remove some things that don't render well.
-	for rem in toRemove: tree.pop(rem)
-	# Remove even more things (no lat, lon or from = node without a position).
-	for key in tree.keys():
-		aLat = tree[key].get('latitude')
-		aLon = tree[key].get('longitude')
-		aFrom = tree[key].get('from')
-		if aLat is None and aLon is None and aFrom is None:
-			 tree.pop(key)
-	# Create and save the graphic.
-	nxG = feeder.treeToNxGraph(tree)
-	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	plt.savefig(pJoin(modelDir,"feederChart.png"))
-
+	genDiagram(modelDir, feederName, feederModel, debug=False)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
+
 	return outData
 
 def cancel(modelDir):
