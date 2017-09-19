@@ -393,8 +393,6 @@ def work(modelDir, inputDict):
 		feederModel = json.load(jsonIn)
 	# Run GFM.
 	rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
-	with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
-		json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
 	gfmInputFilename, lineCosts = convertToGFM(rdtInData, modelDir, feederName, inputDict["xrMatrices"], inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], cwd=modelDir)
@@ -452,8 +450,8 @@ def work(modelDir, inputDict):
 		proc = subprocess.Popen(['gridlabd', 'feeder.glm'], stdout=subprocess.PIPE, shell=True, cwd=modelDir)
 		(out, err) = proc.communicate()
 		accumulator = ""
-		with open(pJoin(modelDir, "test_JSON_dump1.json"), "r") as gldOut:
-			accumulator = json.load(gldOut)
+		'''with open(pJoin(modelDir, "test_JSON_dump1.json"), "r") as gldOut:
+			accumulator = json.load(gldOut)'''
 		with open(pJoin(modelDir, "test_JSON_dump2.json"), "r") as gldOut:
 			accumulator = json.load(gldOut)
 		outData['gridlabdRawOut'] = accumulator
