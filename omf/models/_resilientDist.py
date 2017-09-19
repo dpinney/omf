@@ -212,7 +212,7 @@ def readXRMatrices(dataDir, rdtFile, length):
 		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
 	return xMatrix, rMatrix
 
-def convertToGFM(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
+def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
 	'''Read a omd.json feeder and convert it to fragility/RDT format.
 	'''
 	# Create RDT dict.
@@ -262,7 +262,18 @@ def convertToGFM(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 			lineCosts.append((line.get('name',''), cost))
 
 	#Line Code Creation
+	'''Read XR Matrices from rdtFile. Add gridlabD csv file reading later.
+	'''
+	xMatrix, rMatrix = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
 	xMatrices, rMatrices = readXRMatrices(dataDir, 'xrMatrices.json', 100)
+	#with open(pJoin(dataDir,xrMatrices), "r") as jsonIn:
+	print xrMatrices
+	lineCodes = json.loads(xrMatrices)['line_codes']
+	for i,code in enumerate(lineCodes):
+		if i > 100: break
+		xMatrix[int(code['num_phases'])].append(code['xmatrix'])
+		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
+
 	for lineCode in range(0,lineCount):
 		newLineCode = createObj('line_code')
 		newLineCode['line_code'] = lineCode
@@ -398,7 +409,7 @@ def work(modelDir, inputDict):
 	rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
 	with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
 		json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
-	gfmInputFilename, lineCosts = convertToGFM(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
+	gfmInputFilename, lineCosts = convertToGFM(rdtInData, modelDir, feederName, inputDict["xrMatrices"], inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], cwd=modelDir)
 	# HACK: rename the hardcoded gfm output
