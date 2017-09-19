@@ -216,6 +216,41 @@
 				new Highcharts.Chart(localHighChart);
 			</script>
 		</div>
+		<p class="reportTitle postRun">Substation Power Factor <a target="_self" class="toggle">Hide / Show</a></p>
+		<div id="substationPowerFactorReport" class="tightContent postRun">
+			<div id="powerFactorTimeSeries"></div>
+			<script type="text/javascript">
+				swingPointStart = dateOb(allOutputData.swingTimestamps[0])
+				swingPointInterval = dateOb(allOutputData.swingTimestamps[1]) - pointStart
+				swingHighChartsTemplate = {
+				"chart":{"renderTo":"", "marginRight":20, "marginBottom":35, "zoomType":"x"},
+				"title":{"text":null},
+				"legend":{"layout":"horizontal", "align":"top", "verticalAlign":"top", "x":50, "y":-10, "borderWidth":0},
+				"credits":{"enabled":false},
+				"xAxis":{"type":"datetime","maxZoom":108000000, "tickColor":"gray","lineColor":"gray"},
+				"yAxis":{"title":{"text":null, "style":{"color":"gray"}}},
+				"plotOptions":{"line":{"marker":{"enabled":false}}, "series":{"shadow":false, "pointInterval":swingPointInterval, "pointStart":swingPointStart}},
+				"tooltip":{"valueDecimals":1,"pointFormat":"{point.y:.5f}"},
+				"series":[]}
+				var swingPF = {
+					"marker":{
+						"enabled":false
+					},
+					"color":"blue",
+					"data":allOutputData.powerFactors,
+					"name":"Power Factor",
+					"visible":true
+				}
+				var localHighChart = JSON.parse(JSON.stringify(swingHighChartsTemplate))
+				localHighChart["chart"]["renderTo"] = "powerFactorTimeSeries"
+				localHighChart["chart"]["type"] = "line"
+				localHighChart["chart"]["width"] = 1000
+				localHighChart["chart"]["height"] = 150
+				localHighChart["series"] = [swingPF]
+				localHighChart["yAxis"]= [{"title":{"text":"Voltage (V)","style":{"color":"black"}}}]
+				new Highcharts.Chart(localHighChart);
+			</script>
+		</div>
 		<p class="reportTitle postRun">Energy Balance <a target="_self" class="toggle">Hide / Show</a></p>
 		<div id="newEnergyBalanceReport" class="tightContent postRun">
 			<script type="text/javascript">

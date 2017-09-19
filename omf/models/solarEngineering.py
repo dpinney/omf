@@ -73,8 +73,9 @@ def work(modelDir, inputDict):
 	for key in tree:
 		if 'bustype' in tree[key].keys():
 			if tree[key]['bustype'] == 'SWING':
+				tree[key]['object'] = 'meter'
 				swingN = tree[key]['name']
-	swingRecord = {'object':'recorder', 'property':'voltage_A','file':'subVoltsA.csv','parent':swingN, 'interval':60}
+	swingRecord = {'object':'recorder', 'property':'voltage_A,measured_real_power,measured_power','file':'subVoltsA.csv','parent':swingN, 'interval':60}
 	tree[feeder.getMaxKey(tree) + 1] = swingRecord
 	for key in tree:
 		if 'omftype' in tree[key].keys() and tree[key]['argument']=='minimum_timestep=3600':
@@ -238,22 +239,28 @@ def work(modelDir, inputDict):
 	FIRST_DATA_ROW = 9
 	stringToMag = lambda s:abs(complex(s.replace('d','j')))
 	cleanDown = [stringToMag(x[1]) for x in downData[FIRST_DATA_ROW:-1]]
-	swingTimestamps = [x[0] for x in downData[FIRST_DATA_ROW:-1]]
+	swingTimestamps = [x[0] for x in subData[FIRST_DATA_ROW:-1]]
 	cleanSub = [stringToMag(x[1]) for x in subData[FIRST_DATA_ROW:-1]]
+	# real_power / power
+	powerFactors = []
+	for row in subData[FIRST_DATA_ROW:-1]:
+		powerFactors.append(abs(float(row[2])/stringToMag(row[3])))
+	outData['powerFactors'] = powerFactors
 	outData['swingVoltage'] = cleanSub
 	outData['downlineNodeVolts'] = cleanDown
 	outData['swingTimestamps'] = swingTimestamps
 	# If there is a var volt system, find the min and max voltage for a band
 	minVoltBand = []
 	maxVoltBand = []
-	for key in tree:
-		objKeys = tree[key].keys()
-		if 'object' in objKeys:
-			if tree[key]['object']=='volt_var_control':
-				minVoltBand.append(float(tree[key]['minimum_voltages']))
-				maxVoltBand.append(float(tree[key]['maximum_voltages']))
-	outData['minVoltBand'] = minVoltBand
-	outData['maxVoltBand'] = maxVoltBand
+	if downLineNode != 'None':
+		for key in tree:
+			objKeys = tree[key].keys()
+			if 'object' in objKeys:
+				if tree[key]['object']=='volt_var_control':
+					minVoltBand.append(float(tree[key]['minimum_voltages']))
+					maxVoltBand.append(float(tree[key]['maximum_voltages']))
+		outData['minVoltBand'] = minVoltBand
+		outData['maxVoltBand'] = maxVoltBand
 	# What percentage of our keys have lat lon data?
 	latKeys = [tree[key]['latitude'] for key in tree if 'latitude' in tree[key]]
 	latPerc = 1.0*len(latKeys)/len(tree)
