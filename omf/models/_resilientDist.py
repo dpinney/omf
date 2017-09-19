@@ -358,12 +358,10 @@ def convertToGFM(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 		print "************************************\n\n"
 	return gfmInFile, lineCosts
 
-def genDiagram(dataDir, feederName, feederJson, debug):
+def genDiagram(outputDir, feederJson):
 	# Load required data.
-	feederJson = json.load(open(pJoin(dataDir,feederName + '.omd')))
 	tree = feederJson.get("tree",{})
 	links = feederJson.get("links",{})
-	toRemove = []
 	# Generate lat/lons from nodes and links structures.
 	for link in links:
 		for typeLink in link.keys():
@@ -376,10 +374,6 @@ def genDiagram(dataDir, feederName, feederJson, debug):
 							if leaf.get('name','')==objName:
 								if key=='x': leaf['latitude'] = link[typeLink][key]
 								else: leaf['longitude'] = link[typeLink][key]
-							elif 'config' in leaf.get('object','') or 'climate' in leaf.get('object','') or 'conductor' in leaf.get('object','') or 'solver_method' in leaf or 'omftype' in leaf or 'clock' in leaf or 'module' in leaf:
-								if x not in toRemove: toRemove.append(x)
-	# Remove some things that don't render well.
-	for rem in toRemove: tree.pop(rem)
 	# Remove even more things (no lat, lon or from = node without a position).
 	for key in tree.keys():
 		aLat = tree[key].get('latitude')
@@ -390,7 +384,7 @@ def genDiagram(dataDir, feederName, feederJson, debug):
 	# Create and save the graphic.
 	nxG = feeder.treeToNxGraph(tree)
 	feeder.latLonNxGraph(nxG) # This function creates a .plt reference which can be saved here.
-	plt.savefig(pJoin(dataDir,"feederChart.png"))	
+	plt.savefig(pJoin(outputDir,"feederChart.png"))	
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -503,7 +497,7 @@ def work(modelDir, inputDict):
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
 
 	# Draw the feeder.
-	genDiagram(modelDir, feederName, feederModel, debug=False)
+	genDiagram(modelDir, feederModel)
 	with open(pJoin(modelDir,"feederChart.png"),"rb") as inFile:
 		outData["oneLineDiagram"] = inFile.read().encode("base64")
 
