@@ -20,7 +20,6 @@ conductors is the full path to a .csv file containing conductor information for 
 
 Note that db_network and db_equipment can be the same file is both network and equipment databases were exported to one .mdb file from CYME.
 '''
-import pyodbc
 import feeder, csv, random, math, copy, subprocess, locale
 from os.path import join as pJoin
 import warnings
@@ -2441,6 +2440,7 @@ def convertCymeModel(network_db, modelDir, test=False, type=1, feeder_id=None):
 					glmTree[x]['phases'] = glmTree[x]['phases'] + 'N'
 			except:
 				pass
+	print modelDir
 	checkMissingNodes(nodes, cymsectiondevice, objectList, feeder_id, modelDir, cymsection)
 	return glmTree, x_scale, y_scale
 	
