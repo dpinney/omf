@@ -212,14 +212,14 @@ def readXRMatrices(dataDir, rdtFile, length):
 		rMatrix[int(code['num_phases'])].append(code['rmatrix'])
 	return xMatrix, rMatrix
 
-def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
+def convertToGFM(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
 	'''Read a omd.json feeder and convert it to fragility/RDT format.
 	'''
 	# Create RDT dict.
 	if debug:
 		print "Generating RDT input..."
 		print "************************************"
-	rdtJson = {
+	gfmJson = {
 		'buses' : [],
 		'loads' : [],
 		'generators' : [],
@@ -253,7 +253,7 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 				#newLine['is_transformer'] = True
 				newLine.isTransformer = True
 				#newLine.pop('harden_cost',None)
- 			rdtJson['lines'].append(newLine.toOutput())
+ 			gfmJson['lines'].append(newLine.toOutput())
 			# print "Added newLine: %s (TOTAL: %s)\n"%(newLine, str(lineCount+1))
 			lineCount+=1
 			if newLine.can_harden == True:
@@ -268,9 +268,9 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 		newLineCode = createObj('line_code')
 		newLineCode['line_code'] = lineCode
 		# Get phases and which phase a/b/c exists.
-		newLineCode['num_phases'] = rdtJson['lines'][lineCode]['num_phases']
+		newLineCode['num_phases'] = gfmJson['lines'][lineCode]['num_phases']
 		if int(newLineCode['num_phases']) < 3: 
-			phasesExist = rdtJson['lines'][lineCode]['has_phase']
+			phasesExist = gfmJson['lines'][lineCode]['has_phase']
 		if int(newLineCode['num_phases']) == 3: 	
 			# Set right x/r matrices for 3 phase.
 			newLineCode['xmatrix'] = xMatrices[3][0]
@@ -283,7 +283,7 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 			rMatrix = [[0.36553030, 0.04407197, 0.0], [0.04407197, 0.36282197, 0.0], [0.0, 0.0, 0.0]]
 			newLineCode['xmatrix'] = xMatrix
 			newLineCode['rmatrix'] = rMatrix				
-			print "      ****THIS LINECODE:\n      %s\n      ISNT TESTED FOR THIS OBJECT:\n      %s\n      NEED A 2 PHASE LINE FEEDER."%(rdtJson['lines'][lineCode], newLineCode)
+			print "      ****THIS LINECODE:\n      %s\n      ISNT TESTED FOR THIS OBJECT:\n      %s\n      NEED A 2 PHASE LINE FEEDER."%(gfmJson['lines'][lineCode], newLineCode)
 		else:
 			# Set it for 1 phase.
 			xMatrix = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
@@ -305,7 +305,7 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 			newLineCode['xmatrix'] = xMatrix
 			newLineCode['rmatrix'] = rMatrix	
 		#SET THE newLineCode to the output of GRIDLABD								
-		rdtJson['line_codes'].append(newLineCode)
+		gfmJson['line_codes'].append(newLineCode)
 
 	#Bus Creation
 	objToFind = ['node', 'triplex_node', 'triplex_meter', "load"]
@@ -317,7 +317,7 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 			if bus.get('bustype','').lower() == 'swing':
 				newBus['has_generator'] = True
 			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus, 0.0)
-			rdtJson['buses'].append(newBus)
+			gfmJson['buses'].append(newBus)
 			for busNode in jsonNodes:
 				# HACK: sometimes keys are strings. Sometimes not.
 				if int(key) == busNode.get('treeIndex',0):
@@ -331,33 +331,33 @@ def convertToRDT(inData, dataDir, feederName, maxDG, newLines, newGens, hardCand
 		if loads.get('object','') in objToFind:
 			newLoad = createObj('load')
 			newLoad['id'] = loads.get('name','')+'_lod'
-			for elem in rdtJson['buses']:
+			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == newLoad['id'][0:-4]:
 					busID = elem['id']
 			newLoad['node_id'] = busID
 			numPhases, newLoad['has_phase'], newLoad['max_real_phase'], newLoad['max_reactive_phase'] = getNodePhases(loads, 10)
 			# newLoad.pop('is_critical',None)
-			rdtJson['loads'].append(newLoad)
+			gfmJson['loads'].append(newLoad)
 
 	#Make Gens
 	for key, gens in jsonTree.iteritems():
 		if gens.get('bustype','').lower() == 'swing':
 			genID = gens.get('name','')+'_gen'
-			for elem in rdtJson['buses']:
+			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
 					busID = elem['id']
 			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, maxDG)
 			newGen = Gen(gens.get('name','')+'_gen', busID, has_phase, max_reactive_phase, max_real_phase)
-			rdtJson['generators'].append(newGen.toOutput())
+			gfmJson['generators'].append(newGen.toOutput())
 
 	# Write to file.
-	rdtInFile = 'gfmInput.json'
-	with open(pJoin(dataDir,rdtInFile), "w") as outFile:
-		json.dump(rdtJson, outFile, indent=4)
+	gfmInFile = 'gfmInput.json'
+	with open(pJoin(dataDir,gfmInFile), "w") as outFile:
+		json.dump(gfmJson, outFile, indent=4)
 	if debug:		
-		print "Done... RDT input saved to:            %s"%(pJoin(dataDir,rdtInFile))
+		print "Done... RDT input saved to:            %s"%(pJoin(dataDir,gfmInFile))
 		print "************************************\n\n"
-	return rdtInFile, lineCosts
+	return gfmInFile, lineCosts
 
 def work(modelDir, inputDict):
 	''' Run the model in its directory. '''
@@ -371,7 +371,7 @@ def work(modelDir, inputDict):
 	rdtInData = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
 	with open(pJoin(modelDir,'xrMatrices.json'),'w') as xrMatrixFile:
 		json.dump(json.loads(inputDict['xrMatrices']),xrMatrixFile, indent=4)
-	gfmInputFilename, lineCosts = convertToRDT(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
+	gfmInputFilename, lineCosts = convertToGFM(rdtInData, modelDir, feederName, inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], cwd=modelDir)
 	# HACK: rename the hardcoded gfm output
@@ -443,11 +443,11 @@ def work(modelDir, inputDict):
 	# Run RDT.
 	print "Running RDT..."
 	print "************************************"
-	rdtInFile = modelDir + '/' + 'rdtInput.json'
+	gfmInFile = modelDir + '/' + 'rdtInput.json'
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
-	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', rdtInFile, '-e', rdtOutFile])
+	proc = subprocess.Popen(['java', "-Djna.library.path=" + rdtSolverFolder, '-jar', rdtJarPath, '-c', gfmInFile, '-e', rdtOutFile])
 	proc.wait()
 	rdtRawOut = open(rdtOutFile).read()
 	outData['rdtRawOut'] = rdtRawOut
@@ -461,10 +461,10 @@ def work(modelDir, inputDict):
 
 	# TODO: run GridLAB-D second time to validate RDT results with new control schemes.
 
-	with open(rdtInFile, "r") as rdtInFileData:
-		rdtInFileData = json.load(rdtInFileData)
+	with open(gfmInFile, "r") as gfmInFileData:
+		gfmInFileData = json.load(gfmInFileData)
 	lineData = []
-	for line in rdtInFileData["lines"]:
+	for line in gfmInFileData["lines"]:
 		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
