@@ -49,7 +49,7 @@ def getNodePhases(obj, maxRealPhase):
 			numPhases+=1
 	return numPhases, [hasphaseA, hasphaseB, hasphaseC], [maxRealPhaseA, maxRealPhaseB, maxRealPhaseC], [maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC]
 
-def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
+def convertToGFM(gfmInputTemplate, dataDir, feederName, xrMatrices, maxDG, newLines, newGens, hardCand, lineUnitCost):
 	'''Read a omd.json feeder and convert it to GFM format.'''
 	# Create GFM dict.
 	gfmJson = {
@@ -58,19 +58,18 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 		'generators' : [],
 		'line_codes' : [],
 		'lines' : [],
-		'critical_load_met' : inData.get('critical_load_met',0.98),
-		'total_load_met' : inData.get('total_load_met',0.5),
-		'chance_constraint' : inData.get('chance_constraint', 1.0),
-		'phase_variation' : inData.get('phase_variation', 0.15),
-		'scenarios' : [] # Made up fragility damage scenario.		
+		'critical_load_met' : gfmInputTemplate.get('critical_load_met',0.98),
+		'total_load_met' : gfmInputTemplate.get('total_load_met',0.5),
+		'chance_constraint' : gfmInputTemplate.get('chance_constraint', 1.0),
+		'phase_variation' : gfmInputTemplate.get('phase_variation', 0.15),
+		'scenarios' : [] # Made up fragility damage scenario.
 	}
 	# Get necessary data from .omd.
 	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
-		jsonTree = json.load(jsonIn).get('tree','')
-	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
-		jsonNodes = json.load(jsonIn).get('nodes','')
+		omdContents = json.load(jsonIn)
+		jsonTree = omdContents.get('tree',{})
+		jsonNodes = omdContents.get('nodes',[])
 	#Line Creation
-	lineCosts = []
 	hardCands = hardCand.strip().replace(' ', '').split(',')
 	objToFind = ['triplex_line','transformer', 'regulator', 'underground_line']
 	lineCount = 0
@@ -114,7 +113,6 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 				cost = 0
 			else:
 				cost = float(lineUnitCost)*float(line.get('length',100))
-			lineCosts.append((line.get('name',''), cost))
 	# Line Code Creation
 	xMatrices, rMatrices = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
 	lineCodes = json.loads(xrMatrices)['line_codes']
@@ -235,11 +233,8 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 				'max_real_phase': max_real_phase #*
 			})	
 			gfmJson['generators'].append(genObj)
-	# Write to file.
-	gfmInFile = 'gfmInput.json'
-	with open(pJoin(dataDir,gfmInFile), "w") as outFile:
-		json.dump(gfmJson, outFile, indent=4)
-	return gfmInFile, lineCosts
+	# Return gfmContents
+	return gfmJson
 
 def genDiagram(outputDir, feederJson):
 	# Load required data.
@@ -279,8 +274,16 @@ def work(modelDir, inputDict):
 		feederModel = json.load(jsonIn)
 	# Create GFM input file.
 	print "Running GFM ************************************"
-	gfmInputTemplate = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
-	gfmInputFilename, lineCosts = convertToGFM(gfmInputTemplate, modelDir, feederName, inputDict["xrMatrices"], inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
+	gfmInputTemplate = {
+		'phase_variation' : float(inputDict['phaseVariation']),
+		'chance_constraint' : float(inputDict['chanceConstraint']),
+		'critical_load_met' : float(inputDict['criticalLoadMet']),
+		'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))
+	}
+	gfmJson = convertToGFM(gfmInputTemplate, modelDir, feederName, inputDict["xrMatrices"], inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"])
+	gfmInputFilename = 'gfmInput.json'
+	with open(pJoin(modelDir, gfmInputFilename), "w") as outFile:
+		json.dump(gfmJson, outFile, indent=4)
 	# Run GFM
 	gfmBinaryPath = pJoin(__neoMetaModel__._omfDir,'solvers','gfm', 'Fragility.jar')
 	proc = subprocess.Popen(['java','-jar', gfmBinaryPath, '-r', gfmInputFilename, '-wf', inputDict['weatherImpactsFileName'],'-num','3'], cwd=modelDir)
@@ -289,10 +292,12 @@ def work(modelDir, inputDict):
 	rdtInputFilePath = pJoin(modelDir,'rdtInput.json')
 	os.rename(pJoin(modelDir,'rdt_OUTPUT.json'),rdtInputFilePath)
 	# Pull GFM input data on lines and generators for HTML presentation.
-	with open(rdtInputFilePath, "r") as gfmInFileData:
-		gfmInFileData = json.load(gfmInFileData)
+	with open(rdtInputFilePath, 'r') as rdtInputFile:
+		# HACK: we use rdtInput as a string in the frontend.
+		rdtJsonAsString = rdtInputFile.read()
+		rdtJson = json.loads(rdtJsonAsString)
 	lineData = []
-	for line in gfmInFileData["lines"]:
+	for line in rdtJson["lines"]:
 		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
@@ -310,8 +315,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir,gfmOutFileName),"w") as outFile:
 		json.dump(gfmOut, outFile, indent = 4)
 	'''
-	gfmRawOut = open(rdtInputFilePath).read()
-	outData['gfmRawOut'] = gfmRawOut
+	outData['gfmRawOut'] = rdtJsonAsString
 	# Run GridLAB-D first time to generate xrMatrices.
 	if platform.system() == "Windoze":
 		omdPath = pJoin(modelDir, feederName + ".omd")
