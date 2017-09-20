@@ -177,8 +177,6 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 				# 'ref_voltage': 1.0 # From github.
 			})
 			newBus['id'] = bus.get('name','')+'_bus'
-			if bus.get('bustype','').lower() == 'swing':
-				newBus['has_generator'] = True
 			numPhases, newBus['has_phase'], max_real_phase, max_reactive_phase = getNodePhases(bus, 0.0)
 			gfmJson['buses'].append(newBus)
 			for busNode in jsonNodes:
@@ -225,9 +223,9 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 				'has_phase': has_phase, #*
 				'max_reactive_phase': max_reactive_phase, #*
 				'max_real_phase': max_real_phase #*
-			})	
-			gfmJson['generators'].append(genObj)
-	# Return gfmContents
+			})
+			# BUG: GENERATORS ADDED TO ALL SWING BUSES: gfmJson['generators'].append(genObj)
+	# Return 
 	return gfmJson
 
 def genDiagram(outputDir, feederJson):
