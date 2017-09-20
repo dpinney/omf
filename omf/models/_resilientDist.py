@@ -49,7 +49,7 @@ def getNodePhases(obj, maxRealPhase):
 			numPhases+=1
 	return numPhases, [hasphaseA, hasphaseB, hasphaseC], [maxRealPhaseA, maxRealPhaseB, maxRealPhaseC], [maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC]
 
-def convertToGFM(gfmInputTemplate, dataDir, feederName, xrMatrices, maxDG, newLines, newGens, hardCand, lineUnitCost):
+def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, newGens, hardCand, lineUnitCost):
 	'''Read a omd.json feeder and convert it to GFM format.'''
 	# Create GFM dict.
 	gfmJson = {
@@ -65,10 +65,8 @@ def convertToGFM(gfmInputTemplate, dataDir, feederName, xrMatrices, maxDG, newLi
 		'scenarios' : [] # Made up fragility damage scenario.
 	}
 	# Get necessary data from .omd.
-	with open(pJoin(dataDir,feederName + '.omd'), "r") as jsonIn:
-		omdContents = json.load(jsonIn)
-		jsonTree = omdContents.get('tree',{})
-		jsonNodes = omdContents.get('nodes',[])
+	jsonTree = feederModel.get('tree',{})
+	jsonNodes = feederModel.get('nodes',[])
 	#Line Creation
 	hardCands = hardCand.strip().replace(' ', '').split(',')
 	objToFind = ['triplex_line','transformer', 'regulator', 'underground_line']
@@ -280,7 +278,7 @@ def work(modelDir, inputDict):
 		'critical_load_met' : float(inputDict['criticalLoadMet']),
 		'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))
 	}
-	gfmJson = convertToGFM(gfmInputTemplate, modelDir, feederName, inputDict["xrMatrices"], inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"])
+	gfmJson = convertToGFM(gfmInputTemplate, feederModel, inputDict["xrMatrices"], inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"])
 	gfmInputFilename = 'gfmInput.json'
 	with open(pJoin(modelDir, gfmInputFilename), "w") as outFile:
 		json.dump(gfmJson, outFile, indent=4)
@@ -296,6 +294,7 @@ def work(modelDir, inputDict):
 		# HACK: we use rdtInput as a string in the frontend.
 		rdtJsonAsString = rdtInputFile.read()
 		rdtJson = json.loads(rdtJsonAsString)
+	# Calculate line costs.
 	lineData = []
 	for line in rdtJson["lines"]:
 		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
