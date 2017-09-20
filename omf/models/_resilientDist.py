@@ -69,7 +69,7 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 	jsonNodes = feederModel.get('nodes',[])
 	#Line Creation
 	hardCands = hardCand.strip().replace(' ', '').split(',')
-	objToFind = ['triplex_line','transformer', 'regulator', 'underground_line']
+	objToFind = ['transformer', 'regulator', 'underground_line', 'underground_line', 'overhead_line']
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
 		if line.get('object','') in objToFind:
@@ -101,16 +101,12 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
 			if line.get('name','') in hardCands:
 				newLine['can_harden'] = True
-			if line.get('object','') == 'transformer': 
-				#newLine['is_transformer'] = True
-				newLine['isTransformer'] = True
+			if line.get('object','') in ['transformer','regulator']: 
+				newLine['is_transformer'] = True
+				#newLine['isTransformer'] = True
 				#newLine.pop('harden_cost',None)
  			gfmJson['lines'].append(newLine)
 			lineCount+=1
-			if newLine['can_harden'] == True:
-				cost = 0
-			else:
-				cost = float(lineUnitCost)*float(line.get('length',100))
 	# Line Code Creation
 	xMatrices, rMatrices = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
 	lineCodes = json.loads(xrMatrices)['line_codes']
@@ -162,10 +158,10 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 								break
 			newLineCode['xmatrix'] = xMatrix
 			newLineCode['rmatrix'] = rMatrix	
-		#SET THE newLineCode to the output of GRIDLABD								
+		#SET THE newLineCode to the output of GRIDLABD						
 		gfmJson['line_codes'].append(newLineCode)
 	# Bus creation:
-	objToFind = ['node', 'triplex_node', 'triplex_meter', "load"]
+	objToFind = ['node', 'load']
 	for key, bus in jsonTree.iteritems():
 		# if bus.get('object','') in objToFind and bus.get('bustype','').lower() != 'swing':
 		if bus.get('object','').lower() in objToFind:
@@ -192,7 +188,7 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 					newBus['y'] = busNode.get('y')/5000.0
 					newBus['x'] = busNode.get('x')/5000.0
 	# Load creation:
-	objToFind = ['triplex_meter', 'load']
+	objToFind = ['load']
 	for key, loads in jsonTree.iteritems():
 		if loads.get('object','') in objToFind:
 			newLoad = dict({
