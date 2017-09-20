@@ -69,7 +69,7 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 	jsonNodes = feederModel.get('nodes',[])
 	#Line Creation
 	hardCands = hardCand.strip().replace(' ', '').split(',')
-	objToFind = ['transformer', 'regulator', 'underground_line', 'underground_line', 'overhead_line']
+	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line']
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
 		if line.get('object','') in objToFind:
@@ -81,13 +81,13 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 				'length' : 1.0, #* Units match line code entries.
 				# 'has_switch' : False,
 				# 'construction_cost': 100,
-				'harden_cost': 100000, # Russel: this exists unless its a trans.
+				# 'harden_cost': 100000, # Russel: this exists unless its a trans.
 				# 'switch_cost': 15, # taken from rdtInTrevor.json.
 				'can_harden': False, # Not seen in rdtInTrevor.json.
 				# 'can_add_switch': False, # Not seen in rdtInTrevor.json.
 				# 'num_poles' : 2,
 				# 'capacity' : 5780, # MVA capacity.
-				# 'is_transformer' : False,
+				'is_transformer' : False,
 				'num_phases' : 3, #*
 				# 'is_new' : False,
 				'has_phase' : [True, True, True] #*
