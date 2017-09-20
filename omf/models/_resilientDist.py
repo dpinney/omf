@@ -24,58 +24,6 @@ tooltip = "Model extreme weather and determine optimal investment for distributi
 with open(pJoin(__neoMetaModel__._myDir,modelName+".html"),"r") as tempFile:
 	template = Template(tempFile.read())
 
-class Line:
-	lineCount = 0
-	def __init__(self, id, node1, node2, length=1.0, lineCode=0, hardenCost=100000, numPhases=3, hasPhase=[True,True,True], isTransformer=None):
-		self.id = id
-		self.node1 = node1
-		self.node2 = node2
-		self.lineCode = Line.lineCount
-		self.length = length
-		self.hardenCost = hardenCost
-		self.numPhases = numPhases
-		self.hasPhase = hasPhase
-		self.isTransformer = isTransformer
-		self.is_new = False
-		self.can_harden = False
-		Line.lineCount += 1
-	def checkNone(var):
-		if var != None:
-			return var
-	def toOutput(line):
-		lineOut = {}
-		lineOut["id"] = line.id
-		lineOut["node1_id"] = line.node1
-		lineOut["node2_id"] = line.node2
-		lineOut["line_code"] = line.lineCode
-		lineOut["length"] = line.length
-		lineOut["harden_cost"] = line.hardenCost
-		lineOut["num_phases"] = line.numPhases
-		lineOut["has_phase"] = line.hasPhase
-		if line.isTransformer != None:
-			lineOut["is_transformer"] = line.isTransformer
-		lineOut["is_new"] = line.is_new
-		lineOut["can_harden"] = line.can_harden
-		return lineOut
-
-class Gen:
-	genCount = 0
-	def __init__(self, id, node_id, has_phase=[True, True, True], max_reactive_phase=[1.7976931348623e+308, 1.7976931348623e+308, 1.7976931348623e+308], max_real_phase=[1.7976931348623e+308, 1.7976931348623e+308, 1.7976931348623e+308]):
-		self.id = id
-		self.node_id = node_id
-		self.has_phase = has_phase
-		self.max_reactive_phase = max_reactive_phase
-		self.max_real_phase = max_real_phase
-		Gen.genCount += 1
-	def toOutput(gen):
-		genOut = {}
-		genOut["id"] = gen.id
-		genOut["node_id"] = gen.node_id
-		genOut["has_phase"] = gen.has_phase
-		genOut["max_reactive_phase"] = gen.max_reactive_phase
-		genOut["max_real_phase"] = gen.max_real_phase
-		return genOut
-
 def getNodePhases(obj, maxRealPhase):
 	''' Convert phase info in GridLAB-D obj (e.g. ABC) to GFM phase format (e.g. [True,True,True].'''
 	numPhases = 0
@@ -130,18 +78,41 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
 		if line.get('object','') in objToFind:
-			newLine = Line(line.get('name',''), line.get('from','')+'_bus', line.get('to','')+'_bus', float(line.get('length',100)))
+			newLine = dict({
+				'id' : '', #*
+				'node1_id' : '', #*
+				'node2_id' : '', #*
+				'line_code' : '', #*
+				'length' : 1.0, #* Units match line code entries.
+				# 'has_switch' : False,
+				# 'construction_cost': 100,
+				'harden_cost': 100000, # Russel: this exists unless its a trans.
+				# 'switch_cost': 15, # taken from rdtInTrevor.json.
+				'can_harden': False, # Not seen in rdtInTrevor.json.
+				# 'can_add_switch': False, # Not seen in rdtInTrevor.json.
+				# 'num_poles' : 2,
+				# 'capacity' : 5780, # MVA capacity.
+				# 'is_transformer' : False,
+				'num_phases' : 3, #*
+				# 'is_new' : False,
+				'has_phase' : [True, True, True] #*
+			})
+			newLine['id'] = line.get('name','')
+			newLine['node1_id'] = line.get('from','')+'_bus' 
+			newLine['node2_id'] = line.get('to','')+'_bus'
+			newLine['length'] = float(line.get('length',100))
+			newLine['line_code'] = lineCount
 			# Calculate harden_cost, 10.
 			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
 			if line.get('name','') in hardCands:
-				newLine.can_harden = True
+				newLine['can_harden'] = True
 			if line.get('object','') == 'transformer': 
 				#newLine['is_transformer'] = True
-				newLine.isTransformer = True
+				newLine['isTransformer'] = True
 				#newLine.pop('harden_cost',None)
- 			gfmJson['lines'].append(newLine.toOutput())
+ 			gfmJson['lines'].append(newLine)
 			lineCount+=1
-			if newLine.can_harden == True:
+			if newLine['can_harden'] == True:
 				cost = 0
 			else:
 				cost = float(lineUnitCost)*float(line.get('length',100))
@@ -255,8 +226,18 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 				if elem['id'][0:-4] == genID[0:-4]:
 					busID = elem['id']
 			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, maxDG)
-			newGen = Gen(gens.get('name','')+'_gen', busID, has_phase, max_reactive_phase, max_real_phase)
-			gfmJson['generators'].append(newGen.toOutput())
+			genObj = dict({
+	 			'id': gens.get('name','')+'_gen', #*
+				'node_id': busID, #*
+				# 'is_new': False, # Whether or not new generation can be built.
+				# 'microgrid_cost': 1.5, # Per MW capacity of building DG.
+				# 'max_microgrid': 0, # Max additional capacity for this gen.
+				# 'microgrid_fixed_cost': 0, # One-time fixed cost for building DG.
+				'has_phase': has_phase, #*
+				'max_reactive_phase': max_reactive_phase, #*
+				'max_real_phase': max_real_phase #*
+			})	
+			gfmJson['generators'].append(genObj)
 	# Write to file.
 	gfmInFile = 'gfmInput.json'
 	with open(pJoin(dataDir,gfmInFile), "w") as outFile:
