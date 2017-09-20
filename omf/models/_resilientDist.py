@@ -47,8 +47,6 @@ def getNodePhases(obj, maxRealPhase):
 			maxRealPhaseC = float(maxRealPhase)
 			maxReactivePhaseC = float(maxRealPhase)*0.1
 			numPhases+=1
-	else:
-		print "NO PHASES FOUND FOR OBJ:", obj	
 	return numPhases, [hasphaseA, hasphaseB, hasphaseC], [maxRealPhaseA, maxRealPhaseB, maxRealPhaseC], [maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC]
 
 def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGens, hardCand, lineUnitCost, debug=False):
@@ -148,7 +146,6 @@ def convertToGFM(inData, dataDir, feederName, xrMatrices, maxDG, newLines, newGe
 			rMatrix = [[0.36553030, 0.04407197, 0.0], [0.04407197, 0.36282197, 0.0], [0.0, 0.0, 0.0]]
 			newLineCode['xmatrix'] = xMatrix
 			newLineCode['rmatrix'] = rMatrix				
-			print "      ****THIS LINECODE:\n      %s\n      ISNT TESTED FOR THIS OBJECT:\n      %s\n      NEED A 2 PHASE LINE FEEDER."%(gfmJson['lines'][lineCode], newLineCode)
 		else:
 			# Set it for 1 phase.
 			xMatrix = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
@@ -281,6 +278,7 @@ def work(modelDir, inputDict):
 	with open(pJoin(modelDir, feederName + '.omd'), "r") as jsonIn:
 		feederModel = json.load(jsonIn)
 	# Create GFM input file.
+	print "Running GFM ************************************"
 	gfmInputTemplate = {'phase_variation' : float(inputDict['phaseVariation']), 'chance_constraint' : float(inputDict['chanceConstraint']), 'critical_load_met' : float(inputDict['criticalLoadMet']), 'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))}
 	gfmInputFilename, lineCosts = convertToGFM(gfmInputTemplate, modelDir, feederName, inputDict["xrMatrices"], inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"], debug=False)
 	# Run GFM
@@ -314,7 +312,6 @@ def work(modelDir, inputDict):
 	'''
 	gfmRawOut = open(rdtInputFilePath).read()
 	outData['gfmRawOut'] = gfmRawOut
-	print 'Ran Fragility\n'
 	# Run GridLAB-D first time to generate xrMatrices.
 	if platform.system() == "Windoze":
 		omdPath = pJoin(modelDir, feederName + ".omd")
@@ -360,8 +357,7 @@ def work(modelDir, inputDict):
 		gridlabdRawOut = gridlabd.runInFilesystem(tree, attachments=attachments, workDir=modelDir)
 		outData['gridlabdRawOut'] = gridlabdRawOut
 	# Run RDT.
-	print "Running RDT..."
-	print "************************************"
+	print "Running RDT ************************************"
 	rdtOutFile = modelDir + '/rdtOutput.json'
 	rdtSolverFolder = pJoin(__neoMetaModel__._omfDir,'solvers','rdt')
 	rdtJarPath = pJoin(rdtSolverFolder,'micot-rdt.jar')
