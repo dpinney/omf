@@ -49,7 +49,7 @@ def getNodePhases(obj, maxRealPhase):
 			numPhases+=1
 	return numPhases, [hasphaseA, hasphaseB, hasphaseC], [maxRealPhaseA, maxRealPhaseB, maxRealPhaseC], [maxReactivePhaseA, maxReactivePhaseB, maxReactivePhaseC]
 
-def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, newGens, hardCand, lineUnitCost):
+def convertToGFM(gfmInputTemplate, feederModel):
 	'''Read a omd.json feeder and convert it to GFM format.'''
 	# Create GFM dict.
 	gfmJson = {
@@ -68,7 +68,9 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 	jsonTree = feederModel.get('tree',{})
 	jsonNodes = feederModel.get('nodes',[])
 	#Line Creation
-	hardCands = hardCand.strip().replace(' ', '').split(',')
+	hardCands = gfmInputTemplate['hardeningCandidates'].strip().replace(' ', '').split(',')
+	newLineCands = gfmInputTemplate["newLineCandidates"].strip().replace(' ', '').split(',')
+
 	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line']
 	lineCount = 0
 	for key, line in jsonTree.iteritems():
@@ -101,15 +103,15 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
 			if line.get('name','') in hardCands:
 				newLine['can_harden'] = True
+			if line.get('name','') in newLineCands:
+				newLine["is_new"] = True
 			if line.get('object','') in ['transformer','regulator']: 
 				newLine['is_transformer'] = True
-				#newLine['isTransformer'] = True
-				#newLine.pop('harden_cost',None)
  			gfmJson['lines'].append(newLine)
 			lineCount+=1
 	# Line Code Creation
 	xMatrices, rMatrices = {1: [], 2: [], 3: []}, {1: [], 2: [], 3: []}
-	lineCodes = json.loads(xrMatrices)['line_codes']
+	lineCodes = json.loads(gfmInputTemplate['xrMatrices'])['line_codes']
 	for i,code in enumerate(lineCodes):
 		if i > 100: break
 		xMatrices[int(code['num_phases'])].append(code['xmatrix'])
@@ -212,7 +214,7 @@ def convertToGFM(gfmInputTemplate, feederModel, xrMatrices, maxDG, newLines, new
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
 					busID = elem['id']
-			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, maxDG)
+			numPhases, has_phase, max_real_phase, max_reactive_phase = getNodePhases(gens, gfmInputTemplate['maxDGPerGenerator'])
 			genObj = dict({
 	 			'id': gens.get('name','')+'_gen', #*
 				'node_id': busID, #*
@@ -270,9 +272,13 @@ def work(modelDir, inputDict):
 		'phase_variation' : float(inputDict['phaseVariation']),
 		'chance_constraint' : float(inputDict['chanceConstraint']),
 		'critical_load_met' : float(inputDict['criticalLoadMet']),
-		'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet']))
+		'total_load_met' : (float(inputDict['criticalLoadMet']) + float(inputDict['nonCriticalLoadMet'])),
+		'xrMatrices' : inputDict["xrMatrices"],
+		'maxDGPerGenerator' : float(inputDict["maxDGPerGenerator"]),
+		'newLineCandidates' : inputDict['newLineCandidates'],
+		'hardeningCandidates' : inputDict['hardeningCandidates']
 	}
-	gfmJson = convertToGFM(gfmInputTemplate, feederModel, inputDict["xrMatrices"], inputDict["maxDGPerGenerator"], inputDict["newLineCandidates"], inputDict["generatorCandidates"], inputDict["hardeningCandidates"], inputDict["lineUnitCost"])
+	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
 	with open(pJoin(modelDir, gfmInputFilename), "w") as outFile:
 		json.dump(gfmJson, outFile, indent=4)
@@ -294,20 +300,6 @@ def work(modelDir, inputDict):
 		lineData.append((line["id"], '{:,.2f}'.format(float(line["length"]) * float(inputDict["lineUnitCost"]))))
 	outData["lineData"] = lineData
 	outData["generatorData"] = '{:,.2f}'.format(float(inputDict["dgUnitCost"]) * float(inputDict["maxDGPerGenerator"]))
-	# Denote new lines
-	'''newLineCands = inputDict["newLineCandidates"].strip().replace(' ', '').split(',')
-	with open(pJoin(modelDir,gfmOutFileName), "r") as gfmOut:
-		gfmOut = json.load(gfmOut)
-	for line in gfmOut['lines']:
-		#set can_harden to false for transformers and regulators NO EXPLICIT IDENTIFIER FOR REGULATORS, ID ONLY
-		if(line["is_transformer"] == True):
-			line["can_harden"] = False
-		for newLine in newLineCands:
-			if(newLine == line['id']):
-				line["is_new"] = True
-	with open(pJoin(modelDir,gfmOutFileName),"w") as outFile:
-		json.dump(gfmOut, outFile, indent = 4)
-	'''
 	outData['gfmRawOut'] = rdtJsonAsString
 	# Run GridLAB-D first time to generate xrMatrices.
 	if platform.system() == "Windoze":
