@@ -358,6 +358,7 @@
 					for(var j = 0; j < gfmOutput.scenarios.length; j++) {
 						htmlCollector = "<tr><th>Device ID</th><th>Type</th><th>Result</th></tr>";
 						scenario = gfmOutput.scenarios[j]; 
+						
 						for(var k = 0; k < scenario.hardened_disabled_lines.length; k++) {
 							hdLine = scenario.hardened_disabled_lines[k];
 							htmlCollector = htmlCollector + "<tr><td>" + hdLine + "</td><td>Hardened Line</td><td>Disabled</td></tr>";
@@ -366,8 +367,12 @@
 							dLine = scenario.disable_lines[k];
 							htmlCollector = htmlCollector + "<tr><td>" + dLine + "</td><td>Line</td><td>Disabled</td></tr>";
 						}
+						if (scenario.hardened_disabled_lines.length == 0 && scenario.disable_lines.length == 0) {
+							htmlCollector = htmlCollector + "<tr><td colspan='3'>No components affected.</td></tr>";
+						}
 						scenarioDict[parseFloat(scenario.id) + 1] = htmlCollector;
 					}
+
 				</script>
 			</div>
 		</div>
