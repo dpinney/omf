@@ -139,7 +139,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			xMatrix = [[0.26732955, 0.12200757999999999, 0.0], [0.12200757999999999, 0.27047349, 0.0], [0.0, 0.0, 0.0]]
 			rMatrix = [[0.36553030, 0.04407197, 0.0], [0.04407197, 0.36282197, 0.0], [0.0, 0.0, 0.0]]
 			newLineCode['xmatrix'] = xMatrix
-			newLineCode['rmatrix'] = rMatrix				
+			newLineCode['rmatrix'] = rMatrix
 		else:
 			# Set it for 1 phase.
 			xMatrix = [[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.0, 0.0, 0.0]]
@@ -159,8 +159,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 								rMatrix[0][i] = val
 								break
 			newLineCode['xmatrix'] = xMatrix
-			newLineCode['rmatrix'] = rMatrix	
-		#SET THE newLineCode to the output of GRIDLABD						
+			newLineCode['rmatrix'] = rMatrix
+		#SET THE newLineCode to the output of GRIDLABD
 		gfmJson['line_codes'].append(newLineCode)
 	# Bus creation:
 	objToFind = ['node', 'load']

@@ -17,7 +17,11 @@ class SSCAPI():
 		if 8*struct.calcsize("P") == 64:
 			_dll = CDLL(os.path.join(myDir,"ssc64.dll")) 
 		else:
-			_dll = CDLL(os.path.join(myDir,"ssc32.dll"))
+			# HACK: Windows cannot import a DLL unless it's in the same directory as the process!
+			cachedDir = os.getcwd()
+			os.chdir(myDir)
+			_dll = CDLL("ssc32.dll")
+			os.chdir(cachedDir)
 	elif sys.platform == 'darwin':
 		_dll = CDLL(os.path.join(myDir,"ssc64.dylib"))
 	elif sys.platform == 'linux2':
