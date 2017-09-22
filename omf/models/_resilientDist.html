@@ -163,10 +163,13 @@
 				<input type="text" id="newLineCandidates" name="newLineCandidates" pattern="^([\w\d_-]+)(,[\w\d_-]+)*$">
 			</div>
 			<div class="shortInput">
+				<label class="tooltip">Switch Candidates<span class="classic">The IDs of lines on the system where the user wants to consider adding a switch. At least one line is required.</span></label>
+				<input type="text" id="switchCandidates" name="switchCandidates" pattern="^([\w\d_-]+)(,[\w\d_-]+)*$">
+			</div>
+			<div class="shortInput">
 				<label class="tooltip">Generator Candidates<span class="classic">The IDs of nodes on the system where the user wants to consider adding distributed generation. At least one node is required.</span></label>
 				<input type="text" id="generatorCandidates" name="generatorCandidates" pattern="^([\w\d_-]+)(,[\w\d_-]+)*$">
 			</div>
-
 			<div class="wideInput">
 				<p class="inputSectionHeader">Simulation Specs</p>
 			</div>

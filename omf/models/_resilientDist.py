@@ -70,6 +70,7 @@ def convertToGFM(gfmInputTemplate, feederModel):
 	#Line Creation
 	hardCands = gfmInputTemplate['hardeningCandidates'].strip().replace(' ', '').split(',')
 	newLineCands = gfmInputTemplate["newLineCandidates"].strip().replace(' ', '').split(',')
+	switchCands = gfmInputTemplate["switchCandidates"].strip().replace(' ', '').split(',')
 
 	objToFind = ['transformer', 'regulator', 'underground_line', 'overhead_line']
 	lineCount = 0
@@ -103,6 +104,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			# newLine['capacity'] = 1000000000 # Set it arbitrarily high.
 			if line.get('name','') in hardCands:
 				newLine['can_harden'] = True
+			if line.get('name','') in switchCands:
+				newLine['has_switch'] = True
 			if line.get('name','') in newLineCands:
 				newLine["is_new"] = True
 			if line.get('object','') in ['transformer','regulator']: 
@@ -276,7 +279,8 @@ def work(modelDir, inputDict):
 		'xrMatrices' : inputDict["xrMatrices"],
 		'maxDGPerGenerator' : float(inputDict["maxDGPerGenerator"]),
 		'newLineCandidates' : inputDict['newLineCandidates'],
-		'hardeningCandidates' : inputDict['hardeningCandidates']
+		'hardeningCandidates' : inputDict['hardeningCandidates'],
+		'switchCandidates'	: inputDict['switchCandidates']
 	}
 	gfmJson = convertToGFM(gfmInputTemplate, feederModel)
 	gfmInputFilename = 'gfmInput.json'
@@ -387,6 +391,7 @@ def new(modelDir):
 		"hardeningCandidates": "A_node705-742,A_node705-712,A_node706-725",
 		"newLineCandidates": "TIE_A_to_C,TIE_C_to_B,TIE_B_to_A",
 		"generatorCandidates": "A_node706,A_node707,A_node708,B_node704,B_node705,B_node703",
+		"switchCandidates" : "A_node705-742,A_node705-712",
 		"criticalLoadMet": "0.98",
 		"nonCriticalLoadMet": "0.0",
 		"chanceConstraint": "1.0",
