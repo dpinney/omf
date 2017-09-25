@@ -212,10 +212,8 @@ def convertToGFM(gfmInputTemplate, feederModel):
 			gfmJson['loads'].append(newLoad)
 	# Generator creation:
 	genCands = gfmInputTemplate['generatorCandidates'].strip().replace(' ', '').split(',')
-	print genCands
 	for key, gens in jsonTree.iteritems():
 		if gens.get('name','') in genCands:
-			print 'HIHIHIHIHHI'
 			genID = gens.get('name','')+'_gen'
 			for elem in gfmJson['buses']:
 				if elem['id'][0:-4] == genID[0:-4]:
