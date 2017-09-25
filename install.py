@@ -31,10 +31,12 @@ if platform.system() == 'Linux':
 		os.system("python setup.py develop")
 # if Windows run these commands:
 elif platform.system()=='Windows':
+	# Need to manually download and install Python 2.7 and set python as a path variable, Git, Chocolatey 
+	# Download Pygraphviz whl in the omf directory
 	# git clone https://github.com/dpinney/omf.git
 	workDir = os.getcwd()
-	chocoString = '@"%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command "iex ((New-Object System.Net.WebClient).DownloadString("https://chocolatey.org/install.ps1"))" && SET "PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin"'
-	os.system(chocoString)
+	# chocoString = "@'%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe' -NoProfile -InputFormat None -ExecutionPolicy Bypass -Command 'iex ((New-Object System.Net.WebClient).DownloadString('https://chocolatey.org/install.ps1'))' && SET 'PATH=%PATH%;%ALLUSERSPROFILE%\chocolatey\bin'"
+	# os.system(chocoString)
 	os.system("choco install -y git")
 	os.system("choco install -y wget")
 	os.system("choco install -y python2")
@@ -45,11 +47,14 @@ elif platform.system()=='Windows':
 	os.system("choco install -y pip")
 	os.system("refreshenv")
 	os.system("cd " + workDir)
-	# wget pygraphviz 
-	# pip install whl
+	for file in os.listDir(workDir):
+		if file.endswith('.whl'):
+			whlFile = file
+	os.system("pip install " + whlFile)
 	os.system("wget https://sourceforge.net/projects/gridlab-d/files/gridlab-d/Last%20stable%20release/gridlabd-3.2-win32.exe")
 	os.system("gridlabd-3.2-win32.exe/silent")
 	os.system("cd omf")
+	os.system("refreshenv")
 	os.system("pip install -r requirements.txt")
 	os.system("pip install setuptools==33.1.1")
 	os.system("python setup.py develop")
